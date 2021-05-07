@@ -1,0 +1,44 @@
+<?php
+/**
+ * @OA\Schema()
+ */
+class Topic {
+
+    /**
+     * The topic id.
+     * @var int
+     * @OA\Property()
+     */
+    public $id;
+
+    /**
+     * The topic title.
+     * @var string
+     * @OA\Property()
+     */
+    public $title;
+
+    /**
+     * The topic description.
+     * @var string
+     * @OA\Property()
+     */
+    public $description;
+
+    /**
+     * Data of the active topic task.
+     * @var int
+     * @OA\Property()
+     */
+    public $active_task_id;
+
+    public function __construct(array $data = null)
+    {
+        $this->id = isset($data['id']) ? $data['id'] : null;
+        $this->title = isset($data['title']) ? $data['title'] : null;
+        $this->description = isset($data['description']) ? $data['description'] : null;
+        $this->active_task_id = isset($data['active_task']) ? $data['active_task'] : null;
+    }
+}
+
+?>
