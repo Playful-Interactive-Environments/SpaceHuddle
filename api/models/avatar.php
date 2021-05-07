@@ -3,6 +3,7 @@
 /**
  * List of possible states.
  * @OA\Schema(
+ *   description="Possible avatar symbols.",
  *   type="string",
  *   enum={"STAR", "CIRCLE", "TRIANGLE"},
  *   example="STAR"
@@ -27,8 +28,8 @@ class AvatarSymbol {
 }
 
 /**
- * To visually distinguish in the front end, each participant is assigned its own avatar.
- * @OA\Schema()
+ * For visual differentiation in the frontend, each participant is assigned its own avatar.
+ * @OA\Schema(description="For visual differentiation in the frontend, each participant is assigned its own avatar.",)
  */
 class Avatar {
 

@@ -1,7 +1,7 @@
 <?php
 require_once('topic.php');
 /**
- * @OA\Schema()
+ * @OA\Schema(description="Information needed to display a task in the client application.")
  */
 class ParticipantTask {
 

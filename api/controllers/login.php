@@ -180,7 +180,7 @@ class Login_Controller extends Controller
   /**
   * @OA\Put(
   *   path="/api/user/",
-  *   summary="Update logged in user.",
+  *   summary="Update the logged-in user.",
   *   tags={"User"},
   *   @OA\RequestBody(
   *     @OA\MediaType(
@@ -213,7 +213,7 @@ class Login_Controller extends Controller
   /**
   * @OA\Delete(
   *   path="/api/user/",
-  *   summary="Delete logged in user.",
+  *   summary="Delete the logged-in user.",
   *   tags={"User"},
   *   @OA\Response(response="200", description="Success"),
   *   @OA\Response(response="404", description="Not Found"),

@@ -1,7 +1,7 @@
 <?php
 require_once('avatar.php');
 /**
- * @OA\Schema()
+ * @OA\Schema(description="participant description")
  */
 class Participant {
 

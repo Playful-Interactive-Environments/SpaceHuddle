@@ -1,6 +1,6 @@
 <?php
 /**
- * @OA\Schema()
+ * @OA\Schema(description="resource description")
  */
 class Resource {
 

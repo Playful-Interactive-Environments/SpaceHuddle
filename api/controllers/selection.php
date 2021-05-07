@@ -12,7 +12,7 @@ class Selection_Controller extends Controller
   *   @OA\Response(response="200", description="Success",
   *     @OA\MediaType(
  *         mediaType="application/json",
- *         @OA\Schema(type="array", @OA\Items(ref="#/components/schemas/SelectionGroup")),
+ *         @OA\Schema(type="array", @OA\Items(ref="#/components/schemas/Selection")),
  *     )
   *   ),
   *   @OA\Response(response="404", description="Not Found"),
@@ -30,7 +30,7 @@ class Selection_Controller extends Controller
   *   tags={"Selection"},
   *   @OA\Parameter(in="path", name="id", description="ID of selection to return", required=true),
   *   @OA\Response(response="200", description="Success",
-  *     @OA\JsonContent(ref="#/components/schemas/SelectionGroup"),
+  *     @OA\JsonContent(ref="#/components/schemas/Selection"),
   *   ),
   *   @OA\Response(response="404", description="Not Found"),
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
@@ -75,7 +75,7 @@ class Selection_Controller extends Controller
   *     )
   *   ),
   *   @OA\Response(response="200", description="Success",
-  *     @OA\JsonContent(ref="#/components/schemas/SelectionGroup"),
+  *     @OA\JsonContent(ref="#/components/schemas/Selection"),
   *   ),
   *   @OA\Response(response="404", description="Not Found"),
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
@@ -147,11 +147,11 @@ class Selection_Controller extends Controller
   *     required=true,
   *     @OA\MediaType(
   *         mediaType="json",
-  *         @OA\Schema(ref="#/components/schemas/SelectionGroup")
+  *         @OA\Schema(ref="#/components/schemas/Selection")
   *     )
   *   ),
   *   @OA\Response(response="200", description="Success",
-  *     @OA\JsonContent(ref="#/components/schemas/SelectionGroup"),
+  *     @OA\JsonContent(ref="#/components/schemas/Selection"),
   *   ),
   *   @OA\Response(response="404", description="Not Found"),
   *   security={{"api_key": {}}, {"bearerAuth": {}}}

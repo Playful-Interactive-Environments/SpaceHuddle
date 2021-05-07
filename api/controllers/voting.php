@@ -26,7 +26,7 @@ class Voting_Controller extends Controller
   /**
   * @OA\Get(
   *   path="/api/task/{task_id}/voting/{idea_id}/",
-  *   summary="Get the task idea voting for the logged in participant.",
+  *   summary="Get the task idea voting for the logged-in participant.",
   *   tags={"Voting"},
   *   @OA\Parameter(in="path", name="task_id", description="ID of the task", required=true),
   *   @OA\Parameter(in="path", name="idea_id", description="ID of the idea", required=true),
@@ -45,7 +45,7 @@ class Voting_Controller extends Controller
   /**
   * @OA\Get(
   *   path="/api/task/{task_id}/votings/",
-  *   summary="Get all task votings for the logged in participant.",
+  *   summary="Get all task votings for the logged-in participant.",
   *   tags={"Voting"},
   *   @OA\Parameter(in="path", name="task_id", description="ID of the task", required=true),
   *   @OA\Response(response="200", description="Success",
@@ -67,7 +67,7 @@ class Voting_Controller extends Controller
   /**
   * @OA\Post(
   *   path="/api/task/{task_id}/voting/",
-  *   summary="Create a new voting for the task.",
+  *   summary="Create a new voting for the task by the logged-in participant.",
   *   tags={"Voting"},
   *   @OA\Parameter(in="path", name="task_id", description="ID of the task", required=true),
   *   @OA\RequestBody(
@@ -104,7 +104,7 @@ class Voting_Controller extends Controller
   /**
   * @OA\Put(
   *   path="/api/task/{task_id}/voting/",
-  *   summary="Update a voting for the task.",
+  *   summary="Update a vote for the task by the logged-in participant.",
   *   tags={"Voting"},
   *   @OA\Parameter(in="path", name="task_id", description="ID of the task", required=true),
   *   @OA\RequestBody(

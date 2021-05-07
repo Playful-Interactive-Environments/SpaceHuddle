@@ -2,6 +2,7 @@
 /**
  * List of possible states.
  * @OA\Schema(
+ *   description="display status on the client devices",
  *   type="string",
  *   enum={"WAIT", "ACTIVE", "READ_ONLY", "DONE"},
  *   example="ACTIVE"
@@ -17,6 +18,7 @@ class State_Task {
 /**
  * List of possible states.
  * @OA\Schema(
+ *   description="current status of the idea",
  *   type="string",
  *   enum={"NEW", "DUPPLIKAT", "INAPPROPRIATE", "HANDLED"},
  *   example="NEW"

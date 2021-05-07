@@ -1,8 +1,8 @@
 <?php
 /**
- * @OA\Schema()
+ * @OA\Schema(description="description of the selection group naming")
  */
-class SelectionGroup {
+class Selection {
 
     /**
      * The selection id.

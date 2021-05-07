@@ -150,7 +150,7 @@ class Participant_Controller extends Controller
   /**
   * @OA\Delete(
   *   path="/api/participant/",
-  *   summary="Delete logged in participant.",
+  *   summary="Delete logged-in participant.",
   *   tags={"Participant"},
   *   @OA\Response(response="200", description="Success"),
   *   @OA\Response(response="404", description="Not Found"),
@@ -163,7 +163,7 @@ class Participant_Controller extends Controller
   /**
   * @OA\Get(
   *   path="/api/participant_tasks/",
-  *   summary="List of all tasks for the logged in participant.",
+  *   summary="List of all tasks for the logged-in participant.",
   *   tags={"Participant"},
   *   @OA\Response(response="200", description="Success",
   *     @OA\MediaType(
@@ -182,7 +182,7 @@ class Participant_Controller extends Controller
   /**
   * @OA\Get(
   *   path="/api/topic/{topic_id}/participant_tasks/",
-  *   summary="List of all topic tasks for the logged in participant.",
+  *   summary="List of all topic tasks for the logged-in participant.",
   *   tags={"Participant"},
   *   @OA\Parameter(in="path", name="topic_id", description="ID of the topic", required=true),
   *   @OA\Response(response="200", description="Success",
@@ -202,7 +202,7 @@ class Participant_Controller extends Controller
   /**
   * @OA\Get(
   *   path="/api/participant_topics/",
-  *   summary="List of all topics for the logged in participant.",
+  *   summary="List of all topics for the logged-in participant.",
   *   tags={"Participant"},
   *   @OA\Response(response="200", description="Success",
   *     @OA\MediaType(

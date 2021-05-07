@@ -573,7 +573,7 @@
 					"user"
 				],
 				"summary": "Create user",
-				"description": "This can only be done by the logged in user.",
+				"description": "This can only be done by the logged-in user.",
 				"operationId": "createUser",
 				"produces": [
 					"application/xml",
@@ -721,7 +721,7 @@
 				"tags": [
 					"user"
 				],
-				"summary": "Logs out current logged in user session",
+				"summary": "Logs out current logged-in user session",
 				"description": "",
 				"operationId": "logoutUser",
 				"produces": [
@@ -777,7 +777,7 @@
 					"user"
 				],
 				"summary": "Updated user",
-				"description": "This can only be done by the logged in user.",
+				"description": "This can only be done by the logged-in user.",
 				"operationId": "updateUser",
 				"produces": [
 					"application/xml",
@@ -815,7 +815,7 @@
 					"user"
 				],
 				"summary": "Delete user",
-				"description": "This can only be done by the logged in user.",
+				"description": "This can only be done by the logged-in user.",
 				"operationId": "deleteUser",
 				"produces": [
 					"application/xml",

@@ -1,6 +1,6 @@
 <?php
 /**
- * @OA\Schema()
+ * @OA\Schema(description="Task description")
  */
 class Task {
 

@@ -2,6 +2,7 @@
 /**
  * Permission roles for the session.
  * @OA\Schema(
+ *   description="permission roles for the session",
  *   type="string",
  *   enum={"MODERATOR", "FACILITATOR", "PARTICIPANT"},
  *   example="MODERATOR"

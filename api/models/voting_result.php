@@ -1,13 +1,13 @@
 <?php
 /**
- * @OA\Schema()
+ * @OA\Schema(description="description of the aggregated voting result")
  */
 class VotingResult {
 
     /**
      * evaluated idea
      * @var string
-     * @OA\Property(ref="#/components/schemas/IdeaDescription")
+     * @OA\Property(ref="#/components/schemas/IdeaAbstract")
      */
     public $idea;
 

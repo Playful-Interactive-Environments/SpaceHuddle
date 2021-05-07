@@ -1,6 +1,6 @@
 <?php
 /**
- * @OA\Schema()
+ * @OA\Schema(description="description of the user role for the session")
  */
 class SessionRole {
 

@@ -1,8 +1,8 @@
 <?php
 /**
- * @OA\Schema()
+ * @OA\Schema(description="reduced idea description for voting result")
  */
-class IdeaDescription {
+class IdeaAbstract {
 
     /**
      * The idea id.

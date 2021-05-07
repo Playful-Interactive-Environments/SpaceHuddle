@@ -371,7 +371,7 @@ paths:
       tags:
       - user
       summary: Create user
-      description: This can only be done by the logged in user.
+      description: This can only be done by the logged-in user.
       operationId: createUser
       responses:
         default:
@@ -454,7 +454,7 @@ paths:
     get:
       tags:
       - user
-      summary: Logs out current logged in user session
+      summary: Logs out current logged-in user session
       description: ''
       operationId: logoutUser
       responses:
@@ -492,7 +492,7 @@ paths:
       tags:
       - user
       summary: Updated user
-      description: This can only be done by the logged in user.
+      description: This can only be done by the logged-in user.
       operationId: updateUser
       parameters:
       - name: username
@@ -517,7 +517,7 @@ paths:
       tags:
       - user
       summary: Delete user
-      description: This can only be done by the logged in user.
+      description: This can only be done by the logged-in user.
       operationId: deleteUser
       parameters:
       - name: username
