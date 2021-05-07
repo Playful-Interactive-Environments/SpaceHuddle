@@ -18,6 +18,14 @@ elseif (Controller::is_rest_call("POST")) {
 	$result = $session->add();
 	echo $result;
 }
+elseif (Controller::is_rest_call("PUT")) {
+	$result = $session->update();
+	echo $result;
+}
+elseif (Controller::is_rest_call("DELETE")) {
+	$result = $session->delete();
+	echo $result;
+}
 else {
 	echo "Call ".$_SERVER["REQUEST_METHOD"]." is not yet implemented";
 	http_response_code(405);

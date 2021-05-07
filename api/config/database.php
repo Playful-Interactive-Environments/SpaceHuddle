@@ -42,14 +42,10 @@ class Database
     if ($item_count > 0) {
       http_response_code(200);
       return $stmt->fetchAll(PDO::FETCH_ASSOC);
-      #return json_encode(
-      #  array(
-      #    "response"=>$stmt->fetchAll(PDO::FETCH_ASSOC),
-      #    "count"=>$item_count
-      #  )
-      #);
     }
     else {
+      return array();
+      /*
       http_response_code(404);
       $error = json_encode(
         array(
@@ -59,6 +55,7 @@ class Database
       );
       die($error);
       #return $error;
+      */
     }
   }
 

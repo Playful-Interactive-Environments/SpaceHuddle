@@ -158,6 +158,8 @@ class Participant_Controller extends Controller
   * )
   */
   public function delete()  {
+    #TODO: What happens to the ideas and votes submitted by the user? Set id to zero or delete entry?
+    #TODO: delete dependent tables
   }
 
   /**

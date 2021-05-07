@@ -2,7 +2,10 @@
 require_once(__DIR__.'/../config/generator.php');
 require_once(__DIR__.'/../config/authorization.php');
 require_once(__DIR__.'/../models/session.php');
+require_once(__DIR__.'/../models/role.php');
 require_once('controller.php');
+require_once('topic.php');
+require_once('participant.php');
 
 class Session_Controller extends Controller
 {
@@ -144,7 +147,7 @@ class Session_Controller extends Controller
       $stmt->execute();
       $id = $this->connection->lastInsertId();
 
-      $role = "MODERATOR";
+      $role = Role::MODERATOR;
       $query = "INSERT INTO session_role".
         " (session_id, login_id, role)".
         " VALUES (:session_id, :login_id, :role)";
@@ -196,9 +199,91 @@ class Session_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function update($id, $title, $max_participants, $expiration_date, $public_screen_module_id)  {
+  public function update(
+    $id=null,
+    $title=null,
+    $max_participants=null,
+    $expiration_date=null,
+    $public_screen_module_id=null
+  ) {
+    if (is_null($id)) {
+      $id = $this->get_body_parameter("id");
+    }
+    if (is_null($title)) {
+      $title = $this->get_body_parameter("title");
+    }
+    if (is_null($max_participants)) {
+      $max_participants = $this->get_body_parameter("max_participants");
+    }
+    if (is_null($expiration_date)) {
+      $expiration_date = $this->get_body_parameter("expiration_date");
+    }
+    if (is_null($public_screen_module_id)) {
+      $public_screen_module_id = $this->get_body_parameter("public_screen_module_id");
+    }
+
+    $role = $this->check_rights($id);
+    if (strcasecmp($role, Role::MODERATOR) != 0) {
+        http_response_code(404);
+        $error = json_encode(
+          array(
+            "state"=>"Failed",
+            "message"=>'User is not authorized to update this session.'
+          )
+        );
+        die($error);
+        #return $error;
+    }
+
+    try{
+      $this->connection->beginTransaction();
+
+      $query = "UPDATE session SET ".
+        "title = :title, ".
+        "max_participants = :max_participants, ".
+        "expiration_date = :expiration_date, ".
+        "public_screen_module_id = :public_screen_module_id ".
+        "WHERE id = :id";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":title", $title);
+      $stmt->bindParam(":max_participants", $max_participants);
+      $stmt->bindParam(":expiration_date", $expiration_date);
+      $stmt->bindParam(":public_screen_module_id", $public_screen_module_id);
+      $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+      $stmt->execute();
+      $this->connection->commit();
+      $result = $this->read($id);
+      return $result;
+    }
+    catch(Exception $e){
+        http_response_code(404);
+        $error_msg = $e->getMessage();
+        $this->connection->rollBack();
+        $error = json_encode(
+          array(
+            "state"=>"Failed",
+            "message"=>'Error occurred: '.$error_msg
+          )
+        );
+        die($error);
+        #return $error;
+    }
+  }
+
+  public function check_rights($id) {
     $login_id = getAuthorizationProperty("login_id");
-    #TODO: check rights for session
+    $query = "SELECT * FROM session_role ".
+      "WHERE session_id = :session_id AND login_id = :login_id";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":session_id", $id);
+    $stmt->bindParam(":login_id", $login_id);
+    $stmt->execute();
+    $item_count = $stmt->rowCount();
+    if ($item_count > 0) {
+      $result = $this->database->fatch_first($stmt);
+      return $result["role"];
+    }
+    return null;
   }
 
   /**
@@ -212,12 +297,94 @@ class Session_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function delete($id)  {
+  public function delete($id=null)  {
     $login_id = getAuthorizationProperty("login_id");
     if (is_null($id)) {
       $id = $this->get_url_parameter("session", -1);
     }
-    #TODO: check rights for session
+
+    $role = $this->check_rights($id);
+    if (strcasecmp($role, Role::MODERATOR) != 0) {
+        http_response_code(404);
+        $error = json_encode(
+          array(
+            "state"=>"Failed",
+            "message"=>'User is not authorized to delete this session.'
+          )
+        );
+        die($error);
+        #return $error;
+    }
+
+    try{
+      $this->connection->beginTransaction();
+
+      $query = "SELECT * FROM participant ".
+        "WHERE session_id = :session_id ";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":session_id", $id);
+      $stmt->execute();
+
+      $result_data = $this->database->fatch_all($stmt);
+      foreach($result_data as $result_item) {
+        $participant_id = $result_item["id"];
+        $participant = Participant_Controller::get_instance();
+        $participant->delete($participant_id);
+      }
+
+      $query = "SELECT * FROM topic ".
+        "WHERE session_id = :session_id ";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":session_id", $id);
+      $stmt->execute();
+
+      $result_data = $this->database->fatch_all($stmt);
+      foreach($result_data as $result_item) {
+        $topic_id = $result_item["id"];
+        $topic = Topic_Controller::get_instance();
+        $topic->delete($topic_id);
+      }
+
+      $query = "DELETE FROM resource ".
+        "WHERE session_id = :session_id";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":session_id", $id);
+      $stmt->execute();
+
+      $query = "DELETE FROM session_role ".
+        "WHERE session_id = :session_id";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":session_id", $id);
+      $stmt->execute();
+
+      $query = "DELETE FROM session ".
+        "WHERE id = :id";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":id", $id);
+      $stmt->execute();
+
+      $this->connection->commit();
+    }
+    catch(Exception $e){
+        http_response_code(404);
+        $error_msg = $e->getMessage();
+        $this->connection->rollBack();
+        $error = json_encode(
+          array(
+            "state"=>"Failed",
+            "message"=>'Error occurred: '.$error_msg
+          )
+        );
+        die($error);
+        #return $error;
+    }
+
+    return json_encode(
+      array(
+        "state"=>"Sccess",
+        "message"=>"user was successful deleted"
+      )
+    );
   }
 }
 ?>
