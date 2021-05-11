@@ -29,11 +29,14 @@ class Idea_Controller extends Controller
       $task_id = $this->get_url_parameter("task");
     }
     $role = Task_Controller::check_instance_rights($task_id);
+    $task_type = strtoupper(Task_Type::BRAINSTORMING);
     if (strcasecmp($role, Role::MODERATOR) == 0 or strcasecmp($role, Role::FACILITATOR) == 0) {
       $query = "SELECT * FROM idea ".
-      "WHERE task_id = :task_id";
+      "WHERE task_id = :task_id ".
+      "AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":task_id", $task_id);
+      $stmt->bindParam(":task_type", $task_type);
       $stmt->execute();
       $result_data = $this->database->fatch_all($stmt);
       $result = array();
@@ -45,10 +48,12 @@ class Idea_Controller extends Controller
     elseif (strcasecmp($role, Role::PARTICIPANT) == 0) {
       $participant_id = getAuthorizationProperty("participant_id");
       $query = "SELECT * FROM idea ".
-      "WHERE task_id = :task_id AND participant_id = :participant_id";
+      "WHERE task_id = :task_id AND participant_id = :participant_id ".
+      "AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":task_id", $task_id);
       $stmt->bindParam(":participant_id", $participant_id);
+      $stmt->bindParam(":task_type", $task_type);
       $stmt->execute();
       $result_data = $this->database->fatch_all($stmt);
       $result = array();
@@ -90,11 +95,13 @@ class Idea_Controller extends Controller
       $topic_id = $this->get_url_parameter("topic");
     }
     $role = Topic_Controller::check_instance_rights($topic_id);
+    $task_type = strtoupper(Task_Type::BRAINSTORMING);
     if (strcasecmp($role, Role::MODERATOR) == 0 or strcasecmp($role, Role::FACILITATOR) == 0) {
       $query = "SELECT * FROM idea ".
-      "WHERE task_id IN (SELECT id FROM task WHERE topic_id = :topic_id)";
+      "WHERE task_id IN (SELECT id FROM task WHERE topic_id = :topic_id AND task_type like :task_type)";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":topic_id", $topic_id);
+      $stmt->bindParam(":task_type", $task_type);
       $stmt->execute();
       $result_data = $this->database->fatch_all($stmt);
       $result = array();
@@ -108,10 +115,11 @@ class Idea_Controller extends Controller
 
       $query = "SELECT * FROM idea ".
       "WHERE participant_id = :participant_id ".
-      "AND task_id IN (SELECT id FROM task WHERE topic_id = :topic_id)";
+      "AND task_id IN (SELECT id FROM task WHERE topic_id = :topic_id AND task_type like :task_type)";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":topic_id", $topic_id);
       $stmt->bindParam(":participant_id", $participant_id);
+      $stmt->bindParam(":task_type", $task_type);
       $stmt->execute();
       $result_data = $this->database->fatch_all($stmt);
       $result = array();
@@ -150,11 +158,14 @@ class Idea_Controller extends Controller
       $id = $this->get_url_parameter("idea");
     }
     $role = $this->check_rights($id);
+    $task_type = strtoupper(Task_Type::BRAINSTORMING);
     if (strcasecmp($role, Role::MODERATOR) == 0 or strcasecmp($role, Role::FACILITATOR) == 0) {
       $query = "SELECT * FROM idea ".
-      "WHERE id = :id";
+      "WHERE id = :id ".
+      "AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":id", $id);
+      $stmt->bindParam(":task_type", $task_type);
       $stmt->execute();
       $result = $this->database->fatch_first($stmt);
       return json_encode(new Idea($result));
@@ -162,10 +173,12 @@ class Idea_Controller extends Controller
     elseif (strcasecmp($role, Role::PARTICIPANT) == 0) {
       $participant_id = getAuthorizationProperty("participant_id");
       $query = "SELECT * FROM idea ".
-      "WHERE id = :id AND participant_id = :participant_id";
+      "WHERE id = :id AND participant_id = :participant_id ".
+      "AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":id", $id);
       $stmt->bindParam(":participant_id", $participant_id);
+      $stmt->bindParam(":task_type", $task_type);
       $stmt->execute();
       $result = $this->database->fatch_first($stmt);
       $item_count = $stmt->rowCount();
