@@ -135,19 +135,20 @@ class Session_Controller extends Controller
     try{
       $this->connection->beginTransaction();
       $connection_key = $this->generate_new_session_key();
+      $id = self::uuid();
 
       $query = "INSERT INTO session".
-        " (title, connection_key, max_participants, expiration_date)".
-        " VALUES (:title, :connection_key, :max_participants, :expiration_date)";
+        " (id, title, connection_key, max_participants, expiration_date)".
+        " VALUES (:id, :title, :connection_key, :max_participants, :expiration_date)";
       $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":id", $id);
       $stmt->bindParam(":title", $title);
       $stmt->bindParam(":connection_key", $connection_key);
       $stmt->bindParam(":max_participants", $max_participants);
       $stmt->bindParam(":expiration_date", $expiration_date);
       $stmt->execute();
-      $id = $this->connection->lastInsertId();
 
-      $role = Role::MODERATOR;
+      $role = strtoupper(Role::MODERATOR);
       $query = "INSERT INTO session_role".
         " (session_id, login_id, role)".
         " VALUES (:session_id, :login_id, :role)";
@@ -239,10 +240,10 @@ class Session_Controller extends Controller
       $this->connection->beginTransaction();
 
       $query = "UPDATE session SET ".
-        "title = :title, ".
-        "max_participants = :max_participants, ".
-        "expiration_date = :expiration_date, ".
-        "public_screen_module_id = :public_screen_module_id ".
+        "title = NVL(:title, title), ".
+        "max_participants = NVL(:max_participants, max_participants), ".
+        "expiration_date = NVL(:expiration_date, expiration_date), ".
+        "public_screen_module_id = NVL(:public_screen_module_id, public_screen_module_id) ".
         "WHERE id = :id";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":title", $title);
@@ -271,19 +272,40 @@ class Session_Controller extends Controller
   }
 
   public function check_rights($id) {
-    $login_id = getAuthorizationProperty("login_id");
-    $query = "SELECT * FROM session_role ".
-      "WHERE session_id = :session_id AND login_id = :login_id";
-    $stmt = $this->connection->prepare($query);
-    $stmt->bindParam(":session_id", $id);
-    $stmt->bindParam(":login_id", $login_id);
-    $stmt->execute();
-    $item_count = $stmt->rowCount();
-    if ($item_count > 0) {
-      $result = $this->database->fatch_first($stmt);
-      return $result["role"];
+    if (!isParticipant()) {
+      $login_id = getAuthorizationProperty("login_id");
+      $query = "SELECT * FROM session_role ".
+        "WHERE session_id = :session_id AND login_id = :login_id";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":session_id", $id);
+      $stmt->bindParam(":login_id", $login_id);
+      $stmt->execute();
+      $item_count = $stmt->rowCount();
+      if ($item_count > 0) {
+        $result = $this->database->fatch_first($stmt);
+        return strtoupper($result["role"]);
+      }
+    }
+    else {
+      $participant_id = getAuthorizationProperty("participant_id");
+      $query = "SELECT * FROM participant ".
+        "WHERE session_id = :session_id AND id = :participant_id";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":session_id", $id);
+      $stmt->bindParam(":participant_id", $participant_id);
+      $stmt->execute();
+      $item_count = $stmt->rowCount();
+      if ($item_count > 0) {
+        $result = $this->database->fatch_first($stmt);
+        return strtoupper(Role::PARTICIPANT);
+      }
     }
     return null;
+  }
+
+  public static function check_instance_rights($id) {
+    $instance = self::get_instance();
+    return $instance->check_rights($id);
   }
 
   /**
@@ -316,8 +338,10 @@ class Session_Controller extends Controller
         #return $error;
     }
 
+    $handle_transaction = !$this->connection->inTransaction();
     try{
-      $this->connection->beginTransaction();
+      if ($handle_transaction)
+        $this->connection->beginTransaction();
 
       $query = "SELECT * FROM participant ".
         "WHERE session_id = :session_id ";
@@ -326,9 +350,9 @@ class Session_Controller extends Controller
       $stmt->execute();
 
       $result_data = $this->database->fatch_all($stmt);
+      $participant = Participant_Controller::get_instance();
       foreach($result_data as $result_item) {
         $participant_id = $result_item["id"];
-        $participant = Participant_Controller::get_instance();
         $participant->delete($participant_id);
       }
 
@@ -339,9 +363,9 @@ class Session_Controller extends Controller
       $stmt->execute();
 
       $result_data = $this->database->fatch_all($stmt);
+      $topic = Topic_Controller::get_instance();
       foreach($result_data as $result_item) {
         $topic_id = $result_item["id"];
-        $topic = Topic_Controller::get_instance();
         $topic->delete($topic_id);
       }
 
@@ -363,7 +387,8 @@ class Session_Controller extends Controller
       $stmt->bindParam(":id", $id);
       $stmt->execute();
 
-      $this->connection->commit();
+      if ($handle_transaction)
+        $this->connection->commit();
     }
     catch(Exception $e){
         http_response_code(404);
@@ -382,7 +407,7 @@ class Session_Controller extends Controller
     return json_encode(
       array(
         "state"=>"Sccess",
-        "message"=>"user was successful deleted"
+        "message"=>"session was successful deleted"
       )
     );
   }

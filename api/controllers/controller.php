@@ -1,4 +1,5 @@
 <?php
+use Ramsey\Uuid\Uuid;
 require_once(__DIR__.'/../config/database.php');
 
 class Controller
@@ -23,14 +24,10 @@ class Controller
       return self::$instances[$class];
   }
 
-  /*
-  public static function get_instance () {
-      if (is_null(self::$instance)) {
-        self::$instance = new static();
-      }
-      return self::$instance;
+  public static function uuid() {
+  	$uuid = Uuid::uuid4();
+  	return $uuid->toString();
   }
-  */
 
   public static function get_url_parameter($parameter_name,  $default_value = null) {
     $parameter_value = $default_value;
@@ -114,6 +111,16 @@ class Controller
 
   public static function get_body_parameter($parameter_name,  $default_value = null) {
     $data = json_decode(file_get_contents('php://input'), true);
+    if (!is_array($data)) {
+      http_response_code(404);
+      $error = json_encode(
+        array(
+          "state"=>"data body incorrectly formatted",
+          "message"=>"Data body cannot be read. JSON is not valid."
+        )
+      );
+      die($error);
+    }
     if (array_key_exists($parameter_name, $data)) {
       return $data[$parameter_name];
     }

@@ -11,7 +11,7 @@ date_default_timezone_set('Europe/Vienna');
 // variables used for jwt
 $key = "gab";
 $issued_at = time();
-$expiration_time = $issued_at + (60 * 60); // valid for 1 hour
+$expiration_time = $issued_at + (60 * 60 * 24); // valid for 24 hour
 $issuer = "http://localhost/api/";
 $alg = 'HS256';
 
@@ -104,5 +104,14 @@ function getAuthorizationProperty($property)
     )
   );
   die($error);
+}
+
+function isParticipant()
+{
+  $authorization_data = getAuthorizationData();
+  if (property_exists ($authorization_data , "participant_id")) {
+    return true;
+  }
+  return false;
 }
 ?>

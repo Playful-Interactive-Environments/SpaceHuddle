@@ -37,7 +37,7 @@ class Topic {
         $this->id = isset($data['id']) ? $data['id'] : null;
         $this->title = isset($data['title']) ? $data['title'] : null;
         $this->description = isset($data['description']) ? $data['description'] : null;
-        $this->active_task_id = isset($data['active_task']) ? $data['active_task'] : null;
+        $this->active_task_id = isset($data['active_task_id']) ? $data['active_task_id'] : null;
     }
 }
 

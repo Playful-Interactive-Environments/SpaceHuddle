@@ -51,18 +51,19 @@ class Participant_Controller extends Controller
         $browser_key = $this->generate_new_browser_key($session_key);
         $color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
         $symbol = AvatarSymbol::getRandomValue();
+        $id = self::uuid();
 
         $query = "INSERT INTO participant".
-          " (session_id, browser_key, color, symbol, ip_hash)".
-          " VALUES (:session_id, :browser_key, :color, :symbol, :ip_hash)";
+          " (id, session_id, browser_key, color, symbol, ip_hash)".
+          " VALUES (:id, :session_id, :browser_key, :color, :symbol, :ip_hash)";
         $stmt = $this->connection->prepare($query);
+        $stmt->bindParam(":id", $id);
         $stmt->bindParam(":session_id", $session_id);
         $stmt->bindParam(":browser_key", $browser_key);
         $stmt->bindParam(":color", $color);
         $stmt->bindParam(":symbol", $symbol);
         $stmt->bindParam(":ip_hash", $ip_hash);
         $stmt->execute();
-        $id = $this->connection->lastInsertId();
         $this->connection->commit();
         $result = (object)$this->read($id);
       }

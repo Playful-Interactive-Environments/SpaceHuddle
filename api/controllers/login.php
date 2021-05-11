@@ -115,15 +115,16 @@ class Login_Controller extends Controller
     try{
       $this->connection->beginTransaction();
       $password = md5($password);
+      $id = self::uuid();
 
       $query = "INSERT INTO login".
-        " (username, password)".
-        " VALUES (:username, :password)";
+        " (id, username, password)".
+        " VALUES (:id, :username, :password)";
       $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":id", $id);
       $stmt->bindParam(":username", $username);
       $stmt->bindParam(":password", $password);
       $stmt->execute();
-      $id = $this->connection->lastInsertId();
       $this->connection->commit();
     }
     catch(Exception $e){
@@ -249,8 +250,10 @@ class Login_Controller extends Controller
   public function delete()  {
     $login_id = getAuthorizationProperty("login_id");
 
+    $handle_transaction = !$this->connection->inTransaction();
     try{
-      $this->connection->beginTransaction();
+      if ($handle_transaction)
+        $this->connection->beginTransaction();
 
       $query = "SELECT * FROM session_role ".
         "WHERE login_id = :login_id AND role like :role";
@@ -289,7 +292,8 @@ class Login_Controller extends Controller
       $stmt->bindParam(":login_id", $login_id);
       $stmt->execute();
 
-      $this->connection->commit();
+      if ($handle_transaction)
+        $this->connection->commit();
     }
     catch(Exception $e){
         http_response_code(404);

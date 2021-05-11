@@ -1,6 +1,7 @@
 {
     "require": {
         "zircote/swagger-php": "^3.1",
-        "firebase/php-jwt": "^5.2"
+        "firebase/php-jwt": "^5.2",
+        "ramsey/uuid": "^4.1"
     }
 }

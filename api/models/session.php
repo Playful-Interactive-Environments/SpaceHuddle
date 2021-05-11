@@ -65,11 +65,11 @@ class Session {
         $this->id = isset($data['id']) ? $data['id'] : null;
         $this->title = isset($data['title']) ? $data['title'] : null;
         $this->connection_key = isset($data['connection_key']) ? $data['connection_key'] : null;
-        $this->max_participants = isset($data['max_participants']) ? $data['max_participants'] : null;
+        $this->max_participants = isset($data['max_participants']) ? (int)$data['max_participants'] : null;
         $this->expiration_date = isset($data['expiration_date']) ? $data['expiration_date'] : null;
         $this->creation_date = isset($data['creation_date']) ? $data['creation_date'] : null;
         $this->public_screen_module_id = isset($data['public_screen_module_id']) ? $data['public_screen_module_id'] : null;
-        $this->role = isset($data['role']) ? $data['role'] : null;
+        $this->role = strtoupper(isset($data['role']) ? $data['role'] : null);
     }
 }
 

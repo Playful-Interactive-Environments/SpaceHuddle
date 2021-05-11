@@ -28,8 +28,8 @@ class Voting {
     public function __construct(array $data = null)
     {
         $this->idea_id = isset($data['idea_id']) ? $data['idea_id'] : null;
-        $this->rating = isset($data['rating']) ? $data['rating'] : null;
-        $this->detail_rating = isset($data['detail_rating']) ? $data['detail_rating'] : null;
+        $this->rating = isset($data['rating']) ? (int)$data['rating'] : null;
+        $this->detail_rating = isset($data['detail_rating']) ? (float)$data['detail_rating'] : null;
     }
 }
 

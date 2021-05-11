@@ -19,5 +19,4 @@ function keygen($length=10, $case_sensitive=true)
 	return $key;
 }
 
-
 ?>

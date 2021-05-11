@@ -56,7 +56,7 @@ class Idea {
     public function __construct(array $data = null)
     {
         $this->id = isset($data['id']) ? $data['id'] : null;
-        $this->state = isset($data['state']) ? $data['state'] : null;
+        $this->state = strtoupper(isset($data['state']) ? $data['state'] : null);
         $this->time_stamp = isset($data['time_stamp']) ? $data['time_stamp'] : null;
         $this->description = isset($data['description']) ? $data['description'] : null;
         $this->keywords = isset($data['keywords']) ? $data['keywords'] : null;

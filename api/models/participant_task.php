@@ -57,11 +57,11 @@ class ParticipantTask {
     public function __construct(array $data = null)
     {
         $this->id = isset($data['id']) ? $data['id'] : null;
-        $this->task_type = isset($data['task_type']) ? $data['task_type'] : null;
+        $this->task_type = strtoupper(isset($data['task_type']) ? $data['task_type'] : null);
         $this->name = isset($data['name']) ? $data['name'] : null;
-        $this->parameter = isset($data['parameter']) ? $data['parameter'] : null;
-        $this->order = isset($data['order']) ? $data['order'] : null;
-        $this->state = isset($data['state']) ? $data['state'] : null;
+        $this->parameter = json_decode(isset($data['parameter']) ? $data['parameter'] : null);
+        $this->order = isset($data['order']) ? (int)$data['order'] : null;
+        $this->state = strtoupper(isset($data['state']) ? $data['state'] : null);
         $this->topic = new Topic($data);
     }
 }

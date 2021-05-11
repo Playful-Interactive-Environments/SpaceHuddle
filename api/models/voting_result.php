@@ -1,4 +1,5 @@
 <?php
+require_once('idea_abstract.php');
 /**
  * @OA\Schema(description="description of the aggregated voting result")
  */
@@ -27,9 +28,9 @@ class VotingResult {
 
     public function __construct(array $data = null)
     {
-        $this->idea = isset($data['idea']) ? $data['idea'] : null;
-        $this->rating_sum = isset($data['rating']) ? $data['rating'] : null;
-        $this->detail_rating_sum = isset($data['detail_rating']) ? $data['detail_rating'] : null;
+        $this->idea = new IdeaAbstract($data);
+        $this->rating_sum = isset($data['rating']) ? (int)$data['rating'] : null;
+        $this->detail_rating_sum = isset($data['detail_rating']) ? (float)$data['detail_rating'] : null;
     }
 }
 

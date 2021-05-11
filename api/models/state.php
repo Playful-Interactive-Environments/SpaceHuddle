@@ -26,7 +26,7 @@ class State_Task {
  */
 class State_Idea {
   const NEW = "new";
-  const DUPPLIKAT = "dupplikate";
+  const DUPLICATE = "duplicate";
   const INAPPROPRIATE = "inappropriate";
   const HANDLED = "handled";
 }
