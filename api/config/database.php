@@ -12,6 +12,7 @@ class Database
 
   public function __construct()
   {
+    $this->host = $_SERVER['HTTP_HOST'];
     $this->connection = null;
     try {
       $this->connection = new PDO (

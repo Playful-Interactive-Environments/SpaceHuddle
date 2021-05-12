@@ -12,7 +12,7 @@ date_default_timezone_set('Europe/Vienna');
 $key = "gab";
 $issued_at = time();
 $expiration_time = $issued_at + (60 * 60 * 24); // valid for 24 hour
-$issuer = "http://localhost/api/";
+$issuer = "http://".$_SERVER['HTTP_HOST']."/api/";
 $alg = 'HS256';
 
 function generateToken($data)
@@ -66,7 +66,7 @@ function getBearerToken() {
 
 function getAuthorizationData()
 {
-  global $issued_at, $expiration_time, $issuer, $key, $alg;
+  global $key, $alg;
   $jwt = getBearerToken();
   $error_msg = "no token specified";
   if (isset($jwt)) {
