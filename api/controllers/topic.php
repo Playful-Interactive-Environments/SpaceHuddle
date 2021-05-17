@@ -7,6 +7,11 @@ require_once(__DIR__.'/../models/topic.php');
 
 class Topic_Controller extends Controller
 {
+  public function __construct()
+  {
+      parent::__construct("topic", "Topic", "Session_Controller", "session", "session_id");
+  }
+
   /**
   * @OA\Get(
   *   path="/api/session/{session_id}/topics/",
@@ -24,33 +29,7 @@ class Topic_Controller extends Controller
   * )
   */
   public function read_all($session_id = null)  {
-    if (is_null($session_id)) {
-      $session_id = $this->get_url_parameter("session");
-    }
-    $role = Session_Controller::check_instance_rights($session_id);
-    if (strcasecmp($role, Role::MODERATOR) == 0 or strcasecmp($role, Role::FACILITATOR) == 0) {
-      $query = "SELECT * FROM topic ".
-      "WHERE session_id = :session_id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":session_id", $session_id);
-      $stmt->execute();
-      $result_data = $this->database->fatch_all($stmt);
-      $result = array();
-      foreach($result_data as $result_item) {
-        array_push($result, new Topic($result_item));
-      }
-      return json_encode($result);
-    }
-    else {
-      http_response_code(404);
-      $error = json_encode(
-        array(
-          "state"=>"Failed",
-          "message"=>'User is not authorized to read topics.'
-        )
-      );
-      die($error);
-    }
+    return parent::read_all_generic($session_id);
   }
 
   /**
@@ -67,50 +46,7 @@ class Topic_Controller extends Controller
   * )
   */
   public function read($id = null)  {
-    if (is_null($id)) {
-      $id = $this->get_url_parameter("topic");
-    }
-    $role = $this->check_rights($id);
-    if (strcasecmp($role, Role::MODERATOR) == 0 or strcasecmp($role, Role::FACILITATOR) == 0) {
-      $query = "SELECT * FROM topic ".
-      "WHERE id = :id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":id", $id);
-      $stmt->execute();
-      $result = $this->database->fatch_first($stmt);
-      return json_encode(new Topic($result));
-    }
-    else {
-      http_response_code(404);
-      $error = json_encode(
-        array(
-          "state"=>"Failed",
-          "message"=>'User is not authorized to read topics.'
-        )
-      );
-      die($error);
-    }
-  }
-
-  public function check_rights($id) {
-    $query = "SELECT * FROM topic ".
-      "WHERE id = :id";
-    $stmt = $this->connection->prepare($query);
-    $stmt->bindParam(":id", $id);
-    $stmt->execute();
-    $item_count = $stmt->rowCount();
-    if ($item_count > 0) {
-      $result = $this->database->fatch_first($stmt);
-      $session_id = $result["session_id"];
-      $role = Session_Controller::check_instance_rights($session_id);
-      return $role;
-    }
-    return null;
-  }
-
-  public static function check_instance_rights($id) {
-    $instance = self::get_instance();
-    return $instance->check_rights($id);
+    return parent::read_generic($id);
   }
 
   /**
@@ -136,58 +72,13 @@ class Topic_Controller extends Controller
   * )
   */
   public function add($session_id = null, $title = null, $description = null)  {
-    if (is_null($session_id)) {
-      $session_id = $this->get_url_parameter("session");
-    }
-    if (is_null($title)) {
-      $title = $this->get_body_parameter("title");
-    }
-    if (is_null($description)) {
-      $description = $this->get_body_parameter("description");
-    }
-    $role = Session_Controller::check_instance_rights($session_id);
-    if (strcasecmp($role, Role::MODERATOR) != 0) {
-        http_response_code(404);
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'User is not authorized to add a topic to this session.'
-          )
-        );
-        die($error);
-        #return $error;
-    }
+    $params = $this->format_parameters(array(
+      "session_id"=>array("default"=>$session_id, "url"=>"session"),
+      "title"=>array("default"=>$title),
+      "description"=>array("default"=>$description)
+    ));
 
-    try{
-      $this->connection->beginTransaction();
-      $id = self::uuid();
-
-      $query = "INSERT INTO topic ".
-        " (id, session_id, title, description)".
-        " VALUES (:id, :session_id, :title, :description)";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":id", $id);
-      $stmt->bindParam(":session_id", $session_id);
-      $stmt->bindParam(":title", $title);
-      $stmt->bindParam(":description", $description);
-      $stmt->execute();
-      $this->connection->commit();
-      $result = $this->read($id);
-      return $result;
-    }
-    catch(Exception $e){
-        http_response_code(404);
-        $error_msg = $e->getMessage();
-        $this->connection->rollBack();
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'Error occurred:'.$error_msg
-          )
-        );
-        die($error);
-        #return $error;
-    }
+    return $this->add_generic($params->session_id, $params);
   }
 
   /**
@@ -210,62 +101,14 @@ class Topic_Controller extends Controller
   * )
   */
   public function update($id = null, $title = null, $description = null, $active_task_id = null)  {
-    if (is_null($id)) {
-      $id = $this->get_body_parameter("id");
-    }
-    if (is_null($title)) {
-      $title = $this->get_body_parameter("title");
-    }
-    if (is_null($description)) {
-      $description = $this->get_body_parameter("description");
-    }
-    if (is_null($active_task_id)) {
-      $active_task_id = $this->get_body_parameter("active_task_id");
-    }
-    $role = $this->check_rights($id);
-    if (strcasecmp($role, Role::MODERATOR) != 0) {
-        http_response_code(404);
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'User is not authorized to update this topic.'
-          )
-        );
-        die($error);
-        #return $error;
-    }
+    $params = $this->format_parameters(array(
+      "id"=>array("default"=>$id),
+      "title"=>array("default"=>$title),
+      "description"=>array("default"=>$description),
+      "active_task_id"=>array("default"=>$active_task_id)
+    ));
 
-    try{
-      $this->connection->beginTransaction();
-
-      $query = "UPDATE topic SET ".
-        "title = NVL(:title, title), ".
-        "description = NVL(:description, description), ".
-        "active_task_id = NVL(:active_task_id, active_task_id) ".
-        "WHERE id = :id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":title", $title);
-      $stmt->bindParam(":description", $description);
-      $stmt->bindParam(":active_task_id", $active_task_id);
-      $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-      $stmt->execute();
-      $this->connection->commit();
-      $result = $this->read($id);
-      return $result;
-    }
-    catch(Exception $e){
-        http_response_code(404);
-        $error_msg = $e->getMessage();
-        $this->connection->rollBack();
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'Error occurred: '.$error_msg
-          )
-        );
-        die($error);
-        #return $error;
-    }
+    return $this->update_generic($params->id, $params);
   }
 
   /**
@@ -280,83 +123,33 @@ class Topic_Controller extends Controller
   * )
   */
   public function delete($id = null)  {
-    if (is_null($id)) {
-      $id = $this->get_url_parameter("topic");
-    }
-    $role = $this->check_rights($id);
+    return parent::delete_generic($id);
+  }
 
-    if (strcasecmp($role, Role::MODERATOR) != 0) {
-        http_response_code(404);
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'User is not authorized to delete this topic.'
-          )
-        );
-        die($error);
-        #return $error;
-    }
+  public function delete_dependencies($id) {
+    $query = "SELECT * FROM task WHERE topic_id = :topic_id ";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":topic_id", $id);
+    $stmt->execute();
 
-    $handle_transaction = !$this->connection->inTransaction();
-    try{
-      if ($handle_transaction)
-        $this->connection->beginTransaction();
-
-      $query = "SELECT * FROM task ".
-        "WHERE topic_id = :topic_id ";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":topic_id", $id);
-      $stmt->execute();
-
-      $result_data = $this->database->fatch_all($stmt);
-      $task = Task_Controller::get_instance();
-      foreach($result_data as $result_item) {
-        $task_id = $result_item["id"];
-        $task->delete($task_id);
-      }
-
-      $query = "SELECT * FROM selection_group ".
-        "WHERE topic_id = :topic_id ";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":topic_id", $id);
-      $stmt->execute();
-
-      $result_data = $this->database->fatch_all($stmt);
-      $selection = Selection_Controller::get_instance();
-      foreach($result_data as $result_item) {
-        $selection_id = $result_item["id"];
-        $selection->delete($selection_id);
-      }
-
-      $query = "DELETE FROM topic ".
-        "WHERE id = :id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":id", $id);
-      $stmt->execute();
-
-      if ($handle_transaction)
-        $this->connection->commit();
-    }
-    catch(Exception $e){
-        http_response_code(404);
-        $error_msg = $e->getMessage();
-        $this->connection->rollBack();
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'Error occurred: '.$error_msg
-          )
-        );
-        die($error);
-        #return $error;
+    $result_data = $this->database->fatch_all($stmt);
+    $task = Task_Controller::get_instance();
+    foreach($result_data as $result_item) {
+      $task_id = $result_item["id"];
+      $task->delete($task_id);
     }
 
-    return json_encode(
-      array(
-        "state"=>"Sccess",
-        "message"=>"topic was successful deleted"
-      )
-    );
+    $query = "SELECT * FROM selection_group WHERE topic_id = :topic_id ";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":topic_id", $id);
+    $stmt->execute();
+
+    $result_data = $this->database->fatch_all($stmt);
+    $selection = Selection_Controller::get_instance();
+    foreach($result_data as $result_item) {
+      $selection_id = $result_item["id"];
+      $selection->delete($selection_id);
+    }
   }
 }
 ?>

@@ -5,6 +5,11 @@ require_once('controller.php');
 
 class Public_Screen_Controller extends Controller
 {
+  public function __construct()
+  {
+      parent::__construct("task", "Task", "Topic_Controller", "topic", "topic_id");
+  }
+
   /**
   * @OA\Post(
   *   path="/api/session/{session_id}/public_screen/",

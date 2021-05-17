@@ -6,8 +6,8 @@ class Voting {
 
     /**
      * id of the idea
-     * @var int
-     * @OA\Property()
+     * @var string
+     * @OA\Property(example="uuid")
      */
     public $idea_id;
 

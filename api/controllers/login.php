@@ -18,6 +18,11 @@ require_once('session.php');
  */
 class Login_Controller extends Controller
 {
+  public function __construct()
+  {
+      parent::__construct("login", "Login");
+  }
+
   /**
   * @OA\Post(
   *   path="/api/user/login/",
@@ -117,9 +122,9 @@ class Login_Controller extends Controller
       $password = md5($password);
       $id = self::uuid();
 
-      $query = "INSERT INTO login".
-        " (id, username, password)".
-        " VALUES (:id, :username, :password)";
+      $query = "INSERT INTO login
+        (id, username, password)
+        VALUES (:id, :username, :password)";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":id", $id);
       $stmt->bindParam(":username", $username);
@@ -163,8 +168,7 @@ class Login_Controller extends Controller
   }
 
   private function check_user($username) {
-    $query = "SELECT * FROM login ".
-    "WHERE username = :username";
+    $query = "SELECT * FROM login WHERE username = :username";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":username", $username);
     $stmt->execute();
@@ -206,9 +210,9 @@ class Login_Controller extends Controller
       $this->connection->beginTransaction();
       $password = md5($password);
 
-      $query = "UPDATE login SET ".
-        "password = :password ".
-        "WHERE id = :login_id";
+      $query = "UPDATE login SET
+        password = :password
+        WHERE id = :login_id";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":password", $password);
       $stmt->bindParam(":login_id", $login_id);
@@ -255,8 +259,8 @@ class Login_Controller extends Controller
       if ($handle_transaction)
         $this->connection->beginTransaction();
 
-      $query = "SELECT * FROM session_role ".
-        "WHERE login_id = :login_id AND role like :role";
+      $query = "SELECT * FROM session_role
+        WHERE login_id = :login_id AND role like :role";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":login_id", $login_id);
       $stmt->bindParam(":role", Role::MODERATOR);
@@ -266,8 +270,8 @@ class Login_Controller extends Controller
       foreach($result_data as $result_item) {
         $session_id = $result_item["session_id"];
 
-        $query = "SELECT * FROM session_role ".
-          "WHERE session_id = :session_id AND role like :role";
+        $query = "SELECT * FROM session_role
+          WHERE session_id = :session_id AND role like :role";
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(":session_id", $session_id);
         $stmt->bindParam(":role", Role::MODERATOR);
@@ -280,14 +284,12 @@ class Login_Controller extends Controller
         }
       }
 
-      $query = "DELETE FROM session_role ".
-        "WHERE login_id = :login_id";
+      $query = "DELETE FROM session_role WHERE login_id = :login_id";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":login_id", $login_id);
       $stmt->execute();
 
-      $query = "DELETE FROM login ".
-        "WHERE id = :login_id";
+      $query = "DELETE FROM login WHERE id = :login_id";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":login_id", $login_id);
       $stmt->execute();
@@ -315,6 +317,9 @@ class Login_Controller extends Controller
         "message"=>"user was successful deleted"
       )
     );
+  }
+
+  public function delete_dependencies($id) {
   }
 
 }

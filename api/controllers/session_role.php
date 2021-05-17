@@ -3,6 +3,11 @@ require_once('controller.php');
 
 class SessionRole_Controller extends Controller
 {
+  public function __construct()
+  {
+      parent::__construct("session_role", "SessionRole", "Login_Controller", "login", "login_id");
+  }
+
   /**
   * @OA\Get(
   *   path="/api/session/{session_id}/authorized_users/",
@@ -122,6 +127,9 @@ class SessionRole_Controller extends Controller
   */
   public function delete($id)  {
     #TODO: check rights for session
+  }
+
+  public function delete_dependencies($id) {
   }
 
 }

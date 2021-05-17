@@ -3,6 +3,11 @@ require_once('controller.php');
 
 class Voting_Controller extends Controller
 {
+  public function __construct()
+  {
+      parent::__construct("voting", "Voting", "Task_Controller", "task", "task_id");
+  }
+
   /**
   * @OA\Get(
   *   path="/api/task/{task_id}/voting_result/",

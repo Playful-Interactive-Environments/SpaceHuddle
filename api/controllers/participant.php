@@ -8,6 +8,11 @@ require_once('session.php');
 
 class Participant_Controller extends Controller
 {
+  public function __construct()
+  {
+      parent::__construct("participant", "Participant", "Session_Controller", "session", "session_id");
+  }
+
   /**
   * @OA\Post(
   *   path="/api/participant/connect/",
@@ -37,8 +42,8 @@ class Participant_Controller extends Controller
     $session_id = Session_Controller::get_instance()->read_by_key($session_key)->id;
     $ip_hash = md5($ip_hash);
 
-    $query = "SELECT * FROM participant ".
-    "WHERE session_id = :session_id AND ip_hash = :ip_hash";
+    $query = "SELECT * FROM participant
+      WHERE session_id = :session_id AND ip_hash = :ip_hash";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":session_id", $session_id);
     $stmt->bindParam(":ip_hash", $ip_hash);
@@ -53,9 +58,9 @@ class Participant_Controller extends Controller
         $symbol = AvatarSymbol::getRandomValue();
         $id = self::uuid();
 
-        $query = "INSERT INTO participant".
-          " (id, session_id, browser_key, color, symbol, ip_hash)".
-          " VALUES (:id, :session_id, :browser_key, :color, :symbol, :ip_hash)";
+        $query = "INSERT INTO participant
+          (id, session_id, browser_key, color, symbol, ip_hash)
+          VALUES (:id, :session_id, :browser_key, :color, :symbol, :ip_hash)";
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(":id", $id);
         $stmt->bindParam(":session_id", $session_id);
@@ -98,8 +103,7 @@ class Participant_Controller extends Controller
     $browser_key = "";
     while ($item_count > 0) {
       $browser_key = $session_key.".".keygen(8, false);
-      $query = "SELECT id FROM participant".
-        " WHERE browser_key = :key";
+      $query = "SELECT id FROM participant WHERE browser_key = :key";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":key", $browser_key);
       $stmt->execute();
@@ -132,8 +136,7 @@ class Participant_Controller extends Controller
     if (is_null($browser_key)) {
       $browser_key = $this->get_url_parameter("connect", -1);
     }
-    $query = "SELECT * FROM participant ".
-    "WHERE browser_key = :browser_key";
+    $query = "SELECT * FROM participant WHERE browser_key = :browser_key";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":browser_key", $browser_key);
     $stmt->execute();
@@ -161,6 +164,9 @@ class Participant_Controller extends Controller
   public function delete()  {
     #TODO: What happens to the ideas and votes submitted by the user? Set id to zero or delete entry?
     #TODO: delete dependent tables
+  }
+
+  public function delete_dependencies($id) {
   }
 
   /**

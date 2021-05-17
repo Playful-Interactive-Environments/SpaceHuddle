@@ -5,6 +5,11 @@ require_once('controller.php');
 
 class Client_Controller extends Controller
 {
+  public function __construct()
+  {
+      parent::__construct("task", "Task", "Topic_Controller", "topic", "topic_id");
+  }
+  
   /**
   * @OA\Post(
   *   path="/api/task/{task_id}/client_application/{state}/",
@@ -13,7 +18,7 @@ class Client_Controller extends Controller
   *   @OA\Parameter(in="path", name="task_id", description="ID of the task to be updated", required=true),
   *   @OA\Parameter(in="path", name="state",
   *     description="display status on the client devices",
-  *     required=true, 
+  *     required=true,
   *     @OA\Schema(ref="#/components/schemas/State_Task")),
   *   @OA\Response(response="200", description="Success"),
   *   @OA\Response(response="404", description="Not Found"),

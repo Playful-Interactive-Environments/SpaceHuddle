@@ -7,8 +7,8 @@ class ParticipantTask {
 
     /**
      * The task id.
-     * @var int
-     * @OA\Property()
+     * @var string
+     * @OA\Property(example="uuid")
      */
     public $id;
 

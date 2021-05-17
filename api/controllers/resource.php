@@ -3,6 +3,11 @@ require_once('controller.php');
 
 class Resource_Controller extends Controller
 {
+  public function __construct()
+  {
+      parent::__construct("resource", "Resource", "Session_Controller", "session", "session_id");
+  }
+
   /**
   * @OA\Get(
   *   path="/api/session/{session_id}/resources/",
@@ -118,6 +123,9 @@ class Resource_Controller extends Controller
   */
   public function delete($id)  {
     #TODO: check rights for session
+  }
+
+  public function delete_dependencies($id) {
   }
 
 }

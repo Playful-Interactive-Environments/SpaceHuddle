@@ -9,6 +9,11 @@ require_once('participant.php');
 
 class Session_Controller extends Controller
 {
+  public function __construct()
+  {
+      parent::__construct("session", "Session");
+  }
+
   /**
   * @OA\Get(
   *   path="/api/sessions/",
@@ -27,11 +32,11 @@ class Session_Controller extends Controller
   */
   public function read_all()  {
     $login_id = getAuthorizationProperty("login_id");
-    $query = "SELECT * FROM session ".
-    "INNER JOIN session_role ON session_role.session_id = session.id ".
-    "WHERE session_role.login_id = :login_id";
-    /*$query = "SELECT * FROM session ".
-    "WHERE id IN (SELECT session_id FROM session_role WHERE login_id = :login_id)";*/
+    $query = "SELECT * FROM session
+      INNER JOIN session_role ON session_role.session_id = session.id
+      WHERE session_role.login_id = :login_id";
+    /*$query = "SELECT * FROM session
+      WHERE id IN (SELECT session_id FROM session_role WHERE login_id = :login_id)";*/
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":login_id", $login_id);
     $stmt->execute();
@@ -61,9 +66,9 @@ class Session_Controller extends Controller
     if (is_null($id)) {
       $id = $this->get_url_parameter("session", -1);
     }
-    $query = "SELECT * FROM session ".
-    "INNER JOIN session_role ON session_role.session_id = session.id ".
-    "WHERE session.id = :id and session_role.login_id = :login_id";
+    $query = "SELECT * FROM session
+      INNER JOIN session_role ON session_role.session_id = session.id
+      WHERE session.id = :id and session_role.login_id = :login_id";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":id", $id);
     $stmt->bindParam(":login_id", $login_id);
@@ -73,8 +78,7 @@ class Session_Controller extends Controller
   }
 
   public function read_by_key($session_key) {
-    $query = "SELECT * FROM session ".
-    "WHERE connection_key = :session_key";
+    $query = "SELECT * FROM session WHERE connection_key = :session_key";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":session_key", $session_key);
     $stmt->execute();
@@ -88,8 +92,7 @@ class Session_Controller extends Controller
     $connection_key = "";
     while ($item_count > 0) {
       $connection_key = keygen(8, false);
-      $query = "SELECT id FROM session".
-        " WHERE connection_key = :key";
+      $query = "SELECT id FROM session WHERE connection_key = :key";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":key", $connection_key);
       $stmt->execute();
@@ -137,9 +140,9 @@ class Session_Controller extends Controller
       $connection_key = $this->generate_new_session_key();
       $id = self::uuid();
 
-      $query = "INSERT INTO session".
-        " (id, title, connection_key, max_participants, expiration_date)".
-        " VALUES (:id, :title, :connection_key, :max_participants, :expiration_date)";
+      $query = "INSERT INTO session
+        (id, title, connection_key, max_participants, expiration_date)
+        VALUES (:id, :title, :connection_key, :max_participants, :expiration_date)";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":id", $id);
       $stmt->bindParam(":title", $title);
@@ -149,9 +152,9 @@ class Session_Controller extends Controller
       $stmt->execute();
 
       $role = strtoupper(Role::MODERATOR);
-      $query = "INSERT INTO session_role".
-        " (session_id, login_id, role)".
-        " VALUES (:session_id, :login_id, :role)";
+      $query = "INSERT INTO session_role
+        (session_id, login_id, role)
+        VALUES (:session_id, :login_id, :role)";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":session_id", $id);
       $stmt->bindParam(":login_id", $login_id);
@@ -172,7 +175,6 @@ class Session_Controller extends Controller
           )
         );
         die($error);
-        #return $error;
     }
   }
 
@@ -185,11 +187,11 @@ class Session_Controller extends Controller
   *     @OA\MediaType(
   *       mediaType="json",
   *       @OA\Schema(required={"title", "max_participants", "expiration_date"},
-  *         @OA\Property(property="id", type="integer"),
+  *         @OA\Property(property="id", type="string", example="uuid"),
   *         @OA\Property(property="title", type="string"),
   *         @OA\Property(property="max_participants", type="integer", example=100),
   *         @OA\Property(property="expiration_date", type="string", format="date"),
-  *         @OA\Property(property="public_screen_module_id", type="string", format="int")
+  *         @OA\Property(property="public_screen_module_id", type="string", example=null)
   *       )
   *     )
   *   ),
@@ -207,75 +209,22 @@ class Session_Controller extends Controller
     $expiration_date=null,
     $public_screen_module_id=null
   ) {
-    if (is_null($id)) {
-      $id = $this->get_body_parameter("id");
-    }
-    if (is_null($title)) {
-      $title = $this->get_body_parameter("title");
-    }
-    if (is_null($max_participants)) {
-      $max_participants = $this->get_body_parameter("max_participants");
-    }
-    if (is_null($expiration_date)) {
-      $expiration_date = $this->get_body_parameter("expiration_date");
-    }
-    if (is_null($public_screen_module_id)) {
-      $public_screen_module_id = $this->get_body_parameter("public_screen_module_id");
-    }
+    $params = $this->format_parameters(array(
+      "id"=>array("default"=>$id),
+      "title"=>array("default"=>$title),
+      "max_participants"=>array("default"=>$max_participants),
+      "expiration_date"=>array("default"=>$expiration_date),
+      "public_screen_module_id"=>array("default"=>$public_screen_module_id)
+    ));
 
-    $role = $this->check_rights($id);
-    if (strcasecmp($role, Role::MODERATOR) != 0) {
-        http_response_code(404);
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'User is not authorized to update this session.'
-          )
-        );
-        die($error);
-        #return $error;
-    }
-
-    try{
-      $this->connection->beginTransaction();
-
-      $query = "UPDATE session SET ".
-        "title = NVL(:title, title), ".
-        "max_participants = NVL(:max_participants, max_participants), ".
-        "expiration_date = NVL(:expiration_date, expiration_date), ".
-        "public_screen_module_id = NVL(:public_screen_module_id, public_screen_module_id) ".
-        "WHERE id = :id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":title", $title);
-      $stmt->bindParam(":max_participants", $max_participants);
-      $stmt->bindParam(":expiration_date", $expiration_date);
-      $stmt->bindParam(":public_screen_module_id", $public_screen_module_id);
-      $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-      $stmt->execute();
-      $this->connection->commit();
-      $result = $this->read($id);
-      return $result;
-    }
-    catch(Exception $e){
-        http_response_code(404);
-        $error_msg = $e->getMessage();
-        $this->connection->rollBack();
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'Error occurred: '.$error_msg
-          )
-        );
-        die($error);
-        #return $error;
-    }
+    return $this->update_generic($params->id, $params);
   }
 
   public function check_rights($id) {
     if (!isParticipant()) {
       $login_id = getAuthorizationProperty("login_id");
-      $query = "SELECT * FROM session_role ".
-        "WHERE session_id = :session_id AND login_id = :login_id";
+      $query = "SELECT * FROM session_role
+        WHERE session_id = :session_id AND login_id = :login_id";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":session_id", $id);
       $stmt->bindParam(":login_id", $login_id);
@@ -288,8 +237,8 @@ class Session_Controller extends Controller
     }
     else {
       $participant_id = getAuthorizationProperty("participant_id");
-      $query = "SELECT * FROM participant ".
-        "WHERE session_id = :session_id AND id = :participant_id";
+      $query = "SELECT * FROM participant
+        WHERE session_id = :session_id AND id = :participant_id";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":session_id", $id);
       $stmt->bindParam(":participant_id", $participant_id);
@@ -301,11 +250,6 @@ class Session_Controller extends Controller
       }
     }
     return null;
-  }
-
-  public static function check_instance_rights($id) {
-    $instance = self::get_instance();
-    return $instance->check_rights($id);
   }
 
   /**
@@ -320,96 +264,43 @@ class Session_Controller extends Controller
   * )
   */
   public function delete($id=null)  {
-    $login_id = getAuthorizationProperty("login_id");
-    if (is_null($id)) {
-      $id = $this->get_url_parameter("session", -1);
+    return parent::delete_generic($id);
+  }
+
+  public function delete_dependencies($id) {
+    $query = "SELECT * FROM participant WHERE session_id = :session_id ";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":session_id", $id);
+    $stmt->execute();
+
+    $result_data = $this->database->fatch_all($stmt);
+    $participant = Participant_Controller::get_instance();
+    foreach($result_data as $result_item) {
+      $participant_id = $result_item["id"];
+      $participant->delete($participant_id);
     }
 
-    $role = $this->check_rights($id);
-    if (strcasecmp($role, Role::MODERATOR) != 0) {
-        http_response_code(404);
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'User is not authorized to delete this session.'
-          )
-        );
-        die($error);
-        #return $error;
+    $query = "SELECT * FROM topic WHERE session_id = :session_id ";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":session_id", $id);
+    $stmt->execute();
+
+    $result_data = $this->database->fatch_all($stmt);
+    $topic = Topic_Controller::get_instance();
+    foreach($result_data as $result_item) {
+      $topic_id = $result_item["id"];
+      $topic->delete($topic_id);
     }
 
-    $handle_transaction = !$this->connection->inTransaction();
-    try{
-      if ($handle_transaction)
-        $this->connection->beginTransaction();
+    $query = "DELETE FROM resource WHERE session_id = :session_id";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":session_id", $id);
+    $stmt->execute();
 
-      $query = "SELECT * FROM participant ".
-        "WHERE session_id = :session_id ";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":session_id", $id);
-      $stmt->execute();
-
-      $result_data = $this->database->fatch_all($stmt);
-      $participant = Participant_Controller::get_instance();
-      foreach($result_data as $result_item) {
-        $participant_id = $result_item["id"];
-        $participant->delete($participant_id);
-      }
-
-      $query = "SELECT * FROM topic ".
-        "WHERE session_id = :session_id ";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":session_id", $id);
-      $stmt->execute();
-
-      $result_data = $this->database->fatch_all($stmt);
-      $topic = Topic_Controller::get_instance();
-      foreach($result_data as $result_item) {
-        $topic_id = $result_item["id"];
-        $topic->delete($topic_id);
-      }
-
-      $query = "DELETE FROM resource ".
-        "WHERE session_id = :session_id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":session_id", $id);
-      $stmt->execute();
-
-      $query = "DELETE FROM session_role ".
-        "WHERE session_id = :session_id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":session_id", $id);
-      $stmt->execute();
-
-      $query = "DELETE FROM session ".
-        "WHERE id = :id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":id", $id);
-      $stmt->execute();
-
-      if ($handle_transaction)
-        $this->connection->commit();
-    }
-    catch(Exception $e){
-        http_response_code(404);
-        $error_msg = $e->getMessage();
-        $this->connection->rollBack();
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'Error occurred: '.$error_msg
-          )
-        );
-        die($error);
-        #return $error;
-    }
-
-    return json_encode(
-      array(
-        "state"=>"Sccess",
-        "message"=>"session was successful deleted"
-      )
-    );
+    $query = "DELETE FROM session_role WHERE session_id = :session_id";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":session_id", $id);
+    $stmt->execute();
   }
 }
 ?>

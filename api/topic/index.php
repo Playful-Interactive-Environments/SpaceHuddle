@@ -45,6 +45,10 @@ elseif (Controller::is_rest_call("GET", search_detail_hierarchy: "groups")) {
 	$result = $group->read_all_from_topic();
 	echo $result;
 }
+elseif (Controller::is_rest_call("POST", search_detail_hierarchy: "group")) {
+	$result = $group->add_to_topic();
+	echo $result;
+}
 else {
 	echo "Call ".$_SERVER["REQUEST_METHOD"]." is not yet implemented";
 	http_response_code(405);

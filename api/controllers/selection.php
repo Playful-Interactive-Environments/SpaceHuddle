@@ -3,6 +3,11 @@ require_once('controller.php');
 
 class Selection_Controller extends Controller
 {
+  public function __construct()
+  {
+      parent::__construct("selection_group", "Selection", "Idea_Controller", "idea", "idea_id");
+  }
+
   /**
   * @OA\Get(
   *   path="/api/topic/{topic_id}/selection/",
@@ -212,6 +217,9 @@ class Selection_Controller extends Controller
   */
   public function delete($id)  {
     #TODO: check rights for session
+  }
+
+  public function delete_dependencies($id) {
   }
 
 }

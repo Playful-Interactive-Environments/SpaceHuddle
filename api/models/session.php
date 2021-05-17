@@ -6,8 +6,8 @@ class Session {
 
     /**
      * The session id.
-     * @var int
-     * @OA\Property()
+     * @var string
+     * @OA\Property(example="uuid")
      */
     public $id;
 
@@ -48,8 +48,8 @@ class Session {
 
     /**
      * role in the session
-     * @var int
-     * @OA\Property()
+     * @var string
+     * @OA\Property(example=null)
      */
     public $public_screen_module_id;
 

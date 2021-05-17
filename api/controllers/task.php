@@ -84,7 +84,7 @@ class Task_Controller extends Controller
       "state"=>array("default"=>State_Task::WAIT, "type"=>"State_Task")
     ));
 
-    return $this->add_generic($params["topic_id"], $params);
+    return $this->add_generic($params->topic_id, $params);
   }
 
   /**
@@ -116,7 +116,7 @@ class Task_Controller extends Controller
       "state"=>array("default"=>$state, "type"=>"State_Task")
     ));
 
-    return $this->update_generic($params["id"], $params);
+    return $this->update_generic($params->id, $params);
   }
 
   /**
@@ -135,8 +135,7 @@ class Task_Controller extends Controller
   }
 
   public function delete_dependencies($id) {
-    $query = "SELECT * FROM idea ".
-      "WHERE task_id = :task_id ";
+    $query = "SELECT * FROM idea WHERE task_id = :task_id ";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":task_id", $id);
     $stmt->execute();
@@ -148,8 +147,7 @@ class Task_Controller extends Controller
       $idea->delete($idea_id);
     }
 
-    $query = "DELETE FROM voting ".
-      "WHERE task_id = :task_id";
+    $query = "DELETE FROM voting WHERE task_id = :task_id";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":task_id", $id);
     $stmt->execute();

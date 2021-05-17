@@ -13,8 +13,9 @@ class Controller
   protected $parent_controller;
   protected $parent_table;
   protected $parent_id_name;
+  protected $url_parameter;
 
-  public function __construct($table = null, $class = null, $parent_controller = null, $parent_table = null, $parent_id_name = null)
+  public function __construct($table = null, $class = null, $parent_controller = null, $parent_table = null, $parent_id_name = null, $url_parameter = null)
   {
     $this->database = Database::get_instance();
     $this->connection = $this->database->get_connection();
@@ -23,15 +24,26 @@ class Controller
     $this->parent_controller = $parent_controller;
     $this->parent_table = $parent_table;
     $this->parent_id_name = $parent_id_name;
+    if (is_null($url_parameter)) $url_parameter = $table;
+    $this->url_parameter = $url_parameter;
   }
 
-  protected function generic_parameter_set() {
+  protected function all_generic_parameter_set() {
     return (
       isset($this->table) and
+      isset($this->url_parameter) and
       isset($this->class) and
       isset($this->parent_controller) and
       isset($this->parent_table) and
       isset($this->parent_id_name)
+    );
+  }
+
+  protected function generic_table_parameter_set() {
+    return (
+      isset($this->table) and
+      isset($this->url_parameter) and
+      isset($this->class)
     );
   }
 
@@ -44,17 +56,33 @@ class Controller
       return self::$instances[$class];
   }
 
-  public function read_all_generic($parent_id = null, $authorized_roles = array(Role::MODERATOR, Role::FACILITATOR))  {
-    if ($this->generic_parameter_set()) {
+  public function read_all_generic(
+    $parent_id = null,
+    $authorized_roles = array(Role::MODERATOR, Role::FACILITATOR),
+    $stmt = null,
+    $parent_table = null,
+    $parent_id_name = null,
+    $parent_controller = null
+  )  {
+    if ($this->all_generic_parameter_set()) {
+      if (is_null($parent_table))
+        $parent_table = $this->parent_table;
+      if (is_null($parent_id_name))
+        $parent_id_name = $this->parent_id_name;
+      if (is_null($parent_controller))
+        $parent_controller = $this->parent_controller;
+
       if (is_null($parent_id)) {
-        $parent_id = $this->get_url_parameter($this->parent_table);
+        $parent_id = $this->get_url_parameter($parent_table);
       }
-      $role = $this->parent_controller::check_instance_rights($parent_id);
+      $role = $parent_controller::check_instance_read_rights($parent_id);
       if ($this->is_authorized($role, $authorized_roles)) {
-        $query = "SELECT * FROM $this->table ".
-        "WHERE $this->parent_id_name = :parent_id";
-        $stmt = $this->connection->prepare($query);
-        $stmt->bindParam(":parent_id", $parent_id);
+        if (is_null($stmt)) {
+          $query = "SELECT * FROM $this->table
+            WHERE $parent_id_name = :$parent_id_name";
+          $stmt = $this->connection->prepare($query);
+        }
+        $stmt->bindParam(":$parent_id_name", $parent_id);
         $stmt->execute();
         $result_data = $this->database->fatch_all($stmt);
         $result = array();
@@ -76,16 +104,17 @@ class Controller
     }
   }
 
-  public function read_generic($id = null, $authorized_roles = array(Role::MODERATOR, Role::FACILITATOR))  {
-    if ($this->generic_parameter_set()) {
+  public function read_generic($id = null, $authorized_roles = array(Role::MODERATOR, Role::FACILITATOR), $stmt = null)  {
+    if ($this->generic_table_parameter_set()) {
       if (is_null($id)) {
-        $id = $this->get_url_parameter($this->table);
+        $id = $this->get_url_parameter($this->url_parameter);
       }
-      $role = $this->check_rights($id);
+      $role = $this->check_read_rights($id);
       if ($this->is_authorized($role, $authorized_roles)) {
-        $query = "SELECT * FROM $this->table ".
-        "WHERE id = :id";
-        $stmt = $this->connection->prepare($query);
+        if (is_null($stmt)) {
+          $query = "SELECT * FROM $this->table WHERE id = :id";
+          $stmt = $this->connection->prepare($query);
+        }
         $stmt->bindParam(":id", $id);
         $stmt->execute();
         $result = $this->database->fatch_first($stmt);
@@ -104,8 +133,8 @@ class Controller
     }
   }
 
-  public function add_generic($parent_id, $parameter, $authorized_roles = array(Role::MODERATOR))  {
-    if ($this->generic_parameter_set()) {
+  public function add_generic($parent_id, $parameter, $authorized_roles = array(Role::MODERATOR), $insert_id = true, $duplicate_check = "")  {
+    if ($this->all_generic_parameter_set()) {
       $role = $this->parent_controller::check_instance_rights($parent_id);
       if (!$this->is_authorized($role, $authorized_roles)) {
           http_response_code(404);
@@ -120,25 +149,47 @@ class Controller
 
       try{
         $this->connection->beginTransaction();
-        $id = self::uuid();
+        if (!is_array($parameter)) {
+          $parameter = array($parameter);
+        }
 
-        $columns = "id";
-        $values = ":id";
-        $bind_parameter = array(":id"=>$id);
-        foreach ($parameter as $key => $value) {
-          $columns = "$columns, `$key`";
-          $values = "$values, :$key";
-          $bind_parameter[":$key"] = $value;
-      	}
+        foreach ($parameter as $param_item) {
+          $columns = null;
+          $values = null;
+          $bind_parameter = array();
 
-        $query = "INSERT INTO $this->table ".
-          "($columns) ".
-          "VALUES ($values)";
-        $stmt = $this->connection->prepare($query);
-        $stmt->execute($bind_parameter);
+          if ($insert_id) {
+            $id = self::uuid();
+
+            $columns = "id";
+            $values = ":id";
+            $bind_parameter[":id"] = $id;
+          }
+          foreach ($param_item as $key => $value) {
+            if (isset($columns)) {
+              $columns = "$columns, `$key`";
+              $values = "$values, :$key";
+            }
+            else {
+              $columns = "`$key`";
+              $values = ":$key";
+            }
+            $bind_parameter[":$key"] = $value;
+          }
+
+          $query = "INSERT INTO $this->table
+            ($columns)
+            SELECT $values
+            $duplicate_check ";
+          $stmt = $this->connection->prepare($query);
+          $stmt->execute($bind_parameter);
+        }
+
         $this->connection->commit();
-        $result = $this->read($id);
-        return $result;
+        if ($insert_id) {
+          $result = $this->read($id);
+          return $result;
+        }
       }
       catch(Exception $e){
           http_response_code(404);
@@ -157,7 +208,7 @@ class Controller
   }
 
   public function update_generic($id, $parameter, $authorized_roles = array(Role::MODERATOR))  {
-    if ($this->generic_parameter_set()) {
+    if ($this->generic_table_parameter_set()) {
       $role = $this->check_rights($id);
       if (!$this->is_authorized($role, $authorized_roles)) {
           http_response_code(404);
@@ -176,14 +227,16 @@ class Controller
         $query_data = "";
         $bind_parameter = array(":id"=>$id);
         foreach ($parameter as $key => $value) {
-          $query_data .= "`$key` = NVL(:$key, `$key`), ";
-          $bind_parameter[":$key"] = $value;
+          if ($key != "id") {
+            $query_data .= "`$key` = NVL(:$key, `$key`), ";
+            $bind_parameter[":$key"] = $value;
+          }
       	}
         $query_data = substr_replace($query_data ," ", -2);
 
-        $query = "UPDATE $this->table SET ".
-          $query_data.
-          "WHERE id = :id";
+        $query = "UPDATE $this->table SET
+          $query_data
+          WHERE id = :id";
         $stmt = $this->connection->prepare($query);
         $stmt->execute($bind_parameter);
         $this->connection->commit();
@@ -210,12 +263,13 @@ class Controller
 
   }
 
-  public function delete_generic($id = null, $authorized_roles = array(Role::MODERATOR))  {
-    if ($this->generic_parameter_set()) {
+  public function delete_generic($id = null, $authorized_roles = array(Role::MODERATOR), $stmt = null, $role = null)  {
+    if ($this->generic_table_parameter_set()) {
       if (is_null($id)) {
-        $id = $this->get_url_parameter($this->table);
+        $id = $this->get_url_parameter($this->url_parameter);
       }
-      $role = $this->check_rights($id);
+      if (is_null($role))
+        $role = $this->check_rights($id);
       if (!$this->is_authorized($role, $authorized_roles)) {
           http_response_code(404);
           $error = json_encode(
@@ -235,10 +289,11 @@ class Controller
 
         $this->delete_dependencies($id);
 
-        $query = "DELETE FROM $this->table ".
-          "WHERE id = :id";
-        $stmt = $this->connection->prepare($query);
-        $stmt->bindParam(":id", $id);
+        if (is_null($stmt)) {
+          $query = "DELETE FROM $this->table WHERE id = :id";
+          $stmt = $this->connection->prepare($query);
+          $stmt->bindParam(":id", $id);
+        }
         $stmt->execute();
 
         if ($handle_transaction)
@@ -274,9 +329,8 @@ class Controller
   }
 
   public function check_rights($id) {
-    if ($this->generic_parameter_set()) {
-      $query = "SELECT * FROM $this->table ".
-        "WHERE id = :id";
+    if ($this->all_generic_parameter_set()) {
+      $query = "SELECT * FROM $this->table WHERE id = :id";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":id", $id);
       $stmt->execute();
@@ -291,9 +345,18 @@ class Controller
     return null;
   }
 
+  public function check_read_rights($id) {
+    return $this->check_rights($id);
+  }
+
   public static function check_instance_rights($id) {
     $instance = self::get_instance();
     return $instance->check_rights($id);
+  }
+
+  public static function check_instance_read_rights($id) {
+    $instance = self::get_instance();
+    return $instance->check_read_rights($id);
   }
 
   public static function uuid() {
@@ -396,6 +459,9 @@ class Controller
     if (array_key_exists($parameter_name, $data)) {
       return $data[$parameter_name];
     }
+    if (is_null($parameter_name)) {
+      return $data;
+    }
     return $default_value;
   }
 
@@ -418,15 +484,22 @@ class Controller
     $param_data = array();
     foreach ($parameter as $key => $key_definition) {
       $key_type = null;
+      $key_result = null;
       $value = null;
       if (isset($key_definition)) {
         $key_definition = (object)$key_definition;
         if (isset($key_definition->type))
           $key_type = $key_definition->type;
+        if (isset($key_definition->result))
+          $key_result = $key_definition->result;
         if (isset($key_definition->default))
           $value = $key_definition->default;
         if (is_null($value) and isset($key_definition->url))
           $value = self::get_url_parameter($key_definition->url);
+      }
+
+      if (isset($key_result) and $key_result == "all") {
+        $value = self::get_body_parameter(null);
       }
 
       if (is_null($value))
@@ -435,6 +508,9 @@ class Controller
       if (isset($value) and isset($key_type)) {
         if ($key_type == "JSON") {
           $value = json_encode((object)$value);
+        }
+        elseif ($key_type == "ARRAY") {
+          $value = $value;
         }
         else {
           $value = strtoupper($value);
@@ -453,7 +529,7 @@ class Controller
       $param_data[$key] = $value;
     }
 
-    return $param_data;
+    return (object)$param_data;
   }
 
   public static function is_rest_call($search_method, $first_param_index = 1, $search_detail_hierarchy = "") {

@@ -8,6 +8,19 @@ require_once(__DIR__.'/../models/task_type.php');
 
 class Idea_Controller extends Controller
 {
+  protected $task_type = Task_Type::BRAINSTORMING;
+
+  public function __construct($table = null, $class = null, $parent_controller = null, $parent_table = null, $parent_id_name = null, $url_parameter = null)
+  {
+      if (is_null($table)) $table = "idea";
+      if (is_null($class)) $class = "Idea";
+      if (is_null($parent_controller)) $parent_controller = "Task_Controller";
+      if (is_null($parent_table)) $parent_table = "task";
+      if (is_null($parent_id_name)) $parent_id_name = "task_id";
+      parent::__construct($table, $class, $parent_controller, $parent_table, $parent_id_name, $url_parameter);
+      $this->task_type = Task_Type::BRAINSTORMING;
+  }
+
   /**
   * @OA\Get(
   *   path="/api/task/{task_id}/ideas/",
@@ -24,54 +37,25 @@ class Idea_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read_all_from_task($task_id = null)  {
-    if (is_null($task_id)) {
-      $task_id = $this->get_url_parameter("task");
-    }
-    $role = Task_Controller::check_instance_rights($task_id);
-    $task_type = strtoupper(Task_Type::BRAINSTORMING);
-    if (strcasecmp($role, Role::MODERATOR) == 0 or strcasecmp($role, Role::FACILITATOR) == 0) {
-      $query = "SELECT * FROM idea ".
-      "WHERE task_id = :task_id ".
-      "AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
+  public function read_all_from_task($task_id = null, $treat_participants_separately = true)  {
+    $task_type = strtoupper($this->task_type);
+    if (!isParticipant() or !$treat_participants_separately) {
+      $query = "SELECT * FROM idea
+        WHERE task_id = :task_id
+        AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
       $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":task_id", $task_id);
       $stmt->bindParam(":task_type", $task_type);
-      $stmt->execute();
-      $result_data = $this->database->fatch_all($stmt);
-      $result = array();
-      foreach($result_data as $result_item) {
-        array_push($result, new Idea($result_item));
-      }
-      return json_encode($result);
-    }
-    elseif (strcasecmp($role, Role::PARTICIPANT) == 0) {
-      $participant_id = getAuthorizationProperty("participant_id");
-      $query = "SELECT * FROM idea ".
-      "WHERE task_id = :task_id AND participant_id = :participant_id ".
-      "AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":task_id", $task_id);
-      $stmt->bindParam(":participant_id", $participant_id);
-      $stmt->bindParam(":task_type", $task_type);
-      $stmt->execute();
-      $result_data = $this->database->fatch_all($stmt);
-      $result = array();
-      foreach($result_data as $result_item) {
-        array_push($result, new Idea($result_item));
-      }
-      return json_encode($result);
     }
     else {
-      http_response_code(404);
-      $error = json_encode(
-        array(
-          "state"=>"Failed",
-          "message"=>'User is not authorized to read ideas.'
-        )
-      );
-      die($error);
+      $participant_id = getAuthorizationProperty("participant_id");
+      $query = "SELECT * FROM idea
+        WHERE task_id = :task_id AND participant_id = :participant_id
+        AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":participant_id", $participant_id);
+      $stmt->bindParam(":task_type", $task_type);
     }
+    return parent::read_all_generic($task_id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT), stmt:  $stmt);
   }
 
   /**
@@ -90,54 +74,31 @@ class Idea_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read_all_from_topic($topic_id = null)  {
-    if (is_null($topic_id)) {
-      $topic_id = $this->get_url_parameter("topic");
-    }
-    $role = Topic_Controller::check_instance_rights($topic_id);
-    $task_type = strtoupper(Task_Type::BRAINSTORMING);
-    if (strcasecmp($role, Role::MODERATOR) == 0 or strcasecmp($role, Role::FACILITATOR) == 0) {
-      $query = "SELECT * FROM idea ".
-      "WHERE task_id IN (SELECT id FROM task WHERE topic_id = :topic_id AND task_type like :task_type)";
+  public function read_all_from_topic($topic_id = null, $treat_participants_separately = true)  {
+    $task_type = strtoupper($this->task_type);
+    if (!isParticipant() or !$treat_participants_separately) {
+      $query = "SELECT * FROM idea
+        WHERE task_id IN (SELECT id FROM task WHERE topic_id = :topic_id AND task_type like :task_type)";
       $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":topic_id", $topic_id);
       $stmt->bindParam(":task_type", $task_type);
-      $stmt->execute();
-      $result_data = $this->database->fatch_all($stmt);
-      $result = array();
-      foreach($result_data as $result_item) {
-        array_push($result, new Idea($result_item));
-      }
-      return json_encode($result);
-    }
-    elseif (strcasecmp($role, Role::PARTICIPANT) == 0) {
-      $participant_id = getAuthorizationProperty("participant_id");
-
-      $query = "SELECT * FROM idea ".
-      "WHERE participant_id = :participant_id ".
-      "AND task_id IN (SELECT id FROM task WHERE topic_id = :topic_id AND task_type like :task_type)";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":topic_id", $topic_id);
-      $stmt->bindParam(":participant_id", $participant_id);
-      $stmt->bindParam(":task_type", $task_type);
-      $stmt->execute();
-      $result_data = $this->database->fatch_all($stmt);
-      $result = array();
-      foreach($result_data as $result_item) {
-        array_push($result, new Idea($result_item));
-      }
-      return json_encode($result);
     }
     else {
-      http_response_code(404);
-      $error = json_encode(
-        array(
-          "state"=>"Failed",
-          "message"=>'User is not authorized to read ideas.'
-        )
-      );
-      die($error);
+      $participant_id = getAuthorizationProperty("participant_id");
+      $query = "SELECT * FROM idea
+        WHERE participant_id = :participant_id
+        AND task_id IN (SELECT id FROM task WHERE topic_id = :topic_id AND task_type like :task_type)";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":participant_id", $participant_id);
+      $stmt->bindParam(":task_type", $task_type);
     }
+    return parent::read_all_generic(
+      $topic_id,
+      authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
+      stmt:  $stmt,
+      parent_table: "topic",
+      parent_id_name: "topic_id",
+      parent_controller: "Topic_Controller"
+    );
   }
 
   /**
@@ -153,59 +114,45 @@ class Idea_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read($id = null)  {
-    if (is_null($id)) {
-      $id = $this->get_url_parameter("idea");
-    }
-    $role = $this->check_rights($id);
-    $task_type = strtoupper(Task_Type::BRAINSTORMING);
-    if (strcasecmp($role, Role::MODERATOR) == 0 or strcasecmp($role, Role::FACILITATOR) == 0) {
-      $query = "SELECT * FROM idea ".
-      "WHERE id = :id ".
-      "AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
+  public function read($id = null, $treat_participants_separately = true)  {
+    $task_type = strtoupper($this->task_type);
+    if (!isParticipant() or !$treat_participants_separately) {
+      $query = "SELECT * FROM idea
+        WHERE id = :id
+        AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
       $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":id", $id);
       $stmt->bindParam(":task_type", $task_type);
-      $stmt->execute();
-      $result = $this->database->fatch_first($stmt);
-      return json_encode(new Idea($result));
-    }
-    elseif (strcasecmp($role, Role::PARTICIPANT) == 0) {
-      $participant_id = getAuthorizationProperty("participant_id");
-      $query = "SELECT * FROM idea ".
-      "WHERE id = :id AND participant_id = :participant_id ".
-      "AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":id", $id);
-      $stmt->bindParam(":participant_id", $participant_id);
-      $stmt->bindParam(":task_type", $task_type);
-      $stmt->execute();
-      $result = $this->database->fatch_first($stmt);
-      $item_count = $stmt->rowCount();
-      return json_encode(new Idea($result));
     }
     else {
-      http_response_code(404);
-      $error = json_encode(
-        array(
-          "state"=>"Failed",
-          "message"=>'User is not authorized to read ideas.'
-        )
-      );
-      die($error);
+      $participant_id = getAuthorizationProperty("participant_id");
+      $query = "SELECT * FROM idea
+        WHERE id = :id AND participant_id = :participant_id
+        AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":participant_id", $participant_id);
+      $stmt->bindParam(":task_type", $task_type);
     }
+    return parent::read_generic($id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT), stmt:  $stmt);
+
+    /*$query = "SELECT * FROM idea
+      WHERE id = :id
+      AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":task_type", $task_type);
+    return parent::read_generic($id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT), stmt:  $stmt);
+    */
   }
 
   public function check_rights($id) {
-    $query = "SELECT * FROM idea ".
-      "WHERE id = :id";
+    $query = "SELECT * FROM idea
+      WHERE id = :id";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":id", $id);
 
     if (isParticipant()) {
       $participant_id = getAuthorizationProperty("participant_id");
-      $query = "SELECT * FROM idea ".
-        "WHERE id = :id AND participant_id = :participant_id";
+      $query = "SELECT * FROM idea
+        WHERE id = :id AND participant_id = :participant_id";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":id", $id);
       $stmt->bindParam(":participant_id", $participant_id);
@@ -222,9 +169,8 @@ class Idea_Controller extends Controller
     return null;
   }
 
-  public static function check_instance_rights($id) {
-    $instance = self::get_instance();
-    return $instance->check_rights($id);
+  public function check_read_rights($id) {
+    return parent::check_rights($id);
   }
 
   /**
@@ -253,68 +199,18 @@ class Idea_Controller extends Controller
   */
   public function add_to_task($task_id = null, $keywords = null, $description = null, $link = null, $image = null)  {
     $participant_id = getAuthorizationProperty("participant_id");
-    if (is_null($task_id)) {
-      $task_id = $this->get_url_parameter("task");
-    }
-    if (is_null($keywords)) {
-      $keywords = $this->get_body_parameter("keywords");
-    }
-    if (is_null($description)) {
-      $description = $this->get_body_parameter("description");
-    }
-    if (is_null($link)) {
-      $link = $this->get_body_parameter("link");
-    }
-    if (is_null($image)) {
-      $image = $this->get_body_parameter("image");
-    }
-    $role = Task_Controller::check_instance_rights($task_id);
-    if (strcasecmp($role, Role::PARTICIPANT) != 0) {
-        http_response_code(404);
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'User is not authorized to add a idea to this task.'
-          )
-        );
-        die($error);
-    }
+    $state = strtoupper(State_Idea::NEW);
+    $params = $this->format_parameters(array(
+      "task_id"=>array("default"=>$task_id, "url"=>"task"),
+      "keywords"=>array("default"=>$keywords),
+      "description"=>array("default"=>$description),
+      "link"=>array("default"=>$link),
+      "image"=>array("default"=>$image),
+      "state"=>array("default"=>$state),
+      "participant_id"=>array("default"=>$participant_id)
+    ));
 
-    try{
-      $this->connection->beginTransaction();
-      $state = strtoupper(State_Idea::NEW);
-      $id = self::uuid();
-
-      $query = "INSERT INTO idea ".
-        "(id, task_id, participant_id, state, keywords, description, image, link) ".
-        "VALUES (:id, :task_id, :participant_id, :state, :keywords, :description, :image, :link)";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":id", $id);
-      $stmt->bindParam(":task_id", $task_id);
-      $stmt->bindParam(":participant_id", $participant_id);
-      $stmt->bindParam(":state", $state);
-      $stmt->bindParam(":keywords", $keywords);
-      $stmt->bindParam(":description", $description);
-      $stmt->bindParam(":image", $image);
-      $stmt->bindParam(":link", $link);
-      $stmt->execute();
-      $this->connection->commit();
-      $result = $this->read($id);
-      echo $result;
-    }
-    catch(Exception $e){
-        http_response_code(404);
-        $error_msg = $e->getMessage();
-        $this->connection->rollBack();
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'Error occurred:'.$error_msg
-          )
-        );
-        die($error);
-        #return $error;
-    }
+    return $this->add_generic($params->task_id, $params, authorized_roles: array(Role::PARTICIPANT));
   }
 
   /**
@@ -345,10 +241,10 @@ class Idea_Controller extends Controller
     if (is_null($topic_id)) {
       $topic_id = $this->get_url_parameter("topic");
     }
-    $task_type = Task_Type::BRAINSTORMING;
+    $task_type = strtoupper($this->task_type);
 
-    $query = "SELECT * FROM task ".
-      "WHERE topic_id = :topic_id AND task_type like :task_type";
+    $query = "SELECT * FROM task
+      WHERE topic_id = :topic_id AND task_type like :task_type";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":topic_id", $topic_id);
     $stmt->bindParam(":task_type", $task_type);
@@ -357,7 +253,7 @@ class Idea_Controller extends Controller
     if ($item_count > 0) {
       $result = $this->database->fatch_first($stmt);
       $task_id = $result["id"];
-      $this->add_to_task($task_id, $keywords, $description, $link, $image);
+      return $this->add_to_task($task_id, $keywords, $description, $link, $image);
     }
   }
 
@@ -382,87 +278,16 @@ class Idea_Controller extends Controller
   * )
   */
   public function update($id = null, $state = null, $keywords = null, $description = null, $link = null, $image = null)  {
-    $participant_id = getAuthorizationProperty("participant_id");
-    if (is_null($id)) {
-      $id = $this->get_body_parameter("id");
-    }
-    if (is_null($state)) {
-      $state = $this->get_body_parameter("state");
-    }
-    if (is_null($keywords)) {
-      $keywords = $this->get_body_parameter("keywords");
-    }
-    if (is_null($description)) {
-      $description = $this->get_body_parameter("description");
-    }
-    if (is_null($link)) {
-      $link = $this->get_body_parameter("link");
-    }
-    if (is_null($image)) {
-      $image = $this->get_body_parameter("image");
-    }
-    $role = $this->check_rights($id);
-    if (strcasecmp($role, Role::MODERATOR) != 0 and strcasecmp($role, Role::FACILITATOR) != 0 and strcasecmp($role, Role::PARTICIPANT) != 0) {
-        http_response_code(404);
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'User is not authorized to update this idea.'
-          )
-        );
-        die($error);
-    }
+    $params = $this->format_parameters(array(
+      "id"=>array("default"=>$id),
+      "keywords"=>array("default"=>$keywords),
+      "description"=>array("default"=>$description),
+      "link"=>array("default"=>$link),
+      "image"=>array("default"=>$image),
+      "state"=>array("default"=>$state, "type"=>"State_Idea")
+    ));
 
-    if (isset($state)) {
-      $state = strtoupper($state);
-    }
-
-    if (isset($state) and !defined("State_Idea::$state")) {
-        http_response_code(404);
-        $error = json_encode(
-          array(
-            "state"=>"wrong idea state",
-            "message"=>"the specified idea state does not exist"
-          )
-        );
-        die($error);
-    }
-
-    try{
-      $this->connection->beginTransaction();
-
-      $query = "UPDATE idea SET ".
-        "state = NVL(:state, state), ".
-        "keywords = NVL(:keywords, keywords), ".
-        "description = NVL(:description, description), ".
-        "image = NVL(:image, image), ".
-        "link = NVL(:link, link) ".
-        "WHERE id = :id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":id", $id);
-      $stmt->bindParam(":state", $state);
-      $stmt->bindParam(":keywords", $keywords);
-      $stmt->bindParam(":description", $description);
-      $stmt->bindParam(":image", $image);
-      $stmt->bindParam(":link", $link);
-      $stmt->execute();
-      $this->connection->commit();
-      $result = $this->read($id);
-      return $result;
-    }
-    catch(Exception $e){
-        http_response_code(404);
-        $error_msg = $e->getMessage();
-        $this->connection->rollBack();
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'Error occurred: '.$error_msg
-          )
-        );
-        die($error);
-        #return $error;
-    }
+    return $this->update_generic($params->id, $params, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT));
   }
 
   /**
@@ -477,87 +302,34 @@ class Idea_Controller extends Controller
   * )
   */
   public function delete($id = null)  {
-    if (is_null($id)) {
-      $id = $this->get_url_parameter("idea");
-    }
-    $role = $this->check_rights($id);
+    return parent::delete_generic($id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT));
+  }
 
-    if (strcasecmp($role, Role::MODERATOR) != 0 and strcasecmp($role, Role::FACILITATOR) != 0 and strcasecmp($role, Role::PARTICIPANT) != 0) {
-        http_response_code(404);
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'User is not authorized to delete this idea.'
-          )
-        );
-        die($error);
-        #return $error;
-    }
+  public function delete_dependencies($id) {
+    $query = "DELETE FROM voting WHERE idea_id = :idea_id";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":idea_id", $id);
+    $stmt->execute();
 
-    $handle_transaction = !$this->connection->inTransaction();
-    try{
-      if ($handle_transaction)
-        $this->connection->beginTransaction();
+    $query = "DELETE FROM hierarchy WHERE group_idea_id = :idea_id";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":idea_id", $id);
+    $stmt->execute();
 
-      $query = "DELETE FROM voting ".
-        "WHERE idea_id = :idea_id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":idea_id", $id);
-      $stmt->execute();
+    $query = "DELETE FROM hierarchy WHERE sub_idea_id = :idea_id";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":idea_id", $id);
+    $stmt->execute();
 
-      $query = "DELETE FROM hierarchy ".
-        "WHERE group_idea_id = :idea_id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":idea_id", $id);
-      $stmt->execute();
+    $query = "DELETE FROM selection_group_idea WHERE idea_id = :idea_id";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":idea_id", $id);
+    $stmt->execute();
 
-      $query = "DELETE FROM hierarchy ".
-        "WHERE sub_idea_id = :idea_id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":idea_id", $id);
-      $stmt->execute();
-
-      $query = "DELETE FROM selection_group_idea ".
-        "WHERE idea_id = :idea_id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":idea_id", $id);
-      $stmt->execute();
-
-      $query = "DELETE FROM random_idea ".
-        "WHERE idea_id = :idea_id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":idea_id", $id);
-      $stmt->execute();
-
-      $query = "DELETE FROM idea ".
-        "WHERE id = :id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":id", $id);
-      $stmt->execute();
-
-      if ($handle_transaction)
-        $this->connection->commit();
-    }
-    catch(Exception $e){
-        http_response_code(404);
-        $error_msg = $e->getMessage();
-        $this->connection->rollBack();
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'Error occurred: '.$error_msg
-          )
-        );
-        die($error);
-        #return $error;
-    }
-
-    return json_encode(
-      array(
-        "state"=>"Sccess",
-        "message"=>"idea was successful deleted"
-      )
-    );
+    $query = "DELETE FROM random_idea WHERE idea_id = :idea_id";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":idea_id", $id);
+    $stmt->execute();
   }
 
 }

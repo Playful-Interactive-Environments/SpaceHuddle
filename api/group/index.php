@@ -2,41 +2,35 @@
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');
 
-require_once(__DIR__.'/../controllers/task.php');
-require_once(__DIR__.'/../controllers/idea.php');
 require_once(__DIR__.'/../controllers/group.php');
+require_once(__DIR__.'/../controllers/group_idea.php');
 require_once(__DIR__.'/../controllers/controller.php');
 
-$task = Task_Controller::get_instance();
-$idea = Idea_Controller::get_instance();
 $group = Group_Controller::get_instance();
+$group_idea = Group_Idea_Controller::get_instance();
 
 if (Controller::is_rest_call("GET")) {
-	$result = $task->read();
+	$result = $group->read();
 	echo $result;
 }
 elseif (Controller::is_rest_call("PUT")) {
-	$result = $task->update();
+	$result = $group->update();
 	echo $result;
 }
 elseif (Controller::is_rest_call("DELETE")) {
-	$result = $task->delete();
+	$result = $group->delete();
 	echo $result;
 }
 elseif (Controller::is_rest_call("GET", search_detail_hierarchy: "ideas")) {
-	$result = $idea->read_all_from_task();
+	$result = $group_idea->read_ideas();
 	echo $result;
 }
-elseif (Controller::is_rest_call("POST", search_detail_hierarchy: "idea")) {
-	$result = $idea->add_to_task();
+elseif (Controller::is_rest_call("POST", search_detail_hierarchy: "ideas")) {
+	$result = $group_idea->add_ideas();
 	echo $result;
 }
-elseif (Controller::is_rest_call("GET", search_detail_hierarchy: "groups")) {
-	$result = $group->read_all_from_task();
-	echo $result;
-}
-elseif (Controller::is_rest_call("POST", search_detail_hierarchy: "group")) {
-	$result = $group->add_to_task();
+elseif (Controller::is_rest_call("DELETE", search_detail_hierarchy: "ideas")) {
+	$result = $group_idea->delete_ideas();
 	echo $result;
 }
 else {

@@ -6,7 +6,7 @@ class Topic {
 
     /**
      * The topic id.
-     * @var int
+     * @var string
      * @OA\Property()
      */
     public $id;
@@ -27,8 +27,8 @@ class Topic {
 
     /**
      * Data of the active topic task.
-     * @var int
-     * @OA\Property()
+     * @var string
+     * @OA\Property(example=null)
      */
     public $active_task_id;
 
