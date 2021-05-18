@@ -33,62 +33,22 @@ class Participant_Controller extends Controller
   * )
   */
   public function connect($session_key = null, $ip_hash = null)  {
-    if (is_null($session_key)) {
-      $session_key = $this->get_body_parameter("session_key", "");
-    }
-    if (is_null($ip_hash)) {
-      $ip_hash = $this->get_body_parameter("ip_hash", "");
-    }
-    $session_id = Session_Controller::get_instance()->read_by_key($session_key)->id;
-    $ip_hash = md5($ip_hash);
+    $params = $this->format_parameters(array(
+      "session_key"=>array("default"=>$session_key),
+      "ip_hash"=>array("default"=>$ip_hash, "type"=>"MD5")
+    ));
+    $params->session_id = Session_Controller::get_instance()->read_by_key($params->session_key)->id;
 
-    $query = "SELECT * FROM participant
-      WHERE session_id = :session_id AND ip_hash = :ip_hash";
-    $stmt = $this->connection->prepare($query);
-    $stmt->bindParam(":session_id", $session_id);
-    $stmt->bindParam(":ip_hash", $ip_hash);
-    $stmt->execute();
-    $item_count = $stmt->rowCount();
+    $result = $this->is_registered($params->session_id, $params->ip_hash);
+    if (is_null($result)) {
+      $params->browser_key = $this->generate_new_browser_key($params->session_key);
+      $params->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+      $params->symbol = AvatarSymbol::getRandomValue();
+      unset($params->session_key);
 
-    if ($item_count == 0) {
-      try{
-        $this->connection->beginTransaction();
-        $browser_key = $this->generate_new_browser_key($session_key);
-        $color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
-        $symbol = AvatarSymbol::getRandomValue();
-        $id = self::uuid();
+      $this->add_generic(null, $params, authorized_roles: array(Role::UNKNOWN));
+    }
 
-        $query = "INSERT INTO participant
-          (id, session_id, browser_key, color, symbol, ip_hash)
-          VALUES (:id, :session_id, :browser_key, :color, :symbol, :ip_hash)";
-        $stmt = $this->connection->prepare($query);
-        $stmt->bindParam(":id", $id);
-        $stmt->bindParam(":session_id", $session_id);
-        $stmt->bindParam(":browser_key", $browser_key);
-        $stmt->bindParam(":color", $color);
-        $stmt->bindParam(":symbol", $symbol);
-        $stmt->bindParam(":ip_hash", $ip_hash);
-        $stmt->execute();
-        $this->connection->commit();
-        $result = (object)$this->read($id);
-      }
-      catch(Exception $e){
-          http_response_code(404);
-          $error_msg = $e->getMessage();
-          $this->connection->rollBack();
-          $error = json_encode(
-            array(
-              "state"=>"Failed",
-              "message"=>'Error occurred: '.$error_msg
-            )
-          );
-          die($error);
-          #return $error;
-      }
-    }
-    else {
-      $result = (object)$this->database->fatch_first($stmt);
-    }
     $jwt = generateToken(array(
         "participant_id" => $result->id,
         "browser_key" => $result->browser_key
@@ -112,13 +72,32 @@ class Participant_Controller extends Controller
     return $browser_key;
   }
 
-  private function read($id)  {
+  protected function read($id)  {
     $query = "SELECT * FROM participant WHERE id = :id";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":id", $id);
     $stmt->execute();
     $result = (object)$this->database->fatch_first($stmt);
     return $result;
+  }
+
+  public function check_rights($id) {
+    return $this->check_login($id);
+  }
+
+  protected function is_registered($session_id = null, $ip_hash = null)  {
+    $query = "SELECT * FROM participant
+      WHERE session_id = :session_id AND ip_hash = :ip_hash";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":session_id", $session_id);
+    $stmt->bindParam(":ip_hash", $ip_hash);
+    $stmt->execute();
+    $item_count = $stmt->rowCount();
+
+    if ($item_count > 0) {
+      return (object)$this->database->fatch_first($stmt);
+    }
+    return null;
   }
 
   /**
@@ -166,7 +145,7 @@ class Participant_Controller extends Controller
     #TODO: delete dependent tables
   }
 
-  public function delete_dependencies($id) {
+  protected function delete_dependencies($id) {
   }
 
   /**

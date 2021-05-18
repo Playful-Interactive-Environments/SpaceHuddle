@@ -126,7 +126,7 @@ class Topic_Controller extends Controller
     return parent::delete_generic($id);
   }
 
-  public function delete_dependencies($id) {
+  protected function delete_dependencies($id) {
     $query = "SELECT * FROM task WHERE topic_id = :topic_id ";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":topic_id", $id);

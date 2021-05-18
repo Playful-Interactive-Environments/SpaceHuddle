@@ -12,6 +12,7 @@ class Role {
   const MODERATOR = "moderator";
   const FACILITATOR = "facilitator";
   const PARTICIPANT = "participant";
+  const UNKNOWN = "unknown";
 }
 
 ?>

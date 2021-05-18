@@ -125,7 +125,7 @@ class Resource_Controller extends Controller
     #TODO: check rights for session
   }
 
-  public function delete_dependencies($id) {
+  protected function delete_dependencies($id) {
   }
 
 }

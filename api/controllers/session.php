@@ -125,57 +125,30 @@ class Session_Controller extends Controller
   * )
   */
   public function add($title = null, $max_participants = null, $expiration_date = null)  {
+    $login_id = getAuthorizationProperty("login_id"); # check if the user is logged in
+    $connection_key = $this->generate_new_session_key();
+    $params = $this->format_parameters(array(
+      "title"=>array("default"=>$title),
+      "connection_key"=>array("default"=>$connection_key),
+      "max_participants"=>array("default"=>$max_participants),
+      "expiration_date"=>array("default"=>$expiration_date)
+    ));
+
+    return $this->add_generic(null, $params);
+  }
+
+  protected function add_dependencies($id, $parameter)
+  {
     $login_id = getAuthorizationProperty("login_id");
-    if (is_null($title)) {
-      $title = $this->get_body_parameter("title");
-    }
-    if (is_null($max_participants)) {
-      $max_participants = $this->get_body_parameter("max_participants");
-    }
-    if (is_null($expiration_date)) {
-      $expiration_date = $this->get_body_parameter("expiration_date");
-    }
-    try{
-      $this->connection->beginTransaction();
-      $connection_key = $this->generate_new_session_key();
-      $id = self::uuid();
-
-      $query = "INSERT INTO session
-        (id, title, connection_key, max_participants, expiration_date)
-        VALUES (:id, :title, :connection_key, :max_participants, :expiration_date)";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":id", $id);
-      $stmt->bindParam(":title", $title);
-      $stmt->bindParam(":connection_key", $connection_key);
-      $stmt->bindParam(":max_participants", $max_participants);
-      $stmt->bindParam(":expiration_date", $expiration_date);
-      $stmt->execute();
-
-      $role = strtoupper(Role::MODERATOR);
-      $query = "INSERT INTO session_role
-        (session_id, login_id, role)
-        VALUES (:session_id, :login_id, :role)";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":session_id", $id);
-      $stmt->bindParam(":login_id", $login_id);
-      $stmt->bindParam(":role", $role);
-      $stmt->execute();
-      $this->connection->commit();
-      $result = $this->read($id);
-      return $result;
-    }
-    catch(Exception $e){
-        http_response_code(404);
-        $error_msg = $e->getMessage();
-        $this->connection->rollBack();
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'Error occurred: '.$error_msg
-          )
-        );
-        die($error);
-    }
+    $role = strtoupper(Role::MODERATOR);
+    $query = "INSERT INTO session_role
+      (session_id, login_id, role)
+      VALUES (:session_id, :login_id, :role)";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":session_id", $id);
+    $stmt->bindParam(":login_id", $login_id);
+    $stmt->bindParam(":role", $role);
+    $stmt->execute();
   }
 
   /**
@@ -223,6 +196,9 @@ class Session_Controller extends Controller
   public function check_rights($id) {
     if (!isParticipant()) {
       $login_id = getAuthorizationProperty("login_id");
+      if (is_null($id)) {
+        return strtoupper(Role::MODERATOR);
+      }
       $query = "SELECT * FROM session_role
         WHERE session_id = :session_id AND login_id = :login_id";
       $stmt = $this->connection->prepare($query);
@@ -267,7 +243,7 @@ class Session_Controller extends Controller
     return parent::delete_generic($id);
   }
 
-  public function delete_dependencies($id) {
+  protected function delete_dependencies($id) {
     $query = "SELECT * FROM participant WHERE session_id = :session_id ";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":session_id", $id);

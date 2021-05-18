@@ -305,7 +305,7 @@ class Idea_Controller extends Controller
     return parent::delete_generic($id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT));
   }
 
-  public function delete_dependencies($id) {
+  protected function delete_dependencies($id) {
     $query = "DELETE FROM voting WHERE idea_id = :idea_id";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":idea_id", $id);

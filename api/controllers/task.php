@@ -134,7 +134,7 @@ class Task_Controller extends Controller
     return parent::delete_generic($id);
   }
 
-  public function delete_dependencies($id) {
+  protected function delete_dependencies($id) {
     $query = "SELECT * FROM idea WHERE task_id = :task_id ";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":task_id", $id);

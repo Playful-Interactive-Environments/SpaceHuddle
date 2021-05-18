@@ -1,6 +1,7 @@
 <?php
 require_once(__DIR__.'/../config/authorization.php');
 require_once(__DIR__.'/../models/role.php');
+require_once(__DIR__.'/../models/user.php');
 require_once('controller.php');
 require_once('session.php');
 
@@ -20,7 +21,7 @@ class Login_Controller extends Controller
 {
   public function __construct()
   {
-      parent::__construct("login", "Login");
+      parent::__construct("login", "User");
   }
 
   /**
@@ -49,18 +50,27 @@ class Login_Controller extends Controller
   * )
   */
   public function login($username = null, $password = null)  {
-    if (is_null($username)) {
-      $username = $this->get_body_parameter("username", "");
-    }
-    if (is_null($password)) {
-      $password = $this->get_body_parameter("password", "");
-    }
-    $password = md5($password);
+    $params = $this->format_parameters(array(
+      "username"=>array("default"=>$username),
+      "password"=>array("default"=>$password, "type"=>"MD5")
+    ));
+
     $query = "SELECT * FROM login WHERE username = :username AND password = :password";
     $stmt = $this->connection->prepare($query);
-    $stmt->bindParam(":username", $username);
-    $stmt->bindParam(":password", $password);
+    $stmt->bindParam(":username", $params->username);
+    $stmt->bindParam(":password", $params->password);
     $stmt->execute();
+    $item_count = $stmt->rowCount();
+    if ($item_count == 0) {
+      http_response_code(404);
+      $error = json_encode(
+        array(
+          "state"=>"Login Failed",
+          "message"=>"Username or password wrong"
+        )
+      );
+      die($error);
+    }
     $result = (object)$this->database->fatch_first($stmt);
     $jwt = generateToken(array(
         "login_id" => $result->id,
@@ -96,17 +106,12 @@ class Login_Controller extends Controller
   * )
   */
   public function register($username = null, $password = null, $password_confirmation = null)  {
-    if (is_null($username)) {
-      $username = $this->get_body_parameter("username", "");
-    }
-    if (is_null($password)) {
-      $password = $this->get_body_parameter("password", "");
-    }
-    if (is_null($password_confirmation)) {
-      $password_confirmation = $this->get_body_parameter("password_confirmation", "");
-    }
-    $this->check_password_confirmation($password, $password_confirmation);
-    if ($this->check_user($username))  {
+    $params = $this->format_parameters(array(
+      "username"=>array("default"=>$username),
+      "password"=>array("default"=>$password, "type"=>"MD5"),
+      "password_confirmation"=>array("default"=>$password_confirmation, "type"=>"MD5")
+    ));
+    if ($this->check_user($params->username))  {
         http_response_code(404);
         $error = json_encode(
           array(
@@ -116,35 +121,10 @@ class Login_Controller extends Controller
         );
         die($error);
     }
+    $this->check_password_confirmation($params->password, $params->password_confirmation);
+    if (isset($params->password_confirmation)) unset($params->password_confirmation);
 
-    try{
-      $this->connection->beginTransaction();
-      $password = md5($password);
-      $id = self::uuid();
-
-      $query = "INSERT INTO login
-        (id, username, password)
-        VALUES (:id, :username, :password)";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":id", $id);
-      $stmt->bindParam(":username", $username);
-      $stmt->bindParam(":password", $password);
-      $stmt->execute();
-      $this->connection->commit();
-    }
-    catch(Exception $e){
-        http_response_code(404);
-        $error_msg = $e->getMessage();
-        $this->connection->rollBack();
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'Error occurred: '.$error_msg
-          )
-        );
-        die($error);
-        #return $error;
-    }
+    $this->add_generic(null, $params, authorized_roles: array(Role::UNKNOWN));
 
     return json_encode(
       array(
@@ -177,6 +157,25 @@ class Login_Controller extends Controller
     return ($item_count > 0);
   }
 
+  private function check_password($id, $password) {
+    $query = "SELECT * FROM login WHERE id = :id and password = :password";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":id", $id);
+    $stmt->bindParam(":password", $password);
+    $stmt->execute();
+    $item_count = $stmt->rowCount();
+
+    return ($item_count > 0);
+  }
+
+  public function check_rights($id) {
+    return $this->check_login($id);
+  }
+
+  protected function read($id = null)  {
+    return parent::read_generic($id, role: Role::MODERATOR);
+  }
+
   /**
   * @OA\Put(
   *   path="/api/user/",
@@ -185,7 +184,8 @@ class Login_Controller extends Controller
   *   @OA\RequestBody(
   *     @OA\MediaType(
   *       mediaType="json",
-  *       @OA\Schema(required={"password", "password_confirmation"},
+  *       @OA\Schema(required={"old_password", "password", "password_confirmation"},
+  *         @OA\Property(property="old_password", type="string"),
   *         @OA\Property(property="password", type="string"),
   *         @OA\Property(property="password_confirmation", type="string")
   *       )
@@ -196,43 +196,31 @@ class Login_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function update($password = null, $password_confirmation = null)  {
+  public function update($old_password = null, $password = null, $password_confirmation = null)  {
     $login_id = getAuthorizationProperty("login_id");
-    if (is_null($password)) {
-      $password = $this->get_body_parameter("password", "");
+    $params = $this->format_parameters(array(
+      "id"=>array("default"=>$login_id),
+      "old_password"=>array("default"=>$old_password, "type"=>"MD5"),
+      "password"=>array("default"=>$password, "type"=>"MD5"),
+      "password_confirmation"=>array("default"=>$password_confirmation, "type"=>"MD5")
+    ));
+    $this->check_password_confirmation($params->password, $params->password_confirmation);
+    if (!$this->check_password($login_id, $params->old_password)) {
+      http_response_code(404);
+      $error = json_encode(
+        array(
+          "state"=>"Failed",
+          "message"=>"The old password is wrong."
+        )
+      );
+      die($error);
     }
-    if (is_null($password_confirmation)) {
-      $password_confirmation = $this->get_body_parameter("password_confirmation", "");
-    }
-    $this->check_password_confirmation($password, $password_confirmation);
+    if (isset($params->old_password))
+      unset($params->old_password);
+    if (isset($params->password_confirmation))
+      unset($params->password_confirmation);
 
-    try{
-      $this->connection->beginTransaction();
-      $password = md5($password);
-
-      $query = "UPDATE login SET
-        password = :password
-        WHERE id = :login_id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":password", $password);
-      $stmt->bindParam(":login_id", $login_id);
-      $stmt->execute();
-      $this->connection->commit();
-    }
-    catch(Exception $e){
-        http_response_code(404);
-        $error_msg = $e->getMessage();
-        $this->connection->rollBack();
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'Error occurred: '.$error_msg
-          )
-        );
-        die($error);
-        #return $error;
-    }
-
+    $this->update_generic($params->id, $params);
     return json_encode(
       array(
         "state"=>"Sccess",
@@ -253,74 +241,40 @@ class Login_Controller extends Controller
   */
   public function delete()  {
     $login_id = getAuthorizationProperty("login_id");
+    return parent::delete_generic($login_id);
+  }
 
-    $handle_transaction = !$this->connection->inTransaction();
-    try{
-      if ($handle_transaction)
-        $this->connection->beginTransaction();
+  protected function delete_dependencies($id) {
+    $role = strtoupper(Role::MODERATOR);
+    $query = "SELECT * FROM session_role
+      WHERE login_id = :login_id AND role like :role";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":login_id", $id);
+    $stmt->bindParam(":role", $role);
+    $stmt->execute();
+
+    $result_data = $this->database->fatch_all($stmt);
+    foreach($result_data as $result_item) {
+      $session_id = $result_item["session_id"];
 
       $query = "SELECT * FROM session_role
-        WHERE login_id = :login_id AND role like :role";
+        WHERE session_id = :session_id AND role like :role";
       $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":login_id", $login_id);
-      $stmt->bindParam(":role", Role::MODERATOR);
+      $stmt->bindParam(":session_id", $session_id);
+      $stmt->bindParam(":role", $role);
       $stmt->execute();
+      $item_count = $stmt->rowCount();
 
-      $result_data = $this->database->fatch_all($stmt);
-      foreach($result_data as $result_item) {
-        $session_id = $result_item["session_id"];
-
-        $query = "SELECT * FROM session_role
-          WHERE session_id = :session_id AND role like :role";
-        $stmt = $this->connection->prepare($query);
-        $stmt->bindParam(":session_id", $session_id);
-        $stmt->bindParam(":role", Role::MODERATOR);
-        $stmt->execute();
-        $item_count = $stmt->rowCount();
-
-        if ($item_count == 1) {
-          $session = Session_Controller::get_instance();
-          $session->delete($session_id);
-        }
+      if ($item_count == 1) {
+        $session = Session_Controller::get_instance();
+        $session->delete($session_id);
       }
-
-      $query = "DELETE FROM session_role WHERE login_id = :login_id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":login_id", $login_id);
-      $stmt->execute();
-
-      $query = "DELETE FROM login WHERE id = :login_id";
-      $stmt = $this->connection->prepare($query);
-      $stmt->bindParam(":login_id", $login_id);
-      $stmt->execute();
-
-      if ($handle_transaction)
-        $this->connection->commit();
-    }
-    catch(Exception $e){
-        http_response_code(404);
-        $error_msg = $e->getMessage();
-        $this->connection->rollBack();
-        $error = json_encode(
-          array(
-            "state"=>"Failed",
-            "message"=>'Error occurred: '.$error_msg
-          )
-        );
-        die($error);
-        #return $error;
     }
 
-    return json_encode(
-      array(
-        "state"=>"Sccess",
-        "message"=>"user was successful deleted"
-      )
-    );
+    $query = "DELETE FROM session_role WHERE login_id = :login_id";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":login_id", $id);
+    $stmt->execute();
   }
-
-  public function delete_dependencies($id) {
-  }
-
 }
 ?>

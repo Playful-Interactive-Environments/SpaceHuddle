@@ -114,4 +114,29 @@ function isParticipant()
   }
   return false;
 }
+
+function isUser()
+{
+  $authorization_data = getAuthorizationData();
+  if (property_exists ($authorization_data , "login_id")) {
+    return true;
+  }
+  return false;
+}
+
+function isLoggedIn()
+{
+  global $key, $alg;
+  $jwt = getBearerToken();
+  if (isset($jwt)) {
+    try {
+      $decoded = JWT::decode($jwt, $key, array($alg));
+      if ($decoded->exp > time())
+        return true;
+    }
+    catch(Exception $e){
+    }
+  }
+  return false;
+}
 ?>

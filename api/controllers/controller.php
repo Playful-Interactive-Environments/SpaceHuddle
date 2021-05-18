@@ -102,14 +102,25 @@ class Controller
         die($error);
       }
     }
+    else {
+      http_response_code(404);
+      $error = json_encode(
+        array(
+          "state"=>"Failed",
+          "message"=>"generic parameters not set"
+        )
+      );
+      die($error);
+    }
   }
 
-  public function read_generic($id = null, $authorized_roles = array(Role::MODERATOR, Role::FACILITATOR), $stmt = null)  {
+  public function read_generic($id = null, $authorized_roles = array(Role::MODERATOR, Role::FACILITATOR), $stmt = null, $role = null)  {
     if ($this->generic_table_parameter_set()) {
       if (is_null($id)) {
         $id = $this->get_url_parameter($this->url_parameter);
       }
-      $role = $this->check_read_rights($id);
+      if (is_null($role))
+        $role = $this->check_read_rights($id);
       if ($this->is_authorized($role, $authorized_roles)) {
         if (is_null($stmt)) {
           $query = "SELECT * FROM $this->table WHERE id = :id";
@@ -131,80 +142,136 @@ class Controller
         die($error);
       }
     }
+    else {
+      http_response_code(404);
+      $error = json_encode(
+        array(
+          "state"=>"Failed",
+          "message"=>"generic parameters not set"
+        )
+      );
+      die($error);
+    }
   }
 
-  public function add_generic($parent_id, $parameter, $authorized_roles = array(Role::MODERATOR), $insert_id = true, $duplicate_check = "")  {
-    if ($this->all_generic_parameter_set()) {
-      $role = $this->parent_controller::check_instance_rights($parent_id);
-      if (!$this->is_authorized($role, $authorized_roles)) {
-          http_response_code(404);
-          $error = json_encode(
-            array(
-              "state"=>"Failed",
-              "message"=>"User is not authorized to add this $this->table."
-            )
-          );
-          die($error);
+  public function add_generic(
+    $parent_id,
+    $parameter,
+    $authorized_roles = array(Role::MODERATOR),
+    $insert_id = true,
+    $duplicate_check = "",
+    $parameter_dependencies = null
+  )  {
+    if (isset($parent_id)) {
+      if ($this->all_generic_parameter_set()) {
+        $role = $this->parent_controller::check_instance_rights($parent_id);
+      }
+      else {
+        http_response_code(404);
+        $error = json_encode(
+          array(
+            "state"=>"Failed",
+            "message"=>"generic parameters not set"
+          )
+        );
+        die($error);
+      }
+    }
+    else {
+      $role = $this->check_rights(null);
+    }
+    if (!$this->is_authorized($role, $authorized_roles)) {
+        http_response_code(404);
+        $error = json_encode(
+          array(
+            "state"=>"Failed",
+            "message"=>"User is not authorized to add this $this->table."
+          )
+        );
+        die($error);
+    }
+
+    try{
+      $this->connection->beginTransaction();
+      if (!is_array($parameter)) {
+        $parameter = array($parameter);
+      }
+      if (!is_array($parameter_dependencies)) {
+        $parameter_dependencies = array($parameter_dependencies);
       }
 
-      try{
-        $this->connection->beginTransaction();
-        if (!is_array($parameter)) {
-          $parameter = array($parameter);
+      foreach ($parameter as $param_index => $param_item) {
+        $columns = null;
+        $values = null;
+        $bind_parameter = array();
+
+        if ($insert_id) {
+          $id = self::uuid();
+
+          $columns = "id";
+          $values = ":id";
+          $bind_parameter[":id"] = $id;
+        }
+        foreach ($param_item as $key => $value) {
+          if (isset($columns)) {
+            $columns = "$columns, `$key`";
+            $values = "$values, :$key";
+          }
+          else {
+            $columns = "`$key`";
+            $values = ":$key";
+          }
+          $bind_parameter[":$key"] = $value;
         }
 
-        foreach ($parameter as $param_item) {
-          $columns = null;
-          $values = null;
-          $bind_parameter = array();
+        $query = "INSERT INTO $this->table
+          ($columns)
+          SELECT $values
+          $duplicate_check ";
+        $stmt = $this->connection->prepare($query);
+        $stmt->execute($bind_parameter);
+        $item_count = $stmt->rowCount();
 
-          if ($insert_id) {
-            $id = self::uuid();
-
-            $columns = "id";
-            $values = ":id";
-            $bind_parameter[":id"] = $id;
-          }
-          foreach ($param_item as $key => $value) {
-            if (isset($columns)) {
-              $columns = "$columns, `$key`";
-              $values = "$values, :$key";
-            }
-            else {
-              $columns = "`$key`";
-              $values = ":$key";
-            }
-            $bind_parameter[":$key"] = $value;
-          }
-
-          $query = "INSERT INTO $this->table
-            ($columns)
-            SELECT $values
-            $duplicate_check ";
-          $stmt = $this->connection->prepare($query);
-          $stmt->execute($bind_parameter);
+        if ($item_count > 0) {
+          $this->add_dependencies($id, $parameter_dependencies[$param_index]);
         }
+      }
 
-        $this->connection->commit();
+      $this->connection->commit();
+
+      if ($item_count > 0) {
         if ($insert_id) {
           $result = $this->read($id);
           return $result;
         }
       }
-      catch(Exception $e){
-          http_response_code(404);
-          $error_msg = $e->getMessage();
-          $this->connection->rollBack();
-          $error = json_encode(
-            array(
-              "state"=>"Failed",
-              "message"=>'Error occurred:'.$error_msg
-            )
-          );
-          die($error);
-          #return $error;
+      else {
+        http_response_code(404);
+        $error = json_encode(
+          array(
+            "state"=>"Failed",
+            "message"=>"no data was added"
+          )
+        );
+        die($error);
       }
     }
+    catch(Exception $e){
+        http_response_code(404);
+        $error_msg = $e->getMessage();
+        $this->connection->rollBack();
+        $error = json_encode(
+          array(
+            "state"=>"Failed",
+            "message"=>'Error occurred:'.$error_msg
+          )
+        );
+        die($error);
+    }
+  }
+
+  protected function add_dependencies($id, $parameter)
+  {
   }
 
   public function update_generic($id, $parameter, $authorized_roles = array(Role::MODERATOR))  {
@@ -239,9 +306,23 @@ class Controller
           WHERE id = :id";
         $stmt = $this->connection->prepare($query);
         $stmt->execute($bind_parameter);
+        $item_count = $stmt->rowCount();
         $this->connection->commit();
-        $result = $this->read($id);
-        return $result;
+
+        if ($item_count > 0) {
+          $result = $this->read($id);
+          return $result;
+        }
+        else {
+          http_response_code(404);
+          $error = json_encode(
+            array(
+              "state"=>"Failed",
+              "message"=>"no data was found to modify"
+            )
+          );
+          die($error);
+        }
       }
       catch(Exception $e){
           http_response_code(404);
@@ -257,19 +338,28 @@ class Controller
           #return $error;
       }
     }
+    else {
+      http_response_code(404);
+      $error = json_encode(
+        array(
+          "state"=>"Failed",
+          "message"=>"generic parameters not set"
+        )
+      );
+      die($error);
+    }
   }
 
-  public function delete_dependencies($id) {
+  protected function delete_dependencies($id) {
 
   }
 
-  public function delete_generic($id = null, $authorized_roles = array(Role::MODERATOR), $stmt = null, $role = null)  {
+  public function delete_generic($id = null, $authorized_roles = array(Role::MODERATOR), $stmt = null)  {
     if ($this->generic_table_parameter_set()) {
       if (is_null($id)) {
         $id = $this->get_url_parameter($this->url_parameter);
       }
-      if (is_null($role))
-        $role = $this->check_rights($id);
+      $role = $this->check_rights($id);
       if (!$this->is_authorized($role, $authorized_roles)) {
           http_response_code(404);
           $error = json_encode(
@@ -295,6 +385,7 @@ class Controller
           $stmt->bindParam(":id", $id);
         }
         $stmt->execute();
+        $item_count = $stmt->rowCount();
 
         if ($handle_transaction)
           $this->connection->commit();
@@ -313,12 +404,34 @@ class Controller
           #return $error;
       }
 
-      return json_encode(
+      if ($item_count > 0) {
+        return json_encode(
+          array(
+            "state"=>"Sccess",
+            "message"=>"$this->table was successful deleted"
+          )
+        );
+      }
+      else {
+        http_response_code(404);
+        $error = json_encode(
+          array(
+            "state"=>"Failed",
+            "message"=>"$this->table not found"
+          )
+        );
+        die($error);
+      }
+    }
+    else {
+      http_response_code(404);
+      $error = json_encode(
         array(
-          "state"=>"Sccess",
-          "message"=>"$this->table was successful deleted"
+          "state"=>"Failed",
+          "message"=>"generic parameters not set"
         )
       );
+      die($error);
     }
   }
 
@@ -329,6 +442,11 @@ class Controller
   }
 
   public function check_rights($id) {
+    if (is_null($id)) {
+      $login_id = getAuthorizationProperty("login_id");
+      return strtoupper(Role::MODERATOR);
+    }
+
     if ($this->all_generic_parameter_set()) {
       $query = "SELECT * FROM $this->table WHERE id = :id";
       $stmt = $this->connection->prepare($query);
@@ -343,6 +461,23 @@ class Controller
       }
     }
     return null;
+  }
+
+  public function check_login($id) {
+    if (isLoggedIn()) {
+      if (isUser()) {
+        $login_id = getAuthorizationProperty("login_id");
+        if (is_null($id) or $id == $login_id)
+          return Role::MODERATOR;
+      }
+      if (isParticipant()) {
+        $participant_id = getAuthorizationProperty("participant_id");
+        if (is_null($id) or $id == $participant_id)
+          return Role::PARTICIPANT;
+      }
+    }
+
+    return Role::UNKNOWN;
   }
 
   public function check_read_rights($id) {
@@ -511,6 +646,9 @@ class Controller
         }
         elseif ($key_type == "ARRAY") {
           $value = $value;
+        }
+        elseif ($key_type == "MD5") {
+          $value = md5($value);
         }
         else {
           $value = strtoupper($value);
