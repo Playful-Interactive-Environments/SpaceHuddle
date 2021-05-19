@@ -26,6 +26,7 @@ class Controller
     $this->parent_id_name = $parent_id_name;
     if (is_null($url_parameter)) $url_parameter = $table;
     $this->url_parameter = $url_parameter;
+    http_response_code(400);
   }
 
   protected function all_generic_parameter_set() {
@@ -89,6 +90,7 @@ class Controller
         foreach($result_data as $result_item) {
           array_push($result, new $this->class($result_item));
         }
+        http_response_code(200);
         return json_encode($result);
       }
       else {
@@ -129,6 +131,7 @@ class Controller
         $stmt->bindParam(":id", $id);
         $stmt->execute();
         $result = $this->database->fatch_first($stmt);
+        http_response_code(200);
         return json_encode(new $this->class($result));
       }
       else {
@@ -233,16 +236,27 @@ class Controller
         $item_count = $stmt->rowCount();
 
         if ($item_count > 0) {
-          $this->add_dependencies($id, $parameter_dependencies[$param_index]);
+          if ($insert_id) {
+            $this->add_dependencies($id, $parameter_dependencies[$param_index]);
+          }
         }
       }
 
       $this->connection->commit();
 
       if ($item_count > 0) {
+        http_response_code(200);
         if ($insert_id) {
           $result = $this->read($id);
           return $result;
+        }
+        else {
+          return json_encode(
+            array(
+              "state"=>"Sccess",
+              "message"=>"$this->table was successful added"
+            )
+        );
         }
       }
       else {
@@ -310,6 +324,7 @@ class Controller
         $this->connection->commit();
 
         if ($item_count > 0) {
+          http_response_code(200);
           $result = $this->read($id);
           return $result;
         }
@@ -405,6 +420,7 @@ class Controller
       }
 
       if ($item_count > 0) {
+        http_response_code(200);
         return json_encode(
           array(
             "state"=>"Sccess",
@@ -674,7 +690,7 @@ class Controller
     $url_hierarchy = self::get_url_hierarchy($first_param_index);
 
     $search_hierarchy_parts = array();
-    for ($i=0; $i < $first_param_index; $i++) {
+    for ($i=0; $i < 1; $i++) {
       array_push($search_hierarchy_parts, $url_hierarchy[$i]);
     }
 

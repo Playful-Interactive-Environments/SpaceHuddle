@@ -7,7 +7,15 @@ require_once(__DIR__.'/../controllers/controller.php');
 
 $login = Login_Controller::get_instance();
 
-if (Controller::is_rest_call("PUT")) {
+if (Controller::is_rest_call("POST", 2, search_detail_hierarchy: "login")) {
+	$result = $login->login();
+	echo $result;
+}
+elseif (Controller::is_rest_call("POST", 2, search_detail_hierarchy: "register")) {
+	$result = $login->register();
+	echo $result;
+}
+elseif (Controller::is_rest_call("PUT")) {
 	$result = $login->update();
 	echo $result;
 }
@@ -17,6 +25,6 @@ elseif (Controller::is_rest_call("DELETE")) {
 }
 else {
 	echo "Call ".$_SERVER["REQUEST_METHOD"]." is not yet implemented";
-	http_response_code(405);
+	http_response_code(501);
 }
 ?>

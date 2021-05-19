@@ -3,6 +3,7 @@ require_once(__DIR__.'/../config/generator.php');
 require_once(__DIR__.'/../config/authorization.php');
 require_once(__DIR__.'/../models/avatar.php');
 require_once(__DIR__.'/../models/participant.php');
+require_once(__DIR__.'/../models/state.php');
 require_once('controller.php');
 require_once('session.php');
 
@@ -53,6 +54,7 @@ class Participant_Controller extends Controller
         "participant_id" => $result->id,
         "browser_key" => $result->browser_key
     ));
+    http_response_code(200);
     return json_encode(
       new Participant((array)$result, $jwt)
     );
@@ -125,6 +127,7 @@ class Participant_Controller extends Controller
         "browser_key" => $result->browser_key
     ));
     $result_obj = new Participant((array)$result, $jwt);
+    http_response_code(200);
     return json_encode(
       $result_obj
     );
@@ -150,7 +153,7 @@ class Participant_Controller extends Controller
 
   /**
   * @OA\Get(
-  *   path="/api/participant_tasks/",
+  *   path="/api/participant/tasks/",
   *   summary="List of all tasks for the logged-in participant.",
   *   tags={"Participant"},
   *   @OA\Response(response="200", description="Success",
@@ -164,7 +167,44 @@ class Participant_Controller extends Controller
   * )
   */
   public function get_tasks() {
-
+    $active_state = strtoupper(State_Task::ACTIVE);
+    if (!isParticipant()) {
+      $login_id = getAuthorizationProperty("login_id");
+      $query = "SELECT * FROM task
+        WHERE state like :active_state
+        AND topic_id IN (
+          SELECT topic.id
+          FROM topic
+          INNER JOIN session ON session.id = topic.session_id
+          INNER JOIN session_role ON session_role.session_id = session.id
+          WHERE session_role.login_id = :login_id
+          AND session.expiration_date >= current_timestamp())";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":login_id", $login_id);
+      $stmt->bindParam(":active_state", $active_state);
+    }
+    else {
+      $participant_id = getAuthorizationProperty("participant_id");
+      $query = "SELECT * FROM task
+        WHERE state like :active_state
+        AND topic_id IN (
+          SELECT topic.id
+          FROM topic
+          INNER JOIN session ON session.id = topic.session_id
+          INNER JOIN participant ON participant.session_id = session.id
+          WHERE participant.id = :participant_id and session.expiration_date >= current_timestamp())";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":participant_id", $participant_id);
+      $stmt->bindParam(":active_state", $active_state);
+    }
+    $stmt->execute();
+    $result_data = $this->database->fatch_all($stmt);
+    $result = array();
+    foreach($result_data as $result_item) {
+      array_push($result, new Task($result_item));
+    }
+    http_response_code(200);
+    return json_encode($result);
   }
 
   /**
@@ -189,7 +229,7 @@ class Participant_Controller extends Controller
 
   /**
   * @OA\Get(
-  *   path="/api/participant_topics/",
+  *   path="/api/participant/topics/",
   *   summary="List of all topics for the logged-in participant.",
   *   tags={"Participant"},
   *   @OA\Response(response="200", description="Success",
@@ -203,7 +243,36 @@ class Participant_Controller extends Controller
   * )
   */
   public function get_topics() {
-
+    if (!isParticipant()) {
+      $login_id = getAuthorizationProperty("login_id");
+      $query = "SELECT * FROM topic
+        WHERE session_id IN (
+          SELECT session.id
+          FROM session
+          INNER JOIN session_role ON session_role.session_id = session.id
+          WHERE session_role.login_id = :login_id and session.expiration_date >= current_timestamp())";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":login_id", $login_id);
+    }
+    else {
+      $participant_id = getAuthorizationProperty("participant_id");
+      $query = "SELECT * FROM topic
+        WHERE session_id IN (
+          SELECT session.id
+          FROM session
+          INNER JOIN participant ON participant.session_id = session.id
+          WHERE participant.id = :participant_id and session.expiration_date >= current_timestamp())";
+      $stmt = $this->connection->prepare($query);
+      $stmt->bindParam(":participant_id", $participant_id);
+    }
+    $stmt->execute();
+    $result_data = $this->database->fatch_all($stmt);
+    $result = array();
+    foreach($result_data as $result_item) {
+      array_push($result, new Topic($result_item));
+    }
+    http_response_code(200);
+    return json_encode($result);
   }
 
 }

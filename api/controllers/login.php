@@ -77,6 +77,7 @@ class Login_Controller extends Controller
         "username" => $result->username
     ));
 
+    http_response_code(200);
     return json_encode(
             array(
                 "message" => "Successful login.",
@@ -126,6 +127,7 @@ class Login_Controller extends Controller
 
     $this->add_generic(null, $params, authorized_roles: array(Role::UNKNOWN));
 
+    http_response_code(200);
     return json_encode(
       array(
         "state"=>"Sccess",

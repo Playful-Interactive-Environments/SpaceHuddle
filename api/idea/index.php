@@ -21,6 +21,6 @@ elseif (Controller::is_rest_call("DELETE")) {
 }
 else {
 	echo "Call ".$_SERVER["REQUEST_METHOD"]." is not yet implemented";
-	http_response_code(405);
+	http_response_code(501);
 }
 ?>

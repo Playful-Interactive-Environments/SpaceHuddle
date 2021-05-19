@@ -41,7 +41,7 @@ class Database
     $item_count = $stmt->rowCount();
 
     if ($item_count > 0) {
-      http_response_code(200);
+      #http_response_code(200);
       return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     else {
@@ -64,7 +64,7 @@ class Database
     $item_count = $stmt->rowCount();
 
     if ($item_count > 0) {
-      http_response_code(200);
+      #http_response_code(200);
       return $stmt->fetch(PDO::FETCH_ASSOC);
       #return json_encode(
       #  array(

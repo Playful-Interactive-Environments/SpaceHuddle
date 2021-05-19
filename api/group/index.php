@@ -35,6 +35,6 @@ elseif (Controller::is_rest_call("DELETE", search_detail_hierarchy: "ideas")) {
 }
 else {
 	echo "Call ".$_SERVER["REQUEST_METHOD"]." is not yet implemented";
-	http_response_code(405);
+	http_response_code(501);
 }
 ?>

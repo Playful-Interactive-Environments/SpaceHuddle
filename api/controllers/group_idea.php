@@ -2,6 +2,7 @@
 require_once('controller.php');
 require_once('group.php');
 require_once(__DIR__.'/../models/idea.php');
+require_once(__DIR__.'/../models/role.php');
 
 class Group_Idea_Controller extends Controller
 {
@@ -106,19 +107,22 @@ class Group_Idea_Controller extends Controller
       "group_idea_id"=>array("default"=>$group_id, "url"=>"group"),
       "sub_idea_id"=>array("default"=>$idea_array, "type"=>"ARRAY", "result"=>"all")
     ));
-    $role = Group_Controller::check_instance_rights($params->group_idea_id);
 
     $sub_idea_ids = implode(',', $params->sub_idea_id);
     $query = "DELETE FROM hierarchy WHERE group_idea_id = :group_id AND FIND_IN_SET(sub_idea_id, :idea_id) ";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":group_id", $params->group_idea_id);
     $stmt->bindParam(":idea_id", $sub_idea_ids);
+
     return parent::delete_generic(
       $params->group_idea_id,
       authorized_roles: array(Role::MODERATOR, Role::FACILITATOR),
-      stmt: $stmt,
-      role: $role
+      stmt: $stmt
     );
+  }
+
+  public function check_rights($id) {
+    return Group_Controller::check_instance_rights($id);
   }
 }
 ?>

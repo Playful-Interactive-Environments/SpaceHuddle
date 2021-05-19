@@ -45,6 +45,7 @@ class Session_Controller extends Controller
     foreach($result_data as $result_item) {
       array_push($result, new Session($result_item));
     }
+    http_response_code(200);
     return json_encode($result);
   }
 
@@ -74,6 +75,7 @@ class Session_Controller extends Controller
     $stmt->bindParam(":login_id", $login_id);
     $stmt->execute();
     $result = $this->database->fatch_first($stmt);
+    http_response_code(200);
     return json_encode(new Session($result));
   }
 
