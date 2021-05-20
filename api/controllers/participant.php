@@ -167,11 +167,12 @@ class Participant_Controller extends Controller
   * )
   */
   public function get_tasks() {
-    $active_state = strtoupper(State_Task::ACTIVE);
+    $client_states = array(strtoupper(State_Task::ACTIVE), strtoupper(State_Task::READ_ONLY));
+    $client_states = implode(',', $client_states);
     if (!isParticipant()) {
       $login_id = getAuthorizationProperty("login_id");
       $query = "SELECT * FROM task
-        WHERE state like :active_state
+        WHERE FIND_IN_SET(state, :client_states)
         AND topic_id IN (
           SELECT topic.id
           FROM topic
@@ -181,12 +182,12 @@ class Participant_Controller extends Controller
           AND session.expiration_date >= current_timestamp())";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":login_id", $login_id);
-      $stmt->bindParam(":active_state", $active_state);
+      $stmt->bindParam(":client_states", $client_states);
     }
     else {
       $participant_id = getAuthorizationProperty("participant_id");
       $query = "SELECT * FROM task
-        WHERE state like :active_state
+        WHERE FIND_IN_SET(state, :client_states)
         AND topic_id IN (
           SELECT topic.id
           FROM topic
@@ -195,7 +196,7 @@ class Participant_Controller extends Controller
           WHERE participant.id = :participant_id and session.expiration_date >= current_timestamp())";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":participant_id", $participant_id);
-      $stmt->bindParam(":active_state", $active_state);
+      $stmt->bindParam(":client_states", $client_states);
     }
     $stmt->execute();
     $result_data = $this->database->fatch_all($stmt);
