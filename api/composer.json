@@ -1,9 +1,38 @@
 {
-    "require": {
-        "zircote/swagger-php": "^3.1",
-        "firebase/php-jwt": "^5.2",
-        "ramsey/uuid": "^4.1",
-        "phpunit/phpunit": "^9.5",
-        "guzzlehttp/guzzle": "^7.3"
+  "name": "pie-lab/gab-api",
+  "description": "Definition of the GAB REST API.",
+  "type": "library",
+  "keywords": [
+    "gab",
+    "rest",
+    "api",
+    "brainstorming"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Andrea Aschauer",
+      "email": "andrea.aschauer@fh-hagenberg.at",
+      "role": "Developer"
+    },
+    {
+      "name": "Wolfgang Hochleitner",
+      "email": "wolfgang.hochleitner@fh-hagenberg.at",
+      "role": "Developer"
     }
+  ],
+  "support": {
+    "email": "pie@fh-hagenberg.at",
+    "issues": "https://github.com/Playful-Interactive-Environments/GAB/issues",
+    "source": "https://github.com/Playful-Interactive-Environments/GAB/tree/main/api"
+  },
+  "require": {
+    "zircote/swagger-php": "^3.1",
+    "firebase/php-jwt": "^5.2",
+    "ramsey/uuid": "^4.1",
+    "guzzlehttp/guzzle": "^7.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5"
+  }
 }
