@@ -1,9 +1,12 @@
 <?php
-require(__DIR__.'/../vendor/autoload.php');
-$openapi = \OpenApi\scan([
-  __DIR__.'/../controllers',
-  __DIR__.'/../models'
-]);
+
+require(__DIR__ . '/../vendor/autoload.php');
+
 header('Content-Type: application/json');
-echo $openapi->toJSON();
-?>
+
+echo OpenApi\Generator::scan(
+    [
+        __DIR__ . '/../controllers',
+        __DIR__ . '/../models'
+    ]
+)->toJSON();
