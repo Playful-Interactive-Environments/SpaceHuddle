@@ -57,6 +57,75 @@ class Controller
       return self::$instances[$class];
   }
 
+  public function read_all_generic_stmt(
+    $right_id = null,
+    $authorized_roles = array(Role::MODERATOR, Role::FACILITATOR),
+    $stmt = null,
+    $right_table = null,
+    $right_id_name = null,
+    $rights_controller = null,
+    $result_class = null
+  )  {
+    if ($this->all_generic_parameter_set()) {
+      if (is_null($rights_controller))
+        $rights_controller = $this->parent_controller;
+      if (is_null($right_id_name))
+        $right_id_name = $this->parent_id_name;
+    }
+
+    if ($this->generic_table_parameter_set()) {
+      if (is_null($result_class))
+        $result_class = $this->class;
+    }
+
+    if (isset($right_table) and is_null($right_id)) {
+      $right_id = $this->get_url_parameter($right_table);
+    }
+
+    if (
+      isset($right_id)
+      and isset($rights_controller)
+      and isset($right_id_name)
+      and isset($result_class)
+    ) {
+      if (is_null($right_id)) {
+        $right_id = $this->get_url_parameter($right_table);
+      }
+      $role = $rights_controller::check_instance_read_rights($right_id);
+      if ($this->is_authorized($role, $authorized_roles)) {
+        $stmt->bindParam(":$right_id_name", $right_id);
+        $stmt->execute();
+        $result_data = $this->database->fatch_all($stmt);
+        $result = array();
+        foreach($result_data as $result_item) {
+          array_push($result, new $result_class($result_item));
+        }
+        http_response_code(200);
+        return json_encode($result);
+      }
+      else {
+        http_response_code(404);
+        $error = json_encode(
+          array(
+            "state"=>"Failed",
+            "message"=>"User is not authorized to read $right_table."
+          )
+        );
+        die($error);
+      }
+    }
+    else {
+      http_response_code(404);
+      $error = json_encode(
+        array(
+          "state"=>"Failed",
+          "message"=>"generic parameters not set"
+        )
+      );
+      die($error);
+    }
+  }
+
   public function read_all_generic(
     $parent_id = null,
     $authorized_roles = array(Role::MODERATOR, Role::FACILITATOR),
@@ -72,7 +141,14 @@ class Controller
         $parent_id_name = $this->parent_id_name;
       if (is_null($parent_controller))
         $parent_controller = $this->parent_controller;
+    }
 
+    if (
+      $this->generic_table_parameter_set()
+      and isset($parent_table)
+      and isset($parent_id_name)
+      and isset($parent_controller)
+    ) {
       if (is_null($parent_id)) {
         $parent_id = $this->get_url_parameter($parent_table);
       }
@@ -577,8 +653,10 @@ class Controller
         break;
       }
     }
+    $api_index += 1;
+    $first_param_index -= 1;
 
-    for ($index = $api_index+1; $index < $api_index+$first_param_index; $index++) {
+    for ($index = $api_index; $index < $api_index+$first_param_index; $index++) {
       $test_item = $url_parts[$index];
       if (strlen($test_item) > 0) {
         array_push($hierarchy, $test_item);

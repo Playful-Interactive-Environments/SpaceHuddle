@@ -6,6 +6,7 @@ require_once(__DIR__.'/../models/participant.php');
 require_once(__DIR__.'/../models/state.php');
 require_once('controller.php');
 require_once('session.php');
+require_once('topic.php');
 
 class Participant_Controller extends Controller
 {
@@ -224,8 +225,24 @@ class Participant_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function get_topic_tasks() {
+  public function get_topic_tasks($topic_id = null) {
+    $client_states = array(strtoupper(State_Task::ACTIVE), strtoupper(State_Task::READ_ONLY));
+    $client_states = implode(',', $client_states);
+    $query = "SELECT * FROM task
+      WHERE FIND_IN_SET(state, :client_states)
+      AND topic_id = :topic_id";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":client_states", $client_states);
 
+    return parent::read_all_generic_stmt(
+      $topic_id,
+      array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
+      $stmt,
+      "topic",
+      "topic_id",
+      "Topic_Controller",
+      "Task"
+    );
   }
 
   /**

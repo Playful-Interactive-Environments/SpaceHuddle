@@ -6,12 +6,14 @@ require_once(__DIR__.'/../controllers/topic.php');
 require_once(__DIR__.'/../controllers/task.php');
 require_once(__DIR__.'/../controllers/idea.php');
 require_once(__DIR__.'/../controllers/group.php');
+require_once(__DIR__.'/../controllers/participant.php');
 require_once(__DIR__.'/../controllers/controller.php');
 
 $topic = Topic_Controller::get_instance();
 $task = Task_Controller::get_instance();
 $idea = Idea_Controller::get_instance();
 $group = Group_Controller::get_instance();
+$participant = Participant_Controller::get_instance();
 
 if (Controller::is_rest_call("GET")) {
 	$result = $topic->read();
@@ -31,6 +33,10 @@ elseif (Controller::is_rest_call("GET", search_detail_hierarchy: "tasks")) {
 }
 elseif (Controller::is_rest_call("POST", search_detail_hierarchy: "task")) {
 	$result = $task->add();
+	echo $result;
+}
+elseif (Controller::is_rest_call("GET", search_detail_hierarchy: "participant_tasks")) {
+	$result = $participant->get_topic_tasks();
 	echo $result;
 }
 elseif (Controller::is_rest_call("GET", search_detail_hierarchy: "ideas")) {
