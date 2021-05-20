@@ -15,7 +15,7 @@ curl -sS https://getcomposer.org/installer | php
 
 Installe composer componets in directory api:
 cd api
-composer.phar install
+composer install
 
 Run swagger documentation:
 http://{hostname}/api/documentation/

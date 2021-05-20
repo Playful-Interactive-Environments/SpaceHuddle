@@ -5,18 +5,6 @@ require_once(__DIR__.'/../models/user.php');
 require_once('controller.php');
 require_once('session.php');
 
-/**
- * @OA\Info(title="GAB API", version="0.1")
- * @OA\Schemes(format="https")
- * @OA\SecurityScheme(
- *   securityScheme="bearerAuth",
- *   in="header",
- *   name="Authorization",
- *   type="http",
- *   scheme="Bearer",
- *   bearerFormat="JWT"
- * )
- */
 class Login_Controller extends Controller
 {
   public function __construct()

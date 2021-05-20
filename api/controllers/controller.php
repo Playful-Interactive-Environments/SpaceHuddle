@@ -2,6 +2,19 @@
 use Ramsey\Uuid\Uuid;
 require_once(__DIR__.'/../config/database.php');
 
+/**
+ * @OA\Info(title="GAB API", version="0.1")
+ * @OA\Schemes(format="https")
+ * @OA\SecurityScheme(
+ *   securityScheme="bearerAuth",
+ *   in="header",
+ *   name="Authorization",
+ *   type="http",
+ *   scheme="Bearer",
+ *   bearerFormat="JWT"
+ * )
+ * @OA\Server(url="../../")
+ */
 class Controller
 {
   #protected static $instance  = null;
