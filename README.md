@@ -1,32 +1,44 @@
 # GAB
 GAB: Game Assisted Brainstorming. A new approach to brainstorming with multiple people.
 
-Installation instructions:
+## GAB API
 
-Create database:
-Run the db\\gab.sql script on a mysql database.
-host: same server as REST API server
-database name: "gab
-database username: "root
-database password: ""
+GAB uses a REST API for exchanging data between the different parts of the application (backend, moderator, client). The API's code is located in the `api` directory.
 
-Download composer:
-curl -sS https://getcomposer.org/installer | php
+### Requirements
 
-Installe composer componets in directory api:
-cd api
-composer.phar install
+The GAB API requires the following setup:
 
-Run swagger documentation:
-http://{hostname}/api/documentation/
+- a web server: tested with [Apache 2.4](https://httpd.apache.org/),
+- an SQL database instance: tested with [MariaDB 10.4](https://mariadb.org/),
+- [PHP 8.0](https://www.php.net/),
+- [Composer](https://getcomposer.org/) dependency manager.
 
-Test REST-API for MODERATOR or FACILITATOR:
-1) /api/user/register/
-2) /api/user/login/
-3) copy token to Authorize (Bearer Authorization)
-4) execute any rest call for moderator tool
+### Installation
 
-Test REST-API for PARTICIPANT:
-1) /api/participant/connect/
-3) copy token to Authorize (Bearer Authorization)
-4) execute any rest call for client tool
+1. Install a local web development environment that meets the requirements above. [XAMPP](https://www.apachefriends.org/) works well, setups using [Vagrant](https://www.vagrantup.com/), [Docker](https://www.docker.com/), or other virtual machines will work as well.
+2. If not included in your setup, install Composer following the [instructions](https://getcomposer.org/download/) for your operating system.
+3. Open a shell/terminal/command prompt, change to the `api` directory and install the dependencies by calling `composer install`.
+4. Import `db/gab.sql` into your database. This will create a database called "gab". Create a MySQL user with full permissions on the database. Enter your database credentials in `api/config/database.php`.
+
+### API Documentation
+
+API documentation and testing are done using [Swagger](https://swagger.io/). The documentation is located in `api/documentation`.
+
+To run it, point your browser to <http://{hostname}/{path}/api/documentation/>, e.g., <http://localhost/api/documention> or <http://localhost/GAB/api/documentation>.
+
+To test the various API endpoints, select one from the list, adapt the proposed request body if necessary and press "Execute". You will see the server response below.
+
+To test for the *moderator* or *facilitator*, use the following steps:
+
+1. call `/api/user/register/`,
+2. call`/api/user/login`,
+3. copy the token to authorize (bearer authorization),
+4. execute any arbitrary REST call for the moderator tool.
+
+To test for a *participant*, use the following steps:
+
+1. call `/api/participant/connect/`,
+2. copy the token to authorize (bearer authorization),
+3. execute any arbitrary REST call for the client tool.
+
