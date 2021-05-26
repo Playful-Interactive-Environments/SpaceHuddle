@@ -23,6 +23,10 @@ elseif (Controller::isRestCall("GET", 2, search_detail_hierarchy: "topics")) {
 	$result = $participant->getTopics();
 	echo $result;
 }
+elseif (Controller::isRestCall("DELETE")) {
+	$result = $participant->delete();
+	echo $result;
+}
 else {
 	echo "Call ".$_SERVER["REQUEST_METHOD"]." is not yet implemented";
 	http_response_code(501);

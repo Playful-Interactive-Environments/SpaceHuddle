@@ -184,7 +184,7 @@ class LoginController extends Controller
     return $this->checkLogin($id);
   }
 
-  protected function read(
+  public function read(
       ?string $id = null
   ) : string {
     return parent::readGeneric($id, role: Role::MODERATOR);

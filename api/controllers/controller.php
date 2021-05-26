@@ -301,6 +301,17 @@ class Controller
   }
 
   /**
+   * Get a specific entry in the specified database table.
+   * @param string|null $id Primary key to be queried.
+   * @return string Returns a json encoded specific entry in the specified database table.
+   */
+  public function read(
+      ?string $id = null
+  ) : string {
+    return $this->readGeneric($id);
+  }
+
+  /**
    * Insert an entry into the database table.
    * @param string|null $parent_id Foreign key linked to the table.
    * @param array|object $parameter Data to be inserted.

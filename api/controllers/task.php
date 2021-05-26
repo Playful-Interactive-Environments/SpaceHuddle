@@ -87,7 +87,7 @@ class TaskController extends Controller
   ) : string {
     $params = $this->formatParameters(array(
       "topic_id"=>array("default"=>$topic_id, "url"=>"topic"),
-      "task_type"=>array("default"=>$task_type, "type"=>"Task_Type"),
+      "task_type"=>array("default"=>$task_type, "type"=>"TaskType"),
       "name"=>array("default"=>$name),
       "parameter"=>array("default"=>$parameter, "type"=>"JSON"),
       "order"=>array("default"=>$order),
@@ -126,7 +126,7 @@ class TaskController extends Controller
   ) : string {
     $params = $this->formatParameters(array(
       "id"=>array("default"=>$id),
-      "task_type"=>array("default"=>$task_type, "type"=>"Task_Type"),
+      "task_type"=>array("default"=>$task_type, "type"=>"TaskType"),
       "name"=>array("default"=>$name),
       "parameter"=>array("default"=>$parameter, "type"=>"JSON"),
       "order"=>array("default"=>$order),

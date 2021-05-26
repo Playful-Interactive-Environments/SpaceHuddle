@@ -51,7 +51,7 @@ class ParticipantController extends Controller
       $params->symbol = AvatarSymbol::getRandomValue();
       unset($params->session_key);
 
-      $this->addGeneric(null, $params, authorized_roles: array(Role::UNKNOWN));
+      $result = (object)json_decode($this->addGeneric(null, $params, authorized_roles: array(Role::UNKNOWN)));
     }
 
     $jwt = generateToken(array(
@@ -80,14 +80,10 @@ class ParticipantController extends Controller
     return $browser_key;
   }
 
-  protected function read(
-      string $id
-  ) : object {
-    $query = "SELECT * FROM participant WHERE id = :id";
-    $stmt = $this->connection->prepare($query);
-    $stmt->bindParam(":id", $id);
-    $stmt->execute();
-    return (object)$this->database->fetchFirst($stmt);
+  public function read(
+      ?string $id = null
+  ) : string {
+    return parent::readGeneric($id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT, Role::UNKNOWN));
   }
 
   /**
@@ -98,6 +94,7 @@ class ParticipantController extends Controller
   public function checkRights(
       ?string $id
   ) : ?string {
+    $role = $this->checkLogin($id);
     return $this->checkLogin($id);
   }
 
@@ -162,9 +159,9 @@ class ParticipantController extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function delete()  {
-    #TODO: What happens to the ideas and votes submitted by the user? Set id to zero or delete entry?
-    #TODO: delete dependent tables
+  public function delete() : string {
+    $participant_id = getAuthorizationProperty("participant_id");
+    return parent::deleteGeneric($participant_id, authorized_roles: array(Role::PARTICIPANT));
   }
 
   /**
@@ -174,6 +171,30 @@ class ParticipantController extends Controller
   protected function deleteDependencies(
       string $id
   ) {
+    #TODO: What happens to the ideas and votes submitted by the user? Set id to zero or delete entry?
+    $query = "UPDATE voting
+          SET participant_id = null
+          WHERE participant_id = :participant_id";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":participant_id", $id);
+    $stmt->execute();
+
+    $query = "UPDATE idea
+          SET participant_id = null
+          WHERE participant_id = :participant_id";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":participant_id", $id);
+    $stmt->execute();
+
+    $query = "DELETE FROM module_state WHERE participant_id = :participant_id";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":participant_id", $id);
+    $stmt->execute();
+
+    $query = "DELETE FROM random_idea WHERE participant_id = :participant_id";
+    $stmt = $this->connection->prepare($query);
+    $stmt->bindParam(":participant_id", $id);
+    $stmt->execute();
   }
 
   /**
