@@ -35,16 +35,16 @@ class Session {
     /**
      * How long is the session valid?
      * @var Date|string|null
-     * @OA\Property()
+     * @OA\Property(property="expiration_date")
      */
     public Date|string|null $expiration_date;
 
     /**
      * When was the session created?
      * @var Date|string|null
-     * @OA\Property()
+     * @OA\Property(property="creation_date")
      */
-    public ?string $creation_date;
+    public Date|string|null $creation_date;
 
     /**
      * role in the session

@@ -21,7 +21,7 @@ class Idea {
     /**
      * Time of idea storage.
      * @var Date|string|null
-     * @OA\Property()
+     * @OA\Property(property="time_stamp")
      */
     public Date|string|null $time_stamp;
 
