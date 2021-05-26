@@ -2,10 +2,12 @@
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');
 
-require_once(__DIR__.'/../controllers/task.php');
-require_once(__DIR__.'/../controllers/idea.php');
-require_once(__DIR__.'/../controllers/group.php');
-require_once(__DIR__ . '/../controllers/Controller.php');
+require "../vendor/autoload.php";
+
+use PieLab\GAB\Controllers\Controller;
+use PieLab\GAB\Controllers\TaskController;
+use PieLab\GAB\Controllers\IdeaController;
+use PieLab\GAB\Controllers\GroupController;
 
 $task = TaskController::getInstance();
 $idea = IdeaController::getInstance();

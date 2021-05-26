@@ -2,12 +2,14 @@
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');
 
-require_once(__DIR__ . '/../controllers/SessionController.php');
-require_once(__DIR__.'/../controllers/topic.php');
-require_once(__DIR__ . '/../controllers/Controller.php');
+require "../vendor/autoload.php";
 
-$session = SessionController::getInstance();
+use PieLab\GAB\Controllers\Controller;
+use PieLab\GAB\Controllers\SessionController;
+use PieLab\GAB\Controllers\TopicController;
+
 $topic = TopicController::getInstance();
+$session = SessionController::getInstance();
 
 if (Controller::isRestCall("GET")) {
 	$result = $session->read();

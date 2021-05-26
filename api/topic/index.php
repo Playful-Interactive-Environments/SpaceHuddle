@@ -2,17 +2,21 @@
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');
 
-require_once(__DIR__.'/../controllers/topic.php');
-require_once(__DIR__.'/../controllers/task.php');
-require_once(__DIR__.'/../controllers/idea.php');
-require_once(__DIR__.'/../controllers/group.php');
-require_once(__DIR__.'/../controllers/participant.php');
-require_once(__DIR__ . '/../controllers/Controller.php');
+require "../vendor/autoload.php";
+
+use PieLab\GAB\Controllers\Controller;
+use PieLab\GAB\Controllers\TopicController;
+use PieLab\GAB\Controllers\TaskController;
+use PieLab\GAB\Controllers\IdeaController;
+use PieLab\GAB\Controllers\GroupController;
+use PieLab\GAB\Controllers\SelectionController;
+use PieLab\GAB\Controllers\ParticipantController;
 
 $topic = TopicController::getInstance();
 $task = TaskController::getInstance();
 $idea = IdeaController::getInstance();
 $group = GroupController::getInstance();
+$selection = SelectionController::getInstance();
 $participant = ParticipantController::getInstance();
 
 if (Controller::isRestCall("GET")) {
@@ -53,6 +57,14 @@ elseif (Controller::isRestCall("GET", search_detail_hierarchy: "groups")) {
 }
 elseif (Controller::isRestCall("POST", search_detail_hierarchy: "group")) {
 	$result = $group->addToTopic();
+	echo $result;
+}
+elseif (Controller::isRestCall("GET", search_detail_hierarchy: "selections")) {
+	$result = $selection->readAll();
+	echo $result;
+}
+elseif (Controller::isRestCall("POST", search_detail_hierarchy: "selection")) {
+	$result = $selection->add();
 	echo $result;
 }
 else {

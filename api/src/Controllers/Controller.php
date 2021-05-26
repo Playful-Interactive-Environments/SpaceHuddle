@@ -646,11 +646,14 @@ class Controller
      * @param array $authorized_roles List of authorised roles.
      * @return bool Authorisation state
      */
-    public function isAuthorized(string $role, array $authorized_roles = array(Role::MODERATOR)): bool
+    public function isAuthorized(?string $role, array $authorized_roles = array(Role::MODERATOR)): bool
     {
+      if (isset($role)) {
         $role = strtoupper($role);
         $authorized_roles = array_map("strtoupper", $authorized_roles);
         return in_array($role, $authorized_roles);
+      }
+      return false;
     }
 
     /**

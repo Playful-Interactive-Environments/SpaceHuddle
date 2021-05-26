@@ -1,0 +1,67 @@
+<?php
+require_once('AuthorizedUserTestCase.php');
+
+use PieLab\GAB\Models\TaskType;
+use PieLab\GAB\Models\StateTask;
+
+class TaskTest extends AuthorizedUserTestCase
+{
+  public function __construct()
+  {
+    parent::__construct();
+    $this->get_first_topic_id();
+    $this->get_first_task_id_idea();
+  }
+
+  public function test_get_all() {
+    $res = $this->client->get($this->get_absolute_api_url("/api/topic/$this->topic_id/tasks/"));
+    $this->assertSame($res->getStatusCode(), 200);
+    $this->assertIsJSON($res->getBody());
+  }
+
+  public function test_get_by_id() {
+    $this->assertIsString($this->task_id_idea);
+    $res = $this->client->get($this->get_absolute_api_url("/api/task/$this->task_id_idea/"));
+    $this->assertSame($res->getStatusCode(), 200);
+    $this->assertIsJSON($res->getBody());
+  }
+
+  public function test_workflow() {
+    $data =  json_encode((object)array(
+      'TaskType' => TaskType::SELECTION,
+      'name' => 'test selection',
+      'parameter' => "{'count': 10}",
+      'order' => 10
+    ));
+
+    $res = $this->client->post($this->get_absolute_api_url("/api/topic/$this->topic_id/task/"), [
+        'body' => $data
+    ]);
+    $this->assertSame($res->getStatusCode(), 200);
+    $this->assertIsJSON($res->getBody());
+
+    $result = $this->to_json($res->getBody());
+    $id = $result->id;
+
+    $data =  json_encode((object)array(
+      'id' => $id,
+      'TaskType' => TaskType::SELECTION,
+      'name' => 'test selection',
+      'parameter' => "{'count': 10}",
+      'order' => 10,
+      'state' => StateTask::READ_ONLY
+    ));
+
+    $res = $this->client->put($this->get_absolute_api_url("/api/task/"), [
+        'body' => $data
+    ]);
+    $this->assertSame($res->getStatusCode(), 200);
+    $this->assertIsJSON($res->getBody());
+
+    $res = $this->client->delete($this->get_absolute_api_url("/api/task/$id/"));
+    $this->assertSame($res->getStatusCode(), 200);
+    $this->assertIsJSON($res->getBody());
+  }
+}
+
+?>

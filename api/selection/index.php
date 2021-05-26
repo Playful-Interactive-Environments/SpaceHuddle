@@ -5,34 +5,34 @@ header('Content-Type: application/json; charset=UTF-8');
 require "../vendor/autoload.php";
 
 use PieLab\GAB\Controllers\Controller;
-use PieLab\GAB\Controllers\GroupController;
-use PieLab\GAB\Controllers\GroupIdeaController;
+use PieLab\GAB\Controllers\SelectionController;
+use PieLab\GAB\Controllers\SelectionIdeaController;
 
-$group = GroupController::getInstance();
-$group_idea = GroupIdeaController::getInstance();
+$selection = SelectionController::getInstance();
+$selectionIdea = SelectionIdeaController::getInstance();
 
 if (Controller::isRestCall("GET")) {
-	$result = $group->read();
+	$result = $selection->read();
 	echo $result;
 }
 elseif (Controller::isRestCall("PUT")) {
-	$result = $group->update();
+	$result = $selection->update();
 	echo $result;
 }
 elseif (Controller::isRestCall("DELETE")) {
-	$result = $group->delete();
+	$result = $selection->delete();
 	echo $result;
 }
 elseif (Controller::isRestCall("GET", search_detail_hierarchy: "ideas")) {
-	$result = $group_idea->readIdeas();
+	$result = $selectionIdea->readIdeas();
 	echo $result;
 }
 elseif (Controller::isRestCall("POST", search_detail_hierarchy: "ideas")) {
-	$result = $group_idea->addIdeas();
+	$result = $selectionIdea->addIdeas();
 	echo $result;
 }
 elseif (Controller::isRestCall("DELETE", search_detail_hierarchy: "ideas")) {
-	$result = $group_idea->deleteIdeas();
+	$result = $selectionIdea->deleteIdeas();
 	echo $result;
 }
 else {

@@ -1,21 +1,17 @@
 <?php
-
 namespace PieLab\GAB\Controllers;
 
 use PieLab\GAB\Config\Authorization;
+use PieLab\GAB\Config\Generator;
 
-require_once(__DIR__ . '/../config/generator.php');
-require_once(__DIR__ . '/../models/SessionController.php');
-require_once(__DIR__ . '/../models/Role.php');
-require_once('Controller.php');
-require_once('topic.php');
-require_once('participant.php');
+use PieLab\GAB\Models\Session;
+use PieLab\GAB\Models\Role;
 
 class SessionController extends Controller
 {
     public function __construct()
     {
-        parent::__construct("session", "Session");
+        parent::__construct("session", Session::class);
     }
 
     /**
@@ -100,7 +96,7 @@ class SessionController extends Controller
         $item_count = 1;
         $connection_key = "";
         while ($item_count > 0) {
-            $connection_key = keygen(8, false);
+            $connection_key = Generator::keygen(8, false);
             $query = "SELECT id FROM session WHERE connection_key = :key";
             $stmt = $this->connection->prepare($query);
             $stmt->bindParam(":key", $connection_key);
