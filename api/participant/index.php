@@ -3,7 +3,7 @@ header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');
 
 require_once(__DIR__.'/../controllers/participant.php');
-require_once(__DIR__.'/../controllers/controller.php');
+require_once(__DIR__ . '/../controllers/Controller.php');
 
 
 $participant = ParticipantController::getInstance();

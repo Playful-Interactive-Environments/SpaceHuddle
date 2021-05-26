@@ -1,5 +1,5 @@
 <?php
-require_once('controller.php');
+require_once('Controller.php');
 require_once('idea.php');
 require_once(__DIR__.'/../models/group.php');
 

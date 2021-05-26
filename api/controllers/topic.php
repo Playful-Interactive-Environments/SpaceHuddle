@@ -1,6 +1,6 @@
 <?php
-require_once('controller.php');
-require_once('session.php');
+require_once('Controller.php');
+require_once('SessionController.php');
 require_once('task.php');
 require_once('selection.php');
 require_once(__DIR__.'/../models/topic.php');

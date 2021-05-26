@@ -1,4 +1,7 @@
 <?php
+
+namespace PieLab\GAB\Models;
+
 /**
  * Permission roles for the session.
  * @OA\Schema(
@@ -8,11 +11,10 @@
  *   example="MODERATOR"
  * )
  */
-class Role {
-  const MODERATOR = "moderator";
-  const FACILITATOR = "facilitator";
-  const PARTICIPANT = "participant";
-  const UNKNOWN = "unknown";
+class Role
+{
+    const MODERATOR = "moderator";
+    const FACILITATOR = "facilitator";
+    const PARTICIPANT = "participant";
+    const UNKNOWN = "unknown";
 }
-
-?>

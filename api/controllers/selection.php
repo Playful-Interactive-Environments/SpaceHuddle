@@ -1,5 +1,5 @@
 <?php
-require_once('controller.php');
+require_once('Controller.php');
 
 class SelectionController extends Controller
 {

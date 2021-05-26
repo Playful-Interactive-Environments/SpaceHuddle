@@ -1,9 +1,12 @@
 <?php
+
+namespace PieLab\GAB\Models;
+
 /**
  * @OA\Schema(description="topic description")
  */
-class User {
-
+class User
+{
     /**
      * The user id.
      * @var string|null
@@ -20,9 +23,7 @@ class User {
 
     public function __construct(array $data = null)
     {
-        $this->id = isset($data['id']) ? $data['id'] : null;
-        $this->username = isset($data['username']) ? $data['username'] : null;
+        $this->id = $data['id'] ?? null;
+        $this->username = $data['username'] ?? null;
     }
 }
-
-?>

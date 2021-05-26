@@ -4,7 +4,7 @@ header('Content-Type: application/json; charset=UTF-8');
 
 require_once(__DIR__.'/../controllers/group.php');
 require_once(__DIR__.'/../controllers/group_idea.php');
-require_once(__DIR__.'/../controllers/controller.php');
+require_once(__DIR__ . '/../controllers/Controller.php');
 
 $group = GroupController::getInstance();
 $group_idea = GroupIdeaController::getInstance();

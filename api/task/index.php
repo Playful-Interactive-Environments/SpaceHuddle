@@ -5,7 +5,7 @@ header('Content-Type: application/json; charset=UTF-8');
 require_once(__DIR__.'/../controllers/task.php');
 require_once(__DIR__.'/../controllers/idea.php');
 require_once(__DIR__.'/../controllers/group.php');
-require_once(__DIR__.'/../controllers/controller.php');
+require_once(__DIR__ . '/../controllers/Controller.php');
 
 $task = TaskController::getInstance();
 $idea = IdeaController::getInstance();

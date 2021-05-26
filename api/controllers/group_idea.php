@@ -1,8 +1,8 @@
 <?php
-require_once('controller.php');
+require_once('Controller.php');
 require_once('group.php');
 require_once(__DIR__.'/../models/idea.php');
-require_once(__DIR__.'/../models/role.php');
+require_once(__DIR__ . '/../models/Role.php');
 
 class GroupIdeaController extends Controller
 {
