@@ -1,11 +1,11 @@
 <?php
 require_once('controller.php');
 
-class Resource_Controller extends Controller
+class ResourceController extends Controller
 {
   public function __construct()
   {
-      parent::__construct("resource", "Resource", "Session_Controller", "session", "session_id");
+      parent::__construct("resource", "Resource", "SessionController", "session", "session_id");
   }
 
   /**
@@ -24,7 +24,7 @@ class Resource_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read_all()  {
+  public function readAll() : string {
     #TODO: check rights for session
   }
 
@@ -41,7 +41,9 @@ class Resource_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read($id)  {
+  public function read(
+      ?string $id = null
+  ) : string {
     #TODO: check rights for session
   }
 
@@ -68,7 +70,7 @@ class Resource_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function add()  {
+  public function add() : string {
     try{
       #TODO: check rights for session
     }
@@ -106,7 +108,9 @@ class Resource_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function update($id)  {
+  public function update(
+      ?string  $id = null
+  ) : string {
     #TODO: check rights for session
   }
 
@@ -121,12 +125,21 @@ class Resource_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function delete($id)  {
+  public function delete(
+      ?string $id = null
+  ) : string {
     #TODO: check rights for session
   }
 
-  protected function delete_dependencies($id) {
-  }
+    /**
+     * Delete dependent data.
+     * @param string $id Primary key of the linked table entry.
+     */
+    protected function deleteDependencies(
+        string $id
+    ) {
+
+    }
 
 }
 ?>

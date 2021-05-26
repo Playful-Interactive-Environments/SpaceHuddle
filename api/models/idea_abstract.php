@@ -6,38 +6,38 @@ class IdeaAbstract {
 
     /**
      * The idea id.
-     * @var string
+     * @var string|null
      * @OA\Property(example="uuid")
      */
-    public $id;
+    public ?string $id;
 
     /**
      * Description of the idea.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $description;
+    public ?string $description;
 
     /**
      * Short description or keywords that describe the idea.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $keywords;
+    public ?string $keywords;
 
     /**
      * Image that describes the idea.
-     * @var string
+     * @var string|null
      * @OA\Property(type="string", format="binary")
      */
-    public $image;
+    public ?string $image;
 
     /**
      * Link to a resource that describes the idea.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $link;
+    public ?string $link;
 
     public function __construct(array $data = null)
     {

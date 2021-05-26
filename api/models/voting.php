@@ -6,24 +6,24 @@ class Voting {
 
     /**
      * id of the idea
-     * @var string
+     * @var string|null
      * @OA\Property(example="uuid")
      */
-    public $idea_id;
+    public ?string $idea_id;
 
     /**
      * rating of the idea
-     * @var int
+     * @var int|null
      * @OA\Property()
      */
-    public $rating;
+    public ?int $rating;
 
     /**
      * Weighting of the idea.
-     * @var float
+     * @var float|null
      * @OA\Property()
      */
-    public $detail_rating;
+    public ?float $detail_rating;
 
     public function __construct(array $data = null)
     {

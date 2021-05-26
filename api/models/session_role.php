@@ -6,17 +6,17 @@ class SessionRole {
 
     /**
      * Authorized user.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $username;
+    public ?string $username;
 
     /**
      * Permission role for the session.
-     * @var string
+     * @var string|null
      * @OA\Property(ref="#/components/schemas/Role")
      */
-    public $role;
+    public ?string $role;
 
     public function __construct(array $data = null)
     {

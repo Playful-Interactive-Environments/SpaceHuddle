@@ -5,21 +5,21 @@ header('Content-Type: application/json; charset=UTF-8');
 require_once(__DIR__.'/../controllers/login.php');
 require_once(__DIR__.'/../controllers/controller.php');
 
-$login = Login_Controller::get_instance();
+$login = LoginController::getInstance();
 
-if (Controller::is_rest_call("POST", 2, search_detail_hierarchy: "login")) {
+if (Controller::isRestCall("POST", 2, search_detail_hierarchy: "login")) {
 	$result = $login->login();
 	echo $result;
 }
-elseif (Controller::is_rest_call("POST", 2, search_detail_hierarchy: "register")) {
+elseif (Controller::isRestCall("POST", 2, search_detail_hierarchy: "register")) {
 	$result = $login->register();
 	echo $result;
 }
-elseif (Controller::is_rest_call("PUT")) {
+elseif (Controller::isRestCall("PUT")) {
 	$result = $login->update();
 	echo $result;
 }
-elseif (Controller::is_rest_call("DELETE")) {
+elseif (Controller::isRestCall("DELETE")) {
 	$result = $login->delete();
 	echo $result;
 }

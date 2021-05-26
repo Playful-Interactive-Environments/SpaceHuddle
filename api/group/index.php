@@ -6,31 +6,31 @@ require_once(__DIR__.'/../controllers/group.php');
 require_once(__DIR__.'/../controllers/group_idea.php');
 require_once(__DIR__.'/../controllers/controller.php');
 
-$group = Group_Controller::get_instance();
-$group_idea = Group_Idea_Controller::get_instance();
+$group = GroupController::getInstance();
+$group_idea = GroupIdeaController::getInstance();
 
-if (Controller::is_rest_call("GET")) {
+if (Controller::isRestCall("GET")) {
 	$result = $group->read();
 	echo $result;
 }
-elseif (Controller::is_rest_call("PUT")) {
+elseif (Controller::isRestCall("PUT")) {
 	$result = $group->update();
 	echo $result;
 }
-elseif (Controller::is_rest_call("DELETE")) {
+elseif (Controller::isRestCall("DELETE")) {
 	$result = $group->delete();
 	echo $result;
 }
-elseif (Controller::is_rest_call("GET", search_detail_hierarchy: "ideas")) {
-	$result = $group_idea->read_ideas();
+elseif (Controller::isRestCall("GET", search_detail_hierarchy: "ideas")) {
+	$result = $group_idea->readIdeas();
 	echo $result;
 }
-elseif (Controller::is_rest_call("POST", search_detail_hierarchy: "ideas")) {
-	$result = $group_idea->add_ideas();
+elseif (Controller::isRestCall("POST", search_detail_hierarchy: "ideas")) {
+	$result = $group_idea->addIdeas();
 	echo $result;
 }
-elseif (Controller::is_rest_call("DELETE", search_detail_hierarchy: "ideas")) {
-	$result = $group_idea->delete_ideas();
+elseif (Controller::isRestCall("DELETE", search_detail_hierarchy: "ideas")) {
+	$result = $group_idea->deleteIdeas();
 	echo $result;
 }
 else {

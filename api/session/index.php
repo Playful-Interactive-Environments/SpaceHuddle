@@ -6,33 +6,33 @@ require_once(__DIR__.'/../controllers/session.php');
 require_once(__DIR__.'/../controllers/topic.php');
 require_once(__DIR__.'/../controllers/controller.php');
 
-$session = Session_Controller::get_instance();
-$topic = Topic_Controller::get_instance();
+$session = SessionController::getInstance();
+$topic = TopicController::getInstance();
 
-if (Controller::is_rest_call("GET")) {
+if (Controller::isRestCall("GET")) {
 	$result = $session->read();
 	echo $result;
 }
-elseif (Controller::is_rest_call("POST")) {
+elseif (Controller::isRestCall("POST")) {
 	#foreach ($_SERVER as $key => $value) {
 	#	echo $key.": ".$value."\n";
 	#}
 	$result = $session->add();
 	echo $result;
 }
-elseif (Controller::is_rest_call("PUT")) {
+elseif (Controller::isRestCall("PUT")) {
 	$result = $session->update();
 	echo $result;
 }
-elseif (Controller::is_rest_call("DELETE")) {
+elseif (Controller::isRestCall("DELETE")) {
 	$result = $session->delete();
 	echo $result;
 }
-elseif (Controller::is_rest_call("GET", search_detail_hierarchy: "topics")) {
-	$result = $topic->read_all();
+elseif (Controller::isRestCall("GET", search_detail_hierarchy: "topics")) {
+	$result = $topic->readAll();
 	echo $result;
 }
-elseif (Controller::is_rest_call("POST", search_detail_hierarchy: "topic")) {
+elseif (Controller::isRestCall("POST", search_detail_hierarchy: "topic")) {
 	$result = $topic->add();
 	echo $result;
 }

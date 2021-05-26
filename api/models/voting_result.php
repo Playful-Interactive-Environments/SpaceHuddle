@@ -7,24 +7,24 @@ class VotingResult {
 
     /**
      * evaluated idea
-     * @var string
+     * @var IdeaAbstract|null
      * @OA\Property(ref="#/components/schemas/IdeaAbstract")
      */
-    public $idea;
+    public ?IdeaAbstract $idea;
 
     /**
      * Sum of the idea rating
-     * @var int
+     * @var int|null
      * @OA\Property()
      */
-    public $rating_sum;
+    public ?int $rating_sum;
 
     /**
      * Sum of the idea weighting
-     * @var float
+     * @var float|null
      * @OA\Property()
      */
-    public $detail_rating_sum;
+    public ?float $detail_rating_sum;
 
     public function __construct(array $data = null)
     {

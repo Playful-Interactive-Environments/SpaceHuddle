@@ -6,30 +6,30 @@ class Resource {
 
     /**
      * The resource id.
-     * @var string
+     * @var string|null
      * @OA\Property(example="uuid")
      */
-    public $id;
+    public ?string $id;
 
     /**
      * Title of the resource.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $title;
+    public ?string $title;
     /**
      * Image of the resource.
-     * @var string
+     * @var string|null
      * @OA\Property(type="string", format="binary")
      */
-    public $image;
+    public ?string $image;
 
     /**
      * Link to a resource.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $link;
+    public ?string $link;
 
     public function __construct(array $data = null)
     {

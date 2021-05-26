@@ -3,12 +3,12 @@ require_once('controller.php');
 require_once('idea.php');
 require_once(__DIR__.'/../models/group.php');
 
-class Group_Controller extends Idea_Controller
+class GroupController extends IdeaController
 {
   public function __construct()
   {
-      parent::__construct("idea", "Group", "Task_Controller", "task", "task_id", "group");
-      $this->task_type = Task_Type::GROUPING;
+      parent::__construct("idea", "Group", "TaskController", "task", "task_id", "group");
+      $this->task_type = TaskType::GROUPING;
   }
 
   /**
@@ -27,8 +27,11 @@ class Group_Controller extends Idea_Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read_all_from_task($task_id = null, $treat_participants_separately = false)  {
-    return parent::read_all_from_task($task_id, $treat_participants_separately);
+  public function readAllFromTask(
+      ?string $task_id = null,
+      bool $treat_participants_separately = false
+  ) : string {
+    return parent::readAllFromTask($task_id, $treat_participants_separately);
   }
 
   /**
@@ -47,8 +50,11 @@ class Group_Controller extends Idea_Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read_all_from_topic($topic_id = null, $treat_participants_separately = false)  {
-    return parent::read_all_from_topic($topic_id, $treat_participants_separately);
+  public function readAllFromTopic(
+      ?string $topic_id = null,
+      bool $treat_participants_separately = false
+  ) : string {
+    return parent::readAllFromTopic($topic_id, $treat_participants_separately);
   }
 
   /**
@@ -64,7 +70,10 @@ class Group_Controller extends Idea_Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read($id = null, $treat_participants_separately = false)  {
+  public function read(
+      ?string $id = null,
+      bool $treat_participants_separately = false
+  ) : string {
     return parent::read($id, $treat_participants_separately);
   }
 
@@ -90,9 +99,15 @@ class Group_Controller extends Idea_Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function add_to_task($task_id = null, $keywords = null, $description = null, $link = null, $image = null)  {
-    $state = strtoupper(State_Idea::NEW);
-    $params = $this->format_parameters(array(
+  public function addToTask(
+      ?string $task_id = null,
+      ?string $keywords = null,
+      ?string $description = null,
+      ?string $link = null,
+      ?string $image = null
+  ) : string {
+    $state = strtoupper(StateIdea::NEW);
+    $params = $this->formatParameters(array(
       "task_id"=>array("default"=>$task_id, "url"=>"task"),
       "keywords"=>array("default"=>$keywords),
       "description"=>array("default"=>$description),
@@ -101,7 +116,7 @@ class Group_Controller extends Idea_Controller
       "state"=>array("default"=>$state)
     ));
 
-    return $this->add_generic($params->task_id, $params, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR));
+    return $this->addGeneric($params->task_id, $params, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR));
   }
 
   /**
@@ -126,8 +141,14 @@ class Group_Controller extends Idea_Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function add_to_topic($topic_id = null, $keywords = null, $description = null, $link = null, $image = null)  {
-    return parent::add_to_topic($topic_id, $keywords, $description, $link, $image);
+  public function addToTopic(
+      ?string $topic_id = null,
+      ?string $keywords = null,
+      ?string $description = null,
+      ?string $link = null,
+      ?string $image = null
+  ) : string {
+    return parent::addToTopic($topic_id, $keywords, $description, $link, $image);
   }
 
   /**
@@ -149,7 +170,14 @@ class Group_Controller extends Idea_Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function update($id = null, $state = null, $keywords = null, $description = null, $link = null, $image = null)  {
+  public function update(
+      ?string $id = null,
+      ?string $state = null,
+      ?string $keywords = null,
+      ?string $description = null,
+      ?string $link = null,
+      ?string $image = null
+  ) :string {
     return parent::update($id, $state, $keywords, $description, $link, $image);
   }
 
@@ -164,7 +192,9 @@ class Group_Controller extends Idea_Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function delete($id = null)  {
+  public function delete(
+      ?string $id = null
+  ) :string {
     return parent::delete($id);
   }
 }

@@ -7,36 +7,36 @@ require_once(__DIR__.'/../controllers/idea.php');
 require_once(__DIR__.'/../controllers/group.php');
 require_once(__DIR__.'/../controllers/controller.php');
 
-$task = Task_Controller::get_instance();
-$idea = Idea_Controller::get_instance();
-$group = Group_Controller::get_instance();
+$task = TaskController::getInstance();
+$idea = IdeaController::getInstance();
+$group = GroupController::getInstance();
 
-if (Controller::is_rest_call("GET")) {
+if (Controller::isRestCall("GET")) {
 	$result = $task->read();
 	echo $result;
 }
-elseif (Controller::is_rest_call("PUT")) {
+elseif (Controller::isRestCall("PUT")) {
 	$result = $task->update();
 	echo $result;
 }
-elseif (Controller::is_rest_call("DELETE")) {
+elseif (Controller::isRestCall("DELETE")) {
 	$result = $task->delete();
 	echo $result;
 }
-elseif (Controller::is_rest_call("GET", search_detail_hierarchy: "ideas")) {
-	$result = $idea->read_all_from_task();
+elseif (Controller::isRestCall("GET", search_detail_hierarchy: "ideas")) {
+	$result = $idea->readAllFromTask();
 	echo $result;
 }
-elseif (Controller::is_rest_call("POST", search_detail_hierarchy: "idea")) {
-	$result = $idea->add_to_task();
+elseif (Controller::isRestCall("POST", search_detail_hierarchy: "idea")) {
+	$result = $idea->addToTask();
 	echo $result;
 }
-elseif (Controller::is_rest_call("GET", search_detail_hierarchy: "groups")) {
-	$result = $group->read_all_from_task();
+elseif (Controller::isRestCall("GET", search_detail_hierarchy: "groups")) {
+	$result = $group->readAllFromTask();
 	echo $result;
 }
-elseif (Controller::is_rest_call("POST", search_detail_hierarchy: "group")) {
-	$result = $group->add_to_task();
+elseif (Controller::isRestCall("POST", search_detail_hierarchy: "group")) {
+	$result = $group->addToTask();
 	echo $result;
 }
 else {

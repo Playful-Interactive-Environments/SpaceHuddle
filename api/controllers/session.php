@@ -7,7 +7,7 @@ require_once('controller.php');
 require_once('topic.php');
 require_once('participant.php');
 
-class Session_Controller extends Controller
+class SessionController extends Controller
 {
   public function __construct()
   {
@@ -30,7 +30,7 @@ class Session_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read_all()  {
+  public function readAll() : string {
     $login_id = getAuthorizationProperty("login_id");
     $query = "SELECT * FROM session
       INNER JOIN session_role ON session_role.session_id = session.id
@@ -40,7 +40,7 @@ class Session_Controller extends Controller
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":login_id", $login_id);
     $stmt->execute();
-    $result_data = $this->database->fatch_all($stmt);
+    $result_data = $this->database->fetchAll($stmt);
     $result = array();
     foreach($result_data as $result_item) {
       array_push($result, new Session($result_item));
@@ -62,10 +62,12 @@ class Session_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read($id = null)  {
+  public function read(
+      ?string $id = null
+  ) : string {
     $login_id = getAuthorizationProperty("login_id");
     if (is_null($id)) {
-      $id = $this->get_url_parameter("session", -1);
+      $id = $this->getUrlParameter("session", -1);
     }
     $query = "SELECT * FROM session
       INNER JOIN session_role ON session_role.session_id = session.id
@@ -74,22 +76,24 @@ class Session_Controller extends Controller
     $stmt->bindParam(":id", $id);
     $stmt->bindParam(":login_id", $login_id);
     $stmt->execute();
-    $result = $this->database->fatch_first($stmt);
+    $result = $this->database->fetchFirst($stmt);
     http_response_code(200);
     return json_encode(new Session($result));
   }
 
-  public function read_by_key($session_key) {
+  public function readByKey(
+      string $session_key
+  ) : object {
     $query = "SELECT * FROM session WHERE connection_key = :session_key";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":session_key", $session_key);
     $stmt->execute();
-    $result = (object)$this->database->fatch_first($stmt, "Wrong Session Key");
+    $result = (object)$this->database->fetchFirst($stmt, "Wrong Session Key");
     return $result;
   }
 
 
-  private function generate_new_session_key() {
+  private function generateNewSessionKey() : string {
     $item_count = 1;
     $connection_key = "";
     while ($item_count > 0) {
@@ -126,21 +130,27 @@ class Session_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function add($title = null, $max_participants = null, $expiration_date = null)  {
+  public function add(
+      ?string $title = null,
+      ?string $max_participants = null,
+      ?string $expiration_date = null
+  ) : string {
     $login_id = getAuthorizationProperty("login_id"); # check if the user is logged in
-    $connection_key = $this->generate_new_session_key();
-    $params = $this->format_parameters(array(
+    $connection_key = $this->generateNewSessionKey();
+    $params = $this->formatParameters(array(
       "title"=>array("default"=>$title),
       "connection_key"=>array("default"=>$connection_key),
       "max_participants"=>array("default"=>$max_participants),
       "expiration_date"=>array("default"=>$expiration_date)
     ));
 
-    return $this->add_generic(null, $params);
+    return $this->addGeneric(null, $params);
   }
 
-  protected function add_dependencies($id, $parameter)
-  {
+  protected function addDependencies(
+      string $id,
+      array|object|null $parameter
+  ) {
     $login_id = getAuthorizationProperty("login_id");
     $role = strtoupper(Role::MODERATOR);
     $query = "INSERT INTO session_role
@@ -178,13 +188,13 @@ class Session_Controller extends Controller
   * )
   */
   public function update(
-    $id=null,
-    $title=null,
-    $max_participants=null,
-    $expiration_date=null,
-    $public_screen_module_id=null
-  ) {
-    $params = $this->format_parameters(array(
+    ?string $id=null,
+    ?string $title=null,
+    ?int $max_participants=null,
+    ?string $expiration_date=null,
+    ?string $public_screen_module_id=null
+  ) : string {
+    $params = $this->formatParameters(array(
       "id"=>array("default"=>$id),
       "title"=>array("default"=>$title),
       "max_participants"=>array("default"=>$max_participants),
@@ -192,10 +202,17 @@ class Session_Controller extends Controller
       "public_screen_module_id"=>array("default"=>$public_screen_module_id)
     ));
 
-    return $this->update_generic($params->id, $params);
+    return $this->updateGeneric($params->id, $params);
   }
 
-  public function check_rights($id) {
+  /**
+   * Checks whether the user is authorised to edit the entry with the specified primary key.
+   * @param string|null $id Primary key to be checked.
+   * @return string Role with which the user is authorised to access the entry.
+   */
+  public function checkRights(
+      ?string $id
+  ) : ?string {
     if (!isParticipant()) {
       $login_id = getAuthorizationProperty("login_id");
       if (is_null($id)) {
@@ -209,7 +226,7 @@ class Session_Controller extends Controller
       $stmt->execute();
       $item_count = $stmt->rowCount();
       if ($item_count > 0) {
-        $result = $this->database->fatch_first($stmt);
+        $result = $this->database->fetchFirst($stmt);
         return strtoupper($result["role"]);
       }
     }
@@ -223,7 +240,7 @@ class Session_Controller extends Controller
       $stmt->execute();
       $item_count = $stmt->rowCount();
       if ($item_count > 0) {
-        $result = $this->database->fatch_first($stmt);
+        $result = $this->database->fetchFirst($stmt);
         return strtoupper(Role::PARTICIPANT);
       }
     }
@@ -241,18 +258,26 @@ class Session_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function delete($id=null)  {
-    return parent::delete_generic($id);
+  public function delete(
+      ?string $id=null
+  ) : string {
+    return parent::deleteGeneric($id);
   }
 
-  protected function delete_dependencies($id) {
+  /**
+   * Delete dependent data.
+   * @param string $id Primary key of the linked table entry.
+   */
+  protected function deleteDependencies(
+      string $id
+  ) {
     $query = "SELECT * FROM participant WHERE session_id = :session_id ";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":session_id", $id);
     $stmt->execute();
 
-    $result_data = $this->database->fatch_all($stmt);
-    $participant = Participant_Controller::get_instance();
+    $result_data = $this->database->fetchAll($stmt);
+    $participant = ParticipantController::getInstance();
     foreach($result_data as $result_item) {
       $participant_id = $result_item["id"];
       $participant->delete($participant_id);
@@ -263,8 +288,8 @@ class Session_Controller extends Controller
     $stmt->bindParam(":session_id", $id);
     $stmt->execute();
 
-    $result_data = $this->database->fatch_all($stmt);
-    $topic = Topic_Controller::get_instance();
+    $result_data = $this->database->fetchAll($stmt);
+    $topic = TopicController::getInstance();
     foreach($result_data as $result_item) {
       $topic_id = $result_item["id"];
       $topic->delete($topic_id);

@@ -6,59 +6,59 @@ class Session {
 
     /**
      * The session id.
-     * @var string
+     * @var string|null
      * @OA\Property(example="uuid")
      */
-    public $id;
+    public ?string $id;
 
     /**
      * The session title.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $title;
+    public ?string $title;
 
     /**
      * The key with which the participants can connect to the session.
-     * @var string
+     * @var string|null
      * @OA\Property(example="ABCD1234")
      */
-    public $connection_key;
+    public ?string $connection_key;
 
     /**
      * What is the maximum number of users allowed to participate in the session?
-     * @var int
+     * @var int|null
      * @OA\Property(example=1000)
      */
-    public $max_participants;
+    public ?int $max_participants;
 
     /**
      * How long is the session valid?
-     * @var Date
+     * @var Date|string|null
      * @OA\Property()
      */
-    public $expiration_date;
+    public Date|string|null $expiration_date;
 
     /**
      * When was the session created?
-     * @var Date
+     * @var Date|string|null
      * @OA\Property()
      */
-    public $creation_date;
+    public ?string $creation_date;
 
     /**
      * role in the session
-     * @var string
+     * @var string|null
      * @OA\Property(example=null)
      */
-    public $public_screen_module_id;
+    public ?string $public_screen_module_id;
 
     /**
      * role in the session
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $role;
+    public ?string $role;
 
     public function __construct(array $data = null)
     {

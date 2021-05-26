@@ -8,7 +8,7 @@
  *   example="ACTIVE"
  * )
  */
-class State_Task {
+class StateTask {
   const WAIT = "wait";
   const ACTIVE = "active";
   const READ_ONLY = "read_only";
@@ -24,7 +24,7 @@ class State_Task {
  *   example="NEW"
  * )
  */
-class State_Idea {
+class StateIdea {
   const NEW = "new";
   const DUPLICATE = "duplicate";
   const INAPPROPRIATE = "inappropriate";

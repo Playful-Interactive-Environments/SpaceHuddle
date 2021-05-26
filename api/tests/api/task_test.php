@@ -27,7 +27,7 @@ class Task_Test extends AuthorizedUserTestCase
 
   public function test_workflow() {
     $data =  json_encode((object)array(
-      'task_type' => Task_Type::SELECTION,
+      'TaskType' => TaskType::SELECTION,
       'name' => 'test selection',
       'parameter' => "{'count': 10}",
       'order' => 10
@@ -44,11 +44,11 @@ class Task_Test extends AuthorizedUserTestCase
 
     $data =  json_encode((object)array(
       'id' => $id,
-      'task_type' => Task_Type::SELECTION,
+      'TaskType' => TaskType::SELECTION,
       'name' => 'test selection',
       'parameter' => "{'count': 10}",
       'order' => 10,
-      'state' => State_Task::READ_ONLY
+      'state' => StateTask::READ_ONLY
     ));
 
     $res = $this->client->put($this->get_absolute_api_url("/api/task/"), [

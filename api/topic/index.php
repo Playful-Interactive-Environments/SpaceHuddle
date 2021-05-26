@@ -9,50 +9,50 @@ require_once(__DIR__.'/../controllers/group.php');
 require_once(__DIR__.'/../controllers/participant.php');
 require_once(__DIR__.'/../controllers/controller.php');
 
-$topic = Topic_Controller::get_instance();
-$task = Task_Controller::get_instance();
-$idea = Idea_Controller::get_instance();
-$group = Group_Controller::get_instance();
-$participant = Participant_Controller::get_instance();
+$topic = TopicController::getInstance();
+$task = TaskController::getInstance();
+$idea = IdeaController::getInstance();
+$group = GroupController::getInstance();
+$participant = ParticipantController::getInstance();
 
-if (Controller::is_rest_call("GET")) {
+if (Controller::isRestCall("GET")) {
 	$result = $topic->read();
 	echo $result;
 }
-elseif (Controller::is_rest_call("PUT")) {
+elseif (Controller::isRestCall("PUT")) {
 	$result = $topic->update();
 	echo $result;
 }
-elseif (Controller::is_rest_call("DELETE")) {
+elseif (Controller::isRestCall("DELETE")) {
 	$result = $topic->delete();
 	echo $result;
 }
-elseif (Controller::is_rest_call("GET", search_detail_hierarchy: "tasks")) {
-	$result = $task->read_all();
+elseif (Controller::isRestCall("GET", search_detail_hierarchy: "tasks")) {
+	$result = $task->readAll();
 	echo $result;
 }
-elseif (Controller::is_rest_call("POST", search_detail_hierarchy: "task")) {
+elseif (Controller::isRestCall("POST", search_detail_hierarchy: "task")) {
 	$result = $task->add();
 	echo $result;
 }
-elseif (Controller::is_rest_call("GET", search_detail_hierarchy: "participant_tasks")) {
-	$result = $participant->get_topic_tasks();
+elseif (Controller::isRestCall("GET", search_detail_hierarchy: "participant_tasks")) {
+	$result = $participant->getTopicTasks();
 	echo $result;
 }
-elseif (Controller::is_rest_call("GET", search_detail_hierarchy: "ideas")) {
-	$result = $idea->read_all_from_topic();
+elseif (Controller::isRestCall("GET", search_detail_hierarchy: "ideas")) {
+	$result = $idea->readAllFromTopic();
 	echo $result;
 }
-elseif (Controller::is_rest_call("POST", search_detail_hierarchy: "idea")) {
-	$result = $idea->add_to_topic();
+elseif (Controller::isRestCall("POST", search_detail_hierarchy: "idea")) {
+	$result = $idea->addToTopic();
 	echo $result;
 }
-elseif (Controller::is_rest_call("GET", search_detail_hierarchy: "groups")) {
-	$result = $group->read_all_from_topic();
+elseif (Controller::isRestCall("GET", search_detail_hierarchy: "groups")) {
+	$result = $group->readAllFromTopic();
 	echo $result;
 }
-elseif (Controller::is_rest_call("POST", search_detail_hierarchy: "group")) {
-	$result = $group->add_to_topic();
+elseif (Controller::isRestCall("POST", search_detail_hierarchy: "group")) {
+	$result = $group->addToTopic();
 	echo $result;
 }
 else {

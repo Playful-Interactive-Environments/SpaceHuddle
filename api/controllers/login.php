@@ -5,7 +5,7 @@ require_once(__DIR__.'/../models/user.php');
 require_once('controller.php');
 require_once('session.php');
 
-class Login_Controller extends Controller
+class LoginController extends Controller
 {
   public function __construct()
   {
@@ -37,8 +37,11 @@ class Login_Controller extends Controller
   *   @OA\Response(response="404", description="Not Found")
   * )
   */
-  public function login($username = null, $password = null)  {
-    $params = $this->format_parameters(array(
+  public function login(
+      ?string $username = null,
+      ?string $password = null
+  ) : string {
+    $params = $this->formatParameters(array(
       "username"=>array("default"=>$username),
       "password"=>array("default"=>$password, "type"=>"MD5")
     ));
@@ -59,7 +62,7 @@ class Login_Controller extends Controller
       );
       die($error);
     }
-    $result = (object)$this->database->fatch_first($stmt);
+    $result = (object)$this->database->fetchFirst($stmt);
     $jwt = generateToken(array(
         "login_id" => $result->id,
         "username" => $result->username
@@ -94,13 +97,17 @@ class Login_Controller extends Controller
   *   @OA\Response(response="404", description="Not Found")
   * )
   */
-  public function register($username = null, $password = null, $password_confirmation = null)  {
-    $params = $this->format_parameters(array(
+  public function register(
+      ?string $username = null,
+      ?string $password = null,
+      ?string $password_confirmation = null
+  ) : string {
+    $params = $this->formatParameters(array(
       "username"=>array("default"=>$username),
       "password"=>array("default"=>$password, "type"=>"MD5"),
       "password_confirmation"=>array("default"=>$password_confirmation, "type"=>"MD5")
     ));
-    if ($this->check_user($params->username))  {
+    if ($this->checkUser($params->username))  {
         http_response_code(404);
         $error = json_encode(
           array(
@@ -110,10 +117,10 @@ class Login_Controller extends Controller
         );
         die($error);
     }
-    $this->check_password_confirmation($params->password, $params->password_confirmation);
+    $this->checkPasswordConfirmation($params->password, $params->password_confirmation);
     if (isset($params->password_confirmation)) unset($params->password_confirmation);
 
-    $this->add_generic(null, $params, authorized_roles: array(Role::UNKNOWN));
+    $this->addGeneric(null, $params, authorized_roles: array(Role::UNKNOWN));
 
     http_response_code(200);
     return json_encode(
@@ -124,7 +131,10 @@ class Login_Controller extends Controller
     );
   }
 
-  private function check_password_confirmation($password, $password_confirmation) {
+  private function checkPasswordConfirmation(
+      string $password,
+      string $password_confirmation
+  ) {
     if ($password != $password_confirmation) {
       http_response_code(404);
       $error = json_encode(
@@ -137,7 +147,9 @@ class Login_Controller extends Controller
     }
   }
 
-  private function check_user($username) {
+  private function checkUser(
+      string $username
+  ) : bool {
     $query = "SELECT * FROM login WHERE username = :username";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":username", $username);
@@ -147,7 +159,10 @@ class Login_Controller extends Controller
     return ($item_count > 0);
   }
 
-  private function check_password($id, $password) {
+  private function checkPassword(
+      string $id,
+      string $password
+  ) : bool {
     $query = "SELECT * FROM login WHERE id = :id and password = :password";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":id", $id);
@@ -158,12 +173,21 @@ class Login_Controller extends Controller
     return ($item_count > 0);
   }
 
-  public function check_rights($id) {
-    return $this->check_login($id);
+  /**
+   * Checks whether the user is authorised to edit the entry with the specified primary key.
+   * @param string|null $id Primary key to be checked.
+   * @return string|null Role with which the user is authorised to access the entry.
+   */
+  public function checkRights(
+      ?string $id
+  ) : ?string {
+    return $this->checkLogin($id);
   }
 
-  protected function read($id = null)  {
-    return parent::read_generic($id, role: Role::MODERATOR);
+  protected function read(
+      ?string $id = null
+  ) : string {
+    return parent::readGeneric($id, role: Role::MODERATOR);
   }
 
   /**
@@ -186,16 +210,20 @@ class Login_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function update($old_password = null, $password = null, $password_confirmation = null)  {
+  public function update(
+      ?string $old_password = null,
+      ?string $password = null,
+      ?string $password_confirmation = null
+  ) :string {
     $login_id = getAuthorizationProperty("login_id");
-    $params = $this->format_parameters(array(
+    $params = $this->formatParameters(array(
       "id"=>array("default"=>$login_id),
       "old_password"=>array("default"=>$old_password, "type"=>"MD5"),
       "password"=>array("default"=>$password, "type"=>"MD5"),
       "password_confirmation"=>array("default"=>$password_confirmation, "type"=>"MD5")
     ));
-    $this->check_password_confirmation($params->password, $params->password_confirmation);
-    if (!$this->check_password($login_id, $params->old_password)) {
+    $this->checkPasswordConfirmation($params->password, $params->password_confirmation);
+    if (!$this->checkPassword($login_id, $params->old_password)) {
       http_response_code(404);
       $error = json_encode(
         array(
@@ -210,7 +238,7 @@ class Login_Controller extends Controller
     if (isset($params->password_confirmation))
       unset($params->password_confirmation);
 
-    $this->update_generic($params->id, $params);
+    $this->updateGeneric($params->id, $params);
     return json_encode(
       array(
         "state"=>"Sccess",
@@ -229,12 +257,18 @@ class Login_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function delete()  {
+  public function delete() : string {
     $login_id = getAuthorizationProperty("login_id");
-    return parent::delete_generic($login_id);
+    return parent::deleteGeneric($login_id);
   }
 
-  protected function delete_dependencies($id) {
+  /**
+   * Delete dependent data.
+   * @param string $id Primary key of the linked table entry.
+   */
+  protected function deleteDependencies(
+      string $id
+  ) {
     $role = strtoupper(Role::MODERATOR);
     $query = "SELECT * FROM session_role
       WHERE login_id = :login_id AND role like :role";
@@ -243,7 +277,7 @@ class Login_Controller extends Controller
     $stmt->bindParam(":role", $role);
     $stmt->execute();
 
-    $result_data = $this->database->fatch_all($stmt);
+    $result_data = $this->database->fetchAll($stmt);
     foreach($result_data as $result_item) {
       $session_id = $result_item["session_id"];
 
@@ -256,7 +290,7 @@ class Login_Controller extends Controller
       $item_count = $stmt->rowCount();
 
       if ($item_count == 1) {
-        $session = Session_Controller::get_instance();
+        $session = SessionController::getInstance();
         $session->delete($session_id);
       }
     }

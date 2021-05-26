@@ -19,7 +19,7 @@ class AvatarSymbol {
    * Pick a random value of the AvatarSymbol enum.
    * @return a random AvatarSymbol.
    */
-  public static function getRandomValue() {
+  public static function getRandomValue() : string {
     $oClass = new ReflectionClass(__CLASS__);
     $cases = $oClass->getConstants();
     $keys = array_keys($cases);
@@ -35,17 +35,17 @@ class Avatar {
 
     /**
      * The avatar color.
-     * @var string
+     * @var string|null
      * @OA\Property(example="red")
      */
-    public $color;
+    public ?string $color;
 
     /**
      * The avatar symbol.
-     * @var string
+     * @var string|null
      * @OA\Property(ref="#/components/schemas/AvatarSymbol")
      */
-    public $symbol;
+    public ?string $symbol;
 
     public function __construct(array $data = null)
     {

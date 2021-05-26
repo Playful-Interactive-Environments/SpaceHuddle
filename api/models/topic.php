@@ -6,31 +6,31 @@ class Topic {
 
     /**
      * The topic id.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $id;
+    public ?string $id;
 
     /**
      * The topic title.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $title;
+    public ?string $title;
 
     /**
      * The topic description.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $description;
+    public ?string $description;
 
     /**
      * Data of the active topic task.
-     * @var string
+     * @var string|null
      * @OA\Property(example=null)
      */
-    public $active_task_id;
+    public ?string $active_task_id;
 
     public function __construct(array $data = null)
     {

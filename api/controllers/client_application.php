@@ -3,11 +3,11 @@ require_once(__DIR__.'/../config/authorization.php');
 require_once(__DIR__.'/../models/task.php');
 require_once('controller.php');
 
-class Client_Controller extends Controller
+class ClientController extends Controller
 {
   public function __construct()
   {
-      parent::__construct("task", "Task", "Topic_Controller", "topic", "topic_id");
+      parent::__construct("task", "Task", "TopicController", "topic", "topic_id");
   }
   
   /**
@@ -19,13 +19,16 @@ class Client_Controller extends Controller
   *   @OA\Parameter(in="path", name="state",
   *     description="display status on the client devices",
   *     required=true,
-  *     @OA\Schema(ref="#/components/schemas/State_Task")),
+  *     @OA\Schema(ref="#/components/schemas/StateTask")),
   *   @OA\Response(response="200", description="Success"),
   *   @OA\Response(response="404", description="Not Found"),
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function set_client($session_id, $task_id)  {
+  public function setClient(
+      ?string $session_id = null,
+      ?string $task_id = null
+  ) : mixed {
     $login_id = getAuthorizationProperty("login_id");
     #TODO: check rights for session
   }

@@ -6,11 +6,11 @@ require_once(__DIR__.'/../models/task.php');
 require_once(__DIR__.'/../models/task_type.php');
 require_once(__DIR__.'/../models/state.php');
 
-class Task_Controller extends Controller
+class TaskController extends Controller
 {
   public function __construct()
   {
-      parent::__construct("task", "Task", "Topic_Controller", "topic", "topic_id");
+      parent::__construct("task", "Task", "TopicController", "topic", "topic_id");
   }
 
   /**
@@ -29,8 +29,10 @@ class Task_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read_all($topic_id = null)  {
-    return parent::read_all_generic($topic_id);
+  public function readAll(
+      ?string $topic_id = null
+  ) : string {
+    return parent::readAllGeneric($topic_id);
   }
 
   /**
@@ -46,8 +48,10 @@ class Task_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read($id = null)  {
-    return parent::read_generic($id);
+  public function read(
+      ?string $id = null
+  ) : string {
+    return parent::readGeneric($id);
   }
 
   /**
@@ -74,17 +78,23 @@ class Task_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function add($topic_id = null, $task_type = null, $name = null, $parameter = null, $order = null)  {
-    $params = $this->format_parameters(array(
+  public function add(
+      ?string $topic_id = null,
+      ?string $task_type = null,
+      ?string $name = null,
+      ?string $parameter = null,
+      ?string $order = null
+  ) : string {
+    $params = $this->formatParameters(array(
       "topic_id"=>array("default"=>$topic_id, "url"=>"topic"),
       "task_type"=>array("default"=>$task_type, "type"=>"Task_Type"),
       "name"=>array("default"=>$name),
       "parameter"=>array("default"=>$parameter, "type"=>"JSON"),
       "order"=>array("default"=>$order),
-      "state"=>array("default"=>State_Task::WAIT, "type"=>"State_Task")
+      "state"=>array("default"=>StateTask::WAIT, "type"=>"StateTask")
     ));
 
-    return $this->add_generic($params->topic_id, $params);
+    return $this->addGeneric($params->topic_id, $params);
   }
 
   /**
@@ -106,17 +116,24 @@ class Task_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function update($id = null, $task_type = null, $name = null, $parameter = null, $order = null, $state = null)  {
-    $params = $this->format_parameters(array(
+  public function update(
+      ?string $id = null,
+      ?string $task_type = null,
+      ?string $name = null,
+      ?string $parameter = null,
+      ?string $order = null,
+      ?string $state = null
+  ) : string {
+    $params = $this->formatParameters(array(
       "id"=>array("default"=>$id),
       "task_type"=>array("default"=>$task_type, "type"=>"Task_Type"),
       "name"=>array("default"=>$name),
       "parameter"=>array("default"=>$parameter, "type"=>"JSON"),
       "order"=>array("default"=>$order),
-      "state"=>array("default"=>$state, "type"=>"State_Task")
+      "state"=>array("default"=>$state, "type"=>"StateTask")
     ));
 
-    return $this->update_generic($params->id, $params);
+    return $this->updateGeneric($params->id, $params);
   }
 
   /**
@@ -130,18 +147,26 @@ class Task_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function delete($id = null)  {
-    return parent::delete_generic($id);
+  public function delete(
+      ?string $id = null
+  ) : string {
+    return parent::deleteGeneric($id);
   }
 
-  protected function delete_dependencies($id) {
+  /**
+   * Delete dependent data.
+   * @param string $id Primary key of the linked table entry.
+   */
+  protected function deleteDependencies(
+      string $id
+  ) {
     $query = "SELECT * FROM idea WHERE task_id = :task_id ";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":task_id", $id);
     $stmt->execute();
 
-    $result_data = $this->database->fatch_all($stmt);
-    $idea = Idea_Controller::get_instance();
+    $result_data = $this->database->fetchAll($stmt);
+    $idea = IdeaController::getInstance();
     foreach($result_data as $result_item) {
       $idea_id = $result_item["id"];
       $idea->delete($idea_id);

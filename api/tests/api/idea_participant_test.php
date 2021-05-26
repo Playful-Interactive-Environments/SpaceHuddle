@@ -47,7 +47,7 @@ class Idea_Participant_Test extends AuthorizedParticipantTestCase
 
     $data =  json_encode((object)array(
       'id' => $id,
-      'state' => State_Idea::HANDLED,
+      'state' => StateIdea::HANDLED,
       'keywords' => 'test idea',
       'description' => "new description",
       'link' => null,

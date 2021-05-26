@@ -6,17 +6,17 @@ class User {
 
     /**
      * The user id.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $id;
+    public ?string $id;
 
     /**
      * The username of the user.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $username;
+    public ?string $username;
 
     public function __construct(array $data = null)
     {

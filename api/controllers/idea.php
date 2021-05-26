@@ -6,19 +6,19 @@ require_once('selection.php');
 require_once(__DIR__.'/../models/idea.php');
 require_once(__DIR__.'/../models/task_type.php');
 
-class Idea_Controller extends Controller
+class IdeaController extends Controller
 {
-  protected $task_type = Task_Type::BRAINSTORMING;
+  protected $task_type = TaskType::BRAINSTORMING;
 
   public function __construct($table = null, $class = null, $parent_controller = null, $parent_table = null, $parent_id_name = null, $url_parameter = null)
   {
       if (is_null($table)) $table = "idea";
       if (is_null($class)) $class = "Idea";
-      if (is_null($parent_controller)) $parent_controller = "Task_Controller";
+      if (is_null($parent_controller)) $parent_controller = "TaskController";
       if (is_null($parent_table)) $parent_table = "task";
       if (is_null($parent_id_name)) $parent_id_name = "task_id";
       parent::__construct($table, $class, $parent_controller, $parent_table, $parent_id_name, $url_parameter);
-      $this->task_type = Task_Type::BRAINSTORMING;
+      $this->task_type = TaskType::BRAINSTORMING;
   }
 
   /**
@@ -37,7 +37,10 @@ class Idea_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read_all_from_task($task_id = null, $treat_participants_separately = true)  {
+  public function readAllFromTask(
+      ?string $task_id = null,
+      bool $treat_participants_separately = true
+  ) : string {
     $task_type = strtoupper($this->task_type);
     if (!isParticipant() or !$treat_participants_separately) {
       $query = "SELECT * FROM idea
@@ -55,7 +58,7 @@ class Idea_Controller extends Controller
       $stmt->bindParam(":participant_id", $participant_id);
       $stmt->bindParam(":task_type", $task_type);
     }
-    return parent::read_all_generic($task_id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT), stmt:  $stmt);
+    return parent::readAllGeneric($task_id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT), stmt:  $stmt);
   }
 
   /**
@@ -74,7 +77,10 @@ class Idea_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read_all_from_topic($topic_id = null, $treat_participants_separately = true)  {
+  public function readAllFromTopic(
+      ?string $topic_id = null,
+      bool $treat_participants_separately = true
+  ) :string {
     $task_type = strtoupper($this->task_type);
     if (!isParticipant() or !$treat_participants_separately) {
       $query = "SELECT * FROM idea
@@ -91,13 +97,13 @@ class Idea_Controller extends Controller
       $stmt->bindParam(":participant_id", $participant_id);
       $stmt->bindParam(":task_type", $task_type);
     }
-    return parent::read_all_generic(
+    return parent::readAllGeneric(
       $topic_id,
       authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
       stmt:  $stmt,
       parent_table: "topic",
       parent_id_name: "topic_id",
-      parent_controller: "Topic_Controller"
+      parent_controller: "TopicController"
     );
   }
 
@@ -114,7 +120,10 @@ class Idea_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read($id = null, $treat_participants_separately = true)  {
+  public function read(
+      ?string $id = null,
+      bool $treat_participants_separately = true
+  ) : string {
     $task_type = strtoupper($this->task_type);
     if (!isParticipant() or !$treat_participants_separately) {
       $query = "SELECT * FROM idea
@@ -132,7 +141,7 @@ class Idea_Controller extends Controller
       $stmt->bindParam(":participant_id", $participant_id);
       $stmt->bindParam(":task_type", $task_type);
     }
-    return parent::read_generic($id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT), stmt:  $stmt);
+    return parent::readGeneric($id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT), stmt:  $stmt);
 
     /*$query = "SELECT * FROM idea
       WHERE id = :id
@@ -143,7 +152,14 @@ class Idea_Controller extends Controller
     */
   }
 
-  public function check_rights($id) {
+  /**
+   * Checks whether the user is authorised to edit the entry with the specified primary key.
+   * @param string|null $id Primary key to be checked.
+   * @return string|null Role with which the user is authorised to access the entry.
+   */
+  public function checkRights(
+      ?string $id
+  ) : ?string {
     $query = "SELECT * FROM idea
       WHERE id = :id";
     $stmt = $this->connection->prepare($query);
@@ -161,16 +177,23 @@ class Idea_Controller extends Controller
     $stmt->execute();
     $item_count = $stmt->rowCount();
     if ($item_count > 0) {
-      $result = $this->database->fatch_first($stmt);
+      $result = $this->database->fetchFirst($stmt);
       $task_id = $result["task_id"];
-      $role = Task_Controller::check_instance_rights($task_id);
+      $role = TaskController::checkInstanceRights($task_id);
       return $role;
     }
     return null;
   }
 
-  public function check_read_rights($id) {
-    return parent::check_rights($id);
+  /**
+   * Checks whether the user is authorised to read the entry with the specified primary key.
+   * @param string|null $id Primary key to be checked.
+   * @return string|null Role with which the user is authorised to access the entry.
+   */
+  public function checkReadRights(
+      ?string $id
+  ) : ?string {
+    return parent::checkRights($id);
   }
 
   /**
@@ -197,10 +220,16 @@ class Idea_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function add_to_task($task_id = null, $keywords = null, $description = null, $link = null, $image = null)  {
+  public function addToTask(
+      ?string $task_id = null,
+      ?string $keywords = null,
+      ?string $description = null,
+      ?string $link = null,
+      ?string $image = null
+  ) : string {
     $participant_id = getAuthorizationProperty("participant_id");
-    $state = strtoupper(State_Idea::NEW);
-    $params = $this->format_parameters(array(
+    $state = strtoupper(StateIdea::NEW);
+    $params = $this->formatParameters(array(
       "task_id"=>array("default"=>$task_id, "url"=>"task"),
       "keywords"=>array("default"=>$keywords),
       "description"=>array("default"=>$description),
@@ -210,7 +239,7 @@ class Idea_Controller extends Controller
       "participant_id"=>array("default"=>$participant_id)
     ));
 
-    return $this->add_generic($params->task_id, $params, authorized_roles: array(Role::PARTICIPANT));
+    return $this->addGeneric($params->task_id, $params, authorized_roles: array(Role::PARTICIPANT));
   }
 
   /**
@@ -237,9 +266,15 @@ class Idea_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function add_to_topic($topic_id = null, $keywords = null, $description = null, $link = null, $image = null)  {
+  public function addToTopic(
+      ?string $topic_id = null,
+      ?string $keywords = null,
+      ?string $description = null,
+      ?string $link = null,
+      ?string $image = null
+  ) : string {
     if (is_null($topic_id)) {
-      $topic_id = $this->get_url_parameter("topic");
+      $topic_id = $this->getUrlParameter("topic");
     }
     $task_type = strtoupper($this->task_type);
 
@@ -251,9 +286,9 @@ class Idea_Controller extends Controller
     $stmt->execute();
     $item_count = $stmt->rowCount();
     if ($item_count > 0) {
-      $result = $this->database->fatch_first($stmt);
+      $result = $this->database->fetchFirst($stmt);
       $task_id = $result["id"];
-      return $this->add_to_task($task_id, $keywords, $description, $link, $image);
+      return $this->addToTask($task_id, $keywords, $description, $link, $image);
     }
   }
 
@@ -277,17 +312,24 @@ class Idea_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function update($id = null, $state = null, $keywords = null, $description = null, $link = null, $image = null)  {
-    $params = $this->format_parameters(array(
+  public function update(
+      ?string $id = null,
+      ?string $state = null,
+      ?string $keywords = null,
+      ?string $description = null,
+      ?string $link = null,
+      ?string $image = null
+  ) : string {
+    $params = $this->formatParameters(array(
       "id"=>array("default"=>$id),
       "keywords"=>array("default"=>$keywords),
       "description"=>array("default"=>$description),
       "link"=>array("default"=>$link),
       "image"=>array("default"=>$image),
-      "state"=>array("default"=>$state, "type"=>"State_Idea")
+      "state"=>array("default"=>$state, "type"=>"StateIdea")
     ));
 
-    return $this->update_generic($params->id, $params, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT));
+    return $this->updateGeneric($params->id, $params, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT));
   }
 
   /**
@@ -301,11 +343,19 @@ class Idea_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function delete($id = null)  {
-    return parent::delete_generic($id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT));
+  public function delete(
+      ?string $id = null
+  ) : string {
+    return parent::deleteGeneric($id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT));
   }
 
-  protected function delete_dependencies($id) {
+  /**
+   * Delete dependent data.
+   * @param string $id Primary key of the linked table entry.
+   */
+  protected function deleteDependencies(
+      string $id
+  ) {
     $query = "DELETE FROM voting WHERE idea_id = :idea_id";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":idea_id", $id);

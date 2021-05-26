@@ -4,12 +4,12 @@ require_once('group.php');
 require_once(__DIR__.'/../models/idea.php');
 require_once(__DIR__.'/../models/role.php');
 
-class Group_Idea_Controller extends Controller
+class GroupIdeaController extends Controller
 {
   public function __construct()
   {
-      parent::__construct("hierarchy", "Idea", "Group_Controller", "group", "group_id", "group");
-      $this->task_type = Task_Type::GROUPING;
+      parent::__construct("hierarchy", "Idea", "GroupController", "group", "group_id", "group");
+      $this->task_type = TaskType::GROUPING;
   }
 
   /**
@@ -28,14 +28,16 @@ class Group_Idea_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read_ideas($group_id = null)  {
-    $task_type = strtoupper(Task_Type::BRAINSTORMING);
+  public function readIdeas(
+      ?string $group_id = null
+  ) : string {
+    $task_type = strtoupper(TaskType::BRAINSTORMING);
     $query = "SELECT * FROM idea
       WHERE task_id IN (SELECT id FROM task WHERE task_type like :task_type)
       AND id IN (SELECT sub_idea_id FROM hierarchy WHERE group_idea_id = :group_id)";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":task_type", $task_type);
-    return parent::read_all_generic(
+    return parent::readAllGeneric(
       $group_id,
       authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
       stmt:  $stmt
@@ -61,8 +63,11 @@ class Group_Idea_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function add_ideas($group_id = null, $idea_array = null)  {
-    $params = $this->format_parameters(array(
+  public function addIdeas(
+      ?string $group_id = null,
+      ?array $idea_array = null
+  ) : string {
+    $params = $this->formatParameters(array(
       "group_idea_id"=>array("default"=>$group_id, "url"=>"group"),
       "sub_idea_id"=>array("default"=>$idea_array, "type"=>"ARRAY", "result"=>"all")
     ));
@@ -73,7 +78,7 @@ class Group_Idea_Controller extends Controller
         "sub_idea_id"=>$value
       ));
     }
-    return $this->add_generic(
+    return $this->addGeneric(
       $params->group_idea_id,
       $list,
       insert_id: false,
@@ -102,8 +107,11 @@ class Group_Idea_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function delete_ideas($group_id = null, $idea_array = null)  {
-    $params = $this->format_parameters(array(
+  public function deleteIdeas(
+      ?string $group_id = null,
+      array $idea_array = null
+  ) : string {
+    $params = $this->formatParameters(array(
       "group_idea_id"=>array("default"=>$group_id, "url"=>"group"),
       "sub_idea_id"=>array("default"=>$idea_array, "type"=>"ARRAY", "result"=>"all")
     ));
@@ -114,15 +122,22 @@ class Group_Idea_Controller extends Controller
     $stmt->bindParam(":group_id", $params->group_idea_id);
     $stmt->bindParam(":idea_id", $sub_idea_ids);
 
-    return parent::delete_generic(
+    return parent::deleteGeneric(
       $params->group_idea_id,
       authorized_roles: array(Role::MODERATOR, Role::FACILITATOR),
       stmt: $stmt
     );
   }
 
-  public function check_rights($id) {
-    return Group_Controller::check_instance_rights($id);
+  /**
+   * Checks whether the user is authorised to edit the entry with the specified primary key.
+   * @param string|null $id Primary key to be checked.
+   * @return string|null Role with which the user is authorised to access the entry.
+   */
+  public function checkRights(
+      ?string $id
+  ) : ?string {
+    return GroupController::checkInstanceRights($id);
   }
 }
 ?>

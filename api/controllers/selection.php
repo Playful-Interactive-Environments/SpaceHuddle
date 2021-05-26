@@ -1,11 +1,11 @@
 <?php
 require_once('controller.php');
 
-class Selection_Controller extends Controller
+class SelectionController extends Controller
 {
   public function __construct()
   {
-      parent::__construct("selection_group", "Selection", "Idea_Controller", "idea", "idea_id");
+      parent::__construct("selection_group", "Selection", "IdeaController", "idea", "idea_id");
   }
 
   /**
@@ -24,7 +24,7 @@ class Selection_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read_all()  {
+  public function readAll() : string {
     #TODO: check rights for session
   }
 
@@ -41,7 +41,9 @@ class Selection_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read($id)  {
+  public function read(
+      ?string $id = null
+  ) : string {
     #TODO: check rights for session
   }
 
@@ -61,7 +63,9 @@ class Selection_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read_ideas($id)  {
+  public function readIdeas(
+      ?string $id = null
+  ) : string {
     #TODO: check rights for session
   }
 
@@ -86,7 +90,7 @@ class Selection_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function add()  {
+  public function add() : string {
     try{
       #TODO: check rights for session
     }
@@ -124,7 +128,7 @@ class Selection_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function add_ideas()  {
+  public function addIdeas() : string {
     try{
       #TODO: check rights for session
     }
@@ -162,7 +166,9 @@ class Selection_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function update($id)  {
+  public function update(
+      ?string $id = null
+  ) : string {
     #TODO: check rights for session
   }
 
@@ -185,7 +191,7 @@ class Selection_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function delete_ideas()  {
+  public function deleteIdeas() : string {
     try{
       #TODO: check rights for session
     }
@@ -215,12 +221,21 @@ class Selection_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function delete($id)  {
+  public function delete(
+      ?string $id = null
+  ) : string {
     #TODO: check rights for session
   }
 
-  protected function delete_dependencies($id) {
-  }
+    /**
+     * Delete dependent data.
+     * @param string $id Primary key of the linked table entry.
+     */
+    protected function deleteDependencies(
+        string $id
+    ) {
+
+    }
 
 }
 ?>

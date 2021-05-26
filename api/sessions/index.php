@@ -5,10 +5,10 @@ header('Content-Type: application/json; charset=UTF-8');
 require_once(__DIR__.'/../controllers/session.php');
 require_once(__DIR__.'/../controllers/controller.php');
 
-$session = Session_Controller::get_instance();
+$session = SessionController::getInstance();
 
-if (Controller::is_rest_call("GET")) {
-	$result = $session->read_all();
+if (Controller::isRestCall("GET")) {
+	$result = $session->readAll();
 	echo $result;
 }
 else {

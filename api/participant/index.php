@@ -6,21 +6,21 @@ require_once(__DIR__.'/../controllers/participant.php');
 require_once(__DIR__.'/../controllers/controller.php');
 
 
-$participant = Participant_Controller::get_instance();
-if (Controller::is_rest_call("GET", 2, search_detail_hierarchy: "connect")) {
+$participant = ParticipantController::getInstance();
+if (Controller::isRestCall("GET", 2, search_detail_hierarchy: "connect")) {
 	$result = $participant->reconnect();
 	echo $result;
 }
-elseif (Controller::is_rest_call("POST", 2, search_detail_hierarchy: "connect")) {
+elseif (Controller::isRestCall("POST", 2, search_detail_hierarchy: "connect")) {
 	$result = $participant->connect();
 	echo $result;
 }
-elseif (Controller::is_rest_call("GET", 2, search_detail_hierarchy: "tasks")) {
-	$result = $participant->get_tasks();
+elseif (Controller::isRestCall("GET", 2, search_detail_hierarchy: "tasks")) {
+	$result = $participant->getTasks();
 	echo $result;
 }
-elseif (Controller::is_rest_call("GET", 2, search_detail_hierarchy: "topics")) {
-	$result = $participant->get_topics();
+elseif (Controller::isRestCall("GET", 2, search_detail_hierarchy: "topics")) {
+	$result = $participant->getTopics();
 	echo $result;
 }
 else {

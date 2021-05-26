@@ -5,17 +5,17 @@ header('Content-Type: application/json; charset=UTF-8');
 require_once(__DIR__.'/../controllers/idea.php');
 require_once(__DIR__.'/../controllers/controller.php');
 
-$idea = Idea_Controller::get_instance();
+$idea = IdeaController::getInstance();
 
-if (Controller::is_rest_call("GET")) {
+if (Controller::isRestCall("GET")) {
 	$result = $idea->read();
 	echo $result;
 }
-elseif (Controller::is_rest_call("PUT")) {
+elseif (Controller::isRestCall("PUT")) {
 	$result = $idea->update();
 	echo $result;
 }
-elseif (Controller::is_rest_call("DELETE")) {
+elseif (Controller::isRestCall("DELETE")) {
 	$result = $idea->delete();
 	echo $result;
 }

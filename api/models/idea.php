@@ -6,52 +6,52 @@ class Idea {
 
     /**
      * The idea id.
-     * @var string
+     * @var string|null
      * @OA\Property(example="uuid")
      */
-    public $id;
+    public ?string $id;
 
     /**
      * current status of the idea
-     * @var string
-     * @OA\Property(ref="#/components/schemas/State_Idea")
+     * @var string|null
+     * @OA\Property(ref="#/components/schemas/StateIdea")
      */
-    public $state;
+    public ?string $state;
 
     /**
      * Time of idea storage.
-     * @var Date
+     * @var Date|string|null
      * @OA\Property()
      */
-    public $time_stamp;
+    public Date|string|null $time_stamp;
 
     /**
      * Description of the idea.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $description;
+    public ?string $description;
 
     /**
      * Short description or keywords that describe the idea.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $keywords;
+    public ?string $keywords;
 
     /**
      * Image that describes the idea.
-     * @var string
+     * @var string|null
      * @OA\Property(type="string", format="binary")
      */
-    public $image;
+    public ?string $image;
 
     /**
      * Link to a resource that describes the idea.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $link;
+    public ?string $link;
 
     public function __construct(array $data = null)
     {

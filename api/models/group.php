@@ -6,31 +6,31 @@ class Group {
 
     /**
      * The idea id.
-     * @var string
+     * @var string|null
      * @OA\Property(example="uuid")
      */
-    public $id;
+    public ?string $id;
 
     /**
      * Time of idea storage.
-     * @var Date
+     * @var Date|string|null
      * @OA\Property()
      */
-    public $time_stamp;
+    public Date|string|null $time_stamp;
 
     /**
      * Description of the idea.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $description;
+    public ?string $description;
 
     /**
      * Short description or keywords that describe the idea.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $keywords;
+    public ?string $keywords;
 
     public function __construct(array $data = null)
     {

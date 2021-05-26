@@ -32,7 +32,7 @@ abstract class AuthorizedParticipantTestCase extends AuthorizedTestCase
 
   public function get_first_task_id_idea() {
     if (!isset($this->task_id_idea)) {
-      $this->task_id_idea = $this->get_first_task_id(Task_Type::BRAINSTORMING);
+      $this->task_id_idea = $this->get_first_task_id(TaskType::BRAINSTORMING);
     }
     return $this->task_id_idea;
   }

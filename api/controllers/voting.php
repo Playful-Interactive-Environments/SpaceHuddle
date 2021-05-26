@@ -1,11 +1,11 @@
 <?php
 require_once('controller.php');
 
-class Voting_Controller extends Controller
+class VotingController extends Controller
 {
   public function __construct()
   {
-      parent::__construct("voting", "Voting", "Task_Controller", "task", "task_id");
+      parent::__construct("voting", "Voting", "TaskController", "task", "task_id");
   }
 
   /**
@@ -24,7 +24,7 @@ class Voting_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function voting_result()  {
+  public function votingResult() : string {
     #TODO: check rights for session
   }
 
@@ -42,7 +42,7 @@ class Voting_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function get()  {
+  public function get() : string {
     $participant_id = getAuthorizationProperty("participant_id");
     #TODO: check rights for session
   }
@@ -63,7 +63,7 @@ class Voting_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function get_all()  {
+  public function getAll() : string {
     $participant_id = getAuthorizationProperty("participant_id");
     #TODO: check rights for session
   }
@@ -87,7 +87,7 @@ class Voting_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function add()  {
+  public function add() : string {
     try{
       #TODO: check rights for session
     }
@@ -124,7 +124,7 @@ class Voting_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function update()  {
+  public function update() : string {
     try{
       #TODO: check rights for session
     }

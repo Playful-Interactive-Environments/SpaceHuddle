@@ -1,14 +1,17 @@
 <?php
 
+/**
+ * Class Database standardises the database access.
+ */
 class Database
 {
-  private static $instance = null;
-  private $host = "localhost";
-  private $database_name = "gab";
-  private $username = "root";
-  private $password = "";
+  private static ?Database $instance = null;
+  private string $host = "localhost";
+  private string $database_name = "gab";
+  private string $username = "root";
+  private string $password = "";
 
-  private $connection;
+  private ?PDO $connection;
 
   public function __construct()
   {
@@ -26,18 +29,31 @@ class Database
     }
   }
 
-  public static function get_instance () {
+  /**
+   * singleton pattern
+   * @return Database Returns a static instance for database access.
+   */
+  public static function getInstance () : Database {
       if (is_null(self::$instance)) {
         self::$instance = new Database();
       }
       return self::$instance;
   }
 
-  public function get_connection() {
+  /**
+   * Get the database connection.
+   * @return PDO Returns the database connection.
+   */
+  public function getConnection() : PDO {
     return $this->connection;
   }
 
-  public function fatch_all($stmt) {
+  /**
+   * Returns an array containing all of the result set rows.
+   * @param PDOStatement $stmt Statement to be executed.
+   * @return array Returns all result set rows.
+   */
+  public function fetchAll(PDOStatement $stmt) : array {
     $item_count = $stmt->rowCount();
 
     if ($item_count > 0) {
@@ -60,7 +76,16 @@ class Database
     }
   }
 
-  public function fatch_first($stmt, $error_msg = "No records found.") {
+  /**
+   * Returns the first result set rows.
+   * @param PDOStatement $stmt Statement to be executed.
+   * @param string $error_msg Error message to be thrown if no data is found.
+   * @return mixed Returns the first result set rows.
+   */
+  public function fetchFirst(
+      PDOStatement $stmt,
+      string $error_msg = "No records found."
+  ) : mixed {
     $item_count = $stmt->rowCount();
 
     if ($item_count > 0) {
@@ -86,7 +111,11 @@ class Database
     }
   }
 
-  public function check_success() {
+  /**
+   * Checks whether the last database statement could be executed successfully.
+   * @return string[] Status of the last database statement.
+   */
+  public function checkSuccess() : array {
     $databaseErrors = $this->connection->errorInfo();
     foreach ($databaseErrors as $key => $value) {
   		echo $key.": ".$value."\n";

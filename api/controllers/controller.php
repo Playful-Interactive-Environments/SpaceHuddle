@@ -3,6 +3,8 @@ use Ramsey\Uuid\Uuid;
 require_once(__DIR__.'/../config/database.php');
 
 /**
+ * Base class for REST-API calls.
+ *
  * @OA\Info(title="GAB API", version="0.1")
  * @OA\Schemes(format="https")
  * @OA\SecurityScheme(
@@ -17,21 +19,26 @@ require_once(__DIR__.'/../config/database.php');
  */
 class Controller
 {
-  #protected static $instance  = null;
-  protected static $instances;
-  protected $database;
-  protected $connection;
-  protected $table;
-  protected $class;
-  protected $parent_controller;
-  protected $parent_table;
-  protected $parent_id_name;
-  protected $url_parameter;
+  protected static array $instances;
+  protected Database $database;
+  protected PDO $connection;
+  protected ?string $table;
+  protected ?string $class;
+  protected ?string $parent_controller;
+  protected ?string $parent_table;
+  protected ?string $parent_id_name;
+  protected ?string $url_parameter;
 
-  public function __construct($table = null, $class = null, $parent_controller = null, $parent_table = null, $parent_id_name = null, $url_parameter = null)
+  public function __construct(
+      ?string $table = null,
+      ?string $class = null,
+      ?string $parent_controller = null,
+      ?string $parent_table = null,
+      ?string $parent_id_name = null,
+      ?string $url_parameter = null)
   {
-    $this->database = Database::get_instance();
-    $this->connection = $this->database->get_connection();
+    $this->database = Database::getInstance();
+    $this->connection = $this->database->getConnection();
     $this->class = $class;
     $this->table = $table;
     $this->parent_controller = $parent_controller;
@@ -42,7 +49,11 @@ class Controller
     http_response_code(400);
   }
 
-  protected function all_generic_parameter_set() {
+  /**
+   * Checks if all generic parameters have been set.
+   * @return bool Returns true if all generic parameters have been set.
+   */
+  protected function allGenericParameterSet() : bool {
     return (
       isset($this->table) and
       isset($this->url_parameter) and
@@ -53,7 +64,11 @@ class Controller
     );
   }
 
-  protected function generic_table_parameter_set() {
+  /**
+   * Checks if the basic generic parameters have been set.
+   * @return bool Returns true if the basic generic parameters have been set.
+   */
+  protected function genericTableParameterSet() : bool {
     return (
       isset($this->table) and
       isset($this->url_parameter) and
@@ -61,7 +76,11 @@ class Controller
     );
   }
 
-  public static function get_instance() {
+  /**
+   * singleton pattern
+   * @return Controller Returns a static instance of a controller type.
+   */
+  public static function getInstance() : Controller {
       $class = get_called_class();
 
       if (!isset(self::$instances[$class])) {
@@ -70,29 +89,40 @@ class Controller
       return self::$instances[$class];
   }
 
-  public function read_all_generic_stmt(
-    $right_id = null,
-    $authorized_roles = array(Role::MODERATOR, Role::FACILITATOR),
-    $stmt = null,
-    $right_table = null,
-    $right_id_name = null,
-    $rights_controller = null,
-    $result_class = null
-  )  {
-    if ($this->all_generic_parameter_set()) {
+  /**
+   * Get a list of all authorised entries in the specified statement.
+   * @param string|null $right_id Foreign key linked to the table that restricts the result set.
+   * @param array $authorized_roles List of authorised roles.
+   * @param PDOStatement|null $stmt Statement to be executed.
+   * @param string|null $right_table Database table name to which the database table is linked.
+   * @param string|null $right_id_name Name of the foreign key to which the database table is linked.
+   * @param string|null $rights_controller Controller class of the foreign key relationship.
+   * @param string|null $result_class Result class of the foreign key relationship.
+   * @return string Returns a json encoded list of all authorised entries in the specified database table.
+   */
+  public function readAllGenericStmt(
+    ?string $right_id = null,
+    array $authorized_roles = array(Role::MODERATOR, Role::FACILITATOR),
+    ?PDOStatement $stmt = null,
+    ?string $right_table = null,
+    ?string $right_id_name = null,
+    ?string $rights_controller = null,
+    ?string $result_class = null
+  ) : string {
+    if ($this->allGenericParameterSet()) {
       if (is_null($rights_controller))
         $rights_controller = $this->parent_controller;
       if (is_null($right_id_name))
         $right_id_name = $this->parent_id_name;
     }
 
-    if ($this->generic_table_parameter_set()) {
+    if ($this->genericTableParameterSet()) {
       if (is_null($result_class))
         $result_class = $this->class;
     }
 
     if (isset($right_table) and is_null($right_id)) {
-      $right_id = $this->get_url_parameter($right_table);
+      $right_id = $this->getUrlParameter($right_table);
     }
 
     if (
@@ -102,13 +132,13 @@ class Controller
       and isset($result_class)
     ) {
       if (is_null($right_id)) {
-        $right_id = $this->get_url_parameter($right_table);
+        $right_id = $this->getUrlParameter($right_table);
       }
-      $role = $rights_controller::check_instance_read_rights($right_id);
-      if ($this->is_authorized($role, $authorized_roles)) {
+      $role = $rights_controller::checkInstanceReadRights($right_id);
+      if ($this->isAuthorized($role, $authorized_roles)) {
         $stmt->bindParam(":$right_id_name", $right_id);
         $stmt->execute();
-        $result_data = $this->database->fatch_all($stmt);
+        $result_data = $this->database->fetchAll($stmt);
         $result = array();
         foreach($result_data as $result_item) {
           array_push($result, new $result_class($result_item));
@@ -139,15 +169,26 @@ class Controller
     }
   }
 
-  public function read_all_generic(
-    $parent_id = null,
-    $authorized_roles = array(Role::MODERATOR, Role::FACILITATOR),
-    $stmt = null,
-    $parent_table = null,
-    $parent_id_name = null,
-    $parent_controller = null
-  )  {
-    if ($this->all_generic_parameter_set()) {
+
+    /**
+   * Get a list of all authorised entries in the specified database table.
+   * @param string|null $parent_id Foreign key linked to the table that restricts the result set.
+   * @param array $authorized_roles List of authorised roles.
+   * @param PDOStatement|null $stmt Statement to be executed.
+   * @param string|null $parent_table Database table name to which the database table is linked.
+   * @param string|null $parent_id_name Name of the foreign key to which the database table is linked.
+   * @param string|null $parent_controller Controller class of the foreign key relationship.
+   * @return string Returns a json encoded list of all authorised entries in the specified database table.
+   */
+  public function readAllGeneric(
+    ?string $parent_id = null,
+    array $authorized_roles = array(Role::MODERATOR, Role::FACILITATOR),
+    ?PDOStatement $stmt = null,
+    ?string $parent_table = null,
+    ?string $parent_id_name = null,
+    ?string $parent_controller = null
+  ) :string {
+    if ($this->allGenericParameterSet()) {
       if (is_null($parent_table))
         $parent_table = $this->parent_table;
       if (is_null($parent_id_name))
@@ -157,16 +198,16 @@ class Controller
     }
 
     if (
-      $this->generic_table_parameter_set()
+      $this->genericTableParameterSet()
       and isset($parent_table)
       and isset($parent_id_name)
       and isset($parent_controller)
     ) {
       if (is_null($parent_id)) {
-        $parent_id = $this->get_url_parameter($parent_table);
+        $parent_id = $this->getUrlParameter($parent_table);
       }
-      $role = $parent_controller::check_instance_read_rights($parent_id);
-      if ($this->is_authorized($role, $authorized_roles)) {
+      $role = $parent_controller::checkInstanceReadRights($parent_id);
+      if ($this->isAuthorized($role, $authorized_roles)) {
         if (is_null($stmt)) {
           $query = "SELECT * FROM $this->table
             WHERE $parent_id_name = :$parent_id_name";
@@ -174,7 +215,7 @@ class Controller
         }
         $stmt->bindParam(":$parent_id_name", $parent_id);
         $stmt->execute();
-        $result_data = $this->database->fatch_all($stmt);
+        $result_data = $this->database->fetchAll($stmt);
         $result = array();
         foreach($result_data as $result_item) {
           array_push($result, new $this->class($result_item));
@@ -205,21 +246,34 @@ class Controller
     }
   }
 
-  public function read_generic($id = null, $authorized_roles = array(Role::MODERATOR, Role::FACILITATOR), $stmt = null, $role = null)  {
-    if ($this->generic_table_parameter_set()) {
+  /**
+   * Get a specific entry in the specified database table.
+   * @param string|null $id Primary key to be queried.
+   * @param array $authorized_roles List of authorised roles.
+   * @param PDOStatement|null $stmt Statement to be executed.
+   * @param string|null $role User role.
+   * @return string Returns a json encoded specific entry in the specified database table.
+   */
+  public function readGeneric(
+      ?string $id = null,
+      array $authorized_roles = array(Role::MODERATOR, Role::FACILITATOR),
+      ?PDOStatement $stmt = null,
+      ?string $role = null
+  ) : string {
+    if ($this->genericTableParameterSet()) {
       if (is_null($id)) {
-        $id = $this->get_url_parameter($this->url_parameter);
+        $id = $this->getUrlParameter($this->url_parameter);
       }
       if (is_null($role))
-        $role = $this->check_read_rights($id);
-      if ($this->is_authorized($role, $authorized_roles)) {
+        $role = $this->checkReadRights($id);
+      if ($this->isAuthorized($role, $authorized_roles)) {
         if (is_null($stmt)) {
           $query = "SELECT * FROM $this->table WHERE id = :id";
           $stmt = $this->connection->prepare($query);
         }
         $stmt->bindParam(":id", $id);
         $stmt->execute();
-        $result = $this->database->fatch_first($stmt);
+        $result = $this->database->fetchFirst($stmt);
         http_response_code(200);
         return json_encode(new $this->class($result));
       }
@@ -246,17 +300,27 @@ class Controller
     }
   }
 
-  public function add_generic(
-    $parent_id,
-    $parameter,
-    $authorized_roles = array(Role::MODERATOR),
-    $insert_id = true,
-    $duplicate_check = "",
-    $parameter_dependencies = null
-  )  {
+  /**
+   * Insert an entry into the database table.
+   * @param string|null $parent_id Foreign key linked to the table.
+   * @param array|object $parameter Data to be inserted.
+   * @param array $authorized_roles List of authorised roles.
+   * @param bool $insert_id Table contains a uuid as primary key which should be generated automatically.
+   * @param string|null $duplicate_check SQL statement which checks whether the data to be inserted is unique (if this is necessary).
+   * @param array|object|null $parameter_dependencies Dependent data to be included.
+   * @return string Inserted data in the json format.
+   */
+  public function addGeneric(
+    ?string $parent_id,
+    array|object $parameter,
+    array $authorized_roles = array(Role::MODERATOR),
+    bool $insert_id = true,
+    ?string $duplicate_check = "",
+    array|object|null $parameter_dependencies = null
+  ) : string {
     if (isset($parent_id)) {
-      if ($this->all_generic_parameter_set()) {
-        $role = $this->parent_controller::check_instance_rights($parent_id);
+      if ($this->allGenericParameterSet()) {
+        $role = $this->parent_controller::checkInstanceRights($parent_id);
       }
       else {
         http_response_code(404);
@@ -270,9 +334,9 @@ class Controller
       }
     }
     else {
-      $role = $this->check_rights(null);
+      $role = $this->checkRights(null);
     }
-    if (!$this->is_authorized($role, $authorized_roles)) {
+    if (!$this->isAuthorized($role, $authorized_roles)) {
         http_response_code(404);
         $error = json_encode(
           array(
@@ -326,7 +390,7 @@ class Controller
 
         if ($item_count > 0) {
           if ($insert_id) {
-            $this->add_dependencies($id, $parameter_dependencies[$param_index]);
+            $this->addDependencies($id, $parameter_dependencies[$param_index]);
           }
         }
       }
@@ -373,14 +437,32 @@ class Controller
     }
   }
 
-  protected function add_dependencies($id, $parameter)
-  {
+  /**
+   * Include dependent data.
+   * @param string $id Primary key of the linked table entry
+   * @param array|object $parameter Dependent data to be included.
+   */
+  protected function addDependencies(
+      string $id,
+      array|object|null $parameter
+  ) {
   }
 
-  public function update_generic($id, $parameter, $authorized_roles = array(Role::MODERATOR))  {
-    if ($this->generic_table_parameter_set()) {
-      $role = $this->check_rights($id);
-      if (!$this->is_authorized($role, $authorized_roles)) {
+  /**
+   * Update an entry into the database table.
+   * @param string|null $id Primary key to be updated.
+   * @param array|object $parameter Data to be updated.
+   * @param array $authorized_roles List of authorised roles.
+   * @return string Updated data in the json format.
+   */
+  public function updateGeneric(
+      string $id,
+      array|object $parameter,
+      array $authorized_roles = array(Role::MODERATOR)
+  ) : string {
+    if ($this->genericTableParameterSet()) {
+      $role = $this->checkRights($id);
+      if (!$this->isAuthorized($role, $authorized_roles)) {
           http_response_code(404);
           $error = json_encode(
             array(
@@ -454,17 +536,34 @@ class Controller
     }
   }
 
-  protected function delete_dependencies($id) {
+  /**
+   * Delete dependent data.
+   * @param string $id Primary key of the linked table entry.
+   */
+  protected function deleteDependencies(
+      string $id
+  ) {
 
   }
 
-  public function delete_generic($id = null, $authorized_roles = array(Role::MODERATOR), $stmt = null)  {
-    if ($this->generic_table_parameter_set()) {
+  /**
+   * Delete an entry into the database table.
+   * @param string|null $id Primary key to be deleted.
+   * @param array $authorized_roles List of authorised roles.
+   * @param PDOStatement|null $stmt Statement to be executed.
+   * @return string Success status of the statement.
+   */
+  public function deleteGeneric(
+      ?string $id = null,
+      array $authorized_roles = array(Role::MODERATOR),
+      ?PDOStatement $stmt = null
+  ) : string {
+    if ($this->genericTableParameterSet()) {
       if (is_null($id)) {
-        $id = $this->get_url_parameter($this->url_parameter);
+        $id = $this->getUrlParameter($this->url_parameter);
       }
-      $role = $this->check_rights($id);
-      if (!$this->is_authorized($role, $authorized_roles)) {
+      $role = $this->checkRights($id);
+      if (!$this->isAuthorized($role, $authorized_roles)) {
           http_response_code(404);
           $error = json_encode(
             array(
@@ -481,7 +580,7 @@ class Controller
         if ($handle_transaction)
           $this->connection->beginTransaction();
 
-        $this->delete_dependencies($id);
+        $this->deleteDependencies($id);
 
         if (is_null($stmt)) {
           $query = "DELETE FROM $this->table WHERE id = :id";
@@ -540,35 +639,58 @@ class Controller
     }
   }
 
-  public function is_authorized($role, $authorized_roles = array(Role::MODERATOR))  {
+  /**
+   * Check if the user role is part of the authorised roles.
+   * @param string $role user role
+   * @param array $authorized_roles List of authorised roles.
+   * @return bool Authorisation state
+   */
+  public function isAuthorized(
+      string $role,
+      array $authorized_roles = array(Role::MODERATOR)
+  ) : bool {
     $role = strtoupper($role);
     $authorized_roles = array_map("strtoupper", $authorized_roles);
     return in_array($role, $authorized_roles);
   }
 
-  public function check_rights($id) {
+  /**
+   * Checks whether the user is authorised to edit the entry with the specified primary key.
+   * @param string|null $id Primary key to be checked.
+   * @return string|null Role with which the user is authorised to access the entry.
+   */
+  public function checkRights(
+      ?string $id
+  ) : ?string {
     if (is_null($id)) {
       $login_id = getAuthorizationProperty("login_id");
       return strtoupper(Role::MODERATOR);
     }
 
-    if ($this->all_generic_parameter_set()) {
+    if ($this->allGenericParameterSet()) {
       $query = "SELECT * FROM $this->table WHERE id = :id";
       $stmt = $this->connection->prepare($query);
       $stmt->bindParam(":id", $id);
       $stmt->execute();
       $item_count = $stmt->rowCount();
       if ($item_count > 0) {
-        $result = $this->database->fatch_first($stmt);
+        $result = $this->database->fetchFirst($stmt);
         $parent_id = $result[$this->parent_id_name];
-        $role = $this->parent_controller::check_instance_rights($parent_id);
+        $role = $this->parent_controller::checkInstanceRights($parent_id);
         return $role;
       }
     }
     return null;
   }
 
-  public function check_login($id) {
+  /**
+   * Check whether your own user data is being edited.
+   * @param string|null $id Primary key to be checked.
+   * @return string|null Role with which the user is authorised to access the entry.
+   */
+  public function checkLogin(
+      ?string $id
+  ) : string {
     if (isLoggedIn()) {
       if (isUser()) {
         $login_id = getAuthorizationProperty("login_id");
@@ -585,26 +707,60 @@ class Controller
     return Role::UNKNOWN;
   }
 
-  public function check_read_rights($id) {
-    return $this->check_rights($id);
+  /**
+   * Checks whether the user is authorised to read the entry with the specified primary key.
+   * @param string|null $id Primary key to be checked.
+   * @return string|null Role with which the user is authorised to access the entry.
+   */
+  public function checkReadRights(
+      ?string $id
+  ) : ?string {
+    return $this->checkRights($id);
   }
 
-  public static function check_instance_rights($id) {
-    $instance = self::get_instance();
-    return $instance->check_rights($id);
+  /**
+   * Check the edit rights of the static singleton instance.
+   * @param string|null $id Primary key to be checked.
+   * @return string|null Role with which the user is authorised to access the entry.
+   */
+  public static function checkInstanceRights(
+      ?string $id
+  ) : ?string {
+    $instance = self::getInstance();
+    return $instance->checkRights($id);
   }
 
-  public static function check_instance_read_rights($id) {
-    $instance = self::get_instance();
-    return $instance->check_read_rights($id);
+  /**
+   * Check the read rights of the static singleton instance.
+   * @param string|null $id Primary key to be checked.
+   * @return string|null Role with which the user is authorised to access the entry.
+   */
+  public static function checkInstanceReadRights(
+      ?string $id
+  ) : ?string {
+    $instance = self::getInstance();
+    return $instance->checkReadRights($id);
   }
 
-  public static function uuid() {
+  /**
+   * Creates a random uuid.
+   * @return string Returns a random uuid.
+   */
+  public static function uuid() : string {
   	$uuid = Uuid::uuid4();
   	return $uuid->toString();
   }
 
-  public static function get_url_parameter($parameter_name,  $default_value = null) {
+  /**
+   * Extrudes a parameter from the REST url.
+   * @param string $parameter_name Name of the parameter. The name is separated by a slash before the parameter value ($parameter_name/$parameter_value).
+   * @param mixed|null $default_value Default value if no parameter entry ist found.
+   * @return mixed Returns the parameter value.
+   */
+  public static function getUrlParameter(
+      string $parameter_name,
+      mixed $default_value = null
+  ) : mixed {
     $parameter_value = $default_value;
     if (count($_GET) > 0 and array_key_exists($parameter_name, $_GET)) {
     	$parameter_value = $_GET[$parameter_name];
@@ -626,7 +782,14 @@ class Controller
     return $parameter_value;
   }
 
-  public static function get_url_parameters($first_param_index = 1) {
+  /**
+   * Get a list with all url parameters.
+   * @param int $first_param_index Start index where to start the search for url parameters.
+   * @return object Returns an object with all url parameters.
+   */
+  public static function getUrlParameters(
+      int $first_param_index = 1
+  ) : object {
     $params = array();
     foreach ($_GET as $key => $value) {
   		$params[$key] = $value;
@@ -653,7 +816,14 @@ class Controller
     return (object)$params;
   }
 
-  public static function get_url_hierarchy($first_param_index = 1) {
+  /**
+   * Break down url hierarchy.
+   * @param int $first_param_index Start index where to start the search for url parameters.
+   * @return array Returns a list of the url hierarchy.
+   */
+  public static function getUrlHierarchy(
+      int $first_param_index = 1
+  ) : array {
     $hierarchy = array();
 
   	$url_parts = explode("/", $_SERVER["REQUEST_URI"]);
@@ -686,7 +856,16 @@ class Controller
     return $hierarchy;
   }
 
-  public static function get_body_parameter($parameter_name,  $default_value = null) {
+  /**
+   * Extrudes a parameter from the response body.
+   * @param string $parameter_name Name of the parameter.
+   * @param mixed|null $default_value Default value if no parameter entry ist found.
+   * @return mixed Returns the parameter value.
+   */
+  public static function getBodyParameter(
+      ?string $parameter_name,
+      mixed $default_value = null
+  ) : mixed {
     $data = json_decode(file_get_contents('php://input'), true);
     if (!is_array($data)) {
       http_response_code(404);
@@ -707,7 +886,11 @@ class Controller
     return $default_value;
   }
 
-  public static function get_all_body_parameter() {
+  /**
+   * Get a list with all body parameters.
+   * @return object Returns an object with all body parameters.
+   */
+  public static function getAllBodyParameter() : object {
     $data = json_decode(file_get_contents('php://input'), true);
     if (!is_array($data)) {
       http_response_code(404);
@@ -722,7 +905,14 @@ class Controller
     return $data;
   }
 
-  public static function format_parameters($parameter) {
+  /**
+   * Prepare the list of body parameters in the specified format.
+   * @param array $parameter List of the name and type of the body parameters.
+   * @return object Returns the formatted data.
+   */
+  public static function formatParameters(
+      array $parameter
+  ) : object {
     $param_data = array();
     foreach ($parameter as $key => $key_definition) {
       $key_type = null;
@@ -737,15 +927,15 @@ class Controller
         if (isset($key_definition->default))
           $value = $key_definition->default;
         if (is_null($value) and isset($key_definition->url))
-          $value = self::get_url_parameter($key_definition->url);
+          $value = self::getUrlParameter($key_definition->url);
       }
 
       if (isset($key_result) and $key_result == "all") {
-        $value = self::get_body_parameter(null);
+        $value = self::getBodyParameter(null);
       }
 
       if (is_null($value))
-        $value = self::get_body_parameter($key);
+        $value = self::getBodyParameter($key);
 
       if (isset($value) and isset($key_type)) {
         if ($key_type == "JSON") {
@@ -777,8 +967,19 @@ class Controller
     return (object)$param_data;
   }
 
-  public static function is_rest_call($search_method, $first_param_index = 1, $search_detail_hierarchy = "") {
-    $url_hierarchy = self::get_url_hierarchy($first_param_index);
+  /**
+   * Checks if this is the REST call you are looking for.
+   * @param string $search_method Request type.
+   * @param int $first_param_index Start index where to start the search for url parameters.
+   * @param string $search_detail_hierarchy Break down url hierarchy.
+   * @return bool Returns if this is the REST call you are looking for.
+   */
+  public static function isRestCall(
+      string $search_method,
+      int $first_param_index = 1,
+      string $search_detail_hierarchy = ""
+  ) : bool {
+    $url_hierarchy = self::getUrlHierarchy($first_param_index);
 
     $search_hierarchy_parts = array();
     for ($i=0; $i < 1; $i++) {

@@ -58,28 +58,28 @@ abstract class AuthorizedUserTestCase extends AuthorizedTestCase
 
   public function get_first_task_id_idea() {
     if (!isset($this->task_id_idea)) {
-      $this->task_id_idea = $this->get_first_task_id(Task_Type::BRAINSTORMING);
+      $this->task_id_idea = $this->get_first_task_id(TaskType::BRAINSTORMING);
     }
     return $this->task_id_idea;
   }
 
   public function get_first_task_id_group() {
     if (!isset($this->task_id_group)) {
-      $this->task_id_group = $this->get_first_task_id(Task_Type::GROUPING);
+      $this->task_id_group = $this->get_first_task_id(TaskType::GROUPING);
     }
     return $this->task_id_group;
   }
 
   public function get_first_task_id_select() {
     if (!isset($this->task_id_select)) {
-      $this->task_id_select = $this->get_first_task_id(Task_Type::SELECTION);
+      $this->task_id_select = $this->get_first_task_id(TaskType::SELECTION);
     }
     return $this->task_id_select;
   }
 
   public function get_first_task_id_vote() {
     if (!isset($this->task_id_vote)) {
-      $this->task_id_vote = $this->get_first_task_id(Task_Type::VOTING);
+      $this->task_id_vote = $this->get_first_task_id(TaskType::VOTING);
     }
     return $this->task_id_vote;
   }
@@ -119,8 +119,7 @@ abstract class AuthorizedUserTestCase extends AuthorizedTestCase
     $res = $client->post($this->get_absolute_api_url("/api/user/login/"), [
         'body' => $login_data
     ]);
-    $access_token = $this->to_json($res->getBody())->access_token;
-    return $access_token;
+    return $this->to_json($res->getBody())->access_token;
   }
 }
 

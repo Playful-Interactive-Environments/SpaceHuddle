@@ -8,11 +8,11 @@ require_once('controller.php');
 require_once('session.php');
 require_once('topic.php');
 
-class Participant_Controller extends Controller
+class ParticipantController extends Controller
 {
   public function __construct()
   {
-      parent::__construct("participant", "Participant", "Session_Controller", "session", "session_id");
+      parent::__construct("participant", "Participant", "SessionController", "session", "session_id");
   }
 
   /**
@@ -34,21 +34,24 @@ class Participant_Controller extends Controller
   *   @OA\Response(response="404", description="Not Found")
   * )
   */
-  public function connect($session_key = null, $ip_hash = null)  {
-    $params = $this->format_parameters(array(
+  public function connect(
+      ?string $session_key = null,
+      ?string $ip_hash = null
+  ) : string {
+    $params = $this->formatParameters(array(
       "session_key"=>array("default"=>$session_key),
       "ip_hash"=>array("default"=>$ip_hash, "type"=>"MD5")
     ));
-    $params->session_id = Session_Controller::get_instance()->read_by_key($params->session_key)->id;
+    $params->session_id = SessionController::getInstance()->readByKey($params->session_key)->id;
 
-    $result = $this->is_registered($params->session_id, $params->ip_hash);
+    $result = $this->isRegistered($params->session_id, $params->ip_hash);
     if (is_null($result)) {
-      $params->browser_key = $this->generate_new_browser_key($params->session_key);
+      $params->browser_key = $this->generateNewBrowserKey($params->session_key);
       $params->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
       $params->symbol = AvatarSymbol::getRandomValue();
       unset($params->session_key);
 
-      $this->add_generic(null, $params, authorized_roles: array(Role::UNKNOWN));
+      $this->addGeneric(null, $params, authorized_roles: array(Role::UNKNOWN));
     }
 
     $jwt = generateToken(array(
@@ -61,7 +64,9 @@ class Participant_Controller extends Controller
     );
   }
 
-  private function generate_new_browser_key($session_key) {
+  private function generateNewBrowserKey(
+      string $session_key
+  ) : string {
     $item_count = 1;
     $browser_key = "";
     while ($item_count > 0) {
@@ -75,20 +80,31 @@ class Participant_Controller extends Controller
     return $browser_key;
   }
 
-  protected function read($id)  {
+  protected function read(
+      string $id
+  ) : object {
     $query = "SELECT * FROM participant WHERE id = :id";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":id", $id);
     $stmt->execute();
-    $result = (object)$this->database->fatch_first($stmt);
-    return $result;
+    return (object)$this->database->fetchFirst($stmt);
   }
 
-  public function check_rights($id) {
-    return $this->check_login($id);
+  /**
+   * Checks whether the user is authorised to edit the entry with the specified primary key.
+   * @param string|null $id Primary key to be checked.
+   * @return string|null Role with which the user is authorised to access the entry.
+   */
+  public function checkRights(
+      ?string $id
+  ) : ?string {
+    return $this->checkLogin($id);
   }
 
-  protected function is_registered($session_id = null, $ip_hash = null)  {
+  protected function isRegistered(
+      ?string $session_id = null,
+      ?string $ip_hash = null
+  ) : ?object {
     $query = "SELECT * FROM participant
       WHERE session_id = :session_id AND ip_hash = :ip_hash";
     $stmt = $this->connection->prepare($query);
@@ -98,7 +114,7 @@ class Participant_Controller extends Controller
     $item_count = $stmt->rowCount();
 
     if ($item_count > 0) {
-      return (object)$this->database->fatch_first($stmt);
+      return (object)$this->database->fetchFirst($stmt);
     }
     return null;
   }
@@ -114,15 +130,17 @@ class Participant_Controller extends Controller
   *   @OA\Response(response="404", description="Not Found")
   * )
   */
-  public function reconnect($browser_key = null)  {
+  public function reconnect(
+      ?string $browser_key = null
+  ) :  string {
     if (is_null($browser_key)) {
-      $browser_key = $this->get_url_parameter("connect", -1);
+      $browser_key = $this->getUrlParameter("connect", -1);
     }
     $query = "SELECT * FROM participant WHERE browser_key = :browser_key";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":browser_key", $browser_key);
     $stmt->execute();
-    $result = (object)$this->database->fatch_first($stmt);
+    $result = (object)$this->database->fetchFirst($stmt);
     $jwt = generateToken(array(
         "participant_id" => $result->id,
         "browser_key" => $result->browser_key
@@ -149,7 +167,13 @@ class Participant_Controller extends Controller
     #TODO: delete dependent tables
   }
 
-  protected function delete_dependencies($id) {
+  /**
+   * Delete dependent data.
+   * @param string $id Primary key of the linked table entry.
+   */
+  protected function deleteDependencies(
+      string $id
+  ) {
   }
 
   /**
@@ -167,8 +191,8 @@ class Participant_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function get_tasks() {
-    $client_states = array(strtoupper(State_Task::ACTIVE), strtoupper(State_Task::READ_ONLY));
+  public function getTasks() : string {
+    $client_states = array(strtoupper(StateTask::ACTIVE), strtoupper(StateTask::READ_ONLY));
     $client_states = implode(',', $client_states);
     if (!isParticipant()) {
       $login_id = getAuthorizationProperty("login_id");
@@ -200,7 +224,7 @@ class Participant_Controller extends Controller
       $stmt->bindParam(":client_states", $client_states);
     }
     $stmt->execute();
-    $result_data = $this->database->fatch_all($stmt);
+    $result_data = $this->database->fetchAll($stmt);
     $result = array();
     foreach($result_data as $result_item) {
       array_push($result, new Task($result_item));
@@ -225,8 +249,10 @@ class Participant_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function get_topic_tasks($topic_id = null) {
-    $client_states = array(strtoupper(State_Task::ACTIVE), strtoupper(State_Task::READ_ONLY));
+  public function getTopicTasks(
+      ?string $topic_id = null
+  ) : string {
+    $client_states = array(strtoupper(StateTask::ACTIVE), strtoupper(StateTask::READ_ONLY));
     $client_states = implode(',', $client_states);
     $query = "SELECT * FROM task
       WHERE FIND_IN_SET(state, :client_states)
@@ -234,13 +260,13 @@ class Participant_Controller extends Controller
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":client_states", $client_states);
 
-    return parent::read_all_generic_stmt(
+    return parent::readAllGenericStmt(
       $topic_id,
       array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
       $stmt,
       "topic",
       "topic_id",
-      "Topic_Controller",
+      "TopicController",
       "Task"
     );
   }
@@ -260,7 +286,7 @@ class Participant_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function get_topics() {
+  public function getTopics() : string {
     if (!isParticipant()) {
       $login_id = getAuthorizationProperty("login_id");
       $query = "SELECT * FROM topic
@@ -284,7 +310,7 @@ class Participant_Controller extends Controller
       $stmt->bindParam(":participant_id", $participant_id);
     }
     $stmt->execute();
-    $result_data = $this->database->fatch_all($stmt);
+    $result_data = $this->database->fetchAll($stmt);
     $result = array();
     foreach($result_data as $result_item) {
       array_push($result, new Topic($result_item));

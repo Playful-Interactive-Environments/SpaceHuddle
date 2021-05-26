@@ -3,11 +3,11 @@ require_once(__DIR__.'/../config/authorization.php');
 require_once(__DIR__.'/../models/task.php');
 require_once('controller.php');
 
-class Public_Screen_Controller extends Controller
+class PublicScreenController extends Controller
 {
   public function __construct()
   {
-      parent::__construct("task", "Task", "Topic_Controller", "topic", "topic_id");
+      parent::__construct("task", "Task", "TopicController", "topic", "topic_id");
   }
 
   /**
@@ -29,7 +29,10 @@ class Public_Screen_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function set_public_screen($session_id, $task_id)  {
+  public function setPublicScreen(
+      ?string $session_id = null,
+      ?string $task_id = null
+  ) : string {
     $login_id = getAuthorizationProperty("login_id");
     #TODO: check rights for session
   }
@@ -47,7 +50,10 @@ class Public_Screen_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function get_public_screen($session_id, $task_id)  {
+  public function getPublicScreen(
+      ?string $session_id = null,
+      ?string $task_id = null
+  ) : string {
     $login_id = getAuthorizationProperty("login_id");
     #TODO: check rights for session
   }

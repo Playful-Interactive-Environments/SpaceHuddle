@@ -6,17 +6,17 @@ class Selection {
 
     /**
      * The selection id.
-     * @var string
+     * @var string|null
      * @OA\Property(example="uuid")
      */
-    public $id;
+    public ?string $id;
 
     /**
      * The selection name.
-     * @var string
+     * @var string|null
      * @OA\Property()
      */
-    public $name;
+    public ?string $name;
 
     public function __construct(array $data = null)
     {

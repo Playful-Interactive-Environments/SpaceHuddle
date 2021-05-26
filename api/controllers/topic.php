@@ -5,11 +5,11 @@ require_once('task.php');
 require_once('selection.php');
 require_once(__DIR__.'/../models/topic.php');
 
-class Topic_Controller extends Controller
+class TopicController extends Controller
 {
   public function __construct()
   {
-      parent::__construct("topic", "Topic", "Session_Controller", "session", "session_id");
+      parent::__construct("topic", "Topic", "SessionController", "session", "session_id");
   }
 
   /**
@@ -28,8 +28,10 @@ class Topic_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read_all($session_id = null)  {
-    return parent::read_all_generic($session_id);
+  public function readAll(
+      ?string $session_id = null
+  ) : string {
+    return parent::readAllGeneric($session_id);
   }
 
   /**
@@ -45,8 +47,10 @@ class Topic_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function read($id = null)  {
-    return parent::read_generic($id);
+  public function read(
+      ?string $id = null
+  ) : string {
+    return parent::readGeneric($id);
   }
 
   /**
@@ -71,14 +75,18 @@ class Topic_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function add($session_id = null, $title = null, $description = null)  {
-    $params = $this->format_parameters(array(
+  public function add(
+      ?string $session_id = null,
+      ?string $title = null,
+      ?string $description = null
+  ) : string {
+    $params = $this->formatParameters(array(
       "session_id"=>array("default"=>$session_id, "url"=>"session"),
       "title"=>array("default"=>$title),
       "description"=>array("default"=>$description)
     ));
 
-    return $this->add_generic($params->session_id, $params);
+    return $this->addGeneric($params->session_id, $params);
   }
 
   /**
@@ -100,15 +108,20 @@ class Topic_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function update($id = null, $title = null, $description = null, $active_task_id = null)  {
-    $params = $this->format_parameters(array(
+  public function update(
+      ?string $id = null,
+      ?string $title = null,
+      ?string $description = null,
+      ?string $active_task_id = null
+  ) : string {
+    $params = $this->formatParameters(array(
       "id"=>array("default"=>$id),
       "title"=>array("default"=>$title),
       "description"=>array("default"=>$description),
       "active_task_id"=>array("default"=>$active_task_id)
     ));
 
-    return $this->update_generic($params->id, $params);
+    return $this->updateGeneric($params->id, $params);
   }
 
   /**
@@ -122,18 +135,26 @@ class Topic_Controller extends Controller
   *   security={{"api_key": {}}, {"bearerAuth": {}}}
   * )
   */
-  public function delete($id = null)  {
-    return parent::delete_generic($id);
+  public function delete(
+      ?string $id = null
+  ) : string {
+    return parent::deleteGeneric($id);
   }
 
-  protected function delete_dependencies($id) {
+  /**
+   * Delete dependent data.
+   * @param string $id Primary key of the linked table entry.
+   */
+  protected function deleteDependencies(
+      string $id
+  ) {
     $query = "SELECT * FROM task WHERE topic_id = :topic_id ";
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":topic_id", $id);
     $stmt->execute();
 
-    $result_data = $this->database->fatch_all($stmt);
-    $task = Task_Controller::get_instance();
+    $result_data = $this->database->fetchAll($stmt);
+    $task = TaskController::getInstance();
     foreach($result_data as $result_item) {
       $task_id = $result_item["id"];
       $task->delete($task_id);
@@ -144,8 +165,8 @@ class Topic_Controller extends Controller
     $stmt->bindParam(":topic_id", $id);
     $stmt->execute();
 
-    $result_data = $this->database->fatch_all($stmt);
-    $selection = Selection_Controller::get_instance();
+    $result_data = $this->database->fetchAll($stmt);
+    $selection = SelectionController::getInstance();
     foreach($result_data as $result_item) {
       $selection_id = $result_item["id"];
       $selection->delete($selection_id);

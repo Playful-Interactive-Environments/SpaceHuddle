@@ -7,7 +7,7 @@
  *   example="BRAINSTORMING"
  * )
  */
-class Task_Type {
+class TaskType {
   const INFORMATION = "information";
   const BRAINSTORMING = "brainstorming";
   const SELECTION = "selection";
