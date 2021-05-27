@@ -327,7 +327,7 @@ class IdeaController extends Controller
       "description"=>array("default"=>$description),
       "link"=>array("default"=>$link),
       "image"=>array("default"=>$image),
-      "state"=>array("default"=>$state, "type"=>"StateIdea")
+      "state"=>array("default"=>$state, "type"=>StateIdea::class)
     ));
 
     return $this->updateGeneric($params->id, $params, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT));

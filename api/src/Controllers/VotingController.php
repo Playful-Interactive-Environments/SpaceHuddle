@@ -1,11 +1,13 @@
 <?php
-require_once('Controller.php');
+namespace PieLab\GAB\Controllers;
+
+use PieLab\GAB\Models\Voting;
 
 class VotingController extends Controller
 {
   public function __construct()
   {
-      parent::__construct("voting", "Voting", "TaskController", "task", "task_id");
+      parent::__construct("voting", Voting::class, TaskController::class, "task", "task_id");
   }
 
   /**

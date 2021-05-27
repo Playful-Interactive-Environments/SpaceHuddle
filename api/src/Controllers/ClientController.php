@@ -1,15 +1,15 @@
 <?php
+namespace PieLab\GAB\Controllers;
+
+use PieLab\GAB\Models\Task;
 
 use PieLab\GAB\Config\Authorization;
-
-require_once(__DIR__ . '/../models/task.php');
-require_once('Controller.php');
 
 class ClientController extends Controller
 {
     public function __construct()
     {
-        parent::__construct("task", "Task", "TopicController", "topic", "topic_id");
+        parent::__construct("task", Task::class, TopicController::class, "topic", "topic_id");
     }
 
     /**

@@ -88,11 +88,11 @@ class TaskController extends Controller
   ) : string {
     $params = $this->formatParameters(array(
       "topic_id"=>array("default"=>$topic_id, "url"=>"topic"),
-      "task_type"=>array("default"=>$task_type, "type"=>"TaskType"),
+      "task_type"=>array("default"=>$task_type, "type"=>TaskType::class),
       "name"=>array("default"=>$name),
       "parameter"=>array("default"=>$parameter, "type"=>"JSON"),
       "order"=>array("default"=>$order),
-      "state"=>array("default"=>StateTask::WAIT, "type"=>"StateTask")
+      "state"=>array("default"=>StateTask::WAIT, "type"=>StateTask::class)
     ));
 
     return $this->addGeneric($params->topic_id, $params);
@@ -127,11 +127,11 @@ class TaskController extends Controller
   ) : string {
     $params = $this->formatParameters(array(
       "id"=>array("default"=>$id),
-      "task_type"=>array("default"=>$task_type, "type"=>"TaskType"),
+      "task_type"=>array("default"=>$task_type, "type"=>TaskType::class),
       "name"=>array("default"=>$name),
       "parameter"=>array("default"=>$parameter, "type"=>"JSON"),
       "order"=>array("default"=>$order),
-      "state"=>array("default"=>$state, "type"=>"StateTask")
+      "state"=>array("default"=>$state, "type"=>StateTask::class)
     ));
 
     return $this->updateGeneric($params->id, $params);

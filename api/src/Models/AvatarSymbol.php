@@ -22,7 +22,7 @@ class AvatarSymbol {
    * @return a random AvatarSymbol.
    */
   public static function getRandomValue() : string {
-    $oClass = new ReflectionClass(__CLASS__);
+    $oClass = new \ReflectionClass(__CLASS__);
     $cases = $oClass->getConstants();
     $keys = array_keys($cases);
     return $cases[$keys[rand(0, count($cases)-1)]];

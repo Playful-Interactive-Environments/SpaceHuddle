@@ -1,11 +1,13 @@
 <?php
-require_once('Controller.php');
+namespace PieLab\GAB\Controllers;
+
+use PieLab\GAB\Models\SessionRole;
 
 class SessionRoleController extends Controller
 {
   public function __construct()
   {
-      parent::__construct("session_role", "SessionRole", "LoginController", "login", "login_id");
+      parent::__construct("session_role", SessionRole::class, LoginController::class, "login", "login_id");
   }
 
   /**

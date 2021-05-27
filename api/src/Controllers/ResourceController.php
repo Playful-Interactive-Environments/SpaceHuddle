@@ -1,11 +1,13 @@
 <?php
-require_once('Controller.php');
+namespace PieLab\GAB\Controllers;
+
+use PieLab\GAB\Models\Resource;
 
 class ResourceController extends Controller
 {
   public function __construct()
   {
-      parent::__construct("resource", "Resource", "SessionController", "session", "session_id");
+      parent::__construct("resource", Resource::class, SessionController::class, "session", "session_id");
   }
 
   /**
