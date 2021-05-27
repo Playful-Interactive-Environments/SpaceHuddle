@@ -13,6 +13,9 @@ use PieLab\GAB\Models\TaskType;
  */
 class GroupController extends IdeaController
 {
+    /**
+     * Creates a new GroupController.
+     */
     public function __construct()
     {
         parent::__construct("idea", Group::class, TaskController::class, "task", "task_id", "group");
