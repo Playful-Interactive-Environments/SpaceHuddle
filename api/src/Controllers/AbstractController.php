@@ -263,10 +263,12 @@ abstract class AbstractController
             }
         }
 
-        if ($this->genericTableParameterSet() and
-            isset($parentTable) and
-            isset($parentIdName) and
-            isset($parentController)) {
+        if (
+            $this->genericTableParameterSet()
+            and isset($parentTable)
+            and isset($parentIdName)
+            and isset($parentController)
+        ) {
             if (is_null($parentId)) {
                 $parentId = $this->getUrlParameter($parentTable);
             }
