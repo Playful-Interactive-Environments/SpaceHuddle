@@ -2,22 +2,32 @@
 
 namespace PieLab\GAB\Controllers;
 
-use Exception;
 use PieLab\GAB\Config\Authorization;
 use PieLab\GAB\Models\Role;
 use PieLab\GAB\Models\User;
 
+/**
+ * Controller for user registration and login.
+ * @package PieLab\GAB\Controllers
+ */
 class LoginController extends AbstractController
 {
+    /**
+     * Creates a new LoginController.
+     */
     public function __construct()
     {
         parent::__construct("login", User::class);
     }
 
     /**
+     * Perform a login with an existing user.
+     * @param string|null $username The username.
+     * @param string|null $password The password.
+     * @return string The response to the login attempt in JSON format.
      * @OA\Post(
      *   path="/api/user/login/",
-     *   summary="login with existing user",
+     *   summary="Perform a login with an existing user",
      *   tags={"User"},
      *   @OA\RequestBody(
      *     @OA\MediaType(
@@ -38,7 +48,6 @@ class LoginController extends AbstractController
      *     )),
      *   @OA\Response(response="404", description="Not Found")
      * )
-     * @throws Exception
      */
     public function login(?string $username = null, ?string $password = null): string
     {
@@ -83,9 +92,14 @@ class LoginController extends AbstractController
     }
 
     /**
+     * Register a new user.
+     * @param string|null $username The username.
+     * @param string|null $password The password.
+     * @param string|null $passwordConfirmation The password confirmation.
+     * @return string A JSON encoded reply on success or failure.
      * @OA\Post(
      *   path="/api/user/register/",
-     *   summary="register new user",
+     *   summary="Register a new user",
      *   tags={"User"},
      *   @OA\RequestBody(
      *     @OA\MediaType(
@@ -104,13 +118,13 @@ class LoginController extends AbstractController
     public function register(
         ?string $username = null,
         ?string $password = null,
-        ?string $password_confirmation = null
+        ?string $passwordConfirmation = null
     ): string {
         $params = $this->formatParameters(
             [
                 "username" => ["default" => $username],
                 "password" => ["default" => $password, "type" => "MD5"],
-                "password_confirmation" => ["default" => $password_confirmation, "type" => "MD5"]
+                "password_confirmation" => ["default" => $passwordConfirmation, "type" => "MD5"]
             ]
         );
         if ($this->checkUser($params->username)) {
@@ -118,7 +132,7 @@ class LoginController extends AbstractController
             $error = json_encode(
                 [
                     "state" => "Failed",
-                    "message" => 'User already exists.'
+                    "message" => "User already exists."
                 ]
             );
             die($error);
@@ -139,31 +153,47 @@ class LoginController extends AbstractController
         );
     }
 
-    private function checkPasswordConfirmation(string $password, string $password_confirmation)
+    /**
+     * Checks if the provided password and confirmation match.
+     * @param string $password The password.
+     * @param string $passwordConfirmation The password confirmation.
+     */
+    private function checkPasswordConfirmation(string $password, string $passwordConfirmation): void
     {
-        if ($password != $password_confirmation) {
-            http_response_code(404);
+        if ($password !== $passwordConfirmation) {
+            http_response_code(401);
             $error = json_encode(
                 [
                     "state" => "Failed",
-                    "message" => "Password does not match."
+                    "message" => "Password and confirmation do not match."
                 ]
             );
             die($error);
         }
     }
 
+    /**
+     * Checks if a user already exists.
+     * @param string $username The username.
+     * @return bool Returns true if a user exists, otherwise false.
+     */
     private function checkUser(string $username): bool
     {
         $query = "SELECT * FROM login WHERE username = :username";
-        $stmt = $this->connection->prepare($query);
-        $stmt->bindParam(":username", $username);
-        $stmt->execute();
-        $item_count = $stmt->rowCount();
+        $statement = $this->connection->prepare($query);
+        $statement->bindParam(":username", $username);
+        $statement->execute();
+        $itemCount = $statement->rowCount();
 
-        return ($item_count > 0);
+        return ($itemCount > 0);
     }
 
+    /**
+     * Check if a provided password is correct.
+     * @param string $id The user ID.
+     * @param string $password The password.
+     * @return bool Returns true if a password matches.
+     */
     private function checkPassword(string $id, string $password): bool
     {
         $query = "SELECT * FROM login WHERE id = :id and password = :password";
@@ -186,12 +216,22 @@ class LoginController extends AbstractController
         return $this->checkLogin($id);
     }
 
+    /**
+     * Read data for a specific user.
+     * @param string|null $id The user ID.
+     * @return string Returns a JSON encoded entry for the user.
+     */
     public function read(?string $id = null): string
     {
         return parent::readGeneric($id, role: Role::MODERATOR);
     }
 
     /**
+     * Change the password for the currently logged in user.
+     * @param string|null $oldPassword The old password.
+     * @param string|null $password The new password.
+     * @param string|null $passwordConfirmation The confirmation for the new password.
+     * @return string A JSON encoded message about the result of the query.
      * @OA\Put(
      *   path="/api/user/",
      *   summary="Change the password of the logged-in user.",
@@ -212,17 +252,17 @@ class LoginController extends AbstractController
      * )
      */
     public function update(
-        ?string $old_password = null,
+        ?string $oldPassword = null,
         ?string $password = null,
-        ?string $password_confirmation = null
+        ?string $passwordConfirmation = null
     ): string {
         $login_id = Authorization::getAuthorizationProperty("login_id");
         $params = $this->formatParameters(
             [
                 "id" => ["default" => $login_id],
-                "old_password" => ["default" => $old_password, "type" => "MD5"],
+                "old_password" => ["default" => $oldPassword, "type" => "MD5"],
                 "password" => ["default" => $password, "type" => "MD5"],
-                "password_confirmation" => ["default" => $password_confirmation, "type" => "MD5"]
+                "password_confirmation" => ["default" => $passwordConfirmation, "type" => "MD5"]
             ]
         );
         $this->checkPasswordConfirmation($params->password, $params->password_confirmation);
@@ -253,6 +293,8 @@ class LoginController extends AbstractController
     }
 
     /**
+     * Deletes the currently logged-in user.
+     * @return string A JSON encoded status message.
      * @OA\Delete(
      *   path="/api/user/",
      *   summary="Delete the logged-in user.",
@@ -275,34 +317,32 @@ class LoginController extends AbstractController
     protected function deleteDependencies(string $id)
     {
         $role = strtoupper(Role::MODERATOR);
-        $query = "SELECT * FROM session_role
-      WHERE login_id = :login_id AND role like :role";
-        $stmt = $this->connection->prepare($query);
-        $stmt->bindParam(":login_id", $id);
-        $stmt->bindParam(":role", $role);
-        $stmt->execute();
+        $query = "SELECT * FROM session_role WHERE login_id = :login_id AND role like :role";
+        $statement = $this->connection->prepare($query);
+        $statement->bindParam(":login_id", $id);
+        $statement->bindParam(":role", $role);
+        $statement->execute();
 
-        $result_data = $this->database->fetchAll($stmt);
-        foreach ($result_data as $result_item) {
-            $session_id = $result_item["session_id"];
+        $resultData = $this->database->fetchAll($statement);
+        foreach ($resultData as $result_item) {
+            $sessionId = $result_item["session_id"];
 
-            $query = "SELECT * FROM session_role
-        WHERE session_id = :session_id AND role like :role";
-            $stmt = $this->connection->prepare($query);
-            $stmt->bindParam(":session_id", $session_id);
-            $stmt->bindParam(":role", $role);
-            $stmt->execute();
-            $item_count = $stmt->rowCount();
+            $query = "SELECT * FROM session_role WHERE session_id = :session_id AND role like :role";
+            $statement = $this->connection->prepare($query);
+            $statement->bindParam(":session_id", $sessionId);
+            $statement->bindParam(":role", $role);
+            $statement->execute();
+            $itemCount = $statement->rowCount();
 
-            if ($item_count == 1) {
+            if ($itemCount === 1) {
                 $session = SessionController::getInstance();
-                $session->delete($session_id);
+                $session->delete($sessionId);
             }
         }
 
         $query = "DELETE FROM session_role WHERE login_id = :login_id";
-        $stmt = $this->connection->prepare($query);
-        $stmt->bindParam(":login_id", $id);
-        $stmt->execute();
+        $statement = $this->connection->prepare($query);
+        $statement->bindParam(":login_id", $id);
+        $statement->execute();
     }
 }
