@@ -25,7 +25,7 @@ use Ramsey\Uuid\Uuid;
  * )
  * @OA\Server(url="../../")
  */
-class Controller
+abstract class Controller
 {
     /**
      * The controller singleton instances. Holds all instances of various subtypes.
