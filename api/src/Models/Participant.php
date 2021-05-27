@@ -22,6 +22,13 @@ class Participant {
     public ?string $browser_key;
 
     /**
+     * current status of the idea
+     * @var string|null
+     * @OA\Property(ref="#/components/schemas/StateParticipant")
+     */
+    public ?string $state;
+
+    /**
      * To visually distinguish in the front end, each participant is assigned its own avatar.
      * @OA\Property(ref="#/components/schemas/Avatar")
      */
@@ -47,6 +54,7 @@ class Participant {
     {
         $this->id = $data['id'] ?? null;
         $this->browser_key = $data['browser_key'] ?? null;
+        $this->state = strtoupper($data['state'] ?? null);
         $this->ip_hash = $data['ip_hash'] ?? null;
         $this->avatar = new Avatar($data);
         $this->access_token = $token;

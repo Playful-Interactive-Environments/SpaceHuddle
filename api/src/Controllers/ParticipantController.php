@@ -3,10 +3,12 @@ namespace PieLab\GAB\Controllers;
 
 use PieLab\GAB\Models\AvatarSymbol;
 use PieLab\GAB\Models\Participant;
+use PieLab\GAB\Models\ParticipantTask;
 use PieLab\GAB\Models\StateTask;
 use PieLab\GAB\Models\Topic;
 use PieLab\GAB\Models\Task;
 use PieLab\GAB\Models\Role;
+use PieLab\GAB\Models\StateParticipant;
 
 use PieLab\GAB\Config\Authorization;
 use PieLab\GAB\Config\Generator;
@@ -154,6 +156,31 @@ class ParticipantController extends Controller
         );
     }
 
+  /**
+   * @OA\Put(
+   *   path="/api/participant/state/{state}/",
+   *   summary="Set the participant state.",
+   *   tags={"Participant"},
+   *   @OA\Parameter(in="path", name="state",
+   *     description="display status of the participant",
+   *     required=true,
+   *     @OA\Schema(ref="#/components/schemas/StateParticipant")),
+   *   @OA\Response(response="200", description="Success"),
+   *   @OA\Response(response="404", description="Not Found"),
+   *   security={{"api_key": {}}, {"bearerAuth": {}}}
+   * )
+   */
+  public function setState(StateParticipant|null $state = null): mixed
+  {
+    $participantId = Authorization::getAuthorizationProperty("participant_id");
+    $params = $this->formatParameters(array(
+      "id"=>array("default"=>$participantId),
+      "state"=>array("default"=>$state, "type"=>StateParticipant::class, "url"=>"state")
+    ));
+
+    return $this->updateGeneric($params->id, $params, authorizedRoles: [Role::PARTICIPANT, Role::PARTICIPANT_INACTIVE]);
+  }
+
     /**
      * @OA\Delete(
      *   path="/api/participant/",
@@ -222,29 +249,31 @@ class ParticipantController extends Controller
         $client_states = [strtoupper(StateTask::ACTIVE), strtoupper(StateTask::READ_ONLY)];
         $client_states = implode(',', $client_states);
         if (!Authorization::isParticipant()) {
-            $login_id = getAuthorizationProperty("login_id");
-            $query = "SELECT * FROM task
-        WHERE FIND_IN_SET(state, :client_states)
-        AND topic_id IN (
-          SELECT topic.id
-          FROM topic
-          INNER JOIN session ON session.id = topic.session_id
-          INNER JOIN session_role ON session_role.session_id = session.id
-          WHERE session_role.login_id = :login_id
-          AND session.expiration_date >= current_timestamp())";
+            $login_id = Authorization::getAuthorizationProperty("login_id");
+            $query = "SELECT * FROM topic
+              INNER JOIN task ON topic.id = task.topic_id
+              WHERE FIND_IN_SET(task.state, :client_states)
+              AND task.topic_id IN (
+                SELECT topic.id
+                FROM topic
+                INNER JOIN session ON session.id = topic.session_id
+                INNER JOIN session_role ON session_role.session_id = session.id
+                WHERE session_role.login_id = :login_id
+                AND session.expiration_date >= current_timestamp())";
             $stmt = $this->connection->prepare($query);
             $stmt->bindParam(":login_id", $login_id);
             $stmt->bindParam(":client_states", $client_states);
         } else {
             $participant_id = Authorization::getAuthorizationProperty("participant_id");
-            $query = "SELECT * FROM task
-        WHERE FIND_IN_SET(state, :client_states)
-        AND topic_id IN (
-          SELECT topic.id
-          FROM topic
-          INNER JOIN session ON session.id = topic.session_id
-          INNER JOIN participant ON participant.session_id = session.id
-          WHERE participant.id = :participant_id and session.expiration_date >= current_timestamp())";
+            $query = "SELECT * FROM topic
+              INNER JOIN task ON topic.id = task.topic_id
+              WHERE FIND_IN_SET(task.state, :client_states)
+              AND task.topic_id IN (
+                SELECT topic.id
+                FROM topic
+                INNER JOIN session ON session.id = topic.session_id
+                INNER JOIN participant ON participant.session_id = session.id
+                WHERE participant.id = :participant_id and session.expiration_date >= current_timestamp())";
             $stmt = $this->connection->prepare($query);
             $stmt->bindParam(":participant_id", $participant_id);
             $stmt->bindParam(":client_states", $client_states);
@@ -253,7 +282,7 @@ class ParticipantController extends Controller
         $result_data = $this->database->fetchAll($stmt);
         $result = [];
         foreach ($result_data as $result_item) {
-            array_push($result, new Task($result_item));
+            array_push($result, new ParticipantTask($result_item));
         }
         http_response_code(200);
         return json_encode($result);

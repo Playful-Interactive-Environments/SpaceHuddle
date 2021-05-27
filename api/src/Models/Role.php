@@ -17,4 +17,5 @@ class Role
     const FACILITATOR = "facilitator";
     const PARTICIPANT = "participant";
     const UNKNOWN = "unknown";
+    const PARTICIPANT_INACTIVE = "participant_inactive";
 }

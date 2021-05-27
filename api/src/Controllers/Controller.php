@@ -8,6 +8,7 @@ use PDOStatement;
 use PieLab\GAB\Config\Authorization;
 use PieLab\GAB\Config\Database;
 use PieLab\GAB\Models\Role;
+use PieLab\GAB\Models\StateParticipant;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -747,7 +748,17 @@ abstract class Controller
             if (Authorization::isParticipant()) {
                 $participantId = Authorization::getAuthorizationProperty("participant_id");
                 if (is_null($id) or $id == $participantId) {
-                    return Role::PARTICIPANT;
+                    $state = StateParticipant::ACTIVE;
+                    $query = "SELECT * FROM participant WHERE id = :participant_id AND state like :state";
+                    $statement = $this->connection->prepare($query);
+                    $statement->bindParam(":participant_id", $participantId);
+                    $statement->bindParam(":state", $state);
+                    $statement->execute();
+                    $itemCount = $statement->rowCount();
+                    if ($itemCount > 0) {
+                      return Role::PARTICIPANT;
+                    }
+                    return Role::PARTICIPANT_INACTIVE;
                 }
             }
         }

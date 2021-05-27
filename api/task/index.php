@@ -9,11 +9,13 @@ use PieLab\GAB\Controllers\TaskController;
 use PieLab\GAB\Controllers\IdeaController;
 use PieLab\GAB\Controllers\GroupController;
 use PieLab\GAB\Controllers\VotingController;
+use PieLab\GAB\Controllers\ClientController;
 
 $task = TaskController::getInstance();
 $idea = IdeaController::getInstance();
 $group = GroupController::getInstance();
 $voting = VotingController::getInstance();
+$client = ClientController::getInstance();
 
 if (Controller::isRestCall("GET")) {
 	$result = $task->read();
@@ -53,6 +55,10 @@ elseif (Controller::isRestCall("GET", searchDetailHierarchy: "voting_result")) {
 }
 elseif (Controller::isRestCall("POST", searchDetailHierarchy: "voting")) {
 	$result = $voting->add();
+	echo $result;
+}
+elseif (Controller::isRestCall("PUT", searchDetailHierarchy: "client_application_state")) {
+	$result = $client->setClient();
 	echo $result;
 }
 else {

@@ -59,11 +59,13 @@ class ParticipantTask {
     public function __construct(array $data = null)
     {
         $this->id = $data['id'] ?? null;
-        $this->task_type = strtoupper($data['TaskType'] ?? null);
+        $this->task_type = strtoupper($data['task_type'] ?? null);
         $this->name = $data['name'] ?? null;
         $this->parameter = json_decode($data['parameter'] ?? null);
         $this->order = (int)$data['order'] ?? null;
         $this->state = strtoupper($data['state'] ?? null);
+
+        $data['id'] = $data['topic_id'];
         $this->topic = new Topic($data);
     }
 }

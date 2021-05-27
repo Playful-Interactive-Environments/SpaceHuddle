@@ -4,6 +4,7 @@ namespace PieLab\GAB\Controllers;
 
 use PieLab\GAB\Config\Authorization;
 use PieLab\GAB\Models\Task;
+use PieLab\GAB\Models\StateTask;
 
 /**
  * Class ClientController
@@ -17,8 +18,8 @@ class ClientController extends Controller
     }
 
     /**
-     * @OA\Post(
-     *   path="/api/task/{task_id}/client_application/{state}/",
+     * @OA\Put(
+     *   path="/api/task/{task_id}/client_application_state/{state}/",
      *   summary="Set the client application state for the task.",
      *   tags={"Client Application"},
      *   @OA\Parameter(in="path", name="task_id", description="ID of the task to be updated", required=true),
@@ -31,9 +32,13 @@ class ClientController extends Controller
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
      * )
      */
-    public function setClient(?string $sessionId = null, ?string $taskId = null): mixed
+    public function setClient(?string $taskId = null, StateTask|null $state = null): mixed
     {
-        $loginId = Authorization::getAuthorizationProperty("login_id");
-        #TODO: check rights for session
+      $params = $this->formatParameters(array(
+        "id"=>array("default"=>$taskId, "url"=>"task"),
+        "state"=>array("default"=>$state, "type"=>StateTask::class, "url"=>"client_application_state")
+      ));
+
+      return $this->updateGeneric($params->id, $params);
     }
 }
