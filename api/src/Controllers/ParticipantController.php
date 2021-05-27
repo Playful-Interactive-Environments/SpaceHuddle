@@ -13,7 +13,7 @@ use PieLab\GAB\Models\StateParticipant;
 use PieLab\GAB\Config\Authorization;
 use PieLab\GAB\Config\Generator;
 
-class ParticipantController extends Controller
+class ParticipantController extends AbstractController
 {
     public function __construct()
     {

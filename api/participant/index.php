@@ -4,32 +4,32 @@ header('Content-Type: application/json; charset=UTF-8');
 
 require "../vendor/autoload.php";
 
-use PieLab\GAB\Controllers\Controller;
+use PieLab\GAB\Controllers\AbstractController;
 use PieLab\GAB\Controllers\ParticipantController;
 
 $participant = ParticipantController::getInstance();
 
-if (Controller::isRestCall("GET", 2, searchDetailHierarchy: "connect")) {
+if (AbstractController::isRestCall("GET", 2, searchDetailHierarchy: "connect")) {
 	$result = $participant->reconnect();
 	echo $result;
 }
-elseif (Controller::isRestCall("POST", 2, searchDetailHierarchy: "connect")) {
+elseif (AbstractController::isRestCall("POST", 2, searchDetailHierarchy: "connect")) {
 	$result = $participant->connect();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", 2, searchDetailHierarchy: "tasks")) {
+elseif (AbstractController::isRestCall("GET", 2, searchDetailHierarchy: "tasks")) {
 	$result = $participant->getTasks();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", 2, searchDetailHierarchy: "topics")) {
+elseif (AbstractController::isRestCall("GET", 2, searchDetailHierarchy: "topics")) {
 	$result = $participant->getTopics();
 	echo $result;
 }
-elseif (Controller::isRestCall("DELETE")) {
+elseif (AbstractController::isRestCall("DELETE")) {
 	$result = $participant->delete();
 	echo $result;
 }
-elseif (Controller::isRestCall("PUT", 2, searchDetailHierarchy: "state")) {
+elseif (AbstractController::isRestCall("PUT", 2, searchDetailHierarchy: "state")) {
 	$result = $participant->setState();
 	echo $result;
 }

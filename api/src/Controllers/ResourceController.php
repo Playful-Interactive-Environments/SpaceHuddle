@@ -3,7 +3,7 @@ namespace PieLab\GAB\Controllers;
 
 use PieLab\GAB\Models\Resource;
 
-class ResourceController extends Controller
+class ResourceController extends AbstractController
 {
   public function __construct()
   {

@@ -4,20 +4,20 @@ header('Content-Type: application/json; charset=UTF-8');
 
 require "../vendor/autoload.php";
 
-use PieLab\GAB\Controllers\Controller;
+use PieLab\GAB\Controllers\AbstractController;
 use PieLab\GAB\Controllers\IdeaController;
 
 $idea = IdeaController::getInstance();
 
-if (Controller::isRestCall("GET")) {
+if (AbstractController::isRestCall("GET")) {
 	$result = $idea->read();
 	echo $result;
 }
-elseif (Controller::isRestCall("PUT")) {
+elseif (AbstractController::isRestCall("PUT")) {
 	$result = $idea->update();
 	echo $result;
 }
-elseif (Controller::isRestCall("DELETE")) {
+elseif (AbstractController::isRestCall("DELETE")) {
 	$result = $idea->delete();
 	echo $result;
 }

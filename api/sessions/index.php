@@ -4,12 +4,12 @@ header('Content-Type: application/json; charset=UTF-8');
 
 require "../vendor/autoload.php";
 
-use PieLab\GAB\Controllers\Controller;
+use PieLab\GAB\Controllers\AbstractController;
 use PieLab\GAB\Controllers\SessionController;
 
 $session = SessionController::getInstance();
 
-if (Controller::isRestCall("GET")) {
+if (AbstractController::isRestCall("GET")) {
 	$result = $session->readAll();
 	echo $result;
 }

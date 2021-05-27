@@ -5,7 +5,7 @@ use PieLab\GAB\Models\Topic;
 
 #require_once('task.php');
 
-class TopicController extends Controller
+class TopicController extends AbstractController
 {
   public function __construct()
   {

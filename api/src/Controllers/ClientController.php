@@ -10,7 +10,7 @@ use PieLab\GAB\Models\StateTask;
  * Class ClientController
  * @package PieLab\GAB\Controllers
  */
-class ClientController extends Controller
+class ClientController extends AbstractController
 {
     public function __construct()
     {

@@ -7,7 +7,7 @@ use PieLab\GAB\Models\StateTask;
 
 #require_once('idea.php');
 
-class TaskController extends Controller
+class TaskController extends AbstractController
 {
   public function __construct()
   {

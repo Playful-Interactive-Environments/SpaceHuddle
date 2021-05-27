@@ -7,7 +7,7 @@ use PieLab\GAB\Config\Authorization;
 use PieLab\GAB\Models\Role;
 use PieLab\GAB\Models\User;
 
-class LoginController extends Controller
+class LoginController extends AbstractController
 {
     public function __construct()
     {

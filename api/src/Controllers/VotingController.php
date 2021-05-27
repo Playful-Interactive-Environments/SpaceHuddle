@@ -6,7 +6,7 @@ use PieLab\GAB\Models\Role;
 use PieLab\GAB\Models\Voting;
 use PieLab\GAB\Models\VotingResult;
 
-class VotingController extends Controller
+class VotingController extends AbstractController
 {
   public function __construct()
   {

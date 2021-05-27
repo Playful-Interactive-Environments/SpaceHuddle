@@ -7,7 +7,7 @@ use PieLab\GAB\Config\Generator;
 use PieLab\GAB\Models\Session;
 use PieLab\GAB\Models\Role;
 
-class SessionController extends Controller
+class SessionController extends AbstractController
 {
     public function __construct()
     {

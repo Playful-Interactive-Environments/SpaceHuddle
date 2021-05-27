@@ -7,7 +7,7 @@ use PieLab\GAB\Models\TaskType;
 use PieLab\GAB\Models\Role;
 use PieLab\GAB\Models\StateIdea;
 
-class IdeaController extends Controller
+class IdeaController extends AbstractController
 {
   protected $taskType = TaskType::BRAINSTORMING;
 

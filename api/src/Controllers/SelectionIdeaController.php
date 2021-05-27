@@ -5,12 +5,12 @@ use PieLab\GAB\Models\Role;
 use PieLab\GAB\Models\Idea;
 use PieLab\GAB\Models\TaskType;
 
-class SelectionIdeaController extends Controller
+class SelectionIdeaController extends AbstractController
 {
   public function __construct()
   {
     parent::__construct("selection_group_idea", Idea::class, SelectionController::class,
-      "selection", "selection_group_id", "selection");
+                        "selection", "selection_group_id", "selection");
   }
 
   /**

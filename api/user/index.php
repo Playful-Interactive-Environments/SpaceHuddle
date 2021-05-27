@@ -5,21 +5,21 @@ header("Content-Type: application/json; charset=UTF-8");
 
 require "../vendor/autoload.php";
 
-use PieLab\GAB\Controllers\Controller;
+use PieLab\GAB\Controllers\AbstractController;
 use PieLab\GAB\Controllers\LoginController;
 
 $login = LoginController::getInstance();
 
-if (Controller::isRestCall("POST", 2, searchDetailHierarchy: "login")) {
+if (AbstractController::isRestCall("POST", 2, searchDetailHierarchy: "login")) {
     $result = $login->login();
     echo $result;
-} elseif (Controller::isRestCall("POST", 2, searchDetailHierarchy: "register")) {
+} elseif (AbstractController::isRestCall("POST", 2, searchDetailHierarchy: "register")) {
     $result = $login->register();
     echo $result;
-} elseif (Controller::isRestCall("PUT")) {
+} elseif (AbstractController::isRestCall("PUT")) {
     $result = $login->update();
     echo $result;
-} elseif (Controller::isRestCall("DELETE")) {
+} elseif (AbstractController::isRestCall("DELETE")) {
     $result = $login->delete();
     echo $result;
 } else {

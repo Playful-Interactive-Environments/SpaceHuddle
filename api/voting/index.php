@@ -4,20 +4,20 @@ header('Content-Type: application/json; charset=UTF-8');
 
 require "../vendor/autoload.php";
 
-use PieLab\GAB\Controllers\Controller;
+use PieLab\GAB\Controllers\AbstractController;
 use PieLab\GAB\Controllers\VotingController;
 
 $voting = VotingController::getInstance();
 
-if (Controller::isRestCall("GET")) {
+if (AbstractController::isRestCall("GET")) {
 	$result = $voting->get();
 	echo $result;
 }
-elseif (Controller::isRestCall("PUT")) {
+elseif (AbstractController::isRestCall("PUT")) {
 	$result = $voting->update();
 	echo $result;
 }
-elseif (Controller::isRestCall("DELETE")) {
+elseif (AbstractController::isRestCall("DELETE")) {
 	$result = $voting->delete();
 	echo $result;
 }

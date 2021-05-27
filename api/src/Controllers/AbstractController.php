@@ -26,7 +26,7 @@ use Ramsey\Uuid\Uuid;
  * )
  * @OA\Server(url="../../")
  */
-abstract class Controller
+abstract class AbstractController
 {
     /**
      * The controller singleton instances. Holds all instances of various subtypes.
@@ -178,12 +178,12 @@ abstract class Controller
             if (is_null($rightsController)) {
                 $rightsController = $this->parentController;
             }
-          if (is_null($rightIdName)) {
-            $rightIdName = $this->parentIdName;
-          }
-          if (is_null($rightTable)) {
-            $rightTable = $this->parentTable;
-          }
+            if (is_null($rightIdName)) {
+                $rightIdName = $this->parentIdName;
+            }
+            if (is_null($rightTable)) {
+                $rightTable = $this->parentTable;
+            }
         }
 
         if ($this->genericTableParameterSet()) {
@@ -376,7 +376,8 @@ abstract class Controller
      * @param array|object $parameter Data to be inserted.
      * @param array $authorizedRoles List of authorised roles.
      * @param bool $insertId Table contains a uuid as primary key which should be generated automatically.
-     * @param string|null $duplicateCheck SQL statement which checks whether the data to be inserted is unique (if this is necessary).
+     * @param string|null $duplicateCheck SQL statement which checks whether the data to be inserted is unique (if this
+     * is necessary).
      * @param array|object|null $parameterDependencies Dependent data to be included.
      * @return string Inserted data in the json format.
      */
@@ -756,7 +757,7 @@ abstract class Controller
                     $statement->execute();
                     $itemCount = $statement->rowCount();
                     if ($itemCount > 0) {
-                      return Role::PARTICIPANT;
+                        return Role::PARTICIPANT;
                     }
                     return Role::PARTICIPANT_INACTIVE;
                 }
@@ -810,7 +811,8 @@ abstract class Controller
 
     /**
      * Extrudes a parameter from the REST url.
-     * @param string $parameterName Name of the parameter. The name is separated by a slash before the parameter value ($parameter_name/$parameter_value).
+     * @param string $parameterName Name of the parameter. The name is separated by a slash before the parameter value
+     * ($parameter_name/$parameter_value).
      * @param mixed|null $defaultValue Default value if no parameter entry ist found.
      * @return mixed Returns the parameter value.
      */

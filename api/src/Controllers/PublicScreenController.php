@@ -5,7 +5,7 @@ use PieLab\GAB\Models\Task;
 
 use PieLab\GAB\Config\Authorization;
 
-class PublicScreenController extends Controller
+class PublicScreenController extends AbstractController
 {
     public function __construct()
     {

@@ -4,7 +4,7 @@ header('Content-Type: application/json; charset=UTF-8');
 
 require "../vendor/autoload.php";
 
-use PieLab\GAB\Controllers\Controller;
+use PieLab\GAB\Controllers\AbstractController;
 use PieLab\GAB\Controllers\TopicController;
 use PieLab\GAB\Controllers\TaskController;
 use PieLab\GAB\Controllers\IdeaController;
@@ -19,51 +19,51 @@ $group = GroupController::getInstance();
 $selection = SelectionController::getInstance();
 $participant = ParticipantController::getInstance();
 
-if (Controller::isRestCall("GET")) {
+if (AbstractController::isRestCall("GET")) {
 	$result = $topic->read();
 	echo $result;
 }
-elseif (Controller::isRestCall("PUT")) {
+elseif (AbstractController::isRestCall("PUT")) {
 	$result = $topic->update();
 	echo $result;
 }
-elseif (Controller::isRestCall("DELETE")) {
+elseif (AbstractController::isRestCall("DELETE")) {
 	$result = $topic->delete();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", searchDetailHierarchy: "tasks")) {
+elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "tasks")) {
 	$result = $task->readAll();
 	echo $result;
 }
-elseif (Controller::isRestCall("POST", searchDetailHierarchy: "task")) {
+elseif (AbstractController::isRestCall("POST", searchDetailHierarchy: "task")) {
 	$result = $task->add();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", searchDetailHierarchy: "participant_tasks")) {
+elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "participant_tasks")) {
 	$result = $participant->getTopicTasks();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", searchDetailHierarchy: "ideas")) {
+elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "ideas")) {
 	$result = $idea->readAllFromTopic();
 	echo $result;
 }
-elseif (Controller::isRestCall("POST", searchDetailHierarchy: "idea")) {
+elseif (AbstractController::isRestCall("POST", searchDetailHierarchy: "idea")) {
 	$result = $idea->addToTopic();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", searchDetailHierarchy: "groups")) {
+elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "groups")) {
 	$result = $group->readAllFromTopic();
 	echo $result;
 }
-elseif (Controller::isRestCall("POST", searchDetailHierarchy: "group")) {
+elseif (AbstractController::isRestCall("POST", searchDetailHierarchy: "group")) {
 	$result = $group->addToTopic();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", searchDetailHierarchy: "selections")) {
+elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "selections")) {
 	$result = $selection->readAll();
 	echo $result;
 }
-elseif (Controller::isRestCall("POST", searchDetailHierarchy: "selection")) {
+elseif (AbstractController::isRestCall("POST", searchDetailHierarchy: "selection")) {
 	$result = $selection->add();
 	echo $result;
 }

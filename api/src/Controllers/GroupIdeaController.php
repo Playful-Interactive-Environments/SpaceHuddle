@@ -5,7 +5,7 @@ use PieLab\GAB\Models\Idea;
 use PieLab\GAB\Models\Role;
 use PieLab\GAB\Models\TaskType;
 
-class GroupIdeaController extends Controller
+class GroupIdeaController extends AbstractController
 {
   public function __construct()
   {

@@ -3,7 +3,7 @@ namespace PieLab\GAB\Controllers;
 
 use PieLab\GAB\Models\Selection;
 
-class SelectionController extends Controller
+class SelectionController extends AbstractController
 {
   public function __construct()
   {

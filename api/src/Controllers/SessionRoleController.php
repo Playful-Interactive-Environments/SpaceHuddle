@@ -3,7 +3,7 @@ namespace PieLab\GAB\Controllers;
 
 use PieLab\GAB\Models\SessionRole;
 
-class SessionRoleController extends Controller
+class SessionRoleController extends AbstractController
 {
   public function __construct()
   {
