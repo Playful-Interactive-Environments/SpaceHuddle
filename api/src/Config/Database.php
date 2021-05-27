@@ -7,42 +7,80 @@ use PDOException;
 use PDOStatement;
 
 /**
- * Class Database standardises the database access.
+ * This class provides the single access point to the Database.
  */
 class Database
 {
-    private static ?Database $instance = null;
-    private string $host = "localhost";
-    private string $database_name = "gab";
-    private string $username = "root";
-    private string $password = "";
+    /**
+     * The singleton Database instance.
+     * @var Database
+     */
+    private static Database $instance;
 
+    /**
+     * The database hostname.
+     * @var string
+     */
+    private string $host;
+
+    /**
+     * The database name.
+     * @var string
+     */
+    private string $name;
+
+    /**
+     * The username used to connect to the database.
+     * @var string
+     */
+    private string $username;
+
+    /**
+     * The password used to connect to the database.
+     * @var string
+     */
+    private string $password;
+
+    /**
+     * The actual database connection using PDO.
+     * @var PDO|null
+     */
     private ?PDO $connection;
 
+    /**
+     * Creates a new Database object using the data stored in the Settings object.
+     */
     private function __construct()
     {
-        $this->host = $_SERVER['HTTP_HOST'];
+        $settings = Settings::getInstance();
+        $databaseSettings = $settings["database"];
+
+        $this->host = $databaseSettings["host"];
+        $this->name = $databaseSettings["name"];
+        $this->username = $databaseSettings["username"];
+        $this->password = $databaseSettings["password"];
+
         $this->connection = null;
+
+        //$this->host = $_SERVER['HTTP_HOST'];
+
         try {
-            $this->connection = new PDO(
-                'mysql:host=' . $this->host . '; dbname=' . $this->database_name . ';',
-                $this->username,
-                $this->password
-            );
+            $dsn = "mysql:host=$this->host; dbname=$this->name;";
+            $this->connection = new PDO($dsn, $this->username, $this->password);
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $exception) {
-            echo "Database could not be connected: " . $exception->get_message();
+            echo "Database could not be connected: " . $exception->getMessage();
         }
     }
 
     /**
-     * singleton pattern
-     * @return Database Returns a static instance for database access.
+     * Creates a single instance for a database connection.
+     * @return static The Database object.
      */
-    public static function getInstance(): Database
+    public static function getInstance(): static
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new Database();
+        if (empty(self::$instance)) {
+            self::$instance = new static();
         }
         return self::$instance;
     }
@@ -58,18 +96,18 @@ class Database
 
     /**
      * Returns an array containing all of the result set rows.
-     * @param PDOStatement $stmt Statement to be executed.
+     * @param PDOStatement $statement Statement to be executed.
      * @return array Returns all result set rows.
      */
-    public function fetchAll(PDOStatement $stmt): array
+    public function fetchAll(PDOStatement $statement): array
     {
-        $item_count = $stmt->rowCount();
+        $itemCount = $statement->rowCount();
 
-        if ($item_count > 0) {
+        if ($itemCount > 0) {
             #http_response_code(200);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
         } else {
-            return array();
+            return [];
             /*
             http_response_code(404);
             $error = json_encode(
@@ -86,23 +124,21 @@ class Database
 
     /**
      * Returns the first result set rows.
-     * @param PDOStatement $stmt Statement to be executed.
-     * @param string $error_msg Error message to be thrown if no data is found.
+     * @param PDOStatement $statement Statement to be executed.
+     * @param string $errorMessage Error message to be thrown if no data is found.
      * @return mixed Returns the first result set rows.
      */
-    public function fetchFirst(
-        PDOStatement $stmt,
-        string $error_msg = "No records found."
-    ): mixed {
-        $item_count = $stmt->rowCount();
+    public function fetchFirst(PDOStatement $statement, string $errorMessage = "No records found."): mixed
+    {
+        $itemCount = $statement->rowCount();
 
-        if ($item_count > 0) {
+        if ($itemCount > 0) {
             #http_response_code(200);
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+            return $statement->fetch(PDO::FETCH_ASSOC);
             #return json_encode(
             #  array(
             #    "response"=>$stmt->fetch(PDO::FETCH_ASSOC),
-            #    "count"=>$item_count
+            #    "count"=>$itemCount
             #  )
             #);
         } else {
@@ -110,7 +146,7 @@ class Database
             $error = json_encode(
                 array(
                     "state" => "Failed",
-                    "message" => $error_msg
+                    "message" => $errorMessage
                 )
             );
             die($error);
@@ -131,18 +167,17 @@ class Database
 
         if (!empty($databaseErrors)) {
             http_response_code(404);
-            $error = array(
+            $error = [
                 "state" => "Failed",
-                "message" => 'Error occurred:' . implode(":", $databaseErrors)
-            );
+                "message" => "Error occurred:" . implode(":", $databaseErrors)
+            ];
             die($error);
             #return $error;
         } else {
-            return array(
+            return [
                 "state" => "Success",
-            );
+                "message" => "No database errors occurred."
+            ];
         }
     }
 }
-
-?>
