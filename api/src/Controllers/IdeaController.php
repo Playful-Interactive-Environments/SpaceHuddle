@@ -9,7 +9,7 @@ use PieLab\GAB\Models\StateIdea;
 
 class IdeaController extends Controller
 {
-  protected $task_type = TaskType::BRAINSTORMING;
+  protected $taskType = TaskType::BRAINSTORMING;
 
   public function __construct($table = null, $class = null, $parentController = null, $parentTable = null, $parentIdName = null, $urlParameter = null)
   {
@@ -19,7 +19,7 @@ class IdeaController extends Controller
       if (is_null($parentTable)) $parentTable = "task";
       if (is_null($parentIdName)) $parentIdName = "task_id";
       parent::__construct($table, $class, $parentController, $parentTable, $parentIdName, $urlParameter);
-      $this->task_type = TaskType::BRAINSTORMING;
+      $this->taskType = TaskType::BRAINSTORMING;
   }
 
   /**
@@ -39,11 +39,11 @@ class IdeaController extends Controller
   * )
   */
   public function readAllFromTask(
-      ?string $task_id = null,
-      bool $treat_participants_separately = true
+      ?string $taskId = null,
+      bool $treatParticipantsSeparately = true
   ) : string {
-    $task_type = strtoupper($this->task_type);
-    if (!Authorization::isParticipant() or !$treat_participants_separately) {
+    $task_type = strtoupper($this->taskType);
+    if (!Authorization::isParticipant() or !$treatParticipantsSeparately) {
       $query = "SELECT * FROM idea
         WHERE task_id = :task_id
         AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
@@ -59,7 +59,7 @@ class IdeaController extends Controller
       $stmt->bindParam(":participant_id", $participant_id);
       $stmt->bindParam(":task_type", $task_type);
     }
-    return parent::readAllGeneric($task_id,
+    return parent::readAllGeneric($taskId,
         authorizedRoles
         : array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
         statement: $stmt);
@@ -82,11 +82,11 @@ class IdeaController extends Controller
   * )
   */
   public function readAllFromTopic(
-      ?string $topic_id = null,
-      bool $treat_participants_separately = true
+      ?string $topicId = null,
+      bool $treatParticipantsSeparately = true
   ) :string {
-    $task_type = strtoupper($this->task_type);
-    if (!Authorization::isParticipant() or !$treat_participants_separately) {
+    $task_type = strtoupper($this->taskType);
+    if (!Authorization::isParticipant() or !$treatParticipantsSeparately) {
       $query = "SELECT * FROM idea
         WHERE task_id IN (SELECT id FROM task WHERE topic_id = :topic_id AND task_type like :task_type)";
       $stmt = $this->connection->prepare($query);
@@ -102,7 +102,7 @@ class IdeaController extends Controller
       $stmt->bindParam(":task_type", $task_type);
     }
     return parent::readAllGeneric(
-        $topic_id,
+        $topicId,
         authorizedRoles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
         statement: $stmt,
         parentTable: "topic",
@@ -126,10 +126,10 @@ class IdeaController extends Controller
   */
   public function read(
       ?string $id = null,
-      bool $treat_participants_separately = true
+      bool $treatParticipantsSeparately = true
   ) : string {
-    $task_type = strtoupper($this->task_type);
-    if (!Authorization::isParticipant() or !$treat_participants_separately) {
+    $task_type = strtoupper($this->taskType);
+    if (!Authorization::isParticipant() or !$treatParticipantsSeparately) {
       $query = "SELECT * FROM idea
         WHERE id = :id
         AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
@@ -228,7 +228,7 @@ class IdeaController extends Controller
   * )
   */
   public function addToTask(
-      ?string $task_id = null,
+      ?string $taskId = null,
       ?string $keywords = null,
       ?string $description = null,
       ?string $link = null,
@@ -237,7 +237,7 @@ class IdeaController extends Controller
     $participant_id = Authorization::getAuthorizationProperty("participant_id");
     $state = strtoupper(StateIdea::NEW);
     $params = $this->formatParameters(array(
-      "task_id"=>array("default"=>$task_id, "url"=>"task"),
+      "task_id"=>array("default"=>$taskId, "url"=>"task"),
       "keywords"=>array("default"=>$keywords),
       "description"=>array("default"=>$description),
       "link"=>array("default"=>$link),
@@ -274,21 +274,21 @@ class IdeaController extends Controller
   * )
   */
   public function addToTopic(
-      ?string $topic_id = null,
+      ?string $topicId = null,
       ?string $keywords = null,
       ?string $description = null,
       ?string $link = null,
       ?string $image = null
   ) : string {
-    if (is_null($topic_id)) {
-      $topic_id = $this->getUrlParameter("topic");
+    if (is_null($topicId)) {
+      $topicId = $this->getUrlParameter("topic");
     }
-    $task_type = strtoupper($this->task_type);
+    $task_type = strtoupper($this->taskType);
 
     $query = "SELECT * FROM task
       WHERE topic_id = :topic_id AND task_type like :task_type";
     $stmt = $this->connection->prepare($query);
-    $stmt->bindParam(":topic_id", $topic_id);
+    $stmt->bindParam(":topic_id", $topicId);
     $stmt->bindParam(":task_type", $task_type);
     $stmt->execute();
     $item_count = $stmt->rowCount();
