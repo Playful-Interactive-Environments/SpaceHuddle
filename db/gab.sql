@@ -101,6 +101,7 @@ CREATE TABLE `participant` (
   `id` char(36) NOT NULL,
   `session_id` char(36) NOT NULL,
   `browser_key` varchar(255) NOT NULL,
+  `state` varchar(255) NOT NULL DEFAULT '''ACTIVE''',
   `color` varchar(255) DEFAULT NULL,
   `symbol` varchar(255) DEFAULT NULL,
   `ip_hash` varchar(255) NOT NULL
