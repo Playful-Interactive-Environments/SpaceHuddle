@@ -8,6 +8,13 @@ namespace PieLab\GAB\Models;
 class Voting {
 
     /**
+     * id of the voting
+     * @var string|null
+     * @OA\Property(example="uuid")
+     */
+    public ?string $id;
+
+    /**
      * id of the idea
      * @var string|null
      * @OA\Property(example="uuid")
@@ -30,6 +37,7 @@ class Voting {
 
     public function __construct(array $data = null)
     {
+        $this->id = $data['id'] ?? null;
         $this->idea_id = $data['idea_id'] ?? null;
         $this->rating = (int)$data['rating'] ?? null;
         $this->detail_rating = (float)$data['detail_rating'] ?? null;

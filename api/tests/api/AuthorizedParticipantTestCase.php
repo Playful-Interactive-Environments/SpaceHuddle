@@ -5,41 +5,75 @@ use PieLab\GAB\Models\TaskType;
 
 abstract class AuthorizedParticipantTestCase extends AuthorizedTestCase
 {
-  protected $topic_id;
-  protected $task_id_idea;
+  protected ?string $topicId;
+  protected ?string $taskIdIdea;
+  protected ?string $taskIdVote;
+  protected ?string $votingID;
+  protected ?string $ideaId;
 
-  public function get_first_topic_id() {
-    if (!isset($this->topic_id)) {
-      $res = $this->client->get($this->get_absolute_api_url("/api/participant/topics/"));
-      $result = $this->to_json($res->getBody());
+  public function getFirstTopicId() : ?string {
+    if (!isset($this->topicId)) {
+      $res = $this->client->get($this->getAbsoluteApiUrl("/api/participant/topics/"));
+      $result = $this->toJSON($res->getBody());
       if (count($result) > 0) {
-        $this->topic_id = $result[0]->id;
+        $this->topicId = $result[0]->id;
       }
     }
-    return $this->topic_id;
+    return $this->topicId;
   }
 
-  protected function get_first_task_id($task_type) {
-    $res = $this->client->get($this->get_absolute_api_url("/api/participant/tasks/"));
-    $result = $this->to_json($res->getBody());
+  protected function getFirstTaskId($task_type) : ?string {
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/participant/tasks/"));
+    $result = $this->toJSON($res->getBody());
     if (count($result) > 0) {
-      foreach ($result as $result_item) {
-        if (strtoupper($result_item->task_type) == strtoupper($task_type)) {
-          return $result_item->id;
+      foreach ($result as $resultItem) {
+        if (strtoupper($resultItem->task_type) == strtoupper($task_type)) {
+          return $resultItem->id;
         }
       }
     }
     return null;
   }
 
-  public function get_first_task_id_idea() {
-    if (!isset($this->task_id_idea)) {
-      $this->task_id_idea = $this->get_first_task_id(TaskType::BRAINSTORMING);
+  public function getFirstTaskIdIdea() : ?string {
+    if (!isset($this->taskIdIdea)) {
+      $this->taskIdIdea = $this->getFirstTaskId(TaskType::BRAINSTORMING);
     }
-    return $this->task_id_idea;
+    return $this->taskIdIdea;
   }
 
-  protected function get_access_token() {
+  public function getFirstTaskIdVote() : ?string {
+    if (!isset($this->taskIdVote)) {
+      $this->taskIdVote = $this->getFirstTaskId(TaskType::VOTING);
+    }
+    return $this->taskIdVote;
+  }
+
+  public function getFirstVotingId() : ?string {
+    if (!isset($this->votingID)) {
+      $task_id = $this->getFirstTaskIdVote();
+      $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$task_id/votings/"));
+      $result = $this->toJSON($res->getBody());
+      if (count($result) > 0) {
+        $this->votingID = $result[0]->id;
+      }
+    }
+    return $this->votingID;
+  }
+
+  public function getFirstIdeaId() : ?string {
+    if (!isset($this->ideaId)) {
+      $task_id = $this->getFirstTaskIdIdea();
+      $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$task_id/ideas/"));
+      $result = $this->toJSON($res->getBody());
+      if (count($result) > 0) {
+        $this->ideaId = $result[0]->id;
+      }
+    }
+    return $this->ideaId;
+  }
+
+  protected function getAccessToken() : ?string {
     $client = new GuzzleHttp\Client();
 
     $login_data =  json_encode((object)array(
@@ -47,10 +81,10 @@ abstract class AuthorizedParticipantTestCase extends AuthorizedTestCase
       'ip_hash' => 'localhost'
     ));
 
-    $res = $client->post($this->get_absolute_api_url("/api/participant/connect/"), [
+    $res = $client->post($this->getAbsoluteApiUrl("/api/participant/connect/"), [
         'body' => $login_data
     ]);
-    $access_token = $this->to_json($res->getBody())->access_token;
+    $access_token = $this->toJSON($res->getBody())->access_token;
     return $access_token;
   }
 }

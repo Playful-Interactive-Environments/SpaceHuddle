@@ -10,9 +10,9 @@ abstract class AuthorizedTestCase extends TestCase
   {
     parent::__construct();
     #$this->host = $_SERVER['HTTP_HOST'];
-    $access_token =  $this->get_access_token();
-    if (isset($access_token)) {
-      $bearer = "Bearer $access_token";
+    $accessToken =  $this->getAccessToken();
+    if (isset($accessToken)) {
+      $bearer = "Bearer $accessToken";
       $this->client = new GuzzleHttp\Client([
           'headers' => ["Authorization" => $bearer]
       ]);
@@ -22,28 +22,28 @@ abstract class AuthorizedTestCase extends TestCase
     }
   }
 
-  protected function get_absolute_api_url($relative_url) {
+  protected function getAbsoluteApiUrl($relative_url) : string {
     return "http://$this->host/$relative_url";
   }
 
-  protected function get_access_token() {
+  protected function getAccessToken() : ?string {
     return null;
   }
 
-  protected function to_json($data) {
+  protected function toJSON($data) : mixed {
     if ($this->is_json($data))
       return json_decode($data);
     return null;
   }
 
-  protected function is_json($data) {
-    $is_json = is_array(json_decode($data, true));
+  protected function is_json($data) : bool {
+    $isJson = is_array(json_decode($data, true));
     if (json_last_error() != JSON_ERROR_NONE) {
-      $is_json = false;
+      $isJson = false;
       $error = json_last_error_msg();
       echo "\n\nJSON Error: $error\n\n";
     }
-    return $is_json;
+    return $isJson;
   }
 
   protected function assertIsJSON($data) {

@@ -3,14 +3,14 @@ require_once('AuthorizedTestCase.php');
 
 class LoginTest extends AuthorizedTestCase
 {
-  public function test_workflow() {
+  public function testWorkflow() {
     $data =  json_encode((object)array(
       'username' => 'temp',
       'password' => 'string',
       'password_confirmation' => 'string'
     ));
 
-    $res = $this->client->post($this->get_absolute_api_url("/api/user/register/"), [
+    $res = $this->client->post($this->getAbsoluteApiUrl("/api/user/register/"), [
         'body' => $data
     ]);
     $this->assertSame($res->getStatusCode(), 200);
@@ -21,10 +21,10 @@ class LoginTest extends AuthorizedTestCase
       'password' => 'string'
     ));
 
-    $res = $this->client->post($this->get_absolute_api_url("/api/user/login/"), [
+    $res = $this->client->post($this->getAbsoluteApiUrl("/api/user/login/"), [
         'body' => $login_data
     ]);
-    $access_token = $this->to_json($res->getBody())->access_token;
+    $access_token = $this->toJSON($res->getBody())->access_token;
     $bearer = "Bearer $access_token";
 
     $data =  json_encode((object)array(
@@ -33,14 +33,14 @@ class LoginTest extends AuthorizedTestCase
       'password_confirmation' => 'new'
     ));
 
-    $res = $this->client->put($this->get_absolute_api_url("/api/user/"), [
+    $res = $this->client->put($this->getAbsoluteApiUrl("/api/user/"), [
       'headers' => ["Authorization" => $bearer],
       'body' => $data
     ]);
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
 
-    $res = $this->client->delete($this->get_absolute_api_url("/api/user/"), [
+    $res = $this->client->delete($this->getAbsoluteApiUrl("/api/user/"), [
       'headers' => ["Authorization" => $bearer]
     ]);
     $this->assertSame($res->getStatusCode(), 200);

@@ -177,9 +177,12 @@ class Controller
             if (is_null($rightsController)) {
                 $rightsController = $this->parentController;
             }
-            if (is_null($rightIdName)) {
-                $rightIdName = $this->parentIdName;
-            }
+          if (is_null($rightIdName)) {
+            $rightIdName = $this->parentIdName;
+          }
+          if (is_null($rightTable)) {
+            $rightTable = $this->parentTable;
+          }
         }
 
         if ($this->genericTableParameterSet()) {

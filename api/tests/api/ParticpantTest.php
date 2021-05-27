@@ -6,23 +6,23 @@ class ParticpantTest extends AuthorizedParticipantTestCase
   public function __construct()
   {
     parent::__construct();
-    $this->get_first_topic_id();
+    $this->getFirstTopicId();
   }
 
-  public function test_get_topics() {
-    $res = $this->client->get($this->get_absolute_api_url("/api/participant/topics/"));
+  public function testGetTopics() {
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/participant/topics/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
   }
 
-  public function test_get_tasks() {
-    $res = $this->client->get($this->get_absolute_api_url("/api/participant/tasks/"));
+  public function testGetTasks() {
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/participant/tasks/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
   }
 
-  public function test_get_topic_tasks() {
-    $res = $this->client->get($this->get_absolute_api_url("/api/topic/$this->topic_id/participant_tasks/"));
+  public function testGetTopicTasks() {
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/topic/$this->topicId/participant_tasks/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
   }

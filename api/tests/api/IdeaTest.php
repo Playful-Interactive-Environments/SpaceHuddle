@@ -7,23 +7,23 @@ class IdeaTest extends AuthorizedUserTestCase
   public function __construct()
   {
     parent::__construct();
-    $this->get_first_topic_id();
-    $this->get_first_task_id_idea();
-    $this->get_first_idea_id();
+    $this->getFirstTopicId();
+    $this->getFirstTaskIdIdea();
+    $this->getFirstIdeaId();
   }
 
-  public function test_get_all() {
-    $res = $this->client->get($this->get_absolute_api_url("/api/topic/$this->topic_id/ideas/"));
+  public function testGtAll() {
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/topic/$this->topicId/ideas/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
-    $res = $this->client->get($this->get_absolute_api_url("/api/task/$this->task_id_idea/ideas/"));
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$this->taskIdIdea/ideas/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
   }
 
-  public function test_get_by_id() {
-    $this->assertIsString($this->idea_id);
-    $res = $this->client->get($this->get_absolute_api_url("/api/idea/$this->idea_id/"));
+  public function testGetById() {
+    $this->assertIsString($this->ideaId);
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/idea/$this->ideaId/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
   }

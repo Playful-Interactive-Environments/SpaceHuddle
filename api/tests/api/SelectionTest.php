@@ -6,26 +6,26 @@ class SelectionTest extends AuthorizedUserTestCase
   public function __construct()
   {
     parent::__construct();
-    $this->get_first_topic_id();
+    $this->getFirstTopicId();
     $this->getFirstSelectionId();
-    $this->get_first_idea_id();
+    $this->getFirstIdeaId();
   }
 
   public function testGetAll() {
-    $res = $this->client->get($this->get_absolute_api_url("/api/topic/$this->topic_id/selections/"));
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/topic/$this->topicId/selections/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
   }
 
   public function testGetById() {
     $this->assertIsString($this->selectionId);
-    $res = $this->client->get($this->get_absolute_api_url("/api/selection/$this->selectionId/"));
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/selection/$this->selectionId/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
   }
 
   public function testGetGroupIdeas() {
-    $res = $this->client->get($this->get_absolute_api_url("/api/selection/$this->selectionId/ideas/"));
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/selection/$this->selectionId/ideas/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
   }
@@ -35,13 +35,13 @@ class SelectionTest extends AuthorizedUserTestCase
       'name' => 'test selection'
     ));
 
-    $res = $this->client->post($this->get_absolute_api_url("/api/topic/$this->topic_id/selection/"), [
+    $res = $this->client->post($this->getAbsoluteApiUrl("/api/topic/$this->topicId/selection/"), [
         'body' => $data
     ]);
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
 
-    $result = $this->to_json($res->getBody());
+    $result = $this->toJSON($res->getBody());
     $id = $result->id;
 
     $data =  json_encode((object)array(
@@ -49,29 +49,29 @@ class SelectionTest extends AuthorizedUserTestCase
       'name' => 'test selection 2'
     ));
 
-    $res = $this->client->put($this->get_absolute_api_url("/api/selection/"), [
+    $res = $this->client->put($this->getAbsoluteApiUrl("/api/selection/"), [
         'body' => $data
     ]);
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
 
-    $res = $this->client->delete($this->get_absolute_api_url("/api/selection/$id/"));
+    $res = $this->client->delete($this->getAbsoluteApiUrl("/api/selection/$id/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
   }
 
   public function testWorkflowGroupIdeas() {
     $data =  json_encode(array(
-      $this->idea_id
+      $this->ideaId
     ));
 
-    $res = $this->client->post($this->get_absolute_api_url("/api/selection/$this->selectionId/ideas/"), [
+    $res = $this->client->post($this->getAbsoluteApiUrl("/api/selection/$this->selectionId/ideas/"), [
         'body' => $data
     ]);
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
 
-    $res = $this->client->delete($this->get_absolute_api_url("/api/selection/$this->selectionId/ideas/"), [
+    $res = $this->client->delete($this->getAbsoluteApiUrl("/api/selection/$this->selectionId/ideas/"), [
         'body' => $data
     ]);
     $this->assertSame($res->getStatusCode(), 200);

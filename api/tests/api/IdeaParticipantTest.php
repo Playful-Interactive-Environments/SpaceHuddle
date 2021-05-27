@@ -8,14 +8,14 @@ class IdeaParticipantTest extends AuthorizedParticipantTestCase
   public function __construct()
   {
     parent::__construct();
-    $this->get_first_topic_id();
-    $this->get_first_task_id_idea();
+    $this->getFirstTopicId();
+    $this->getFirstTaskIdIdea();
     #$user = new Idea_Test();
     #$this->topic_id = $user->get_first_topic_id();
     #$this->task_id_idea = $user->get_first_task_id_idea();
   }
 
-  public function test_workflow() {
+  public function testWorkflow() {
     $data =  json_encode((object)array(
       'keywords' => 'test idea',
       'description' => "...",
@@ -23,26 +23,26 @@ class IdeaParticipantTest extends AuthorizedParticipantTestCase
       'image' => null
     ));
 
-    $res = $this->client->post($this->get_absolute_api_url("/api/topic/$this->topic_id/idea/"), [
+    $res = $this->client->post($this->getAbsoluteApiUrl("/api/topic/$this->topicId/idea/"), [
         'body' => $data
     ]);
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
 
-    $result = $this->to_json($res->getBody());
+    $result = $this->toJSON($res->getBody());
     $id = $result->id;
 
-    $res = $this->client->delete($this->get_absolute_api_url("/api/idea/$id/"));
+    $res = $this->client->delete($this->getAbsoluteApiUrl("/api/idea/$id/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
 
-    $res = $this->client->post($this->get_absolute_api_url("/api/task/$this->task_id_idea/idea/"), [
+    $res = $this->client->post($this->getAbsoluteApiUrl("/api/task/$this->taskIdIdea/idea/"), [
         'body' => $data
     ]);
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
 
-    $result = $this->to_json($res->getBody());
+    $result = $this->toJSON($res->getBody());
     $id = $result->id;
 
     $data =  json_encode((object)array(
@@ -54,13 +54,13 @@ class IdeaParticipantTest extends AuthorizedParticipantTestCase
       'image' => null
     ));
 
-    $res = $this->client->put($this->get_absolute_api_url("/api/idea/"), [
+    $res = $this->client->put($this->getAbsoluteApiUrl("/api/idea/"), [
         'body' => $data
     ]);
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
 
-    $res = $this->client->delete($this->get_absolute_api_url("/api/idea/$id/"));
+    $res = $this->client->delete($this->getAbsoluteApiUrl("/api/idea/$id/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
   }
