@@ -268,6 +268,7 @@ class SessionController extends AbstractController
             if ($itemCount > 0) {
                 $result = $this->database->fetchFirst($statement);
                 return strtoupper(Role::PARTICIPANT);
+                // TODO: What's $result being used for?
             }
         }
         return null;

@@ -142,10 +142,10 @@ class Database
         } else {
             http_response_code(404);
             $error = json_encode(
-                array(
+                [
                     "state" => "Failed",
                     "message" => $errorMessage
-                )
+                ]
             );
             die($error);
             #return $error;

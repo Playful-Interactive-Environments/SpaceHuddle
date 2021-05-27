@@ -135,7 +135,7 @@ class IdeaController extends AbstractController
         $statement->bindParam(":task_type", $taskType);
         return parent::readAllGeneric(
             $topicId,
-            authorizedRoles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
+            authorizedRoles: [Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT],
             statement: $statement,
             parentTable: "topic",
             parentIdName: "topic_id",

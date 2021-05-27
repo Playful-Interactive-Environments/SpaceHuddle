@@ -56,7 +56,7 @@ class SelectionIdeaController extends AbstractController
         $statement->bindParam(":task_type", $taskType);
         return parent::readAllGeneric(
             $selectionGroupId,
-            authorizedRoles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
+            authorizedRoles: [Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT],
             statement: $statement
         );
     }
@@ -152,7 +152,7 @@ class SelectionIdeaController extends AbstractController
 
         return parent::deleteGeneric(
             $params->selection_group_id,
-            authorizedRoles: array(Role::MODERATOR, Role::FACILITATOR),
+            authorizedRoles: [Role::MODERATOR, Role::FACILITATOR],
             statement: $statement
         );
     }
