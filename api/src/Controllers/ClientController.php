@@ -32,7 +32,7 @@ class ClientController extends Controller
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
      * )
      */
-    public function setClient(?string $taskId = null, StateTask|null $state = null): mixed
+    public function setClient(?string $taskId = null, StateTask|null $state = null): string
     {
       $params = $this->formatParameters(array(
         "id"=>array("default"=>$taskId, "url"=>"task"),
