@@ -1,10 +1,14 @@
 <?php
+
 namespace PieLab\GAB\Controllers;
 
+use PieLab\GAB\Config\Authorization;
 use PieLab\GAB\Models\Task;
 
-use PieLab\GAB\Config\Authorization;
-
+/**
+ * Class ClientController
+ * @package PieLab\GAB\Controllers
+ */
 class ClientController extends Controller
 {
     public function __construct()
@@ -27,9 +31,9 @@ class ClientController extends Controller
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
      * )
      */
-    public function setClient(?string $session_id = null, ?string $task_id = null): mixed
+    public function setClient(?string $sessionId = null, ?string $taskId = null): mixed
     {
-        $login_id = Authorization::getAuthorizationProperty("login_id");
+        $loginId = Authorization::getAuthorizationProperty("login_id");
         #TODO: check rights for session
     }
 }
