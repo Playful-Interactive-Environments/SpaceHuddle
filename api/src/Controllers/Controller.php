@@ -28,10 +28,10 @@ use Ramsey\Uuid\Uuid;
 class Controller
 {
     /**
-     * The controller singleton instance. Can be of a subtype too.
-     * @var Controller
+     * The controller singleton instances. Holds all instances of various subtypes.
+     * @var array
      */
-    protected static Controller $instance;
+    protected static array $instances;
 
     /**
      * The Database object.
@@ -147,10 +147,10 @@ class Controller
      */
     public static function getInstance(): static
     {
-        if (empty(static::$instance)) {
-            static::$instance = new static();
+        if (!isset(static::$instances[static::class])) {
+            static::$instances[static::class] = new static();
         }
-        return static::$instance;
+        return static::$instances[static::class];
     }
 
     /**
