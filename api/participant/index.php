@@ -9,19 +9,19 @@ use PieLab\GAB\Controllers\ParticipantController;
 
 $participant = ParticipantController::getInstance();
 
-if (Controller::isRestCall("GET", 2, search_detail_hierarchy: "connect")) {
+if (Controller::isRestCall("GET", 2, searchDetailHierarchy: "connect")) {
 	$result = $participant->reconnect();
 	echo $result;
 }
-elseif (Controller::isRestCall("POST", 2, search_detail_hierarchy: "connect")) {
+elseif (Controller::isRestCall("POST", 2, searchDetailHierarchy: "connect")) {
 	$result = $participant->connect();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", 2, search_detail_hierarchy: "tasks")) {
+elseif (Controller::isRestCall("GET", 2, searchDetailHierarchy: "tasks")) {
 	$result = $participant->getTasks();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", 2, search_detail_hierarchy: "topics")) {
+elseif (Controller::isRestCall("GET", 2, searchDetailHierarchy: "topics")) {
 	$result = $participant->getTopics();
 	echo $result;
 }

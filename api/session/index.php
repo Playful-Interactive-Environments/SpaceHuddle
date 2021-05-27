@@ -30,11 +30,11 @@ elseif (Controller::isRestCall("DELETE")) {
 	$result = $session->delete();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", search_detail_hierarchy: "topics")) {
+elseif (Controller::isRestCall("GET", searchDetailHierarchy: "topics")) {
 	$result = $topic->readAll();
 	echo $result;
 }
-elseif (Controller::isRestCall("POST", search_detail_hierarchy: "topic")) {
+elseif (Controller::isRestCall("POST", searchDetailHierarchy: "topic")) {
 	$result = $topic->add();
 	echo $result;
 }

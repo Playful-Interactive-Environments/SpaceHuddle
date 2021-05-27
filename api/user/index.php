@@ -10,10 +10,10 @@ use PieLab\GAB\Controllers\LoginController;
 
 $login = LoginController::getInstance();
 
-if (Controller::isRestCall("POST", 2, search_detail_hierarchy: "login")) {
+if (Controller::isRestCall("POST", 2, searchDetailHierarchy: "login")) {
     $result = $login->login();
     echo $result;
-} elseif (Controller::isRestCall("POST", 2, search_detail_hierarchy: "register")) {
+} elseif (Controller::isRestCall("POST", 2, searchDetailHierarchy: "register")) {
     $result = $login->register();
     echo $result;
 } elseif (Controller::isRestCall("PUT")) {

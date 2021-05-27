@@ -31,39 +31,39 @@ elseif (Controller::isRestCall("DELETE")) {
 	$result = $topic->delete();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", search_detail_hierarchy: "tasks")) {
+elseif (Controller::isRestCall("GET", searchDetailHierarchy: "tasks")) {
 	$result = $task->readAll();
 	echo $result;
 }
-elseif (Controller::isRestCall("POST", search_detail_hierarchy: "task")) {
+elseif (Controller::isRestCall("POST", searchDetailHierarchy: "task")) {
 	$result = $task->add();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", search_detail_hierarchy: "participant_tasks")) {
+elseif (Controller::isRestCall("GET", searchDetailHierarchy: "participant_tasks")) {
 	$result = $participant->getTopicTasks();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", search_detail_hierarchy: "ideas")) {
+elseif (Controller::isRestCall("GET", searchDetailHierarchy: "ideas")) {
 	$result = $idea->readAllFromTopic();
 	echo $result;
 }
-elseif (Controller::isRestCall("POST", search_detail_hierarchy: "idea")) {
+elseif (Controller::isRestCall("POST", searchDetailHierarchy: "idea")) {
 	$result = $idea->addToTopic();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", search_detail_hierarchy: "groups")) {
+elseif (Controller::isRestCall("GET", searchDetailHierarchy: "groups")) {
 	$result = $group->readAllFromTopic();
 	echo $result;
 }
-elseif (Controller::isRestCall("POST", search_detail_hierarchy: "group")) {
+elseif (Controller::isRestCall("POST", searchDetailHierarchy: "group")) {
 	$result = $group->addToTopic();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", search_detail_hierarchy: "selections")) {
+elseif (Controller::isRestCall("GET", searchDetailHierarchy: "selections")) {
 	$result = $selection->readAll();
 	echo $result;
 }
-elseif (Controller::isRestCall("POST", search_detail_hierarchy: "selection")) {
+elseif (Controller::isRestCall("POST", searchDetailHierarchy: "selection")) {
 	$result = $selection->add();
 	echo $result;
 }

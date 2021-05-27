@@ -23,15 +23,15 @@ elseif (Controller::isRestCall("DELETE")) {
 	$result = $group->delete();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", search_detail_hierarchy: "ideas")) {
+elseif (Controller::isRestCall("GET", searchDetailHierarchy: "ideas")) {
 	$result = $group_idea->readIdeas();
 	echo $result;
 }
-elseif (Controller::isRestCall("POST", search_detail_hierarchy: "ideas")) {
+elseif (Controller::isRestCall("POST", searchDetailHierarchy: "ideas")) {
 	$result = $group_idea->addIdeas();
 	echo $result;
 }
-elseif (Controller::isRestCall("DELETE", search_detail_hierarchy: "ideas")) {
+elseif (Controller::isRestCall("DELETE", searchDetailHierarchy: "ideas")) {
 	$result = $group_idea->deleteIdeas();
 	echo $result;
 }

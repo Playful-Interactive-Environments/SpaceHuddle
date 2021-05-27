@@ -119,7 +119,7 @@ class GroupController extends IdeaController
       "state"=>array("default"=>$state)
     ));
 
-    return $this->addGeneric($params->task_id, $params, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR));
+    return $this->addGeneric($params->task_id, $params, authorizedRoles: array(Role::MODERATOR, Role::FACILITATOR));
   }
 
   /**

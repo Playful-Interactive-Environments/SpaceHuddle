@@ -25,19 +25,19 @@ elseif (Controller::isRestCall("DELETE")) {
 	$result = $task->delete();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", search_detail_hierarchy: "ideas")) {
+elseif (Controller::isRestCall("GET", searchDetailHierarchy: "ideas")) {
 	$result = $idea->readAllFromTask();
 	echo $result;
 }
-elseif (Controller::isRestCall("POST", search_detail_hierarchy: "idea")) {
+elseif (Controller::isRestCall("POST", searchDetailHierarchy: "idea")) {
 	$result = $idea->addToTask();
 	echo $result;
 }
-elseif (Controller::isRestCall("GET", search_detail_hierarchy: "groups")) {
+elseif (Controller::isRestCall("GET", searchDetailHierarchy: "groups")) {
 	$result = $group->readAllFromTask();
 	echo $result;
 }
-elseif (Controller::isRestCall("POST", search_detail_hierarchy: "group")) {
+elseif (Controller::isRestCall("POST", searchDetailHierarchy: "group")) {
 	$result = $group->addToTask();
 	echo $result;
 }

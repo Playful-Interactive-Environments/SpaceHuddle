@@ -39,9 +39,9 @@ class GroupIdeaController extends Controller
     $stmt = $this->connection->prepare($query);
     $stmt->bindParam(":task_type", $task_type);
     return parent::readAllGeneric(
-      $group_id,
-      authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
-      stmt:  $stmt
+        $group_id,
+        authorizedRoles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
+        statement: $stmt
     );
   }
 
@@ -80,10 +80,10 @@ class GroupIdeaController extends Controller
       ));
     }
     return $this->addGeneric(
-      $params->group_idea_id,
-      $list,
-      insert_id: false,
-      duplicate_check: "WHERE NOT EXISTS(
+        $params->group_idea_id,
+        $list,
+        insertId: false,
+        duplicateCheck: "WHERE NOT EXISTS(
         SELECT 1 FROM hierarchy WHERE group_idea_id = :group_idea_id AND sub_idea_id = :sub_idea_id
         ) LIMIT 1  "
     );
@@ -124,9 +124,9 @@ class GroupIdeaController extends Controller
     $stmt->bindParam(":idea_id", $sub_idea_ids);
 
     return parent::deleteGeneric(
-      $params->group_idea_id,
-      authorized_roles: array(Role::MODERATOR, Role::FACILITATOR),
-      stmt: $stmt
+        $params->group_idea_id,
+        authorizedRoles: array(Role::MODERATOR, Role::FACILITATOR),
+        statement: $stmt
     );
   }
 

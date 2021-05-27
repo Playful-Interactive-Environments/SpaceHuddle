@@ -55,7 +55,7 @@ class ParticipantController extends Controller
             $params->symbol = AvatarSymbol::getRandomValue();
             unset($params->session_key);
 
-            $result = (object)json_decode($this->addGeneric(null, $params, authorized_roles: array(Role::UNKNOWN)));
+            $result = (object)json_decode($this->addGeneric(null, $params, authorizedRoles: array(Role::UNKNOWN)));
         }
 
         $jwt = Authorization::generateToken(
@@ -89,7 +89,7 @@ class ParticipantController extends Controller
     {
         return parent::readGeneric(
             $id,
-            authorized_roles: [Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT, Role::UNKNOWN]
+            authorizedRoles: [Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT, Role::UNKNOWN]
         );
     }
 
@@ -167,7 +167,7 @@ class ParticipantController extends Controller
     public function delete(): string
     {
         $participant_id = Authorization::getAuthorizationProperty("participant_id");
-        return parent::deleteGeneric($participant_id, authorized_roles: [Role::PARTICIPANT]);
+        return parent::deleteGeneric($participant_id, authorizedRoles: [Role::PARTICIPANT]);
     }
 
     /**

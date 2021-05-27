@@ -11,14 +11,14 @@ class IdeaController extends Controller
 {
   protected $task_type = TaskType::BRAINSTORMING;
 
-  public function __construct($table = null, $class = null, $parent_controller = null, $parent_table = null, $parent_id_name = null, $url_parameter = null)
+  public function __construct($table = null, $class = null, $parentController = null, $parentTable = null, $parentIdName = null, $urlParameter = null)
   {
       if (is_null($table)) $table = "idea";
       if (is_null($class)) $class = Idea::class;
-      if (is_null($parent_controller)) $parent_controller = TaskController::class;
-      if (is_null($parent_table)) $parent_table = "task";
-      if (is_null($parent_id_name)) $parent_id_name = "task_id";
-      parent::__construct($table, $class, $parent_controller, $parent_table, $parent_id_name, $url_parameter);
+      if (is_null($parentController)) $parentController = TaskController::class;
+      if (is_null($parentTable)) $parentTable = "task";
+      if (is_null($parentIdName)) $parentIdName = "task_id";
+      parent::__construct($table, $class, $parentController, $parentTable, $parentIdName, $urlParameter);
       $this->task_type = TaskType::BRAINSTORMING;
   }
 
@@ -59,7 +59,10 @@ class IdeaController extends Controller
       $stmt->bindParam(":participant_id", $participant_id);
       $stmt->bindParam(":task_type", $task_type);
     }
-    return parent::readAllGeneric($task_id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT), stmt:  $stmt);
+    return parent::readAllGeneric($task_id,
+        authorizedRoles
+        : array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
+        statement: $stmt);
   }
 
   /**
@@ -99,12 +102,12 @@ class IdeaController extends Controller
       $stmt->bindParam(":task_type", $task_type);
     }
     return parent::readAllGeneric(
-      $topic_id,
-      authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
-      stmt:  $stmt,
-      parent_table: "topic",
-      parent_id_name: "topic_id",
-      parent_controller: TopicController::class
+        $topic_id,
+        authorizedRoles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
+        statement: $stmt,
+        parentTable: "topic",
+        parentIdName: "topic_id",
+        parentController: TopicController::class
     );
   }
 
@@ -142,7 +145,10 @@ class IdeaController extends Controller
       $stmt->bindParam(":participant_id", $participant_id);
       $stmt->bindParam(":task_type", $task_type);
     }
-    return parent::readGeneric($id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT), stmt:  $stmt);
+    return parent::readGeneric($id,
+        authorizedRoles
+        : array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT),
+        statement: $stmt);
 
     /*$query = "SELECT * FROM idea
       WHERE id = :id
@@ -240,7 +246,7 @@ class IdeaController extends Controller
       "participant_id"=>array("default"=>$participant_id)
     ));
 
-    return $this->addGeneric($params->task_id, $params, authorized_roles: array(Role::PARTICIPANT));
+    return $this->addGeneric($params->task_id, $params, authorizedRoles: array(Role::PARTICIPANT));
   }
 
   /**
@@ -330,7 +336,7 @@ class IdeaController extends Controller
       "state"=>array("default"=>$state, "type"=>StateIdea::class)
     ));
 
-    return $this->updateGeneric($params->id, $params, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT));
+    return $this->updateGeneric($params->id, $params, authorizedRoles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT));
   }
 
   /**
@@ -347,7 +353,7 @@ class IdeaController extends Controller
   public function delete(
       ?string $id = null
   ) : string {
-    return parent::deleteGeneric($id, authorized_roles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT));
+    return parent::deleteGeneric($id, authorizedRoles: array(Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT));
   }
 
   /**

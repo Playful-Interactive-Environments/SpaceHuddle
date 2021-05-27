@@ -128,7 +128,7 @@ class LoginController extends Controller
             unset($params->password_confirmation);
         }
 
-        $this->addGeneric(null, $params, authorized_roles: [Role::UNKNOWN]);
+        $this->addGeneric(null, $params, authorizedRoles: [Role::UNKNOWN]);
 
         http_response_code(200);
         return json_encode(
