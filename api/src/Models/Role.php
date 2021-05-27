@@ -7,15 +7,15 @@ namespace PieLab\GAB\Models;
  * @OA\Schema(
  *   description="permission roles for the session",
  *   type="string",
- *   enum={"MODERATOR", "FACILITATOR", "PARTICIPANT"},
+ *   enum={"MODERATOR", "FACILITATOR", "PARTICIPANT", "UNKNOWN", "PARTICIPANT_INACTIVE"},
  *   example="MODERATOR"
  * )
  */
 class Role
 {
-    const MODERATOR = "moderator";
-    const FACILITATOR = "facilitator";
-    const PARTICIPANT = "participant";
-    const UNKNOWN = "unknown";
-    const PARTICIPANT_INACTIVE = "participant_inactive";
+    public const MODERATOR = "moderator";
+    public const FACILITATOR = "facilitator";
+    public const PARTICIPANT = "participant";
+    public const UNKNOWN = "unknown";
+    public const PARTICIPANT_INACTIVE = "participant_inactive";
 }

@@ -3,10 +3,11 @@
 namespace PieLab\GAB\Models;
 
 /**
+ * Describes a participant.
  * @OA\Schema(description="participant description")
  */
-class Participant {
-
+class Participant
+{
     /**
      * The participant id.
      * @var string|null
@@ -19,10 +20,10 @@ class Participant {
      * @var string|null
      * @OA\Property()
      */
-    public ?string $browser_key;
+    public ?string $browserKey;
 
     /**
-     * current status of the idea
+     * Current status of the participant.
      * @var string|null
      * @OA\Property(ref="#/components/schemas/StateParticipant")
      */
@@ -34,31 +35,33 @@ class Participant {
      */
     public ?Avatar $avatar;
 
-
     /**
-     * Encrypted IP address to hide IP addresses from the public while implementing an IP hash check function for a user account.
+     * Encrypted IP address to hide IP addresses from the public while implementing an IP hash check function for a user
+     * account.
      * @var string|null
      * @OA\Property()
      */
-    public ?string $ip_hash;
-
+    public ?string $ipHash;
 
     /**
      * Authorization token to identify the participant.
      * @var string|null
      * @OA\Property()
      */
-    public ?string $access_token;
+    public ?string $accessToken;
 
+    /**
+     * Creates a new Participant.
+     * @param array|null $data Participant data.
+     * @param null $token Authorization token.
+     */
     public function __construct(array $data = null, $token = null)
     {
-        $this->id = $data['id'] ?? null;
-        $this->browser_key = $data['browser_key'] ?? null;
-        $this->state = strtoupper($data['state'] ?? null);
-        $this->ip_hash = $data['ip_hash'] ?? null;
+        $this->id = $data["id"] ?? null;
+        $this->browserKey = $data["browser_key"] ?? null;
+        $this->state = strtoupper($data["state"] ?? null);
+        $this->ipHash = $data["ip_hash"] ?? null;
         $this->avatar = new Avatar($data);
-        $this->access_token = $token;
+        $this->accessToken = $token;
     }
 }
-
-?>

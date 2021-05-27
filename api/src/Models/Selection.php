@@ -3,10 +3,11 @@
 namespace PieLab\GAB\Models;
 
 /**
+ * Selection description.
  * @OA\Schema(description="description of the selection group naming")
  */
-class Selection {
-
+class Selection
+{
     /**
      * The selection id.
      * @var string|null
@@ -21,11 +22,13 @@ class Selection {
      */
     public ?string $name;
 
+    /**
+     * Creates a new selection.
+     * @param array|null $data Selection data.
+     */
     public function __construct(array $data = null)
     {
-        $this->id = $data['id'] ?? null;
-        $this->name = $data['name'] ?? null;
+        $this->id = $data["id"] ?? null;
+        $this->name = $data["name"] ?? null;
     }
 }
-
-?>

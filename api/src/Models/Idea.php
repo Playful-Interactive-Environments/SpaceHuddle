@@ -3,10 +3,11 @@
 namespace PieLab\GAB\Models;
 
 /**
+ * Represents an idea.
  * @OA\Schema(description="total idea description")
  */
-class Idea {
-
+class Idea
+{
     /**
      * The idea id.
      * @var string|null
@@ -15,7 +16,7 @@ class Idea {
     public ?string $id;
 
     /**
-     * current status of the idea
+     * Current status of the idea.
      * @var string|null
      * @OA\Property(ref="#/components/schemas/StateIdea")
      */
@@ -26,7 +27,8 @@ class Idea {
      * @var Date|string|null
      * @OA\Property(property="time_stamp")
      */
-    public Date|string|null $time_stamp;
+    public Date|string|null $timestamp;
+    // TODO: I still don't think, that Date is correct here. Is it a Unix Timestamp? Then it should probably be int?
 
     /**
      * Description of the idea.
@@ -56,16 +58,18 @@ class Idea {
      */
     public ?string $link;
 
+    /**
+     * Creates a new idea.
+     * @param array|null $data The idea data.
+     */
     public function __construct(array $data = null)
     {
-        $this->id = $data['id'] ?? null;
-        $this->state = strtoupper($data['state'] ?? null);
-        $this->time_stamp = $data['time_stamp'] ?? null;
-        $this->description = $data['description'] ?? null;
-        $this->keywords = $data['keywords'] ?? null;
-        $this->image = $data['image'] ?? null;
-        $this->link = $data['link'] ?? null;
+        $this->id = $data["id"] ?? null;
+        $this->state = strtoupper($data["state"] ?? null);
+        $this->timestamp = $data["time_stamp"] ?? null;
+        $this->description = $data["description"] ?? null;
+        $this->keywords = $data["keywords"] ?? null;
+        $this->image = $data["image"] ?? null;
+        $this->link = $data["link"] ?? null;
     }
 }
-
-?>

@@ -6,8 +6,8 @@ namespace PieLab\GAB\Models;
  * For visual differentiation in the frontend, each participant is assigned its own avatar.
  * @OA\Schema(description="For visual differentiation in the frontend, each participant is assigned its own avatar.",)
  */
-class Avatar {
-
+class Avatar
+{
     /**
      * The avatar color.
      * @var string|null
@@ -22,11 +22,13 @@ class Avatar {
      */
     public ?string $symbol;
 
+    /**
+     * Create a new avatar.
+     * @param array|null $data Configuration data (color and symbol).
+     */
     public function __construct(array $data = null)
     {
-        $this->color = $data['color'] ?? null;
-        $this->symbol = $data['symbol'] ?? null;
+        $this->color = $data["color"] ?? null;
+        $this->symbol = $data["symbol"] ?? null;
     }
 }
-
-?>

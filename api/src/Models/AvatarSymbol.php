@@ -2,8 +2,10 @@
 
 namespace PieLab\GAB\Models;
 
+use ReflectionClass;
+
 /**
- * List of possible states.
+ * List of possible avatar symbols.
  * @OA\Schema(
  *   description="Possible avatar symbols.",
  *   type="string",
@@ -11,22 +13,21 @@ namespace PieLab\GAB\Models;
  *   example="STAR"
  * )
  */
-class AvatarSymbol {
-  const STAR = "star";
-  const CIRCLE = "circle";
-  const TRIANGLE = "triangle";
+class AvatarSymbol
+{
+    public const STAR = "star";
+    public const CIRCLE = "circle";
+    public const TRIANGLE = "triangle";
 
-
-  /**
-   * Pick a random value of the AvatarSymbol enum.
-   * @return a random AvatarSymbol.
-   */
-  public static function getRandomValue() : string {
-    $oClass = new \ReflectionClass(__CLASS__);
-    $cases = $oClass->getConstants();
-    $keys = array_keys($cases);
-    return $cases[$keys[rand(0, count($cases)-1)]];
-  }
+    /**
+     * Pick a random value of the AvatarSymbol enum.
+     * @return string A random AvatarSymbol.
+     */
+    public static function getRandomValue(): string
+    {
+        $oClass = new ReflectionClass(__CLASS__);
+        $cases = $oClass->getConstants();
+        $keys = array_keys($cases);
+        return $cases[$keys[rand(0, count($cases) - 1)]];
+    }
 }
-
-?>
