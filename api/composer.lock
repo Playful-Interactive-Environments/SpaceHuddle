@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "717660f6c60fb17c91d8889fabb8f24f",
+    "content-hash": "ed13aabcbaf11073ae26926ea328528d",
     "packages": [
         {
             "name": "brick/math",
@@ -1152,16 +1152,16 @@
         },
         {
             "name": "zircote/swagger-php",
-            "version": "3.2.0",
+            "version": "3.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "c5f0819764f9bd8a246732d662b95ce533c0479f"
+                "reference": "eef1dd98e6f6071573908fd7007270510051e5f9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/c5f0819764f9bd8a246732d662b95ce533c0479f",
-                "reference": "c5f0819764f9bd8a246732d662b95ce533c0479f",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/eef1dd98e6f6071573908fd7007270510051e5f9",
+                "reference": "eef1dd98e6f6071573908fd7007270510051e5f9",
                 "shasum": ""
             },
             "require": {
@@ -1217,9 +1217,9 @@
             ],
             "support": {
                 "issues": "https://github.com/zircote/swagger-php/issues",
-                "source": "https://github.com/zircote/swagger-php/tree/3.2.0"
+                "source": "https://github.com/zircote/swagger-php/tree/3.2.1"
             },
-            "time": "2021-05-20T00:45:34+00:00"
+            "time": "2021-05-20T21:46:24+00:00"
         }
     ],
     "packages-dev": [
@@ -3241,7 +3241,10 @@
     "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": ">=8.0",
+        "ext-pdo": "*"
+    },
     "platform-dev": [],
     "plugin-api-version": "2.0.0"
 }
