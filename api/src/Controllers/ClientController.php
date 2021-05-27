@@ -2,22 +2,28 @@
 
 namespace PieLab\GAB\Controllers;
 
-use PieLab\GAB\Config\Authorization;
-use PieLab\GAB\Models\Task;
 use PieLab\GAB\Models\StateTask;
+use PieLab\GAB\Models\Task;
 
 /**
- * Class ClientController
+ * Controller class for clients.
  * @package PieLab\GAB\Controllers
  */
 class ClientController extends AbstractController
 {
-    public function __construct()
+    /**
+     * Creates a new ClientController.
+     */
+    protected function __construct()
     {
         parent::__construct("task", Task::class, TopicController::class, "topic", "topic_id");
     }
 
     /**
+     * Set the client application state for the task.
+     * @param string|null $taskId The task's ID.
+     * @param StateTask|null $state The client state.
+     * @return string Updated data in JSON format.
      * @OA\Put(
      *   path="/api/task/{task_id}/client_application_state/{state}/",
      *   summary="Set the client application state for the task.",
@@ -34,11 +40,13 @@ class ClientController extends AbstractController
      */
     public function setClient(?string $taskId = null, StateTask|null $state = null): string
     {
-      $params = $this->formatParameters(array(
-        "id"=>array("default"=>$taskId, "url"=>"task"),
-        "state"=>array("default"=>$state, "type"=>StateTask::class, "url"=>"client_application_state")
-      ));
+        $params = $this->formatParameters(
+            [
+                "id" => ["default" => $taskId, "url" => "task"],
+                "state" => ["default" => $state, "type" => StateTask::class, "url" => "client_application_state"]
+            ]
+        );
 
-      return $this->updateGeneric($params->id, $params);
+        return $this->updateGeneric($params->id, $params);
     }
 }
