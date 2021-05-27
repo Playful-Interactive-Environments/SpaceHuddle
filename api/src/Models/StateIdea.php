@@ -11,11 +11,10 @@ namespace PieLab\GAB\Models;
  *   example="NEW"
  * )
  */
-class StateIdea {
-  const NEW = "new";
-  const DUPLICATE = "duplicate";
-  const INAPPROPRIATE = "inappropriate";
-  const HANDLED = "handled";
+class StateIdea
+{
+    public const NEW = "new";
+    public const DUPLICATE = "duplicate";
+    public const INAPPROPRIATE = "inappropriate";
+    public const HANDLED = "handled";
 }
-
-?>

@@ -3,37 +3,40 @@
 namespace PieLab\GAB\Models;
 
 /**
+ * Describes a voting result.
  * @OA\Schema(description="description of the aggregated voting result")
  */
-class VotingResult {
-
+class VotingResult
+{
     /**
-     * evaluated idea
+     * Evaluated idea.
      * @var IdeaAbstract|null
      * @OA\Property(ref="#/components/schemas/IdeaAbstract")
      */
     public ?IdeaAbstract $idea;
 
     /**
-     * Sum of the idea rating
+     * Sum of the idea rating.
      * @var int|null
      * @OA\Property()
      */
-    public ?int $rating_sum;
+    public ?int $ratingSum;
 
     /**
-     * Sum of the idea weighting
+     * Sum of the idea weighting.
      * @var float|null
      * @OA\Property()
      */
-    public ?float $detail_rating_sum;
+    public ?float $detailRatingSum;
 
+    /**
+     * Creates a new voting result.
+     * @param array|null $data VotingResult data.
+     */
     public function __construct(array $data = null)
     {
         $this->idea = new IdeaAbstract($data);
-        $this->rating_sum = (int)$data['rating'] ?? null;
-        $this->detail_rating_sum = (float)$data['detail_rating'] ?? null;
+        $this->ratingSum = (int)$data["rating"] ?? null;
+        $this->detailRatingSum = (float)$data["detail_rating"] ?? null;
     }
 }
-
-?>

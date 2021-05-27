@@ -11,9 +11,8 @@ namespace PieLab\GAB\Models;
  *   example="ACTIVE"
  * )
  */
-class StateParticipant {
-  const ACTIVE = "active";
-  const INACTIVE = "inactive";
+class StateParticipant
+{
+    public const ACTIVE = "active";
+    public const INACTIVE = "inactive";
 }
-
-?>

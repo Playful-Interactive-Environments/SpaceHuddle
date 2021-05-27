@@ -11,11 +11,10 @@ namespace PieLab\GAB\Models;
  *   example="ACTIVE"
  * )
  */
-class StateTask {
-  const WAIT = "wait";
-  const ACTIVE = "active";
-  const READ_ONLY = "read_only";
-  const DONE = "done";
+class StateTask
+{
+    public const WAIT = "wait";
+    public const ACTIVE = "active";
+    public const READ_ONLY = "read_only";
+    public const DONE = "done";
 }
-
-?>

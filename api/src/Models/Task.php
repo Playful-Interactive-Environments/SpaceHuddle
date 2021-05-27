@@ -5,8 +5,8 @@ namespace PieLab\GAB\Models;
 /**
  * @OA\Schema(description="Task description")
  */
-class Task {
-
+class Task
+{
     /**
      * The task id.
      * @var string|null
@@ -19,7 +19,7 @@ class Task {
      * @var string|null
      * @OA\Property()
      */
-    public ?string $task_type;
+    public ?string $taskType;
 
     /**
      * The name of the task.
@@ -43,21 +43,23 @@ class Task {
     public ?int $order;
 
     /**
-     * current status of the task
+     * Current status of the task.
      * @var string|null
      * @OA\Property(ref="#/components/schemas/StateTask")
      */
     public ?string $state;
 
+    /**
+     * Creates a new task.
+     * @param array|null $data Task data.
+     */
     public function __construct(array $data = null)
     {
-        $this->id = $data['id'] ?? null;
-        $this->task_type = strtoupper($data['task_type'] ?? null);
-        $this->name = $data['name'] ?? null;
-        $this->parameter = json_decode($data['parameter'] ?? null);
-        $this->order =  (int)$data['order'] ?? null;
-        $this->state = strtoupper( $data['state'] ?? null);
+        $this->id = $data["id"] ?? null;
+        $this->taskType = strtoupper($data["task_type"] ?? null);
+        $this->name = $data["name"] ?? null;
+        $this->parameter = json_decode($data["parameter"] ?? null);
+        $this->order = (int)$data["order"] ?? null;
+        $this->state = strtoupper($data["state"] ?? null);
     }
 }
-
-?>

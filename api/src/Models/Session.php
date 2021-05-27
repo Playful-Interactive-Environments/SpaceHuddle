@@ -3,12 +3,13 @@
 namespace PieLab\GAB\Models;
 
 /**
+ * Describes a session.
  * @OA\Schema(description="session description")
  */
-class Session {
-
+class Session
+{
     /**
-     * The session id.
+     * The session ID.
      * @var string|null
      * @OA\Property(example="uuid")
      */
@@ -33,47 +34,50 @@ class Session {
      * @var int|null
      * @OA\Property(example=1000)
      */
-    public ?int $max_participants;
+    public ?int $maxParticipants;
 
     /**
      * How long is the session valid?
      * @var Date|string|null
      * @OA\Property(property="expiration_date")
      */
-    public Date|string|null $expiration_date;
+    public Date|string|null $expirationDate;
+    // TODO: Check class Date.
 
     /**
      * When was the session created?
      * @var Date|string|null
      * @OA\Property(property="creation_date")
      */
-    public Date|string|null $creation_date;
+    public Date|string|null $creationDate;
 
     /**
-     * role in the session
+     * Public screen module ID.
      * @var string|null
      * @OA\Property(example=null)
      */
-    public ?string $public_screen_module_id;
+    public ?string $publicScreenModuleId;
 
     /**
-     * role in the session
+     * Role in the session.
      * @var string|null
      * @OA\Property()
      */
     public ?string $role;
 
+    /**
+     * Creates a new session.
+     * @param array|null $data Session data.
+     */
     public function __construct(array $data = null)
     {
-        $this->id = $data['id'] ?? null;
-        $this->title = $data['title'] ?? null;
-        $this->connection_key = $data['connection_key'] ?? null;
-        $this->max_participants = (int)$data['max_participants'] ?? null;
-        $this->expiration_date = $data['expiration_date'] ?? null;
-        $this->creation_date = $data['creation_date'] ?? null;
-        $this->public_screen_module_id = $data['public_screen_module_id'] ?? null;
-        $this->role = strtoupper($data['role'] ?? null);
+        $this->id = $data["id"] ?? null;
+        $this->title = $data["title"] ?? null;
+        $this->connection_key = $data["connection_key"] ?? null;
+        $this->maxParticipants = (int)$data["max_participants"] ?? null;
+        $this->expirationDate = $data["expiration_date"] ?? null;
+        $this->creationDate = $data["creation_date"] ?? null;
+        $this->publicScreenModuleId = $data["public_screen_module_id"] ?? null;
+        $this->role = strtoupper($data["role"] ?? null);
     }
 }
-
-?>

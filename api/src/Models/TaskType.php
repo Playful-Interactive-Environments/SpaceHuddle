@@ -3,6 +3,7 @@
 namespace PieLab\GAB\Models;
 
 /**
+ * Possible task types.
  * @OA\Schema(
  *   description="possible task types",
  *   type="string",
@@ -10,12 +11,11 @@ namespace PieLab\GAB\Models;
  *   example="BRAINSTORMING"
  * )
  */
-class TaskType {
-  const INFORMATION = "information";
-  const BRAINSTORMING = "brainstorming";
-  const SELECTION = "selection";
-  const GROUPING = "grouping";
-  const VOTING = "voting";
+class TaskType
+{
+    public const INFORMATION = "information";
+    public const BRAINSTORMING = "brainstorming";
+    public const SELECTION = "selection";
+    public const GROUPING = "grouping";
+    public const VOTING = "voting";
 }
-
-?>

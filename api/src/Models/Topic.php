@@ -3,10 +3,11 @@
 namespace PieLab\GAB\Models;
 
 /**
+ * Represents a topic.
  * @OA\Schema(description="topic description")
  */
-class Topic {
-
+class Topic
+{
     /**
      * The topic id.
      * @var string|null
@@ -33,15 +34,17 @@ class Topic {
      * @var string|null
      * @OA\Property(example=null)
      */
-    public ?string $active_task_id;
+    public ?string $activeTaskId;
 
+    /**
+     * Creates a new task.
+     * @param array|null $data Task data.
+     */
     public function __construct(array $data = null)
     {
-        $this->id = $data['id'] ?? null;
-        $this->title = $data['title'] ?? null;
-        $this->description = $data['description'] ?? null;
-        $this->active_task_id = $data['active_task_id'] ?? null;
+        $this->id = $data["id"] ?? null;
+        $this->title = $data["title"] ?? null;
+        $this->description = $data["description"] ?? null;
+        $this->activeTaskId = $data["active_task_id"] ?? null;
     }
 }
-
-?>

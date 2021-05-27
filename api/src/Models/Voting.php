@@ -3,26 +3,27 @@
 namespace PieLab\GAB\Models;
 
 /**
+ * Represents a voting.
  * @OA\Schema(description="basic voting description")
  */
-class Voting {
-
+class Voting
+{
     /**
-     * id of the voting
+     * ID of the voting.
      * @var string|null
      * @OA\Property(example="uuid")
      */
     public ?string $id;
 
     /**
-     * id of the idea
+     * ID of the idea.
      * @var string|null
      * @OA\Property(example="uuid")
      */
-    public ?string $idea_id;
+    public ?string $ideaId;
 
     /**
-     * rating of the idea
+     * Rating of the idea.
      * @var int|null
      * @OA\Property()
      */
@@ -33,15 +34,17 @@ class Voting {
      * @var float|null
      * @OA\Property()
      */
-    public ?float $detail_rating;
+    public ?float $detailRating;
 
+    /**
+     * Creates a new voting.
+     * @param array|null $data Voting data.
+     */
     public function __construct(array $data = null)
     {
-        $this->id = $data['id'] ?? null;
-        $this->idea_id = $data['idea_id'] ?? null;
-        $this->rating = (int)$data['rating'] ?? null;
-        $this->detail_rating = (float)$data['detail_rating'] ?? null;
+        $this->id = $data["id"] ?? null;
+        $this->ideaId = $data["idea_id"] ?? null;
+        $this->rating = (int)$data["rating"] ?? null;
+        $this->detailRating = (float)$data["detail_rating"] ?? null;
     }
 }
-
-?>
