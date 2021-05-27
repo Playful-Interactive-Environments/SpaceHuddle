@@ -30,17 +30,28 @@ class Authorization
      * Generates a bearer token.
      * @param array $data Usually a combination of login ID and username.
      * @return string The bearer token.
-     * @throws Exception Thrown when an issue with the DateTime object occurs.
      */
     public static function generateToken(array $data): string
     {
         $settings = Settings::getInstance();
         $timeZone = $settings->get("timezone");
         $tokenSettings = $settings->get("token");
-        $issuedAt = new DateTimeImmutable("now", new DateTimeZone($timeZone));
-        $expiresAt = $issuedAt->add(new DateInterval($tokenSettings["expiresAfter"]));
+        try {
+            $issuedAt = new DateTimeImmutable("now", new DateTimeZone($timeZone));
+            $expiresAt = $issuedAt->add(new DateInterval($tokenSettings["expiresAfter"]));
+        } catch (Exception $e) {
+            http_response_code(500);
+            $error = json_encode(
+                [
+                    "state" => "Server error",
+                    "message" => $e->getMessage()
+                ]
+            );
+            die($error);
+        }
 
-        $protocol = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off" || $_SERVER["SERVER_PORT"] == 443) ? "https://" : "http://";
+        $protocol = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off"
+            || $_SERVER["SERVER_PORT"] == 443) ? "https://" : "http://";
         $issuer = $protocol . $_SERVER["HTTP_HOST"] . "/api/";
 
         $token = [
@@ -67,7 +78,8 @@ class Authorization
                 $headers = trim($_SERVER["HTTP_AUTHORIZATION"]);
             } elseif (function_exists("apache_request_headers")) {
                 $requestHeaders = apache_request_headers();
-                // Server-side fix for bug in old Android versions (a nice side-effect of this fix means we don't care about capitalization for Authorization)
+                // Server-side fix for bug in old Android versions
+                // (a nice side-effect of this fix means we don't care about capitalization for Authorization)
                 $requestHeaders = array_combine(
                     array_map("ucwords", array_keys($requestHeaders)),
                     array_values($requestHeaders)
@@ -113,7 +125,7 @@ class Authorization
                 if ($decoded->exp > $now->getTimestamp()) {
                     return $decoded->data;
                 }
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $errorMessage = "Wrong token.";
             }
         }
@@ -188,7 +200,7 @@ class Authorization
                 if ($decoded->exp > time()) {
                     return true;
                 }
-            } catch (Exception $e) {
+            } catch (Exception) {
             }
         }
         return false;
