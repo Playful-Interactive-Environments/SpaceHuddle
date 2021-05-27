@@ -1,18 +1,29 @@
 <?php
+
 namespace PieLab\GAB\Controllers;
 
+use PieLab\GAB\Config\Authorization;
 use PieLab\GAB\Models\Task;
 
-use PieLab\GAB\Config\Authorization;
-
+/**
+ * Controller for the public screen.
+ * @package PieLab\GAB\Controllers
+ */
 class PublicScreenController extends AbstractController
 {
-    public function __construct()
+    /**
+     * Creates a new PublicScreenController.
+     */
+    protected function __construct()
     {
         parent::__construct("task", Task::class, TopicController::class, "topic", "topic_id");
     }
 
     /**
+     * Set a task to be displayed on the public screen for the session.
+     * @param string|null $sessionId The session ID.
+     * @param string|null $taskId The task ID.
+     * @return string Returns the success message in JSON format.
      * @OA\Post(
      *   path="/api/session/{session_id}/public_screen/",
      *   summary="Set a task to be displayed on the public screen for the session.",
@@ -31,13 +42,17 @@ class PublicScreenController extends AbstractController
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
      * )
      */
-    public function setPublicScreen(?string $session_id = null, string $task_id = null): string
+    public function setPublicScreen(?string $sessionId = null, string $taskId = null): string
     {
-        $login_id = Authorization::getAuthorizationProperty("login_id");
+        $loginId = Authorization::getAuthorizationProperty("login_id");
         #TODO: check rights for session
     }
 
     /**
+     * Get the aktive task to be displayed on the public screen for the session.
+     * @param string|null $sessionId The session ID.
+     * @param string|null $taskId The task ID.
+     * @return string Returns the success message in JSON format.
      * @OA\Get(
      *   path="/api/session/{session_id}/public_screen/",
      *   summary="Get the aktive task to be displayed on the public screen for the session.",
@@ -50,9 +65,9 @@ class PublicScreenController extends AbstractController
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
      * )
      */
-    public function getPublicScreen(?string $session_id = null, ?string $task_id = null): string
+    public function getPublicScreen(?string $sessionId = null, ?string $taskId = null): string
     {
-        $login_id = Authorization::getAuthorizationProperty("login_id");
+        $loginId = Authorization::getAuthorizationProperty("login_id");
         #TODO: check rights for session
     }
 }
