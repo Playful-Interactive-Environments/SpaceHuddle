@@ -53,7 +53,7 @@ class Database
     private function __construct()
     {
         $settings = Settings::getInstance();
-        $databaseSettings = $settings["database"];
+        $databaseSettings = $settings->get("database");
 
         $this->host = $databaseSettings["host"];
         $this->name = $databaseSettings["name"];
@@ -61,8 +61,6 @@ class Database
         $this->password = $databaseSettings["password"];
 
         $this->connection = null;
-
-        //$this->host = $_SERVER['HTTP_HOST'];
 
         try {
             $dsn = "mysql:host=$this->host; dbname=$this->name;";
