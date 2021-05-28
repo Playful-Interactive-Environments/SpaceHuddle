@@ -27,7 +27,7 @@ class Session
      * @var string|null
      * @OA\Property(example="ABCD1234")
      */
-    public ?string $connection_key;
+    public ?string $connectionKey;
 
     /**
      * What is the maximum number of users allowed to participate in the session?
@@ -39,16 +39,16 @@ class Session
     /**
      * How long is the session valid?
      * @var string|null
-     * @OA\Property(property="expiration_date", format="date")
+     * @OA\Property(format="date")
      */
-    public string|null $expirationDate;
+    public ?string $expirationDate;
 
     /**
      * When was the session created?
      * @var string|null
-     * @OA\Property(property="creation_date", format="date")
+     * @OA\Property(format="date")
      */
-    public string|null $creationDate;
+    public ?string $creationDate;
 
     /**
      * Public screen module ID.
@@ -72,7 +72,7 @@ class Session
     {
         $this->id = $data["id"] ?? null;
         $this->title = $data["title"] ?? null;
-        $this->connection_key = $data["connection_key"] ?? null;
+        $this->connectionKey = $data["connection_key"] ?? null;
         $this->maxParticipants = (int)$data["max_participants"] ?? null;
         $this->expirationDate = $data["expiration_date"] ?? null;
         $this->creationDate = $data["creation_date"] ?? null;

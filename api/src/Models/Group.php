@@ -18,9 +18,9 @@ class Group
     /**
      * Time of group storage.
      * @var string|null
-     * @OA\Property(property="time_stamp", format="date")
+     * @OA\Property(format="date")
      */
-    public string|null $timestamp;
+    public ?string $timestamp;
 
     /**
      * Description of the group.
