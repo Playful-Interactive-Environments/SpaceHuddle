@@ -7,9 +7,11 @@ require "../vendor/autoload.php";
 use PieLab\GAB\Controllers\AbstractController;
 use PieLab\GAB\Controllers\SessionController;
 use PieLab\GAB\Controllers\TopicController;
+use PieLab\GAB\Controllers\TaskController;
 
 $topic = TopicController::getInstance();
 $session = SessionController::getInstance();
+$task = TaskController::getInstance();
 
 if (AbstractController::isRestCall("GET")) {
 	$result = $session->read();
@@ -36,6 +38,14 @@ elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "topics")) 
 }
 elseif (AbstractController::isRestCall("POST", searchDetailHierarchy: "topic")) {
 	$result = $topic->add();
+	echo $result;
+}
+elseif (AbstractController::isRestCall("PUT", searchDetailHierarchy: "public_screen")) {
+	$result = $session->setPublicScreen();
+	echo $result;
+}
+elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "public_screen")) {
+	$result = $task->getPublicScreen();
 	echo $result;
 }
 else {

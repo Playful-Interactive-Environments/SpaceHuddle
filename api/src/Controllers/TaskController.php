@@ -2,6 +2,11 @@
 
 namespace PieLab\GAB\Controllers;
 
+use PieLab\GAB\Config\Authorization;
+use PieLab\GAB\Models\ParticipantTask;
+use PieLab\GAB\Models\Role;
+use PieLab\GAB\Models\Session;
+use PieLab\GAB\Models\StateModule;
 use PieLab\GAB\Models\StateTask;
 use PieLab\GAB\Models\Task;
 use PieLab\GAB\Models\TaskType;
@@ -114,7 +119,34 @@ class TaskController extends AbstractController
             ]
         );
 
-        return $this->addGeneric($params->topic_id, $params);
+        $parameterDependencies = $this->formatParameters(
+            [
+                "module_name" => ["default" => $params->task_type],
+                "order" => ["default" => 1],
+                "state" => ["default" => StateModule::ACTIVE, "type" => StateModule::class]
+            ]
+        );
+
+        return $this->addGeneric($params->topic_id, $params, parameterDependencies: $parameterDependencies);
+    }
+
+    /**
+     * Include dependent data.
+     * @param string $id Primary key of the linked table entry
+     * @param array|object|null $parameter Dependent data to be included.
+     */
+    protected function addDependencies(string $id, array|object|null $parameter)
+    {
+        $moduleId = self::uuid();
+        $query = "INSERT INTO module (`id`, `task_id`, `module_name`, `order`, `state`) 
+            VALUES (:id, :task_id, :module_name, :order, :state)";
+        $statement = $this->connection->prepare($query);
+        $statement->bindParam(":id", $moduleId);
+        $statement->bindParam(":task_id", $id);
+        $statement->bindParam(":module_name", $parameter->module_name);
+        $statement->bindParam(":order", $parameter->order);
+        $statement->bindParam(":state", $parameter->state);
+        $statement->execute();
     }
 
     /**
@@ -207,5 +239,60 @@ class TaskController extends AbstractController
         $statement = $this->connection->prepare($query);
         $statement->bindParam(":task_id", $id);
         $statement->execute();
+
+        $query = "UPDATE topic
+          SET active_task_id = null
+          WHERE active_task_id = :task_id";
+        $statement = $this->connection->prepare($query);
+        $statement->bindParam(":task_id", $id);
+        $statement->execute();
+
+        $query = "SELECT * FROM module WHERE task_id = :task_id ";
+        $statement = $this->connection->prepare($query);
+        $statement->bindParam(":task_id", $id);
+        $statement->execute();
+
+        $resultData = $this->database->fetchAll($statement);
+        $idea = ModuleController::getInstance();
+        foreach ($resultData as $resultItem) {
+            $ideaId = $resultItem["id"];
+            $idea->delete($ideaId);
+        }
+    }
+
+    /**
+     * Get the aktive task to be displayed on the public screen for the session.
+     * @param string|null $sessionId The session ID.
+     * @param string|null $taskId The task ID.
+     * @return string Returns the success message in JSON format.
+     * @OA\Get(
+     *   path="/api/session/{sessionId}/public_screen/",
+     *   summary="Get the aktive task to be displayed on the public screen for the session.",
+     *   tags={"Public Screen"},
+     *   @OA\Parameter(in="path", name="sessionId", description="ID of the session to be displayed", required=true),
+     *   @OA\Response(response="200", description="Success",
+     *     @OA\JsonContent(ref="#/components/schemas/Task"),
+     *   ),
+     *   @OA\Response(response="404", description="Not Found"),
+     *   security={{"api_key": {}}, {"bearerAuth": {}}}
+     * )
+     */
+    public function getPublicScreen(?string $sessionId = null): string
+    {
+        if (is_null($sessionId)) {
+            $sessionId = $this->getUrlParameter("session");
+        }
+        $query = "SELECT * FROM task
+          WHERE id IN (
+            SELECT module.task_id
+            FROM session 
+            INNER JOIN module ON module.id = session.public_screen_module_id
+            WHERE session.id = :sessionId)";
+        $statement = $this->connection->prepare($query);
+        $statement->bindParam(":sessionId", $sessionId);
+        $statement->execute();
+        $result = $this->database->fetchFirst($statement);
+        http_response_code(200);
+        return json_encode(new Task($result));
     }
 }

@@ -332,4 +332,60 @@ class SessionController extends AbstractController
         $statement->bindParam(":session_id", $id);
         $statement->execute();
     }
+
+    /**
+     * Set a task to be displayed on the public screen for the session.
+     * @param string|null $sessionId The session ID.
+     * @param string|null $taskId The task ID.
+     * @return string Returns the success message in JSON format.
+     * @OA\Put(
+     *   path="/api/session/{sessionId}/public_screen/{taskId}/",
+     *   summary="Set a task to be displayed on the public screen for the session.",
+     *   tags={"Public Screen"},
+     *   @OA\Parameter(in="path", name="sessionId", description="ID of the session to be updated", required=true),
+     *   @OA\Parameter(in="path", name="taskId", description="ID of the task to be displayed on the public screen", required=true),
+     *   @OA\Response(response="200", description="Success"),
+     *   @OA\Response(response="404", description="Not Found"),
+     *   security={{"api_key": {}}, {"bearerAuth": {}}}
+     * )
+     */
+    public function setPublicScreen(?string $sessionId = null, string $taskId = null): string
+    {
+        $params = $this->formatParameters(
+            [
+                "id" => ["default" => $sessionId, "url" => "session", "required" => true],
+                "task_id" => ["default" => $taskId, "url" => "public_screen", "required" => true]
+            ]
+        );
+
+        $query = "SELECT * FROM module WHERE task_id = :task_id ";
+        $statement = $this->connection->prepare($query);
+        $statement->bindParam(":task_id", $params->task_id);
+        $statement->execute();
+        $itemCount = $statement->rowCount();
+        if ($itemCount > 0) {
+            $result = (object)$this->database->fetchFirst($statement);
+            $params->public_screen_module_id = $result->id;
+            unset($params->task_id);
+        }
+        else {
+            http_response_code(404);
+            $error = json_encode(
+                [
+                    "state" => "Failed",
+                    "message" => "Task has no module and can not be set for public screen."
+                ]
+            );
+            die($error);
+        }
+
+        $this->updateGeneric($params->id, $params);
+
+        return json_encode(
+            [
+                "state" => "Success",
+                "message" => "Public screen was successfully updated."
+            ]
+        );
+    }
 }
