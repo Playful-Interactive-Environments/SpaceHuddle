@@ -328,7 +328,7 @@ abstract class AbstractController
                 $id = $this->getUrlParameter($this->urlParameter);
             }
             if (is_null($role)) {
-                $role = $this->checkReadRights($id);
+                $role = $this->getAuthorisationReadRole($id);
             }
             if ($this->isAuthorized($role, $authorizedRoles)) {
                 if (is_null($statement)) {
@@ -774,7 +774,7 @@ abstract class AbstractController
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
      */
-    public function checkReadRights(?string $id): ?string
+    public function getAuthorisationReadRole(?string $id): ?string
     {
         return $this->getAuthorisationRole($id);
     }
@@ -784,7 +784,7 @@ abstract class AbstractController
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
      */
-    public static function checkInstanceRights(?string $id): ?string
+    public static function getInstanceAuthorisationRole(?string $id): ?string
     {
         $instance = self::getInstance();
         return $instance->getAuthorisationRole($id);
@@ -795,10 +795,10 @@ abstract class AbstractController
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
      */
-    public static function checkInstanceReadRights(?string $id): ?string
+    public static function getInstanceAuthorisationReadRole(?string $id): ?string
     {
         $instance = self::getInstance();
-        return $instance->checkReadRights($id);
+        return $instance->getAuthorisationReadRole($id);
     }
 
     /**

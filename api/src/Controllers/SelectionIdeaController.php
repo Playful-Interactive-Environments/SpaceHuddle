@@ -164,6 +164,6 @@ class SelectionIdeaController extends AbstractController
      */
     public function getAuthorisationRole(?string $id): ?string
     {
-        return SelectionController::checkInstanceRights($id);
+        return SelectionController::getInstanceAuthorisationRole($id);
     }
 }

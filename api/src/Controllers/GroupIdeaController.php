@@ -156,6 +156,6 @@ class GroupIdeaController extends AbstractController
      */
     public function getAuthorisationRole(?string $id): ?string
     {
-        return GroupController::checkInstanceRights($id);
+        return GroupController::getInstanceAuthorisationRole($id);
     }
 }

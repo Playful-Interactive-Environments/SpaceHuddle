@@ -250,7 +250,7 @@ class VotingController extends AbstractController
         if ($itemCount > 0) {
             $result = $this->database->fetchFirst($statement);
             $taskId = $result["task_id"];
-            return TaskController::checkInstanceRights($taskId);
+            return TaskController::getInstanceAuthorisationRole($taskId);
         }
         return null;
     }

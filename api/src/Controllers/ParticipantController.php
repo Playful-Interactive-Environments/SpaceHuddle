@@ -132,7 +132,7 @@ class ParticipantController extends AbstractController
             $itemCount = $statement->rowCount();
             if ($itemCount > 0) {
                 $participant = (object)$this->database->fetchFirst($statement);
-                return SessionController::checkInstanceRights($participant->session_id);
+                return SessionController::getInstanceAuthorisationRole($participant->session_id);
             }
         }
     }

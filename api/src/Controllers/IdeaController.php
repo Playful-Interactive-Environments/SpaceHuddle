@@ -206,7 +206,7 @@ class IdeaController extends AbstractController
         if ($itemCount > 0) {
             $result = $this->database->fetchFirst($statement);
             $taskId = $result["task_id"];
-            return TaskController::checkInstanceRights($taskId);
+            return TaskController::getInstanceAuthorisationRole($taskId);
         }
         return null;
     }
@@ -216,7 +216,7 @@ class IdeaController extends AbstractController
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
      */
-    public function checkReadRights(?string $id): ?string
+    public function getAuthorisationReadRole(?string $id): ?string
     {
         return parent::getAuthorisationRole($id);
     }
