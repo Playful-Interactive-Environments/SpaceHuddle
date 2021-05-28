@@ -9,11 +9,13 @@ use PieLab\GAB\Controllers\SessionController;
 use PieLab\GAB\Controllers\TopicController;
 use PieLab\GAB\Controllers\TaskController;
 use PieLab\GAB\Controllers\ResourceController;
+use PieLab\GAB\Controllers\SessionRoleController;
 
 $topic = TopicController::getInstance();
 $session = SessionController::getInstance();
 $task = TaskController::getInstance();
 $resource = ResourceController::getInstance();
+$sessionRole = SessionRoleController::getInstance();
 
 if (AbstractController::isRestCall("GET")) {
 	$result = $session->read();
@@ -56,6 +58,26 @@ elseif (AbstractController::isRestCall("PUT", searchDetailHierarchy: "public_scr
 }
 elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "public_screen")) {
 	$result = $task->getPublicScreen();
+	echo $result;
+}
+elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "authorized_users")) {
+	$result = $sessionRole->readAll();
+	echo $result;
+}
+elseif (AbstractController::isRestCall("POST", searchDetailHierarchy: "authorized_users")) {
+	$result = $sessionRole->add();
+	echo $result;
+}
+elseif (AbstractController::isRestCall("PUT", searchDetailHierarchy: "authorized_users")) {
+	$result = $sessionRole->update();
+	echo $result;
+}
+elseif (AbstractController::isRestCall("DELETE", searchDetailHierarchy: "authorized_users")) {
+	$result = $sessionRole->delete();
+	echo $result;
+}
+elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "own_user_role")) {
+	$result = $sessionRole->read();
 	echo $result;
 }
 else {

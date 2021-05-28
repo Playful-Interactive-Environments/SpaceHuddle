@@ -1,6 +1,5 @@
 <?php
 require_once('AuthorizedParticipantTestCase.php');
-require_once('IdeaTest.php');
 use PieLab\GAB\Models\StateIdea;
 
 class IdeaParticipantTest extends AuthorizedParticipantTestCase

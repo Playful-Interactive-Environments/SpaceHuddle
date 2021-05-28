@@ -3,7 +3,11 @@
 namespace PieLab\GAB\Controllers;
 
 use Exception;
+use PieLab\GAB\Config\Authorization;
+use PieLab\GAB\Models\Role;
+use PieLab\GAB\Models\Session;
 use PieLab\GAB\Models\SessionRole;
+use PieLab\GAB\Models\VotingResult;
 
 /**
  * Controller for roles in a session.
@@ -16,7 +20,7 @@ class SessionRoleController extends AbstractController
      */
     protected function __construct()
     {
-        parent::__construct("session_role", SessionRole::class, LoginController::class, "login", "login_id");
+        parent::__construct("session_role", SessionRole::class, SessionController::class, "session", "session_id");
     }
 
     /**
@@ -37,20 +41,27 @@ class SessionRoleController extends AbstractController
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
      * )
      */
-    public function readAll(): string
+    public function readAll(?string $sessionId = null): string
     {
-        #TODO: check rights for session
+        $query = "SELECT * FROM login INNER JOIN session_role ON session_role.login_id = login.id
+                  WHERE session_role.session_id = :session_id";
+        $statement = $this->connection->prepare($query);
+
+        return parent::readAllGeneric(
+            $sessionId,
+            [Role::MODERATOR],
+            $statement
+        );
     }
 
     /**
      * Get the role of the username in the session.
      * @return string The user's role.
      * @OA\Get(
-     *   path="/api/session/{sessionId}/authorized_users/{username}/",
+     *   path="/api/session/{sessionId}/own_user_role/",
      *   summary="Get the role of the username in the session.",
      *   tags={"Session Role"},
      *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),
-     *   @OA\Parameter(in="path", name="username", description="authorized user", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\JsonContent(ref="#/components/schemas/SessionRole"),
      *   ),
@@ -58,9 +69,23 @@ class SessionRoleController extends AbstractController
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
      * )
      */
-    public function read(?string $id = null): string
+    public function read(?string $sessionId = null): string
     {
-        #TODO: check rights for session
+        $loginId = Authorization::getAuthorizationProperty("loginId");
+        $query = "SELECT * FROM login INNER JOIN session_role ON session_role.login_id = login.id
+                  WHERE session_role.session_id = :session_id and session_role.login_id = :login_id";
+        $statement = $this->connection->prepare($query);
+        $statement->bindParam(":login_id", $loginId);
+
+        $result = json_decode(parent::readAllGeneric(
+            $sessionId,
+            [Role::MODERATOR, Role::FACILITATOR],
+            $statement
+        ));
+
+        if (count($result) > 0) {
+            return json_encode($result[0]);
+        }
     }
 
     /**
@@ -87,23 +112,38 @@ class SessionRoleController extends AbstractController
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
      * )
      */
-    public function add(): string
+    public function add(?string $sessionId = null, ?string $username = null, ?string $role = null): string
     {
-        try {
-            #TODO: check rights for session
-        } catch (Exception $e) {
+        $params = $this->formatParameters(
+            [
+                "session_id" => ["default" => $sessionId, "url" => "session", "required" => true],
+                "username" => ["default" => $username, "required" => true],
+                "role" => ["default" => $role, "type" => Role::class, "required" => true]
+            ]
+        );
+
+        $query = "SELECT * FROM login WHERE username = :username ";
+        $statement = $this->connection->prepare($query);
+        $statement->bindParam(":username", $params->username);
+        $statement->execute();
+        $itemCount = $statement->rowCount();
+        if ($itemCount > 0) {
+            $result = (object)$this->database->fetchFirst($statement);
+            $params->login_id = $result->id;
+            unset($params->username);
+        }
+        else {
             http_response_code(404);
-            $errorMessage = $e->getMessage();
-            $this->connection->rollBack();
             $error = json_encode(
                 [
                     "state" => "Failed",
-                    "message" => 'Error occurred:' . $errorMessage
+                    "message" => "Username not exists."
                 ]
             );
             die($error);
-            #return $error;
         }
+
+        return $this->addGeneric(null, $params, authorizedRoles: [Role::MODERATOR], insertId: false);
     }
 
     /**
@@ -131,9 +171,39 @@ class SessionRoleController extends AbstractController
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
      * )
      */
-    public function update(?string $id = null): string
+    public function update(?string $sessionId = null, ?string $username = null, ?string $role = null): string
     {
-        #TODO: check rights for session
+        $params = $this->formatParameters(
+            [
+                "session_id" => ["default" => $sessionId, "url" => "session", "required" => true],
+                "username" => ["default" => $username, "required" => true],
+                "role" => ["default" => $role, "type" => Role::class, "required" => true]
+            ]
+        );
+
+        $query = "UPDATE session_role 
+            SET role = :role 
+            WHERE session_id = :session_id 
+            AND login_id IN (SELECT id FROM login WHERE username = :username)";
+
+        $this->updateGeneric($params->session_id, $params, authorizedRoles: [Role::MODERATOR], query: $query);
+
+        return json_encode(
+            [
+                "state" => "Success",
+                "message" => "Role was successfully updated."
+            ]
+        );
+    }
+
+    /**
+     * Checks the access role via which the logged-in user may access the entry with the specified primary key.
+     * @param string|null $id Primary key to be checked.
+     * @return string|null Role with which the user is authorised to access the entry.
+     */
+    public function getAuthorisationRole(?string $id): ?string
+    {
+        return SessionController::getInstanceAuthorisationRole($id);
     }
 
     /**
@@ -152,9 +222,27 @@ class SessionRoleController extends AbstractController
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
      * )
      */
-    public function delete(?string $id = null): string
+    public function delete(?string $sessionId = null, ?string $username = null): string
     {
-        #TODO: check rights for session
+        $params = $this->formatParameters(
+            [
+                "session_id" => ["default" => $sessionId, "url" => "session", "required" => true],
+                "username" => ["default" => $username, "url" => "authorized_users", "required" => true]
+            ]
+        );
+
+        $query = "DELETE FROM session_role 
+            WHERE session_id = :session_id 
+            AND login_id IN (SELECT id FROM login WHERE username = :username)";;
+        $stmt = $this->connection->prepare($query);
+        $stmt->bindParam(":session_id", $params->session_id);
+        $stmt->bindParam(":username", $params->username);
+
+        return parent::deleteGeneric(
+            $params->session_id,
+            authorizedRoles: [Role::MODERATOR],
+            statement: $stmt
+        );
     }
 
     /**

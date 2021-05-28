@@ -519,7 +519,8 @@ abstract class AbstractController
     public function updateGeneric(
         string $id,
         array|object $parameter,
-        array $authorizedRoles = [Role::MODERATOR]
+        array $authorizedRoles = [Role::MODERATOR],
+        ?string $query = null
     ): string {
         if ($this->genericTableParameterSet()) {
             $role = $this->getAuthorisationRole($id);
@@ -538,16 +539,21 @@ abstract class AbstractController
                 $this->connection->beginTransaction();
 
                 $queryData = "";
-                $bindParameter = [":id" => $id];
+                $bindParameter = [];
+                if (is_null($query)) {
+                    $bindParameter = [":id" => $id];
+                }
                 foreach ($parameter as $key => $value) {
-                    if ($key != "id") {
+                    if ($key != "id" or isset($query)) {
                         $queryData .= "`$key` = NVL(:$key, `$key`), ";
                         $bindParameter[":$key"] = $value;
                     }
                 }
                 $queryData = substr_replace($queryData, " ", -2);
 
-                $query = "UPDATE $this->table SET $queryData WHERE id = :id";
+                if (is_null($query)) {
+                    $query = "UPDATE $this->table SET $queryData WHERE id = :id";
+                }
                 $statement = $this->connection->prepare($query);
                 $statement->execute($bindParameter);
                 $itemCount = $statement->rowCount();
