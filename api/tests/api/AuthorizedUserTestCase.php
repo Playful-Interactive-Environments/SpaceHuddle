@@ -14,6 +14,7 @@ abstract class AuthorizedUserTestCase extends AuthorizedTestCase
   protected ?string $ideaId;
   protected ?string $groupId;
   protected ?string $selectionId;
+  protected ?string $resourceId;
 
   public function __construct()
   {
@@ -120,6 +121,18 @@ abstract class AuthorizedUserTestCase extends AuthorizedTestCase
       }
     }
     return $this->selectionId;
+  }
+
+  public function getFirstResourceId() : ?string {
+    if (!isset($this->resourceId)) {
+      $sessionId = $this->getFirstSessionId();
+      $res = $this->client->get($this->getAbsoluteApiUrl("/api/session/$sessionId/resources/"));
+      $result = $this->toJSON($res->getBody());
+      if (count($result) > 0) {
+        $this->resourceId = $result[0]->id;
+      }
+    }
+    return $this->resourceId;
   }
 
   protected function getAccessToken() : ?string {

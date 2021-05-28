@@ -31,7 +31,7 @@ class DisplayTest extends AuthorizedUserTestCase
     $res = $this->client->put($this->getAbsoluteApiUrl("/api/session/$this->sessionId/public_screen/$this->taskIdSelect/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
-    
+
     $res = $this->client->put($this->getAbsoluteApiUrl("/api/session/$this->sessionId/public_screen/$this->taskIdIdea/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());

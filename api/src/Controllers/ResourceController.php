@@ -37,9 +37,9 @@ class ResourceController extends AbstractController
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
      * )
      */
-    public function readAll(): string
+    public function readAll(?string $sessionId = null): string
     {
-        #TODO: check rights for session
+        return parent::readAllGeneric($sessionId);
     }
 
     /**
@@ -59,7 +59,7 @@ class ResourceController extends AbstractController
      */
     public function read(?string $id = null): string
     {
-        #TODO: check rights for session
+        return parent::readGeneric($id);
     }
 
     /**
@@ -87,23 +87,18 @@ class ResourceController extends AbstractController
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
      * )
      */
-    public function add(): string
+    public function add(?string $sessionId = null, ?string $title = null, ?string $link = null, ?string $image = null): string
     {
-        try {
-            #TODO: check rights for session
-        } catch (Exception $e) {
-            http_response_code(404);
-            $error_msg = $e->getMessage();
-            $this->connection->rollBack();
-            $error = json_encode(
-                [
-                    "state" => "Failed",
-                    "message" => 'Error occurred:' . $error_msg
-                ]
-            );
-            die($error);
-            #return $error;
-        }
+        $params = $this->formatParameters(
+            [
+                "session_id" => ["default" => $sessionId, "url" => "session", "required" => true],
+                "title" => ["default" => $title, "required" => true],
+                "link" => ["default" => $link],
+                "image" => ["default" => $image]
+            ]
+        );
+
+        return $this->addGeneric($params->session_id, $params);
     }
 
     /**
@@ -128,9 +123,22 @@ class ResourceController extends AbstractController
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
      * )
      */
-    public function update(?string $id = null): string
-    {
-        #TODO: check rights for session
+    public function update(
+        ?string $id = null,
+        ?string $title = null,
+        ?string $link = null,
+        ?string $image = null
+    ): string {
+        $params = $this->formatParameters(
+            [
+                "id" => ["default" => $id],
+                "title" => ["default" => $title],
+                "link" => ["default" => $link],
+                "image" => ["default" => $image]
+            ]
+        );
+
+        return $this->updateGeneric($params->id, $params);
     }
 
     /**
@@ -149,7 +157,7 @@ class ResourceController extends AbstractController
      */
     public function delete(?string $id = null): string
     {
-        #TODO: check rights for session
+        return parent::deleteGeneric($id);
     }
 
     /**

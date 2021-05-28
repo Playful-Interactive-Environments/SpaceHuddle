@@ -8,10 +8,12 @@ use PieLab\GAB\Controllers\AbstractController;
 use PieLab\GAB\Controllers\SessionController;
 use PieLab\GAB\Controllers\TopicController;
 use PieLab\GAB\Controllers\TaskController;
+use PieLab\GAB\Controllers\ResourceController;
 
 $topic = TopicController::getInstance();
 $session = SessionController::getInstance();
 $task = TaskController::getInstance();
+$resource = ResourceController::getInstance();
 
 if (AbstractController::isRestCall("GET")) {
 	$result = $session->read();
@@ -38,6 +40,14 @@ elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "topics")) 
 }
 elseif (AbstractController::isRestCall("POST", searchDetailHierarchy: "topic")) {
 	$result = $topic->add();
+	echo $result;
+}
+elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "resources")) {
+	$result = $resource->readAll();
+	echo $result;
+}
+elseif (AbstractController::isRestCall("POST", searchDetailHierarchy: "resource")) {
+	$result = $resource->add();
 	echo $result;
 }
 elseif (AbstractController::isRestCall("PUT", searchDetailHierarchy: "public_screen")) {
