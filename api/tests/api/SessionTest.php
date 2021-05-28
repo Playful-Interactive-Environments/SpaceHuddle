@@ -25,8 +25,8 @@ class SessionTest extends AuthorizedUserTestCase
   public function testWorkflow() {
     $data =  json_encode((object)array(
       'title' => 'test session',
-      'max_participants' => 100,
-      'expiration_date' => '2021-12-31'
+      'maxParticipants' => 100,
+      'expirationDate' => '2021-12-31'
     ));
 
     $res = $this->client->post($this->getAbsoluteApiUrl("/api/session/"), [
@@ -41,7 +41,7 @@ class SessionTest extends AuthorizedUserTestCase
     $data =  json_encode((object)array(
       'id' => $id,
       'title' => 'test session 2',
-      'max_participants' => 99
+      'maxParticipants' => 99
     ));
 
     $res = $this->client->put($this->getAbsoluteApiUrl("/api/session/"), [

@@ -26,10 +26,10 @@ class GroupIdeaController extends AbstractController
      * @param string|null $groupId The group's ID.
      * @return string Returns a json encoded list of all ideas for this group.
      * @OA\Get(
-     *   path="/api/group/{group_id}/ideas",
+     *   path="/api/group/{groupId}/ideas",
      *   summary="Ideas for the group with the specified id.",
      *   tags={"Group"},
-     *   @OA\Parameter(in="path", name="group_id", description="ID of group to return", required=true),
+     *   @OA\Parameter(in="path", name="groupId", description="ID of group to return", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -60,10 +60,10 @@ class GroupIdeaController extends AbstractController
      * @param array|null $ideaArray The list of ideas to add.
      * @return string Inserted data in the json format.
      * @OA\Post(
-     *   path="/api/group/{group_id}/ideas/",
+     *   path="/api/group/{groupId}/ideas/",
      *   summary="Add list of idea_ids to a group.",
      *   tags={"Group"},
-     *   @OA\Parameter(in="path", name="group_id", description="ID of the group", required=true),
+     *   @OA\Parameter(in="path", name="groupId", description="ID of the group", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
@@ -81,7 +81,7 @@ class GroupIdeaController extends AbstractController
     {
         $params = $this->formatParameters(
             [
-                "group_idea_id" => ["default" => $groupId, "url" => "group"],
+                "group_idea_id" => ["default" => $groupId, "url" => "group", "required" => true],
                 "sub_idea_id" => ["default" => $ideaArray, "type" => "ARRAY", "result" => "all"]
             ]
         );
@@ -110,10 +110,10 @@ class GroupIdeaController extends AbstractController
      * @param array|null $ideaArray The list of ideas to delete.
      * @return string Success status of the statement.
      * @OA\Delete(
-     *   path="/api/group/{group_id}/ideas/",
+     *   path="/api/group/{groupId}/ideas/",
      *   summary="Delete the list of idea_ids from a group.",
      *   tags={"Group"},
-     *   @OA\Parameter(in="path", name="group_id", description="ID of the group", required=true),
+     *   @OA\Parameter(in="path", name="groupId", description="ID of the group", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
@@ -131,7 +131,7 @@ class GroupIdeaController extends AbstractController
     {
         $params = $this->formatParameters(
             [
-                "group_idea_id" => ["default" => $groupId, "url" => "group"],
+                "group_idea_id" => ["default" => $groupId, "url" => "group", "required" => true],
                 "sub_idea_id" => ["default" => $ideaArray, "type" => "ARRAY", "result" => "all"]
             ]
         );

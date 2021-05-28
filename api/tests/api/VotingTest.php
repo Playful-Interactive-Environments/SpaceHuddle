@@ -32,9 +32,9 @@ class VotingTest extends AuthorizedParticipantTestCase
 
   public function testWorkflow() {
     $data =  json_encode((object)array(
-      'idea_id' => $this->ideaId,
+      'ideaId' => $this->ideaId,
       'rating' => 2,
-      'detail_rating' => 2.5
+      'detailRating' => 2.5
     ));
 
     $res = $this->client->post($this->getAbsoluteApiUrl("/api/task/$this->taskIdVote/voting/"), [
@@ -48,9 +48,9 @@ class VotingTest extends AuthorizedParticipantTestCase
 
     $data =  json_encode((object)array(
       'id' => $id,
-      'idea_id' => $this->ideaId,
+      'ideaId' => $this->ideaId,
       'rating' => 2,
-      'detail_rating' => 2.7
+      'detailRating' => 2.7
     ));
 
     $res = $this->client->put($this->getAbsoluteApiUrl("/api/voting/"), [

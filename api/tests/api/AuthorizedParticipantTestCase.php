@@ -22,12 +22,12 @@ abstract class AuthorizedParticipantTestCase extends AuthorizedTestCase
     return $this->topicId;
   }
 
-  protected function getFirstTaskId($task_type) : ?string {
+  protected function getFirstTaskId($taskType) : ?string {
     $res = $this->client->get($this->getAbsoluteApiUrl("/api/participant/tasks/"));
     $result = $this->toJSON($res->getBody());
     if (count($result) > 0) {
       foreach ($result as $resultItem) {
-        if (strtoupper($resultItem->task_type) == strtoupper($task_type)) {
+        if (strtoupper($resultItem->taskType) == strtoupper($taskType)) {
           return $resultItem->id;
         }
       }
@@ -51,8 +51,8 @@ abstract class AuthorizedParticipantTestCase extends AuthorizedTestCase
 
   public function getFirstVotingId() : ?string {
     if (!isset($this->votingID)) {
-      $task_id = $this->getFirstTaskIdVote();
-      $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$task_id/votings/"));
+      $taskId = $this->getFirstTaskIdVote();
+      $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$taskId/votings/"));
       $result = $this->toJSON($res->getBody());
       if (count($result) > 0) {
         $this->votingID = $result[0]->id;
@@ -63,8 +63,8 @@ abstract class AuthorizedParticipantTestCase extends AuthorizedTestCase
 
   public function getFirstIdeaId() : ?string {
     if (!isset($this->ideaId)) {
-      $task_id = $this->getFirstTaskIdIdea();
-      $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$task_id/ideas/"));
+      $taskId = $this->getFirstTaskIdIdea();
+      $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$taskId/ideas/"));
       $result = $this->toJSON($res->getBody());
       if (count($result) > 0) {
         $this->ideaId = $result[0]->id;
@@ -77,15 +77,14 @@ abstract class AuthorizedParticipantTestCase extends AuthorizedTestCase
     $client = new GuzzleHttp\Client();
 
     $login_data =  json_encode((object)array(
-      'session_key' => 'ZP4L4QFX',
-      'ip_hash' => 'localhost'
+      'sessionKey' => 'ZP4L4QFX',
+      'ipHash' => 'localhost'
     ));
 
     $res = $client->post($this->getAbsoluteApiUrl("/api/participant/connect/"), [
         'body' => $login_data
     ]);
-    $access_token = $this->toJSON($res->getBody())->access_token;
-    return $access_token;
+    return $this->toJSON($res->getBody())->accessToken;
   }
 }
 

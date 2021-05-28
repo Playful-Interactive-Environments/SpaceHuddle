@@ -43,7 +43,7 @@ class LoginController extends AbstractController
      *       mediaType="json",
      *       @OA\Schema(
      *         @OA\Property(property="message", type="string"),
-     *         @OA\Property(property="access_token", type="string")
+     *         @OA\Property(property="accessToken", type="string")
      *       )
      *     )),
      *   @OA\Response(response="404", description="Not Found")
@@ -53,8 +53,8 @@ class LoginController extends AbstractController
     {
         $params = $this->formatParameters(
             [
-                "username" => ["default" => $username],
-                "password" => ["default" => $password, "type" => "MD5"]
+                "username" => ["default" => $username, "required" => true],
+                "password" => ["default" => $password, "type" => "MD5", "required" => true]
             ]
         );
 
@@ -77,7 +77,7 @@ class LoginController extends AbstractController
         $result = (object)$this->database->fetchFirst($stmt);
         $jwt = Authorization::generateToken(
             [
-                "login_id" => $result->id,
+                "loginId" => $result->id,
                 "username" => $result->username
             ]
         );
@@ -86,7 +86,7 @@ class LoginController extends AbstractController
         return json_encode(
             [
                 "message" => "Successful login.",
-                "access_token" => $jwt
+                "accessToken" => $jwt
             ]
         );
     }
@@ -104,10 +104,10 @@ class LoginController extends AbstractController
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
-     *       @OA\Schema(required={"username", "password", "password_confirmation"},
+     *       @OA\Schema(required={"username", "password", "passwordConfirmation"},
      *         @OA\Property(property="username", type="string"),
      *         @OA\Property(property="password", type="string"),
-     *         @OA\Property(property="password_confirmation", type="string")
+     *         @OA\Property(property="passwordConfirmation", type="string")
      *       )
      *     )
      *   ),
@@ -122,9 +122,9 @@ class LoginController extends AbstractController
     ): string {
         $params = $this->formatParameters(
             [
-                "username" => ["default" => $username],
-                "password" => ["default" => $password, "type" => "MD5"],
-                "password_confirmation" => ["default" => $passwordConfirmation, "type" => "MD5"]
+                "username" => ["default" => $username, "required" => true],
+                "password" => ["default" => $password, "type" => "MD5", "required" => true],
+                "passwordConfirmation" => ["default" => $passwordConfirmation, "type" => "MD5", "required" => true]
             ]
         );
         if ($this->checkUser($params->username)) {
@@ -137,9 +137,9 @@ class LoginController extends AbstractController
             );
             die($error);
         }
-        $this->checkPasswordConfirmation($params->password, $params->password_confirmation);
-        if (isset($params->password_confirmation)) {
-            unset($params->password_confirmation);
+        $this->checkPasswordConfirmation($params->password, $params->passwordConfirmation);
+        if (isset($params->passwordConfirmation)) {
+            unset($params->passwordConfirmation);
         }
 
         $this->addGeneric(null, $params, authorizedRoles: [Role::UNKNOWN]);
@@ -239,10 +239,10 @@ class LoginController extends AbstractController
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
-     *       @OA\Schema(required={"old_password", "password", "password_confirmation"},
-     *         @OA\Property(property="old_password", type="string"),
+     *       @OA\Schema(required={"oldPassword", "password", "passwordConfirmation"},
+     *         @OA\Property(property="oldPassword", type="string"),
      *         @OA\Property(property="password", type="string"),
-     *         @OA\Property(property="password_confirmation", type="string")
+     *         @OA\Property(property="passwordConfirmation", type="string")
      *       )
      *     )
      *   ),
@@ -256,17 +256,17 @@ class LoginController extends AbstractController
         ?string $password = null,
         ?string $passwordConfirmation = null
     ): string {
-        $login_id = Authorization::getAuthorizationProperty("login_id");
+        $login_id = Authorization::getAuthorizationProperty("loginId");
         $params = $this->formatParameters(
             [
                 "id" => ["default" => $login_id],
-                "old_password" => ["default" => $oldPassword, "type" => "MD5"],
-                "password" => ["default" => $password, "type" => "MD5"],
-                "password_confirmation" => ["default" => $passwordConfirmation, "type" => "MD5"]
+                "oldPassword" => ["default" => $oldPassword, "type" => "MD5", "required" => true],
+                "password" => ["default" => $password, "type" => "MD5", "required" => true],
+                "passwordConfirmation" => ["default" => $passwordConfirmation, "type" => "MD5", "required" => true]
             ]
         );
-        $this->checkPasswordConfirmation($params->password, $params->password_confirmation);
-        if (!$this->checkPassword($login_id, $params->old_password)) {
+        $this->checkPasswordConfirmation($params->password, $params->passwordConfirmation);
+        if (!$this->checkPassword($login_id, $params->oldPassword)) {
             http_response_code(404);
             $error = json_encode(
                 [
@@ -276,11 +276,11 @@ class LoginController extends AbstractController
             );
             die($error);
         }
-        if (isset($params->old_password)) {
-            unset($params->old_password);
+        if (isset($params->oldPassword)) {
+            unset($params->oldPassword);
         }
-        if (isset($params->password_confirmation)) {
-            unset($params->password_confirmation);
+        if (isset($params->passwordConfirmation)) {
+            unset($params->passwordConfirmation);
         }
 
         $this->updateGeneric($params->id, $params);
@@ -306,7 +306,7 @@ class LoginController extends AbstractController
      */
     public function delete(): string
     {
-        $login_id = Authorization::getAuthorizationProperty("login_id");
+        $login_id = Authorization::getAuthorizationProperty("loginId");
         return parent::deleteGeneric($login_id);
     }
 

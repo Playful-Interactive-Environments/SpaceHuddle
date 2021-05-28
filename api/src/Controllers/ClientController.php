@@ -25,10 +25,10 @@ class ClientController extends AbstractController
      * @param StateTask|null $state The client state.
      * @return string Updated data in JSON format.
      * @OA\Put(
-     *   path="/api/task/{task_id}/client_application_state/{state}/",
+     *   path="/api/task/{taskId}/client_application_state/{state}/",
      *   summary="Set the client application state for the task.",
      *   tags={"Client Application"},
-     *   @OA\Parameter(in="path", name="task_id", description="ID of the task to be updated", required=true),
+     *   @OA\Parameter(in="path", name="taskId", description="ID of the task to be updated", required=true),
      *   @OA\Parameter(in="path", name="state",
      *     description="display status on the client devices",
      *     required=true,
@@ -42,8 +42,8 @@ class ClientController extends AbstractController
     {
         $params = $this->formatParameters(
             [
-                "id" => ["default" => $taskId, "url" => "task"],
-                "state" => ["default" => $state, "type" => StateTask::class, "url" => "client_application_state"]
+                "id" => ["default" => $taskId, "url" => "task", "required" => true],
+                "state" => ["default" => $state, "type" => StateTask::class, "url" => "client_application_state", "required" => true]
             ]
         );
 

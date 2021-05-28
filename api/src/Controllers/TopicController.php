@@ -23,10 +23,10 @@ class TopicController extends AbstractController
      * @param string|null $sessionId The session's ID.
      * @return string A list of topics for the session.
      * @OA\Get(
-     *   path="/api/session/{session_id}/topics/",
+     *   path="/api/session/{sessionId}/topics/",
      *   summary="List of all topics for the session.",
      *   tags={"Topic"},
-     *   @OA\Parameter(in="path", name="session_id", description="ID of the session", required=true),
+     *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -70,10 +70,10 @@ class TopicController extends AbstractController
      * @param string|null $description The topic description.
      * @return string The topic data in JSON format.
      * @OA\Post(
-     *   path="/api/session/{session_id}/topic/",
+     *   path="/api/session/{sessionId}/topic/",
      *   summary="Create a new topic for the session.",
      *   tags={"Topic"},
-     *   @OA\Parameter(in="path", name="session_id", description="ID of the session", required=true),
+     *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
@@ -94,9 +94,9 @@ class TopicController extends AbstractController
     {
         $params = $this->formatParameters(
             [
-                "session_id" => ["default" => $sessionId, "url" => "session"],
-                "title" => ["default" => $title],
-                "description" => ["default" => $description]
+                "session_id" => ["default" => $sessionId, "url" => "session", "required" => true],
+                "title" => ["default" => $title, "required" => true],
+                "description" => ["default" => $description, "required" => true]
             ]
         );
 
@@ -139,7 +139,7 @@ class TopicController extends AbstractController
                 "id" => ["default" => $id],
                 "title" => ["default" => $title],
                 "description" => ["default" => $description],
-                "active_task_id" => ["default" => $activeTaskId]
+                "active_task_id" => ["default" => $activeTaskId, "requestKey" => "activeTaskId"]
             ]
         );
 

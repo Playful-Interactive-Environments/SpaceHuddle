@@ -34,8 +34,8 @@ abstract class AuthorizedUserTestCase extends AuthorizedTestCase
 
   public function getFirstTopicId() : ?string {
     if (!isset($this->topicId)) {
-      $session_id = $this->getFirstSessionId();
-      $res = $this->client->get($this->getAbsoluteApiUrl("/api/session/$session_id/topics/"));
+      $sessionId = $this->getFirstSessionId();
+      $res = $this->client->get($this->getAbsoluteApiUrl("/api/session/$sessionId/topics/"));
       $result = $this->toJSON($res->getBody());
       if (count($result) > 0) {
         $this->topicId = $result[0]->id;
@@ -44,13 +44,13 @@ abstract class AuthorizedUserTestCase extends AuthorizedTestCase
     return $this->topicId;
   }
 
-  protected function getFirstTaskId($task_type) : ?string {
-    $topic_id = $this->getFirstTopicId();
-    $res = $this->client->get($this->getAbsoluteApiUrl("/api/topic/$topic_id/tasks/"));
+  protected function getFirstTaskId($taskType) : ?string {
+    $topicId = $this->getFirstTopicId();
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/topic/$topicId/tasks/"));
     $result = $this->toJSON($res->getBody());
     if (count($result) > 0) {
       foreach ($result as $resultItem) {
-        if (strtoupper($resultItem->task_type) == strtoupper($task_type)) {
+        if (strtoupper($resultItem->taskType) == strtoupper($taskType)) {
           return $resultItem->id;
         }
       }
@@ -88,8 +88,8 @@ abstract class AuthorizedUserTestCase extends AuthorizedTestCase
 
   public function getFirstIdeaId() : ?string {
     if (!isset($this->ideaId)) {
-      $task_id = $this->getFirstTaskIdIdea();
-      $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$task_id/ideas/"));
+      $taskId = $this->getFirstTaskIdIdea();
+      $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$taskId/ideas/"));
       $result = $this->toJSON($res->getBody());
       if (count($result) > 0) {
         $this->ideaId = $result[0]->id;
@@ -100,8 +100,8 @@ abstract class AuthorizedUserTestCase extends AuthorizedTestCase
 
   public function getFirstGroupId() : ?string {
     if (!isset($this->groupId)) {
-      $task_id = $this->getFirstTaskIdGroup();
-      $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$task_id/groups/"));
+      $taskId = $this->getFirstTaskIdGroup();
+      $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$taskId/groups/"));
       $result = $this->toJSON($res->getBody());
       if (count($result) > 0) {
         $this->groupId = $result[0]->id;
@@ -112,8 +112,8 @@ abstract class AuthorizedUserTestCase extends AuthorizedTestCase
 
   public function getFirstSelectionId() : ?string {
     if (!isset($this->selectionId)) {
-      $topic_id = $this->getFirstTopicId();
-      $res = $this->client->get($this->getAbsoluteApiUrl("/api/topic/$topic_id/selections/"));
+      $topicId = $this->getFirstTopicId();
+      $res = $this->client->get($this->getAbsoluteApiUrl("/api/topic/$topicId/selections/"));
       $result = $this->toJSON($res->getBody());
       if (count($result) > 0) {
         $this->selectionId = $result[0]->id;
@@ -125,15 +125,15 @@ abstract class AuthorizedUserTestCase extends AuthorizedTestCase
   protected function getAccessToken() : ?string {
     $client = new GuzzleHttp\Client();
 
-    $login_data =  json_encode((object)array(
+    $loginData =  json_encode((object)array(
       'username' => 'testuser',
       'password' => 'testuser'
     ));
 
     $res = $client->post($this->getAbsoluteApiUrl("/api/user/login/"), [
-        'body' => $login_data
+        'body' => $loginData
     ]);
-    return $this->toJSON($res->getBody())->access_token;
+    return $this->toJSON($res->getBody())->accessToken;
   }
 }
 

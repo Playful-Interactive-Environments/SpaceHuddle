@@ -43,7 +43,7 @@ class Group
     public function __construct(array $data = null)
     {
         $this->id = $data["id"] ?? null;
-        $this->timestamp = $data["time_stamp"] ?? null;
+        $this->timestamp = $data["timestamp"] ?? null;
         $this->description = $data["description"] ?? null;
         $this->keywords = $data["keywords"] ?? null;
     }

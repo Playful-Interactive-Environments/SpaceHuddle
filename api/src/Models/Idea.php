@@ -65,7 +65,7 @@ class Idea
     {
         $this->id = $data["id"] ?? null;
         $this->state = strtoupper($data["state"] ?? null);
-        $this->timestamp = $data["time_stamp"] ?? null;
+        $this->timestamp = $data["timestamp"] ?? null;
         $this->description = $data["description"] ?? null;
         $this->keywords = $data["keywords"] ?? null;
         $this->image = $data["image"] ?? null;

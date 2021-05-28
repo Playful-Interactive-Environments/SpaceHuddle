@@ -167,7 +167,7 @@ class Authorization
     public static function isParticipant(): bool
     {
         $authorizationData = self::getAuthorizationData();
-        if (property_exists($authorizationData, "participant_id")) {
+        if (property_exists($authorizationData, "participantId")) {
             return true;
         }
         return false;
@@ -180,7 +180,7 @@ class Authorization
     public static function isUser(): bool
     {
         $authorization_data = self::getAuthorizationData();
-        if (property_exists($authorization_data, "login_id")) {
+        if (property_exists($authorization_data, "loginId")) {
             return true;
         }
         return false;

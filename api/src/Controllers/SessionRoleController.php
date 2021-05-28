@@ -23,10 +23,10 @@ class SessionRoleController extends AbstractController
      * List all authorized users for the session.
      * @return string A list of all authorized users in JSON format.
      * @OA\Get(
-     *   path="/api/session/{session_id}/authorized_users/",
+     *   path="/api/session/{sessionId}/authorized_users/",
      *   summary="List of all authorized users for the session.",
      *   tags={"Session Role"},
-     *   @OA\Parameter(in="path", name="session_id", description="ID of the session", required=true),
+     *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -46,10 +46,10 @@ class SessionRoleController extends AbstractController
      * Get the role of the username in the session.
      * @return string The user's role.
      * @OA\Get(
-     *   path="/api/session/{session_id}/authorized_users/{username}/",
+     *   path="/api/session/{sessionId}/authorized_users/{username}/",
      *   summary="Get the role of the username in the session.",
      *   tags={"Session Role"},
-     *   @OA\Parameter(in="path", name="session_id", description="ID of the session", required=true),
+     *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),
      *   @OA\Parameter(in="path", name="username", description="authorized user", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\JsonContent(ref="#/components/schemas/SessionRole"),
@@ -67,10 +67,10 @@ class SessionRoleController extends AbstractController
      * Add a new authorized user to the session.
      * @return string The updated session role data.
      * @OA\Post(
-     *   path="/api/session/{session_id}/authorized_users/",
+     *   path="/api/session/{sessionId}/authorized_users/",
      *   summary="Add a new authorized user to the session.",
      *   tags={"Session Role"},
-     *   @OA\Parameter(in="path", name="session_id", description="ID of the session", required=true),
+     *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
@@ -111,14 +111,14 @@ class SessionRoleController extends AbstractController
      * @param string|null $id The session's ID.
      * @return string The updated session role data.
      * @OA\Put(
-     *   path="/api/session/{session_id}/authorized_users/",
+     *   path="/api/session/{sessionId}/authorized_users/",
      *   summary="Update the role of a authorized user for a session.",
      *   tags={"Session Role"},
-     *   @OA\Parameter(in="path", name="session_id", description="ID of the session", required=true),
+     *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
-     *       @OA\Schema(required={"id", "title", "description"},
+     *       @OA\Schema(required={"id"},
      *         @OA\Property(property="username", type="string"),
      *         @OA\Property(property="role", type="string")
      *       )
@@ -141,10 +141,10 @@ class SessionRoleController extends AbstractController
      * @param string|null $id The session's ID.
      * @return string The updated session role data.
      * @OA\Delete(
-     *   path="/api/session/{session_id}/authorized_users/{username}/",
+     *   path="/api/session/{sessionId}/authorized_users/{username}/",
      *   summary="Remove username for a session.",
      *   tags={"Session Role"},
-     *   @OA\Parameter(in="path", name="session_id", description="ID of the session", required=true),
+     *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),
      *   @OA\Parameter(in="path", name="username", description="Username of the user who should be deprived of the
      *   session permission", required=true),
      *   @OA\Response(response="200", description="Success"),

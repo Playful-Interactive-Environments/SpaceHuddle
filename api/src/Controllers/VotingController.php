@@ -26,10 +26,10 @@ class VotingController extends AbstractController
      * @param string|null $taskId The task's ID.
      * @return string The voting result in JSON format.
      * @OA\Get(
-     *   path="/api/task/{task_id}/voting_result/",
+     *   path="/api/task/{taskId}/voting_result/",
      *   summary="Returns the result of the voting for the specified task.",
      *   tags={"Voting"},
-     *   @OA\Parameter(in="path", name="task_id", description="ID of the task", required=true),
+     *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -73,7 +73,7 @@ class VotingController extends AbstractController
      */
     public function get(string $id = null): string
     {
-        $participantId = Authorization::getAuthorizationProperty("participant_id");
+        $participantId = Authorization::getAuthorizationProperty("participantId");
         $query = "SELECT * FROM voting WHERE id = :id AND participant_id = :participant_id";
         $statement = $this->connection->prepare($query);
         $statement->bindParam(":participant_id", $participantId);
@@ -95,10 +95,10 @@ class VotingController extends AbstractController
      * @param string|null $taskId The task's ID.
      * @return string The voting data in JSON format.
      * @OA\Get(
-     *   path="/api/task/{task_id}/votings/",
+     *   path="/api/task/{taskId}/votings/",
      *   summary="Get all task votings for the logged-in participant.",
      *   tags={"Voting"},
-     *   @OA\Parameter(in="path", name="task_id", description="ID of the task", required=true),
+     *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -111,7 +111,7 @@ class VotingController extends AbstractController
      */
     public function getAll(string $taskId = null): string
     {
-        $participantId = Authorization::getAuthorizationProperty("participant_id");
+        $participantId = Authorization::getAuthorizationProperty("participantId");
         $query = "SELECT * FROM voting WHERE task_id = :task_id AND participant_id = :participant_id";
         $statement = $this->connection->prepare($query);
         $statement->bindParam(":participant_id", $participantId);
@@ -130,15 +130,18 @@ class VotingController extends AbstractController
      * @param string|null $detailRating The detailed rating.
      * @return string A success or failure statement in JSON format.
      * @OA\Post(
-     *   path="/api/task/{task_id}/voting/",
+     *   path="/api/task/{taskId}/voting/",
      *   summary="Create a new voting for the task by the logged-in participant.",
      *   tags={"Voting"},
-     *   @OA\Parameter(in="path", name="task_id", description="ID of the task", required=true),
+     *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
      *   @OA\RequestBody(
-     *     required=true,
      *     @OA\MediaType(
-     *         mediaType="json",
-     *         @OA\Schema(ref="#/components/schemas/Voting")
+     *       mediaType="json",
+     *       @OA\Schema(required={"ideaId", "rating"},
+     *         @OA\Property(property="ideaId", type="string"),
+     *         @OA\Property(property="rating", type="integer", format="int"),
+     *         @OA\Property(property="detailRating", type="number", format="float")
+     *       )
      *     )
      *   ),
      *   @OA\Response(response="200", description="Success"),
@@ -152,14 +155,14 @@ class VotingController extends AbstractController
         ?string $rating = null,
         ?string $detailRating = null
     ): string {
-        $participantId = Authorization::getAuthorizationProperty("participant_id");
+        $participantId = Authorization::getAuthorizationProperty("participantId");
         $params = $this->formatParameters(
             [
-                "task_id" => ["default" => $taskId, "url" => "task"],
-                "idea_id" => ["default" => $ideaId],
+                "task_id" => ["default" => $taskId, "url" => "task", "required" => true],
+                "idea_id" => ["default" => $ideaId, "requestKey" => "ideaId", "required" => true],
                 "participant_id" => ["default" => $participantId],
-                "rating" => ["default" => $rating],
-                "detail_rating" => ["default" => $detailRating]
+                "rating" => ["default" => $rating, "required" => true],
+                "detail_rating" => ["default" => $detailRating, "requestKey" => "detailRating"]
             ]
         );
 
@@ -198,9 +201,9 @@ class VotingController extends AbstractController
         $params = $this->formatParameters(
             [
                 "id" => ["default" => $id],
-                "idea_id" => ["default" => $ideaId],
+                "idea_id" => ["default" => $ideaId, "requestKey" => "ideaId"],
                 "rating" => ["default" => $rating],
-                "detail_rating" => ["default" => $detailRating]
+                "detail_rating" => ["default" => $detailRating, "requestKey" => "detailRating"]
             ]
         );
 
@@ -238,7 +241,7 @@ class VotingController extends AbstractController
         $statement->bindParam(":id", $id);
 
         if (Authorization::isParticipant()) {
-            $participantId = Authorization::getAuthorizationProperty("participant_id");
+            $participantId = Authorization::getAuthorizationProperty("participantId");
             $query = "SELECT * FROM voting WHERE id = :id AND participant_id = :participant_id";
             $statement = $this->connection->prepare($query);
             $statement->bindParam(":id", $id);

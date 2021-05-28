@@ -30,10 +30,10 @@ class SelectionController extends AbstractController
      * @param string|null $topicId The selection's ID.
      * @return string A list of all selections for a topic in JSON format.
      * @OA\Get(
-     *   path="/api/topic/{topic_id}/selections/",
+     *   path="/api/topic/{topicId}/selections/",
      *   summary="List of all selections for the topic.",
      *   tags={"Selection"},
-     *   @OA\Parameter(in="path", name="topic_id", description="ID of the topic", required=true),
+     *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -76,10 +76,10 @@ class SelectionController extends AbstractController
      * @param string|null $name The selection name.
      * @return string The selection in JSON format.
      * @OA\Post(
-     *   path="/api/topic/{topic_id}/selection/",
+     *   path="/api/topic/{topicId}/selection/",
      *   summary="Create a new selection for the topic.",
      *   tags={"Selection"},
-     *   @OA\Parameter(in="path", name="topic_id", description="ID of the topic", required=true),
+     *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
@@ -99,8 +99,8 @@ class SelectionController extends AbstractController
     {
         $params = $this->formatParameters(
             [
-                "topic_id" => ["default" => $topicId, "url" => "topic"],
-                "name" => ["default" => $name]
+                "topic_id" => ["default" => $topicId, "url" => "topic", "required" => true],
+                "name" => ["default" => $name, "required" => true]
             ]
         );
 

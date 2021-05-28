@@ -62,10 +62,10 @@ class IdeaController extends AbstractController
      * @param bool $treatParticipantsSeparately Treat participants separately.
      * @return string Returns a json encoded list of all ideas for the task.
      * @OA\Get(
-     *   path="/api/task/{task_id}/ideas/",
+     *   path="/api/task/{taskId}/ideas/",
      *   summary="List of all ideas for the task.",
      *   tags={"Idea"},
-     *   @OA\Parameter(in="path", name="task_id", description="ID of the task", required=true),
+     *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -84,7 +84,7 @@ class IdeaController extends AbstractController
                      WHERE task_type like :task_type)";
             $statement = $this->connection->prepare($query);
         } else {
-            $participantId = Authorization::getAuthorizationProperty("participant_id");
+            $participantId = Authorization::getAuthorizationProperty("participantId");
             $query = "SELECT * FROM idea WHERE task_id = :task_id AND participant_id = :participant_id
                      AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
             $statement = $this->connection->prepare($query);
@@ -104,10 +104,10 @@ class IdeaController extends AbstractController
      * @param bool $treatParticipantsSeparately Treat participants separately.
      * @return string Returns a json encoded list of all ideas for the topic.
      * @OA\Get(
-     *   path="/api/topic/{topic_id}/ideas/",
+     *   path="/api/topic/{topicId}/ideas/",
      *   summary="List of all ideas for the topic.",
      *   tags={"Idea"},
-     *   @OA\Parameter(in="path", name="topic_id", description="ID of the topic", required=true),
+     *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -126,7 +126,7 @@ class IdeaController extends AbstractController
                                                            AND task_type like :task_type)";
             $statement = $this->connection->prepare($query);
         } else {
-            $participantId = Authorization::getAuthorizationProperty("participant_id");
+            $participantId = Authorization::getAuthorizationProperty("participantId");
             $query = "SELECT * FROM idea WHERE participant_id = :participant_id AND
                          task_id IN (SELECT id FROM task WHERE topic_id = :topic_id AND task_type like :task_type)";
             $statement = $this->connection->prepare($query);
@@ -168,7 +168,7 @@ class IdeaController extends AbstractController
                                           IN (SELECT id FROM task WHERE task_type like :task_type)";
             $statement = $this->connection->prepare($query);
         } else {
-            $participant_id = Authorization::getAuthorizationProperty("participant_id");
+            $participant_id = Authorization::getAuthorizationProperty("participantId");
             $query = "SELECT * FROM idea WHERE id = :id AND participant_id = :participant_id
                      AND task_id IN (SELECT id FROM task WHERE task_type like :task_type)";
             $statement = $this->connection->prepare($query);
@@ -194,7 +194,7 @@ class IdeaController extends AbstractController
         $statement->bindParam(":id", $id);
 
         if (Authorization::isParticipant()) {
-            $participantId = Authorization::getAuthorizationProperty("participant_id");
+            $participantId = Authorization::getAuthorizationProperty("participantId");
             $query = "SELECT * FROM idea WHERE id = :id AND participant_id = :participant_id";
             $statement = $this->connection->prepare($query);
             $statement->bindParam(":id", $id);
@@ -230,10 +230,10 @@ class IdeaController extends AbstractController
      * @param string|null $image An image for the idea.
      * @return string Returns the added idea in JSON format.
      * @OA\Post(
-     *   path="/api/task/{task_id}/idea/",
+     *   path="/api/task/{taskId}/idea/",
      *   summary="Create a new idea for the task.",
      *   tags={"Idea"},
-     *   @OA\Parameter(in="path", name="task_id", description="ID of the task", required=true),
+     *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
@@ -259,12 +259,12 @@ class IdeaController extends AbstractController
         ?string $link = null,
         ?string $image = null
     ): string {
-        $participant_id = Authorization::getAuthorizationProperty("participant_id");
+        $participant_id = Authorization::getAuthorizationProperty("participantId");
         $state = strtoupper(StateIdea::NEW);
         $params = $this->formatParameters(
             [
-                "task_id" => ["default" => $taskId, "url" => "task"],
-                "keywords" => ["default" => $keywords],
+                "task_id" => ["default" => $taskId, "url" => "task", "required" => true],
+                "keywords" => ["default" => $keywords, "required" => true],
                 "description" => ["default" => $description],
                 "link" => ["default" => $link],
                 "image" => ["default" => $image],
@@ -285,10 +285,10 @@ class IdeaController extends AbstractController
      * @param string|null $image An image for the idea.
      * @return string Returns the added idea in JSON format.
      * @OA\Post(
-     *   path="/api/topic/{topic_id}/idea/",
+     *   path="/api/topic/{topicId}/idea/",
      *   summary="Create a new idea for the topic.",
      *   tags={"Idea"},
-     *   @OA\Parameter(in="path", name="topic_id", description="ID of the topic", required=true),
+     *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",

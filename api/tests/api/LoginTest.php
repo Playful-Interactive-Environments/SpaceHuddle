@@ -7,7 +7,7 @@ class LoginTest extends AuthorizedTestCase
     $data =  json_encode((object)array(
       'username' => 'temp',
       'password' => 'string',
-      'password_confirmation' => 'string'
+      'passwordConfirmation' => 'string'
     ));
 
     $res = $this->client->post($this->getAbsoluteApiUrl("/api/user/register/"), [
@@ -24,13 +24,13 @@ class LoginTest extends AuthorizedTestCase
     $res = $this->client->post($this->getAbsoluteApiUrl("/api/user/login/"), [
         'body' => $login_data
     ]);
-    $access_token = $this->toJSON($res->getBody())->access_token;
-    $bearer = "Bearer $access_token";
+    $accessToken = $this->toJSON($res->getBody())->accessToken;
+    $bearer = "Bearer $accessToken";
 
     $data =  json_encode((object)array(
-      'old_password' => 'string',
+      'oldPassword' => 'string',
       'password' => 'new',
-      'password_confirmation' => 'new'
+      'passwordConfirmation' => 'new'
     ));
 
     $res = $this->client->put($this->getAbsoluteApiUrl("/api/user/"), [

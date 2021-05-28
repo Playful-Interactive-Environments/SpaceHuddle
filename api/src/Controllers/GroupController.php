@@ -28,10 +28,10 @@ class GroupController extends IdeaController
      * @param bool $treatParticipantsSeparately Treat each participant separately.
      * @return string Returns a json encoded list of all groups for this task.
      * @OA\Get(
-     *   path="/api/task/{task_id}/groups/",
+     *   path="/api/task/{taskId}/groups/",
      *   summary="List of all groups for the task.",
      *   tags={"Group"},
-     *   @OA\Parameter(in="path", name="task_id", description="ID of the task", required=true),
+     *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -53,10 +53,10 @@ class GroupController extends IdeaController
      * @param bool $treatParticipantsSeparately Treat each participant separately.
      * @return string Returns a json encoded list of all groups for this topic.
      * @OA\Get(
-     *   path="/api/topic/{topic_id}/groups/",
+     *   path="/api/topic/{topicId}/groups/",
      *   summary="List of all groups for the topic.",
      *   tags={"Group"},
-     *   @OA\Parameter(in="path", name="topic_id", description="ID of the topic", required=true),
+     *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -103,10 +103,10 @@ class GroupController extends IdeaController
      * @param string|null $image The group's image.
      * @return string Returns the inserted group data in JSON format.
      * @OA\Post(
-     *   path="/api/task/{task_id}/group/",
+     *   path="/api/task/{taskId}/group/",
      *   summary="Create a new group for the task.",
      *   tags={"Group"},
-     *   @OA\Parameter(in="path", name="task_id", description="ID of the task", required=true),
+     *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
@@ -133,8 +133,8 @@ class GroupController extends IdeaController
         $state = strtoupper(StateIdea::NEW);
         $params = $this->formatParameters(
             [
-                "task_id" => ["default" => $taskId, "url" => "task"],
-                "keywords" => ["default" => $keywords],
+                "task_id" => ["default" => $taskId, "url" => "task", "required" => true],
+                "keywords" => ["default" => $keywords, "required" => true],
                 "description" => ["default" => $description],
                 "link" => ["default" => $link],
                 "image" => ["default" => $image],
@@ -154,10 +154,10 @@ class GroupController extends IdeaController
      * @param string|null $image The group's image.
      * @return string Returns the inserted group data in JSON format.
      * @OA\Post(
-     *   path="/api/topic/{topic_id}/group/",
+     *   path="/api/topic/{topicId}/group/",
      *   summary="Create a new group for the topic.",
      *   tags={"Group"},
-     *   @OA\Parameter(in="path", name="topic_id", description="ID of the topic", required=true),
+     *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",

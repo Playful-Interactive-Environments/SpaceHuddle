@@ -200,7 +200,7 @@ abstract class AbstractController
             if (is_null($rightId)) {
                 $rightId = $this->getUrlParameter($rightTable);
             }
-            $role = $rightsController::checkInstanceReadRights($rightId);
+            $role = $rightsController::getInstanceAuthorisationReadRole($rightId);
             if ($this->isAuthorized($role, $authorizedRoles)) {
                 $statement->bindParam(":$rightIdName", $rightId);
                 $statement->execute();
@@ -272,7 +272,7 @@ abstract class AbstractController
             if (is_null($parentId)) {
                 $parentId = $this->getUrlParameter($parentTable);
             }
-            $role = $parentController::checkInstanceReadRights($parentId);
+            $role = $parentController::getInstanceAuthorisationReadRole($parentId);
             if ($this->isAuthorized($role, $authorizedRoles)) {
                 if (is_null($statement)) {
                     $query = "SELECT * FROM $this->table WHERE $parentIdName = :$parentIdName";
@@ -393,7 +393,7 @@ abstract class AbstractController
     ): string {
         if (isset($parentId)) {
             if ($this->allGenericParameterSet()) {
-                $role = $this->parentController::checkInstanceRights($parentId);
+                $role = $this->parentController::getInstanceAuthorisationRole($parentId);
             } else {
                 http_response_code(404);
                 $error = json_encode(
@@ -715,7 +715,7 @@ abstract class AbstractController
     public function getAuthorisationRole(?string $id): ?string
     {
         if (is_null($id)) {
-            $loginId = Authorization::getAuthorizationProperty("login_id");
+            $loginId = Authorization::getAuthorizationProperty("loginId");
             return strtoupper(Role::MODERATOR);
         }
 
@@ -728,7 +728,7 @@ abstract class AbstractController
             if ($itemCount > 0) {
                 $result = $this->database->fetchFirst($statement);
                 $parentId = $result[$this->parentIdName];
-                return $this->parentController::checkInstanceRights($parentId);
+                return $this->parentController::getInstanceAuthorisationRole($parentId);
             }
         }
         return null;
@@ -743,25 +743,25 @@ abstract class AbstractController
     {
         if (Authorization::isLoggedIn()) {
             if (Authorization::isUser()) {
-                $loginId = Authorization::getAuthorizationProperty("login_id");
+                $loginId = Authorization::getAuthorizationProperty("loginId");
                 if (is_null($id) or $id == $loginId) {
                     return Role::MODERATOR;
                 }
             }
             if (Authorization::isParticipant()) {
-                $participantId = Authorization::getAuthorizationProperty("participant_id");
+                $participantId = Authorization::getAuthorizationProperty("participantId");
                 if (is_null($id) or $id == $participantId) {
-                    $state = StateParticipant::ACTIVE;
-                    $query = "SELECT * FROM participant WHERE id = :participant_id AND state like :state";
+                    $query = "SELECT * FROM participant WHERE id = :participant_id";
                     $statement = $this->connection->prepare($query);
                     $statement->bindParam(":participant_id", $participantId);
-                    $statement->bindParam(":state", $state);
                     $statement->execute();
                     $itemCount = $statement->rowCount();
                     if ($itemCount > 0) {
-                        return Role::PARTICIPANT;
+                        $participant = (object)$this->database->fetchFirst($statement);
+                        if (strtoupper($participant->state) == strtoupper(StateParticipant::ACTIVE))
+                            return Role::PARTICIPANT;
+                        return Role::PARTICIPANT_INACTIVE;
                     }
-                    return Role::PARTICIPANT_INACTIVE;
                 }
             }
         }
@@ -971,6 +971,8 @@ abstract class AbstractController
         foreach ($parameter as $key => $keyDefinition) {
             $keyType = null;
             $keyResult = null;
+            $requestKey = $key;
+            $required = false;
             $value = null;
             if (isset($keyDefinition)) {
                 $keyDefinition = (object)$keyDefinition;
@@ -983,6 +985,12 @@ abstract class AbstractController
                 if (isset($keyDefinition->default)) {
                     $value = $keyDefinition->default;
                 }
+                if (isset($keyDefinition->requestKey)) {
+                    $requestKey = $keyDefinition->requestKey;
+                }
+                if (isset($keyDefinition->required)) {
+                    $required = $keyDefinition->required;
+                }
                 if (is_null($value) and isset($keyDefinition->url)) {
                     $value = self::getUrlParameter($keyDefinition->url);
                 }
@@ -993,7 +1001,7 @@ abstract class AbstractController
             }
 
             if (is_null($value)) {
-                $value = self::getBodyParameter($key);
+                $value = self::getBodyParameter($requestKey);
             }
 
             if (isset($value) and isset($keyType)) {
@@ -1016,6 +1024,17 @@ abstract class AbstractController
                         die($error);
                     }
                 }
+            }
+
+            if ($required and is_null($value)) {
+                http_response_code(404);
+                $error = json_encode(
+                    [
+                        "state" => "$requestKey not specified",
+                        "message" => "the $requestKey is required"
+                    ]
+                );
+                die($error);
             }
             $paramData[$key] = $value;
         }

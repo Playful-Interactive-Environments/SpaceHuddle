@@ -32,10 +32,10 @@ class SelectionIdeaController extends AbstractController
      * @param string|null $selectionGroupId
      * @return string Returns a list of ideas in JSON format.
      * @OA\Get(
-     *   path="/api/selection/{selection_id}/ideas",
+     *   path="/api/selection/{selectionId}/ideas",
      *   summary="Ideas for the selection with the specified id.",
      *   tags={"Selection"},
-     *   @OA\Parameter(in="path", name="selection_id", description="ID of selection to return", required=true),
+     *   @OA\Parameter(in="path", name="selectionId", description="ID of selection to return", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -67,15 +67,15 @@ class SelectionIdeaController extends AbstractController
      * @param array|null $ideaArray The idea array.
      * @return string Returns a success or failure statement in JSON format.
      * @OA\Post(
-     *   path="/api/selection/{selection_id}/ideas/",
+     *   path="/api/selection/{selectionId}/ideas/",
      *   summary="Add list of idea_ids to a selection.",
      *   tags={"Selection"},
-     *   @OA\Parameter(in="path", name="selection_id", description="ID of the selection", required=true),
+     *   @OA\Parameter(in="path", name="selectionId", description="ID of the selection", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
      *       @OA\Schema(type="array",
-     *         @OA\Items( type="integer")
+     *         @OA\Items( type="string", example="uuid")
      *       )
      *     )
      *   ),
@@ -88,7 +88,7 @@ class SelectionIdeaController extends AbstractController
     {
         $params = $this->formatParameters(
             [
-                "selection_group_id" => ["default" => $selectionId, "url" => "selection"],
+                "selection_group_id" => ["default" => $selectionId, "url" => "selection", "required" => true],
                 "idea_id" => ["default" => $ideaArray, "type" => "ARRAY", "result" => "all"]
             ]
         );
@@ -117,15 +117,15 @@ class SelectionIdeaController extends AbstractController
      * @param array|null $ideaArray The idea array.
      * @return string Returns a success or failure statement in JSON format.
      * @OA\Delete(
-     *   path="/api/selection/{selection_id}/ideas/",
+     *   path="/api/selection/{selectionId}/ideas/",
      *   summary="Delete the list of idea_ids from a selection.",
      *   tags={"Selection"},
-     *   @OA\Parameter(in="path", name="selection_id", description="ID of the selection", required=true),
+     *   @OA\Parameter(in="path", name="selectionId", description="ID of the selection", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
      *       @OA\Schema(type="array",
-     *         @OA\Items( type="integer")
+     *         @OA\Items( type="string", example="uuid")
      *       )
      *     )
      *   ),
@@ -138,7 +138,7 @@ class SelectionIdeaController extends AbstractController
     {
         $params = $this->formatParameters(
             [
-                "selection_group_id" => ["default" => $selectionId, "url" => "selection"],
+                "selection_group_id" => ["default" => $selectionId, "url" => "selection", "required" => true],
                 "idea_id" => ["default" => $ideaArray, "type" => "ARRAY", "result" => "all"]
             ]
         );

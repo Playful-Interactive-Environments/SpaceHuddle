@@ -41,7 +41,7 @@ class SessionController extends AbstractController
      */
     public function readAll(): string
     {
-        $loginId = Authorization::getAuthorizationProperty("login_id");
+        $loginId = Authorization::getAuthorizationProperty("loginId");
         $query = "SELECT * FROM session INNER JOIN session_role ON session_role.session_id = session.id
                   WHERE session_role.login_id = :login_id";
         /*$query = "SELECT * FROM session
@@ -76,7 +76,7 @@ class SessionController extends AbstractController
      */
     public function read(?string $id = null): string
     {
-        $loginId = Authorization::getAuthorizationProperty("login_id");
+        $loginId = Authorization::getAuthorizationProperty("loginId");
         if (is_null($id)) {
             $id = $this->getUrlParameter("session", -1);
         }
@@ -137,10 +137,10 @@ class SessionController extends AbstractController
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
-     *       @OA\Schema(required={"title", "max_participants", "expiration_date"},
+     *       @OA\Schema(required={"title", "maxParticipants", "expirationDate"},
      *         @OA\Property(property="title", type="string"),
-     *         @OA\Property(property="max_participants", type="integer", example=100),
-     *         @OA\Property(property="expiration_date", type="string", format="date")
+     *         @OA\Property(property="maxParticipants", type="integer", example=100),
+     *         @OA\Property(property="expirationDate", type="string", format="date")
      *       )
      *     )
      *   ),
@@ -153,14 +153,14 @@ class SessionController extends AbstractController
      */
     public function add(?string $title = null, ?string $maxParticipants = null, ?string $expirationDate = null): string
     {
-        $loginId = Authorization::getAuthorizationProperty("login_id"); # check if the user is logged in
+        $loginId = Authorization::getAuthorizationProperty("loginId"); # check if the user is logged in
         $connectionKey = $this->generateNewSessionKey();
         $params = $this->formatParameters(
             [
-                "title" => ["default" => $title],
-                "connection_key" => ["default" => $connectionKey],
-                "max_participants" => ["default" => $maxParticipants],
-                "expiration_date" => ["default" => $expirationDate]
+                "title" => ["default" => $title, "required" => true],
+                "connection_key" => ["default" => $connectionKey, "requestKey" => "connectionKey"],
+                "max_participants" => ["default" => $maxParticipants, "requestKey" => "maxParticipants", "required" => true],
+                "expiration_date" => ["default" => $expirationDate, "requestKey" => "expirationDate", "required" => true]
             ]
         );
 
@@ -174,7 +174,7 @@ class SessionController extends AbstractController
      */
     protected function addDependencies(string $id, array|object|null $parameter)
     {
-        $loginId = Authorization::getAuthorizationProperty("login_id");
+        $loginId = Authorization::getAuthorizationProperty("loginId");
         $role = strtoupper(Role::MODERATOR);
         $query = "INSERT INTO session_role (session_id, login_id, role) VALUES (:session_id, :login_id, :role)";
         $statement = $this->connection->prepare($query);
@@ -199,12 +199,12 @@ class SessionController extends AbstractController
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
-     *       @OA\Schema(required={"title", "max_participants", "expiration_date"},
+     *       @OA\Schema(required={"id"},
      *         @OA\Property(property="id", type="string", example="uuid"),
      *         @OA\Property(property="title", type="string"),
-     *         @OA\Property(property="max_participants", type="integer", example=100),
-     *         @OA\Property(property="expiration_date", type="string", format="date"),
-     *         @OA\Property(property="public_screen_module_id", type="string", example=null)
+     *         @OA\Property(property="maxParticipants", type="integer", example=100),
+     *         @OA\Property(property="expirationDate", type="string", format="date"),
+     *         @OA\Property(property="publicScreenModuleId", type="string", example=null)
      *       )
      *     )
      *   ),
@@ -224,11 +224,11 @@ class SessionController extends AbstractController
     ): string {
         $params = $this->formatParameters(
             [
-                "id" => ["default" => $id],
+                "id" => ["default" => $id, "required" => true],
                 "title" => ["default" => $title],
-                "max_participants" => ["default" => $maxParticipants],
-                "expiration_date" => ["default" => $expirationDate],
-                "public_screen_module_id" => ["default" => $publicScreenModuleId]
+                "max_participants" => ["default" => $maxParticipants, "requestKey" => "maxParticipants"],
+                "expiration_date" => ["default" => $expirationDate, "requestKey" => "expirationDate"],
+                "public_screen_module_id" => ["default" => $publicScreenModuleId, "requestKey" => "publicScreenModuleId"]
             ]
         );
 
@@ -243,7 +243,7 @@ class SessionController extends AbstractController
     public function getAuthorisationRole(?string $id): ?string
     {
         if (!Authorization::isParticipant()) {
-            $loginId = Authorization::getAuthorizationProperty("login_id");
+            $loginId = Authorization::getAuthorizationProperty("loginId");
             if (is_null($id)) {
                 return strtoupper(Role::MODERATOR);
             }
@@ -258,7 +258,7 @@ class SessionController extends AbstractController
                 return strtoupper($result["role"]);
             }
         } else {
-            $participantId = Authorization::getAuthorizationProperty("participant_id");
+            $participantId = Authorization::getAuthorizationProperty("participantId");
             $query = "SELECT * FROM participant WHERE session_id = :session_id AND id = :participant_id";
             $statement = $this->connection->prepare($query);
             $statement->bindParam(":session_id", $id);

@@ -45,7 +45,7 @@ CREATE TABLE `idea` (
   `task_id` char(36) NOT NULL,
   `participant_id` char(36) DEFAULT NULL,
   `state` varchar(255) NOT NULL,
-  `time_stamp` datetime NOT NULL DEFAULT current_timestamp(),
+  `timestamp` datetime NOT NULL DEFAULT current_timestamp(),
   `keywords` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
   `image` longblob DEFAULT NULL,

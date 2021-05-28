@@ -23,10 +23,10 @@ class ResourceController extends AbstractController
      * List of all resources for the session.
      * @return string The resource data of this session.
      * @OA\Get(
-     *   path="/api/session/{session_id}/resources/",
+     *   path="/api/session/{sessionId}/resources/",
      *   summary="List of all resources for the session.",
      *   tags={"Resource"},
-     *   @OA\Parameter(in="path", name="session_id", description="ID of the session", required=true),
+     *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -66,10 +66,10 @@ class ResourceController extends AbstractController
      * Create a new resource for the session.
      * @return string Data of the added resource in JSON format.
      * @OA\Post(
-     *   path="/api/session/{session_id}/resource/",
+     *   path="/api/session/{sessionId}/resource/",
      *   summary="Create a new resource for the session.",
      *   tags={"Resource"},
-     *   @OA\Parameter(in="path", name="session_id", description="ID of the session", required=true),
+     *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",

@@ -28,7 +28,7 @@ class TaskTest extends AuthorizedUserTestCase
 
   public function testWorkflow() {
     $data =  json_encode((object)array(
-      'TaskType' => TaskType::SELECTION,
+      'taskType' => TaskType::SELECTION,
       'name' => 'test selection',
       'parameter' => "{'count': 10}",
       'order' => 10
@@ -45,7 +45,7 @@ class TaskTest extends AuthorizedUserTestCase
 
     $data =  json_encode((object)array(
       'id' => $id,
-      'TaskType' => TaskType::SELECTION,
+      'taskType' => TaskType::SELECTION,
       'name' => 'test selection',
       'parameter' => "{'count': 10}",
       'order' => 10,

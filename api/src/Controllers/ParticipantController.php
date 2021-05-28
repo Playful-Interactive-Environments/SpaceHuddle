@@ -39,9 +39,9 @@ class ParticipantController extends AbstractController
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
-     *       @OA\Schema(required={"session_key", "ip_hash"},
-     *         @OA\Property(property="session_key", type="string"),
-     *         @OA\Property(property="ip_hash", type="string")
+     *       @OA\Schema(required={"sessionKey", "ipHash"},
+     *         @OA\Property(property="sessionKey", type="string"),
+     *         @OA\Property(property="ipHash", type="string")
      *       )
      *     )
      *   ),
@@ -54,8 +54,9 @@ class ParticipantController extends AbstractController
     {
         $params = $this->formatParameters(
             [
-                "session_key" => ["default" => $sessionKey],
-                "ip_hash" => ["default" => $ipHash, "type" => "MD5"]
+                "session_key" => ["default" => $sessionKey, "requestKey" => "sessionKey", "required" => true],
+                "ip_hash" => ["default" => $ipHash, "type" => "MD5", "requestKey" => "ipHash", "required" => true],
+                "state" => ["default" => StateParticipant::ACTIVE, "type" => StateParticipant::class]
             ]
         );
         $params->session_id = SessionController::getInstance()->readByKey($params->session_key)->id;
@@ -72,14 +73,13 @@ class ParticipantController extends AbstractController
 
         $jwt = Authorization::generateToken(
             [
-                "participant_id" => $result->id,
-                "browser_key" => $result->browser_key
+                "participantId" => $result->id,
+                "browserKey" => $result->browserKey
             ]
         );
+        $result->accessToken = $jwt;
         http_response_code(200);
-        return json_encode(
-            new Participant((array)$result, $jwt)
-        );
+        return json_encode($result);
     }
 
     /**
@@ -122,19 +122,23 @@ class ParticipantController extends AbstractController
      */
     public function getAuthorisationRole(?string $id): ?string
     {
-        if (Authorization::isParticipant()) {
-            return $this->getLoginRole($id);
-        } else {
-            $query = "SELECT * FROM participant WHERE id = :id";
-            $statement = $this->connection->prepare($query);
-            $statement->bindParam(":id", $id);
-            $statement->execute();
-            $itemCount = $statement->rowCount();
-            if ($itemCount > 0) {
-                $participant = (object)$this->database->fetchFirst($statement);
-                return SessionController::getInstanceAuthorisationRole($participant->session_id);
+        if (Authorization::isLoggedIn()) {
+            if (Authorization::isParticipant()) {
+                return $this->getLoginRole($id);
+            } else {
+                $query = "SELECT * FROM participant WHERE id = :id";
+                $statement = $this->connection->prepare($query);
+                $statement->bindParam(":id", $id);
+                $statement->execute();
+                $itemCount = $statement->rowCount();
+                if ($itemCount > 0) {
+                    $participant = (object)$this->database->fetchFirst($statement);
+                    return SessionController::getInstanceAuthorisationRole($participant->session_id);
+                }
             }
         }
+
+        return Role::UNKNOWN;
     }
 
     /**
@@ -153,7 +157,7 @@ class ParticipantController extends AbstractController
         $itemCount = $statement->rowCount();
 
         if ($itemCount > 0) {
-            return (object)$this->database->fetchFirst($statement);
+            return new Participant($this->database->fetchFirst($statement));
         }
         return null;
     }
@@ -163,10 +167,10 @@ class ParticipantController extends AbstractController
      * @param string|null $browserKey The browser key.
      * @return string The participant data in JSON format.
      * @OA\Get(
-     *   path="/api/participant/connect/{browser_key}/",
+     *   path="/api/participant/connect/{browserKey}/",
      *   summary="Reconnect to a session",
      *   tags={"Participant"},
-     *   @OA\Parameter(in="path", name="browser_key", description="the generated browser_key from the last connection to
+     *   @OA\Parameter(in="path", name="browserKey", description="the generated browser_key from the last connection to
      *   the session", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\JsonContent(ref="#/components/schemas/Participant")),
@@ -185,8 +189,8 @@ class ParticipantController extends AbstractController
         $result = (object)$this->database->fetchFirst($statement);
         $jwt = Authorization::generateToken(
             [
-                "participant_id" => $result->id,
-                "browser_key" => $result->browser_key
+                "participantId" => $result->id,
+                "browserKey" => $result->browser_key
             ]
         );
         $resultObject = new Participant((array)$result, $jwt);
@@ -213,11 +217,11 @@ class ParticipantController extends AbstractController
      */
     public function setState(StateParticipant|null $state = null): string
     {
-        $participantId = Authorization::getAuthorizationProperty("participant_id");
+        $participantId = Authorization::getAuthorizationProperty("participantId");
         $params = $this->formatParameters(
             [
                 "id" => ["default" => $participantId],
-                "state" => ["default" => $state, "type" => StateParticipant::class, "url" => "state"]
+                "state" => ["default" => $state, "type" => StateParticipant::class, "url" => "state", "required" => true]
             ]
         );
 
@@ -243,7 +247,7 @@ class ParticipantController extends AbstractController
     public function delete(?string $participantId = null): string
     {
         if (is_null($participantId)) {
-            $participantId = Authorization::getAuthorizationProperty("participant_id");
+            $participantId = Authorization::getAuthorizationProperty("participantId");
         }
         return parent::deleteGeneric($participantId, authorizedRoles: [Role::PARTICIPANT, Role::MODERATOR]);
     }
@@ -301,7 +305,7 @@ class ParticipantController extends AbstractController
         $clientStates = [strtoupper(StateTask::ACTIVE), strtoupper(StateTask::READ_ONLY)];
         $clientStates = implode(",", $clientStates);
         if (!Authorization::isParticipant()) {
-            $loginId = Authorization::getAuthorizationProperty("login_id");
+            $loginId = Authorization::getAuthorizationProperty("loginId");
             $query = "SELECT * FROM topic
               INNER JOIN task ON topic.id = task.topic_id
               WHERE FIND_IN_SET(task.state, :client_states)
@@ -315,7 +319,7 @@ class ParticipantController extends AbstractController
             $statement = $this->connection->prepare($query);
             $statement->bindParam(":login_id", $loginId);
         } else {
-            $participantId = Authorization::getAuthorizationProperty("participant_id");
+            $participantId = Authorization::getAuthorizationProperty("participantId");
             $query = "SELECT * FROM topic
               INNER JOIN task ON topic.id = task.topic_id
               WHERE FIND_IN_SET(task.state, :client_states)
@@ -344,10 +348,10 @@ class ParticipantController extends AbstractController
      * @param string|null $topicId The topic's ID.
      * @return string A list of all topic tasks in JSON format.
      * @OA\Get(
-     *   path="/api/topic/{topic_id}/participant_tasks/",
+     *   path="/api/topic/{topicId}/participant_tasks/",
      *   summary="List of all topic tasks for the logged-in participant.",
      *   tags={"Participant"},
-     *   @OA\Parameter(in="path", name="topic_id", description="ID of the topic", required=true),
+     *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -399,7 +403,7 @@ class ParticipantController extends AbstractController
     public function getTopics(): string
     {
         if (!Authorization::isParticipant()) {
-            $loginId = Authorization::getAuthorizationProperty("login_id");
+            $loginId = Authorization::getAuthorizationProperty("loginId");
             $query = "SELECT * FROM topic
         WHERE session_id IN (
           SELECT session.id
@@ -409,7 +413,7 @@ class ParticipantController extends AbstractController
             $statement = $this->connection->prepare($query);
             $statement->bindParam(":login_id", $loginId);
         } else {
-            $participantId = Authorization::getAuthorizationProperty("participant_id");
+            $participantId = Authorization::getAuthorizationProperty("participantId");
             $query = "SELECT * FROM topic
         WHERE session_id IN (
           SELECT session.id

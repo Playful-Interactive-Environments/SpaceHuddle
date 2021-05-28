@@ -25,10 +25,10 @@ class TaskController extends AbstractController
      * @param string|null $topicId The topic's ID.
      * @return string A list of all tasks in JSON format.
      * @OA\Get(
-     *   path="/api/topic/{topic_id}/tasks/",
+     *   path="/api/topic/{topicId}/tasks/",
      *   summary="List of all tasks for the topic.",
      *   tags={"Task"},
-     *   @OA\Parameter(in="path", name="topic_id", description="ID of the topic", required=true),
+     *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -74,15 +74,15 @@ class TaskController extends AbstractController
      * @param string|null $order The task order.
      * @return string The new task in JSON format.
      * @OA\Post(
-     *   path="/api/topic/{topic_id}/task/",
+     *   path="/api/topic/{topicId}/task/",
      *   summary="Create a new task for the topic.",
      *   tags={"Task"},
-     *   @OA\Parameter(in="path", name="topic_id", description="ID of the topic", required=true),
+     *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="json",
-     *       @OA\Schema(required={"id", "task_type"},
-     *         @OA\Property(property="task_type", type="string"),
+     *       @OA\Schema(required={"taskType"},
+     *         @OA\Property(property="taskType", type="string"),
      *         @OA\Property(property="name", type="string"),
      *         @OA\Property(property="parameter", type="object", format="json"),
      *         @OA\Property(property="order", type="integer")
@@ -105,8 +105,8 @@ class TaskController extends AbstractController
     ): string {
         $params = $this->formatParameters(
             [
-                "topic_id" => ["default" => $topicId, "url" => "topic"],
-                "task_type" => ["default" => $taskType, "type" => TaskType::class],
+                "topic_id" => ["default" => $topicId, "url" => "topic", "required" => true],
+                "task_type" => ["default" => $taskType, "type" => TaskType::class, "requestKey" => "taskType", "required" => true],
                 "name" => ["default" => $name],
                 "parameter" => ["default" => $parameter, "type" => "JSON"],
                 "order" => ["default" => $order],
@@ -155,7 +155,7 @@ class TaskController extends AbstractController
         $params = $this->formatParameters(
             [
                 "id" => ["default" => $id],
-                "task_type" => ["default" => $taskType, "type" => TaskType::class],
+                "task_type" => ["default" => $taskType, "type" => TaskType::class, "requestKey" => "taskType"],
                 "name" => ["default" => $name],
                 "parameter" => ["default" => $parameter, "type" => "JSON"],
                 "order" => ["default" => $order],
