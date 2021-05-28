@@ -236,11 +236,11 @@ class SessionController extends AbstractController
     }
 
     /**
-     * Checks whether the user is authorised to edit the entry with the specified primary key.
+     * Checks the access role via which the logged-in user may access the entry with the specified primary key.
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
      */
-    public function checkRights(?string $id): ?string
+    public function getAuthorisationRole(?string $id): ?string
     {
         if (!Authorization::isParticipant()) {
             $loginId = Authorization::getAuthorizationProperty("login_id");
@@ -268,7 +268,6 @@ class SessionController extends AbstractController
             if ($itemCount > 0) {
                 $result = $this->database->fetchFirst($statement);
                 return strtoupper(Role::PARTICIPANT);
-                // TODO: What's $result being used for?
             }
         }
         return null;
@@ -309,7 +308,6 @@ class SessionController extends AbstractController
         foreach ($resultData as $resultItem) {
             $participantId = $resultItem["id"];
             $participant->delete($participantId);
-            // TODO: delete() has no parameters. Adapt the method or the code here?
         }
 
         $query = "SELECT * FROM topic WHERE session_id = :session_id ";

@@ -116,13 +116,27 @@ class ParticipantController extends AbstractController
     }
 
     /**
-     * Checks whether the user is authorised to edit the entry with the specified primary key.
+     * Checks the access role via which the logged-in user may access the entry with the specified primary key.
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
      */
-    public function checkRights(?string $id): ?string
+    public function getAuthorisationRole(?string $id): ?string
     {
-        return $this->checkLogin($id);
+      if (Authorization::isParticipant()) {
+        return $this->getLoginRole($id);
+      }
+      else {
+        $query = "SELECT * FROM participant WHERE id = :id";
+        $statement = $this->connection->prepare($query);
+        $statement->bindParam(":id", $id);
+        $statement->execute();
+        $itemCount = $statement->rowCount();
+        if ($itemCount > 0) {
+          $participant = (object)$this->database->fetchFirst($statement);
+          return SessionController::checkInstanceRights($participant->session_id);
+        }
+
+      }
     }
 
     /**
@@ -212,7 +226,7 @@ class ParticipantController extends AbstractController
         return $this->updateGeneric(
             $params->id,
             $params,
-            authorizedRoles: [Role::PARTICIPANT, Role::PARTICIPANT_INACTIVE]
+            authorizedRoles: [Role::PARTICIPANT, Role::PARTICIPANT_INACTIVE, Role::MODERATOR]
         );
     }
 
@@ -228,10 +242,12 @@ class ParticipantController extends AbstractController
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
      * )
      */
-    public function delete(): string
+    public function delete(?string $participantId = null): string
     {
+      if (is_null($participantId)) {
         $participantId = Authorization::getAuthorizationProperty("participant_id");
-        return parent::deleteGeneric($participantId, authorizedRoles: [Role::PARTICIPANT]);
+      }
+      return parent::deleteGeneric($participantId, authorizedRoles: [Role::PARTICIPANT, Role::MODERATOR]);
     }
 
     /**
@@ -240,7 +256,6 @@ class ParticipantController extends AbstractController
      */
     protected function deleteDependencies(string $id): void
     {
-        #TODO: What happens to the ideas and votes submitted by the user? Set id to zero or delete entry?
         $query = "UPDATE voting
           SET participant_id = null
           WHERE participant_id = :participant_id";

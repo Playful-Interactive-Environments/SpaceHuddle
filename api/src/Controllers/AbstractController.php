@@ -405,7 +405,7 @@ abstract class AbstractController
                 die($error);
             }
         } else {
-            $role = $this->checkRights(null);
+            $role = $this->getAuthorisationRole(null);
         }
         if (!$this->isAuthorized($role, $authorizedRoles)) {
             http_response_code(404);
@@ -522,7 +522,7 @@ abstract class AbstractController
         array $authorizedRoles = [Role::MODERATOR]
     ): string {
         if ($this->genericTableParameterSet()) {
-            $role = $this->checkRights($id);
+            $role = $this->getAuthorisationRole($id);
             if (!$this->isAuthorized($role, $authorizedRoles)) {
                 http_response_code(404);
                 $error = json_encode(
@@ -615,7 +615,7 @@ abstract class AbstractController
             if (is_null($id)) {
                 $id = $this->getUrlParameter($this->urlParameter);
             }
-            $role = $this->checkRights($id);
+            $role = $this->getAuthorisationRole($id);
             if (!$this->isAuthorized($role, $authorizedRoles)) {
                 http_response_code(404);
                 $error = json_encode(
@@ -708,11 +708,11 @@ abstract class AbstractController
     }
 
     /**
-     * Checks whether the user is authorised to edit the entry with the specified primary key.
+     * Checks the access role via which the logged-in user may access the entry with the specified primary key.
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
      */
-    public function checkRights(?string $id): ?string
+    public function getAuthorisationRole(?string $id): ?string
     {
         if (is_null($id)) {
             $loginId = Authorization::getAuthorizationProperty("login_id");
@@ -735,11 +735,11 @@ abstract class AbstractController
     }
 
     /**
-     * Check whether your own user data is being edited.
+     * Check the access role via which one's own user data can be edited.
      * @param string|null $id Primary key to be checked.
      * @return string Role with which the user is authorised to access the entry.
      */
-    public function checkLogin(?string $id): string
+    public function getLoginRole(?string $id): string
     {
         if (Authorization::isLoggedIn()) {
             if (Authorization::isUser()) {
@@ -776,7 +776,7 @@ abstract class AbstractController
      */
     public function checkReadRights(?string $id): ?string
     {
-        return $this->checkRights($id);
+        return $this->getAuthorisationRole($id);
     }
 
     /**
@@ -787,7 +787,7 @@ abstract class AbstractController
     public static function checkInstanceRights(?string $id): ?string
     {
         $instance = self::getInstance();
-        return $instance->checkRights($id);
+        return $instance->getAuthorisationRole($id);
     }
 
     /**

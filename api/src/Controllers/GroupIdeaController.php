@@ -150,11 +150,11 @@ class GroupIdeaController extends AbstractController
     }
 
     /**
-     * Checks whether the user is authorised to edit the entry with the specified primary key.
+     * Checks the access role via which the logged-in user may access the entry with the specified primary key.
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
      */
-    public function checkRights(?string $id): ?string
+    public function getAuthorisationRole(?string $id): ?string
     {
         return GroupController::checkInstanceRights($id);
     }

@@ -24,11 +24,10 @@ class Idea
 
     /**
      * Time of idea storage.
-     * @var Date|string|null
-     * @OA\Property(property="time_stamp")
+     * @var string|null
+     * @OA\Property(property="time_stamp", format="date")
      */
-    public Date|string|null $timestamp;
-    // TODO: I still don't think, that Date is correct here. Is it a Unix Timestamp? Then it should probably be int?
+    public string|null $timestamp;
 
     /**
      * Description of the idea.

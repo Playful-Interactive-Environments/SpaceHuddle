@@ -38,18 +38,17 @@ class Session
 
     /**
      * How long is the session valid?
-     * @var Date|string|null
-     * @OA\Property(property="expiration_date")
+     * @var string|null
+     * @OA\Property(property="expiration_date", format="date")
      */
-    public Date|string|null $expirationDate;
-    // TODO: Check class Date.
+    public string|null $expirationDate;
 
     /**
      * When was the session created?
-     * @var Date|string|null
-     * @OA\Property(property="creation_date")
+     * @var string|null
+     * @OA\Property(property="creation_date", format="date")
      */
-    public Date|string|null $creationDate;
+    public string|null $creationDate;
 
     /**
      * Public screen module ID.

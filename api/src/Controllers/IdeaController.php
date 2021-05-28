@@ -183,11 +183,11 @@ class IdeaController extends AbstractController
     }
 
     /**
-     * Checks whether the user is authorised to edit the entry with the specified primary key.
+     * Checks the access role via which the logged-in user may access the entry with the specified primary key.
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
      */
-    public function checkRights(?string $id): ?string
+    public function getAuthorisationRole(?string $id): ?string
     {
         $query = "SELECT * FROM idea WHERE id = :id";
         $statement = $this->connection->prepare($query);
@@ -218,7 +218,7 @@ class IdeaController extends AbstractController
      */
     public function checkReadRights(?string $id): ?string
     {
-        return parent::checkRights($id);
+        return parent::getAuthorisationRole($id);
     }
 
     /**
@@ -329,8 +329,16 @@ class IdeaController extends AbstractController
             $result = $this->database->fetchFirst($statement);
             $taskId = $result["id"];
             return $this->addToTask($taskId, $keywords, $description, $link, $image);
+        } else {
+          http_response_code(404);
+          $error = json_encode(
+            [
+              "state" => "Failed",
+              "message" => "Topic has no BRAINSTORMING task."
+            ]
+          );
+          die($error);
         }
-        // TODO: Missing return statement. What to return here?
     }
 
     /**
