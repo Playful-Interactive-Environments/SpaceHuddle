@@ -330,14 +330,14 @@ class IdeaController extends AbstractController
             $taskId = $result["id"];
             return $this->addToTask($taskId, $keywords, $description, $link, $image);
         } else {
-          http_response_code(404);
-          $error = json_encode(
-            [
-              "state" => "Failed",
-              "message" => "Topic has no BRAINSTORMING task."
-            ]
-          );
-          die($error);
+            http_response_code(404);
+            $error = json_encode(
+                [
+                  "state" => "Failed",
+                  "message" => "Topic has no BRAINSTORMING task."
+                ]
+            );
+            die($error);
         }
     }
 

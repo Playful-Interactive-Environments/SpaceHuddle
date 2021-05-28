@@ -122,21 +122,19 @@ class ParticipantController extends AbstractController
      */
     public function getAuthorisationRole(?string $id): ?string
     {
-      if (Authorization::isParticipant()) {
-        return $this->getLoginRole($id);
-      }
-      else {
-        $query = "SELECT * FROM participant WHERE id = :id";
-        $statement = $this->connection->prepare($query);
-        $statement->bindParam(":id", $id);
-        $statement->execute();
-        $itemCount = $statement->rowCount();
-        if ($itemCount > 0) {
-          $participant = (object)$this->database->fetchFirst($statement);
-          return SessionController::checkInstanceRights($participant->session_id);
+        if (Authorization::isParticipant()) {
+            return $this->getLoginRole($id);
+        } else {
+            $query = "SELECT * FROM participant WHERE id = :id";
+            $statement = $this->connection->prepare($query);
+            $statement->bindParam(":id", $id);
+            $statement->execute();
+            $itemCount = $statement->rowCount();
+            if ($itemCount > 0) {
+                $participant = (object)$this->database->fetchFirst($statement);
+                return SessionController::checkInstanceRights($participant->session_id);
+            }
         }
-
-      }
     }
 
     /**
@@ -244,10 +242,10 @@ class ParticipantController extends AbstractController
      */
     public function delete(?string $participantId = null): string
     {
-      if (is_null($participantId)) {
-        $participantId = Authorization::getAuthorizationProperty("participant_id");
-      }
-      return parent::deleteGeneric($participantId, authorizedRoles: [Role::PARTICIPANT, Role::MODERATOR]);
+        if (is_null($participantId)) {
+            $participantId = Authorization::getAuthorizationProperty("participant_id");
+        }
+        return parent::deleteGeneric($participantId, authorizedRoles: [Role::PARTICIPANT, Role::MODERATOR]);
     }
 
     /**
