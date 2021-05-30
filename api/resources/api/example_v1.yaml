@@ -16,9 +16,9 @@ externalDocs:
   description: External Documentation
   url: 'https://example.com/documentation'
 servers:
-  - url: 'https://test.example.com/api/v1'
+  - url: '../api'
     description: Test
-  - url: 'https://staging.example.com/api/v1'
+  - url: 'https://localhost/GAB/api/api'
     description: Staging
   - url: 'https://example.com/api/v1'
     description: Production
