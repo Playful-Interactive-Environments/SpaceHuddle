@@ -76,7 +76,7 @@ class TopicController extends AbstractController
      *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(required={"title", "description"},
      *         @OA\Property(property="title", type="string"),
      *         @OA\Property(property="description", type="string")
@@ -117,7 +117,7 @@ class TopicController extends AbstractController
      *   @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
-     *         mediaType="json",
+     *         mediaType="application/json",
      *         @OA\Schema(ref="#/components/schemas/Topic")
      *     )
      *   ),

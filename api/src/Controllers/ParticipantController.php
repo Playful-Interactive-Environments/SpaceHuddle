@@ -38,7 +38,7 @@ class ParticipantController extends AbstractController
      *   tags={"Participant"},
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(required={"sessionKey", "ipHash"},
      *         @OA\Property(property="sessionKey", type="string"),
      *         @OA\Property(property="ipHash", type="string")

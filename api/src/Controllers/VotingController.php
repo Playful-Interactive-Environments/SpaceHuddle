@@ -136,7 +136,7 @@ class VotingController extends AbstractController
      *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(required={"ideaId", "rating"},
      *         @OA\Property(property="ideaId", type="string"),
      *         @OA\Property(property="rating", type="integer", format="int"),
@@ -183,7 +183,7 @@ class VotingController extends AbstractController
      *   @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
-     *         mediaType="json",
+     *         mediaType="application/json",
      *         @OA\Schema(ref="#/components/schemas/Voting")
      *     )
      *   ),

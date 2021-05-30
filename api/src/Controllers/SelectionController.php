@@ -82,7 +82,7 @@ class SelectionController extends AbstractController
      *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(required={"name"},
      *         @OA\Property(property="name", type="string")
      *       )
@@ -119,7 +119,7 @@ class SelectionController extends AbstractController
      *   @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
-     *         mediaType="json",
+     *         mediaType="application/json",
      *         @OA\Schema(ref="#/components/schemas/Selection")
      *     )
      *   ),

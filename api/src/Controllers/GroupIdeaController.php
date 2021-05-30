@@ -66,7 +66,7 @@ class GroupIdeaController extends AbstractController
      *   @OA\Parameter(in="path", name="groupId", description="ID of the group", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(type="array",
      *         @OA\Items( type="string", example="uuid")
      *       )
@@ -116,7 +116,7 @@ class GroupIdeaController extends AbstractController
      *   @OA\Parameter(in="path", name="groupId", description="ID of the group", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(type="array",
      *         @OA\Items( type="string", example="uuid")
      *       )

@@ -98,7 +98,7 @@ class SessionRoleController extends AbstractController
      *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(required={"username", "role"},
      *         @OA\Property(property="username", type="string"),
      *         @OA\Property(property="role", type="string")
@@ -157,7 +157,7 @@ class SessionRoleController extends AbstractController
      *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(required={"id"},
      *         @OA\Property(property="username", type="string"),
      *         @OA\Property(property="role", type="string")

@@ -136,7 +136,7 @@ class SessionController extends AbstractController
      *   tags={"Session"},
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(required={"title", "maxParticipants", "expirationDate"},
      *         @OA\Property(property="title", type="string"),
      *         @OA\Property(property="maxParticipants", type="integer", example=100),
@@ -198,7 +198,7 @@ class SessionController extends AbstractController
      *   tags={"Session"},
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(required={"id"},
      *         @OA\Property(property="id", type="string", example="uuid"),
      *         @OA\Property(property="title", type="string"),

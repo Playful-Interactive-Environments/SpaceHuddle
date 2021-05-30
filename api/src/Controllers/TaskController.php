@@ -85,7 +85,7 @@ class TaskController extends AbstractController
      *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(required={"taskType"},
      *         @OA\Property(property="taskType", type="string"),
      *         @OA\Property(property="name", type="string"),
@@ -165,7 +165,7 @@ class TaskController extends AbstractController
      *   @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
-     *         mediaType="json",
+     *         mediaType="application/json",
      *         @OA\Schema(ref="#/components/schemas/Task")
      *     )
      *   ),

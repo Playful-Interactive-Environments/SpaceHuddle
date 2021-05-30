@@ -109,7 +109,7 @@ class GroupController extends IdeaController
      *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(required={"keywords"},
      *         @OA\Property(property="keywords", type="string"),
      *         @OA\Property(property="description", type="string")
@@ -160,7 +160,7 @@ class GroupController extends IdeaController
      *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(required={"keywords"},
      *         @OA\Property(property="keywords", type="string"),
      *         @OA\Property(property="description", type="string")
@@ -200,7 +200,7 @@ class GroupController extends IdeaController
      *   @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
-     *         mediaType="json",
+     *         mediaType="application/json",
      *         @OA\Schema(ref="#/components/schemas/Group")
      *     )
      *   ),

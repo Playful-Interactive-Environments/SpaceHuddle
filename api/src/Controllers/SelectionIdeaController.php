@@ -73,7 +73,7 @@ class SelectionIdeaController extends AbstractController
      *   @OA\Parameter(in="path", name="selectionId", description="ID of the selection", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(type="array",
      *         @OA\Items( type="string", example="uuid")
      *       )
@@ -123,7 +123,7 @@ class SelectionIdeaController extends AbstractController
      *   @OA\Parameter(in="path", name="selectionId", description="ID of the selection", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(type="array",
      *         @OA\Items( type="string", example="uuid")
      *       )

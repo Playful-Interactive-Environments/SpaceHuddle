@@ -31,7 +31,7 @@ class LoginController extends AbstractController
      *   tags={"User"},
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(required={"username", "password"},
      *         @OA\Property(property="username", type="string"),
      *         @OA\Property(property="password", type="string")
@@ -40,7 +40,7 @@ class LoginController extends AbstractController
      *   ),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(
      *         @OA\Property(property="message", type="string"),
      *         @OA\Property(property="accessToken", type="string")
@@ -103,7 +103,7 @@ class LoginController extends AbstractController
      *   tags={"User"},
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(required={"username", "password", "passwordConfirmation"},
      *         @OA\Property(property="username", type="string"),
      *         @OA\Property(property="password", type="string"),
@@ -238,7 +238,7 @@ class LoginController extends AbstractController
      *   tags={"User"},
      *   @OA\RequestBody(
      *     @OA\MediaType(
-     *       mediaType="json",
+     *       mediaType="application/json",
      *       @OA\Schema(required={"oldPassword", "password", "passwordConfirmation"},
      *         @OA\Property(property="oldPassword", type="string"),
      *         @OA\Property(property="password", type="string"),
