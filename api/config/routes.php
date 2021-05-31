@@ -22,6 +22,7 @@ return function (App $app) {
             $app->get('/users/{user_id}', \App\Action\User\UserReadAction::class);
             $app->put('/users/{user_id}', \App\Action\User\UserUpdateAction::class);
             $app->delete('/users/{user_id}', \App\Action\User\UserDeleteAction::class);
+            $app->post('/user/login/', \App\Action\User\UserLoginAction::class);
         }
     )->add(HttpBasicAuthentication::class);
 };

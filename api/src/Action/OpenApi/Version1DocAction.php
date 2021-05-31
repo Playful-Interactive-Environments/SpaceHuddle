@@ -3,6 +3,7 @@
 namespace App\Action\OpenApi;
 
 use App\Responder\Responder;
+use PHPUnit\Util\Json;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -36,12 +37,19 @@ final class Version1DocAction
         ServerRequestInterface $request,
         ResponseInterface $response
     ): ResponseInterface {
+        $scheme = $_SERVER['REQUEST_SCHEME'];
+        $host = $_SERVER['HTTP_HOST'];
+        $url = $_SERVER['REQUEST_URI'];
         // Path to the yaml file
-        $yamlFile = __DIR__ . '/../../../resources/api/example_v1.yaml';
-
+        $jsonFile = "$scheme://$host/$url/../../resources/api/api.php";
         $viewData = [
-            'spec' => json_encode(Yaml::parseFile($yamlFile)),
+            'url' => $jsonFile,
         ];
+
+        $yamlFile = __DIR__ . '/../../../resources/api/example_v1.yaml';
+        #$viewData = [
+        #    'spec' => json_encode(Yaml::parseFile($yamlFile)),
+        #];
 
         return $this->responder->withTemplate($response, 'doc/swagger.php', $viewData);
     }

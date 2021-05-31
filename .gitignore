@@ -5,3 +5,4 @@ vendor/
 webalizer/
 *.cache
 api/.idea/
+.idea/
