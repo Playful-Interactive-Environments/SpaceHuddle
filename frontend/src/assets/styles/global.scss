@@ -1,7 +1,31 @@
-@import '@/assets/styles/fonts.scss';
-@import '@/assets/styles/variables.scss';
+@import '~@/assets/styles/fonts.scss';
+@import '~@/assets/styles/variables.scss';
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+ol,
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
 
 body {
+  margin: 0;
+  padding: 0;
   font-size: var(--font-size-default);
   font-family: var(--font-family);
   font-weight: var(--font-weight-default);
@@ -70,7 +94,7 @@ body {
     transition: background-position 0.2s;
 
     &:hover {
-      background-position: 0%;
+      background-position: 0;
       opacity: 1;
     }
   }
@@ -199,9 +223,12 @@ textarea {
   &--fullheight {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
+  }
+
+  &--centered {
+    align-items: center;
+    text-align: center;
   }
 }
 
