@@ -15,12 +15,12 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES latin1 */;
+/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Datenbank: `gab`
 --
-CREATE DATABASE IF NOT EXISTS `gab` DEFAULT CHARACTER SET latin1 COLLATE latin1_general_ci;
+CREATE DATABASE IF NOT EXISTS `gab` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `gab`;
 
 -- --------------------------------------------------------
@@ -32,7 +32,7 @@ USE `gab`;
 CREATE TABLE `hierarchy` (
   `group_idea_id` char(36) NOT NULL,
   `sub_idea_id` char(36) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -50,19 +50,19 @@ CREATE TABLE `idea` (
   `description` text DEFAULT NULL,
   `image` longblob DEFAULT NULL,
   `link` varchar(500) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `login`
+-- Tabellenstruktur für Tabelle `user`
 --
 
-CREATE TABLE `login` (
+CREATE TABLE `user` (
   `id` char(36) NOT NULL,
   `username` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -76,8 +76,8 @@ CREATE TABLE `module` (
   `module_name` varchar(255) NOT NULL,
   `order` int(11) NOT NULL,
   `state` varchar(255) NOT NULL,
-  `parameter` longtext CHARACTER SET latin1 COLLATE latin1_bin DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -89,7 +89,7 @@ CREATE TABLE `module_state` (
   `module_id` char(36) NOT NULL,
   `participant_id` char(36) NOT NULL,
   `state` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -105,7 +105,7 @@ CREATE TABLE `participant` (
   `color` varchar(255) DEFAULT NULL,
   `symbol` varchar(255) DEFAULT NULL,
   `ip_hash` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -116,7 +116,7 @@ CREATE TABLE `participant` (
 CREATE TABLE `random_idea` (
   `idea_id` char(36) NOT NULL,
   `participant_id` char(36) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -130,7 +130,7 @@ CREATE TABLE `resource` (
   `title` varchar(255) NOT NULL,
   `image` longblob DEFAULT NULL,
   `link` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -142,7 +142,7 @@ CREATE TABLE `selection_group` (
   `id` char(36) NOT NULL,
   `topic_id` char(36) NOT NULL,
   `name` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -153,7 +153,7 @@ CREATE TABLE `selection_group` (
 CREATE TABLE `selection_group_idea` (
   `selection_group_id` char(36) NOT NULL,
   `idea_id` char(36) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -169,7 +169,7 @@ CREATE TABLE `session` (
   `expiration_date` date DEFAULT NULL,
   `creation_date` date NOT NULL DEFAULT current_timestamp(),
   `public_screen_module_id` char(36) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -179,9 +179,9 @@ CREATE TABLE `session` (
 
 CREATE TABLE `session_role` (
   `session_id` char(36) NOT NULL,
-  `login_id` char(36) NOT NULL,
+  `user_id` char(36) NOT NULL,
   `role` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -194,11 +194,11 @@ CREATE TABLE `task` (
   `topic_id` char(36) NOT NULL,
   `task_type` varchar(255) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
-  `parameter` longtext CHARACTER SET latin1 COLLATE latin1_bin DEFAULT NULL,
+  `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `order` int(11) NOT NULL,
   `state` varchar(255) DEFAULT NULL,
   `active_module_id` char(36) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -212,7 +212,7 @@ CREATE TABLE `topic` (
   `title` varchar(255) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   `active_task_id` char(36) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -227,7 +227,7 @@ CREATE TABLE `voting` (
   `idea_id` char(36) NOT NULL,
   `rating` int(11) NOT NULL,
   `detail_rating` float DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Indizes der exportierten Tabellen
@@ -249,9 +249,9 @@ ALTER TABLE `idea`
   ADD KEY `idea_ibfk_participant` (`participant_id`);
 
 --
--- Indizes für die Tabelle `login`
+-- Indizes für die Tabelle `user`
 --
-ALTER TABLE `login`
+ALTER TABLE `user`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `username` (`username`);
 
@@ -317,8 +317,8 @@ ALTER TABLE `session`
 -- Indizes für die Tabelle `session_role`
 --
 ALTER TABLE `session_role`
-  ADD PRIMARY KEY (`session_id`,`login_id`),
-  ADD KEY `login_id` (`login_id`);
+  ADD PRIMARY KEY (`session_id`,`user_id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indizes für die Tabelle `task`
@@ -418,7 +418,7 @@ ALTER TABLE `session`
 -- Constraints der Tabelle `session_role`
 --
 ALTER TABLE `session_role`
-  ADD CONSTRAINT `session_role_ibfk_role` FOREIGN KEY (`login_id`) REFERENCES `login` (`id`),
+  ADD CONSTRAINT `session_role_ibfk_role` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
   ADD CONSTRAINT `session_role_ibfk_session` FOREIGN KEY (`session_id`) REFERENCES `session` (`id`);
 
 --
