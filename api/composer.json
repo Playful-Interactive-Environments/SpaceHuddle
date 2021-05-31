@@ -1,17 +1,33 @@
 {
-    "name": "odan/slim4-skeleton",
-    "type": "project",
-    "description": "A Slim 4 skeleton",
+    "name": "pie-lab/gab-api",
+    "description": "Definition of the GAB REST API.",
+    "type": "library",
     "keywords": [
-        "slim-framework",
-        "skeleton",
-        "slim",
-        "slim4",
-        "apache"
+        "gab",
+        "rest",
+        "api",
+        "brainstorming"
     ],
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrea Aschauer",
+            "email": "andrea.aschauer@fh-hagenberg.at",
+            "role": "Developer"
+        },
+        {
+            "name": "Wolfgang Hochleitner",
+            "email": "wolfgang.hochleitner@fh-hagenberg.at",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "email": "pie@fh-hagenberg.at",
+        "issues": "https://github.com/Playful-Interactive-Environments/GAB/issues",
+        "source": "https://github.com/Playful-Interactive-Environments/GAB/tree/main/api"
+    },
     "require": {
-        "php": "^7.4 || ^8.0",
+        "php": ">=8.0",
         "ext-json": "*",
         "ext-pdo": "*",
         "cakephp/chronos": "^2",
