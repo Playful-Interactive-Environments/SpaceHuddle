@@ -81,11 +81,6 @@ final class UserValidator
             ->notEmptyString('username', 'Input required')
             ->notEmptyString('password', 'Input required')
             ->minLength('password', 8, 'Too short')
-            ->maxLength('password', 40, 'Too long')
-            ->email('email', false, 'Input required')
-            ->inList('user_role_id', [UserRoleType::ROLE_USER, UserRoleType::ROLE_ADMIN], 'Invalid')
-            ->notEmptyString('locale', 'Input required')
-            ->regex('locale', '/^[a-z]{2}\_[A-Z]{2}$/', 'Invalid')
-            ->boolean('enabled', 'Invalid');
+            ->maxLength('password', 40, 'Too long');
     }
 }
