@@ -30,6 +30,24 @@ final class UserValidator
     }
 
     /**
+     * Validate create.
+     *
+     * @param int $userId The user id
+     * @param array<mixed> $data The data
+     *
+     * @return void
+     */
+    public function validateUserCreate(array $data): void
+    {
+        $this->validateUser($data);
+
+        $username = $data["username"];
+        if ($this->repository->existsUsername($username)) {
+            throw new ValidationException("User $username already exists");
+        }
+    }
+
+    /**
      * Validate update.
      *
      * @param int $userId The user id
@@ -78,9 +96,22 @@ final class UserValidator
         $validator = $this->validationFactory->createValidator();
 
         return $validator
-            ->notEmptyString('username', 'Input required')
-            ->notEmptyString('password', 'Input required')
+            ->notEmptyString('username')
+            ->requirePresence('username', 'create')
+            ->notEmptyString('password')
+            ->requirePresence('password')
+            ->notEmptyString('passwordConfirmation')
+            ->requirePresence('passwordConfirmation')
             ->minLength('password', 8, 'Too short')
-            ->maxLength('password', 40, 'Too long');
+            ->maxLength('password', 40, 'Too long')
+            //->compareFields('password', 'passwordConfirmation', 'COMPARE_EQUAL')
+            ->add('password', 'custom', [
+                'rule' => function ($value, $context) {
+                    if (array_key_exists("passwordConfirmation", $context["data"]))
+                        return ($value == $context["data"]["passwordConfirmation"]);
+                    return false;
+                },
+                'message' => 'Password and confirmation do not match.'
+            ]);
     }
 }

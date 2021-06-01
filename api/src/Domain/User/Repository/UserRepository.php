@@ -6,6 +6,7 @@ use App\Domain\User\Data\UserData;
 use App\Factory\QueryFactory;
 use Cake\Chronos\Chronos;
 use DomainException;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Repository.
@@ -31,14 +32,15 @@ final class UserRepository
      *
      * @return int The new ID
      */
-    public function insertUser(UserData $user): int
+    public function insertUser(object $user): UserData
     {
+        $user->id = Uuid::uuid4()->toString();
         $row = $this->toRow($user);
-        $row['created_at'] = Chronos::now()->toDateTimeString();
 
-        return (int)$this->queryFactory->newInsert('users', $row)
-            ->execute()
-            ->lastInsertId();
+        $this->queryFactory->newInsert('user', $row)
+            ->execute();
+
+        return $this->getUserById($user->id);
     }
 
     /**
@@ -50,19 +52,13 @@ final class UserRepository
      *
      * @return UserData The user
      */
-    public function getUserById(int $userId): UserData
+    public function getUserById(string $userId): UserData
     {
-        $query = $this->queryFactory->newSelect('users');
+        $query = $this->queryFactory->newSelect('user');
         $query->select(
             [
                 'id',
-                'username',
-                'first_name',
-                'last_name',
-                'email',
-                'user_role_id',
-                'locale',
-                'enabled',
+                'username'
             ]
         );
 
@@ -101,14 +97,29 @@ final class UserRepository
     /**
      * Check user id.
      *
-     * @param int $userId The user id
+     * @param string $userId The user id
      *
      * @return bool True if exists
      */
-    public function existsUserId(int $userId): bool
+    public function existsUserId(string $userId): bool
     {
-        $query = $this->queryFactory->newSelect('users');
+        $query = $this->queryFactory->newSelect('user');
         $query->select('id')->andWhere(['id' => $userId]);
+
+        return (bool)$query->execute()->fetch('assoc');
+    }
+
+    /**
+     * Check user id.
+     *
+     * @param string $username The user name
+     *
+     * @return bool True if exists
+     */
+    public function existsUsername(string $username): bool
+    {
+        $query = $this->queryFactory->newSelect('user');
+        $query->select('id')->andWhere(['username' => $username]);
 
         return (bool)$query->execute()->fetch('assoc');
     }
@@ -134,18 +145,12 @@ final class UserRepository
      *
      * @return array The array
      */
-    private function toRow(UserData $user): array
+    private function toRow(object $user): array
     {
         return [
             'id' => $user->id,
             'username' => $user->username,
-            'password' => $user->password,
-            'first_name' => $user->firstName,
-            'last_name' => $user->lastName,
-            'email' => $user->email,
-            'user_role_id' => $user->userRoleId,
-            'locale' => $user->locale,
-            'enabled' => (int)$user->enabled,
+            'password' => $user->password
         ];
     }
 }

@@ -44,13 +44,13 @@ final class UserCreator
      *
      * @return int The new user ID
      */
-    public function createUser(array $data): int
+    public function createUser(array $data): UserData
     {
         // Input validation
-        $this->userValidator->validateUser($data);
+        $this->userValidator->validateUserCreate($data);
 
         // Map form data to user DTO (model)
-        $user = new UserData($data);
+        $user = (object)$data;
 
         // Hash password
         if ($user->password) {
@@ -58,11 +58,11 @@ final class UserCreator
         }
 
         // Insert user and get new user ID
-        $userId = $this->repository->insertUser($user);
+        $userResult = $this->repository->insertUser($user);
 
         // Logging
-        $this->logger->info(sprintf('User created successfully: %s', $userId));
+        $this->logger->info(sprintf('User created successfully: %s', $userResult->username));
 
-        return $userId;
+        return $userResult;
     }
 }

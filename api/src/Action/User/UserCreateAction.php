@@ -43,11 +43,11 @@ final class UserCreateAction
         $data = (array)$request->getParsedBody();
 
         // Invoke the Domain with inputs and retain the result
-        $userId = $this->userCreator->createUser($data);
+        $userResult = $this->userCreator->createUser($data);
 
         // Build the HTTP response
         return $this->responder
-            ->withJson($response, ['user_id' => $userId])
+            ->withJson($response, $userResult)
             ->withStatus(StatusCodeInterface::STATUS_CREATED);
     }
 }

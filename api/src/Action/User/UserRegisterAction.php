@@ -12,7 +12,7 @@ use Psr\Http\Message\ServerRequestInterface;
  * Action for registering a new user.
  * @package App\Action\User
  * @OA\Post(
- *   path="/api/user/register",
+ *   path="/api/user/register/",
  *   summary="Register a new user",
  *   tags={"User"},
  *   @OA\RequestBody(
@@ -49,10 +49,10 @@ final class UserRegisterAction
         // Extract the form data from the request body
         $data = (array)$request->getParsedBody();
 
-        $this->userCreator->createUser($data);
+        $userResult = $this->userCreator->createUser($data);
 
         return $this->responder
-            ->withJson($response, ["id" => 1])
+            ->withJson($response, $userResult)
             ->withStatus(StatusCodeInterface::STATUS_CREATED);
     }
 }
