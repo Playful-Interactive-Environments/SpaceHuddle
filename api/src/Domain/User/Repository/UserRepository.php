@@ -28,9 +28,9 @@ final class UserRepository
     /**
      * Insert user row.
      *
-     * @param UserData $user The user data
+     * @param object $user The user data
      *
-     * @return int The new ID
+     * @return UserData The new ID
      */
     public function insertUser(object $user): UserData
     {
@@ -46,7 +46,7 @@ final class UserRepository
     /**
      * Get user by id.
      *
-     * @param int $userId The user id
+     * @param string $userId The user id
      *
      * @throws DomainException
      *
@@ -141,7 +141,7 @@ final class UserRepository
     /**
      * Convert to array.
      *
-     * @param UserData $user The user data
+     * @param object $user The user data
      *
      * @return array The array
      */

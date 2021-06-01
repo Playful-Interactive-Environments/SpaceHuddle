@@ -42,7 +42,7 @@ final class UserCreator
      *
      * @param array<mixed> $data The form data
      *
-     * @return int The new user ID
+     * @return UserData The new user
      */
     public function createUser(array $data): UserData
     {
