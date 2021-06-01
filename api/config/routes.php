@@ -25,9 +25,8 @@ return function (App $app) {
             $app->put("/users/{user_id}", \App\Action\User\UserUpdateAction::class);
             $app->delete("/users/{user_id}", \App\Action\User\UserDeleteAction::class);
             $app->post("/user/login/", \App\Action\User\UserLoginAction::class);*/
-            $app->post("/login", \App\Action\User\UserLoginAction::class);
-            $app->get("/register", \App\Action\User\UserRegisterAction::class);
-            $app->post("/register", \App\Action\User\UserRegisterAction::class);
+            $app->post("/login[/]", \App\Action\User\UserLoginAction::class);
+            $app->post("/register[/]", \App\Action\User\UserRegisterAction::class);
             $app->put("", \App\Action\User\UserChangePasswordAction::class);
             $app->delete("", \App\Action\User\UserDeleteAction::class);
         }
