@@ -11,17 +11,6 @@ use Psr\Http\Message\ServerRequestInterface;
 /**
  * Action.
  *
- * @OA\Info(title="GAB API", version="0.1")
- * @OA\Schemes(format="https")
- * @OA\SecurityScheme(
- *   securityScheme="bearerAuth",
- *   in="header",
- *   name="Authorization",
- *   type="http",
- *   scheme="Bearer",
- *   bearerFormat="JWT"
- * )
- * @OA\Server(url="../../")
  */
 final class UserLoginAction
 {
