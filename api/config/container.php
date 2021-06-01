@@ -21,7 +21,7 @@ use Slim\Middleware\ErrorMiddleware;
 use Slim\Views\PhpRenderer;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputOption;
-use Tuupola\Middleware\HttpBasicAuthentication;
+use Tuupola\Middleware\JwtAuthentication;
 
 return [
     // Application settings
@@ -135,9 +135,9 @@ return [
         return new PhpRenderer($container->get('settings')['template']);
     },
 
-    HttpBasicAuthentication::class => function (ContainerInterface $container) {
-        $settings = $container->get('settings')['api_auth'];
+    JwtAuthentication::class => function (ContainerInterface $container) {
+        $settings = $container->get('settings')['jwt_auth'];
 
-        return new HttpBasicAuthentication($settings);
+        return new JwtAuthentication($settings);
     },
 ];

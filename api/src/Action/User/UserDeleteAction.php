@@ -8,7 +8,16 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
- * Action.
+ * Action to deletes the currently logged-in user.
+ *
+ * @OA\Delete(
+ *   path="/api/user/",
+ *   summary="Delete the logged-in user.",
+ *   tags={"User"},
+ *   @OA\Response(response="200", description="Success"),
+ *   @OA\Response(response="404", description="Not Found"),
+ *   security={{"api_key": {}}, {"bearerAuth": {}}}
+ * )
  */
 final class UserDeleteAction
 {
@@ -42,6 +51,21 @@ final class UserDeleteAction
         ResponseInterface $response,
         array $args
     ): ResponseInterface {
+
+        // Extract the form data from the request body
+        $data = (array)$request->getParsedBody();
+
+        $token = $request->getAttribute("token");
+        $userId = $token["data"]->userId;
+
+        // Invoke the Domain with inputs and retain the result
+        $userResult = "Not implemented: delete user $userId";
+
+        // Build the HTTP response
+        return $this->responder
+            ->withJson($response, $userResult);
+
+        /*
         // Fetch parameters from the request
         $userId = (int)$args['user_id'];
 
@@ -49,6 +73,6 @@ final class UserDeleteAction
         $this->userDeleter->deleteUser($userId);
 
         // Render the json response
-        return $this->responder->withJson($response);
+        return $this->responder->withJson($response);*/
     }
 }

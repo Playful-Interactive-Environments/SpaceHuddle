@@ -42,7 +42,7 @@ class UserCreateActionTest extends TestCase
                 'enabled' => true,
             ]
         );
-        $request = $this->withHttpBasicAuth($request);
+        $request = $this->withJwtAuth($request);
 
         $response = $this->app->handle($request);
 
@@ -96,7 +96,7 @@ class UserCreateActionTest extends TestCase
                 'enabled' => 'a',
             ]
         );
-        $request = $this->withHttpBasicAuth($request);
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
         // Check response

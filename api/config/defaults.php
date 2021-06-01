@@ -102,4 +102,7 @@ $settings['commands'] = [
     \App\Console\SchemaDumpCommand::class,
 ];
 
+// Console commands
+$settings['timezone'] = 'Europe/Vienna';
+
 return $settings;

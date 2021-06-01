@@ -22,9 +22,11 @@ require __DIR__ . '/local.dev.php';
 $settings['db']['username'] = 'root';
 $settings['db']['password'] = '';
 
-$settings['api_auth'] = [
-    'users' => [
-        'api-admin' => 'secret',
-        'api-user' => 'secret',
-    ],
+$settings['jwt_auth'] = [
+    'secret' => 'supersecretkeyyoushouldnotcommittogithub',
+    'algorithm' => ['HS256']
+];
+
+$settings["token"] = [
+    "expiresAfter" => "PT24H" // See https://www.php.net/manual/de/dateinterval.construct.php
 ];

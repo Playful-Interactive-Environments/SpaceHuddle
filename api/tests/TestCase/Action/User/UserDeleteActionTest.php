@@ -28,7 +28,7 @@ class UserDeleteActionTest extends TestCase
         $this->insertFixtures([UserFixture::class]);
 
         $request = $this->createJsonRequest('DELETE', '/api/users/1');
-        $request = $this->withHttpBasicAuth($request);
+        $request = $this->withJwtAuth($request);
 
         $response = $this->app->handle($request);
 

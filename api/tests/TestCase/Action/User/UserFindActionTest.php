@@ -28,7 +28,7 @@ class UserFindActionTest extends TestCase
         $this->insertFixtures([UserFixture::class]);
 
         $request = $this->createRequest('GET', '/api/users');
-        $request = $this->withHttpBasicAuth($request);
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
         $this->assertSame(StatusCodeInterface::STATUS_OK, $response->getStatusCode());
@@ -69,7 +69,7 @@ class UserFindActionTest extends TestCase
     public function testListUsersWithoutLogin(): void
     {
         $request = $this->createRequest('GET', '/api/users');
-        $request = $this->withHttpBasicAuth($request)->withoutHeader('Authorization');
+        $request = $this->withJwtAuth($request)->withoutHeader('Authorization');
         $response = $this->app->handle($request);
 
         $this->assertSame(StatusCodeInterface::STATUS_UNAUTHORIZED, $response->getStatusCode());

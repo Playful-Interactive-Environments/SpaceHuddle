@@ -4,7 +4,7 @@
 
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
-use Tuupola\Middleware\HttpBasicAuthentication;
+use Tuupola\Middleware\JwtAuthentication;
 
 return function (App $app) {
     // Redirect to Swagger documentation
@@ -27,8 +27,15 @@ return function (App $app) {
             $app->post("/user/login/", \App\Action\User\UserLoginAction::class);*/
             $app->post("/login[/]", \App\Action\User\UserLoginAction::class);
             $app->post("/register[/]", \App\Action\User\UserRegisterAction::class);
-            $app->put("", \App\Action\User\UserChangePasswordAction::class);
-            $app->delete("", \App\Action\User\UserDeleteAction::class);
         }
-    );//->add(HttpBasicAuthentication::class);
+    );
+
+    // Password protected area
+    $app->group(
+        "/user",
+        function (RouteCollectorProxy $app) {
+            $app->put("[/]", \App\Action\User\UserChangePasswordAction::class);
+            $app->delete("[/]", \App\Action\User\UserDeleteAction::class);
+        }
+    )->add(JwtAuthentication::class);
 };

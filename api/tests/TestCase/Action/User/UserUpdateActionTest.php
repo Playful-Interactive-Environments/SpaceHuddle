@@ -45,7 +45,7 @@ class UserUpdateActionTest extends TestCase
                 'enabled' => true,
             ]
         );
-        $request = $this->withHttpBasicAuth($request);
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
         // Check response
@@ -97,7 +97,7 @@ class UserUpdateActionTest extends TestCase
                 'enabled' => 1,
             ]
         );
-        $request = $this->withHttpBasicAuth($request);
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
         // Check response

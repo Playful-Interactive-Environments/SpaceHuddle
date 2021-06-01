@@ -14,17 +14,25 @@ use Firebase\JWT\JWT;
  */
 class Authorization
 {
+    private static function apiSettings() : array {
+        return require __DIR__ . '/../../../config/settings.php';
+    }
+
     /**
      * Token key.
      * @var string
      */
-    private const KEY = "gab";
+    private static function getKey() : string {
+        return self::apiSettings()["jwt_auth"]["secret"];
+    }
 
     /**
      * Token algorithm used by JWT.
      * @var string
      */
-    private const ALGORITHM = "HS256";
+    private static function getAlgorithm() : array {
+        return self::apiSettings()["jwt_auth"]["algorithm"];
+    }
 
     /**
      * Generates a bearer token.
@@ -33,9 +41,12 @@ class Authorization
      */
     public static function generateToken(array $data): string
     {
-        $settings = Settings::getInstance();
-        $timeZone = $settings->get("timezone");
-        $tokenSettings = $settings->get("token");
+
+        $timeZone = self::apiSettings()["timezone"];
+        $tokenSettings = self::apiSettings()["token"];
+        $key = self::getKey();
+        $algorithm = self::getAlgorithm()[0];
+
         try {
             $issuedAt = new DateTimeImmutable("now", new DateTimeZone($timeZone));
             $expiresAt = $issuedAt->add(new DateInterval($tokenSettings["expiresAfter"]));
@@ -61,7 +72,7 @@ class Authorization
             "data" => $data
         ];
 
-        return JWT::encode($token, self::KEY, self::ALGORITHM);
+        return JWT::encode($token, $key, $algorithm);
     }
 
     /**
@@ -114,12 +125,15 @@ class Authorization
      */
     private static function getAuthorizationData(): ?object
     {
+        $key = self::getKey();
+        $algorithm = self::getAlgorithm();
+
         $jwt = self::getBearerToken();
         $errorMessage = "No token specified.";
         if (isset($jwt)) {
             $errorMessage = "Token expired.";
             try {
-                $decoded = JWT::decode($jwt, self::KEY, [self::ALGORITHM]);
+                $decoded = JWT::decode($jwt, $key, $algorithm);
                 $now = new DateTimeImmutable("now", new DateTimeZone(Settings::getInstance()->get("timezone")));
                 if ($decoded->exp > $now->getTimestamp()) {
                     return $decoded->data;
@@ -192,10 +206,12 @@ class Authorization
      */
     public static function isLoggedIn(): bool
     {
+        $key = self::getKey();
+        $algorithm = self::getAlgorithm()[0];
         $jwt = self::getBearerToken();
         if (isset($jwt)) {
             try {
-                $decoded = JWT::decode($jwt, self::KEY, [self::ALGORITHM]);
+                $decoded = JWT::decode($jwt, $key, $algorithm);
                 if ($decoded->exp > time()) {
                     return true;
                 }

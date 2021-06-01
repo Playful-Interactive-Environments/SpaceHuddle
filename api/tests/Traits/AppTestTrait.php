@@ -17,7 +17,7 @@ trait AppTestTrait
 {
     use ArrayTestTrait;
     use ContainerTestTrait;
-    use HttpBasicAuthTestTrait;
+    use JwtAuthTestTrait;
     use HttpTestTrait;
     use HttpJsonTestTrait;
     use MockTestTrait;

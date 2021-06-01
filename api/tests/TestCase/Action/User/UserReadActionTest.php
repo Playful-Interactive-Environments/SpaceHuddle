@@ -28,7 +28,7 @@ class UserReadActionTest extends TestCase
         $this->insertFixtures([UserFixture::class]);
 
         $request = $this->createRequest('GET', '/api/users/1');
-        $request = $this->withHttpBasicAuth($request);
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
         $this->assertSame(StatusCodeInterface::STATUS_OK, $response->getStatusCode());
@@ -56,7 +56,7 @@ class UserReadActionTest extends TestCase
     public function testInvalidId(): void
     {
         $request = $this->createRequest('GET', '/api/users/99');
-        $request = $this->withHttpBasicAuth($request);
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
         $this->assertSame(StatusCodeInterface::STATUS_BAD_REQUEST, $response->getStatusCode());
