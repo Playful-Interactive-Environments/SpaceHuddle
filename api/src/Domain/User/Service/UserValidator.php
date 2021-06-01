@@ -7,6 +7,7 @@ use App\Domain\User\Type\UserRoleType;
 use App\Factory\ValidationFactory;
 use Cake\Validation\Validator;
 use Selective\Validation\Exception\ValidationException;
+use Selective\Validation\ValidationResult;
 
 /**
  * Service.
@@ -32,19 +33,20 @@ final class UserValidator
     /**
      * Validate create.
      *
-     * @param int $userId The user id
      * @param array<mixed> $data The data
      *
      * @return void
      */
     public function validateUserCreate(array $data): void
     {
-        $this->validateUser($data);
-
         $username = $data["username"];
         if ($this->repository->existsUsername($username)) {
-            throw new ValidationException("User $username already exists");
+            $result = new ValidationResult();
+            $result->addError("username", "User $username already exists.");
+            throw new ValidationException("Existing user.", $result);
         }
+
+        $this->validateUser($data);
     }
 
     /**
@@ -69,9 +71,9 @@ final class UserValidator
      *
      * @param array<mixed> $data The data
      *
+     * @return void
      * @throws ValidationException
      *
-     * @return void
      */
     public function validateUser(array $data): void
     {
@@ -104,14 +106,6 @@ final class UserValidator
             ->requirePresence('passwordConfirmation')
             ->minLength('password', 8, 'Too short')
             ->maxLength('password', 40, 'Too long')
-            //->compareFields('password', 'passwordConfirmation', 'COMPARE_EQUAL')
-            ->add('password', 'custom', [
-                'rule' => function ($value, $context) {
-                    if (array_key_exists("passwordConfirmation", $context["data"]))
-                        return ($value == $context["data"]["passwordConfirmation"]);
-                    return false;
-                },
-                'message' => 'Password and confirmation do not match.'
-            ]);
+            ->equalToField('passwordConfirmation', 'password');
     }
 }
