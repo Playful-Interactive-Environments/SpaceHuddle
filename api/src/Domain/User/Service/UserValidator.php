@@ -3,6 +3,7 @@
 namespace App\Domain\User\Service;
 
 use App\Domain\User\Repository\UserRepository;
+use App\Domain\Service\AbstractValidator;
 use App\Domain\User\Type\UserRoleType;
 use App\Factory\ValidationFactory;
 use Cake\Validation\Validator;
@@ -12,11 +13,9 @@ use Selective\Validation\ValidationResult;
 /**
  * Service.
  */
-final class UserValidator
+final class UserValidator extends AbstractValidator
 {
     private UserRepository $repository;
-
-    private ValidationFactory $validationFactory;
 
     /**
      * The constructor.
@@ -26,8 +25,35 @@ final class UserValidator
      */
     public function __construct(UserRepository $repository, ValidationFactory $validationFactory)
     {
+        parent::__construct($validationFactory);
         $this->repository = $repository;
-        $this->validationFactory = $validationFactory;
+    }
+
+    /**
+     * Validate create.
+     *
+     * @param int $userId The user id
+     * @param array<mixed> $data The data
+     *
+     * @return void
+     */
+    public function validateLogin(array $data): void
+    {
+        $this->validateEntity($data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("username")
+                ->requirePresence("username")
+                ->notEmptyString("password")
+                ->requirePresence("password")
+        );
+
+        $username = $data["username"];
+        $password = $data["password"];
+        if (!$this->repository->checkPassword($username, $password)) {
+            $result = new ValidationResult();
+            $result->addError("username or password", "Username or password wrong.");
+            throw new ValidationException("Username or password wrong", $result);
+        }
     }
 
     /**
@@ -39,14 +65,14 @@ final class UserValidator
      */
     public function validateUserCreate(array $data): void
     {
+        $this->validateEntity($data);
+
         $username = $data["username"];
         if ($this->repository->existsUsername($username)) {
             $result = new ValidationResult();
             $result->addError("username", "User $username already exists.");
             throw new ValidationException("Existing user.", $result);
         }
-
-        $this->validateUser($data);
     }
 
     /**
@@ -60,32 +86,12 @@ final class UserValidator
     public function validateUserUpdate(int $userId, array $data): void
     {
         if (!$this->repository->existsUserId($userId)) {
-            throw new ValidationException(sprintf('User not found: %s', $userId));
+            $result = new ValidationResult();
+            $result->addError("user_id", "User $userId not found.");
+            throw new ValidationException(sprintf("User not found: %s", $userId));
         }
 
-        $this->validateUser($data);
-    }
-
-    /**
-     * Validate new user.
-     *
-     * @param array<mixed> $data The data
-     *
-     * @return void
-     * @throws ValidationException
-     *
-     */
-    public function validateUser(array $data): void
-    {
-        $validator = $this->createValidator();
-
-        $validationResult = $this->validationFactory->createValidationResult(
-            $validator->validate($data)
-        );
-
-        if ($validationResult->fails()) {
-            throw new ValidationException('Please check your input', $validationResult);
-        }
+        $this->validateEntity($data);
     }
 
     /**
@@ -93,19 +99,19 @@ final class UserValidator
      *
      * @return Validator The validator
      */
-    private function createValidator(): Validator
+    protected function createValidator(): Validator
     {
         $validator = $this->validationFactory->createValidator();
 
         return $validator
-            ->notEmptyString('username')
-            ->requirePresence('username', 'create')
-            ->notEmptyString('password')
-            ->requirePresence('password')
-            ->notEmptyString('passwordConfirmation')
-            ->requirePresence('passwordConfirmation')
-            ->minLength('password', 8, 'Too short')
-            ->maxLength('password', 40, 'Too long')
-            ->equalToField('passwordConfirmation', 'password');
+            ->notEmptyString("username")
+            ->requirePresence("username", "create")
+            ->notEmptyString("password")
+            ->requirePresence("password")
+            ->notEmptyString("passwordConfirmation")
+            ->requirePresence("passwordConfirmation")
+            ->minLength("password", 8, "Too short")
+            ->maxLength("password", 40, "Too long")
+            ->equalToField("passwordConfirmation", "password", "Password and confirmation do not match.");
     }
 }

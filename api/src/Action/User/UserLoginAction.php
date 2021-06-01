@@ -9,8 +9,31 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
- * Action.
+ * Action for user login.
  *
+ * @OA\Post(
+ *   path="/api/user/login/",
+ *   summary="Perform a login with an existing user",
+ *   tags={"User"},
+ *   @OA\RequestBody(
+ *     @OA\MediaType(
+ *       mediaType="application/json",
+ *       @OA\Schema(required={"username", "password"},
+ *         @OA\Property(property="username", type="string"),
+ *         @OA\Property(property="password", type="string")
+ *       )
+ *     )
+ *   ),
+ *   @OA\Response(response="200", description="Success",
+ *     @OA\MediaType(
+ *       mediaType="application/json",
+ *       @OA\Schema(
+ *         @OA\Property(property="message", type="string"),
+ *         @OA\Property(property="accessToken", type="string")
+ *       )
+ *     )),
+ *   @OA\Response(response="404", description="Not Found")
+ * )
  */
 final class UserLoginAction
 {
@@ -37,29 +60,6 @@ final class UserLoginAction
      * @param ResponseInterface $response The response
      *
      * @return ResponseInterface The response
-     * @OA\Post(
-     *   path="/api/user/login/",
-     *   summary="Perform a login with an existing user",
-     *   tags={"User"},
-     *   @OA\RequestBody(
-     *     @OA\MediaType(
-     *       mediaType="application/json",
-     *       @OA\Schema(required={"username", "password"},
-     *         @OA\Property(property="username", type="string"),
-     *         @OA\Property(property="password", type="string")
-     *       )
-     *     )
-     *   ),
-     *   @OA\Response(response="200", description="Success",
-     *     @OA\MediaType(
-     *       mediaType="application/json",
-     *       @OA\Schema(
-     *         @OA\Property(property="message", type="string"),
-     *         @OA\Property(property="accessToken", type="string")
-     *       )
-     *     )),
-     *   @OA\Response(response="404", description="Not Found")
-     * )
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
@@ -67,11 +67,11 @@ final class UserLoginAction
         $data = (array)$request->getParsedBody();
 
         // Invoke the Domain with inputs and retain the result
-        $userId = $this->userLogin->loginUser($data);
+        $userResult = $this->userLogin->loginUser($data);
 
         // Build the HTTP response
         return $this->responder
-            ->withJson($response, ['user_id' => $userId])
+            ->withJson($response, $userResult)
             ->withStatus(StatusCodeInterface::STATUS_CREATED);
     }
 }

@@ -74,6 +74,36 @@ final class UserRepository
     }
 
     /**
+     * Get user by username.
+     *
+     * @param string $username The user name
+     *
+     * @throws DomainException
+     *
+     * @return UserData The user
+     */
+    public function getUserByName(string $username): UserData
+    {
+        $query = $this->queryFactory->newSelect('user');
+        $query->select(
+            [
+                'id',
+                'username'
+            ]
+        );
+
+        $query->andWhere(['username' => $username]);
+
+        $row = $query->execute()->fetch('assoc');
+
+        if (!$row) {
+            throw new DomainException(sprintf('User not found: %s', $username));
+        }
+
+        return new UserData($row);
+    }
+
+    /**
      * Update user row.
      *
      * @param UserData $user The user
@@ -122,6 +152,35 @@ final class UserRepository
         $query->select('id')->andWhere(['username' => $username]);
 
         return (bool)$query->execute()->fetch('assoc');
+    }
+
+    /**
+     * Checks whether the password for the specified user is correct.
+     *
+     * @param string $username The user name
+     * @param string $password The password
+     *
+     * @return bool True if password matches.
+     */
+    public function checkPassword(string $username, string $password) : bool
+    {
+        $query = $this->queryFactory->newSelect('user');
+        $query->select(
+            [
+                'password'
+            ]
+        );
+
+        $query->andWhere(['username' => $username]);
+
+        $row = $query->execute()->fetch('assoc');
+
+        if ($row) {
+            $hash = $row['password'];
+            return password_verify($password, $hash);
+        }
+
+        return false;
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Domain\User\Service;
 
 use App\Domain\User\Data\UserData;
+use App\Domain\Service\Authorization;
 use App\Domain\User\Repository\UserRepository;
 use App\Factory\LoggerFactory;
 use Psr\Log\LoggerInterface;
@@ -44,7 +45,23 @@ final class UserLogin
      *
      * @return array<mixed> The access token
      */
-    public function loginUser(array $data): int
+    public function loginUser(array $data): mixed
     {
+        // Input validation
+        $this->userValidator->validateLogin($data);
+
+        // Insert user and get new user ID
+        $userResult = $this->repository->getUserByName($data["username"]);
+        $jwt = Authorization::generateToken(
+            [
+                "userId" => $userResult->id,
+                "username" => $userResult->username
+            ]
+        );
+
+        return [
+            "message" => "Successful login.",
+            "accessToken" => $jwt
+        ];
     }
 }
