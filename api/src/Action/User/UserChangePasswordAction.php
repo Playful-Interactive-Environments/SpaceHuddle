@@ -3,7 +3,6 @@
 
 namespace App\Action\User;
 
-use App\Domain\User\Service\UserLogin;
 use App\Domain\User\Service\UserUpdater;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -63,8 +62,7 @@ class UserChangePasswordAction
         // Extract the form data from the request body
         $data = (array)$request->getParsedBody();
 
-        $token = $request->getAttribute("token");
-        $userId = $token["data"]->userId;
+        $userId = $request->getAttribute("userId");
 
         // Invoke the Domain with inputs and retain the result
         $userResult = "Not implemented: update user $userId";

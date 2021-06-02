@@ -55,8 +55,7 @@ final class UserDeleteAction
         // Extract the form data from the request body
         $data = (array)$request->getParsedBody();
 
-        $token = $request->getAttribute("token");
-        $userId = $token["data"]->userId;
+        $userId = $request->getAttribute("userId");
 
         // Invoke the Domain with inputs and retain the result
         $userResult = "Not implemented: delete user $userId";
