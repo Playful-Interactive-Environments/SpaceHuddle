@@ -76,6 +76,22 @@ final class UserValidator extends AbstractValidator
     }
 
     /**
+     * Validate if the use exists.
+     *
+     * @param string $userId The user id
+     *
+     * @return void
+     */
+    public function validateUserExists(string $userId): void
+    {
+        if (!$this->repository->existsUserId($userId)) {
+            $result = new ValidationResult();
+            $result->addError("userId", "The logged-in user no longer exists.");
+            throw new ValidationException("Please check your login", $result);
+        }
+    }
+
+    /**
      * Validate update.
      *
      * @param string $userId The user id
@@ -85,12 +101,7 @@ final class UserValidator extends AbstractValidator
      */
     public function validateUserUpdate(string $userId, array $data): void
     {
-        if (!$this->repository->existsUserId($userId)) {
-            $result = new ValidationResult();
-            $result->addError("userId", "The logged-in user no longer exists.");
-            throw new ValidationException("Please check your login");
-        }
-
+        $this->validateUserExists($userId);
         $this->validateEntity($data, newRecord: false);
     }
 

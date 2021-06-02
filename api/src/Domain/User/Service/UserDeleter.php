@@ -11,14 +11,20 @@ final class UserDeleter
 {
     private UserRepository $repository;
 
+    private UserValidator $userValidator;
+
     /**
      * The constructor.
      *
      * @param UserRepository $repository The repository
      */
-    public function __construct(UserRepository $repository)
+    public function __construct(
+        UserRepository $repository,
+        UserValidator $userValidator,
+    )
     {
         $this->repository = $repository;
+        $this->userValidator = $userValidator;
     }
 
     /**
@@ -28,11 +34,16 @@ final class UserDeleter
      *
      * @return void
      */
-    public function deleteUser(int $userId): void
+    public function deleteUser(string $userId): mixed
     {
         // Input validation
-        // ...
+        $this->userValidator->validateUserExists($userId);
 
         $this->repository->deleteUserById($userId);
+
+        return [
+                "state" => "Success",
+                "message" => "user was successfully deleted."
+            ];
     }
 }

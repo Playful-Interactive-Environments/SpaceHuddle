@@ -252,9 +252,9 @@ final class UserRepository
      *
      * @return void
      */
-    public function deleteUserById(int $userId): void
+    public function deleteUserById(string $userId): void
     {
-        $this->queryFactory->newDelete("users")
+        $this->queryFactory->newDelete("user")
             ->andWhere(["id" => $userId])
             ->execute();
     }

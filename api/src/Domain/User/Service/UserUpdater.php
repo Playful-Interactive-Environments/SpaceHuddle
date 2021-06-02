@@ -71,7 +71,7 @@ final class UserUpdater
      *
      * @return void
      */
-    public function updatePassword(string $userId, array $data): UserData
+    public function updatePassword(string $userId, array $data): mixed
     {
         // Input validation
         $this->userValidator->validatePasswordUpdate($userId, $data);
@@ -86,6 +86,9 @@ final class UserUpdater
         // Logging
         $this->logger->info("The password was successfully updated: $userId");
 
-        return $userResult;
+        return [
+                "state" => "Success",
+                "message" => "The password was successfully updated."
+            ];
     }
 }
