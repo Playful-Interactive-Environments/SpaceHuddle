@@ -6,7 +6,6 @@ use App\Domain\User\Data\UserData;
 use App\Factory\QueryFactory;
 use Cake\Chronos\Chronos;
 use DomainException;
-use Ramsey\Uuid\Uuid;
 
 /**
  * Repository.
@@ -34,7 +33,7 @@ final class UserRepository
      */
     public function insertUser(object $user): UserData
     {
-        $user->id = Uuid::uuid4()->toString();
+        $user->id = uuid_create();
         $row = $this->toRow($user);
 
         $this->queryFactory->newInsert('user', $row)
