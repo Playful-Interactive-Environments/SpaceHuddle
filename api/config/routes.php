@@ -8,6 +8,7 @@ use App\Action\User\UserChangePasswordAction;
 use App\Action\User\UserDeleteAction;
 use App\Action\User\UserLoginAction;
 use App\Action\User\UserRegisterAction;
+use \App\Action\Session\SessionCreateAction;
 use App\Middleware\JwtAuthMiddleware;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
@@ -42,6 +43,14 @@ return function (App $app) {
         function (RouteCollectorProxy $app) {
             $app->put("[/]", UserChangePasswordAction::class);
             $app->delete("[/]", UserDeleteAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+
+    $app->group(
+        "/session",
+        function (RouteCollectorProxy $app) {
+            $app->post("[/]", SessionCreateAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 };
