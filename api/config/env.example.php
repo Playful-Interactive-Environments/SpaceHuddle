@@ -21,12 +21,3 @@ require __DIR__ . '/local.dev.php';
 // Database
 $settings['db']['username'] = 'root';
 $settings['db']['password'] = '';
-
-$settings['jwt_auth'] = [
-    'secret' => 'supersecretkeyyoushouldnotcommittogithub',
-    'algorithm' => ['HS256']
-];
-
-$settings["token"] = [
-    "expiresAfter" => "PT24H" // See https://www.php.net/manual/de/dateinterval.construct.php
-];

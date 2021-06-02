@@ -97,12 +97,17 @@ $settings['phoenix'] = [
     'log_table_name' => 'phoenix_log',
 ];
 
+// JWT settings
+$settings['jwt'] = [
+    // The issuer name
+    'issuer' => 'localhost',
+    // Max lifetime in seconds
+    'lifetime' => 86400
+];
+
 // Console commands
 $settings['commands'] = [
     \App\Console\SchemaDumpCommand::class,
 ];
-
-// Console commands
-$settings['timezone'] = 'Europe/Vienna';
 
 return $settings;
