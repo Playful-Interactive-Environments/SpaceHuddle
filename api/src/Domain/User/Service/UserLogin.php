@@ -2,10 +2,9 @@
 
 namespace App\Domain\User\Service;
 
-use App\Domain\User\Data\UserData;
-use App\Domain\Service\Authorization;
 use App\Domain\User\Repository\UserRepository;
 use App\Factory\LoggerFactory;
+use App\Routing\JwtAuth;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -19,6 +18,8 @@ final class UserLogin
 
     private LoggerInterface $logger;
 
+    private JwtAuth $jwtAuth;
+
     /**
      * The constructor.
      *
@@ -29,13 +30,15 @@ final class UserLogin
     public function __construct(
         UserRepository $repository,
         UserValidator $userValidator,
-        LoggerFactory $loggerFactory
+        LoggerFactory $loggerFactory,
+        JwtAuth $jwtAuth
     ) {
         $this->repository = $repository;
         $this->userValidator = $userValidator;
         $this->logger = $loggerFactory
             ->addFileHandler('user_creator.log')
             ->createLogger();
+        $this->jwtAuth = $jwtAuth;
     }
 
     /**
@@ -45,14 +48,15 @@ final class UserLogin
      *
      * @return array<mixed> The access token
      */
-    public function loginUser(array $data): mixed
+    public function loginUser(array $data): array
     {
         // Input validation
         $this->userValidator->validateLogin($data);
 
         // Insert user and get new user ID
         $userResult = $this->repository->getUserByName($data["username"]);
-        $jwt = Authorization::generateToken(
+
+        $jwt = $this->jwtAuth->createJwt(
             [
                 "userId" => $userResult->id,
                 "username" => $userResult->username
@@ -61,7 +65,9 @@ final class UserLogin
 
         return [
             "message" => "Successful login.",
-            "accessToken" => $jwt
+            "access_token" => $jwt,
+            "token_type" => "Bearer",
+            "expires_in" => $this->jwtAuth->getLifetime()
         ];
     }
 }
