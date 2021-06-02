@@ -43,7 +43,7 @@ final class UserUpdateAction
         array $args
     ): ResponseInterface {
         // Extract the form data from the request body
-        $userId = (int)$args['user_id'];
+        $userId = (int)$args["user_id"];
         $data = (array)$request->getParsedBody();
 
         // Invoke the Domain with inputs and retain the result

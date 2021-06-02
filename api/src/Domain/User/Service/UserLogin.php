@@ -36,7 +36,7 @@ final class UserLogin
         $this->repository = $repository;
         $this->userValidator = $userValidator;
         $this->logger = $loggerFactory
-            ->addFileHandler('user_creator.log')
+            ->addFileHandler("user_creator.log")
             ->createLogger();
         $this->jwtAuth = $jwtAuth;
     }

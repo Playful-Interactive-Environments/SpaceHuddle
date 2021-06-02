@@ -34,12 +34,23 @@ final class UserRepository
     public function insertUser(object $user): UserData
     {
         $user->id = uuid_create();
+        $user->password = self::encryptPassword($user->password);
         $row = $this->toRow($user);
 
-        $this->queryFactory->newInsert('user', $row)
+        $this->queryFactory->newInsert("user", $row)
             ->execute();
 
         return $this->getUserById($user->id);
+    }
+
+    /**
+     * Encrypts the password
+     * @param string $password Password to be encrypted.
+     * @return string hashed password
+     */
+    private static function encryptPassword(string $password) : string {
+        // Hash password
+        return password_hash($password, PASSWORD_DEFAULT);
     }
 
     /**
@@ -53,20 +64,20 @@ final class UserRepository
      */
     public function getUserById(string $userId): UserData
     {
-        $query = $this->queryFactory->newSelect('user');
+        $query = $this->queryFactory->newSelect("user");
         $query->select(
             [
-                'id',
-                'username'
+                "id",
+                "username"
             ]
         );
 
-        $query->andWhere(['id' => $userId]);
+        $query->andWhere(["id" => $userId]);
 
-        $row = $query->execute()->fetch('assoc');
+        $row = $query->execute()->fetch("assoc");
 
         if (!$row) {
-            throw new DomainException(sprintf('User not found: %s', $userId));
+            throw new DomainException(sprintf("User not found: %s", $userId));
         }
 
         return new UserData($row);
@@ -83,20 +94,20 @@ final class UserRepository
      */
     public function getUserByName(string $username): UserData
     {
-        $query = $this->queryFactory->newSelect('user');
+        $query = $this->queryFactory->newSelect("user");
         $query->select(
             [
-                'id',
-                'username'
+                "id",
+                "username"
             ]
         );
 
-        $query->andWhere(['username' => $username]);
+        $query->andWhere(["username" => $username]);
 
-        $row = $query->execute()->fetch('assoc');
+        $row = $query->execute()->fetch("assoc");
 
         if (!$row) {
-            throw new DomainException(sprintf('User not found: %s', $username));
+            throw new DomainException(sprintf("User not found: %s", $username));
         }
 
         return new UserData($row);
@@ -109,18 +120,41 @@ final class UserRepository
      *
      * @return void
      */
-    public function updateUser(UserData $user): void
+    public function updateUser(object $user): UserData
     {
         $row = $this->toRow($user);
 
         // Updating the password is another use case
-        unset($row['password']);
+        unset($row["password"]);
 
-        $row['updated_at'] = Chronos::now()->toDateTimeString();
+        $row["updated_at"] = Chronos::now()->toDateTimeString();
 
-        $this->queryFactory->newUpdate('users', $row)
-            ->andWhere(['id' => $user->id])
+        $this->queryFactory->newUpdate("user", $row)
+            ->andWhere(["id" => $user->id])
             ->execute();
+
+        return $this->getUserById($user->id);
+    }
+
+    /**
+     * Update user row.
+     *
+     * @param UserData $user The user
+     *
+     * @return void
+     */
+    public function updatePassword(object $user): UserData
+    {
+        $user->password = self::encryptPassword($user->password);
+        $row = [
+            "password" => $user->password
+        ];
+
+        $this->queryFactory->newUpdate("user", $row)
+            ->andWhere(["id" => $user->id])
+            ->execute();
+
+        return $this->getUserById($user->id);
     }
 
     /**
@@ -132,10 +166,10 @@ final class UserRepository
      */
     public function existsUserId(string $userId): bool
     {
-        $query = $this->queryFactory->newSelect('user');
-        $query->select('id')->andWhere(['id' => $userId]);
+        $query = $this->queryFactory->newSelect("user");
+        $query->select("id")->andWhere(["id" => $userId]);
 
-        return (bool)$query->execute()->fetch('assoc');
+        return (bool)$query->execute()->fetch("assoc");
     }
 
     /**
@@ -147,10 +181,10 @@ final class UserRepository
      */
     public function existsUsername(string $username): bool
     {
-        $query = $this->queryFactory->newSelect('user');
-        $query->select('id')->andWhere(['username' => $username]);
+        $query = $this->queryFactory->newSelect("user");
+        $query->select("id")->andWhere(["username" => $username]);
 
-        return (bool)$query->execute()->fetch('assoc');
+        return (bool)$query->execute()->fetch("assoc");
     }
 
     /**
@@ -163,19 +197,19 @@ final class UserRepository
      */
     public function checkPassword(string $username, string $password) : bool
     {
-        $query = $this->queryFactory->newSelect('user');
+        $query = $this->queryFactory->newSelect("user");
         $query->select(
             [
-                'password'
+                "password"
             ]
         );
 
-        $query->andWhere(['username' => $username]);
+        $query->andWhere(["username" => $username]);
 
-        $row = $query->execute()->fetch('assoc');
+        $row = $query->execute()->fetch("assoc");
 
         if ($row) {
-            $hash = $row['password'];
+            $hash = $row["password"];
             return password_verify($password, $hash);
         }
 
@@ -191,8 +225,8 @@ final class UserRepository
      */
     public function deleteUserById(int $userId): void
     {
-        $this->queryFactory->newDelete('users')
-            ->andWhere(['id' => $userId])
+        $this->queryFactory->newDelete("users")
+            ->andWhere(["id" => $userId])
             ->execute();
     }
 
@@ -206,9 +240,9 @@ final class UserRepository
     private function toRow(object $user): array
     {
         return [
-            'id' => $user->id,
-            'username' => $user->username,
-            'password' => $user->password
+            "id" => $user->id,
+            "username" => $user->username,
+            "password" => $user->password
         ];
     }
 }

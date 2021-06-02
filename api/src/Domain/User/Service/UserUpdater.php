@@ -33,31 +33,59 @@ final class UserUpdater
         $this->repository = $repository;
         $this->userValidator = $userValidator;
         $this->logger = $loggerFactory
-            ->addFileHandler('user_updater.log')
+            ->addFileHandler("user_updater.log")
             ->createLogger();
     }
 
     /**
      * Update user.
      *
-     * @param int $userId The user id
+     * @param string $userId The user id
      * @param array<mixed> $data The request data
      *
      * @return void
      */
-    public function updateUser(int $userId, array $data): void
+    public function updateUser(string $userId, array $data): UserData
     {
         // Input validation
         $this->userValidator->validateUserUpdate($userId, $data);
 
         // Validation was successfully
-        $user = new UserData($data);
+        $user = (object)$data;
         $user->id = $userId;
 
         // Update the user
-        $this->repository->updateUser($user);
+        $userResult = $this->repository->updateUser($user);
 
         // Logging
-        $this->logger->info(sprintf('User updated successfully: %s', $userId));
+        $this->logger->info("User updated successfully: $userId");
+
+        return $userResult;
+    }
+
+    /**
+     * Update user.
+     *
+     * @param string $userId The user id
+     * @param array<mixed> $data The request data
+     *
+     * @return void
+     */
+    public function updatePassword(string $userId, array $data): UserData
+    {
+        // Input validation
+        $this->userValidator->validateUserUpdate($userId, $data);
+
+        // Validation was successfully
+        $user = (object)$data;
+        $user->id = $userId;
+
+        // Update the user
+        $userResult = $this->repository->updatePassword($user);
+
+        // Logging
+        $this->logger->info("The password was successfully updated: $userId");
+
+        return $userResult;
     }
 }

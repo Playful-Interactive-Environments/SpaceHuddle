@@ -33,17 +33,17 @@ abstract class AbstractValidator
      *
      * @return void
      */
-    protected function validateEntity(array $data, ?Validator $validator = null): void
+    protected function validateEntity(array $data, ?Validator $validator = null, bool $newRecord = true): void
     {
         if (is_null($validator))
             $validator = $this->createValidator();
 
         $validationResult = $this->validationFactory->createValidationResult(
-            $validator->validate($data)
+            $validator->validate($data, $newRecord)
         );
 
         if ($validationResult->fails()) {
-            throw new ValidationException('Please check your input', $validationResult);
+            throw new ValidationException("Please check your input", $validationResult);
         }
     }
 

@@ -693,16 +693,16 @@
         },
         {
             "name": "lulco/phoenix",
-            "version": "1.7.0",
+            "version": "1.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lulco/phoenix.git",
-                "reference": "85a2c1e01d211232d1bc15a9324960e7287e3f50"
+                "reference": "8e55c54438327d2d653fb29f35d3e3c975a8cc37"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lulco/phoenix/zipball/85a2c1e01d211232d1bc15a9324960e7287e3f50",
-                "reference": "85a2c1e01d211232d1bc15a9324960e7287e3f50",
+                "url": "https://api.github.com/repos/lulco/phoenix/zipball/8e55c54438327d2d653fb29f35d3e3c975a8cc37",
+                "reference": "8e55c54438327d2d653fb29f35d3e3c975a8cc37",
                 "shasum": ""
             },
             "require": {
@@ -753,9 +753,9 @@
             ],
             "support": {
                 "issues": "https://github.com/lulco/phoenix/issues",
-                "source": "https://github.com/lulco/phoenix/tree/1.7.0"
+                "source": "https://github.com/lulco/phoenix/tree/1.8.0"
             },
-            "time": "2021-04-14T10:04:53+00:00"
+            "time": "2021-06-01T21:28:54+00:00"
         },
         {
             "name": "monolog/monolog",

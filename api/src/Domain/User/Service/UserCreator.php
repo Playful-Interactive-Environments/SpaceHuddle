@@ -33,7 +33,7 @@ final class UserCreator
         $this->repository = $repository;
         $this->userValidator = $userValidator;
         $this->logger = $loggerFactory
-            ->addFileHandler('user_creator.log')
+            ->addFileHandler("user_creator.log")
             ->createLogger();
     }
 
@@ -52,16 +52,11 @@ final class UserCreator
         // Map form data to user DTO (model)
         $user = (object)$data;
 
-        // Hash password
-        if ($user->password) {
-            $user->password = (string)password_hash($user->password, PASSWORD_DEFAULT);
-        }
-
         // Insert user and get new user ID
         $userResult = $this->repository->insertUser($user);
 
         // Logging
-        $this->logger->info(sprintf('User created successfully: %s', $userResult->username));
+        $this->logger->info("User created successfully: $userResult->username");
 
         return $userResult;
     }

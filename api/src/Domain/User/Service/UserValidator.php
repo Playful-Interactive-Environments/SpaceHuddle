@@ -52,7 +52,7 @@ final class UserValidator extends AbstractValidator
         if (!$this->repository->checkPassword($username, $password)) {
             $result = new ValidationResult();
             $result->addError("username or password", "Username or password wrong.");
-            throw new ValidationException("Username or password wrong", $result);
+            throw new ValidationException("Please check your input", $result);
         }
     }
 
@@ -71,27 +71,27 @@ final class UserValidator extends AbstractValidator
         if ($this->repository->existsUsername($username)) {
             $result = new ValidationResult();
             $result->addError("username", "User $username already exists.");
-            throw new ValidationException("Existing user.", $result);
+            throw new ValidationException("Please check your input", $result);
         }
     }
 
     /**
      * Validate update.
      *
-     * @param int $userId The user id
+     * @param string $userId The user id
      * @param array<mixed> $data The data
      *
      * @return void
      */
-    public function validateUserUpdate(int $userId, array $data): void
+    public function validateUserUpdate(string $userId, array $data): void
     {
         if (!$this->repository->existsUserId($userId)) {
             $result = new ValidationResult();
-            $result->addError("user_id", "User $userId not found.");
-            throw new ValidationException(sprintf("User not found: %s", $userId));
+            $result->addError("userId", "The logged-in user no longer exists.");
+            throw new ValidationException("Please check your login");
         }
 
-        $this->validateEntity($data);
+        $this->validateEntity($data, newRecord: false);
     }
 
     /**
