@@ -20,8 +20,8 @@ use Psr\Http\Message\ServerRequestInterface;
  *       mediaType="application/json",
  *       @OA\Schema(required={"username", "password", "passwordConfirmation"},
  *         @OA\Property(property="username", type="string", example="john.doe"),
- *         @OA\Property(property="password", type="string", example="secret"),
- *         @OA\Property(property="passwordConfirmation", type="string", example="secret")
+ *         @OA\Property(property="password", type="string", example="secret123"),
+ *         @OA\Property(property="passwordConfirmation", type="string", example="secret123")
  *       )
  *     )
  *   ),

@@ -19,20 +19,35 @@ use Psr\Http\Message\ServerRequestInterface;
  *     @OA\MediaType(
  *       mediaType="application/json",
  *       @OA\Schema(required={"username", "password"},
- *         @OA\Property(property="username", type="string"),
- *         @OA\Property(property="password", type="string")
+ *         @OA\Property(property="username", type="string", example="john.doe"),
+ *         @OA\Property(property="password", type="string", example="secret123")
  *       )
  *     )
  *   ),
- *   @OA\Response(response="200", description="Success",
+ *   @OA\Response(response="201", description="Created.",
  *     @OA\MediaType(
  *       mediaType="application/json",
  *       @OA\Schema(
- *         @OA\Property(property="message", type="string"),
- *         @OA\Property(property="accessToken", type="string")
+ *         @OA\Property(property="message", type="string", description="Success message.", example="Successful login."),
+ *         @OA\Property(
+ *           property="access_token",
+ *           type="string",
+ *           description="The access token.",
+ *           example="reallylongtokenstring"
+ *         ),
+ *         @OA\Property(property="token_type", type="string", description="The token type.", example="Bearer"),
+ *         @OA\Property(
+ *           property="expires_in",
+ *           type="int",
+ *           description="The token expiration in seconds.",
+ *           example="86400"
+ *         ),
  *       )
  *     )),
- *   @OA\Response(response="404", description="Not Found")
+ *   @OA\Response(response="400", ref="#/components/responses/400"),
+ *   @OA\Response(response="403", ref="#/components/responses/403"),
+ *   @OA\Response(response="422", ref="#/components/responses/422"),
+ *   @OA\Response(response="500", ref="#/components/responses/500")
  * )
  */
 final class UserLoginAction
