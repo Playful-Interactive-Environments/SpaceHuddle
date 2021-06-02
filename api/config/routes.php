@@ -2,16 +2,22 @@
 
 // Define app routes
 
+use App\Action\Home\HomeAction;
+use App\Action\OpenApi\Version1DocAction;
+use App\Action\User\UserChangePasswordAction;
+use App\Action\User\UserDeleteAction;
+use App\Action\User\UserLoginAction;
+use App\Action\User\UserRegisterAction;
+use App\Middleware\JwtAuthMiddleware;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
-use Tuupola\Middleware\JwtAuthentication;
 
 return function (App $app) {
     // Redirect to Swagger documentation
-    $app->get("/", \App\Action\Home\HomeAction::class)->setName("home");
+    $app->get("/", HomeAction::class)->setName("home");
 
     // Swagger API documentation
-    $app->get("/docs/v1", \App\Action\OpenApi\Version1DocAction::class)->setName("docs");
+    $app->get("/docs/v1", Version1DocAction::class)->setName("docs");
 
     //$app->get("/user/register", \App\Action\User\UserRegisterAction::class);
 
@@ -25,8 +31,8 @@ return function (App $app) {
             $app->put("/users/{user_id}", \App\Action\User\UserUpdateAction::class);
             $app->delete("/users/{user_id}", \App\Action\User\UserDeleteAction::class);
             $app->post("/user/login/", \App\Action\User\UserLoginAction::class);*/
-            $app->post("/login[/]", \App\Action\User\UserLoginAction::class);
-            $app->post("/register[/]", \App\Action\User\UserRegisterAction::class);
+            $app->post("/login[/]", UserLoginAction::class);
+            $app->post("/register[/]", UserRegisterAction::class);
         }
     );
 
@@ -34,8 +40,8 @@ return function (App $app) {
     $app->group(
         "/user",
         function (RouteCollectorProxy $app) {
-            $app->put("[/]", \App\Action\User\UserChangePasswordAction::class);
-            $app->delete("[/]", \App\Action\User\UserDeleteAction::class);
+            $app->put("[/]", UserChangePasswordAction::class);
+            $app->delete("[/]", UserDeleteAction::class);
         }
-    )->add(JwtAuthentication::class);
+    )->add(JwtAuthMiddleware::class);
 };
