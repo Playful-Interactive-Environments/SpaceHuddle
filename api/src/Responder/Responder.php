@@ -43,7 +43,7 @@ final class Responder
      */
     public function createResponse(): ResponseInterface
     {
-        return $this->responseFactory->createResponse()->withHeader('Content-Type', 'text/html; charset=utf-8');
+        return $this->responseFactory->createResponse()->withHeader("Content-Type", "text/html; charset=utf-8");
     }
 
     /**
@@ -78,10 +78,10 @@ final class Responder
         array $queryParams = []
     ): ResponseInterface {
         if ($queryParams) {
-            $destination = sprintf('%s?%s', $destination, http_build_query($queryParams));
+            $destination = sprintf("%s?%s", $destination, http_build_query($queryParams));
         }
 
-        return $response->withStatus(302)->withHeader('Location', $destination);
+        return $response->withStatus(302)->withHeader("Location", $destination);
     }
 
     /**
@@ -123,7 +123,7 @@ final class Responder
         $data = null,
         int $options = 0
     ): ResponseInterface {
-        $response = $response->withHeader('Content-Type', 'application/json');
+        $response = $response->withHeader("Content-Type", "application/json");
         $response->getBody()->write((string)json_encode($data, $options));
 
         return $response;

@@ -20,7 +20,7 @@ class HomeActionTest extends TestCase
      */
     public function testAction(): void
     {
-        $request = $this->createRequest('GET', '/');
+        $request = $this->createRequest("GET", "/");
         $response = $this->app->handle($request);
 
         // Assert: Redirect
@@ -34,7 +34,7 @@ class HomeActionTest extends TestCase
      */
     public function testPageNotFound(): void
     {
-        $request = $this->createRequest('GET', '/nada');
+        $request = $this->createRequest("GET", "/nada");
         $response = $this->app->handle($request);
 
         // Assert: Not found

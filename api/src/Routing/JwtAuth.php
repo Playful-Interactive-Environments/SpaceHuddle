@@ -98,7 +98,7 @@ final class JwtAuth
     {
         $token = $this->configuration->parser()->parse($token);
         if (!$token instanceof UnencryptedToken) {
-            throw new ConstraintViolation('You should pass a plain token');
+            throw new ConstraintViolation("You should pass a plain token");
         }
         return $token;
     }
@@ -130,8 +130,8 @@ final class JwtAuth
         // Custom constraints
         // Check whether the user id and username are valid
         // TODO: Do we need to check against the database here if these are valid claims (userId and username)?
-        $userId = $token->claims()->get('userId');
-        $username = $token->claims()->get('username');
+        $userId = $token->claims()->get("userId");
+        $username = $token->claims()->get("username");
         if (!$userId || !$username) {
         // Token related to an unknown user
             return null;

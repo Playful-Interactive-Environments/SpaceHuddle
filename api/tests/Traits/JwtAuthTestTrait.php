@@ -20,13 +20,13 @@ trait JwtAuthTestTrait
     protected function withJwtAuth(ServerRequestInterface $request): ServerRequestInterface
     {
         function apiSettings() : array {
-            return require __DIR__ . '/../../config/settings.php';
+            return require __DIR__ . "/../../config/settings.php";
         }
 
         $settings = apiSettings()["jwt_auth"];
 
         $this->setContainerValue(JwtAuthentication::class, new JwtAuthentication($settings));
 
-        return $request->withHeader('Authorization', 'Bearer ' . base64_encode('api-user:secret'));
+        return $request->withHeader("Authorization", "Bearer " . base64_encode("api-user:secret"));
     }
 }

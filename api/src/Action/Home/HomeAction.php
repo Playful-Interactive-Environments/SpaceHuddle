@@ -33,6 +33,6 @@ final class HomeAction
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        return $this->responder->withRedirectFor($response, 'docs');
+        return $this->responder->withRedirectFor($response, "docs");
     }
 }

@@ -40,7 +40,7 @@ final class DefaultErrorHandler
         $this->responder = $responder;
         $this->responseFactory = $responseFactory;
         $this->logger = $loggerFactory
-            ->addFileHandler('error.log')
+            ->addFileHandler("error.log")
             ->createLogger();
     }
 
@@ -64,7 +64,7 @@ final class DefaultErrorHandler
         if ($logErrors) {
             $this->logger->error(
                 sprintf(
-                    'Error: [%s] %s, Method: %s, Path: %s',
+                    "Error: [%s] %s, Method: %s, Path: %s",
                     $exception->getCode(),
                     $this->getExceptionText($exception),
                     $request->getMethod(),
@@ -82,8 +82,8 @@ final class DefaultErrorHandler
         // Render response
         $response = $this->responseFactory->createResponse();
         $response = $this->responder->withJson($response, [
-            'error' => [
-                'message' => $errorMessage,
+            "error" => [
+                "message" => $errorMessage,
             ],
         ]);
 
@@ -112,7 +112,7 @@ final class DefaultErrorHandler
         }
 
         $file = basename($exception->getFile());
-        if ($file === 'CallableResolver.php') {
+        if ($file === "CallableResolver.php") {
             $statusCode = StatusCodeInterface::STATUS_NOT_FOUND;
         }
 
@@ -131,11 +131,11 @@ final class DefaultErrorHandler
     private function getErrorMessage(Throwable $exception, int $statusCode, bool $displayErrorDetails): string
     {
         $reasonPhrase = $this->responseFactory->createResponse()->withStatus($statusCode)->getReasonPhrase();
-        $errorMessage = sprintf('%s %s', $statusCode, $reasonPhrase);
+        $errorMessage = sprintf("%s %s", $statusCode, $reasonPhrase);
 
         if ($displayErrorDetails === true) {
             $errorMessage = sprintf(
-                '%s - Error details: %s',
+                "%s - Error details: %s",
                 $errorMessage,
                 $this->getExceptionText($exception)
             );
@@ -159,7 +159,7 @@ final class DefaultErrorHandler
         $line = $exception->getLine();
         $message = $exception->getMessage();
         $trace = $exception->getTraceAsString();
-        $error = sprintf('[%s] %s in %s on line %s.', $code, $message, $file, $line);
+        $error = sprintf("[%s] %s in %s on line %s.", $code, $message, $file, $line);
         $error .= sprintf("\nBacktrace:\n%s", $trace);
 
         if ($maxLength > 0) {

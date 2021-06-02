@@ -35,11 +35,11 @@ trait AppTestTrait
      */
     protected function setUp(): void
     {
-        $this->app = require __DIR__ . '/../../config/bootstrap.php';
+        $this->app = require __DIR__ . "/../../config/bootstrap.php";
         $this->setUpContainer($this->app->getContainer());
 
-        if (method_exists($this, 'setUpDatabase')) {
-            $this->setUpDatabase(__DIR__ . '/../../resources/schema/schema.sql');
+        if (method_exists($this, "setUpDatabase")) {
+            $this->setUpDatabase(__DIR__ . "/../../resources/schema/schema.sql");
         }
     }
 }

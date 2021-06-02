@@ -4,55 +4,55 @@
 
 // Error reporting
 error_reporting(0);
-ini_set('display_errors', '0');
+ini_set("display_errors", "0");
 
 // Timezone
-date_default_timezone_set('Europe/Berlin');
+date_default_timezone_set("Europe/Berlin");
 
 // Settings
 $settings = [];
 
 // Path settings
-$settings['root'] = dirname(__DIR__);
-$settings['temp'] = $settings['root'] . '/tmp';
-$settings['public'] = $settings['root'] . '/public';
-$settings['template'] = $settings['root'] . '/templates';
+$settings["root"] = dirname(__DIR__);
+$settings["temp"] = $settings["root"] . "/tmp";
+$settings["public"] = $settings["root"] . "/public";
+$settings["template"] = $settings["root"] . "/templates";
 
 // Error handler
-$settings['error'] = [
+$settings["error"] = [
     // Should be set to false in production
-    'display_error_details' => true,
+    "display_error_details" => true,
     // Should be set to false for unit tests
-    'log_errors' => true,
+    "log_errors" => true,
     // Display error details in error log
-    'log_error_details' => true,
+    "log_error_details" => true,
 ];
 
 // Logger settings
-$settings['logger'] = [
-    'name' => 'app',
-    'path' => $settings['root'] . '/logs',
-    'filename' => 'app.log',
-    'level' => \Monolog\Logger::DEBUG,
-    'file_permission' => 0775,
+$settings["logger"] = [
+    "name" => "app",
+    "path" => $settings["root"] . "/logs",
+    "filename" => "app.log",
+    "level" => \Monolog\Logger::DEBUG,
+    "file_permission" => 0775,
 ];
 
 // Database settings
-$settings['db'] = [
-    'driver' => \Cake\Database\Driver\Mysql::class,
-    'host' => 'localhost',
-    'encoding' => 'utf8mb4',
-    'collation' => 'utf8mb4_unicode_ci',
+$settings["db"] = [
+    "driver" => \Cake\Database\Driver\Mysql::class,
+    "host" => "localhost",
+    "encoding" => "utf8mb4",
+    "collation" => "utf8mb4_unicode_ci",
     // Enable identifier quoting
-    'quoteIdentifiers' => true,
+    "quoteIdentifiers" => true,
     // Set to null to use MySQL servers timezone
-    'timezone' => null,
+    "timezone" => null,
     // Disable meta data cache
-    'cacheMetadata' => false,
+    "cacheMetadata" => false,
     // Disable query logging
-    'log' => false,
+    "log" => false,
     // PDO options
-    'flags' => [
+    "flags" => [
         // Turn off persistent connections
         PDO::ATTR_PERSISTENT => false,
         // Enable exceptions
@@ -69,44 +69,44 @@ $settings['db'] = [
 ];
 
 // Phoenix settings
-$settings['phoenix'] = [
-    'migration_dirs' => [
-        'first' => __DIR__ . '/../resources/migrations',
+$settings["phoenix"] = [
+    "migration_dirs" => [
+        "first" => __DIR__ . "/../resources/migrations",
     ],
-    'environments' => [
-        'local' => [
-            'adapter' => 'mysql',
-            'host' => '127.0.0.1',
-            'port' => 3306,
-            'username' => 'root',
-            'password' => '',
-            'db_name' => 'slim_skeleton_dev',
-            'charset' => 'utf8',
+    "environments" => [
+        "local" => [
+            "adapter" => "mysql",
+            "host" => "127.0.0.1",
+            "port" => 3306,
+            "username" => "root",
+            "password" => "",
+            "db_name" => "slim_skeleton_dev",
+            "charset" => "utf8",
         ],
-        'local2' => [
-            'adapter' => 'mysql',
-            'host' => '127.0.0.1',
-            'port' => 3306,
-            'username' => 'root',
-            'password' => 'root',
-            'db_name' => 'slim_skeleton_diff',
-            'charset' => 'utf8',
+        "local2" => [
+            "adapter" => "mysql",
+            "host" => "127.0.0.1",
+            "port" => 3306,
+            "username" => "root",
+            "password" => "root",
+            "db_name" => "slim_skeleton_diff",
+            "charset" => "utf8",
         ],
     ],
-    'default_environment' => 'local',
-    'log_table_name' => 'phoenix_log',
+    "default_environment" => "local",
+    "log_table_name" => "phoenix_log",
 ];
 
 // JWT settings
-$settings['jwt'] = [
+$settings["jwt"] = [
     // The issuer name
-    'issuer' => 'localhost',
+    "issuer" => "localhost",
     // Max lifetime in seconds
-    'lifetime' => 86400
+    "lifetime" => 86400
 ];
 
 // Console commands
-$settings['commands'] = [
+$settings["commands"] = [
     \App\Console\SchemaDumpCommand::class,
 ];
 

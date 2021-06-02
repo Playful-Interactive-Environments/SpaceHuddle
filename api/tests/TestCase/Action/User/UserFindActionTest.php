@@ -27,33 +27,33 @@ class UserFindActionTest extends TestCase
     {
         $this->insertFixtures([UserFixture::class]);
 
-        $request = $this->createRequest('GET', '/api/users');
+        $request = $this->createRequest("GET", "/api/users");
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
         $this->assertSame(StatusCodeInterface::STATUS_OK, $response->getStatusCode());
         $this->assertJsonData(
             [
-                'users' => [
+                "users" => [
                     0 => [
-                        'id' => 1,
-                        'username' => 'admin',
-                        'first_name' => null,
-                        'last_name' => null,
-                        'email' => 'admin@example.com',
-                        'user_role_id' => 1,
-                        'locale' => 'en_US',
-                        'enabled' => true,
+                        "id" => 1,
+                        "username" => "admin",
+                        "first_name" => null,
+                        "last_name" => null,
+                        "email" => "admin@example.com",
+                        "user_role_id" => 1,
+                        "locale" => "en_US",
+                        "enabled" => true,
                     ],
                     1 => [
-                        'id' => 2,
-                        'username' => 'user',
-                        'first_name' => null,
-                        'last_name' => null,
-                        'email' => 'user@example.com',
-                        'user_role_id' => 2,
-                        'locale' => 'de_DE',
-                        'enabled' => true,
+                        "id" => 2,
+                        "username" => "user",
+                        "first_name" => null,
+                        "last_name" => null,
+                        "email" => "user@example.com",
+                        "user_role_id" => 2,
+                        "locale" => "de_DE",
+                        "enabled" => true,
                     ],
                 ],
             ],
@@ -68,8 +68,8 @@ class UserFindActionTest extends TestCase
      */
     public function testListUsersWithoutLogin(): void
     {
-        $request = $this->createRequest('GET', '/api/users');
-        $request = $this->withJwtAuth($request)->withoutHeader('Authorization');
+        $request = $this->createRequest("GET", "/api/users");
+        $request = $this->withJwtAuth($request)->withoutHeader("Authorization");
         $response = $this->app->handle($request);
 
         $this->assertSame(StatusCodeInterface::STATUS_UNAUTHORIZED, $response->getStatusCode());

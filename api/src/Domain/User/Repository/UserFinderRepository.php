@@ -34,25 +34,25 @@ final class UserFinderRepository
      */
     public function findUsers(): array
     {
-        $query = $this->queryFactory->newSelect('users');
+        $query = $this->queryFactory->newSelect("users");
 
         $query->select(
             [
-                'id',
-                'username',
-                'first_name',
-                'last_name',
-                'email',
-                'user_role_id',
-                'locale',
-                'enabled',
+                "id",
+                "username",
+                "first_name",
+                "last_name",
+                "email",
+                "user_role_id",
+                "locale",
+                "enabled",
             ]
         );
 
         // Add more "use case specific" conditions to the query
         // ...
 
-        $rows = $query->execute()->fetchAll('assoc') ?: [];
+        $rows = $query->execute()->fetchAll("assoc") ?: [];
 
         // Convert to list of objects
         return $this->hydrator->hydrate($rows, UserData::class);

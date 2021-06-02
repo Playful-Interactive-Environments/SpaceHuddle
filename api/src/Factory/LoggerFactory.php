@@ -29,12 +29,12 @@ final class LoggerFactory
      */
     public function __construct(array $settings = [])
     {
-        $this->path = (string)($settings['path'] ?? '');
-        $this->level = (int)($settings['level'] ?? 0);
+        $this->path = (string)($settings["path"] ?? "");
+        $this->level = (int)($settings["level"] ?? 0);
 
         // This can be used for testing to make the Factory testable
-        if (isset($settings['test'])) {
-            $this->testLogger = $settings['test'];
+        if (isset($settings["test"])) {
+            $this->testLogger = $settings["test"];
         }
     }
 
@@ -86,7 +86,7 @@ final class LoggerFactory
      */
     public function addFileHandler(string $filename, int $level = null): self
     {
-        $filename = sprintf('%s/%s', $this->path, $filename);
+        $filename = "$this->path/$filename";
         $rotatingFileHandler = new RotatingFileHandler($filename, 0, $level ?? $this->level, true, 0777);
 
         // The last "true" here tells monolog to remove empty []'s
@@ -106,7 +106,7 @@ final class LoggerFactory
      */
     public function addConsoleHandler(int $level = null): self
     {
-        $streamHandler = new StreamHandler('php://output', $level ?? $this->level);
+        $streamHandler = new StreamHandler("php://output", $level ?? $this->level);
         $streamHandler->setFormatter(new LineFormatter(null, null, false, true));
 
         $this->addHandler($streamHandler);

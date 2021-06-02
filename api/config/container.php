@@ -29,8 +29,8 @@ use Tuupola\Middleware\JwtAuthentication;
 
 return [
     // Application settings
-    'settings' => function () {
-        return require __DIR__ . '/settings.php';
+    "settings" => function () {
+        return require __DIR__ . "/settings.php";
     },
 
     App::class => function (ContainerInterface $container) {
@@ -67,7 +67,7 @@ return [
 
     // The logger factory
     LoggerFactory::class => function (ContainerInterface $container) {
-        return new LoggerFactory($container->get('settings')['logger']);
+        return new LoggerFactory($container->get("settings")["logger"]);
     },
 
     BasePathMiddleware::class => function (ContainerInterface $container) {
@@ -78,7 +78,7 @@ return [
 
     // Database connection
     Connection::class => function (ContainerInterface $container) {
-        return new Connection($container->get('settings')['db']);
+        return new Connection($container->get("settings")["db"]);
     },
 
     PDO::class => function (ContainerInterface $container) {
@@ -100,19 +100,19 @@ return [
     },
 
     ErrorMiddleware::class => function (ContainerInterface $container) {
-        $settings = $container->get('settings')['error'];
+        $settings = $container->get("settings")["error"];
         $app = $container->get(App::class);
 
         $logger = $container->get(LoggerFactory::class)
-            ->addFileHandler('error.log')
+            ->addFileHandler("error.log")
             ->createLogger();
 
         $errorMiddleware = new ErrorMiddleware(
             $app->getCallableResolver(),
             $app->getResponseFactory(),
-            (bool)$settings['display_error_details'],
-            (bool)$settings['log_errors'],
-            (bool)$settings['log_error_details'],
+            (bool)$settings["display_error_details"],
+            (bool)$settings["log_errors"],
+            (bool)$settings["log_error_details"],
             $logger
         );
 
@@ -125,10 +125,10 @@ return [
         $application = new Application();
 
         $application->getDefinition()->addOption(
-            new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The Environment name.', 'development')
+            new InputOption("--env", "-e", InputOption::VALUE_REQUIRED, "The Environment name.", "development")
         );
 
-        foreach ($container->get('settings')['commands'] as $class) {
+        foreach ($container->get("settings")["commands"] as $class) {
             $application->add($container->get($class));
         }
 
@@ -136,27 +136,27 @@ return [
     },
 
     PhpRenderer::class => function (ContainerInterface $container) {
-        return new PhpRenderer($container->get('settings')['template']);
+        return new PhpRenderer($container->get("settings")["template"]);
     },
 
     JwtAuthentication::class => function (ContainerInterface $container) {
-        $settings = $container->get('settings')['jwt_auth'];
+        $settings = $container->get("settings")["jwt_auth"];
 
         return new JwtAuthentication($settings);
     },
 
     JwtAuth::class => function (ContainerInterface $container) {
         $configuration = $container->get(Configuration::class);
-        $jwtSettings = $container->get('settings')['jwt'];
-        $issuer = (string)$jwtSettings['issuer'];
-        $lifetime = (int)$jwtSettings['lifetime'];
+        $jwtSettings = $container->get("settings")["jwt"];
+        $issuer = (string)$jwtSettings["issuer"];
+        $lifetime = (int)$jwtSettings["lifetime"];
         return new JwtAuth($configuration, $issuer, $lifetime);
     },
 
     Configuration::class => function (ContainerInterface $container) {
-        $jwtSettings = $container->get('settings')['jwt'];
-        $privateKey = (string)$jwtSettings['private_key'];
-        $publicKey = (string)$jwtSettings['public_key'];
+        $jwtSettings = $container->get("settings")["jwt"];
+        $privateKey = (string)$jwtSettings["private_key"];
+        $publicKey = (string)$jwtSettings["public_key"];
         // Asymmetric algorithms use a private key for signature creation
         // and a public key for verification
         return Configuration::forAsymmetricSigner(

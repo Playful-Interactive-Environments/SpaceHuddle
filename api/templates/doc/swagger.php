@@ -41,7 +41,7 @@
         // Begin Swagger UI call region
         const ui = SwaggerUIBundle({
             spec: <?= $spec ?>,
-            dom_id: '#swagger-ui',
+            dom_id: "#swagger-ui",
             deepLinking: true,
             presets: [
                 SwaggerUIBundle.presets.apis,

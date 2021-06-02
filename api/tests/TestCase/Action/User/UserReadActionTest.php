@@ -27,7 +27,7 @@ class UserReadActionTest extends TestCase
     {
         $this->insertFixtures([UserFixture::class]);
 
-        $request = $this->createRequest('GET', '/api/users/1');
+        $request = $this->createRequest("GET", "/api/users/1");
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
@@ -35,14 +35,14 @@ class UserReadActionTest extends TestCase
         $this->assertJsonContentType($response);
         $this->assertJsonData(
             [
-                'id' => 1,
-                'username' => 'admin',
-                'first_name' => null,
-                'last_name' => null,
-                'email' => 'admin@example.com',
-                'user_role_id' => 1,
-                'locale' => 'en_US',
-                'enabled' => true,
+                "id" => 1,
+                "username" => "admin",
+                "first_name" => null,
+                "last_name" => null,
+                "email" => "admin@example.com",
+                "user_role_id" => 1,
+                "locale" => "en_US",
+                "enabled" => true,
             ],
             $response
         );
@@ -55,7 +55,7 @@ class UserReadActionTest extends TestCase
      */
     public function testInvalidId(): void
     {
-        $request = $this->createRequest('GET', '/api/users/99');
+        $request = $this->createRequest("GET", "/api/users/99");
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 

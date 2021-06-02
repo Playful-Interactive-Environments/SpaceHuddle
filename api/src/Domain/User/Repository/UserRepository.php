@@ -77,7 +77,7 @@ final class UserRepository
         $row = $query->execute()->fetch("assoc");
 
         if (!$row) {
-            throw new DomainException(sprintf("User not found: %s", $userId));
+            throw new DomainException("User not found: $userId");
         }
 
         return new UserData($row);
@@ -107,7 +107,7 @@ final class UserRepository
         $row = $query->execute()->fetch("assoc");
 
         if (!$row) {
-            throw new DomainException(sprintf("User not found: %s", $username));
+            throw new DomainException("User not found: $username");
         }
 
         return new UserData($row);

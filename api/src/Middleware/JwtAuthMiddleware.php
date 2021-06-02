@@ -49,11 +49,11 @@ final class JwtAuthMiddleware implements MiddlewareInterface
         ServerRequestInterface $request,
         RequestHandlerInterface $handler
     ): ResponseInterface {
-        $token = explode(' ', (string)$request->getHeaderLine('Authorization'))[1] ?? '';
+        $token = explode(" ", (string)$request->getHeaderLine("Authorization"))[1] ?? "";
         if (!$token || !$this->jwtAuth->validateToken($token)) {
             return $this->responseFactory->createResponse()
-                ->withHeader('Content-Type', 'application/json')
-                ->withStatus(401, 'Unauthorized');
+                ->withHeader("Content-Type", "application/json")
+                ->withStatus(401, "Unauthorized");
         }
         return $handler->handle($request);
     }

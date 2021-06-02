@@ -37,8 +37,8 @@ final class SchemaDumpCommand extends Command
     {
         parent::configure();
 
-        $this->setName('schema-dump');
-        $this->setDescription('Generate a schema.sql from the schema data source.');
+        $this->setName("schema-dump");
+        $this->setDescription("Generate a schema.sql from the schema data source.");
     }
 
     /**
@@ -52,27 +52,27 @@ final class SchemaDumpCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Lazy loading, because the database may not exists
-        $output->writeln(sprintf('Use database: %s', (string)$this->query('select database()')->fetchColumn()));
+        $output->writeln(sprintf("Use database: %s", (string)$this->query("select database()")->fetchColumn()));
 
-        $statement = $this->query('SELECT table_name
+        $statement = $this->query("SELECT table_name
                 FROM information_schema.tables
-                WHERE table_schema = database()');
+                WHERE table_schema = database()");
 
         $sql = [];
         while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
             $row = array_change_key_case($row);
-            $statement2 = $this->query(sprintf('SHOW CREATE TABLE `%s`;', (string)$row['table_name']));
-            $createTableSql = $statement2->fetch()['Create Table'];
-            $sql[] = preg_replace('/AUTO_INCREMENT=\d+/', '', $createTableSql) . ';';
+            $statement2 = $this->query(sprintf("SHOW CREATE TABLE `%s`;", (string)$row["table_name"]));
+            $createTableSql = $statement2->fetch()["Create Table"];
+            $sql[] = preg_replace("/AUTO_INCREMENT=\d+/", "", $createTableSql) . ";";
         }
 
         $sql = implode("\n\n", $sql);
 
-        $filename = __DIR__ . '/../../resources/schema/schema.sql';
+        $filename = __DIR__ . "/../../resources/schema/schema.sql";
         file_put_contents($filename, $sql);
 
-        $output->writeln(sprintf('Generated file: %s', realpath($filename)));
-        $output->writeln(sprintf('<info>Done</info>'));
+        $output->writeln(sprintf("Generated file: %s", realpath($filename)));
+        $output->writeln(sprintf("<info>Done</info>"));
 
         return 0;
     }
@@ -91,7 +91,7 @@ final class SchemaDumpCommand extends Command
         $statement = $this->pdo->query($sql);
 
         if (!$statement) {
-            throw new UnexpectedValueException('Query failed');
+            throw new UnexpectedValueException("Query failed");
         }
 
         return $statement;

@@ -16,8 +16,8 @@
  * a security breach, and production values will never have to be
  * shared with all project collaborators.
  */
-require __DIR__ . '/local.dev.php';
+require __DIR__ . "/local.dev.php";
 
 // Database
-$settings['db']['username'] = 'root';
-$settings['db']['password'] = '';
+$settings["db"]["username"] = "root";
+$settings["db"]["password"] = "";

@@ -40,22 +40,22 @@ final class JwtClaimMiddleware implements MiddlewareInterface
         ServerRequestInterface $request,
         RequestHandlerInterface $handler
     ): ResponseInterface {
-        $authorization = explode(' ', (string)$request->getHeaderLine('Authorization'));
-        $type = $authorization[0] ?? '';
-        $credentials = $authorization[1] ?? '';
-        if ($type !== 'Bearer') {
+        $authorization = explode(" ", (string)$request->getHeaderLine("Authorization"));
+        $type = $authorization[0] ?? "";
+        $credentials = $authorization[1] ?? "";
+        if ($type !== "Bearer") {
             return $handler->handle($request);
         }
         $token = $this->jwtAuth->validateToken($credentials);
         if ($token) {
             // Append valid token
-            $request = $request->withAttribute('token', $token);
+            $request = $request->withAttribute("token", $token);
             // Append the user id as request attribute
-            $request = $request->withAttribute('userId', $token->claims()->get('userId'));
+            $request = $request->withAttribute("userId", $token->claims()->get("userId"));
             // Append the username as request attribute
-            $request = $request->withAttribute('username', $token->claims()->get('username'));
+            $request = $request->withAttribute("username", $token->claims()->get("username"));
             // Add more claim values as attribute...
-            //$request = $request->withAttribute('locale', $token->claims()->get('locale'));
+            //$request = $request->withAttribute("locale", $token->claims()->get("locale"));
         }
         return $handler->handle($request);
     }

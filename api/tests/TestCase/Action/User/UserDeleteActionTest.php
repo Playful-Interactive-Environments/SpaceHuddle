@@ -27,7 +27,7 @@ class UserDeleteActionTest extends TestCase
     {
         $this->insertFixtures([UserFixture::class]);
 
-        $request = $this->createJsonRequest('DELETE', '/api/users/1');
+        $request = $this->createJsonRequest("DELETE", "/api/users/1");
         $request = $this->withJwtAuth($request);
 
         $response = $this->app->handle($request);
@@ -36,7 +36,7 @@ class UserDeleteActionTest extends TestCase
         $this->assertSame(StatusCodeInterface::STATUS_OK, $response->getStatusCode());
 
         // Check database
-        $this->assertTableRowCount(1, 'users');
-        $this->assertTableRowNotExists('users', 1);
+        $this->assertTableRowCount(1, "users");
+        $this->assertTableRowNotExists("users", 1);
     }
 }

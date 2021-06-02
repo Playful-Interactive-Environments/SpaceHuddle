@@ -34,6 +34,6 @@ final class UserData
         $reader = new ArrayReader($data);
 
         $this->id = $reader->findString("id");
-        $this->username = $reader->findString('username');
+        $this->username = $reader->findString("username");
     }
 }

@@ -15,7 +15,7 @@ class LoggerFactoryTest extends TestCase
 {
     use AppTestTrait;
 
-    private string $temp = __DIR__ . '/temp';
+    private string $temp = __DIR__ . "/temp";
 
     /**
      * Set up.
@@ -53,7 +53,7 @@ class LoggerFactoryTest extends TestCase
     private function cleanUp(): void
     {
         /** @var array<int, string> $files */
-        $files = glob($this->temp . '/*.*');
+        $files = glob($this->temp . "/*.*");
 
         foreach ($files as $file) {
             unlink($file);
@@ -67,12 +67,12 @@ class LoggerFactoryTest extends TestCase
      */
     public function test(): void
     {
-        $this->expectOutputRegex('/INFO: Info message/');
-        $this->expectOutputRegex('/ERROR: Error message/');
+        $this->expectOutputRegex("/INFO: Info message/");
+        $this->expectOutputRegex("/ERROR: Error message/");
 
         $settings = [
-            'path' => $this->temp,
-            'level' => 0,
+            "path" => $this->temp,
+            "level" => 0,
         ];
 
         $factory = new LoggerFactory($settings);
@@ -80,17 +80,17 @@ class LoggerFactoryTest extends TestCase
         $testHandler = new TestHandler();
         $factory
             ->addHandler($testHandler)
-            ->addFileHandler('test.log')
+            ->addFileHandler("test.log")
             ->addConsoleHandler();
 
         $logger = $factory->createLogger();
-        $logger->info('Info message');
-        $logger->error('Error message');
+        $logger->info("Info message");
+        $logger->error("Error message");
 
-        $this->assertTrue($testHandler->hasInfo('Info message'));
-        $this->assertTrue($testHandler->hasError('Error message'));
+        $this->assertTrue($testHandler->hasInfo("Info message"));
+        $this->assertTrue($testHandler->hasError("Error message"));
 
-        $now = (new DateTimeImmutable())->format('Y-m-d');
-        $this->assertFileExists(sprintf('%s/test-%s.log', $this->temp, $now));
+        $now = (new DateTimeImmutable())->format("Y-m-d");
+        $this->assertFileExists(sprintf("%s/test-%s.log", $this->temp, $now));
     }
 }
