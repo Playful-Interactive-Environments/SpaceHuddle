@@ -2,7 +2,11 @@
 
 use App\Factory\LoggerFactory;
 use App\Handler\DefaultErrorHandler;
+use App\Routing\JwtAuth;
 use Cake\Database\Connection;
+use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\Signer\Key\InMemory;
+use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -139,5 +143,26 @@ return [
         $settings = $container->get('settings')['jwt_auth'];
 
         return new JwtAuthentication($settings);
+    },
+
+    JwtAuth::class => function (ContainerInterface $container) {
+        $configuration = $container->get(Configuration::class);
+        $jwtSettings = $container->get('settings')['jwt'];
+        $issuer = (string)$jwtSettings['issuer'];
+        $lifetime = (int)$jwtSettings['lifetime'];
+        return new JwtAuth($configuration, $issuer, $lifetime);
+    },
+
+    Configuration::class => function (ContainerInterface $container) {
+        $jwtSettings = $container->get('settings')['jwt'];
+        $privateKey = (string)$jwtSettings['private_key'];
+        $publicKey = (string)$jwtSettings['public_key'];
+        // Asymmetric algorithms use a private key for signature creation
+        // and a public key for verification
+        return Configuration::forAsymmetricSigner(
+            new Sha256(),
+            InMemory::plainText($privateKey),
+            InMemory::plainText($publicKey)
+        );
     },
 ];
