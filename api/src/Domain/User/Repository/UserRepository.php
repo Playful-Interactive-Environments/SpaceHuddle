@@ -195,7 +195,7 @@ final class UserRepository
      *
      * @return bool True if password matches.
      */
-    public function checkPassword(string $username, string $password) : bool
+    public function checkPasswordForUsername(string $username, string $password) : bool
     {
         $query = $this->queryFactory->newSelect("user");
         $query->select(
@@ -205,6 +205,35 @@ final class UserRepository
         );
 
         $query->andWhere(["username" => $username]);
+
+        $row = $query->execute()->fetch("assoc");
+
+        if ($row) {
+            $hash = $row["password"];
+            return password_verify($password, $hash);
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether the password for the specified user is correct.
+     *
+     * @param string $username The user name
+     * @param string $password The password
+     *
+     * @return bool True if password matches.
+     */
+    public function checkPasswordForUserId(string $userId, string $password) : bool
+    {
+        $query = $this->queryFactory->newSelect("user");
+        $query->select(
+            [
+                "password"
+            ]
+        );
+
+        $query->andWhere(["id" => $userId]);
 
         $row = $query->execute()->fetch("assoc");
 

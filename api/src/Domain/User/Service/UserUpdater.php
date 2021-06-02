@@ -74,7 +74,7 @@ final class UserUpdater
     public function updatePassword(string $userId, array $data): UserData
     {
         // Input validation
-        $this->userValidator->validateUserUpdate($userId, $data);
+        $this->userValidator->validatePasswordUpdate($userId, $data);
 
         // Validation was successfully
         $user = (object)$data;

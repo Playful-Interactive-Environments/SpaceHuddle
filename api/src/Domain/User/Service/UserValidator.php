@@ -49,7 +49,7 @@ final class UserValidator extends AbstractValidator
 
         $username = $data["username"];
         $password = $data["password"];
-        if (!$this->repository->checkPassword($username, $password)) {
+        if (!$this->repository->checkPasswordForUsername($username, $password)) {
             $result = new ValidationResult();
             $result->addError("username or password", "Username or password wrong.");
             throw new ValidationException("Please check your input", $result);
@@ -94,6 +94,25 @@ final class UserValidator extends AbstractValidator
         $this->validateEntity($data, newRecord: false);
     }
 
+    /**
+     * Validate password update.
+     *
+     * @param string $userId The user id
+     * @param array<mixed> $data The data
+     *
+     * @return void
+     */
+    public function validatePasswordUpdate(string $userId, array $data): void
+    {
+        $this->validateUserUpdate($userId, $data);
+
+        $oldPassword = $data["oldPassword"];
+        if (!$this->repository->checkPasswordForUserId($userId, $oldPassword)) {
+            $result = new ValidationResult();
+            $result->addError("password", "The old password is wrong.");
+            throw new ValidationException("Please check your input", $result);
+        }
+    }
     /**
      * Create validator.
      *
