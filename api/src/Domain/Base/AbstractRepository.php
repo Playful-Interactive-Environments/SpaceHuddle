@@ -3,6 +3,7 @@
 namespace App\Domain\Base;
 
 use App\Factory\QueryFactory;
+use DomainException;
 
 /**
  * Description of the common repository functionality.
@@ -14,22 +15,19 @@ abstract class AbstractRepository
     protected ?string $entityName;
     protected ?string $resultClass;
 
-    /**
-     * @param $name Property name
-     */
-    public function __get($name) : mixed
+    public function __get($name): mixed
     {
-        $methode = "get".ucfirst($name);
-        echo "search Methode: $methode";
-        if (method_exists($this, $methode))
-        {
-            return $this->$methode();
+        $method = "get" . ucfirst($name);
+        echo "search method: $method";
+        if (method_exists($this, $method)) {
+            return $this->$method();
+        } else {
+            return null;
         }
-        else return null;
     }
 
     /**
-     * get the entity table name
+     * Get the entity table name.
      * @return string|null entity table name
      */
     public function getEntityName(): ?string
@@ -39,7 +37,6 @@ abstract class AbstractRepository
 
     /**
      * The constructor.
-     *
      * @param QueryFactory $queryFactory The query factory
      */
     public function __construct(QueryFactory $queryFactory, ?string $entityName = null, ?string $resultClass = null)
@@ -63,12 +60,10 @@ abstract class AbstractRepository
 
     /**
      * Insert entity row.
-     *
      * @param object $data The data to be inserted
-     *
-     * @return AbstractData The new created entity
+     * @return AbstractData|null The new created entity
      */
-    public function insert(object $data): AbstractData|null
+    public function insert(object $data): ?AbstractData
     {
         if ($this->genericTableParameterSet()) {
             $data->id = uuid_create();
@@ -84,14 +79,10 @@ abstract class AbstractRepository
 
     /**
      * Get entity.
-     *
-     * @param ?array $conditions The WHERE conditions to add with AND
-     *
-     * @throws DomainException
-     *
-     * @return AbstractData The result entity
+     * @param ?array $conditions The WHERE conditions to add with AND.
+     * @return AbstractData|null The result entity.
      */
-    public function get(array $conditions = null): AbstractData|null
+    public function get(array $conditions = null): ?AbstractData
     {
         if ($this->genericTableParameterSet()) {
             $query = $this->queryFactory->newSelect($this->entityName);
@@ -110,27 +101,21 @@ abstract class AbstractRepository
     }
 
     /**
-     * Get entity by id.
-     *
-     * @param string $id The entity id
-     *
-     * @throws DomainException
-     *
-     * @return AbstractData The result entity
+     * Get entity by ID.
+     * @param string $id The entity ID.
+     * @return AbstractData|null The result entity.
      */
-    public function getById(string $id): AbstractData|null
+    public function getById(string $id): ?AbstractData
     {
         return $this->get(["id" => $id]);
     }
 
     /**
      * Update entity row.
-     *
-     * @param AbstractData $data The entity to change
-     *
-     * @return void
+     * @param object|array $data The entity to change.
+     * @return AbstractData|null The result entity.
      */
-    public function update(object|array $data): AbstractData|null
+    public function update(object|array $data): ?AbstractData
     {
         if ($this->genericTableParameterSet()) {
             if (!is_array($data)) {
@@ -151,9 +136,7 @@ abstract class AbstractRepository
 
     /**
      * Check entity.
-     *
      * @param ?array $conditions The WHERE conditions to add with AND
-     *
      * @return bool True if exists
      */
     public function exists(array $conditions = null): bool
@@ -169,10 +152,8 @@ abstract class AbstractRepository
     }
 
     /**
-     * Check entity id.
-     *
-     * @param string $id The entity id
-     *
+     * Check entity ID.
+     * @param string $id The entity ID.
      * @return bool True if exists
      */
     public function existsId(string $id): bool
@@ -183,28 +164,27 @@ abstract class AbstractRepository
     /**
      * Encrypts the text
      * @param string $text Text to be encrypted.
-     * @return string hashed text
+     * @return string The hashed text.
      */
-    protected static function encryptText(string $text) : string {
+    protected static function encryptText(string $text): string
+    {
         // Hash text
         return password_hash($text, PASSWORD_DEFAULT);
     }
 
     /**
-     * Checks whether the encrypt text for the specified entity is correct.
-     *
+     * Checks whether the encrypted text for the specified entity is correct.
      * @param array $conditions The WHERE conditions to add with AND
      * @param string $text The original text
-     *
      * @return bool True if text matches.
      */
-    public function checkEncryptText(array $conditions, string $text, string $textColumName = "password") : bool
+    public function checkEncryptText(array $conditions, string $text, string $textColumnName = "password"): bool
     {
         if ($this->genericTableParameterSet()) {
             $query = $this->queryFactory->newSelect($this->entityName);
             $query->select(
                 [
-                    $textColumName
+                    $textColumnName
                 ]
             );
 
@@ -213,7 +193,7 @@ abstract class AbstractRepository
             $row = $query->execute()->fetch("assoc");
 
             if ($row) {
-                $hash = $row[$textColumName];
+                $hash = $row[$textColumnName];
                 return password_verify($text, $hash);
             }
         }
@@ -257,7 +237,7 @@ abstract class AbstractRepository
                 $connectionKey = self::keygen(8, false);
                 $query = $this->queryFactory->newSelect($this->entityName);
                 $query->select("id")->andWhere([$keyColumnName => $connectionKey]);
-                if ((bool)$query->execute()->fetch("assoc")) {
+                if ($query->execute()->fetch("assoc")) {
                     $connectionKey = "";
                 }
             }
@@ -267,23 +247,20 @@ abstract class AbstractRepository
     }
 
     /**
-     * Checks whether the encrypt text for the specified entity is correct.
-     *
-     * @param string $id The entity id
-     * @param string $text The original text
+     * Checks whether the encrypted text for the specified entity is correct.
+     * @param string $id The entity ID.
+     * @param string $text The original text.
      *
      * @return bool True if text matches.
      */
-    public function checkEncryptTextForId(string $id, string $text, string $textColumName = "password") : bool
+    public function checkEncryptTextForId(string $id, string $text, string $textColumnName = "password"): bool
     {
-        return self::checkEncryptText(["id" => $id], $text, $textColumName);
+        return self::checkEncryptText(["id" => $id], $text, $textColumnName);
     }
 
     /**
      * Delete entity row.
-     *
-     * @param int $id The entity id
-     *
+     * @param string $id The entity ID.
      * @return void
      */
     public function deleteById(string $id): void
@@ -297,14 +274,11 @@ abstract class AbstractRepository
 
     /**
      * Convert to array.
-     *
      * @param object $data The entity data
-     *
      * @return array The array
      */
     protected function toRow(object $data): array
     {
         return (array)$data;
     }
-
 }
