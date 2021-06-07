@@ -68,7 +68,7 @@ class SessionCreateAction
         $userId = $request->getAttribute("userId");
 
         // Invoke the Domain with inputs and retain the result
-        $userResult = $this->service->createSession($userId, $data);
+        $userResult = $this->service->service($data, $userId);
 
         // Build the HTTP response
         return $this->responder

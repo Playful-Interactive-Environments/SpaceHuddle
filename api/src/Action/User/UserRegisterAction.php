@@ -49,7 +49,7 @@ final class UserRegisterAction
         // Extract the form data from the request body
         $data = (array)$request->getParsedBody();
 
-        $userResult = $this->userCreator->createUser($data);
+        $userResult = $this->userCreator->service($data);
 
         return $this->responder
             ->withJson($response, $userResult)

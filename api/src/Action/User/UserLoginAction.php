@@ -82,7 +82,7 @@ final class UserLoginAction
         $data = (array)$request->getParsedBody();
 
         // Invoke the Domain with inputs and retain the result
-        $userResult = $this->userLogin->loginUser($data);
+        $userResult = $this->userLogin->service($data);
 
         // Build the HTTP response
         return $this->responder

@@ -58,7 +58,7 @@ final class UserDeleteAction
         $userId = $request->getAttribute("userId");
 
         // Invoke the domain (service class)
-        $userResult = $this->userDeleter->deleteUser($userId);
+        $userResult = $this->userDeleter->service($userId);
 
         // Build the HTTP response
         return $this->responder

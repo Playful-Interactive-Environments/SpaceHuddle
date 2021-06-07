@@ -65,7 +65,7 @@ class UserChangePasswordAction
         $userId = $request->getAttribute("userId");
 
         // Invoke the Domain with inputs and retain the result
-        $userResult = $this->userUpdater->updatePassword($userId, $data);
+        $userResult = $this->userUpdater->servicePassword($userId, $data);
 
         // Build the HTTP response
         return $this->responder

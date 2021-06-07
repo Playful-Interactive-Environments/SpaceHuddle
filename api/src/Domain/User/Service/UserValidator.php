@@ -3,8 +3,7 @@
 namespace App\Domain\User\Service;
 
 use App\Domain\User\Repository\UserRepository;
-use App\Domain\Service\AbstractValidator;
-use App\Domain\User\Type\UserRoleType;
+use App\Domain\Base\AbstractValidator;
 use App\Factory\ValidationFactory;
 use Cake\Validation\Validator;
 use Selective\Validation\Exception\ValidationException;
@@ -15,8 +14,6 @@ use Selective\Validation\ValidationResult;
  */
 final class UserValidator extends AbstractValidator
 {
-    private UserRepository $repository;
-
     /**
      * The constructor.
      *
@@ -25,8 +22,13 @@ final class UserValidator extends AbstractValidator
      */
     public function __construct(UserRepository $repository, ValidationFactory $validationFactory)
     {
-        parent::__construct($validationFactory);
-        $this->repository = $repository;
+        parent::__construct($repository, $validationFactory);
+    }
+
+    protected function getRepository() : UserRepository {
+        if ($this->repository instanceof UserRepository) {
+            return $this->repository;
+        }
     }
 
     /**
@@ -49,7 +51,7 @@ final class UserValidator extends AbstractValidator
 
         $username = $data["username"];
         $password = $data["password"];
-        if (!$this->repository->checkPasswordForUsername($username, $password)) {
+        if (!$this->getRepository()->checkPasswordForUsername($username, $password)) {
             $result = new ValidationResult();
             $result->addError("username or password", "Username or password wrong.");
             throw new ValidationException("Please check your input", $result);
@@ -63,12 +65,12 @@ final class UserValidator extends AbstractValidator
      *
      * @return void
      */
-    public function validateUserCreate(array $data): void
+    public function validateCreate(array $data): void
     {
         $this->validateEntity($data);
 
         $username = $data["username"];
-        if ($this->repository->existsUsername($username)) {
+        if ($this->getRepository()->existsUsername($username)) {
             $result = new ValidationResult();
             $result->addError("username", "User $username already exists.");
             throw new ValidationException("Please check your input", $result);
@@ -76,33 +78,15 @@ final class UserValidator extends AbstractValidator
     }
 
     /**
-     * Validate if the use exists.
+     * Validate if the entity exists.
      *
-     * @param string $userId The user id
-     *
-     * @return void
-     */
-    public function validateUserExists(string $userId): void
-    {
-        if (!$this->repository->existsUserId($userId)) {
-            $result = new ValidationResult();
-            $result->addError("userId", "The logged-in user no longer exists.");
-            throw new ValidationException("Please check your login", $result);
-        }
-    }
-
-    /**
-     * Validate update.
-     *
-     * @param string $userId The user id
-     * @param array<mixed> $data The data
+     * @param string $id The entity id
      *
      * @return void
      */
-    public function validateUserUpdate(string $userId, array $data): void
+    public function validateExists(string $id, ?string $errorMessage = null): void
     {
-        $this->validateUserExists($userId);
-        $this->validateEntity($data, newRecord: false);
+        parent::validateExists($id, "The logged-in user no longer exists.");
     }
 
     /**
@@ -115,10 +99,10 @@ final class UserValidator extends AbstractValidator
      */
     public function validatePasswordUpdate(string $userId, array $data): void
     {
-        $this->validateUserUpdate($userId, $data);
+        $this->validateUpdate($userId, $data);
 
         $oldPassword = $data["oldPassword"];
-        if (!$this->repository->checkPasswordForUserId($userId, $oldPassword)) {
+        if (!$this->repository->checkEncryptTextForId($userId, $oldPassword)) {
             $result = new ValidationResult();
             $result->addError("password", "The old password is wrong.");
             throw new ValidationException("Please check your input", $result);

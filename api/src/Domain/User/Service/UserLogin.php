@@ -2,6 +2,7 @@
 
 namespace App\Domain\User\Service;
 
+use App\Domain\Base\Service\AbstractService;
 use App\Domain\User\Repository\UserRepository;
 use App\Factory\LoggerFactory;
 use App\Routing\JwtAuth;
@@ -10,34 +11,25 @@ use Psr\Log\LoggerInterface;
 /**
  * Service.
  */
-final class UserLogin
+final class UserLogin extends AbstractService
 {
-    private UserRepository $repository;
-
-    private UserValidator $userValidator;
-
-    private LoggerInterface $logger;
-
     private JwtAuth $jwtAuth;
 
     /**
      * The constructor.
      *
      * @param UserRepository $repository The repository
-     * @param UserValidator $userValidator The validator
+     * @param UserValidator $validator The validator
      * @param LoggerFactory $loggerFactory The logger factory
+     * @param JwtAuth $jwtAuth The jwt authorization
      */
     public function __construct(
         UserRepository $repository,
-        UserValidator $userValidator,
+        UserValidator $validator,
         LoggerFactory $loggerFactory,
         JwtAuth $jwtAuth
     ) {
-        $this->repository = $repository;
-        $this->userValidator = $userValidator;
-        $this->logger = $loggerFactory
-            ->addFileHandler("user_creator.log")
-            ->createLogger();
+        parent::__construct($repository, $validator, $loggerFactory);
         $this->jwtAuth = $jwtAuth;
     }
 
@@ -48,10 +40,10 @@ final class UserLogin
      *
      * @return array<mixed> The access token
      */
-    public function loginUser(array $data): array
+    public function service(array $data): array
     {
         // Input validation
-        $this->userValidator->validateLogin($data);
+        $this->validator->validateLogin($data);
 
         // Insert user and get new user ID
         $userResult = $this->repository->getUserByName($data["username"]);

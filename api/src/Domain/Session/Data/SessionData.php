@@ -2,21 +2,15 @@
 
 namespace App\Domain\Session\Data;
 
+use App\Domain\Base\AbstractData;
 use Selective\ArrayReader\ArrayReader;
 
 /**
  * Describes a session.
  * @OA\Schema(description="session description")
  */
-class SessionData
+class SessionData extends AbstractData
 {
-    /**
-     * The session ID.
-     * @var string|null
-     * @OA\Property(example="uuid")
-     */
-    public ?string $id;
-
     /**
      * The session title.
      * @var string|null
@@ -67,15 +61,11 @@ class SessionData
     public ?string $role;
 
     /**
-     * The constructor.
-     *
-     * @param array $data The data
+     * Individual function for initial creation of properties
+     * @param ArrayReader $reader The data
      */
-    public function __construct(array $data = [])
+    protected function initProperties(ArrayReader $reader) : void
     {
-        $reader = new ArrayReader($data);
-
-        $this->id = $reader->findString("id");
         $this->title = $reader->findString("title");
         $this->connectionKey = $reader->findString("connection_key");
         $this->maxParticipants = $reader->findInt("max_participants");
@@ -84,7 +74,8 @@ class SessionData
         $this->publicScreenModuleId = $reader->findString("public_screen_module_id");
         $this->role = $reader->findString("role");
 
-        if (isset($this->role))
+        if (isset($this->role)) {
             $this->role = strtoupper($this->role);
+        }
     }
 }

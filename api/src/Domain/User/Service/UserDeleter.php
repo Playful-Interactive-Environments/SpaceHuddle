@@ -2,48 +2,27 @@
 
 namespace App\Domain\User\Service;
 
+use App\Domain\Base\Service\ServiceDeleter;
 use App\Domain\User\Repository\UserRepository;
+use App\Factory\LoggerFactory;
 
 /**
  * Service.
  */
-final class UserDeleter
+final class UserDeleter extends ServiceDeleter
 {
-    private UserRepository $repository;
-
-    private UserValidator $userValidator;
-
     /**
      * The constructor.
      *
      * @param UserRepository $repository The repository
+     * @param UserValidator $validator The validator
+     * @param LoggerFactory $loggerFactory The logger factory
      */
     public function __construct(
         UserRepository $repository,
-        UserValidator $userValidator,
-    )
-    {
-        $this->repository = $repository;
-        $this->userValidator = $userValidator;
-    }
-
-    /**
-     * Delete user.
-     *
-     * @param int $userId The user id
-     *
-     * @return void
-     */
-    public function deleteUser(string $userId): mixed
-    {
-        // Input validation
-        $this->userValidator->validateUserExists($userId);
-
-        $this->repository->deleteUserById($userId);
-
-        return [
-                "state" => "Success",
-                "message" => "user was successfully deleted."
-            ];
+        UserValidator $validator,
+        LoggerFactory $loggerFactory
+    ) {
+        parent::__construct($repository, $validator, $loggerFactory);
     }
 }

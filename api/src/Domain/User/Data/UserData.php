@@ -2,21 +2,15 @@
 
 namespace App\Domain\User\Data;
 
+use App\Domain\Base\AbstractData;
 use Selective\ArrayReader\ArrayReader;
 
 /**
  * Data Model for User.
  * @OA\Schema(description="User description")
  */
-final class UserData
+final class UserData extends AbstractData
 {
-    /**
-     * The user ID.
-     * @var string|null
-     * @OA\Property()
-     */
-    public ?string $id = null;
-
     /**
      * The username of the user.
      * @var string|null
@@ -25,15 +19,11 @@ final class UserData
     public ?string $username = null;
 
     /**
-     * The constructor.
-     *
-     * @param array $data The data
+     * Individual function for initial creation of properties
+     * @param ArrayReader $reader The data
      */
-    public function __construct(array $data = [])
+    protected function initProperties(ArrayReader $reader) : void
     {
-        $reader = new ArrayReader($data);
-
-        $this->id = $reader->findString("id");
         $this->username = $reader->findString("username");
     }
 }

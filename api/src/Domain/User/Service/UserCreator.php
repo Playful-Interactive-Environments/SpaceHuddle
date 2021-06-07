@@ -2,6 +2,7 @@
 
 namespace App\Domain\User\Service;
 
+use App\Domain\Base\Service\ServiceCreator;
 use App\Domain\User\Data\UserData;
 use App\Domain\User\Repository\UserRepository;
 use App\Factory\LoggerFactory;
@@ -10,54 +11,20 @@ use Psr\Log\LoggerInterface;
 /**
  * Service.
  */
-final class UserCreator
+final class UserCreator extends ServiceCreator
 {
-    private UserRepository $repository;
-
-    private UserValidator $userValidator;
-
-    private LoggerInterface $logger;
-
     /**
      * The constructor.
      *
      * @param UserRepository $repository The repository
-     * @param UserValidator $userValidator The validator
+     * @param UserValidator $validator The validator
      * @param LoggerFactory $loggerFactory The logger factory
      */
     public function __construct(
         UserRepository $repository,
-        UserValidator $userValidator,
+        UserValidator $validator,
         LoggerFactory $loggerFactory
     ) {
-        $this->repository = $repository;
-        $this->userValidator = $userValidator;
-        $this->logger = $loggerFactory
-            ->addFileHandler("user_creator.log")
-            ->createLogger();
-    }
-
-    /**
-     * Create a new user.
-     *
-     * @param array<mixed> $data The form data
-     *
-     * @return UserData The new user
-     */
-    public function createUser(array $data): UserData
-    {
-        // Input validation
-        $this->userValidator->validateUserCreate($data);
-
-        // Map form data to user DTO (model)
-        $user = (object)$data;
-
-        // Insert user and get new user ID
-        $userResult = $this->repository->insertUser($user);
-
-        // Logging
-        $this->logger->info("User created successfully: $userResult->username");
-
-        return $userResult;
+        parent::__construct($repository, $validator, $loggerFactory);
     }
 }

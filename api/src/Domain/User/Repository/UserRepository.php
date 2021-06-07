@@ -2,18 +2,18 @@
 
 namespace App\Domain\User\Repository;
 
+use App\Domain\Base\AbstractRepository;
 use App\Domain\User\Data\UserData;
 use App\Factory\QueryFactory;
 use Cake\Chronos\Chronos;
 use DomainException;
+use phpDocumentor\Reflection\Types\Parent_;
 
 /**
  * Repository.
  */
-final class UserRepository
+final class UserRepository extends AbstractRepository
 {
-    private QueryFactory $queryFactory;
-
     /**
      * The constructor.
      *
@@ -21,66 +21,20 @@ final class UserRepository
      */
     public function __construct(QueryFactory $queryFactory)
     {
-        $this->queryFactory = $queryFactory;
+        parent::__construct($queryFactory, "user", UserData::class);
     }
 
     /**
      * Insert user row.
      *
-     * @param object $user The user data
+     * @param object $data The user data
      *
      * @return UserData The new ID
      */
-    public function insertUser(object $user): UserData
+    public function insert(object $data): UserData
     {
-        $user->id = uuid_create();
-        $user->password = self::encryptPassword($user->password);
-        $row = $this->toRow($user);
-
-        $this->queryFactory->newInsert("user", $row)
-            ->execute();
-
-        return $this->getUserById($user->id);
-    }
-
-    /**
-     * Encrypts the password
-     * @param string $password Password to be encrypted.
-     * @return string hashed password
-     */
-    private static function encryptPassword(string $password) : string {
-        // Hash password
-        return password_hash($password, PASSWORD_DEFAULT);
-    }
-
-    /**
-     * Get user by id.
-     *
-     * @param string $userId The user id
-     *
-     * @throws DomainException
-     *
-     * @return UserData The user
-     */
-    public function getUserById(string $userId): UserData
-    {
-        $query = $this->queryFactory->newSelect("user");
-        $query->select(
-            [
-                "id",
-                "username"
-            ]
-        );
-
-        $query->andWhere(["id" => $userId]);
-
-        $row = $query->execute()->fetch("assoc");
-
-        if (!$row) {
-            throw new DomainException("User not found: $userId");
-        }
-
-        return new UserData($row);
+        $data->password = self::encryptText($data->password);
+        return parent::insert($data);
     }
 
     /**
@@ -94,82 +48,37 @@ final class UserRepository
      */
     public function getUserByName(string $username): UserData
     {
-        $query = $this->queryFactory->newSelect("user");
-        $query->select(
-            [
-                "id",
-                "username"
-            ]
-        );
-
-        $query->andWhere(["username" => $username]);
-
-        $row = $query->execute()->fetch("assoc");
-
-        if (!$row) {
-            throw new DomainException("User not found: $username");
-        }
-
-        return new UserData($row);
+        return $this->get(["username" => $username]);
     }
 
     /**
      * Update user row.
      *
-     * @param UserData $user The user
+     * @param UserData $data The user
      *
      * @return void
      */
-    public function updateUser(object $user): UserData
+    public function update(object|array $data): UserData
     {
-        $row = $this->toRow($user);
-
         // Updating the password is another use case
-        unset($row["password"]);
-
-        $row["updated_at"] = Chronos::now()->toDateTimeString();
-
-        $this->queryFactory->newUpdate("user", $row)
-            ->andWhere(["id" => $user->id])
-            ->execute();
-
-        return $this->getUserById($user->id);
+        unset($data->password);
+        return parent::update($data);
     }
 
     /**
      * Update user row.
      *
-     * @param UserData $user The user
+     * @param UserData $data The user
      *
      * @return void
      */
-    public function updatePassword(object $user): UserData
+    public function updatePassword(object $data): UserData
     {
-        $user->password = self::encryptPassword($user->password);
         $row = [
-            "password" => $user->password
+            "id" => $data->id,
+            "password" => self::encryptText($data->password)
         ];
-
-        $this->queryFactory->newUpdate("user", $row)
-            ->andWhere(["id" => $user->id])
-            ->execute();
-
-        return $this->getUserById($user->id);
-    }
-
-    /**
-     * Check user id.
-     *
-     * @param string $userId The user id
-     *
-     * @return bool True if exists
-     */
-    public function existsUserId(string $userId): bool
-    {
-        $query = $this->queryFactory->newSelect("user");
-        $query->select("id")->andWhere(["id" => $userId]);
-
-        return (bool)$query->execute()->fetch("assoc");
+        return parent::update($row);
     }
 
     /**
@@ -181,10 +90,7 @@ final class UserRepository
      */
     public function existsUsername(string $username): bool
     {
-        $query = $this->queryFactory->newSelect("user");
-        $query->select("id")->andWhere(["username" => $username]);
-
-        return (bool)$query->execute()->fetch("assoc");
+        return self::exists(["username" => $username]);
     }
 
     /**
@@ -197,81 +103,22 @@ final class UserRepository
      */
     public function checkPasswordForUsername(string $username, string $password) : bool
     {
-        $query = $this->queryFactory->newSelect("user");
-        $query->select(
-            [
-                "password"
-            ]
-        );
-
-        $query->andWhere(["username" => $username]);
-
-        $row = $query->execute()->fetch("assoc");
-
-        if ($row) {
-            $hash = $row["password"];
-            return password_verify($password, $hash);
-        }
-
-        return false;
-    }
-
-    /**
-     * Checks whether the password for the specified user is correct.
-     *
-     * @param string $username The user name
-     * @param string $password The password
-     *
-     * @return bool True if password matches.
-     */
-    public function checkPasswordForUserId(string $userId, string $password) : bool
-    {
-        $query = $this->queryFactory->newSelect("user");
-        $query->select(
-            [
-                "password"
-            ]
-        );
-
-        $query->andWhere(["id" => $userId]);
-
-        $row = $query->execute()->fetch("assoc");
-
-        if ($row) {
-            $hash = $row["password"];
-            return password_verify($password, $hash);
-        }
-
-        return false;
-    }
-
-    /**
-     * Delete user row.
-     *
-     * @param int $userId The user id
-     *
-     * @return void
-     */
-    public function deleteUserById(string $userId): void
-    {
-        $this->queryFactory->newDelete("user")
-            ->andWhere(["id" => $userId])
-            ->execute();
+        return self::checkEncryptText(["username" => $username], $password);
     }
 
     /**
      * Convert to array.
      *
-     * @param object $user The user data
+     * @param object $data The entity data
      *
      * @return array The array
      */
-    private function toRow(object $user): array
+    protected function toRow(object $data): array
     {
         return [
-            "id" => $user->id,
-            "username" => $user->username,
-            "password" => $user->password
+            "id" => $data->id,
+            "username" => $data->username,
+            "password" => $data->password
         ];
     }
 }

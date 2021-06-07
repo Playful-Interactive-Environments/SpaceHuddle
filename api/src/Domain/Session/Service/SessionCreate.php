@@ -4,20 +4,17 @@
 namespace App\Domain\Session\Service;
 
 
+use App\Domain\Base\Service\ServiceCreator;
 use App\Domain\Session\Data\SessionData;
 use App\Domain\Session\Repository\SessionRepository;
-use App\Domain\Session\Service\SessionValidator;
 use App\Factory\LoggerFactory;
-use Psr\Log\LoggerInterface;
 
-class SessionCreate
+/**
+ * Session create service.
+ * @package App\Domain\Session\Service
+ */
+class SessionCreate extends ServiceCreator
 {
-    private SessionRepository $repository;
-
-    private SessionValidator $validator;
-
-    private LoggerInterface $logger;
-
     /**
      * The constructor.
      *
@@ -30,30 +27,27 @@ class SessionCreate
         SessionValidator $validator,
         LoggerFactory $loggerFactory
     ) {
-        $this->repository = $repository;
-        $this->validator = $validator;
-        $this->logger = $loggerFactory
-            ->addFileHandler("session_creator.log")
-            ->createLogger();
+        parent::__construct($repository, $validator, $loggerFactory);
     }
 
     /**
-     * Create a new session.
+     * Functionality of the session create service.
      *
      * @param array<mixed> $data The form data
+     * @param ?string $userId Id of the logged in user
      *
-     * @return SessionData The new session
+     * @return SessionData Result entity
      */
-    public function createSession(string $userId, array $data): SessionData
+    public function service(array $data, ?string $userId = null): SessionData
     {
         // Input validation
-        $this->validator->validateSessionCreate($data);
+        $this->validator->validateCreate($data);
 
         // Map form data to session DTO (model)
         $session = (object)$data;
 
         // Insert session and get new session ID
-        $result = $this->repository->inserSession($userId, $session);
+        $result = $this->repository->insert($session, $userId);
 
         // Logging
         $this->logger->info("Session created successfully: $result->id");
