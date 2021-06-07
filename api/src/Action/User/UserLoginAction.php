@@ -2,11 +2,10 @@
 
 namespace App\Action\User;
 
+use App\Action\Base\AbstractAction;
 use App\Domain\User\Service\UserLogin;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Action for user login.
@@ -50,43 +49,17 @@ use Psr\Http\Message\ServerRequestInterface;
  *   @OA\Response(response="500", ref="#/components/responses/500")
  * )
  */
-final class UserLoginAction
+final class UserLoginAction extends AbstractAction
 {
-    private Responder $responder;
-
-    private UserLogin $userLogin;
-
     /**
      * The constructor.
      *
      * @param Responder $responder The responder
-     * @param UserLogin $userLogin The service
+     * @param UserLogin $service The service
      */
-    public function __construct(Responder $responder, UserLogin $userLogin)
+    public function __construct(Responder $responder, UserLogin $service)
     {
-        $this->responder = $responder;
-        $this->userLogin = $userLogin;
-    }
-
-    /**
-     * Action.
-     *
-     * @param ServerRequestInterface $request The request
-     * @param ResponseInterface $response The response
-     *
-     * @return ResponseInterface The response
-     */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
-    {
-        // Extract the form data from the request body
-        $data = (array)$request->getParsedBody();
-
-        // Invoke the Domain with inputs and retain the result
-        $userResult = $this->userLogin->service($data);
-
-        // Build the HTTP response
-        return $this->responder
-            ->withJson($response, $userResult)
-            ->withStatus(StatusCodeInterface::STATUS_CREATED);
+        parent::__construct($responder, $service);
+        $this->successStatusCode = StatusCodeInterface::STATUS_ACCEPTED;
     }
 }

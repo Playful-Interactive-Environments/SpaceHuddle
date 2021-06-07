@@ -3,10 +3,10 @@
 
 namespace App\Action\User;
 
+use App\Action\Base\AbstractAction;
 use App\Domain\User\Service\UserUpdater;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -31,45 +31,31 @@ use Psr\Http\Message\ServerRequestInterface;
  *   security={{"api_key": {}}, {"bearerAuth": {}}}
  * )
  */
-class UserChangePasswordAction
+class UserChangePasswordAction extends AbstractAction
 {
-    private Responder $responder;
-
-    private UserUpdater $userUpdater;
-
     /**
      * The constructor.
      *
      * @param Responder $responder The responder
-     * @param UserUpdater $userUpdater The service
+     * @param UserUpdater $service The service
      */
-    public function __construct(Responder $responder, UserUpdater $userUpdater)
+    public function __construct(Responder $responder, UserUpdater $service)
     {
-        $this->responder = $responder;
-        $this->userUpdater = $userUpdater;
+        parent::__construct($responder, $service);
+        $this->successStatusCode = StatusCodeInterface::STATUS_CREATED;
     }
 
     /**
-     * Action.
-     *
+     * Execute specific service functionality
      * @param ServerRequestInterface $request The request
-     * @param ResponseInterface $response The response
-     *
-     * @return ResponseInterface The response
+     * @param array $data form data from the request body
+     * @return mixed service result
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
-    {
-        // Extract the form data from the request body
-        $data = (array)$request->getParsedBody();
+    protected function executeService(ServerRequestInterface $request, array $data) : mixed {
 
         $userId = $request->getAttribute("userId");
 
         // Invoke the Domain with inputs and retain the result
-        $userResult = $this->userUpdater->servicePassword($userId, $data);
-
-        // Build the HTTP response
-        return $this->responder
-            ->withJson($response, $userResult)
-            ->withStatus(StatusCodeInterface::STATUS_CREATED);
+        return $this->service->servicePassword($userId, $data);
     }
 }

@@ -6,6 +6,10 @@ namespace App\Domain\Base;
 
 use Selective\ArrayReader\ArrayReader;
 
+/**
+ * Description of the common entity data functionality.
+ * @package App\Domain\Base
+ */
 abstract class AbstractData
 {
     /**

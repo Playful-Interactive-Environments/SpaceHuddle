@@ -3,8 +3,8 @@
 
 namespace App\Action\Session;
 
+use App\Action\Base\AbstractAction;
 use App\Domain\Session\Service\SessionCreate;
-use App\Domain\User\Service\UserLogin;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -34,12 +34,8 @@ use Psr\Http\Message\ServerRequestInterface;
  *   security={{"api_key": {}}, {"bearerAuth": {}}}
  * )
  */
-class SessionCreateAction
+class SessionCreateAction extends AbstractAction
 {
-    private Responder $responder;
-
-    private SessionCreate $service;
-
     /**
      * The constructor.
      *
@@ -48,31 +44,21 @@ class SessionCreateAction
      */
     public function __construct(Responder $responder, SessionCreate $service)
     {
-        $this->responder = $responder;
-        $this->service = $service;
+        parent::__construct($responder, $service);
+        $this->successStatusCode = StatusCodeInterface::STATUS_CREATED;
     }
 
     /**
-     * Action.
-     *
+     * Execute specific service functionality
      * @param ServerRequestInterface $request The request
-     * @param ResponseInterface $response The response
-     *
-     * @return ResponseInterface The response
+     * @param array $data form data from the request body
+     * @return mixed service result
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
-    {
-        // Extract the form data from the request body
-        $data = (array)$request->getParsedBody();
+    protected function executeService(ServerRequestInterface $request, array $data) : mixed {
 
         $userId = $request->getAttribute("userId");
 
         // Invoke the Domain with inputs and retain the result
-        $userResult = $this->service->service($data, $userId);
-
-        // Build the HTTP response
-        return $this->responder
-            ->withJson($response, $userResult)
-            ->withStatus(StatusCodeInterface::STATUS_CREATED);
+        return $this->service->service($data, $userId);
     }
 }

@@ -2,9 +2,10 @@
 
 namespace App\Action\User;
 
+use App\Action\Base\AbstractAction;
 use App\Domain\User\Service\UserDeleter;
 use App\Responder\Responder;
-use Psr\Http\Message\ResponseInterface;
+use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -19,59 +20,31 @@ use Psr\Http\Message\ServerRequestInterface;
  *   security={{"api_key": {}}, {"bearerAuth": {}}}
  * )
  */
-final class UserDeleteAction
+final class UserDeleteAction extends AbstractAction
 {
-    private UserDeleter $userDeleter;
-
-    private Responder $responder;
-
     /**
      * The constructor.
      *
-     * @param UserDeleter $userDeleter The service
      * @param Responder $responder The responder
+     * @param UserDeleter $service The service
      */
-    public function __construct(UserDeleter $userDeleter, Responder $responder)
+    public function __construct(Responder $responder, UserDeleter $service)
     {
-        $this->userDeleter = $userDeleter;
-        $this->responder = $responder;
+        parent::__construct($responder, $service);
+        $this->successStatusCode = StatusCodeInterface::STATUS_OK;
     }
 
     /**
-     * Action.
-     *
+     * Execute specific service functionality
      * @param ServerRequestInterface $request The request
-     * @param ResponseInterface $response The response
-     * @param array<mixed> $args The routing arguments
-     *
-     * @return ResponseInterface The response
+     * @param array $data form data from the request body
+     * @return mixed service result
      */
-    public function __invoke(
-        ServerRequestInterface $request,
-        ResponseInterface $response,
-        array $args
-    ): ResponseInterface {
-
-        // Extract the form data from the request body
-        $data = (array)$request->getParsedBody();
+    protected function executeService(ServerRequestInterface $request, array $data) : mixed {
 
         $userId = $request->getAttribute("userId");
 
-        // Invoke the domain (service class)
-        $userResult = $this->userDeleter->service($userId);
-
-        // Build the HTTP response
-        return $this->responder
-            ->withJson($response, $userResult);
-
-        /*
-        // Fetch parameters from the request
-        $userId = (int)$args['user_id'];
-
-        // Invoke the domain (service class)
-        $this->userDeleter->deleteUser($userId);
-
-        // Render the json response
-        return $this->responder->withJson($response);*/
+        // Invoke the Domain with inputs and retain the result
+        return $this->service->service($userId);
     }
 }

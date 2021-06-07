@@ -2,11 +2,10 @@
 
 namespace App\Action\User;
 
+use App\Action\Base\AbstractAction;
 use App\Domain\User\Service\UserCreator;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Action for registering a new user.
@@ -32,27 +31,17 @@ use Psr\Http\Message\ServerRequestInterface;
  *   @OA\Response(response="500", ref="#/components/responses/500")
  * )
  */
-final class UserRegisterAction
+final class UserRegisterAction extends AbstractAction
 {
-    private Responder $responder;
-
-    private UserCreator $userCreator;
-
-    public function __construct(Responder $responder, UserCreator $userCreator)
+    /**
+     * The constructor.
+     *
+     * @param Responder $responder The responder
+     * @param UserCreator $service The service
+     */
+    public function __construct(Responder $responder, UserCreator $service)
     {
-        $this->responder = $responder;
-        $this->userCreator = $userCreator;
-    }
-
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
-    {
-        // Extract the form data from the request body
-        $data = (array)$request->getParsedBody();
-
-        $userResult = $this->userCreator->service($data);
-
-        return $this->responder
-            ->withJson($response, $userResult)
-            ->withStatus(StatusCodeInterface::STATUS_CREATED);
+        parent::__construct($responder, $service);
+        $this->successStatusCode = StatusCodeInterface::STATUS_CREATED;
     }
 }

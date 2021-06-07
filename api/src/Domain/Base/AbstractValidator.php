@@ -8,7 +8,7 @@ use Selective\Validation\Exception\ValidationException;
 use Selective\Validation\ValidationResult;
 
 /**
- * Service.
+ * Description of the common validation functionality.
  */
 abstract class AbstractValidator
 {
