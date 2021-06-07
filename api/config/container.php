@@ -25,7 +25,6 @@ use Slim\Middleware\ErrorMiddleware;
 use Slim\Views\PhpRenderer;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputOption;
-use Tuupola\Middleware\JwtAuthentication;
 
 return [
     // Application settings
@@ -137,12 +136,6 @@ return [
 
     PhpRenderer::class => function (ContainerInterface $container) {
         return new PhpRenderer($container->get("settings")["template"]);
-    },
-
-    JwtAuthentication::class => function (ContainerInterface $container) {
-        $settings = $container->get("settings")["jwt_auth"];
-
-        return new JwtAuthentication($settings);
     },
 
     JwtAuth::class => function (ContainerInterface $container) {
