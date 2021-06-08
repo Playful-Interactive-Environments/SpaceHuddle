@@ -110,4 +110,12 @@ final class QueryFactory
     {
         $this->connection->rollback();
     }
+
+    /**
+     * Checks if a transaction is running.
+     */
+    public function inTransaction(): bool
+    {
+        return $this->connection->inTransaction();
+    }
 }

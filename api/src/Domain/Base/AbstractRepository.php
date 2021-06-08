@@ -273,7 +273,10 @@ abstract class AbstractRepository extends RepositoryErrorHandling
      */
     public function deleteById(string $id): void
     {
-        $this->queryFactory->beginTransaction();
+        $handleTransaction = !$this->queryFactory->inTransaction();
+        if ($handleTransaction) {
+            $this->queryFactory->beginTransaction();
+        }
         $this->deleteDependencies($id);
 
         if ($this->genericTableParameterSet()) {
@@ -281,7 +284,9 @@ abstract class AbstractRepository extends RepositoryErrorHandling
                 ->andWhere(["id" => $id])
                 ->execute();
         }
-        $this->queryFactory->commitTransaction();
+        if ($handleTransaction) {
+            $this->queryFactory->commitTransaction();
+        }
     }
 
     /**
