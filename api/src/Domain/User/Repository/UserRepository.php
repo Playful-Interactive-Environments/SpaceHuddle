@@ -4,9 +4,14 @@ namespace App\Domain\User\Repository;
 
 use App\Domain\Base\AbstractData;
 use App\Domain\Base\AbstractRepository;
+use App\Domain\Session\Repository\SessionRepository;
 use App\Domain\User\Data\UserData;
+use App\Domain\User\Data\UserRole;
 use App\Factory\QueryFactory;
+use Cake\Core\ContainerInterface;
 use DomainException;
+use function PHPUnit\Framework\isInfinite;
+use function PHPUnit\Framework\isInstanceOf;
 
 /**
  * Repository.
@@ -17,7 +22,7 @@ final class UserRepository extends AbstractRepository
      * The constructor.
      * @param QueryFactory $queryFactory The query factory
      */
-    public function __construct(QueryFactory $queryFactory)
+    public function __construct(QueryFactory $queryFactory,)
     {
         parent::__construct($queryFactory, "user", UserData::class);
     }
@@ -90,6 +95,40 @@ final class UserRepository extends AbstractRepository
     public function checkPasswordForUsername(string $username, string $password): bool
     {
         return self::checkEncryptText(["username" => $username], $password);
+    }
+
+    /**
+     * Delete dependent data.
+     * @param string $id Primary key of the linked table entry.
+     * @return void
+     */
+    protected function deleteDependencies(string $id): void
+    {
+        $query = $this->queryFactory->newSelect("session_role");
+        $query->select(["session_id"]);
+        $query->andWhere(["user_id" => $id, "role" => strtoupper(UserRole::MODERATOR)]);
+
+        $result = $query->execute()->fetchAll("assoc");
+        if (is_array($result)) {
+            //TODO: Implement an equivalent for getInstance
+            $session = new SessionRepository($this->queryFactory);
+            foreach ($result as $result_item) {
+                $sessionId = $result_item["session_id"];
+
+                $query = $this->queryFactory->newSelect("session_role");
+                $query->select(["session_id"]);
+                $query->andWhere(["session_id" => $sessionId, "role" => strtoupper(UserRole::MODERATOR)]);
+                $itemCount = $query->execute()->rowCount();
+
+                if ($itemCount === 1) {
+                    $session->deleteById($sessionId);
+                }
+            }
+        }
+
+        $this->queryFactory->newDelete("session_role")
+            ->andWhere(["user_id" => $id])
+            ->execute();
     }
 
 

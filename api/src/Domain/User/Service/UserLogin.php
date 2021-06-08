@@ -43,12 +43,12 @@ final class UserLogin extends AbstractService
         $this->validator->validateLogin($data);
 
         // Insert user and get new user ID
-        $userResult = $this->repository->getUserByName($data["username"]);
+        $result = $this->repository->getUserByName($data["username"]);
 
         $jwt = $this->jwtAuth->createJwt(
             [
-                "userId" => $userResult->id,
-                "username" => $userResult->username
+                "userId" => $result->id,
+                "username" => $result->username
             ]
         );
 

@@ -116,6 +116,7 @@ return [
         );
 
         $errorMiddleware->setDefaultErrorHandler($container->get(DefaultErrorHandler::class));
+        $errorMiddleware->setErrorHandler(PDOException::class, \App\Domain\Base\RepositoryErrorHandling::class);
 
         return $errorMiddleware;
     },

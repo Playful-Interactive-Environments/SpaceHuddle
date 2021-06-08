@@ -9,6 +9,7 @@ use App\Domain\Base\AbstractRepository;
 use App\Domain\User\Data\UserRole;
 use App\Factory\QueryFactory;
 use App\Domain\Session\Data\SessionData;
+use Cake\Core\ContainerInterface;
 
 /**
  * Repository
@@ -45,6 +46,49 @@ class SessionRepository extends AbstractRepository
             ->execute();
 
         return $this->getById($id);
+    }
+
+    /**
+     * Delete dependent data.
+     * @param string $id Primary key of the linked table entry.
+     * @return void
+     */
+    protected function deleteDependencies(string $id): void
+    {
+        $query = $this->queryFactory->newSelect("participant");
+        $query->select(["id"]);
+        $query->andWhere(["session_id" => $id]);
+
+        $result = $query->execute()->fetchAll("assoc");
+        if (is_array($result)) {
+            #$participant = new ParticipantRepository($this->queryFactory);
+            foreach ($result as $result_item) {
+                $participantId = $result_item["id"];
+                #$participant->deleteById($participantId);
+            }
+        }
+
+        $query = $this->queryFactory->newSelect("topic");
+        $query->select(["id"]);
+        $query->andWhere(["session_id" => $id]);
+
+        $result = $query->execute()->fetchAll("assoc");
+        if (is_array($result)) {
+            //TODO: Implement an equivalent for getInstance
+            #$topic = new TopicRepository($this->queryFactory);
+            foreach ($result as $result_item) {
+                $topicId = $result_item["id"];
+                #$topic->deleteById($topicId);
+            }
+        }
+
+        $this->queryFactory->newDelete("resource")
+            ->andWhere(["session_id" => $id])
+            ->execute();
+
+        $this->queryFactory->newDelete("session_role")
+            ->andWhere(["session_id" => $id])
+            ->execute();
     }
 
     /**

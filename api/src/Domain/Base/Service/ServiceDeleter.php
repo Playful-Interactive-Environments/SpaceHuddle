@@ -18,7 +18,7 @@ class ServiceDeleter extends AbstractService
      *
      * @return array<string, string>
      */
-    public function service(string $id) : array
+    public function service(string $id): array
     {
         // Input validation
         $this->validator->validateExists($id);

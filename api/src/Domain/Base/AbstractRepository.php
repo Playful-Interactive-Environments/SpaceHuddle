@@ -9,7 +9,7 @@ use DomainException;
  * Description of the common repository functionality.
  * @package App\Domain\Service
  */
-abstract class AbstractRepository
+abstract class AbstractRepository extends RepositoryErrorHandling
 {
     protected QueryFactory $queryFactory;
     protected ?string $entityName;
@@ -273,11 +273,24 @@ abstract class AbstractRepository
      */
     public function deleteById(string $id): void
     {
+        $this->queryFactory->beginTransaction();
+        $this->deleteDependencies($id);
+
         if ($this->genericTableParameterSet()) {
             $this->queryFactory->newDelete($this->entityName)
                 ->andWhere(["id" => $id])
                 ->execute();
         }
+        $this->queryFactory->commitTransaction();
+    }
+
+    /**
+     * Delete dependent data.
+     * @param string $id Primary key of the linked table entry.
+     * @return void
+     */
+    protected function deleteDependencies(string $id): void
+    {
     }
 
     /**
