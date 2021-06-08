@@ -24,6 +24,6 @@ class Version1DocActionTest extends TestCase
         $response = $this->app->handle($request);
 
         $this->assertSame(StatusCodeInterface::STATUS_OK, $response->getStatusCode());
-        $this->assertStringContainsString("<div id='swagger-ui'></div>", (string)$response->getBody());
+        $this->assertStringContainsString('<div id="swagger-ui"></div>', (string)$response->getBody());
     }
 }

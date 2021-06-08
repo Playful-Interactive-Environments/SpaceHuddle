@@ -29,14 +29,14 @@ use Fig\Http\Message\StatusCodeInterface;
  *       @OA\Schema(
  *         @OA\Property(property="message", type="string", description="Success message.", example="Successful login."),
  *         @OA\Property(
- *           property="access_token",
+ *           property="accessToken",
  *           type="string",
  *           description="The access token.",
  *           example="reallylongtokenstring"
  *         ),
- *         @OA\Property(property="token_type", type="string", description="The token type.", example="Bearer"),
+ *         @OA\Property(property="tokenType", type="string", description="The token type.", example="Bearer"),
  *         @OA\Property(
- *           property="expires_in",
+ *           property="expiresIn",
  *           type="int",
  *           description="The token expiration in seconds.",
  *           example="86400"

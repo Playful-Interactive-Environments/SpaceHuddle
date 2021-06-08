@@ -24,7 +24,7 @@ class ResponderTest extends TestCase
 
         $response = $responder->withJson($this->createResponse(), ["success" => true]);
 
-        $this->assertSame("{'success':true}", (string)$response->getBody());
+        $this->assertSame('{"success":true}', (string)$response->getBody());
         $this->assertSame("application/json", $response->getHeaderLine("Content-Type"));
         $this->assertSame(200, $response->getStatusCode());
     }

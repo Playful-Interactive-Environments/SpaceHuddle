@@ -54,9 +54,9 @@ final class UserLogin extends AbstractService
 
         return [
             "message" => "Successful login.",
-            "access_token" => $jwt,
-            "token_type" => "Bearer",
-            "expires_in" => $this->jwtAuth->getLifetime()
+            "accessToken" => $jwt,
+            "tokenType" => "Bearer",
+            "expiresIn" => $this->jwtAuth->getLifetime()
         ];
     }
 }
