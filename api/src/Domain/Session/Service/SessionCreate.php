@@ -1,11 +1,9 @@
 <?php
 
-
 namespace App\Domain\Session\Service;
 
-
+use App\Domain\Base\AbstractData;
 use App\Domain\Base\Service\ServiceCreator;
-use App\Domain\Session\Data\SessionData;
 use App\Domain\Session\Repository\SessionRepository;
 use App\Factory\LoggerFactory;
 
@@ -33,12 +31,12 @@ class SessionCreate extends ServiceCreator
     /**
      * Functionality of the session create service.
      *
-     * @param array<mixed> $data The form data
+     * @param array<string, mixed> $data The form data
      * @param ?string $userId Id of the logged in user
      *
-     * @return SessionData Result entity
+     * @return AbstractData|null Result entity
      */
-    public function service(array $data, ?string $userId = null): SessionData
+    public function service(array $data, ?string $userId = null): AbstractData|null
     {
         // Input validation
         $this->validator->validateCreate($data);

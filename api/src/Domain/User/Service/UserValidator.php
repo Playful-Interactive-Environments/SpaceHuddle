@@ -35,7 +35,7 @@ final class UserValidator extends AbstractValidator
      * Validate create.
      *
      * @param int $userId The user id
-     * @param array<mixed> $data The data
+     * @param array<string, mixed> $data The data
      *
      * @return void
      */
@@ -61,7 +61,7 @@ final class UserValidator extends AbstractValidator
     /**
      * Validate create.
      *
-     * @param array<mixed> $data The data
+     * @param array<string, mixed> $data The data
      *
      * @return void
      */
@@ -79,9 +79,8 @@ final class UserValidator extends AbstractValidator
 
     /**
      * Validate if the entity exists.
-     *
      * @param string $id The entity id
-     *
+     * @param string|null $errorMessage Custom error message
      * @return void
      */
     public function validateExists(string $id, ?string $errorMessage = null): void
@@ -93,7 +92,7 @@ final class UserValidator extends AbstractValidator
      * Validate password update.
      *
      * @param string $userId The user id
-     * @param array<mixed> $data The data
+     * @param array<string, mixed> $data The data
      *
      * @return void
      */

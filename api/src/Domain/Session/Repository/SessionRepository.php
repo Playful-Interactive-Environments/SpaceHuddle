@@ -4,6 +4,7 @@
 namespace App\Domain\Session\Repository;
 
 
+use App\Domain\Base\AbstractData;
 use App\Domain\Base\AbstractRepository;
 use App\Domain\User\Data\UserRole;
 use App\Factory\QueryFactory;
@@ -25,13 +26,12 @@ class SessionRepository extends AbstractRepository
     }
 
     /**
-     * Insert user row.
-     *
-     * @param object $session The user data
-     *
-     * @return SessionData The new session
+     * Insert session row.
+     * @param object $data The session data
+     * @param string|null $userId Authorised user
+     * @return AbstractData|null The new session
      */
-    public function insert(object $data, string $userId = null): SessionData
+    public function insert(object $data, string $userId = null): ?AbstractData
     {
         $data->connectionKey = $this->generateNewConnectionKey("connection_key");
         $result = parent::insert($data);
@@ -49,10 +49,8 @@ class SessionRepository extends AbstractRepository
 
     /**
      * Convert to array.
-     *
      * @param object $data The entity data
-     *
-     * @return array The array
+     * @return array<string, mixed> The array
      */
     protected function toRow(object $data): array
     {

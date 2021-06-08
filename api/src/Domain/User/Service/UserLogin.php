@@ -6,14 +6,13 @@ use App\Domain\Base\Service\AbstractService;
 use App\Domain\User\Repository\UserRepository;
 use App\Factory\LoggerFactory;
 use App\Routing\JwtAuth;
-use Psr\Log\LoggerInterface;
 
 /**
  * Service.
  */
 final class UserLogin extends AbstractService
 {
-    private JwtAuth $jwtAuth;
+    protected JwtAuth $jwtAuth;
 
     /**
      * The constructor.
@@ -35,10 +34,8 @@ final class UserLogin extends AbstractService
 
     /**
      * Perform a login with an existing user.
-     *
-     * @param array<mixed> $data The form data
-     *
-     * @return array<mixed> The access token
+     * @param array<string, mixed> $data The form data
+     * @return array<string, mixed> The access token
      */
     public function service(array $data): array
     {

@@ -32,9 +32,9 @@ final class UserUpdater extends ServiceUpdater
      * change the password for the logged in user.
      *
      * @param string $userId The user id
-     * @param array<mixed> $data The request data
+     * @param array<string, mixed> $data The request data
      *
-     * @return void
+     * @return mixed
      */
     public function servicePassword(string $userId, array $data): mixed
     {
@@ -46,7 +46,7 @@ final class UserUpdater extends ServiceUpdater
         $user->id = $userId;
 
         // Update the user
-        $userResult = $this->repository->updatePassword($user);
+        $result = $this->repository->updatePassword($user);
 
         // Logging
         $this->logger->info("The password was successfully updated: $userId");

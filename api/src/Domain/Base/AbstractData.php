@@ -13,13 +13,6 @@ use Selective\ArrayReader\ArrayReader;
 abstract class AbstractData
 {
     /**
-     * The entity ID.
-     * @var string|null
-     * @OA\Property()
-     */
-    public ?string $id = null;
-
-    /**
      * The constructor.
      *
      * @param array $data The data
@@ -27,8 +20,6 @@ abstract class AbstractData
     public function __construct(array $data = [])
     {
         $reader = new ArrayReader($data);
-
-        $this->id = $reader->findString("id");
         $this->initProperties($reader);
     }
 

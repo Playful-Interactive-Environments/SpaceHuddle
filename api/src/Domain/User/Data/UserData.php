@@ -12,6 +12,13 @@ use Selective\ArrayReader\ArrayReader;
 final class UserData extends AbstractData
 {
     /**
+     * The entity ID.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $id = null;
+
+    /**
      * The username of the user.
      * @var string|null
      * @OA\Property()
@@ -24,6 +31,7 @@ final class UserData extends AbstractData
      */
     protected function initProperties(ArrayReader $reader) : void
     {
+        $this->id = $reader->findString("id");
         $this->username = $reader->findString("username");
     }
 }

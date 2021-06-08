@@ -12,6 +12,13 @@ use Selective\ArrayReader\ArrayReader;
 class SessionData extends AbstractData
 {
     /**
+     * The entity ID.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $id = null;
+
+    /**
      * The session title.
      * @var string|null
      * @OA\Property()
@@ -66,6 +73,7 @@ class SessionData extends AbstractData
      */
     protected function initProperties(ArrayReader $reader) : void
     {
+        $this->id = $reader->findString("id");
         $this->title = $reader->findString("title");
         $this->connectionKey = $reader->findString("connection_key");
         $this->maxParticipants = $reader->findInt("max_participants");

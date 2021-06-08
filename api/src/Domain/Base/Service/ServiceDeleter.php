@@ -16,9 +16,9 @@ class ServiceDeleter extends AbstractService
      *
      * @param string $id The entity id
      *
-     * @return void
+     * @return array<string, string>
      */
-    public function service(string $id) : mixed
+    public function service(string $id) : array
     {
         // Input validation
         $this->validator->validateExists($id);

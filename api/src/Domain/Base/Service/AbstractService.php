@@ -2,7 +2,6 @@
 
 namespace App\Domain\Base\Service;
 
-use App\Domain\Base\AbstractData;
 use App\Domain\Base\AbstractRepository;
 use App\Domain\Base\AbstractValidator;
 use App\Factory\LoggerFactory;

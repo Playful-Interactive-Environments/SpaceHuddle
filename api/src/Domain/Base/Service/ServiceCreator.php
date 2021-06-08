@@ -3,7 +3,6 @@
 
 namespace App\Domain\Base\Service;
 
-
 use App\Domain\Base\AbstractData;
 
 /**
@@ -15,11 +14,11 @@ class ServiceCreator extends AbstractService
     /**
      * Functionality of the create service.
      *
-     * @param array<mixed> $data The form data
+     * @param array<string, mixed> $data The form data
      *
-     * @return AbstractData Result entity
+     * @return AbstractData|null Result entity
      */
-    public function service(array $data): AbstractData
+    public function service(array $data): AbstractData|null
     {
         // Input validation
         $this->validator->validateCreate($data);

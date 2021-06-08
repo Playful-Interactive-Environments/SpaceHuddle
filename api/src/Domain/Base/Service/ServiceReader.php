@@ -16,9 +16,9 @@ class ServiceReader extends AbstractService
      *
      * @param string $id The entity id
      *
-     * @return AbstractData The entity data
+     * @return AbstractData|null The entity data
      */
-    public function service(string $id): AbstractData
+    public function service(string $id): AbstractData|null
     {
         // Input validation
         // ...

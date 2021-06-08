@@ -15,10 +15,14 @@ abstract class AbstractRepository
     protected ?string $entityName;
     protected ?string $resultClass;
 
-    public function __get($name): mixed
+    /**
+     * Get private properties
+     * @param string $name Private property name
+     * @return mixed Property value
+     */
+    public function __get(string $name): mixed
     {
         $method = "get" . ucfirst($name);
-        echo "search method: $method";
         if (method_exists($this, $method)) {
             return $this->$method();
         } else {
@@ -38,6 +42,8 @@ abstract class AbstractRepository
     /**
      * The constructor.
      * @param QueryFactory $queryFactory The query factory
+     * @param string|null $entityName Name of the database table
+     * @param string|null $resultClass Name of the result class
      */
     public function __construct(QueryFactory $queryFactory, ?string $entityName = null, ?string $resultClass = null)
     {
@@ -79,10 +85,10 @@ abstract class AbstractRepository
 
     /**
      * Get entity.
-     * @param ?array $conditions The WHERE conditions to add with AND.
+     * @param array $conditions The WHERE conditions to add with AND.
      * @return AbstractData|null The result entity.
      */
-    public function get(array $conditions = null): ?AbstractData
+    public function get(array $conditions = []): ?AbstractData
     {
         if ($this->genericTableParameterSet()) {
             $query = $this->queryFactory->newSelect($this->entityName);
@@ -136,10 +142,10 @@ abstract class AbstractRepository
 
     /**
      * Check entity.
-     * @param ?array $conditions The WHERE conditions to add with AND
+     * @param array $conditions The WHERE conditions to add with AND
      * @return bool True if exists
      */
-    public function exists(array $conditions = null): bool
+    public function exists(array $conditions = []): bool
     {
         if ($this->genericTableParameterSet()) {
             $query = $this->queryFactory->newSelect($this->entityName);
@@ -176,6 +182,7 @@ abstract class AbstractRepository
      * Checks whether the encrypted text for the specified entity is correct.
      * @param array $conditions The WHERE conditions to add with AND
      * @param string $text The original text
+     * @param string $textColumnName Database column name of the column to be encrypted.
      * @return bool True if text matches.
      */
     public function checkEncryptText(array $conditions, string $text, string $textColumnName = "password"): bool
@@ -210,8 +217,8 @@ abstract class AbstractRepository
     protected static function keygen(int $length = 10, bool $caseSensitive = true): string
     {
         $key = "";
-        list($usec, $sec) = explode(" ", microtime());
-        mt_srand((float)$sec + ((float)$usec * 100000));
+        list($uSec, $sec) = explode(" ", microtime());
+        mt_srand((int)((float)$sec + ((float)$uSec * 100000)));
 
         $inputs = array_merge(range("z", "a"), range(0, 9), range("A", "Z"));
         if (!$caseSensitive) {
@@ -227,6 +234,7 @@ abstract class AbstractRepository
 
     /**
      * Generate a new connection key.
+     * @param string $keyColumnName Database column name of the column to be encrypted.
      * @return string The connection key.
      */
     protected function generateNewConnectionKey(string $keyColumnName = "connection_key"): string
@@ -250,7 +258,7 @@ abstract class AbstractRepository
      * Checks whether the encrypted text for the specified entity is correct.
      * @param string $id The entity ID.
      * @param string $text The original text.
-     *
+     * @param string $textColumnName Database column name of the column to be encrypted.
      * @return bool True if text matches.
      */
     public function checkEncryptTextForId(string $id, string $text, string $textColumnName = "password"): bool
@@ -275,7 +283,7 @@ abstract class AbstractRepository
     /**
      * Convert to array.
      * @param object $data The entity data
-     * @return array The array
+     * @return array<string, mixed> The array
      */
     protected function toRow(object $data): array
     {

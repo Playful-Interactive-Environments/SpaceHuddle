@@ -25,9 +25,9 @@ final class UserRepository extends AbstractRepository
     /**
      * Insert user row.
      * @param object $data The user data
-     * @return AbstractData The new ID
+     * @return AbstractData|null The new user
      */
-    public function insert(object $data): AbstractData
+    public function insert(object $data): AbstractData|null
     {
         $data->password = self::encryptText($data->password);
         return parent::insert($data);
@@ -40,7 +40,7 @@ final class UserRepository extends AbstractRepository
      * @throws DomainException
      *
      */
-    public function getUserByName(string $username): AbstractData
+    public function getUserByName(string $username): AbstractData|null
     {
         return $this->get(["username" => $username]);
     }
@@ -48,9 +48,9 @@ final class UserRepository extends AbstractRepository
     /**
      * Update user row.
      * @param object|array $data The user
-     * @return AbstractData The updated user.
+     * @return AbstractData|null The updated user.
      */
-    public function update(object|array $data): AbstractData
+    public function update(object|array $data): AbstractData|null
     {
         // Updating the password is another use case
         unset($data->password);
@@ -60,9 +60,9 @@ final class UserRepository extends AbstractRepository
     /**
      * Update user row.
      * @param object $data The user
-     * @return AbstractData
+     * @return AbstractData|null The updated user.
      */
-    public function updatePassword(object $data): AbstractData
+    public function updatePassword(object $data): AbstractData|null
     {
         $row = [
             "id" => $data->id,
@@ -92,10 +92,11 @@ final class UserRepository extends AbstractRepository
         return self::checkEncryptText(["username" => $username], $password);
     }
 
+
     /**
      * Convert to array.
      * @param object $data The entity data
-     * @return array The array
+     * @return array<string, mixed> The array
      */
     protected function toRow(object $data): array
     {

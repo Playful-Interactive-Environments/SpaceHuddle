@@ -31,23 +31,22 @@ abstract class AbstractValidator
      * get the repository
      * @return AbstractRepository repository
      */
-    protected function getRepository() : AbstractRepository {
+    protected function getRepository() : AbstractRepository
+    {
         return $this->repository;
     }
 
     /**
      * Validate if the entity exists.
-     *
      * @param string $id The entity id
-     *
+     * @param string|null $errorMessage custom error message
      * @return void
      */
     public function validateExists(string $id, ?string $errorMessage = null): void
     {
         if (!$this->repository->existsId($id)) {
             $result = new ValidationResult();
-            if (is_null($errorMessage))
-            {
+            if (is_null($errorMessage)) {
                 $entityName = $this->repository->getEntityName();
                 $errorMessage = "$entityName $id is not valid.";
             }
@@ -59,7 +58,7 @@ abstract class AbstractValidator
     /**
      * Validate create.
      *
-     * @param array<mixed> $data The data
+     * @param array<string, mixed> $data The data
      *
      * @return void
      */
@@ -72,7 +71,7 @@ abstract class AbstractValidator
      * Validate update.
      *
      * @param string $id The entity id
-     * @param array<mixed> $data The data
+     * @param array<string, mixed> $data The data
      *
      * @return void
      */
@@ -84,17 +83,16 @@ abstract class AbstractValidator
 
     /**
      * Validate Entity.
-     *
-     * @param array<mixed> $data The data
-     *
-     * @throws ValidationException
-     *
+     * @param array<string, mixed> $data The data
+     * @param Validator|null $validator Validation rules to be used
+     * @param bool $newRecord Is it a create or update operation
      * @return void
      */
     protected function validateEntity(array $data, ?Validator $validator = null, bool $newRecord = true): void
     {
-        if (is_null($validator))
+        if (is_null($validator)) {
             $validator = $this->createValidator();
+        }
 
         $validationResult = $this->validationFactory->createValidationResult(
             $validator->validate($data, $newRecord)
@@ -112,8 +110,6 @@ abstract class AbstractValidator
      */
     protected function createValidator(): Validator
     {
-        $validator = $this->validationFactory->createValidator();
-
-        return $validator;
+        return $this->validationFactory->createValidator();
     }
 }
