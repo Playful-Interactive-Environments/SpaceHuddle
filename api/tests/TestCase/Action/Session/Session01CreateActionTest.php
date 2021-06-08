@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Test\TestCase\Action\User;
+
+namespace App\Test\TestCase\Action\Session;
 
 use App\Test\Traits\AppTestTrait;
 use Fig\Http\Message\StatusCodeInterface;
-use PHPUnit\Framework\TestCase;
+use Monolog\Test\TestCase;
 use Selective\TestTrait\Traits\DatabaseTestTrait;
 
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\User\UserLoginAction
+ * @coversDefaultClass \App\Action\Session\SessionCreateAction
  */
-class User02LoginActionTest extends TestCase
+class Session01CreateActionTest extends TestCase
 {
     use AppTestTrait;
     use DatabaseTestTrait;
@@ -22,22 +23,27 @@ class User02LoginActionTest extends TestCase
      *
      * @return void
      */
-    public function testLoginUser(): void
+    public function testCreateSession(): void
     {
+        $tableRowCount = $this->getTableRowCount("session");
         $request = $this->createJsonRequest(
             "POST",
-            "/user/login/",
+            "/session/",
             [
-                "username" => "admin",
-                "password" => "secret123"
+                "title" => "php unit test session",
+                "maxParticipants" => 100,
+                "expirationDate" => "2022-01-01"
             ]
         );
-
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
         // Check response
-        $this->assertSame(StatusCodeInterface::STATUS_ACCEPTED, $response->getStatusCode());
+        $this->assertSame(StatusCodeInterface::STATUS_CREATED, $response->getStatusCode());
         $this->assertJsonContentType($response);
+
+        // Check database
+        $this->assertTableRowCount($tableRowCount+1, "session");
     }
 
     /**
@@ -45,20 +51,18 @@ class User02LoginActionTest extends TestCase
      *
      * @return void
      */
-    public function testLoginUserValidation(): void
+    public function testCreateSessionValidation(): void
     {
         $request = $this->createJsonRequest(
             "POST",
-            "/user/login/",
+            "/session/",
             [
-                "username" => "admin",
-                "password" => "1234",
+                "maxParticipants" => 100,
+                "expirationDate" => "2022-01-01"
             ]
         );
-
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
-        #echo $response->getBody();
-        #echo "\n\n";
 
         // Check response
         $this->assertSame(StatusCodeInterface::STATUS_UNPROCESSABLE_ENTITY, $response->getStatusCode());
@@ -70,9 +74,9 @@ class User02LoginActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "Username or password wrong.",
-                            "field" => "username or password",
-                        ],
+                            "message" => "This field is required",
+                            "field" => "title",
+                        ]
                     ],
                 ],
             ],

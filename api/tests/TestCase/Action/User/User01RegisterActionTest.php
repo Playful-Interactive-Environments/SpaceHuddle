@@ -2,9 +2,7 @@
 
 namespace App\Test\TestCase\Action\User;
 
-use App\Domain\User\Type\UserRoleType;
 use App\Test\Traits\AppTestTrait;
-use Cake\Chronos\Chronos;
 use Fig\Http\Message\StatusCodeInterface;
 use PHPUnit\Framework\TestCase;
 use Selective\TestTrait\Traits\DatabaseTestTrait;
@@ -12,7 +10,7 @@ use Selective\TestTrait\Traits\DatabaseTestTrait;
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\User\UserLoginAction
+ * @coversDefaultClass \App\Action\User\UserRegisterAction
  */
 class User01RegisterActionTest extends TestCase
 {
@@ -26,6 +24,7 @@ class User01RegisterActionTest extends TestCase
      */
     public function testCreateUser(): void
     {
+        $tableRowCount = $this->getTableRowCount("user");
         $request = $this->createJsonRequest(
             "POST",
             "/user/register/",
@@ -42,7 +41,7 @@ class User01RegisterActionTest extends TestCase
         $this->assertJsonContentType($response);
 
         // Check database
-        $this->assertTableRowCount(2, "user");
+        $this->assertTableRowCount($tableRowCount+1, "user");
     }
 
     /**

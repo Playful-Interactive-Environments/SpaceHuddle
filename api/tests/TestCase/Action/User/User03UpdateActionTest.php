@@ -10,9 +10,9 @@ use Selective\TestTrait\Traits\DatabaseTestTrait;
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\User\UserLoginAction
+ * @coversDefaultClass \App\Action\User\UserChangePasswordAction
  */
-class User02LoginActionTest extends TestCase
+class User03UpdateActionTest extends TestCase
 {
     use AppTestTrait;
     use DatabaseTestTrait;
@@ -22,21 +22,23 @@ class User02LoginActionTest extends TestCase
      *
      * @return void
      */
-    public function testLoginUser(): void
+    public function testUpdateUser(): void
     {
         $request = $this->createJsonRequest(
-            "POST",
-            "/user/login/",
+            "PUT",
+            "/user/",
             [
-                "username" => "admin",
-                "password" => "secret123"
+                "oldPassword" => "secret123",
+                "password" => "string1234",
+                "passwordConfirmation" => "string1234"
             ]
         );
+        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "secret123"));
 
         $response = $this->app->handle($request);
 
         // Check response
-        $this->assertSame(StatusCodeInterface::STATUS_ACCEPTED, $response->getStatusCode());
+        $this->assertSame(StatusCodeInterface::STATUS_CREATED, $response->getStatusCode());
         $this->assertJsonContentType($response);
     }
 
@@ -45,20 +47,19 @@ class User02LoginActionTest extends TestCase
      *
      * @return void
      */
-    public function testLoginUserValidation(): void
+    public function testUpdateUserValidation(): void
     {
         $request = $this->createJsonRequest(
-            "POST",
-            "/user/login/",
+            "PUT",
+            "/user/",
             [
-                "username" => "admin",
-                "password" => "1234",
+                "oldPassword" => "secret123",
+                "password" => "secret1233",
+                "passwordConfirmation" => "secret123"
             ]
         );
-
+        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "string1234"));
         $response = $this->app->handle($request);
-        #echo $response->getBody();
-        #echo "\n\n";
 
         // Check response
         $this->assertSame(StatusCodeInterface::STATUS_UNPROCESSABLE_ENTITY, $response->getStatusCode());
@@ -70,8 +71,8 @@ class User02LoginActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "Username or password wrong.",
-                            "field" => "username or password",
+                            "message" => "Password and confirmation do not match.",
+                            "field" => "passwordConfirmation",
                         ],
                     ],
                 ],

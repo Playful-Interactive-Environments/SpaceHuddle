@@ -2,9 +2,7 @@
 
 namespace App\Test\TestCase\Action\User;
 
-use App\Domain\User\Type\UserRoleType;
 use App\Test\Traits\AppTestTrait;
-use Cake\Chronos\Chronos;
 use Fig\Http\Message\StatusCodeInterface;
 use PHPUnit\Framework\TestCase;
 use Selective\TestTrait\Traits\DatabaseTestTrait;
@@ -12,7 +10,7 @@ use Selective\TestTrait\Traits\DatabaseTestTrait;
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\User\UserLoginAction
+ * @coversDefaultClass \App\Action\User\UserDeleteAction
  */
 class User04DeleteActionTest extends TestCase
 {
@@ -26,11 +24,12 @@ class User04DeleteActionTest extends TestCase
      */
     public function testDeleteUser(): void
     {
+        $tableRowCount = $this->getTableRowCount("user");
         $request = $this->createJsonRequest(
             "DELETE",
             "/user/"
         );
-        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "secret123"));
+        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "string1234"));
 
         $response = $this->app->handle($request);
 
@@ -39,7 +38,7 @@ class User04DeleteActionTest extends TestCase
         $this->assertJsonContentType($response);
 
         // Check database
-        $this->assertTableRowCount(1, "user");
+        $this->assertTableRowCount($tableRowCount-1, "user");
 
         // Check double delete
         $response = $this->app->handle($request);
@@ -75,7 +74,7 @@ class User04DeleteActionTest extends TestCase
             "DELETE",
             "/user/"
         );
-        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "secret123"));
+        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "string1234"));
         $response = $this->app->handle($request);
 
         // Check response
