@@ -3,7 +3,7 @@ import Home from '../views/Home.vue';
 import Join from '../views/client/Join.vue';
 import ModuleOverview from '@/views/client/Overview.vue';
 import SessionOverview from '@/views/moderator/SessionOverview.vue';
-import SessionDetail from '@/views/moderator/SessionDetail.vue';
+import SessionDetails from '@/views/moderator/SessionDetails.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -38,7 +38,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/session-detail',
     name: 'session-detail',
-    component: SessionDetail,
+    component: SessionDetails,
   },
 ];
 

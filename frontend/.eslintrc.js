@@ -25,6 +25,7 @@ module.exports = {
                 tabWidth: 4,
                 bracketSpacing: true,
                 vueIndentScriptAndStyle: false,
+                endOfLine: 'auto',
             },
         ],
     },
