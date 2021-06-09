@@ -2,6 +2,7 @@
 
 namespace App\Domain\User\Repository;
 
+use App\Data\AuthorisationData;
 use App\Domain\Base\Data\AbstractData;
 use App\Domain\Base\Repository\AbstractRepository;
 use App\Domain\Session\Repository\SessionRepository;
@@ -22,6 +23,17 @@ final class UserRepository extends AbstractRepository
     public function __construct(QueryFactory $queryFactory,)
     {
         parent::__construct($queryFactory, "user", UserData::class);
+    }
+
+    /**
+     * Checks the access role via which the logged-in user may access the entry with the specified primary key.
+     * @param AuthorisationData $authorisation Authorisation token data.
+     * @param string|null $id Primary key to be checked.
+     * @return string|null Role with which the user is authorised to access the entry.
+     */
+    public function getAuthorisationRole(AuthorisationData $authorisation, ?string $id): ?string
+    {
+        return $this->getUserRole($authorisation, $id);
     }
 
     /**

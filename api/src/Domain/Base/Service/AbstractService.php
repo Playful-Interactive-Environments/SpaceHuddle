@@ -2,11 +2,13 @@
 
 namespace App\Domain\Base\Service;
 
+use App\Data\AuthorisationRoleType;
 use App\Database\TransactionInterface;
 use App\Domain\Base\Repository\AbstractRepository;
 use App\Domain\Base\Data\AbstractData;
 use App\Data\AuthorisationData;
 use App\Data\AuthorisationException;
+use App\Domain\User\Type\UserRoleType;
 use App\Factory\LoggerFactory;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Log\LoggerInterface;
@@ -21,7 +23,8 @@ abstract class AbstractService
     protected AbstractValidator $validator;
     protected TransactionInterface $transaction;
     protected LoggerInterface $logger;
-    protected array $permission;
+    protected array $authorisationPermissionList;
+    protected array $entityPermissionList;
 
     /**
      * The constructor.
@@ -43,7 +46,16 @@ abstract class AbstractService
         $this->logger = $loggerFactory
             ->addFileHandler("service.log")
             ->createLogger();
-        $this->permission = [];
+        $this->authorisationPermissionList = [
+            AuthorisationRoleType::PARTICIPANT,
+            AuthorisationRoleType::USER,
+            AuthorisationRoleType::NONE
+        ];
+        $this->entityPermissionList = [
+            UserRoleType::MODERATOR,
+            UserRoleType::FACILITATOR,
+            UserRoleType::PARTICIPANT
+        ];
     }
 
     /**
@@ -51,12 +63,20 @@ abstract class AbstractService
      * @param AuthorisationData $authorisation Authorisation data
      * @return bool TRUE if the rights for executing the service are available.
      */
-    public function hasPermission(AuthorisationData $authorisation): bool
+    public function hasPermission(AuthorisationData $authorisation, array $data): bool
     {
-        return (
-            sizeof($this->permission) === 0 or
-            in_array($authorisation->role, $this->permission)
+        $permission = (
+            sizeof($this->authorisationPermissionList) === 0 or
+            $this->repository::isAuthorized($authorisation->role, $this->authorisationPermissionList)
         );
+
+        if ($permission and key_exists("id", $data)) {
+            $id = $data["id"];
+            $specificEntityRole = $this->repository->getAuthorisationRole($authorisation, $id);
+            $permission = $this->repository::isAuthorized($specificEntityRole, $this->entityPermissionList);
+        }
+
+        return $permission;
     }
 
     /**
@@ -70,10 +90,11 @@ abstract class AbstractService
      */
     public function service(AuthorisationData $authorisation, array $data): array|AbstractData|null
     {
-        if (!$this->hasPermission($authorisation)) {
+        if (!$this->hasPermission($authorisation, $data)) {
             http_response_code(StatusCodeInterface::STATUS_UNAUTHORIZED);
             throw new AuthorisationException("User has no rights for this service");
         }
+
         return null;
     }
 }

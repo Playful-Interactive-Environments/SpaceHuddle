@@ -6,6 +6,7 @@ use App\Database\TransactionInterface;
 use App\Data\AuthorisationRoleType;
 use App\Domain\Base\Service\ServiceDeleter;
 use App\Domain\User\Repository\UserRepository;
+use App\Domain\User\Type\UserRoleType;
 use App\Factory\LoggerFactory;
 
 /**
@@ -28,6 +29,10 @@ final class UserDeleter extends ServiceDeleter
         LoggerFactory $loggerFactory
     ) {
         parent::__construct($repository, $validator, $transaction, $loggerFactory);
-        $this->permission = [AuthorisationRoleType::USER];
+        $this->authorisationPermissionList = [AuthorisationRoleType::USER];
+        $this->entityPermissionList = [
+            UserRoleType::MODERATOR,
+            UserRoleType::FACILITATOR
+        ];
     }
 }

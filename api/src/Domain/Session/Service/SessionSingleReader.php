@@ -6,6 +6,7 @@ use App\Database\TransactionInterface;
 use App\Data\AuthorisationRoleType;
 use App\Domain\Base\Service\ServiceSingleReader;
 use App\Domain\Session\Repository\SessionRepository;
+use App\Domain\User\Type\UserRoleType;
 use App\Factory\LoggerFactory;
 
 /**
@@ -29,6 +30,10 @@ class SessionSingleReader extends ServiceSingleReader
         LoggerFactory $loggerFactory
     ) {
         parent::__construct($repository, $validator, $transaction, $loggerFactory);
-        $this->permission = [AuthorisationRoleType::USER];
+        $this->authorisationPermissionList = [AuthorisationRoleType::USER];
+        $this->entityPermissionList = [
+            UserRoleType::MODERATOR,
+            UserRoleType::FACILITATOR
+        ];
     }
 }

@@ -2,8 +2,10 @@
 
 namespace App\Domain\Session\Repository;
 
+use App\Data\AuthorisationData;
 use App\Domain\Base\Data\AbstractData;
 use App\Domain\Base\Repository\AbstractRepository;
+use App\Domain\User\Repository\UserRepository;
 use App\Domain\User\Type\UserRoleType;
 use App\Factory\QueryFactory;
 use App\Domain\Session\Data\SessionData;
@@ -20,7 +22,51 @@ class SessionRepository extends AbstractRepository
      */
     public function __construct(QueryFactory $queryFactory)
     {
-        parent::__construct($queryFactory, "session", SessionData::class, "user_id");
+        parent::__construct(
+            $queryFactory,
+            "session",
+            SessionData::class,
+            "user_id",
+            UserRepository::class);
+    }
+
+    /**
+     * Checks the access role via which the logged-in user may access the entry with the specified primary key.
+     * @param AuthorisationData $authorisation Authorisation token data.
+     * @param string|null $id Primary key to be checked.
+     * @return string|null Role with which the user is authorised to access the entry.
+     */
+    public function getAuthorisationRole(AuthorisationData $authorisation, ?string $id): ?string
+    {
+        if ($authorisation->isUser()) {
+            if (is_null($id)) {
+                return strtoupper(UserRoleType::MODERATOR);
+            }
+            $query = $this->queryFactory->newSelect("session_role");
+            $query->select(["*"])
+                ->andWhere([
+                    "session_id" => $id,
+                    "user_id" => $authorisation->id
+                ]);
+
+            $statement = $query->execute();
+            $itemCount = $statement->rowCount();
+            if ($itemCount > 0) {
+                $result = $statement->fetch("assoc");
+                return strtoupper($result["role"]);
+            }
+        } elseif ($authorisation->isParticipant()) {
+            $query = $this->queryFactory->newSelect("participant");
+            $query->select(["*"])
+                ->andWhere([
+                    "session_id" => $id,
+                    "id" => $authorisation->id
+                ]);
+            if ($query->execute()->rowCount() > 0) {
+                return strtoupper(UserRoleType::PARTICIPANT);
+            }
+        }
+        return null;
     }
 
     /**
@@ -58,8 +104,6 @@ class SessionRepository extends AbstractRepository
                     }
                     return $result;
                 }
-            } else {
-                throw new DomainException("Entity $this->entityName not found");
             }
         }
         return null;
@@ -159,5 +203,4 @@ class SessionRepository extends AbstractRepository
             "public_screen_module_id" => $data->publicScreenModuleId ?? null
         ];
     }
-
 }

@@ -2,9 +2,13 @@
 
 namespace App\Domain\Base\Repository;
 
+use App\Data\AuthorisationData;
 use App\Domain\Base\Data\AbstractData;
+use App\Domain\Participant\Type\ParticipantState;
+use App\Domain\User\Type\UserRoleType;
 use App\Factory\QueryFactory;
 use DomainException;
+use function DI\string;
 
 /**
  * Description of the common repository functionality.
@@ -16,6 +20,7 @@ abstract class AbstractRepository
     protected ?string $entityName;
     protected ?string $resultClass;
     protected ?string $parentIdName;
+    protected AbstractRepository $parentRepository;
 
     /**
      * Get private properties
@@ -47,17 +52,22 @@ abstract class AbstractRepository
      * @param string|null $entityName Name of the database table
      * @param string|null $resultClass Name of the result class
      * @param string|null $parentIdName Column name of the parent ID.
+     * @param string|null $parentRepository The parent repository class.
      */
     public function __construct(
         QueryFactory $queryFactory,
         ?string $entityName = null,
         ?string $resultClass = null,
-        ?string $parentIdName = null
+        ?string $parentIdName = null,
+        ?string $parentRepository = null
     ) {
         $this->queryFactory = $queryFactory;
         $this->entityName = $entityName;
         $this->resultClass = $resultClass;
         $this->parentIdName = $parentIdName;
+        if (isset($parentRepository)) {
+            $this->parentRepository = new $parentRepository($queryFactory);
+        }
     }
 
     /**
@@ -68,7 +78,8 @@ abstract class AbstractRepository
     {
         return (
             $this->genericTableParameterSet() and
-            isset($this->parentIdName)
+            isset($this->parentIdName) and
+            isset($this->parentRepository)
         );
     }
 
@@ -85,6 +96,100 @@ abstract class AbstractRepository
     }
 
     /**
+     * Check if the user role is part of the authorised roles.
+     * @param string|null $role User role
+     * @param array $authorizedRoles List of authorised roles.
+     * @return bool Authorisation state
+     */
+    public static function isAuthorized(?string $role, array $authorizedRoles = [UserRoleType::MODERATOR]): bool
+    {
+        if (isset($role)) {
+            $role = strtoupper($role);
+            $authorizedRoles = array_map("strtoupper", $authorizedRoles);
+            return in_array($role, $authorizedRoles);
+        }
+        return false;
+    }
+
+    /**
+     * Checks the access role via which the logged-in user may access the entry with the specified primary key.
+     * @param AuthorisationData $authorisation Authorisation token data.
+     * @param string|null $id Primary key to be checked.
+     * @return string|null Role with which the user is authorised to access the entry.
+     */
+    public function getAuthorisationRole(AuthorisationData $authorisation, ?string $id): ?string
+    {
+        if (is_null($id)) {
+            if ($authorisation->isUser()) {
+                return strtoupper(UserRoleType::MODERATOR);
+            } elseif ($authorisation->isParticipant()) {
+                return strtoupper(UserRoleType::PARTICIPANT);
+            }
+        } else {
+            $query = $this->queryFactory->newSelect($this->entityName);
+            $query->select(["*"])
+                ->andWhere(["id" => $id]);
+            $statement = $query->execute();
+            $itemCount = $statement->rowCount();
+            if ($itemCount > 0) {
+                $parentId = $statement->fetch("assoc")[$this->parentIdName];
+                return $this->parentRepository->getAuthorisationRole($authorisation, $parentId);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Check the access role via which one's own user data can be edited.
+     * @param AuthorisationData $authorisation Authorisation token data.
+     * @param string|null $id Primary key to be checked.
+     * @return string Role with which the user is authorised to access the entry.
+     */
+    public function getUserRole(AuthorisationData $authorisation, ?string $id): string
+    {
+        if ($authorisation->isLoggedIn()) {
+            if ($authorisation->isUser()) {
+                $userId = $authorisation->id;
+                if (is_null($id) or $id == $userId) {
+                    return UserRoleType::MODERATOR;
+                }
+            }
+            if ($authorisation->isParticipant()) {
+                $participantId = $authorisation->id;
+                if (is_null($id) or $id == $participantId) {
+                    $query = $this->queryFactory->newSelect("participant");
+                    $query->select(["*"])
+                        ->andWhere(["id" => $participantId]);
+                    $statement = $query->execute();
+
+                    $itemCount = $statement->rowCount();
+                    if ($itemCount > 0) {
+                        $participant = $statement->fetch("assoc");
+                        if (strtoupper($participant["state"]) == strtoupper(ParticipantState::ACTIVE)) {
+                            return UserRoleType::PARTICIPANT;
+                        }
+                        return UserRoleType::PARTICIPANT_INACTIVE;
+                    }
+                }
+            }
+        }
+
+        return UserRoleType::UNKNOWN;
+    }
+
+    /**
+     * Checks whether the user is authorised to read the entry with the specified primary key.
+     * @param AuthorisationData $authorisation Authorisation token data.
+     * @param string|null $id Primary key to be checked.
+     * @return string|null Role with which the user is authorised to access the entry.
+     */
+    public function getAuthorisationReadRole(AuthorisationData $authorisation, ?string $id): ?string
+    {
+        return $this->getAuthorisationRole($authorisation, $id);
+    }
+
+    /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
      * @return AbstractData|array<AbstractData>|null The result entity(s).
@@ -93,8 +198,8 @@ abstract class AbstractRepository
     {
         if ($this->genericTableParameterSet()) {
             $query = $this->queryFactory->newSelect($this->entityName);
-            $query->select(["*"]);
-            $query->andWhere($conditions);
+            $query->select(["*"])
+                ->andWhere($conditions);
 
             $rows = $query->execute()->fetchAll("assoc");
             if (is_array($rows) and sizeof($rows) > 0) {
@@ -107,8 +212,6 @@ abstract class AbstractRepository
                     }
                     return $result;
                 }
-            } else {
-                throw new DomainException("Entity $this->entityName not found");
             }
         }
         return null;
@@ -139,7 +242,11 @@ abstract class AbstractRepository
      */
     public function getById(string $id): ?AbstractData
     {
-        return $this->get(["id" => $id]);
+        $result = $this->get(["id" => $id]);
+        if (!is_object($result)) {
+            throw new DomainException("Entity $this->entityName not found");
+        }
+        return $result;
     }
 
     /**
