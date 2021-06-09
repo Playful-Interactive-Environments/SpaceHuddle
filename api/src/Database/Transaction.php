@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Database;
+
 use Cake\Database\Connection;
+
 /**
  * Transaction handler.
  */
@@ -30,7 +32,7 @@ final class Transaction implements TransactionInterface
     }
 
     /**
-     * Commits current transaction.
+     * Commits the current transaction.
      */
     public function commit(): void
     {
@@ -38,7 +40,7 @@ final class Transaction implements TransactionInterface
     }
 
     /**
-     * Rollback current transaction.
+     * Rollback the current transaction.
      */
     public function rollback(): void
     {
