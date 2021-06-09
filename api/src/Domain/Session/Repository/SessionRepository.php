@@ -9,7 +9,6 @@ use App\Domain\Base\AbstractRepository;
 use App\Domain\User\Data\UserRole;
 use App\Factory\QueryFactory;
 use App\Domain\Session\Data\SessionData;
-use Cake\Core\ContainerInterface;
 
 /**
  * Repository
@@ -29,23 +28,29 @@ class SessionRepository extends AbstractRepository
     /**
      * Insert session row.
      * @param object $data The session data
-     * @param string|null $userId Authorised user
      * @return AbstractData|null The new session
      */
-    public function insert(object $data, string $userId = null): ?AbstractData
+    public function insert(object $data): ?AbstractData
     {
         $data->connectionKey = $this->generateNewConnectionKey("connection_key");
-        $result = parent::insert($data);
+        return parent::insert($data);
+    }
 
-        $id = $result->id;
-        $this->queryFactory->newInsert("session_role", [
+    /**
+     * Include dependent data.
+     * @param string $id Primary key of the linked table entry
+     * @param array|object|null $parameter Dependent data to be included.
+     * @return void
+     */
+    protected function insertDependencies(string $id, array|object|null $parameter): void
+    {
+        if (is_object($parameter)) {
+            $this->queryFactory->newInsert("session_role", [
                 "session_id" => $id,
-                "user_id" => $userId,
+                "user_id" => $parameter->userId,
                 "role" => strtoupper(UserRole::MODERATOR)
-            ])
-            ->execute();
-
-        return $this->getById($id);
+            ])->execute();
+        }
     }
 
     /**

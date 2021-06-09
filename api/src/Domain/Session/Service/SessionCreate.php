@@ -43,9 +43,10 @@ class SessionCreate extends ServiceCreator
 
         // Map form data to session DTO (model)
         $session = (object)$data;
+        $session->userId = $userId;
 
         // Insert session and get new session ID
-        $result = $this->repository->insert($session, $userId);
+        $result = $this->repository->insert($session);
 
         // Logging
         $this->logger->info("Session created successfully: $result->id");

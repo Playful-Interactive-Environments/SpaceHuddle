@@ -75,12 +75,33 @@ abstract class AbstractRepository extends RepositoryErrorHandling
             $data->id = uuid_create();
             $row = $this->toRow($data);
 
-            $this->queryFactory->newInsert($this->entityName, $row)
-                ->execute();
+            $handleTransaction = !$this->queryFactory->inTransaction();
+            if ($handleTransaction) {
+                $this->queryFactory->beginTransaction();
+            }
+            $itemCount = $this->queryFactory->newInsert($this->entityName, $row)
+                ->execute()->rowCount();
+
+            if ($itemCount > 0 and array_key_exists("id", $row)) {
+                $this->insertDependencies($data->id, $data);
+            }
+            if ($handleTransaction) {
+                $this->queryFactory->commitTransaction();
+            }
 
             return $this->getById($data->id);
         }
         return null;
+    }
+
+    /**
+     * Include dependent data.
+     * @param string $id Primary key of the linked table entry
+     * @param array|object|null $parameter Dependent data to be included.
+     * @return void
+     */
+    protected function insertDependencies(string $id, array|object|null $parameter): void
+    {
     }
 
     /**
@@ -131,9 +152,17 @@ abstract class AbstractRepository extends RepositoryErrorHandling
             $id = $data["id"];
             unset($data["id"]);
 
+
+            $handleTransaction = !$this->queryFactory->inTransaction();
+            if ($handleTransaction) {
+                $this->queryFactory->beginTransaction();
+            }
             $this->queryFactory->newUpdate($this->entityName, $data)
                 ->andWhere(["id" => $id])
                 ->execute();
+            if ($handleTransaction) {
+                $this->queryFactory->commitTransaction();
+            }
 
             return $this->getById($id);
         }
