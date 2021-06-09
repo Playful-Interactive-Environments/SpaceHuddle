@@ -2,11 +2,11 @@
 
 namespace App\Domain\Base\Service;
 
-use App\Domain\Base\AbstractRepository;
-use App\Domain\Base\AbstractValidator;
+use App\Database\TransactionInterface;
+use App\Domain\Base\Repository\AbstractRepository;
 use App\Domain\Base\Data\AbstractData;
-use App\Domain\Base\Data\AuthorisationData;
-use App\Domain\Base\Data\AuthorisationException;
+use App\Data\AuthorisationData;
+use App\Data\AuthorisationException;
 use App\Factory\LoggerFactory;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Log\LoggerInterface;
@@ -19,6 +19,7 @@ abstract class AbstractService
 {
     protected AbstractRepository $repository;
     protected AbstractValidator $validator;
+    protected TransactionInterface $transaction;
     protected LoggerInterface $logger;
     protected array $permission;
 
@@ -27,15 +28,18 @@ abstract class AbstractService
      *
      * @param AbstractRepository $repository The repository
      * @param AbstractValidator $validator The validator
+     * @param TransactionInterface $transaction The transaction
      * @param LoggerFactory $loggerFactory The logger factory
      */
     public function __construct(
         AbstractRepository $repository,
         AbstractValidator $validator,
+        TransactionInterface $transaction,
         LoggerFactory $loggerFactory
     ) {
         $this->repository = $repository;
         $this->validator = $validator;
+        $this->transaction = $transaction;
         $this->logger = $loggerFactory
             ->addFileHandler("service.log")
             ->createLogger();

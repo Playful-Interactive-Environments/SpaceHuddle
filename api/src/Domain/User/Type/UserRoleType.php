@@ -3,13 +3,19 @@
 namespace App\Domain\User\Type;
 
 /**
- * Type.
+ * Permission roles for the session.
+ * @OA\Schema(
+ *   description="permission roles for the session",
+ *   type="string",
+ *   enum={"MODERATOR", "FACILITATOR", "PARTICIPANT", "UNKNOWN", "PARTICIPANT_INACTIVE"},
+ *   example="MODERATOR"
+ * )
  */
-final class UserRoleType
+class UserRoleType
 {
-    /** @var int */
-    public const ROLE_ADMIN = 1;
-
-    /** @var int */
-    public const ROLE_USER = 2;
+    public const MODERATOR = "moderator";
+    public const FACILITATOR = "facilitator";
+    public const PARTICIPANT = "participant";
+    public const UNKNOWN = "unknown";
+    public const PARTICIPANT_INACTIVE = "participant_inactive";
 }

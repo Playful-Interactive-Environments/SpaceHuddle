@@ -3,7 +3,7 @@
 namespace App\Domain\Session\Service;
 
 use App\Domain\Session\Repository\SessionRepository;
-use App\Domain\Base\AbstractValidator;
+use App\Domain\Base\Service\AbstractValidator;
 use App\Factory\ValidationFactory;
 use Cake\Validation\Validator;
 

@@ -14,7 +14,7 @@ final class UserData extends AbstractData
     /**
      * The entity ID.
      * @var string|null
-     * @OA\Property()
+     * @OA\Property(example="uuid")
      */
     public ?string $id = null;
 

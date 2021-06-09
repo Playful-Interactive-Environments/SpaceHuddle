@@ -3,7 +3,7 @@
 namespace App\Domain\User\Service;
 
 use App\Domain\User\Repository\UserRepository;
-use App\Domain\Base\AbstractValidator;
+use App\Domain\Base\Service\AbstractValidator;
 use App\Factory\ValidationFactory;
 use Cake\Validation\Validator;
 use Selective\Validation\Exception\ValidationException;

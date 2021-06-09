@@ -3,8 +3,10 @@
 
 namespace App\Domain\Base\Service;
 
+use App\Data\AuthorisationException;
 use App\Domain\Base\Data\AbstractData;
-use App\Domain\Base\Data\AuthorisationData;
+use App\Data\AuthorisationData;
+use PDOException;
 
 /**
  * Description of the common delete service functionality.
@@ -19,7 +21,7 @@ class ServiceDeleter extends AbstractService
      * @param array<string, mixed> $data The form data
      *
      * @return array|AbstractData|null Service output
-     * @throws \App\Domain\Base\Data\AuthorisationException
+     * @throws AuthorisationException
      */
     public function service(AuthorisationData $authorisation, array $data): array|AbstractData|null
     {
@@ -30,7 +32,9 @@ class ServiceDeleter extends AbstractService
         // Input validation
         $this->validator->validateExists($id);
 
-        $this->repository->deleteById($id);
+        $this->transaction->begin();
+        $this->repository->deleteById($id);// Commit all changes
+        $this->transaction->commit();
 
         $entityName = $this->repository->getEntityName();
         return [

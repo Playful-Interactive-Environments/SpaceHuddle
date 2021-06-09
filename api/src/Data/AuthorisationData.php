@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Domain\Base\Data;
+namespace App\Data;
 
+use App\Data\AuthorisationRoleType;
 use Lcobucci\JWT\Token\DataSet;
 
 /**
@@ -34,15 +35,15 @@ class AuthorisationData
             $participantId = $data->get("participantId");
             if (isset($userId)) {
                 $this->id = $userId;
-                $this->role = AuthorisationRole::USER;
+                $this->role = AuthorisationRoleType::USER;
             } elseif (isset($participantId)) {
                 $this->id = $participantId;
-                $this->role = AuthorisationRole::PARTICIPANT;
+                $this->role = AuthorisationRoleType::PARTICIPANT;
             } else {
-                $this->role = AuthorisationRole::NONE;
+                $this->role = AuthorisationRoleType::NONE;
             }
         } else {
-            $this->role = AuthorisationRole::NONE;
+            $this->role = AuthorisationRoleType::NONE;
         }
     }
 
@@ -52,7 +53,7 @@ class AuthorisationData
      */
     public function isParticipant(): bool
     {
-        return ($this->role === AuthorisationRole::PARTICIPANT);
+        return ($this->role === AuthorisationRoleType::PARTICIPANT);
     }
 
     /**
@@ -61,7 +62,7 @@ class AuthorisationData
      */
     public function isUser(): bool
     {
-        return ($this->role === AuthorisationRole::USER);
+        return ($this->role === AuthorisationRoleType::USER);
     }
 
     /**
@@ -70,6 +71,6 @@ class AuthorisationData
      */
     public function isLoggedIn(): bool
     {
-        return ($this->role !== AuthorisationRole::USER and $this->role !== AuthorisationRole::PARTICIPANT);
+        return ($this->role !== AuthorisationRoleType::USER and $this->role !== AuthorisationRoleType::PARTICIPANT);
     }
 }

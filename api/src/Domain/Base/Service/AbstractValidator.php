@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Domain\Base;
+namespace App\Domain\Base\Service;
 
+use App\Domain\Base\Repository\AbstractRepository;
 use App\Factory\ValidationFactory;
 use Cake\Validation\Validator;
 use Selective\Validation\Exception\ValidationException;

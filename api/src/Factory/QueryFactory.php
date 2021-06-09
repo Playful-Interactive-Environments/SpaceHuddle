@@ -86,36 +86,4 @@ final class QueryFactory
     {
         return $this->newQuery()->delete($table);
     }
-
-    /**
-     * Starts a new transaction.
-     */
-    public function beginTransaction(): void
-    {
-        $this->connection->begin();
-    }
-
-    /**
-     * Commits current transaction.
-     */
-    public function commitTransaction(): void
-    {
-        $this->connection->commit();
-    }
-
-    /**
-     * Rollback current transaction.
-     */
-    public function rollbackTransaction(): void
-    {
-        $this->connection->rollback();
-    }
-
-    /**
-     * Checks if a transaction is running.
-     */
-    public function inTransaction(): bool
-    {
-        return $this->connection->inTransaction();
-    }
 }

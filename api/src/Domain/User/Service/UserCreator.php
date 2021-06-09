@@ -2,6 +2,7 @@
 
 namespace App\Domain\User\Service;
 
+use App\Database\TransactionInterface;
 use App\Domain\Base\Service\ServiceCreator;
 use App\Domain\User\Data\UserData;
 use App\Domain\User\Repository\UserRepository;
@@ -18,13 +19,15 @@ final class UserCreator extends ServiceCreator
      *
      * @param UserRepository $repository The repository
      * @param UserValidator $validator The validator
+     * @param TransactionInterface $transaction The transaction
      * @param LoggerFactory $loggerFactory The logger factory
      */
     public function __construct(
         UserRepository $repository,
         UserValidator $validator,
+        TransactionInterface $transaction,
         LoggerFactory $loggerFactory
     ) {
-        parent::__construct($repository, $validator, $loggerFactory);
+        parent::__construct($repository, $validator, $transaction, $loggerFactory);
     }
 }

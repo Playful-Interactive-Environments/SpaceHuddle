@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Domain\Base;
+namespace App\Handler;
 
-use App\Factory\QueryFactory;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -10,22 +9,11 @@ use Slim\Interfaces\ErrorHandlerInterface;
 use Throwable;
 
 /**
- * Implement PDOException error handling for middleware
- * @package App\Domain\Base
+ * Class AuthorisationErrorHandling
+ * @package App\Domain\Base\Data
  */
-class RepositoryErrorHandling implements ErrorHandlerInterface
+class AuthorisationErrorHandling implements ErrorHandlerInterface
 {
-    protected QueryFactory $queryFactory;
-
-    /**
-     * The constructor.
-     * @param QueryFactory $queryFactory The query factory
-     */
-    public function __construct(QueryFactory $queryFactory)
-    {
-        $this->queryFactory = $queryFactory;
-    }
-
     /**
      * @param ServerRequestInterface $request
      * @param Throwable              $exception
@@ -41,9 +29,8 @@ class RepositoryErrorHandling implements ErrorHandlerInterface
         bool $logErrors,
         bool $logErrorDetails
     ): ResponseInterface {
-        http_response_code(StatusCodeInterface::STATUS_FAILED_DEPENDENCY);
+        http_response_code(StatusCodeInterface::STATUS_UNAUTHORIZED);
         $errorMessage = $exception->getMessage();
-        $this->queryFactory->rollbackTransaction();
         $error = json_encode(
             [
                 "state" => "Failed",

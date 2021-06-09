@@ -2,8 +2,10 @@
 
 namespace App\Domain\User\Service;
 
+use App\Data\AuthorisationException;
+use App\Database\TransactionInterface;
 use App\Domain\Base\Data\AbstractData;
-use App\Domain\Base\Data\AuthorisationData;
+use App\Data\AuthorisationData;
 use App\Domain\Base\Service\AbstractService;
 use App\Domain\User\Repository\UserRepository;
 use App\Factory\LoggerFactory;
@@ -21,16 +23,18 @@ final class UserLogin extends AbstractService
      *
      * @param UserRepository $repository The repository
      * @param UserValidator $validator The validator
+     * @param TransactionInterface $transaction The transaction
      * @param LoggerFactory $loggerFactory The logger factory
      * @param JwtAuth $jwtAuth The jwt authorization
      */
     public function __construct(
         UserRepository $repository,
         UserValidator $validator,
+        TransactionInterface $transaction,
         LoggerFactory $loggerFactory,
         JwtAuth $jwtAuth
     ) {
-        parent::__construct($repository, $validator, $loggerFactory);
+        parent::__construct($repository, $validator, $transaction, $loggerFactory);
         $this->jwtAuth = $jwtAuth;
     }
 
@@ -41,7 +45,7 @@ final class UserLogin extends AbstractService
      * @param array<string, mixed> $data The form data
      *
      * @return array|AbstractData|null Service output
-     * @throws \App\Domain\Base\Data\AuthorisationException
+     * @throws AuthorisationException
      */
     public function service(AuthorisationData $authorisation, array $data): array|AbstractData|null
     {

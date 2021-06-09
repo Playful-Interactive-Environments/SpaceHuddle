@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domain\Base\Data;
+namespace App\Data;
 
-class AuthorisationRole
+class AuthorisationRoleType
 {
     public const USER = "user";
     public const PARTICIPANT = "participant";

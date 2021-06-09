@@ -3,8 +3,9 @@
 
 namespace App\Domain\Base\Service;
 
+use App\Data\AuthorisationException;
 use App\Domain\Base\Data\AbstractData;
-use App\Domain\Base\Data\AuthorisationData;
+use App\Data\AuthorisationData;
 
 /**
  * Description of the common insert service functionality.
@@ -19,7 +20,7 @@ class ServiceCreator extends AbstractService
      * @param array<string, mixed> $data The form data
      *
      * @return array|AbstractData|null Service output
-     * @throws \App\Domain\Base\Data\AuthorisationException
+     * @throws AuthorisationException
      */
     public function service(AuthorisationData $authorisation, array $data): array|AbstractData|null
     {
@@ -28,8 +29,10 @@ class ServiceCreator extends AbstractService
         // Input validation
         $this->validator->validateCreate($data);
 
+        $this->transaction->begin();
         // Insert entity and get new ID
         $result = $this->repository->insert((object)$data);
+        $this->transaction->commit();
 
         // Logging
         $entityName = $this->repository->getEntityName();

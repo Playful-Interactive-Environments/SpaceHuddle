@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Base\Data;
+namespace App\Data;
 
 /**
  * Class AuthorisationException

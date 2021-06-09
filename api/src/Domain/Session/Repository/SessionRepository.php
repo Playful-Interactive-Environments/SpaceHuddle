@@ -1,12 +1,10 @@
 <?php
 
-
 namespace App\Domain\Session\Repository;
 
-
 use App\Domain\Base\Data\AbstractData;
-use App\Domain\Base\AbstractRepository;
-use App\Domain\User\Data\UserRole;
+use App\Domain\Base\Repository\AbstractRepository;
+use App\Domain\User\Type\UserRoleType;
 use App\Factory\QueryFactory;
 use App\Domain\Session\Data\SessionData;
 
@@ -97,7 +95,7 @@ class SessionRepository extends AbstractRepository
             $this->queryFactory->newInsert("session_role", [
                 "session_id" => $id,
                 "user_id" => $parameter->userId,
-                "role" => strtoupper(UserRole::MODERATOR)
+                "role" => strtoupper(UserRoleType::MODERATOR)
             ])->execute();
         }
     }

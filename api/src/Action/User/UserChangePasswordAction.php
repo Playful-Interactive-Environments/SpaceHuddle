@@ -44,18 +44,4 @@ class UserChangePasswordAction extends AbstractAction
         parent::__construct($responder, $service);
         $this->successStatusCode = StatusCodeInterface::STATUS_CREATED;
     }
-
-    /**
-     * Execute specific service functionality
-     * @param ServerRequestInterface $request The request
-     * @param array $data form data from the request body
-     * @return mixed service result
-     */
-    protected function executeService(ServerRequestInterface $request, array $data) : mixed {
-
-        $userId = $request->getAttribute("userId");
-
-        // Invoke the Domain with inputs and retain the result
-        return $this->service->service($userId, $data);
-    }
 }

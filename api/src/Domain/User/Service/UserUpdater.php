@@ -2,15 +2,14 @@
 
 namespace App\Domain\User\Service;
 
+use App\Data\AuthorisationException;
+use App\Database\TransactionInterface;
 use App\Domain\Base\Data\AbstractData;
-use App\Domain\Base\Data\AuthorisationData;
-use App\Domain\Base\Data\AuthorisationRole;
+use App\Data\AuthorisationData;
+use App\Data\AuthorisationRoleType;
 use App\Domain\Base\Service\AbstractService;
-use App\Domain\Base\Service\ServiceUpdater;
-use App\Domain\User\Data\UserData;
 use App\Domain\User\Repository\UserRepository;
 use App\Factory\LoggerFactory;
-use Psr\Log\LoggerInterface;
 
 /**
  * Service.
@@ -22,15 +21,17 @@ final class UserUpdater extends AbstractService
      *
      * @param UserRepository $repository The repository
      * @param UserValidator $validator The validator
+     * @param TransactionInterface $transaction The transaction
      * @param LoggerFactory $loggerFactory The logger factory
      */
     public function __construct(
         UserRepository $repository,
         UserValidator $validator,
+        TransactionInterface $transaction,
         LoggerFactory $loggerFactory
     ) {
-        parent::__construct($repository, $validator, $loggerFactory);
-        $this->permission = [AuthorisationRole::USER];
+        parent::__construct($repository, $validator, $transaction, $loggerFactory);
+        $this->permission = [AuthorisationRoleType::USER];
     }
 
     /**
@@ -40,7 +41,7 @@ final class UserUpdater extends AbstractService
      * @param array<string, mixed> $data The form data
      *
      * @return array|AbstractData|null Service output
-     * @throws \App\Domain\Base\Data\AuthorisationException
+     * @throws AuthorisationException
      */
     public function service(AuthorisationData $authorisation, array $data): array|AbstractData|null
     {
@@ -53,8 +54,10 @@ final class UserUpdater extends AbstractService
         $user = (object)$data;
         $user->id = $authorisation->id;
 
+        $this->transaction->begin();
         // Update the user
         $result = $this->repository->updatePassword($user);
+        $this->transaction->commit();
 
         // Logging
         $this->logger->info("The password was successfully updated: $authorisation->id");

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Base;
+namespace App\Domain\Base\Repository;
 
 use App\Domain\Base\Data\AbstractData;
 use App\Factory\QueryFactory;
@@ -10,7 +10,7 @@ use DomainException;
  * Description of the common repository functionality.
  * @package App\Domain\Service
  */
-abstract class AbstractRepository extends RepositoryErrorHandling
+abstract class AbstractRepository
 {
     protected QueryFactory $queryFactory;
     protected ?string $entityName;
@@ -53,8 +53,7 @@ abstract class AbstractRepository extends RepositoryErrorHandling
         ?string $entityName = null,
         ?string $resultClass = null,
         ?string $parentIdName = null
-    )
-    {
+    ) {
         $this->queryFactory = $queryFactory;
         $this->entityName = $entityName;
         $this->resultClass = $resultClass;
@@ -154,18 +153,11 @@ abstract class AbstractRepository extends RepositoryErrorHandling
             $data->id = uuid_create();
             $row = $this->toRow($data);
 
-            $handleTransaction = !$this->queryFactory->inTransaction();
-            if ($handleTransaction) {
-                $this->queryFactory->beginTransaction();
-            }
             $itemCount = $this->queryFactory->newInsert($this->entityName, $row)
                 ->execute()->rowCount();
 
             if ($itemCount > 0 and array_key_exists("id", $row)) {
                 $this->insertDependencies($data->id, $data);
-            }
-            if ($handleTransaction) {
-                $this->queryFactory->commitTransaction();
             }
 
             return $this->getById($data->id);
@@ -198,17 +190,9 @@ abstract class AbstractRepository extends RepositoryErrorHandling
             $id = $data["id"];
             unset($data["id"]);
 
-
-            $handleTransaction = !$this->queryFactory->inTransaction();
-            if ($handleTransaction) {
-                $this->queryFactory->beginTransaction();
-            }
             $this->queryFactory->newUpdate($this->entityName, $data)
                 ->andWhere(["id" => $id])
                 ->execute();
-            if ($handleTransaction) {
-                $this->queryFactory->commitTransaction();
-            }
 
             return $this->getById($id);
         }
@@ -348,19 +332,12 @@ abstract class AbstractRepository extends RepositoryErrorHandling
      */
     public function deleteById(string $id): void
     {
-        $handleTransaction = !$this->queryFactory->inTransaction();
-        if ($handleTransaction) {
-            $this->queryFactory->beginTransaction();
-        }
         $this->deleteDependencies($id);
 
         if ($this->genericTableParameterSet()) {
             $this->queryFactory->newDelete($this->entityName)
                 ->andWhere(["id" => $id])
                 ->execute();
-        }
-        if ($handleTransaction) {
-            $this->queryFactory->commitTransaction();
         }
     }
 

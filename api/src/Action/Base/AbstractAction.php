@@ -3,7 +3,8 @@
 
 namespace App\Action\Base;
 
-use App\Domain\Base\Data\AuthorisationData;
+use App\Data\AuthorisationData;
+use App\Data\AuthorisationException;
 use App\Domain\Base\Service\AbstractService;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -38,15 +39,16 @@ abstract class AbstractAction
      *
      * @param ServerRequestInterface $request The request
      * @param ResponseInterface $response The response
+     * @param array $args Url parameter
      *
      * @return ResponseInterface The response
+     * @throws AuthorisationException
      */
     public function __invoke(
         ServerRequestInterface $request,
         ResponseInterface $response,
         array $args
-    ): ResponseInterface
-    {
+    ): ResponseInterface {
         // Extract the form data from the request body
         $bodyData = (array)$request->getParsedBody();
         $authorisation = $request->getAttribute("authorisation");
@@ -61,16 +63,17 @@ abstract class AbstractAction
 
     /**
      * Execute specific service functionality
-     * @param ServerRequestInterface $request The request
-     * @param array $data form data from the request body
+     * @param AuthorisationData $authorisation Authorisation token data
+     * @param array $bodyData Form data from the request body
+     * @param array $urlData Url parameter from the request
      * @return mixed service result
+     * @throws AuthorisationException
      */
     protected function executeService(
         AuthorisationData $authorisation,
         array $bodyData,
         array $urlData
-    ) : mixed
-    {
+    ) : mixed {
         $data = array_merge($bodyData, $urlData);
         return $this->service->service($authorisation, $data);
     }

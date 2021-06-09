@@ -3,8 +3,9 @@
 
 namespace App\Domain\Base\Service;
 
+use App\Data\AuthorisationException;
 use App\Domain\Base\Data\AbstractData;
-use App\Domain\Base\Data\AuthorisationData;
+use App\Data\AuthorisationData;
 
 /**
  * Description of the common update service functionality.
@@ -19,7 +20,7 @@ class ServiceUpdater extends AbstractService
      * @param array<string, mixed> $data The form data
      *
      * @return array|AbstractData|null Service output
-     * @throws \App\Domain\Base\Data\AuthorisationException
+     * @throws AuthorisationException
      */
     public function service(AuthorisationData $authorisation, array $data): array|AbstractData|null
     {
@@ -34,8 +35,10 @@ class ServiceUpdater extends AbstractService
         $user = (object)$data;
         $user->id = $id;
 
+        $this->transaction->begin();
         // Update the user
         $result = $this->repository->update($user);
+        $this->transaction->commit();
 
         // Logging
         $entityName = $this->repository->getEntityName();

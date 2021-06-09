@@ -2,7 +2,7 @@
 
 namespace App\Middleware;
 
-use App\Domain\Base\Data\AuthorisationData;
+use App\Data\AuthorisationData;
 use App\Routing\JwtAuth;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;

@@ -2,8 +2,6 @@
 
 namespace App\Test\Fixture;
 
-use App\Domain\User\Type\UserRoleType;
-
 /**
  * Fixture.
  */
