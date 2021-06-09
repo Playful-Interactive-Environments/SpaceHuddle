@@ -2,7 +2,9 @@
 
 namespace App\Middleware;
 
+use App\Domain\Base\Data\AuthorisationData;
 use App\Routing\JwtAuth;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -17,15 +19,22 @@ final class JwtClaimMiddleware implements MiddlewareInterface
      * @var JwtAuth
      */
     private JwtAuth $jwtAuth;
+    /**
+     * @var ResponseFactoryInterface
+     */
+    private ResponseFactoryInterface $responseFactory;
 
     /**
      * The constructor.
      *
      * @param JwtAuth $jwtAuth The JWT auth
      */
-    public function __construct(JwtAuth $jwtAuth)
-    {
+    public function __construct(
+        JwtAuth $jwtAuth,
+        ResponseFactoryInterface $responseFactory
+    ) {
         $this->jwtAuth = $jwtAuth;
+        $this->responseFactory = $responseFactory;
     }
 
     /**
@@ -44,6 +53,8 @@ final class JwtClaimMiddleware implements MiddlewareInterface
         $type = $authorization[0] ?? "";
         $credentials = $authorization[1] ?? "";
         if ($type !== "Bearer") {
+            // Append the authorisation as request attribute
+            $request = $request->withAttribute("authorisation", new AuthorisationData());
             return $handler->handle($request);
         }
         $token = $this->jwtAuth->validateToken($credentials);
@@ -58,8 +69,15 @@ final class JwtClaimMiddleware implements MiddlewareInterface
             $request = $request->withAttribute("participantId", $token->claims()->get("participantId"));
             // Append the username as request attribute
             $request = $request->withAttribute("browserKey", $token->claims()->get("browserKey"));
+            // Append the authorisation as request attribute
+            $request = $request->withAttribute("authorisation", new AuthorisationData($token->claims()));
             // Add more claim values as attribute...
             //$request = $request->withAttribute("locale", $token->claims()->get("locale"));
+        }
+        else {
+            return $this->responseFactory->createResponse()
+                ->withHeader("Content-Type", "application/json")
+                ->withStatus(401, "Unauthorized");
         }
         return $handler->handle($request);
     }

@@ -1,8 +1,6 @@
 <?php
 
-
-namespace App\Domain\Base;
-
+namespace App\Domain\Base\Data;
 
 use Selective\ArrayReader\ArrayReader;
 

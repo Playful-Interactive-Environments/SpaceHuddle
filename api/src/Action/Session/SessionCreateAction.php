@@ -4,14 +4,14 @@
 namespace App\Action\Session;
 
 use App\Action\Base\AbstractAction;
-use App\Domain\Session\Service\SessionCreate;
+use App\Domain\Session\Service\SessionCreator;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
- * Action Create a new session.
+ * Action for creating a new session.
  *
  * @OA\Post(
  *   path="/api/session/",
@@ -40,9 +40,9 @@ class SessionCreateAction extends AbstractAction
      * The constructor.
      *
      * @param Responder $responder The responder
-     * @param SessionCreate $service The service
+     * @param SessionCreator $service The service
      */
-    public function __construct(Responder $responder, SessionCreate $service)
+    public function __construct(Responder $responder, SessionCreator $service)
     {
         parent::__construct($responder, $service);
         $this->successStatusCode = StatusCodeInterface::STATUS_CREATED;
@@ -54,8 +54,8 @@ class SessionCreateAction extends AbstractAction
      * @param array $data form data from the request body
      * @return mixed service result
      */
-    protected function executeService(ServerRequestInterface $request, array $data) : mixed {
-
+    protected function executeService(ServerRequestInterface $request, array $data) : mixed
+    {
         $userId = $request->getAttribute("userId");
 
         // Invoke the Domain with inputs and retain the result

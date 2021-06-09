@@ -2,6 +2,7 @@
 
 namespace App\Domain\User\Service;
 
+use App\Domain\Base\Data\AuthorisationRole;
 use App\Domain\Base\Service\ServiceDeleter;
 use App\Domain\User\Repository\UserRepository;
 use App\Factory\LoggerFactory;
@@ -24,5 +25,6 @@ final class UserDeleter extends ServiceDeleter
         LoggerFactory $loggerFactory
     ) {
         parent::__construct($repository, $validator, $loggerFactory);
+        $this->permission = [AuthorisationRole::USER];
     }
 }

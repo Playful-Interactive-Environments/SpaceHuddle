@@ -3,7 +3,8 @@
 
 namespace App\Domain\Base\Service;
 
-use App\Domain\Base\AbstractData;
+use App\Domain\Base\Data\AbstractData;
+use App\Domain\Base\Data\AuthorisationData;
 
 /**
  * Description of the common update service functionality.
@@ -14,13 +15,18 @@ class ServiceUpdater extends AbstractService
     /**
      * Functionality of the update service.
      *
-     * @param string $id The entity id
-     * @param array $data Data to be modified
+     * @param AuthorisationData $authorisation Authorisation data
+     * @param array<string, mixed> $data The form data
      *
-     * @return void
+     * @return array|AbstractData|null Service output
+     * @throws \App\Domain\Base\Data\AuthorisationException
      */
-    public function service(string $id, array $data): mixed
+    public function service(AuthorisationData $authorisation, array $data): array|AbstractData|null
     {
+        parent::service($authorisation, $data);
+
+        $id = $data["id"];
+
         // Input validation
         $this->validator->validateUpdate($id, $data);
 

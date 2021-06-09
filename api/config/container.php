@@ -3,6 +3,9 @@
 use App\Factory\LoggerFactory;
 use App\Handler\DefaultErrorHandler;
 use App\Routing\JwtAuth;
+use \App\Domain\Base\RepositoryErrorHandling;
+use \App\Domain\Base\Data\AuthorisationErrorHandling;
+use \App\Domain\Base\Data\AuthorisationException;
 use Cake\Database\Connection;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Key\InMemory;
@@ -116,7 +119,8 @@ return [
         );
 
         $errorMiddleware->setDefaultErrorHandler($container->get(DefaultErrorHandler::class));
-        $errorMiddleware->setErrorHandler(PDOException::class, \App\Domain\Base\RepositoryErrorHandling::class);
+        $errorMiddleware->setErrorHandler(PDOException::class, RepositoryErrorHandling::class);
+        $errorMiddleware->setErrorHandler(AuthorisationException::class, AuthorisationErrorHandling::class);
 
         return $errorMiddleware;
     },

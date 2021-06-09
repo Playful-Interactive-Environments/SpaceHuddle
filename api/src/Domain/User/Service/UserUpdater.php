@@ -2,6 +2,10 @@
 
 namespace App\Domain\User\Service;
 
+use App\Domain\Base\Data\AbstractData;
+use App\Domain\Base\Data\AuthorisationData;
+use App\Domain\Base\Data\AuthorisationRole;
+use App\Domain\Base\Service\AbstractService;
 use App\Domain\Base\Service\ServiceUpdater;
 use App\Domain\User\Data\UserData;
 use App\Domain\User\Repository\UserRepository;
@@ -11,7 +15,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Service.
  */
-final class UserUpdater extends ServiceUpdater
+final class UserUpdater extends AbstractService
 {
     /**
      * The constructor.
@@ -26,34 +30,38 @@ final class UserUpdater extends ServiceUpdater
         LoggerFactory $loggerFactory
     ) {
         parent::__construct($repository, $validator, $loggerFactory);
+        $this->permission = [AuthorisationRole::USER];
     }
 
     /**
-     * change the password for the logged in user.
+     * Functionality of the change password for the logged in user service.
      *
-     * @param string $userId The user id
-     * @param array<string, mixed> $data The request data
+     * @param AuthorisationData $authorisation Authorisation data
+     * @param array<string, mixed> $data The form data
      *
-     * @return mixed
+     * @return array|AbstractData|null Service output
+     * @throws \App\Domain\Base\Data\AuthorisationException
      */
-    public function servicePassword(string $userId, array $data): mixed
+    public function service(AuthorisationData $authorisation, array $data): array|AbstractData|null
     {
+        parent::service($authorisation, $data);
+
         // Input validation
-        $this->validator->validatePasswordUpdate($userId, $data);
+        $this->validator->validatePasswordUpdate($authorisation->id, $data);
 
         // Validation was successfully
         $user = (object)$data;
-        $user->id = $userId;
+        $user->id = $authorisation->id;
 
         // Update the user
         $result = $this->repository->updatePassword($user);
 
         // Logging
-        $this->logger->info("The password was successfully updated: $userId");
+        $this->logger->info("The password was successfully updated: $authorisation->id");
 
         return [
-                "state" => "Success",
-                "message" => "The password was successfully updated."
-            ];
+            "state" => "Success",
+            "message" => "The password was successfully updated."
+        ];
     }
 }

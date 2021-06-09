@@ -2,7 +2,10 @@
 
 namespace App\Domain\Session\Service;
 
-use App\Domain\Base\AbstractData;
+use App\Domain\Base\Data\AbstractData;
+use App\Domain\Base\Data\AuthorisationData;
+use App\Domain\Base\Data\AuthorisationRole;
+use App\Domain\Base\Service\AbstractService;
 use App\Domain\Base\Service\ServiceCreator;
 use App\Domain\Session\Repository\SessionRepository;
 use App\Factory\LoggerFactory;
@@ -11,7 +14,7 @@ use App\Factory\LoggerFactory;
  * Session create service.
  * @package App\Domain\Session\Service
  */
-class SessionCreate extends ServiceCreator
+class SessionCreator extends AbstractService
 {
     /**
      * The constructor.
@@ -26,24 +29,28 @@ class SessionCreate extends ServiceCreator
         LoggerFactory $loggerFactory
     ) {
         parent::__construct($repository, $validator, $loggerFactory);
+        $this->permission = [AuthorisationRole::USER];
     }
 
     /**
      * Functionality of the session create service.
      *
+     * @param AuthorisationData $authorisation Authorisation data
      * @param array<string, mixed> $data The form data
-     * @param ?string $userId Id of the logged in user
      *
-     * @return AbstractData|null Result entity
+     * @return array|AbstractData|null Service output
+     * @throws \App\Domain\Base\Data\AuthorisationException
      */
-    public function service(array $data, ?string $userId = null): AbstractData|null
+    public function service(AuthorisationData $authorisation, array $data): array|AbstractData|null
     {
+        parent::service($authorisation, $data);
+
         // Input validation
         $this->validator->validateCreate($data);
 
         // Map form data to session DTO (model)
         $session = (object)$data;
-        $session->userId = $userId;
+        $session->userId = $authorisation->id;
 
         // Insert session and get new session ID
         $result = $this->repository->insert($session);

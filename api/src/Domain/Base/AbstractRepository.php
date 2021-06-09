@@ -2,6 +2,7 @@
 
 namespace App\Domain\Base;
 
+use App\Domain\Base\Data\AbstractData;
 use App\Factory\QueryFactory;
 use DomainException;
 
@@ -14,6 +15,7 @@ abstract class AbstractRepository extends RepositoryErrorHandling
     protected QueryFactory $queryFactory;
     protected ?string $entityName;
     protected ?string $resultClass;
+    protected ?string $parentIdName;
 
     /**
      * Get private properties
@@ -44,12 +46,31 @@ abstract class AbstractRepository extends RepositoryErrorHandling
      * @param QueryFactory $queryFactory The query factory
      * @param string|null $entityName Name of the database table
      * @param string|null $resultClass Name of the result class
+     * @param string|null $parentIdName Column name of the parent ID.
      */
-    public function __construct(QueryFactory $queryFactory, ?string $entityName = null, ?string $resultClass = null)
+    public function __construct(
+        QueryFactory $queryFactory,
+        ?string $entityName = null,
+        ?string $resultClass = null,
+        ?string $parentIdName = null
+    )
     {
         $this->queryFactory = $queryFactory;
         $this->entityName = $entityName;
         $this->resultClass = $resultClass;
+        $this->parentIdName = $parentIdName;
+    }
+
+    /**
+     * Checks if all generic parameters have been set.
+     * @return bool Returns true if all generic parameters have been set.
+     */
+    protected function allGenericParameterSet(): bool
+    {
+        return (
+            $this->genericTableParameterSet() and
+            isset($this->parentIdName)
+        );
     }
 
     /**
@@ -62,6 +83,64 @@ abstract class AbstractRepository extends RepositoryErrorHandling
             isset($this->entityName) and
             isset($this->resultClass)
         );
+    }
+
+    /**
+     * Get entity.
+     * @param array $conditions The WHERE conditions to add with AND.
+     * @return AbstractData|array<AbstractData>|null The result entity(s).
+     */
+    public function get(array $conditions = []): null|AbstractData|array
+    {
+        if ($this->genericTableParameterSet()) {
+            $query = $this->queryFactory->newSelect($this->entityName);
+            $query->select(["*"]);
+            $query->andWhere($conditions);
+
+            $rows = $query->execute()->fetchAll("assoc");
+            if (is_array($rows) and sizeof($rows) > 0) {
+                if (sizeof($rows) === 1) {
+                    return new $this->resultClass($rows[0]);
+                } else {
+                    $result = [];
+                    foreach ($rows as $resultItem) {
+                        array_push($result, new $this->resultClass($resultItem));
+                    }
+                    return $result;
+                }
+            } else {
+                throw new DomainException("Entity $this->entityName not found");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get entity by ID.
+     * @param string $parentId The entity parent ID.
+     * @return array<AbstractData> The result entity list.
+     */
+    public function getAll(string $parentId): array
+    {
+        if ($this->allGenericParameterSet()) {
+            $result = $this->get([$this->parentIdName => $parentId]);
+            if (is_array($result)) {
+                return $result;
+            } elseif (isset($result)) {
+                return [$result];
+            }
+        }
+        return [];
+    }
+
+    /**
+     * Get entity by ID.
+     * @param string $id The entity ID.
+     * @return AbstractData|null The result entity.
+     */
+    public function getById(string $id): ?AbstractData
+    {
+        return $this->get(["id" => $id]);
     }
 
     /**
@@ -102,39 +181,6 @@ abstract class AbstractRepository extends RepositoryErrorHandling
      */
     protected function insertDependencies(string $id, array|object|null $parameter): void
     {
-    }
-
-    /**
-     * Get entity.
-     * @param array $conditions The WHERE conditions to add with AND.
-     * @return AbstractData|null The result entity.
-     */
-    public function get(array $conditions = []): ?AbstractData
-    {
-        if ($this->genericTableParameterSet()) {
-            $query = $this->queryFactory->newSelect($this->entityName);
-            $query->select(["*"]);
-            $query->andWhere($conditions);
-
-            $row = $query->execute()->fetch("assoc");
-
-            if (!$row) {
-                throw new DomainException("Entity $this->entityName not found");
-            }
-
-            return new $this->resultClass($row);
-        }
-        return null;
-    }
-
-    /**
-     * Get entity by ID.
-     * @param string $id The entity ID.
-     * @return AbstractData|null The result entity.
-     */
-    public function getById(string $id): ?AbstractData
-    {
-        return $this->get(["id" => $id]);
     }
 
     /**

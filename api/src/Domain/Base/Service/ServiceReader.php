@@ -3,7 +3,8 @@
 
 namespace App\Domain\Base\Service;
 
-use App\Domain\Base\AbstractData;
+use App\Domain\Base\Data\AbstractData;
+use App\Domain\Base\Data\AuthorisationData;
 
 /**
  * Description of the common read service functionality.
@@ -12,19 +13,24 @@ use App\Domain\Base\AbstractData;
 class ServiceReader extends AbstractService
 {
     /**
-     * Functionality of the read service.
+     * Functionality of the read all service.
      *
-     * @param string $id The entity id
+     * @param AuthorisationData $authorisation Authorisation data
+     * @param array<string, mixed> $data The form data
      *
-     * @return AbstractData|null The entity data
+     * @return array|AbstractData|null Service output
+     * @throws \App\Domain\Base\Data\AuthorisationException
      */
-    public function service(string $id): AbstractData|null
+    public function service(AuthorisationData $authorisation, array $data): array|AbstractData|null
     {
+        parent::service($authorisation, $data);
+
+        $parentId = $data["parentId"];
         // Input validation
         // ...
 
         // Fetch data from the database
-        $result = $this->repository->getById($id);
+        $result = $this->repository->getAll($parentId);
 
         // Optional: Add or invoke your complex business logic here
         // ...

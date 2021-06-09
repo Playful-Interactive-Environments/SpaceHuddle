@@ -56,6 +56,6 @@ class UserChangePasswordAction extends AbstractAction
         $userId = $request->getAttribute("userId");
 
         // Invoke the Domain with inputs and retain the result
-        return $this->service->servicePassword($userId, $data);
+        return $this->service->service($userId, $data);
     }
 }

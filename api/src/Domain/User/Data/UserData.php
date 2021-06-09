@@ -2,7 +2,7 @@
 
 namespace App\Domain\User\Data;
 
-use App\Domain\Base\AbstractData;
+use App\Domain\Base\Data\AbstractData;
 use Selective\ArrayReader\ArrayReader;
 
 /**

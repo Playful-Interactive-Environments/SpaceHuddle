@@ -3,7 +3,8 @@
 
 namespace App\Domain\Base\Service;
 
-use App\Domain\Base\AbstractData;
+use App\Domain\Base\Data\AbstractData;
+use App\Domain\Base\Data\AuthorisationData;
 
 /**
  * Description of the common delete service functionality.
@@ -14,12 +15,18 @@ class ServiceDeleter extends AbstractService
     /**
      * Functionality of the delete service.
      *
-     * @param string $id The entity id
+     * @param AuthorisationData $authorisation Authorisation data
+     * @param array<string, mixed> $data The form data
      *
-     * @return array<string, string>
+     * @return array|AbstractData|null Service output
+     * @throws \App\Domain\Base\Data\AuthorisationException
      */
-    public function service(string $id): array
+    public function service(AuthorisationData $authorisation, array $data): array|AbstractData|null
     {
+        parent::service($authorisation, $data);
+
+        $id = $data["id"];
+
         // Input validation
         $this->validator->validateExists($id);
 

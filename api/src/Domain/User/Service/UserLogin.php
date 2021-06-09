@@ -2,6 +2,8 @@
 
 namespace App\Domain\User\Service;
 
+use App\Domain\Base\Data\AbstractData;
+use App\Domain\Base\Data\AuthorisationData;
 use App\Domain\Base\Service\AbstractService;
 use App\Domain\User\Repository\UserRepository;
 use App\Factory\LoggerFactory;
@@ -33,12 +35,18 @@ final class UserLogin extends AbstractService
     }
 
     /**
-     * Perform a login with an existing user.
+     * Functionality of the login service.
+     *
+     * @param AuthorisationData $authorisation Authorisation data
      * @param array<string, mixed> $data The form data
-     * @return array<string, mixed> The access token
+     *
+     * @return array|AbstractData|null Service output
+     * @throws \App\Domain\Base\Data\AuthorisationException
      */
-    public function service(array $data): array
+    public function service(AuthorisationData $authorisation, array $data): array|AbstractData|null
     {
+        parent::service($authorisation, $data);
+
         // Input validation
         $this->validator->validateLogin($data);
 

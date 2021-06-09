@@ -1,19 +1,18 @@
 <?php
 
-
 namespace App\Domain\Base\Service;
 
 use App\Domain\Base\Data\AbstractData;
 use App\Domain\Base\Data\AuthorisationData;
 
 /**
- * Description of the common insert service functionality.
+ * Description of the common read service functionality.
  * @package App\Domain\Base\Service
  */
-class ServiceCreator extends AbstractService
+class ServiceSingleReader extends AbstractService
 {
     /**
-     * Functionality of the create service.
+     * Functionality of the read single entity service.
      *
      * @param AuthorisationData $authorisation Authorisation data
      * @param array<string, mixed> $data The form data
@@ -25,15 +24,18 @@ class ServiceCreator extends AbstractService
     {
         parent::service($authorisation, $data);
 
+        $id = $data["id"];
         // Input validation
-        $this->validator->validateCreate($data);
+        // ...
 
-        // Insert entity and get new ID
-        $result = $this->repository->insert((object)$data);
+        // Fetch data from the database
+        $result = $this->repository->getById($id);
 
-        // Logging
-        $entityName = $this->repository->getEntityName();
-        $this->logger->info("$entityName created successfully: $result->id");
+        // Optional: Add or invoke your complex business logic here
+        // ...
+
+        // Optional: Map result
+        // ...
 
         return $result;
     }

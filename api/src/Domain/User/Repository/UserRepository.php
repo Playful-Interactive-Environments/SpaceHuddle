@@ -2,16 +2,13 @@
 
 namespace App\Domain\User\Repository;
 
-use App\Domain\Base\AbstractData;
+use App\Domain\Base\Data\AbstractData;
 use App\Domain\Base\AbstractRepository;
 use App\Domain\Session\Repository\SessionRepository;
 use App\Domain\User\Data\UserData;
 use App\Domain\User\Data\UserRole;
 use App\Factory\QueryFactory;
-use Cake\Core\ContainerInterface;
 use DomainException;
-use function PHPUnit\Framework\isInfinite;
-use function PHPUnit\Framework\isInstanceOf;
 
 /**
  * Repository.
@@ -112,8 +109,8 @@ final class UserRepository extends AbstractRepository
         if (is_array($result)) {
             //TODO: Implement an equivalent for getInstance
             $session = new SessionRepository($this->queryFactory);
-            foreach ($result as $result_item) {
-                $sessionId = $result_item["session_id"];
+            foreach ($result as $resultItem) {
+                $sessionId = $resultItem["session_id"];
 
                 $query = $this->queryFactory->newSelect("session_role");
                 $query->select(["session_id"]);

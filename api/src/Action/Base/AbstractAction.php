@@ -3,6 +3,7 @@
 
 namespace App\Action\Base;
 
+use App\Domain\Base\Data\AuthorisationData;
 use App\Domain\Base\Service\AbstractService;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -40,12 +41,17 @@ abstract class AbstractAction
      *
      * @return ResponseInterface The response
      */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $args
+    ): ResponseInterface
     {
         // Extract the form data from the request body
-        $data = (array)$request->getParsedBody();
+        $bodyData = (array)$request->getParsedBody();
+        $authorisation = $request->getAttribute("authorisation");
 
-        $result = $this->executeService($request, $data);
+        $result = $this->executeService($authorisation, $bodyData, $args);
 
         // Build the HTTP response
         return $this->responder
@@ -59,7 +65,13 @@ abstract class AbstractAction
      * @param array $data form data from the request body
      * @return mixed service result
      */
-    protected function executeService(ServerRequestInterface $request, array $data) : mixed {
-        return $this->service->service($data);
+    protected function executeService(
+        AuthorisationData $authorisation,
+        array $bodyData,
+        array $urlData
+    ) : mixed
+    {
+        $data = array_merge($bodyData, $urlData);
+        return $this->service->service($authorisation, $data);
     }
 }

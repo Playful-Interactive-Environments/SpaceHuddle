@@ -4,7 +4,7 @@
 namespace App\Domain\Session\Repository;
 
 
-use App\Domain\Base\AbstractData;
+use App\Domain\Base\Data\AbstractData;
 use App\Domain\Base\AbstractRepository;
 use App\Domain\User\Data\UserRole;
 use App\Factory\QueryFactory;
@@ -22,7 +22,7 @@ class SessionRepository extends AbstractRepository
      */
     public function __construct(QueryFactory $queryFactory)
     {
-        parent::__construct($queryFactory, "session", SessionData::class);
+        parent::__construct($queryFactory, "session", SessionData::class, "user_id");
     }
 
     /**
@@ -34,6 +34,55 @@ class SessionRepository extends AbstractRepository
     {
         $data->connectionKey = $this->generateNewConnectionKey("connection_key");
         return parent::insert($data);
+    }
+
+    /**
+     * Get entity.
+     * @param array $conditions The WHERE conditions to add with AND.
+     * @return AbstractData|array<AbstractData>|null The result entity(s).
+     */
+    public function get(array $conditions = []): null|AbstractData|array
+    {
+        if ($this->genericTableParameterSet()) {
+            $query = $this->queryFactory->newSelect($this->entityName);
+            $query->select(["*"])
+                ->innerJoin("session_role", "session_role.session_id = session.id")
+                ->andWhere($conditions);
+
+            $rows = $query->execute()->fetchAll("assoc");
+            if (is_array($rows) and sizeof($rows) > 0) {
+                if (sizeof($rows) === 1) {
+                    return new $this->resultClass($rows[0]);
+                } else {
+                    $result = [];
+                    foreach ($rows as $resultItem) {
+                        array_push($result, new $this->resultClass($resultItem));
+                    }
+                    return $result;
+                }
+            } else {
+                throw new DomainException("Entity $this->entityName not found");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get entity by ID.
+     * @param string $parentId The entity parent ID.
+     * @return array<AbstractData> The result entity list.
+     */
+    public function getAll(string $parentId): array
+    {
+        if ($this->allGenericParameterSet()) {
+            $result = $this->get(["session_role.user_id" => $parentId]);
+            if (is_array($result)) {
+                return $result;
+            } elseif (isset($result)) {
+                return [$result];
+            }
+        }
+        return [];
     }
 
     /**
@@ -67,8 +116,8 @@ class SessionRepository extends AbstractRepository
         $result = $query->execute()->fetchAll("assoc");
         if (is_array($result)) {
             #$participant = new ParticipantRepository($this->queryFactory);
-            foreach ($result as $result_item) {
-                $participantId = $result_item["id"];
+            foreach ($result as $resultItem) {
+                $participantId = $resultItem["id"];
                 #$participant->deleteById($participantId);
             }
         }
@@ -81,8 +130,8 @@ class SessionRepository extends AbstractRepository
         if (is_array($result)) {
             //TODO: Implement an equivalent for getInstance
             #$topic = new TopicRepository($this->queryFactory);
-            foreach ($result as $result_item) {
-                $topicId = $result_item["id"];
+            foreach ($result as $resultItem) {
+                $topicId = $resultItem["id"];
                 #$topic->deleteById($topicId);
             }
         }

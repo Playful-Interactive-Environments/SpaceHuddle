@@ -9,6 +9,8 @@ use App\Action\User\UserDeleteAction;
 use App\Action\User\UserLoginAction;
 use App\Action\User\UserRegisterAction;
 use \App\Action\Session\SessionCreateAction;
+use \App\Action\Session\SessionReadSingleAction;
+use \App\Action\Session\SessionReadAllAction;
 use App\Middleware\JwtAuthMiddleware;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
@@ -46,11 +48,18 @@ return function (App $app) {
         }
     )->add(JwtAuthMiddleware::class);
 
-
     $app->group(
         "/session",
         function (RouteCollectorProxy $app) {
             $app->post("[/]", SessionCreateAction::class);
+            $app->get("/{id}[/]", SessionReadSingleAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/sessions",
+        function (RouteCollectorProxy $app) {
+            $app->get("[/]", SessionReadAllAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 };
