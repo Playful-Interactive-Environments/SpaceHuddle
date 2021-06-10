@@ -71,10 +71,7 @@ final class JwtClaimMiddleware implements MiddlewareInterface
             $request = $request->withAttribute("browserKey", $token->claims()->get("browserKey"));
             // Append the authorisation as request attribute
             $request = $request->withAttribute("authorisation", new AuthorisationData($token->claims()));
-            // Add more claim values as attribute...
-            //$request = $request->withAttribute("locale", $token->claims()->get("locale"));
-        }
-        else {
+        } else {
             return $this->responseFactory->createResponse()
                 ->withHeader("Content-Type", "application/json")
                 ->withStatus(401, "Unauthorized");

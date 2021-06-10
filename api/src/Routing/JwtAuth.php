@@ -74,7 +74,7 @@ final class JwtAuth
             ->canOnlyBeUsedAfter($now)
             // Configures the expiration time of the token (exp claim)
             ->expiresAt($now->addSeconds($this->lifetime));
-            // Add claims like "uid"
+        // Add claims like "uid"
         foreach ($claims as $name => $value) {
             $builder = $builder->withClaim($name, $value);
         }
@@ -124,7 +124,7 @@ final class JwtAuth
         // Check whether the token has not expired
         $constraints[] = new LooseValidAt(new SystemClock(Chronos::now()->getTimezone()));
         if (!$this->configuration->validator()->validate($token, ...$constraints)) {
-        // Token signature is not valid
+            // Token signature is not valid
             return null;
         }
         // Custom constraints
@@ -133,7 +133,7 @@ final class JwtAuth
         $userId = $token->claims()->get("userId");
         $username = $token->claims()->get("username");
         if (!$userId || !$username) {
-        // Token related to an unknown user
+            // Token related to an unknown user
             return null;
         }
         return $token;
