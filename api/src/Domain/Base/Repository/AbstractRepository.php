@@ -20,7 +20,7 @@ abstract class AbstractRepository
     protected ?string $entityName;
     protected ?string $resultClass;
     protected ?string $parentIdName;
-    protected AbstractRepository $parentRepository;
+    protected ?AbstractRepository $parentRepository;
 
     /**
      * Get private properties
@@ -47,6 +47,15 @@ abstract class AbstractRepository
     }
 
     /**
+     * Get the parent repository.
+     * @return AbstractRepository|null parent repository
+     */
+    public function getParentRepository(): ?AbstractRepository
+    {
+        return $this->parentRepository;
+    }
+
+    /**
      * The constructor.
      * @param QueryFactory $queryFactory The query factory
      * @param string|null $entityName Name of the database table
@@ -67,6 +76,8 @@ abstract class AbstractRepository
         $this->parentIdName = $parentIdName;
         if (isset($parentRepository)) {
             $this->parentRepository = new $parentRepository($queryFactory);
+        } else {
+            $this->parentRepository = null;
         }
     }
 

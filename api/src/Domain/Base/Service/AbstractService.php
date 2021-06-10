@@ -80,16 +80,29 @@ abstract class AbstractService
     /**
      * Is authorisation required for the service and if so, which one?
      * @param AuthorisationData $authorisation Authorisation data
+     * @param array<string, mixed> $urlData Url parameter from the request
      * @return bool TRUE if the rights for executing the service are available.
      */
-    public function hasPermission(AuthorisationData $authorisation, array $data): bool
+    public function hasPermission(AuthorisationData $authorisation, array $urlData): bool
     {
         $permission = self::isAuthorized($authorisation->role, $this->authorisationPermissionList);
 
-        if ($permission and key_exists("id", $data)) {
-            $id = $data["id"];
-            $specificEntityRole = $this->repository->getAuthorisationRole($authorisation, $id);
-            $permission = self::isAuthorized($specificEntityRole, $this->entityPermissionList);
+        if ($permission) {
+            if (key_exists("id", $urlData)) {
+                $id = $urlData["id"];
+                $specificEntityRole = $this->repository->getAuthorisationRole($authorisation, $id);
+                $permission = self::isAuthorized($specificEntityRole, $this->entityPermissionList);
+            } elseif (sizeof($urlData) > 0) {
+                $urlParameterName = array_key_first($urlData);
+                if (str_ends_with($urlParameterName, "Id")) {
+                    $id = $urlData[$urlParameterName];
+                    $repository = $this->repository->getParentRepository();
+                    if (isset($repository)) {
+                        $specificEntityRole = $repository->getAuthorisationRole($authorisation, $id);
+                        $permission = self::isAuthorized($specificEntityRole, $this->entityPermissionList);
+                    }
+                }
+            }
         }
 
         return $permission;
@@ -99,14 +112,18 @@ abstract class AbstractService
      * Functionality of the service.
      *
      * @param AuthorisationData $authorisation Authorisation data
-     * @param array<string, mixed> $data The form data
+     * @param array<string, mixed> $bodyData Form data from the request body
+     * @param array<string, mixed> $urlData Url parameter from the request
      *
      * @return array|AbstractData|null Service output
      * @throws AuthorisationException
      */
-    public function service(AuthorisationData $authorisation, array $data): array|AbstractData|null
-    {
-        if (!$this->hasPermission($authorisation, $data)) {
+    public function service(
+        AuthorisationData $authorisation,
+        array $bodyData,
+        array $urlData
+    ): array|AbstractData|null {
+        if (!$this->hasPermission($authorisation, $urlData)) {
             http_response_code(StatusCodeInterface::STATUS_UNAUTHORIZED);
             throw new AuthorisationException("User has no rights for this service");
         }

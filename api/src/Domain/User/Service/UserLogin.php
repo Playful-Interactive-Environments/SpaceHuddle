@@ -42,14 +42,19 @@ final class UserLogin extends AbstractService
      * Functionality of the login service.
      *
      * @param AuthorisationData $authorisation Authorisation data
-     * @param array<string, mixed> $data The form data
+     * @param array<string, mixed> $bodyData Form data from the request body
+     * @param array<string, mixed> $urlData Url parameter from the request
      *
      * @return array|AbstractData|null Service output
      * @throws AuthorisationException
      */
-    public function service(AuthorisationData $authorisation, array $data): array|AbstractData|null
-    {
-        parent::service($authorisation, $data);
+    public function service(
+        AuthorisationData $authorisation,
+        array $bodyData,
+        array $urlData
+    ): array|AbstractData|null {
+        parent::service($authorisation, $bodyData, $urlData);
+        $data = array_merge($bodyData, $urlData);
 
         // Input validation
         $this->validator->validateLogin($data);

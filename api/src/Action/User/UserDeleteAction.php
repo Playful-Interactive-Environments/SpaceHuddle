@@ -52,6 +52,6 @@ final class UserDeleteAction extends AbstractAction
         if ($authorisation->isUser()) {
             $userId = $authorisation->id;
         }
-        return $this->service->service($authorisation, ["id" => $userId]);
+        return $this->service->service($authorisation, [], ["id" => $userId]);
     }
 }

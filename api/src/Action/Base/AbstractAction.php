@@ -64,8 +64,8 @@ abstract class AbstractAction
     /**
      * Execute specific service functionality
      * @param AuthorisationData $authorisation Authorisation token data
-     * @param array $bodyData Form data from the request body
-     * @param array $urlData Url parameter from the request
+     * @param array<string, mixed> $bodyData Form data from the request body
+     * @param array<string, mixed> $urlData Url parameter from the request
      * @return mixed service result
      * @throws AuthorisationException
      */
@@ -74,7 +74,6 @@ abstract class AbstractAction
         array $bodyData,
         array $urlData
     ) : mixed {
-        $data = array_merge($bodyData, $urlData);
-        return $this->service->service($authorisation, $data);
+        return $this->service->service($authorisation, $bodyData, $urlData);
     }
 }
