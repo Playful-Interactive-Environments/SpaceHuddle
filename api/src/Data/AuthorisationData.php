@@ -2,7 +2,8 @@
 
 namespace App\Data;
 
-use App\Data\AuthorisationRoleType;
+use App\Domain\Participant\Type\ParticipantState;
+use App\Factory\QueryFactory;
 use Lcobucci\JWT\Token\DataSet;
 
 /**
@@ -26,9 +27,10 @@ class AuthorisationData
     /**
      * The constructor.
      *
+     * @param QueryFactory $queryFactory The query factory
      * @param DataSet $data The data
      */
-    public function __construct(?DataSet $data = null)
+    public function __construct(QueryFactory $queryFactory, ?DataSet $data = null)
     {
         if (isset($data)) {
             $userId = $data->get("userId");
@@ -39,11 +41,32 @@ class AuthorisationData
             } elseif (isset($participantId)) {
                 $this->id = $participantId;
                 $this->role = AuthorisationRoleType::PARTICIPANT;
+                $this->checkParticipantState($queryFactory);
             } else {
                 $this->role = AuthorisationRoleType::NONE;
             }
         } else {
             $this->role = AuthorisationRoleType::NONE;
+        }
+    }
+
+    /**
+     * Check if the participant is active.
+     * @param QueryFactory $queryFactory The query factory
+     */
+    private function checkParticipantState(QueryFactory $queryFactory): void
+    {
+        $query = $queryFactory->newSelect("participant");
+        $query->select(["*"])
+            ->andWhere(["id" => $this->id]);
+        $statement = $query->execute();
+
+        $itemCount = $statement->rowCount();
+        if ($itemCount > 0) {
+            $participant = $statement->fetch("assoc");
+            if (strtoupper($participant["state"]) != strtoupper(ParticipantState::ACTIVE)) {
+                $this->role = AuthorisationRoleType::PARTICIPANT_INACTIVE;
+            }
         }
     }
 

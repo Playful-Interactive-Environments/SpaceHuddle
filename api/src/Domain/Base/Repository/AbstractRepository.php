@@ -96,22 +96,6 @@ abstract class AbstractRepository
     }
 
     /**
-     * Check if the user role is part of the authorised roles.
-     * @param string|null $role User role
-     * @param array $authorizedRoles List of authorised roles.
-     * @return bool Authorisation state
-     */
-    public static function isAuthorized(?string $role, array $authorizedRoles = [UserRoleType::MODERATOR]): bool
-    {
-        if (isset($role)) {
-            $role = strtoupper($role);
-            $authorizedRoles = array_map("strtoupper", $authorizedRoles);
-            return in_array($role, $authorizedRoles);
-        }
-        return false;
-    }
-
-    /**
      * Checks the access role via which the logged-in user may access the entry with the specified primary key.
      * @param AuthorisationData $authorisation Authorisation token data.
      * @param string|null $id Primary key to be checked.
@@ -138,44 +122,6 @@ abstract class AbstractRepository
         }
 
         return null;
-    }
-
-    /**
-     * Check the access role via which one's own user data can be edited.
-     * @param AuthorisationData $authorisation Authorisation token data.
-     * @param string|null $id Primary key to be checked.
-     * @return string Role with which the user is authorised to access the entry.
-     */
-    public function getUserRole(AuthorisationData $authorisation, ?string $id): string
-    {
-        if ($authorisation->isLoggedIn()) {
-            if ($authorisation->isUser()) {
-                $userId = $authorisation->id;
-                if (is_null($id) or $id == $userId) {
-                    return UserRoleType::MODERATOR;
-                }
-            }
-            if ($authorisation->isParticipant()) {
-                $participantId = $authorisation->id;
-                if (is_null($id) or $id == $participantId) {
-                    $query = $this->queryFactory->newSelect("participant");
-                    $query->select(["*"])
-                        ->andWhere(["id" => $participantId]);
-                    $statement = $query->execute();
-
-                    $itemCount = $statement->rowCount();
-                    if ($itemCount > 0) {
-                        $participant = $statement->fetch("assoc");
-                        if (strtoupper($participant["state"]) == strtoupper(ParticipantState::ACTIVE)) {
-                            return UserRoleType::PARTICIPANT;
-                        }
-                        return UserRoleType::PARTICIPANT_INACTIVE;
-                    }
-                }
-            }
-        }
-
-        return UserRoleType::UNKNOWN;
     }
 
     /**

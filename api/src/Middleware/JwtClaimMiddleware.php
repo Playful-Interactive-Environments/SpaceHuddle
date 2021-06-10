@@ -3,6 +3,7 @@
 namespace App\Middleware;
 
 use App\Data\AuthorisationData;
+use App\Factory\QueryFactory;
 use App\Routing\JwtAuth;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -19,22 +20,28 @@ final class JwtClaimMiddleware implements MiddlewareInterface
      * @var JwtAuth
      */
     private JwtAuth $jwtAuth;
+
     /**
      * @var ResponseFactoryInterface
      */
     private ResponseFactoryInterface $responseFactory;
+    private QueryFactory $queryFactory;
 
     /**
      * The constructor.
      *
      * @param JwtAuth $jwtAuth The JWT auth
+     * @param ResponseFactoryInterface $responseFactory The response factory
+     * @param QueryFactory $queryFactory The query factory
      */
     public function __construct(
         JwtAuth $jwtAuth,
-        ResponseFactoryInterface $responseFactory
+        ResponseFactoryInterface $responseFactory,
+        QueryFactory $queryFactory
     ) {
         $this->jwtAuth = $jwtAuth;
         $this->responseFactory = $responseFactory;
+        $this->queryFactory = $queryFactory;
     }
 
     /**
@@ -54,7 +61,7 @@ final class JwtClaimMiddleware implements MiddlewareInterface
         $credentials = $authorization[1] ?? "";
         if ($type !== "Bearer") {
             // Append the authorisation as request attribute
-            $request = $request->withAttribute("authorisation", new AuthorisationData());
+            $request = $request->withAttribute("authorisation", new AuthorisationData($this->queryFactory));
             return $handler->handle($request);
         }
         $token = $this->jwtAuth->validateToken($credentials);
@@ -70,7 +77,7 @@ final class JwtClaimMiddleware implements MiddlewareInterface
             // Append the username as request attribute
             $request = $request->withAttribute("browserKey", $token->claims()->get("browserKey"));
             // Append the authorisation as request attribute
-            $request = $request->withAttribute("authorisation", new AuthorisationData($token->claims()));
+            $request = $request->withAttribute("authorisation", new AuthorisationData($this->queryFactory, $token->claims()));
         } else {
             return $this->responseFactory->createResponse()
                 ->withHeader("Content-Type", "application/json")

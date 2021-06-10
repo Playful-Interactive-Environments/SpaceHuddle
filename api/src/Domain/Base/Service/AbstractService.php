@@ -59,21 +59,37 @@ abstract class AbstractService
     }
 
     /**
+     * Check if the user role is part of the authorised roles.
+     * @param string|null $role User role
+     * @param array $authorizedRoles List of authorised roles.
+     * @return bool Authorisation state
+     */
+    protected static function isAuthorized(?string $role, array $authorizedRoles = []): bool
+    {
+        if (isset($role)) {
+            $role = strtoupper($role);
+            $authorizedRoles = array_map("strtoupper", $authorizedRoles);
+            return (
+                sizeof($authorizedRoles) === 0 or
+                in_array($role, $authorizedRoles)
+            );
+        }
+        return false;
+    }
+
+    /**
      * Is authorisation required for the service and if so, which one?
      * @param AuthorisationData $authorisation Authorisation data
      * @return bool TRUE if the rights for executing the service are available.
      */
     public function hasPermission(AuthorisationData $authorisation, array $data): bool
     {
-        $permission = (
-            sizeof($this->authorisationPermissionList) === 0 or
-            $this->repository::isAuthorized($authorisation->role, $this->authorisationPermissionList)
-        );
+        $permission = self::isAuthorized($authorisation->role, $this->authorisationPermissionList);
 
         if ($permission and key_exists("id", $data)) {
             $id = $data["id"];
             $specificEntityRole = $this->repository->getAuthorisationRole($authorisation, $id);
-            $permission = $this->repository::isAuthorized($specificEntityRole, $this->entityPermissionList);
+            $permission = self::isAuthorized($specificEntityRole, $this->entityPermissionList);
         }
 
         return $permission;
