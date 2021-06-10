@@ -18,6 +18,7 @@ trait AppTestTrait
     use ArrayTestTrait;
     use ContainerTestTrait;
     use JwtAuthTestTrait;
+    use UserTestTrait;
     use HttpTestTrait;
     use HttpJsonTestTrait;
     use MockTestTrait;

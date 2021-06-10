@@ -29,7 +29,7 @@ trait JwtAuthTestTrait
         $json = json_decode($response->getBody());
         $accessToken = "";
         if (property_exists($json, "accessToken")) {
-            $accessToken = json_decode($response->getBody())->accessToken;
+            $accessToken = $json->accessToken;
         }
         return $accessToken;
     }
