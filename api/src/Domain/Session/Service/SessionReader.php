@@ -33,11 +33,7 @@ class SessionReader extends AbstractService
         LoggerFactory $loggerFactory
     ) {
         parent::__construct($repository, $validator, $transaction, $loggerFactory);
-        $this->authorisationPermissionList = [AuthorisationRoleType::USER];
-        $this->entityPermissionList = [
-            UserRoleType::MODERATOR,
-            UserRoleType::FACILITATOR
-        ];
+        $this->authorisationPermissionList = [AuthorisationRoleType::USER, AuthorisationRoleType::PARTICIPANT];
     }
 
     /**
@@ -56,6 +52,6 @@ class SessionReader extends AbstractService
         array $urlData
     ): array|AbstractData|null {
         parent::service($authorisation, $bodyData, $urlData);
-        return $this->repository->getAll($authorisation->id);
+        return $this->repository->getAllAuthorised($authorisation->id, $authorisation);
     }
 }

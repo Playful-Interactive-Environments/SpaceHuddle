@@ -83,15 +83,24 @@ class SessionRepository extends AbstractRepository
     /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
+     * @param AuthorisationData $authorisation Authorisation token data.
      * @return AbstractData|array<AbstractData>|null The result entity(s).
      */
-    public function get(array $conditions = []): null|AbstractData|array
+    public function getAuthorised(array $conditions, AuthorisationData $authorisation): null|AbstractData|array
     {
         if ($this->genericTableParameterSet()) {
             $query = $this->queryFactory->newSelect($this->entityName);
-            $query->select(["*"])
-                ->innerJoin("session_role", "session_role.session_id = session.id")
-                ->andWhere($conditions);
+
+            if ($authorisation->isUser()) {
+                $query->select(["*"])
+                    ->innerJoin("session_role", "session_role.session_id = session.id")
+                    ->andWhere($conditions);
+            } else {
+                $role = strtoupper(UserRoleType::PARTICIPANT);
+                $query->select(["session.*", "'$role' AS role"])
+                    ->innerJoin("participant", "participant.session_id = session.id")
+                    ->andWhere($conditions);
+            }
 
             $rows = $query->execute()->fetchAll("assoc");
             if (is_array($rows) and sizeof($rows) > 0) {
@@ -111,13 +120,41 @@ class SessionRepository extends AbstractRepository
 
     /**
      * Get entity by ID.
+     * @param string $id The entity ID.
+     * @param AuthorisationData $authorisation Authorisation token data.
+     * @return AbstractData|null The result entity.
+     */
+    public function getByIdAuthorised(string $id, AuthorisationData $authorisation): ?AbstractData
+    {
+        $authorisationColumnName  = "session_role.user_id";
+        if ($authorisation->isParticipant()) {
+            $authorisationColumnName  = "participant.id";
+        }
+        $result = $this->getAuthorised([
+            "session.id" => $id,
+            $authorisationColumnName => $authorisation->id
+        ], $authorisation);
+        if (!is_object($result)) {
+            throw new DomainException("Entity $this->entityName not found");
+        }
+        return $result;
+    }
+
+    /**
+     * Get entity by ID.
      * @param string $parentId The entity parent ID.
+     * @param AuthorisationData $authorisation Authorisation token data.
      * @return array<AbstractData> The result entity list.
      */
-    public function getAll(string $parentId): array
+    public function getAllAuthorised(string $parentId, AuthorisationData $authorisation): array
     {
+        $authorisationColumnName  = "session_role.user_id";
+        if ($authorisation->isParticipant()) {
+            $authorisationColumnName  = "participant.id";
+        }
+
         if ($this->allGenericParameterSet()) {
-            $result = $this->get(["session_role.user_id" => $parentId]);
+            $result = $this->getAuthorised([$authorisationColumnName => $parentId], $authorisation);
             if (is_array($result)) {
                 return $result;
             } elseif (isset($result)) {
