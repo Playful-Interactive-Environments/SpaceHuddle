@@ -7,7 +7,7 @@ use App\Domain\Base\Data\AbstractData;
 use App\Domain\Base\Repository\AbstractRepository;
 use App\Domain\Session\Repository\SessionRepository;
 use App\Domain\User\Data\UserData;
-use App\Domain\User\Type\UserRoleType;
+use App\Domain\Session\Type\SessionRoleType;
 use App\Factory\QueryFactory;
 use DomainException;
 
@@ -33,7 +33,7 @@ final class UserRepository extends AbstractRepository
      */
     public function getAuthorisationRole(AuthorisationData $authorisation, ?string $id): ?string
     {
-        return UserRoleType::mapAuthorisationRoleType($authorisation->role);
+        return SessionRoleType::mapAuthorisationRoleType($authorisation->role);
     }
 
     /**
@@ -115,7 +115,7 @@ final class UserRepository extends AbstractRepository
     {
         $query = $this->queryFactory->newSelect("session_role");
         $query->select(["session_id"]);
-        $query->andWhere(["user_id" => $id, "role" => strtoupper(UserRoleType::MODERATOR)]);
+        $query->andWhere(["user_id" => $id, "role" => strtoupper(SessionRoleType::MODERATOR)]);
 
         $result = $query->execute()->fetchAll("assoc");
         if (is_array($result)) {
@@ -126,7 +126,7 @@ final class UserRepository extends AbstractRepository
 
                 $query = $this->queryFactory->newSelect("session_role");
                 $query->select(["session_id"]);
-                $query->andWhere(["session_id" => $sessionId, "role" => strtoupper(UserRoleType::MODERATOR)]);
+                $query->andWhere(["session_id" => $sessionId, "role" => strtoupper(SessionRoleType::MODERATOR)]);
                 $itemCount = $query->execute()->rowCount();
 
                 if ($itemCount === 1) {

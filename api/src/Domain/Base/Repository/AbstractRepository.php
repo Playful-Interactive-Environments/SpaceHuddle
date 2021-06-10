@@ -4,7 +4,7 @@ namespace App\Domain\Base\Repository;
 
 use App\Data\AuthorisationData;
 use App\Domain\Base\Data\AbstractData;
-use App\Domain\User\Type\UserRoleType;
+use App\Domain\Session\Type\SessionRoleType;
 use App\Factory\QueryFactory;
 use DomainException;
 
@@ -114,9 +114,9 @@ abstract class AbstractRepository
     {
         if (is_null($id)) {
             if ($authorisation->isUser()) {
-                return strtoupper(UserRoleType::MODERATOR);
+                return strtoupper(SessionRoleType::MODERATOR);
             } elseif ($authorisation->isParticipant()) {
-                return strtoupper(UserRoleType::PARTICIPANT);
+                return strtoupper(SessionRoleType::PARTICIPANT);
             }
         } else {
             $query = $this->queryFactory->newSelect($this->entityName);

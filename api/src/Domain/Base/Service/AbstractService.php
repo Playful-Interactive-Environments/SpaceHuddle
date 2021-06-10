@@ -8,7 +8,7 @@ use App\Domain\Base\Repository\AbstractRepository;
 use App\Domain\Base\Data\AbstractData;
 use App\Data\AuthorisationData;
 use App\Data\AuthorisationException;
-use App\Domain\User\Type\UserRoleType;
+use App\Domain\Session\Type\SessionRoleType;
 use App\Factory\LoggerFactory;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Log\LoggerInterface;
@@ -52,9 +52,9 @@ abstract class AbstractService
             AuthorisationRoleType::NONE
         ];
         $this->entityPermissionList = [
-            UserRoleType::MODERATOR,
-            UserRoleType::FACILITATOR,
-            UserRoleType::PARTICIPANT
+            SessionRoleType::MODERATOR,
+            SessionRoleType::FACILITATOR,
+            SessionRoleType::PARTICIPANT
         ];
     }
 

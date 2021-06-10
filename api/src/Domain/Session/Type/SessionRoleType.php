@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\User\Type;
+namespace App\Domain\Session\Type;
 
 use App\Data\AuthorisationRoleType;
 
@@ -13,7 +13,7 @@ use App\Data\AuthorisationRoleType;
  *   example="MODERATOR"
  * )
  */
-class UserRoleType
+class SessionRoleType
 {
     /** @var string */
     public const MODERATOR = "moderator";
@@ -25,10 +25,10 @@ class UserRoleType
     public const PARTICIPANT = "participant";
 
     /** @var string */
-    public const UNKNOWN = "unknown";
+    public const PARTICIPANT_INACTIVE = "participant_inactive";
 
     /** @var string */
-    public const PARTICIPANT_INACTIVE = "participant_inactive";
+    public const UNKNOWN = "unknown";
 
     /**
      * Map a user role based on the given token to the default role permission for the given session.

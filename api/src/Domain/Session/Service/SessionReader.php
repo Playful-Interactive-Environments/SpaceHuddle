@@ -9,7 +9,7 @@ use App\Data\AuthorisationData;
 use App\Data\AuthorisationRoleType;
 use App\Domain\Base\Service\AbstractService;
 use App\Domain\Session\Repository\SessionRepository;
-use App\Domain\User\Type\UserRoleType;
+use App\Domain\Session\Type\SessionRoleType;
 use App\Factory\LoggerFactory;
 
 /**

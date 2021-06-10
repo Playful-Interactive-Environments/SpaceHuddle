@@ -6,7 +6,7 @@ use App\Data\AuthorisationData;
 use App\Domain\Base\Data\AbstractData;
 use App\Domain\Base\Repository\AbstractRepository;
 use App\Domain\User\Repository\UserRepository;
-use App\Domain\User\Type\UserRoleType;
+use App\Domain\Session\Type\SessionRoleType;
 use App\Factory\QueryFactory;
 use App\Domain\Session\Data\SessionData;
 
@@ -40,7 +40,7 @@ class SessionRepository extends AbstractRepository
     {
         if ($authorisation->isUser()) {
             if (is_null($id)) {
-                return strtoupper(UserRoleType::MODERATOR);
+                return strtoupper(SessionRoleType::MODERATOR);
             }
             $query = $this->queryFactory->newSelect("session_role");
             $query->select(["*"])
@@ -63,7 +63,7 @@ class SessionRepository extends AbstractRepository
                     "id" => $authorisation->id
                 ]);
             if ($query->execute()->rowCount() > 0) {
-                return strtoupper(UserRoleType::PARTICIPANT);
+                return strtoupper(SessionRoleType::PARTICIPANT);
             }
         }
         return null;
@@ -96,7 +96,7 @@ class SessionRepository extends AbstractRepository
                     ->innerJoin("session_role", "session_role.session_id = session.id")
                     ->andWhere($conditions);
             } else {
-                $role = strtoupper(UserRoleType::PARTICIPANT);
+                $role = strtoupper(SessionRoleType::PARTICIPANT);
                 $query->select(["session.*", "'$role' AS role"])
                     ->innerJoin("participant", "participant.session_id = session.id")
                     ->andWhere($conditions);
@@ -176,7 +176,7 @@ class SessionRepository extends AbstractRepository
             $this->queryFactory->newInsert("session_role", [
                 "session_id" => $id,
                 "user_id" => $parameter->userId,
-                "role" => strtoupper(UserRoleType::MODERATOR)
+                "role" => strtoupper(SessionRoleType::MODERATOR)
             ])->execute();
         }
     }
