@@ -35,6 +35,7 @@ class AuthorisationData
         if (isset($data)) {
             $userId = $data->get("userId");
             $participantId = $data->get("participantId");
+
             if (isset($userId)) {
                 $this->id = $userId;
                 $this->role = AuthorisationRoleType::USER;

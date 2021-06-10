@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Domain\Participant\Service;
+
+use App\Domain\Base\Service\AbstractValidator;
+use App\Domain\Participant\Repository\ParticipantRepository;
+use App\Factory\ValidationFactory;
+use Selective\Validation\Exception\ValidationException;
+use Selective\Validation\ValidationResult;
+
+/**
+ * Service.
+ */
+class ParticipantValidator extends AbstractValidator
+{
+    /**
+     * The constructor.
+     *
+     * @param ParticipantRepository $repository The repository
+     * @param ValidationFactory $validationFactory The validation
+     */
+    public function __construct(ParticipantRepository $repository, ValidationFactory $validationFactory)
+    {
+        parent::__construct($repository, $validationFactory);
+    }
+
+    /**
+     * Validate create.
+     *
+     * @param int $userId The user id
+     * @param array<string, mixed> $data The data
+     *
+     * @return void
+     */
+    public function validateConnect(array $data): void
+    {
+        $this->validateEntity($data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("sessionKey")
+                ->requirePresence("sessionKey")
+                ->notEmptyString("ipHash")
+                ->requirePresence("ipHash")
+        );
+
+        $sessionKey = $data["sessionKey"];
+        if (!$this->getRepository()->checkSessionKey($sessionKey)) {
+            $result = new ValidationResult();
+            $result->addError("sessionKey", "sessionKey wrong.");
+            throw new ValidationException("Please check your input", $result);
+        }
+    }
+}

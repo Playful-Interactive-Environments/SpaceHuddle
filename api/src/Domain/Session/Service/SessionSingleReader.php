@@ -30,10 +30,6 @@ class SessionSingleReader extends ServiceSingleReader
         LoggerFactory $loggerFactory
     ) {
         parent::__construct($repository, $validator, $transaction, $loggerFactory);
-        $this->authorisationPermissionList = [AuthorisationRoleType::USER];
-        $this->entityPermissionList = [
-            UserRoleType::MODERATOR,
-            UserRoleType::FACILITATOR
-        ];
+        $this->authorisationPermissionList = [AuthorisationRoleType::USER, AuthorisationRoleType::PARTICIPANT];
     }
 }

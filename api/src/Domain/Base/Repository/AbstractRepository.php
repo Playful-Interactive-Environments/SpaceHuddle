@@ -4,11 +4,9 @@ namespace App\Domain\Base\Repository;
 
 use App\Data\AuthorisationData;
 use App\Domain\Base\Data\AbstractData;
-use App\Domain\Participant\Type\ParticipantState;
 use App\Domain\User\Type\UserRoleType;
 use App\Factory\QueryFactory;
 use DomainException;
-use function DI\string;
 
 /**
  * Description of the common repository functionality.
@@ -360,12 +358,14 @@ abstract class AbstractRepository
      * @param string $keyColumnName Database column name of the column to be encrypted.
      * @return string The connection key.
      */
-    protected function generateNewConnectionKey(string $keyColumnName = "connection_key"): string
-    {
+    protected function generateNewConnectionKey(
+        string $keyColumnName = "connection_key",
+        string $keyPrefix = ""
+    ): string {
         if ($this->genericTableParameterSet()) {
             $connectionKey = "";
             while (strlen($connectionKey) == 0) {
-                $connectionKey = self::keygen(8, false);
+                $connectionKey = $keyPrefix . self::keygen(8, false);
                 $query = $this->queryFactory->newSelect($this->entityName);
                 $query->select("id")->andWhere([$keyColumnName => $connectionKey]);
                 if ($query->execute()->fetch("assoc")) {

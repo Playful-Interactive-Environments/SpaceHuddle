@@ -4,6 +4,7 @@
 
 use App\Action\Home\HomeAction;
 use App\Action\OpenApi\Version1DocAction;
+use App\Action\Participant\ParticipantConnectAction;
 use App\Action\User\UserChangePasswordAction;
 use App\Action\User\UserDeleteAction;
 use App\Action\User\UserLoginAction;
@@ -22,20 +23,18 @@ return function (App $app) {
     // Swagger API documentation
     $app->get("/docs/v1", Version1DocAction::class)->setName("docs");
 
-    //$app->get("/user/register", \App\Action\User\UserRegisterAction::class);
-
-    // Password protected area
     $app->group(
         "/user",
         function (RouteCollectorProxy $app) {
-            /*$app->get("/users", \App\Action\User\UserFindAction::class);
-            $app->post("/users", \App\Action\User\UserCreateAction::class);
-            $app->get("/users/{user_id}", \App\Action\User\UserReadAction::class);
-            $app->put("/users/{user_id}", \App\Action\User\UserUpdateAction::class);
-            $app->delete("/users/{user_id}", \App\Action\User\UserDeleteAction::class);
-            $app->post("/user/login/", \App\Action\User\UserLoginAction::class);*/
             $app->post("/login[/]", UserLoginAction::class);
             $app->post("/register[/]", UserRegisterAction::class);
+        }
+    );
+
+    $app->group(
+        "/participant",
+        function (RouteCollectorProxy $app) {
+            $app->post("/connect[/]", ParticipantConnectAction::class);
         }
     );
 

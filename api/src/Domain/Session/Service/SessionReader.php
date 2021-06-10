@@ -56,7 +56,6 @@ class SessionReader extends AbstractService
         array $urlData
     ): array|AbstractData|null {
         parent::service($authorisation, $bodyData, $urlData);
-        $data = array_merge($bodyData, $urlData);
         return $this->repository->getAll($authorisation->id);
     }
 }

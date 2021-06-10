@@ -132,8 +132,14 @@ final class JwtAuth
         // TODO: Do we need to check against the database here if these are valid claims (userId and username)?
         $userId = $token->claims()->get("userId");
         $username = $token->claims()->get("username");
-        if (!$userId || !$username) {
-            // Token related to an unknown user
+        $isUser = (isset($userId) and isset($username));
+
+        $participantId = $token->claims()->get("participantId");
+        $browserKey = $token->claims()->get("browserKey");
+        $isParticipant = (isset($participantId) and isset($browserKey));
+
+        if ($isUser and $isParticipant) {
+            // Token related to an unknown user and participant
             return null;
         }
         return $token;
