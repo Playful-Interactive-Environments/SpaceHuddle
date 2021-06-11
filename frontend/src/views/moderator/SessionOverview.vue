@@ -18,7 +18,7 @@
           </template>
         </Card>
       </div>
-      <AddItem text="New Session" :isColumn="true" @addNew="newSession()" />
+      <AddItem text="New Session" :isColumn="true" @addNew="newSession" />
     </div>
   </div>
 </template>

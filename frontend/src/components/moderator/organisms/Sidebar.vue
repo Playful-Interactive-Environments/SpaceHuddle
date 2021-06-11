@@ -13,7 +13,7 @@
       <ModuleCount />
     </div>
     <div class="sidebar__bottom">
-      <SessionCode />
+      <SessionCode code="YXCVBNM" />
       <button class="btn btn--mint btn--fullwidth">Public Screen</button>
     </div>
   </section>

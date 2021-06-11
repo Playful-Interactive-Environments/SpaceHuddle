@@ -3,6 +3,7 @@
     <button
       class="btn btn--fullwidth btn--icon"
       :class="[hasBorder ? 'btn--outline-gray' : 'btn--white']"
+      @click="copyToClipboard"
     >
       <img
         src="@/assets/icons/copy.svg"
@@ -10,7 +11,7 @@
         width="20"
         height="auto"
       />
-      YXCVBNM
+      {{ code }}
     </button>
     <button
       class="btn btn--icon session-code__share"
@@ -35,6 +36,14 @@ import { Options, Vue } from 'vue-class-component';
 })
 export default class ModuleCount extends Vue {
   @Prop({ default: false }) hasBorder!: boolean;
+  @Prop({ default: '' }) code!: string;
+
+  copyToClipboard(): void {
+    navigator.clipboard.writeText(this.code).then(
+      () => console.log('Successfully copied to clipboard'),
+      () => console.log('Could not copy to clipboard')
+    );
+  }
 }
 </script>
 

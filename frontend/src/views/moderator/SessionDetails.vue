@@ -17,7 +17,7 @@
                 </li>
               </template>
             </draggable>
-            <AddItem text="Add module" @addNew="addModule()" />
+            <AddItem text="Add module" @addNew="addModule" />
           </template>
         </TopicExpand>
       </div>
