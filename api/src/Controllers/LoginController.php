@@ -83,6 +83,10 @@ class LoginController extends AbstractController
         );
 
         http_response_code(200);
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: POST, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         return json_encode(
             [
                 "message" => "Successful login.",
@@ -145,12 +149,28 @@ class LoginController extends AbstractController
         $this->addGeneric(null, $params, authorizedRoles: [Role::UNKNOWN]);
 
         http_response_code(200);
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: POST, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         return json_encode(
             [
                 "state" => "Success",
                 "message" => "User was created."
             ]
         );
+    }
+
+    /**
+     * Prefllight OPTIONS method for CORS. Returns nothing (empty body), but only headers.
+     */
+    public function preflight(): void
+    {
+        http_response_code(200);
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
     }
 
     /**
@@ -266,6 +286,10 @@ class LoginController extends AbstractController
             ]
         );
         $this->checkPasswordConfirmation($params->password, $params->passwordConfirmation);
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: PUT, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         if (!$this->checkPassword($login_id, $params->oldPassword)) {
             http_response_code(404);
             $error = json_encode(

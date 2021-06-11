@@ -22,6 +22,8 @@ if (AbstractController::isRestCall("POST", 2, searchDetailHierarchy: "login")) {
 } elseif (AbstractController::isRestCall("DELETE")) {
     $result = $login->delete();
     echo $result;
+} elseif (AbstractController::isRestCall("OPTIONS")) {
+    $login->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);

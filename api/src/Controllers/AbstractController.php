@@ -622,6 +622,10 @@ abstract class AbstractController
                 $id = $this->getUrlParameter($this->urlParameter);
             }
             $role = $this->getAuthorisationRole($id);
+            header("Access-Control-Allow-Origin: *");
+            header("Access-Control-Allow-Methods: DELETE, OPTIONS");
+            header("Access-Control-Allow-Headers: *");
+            header("Access-Control-Allow-Credentials: true");
             if (!$this->isAuthorized($role, $authorizedRoles)) {
                 http_response_code(404);
                 $error = json_encode(
