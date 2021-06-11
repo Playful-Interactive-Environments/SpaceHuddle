@@ -22,7 +22,7 @@ class AuthorisationData
      * The login type (user oder participant).
      * @var string|null
      */
-    public ?string $role = null;
+    public ?string $type = null;
 
     /**
      * The constructor.
@@ -30,7 +30,7 @@ class AuthorisationData
      * @param QueryFactory $queryFactory The query factory
      * @param DataSet $data The data
      */
-    public function __construct(QueryFactory $queryFactory, ?DataSet $data = null)
+    public function __construct(?DataSet $data = null)
     {
         if (isset($data)) {
             $userId = $data->get("userId");
@@ -38,36 +38,15 @@ class AuthorisationData
 
             if (isset($userId)) {
                 $this->id = $userId;
-                $this->role = AuthorisationRoleType::USER;
+                $this->type = AuthorisationType::USER;
             } elseif (isset($participantId)) {
                 $this->id = $participantId;
-                $this->role = AuthorisationRoleType::PARTICIPANT;
-                $this->checkParticipantState($queryFactory);
+                $this->type = AuthorisationType::PARTICIPANT;
             } else {
-                $this->role = AuthorisationRoleType::NONE;
+                $this->type = AuthorisationType::NONE;
             }
         } else {
-            $this->role = AuthorisationRoleType::NONE;
-        }
-    }
-
-    /**
-     * Check if the participant is active.
-     * @param QueryFactory $queryFactory The query factory
-     */
-    private function checkParticipantState(QueryFactory $queryFactory): void
-    {
-        $query = $queryFactory->newSelect("participant");
-        $query->select(["*"])
-            ->andWhere(["id" => $this->id]);
-        $statement = $query->execute();
-
-        $itemCount = $statement->rowCount();
-        if ($itemCount > 0) {
-            $participant = $statement->fetch("assoc");
-            if (strtoupper($participant["state"]) != strtoupper(ParticipantState::ACTIVE)) {
-                $this->role = AuthorisationRoleType::PARTICIPANT_INACTIVE;
-            }
+            $this->type = AuthorisationType::NONE;
         }
     }
 
@@ -77,7 +56,7 @@ class AuthorisationData
      */
     public function isParticipant(): bool
     {
-        return ($this->role === AuthorisationRoleType::PARTICIPANT);
+        return ($this->type === AuthorisationType::PARTICIPANT);
     }
 
     /**
@@ -86,7 +65,7 @@ class AuthorisationData
      */
     public function isUser(): bool
     {
-        return ($this->role === AuthorisationRoleType::USER);
+        return ($this->type === AuthorisationType::USER);
     }
 
     /**
@@ -95,6 +74,6 @@ class AuthorisationData
      */
     public function isLoggedIn(): bool
     {
-        return ($this->role !== AuthorisationRoleType::USER or $this->role !== AuthorisationRoleType::PARTICIPANT);
+        return ($this->type !== AuthorisationType::USER or $this->type !== AuthorisationType::PARTICIPANT);
     }
 }

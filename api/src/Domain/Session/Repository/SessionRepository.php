@@ -9,6 +9,7 @@ use App\Domain\User\Repository\UserRepository;
 use App\Domain\Session\Type\SessionRoleType;
 use App\Factory\QueryFactory;
 use App\Domain\Session\Data\SessionData;
+use function DI\string;
 
 /**
  * Repository
@@ -38,46 +39,24 @@ class SessionRepository extends AbstractRepository
      */
     public function getAuthorisationRole(AuthorisationData $authorisation, ?string $id): ?string
     {
-        if ($authorisation->isUser()) {
-            if (is_null($id)) {
-                return strtoupper(SessionRoleType::MODERATOR);
-            }
-            $query = $this->queryFactory->newSelect("session_role");
-            $query->select(["*"])
-                ->andWhere([
-                    "session_id" => $id,
-                    "user_id" => $authorisation->id
-                ]);
+        if (is_null($id)) {
+            return strtoupper(SessionRoleType::MODERATOR);
+        }
+        $query = $this->queryFactory->newSelect("session_permission");
+        $query->select(["role"])
+            ->andWhere([
+                "session_id" => $id,
+                "user_id" => $authorisation->id,
+                "user_type" => $authorisation->type
+            ]);
 
-            $statement = $query->execute();
-            $itemCount = $statement->rowCount();
-            if ($itemCount > 0) {
-                $result = $statement->fetch("assoc");
-                return strtoupper($result["role"]);
-            }
-        } elseif ($authorisation->isParticipant()) {
-            $query = $this->queryFactory->newSelect("participant");
-            $query->select(["*"])
-                ->andWhere([
-                    "session_id" => $id,
-                    "id" => $authorisation->id
-                ]);
-            if ($query->execute()->rowCount() > 0) {
-                return strtoupper(SessionRoleType::PARTICIPANT);
-            }
+        $statement = $query->execute();
+        $itemCount = $statement->rowCount();
+        if ($itemCount > 0) {
+            $result = $statement->fetch("assoc");
+            return strtoupper($result["role"]);
         }
         return null;
-    }
-
-    /**
-     * Insert session row.
-     * @param object $data The session data
-     * @return AbstractData|null The new session
-     */
-    public function insert(object $data): ?AbstractData
-    {
-        $data->connectionKey = $this->generateNewConnectionKey("connection_key");
-        return parent::insert($data);
     }
 
     /**
@@ -89,18 +68,16 @@ class SessionRepository extends AbstractRepository
     public function getAuthorised(array $conditions, AuthorisationData $authorisation): null|AbstractData|array
     {
         if ($this->genericTableParameterSet()) {
-            $query = $this->queryFactory->newSelect($this->entityName);
+            $authorisation_conditions = [
+                "session_permission.user_id" => $authorisation->id,
+                "session_permission.user_type" => $authorisation->type
+            ];
 
-            if ($authorisation->isUser()) {
-                $query->select(["*"])
-                    ->innerJoin("session_role", "session_role.session_id = session.id")
-                    ->andWhere($conditions);
-            } else {
-                $role = strtoupper(SessionRoleType::PARTICIPANT);
-                $query->select(["session.*", "'$role' AS role"])
-                    ->innerJoin("participant", "participant.session_id = session.id")
-                    ->andWhere($conditions);
-            }
+            $query = $this->queryFactory->newSelect($this->entityName);
+            $query->select(["session.*", "session_permission.role"])
+                ->innerJoin("session_permission", "session_permission.session_id = session.id")
+                ->andWhere($authorisation_conditions)
+                ->andWhere($conditions);
 
             $rows = $query->execute()->fetchAll("assoc");
             if (is_array($rows) and sizeof($rows) > 0) {
@@ -126,13 +103,8 @@ class SessionRepository extends AbstractRepository
      */
     public function getByIdAuthorised(string $id, AuthorisationData $authorisation): ?AbstractData
     {
-        $authorisationColumnName  = "session_role.user_id";
-        if ($authorisation->isParticipant()) {
-            $authorisationColumnName  = "participant.id";
-        }
         $result = $this->getAuthorised([
-            "session.id" => $id,
-            $authorisationColumnName => $authorisation->id
+            "session.id" => $id
         ], $authorisation);
         if (!is_object($result)) {
             throw new DomainException("Entity $this->entityName not found");
@@ -148,13 +120,8 @@ class SessionRepository extends AbstractRepository
      */
     public function getAllAuthorised(string $parentId, AuthorisationData $authorisation): array
     {
-        $authorisationColumnName  = "session_role.user_id";
-        if ($authorisation->isParticipant()) {
-            $authorisationColumnName  = "participant.id";
-        }
-
         if ($this->allGenericParameterSet()) {
-            $result = $this->getAuthorised([$authorisationColumnName => $parentId], $authorisation);
+            $result = $this->getAuthorised(["session_permission.user_state" => "active"], $authorisation);
             if (is_array($result)) {
                 return $result;
             } elseif (isset($result)) {
@@ -162,6 +129,17 @@ class SessionRepository extends AbstractRepository
             }
         }
         return [];
+    }
+
+    /**
+     * Insert session row.
+     * @param object $data The session data
+     * @return AbstractData|null The new session
+     */
+    public function insert(object $data): ?AbstractData
+    {
+        $data->connectionKey = $this->generateNewConnectionKey("connection_key");
+        return parent::insert($data);
     }
 
     /**

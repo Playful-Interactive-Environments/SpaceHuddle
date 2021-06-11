@@ -449,16 +449,25 @@ ALTER TABLE `voting`
 -- Struktur des Views `session_permission`
 --
 
-CREATE VIEW session_permission AS
-SELECT user_id, 'USER' AS type, session_id, role
+CREATE VIEW session_permission (user_id, user_type, user_state, session_id, role) AS
+SELECT
+    user_id,
+    'USER' COLLATE utf8mb4_unicode_ci AS user_type,
+    'ACTIVE' COLLATE utf8mb4_unicode_ci AS user_state,
+    session_id,
+    role
 FROM session_role
-UNION ALL
-SELECT id as user_id, 'PARTICIPANT' AS type, session_id,
-       CASE state
-           WHEN 'ACTIVE' THEN 'PARTICIPANT'
-           WHEN 'INACTIVE' THEN 'PARTICIPANT_INACTIVE'
-           END AS role
-from participant
+UNION
+SELECT
+    id as user_id,
+    'PARTICIPANT' COLLATE utf8mb4_unicode_ci AS user_type,
+    state COLLATE utf8mb4_unicode_ci AS user_state,
+    session_id,
+    CASE state
+        WHEN 'ACTIVE' THEN 'PARTICIPANT'
+        WHEN 'INACTIVE' THEN 'PARTICIPANT_INACTIVE'
+        END AS role
+from participant;
 
 COMMIT;
 

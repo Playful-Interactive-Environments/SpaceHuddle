@@ -6,7 +6,7 @@ use App\Data\AuthorisationException;
 use App\Database\TransactionInterface;
 use App\Domain\Base\Data\AbstractData;
 use App\Data\AuthorisationData;
-use App\Data\AuthorisationRoleType;
+use App\Data\AuthorisationType;
 use App\Domain\Base\Service\AbstractService;
 use App\Domain\User\Repository\UserRepository;
 use App\Domain\Session\Type\SessionRoleType;
@@ -32,7 +32,7 @@ final class UserUpdater extends AbstractService
         LoggerFactory $loggerFactory
     ) {
         parent::__construct($repository, $validator, $transaction, $loggerFactory);
-        $this->authorisationPermissionList = [AuthorisationRoleType::USER];
+        $this->authorisationPermissionList = [AuthorisationType::USER];
         $this->entityPermissionList = [
             SessionRoleType::MODERATOR,
             SessionRoleType::FACILITATOR

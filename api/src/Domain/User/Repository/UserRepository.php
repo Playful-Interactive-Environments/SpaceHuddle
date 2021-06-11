@@ -33,7 +33,7 @@ final class UserRepository extends AbstractRepository
      */
     public function getAuthorisationRole(AuthorisationData $authorisation, ?string $id): ?string
     {
-        return SessionRoleType::mapAuthorisationRoleType($authorisation->role);
+        return SessionRoleType::mapAuthorisationType($authorisation->type);
     }
 
     /**

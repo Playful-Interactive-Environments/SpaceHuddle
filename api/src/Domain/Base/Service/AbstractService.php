@@ -2,7 +2,7 @@
 
 namespace App\Domain\Base\Service;
 
-use App\Data\AuthorisationRoleType;
+use App\Data\AuthorisationType;
 use App\Database\TransactionInterface;
 use App\Domain\Base\Repository\AbstractRepository;
 use App\Domain\Base\Data\AbstractData;
@@ -47,9 +47,9 @@ abstract class AbstractService
             ->addFileHandler("service.log")
             ->createLogger();
         $this->authorisationPermissionList = [
-            AuthorisationRoleType::PARTICIPANT,
-            AuthorisationRoleType::USER,
-            AuthorisationRoleType::NONE
+            AuthorisationType::PARTICIPANT,
+            AuthorisationType::USER,
+            AuthorisationType::NONE
         ];
         $this->entityPermissionList = [
             SessionRoleType::MODERATOR,
@@ -85,7 +85,7 @@ abstract class AbstractService
      */
     public function hasPermission(AuthorisationData $authorisation, array $urlData): bool
     {
-        $permission = self::isAuthorized($authorisation->role, $this->authorisationPermissionList);
+        $permission = self::isAuthorized($authorisation->type, $this->authorisationPermissionList);
 
         if ($permission) {
             if (key_exists("id", $urlData)) {

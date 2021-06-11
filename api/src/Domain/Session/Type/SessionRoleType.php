@@ -2,7 +2,7 @@
 
 namespace App\Domain\Session\Type;
 
-use App\Data\AuthorisationRoleType;
+use App\Data\AuthorisationType;
 
 /**
  * Permission roles for the session.
@@ -35,20 +35,17 @@ class SessionRoleType
      * @param string $authorisationRoleType User role based on the given token.
      * @return string Default permission roles for the session.
      */
-    public static function mapAuthorisationRoleType(string $authorisationRoleType): string
+    public static function mapAuthorisationType(string $authorisationRoleType): string
     {
-        if ($authorisationRoleType === AuthorisationRoleType::USER) {
-            return self::MODERATOR;
+        if ($authorisationRoleType === AuthorisationType::USER) {
+            return strtoupper(self::MODERATOR);
         }
-        if ($authorisationRoleType === AuthorisationRoleType::PARTICIPANT) {
-            return self::PARTICIPANT;
+        if ($authorisationRoleType === AuthorisationType::PARTICIPANT) {
+            return strtoupper(self::PARTICIPANT);
         }
-        if ($authorisationRoleType === AuthorisationRoleType::PARTICIPANT_INACTIVE) {
-            return self::PARTICIPANT_INACTIVE;
+        if ($authorisationRoleType === AuthorisationType::NONE) {
+            return strtoupper(self::UNKNOWN);
         }
-        if ($authorisationRoleType === AuthorisationRoleType::NONE) {
-            return self::UNKNOWN;
-        }
-        return self::UNKNOWN;
+        return strtoupper(self::UNKNOWN);
     }
 }

@@ -5,7 +5,7 @@ namespace App\Domain\Session\Service;
 use App\Data\AuthorisationData;
 use App\Data\AuthorisationException;
 use App\Database\TransactionInterface;
-use App\Data\AuthorisationRoleType;
+use App\Data\AuthorisationType;
 use App\Domain\Base\Data\AbstractData;
 use App\Domain\Base\Service\ServiceSingleReader;
 use App\Domain\Session\Repository\SessionRepository;
@@ -33,7 +33,7 @@ class SessionSingleReader extends ServiceSingleReader
         LoggerFactory $loggerFactory
     ) {
         parent::__construct($repository, $validator, $transaction, $loggerFactory);
-        $this->authorisationPermissionList = [AuthorisationRoleType::USER, AuthorisationRoleType::PARTICIPANT];
+        $this->authorisationPermissionList = [AuthorisationType::USER, AuthorisationType::PARTICIPANT];
     }
     /**
      * Functionality of the read single entity service.

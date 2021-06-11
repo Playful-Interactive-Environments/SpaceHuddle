@@ -113,11 +113,7 @@ abstract class AbstractRepository
     public function getAuthorisationRole(AuthorisationData $authorisation, ?string $id): ?string
     {
         if (is_null($id)) {
-            if ($authorisation->isUser()) {
-                return strtoupper(SessionRoleType::MODERATOR);
-            } elseif ($authorisation->isParticipant()) {
-                return strtoupper(SessionRoleType::PARTICIPANT);
-            }
+            return SessionRoleType::mapAuthorisationType($authorisation->type);
         } else {
             $query = $this->queryFactory->newSelect($this->entityName);
             $query->select(["*"])
