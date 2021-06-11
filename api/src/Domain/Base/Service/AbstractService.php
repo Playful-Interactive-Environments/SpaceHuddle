@@ -125,7 +125,7 @@ abstract class AbstractService
     ): array|AbstractData|null {
         if (!$this->hasPermission($authorisation, $urlData)) {
             http_response_code(StatusCodeInterface::STATUS_UNAUTHORIZED);
-            throw new AuthorisationException("User has no rights for this service");
+            throw new AuthorisationException("User has no rights for this service or entity");
         }
 
         return null;
