@@ -5,6 +5,7 @@
 use App\Action\Home\HomeAction;
 use App\Action\OpenApi\Version1DocAction;
 use App\Action\Participant\ParticipantConnectAction;
+use App\Action\PreflightAction;
 use App\Action\User\UserChangePasswordAction;
 use App\Action\User\UserDeleteAction;
 use App\Action\User\UserLoginAction;
@@ -27,7 +28,9 @@ return function (App $app) {
         "/user",
         function (RouteCollectorProxy $app) {
             $app->post("/login[/]", UserLoginAction::class);
+            $app->options("/login[/]", PreflightAction::class);
             $app->post("/register[/]", UserRegisterAction::class);
+            $app->options("/register[/]", PreflightAction::class);
         }
     );
 
@@ -35,6 +38,7 @@ return function (App $app) {
         "/participant",
         function (RouteCollectorProxy $app) {
             $app->post("/connect[/]", ParticipantConnectAction::class);
+            $app->options("/connect[/]", PreflightAction::class);
         }
     );
 
@@ -44,14 +48,7 @@ return function (App $app) {
         function (RouteCollectorProxy $app) {
             $app->put("[/]", UserChangePasswordAction::class);
             $app->delete("[/]", UserDeleteAction::class);
-        }
-    )->add(JwtAuthMiddleware::class);
-
-    $app->group(
-        "/session",
-        function (RouteCollectorProxy $app) {
-            $app->post("[/]", SessionCreateAction::class);
-            $app->get("/{id}[/]", SessionReadSingleAction::class);
+            $app->options("[/]", PreflightAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 
@@ -59,6 +56,17 @@ return function (App $app) {
         "/sessions",
         function (RouteCollectorProxy $app) {
             $app->get("[/]", SessionReadAllAction::class);
+            $app->options("[/]", PreflightAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/session",
+        function (RouteCollectorProxy $app) {
+            $app->post("[/]", SessionCreateAction::class);
+            $app->options("[/]", PreflightAction::class);
+            $app->get("/{id}[/]", SessionReadSingleAction::class);
+            $app->options("{id}[/]", PreflightAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 };
