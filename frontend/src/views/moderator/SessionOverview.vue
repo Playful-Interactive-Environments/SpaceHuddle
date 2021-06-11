@@ -21,6 +21,11 @@
                     </template>
                 </Card>
             </div>
+            <AddItem
+                text="New Session"
+                :isColumn="true"
+                @addNew="newSession()"
+            />
         </div>
     </div>
 </template>
@@ -30,25 +35,31 @@ import { Options, Vue } from 'vue-class-component';
 import Card from '../../components/shared/atoms/Card.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
+import AddItem from '@/components/moderator/atoms/AddItem.vue';
 
 @Options({
     components: {
         Card,
         ModuleCount,
         SessionCode,
+        AddItem,
     },
 })
-export default class SessionOverview extends Vue {}
+export default class SessionOverview extends Vue {
+    newSession() {
+        console.log('new Session clicked');
+    }
+}
 </script>
 
 <style scoped>
 .grid-container {
     display: grid;
     grid-gap: 50px 50px;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: 1fr 1fr 1fr;
 }
 .session-overview {
-    background: #e5e5e5;
+    background: var(--color-background-gray);
     padding: 60px 120px 60px 120px;
 }
 p {

@@ -47,6 +47,14 @@ export default class ModuleItem extends Vue {
     public ModuleType = ModuleType;
 
     mounted(): void {
+        this.setModuleStyles();
+    }
+
+    updated(): void {
+        this.setModuleStyles();
+    }
+
+    private setModuleStyles(): void {
         (this.$refs.item as HTMLElement).style.setProperty(
             '--module-color',
             ModuleColors[this.type]
@@ -68,7 +76,7 @@ export default class ModuleItem extends Vue {
     align-items: center;
     background-color: white;
     border-radius: var(--border-radius);
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     padding: 1.5rem 5rem 1.5rem 4.5rem;
     margin-left: 3rem;
 
@@ -99,6 +107,7 @@ export default class ModuleItem extends Vue {
         align-items: center;
         width: 35px;
         align-self: stretch;
+        cursor: pointer;
     }
 
     &__dots-icon {

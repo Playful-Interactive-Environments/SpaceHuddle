@@ -26,8 +26,8 @@ p {
     margin: auto;
     padding: 15px 30px 15px 30px;
     background: #fff;
-    box-shadow: 0.15rem 0.15rem 0.5rem 0.01rem rgba(0, 0, 0, 0.2);
-    border-radius: 1rem;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius);
     overflow: hidden;
 }
 .uppercaseOverview {

@@ -63,6 +63,7 @@ export default class Timer extends Vue {
     &__title {
         display: flex;
         justify-content: space-between;
+        cursor: pointer;
     }
 
     &__arrow {

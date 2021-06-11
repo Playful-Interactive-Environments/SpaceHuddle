@@ -2,17 +2,22 @@
     <div class="detail">
         <Sidebar />
         <main class="detail__content">
-            <div v-for="topic in 2" :key="topic">
+            <div v-for="(topic, index) in topics" :key="topic">
                 <TopicExpand>
                     <template v-slot:title>Topic Uno</template>
                     <template v-slot:content>
-                        <li
-                            v-for="module in 2"
-                            :key="module"
-                            class="detail__module"
+                        <draggable
+                            v-model="topics[index]"
+                            tag="transition-group"
+                            item-key="type"
                         >
-                            <ModuleItem type="voting" />
-                        </li>
+                            <template #item="{ element }">
+                                <li class="detail__module">
+                                    <ModuleItem :type="element.type" />
+                                </li>
+                            </template>
+                        </draggable>
+                        <AddItem text="Add module" @addItem="addModule()" />
                     </template>
                 </TopicExpand>
             </div>
@@ -22,25 +27,47 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import draggable from 'vuedraggable';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleItem from '@/components/moderator/molecules/ModuleItem.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
+import ModuleType from '../../types/ModuleType';
+import AddItem from '@/components/moderator/atoms/AddItem.vue';
 
 @Options({
     components: {
         Sidebar,
         ModuleItem,
         TopicExpand,
+        draggable,
+        AddItem,
     },
 })
 export default class SessionDetails extends Vue {
     public topicExpanded = true;
+    public topics = [
+        [
+            { type: ModuleType.BRAINSTORMING },
+            { type: ModuleType.SELECTION },
+            { type: ModuleType.VOTING },
+        ],
+        [
+            { type: ModuleType.BRAINSTORMING },
+            { type: ModuleType.CATEGORIZATION },
+        ],
+    ];
+
+    addModule() {
+        console.log('add module');
+    }
 }
 </script>
 
 <style lang="scss" scoped>
 .detail {
+    background-color: var(--color-background-gray);
     margin-left: var(--sidebar-width);
+    min-height: 100vh;
 
     &__content {
         flex-grow: 1;
