@@ -442,6 +442,24 @@ ALTER TABLE `voting`
   ADD CONSTRAINT `voting_ibfk_idea` FOREIGN KEY (`idea_id`) REFERENCES `idea` (`id`),
   ADD CONSTRAINT `voting_ibfk_participant` FOREIGN KEY (`participant_id`) REFERENCES `participant` (`id`),
   ADD CONSTRAINT `voting_ibfk_task` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`);
+
+-- --------------------------------------------------------
+
+--
+-- Struktur des Views `session_permission`
+--
+
+CREATE VIEW session_permission AS
+SELECT user_id, 'USER' AS type, session_id, role
+FROM session_role
+UNION ALL
+SELECT id as user_id, 'PARTICIPANT' AS type, session_id,
+       CASE state
+           WHEN 'ACTIVE' THEN 'PARTICIPANT'
+           WHEN 'INACTIVE' THEN 'PARTICIPANT_INACTIVE'
+           END AS role
+from participant
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
