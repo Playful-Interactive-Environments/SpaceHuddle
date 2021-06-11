@@ -121,7 +121,9 @@ class SessionRepository extends AbstractRepository
     public function getAllAuthorised(string $parentId, AuthorisationData $authorisation): array
     {
         if ($this->allGenericParameterSet()) {
-            $result = $this->getAuthorised(["session_permission.user_state" => "active"], $authorisation);
+            $result = $this->getAuthorised([
+                #"session_permission.user_state" => "active"
+            ], $authorisation);
             if (is_array($result)) {
                 return $result;
             } elseif (isset($result)) {
