@@ -23,6 +23,10 @@ img {
   height: auto;
 }
 
+p {
+  margin: 0;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -38,7 +42,7 @@ body {
 .heading {
   color: var(--color-darkblue);
   font-weight: var(--font-weight-bold);
-  margin: 0.5rem 0 1rem;
+  margin: 0 0 0.5rem;
 
   &--big {
     font-size: calc(48rem / 16);
@@ -72,13 +76,13 @@ body {
   border-radius: 100px;
   white-space: nowrap;
   cursor: pointer;
-  padding: 0.8rem 2rem;
+  padding: 0.7rem 2rem;
   width: 200px;
   margin: 0.5rem auto;
   transition: background-color 0.2s, opacity 0.2s;
 
   &:hover {
-    opacity: 0.8;
+    opacity: 0.9;
   }
 
   &--gradient {
@@ -105,7 +109,7 @@ body {
     border: 2px solid var(--color-mint-dark);
     box-sizing: border-box;
     transition: background-color 0.2s, color 0.2s;
-    padding: calc(10.8rem / 16) 2rem;
+    padding: calc(9.2rem / 16) 2rem;
 
     &:hover {
       background-color: var(--color-mint-dark);
@@ -120,11 +124,25 @@ body {
     border: 2px solid white;
     box-sizing: border-box;
     transition: background-color 0.2s, color 0.2s;
-    padding: calc(10.8rem / 16) 2rem;
+    padding: calc(9.2rem / 16) 2rem;
 
     &:hover {
       background-color: white;
       color: var(--color-darkblue);
+      opacity: 1;
+    }
+  }
+
+  &--outline-gray {
+    background-color: transparent;
+    color: var(--color-darkblue);
+    border: 2px solid var(--color-background-gray);
+    box-sizing: border-box;
+    transition: background-color 0.2s, color 0.2s;
+    padding: calc(9.2rem / 16) 2rem;
+
+    &:hover {
+      background-color: var(--color-background-gray);
       opacity: 1;
     }
   }
@@ -149,13 +167,18 @@ body {
     background-color: var(--color-purple);
   }
 
+  &--white {
+    background-color: white;
+    color: var(--color-darkblue);
+  }
+
   &--icon {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 0.8rem;
     padding: 0;
-    height: calc(44.8rem / 16);
+    height: calc(40.57rem / 16);
   }
 
   &--wide {
@@ -172,7 +195,7 @@ input {
   font-size: var(--font-size-default);
   color: var(--color-darkblue);
   background-color: var(--color-background-gray);
-  padding: 0.8rem 1.2rem;
+  padding: 0.7rem 1.2rem;
   border-radius: 100px;
   border: none;
   margin: 0.5rem auto;
@@ -194,7 +217,7 @@ input {
 textarea {
   font-family: var(--font-family);
   font-size: var(--font-size-default);
-  padding: 0.8rem 1.2rem;
+  padding: 0.7rem 1rem;
   border-radius: var(--border-radius-small);
   background-color: var(--color-background-gray);
   border: none;
