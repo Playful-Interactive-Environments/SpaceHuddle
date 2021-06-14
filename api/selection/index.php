@@ -1,4 +1,5 @@
 <?php
+
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');
 
@@ -12,31 +13,24 @@ $selection = SelectionController::getInstance();
 $selectionIdea = SelectionIdeaController::getInstance();
 
 if (AbstractController::isRestCall("GET")) {
-	$result = $selection->read();
-	echo $result;
+    $result = $selection->read();
+    echo $result;
+} elseif (AbstractController::isRestCall("PUT")) {
+    $result = $selection->update();
+    echo $result;
+} elseif (AbstractController::isRestCall("DELETE")) {
+    $result = $selection->delete();
+    echo $result;
+} elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "ideas")) {
+    $result = $selectionIdea->readIdeas();
+    echo $result;
+} elseif (AbstractController::isRestCall("POST", searchDetailHierarchy: "ideas")) {
+    $result = $selectionIdea->addIdeas();
+    echo $result;
+} elseif (AbstractController::isRestCall("DELETE", searchDetailHierarchy: "ideas")) {
+    $result = $selectionIdea->deleteIdeas();
+    echo $result;
+} else {
+    echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
+    http_response_code(501);
 }
-elseif (AbstractController::isRestCall("PUT")) {
-	$result = $selection->update();
-	echo $result;
-}
-elseif (AbstractController::isRestCall("DELETE")) {
-	$result = $selection->delete();
-	echo $result;
-}
-elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "ideas")) {
-	$result = $selectionIdea->readIdeas();
-	echo $result;
-}
-elseif (AbstractController::isRestCall("POST", searchDetailHierarchy: "ideas")) {
-	$result = $selectionIdea->addIdeas();
-	echo $result;
-}
-elseif (AbstractController::isRestCall("DELETE", searchDetailHierarchy: "ideas")) {
-	$result = $selectionIdea->deleteIdeas();
-	echo $result;
-}
-else {
-	echo "Call ".$_SERVER["REQUEST_METHOD"]." is not yet implemented";
-	http_response_code(501);
-}
-?>
