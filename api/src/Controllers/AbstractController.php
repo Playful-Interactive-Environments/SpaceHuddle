@@ -722,6 +722,18 @@ abstract class AbstractController
     }
 
     /**
+     * Preflight OPTIONS method for CORS. Returns nothing (empty body), but only headers.
+     */
+    public function preflight(): void
+    {
+        http_response_code(200);
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
+    }
+
+    /**
      * Check if the user role is part of the authorised roles.
      * @param string|null $role User role
      * @param array $authorizedRoles List of authorised roles.

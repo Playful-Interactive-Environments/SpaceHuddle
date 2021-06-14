@@ -56,6 +56,8 @@ if (AbstractController::isRestCall("GET")) {
 } elseif (AbstractController::isRestCall("POST", searchDetailHierarchy: "selection")) {
     $result = $selection->add();
     echo $result;
+} elseif (AbstractController::isRestCall("OPTIONS")) {
+    $topic->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);

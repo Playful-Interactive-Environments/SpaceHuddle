@@ -51,6 +51,8 @@ if (AbstractController::isRestCall("GET")) {
 } elseif (AbstractController::isRestCall("PUT", searchDetailHierarchy: "client_application_state")) {
     $result = $client->setClient();
     echo $result;
+} elseif (AbstractController::isRestCall("OPTIONS")) {
+    $task->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);

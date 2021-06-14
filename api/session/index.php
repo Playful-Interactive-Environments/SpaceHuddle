@@ -61,8 +61,10 @@ if (AbstractController::isRestCall("GET")) {
     $result = $sessionRole->delete();
     echo $result;
 } elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "own_user_role")) {
-    $result = $sessionRole->read();
+    $result = $session->read();
     echo $result;
+} elseif (AbstractController::isRestCall("OPTIONS")) {
+    $sessionRole->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);

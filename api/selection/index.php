@@ -30,6 +30,8 @@ if (AbstractController::isRestCall("GET")) {
 } elseif (AbstractController::isRestCall("DELETE", searchDetailHierarchy: "ideas")) {
     $result = $selectionIdea->deleteIdeas();
     echo $result;
+} elseif (AbstractController::isRestCall("OPTIONS")) {
+    $selection->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);

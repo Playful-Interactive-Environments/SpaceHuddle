@@ -28,6 +28,8 @@ if (AbstractController::isRestCall("GET", 2, searchDetailHierarchy: "connect")) 
 } elseif (AbstractController::isRestCall("PUT", 2, searchDetailHierarchy: "state")) {
     $result = $participant->setState();
     echo $result;
+} elseif (AbstractController::isRestCall("OPTIONS")) {
+    $participant->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);

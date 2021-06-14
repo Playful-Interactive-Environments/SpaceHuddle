@@ -19,6 +19,8 @@ if (AbstractController::isRestCall("GET")) {
 } elseif (AbstractController::isRestCall("DELETE")) {
     $result = $resource->delete();
     echo $result;
+} elseif (AbstractController::isRestCall("OPTIONS")) {
+    $resource->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);
