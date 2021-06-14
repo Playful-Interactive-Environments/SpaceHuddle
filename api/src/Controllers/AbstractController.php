@@ -196,6 +196,10 @@ abstract class AbstractController
             $rightId = $this->getUrlParameter($rightTable);
         }
 
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         if (isset($rightId) and isset($rightsController) and isset($rightIdName) and isset($resultClass)) {
             if (is_null($rightId)) {
                 $rightId = $this->getUrlParameter($rightTable);
