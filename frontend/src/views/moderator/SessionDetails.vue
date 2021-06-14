@@ -1,6 +1,6 @@
 <template>
-  <div class="detail">
-    <Sidebar />
+  <div v-if="session" class="detail">
+    <Sidebar :session="session" />
     <main class="detail__content">
       <div v-for="(topic, index) in topics" :key="topic">
         <TopicExpand>
@@ -31,8 +31,12 @@ import draggable from 'vuedraggable';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleItem from '@/components/moderator/molecules/ModuleItem.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
-import ModuleType from '../../types/ModuleType';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
+import { Prop } from 'vue-property-decorator';
+import * as sessionService from '@/services/moderator/session-service';
+import * as topicService from '@/services/moderator/topic-service';
+import { Topic } from '@/services/moderator/topic-service';
+import { Session } from '@/services/moderator/session-service';
 
 @Options({
   components: {
@@ -44,15 +48,22 @@ import AddItem from '@/components/moderator/atoms/AddItem.vue';
   },
 })
 export default class SessionDetails extends Vue {
+  @Prop() readonly id!: string;
+
+  session: Session | null = null;
+  topics: Topic[] = [];
   public topicExpanded = true;
-  public topics = [
-    [
-      { type: ModuleType.BRAINSTORMING },
-      { type: ModuleType.SELECTION },
-      { type: ModuleType.VOTING },
-    ],
-    [{ type: ModuleType.BRAINSTORMING }, { type: ModuleType.CATEGORIZATION }],
-  ];
+
+  async mounted(): Promise<void> {
+    this.session = await sessionService.getById(this.id);
+    this.topics = await sessionService.getTopicsList(this.session.id);
+    await this.topics.forEach(async (topic) => {
+      // TODO: call task endpoint to get the tasks for the topic
+      const currentTaskList = await topicService.getTaskList(topic.id);
+      console.log(currentTaskList);
+    });
+    console.log(this.topics);
+  }
 
   addModule(): void {
     console.log('add module');
