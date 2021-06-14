@@ -1,8 +1,8 @@
 <template>
-    <div class="overview container container--fullheight">
-        <h1>Hello fellow explorer!</h1>
-        <p>here you can see all active topics and modules</p>
-    </div>
+  <div class="overview container container--fullheight">
+    <h1>Hello fellow explorer!</h1>
+    <p>here you can see all active topics and modules</p>
+  </div>
 </template>
 
 <script lang="ts">
@@ -13,7 +13,7 @@ export default class ModuleOverview extends Vue {}
 
 <style lang="scss" scoped>
 .overview {
-    color: #fff;
-    background: var(--color-darkblue);
+  color: #fff;
+  background: var(--color-darkblue);
 }
 </style>
