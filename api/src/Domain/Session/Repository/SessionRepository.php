@@ -5,6 +5,7 @@ namespace App\Domain\Session\Repository;
 use App\Data\AuthorisationData;
 use App\Domain\Base\Data\AbstractData;
 use App\Domain\Base\Repository\AbstractRepository;
+use App\Domain\Base\Repository\KeyGeneratorTrait;
 use App\Domain\User\Repository\UserRepository;
 use App\Domain\Session\Type\SessionRoleType;
 use App\Factory\QueryFactory;
@@ -16,6 +17,8 @@ use function DI\string;
  */
 class SessionRepository extends AbstractRepository
 {
+    use KeyGeneratorTrait;
+
     /**
      * The constructor.
      *

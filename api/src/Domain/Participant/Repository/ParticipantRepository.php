@@ -3,6 +3,8 @@
 namespace App\Domain\Participant\Repository;
 
 use App\Domain\Base\Repository\AbstractRepository;
+use App\Domain\Base\Repository\EncryptTrait;
+use App\Domain\Base\Repository\KeyGeneratorTrait;
 use App\Domain\Participant\Data\ParticipantData;
 use App\Domain\Participant\Type\AvatarSymbol;
 use App\Domain\Participant\Type\ParticipantState;
@@ -13,6 +15,9 @@ use App\Factory\QueryFactory;
  */
 class ParticipantRepository extends AbstractRepository
 {
+    use KeyGeneratorTrait;
+    use EncryptTrait;
+
     /**
      * The constructor.
      *
@@ -44,6 +49,7 @@ class ParticipantRepository extends AbstractRepository
             $participant = $this->isRegistered($sessionId, $data->ipHash);
             if (is_null($participant)) {
                 $data->sessionId = $sessionId;
+                $data->ipHash = self::encryptText($data->ipHash);
                 $data->browserKey = $this->generateNewConnectionKey("browser_key", $data->sessionKey . ".");
                 $data->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
                 $data->symbol = AvatarSymbol::getRandomValue();
@@ -78,14 +84,7 @@ class ParticipantRepository extends AbstractRepository
      */
     protected function isRegistered(?string $sessionId = null, ?string $ipHash = null): ?ParticipantData
     {
-        $query = $this->queryFactory->newSelect("participant");
-        $query->select(["id"])
-            ->andWhere([
-                "session_id" => $sessionId,
-                "ip_hash" => $ipHash
-            ]);
-
-        $result = $query->execute()->fetch("assoc");
+        $result = self::checkEncryptTextAndGetRow(["session_id" => $sessionId], $ipHash, "ip_hash");
         if (is_array($result)) {
             return new ParticipantData($result);
         }

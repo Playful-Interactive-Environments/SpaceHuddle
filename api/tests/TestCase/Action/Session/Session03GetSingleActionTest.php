@@ -4,6 +4,7 @@
 namespace App\Test\TestCase\Action\Session;
 
 use App\Test\Traits\AppTestTrait;
+use App\Test\Traits\UserTestTrait;
 use Fig\Http\Message\StatusCodeInterface;
 use Monolog\Test\TestCase;
 use Selective\TestTrait\Traits\DatabaseTestTrait;
@@ -18,6 +19,18 @@ class Session03GetSingleActionTest extends TestCase
     use AppTestTrait;
     use DatabaseTestTrait;
 
+    protected ?string $sessionId;
+
+    /**
+     * Before each test.
+     *
+     * @return void
+     */
+    protected function setUp(): void {
+        $this->setUpAppTraid();
+        $this->sessionId = $this->getFirstSessionId();
+    }
+
     /**
      * Test.
      *
@@ -25,10 +38,9 @@ class Session03GetSingleActionTest extends TestCase
      */
     public function testGetSingleSessions(): void
     {
-        $sessionId = $this->getFirstSessionId();
         $request = $this->createJsonRequest(
             "GET",
-            "/session/$sessionId/"
+            "/session/$this->sessionId/"
         );
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);

@@ -5,6 +5,7 @@ namespace App\Domain\User\Repository;
 use App\Data\AuthorisationData;
 use App\Domain\Base\Data\AbstractData;
 use App\Domain\Base\Repository\AbstractRepository;
+use App\Domain\Base\Repository\EncryptTrait;
 use App\Domain\Session\Repository\SessionRepository;
 use App\Domain\User\Data\UserData;
 use App\Domain\Session\Type\SessionRoleType;
@@ -16,6 +17,8 @@ use DomainException;
  */
 final class UserRepository extends AbstractRepository
 {
+    use EncryptTrait;
+
     /**
      * The constructor.
      * @param QueryFactory $queryFactory The query factory

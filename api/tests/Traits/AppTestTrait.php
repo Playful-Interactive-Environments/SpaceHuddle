@@ -34,8 +34,7 @@ trait AppTestTrait
      *
      * @return void
      */
-    protected function setUp(): void
-    {
+    protected function setUpAppTraid(): void {
         $this->app = require __DIR__ . "/../../config/bootstrap.php";
         $this->setUpContainer($this->app->getContainer());
 
@@ -44,5 +43,15 @@ trait AppTestTrait
             $this->setUpDatabase(__DIR__ . "/../../resources/schema/schema.sql");
         }
         */
+    }
+
+    /**
+     * Before each test.
+     *
+     * @return void
+     */
+    protected function setUp(): void
+    {
+        $this->setUpAppTraid();
     }
 }
