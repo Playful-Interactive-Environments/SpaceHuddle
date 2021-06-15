@@ -19,7 +19,6 @@ class Participant01ConnectActionTest extends TestCase
         AppTestTrait::setUp as private setUpAppTraid;
     }
     use UserTestTrait;
-    use DatabaseTestTrait;
 
     protected ?string $sessionKey;
 

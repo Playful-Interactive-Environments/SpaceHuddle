@@ -2,7 +2,7 @@
 
 namespace App\Action\Session;
 
-use App\Action\Base\AbstractAction;
+use App\Action\Base\ActionTrait;
 use App\Domain\Session\Service\SessionSingleReader;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -22,8 +22,11 @@ use Fig\Http\Message\StatusCodeInterface;
  *   security={{"api_key": {}}, {"bearerAuth": {}}}
  * )
  */
-class SessionReadSingleAction extends AbstractAction
+class SessionReadSingleAction
 {
+    use ActionTrait;
+    protected SessionSingleReader $service;
+
     /**
      * The constructor.
      *
@@ -32,7 +35,8 @@ class SessionReadSingleAction extends AbstractAction
      */
     public function __construct(Responder $responder, SessionSingleReader $service)
     {
-        parent::__construct($responder, $service);
+        $this->setUp($responder);
+        $this->service = $service;
         $this->successStatusCode = StatusCodeInterface::STATUS_OK;
     }
 }

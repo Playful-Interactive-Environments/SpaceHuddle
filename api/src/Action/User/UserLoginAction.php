@@ -2,7 +2,7 @@
 
 namespace App\Action\User;
 
-use App\Action\Base\AbstractAction;
+use App\Action\Base\ActionTrait;
 use App\Domain\User\Service\UserLogin;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -49,8 +49,11 @@ use Fig\Http\Message\StatusCodeInterface;
  *   @OA\Response(response="500", ref="#/components/responses/500")
  * )
  */
-final class UserLoginAction extends AbstractAction
+final class UserLoginAction
 {
+    use ActionTrait;
+    protected UserLogin $service;
+
     /**
      * The constructor.
      *
@@ -59,7 +62,8 @@ final class UserLoginAction extends AbstractAction
      */
     public function __construct(Responder $responder, UserLogin $service)
     {
-        parent::__construct($responder, $service);
+        $this->setUp($responder);
+        $this->service = $service;
         $this->successStatusCode = StatusCodeInterface::STATUS_ACCEPTED;
     }
 }

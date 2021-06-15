@@ -2,37 +2,34 @@
 
 namespace App\Domain\Base\Repository;
 
-use App\Domain\Base\Data\AbstractData;
 use App\Factory\QueryFactory;
-use DomainException;
 
 /**
  * Description of the common repository functionality.
- * @package App\Domain\Service
  */
-abstract class AbstractRepository
+trait RepositoryTrait
 {
     use GenericTrait;
-    use MagicPropertiesTrait;
     use AuthorisationRoleTrait;
 
     protected QueryFactory $queryFactory;
 
     /**
-     * The constructor.
+     * Basic setup for constructor.
      * @param QueryFactory $queryFactory The query factory
      * @param string|null $entityName Name of the database table
      * @param string|null $resultClass Name of the result class
      * @param string|null $parentIdName Column name of the parent ID.
      * @param string|null $parentRepository The parent repository class.
+     * @return void
      */
-    public function __construct(
+    protected function setUp(
         QueryFactory $queryFactory,
         ?string $entityName = null,
         ?string $resultClass = null,
         ?string $parentIdName = null,
         ?string $parentRepository = null
-    ) {
+    ): void {
         $this->queryFactory = $queryFactory;
         $this->setGenerics($queryFactory, $entityName, $resultClass, $parentIdName, $parentRepository);
     }
@@ -40,10 +37,10 @@ abstract class AbstractRepository
     /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
-     * @return AbstractData|array<AbstractData>|null The result entity(s).
+     * @return object|array<object>|null The result entity(s).
      * @throws GenericException
      */
-    public function get(array $conditions = []): null|AbstractData|array
+    public function get(array $conditions = []): null|object|array
     {
         $query = $this->queryFactory->newSelect($this->getEntityName());
         $query->select(["*"])
@@ -67,7 +64,7 @@ abstract class AbstractRepository
     /**
      * Get entity by ID.
      * @param string $parentId The entity parent ID.
-     * @return array<AbstractData> The result entity list.
+     * @return array<object> The result entity list.
      * @throws GenericException
      */
     public function getAll(string $parentId): array
@@ -84,10 +81,10 @@ abstract class AbstractRepository
     /**
      * Get entity by ID.
      * @param string $id The entity ID.
-     * @return AbstractData|null The result entity.
+     * @return object|null The result entity.
      * @throws GenericException
      */
-    public function getById(string $id): ?AbstractData
+    public function getById(string $id): ?object
     {
         $result = $this->get(["id" => $id]);
         if (!is_object($result)) {
@@ -99,10 +96,10 @@ abstract class AbstractRepository
     /**
      * Insert entity row.
      * @param object $data The data to be inserted
-     * @return AbstractData|null The new created entity
+     * @return object|null The new created entity
      * @throws GenericException
      */
-    public function insert(object $data): ?AbstractData
+    public function insert(object $data): ?object
     {
         $data->id = uuid_create();
         $row = $this->toRow($data);
@@ -130,10 +127,10 @@ abstract class AbstractRepository
     /**
      * Update entity row.
      * @param object|array $data The entity to change.
-     * @return AbstractData|null The result entity.
+     * @return object|null The result entity.
      * @throws GenericException
      */
-    public function update(object|array $data): ?AbstractData
+    public function update(object|array $data): ?object
     {
         if (!is_array($data)) {
             $data = $this->toRow($data);

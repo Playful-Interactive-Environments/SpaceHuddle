@@ -4,15 +4,19 @@
 namespace App\Domain\Base\Service;
 
 use App\Data\AuthorisationException;
-use App\Domain\Base\Data\AbstractData;
 use App\Data\AuthorisationData;
+use App\Domain\Base\Repository\GenericException;
 
 /**
  * Description of the common read service functionality.
  * @package App\Domain\Base\Service
  */
-class ServiceReader extends AbstractService
+trait ServiceReaderTrait
 {
+    use BaseServiceTrait {
+        BaseServiceTrait::service as private genericService;
+    }
+
     /**
      * Functionality of the read all service.
      *
@@ -20,15 +24,15 @@ class ServiceReader extends AbstractService
      * @param array<string, mixed> $bodyData Form data from the request body
      * @param array<string, mixed> $urlData Url parameter from the request
      *
-     * @return array|AbstractData|null Service output
-     * @throws AuthorisationException
+     * @return array|object|null Service output
+     * @throws AuthorisationException|GenericException
      */
     public function service(
         AuthorisationData $authorisation,
         array $bodyData,
         array $urlData
-    ): array|AbstractData|null {
-        parent::service($authorisation, $bodyData, $urlData);
+    ): array|object|null {
+        $this->genericService($authorisation, $bodyData, $urlData);
         $data = array_merge($bodyData, $urlData);
 
         $parentId = $data["parentId"];

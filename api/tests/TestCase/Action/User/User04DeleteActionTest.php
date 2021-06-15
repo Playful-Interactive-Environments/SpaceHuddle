@@ -15,7 +15,6 @@ use Selective\TestTrait\Traits\DatabaseTestTrait;
 class User04DeleteActionTest extends TestCase
 {
     use AppTestTrait;
-    use DatabaseTestTrait;
 
     /**
      * Test.
@@ -29,7 +28,7 @@ class User04DeleteActionTest extends TestCase
             "DELETE",
             "/user/"
         );
-        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "string1234"));
+        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "string1234", false));
 
         $response = $this->app->handle($request);
 
@@ -74,7 +73,7 @@ class User04DeleteActionTest extends TestCase
             "DELETE",
             "/user/"
         );
-        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "string1234"));
+        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "string1234", false));
         $response = $this->app->handle($request);
 
         // Check response

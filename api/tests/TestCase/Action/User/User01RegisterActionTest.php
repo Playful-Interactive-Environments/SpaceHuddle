@@ -15,7 +15,6 @@ use Selective\TestTrait\Traits\DatabaseTestTrait;
 class User01RegisterActionTest extends TestCase
 {
     use AppTestTrait;
-    use DatabaseTestTrait;
 
     /**
      * Test.

@@ -3,21 +3,26 @@
 namespace App\Domain\Session\Repository;
 
 use App\Data\AuthorisationData;
-use App\Domain\Base\Data\AbstractData;
-use App\Domain\Base\Repository\AbstractRepository;
+use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\KeyGeneratorTrait;
+use App\Domain\Base\Repository\RepositoryInterface;
+use App\Domain\Base\Repository\RepositoryTrait;
+use App\Domain\Participant\Repository\ParticipantRepository;
 use App\Domain\User\Repository\UserRepository;
 use App\Domain\Session\Type\SessionRoleType;
 use App\Factory\QueryFactory;
 use App\Domain\Session\Data\SessionData;
-use function DI\string;
+use DomainException;
 
 /**
  * Repository
  */
-class SessionRepository extends AbstractRepository
+class SessionRepository implements RepositoryInterface
 {
     use KeyGeneratorTrait;
+    use RepositoryTrait {
+        RepositoryTrait::insert as private genericInsert;
+    }
 
     /**
      * The constructor.
@@ -26,12 +31,13 @@ class SessionRepository extends AbstractRepository
      */
     public function __construct(QueryFactory $queryFactory)
     {
-        parent::__construct(
+        $this->setUp(
             $queryFactory,
             "session",
             SessionData::class,
             "user_id",
-            UserRepository::class);
+            UserRepository::class
+        );
     }
 
     /**
@@ -66,9 +72,10 @@ class SessionRepository extends AbstractRepository
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
      * @param AuthorisationData $authorisation Authorisation token data.
-     * @return AbstractData|array<AbstractData>|null The result entity(s).
+     * @return SessionData|array<SessionData>|null The result entity(s).
+     * @throws GenericException
      */
-    public function getAuthorised(array $conditions, AuthorisationData $authorisation): null|AbstractData|array
+    public function getAuthorised(array $conditions, AuthorisationData $authorisation): null|SessionData|array
     {
         $authorisation_conditions = [
             "session_permission.user_id" => $authorisation->id,
@@ -101,9 +108,10 @@ class SessionRepository extends AbstractRepository
      * Get entity by ID.
      * @param string $id The entity ID.
      * @param AuthorisationData $authorisation Authorisation token data.
-     * @return AbstractData|null The result entity.
+     * @return SessionData|null The result entity.
+     * @throws GenericException
      */
-    public function getByIdAuthorised(string $id, AuthorisationData $authorisation): ?AbstractData
+    public function getByIdAuthorised(string $id, AuthorisationData $authorisation): ?SessionData
     {
         $result = $this->getAuthorised([
             "session.id" => $id
@@ -118,7 +126,8 @@ class SessionRepository extends AbstractRepository
      * Get entity by ID.
      * @param string $parentId The entity parent ID.
      * @param AuthorisationData $authorisation Authorisation token data.
-     * @return array<AbstractData> The result entity list.
+     * @return array<SessionData> The result entity list.
+     * @throws GenericException
      */
     public function getAllAuthorised(string $parentId, AuthorisationData $authorisation): array
     {
@@ -136,12 +145,13 @@ class SessionRepository extends AbstractRepository
     /**
      * Insert session row.
      * @param object $data The session data
-     * @return AbstractData|null The new session
+     * @return object|null The new session
+     * @throws GenericException
      */
-    public function insert(object $data): ?AbstractData
+    public function insert(object $data): ?object
     {
         $data->connectionKey = $this->generateNewConnectionKey("connection_key");
-        return parent::insert($data);
+        return $this->genericInsert($data);
     }
 
     /**
@@ -165,6 +175,7 @@ class SessionRepository extends AbstractRepository
      * Delete dependent data.
      * @param string $id Primary key of the linked table entry.
      * @return void
+     * @throws GenericException
      */
     protected function deleteDependencies(string $id): void
     {
@@ -174,10 +185,10 @@ class SessionRepository extends AbstractRepository
 
         $result = $query->execute()->fetchAll("assoc");
         if (is_array($result)) {
-            #$participant = new ParticipantRepository($this->queryFactory);
+            $participant = new ParticipantRepository($this->queryFactory);
             foreach ($result as $resultItem) {
                 $participantId = $resultItem["id"];
-                #$participant->deleteById($participantId);
+                $participant->deleteById($participantId);
             }
         }
 

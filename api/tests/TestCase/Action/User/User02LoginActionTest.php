@@ -15,7 +15,6 @@ use Selective\TestTrait\Traits\DatabaseTestTrait;
 class User02LoginActionTest extends TestCase
 {
     use AppTestTrait;
-    use DatabaseTestTrait;
 
     /**
      * Test.

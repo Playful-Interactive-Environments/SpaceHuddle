@@ -2,7 +2,7 @@
 
 namespace App\Domain\Participant\Service;
 
-use App\Domain\Base\Service\AbstractValidator;
+use App\Domain\Base\Service\ValidatorTrait;
 use App\Domain\Participant\Repository\ParticipantRepository;
 use App\Factory\ValidationFactory;
 use Selective\Validation\Exception\ValidationException;
@@ -11,8 +11,10 @@ use Selective\Validation\ValidationResult;
 /**
  * Service.
  */
-class ParticipantValidator extends AbstractValidator
+class ParticipantValidator
 {
+    use ValidatorTrait;
+
     /**
      * The constructor.
      *
@@ -21,7 +23,7 @@ class ParticipantValidator extends AbstractValidator
      */
     public function __construct(ParticipantRepository $repository, ValidationFactory $validationFactory)
     {
-        parent::__construct($repository, $validationFactory);
+        $this->setUp($repository, $validationFactory);
     }
 
     /**

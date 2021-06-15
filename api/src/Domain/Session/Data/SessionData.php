@@ -2,14 +2,13 @@
 
 namespace App\Domain\Session\Data;
 
-use App\Domain\Base\Data\AbstractData;
 use Selective\ArrayReader\ArrayReader;
 
 /**
  * Describes a session.
  * @OA\Schema(description="session description")
  */
-class SessionData extends AbstractData
+class SessionData
 {
     /**
      * The entity ID.
@@ -68,11 +67,12 @@ class SessionData extends AbstractData
     public ?string $role;
 
     /**
-     * Individual function for initial creation of properties
-     * @param ArrayReader $reader The data
+     * Creates a new Participant.
+     * @param array $data Participant data.
      */
-    protected function initProperties(ArrayReader $reader) : void
+    public function __construct(array $data = [])
     {
+        $reader = new ArrayReader($data);
         $this->id = $reader->findString("id");
         $this->title = $reader->findString("title");
         $this->connectionKey = $reader->findString("connection_key");

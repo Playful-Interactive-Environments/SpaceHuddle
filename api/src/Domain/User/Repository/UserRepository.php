@@ -3,9 +3,10 @@
 namespace App\Domain\User\Repository;
 
 use App\Data\AuthorisationData;
-use App\Domain\Base\Data\AbstractData;
-use App\Domain\Base\Repository\AbstractRepository;
 use App\Domain\Base\Repository\EncryptTrait;
+use App\Domain\Base\Repository\GenericException;
+use App\Domain\Base\Repository\RepositoryInterface;
+use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Session\Repository\SessionRepository;
 use App\Domain\User\Data\UserData;
 use App\Domain\Session\Type\SessionRoleType;
@@ -15,9 +16,13 @@ use DomainException;
 /**
  * Repository.
  */
-final class UserRepository extends AbstractRepository
+final class UserRepository implements RepositoryInterface
 {
     use EncryptTrait;
+    use RepositoryTrait {
+        RepositoryTrait::insert as private genericInsert;
+        RepositoryTrait::update as private genericUpdate;
+    }
 
     /**
      * The constructor.
@@ -25,7 +30,7 @@ final class UserRepository extends AbstractRepository
      */
     public function __construct(QueryFactory $queryFactory,)
     {
-        parent::__construct($queryFactory, "user", UserData::class);
+        $this->setUp($queryFactory, "user", UserData::class);
     }
 
     /**
@@ -42,22 +47,22 @@ final class UserRepository extends AbstractRepository
     /**
      * Insert user row.
      * @param object $data The user data
-     * @return AbstractData|null The new user
+     * @return object|null The new user
+     * @throws GenericException
      */
-    public function insert(object $data): AbstractData|null
+    public function insert(object $data): object|null
     {
         $data->password = self::encryptText($data->password);
-        return parent::insert($data);
+        return $this->genericInsert($data);
     }
 
     /**
      * Get user by username.
      * @param string $username The username.
-     * @return AbstractData The user.
-     * @throws DomainException
-     *
+     * @return object|null The user.
+     * @throws GenericException
      */
-    public function getUserByName(string $username): AbstractData|null
+    public function getUserByName(string $username): object|null
     {
         return $this->get(["username" => $username]);
     }
@@ -65,33 +70,36 @@ final class UserRepository extends AbstractRepository
     /**
      * Update user row.
      * @param object|array $data The user
-     * @return AbstractData|null The updated user.
+     * @return object|null The updated user.
+     * @throws GenericException
      */
-    public function update(object|array $data): AbstractData|null
+    public function update(object|array $data): object|null
     {
         // Updating the password is another use case
         unset($data->password);
-        return parent::update($data);
+        return $this->genericUpdate($data);
     }
 
     /**
      * Update user row.
      * @param object $data The user
-     * @return AbstractData|null The updated user.
+     * @return object|null The updated user.
+     * @throws GenericException
      */
-    public function updatePassword(object $data): AbstractData|null
+    public function updatePassword(object $data): object|null
     {
         $row = [
             "id" => $data->id,
             "password" => self::encryptText($data->password)
         ];
-        return parent::update($row);
+        return $this->genericUpdate($row);
     }
 
     /**
      * Check user ID.
      * @param string $username The username.
      * @return bool True if exists
+     * @throws GenericException
      */
     public function existsUsername(string $username): bool
     {
@@ -113,6 +121,7 @@ final class UserRepository extends AbstractRepository
      * Delete dependent data.
      * @param string $id Primary key of the linked table entry.
      * @return void
+     * @throws GenericException
      */
     protected function deleteDependencies(string $id): void
     {

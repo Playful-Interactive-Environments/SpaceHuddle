@@ -2,16 +2,18 @@
 
 namespace App\Domain\Session\Service;
 
+use App\Domain\Base\Service\ValidatorTrait;
 use App\Domain\Session\Repository\SessionRepository;
-use App\Domain\Base\Service\AbstractValidator;
 use App\Factory\ValidationFactory;
 use Cake\Validation\Validator;
 
 /**
  * Service.
  */
-final class SessionValidator extends AbstractValidator
+final class SessionValidator
 {
+    use ValidatorTrait;
+
     /**
      * The constructor.
      *
@@ -20,7 +22,7 @@ final class SessionValidator extends AbstractValidator
      */
     public function __construct(SessionRepository $repository, ValidationFactory $validationFactory)
     {
-        parent::__construct($repository, $validationFactory);
+        $this->setUp($repository, $validationFactory);
     }
 
     /**

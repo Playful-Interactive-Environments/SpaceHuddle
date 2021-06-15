@@ -2,7 +2,7 @@
 
 namespace App\Action\User;
 
-use App\Action\Base\AbstractAction;
+use App\Action\Base\ActionTrait;
 use App\Data\AuthorisationData;
 use App\Data\AuthorisationException;
 use App\Domain\User\Service\UserDeleter;
@@ -21,8 +21,11 @@ use Fig\Http\Message\StatusCodeInterface;
  *   security={{"api_key": {}}, {"bearerAuth": {}}}
  * )
  */
-final class UserDeleteAction extends AbstractAction
+final class UserDeleteAction
 {
+    use ActionTrait;
+    protected UserDeleter $service;
+
     /**
      * The constructor.
      *
@@ -31,7 +34,8 @@ final class UserDeleteAction extends AbstractAction
      */
     public function __construct(Responder $responder, UserDeleter $service)
     {
-        parent::__construct($responder, $service);
+        $this->setUp($responder);
+        $this->service = $service;
         $this->successStatusCode = StatusCodeInterface::STATUS_OK;
     }
 

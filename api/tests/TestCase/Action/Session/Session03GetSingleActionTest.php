@@ -20,7 +20,6 @@ class Session03GetSingleActionTest extends TestCase
         AppTestTrait::setUp as private setUpAppTraid;
     }
     use UserTestTrait;
-    use DatabaseTestTrait;
 
     protected ?string $sessionId;
 

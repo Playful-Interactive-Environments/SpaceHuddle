@@ -2,7 +2,7 @@
 
 namespace App\Action\User;
 
-use App\Action\Base\AbstractAction;
+use App\Action\Base\ActionTrait;
 use App\Domain\User\Service\UserCreator;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -31,8 +31,11 @@ use Fig\Http\Message\StatusCodeInterface;
  *   @OA\Response(response="500", ref="#/components/responses/500")
  * )
  */
-final class UserRegisterAction extends AbstractAction
+final class UserRegisterAction
 {
+    use ActionTrait;
+    protected UserCreator $service;
+
     /**
      * The constructor.
      *
@@ -41,7 +44,8 @@ final class UserRegisterAction extends AbstractAction
      */
     public function __construct(Responder $responder, UserCreator $service)
     {
-        parent::__construct($responder, $service);
+        $this->setUp($responder);
+        $this->service = $service;
         $this->successStatusCode = StatusCodeInterface::STATUS_CREATED;
     }
 }

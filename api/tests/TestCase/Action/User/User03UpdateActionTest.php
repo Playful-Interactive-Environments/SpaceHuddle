@@ -15,7 +15,6 @@ use Selective\TestTrait\Traits\DatabaseTestTrait;
 class User03UpdateActionTest extends TestCase
 {
     use AppTestTrait;
-    use DatabaseTestTrait;
 
     /**
      * Test.
@@ -33,7 +32,7 @@ class User03UpdateActionTest extends TestCase
                 "passwordConfirmation" => "string1234"
             ]
         );
-        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "secret123"));
+        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "secret123", false));
 
         $response = $this->app->handle($request);
 
@@ -58,7 +57,7 @@ class User03UpdateActionTest extends TestCase
                 "passwordConfirmation" => "secret123"
             ]
         );
-        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "string1234"));
+        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "string1234", false));
         $response = $this->app->handle($request);
 
         // Check response

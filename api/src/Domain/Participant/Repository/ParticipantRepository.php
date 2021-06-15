@@ -2,9 +2,10 @@
 
 namespace App\Domain\Participant\Repository;
 
-use App\Domain\Base\Repository\AbstractRepository;
 use App\Domain\Base\Repository\EncryptTrait;
 use App\Domain\Base\Repository\KeyGeneratorTrait;
+use App\Domain\Base\Repository\RepositoryInterface;
+use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Participant\Data\ParticipantData;
 use App\Domain\Participant\Type\AvatarSymbol;
 use App\Domain\Participant\Type\ParticipantState;
@@ -13,10 +14,11 @@ use App\Factory\QueryFactory;
 /**
  * Repository
  */
-class ParticipantRepository extends AbstractRepository
+class ParticipantRepository implements RepositoryInterface
 {
     use KeyGeneratorTrait;
     use EncryptTrait;
+    use RepositoryTrait;
 
     /**
      * The constructor.
@@ -25,16 +27,18 @@ class ParticipantRepository extends AbstractRepository
      */
     public function __construct(QueryFactory $queryFactory)
     {
-        parent::__construct(
+        $this->setUp(
             $queryFactory,
             "participant",
-            ParticipantData::class);
+            ParticipantData::class
+        );
     }
 
     /**
      * Connect to session.
      * @param object $data The data to be inserted
      * @return ParticipantData|null The new created entity
+     * @throws \App\Domain\Base\Repository\GenericException
      */
     public function connect(object $data): ?ParticipantData
     {

@@ -2,7 +2,8 @@
 
 namespace App\Domain\Base\Service;
 
-use App\Domain\Base\Repository\AbstractRepository;
+use App\Domain\Base\Repository\GenericException;
+use App\Domain\Base\Repository\RepositoryInterface;
 use App\Factory\ValidationFactory;
 use Cake\Validation\Validator;
 use Selective\Validation\Exception\ValidationException;
@@ -11,18 +12,19 @@ use Selective\Validation\ValidationResult;
 /**
  * Description of the common validation functionality.
  */
-abstract class AbstractValidator
+trait ValidatorTrait
 {
-    protected AbstractRepository $repository;
+    protected RepositoryInterface $repository;
     protected ValidationFactory $validationFactory;
 
     /**
-     * The constructor.
+     * Basic setup for constructor.
      *
-     * @param AbstractRepository $repository The repository
+     * @param RepositoryInterface $repository The repository
      * @param ValidationFactory $validationFactory The validation
+     * @return void
      */
-    public function __construct(AbstractRepository $repository, ValidationFactory $validationFactory)
+    protected function setUp(RepositoryInterface $repository, ValidationFactory $validationFactory): void
     {
         $this->repository = $repository;
         $this->validationFactory = $validationFactory;
@@ -30,9 +32,9 @@ abstract class AbstractValidator
 
     /**
      * get the repository
-     * @return AbstractRepository repository
+     * @return RepositoryInterface repository
      */
-    protected function getRepository() : AbstractRepository
+    protected function getRepository() : RepositoryInterface
     {
         return $this->repository;
     }
@@ -40,8 +42,9 @@ abstract class AbstractValidator
     /**
      * Validate if the entity exists.
      * @param string $id The entity id
-     * @param string|null $errorMessage custom error message
+     * @param string|null $errorMessage Custom error message
      * @return void
+     * @throws GenericException
      */
     public function validateExists(string $id, ?string $errorMessage = null): void
     {
@@ -75,6 +78,7 @@ abstract class AbstractValidator
      * @param array<string, mixed> $data The data
      *
      * @return void
+     * @throws GenericException
      */
     public function validateUpdate(string $id, array $data): void
     {

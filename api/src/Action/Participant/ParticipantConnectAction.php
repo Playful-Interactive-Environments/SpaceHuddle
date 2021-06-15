@@ -2,7 +2,7 @@
 
 namespace App\Action\Participant;
 
-use App\Action\Base\AbstractAction;
+use App\Action\Base\ActionTrait;
 use App\Domain\Participant\Service\ParticipantConnector;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -28,8 +28,11 @@ use Fig\Http\Message\StatusCodeInterface;
  *   @OA\Response(response="404", description="Not Found")
  * )
  */
-final class ParticipantConnectAction extends AbstractAction
+final class ParticipantConnectAction
 {
+    use ActionTrait;
+    protected ParticipantConnector $service;
+
     /**
      * The constructor.
      *
@@ -38,7 +41,8 @@ final class ParticipantConnectAction extends AbstractAction
      */
     public function __construct(Responder $responder, ParticipantConnector $service)
     {
-        parent::__construct($responder, $service);
+        $this->setUp($responder);
+        $this->service = $service;
         $this->successStatusCode = StatusCodeInterface::STATUS_ACCEPTED;
     }
 }

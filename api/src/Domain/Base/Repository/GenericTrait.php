@@ -2,7 +2,6 @@
 
 namespace App\Domain\Base\Repository;
 
-use App\Domain\Base\Data\AbstractData;
 use App\Factory\QueryFactory;
 
 trait GenericTrait
@@ -10,7 +9,7 @@ trait GenericTrait
     private ?string $entityName;
     private ?string $resultClass;
     private ?string $parentIdName;
-    private ?AbstractRepository $parentRepository;
+    private ?RepositoryInterface $parentRepository;
 
     /**
      * Sets the generic parameters.
@@ -21,7 +20,7 @@ trait GenericTrait
      * @param string|null $parentRepository The parent repository class.
      * @return void
      */
-    public function setGenerics(
+    protected function setGenerics(
         QueryFactory $queryFactory,
         ?string $entityName = null,
         ?string $resultClass = null,
@@ -57,7 +56,7 @@ trait GenericTrait
      * @return string Name of the result class
      * @throws GenericException
      */
-    public function getResultClass(): string
+    protected function getResultClass(): string
     {
         if (isset($this->resultClass)) {
             return $this->resultClass;
@@ -69,10 +68,10 @@ trait GenericTrait
     /**
      * Get the name of the result class.
      * @param array $data Content of the new entity.
-     * @return AbstractData New instance of the result class
+     * @return object New instance of the result class
      * @throws GenericException
      */
-    public function createResultClass(array $data = []): AbstractData
+    protected function createResultClass(array $data = []): object
     {
         if (isset($this->resultClass)) {
             return new $this->resultClass($data);
@@ -86,7 +85,7 @@ trait GenericTrait
      * @return string Column name of the parent ID.
      * @throws GenericException
      */
-    public function getParentIdName(): string
+    protected function getParentIdName(): string
     {
         if (isset($this->parentIdName)) {
             return $this->parentIdName;
@@ -97,10 +96,10 @@ trait GenericTrait
 
     /**
      * Get the parent repository.
-     * @return AbstractRepository parent repository
+     * @return RepositoryInterface parent repository
      * @throws GenericException
      */
-    public function getParentRepository(): AbstractRepository
+    public function getParentRepository(): RepositoryInterface
     {
         if (isset($this->parentRepository)) {
             return $this->parentRepository;

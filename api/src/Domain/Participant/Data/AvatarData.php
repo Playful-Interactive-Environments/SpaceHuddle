@@ -2,14 +2,13 @@
 
 namespace App\Domain\Participant\Data;
 
-use App\Domain\Base\Data\AbstractData;
 use Selective\ArrayReader\ArrayReader;
 
 /**
  * For visual differentiation in the frontend, each participant is assigned its own avatar.
  * @OA\Schema(description="For visual differentiation in the frontend, each participant is assigned its own avatar.",)
  */
-class AvatarData extends AbstractData
+class AvatarData
 {
     /**
      * The avatar color.
@@ -26,11 +25,13 @@ class AvatarData extends AbstractData
     public ?string $symbol;
 
     /**
-     * Individual function for initial creation of properties
-     * @param ArrayReader $reader The data
+     * The constructor.
+     *
+     * @param array $data The data
      */
-    protected function initProperties(ArrayReader $reader) : void
+    public function __construct(array $data = [])
     {
+        $reader = new ArrayReader($data);
         $this->color = $reader->findString("color");
         $this->symbol = $reader->findString("symbol");
     }

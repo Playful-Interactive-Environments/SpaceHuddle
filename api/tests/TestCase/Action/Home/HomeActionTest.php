@@ -3,6 +3,7 @@
 namespace App\Test\TestCase\Action\Home;
 
 use App\Test\Traits\AppTestTrait;
+use App\Test\Traits\DatabaseCleanupTestTrait;
 use Fig\Http\Message\StatusCodeInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -11,7 +12,20 @@ use PHPUnit\Framework\TestCase;
  */
 class HomeActionTest extends TestCase
 {
-    use AppTestTrait;
+    use AppTestTrait, DatabaseCleanupTestTrait {
+        DatabaseCleanupTestTrait::dropTables insteadof AppTestTrait;
+        AppTestTrait::setUp as private setUpAppTraid;
+    }
+
+    /**
+     * Before each test.
+     *
+     * @return void
+     */
+    protected function setUp(): void {
+        $this->setUpAppTraid();
+        $this->cleanup();
+    }
 
     /**
      * Test.

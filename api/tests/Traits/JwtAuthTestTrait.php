@@ -15,8 +15,11 @@ trait JwtAuthTestTrait
      * @param string $password Password of the authorised user
      * @return string|null json token
      */
-    protected function getAccessToken(string $username = "john.doe", string $password = "secret123") : ?string
-    {
+    protected function getAccessToken(
+        string $username = "john.doe",
+        string $password = "secret123",
+        bool $createIfNotExists = true
+    ): ?string {
         $request = $this->createJsonRequest(
             "POST",
             "/user/login/",
@@ -30,6 +33,18 @@ trait JwtAuthTestTrait
         $accessToken = "";
         if (property_exists($json, "accessToken")) {
             $accessToken = $json->accessToken;
+        } elseif ($createIfNotExists) {
+            $request = $this->createJsonRequest(
+                "POST",
+                "/user/register/",
+                [
+                    "username" => $username,
+                    "password" => $password,
+                    "passwordConfirmation" => $password
+                ]
+            );
+            $this->app->handle($request);
+            $accessToken = $this->getAccessToken($username, $password, false);
         }
         return $accessToken;
     }

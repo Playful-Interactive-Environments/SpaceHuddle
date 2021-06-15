@@ -3,11 +3,10 @@
 
 namespace App\Action\User;
 
-use App\Action\Base\AbstractAction;
+use App\Action\Base\ActionTrait;
 use App\Domain\User\Service\UserUpdater;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Action to change the password for the currently logged in user.
@@ -31,8 +30,11 @@ use Psr\Http\Message\ServerRequestInterface;
  *   security={{"api_key": {}}, {"bearerAuth": {}}}
  * )
  */
-class UserChangePasswordAction extends AbstractAction
+class UserChangePasswordAction
 {
+    use ActionTrait;
+    protected UserUpdater $service;
+
     /**
      * The constructor.
      *
@@ -41,7 +43,8 @@ class UserChangePasswordAction extends AbstractAction
      */
     public function __construct(Responder $responder, UserUpdater $service)
     {
-        parent::__construct($responder, $service);
+        $this->setUp($responder);
+        $this->service = $service;
         $this->successStatusCode = StatusCodeInterface::STATUS_CREATED;
     }
 }

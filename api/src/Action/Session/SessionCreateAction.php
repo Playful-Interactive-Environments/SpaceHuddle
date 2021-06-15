@@ -3,8 +3,7 @@
 
 namespace App\Action\Session;
 
-use App\Action\Base\AbstractAction;
-use App\Data\AuthorisationData;
+use App\Action\Base\ActionTrait;
 use App\Domain\Session\Service\SessionCreator;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -33,8 +32,11 @@ use Fig\Http\Message\StatusCodeInterface;
  *   security={{"api_key": {}}, {"bearerAuth": {}}}
  * )
  */
-class SessionCreateAction extends AbstractAction
+class SessionCreateAction
 {
+    use ActionTrait;
+    protected SessionCreator $service;
+
     /**
      * The constructor.
      *
@@ -43,7 +45,8 @@ class SessionCreateAction extends AbstractAction
      */
     public function __construct(Responder $responder, SessionCreator $service)
     {
-        parent::__construct($responder, $service);
+        $this->setUp($responder);
+        $this->service = $service;
         $this->successStatusCode = StatusCodeInterface::STATUS_CREATED;
     }
 }

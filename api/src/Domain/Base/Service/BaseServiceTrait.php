@@ -2,12 +2,12 @@
 
 namespace App\Domain\Base\Service;
 
-use App\Data\AuthorisationType;
-use App\Database\TransactionInterface;
-use App\Domain\Base\Repository\AbstractRepository;
-use App\Domain\Base\Data\AbstractData;
 use App\Data\AuthorisationData;
 use App\Data\AuthorisationException;
+use App\Data\AuthorisationType;
+use App\Database\TransactionInterface;
+use App\Domain\Base\Repository\GenericException;
+use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Session\Type\SessionRoleType;
 use App\Factory\LoggerFactory;
 use Fig\Http\Message\StatusCodeInterface;
@@ -15,37 +15,37 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Description of the common service functionality.
- * @package App\Domain\Base\Service
  */
-abstract class AbstractService
+trait BaseServiceTrait
 {
-    protected AbstractRepository $repository;
-    protected AbstractValidator $validator;
     protected TransactionInterface $transaction;
     protected LoggerInterface $logger;
     protected array $authorisationPermissionList;
     protected array $entityPermissionList;
 
     /**
-     * The constructor.
+     * Basic setup for constructor.
      *
-     * @param AbstractRepository $repository The repository
-     * @param AbstractValidator $validator The validator
      * @param TransactionInterface $transaction The transaction
      * @param LoggerFactory $loggerFactory The logger factory
+     * @return void
      */
-    public function __construct(
-        AbstractRepository $repository,
-        AbstractValidator $validator,
+    protected function setUp(
         TransactionInterface $transaction,
         LoggerFactory $loggerFactory
-    ) {
-        $this->repository = $repository;
-        $this->validator = $validator;
+    ): void {
         $this->transaction = $transaction;
         $this->logger = $loggerFactory
             ->addFileHandler("service.log")
             ->createLogger();
+        $this->setPermission();
+    }
+
+    /**
+     * Define authorised roles for the service.
+     */
+    protected function setPermission(): void
+    {
         $this->authorisationPermissionList = [
             AuthorisationType::PARTICIPANT,
             AuthorisationType::USER,
@@ -82,8 +82,9 @@ abstract class AbstractService
      * @param AuthorisationData $authorisation Authorisation data
      * @param array<string, mixed> $urlData Url parameter from the request
      * @return bool TRUE if the rights for executing the service are available.
+     * @throws GenericException
      */
-    public function hasPermission(AuthorisationData $authorisation, array $urlData): bool
+    protected function hasPermission(AuthorisationData $authorisation, array $urlData): bool
     {
         $permission = self::isAuthorized($authorisation->type, $this->authorisationPermissionList);
 
@@ -115,14 +116,14 @@ abstract class AbstractService
      * @param array<string, mixed> $bodyData Form data from the request body
      * @param array<string, mixed> $urlData Url parameter from the request
      *
-     * @return array|AbstractData|null Service output
-     * @throws AuthorisationException
+     * @return array|object|null Service output
+     * @throws AuthorisationException|GenericException
      */
     public function service(
         AuthorisationData $authorisation,
         array $bodyData,
         array $urlData
-    ): array|AbstractData|null {
+    ): array|object|null {
         if (!$this->hasPermission($authorisation, $urlData)) {
             http_response_code(StatusCodeInterface::STATUS_UNAUTHORIZED);
             throw new AuthorisationException("User has no rights for this service or entity");

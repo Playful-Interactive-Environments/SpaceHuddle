@@ -5,8 +5,8 @@ namespace App\Domain\Participant\Service;
 use App\Data\AuthorisationData;
 use App\Data\AuthorisationException;
 use App\Database\TransactionInterface;
-use App\Domain\Base\Data\AbstractData;
-use App\Domain\Base\Service\AbstractService;
+use App\Domain\Base\Repository\GenericException;
+use App\Domain\Base\Service\BaseServiceTrait;
 use App\Domain\Participant\Repository\ParticipantRepository;
 use App\Factory\LoggerFactory;
 use App\Routing\JwtAuth;
@@ -14,8 +14,15 @@ use App\Routing\JwtAuth;
 /**
  * Service.
  */
-class ParticipantConnector extends AbstractService
+class ParticipantConnector
 {
+    use BaseServiceTrait {
+        BaseServiceTrait::service as private genericService;
+    }
+
+    protected ParticipantRepository $repository;
+    protected ParticipantValidator $validator;
+
     protected JwtAuth $jwtAuth;
 
     /**
@@ -34,7 +41,9 @@ class ParticipantConnector extends AbstractService
         LoggerFactory $loggerFactory,
         JwtAuth $jwtAuth
     ) {
-        parent::__construct($repository, $validator, $transaction, $loggerFactory);
+        $this->setUp($transaction, $loggerFactory);
+        $this->repository = $repository;
+        $this->validator = $validator;
         $this->jwtAuth = $jwtAuth;
     }
 
@@ -45,15 +54,15 @@ class ParticipantConnector extends AbstractService
      * @param array<string, mixed> $bodyData Form data from the request body
      * @param array<string, mixed> $urlData Url parameter from the request
      *
-     * @return array|AbstractData|null Service output
-     * @throws AuthorisationException
+     * @return array|object|null Service output
+     * @throws AuthorisationException|GenericException
      */
     public function service(
         AuthorisationData $authorisation,
         array $bodyData,
         array $urlData
-    ): array|AbstractData|null {
-        parent::service($authorisation, $bodyData, $urlData);
+    ): array|object|null {
+        $this->genericService($authorisation, $bodyData, $urlData);
         $data = array_merge($bodyData, $urlData);
 
         // Input validation

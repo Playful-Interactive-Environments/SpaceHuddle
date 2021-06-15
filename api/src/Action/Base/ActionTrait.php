@@ -5,7 +5,7 @@ namespace App\Action\Base;
 
 use App\Data\AuthorisationData;
 use App\Data\AuthorisationException;
-use App\Domain\Base\Service\AbstractService;
+use App\Domain\Base\Service\ServiceInterface;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -13,24 +13,21 @@ use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Description of the common action functionality.
- * @package App\Action\Base
  */
-abstract class AbstractAction
+trait ActionTrait
 {
     protected Responder $responder;
-    protected AbstractService $service;
     protected int $successStatusCode;
 
     /**
-     * The constructor.
+     * Basic setup for constructor.
      *
      * @param Responder $responder The responder
-     * @param AbstractService $service The service
+     * @return void
      */
-    public function __construct(Responder $responder, AbstractService $service)
+    protected function setUp(Responder $responder): void
     {
         $this->responder = $responder;
-        $this->service = $service;
         $this->successStatusCode = StatusCodeInterface::STATUS_OK;
     }
 

@@ -2,14 +2,13 @@
 
 namespace App\Domain\Participant\Data;
 
-use App\Domain\Base\Data\AbstractData;
 use Selective\ArrayReader\ArrayReader;
 
 /**
  * Describes a participant.
  * @OA\Schema(description="participant description")
  */
-class ParticipantData extends AbstractData
+class ParticipantData
 {
     /**
      * The participant id.
@@ -54,27 +53,17 @@ class ParticipantData extends AbstractData
     public ?string $accessToken;
 
     /**
-     * Individual function for initial creation of properties
-     * @param ArrayReader $reader The data
+     * Creates a new Participant.
+     * @param array $data Participant data.
+     * @param null|string $token Authorization token.
      */
-    protected function initProperties(ArrayReader $reader) : void
+    public function __construct(array $data = [], ?string $token = null)
     {
+        $reader = new ArrayReader($data);
         $this->id = $reader->findString("id");
         $this->browserKey = $reader->findString("browser_key");
         $this->state = $reader->findString("state");
-        $this->ipHash = $reader->findInt("ip_hash");
-        $this->avatar =  $reader->findString("expiration_date");
-        $this->accessToken = $reader->findString("creation_date");
-    }
-
-    /**
-     * Creates a new Participant.
-     * @param array|null $data Participant data.
-     * @param null $token Authorization token.
-     */
-    public function __construct(array $data = null, $token = null)
-    {
-        parent::__construct($data);
+        $this->ipHash = $reader->findString("ip_hash");
         $this->avatar = new AvatarData($data);
         $this->accessToken = $token;
     }
