@@ -16,7 +16,10 @@ use Selective\TestTrait\Traits\DatabaseTestTrait;
  */
 class Session03GetSingleActionTest extends TestCase
 {
-    use AppTestTrait;
+    use AppTestTrait {
+        AppTestTrait::setUp as private setUpAppTraid;
+    }
+    use UserTestTrait;
     use DatabaseTestTrait;
 
     protected ?string $sessionId;

@@ -9,7 +9,6 @@ use Selective\TestTrait\Traits\HttpJsonTestTrait;
  */
 trait UserTestTrait
 {
-
     /**
      * Determine first session id
      * @return string|null json token

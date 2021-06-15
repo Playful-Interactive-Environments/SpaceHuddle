@@ -18,7 +18,6 @@ trait AppTestTrait
     use ArrayTestTrait;
     use ContainerTestTrait;
     use JwtAuthTestTrait;
-    use UserTestTrait;
     use HttpTestTrait;
     use HttpJsonTestTrait;
     use MockTestTrait;
@@ -34,7 +33,8 @@ trait AppTestTrait
      *
      * @return void
      */
-    protected function setUpAppTraid(): void {
+    protected function setUp(): void
+    {
         $this->app = require __DIR__ . "/../../config/bootstrap.php";
         $this->setUpContainer($this->app->getContainer());
 
@@ -43,15 +43,5 @@ trait AppTestTrait
             $this->setUpDatabase(__DIR__ . "/../../resources/schema/schema.sql");
         }
         */
-    }
-
-    /**
-     * Before each test.
-     *
-     * @return void
-     */
-    protected function setUp(): void
-    {
-        $this->setUpAppTraid();
     }
 }

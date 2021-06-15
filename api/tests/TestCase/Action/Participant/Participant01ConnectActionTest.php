@@ -3,6 +3,7 @@
 namespace App\Test\TestCase\Action\Participant;
 
 use App\Test\Traits\AppTestTrait;
+use App\Test\Traits\UserTestTrait;
 use Fig\Http\Message\StatusCodeInterface;
 use PHPUnit\Framework\TestCase;
 use Selective\TestTrait\Traits\DatabaseTestTrait;
@@ -14,7 +15,10 @@ use Selective\TestTrait\Traits\DatabaseTestTrait;
  */
 class Participant01ConnectActionTest extends TestCase
 {
-    use AppTestTrait;
+    use AppTestTrait {
+        AppTestTrait::setUp as private setUpAppTraid;
+    }
+    use UserTestTrait;
     use DatabaseTestTrait;
 
     protected ?string $sessionKey;
