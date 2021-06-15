@@ -32,9 +32,8 @@ trait ServiceSingleReaderTrait
         array $urlData
     ): array|object|null {
         $this->genericService($authorisation, $bodyData, $urlData);
-        $data = array_merge($bodyData, $urlData);
 
-        $id = $data["id"];
+        $id = $urlData["id"];
         // Input validation
         // ...
 

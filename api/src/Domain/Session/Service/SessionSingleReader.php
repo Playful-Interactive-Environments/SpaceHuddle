@@ -4,13 +4,10 @@ namespace App\Domain\Session\Service;
 
 use App\Data\AuthorisationData;
 use App\Data\AuthorisationException;
-use App\Database\TransactionInterface;
 use App\Data\AuthorisationType;
 use App\Domain\Base\Repository\GenericException;
-use App\Domain\Base\Service\ServiceSingleReaderTrait;
-use App\Domain\Session\Repository\SessionRepository;
+use App\Domain\Base\Service\BaseServiceTrait;
 use App\Domain\Session\Type\SessionRoleType;
-use App\Factory\LoggerFactory;
 
 /**
  * Read all session service
@@ -18,8 +15,8 @@ use App\Factory\LoggerFactory;
  */
 class SessionSingleReader
 {
-    use ServiceSingleReaderTrait {
-        ServiceSingleReaderTrait::service as private genericReadService;
+    use BaseServiceTrait {
+        BaseServiceTrait::service as private genericService;
     }
     use SessionServiceTrait;
 
@@ -54,9 +51,8 @@ class SessionSingleReader
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $this->genericReadService($authorisation, $bodyData, $urlData);
+        $this->genericService($authorisation, $bodyData, $urlData);
         $id = $urlData["id"];
-        $result = $this->repository->getByIdAuthorised($id, $authorisation);
-        return $result;
+        return $this->repository->getByIdAuthorised($id, $authorisation);
     }
 }
