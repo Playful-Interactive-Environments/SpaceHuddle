@@ -38,18 +38,15 @@ trait KeyGeneratorTrait
         string $keyColumnName = "connection_key",
         string $keyPrefix = ""
     ): string {
-        if ($this->genericTableParameterSet()) {
-            $connectionKey = "";
-            while (strlen($connectionKey) == 0) {
-                $connectionKey = $keyPrefix . self::keygen(8, false);
-                $query = $this->queryFactory->newSelect($this->entityName);
-                $query->select("id")->andWhere([$keyColumnName => $connectionKey]);
-                if ($query->execute()->fetch("assoc")) {
-                    $connectionKey = "";
-                }
+        $connectionKey = "";
+        while (strlen($connectionKey) == 0) {
+            $connectionKey = $keyPrefix . self::keygen(8, false);
+            $query = $this->queryFactory->newSelect($this->getEntityName());
+            $query->select("id")->andWhere([$keyColumnName => $connectionKey]);
+            if ($query->execute()->fetch("assoc")) {
+                $connectionKey = "";
             }
-            return $connectionKey;
         }
-        return self::keygen(8, false);
+        return $connectionKey;
     }
 }

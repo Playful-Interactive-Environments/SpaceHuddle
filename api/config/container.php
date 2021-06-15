@@ -1,7 +1,9 @@
 <?php
 
+use App\Domain\Base\Repository\GenericException;
 use App\Factory\LoggerFactory;
 use App\Handler\DefaultErrorHandler;
+use App\Handler\GenericErrorHandling;
 use App\Routing\JwtAuth;
 use App\Database\Transaction;
 use App\Database\TransactionInterface;
@@ -125,8 +127,18 @@ return [
         );
 
         $errorMiddleware->setDefaultErrorHandler($container->get(DefaultErrorHandler::class));
-        $errorMiddleware->setErrorHandler(PDOException::class, PDOErrorHandling::class);
-        $errorMiddleware->setErrorHandler(AuthorisationException::class, AuthorisationErrorHandling::class);
+        $errorMiddleware->setErrorHandler(
+            PDOException::class,
+            PDOErrorHandling::class
+        );
+        $errorMiddleware->setErrorHandler(
+            AuthorisationException::class,
+            AuthorisationErrorHandling::class
+        );
+        $errorMiddleware->setErrorHandler(
+            GenericException::class,
+            GenericErrorHandling::class
+        );
 
         return $errorMiddleware;
     },

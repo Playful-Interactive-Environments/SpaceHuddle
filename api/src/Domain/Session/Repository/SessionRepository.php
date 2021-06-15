@@ -70,31 +70,30 @@ class SessionRepository extends AbstractRepository
      */
     public function getAuthorised(array $conditions, AuthorisationData $authorisation): null|AbstractData|array
     {
-        if ($this->genericTableParameterSet()) {
-            $authorisation_conditions = [
-                "session_permission.user_id" => $authorisation->id,
-                "session_permission.user_type" => $authorisation->type
-            ];
+        $authorisation_conditions = [
+            "session_permission.user_id" => $authorisation->id,
+            "session_permission.user_type" => $authorisation->type
+        ];
 
-            $query = $this->queryFactory->newSelect($this->entityName);
-            $query->select(["session.*", "session_permission.role"])
-                ->innerJoin("session_permission", "session_permission.session_id = session.id")
-                ->andWhere($authorisation_conditions)
-                ->andWhere($conditions);
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["session.*", "session_permission.role"])
+            ->innerJoin("session_permission", "session_permission.session_id = session.id")
+            ->andWhere($authorisation_conditions)
+            ->andWhere($conditions);
 
-            $rows = $query->execute()->fetchAll("assoc");
-            if (is_array($rows) and sizeof($rows) > 0) {
-                if (sizeof($rows) === 1) {
-                    return new $this->resultClass($rows[0]);
-                } else {
-                    $result = [];
-                    foreach ($rows as $resultItem) {
-                        array_push($result, new $this->resultClass($resultItem));
-                    }
-                    return $result;
+        $rows = $query->execute()->fetchAll("assoc");
+        if (is_array($rows) and sizeof($rows) > 0) {
+            if (sizeof($rows) === 1) {
+                return $this->createResultClass($rows[0]);
+            } else {
+                $result = [];
+                foreach ($rows as $resultItem) {
+                    array_push($result, $this->createResultClass($resultItem));
                 }
+                return $result;
             }
         }
+
         return null;
     }
 
@@ -123,15 +122,13 @@ class SessionRepository extends AbstractRepository
      */
     public function getAllAuthorised(string $parentId, AuthorisationData $authorisation): array
     {
-        if ($this->allGenericParameterSet()) {
-            $result = $this->getAuthorised([
-                #"session_permission.user_state" => "active"
-            ], $authorisation);
-            if (is_array($result)) {
-                return $result;
-            } elseif (isset($result)) {
-                return [$result];
-            }
+        $result = $this->getAuthorised([
+            #"session_permission.user_state" => "active"
+        ], $authorisation);
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
         }
         return [];
     }

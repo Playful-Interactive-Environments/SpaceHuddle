@@ -25,24 +25,22 @@ trait EncryptTrait
      */
     public function checkEncryptTextAndGetRow(array $conditions, string $text, string $textColumnName = "password"): array|null
     {
-        if ($this->genericTableParameterSet()) {
-            $query = $this->queryFactory->newSelect($this->entityName);
-            $query->select(
-                [
-                    $textColumnName
-                ]
-            );
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(
+            [
+                $textColumnName
+            ]
+        );
 
-            $query->andWhere($conditions);
+        $query->andWhere($conditions);
 
-            $rows = $query->execute()->fetchAll("assoc");
+        $rows = $query->execute()->fetchAll("assoc");
 
-            foreach ($rows as $row) {
-                $hash = $row[$textColumnName];
-                $match = password_verify($text, $hash);
-                if ($match) {
-                    return $row;
-                }
+        foreach ($rows as $row) {
+            $hash = $row[$textColumnName];
+            $match = password_verify($text, $hash);
+            if ($match) {
+                return $row;
             }
         }
 

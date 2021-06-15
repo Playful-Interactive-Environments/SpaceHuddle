@@ -3,6 +3,7 @@
 namespace App\Handler;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Interfaces\ErrorHandlerInterface;
@@ -12,8 +13,22 @@ use Throwable;
  * Class AuthorisationErrorHandling
  * @package App\Domain\Base\Data
  */
-class AuthorisationErrorHandling implements ErrorHandlerInterface
+class GenericErrorHandling implements ErrorHandlerInterface
 {
+    use ErrorMessage;
+    private ResponseFactoryInterface $responseFactory;
+
+    /**
+     * The constructor.
+     * @param ResponseFactoryInterface $responseFactory The response factory
+     */
+    public function __construct(
+        ResponseFactoryInterface $responseFactory
+    )
+    {
+        $this->responseFactory = $responseFactory;
+    }
+
     /**
      * @param ServerRequestInterface $request
      * @param Throwable              $exception
@@ -29,12 +44,13 @@ class AuthorisationErrorHandling implements ErrorHandlerInterface
         bool $logErrors,
         bool $logErrorDetails
     ): ResponseInterface {
-        http_response_code(StatusCodeInterface::STATUS_METHOD_NOT_ALLOWED);
-        $errorMessage = $exception->getMessage();
+        $statusCode = StatusCodeInterface::STATUS_PRECONDITION_REQUIRED;
+        http_response_code($statusCode);
+        $errorMessage = $this->getErrorMessage($exception, $statusCode, $displayErrorDetails);
         $error = json_encode(
             [
                 "state" => "Failed",
-                "message" => "Authorisation error occurred: " . $errorMessage
+                "message" => "Generic Error occurred: " . $errorMessage
             ]
         );
         die($error);
