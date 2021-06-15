@@ -34,9 +34,10 @@ import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { Prop } from 'vue-property-decorator';
 import * as sessionService from '@/services/moderator/session-service';
-import * as topicService from '@/services/moderator/topic-service';
-import { Topic } from '@/services/moderator/topic-service';
+// import * as topicService from '@/services/moderator/topic-service';
+// import { Topic } from '@/services/moderator/topic-service';
 import { Session } from '@/services/moderator/session-service';
+import ModuleType from '@/types/ModuleType';
 
 @Options({
   components: {
@@ -51,17 +52,26 @@ export default class SessionDetails extends Vue {
   @Prop() readonly id!: string;
 
   session: Session | null = null;
-  topics: Topic[] = [];
+
+  // TODO: Exchange topics definition once CORS issues for task and topic endpoints are resolved
+  // topics: Topic[] = [];
+  public topics = [
+    [
+      { type: ModuleType.BRAINSTORMING },
+      { type: ModuleType.SELECTION },
+      { type: ModuleType.VOTING },
+    ],
+    [{ type: ModuleType.BRAINSTORMING }, { type: ModuleType.CATEGORIZATION }],
+  ];
   public topicExpanded = true;
 
   async mounted(): Promise<void> {
     this.session = await sessionService.getById(this.id);
-    this.topics = await sessionService.getTopicsList(this.session.id);
+    // TODO: uncomment once CORS issues for task and topic endpoints are resolved
+    /* this.topics = await sessionService.getTopicsList(this.session.id);
     await this.topics.forEach(async (topic) => {
-      // TODO: call task endpoint to get the tasks for the topic
       const currentTaskList = await topicService.getTaskList(topic.id);
-      console.log(currentTaskList);
-    });
+    }); */
     console.log(this.topics);
   }
 
