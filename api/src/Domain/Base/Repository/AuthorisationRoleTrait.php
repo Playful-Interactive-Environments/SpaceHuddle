@@ -5,6 +5,9 @@ namespace App\Domain\Base\Repository;
 use App\Data\AuthorisationData;
 use App\Domain\Session\Type\SessionRoleType;
 
+/**
+ * Trait for checking the access role.
+ */
 trait AuthorisationRoleTrait
 {
     /**

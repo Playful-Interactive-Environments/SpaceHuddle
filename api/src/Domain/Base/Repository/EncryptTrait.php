@@ -2,6 +2,9 @@
 
 namespace App\Domain\Base\Repository;
 
+/**
+ * Trait for encrypting and decrypting database entries.
+ */
 trait EncryptTrait
 {
 

@@ -4,6 +4,9 @@ namespace App\Domain\Base\Repository;
 
 use App\Factory\QueryFactory;
 
+/**
+ * Trait to create and read generic parameters that allow easy code usage of the database access for different entities.
+ */
 trait GenericTrait
 {
     private ?string $entityName;

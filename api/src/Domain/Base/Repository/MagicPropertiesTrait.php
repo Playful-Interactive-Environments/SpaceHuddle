@@ -2,6 +2,9 @@
 
 namespace App\Domain\Base\Repository;
 
+/**
+ * Trait that provides the Get functionality for private properties.
+ */
 trait MagicPropertiesTrait
 {
     /**

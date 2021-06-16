@@ -3,8 +3,7 @@
 namespace App\Domain\Base\Repository;
 
 /**
- * Class AuthorisationException
- * @package App\Domain\Base\Data
+ * Throws an exception if required generic parameters are missing.
  */
 class GenericException extends \Exception
 {

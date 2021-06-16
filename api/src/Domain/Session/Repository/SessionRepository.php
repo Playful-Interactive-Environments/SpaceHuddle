@@ -220,7 +220,7 @@ class SessionRepository implements RepositoryInterface
      * @param object $data The entity data
      * @return array<string, mixed> The array
      */
-    protected function toRow(object $data): array
+    protected function formatDatabaseInput(object $data): array
     {
         return [
             "id" => $data->id ?? null,

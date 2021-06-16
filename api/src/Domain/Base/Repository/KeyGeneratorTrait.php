@@ -2,6 +2,9 @@
 
 namespace App\Domain\Base\Repository;
 
+/**
+ * Trait which generates the unique connection keys between session and participant.
+ */
 trait KeyGeneratorTrait
 {
     /**
