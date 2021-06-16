@@ -13,9 +13,7 @@ use App\Domain\Base\Repository\GenericException;
  */
 trait ServiceReaderTrait
 {
-    use BaseServiceTrait {
-        BaseServiceTrait::service as private genericService;
-    }
+    use BaseServiceTrait;
 
     /**
      * Functionality of the read all service.
@@ -32,7 +30,7 @@ trait ServiceReaderTrait
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $this->genericService($authorisation, $bodyData, $urlData);
+        $this->checkPermission($authorisation, $urlData);
         $data = array_merge($bodyData, $urlData);
 
         $parentId = $data["parentId"];

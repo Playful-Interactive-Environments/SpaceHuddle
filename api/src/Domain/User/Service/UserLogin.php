@@ -16,9 +16,7 @@ use App\Routing\JwtAuth;
  */
 final class UserLogin
 {
-    use BaseServiceTrait {
-        BaseServiceTrait::service as private genericService;
-    }
+    use BaseServiceTrait;
 
     protected UserRepository $repository;
     protected UserValidator $validator;
@@ -61,7 +59,7 @@ final class UserLogin
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $this->genericService($authorisation, $bodyData, $urlData);
+        $this->checkPermission($authorisation, $urlData);
         $data = array_merge($bodyData, $urlData);
 
         // Input validation

@@ -15,9 +15,7 @@ use App\Domain\Session\Type\SessionRoleType;
  */
 class SessionSingleReader
 {
-    use BaseServiceTrait {
-        BaseServiceTrait::service as private genericService;
-    }
+    use BaseServiceTrait;
     use SessionServiceTrait;
 
     /**
@@ -51,7 +49,7 @@ class SessionSingleReader
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $this->genericService($authorisation, $bodyData, $urlData);
+        $this->checkPermission($authorisation, $urlData);
         $id = $urlData["id"];
         return $this->repository->getByIdAuthorised($id, $authorisation);
     }

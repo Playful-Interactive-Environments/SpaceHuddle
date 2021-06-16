@@ -12,9 +12,7 @@ use App\Domain\Base\Repository\GenericException;
  */
 trait ServiceSingleReaderTrait
 {
-    use BaseServiceTrait {
-        BaseServiceTrait::service as private genericService;
-    }
+    use BaseServiceTrait;
 
     /**
      * Functionality of the read single entity service.
@@ -31,7 +29,7 @@ trait ServiceSingleReaderTrait
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $this->genericService($authorisation, $bodyData, $urlData);
+        $this->checkPermission($authorisation, $bodyData, $urlData);
 
         $id = $urlData["id"];
         // Input validation

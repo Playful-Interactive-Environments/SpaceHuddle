@@ -18,9 +18,7 @@ use App\Factory\LoggerFactory;
  */
 class SessionReader
 {
-    use BaseServiceTrait {
-        BaseServiceTrait::service as private genericService;
-    }
+    use BaseServiceTrait;
     use SessionServiceTrait;
 
     /**
@@ -54,7 +52,7 @@ class SessionReader
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $this->genericService($authorisation, $bodyData, $urlData);
+        $this->checkPermission($authorisation, $urlData);
         return $this->repository->getAllAuthorised($authorisation->id, $authorisation);
     }
 }

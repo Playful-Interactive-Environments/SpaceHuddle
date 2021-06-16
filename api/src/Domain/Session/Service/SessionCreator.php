@@ -18,9 +18,7 @@ use App\Factory\LoggerFactory;
  */
 class SessionCreator
 {
-    use BaseServiceTrait {
-        BaseServiceTrait::service as private genericService;
-    }
+    use BaseServiceTrait;
     use SessionServiceTrait;
 
     /**
@@ -51,7 +49,7 @@ class SessionCreator
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $this->genericService($authorisation, $bodyData, $urlData);
+        $this->checkPermission($authorisation, $urlData);
         $data = array_merge($bodyData, $urlData);
 
         // Input validation

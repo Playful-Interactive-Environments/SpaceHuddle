@@ -13,9 +13,7 @@ use App\Domain\Base\Repository\GenericException;
  */
 trait ServiceDeleterTrait
 {
-    use BaseServiceTrait {
-        BaseServiceTrait::service as private genericService;
-    }
+    use BaseServiceTrait;
 
     /**
      * Functionality of the delete service.
@@ -32,7 +30,7 @@ trait ServiceDeleterTrait
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $this->genericService($authorisation, $bodyData, $urlData);
+        $this->checkPermission($authorisation, $urlData);
         $data = array_merge($bodyData, $urlData);
 
         $id = $data["id"];
