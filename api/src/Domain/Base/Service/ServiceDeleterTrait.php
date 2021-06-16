@@ -31,9 +31,7 @@ trait ServiceDeleterTrait
         array $urlData
     ): array|object|null {
         $this->checkPermission($authorisation, $urlData);
-        $data = array_merge($bodyData, $urlData);
-
-        $id = $data["id"];
+        $id = $urlData["id"];
 
         // Input validation
         $this->validator->validateExists($id);

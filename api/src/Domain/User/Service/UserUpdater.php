@@ -3,14 +3,11 @@
 namespace App\Domain\User\Service;
 
 use App\Data\AuthorisationException;
-use App\Database\TransactionInterface;
 use App\Data\AuthorisationData;
 use App\Data\AuthorisationType;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\BaseServiceTrait;
-use App\Domain\User\Repository\UserRepository;
 use App\Domain\Session\Type\SessionRoleType;
-use App\Factory\LoggerFactory;
 
 /**
  * Service.

@@ -6,6 +6,8 @@ use App\Action\Home\HomeAction;
 use App\Action\OpenApi\Version1DocAction;
 use App\Action\Participant\ParticipantConnectAction;
 use App\Action\PreflightAction;
+use App\Action\Session\SessionDeleteAction;
+use App\Action\Session\SessionUpdateAction;
 use App\Action\User\UserChangePasswordAction;
 use App\Action\User\UserDeleteAction;
 use App\Action\User\UserLoginAction;
@@ -67,6 +69,8 @@ return function (App $app) {
             $app->options("[/]", PreflightAction::class);
             $app->get("/{id}[/]", SessionReadSingleAction::class);
             $app->options("{id}[/]", PreflightAction::class);
+            $app->put("[/]", SessionUpdateAction::class);
+            $app->delete("/{id}[/]", SessionDeleteAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 };

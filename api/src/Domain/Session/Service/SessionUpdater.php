@@ -2,20 +2,21 @@
 
 namespace App\Domain\Session\Service;
 
-use App\Data\AuthorisationException;
 use App\Data\AuthorisationData;
+use App\Data\AuthorisationException;
 use App\Data\AuthorisationType;
 use App\Domain\Base\Repository\GenericException;
-use App\Domain\Base\Service\BaseServiceTrait;
+use App\Domain\Base\Service\ServiceUpdaterTrait;
 use App\Domain\Session\Type\SessionRoleType;
 
 /**
- * Session create service.
- * @package App\Domain\Session\Service
+ * Service.
  */
-class SessionCreator
+class SessionUpdater
 {
-    use BaseServiceTrait;
+    use ServiceUpdaterTrait {
+        ServiceUpdaterTrait::service as private genericService;
+    }
     use SessionServiceTrait;
 
     /**
@@ -32,7 +33,7 @@ class SessionCreator
     }
 
     /**
-     * Functionality of the session create service.
+     * Functionality of the update service.
      *
      * @param AuthorisationData $authorisation Authorisation data
      * @param array<string, mixed> $bodyData Form data from the request body
@@ -46,24 +47,8 @@ class SessionCreator
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $this->checkPermission($authorisation, $urlData);
-        $data = array_merge($bodyData, $urlData);
-
-        // Input validation
-        $this->validator->validateCreate($data);
-
-        // Map form data to session DTO (model)
-        $session = (object)$data;
-        $session->userId = $authorisation->id;
-
-        $this->transaction->begin();
-        // Insert session and get new session ID
-        $result = $this->repository->insert($session);
-        $this->transaction->commit();
-
-        // Logging
-        $this->logger->info("Session created successfully: $result->id");
-
+        $result = $this->genericService($authorisation, $bodyData, $urlData);
+        $result->role = strtoupper(SessionRoleType::MODERATOR);
         return $result;
     }
 }
