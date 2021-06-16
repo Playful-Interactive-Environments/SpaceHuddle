@@ -24,25 +24,7 @@ use Fig\Http\Message\StatusCodeInterface;
  *     )
  *   ),
  *   @OA\Response(response="201", description="Created.",
- *     @OA\MediaType(
- *       mediaType="application/json",
- *       @OA\Schema(
- *         @OA\Property(property="message", type="string", description="Success message.", example="Successful login."),
- *         @OA\Property(
- *           property="accessToken",
- *           type="string",
- *           description="The access token.",
- *           example="reallylongtokenstring"
- *         ),
- *         @OA\Property(property="tokenType", type="string", description="The token type.", example="Bearer"),
- *         @OA\Property(
- *           property="expiresIn",
- *           type="int",
- *           description="The token expiration in seconds.",
- *           example="86400"
- *         ),
- *       )
- *     )),
+ *     @OA\JsonContent(ref="#/components/schemas/TokenData")),
  *   @OA\Response(response="400", ref="#/components/responses/400"),
  *   @OA\Response(response="403", ref="#/components/responses/403"),
  *   @OA\Response(response="422", ref="#/components/responses/422"),

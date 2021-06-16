@@ -38,33 +38,15 @@ class ParticipantData
     public ?AvatarData $avatar;
 
     /**
-     * Encrypted IP address to hide IP addresses from the public while implementing an IP hash check function for a user
-     * account.
-     * @var string|null
-     * @OA\Property()
-     */
-    public ?string $ipHash;
-
-    /**
-     * Authorization token to identify the participant.
-     * @var string|null
-     * @OA\Property()
-     */
-    public ?string $accessToken;
-
-    /**
      * Creates a new Participant.
      * @param array $data Participant data.
-     * @param null|string $token Authorization token.
      */
-    public function __construct(array $data = [], ?string $token = null)
+    public function __construct(array $data = [])
     {
         $reader = new ArrayReader($data);
         $this->id = $reader->findString("id");
         $this->browserKey = $reader->findString("browser_key");
         $this->state = $reader->findString("state");
-        $this->ipHash = $reader->findString("ip_hash");
         $this->avatar = new AvatarData($data);
-        $this->accessToken = $token;
     }
 }

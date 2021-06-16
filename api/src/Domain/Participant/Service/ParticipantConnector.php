@@ -5,8 +5,10 @@ namespace App\Domain\Participant\Service;
 use App\Data\AuthorisationData;
 use App\Data\AuthorisationException;
 use App\Database\TransactionInterface;
+use App\Domain\Base\Data\TokenData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\BaseServiceTrait;
+use App\Domain\Participant\Data\ParticipantTokenData;
 use App\Domain\Participant\Repository\ParticipantRepository;
 use App\Factory\LoggerFactory;
 use App\Routing\JwtAuth;
@@ -76,11 +78,13 @@ class ParticipantConnector
             ]
         );
 
-        return [
+        $tokenResult = new TokenData([
             "message" => "Successful connected.",
             "accessToken" => $jwt,
             "tokenType" => "Bearer",
             "expiresIn" => $this->jwtAuth->getLifetime()
-        ];
+        ]);
+
+        return new ParticipantTokenData($result, $tokenResult);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Domain\User\Service;
 use App\Data\AuthorisationException;
 use App\Database\TransactionInterface;
 use App\Data\AuthorisationData;
+use App\Domain\Base\Data\TokenData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\BaseServiceTrait;
 use App\Domain\User\Repository\UserRepository;
@@ -75,11 +76,11 @@ final class UserLogin
             ]
         );
 
-        return [
+        return new TokenData([
             "message" => "Successful login.",
             "accessToken" => $jwt,
             "tokenType" => "Bearer",
             "expiresIn" => $this->jwtAuth->getLifetime()
-        ];
+        ]);
     }
 }

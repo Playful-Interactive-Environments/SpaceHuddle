@@ -24,7 +24,7 @@ use Fig\Http\Message\StatusCodeInterface;
  *     )
  *   ),
  *   @OA\Response(response="200", description="Success",
- *     @OA\JsonContent(ref="#/components/schemas/ParticipantData")),
+ *     @OA\JsonContent(ref="#/components/schemas/ParticipantTokenData")),
  *   @OA\Response(response="404", description="Not Found")
  * )
  */

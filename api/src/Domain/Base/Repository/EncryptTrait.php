@@ -31,7 +31,7 @@ trait EncryptTrait
         $query = $this->queryFactory->newSelect($this->getEntityName());
         $query->select(
             [
-                $textColumnName
+                "*"
             ]
         );
 
