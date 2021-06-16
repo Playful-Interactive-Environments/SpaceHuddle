@@ -11,6 +11,7 @@ use App\Handler\PDOErrorHandling;
 use App\Handler\AuthorisationErrorHandling;
 use App\Data\AuthorisationException;
 use Cake\Database\Connection;
+use Casbin\Enforcer;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
@@ -181,4 +182,11 @@ return [
             InMemory::plainText($publicKey)
         );
     },
+
+    Enforcer::class => function (ContainerInterface $container) {
+        $authSettings = $container->get("settings")["auth"];
+        $model = $authSettings["model"];
+        $policy = $authSettings["policy"];
+        return new Enforcer($model, $policy);
+    }
 ];

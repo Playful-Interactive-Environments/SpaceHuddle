@@ -1,5 +1,6 @@
 <?php
 
+use App\Middleware\AuthorizationMiddleware;
 use App\Middleware\CorsMiddleware;
 use App\Middleware\JwtClaimMiddleware;
 use Selective\BasePath\BasePathMiddleware;
@@ -11,6 +12,7 @@ return function (App $app) {
     $app->addBodyParsingMiddleware();
     $app->add(ValidationExceptionMiddleware::class);
     $app->add(CorsMiddleware::class);
+    $app->add(AuthorizationMiddleware::class);
     $app->addRoutingMiddleware();
     $app->add(JwtClaimMiddleware::class);
     $app->add(BasePathMiddleware::class);
