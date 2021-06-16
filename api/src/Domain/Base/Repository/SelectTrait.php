@@ -3,6 +3,8 @@
 
 namespace App\Domain\Base\Repository;
 
+use Cake\Database\Query;
+
 /**
  * Trait that provides the read database entries functionality.
  */
@@ -20,19 +22,7 @@ trait SelectTrait
         $query->select(["*"])
             ->andWhere($conditions);
 
-        $rows = $query->execute()->fetchAll("assoc");
-        if (is_array($rows) and sizeof($rows) > 0) {
-            if (sizeof($rows) === 1) {
-                return $this->createResultClass($rows[0]);
-            } else {
-                $result = [];
-                foreach ($rows as $resultItem) {
-                    array_push($result, $this->createResultClass($resultItem));
-                }
-                return $result;
-            }
-        }
-        return null;
+        return $this->fetchAll($query);
     }
 
     /**
@@ -65,5 +55,27 @@ trait SelectTrait
             throw new DomainException("Entity $this->getEntityName() not found");
         }
         return $result;
+    }
+
+    /**
+     * Fetches all entities from the database query and converts them into an object of the generic result class.
+     * @param Query $query Database query.
+     * @return object|array|null The result entity(s).
+     */
+    protected function fetchAll(Query $query) : null|object|array
+    {
+        $rows = $query->execute()->fetchAll("assoc");
+        if (is_array($rows) and sizeof($rows) > 0) {
+            if (sizeof($rows) === 1) {
+                return $this->createResultClass($rows[0]);
+            } else {
+                $result = [];
+                foreach ($rows as $resultItem) {
+                    array_push($result, $this->createResultClass($resultItem));
+                }
+                return $result;
+            }
+        }
+        return null;
     }
 }

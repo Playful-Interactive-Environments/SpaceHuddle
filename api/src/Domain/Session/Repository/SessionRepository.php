@@ -88,20 +88,7 @@ class SessionRepository implements RepositoryInterface
             ->andWhere($authorisation_conditions)
             ->andWhere($conditions);
 
-        $rows = $query->execute()->fetchAll("assoc");
-        if (is_array($rows) and sizeof($rows) > 0) {
-            if (sizeof($rows) === 1) {
-                return $this->createResultClass($rows[0]);
-            } else {
-                $result = [];
-                foreach ($rows as $resultItem) {
-                    array_push($result, $this->createResultClass($resultItem));
-                }
-                return $result;
-            }
-        }
-
-        return null;
+        return $this->fetchAll($query);
     }
 
     /**
