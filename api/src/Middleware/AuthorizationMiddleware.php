@@ -2,6 +2,7 @@
 
 namespace App\Middleware;
 
+use Casbin\Exceptions\CasbinException;
 use Casbin\Model\Model;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -42,21 +43,40 @@ class AuthorizationMiddleware
      * @param RequestHandlerInterface $handler PSR-15 request handler
      *
      * @return ResponseInterface The response
+     * @throws CasbinException
      */
     public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // TODO: Get our user ID here
-        $user = $request->getAttribute('user');
-        // TODO: Get a URI/path without the basepath (now its /GAB/api/...)
+        $authorisation = $request->getAttribute('authorisation');
+        // TODO: Get session role from repository (getAuthorisationRole)
+        $role = "moderator";
+
         $uri = $request->getUri();
         $action = $request->getMethod();
+        // Get a URI/path without the basepath (now its /GAB/api/...)
+        $uriPath = $this->removeBaseUrl($uri->getPath());
 
-        if ($user && !$this->enforcer->enforce($user, $uri->getPath(), $action)) {
+        if ($authorisation && !$this->enforcer->enforce($authorisation->type, $uriPath, $action)) {
             return $this->responseFactory->createResponse()
                 ->withHeader("Content-Type", "application/json")
                 ->withStatus(StatusCodeInterface::STATUS_FORBIDDEN, "Unauthorized.");
         }
 
         return $handler->handle($request);
+    }
+
+    /**
+     * Get a URI/path without the base path (now its /GAB/api/...)
+     * @param string $uriPath Uri with base path
+     * @return string Uri without base path
+     */
+    private function removeBaseUrl(string $uriPath): string
+    {
+        $indexPath = "/public/index.php";
+        $scriptName = $_SERVER['SCRIPT_NAME'];
+
+        // base url
+        $baseUrl = str_replace($indexPath, "", $scriptName);
+        return str_replace($baseUrl, "", $uriPath);
     }
 }
