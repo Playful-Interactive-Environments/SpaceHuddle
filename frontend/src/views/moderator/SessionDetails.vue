@@ -12,7 +12,7 @@
           >
             <template #item="{ element }">
               <li class="detail__module">
-                <ModuleItem :type="element.type" />
+                <ModuleCard :type="element.type" />
               </li>
             </template>
           </draggable>
@@ -27,7 +27,7 @@
 import { Options, Vue } from 'vue-class-component';
 import draggable from 'vuedraggable';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
-import ModuleItem from '@/components/moderator/molecules/ModuleItem.vue';
+import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { Prop } from 'vue-property-decorator';
@@ -40,7 +40,7 @@ import ModuleType from '@/types/ModuleType';
 @Options({
   components: {
     Sidebar,
-    ModuleItem,
+    ModuleCard,
     TopicExpand,
     draggable,
     AddItem,

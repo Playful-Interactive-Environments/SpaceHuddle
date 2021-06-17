@@ -1,29 +1,29 @@
 <template>
   <article
     ref="item"
-    class="module-item"
-    :class="{ 'module-item--client': isClient }"
+    class="module-card"
+    :class="{ 'module-card--client': isClient }"
   >
     <img
       :src="require(`@/assets/illustrations/planets/${type}.png`)"
       alt="planet"
-      class="module-item__planet"
+      class="module-card__planet"
     />
     <ModuleInfo
       :type="type"
       :title="'Module Title'"
       :description="'Module description here ...'"
     />
-    <Timer class="module-item__timer" />
-    <div class="module-item__toggles" v-if="!isClient">
+    <Timer class="module-card__timer" />
+    <div class="module-card__toggles" v-if="!isClient">
       <Toggle label="Active" v-if="!(type === ModuleType.SELECTION)" />
       <Toggle label="Public Screen" />
     </div>
-    <div class="module-item__drag" v-if="!isClient">
+    <div class="module-card__drag" v-if="!isClient">
       <img
         src="@/assets/icons/drag-dots.svg"
         alt="draggable"
-        class="module-item__dots-icon"
+        class="module-card__dots-icon"
       />
     </div>
   </article>
@@ -45,7 +45,7 @@ import Toggle from '@/components/moderator/atoms/Toggle.vue';
     Toggle,
   },
 })
-export default class ModuleItem extends Vue {
+export default class ModuleCard extends Vue {
   @Prop({ default: ModuleType.BRAINSTORMING }) type!: ModuleType;
   @Prop({ default: false }) isClient!: boolean;
 
@@ -74,7 +74,7 @@ export default class ModuleItem extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.module-item {
+.module-card {
   position: relative;
   display: flex;
   justify-content: space-between;
@@ -84,27 +84,6 @@ export default class ModuleItem extends Vue {
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   padding: 1.5rem 5rem 1.5rem 4.5rem;
   margin-left: 3rem;
-
-  &--client {
-    flex-direction: column;
-    margin-left: 0;
-    padding: 1.5rem 1.5rem 0;
-    text-align: center;
-    color: var(--color-darkblue);
-    width: 65vw;
-    margin-bottom: 1.5rem;
-
-    .module-item__planet {
-      position: static;
-      transform: none;
-      margin-bottom: 0.5rem;
-    }
-
-    .module-item__timer {
-      margin-top: 0.5rem;
-      transform: translateY(50%);
-    }
-  }
 
   &__planet {
     position: absolute;
@@ -139,6 +118,27 @@ export default class ModuleItem extends Vue {
   &__dots-icon {
     width: 12px;
     height: auto;
+  }
+
+  &--client {
+    flex-direction: column;
+    margin-left: 0;
+    padding: 1.5rem 1.5rem 0;
+    text-align: center;
+    color: var(--color-darkblue);
+    width: 65vw;
+    margin-bottom: 1.5rem;
+
+    .module-card__planet {
+      position: static;
+      transform: none;
+      margin-bottom: 0.5rem;
+    }
+
+    .module-card__timer {
+      margin-top: 0.5rem;
+      transform: translateY(50%);
+    }
   }
 }
 </style>

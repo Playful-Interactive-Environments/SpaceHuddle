@@ -8,6 +8,7 @@
     <form @submit="submit">
       <label>
         <input
+          class="input"
           name="sessionCode"
           v-model="roomCode"
           placeholder="Enter Session PIN"

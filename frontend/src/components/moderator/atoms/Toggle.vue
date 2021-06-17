@@ -3,7 +3,7 @@
     <div>{{ label }}</div>
 
     <label class="toggle__switch">
-      <input type="checkbox" class="toggle__input" />
+      <input type="checkbox" class="input toggle__input" />
       <span class="toggle__slider"></span>
     </label>
   </div>

@@ -3,7 +3,7 @@
     <h1>Debug Page</h1>
     <div class="container--centered">
       <label for="jwt">Custom JWT</label>
-      <input v-model="jwt" id="jwt" type="text" />
+      <input v-model="jwt" id="jwt" type="text" class="input" />
       <button class="btn" @click="setJwt">Fake Login 🚀</button>
     </div>
   </div>

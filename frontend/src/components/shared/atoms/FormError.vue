@@ -11,7 +11,7 @@ import { Prop } from 'vue-property-decorator';
 import { Vue } from 'vue-class-component';
 
 export default class FormErrors extends Vue {
-  @Prop({ default: [] }) errors!: string[];
+  @Prop({ default: [] }) errors?: string[];
 }
 </script>
 
