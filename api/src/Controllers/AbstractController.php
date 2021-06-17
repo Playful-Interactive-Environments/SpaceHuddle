@@ -196,6 +196,10 @@ abstract class AbstractController
             $rightId = $this->getUrlParameter($rightTable);
         }
 
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         if (isset($rightId) and isset($rightsController) and isset($rightIdName) and isset($resultClass)) {
             if (is_null($rightId)) {
                 $rightId = $this->getUrlParameter($rightTable);
@@ -263,6 +267,10 @@ abstract class AbstractController
             }
         }
 
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         if (
             $this->genericTableParameterSet()
             and isset($parentTable)
@@ -323,6 +331,10 @@ abstract class AbstractController
         ?PDOStatement $statement = null,
         ?string $role = null
     ): string {
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         if ($this->genericTableParameterSet()) {
             if (is_null($id)) {
                 $id = $this->getUrlParameter($this->urlParameter);
@@ -391,6 +403,10 @@ abstract class AbstractController
         ?string $duplicateCheck = "",
         array|object|null $parameterDependencies = null
     ): string {
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: POST, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         if (isset($parentId)) {
             if ($this->allGenericParameterSet()) {
                 $role = $this->parentController::getInstanceAuthorisationRole($parentId);
@@ -522,6 +538,10 @@ abstract class AbstractController
         array $authorizedRoles = [Role::MODERATOR],
         ?string $query = null
     ): string {
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: PUT, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         if ($this->genericTableParameterSet()) {
             $role = $this->getAuthorisationRole($id);
             if (!$this->isAuthorized($role, $authorizedRoles)) {
@@ -617,15 +637,15 @@ abstract class AbstractController
         array $authorizedRoles = [Role::MODERATOR],
         ?PDOStatement $statement = null
     ): string {
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: DELETE, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         if ($this->genericTableParameterSet()) {
             if (is_null($id)) {
                 $id = $this->getUrlParameter($this->urlParameter);
             }
             $role = $this->getAuthorisationRole($id);
-            header("Access-Control-Allow-Origin: *");
-            header("Access-Control-Allow-Methods: DELETE, OPTIONS");
-            header("Access-Control-Allow-Headers: *");
-            header("Access-Control-Allow-Credentials: true");
             if (!$this->isAuthorized($role, $authorizedRoles)) {
                 http_response_code(404);
                 $error = json_encode(
@@ -699,6 +719,18 @@ abstract class AbstractController
             );
             die($error);
         }
+    }
+
+    /**
+     * Preflight OPTIONS method for CORS. Returns nothing (empty body), but only headers.
+     */
+    public function preflight(): void
+    {
+        http_response_code(200);
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
     }
 
     /**

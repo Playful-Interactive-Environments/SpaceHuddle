@@ -293,6 +293,10 @@ class TaskController extends AbstractController
         $statement->execute();
         $result = $this->database->fetchFirst($statement);
         http_response_code(200);
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         return json_encode(new Task($result));
     }
 }

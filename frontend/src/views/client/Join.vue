@@ -15,7 +15,7 @@
         />
         <form-error :errors="errors"></form-error>
       </label>
-      <button class="btn btn--mint" type="submit">Join session</button>
+      <button class="btn btn--mint" @click="submit">Join session</button>
     </form>
   </div>
 </template>
@@ -23,6 +23,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import FormError from '../../components/shared/atoms/FormError.vue';
+import * as participantService from '@/services/client/participant-service';
 
 @Options({
   components: {
@@ -34,14 +35,23 @@ export default class Join extends Vue {
   errors: string[] = [];
 
   async submit(e: Event): Promise<void> {
-    if (this.roomCode.length > 0) {
-      // TODO: add session logic
-      await this.$router.push({ name: 'module-overview' });
-    } else {
-      // TODO: prevent infinitely adding error codes - use vuelidate?
-      this.errors.push('Please enter a code.');
-    }
     e.preventDefault();
+    if (this.roomCode.length > 0) {
+      const { state } = await participantService.connect(this.roomCode);
+      if (state === participantService.ConnectState.ACTIVE) {
+        await this.$router.push(`/client/${this.roomCode}`);
+      } else if (state === participantService.ConnectState.FAILED) {
+        this.addError('Sorry, the provided code is invalid.');
+      }
+    } else {
+      // TODO: use vuelidate or another validation library?
+      this.addError('Please enter a code.');
+    }
+  }
+
+  addError(newError: string): void {
+    if (this.errors.find((error) => error === newError) !== undefined) return;
+    this.errors.push(newError);
   }
 }
 </script>

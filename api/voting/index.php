@@ -1,4 +1,5 @@
 <?php
+
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');
 
@@ -10,19 +11,17 @@ use PieLab\GAB\Controllers\VotingController;
 $voting = VotingController::getInstance();
 
 if (AbstractController::isRestCall("GET")) {
-	$result = $voting->get();
-	echo $result;
+    $result = $voting->get();
+    echo $result;
+} elseif (AbstractController::isRestCall("PUT")) {
+    $result = $voting->update();
+    echo $result;
+} elseif (AbstractController::isRestCall("DELETE")) {
+    $result = $voting->delete();
+    echo $result;
+} elseif (AbstractController::isRestCall("OPTIONS")) {
+    $voting->preflight();
+} else {
+    echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
+    http_response_code(501);
 }
-elseif (AbstractController::isRestCall("PUT")) {
-	$result = $voting->update();
-	echo $result;
-}
-elseif (AbstractController::isRestCall("DELETE")) {
-	$result = $voting->delete();
-	echo $result;
-}
-else {
-	echo "Call ".$_SERVER["REQUEST_METHOD"]." is not yet implemented";
-	http_response_code(501);
-}
-?>

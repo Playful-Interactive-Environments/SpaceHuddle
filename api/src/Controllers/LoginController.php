@@ -162,18 +162,6 @@ class LoginController extends AbstractController
     }
 
     /**
-     * Prefllight OPTIONS method for CORS. Returns nothing (empty body), but only headers.
-     */
-    public function preflight(): void
-    {
-        http_response_code(200);
-        header("Access-Control-Allow-Origin: *");
-        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-        header("Access-Control-Allow-Headers: *");
-        header("Access-Control-Allow-Credentials: true");
-    }
-
-    /**
      * Checks if the provided password and confirmation match.
      * @param string $password The password.
      * @param string $passwordConfirmation The password confirmation.

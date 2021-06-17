@@ -1,4 +1,5 @@
 <?php
+
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=UTF-8');
 
@@ -10,19 +11,17 @@ use PieLab\GAB\Controllers\ResourceController;
 $resource = ResourceController::getInstance();
 
 if (AbstractController::isRestCall("GET")) {
-	$result = $resource->read();
-	echo $result;
+    $result = $resource->read();
+    echo $result;
+} elseif (AbstractController::isRestCall("PUT")) {
+    $result = $resource->update();
+    echo $result;
+} elseif (AbstractController::isRestCall("DELETE")) {
+    $result = $resource->delete();
+    echo $result;
+} elseif (AbstractController::isRestCall("OPTIONS")) {
+    $resource->preflight();
+} else {
+    echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
+    http_response_code(501);
 }
-elseif (AbstractController::isRestCall("PUT")) {
-	$result = $resource->update();
-	echo $result;
-}
-elseif (AbstractController::isRestCall("DELETE")) {
-	$result = $resource->delete();
-	echo $result;
-}
-else {
-	echo "Call ".$_SERVER["REQUEST_METHOD"]." is not yet implemented";
-	http_response_code(501);
-}
-?>

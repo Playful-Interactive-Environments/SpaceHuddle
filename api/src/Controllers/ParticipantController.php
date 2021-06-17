@@ -79,6 +79,10 @@ class ParticipantController extends AbstractController
         );
         $result->accessToken = $jwt;
         http_response_code(200);
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: POST, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         return json_encode($result);
     }
 
@@ -195,6 +199,10 @@ class ParticipantController extends AbstractController
         );
         $resultObject = new Participant((array)$result, $jwt);
         http_response_code(200);
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         return json_encode($resultObject);
     }
 
@@ -340,6 +348,10 @@ class ParticipantController extends AbstractController
             array_push($result, new ParticipantTask($resultItem));
         }
         http_response_code(200);
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         return json_encode($result);
     }
 
@@ -430,6 +442,10 @@ class ParticipantController extends AbstractController
             array_push($result, new Topic($result_item));
         }
         http_response_code(200);
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, OPTIONS");
+        header("Access-Control-Allow-Headers: *");
+        header("Access-Control-Allow-Credentials: true");
         return json_encode($result);
     }
 }

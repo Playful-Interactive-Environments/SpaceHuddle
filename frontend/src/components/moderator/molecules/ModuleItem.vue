@@ -85,7 +85,7 @@ export default class ModuleItem extends Vue {
   padding: 1.5rem 5rem 1.5rem 4.5rem;
   margin-left: 3rem;
 
-  &--client {
+  <<<<<<< HEAD &--client {
     flex-direction: column;
     margin-left: 0;
     padding: 1.5rem 1.5rem 0;
@@ -136,7 +136,37 @@ export default class ModuleItem extends Vue {
     cursor: pointer;
   }
 
-  &__dots-icon {
+  ======= &__planet {
+    position: absolute;
+    left: -4rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8rem;
+  }
+
+  &__toggles {
+    display: flex;
+    flex-direction: column;
+    margin-left: 3rem;
+  }
+
+  &__drag {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-mint);
+    background-color: var(--module-color);
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    align-self: stretch;
+    cursor: pointer;
+  }
+
+  >>>>>>>main &__dots-icon {
     width: 12px;
     height: auto;
   }

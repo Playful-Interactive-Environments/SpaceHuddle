@@ -331,6 +331,10 @@ class IdeaController extends AbstractController
             return $this->addToTask($taskId, $keywords, $description, $link, $image);
         } else {
             http_response_code(404);
+            header("Access-Control-Allow-Origin: *");
+            header("Access-Control-Allow-Methods: POST, OPTIONS");
+            header("Access-Control-Allow-Headers: *");
+            header("Access-Control-Allow-Credentials: true");
             $error = json_encode(
                 [
                   "state" => "Failed",
