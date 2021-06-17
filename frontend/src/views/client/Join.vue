@@ -5,7 +5,7 @@
       Just enter the code your moderator provided in the field below and you’re
       ready to go!
     </p>
-    <form>
+    <form @submit="submit">
       <label>
         <input
           name="sessionCode"
@@ -60,6 +60,7 @@ export default class Join extends Vue {
 .join {
   padding-top: 3rem;
   color: #fff;
+  background: var(--color-darkblue);
   background-image: url('../../assets/illustrations/telescope.png');
   background-position: center;
   background-size: cover;
