@@ -1,3 +1,6 @@
+p, none, /, GET
+p, none, /docs/v1, GET
+
 p, user, /participant/connect[/], POST
 p, user, /session[/], PUT
 p, user, /session[/], POST
