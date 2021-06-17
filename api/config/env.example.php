@@ -24,3 +24,7 @@ $settings["db"]["password"] = "";
 
 $settings["jwt"]["private_key"] = file_get_contents(__DIR__ . "/../resources/keys/private.pem");
 $settings["jwt"]["public_key"] = file_get_contents(__DIR__ . "/../resources/keys/public.pem");
+
+// Authorization
+$settings['auth']['model'] = __DIR__ . "/../resources/auth/model.conf";
+$settings['auth']['policy'] = __DIR__ . "/../resources/auth/policy.csv";
