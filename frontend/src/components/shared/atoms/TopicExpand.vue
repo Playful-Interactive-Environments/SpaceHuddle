@@ -11,7 +11,7 @@
         <div
           aria-label="arrow"
           class="expand__arrow"
-          :class="{ expanded: isExpanded }"
+          :class="{ expanded: isExpanded, 'expand__arrow--white': isRow }"
         ></div>
       </div>
     </div>
@@ -84,12 +84,16 @@ export default class Timer extends Vue {
     mask-image: url('../../../assets/icons/arrow.svg');
     mask-repeat: no-repeat;
     mask-position: center;
-    background-color: white;
+    background-color: var(--color-darkblue);
     width: 1.2rem;
     height: 1.2rem;
     margin-right: 0.2rem;
     transition: transform 0.4s;
     transform-origin: center;
+
+    &--white {
+      background-color: white;
+    }
 
     &.expanded {
       transform: rotate(180deg);
