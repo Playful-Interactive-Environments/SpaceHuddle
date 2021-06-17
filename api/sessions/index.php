@@ -10,11 +10,12 @@ use PieLab\GAB\Controllers\SessionController;
 
 $session = SessionController::getInstance();
 
-if (AbstractController::isRestCall("GET")) {
+// Send CORS preflight response
+if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+    $session->preflight();
+} elseif (AbstractController::isRestCall("GET")) {
     $result = $session->readAll();
     echo $result;
-} elseif (AbstractController::isRestCall("OPTIONS")) {
-    $session->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);

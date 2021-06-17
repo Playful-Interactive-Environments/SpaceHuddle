@@ -10,7 +10,10 @@ use PieLab\GAB\Controllers\VotingController;
 
 $voting = VotingController::getInstance();
 
-if (AbstractController::isRestCall("GET")) {
+// Send CORS preflight response
+if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+    $voting->preflight();
+} elseif (AbstractController::isRestCall("GET")) {
     $result = $voting->get();
     echo $result;
 } elseif (AbstractController::isRestCall("PUT")) {
@@ -19,8 +22,6 @@ if (AbstractController::isRestCall("GET")) {
 } elseif (AbstractController::isRestCall("DELETE")) {
     $result = $voting->delete();
     echo $result;
-} elseif (AbstractController::isRestCall("OPTIONS")) {
-    $voting->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);

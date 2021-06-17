@@ -10,7 +10,10 @@ use PieLab\GAB\Controllers\LoginController;
 
 $login = LoginController::getInstance();
 
-if (AbstractController::isRestCall("POST", 2, searchDetailHierarchy: "login")) {
+// Send CORS preflight response
+if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+    $login->preflight();
+} elseif (AbstractController::isRestCall("POST", 2, searchDetailHierarchy: "login")) {
     $result = $login->login();
     echo $result;
 } elseif (AbstractController::isRestCall("POST", 2, searchDetailHierarchy: "register")) {
@@ -22,8 +25,6 @@ if (AbstractController::isRestCall("POST", 2, searchDetailHierarchy: "login")) {
 } elseif (AbstractController::isRestCall("DELETE")) {
     $result = $login->delete();
     echo $result;
-} elseif (AbstractController::isRestCall("OPTIONS")) {
-    $login->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);

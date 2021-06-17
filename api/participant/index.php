@@ -10,7 +10,10 @@ use PieLab\GAB\Controllers\ParticipantController;
 
 $participant = ParticipantController::getInstance();
 
-if (AbstractController::isRestCall("GET", 2, searchDetailHierarchy: "connect")) {
+// Send CORS preflight response
+if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+    $participant->preflight();
+} elseif (AbstractController::isRestCall("GET", 2, searchDetailHierarchy: "connect")) {
     $result = $participant->reconnect();
     echo $result;
 } elseif (AbstractController::isRestCall("POST", 2, searchDetailHierarchy: "connect")) {
@@ -28,8 +31,6 @@ if (AbstractController::isRestCall("GET", 2, searchDetailHierarchy: "connect")) 
 } elseif (AbstractController::isRestCall("PUT", 2, searchDetailHierarchy: "state")) {
     $result = $participant->setState();
     echo $result;
-} elseif (AbstractController::isRestCall("OPTIONS")) {
-    $participant->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);

@@ -10,7 +10,10 @@ use PieLab\GAB\Controllers\ResourceController;
 
 $resource = ResourceController::getInstance();
 
-if (AbstractController::isRestCall("GET")) {
+// Send CORS preflight response
+if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+    $resource->preflight();
+} elseif (AbstractController::isRestCall("GET")) {
     $result = $resource->read();
     echo $result;
 } elseif (AbstractController::isRestCall("PUT")) {
@@ -19,8 +22,6 @@ if (AbstractController::isRestCall("GET")) {
 } elseif (AbstractController::isRestCall("DELETE")) {
     $result = $resource->delete();
     echo $result;
-} elseif (AbstractController::isRestCall("OPTIONS")) {
-    $resource->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);

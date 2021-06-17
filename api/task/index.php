@@ -18,7 +18,10 @@ $group = GroupController::getInstance();
 $voting = VotingController::getInstance();
 $client = ClientController::getInstance();
 
-if (AbstractController::isRestCall("GET")) {
+// Send CORS preflight response
+if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+    $task->preflight();
+} elseif (AbstractController::isRestCall("GET")) {
     $result = $task->read();
     echo $result;
 } elseif (AbstractController::isRestCall("PUT")) {
@@ -51,8 +54,6 @@ if (AbstractController::isRestCall("GET")) {
 } elseif (AbstractController::isRestCall("PUT", searchDetailHierarchy: "client_application_state")) {
     $result = $client->setClient();
     echo $result;
-} elseif (AbstractController::isRestCall("OPTIONS")) {
-    $task->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);

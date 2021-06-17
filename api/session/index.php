@@ -18,7 +18,10 @@ $task = TaskController::getInstance();
 $resource = ResourceController::getInstance();
 $sessionRole = SessionRoleController::getInstance();
 
-if (AbstractController::isRestCall("GET")) {
+// Send CORS preflight response
+if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+    $session->preflight();
+} elseif (AbstractController::isRestCall("GET")) {
     $result = $session->read();
     echo $result;
 } elseif (AbstractController::isRestCall("POST")) {
@@ -63,8 +66,6 @@ if (AbstractController::isRestCall("GET")) {
 } elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "own_user_role")) {
     $result = $session->read();
     echo $result;
-} elseif (AbstractController::isRestCall("OPTIONS")) {
-    $sessionRole->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);

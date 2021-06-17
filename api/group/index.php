@@ -12,7 +12,10 @@ use PieLab\GAB\Controllers\GroupIdeaController;
 $group = GroupController::getInstance();
 $group_idea = GroupIdeaController::getInstance();
 
-if (AbstractController::isRestCall("GET")) {
+// Send CORS preflight response
+if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+    $group->preflight();
+} elseif (AbstractController::isRestCall("GET")) {
     $result = $group->read();
     echo $result;
 } elseif (AbstractController::isRestCall("PUT")) {
@@ -30,8 +33,6 @@ if (AbstractController::isRestCall("GET")) {
 } elseif (AbstractController::isRestCall("DELETE", searchDetailHierarchy: "ideas")) {
     $result = $group_idea->deleteIdeas();
     echo $result;
-} elseif (AbstractController::isRestCall("OPTIONS")) {
-    $group->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);

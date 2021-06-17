@@ -12,7 +12,10 @@ use PieLab\GAB\Controllers\SelectionIdeaController;
 $selection = SelectionController::getInstance();
 $selectionIdea = SelectionIdeaController::getInstance();
 
-if (AbstractController::isRestCall("GET")) {
+// Send CORS preflight response
+if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+    $selection->preflight();
+} elseif (AbstractController::isRestCall("GET")) {
     $result = $selection->read();
     echo $result;
 } elseif (AbstractController::isRestCall("PUT")) {
@@ -30,8 +33,6 @@ if (AbstractController::isRestCall("GET")) {
 } elseif (AbstractController::isRestCall("DELETE", searchDetailHierarchy: "ideas")) {
     $result = $selectionIdea->deleteIdeas();
     echo $result;
-} elseif (AbstractController::isRestCall("OPTIONS")) {
-    $selection->preflight();
 } else {
     echo "Call " . $_SERVER["REQUEST_METHOD"] . " is not yet implemented";
     http_response_code(501);
