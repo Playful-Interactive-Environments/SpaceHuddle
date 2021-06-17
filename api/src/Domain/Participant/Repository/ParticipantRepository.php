@@ -50,10 +50,10 @@ class ParticipantRepository implements RepositoryInterface
         $result = $query->execute()->fetch("assoc");
         if (is_array($result)) {
             $sessionId = $result["id"];
-            $participant = $this->isRegistered($sessionId, $data->ipHash);
+            $participant = $this->isRegistered($sessionId, $data->ip);
             if (is_null($participant)) {
                 $data->sessionId = $sessionId;
-                $data->ipHash = self::encryptText($data->ipHash);
+                $data->ipHash = self::encryptText($data->ip);
                 $data->browserKey = $this->generateNewConnectionKey("browser_key", $data->sessionKey . ".");
                 $data->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
                 $data->symbol = AvatarSymbol::getRandomValue();
@@ -83,12 +83,12 @@ class ParticipantRepository implements RepositoryInterface
     /**
      * Checks if a participant is registered.
      * @param string|null $sessionId The session's ID.
-     * @param string|null $ipHash The participant's IP hash.
+     * @param string|null $ip The participant's IP hash.
      * @return ParticipantData|null Returns an object if registered, otherwise null.
      */
-    protected function isRegistered(?string $sessionId = null, ?string $ipHash = null): ?ParticipantData
+    protected function isRegistered(?string $sessionId = null, ?string $ip = null): ?ParticipantData
     {
-        $result = self::checkEncryptTextAndGetRow(["session_id" => $sessionId], $ipHash, "ip_hash");
+        $result = self::checkEncryptTextAndGetRow(["session_id" => $sessionId], $ip, "ip_hash");
         if (is_array($result)) {
             return new ParticipantData($result);
         }

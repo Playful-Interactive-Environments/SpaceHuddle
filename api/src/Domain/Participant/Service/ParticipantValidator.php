@@ -40,8 +40,8 @@ class ParticipantValidator
             $this->validationFactory->createValidator()
                 ->notEmptyString("sessionKey")
                 ->requirePresence("sessionKey")
-                ->notEmptyString("ipHash")
-                ->requirePresence("ipHash")
+                ->notEmptyString("ip")
+                ->requirePresence("ip")
         );
 
         $sessionKey = $data["sessionKey"];

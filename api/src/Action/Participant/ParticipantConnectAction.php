@@ -17,9 +17,9 @@ use Fig\Http\Message\StatusCodeInterface;
  *   @OA\RequestBody(
  *     @OA\MediaType(
  *       mediaType="application/json",
- *       @OA\Schema(required={"sessionKey", "ipHash"},
+ *       @OA\Schema(required={"sessionKey", "ip"},
  *         @OA\Property(property="sessionKey", type="string"),
- *         @OA\Property(property="ipHash", type="string")
+ *         @OA\Property(property="ip", type="string")
  *       )
  *     )
  *   ),

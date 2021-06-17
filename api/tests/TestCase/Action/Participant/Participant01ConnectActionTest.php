@@ -44,7 +44,7 @@ class Participant01ConnectActionTest extends TestCase
             "/participant/connect/",
             [
                 "sessionKey" => $this->sessionKey,
-                "ipHash" => "testIP"
+                "ip" => "testIP"
             ]
         );
 
@@ -67,7 +67,7 @@ class Participant01ConnectActionTest extends TestCase
             "/participant/connect/",
             [
                 "sessionKey" => "NoKey",
-                "ipHash" => "testIP",
+                "ip" => "testIP",
             ]
         );
 
