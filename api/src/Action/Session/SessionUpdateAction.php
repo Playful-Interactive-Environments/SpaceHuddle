@@ -19,6 +19,7 @@ use Fig\Http\Message\StatusCodeInterface;
  *       @OA\Schema(required={"id"},
  *         @OA\Property(property="id", type="string", example="uuid"),
  *         @OA\Property(property="title", type="string"),
+ *         @OA\Property(property="description", type="string"),
  *         @OA\Property(property="maxParticipants", type="integer", example=100),
  *         @OA\Property(property="expirationDate", type="string", format="date"),
  *         @OA\Property(property="publicScreenModuleId", type="string", example=null)

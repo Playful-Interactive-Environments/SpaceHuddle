@@ -20,6 +20,7 @@ use Fig\Http\Message\StatusCodeInterface;
  *       mediaType="application/json",
  *       @OA\Schema(required={"title", "maxParticipants", "expirationDate"},
  *         @OA\Property(property="title", type="string"),
+ *         @OA\Property(property="description", type="string"),
  *         @OA\Property(property="maxParticipants", type="integer", example=100),
  *         @OA\Property(property="expirationDate", type="string", format="date")
  *       )

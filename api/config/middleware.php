@@ -12,7 +12,7 @@ return function (App $app) {
     $app->addBodyParsingMiddleware();
     $app->add(ValidationExceptionMiddleware::class);
     $app->add(CorsMiddleware::class);
-    $app->add(AuthorizationMiddleware::class);
+    //$app->add(AuthorizationMiddleware::class);
     $app->addRoutingMiddleware();
     $app->add(JwtClaimMiddleware::class);
     $app->add(BasePathMiddleware::class);

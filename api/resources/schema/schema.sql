@@ -164,6 +164,7 @@ CREATE TABLE `selection_group_idea` (
 CREATE TABLE `session` (
                            `id` char(36) NOT NULL,
                            `title` varchar(255) NOT NULL,
+                           `description` varchar(1024) DEFAULT NULL,
                            `connection_key` char(10) NOT NULL,
                            `max_participants` int(11) DEFAULT NULL,
                            `expiration_date` date DEFAULT NULL,
@@ -210,7 +211,7 @@ CREATE TABLE `topic` (
                          `id` char(36) NOT NULL,
                          `session_id` char(36) NOT NULL,
                          `title` varchar(255) NOT NULL,
-                         `description` varchar(255) DEFAULT NULL,
+                         `description` varchar(1024) DEFAULT NULL,
                          `active_task_id` char(36) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

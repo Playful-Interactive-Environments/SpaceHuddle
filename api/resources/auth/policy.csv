@@ -5,8 +5,10 @@ p, user, /participant/connect[/], POST
 p, user, /session[/], PUT
 p, user, /session[/], POST
 p, user, /sessions[/], GET
-p, user, /session/:id[/], GET
-p, user, /session/:id[/], DELETE
+p, user, /session/:id/, GET
+p, user, /session/:id/, DELETE
+p, user, /session/:id, GET
+p, user, /session/:id, DELETE
 p, user, /user[/], PUT
 p, user, /user[/], DELETE
 p, user, /user/login[/], POST
@@ -14,7 +16,8 @@ p, user, /user/register[/], POST
 
 p, participant, /participant/connect[/], POST
 p, participant, /sessions[/], GET
-p, participant, /session/:id[/], GET
+p, participant, /session/:id/, GET
+p, participant, /session/:id, GET
 p, participant, /user/login[/], POST
 p, participant, /user/register[/], POST
 
