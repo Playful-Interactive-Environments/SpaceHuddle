@@ -2,25 +2,23 @@
   <div v-if="session" class="detail">
     <Sidebar :session="session" />
     <main class="detail__content">
-      <div v-for="(topic, index) in topics" :key="topic">
-        <TopicExpand>
-          <template v-slot:title>Topic Uno</template>
-          <template v-slot:content>
-            <draggable
-              v-model="topics[index]"
-              tag="transition-group"
-              item-key="type"
-            >
-              <template #item="{ element }">
-                <li class="detail__module">
-                  <ModuleItem :type="element.type" />
-                </li>
-              </template>
-            </draggable>
-            <AddItem text="Add module" @addNew="addModule" />
-          </template>
-        </TopicExpand>
-      </div>
+      <TopicExpand v-for="(topic, index) in topics" :key="topic">
+        <template v-slot:title>Topic Uno</template>
+        <template v-slot:content>
+          <draggable
+            v-model="topics[index]"
+            tag="transition-group"
+            item-key="type"
+          >
+            <template #item="{ element }">
+              <li class="detail__module">
+                <ModuleItem :type="element.type" />
+              </li>
+            </template>
+          </draggable>
+          <AddItem text="Add module" @addNew="addModule" />
+        </template>
+      </TopicExpand>
     </main>
   </div>
 </template>

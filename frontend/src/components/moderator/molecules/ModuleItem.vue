@@ -1,5 +1,9 @@
 <template>
-  <article ref="item" class="module-item">
+  <article
+    ref="item"
+    class="module-item"
+    :class="{ 'module-item--client': isClient }"
+  >
     <img
       :src="require(`@/assets/illustrations/planets/${type}.png`)"
       alt="planet"
@@ -10,12 +14,12 @@
       :title="'Module Title'"
       :description="'Module description here ...'"
     />
-    <Timer />
-    <div class="module-item__toggles">
+    <Timer class="module-item__timer" />
+    <div class="module-item__toggles" v-if="!isClient">
       <Toggle label="Active" v-if="!(type === ModuleType.SELECTION)" />
       <Toggle label="Public Screen" />
     </div>
-    <div class="module-item__drag">
+    <div class="module-item__drag" v-if="!isClient">
       <img
         src="@/assets/icons/drag-dots.svg"
         alt="draggable"
@@ -43,6 +47,7 @@ import Toggle from '@/components/moderator/atoms/Toggle.vue';
 })
 export default class ModuleItem extends Vue {
   @Prop({ default: ModuleType.BRAINSTORMING }) type!: ModuleType;
+  @Prop({ default: false }) isClient!: boolean;
 
   public ModuleType = ModuleType;
 
@@ -79,6 +84,27 @@ export default class ModuleItem extends Vue {
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   padding: 1.5rem 5rem 1.5rem 4.5rem;
   margin-left: 3rem;
+
+  &--client {
+    flex-direction: column;
+    margin-left: 0;
+    padding: 1.5rem 1.5rem 0;
+    text-align: center;
+    color: var(--color-darkblue);
+    width: 65vw;
+    margin-bottom: 1.5rem;
+
+    .module-item__planet {
+      position: static;
+      transform: none;
+      margin-bottom: 0.5rem;
+    }
+
+    .module-item__timer {
+      margin-top: 0.5rem;
+      transform: translateY(50%);
+    }
+  }
 
   &__planet {
     position: absolute;

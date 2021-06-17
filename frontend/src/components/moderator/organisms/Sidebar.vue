@@ -78,7 +78,7 @@ export default class Sidebar extends Vue {
     width: 20px;
     height: auto;
     cursor: pointer;
-    mask-image: url(../../../assets/icons/settings.svg);
+    mask-image: url('../../../assets/icons/settings.svg');
     mask-repeat: no-repeat;
     background-color: var(--color-darkblue-light);
     transition: background-color 0.2s opacity 0.5s;

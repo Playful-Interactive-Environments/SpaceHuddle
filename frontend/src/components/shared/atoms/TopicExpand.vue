@@ -1,13 +1,19 @@
 <template>
   <div class="expand">
-    <div role="button" class="expand__title" @click="isExpanded = !isExpanded">
+    <div
+      role="button"
+      class="expand__title"
+      :class="{ 'expand__title--row': isRow }"
+      @click="isExpanded = !isExpanded"
+    >
       <h2><slot name="title"></slot></h2>
-      <img
-        src="@/assets/icons/arrow.svg"
-        alt="dropdown-arrow"
-        class="expand__arrow"
-        :class="{ expanded: isExpanded }"
-      />
+      <div class="expand__icon">
+        <div
+          aria-label="arrow"
+          class="expand__arrow"
+          :class="{ expanded: isExpanded, 'expand__arrow--white': isRow }"
+        ></div>
+      </div>
     </div>
     <transition
       name="expand"
@@ -16,7 +22,11 @@
       v-on:before-leave="beforeLeave"
       v-on:leave="leave"
     >
-      <ul class="expand__content" v-show="isExpanded">
+      <ul
+        class="expand__content"
+        :class="{ 'expand__content--row': isRow }"
+        v-show="isExpanded"
+      >
         <slot name="content"></slot>
       </ul>
     </transition>
@@ -25,11 +35,13 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import { Prop } from 'vue-property-decorator';
 
 @Options({
   components: {},
 })
 export default class Timer extends Vue {
+  @Prop({ default: false }) isRow!: boolean;
   public isExpanded = true;
 
   beforeEnter(el: HTMLElement): void {
@@ -62,11 +74,26 @@ export default class Timer extends Vue {
     cursor: pointer;
   }
 
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   &__arrow {
+    mask-image: url('../../../assets/icons/arrow.svg');
+    mask-repeat: no-repeat;
+    mask-position: center;
+    background-color: var(--color-darkblue);
     width: 1.2rem;
+    height: 1.2rem;
     margin-right: 0.2rem;
     transition: transform 0.4s;
     transform-origin: center;
+
+    &--white {
+      background-color: white;
+    }
 
     &.expanded {
       transform: rotate(180deg);
@@ -76,6 +103,23 @@ export default class Timer extends Vue {
   &__content {
     transform-origin: top center;
     transition: height 0.25s ease-out, opacity 0.1s;
+  }
+
+  &__title--row {
+    padding: 0 2rem;
+  }
+
+  &__content--row {
+    display: flex;
+    overflow-x: scroll;
+    overflow-y: visible;
+    padding: 0 2rem;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 </style>
