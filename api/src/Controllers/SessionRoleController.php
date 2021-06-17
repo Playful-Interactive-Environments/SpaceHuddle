@@ -43,7 +43,7 @@ class SessionRoleController extends AbstractController
      */
     public function readAll(?string $sessionId = null): string
     {
-        $query = "SELECT * FROM login INNER JOIN session_role ON session_role.login_id = login.id
+        $query = "SELECT * FROM user INNER JOIN session_role ON session_role.user_id = user.id
                   WHERE session_role.session_id = :session_id";
         $statement = $this->connection->prepare($query);
 
@@ -71,11 +71,11 @@ class SessionRoleController extends AbstractController
      */
     public function read(?string $sessionId = null): string
     {
-        $loginId = Authorization::getAuthorizationProperty("loginId");
-        $query = "SELECT * FROM login INNER JOIN session_role ON session_role.login_id = login.id
-                  WHERE session_role.session_id = :session_id and session_role.login_id = :login_id";
+        $userId = Authorization::getAuthorizationProperty("userId");
+        $query = "SELECT * FROM user INNER JOIN session_role ON session_role.user_id = user.id
+                  WHERE session_role.session_id = :session_id and session_role.user_id = :user_id";
         $statement = $this->connection->prepare($query);
-        $statement->bindParam(":login_id", $loginId);
+        $statement->bindParam(":user_id", $userId);
 
         $result = json_decode(parent::readAllGeneric(
             $sessionId,
@@ -122,14 +122,14 @@ class SessionRoleController extends AbstractController
             ]
         );
 
-        $query = "SELECT * FROM login WHERE username = :username ";
+        $query = "SELECT * FROM user WHERE username = :username ";
         $statement = $this->connection->prepare($query);
         $statement->bindParam(":username", $params->username);
         $statement->execute();
         $itemCount = $statement->rowCount();
         if ($itemCount > 0) {
             $result = (object)$this->database->fetchFirst($statement);
-            $params->login_id = $result->id;
+            $params->user_id = $result->id;
             unset($params->username);
         }
         else {
@@ -181,10 +181,10 @@ class SessionRoleController extends AbstractController
             ]
         );
 
-        $query = "UPDATE session_role 
-            SET role = :role 
-            WHERE session_id = :session_id 
-            AND login_id IN (SELECT id FROM login WHERE username = :username)";
+        $query = "UPDATE session_role
+            SET role = :role
+            WHERE session_id = :session_id
+            AND user_id IN (SELECT id FROM user WHERE username = :username)";
 
         $this->updateGeneric($params->session_id, $params, authorizedRoles: [Role::MODERATOR], query: $query);
 
@@ -231,9 +231,9 @@ class SessionRoleController extends AbstractController
             ]
         );
 
-        $query = "DELETE FROM session_role 
-            WHERE session_id = :session_id 
-            AND login_id IN (SELECT id FROM login WHERE username = :username)";;
+        $query = "DELETE FROM session_role
+            WHERE session_id = :session_id
+            AND user_id IN (SELECT id FROM user WHERE username = :username)";;
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(":session_id", $params->session_id);
         $stmt->bindParam(":username", $params->username);

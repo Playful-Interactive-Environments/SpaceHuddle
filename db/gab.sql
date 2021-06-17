@@ -55,10 +55,10 @@ CREATE TABLE `idea` (
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `login`
+-- Tabellenstruktur für Tabelle `user`
 --
 
-CREATE TABLE `login` (
+CREATE TABLE `user` (
   `id` char(36) NOT NULL,
   `username` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL
@@ -179,7 +179,7 @@ CREATE TABLE `session` (
 
 CREATE TABLE `session_role` (
   `session_id` char(36) NOT NULL,
-  `login_id` char(36) NOT NULL,
+  `user_id` char(36) NOT NULL,
   `role` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -249,9 +249,9 @@ ALTER TABLE `idea`
   ADD KEY `idea_ibfk_participant` (`participant_id`);
 
 --
--- Indizes für die Tabelle `login`
+-- Indizes für die Tabelle `user`
 --
-ALTER TABLE `login`
+ALTER TABLE `user`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `username` (`username`);
 
@@ -317,8 +317,8 @@ ALTER TABLE `session`
 -- Indizes für die Tabelle `session_role`
 --
 ALTER TABLE `session_role`
-  ADD PRIMARY KEY (`session_id`,`login_id`),
-  ADD KEY `login_id` (`login_id`);
+  ADD PRIMARY KEY (`session_id`,`user_id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indizes für die Tabelle `task`
@@ -418,7 +418,7 @@ ALTER TABLE `session`
 -- Constraints der Tabelle `session_role`
 --
 ALTER TABLE `session_role`
-  ADD CONSTRAINT `session_role_ibfk_role` FOREIGN KEY (`login_id`) REFERENCES `login` (`id`),
+  ADD CONSTRAINT `session_role_ibfk_role` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
   ADD CONSTRAINT `session_role_ibfk_session` FOREIGN KEY (`session_id`) REFERENCES `session` (`id`);
 
 --

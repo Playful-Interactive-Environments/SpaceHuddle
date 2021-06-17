@@ -17,7 +17,7 @@ class LoginController extends AbstractController
      */
     public function __construct()
     {
-        parent::__construct("login", User::class);
+        parent::__construct("user", User::class);
     }
 
     /**
@@ -58,7 +58,7 @@ class LoginController extends AbstractController
             ]
         );
 
-        $query = "SELECT * FROM login WHERE username = :username AND password = :password";
+        $query = "SELECT * FROM user WHERE username = :username AND password = :password";
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(":username", $params->username);
         $stmt->bindParam(":password", $params->password);
@@ -77,7 +77,7 @@ class LoginController extends AbstractController
         $result = (object)$this->database->fetchFirst($stmt);
         $jwt = Authorization::generateToken(
             [
-                "loginId" => $result->id,
+                "userId" => $result->id,
                 "username" => $result->username
             ]
         );
@@ -187,7 +187,7 @@ class LoginController extends AbstractController
      */
     private function checkUser(string $username): bool
     {
-        $query = "SELECT * FROM login WHERE username = :username";
+        $query = "SELECT * FROM user WHERE username = :username";
         $statement = $this->connection->prepare($query);
         $statement->bindParam(":username", $username);
         $statement->execute();
@@ -204,7 +204,7 @@ class LoginController extends AbstractController
      */
     private function checkPassword(string $id, string $password): bool
     {
-        $query = "SELECT * FROM login WHERE id = :id and password = :password";
+        $query = "SELECT * FROM user WHERE id = :id and password = :password";
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(":id", $id);
         $stmt->bindParam(":password", $password);
@@ -264,10 +264,10 @@ class LoginController extends AbstractController
         ?string $password = null,
         ?string $passwordConfirmation = null
     ): string {
-        $login_id = Authorization::getAuthorizationProperty("loginId");
+        $userId = Authorization::getAuthorizationProperty("userId");
         $params = $this->formatParameters(
             [
-                "id" => ["default" => $login_id],
+                "id" => ["default" => $userId],
                 "oldPassword" => ["default" => $oldPassword, "type" => "MD5", "required" => true],
                 "password" => ["default" => $password, "type" => "MD5", "required" => true],
                 "passwordConfirmation" => ["default" => $passwordConfirmation, "type" => "MD5", "required" => true]
@@ -278,7 +278,7 @@ class LoginController extends AbstractController
         header("Access-Control-Allow-Methods: PUT, OPTIONS");
         header("Access-Control-Allow-Headers: *");
         header("Access-Control-Allow-Credentials: true");
-        if (!$this->checkPassword($login_id, $params->oldPassword)) {
+        if (!$this->checkPassword($userId, $params->oldPassword)) {
             http_response_code(404);
             $error = json_encode(
                 [
@@ -318,8 +318,8 @@ class LoginController extends AbstractController
      */
     public function delete(): string
     {
-        $login_id = Authorization::getAuthorizationProperty("loginId");
-        return parent::deleteGeneric($login_id);
+        $userId = Authorization::getAuthorizationProperty("userId");
+        return parent::deleteGeneric($userId);
     }
 
     /**
@@ -329,9 +329,9 @@ class LoginController extends AbstractController
     protected function deleteDependencies(string $id)
     {
         $role = strtoupper(Role::MODERATOR);
-        $query = "SELECT * FROM session_role WHERE login_id = :login_id AND role like :role";
+        $query = "SELECT * FROM session_role WHERE user_id = :user_id AND role like :role";
         $statement = $this->connection->prepare($query);
-        $statement->bindParam(":login_id", $id);
+        $statement->bindParam(":user_id", $id);
         $statement->bindParam(":role", $role);
         $statement->execute();
 
@@ -352,9 +352,9 @@ class LoginController extends AbstractController
             }
         }
 
-        $query = "DELETE FROM session_role WHERE login_id = :login_id";
+        $query = "DELETE FROM session_role WHERE user_id = :user_id";
         $statement = $this->connection->prepare($query);
-        $statement->bindParam(":login_id", $id);
+        $statement->bindParam(":user_id", $id);
         $statement->execute();
     }
 }

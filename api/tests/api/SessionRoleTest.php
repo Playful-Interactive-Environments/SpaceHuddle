@@ -23,7 +23,7 @@ class SessionRoleTest extends AuthorizedUserTestCase
   }
 
   public function testWorkflow() {
-    $username = "xxx";
+    $username = "john.doe";# "xxx";
     $data =  json_encode((object)array(
       'username' => $username,
       'role' => Role::FACILITATOR

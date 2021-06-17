@@ -76,13 +76,13 @@ abstract class AuthorizedParticipantTestCase extends AuthorizedTestCase
   protected function getAccessToken() : ?string {
     $client = new GuzzleHttp\Client();
 
-    $login_data =  json_encode((object)array(
-      'sessionKey' => 'ZP4L4QFX',
-      'ipHash' => 'localhost'
+    $loginData =  json_encode((object)array(
+      'sessionKey' => '9064AWOU',# 'ZP4L4QFX',
+      'ip' => 'localhost'
     ));
 
     $res = $client->post($this->getAbsoluteApiUrl("/api/participant/connect/"), [
-        'body' => $login_data
+        'body' => $loginData
     ]);
     return $this->toJSON($res->getBody())->accessToken;
   }

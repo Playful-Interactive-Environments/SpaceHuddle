@@ -16,13 +16,13 @@ class LoginTest extends AuthorizedTestCase
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
 
-    $login_data =  json_encode((object)array(
+    $loginData =  json_encode((object)array(
       'username' => 'temp',
       'password' => 'string'
     ));
 
     $res = $this->client->post($this->getAbsoluteApiUrl("/api/user/login/"), [
-        'body' => $login_data
+        'body' => $loginData
     ]);
     $accessToken = $this->toJSON($res->getBody())->accessToken;
     $bearer = "Bearer $accessToken";

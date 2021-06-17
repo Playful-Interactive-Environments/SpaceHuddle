@@ -757,7 +757,7 @@ abstract class AbstractController
     public function getAuthorisationRole(?string $id): ?string
     {
         if (is_null($id)) {
-            $loginId = Authorization::getAuthorizationProperty("loginId");
+            $userId = Authorization::getAuthorizationProperty("userId");
             return strtoupper(Role::MODERATOR);
         }
 
@@ -785,8 +785,8 @@ abstract class AbstractController
     {
         if (Authorization::isLoggedIn()) {
             if (Authorization::isUser()) {
-                $loginId = Authorization::getAuthorizationProperty("loginId");
-                if (is_null($id) or $id == $loginId) {
+                $userId = Authorization::getAuthorizationProperty("userId");
+                if (is_null($id) or $id == $userId) {
                     return Role::MODERATOR;
                 }
             }

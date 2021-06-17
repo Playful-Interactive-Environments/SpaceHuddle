@@ -30,7 +30,7 @@ class ParticipantController extends AbstractController
     /**
      * Connect to a session as a participant.
      * @param string|null $sessionKey The session's key.
-     * @param string|null $ipHash The participant's IP hash.
+     * @param string|null $ip The participant's IP hash.
      * @return string The participant data in JSON format.
      * @OA\Post(
      *   path="/api/participant/connect/",
@@ -39,9 +39,9 @@ class ParticipantController extends AbstractController
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="application/json",
-     *       @OA\Schema(required={"sessionKey", "ipHash"},
+     *       @OA\Schema(required={"sessionKey", "ip"},
      *         @OA\Property(property="sessionKey", type="string"),
-     *         @OA\Property(property="ipHash", type="string")
+     *         @OA\Property(property="ip", type="string")
      *       )
      *     )
      *   ),
@@ -50,12 +50,12 @@ class ParticipantController extends AbstractController
      *   @OA\Response(response="404", description="Not Found")
      * )
      */
-    public function connect(?string $sessionKey = null, ?string $ipHash = null): string
+    public function connect(?string $sessionKey = null, ?string $ip = null): string
     {
         $params = $this->formatParameters(
             [
                 "session_key" => ["default" => $sessionKey, "requestKey" => "sessionKey", "required" => true],
-                "ip_hash" => ["default" => $ipHash, "type" => "MD5", "requestKey" => "ipHash", "required" => true],
+                "ip_hash" => ["default" => $ip, "type" => "MD5", "requestKey" => "ip", "required" => true],
                 "state" => ["default" => StateParticipant::ACTIVE, "type" => StateParticipant::class]
             ]
         );
@@ -313,7 +313,7 @@ class ParticipantController extends AbstractController
         $clientStates = [strtoupper(StateTask::ACTIVE), strtoupper(StateTask::READ_ONLY)];
         $clientStates = implode(",", $clientStates);
         if (!Authorization::isParticipant()) {
-            $loginId = Authorization::getAuthorizationProperty("loginId");
+            $userId = Authorization::getAuthorizationProperty("userId");
             $query = "SELECT * FROM topic
               INNER JOIN task ON topic.id = task.topic_id
               WHERE FIND_IN_SET(task.state, :client_states)
@@ -322,10 +322,10 @@ class ParticipantController extends AbstractController
                 FROM topic
                 INNER JOIN session ON session.id = topic.session_id
                 INNER JOIN session_role ON session_role.session_id = session.id
-                WHERE session_role.login_id = :login_id
+                WHERE session_role.user_id = :user_id
                 AND session.expiration_date >= current_timestamp())";
             $statement = $this->connection->prepare($query);
-            $statement->bindParam(":login_id", $loginId);
+            $statement->bindParam(":user_id", $userId);
         } else {
             $participantId = Authorization::getAuthorizationProperty("participantId");
             $query = "SELECT * FROM topic
@@ -415,15 +415,15 @@ class ParticipantController extends AbstractController
     public function getTopics(): string
     {
         if (!Authorization::isParticipant()) {
-            $loginId = Authorization::getAuthorizationProperty("loginId");
+            $userId = Authorization::getAuthorizationProperty("userId");
             $query = "SELECT * FROM topic
         WHERE session_id IN (
           SELECT session.id
           FROM session
           INNER JOIN session_role ON session_role.session_id = session.id
-          WHERE session_role.login_id = :login_id and session.expiration_date >= current_timestamp())";
+          WHERE session_role.user_id = :user_id and session.expiration_date >= current_timestamp())";
             $statement = $this->connection->prepare($query);
-            $statement->bindParam(":login_id", $loginId);
+            $statement->bindParam(":user_id", $userId);
         } else {
             $participantId = Authorization::getAuthorizationProperty("participantId");
             $query = "SELECT * FROM topic

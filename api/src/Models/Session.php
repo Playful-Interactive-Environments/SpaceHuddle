@@ -23,6 +23,13 @@ class Session
     public ?string $title;
 
     /**
+     * The session description.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $description;
+
+    /**
      * The key with which the participants can connect to the session.
      * @var string|null
      * @OA\Property(example="ABCD1234")
@@ -72,6 +79,7 @@ class Session
     {
         $this->id = $data["id"] ?? null;
         $this->title = $data["title"] ?? null;
+        $this->description = $data["description"] ?? null;
         $this->connectionKey = $data["connection_key"] ?? null;
         $this->maxParticipants = (int)$data["max_participants"] ?? null;
         $this->expirationDate = $data["expiration_date"] ?? null;

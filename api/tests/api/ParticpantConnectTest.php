@@ -5,8 +5,8 @@ class ParticpantConnectTest extends AuthorizedTestCase
 {
   public function testWorkflow() {
     $data =  json_encode((object)array(
-        'sessionKey' => 'ZP4L4QFX',
-        'ipHash' => 'xxx'
+        'sessionKey' => '9064AWOU',# 'ZP4L4QFX',
+        'ip' => 'xxx'
     ));
 
     $res = $this->client->post($this->getAbsoluteApiUrl("/api/participant/connect/"), [

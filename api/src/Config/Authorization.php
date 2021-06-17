@@ -28,7 +28,7 @@ class Authorization
 
     /**
      * Generates a bearer token.
-     * @param array $data Usually a combination of login ID and username.
+     * @param array $data Usually a combination of user ID and username.
      * @return string The bearer token.
      */
     public static function generateToken(array $data): string
@@ -180,7 +180,7 @@ class Authorization
     public static function isUser(): bool
     {
         $authorization_data = self::getAuthorizationData();
-        if (property_exists($authorization_data, "loginId")) {
+        if (property_exists($authorization_data, "userId")) {
             return true;
         }
         return false;
