@@ -3,6 +3,8 @@
 namespace App\Handler;
 
 use App\Database\TransactionInterface;
+use App\Factory\LoggerFactory;
+use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -16,31 +18,42 @@ use Throwable;
  */
 class PDOErrorHandling implements ErrorHandlerInterface
 {
-    use ErrorMessage;
+    use HandlerSetupTrait {
+        HandlerSetupTrait::__construct as private setUp;
+    }
+    use ErrorMessageTrait;
+
     protected TransactionInterface $transaction;
     private ResponseFactoryInterface $responseFactory;
 
     /**
      * The constructor.
-     * @param TransactionInterface $transaction The transaction
+     *
+     * @param Responder $responder The responder
      * @param ResponseFactoryInterface $responseFactory The response factory
+     * @param LoggerFactory $loggerFactory The logger factory
+     * @param TransactionInterface $transaction The transaction
      */
     public function __construct(
-        TransactionInterface $transaction,
-        ResponseFactoryInterface $responseFactory
-    )
-    {
+        Responder $responder,
+        ResponseFactoryInterface $responseFactory,
+        LoggerFactory $loggerFactory,
+        TransactionInterface $transaction
+    ) {
+        $this->setUp($responder, $responseFactory, $loggerFactory);
         $this->transaction = $transaction;
-        $this->responseFactory = $responseFactory;
     }
 
     /**
-     * @param ServerRequestInterface $request
-     * @param Throwable              $exception
-     * @param bool                   $displayErrorDetails
-     * @param bool                   $logErrors
-     * @param bool                   $logErrorDetails
-     * @return ResponseInterface
+     * Invoke.
+     *
+     * @param ServerRequestInterface $request The request
+     * @param Throwable $exception The exception
+     * @param bool $displayErrorDetails Show error details
+     * @param bool $logErrors Log errors
+     * @param bool $logErrorDetails Log error details
+     *
+     * @return ResponseInterface The response
      */
     public function __invoke(
         ServerRequestInterface $request,
@@ -51,10 +64,9 @@ class PDOErrorHandling implements ErrorHandlerInterface
     ): ResponseInterface {
         $this->transaction->rollback();
         $statusCode = StatusCodeInterface::STATUS_FAILED_DEPENDENCY;
-        http_response_code($statusCode);
 
         // Error message
-        $errorMessage = $exception->getMessage();
+        $errorMessage = "Database exception: ".$exception->getMessage();
 
         if ($displayErrorDetails) {
             $trace_list = $exception->getTrace();
@@ -70,12 +82,12 @@ class PDOErrorHandling implements ErrorHandlerInterface
             #$errorMessage = $this->getErrorMessage($exception, $statusCode, $displayErrorDetails);
         }
 
-        $error = json_encode(
-            [
-                "state" => "Failed",
-                "message" => "Database exception: $errorMessage"
-            ]
+        return $this->handleException(
+            $request,
+            $exception,
+            $logErrors,
+            $statusCode,
+            $errorMessage
         );
-        die($error);
     }
 }

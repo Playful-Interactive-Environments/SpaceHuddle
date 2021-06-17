@@ -59,7 +59,7 @@ class AuthorizationMiddleware
         if ($authorisation && !$this->enforcer->enforce($authorisation->type, $uriPath, $action)) {
             return $this->responseFactory->createResponse()
                 ->withHeader("Content-Type", "application/json")
-                ->withStatus(StatusCodeInterface::STATUS_FORBIDDEN, "Unauthorized.");
+                ->withStatus(StatusCodeInterface::STATUS_FORBIDDEN, "User has no rights for this service or entity.");
         }
 
         return $handler->handle($request);

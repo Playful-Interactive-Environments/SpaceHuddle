@@ -100,8 +100,8 @@ trait ServicePermissionTrait
         array $urlData
     ): void {
         if (!$this->hasPermission($authorisation, $urlData)) {
-            http_response_code(StatusCodeInterface::STATUS_UNAUTHORIZED);
-            throw new AuthorisationException("User has no rights for this service or entity");
+            http_response_code(StatusCodeInterface::STATUS_FORBIDDEN);
+            throw new AuthorisationException("User has no rights for this service or entity.");
         }
     }
 

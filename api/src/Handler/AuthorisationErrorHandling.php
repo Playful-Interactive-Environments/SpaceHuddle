@@ -14,13 +14,19 @@ use Throwable;
  */
 class AuthorisationErrorHandling implements ErrorHandlerInterface
 {
+    use HandlerSetupTrait;
+    use ErrorMessageTrait;
+
     /**
-     * @param ServerRequestInterface $request
-     * @param Throwable              $exception
-     * @param bool                   $displayErrorDetails
-     * @param bool                   $logErrors
-     * @param bool                   $logErrorDetails
-     * @return ResponseInterface
+     * Invoke.
+     *
+     * @param ServerRequestInterface $request The request
+     * @param Throwable $exception The exception
+     * @param bool $displayErrorDetails Show error details
+     * @param bool $logErrors Log errors
+     * @param bool $logErrorDetails Log error details
+     *
+     * @return ResponseInterface The response
      */
     public function __invoke(
         ServerRequestInterface $request,
@@ -29,14 +35,25 @@ class AuthorisationErrorHandling implements ErrorHandlerInterface
         bool $logErrors,
         bool $logErrorDetails
     ): ResponseInterface {
-        http_response_code(StatusCodeInterface::STATUS_METHOD_NOT_ALLOWED);
-        $errorMessage = $exception->getMessage();
+        $statusCode = StatusCodeInterface::STATUS_FORBIDDEN; #STATUS_METHOD_NOT_ALLOWED;
+        $errorMessage = "Authorisation error occurred: " . $exception->getMessage();
+
+        return $this->handleException(
+            $request,
+            $exception,
+            $logErrors,
+            $statusCode,
+            $errorMessage
+        );
+
+        /*
+        http_response_code($statusCode);
         $error = json_encode(
             [
                 "state" => "Failed",
-                "message" => "Authorisation error occurred: " . $errorMessage
+                "message" => $errorMessage
             ]
         );
-        die($error);
+        die($error);*/
     }
 }

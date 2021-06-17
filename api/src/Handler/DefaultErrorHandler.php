@@ -19,32 +19,8 @@ use Throwable;
  */
 final class DefaultErrorHandler
 {
-    use ErrorMessage;
-
-    private Responder $responder;
-
-    private ResponseFactoryInterface $responseFactory;
-
-    private LoggerInterface $logger;
-
-    /**
-     * The constructor.
-     *
-     * @param Responder $responder The responder
-     * @param ResponseFactoryInterface $responseFactory The response factory
-     * @param LoggerFactory $loggerFactory The logger factory
-     */
-    public function __construct(
-        Responder $responder,
-        ResponseFactoryInterface $responseFactory,
-        LoggerFactory $loggerFactory
-    ) {
-        $this->responder = $responder;
-        $this->responseFactory = $responseFactory;
-        $this->logger = $loggerFactory
-            ->addFileHandler("error.log")
-            ->createLogger();
-    }
+    use HandlerSetupTrait;
+    use ErrorMessageTrait;
 
     /**
      * Invoke.
@@ -62,34 +38,19 @@ final class DefaultErrorHandler
         bool $displayErrorDetails,
         bool $logErrors
     ): ResponseInterface {
-        // Log error
-        if ($logErrors) {
-            $this->logger->error(
-                sprintf(
-                    "Error: [%s] %s, Method: %s, Path: %s",
-                    $exception->getCode(),
-                    $this->getExceptionText($exception),
-                    $request->getMethod(),
-                    $request->getUri()->getPath()
-                )
-            );
-        }
-
         // Detect status code
         $statusCode = $this->getHttpStatusCode($exception);
 
         // Error message
         $errorMessage = $this->getErrorMessage($exception, $statusCode, $displayErrorDetails);
 
-        // Render response
-        $response = $this->responseFactory->createResponse();
-        $response = $this->responder->withJson($response, [
-            "error" => [
-                "message" => $errorMessage,
-            ],
-        ]);
-
-        return $response->withStatus($statusCode);
+        return $this->handleException(
+            $request,
+            $exception,
+            $logErrors,
+            $statusCode,
+            $errorMessage
+        );
     }
 
     /**

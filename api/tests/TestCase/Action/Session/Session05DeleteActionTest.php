@@ -60,9 +60,9 @@ class Session05DeleteActionTest extends TestCase
     public function testDeleteSessionsInvalidId(): void
     {
         $request = $this->createRequest("DELETE", "/session/xxx/");
-        $request = $this->withJwtAuth($request)->withoutHeader("Authorization");
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
-        $this->assertSame(StatusCodeInterface::STATUS_UNAUTHORIZED, $response->getStatusCode());
+        $this->assertSame(StatusCodeInterface::STATUS_FORBIDDEN, $response->getStatusCode());
     }
 }

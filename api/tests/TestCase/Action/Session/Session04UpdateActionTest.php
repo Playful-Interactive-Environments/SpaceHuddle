@@ -28,7 +28,8 @@ class Session04UpdateActionTest extends TestCase
      *
      * @return void
      */
-    protected function setUp(): void {
+    protected function setUp(): void
+    {
         $this->setUpAppTraid();
         $this->sessionId = $this->getFirstSessionId();
     }
@@ -63,16 +64,17 @@ class Session04UpdateActionTest extends TestCase
      */
     public function testUpdateSessionsInvalidId(): void
     {
-        $request = $this->createRequest("PUT",
+        $request = $this->createJsonRequest(
+            "PUT",
             "/session/",
             [
-                "id" => 'xxx',
+                "id" => "xxx",
                 "maxParticipants" => null
             ]
         );
-        $request = $this->withJwtAuth($request)->withoutHeader("Authorization");
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
-        $this->assertSame(StatusCodeInterface::STATUS_UNAUTHORIZED, $response->getStatusCode());
+        $this->assertSame(StatusCodeInterface::STATUS_FORBIDDEN, $response->getStatusCode());
     }
 }

@@ -30,10 +30,10 @@ trait ServiceUpdaterTrait
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $this->checkPermission($authorisation, $urlData);
         $data = array_merge($bodyData, $urlData);
-
         $id = $data["id"];
+
+        $this->checkPermission($authorisation, $data);
 
         // Input validation
         $this->validator->validateUpdate($id, $data);
