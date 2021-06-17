@@ -1,6 +1,6 @@
 <template>
-  <div class="detail">
-    <Sidebar />
+  <div v-if="session" class="detail">
+    <Sidebar :session="session" />
     <main class="detail__content">
       <div v-for="(topic, index) in topics" :key="topic">
         <TopicExpand>
@@ -31,8 +31,13 @@ import draggable from 'vuedraggable';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleItem from '@/components/moderator/molecules/ModuleItem.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
-import ModuleType from '../../types/ModuleType';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
+import { Prop } from 'vue-property-decorator';
+import * as sessionService from '@/services/moderator/session-service';
+// import * as topicService from '@/services/moderator/topic-service';
+// import { Topic } from '@/services/moderator/topic-service';
+import { Session } from '@/services/moderator/session-service';
+import ModuleType from '@/types/ModuleType';
 
 @Options({
   components: {
@@ -44,7 +49,12 @@ import AddItem from '@/components/moderator/atoms/AddItem.vue';
   },
 })
 export default class SessionDetails extends Vue {
-  public topicExpanded = true;
+  @Prop() readonly id!: string;
+
+  session: Session | null = null;
+
+  // TODO: Exchange topics definition once CORS issues for task and topic endpoints are resolved
+  // topics: Topic[] = [];
   public topics = [
     [
       { type: ModuleType.BRAINSTORMING },
@@ -53,6 +63,17 @@ export default class SessionDetails extends Vue {
     ],
     [{ type: ModuleType.BRAINSTORMING }, { type: ModuleType.CATEGORIZATION }],
   ];
+  public topicExpanded = true;
+
+  async mounted(): Promise<void> {
+    this.session = await sessionService.getById(this.id);
+    // TODO: uncomment once CORS issues for task and topic endpoints are resolved
+    /* this.topics = await sessionService.getTopicsList(this.session.id);
+    await this.topics.forEach(async (topic) => {
+      const currentTaskList = await topicService.getTaskList(topic.id);
+    }); */
+    console.log(this.topics);
+  }
 
   addModule(): void {
     console.log('add module');

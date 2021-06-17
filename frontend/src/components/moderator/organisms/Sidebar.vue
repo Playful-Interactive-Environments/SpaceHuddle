@@ -3,17 +3,19 @@
     <div class="sidebar__top">
       <div class="sidebar__logo"></div>
       <div class="sidebar__row">
-        <div>24.06.2021</div>
+        <div>{{ formatDate(session.creationDate) }}</div>
         <div class="sidebar__icon" aria-label="settings" role="button"></div>
       </div>
-      <h1 class="heading heading--regular heading--white">Marketing Meeting</h1>
+      <h1 class="heading heading--regular heading--white">
+        {{ session.title }}
+      </h1>
       <div class="sidebar__text">
         Short description about the goals of this session and other stuff ...
       </div>
       <ModuleCount />
     </div>
     <div class="sidebar__bottom">
-      <SessionCode code="YXCVBNM" />
+      <SessionCode :code="session.connectionKey" />
       <button class="btn btn--mint btn--fullwidth">Public Screen</button>
     </div>
   </section>
@@ -23,6 +25,9 @@
 import { Options, Vue } from 'vue-class-component';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
+import { Prop } from 'vue-property-decorator';
+import { Session } from '@/services/moderator/session-service';
+import { formatDate } from '@/utils/date';
 
 @Options({
   components: {
@@ -30,7 +35,11 @@ import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
     SessionCode,
   },
 })
-export default class Sidebar extends Vue {}
+export default class Sidebar extends Vue {
+  @Prop() readonly session!: Session;
+
+  formatDate = formatDate;
+}
 </script>
 
 <style lang="scss" scoped>
