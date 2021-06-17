@@ -53,6 +53,7 @@ export default class ModuleOverview extends Vue {
   color: #fff;
   background: var(--color-darkblue);
   background-image: url('../../assets/illustrations/stars-background.png');
+  background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;
 
