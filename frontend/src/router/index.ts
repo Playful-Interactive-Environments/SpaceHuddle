@@ -4,6 +4,7 @@ import Join from '../views/client/Join.vue';
 import ModuleOverview from '@/views/client/Overview.vue';
 import SessionOverview from '@/views/moderator/SessionOverview.vue';
 import SessionDetails from '@/views/moderator/SessionDetails.vue';
+import Register from '@/views/moderator/Register.vue';
 import Debug from '@/views/Debug.vue';
 import Login from '@/views/moderator/Login.vue';
 import { isAuthenticated } from '@/services/moderator/auth-service';
@@ -18,6 +19,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/login',
     name: 'login',
     component: Login,
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: Register,
   },
   {
     path: '/join',

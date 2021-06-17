@@ -1,8 +1,18 @@
 <template>
   <div class="grid-container container--fullheight">
+    <div class="grid-item container--fullheight background-image">
+      <div class="inline center container--centered">
+        <h2>Welcome back!</h2>
+        <p class="center-text">
+          Voluptua at vero eos et accusam et justo duo dolores et ea rebum. Stet
+          clita gergren.
+        </p>
+        <button class="btn btn--outline-white">Login</button>
+      </div>
+    </div>
     <div class="grid-item container container--centered center">
-      <div class="inline container--centered">
-        <h1 class="heading heading--regular">Login</h1>
+      <div class="inline">
+        <h1 class="heading heading--regular">Register</h1>
         <p>
           Voluptua at vero eos et accusam et justo duo dolores et ea rebum. Stet
           clita kasd gubergren.
@@ -17,23 +27,19 @@
             placeholder="Enter your password"
             type="text"
           />
+          <h4>Password repeat</h4>
+          <input
+            name="password"
+            placeholder="Repeat your password"
+            type="text"
+          />
         </div>
         <form-error :errors="errors"></form-error>
         <form @submit="submit">
           <button class="btn btn--wide btn--gradient" type="submit">
-            Login
+            Register
           </button>
         </form>
-      </div>
-    </div>
-    <div class="grid-item container--fullheight background-image">
-      <div class="inline center container--centered">
-        <h1 class="heading--regular center-text">New here?</h1>
-        <p class="center-text">
-          Voluptua at vero eos et accusam et justo duo dolores et ea rebum. Stet
-          clita gergren.
-        </p>
-        <button class="btn btn--outline-white">Register</button>
       </div>
     </div>
   </div>
@@ -42,16 +48,12 @@
 <script lang="ts">
 import { Vue } from 'vue-class-component';
 
-export default class Login extends Vue {}
+export default class Register extends Vue {}
 </script>
 
 <style scoped>
 .center {
   margin: auto;
-}
-
-.center-text {
-  text-align: center;
 }
 
 .background-image {
