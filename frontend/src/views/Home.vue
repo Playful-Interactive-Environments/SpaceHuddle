@@ -60,7 +60,7 @@
     </button>
     <button class="btn btn--gradient">Button Gradient</button>
     <button class="btn btn--outline">Button Outline</button>
-    <input placeholder="Your text here ..." />
+    <input placeholder="Your text here ..." class="input" />
     <textarea placeholder="Your text here ..." rows="3"></textarea>
   </div>
 </template>

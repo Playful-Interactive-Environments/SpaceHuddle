@@ -1,90 +1,112 @@
 <template>
-  <div class="grid-container container--fullheight">
-    <div class="grid-item container container--centered center">
-      <div class="inline container--centered">
-        <h1 class="heading heading--regular">Login</h1>
-        <p>
-          Voluptua at vero eos et accusam et justo duo dolores et ea rebum. Stet
-          clita kasd gubergren.
+  <div class="login container--fullheight">
+    <section class="container container--fullheight container--centered">
+      <div class="login__content">
+        <h1 class="heading heading--medium">Login</h1>
+        <p class="login__description">
+          Go ahead and login to access all your existing resources create new
+          brainstorming sessions.
         </p>
-        <div class="inline">
-          <h4>Email</h4>
-          <input name="email" placeholder="Enter your email" type="text" />
-
-          <h4>Password</h4>
+        <form @submit="submit">
+          <h3 class="heading heading--xs">Email</h3>
           <input
+            class="input input--fullwidth"
+            name="email"
+            placeholder="Enter your email"
+            type="text"
+          />
+          <h3 class="heading heading--xs">Password</h3>
+          <input
+            class="input input--fullwidth"
             name="password"
             placeholder="Enter your password"
             type="text"
           />
-        </div>
-        <form-error :errors="errors"></form-error>
-        <form @submit="submit">
-          <button class="btn btn--wide btn--gradient" type="submit">
+          <form-error :errors="errors"></form-error>
+          <button
+            class="btn btn--wide btn--gradient btn--fullwidth"
+            type="submit"
+          >
             Login
           </button>
+          <p class="login__forgot-pw" role="button">Forgot Password?</p>
         </form>
       </div>
-    </div>
-    <div class="grid-item container--fullheight background-image">
-      <div class="inline center container--centered">
-        <h1 class="heading--regular center-text">New here?</h1>
-        <p class="center-text">
-          Voluptua at vero eos et accusam et justo duo dolores et ea rebum. Stet
-          clita gergren.
+    </section>
+    <section
+      class="
+        login__bg-section
+        container container--fullheight container--centered
+      "
+    >
+      <div class="container--centered">
+        <h2 class="heading heading--medium heading--white">New here?</h2>
+        <p class="login__text">
+          Go ahead and create an account if you want to use our great
+          brainstorming tool.
         </p>
-        <button class="btn btn--outline-white">Register</button>
+        <router-link to="register">
+          <button class="btn btn--outline-white">Register</button>
+        </router-link>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
 <script lang="ts">
-import { Vue } from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
+import FormError from '../../components/shared/atoms/FormError.vue';
 
+@Options({
+  components: {
+    FormError,
+  },
+})
 export default class Login extends Vue {}
 </script>
 
-<style scoped>
-.center {
-  margin: auto;
-}
-
-.center-text {
-  text-align: center;
-}
-
-.background-image {
-  color: #fff;
-  background-image: url('../../assets/illustrations/telescope.png');
-  background-position: center;
-  background-size: cover;
-  display: flex;
-  align-items: stretch;
-}
-
-.grid-container {
+<style lang="scss" scoped>
+.login {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 5fr 3fr;
   padding: 0;
   margin: 0;
-}
 
-p {
-  width: 300px;
-  text-align: left;
-}
-h1 {
-  text-align: left;
-}
+  &__bg-section {
+    color: #fff;
+    background-color: var(--color-darkblue);
+    background-image: url('../../assets/illustrations/bg_without_telescope.png');
+    background-position: center;
+    background-size: cover;
+  }
 
-h4 {
-  padding: 0;
-  margin-bottom: 0;
-  margin-left: 5px;
-  text-align: left;
-}
-.inline {
-  display: inline-block;
+  &__content {
+    width: 35vw;
+    max-width: 520px;
+    text-align: left;
+  }
+
+  &__description {
+    line-height: 1.5;
+    margin: 1.5rem 0 1rem;
+  }
+
+  &__text {
+    line-height: 1.5;
+    padding: 0 2rem;
+  }
+
+  &__forgot-pw {
+    text-align: center;
+    cursor: pointer;
+  }
+
+  button {
+    margin: 1.5rem 0 1rem;
+  }
+
+  input {
+    margin-top: 0;
+  }
 }
 </style>

@@ -1,47 +1,58 @@
 <template>
-  <div class="grid-container container--fullheight">
-    <div class="grid-item container--fullheight background-image">
-      <div class="inline center container--centered">
-        <h2>Welcome back!</h2>
-        <p class="center-text">
-          Voluptua at vero eos et accusam et justo duo dolores et ea rebum. Stet
-          clita gergren.
-        </p>
+  <div class="register container--fullheight">
+    <section
+      class="
+        register__bg-section
+        container container--fullheight container--centered
+      "
+    >
+      <h2 class="heading heading--medium heading--white">Welcome back!</h2>
+      <p class="register__text">
+        If you already have an account, just go ahead and login to access all
+        your existing resources.
+      </p>
+      <router-link to="login">
         <button class="btn btn--outline-white">Login</button>
-      </div>
-    </div>
-    <div class="grid-item container container--centered center">
-      <div class="inline">
-        <h1 class="heading heading--regular">Register</h1>
-        <p>
-          Voluptua at vero eos et accusam et justo duo dolores et ea rebum. Stet
-          clita kasd gubergren.
+      </router-link>
+    </section>
+    <section class="container container--fullheight container--centered">
+      <div class="register__content">
+        <h1 class="heading heading--medium">Register</h1>
+        <p class="register__description">
+          Please enter your personal info to create an account.
         </p>
-        <div class="inline">
-          <h4>Email</h4>
-          <input name="email" placeholder="Enter your email" type="text" />
-
-          <h4>Password</h4>
+        <form @submit="submit">
+          <h3 class="heading heading--xs">Email</h3>
           <input
+            class="input input--fullwidth"
+            name="email"
+            placeholder="Enter your email"
+            type="text"
+          />
+          <h3 class="heading heading--xs">Password</h3>
+          <input
+            class="input input--fullwidth"
             name="password"
             placeholder="Enter your password"
             type="text"
           />
-          <h4>Password repeat</h4>
+          <h4 class="heading heading--xs">Password repeat</h4>
           <input
+            class="input input--fullwidth"
             name="password"
             placeholder="Repeat your password"
             type="text"
           />
-        </div>
-        <form-error :errors="errors"></form-error>
-        <form @submit="submit">
-          <button class="btn btn--wide btn--gradient" type="submit">
+          <form-error :errors="errors"></form-error>
+          <button
+            class="btn btn--wide btn--gradient btn--fullwidth"
+            type="submit"
+          >
             Register
           </button>
         </form>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -51,42 +62,48 @@ import { Vue } from 'vue-class-component';
 export default class Register extends Vue {}
 </script>
 
-<style scoped>
-.center {
-  margin: auto;
-}
-
-.background-image {
-  color: #fff;
-  background-image: url('../../assets/illustrations/telescope.png');
-  background-position: center;
-  background-size: cover;
-  display: flex;
-  align-items: stretch;
-}
-
-.grid-container {
+<style lang="scss" scoped>
+.register {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 3fr 5fr;
   padding: 0;
   margin: 0;
-}
 
-p {
-  width: 300px;
-  text-align: left;
-}
-h1 {
-  text-align: left;
-}
+  &__bg-section {
+    color: #fff;
+    background-color: var(--color-darkblue);
+    background-image: url('../../assets/illustrations/bg_without_telescope.png');
+    background-position: center;
+    background-size: cover;
+  }
 
-h4 {
-  padding: 0;
-  margin-bottom: 0;
-  margin-left: 5px;
-  text-align: left;
-}
-.inline {
-  display: inline-block;
+  &__content {
+    width: 35vw;
+    max-width: 520px;
+    text-align: left;
+  }
+
+  &__description {
+    line-height: 1.5;
+    margin: 1.5rem 0 1rem;
+  }
+
+  &__text {
+    line-height: 1.5;
+    padding: 0.5rem 2rem 0;
+  }
+
+  &__forgot-pw {
+    text-align: center;
+    cursor: pointer;
+  }
+
+  button {
+    margin: 1.5rem 0 1rem;
+  }
+
+  input {
+    margin-top: 0;
+  }
 }
 </style>

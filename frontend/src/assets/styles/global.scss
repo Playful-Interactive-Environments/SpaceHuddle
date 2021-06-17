@@ -49,7 +49,7 @@ body {
   }
 
   &--medium {
-    font-size: calc(32rem / 16);
+    font-size: calc(28rem / 16);
   }
 
   &--regular {
@@ -58,6 +58,12 @@ body {
 
   &--small {
     font-size: var(--font-size-large);
+    font-weight: var(--font-weight-semibold);
+    margin: 0.5rem 0;
+  }
+
+  &--xs {
+    font-size: var(--font-size-default);
     font-weight: var(--font-weight-semibold);
     margin: 0.5rem 0;
   }
@@ -190,7 +196,7 @@ body {
   }
 }
 
-input {
+.input {
   font-family: var(--font-family);
   font-size: var(--font-size-default);
   color: var(--color-darkblue);
@@ -251,6 +257,7 @@ textarea {
 
   &--centered {
     align-items: center;
+    justify-content: center;
     text-align: center;
   }
 }
