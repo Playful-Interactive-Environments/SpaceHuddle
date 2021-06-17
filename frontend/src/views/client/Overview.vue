@@ -11,7 +11,7 @@
       <template v-slot:title>Topic Uno</template>
       <template v-slot:content>
         <li class="overview__module" v-for="module in topic" :key="module.type">
-          <ModuleItem :type="module.type" :isClient="true" />
+          <ModuleCard :type="module.type" :isClient="true" />
         </li>
 
         <AddItem text="Add module" @addNew="addModule" />
@@ -25,7 +25,7 @@ import { Vue, Options } from 'vue-class-component';
 import MenuBar from '@/components/client/molecules/Menubar.vue';
 import SessionInfo from '@/components/client/molecules/SessionInfo.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
-import ModuleItem from '@/components/moderator/molecules/ModuleItem.vue';
+import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
 import ModuleType from '../../types/ModuleType';
 
 @Options({
@@ -33,7 +33,7 @@ import ModuleType from '../../types/ModuleType';
     MenuBar,
     SessionInfo,
     TopicExpand,
-    ModuleItem,
+    ModuleCard,
   },
 })
 export default class ModuleOverview extends Vue {
