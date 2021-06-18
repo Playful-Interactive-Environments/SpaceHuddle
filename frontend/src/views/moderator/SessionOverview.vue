@@ -60,6 +60,7 @@ export default class SessionOverview extends Vue {
   async newSession(): Promise<void> {
     await sessionService.post({
       title: 'New session created',
+      description: 'Test description',
       maxParticipants: 100,
       expirationDate: '2021-09-12',
     });

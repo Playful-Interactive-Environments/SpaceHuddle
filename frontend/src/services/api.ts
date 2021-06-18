@@ -1,18 +1,25 @@
 import Axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { getJwt } from '@/services/moderator/auth-service';
+import EndpointType from '@/types/Endpoint';
 
-const endpointsWithAuthorization = ['sessions/', 'session/'];
+const endpointsWithAuthorization = [
+  EndpointType.SESSIONS,
+  EndpointType.SESSION,
+  EndpointType.TOPICS,
+  EndpointType.TOPIC,
+  EndpointType.TASKS,
+  EndpointType.TASK,
+];
 
-const endpointRequiresAuthorization = (endpoint: string) => {
+const endpointRequiresAuthorization = (endpoint: EndpointType) => {
   return endpointsWithAuthorization.includes(endpoint);
 };
 
 const interceptorAuthHeader = (
   axiosConfig: AxiosRequestConfig,
-  endpoint: string
+  endpoint: EndpointType
 ): AxiosRequestConfig => {
   if (endpointRequiresAuthorization(endpoint)) {
-    console.log('here');
     const jwt = getJwt();
     if (!jwt) throw new Error('Missing Authentication Token');
 
@@ -24,7 +31,7 @@ const interceptorAuthHeader = (
 };
 
 export const apiEndpoint = (
-  endpoint: string,
+  endpoint: EndpointType,
   options?: Partial<AxiosRequestConfig>
 ): AxiosInstance => {
   const config = {
@@ -32,7 +39,6 @@ export const apiEndpoint = (
     ...options,
   };
   const axiosInstance = Axios.create(config);
-  console.log('here created');
 
   // request interceptors are used to automatically attach the authorization header for endpoints
   // that require authorization

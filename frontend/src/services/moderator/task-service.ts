@@ -1,6 +1,7 @@
 import { apiEndpoint } from '@/services/api';
 import ModuleType from '@/types/ModuleType';
 import TaskStates from '@/types/TaskStates';
+import EndpointType from '@/types/Endpoint';
 
 export interface Task {
   id: string;
@@ -11,4 +12,4 @@ export interface Task {
   state: TaskStates; // TODO ask what possible states a task can be in - WAIT,
 }
 
-const API_TASK_ENDPOINT = apiEndpoint('task/');
+const API_TASK_ENDPOINT = apiEndpoint(EndpointType.TASK);

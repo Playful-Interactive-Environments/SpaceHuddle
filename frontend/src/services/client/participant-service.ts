@@ -1,6 +1,7 @@
 import { apiEndpoint } from '@/services/api';
+import EndpointType from '@/types/Endpoint';
 
-const API_SESSION_ENDPOINT = apiEndpoint('participant/');
+const API_SESSION_ENDPOINT = apiEndpoint(EndpointType.PARTICIPANT);
 
 export enum ConnectState {
   ACTIVE = 'ACTIVE',
@@ -25,10 +26,13 @@ export const connect = async (
   sessionKey: string
 ): Promise<Participant | Partial<Participant>> => {
   try {
-    const { data } = await API_SESSION_ENDPOINT.post<Participant>('connect', {
-      sessionKey,
-      ipHash: 'asdfs',
-    });
+    const { data } = await API_SESSION_ENDPOINT.post<Participant>(
+      EndpointType.CONNECT,
+      {
+        sessionKey,
+        ip: 'asdfs', // TODO: send client ip
+      }
+    );
     // TODO: set browser-hash to localstorage?
     return data;
   } catch (error) {
@@ -41,7 +45,7 @@ export const reconnect = async (): Promise<Participant> => {
     // TODO: browser hash from localstorage/sessionstorage?
     const browserKey = 'AHMS1JZT.9VZTRRNE';
     const { data } = await API_SESSION_ENDPOINT.get<Participant>(
-      `connect/${browserKey}`
+      `${EndpointType.CONNECT}/${browserKey}/`
     );
     return data;
   } catch (e) {
