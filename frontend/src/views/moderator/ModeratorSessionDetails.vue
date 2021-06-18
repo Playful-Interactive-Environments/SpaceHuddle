@@ -19,6 +19,7 @@
           <AddItem text="Add module" @addNew="addModule" />
         </template>
       </TopicExpand>
+      <button @click="addTopic">add topic test</button>
     </main>
   </div>
 </template>
@@ -32,8 +33,6 @@ import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { Prop } from 'vue-property-decorator';
 import * as sessionService from '@/services/moderator/session-service';
-// import * as topicService from '@/services/moderator/topic-service';
-// import { Topic } from '@/services/moderator/topic-service';
 import { Session } from '@/services/moderator/session-service';
 import ModuleType from '@/types/ModuleType';
 
@@ -46,8 +45,8 @@ import ModuleType from '@/types/ModuleType';
     AddItem,
   },
 })
-export default class SessionDetails extends Vue {
-  @Prop() readonly id!: string;
+export default class ModeratorSessionDetails extends Vue {
+  @Prop() readonly sessionId!: string;
 
   session: Session | null = null;
 
@@ -64,13 +63,18 @@ export default class SessionDetails extends Vue {
   public topicExpanded = true;
 
   async mounted(): Promise<void> {
-    this.session = await sessionService.getById(this.id);
-    // TODO: uncomment once CORS issues for task and topic endpoints are resolved
-    /* this.topics = await sessionService.getTopicsList(this.session.id);
-    await this.topics.forEach(async (topic) => {
-      const currentTaskList = await topicService.getTaskList(topic.id);
-    }); */
-    console.log(this.topics);
+    this.session = await sessionService.getById(this.sessionId);
+    const topics = await sessionService.getTopicsList(this.session.id);
+    console.log('topics fetched', topics);
+    // TODO: fetch tasks for every topic correctly
+  }
+
+  async addTopic(): Promise<void> {
+    const data = await sessionService.postTopic(this.sessionId, {
+      title: 'Test topic',
+      description: 'asdf',
+    });
+    console.log('topic added', data);
   }
 
   addModule(): void {

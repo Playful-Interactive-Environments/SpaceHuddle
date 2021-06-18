@@ -13,7 +13,7 @@
           </template>
           <template v-slot:default>
             <SessionCode :code="session.connectionKey" :hasBorder="true" />
-            <router-link :to="session.id">
+            <router-link :to="`/session/${session.id}`">
               <button class="btn btn--mint btn--fullwidth">
                 Go to session
               </button>
@@ -48,7 +48,7 @@ import { formatDate } from '@/utils/date';
     AddItem,
   },
 })
-export default class SessionOverview extends Vue {
+export default class ModeratorSessionOverview extends Vue {
   sessions: Session[] = [];
 
   formatDate = formatDate;
@@ -60,6 +60,7 @@ export default class SessionOverview extends Vue {
   async newSession(): Promise<void> {
     await sessionService.post({
       title: 'New session created',
+      description: 'Test description',
       maxParticipants: 100,
       expirationDate: '2021-09-12',
     });

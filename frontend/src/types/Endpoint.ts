@@ -1,0 +1,25 @@
+enum EndpointType {
+  AUTHORIZED_USERS = 'authorized_users',
+  CONNECT = 'connect',
+  GROUP = 'group',
+  IDEA = 'idea',
+  IDEAS = 'ideas',
+  OWN_USER_ROLE = 'own_user_role',
+  PARTICIPANT = 'participant',
+  PARTICIPANT_TASKS = 'participant_tasks',
+  PUBLIC_SCREEN = 'public_screen',
+  RESOURCE = 'resources',
+  SELECTION = 'selection',
+  SESSION = 'session',
+  SESSIONS = 'sessions',
+  TASK = 'task',
+  TASKS = 'tasks',
+  TOPIC = 'topic',
+  TOPICS = 'topics',
+  USER = 'user',
+  VOTING = 'voting',
+  VOTINGS = 'votings',
+  VOTING_RESULTS = 'voting_results',
+}
+
+export default EndpointType;

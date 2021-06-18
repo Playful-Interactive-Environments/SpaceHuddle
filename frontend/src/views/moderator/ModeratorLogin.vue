@@ -1,25 +1,11 @@
 <template>
-  <div class="register container--fullheight">
-    <section
-      class="
-        register__bg-section
-        container container--fullheight container--centered
-      "
-    >
-      <h2 class="heading heading--medium heading--white">Welcome back!</h2>
-      <p class="register__text">
-        If you already have an account, just go ahead and login to access all
-        your existing resources.
-      </p>
-      <router-link to="login">
-        <button class="btn btn--outline-white">Login</button>
-      </router-link>
-    </section>
+  <div class="login container--fullheight">
     <section class="container container--fullheight container--centered">
-      <div class="register__content">
-        <h1 class="heading heading--medium">Register</h1>
-        <p class="register__description">
-          Please enter your personal info to create an account.
+      <div class="login__content">
+        <h1 class="heading heading--medium">Login</h1>
+        <p class="login__description">
+          Go ahead and login to access all your existing resources create new
+          brainstorming sessions.
         </p>
         <form @submit="submit">
           <h3 class="heading heading--xs">Email</h3>
@@ -36,36 +22,53 @@
             placeholder="Enter your password"
             type="text"
           />
-          <h4 class="heading heading--xs">Password repeat</h4>
-          <input
-            class="input input--fullwidth"
-            name="password"
-            placeholder="Repeat your password"
-            type="text"
-          />
           <form-error :errors="errors"></form-error>
           <button
             class="btn btn--wide btn--gradient btn--fullwidth"
             type="submit"
           >
-            Register
+            Login
           </button>
+          <p class="login__forgot-pw" role="button">Forgot Password?</p>
         </form>
+      </div>
+    </section>
+    <section
+      class="
+        login__bg-section
+        container container--fullheight container--centered
+      "
+    >
+      <div class="container--centered">
+        <h2 class="heading heading--medium heading--white">New here?</h2>
+        <p class="login__text">
+          Go ahead and create an account if you want to use our great
+          brainstorming tool.
+        </p>
+        <router-link to="register">
+          <button class="btn btn--outline-white">Register</button>
+        </router-link>
       </div>
     </section>
   </div>
 </template>
 
 <script lang="ts">
-import { Vue } from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
+import FormError from '../../components/shared/atoms/FormError.vue';
 
-export default class Register extends Vue {}
+@Options({
+  components: {
+    FormError,
+  },
+})
+export default class ModeratorLogin extends Vue {}
 </script>
 
 <style lang="scss" scoped>
-.register {
+.login {
   display: grid;
-  grid-template-columns: 3fr 5fr;
+  grid-template-columns: 5fr 3fr;
   padding: 0;
   margin: 0;
 
@@ -90,7 +93,7 @@ export default class Register extends Vue {}
 
   &__text {
     line-height: 1.5;
-    padding: 0.5rem 2rem 0;
+    padding: 0 2rem;
   }
 
   &__forgot-pw {

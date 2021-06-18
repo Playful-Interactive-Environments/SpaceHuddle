@@ -9,8 +9,8 @@
       <label>
         <input
           class="input"
-          name="sessionCode"
-          v-model="roomCode"
+          name="sessionKey"
+          v-model="sessionKey"
           placeholder="Enter Session PIN"
           type="text"
         />
@@ -31,16 +31,21 @@ import * as participantService from '@/services/client/participant-service';
     FormError,
   },
 })
-export default class Join extends Vue {
-  roomCode = '';
+export default class ClientJoin extends Vue {
+  sessionKey = '';
   errors: string[] = [];
 
   async submit(e: Event): Promise<void> {
     e.preventDefault();
-    if (this.roomCode.length > 0) {
-      const { state } = await participantService.connect(this.roomCode);
+    if (this.sessionKey.length > 0) {
+      const { state } = await participantService.connect(this.sessionKey);
       if (state === participantService.ConnectState.ACTIVE) {
-        await this.$router.push(`/client/${this.roomCode}`);
+        await this.$router.push({
+          name: 'client-overview',
+          params: {
+            sessionKey: this.sessionKey,
+          },
+        });
       } else if (state === participantService.ConnectState.FAILED) {
         this.addError('Sorry, the provided code is invalid.');
       }
