@@ -1,27 +1,51 @@
-p, none, /, GET
-p, none, /docs/v1, GET
+p, NONE, /, GET
+p, NONE, /docs/v1, GET
 
-p, user, /participant/connect[/], POST
-p, user, /session[/], PUT
-p, user, /session[/], POST
-p, user, /sessions[/], GET
-p, user, /session/:id/, GET
-p, user, /session/:id/, DELETE
-p, user, /session/:id, GET
-p, user, /session/:id, DELETE
-p, user, /user[/], PUT
-p, user, /user[/], DELETE
-p, user, /user/login[/], POST
-p, user, /user/register[/], POST
+p, UNKNOWN, /, GET
+p, UNKNOWN, /docs/v1, GET
 
-p, participant, /participant/connect[/], POST
-p, participant, /sessions[/], GET
-p, participant, /session/:id/, GET
-p, participant, /session/:id, GET
-p, participant, /user/login[/], POST
-p, participant, /user/register[/], POST
+p, USER, /participant/connect[/], POST
+p, USER, /session[/], PUT
+p, USER, /session[/], POST
+p, USER, /sessions[/], GET
+p, USER, /session/:id/, GET
+p, USER, /session/:id, GET
+p, USER, /session/:id/, DELETE
+p, USER, /session/:id, DELETE
+p, USER, /user[/], PUT
+p, USER, /user[/], DELETE
+p, USER, /user/login[/], POST
+p, USER, /user/register[/], POST
 
-p, none, /participant/connect[/], POST
-p, none, /user/login[/], POST
-p, none, /user/register[/], POST
+p, MODERATOR, /participant/connect[/], POST
+p, MODERATOR, /session[/], PUT
+p, MODERATOR, /session[/], POST
+p, MODERATOR, /sessions[/], GET
+p, MODERATOR, /session/:id/, GET
+p, MODERATOR, /session/:id, GET
+p, MODERATOR, /session/:id/, DELETE
+p, MODERATOR, /session/:id, DELETE
+p, MODERATOR, /user[/], PUT
+p, MODERATOR, /user[/], DELETE
+p, MODERATOR, /user/login[/], POST
+p, MODERATOR, /user/register[/], POST
+
+p, FACILITATOR, /sessions[/], GET
+p, FACILITATOR, /session/:id/, GET
+p, FACILITATOR, /session/:id, GET
+
+p, PARTICIPANT, /participant/connect[/], POST
+p, PARTICIPANT, /sessions[/], GET
+p, PARTICIPANT, /session/:id/, GET
+p, PARTICIPANT, /session/:id, GET
+p, PARTICIPANT, /user/login[/], POST
+p, PARTICIPANT, /user/register[/], POST
+
+p, NONE, /participant/connect[/], POST
+p, NONE, /user/login[/], POST
+p, NONE, /user/register[/], POST
+
+p, UNKNOWN, /participant/connect[/], POST
+p, UNKNOWN, /user/login[/], POST
+p, UNKNOWN, /user/register[/], POST
 
