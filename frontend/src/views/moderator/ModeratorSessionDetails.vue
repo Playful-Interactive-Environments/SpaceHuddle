@@ -45,8 +45,8 @@ import ModuleType from '@/types/ModuleType';
     AddItem,
   },
 })
-export default class SessionDetails extends Vue {
-  @Prop() readonly id!: string;
+export default class ModeratorSessionDetails extends Vue {
+  @Prop() readonly sessionId!: string;
 
   session: Session | null = null;
 
@@ -63,14 +63,14 @@ export default class SessionDetails extends Vue {
   public topicExpanded = true;
 
   async mounted(): Promise<void> {
-    this.session = await sessionService.getById(this.id);
+    this.session = await sessionService.getById(this.sessionId);
     const topics = await sessionService.getTopicsList(this.session.id);
     console.log('topics fetched', topics);
     // TODO: fetch tasks for every topic correctly
   }
 
   async addTopic(): Promise<void> {
-    const data = await sessionService.postTopic(this.id, {
+    const data = await sessionService.postTopic(this.sessionId, {
       title: 'Test topic',
       description: 'asdf',
     });

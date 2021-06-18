@@ -27,6 +27,7 @@ import SessionInfo from '@/components/client/molecules/SessionInfo.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
 import ModuleType from '../../types/ModuleType';
+import { Prop } from 'vue-property-decorator';
 
 @Options({
   components: {
@@ -36,7 +37,8 @@ import ModuleType from '../../types/ModuleType';
     ModuleCard,
   },
 })
-export default class ModuleOverview extends Vue {
+export default class ClientOverview extends Vue {
+  @Prop({ required: true }) sessionKey!: string;
   public topics = [
     [
       { type: ModuleType.BRAINSTORMING },

@@ -1,12 +1,14 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
-import Home from '../views/Home.vue';
-import Join from '../views/client/Join.vue';
-import ModuleOverview from '@/views/client/Overview.vue';
-import SessionOverview from '@/views/moderator/SessionOverview.vue';
-import SessionDetails from '@/views/moderator/SessionDetails.vue';
-import Register from '@/views/moderator/Register.vue';
+
+import ClientJoin from '../views/client/ClientJoin.vue';
+import ClientOverview from '@/views/client/ClientOverview.vue';
 import Debug from '@/views/Debug.vue';
-import Login from '@/views/moderator/Login.vue';
+import Home from '../views/Home.vue';
+import ModeratorLogin from '@/views/moderator/ModeratorLogin.vue';
+import ModeratorRegister from '@/views/moderator/ModeratorRegister.vue';
+import ModeratorSessionDetails from '@/views/moderator/ModeratorSessionDetails.vue';
+import ModeratorSessionOverview from '@/views/moderator/ModeratorSessionOverview.vue';
+
 import { isAuthenticated } from '@/services/moderator/auth-service';
 
 const routes: Array<RouteRecordRaw> = [
@@ -17,38 +19,38 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/login',
-    name: 'login',
-    component: Login,
+    name: 'moderator-login',
+    component: ModeratorLogin,
   },
   {
     path: '/register',
-    name: 'register',
-    component: Register,
+    name: 'moderator-register',
+    component: ModeratorRegister,
   },
   {
     path: '/join',
-    name: 'join',
-    component: Join,
+    name: 'client-join',
+    component: ClientJoin,
   },
   {
-    path: '/client/:id',
-    name: 'module-overview',
-    component: ModuleOverview,
-    props: (route) => ({ id: route.params.id }),
+    path: '/:sessionKey',
+    name: 'client-overview',
+    component: ClientOverview,
+    props: (route) => ({ sessionKey: route.params.sessionKey }),
   },
   {
-    path: '/overview',
-    name: 'overview',
-    component: SessionOverview,
+    path: '/sessions',
+    name: 'moderator-session-overview',
+    component: ModeratorSessionOverview,
     meta: {
       requiresAuth: true,
     },
   },
   {
-    path: '/:id',
-    name: 'session-detail',
-    component: SessionDetails,
-    props: (route) => ({ id: route.params.id }),
+    path: '/session/:sessionId',
+    name: 'moderator-session-details',
+    component: ModeratorSessionDetails,
+    props: (route) => ({ sessionId: route.params.sessionId }),
     meta: {
       requiresAuth: true,
     },

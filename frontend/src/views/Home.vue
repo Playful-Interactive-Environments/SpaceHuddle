@@ -1,7 +1,7 @@
 <template>
   Moderator
   <nav>
-    <router-link to="overview">Session Overview</router-link>
+    <router-link to="/sessions">Session Overview</router-link>
   </nav>
   Client
   <nav>
