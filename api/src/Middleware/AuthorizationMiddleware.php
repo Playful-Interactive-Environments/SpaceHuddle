@@ -3,6 +3,7 @@
 namespace App\Middleware;
 
 use App\Data\AuthorisationData;
+use App\Data\AuthorisationType;
 use App\Domain\Infrastructure\Repository\InfrastructureRepository;
 use App\Domain\Session\Type\SessionRoleType;
 use Casbin\Exceptions\CasbinException;
@@ -82,12 +83,19 @@ class AuthorizationMiddleware
                             "User has no rights for this entity."
                         );
                 }
-            } else {
+            } elseif (strtoupper($authorisation->type) != strtoupper(AuthorisationType::NONE)) {
                 return $this->responseFactory->createResponse()
                     ->withHeader("Content-Type", "application/json")
                     ->withStatus(
                         StatusCodeInterface::STATUS_FORBIDDEN,
                         "User has no rights for this service."
+                    );
+            } else {
+                return $this->responseFactory->createResponse()
+                    ->withHeader("Content-Type", "application/json")
+                    ->withStatus(
+                        StatusCodeInterface::STATUS_UNAUTHORIZED,
+                        "No valid access token specified."
                     );
             }
         }
@@ -106,6 +114,10 @@ class AuthorizationMiddleware
     {
         $urlData = [];
         $dataEntity = [];
+        $policyPath = str_replace("[/]", "/", $policyPath);
+        if (str_ends_with($policyPath, "/")) {
+            $policyPath = substr_replace($policyPath, "", -1);
+        }
         $policyPathParts = explode("/", $policyPath);
         $uriPathParts = explode("/", $uriPath);
 
@@ -150,19 +162,20 @@ class AuthorizationMiddleware
     {
         $parameterValue = $parameter["value"];
         $parameterEntity = $parameter["entity"];
+        $id = null;
+        $entity = "user";
+
         if (key_exists("id", $parameterValue)) {
             $id = $parameterValue["id"];
             $entity = $parameterEntity["id"];
-            return $this->repository->getAuthorisationRole($authorisation, $entity, $id);
         } elseif (sizeof($parameterValue) > 0) {
             $urlParameterName = array_key_first($parameterValue);
             if (str_ends_with($urlParameterName, "Id")) {
                 $id = $parameterValue[$urlParameterName];
                 $entity = $parameterEntity[$urlParameterName];
-                return $this->repository->getAuthorisationRole($authorisation, $entity, $id);
             }
         }
-        return SessionRoleType::UNKNOWN;
+        return $this->repository->getAuthorisationRole($authorisation, $entity, $id) ?? SessionRoleType::UNKNOWN;
     }
 
     /**

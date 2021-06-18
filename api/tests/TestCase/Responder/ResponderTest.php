@@ -43,44 +43,4 @@ class ResponderTest extends TestCase
         $this->assertSame("https://www.example.com/", $response->getHeaderLine("Location"));
         $this->assertSame("", (string)$response->getBody());
     }
-
-    /**
-     * Test.
-     *
-     * @return void
-     */
-    public function testRedirectUrlWithQueryString(): void
-    {
-        $responder = $this->container->get(Responder::class);
-        $queryParams = ["foo" => "bar"];
-        $response = $responder->withRedirect($this->createResponse(), "https://www.example.com/", $queryParams);
-
-        $this->assertSame(302, $response->getStatusCode());
-        $this->assertSame("https://www.example.com/?foo=bar", $response->getHeaderLine("Location"));
-        $this->assertSame("", (string)$response->getBody());
-    }
-
-    /**
-     * Test.
-     *
-     * @return void
-     */
-    public function testRedirectRouteName(): void
-    {
-        $responder = $this->container->get(Responder::class);
-
-        $this->app->get(
-            "/foo",
-            function ($request, $response) use ($responder) {
-                return $responder->withRedirectFor($response, "foo");
-            }
-        )->setName("foo");
-
-        $request = $this->createRequest("GET", "/foo");
-        $response = $this->app->handle($request);
-
-        $this->assertSame(302, $response->getStatusCode());
-        $this->assertSame("/foo", $response->getHeaderLine("Location"));
-        $this->assertSame("", (string)$response->getBody());
-    }
 }
