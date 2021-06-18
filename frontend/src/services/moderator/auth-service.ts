@@ -1,16 +1,14 @@
+const JWT_KEY = 'jwt';
+
 export const isAuthenticated = (): boolean => {
-  return true;
+  const jwtFromStorage = getJwt();
+  return !!jwtFromStorage;
 };
 
-let jwt = '';
-
-export const setDebuggingJwt = (customJwt: string): void => {
-  jwt = customJwt;
+export const setDebuggingJwt = (jwt: string): void => {
   window.localStorage.setItem('jwt', jwt);
 };
 
 export const getJwt = (): string | null => {
-  const jwtFromStorage = window.localStorage.getItem('jwt');
-  if (jwtFromStorage) return jwtFromStorage;
-  return null;
+  return window.localStorage.getItem(JWT_KEY);
 };
