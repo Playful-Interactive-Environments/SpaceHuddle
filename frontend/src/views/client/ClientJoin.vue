@@ -72,7 +72,7 @@ export default class ClientJoin extends Vue {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .join {
   padding-top: 3rem;
   color: #fff;

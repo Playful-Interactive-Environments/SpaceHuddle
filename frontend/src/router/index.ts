@@ -16,6 +16,7 @@ import ModeratorVoting from '@/views/moderator/ModeratorVoting.vue';
 import NotFound from '@/views/shared/NotFound.vue';
 
 import { isAuthenticated } from '@/services/auth-service';
+import ClientBrainstorming from '@/views/client/ModeratorBrainstorming.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -132,6 +133,11 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/:catchAll(.*)',
     component: NotFound,
+  },
+  {
+    path: '/brainstorming',
+    name: 'client-brainstorming',
+    component: ClientBrainstorming,
   },
 ];
 
