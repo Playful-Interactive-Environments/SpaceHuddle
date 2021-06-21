@@ -40,7 +40,11 @@ class AuthorizationMiddleware
         ResponseFactoryInterface $responseFactory,
         InfrastructureRepository $repository
     ) {
+
         $this->enforcer = $enforcer;
+        $this->enforcer->addFunction("getDefaultRoleFromType", function (string $type): string {
+            return SessionRoleType::mapAuthorisationType($type);
+        });
         $this->responseFactory = $responseFactory;
         $this->repository = $repository;
     }
@@ -64,18 +68,21 @@ class AuthorizationMiddleware
         $action = $request->getMethod();
         // Get a URI/path without the basepath (now its /GAB/api/...)
         $uriPath = $this->removeBaseUrl($uri->getPath());
+        if (!str_ends_with($uriPath, "/")) {
+            $uriPath = $uriPath . "/";
+        }
 
         // Extract the form data from the request body
         $bodyData = $request->getParsedBody();
 
         if ($authorisation) {
             $authorisationType = strtoupper($authorisation->type);
-            $policy = $this->enforcer->enforceEx($authorisationType, $uriPath, $action);
+            $policy = $this->enforcer->enforceEx($authorisationType, "ROUTE", $uriPath, $action);
             if ($policy && $policy[0]) {
                 $policyPath = $policy[1][1];
                 $parameter = $this->parseParameter($uriPath, $policyPath, $bodyData);
                 $role = strtoupper($this->getRole($authorisation, $parameter));
-                if (!$this->enforcer->enforce($role, $uriPath, $action)) {
+                if (!$this->enforcer->enforce($authorisationType, $role, $uriPath, $action)) {
                     return $this->responseFactory->createResponse()
                         ->withHeader("Content-Type", "application/json")
                         ->withStatus(

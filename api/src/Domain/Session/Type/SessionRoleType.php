@@ -37,13 +37,13 @@ class SessionRoleType
      */
     public static function mapAuthorisationType(string $authorisationRoleType): string
     {
-        if ($authorisationRoleType === AuthorisationType::USER) {
+        if (strtoupper($authorisationRoleType) === strtoupper(AuthorisationType::USER)) {
             return strtoupper(self::MODERATOR);
         }
-        if ($authorisationRoleType === AuthorisationType::PARTICIPANT) {
+        if (strtoupper($authorisationRoleType) === strtoupper(AuthorisationType::PARTICIPANT)) {
             return strtoupper(self::PARTICIPANT);
         }
-        if ($authorisationRoleType === AuthorisationType::NONE) {
+        if (strtoupper($authorisationRoleType) === strtoupper(AuthorisationType::NONE)) {
             return strtoupper(self::UNKNOWN);
         }
         return strtoupper(self::UNKNOWN);

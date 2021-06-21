@@ -19,6 +19,7 @@ use Fig\Http\Message\StatusCodeInterface;
  *     @OA\JsonContent(ref="#/components/schemas/SessionData"),
  *   ),
  *   @OA\Response(response="404", description="Not Found"),
+ *   @OA\Response(response="403", ref="#/components/responses/403"),
  *   security={{"api_key": {}}, {"bearerAuth": {}}}
  * )
  */
