@@ -5,7 +5,6 @@ namespace App\Action\Base;
 
 use App\Data\AuthorisationData;
 use App\Data\AuthorisationException;
-use App\Domain\Base\Service\ServiceInterface;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseInterface;

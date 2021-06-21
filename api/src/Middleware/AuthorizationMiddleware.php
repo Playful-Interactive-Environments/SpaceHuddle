@@ -13,6 +13,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Casbin\Enforcer;
+use Slim\Routing\RouteContext;
 
 /**
  * Authorization middleware using Casbin.
@@ -72,15 +73,10 @@ class AuthorizationMiddleware
             $uriPath = $uriPath . "/";
         }
 
-        // Extract the form data from the request body
-        $bodyData = $request->getParsedBody();
-
         if ($authorisation) {
             $authorisationType = strtoupper($authorisation->type);
-            $policy = $this->enforcer->enforceEx($authorisationType, "ROUTE", $uriPath, $action);
-            if ($policy && $policy[0]) {
-                $policyPath = $policy[1][1];
-                $parameter = $this->parseParameter($uriPath, $policyPath, $bodyData);
+            if ($this->enforcer->enforce($authorisationType, "ROUTE", $uriPath, $action)) {
+                $parameter = $this->parseParameter($request);
                 $role = strtoupper($this->getRole($authorisation, $parameter));
                 if (!$this->enforcer->enforce($authorisationType, $role, $uriPath, $action)) {
                     return $this->responseFactory->createResponse()
@@ -112,49 +108,40 @@ class AuthorizationMiddleware
 
     /**
      * Determine url and body parameters and associated entity.
-     * @param string $uriPath Request url
-     * @param string $policyPath Connected polity url
-     * @param array|null $bodyData Body parameter
+     * @param ServerRequestInterface $request PSR-7 request
      * @return array Contained parameters
      */
-    private function parseParameter(string $uriPath, string $policyPath, ?array $bodyData): array
+    private function parseParameter(ServerRequestInterface $request): array
     {
-        $urlData = [];
+        $routeContext = RouteContext::fromRequest($request);
+        $route = $routeContext->getRoute();
+
+        $pattern = explode("/", str_replace("[/]", "/", $route->getPattern()));
+        $pattern = array_filter($pattern, fn($value) => !is_null($value) && $value !== '');
+
         $dataEntity = [];
-        $policyPath = str_replace("[/]", "/", $policyPath);
-        if (str_ends_with($policyPath, "/")) {
-            $policyPath = substr_replace($policyPath, "", -1);
-        }
-        $policyPathParts = explode("/", $policyPath);
-        $uriPathParts = explode("/", $uriPath);
-
-        if ($bodyData) {
-            $bodyKeys = array_keys($bodyData);
-            foreach ($bodyKeys as $bodyKey) {
-                $dataEntity[$bodyKey] = end($policyPathParts);
+        $bodyData = [];
+        if ($request->getMethod() == "PUT") {
+            // Extract the form data from the request body
+            $body = $request->getParsedBody() ?? [];
+            if (array_key_exists("id")) {
+                $bodyData["id"] = $body["id"];
+                $dataEntity["id"] = end($pattern);
             }
         }
 
-        for ($i = 0; $i < sizeof($policyPathParts); $i++) {
-            $element = $policyPathParts[$i];
-            if (str_starts_with($element, ":")) {
-                $element = substr_replace($element, "", 0, 1);
-                $urlData[$element] = $uriPathParts[$i];
-                $dataEntity[$element] = $policyPathParts[$i-1];
+        $urlData = $route->getArguments();
+        $data = array_merge($bodyData, $urlData);
+
+        foreach (array_keys($urlData) as $key) {
+            $paramIndex = array_search("{{$key}}", $pattern);
+            if ($paramIndex > 0) {
+                $dataEntity[$key] = $pattern[$paramIndex-1];
             }
-        }
-
-        if ($bodyData) {
-            $data = array_merge($bodyData, $urlData);
-
-            return [
-                "value" => $data,
-                "entity" => $dataEntity
-            ];
         }
 
         return [
-            "value" => $urlData,
+            "value" => $data,
             "entity" => $dataEntity
         ];
     }
