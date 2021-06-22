@@ -5,20 +5,26 @@ namespace App\Middleware;
 use App\Data\AuthorisationType;
 use App\Domain\Infrastructure\Service\PermissionService;
 use App\Domain\Session\Type\SessionRoleType;
+use Casbin\Enforcer;
 use Casbin\Exceptions\CasbinException;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Http\Message\ResponseInterface;
-use Casbin\Enforcer;
+use Slim\App;
 use Slim\Routing\RouteContext;
 
 /**
  * Authorization middleware using Casbin.
  */
-class AuthorizationMiddleware
+final class AuthorizationMiddleware
 {
+    /**
+     * @var App
+     */
+    private App $app;
+
     /**
      * @var Enforcer
      */
@@ -35,16 +41,18 @@ class AuthorizationMiddleware
     private PermissionService $service;
 
     /**
+     * @param App $app The Slim app.
      * @param Enforcer $enforcer Casbin Enforcer class.
      * @param ResponseFactoryInterface $responseFactory The response factory.
-     * @param PermissionService $service The permission service
+     * @param PermissionService $service The permission service.
      */
     public function __construct(
+        App $app,
         Enforcer $enforcer,
         ResponseFactoryInterface $responseFactory,
         PermissionService $service
     ) {
-
+        $this->app = $app;
         $this->enforcer = $enforcer;
         $this->responseFactory = $responseFactory;
         $this->service = $service;
@@ -73,8 +81,8 @@ class AuthorizationMiddleware
 
         $uri = $request->getUri();
         $action = $request->getMethod();
-        // Get a URI/path without the basepath (now its /GAB/api/...)
-        $uriPath = $this->removeBaseUrl($uri->getPath());
+        // Get a URI/path without the base path
+        $uriPath = $this->removeBasePath($uri->getPath());
         if (!str_ends_with($uriPath, "/")) {
             $uriPath = $uriPath . "/";
         }
@@ -124,17 +132,18 @@ class AuthorizationMiddleware
     }
 
     /**
-     * Get a URI/path without the base path (now its /GAB/api/...)
-     * @param string $uriPath Uri with base path
-     * @return string Uri without base path
+     * Get a URI/path without the base path.
+     * @param string $uriPath URI with including the base path.
+     * @return string URI without the base path.
      */
-    private function removeBaseUrl(string $uriPath): string
+    private function removeBasePath(string $uriPath): string
     {
-        $indexPath = "/public/index.php";
-        $scriptName = $_SERVER['SCRIPT_NAME'];
+        $basePath = $this->app->getBasePath();
 
-        // base url
-        $baseUrl = str_replace($indexPath, "", $scriptName);
-        return str_replace($baseUrl, "", $uriPath);
+        if (empty($basePath) || !str_starts_with($uriPath, $basePath)) {
+            return $uriPath;
+        }
+
+        return substr($uriPath, strlen($basePath)) ?: "/";
     }
 }
