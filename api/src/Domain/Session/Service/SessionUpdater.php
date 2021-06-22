@@ -3,8 +3,6 @@
 namespace App\Domain\Session\Service;
 
 use App\Data\AuthorisationData;
-use App\Data\AuthorisationException;
-use App\Data\AuthorisationType;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\ServiceUpdaterTrait;
 use App\Domain\Session\Type\SessionRoleType;
@@ -20,19 +18,6 @@ class SessionUpdater
     use SessionServiceTrait;
 
     /**
-     * Define authorised roles for the service.
-     */
-    protected function setPermission(): void
-    {
-        $this->authorisationPermissionList = [
-            AuthorisationType::USER
-        ];
-        $this->entityPermissionList = [
-            SessionRoleType::MODERATOR
-        ];
-    }
-
-    /**
      * Functionality of the update service.
      *
      * @param AuthorisationData $authorisation Authorisation data
@@ -40,7 +25,7 @@ class SessionUpdater
      * @param array<string, mixed> $urlData Url parameter from the request
      *
      * @return array|object|null Service output
-     * @throws AuthorisationException|GenericException
+     * @throws GenericException
      */
     public function service(
         AuthorisationData $authorisation,

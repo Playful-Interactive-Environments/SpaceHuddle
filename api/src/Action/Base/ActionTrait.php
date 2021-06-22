@@ -4,7 +4,6 @@
 namespace App\Action\Base;
 
 use App\Data\AuthorisationData;
-use App\Data\AuthorisationException;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -38,7 +37,6 @@ trait ActionTrait
      * @param array $args Url parameter
      *
      * @return ResponseInterface The response
-     * @throws AuthorisationException
      */
     public function __invoke(
         ServerRequestInterface $request,
@@ -63,7 +61,6 @@ trait ActionTrait
      * @param array<string, mixed> $bodyData Form data from the request body
      * @param array<string, mixed> $urlData Url parameter from the request
      * @return mixed service result
-     * @throws AuthorisationException
      */
     protected function executeService(
         AuthorisationData $authorisation,

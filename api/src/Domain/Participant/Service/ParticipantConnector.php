@@ -3,7 +3,6 @@
 namespace App\Domain\Participant\Service;
 
 use App\Data\AuthorisationData;
-use App\Data\AuthorisationException;
 use App\Database\TransactionInterface;
 use App\Domain\Base\Data\TokenData;
 use App\Domain\Base\Repository\GenericException;
@@ -55,14 +54,13 @@ class ParticipantConnector
      * @param array<string, mixed> $urlData Url parameter from the request
      *
      * @return array|object|null Service output
-     * @throws AuthorisationException|GenericException
+     * @throws GenericException
      */
     public function service(
         AuthorisationData $authorisation,
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $this->checkPermission($authorisation, $urlData);
         $data = array_merge($bodyData, $urlData);
 
         // Input validation

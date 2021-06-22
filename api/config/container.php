@@ -8,8 +8,6 @@ use App\Routing\JwtAuth;
 use App\Database\Transaction;
 use App\Database\TransactionInterface;
 use App\Handler\PDOErrorHandling;
-use App\Handler\AuthorisationErrorHandling;
-use App\Data\AuthorisationException;
 use Cake\Database\Connection;
 use Casbin\Enforcer;
 use Lcobucci\JWT\Configuration;
@@ -131,10 +129,6 @@ return [
         $errorMiddleware->setErrorHandler(
             PDOException::class,
             PDOErrorHandling::class
-        );
-        $errorMiddleware->setErrorHandler(
-            AuthorisationException::class,
-            AuthorisationErrorHandling::class
         );
         $errorMiddleware->setErrorHandler(
             GenericException::class,

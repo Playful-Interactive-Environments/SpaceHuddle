@@ -11,8 +11,6 @@ use Psr\Log\LoggerInterface;
  */
 trait BaseServiceTrait
 {
-    use ServicePermissionTrait;
-
     protected TransactionInterface $transaction;
     protected LoggerInterface $logger;
 
@@ -31,6 +29,5 @@ trait BaseServiceTrait
         $this->logger = $loggerFactory
             ->addFileHandler("service.log")
             ->createLogger();
-        $this->setPermission();
     }
 }

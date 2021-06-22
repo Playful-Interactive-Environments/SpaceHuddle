@@ -2,7 +2,6 @@
 
 namespace App\Domain\User\Service;
 
-use App\Data\AuthorisationException;
 use App\Database\TransactionInterface;
 use App\Data\AuthorisationData;
 use App\Domain\Base\Data\TokenData;
@@ -53,14 +52,13 @@ final class UserLogin
      * @param array<string, mixed> $urlData Url parameter from the request
      *
      * @return array|object|null Service output
-     * @throws AuthorisationException|GenericException
+     * @throws GenericException
      */
     public function service(
         AuthorisationData $authorisation,
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $this->checkPermission($authorisation, $urlData);
         $data = array_merge($bodyData, $urlData);
 
         // Input validation

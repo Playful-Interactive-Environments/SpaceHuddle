@@ -3,11 +3,8 @@
 namespace App\Domain\Session\Service;
 
 use App\Data\AuthorisationData;
-use App\Data\AuthorisationException;
-use App\Data\AuthorisationType;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\BaseServiceTrait;
-use App\Domain\Session\Type\SessionRoleType;
 
 /**
  * Read all session service
@@ -19,22 +16,6 @@ class SessionSingleReader
     use SessionServiceTrait;
 
     /**
-     * Define authorised roles for the service.
-     */
-    protected function setPermission(): void
-    {
-        $this->authorisationPermissionList = [
-            AuthorisationType::USER,
-            AuthorisationType::PARTICIPANT
-        ];
-        $this->entityPermissionList = [
-            SessionRoleType::MODERATOR,
-            SessionRoleType::FACILITATOR,
-            SessionRoleType::PARTICIPANT
-        ];
-    }
-
-    /**
      * Functionality of the read single entity service.
      *
      * @param AuthorisationData $authorisation Authorisation data
@@ -42,14 +23,13 @@ class SessionSingleReader
      * @param array<string, mixed> $urlData Url parameter from the request
      *
      * @return array|object|null Service output
-     * @throws AuthorisationException|GenericException
+     * @throws GenericException
      */
     public function service(
         AuthorisationData $authorisation,
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $this->checkPermission($authorisation, $urlData);
         $id = $urlData["id"];
         return $this->repository->getByIdAuthorised($id, $authorisation);
     }

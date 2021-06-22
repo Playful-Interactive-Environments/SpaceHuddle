@@ -10,7 +10,7 @@ use Slim\Interfaces\ErrorHandlerInterface;
 use Throwable;
 
 /**
- * Class AuthorisationErrorHandling
+ * Class GenericErrorHandling
  * @package App\Domain\Base\Data
  */
 class GenericErrorHandling implements ErrorHandlerInterface

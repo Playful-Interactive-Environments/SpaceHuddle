@@ -4,7 +4,6 @@ namespace App\Action\User;
 
 use App\Action\Base\ActionTrait;
 use App\Data\AuthorisationData;
-use App\Data\AuthorisationException;
 use App\Domain\User\Service\UserDeleter;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -45,7 +44,6 @@ final class UserDeleteAction
      * @param array $bodyData Form data from the request body
      * @param array $urlData Url parameter from the request
      * @return mixed service result
-     * @throws AuthorisationException
      */
     protected function executeService(
         AuthorisationData $authorisation,

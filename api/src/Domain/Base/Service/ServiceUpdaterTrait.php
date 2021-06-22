@@ -3,9 +3,7 @@
 
 namespace App\Domain\Base\Service;
 
-use App\Data\AuthorisationException;
 use App\Data\AuthorisationData;
-use App\Domain\Base\Repository\GenericException;
 
 /**
  * Description of the common update service functionality.
@@ -23,7 +21,6 @@ trait ServiceUpdaterTrait
      * @param array<string, mixed> $urlData Url parameter from the request
      *
      * @return array|object|null Service output
-     * @throws AuthorisationException|GenericException
      */
     public function service(
         AuthorisationData $authorisation,
@@ -32,8 +29,6 @@ trait ServiceUpdaterTrait
     ): array|object|null {
         $data = array_merge($bodyData, $urlData);
         $id = $data["id"];
-
-        $this->checkPermission($authorisation, $data);
 
         // Input validation
         $this->validator->validateUpdate($id, $data);
