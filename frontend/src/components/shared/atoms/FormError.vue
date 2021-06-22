@@ -1,7 +1,7 @@
 <template>
   <ul class="form-error">
     <li v-for="error in errors" class="form-error__message" :key="error">
-      {{ error }}
+      {{ typeof error === 'string' ? error : error.$message }}
     </li>
   </ul>
 </template>
@@ -9,9 +9,10 @@
 <script lang="ts">
 import { Prop } from 'vue-property-decorator';
 import { Vue } from 'vue-class-component';
+import { ErrorObject } from '@vuelidate/core';
 
-export default class FormErrors extends Vue {
-  @Prop({ default: [] }) errors?: string[];
+export default class FormError extends Vue {
+  @Prop() errors!: string[] | ErrorObject[];
 }
 </script>
 
