@@ -43,9 +43,6 @@ class AuthorizationMiddleware
     ) {
 
         $this->enforcer = $enforcer;
-        $this->enforcer->addFunction("getDefaultRoleFromType", function (string $type): string {
-            return SessionRoleType::mapAuthorisationType($type);
-        });
         $this->responseFactory = $responseFactory;
         $this->repository = $repository;
     }
@@ -75,7 +72,12 @@ class AuthorizationMiddleware
 
         if ($authorisation) {
             $authorisationType = strtoupper($authorisation->type);
-            if ($this->enforcer->enforce($authorisationType, "ROUTE", $uriPath, $action)) {
+            if ($this->enforcer->enforce(
+                $authorisationType,
+                SessionRoleType::mapAuthorisationType($authorisationType),
+                $uriPath,
+                $action
+            )) {
                 $parameter = $this->parseParameter($request);
                 $role = strtoupper($this->getRole($authorisation, $parameter));
                 if (!$this->enforcer->enforce($authorisationType, $role, $uriPath, $action)) {
