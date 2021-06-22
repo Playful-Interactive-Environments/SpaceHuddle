@@ -2,9 +2,8 @@
 
 namespace App\Middleware;
 
-use App\Data\AuthorisationData;
 use App\Data\AuthorisationType;
-use App\Domain\Infrastructure\Repository\InfrastructureRepository;
+use App\Domain\Infrastructure\Service\PermissionService;
 use App\Domain\Session\Type\SessionRoleType;
 use Casbin\Exceptions\CasbinException;
 use Fig\Http\Message\StatusCodeInterface;
@@ -29,22 +28,26 @@ class AuthorizationMiddleware
      * @var ResponseFactoryInterface
      */
     private ResponseFactoryInterface $responseFactory;
-    private InfrastructureRepository $repository;
+
+    /**
+     * @var PermissionService
+     */
+    private PermissionService $service;
 
     /**
      * @param Enforcer $enforcer Casbin Enforcer class.
      * @param ResponseFactoryInterface $responseFactory The response factory.
-     * @param InfrastructureRepository $repository The infrastructure repository
+     * @param PermissionService $service The permission service
      */
     public function __construct(
         Enforcer $enforcer,
         ResponseFactoryInterface $responseFactory,
-        InfrastructureRepository $repository
+        PermissionService $service
     ) {
 
         $this->enforcer = $enforcer;
         $this->responseFactory = $responseFactory;
-        $this->repository = $repository;
+        $this->service = $service;
     }
 
     /**
@@ -61,6 +64,12 @@ class AuthorizationMiddleware
         RequestHandlerInterface $handler
     ): ResponseInterface {
         $authorisation = $request->getAttribute('authorisation');
+        $bodyData = $request->getParsedBody();
+
+        $routeContext = RouteContext::fromRequest($request);
+        $route = $routeContext->getRoute();
+        $urlData = $route->getArguments();
+        $urlPattern = $route->getPattern();
 
         $uri = $request->getUri();
         $action = $request->getMethod();
@@ -78,9 +87,15 @@ class AuthorizationMiddleware
                 $uriPath,
                 $action
             )) {
-                $parameter = $this->parseParameter($request);
-                $role = strtoupper($this->getRole($authorisation, $parameter));
-                if (!$this->enforcer->enforce($authorisationType, $role, $uriPath, $action)) {
+                $sessionRole = $this->service->service(
+                    $authorisation,
+                    $bodyData,
+                    $urlData,
+                    $urlPattern,
+                    $action,
+                    false
+                );
+                if (!$this->enforcer->enforce($authorisationType, $sessionRole, $uriPath, $action)) {
                     return $this->responseFactory->createResponse()
                         ->withHeader("Content-Type", "application/json")
                         ->withStatus(
@@ -106,72 +121,6 @@ class AuthorizationMiddleware
         }
 
         return $handler->handle($request);
-    }
-
-    /**
-     * Determine url and body parameters and associated entity.
-     * @param ServerRequestInterface $request PSR-7 request
-     * @return array Contained parameters
-     */
-    private function parseParameter(ServerRequestInterface $request): array
-    {
-        $routeContext = RouteContext::fromRequest($request);
-        $route = $routeContext->getRoute();
-
-        $pattern = explode("/", str_replace("[/]", "/", $route->getPattern()));
-        $pattern = array_filter($pattern, fn($value) => !is_null($value) && $value !== '');
-
-        $dataEntity = [];
-        $bodyData = [];
-        if ($request->getMethod() == "PUT") {
-            // Extract the form data from the request body
-            $body = $request->getParsedBody() ?? [];
-            if (array_key_exists("id")) {
-                $bodyData["id"] = $body["id"];
-                $dataEntity["id"] = end($pattern);
-            }
-        }
-
-        $urlData = $route->getArguments();
-        $data = array_merge($bodyData, $urlData);
-
-        foreach (array_keys($urlData) as $key) {
-            $paramIndex = array_search("{{$key}}", $pattern);
-            if ($paramIndex > 0) {
-                $dataEntity[$key] = $pattern[$paramIndex-1];
-            }
-        }
-
-        return [
-            "value" => $data,
-            "entity" => $dataEntity
-        ];
-    }
-
-    /**
-     * Determines the session role
-     * @param AuthorisationData $authorisation Authorisation data
-     * @param array<string, mixed> $parameter Parameters and associated entities.
-     * @return string Session role
-     */
-    protected function getRole(AuthorisationData $authorisation, array $parameter): string
-    {
-        $parameterValue = $parameter["value"];
-        $parameterEntity = $parameter["entity"];
-        $id = null;
-        $entity = "user";
-
-        if (key_exists("id", $parameterValue)) {
-            $id = $parameterValue["id"];
-            $entity = $parameterEntity["id"];
-        } elseif (sizeof($parameterValue) > 0) {
-            $urlParameterName = array_key_first($parameterValue);
-            if (str_ends_with($urlParameterName, "Id")) {
-                $id = $parameterValue[$urlParameterName];
-                $entity = $parameterEntity[$urlParameterName];
-            }
-        }
-        return $this->repository->getAuthorisationRole($authorisation, $entity, $id) ?? SessionRoleType::UNKNOWN;
     }
 
     /**
