@@ -2,10 +2,10 @@
   <div class="idea-card">
     <div>
       <div class="idea-card__idea">
-        {{ hasKeywords ? keywords : description }}
+        {{ hasKeywords ? idea.keywords : idea.description }}
       </div>
       <div v-if="hasKeywords" class="idea-card__description">
-        {{ description }}
+        {{ idea.description }}
       </div>
     </div>
     <div class="idea-card__delete" @click="deleteIdea"></div>
@@ -17,21 +17,20 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import * as ideaService from '@/services/moderator/idea-service';
 import * as taskService from '@/services/moderator/task-service';
+import { Idea } from '@/services/moderator/idea-service';
 
 @Options({
   components: {},
 })
 export default class Toggle extends Vue {
-  @Prop({ default: null }) id!: string;
-  @Prop({ default: null }) keywords?: string;
-  @Prop({ default: '' }) description?: string;
+  @Prop({ default: null }) idea!: Idea;
 
   get hasKeywords(): boolean {
-    return !!(this.keywords && this.keywords.length > 0);
+    return !!(this.idea.keywords && this.idea.keywords.length > 0);
   }
 
   async deleteIdea(): Promise<void> {
-    await ideaService.deleteIdea(this.id);
+    await ideaService.deleteIdea(this.idea.id);
     this.$emit('ideaDeleted');
   }
 }

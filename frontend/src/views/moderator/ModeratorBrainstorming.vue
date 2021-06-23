@@ -10,9 +10,7 @@
       />
       <main class="brainstorming__content">
         <IdeaCard
-          :id="idea.id"
-          :keywords="idea.keywords"
-          :description="idea.description"
+          :idea="idea"
           v-for="(idea, index) in ideas"
           :key="index"
           @ideaDeleted="getIdeas"
