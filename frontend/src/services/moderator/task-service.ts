@@ -9,7 +9,7 @@ export interface Task {
   name: string;
   parameter: any; // TODO: ask what options can be provided
   order: number;
-  state: TaskStates; // TODO ask what possible states a task can be in - WAIT,
+  state: TaskStates; // TODO: ask what possible states a task can be in - WAIT,
 }
 
 const API_TASK_ENDPOINT = apiEndpoint(EndpointType.TASK);

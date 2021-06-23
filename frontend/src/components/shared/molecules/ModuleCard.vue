@@ -37,6 +37,7 @@ import ModuleColors from '@/types/ModuleColors';
 import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import Toggle from '@/components/moderator/atoms/Toggle.vue';
+import { setModuleStyles } from '../../../utils/moduleStyles';
 
 @Options({
   components: {
@@ -52,23 +53,11 @@ export default class ModuleCard extends Vue {
   public ModuleType = ModuleType;
 
   mounted(): void {
-    this.setModuleStyles();
+    setModuleStyles(this.$refs.item as HTMLElement, this.type);
   }
 
   updated(): void {
-    this.setModuleStyles();
-  }
-
-  private setModuleStyles(): void {
-    (this.$refs.item as HTMLElement).style.setProperty(
-      '--module-color',
-      ModuleColors[this.type]
-    );
-    // TODO: add Planet images
-    (this.$refs.item as HTMLElement).style.setProperty(
-      '--module-planet',
-      `/assets/illustrations/${this.type}.png`
-    );
+    setModuleStyles(this.$refs.item as HTMLElement, this.type);
   }
 }
 </script>
@@ -97,6 +86,7 @@ export default class ModuleCard extends Vue {
     display: flex;
     flex-direction: column;
     margin-left: 3rem;
+    width: 12rem;
   }
 
   &__drag {

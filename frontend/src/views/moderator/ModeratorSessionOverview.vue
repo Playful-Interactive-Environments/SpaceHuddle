@@ -9,7 +9,7 @@
           }}</template>
           <template v-slot:title> {{ session.title }} </template>
           <template v-slot:description>
-            short description about the goals of this session and other stuff...
+            {{ session.description }}
           </template>
           <template v-slot:default>
             <SessionCode :code="session.connectionKey" :hasBorder="true" />

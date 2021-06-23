@@ -2,43 +2,58 @@
   <section class="sidebar">
     <div class="sidebar__top">
       <div class="sidebar__logo"></div>
+      <!-- <router-link :to="`/session/${session.id}`"></router-link> -->
       <div class="sidebar__row">
-        <div>{{ formatDate(session.creationDate) }}</div>
+        <div>{{ pretitle }}</div>
         <div class="sidebar__icon" aria-label="settings" role="button"></div>
       </div>
       <h1 class="heading heading--regular heading--white">
-        {{ session.title }}
+        {{ title }}
       </h1>
       <div class="sidebar__text">
-        Short description about the goals of this session and other stuff ...
+        {{ description }}
       </div>
-      <ModuleCount />
+      <ModuleCount v-if="session" />
     </div>
     <div class="sidebar__bottom">
-      <SessionCode :code="session.connectionKey" />
-      <button class="btn btn--mint btn--fullwidth">Public Screen</button>
+      <SessionCode :code="session.connectionKey" v-if="session" />
+      <div class="sidebar__toggles" v-else>
+        <Toggle label="Active" v-if="!(type === ModuleType.SELECTION)" />
+        <Toggle label="Public Screen" />
+      </div>
+      <button
+        class="btn btn--mint btn--fullwidth"
+        :class="{ sidebar__button: !session }"
+      >
+        Public Screen
+      </button>
     </div>
   </section>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
-import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import { Prop } from 'vue-property-decorator';
 import { Session } from '@/services/moderator/session-service';
-import { formatDate } from '@/utils/date';
+import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
+import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
+import Toggle from '@/components/moderator/atoms/Toggle.vue';
+import ModuleType from '../../../types/ModuleType';
 
 @Options({
   components: {
     ModuleCount,
     SessionCode,
+    Toggle,
   },
 })
 export default class Sidebar extends Vue {
-  @Prop() readonly session!: Session;
+  @Prop({ default: null }) readonly session!: Session;
+  @Prop({ default: '' }) readonly title!: string;
+  @Prop({ default: '' }) readonly pretitle!: string;
+  @Prop({ default: '' }) readonly description!: string;
 
-  formatDate = formatDate;
+  ModuleType = ModuleType;
 }
 </script>
 
@@ -91,6 +106,14 @@ export default class Sidebar extends Vue {
 
   &__text {
     margin-bottom: 1.5rem;
+  }
+
+  &__toggles {
+    margin-bottom: 1rem;
+  }
+
+  &__button {
+    background-color: var(--module-color);
   }
 }
 </style>

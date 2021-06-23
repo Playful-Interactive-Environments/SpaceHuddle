@@ -8,6 +8,7 @@ import ModeratorLogin from '@/views/moderator/ModeratorLogin.vue';
 import ModeratorRegister from '@/views/moderator/ModeratorRegister.vue';
 import ModeratorSessionDetails from '@/views/moderator/ModeratorSessionDetails.vue';
 import ModeratorSessionOverview from '@/views/moderator/ModeratorSessionOverview.vue';
+import ModeratorBrainstorming from '@/views/moderator/ModeratorBrainstorming.vue';
 
 import { isAuthenticated } from '@/services/moderator/auth-service';
 
@@ -28,17 +29,6 @@ const routes: Array<RouteRecordRaw> = [
     component: ModeratorRegister,
   },
   {
-    path: '/join',
-    name: 'client-join',
-    component: ClientJoin,
-  },
-  {
-    path: '/:sessionKey',
-    name: 'client-overview',
-    component: ClientOverview,
-    props: (route) => ({ sessionKey: route.params.sessionKey }),
-  },
-  {
     path: '/sessions',
     name: 'moderator-session-overview',
     component: ModeratorSessionOverview,
@@ -54,6 +44,26 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       requiresAuth: true,
     },
+  },
+  {
+    path: '/task/:taskId',
+    name: 'moderator-brainstorming',
+    component: ModeratorBrainstorming,
+    props: (route) => ({ taskId: route.params.taskId }),
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/join',
+    name: 'client-join',
+    component: ClientJoin,
+  },
+  {
+    path: '/:sessionKey',
+    name: 'client-overview',
+    component: ClientOverview,
+    props: (route) => ({ sessionKey: route.params.sessionKey }),
   },
   {
     path: '/debug',

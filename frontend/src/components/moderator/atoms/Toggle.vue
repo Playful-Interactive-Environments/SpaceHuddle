@@ -26,7 +26,6 @@ export default class Toggle extends Vue {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 12rem;
 
   + .toggle {
     margin-top: 0.5rem;
