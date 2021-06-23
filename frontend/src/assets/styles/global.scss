@@ -58,14 +58,13 @@ body {
 
   &--small {
     font-size: var(--font-size-large);
-    font-weight: var(--font-weight-semibold);
     margin: 0.5rem 0;
   }
 
   &--xs {
     font-size: var(--font-size-default);
     font-weight: var(--font-weight-semibold);
-    margin: 0.5rem 0;
+    margin: 0.5rem 0 0.3rem;
   }
 
   &--white {

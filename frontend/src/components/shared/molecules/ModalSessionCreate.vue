@@ -1,16 +1,16 @@
 <template>
   <ModalBase
-    v-model:show-modal="showModal"
+    :showModal="showModal"
     @update:showModal="$emit('update:showModal', $event)"
   >
-    <div class="modal">
-      <h2>Create Session</h2>
+    <div class="session-create">
+      <h2 class="heading heading--regular">Create Session</h2>
       <p>
         The session is the place that bundles all information belonging to your
         brainstorming adventure.
       </p>
-      <form>
-        <label for="title" class="label">Title</label>
+      <form class="session-create__form">
+        <label for="title" class="heading heading--xs">Title</label>
         <input
           id="title"
           v-model="title"
@@ -18,12 +18,13 @@
           placeholder="e.g. Marketing Meeting"
           @blur="context.$v.title.$touch()"
         />
-        <form-error
+        <FormError
           v-if="context.$v.title.$error"
           :errors="context.$v.title.$errors"
+          :isSmall="true"
         />
 
-        <label for="description" class="label">Description</label>
+        <label for="description" class="heading heading--xs">Description</label>
         <textarea
           id="description"
           v-model="description"
@@ -32,17 +33,18 @@
           placeholder="e.g. The purpose of the meeting is to come up with new ideas our new app."
           @blur="context.$v.description.$touch"
         />
-        <form-error
+        <FormError
           v-if="context.$v.description.$error"
           :errors="context.$v.description.$errors"
+          :isSmall="true"
         />
-        <h3>Topics</h3>
+        <h3 class="session-create__topic heading heading--small">Topics</h3>
         <p>
           Topics help to make a clear distinction between subjects that should
           have separate brainstorming modules. Tip: Keep it simple - one or two
           topics are usually enough!
         </p>
-        <label for="topic">Topic 1</label>
+        <label for="topic" class="heading heading--xs">Topic 1</label>
         <input
           id="topic"
           v-model="topic"
@@ -50,9 +52,10 @@
           placeholder="e.g. New app Name"
           @blur="context.$v.topic.$touch()"
         />
-        <form-error
+        <FormError
           v-if="context.$v.topic.$error"
           :errors="context.$v.topic.$errors"
+          :isSmall="true"
         />
         <button
           type="submit"
@@ -72,7 +75,6 @@ import { Prop } from 'vue-property-decorator';
 import useVuelidate from '@vuelidate/core';
 import { maxLength, required } from '@vuelidate/validators';
 
-import AddItemSubtle from '@/components/moderator/atoms/AddItemSubtle.vue';
 import FormError from '@/components/shared/atoms/FormError.vue';
 import ModalBase from '@/components/shared/molecules/ModalBase.vue';
 
@@ -80,7 +82,6 @@ import * as sessionService from '@/services/moderator/session-service';
 
 @Options({
   components: {
-    AddItemSubtle,
     FormError,
     ModalBase,
   },
@@ -141,22 +142,24 @@ export default class ModalSessionCreate extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.modal {
+.session-create {
   display: flex;
   flex-direction: column;
   padding: 0 1rem;
-}
+  line-height: 1.2;
 
-form {
-  display: flex;
-  flex-direction: column;
-}
+  &__form {
+    display: flex;
+    flex-direction: column;
 
-.topic-group {
-  display: flex;
+    input,
+    textarea {
+      margin: 0 0 0.2rem;
+    }
+  }
 
-  &__close {
-    margin-left: 0.5rem;
+  &__topic {
+    margin-top: 1rem;
   }
 }
 </style>

@@ -42,7 +42,7 @@ export default class ModalBase extends Vue {
     flex-direction: column;
     text-align: left;
     margin: 0 1rem;
-    padding: 2rem 2rem;
+    padding: 1.5rem 1.5rem;
     border-radius: var(--border-radius);
     background: #fff;
     width: 40vw;
@@ -51,6 +51,7 @@ export default class ModalBase extends Vue {
   &__close {
     align-self: flex-end;
     padding: 0.2rem;
+    position: absolute;
   }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <ul class="form-error">
+  <ul class="form-error" :class="{ 'form-error--small': isSmall }">
     <li v-for="error in errors" class="form-error__message" :key="error">
       {{ typeof error === 'string' ? error : error.$message }}
     </li>
@@ -13,6 +13,7 @@ import { ErrorObject } from '@vuelidate/core';
 
 export default class FormError extends Vue {
   @Prop() errors!: string[] | ErrorObject[];
+  @Prop({ default: false }) isSmall?: boolean;
 }
 </script>
 
@@ -20,6 +21,10 @@ export default class FormError extends Vue {
 .form-error {
   &__message {
     color: var(--color-red);
+  }
+
+  &--small {
+    font-size: var(--font-size-small);
   }
 }
 </style>
