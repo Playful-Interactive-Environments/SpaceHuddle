@@ -22,6 +22,21 @@ use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 
 return function (App $app) {
+    $generateOptions = function () use ($app) {
+        $routes = $app->getRouteCollector()->getRoutes();
+        $optionPatterns = [];
+        foreach ($routes as $route) {
+            $pattern = $route->getPattern();
+            if (!in_array($pattern, $optionPatterns)) {
+                array_push($optionPatterns, $pattern);
+            }
+        }
+
+        foreach ($optionPatterns as $pattern) {
+            $app->options($pattern, PreflightAction::class);
+        }
+    };
+
     // Redirect to Swagger documentation
     $app->get("/", HomeAction::class)->setName("home");
 
@@ -32,9 +47,7 @@ return function (App $app) {
         "/user",
         function (RouteCollectorProxy $app) {
             $app->post("/login[/]", UserLoginAction::class);
-            $app->options("/login[/]", PreflightAction::class);
             $app->post("/register[/]", UserRegisterAction::class);
-            $app->options("/register[/]", PreflightAction::class);
         }
     );
 
@@ -42,7 +55,6 @@ return function (App $app) {
         "/participant",
         function (RouteCollectorProxy $app) {
             $app->post("/connect[/]", ParticipantConnectAction::class);
-            $app->options("/connect[/]", PreflightAction::class);
         }
     );
 
@@ -52,7 +64,6 @@ return function (App $app) {
         function (RouteCollectorProxy $app) {
             $app->put("[/]", UserChangePasswordAction::class);
             $app->delete("[/]", UserDeleteAction::class);
-            $app->options("[/]", PreflightAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 
@@ -60,7 +71,6 @@ return function (App $app) {
         "/sessions",
         function (RouteCollectorProxy $app) {
             $app->get("[/]", SessionReadAllAction::class);
-            $app->options("[/]", PreflightAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 
@@ -71,19 +81,17 @@ return function (App $app) {
                 "/{sessionId}/topic",
                 function (RouteCollectorProxy $app) {
                     $app->post("[/]", TopicCreateAction::class);
-                    $app->options("[/]", PreflightAction::class);
                 }
             );
 
             $app->get("/{sessionId}/topics[/]", TopicReadAllAction::class);
-            $app->options("/{sessionId}/topics[/]", PreflightAction::class);
 
             $app->post("[/]", SessionCreateAction::class);
-            $app->options("[/]", PreflightAction::class);
             $app->get("/{id}[/]", SessionReadSingleAction::class);
-            $app->options("{id}[/]", PreflightAction::class);
             $app->put("[/]", SessionUpdateAction::class);
             $app->delete("/{id}[/]", SessionDeleteAction::class);
         }
     )->add(JwtAuthMiddleware::class);
+
+    $generateOptions();
 };
