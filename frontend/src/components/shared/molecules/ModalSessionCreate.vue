@@ -1,6 +1,6 @@
 <template>
   <ModalBase
-    :showModal="showModal"
+    v-model:show-modal="showModal"
     @update:showModal="$emit('update:showModal', $event)"
   >
     <div class="session-create">
