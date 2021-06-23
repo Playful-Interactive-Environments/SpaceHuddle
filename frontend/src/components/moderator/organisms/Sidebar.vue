@@ -18,7 +18,7 @@
     <div class="sidebar__bottom">
       <SessionCode :code="session.connectionKey" v-if="session" />
       <div class="sidebar__toggles" v-else>
-        <Toggle label="Active" v-if="!(type === ModuleType.SELECTION)" />
+        <Toggle label="Active" v-if="!(moduleType === ModuleType.SELECTION)" />
         <Toggle label="Public Screen" />
       </div>
       <button
@@ -48,10 +48,11 @@ import ModuleType from '../../../types/ModuleType';
   },
 })
 export default class Sidebar extends Vue {
-  @Prop({ default: null }) readonly session!: Session;
+  @Prop({ default: null }) readonly session?: Session;
   @Prop({ default: '' }) readonly title!: string;
   @Prop({ default: '' }) readonly pretitle!: string;
   @Prop({ default: '' }) readonly description!: string;
+  @Prop({ default: null }) readonly moduleType!: ModuleType;
 
   ModuleType = ModuleType;
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="brainstorming" ref="item">
+  <div class="voting" ref="item">
     <div v-if="task">
       <!-- TODO: task description missing -->
       <Sidebar
@@ -8,15 +8,9 @@
         :description="task.name"
         :moduleType="ModuleType[task.taskType]"
       />
-      <main class="brainstorming__content">
-        <IdeaCard
-          :id="idea.id"
-          :keywords="idea.keywords"
-          :description="idea.description"
-          v-for="(idea, index) in ideas"
-          :key="index"
-          @ideaDeleted="getIdeas"
-        />
+      <main class="voting__content">
+        <!-- TODO: voting module content -->
+        Voting content works!
       </main>
     </div>
   </div>
@@ -30,6 +24,8 @@ import { Idea } from '../../services/moderator/idea-service';
 import { setModuleStyles } from '../../utils/moduleStyles';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleType from '../../types/ModuleType';
+import TaskStates from '../../types/TaskStates';
+import ModuleColors from '../../types/ModuleColors';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import * as taskService from '@/services/moderator/task-service';
 
@@ -39,7 +35,7 @@ import * as taskService from '@/services/moderator/task-service';
     IdeaCard,
   },
 })
-export default class ModeratorBrainstorming extends Vue {
+export default class ModeratorVoting extends Vue {
   @Prop({ default: '' }) readonly taskId!: string;
 
   task: Task | null = null;
@@ -48,22 +44,17 @@ export default class ModeratorBrainstorming extends Vue {
 
   async mounted(): Promise<void> {
     this.task = await taskService.getTaskById(this.taskId);
-    console.log(this.task.id);
-    this.getIdeas();
+    this.ideas = await taskService.getIdeasForTask(this.taskId);
     setModuleStyles(
       this.$refs.item as HTMLElement,
       ModuleType[this.task.taskType]
     );
   }
-
-  async getIdeas(): Promise<void> {
-    this.ideas = await taskService.getIdeasForTask(this.taskId);
-  }
 }
 </script>
 
 <style lang="scss" scoped>
-.brainstorming {
+.voting {
   background-color: var(--color-background-gray);
   margin-left: var(--sidebar-width);
   min-height: 100vh;

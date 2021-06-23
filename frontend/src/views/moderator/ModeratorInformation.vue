@@ -1,22 +1,16 @@
 <template>
-  <div class="brainstorming" ref="item">
+  <div class="information" ref="item">
     <div v-if="task">
       <!-- TODO: task description missing -->
       <Sidebar
         :title="task.name"
         :pretitle="task.taskType"
         :description="task.name"
-        :moduleType="ModuleType[task.taskType]"
+        :moduleType="'information'"
       />
-      <main class="brainstorming__content">
-        <IdeaCard
-          :id="idea.id"
-          :keywords="idea.keywords"
-          :description="idea.description"
-          v-for="(idea, index) in ideas"
-          :key="index"
-          @ideaDeleted="getIdeas"
-        />
+      <main class="information__content">
+        <!-- TODO: information module content -->
+        Information content works!
       </main>
     </div>
   </div>
@@ -26,7 +20,6 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { Task } from '../../services/moderator/task-service';
-import { Idea } from '../../services/moderator/idea-service';
 import { setModuleStyles } from '../../utils/moduleStyles';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleType from '../../types/ModuleType';
@@ -39,31 +32,24 @@ import * as taskService from '@/services/moderator/task-service';
     IdeaCard,
   },
 })
-export default class ModeratorBrainstorming extends Vue {
+export default class ModeratorInformation extends Vue {
   @Prop({ default: '' }) readonly taskId!: string;
 
   task: Task | null = null;
-  ideas: Idea[] = [];
-  ModuleType = ModuleType;
+  // ModuleType = ModuleType;
 
   async mounted(): Promise<void> {
     this.task = await taskService.getTaskById(this.taskId);
-    console.log(this.task.id);
-    this.getIdeas();
     setModuleStyles(
       this.$refs.item as HTMLElement,
       ModuleType[this.task.taskType]
     );
   }
-
-  async getIdeas(): Promise<void> {
-    this.ideas = await taskService.getIdeasForTask(this.taskId);
-  }
 }
 </script>
 
 <style lang="scss" scoped>
-.brainstorming {
+.information {
   background-color: var(--color-background-gray);
   margin-left: var(--sidebar-width);
   min-height: 100vh;

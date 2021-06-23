@@ -1,5 +1,5 @@
 <template>
-  <div class="brainstorming" ref="item">
+  <div class="categorization" ref="item">
     <div v-if="task">
       <!-- TODO: task description missing -->
       <Sidebar
@@ -8,15 +8,9 @@
         :description="task.name"
         :moduleType="ModuleType[task.taskType]"
       />
-      <main class="brainstorming__content">
-        <IdeaCard
-          :id="idea.id"
-          :keywords="idea.keywords"
-          :description="idea.description"
-          v-for="(idea, index) in ideas"
-          :key="index"
-          @ideaDeleted="getIdeas"
-        />
+      <main class="categorization__content">
+        <!-- TODO: categorization module content -->
+        Categorization content works!
       </main>
     </div>
   </div>
@@ -39,7 +33,7 @@ import * as taskService from '@/services/moderator/task-service';
     IdeaCard,
   },
 })
-export default class ModeratorBrainstorming extends Vue {
+export default class ModeratorCategorization extends Vue {
   @Prop({ default: '' }) readonly taskId!: string;
 
   task: Task | null = null;
@@ -48,22 +42,17 @@ export default class ModeratorBrainstorming extends Vue {
 
   async mounted(): Promise<void> {
     this.task = await taskService.getTaskById(this.taskId);
-    console.log(this.task.id);
-    this.getIdeas();
-    setModuleStyles(
-      this.$refs.item as HTMLElement,
-      ModuleType[this.task.taskType]
-    );
-  }
-
-  async getIdeas(): Promise<void> {
-    this.ideas = await taskService.getIdeasForTask(this.taskId);
+    // TODO: change once grouping is renamed to categorization
+    // setModuleStyles(
+    //   this.$refs.item as HTMLElement,
+    //   ModuleType[this.task.taskType]
+    // );
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.brainstorming {
+.categorization {
   background-color: var(--color-background-gray);
   margin-left: var(--sidebar-width);
   min-height: 100vh;

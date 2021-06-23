@@ -7,17 +7,21 @@
       :description="session.description"
     />
     <main class="detail__content">
-      <TopicExpand v-for="(topic, index) in tempTopics" :key="topic">
-        <template v-slot:title>Topic Uno</template>
+      <TopicExpand v-for="(topic, index) in topics" :key="topic">
+        <template v-slot:title>{{ topic.title }}</template>
         <template v-slot:content>
           <draggable
-            v-model="tempTopics[index]"
+            v-model="topics[index].tasks"
             tag="transition-group"
-            item-key="type"
+            item-key="id"
           >
             <template #item="{ element }">
               <li class="detail__module">
-                <ModuleCard :type="element.type" />
+                <ModuleCard
+                  :sessionId="sessionId"
+                  :type="ModuleType[element.taskType]"
+                  :task="element"
+                />
               </li>
             </template>
           </draggable>
@@ -38,6 +42,7 @@ import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { Prop } from 'vue-property-decorator';
 import * as sessionService from '@/services/moderator/session-service';
+import * as topicService from '@/services/moderator/topic-service';
 import { formatDate } from '@/utils/date';
 import { Session } from '@/services/moderator/session-service';
 import { Topic } from '../../services/moderator/topic-service';
@@ -59,21 +64,14 @@ export default class ModeratorSessionDetails extends Vue {
   topics: Topic[] = [];
   formatDate = formatDate;
 
-  // TODO: Exchange topics definition once CORS issues for task and topic endpoints are resolved
-  public tempTopics = [
-    [
-      { type: ModuleType.BRAINSTORMING },
-      { type: ModuleType.SELECTION },
-      { type: ModuleType.VOTING },
-    ],
-    [{ type: ModuleType.BRAINSTORMING }, { type: ModuleType.CATEGORIZATION }],
-  ];
+  ModuleType = ModuleType;
 
   async mounted(): Promise<void> {
     this.session = await sessionService.getById(this.sessionId);
     this.topics = await sessionService.getTopicsList(this.session.id);
-    console.log('topics fetched', this.topics);
-    // TODO: fetch tasks for every topic correctly
+    this.topics.forEach(async (topic) => {
+      topic.tasks = await topicService.getTaskList(topic.id);
+    });
   }
 
   async addTopic(): Promise<void> {

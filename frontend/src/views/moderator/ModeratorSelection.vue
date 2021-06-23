@@ -1,5 +1,5 @@
 <template>
-  <div class="brainstorming" ref="item">
+  <div class="selection" ref="item">
     <div v-if="task">
       <!-- TODO: task description missing -->
       <Sidebar
@@ -8,15 +8,9 @@
         :description="task.name"
         :moduleType="ModuleType[task.taskType]"
       />
-      <main class="brainstorming__content">
-        <IdeaCard
-          :id="idea.id"
-          :keywords="idea.keywords"
-          :description="idea.description"
-          v-for="(idea, index) in ideas"
-          :key="index"
-          @ideaDeleted="getIdeas"
-        />
+      <main class="selection__content">
+        <!-- TODO: selection module content -->
+        Selection content works!
       </main>
     </div>
   </div>
@@ -39,7 +33,7 @@ import * as taskService from '@/services/moderator/task-service';
     IdeaCard,
   },
 })
-export default class ModeratorBrainstorming extends Vue {
+export default class ModeratorSelection extends Vue {
   @Prop({ default: '' }) readonly taskId!: string;
 
   task: Task | null = null;
@@ -48,22 +42,17 @@ export default class ModeratorBrainstorming extends Vue {
 
   async mounted(): Promise<void> {
     this.task = await taskService.getTaskById(this.taskId);
-    console.log(this.task.id);
-    this.getIdeas();
+    this.ideas = await taskService.getIdeasForTask(this.taskId);
     setModuleStyles(
       this.$refs.item as HTMLElement,
       ModuleType[this.task.taskType]
     );
   }
-
-  async getIdeas(): Promise<void> {
-    this.ideas = await taskService.getIdeasForTask(this.taskId);
-  }
 }
 </script>
 
 <style lang="scss" scoped>
-.brainstorming {
+.selection {
   background-color: var(--color-background-gray);
   margin-left: var(--sidebar-width);
   min-height: 100vh;

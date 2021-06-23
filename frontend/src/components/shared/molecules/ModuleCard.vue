@@ -1,43 +1,46 @@
 <template>
-  <article
-    ref="item"
-    class="module-card"
-    :class="{ 'module-card--client': isClient }"
-  >
-    <img
-      :src="require(`@/assets/illustrations/planets/${type}.png`)"
-      alt="planet"
-      class="module-card__planet"
-    />
-    <ModuleInfo
-      :type="type"
-      :title="'Module Title'"
-      :description="'Module description here ...'"
-    />
-    <Timer class="module-card__timer" />
-    <div class="module-card__toggles" v-if="!isClient">
-      <Toggle label="Active" v-if="!(type === ModuleType.SELECTION)" />
-      <Toggle label="Public Screen" />
-    </div>
-    <div class="module-card__drag" v-if="!isClient">
+  <router-link :to="`/${type}/${sessionId}/${task.id}`">
+    <article
+      ref="item"
+      class="module-card"
+      :class="{ 'module-card--client': isClient }"
+    >
       <img
-        src="@/assets/icons/drag-dots.svg"
-        alt="draggable"
-        class="module-card__dots-icon"
+        :src="require(`@/assets/illustrations/planets/${type}.png`)"
+        alt="planet"
+        class="module-card__planet"
       />
-    </div>
-  </article>
+      <ModuleInfo
+        :type="type"
+        :title="task.name"
+        :description="'Module description here ...'"
+      />
+      <Timer class="module-card__timer" />
+      <div class="module-card__toggles" v-if="!isClient">
+        <Toggle label="Active" v-if="!(type === ModuleType.SELECTION)" />
+        <Toggle label="Public Screen" />
+      </div>
+      <div class="module-card__drag" v-if="!isClient">
+        <img
+          src="@/assets/icons/drag-dots.svg"
+          alt="draggable"
+          class="module-card__dots-icon"
+        />
+      </div>
+    </article>
+  </router-link>
 </template>
 
 <script lang="ts">
 import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
-import ModuleType from '@/types/ModuleType';
-import ModuleColors from '@/types/ModuleColors';
+import { setModuleStyles } from '../../../utils/moduleStyles';
+import { Task } from '../../../services/moderator/task-service';
 import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import Toggle from '@/components/moderator/atoms/Toggle.vue';
-import { setModuleStyles } from '../../../utils/moduleStyles';
+import ModuleType from '@/types/ModuleType';
+import ModuleColors from '@/types/ModuleColors';
 
 @Options({
   components: {
@@ -47,10 +50,12 @@ import { setModuleStyles } from '../../../utils/moduleStyles';
   },
 })
 export default class ModuleCard extends Vue {
+  @Prop() readonly sessionId!: string;
   @Prop({ default: ModuleType.BRAINSTORMING }) type!: ModuleType;
+  @Prop({ default: null }) task!: Task;
   @Prop({ default: false }) isClient!: boolean;
 
-  public ModuleType = ModuleType;
+  ModuleType = ModuleType;
 
   mounted(): void {
     setModuleStyles(this.$refs.item as HTMLElement, this.type);

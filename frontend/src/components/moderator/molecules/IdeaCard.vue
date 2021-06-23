@@ -15,11 +15,14 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
+import * as ideaService from '@/services/moderator/idea-service';
+import * as taskService from '@/services/moderator/task-service';
 
 @Options({
   components: {},
 })
 export default class Toggle extends Vue {
+  @Prop({ default: null }) id!: string;
   @Prop({ default: null }) keywords?: string;
   @Prop({ default: '' }) description?: string;
 
@@ -27,9 +30,9 @@ export default class Toggle extends Vue {
     return !!(this.keywords && this.keywords.length > 0);
   }
 
-  deleteIdea(): void {
-    //TODO: delete
-    console.log('implement deletion api call');
+  async deleteIdea(): Promise<void> {
+    await ideaService.deleteIdea(this.id);
+    this.$emit('ideaDeleted');
   }
 }
 </script>
@@ -56,8 +59,8 @@ export default class Toggle extends Vue {
   }
 
   &__delete {
-    height: 20px;
-    width: 18px;
+    height: 24px;
+    width: 22px;
     min-width: 18px;
     margin-left: 0.5rem;
     cursor: pointer;

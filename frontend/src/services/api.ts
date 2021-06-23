@@ -9,6 +9,7 @@ const endpointsWithAuthorization = [
   EndpointType.TOPIC,
   EndpointType.TASKS,
   EndpointType.TASK,
+  EndpointType.IDEA,
 ];
 
 const endpointRequiresAuthorization = (endpoint: EndpointType) => {
