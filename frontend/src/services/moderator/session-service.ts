@@ -36,8 +36,12 @@ export const getTopicsList = async (sessionId: string): Promise<Topic[]> => {
   return data;
 };
 
-export const post = async (data: Partial<Session>): Promise<void> => {
-  await API_SESSION_ENDPOINT.post<Session>('/', data);
+export const post = async (data: Partial<Session>): Promise<Session> => {
+  const { data: responseData } = await API_SESSION_ENDPOINT.post<Session>(
+    '/',
+    data
+  );
+  return responseData;
 };
 
 export const postTopic = async (
