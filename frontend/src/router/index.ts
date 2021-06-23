@@ -46,10 +46,13 @@ const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: '/task/:taskId',
+    path: '/brainstorming/:sessionId/:taskId',
     name: 'moderator-brainstorming',
     component: ModeratorBrainstorming,
-    props: (route) => ({ taskId: route.params.taskId }),
+    props: (route) => ({
+      sessionId: route.params.sessionId,
+      taskId: route.params.taskId,
+    }),
     meta: {
       requiresAuth: true,
     },

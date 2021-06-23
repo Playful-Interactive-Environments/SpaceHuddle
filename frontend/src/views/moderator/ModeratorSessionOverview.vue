@@ -70,7 +70,7 @@ export default class ModeratorSessionOverview extends Vue {
 <style scoped>
 .grid-container {
   display: grid;
-  grid-gap: 50px 50px;
+  grid-gap: 2rem;
   grid-template-columns: 1fr 1fr 1fr;
 }
 .session-overview {
