@@ -5,8 +5,7 @@ return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
     ->setRules(
         [
-            "@PSR1" => true,
-            "@PSR2" => true,
+            "@PSR12" => true,
             "@Symfony" => true,
             "psr_autoloading" => true,
             // custom rules
