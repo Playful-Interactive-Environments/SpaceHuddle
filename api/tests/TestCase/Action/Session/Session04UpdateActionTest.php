@@ -7,7 +7,6 @@ use App\Test\Traits\AppTestTrait;
 use App\Test\Traits\UserTestTrait;
 use Fig\Http\Message\StatusCodeInterface;
 use Monolog\Test\TestCase;
-use Selective\TestTrait\Traits\DatabaseTestTrait;
 
 /**
  * Test.

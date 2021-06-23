@@ -5,7 +5,6 @@ namespace App\Test\TestCase\Action\User;
 use App\Test\Traits\AppTestTrait;
 use Fig\Http\Message\StatusCodeInterface;
 use PHPUnit\Framework\TestCase;
-use Selective\TestTrait\Traits\DatabaseTestTrait;
 
 /**
  * Test.

@@ -27,21 +27,23 @@ trait ServiceReaderTrait
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $data = array_merge($bodyData, $urlData);
+        $urlParameterName = array_key_first($urlData);
+        if (str_ends_with($urlParameterName, "Id")) {
+            $parentId = $urlData[$urlParameterName];
+            // Input validation
+            // ...
 
-        $parentId = $data["parentId"];
-        // Input validation
-        // ...
+            // Fetch data from the database
+            $result = $this->repository->getAll($parentId);
 
-        // Fetch data from the database
-        $result = $this->repository->getAll($parentId);
+            // Optional: Add or invoke your complex business logic here
+            // ...
 
-        // Optional: Add or invoke your complex business logic here
-        // ...
+            // Optional: Map result
+            // ...
 
-        // Optional: Map result
-        // ...
-
-        return $result;
+            return $result;
+        }
+        return null;
     }
 }

@@ -1,12 +1,10 @@
 <?php
 
-
 namespace App\Test\TestCase\Action\Session;
 
 use App\Test\Traits\AppTestTrait;
 use Fig\Http\Message\StatusCodeInterface;
 use Monolog\Test\TestCase;
-use Selective\TestTrait\Traits\DatabaseTestTrait;
 
 /**
  * Test.
@@ -30,6 +28,7 @@ class Session01CreateActionTest extends TestCase
             "/session/",
             [
                 "title" => "php unit test session",
+                "description" => "create from unit test",
                 "maxParticipants" => 100,
                 "expirationDate" => "2022-01-01"
             ]

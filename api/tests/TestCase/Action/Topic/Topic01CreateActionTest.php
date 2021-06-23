@@ -1,43 +1,48 @@
 <?php
 
-namespace App\Test\TestCase\Action\User;
+namespace App\Test\TestCase\Action\Topic;
 
 use App\Test\Traits\AppTestTrait;
+use App\Test\Traits\UserTestTrait;
 use Fig\Http\Message\StatusCodeInterface;
-use PHPUnit\Framework\TestCase;
+use Monolog\Test\TestCase;
 
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\User\UserChangePasswordAction
+ * @coversDefaultClass \App\Action\Topic\TopicCreateAction
  */
-class User03UpdateActionTest extends TestCase
+class Topic01CreateActionTest extends TestCase
 {
     use AppTestTrait;
+    use UserTestTrait;
 
     /**
      * Test.
      *
      * @return void
      */
-    public function testUpdateUser(): void
+    public function testCreateTopic(): void
     {
+        $tableRowCount = $this->getTableRowCount("topic");
+        $sessionId = $this->getFirstSessionId();
         $request = $this->createJsonRequest(
-            "PUT",
-            "/user/",
+            "POST",
+            "/session/$sessionId/topic/",
             [
-                "oldPassword" => "secret123",
-                "password" => "string1234",
-                "passwordConfirmation" => "string1234"
+                "title" => "php unit test topic",
+                "description" => "create from unit test"
             ]
         );
-        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "secret123", false));
-
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
         // Check response
         $this->assertSame(StatusCodeInterface::STATUS_CREATED, $response->getStatusCode());
         $this->assertJsonContentType($response);
+
+        // Check database
+        $this->assertTableRowCount($tableRowCount+1, "session");
     }
 
     /**
@@ -45,18 +50,17 @@ class User03UpdateActionTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateUserValidation(): void
+    public function testCreateTopicValidation(): void
     {
+        $sessionId = $this->getFirstSessionId();
         $request = $this->createJsonRequest(
-            "PUT",
-            "/user/",
+            "POST",
+            "/session/$sessionId/topic/",
             [
-                "oldPassword" => "secret123",
-                "password" => "secret1233",
-                "passwordConfirmation" => "secret123"
+                "description" => "create from unit test"
             ]
         );
-        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "string1234", false));
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
         // Check response
@@ -69,9 +73,9 @@ class User03UpdateActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "Password and confirmation do not match.",
-                            "field" => "passwordConfirmation",
-                        ],
+                            "message" => "This field is required",
+                            "field" => "title",
+                        ]
                     ],
                 ],
             ],

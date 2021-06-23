@@ -8,6 +8,8 @@ use App\Action\Participant\ParticipantConnectAction;
 use App\Action\PreflightAction;
 use App\Action\Session\SessionDeleteAction;
 use App\Action\Session\SessionUpdateAction;
+use App\Action\Topic\TopicCreateAction;
+use App\Action\Topic\TopicReadAllAction;
 use App\Action\User\UserChangePasswordAction;
 use App\Action\User\UserDeleteAction;
 use App\Action\User\UserLoginAction;
@@ -65,6 +67,17 @@ return function (App $app) {
     $app->group(
         "/session",
         function (RouteCollectorProxy $app) {
+            $app->group(
+                "/{sessionId}/topic",
+                function (RouteCollectorProxy $app) {
+                    $app->post("[/]", TopicCreateAction::class);
+                    $app->options("[/]", PreflightAction::class);
+                }
+            );
+
+            $app->get("/{sessionId}/topics[/]", TopicReadAllAction::class);
+            $app->options("/{sessionId}/topics[/]", PreflightAction::class);
+
             $app->post("[/]", SessionCreateAction::class);
             $app->options("[/]", PreflightAction::class);
             $app->get("/{id}[/]", SessionReadSingleAction::class);

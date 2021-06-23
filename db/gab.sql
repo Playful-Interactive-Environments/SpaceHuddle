@@ -218,10 +218,10 @@ CREATE TABLE `topic` (
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `voting`
+-- Tabellenstruktur für Tabelle `vote`
 --
 
-CREATE TABLE `voting` (
+CREATE TABLE `vote` (
   `id` char(36) NOT NULL,
   `task_id` char(36) NOT NULL,
   `participant_id` char(36) DEFAULT NULL,
@@ -338,13 +338,13 @@ ALTER TABLE `topic`
   ADD KEY `topic_ibfk_active_task` (`active_task_id`);
 
 --
--- Indizes für die Tabelle `voting`
+-- Indizes für die Tabelle `vote`
 --
-ALTER TABLE `voting`
+ALTER TABLE `vote`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `voting_ibfk_task` (`task_id`),
-  ADD KEY `voting_ibfk_participant` (`participant_id`),
-  ADD KEY `voting_ibfk_idea` (`idea_id`);
+  ADD KEY `vote_ibfk_task` (`task_id`),
+  ADD KEY `vote_ibfk_participant` (`participant_id`),
+  ADD KEY `vote_ibfk_idea` (`idea_id`);
 
 --
 -- Constraints der exportierten Tabellen
@@ -437,12 +437,12 @@ ALTER TABLE `topic`
   ADD CONSTRAINT `topic_ibfk_session` FOREIGN KEY (`session_id`) REFERENCES `session` (`id`);
 
 --
--- Constraints der Tabelle `voting`
+-- Constraints der Tabelle `vote`
 --
-ALTER TABLE `voting`
-  ADD CONSTRAINT `voting_ibfk_idea` FOREIGN KEY (`idea_id`) REFERENCES `idea` (`id`),
-  ADD CONSTRAINT `voting_ibfk_participant` FOREIGN KEY (`participant_id`) REFERENCES `participant` (`id`),
-  ADD CONSTRAINT `voting_ibfk_task` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`);
+ALTER TABLE `vote`
+  ADD CONSTRAINT `vote_ibfk_idea` FOREIGN KEY (`idea_id`) REFERENCES `idea` (`id`),
+  ADD CONSTRAINT `vote_ibfk_participant` FOREIGN KEY (`participant_id`) REFERENCES `participant` (`id`),
+  ADD CONSTRAINT `vote_ibfk_task` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`);
 
 -- --------------------------------------------------------
 
