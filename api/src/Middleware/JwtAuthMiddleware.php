@@ -49,6 +49,11 @@ final class JwtAuthMiddleware implements MiddlewareInterface
         ServerRequestInterface $request,
         RequestHandlerInterface $handler
     ): ResponseInterface {
+        $action = $request->getMethod();
+        if ($action == "OPTIONS") {
+            return $handler->handle($request);
+        }
+
         $token = explode(" ", (string)$request->getHeaderLine("Authorization"))[1] ?? "";
         if (!$token || !$this->jwtAuth->validateToken($token)) {
             return $this->responseFactory->createResponse()

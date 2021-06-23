@@ -71,6 +71,11 @@ final class AuthorizationMiddleware
         ServerRequestInterface $request,
         RequestHandlerInterface $handler
     ): ResponseInterface {
+        $action = $request->getMethod();
+        if ($action == "OPTIONS") {
+            return $handler->handle($request);
+        }
+
         $authorisation = $request->getAttribute('authorisation');
         $bodyData = $request->getParsedBody();
 
@@ -80,7 +85,6 @@ final class AuthorizationMiddleware
         $urlPattern = $route->getPattern();
 
         $uri = $request->getUri();
-        $action = $request->getMethod();
         // Get a URI/path without the base path
         $uriPath = $this->removeBasePath($uri->getPath());
         if (!str_ends_with($uriPath, "/")) {
