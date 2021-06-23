@@ -8,7 +8,7 @@ use App\Domain\Base\Service\ServiceUpdaterTrait;
 use App\Domain\Session\Type\SessionRoleType;
 
 /**
- * Service.
+ * Update session service.
  */
 class SessionUpdater
 {

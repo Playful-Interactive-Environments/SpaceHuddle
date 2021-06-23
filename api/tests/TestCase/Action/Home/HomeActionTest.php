@@ -14,7 +14,7 @@ class HomeActionTest extends TestCase
 {
     use AppTestTrait, DatabaseCleanupTestTrait {
         DatabaseCleanupTestTrait::dropTables insteadof AppTestTrait;
-        AppTestTrait::setUp as private setUpAppTraid;
+        AppTestTrait::setUp as private setUpAppTrait;
     }
 
     /**
@@ -23,7 +23,7 @@ class HomeActionTest extends TestCase
      * @return void
      */
     protected function setUp(): void {
-        $this->setUpAppTraid();
+        $this->setUpAppTrait();
         $this->cleanup();
     }
 

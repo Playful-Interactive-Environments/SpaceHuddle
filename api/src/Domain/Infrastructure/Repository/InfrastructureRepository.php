@@ -5,6 +5,7 @@ namespace App\Domain\Infrastructure\Repository;
 use App\Data\AuthorisationData;
 use App\Domain\Participant\Repository\ParticipantRepository;
 use App\Domain\Session\Repository\SessionRepository;
+use App\Domain\Topic\Repository\TopicRepository;
 use App\Domain\User\Repository\UserRepository;
 use App\Factory\QueryFactory;
 
@@ -15,9 +16,10 @@ class InfrastructureRepository
 {
     protected QueryFactory $queryFactory;
     protected array $repositoryMapping = [
-      "session" => SessionRepository::class,
-      "user" => UserRepository::class,
-      "participant" => ParticipantRepository::class
+        "session" => SessionRepository::class,
+        "topic" => TopicRepository::class,
+        "user" => UserRepository::class,
+        "participant" => ParticipantRepository::class
     ];
 
     /**

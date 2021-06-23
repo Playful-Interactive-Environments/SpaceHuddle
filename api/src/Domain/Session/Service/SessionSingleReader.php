@@ -7,7 +7,7 @@ use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\BaseServiceTrait;
 
 /**
- * Read all session service
+ * Read specific session service
  * @package App\Domain\Session\Service
  */
 class SessionSingleReader

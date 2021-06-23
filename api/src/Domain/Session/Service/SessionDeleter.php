@@ -5,7 +5,7 @@ namespace App\Domain\Session\Service;
 use App\Domain\Base\Service\ServiceDeleterTrait;
 
 /**
- * Service.
+ * Delete session service.
  */
 class SessionDeleter
 {

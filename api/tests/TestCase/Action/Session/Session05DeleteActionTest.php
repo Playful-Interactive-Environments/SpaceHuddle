@@ -16,7 +16,7 @@ use Monolog\Test\TestCase;
 class Session05DeleteActionTest extends TestCase
 {
     use AppTestTrait {
-        AppTestTrait::setUp as private setUpAppTraid;
+        AppTestTrait::setUp as private setUpAppTrait;
     }
     use UserTestTrait;
 
@@ -28,7 +28,7 @@ class Session05DeleteActionTest extends TestCase
      * @return void
      */
     protected function setUp(): void {
-        $this->setUpAppTraid();
+        $this->setUpAppTrait();
         $this->sessionId = $this->getFirstSessionId();
     }
 

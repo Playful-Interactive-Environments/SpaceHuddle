@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 class Participant01ConnectActionTest extends TestCase
 {
     use AppTestTrait {
-        AppTestTrait::setUp as private setUpAppTraid;
+        AppTestTrait::setUp as private setUpAppTrait;
     }
     use UserTestTrait;
 
@@ -27,7 +27,7 @@ class Participant01ConnectActionTest extends TestCase
      * @return void
      */
     protected function setUp(): void {
-        $this->setUpAppTraid();
+        $this->setUpAppTrait();
         $this->sessionKey = $this->getFirstSessionKey();
     }
 

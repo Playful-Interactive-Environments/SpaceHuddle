@@ -14,8 +14,23 @@ use Monolog\Test\TestCase;
  */
 class Topic02GetAllActionTest extends TestCase
 {
-    use AppTestTrait;
+    use AppTestTrait {
+        AppTestTrait::setUp as private setUpAppTrait;
+    }
     use UserTestTrait;
+
+    protected ?string $sessionId;
+
+    /**
+     * Before each test.
+     *
+     * @return void
+     */
+    protected function setUp(): void
+    {
+        $this->setUpAppTrait();
+        $this->sessionId = $this->getFirstSessionId();
+    }
 
     /**
      * Test.
@@ -24,10 +39,9 @@ class Topic02GetAllActionTest extends TestCase
      */
     public function testGetAllSessions(): void
     {
-        $sessionId = $this->getFirstSessionId();
         $request = $this->createJsonRequest(
             "GET",
-            "/session/$sessionId/topics/"
+            "/session/$this->sessionId/topics/"
         );
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
@@ -44,8 +58,7 @@ class Topic02GetAllActionTest extends TestCase
      */
     public function testGetAllSessionsWithoutLogin(): void
     {
-        $sessionId = $this->getFirstSessionId();
-        $request = $this->createRequest("GET", "/session/$sessionId/topics/");
+        $request = $this->createRequest("GET", "/session/$this->sessionId/topics/");
         $request = $this->withJwtAuth($request)->withoutHeader("Authorization");
         $response = $this->app->handle($request);
 

@@ -8,6 +8,7 @@ use App\Domain\Base\Repository\KeyGeneratorTrait;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Participant\Repository\ParticipantRepository;
+use App\Domain\Topic\Repository\TopicRepository;
 use App\Domain\User\Repository\UserRepository;
 use App\Domain\Session\Type\SessionRoleType;
 use App\Factory\QueryFactory;
@@ -185,11 +186,10 @@ class SessionRepository implements RepositoryInterface
 
         $result = $query->execute()->fetchAll("assoc");
         if (is_array($result)) {
-            //TODO: Implement an equivalent for getInstance
-            #$topic = new TopicRepository($this->queryFactory);
+            $topic = new TopicRepository($this->queryFactory);
             foreach ($result as $resultItem) {
                 $topicId = $resultItem["id"];
-                #$topic->deleteById($topicId);
+                $topic->deleteById($topicId);
             }
         }
 

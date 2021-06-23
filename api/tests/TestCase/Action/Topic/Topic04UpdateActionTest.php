@@ -1,7 +1,6 @@
 <?php
 
-
-namespace App\Test\TestCase\Action\Session;
+namespace App\Test\TestCase\Action\Topic;
 
 use App\Test\Traits\AppTestTrait;
 use App\Test\Traits\UserTestTrait;
@@ -11,16 +10,16 @@ use Monolog\Test\TestCase;
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\Session\SessionCreateAction
+ * @coversDefaultClass \App\Action\Topic\TopicUpdateAction
  */
-class Session04UpdateActionTest extends TestCase
+class Topic04UpdateActionTest extends TestCase
 {
     use AppTestTrait {
         AppTestTrait::setUp as private setUpAppTrait;
     }
     use UserTestTrait;
 
-    protected ?string $sessionId;
+    protected ?string $topicId;
 
     /**
      * Before each test.
@@ -30,7 +29,7 @@ class Session04UpdateActionTest extends TestCase
     protected function setUp(): void
     {
         $this->setUpAppTrait();
-        $this->sessionId = $this->getFirstSessionId();
+        $this->topicId = $this->getFirstTopicId();
     }
 
     /**
@@ -38,14 +37,14 @@ class Session04UpdateActionTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateSessions(): void
+    public function testUpdateTopic(): void
     {
         $request = $this->createJsonRequest(
             "PUT",
-            "/session/",
+            "/topic/",
             [
-                "id" => $this->sessionId,
-                "maxParticipants" => null
+                "id" => $this->topicId,
+                "description" => null
             ]
         );
         $request = $this->withJwtAuth($request);
@@ -61,14 +60,14 @@ class Session04UpdateActionTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateSessionsInvalidId(): void
+    public function testUpdateTopicInvalidId(): void
     {
         $request = $this->createJsonRequest(
             "PUT",
-            "/session/",
+            "/topic/",
             [
                 "id" => "xxx",
-                "maxParticipants" => null
+                "description" => null
             ]
         );
         $request = $this->withJwtAuth($request);

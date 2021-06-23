@@ -16,7 +16,7 @@ use Monolog\Test\TestCase;
 class Session03GetSingleActionTest extends TestCase
 {
     use AppTestTrait {
-        AppTestTrait::setUp as private setUpAppTraid;
+        AppTestTrait::setUp as private setUpAppTrait;
     }
     use UserTestTrait;
 
@@ -27,8 +27,9 @@ class Session03GetSingleActionTest extends TestCase
      *
      * @return void
      */
-    protected function setUp(): void {
-        $this->setUpAppTraid();
+    protected function setUp(): void
+    {
+        $this->setUpAppTrait();
         $this->sessionId = $this->getFirstSessionId();
     }
 
@@ -37,7 +38,7 @@ class Session03GetSingleActionTest extends TestCase
      *
      * @return void
      */
-    public function testGetSingleSessions(): void
+    public function testGetSingleSession(): void
     {
         $request = $this->createJsonRequest(
             "GET",
@@ -56,7 +57,7 @@ class Session03GetSingleActionTest extends TestCase
      *
      * @return void
      */
-    public function testGetSingleSessionsInvalidId(): void
+    public function testGetSingleSessionInvalidId(): void
     {
         $request = $this->createRequest("GET", "/session/xxx/");
         $request = $this->withJwtAuth($request);

@@ -1,7 +1,6 @@
 <?php
 
-
-namespace App\Test\TestCase\Action\Session;
+namespace App\Test\TestCase\Action\Topic;
 
 use App\Test\Traits\AppTestTrait;
 use App\Test\Traits\UserTestTrait;
@@ -11,26 +10,25 @@ use Monolog\Test\TestCase;
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\Session\SessionCreateAction
+ * @coversDefaultClass \App\Action\Topic\TopicDeleteAction
  */
-class Session04UpdateActionTest extends TestCase
+class Topic05DeleteActionTest extends TestCase
 {
     use AppTestTrait {
         AppTestTrait::setUp as private setUpAppTrait;
     }
     use UserTestTrait;
 
-    protected ?string $sessionId;
+    protected ?string $topicId;
 
     /**
      * Before each test.
      *
      * @return void
      */
-    protected function setUp(): void
-    {
+    protected function setUp(): void {
         $this->setUpAppTrait();
-        $this->sessionId = $this->getFirstSessionId();
+        $this->topicId = $this->getFirstTopicId();
     }
 
     /**
@@ -38,15 +36,11 @@ class Session04UpdateActionTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateSessions(): void
+    public function testDeleteTopic(): void
     {
         $request = $this->createJsonRequest(
-            "PUT",
-            "/session/",
-            [
-                "id" => $this->sessionId,
-                "maxParticipants" => null
-            ]
+            "DELETE",
+            "/topic/$this->topicId/"
         );
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
@@ -61,19 +55,13 @@ class Session04UpdateActionTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateSessionsInvalidId(): void
+    public function testDeleteTopicInvalidId(): void
     {
-        $request = $this->createJsonRequest(
-            "PUT",
-            "/session/",
-            [
-                "id" => "xxx",
-                "maxParticipants" => null
-            ]
-        );
+        $request = $this->createRequest("DELETE", "/topic/xxx/");
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
         $this->assertSame(StatusCodeInterface::STATUS_FORBIDDEN, $response->getStatusCode());
     }
 }
+

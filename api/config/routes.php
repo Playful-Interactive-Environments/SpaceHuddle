@@ -9,7 +9,10 @@ use App\Action\PreflightAction;
 use App\Action\Session\SessionDeleteAction;
 use App\Action\Session\SessionUpdateAction;
 use App\Action\Topic\TopicCreateAction;
+use App\Action\Topic\TopicDeleteAction;
 use App\Action\Topic\TopicReadAllAction;
+use App\Action\Topic\TopicReadSingleAction;
+use App\Action\Topic\TopicUpdateAction;
 use App\Action\User\UserChangePasswordAction;
 use App\Action\User\UserDeleteAction;
 use App\Action\User\UserLoginAction;
@@ -90,6 +93,15 @@ return function (App $app) {
             $app->get("/{id}[/]", SessionReadSingleAction::class);
             $app->put("[/]", SessionUpdateAction::class);
             $app->delete("/{id}[/]", SessionDeleteAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/topic",
+        function (RouteCollectorProxy $app) {
+            $app->get("/{id}[/]", TopicReadSingleAction::class);
+            $app->put("[/]", TopicUpdateAction::class);
+            $app->delete("/{id}[/]", TopicDeleteAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 

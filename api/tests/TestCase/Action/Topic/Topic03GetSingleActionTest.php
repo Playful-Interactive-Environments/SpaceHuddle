@@ -1,7 +1,6 @@
 <?php
 
-
-namespace App\Test\TestCase\Action\Session;
+namespace App\Test\TestCase\Action\Topic;
 
 use App\Test\Traits\AppTestTrait;
 use App\Test\Traits\UserTestTrait;
@@ -11,16 +10,16 @@ use Monolog\Test\TestCase;
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\Session\SessionCreateAction
+ * @coversDefaultClass \App\Action\Topic\TopicReadSingleAction
  */
-class Session04UpdateActionTest extends TestCase
+class Topic03GetSingleActionTest extends TestCase
 {
     use AppTestTrait {
         AppTestTrait::setUp as private setUpAppTrait;
     }
     use UserTestTrait;
 
-    protected ?string $sessionId;
+    protected ?string $topicId;
 
     /**
      * Before each test.
@@ -30,7 +29,7 @@ class Session04UpdateActionTest extends TestCase
     protected function setUp(): void
     {
         $this->setUpAppTrait();
-        $this->sessionId = $this->getFirstSessionId();
+        $this->topicId = $this->getFirstTopicId();
     }
 
     /**
@@ -38,21 +37,17 @@ class Session04UpdateActionTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateSessions(): void
+    public function testGetSingleTopic(): void
     {
         $request = $this->createJsonRequest(
-            "PUT",
-            "/session/",
-            [
-                "id" => $this->sessionId,
-                "maxParticipants" => null
-            ]
+            "GET",
+            "/topic/$this->topicId/"
         );
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
         // Check response
-        $this->assertSame(StatusCodeInterface::STATUS_CREATED, $response->getStatusCode());
+        $this->assertSame(StatusCodeInterface::STATUS_OK, $response->getStatusCode());
         $this->assertJsonContentType($response);
     }
 
@@ -61,16 +56,9 @@ class Session04UpdateActionTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateSessionsInvalidId(): void
+    public function testGetSingleTopicInvalidId(): void
     {
-        $request = $this->createJsonRequest(
-            "PUT",
-            "/session/",
-            [
-                "id" => "xxx",
-                "maxParticipants" => null
-            ]
-        );
+        $request = $this->createRequest("GET", "/topic/xxx/");
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 

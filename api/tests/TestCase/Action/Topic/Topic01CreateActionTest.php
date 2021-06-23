@@ -14,8 +14,23 @@ use Monolog\Test\TestCase;
  */
 class Topic01CreateActionTest extends TestCase
 {
-    use AppTestTrait;
+    use AppTestTrait {
+        AppTestTrait::setUp as private setUpAppTrait;
+    }
     use UserTestTrait;
+
+    protected ?string $sessionId;
+
+    /**
+     * Before each test.
+     *
+     * @return void
+     */
+    protected function setUp(): void
+    {
+        $this->setUpAppTrait();
+        $this->sessionId = $this->getFirstSessionId();
+    }
 
     /**
      * Test.
@@ -25,10 +40,9 @@ class Topic01CreateActionTest extends TestCase
     public function testCreateTopic(): void
     {
         $tableRowCount = $this->getTableRowCount("topic");
-        $sessionId = $this->getFirstSessionId();
         $request = $this->createJsonRequest(
             "POST",
-            "/session/$sessionId/topic/",
+            "/session/$this->sessionId/topic/",
             [
                 "title" => "php unit test topic",
                 "description" => "create from unit test"
@@ -52,10 +66,9 @@ class Topic01CreateActionTest extends TestCase
      */
     public function testCreateTopicValidation(): void
     {
-        $sessionId = $this->getFirstSessionId();
         $request = $this->createJsonRequest(
             "POST",
-            "/session/$sessionId/topic/",
+            "/session/$this->sessionId/topic/",
             [
                 "description" => "create from unit test"
             ]
