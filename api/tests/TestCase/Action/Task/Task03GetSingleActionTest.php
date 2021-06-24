@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Test\TestCase\Action\Topic;
+namespace App\Test\TestCase\Action\Task;
 
 use App\Test\Traits\AppTestTrait;
 use App\Test\Traits\UserTestTrait;
@@ -10,16 +10,16 @@ use Monolog\Test\TestCase;
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\Topic\TopicReadAllAction
+ * @coversDefaultClass \App\Action\Task\TaskReadSingleAction
  */
-class Topic02GetAllActionTest extends TestCase
+class Task03GetSingleActionTest extends TestCase
 {
     use AppTestTrait {
         AppTestTrait::setUp as private setUpAppTrait;
     }
     use UserTestTrait;
 
-    protected ?string $sessionId;
+    protected ?string $taskId;
 
     /**
      * Before each test.
@@ -29,7 +29,7 @@ class Topic02GetAllActionTest extends TestCase
     protected function setUp(): void
     {
         $this->setUpAppTrait();
-        $this->sessionId = $this->getFirstSessionId();
+        $this->taskId = $this->getFirstTaskId();
     }
 
     /**
@@ -37,11 +37,11 @@ class Topic02GetAllActionTest extends TestCase
      *
      * @return void
      */
-    public function testGetAllTopics(): void
+    public function testGetSingleTask(): void
     {
         $request = $this->createJsonRequest(
             "GET",
-            "/session/$this->sessionId/topics/"
+            "/task/$this->taskId/"
         );
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
@@ -56,13 +56,12 @@ class Topic02GetAllActionTest extends TestCase
      *
      * @return void
      */
-    public function testGetAllTopicsWithoutLogin(): void
+    public function testGetSingleTaskInvalidId(): void
     {
-        $request = $this->createRequest("GET", "/session/$this->sessionId/topics/");
-        $request = $this->withJwtAuth($request)->withoutHeader("Authorization");
+        $request = $this->createRequest("GET", "/task/xxx/");
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
-        $this->assertSame(StatusCodeInterface::STATUS_UNAUTHORIZED, $response->getStatusCode());
+        $this->assertSame(StatusCodeInterface::STATUS_FORBIDDEN, $response->getStatusCode());
     }
 }
-

@@ -84,7 +84,7 @@ trait UserTestTrait
     }
 
     /**
-     * Determine first session id
+     * Determine first topic id
      * @return string|null json token
      */
     protected function getFirstTopicId() : ?string
@@ -95,6 +95,26 @@ trait UserTestTrait
             [
                 "title" => "php unit test topic",
                 "description" => "create from unit test"
+            ]
+        );
+        if (is_object($result) and property_exists($result, "id")) {
+            return $result->id;
+        }
+        return "";
+    }
+
+    /**
+     * Determine first task id
+     * @return string|null json token
+     */
+    protected function getFirstTaskId() : ?string
+    {
+        $topicId = $this->getFirstTopicId();
+        $result = $this->getFirstEntity(
+            "topic/$topicId/tasks",
+            [
+                "taskType" => "BRAINSTORMING",
+                "name" => "php unit test task"
             ]
         );
         if (is_object($result) and property_exists($result, "id")) {

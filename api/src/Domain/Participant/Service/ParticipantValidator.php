@@ -4,6 +4,7 @@ namespace App\Domain\Participant\Service;
 
 use App\Domain\Base\Service\ValidatorTrait;
 use App\Domain\Participant\Repository\ParticipantRepository;
+use App\Domain\Participant\Type\ParticipantState;
 use App\Factory\ValidationFactory;
 use Selective\Validation\Exception\ValidationException;
 use Selective\Validation\ValidationResult;
@@ -42,6 +43,12 @@ class ParticipantValidator
                 ->requirePresence("sessionKey")
                 ->notEmptyString("ip")
                 ->requirePresence("ip")
+                ->add("state", "custom", [
+                    "rule" => function ($value) {
+                        return self::isTypeOption($value, ParticipantState::class);
+                    },
+                    "message" => "Wrong participant state."
+                ])
         );
 
         $sessionKey = $data["sessionKey"];

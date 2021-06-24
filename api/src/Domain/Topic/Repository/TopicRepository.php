@@ -6,6 +6,7 @@ use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Session\Repository\SessionRepository;
+use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Topic\Data\TopicData;
 use App\Factory\QueryFactory;
 
@@ -46,13 +47,13 @@ class TopicRepository implements RepositoryInterface
 
         $result = $query->execute()->fetchAll("assoc");
         if (is_array($result)) {
-            //TODO: Implement TaskRepository
-            #$task = new TaskRepository($this->queryFactory);
+            $task = new TaskRepository($this->queryFactory);
             foreach ($result as $resultItem) {
                 $taskId = $resultItem["id"];
-                #$task->deleteById($taskId);
+                $task->deleteById($taskId);
             }
         }
+
         $query = $this->queryFactory->newSelect("selection_group");
         $query->select(["id"]);
         $query->andWhere(["topic_id" => $id]);

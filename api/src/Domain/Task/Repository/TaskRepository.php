@@ -1,0 +1,98 @@
+<?php
+
+namespace App\Domain\Task\Repository;
+
+use App\Domain\Base\Repository\GenericException;
+use App\Domain\Base\Repository\RepositoryInterface;
+use App\Domain\Base\Repository\RepositoryTrait;
+use App\Domain\Task\Data\TaskData;
+use App\Domain\Task\Type\TaskState;
+use App\Domain\Topic\Repository\TopicRepository;
+use App\Factory\QueryFactory;
+
+/**
+ * Repository
+ */
+class TaskRepository implements RepositoryInterface
+{
+    use RepositoryTrait;
+
+    /**
+     * The constructor.
+     *
+     * @param QueryFactory $queryFactory The query factory
+     */
+    public function __construct(QueryFactory $queryFactory)
+    {
+        $this->setUp(
+            $queryFactory,
+            "task",
+            TaskData::class,
+            "topic_id",
+            TopicRepository::class
+        );
+    }
+
+    /**
+     * Delete dependent data.
+     * @param string $id Primary key of the linked table entry.
+     * @return void
+     * @throws GenericException
+     */
+    protected function deleteDependencies(string $id): void
+    {
+        $query = $this->queryFactory->newSelect("idea");
+        $query->select(["id"]);
+        $query->andWhere(["task_id" => $id]);
+
+        $result = $query->execute()->fetchAll("assoc");
+        if (is_array($result)) {
+            //TODO: Implement IdeaRepository
+            #$idea = new IdeaRepository($this->queryFactory);
+            foreach ($result as $resultItem) {
+                $ideaId = $resultItem["id"];
+                #$idea->deleteById($ideaId);
+            }
+        }
+
+        $query = $this->queryFactory->newSelect("module");
+        $query->select(["id"]);
+        $query->andWhere(["task_id" => $id]);
+
+        $result = $query->execute()->fetchAll("assoc");
+        if (is_array($result)) {
+            //TODO: Implement ModuleRepository
+            #$module = new ModuleRepository($this->queryFactory);
+            foreach ($result as $resultItem) {
+                $moduleId = $resultItem["id"];
+                #$module->deleteById($moduleId);
+            }
+        }
+
+        $this->queryFactory->newDelete("vote")
+            ->andWhere(["task_id" => $id])
+            ->execute();
+
+        $this->queryFactory->newUpdate("topic", ["active_task_id" => null])
+            ->andWhere(["active_task_id" => $id])
+            ->execute();
+    }
+
+    /**
+     * Convert to array.
+     * @param object $data The entity data
+     * @return array<string, mixed> The array
+     */
+    protected function formatDatabaseInput(object $data): array
+    {
+        return [
+            "id" => $data->id ?? null,
+            "topic_id" => $data->topicId ?? null,
+            "task_type" => $data->taskType ?? null,
+            "name" => $data->name ?? null,
+            "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null,
+            "order" => $data->order ?? 0,
+            "state" => $data->state ?? strtoupper(TaskState::WAIT)
+        ];
+    }
+}

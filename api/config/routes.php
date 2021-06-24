@@ -8,6 +8,11 @@ use App\Action\Participant\ParticipantConnectAction;
 use App\Action\PreflightAction;
 use App\Action\Session\SessionDeleteAction;
 use App\Action\Session\SessionUpdateAction;
+use App\Action\Task\TaskCreateAction;
+use App\Action\Task\TaskDeleteAction;
+use App\Action\Task\TaskReadAllAction;
+use App\Action\Task\TaskReadSingleAction;
+use App\Action\Task\TaskUpdateAction;
 use App\Action\Topic\TopicCreateAction;
 use App\Action\Topic\TopicDeleteAction;
 use App\Action\Topic\TopicReadAllAction;
@@ -80,13 +85,7 @@ return function (App $app) {
     $app->group(
         "/session",
         function (RouteCollectorProxy $app) {
-            $app->group(
-                "/{sessionId}/topic",
-                function (RouteCollectorProxy $app) {
-                    $app->post("[/]", TopicCreateAction::class);
-                }
-            );
-
+            $app->post("/{sessionId}/topic[/]", TopicCreateAction::class);
             $app->get("/{sessionId}/topics[/]", TopicReadAllAction::class);
 
             $app->post("[/]", SessionCreateAction::class);
@@ -99,9 +98,21 @@ return function (App $app) {
     $app->group(
         "/topic",
         function (RouteCollectorProxy $app) {
+            $app->post("/{topicId}/task[/]", TaskCreateAction::class);
+            $app->get("/{topicId}/tasks[/]", TaskReadAllAction::class);
+
             $app->get("/{id}[/]", TopicReadSingleAction::class);
             $app->put("[/]", TopicUpdateAction::class);
             $app->delete("/{id}[/]", TopicDeleteAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/task",
+        function (RouteCollectorProxy $app) {
+            $app->get("/{id}[/]", TaskReadSingleAction::class);
+            $app->put("[/]", TaskUpdateAction::class);
+            $app->delete("/{id}[/]", TaskDeleteAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 

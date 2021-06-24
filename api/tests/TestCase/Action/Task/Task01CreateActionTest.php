@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Test\TestCase\Action\Topic;
+namespace App\Test\TestCase\Action\Task;
 
 use App\Test\Traits\AppTestTrait;
 use App\Test\Traits\UserTestTrait;
@@ -10,16 +10,16 @@ use Monolog\Test\TestCase;
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\Topic\TopicCreateAction
+ * @coversDefaultClass \App\Action\Task\TaskCreateAction
  */
-class Topic01CreateActionTest extends TestCase
+class Task01CreateActionTest extends TestCase
 {
     use AppTestTrait {
         AppTestTrait::setUp as private setUpAppTrait;
     }
     use UserTestTrait;
 
-    protected ?string $sessionId;
+    protected ?string $topicId;
 
     /**
      * Before each test.
@@ -29,7 +29,7 @@ class Topic01CreateActionTest extends TestCase
     protected function setUp(): void
     {
         $this->setUpAppTrait();
-        $this->sessionId = $this->getFirstSessionId();
+        $this->topicId = $this->getFirstTopicId();
     }
 
     /**
@@ -37,15 +37,15 @@ class Topic01CreateActionTest extends TestCase
      *
      * @return void
      */
-    public function testCreateTopic(): void
+    public function testCreateTask(): void
     {
-        $tableRowCount = $this->getTableRowCount("topic");
+        $tableRowCount = $this->getTableRowCount("task");
         $request = $this->createJsonRequest(
             "POST",
-            "/session/$this->sessionId/topic/",
+            "/topic/$this->topicId/task/",
             [
-                "title" => "php unit test topic",
-                "description" => "create from unit test"
+                "taskType" => "brainstorming",
+                "name" => "php unit test task"
             ]
         );
         $request = $this->withJwtAuth($request);
@@ -56,7 +56,7 @@ class Topic01CreateActionTest extends TestCase
         $this->assertJsonContentType($response);
 
         // Check database
-        $this->assertTableRowCount($tableRowCount+1, "topic");
+        $this->assertTableRowCount($tableRowCount+1, "task");
     }
 
     /**
@@ -64,13 +64,14 @@ class Topic01CreateActionTest extends TestCase
      *
      * @return void
      */
-    public function testCreateTopicValidation(): void
+    public function testCreateTaskValidation(): void
     {
         $request = $this->createJsonRequest(
             "POST",
-            "/session/$this->sessionId/topic/",
+            "/topic/$this->topicId/task/",
             [
-                "description" => "create from unit test"
+                "taskType" => "xxx",
+                "name" => "php unit test task"
             ]
         );
         $request = $this->withJwtAuth($request);
@@ -86,8 +87,8 @@ class Topic01CreateActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "This field is required",
-                            "field" => "title",
+                            "message" => "Wrong task type.",
+                            "field" => "taskType",
                         ]
                     ],
                 ],

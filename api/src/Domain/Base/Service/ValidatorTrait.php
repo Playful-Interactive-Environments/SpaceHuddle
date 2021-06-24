@@ -117,4 +117,19 @@ trait ValidatorTrait
     {
         return $this->validationFactory->createValidator();
     }
+
+    /**
+     * Does the value correspond to an enum entry (constant) of the specified type?
+     * @param string|null $value Value to be checked
+     * @param string $type Enum type
+     * @return bool If true, enum entry (constant) exists
+     */
+    private static function isTypeOption(?string $value, string $type): bool
+    {
+        if (isset($value)) {
+            $value = strtoupper($value);
+            return defined("$type::$value");
+        }
+        return true;
+    }
 }

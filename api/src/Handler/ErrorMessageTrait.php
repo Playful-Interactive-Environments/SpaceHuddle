@@ -34,6 +34,30 @@ trait ErrorMessageTrait
     }
 
     /**
+     * Get the first error file outside of composer files.
+     *
+     * @param Throwable $exception The error
+     * @return array<string, mixed> First error file outside of composer files.
+     */
+    private function getFirstNotComposerFile(Throwable $exception): array
+    {
+        $trace_list = $exception->getTrace();
+        $traceIndex = 0;
+        foreach ($trace_list as $trace) {
+            if (!str_contains($trace["file"], "vendor")) {
+                $file = $trace["file"];
+                $line = $trace["line"];
+                return [
+                    "file" => $file,
+                    "line" => $line,
+                    "traceIndex" => $traceIndex
+                ];
+            }
+            $traceIndex++;
+        }
+    }
+
+    /**
      * Get exception text.
      *
      * @param Throwable $exception Error
@@ -44,11 +68,13 @@ trait ErrorMessageTrait
     private function getExceptionText(Throwable $exception, int $maxLength = 0): string
     {
         $code = $exception->getCode();
-        $file = $exception->getFile();
-        $line = $exception->getLine();
+        $fileInfo = $this->getFirstNotComposerFile($exception);
+        $file = $fileInfo["file"];# $exception->getFile();
+        $line = $fileInfo["line"];# $exception->getLine();
+        $traceIndex = $fileInfo["traceIndex"];# 0;
         $message = $exception->getMessage();
         $trace = $exception->getTraceAsString();
-        $error = sprintf("[%s] %s in %s on line %s.", $code, $message, $file, $line);
+        $error = sprintf("[%s] %s in trace index %s - %s on line %s.", $code, $message, $traceIndex, $file, $line);
         $error .= sprintf("\nBacktrace:\n%s", $trace);
 
         if ($maxLength > 0) {

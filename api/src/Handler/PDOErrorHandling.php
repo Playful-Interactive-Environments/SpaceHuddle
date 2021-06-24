@@ -69,6 +69,12 @@ class PDOErrorHandling implements ErrorHandlerInterface
         $errorMessage = "Database exception: ".$exception->getMessage();
 
         if ($displayErrorDetails) {
+            $fileInfo = $this->getFirstNotComposerFile($exception);
+            $file = $fileInfo["file"];
+            $line = $fileInfo["line"];
+            $errorMessage = "$errorMessage ($file: $line)";
+
+            /*
             $trace_list = $exception->getTrace();
             foreach ($trace_list as $trace) {
                 if (!str_contains($trace["file"], "vendor")) {
@@ -77,7 +83,7 @@ class PDOErrorHandling implements ErrorHandlerInterface
                     $errorMessage = "$errorMessage ($file: $line)";
                     break;
                 }
-            }
+            }*/
 
             #$errorMessage = $this->getErrorMessage($exception, $statusCode, $displayErrorDetails);
         }

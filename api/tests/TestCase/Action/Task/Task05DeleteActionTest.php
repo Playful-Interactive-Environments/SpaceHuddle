@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Test\TestCase\Action\Topic;
+namespace App\Test\TestCase\Action\Task;
 
 use App\Test\Traits\AppTestTrait;
 use App\Test\Traits\UserTestTrait;
@@ -10,26 +10,25 @@ use Monolog\Test\TestCase;
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\Topic\TopicReadAllAction
+ * @coversDefaultClass \App\Action\Task\TaskDeleteAction
  */
-class Topic02GetAllActionTest extends TestCase
+class Task05DeleteActionTest extends TestCase
 {
     use AppTestTrait {
         AppTestTrait::setUp as private setUpAppTrait;
     }
     use UserTestTrait;
 
-    protected ?string $sessionId;
+    protected ?string $taskId;
 
     /**
      * Before each test.
      *
      * @return void
      */
-    protected function setUp(): void
-    {
+    protected function setUp(): void {
         $this->setUpAppTrait();
-        $this->sessionId = $this->getFirstSessionId();
+        $this->taskId = $this->getFirstTaskId();
     }
 
     /**
@@ -37,17 +36,17 @@ class Topic02GetAllActionTest extends TestCase
      *
      * @return void
      */
-    public function testGetAllTopics(): void
+    public function testDeleteTask(): void
     {
         $request = $this->createJsonRequest(
-            "GET",
-            "/session/$this->sessionId/topics/"
+            "DELETE",
+            "/task/$this->taskId/"
         );
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
         // Check response
-        $this->assertSame(StatusCodeInterface::STATUS_OK, $response->getStatusCode());
+        $this->assertSame(StatusCodeInterface::STATUS_CREATED, $response->getStatusCode());
         $this->assertJsonContentType($response);
     }
 
@@ -56,13 +55,13 @@ class Topic02GetAllActionTest extends TestCase
      *
      * @return void
      */
-    public function testGetAllTopicsWithoutLogin(): void
+    public function testDeleteTaskInvalidId(): void
     {
-        $request = $this->createRequest("GET", "/session/$this->sessionId/topics/");
-        $request = $this->withJwtAuth($request)->withoutHeader("Authorization");
+        $request = $this->createRequest("DELETE", "/task/xxx/");
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
-        $this->assertSame(StatusCodeInterface::STATUS_UNAUTHORIZED, $response->getStatusCode());
+        $this->assertSame(StatusCodeInterface::STATUS_FORBIDDEN, $response->getStatusCode());
     }
 }
 
