@@ -30,7 +30,7 @@ USE `gab`;
 --
 
 CREATE TABLE `hierarchy` (
-                             `group_idea_id` char(36) NOT NULL,
+                             `category_idea_id` char(36) NOT NULL,
                              `sub_idea_id` char(36) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -135,24 +135,24 @@ CREATE TABLE `resource` (
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `selection_group`
+-- Tabellenstruktur für Tabelle `selection`
 --
 
-CREATE TABLE `selection_group` (
-                                   `id` char(36) NOT NULL,
-                                   `topic_id` char(36) NOT NULL,
-                                   `name` varchar(255) NOT NULL
+CREATE TABLE `selection` (
+                             `id` char(36) NOT NULL,
+                             `topic_id` char(36) NOT NULL,
+                             `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `selection_group_idea`
+-- Tabellenstruktur für Tabelle `selection_idea`
 --
 
-CREATE TABLE `selection_group_idea` (
-                                        `selection_group_id` char(36) NOT NULL,
-                                        `idea_id` char(36) NOT NULL
+CREATE TABLE `selection_idea` (
+                                  `selection_id` char(36) NOT NULL,
+                                  `idea_id` char(36) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -164,7 +164,7 @@ CREATE TABLE `selection_group_idea` (
 CREATE TABLE `session` (
                            `id` char(36) NOT NULL,
                            `title` varchar(255) NOT NULL,
-                           `description` varchar(1024) DEFAULT NULL,
+                           `description` text DEFAULT NULL,
                            `connection_key` char(10) NOT NULL,
                            `max_participants` int(11) DEFAULT NULL,
                            `expiration_date` date DEFAULT NULL,
@@ -195,6 +195,7 @@ CREATE TABLE `task` (
                         `topic_id` char(36) NOT NULL,
                         `task_type` varchar(255) NOT NULL,
                         `name` varchar(255) DEFAULT NULL,
+                        `description` text DEFAULT NULL,
                         `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
                         `order` int(11) NOT NULL,
                         `state` varchar(255) DEFAULT NULL,
@@ -211,7 +212,7 @@ CREATE TABLE `topic` (
                          `id` char(36) NOT NULL,
                          `session_id` char(36) NOT NULL,
                          `title` varchar(255) NOT NULL,
-                         `description` varchar(1024) DEFAULT NULL,
+                         `description` text DEFAULT NULL,
                          `active_task_id` char(36) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -222,12 +223,12 @@ CREATE TABLE `topic` (
 --
 
 CREATE TABLE `vote` (
-                          `id` char(36) NOT NULL,
-                          `task_id` char(36) NOT NULL,
-                          `participant_id` char(36) DEFAULT NULL,
-                          `idea_id` char(36) NOT NULL,
-                          `rating` int(11) NOT NULL,
-                          `detail_rating` float DEFAULT NULL
+                        `id` char(36) NOT NULL,
+                        `task_id` char(36) NOT NULL,
+                        `participant_id` char(36) DEFAULT NULL,
+                        `idea_id` char(36) NOT NULL,
+                        `rating` int(11) NOT NULL,
+                        `detail_rating` float DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -238,7 +239,7 @@ CREATE TABLE `vote` (
 -- Indizes für die Tabelle `hierarchy`
 --
 ALTER TABLE `hierarchy`
-    ADD PRIMARY KEY (`group_idea_id`,`sub_idea_id`),
+    ADD PRIMARY KEY (`category_idea_id`,`sub_idea_id`),
   ADD KEY `hierarchy_ibfk_sub_idea` (`sub_idea_id`);
 
 --
@@ -293,18 +294,18 @@ ALTER TABLE `resource`
   ADD KEY `resource_ibfk_session` (`session_id`);
 
 --
--- Indizes für die Tabelle `selection_group`
+-- Indizes für die Tabelle `selection`
 --
-ALTER TABLE `selection_group`
+ALTER TABLE `selection`
     ADD PRIMARY KEY (`id`),
-  ADD KEY `selection_group_ibfk_topic` (`topic_id`);
+  ADD KEY `selection_ibfk_topic` (`topic_id`);
 
 --
--- Indizes für die Tabelle `selection_group_idea`
+-- Indizes für die Tabelle `selection_idea`
 --
-ALTER TABLE `selection_group_idea`
-    ADD PRIMARY KEY (`selection_group_id`,`idea_id`),
-  ADD KEY `selection_group_idea_ibfk_idea` (`idea_id`);
+ALTER TABLE `selection_idea`
+    ADD PRIMARY KEY (`selection_id`,`idea_id`),
+  ADD KEY `selection_idea_ibfk_idea` (`idea_id`);
 
 --
 -- Indizes für die Tabelle `session`
@@ -354,7 +355,7 @@ ALTER TABLE `vote`
 -- Constraints der Tabelle `hierarchy`
 --
 ALTER TABLE `hierarchy`
-    ADD CONSTRAINT `hierarchy_ibfk_group_idea` FOREIGN KEY (`group_idea_id`) REFERENCES `idea` (`id`),
+    ADD CONSTRAINT `hierarchy_ibfk_category_idea` FOREIGN KEY (`category_idea_id`) REFERENCES `idea` (`id`),
   ADD CONSTRAINT `hierarchy_ibfk_sub_idea` FOREIGN KEY (`sub_idea_id`) REFERENCES `idea` (`id`);
 
 --
@@ -397,17 +398,17 @@ ALTER TABLE `resource`
     ADD CONSTRAINT `resource_ibfk_session` FOREIGN KEY (`session_id`) REFERENCES `session` (`id`);
 
 --
--- Constraints der Tabelle `selection_group`
+-- Constraints der Tabelle `selection`
 --
-ALTER TABLE `selection_group`
-    ADD CONSTRAINT `selection_group_ibfk_topic` FOREIGN KEY (`topic_id`) REFERENCES `topic` (`id`);
+ALTER TABLE `selection`
+    ADD CONSTRAINT `selection_ibfk_topic` FOREIGN KEY (`topic_id`) REFERENCES `topic` (`id`);
 
 --
--- Constraints der Tabelle `selection_group_idea`
+-- Constraints der Tabelle `selection_idea`
 --
-ALTER TABLE `selection_group_idea`
-    ADD CONSTRAINT `selection_group_idea_ibfk_idea` FOREIGN KEY (`idea_id`) REFERENCES `idea` (`id`),
-  ADD CONSTRAINT `selection_group_idea_ibfk_selection_group` FOREIGN KEY (`selection_group_id`) REFERENCES `selection_group` (`id`);
+ALTER TABLE `selection_idea`
+    ADD CONSTRAINT `selection_idea_ibfk_idea` FOREIGN KEY (`idea_id`) REFERENCES `idea` (`id`),
+  ADD CONSTRAINT `selection_idea_ibfk_selection` FOREIGN KEY (`selection_id`) REFERENCES `selection` (`id`);
 
 --
 -- Constraints der Tabelle `session`

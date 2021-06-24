@@ -3,16 +3,16 @@ p, UNKNOWN, /docs/v1/, GET
 
 p, MODERATOR, /task/:taskId/client_application_state/:state/, PUT
 
-p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/groups/, GET
-p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/groups/, GET
-p, MODERATOR|FACILITATOR|PARTICIPANT, /group/:id/, GET
-p, MODERATOR|FACILITATOR, /group/:id/, DELETE
-p, MODERATOR|FACILITATOR, /task/:taskId/group/, POST
-p, MODERATOR|FACILITATOR, /topic/:topicId/group/, POST
-p, MODERATOR|FACILITATOR, /group/, PUT
-p, MODERATOR|FACILITATOR|PARTICIPANT, /group/:groupId/ideas/, GET
-p, MODERATOR|FACILITATOR|PARTICIPANT, /group/:groupId/ideas/, POST
-p, MODERATOR|FACILITATOR|PARTICIPANT, /group/:groupId/ideas/, DELETE
+p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/categories/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/categories/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /category/:id/, GET
+p, MODERATOR|FACILITATOR, /category/:id/, DELETE
+p, MODERATOR|FACILITATOR, /task/:taskId/category/, POST
+p, MODERATOR|FACILITATOR, /topic/:topicId/category/, POST
+p, MODERATOR|FACILITATOR, /category/, PUT
+p, MODERATOR|FACILITATOR|PARTICIPANT, /category/:categoryId/ideas/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /category/:categoryId/ideas/, POST
+p, MODERATOR|FACILITATOR|PARTICIPANT, /category/:categoryId/ideas/, DELETE
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/ideas/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/ideas/, GET

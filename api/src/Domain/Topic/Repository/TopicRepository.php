@@ -54,7 +54,7 @@ class TopicRepository implements RepositoryInterface
             }
         }
 
-        $query = $this->queryFactory->newSelect("selection_group");
+        $query = $this->queryFactory->newSelect("selection");
         $query->select(["id"]);
         $query->andWhere(["topic_id" => $id]);
 

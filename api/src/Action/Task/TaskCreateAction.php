@@ -22,6 +22,7 @@ use Fig\Http\Message\StatusCodeInterface;
  *       @OA\Schema(required={"taskType"},
  *         @OA\Property(property="taskType", type="string"),
  *         @OA\Property(property="name", type="string"),
+ *         @OA\Property(property="description", type="string"),
  *         @OA\Property(property="parameter", type="object", format="json"),
  *         @OA\Property(property="order", type="integer")
  *       )

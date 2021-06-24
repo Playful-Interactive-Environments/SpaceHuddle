@@ -90,6 +90,7 @@ class TaskRepository implements RepositoryInterface
             "topic_id" => $data->topicId ?? null,
             "task_type" => $data->taskType ?? null,
             "name" => $data->name ?? null,
+            "description" => $data->description ?? null,
             "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null,
             "order" => $data->order ?? 0,
             "state" => $data->state ?? strtoupper(TaskState::WAIT)

@@ -32,6 +32,13 @@ class TaskData
     public ?string $name;
 
     /**
+     * The description of the task.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $description;
+
+    /**
      * Variable json parameters depending on the task type.
      * @var object|null
      * @OA\Property(type="object", format="json")
@@ -62,6 +69,7 @@ class TaskData
         $this->id = $reader->findString("id");
         $this->taskType = strtoupper($reader->findString("task_type"));
         $this->name = $reader->findString("name");
+        $this->description = $reader->findString("description");
         $this->parameter = (object)json_decode($reader->findString("parameter"));
         $this->order = $reader->findInt("order");
         $this->state = strtoupper($reader->findString("state"));
