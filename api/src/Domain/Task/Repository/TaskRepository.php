@@ -5,6 +5,9 @@ namespace App\Domain\Task\Repository;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
+use App\Domain\Module\Repository\ModuleRepository;
+use App\Domain\Module\Type\ModuleState;
+use App\Domain\Session\Type\SessionRoleType;
 use App\Domain\Task\Data\TaskData;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Topic\Repository\TopicRepository;
@@ -31,6 +34,27 @@ class TaskRepository implements RepositoryInterface
             "topic_id",
             TopicRepository::class
         );
+    }
+
+    /**
+     * Include dependent data.
+     * @param string $id Primary key of the linked table entry
+     * @param array|object|null $parameter Dependent data to be included.
+     * @return void
+     */
+    protected function insertDependencies(string $id, array|object|null $parameter): void
+    {
+        $moduleId = uuid_create();
+
+        if (is_object($parameter)) {
+            $this->queryFactory->newInsert("module", [
+                "id" => $moduleId,
+                "task_id" => $id,
+                "module_name" => $parameter->taskType,
+                "order" => 1,
+                "state" => strtoupper(ModuleState::ACTIVE)
+            ])->execute();
+        }
     }
 
     /**
@@ -61,11 +85,10 @@ class TaskRepository implements RepositoryInterface
 
         $result = $query->execute()->fetchAll("assoc");
         if (is_array($result)) {
-            //TODO: Implement ModuleRepository
-            #$module = new ModuleRepository($this->queryFactory);
+            $module = new ModuleRepository($this->queryFactory);
             foreach ($result as $resultItem) {
                 $moduleId = $resultItem["id"];
-                #$module->deleteById($moduleId);
+                $module->deleteById($moduleId);
             }
         }
 

@@ -5,8 +5,8 @@ namespace App\Domain\Task\Data;
 use Selective\ArrayReader\ArrayReader;
 
 /**
- * Represents a topic.
- * @OA\Schema(description="topic description")
+ * Represents a task.
+ * @OA\Schema(description="task description")
  */
 class TaskData
 {

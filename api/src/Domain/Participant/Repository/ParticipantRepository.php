@@ -3,6 +3,7 @@
 namespace App\Domain\Participant\Repository;
 
 use App\Domain\Base\Repository\EncryptTrait;
+use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\KeyGeneratorTrait;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
@@ -38,7 +39,7 @@ class ParticipantRepository implements RepositoryInterface
      * Connect to session.
      * @param object $data The data to be inserted
      * @return ParticipantData|null The new created entity
-     * @throws \App\Domain\Base\Repository\GenericException
+     * @throws GenericException
      */
     public function connect(object $data): ?ParticipantData
     {
@@ -66,6 +67,21 @@ class ParticipantRepository implements RepositoryInterface
     }
 
     /**
+     * Connect to session.
+     * @param object $data The data to be inserted
+     * @return ParticipantData|null The participant entity
+     * @throws GenericException
+     */
+    public function reconnect(string $browserKey): ?ParticipantData
+    {
+        $result = $this->get(["browser_key" => $browserKey]);
+        if (!is_object($result)) {
+            throw new DomainException("Entity $this->getEntityName() not found");
+        }
+        return $result;
+    }
+
+    /**
      * Checks whether the session key exists.
      * @param string $sessionKey The session key.
      * @return bool True if session key exists.
@@ -76,6 +92,21 @@ class ParticipantRepository implements RepositoryInterface
         $query->select(["id"])
             ->andWhere([
                 "connection_key" => $sessionKey
+            ]);
+        return ($query->execute()->rowCount() > 0);
+    }
+
+    /**
+     * Checks whether the browser key exists.
+     * @param string $browserKey The browser key.
+     * @return bool True if browser key exists.
+     */
+    public function checkBrowserKey(string $browserKey): bool
+    {
+        $query = $this->queryFactory->newSelect("participant");
+        $query->select(["id"])
+            ->andWhere([
+                "browser_key" => $browserKey
             ]);
         return ($query->execute()->rowCount() > 0);
     }

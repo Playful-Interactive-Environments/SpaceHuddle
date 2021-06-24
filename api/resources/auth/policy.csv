@@ -28,7 +28,7 @@ p, MODERATOR, /user/, PUT
 p, MODERATOR, /user/, DELETE
 
 p, UNKNOWN|MODERATOR|PARTICIPANT, /participant/connect/, POST
-p, UNKNOWN|MODERATOR|PARTICIPANT, /participant/connect/:browserKey/, GET
+p, UNKNOWN|MODERATOR|PARTICIPANT, /participant/reconnect/:browserKey/, GET
 p, MODERATOR|PARTICIPANT, /participant/state/:state/, PUT
 p, MODERATOR|PARTICIPANT, /participant/, DELETE
 p, PARTICIPANT, /participant/tasks/, GET

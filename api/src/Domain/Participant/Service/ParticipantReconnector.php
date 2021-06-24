@@ -13,9 +13,9 @@ use App\Factory\LoggerFactory;
 use App\Routing\JwtAuth;
 
 /**
- * Participant connect service.
+ * Participant reconnect service.
  */
-class ParticipantConnector
+class ParticipantReconnector
 {
     use BaseServiceTrait;
 
@@ -61,13 +61,11 @@ class ParticipantConnector
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $data = array_merge($bodyData, $urlData);
-
         // Input validation
-        $this->validator->validateConnect($data);
+        $this->validator->validateReconnect($urlData);
 
         // Insert user and get new user ID
-        $result = $this->repository->connect((object)$data);
+        $result = $this->repository->reconnect($urlData["browserKey"]);
 
         $jwt = $this->jwtAuth->createJwt(
             [

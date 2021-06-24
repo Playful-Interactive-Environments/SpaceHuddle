@@ -5,7 +5,7 @@ namespace App\Domain\Participant\Data;
 use App\Domain\Base\Data\TokenData;
 
 /**
- * Describes a participant.
+ * Describes a participant with a token.
  * @OA\Schema(description="participant description")
  */
 class ParticipantTokenData
