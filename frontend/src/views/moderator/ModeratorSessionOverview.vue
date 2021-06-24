@@ -36,15 +36,14 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import { Session } from '@/services/moderator/session-service';
+import { formatDate } from '@/utils/date';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import Card from '../../components/shared/atoms/Card.vue';
 import ModalSessionCreate from '@/components/shared/molecules/ModalSessionCreate.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import * as sessionService from '@/services/moderator/session-service';
-import { Session } from '@/services/moderator/session-service';
-
-import { formatDate } from '@/utils/date';
 
 @Options({
   components: {
@@ -70,7 +69,7 @@ export default class ModeratorSessionOverview extends Vue {
 <style scoped>
 .grid-container {
   display: grid;
-  grid-gap: 50px 50px;
+  grid-gap: 2rem;
   grid-template-columns: 1fr 1fr 1fr;
 }
 .session-overview {

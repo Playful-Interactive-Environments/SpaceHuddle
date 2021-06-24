@@ -1,18 +1,27 @@
 <template>
   <div v-if="session" class="detail">
-    <Sidebar :session="session" />
+    <Sidebar
+      :session="session"
+      :title="session.title"
+      :pretitle="formatDate(session.creationDate)"
+      :description="session.description"
+    />
     <main class="detail__content">
       <TopicExpand v-for="(topic, index) in topics" :key="topic">
-        <template v-slot:title>Topic Uno</template>
+        <template v-slot:title>{{ topic.title }}</template>
         <template v-slot:content>
           <draggable
-            v-model="topics[index]"
+            v-model="topics[index].tasks"
             tag="transition-group"
-            item-key="type"
+            item-key="id"
           >
             <template #item="{ element }">
               <li class="detail__module">
-                <ModuleCard :type="element.type" />
+                <ModuleCard
+                  :sessionId="sessionId"
+                  :type="ModuleType[element.taskType]"
+                  :task="element"
+                />
               </li>
             </template>
           </draggable>
@@ -33,7 +42,10 @@ import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { Prop } from 'vue-property-decorator';
 import * as sessionService from '@/services/moderator/session-service';
+import * as topicService from '@/services/moderator/topic-service';
+import { formatDate } from '@/utils/date';
 import { Session } from '@/services/moderator/session-service';
+import { Topic } from '../../services/moderator/topic-service';
 import ModuleType from '@/types/ModuleType';
 
 @Options({
@@ -49,24 +61,17 @@ export default class ModeratorSessionDetails extends Vue {
   @Prop() readonly sessionId!: string;
 
   session: Session | null = null;
+  topics: Topic[] = [];
+  formatDate = formatDate;
 
-  // TODO: Exchange topics definition once CORS issues for task and topic endpoints are resolved
-  // topics: Topic[] = [];
-  public topics = [
-    [
-      { type: ModuleType.BRAINSTORMING },
-      { type: ModuleType.SELECTION },
-      { type: ModuleType.VOTING },
-    ],
-    [{ type: ModuleType.BRAINSTORMING }, { type: ModuleType.CATEGORIZATION }],
-  ];
-  public topicExpanded = true;
+  ModuleType = ModuleType;
 
   async mounted(): Promise<void> {
     this.session = await sessionService.getById(this.sessionId);
-    const topics = await sessionService.getTopicsList(this.session.id);
-    console.log('topics fetched', topics);
-    // TODO: fetch tasks for every topic correctly
+    this.topics = await sessionService.getTopicsList(this.session.id);
+    this.topics.forEach(async (topic) => {
+      topic.tasks = await topicService.getTaskList(topic.id);
+    });
   }
 
   async addTopic(): Promise<void> {

@@ -7,6 +7,7 @@ export interface Topic {
   title: string;
   description: string;
   activeTaskId: string;
+  tasks?: Task[];
 }
 
 const API_TOPIC_ENDPOINT = apiEndpoint(EndpointType.TOPIC);

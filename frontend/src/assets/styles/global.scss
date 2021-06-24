@@ -27,6 +27,18 @@ p {
   margin: 0;
 }
 
+a {
+  text-decoration: none;
+  color: var(--color-darkblue);
+
+  &:visited,
+  &:focus,
+  &:hover,
+  &:active {
+    color: var(--color-darkblue);
+  }
+}
+
 body {
   margin: 0;
   padding: 0;
