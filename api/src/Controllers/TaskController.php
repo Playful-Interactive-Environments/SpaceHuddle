@@ -75,6 +75,7 @@ class TaskController extends AbstractController
      * @param string|null $topicId The topic's ID.
      * @param string|null $taskType The task's type.
      * @param string|null $name The task's name.
+     * @param string|null $description The task's description.
      * @param string|null $parameter The task's parameters.
      * @param string|null $order The task order.
      * @return string The new task in JSON format.
@@ -89,6 +90,7 @@ class TaskController extends AbstractController
      *       @OA\Schema(required={"taskType"},
      *         @OA\Property(property="taskType", type="string"),
      *         @OA\Property(property="name", type="string"),
+     *         @OA\Property(property="description", type="string"),
      *         @OA\Property(property="parameter", type="object", format="json"),
      *         @OA\Property(property="order", type="integer")
      *       )
@@ -105,6 +107,7 @@ class TaskController extends AbstractController
         ?string $topicId = null,
         ?string $taskType = null,
         ?string $name = null,
+        ?string $description = null,
         ?string $parameter = null,
         ?string $order = null
     ): string {
@@ -113,6 +116,7 @@ class TaskController extends AbstractController
                 "topic_id" => ["default" => $topicId, "url" => "topic", "required" => true],
                 "task_type" => ["default" => $taskType, "type" => TaskType::class, "requestKey" => "taskType", "required" => true],
                 "name" => ["default" => $name],
+                "description" => ["default" => $description],
                 "parameter" => ["default" => $parameter, "type" => "JSON"],
                 "order" => ["default" => $order],
                 "state" => ["default" => StateTask::WAIT, "type" => StateTask::class]
@@ -154,6 +158,7 @@ class TaskController extends AbstractController
      * @param string|null $id The task's ID.
      * @param string|null $taskType The task's type.
      * @param string|null $name The task's name.
+     * @param string|null $description The task's description.
      * @param string|null $parameter The task's parameters.
      * @param string|null $order The task order.
      * @param string|null $state The task's state.
@@ -180,6 +185,7 @@ class TaskController extends AbstractController
         ?string $id = null,
         ?string $taskType = null,
         ?string $name = null,
+        ?string $description = null,
         ?string $parameter = null,
         ?string $order = null,
         ?string $state = null
@@ -189,6 +195,7 @@ class TaskController extends AbstractController
                 "id" => ["default" => $id],
                 "task_type" => ["default" => $taskType, "type" => TaskType::class, "requestKey" => "taskType"],
                 "name" => ["default" => $name],
+                "description" => ["default" => $description],
                 "parameter" => ["default" => $parameter, "type" => "JSON"],
                 "order" => ["default" => $order],
                 "state" => ["default" => $state, "type" => StateTask::class]

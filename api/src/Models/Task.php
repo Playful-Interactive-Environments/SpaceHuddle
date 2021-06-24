@@ -29,6 +29,14 @@ class Task
     public ?string $name;
 
     /**
+     * The description of the task.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $description;
+
+
+    /**
      * Variable json parameters depending on the task type.
      * @var object|null
      * @OA\Property(type="object", format="json")
@@ -58,6 +66,7 @@ class Task
         $this->id = $data["id"] ?? null;
         $this->taskType = strtoupper($data["task_type"] ?? null);
         $this->name = $data["name"] ?? null;
+        $this->description = $data["description"] ?? null;
         $this->parameter = json_decode($data["parameter"] ?? null);
         $this->order = (int)$data["order"] ?? null;
         $this->state = strtoupper($data["state"] ?? null);
