@@ -47,10 +47,10 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
 } elseif (AbstractController::isRestCall("POST", searchDetailHierarchy: "idea")) {
     $result = $idea->addToTopic();
     echo $result;
-} elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "groups")) {
+} elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "categories")) {
     $result = $group->readAllFromTopic();
     echo $result;
-} elseif (AbstractController::isRestCall("POST", searchDetailHierarchy: "group")) {
+} elseif (AbstractController::isRestCall("POST", searchDetailHierarchy: "category")) {
     $result = $group->addToTopic();
     echo $result;
 } elseif (AbstractController::isRestCall("GET", searchDetailHierarchy: "selections")) {

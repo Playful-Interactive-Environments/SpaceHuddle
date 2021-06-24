@@ -7,7 +7,7 @@ use PieLab\GAB\Models\Role;
 use PieLab\GAB\Models\TaskType;
 
 /**
- * Controller for group ideas.
+ * Controller for category ideas.
  * @package PieLab\GAB\Controllers
  */
 class GroupIdeaController extends AbstractController
@@ -17,19 +17,19 @@ class GroupIdeaController extends AbstractController
      */
     protected function __construct()
     {
-        parent::__construct("hierarchy", Idea::class, GroupController::class, "group", "group_id", "group");
-        $this->taskType = TaskType::GROUPING;
+        parent::__construct("hierarchy", Idea::class, GroupController::class, "group", "group_id", "category");
+        $this->taskType = TaskType::CATEGORISATION;
     }
 
     /**
-     * Read the ideas for the group with the specified ID.
-     * @param string|null $groupId The group's ID.
-     * @return string Returns a json encoded list of all ideas for this group.
+     * Read the ideas for the category with the specified ID.
+     * @param string|null $categoryId The category's ID.
+     * @return string Returns a json encoded list of all ideas for this category.
      * @OA\Get(
-     *   path="/api/group/{groupId}/ideas",
-     *   summary="Ideas for the group with the specified id.",
-     *   tags={"Group"},
-     *   @OA\Parameter(in="path", name="groupId", description="ID of group to return", required=true),
+     *   path="/api/category/{categoryId}/ideas",
+     *   summary="Ideas for the category with the specified id.",
+     *   tags={"Category"},
+     *   @OA\Parameter(in="path", name="categoryId", description="ID of category to return", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
@@ -55,15 +55,15 @@ class GroupIdeaController extends AbstractController
     }
 
     /**
-     * Add a list of ideas to a group.
-     * @param string|null $groupId The group's ID.
+     * Add a list of ideas to a category.
+     * @param string|null $categoryId The category's ID.
      * @param array|null $ideaArray The list of ideas to add.
      * @return string Inserted data in the json format.
      * @OA\Post(
-     *   path="/api/group/{groupId}/ideas/",
-     *   summary="Add list of idea_ids to a group.",
-     *   tags={"Group"},
-     *   @OA\Parameter(in="path", name="groupId", description="ID of the group", required=true),
+     *   path="/api/category/{categoryId}/ideas/",
+     *   summary="Add list of idea_ids to a category.",
+     *   tags={"Category"},
+     *   @OA\Parameter(in="path", name="categoryId", description="ID of the category", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="application/json",
@@ -81,7 +81,7 @@ class GroupIdeaController extends AbstractController
     {
         $params = $this->formatParameters(
             [
-                "group_idea_id" => ["default" => $groupId, "url" => "group", "required" => true],
+                "group_idea_id" => ["default" => $groupId, "url" => "category", "required" => true],
                 "sub_idea_id" => ["default" => $ideaArray, "type" => "ARRAY", "result" => "all"]
             ]
         );
@@ -105,15 +105,15 @@ class GroupIdeaController extends AbstractController
     }
 
     /**
-     * Delete a list of ideas from a group.
-     * @param string|null $groupId The group's ID.
+     * Delete a list of ideas from a category.
+     * @param string|null $categoryId The category's ID.
      * @param array|null $ideaArray The list of ideas to delete.
      * @return string Success status of the statement.
      * @OA\Delete(
-     *   path="/api/group/{groupId}/ideas/",
-     *   summary="Delete the list of idea_ids from a group.",
-     *   tags={"Group"},
-     *   @OA\Parameter(in="path", name="groupId", description="ID of the group", required=true),
+     *   path="/api/category/{categoryId}/ideas/",
+     *   summary="Delete the list of idea_ids from a category.",
+     *   tags={"Category"},
+     *   @OA\Parameter(in="path", name="categoryId", description="ID of the category", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
      *       mediaType="application/json",
@@ -131,7 +131,7 @@ class GroupIdeaController extends AbstractController
     {
         $params = $this->formatParameters(
             [
-                "group_idea_id" => ["default" => $groupId, "url" => "group", "required" => true],
+                "group_idea_id" => ["default" => $groupId, "url" => "category", "required" => true],
                 "sub_idea_id" => ["default" => $ideaArray, "type" => "ARRAY", "result" => "all"]
             ]
         );

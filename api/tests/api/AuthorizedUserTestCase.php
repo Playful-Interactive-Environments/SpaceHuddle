@@ -68,7 +68,7 @@ abstract class AuthorizedUserTestCase extends AuthorizedTestCase
 
   public function getFirstTaskIdGroup() : ?string {
     if (!isset($this->taskIdGroup)) {
-      $this->taskIdGroup = $this->getFirstTaskId(TaskType::GROUPING);
+      $this->taskIdGroup = $this->getFirstTaskId(TaskType::CATEGORISATION);
     }
     return $this->taskIdGroup;
   }
@@ -102,7 +102,7 @@ abstract class AuthorizedUserTestCase extends AuthorizedTestCase
   public function getFirstGroupId() : ?string {
     if (!isset($this->groupId)) {
       $taskId = $this->getFirstTaskIdGroup();
-      $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$taskId/groups/"));
+      $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$taskId/categories/"));
       $result = $this->toJSON($res->getBody());
       if (count($result) > 0) {
         $this->groupId = $result[0]->id;

@@ -7,7 +7,7 @@ namespace PieLab\GAB\Models;
  * @OA\Schema(
  *   description="possible task types",
  *   type="string",
- *   enum={"INFORMATION", "BRAINSTORMING", "SELECTION", "GROUPING", "VOTING"},
+ *   enum={"INFORMATION", "BRAINSTORMING", "SELECTION", "CATEGORISATION", "VOTING"},
  *   example="BRAINSTORMING"
  * )
  */
@@ -16,6 +16,6 @@ class TaskType
     public const INFORMATION = "information";
     public const BRAINSTORMING = "brainstorming";
     public const SELECTION = "selection";
-    public const GROUPING = "grouping";
+    public const CATEGORISATION = "categorisation";
     public const VOTING = "voting";
 }

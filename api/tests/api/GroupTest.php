@@ -13,23 +13,23 @@ class GroupTest extends AuthorizedUserTestCase
   }
 
   public function testGetAll() {
-    $res = $this->client->get($this->getAbsoluteApiUrl("/api/topic/$this->topicId/groups/"));
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/topic/$this->topicId/categories/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
-    $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$this->taskIdGroup/groups/"));
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/task/$this->taskIdGroup/categories/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
   }
 
   public function testGetById() {
     $this->assertIsString($this->groupId);
-    $res = $this->client->get($this->getAbsoluteApiUrl("/api/group/$this->groupId/"));
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/category/$this->groupId/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
   }
 
   public function testGetGroupIdeas() {
-    $res = $this->client->get($this->getAbsoluteApiUrl("/api/group/$this->groupId/ideas/"));
+    $res = $this->client->get($this->getAbsoluteApiUrl("/api/category/$this->groupId/ideas/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
   }
@@ -40,7 +40,7 @@ class GroupTest extends AuthorizedUserTestCase
       'description' => "..."
     ));
 
-    $res = $this->client->post($this->getAbsoluteApiUrl("/api/topic/$this->topicId/group/"), [
+    $res = $this->client->post($this->getAbsoluteApiUrl("/api/topic/$this->topicId/category/"), [
         'body' => $data
     ]);
     $this->assertSame($res->getStatusCode(), 200);
@@ -49,11 +49,11 @@ class GroupTest extends AuthorizedUserTestCase
     $result = $this->toJSON($res->getBody());
     $id = $result->id;
 
-    $res = $this->client->delete($this->getAbsoluteApiUrl("/api/group/$id/"));
+    $res = $this->client->delete($this->getAbsoluteApiUrl("/api/category/$id/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
 
-    $res = $this->client->post($this->getAbsoluteApiUrl("/api/task/$this->taskIdGroup/group/"), [
+    $res = $this->client->post($this->getAbsoluteApiUrl("/api/task/$this->taskIdGroup/category/"), [
         'body' => $data
     ]);
     $this->assertSame($res->getStatusCode(), 200);
@@ -68,13 +68,13 @@ class GroupTest extends AuthorizedUserTestCase
       'description' => "new description"
     ));
 
-    $res = $this->client->put($this->getAbsoluteApiUrl("/api/group/"), [
+    $res = $this->client->put($this->getAbsoluteApiUrl("/api/category/"), [
         'body' => $data
     ]);
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
 
-    $res = $this->client->delete($this->getAbsoluteApiUrl("/api/group/$id/"));
+    $res = $this->client->delete($this->getAbsoluteApiUrl("/api/category/$id/"));
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
   }
@@ -84,13 +84,13 @@ class GroupTest extends AuthorizedUserTestCase
       $this->ideaId
     ));
 
-    $res = $this->client->post($this->getAbsoluteApiUrl("/api/group/$this->groupId/ideas/"), [
+    $res = $this->client->post($this->getAbsoluteApiUrl("/api/category/$this->groupId/ideas/"), [
         'body' => $data
     ]);
     $this->assertSame($res->getStatusCode(), 200);
     $this->assertIsJSON($res->getBody());
 
-    $res = $this->client->delete($this->getAbsoluteApiUrl("/api/group/$this->groupId/ideas/"), [
+    $res = $this->client->delete($this->getAbsoluteApiUrl("/api/category/$this->groupId/ideas/"), [
         'body' => $data
     ]);
     $this->assertSame($res->getStatusCode(), 200);

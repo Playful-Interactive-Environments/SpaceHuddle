@@ -5,7 +5,7 @@ class ParticpantConnectTest extends AuthorizedTestCase
 {
   public function testWorkflow() {
     $data =  json_encode((object)array(
-        'sessionKey' => '9064AWOU',# 'ZP4L4QFX',
+        'sessionKey' => 'ZP4L4QFX',
         'ip' => 'xxx'
     ));
 

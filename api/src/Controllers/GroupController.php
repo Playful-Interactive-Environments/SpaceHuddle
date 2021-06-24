@@ -8,7 +8,7 @@ use PieLab\GAB\Models\StateIdea;
 use PieLab\GAB\Models\TaskType;
 
 /**
- * Controller class for groups.
+ * Controller class for category.
  * @package PieLab\GAB\Controllers
  */
 class GroupController extends IdeaController
@@ -18,24 +18,24 @@ class GroupController extends IdeaController
      */
     public function __construct()
     {
-        parent::__construct("idea", Group::class, TaskController::class, "task", "task_id", "group");
-        $this->taskType = TaskType::GROUPING;
+        parent::__construct("idea", Group::class, TaskController::class, "task", "task_id", "category");
+        $this->taskType = TaskType::CATEGORISATION;
     }
 
     /**
-     * Get a list of all groups for the task.
+     * Get a list of all categories for the task.
      * @param string|null $taskId The task's ID.
      * @param bool $treatParticipantsSeparately Treat each participant separately.
-     * @return string Returns a json encoded list of all groups for this task.
+     * @return string Returns a json encoded list of all categories for this task.
      * @OA\Get(
-     *   path="/api/task/{taskId}/groups/",
-     *   summary="List of all groups for the task.",
-     *   tags={"Group"},
+     *   path="/api/task/{taskId}/categories/",
+     *   summary="List of all categories for the task.",
+     *   tags={"Category"},
      *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
-     *         @OA\Schema(type="array", @OA\Items(ref="#/components/schemas/Group")),
+     *         @OA\Schema(type="array", @OA\Items(ref="#/components/schemas/Category")),
      *     )
      *   ),
      *   @OA\Response(response="404", description="Not Found"),
@@ -48,19 +48,19 @@ class GroupController extends IdeaController
     }
 
     /**
-     * Get a list of all groups for the topic.
+     * Get a list of all categories for the topic.
      * @param string|null $topicId The topic's ID.
      * @param bool $treatParticipantsSeparately Treat each participant separately.
-     * @return string Returns a json encoded list of all groups for this topic.
+     * @return string Returns a json encoded list of all categories for this topic.
      * @OA\Get(
-     *   path="/api/topic/{topicId}/groups/",
-     *   summary="List of all groups for the topic.",
-     *   tags={"Group"},
+     *   path="/api/topic/{topicId}/categories/",
+     *   summary="List of all categories for the topic.",
+     *   tags={"Category"},
      *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
      *   @OA\Response(response="200", description="Success",
      *     @OA\MediaType(
      *         mediaType="application/json",
-     *         @OA\Schema(type="array", @OA\Items(ref="#/components/schemas/Group")),
+     *         @OA\Schema(type="array", @OA\Items(ref="#/components/schemas/Category")),
      *     )
      *   ),
      *   @OA\Response(response="404", description="Not Found"),
@@ -73,17 +73,17 @@ class GroupController extends IdeaController
     }
 
     /**
-     * Read detailed data for the group with the specified ID.
-     * @param string|null $id The group's ID.
+     * Read detailed data for the category with the specified ID.
+     * @param string|null $id The category's ID.
      * @param bool $treatParticipantsSeparately Treat participants separately.
-     * @return string Returns a json encoded entry for this group.
+     * @return string Returns a json encoded entry for this category.
      * @OA\Get(
-     *   path="/api/group/{id}/",
-     *   summary="Detail data for the group with the specified id.",
-     *   tags={"Group"},
-     *   @OA\Parameter(in="path", name="id", description="ID of group to return", required=true),
+     *   path="/api/category/{id}/",
+     *   summary="Detail data for the category with the specified id.",
+     *   tags={"Category"},
+     *   @OA\Parameter(in="path", name="id", description="ID of category to return", required=true),
      *   @OA\Response(response="200", description="Success",
-     *     @OA\JsonContent(ref="#/components/schemas/Group"),
+     *     @OA\JsonContent(ref="#/components/schemas/Category"),
      *   ),
      *   @OA\Response(response="404", description="Not Found"),
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
@@ -95,17 +95,17 @@ class GroupController extends IdeaController
     }
 
     /**
-     * Create a group for a task.
-     * @param string|null $taskId The group's ID.
-     * @param string|null $keywords The group's keywords.
-     * @param string|null $description The group's description.
-     * @param string|null $link The group's link.
-     * @param string|null $image The group's image.
-     * @return string Returns the inserted group data in JSON format.
+     * Create a category for a task.
+     * @param string|null $taskId The task ID.
+     * @param string|null $keywords The category's keywords.
+     * @param string|null $description The category's description.
+     * @param string|null $link The category's link.
+     * @param string|null $image The category's image.
+     * @return string Returns the inserted category data in JSON format.
      * @OA\Post(
-     *   path="/api/task/{taskId}/group/",
-     *   summary="Create a new group for the task.",
-     *   tags={"Group"},
+     *   path="/api/task/{taskId}/category/",
+     *   summary="Create a new category for the task.",
+     *   tags={"Category"},
      *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
@@ -117,7 +117,7 @@ class GroupController extends IdeaController
      *     )
      *   ),
      *   @OA\Response(response="200", description="Success",
-     *     @OA\JsonContent(ref="#/components/schemas/Group"),
+     *     @OA\JsonContent(ref="#/components/schemas/Category"),
      *   ),
      *   @OA\Response(response="404", description="Not Found"),
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
@@ -146,17 +146,17 @@ class GroupController extends IdeaController
     }
 
     /**
-     * Create a new group for the topic.
-     * @param string|null $topicId The group's ID.
-     * @param string|null $keywords The group's keywords.
-     * @param string|null $description The group's description.
-     * @param string|null $link The group's link.
-     * @param string|null $image The group's image.
-     * @return string Returns the inserted group data in JSON format.
+     * Create a new category for the topic.
+     * @param string|null $topicId The topic ID.
+     * @param string|null $keywords The category's keywords.
+     * @param string|null $description The category's description.
+     * @param string|null $link The category's link.
+     * @param string|null $image The category's image.
+     * @return string Returns the inserted category data in JSON format.
      * @OA\Post(
-     *   path="/api/topic/{topicId}/group/",
-     *   summary="Create a new group for the topic.",
-     *   tags={"Group"},
+     *   path="/api/topic/{topicId}/category/",
+     *   summary="Create a new category for the topic.",
+     *   tags={"Category"},
      *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
      *   @OA\RequestBody(
      *     @OA\MediaType(
@@ -168,7 +168,7 @@ class GroupController extends IdeaController
      *     )
      *   ),
      *   @OA\Response(response="200", description="Success",
-     *     @OA\JsonContent(ref="#/components/schemas/Group"),
+     *     @OA\JsonContent(ref="#/components/schemas/Category"),
      *   ),
      *   @OA\Response(response="404", description="Not Found"),
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
@@ -185,27 +185,27 @@ class GroupController extends IdeaController
     }
 
     /**
-     * Update a group.
-     * @param string|null $id The group's ID.
-     * @param string|null $state The group's state.
-     * @param string|null $keywords The group's keywords.
-     * @param string|null $description The group's description.
-     * @param string|null $link The group's link.
-     * @param string|null $image The group's image.
+     * Update a category.
+     * @param string|null $id The category's ID.
+     * @param string|null $state The category's state.
+     * @param string|null $keywords The category's keywords.
+     * @param string|null $description The category's description.
+     * @param string|null $link The category's link.
+     * @param string|null $image The category's image.
      * @return string
      * @OA\Put(
-     *   path="/api/group/",
-     *   summary="Update a group.",
-     *   tags={"Group"},
+     *   path="/api/category/",
+     *   summary="Update a category.",
+     *   tags={"Category"},
      *   @OA\RequestBody(
      *     required=true,
      *     @OA\MediaType(
      *         mediaType="application/json",
-     *         @OA\Schema(ref="#/components/schemas/Group")
+     *         @OA\Schema(ref="#/components/schemas/Category")
      *     )
      *   ),
      *   @OA\Response(response="200", description="Success",
-     *     @OA\JsonContent(ref="#/components/schemas/Group"),
+     *     @OA\JsonContent(ref="#/components/schemas/Category"),
      *   ),
      *   @OA\Response(response="404", description="Not Found"),
      *   security={{"api_key": {}}, {"bearerAuth": {}}}
@@ -223,14 +223,14 @@ class GroupController extends IdeaController
     }
 
     /**
-     * Delete a group.
+     * Delete a grcategoryoup.
      * @param string|null $id The ID.
      * @return string A JSON encoded response statement.
      * @OA\Delete(
-     *   path="/api/group/{id}/",
-     *   summary="Delete a group.",
-     *   tags={"Group"},
-     *   @OA\Parameter(in="path", name="id", description="ID of group to delete", required=true),
+     *   path="/api/category/{id}/",
+     *   summary="Delete a category.",
+     *   tags={"Category"},
+     *   @OA\Parameter(in="path", name="id", description="ID of category to delete", required=true),
      *   @OA\Response(response="200", description="Success"),
      *   @OA\Response(response="404", description="Not Found"),
      *   security={{"api_key": {}}, {"bearerAuth": {}}}

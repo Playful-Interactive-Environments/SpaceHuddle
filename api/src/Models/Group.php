@@ -3,8 +3,8 @@
 namespace PieLab\GAB\Models;
 
 /**
- * Represents a group.
- * @OA\Schema(description="group category description")
+ * Represents a category.
+ * @OA\Schema(schema="Category", description="category description")
  */
 class Group
 {

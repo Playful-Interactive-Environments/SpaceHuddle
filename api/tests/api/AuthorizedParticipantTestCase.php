@@ -77,7 +77,7 @@ abstract class AuthorizedParticipantTestCase extends AuthorizedTestCase
     $client = new GuzzleHttp\Client();
 
     $loginData =  json_encode((object)array(
-      'sessionKey' => '9064AWOU',# 'ZP4L4QFX',
+      'sessionKey' => 'ZP4L4QFX',
       'ip' => 'localhost'
     ));
 
