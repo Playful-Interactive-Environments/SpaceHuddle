@@ -7,44 +7,14 @@ namespace App\Test\Traits;
  */
 trait UserTestTrait
 {
-    /**
-     * Get first entity entry from the database
-     * @param string $entityUrl Name of the get api call
-     * @param array|null $postData If set, creates a new entry with the specified data if the result is empty
-     * @return object|null First entry
-     */
-    private function getFirstEntity(string $entityUrl, ?array $postData = null) : ?object
-    {
-        $request = $this->createJsonRequest(
-            "GET",
-            "/$entityUrl/"
-        );
-        $request = $this->withJwtAuth($request);
-        $response = $this->app->handle($request);
-        $json = json_decode($response->getBody());
-        $result = null;
-        if (is_array($json) and sizeof($json) > 0 and property_exists($json[0], "id")) {
-            $result = $json[0];
-        } elseif (isset($postData)) {
-            $entityNameSingular = substr_replace($entityUrl ,"", -1);
-            $request = $this->createJsonRequest(
-                "POST",
-                "/$entityNameSingular/",
-                $postData
-            );
-            $request = $this->withJwtAuth($request);
-            $this->app->handle($request);
-            $result = $this->getFirstEntity($entityUrl, null);
-        }
-        return $result;
-    }
+    use EntityTestTrait;
 
     /**
      * Get the first session entry from the database
-     * @param bool $createIfNotExists If true, creates a new entry if the result is empty
+     * @param string|null $token Use alternative Login
      * @return object|null First entry
      */
-    private function getFirstSession(bool $createIfNotExists = true) : ?object
+    private function getFirstSession(string|null $token = null) : ?object
     {
         return $this->getFirstEntity(
             "sessions",
@@ -53,7 +23,8 @@ trait UserTestTrait
                 "description" => "create from unit test",
                 "maxParticipants" => 100,
                 "expirationDate" => "2022-01-01"
-            ]
+            ],
+            $token
         );
     }
 

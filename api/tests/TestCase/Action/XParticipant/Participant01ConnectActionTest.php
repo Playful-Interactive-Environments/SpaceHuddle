@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Test\TestCase\Action\Participant;
+namespace App\Test\TestCase\Action\XParticipant;
 
 use App\Test\Traits\AppTestTrait;
 use App\Test\Traits\UserTestTrait;
@@ -59,7 +59,7 @@ class Participant01ConnectActionTest extends TestCase
      *
      * @return void
      */
-    public function testLoginUserValidation(): void
+    public function testConnectValidation(): void
     {
         $request = $this->createJsonRequest(
             "POST",
