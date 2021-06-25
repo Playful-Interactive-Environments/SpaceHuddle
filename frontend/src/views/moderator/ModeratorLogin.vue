@@ -7,13 +7,20 @@
           Go ahead and login to access all your existing resources create new
           brainstorming sessions.
         </p>
-        <form @submit="submit">
+        <form @submit.prevent="loginUser">
           <h3 class="heading heading--xs">Email</h3>
           <input
             class="input input--fullwidth"
             name="email"
             placeholder="Enter your email"
-            type="text"
+            type="email"
+            v-model="email"
+            @blur="context.$v.email.$touch()"
+          />
+          <FormError
+            v-if="context.$v.email.$error"
+            :errors="context.$v.email.$errors"
+            :isSmall="true"
           />
           <h3 class="heading heading--xs">Password</h3>
           <input
@@ -21,8 +28,14 @@
             name="password"
             placeholder="Enter your password"
             type="text"
+            v-model="password"
+            @blur="context.$v.password.$touch()"
           />
-          <form-error :errors="errors"></form-error>
+          <FormError
+            v-if="context.$v.password.$error"
+            :errors="context.$v.password.$errors"
+            :isSmall="true"
+          />
           <button
             class="btn btn--wide btn--gradient btn--fullwidth"
             type="submit"
@@ -54,15 +67,42 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-import FormError from '../../components/shared/atoms/FormError.vue';
+import { Options, Vue, setup } from 'vue-class-component';
+import { maxLength, minLength, required, email } from '@vuelidate/validators';
+import useVuelidate from '@vuelidate/core';
+import FormError from '@/components/shared/atoms/FormError.vue';
 
 @Options({
   components: {
     FormError,
   },
+  validations: {
+    email: {
+      email,
+      required,
+    },
+    password: {
+      required,
+      min: minLength(8),
+      max: maxLength(12),
+    },
+  },
 })
-export default class ModeratorLogin extends Vue {}
+export default class ModeratorLogin extends Vue {
+  email = '';
+  password = '';
+
+  context = setup(() => {
+    return {
+      $v: useVuelidate(),
+    };
+  });
+
+  async loginUser(): Promise<void> {
+    await this.context.$v.$validate();
+    if (this.context.$v.$error) return;
+  }
+}
 </script>
 
 <style lang="scss" scoped>

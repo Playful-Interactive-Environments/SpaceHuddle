@@ -24,8 +24,6 @@ import { Idea } from '../../services/moderator/idea-service';
 import { setModuleStyles } from '../../utils/moduleStyles';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleType from '../../types/ModuleType';
-import TaskStates from '../../types/TaskStates';
-import ModuleColors from '../../types/ModuleColors';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import * as taskService from '@/services/moderator/task-service';
 

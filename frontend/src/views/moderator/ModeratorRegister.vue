@@ -21,29 +21,49 @@
         <p class="register__description">
           Please enter your personal info to create an account.
         </p>
-        <form @submit="submit">
+        <form @submit.prevent="registerUser">
           <h3 class="heading heading--xs">Email</h3>
           <input
             class="input input--fullwidth"
             name="email"
             placeholder="Enter your email"
-            type="text"
+            type="email"
+            v-model.trim="context.$v.email.$model"
+            @blur="context.$v.email.$touch()"
+          />
+          <FormError
+            v-if="context.$v.email.$error"
+            :errors="context.$v.email.$errors"
+            :isSmall="true"
           />
           <h3 class="heading heading--xs">Password</h3>
           <input
             class="input input--fullwidth"
             name="password"
             placeholder="Enter your password"
-            type="text"
+            type="password"
+            v-model.trim="context.$v.password.$model"
+            @blur="context.$v.password.$touch()"
+          />
+          <FormError
+            v-if="context.$v.password.$error"
+            :errors="context.$v.password.$errors"
+            :isSmall="true"
           />
           <h4 class="heading heading--xs">Password repeat</h4>
           <input
             class="input input--fullwidth"
-            name="password"
+            name="passwordRepeat"
             placeholder="Repeat your password"
-            type="text"
+            type="password"
+            v-model.trim="context.$v.passwordRepeat.$model"
+            @blur="context.$v.passwordRepeat.$touch()"
           />
-          <form-error :errors="errors"></form-error>
+          <FormError
+            v-if="context.$v.passwordRepeat.$error"
+            :errors="context.$v.passwordRepeat.$errors"
+            :isSmall="true"
+          />
           <button
             class="btn btn--wide btn--gradient btn--fullwidth"
             type="submit"
@@ -57,9 +77,68 @@
 </template>
 
 <script lang="ts">
-import { Vue } from 'vue-class-component';
+import { Options, Vue, setup } from 'vue-class-component';
+import {
+  maxLength,
+  minLength,
+  required,
+  email,
+  sameAs,
+  helpers,
+} from '@vuelidate/validators';
+import useVuelidate from '@vuelidate/core';
+import FormError from '@/components/shared/atoms/FormError.vue';
 
-export default class ModeratorRegister extends Vue {}
+@Options({
+  components: {
+    FormError,
+  },
+  validations: {
+    email: {
+      email,
+      required,
+    },
+    password: {
+      required,
+      min: minLength(8),
+      max: maxLength(12),
+      containsUppercase: function (value: string) {
+        return !/[A-Z]/.test(value);
+      },
+      containsLowercase: function (value: string) {
+        return !/[a-z]/.test(value);
+      },
+      containsNumber: function (value: string) {
+        return !/[0-9]/.test(value);
+      },
+      containsSpecial: function (value: string) {
+        return !/[#?!@$%^&*-]/.test(value);
+      },
+    },
+    passwordRepeat: {
+      required,
+      min: minLength(8),
+      max: maxLength(12),
+      sameAsPassword: sameAs('password'),
+    },
+  },
+})
+export default class ModeratorRegister extends Vue {
+  email = '';
+  password = '';
+  passwordRepeat = '';
+
+  context = setup(() => {
+    return {
+      $v: useVuelidate(),
+    };
+  });
+
+  async registerUser(): Promise<void> {
+    await this.context.$v.$validate();
+    if (this.context.$v.$error) return;
+  }
+}
 </script>
 
 <style lang="scss" scoped>
