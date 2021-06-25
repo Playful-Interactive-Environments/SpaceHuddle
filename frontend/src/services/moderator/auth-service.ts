@@ -1,14 +1,14 @@
 const JWT_KEY = 'jwt';
 
 export const isAuthenticated = (): boolean => {
-  const jwtFromStorage = getJwt();
+  const jwtFromStorage = getAccessToken();
   return !!jwtFromStorage;
 };
 
-export const setDebuggingJwt = (jwt: string): void => {
-  window.localStorage.setItem('jwt', jwt);
+export const setAccessToken = (jwt: string): void => {
+  window.localStorage.setItem(JWT_KEY, 'Bearer ' + jwt);
 };
 
-export const getJwt = (): string | null => {
+export const getAccessToken = (): string | null => {
   return window.localStorage.getItem(JWT_KEY);
 };

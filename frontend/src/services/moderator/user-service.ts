@@ -1,5 +1,5 @@
 import { apiEndpoint } from '@/services/api';
-import ApiResponse from '@/types/ApiResponse';
+import { ApiResponse, LoginResponse } from '@/types/ApiResponse';
 import EndpointType from '@/types/Endpoint';
 
 const API_USER_ENDPOINT = apiEndpoint(EndpointType.USER);
@@ -9,23 +9,21 @@ export const registerUser = async (
   password: string,
   passwordRepeat: string
 ): Promise<ApiResponse> => {
-  const data = await API_USER_ENDPOINT.post<ApiResponse>(`/register/`, {
-    email: email,
+  const data = await API_USER_ENDPOINT.post<ApiResponse>(`/register`, {
+    username: email,
     password: password,
     passwordConfirmation: passwordRepeat,
   });
-  console.log(data);
   return data.data;
 };
 
 export const loginUser = async (
   email: string,
   password: string
-): Promise<ApiResponse> => {
-  const data = await API_USER_ENDPOINT.post<ApiResponse>(`/login/`, {
-    email: email,
+): Promise<LoginResponse> => {
+  const data = await API_USER_ENDPOINT.post<LoginResponse>(`/login`, {
+    username: email,
     password: password,
   });
-  console.log(data);
   return data.data;
 };

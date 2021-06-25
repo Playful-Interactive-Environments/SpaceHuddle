@@ -10,7 +10,7 @@
 </template>
 <script lang="ts">
 import { Vue } from 'vue-class-component';
-import { setDebuggingJwt } from '@/services/moderator/auth-service';
+import { setAccessToken } from '@/services/moderator/auth-service';
 export default class Debug extends Vue {
   jwt = '';
 
@@ -20,7 +20,7 @@ export default class Debug extends Vue {
       this.jwt = `Bearer ${this.jwt}`;
     }
     alert('Congratulations, your token is set! Let the adventures begin!');
-    setDebuggingJwt(this.jwt);
+    setAccessToken(this.jwt);
   }
 }
 </script>

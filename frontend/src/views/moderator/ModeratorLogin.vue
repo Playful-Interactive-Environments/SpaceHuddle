@@ -13,7 +13,7 @@
             class="input input--fullwidth"
             name="email"
             placeholder="Enter your email"
-            type="text"
+            type="email"
             v-model="email"
             @blur="context.$v.email.$touch()"
           />
@@ -27,7 +27,7 @@
             class="input input--fullwidth"
             name="password"
             placeholder="Enter your password"
-            type="text"
+            type="password"
             v-model="password"
             @blur="context.$v.password.$touch()"
           />
@@ -71,6 +71,7 @@ import { Options, Vue, setup } from 'vue-class-component';
 import { maxLength, minLength, required, email } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
+import * as authService from '@/services/moderator/auth-service';
 import * as userService from '@/services/moderator/user-service';
 
 @Options({
@@ -103,8 +104,17 @@ export default class ModeratorLogin extends Vue {
     await this.context.$v.$validate();
     if (this.context.$v.$error) return;
 
-    const data = userService.loginUser(this.email, this.password);
-    console.log(data);
+    const data = await userService.loginUser(this.email, this.password);
+
+    if (data.accessToken) {
+      authService.setAccessToken(data.accessToken);
+      console.log(authService.getAccessToken());
+      this.$router.push({
+        name: 'moderator-session-overview',
+      });
+    } else {
+      // TODO: error snackbar if something went wrong
+    }
   }
 }
 </script>

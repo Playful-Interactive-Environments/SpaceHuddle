@@ -1,6 +1,11 @@
 interface ApiResponse {
-  state: 'Success';
-  message: 'User was created.';
+  state: string;
+  message: string;
 }
 
-export default ApiResponse;
+interface LoginResponse {
+  message: string;
+  accessToken: string;
+}
+
+export { ApiResponse, LoginResponse };

@@ -1,5 +1,5 @@
 import Axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { getJwt } from '@/services/moderator/auth-service';
+import { getAccessToken } from '@/services/moderator/auth-service';
 import EndpointType from '@/types/Endpoint';
 
 const endpointsWithAuthorization = [
@@ -21,7 +21,9 @@ const interceptorAuthHeader = (
   endpoint: EndpointType
 ): AxiosRequestConfig => {
   if (endpointRequiresAuthorization(endpoint)) {
-    const jwt = getJwt();
+    console.log(getAccessToken());
+
+    const jwt = getAccessToken();
     if (!jwt) throw new Error('Missing Authentication Token');
 
     axiosConfig.headers = {

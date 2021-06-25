@@ -98,6 +98,8 @@ import {
 } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
+import { ApiResponse } from '@/types/ApiResponse';
+import States from '@/types/States';
 import * as userService from '@/services/moderator/user-service';
 
 @Options({
@@ -148,13 +150,19 @@ export default class ModeratorRegister extends Vue {
     await this.context.$v.$validate();
     if (this.context.$v.$error || this.hasMatchingPasswords) return;
 
-    const data = await userService.registerUser(
+    const data: ApiResponse = await userService.registerUser(
       this.email,
       this.password,
       this.passwordRepeat
     );
 
-    console.log(data);
+    if (data.state == States.SUCCESS) {
+      this.$router.push({
+        name: 'moderator-login',
+      });
+    } else {
+      // TODO: check if user created or not -> show snackbar
+    }
   }
 
   get hasMatchingPasswords(): boolean {
