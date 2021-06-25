@@ -60,18 +60,23 @@ trait SelectTrait
     /**
      * Fetches all entities from the database query and converts them into an object of the generic result class.
      * @param Query $query Database query.
+     * @param string|null $resultClass Name of the result class
      * @return object|array|null The result entity(s).
      */
-    protected function fetchAll(Query $query) : null|object|array
+    protected function fetchAll(Query $query, ?string $resultClass = null) : null|object|array
     {
+        if (is_null($resultClass)) {
+            $resultClass = $this->getResultClass();
+        }
+
         $rows = $query->execute()->fetchAll("assoc");
         if (is_array($rows) and sizeof($rows) > 0) {
             if (sizeof($rows) === 1) {
-                return $this->createResultClass($rows[0]);
+                return new $resultClass($rows[0]);
             } else {
                 $result = [];
                 foreach ($rows as $resultItem) {
-                    array_push($result, $this->createResultClass($resultItem));
+                    array_push($result, new $resultClass($resultItem));
                 }
                 return $result;
             }

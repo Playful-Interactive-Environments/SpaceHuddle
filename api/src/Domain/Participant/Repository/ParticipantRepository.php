@@ -2,17 +2,23 @@
 
 namespace App\Domain\Participant\Repository;
 
-use App\Data\AuthorisationData;
 use App\Domain\Base\Repository\EncryptTrait;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\KeyGeneratorTrait;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Participant\Data\ParticipantData;
+use App\Domain\Participant\Data\ParticipantTaskData;
 use App\Domain\Participant\Type\AvatarSymbol;
 use App\Domain\Participant\Type\ParticipantState;
 use App\Domain\Session\Repository\SessionRepository;
+use App\Domain\Task\Data\TaskData;
+use App\Domain\Task\Type\TaskState;
+use App\Domain\Topic\Data\TopicData;
 use App\Factory\QueryFactory;
+use Cake\Database\Expression\QueryExpression;
+use Cake\Database\Query;
+use Cake\I18n\Time;
 
 /**
  * Repository
@@ -128,6 +134,123 @@ class ParticipantRepository implements RepositoryInterface
             return new ParticipantData($result);
         }
         return null;
+    }
+
+    /**
+     * Delete dependent data.
+     * @param string $id Primary key of the linked table entry.
+     * @return void
+     */
+    protected function deleteDependencies(string $id): void
+    {
+        $this->queryFactory->newUpdate("vote", ["participant_id" => null])
+            ->andWhere(["participant_id" => $id])
+            ->execute();
+
+        $this->queryFactory->newUpdate("idea", ["participant_id" => null])
+            ->andWhere(["participant_id" => $id])
+            ->execute();
+
+        $this->queryFactory->newDelete("module_state")
+            ->andWhere(["participant_id" => $id])
+            ->execute();
+
+        $this->queryFactory->newDelete("random_idea")
+            ->andWhere(["participant_id" => $id])
+            ->execute();
+    }
+
+    /**
+     * List all tasks for the currently logged-in participant.
+     * @param string $id The entity ID.
+     * @return array The list of tasks in JSON format.
+     */
+    public function getTasks(string $id): array
+    {
+        $query = $this->queryFactory->newSelect("task");
+        $query->select(["topic.*", "task.*"])
+            ->innerJoin("topic", "topic.id = task.topic_id")
+            ->innerJoin("session", "session.id = topic.session_id")
+            ->innerJoin("participant", "participant.session_id = session.id")
+            ->whereInList("task.state", [
+                strtoupper(TaskState::ACTIVE),
+                strtoupper(TaskState::READ_ONLY)
+            ])
+            ->andWhere([
+                "participant.id" => $id,
+                "session.expiration_date >= current_timestamp()"
+            ]);
+
+        $result = $this->fetchAll($query, ParticipantTaskData::class);
+        if (isset($result)) {
+            if (is_array($result)) {
+                return $result;
+            }
+            return [$result];
+        }
+
+        return [];
+    }
+
+    /**
+     * List all topics for the current participant.
+     * @param string $id The entity ID.
+     * @return array A list of topics in JSON format.
+     */
+    public function getTopics(string $id): array
+    {
+        $query = $this->queryFactory->newSelect("topic");
+        $query->select(["topic.*"])
+            ->innerJoin("session", "session.id = topic.session_id")
+            ->innerJoin("participant", "participant.session_id = session.id")
+            ->andWhere([
+                "participant.id" => $id,
+                "session.expiration_date >= current_timestamp()"
+            ]);
+
+        $result = $this->fetchAll($query, TopicData::class);
+        if (isset($result)) {
+            if (is_array($result)) {
+                return $result;
+            }
+            return [$result];
+        }
+
+        return [];
+    }
+
+    /**
+     * List all topic tasks for the logged-in participant.
+     * @param string $topicId The topic's ID.
+     * @param string $id The entity ID.
+     * @return array A list of all topic tasks in JSON format.
+     */
+    public function getTopicTasks(string $topicId, string $id): array
+    {
+        $query = $this->queryFactory->newSelect("task");
+        $query->select(["task.*"])
+            ->innerJoin("topic", "topic.id = task.topic_id")
+            ->innerJoin("session", "session.id = topic.session_id")
+            ->innerJoin("participant", "participant.session_id = session.id")
+            ->whereInList("task.state", [
+                strtoupper(TaskState::ACTIVE),
+                strtoupper(TaskState::READ_ONLY)
+            ])
+            ->andWhere([
+                "participant.id" => $id,
+                "task.topic_id" => $topicId,
+                "session.expiration_date >= current_timestamp()"
+            ]);
+
+        $result = $this->fetchAll($query, TaskData::class);
+        if (isset($result)) {
+            if (is_array($result)) {
+                return $result;
+            }
+            return [$result];
+        }
+
+        return [];
     }
 
     /**
