@@ -104,6 +104,11 @@ class PermissionService
             }
         }
 
+        if (is_null($id) and $authorisation->isLoggedIn()) {
+            $id = $authorisation->id;
+            $entity = strtolower($authorisation->type);
+        }
+
         if ($readOnly) {
             return $this->repository->getAuthorisationReadRole($authorisation, $entity, $id) ??
                 SessionRoleType::UNKNOWN;

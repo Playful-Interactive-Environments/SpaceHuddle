@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Domain\Base\Service;
 
 use App\Data\AuthorisationData;
@@ -9,9 +8,11 @@ use App\Data\AuthorisationData;
  * Description of the common update service functionality.
  * @package App\Domain\Base\Service
  */
-trait ServiceUpdaterTrait
+trait ServiceUpdateMessageTrait
 {
-    use BaseServiceTrait;
+    use ServiceUpdaterTrait {
+        ServiceUpdaterTrait::service as private updateService;
+    }
 
     /**
      * Functionality of the update service.
@@ -27,25 +28,13 @@ trait ServiceUpdaterTrait
         array $bodyData,
         array $urlData
     ): array|object|null {
-        $data = array_merge($bodyData, $urlData);
-        $id = $data["id"];
-
-        // Input validation
-        $this->validator->validateUpdate($id, $data);
-
-        // Validation was successfully
-        $object = (object)$data;
-        $object->id = $id;
-
-        $this->transaction->begin();
-        // Update the user
-        $result = $this->repository->update($object);
-        $this->transaction->commit();
+        $result = $this->updateService($authorisation, $bodyData, $urlData);
 
         // Logging
         $entityName = $this->repository->getEntityName();
-        $this->logger->info("$entityName updated successfully: $id");
-
-        return $result;
+        return [
+            "state" => "Success",
+            "message" => "$entityName updated successfully: $result->id"
+        ];
     }
 }

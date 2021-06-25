@@ -25,7 +25,7 @@ class SessionRoleType
     public const PARTICIPANT = "participant";
 
     /** @var string */
-    public const PARTICIPANT_INACTIVE = "participant_inactive";
+    public const INACTIVE = "inactive";
 
     /** @var string */
     public const UNKNOWN = "unknown";

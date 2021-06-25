@@ -29,8 +29,8 @@ p, MODERATOR, /user/, DELETE
 
 p, UNKNOWN|MODERATOR|PARTICIPANT, /participant/connect/, POST
 p, UNKNOWN|MODERATOR|PARTICIPANT, /participant/reconnect/:browserKey/, GET
-p, MODERATOR|PARTICIPANT, /participant/state/:state/, PUT
-p, MODERATOR|PARTICIPANT, /participant/, DELETE
+p, MODERATOR|PARTICIPANT|INACTIVE, /participant/state/:state/, PUT
+p, MODERATOR|PARTICIPANT|INACTIVE, /participant/, DELETE
 p, PARTICIPANT, /participant/tasks/, GET
 p, PARTICIPANT, /participant/topics/, GET
 p, PARTICIPANT, /topic/:topicId/participant_tasks/, GET
@@ -87,5 +87,5 @@ p, MODERATOR|PARTICIPANT, /vote/, PUT
 g, MODERATOR, USER
 g, FACILITATOR, USER
 g, PARTICIPANT, PARTICIPANT
-g, PARTICIPANT_INACTIVE, PARTICIPANT
+g, INACTIVE, PARTICIPANT
 g, UNKNOWN, NONE

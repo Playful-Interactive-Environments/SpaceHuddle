@@ -3,7 +3,6 @@
 namespace App\Domain\Session\Service;
 
 use App\Data\AuthorisationData;
-use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\ServiceUpdaterTrait;
 use App\Domain\Session\Type\SessionRoleType;
 
@@ -25,7 +24,6 @@ class SessionUpdater
      * @param array<string, mixed> $urlData Url parameter from the request
      *
      * @return array|object|null Service output
-     * @throws GenericException
      */
     public function service(
         AuthorisationData $authorisation,

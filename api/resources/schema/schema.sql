@@ -467,7 +467,7 @@ SELECT
     session_id,
     CASE state
         WHEN 'ACTIVE' THEN 'PARTICIPANT'
-        WHEN 'INACTIVE' THEN 'PARTICIPANT_INACTIVE'
+        WHEN 'INACTIVE' THEN 'INACTIVE'
         END AS role
 from participant;
 

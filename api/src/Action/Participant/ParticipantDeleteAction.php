@@ -2,7 +2,6 @@
 
 namespace App\Action\Participant;
 
-use App\Action\Base\ActionTrait;
 use App\Domain\Participant\Service\ParticipantDeleter;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -21,7 +20,7 @@ use Fig\Http\Message\StatusCodeInterface;
  */
 class ParticipantDeleteAction
 {
-    use ActionTrait;
+    use ParticipantActionTrait;
     protected ParticipantDeleter $service;
 
     /**

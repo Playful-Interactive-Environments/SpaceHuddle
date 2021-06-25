@@ -2,7 +2,6 @@
 
 namespace App\Action\Participant;
 
-use App\Action\Base\ActionTrait;
 use App\Domain\Participant\Service\ParticipantUpdater;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -25,7 +24,7 @@ use Fig\Http\Message\StatusCodeInterface;
  */
 class ParticipantUpdateAction
 {
-    use ActionTrait;
+    use ParticipantActionTrait;
     protected ParticipantUpdater $service;
 
     /**

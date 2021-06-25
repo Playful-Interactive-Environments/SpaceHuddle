@@ -2,6 +2,7 @@
 
 namespace App\Domain\Participant\Repository;
 
+use App\Data\AuthorisationData;
 use App\Domain\Base\Repository\EncryptTrait;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\KeyGeneratorTrait;
@@ -10,6 +11,7 @@ use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Participant\Data\ParticipantData;
 use App\Domain\Participant\Type\AvatarSymbol;
 use App\Domain\Participant\Type\ParticipantState;
+use App\Domain\Session\Repository\SessionRepository;
 use App\Factory\QueryFactory;
 
 /**
@@ -31,7 +33,9 @@ class ParticipantRepository implements RepositoryInterface
         $this->setUp(
             $queryFactory,
             "participant",
-            ParticipantData::class
+            ParticipantData::class,
+            "session_id",
+            SessionRepository::class
         );
     }
 
