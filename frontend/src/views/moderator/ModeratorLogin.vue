@@ -13,7 +13,7 @@
             class="input input--fullwidth"
             name="email"
             placeholder="Enter your email"
-            type="email"
+            type="text"
             v-model="email"
             @blur="context.$v.email.$touch()"
           />
@@ -71,6 +71,7 @@ import { Options, Vue, setup } from 'vue-class-component';
 import { maxLength, minLength, required, email } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
+import * as userService from '@/services/moderator/user-service';
 
 @Options({
   components: {
@@ -78,7 +79,7 @@ import FormError from '@/components/shared/atoms/FormError.vue';
   },
   validations: {
     email: {
-      email,
+      // email,
       required,
     },
     password: {
@@ -101,6 +102,9 @@ export default class ModeratorLogin extends Vue {
   async loginUser(): Promise<void> {
     await this.context.$v.$validate();
     if (this.context.$v.$error) return;
+
+    const data = userService.loginUser(this.email, this.password);
+    console.log(data);
   }
 }
 </script>

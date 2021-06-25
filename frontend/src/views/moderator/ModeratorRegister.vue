@@ -28,7 +28,8 @@
             name="email"
             placeholder="Enter your email"
             type="email"
-            v-model.trim="context.$v.email.$model"
+            v-model.trim="email"
+            autocomplete="email"
             @blur="context.$v.email.$touch()"
           />
           <FormError
@@ -42,7 +43,8 @@
             name="password"
             placeholder="Enter your password"
             type="password"
-            v-model.trim="context.$v.password.$model"
+            autocomplete="new-password"
+            v-model.trim="password"
             @blur="context.$v.password.$touch()"
           />
           <FormError
@@ -56,12 +58,20 @@
             name="passwordRepeat"
             placeholder="Repeat your password"
             type="password"
-            v-model.trim="context.$v.passwordRepeat.$model"
+            autocomplete="new-password"
+            v-model.trim="passwordRepeat"
             @blur="context.$v.passwordRepeat.$touch()"
           />
           <FormError
-            v-if="context.$v.passwordRepeat.$error"
-            :errors="context.$v.passwordRepeat.$errors"
+            v-if="
+              context.$v.passwordRepeat.$error ||
+              (context.$v.passwordRepeat.$dirty && hasMatchingPasswords)
+            "
+            :errors="
+              context.$v.passwordRepeat.$error
+                ? context.$v.passwordRepeat.$errors
+                : { passwordRepeatMsg }
+            "
             :isSmall="true"
           />
           <button
@@ -88,6 +98,7 @@ import {
 } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
+import * as userService from '@/services/moderator/user-service';
 
 @Options({
   components: {
@@ -102,24 +113,22 @@ import FormError from '@/components/shared/atoms/FormError.vue';
       required,
       min: minLength(8),
       max: maxLength(12),
-      containsUppercase: function (value: string) {
-        return !/[A-Z]/.test(value);
-      },
-      containsLowercase: function (value: string) {
-        return !/[a-z]/.test(value);
-      },
-      containsNumber: function (value: string) {
-        return !/[0-9]/.test(value);
-      },
-      containsSpecial: function (value: string) {
-        return !/[#?!@$%^&*-]/.test(value);
-      },
+      containsUppercase: helpers.withMessage(
+        'Password must contain at least one lowercase and uppercase letter, a number and a special character.',
+        (value) => {
+          return (
+            /[A-Z]/.test(value as string) &&
+            /[a-z]/.test(value as string) &&
+            /[0-9]/.test(value as string) &&
+            /[#?!@$%^&*-]/.test(value as string)
+          );
+        }
+      ),
     },
     passwordRepeat: {
       required,
       min: minLength(8),
       max: maxLength(12),
-      sameAsPassword: sameAs('password'),
     },
   },
 })
@@ -127,6 +136,7 @@ export default class ModeratorRegister extends Vue {
   email = '';
   password = '';
   passwordRepeat = '';
+  passwordRepeatMsg = 'Password repetition does not match.';
 
   context = setup(() => {
     return {
@@ -136,7 +146,19 @@ export default class ModeratorRegister extends Vue {
 
   async registerUser(): Promise<void> {
     await this.context.$v.$validate();
-    if (this.context.$v.$error) return;
+    if (this.context.$v.$error || this.hasMatchingPasswords) return;
+
+    const data = await userService.registerUser(
+      this.email,
+      this.password,
+      this.passwordRepeat
+    );
+
+    console.log(data);
+  }
+
+  get hasMatchingPasswords(): boolean {
+    return this.password !== this.passwordRepeat;
   }
 }
 </script>
