@@ -74,6 +74,6 @@ class AuthorisationData
      */
     public function isLoggedIn(): bool
     {
-        return ($this->type !== AuthorisationType::USER or $this->type !== AuthorisationType::PARTICIPANT);
+        return ($this->type === AuthorisationType::USER or $this->type === AuthorisationType::PARTICIPANT);
     }
 }
