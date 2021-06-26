@@ -246,6 +246,10 @@ body {
   &--fullwidth {
     width: 100%;
   }
+
+  &--centered {
+    text-align: center;
+  }
 }
 
 .select {
@@ -276,10 +280,14 @@ body {
     min-height: 100vh;
   }
 
-  &--centered {
+  &--centered,
+  &--centered-horizontal {
     align-items: center;
-    justify-content: center;
     text-align: center;
+  }
+
+  &--centered {
+    justify-content: center;
   }
 }
 
