@@ -10,7 +10,7 @@
 </template>
 <script lang="ts">
 import { Vue } from 'vue-class-component';
-import { setAccessToken } from '@/services/moderator/auth-service';
+import { setAccessToken } from '@/services/auth-service';
 export default class Debug extends Vue {
   jwt = '';
 

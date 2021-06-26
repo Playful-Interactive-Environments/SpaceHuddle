@@ -1,11 +1,7 @@
 interface ApiResponse {
-  state: string;
+  state?: string;
   message: string;
+  accessToken?: string;
 }
 
-interface LoginResponse {
-  message: string;
-  accessToken: string;
-}
-
-export { ApiResponse, LoginResponse };
+export default ApiResponse;

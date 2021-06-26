@@ -36,10 +36,7 @@
             :errors="context.$v.password.$errors"
             :isSmall="true"
           />
-          <button
-            class="btn btn--wide btn--gradient btn--fullwidth"
-            type="submit"
-          >
+          <button class="btn btn--gradient btn--fullwidth" type="submit">
             Login
           </button>
           <p class="login__forgot-pw" role="button">Forgot Password?</p>
@@ -69,10 +66,11 @@
 <script lang="ts">
 import { Options, Vue, setup } from 'vue-class-component';
 import { maxLength, minLength, required, email } from '@vuelidate/validators';
+import ApiResponse from '@/types/ApiResponse';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
-import * as authService from '@/services/moderator/auth-service';
-import * as userService from '@/services/moderator/user-service';
+import * as authService from '@/services/auth-service';
+import * as userService from '@/services/user-service';
 
 @Options({
   components: {
@@ -80,7 +78,7 @@ import * as userService from '@/services/moderator/user-service';
   },
   validations: {
     email: {
-      // email,
+      email,
       required,
     },
     password: {
@@ -104,16 +102,19 @@ export default class ModeratorLogin extends Vue {
     await this.context.$v.$validate();
     if (this.context.$v.$error) return;
 
-    const data = await userService.loginUser(this.email, this.password);
+    const data: ApiResponse = await userService.loginUser(
+      this.email,
+      this.password
+    );
 
     if (data.accessToken) {
       authService.setAccessToken(data.accessToken);
-      console.log(authService.getAccessToken());
       this.$router.push({
         name: 'moderator-session-overview',
       });
-    } else {
+    } else if (data.message) {
       // TODO: error snackbar if something went wrong
+      console.log(data.message);
     }
   }
 }

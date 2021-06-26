@@ -1,9 +1,14 @@
 <template>
-  <div class="toggle">
+  <div class="toggle" @click.stop>
     <div>{{ label }}</div>
 
     <label class="toggle__switch">
-      <input type="checkbox" class="input toggle__input" />
+      <input
+        type="checkbox"
+        class="input toggle__input"
+        :checked="isActive"
+        @click="toggleClicked($event)"
+      />
       <span class="toggle__slider"></span>
     </label>
   </div>
@@ -18,6 +23,12 @@ import { Prop } from 'vue-property-decorator';
 })
 export default class Toggle extends Vue {
   @Prop({ default: '' }) label!: string;
+  @Prop({ default: false }) isActive!: boolean;
+
+  toggleClicked(event: Event) {
+    event.stopPropagation();
+    this.$emit('toggleClicked');
+  }
 }
 </script>
 

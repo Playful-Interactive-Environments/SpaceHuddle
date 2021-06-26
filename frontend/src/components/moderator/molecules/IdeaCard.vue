@@ -15,9 +15,9 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import * as ideaService from '@/services/moderator/idea-service';
-import * as taskService from '@/services/moderator/task-service';
-import { Idea } from '@/services/moderator/idea-service';
+import * as ideaService from '@/services/idea-service';
+import * as taskService from '@/services/task-service';
+import { Idea } from '@/services/idea-service';
 
 @Options({
   components: {},

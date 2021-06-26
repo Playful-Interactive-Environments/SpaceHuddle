@@ -74,10 +74,7 @@
             "
             :isSmall="true"
           />
-          <button
-            class="btn btn--wide btn--gradient btn--fullwidth"
-            type="submit"
-          >
+          <button class="btn btn--gradient btn--fullwidth" type="submit">
             Register
           </button>
         </form>
@@ -93,14 +90,12 @@ import {
   minLength,
   required,
   email,
-  sameAs,
   helpers,
 } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
-import { ApiResponse } from '@/types/ApiResponse';
 import States from '@/types/States';
-import * as userService from '@/services/moderator/user-service';
+import * as userService from '@/services/user-service';
 
 @Options({
   components: {
@@ -150,13 +145,13 @@ export default class ModeratorRegister extends Vue {
     await this.context.$v.$validate();
     if (this.context.$v.$error || this.hasMatchingPasswords) return;
 
-    const data: ApiResponse = await userService.registerUser(
+    const { state } = await userService.registerUser(
       this.email,
       this.password,
       this.passwordRepeat
     );
 
-    if (data.state == States.SUCCESS) {
+    if (state == States.SUCCESS) {
       this.$router.push({
         name: 'moderator-login',
       });

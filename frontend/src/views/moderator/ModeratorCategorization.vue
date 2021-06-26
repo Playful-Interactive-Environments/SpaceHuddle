@@ -19,13 +19,13 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import { Task } from '../../services/moderator/task-service';
-import { Idea } from '../../services/moderator/idea-service';
+import { Task } from '../../services/task-service';
+import { Idea } from '../../services/idea-service';
 import { setModuleStyles } from '../../utils/moduleStyles';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleType from '../../types/ModuleType';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
-import * as taskService from '@/services/moderator/task-service';
+import * as taskService from '@/services/task-service';
 
 @Options({
   components: {
