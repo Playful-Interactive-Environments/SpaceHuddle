@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts">
-import { Prop, Watch } from 'vue-property-decorator';
+import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import { setModuleStyles } from '../../../utils/moduleStyles';
 import { Task } from '@/services/task-service';
@@ -79,11 +79,6 @@ export default class ModuleCard extends Vue {
   @Prop({ default: false }) isClient!: boolean;
   @Prop({ default: false }) isOnPublicScreen!: boolean;
 
-  @Watch('isOnPublicScreen')
-  onIsOnPublicScreenChanged(val: boolean, oldVal: boolean) {
-    console.log('watcher changed', this.isOnPublicScreen);
-  }
-
   ModuleType = ModuleType;
   TaskStates = TaskStates;
 
@@ -96,7 +91,6 @@ export default class ModuleCard extends Vue {
   }
 
   changePublicScreen(show: boolean): void {
-    console.log('triggered', this.task.id);
     this.eventBus.emit('changePublicScreen', this.task.id);
   }
 

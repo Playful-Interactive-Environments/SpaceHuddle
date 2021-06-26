@@ -78,7 +78,6 @@ export default class ModeratorSessionDetails extends Vue {
     await this.getPublicScreen();
 
     this.eventBus.on('changePublicScreen', async (id) => {
-      console.log('CHANGE', id);
       this.publicScreenTaskId = id as string;
       // TODO: change endpoint to toggle public screen
       let data = await sessionService.displayOnPublicScreen(
