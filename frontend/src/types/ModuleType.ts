@@ -2,7 +2,7 @@ enum ModuleType {
   INFORMATION = 'information',
   BRAINSTORMING = 'brainstorming',
   SELECTION = 'selection',
-  CATEGORIZATION = 'categorization',
+  CATEGORISATION = 'categorisation',
   VOTING = 'voting',
 }
 

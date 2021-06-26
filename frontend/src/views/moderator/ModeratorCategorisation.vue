@@ -1,5 +1,5 @@
 <template>
-  <div class="categorization" ref="item">
+  <div class="categorisation" ref="item">
     <div v-if="task">
       <!-- TODO: task description missing -->
       <Sidebar
@@ -8,9 +8,9 @@
         :description="task.name"
         :moduleType="ModuleType[task.taskType]"
       />
-      <main class="categorization__content">
-        <!-- TODO: categorization module content -->
-        Categorization content works!
+      <main class="categorisation__content">
+        <!-- TODO: categorisation module content -->
+        Categorisation content works!
       </main>
     </div>
   </div>
@@ -33,7 +33,7 @@ import * as taskService from '@/services/moderator/task-service';
     IdeaCard,
   },
 })
-export default class ModeratorCategorization extends Vue {
+export default class ModeratorCategorisation extends Vue {
   @Prop({ default: '' }) readonly taskId!: string;
 
   task: Task | null = null;
@@ -42,7 +42,7 @@ export default class ModeratorCategorization extends Vue {
 
   async mounted(): Promise<void> {
     this.task = await taskService.getTaskById(this.taskId);
-    // TODO: change once grouping is renamed to categorization
+    // TODO: change once grouping is renamed to categorisation
     // setModuleStyles(
     //   this.$refs.item as HTMLElement,
     //   ModuleType[this.task.taskType]
@@ -52,7 +52,7 @@ export default class ModeratorCategorization extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.categorization {
+.categorisation {
   background-color: var(--color-background-gray);
   margin-left: var(--sidebar-width);
   min-height: 100vh;

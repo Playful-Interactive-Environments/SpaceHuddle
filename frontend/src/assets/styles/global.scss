@@ -233,13 +233,30 @@ body {
   &::placeholder {
     color: var(--color-darkblue-light);
   }
-
   &:focus {
     outline: none;
+    border: 1px solid var(--color-mint-light);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 200ms;
   }
 
   &--fullwidth {
     width: 100%;
+  }
+
+  &-select {
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('../icons/arrow.svg');
+    background-size: 1em;
+    background-repeat: no-repeat;
+    background-position: right 0.8em top 50%;
+
+    option {
+      color: var(--color-darkblue);
+    }
   }
 }
 
@@ -259,6 +276,9 @@ body {
 
   &:focus {
     outline: none;
+    border: 1px solid var(--color-mint-light);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 200ms;
   }
 
   &--fullwidth {

@@ -45,7 +45,7 @@ export default class ClientOverview extends Vue {
       { type: ModuleType.SELECTION },
       { type: ModuleType.VOTING },
     ],
-    [{ type: ModuleType.BRAINSTORMING }, { type: ModuleType.CATEGORIZATION }],
+    [{ type: ModuleType.BRAINSTORMING }, { type: ModuleType.CATEGORISATION }],
   ];
 }
 </script>
