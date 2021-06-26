@@ -10,10 +10,11 @@
         from 5 different types of modules.
       </p>
       <form class="session-create__form">
-        <label for="title" class="heading heading--xs">Module type</label>
+        <label for="moduleType" class="heading heading--xs">Module type</label>
         <select
           v-model="moduleType"
-          class="input input-select input--fullwidth"
+          id="moduleType"
+          class="select select--fullwidth"
         >
           <option v-for="type in ModuleTypeKeys" :key="type" :value="type">
             {{ ModuleType[type] }}
