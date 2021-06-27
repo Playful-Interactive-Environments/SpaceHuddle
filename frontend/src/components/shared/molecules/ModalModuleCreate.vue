@@ -101,7 +101,7 @@ export default class ModalModuleCreate extends Vue {
   @Prop({ default: false }) showModal!: boolean;
   @Prop({ required: true }) topicId!: string;
 
-  moduleType: ModuleType = this.ModuleTypeKeys[1];
+  moduleType = this.ModuleTypeKeys[1];
   title = '';
   description = '';
 
@@ -113,8 +113,8 @@ export default class ModalModuleCreate extends Vue {
     };
   });
 
-  get ModuleTypeKeys(): string[] {
-    return Object.keys<ModuleType>(ModuleType);
+  get ModuleTypeKeys(): Array<keyof typeof ModuleType> {
+    return Object.keys(ModuleType) as Array<keyof typeof ModuleType>;
   }
 
   async createModule(): Promise<void> {

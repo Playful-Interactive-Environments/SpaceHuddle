@@ -13,7 +13,7 @@
       <ModuleInfo
         :type="type"
         :title="task.name"
-        :description="'Module description here ...'"
+        :description="task.description"
       />
       <Timer class="module-card__timer" />
       <div class="module-card__toggles" v-if="!isClient">
@@ -90,7 +90,7 @@ export default class ModuleCard extends Vue {
   &__toggles {
     display: flex;
     flex-direction: column;
-    margin-left: 3rem;
+    margin-left: 2rem;
     width: 12rem;
   }
 
