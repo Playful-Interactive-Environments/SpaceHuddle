@@ -30,6 +30,7 @@
 <script lang="ts">
 import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
+import SnackbarType from '@/types/SnackbarType';
 
 @Options({
   components: {},
@@ -40,8 +41,18 @@ export default class ModuleCount extends Vue {
 
   copyToClipboard(): void {
     navigator.clipboard.writeText(this.code).then(
-      () => console.log('Successfully copied to clipboard'),
-      () => console.log('Could not copy to clipboard')
+      () => {
+        this.eventBus.emit('showSnackbar', {
+          type: SnackbarType.SUCCESS,
+          message: 'Successfully copied to clipboard.',
+        });
+      },
+      () => {
+        this.eventBus.emit('showSnackbar', {
+          type: SnackbarType.ERROR,
+          message: 'Could not copy to clipboard.',
+        });
+      }
     );
   }
 }

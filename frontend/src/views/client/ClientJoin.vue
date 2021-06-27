@@ -60,7 +60,6 @@ export default class ClientJoin extends Vue {
         this.addError('Sorry, the provided code is invalid.');
       }
     } else {
-      // TODO: use vuelidate or another validation library?
       this.addError('Please enter a code.');
       return;
     }

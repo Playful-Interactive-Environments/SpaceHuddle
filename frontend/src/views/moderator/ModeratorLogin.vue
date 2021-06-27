@@ -69,6 +69,7 @@ import { maxLength, minLength, required, email } from '@vuelidate/validators';
 import ApiResponse from '@/types/ApiResponse';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
+import SnackbarType from '@/types/SnackbarType';
 import * as authService from '@/services/auth-service';
 import * as userService from '@/services/user-service';
 
@@ -114,8 +115,10 @@ export default class ModeratorLogin extends Vue {
         name: 'moderator-session-overview',
       });
     } else if (data.message) {
-      // TODO: error snackbar if something went wrong
-      console.log(data.message);
+      this.eventBus.emit('showSnackbar', {
+        type: SnackbarType.ERROR,
+        message: data.message,
+      });
     }
   }
 }
