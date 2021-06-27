@@ -135,9 +135,10 @@ const routes: Array<RouteRecordRaw> = [
     component: NotFound,
   },
   {
-    path: '/brainstorming',
+    path: '/brainstorming/:taskId',
     name: 'client-brainstorming',
     component: ClientBrainstorming,
+    props: (route) => ({ taskId: route.params.taskId }),
   },
 ];
 

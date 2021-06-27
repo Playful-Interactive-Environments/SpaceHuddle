@@ -51,13 +51,15 @@
         </p>
         <textarea
           v-if="showSecondInput"
+          v-model="keywords"
           class="textarea textarea--fullwidth"
-          placeholder="Your idea is very long, give some keywords"
+          placeholder="Your idea is very long, provide some keywords"
         ></textarea>
         <textarea
           class="textarea textarea--fullwidth"
           placeholder="Type your idea here ..."
           ref="ideaTextfield"
+          v-model="description"
           @input="checkCharacterCount($event.target.value)"
         ></textarea>
         <div class="brainstorming--bottom">
@@ -80,12 +82,16 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { Options, setup, Vue } from 'vue-class-component';
 import MenuBar from '@/components/client/molecules/Menubar.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import HalfCard from '@/components/shared/atoms/HalfCard.vue';
 import Card from '@/components/shared/atoms/Card.vue';
 import ModuleType from '@/types/ModuleType';
+import useVuelidate from '@vuelidate/core';
+import * as taskService from '@/services/moderator/task-service';
+import { Prop } from 'vue-property-decorator';
+import { maxLength, required } from '@vuelidate/validators';
 
 @Options({
   components: {
@@ -96,6 +102,7 @@ import ModuleType from '@/types/ModuleType';
   },
 })
 export default class ClientBrainstorming extends Vue {
+  @Prop({ required: true }) taskId!: string;
   public topic = { type: ModuleType.BRAINSTORMING };
   public showSecondInput = false;
   index = 0;
@@ -107,6 +114,35 @@ export default class ClientBrainstorming extends Vue {
   ];
   public currentPlanet = this.planets[this.index];
   public myVar = null;
+  description = '';
+  keywords = '';
+
+  context = setup(() => {
+    return {
+      $v: useVuelidate(),
+    };
+  });
+
+  async createIdea(): Promise<void> {
+    console.log('createIdea');
+    console.log(
+      'DESCRIPTION: ',
+      this.description,
+      ' & KEYWORDS: ',
+      this.keywords
+    );
+    await this.context.$v.$validate();
+    if (this.context.$v.$error) return;
+
+    await taskService.postIdea(this.taskId, {
+      description: this.description,
+      keywords: this.keywords,
+      image: '',
+      link: '',
+    });
+    this.$emit('update:showModal', false);
+    this.$emit('moduleCreated');
+  }
 
   checkCharacterCount(value: string): void {
     if (value.length > 60) {
@@ -118,6 +154,7 @@ export default class ClientBrainstorming extends Vue {
   submitIdea(): void {
     console.log('submit');
     console.log(this.index);
+    this.createIdea();
     setTimeout(this.setNewPlanet, 2000);
   }
   setNewPlanet(): void {

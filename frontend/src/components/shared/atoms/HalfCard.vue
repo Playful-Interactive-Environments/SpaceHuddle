@@ -19,7 +19,7 @@ import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
   },
 })
 export default class HalfCard extends Vue {
-  @Prop({ default: ModuleType.CATEGORIZATION }) type!: ModuleType;
+  @Prop({ default: ModuleType.CATEGORISATION }) type!: ModuleType;
 }
 </script>
 

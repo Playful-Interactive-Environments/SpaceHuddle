@@ -33,3 +33,14 @@ export const updateTask = async (task: Task): Promise<Task> => {
   const { data } = await API_TASK_ENDPOINT.put<Task>(``, task);
   return data;
 };
+
+export const postIdea = async (
+  taskId: string,
+  data: Partial<Idea>
+): Promise<Idea> => {
+  const { data: responseData } = await API_TASK_ENDPOINT.post<Idea>(
+    `/${taskId}/${EndpointType.IDEA}`,
+    data
+  );
+  return responseData;
+};
