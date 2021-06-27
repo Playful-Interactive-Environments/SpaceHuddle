@@ -34,7 +34,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import { Session } from '@/services/moderator/session-service';
+import { Session } from '@/services/session-service';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import Toggle from '@/components/moderator/atoms/Toggle.vue';

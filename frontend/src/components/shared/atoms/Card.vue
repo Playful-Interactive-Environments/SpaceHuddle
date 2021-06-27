@@ -1,11 +1,12 @@
 <template>
   <div class="blog-card">
-    <p class="uppercaseOverview"><slot name="date">24.08.2020</slot></p>
-    <h3 class="title"><slot name="title"></slot></h3>
-    <p><slot name="description"></slot></p>
-    <p class="uppercaseOverview"><slot name="topics"></slot></p>
-    <p class="uppercaseOverview"><slot name="modules"></slot></p>
-    <slot>My default text</slot>
+    <p class="blog-card__date"><slot name="date"></slot></p>
+    <h2 class="heading heading--regular"><slot name="title"></slot></h2>
+    <p class="blog-card__description"><slot name="description"></slot></p>
+    <slot name="topics"></slot>
+    <div class="blog-card__content">
+      <slot> </slot>
+    </div>
   </div>
 </template>
 
@@ -18,21 +19,32 @@ export default class Card extends Vue {
 }
 </script>
 
-<style scoped>
-p {
-  font-size: 0.8rem;
-}
+<style lang="scss" scoped>
 .blog-card {
   margin: auto;
-  padding: 15px 30px 15px 30px;
+  padding: 1.5rem 2rem;
   background: #fff;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   border-radius: var(--border-radius);
   overflow: hidden;
-}
-.uppercaseOverview {
-  text-transform: uppercase;
-  color: #aaaaaa;
-  font-size: 0.8rem;
+
+  &__date {
+    text-transform: uppercase;
+    color: #aaaaaa;
+    font-size: var(--font-size-small);
+    margin-bottom: 1rem;
+  }
+
+  &__description {
+    line-clamp: 3;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__content {
+    margin-top: 2.5rem;
+  }
 }
 </style>

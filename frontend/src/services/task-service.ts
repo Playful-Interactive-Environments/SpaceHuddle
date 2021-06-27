@@ -28,3 +28,8 @@ export const getIdeasForTask = async (taskId: string): Promise<Idea[]> => {
   );
   return data;
 };
+
+export const updateTask = async (task: Task): Promise<Task> => {
+  const { data } = await API_TASK_ENDPOINT.put<Task>(``, task);
+  return data;
+};

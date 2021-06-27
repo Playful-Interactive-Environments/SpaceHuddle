@@ -1,5 +1,6 @@
+import { AxiosError } from 'axios';
 import { apiEndpoint } from '@/services/api';
-import { Task } from '@/services/moderator/task-service';
+import { Task } from '@/services/task-service';
 import EndpointType from '@/types/Endpoint';
 
 export interface Topic {
@@ -17,6 +18,17 @@ export const getTaskList = async (topicId: string): Promise<Task[]> => {
     `/${topicId}/${EndpointType.TASKS}`
   );
   return data;
+};
+
+export const getParticipantTasks = async (topicId: string): Promise<Task[]> => {
+  try {
+    const { data } = await API_TOPIC_ENDPOINT.get<Task[]>(
+      `/${topicId}/${EndpointType.PARTICIPANT_TASKS}`
+    );
+    return data;
+  } catch (error) {
+    return (error as AxiosError).response?.data;
+  }
 };
 
 export const postTask = async (
