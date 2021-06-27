@@ -25,15 +25,18 @@
               </li>
             </template>
           </draggable>
-          <AddItem text="Add module" @addNew="showModalModuleCreate = true" />
-          <ModalModuleCreate
-            v-model:show-modal="showModalModuleCreate"
-            :topic-id="topic.id"
-            @moduleCreated="getTopics"
+          <AddItem
+            text="Add module"
+            @addNew="openModalModuleCreate(topic.id)"
           />
         </template>
       </TopicExpand>
     </main>
+    <ModalModuleCreate
+      v-model:show-modal="showModalModuleCreate"
+      :topic-id="addNewTopicId"
+      @moduleCreated="getTopics"
+    />
   </div>
 </template>
 
@@ -70,6 +73,7 @@ export default class ModeratorSessionDetails extends Vue {
   topics: Topic[] = [];
   showModalModuleCreate = false;
   formatDate = formatDate;
+  addNewTopicId = '';
 
   ModuleType = ModuleType;
 
@@ -83,6 +87,11 @@ export default class ModeratorSessionDetails extends Vue {
     this.topics.forEach(async (topic) => {
       topic.tasks = await topicService.getTaskList(topic.id);
     });
+  }
+
+  openModalModuleCreate(topicId: string): void {
+    this.addNewTopicId = topicId;
+    this.showModalModuleCreate = true;
   }
 }
 </script>

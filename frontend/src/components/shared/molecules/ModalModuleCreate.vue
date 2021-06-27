@@ -118,6 +118,12 @@ export default class ModalModuleCreate extends Vue {
     return Object.keys(ModuleType) as Array<keyof typeof ModuleType>;
   }
 
+  resetForm(): void {
+    this.moduleType = this.ModuleTypeKeys[1];
+    this.title = '';
+    this.description = '';
+  }
+
   async createModule(): Promise<void> {
     await this.context.$v.$validate();
     if (this.context.$v.$error) return;
@@ -131,6 +137,8 @@ export default class ModalModuleCreate extends Vue {
     });
     this.$emit('update:showModal', false);
     this.$emit('moduleCreated');
+    this.resetForm();
+    this.context.$v.$reset();
   }
 }
 </script>
