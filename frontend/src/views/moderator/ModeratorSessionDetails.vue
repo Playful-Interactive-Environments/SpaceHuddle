@@ -6,6 +6,7 @@
       :pretitle="formatDate(session.creationDate)"
       :description="session.description"
     />
+    <Navigation />
     <main class="detail__content">
       <TopicExpand v-for="(topic, index) in topics" :key="topic.id">
         <template v-slot:title>{{ topic.title }}</template>
@@ -46,26 +47,28 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
-import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
-import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
-import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
+import ModalModuleCreate from '@/components/shared/molecules/ModalModuleCreate.vue';
+import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
+import Navigation from '@/components/moderator/molecules/Navigation.vue';
+import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
+import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
+import { formatDate } from '@/utils/date';
+import ModuleType from '@/types/ModuleType';
 import * as sessionService from '@/services/session-service';
 import * as topicService from '@/services/topic-service';
-import { formatDate } from '@/utils/date';
 import { Session } from '@/services/session-service';
 import { Topic } from '../../services/topic-service';
-import ModalModuleCreate from '@/components/shared/molecules/ModalModuleCreate.vue';
-import ModuleType from '@/types/ModuleType';
 
 @Options({
   components: {
-    Sidebar,
-    ModuleCard,
-    TopicExpand,
-    draggable,
     AddItem,
+    draggable,
     ModalModuleCreate,
+    ModuleCard,
+    Navigation,
+    TopicExpand,
+    Sidebar,
   },
 })
 export default class ModeratorSessionDetails extends Vue {
@@ -130,7 +133,7 @@ export default class ModeratorSessionDetails extends Vue {
 
   &__content {
     flex-grow: 1;
-    padding: 2rem 3rem;
+    padding: 0 3rem;
   }
 
   &__module + .detail__module {

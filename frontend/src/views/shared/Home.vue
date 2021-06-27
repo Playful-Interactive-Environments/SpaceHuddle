@@ -36,52 +36,56 @@ export default class Home extends Vue {}
 </script>
 
 <style lang="scss" scoped>
+@import '~@/assets/styles/breakpoints.scss';
+
 .home {
-  flex-direction: row;
-  justify-content: space-between;
+  flex: 1;
   align-items: center;
   box-sizing: border-box;
-  padding: 2rem 4rem;
-  gap: 3rem;
-  flex: 1;
+  flex-direction: column-reverse;
+  justify-content: center;
+  padding: 1rem;
+  gap: 1rem;
+  text-align: center;
 
   &__content {
-    max-width: 35vw;
+    max-width: 100vw;
 
-    @media screen and (max-width: 768px) {
-      max-width: 100vw;
+    @include md {
+      max-width: 35vw;
     }
   }
 
   &__link {
-    margin-right: 1rem;
+    margin: 0 auto;
 
-    @media screen and (max-width: 768px) {
-      margin: 0 auto;
+    @include md {
+      margin-right: 1rem;
     }
   }
 
   &__text {
-    margin: 1.5rem 0 2rem;
+    margin: 0.8rem 0 1.2rem;
 
-    @media screen and (max-width: 768px) {
-      margin: 0.8rem 0 1.2rem;
+    @include md {
+      margin: 1.5rem 0 2rem;
     }
   }
 
   &__img {
-    max-width: 50vw;
-    @media screen and (max-width: 768px) {
-      max-width: 75vw;
+    max-width: 75vw;
+
+    @include md {
+      max-width: 50vw;
     }
   }
 
-  @media screen and (max-width: 768px) {
-    flex-direction: column-reverse;
-    justify-content: center;
-    padding: 1rem;
-    gap: 1rem;
-    text-align: center;
+  @include md {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 2rem 4rem;
+    gap: 3rem;
+    text-align: left;
   }
 }
 </style>

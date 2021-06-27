@@ -1,7 +1,11 @@
 <template>
   <div class="module-count">
-    <div><span class="module-count__count">2</span> Topics</div>
-    <div><span class="module-count__count">6</span> Modules</div>
+    <div class="module-count__item">
+      <span class="module-count__count">2</span> Topics
+    </div>
+    <div class="module-count__item">
+      <span class="module-count__count">6</span> Modules
+    </div>
   </div>
 </template>
 
@@ -24,6 +28,12 @@ export default class ModuleCount extends Vue {}
   letter-spacing: 2px;
   margin-top: 1rem;
   line-height: 1;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+
+  &__item {
+    white-space: nowrap;
+  }
 
   &__count {
     background-color: var(--color-mint-light);

@@ -1,9 +1,10 @@
 <template>
-  <div class="session-overview container--fullheight">
-    <h1>Your Sessions</h1>
-    <div class="grid-container">
-      <div class="grid-item" v-for="session in sessions" :key="session.id">
-        <Card>
+  <div class="session-overview">
+    <Header />
+    <main class="container container--spaced container--fullheight-header">
+      <h1>Your Sessions</h1>
+      <div class="session-overview__session-container">
+        <Card v-for="session in sessions" :key="session.id">
           <template v-slot:date>
             {{ formatDate(session.creationDate) }}
           </template>
@@ -23,14 +24,14 @@
             <ModuleCount />
           </template>
         </Card>
+        <AddItem
+          text="New Session"
+          :isColumn="true"
+          @addNew="showModalSessionCreate = true"
+        />
+        <ModalSessionCreate v-model:show-modal="showModalSessionCreate" />
       </div>
-      <AddItem
-        text="New Session"
-        :isColumn="true"
-        @addNew="showModalSessionCreate = true"
-      />
-      <ModalSessionCreate v-model:show-modal="showModalSessionCreate" />
-    </div>
+    </main>
   </div>
 </template>
 
@@ -40,6 +41,7 @@ import { Session } from '@/services/session-service';
 import { formatDate } from '@/utils/date';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import Card from '../../components/shared/atoms/Card.vue';
+import Header from '@/components/moderator/organisms/Header.vue';
 import ModalSessionCreate from '@/components/shared/molecules/ModalSessionCreate.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
@@ -49,6 +51,7 @@ import * as sessionService from '@/services/session-service';
   components: {
     AddItem,
     Card,
+    Header,
     ModalSessionCreate,
     ModuleCount,
     SessionCode,
@@ -66,17 +69,21 @@ export default class ModeratorSessionOverview extends Vue {
 }
 </script>
 
-<style scoped>
-.grid-container {
-  display: grid;
-  grid-gap: 2rem;
-  grid-template-columns: 1fr 1fr 1fr;
-}
+<style lang="scss" scoped>
+@import '~@/assets/styles/breakpoints.scss';
+
 .session-overview {
-  background: var(--color-background-gray);
-  padding: 60px 120px 60px 120px;
-}
-p {
-  font-size: 0.8rem;
+  background-color: var(--color-background-gray);
+
+  &__session-container {
+    width: 100%;
+    display: grid;
+    grid-gap: 2rem;
+    grid-template-columns: 1fr 1fr 1fr;
+
+    @include xxl {
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+  }
 }
 </style>

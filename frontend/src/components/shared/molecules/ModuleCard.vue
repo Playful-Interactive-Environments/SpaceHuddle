@@ -116,6 +116,11 @@ export default class ModuleCard extends Vue {
   padding: 1.5rem 5rem 1.5rem 4.5rem;
   margin-left: 3rem;
 
+  &:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    transition: all 200ms;
+  }
+
   &__planet {
     position: absolute;
     left: -4rem;
