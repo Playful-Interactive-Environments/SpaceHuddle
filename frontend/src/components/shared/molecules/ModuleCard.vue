@@ -23,6 +23,7 @@
       />
       <Timer
         class="module-card__timer"
+        :isActive="task.state === TaskStates.ACTIVE"
         v-if="
           !(type === ModuleType.INFORMATION || type === ModuleType.SELECTION)
         "
