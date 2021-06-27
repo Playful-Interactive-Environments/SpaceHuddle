@@ -32,8 +32,8 @@ export default class Navigation extends Vue {
 .nav {
   display: flex;
   justify-content: flex-end;
-  align-self: end;
-  padding: 2em;
+  align-items: center;
+  padding: 0 2em;
 
   &__item {
     display: flex;

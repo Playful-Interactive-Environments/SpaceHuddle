@@ -1,0 +1,36 @@
+// Breakpoint variables and breakpoint mixins for the project
+$breakpoint-xxl: 1536px;
+$breakpoint-xl: 1280px;
+$breakpoint-lg: 1024px;
+$breakpoint-md: 768px;
+$breakpoint-sm: 640px;
+
+@mixin sm {
+  @media screen and (min-width: #{$breakpoint-sm}) {
+    @content;
+  }
+}
+
+@mixin md {
+  @media screen and (min-width: #{$breakpoint-md}) {
+    @content;
+  }
+}
+
+@mixin lg {
+  @media screen and (min-width: #{$breakpoint-lg}) {
+    @content;
+  }
+}
+
+@mixin xl {
+  @media screen and (min-width: #{$breakpoint-xl}) {
+    @content;
+  }
+}
+
+@mixin xxl {
+  @media screen and (min-width: #{$breakpoint-xxl}) {
+    @content;
+  }
+}

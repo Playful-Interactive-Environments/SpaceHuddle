@@ -24,12 +24,14 @@ export default class Header extends Vue {
 
 <style lang="scss" scoped>
 .header {
+  height: var(--header-height);
   display: flex;
   justify-content: space-between;
+  align-items: center;
   width: 100%;
 
   &__logo {
-    padding: 2em;
+    padding: 0 2em;
   }
 }
 </style>
