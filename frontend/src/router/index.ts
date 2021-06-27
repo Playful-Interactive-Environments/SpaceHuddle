@@ -16,7 +16,7 @@ import ModeratorVoting from '@/views/moderator/ModeratorVoting.vue';
 import NotFound from '@/views/shared/NotFound.vue';
 
 import { isAuthenticated } from '@/services/auth-service';
-import ClientBrainstorming from '@/views/client/ModeratorBrainstorming.vue';
+import ClientBrainstorming from '@/views/client/ClientBrainstorming.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
