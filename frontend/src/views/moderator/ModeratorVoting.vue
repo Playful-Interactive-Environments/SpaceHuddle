@@ -1,11 +1,10 @@
 <template>
   <div class="voting" ref="item">
     <div v-if="task">
-      <!-- TODO: task description missing -->
       <Sidebar
         :title="task.name"
         :pretitle="task.taskType"
-        :description="task.name"
+        :description="task.description"
         :moduleType="ModuleType[task.taskType]"
       />
       <Navigation />

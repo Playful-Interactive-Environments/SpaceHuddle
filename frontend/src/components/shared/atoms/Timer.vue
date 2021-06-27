@@ -11,22 +11,22 @@ import { Prop, Watch } from 'vue-property-decorator';
 })
 export default class Timer extends Vue {
   @Prop({ default: false }) isActive!: boolean;
-  duration = 360;
-  timer!: number;
-  readonly countdownInterval = 1000;
+  timeLeft = 360;
+  timerInterval!: number;
+  readonly interval = 1000;
 
   @Watch('isActive')
   onIsActiveChanged(val: boolean) {
     if (val === true) {
       this.startTimer();
     } else {
-      clearInterval(this.timer);
+      clearInterval(this.timerInterval);
     }
   }
 
   get formattedTime(): string {
-    let minutes = Math.floor(this.duration / 60);
-    let seconds = this.duration - minutes * 60;
+    let minutes = Math.floor(this.timeLeft / 60);
+    let seconds = this.timeLeft - minutes * 60;
     return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
   }
 
@@ -37,12 +37,12 @@ export default class Timer extends Vue {
   }
 
   startTimer(): void {
-    this.timer = setInterval(() => {
-      this.duration -= 1;
-      if (this.duration <= 0) {
-        clearInterval(this.timer);
+    this.timerInterval = setInterval(() => {
+      this.timeLeft -= 1;
+      if (this.timeLeft <= 0) {
+        clearInterval(this.timerInterval);
       }
-    }, this.countdownInterval);
+    }, this.interval);
   }
 }
 </script>

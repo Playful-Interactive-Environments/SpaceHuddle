@@ -1,11 +1,10 @@
 <template>
   <div class="brainstorming" ref="item">
     <div v-if="task">
-      <!-- TODO: task description missing -->
       <Sidebar
         :title="task.name"
         :pretitle="task.taskType"
-        :description="task.name"
+        :description="task.description"
         :moduleType="ModuleType[task.taskType]"
       />
       <Navigation />
@@ -46,18 +45,29 @@ export default class ModeratorBrainstorming extends Vue {
   task: Task | null = null;
   ideas: Idea[] = [];
   ModuleType = ModuleType;
+  ideaInterval!: number;
+  readonly interval = 3000;
 
   async mounted(): Promise<void> {
     this.task = await taskService.getTaskById(this.taskId);
     this.getIdeas();
+    this.startIdeaInterval();
     setModuleStyles(
       this.$refs.item as HTMLElement,
       ModuleType[this.task.taskType]
     );
   }
 
+  destroyed() {
+    clearInterval(this.ideaInterval);
+  }
+
   async getIdeas(): Promise<void> {
     this.ideas = await taskService.getIdeasForTask(this.taskId);
+  }
+
+  startIdeaInterval(): void {
+    this.ideaInterval = setInterval(this.getIdeas, this.interval);
   }
 }
 </script>
