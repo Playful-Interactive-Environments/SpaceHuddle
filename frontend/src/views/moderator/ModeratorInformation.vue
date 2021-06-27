@@ -7,7 +7,10 @@
         :description="task.description"
         :moduleType="'information'"
       />
-      <Navigation />
+      <div class="brainstorming__header">
+        <BackButton :route="'/session/' + sessionId" />
+        <Navigation />
+      </div>
       <main class="information__content">
         <!-- TODO: information module content -->
         Information content works!
@@ -23,15 +26,17 @@ import { Task } from '../../services/task-service';
 import { setModuleStyles } from '../../utils/moduleStyles';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import ModuleType from '../../types/ModuleType';
-import * as taskService from '@/services/task-service';
 import Navigation from '@/components/moderator/molecules/Navigation.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
+import BackButton from '@/components/moderator/atoms/BackButton.vue';
+import * as taskService from '@/services/task-service';
 
 @Options({
   components: {
     IdeaCard,
     Navigation,
     Sidebar,
+    BackButton,
   },
 })
 export default class ModeratorInformation extends Vue {
@@ -55,6 +60,14 @@ export default class ModeratorInformation extends Vue {
   background-color: var(--color-background-gray);
   margin-left: var(--sidebar-width);
   min-height: 100vh;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: var(--header-height);
+    padding-left: 2rem;
+  }
 
   &__content {
     padding: 2rem;

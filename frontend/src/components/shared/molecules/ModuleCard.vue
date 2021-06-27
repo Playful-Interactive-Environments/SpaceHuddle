@@ -61,8 +61,6 @@ import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import Toggle from '@/components/moderator/atoms/Toggle.vue';
 import ModuleType from '@/types/ModuleType';
-import mitt from 'mitt';
-import * as sessionService from '@/services/session-service';
 import * as taskService from '@/services/task-service';
 import TaskStates from '../../../types/TaskStates';
 
@@ -91,7 +89,7 @@ export default class ModuleCard extends Vue {
     setModuleStyles(this.$refs.item as HTMLElement, this.type);
   }
 
-  changePublicScreen(show: boolean): void {
+  changePublicScreen(): void {
     this.eventBus.emit('changePublicScreen', this.task.id);
   }
 

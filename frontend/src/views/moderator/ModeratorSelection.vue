@@ -7,7 +7,10 @@
         :description="task.description"
         :moduleType="ModuleType[task.taskType]"
       />
-      <Navigation />
+      <div class="brainstorming__header">
+        <BackButton :route="'/session/' + sessionId" />
+        <Navigation />
+      </div>
       <main class="selection__content">
         <!-- TODO: selection module content -->
         Selection content works!
@@ -26,6 +29,7 @@ import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import ModuleType from '../../types/ModuleType';
 import Navigation from '@/components/moderator/molecules/Navigation.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
+import BackButton from '@/components/moderator/atoms/BackButton.vue';
 import * as taskService from '@/services/task-service';
 
 @Options({
@@ -33,6 +37,7 @@ import * as taskService from '@/services/task-service';
     IdeaCard,
     Navigation,
     Sidebar,
+    BackButton,
   },
 })
 export default class ModeratorSelection extends Vue {
@@ -58,6 +63,14 @@ export default class ModeratorSelection extends Vue {
   background-color: var(--color-background-gray);
   margin-left: var(--sidebar-width);
   min-height: 100vh;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: var(--header-height);
+    padding-left: 2rem;
+  }
 
   &__content {
     padding: 2rem;

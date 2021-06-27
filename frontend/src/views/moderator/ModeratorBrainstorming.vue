@@ -7,7 +7,10 @@
         :description="task.description"
         :moduleType="ModuleType[task.taskType]"
       />
-      <Navigation />
+      <div class="brainstorming__header">
+        <BackButton :route="'/session/' + sessionId" />
+        <Navigation />
+      </div>
       <main class="brainstorming__content">
         <IdeaCard
           :idea="idea"
@@ -29,6 +32,7 @@ import { setModuleStyles } from '../../utils/moduleStyles';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleType from '../../types/ModuleType';
 import Navigation from '@/components/moderator/molecules/Navigation.vue';
+import BackButton from '@/components/moderator/atoms/BackButton.vue';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import * as taskService from '@/services/task-service';
 
@@ -37,9 +41,11 @@ import * as taskService from '@/services/task-service';
     IdeaCard,
     Navigation,
     Sidebar,
+    BackButton,
   },
 })
 export default class ModeratorBrainstorming extends Vue {
+  @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: '' }) readonly taskId!: string;
 
   task: Task | null = null;
@@ -58,7 +64,7 @@ export default class ModeratorBrainstorming extends Vue {
     );
   }
 
-  destroyed() {
+  destroyed(): void {
     clearInterval(this.ideaInterval);
   }
 
@@ -77,6 +83,14 @@ export default class ModeratorBrainstorming extends Vue {
   background-color: var(--color-background-gray);
   margin-left: var(--sidebar-width);
   min-height: 100vh;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: var(--header-height);
+    padding-left: 2rem;
+  }
 
   &__content {
     padding: 2rem;

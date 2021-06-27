@@ -7,7 +7,10 @@
         :description="task.description"
         :moduleType="ModuleType[task.taskType]"
       />
-      <Navigation />
+      <div class="brainstorming__header">
+        <BackButton :route="'/session/' + sessionId" />
+        <Navigation />
+      </div>
       <main class="categorisation__content">
         <!-- TODO: categorisation module content -->
         Categorisation content works!
@@ -26,6 +29,7 @@ import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleType from '../../types/ModuleType';
 import Navigation from '@/components/moderator/molecules/Navigation.vue';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
+import BackButton from '@/components/moderator/atoms/BackButton.vue';
 import * as taskService from '@/services/task-service';
 
 @Options({
@@ -33,6 +37,7 @@ import * as taskService from '@/services/task-service';
     IdeaCard,
     Sidebar,
     Navigation,
+    BackButton,
   },
 })
 export default class ModeratorCategorisation extends Vue {
@@ -44,11 +49,10 @@ export default class ModeratorCategorisation extends Vue {
 
   async mounted(): Promise<void> {
     this.task = await taskService.getTaskById(this.taskId);
-    // TODO: change once grouping is renamed to categorisation
-    // setModuleStyles(
-    //   this.$refs.item as HTMLElement,
-    //   ModuleType[this.task.taskType]
-    // );
+    setModuleStyles(
+      this.$refs.item as HTMLElement,
+      ModuleType[this.task.taskType]
+    );
   }
 }
 </script>
@@ -58,6 +62,14 @@ export default class ModeratorCategorisation extends Vue {
   background-color: var(--color-background-gray);
   margin-left: var(--sidebar-width);
   min-height: 100vh;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: var(--header-height);
+    padding-left: 2rem;
+  }
 
   &__content {
     padding: 2rem;
