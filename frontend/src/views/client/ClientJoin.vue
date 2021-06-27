@@ -1,5 +1,7 @@
 <template>
-  <div class="join container container--fullheight container--centered">
+  <div
+    class="join container container--fullheight container--centered-horizontal"
+  >
     <h1>Ready for adventure?</h1>
     <p>
       Just enter the code your moderator provided in the field below and you’re
@@ -8,7 +10,7 @@
     <form @submit="submit">
       <label>
         <input
-          class="input"
+          class="input input--centered"
           name="sessionKey"
           v-model="sessionKey"
           placeholder="Enter Session PIN"

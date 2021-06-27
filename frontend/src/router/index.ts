@@ -10,7 +10,7 @@ import ModeratorSessionOverview from '@/views/moderator/ModeratorSessionOverview
 import ModeratorBrainstorming from '@/views/moderator/ModeratorBrainstorming.vue';
 import ModeratorInformation from '@/views/moderator/ModeratorInformation.vue';
 import ModeratorSelection from '@/views/moderator/ModeratorSelection.vue';
-import ModeratorCategorization from '@/views/moderator/ModeratorCategorization.vue';
+import ModeratorCategorisation from '@/views/moderator/ModeratorCategorisation.vue';
 import ModeratorVoting from '@/views/moderator/ModeratorVoting.vue';
 import NotFound from '@/views/shared/NotFound.vue';
 
@@ -86,9 +86,9 @@ const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: '/categorization/:sessionId/:taskId',
-    name: 'moderator-categorization',
-    component: ModeratorCategorization,
+    path: '/categorisation/:sessionId/:taskId',
+    name: 'moderator-categorisation',
+    component: ModeratorCategorisation,
     props: (route) => ({
       sessionId: route.params.sessionId,
       taskId: route.params.taskId,

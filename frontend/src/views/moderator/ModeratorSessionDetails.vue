@@ -27,7 +27,12 @@
               </li>
             </template>
           </draggable>
-          <AddItem text="Add module" @addNew="addModule" />
+          <AddItem text="Add module" @addNew="showModalModuleCreate = true" />
+          <ModalModuleCreate
+            v-model:show-modal="showModalModuleCreate"
+            :topic-id="topic.id"
+            @moduleCreated="getTopics"
+          />
         </template>
       </TopicExpand>
     </main>
@@ -36,17 +41,18 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import { Prop } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
-import { Prop } from 'vue-property-decorator';
 import * as sessionService from '@/services/session-service';
 import * as topicService from '@/services/topic-service';
 import { formatDate } from '@/utils/date';
 import { Session } from '@/services/session-service';
 import { Topic } from '../../services/topic-service';
+import ModalModuleCreate from '@/components/shared/molecules/ModalModuleCreate.vue';
 import ModuleType from '@/types/ModuleType';
 
 @Options({
@@ -56,6 +62,7 @@ import ModuleType from '@/types/ModuleType';
     TopicExpand,
     draggable,
     AddItem,
+    ModalModuleCreate,
   },
 })
 export default class ModeratorSessionDetails extends Vue {
@@ -64,11 +71,16 @@ export default class ModeratorSessionDetails extends Vue {
   session: Session | null = null;
   topics: Topic[] = [];
   publicScreenTaskId = '';
+  showModalModuleCreate = false;
   formatDate = formatDate;
 
   ModuleType = ModuleType;
 
   async mounted(): Promise<void> {
+    await this.getTopics();
+  }
+
+  async getTopics(): Promise<void> {
     this.session = await sessionService.getById(this.sessionId);
     this.topics = await sessionService.getTopicsList(this.session.id);
     this.topics.forEach(async (topic) => {
