@@ -1,53 +1,38 @@
 <template>
   <transition name="snackbar">
-    <div v-if="showSnackbar" class="snackbar-wrapper">
-      <div class="snackbar snackbar__info">
-        {{ message }}
-      </div>
+    <div
+      class="snackbar"
+      :class="'snackbar__' + snackbarType"
+      v-if="showSnackbar"
+    >
+      {{ snackbarMessage }}
     </div>
   </transition>
 </template>
 
 <script lang="ts">
 import { Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
+import SnackbarType from '@/types/SnackbarType';
 
+// use via eventbus
 export default class Snackbar extends Vue {
-  @Prop({ default: 'something went wrong' }) snackbarMessage!: string;
-  @Prop({ default: false }) showSnackbar?: boolean;
-  @Prop({ default: 'snackbar__error' }) snackbarType?: string;
+  @Prop({ default: 'Oups! Something went wrong' }) snackbarMessage!: string;
+  @Prop({ default: false }) showSnackbar!: boolean;
+  @Prop({ default: SnackbarType.SUCCESS }) snackbarType?: SnackbarType;
 }
-/*
-// import snackbar component from import Snackbar from '@/components/shared/atoms/Snackbar.vue';
-// and use these properties in parent view to display individual snackbar info
-  <snackbar
-    v-bind:showSnackbar="showSnackbar"
-    v-bind:snackbarMessage="errorMessage"
-    v-bind:snackbarType="errorMessage"
-  ></snackbar>
-
-showSnackbar = false;
-snackbarMessage = 'This is an example message';
-snackbarType = 'error';
-
-triggerSnackbar = () => {
-  this.showSnackbar = true;
-  setTimeout(() => (this.showSnackbar = false), 3000);
-};
- */
 </script>
 
 <style lang="scss" scoped>
-.snackbar-wrapper {
-  position: fixed;
-  width: 100%;
-  top: 20px;
-}
 .snackbar {
-  padding: 20px;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 2rem;
+  padding: 0.6rem 2rem;
   color: white;
-  border-radius: 10px;
-  box-shadow: 1px 3px 5px rgba(0, 0, 0, 0.2);
+  border-radius: var(--border-radius-xs);
+  box-shadow: 1px 3px 20px rgba(0, 0, 0, 0.2);
   max-width: 400px;
   margin: 0 auto;
 
@@ -58,18 +43,18 @@ triggerSnackbar = () => {
     background: var(--color-mint);
   }
   &__info {
-    background: var(--color-blue);
+    background: var(--color-yellow);
   }
 }
 
 /* enter transitions */
 .snackbar-enter-from {
   opacity: 0;
-  transform: translateY(-60px);
+  transform: translateX(-50%) translateY(-60px);
 }
 .snackbar-enter-to {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 .snackbar-enter-active {
   transition: all 0.5s ease;
@@ -77,11 +62,11 @@ triggerSnackbar = () => {
 /* leave transitions */
 .snackbar-leave-from {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 .snackbar-leave-to {
   opacity: 0;
-  transform: translateY(-60px);
+  transform: translateX(-50%) translateY(-60px);
 }
 .snackbar-leave-active {
   transition: all 0.3s ease;

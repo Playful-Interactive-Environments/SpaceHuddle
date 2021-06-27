@@ -55,6 +55,7 @@ import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import { formatDate } from '@/utils/date';
 import ModuleType from '@/types/ModuleType';
+import SnackbarType from '@/types/SnackbarType';
 import * as sessionService from '@/services/session-service';
 import * as topicService from '@/services/topic-service';
 import { Session } from '@/services/session-service';
@@ -102,8 +103,10 @@ export default class ModeratorSessionDetails extends Vue {
         this.sessionId,
         this.publicScreenTaskId
       );
-      // TODO: snackbar success
-      console.log(data.message);
+      this.eventBus.emit('showSnackbar', {
+        type: SnackbarType.SUCCESS,
+        message: 'Successfully updated public screen.',
+      });
     });
   }
 

@@ -10,9 +10,9 @@ export interface Task {
   taskType: keyof typeof ModuleType;
   name: string;
   description: string;
-  parameter: any; // TODO: ask what options can be provided
+  parameter: any;
   order: number;
-  state: TaskStates; // TODO: ask what possible states a task can be in - WAIT,
+  state: TaskStates;
 }
 
 const API_TASK_ENDPOINT = apiEndpoint(EndpointType.TASK);

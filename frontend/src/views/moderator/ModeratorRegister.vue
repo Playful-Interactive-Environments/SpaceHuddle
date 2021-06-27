@@ -95,6 +95,7 @@ import {
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
 import States from '@/types/States';
+import SnackbarType from '@/types/SnackbarType';
 import * as userService from '@/services/user-service';
 
 @Options({
@@ -155,8 +156,15 @@ export default class ModeratorRegister extends Vue {
       this.$router.push({
         name: 'moderator-login',
       });
+      this.eventBus.emit('showSnackbar', {
+        type: SnackbarType.SUCCESS,
+        message: 'Your account was successfully created.',
+      });
     } else {
-      // TODO: check if user created or not -> show snackbar
+      this.eventBus.emit('showSnackbar', {
+        type: SnackbarType.ERROR,
+        message: 'Something went wrong, could not create account.',
+      });
     }
   }
 

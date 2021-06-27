@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import { Topic } from '@/services/topic-service';
 import { apiEndpoint } from '@/services/api';
 import EndpointType from '@/types/Endpoint';
@@ -34,10 +35,9 @@ export const connect = async (
         ip: 'asdfs', // TODO: send client ip
       }
     );
-    // TODO: set browser-hash to localstorage?
     return data;
   } catch (error) {
-    return error.response?.data;
+    return (error as AxiosError).response?.data;
   }
 };
 
@@ -48,7 +48,7 @@ export const reconnect = async (browserKey: string): Promise<Participant> => {
     );
     return data;
   } catch (error) {
-    return error.response?.data;
+    return (error as AxiosError).response?.data;
   }
 };
 
@@ -59,6 +59,6 @@ export const getTopicList = async (): Promise<Topic[]> => {
     );
     return data;
   } catch (error) {
-    return error.response?.data;
+    return (error as AxiosError).response?.data;
   }
 };
