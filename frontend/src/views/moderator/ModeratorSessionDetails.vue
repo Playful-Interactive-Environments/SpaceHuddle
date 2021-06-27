@@ -48,7 +48,7 @@ import { formatDate } from '@/utils/date';
 import { Session } from '@/services/session-service';
 import { Topic } from '../../services/topic-service';
 import ModuleType from '@/types/ModuleType';
-import mitt from 'mitt';
+import { Task } from '../../services/task-service';
 
 @Options({
   components: {
@@ -94,9 +94,9 @@ export default class ModeratorSessionDetails extends Vue {
   }
 
   async getPublicScreen(): Promise<void> {
-    let publicScreenTask = await sessionService.getPublicScreen(this.sessionId);
-    if (publicScreenTask) {
-      this.publicScreenTaskId = publicScreenTask.id;
+    let data = await sessionService.getPublicScreen(this.sessionId);
+    if (data) {
+      this.publicScreenTaskId = data.id;
     }
   }
 }

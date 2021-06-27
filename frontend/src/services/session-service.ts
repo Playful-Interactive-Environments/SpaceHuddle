@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import { Task } from '@/services/task-service';
 import { apiEndpoint } from '@/services/api';
 import UserType from '@/types/UserType';
@@ -65,11 +66,17 @@ export const remove = async (id: string): Promise<void> => {
   await API_SESSION_ENDPOINT.delete<Session>(`/${id}`);
 };
 
-export const getPublicScreen = async (sessionId: string): Promise<Task> => {
-  const { data } = await API_SESSION_ENDPOINT.get<Task>(
-    `/${sessionId}/${EndpointType.PUBLIC_SCREEN}`
-  );
-  return data;
+export const getPublicScreen = async (
+  sessionId: string
+): Promise<Task | null> => {
+  try {
+    const { data } = await API_SESSION_ENDPOINT.get<Task>(
+      `/${sessionId}/${EndpointType.PUBLIC_SCREEN}`
+    );
+    return data;
+  } catch (error) {
+    return null;
+  }
 };
 
 export const displayOnPublicScreen = async (
