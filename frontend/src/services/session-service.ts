@@ -1,4 +1,3 @@
-import { AxiosError } from 'axios';
 import { Task } from '@/services/task-service';
 import { apiEndpoint } from '@/services/api';
 import UserType from '@/types/UserType';

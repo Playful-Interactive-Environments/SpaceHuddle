@@ -48,7 +48,6 @@ import { formatDate } from '@/utils/date';
 import { Session } from '@/services/session-service';
 import { Topic } from '../../services/topic-service';
 import ModuleType from '@/types/ModuleType';
-import { Task } from '../../services/task-service';
 
 @Options({
   components: {

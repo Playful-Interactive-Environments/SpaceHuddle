@@ -1,6 +1,6 @@
 enum States {
-  SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR',
+  SUCCESS = 'Success',
+  ERROR = 'Error',
 }
 
 export default States;

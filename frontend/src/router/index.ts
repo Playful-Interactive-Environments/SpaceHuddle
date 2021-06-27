@@ -2,7 +2,6 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
 import ClientJoin from '../views/client/ClientJoin.vue';
 import ClientOverview from '@/views/client/ClientOverview.vue';
-import Debug from '@/views/Debug.vue';
 import Home from '../views/shared/Home.vue';
 import ModeratorLogin from '@/views/moderator/ModeratorLogin.vue';
 import ModeratorRegister from '@/views/moderator/ModeratorRegister.vue';
@@ -123,11 +122,6 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       requiresAuth: true,
     },
-  },
-  {
-    path: '/debug',
-    name: 'debug',
-    component: Debug,
   },
   {
     path: '/:catchAll(.*)',
