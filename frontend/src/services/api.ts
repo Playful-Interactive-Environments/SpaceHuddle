@@ -1,5 +1,5 @@
 import Axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { getJwt } from '@/services/moderator/auth-service';
+import { getAccessToken } from '@/services/auth-service';
 import EndpointType from '@/types/Endpoint';
 
 const endpointsWithAuthorization = [
@@ -10,10 +10,14 @@ const endpointsWithAuthorization = [
   EndpointType.TASKS,
   EndpointType.TASK,
   EndpointType.IDEA,
+  EndpointType.PARTICIPANT,
 ];
 
 const endpointRequiresAuthorization = (endpoint: EndpointType) => {
-  return endpointsWithAuthorization.includes(endpoint);
+  return (
+    endpointsWithAuthorization.includes(endpoint) &&
+    !endpointsWithAuthorization.includes(EndpointType.CONNECT)
+  );
 };
 
 const interceptorAuthHeader = (
@@ -21,7 +25,7 @@ const interceptorAuthHeader = (
   endpoint: EndpointType
 ): AxiosRequestConfig => {
   if (endpointRequiresAuthorization(endpoint)) {
-    const jwt = getJwt();
+    const jwt = getAccessToken();
     if (!jwt) throw new Error('Missing Authentication Token');
 
     axiosConfig.headers = {
@@ -54,6 +58,7 @@ export const apiEndpoint = (
       return response;
     },
     (error) => {
+      console.log(error.response);
       console.error('axios error interceptor triggered.. :(');
       // TODO: show an error snackbar (but only for some endpoints)
       return Promise.reject(error);

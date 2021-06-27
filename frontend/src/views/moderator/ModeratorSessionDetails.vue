@@ -6,8 +6,9 @@
       :pretitle="formatDate(session.creationDate)"
       :description="session.description"
     />
+    <Navigation />
     <main class="detail__content">
-      <TopicExpand v-for="(topic, index) in topics" :key="topic">
+      <TopicExpand v-for="(topic, index) in topics" :key="topic.id">
         <template v-slot:title>{{ topic.title }}</template>
         <template v-slot:content>
           <draggable
@@ -21,40 +22,53 @@
                   :sessionId="sessionId"
                   :type="ModuleType[element.taskType]"
                   :task="element"
+                  :isOnPublicScreen="element.id === publicScreenTaskId"
+                  @changePublicScreen="changePublicScreen($event)"
                 />
               </li>
             </template>
           </draggable>
-          <AddItem text="Add module" @addNew="addModule" />
+          <AddItem
+            text="Add module"
+            @addNew="openModalModuleCreate(topic.id)"
+          />
         </template>
       </TopicExpand>
-      <button @click="addTopic">add topic test</button>
     </main>
+    <ModalModuleCreate
+      v-model:show-modal="showModalModuleCreate"
+      :topic-id="addNewTopicId"
+      @moduleCreated="getTopics"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import draggable from 'vuedraggable';
-import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
-import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
-import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
-import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { Prop } from 'vue-property-decorator';
-import * as sessionService from '@/services/moderator/session-service';
-import * as topicService from '@/services/moderator/topic-service';
+import draggable from 'vuedraggable';
+import AddItem from '@/components/moderator/atoms/AddItem.vue';
+import ModalModuleCreate from '@/components/shared/molecules/ModalModuleCreate.vue';
+import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
+import Navigation from '@/components/moderator/molecules/Navigation.vue';
+import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
+import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import { formatDate } from '@/utils/date';
-import { Session } from '@/services/moderator/session-service';
-import { Topic } from '../../services/moderator/topic-service';
 import ModuleType from '@/types/ModuleType';
+import * as sessionService from '@/services/session-service';
+import * as topicService from '@/services/topic-service';
+import { Session } from '@/services/session-service';
+import { Topic } from '../../services/topic-service';
 
 @Options({
   components: {
-    Sidebar,
-    ModuleCard,
-    TopicExpand,
-    draggable,
     AddItem,
+    draggable,
+    ModalModuleCreate,
+    ModuleCard,
+    Navigation,
+    TopicExpand,
+    Sidebar,
   },
 })
 export default class ModeratorSessionDetails extends Vue {
@@ -62,28 +76,51 @@ export default class ModeratorSessionDetails extends Vue {
 
   session: Session | null = null;
   topics: Topic[] = [];
+  publicScreenTaskId = '';
+  showModalModuleCreate = false;
   formatDate = formatDate;
+  addNewTopicId = '';
 
   ModuleType = ModuleType;
 
   async mounted(): Promise<void> {
+    await this.getTopics();
+  }
+
+  async getTopics(): Promise<void> {
     this.session = await sessionService.getById(this.sessionId);
     this.topics = await sessionService.getTopicsList(this.session.id);
     this.topics.forEach(async (topic) => {
       topic.tasks = await topicService.getTaskList(topic.id);
     });
-  }
+    await this.getPublicScreen();
 
-  async addTopic(): Promise<void> {
-    const data = await sessionService.postTopic(this.sessionId, {
-      title: 'Test topic',
-      description: 'asdf',
+    this.eventBus.on('changePublicScreen', async (id) => {
+      this.publicScreenTaskId = id as string;
+      // TODO: change endpoint to toggle public screen
+      let data = await sessionService.displayOnPublicScreen(
+        this.sessionId,
+        this.publicScreenTaskId
+      );
+      // TODO: snackbar success
+      console.log(data.message);
     });
-    console.log('topic added', data);
   }
 
   addModule(): void {
     console.log('add module');
+  }
+
+  async getPublicScreen(): Promise<void> {
+    let data = await sessionService.getPublicScreen(this.sessionId);
+    if (data) {
+      this.publicScreenTaskId = data.id;
+    }
+  }
+
+  openModalModuleCreate(topicId: string): void {
+    this.addNewTopicId = topicId;
+    this.showModalModuleCreate = true;
   }
 }
 </script>
@@ -96,7 +133,7 @@ export default class ModeratorSessionDetails extends Vue {
 
   &__content {
     flex-grow: 1;
-    padding: 2rem 3rem;
+    padding: 0 3rem;
   }
 
   &__module + .detail__module {

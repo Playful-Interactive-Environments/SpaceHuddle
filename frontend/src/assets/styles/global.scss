@@ -1,5 +1,6 @@
 @import '~@/assets/styles/fonts.scss';
 @import '~@/assets/styles/variables.scss';
+@import '~@/assets/styles/breakpoints.scss';
 
 html {
   box-sizing: border-box;
@@ -57,7 +58,12 @@ body {
   margin: 0 0 0.5rem;
 
   &--big {
-    font-size: calc(48rem / 16);
+    font-size: calc(40rem / 16);
+    line-height: 1.2;
+
+    @media screen and (max-width: 768px) {
+      font-size: calc(28rem / 16);
+    }
   }
 
   &--medium {
@@ -93,9 +99,9 @@ body {
   border-radius: 100px;
   white-space: nowrap;
   cursor: pointer;
-  padding: 0.7rem 2rem;
+  padding: 0.7rem 1rem;
   width: 200px;
-  margin: 0.5rem auto;
+  margin: 0.25rem auto;
   transition: background-color 0.2s, opacity 0.2s;
 
   &:hover {
@@ -126,7 +132,7 @@ body {
     border: 2px solid var(--color-mint-dark);
     box-sizing: border-box;
     transition: background-color 0.2s, color 0.2s;
-    padding: calc(9.2rem / 16) 2rem;
+    padding: calc(9.2rem / 16) 1rem;
 
     &:hover {
       background-color: var(--color-mint-dark);
@@ -141,7 +147,7 @@ body {
     border: 2px solid white;
     box-sizing: border-box;
     transition: background-color 0.2s, color 0.2s;
-    padding: calc(9.2rem / 16) 2rem;
+    padding: calc(9.2rem / 16) 1rem;
 
     &:hover {
       background-color: white;
@@ -156,7 +162,7 @@ body {
     border: 2px solid var(--color-background-gray);
     box-sizing: border-box;
     transition: background-color 0.2s, color 0.2s;
-    padding: calc(9.2rem / 16) 2rem;
+    padding: calc(9.2rem / 16) 1rem;
 
     &:hover {
       background-color: var(--color-background-gray);
@@ -219,7 +225,9 @@ body {
   margin-top: 1rem;
 }
 
-.input {
+.input,
+.select,
+.textarea {
   font-family: var(--font-family);
   font-size: var(--font-size-default);
   color: var(--color-darkblue);
@@ -236,34 +244,34 @@ body {
 
   &:focus {
     outline: none;
+    border: 1px solid var(--color-mint-light);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 200ms;
   }
 
   &--fullwidth {
     width: 100%;
+  }
+
+  &--centered {
+    text-align: center;
   }
 }
 
+.select {
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url('../icons/arrow.svg');
+  background-size: 0.8em;
+  background-repeat: no-repeat;
+  background-position: right 1em top 50%;
+  text-transform: capitalize;
+}
+
 .textarea {
-  font-family: var(--font-family);
-  font-size: var(--font-size-default);
-  padding: 0.7rem 1rem;
   border-radius: var(--border-radius-small);
-  background-color: var(--color-background-gray);
-  border: none;
-  margin: 0.5rem auto;
-  width: 300px;
-
-  &::placeholder {
-    color: var(--color-darkblue-light);
-  }
-
-  &:focus {
-    outline: none;
-  }
-
-  &--fullwidth {
-    width: 100%;
-  }
 }
 
 .container {
@@ -278,10 +286,25 @@ body {
     min-height: 100vh;
   }
 
-  &--centered {
+  &--fullheight-header {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - var(--header-height));
+  }
+
+  &--spaced {
+    margin: auto;
+    padding: 1rem 5rem;
+  }
+
+  &--centered,
+  &--centered-horizontal {
     align-items: center;
-    justify-content: center;
     text-align: center;
+  }
+
+  &--centered {
+    justify-content: center;
   }
 }
 

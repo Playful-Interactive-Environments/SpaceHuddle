@@ -1,7 +1,9 @@
+import { Task } from '@/services/task-service';
 import { apiEndpoint } from '@/services/api';
 import UserType from '@/types/UserType';
-import { Topic } from '@/services/moderator/topic-service';
+import { Topic } from '@/services/topic-service';
 import EndpointType from '@/types/Endpoint';
+import ApiResponse from '@/types/ApiResponse';
 
 // TODO: move types to separate files in types folder?
 export interface Session {
@@ -61,4 +63,27 @@ export const patch = async (data: Partial<Session>): Promise<void> => {
 
 export const remove = async (id: string): Promise<void> => {
   await API_SESSION_ENDPOINT.delete<Session>(`/${id}`);
+};
+
+export const getPublicScreen = async (
+  sessionId: string
+): Promise<Task | null> => {
+  try {
+    const { data } = await API_SESSION_ENDPOINT.get<Task>(
+      `/${sessionId}/${EndpointType.PUBLIC_SCREEN}`
+    );
+    return data;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const displayOnPublicScreen = async (
+  sessionId: string,
+  taskId: string
+): Promise<ApiResponse> => {
+  const { data } = await API_SESSION_ENDPOINT.put<ApiResponse>(
+    `/${sessionId}/${EndpointType.PUBLIC_SCREEN}/${taskId}/`
+  );
+  return data;
 };

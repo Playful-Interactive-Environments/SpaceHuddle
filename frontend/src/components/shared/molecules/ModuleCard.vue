@@ -1,5 +1,11 @@
 <template>
-  <router-link :to="`/${type}/${sessionId}/${task.id}`">
+  <router-link
+    :to="
+      isClient
+        ? `/${sessionId}/brainstorming/${task.id}`
+        : `/${type}/${sessionId}/${task.id}`
+    "
+  >
     <article
       ref="item"
       class="module-card"
@@ -13,12 +19,26 @@
       <ModuleInfo
         :type="type"
         :title="task.name"
-        :description="'Module description here ...'"
+        :description="task.description"
       />
-      <Timer class="module-card__timer" />
+      <Timer
+        class="module-card__timer"
+        v-if="
+          !(type === ModuleType.INFORMATION || type === ModuleType.SELECTION)
+        "
+      />
       <div class="module-card__toggles" v-if="!isClient">
-        <Toggle label="Active" v-if="!(type === ModuleType.SELECTION)" />
-        <Toggle label="Public Screen" />
+        <Toggle
+          label="Active"
+          :isActive="task.state === TaskStates.ACTIVE"
+          v-if="type !== ModuleType.SELECTION"
+          @toggleClicked="changeActiveState"
+        />
+        <Toggle
+          label="Public Screen"
+          :isActive="isOnPublicScreen"
+          @toggleClicked="changePublicScreen($event)"
+        />
       </div>
       <div class="module-card__drag" v-if="!isClient">
         <img
@@ -35,12 +55,15 @@
 import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import { setModuleStyles } from '../../../utils/moduleStyles';
-import { Task } from '../../../services/moderator/task-service';
+import { Task } from '@/services/task-service';
 import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import Toggle from '@/components/moderator/atoms/Toggle.vue';
 import ModuleType from '@/types/ModuleType';
-import ModuleColors from '@/types/ModuleColors';
+import mitt from 'mitt';
+import * as sessionService from '@/services/session-service';
+import * as taskService from '@/services/task-service';
+import TaskStates from '../../../types/TaskStates';
 
 @Options({
   components: {
@@ -54,8 +77,10 @@ export default class ModuleCard extends Vue {
   @Prop({ default: ModuleType.BRAINSTORMING }) type!: ModuleType;
   @Prop({ default: null }) task!: Task;
   @Prop({ default: false }) isClient!: boolean;
+  @Prop({ default: false }) isOnPublicScreen!: boolean;
 
   ModuleType = ModuleType;
+  TaskStates = TaskStates;
 
   mounted(): void {
     setModuleStyles(this.$refs.item as HTMLElement, this.type);
@@ -63,6 +88,18 @@ export default class ModuleCard extends Vue {
 
   updated(): void {
     setModuleStyles(this.$refs.item as HTMLElement, this.type);
+  }
+
+  changePublicScreen(show: boolean): void {
+    this.eventBus.emit('changePublicScreen', this.task.id);
+  }
+
+  async changeActiveState(): Promise<void> {
+    this.task.state =
+      this.task.state === TaskStates.ACTIVE
+        ? TaskStates.WAIT
+        : TaskStates.ACTIVE;
+    await taskService.updateTask(this.task);
   }
 }
 </script>
@@ -79,6 +116,11 @@ export default class ModuleCard extends Vue {
   padding: 1.5rem 5rem 1.5rem 4.5rem;
   margin-left: 3rem;
 
+  &:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    transition: all 200ms;
+  }
+
   &__planet {
     position: absolute;
     left: -4rem;
@@ -90,7 +132,7 @@ export default class ModuleCard extends Vue {
   &__toggles {
     display: flex;
     flex-direction: column;
-    margin-left: 3rem;
+    margin-left: 2rem;
     width: 12rem;
   }
 

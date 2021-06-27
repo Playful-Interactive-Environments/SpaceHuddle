@@ -1,7 +1,8 @@
+import { Topic } from '@/services/topic-service';
 import { apiEndpoint } from '@/services/api';
 import EndpointType from '@/types/Endpoint';
 
-const API_SESSION_ENDPOINT = apiEndpoint(EndpointType.PARTICIPANT);
+const API_PARTICIPANT_ENDPOINT = apiEndpoint(EndpointType.PARTICIPANT);
 
 export enum ConnectState {
   ACTIVE = 'ACTIVE',
@@ -13,7 +14,7 @@ interface Avatar {
   symbol: string;
 }
 
-interface Participant {
+export interface Participant {
   accessToken: string;
   avatar: Avatar;
   browserKey: string;
@@ -26,7 +27,7 @@ export const connect = async (
   sessionKey: string
 ): Promise<Participant | Partial<Participant>> => {
   try {
-    const { data } = await API_SESSION_ENDPOINT.post<Participant>(
+    const { data } = await API_PARTICIPANT_ENDPOINT.post<Participant>(
       EndpointType.CONNECT,
       {
         sessionKey,
@@ -40,15 +41,24 @@ export const connect = async (
   }
 };
 
-export const reconnect = async (): Promise<Participant> => {
+export const reconnect = async (browserKey: string): Promise<Participant> => {
   try {
-    // TODO: browser hash from localstorage/sessionstorage?
-    const browserKey = 'AHMS1JZT.9VZTRRNE';
-    const { data } = await API_SESSION_ENDPOINT.get<Participant>(
-      `${EndpointType.CONNECT}/${browserKey}/`
+    const { data } = await API_PARTICIPANT_ENDPOINT.get<Participant>(
+      `/${EndpointType.CONNECT}/${browserKey}/`
     );
     return data;
-  } catch (e) {
-    return e.response?.data;
+  } catch (error) {
+    return error.response?.data;
+  }
+};
+
+export const getTopicList = async (): Promise<Topic[]> => {
+  try {
+    const { data } = await API_PARTICIPANT_ENDPOINT.get<Topic[]>(
+      `/${EndpointType.TOPICS}`
+    );
+    return data;
+  } catch (error) {
+    return error.response?.data;
   }
 };

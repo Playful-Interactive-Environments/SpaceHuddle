@@ -21,33 +21,60 @@
         <p class="register__description">
           Please enter your personal info to create an account.
         </p>
-        <form @submit="submit">
+        <form @submit.prevent="registerUser">
           <h3 class="heading heading--xs">Email</h3>
           <input
             class="input input--fullwidth"
             name="email"
             placeholder="Enter your email"
-            type="text"
+            type="email"
+            v-model.trim="email"
+            autocomplete="email"
+            @blur="context.$v.email.$touch()"
+          />
+          <FormError
+            v-if="context.$v.email.$error"
+            :errors="context.$v.email.$errors"
+            :isSmall="true"
           />
           <h3 class="heading heading--xs">Password</h3>
           <input
             class="input input--fullwidth"
             name="password"
             placeholder="Enter your password"
-            type="text"
+            type="password"
+            autocomplete="new-password"
+            v-model.trim="password"
+            @blur="context.$v.password.$touch()"
+          />
+          <FormError
+            v-if="context.$v.password.$error"
+            :errors="context.$v.password.$errors"
+            :isSmall="true"
           />
           <h4 class="heading heading--xs">Password repeat</h4>
           <input
             class="input input--fullwidth"
-            name="password"
+            name="passwordRepeat"
             placeholder="Repeat your password"
-            type="text"
+            type="password"
+            autocomplete="new-password"
+            v-model.trim="passwordRepeat"
+            @blur="context.$v.passwordRepeat.$touch()"
           />
-          <form-error :errors="errors"></form-error>
-          <button
-            class="btn btn--wide btn--gradient btn--fullwidth"
-            type="submit"
-          >
+          <FormError
+            v-if="
+              context.$v.passwordRepeat.$error ||
+              (context.$v.passwordRepeat.$dirty && hasMatchingPasswords)
+            "
+            :errors="
+              context.$v.passwordRepeat.$error
+                ? context.$v.passwordRepeat.$errors
+                : { passwordRepeatMsg }
+            "
+            :isSmall="true"
+          />
+          <button class="btn btn--gradient btn--fullwidth" type="submit">
             Register
           </button>
         </form>
@@ -57,9 +84,86 @@
 </template>
 
 <script lang="ts">
-import { Vue } from 'vue-class-component';
+import { Options, Vue, setup } from 'vue-class-component';
+import {
+  maxLength,
+  minLength,
+  required,
+  email,
+  helpers,
+} from '@vuelidate/validators';
+import useVuelidate from '@vuelidate/core';
+import FormError from '@/components/shared/atoms/FormError.vue';
+import States from '@/types/States';
+import * as userService from '@/services/user-service';
 
-export default class ModeratorRegister extends Vue {}
+@Options({
+  components: {
+    FormError,
+  },
+  validations: {
+    email: {
+      email,
+      required,
+    },
+    password: {
+      required,
+      min: minLength(8),
+      max: maxLength(12),
+      containsUppercase: helpers.withMessage(
+        'Password must contain at least one lowercase and uppercase letter, a number and a special character.',
+        (value) => {
+          return (
+            /[A-Z]/.test(value as string) &&
+            /[a-z]/.test(value as string) &&
+            /[0-9]/.test(value as string) &&
+            /[#?!@$%^&*-]/.test(value as string)
+          );
+        }
+      ),
+    },
+    passwordRepeat: {
+      required,
+      min: minLength(8),
+      max: maxLength(12),
+    },
+  },
+})
+export default class ModeratorRegister extends Vue {
+  email = '';
+  password = '';
+  passwordRepeat = '';
+  passwordRepeatMsg = 'Password repetition does not match.';
+
+  context = setup(() => {
+    return {
+      $v: useVuelidate(),
+    };
+  });
+
+  async registerUser(): Promise<void> {
+    await this.context.$v.$validate();
+    if (this.context.$v.$error || this.hasMatchingPasswords) return;
+
+    const { state } = await userService.registerUser(
+      this.email,
+      this.password,
+      this.passwordRepeat
+    );
+
+    if (state == States.SUCCESS) {
+      this.$router.push({
+        name: 'moderator-login',
+      });
+    } else {
+      // TODO: check if user created or not -> show snackbar
+    }
+  }
+
+  get hasMatchingPasswords(): boolean {
+    return this.password !== this.passwordRepeat;
+  }
+}
 </script>
 
 <style lang="scss" scoped>

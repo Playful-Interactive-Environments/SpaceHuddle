@@ -4,18 +4,35 @@
     @update:showModal="$emit('update:showModal', $event)"
   >
     <div class="session-create">
-      <h2 class="heading heading--regular">Create Session</h2>
+      <h2 class="heading heading--regular">Add a Module</h2>
       <p>
-        The session is the place that bundles all information belonging to your
-        brainstorming adventure.
+        Modules are the place where all the interaction happens. You can choose
+        from 5 different types of modules.
       </p>
       <form class="session-create__form">
-        <label for="title" class="heading heading--xs">Title</label>
+        <label for="moduleType" class="heading heading--xs">Module type</label>
+        <select
+          v-model="moduleType"
+          id="moduleType"
+          class="select select--fullwidth"
+        >
+          <option v-for="type in ModuleTypeKeys" :key="type" :value="type">
+            {{ ModuleType[type] }}
+          </option>
+        </select>
+        <FormError
+          v-if="context.$v.moduleType.$error"
+          :errors="context.$v.moduleType.$errors"
+          :isSmall="true"
+        />
+        <label for="title" class="heading heading--xs">{{
+          moduleType === 'BRAINSTORMING' ? 'Question' : 'Title'
+        }}</label>
         <input
           id="title"
           v-model="title"
           class="input input--fullwidth"
-          placeholder="e.g. Marketing Meeting"
+          placeholder="e.g. What should be the name of our new app?"
           @blur="context.$v.title.$touch()"
         />
         <FormError
@@ -38,31 +55,12 @@
           :errors="context.$v.description.$errors"
           :isSmall="true"
         />
-        <h3 class="session-create__topic heading heading--small">Topics</h3>
-        <p>
-          Topics help to make a clear distinction between subjects that should
-          have separate brainstorming modules. Tip: Keep it simple - one or two
-          topics are usually enough!
-        </p>
-        <label for="topic" class="heading heading--xs">Topic 1</label>
-        <input
-          id="topic"
-          v-model="topic"
-          class="input input--fullwidth"
-          placeholder="e.g. New app Name"
-          @blur="context.$v.topic.$touch()"
-        />
-        <FormError
-          v-if="context.$v.topic.$error"
-          :errors="context.$v.topic.$errors"
-          :isSmall="true"
-        />
         <button
           type="submit"
           class="btn btn--gradient btn--fullwidth"
-          @click.prevent="saveSession"
+          @click.prevent="createModule"
         >
-          Create session
+          Create module
         </button>
       </form>
     </div>
@@ -78,7 +76,8 @@ import { maxLength, required } from '@vuelidate/validators';
 import FormError from '@/components/shared/atoms/FormError.vue';
 import ModalBase from '@/components/shared/molecules/ModalBase.vue';
 
-import * as sessionService from '@/services/session-service';
+import * as topicService from '@/services/topic-service';
+import ModuleType from '@/types/ModuleType';
 
 @Options({
   components: {
@@ -86,6 +85,9 @@ import * as sessionService from '@/services/session-service';
     ModalBase,
   },
   validations: {
+    moduleType: {
+      required,
+    },
     title: {
       required,
       max: maxLength(255),
@@ -94,19 +96,17 @@ import * as sessionService from '@/services/session-service';
       required,
       max: maxLength(1000),
     },
-    topic: {
-      required,
-      max: maxLength(255),
-    },
   },
 })
-export default class ModalSessionCreate extends Vue {
+export default class ModalModuleCreate extends Vue {
   @Prop({ default: false }) showModal!: boolean;
+  @Prop({ required: true }) topicId!: string;
 
+  moduleType = this.ModuleTypeKeys[1];
   title = '';
   description = '';
-  topic = '';
-  maxNrOfTopics = 5;
+
+  ModuleType = ModuleType;
 
   context = setup(() => {
     return {
@@ -114,29 +114,31 @@ export default class ModalSessionCreate extends Vue {
     };
   });
 
-  async saveSession(): Promise<void> {
+  get ModuleTypeKeys(): Array<keyof typeof ModuleType> {
+    return Object.keys(ModuleType) as Array<keyof typeof ModuleType>;
+  }
+
+  resetForm(): void {
+    this.moduleType = this.ModuleTypeKeys[1];
+    this.title = '';
+    this.description = '';
+  }
+
+  async createModule(): Promise<void> {
     await this.context.$v.$validate();
     if (this.context.$v.$error) return;
 
-    const session = await sessionService.post({
-      title: this.title,
+    await topicService.postTask(this.topicId, {
+      taskType: this.moduleType,
+      name: this.title,
       description: this.description,
-      maxParticipants: 100,
-      expirationDate: '2021-09-12',
+      parameter: {},
+      order: 0,
     });
-
-    await sessionService.postTopic(session.id, {
-      title: this.topic,
-      description: 'dummy data - this field should be removed in the backend!',
-    });
-
     this.$emit('update:showModal', false);
-    await this.$router.push({
-      name: 'moderator-session-details',
-      params: {
-        sessionId: session.id,
-      },
-    });
+    this.$emit('moduleCreated');
+    this.resetForm();
+    this.context.$v.$reset();
   }
 }
 </script>

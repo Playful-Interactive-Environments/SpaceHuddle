@@ -9,6 +9,7 @@ export interface Task {
   // see: https://www.typescriptlang.org/docs/handbook/enums.html
   taskType: keyof typeof ModuleType;
   name: string;
+  description: string;
   parameter: any; // TODO: ask what options can be provided
   order: number;
   state: TaskStates; // TODO: ask what possible states a task can be in - WAIT,
@@ -25,5 +26,10 @@ export const getIdeasForTask = async (taskId: string): Promise<Idea[]> => {
   const { data } = await API_TASK_ENDPOINT.get<Idea[]>(
     `/${taskId}/${EndpointType.IDEAS}`
   );
+  return data;
+};
+
+export const updateTask = async (task: Task): Promise<Task> => {
+  const { data } = await API_TASK_ENDPOINT.put<Task>(``, task);
   return data;
 };

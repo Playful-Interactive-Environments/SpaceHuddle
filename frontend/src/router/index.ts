@@ -2,8 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
 import ClientJoin from '../views/client/ClientJoin.vue';
 import ClientOverview from '@/views/client/ClientOverview.vue';
-import Debug from '@/views/Debug.vue';
-import Home from '../views/Home.vue';
+import Home from '../views/shared/Home.vue';
 import ModeratorLogin from '@/views/moderator/ModeratorLogin.vue';
 import ModeratorRegister from '@/views/moderator/ModeratorRegister.vue';
 import ModeratorSessionDetails from '@/views/moderator/ModeratorSessionDetails.vue';
@@ -11,10 +10,12 @@ import ModeratorSessionOverview from '@/views/moderator/ModeratorSessionOverview
 import ModeratorBrainstorming from '@/views/moderator/ModeratorBrainstorming.vue';
 import ModeratorInformation from '@/views/moderator/ModeratorInformation.vue';
 import ModeratorSelection from '@/views/moderator/ModeratorSelection.vue';
-import ModeratorCategorization from '@/views/moderator/ModeratorCategorization.vue';
+import ModeratorCategorisation from '@/views/moderator/ModeratorCategorisation.vue';
+import ModeratorProfile from '@/views/moderator/ModeratorProfile.vue';
 import ModeratorVoting from '@/views/moderator/ModeratorVoting.vue';
+import NotFound from '@/views/shared/NotFound.vue';
 
-import { isAuthenticated } from '@/services/moderator/auth-service';
+import { isAuthenticated } from '@/services/auth-service';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -31,6 +32,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/register',
     name: 'moderator-register',
     component: ModeratorRegister,
+  },
+  {
+    path: '/profile',
+    name: 'moderator-profile',
+    component: ModeratorProfile,
   },
   {
     path: '/sessions',
@@ -86,9 +92,9 @@ const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: '/categorization/:sessionId/:taskId',
-    name: 'moderator-categorization',
-    component: ModeratorCategorization,
+    path: '/categorisation/:sessionId/:taskId',
+    name: 'moderator-categorisation',
+    component: ModeratorCategorisation,
     props: (route) => ({
       sessionId: route.params.sessionId,
       taskId: route.params.taskId,
@@ -119,11 +125,13 @@ const routes: Array<RouteRecordRaw> = [
     name: 'client-overview',
     component: ClientOverview,
     props: (route) => ({ sessionKey: route.params.sessionKey }),
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
-    path: '/debug',
-    name: 'debug',
-    component: Debug,
+    path: '/:catchAll(.*)',
+    component: NotFound,
   },
 ];
 
@@ -135,7 +143,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
 
-  if (requiresAuth && !isAuthenticated()) next('login');
+  if (requiresAuth && !isAuthenticated()) next({ name: 'home' });
   else next();
 });
 
