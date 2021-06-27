@@ -30,6 +30,7 @@ export default class Navigation extends Vue {
 
 <style lang="scss" scoped>
 .nav {
+  height: var(--header-height);
   display: flex;
   justify-content: flex-end;
   align-items: center;

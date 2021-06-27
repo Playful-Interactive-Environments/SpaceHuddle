@@ -15,20 +15,26 @@
       <div class="sidebar__text">
         {{ description }}
       </div>
-      <ModuleCount v-if="session" />
+      <ModuleCount v-if="isSession" />
     </div>
     <div class="sidebar__bottom">
-      <SessionCode :code="session.connectionKey" v-if="session" />
+      <SessionCode v-if="isSession" :code="sessionConnectionKey" />
       <div class="sidebar__toggles" v-else>
         <Toggle label="Active" v-if="!(moduleType === ModuleType.SELECTION)" />
-        <Toggle label="Public Screen" />
+        <Toggle
+          label="Public Screen"
+          :isActive="isOnPublicScreen"
+          @toggleClicked="$emit('changePublicScreen')"
+        />
       </div>
-      <button
-        class="btn btn--mint btn--fullwidth"
-        :class="{ sidebar__button: !session }"
-      >
-        Public Screen
-      </button>
+      <router-link v-if="sessionId" :to="`/public-screen/${sessionId}`">
+        <button
+          class="btn btn--mint btn--fullwidth"
+          :class="{ sidebar__button: !isSession }"
+        >
+          Public Screen
+        </button>
+      </router-link>
     </div>
   </section>
 </template>
@@ -52,11 +58,14 @@ import Toggle from '@/components/moderator/atoms/Toggle.vue';
   },
 })
 export default class Sidebar extends Vue {
-  @Prop({ default: null }) readonly session?: Session;
+  @Prop({ default: false }) readonly isSession!: Session;
+  @Prop({ default: '' }) readonly sessionId!: string;
+  @Prop({ default: '' }) readonly sessionConnectionKey!: string;
   @Prop({ default: '' }) readonly title!: string;
   @Prop({ default: '' }) readonly pretitle!: string;
   @Prop({ default: '' }) readonly description!: string;
   @Prop({ default: null }) readonly moduleType!: ModuleType;
+  @Prop({ default: false }) readonly isOnPublicScreen!: boolean;
 
   ModuleType = ModuleType;
 }
@@ -101,7 +110,7 @@ export default class Sidebar extends Vue {
     mask-image: url('../../../assets/icons/settings.svg');
     mask-repeat: no-repeat;
     background-color: var(--color-darkblue-light);
-    transition: background-color 0.2s opacity 0.5s;
+    transition: background-color 0.2s, opacity 0.5s;
 
     &:hover {
       background-color: white;

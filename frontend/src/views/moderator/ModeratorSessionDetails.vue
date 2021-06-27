@@ -1,7 +1,9 @@
 <template>
   <div v-if="session" class="detail">
     <Sidebar
-      :session="session"
+      :is-session="true"
+      :session-id="session.id"
+      :session-connection-key="session.connectionKey"
       :title="session.title"
       :pretitle="formatDate(session.creationDate)"
       :description="session.description"
@@ -59,8 +61,10 @@ import SnackbarType from '@/types/SnackbarType';
 import * as sessionService from '@/services/session-service';
 import * as topicService from '@/services/topic-service';
 import { Session } from '@/services/session-service';
-import { Topic } from '../../services/topic-service';
+import { Topic } from '@/services/topic-service';
+import { EventType } from '@/types/EventType';
 
+export const EVENT_CHANGE_PUBLIC_SCREEN = 'changePublicScreen';
 @Options({
   components: {
     AddItem,
@@ -86,17 +90,8 @@ export default class ModeratorSessionDetails extends Vue {
 
   async mounted(): Promise<void> {
     await this.getTopics();
-  }
-
-  async getTopics(): Promise<void> {
-    this.session = await sessionService.getById(this.sessionId);
-    this.topics = await sessionService.getTopicsList(this.session.id);
-    this.topics.forEach(async (topic) => {
-      topic.tasks = await topicService.getTaskList(topic.id);
-    });
-    await this.getPublicScreen();
-
-    this.eventBus.on('changePublicScreen', async (id) => {
+    this.eventBus.off(EventType.CHANGE_PUBLIC_SCREEN);
+    this.eventBus.on(EventType.CHANGE_PUBLIC_SCREEN, async (id) => {
       this.publicScreenTaskId = id as string;
       // TODO: change endpoint to toggle public screen
       let data = await sessionService.displayOnPublicScreen(
@@ -110,8 +105,13 @@ export default class ModeratorSessionDetails extends Vue {
     });
   }
 
-  addModule(): void {
-    console.log('add module');
+  async getTopics(): Promise<void> {
+    this.session = await sessionService.getById(this.sessionId);
+    this.topics = await sessionService.getTopicsList(this.session.id);
+    this.topics.forEach(async (topic) => {
+      topic.tasks = await topicService.getTaskList(topic.id);
+    });
+    await this.getPublicScreen();
   }
 
   async getPublicScreen(): Promise<void> {

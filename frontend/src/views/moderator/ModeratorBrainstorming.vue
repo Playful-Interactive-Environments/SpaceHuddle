@@ -2,10 +2,13 @@
   <div class="brainstorming" ref="item">
     <div v-if="task">
       <Sidebar
+        :session-id="sessionId"
         :title="task.name"
         :pretitle="task.taskType"
         :description="task.description"
         :moduleType="ModuleType[task.taskType]"
+        :is-on-public-screen="task.id === publicScreenTask?.id"
+        @changePublicScreen="changePublicScreen"
       />
       <NavigationWithBack :back-route="'/session/' + sessionId" />
       <main class="brainstorming__content">
@@ -23,14 +26,16 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import { Task } from '../../services/task-service';
-import { Idea } from '../../services/idea-service';
-import { setModuleStyles } from '../../utils/moduleStyles';
+import { Task } from '@/services/task-service';
+import { Idea } from '@/services/idea-service';
+import { setModuleStyles } from '@/utils/moduleStyles';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleType from '../../types/ModuleType';
 import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import * as taskService from '@/services/task-service';
+import * as sessionService from '@/services/session-service';
+import { EventType } from '@/types/EventType';
 
 @Options({
   components: {
@@ -44,6 +49,7 @@ export default class ModeratorBrainstorming extends Vue {
   @Prop({ default: '' }) readonly taskId!: string;
 
   task: Task | null = null;
+  publicScreenTask: Task | null = null;
   ideas: Idea[] = [];
   ModuleType = ModuleType;
   ideaInterval!: number;
@@ -51,8 +57,11 @@ export default class ModeratorBrainstorming extends Vue {
 
   async mounted(): Promise<void> {
     this.task = await taskService.getTaskById(this.taskId);
-    this.getIdeas();
+    await this.getIdeas();
     this.startIdeaInterval();
+    this.publicScreenTask = await sessionService.getPublicScreen(
+      this.sessionId
+    );
     setModuleStyles(
       this.$refs.item as HTMLElement,
       ModuleType[this.task.taskType]
@@ -65,6 +74,10 @@ export default class ModeratorBrainstorming extends Vue {
 
   async getIdeas(): Promise<void> {
     this.ideas = await taskService.getIdeasForTask(this.taskId);
+  }
+
+  changePublicScreen(): void {
+    this.eventBus.emit(EventType.CHANGE_PUBLIC_SCREEN, this.taskId);
   }
 
   startIdeaInterval(): void {
