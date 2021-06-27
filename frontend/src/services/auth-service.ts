@@ -14,6 +14,10 @@ export const getAccessToken = (): string | null => {
   return window.localStorage.getItem(JWT_KEY);
 };
 
+export const removeAccessToken = (): void => {
+  window.localStorage.removeItem(JWT_KEY);
+};
+
 export const setBrowserKey = (key: string): void => {
   window.localStorage.setItem(BROWSER_KEY, key);
 };

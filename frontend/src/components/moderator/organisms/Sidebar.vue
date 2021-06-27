@@ -1,7 +1,9 @@
 <template>
   <section class="sidebar">
     <div class="sidebar__top">
-      <div class="sidebar__logo"></div>
+      <div class="sidebar__logo">
+        <Logo />
+      </div>
       <!-- <router-link :to="`/session/${session.id}`"></router-link> -->
       <div class="sidebar__row">
         <div>{{ pretitle }}</div>
@@ -35,13 +37,15 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { Session } from '@/services/session-service';
-import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
+import Logo from '@/components/moderator/atoms/Logo.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
-import Toggle from '@/components/moderator/atoms/Toggle.vue';
 import ModuleType from '../../../types/ModuleType';
+import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
+import Toggle from '@/components/moderator/atoms/Toggle.vue';
 
 @Options({
   components: {
+    Logo,
     ModuleCount,
     SessionCode,
     Toggle,
@@ -68,7 +72,7 @@ export default class Sidebar extends Vue {
   min-width: 300px;
   min-height: 100vh;
   height: 100vh;
-  padding: 1rem 2rem;
+  padding: 2rem 2rem 1rem;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

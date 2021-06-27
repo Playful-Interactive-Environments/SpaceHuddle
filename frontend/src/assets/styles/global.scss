@@ -285,6 +285,11 @@ body {
     min-height: 100vh;
   }
 
+  &--spaced {
+    margin: auto;
+    padding: 1rem 5rem;
+  }
+
   &--centered,
   &--centered-horizontal {
     align-items: center;

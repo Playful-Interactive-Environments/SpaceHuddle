@@ -11,6 +11,7 @@ import ModeratorBrainstorming from '@/views/moderator/ModeratorBrainstorming.vue
 import ModeratorInformation from '@/views/moderator/ModeratorInformation.vue';
 import ModeratorSelection from '@/views/moderator/ModeratorSelection.vue';
 import ModeratorCategorisation from '@/views/moderator/ModeratorCategorisation.vue';
+import ModeratorProfile from '@/views/moderator/ModeratorProfile.vue';
 import ModeratorVoting from '@/views/moderator/ModeratorVoting.vue';
 import NotFound from '@/views/shared/NotFound.vue';
 
@@ -31,6 +32,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/register',
     name: 'moderator-register',
     component: ModeratorRegister,
+  },
+  {
+    path: '/profile',
+    name: 'moderator-profile',
+    component: ModeratorProfile,
   },
   {
     path: '/sessions',
@@ -137,7 +143,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
 
-  if (requiresAuth && !isAuthenticated()) next('home');
+  if (requiresAuth && !isAuthenticated()) next({ name: 'home' });
   else next();
 });
 

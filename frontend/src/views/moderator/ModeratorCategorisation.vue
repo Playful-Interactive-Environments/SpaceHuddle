@@ -8,6 +8,7 @@
         :description="task.name"
         :moduleType="ModuleType[task.taskType]"
       />
+      <Navigation />
       <main class="categorisation__content">
         <!-- TODO: categorisation module content -->
         Categorisation content works!
@@ -24,13 +25,15 @@ import { Idea } from '../../services/idea-service';
 import { setModuleStyles } from '../../utils/moduleStyles';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleType from '../../types/ModuleType';
+import Navigation from '@/components/moderator/molecules/Navigation.vue';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import * as taskService from '@/services/task-service';
 
 @Options({
   components: {
-    Sidebar,
     IdeaCard,
+    Sidebar,
+    Navigation,
   },
 })
 export default class ModeratorCategorisation extends Vue {
