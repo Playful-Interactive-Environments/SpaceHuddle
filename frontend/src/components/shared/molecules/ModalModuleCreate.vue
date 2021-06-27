@@ -76,7 +76,7 @@ import { maxLength, required } from '@vuelidate/validators';
 import FormError from '@/components/shared/atoms/FormError.vue';
 import ModalBase from '@/components/shared/molecules/ModalBase.vue';
 
-import * as topicService from '@/services/moderator/topic-service';
+import * as topicService from '@/services/topic-service';
 import ModuleType from '@/types/ModuleType';
 
 @Options({
