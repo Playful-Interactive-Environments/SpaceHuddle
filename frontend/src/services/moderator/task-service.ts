@@ -9,6 +9,7 @@ export interface Task {
   // see: https://www.typescriptlang.org/docs/handbook/enums.html
   taskType: keyof typeof ModuleType;
   name: string;
+  description: string;
   parameter: any; // TODO: ask what options can be provided
   order: number;
   state: TaskStates; // TODO: ask what possible states a task can be in - WAIT,

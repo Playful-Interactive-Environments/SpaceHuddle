@@ -18,3 +18,14 @@ export const getTaskList = async (topicId: string): Promise<Task[]> => {
   );
   return data;
 };
+
+export const postTask = async (
+  taskId: string,
+  data: Partial<Task>
+): Promise<Task> => {
+  const { data: responseData } = await API_TOPIC_ENDPOINT.post<Task>(
+    `/${taskId}/${EndpointType.TASK}`,
+    data
+  );
+  return responseData;
+};
