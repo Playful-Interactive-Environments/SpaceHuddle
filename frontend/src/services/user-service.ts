@@ -11,7 +11,7 @@ export const registerUser = async (
   passwordRepeat: string
 ): Promise<ApiResponse> => {
   const { data } = await API_USER_ENDPOINT.post<ApiResponse>(
-    `/${EndpointType.REGISTER}`,
+    `/${EndpointType.REGISTER}/`,
     {
       username: email,
       password: password,
@@ -27,7 +27,7 @@ export const loginUser = async (
 ): Promise<ApiResponse> => {
   try {
     const { data } = await API_USER_ENDPOINT.post<ApiResponse>(
-      `/${EndpointType.LOGIN}`,
+      `/${EndpointType.LOGIN}/`,
       {
         username: email,
         password: password,

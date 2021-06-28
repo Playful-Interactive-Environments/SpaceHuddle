@@ -18,19 +18,19 @@ export interface Task {
 const API_TASK_ENDPOINT = apiEndpoint(EndpointType.TASK);
 
 export const getTaskById = async (taskId: string): Promise<Task> => {
-  const { data } = await API_TASK_ENDPOINT.get<Task>(`/${taskId}`);
+  const { data } = await API_TASK_ENDPOINT.get<Task>(`/${taskId}/`);
   return data;
 };
 
 export const getIdeasForTask = async (taskId: string): Promise<Idea[]> => {
   const { data } = await API_TASK_ENDPOINT.get<Idea[]>(
-    `/${taskId}/${EndpointType.IDEAS}`
+    `/${taskId}/${EndpointType.IDEAS}/`
   );
   return data;
 };
 
 export const updateTask = async (task: Task): Promise<Task> => {
-  const { data } = await API_TASK_ENDPOINT.put<Task>(``, task);
+  const { data } = await API_TASK_ENDPOINT.put<Task>(`/`, task);
   return data;
 };
 

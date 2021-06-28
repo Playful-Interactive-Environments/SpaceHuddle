@@ -29,10 +29,9 @@ export const connect = async (
 ): Promise<Participant | Partial<Participant>> => {
   try {
     const { data } = await API_PARTICIPANT_ENDPOINT.post<Participant>(
-      EndpointType.CONNECT,
+      `/${EndpointType.CONNECT}/`,
       {
         sessionKey,
-        ip: 'asdfs', // TODO: send client ip
       }
     );
     return data;
@@ -55,7 +54,7 @@ export const reconnect = async (browserKey: string): Promise<Participant> => {
 export const getTopicList = async (): Promise<Topic[]> => {
   try {
     const { data } = await API_PARTICIPANT_ENDPOINT.get<Topic[]>(
-      `/${EndpointType.TOPICS}`
+      `/${EndpointType.TOPICS}/`
     );
     return data;
   } catch (error) {

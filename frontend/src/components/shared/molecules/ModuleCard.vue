@@ -160,7 +160,7 @@ export default class ModuleCard extends Vue {
   &--client {
     flex-direction: column;
     margin-left: 0;
-    padding: 1.5rem 1.5rem 0;
+    padding: 1.5rem 1.5rem 2.2rem;
     text-align: center;
     color: var(--color-darkblue);
     width: 65vw;
@@ -173,7 +173,8 @@ export default class ModuleCard extends Vue {
     }
 
     .module-card__timer {
-      margin-top: 0.5rem;
+      position: absolute;
+      bottom: 0;
       transform: translateY(50%);
     }
   }

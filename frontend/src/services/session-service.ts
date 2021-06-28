@@ -27,13 +27,13 @@ export const getList = async (): Promise<Session[]> => {
 };
 
 export const getById = async (id: string): Promise<Session> => {
-  const { data } = await API_SESSION_ENDPOINT.get<Session>(`/${id}`);
+  const { data } = await API_SESSION_ENDPOINT.get<Session>(`/${id}/`);
   return data;
 };
 
 export const getTopicsList = async (sessionId: string): Promise<Topic[]> => {
   const { data } = await API_SESSION_ENDPOINT.get<Topic[]>(
-    `/${sessionId}/${EndpointType.TOPICS}`
+    `/${sessionId}/${EndpointType.TOPICS}/`
   );
   return data;
 };
@@ -51,7 +51,7 @@ export const postTopic = async (
   data: Partial<Topic>
 ): Promise<Topic> => {
   const { data: responseData } = await API_SESSION_ENDPOINT.post<Topic>(
-    `/${sessionId}/${EndpointType.TOPIC}`,
+    `/${sessionId}/${EndpointType.TOPIC}/`,
     data
   );
   return responseData;
@@ -62,7 +62,7 @@ export const patch = async (data: Partial<Session>): Promise<void> => {
 };
 
 export const remove = async (id: string): Promise<void> => {
-  await API_SESSION_ENDPOINT.delete<Session>(`/${id}`);
+  await API_SESSION_ENDPOINT.delete<Session>(`/${id}/`);
 };
 
 export const getPublicScreen = async (
@@ -70,7 +70,7 @@ export const getPublicScreen = async (
 ): Promise<Task | null> => {
   try {
     const { data } = await API_SESSION_ENDPOINT.get<Task>(
-      `/${sessionId}/${EndpointType.PUBLIC_SCREEN}`
+      `/${sessionId}/${EndpointType.PUBLIC_SCREEN}/`
     );
     return data;
   } catch (error) {

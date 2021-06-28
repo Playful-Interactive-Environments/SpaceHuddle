@@ -24,15 +24,16 @@ export default class Sidebar extends Vue {
 
   mounted(): void {
     this.eventBus.off('showSnackbar');
-    this.eventBus.on(
-      'showSnackbar',
-      async (data: { type: SnackbarType; message: string }) => {
-        this.showSnackbar = true;
-        this.snackbarMessage = data.message;
-        this.snackbarType = data.type;
-        setTimeout(() => (this.showSnackbar = false), 2500);
-      }
-    );
+    this.eventBus.on('showSnackbar', async (data) => {
+      this.showSnackbar = true;
+      this.snackbarMessage = (
+        data as { type: SnackbarType; message: string }
+      ).message;
+      this.snackbarType = (
+        data as { type: SnackbarType; message: string }
+      ).type;
+      setTimeout(() => (this.showSnackbar = false), 2500);
+    });
   }
 }
 </script>
