@@ -16,6 +16,7 @@ import ModeratorVoting from '@/views/moderator/ModeratorVoting.vue';
 import NotFound from '@/views/shared/NotFound.vue';
 
 import { isAuthenticated } from '@/services/auth-service';
+import ClientBrainstorming from '@/views/client/ClientBrainstorming.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -121,10 +122,9 @@ const routes: Array<RouteRecordRaw> = [
     component: ClientJoin,
   },
   {
-    path: '/:sessionKey',
+    path: '/overview',
     name: 'client-overview',
     component: ClientOverview,
-    props: (route) => ({ sessionKey: route.params.sessionKey }),
     meta: {
       requiresAuth: true,
     },
@@ -132,6 +132,12 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/:catchAll(.*)',
     component: NotFound,
+  },
+  {
+    path: '/task/brainstorming/:taskId',
+    name: 'client-brainstorming',
+    component: ClientBrainstorming,
+    props: (route) => ({ taskId: route.params.taskId }),
   },
 ];
 

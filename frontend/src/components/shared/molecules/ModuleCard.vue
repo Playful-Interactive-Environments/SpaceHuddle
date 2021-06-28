@@ -1,9 +1,7 @@
 <template>
   <router-link
     :to="
-      isClient
-        ? `/${sessionId}/brainstorming/${task.id}`
-        : `/${type}/${sessionId}/${task.id}`
+      isClient ? `/task/${type}/${task.id}` : `/${type}/${sessionId}/${task.id}`
     "
   >
     <article
@@ -73,7 +71,7 @@ import TaskStates from '../../../types/TaskStates';
   },
 })
 export default class ModuleCard extends Vue {
-  @Prop() readonly sessionId!: string;
+  @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: ModuleType.BRAINSTORMING }) type!: ModuleType;
   @Prop({ default: null }) task!: Task;
   @Prop({ default: false }) isClient!: boolean;
@@ -165,6 +163,7 @@ export default class ModuleCard extends Vue {
     color: var(--color-darkblue);
     width: 65vw;
     margin-bottom: 1.5rem;
+    min-height: calc(100% - 18.4px);
 
     .module-card__planet {
       position: static;

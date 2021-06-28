@@ -55,6 +55,7 @@ export default class Toggle extends Vue {
   &__description {
     color: var(--color-darkblue-light);
     margin-top: 0.5rem;
+    word-break: break-word;
   }
 
   &__delete {
