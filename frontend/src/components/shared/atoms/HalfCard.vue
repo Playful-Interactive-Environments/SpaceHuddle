@@ -1,8 +1,7 @@
 <template>
   <div class="half-card fullwidth">
     <div class="half-card__content container">
-      <ModuleInfo :type="type" />
-      <slot>Half-Card</slot>
+      <slot />
     </div>
   </div>
 </template>
@@ -33,7 +32,7 @@ export default class HalfCard extends Vue {
   color: #1d2948;
   border-radius: 30px 30px 0 0;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem 0 1.5rem 0;
+  padding: 0.5rem 0 1.5rem 0;
   margin: 0;
 
   &__content {

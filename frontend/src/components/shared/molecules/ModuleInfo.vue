@@ -1,7 +1,9 @@
 <template>
-  <div class="module-info">
+  <div :class="{ 'module-info--centered': isClient }" class="module-info">
     <span class="module-info__type">{{ type }}</span>
-    <h3 class="module-info__title">{{ title }}</h3>
+    <h3 :class="{ 'heading--regular': isClient }" class="module-info__title">
+      {{ title }}
+    </h3>
     <p class="module-info__description">{{ description }}</p>
   </div>
 </template>
@@ -18,6 +20,7 @@ export default class ModuleInfo extends Vue {
   @Prop({ default: ModuleType.BRAINSTORMING }) type!: ModuleType;
   @Prop({ default: '' }) title!: string;
   @Prop({ default: '' }) description!: string;
+  @Prop({ default: false }) isClient!: boolean;
 }
 </script>
 
@@ -25,9 +28,9 @@ export default class ModuleInfo extends Vue {
 .module-info {
   flex-grow: 1;
   max-width: 60%;
+  font-size: var(--font-size-small);
 
   &__type {
-    font-size: var(--font-size-small);
     text-transform: uppercase;
     letter-spacing: 1px;
     color: var(--module-color);
@@ -39,12 +42,23 @@ export default class ModuleInfo extends Vue {
   }
 
   &__description {
-    font-size: var(--font-size-small);
     display: -webkit-box;
     line-clamp: 1;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  &--centered {
+    text-align: center;
+    max-width: 100%;
+    font-size: var(--font-size-default);
+    margin-bottom: 1em;
+    line-height: 1.75em;
+
+    span {
+      line-height: 3em;
+    }
   }
 }
 </style>

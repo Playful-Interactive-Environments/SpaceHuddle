@@ -1,5 +1,5 @@
 <template>
-  <div class="brainstorming container--fullheight container">
+  <div class="brainstorming container--fullheight container" ref="item">
     <MenuBar />
     <div class="grid-container">
       <div class="grid-item">
@@ -43,27 +43,41 @@
         <Timer class="brainstorming__timer"></Timer>
       </div>
     </div>
-    <HalfCard :type="topic.type">
+    <HalfCard :type="type">
       <slot>
-        <h1 class="heading--regular">Think of a name for our app</h1>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur et verotateum adipiscing elit.
-        </p>
+        <ModuleInfo
+          :type="type"
+          title="Think of a Name"
+          description="this is a fancy description"
+          :is-client="true"
+        />
+
         <textarea
+          id="keywords"
           v-if="showSecondInput"
           v-model="keywords"
           class="textarea textarea--fullwidth"
           placeholder="Your idea is very long, provide some keywords"
         ></textarea>
         <textarea
+          id="description"
           class="textarea textarea--fullwidth"
           placeholder="Type your idea here ..."
           ref="ideaTextfield"
           v-model="description"
-          @input="checkCharacterCount($event.target.value)"
+          @input="checkCharacterCount()"
+          @blur="context.$v.description.$touch()"
         ></textarea>
+        <FormError
+          v-if="context.$v.description.$error"
+          :errors="context.$v.description.$errors"
+          :isSmall="true"
+        />
         <div class="brainstorming--bottom">
-          <button class="btn btn--mint btn--fullwidth" @click="submitIdea">
+          <button
+            class="btn btn--mint btn--fullwidth"
+            @click.prevent="submitIdea"
+          >
             Submit idea
           </button>
           <button class="btn btn--icon btn--fullwidth">
@@ -86,12 +100,16 @@ import { Options, setup, Vue } from 'vue-class-component';
 import MenuBar from '@/components/client/molecules/Menubar.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import HalfCard from '@/components/shared/atoms/HalfCard.vue';
+import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import Card from '@/components/shared/atoms/Card.vue';
 import ModuleType from '@/types/ModuleType';
 import useVuelidate from '@vuelidate/core';
-import * as taskService from '@/services/moderator/task-service';
+import * as taskService from '@/services/task-service';
 import { Prop } from 'vue-property-decorator';
+import { setModuleStyles } from '@/utils/moduleStyles';
+import { getTaskById } from '@/services/task-service';
 import { maxLength, required } from '@vuelidate/validators';
+import FormError from '@/components/shared/atoms/FormError.vue';
 
 @Options({
   components: {
@@ -99,11 +117,23 @@ import { maxLength, required } from '@vuelidate/validators';
     Timer,
     HalfCard,
     Card,
+    ModuleInfo,
+    FormError,
+  },
+  validations: {
+    keyword: {
+      max: maxLength(15),
+    },
+    description: {
+      required,
+      max: maxLength(255),
+    },
   },
 })
 export default class ClientBrainstorming extends Vue {
   @Prop({ required: true }) taskId!: string;
-  public topic = { type: ModuleType.BRAINSTORMING };
+
+  public type = ModuleType.BRAINSTORMING;
   public showSecondInput = false;
   index = 0;
   public planets = [
@@ -123,14 +153,15 @@ export default class ClientBrainstorming extends Vue {
     };
   });
 
+  mounted(): void {
+    setModuleStyles(this.$refs.item as HTMLElement, this.type);
+  }
+
+  updated(): void {
+    setModuleStyles(this.$refs.item as HTMLElement, this.type);
+  }
+
   async createIdea(): Promise<void> {
-    console.log('createIdea');
-    console.log(
-      'DESCRIPTION: ',
-      this.description,
-      ' & KEYWORDS: ',
-      this.keywords
-    );
     await this.context.$v.$validate();
     if (this.context.$v.$error) return;
 
@@ -140,25 +171,25 @@ export default class ClientBrainstorming extends Vue {
       image: '',
       link: '',
     });
-    this.$emit('update:showModal', false);
-    this.$emit('moduleCreated');
+
+    this.description = '';
+    this.keywords = '';
   }
 
-  checkCharacterCount(value: string): void {
-    if (value.length > 60) {
+  checkCharacterCount(): void {
+    if (this.description.length > 60) {
       this.showSecondInput = true;
+    } else {
+      this.showSecondInput = false;
     }
-    console.log('text entered: ', value.length, ' - ', this.showSecondInput);
   }
 
   submitIdea(): void {
     console.log('submit');
-    console.log(this.index);
     this.createIdea();
-    setTimeout(this.setNewPlanet, 2000);
+    setTimeout(this.setNewPlanet, 500);
   }
   setNewPlanet(): void {
-    console.log('new planet');
     if (this.index < this.planets.length - 1) {
       this.index++;
     } else {
@@ -195,7 +226,9 @@ export default class ClientBrainstorming extends Vue {
     color: white;
     font-size: 1.8rem;
     padding: 0;
+    background-color: transparent;
   }
+
   &--uppercase {
     text-transform: uppercase;
     color: white;
