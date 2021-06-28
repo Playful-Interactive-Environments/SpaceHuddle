@@ -27,7 +27,6 @@ export default class ModuleInfo extends Vue {
 <style lang="scss" scoped>
 .module-info {
   flex-grow: 1;
-  max-width: 60%;
   font-size: var(--font-size-small);
 
   &__type {

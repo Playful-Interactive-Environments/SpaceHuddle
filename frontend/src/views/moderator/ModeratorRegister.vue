@@ -134,7 +134,7 @@ export default class ModeratorRegister extends Vue {
   email = '';
   password = '';
   passwordRepeat = '';
-  passwordRepeatMsg = 'Password repetition does not match.';
+  readonly passwordRepeatMsg = 'Password repetition does not match.';
 
   context = setup(() => {
     return {

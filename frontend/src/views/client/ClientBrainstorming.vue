@@ -3,35 +3,18 @@
     <MenuBar />
     <div class="grid-container">
       <div class="grid-item">
-        <div class="brainstorming__planetDiv">
-          <transition name="fade">
+        <div
+          class="brainstorming__planetDiv"
+          :class="{ 'brainstorming__planetDiv--animation': scalePlanet }"
+        >
+          <transition
+            name="fade"
+            v-for="(planet, index) in planets"
+            :key="index"
+          >
             <img
-              v-if="index === 0"
-              :src="planets[0]"
-              alt="planet"
-              class="brainstorming__planet"
-            />
-          </transition>
-          <transition name="fade">
-            <img
-              v-if="index === 1"
-              :src="planets[1]"
-              alt="planet"
-              class="brainstorming__planet"
-            />
-          </transition>
-          <transition name="fade">
-            <img
-              v-if="index === 2"
-              :src="planets[2]"
-              alt="planet"
-              class="brainstorming__planet"
-            />
-          </transition>
-          <transition name="fade">
-            <img
-              v-if="index === 3"
-              :src="planets[3]"
+              v-if="activepPlanetIndex === index"
+              :src="planets[index]"
               alt="planet"
               class="brainstorming__planet"
             />
@@ -52,18 +35,32 @@
           :is-client="true"
         />
 
-        <textarea
+        <input
           id="keywords"
           v-if="showSecondInput"
           v-model="keywords"
           class="textarea textarea--fullwidth"
-          placeholder="Your idea is very long, provide some keywords"
-        ></textarea>
+          placeholder="Please provide some keywords"
+        />
+        <FormError
+          v-if="
+            context.$v.keywords.$error ||
+            (context.$v.keywords.$dirty && keywordsEmpty)
+          "
+          :errors="
+            context.$v.keywords.$error
+              ? context.$v.keywords.$errors
+              : { keywordsEmptyMsg }
+          "
+          :isSmall="true"
+        />
         <textarea
           id="description"
           class="textarea textarea--fullwidth"
           placeholder="Type your idea here ..."
           ref="ideaTextfield"
+          rows="5"
+          contenteditable
           v-model="description"
           @input="checkCharacterCount()"
           @blur="context.$v.description.$touch()"
@@ -80,7 +77,7 @@
           >
             Submit idea
           </button>
-          <button class="btn btn--icon btn--fullwidth">
+          <button class="btn btn--icon btn--fullwidth" type="button">
             <img
               src="@/assets/icons/rocket.svg"
               alt="rocket-icon"
@@ -104,12 +101,12 @@ import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import Card from '@/components/shared/atoms/Card.vue';
 import ModuleType from '@/types/ModuleType';
 import useVuelidate from '@vuelidate/core';
-import * as taskService from '@/services/task-service';
 import { Prop } from 'vue-property-decorator';
 import { setModuleStyles } from '@/utils/moduleStyles';
 import { getTaskById } from '@/services/task-service';
 import { maxLength, required } from '@vuelidate/validators';
 import FormError from '@/components/shared/atoms/FormError.vue';
+import * as taskService from '@/services/task-service';
 
 @Options({
   components: {
@@ -121,8 +118,8 @@ import FormError from '@/components/shared/atoms/FormError.vue';
     FormError,
   },
   validations: {
-    keyword: {
-      max: maxLength(15),
+    keywords: {
+      max: maxLength(36),
     },
     description: {
       required,
@@ -133,19 +130,21 @@ import FormError from '@/components/shared/atoms/FormError.vue';
 export default class ClientBrainstorming extends Vue {
   @Prop({ required: true }) taskId!: string;
 
-  public type = ModuleType.BRAINSTORMING;
-  public showSecondInput = false;
-  index = 0;
-  public planets = [
-    require(`@/assets/illustrations/planets/brainstorming01.png`),
-    require(`@/assets/illustrations/planets/brainstorming02.png`),
-    require(`@/assets/illustrations/planets/brainstorming03.png`),
-    require(`@/assets/illustrations/planets/brainstorming04.png`),
+  type = ModuleType.BRAINSTORMING;
+  activepPlanetIndex = 0;
+  planets = [
+    require('../../assets/illustrations/planets/brainstorming01.png'),
+    require('../../assets/illustrations/planets/brainstorming02.png'),
+    require('../../assets/illustrations/planets/brainstorming03.png'),
+    require('../../assets/illustrations/planets/brainstorming04.png'),
   ];
-  public currentPlanet = this.planets[this.index];
-  public myVar = null;
+  currentPlanet = this.planets[this.activepPlanetIndex];
+  myVar = null;
   description = '';
   keywords = '';
+  readonly keywordsEmptyMsg =
+    'Your idea is very long, please provide some keywords.';
+  scalePlanet = false;
 
   context = setup(() => {
     return {
@@ -161,9 +160,13 @@ export default class ClientBrainstorming extends Vue {
     setModuleStyles(this.$refs.item as HTMLElement, this.type);
   }
 
-  async createIdea(): Promise<void> {
+  get keywordsEmpty() {
+    return this.showSecondInput && this.keywords.length <= 0;
+  }
+
+  async submitIdea(): Promise<void> {
     await this.context.$v.$validate();
-    if (this.context.$v.$error) return;
+    if (this.context.$v.$error || this.keywordsEmpty) return;
 
     await taskService.postIdea(this.taskId, {
       description: this.description,
@@ -174,32 +177,43 @@ export default class ClientBrainstorming extends Vue {
 
     this.description = '';
     this.keywords = '';
-  }
-
-  checkCharacterCount(): void {
-    if (this.description.length > 60) {
-      this.showSecondInput = true;
-    } else {
-      this.showSecondInput = false;
-    }
-  }
-
-  submitIdea(): void {
-    console.log('submit');
-    this.createIdea();
+    this.$nextTick(() => {
+      this.context.$v.$reset();
+    });
     setTimeout(this.setNewPlanet, 500);
   }
+
+  get showSecondInput(): boolean {
+    return this.description.length > 60 ? true : false;
+  }
+
   setNewPlanet(): void {
-    if (this.index < this.planets.length - 1) {
-      this.index++;
+    if (this.activepPlanetIndex < this.planets.length - 1) {
+      this.activepPlanetIndex++;
     } else {
-      this.index = 0;
+      console.log('trigger animation');
+      this.scalePlanet = true;
+      setTimeout(() => {
+        this.scalePlanet = false;
+      }, 1000);
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+@keyframes planetAnimation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .brainstorming {
   color: #fff;
   background: var(--color-darkblue);
@@ -213,6 +227,12 @@ export default class ClientBrainstorming extends Vue {
     left: 1rem;
     width: 11rem;
     height: 11rem;
+    transition: transform 0.2;
+
+    &--animation {
+      animation-name: planetAnimation;
+      animation-duration: 0.6s;
+    }
   }
 
   &__planet {

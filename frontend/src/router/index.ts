@@ -122,10 +122,9 @@ const routes: Array<RouteRecordRaw> = [
     component: ClientJoin,
   },
   {
-    path: '/:sessionKey',
+    path: '/overview',
     name: 'client-overview',
     component: ClientOverview,
-    props: (route) => ({ sessionKey: route.params.sessionKey }),
     meta: {
       requiresAuth: true,
     },
@@ -135,7 +134,7 @@ const routes: Array<RouteRecordRaw> = [
     component: NotFound,
   },
   {
-    path: '/:sessionKey/brainstorming/:taskId',
+    path: '/task/brainstorming/:taskId',
     name: 'client-brainstorming',
     component: ClientBrainstorming,
     props: (route) => ({ taskId: route.params.taskId }),
