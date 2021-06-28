@@ -454,16 +454,16 @@ ALTER TABLE `voting`
 CREATE VIEW session_permission (user_id, user_type, user_state, session_id, role) AS
 SELECT
     user_id,
-    'USER' COLLATE utf8mb4_unicode_ci AS user_type,
-    'ACTIVE' COLLATE utf8mb4_unicode_ci AS user_state,
+    'USER' AS user_type,
+    'ACTIVE' AS user_state,
     session_id,
     role
 FROM session_role
 UNION
 SELECT
     id as user_id,
-    'PARTICIPANT' COLLATE utf8mb4_unicode_ci AS user_type,
-    state COLLATE utf8mb4_unicode_ci AS user_state,
+    'PARTICIPANT' AS user_type,
+    state AS user_state,
     session_id,
     CASE state
         WHEN 'ACTIVE' THEN 'PARTICIPANT'
