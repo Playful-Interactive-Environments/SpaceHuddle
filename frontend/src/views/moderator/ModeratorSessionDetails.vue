@@ -64,7 +64,6 @@ import { Session } from '@/services/session-service';
 import { Topic } from '@/services/topic-service';
 import { EventType } from '@/types/EventType';
 
-export const EVENT_CHANGE_PUBLIC_SCREEN = 'changePublicScreen';
 @Options({
   components: {
     AddItem,
@@ -98,7 +97,7 @@ export default class ModeratorSessionDetails extends Vue {
         this.sessionId,
         this.publicScreenTaskId
       );
-      this.eventBus.emit('showSnackbar', {
+      this.eventBus.emit(EventType.SHOW_SNACKBAR, {
         type: SnackbarType.SUCCESS,
         message: 'Successfully updated public screen.',
       });

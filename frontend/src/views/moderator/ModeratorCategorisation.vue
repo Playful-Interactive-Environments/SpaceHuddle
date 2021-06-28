@@ -31,7 +31,7 @@ import NavigationWithBack from '@/components/moderator/organisms/NavigationWithB
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import * as taskService from '@/services/task-service';
 import * as sessionService from '@/services/session-service';
-import { EVENT_CHANGE_PUBLIC_SCREEN } from '@/views/moderator/ModeratorSessionDetails.vue';
+import { EventType } from '@/types/EventType';
 
 @Options({
   components: {
@@ -61,7 +61,7 @@ export default class ModeratorCategorisation extends Vue {
   }
 
   changePublicScreen(): void {
-    this.eventBus.emit(EVENT_CHANGE_PUBLIC_SCREEN, this.taskId);
+    this.eventBus.emit(EventType.CHANGE_PUBLIC_SCREEN, this.taskId);
   }
 }
 </script>
