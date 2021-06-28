@@ -32,7 +32,6 @@ export const connect = async (
       `/${EndpointType.CONNECT}/`,
       {
         sessionKey,
-        ip: 'asdfs', // TODO: send client ip
       }
     );
     return data;
