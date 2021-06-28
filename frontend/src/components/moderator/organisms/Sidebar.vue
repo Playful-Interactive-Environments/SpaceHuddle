@@ -43,7 +43,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { Session } from '@/services/session-service';
-import Logo from '@/components/moderator/atoms/Logo.vue';
+import Logo from '@/components/shared/atoms/Logo.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import ModuleType from '../../../types/ModuleType';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';

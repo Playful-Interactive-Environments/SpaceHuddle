@@ -133,7 +133,7 @@ export default class ModalModuleCreate extends Vue {
       name: this.title,
       description: this.description,
       parameter: {},
-      order: 0,
+      order: 10,
     });
     this.$emit('update:showModal', false);
     this.$emit('moduleCreated');

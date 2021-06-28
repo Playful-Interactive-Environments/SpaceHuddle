@@ -1,5 +1,6 @@
 <template>
-  <div class="container container--fullheight home">
+  <Header :hasNavigation="false" />
+  <div class="container container--spaced container--fullheight-header home">
     <section class="home__content">
       <h1 class="heading heading--big">Brainstorm to infinity and beyond!</h1>
       <p class="home__text">
@@ -25,11 +26,11 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
+import Header from '@/components/moderator/organisms/Header.vue';
 
 @Options({
   components: {
-    HelloWorld,
+    Header,
   },
 })
 export default class Home extends Vue {}

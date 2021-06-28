@@ -23,15 +23,15 @@
       </div>
       <div class="grid-item brainstorming--center">
         <div class="brainstorming--uppercase">Time Left</div>
-        <Timer class="brainstorming__timer"></Timer>
+        <Timer class="brainstorming__timer" :isActive="true"></Timer>
       </div>
     </div>
     <HalfCard :type="type">
       <slot>
         <ModuleInfo
           :type="type"
-          title="Think of a Name"
-          description="this is a fancy description"
+          title="What should should be the name of our application?"
+          description="Add you ideas about how we should name our brainstorming app. You are not limited in your creativity or if you choose one or several words."
           :is-client="true"
         />
 
@@ -59,7 +59,7 @@
           class="textarea textarea--fullwidth"
           placeholder="Type your idea here ..."
           ref="ideaTextfield"
-          rows="5"
+          rows="4"
           contenteditable
           v-model="description"
           @input="checkCharacterCount()"
