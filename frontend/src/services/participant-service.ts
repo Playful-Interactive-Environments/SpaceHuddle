@@ -4,6 +4,9 @@ import { apiEndpoint } from '@/services/api';
 import EndpointType from '@/types/Endpoint';
 
 const API_PARTICIPANT_ENDPOINT = apiEndpoint(EndpointType.PARTICIPANT);
+const API_PARTICIPANT_CONNECT_ENDPOINT = apiEndpoint(
+  EndpointType.PARTICIPANT_CONNECT
+);
 
 export enum ConnectState {
   ACTIVE = 'ACTIVE',
@@ -28,22 +31,25 @@ export const connect = async (
   sessionKey: string
 ): Promise<Participant | Partial<Participant>> => {
   try {
-    const { data } = await API_PARTICIPANT_ENDPOINT.post<Participant>(
-      `/${EndpointType.CONNECT}/`,
+    console.log('try out connection');
+    const { data } = await API_PARTICIPANT_CONNECT_ENDPOINT.post<Participant>(
+      `/`,
       {
         sessionKey,
       }
     );
+    console.log(data);
     return data;
   } catch (error) {
+    console.log('error', error);
     return (error as AxiosError).response?.data;
   }
 };
 
 export const reconnect = async (browserKey: string): Promise<Participant> => {
   try {
-    const { data } = await API_PARTICIPANT_ENDPOINT.get<Participant>(
-      `/${EndpointType.CONNECT}/${browserKey}/`
+    const { data } = await API_PARTICIPANT_CONNECT_ENDPOINT.get<Participant>(
+      `/${browserKey}/`
     );
     return data;
   } catch (error) {

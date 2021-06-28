@@ -14,10 +14,7 @@ const endpointsWithAuthorization = [
 ];
 
 const endpointRequiresAuthorization = (endpoint: EndpointType) => {
-  return (
-    endpointsWithAuthorization.includes(endpoint) &&
-    !endpointsWithAuthorization.includes(EndpointType.CONNECT)
-  );
+  return endpointsWithAuthorization.includes(endpoint);
 };
 
 const interceptorAuthHeader = (

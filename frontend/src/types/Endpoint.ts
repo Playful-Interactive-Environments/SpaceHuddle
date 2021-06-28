@@ -7,6 +7,7 @@ enum EndpointType {
   LOGIN = 'login',
   OWN_USER_ROLE = 'own_user_role',
   PARTICIPANT = 'participant',
+  PARTICIPANT_CONNECT = 'participant/connect',
   PARTICIPANT_TASKS = 'participant_tasks',
   PUBLIC_SCREEN = 'public_screen',
   REGISTER = 'register',
