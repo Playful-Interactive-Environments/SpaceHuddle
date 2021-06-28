@@ -1,6 +1,17 @@
 <template>
   <div class="public-screen">
-    <main v-if="task" class="container container--spaced" ref="container">
+    <Header :white="true" />
+    <main
+      v-if="!task"
+      class="
+        container container--fullheight container--centered
+        public-screen__error
+      "
+    >
+      <h2>Sorry, nothing here.</h2>
+      <p>Make sure that a module is activated for the public view.</p>
+    </main>
+    <main v-else class="container container--spaced" ref="container">
       <section class="public-screen__overview">
         <div class="public-screen__overview-left">
           <span class="public-screen__overview-type">
@@ -24,8 +35,11 @@
           />
         </div>
       </section>
-      <section v-if="showFallback" class="container container--centered">
-        Sorry, nothing to see yet.
+      <section
+        v-if="ideas.length === 0"
+        class="container container--centered public-screen__error"
+      >
+        <p>No ideas yet - stay tuned.</p>
       </section>
       <section v-else class="public-screen__content">
         <IdeaCard
@@ -43,6 +57,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 
+import Header from '@/components/moderator/organisms/Header.vue';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 
@@ -56,6 +71,7 @@ import { setModuleStyles } from '@/utils/moduleStyles';
 
 @Options({
   components: {
+    Header,
     IdeaCard,
     Timer,
   },
@@ -67,12 +83,16 @@ export default class PublicScreen extends Vue {
   ideas: Idea[] = [];
   showFallback = false;
 
+  ideaInterval!: number;
+  readonly interval = 3000;
+
   ModuleType = ModuleType;
 
   async mounted(): Promise<void> {
     this.task = await sessionService.getPublicScreen(this.sessionId);
+    console.log(this.task);
     if (this.task) {
-      this.ideas = await taskService.getIdeasForTask(this.task.id);
+      await this.getIdeas();
       setModuleStyles(
         this.$refs.container as HTMLElement,
         ModuleType[this.task.taskType]
@@ -80,6 +100,19 @@ export default class PublicScreen extends Vue {
     } else {
       this.showFallback = true;
     }
+    this.startIdeaInterval();
+  }
+
+  async getIdeas(): Promise<void> {
+    if (this.task) this.ideas = await taskService.getIdeasForTask(this.task.id);
+  }
+
+  startIdeaInterval(): void {
+    this.ideaInterval = setInterval(this.getIdeas, this.interval);
+  }
+
+  destroyed(): void {
+    clearInterval(this.ideaInterval);
   }
 }
 </script>
@@ -93,10 +126,9 @@ export default class PublicScreen extends Vue {
     display: flex;
     justify-content: space-between;
     color: white;
-    margin-top: 1rem;
 
     &-planet {
-      height: 12rem;
+      height: 10rem;
       margin-left: 2rem;
     }
 
@@ -120,9 +152,13 @@ export default class PublicScreen extends Vue {
   }
 
   &__content {
-    margin-top: 3em;
-    column-width: 22vw;
+    margin-top: 1em;
+    column-width: 20vw;
     column-gap: 1rem;
+  }
+
+  &__error {
+    color: white;
   }
 }
 </style>

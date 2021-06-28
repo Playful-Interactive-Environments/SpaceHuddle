@@ -1,7 +1,7 @@
 <template>
   <header class="header">
     <Logo class="header__logo" />
-    <Navigation />
+    <Navigation :white="white" />
   </header>
 </template>
 
@@ -19,6 +19,7 @@ import Navigation from '@/components/moderator/molecules/Navigation.vue';
 })
 export default class Header extends Vue {
   @Prop({ default: true }) hasLogo!: boolean;
+  @Prop({ default: false }) white!: boolean;
 }
 </script>
 

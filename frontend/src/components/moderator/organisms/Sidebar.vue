@@ -72,6 +72,8 @@ export default class Sidebar extends Vue {
 </script>
 
 <style lang="scss" scoped>
+@import '~@/assets/styles/icons.scss';
+
 .sidebar {
   background-color: var(--color-darkblue);
   position: fixed;
@@ -104,12 +106,11 @@ export default class Sidebar extends Vue {
   }
 
   &__icon {
-    width: 20px;
-    height: auto;
     cursor: pointer;
-    mask-image: url('../../../assets/icons/settings.svg');
-    mask-repeat: no-repeat;
-    background-color: var(--color-darkblue-light);
+    @include icon-m(
+      '~@/assets/icons/settings.svg',
+      var(--color-darkblue-light)
+    );
     transition: background-color 0.2s, opacity 0.5s;
 
     &:hover {

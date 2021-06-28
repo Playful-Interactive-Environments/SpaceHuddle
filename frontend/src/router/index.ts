@@ -39,6 +39,9 @@ const routes: Array<RouteRecordRaw> = [
     path: '/profile',
     name: 'moderator-profile',
     component: ModeratorProfile,
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
     path: '/sessions',
@@ -144,6 +147,9 @@ const routes: Array<RouteRecordRaw> = [
     path: '/public-screen/:sessionId',
     name: 'public-screen',
     component: PublicScreen,
+    meta: {
+      requiresAuth: true,
+    },
     props: (route) => ({
       sessionId: route.params.sessionId,
     }),

@@ -37,6 +37,8 @@ export default class IdeaCard extends Vue {
 </script>
 
 <style lang="scss" scoped>
+@import '~@/assets/styles/icons.scss';
+
 .idea-card {
   -webkit-column-break-inside: avoid;
   display: flex;
@@ -59,17 +61,10 @@ export default class IdeaCard extends Vue {
   }
 
   &__delete {
-    height: 24px;
-    width: 22px;
     min-width: 18px;
     margin-left: 0.5rem;
     cursor: pointer;
-    mask-image: url('../../../assets/icons/trash.svg');
-    mask-repeat: no-repeat;
-    mask-position: center;
-    mask-size: contain;
-    background-color: var(--color-darkblue);
-    transition: background-color 0.2s;
+    @include icon-l('~@/assets/icons/trash.svg', var(--color-darkblue));
 
     &:hover {
       background-color: var(--color-red);
