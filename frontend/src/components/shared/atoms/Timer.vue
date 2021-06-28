@@ -15,9 +15,9 @@ export default class Timer extends Vue {
   timerInterval!: number;
   readonly interval = 1000;
 
-  @Watch('isActive')
-  onIsActiveChanged(val: boolean) {
-    if (val === true) {
+  @Watch('isActive', { immediate: true })
+  onIsActiveChanged(val: boolean): void {
+    if (val) {
       this.startTimer();
     } else {
       clearInterval(this.timerInterval);
@@ -28,12 +28,6 @@ export default class Timer extends Vue {
     let minutes = Math.floor(this.timeLeft / 60);
     let seconds = this.timeLeft - minutes * 60;
     return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-  }
-
-  mounted() {
-    if (this.isActive) {
-      this.startTimer();
-    }
   }
 
   startTimer(): void {

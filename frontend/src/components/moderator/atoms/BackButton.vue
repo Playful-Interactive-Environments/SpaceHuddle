@@ -1,7 +1,7 @@
 <template>
   <router-link :to="route">
     <div class="back">
-      <div class="back__button"></div>
+      <div class="back__icon"></div>
       <div class="back__text">Back</div>
     </div>
   </router-link>
@@ -24,7 +24,7 @@ export default class BackButton extends Vue {
   display: flex;
   align-items: center;
 
-  &__button {
+  &__icon {
     mask-image: url('../../../assets/icons/arrow.svg');
     mask-repeat: no-repeat;
     mask-position: center;

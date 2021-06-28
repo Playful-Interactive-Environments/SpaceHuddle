@@ -7,6 +7,7 @@
         :description="task.description"
         :moduleType="ModuleType[task.taskType]"
       />
+      <NavigationWithBack :back-route="'/session/' + sessionId" />
       <div class="brainstorming__header">
         <BackButton :route="'/session/' + sessionId" />
         <Navigation />
@@ -27,20 +28,19 @@ import { Idea } from '@/services/idea-service';
 import { setModuleStyles } from '../../utils/moduleStyles';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import ModuleType from '../../types/ModuleType';
-import Navigation from '@/components/moderator/molecules/Navigation.vue';
+import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
-import BackButton from '@/components/moderator/atoms/BackButton.vue';
 import * as taskService from '@/services/task-service';
 
 @Options({
   components: {
     IdeaCard,
-    Navigation,
+    NavigationWithBack,
     Sidebar,
-    BackButton,
   },
 })
 export default class ModeratorVoting extends Vue {
+  @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: '' }) readonly taskId!: string;
 
   task: Task | null = null;
@@ -63,14 +63,6 @@ export default class ModeratorVoting extends Vue {
   background-color: var(--color-background-gray);
   margin-left: var(--sidebar-width);
   min-height: 100vh;
-
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: var(--header-height);
-    padding-left: 2rem;
-  }
 
   &__content {
     padding: 2rem;
