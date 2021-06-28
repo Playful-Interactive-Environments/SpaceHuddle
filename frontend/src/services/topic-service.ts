@@ -15,7 +15,7 @@ const API_TOPIC_ENDPOINT = apiEndpoint(EndpointType.TOPIC);
 
 export const getTaskList = async (topicId: string): Promise<Task[]> => {
   const { data } = await API_TOPIC_ENDPOINT.get<Task[]>(
-    `/${topicId}/${EndpointType.TASKS}`
+    `/${topicId}/${EndpointType.TASKS}/`
   );
   return data;
 };
@@ -23,7 +23,7 @@ export const getTaskList = async (topicId: string): Promise<Task[]> => {
 export const getParticipantTasks = async (topicId: string): Promise<Task[]> => {
   try {
     const { data } = await API_TOPIC_ENDPOINT.get<Task[]>(
-      `/${topicId}/${EndpointType.PARTICIPANT_TASKS}`
+      `/${topicId}/${EndpointType.PARTICIPANT_TASKS}/`
     );
     return data;
   } catch (error) {
@@ -36,7 +36,7 @@ export const postTask = async (
   data: Partial<Task>
 ): Promise<Task> => {
   const { data: responseData } = await API_TOPIC_ENDPOINT.post<Task>(
-    `/${taskId}/${EndpointType.TASK}`,
+    `/${taskId}/${EndpointType.TASK}/`,
     data
   );
   return responseData;

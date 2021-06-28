@@ -14,5 +14,5 @@ export interface Idea {
 const API_IDEA_ENDPOINT = apiEndpoint(EndpointType.IDEA);
 
 export const deleteIdea = async (id: string): Promise<void> => {
-  await API_IDEA_ENDPOINT.delete<any>(`/${id}`);
+  await API_IDEA_ENDPOINT.delete<any>(`/${id}/`);
 };
