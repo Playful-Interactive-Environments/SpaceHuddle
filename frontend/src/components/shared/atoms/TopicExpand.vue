@@ -67,6 +67,8 @@ export default class Timer extends Vue {
 </script>
 
 <style lang="scss" scoped>
+@import '~@/assets/styles/icons.scss';
+
 .expand {
   &__title {
     display: flex;
@@ -81,12 +83,7 @@ export default class Timer extends Vue {
   }
 
   &__arrow {
-    mask-image: url('../../../assets/icons/arrow.svg');
-    mask-repeat: no-repeat;
-    mask-position: center;
-    background-color: var(--color-darkblue);
-    width: 1.2rem;
-    height: 1.2rem;
+    @include icon-m('~@/assets/icons/arrow.svg');
     margin-right: 0.2rem;
     transition: transform 0.4s;
     transform-origin: center;

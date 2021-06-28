@@ -1,7 +1,9 @@
 <template>
   <div v-if="session" class="detail">
     <Sidebar
-      :session="session"
+      :is-session="true"
+      :session-id="session.id"
+      :session-connection-key="session.connectionKey"
       :title="session.title"
       :pretitle="formatDate(session.creationDate)"
       :description="session.description"
@@ -59,7 +61,8 @@ import SnackbarType from '@/types/SnackbarType';
 import * as sessionService from '@/services/session-service';
 import * as topicService from '@/services/topic-service';
 import { Session } from '@/services/session-service';
-import { Topic } from '../../services/topic-service';
+import { Topic } from '@/services/topic-service';
+import { EventType } from '@/types/EventType';
 
 @Options({
   components: {
@@ -86,6 +89,19 @@ export default class ModeratorSessionDetails extends Vue {
 
   async mounted(): Promise<void> {
     await this.getTopics();
+    this.eventBus.off(EventType.CHANGE_PUBLIC_SCREEN);
+    this.eventBus.on(EventType.CHANGE_PUBLIC_SCREEN, async (id) => {
+      this.publicScreenTaskId = id as string;
+      // TODO: change endpoint to toggle public screen
+      let data = await sessionService.displayOnPublicScreen(
+        this.sessionId,
+        this.publicScreenTaskId
+      );
+      this.eventBus.emit(EventType.SHOW_SNACKBAR, {
+        type: SnackbarType.SUCCESS,
+        message: 'Successfully updated public screen.',
+      });
+    });
   }
 
   async getTopics(): Promise<void> {
@@ -95,23 +111,6 @@ export default class ModeratorSessionDetails extends Vue {
       topic.tasks = await topicService.getTaskList(topic.id);
     });
     await this.getPublicScreen();
-
-    this.eventBus.on('changePublicScreen', async (id) => {
-      this.publicScreenTaskId = id as string;
-      // TODO: change endpoint to toggle public screen
-      let data = await sessionService.displayOnPublicScreen(
-        this.sessionId,
-        this.publicScreenTaskId
-      );
-      this.eventBus.emit('showSnackbar', {
-        type: SnackbarType.SUCCESS,
-        message: 'Successfully updated public screen.',
-      });
-    });
-  }
-
-  addModule(): void {
-    console.log('add module');
   }
 
   async getPublicScreen(): Promise<void> {

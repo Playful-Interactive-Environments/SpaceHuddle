@@ -8,7 +8,7 @@
         {{ idea.description }}
       </div>
     </div>
-    <div class="idea-card__delete" @click="deleteIdea"></div>
+    <div v-if="isDeletable" class="idea-card__delete" @click="deleteIdea"></div>
   </div>
 </template>
 
@@ -16,14 +16,14 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import * as ideaService from '@/services/idea-service';
-import * as taskService from '@/services/task-service';
 import { Idea } from '@/services/idea-service';
 
 @Options({
   components: {},
 })
-export default class Toggle extends Vue {
+export default class IdeaCard extends Vue {
   @Prop({ default: null }) idea!: Idea;
+  @Prop({ default: true }) isDeletable!: boolean;
 
   get hasKeywords(): boolean {
     return !!(this.idea.keywords && this.idea.keywords.length > 0);
@@ -37,6 +37,8 @@ export default class Toggle extends Vue {
 </script>
 
 <style lang="scss" scoped>
+@import '~@/assets/styles/icons.scss';
+
 .idea-card {
   -webkit-column-break-inside: avoid;
   display: flex;
@@ -59,17 +61,10 @@ export default class Toggle extends Vue {
   }
 
   &__delete {
-    height: 24px;
-    width: 22px;
     min-width: 18px;
     margin-left: 0.5rem;
     cursor: pointer;
-    mask-image: url('../../../assets/icons/trash.svg');
-    mask-repeat: no-repeat;
-    mask-position: center;
-    mask-size: contain;
-    background-color: var(--color-darkblue);
-    transition: background-color 0.2s;
+    @include icon-l('~@/assets/icons/trash.svg', var(--color-darkblue));
 
     &:hover {
       background-color: var(--color-red);

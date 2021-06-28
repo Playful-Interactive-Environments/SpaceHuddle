@@ -14,6 +14,7 @@ import ModeratorCategorisation from '@/views/moderator/ModeratorCategorisation.v
 import ModeratorProfile from '@/views/moderator/ModeratorProfile.vue';
 import ModeratorVoting from '@/views/moderator/ModeratorVoting.vue';
 import NotFound from '@/views/shared/NotFound.vue';
+import PublicScreen from '@/views/PublicScreen.vue';
 
 import { isAuthenticated } from '@/services/auth-service';
 import ClientBrainstorming from '@/views/client/ClientBrainstorming.vue';
@@ -38,6 +39,9 @@ const routes: Array<RouteRecordRaw> = [
     path: '/profile',
     name: 'moderator-profile',
     component: ModeratorProfile,
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
     path: '/sessions',
@@ -138,6 +142,17 @@ const routes: Array<RouteRecordRaw> = [
     name: 'client-brainstorming',
     component: ClientBrainstorming,
     props: (route) => ({ taskId: route.params.taskId }),
+  },
+  {
+    path: '/public-screen/:sessionId',
+    name: 'public-screen',
+    component: PublicScreen,
+    meta: {
+      requiresAuth: true,
+    },
+    props: (route) => ({
+      sessionId: route.params.sessionId,
+    }),
   },
 ];
 

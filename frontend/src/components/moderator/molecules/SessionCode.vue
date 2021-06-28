@@ -31,6 +31,7 @@
 import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import SnackbarType from '@/types/SnackbarType';
+import { EventType } from '@/types/EventType';
 
 @Options({
   components: {},
@@ -42,13 +43,13 @@ export default class ModuleCount extends Vue {
   copyToClipboard(): void {
     navigator.clipboard.writeText(this.code).then(
       () => {
-        this.eventBus.emit('showSnackbar', {
+        this.eventBus.emit(EventType.SHOW_SNACKBAR, {
           type: SnackbarType.SUCCESS,
           message: 'Successfully copied to clipboard.',
         });
       },
       () => {
-        this.eventBus.emit('showSnackbar', {
+        this.eventBus.emit(EventType.SHOW_SNACKBAR, {
           type: SnackbarType.ERROR,
           message: 'Could not copy to clipboard.',
         });

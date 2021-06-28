@@ -72,6 +72,7 @@ import FormError from '@/components/shared/atoms/FormError.vue';
 import SnackbarType from '@/types/SnackbarType';
 import * as authService from '@/services/auth-service';
 import * as userService from '@/services/user-service';
+import { EventType } from '@/types/EventType';
 
 @Options({
   components: {
@@ -111,11 +112,11 @@ export default class ModeratorLogin extends Vue {
     if (data.accessToken) {
       authService.setAccessToken(data.accessToken);
       authService.setUserData(this.email);
-      this.$router.push({
+      await this.$router.push({
         name: 'moderator-session-overview',
       });
     } else if (data.message) {
-      this.eventBus.emit('showSnackbar', {
+      this.eventBus.emit(EventType.SHOW_SNACKBAR, {
         type: SnackbarType.ERROR,
         message: data.message,
       });
