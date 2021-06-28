@@ -4,6 +4,7 @@
 namespace App\Domain\Base\Repository;
 
 use Cake\Database\Query;
+use DomainException;
 
 /**
  * Trait that provides the read database entries functionality.
@@ -52,7 +53,7 @@ trait SelectTrait
     {
         $result = $this->get(["id" => $id]);
         if (!is_object($result)) {
-            throw new DomainException("Entity $this->getEntityName() not found");
+            throw new DomainException("Entity $this->entityName not found");
         }
         return $result;
     }

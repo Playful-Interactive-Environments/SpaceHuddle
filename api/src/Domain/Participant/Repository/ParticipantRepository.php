@@ -19,6 +19,7 @@ use App\Factory\QueryFactory;
 use Cake\Database\Expression\QueryExpression;
 use Cake\Database\Query;
 use Cake\I18n\Time;
+use DomainException;
 
 /**
  * Repository
@@ -61,6 +62,9 @@ class ParticipantRepository implements RepositoryInterface
         $result = $query->execute()->fetch("assoc");
         if (is_array($result)) {
             $sessionId = $result["id"];
+            if (!isset($data->ip)) {
+                $data->ip = $this->getClientIp();
+            }
             $participant = $this->isRegistered($sessionId, $data->ip);
             if (is_null($participant)) {
                 $data->sessionId = $sessionId;
@@ -74,11 +78,30 @@ class ParticipantRepository implements RepositoryInterface
             }
             return $participant;
         }
+        return null;
     }
 
     /**
-     * Connect to session.
-     * @param object $data The data to be inserted
+     * Determine client IP address
+     * @return string Client IP
+     */
+    private function getClientIp(): string
+    {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            //ip from share internet
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            //ip pass from proxy
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        return $ip;
+    }
+
+    /**
+     * Reconnect to session.
+     * @param string $browserKey Connection key generated individually for the participant.
      * @return ParticipantData|null The participant entity
      * @throws GenericException
      */
@@ -86,7 +109,7 @@ class ParticipantRepository implements RepositoryInterface
     {
         $result = $this->get(["browser_key" => $browserKey]);
         if (!is_object($result)) {
-            throw new DomainException("Entity $this->getEntityName() not found");
+            throw new DomainException("Entity $this->entityName not found");
         }
         return $result;
     }

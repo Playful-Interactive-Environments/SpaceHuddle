@@ -52,8 +52,6 @@ class ParticipantValidator
             ->requirePresence("id", "update")
             ->notEmptyString("sessionKey")
             ->requirePresence("sessionKey", "create")
-            ->notEmptyString("ip")
-            ->requirePresence("ip", "create")
             ->add("state", "custom", [
                 "rule" => function ($value) {
                     return self::isTypeOption($value, ParticipantState::class);
@@ -75,8 +73,6 @@ class ParticipantValidator
             $this->validationFactory->createValidator()
                 ->notEmptyString("sessionKey")
                 ->requirePresence("sessionKey")
-                ->notEmptyString("ip")
-                ->requirePresence("ip")
         );
 
         $sessionKey = $data["sessionKey"];
