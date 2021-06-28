@@ -1,14 +1,13 @@
 <template>
   <div class="information" ref="item">
     <div v-if="task">
-      <!-- TODO: task description missing -->
       <Sidebar
         :title="task.name"
         :pretitle="task.taskType"
-        :description="task.name"
+        :description="task.description"
         :moduleType="'information'"
       />
-      <Navigation />
+      <NavigationWithBack :back-route="'/session/' + sessionId" />
       <main class="information__content">
         <!-- TODO: information module content -->
         Information content works!
@@ -24,18 +23,19 @@ import { Task } from '../../services/task-service';
 import { setModuleStyles } from '../../utils/moduleStyles';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import ModuleType from '../../types/ModuleType';
-import * as taskService from '@/services/task-service';
-import Navigation from '@/components/moderator/molecules/Navigation.vue';
+import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
+import * as taskService from '@/services/task-service';
 
 @Options({
   components: {
     IdeaCard,
-    Navigation,
+    NavigationWithBack,
     Sidebar,
   },
 })
 export default class ModeratorInformation extends Vue {
+  @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: '' }) readonly taskId!: string;
 
   task: Task | null = null;

@@ -1,14 +1,17 @@
 <template>
   <div class="voting" ref="item">
     <div v-if="task">
-      <!-- TODO: task description missing -->
       <Sidebar
         :title="task.name"
         :pretitle="task.taskType"
-        :description="task.name"
+        :description="task.description"
         :moduleType="ModuleType[task.taskType]"
       />
-      <Navigation />
+      <NavigationWithBack :back-route="'/session/' + sessionId" />
+      <div class="brainstorming__header">
+        <BackButton :route="'/session/' + sessionId" />
+        <Navigation />
+      </div>
       <main class="voting__content">
         <!-- TODO: voting module content -->
         Voting content works!
@@ -25,18 +28,19 @@ import { Idea } from '@/services/idea-service';
 import { setModuleStyles } from '../../utils/moduleStyles';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import ModuleType from '../../types/ModuleType';
-import Navigation from '@/components/moderator/molecules/Navigation.vue';
+import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import * as taskService from '@/services/task-service';
 
 @Options({
   components: {
     IdeaCard,
-    Navigation,
+    NavigationWithBack,
     Sidebar,
   },
 })
 export default class ModeratorVoting extends Vue {
+  @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: '' }) readonly taskId!: string;
 
   task: Task | null = null;

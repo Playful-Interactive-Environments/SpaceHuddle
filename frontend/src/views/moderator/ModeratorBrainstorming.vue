@@ -1,14 +1,13 @@
 <template>
   <div class="brainstorming" ref="item">
     <div v-if="task">
-      <!-- TODO: task description missing -->
       <Sidebar
         :title="task.name"
         :pretitle="task.taskType"
-        :description="task.name"
+        :description="task.description"
         :moduleType="ModuleType[task.taskType]"
       />
-      <Navigation />
+      <NavigationWithBack :back-route="'/session/' + sessionId" />
       <main class="brainstorming__content">
         <IdeaCard
           :idea="idea"
@@ -29,35 +28,47 @@ import { Idea } from '../../services/idea-service';
 import { setModuleStyles } from '../../utils/moduleStyles';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleType from '../../types/ModuleType';
-import Navigation from '@/components/moderator/molecules/Navigation.vue';
+import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import * as taskService from '@/services/task-service';
 
 @Options({
   components: {
     IdeaCard,
-    Navigation,
+    NavigationWithBack,
     Sidebar,
   },
 })
 export default class ModeratorBrainstorming extends Vue {
+  @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: '' }) readonly taskId!: string;
 
   task: Task | null = null;
   ideas: Idea[] = [];
   ModuleType = ModuleType;
+  ideaInterval!: number;
+  readonly interval = 3000;
 
   async mounted(): Promise<void> {
     this.task = await taskService.getTaskById(this.taskId);
     this.getIdeas();
+    this.startIdeaInterval();
     setModuleStyles(
       this.$refs.item as HTMLElement,
       ModuleType[this.task.taskType]
     );
   }
 
+  destroyed(): void {
+    clearInterval(this.ideaInterval);
+  }
+
   async getIdeas(): Promise<void> {
     this.ideas = await taskService.getIdeasForTask(this.taskId);
+  }
+
+  startIdeaInterval(): void {
+    this.ideaInterval = setInterval(this.getIdeas, this.interval);
   }
 }
 </script>

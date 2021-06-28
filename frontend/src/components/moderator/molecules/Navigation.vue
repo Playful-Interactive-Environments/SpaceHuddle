@@ -34,6 +34,7 @@ export default class Navigation extends Vue {
   justify-content: flex-end;
   align-items: center;
   padding: 0 2em;
+  height: var(--header-height);
 
   &__item {
     display: flex;

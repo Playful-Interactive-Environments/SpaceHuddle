@@ -42,7 +42,7 @@ import { Prop } from 'vue-property-decorator';
 })
 export default class Timer extends Vue {
   @Prop({ default: false }) isRow!: boolean;
-  public isExpanded = true;
+  isExpanded = true;
 
   beforeEnter(el: HTMLElement): void {
     el.style.height = '0';

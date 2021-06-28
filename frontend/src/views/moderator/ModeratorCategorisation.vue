@@ -1,14 +1,13 @@
 <template>
   <div class="categorisation" ref="item">
     <div v-if="task">
-      <!-- TODO: task description missing -->
       <Sidebar
         :title="task.name"
         :pretitle="task.taskType"
-        :description="task.name"
+        :description="task.description"
         :moduleType="ModuleType[task.taskType]"
       />
-      <Navigation />
+      <NavigationWithBack :back-route="'/session/' + sessionId" />
       <main class="categorisation__content">
         <!-- TODO: categorisation module content -->
         Categorisation content works!
@@ -25,7 +24,7 @@ import { Idea } from '../../services/idea-service';
 import { setModuleStyles } from '../../utils/moduleStyles';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleType from '../../types/ModuleType';
-import Navigation from '@/components/moderator/molecules/Navigation.vue';
+import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import * as taskService from '@/services/task-service';
 
@@ -33,10 +32,11 @@ import * as taskService from '@/services/task-service';
   components: {
     IdeaCard,
     Sidebar,
-    Navigation,
+    NavigationWithBack,
   },
 })
 export default class ModeratorCategorisation extends Vue {
+  @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: '' }) readonly taskId!: string;
 
   task: Task | null = null;
@@ -45,11 +45,10 @@ export default class ModeratorCategorisation extends Vue {
 
   async mounted(): Promise<void> {
     this.task = await taskService.getTaskById(this.taskId);
-    // TODO: change once grouping is renamed to categorisation
-    // setModuleStyles(
-    //   this.$refs.item as HTMLElement,
-    //   ModuleType[this.task.taskType]
-    // );
+    setModuleStyles(
+      this.$refs.item as HTMLElement,
+      ModuleType[this.task.taskType]
+    );
   }
 }
 </script>
