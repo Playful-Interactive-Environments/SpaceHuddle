@@ -14,10 +14,7 @@ const endpointsWithAuthorization = [
 ];
 
 const endpointRequiresAuthorization = (endpoint: EndpointType) => {
-  return (
-    endpointsWithAuthorization.includes(endpoint) &&
-    !endpointsWithAuthorization.includes(EndpointType.CONNECT)
-  );
+  return endpointsWithAuthorization.includes(endpoint);
 };
 
 const interceptorAuthHeader = (
@@ -58,7 +55,6 @@ export const apiEndpoint = (
       return response;
     },
     (error) => {
-      console.log(error.response);
       console.error('axios error interceptor triggered.. :(');
       // TODO: show an error snackbar (but only for some endpoints)
       return Promise.reject(error);
