@@ -40,8 +40,7 @@ class ParticipantController extends AbstractController
      *     @OA\MediaType(
      *       mediaType="application/json",
      *       @OA\Schema(required={"sessionKey", "ip"},
-     *         @OA\Property(property="sessionKey", type="string"),
-     *         @OA\Property(property="ip", type="string")
+     *         @OA\Property(property="sessionKey", type="string")
      *       )
      *     )
      *   ),
@@ -52,6 +51,10 @@ class ParticipantController extends AbstractController
      */
     public function connect(?string $sessionKey = null, ?string $ip = null): string
     {
+        if (is_null($ip) and is_null($this->getBodyParameter("ip"))) {
+          $ip = $this->getClientIp();
+        }
+
         $params = $this->formatParameters(
             [
                 "session_key" => ["default" => $sessionKey, "requestKey" => "sessionKey", "required" => true],
@@ -84,6 +87,24 @@ class ParticipantController extends AbstractController
         header("Access-Control-Allow-Headers: *");
         header("Access-Control-Allow-Credentials: true");
         return json_encode($result);
+    }
+
+    /**
+     * Determine client IP address
+     * @return string Client IP
+     */
+    private function getClientIp(): string
+    {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            //ip from share internet
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            //ip pass from proxy
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        return $ip;
     }
 
     /**
