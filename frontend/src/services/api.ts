@@ -55,7 +55,6 @@ export const apiEndpoint = (
       return response;
     },
     (error) => {
-      console.log(error.response);
       console.error('axios error interceptor triggered.. :(');
       // TODO: show an error snackbar (but only for some endpoints)
       return Promise.reject(error);

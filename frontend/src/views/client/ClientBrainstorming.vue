@@ -191,7 +191,6 @@ export default class ClientBrainstorming extends Vue {
     if (this.activepPlanetIndex < this.planets.length - 1) {
       this.activepPlanetIndex++;
     } else {
-      console.log('trigger animation');
       this.scalePlanet = true;
       setTimeout(() => {
         this.scalePlanet = false;

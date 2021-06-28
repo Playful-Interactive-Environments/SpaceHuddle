@@ -31,17 +31,14 @@ export const connect = async (
   sessionKey: string
 ): Promise<Participant | Partial<Participant>> => {
   try {
-    console.log('try out connection');
     const { data } = await API_PARTICIPANT_CONNECT_ENDPOINT.post<Participant>(
       `/`,
       {
         sessionKey,
       }
     );
-    console.log(data);
     return data;
   } catch (error) {
-    console.log('error', error);
     return (error as AxiosError).response?.data;
   }
 };

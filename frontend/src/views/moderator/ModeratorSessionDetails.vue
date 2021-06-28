@@ -110,10 +110,6 @@ export default class ModeratorSessionDetails extends Vue {
     });
   }
 
-  addModule(): void {
-    console.log('add module');
-  }
-
   async getPublicScreen(): Promise<void> {
     let data = await sessionService.getPublicScreen(this.sessionId);
     if (data) {

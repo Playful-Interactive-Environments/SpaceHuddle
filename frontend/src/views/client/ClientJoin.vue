@@ -70,8 +70,6 @@ export default class ClientJoin extends Vue {
       ? await participantService.reconnect(browserKeyLS)
       : await participantService.connect(this.sessionKey);
 
-    console.log('after connect', participantData);
-
     if (participantData.state === participantService.ConnectState.ACTIVE) {
       authService.setBrowserKey(participantData.browserKey as string);
       authService.setAccessToken(participantData.accessToken as string);
