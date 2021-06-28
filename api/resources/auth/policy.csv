@@ -66,7 +66,7 @@ p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/own_user_role/, GET
 p, MODERATOR, /session/:sessionId/authorized_users/:username/, DELETE
 
 p, MODERATOR|FACILITATOR, /topic/:topicId/tasks/, GET
-p, MODERATOR|FACILITATOR, /task/:id/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/, GET
 p, MODERATOR, /task/:id/, DELETE
 p, MODERATOR, /topic/:topicId/task/, POST
 p, MODERATOR, /task/, PUT
