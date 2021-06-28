@@ -95,14 +95,11 @@ export default class ModuleCard extends Vue {
   }
 
   async changeActiveState(): Promise<void> {
-    console.log(this.task.state);
-
     this.task.state =
       this.task.state === TaskStates.ACTIVE
         ? TaskStates.WAIT
         : TaskStates.ACTIVE;
     await taskService.updateTask(this.task);
-    console.log('updated');
   }
 }
 </script>
