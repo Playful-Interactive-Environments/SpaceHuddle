@@ -27,7 +27,7 @@
           </p>
         </div>
         <div class="public-screen__overview-right">
-          <Timer />
+          <Timer :isActive="task.state === TaskStates.ACTIVE" />
           <img
             :src="
               require(`@/assets/illustrations/planets/${
@@ -72,6 +72,7 @@ import { Task } from '@/services/task-service';
 import ModuleType from '@/types/ModuleType';
 
 import { setModuleStyles } from '@/utils/moduleStyles';
+import TaskStates from '@/types/TaskStates';
 
 @Options({
   components: {
@@ -91,6 +92,7 @@ export default class PublicScreen extends Vue {
   readonly interval = 3000;
 
   ModuleType = ModuleType;
+  TaskStates = TaskStates;
 
   async mounted(): Promise<void> {
     this.task = await sessionService.getPublicScreen(this.sessionId);
