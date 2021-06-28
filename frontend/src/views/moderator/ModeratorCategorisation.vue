@@ -1,14 +1,16 @@
 <template>
   <div class="categorisation" ref="item">
     <div v-if="task">
-      <!-- TODO: task description missing -->
       <Sidebar
+        :session-id="sessionId"
         :title="task.name"
         :pretitle="task.taskType"
-        :description="task.name"
+        :description="task.description"
         :moduleType="ModuleType[task.taskType]"
+        :is-on-public-screen="task.id === publicScreenTask?.id"
+        @changePublicScreen="changePublicScreen"
       />
-      <Navigation />
+      <NavigationWithBack :back-route="'/session/' + sessionId" />
       <main class="categorisation__content">
         <!-- TODO: categorisation module content -->
         Categorisation content works!
@@ -20,36 +22,46 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import { Task } from '../../services/task-service';
-import { Idea } from '../../services/idea-service';
-import { setModuleStyles } from '../../utils/moduleStyles';
+import { Task } from '@/services/task-service';
+import { Idea } from '@/services/idea-service';
+import { setModuleStyles } from '@/utils/moduleStyles';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleType from '../../types/ModuleType';
-import Navigation from '@/components/moderator/molecules/Navigation.vue';
+import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import * as taskService from '@/services/task-service';
+import * as sessionService from '@/services/session-service';
+import { EventType } from '@/types/EventType';
 
 @Options({
   components: {
     IdeaCard,
     Sidebar,
-    Navigation,
+    NavigationWithBack,
   },
 })
 export default class ModeratorCategorisation extends Vue {
+  @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: '' }) readonly taskId!: string;
 
   task: Task | null = null;
+  publicScreenTask: Task | null = null;
   ideas: Idea[] = [];
   ModuleType = ModuleType;
 
   async mounted(): Promise<void> {
     this.task = await taskService.getTaskById(this.taskId);
-    // TODO: change once grouping is renamed to categorisation
-    // setModuleStyles(
-    //   this.$refs.item as HTMLElement,
-    //   ModuleType[this.task.taskType]
-    // );
+    setModuleStyles(
+      this.$refs.item as HTMLElement,
+      ModuleType[this.task.taskType]
+    );
+    this.publicScreenTask = await sessionService.getPublicScreen(
+      this.sessionId
+    );
+  }
+
+  changePublicScreen(): void {
+    this.eventBus.emit(EventType.CHANGE_PUBLIC_SCREEN, this.taskId);
   }
 }
 </script>

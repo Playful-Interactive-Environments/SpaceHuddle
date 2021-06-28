@@ -1,18 +1,21 @@
 <template>
-  <nav class="nav">
+  <nav
+    class="nav"
+    :class="{
+      'nav--white': white,
+    }"
+  >
     <router-link to="/sessions" class="nav__item">
-      <img
-        src="../../../assets/icons/session-overview.svg"
-        alt="session overview icon"
-        class="icon icon--m nav__item-icon"
+      <div
+        class="nav__item-icon nav__session-icon"
+        :class="{ 'nav__item-icon--white': white }"
       />
       Sessions
     </router-link>
     <router-link to="/profile" class="nav__item">
-      <img
-        src="../../../assets/icons/user.svg"
-        alt="user icon"
-        class="icon icon--m nav__item-icon"
+      <div
+        class="nav__item-icon nav__profile-icon"
+        :class="{ 'nav__item-icon--white': white }"
       />
       Profile
     </router-link>
@@ -24,16 +27,28 @@ import { Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 
 export default class Navigation extends Vue {
-  @Prop({ default: true }) hasLogo!: boolean;
+  @Prop({ default: false }) white!: boolean;
 }
 </script>
 
 <style lang="scss" scoped>
+@import '~@/assets/styles/icons.scss';
+
 .nav {
+  height: var(--header-height);
   display: flex;
   justify-content: flex-end;
   align-items: center;
   padding: 0 2em;
+  height: var(--header-height);
+
+  &__session-icon {
+    @include icon-m('~@/assets/icons/session-overview.svg');
+  }
+
+  &__profile-icon {
+    @include icon-m('~@/assets/icons/user.svg');
+  }
 
   &__item {
     display: flex;
@@ -42,6 +57,16 @@ export default class Navigation extends Vue {
 
     &-icon {
       margin-right: 0.5em;
+
+      &--white {
+        background-color: #ffffff;
+      }
+    }
+  }
+
+  &--white {
+    a {
+      color: #ffffff;
     }
   }
 }

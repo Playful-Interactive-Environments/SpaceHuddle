@@ -21,6 +21,7 @@
       />
       <Timer
         class="module-card__timer"
+        :isActive="task.state === TaskStates.ACTIVE"
         v-if="
           !(type === ModuleType.INFORMATION || type === ModuleType.SELECTION)
         "
@@ -35,7 +36,7 @@
         <Toggle
           label="Public Screen"
           :isActive="isOnPublicScreen"
-          @toggleClicked="changePublicScreen($event)"
+          @toggleClicked="changePublicScreen"
         />
       </div>
       <div class="module-card__drag" v-if="!isClient">
@@ -52,16 +53,15 @@
 <script lang="ts">
 import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
-import { setModuleStyles } from '../../../utils/moduleStyles';
+import { setModuleStyles } from '@/utils/moduleStyles';
 import { Task } from '@/services/task-service';
 import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import Toggle from '@/components/moderator/atoms/Toggle.vue';
 import ModuleType from '@/types/ModuleType';
-import mitt from 'mitt';
-import * as sessionService from '@/services/session-service';
 import * as taskService from '@/services/task-service';
 import TaskStates from '../../../types/TaskStates';
+import { EventType } from '@/types/EventType';
 
 @Options({
   components: {
@@ -88,8 +88,8 @@ export default class ModuleCard extends Vue {
     setModuleStyles(this.$refs.item as HTMLElement, this.type);
   }
 
-  changePublicScreen(show: boolean): void {
-    this.eventBus.emit('changePublicScreen', this.task.id);
+  changePublicScreen(): void {
+    this.eventBus.emit(EventType.CHANGE_PUBLIC_SCREEN, this.task.id);
   }
 
   async changeActiveState(): Promise<void> {
