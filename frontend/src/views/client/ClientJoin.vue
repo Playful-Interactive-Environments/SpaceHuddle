@@ -76,7 +76,7 @@ export default class ClientJoin extends Vue {
       await this.$router.push({
         name: 'client-overview',
       });
-    } else {
+    } else if (!browserKeyLS) {
       this.addError('Sorry, the provided code is invalid.');
     }
   }

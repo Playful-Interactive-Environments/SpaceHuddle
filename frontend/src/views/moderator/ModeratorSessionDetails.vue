@@ -16,7 +16,7 @@
           <draggable
             v-model="topics[index].tasks"
             tag="transition-group"
-            item-key="id"
+            item-key="order"
           >
             <template #item="{ element }">
               <li class="detail__module">
@@ -63,6 +63,7 @@ import * as topicService from '@/services/topic-service';
 import { Session } from '@/services/session-service';
 import { Topic } from '@/services/topic-service';
 import { EventType } from '@/types/EventType';
+import { Task } from '../../services/task-service';
 
 @Options({
   components: {
@@ -109,6 +110,7 @@ export default class ModeratorSessionDetails extends Vue {
     this.topics = await sessionService.getTopicsList(this.session.id);
     this.topics.forEach(async (topic) => {
       topic.tasks = await topicService.getTaskList(topic.id);
+      topic.tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
     });
     await this.getPublicScreen();
   }

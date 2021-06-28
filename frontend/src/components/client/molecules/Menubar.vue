@@ -1,15 +1,18 @@
 <template>
   <div class="menubar">
-    <div class="menubar__logo">GAB</div>
+    <Logo class="menubar__logo" />
     <div class="menubar__icon">|||</div>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Options } from 'vue-class-component';
+import Logo from '@/components/shared/atoms/Logo.vue';
 
 @Options({
-  components: {},
+  components: {
+    Logo,
+  },
 })
 export default class Menubar extends Vue {}
 </script>
@@ -24,6 +27,10 @@ export default class Menubar extends Vue {}
 
   &__logo {
     font-weight: var(--font-weight-bold);
+    display: flex;
+    align-items: center;
+    width: 40vw;
+    margin-bottom: -6px;
   }
 
   &__icon {

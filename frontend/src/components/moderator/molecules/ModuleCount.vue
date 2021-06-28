@@ -4,7 +4,7 @@
       <span class="module-count__count">2</span> Topics
     </div>
     <div class="module-count__item">
-      <span class="module-count__count">6</span> Modules
+      <span class="module-count__count">7</span> Modules
     </div>
   </div>
 </template>

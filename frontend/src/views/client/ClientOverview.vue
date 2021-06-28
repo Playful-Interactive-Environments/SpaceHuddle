@@ -3,8 +3,8 @@
     <div class="container">
       <MenuBar />
       <SessionInfo
-        :title="'Session title'"
-        :description="'Lorem ipsum si dolor description here ...'"
+        :title="'GAB project meeting'"
+        :description="'The purpose of this meeting is to find a name for our new game assisted brainstroming application.'"
       />
     </div>
     <TopicExpand v-for="topic in filteredTopics" :key="topic.id" :isRow="true">

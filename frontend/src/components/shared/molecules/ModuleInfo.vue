@@ -25,9 +25,15 @@ export default class ModuleInfo extends Vue {
 </script>
 
 <style lang="scss" scoped>
+@import '~@/assets/styles/breakpoints.scss';
+
 .module-info {
   flex-grow: 1;
   font-size: var(--font-size-small);
+
+  @include md {
+    max-width: 60%;
+  }
 
   &__type {
     text-transform: uppercase;
@@ -41,11 +47,17 @@ export default class ModuleInfo extends Vue {
   }
 
   &__description {
-    display: -webkit-box;
-    line-clamp: 1;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    margin-top: 0.5rem;
+    line-height: 1.2;
+    @include md {
+      margin-top: 0;
+      line-height: 1.3;
+      display: -webkit-box;
+      line-clamp: 1;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
   }
 
   &--centered {
