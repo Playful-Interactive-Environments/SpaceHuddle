@@ -11,7 +11,11 @@
       <h2>Sorry, nothing here.</h2>
       <p>Make sure that a module is activated for the public view.</p>
     </main>
-    <main v-else class="container container--spaced" ref="container">
+    <main
+      v-else
+      class="public-screen__container container container--spaced"
+      ref="container"
+    >
       <section class="public-screen__overview">
         <div class="public-screen__overview-left">
           <span class="public-screen__overview-type">
@@ -120,7 +124,11 @@ export default class PublicScreen extends Vue {
 .public-screen {
   background: url('../assets/illustrations/stars-background_without_dust.png');
   background-size: contain;
-  height: 100vh;
+  min-height: 100vh;
+
+  &__container {
+    padding-top: 0;
+  }
 
   &__overview {
     display: flex;
@@ -128,8 +136,10 @@ export default class PublicScreen extends Vue {
     color: white;
 
     &-planet {
-      height: 10rem;
+      height: 9rem;
       margin-left: 2rem;
+      margin-top: -20px;
+      margin-right: -20px;
     }
 
     &-left {
