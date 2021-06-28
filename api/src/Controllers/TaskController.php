@@ -67,7 +67,7 @@ class TaskController extends AbstractController
      */
     public function read(?string $id = null): string
     {
-        return parent::readGeneric($id);
+        return parent::readGeneric($id, authorizedRoles: [Role::MODERATOR, Role::FACILITATOR, Role::PARTICIPANT]);
     }
 
     /**
@@ -142,7 +142,7 @@ class TaskController extends AbstractController
     protected function addDependencies(string $id, array|object|null $parameter)
     {
         $moduleId = self::uuid();
-        $query = "INSERT INTO module (`id`, `task_id`, `module_name`, `order`, `state`) 
+        $query = "INSERT INTO module (`id`, `task_id`, `module_name`, `order`, `state`)
             VALUES (:id, :task_id, :module_name, :order, :state)";
         $statement = $this->connection->prepare($query);
         $statement->bindParam(":id", $moduleId);
@@ -292,7 +292,7 @@ class TaskController extends AbstractController
         $query = "SELECT * FROM task
           WHERE id IN (
             SELECT module.task_id
-            FROM session 
+            FROM session
             INNER JOIN module ON module.id = session.public_screen_module_id
             WHERE session.id = :sessionId)";
         $statement = $this->connection->prepare($query);

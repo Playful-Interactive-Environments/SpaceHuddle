@@ -41,13 +41,20 @@ class SessionController extends AbstractController
      */
     public function readAll(): string
     {
-        $userId = Authorization::getAuthorizationProperty("userId");
-        $query = "SELECT * FROM session INNER JOIN session_role ON session_role.session_id = session.id
-                  WHERE session_role.user_id = :user_id";
+        if (Authorization::isUser()) {
+          $userId = Authorization::getAuthorizationProperty("userId");
+          $userType = 'USER';
+        } else {
+          $userId = Authorization::getAuthorizationProperty("participantId");
+          $userType = 'PARTICIPANT';
+        }
+        $query = "SELECT * FROM session INNER JOIN session_permission ON session_permission.session_id = session.id
+                  WHERE session_permission.user_id = :user_id AND session_permission.user_type = :user_type";
         /*$query = "SELECT * FROM session
           WHERE id IN (SELECT session_id FROM session_role WHERE user_id = :user_id)";*/
         $statement = $this->connection->prepare($query);
         $statement->bindParam(":user_id", $userId);
+        $statement->bindParam(":user_type", $userType);
         $statement->execute();
         $resultData = $this->database->fetchAll($statement);
         $result = [];
@@ -80,15 +87,22 @@ class SessionController extends AbstractController
      */
     public function read(?string $id = null): string
     {
-        $userId = Authorization::getAuthorizationProperty("userId");
+        if (Authorization::isUser()) {
+          $userId = Authorization::getAuthorizationProperty("userId");
+          $userType = 'USER';
+        } else {
+          $userId = Authorization::getAuthorizationProperty("participantId");
+          $userType = 'PARTICIPANT';
+        }
         if (is_null($id)) {
             $id = $this->getUrlParameter("session", -1);
         }
-        $query = "SELECT * FROM session INNER JOIN session_role ON session_role.session_id = session.id
-                  WHERE session.id = :id and session_role.user_id = :user_id";
+        $query = "SELECT * FROM session INNER JOIN session_permission ON session_permission.session_id = session.id
+                  WHERE session.id = :id AND session_permission.user_id = :user_id AND session_permission.user_type = :user_type";
         $statement = $this->connection->prepare($query);
         $statement->bindParam(":id", $id);
         $statement->bindParam(":user_id", $userId);
+        $statement->bindParam(":user_type", $userType);
         $statement->execute();
         $result = $this->database->fetchFirst($statement);
         http_response_code(200);
