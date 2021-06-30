@@ -62,12 +62,12 @@ class SessionRepository implements RepositoryInterface
             false
         );
 
-        if ($authorisation->isParticipant() and $role == SessionRoleType::PARTICIPANT) {
+        if ($authorisation->isParticipant() and $role == strtoupper(SessionRoleType::PARTICIPANT)) {
             $result = $this->get([
                 "session.id" => $id
             ]);
             if (!is_object($result)) {
-                return SessionRoleType::EXPIRED;
+                return strtoupper(SessionRoleType::EXPIRED);
             }
         }
 

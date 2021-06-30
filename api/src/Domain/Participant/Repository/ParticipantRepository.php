@@ -241,40 +241,6 @@ class ParticipantRepository implements RepositoryInterface
     }
 
     /**
-     * List all topic tasks for the logged-in participant.
-     * @param string $topicId The topic's ID.
-     * @param string $id The entity ID.
-     * @return array A list of all topic tasks in JSON format.
-     */
-    public function getTopicTasks(string $topicId, string $id): array
-    {
-        $query = $this->queryFactory->newSelect("task");
-        $query->select(["task.*"])
-            ->innerJoin("topic", "topic.id = task.topic_id")
-            ->innerJoin("session", "session.id = topic.session_id")
-            ->innerJoin("participant", "participant.session_id = session.id")
-            ->whereInList("task.state", [
-                strtoupper(TaskState::ACTIVE),
-                strtoupper(TaskState::READ_ONLY)
-            ])
-            ->andWhere([
-                "participant.id" => $id,
-                "task.topic_id" => $topicId,
-                "session.expiration_date >= current_timestamp()"
-            ]);
-
-        $result = $this->fetchAll($query, TaskData::class);
-        if (isset($result)) {
-            if (is_array($result)) {
-                return $result;
-            }
-            return [$result];
-        }
-
-        return [];
-    }
-
-    /**
      * Convert to array.
      * @param object $data The entity data
      * @return array<string, mixed> The array

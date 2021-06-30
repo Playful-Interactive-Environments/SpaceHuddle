@@ -33,7 +33,6 @@ p, MODERATOR|PARTICIPANT|INACTIVE, /participant/state/:state/, PUT
 p, MODERATOR|PARTICIPANT|INACTIVE, /participant/, DELETE
 p, PARTICIPANT, /participant/tasks/, GET
 p, PARTICIPANT, /participant/topics/, GET
-p, PARTICIPANT, /topic/:topicId/participant_tasks/, GET
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/resources/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /resource/:id/, GET
@@ -65,14 +64,14 @@ p, MODERATOR, /session/:sessionId/authorized_users/, POST
 p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/own_user_role/, GET
 p, MODERATOR, /session/:sessionId/authorized_users/:username/, DELETE
 
-p, MODERATOR|FACILITATOR, /topic/:topicId/tasks/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/tasks/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/, GET
 p, MODERATOR, /task/:id/, DELETE
 p, MODERATOR, /topic/:topicId/task/, POST
 p, MODERATOR, /task/, PUT
 
-p, MODERATOR|FACILITATOR, /session/:sessionId/topics/, GET
-p, MODERATOR|FACILITATOR, /topic/:id/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/topics/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:id/, GET
 p, MODERATOR, /topic/:id/, DELETE
 p, MODERATOR, /session/:sessionId/topic/, POST
 p, MODERATOR, /topic/, PUT
