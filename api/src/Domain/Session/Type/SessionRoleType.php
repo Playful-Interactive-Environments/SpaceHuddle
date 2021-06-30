@@ -30,6 +30,9 @@ class SessionRoleType
     /** @var string */
     public const UNKNOWN = "unknown";
 
+    /** @var string */
+    public const EXPIRED = "expired";
+
     /**
      * Map a user role based on the given token to the default role permission for the given session.
      * @param string $authorisationRoleType User role based on the given token.

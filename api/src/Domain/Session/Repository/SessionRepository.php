@@ -67,7 +67,7 @@ class SessionRepository implements RepositoryInterface
                 "session.id" => $id
             ]);
             if (!is_object($result)) {
-                return SessionRoleType::INACTIVE;
+                return SessionRoleType::EXPIRED;
             }
         }
 
