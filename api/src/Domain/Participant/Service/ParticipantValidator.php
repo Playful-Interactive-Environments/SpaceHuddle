@@ -12,7 +12,7 @@ use Selective\Validation\Exception\ValidationException;
 use Selective\Validation\ValidationResult;
 
 /**
- * Service.
+ * Participant validation service.
  */
 class ParticipantValidator
 {

@@ -3,10 +3,9 @@
 namespace App\Domain\User\Service;
 
 use App\Database\TransactionInterface;
-use App\Data\AuthorisationData;
 use App\Domain\Base\Data\TokenData;
 use App\Domain\Base\Repository\GenericException;
-use App\Domain\Base\Service\BaseServiceTrait;
+use App\Domain\Base\Service\BaseBodyServiceTrait;
 use App\Domain\User\Repository\UserRepository;
 use App\Factory\LoggerFactory;
 use App\Routing\JwtAuth;
@@ -16,7 +15,7 @@ use App\Routing\JwtAuth;
  */
 final class UserLogin
 {
-    use BaseServiceTrait;
+    use BaseBodyServiceTrait;
 
     protected UserRepository $repository;
     protected UserValidator $validator;
@@ -45,25 +44,26 @@ final class UserLogin
     }
 
     /**
-     * Functionality of the login service.
+     * Validates whether the transferred data is suitable for the service.
+     * @param array $data Data to be verified.
+     * @return void
+     */
+    protected function serviceValidation(array $data): void
+    {
+        $this->validator->validateLogin($data);
+    }
+
+    /**
+     * Executes the repository instructions assigned to the service.
      *
-     * @param AuthorisationData $authorisation Authorisation data
-     * @param array<string, mixed> $bodyData Form data from the request body
-     * @param array<string, mixed> $urlData Url parameter from the request
+     * @param array $data Input data from the request.
      *
-     * @return array|object|null Service output
+     * @return array|object|null Repository answer.
      * @throws GenericException
      */
-    public function service(
-        AuthorisationData $authorisation,
-        array $bodyData,
-        array $urlData
+    protected function serviceExecution(
+        array $data
     ): array|object|null {
-        $data = array_merge($bodyData, $urlData);
-
-        // Input validation
-        $this->validator->validateLogin($data);
-
         // Insert user and get new user ID
         $result = $this->repository->getUserByName($data["username"]);
 

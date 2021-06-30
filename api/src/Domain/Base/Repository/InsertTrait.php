@@ -12,12 +12,14 @@ trait InsertTrait
      * Insert entity row.
      * @param object $data The data to be inserted
      * @return object|null The new created entity
-     * @throws GenericException
      */
     public function insert(object $data): ?object
     {
         $data->id = uuid_create();
+
+        $usedKeys = array_values($this->translateKeys((array)$data));
         $row = $this->formatDatabaseInput($data);
+        $row = $this->unsetUnused($row, $usedKeys);
 
         $itemCount = $this->queryFactory->newInsert($this->getEntityName(), $row)
             ->execute()->rowCount();

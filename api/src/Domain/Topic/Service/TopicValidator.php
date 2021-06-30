@@ -8,7 +8,7 @@ use App\Factory\ValidationFactory;
 use Cake\Validation\Validator;
 
 /**
- * Service.
+ * Topic validation service.
  */
 class TopicValidator
 {

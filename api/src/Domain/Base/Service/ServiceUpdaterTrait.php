@@ -1,9 +1,6 @@
 <?php
 
-
 namespace App\Domain\Base\Service;
-
-use App\Data\AuthorisationData;
 
 /**
  * Description of the common update service functionality.
@@ -11,41 +8,31 @@ use App\Data\AuthorisationData;
  */
 trait ServiceUpdaterTrait
 {
-    use BaseServiceTrait;
+    use BaseManipulationServiceTrait;
 
     /**
-     * Functionality of the update service.
-     *
-     * @param AuthorisationData $authorisation Authorisation data
-     * @param array<string, mixed> $bodyData Form data from the request body
-     * @param array<string, mixed> $urlData Url parameter from the request
-     *
-     * @return array|object|null Service output
+     * Validates whether the transferred data is suitable for the service.
+     * @param array $data Data to be verified.
+     * @return void
      */
-    public function service(
-        AuthorisationData $authorisation,
-        array $bodyData,
-        array $urlData
-    ): array|object|null {
-        $data = array_merge($bodyData, $urlData);
+    protected function serviceValidation(array $data): void
+    {
         $id = $data["id"];
 
         // Input validation
         $this->validator->validateUpdate($id, $data);
+    }
 
-        // Validation was successfully
-        $object = (object)$data;
-        $object->id = $id;
-
-        $this->transaction->begin();
-        // Update the user
-        $result = $this->repository->update($object);
-        $this->transaction->commit();
-
-        // Logging
-        $entityName = $this->repository->getEntityName();
-        $this->logger->info("$entityName updated successfully: $id");
-
-        return $result;
+    /**
+     * Executes the repository instructions assigned to the service.
+     *
+     * @param array $data Input data from the request.
+     *
+     * @return array|object|null Repository answer.
+     */
+    protected function serviceExecution(
+        array $data
+    ): array|object|null {
+        return $this->repository->update((object)$data);
     }
 }

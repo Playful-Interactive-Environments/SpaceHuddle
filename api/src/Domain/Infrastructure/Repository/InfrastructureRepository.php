@@ -2,7 +2,9 @@
 
 namespace App\Domain\Infrastructure\Repository;
 
-use App\Data\AuthorisationData;
+use App\Domain\Base\Repository\AuthorisationTrait;
+use App\Domain\Base\Repository\GenericException;
+use App\Domain\Base\Repository\InstantiateTrait;
 use App\Domain\Participant\Repository\ParticipantRepository;
 use App\Domain\Session\Repository\SessionRepository;
 use App\Domain\Task\Repository\TaskRepository;
@@ -15,6 +17,9 @@ use App\Factory\QueryFactory;
  */
 class InfrastructureRepository
 {
+    use AuthorisationTrait;
+    use InstantiateTrait;
+
     protected QueryFactory $queryFactory;
     protected array $repositoryMapping = [
         "session" => SessionRepository::class,
@@ -36,27 +41,27 @@ class InfrastructureRepository
 
     /**
      * Checks the access role via which the logged-in user may access the entry with the specified primary key.
-     * @param AuthorisationData $authorisation Authorisation token data.
      * @param string $entityName Name of the database table.
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
+     * @throws GenericException
      */
-    public function getAuthorisationRole(AuthorisationData $authorisation, string $entityName, ?string $id): ?string
+    public function getAuthorisationRole(string $entityName, ?string $id): ?string
     {
-        $repository = new $this->repositoryMapping[$entityName]($this->queryFactory);
-        return $repository->getAuthorisationRole($authorisation, $id);
+        $repository = $this->copy($this->repositoryMapping[$entityName]);
+        return $repository->getAuthorisationRole($id);
     }
 
     /**
      * Checks whether the user is authorised to read the entry with the specified primary key.
-     * @param AuthorisationData $authorisation Authorisation token data.
      * @param string $entityName Name of the database table.
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
+     * @throws GenericException
      */
-    public function getAuthorisationReadRole(AuthorisationData $authorisation, string $entityName, ?string $id): ?string
+    public function getAuthorisationReadRole(string $entityName, ?string $id): ?string
     {
-        $repository = new $this->repositoryMapping[$entityName]($this->queryFactory);
-        return $repository->getAuthorisationReadRole($authorisation, $id);
+        $repository = $this->copy($this->repositoryMapping[$entityName]);
+        return $repository->getAuthorisationReadRole($id);
     }
 }

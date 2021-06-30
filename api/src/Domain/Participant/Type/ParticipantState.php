@@ -3,7 +3,7 @@
 namespace App\Domain\Participant\Type;
 
 /**
- * List of possible states.
+ * List of possible participant states.
  * @OA\Schema(
  *   description="current status of the participant",
  *   type="string",

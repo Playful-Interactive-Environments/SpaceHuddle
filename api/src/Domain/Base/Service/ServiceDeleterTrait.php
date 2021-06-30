@@ -1,9 +1,6 @@
 <?php
 
-
 namespace App\Domain\Base\Service;
-
-use App\Data\AuthorisationData;
 
 /**
  * Description of the common delete service functionality.
@@ -11,33 +8,36 @@ use App\Data\AuthorisationData;
  */
 trait ServiceDeleterTrait
 {
-    use BaseServiceTrait;
+    use BaseManipulationServiceTrait;
 
     /**
-     * Functionality of the delete service.
-     *
-     * @param AuthorisationData $authorisation Authorisation data
-     * @param array<string, mixed> $bodyData Form data from the request body
-     * @param array<string, mixed> $urlData Url parameter from the request
-     *
-     * @return array|object|null Service output
+     * Validates whether the transferred data is suitable for the service.
+     * @param array $data Data to be verified.
+     * @return void
      */
-    public function service(
-        AuthorisationData $authorisation,
-        array $bodyData,
-        array $urlData
-    ): array|object|null {
-        $id = $urlData["id"];
+    protected function serviceValidation(array $data): void
+    {
+        $id = $data["id"];
 
         // Input validation
         $this->validator->validateExists($id);
+    }
 
-        $this->transaction->begin();
+    /**
+     * Executes the repository instructions assigned to the service.
+     *
+     * @param array $data Input data from the request.
+     *
+     * @return array|object|null Repository answer.
+     */
+    protected function serviceExecution(
+        array $data
+    ): array|object|null {
+        $id = $data["id"];
         $this->repository->deleteById($id);// Commit all changes
-        $this->transaction->commit();
 
         $entityName = $this->repository->getEntityName();
-        return [
+        return (object)[
             "state" => "Success",
             "message" => "$entityName was successfully deleted."
         ];

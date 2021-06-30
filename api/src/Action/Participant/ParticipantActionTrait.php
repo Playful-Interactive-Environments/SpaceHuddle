@@ -22,7 +22,7 @@ trait ParticipantActionTrait
         array $urlData
     ) : mixed {
         if ($authorisation->isParticipant()) {
-            $urlData["id"] = $authorisation->id;
+            $urlData["participantId"] = $authorisation->id;
         }
         return $this->service->service($authorisation, $bodyData, $urlData);
     }

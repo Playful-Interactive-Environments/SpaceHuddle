@@ -8,7 +8,7 @@ use App\Factory\ValidationFactory;
 use Cake\Validation\Validator;
 
 /**
- * Service.
+ * Session validation Service.
  */
 final class SessionValidator
 {

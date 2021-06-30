@@ -16,8 +16,6 @@ use App\Domain\Task\Data\TaskData;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Topic\Data\TopicData;
 use App\Factory\QueryFactory;
-use Cake\Database\Expression\QueryExpression;
-use Cake\Database\Query;
 use Cake\I18n\Time;
 use DomainException;
 

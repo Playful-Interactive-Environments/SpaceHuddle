@@ -9,6 +9,8 @@ use App\Factory\QueryFactory;
  */
 trait GenericTrait
 {
+    use InstantiateTrait;
+
     private ?string $entityName;
     private ?string $resultClass;
     private ?string $parentIdName;
@@ -109,5 +111,14 @@ trait GenericTrait
         } else {
             throw new GenericException("Parent repository not set.");
         }
+    }
+
+    /**
+     * Check if the repository has a parent repository specified.
+     * @return bool If true, a parent repository is specified.
+     */
+    protected function hasParentRepository(): bool
+    {
+        return isset($this->parentRepository);
     }
 }

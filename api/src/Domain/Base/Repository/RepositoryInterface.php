@@ -19,6 +19,19 @@ interface RepositoryInterface
     );
 
     /**
+     * Sets the authorisation data for the repository.
+     * @param AuthorisationData $authorisation Current authorisation data.
+     * @return void
+     */
+    public function setAuthorisation(AuthorisationData $authorisation): void;
+
+    /**
+     * Gets the authorisation data from the repository.
+     * @return AuthorisationData
+     */
+    public function getAuthorisation(): AuthorisationData;
+
+    /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
      * @return object|array<object>|null The result entity(s).
@@ -98,19 +111,17 @@ interface RepositoryInterface
 
     /**
      * Checks the access role via which the logged-in user may access the entry with the specified primary key.
-     * @param AuthorisationData $authorisation Authorisation token data.
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
      * @throws GenericException
      */
-    public function getAuthorisationRole(AuthorisationData $authorisation, ?string $id): ?string;
+    public function getAuthorisationRole(?string $id): ?string;
 
     /**
      * Checks whether the user is authorised to read the entry with the specified primary key.
-     * @param AuthorisationData $authorisation Authorisation token data.
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
      * @throws GenericException
      */
-    public function getAuthorisationReadRole(AuthorisationData $authorisation, ?string $id): ?string;
+    public function getAuthorisationReadRole(?string $id): ?string;
 }

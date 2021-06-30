@@ -1,9 +1,6 @@
 <?php
 
-
 namespace App\Domain\Base\Service;
-
-use App\Data\AuthorisationData;
 
 /**
  * Description of the common insert service functionality.
@@ -11,36 +8,30 @@ use App\Data\AuthorisationData;
  */
 trait ServiceCreatorTrait
 {
-    use BaseServiceTrait;
+    use BaseManipulationServiceTrait;
 
     /**
-     * Functionality of the create service.
-     *
-     * @param AuthorisationData $authorisation Authorisation data
-     * @param array<string, mixed> $bodyData Form data from the request body
-     * @param array<string, mixed> $urlData Url parameter from the request
-     *
-     * @return array|object|null Service output
+     * Validates whether the transferred data is suitable for the service.
+     * @param array $data Data to be verified.
+     * @return void
      */
-    public function service(
-        AuthorisationData $authorisation,
-        array $bodyData,
-        array $urlData
-    ): array|object|null {
-        $data = array_merge($bodyData, $urlData);
-
+    protected function serviceValidation(array $data): void
+    {
         // Input validation
         $this->validator->validateCreate($data);
+    }
 
-        $this->transaction->begin();
+    /**
+     * Executes the repository instructions assigned to the service.
+     *
+     * @param array $data Input data from the request.
+     *
+     * @return array|object|null Repository answer.
+     */
+    protected function serviceExecution(
+        array $data
+    ): array|object|null {
         // Insert entity and get new ID
-        $result = $this->repository->insert((object)$data);
-        $this->transaction->commit();
-
-        // Logging
-        $entityName = $this->repository->getEntityName();
-        $this->logger->info("$entityName created successfully: $result->id");
-
-        return $result;
+        return $this->repository->insert((object)$data);
     }
 }

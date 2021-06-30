@@ -1,9 +1,6 @@
 <?php
 
-
 namespace App\Domain\Base\Service;
-
-use App\Data\AuthorisationData;
 
 /**
  * Description of the common read service functionality.
@@ -11,38 +8,24 @@ use App\Data\AuthorisationData;
  */
 trait ServiceReaderTrait
 {
-    use BaseServiceTrait;
+    use BaseUrlServiceTrait;
 
     /**
-     * Functionality of the read all service.
+     * Executes the repository instructions assigned to the service.
      *
-     * @param AuthorisationData $authorisation Authorisation data
-     * @param array<string, mixed> $bodyData Form data from the request body
-     * @param array<string, mixed> $urlData Url parameter from the request
+     * @param array $data Input data from the request.
      *
-     * @return array|object|null Service output
+     * @return array|object|null Repository answer.
      */
-    public function service(
-        AuthorisationData $authorisation,
-        array $bodyData,
-        array $urlData
+    protected function serviceExecution(
+        array $data
     ): array|object|null {
-        $urlParameterName = array_key_first($urlData);
+        $urlParameterName = array_key_first($data);
         if (str_ends_with($urlParameterName, "Id")) {
-            $parentId = $urlData[$urlParameterName];
-            // Input validation
-            // ...
+            $parentId = $data[$urlParameterName];
 
             // Fetch data from the database
-            $result = $this->repository->getAll($parentId);
-
-            // Optional: Add or invoke your complex business logic here
-            // ...
-
-            // Optional: Map result
-            // ...
-
-            return $result;
+            return $this->repository->getAll($parentId);
         }
         return null;
     }

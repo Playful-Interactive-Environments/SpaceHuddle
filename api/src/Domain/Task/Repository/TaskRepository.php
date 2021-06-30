@@ -37,6 +37,53 @@ class TaskRepository implements RepositoryInterface
     }
 
     /**
+     * Checks the access role via which the logged-in user may access the entry with the specified primary key.
+     * @param string|null $id Primary key to be checked.
+     * @return string|null Role with which the user is authorised to access the entry.
+     * @throws GenericException
+     */
+    public function getAuthorisationRole(
+        ?string $id
+    ): ?string {
+        $authorisation = $this->getAuthorisation();
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["*"])
+            ->andWhere(["id" => $id]);
+
+        if ($authorisation->isParticipant()) {
+            $query->whereInList("state", [
+                strtoupper(TaskState::ACTIVE),
+                strtoupper(TaskState::READ_ONLY)
+            ]);
+        }
+
+        return $this->getAuthorisationRoleFromQuery($id, $query);
+    }
+
+    /**
+     * Get entity.
+     * @param array $conditions The WHERE conditions to add with AND.
+     * @return object|array<object>|null The result entity(s).
+     * @throws GenericException
+     */
+    public function get(array $conditions = []): null|object|array
+    {
+        $authorisation = $this->getAuthorisation();
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["*"])
+            ->andWhere($conditions);
+
+        if ($authorisation->isParticipant()) {
+            $query->whereInList("state", [
+                strtoupper(TaskState::ACTIVE),
+                strtoupper(TaskState::READ_ONLY)
+            ]);
+        }
+
+        return $this->fetchAll($query);
+    }
+
+    /**
      * Include dependent data.
      * @param string $id Primary key of the linked table entry
      * @param array|object|null $parameter Dependent data to be included.

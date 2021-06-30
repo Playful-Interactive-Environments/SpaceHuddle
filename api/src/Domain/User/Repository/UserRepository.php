@@ -35,12 +35,13 @@ final class UserRepository implements RepositoryInterface
 
     /**
      * Checks the access role via which the logged-in user may access the entry with the specified primary key.
-     * @param AuthorisationData $authorisation Authorisation token data.
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
+     * @throws GenericException
      */
-    public function getAuthorisationRole(AuthorisationData $authorisation, ?string $id): ?string
+    public function getAuthorisationRole(?string $id): ?string
     {
+        $authorisation = $this->getAuthorisation();
         return SessionRoleType::mapAuthorisationType($authorisation->type);
     }
 
@@ -88,8 +89,9 @@ final class UserRepository implements RepositoryInterface
      */
     public function updatePassword(object $data): object|null
     {
+        $authorisation = $this->getAuthorisation();
         $row = [
-            "id" => $data->id,
+            "id" => $authorisation->id,
             "password" => self::encryptText($data->password)
         ];
         return $this->genericUpdate($row);

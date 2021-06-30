@@ -2,44 +2,40 @@
 
 namespace App\Domain\Participant\Service;
 
-use App\Data\AuthorisationData;
-use App\Database\TransactionInterface;
-use App\Domain\Base\Data\TokenData;
 use App\Domain\Base\Repository\GenericException;
-use App\Domain\Base\Service\BaseServiceTrait;
-use App\Domain\Participant\Data\ParticipantTokenData;
-use App\Domain\Participant\Repository\ParticipantRepository;
-use App\Factory\LoggerFactory;
-use App\Routing\JwtAuth;
+use App\Domain\Base\Service\BaseUrlServiceTrait;
 
 /**
  * Participant reconnect service.
  */
 class ParticipantReconnector
 {
-    use BaseServiceTrait;
+    use BaseUrlServiceTrait;
     use ParticipantConnectServiceTrait;
 
     /**
-     * Functionality of the login service.
+     * Validates whether the transferred data is suitable for the service.
+     * @param array $data Data to be verified.
+     * @return void
+     */
+    protected function serviceValidation(array $data): void
+    {
+        $this->validator->validateReconnect($data);
+    }
+
+    /**
+     * Executes the repository instructions assigned to the service.
      *
-     * @param AuthorisationData $authorisation Authorisation data
-     * @param array<string, mixed> $bodyData Form data from the request body
-     * @param array<string, mixed> $urlData Url parameter from the request
+     * @param array $data Input data from the request.
      *
-     * @return ParticipantTokenData|null Service output
+     * @return array|object|null Repository answer.
      * @throws GenericException
      */
-    public function service(
-        AuthorisationData $authorisation,
-        array $bodyData,
-        array $urlData
-    ): ParticipantTokenData|null {
-        // Input validation
-        $this->validator->validateReconnect($urlData);
-
+    protected function serviceExecution(
+        array $data
+    ): array|object|null {
         // Insert user and get new user ID
-        $result = $this->repository->reconnect($urlData["browserKey"]);
+        $result = $this->repository->reconnect($data["browserKey"]);
         return $this->createTokenData($result);
     }
 }

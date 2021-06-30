@@ -15,7 +15,6 @@ trait SelectTrait
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
      * @return object|array<object>|null The result entity(s).
-     * @throws GenericException
      */
     public function get(array $conditions = []): null|object|array
     {
@@ -30,7 +29,6 @@ trait SelectTrait
      * Get entity by ID.
      * @param string $parentId The entity parent ID.
      * @return array<object> The result entity list.
-     * @throws GenericException
      */
     public function getAll(string $parentId): array
     {
@@ -47,7 +45,6 @@ trait SelectTrait
      * Get entity by ID.
      * @param string $id The entity ID.
      * @return object|null The result entity.
-     * @throws GenericException
      */
     public function getById(string $id): ?object
     {

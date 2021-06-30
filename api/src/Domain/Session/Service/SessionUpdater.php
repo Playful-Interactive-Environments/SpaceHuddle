@@ -2,7 +2,6 @@
 
 namespace App\Domain\Session\Service;
 
-use App\Data\AuthorisationData;
 use App\Domain\Base\Service\ServiceUpdaterTrait;
 use App\Domain\Session\Type\SessionRoleType;
 
@@ -12,25 +11,21 @@ use App\Domain\Session\Type\SessionRoleType;
 class SessionUpdater
 {
     use ServiceUpdaterTrait {
-        ServiceUpdaterTrait::service as private genericService;
+        ServiceUpdaterTrait::serviceExecution as private genericService;
     }
     use SessionServiceTrait;
 
     /**
-     * Functionality of the update service.
+     * Executes the repository instructions assigned to the service.
      *
-     * @param AuthorisationData $authorisation Authorisation data
-     * @param array<string, mixed> $bodyData Form data from the request body
-     * @param array<string, mixed> $urlData Url parameter from the request
+     * @param array $data Input data from the request.
      *
-     * @return array|object|null Service output
+     * @return array|object|null Repository answer.
      */
-    public function service(
-        AuthorisationData $authorisation,
-        array $bodyData,
-        array $urlData
+    protected function serviceExecution(
+        array $data
     ): array|object|null {
-        $result = $this->genericService($authorisation, $bodyData, $urlData);
+        $result = $this->genericService($data);
         $result->role = strtoupper(SessionRoleType::MODERATOR);
         return $result;
     }

@@ -11,7 +11,7 @@ use Selective\Validation\Exception\ValidationException;
 use Selective\Validation\ValidationResult;
 
 /**
- * Service.
+ * User validation service.
  */
 final class UserValidator
 {
@@ -30,7 +30,12 @@ final class UserValidator
         $this->setUp($repository, $validationFactory);
     }
 
-    protected function getRepository() : UserRepository {
+    /**
+     * Convert RepositoryInterface to UserRepository.
+     * @return UserRepository UserRepository
+     */
+    protected function getRepository(): UserRepository
+    {
         if ($this->repository instanceof UserRepository) {
             return $this->repository;
         }
@@ -45,7 +50,8 @@ final class UserValidator
      */
     public function validateLogin(array $data): void
     {
-        $this->validateEntity($data,
+        $this->validateEntity(
+            $data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("username")
                 ->requirePresence("username")
@@ -97,14 +103,14 @@ final class UserValidator
     /**
      * Validate password update.
      *
-     * @param string $userId The user id
      * @param array<string, mixed> $data The data
      *
      * @return void
      * @throws GenericException
      */
-    public function validatePasswordUpdate(string $userId, array $data): void
+    public function validatePasswordUpdate(array $data): void
     {
+        $userId = $this->repository->getAuthorisation()->id;
         $this->validateUpdate($userId, $data);
 
         $oldPassword = $data["oldPassword"];

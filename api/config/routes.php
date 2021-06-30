@@ -3,6 +3,8 @@
 // Define app routes
 
 use App\Action\Home\HomeAction;
+use App\Action\Idea\IdeaReadAllFromTaskAction;
+use App\Action\Idea\TaskIdeaCreateAction;
 use App\Action\OpenApi\Version1DocAction;
 use App\Action\Participant\ParticipantConnectAction;
 use App\Action\Participant\ParticipantDeleteAction;
@@ -122,6 +124,9 @@ return function (App $app) {
     $app->group(
         "/task",
         function (RouteCollectorProxy $app) {
+            $app->get("/{taskId}/ideas[/]", IdeaReadAllFromTaskAction::class);
+            $app->post("/{taskId}/idea[/]", TaskIdeaCreateAction::class);
+
             $app->get("/{id}[/]", TaskReadSingleAction::class);
             $app->put("[/]", TaskUpdateAction::class);
             $app->delete("/{id}[/]", TaskDeleteAction::class);

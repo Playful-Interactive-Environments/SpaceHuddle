@@ -27,7 +27,7 @@ use Fig\Http\Message\StatusCodeInterface;
  */
 class SessionReadAllAction
 {
-    use ActionTrait;
+    use SessionActionTrait;
     protected SessionReader $service;
 
     /**

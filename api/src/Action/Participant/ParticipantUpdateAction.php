@@ -24,7 +24,7 @@ use Fig\Http\Message\StatusCodeInterface;
  */
 class ParticipantUpdateAction
 {
-    use ParticipantActionTrait;
+    use ParticipantSelfActionTrait;
     protected ParticipantUpdater $service;
 
     /**

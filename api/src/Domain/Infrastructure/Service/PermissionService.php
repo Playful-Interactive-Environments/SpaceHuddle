@@ -45,6 +45,8 @@ class PermissionService
         string $routeMethod,
         bool $readOnly = false
     ): ?string {
+        $this->repository->setAuthorisation($authorisation);
+
         //Determine url and body parameters and associated entity.
 
         $patternParts = explode("/", str_replace("[/]", "/", $routePattern));
@@ -110,10 +112,10 @@ class PermissionService
         }
 
         if ($readOnly) {
-            return $this->repository->getAuthorisationReadRole($authorisation, $entity, $id) ??
+            return $this->repository->getAuthorisationReadRole($entity, $id) ??
                 SessionRoleType::UNKNOWN;
         }
 
-        return $this->repository->getAuthorisationRole($authorisation, $entity, $id) ?? SessionRoleType::UNKNOWN;
+        return $this->repository->getAuthorisationRole($entity, $id) ?? SessionRoleType::UNKNOWN;
     }
 }

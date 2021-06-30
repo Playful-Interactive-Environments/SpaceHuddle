@@ -43,45 +43,54 @@ class SessionRepository implements RepositoryInterface
 
     /**
      * Checks the access role via which the logged-in user may access the entry with the specified primary key.
-     * @param AuthorisationData $authorisation Authorisation token data.
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
+     * @throws GenericException
      */
-    public function getAuthorisationRole(AuthorisationData $authorisation, ?string $id): ?string
+    public function getAuthorisationRole(?string $id): ?string
     {
-        if (is_null($id)) {
-            return strtoupper(SessionRoleType::MODERATOR);
-        }
-        $query = $this->queryFactory->newSelect("session_permission");
-        $query->select(["role"])
-            ->andWhere([
-                "session_id" => $id,
-                "user_id" => $authorisation->id,
-                "user_type" => $authorisation->type
-            ]);
+        $authorisation = $this->getAuthorisation();
+        $conditions = [
+            "session_id" => $id,
+            "user_id" => $authorisation->id,
+            "user_type" => $authorisation->type
+        ];
+        $role = $this->getAuthorisationRoleFromCondition(
+            $id,
+            $conditions,
+            "session_permission",
+            false
+        );
 
-        $statement = $query->execute();
-        $itemCount = $statement->rowCount();
-        if ($itemCount > 0) {
-            $result = $statement->fetch("assoc");
-            return strtoupper($result["role"]);
+        if ($authorisation->isParticipant() and $role == SessionRoleType::PARTICIPANT) {
+            $result = $this->get([
+                "session.id" => $id
+            ]);
+            if (!is_object($result)) {
+                return SessionRoleType::INACTIVE;
+            }
         }
-        return null;
+
+        return $role;
     }
 
     /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
-     * @param AuthorisationData $authorisation Authorisation token data.
      * @return SessionData|array<SessionData>|null The result entity(s).
      * @throws GenericException
      */
-    public function getAuthorised(array $conditions, AuthorisationData $authorisation): null|SessionData|array
+    public function get(array $conditions = []): null|SessionData|array
     {
+        $authorisation = $this->getAuthorisation();
         $authorisation_conditions = [
             "session_permission.user_id" => $authorisation->id,
             "session_permission.user_type" => $authorisation->type
         ];
+
+        if ($authorisation->isParticipant()) {
+            array_push($conditions, "session.expiration_date >= current_timestamp()");
+        }
 
         $query = $this->queryFactory->newSelect($this->getEntityName());
         $query->select(["session.*", "session_permission.role"])
@@ -95,15 +104,14 @@ class SessionRepository implements RepositoryInterface
     /**
      * Get entity by ID.
      * @param string $id The entity ID.
-     * @param AuthorisationData $authorisation Authorisation token data.
      * @return SessionData|null The result entity.
      * @throws GenericException
      */
-    public function getByIdAuthorised(string $id, AuthorisationData $authorisation): ?SessionData
+    public function getById(string $id): ?SessionData
     {
-        $result = $this->getAuthorised([
+        $result = $this->get([
             "session.id" => $id
-        ], $authorisation);
+        ]);
         if (!is_object($result)) {
             throw new DomainException("Entity $this->entityName not found");
         }
@@ -113,15 +121,14 @@ class SessionRepository implements RepositoryInterface
     /**
      * Get entity by ID.
      * @param string $parentId The entity parent ID.
-     * @param AuthorisationData $authorisation Authorisation token data.
      * @return array<SessionData> The result entity list.
      * @throws GenericException
      */
-    public function getAllAuthorised(string $parentId, AuthorisationData $authorisation): array
+    public function getAll(string $parentId): array
     {
-        $result = $this->getAuthorised([
+        $result = $this->get([
             #"session_permission.user_state" => "active"
-        ], $authorisation);
+        ]);
         if (is_array($result)) {
             return $result;
         } elseif (isset($result)) {

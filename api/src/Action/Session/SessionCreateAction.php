@@ -35,7 +35,7 @@ use Fig\Http\Message\StatusCodeInterface;
  */
 class SessionCreateAction
 {
-    use ActionTrait;
+    use SessionActionTrait;
     protected SessionCreator $service;
 
     /**

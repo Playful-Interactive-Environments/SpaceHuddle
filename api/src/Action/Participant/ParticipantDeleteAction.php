@@ -20,7 +20,7 @@ use Fig\Http\Message\StatusCodeInterface;
  */
 class ParticipantDeleteAction
 {
-    use ParticipantActionTrait;
+    use ParticipantSelfActionTrait;
     protected ParticipantDeleter $service;
 
     /**

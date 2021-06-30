@@ -26,7 +26,7 @@ use Fig\Http\Message\StatusCodeInterface;
  */
 class ParticipantReadTopicAction
 {
-    use ActionTrait;
+    use ParticipantActionTrait;
     protected ParticipantTopicReader $service;
 
     /**

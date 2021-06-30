@@ -2,37 +2,28 @@
 
 namespace App\Domain\Base\Service;
 
-use App\Data\AuthorisationData;
-
 /**
  * Description of the common update service functionality.
  * @package App\Domain\Base\Service
  */
 trait ServiceUpdateMessageTrait
 {
-    use ServiceUpdaterTrait {
-        ServiceUpdaterTrait::service as private updateService;
-    }
+    use ServiceUpdaterTrait;
 
     /**
-     * Functionality of the update service.
+     * Executes the repository instructions assigned to the service.
      *
-     * @param AuthorisationData $authorisation Authorisation data
-     * @param array<string, mixed> $bodyData Form data from the request body
-     * @param array<string, mixed> $urlData Url parameter from the request
+     * @param array $data Input data from the request.
      *
-     * @return array|object|null Service output
+     * @return array|object|null Repository answer.
      */
-    public function service(
-        AuthorisationData $authorisation,
-        array $bodyData,
-        array $urlData
+    protected function serviceExecution(
+        array $data
     ): array|object|null {
-        $result = $this->updateService($authorisation, $bodyData, $urlData);
+        $result = $this->repository->update((object)$data);
 
-        // Logging
         $entityName = $this->repository->getEntityName();
-        return [
+        return (object)[
             "state" => "Success",
             "message" => "$entityName updated successfully: $result->id"
         ];

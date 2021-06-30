@@ -6,7 +6,6 @@ use App\Domain\Base\Service\ServiceCreatorTrait;
 
 /**
  * Topic create service.
- * @package App\Domain\Session\Service
  */
 class TopicCreator
 {

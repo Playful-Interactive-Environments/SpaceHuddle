@@ -2,9 +2,8 @@
 
 namespace App\Domain\Session\Service;
 
-use App\Data\AuthorisationData;
 use App\Domain\Base\Repository\GenericException;
-use App\Domain\Base\Service\BaseServiceTrait;
+use App\Domain\Base\Service\BaseUrlServiceTrait;
 
 /**
  * Read specific session service
@@ -12,25 +11,21 @@ use App\Domain\Base\Service\BaseServiceTrait;
  */
 class SessionSingleReader
 {
-    use BaseServiceTrait;
+    use BaseUrlServiceTrait;
     use SessionServiceTrait;
 
     /**
-     * Functionality of the read single entity service.
+     * Executes the repository instructions assigned to the service.
      *
-     * @param AuthorisationData $authorisation Authorisation data
-     * @param array<string, mixed> $bodyData Form data from the request body
-     * @param array<string, mixed> $urlData Url parameter from the request
+     * @param array $data Input data from the request.
      *
-     * @return array|object|null Service output
+     * @return array|object|null Repository answer.
      * @throws GenericException
      */
-    public function service(
-        AuthorisationData $authorisation,
-        array $bodyData,
-        array $urlData
+    protected function serviceExecution(
+        array $data
     ): array|object|null {
-        $id = $urlData["id"];
-        return $this->repository->getByIdAuthorised($id, $authorisation);
+        $id = $data["id"];
+        return $this->repository->getById($id);
     }
 }

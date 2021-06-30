@@ -17,6 +17,7 @@ trait RepositoryTrait
     }
     use DeleteTrait;
     use CheckTrait;
+    use AuthorisationTrait;
 
     protected QueryFactory $queryFactory;
 
