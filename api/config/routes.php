@@ -3,14 +3,18 @@
 // Define app routes
 
 use App\Action\Home\HomeAction;
+use App\Action\Idea\IdeaCreateForTopicAction;
+use App\Action\Idea\IdeaDeleteAction;
 use App\Action\Idea\IdeaReadAllFromTaskAction;
-use App\Action\Idea\TaskIdeaCreateAction;
+use App\Action\Idea\IdeaCreateForTaskAction;
+use App\Action\Idea\IdeaReadAllFromTopicAction;
+use App\Action\Idea\IdeaReadSingleAction;
+use App\Action\Idea\IdeaUpdateAction;
 use App\Action\OpenApi\Version1DocAction;
 use App\Action\Participant\ParticipantConnectAction;
 use App\Action\Participant\ParticipantDeleteAction;
 use App\Action\Participant\ParticipantReadTaskAction;
 use App\Action\Participant\ParticipantReadTopicAction;
-use App\Action\Participant\ParticipantReadTopicTaskAction;
 use App\Action\Participant\ParticipantReconnectAction;
 use App\Action\Participant\ParticipantUpdateAction;
 use App\Action\PreflightAction;
@@ -113,7 +117,9 @@ return function (App $app) {
         function (RouteCollectorProxy $app) {
             $app->post("/{topicId}/task[/]", TaskCreateAction::class);
             $app->get("/{topicId}/tasks[/]", TaskReadAllAction::class);
-            $app->get("/{topicId}/participant_tasks[/]", ParticipantReadTopicTaskAction::class);
+
+            $app->get("/{topicId}/ideas[/]", IdeaReadAllFromTopicAction::class);
+            $app->post("/{topicId}/idea[/]", IdeaCreateForTopicAction::class);
 
             $app->get("/{id}[/]", TopicReadSingleAction::class);
             $app->put("[/]", TopicUpdateAction::class);
@@ -125,11 +131,20 @@ return function (App $app) {
         "/task",
         function (RouteCollectorProxy $app) {
             $app->get("/{taskId}/ideas[/]", IdeaReadAllFromTaskAction::class);
-            $app->post("/{taskId}/idea[/]", TaskIdeaCreateAction::class);
+            $app->post("/{taskId}/idea[/]", IdeaCreateForTaskAction::class);
 
             $app->get("/{id}[/]", TaskReadSingleAction::class);
             $app->put("[/]", TaskUpdateAction::class);
             $app->delete("/{id}[/]", TaskDeleteAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/idea",
+        function (RouteCollectorProxy $app) {
+            $app->get("/{id}[/]", IdeaReadSingleAction::class);
+            $app->put("[/]", IdeaUpdateAction::class);
+            $app->delete("/{id}[/]", IdeaDeleteAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 

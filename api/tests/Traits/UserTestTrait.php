@@ -93,4 +93,20 @@ trait UserTestTrait
         }
         return "";
     }
+
+    /**
+     * Determine first idea id
+     * @return string|null json token
+     */
+    protected function getFirstIdeaId() : ?string
+    {
+        $topicId = $this->getFirstTopicId();
+        $result = $this->getFirstEntity(
+            "topic/$topicId/ideas"
+        );
+        if (is_object($result) and property_exists($result, "id")) {
+            return $result->id;
+        }
+        return "";
+    }
 }

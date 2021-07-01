@@ -3,18 +3,18 @@
 namespace App\Action\Idea;
 
 use App\Action\Base\ActionTrait;
-use App\Domain\Idea\Service\IdeaReaderTask;
+use App\Domain\Idea\Service\IdeaReaderTopic;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 
 /**
- * Action for reading a list of all the ideas for the specified task.
+ * Action for reading a list of all the ideas for the specified topic.
  *
  * @OA\Get(
- *   path="/api/task/{taskId}/ideas/",
- *   summary="List of all ideas for the task.",
+ *   path="/api/topic/{topicId}/ideas/",
+ *   summary="List of all ideas for the topic.",
  *   tags={"Idea"},
- *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
+ *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
  *   @OA\Response(response="200", description="Success",
  *     @OA\MediaType(
  *         mediaType="application/json",
@@ -25,18 +25,18 @@ use Fig\Http\Message\StatusCodeInterface;
  *   security={{"api_key": {}}, {"bearerAuth": {}}}
  * )
  */
-class IdeaReadAllFromTaskAction
+class IdeaReadAllFromTopicAction
 {
     use ActionTrait;
-    protected IdeaReaderTask $service;
+    protected IdeaReaderTopic $service;
 
     /**
      * The constructor.
      *
      * @param Responder $responder The responder
-     * @param IdeaReaderTask $service The service
+     * @param IdeaReaderTopic $service The service
      */
-    public function __construct(Responder $responder, IdeaReaderTask $service)
+    public function __construct(Responder $responder, IdeaReaderTopic $service)
     {
         $this->setUp($responder);
         $this->service = $service;

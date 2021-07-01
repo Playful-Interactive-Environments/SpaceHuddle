@@ -7,6 +7,7 @@ use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Idea\Data\IdeaData;
 use App\Domain\Task\Repository\TaskRepository;
+use App\Domain\Task\Type\TaskState;
 use App\Domain\Task\Type\TaskType;
 use App\Factory\QueryFactory;
 
@@ -110,6 +111,72 @@ class IdeaRepository implements RepositoryInterface
             throw new DomainException("Entity $this->entityName not found");
         }
         return $result;
+    }
+
+    /**
+     * Get list of entities for the topic ID.
+     * @param string $topicId The topic ID.
+     * @return array<object> The result entity list.
+     * @throws GenericException
+     */
+    public function getAllFromTopic(string $topicId): array
+    {
+        $result = $this->get([
+            "task.topic_id" => $topicId,
+            "task_type" => $this->taskType,
+            "task.state IN" => [
+                strtoupper(TaskState::ACTIVE),
+                strtoupper(TaskState::READ_ONLY)
+            ]
+        ]);
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
+    }
+
+    /**
+     * Insert entity row.
+     * @param object $data The data to be inserted
+     * @return object|null The new created entity
+     */
+    public function insertToTopic(object $data): ?object
+    {
+        $taskId = $this->getTopicBrainstormingTask(
+            $data->topicId,
+            [strtoupper(TaskState::ACTIVE)]
+        );
+        if (isset($taskId)) {
+            $data->taskId = $taskId;
+            return $this->insert($data);
+        }
+        return null;
+    }
+
+    /**
+     * Determine the first active brainstorming task that is assigned to the topic.
+     * If no corresponding task has been created, NULL is returned.
+     * @param string $topicId Topic ID
+     * @param array $validStates Valid states
+     * @return string|null First active brainstorming task that is assigned to the topic.
+     * If no corresponding task has been created, NULL is returned.
+     */
+    public function getTopicBrainstormingTask(string $topicId, array $validStates): ?string
+    {
+        $query = $this->queryFactory->newSelect("task");
+        $query->select(["id"])
+            ->andWhere([
+                "topic_id" => $topicId,
+                "task_type" => $this->taskType
+            ])->whereInList("state", $validStates);
+
+        $result = $query->execute()->fetch("assoc");
+        if ($result) {
+            return $result["id"];
+        }
+        return null;
     }
 
     /**

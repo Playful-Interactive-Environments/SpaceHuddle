@@ -26,7 +26,7 @@ trait SelectTrait
     }
 
     /**
-     * Get entity by ID.
+     * Get list of entities for the parent ID.
      * @param string $parentId The entity parent ID.
      * @return array<object> The result entity list.
      */

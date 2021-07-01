@@ -5,6 +5,7 @@ namespace App\Domain\Infrastructure\Repository;
 use App\Domain\Base\Repository\AuthorisationTrait;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\InstantiateTrait;
+use App\Domain\Idea\Repository\IdeaRepository;
 use App\Domain\Participant\Repository\ParticipantRepository;
 use App\Domain\Session\Repository\SessionRepository;
 use App\Domain\Task\Repository\TaskRepository;
@@ -25,6 +26,7 @@ class InfrastructureRepository
         "session" => SessionRepository::class,
         "topic" => TopicRepository::class,
         "task" => TaskRepository::class,
+        "idea" => IdeaRepository::class,
         "user" => UserRepository::class,
         "participant" => ParticipantRepository::class
     ];

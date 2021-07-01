@@ -42,8 +42,7 @@ class PermissionService
         array|object|null $requestBody,
         array $urlData,
         string $routePattern,
-        string $routeMethod,
-        bool $readOnly = false
+        string $routeMethod
     ): ?string {
         $this->repository->setAuthorisation($authorisation);
 
@@ -75,7 +74,7 @@ class PermissionService
         }
 
         //Determines the session role
-        return $this->getRole($authorisation, $data, $dataEntity, $readOnly);
+        return $this->getRole($authorisation, $data, $dataEntity, $routeMethod == "GET");
     }
 
     /**
@@ -90,7 +89,7 @@ class PermissionService
         AuthorisationData $authorisation,
         array $parameterValue,
         array $parameterEntity,
-        bool $readOnly = false
+        bool $readPermission = false
     ): string {
         $id = null;
         $entity = "user";
@@ -111,7 +110,7 @@ class PermissionService
             $entity = strtolower($authorisation->type);
         }
 
-        if ($readOnly) {
+        if ($readPermission) {
             return $this->repository->getAuthorisationReadRole($entity, $id) ??
                 SessionRoleType::UNKNOWN;
         }

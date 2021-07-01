@@ -39,11 +39,13 @@ class TaskRepository implements RepositoryInterface
     /**
      * Checks the access role via which the logged-in user may access the entry with the specified primary key.
      * @param string|null $id Primary key to be checked.
+     * @param array $validStates Valid states
      * @return string|null Role with which the user is authorised to access the entry.
      * @throws GenericException
      */
-    public function getAuthorisationRole(
-        ?string $id
+    private function getAuthorisationRoleForState(
+        ?string $id,
+        array $validStates
     ): ?string {
         $authorisation = $this->getAuthorisation();
         $query = $this->queryFactory->newSelect($this->getEntityName());
@@ -51,13 +53,44 @@ class TaskRepository implements RepositoryInterface
             ->andWhere(["id" => $id]);
 
         if ($authorisation->isParticipant()) {
-            $query->whereInList("state", [
-                strtoupper(TaskState::ACTIVE),
-                strtoupper(TaskState::READ_ONLY)
-            ]);
+            $query->whereInList("state", $validStates);
         }
 
         return $this->getAuthorisationRoleFromQuery($id, $query);
+    }
+
+    /**
+     * Checks the access role via which the logged-in user may access the entry with the specified primary key.
+     * @param string|null $id Primary key to be checked.
+     * @return string|null Role with which the user is authorised to access the entry.
+     * @throws GenericException
+     */
+    public function getAuthorisationRole(
+        ?string $id
+    ): ?string {
+        return $this->getAuthorisationRoleForState(
+            $id,
+            [
+                strtoupper(TaskState::ACTIVE)
+            ]
+        );
+    }
+
+    /**
+     * Checks whether the user is authorised to read the entry with the specified primary key.
+     * @param string|null $id Primary key to be checked.
+     * @return string|null Role with which the user is authorised to access the entry.
+     * @throws GenericException
+     */
+    public function getAuthorisationReadRole(?string $id): ?string
+    {
+        return $this->getAuthorisationRoleForState(
+            $id,
+            [
+                strtoupper(TaskState::ACTIVE),
+                strtoupper(TaskState::READ_ONLY)
+            ]
+        );
     }
 
     /**

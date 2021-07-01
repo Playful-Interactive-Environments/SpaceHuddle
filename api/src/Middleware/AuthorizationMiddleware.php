@@ -104,8 +104,7 @@ final class AuthorizationMiddleware
                     $bodyData,
                     $urlData,
                     $urlPattern,
-                    $action,
-                    false
+                    $action
                 );
                 if (!$this->enforcer->enforce($authorisationType, $sessionRole, $uriPath, $action)) {
                     return $this->responseFactory->createResponse()
