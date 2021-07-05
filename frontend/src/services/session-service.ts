@@ -31,6 +31,12 @@ export const getById = async (id: string): Promise<Session> => {
   return data;
 };
 
+export const getClientSession = async (): Promise<Session> => {
+  const API_SESSIONS_ENDPOINT = apiEndpoint(EndpointType.SESSIONS);
+  const { data } = await API_SESSIONS_ENDPOINT.get<Session[]>('/');
+  return data[0];
+};
+
 export const getTopicsList = async (sessionId: string): Promise<Topic[]> => {
   const { data } = await API_SESSION_ENDPOINT.get<Topic[]>(
     `/${sessionId}/${EndpointType.TOPICS}/`

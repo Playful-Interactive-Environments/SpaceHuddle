@@ -22,7 +22,7 @@ import { Idea } from '@/services/idea-service';
   components: {},
 })
 export default class IdeaCard extends Vue {
-  @Prop({ default: null }) idea!: Idea;
+  @Prop() idea!: Idea;
   @Prop({ default: true }) isDeletable!: boolean;
 
   get hasKeywords(): boolean {

@@ -2,10 +2,7 @@
   <div class="overview container--fullheight">
     <div class="container">
       <MenuBar />
-      <SessionInfo
-        :title="'GAB project meeting'"
-        :description="'The purpose of this meeting is to find a name for our new game assisted brainstroming application.'"
-      />
+      <SessionInfo :title="sessionName" :description="sessionDescription" />
     </div>
     <TopicExpand v-for="topic in filteredTopics" :key="topic.id" :isRow="true">
       <template v-slot:title>{{ topic.title }}</template>
@@ -33,6 +30,7 @@ import ModuleType from '../../types/ModuleType';
 import { Prop } from 'vue-property-decorator';
 import * as topicService from '@/services/topic-service';
 import * as participantService from '@/services/participant-service';
+import * as sessionService from '@/services/session-service';
 import { Topic } from '@/services/topic-service';
 
 @Options({
@@ -48,9 +46,12 @@ export default class ClientOverview extends Vue {
 
   topics: Topic[] = [];
   ModuleType = ModuleType;
+  sessionName = '';
+  sessionDescription = '';
 
-  async mounted(): Promise<void> {
-    await this.getTopicsAndTasks();
+  mounted(): void {
+    this.getSessionInfo();
+    this.getTopicsAndTasks();
   }
 
   get filteredTopics(): Topic[] {
@@ -62,6 +63,12 @@ export default class ClientOverview extends Vue {
     this.topics.forEach(async (topic) => {
       topic.tasks = await topicService.getParticipantTasks(topic.id);
     });
+  }
+
+  async getSessionInfo(): Promise<void> {
+    let session = await sessionService.getClientSession();
+    this.sessionName = session.title;
+    this.sessionDescription = session.description;
   }
 }
 </script>

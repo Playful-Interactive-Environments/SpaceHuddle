@@ -42,7 +42,7 @@ export default class HalfCard extends Vue {
 
 .fullwidth {
   width: 100vw;
-  height: 100vw;
+  min-height: 100vw;
   position: relative;
   margin-left: -50vw;
   margin-top: 10px;

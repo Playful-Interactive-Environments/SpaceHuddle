@@ -1,5 +1,5 @@
 <template>
-  <router-link to="/sessions">
+  <router-link :to="isClient ? '/overview' : '/sessions'">
     <svg
       id="logo"
       class="logo"
@@ -31,10 +31,13 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import { Prop } from 'vue-property-decorator';
 @Options({
   components: {},
 })
-export default class Logo extends Vue {}
+export default class Logo extends Vue {
+  @Prop({ default: false }) isClient!: boolean;
+}
 </script>
 
 <style lang="scss" scoped>

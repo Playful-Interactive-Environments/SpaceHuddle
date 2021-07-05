@@ -63,7 +63,6 @@ import * as topicService from '@/services/topic-service';
 import { Session } from '@/services/session-service';
 import { Topic } from '@/services/topic-service';
 import { EventType } from '@/types/EventType';
-import { Task } from '../../services/task-service';
 
 @Options({
   components: {
@@ -94,7 +93,7 @@ export default class ModeratorSessionDetails extends Vue {
     this.eventBus.on(EventType.CHANGE_PUBLIC_SCREEN, async (id) => {
       this.publicScreenTaskId = id as string;
       // TODO: change endpoint to toggle public screen
-      let data = await sessionService.displayOnPublicScreen(
+      await sessionService.displayOnPublicScreen(
         this.sessionId,
         this.publicScreenTaskId
       );
