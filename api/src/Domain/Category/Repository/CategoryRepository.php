@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Domain\Idea\Repository;
+namespace App\Domain\Category\Repository;
 
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
-use App\Domain\Idea\Data\IdeaData;
+use App\Domain\Category\Data\CategoryData;
+use App\Domain\Idea\Repository\IdeaTableTrait;
 use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Task\Type\TaskType;
@@ -14,7 +15,7 @@ use App\Factory\QueryFactory;
 /**
  * Repository
  */
-class IdeaRepository implements RepositoryInterface
+class CategoryRepository implements RepositoryInterface
 {
     use RepositoryTrait, IdeaTableTrait {
         IdeaTableTrait::getById insteadof RepositoryTrait;
@@ -26,7 +27,7 @@ class IdeaRepository implements RepositoryInterface
      * The type of task involved.
      * @var string
      */
-    protected string $taskType = TaskType::BRAINSTORMING;
+    protected string $taskType = TaskType::CATEGORISATION;
 
     /**
      * The constructor.
@@ -38,7 +39,7 @@ class IdeaRepository implements RepositoryInterface
         $this->setUp(
             $queryFactory,
             "idea",
-            IdeaData::class,
+            CategoryData::class,
             "task_id",
             TaskRepository::class
         );
@@ -47,46 +48,17 @@ class IdeaRepository implements RepositoryInterface
     }
 
     /**
-     * Checks the access role via which the logged-in user may access the entry with the specified primary key.
-     * @param string|null $id Primary key to be checked.
-     * @return string|null Role with which the user is authorised to access the entry.
-     * @throws GenericException
-     */
-    public function getAuthorisationRole(
-        ?string $id
-    ): ?string {
-        $authorisation = $this->getAuthorisation();
-        $conditions = ["id" => $id];
-        if ($authorisation->isParticipant()) {
-            $conditions["participant_id"] = $authorisation->id;
-        }
-        return $this->getAuthorisationRoleFromCondition($id, $conditions);
-    }
-
-    /**
-     * Checks whether the user is authorised to read the entry with the specified primary key.
-     * @param string|null $id Primary key to be checked.
-     * @return string|null Role with which the user is authorised to access the entry.
-     * @throws GenericException
-     */
-    public function getAuthorisationReadRole(?string $id): ?string
-    {
-        return $this->getAuthorisationRoleFromCondition($id, ["id" => $id]);
-    }
-
-    /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
-     * @return IdeaData|array<IdeaData>|null The result entity(s).
+     * @return CategoryData|array<CategoryData>|null The result entity(s).
      * @throws GenericException
      */
-    public function get(array $conditions = []): null|IdeaData|array
+    public function get(array $conditions = []): null|CategoryData|array
     {
         $authorisation = $this->getAuthorisation();
         $authorisation_conditions = [];
         if ($authorisation->isParticipant()) {
             $authorisation_conditions = [
-                "idea.participant_id" => $authorisation->id,
                 "task.state IN" => [
                     strtoupper(TaskState::ACTIVE),
                     strtoupper(TaskState::READ_ONLY)

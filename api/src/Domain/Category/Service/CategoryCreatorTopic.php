@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Domain\Idea\Service;
+namespace App\Domain\Category\Service;
 
 use App\Domain\Base\Service\ServiceCreatorTrait;
 use App\Domain\Idea\Type\IdeaState;
 use App\Domain\Task\Type\TaskState;
 
 /**
- * Idea create service.
+ * Category create service.
  */
-class IdeaCreatorTopic
+class CategoryCreatorTopic
 {
     use ServiceCreatorTrait {
         ServiceCreatorTrait::serviceExecution as private creatorService;
     }
-    use IdeaServiceTrait;
+    use CategoryServiceTrait;
 
     /**
      * Validates whether the transferred data is suitable for the service.
@@ -25,7 +25,7 @@ class IdeaCreatorTopic
     {
         // Input validation
         $this->validator->validateCreate($data);
-        $this->validator->validateTopic($data["topicId"], [strtoupper(TaskState::ACTIVE)]);
+        $this->validator->validateTopic($data["topicId"], []);
     }
 
     /**
@@ -40,6 +40,6 @@ class IdeaCreatorTopic
     ): array|object|null {
         $data["state"] = strtoupper(IdeaState::NEW);
         // Insert entity and get new ID
-        return $this->repository->insertToTopic((object)$data, [strtoupper(TaskState::ACTIVE)]);
+        return $this->repository->insertToTopic((object)$data, []);
     }
 }

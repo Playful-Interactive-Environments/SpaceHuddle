@@ -1,25 +1,25 @@
 <?php
 
-namespace App\Test\TestCase\Action\Action06Idea;
+namespace App\Test\TestCase\Action\Action07Category;
 
 use App\Test\Traits\AppTestTrait;
-use App\Test\Traits\ParticipantTestTrait;
+use App\Test\Traits\UserTestTrait;
 use Fig\Http\Message\StatusCodeInterface;
 use Monolog\Test\TestCase;
 
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\Idea\IdeaReadAllFromTaskAction
+ * @coversDefaultClass \App\Action\Category\CategoryReadSingleAction
  */
-class Idea03GetAllFromTaskActionTest extends TestCase
+class Category05GetSingleActionTest extends TestCase
 {
-    use AppTestTrait, ParticipantTestTrait {
-        ParticipantTestTrait::getAccessToken insteadof AppTestTrait;
+    use AppTestTrait {
         AppTestTrait::setUp as private setUpAppTrait;
     }
+    use UserTestTrait;
 
-    protected ?string $taskId;
+    protected ?string $categoryId;
 
     /**
      * Before each test.
@@ -29,7 +29,7 @@ class Idea03GetAllFromTaskActionTest extends TestCase
     protected function setUp(): void
     {
         $this->setUpAppTrait();
-        $this->taskId = $this->getFirstBrainstormingTaskId();
+        $this->categoryId = $this->getFirstCategoryId();
     }
 
     /**
@@ -37,11 +37,11 @@ class Idea03GetAllFromTaskActionTest extends TestCase
      *
      * @return void
      */
-    public function testGetAllIdeasFromTask(): void
+    public function testGetSingleCategory(): void
     {
         $request = $this->createJsonRequest(
             "GET",
-            "/task/$this->taskId/ideas/"
+            "/category/$this->categoryId/"
         );
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
@@ -56,12 +56,12 @@ class Idea03GetAllFromTaskActionTest extends TestCase
      *
      * @return void
      */
-    public function testGetAllIdeasFromTaskWithoutLogin(): void
+    public function testGetSingleCategoryInvalidId(): void
     {
-        $request = $this->createRequest("GET", "/task/$this->taskId/ideas/");
-        $request = $this->withJwtAuth($request)->withoutHeader("Authorization");
+        $request = $this->createRequest("GET", "/category/xxx/");
+        $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
-        $this->assertSame(StatusCodeInterface::STATUS_UNAUTHORIZED, $response->getStatusCode());
+        $this->assertSame(StatusCodeInterface::STATUS_FORBIDDEN, $response->getStatusCode());
     }
 }

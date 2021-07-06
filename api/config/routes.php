@@ -2,6 +2,13 @@
 
 // Define app routes
 
+use App\Action\Category\CategoryCreateForTaskAction;
+use App\Action\Category\CategoryCreateForTopicAction;
+use App\Action\Category\CategoryDeleteAction;
+use App\Action\Category\CategoryReadAllFromTaskAction;
+use App\Action\Category\CategoryReadAllFromTopicAction;
+use App\Action\Category\CategoryReadSingleAction;
+use App\Action\Category\CategoryUpdateAction;
 use App\Action\Home\HomeAction;
 use App\Action\Idea\IdeaCreateForTopicAction;
 use App\Action\Idea\IdeaDeleteAction;
@@ -121,6 +128,9 @@ return function (App $app) {
             $app->get("/{topicId}/ideas[/]", IdeaReadAllFromTopicAction::class);
             $app->post("/{topicId}/idea[/]", IdeaCreateForTopicAction::class);
 
+            $app->get("/{topicId}/categories[/]", CategoryReadAllFromTopicAction::class);
+            $app->post("/{topicId}/category[/]", CategoryCreateForTopicAction::class);
+
             $app->get("/{id}[/]", TopicReadSingleAction::class);
             $app->put("[/]", TopicUpdateAction::class);
             $app->delete("/{id}[/]", TopicDeleteAction::class);
@@ -132,6 +142,9 @@ return function (App $app) {
         function (RouteCollectorProxy $app) {
             $app->get("/{taskId}/ideas[/]", IdeaReadAllFromTaskAction::class);
             $app->post("/{taskId}/idea[/]", IdeaCreateForTaskAction::class);
+
+            $app->get("/{taskId}/categories[/]", CategoryReadAllFromTaskAction::class);
+            $app->post("/{taskId}/category[/]", CategoryCreateForTaskAction::class);
 
             $app->get("/{id}[/]", TaskReadSingleAction::class);
             $app->put("[/]", TaskUpdateAction::class);
@@ -145,6 +158,15 @@ return function (App $app) {
             $app->get("/{id}[/]", IdeaReadSingleAction::class);
             $app->put("[/]", IdeaUpdateAction::class);
             $app->delete("/{id}[/]", IdeaDeleteAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/category",
+        function (RouteCollectorProxy $app) {
+            $app->get("/{id}[/]", CategoryReadSingleAction::class);
+            $app->put("[/]", CategoryUpdateAction::class);
+            $app->delete("/{id}[/]", CategoryDeleteAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 

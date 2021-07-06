@@ -100,10 +100,13 @@ trait ParticipantTestTrait
      * Determine first task id
      * @return string|null json token
      */
-    protected function getFirstTaskId() : ?string
+    protected function getFirstBrainstormingTaskId() : ?string
     {
         $result = $this->getFirstEntity(
-            "participant/tasks"
+            "participant/tasks",
+            condition: [
+                "taskType" => "BRAINSTORMING"
+            ]
         );
         if (is_object($result) and property_exists($result, "id")) {
             return $result->id;

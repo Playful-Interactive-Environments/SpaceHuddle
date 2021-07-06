@@ -1,25 +1,25 @@
 <?php
 
-namespace App\Test\TestCase\Action\Action06Idea;
+namespace App\Test\TestCase\Action\Action07Category;
 
 use App\Test\Traits\AppTestTrait;
-use App\Test\Traits\ParticipantTestTrait;
+use App\Test\Traits\UserTestTrait;
 use Fig\Http\Message\StatusCodeInterface;
 use Monolog\Test\TestCase;
 
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\Idea\IdeaReadAllFromTaskAction
+ * @coversDefaultClass \App\Action\Category\CategoryReadAllFromTopicAction
  */
-class Idea03GetAllFromTaskActionTest extends TestCase
+class Category04GetAllFromTopicActionTest extends TestCase
 {
-    use AppTestTrait, ParticipantTestTrait {
-        ParticipantTestTrait::getAccessToken insteadof AppTestTrait;
+    use AppTestTrait {
         AppTestTrait::setUp as private setUpAppTrait;
     }
+    use UserTestTrait;
 
-    protected ?string $taskId;
+    protected ?string $topicId;
 
     /**
      * Before each test.
@@ -29,7 +29,7 @@ class Idea03GetAllFromTaskActionTest extends TestCase
     protected function setUp(): void
     {
         $this->setUpAppTrait();
-        $this->taskId = $this->getFirstBrainstormingTaskId();
+        $this->topicId = $this->getFirstTopicId();
     }
 
     /**
@@ -37,11 +37,11 @@ class Idea03GetAllFromTaskActionTest extends TestCase
      *
      * @return void
      */
-    public function testGetAllIdeasFromTask(): void
+    public function testGetAllCategoriesFromTopic(): void
     {
         $request = $this->createJsonRequest(
             "GET",
-            "/task/$this->taskId/ideas/"
+            "/topic/$this->topicId/categories/"
         );
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
@@ -56,9 +56,9 @@ class Idea03GetAllFromTaskActionTest extends TestCase
      *
      * @return void
      */
-    public function testGetAllIdeasFromTaskWithoutLogin(): void
+    public function testGetAllCategoriesFromTopicWithoutLogin(): void
     {
-        $request = $this->createRequest("GET", "/task/$this->taskId/ideas/");
+        $request = $this->createRequest("GET", "/topic/$this->topicId/categories/");
         $request = $this->withJwtAuth($request)->withoutHeader("Authorization");
         $response = $this->app->handle($request);
 

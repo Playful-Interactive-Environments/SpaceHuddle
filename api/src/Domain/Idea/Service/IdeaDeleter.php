@@ -5,7 +5,7 @@ namespace App\Domain\Idea\Service;
 use App\Domain\Base\Service\ServiceDeleterTrait;
 
 /**
- * Delete topic service.
+ * Delete idea service.
  */
 class IdeaDeleter
 {

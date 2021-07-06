@@ -3,7 +3,7 @@
 
 namespace App\Action\Session;
 
-use App\Action\Base\ActionTrait;
+use App\Action\Base\AuthorisationActionTrait;
 use App\Domain\Session\Service\SessionCreator;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -35,7 +35,7 @@ use Fig\Http\Message\StatusCodeInterface;
  */
 class SessionCreateAction
 {
-    use SessionActionTrait;
+    use AuthorisationActionTrait;
     protected SessionCreator $service;
 
     /**

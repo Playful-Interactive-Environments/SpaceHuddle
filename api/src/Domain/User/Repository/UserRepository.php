@@ -89,9 +89,8 @@ final class UserRepository implements RepositoryInterface
      */
     public function updatePassword(object $data): object|null
     {
-        $authorisation = $this->getAuthorisation();
         $row = [
-            "id" => $authorisation->id,
+            "id" => $data->id,
             "password" => self::encryptText($data->password)
         ];
         return $this->genericUpdate($row);

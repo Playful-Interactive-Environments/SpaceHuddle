@@ -3,7 +3,6 @@
 
 namespace App\Action\User;
 
-use App\Action\Base\ActionTrait;
 use App\Domain\User\Service\UserUpdater;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -32,7 +31,7 @@ use Fig\Http\Message\StatusCodeInterface;
  */
 class UserChangePasswordAction
 {
-    use ActionTrait;
+    use UserSelfActionTrait;
     protected UserUpdater $service;
 
     /**

@@ -95,6 +95,118 @@ trait UserTestTrait
     }
 
     /**
+     * Determine first task id
+     * @return string|null json token
+     */
+    protected function getFirstBrainstormingTaskId() : ?string
+    {
+        $topicId = $this->getFirstTopicId();
+        $result = $this->getFirstEntity(
+            "topic/$topicId/tasks",
+            [
+                "taskType" => "BRAINSTORMING",
+                "name" => "php unit test task"
+            ],
+            condition: [
+                "taskType" => "BRAINSTORMING"
+            ]
+        );
+        if (is_object($result) and property_exists($result, "id")) {
+            return $result->id;
+        }
+        return "";
+    }
+
+    /**
+     * Determine first task id
+     * @return string|null json token
+     */
+    protected function getFirstCategorisationTaskId() : ?string
+    {
+        $topicId = $this->getFirstTopicId();
+        $result = $this->getFirstEntity(
+            "topic/$topicId/tasks",
+            [
+                "taskType" => "CATEGORISATION",
+                "name" => "php unit test task"
+            ],
+            condition: [
+                "taskType" => "CATEGORISATION"
+            ]
+        );
+        if (is_object($result) and property_exists($result, "id")) {
+            return $result->id;
+        }
+        return "";
+    }
+
+    /**
+     * Determine first task id
+     * @return string|null json token
+     */
+    protected function getFirstSelectionTaskId() : ?string
+    {
+        $topicId = $this->getFirstTopicId();
+        $result = $this->getFirstEntity(
+            "topic/$topicId/tasks",
+            [
+                "taskType" => "SELECTION",
+                "name" => "php unit test task"
+            ],
+            condition: [
+                "taskType" => "SELECTION"
+            ]
+        );
+        if (is_object($result) and property_exists($result, "id")) {
+            return $result->id;
+        }
+        return "";
+    }
+
+    /**
+     * Determine first task id
+     * @return string|null json token
+     */
+    protected function getFirstVotingTaskId() : ?string
+    {
+        $topicId = $this->getFirstTopicId();
+        $result = $this->getFirstEntity(
+            "topic/$topicId/tasks",
+            [
+                "taskType" => "VOTING",
+                "name" => "php unit test task"
+            ],
+            condition: [
+                "taskType" => "VOTING"
+            ]
+        );
+        if (is_object($result) and property_exists($result, "id")) {
+            return $result->id;
+        }
+        return "";
+    }
+
+    /**
+     * Determine first task id
+     * @return string|null json token
+     */
+    protected function getFirstInformationTaskId() : ?string
+    {
+        $topicId = $this->getFirstTopicId();
+        $result = $this->getFirstEntity(
+            "topic/$topicId/tasks",
+            [
+                "taskType" => "INFORMATION",
+                "name" => "php unit test task"
+            ]
+        );
+        if (is_object($result) and property_exists($result, "id")) {
+            return $result->id;
+        }
+        return "";
+    }
+
+    /**
      * Determine first idea id
      * @return string|null json token
      */
@@ -103,6 +215,22 @@ trait UserTestTrait
         $topicId = $this->getFirstTopicId();
         $result = $this->getFirstEntity(
             "topic/$topicId/ideas"
+        );
+        if (is_object($result) and property_exists($result, "id")) {
+            return $result->id;
+        }
+        return "";
+    }
+
+    /**
+     * Determine first category id
+     * @return string|null json token
+     */
+    protected function getFirstCategoryId() : ?string
+    {
+        $topicId = $this->getFirstTopicId();
+        $result = $this->getFirstEntity(
+            "topic/$topicId/categories"
         );
         if (is_object($result) and property_exists($result, "id")) {
             return $result->id;

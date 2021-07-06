@@ -2,7 +2,7 @@
 
 namespace App\Action\Participant;
 
-use App\Action\Base\ActionTrait;
+use App\Action\Base\AuthorisationActionTrait;
 use App\Domain\Participant\Service\ParticipantTopicReader;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -26,7 +26,7 @@ use Fig\Http\Message\StatusCodeInterface;
  */
 class ParticipantReadTopicAction
 {
-    use ParticipantActionTrait;
+    use AuthorisationActionTrait;
     protected ParticipantTopicReader $service;
 
     /**

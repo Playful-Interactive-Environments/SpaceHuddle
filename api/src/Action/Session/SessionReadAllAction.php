@@ -2,7 +2,7 @@
 
 namespace App\Action\Session;
 
-use App\Action\Base\ActionTrait;
+use App\Action\Base\AuthorisationActionTrait;
 use App\Domain\Session\Service\SessionReader;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -27,7 +27,7 @@ use Fig\Http\Message\StatusCodeInterface;
  */
 class SessionReadAllAction
 {
-    use SessionActionTrait;
+    use AuthorisationActionTrait;
     protected SessionReader $service;
 
     /**

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Action\Session;
+namespace App\Action\User;
 
 use App\Action\Base\ActionTrait;
 use App\Data\AuthorisationData;
 
-trait SessionActionTrait
+trait UserSelfActionTrait
 {
     use ActionTrait;
 
@@ -22,11 +22,8 @@ trait SessionActionTrait
         array $urlData
     ) : mixed {
         if ($authorisation->isUser()) {
-            $urlData["userId"] = $authorisation->id;
-        } elseif ($authorisation->isParticipant()) {
-            $urlData["participantId"] = $authorisation->id;
+            $urlData["id"] = $authorisation->id;
         }
-
         return $this->service->service($authorisation, $bodyData, $urlData);
     }
 }

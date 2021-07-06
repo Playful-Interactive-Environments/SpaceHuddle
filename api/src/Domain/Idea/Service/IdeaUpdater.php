@@ -6,7 +6,7 @@ namespace App\Domain\Idea\Service;
 use App\Domain\Base\Service\ServiceUpdaterTrait;
 
 /**
- * Update topic service.
+ * Update idea service.
  */
 class IdeaUpdater
 {

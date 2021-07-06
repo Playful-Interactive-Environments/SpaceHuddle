@@ -1,25 +1,25 @@
 <?php
 
-namespace App\Test\TestCase\Action\Action06Idea;
+namespace App\Test\TestCase\Action\Action07Category;
 
 use App\Test\Traits\AppTestTrait;
-use App\Test\Traits\ParticipantTestTrait;
+use App\Test\Traits\UserTestTrait;
 use Fig\Http\Message\StatusCodeInterface;
 use Monolog\Test\TestCase;
 
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\Idea\IdeaCreateForTaskAction
+ * @coversDefaultClass \App\Action\Category\CategoryCreateForTopicAction
  */
-class Idea01CreateForTaskActionTest extends TestCase
+class Category02CreateForTopicActionTest extends TestCase
 {
-    use AppTestTrait, ParticipantTestTrait {
-        ParticipantTestTrait::getAccessToken insteadof AppTestTrait;
+    use AppTestTrait {
         AppTestTrait::setUp as private setUpAppTrait;
     }
+    use UserTestTrait;
 
-    protected ?string $taskId;
+    protected ?string $topicId;
 
     /**
      * Before each test.
@@ -29,7 +29,7 @@ class Idea01CreateForTaskActionTest extends TestCase
     protected function setUp(): void
     {
         $this->setUpAppTrait();
-        $this->taskId = $this->getFirstBrainstormingTaskId();
+        $this->topicId = $this->getFirstTopicId();
     }
 
     /**
@@ -37,14 +37,14 @@ class Idea01CreateForTaskActionTest extends TestCase
      *
      * @return void
      */
-    public function testCreateIdeaForTask(): void
+    public function testCreateCategoryForTopic(): void
     {
         $tableRowCount = $this->getTableRowCount("idea");
         $request = $this->createJsonRequest(
             "POST",
-            "/task/$this->taskId/idea/",
+            "/topic/$this->topicId/category/",
             [
-                "keywords" => "php unit test idea"
+                "keywords" => "php unit test category"
             ]
         );
         $request = $this->withJwtAuth($request);
@@ -63,13 +63,13 @@ class Idea01CreateForTaskActionTest extends TestCase
      *
      * @return void
      */
-    public function testCreateIdeaForTaskValidation(): void
+    public function testCreateCategoryForTopicValidation(): void
     {
         $request = $this->createJsonRequest(
             "POST",
-            "/task/$this->taskId/idea/",
+            "/topic/$this->topicId/category/",
             [
-                "description" => "php unit test idea"
+                "description" => "php unit test category"
             ]
         );
         $request = $this->withJwtAuth($request);

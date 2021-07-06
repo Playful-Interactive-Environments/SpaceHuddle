@@ -2,6 +2,7 @@
 
 namespace App\Action\Idea;
 
+use App\Action\Base\AuthorisationActionTrait;
 use App\Domain\Idea\Service\IdeaCreatorTopic;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
@@ -34,7 +35,7 @@ use Fig\Http\Message\StatusCodeInterface;
  */
 class IdeaCreateForTopicAction
 {
-    use IdeaActionTrait;
+    use AuthorisationActionTrait;
     protected IdeaCreatorTopic $service;
 
     /**
@@ -49,5 +50,4 @@ class IdeaCreateForTopicAction
         $this->service = $service;
         $this->successStatusCode = StatusCodeInterface::STATUS_CREATED;
     }
-
 }
