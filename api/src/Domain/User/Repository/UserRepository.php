@@ -132,7 +132,6 @@ final class UserRepository implements RepositoryInterface
 
         $result = $query->execute()->fetchAll("assoc");
         if (is_array($result)) {
-            //TODO: Implement an equivalent for getInstance
             $session = new SessionRepository($this->queryFactory);
             foreach ($result as $resultItem) {
                 $sessionId = $resultItem["session_id"];

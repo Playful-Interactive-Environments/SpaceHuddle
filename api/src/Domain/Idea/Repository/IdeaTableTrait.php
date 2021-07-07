@@ -2,8 +2,6 @@
 
 namespace App\Domain\Idea\Repository;
 
-use App\Domain\Task\Type\TaskState;
-
 trait IdeaTableTrait
 {
     /**

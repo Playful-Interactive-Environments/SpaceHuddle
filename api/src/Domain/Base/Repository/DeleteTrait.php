@@ -12,7 +12,6 @@ trait DeleteTrait
      * Delete entity row.
      * @param string $id The entity ID.
      * @return void
-     * @throws GenericException
      */
     public function deleteById(string $id): void
     {

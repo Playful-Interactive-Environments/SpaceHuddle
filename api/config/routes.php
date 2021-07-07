@@ -5,6 +5,9 @@
 use App\Action\Category\CategoryCreateForTaskAction;
 use App\Action\Category\CategoryCreateForTopicAction;
 use App\Action\Category\CategoryDeleteAction;
+use App\Action\Category\CategoryIdeaAddAction;
+use App\Action\Category\CategoryIdeaDeleteAction;
+use App\Action\Category\CategoryIdeaReadAction;
 use App\Action\Category\CategoryReadAllFromTaskAction;
 use App\Action\Category\CategoryReadAllFromTopicAction;
 use App\Action\Category\CategoryReadSingleAction;
@@ -164,6 +167,10 @@ return function (App $app) {
     $app->group(
         "/category",
         function (RouteCollectorProxy $app) {
+            $app->get("/{categoryId}/ideas[/]", CategoryIdeaReadAction::class);
+            $app->post("/{categoryId}/ideas[/]", CategoryIdeaAddAction::class);
+            $app->delete("/{categoryId}/ideas[/]", CategoryIdeaDeleteAction::class);
+
             $app->get("/{id}[/]", CategoryReadSingleAction::class);
             $app->put("[/]", CategoryUpdateAction::class);
             $app->delete("/{id}[/]", CategoryDeleteAction::class);

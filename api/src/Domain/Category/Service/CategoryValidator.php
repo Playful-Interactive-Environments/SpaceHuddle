@@ -58,4 +58,38 @@ class CategoryValidator
             throw new ValidationException("Please check your input", $result);
         }
     }
+
+    /**
+     * Ideas validator.
+     * @param array $data Data to be verified.
+     * @param bool $lookForConnected If true, only ideas already associated with the category are valid.
+     * @return void
+     */
+    public function validateIdeas(array $data, bool $lookForConnected = false): void
+    {
+        $this->validateEntity(
+            $data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("categoryId")
+                ->requirePresence("categoryId")
+                ->notEmptyArray("ideas")
+                ->requirePresence("ideas")
+        );
+
+        $categoryId = $data["categoryId"];
+        $ideas = $data["ideas"];
+
+        if (!$this->repository->ideasAgreeWithCategory($categoryId, $ideas, $lookForConnected)) {
+            $result = new ValidationResult();
+            $message = "Not all ideas are valid idea keys or do not belong to the same topic as the category.";
+            if ($lookForConnected) {
+                $message = "Not all ideas are linked to the category.";
+            }
+            $result->addError(
+                "ideas",
+                $message
+            );
+            throw new ValidationException("Please check your input", $result);
+        }
+    }
 }
