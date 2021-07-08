@@ -12,8 +12,6 @@ use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Task\Type\TaskType;
 use App\Factory\QueryFactory;
-use Cake\Database\Expression\QueryExpression;
-use Cake\Database\Query;
 
 /**
  * Repository

@@ -8,6 +8,10 @@ use App\Domain\Base\Repository\InstantiateTrait;
 use App\Domain\Category\Repository\CategoryRepository;
 use App\Domain\Idea\Repository\IdeaRepository;
 use App\Domain\Participant\Repository\ParticipantRepository;
+use App\Domain\Resource\Repository\ResourceRepository;
+use App\Domain\Selection\Repository\SelectionRepository;
+use App\Domain\SessionRole\Repository\SessionRoleRepository;
+use App\Domain\Vote\Repository\VoteRepository;
 use App\Domain\Session\Repository\SessionRepository;
 use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Topic\Repository\TopicRepository;
@@ -29,6 +33,10 @@ class InfrastructureRepository
         "task" => TaskRepository::class,
         "idea" => IdeaRepository::class,
         "category" => CategoryRepository::class,
+        "selection" => SelectionRepository::class,
+        "vote" => VoteRepository::class,
+        "resource" => ResourceRepository::class,
+        "session_role" => SessionRoleRepository::class,
         "user" => UserRepository::class,
         "participant" => ParticipantRepository::class
     ];

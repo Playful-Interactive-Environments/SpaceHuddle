@@ -25,8 +25,8 @@ final class UserData
     public ?string $username = null;
 
     /**
-     * Creates a new Participant.
-     * @param array $data Participant data.
+     * Creates a new User.
+     * @param array $data User data.
      */
     public function __construct(array $data = [])
     {
