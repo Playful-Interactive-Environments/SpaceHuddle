@@ -230,7 +230,29 @@ trait UserTestTrait
     {
         $topicId = $this->getFirstTopicId();
         $result = $this->getFirstEntity(
-            "topic/$topicId/categories"
+            "topic/$topicId/categories",
+            [
+                "keyword" => "php unit test category"
+            ]
+        );
+        if (is_object($result) and property_exists($result, "id")) {
+            return $result->id;
+        }
+        return "";
+    }
+
+    /**
+     * Determine first selection id
+     * @return string|null json token
+     */
+    protected function getFirstSelectionId() : ?string
+    {
+        $topicId = $this->getFirstTopicId();
+        $result = $this->getFirstEntity(
+            "topic/$topicId/selections",
+            [
+                "name" => "php unit test selection"
+            ]
         );
         if (is_object($result) and property_exists($result, "id")) {
             return $result->id;

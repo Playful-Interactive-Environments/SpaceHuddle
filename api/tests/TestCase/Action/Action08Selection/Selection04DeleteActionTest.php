@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Test\TestCase\Action\Action07Category;
+namespace App\Test\TestCase\Action\Action08Selection;
 
 use App\Test\Traits\AppTestTrait;
 use App\Test\Traits\UserTestTrait;
@@ -10,16 +10,16 @@ use Monolog\Test\TestCase;
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\Category\CategoryUpdateAction
+ * @coversDefaultClass \App\Action\Selection\SelectionDeleteAction
  */
-class Category07UpdateActionTrait extends TestCase
+class Selection04DeleteActionTest extends TestCase
 {
     use AppTestTrait {
         AppTestTrait::setUp as private setUpAppTrait;
     }
     use UserTestTrait;
 
-    protected ?string $categoryId;
+    protected ?string $selectionId;
 
     /**
      * Before each test.
@@ -29,7 +29,7 @@ class Category07UpdateActionTrait extends TestCase
     protected function setUp(): void
     {
         $this->setUpAppTrait();
-        $this->categoryId = $this->getFirstCategoryId();
+        $this->selectionId = $this->getFirstSelectionId();
     }
 
     /**
@@ -37,15 +37,11 @@ class Category07UpdateActionTrait extends TestCase
      *
      * @return void
      */
-    public function testUpdateCategory(): void
+    public function testDeleteSelection(): void
     {
         $request = $this->createJsonRequest(
-            "PUT",
-            "/category/",
-            [
-                "id" => $this->categoryId,
-                "description" => "test"
-            ]
+            "DELETE",
+            "/selection/$this->selectionId/"
         );
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
@@ -60,16 +56,9 @@ class Category07UpdateActionTrait extends TestCase
      *
      * @return void
      */
-    public function testUpdateCategoryInvalidId(): void
+    public function testDeleteSelectionInvalidId(): void
     {
-        $request = $this->createJsonRequest(
-            "PUT",
-            "/category/",
-            [
-                "id" => "xxx",
-                "description" => null
-            ]
-        );
+        $request = $this->createRequest("DELETE", "/selection/xxx/");
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 

@@ -5,7 +5,7 @@ namespace App\Domain\Task\Service;
 use App\Domain\Base\Service\ServiceDeleterTrait;
 
 /**
- * Delete topic service.
+ * Delete task service.
  */
 class TaskDeleter
 {

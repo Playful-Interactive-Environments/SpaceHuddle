@@ -28,6 +28,14 @@ use App\Action\Participant\ParticipantReadTopicAction;
 use App\Action\Participant\ParticipantReconnectAction;
 use App\Action\Participant\ParticipantUpdateAction;
 use App\Action\PreflightAction;
+use App\Action\Selection\SelectionCreateAction;
+use App\Action\Selection\SelectionDeleteAction;
+use App\Action\Selection\SelectionIdeaAddAction;
+use App\Action\Selection\SelectionIdeaDeleteAction;
+use App\Action\Selection\SelectionIdeaReadAction;
+use App\Action\Selection\SelectionReadAllAction;
+use App\Action\Selection\SelectionReadSingleAction;
+use App\Action\Selection\SelectionUpdateAction;
 use App\Action\Session\PublicScreenReadAction;
 use App\Action\Session\PublicScreenUpdateAction;
 use App\Action\Session\SessionDeleteAction;
@@ -140,6 +148,9 @@ return function (App $app) {
             $app->get("/{topicId}/categories[/]", CategoryReadAllFromTopicAction::class);
             $app->post("/{topicId}/category[/]", CategoryCreateForTopicAction::class);
 
+            $app->get("/{topicId}/selections[/]", SelectionReadAllAction::class);
+            $app->post("/{topicId}/selection[/]", SelectionCreateAction::class);
+
             $app->get("/{id}[/]", TopicReadSingleAction::class);
             $app->put("[/]", TopicUpdateAction::class);
             $app->delete("/{id}[/]", TopicDeleteAction::class);
@@ -182,6 +193,19 @@ return function (App $app) {
             $app->get("/{id}[/]", CategoryReadSingleAction::class);
             $app->put("[/]", CategoryUpdateAction::class);
             $app->delete("/{id}[/]", CategoryDeleteAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/selection",
+        function (RouteCollectorProxy $app) {
+            $app->get("/{selectionId}/ideas[/]", SelectionIdeaReadAction::class);
+            $app->post("/{selectionId}/ideas[/]", SelectionIdeaAddAction::class);
+            $app->delete("/{selectionId}/ideas[/]", SelectionIdeaDeleteAction::class);
+
+            $app->get("/{id}[/]", SelectionReadSingleAction::class);
+            $app->put("[/]", SelectionUpdateAction::class);
+            $app->delete("/{id}[/]", SelectionDeleteAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 
