@@ -1,6 +1,6 @@
 <template>
   <div class="menubar">
-    <Logo class="menubar__logo" />
+    <Logo class="menubar__logo" :isClient="true" />
     <div class="menubar__icon">|||</div>
   </div>
 </template>

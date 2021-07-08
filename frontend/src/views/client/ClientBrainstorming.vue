@@ -30,8 +30,8 @@
       <slot>
         <ModuleInfo
           :type="type"
-          title="What should should be the name of our application?"
-          description="Add you ideas about how we should name our brainstorming app. You are not limited in your creativity or if you choose one or several words."
+          :title="taskName"
+          :description="taskDescription"
           :is-client="true"
         />
 
@@ -103,10 +103,10 @@ import ModuleType from '@/types/ModuleType';
 import useVuelidate from '@vuelidate/core';
 import { Prop } from 'vue-property-decorator';
 import { setModuleStyles } from '@/utils/moduleStyles';
-import { getTaskById } from '@/services/task-service';
 import { maxLength, required } from '@vuelidate/validators';
 import FormError from '@/components/shared/atoms/FormError.vue';
 import * as taskService from '@/services/task-service';
+import { Task } from '../../services/task-service';
 
 @Options({
   components: {
@@ -145,6 +145,8 @@ export default class ClientBrainstorming extends Vue {
   readonly keywordsEmptyMsg =
     'Your idea is very long, please provide some keywords.';
   scalePlanet = false;
+  taskName = '';
+  taskDescription = '';
 
   context = setup(() => {
     return {
@@ -152,15 +154,16 @@ export default class ClientBrainstorming extends Vue {
     };
   });
 
-  mounted(): void {
+  async mounted(): Promise<void> {
     setModuleStyles(this.$refs.item as HTMLElement, this.type);
+    await this.getTaskData();
   }
 
   updated(): void {
     setModuleStyles(this.$refs.item as HTMLElement, this.type);
   }
 
-  get keywordsEmpty() {
+  get keywordsEmpty(): boolean {
     return this.showSecondInput && this.keywords.length <= 0;
   }
 
@@ -196,6 +199,12 @@ export default class ClientBrainstorming extends Vue {
         this.scalePlanet = false;
       }, 1000);
     }
+  }
+
+  async getTaskData(): Promise<void> {
+    let { name, description } = await taskService.getTaskById(this.taskId);
+    this.taskName = name;
+    this.taskDescription = description;
   }
 }
 </script>
@@ -259,12 +268,7 @@ export default class ClientBrainstorming extends Vue {
     margin: auto;
   }
   &--bottom {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    padding: 1rem 2rem;
-    margin-left: -50vw;
-    left: 50%;
+    margin-top: 0.75rem;
   }
   .fade-enter-active,
   .fade-leave-active {

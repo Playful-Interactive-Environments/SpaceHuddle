@@ -64,7 +64,7 @@ export default class Sidebar extends Vue {
   @Prop({ default: '' }) readonly title!: string;
   @Prop({ default: '' }) readonly pretitle!: string;
   @Prop({ default: '' }) readonly description!: string;
-  @Prop({ default: null }) readonly moduleType!: ModuleType;
+  @Prop() readonly moduleType!: ModuleType;
   @Prop({ default: false }) readonly isOnPublicScreen!: boolean;
 
   ModuleType = ModuleType;

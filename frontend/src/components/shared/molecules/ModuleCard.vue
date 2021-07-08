@@ -73,7 +73,7 @@ import { EventType } from '@/types/EventType';
 export default class ModuleCard extends Vue {
   @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: ModuleType.BRAINSTORMING }) type!: ModuleType;
-  @Prop({ default: null }) task!: Task;
+  @Prop() task!: Task;
   @Prop({ default: false }) isClient!: boolean;
   @Prop({ default: false }) isOnPublicScreen!: boolean;
 
