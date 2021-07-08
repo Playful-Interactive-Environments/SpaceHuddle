@@ -68,4 +68,60 @@ class IdeaValidator
             throw new ValidationException("Please check your input", $result);
         }
     }
+
+    /**
+     * Validate create.
+     *
+     * @param array<string, mixed> $data The data
+     *
+     * @return void
+     */
+    public function validateCreate(array $data): void
+    {
+        $this->validateEntity(
+            $data
+        );
+
+        if (array_key_exists("taskId", $data)){
+            $taskId = $data["taskId"];
+            $this->validateTaskType($taskId);
+        }
+    }
+
+    /**
+     * Validate read.
+     *
+     * @param array<string, mixed> $data The data
+     *
+     * @return void
+     */
+    public function validateRead(array $data): void
+    {
+        $this->validateEntity(
+            $data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("taskId")
+                ->requirePresence("taskId")
+        );
+
+        $taskId = $data["taskId"];
+        $this->validateTaskType($taskId);
+    }
+
+    /**
+     * Validate task type.
+     * @param string $taskId Task Id to be checked.
+     * @return void
+     */
+    private function validateTaskType(string $taskId): void
+    {
+        if (!$this->repository->taskHasCorrectTaskType($taskId)) {
+            $result = new ValidationResult();
+            $result->addError(
+                "taskId",
+                "The specified task has the wrong type. A BRAINSTORMING task is expected."
+            );
+            throw new ValidationException("Please check your input", $result);
+        }
+    }
 }

@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Test\TestCase\Action\Action04Task;
+namespace App\Test\TestCase\Action\Action09Vote;
 
-use App\Domain\Task\Type\TaskState;
 use App\Test\Traits\AppTestTrait;
 use App\Test\Traits\UserTestTrait;
 use Fig\Http\Message\StatusCodeInterface;
@@ -11,17 +10,16 @@ use Monolog\Test\TestCase;
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\Task\TaskStateUpdateAction
+ * @coversDefaultClass \App\Action\Vote\VoteUpdateAction
  */
-class Task06UpdateStateActionTest extends TestCase
+class Vote05UpdateActionTest extends TestCase
 {
     use AppTestTrait {
         AppTestTrait::setUp as private setUpAppTrait;
     }
     use UserTestTrait;
 
-    protected ?string $taskId;
-    protected ?string $taskIdVote;
+    protected ?string $voteId;
 
     /**
      * Before each test.
@@ -31,8 +29,7 @@ class Task06UpdateStateActionTest extends TestCase
     protected function setUp(): void
     {
         $this->setUpAppTrait();
-        $this->taskId = $this->getFirstCategorisationTaskId();
-        $this->taskIdVote = $this->getFirstVotingTaskId();
+        $this->voteId = $this->getFirstVoteId();
     }
 
     /**
@@ -40,28 +37,22 @@ class Task06UpdateStateActionTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateTaskState(): void
+    public function testUpdateVote(): void
     {
-        $state = TaskState::ACTIVE;
         $request = $this->createJsonRequest(
             "PUT",
-            "/task/$this->taskId/client_application_state/$state/"
+            "/vote/",
+            [
+                "id" => $this->voteId,
+                "detailRating" => 2.8
+            ]
         );
-
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);
 
         // Check response
         $this->assertSame(StatusCodeInterface::STATUS_CREATED, $response->getStatusCode());
         $this->assertJsonContentType($response);
-
-        $request = $this->createJsonRequest(
-            "PUT",
-            "/task/$this->taskIdVote/client_application_state/$state/"
-        );
-
-        $request = $this->withJwtAuth($request);
-        $response = $this->app->handle($request);
     }
 
     /**
@@ -69,12 +60,15 @@ class Task06UpdateStateActionTest extends TestCase
      *
      * @return void
      */
-    public function testUpdateTaskStateInvalidId(): void
+    public function testUpdateVoteInvalidId(): void
     {
-        $state = TaskState::ACTIVE;
         $request = $this->createJsonRequest(
             "PUT",
-            "/task/xxx/client_application_state/$state/"
+            "/vote/",
+            [
+                "id" => "xxx",
+                "description" => null
+            ]
         );
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);

@@ -2,6 +2,8 @@
 
 namespace App\Domain\Idea\Repository;
 
+use App\Domain\Task\Type\TaskType;
+
 trait IdeaTableTrait
 {
     /**
@@ -64,6 +66,23 @@ trait IdeaTableTrait
             return $result["id"];
         }
         return null;
+    }
+
+    /**
+     * Checks if the task fit the idea task type.
+     * @param string $taskId The task ID.
+     * @return bool If true, the data match.
+     */
+    public function taskHasCorrectTaskType(string $taskId): bool
+    {
+        $query = $this->queryFactory->newSelect("task");
+        $query->select(["id"])
+            ->andWhere([
+                "task_type" => $this->taskType,
+                "id" => $taskId
+            ]);
+
+        return ($query->execute()->rowCount() == 1);
     }
 
     /**

@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Domain\Idea\Service;
+namespace App\Domain\Vote\Service;
 
 use App\Domain\Base\Service\ServiceReaderTrait;
 
 /**
- * Service to read all ideas for one task.
+ * Service to read all votes for one topic
  */
-class IdeaReaderTask
+class VoteReader
 {
     use ServiceReaderTrait;
-    use IdeaServiceTrait;
+    use VoteServiceTrait;
 
     /**
      * Validates whether the transferred data is suitable for the service.

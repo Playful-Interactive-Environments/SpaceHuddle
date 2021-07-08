@@ -58,6 +58,12 @@ use App\Action\User\UserRegisterAction;
 use \App\Action\Session\SessionCreateAction;
 use \App\Action\Session\SessionReadSingleAction;
 use \App\Action\Session\SessionReadAllAction;
+use App\Action\Vote\VoteCreateAction;
+use App\Action\Vote\VoteDeleteAction;
+use App\Action\Vote\VoteReadAllAction;
+use App\Action\Vote\VoteReadSingleAction;
+use App\Action\Vote\VoteResultReadAction;
+use App\Action\Vote\VoteUpdateAction;
 use App\Middleware\JwtAuthMiddleware;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
@@ -168,6 +174,10 @@ return function (App $app) {
             $app->get("/{taskId}/categories[/]", CategoryReadAllFromTaskAction::class);
             $app->post("/{taskId}/category[/]", CategoryCreateForTaskAction::class);
 
+            $app->get("/{taskId}/votes[/]", VoteReadAllAction::class);
+            $app->get("/{taskId}/vote_result[/]", VoteResultReadAction::class);
+            $app->post("/{taskId}/vote[/]", VoteCreateAction::class);
+
             $app->get("/{id}[/]", TaskReadSingleAction::class);
             $app->put("[/]", TaskUpdateAction::class);
             $app->delete("/{id}[/]", TaskDeleteAction::class);
@@ -206,6 +216,15 @@ return function (App $app) {
             $app->get("/{id}[/]", SelectionReadSingleAction::class);
             $app->put("[/]", SelectionUpdateAction::class);
             $app->delete("/{id}[/]", SelectionDeleteAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/vote",
+        function (RouteCollectorProxy $app) {
+            $app->get("/{id}[/]", VoteReadSingleAction::class);
+            $app->put("[/]", VoteUpdateAction::class);
+            $app->delete("/{id}[/]", VoteDeleteAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 

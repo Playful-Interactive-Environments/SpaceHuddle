@@ -132,4 +132,26 @@ trait ParticipantTestTrait
         }
         return "";
     }
+
+    /**
+     * Determine first selection id
+     * @return string|null json token
+     */
+    protected function getFirstVoteId() : ?string
+    {
+        $taskId = $this->getFirstTaskId();
+        $ideaId = $this->getFirstIdeaId();
+        $result = $this->getFirstEntity(
+            "task/$taskId/votes",
+            [
+                "ideaId" => $ideaId,
+                "rating" => "2",
+                "detailRating" => "2"
+            ]
+        );
+        if (is_object($result) and property_exists($result, "id")) {
+            return $result->id;
+        }
+        return "";
+    }
 }

@@ -259,4 +259,20 @@ trait UserTestTrait
         }
         return "";
     }
+
+    /**
+     * Determine first selection id
+     * @return string|null json token
+     */
+    protected function getFirstVoteId() : ?string
+    {
+        $taskId = $this->getFirstTaskId();
+        $result = $this->getFirstEntity(
+            "task/$taskId/votes"
+        );
+        if (is_object($result) and property_exists($result, "id")) {
+            return $result->id;
+        }
+        return "";
+    }
 }
