@@ -30,4 +30,20 @@ class ResourceRepository implements RepositoryInterface
             SessionRepository::class
         );
     }
+
+    /**
+     * Convert to array.
+     * @param object $data The entity data
+     * @return array<string, mixed> The array
+     */
+    protected function formatDatabaseInput(object $data): array
+    {
+        return [
+            "id" => $data->id ?? null,
+            "session_id" => $data->sessionId ?? null,
+            "title" => $data->title ?? null,
+            "image" => $data->image ?? null,
+            "link" => $data->link ?? null
+        ];
+    }
 }

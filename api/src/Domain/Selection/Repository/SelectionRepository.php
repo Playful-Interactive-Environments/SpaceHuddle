@@ -42,4 +42,18 @@ class SelectionRepository implements RepositoryInterface
             ->andWhere(["selection_id" => $id])
             ->execute();
     }
+
+    /**
+     * Convert to array.
+     * @param object $data The entity data
+     * @return array<string, mixed> The array
+     */
+    protected function formatDatabaseInput(object $data): array
+    {
+        return [
+            "id" => $data->id ?? null,
+            "topic_id" => $data->topicId ?? null,
+            "name" => $data->name ?? null
+        ];
+    }
 }

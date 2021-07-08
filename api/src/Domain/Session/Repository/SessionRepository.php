@@ -141,7 +141,6 @@ class SessionRepository implements RepositoryInterface
      * Insert session row.
      * @param object $data The session data
      * @return object|null The new session
-     * @throws GenericException
      */
     public function insert(object $data): ?object
     {
