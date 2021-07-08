@@ -28,6 +28,8 @@ use App\Action\Participant\ParticipantReadTopicAction;
 use App\Action\Participant\ParticipantReconnectAction;
 use App\Action\Participant\ParticipantUpdateAction;
 use App\Action\PreflightAction;
+use App\Action\Session\PublicScreenReadAction;
+use App\Action\Session\PublicScreenUpdateAction;
 use App\Action\Session\SessionDeleteAction;
 use App\Action\Session\SessionUpdateAction;
 use App\Action\Task\TaskCreateAction;
@@ -113,6 +115,9 @@ return function (App $app) {
     $app->group(
         "/session",
         function (RouteCollectorProxy $app) {
+            $app->put("/{sessionId}/public_screen/{taskId}[/]", PublicScreenUpdateAction::class);
+            $app->get("/{sessionId}/public_screen[/]", PublicScreenReadAction::class);
+
             $app->post("/{sessionId}/topic[/]", TopicCreateAction::class);
             $app->get("/{sessionId}/topics[/]", TopicReadAllAction::class);
 

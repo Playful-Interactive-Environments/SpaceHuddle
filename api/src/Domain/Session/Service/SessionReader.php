@@ -6,7 +6,6 @@ use App\Domain\Base\Service\ServiceReaderTrait;
 
 /**
  * Read all session service
- * @package App\Domain\Session\Service
  */
 class SessionReader
 {

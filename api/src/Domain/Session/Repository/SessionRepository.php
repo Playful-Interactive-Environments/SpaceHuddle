@@ -2,12 +2,12 @@
 
 namespace App\Domain\Session\Repository;
 
-use App\Data\AuthorisationData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\KeyGeneratorTrait;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Participant\Repository\ParticipantRepository;
+use App\Domain\Task\Data\TaskData;
 use App\Domain\Topic\Repository\TopicRepository;
 use App\Domain\User\Repository\UserRepository;
 use App\Domain\Session\Type\SessionRoleType;
@@ -170,7 +170,6 @@ class SessionRepository implements RepositoryInterface
      * Delete dependent data.
      * @param string $id Primary key of the linked table entry.
      * @return void
-     * @throws GenericException
      */
     protected function deleteDependencies(string $id): void
     {
@@ -225,5 +224,76 @@ class SessionRepository implements RepositoryInterface
             "expiration_date" => $data->expirationDate ?? null,
             "public_screen_module_id" => $data->publicScreenModuleId ?? null
         ];
+    }
+
+    /**
+     * Sets the active session task displayed on the public screen.
+     * @param string $sessionId The session id to be updated.
+     * @param string $taskId The active task id on the public screen.
+     * @return object|null The updated session.
+     * @throws GenericException
+     */
+    public function setPublicScreen(string $sessionId, string $taskId): object|null
+    {
+        $moduleId = $this->getPossiblePublicScreenModule($sessionId, $taskId);
+        if (isset($moduleId)) {
+            $row = [
+                "id" => $sessionId,
+                "public_screen_module_id" => $moduleId
+            ];
+            return $this->update($row);
+        }
+        return null;
+    }
+
+    /**
+     * Evaluates whether there is a valid module for the task to be set.
+     * @param string $sessionId The session id to be updated.
+     * @param string $taskId The active task id on the public screen.
+     * @return string|null Module Id
+     */
+    public function getPossiblePublicScreenModule(string $sessionId, string $taskId): ?string
+    {
+        $query = $this->queryFactory->newSelect("module");
+        $query->select(["module.id"])
+            ->innerJoin("task", "task.id = module.task_id")
+            ->innerJoin("topic", "topic.id = task.topic_id")
+            ->andWhere([
+                "module.task_id" => $taskId,
+                "topic.session_id" => $sessionId
+            ]);
+
+        $result = $query->execute()->fetch("assoc");
+        if (is_array($result)) {
+            return $result["id"];
+        }
+        return null;
+    }
+
+    /**
+     * Get the active session task displayed on the public screen.
+     * @param string $sessionId The session id.
+     * @return object|null The result entity.
+     */
+    public function getPublicScreen(string $sessionId): ?object
+    {
+        $query = $this->queryFactory->newSelect("task");
+        $query->select(["task.*"])
+            ->innerJoin("module", "task.id = module.task_id")
+            ->innerJoin("session", "module.id = session.public_screen_module_id")
+            ->andWhere([
+                "session.id" => $sessionId
+            ]);
+
+        $result = $this->fetchAll($query, TaskData::class);
+
+        if (is_array($result)) {
+            if (sizeof($result) > 0) {
+                $result = $result[0];
+            } else {
+                $result = null;
+            }
+        }
+        return $result;
     }
 }
