@@ -58,4 +58,27 @@ class TaskValidator
                 "message" => "Wrong task state."
             ]);
     }
+
+    /**
+     * State update validator.
+     * @param array $data Data to be verified.
+     * @return void
+     */
+    public function validateStateUpdate(array $data): void
+    {
+        $this->validateEntity(
+            $data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("taskId")
+                ->requirePresence("taskId")
+                ->notEmptyArray("state")
+                ->requirePresence("state")
+                ->add("state", "custom", [
+                    "rule" => function ($value) {
+                        return self::isTypeOption($value, TaskState::class);
+                    },
+                    "message" => "Wrong task state."
+                ])
+        );
+    }
 }

@@ -11,9 +11,7 @@ use App\Domain\Task\Type\TaskState;
  */
 class CategoryCreatorTopic
 {
-    use ServiceCreatorTrait {
-        ServiceCreatorTrait::serviceExecution as private creatorService;
-    }
+    use ServiceCreatorTrait;
     use CategoryServiceTrait;
 
     /**

@@ -34,6 +34,7 @@ use App\Action\Task\TaskCreateAction;
 use App\Action\Task\TaskDeleteAction;
 use App\Action\Task\TaskReadAllAction;
 use App\Action\Task\TaskReadSingleAction;
+use App\Action\Task\TaskStateUpdateAction;
 use App\Action\Task\TaskUpdateAction;
 use App\Action\Topic\TopicCreateAction;
 use App\Action\Topic\TopicDeleteAction;
@@ -143,6 +144,8 @@ return function (App $app) {
     $app->group(
         "/task",
         function (RouteCollectorProxy $app) {
+            $app->put("/{taskId}/client_application_state/{state}[/]", TaskStateUpdateAction::class);
+
             $app->get("/{taskId}/ideas[/]", IdeaReadAllFromTaskAction::class);
             $app->post("/{taskId}/idea[/]", IdeaCreateForTaskAction::class);
 

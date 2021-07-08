@@ -5,7 +5,7 @@ namespace App\Domain\Task\Service;
 use App\Domain\Base\Service\ServiceUpdaterTrait;
 
 /**
- * Update topic service.
+ * Update task service.
  */
 class TaskUpdater
 {

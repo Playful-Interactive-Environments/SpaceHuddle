@@ -182,6 +182,22 @@ class TaskRepository implements RepositoryInterface
     }
 
     /**
+     * Sets the task state.
+     * @param string $taskId The task id to be updated.
+     * @param string $state The new state.
+     * @return object|null The updated task.
+     * @throws GenericException
+     */
+    public function setClientState(string $taskId, string $state): object|null
+    {
+        $row = [
+            "id" => $taskId,
+            "state" => $state
+        ];
+        return $this->update($row);
+    }
+
+    /**
      * Convert to array.
      * @param object $data The entity data
      * @return array<string, mixed> The array
