@@ -261,14 +261,33 @@ trait UserTestTrait
     }
 
     /**
-     * Determine first selection id
+     * Determine first vote id
      * @return string|null json token
      */
     protected function getFirstVoteId() : ?string
     {
-        $taskId = $this->getFirstTaskId();
+        $taskId = $this->getFirstVotingTaskId();
         $result = $this->getFirstEntity(
             "task/$taskId/votes"
+        );
+        if (is_object($result) and property_exists($result, "id")) {
+            return $result->id;
+        }
+        return "";
+    }
+
+    /**
+     * Determine first resource id
+     * @return string|null json token
+     */
+    protected function getFirstResourceId() : ?string
+    {
+        $sessionId = $this->getFirstSessionId();
+        $result = $this->getFirstEntity(
+            "session/$sessionId/resources",
+            [
+                "title" => "php unit test resource"
+            ]
         );
         if (is_object($result) and property_exists($result, "id")) {
             return $result->id;

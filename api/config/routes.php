@@ -28,6 +28,11 @@ use App\Action\Participant\ParticipantReadTopicAction;
 use App\Action\Participant\ParticipantReconnectAction;
 use App\Action\Participant\ParticipantUpdateAction;
 use App\Action\PreflightAction;
+use App\Action\Resource\ResourceCreateAction;
+use App\Action\Resource\ResourceDeleteAction;
+use App\Action\Resource\ResourceReadAllAction;
+use App\Action\Resource\ResourceReadSingleAction;
+use App\Action\Resource\ResourceUpdateAction;
 use App\Action\Selection\SelectionCreateAction;
 use App\Action\Selection\SelectionDeleteAction;
 use App\Action\Selection\SelectionIdeaAddAction;
@@ -135,6 +140,9 @@ return function (App $app) {
             $app->post("/{sessionId}/topic[/]", TopicCreateAction::class);
             $app->get("/{sessionId}/topics[/]", TopicReadAllAction::class);
 
+            $app->post("/{sessionId}/resource[/]", ResourceCreateAction::class);
+            $app->get("/{sessionId}/resources[/]", ResourceReadAllAction::class);
+
             $app->post("[/]", SessionCreateAction::class);
             $app->get("/{id}[/]", SessionReadSingleAction::class);
             $app->put("[/]", SessionUpdateAction::class);
@@ -225,6 +233,15 @@ return function (App $app) {
             $app->get("/{id}[/]", VoteReadSingleAction::class);
             $app->put("[/]", VoteUpdateAction::class);
             $app->delete("/{id}[/]", VoteDeleteAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/resource",
+        function (RouteCollectorProxy $app) {
+            $app->get("/{id}[/]", ResourceReadSingleAction::class);
+            $app->put("[/]", ResourceUpdateAction::class);
+            $app->delete("/{id}[/]", ResourceDeleteAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 

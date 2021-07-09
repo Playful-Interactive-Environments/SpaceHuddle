@@ -134,12 +134,12 @@ trait ParticipantTestTrait
     }
 
     /**
-     * Determine first selection id
+     * Determine first vote id
      * @return string|null json token
      */
     protected function getFirstVoteId() : ?string
     {
-        $taskId = $this->getFirstTaskId();
+        $taskId = $this->getFirstVotingTaskId();
         $ideaId = $this->getFirstIdeaId();
         $result = $this->getFirstEntity(
             "task/$taskId/votes",
