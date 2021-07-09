@@ -5,6 +5,7 @@ namespace App\Domain\Task\Repository;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
+use App\Domain\Idea\Repository\IdeaRepository;
 use App\Domain\Module\Repository\ModuleRepository;
 use App\Domain\Module\Type\ModuleState;
 use App\Domain\Session\Type\SessionRoleType;
@@ -151,11 +152,10 @@ class TaskRepository implements RepositoryInterface
 
         $result = $query->execute()->fetchAll("assoc");
         if (is_array($result)) {
-            //TODO: Implement IdeaRepository
-            #$idea = new IdeaRepository($this->queryFactory);
+            $idea = new IdeaRepository($this->queryFactory);
             foreach ($result as $resultItem) {
                 $ideaId = $resultItem["id"];
-                #$idea->deleteById($ideaId);
+                $idea->deleteById($ideaId);
             }
         }
 

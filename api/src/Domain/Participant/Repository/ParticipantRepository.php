@@ -12,7 +12,6 @@ use App\Domain\Participant\Data\ParticipantTaskData;
 use App\Domain\Participant\Type\AvatarSymbol;
 use App\Domain\Participant\Type\ParticipantState;
 use App\Domain\Session\Repository\SessionRepository;
-use App\Domain\Task\Data\TaskData;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Topic\Data\TopicData;
 use App\Factory\QueryFactory;

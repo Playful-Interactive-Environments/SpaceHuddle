@@ -45,6 +45,11 @@ use App\Action\Session\PublicScreenReadAction;
 use App\Action\Session\PublicScreenUpdateAction;
 use App\Action\Session\SessionDeleteAction;
 use App\Action\Session\SessionUpdateAction;
+use App\Action\SessionRole\SessionRoleCreateAction;
+use App\Action\SessionRole\SessionRoleDeleteAction;
+use App\Action\SessionRole\SessionRoleReadAllAction;
+use App\Action\SessionRole\SessionRoleReadSingleAction;
+use App\Action\SessionRole\SessionRoleUpdateAction;
 use App\Action\Task\TaskCreateAction;
 use App\Action\Task\TaskDeleteAction;
 use App\Action\Task\TaskReadAllAction;
@@ -142,6 +147,12 @@ return function (App $app) {
 
             $app->post("/{sessionId}/resource[/]", ResourceCreateAction::class);
             $app->get("/{sessionId}/resources[/]", ResourceReadAllAction::class);
+
+            $app->post("/{sessionId}/authorized_user[/]", SessionRoleCreateAction::class);
+            $app->put("/{sessionId}/authorized_user[/]", SessionRoleUpdateAction::class);
+            $app->delete("/{sessionId}/authorized_user/{username}[/]", SessionRoleDeleteAction::class);
+            $app->get("/{sessionId}/own_user_role[/]", SessionRoleReadSingleAction::class);
+            $app->get("/{sessionId}/authorized_users[/]", SessionRoleReadAllAction::class);
 
             $app->post("[/]", SessionCreateAction::class);
             $app->get("/{id}[/]", SessionReadSingleAction::class);

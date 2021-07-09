@@ -5,6 +5,7 @@ namespace App\Domain\Topic\Repository;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
+use App\Domain\Selection\Repository\SelectionRepository;
 use App\Domain\Session\Repository\SessionRepository;
 use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Topic\Data\TopicData;
@@ -60,11 +61,10 @@ class TopicRepository implements RepositoryInterface
 
         $result = $query->execute()->fetchAll("assoc");
         if (is_array($result)) {
-            //TODO: Implement SelectionRepository
-            #$selection = new SelectionRepository($this->queryFactory);
+            $selection = new SelectionRepository($this->queryFactory);
             foreach ($result as $resultItem) {
                 $selectionId = $resultItem["id"];
-                #$selection->deleteById($selectionId);
+                $selection->deleteById($selectionId);
             }
         }
     }
