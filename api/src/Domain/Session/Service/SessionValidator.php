@@ -55,21 +55,21 @@ final class SessionValidator
             $this->validationFactory->createValidator()
                 ->notEmptyString("sessionId")
                 ->requirePresence("sessionId")
-                ->notEmptyArray("taskId")
-                ->requirePresence("taskId")
         );
 
         $sessionId = $data["sessionId"];
         $taskId = $data["taskId"];
-        $moduleId = $this->repository->getPossiblePublicScreenModule($sessionId, $taskId);
+        if (isset($taskId)) {
+            $moduleId = $this->repository->getPossiblePublicScreenModule($sessionId, $taskId);
 
-        if (is_null($moduleId)) {
-            $result = new ValidationResult();
-            $result->addError(
-                "taskId",
-                "The task does not belong to the session or has no module and can not be set for public screen."
-            );
-            throw new ValidationException("Please check your input", $result);
+            if (is_null($moduleId)) {
+                $result = new ValidationResult();
+                $result->addError(
+                    "taskId",
+                    "The task does not belong to the session or has no module and can not be set for public screen."
+                );
+                throw new ValidationException("Please check your input", $result);
+            }
         }
     }
 }

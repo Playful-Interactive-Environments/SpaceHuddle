@@ -228,21 +228,25 @@ class SessionRepository implements RepositoryInterface
     /**
      * Sets the active session task displayed on the public screen.
      * @param string $sessionId The session id to be updated.
-     * @param string $taskId The active task id on the public screen.
+     * @param string|null $taskId The active task id on the public screen.
      * @return object|null The updated session.
      * @throws GenericException
      */
-    public function setPublicScreen(string $sessionId, string $taskId): object|null
+    public function setPublicScreen(string $sessionId, ?string $taskId): object|null
     {
-        $moduleId = $this->getPossiblePublicScreenModule($sessionId, $taskId);
-        if (isset($moduleId)) {
-            $row = [
-                "id" => $sessionId,
-                "public_screen_module_id" => $moduleId
-            ];
-            return $this->update($row);
+        $moduleId = null;
+        if (isset($taskId)) {
+            $moduleId = $this->getPossiblePublicScreenModule($sessionId, $taskId);
+            if (is_null($moduleId)) {
+                return null;
+            }
         }
-        return null;
+        
+        $row = [
+            "id" => $sessionId,
+            "public_screen_module_id" => $moduleId
+        ];
+        return $this->update($row);
     }
 
     /**

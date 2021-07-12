@@ -47,6 +47,12 @@ trait ActionTrait
         $bodyData = (array)$request->getParsedBody();
         $authorisation = $request->getAttribute("authorisation");
 
+        foreach ($args as $key => $value) {
+            if ($value === "{{$key}}") {
+                $args[$key] = null;
+            }
+        }
+
         $result = $this->executeService($authorisation, $bodyData, $args);
 
         // Build the HTTP response
