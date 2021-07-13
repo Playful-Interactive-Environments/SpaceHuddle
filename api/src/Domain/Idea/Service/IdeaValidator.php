@@ -86,6 +86,8 @@ class IdeaValidator
             $taskId = $data["taskId"];
             $this->validateTaskType($taskId);
         }
+
+        $this->validateIdeeExists($data);
     }
 
     /**
@@ -120,6 +122,23 @@ class IdeaValidator
             $result->addError(
                 "taskId",
                 "The specified task has the wrong type. A BRAINSTORMING task is expected."
+            );
+            throw new ValidationException("Please check your input", $result);
+        }
+    }
+
+    /**
+     * Validate if the user has already submitted the idea.
+     * @param array $data The data to be inserted
+     * @return void
+     */
+    private function validateIdeeExists(array $data): void
+    {
+        if (!$this->repository->isNew((object)$data)) {
+            $result = new ValidationResult();
+            $result->addError(
+                "idea",
+                "The idea has already been submitted."
             );
             throw new ValidationException("Please check your input", $result);
         }

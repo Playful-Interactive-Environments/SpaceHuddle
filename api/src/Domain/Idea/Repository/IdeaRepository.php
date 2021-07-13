@@ -95,11 +95,16 @@ class IdeaRepository implements RepositoryInterface
         }
 
         $query = $this->queryFactory->newSelect($this->getEntityName());
-        $query->select(["idea.*"])
+        $query->select([
+            "idea.*",
+            "COUNT(*) AS count"
+        ])
             ->innerJoin("task", "task.id = idea.task_id")
             ->andWhere($authorisation_conditions)
             ->andWhere(["task.task_type" => $this->taskType])
-            ->andWhere($conditions);
+            ->andWhere($conditions)
+            ->distinct(["idea.task_id", "idea.keywords", "idea.description", "idea.image", "idea.link"])
+            ->order(["idea.timestamp"]);
 
         return $this->fetchAll($query);
     }

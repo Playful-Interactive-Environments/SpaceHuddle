@@ -2,6 +2,8 @@
 
 namespace App\Domain\Idea\Repository;
 
+use App\Domain\Task\Type\TaskState;
+
 trait IdeaTableTrait
 {
     /**
@@ -128,6 +130,39 @@ trait IdeaTableTrait
         $this->queryFactory->newDelete("random_idea")
             ->andWhere(["idea_id" => $id])
             ->execute();
+    }
+
+
+    /**
+     * Checks whether the user has already submitted the idea.
+     * @param object $data The data to be inserted
+     * @return bool If true, the idea has already been submitted.
+     */
+    public function isNew(object $data): bool
+    {
+        $taskId = $data->taskId ?? $this->getTopicTask($data->topicId, [strtoupper(TaskState::ACTIVE)]);
+        if (isset($taskId)) {
+            $condition = [
+                "task_id" => $taskId,
+                "participant_id" => $data->participantId ?? null,
+                "keywords" => $data->keywords ?? null,
+                "description" => $data->description ?? null,
+                "image" => $data->image ?? null,
+                "link" => $data->link ?? null
+            ];
+            foreach ($condition as $key => $value) {
+                if (is_null($value)) {
+                    $condition["$key is"] = $value;
+                    unset($condition[$key]);
+                }
+            }
+
+            $query = $this->queryFactory->newSelect("idea");
+            $query->select(["id"])
+                ->andWhere($condition);
+            return ($query->execute()->rowCount() == 0);
+        }
+        return false;
     }
 
     /**

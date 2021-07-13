@@ -44,7 +44,7 @@ class Idea01CreateForTopicActionTest extends TestCase
             "POST",
             "/topic/$this->topicId/idea/",
             [
-                "keywords" => "php unit test idea"
+                "keywords" => "php unit test idea from topic"
             ]
         );
         $request = $this->withJwtAuth($request);

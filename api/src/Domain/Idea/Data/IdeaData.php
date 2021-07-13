@@ -25,6 +25,13 @@ class IdeaData extends IdeaAbstract
     public ?string $timestamp;
 
     /**
+     * Idea count.
+     * @var int|null
+     * @OA\Property()
+     */
+    public ?int $count;
+
+    /**
      * Creates a new idea.
      * @param array $data Idea data.
      */
@@ -35,5 +42,6 @@ class IdeaData extends IdeaAbstract
         $reader = new ArrayReader($data);
         $this->state = $reader->findString("state");
         $this->timestamp = $reader->findString("timestamp");
+        $this->count = $reader->findInt("count");
     }
 }
