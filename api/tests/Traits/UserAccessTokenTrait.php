@@ -12,8 +12,8 @@ trait UserAccessTokenTrait
      * @return string|null json token
      */
     protected function getAccessToken(
-        string $username = "john.doe",
-        string $password = "secret123",
+        string $username = "john.doe@fhooe.at",
+        string $password = "Secret123!",
         bool $createIfNotExists = true
     ): ?string {
         $request = $this->createJsonRequest(
