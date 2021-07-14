@@ -1,8 +1,7 @@
 xampp/
-bin/
 composer.phar
 vendor/
 webalizer/
 *.cache
 api/.idea/
-.idea
+.idea/
