@@ -27,9 +27,9 @@ class User01RegisterActionTest extends TestCase
             "POST",
             "/user/register/",
             [
-                "username" => "admin",
-                "password" => "secret123",
-                "passwordConfirmation" => "secret123"
+                "username" => "admin@fhooe.at",
+                "password" => "Secret123!",
+                "passwordConfirmation" => "Secret123!"
             ]
         );
         $response = $this->app->handle($request);
@@ -81,6 +81,10 @@ class User01RegisterActionTest extends TestCase
                             "field" => "password",
                         ],
                         2 => [
+                            "message" => "Password must contain at least one lowercase and uppercase letter, a number and a special character.",
+                            "field" => "password",
+                        ],
+                        3 => [
                             "message" => "Password and confirmation do not match.",
                             "field" => "passwordConfirmation",
                         ],

@@ -27,7 +27,7 @@ class User04DeleteActionTest extends TestCase
             "DELETE",
             "/user/"
         );
-        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "string1234", false));
+        $request = $this->withJwtAuth($request, $this->getAccessToken("admin@fhooe.at", "String1234!", false));
 
         $response = $this->app->handle($request);
 

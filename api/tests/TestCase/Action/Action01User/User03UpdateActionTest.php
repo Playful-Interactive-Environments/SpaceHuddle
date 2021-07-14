@@ -26,12 +26,12 @@ class User03UpdateActionTest extends TestCase
             "PUT",
             "/user/",
             [
-                "oldPassword" => "secret123",
-                "password" => "string1234",
-                "passwordConfirmation" => "string1234"
+                "oldPassword" => "Secret123!",
+                "password" => "String1234!",
+                "passwordConfirmation" => "String1234!"
             ]
         );
-        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "secret123", false));
+        $request = $this->withJwtAuth($request, $this->getAccessToken("admin@fhooe.at", "Secret123!", false));
 
         $response = $this->app->handle($request);
 
@@ -51,12 +51,12 @@ class User03UpdateActionTest extends TestCase
             "PUT",
             "/user/",
             [
-                "oldPassword" => "secret123",
-                "password" => "secret1233",
-                "passwordConfirmation" => "secret123"
+                "oldPassword" => "Secret123!",
+                "password" => "Secret1233!",
+                "passwordConfirmation" => "Secret123"
             ]
         );
-        $request = $this->withJwtAuth($request, $this->getAccessToken("admin", "string1234", false));
+        $request = $this->withJwtAuth($request, $this->getAccessToken("admin@fhooe.at", "String1234!", false));
         $response = $this->app->handle($request);
 
         // Check response

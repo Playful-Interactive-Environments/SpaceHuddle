@@ -40,7 +40,7 @@ class SessionRole05DeleteActionTest extends TestCase
     {
         $request = $this->createJsonRequest(
             "DELETE",
-            "/session/$this->sessionId/authorized_user/test.facilitator/"
+            "/session/$this->sessionId/authorized_user/test.facilitator@fhooe.at/"
         );
         $request = $this->withJwtAuth($request);
         $response = $this->app->handle($request);

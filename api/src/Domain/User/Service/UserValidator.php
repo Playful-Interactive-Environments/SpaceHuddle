@@ -55,6 +55,7 @@ final class UserValidator
             $this->validationFactory->createValidator()
                 ->notEmptyString("username")
                 ->requirePresence("username")
+                ->email("username")
                 ->notEmptyString("password")
                 ->requirePresence("password")
         );
@@ -132,12 +133,18 @@ final class UserValidator
         return $validator
             ->notEmptyString("username")
             ->requirePresence("username", "create")
+            ->email("username", message: "The username must be an email address.")
             ->notEmptyString("password")
             ->requirePresence("password")
             ->notEmptyString("passwordConfirmation")
             ->requirePresence("passwordConfirmation")
             ->minLength("password", 8, "Too short")
-            ->maxLength("password", 40, "Too long")
+            ->maxLength("password", 255, "Too long")
+            ->regex(
+                "password",
+                "/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).*$/",
+                "Password must contain at least one lowercase and uppercase letter, a number and a special character."
+            )
             ->equalToField("passwordConfirmation", "password", "Password and confirmation do not match.");
     }
 }

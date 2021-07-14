@@ -40,12 +40,12 @@ class SessionRole01CreateActionTest extends TestCase
     public function testCreateSessionRole(): void
     {
         $tableRowCount = $this->getTableRowCount("session_role");
-        $this->getAccessToken("test.facilitator", "secret123", true);
+        $this->getAccessToken("test.facilitator@fhooe.at", "Secret123!", true);
         $request = $this->createJsonRequest(
             "POST",
             "/session/$this->sessionId/authorized_user/",
             [
-                "username" => "test.facilitator",
+                "username" => "test.facilitator@fhooe.at",
                 "role" => "FACILITATOR"
             ]
         );

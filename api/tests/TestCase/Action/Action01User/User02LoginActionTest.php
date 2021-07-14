@@ -26,8 +26,8 @@ class User02LoginActionTest extends TestCase
             "POST",
             "/user/login/",
             [
-                "username" => "admin",
-                "password" => "secret123"
+                "username" => "admin@fhooe.at",
+                "password" => "Secret123!"
             ]
         );
 
@@ -49,7 +49,7 @@ class User02LoginActionTest extends TestCase
             "POST",
             "/user/login/",
             [
-                "username" => "admin",
+                "username" => "admin@fhooe.at",
                 "password" => "1234",
             ]
         );

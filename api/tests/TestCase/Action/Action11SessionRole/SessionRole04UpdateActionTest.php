@@ -43,7 +43,7 @@ class SessionRole04UpdateActionTest extends TestCase
             "PUT",
             "/session/$this->sessionId/authorized_user/",
             [
-                "username" => "test.facilitator",
+                "username" => "test.facilitator@fhooe.at",
                 "role" => "MODERATOR"
             ]
         );
