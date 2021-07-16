@@ -59,8 +59,7 @@ import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import Toggle from '@/components/moderator/atoms/Toggle.vue';
 import ModuleType from '@/types/ModuleType';
-import * as taskService from '@/services/task-service';
-import TaskStates from '../../../types/TaskStates';
+import TaskStates from '@/types/TaskStates';
 import { EventType } from '@/types/EventType';
 
 @Options({
@@ -88,16 +87,12 @@ export default class ModuleCard extends Vue {
     setModuleStyles(this.$refs.item as HTMLElement, this.type);
   }
 
-  changePublicScreen(): void {
-    this.eventBus.emit(EventType.CHANGE_PUBLIC_SCREEN, this.task.id);
+  changePublicScreen(isActive: boolean): void {
+    this.eventBus.emit(EventType.CHANGE_PUBLIC_SCREEN, isActive ? this.task.id : '{taskId}');
   }
 
   async changeActiveState(): Promise<void> {
-    this.task.state =
-      this.task.state === TaskStates.ACTIVE
-        ? TaskStates.WAIT
-        : TaskStates.ACTIVE;
-    await taskService.updateTask(this.task);
+    this.eventBus.emit(EventType.CHANGE_CLIENT_STATE, this.task);
   }
 }
 </script>

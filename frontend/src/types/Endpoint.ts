@@ -1,14 +1,13 @@
 enum EndpointType {
   AUTHORIZED_USERS = 'authorized_users',
-  CONNECT = 'connect',
-  GROUP = 'group',
+  CATEGORY = 'category',
   IDEA = 'idea',
   IDEAS = 'ideas',
   LOGIN = 'login',
   OWN_USER_ROLE = 'own_user_role',
   PARTICIPANT = 'participant',
   PARTICIPANT_CONNECT = 'participant/connect',
-  PARTICIPANT_TASKS = 'participant_tasks',
+  PARTICIPANT_RECONNECT = 'participant/reconnect',
   PUBLIC_SCREEN = 'public_screen',
   REGISTER = 'register',
   RESOURCE = 'resources',
@@ -20,9 +19,9 @@ enum EndpointType {
   TOPIC = 'topic',
   TOPICS = 'topics',
   USER = 'user',
-  VOTING = 'voting',
-  VOTINGS = 'votings',
-  VOTING_RESULTS = 'voting_results',
+  VOTE = 'vote',
+  VOTES = 'votes',
+  VOTE_RESULTS = 'vote_result',
 }
 
 export default EndpointType;

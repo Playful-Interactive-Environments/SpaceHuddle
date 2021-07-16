@@ -1,5 +1,5 @@
 <template>
-  <div class="voting" ref="item">
+  <div class="task_definition" ref="item">
     <div v-if="task">
       <Sidebar
         :session-id="sessionId"
@@ -8,16 +8,14 @@
         :description="task.description"
         :moduleType="ModuleType[task.taskType]"
         :is-on-public-screen="task.id === publicScreenTask?.id"
+        :is-active="task.state === TaskStates.ACTIVE"
+        @changeActiveState="changeActiveState"
         @changePublicScreen="changePublicScreen"
       />
       <NavigationWithBack :back-route="'/session/' + sessionId" />
-      <div class="brainstorming__header">
-        <BackButton :route="'/session/' + sessionId" />
-        <Navigation />
-      </div>
-      <main class="voting__content">
-        <!-- TODO: voting module content -->
-        Voting content works!
+      <form-error :errors="errors"></form-error>
+      <main class="task_definition__content">
+        <slot />
       </main>
     </div>
   </div>
@@ -29,22 +27,25 @@ import { Prop } from 'vue-property-decorator';
 import { Task } from '@/services/task-service';
 import { Idea } from '@/services/idea-service';
 import { setModuleStyles } from '@/utils/moduleStyles';
-import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
-import ModuleType from '../../types/ModuleType';
-import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
+import ModuleType from '@/types/ModuleType';
+import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
+import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import * as taskService from '@/services/task-service';
 import * as sessionService from '@/services/session-service';
 import { EventType } from '@/types/EventType';
+import FormError from '@/components/shared/atoms/FormError.vue';
+import TaskStates from '@/types/TaskStates';
 
 @Options({
   components: {
     IdeaCard,
-    NavigationWithBack,
     Sidebar,
+    NavigationWithBack,
+    FormError
   },
 })
-export default class ModeratorVoting extends Vue {
+export default class ModuleDetailView extends Vue {
   @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: '' }) readonly taskId!: string;
 
@@ -52,27 +53,34 @@ export default class ModeratorVoting extends Vue {
   publicScreenTask: Task | null = null;
   ideas: Idea[] = [];
   ModuleType = ModuleType;
+  TaskStates = TaskStates;
+  errors: string[] = [];
 
   async mounted(): Promise<void> {
-    this.task = await taskService.getTaskById(this.taskId);
-    this.ideas = await taskService.getIdeasForTask(this.taskId);
-    this.publicScreenTask = await sessionService.getPublicScreen(
-      this.sessionId
-    );
-    setModuleStyles(
-      this.$refs.item as HTMLElement,
-      ModuleType[this.task.taskType]
-    );
+    taskService.getTaskById(this.taskId).then((queryResult) => {
+      this.task = queryResult;
+      setModuleStyles(
+        this.$refs.item as HTMLElement,
+        ModuleType[this.task.taskType]
+      );
+      sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
+        this.publicScreenTask = queryResult;
+      });
+    });
   }
 
-  changePublicScreen(): void {
-    this.eventBus.emit(EventType.CHANGE_PUBLIC_SCREEN, this.taskId);
+  async changeActiveState(): Promise<void> {
+    this.eventBus.emit(EventType.CHANGE_CLIENT_STATE, this.task);
+  }
+
+  changePublicScreen(isActive: boolean): void {
+    this.eventBus.emit(EventType.CHANGE_PUBLIC_SCREEN, isActive ? this.taskId : '{taskId}');
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.voting {
+.task_definition {
   background-color: var(--color-background-gray);
   margin-left: var(--sidebar-width);
   min-height: 100vh;

@@ -3,6 +3,7 @@
     <div class="container">
       <MenuBar />
       <SessionInfo :title="sessionName" :description="sessionDescription" />
+      <form-error :errors="errors"></form-error>
     </div>
     <TopicExpand v-for="topic in filteredTopics" :key="topic.id" :isRow="true">
       <template v-slot:title>{{ topic.title }}</template>
@@ -12,7 +13,7 @@
             :type="ModuleType[task.taskType]"
             :task="task"
             :isClient="true"
-            :sessionId="sessionKey"
+            :sessionId="sessionId"
           />
         </li>
       </template>
@@ -26,12 +27,12 @@ import MenuBar from '@/components/client/molecules/Menubar.vue';
 import SessionInfo from '@/components/client/molecules/SessionInfo.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
-import ModuleType from '../../types/ModuleType';
-import { Prop } from 'vue-property-decorator';
-import * as topicService from '@/services/topic-service';
+import ModuleType from '@/types/ModuleType';
+import * as taskService from '@/services/task-service';
 import * as participantService from '@/services/participant-service';
 import * as sessionService from '@/services/session-service';
 import { Topic } from '@/services/topic-service';
+import FormError from '@/components/shared/atoms/FormError.vue';
 
 @Options({
   components: {
@@ -39,15 +40,16 @@ import { Topic } from '@/services/topic-service';
     SessionInfo,
     TopicExpand,
     ModuleCard,
+    FormError
   },
 })
 export default class ClientOverview extends Vue {
-  @Prop({ required: true }) sessionKey!: string;
-
   topics: Topic[] = [];
   ModuleType = ModuleType;
   sessionName = '';
   sessionDescription = '';
+  sessionId = '';
+  errors: string[] = [];
 
   mounted(): void {
     this.getSessionInfo();
@@ -59,16 +61,22 @@ export default class ClientOverview extends Vue {
   }
 
   async getTopicsAndTasks(): Promise<void> {
-    this.topics = await participantService.getTopicList();
-    this.topics.forEach(async (topic) => {
-      topic.tasks = await topicService.getParticipantTasks(topic.id);
+    participantService.getTopicList().then((queryResult) => {
+      this.topics = queryResult;
+      this.topics.forEach(async (topic) => {
+        taskService.getTaskList(topic.id).then((queryResult) => {
+          topic.tasks = queryResult;
+        });
+      });
     });
   }
 
   async getSessionInfo(): Promise<void> {
-    let session = await sessionService.getClientSession();
-    this.sessionName = session.title;
-    this.sessionDescription = session.description;
+    sessionService.getClientSession().then((queryResult) => {
+      this.sessionName = queryResult.title;
+      this.sessionDescription = queryResult.description;
+      this.sessionId = queryResult.id;
+    });
   }
 }
 </script>

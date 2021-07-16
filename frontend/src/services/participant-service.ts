@@ -1,12 +1,6 @@
-import { AxiosError } from 'axios';
 import { Topic } from '@/services/topic-service';
-import { apiEndpoint } from '@/services/api';
+import { apiExecuteGetHandled, apiExecutePost} from '@/services/api';
 import EndpointType from '@/types/Endpoint';
-
-const API_PARTICIPANT_ENDPOINT = apiEndpoint(EndpointType.PARTICIPANT);
-const API_PARTICIPANT_CONNECT_ENDPOINT = apiEndpoint(
-  EndpointType.PARTICIPANT_CONNECT
-);
 
 export enum ConnectState {
   ACTIVE = 'ACTIVE',
@@ -19,48 +13,43 @@ interface Avatar {
 }
 
 export interface Participant {
-  accessToken: string;
-  avatar: Avatar;
-  browserKey: string;
-  id: string;
-  ipHash: string;
-  state: ConnectState;
+  participant: {
+    id: string;
+    browserKey: string;
+    state: ConnectState;
+    avatar: Avatar;
+  };
+  token: {
+    message: string;
+    accessToken: string;
+    tokenType: string;
+    expiresIn: number;
+  }
 }
 
 export const connect = async (
   sessionKey: string
 ): Promise<Participant | Partial<Participant>> => {
-  try {
-    const { data } = await API_PARTICIPANT_CONNECT_ENDPOINT.post<Participant>(
-      `/`,
-      {
-        sessionKey,
-      }
-    );
-    return data;
-  } catch (error) {
-    return (error as AxiosError).response?.data;
-  }
+  return await apiExecutePost<Participant>(
+    `/${EndpointType.PARTICIPANT_CONNECT}/`,
+    {
+      sessionKey,
+    },
+    false
+  );
 };
 
 export const reconnect = async (browserKey: string): Promise<Participant> => {
-  try {
-    const { data } = await API_PARTICIPANT_CONNECT_ENDPOINT.get<Participant>(
-      `/${browserKey}/`
-    );
-    return data;
-  } catch (error) {
-    return (error as AxiosError).response?.data;
-  }
+  return await apiExecuteGetHandled<Participant>(
+    `/${EndpointType.PARTICIPANT_RECONNECT}/${browserKey}/`,
+    {},
+    false
+  );
 };
 
 export const getTopicList = async (): Promise<Topic[]> => {
-  try {
-    const { data } = await API_PARTICIPANT_ENDPOINT.get<Topic[]>(
-      `/${EndpointType.TOPICS}/`
-    );
-    return data;
-  } catch (error) {
-    return (error as AxiosError).response?.data;
-  }
+  return await apiExecuteGetHandled<Topic[]>(
+    `/${EndpointType.PARTICIPANT}/${EndpointType.TOPICS}/`,
+    []
+  );
 };

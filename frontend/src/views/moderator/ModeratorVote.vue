@@ -1,7 +1,7 @@
 <template>
   <ModuleDetailView :sessionId="sessionId" :taskId="taskId">
-    <!-- TODO: information module content -->
-    Information content works!
+    <!-- TODO: vote module content -->
+    Vote content works!
   </ModuleDetailView>
 </template>
 
@@ -15,7 +15,7 @@ import ModuleDetailView from "@/components/moderator/organisms/ModuleDetailView.
     ModuleDetailView,
   },
 })
-export default class ModeratorInformation extends Vue {
+export default class ModeratorVote extends Vue {
   @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: '' }) readonly taskId!: string;
   errors: string[] = [];

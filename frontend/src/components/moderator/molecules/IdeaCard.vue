@@ -17,6 +17,11 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import * as ideaService from '@/services/idea-service';
 import { Idea } from '@/services/idea-service';
+import {
+  getErrorMessage,
+  addError,
+  clearErrors,
+} from '@/services/exception-service';
 
 @Options({
   components: {},
@@ -24,14 +29,22 @@ import { Idea } from '@/services/idea-service';
 export default class IdeaCard extends Vue {
   @Prop() idea!: Idea;
   @Prop({ default: true }) isDeletable!: boolean;
+  errors: string[] = [];
 
   get hasKeywords(): boolean {
     return !!(this.idea.keywords && this.idea.keywords.length > 0);
   }
 
   async deleteIdea(): Promise<void> {
-    await ideaService.deleteIdea(this.idea.id);
-    this.$emit('ideaDeleted');
+    clearErrors(this.errors);
+    ideaService.deleteIdea(this.idea.id).then(
+      () => {
+        this.$emit('ideaDeleted');
+      },
+      (error) => {
+        addError(this.errors, getErrorMessage(error));
+      }
+    );
   }
 }
 </script>

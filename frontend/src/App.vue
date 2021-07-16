@@ -11,6 +11,7 @@
 import { Vue, Options } from 'vue-class-component';
 import Snackbar from '@/components/shared/atoms/Snackbar.vue';
 import SnackbarType from '@/types/SnackbarType';
+import {EventType} from "@/types/EventType";
 
 @Options({
   components: {
@@ -23,8 +24,8 @@ export default class Sidebar extends Vue {
   snackbarType = SnackbarType.INFO;
 
   mounted(): void {
-    this.eventBus.off('showSnackbar');
-    this.eventBus.on('showSnackbar', async (data) => {
+    this.eventBus.off(EventType.SHOW_SNACKBAR);
+    this.eventBus.on(EventType.SHOW_SNACKBAR, async (data) => {
       this.showSnackbar = true;
       this.snackbarMessage = (
         data as { type: SnackbarType; message: string }
@@ -32,7 +33,7 @@ export default class Sidebar extends Vue {
       this.snackbarType = (
         data as { type: SnackbarType; message: string }
       ).type;
-      setTimeout(() => (this.showSnackbar = false), 2500);
+      setTimeout(() => (this.showSnackbar = false), 4000);
     });
   }
 }

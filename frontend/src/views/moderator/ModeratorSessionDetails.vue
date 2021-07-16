@@ -60,9 +60,17 @@ import ModuleType from '@/types/ModuleType';
 import SnackbarType from '@/types/SnackbarType';
 import * as sessionService from '@/services/session-service';
 import * as topicService from '@/services/topic-service';
+import * as taskService from '@/services/task-service';
 import { Session } from '@/services/session-service';
 import { Topic } from '@/services/topic-service';
+import { Task } from '@/services/task-service';
 import { EventType } from '@/types/EventType';
+import TaskStates from '@/types/TaskStates';
+import {
+  getErrorMessage,
+  addError,
+  clearErrors,
+} from '@/services/exception-service';
 
 @Options({
   components: {
@@ -84,41 +92,83 @@ export default class ModeratorSessionDetails extends Vue {
   showModalModuleCreate = false;
   formatDate = formatDate;
   addNewTopicId = '';
+  errors: string[] = [];
 
   ModuleType = ModuleType;
 
   async mounted(): Promise<void> {
-    await this.getTopics();
     this.eventBus.off(EventType.CHANGE_PUBLIC_SCREEN);
     this.eventBus.on(EventType.CHANGE_PUBLIC_SCREEN, async (id) => {
-      this.publicScreenTaskId = id as string;
-      // TODO: change endpoint to toggle public screen
-      await sessionService.displayOnPublicScreen(
-        this.sessionId,
-        this.publicScreenTaskId
+      await this.changePublicScreen(id as string);
+    });
+    this.eventBus.off(EventType.CHANGE_CLIENT_STATE);
+    this.eventBus.on(EventType.CHANGE_CLIENT_STATE, async (task) => {
+      await this.changeClientState(task as Task);
+    });
+    await this.getTopics();
+  }
+
+  async changePublicScreen(id: string|null): Promise<void> {
+    clearErrors(this.errors);
+    this.publicScreenTaskId = id as string;
+    sessionService
+      .displayOnPublicScreen(this.sessionId, this.publicScreenTaskId)
+      .then(
+        () => {
+          this.eventBus.emit(EventType.SHOW_SNACKBAR, {
+            type: SnackbarType.SUCCESS,
+            message: 'Successfully updated public screen.',
+          });
+        },
+        (error) => {
+          addError(this.errors, getErrorMessage(error));
+        }
       );
-      this.eventBus.emit(EventType.SHOW_SNACKBAR, {
-        type: SnackbarType.SUCCESS,
-        message: 'Successfully updated public screen.',
+  }
+
+  async changeClientState(task: Task): Promise<void> {
+    clearErrors(this.errors);
+    if (task) {
+      task.state =
+        task.state === TaskStates.ACTIVE
+          ? TaskStates.WAIT
+          : TaskStates.ACTIVE;
+      taskService.updateTask(task).then(
+        () => {
+          this.eventBus.emit(EventType.SHOW_SNACKBAR, {
+            type: SnackbarType.SUCCESS,
+            message: 'Successfully updated client state.',
+          });
+        },
+        (error) => {
+          addError(this.errors, getErrorMessage(error));
+        }
+      );
+    }
+  }
+
+  async getTopics(): Promise<void> {
+    sessionService.getById(this.sessionId).then((queryResult) => {
+      this.session = queryResult;
+      topicService.getTopicsList(this.session.id).then((queryResult) => {
+        this.topics = queryResult;
+        this.topics.forEach(async (topic) => {
+          taskService.getTaskList(topic.id).then((queryResult) => {
+            topic.tasks = queryResult;
+            topic.tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
+          });
+        });
+        this.getPublicScreen();
       });
     });
   }
 
-  async getTopics(): Promise<void> {
-    this.session = await sessionService.getById(this.sessionId);
-    this.topics = await sessionService.getTopicsList(this.session.id);
-    this.topics.forEach(async (topic) => {
-      topic.tasks = await topicService.getTaskList(topic.id);
-      topic.tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
-    });
-    await this.getPublicScreen();
-  }
-
   async getPublicScreen(): Promise<void> {
-    let data = await sessionService.getPublicScreen(this.sessionId);
-    if (data) {
-      this.publicScreenTaskId = data.id;
-    }
+    sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
+      if (queryResult) {
+        this.publicScreenTaskId = queryResult.id;
+      }
+    });
   }
 
   openModalModuleCreate(topicId: string): void {

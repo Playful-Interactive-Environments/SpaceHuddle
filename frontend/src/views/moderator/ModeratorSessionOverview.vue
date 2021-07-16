@@ -40,7 +40,7 @@ import { Options, Vue } from 'vue-class-component';
 import { Session } from '@/services/session-service';
 import { formatDate } from '@/utils/date';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
-import Card from '../../components/shared/atoms/Card.vue';
+import Card from '@/components/shared/atoms/Card.vue';
 import Header from '@/components/moderator/organisms/Header.vue';
 import ModalSessionCreate from '@/components/shared/molecules/ModalSessionCreate.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
@@ -60,11 +60,14 @@ import * as sessionService from '@/services/session-service';
 export default class ModeratorSessionOverview extends Vue {
   sessions: Session[] = [];
   showModalSessionCreate = false;
+  errors: string[] = [];
 
   formatDate = formatDate;
 
   async mounted(): Promise<void> {
-    this.sessions = await sessionService.getList();
+    sessionService.getList().then((queryResult) => {
+      this.sessions = queryResult;
+    });
   }
 }
 </script>

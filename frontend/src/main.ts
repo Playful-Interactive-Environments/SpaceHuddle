@@ -18,3 +18,5 @@ app.use(router);
 app.config.globalProperties.eventBus = eventBus;
 app.use(VueFinalModal(), {});
 app.mount('#app');
+
+export default app;

@@ -1,9 +1,12 @@
 import { Task } from '@/services/task-service';
-import { apiEndpoint } from '@/services/api';
+import {
+  apiExecuteDelete,
+  apiExecuteGetHandled,
+  apiExecutePost,
+  apiExecutePut
+} from '@/services/api';
 import UserType from '@/types/UserType';
-import { Topic } from '@/services/topic-service';
 import EndpointType from '@/types/Endpoint';
-import ApiResponse from '@/types/ApiResponse';
 
 // TODO: move types to separate files in types folder?
 export interface Session {
@@ -18,78 +21,58 @@ export interface Session {
   title: string;
 }
 
-const API_SESSION_ENDPOINT = apiEndpoint(EndpointType.SESSION);
-
 export const getList = async (): Promise<Session[]> => {
-  const API_SESSIONS_ENDPOINT = apiEndpoint(EndpointType.SESSIONS);
-  const { data } = await API_SESSIONS_ENDPOINT.get<Session[]>('/');
-  return data;
+  return await apiExecuteGetHandled<Session[]>(
+    `/${EndpointType.SESSIONS}/`,
+    []
+  );
 };
 
 export const getById = async (id: string): Promise<Session> => {
-  const { data } = await API_SESSION_ENDPOINT.get<Session>(`/${id}/`);
-  return data;
+  return await apiExecuteGetHandled<Session>(
+    `/${EndpointType.SESSION}/${id}/`
+  );
 };
 
 export const getClientSession = async (): Promise<Session> => {
-  const API_SESSIONS_ENDPOINT = apiEndpoint(EndpointType.SESSIONS);
-  const { data } = await API_SESSIONS_ENDPOINT.get<Session[]>('/');
-  return data[0];
-};
-
-export const getTopicsList = async (sessionId: string): Promise<Topic[]> => {
-  const { data } = await API_SESSION_ENDPOINT.get<Topic[]>(
-    `/${sessionId}/${EndpointType.TOPICS}/`
+  const result = await apiExecuteGetHandled<Session[]>(
+    `/${EndpointType.SESSIONS}/`,
+    []
   );
-  return data;
+  if (Array.isArray(result) && result.length > 0) {
+    return result[0];
+  }
+  return {} as Session;
 };
 
 export const post = async (data: Partial<Session>): Promise<Session> => {
-  const { data: responseData } = await API_SESSION_ENDPOINT.post<Session>(
-    '/',
+  return await apiExecutePost<Session>(
+    `/${EndpointType.SESSION}/`,
     data
   );
-  return responseData;
-};
-
-export const postTopic = async (
-  sessionId: string,
-  data: Partial<Topic>
-): Promise<Topic> => {
-  const { data: responseData } = await API_SESSION_ENDPOINT.post<Topic>(
-    `/${sessionId}/${EndpointType.TOPIC}/`,
-    data
-  );
-  return responseData;
-};
-
-export const patch = async (data: Partial<Session>): Promise<void> => {
-  await API_SESSION_ENDPOINT.patch<Session>('/', data);
 };
 
 export const remove = async (id: string): Promise<void> => {
-  await API_SESSION_ENDPOINT.delete<Session>(`/${id}/`);
+  return await apiExecuteDelete<any>(
+    `/${EndpointType.SESSION}/${id}/`
+  );
 };
 
 export const getPublicScreen = async (
   sessionId: string
 ): Promise<Task | null> => {
-  try {
-    const { data } = await API_SESSION_ENDPOINT.get<Task>(
-      `/${sessionId}/${EndpointType.PUBLIC_SCREEN}/`
-    );
-    return data;
-  } catch (error) {
-    return null;
-  }
+  return await apiExecuteGetHandled<Task>(
+    `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PUBLIC_SCREEN}/`,
+    null
+  );
 };
 
 export const displayOnPublicScreen = async (
   sessionId: string,
   taskId: string
-): Promise<ApiResponse> => {
-  const { data } = await API_SESSION_ENDPOINT.put<ApiResponse>(
-    `/${sessionId}/${EndpointType.PUBLIC_SCREEN}/${taskId}/`
+): Promise<Session> => {
+  return await apiExecutePut<Session>(
+    `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PUBLIC_SCREEN}/${taskId}/`,
+    {}
   );
-  return data;
 };

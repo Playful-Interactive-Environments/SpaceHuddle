@@ -36,6 +36,7 @@
             :errors="context.$v.password.$errors"
             :isSmall="true"
           />
+          <form-error :errors="errors"></form-error>
           <button class="btn btn--gradient btn--fullwidth" type="submit">
             Login
           </button>
@@ -66,13 +67,11 @@
 <script lang="ts">
 import { Options, Vue, setup } from 'vue-class-component';
 import { maxLength, minLength, required, email } from '@vuelidate/validators';
-import ApiResponse from '@/types/ApiResponse';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
-import SnackbarType from '@/types/SnackbarType';
 import * as authService from '@/services/auth-service';
 import * as userService from '@/services/user-service';
-import { EventType } from '@/types/EventType';
+import {addError, clearErrors, getErrorMessage} from "@/services/exception-service";
 
 @Options({
   components: {
@@ -86,13 +85,14 @@ import { EventType } from '@/types/EventType';
     password: {
       required,
       min: minLength(8),
-      max: maxLength(12),
+      max: maxLength(255),
     },
   },
 })
 export default class ModeratorLogin extends Vue {
   email = '';
   password = '';
+  errors: string[] = [];
 
   context = setup(() => {
     return {
@@ -101,26 +101,28 @@ export default class ModeratorLogin extends Vue {
   });
 
   async loginUser(): Promise<void> {
+    clearErrors(this.errors);
+
     await this.context.$v.$validate();
     if (this.context.$v.$error) return;
 
-    const data: ApiResponse = await userService.loginUser(
+    userService.loginUser(
       this.email,
       this.password
+    ).then(
+      (queryResult) => {
+        if (queryResult.accessToken) {
+          authService.setAccessToken(queryResult.accessToken);
+          authService.setUserData(this.email);
+          this.$router.push({
+            name: 'moderator-session-overview',
+          });
+        }
+      },
+      (error) => {
+        addError(this.errors, getErrorMessage(error));
+      }
     );
-
-    if (data.accessToken) {
-      authService.setAccessToken(data.accessToken);
-      authService.setUserData(this.email);
-      await this.$router.push({
-        name: 'moderator-session-overview',
-      });
-    } else if (data.message) {
-      this.eventBus.emit(EventType.SHOW_SNACKBAR, {
-        type: SnackbarType.ERROR,
-        message: data.message,
-      });
-    }
   }
 }
 </script>

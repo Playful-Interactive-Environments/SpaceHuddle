@@ -13,7 +13,7 @@
             :key="index"
           >
             <img
-              v-if="activepPlanetIndex === index"
+              v-if="activePlanetIndex === index"
               :src="planets[index]"
               alt="planet"
               class="brainstorming__planet"
@@ -62,7 +62,6 @@
           rows="4"
           contenteditable
           v-model="description"
-          @input="checkCharacterCount()"
           @blur="context.$v.description.$touch()"
         ></textarea>
         <FormError
@@ -70,6 +69,7 @@
           :errors="context.$v.description.$errors"
           :isSmall="true"
         />
+        <form-error :errors="errors"></form-error>
         <div class="brainstorming--bottom">
           <button
             class="btn btn--mint btn--fullwidth"
@@ -106,7 +106,14 @@ import { setModuleStyles } from '@/utils/moduleStyles';
 import { maxLength, required } from '@vuelidate/validators';
 import FormError from '@/components/shared/atoms/FormError.vue';
 import * as taskService from '@/services/task-service';
-import { Task } from '../../services/task-service';
+import * as ideaService from '@/services/idea-service';
+import { EventType } from '@/types/EventType';
+import SnackbarType from '@/types/SnackbarType';
+import {
+  getErrorMessage,
+  addError,
+  clearErrors,
+} from '@/services/exception-service';
 
 @Options({
   components: {
@@ -123,24 +130,25 @@ import { Task } from '../../services/task-service';
     },
     description: {
       required,
-      max: maxLength(255),
-    },
+      max: maxLength(255)
+    }
   },
 })
 export default class ClientBrainstorming extends Vue {
   @Prop({ required: true }) taskId!: string;
 
   type = ModuleType.BRAINSTORMING;
-  activepPlanetIndex = 0;
+  activePlanetIndex = 0;
   planets = [
     require('../../assets/illustrations/planets/brainstorming01.png'),
     require('../../assets/illustrations/planets/brainstorming02.png'),
     require('../../assets/illustrations/planets/brainstorming03.png'),
     require('../../assets/illustrations/planets/brainstorming04.png'),
   ];
-  currentPlanet = this.planets[this.activepPlanetIndex];
+  currentPlanet = this.planets[this.activePlanetIndex];
   myVar = null;
   description = '';
+  errors: string[] = [];
   keywords = '';
   readonly keywordsEmptyMsg =
     'Your idea is very long, please provide some keywords.';
@@ -168,22 +176,34 @@ export default class ClientBrainstorming extends Vue {
   }
 
   async submitIdea(): Promise<void> {
+    clearErrors(this.errors);
     await this.context.$v.$validate();
     if (this.context.$v.$error || this.keywordsEmpty) return;
 
-    await taskService.postIdea(this.taskId, {
-      description: this.description,
-      keywords: this.keywords,
-      image: '',
-      link: '',
-    });
-
-    this.description = '';
-    this.keywords = '';
-    this.$nextTick(() => {
-      this.context.$v.$reset();
-    });
-    setTimeout(this.setNewPlanet, 500);
+    ideaService
+      .postIdea(this.taskId, {
+        description: this.keywords.length > 0 ? this.description : '',
+        keywords: this.keywords.length > 0 ? this.keywords : this.description,
+        image: '',
+        link: '',
+      })
+      .then(
+        (queryResult) => {
+          this.description = '';
+          this.keywords = '';
+          this.$nextTick(() => {
+            this.context.$v.$reset();
+          });
+          setTimeout(this.setNewPlanet, 500);
+          this.eventBus.emit(EventType.SHOW_SNACKBAR, {
+            type: SnackbarType.SUCCESS,
+            message: `Thank you for the idea - ${queryResult.keywords}.`,
+          });
+        },
+        (error) => {
+          addError(this.errors, getErrorMessage(error));
+        }
+      );
   }
 
   get showSecondInput(): boolean {
@@ -191,8 +211,8 @@ export default class ClientBrainstorming extends Vue {
   }
 
   setNewPlanet(): void {
-    if (this.activepPlanetIndex < this.planets.length - 1) {
-      this.activepPlanetIndex++;
+    if (this.activePlanetIndex < this.planets.length - 1) {
+      this.activePlanetIndex++;
     } else {
       this.scalePlanet = true;
       setTimeout(() => {
@@ -202,9 +222,10 @@ export default class ClientBrainstorming extends Vue {
   }
 
   async getTaskData(): Promise<void> {
-    let { name, description } = await taskService.getTaskById(this.taskId);
-    this.taskName = name;
-    this.taskDescription = description;
+    taskService.getTaskById(this.taskId).then((queryResult) => {
+      this.taskName = queryResult.name;
+      this.taskDescription = queryResult.description;
+    });
   }
 }
 </script>

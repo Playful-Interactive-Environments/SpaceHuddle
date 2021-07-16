@@ -79,6 +79,12 @@ import FormError from '@/components/shared/atoms/FormError.vue';
 import ModalBase from '@/components/shared/molecules/ModalBase.vue';
 
 import * as sessionService from '@/services/session-service';
+import * as topicService from '@/services/topic-service';
+import {
+  getErrorMessage,
+  addError,
+  clearErrors,
+} from '@/services/exception-service';
 
 @Options({
   components: {
@@ -107,6 +113,7 @@ export default class ModalSessionCreate extends Vue {
   description = '';
   topic = '';
   maxNrOfTopics = 5;
+  errors: string[] = [];
 
   context = setup(() => {
     return {
@@ -115,28 +122,44 @@ export default class ModalSessionCreate extends Vue {
   });
 
   async saveSession(): Promise<void> {
+    clearErrors(this.errors);
     await this.context.$v.$validate();
     if (this.context.$v.$error) return;
 
-    const session = await sessionService.post({
-      title: this.title,
-      description: this.description,
-      maxParticipants: 100,
-      expirationDate: '2021-09-12',
-    });
-
-    await sessionService.postTopic(session.id, {
-      title: this.topic,
-      description: 'dummy data - this field should be removed in the backend!',
-    });
-
-    this.$emit('update:showModal', false);
-    await this.$router.push({
-      name: 'moderator-session-details',
-      params: {
-        sessionId: session.id,
-      },
-    });
+    sessionService
+      .post({
+        title: this.title,
+        description: this.description,
+        maxParticipants: 100,
+        expirationDate: '2021-09-12',
+      })
+      .then(
+        (session) => {
+          topicService
+            .postTopic(session.id, {
+              title: this.topic,
+              description:
+                'dummy data - this field should be removed in the backend!',
+            })
+            .then(
+              () => {
+                //this.$emit('update:showModal', false);
+                this.$router.push({
+                  name: 'moderator-session-details',
+                  params: {
+                    sessionId: session.id,
+                  },
+                });
+              },
+              (error) => {
+                addError(this.errors, getErrorMessage(error));
+              }
+            );
+        },
+        (error) => {
+          addError(this.errors, getErrorMessage(error));
+        }
+      );
   }
 }
 </script>

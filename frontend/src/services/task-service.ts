@@ -1,4 +1,4 @@
-import { apiEndpoint } from '@/services/api';
+import {apiEndpoint, apiExecuteGet, apiExecuteGetHandled, apiExecutePost, apiExecutePut} from '@/services/api';
 import ModuleType from '@/types/ModuleType';
 import TaskStates from '@/types/TaskStates';
 import EndpointType from '@/types/Endpoint';
@@ -15,32 +15,32 @@ export interface Task {
   state: TaskStates;
 }
 
-const API_TASK_ENDPOINT = apiEndpoint(EndpointType.TASK);
-
 export const getTaskById = async (taskId: string): Promise<Task> => {
-  const { data } = await API_TASK_ENDPOINT.get<Task>(`/${taskId}/`);
-  return data;
-};
-
-export const getIdeasForTask = async (taskId: string): Promise<Idea[]> => {
-  const { data } = await API_TASK_ENDPOINT.get<Idea[]>(
-    `/${taskId}/${EndpointType.IDEAS}/`
+  return await apiExecuteGetHandled<Task>(
+    `/${EndpointType.TASK}/${taskId}/`
   );
-  return data;
 };
 
-export const updateTask = async (task: Task): Promise<Task> => {
-  const { data } = await API_TASK_ENDPOINT.put<Task>(`/`, task);
-  return data;
-};
-
-export const postIdea = async (
-  taskId: string,
-  data: Partial<Idea>
-): Promise<Idea> => {
-  const { data: responseData } = await API_TASK_ENDPOINT.post<Idea>(
-    `/${taskId}/${EndpointType.IDEA}`,
+export const updateTask = async (data: Task): Promise<Task> => {
+  return await apiExecutePut<Task>(
+    `/${EndpointType.TASK}/`,
     data
   );
-  return responseData;
+};
+
+export const getTaskList = async (topicId: string): Promise<Task[]> => {
+  return await apiExecuteGetHandled<Task[]>(
+    `/${EndpointType.TOPIC}/${topicId}/${EndpointType.TASKS}/`,
+    []
+  );
+};
+
+export const postTask = async (
+  taskId: string,
+  data: Partial<Task>
+): Promise<Task> => {
+  return await apiExecutePost<Task>(
+    `/${EndpointType.TOPIC}/${taskId}/${EndpointType.TASK}/`,
+    data
+  );
 };

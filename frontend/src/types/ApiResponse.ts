@@ -1,7 +1,8 @@
 interface ApiResponse {
-  state?: string;
-  message: string;
+  message?: string;
   accessToken?: string;
+  tokenType?: string;
+  expiresIn?: string;
 }
 
 export default ApiResponse;

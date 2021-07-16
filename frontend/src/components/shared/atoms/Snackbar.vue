@@ -5,7 +5,11 @@
       :class="'snackbar__' + snackbarType"
       v-if="showSnackbar"
     >
-      {{ snackbarMessage }}
+      <ul>
+        <li v-for="error in errors" :key="error">
+          {{ error }}
+        </li>
+      </ul>
     </div>
   </transition>
 </template>
@@ -17,9 +21,16 @@ import SnackbarType from '@/types/SnackbarType';
 
 // use via eventbus
 export default class Snackbar extends Vue {
-  @Prop({ default: 'Oups! Something went wrong' }) snackbarMessage!: string;
+  @Prop({ default: 'Oops! Something went wrong' }) snackbarMessage!:
+    | string
+    | string[];
   @Prop({ default: false }) showSnackbar!: boolean;
   @Prop({ default: SnackbarType.SUCCESS }) snackbarType?: SnackbarType;
+
+  get errors(): string[] {
+    if (Array.isArray(this.snackbarMessage)) return this.snackbarMessage;
+    return [this.snackbarMessage];
+  }
 }
 </script>
 

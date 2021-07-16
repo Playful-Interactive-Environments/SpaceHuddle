@@ -76,8 +76,13 @@ import { maxLength, required } from '@vuelidate/validators';
 import FormError from '@/components/shared/atoms/FormError.vue';
 import ModalBase from '@/components/shared/molecules/ModalBase.vue';
 
-import * as topicService from '@/services/topic-service';
+import * as taskService from '@/services/task-service';
 import ModuleType from '@/types/ModuleType';
+import {
+  getErrorMessage,
+  addError,
+  clearErrors,
+} from '@/services/exception-service';
 
 @Options({
   components: {
@@ -105,6 +110,7 @@ export default class ModalModuleCreate extends Vue {
   moduleType = this.ModuleTypeKeys[1];
   title = '';
   description = '';
+  errors: string[] = [];
 
   ModuleType = ModuleType;
 
@@ -125,20 +131,29 @@ export default class ModalModuleCreate extends Vue {
   }
 
   async createModule(): Promise<void> {
+    clearErrors(this.errors);
     await this.context.$v.$validate();
     if (this.context.$v.$error) return;
 
-    await topicService.postTask(this.topicId, {
-      taskType: this.moduleType,
-      name: this.title,
-      description: this.description,
-      parameter: {},
-      order: 10,
-    });
-    this.$emit('update:showModal', false);
-    this.$emit('moduleCreated');
-    this.resetForm();
-    this.context.$v.$reset();
+    taskService
+      .postTask(this.topicId, {
+        taskType: this.moduleType,
+        name: this.title,
+        description: this.description,
+        parameter: {},
+        order: 10,
+      })
+      .then(
+        () => {
+          this.$emit('update:showModal', false);
+          this.$emit('moduleCreated');
+          this.resetForm();
+          this.context.$v.$reset();
+        },
+        (error) => {
+          addError(this.errors, getErrorMessage(error));
+        }
+      );
   }
 }
 </script>

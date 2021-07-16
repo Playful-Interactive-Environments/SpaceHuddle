@@ -34,7 +34,12 @@ import { Options, Vue } from 'vue-class-component';
 import { Participant } from '@/services/participant-service';
 import * as participantService from '@/services/participant-service';
 import * as authService from '@/services/auth-service';
-import FormError from '../../components/shared/atoms/FormError.vue';
+import FormError from '@/components/shared/atoms/FormError.vue';
+import {
+  getErrorMessage,
+  addError,
+  clearErrors,
+} from '@/services/exception-service';
 
 @Options({
   components: {
@@ -51,34 +56,51 @@ export default class ClientJoin extends Vue {
   }
 
   async submit(e: Event): Promise<void> {
+    clearErrors(this.errors);
     e.preventDefault();
     if (this.sessionKey.length > 0) {
       this.connectToSession();
     } else {
-      this.addError('Please enter a code.');
+      addError(this.errors, 'Please enter a code.');
       return;
     }
   }
 
-  addError(newError: string): void {
-    if (this.errors.find((error) => error === newError) !== undefined) return;
-    this.errors.push(newError);
+  async connectToSession(browserKeyLS: string | null = null): Promise<void> {
+    if (browserKeyLS) {
+      participantService.reconnect(browserKeyLS).then((queryResult) => {
+        this.handleConnectionResult(queryResult);
+      });
+    } else {
+      participantService.connect(this.sessionKey).then(
+        (queryResult) => {
+          this.handleConnectionResult(queryResult);
+        },
+        (error) => {
+          addError(this.errors, 'Sorry, the provided code is invalid.');
+          addError(this.errors, getErrorMessage(error));
+        }
+      );
+    }
   }
 
-  async connectToSession(browserKeyLS: string | null = null): Promise<void> {
-    const participantData: Partial<Participant> | Participant = browserKeyLS
-      ? await participantService.reconnect(browserKeyLS)
-      : await participantService.connect(this.sessionKey);
-
-    if (participantData.state === participantService.ConnectState.ACTIVE) {
-      authService.setBrowserKey(participantData.browserKey as string);
-      authService.setAccessToken(participantData.accessToken as string);
-      await this.$router.push({
-        name: 'client-overview',
-      });
-    } else if (!browserKeyLS) {
-      this.addError('Sorry, the provided code is invalid.');
+  handleConnectionResult(participantData: Partial<Participant> | Participant ): boolean {
+    if (participantData.participant && participantData.token) {
+      if (
+        participantData.participant.state ===
+        participantService.ConnectState.ACTIVE
+      ) {
+        authService.setBrowserKey(
+          participantData.participant.browserKey as string
+        );
+        authService.setAccessToken(participantData.token.accessToken as string);
+        this.$router.push({
+          name: 'client-overview',
+        });
+        return true;
+      }
     }
+    return false;
   }
 }
 </script>

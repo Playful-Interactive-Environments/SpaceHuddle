@@ -27,7 +27,10 @@ export default class Toggle extends Vue {
 
   toggleClicked(event: Event) {
     event.stopPropagation();
-    this.$emit('toggleClicked');
+    if (event.target) {
+      const target = event.target as any;
+      this.$emit('toggleClicked', target.checked);
+    }
   }
 }
 </script>

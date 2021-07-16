@@ -74,6 +74,7 @@
             "
             :isSmall="true"
           />
+          <form-error :errors="errors"></form-error>
           <button class="btn btn--gradient btn--fullwidth" type="submit">
             Register
           </button>
@@ -98,6 +99,11 @@ import States from '@/types/States';
 import SnackbarType from '@/types/SnackbarType';
 import * as userService from '@/services/user-service';
 import { EventType } from '@/types/EventType';
+import {
+  getErrorMessage,
+  addError,
+  clearErrors,
+} from '@/services/exception-service';
 
 @Options({
   components: {
@@ -111,7 +117,7 @@ import { EventType } from '@/types/EventType';
     password: {
       required,
       min: minLength(8),
-      max: maxLength(12),
+      max: maxLength(255),
       containsUppercase: helpers.withMessage(
         'Password must contain at least one lowercase and uppercase letter, a number and a special character.',
         (value) => {
@@ -136,6 +142,7 @@ export default class ModeratorRegister extends Vue {
   password = '';
   passwordRepeat = '';
   readonly passwordRepeatMsg = 'Password repetition does not match.';
+  errors: string[] = [];
 
   context = setup(() => {
     return {
@@ -144,29 +151,30 @@ export default class ModeratorRegister extends Vue {
   });
 
   async registerUser(): Promise<void> {
+    clearErrors(this.errors);
     await this.context.$v.$validate();
     if (this.context.$v.$error || this.hasMatchingPasswords) return;
 
-    const { state } = await userService.registerUser(
-      this.email,
-      this.password,
-      this.passwordRepeat
-    );
-
-    if (state == States.SUCCESS) {
-      this.$router.push({
-        name: 'moderator-login',
-      });
-      this.eventBus.emit(EventType.SHOW_SNACKBAR, {
-        type: SnackbarType.SUCCESS,
-        message: 'Your account was successfully created.',
-      });
-    } else {
-      this.eventBus.emit(EventType.SHOW_SNACKBAR, {
-        type: SnackbarType.ERROR,
-        message: 'Something went wrong, could not create account.',
-      });
-    }
+    userService
+      .registerUser(
+        this.email,
+        this.password,
+        this.passwordRepeat
+      )
+      .then(
+        () => {
+          this.$router.push({
+            name: 'moderator-login',
+          });
+          this.eventBus.emit(EventType.SHOW_SNACKBAR, {
+            type: SnackbarType.SUCCESS,
+            message: 'Your account was successfully created.',
+          });
+        },
+        (error) => {
+          addError(this.errors, getErrorMessage(error));
+        }
+      );
   }
 
   get hasMatchingPasswords(): boolean {

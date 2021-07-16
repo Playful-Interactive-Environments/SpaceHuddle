@@ -12,12 +12,15 @@ import ModeratorInformation from '@/views/moderator/ModeratorInformation.vue';
 import ModeratorSelection from '@/views/moderator/ModeratorSelection.vue';
 import ModeratorCategorisation from '@/views/moderator/ModeratorCategorisation.vue';
 import ModeratorProfile from '@/views/moderator/ModeratorProfile.vue';
-import ModeratorVoting from '@/views/moderator/ModeratorVoting.vue';
+import ModeratorVote from '@/views/moderator/ModeratorVote.vue';
 import NotFound from '@/views/shared/NotFound.vue';
 import PublicScreen from '@/views/PublicScreen.vue';
 
-import { isAuthenticated } from '@/services/auth-service';
+import {isParticipant, isAuthenticated, isUser, removeAccessToken} from '@/services/auth-service';
 import ClientBrainstorming from '@/views/client/ClientBrainstorming.vue';
+import app from "@/main";
+import {EventType} from "@/types/EventType";
+import SnackbarType from "@/types/SnackbarType";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -41,6 +44,7 @@ const routes: Array<RouteRecordRaw> = [
     component: ModeratorProfile,
     meta: {
       requiresAuth: true,
+      requiresUser: true,
     },
   },
   {
@@ -49,6 +53,7 @@ const routes: Array<RouteRecordRaw> = [
     component: ModeratorSessionOverview,
     meta: {
       requiresAuth: true,
+      requiresUser: true,
     },
   },
   {
@@ -58,6 +63,7 @@ const routes: Array<RouteRecordRaw> = [
     props: (route) => ({ sessionId: route.params.sessionId }),
     meta: {
       requiresAuth: true,
+      requiresUser: true,
     },
   },
   {
@@ -70,6 +76,7 @@ const routes: Array<RouteRecordRaw> = [
     }),
     meta: {
       requiresAuth: true,
+      requiresUser: true,
     },
   },
   {
@@ -82,6 +89,7 @@ const routes: Array<RouteRecordRaw> = [
     }),
     meta: {
       requiresAuth: true,
+      requiresUser: true,
     },
   },
   {
@@ -94,6 +102,7 @@ const routes: Array<RouteRecordRaw> = [
     }),
     meta: {
       requiresAuth: true,
+      requiresUser: true,
     },
   },
   {
@@ -106,18 +115,20 @@ const routes: Array<RouteRecordRaw> = [
     }),
     meta: {
       requiresAuth: true,
+      requiresUser: true,
     },
   },
   {
     path: '/voting/:sessionId/:taskId',
-    name: 'moderator-voting',
-    component: ModeratorVoting,
+    name: 'moderator-vote',
+    component: ModeratorVote,
     props: (route) => ({
       sessionId: route.params.sessionId,
       taskId: route.params.taskId,
     }),
     meta: {
       requiresAuth: true,
+      requiresUser: true,
     },
   },
   {
@@ -131,6 +142,7 @@ const routes: Array<RouteRecordRaw> = [
     component: ClientOverview,
     meta: {
       requiresAuth: true,
+      requiresParticipant: true,
     },
   },
   {
@@ -141,6 +153,10 @@ const routes: Array<RouteRecordRaw> = [
     path: '/task/brainstorming/:taskId',
     name: 'client-brainstorming',
     component: ClientBrainstorming,
+    meta: {
+      requiresAuth: true,
+      requiresParticipant: true,
+    },
     props: (route) => ({ taskId: route.params.taskId }),
   },
   {
@@ -163,8 +179,26 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+  const requiresUser = to.matched.some((record) => record.meta.requiresUser);
+  const requiresParticipant = to.matched.some((record) => record.meta.requiresParticipant);
 
-  if (requiresAuth && !isAuthenticated()) next({ name: 'home' });
+  if (
+    (requiresAuth && !isAuthenticated()) ||
+    (requiresUser && !isUser()) ||
+    (requiresParticipant && !isParticipant())
+  ) {
+    console.log(requiresAuth);
+    console.log(requiresUser);
+    console.log(requiresParticipant);
+    let errorMessage = 'Authorisation has expired.';
+    if (isAuthenticated()) errorMessage = 'Incorrect authorisation type.';
+    app.config.globalProperties.eventBus.emit(EventType.SHOW_SNACKBAR, {
+      type: SnackbarType.ERROR,
+      message: errorMessage,
+    });
+    removeAccessToken();
+    next({ name: 'home' });
+  }
   else next();
 });
 

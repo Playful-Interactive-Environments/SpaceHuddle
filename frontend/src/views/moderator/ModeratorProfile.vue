@@ -29,14 +29,15 @@ import * as authService from '@/services/auth-service';
 })
 export default class ModeratorProfile extends Vue {
   email = '';
+  errors: string[] = [];
 
   mounted(): void {
     this.email = authService.getUserData() || '';
   }
 
-  async logout(): Promise<void> {
+  logout(): void {
     authService.removeAccessToken();
-    await this.$router.push({ name: 'home' });
+    this.$router.push({ name: 'home' });
   }
 }
 </script>

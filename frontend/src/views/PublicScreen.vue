@@ -66,7 +66,7 @@ import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 
 import * as sessionService from '@/services/session-service';
-import * as taskService from '@/services/task-service';
+import * as ideaService from '@/services/idea-service';
 import { Idea } from '@/services/idea-service';
 import { Task } from '@/services/task-service';
 import ModuleType from '@/types/ModuleType';
@@ -95,22 +95,30 @@ export default class PublicScreen extends Vue {
   TaskStates = TaskStates;
 
   async mounted(): Promise<void> {
-    this.task = await sessionService.getPublicScreen(this.sessionId);
-    console.log(this.task);
-    if (this.task) {
-      await this.getIdeas();
-      setModuleStyles(
-        this.$refs.container as HTMLElement,
-        ModuleType[this.task.taskType]
-      );
-    } else {
-      this.showFallback = true;
-    }
-    this.startIdeaInterval();
+    sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
+      this.task = queryResult;
+      if (this.task) {
+        this.getIdeas().then(() => {
+          if (this.task) {
+            setModuleStyles(
+              this.$refs.container as HTMLElement,
+              ModuleType[this.task.taskType]
+            );
+          }
+        });
+      } else {
+        this.showFallback = true;
+      }
+      this.startIdeaInterval();
+    });
   }
 
   async getIdeas(): Promise<void> {
-    if (this.task) this.ideas = await taskService.getIdeasForTask(this.task.id);
+    if (this.task) {
+      await ideaService.getIdeasForTask(this.task.id).then((ideas) => {
+        this.ideas = ideas;
+      });
+    }
   }
 
   startIdeaInterval(): void {
