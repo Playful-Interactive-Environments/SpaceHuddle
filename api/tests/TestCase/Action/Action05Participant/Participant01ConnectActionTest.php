@@ -82,7 +82,7 @@ class Participant01ConnectActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "sessionKey wrong.",
+                            "message" => "sessionKey wrong",
                             "field" => "sessionKey",
                         ],
                     ],

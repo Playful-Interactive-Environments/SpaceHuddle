@@ -46,7 +46,7 @@ class ParticipantData
         $reader = new ArrayReader($data);
         $this->id = $reader->findString("id");
         $this->browserKey = $reader->findString("browser_key");
-        $this->state = $reader->findString("state");
+        $this->state = strtoupper($reader->findString("state"));
         $this->avatar = new AvatarData($data);
     }
 }

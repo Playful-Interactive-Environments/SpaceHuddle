@@ -40,7 +40,7 @@ class IdeaData extends IdeaAbstract
         parent::__construct($data);
 
         $reader = new ArrayReader($data);
-        $this->state = $reader->findString("state");
+        $this->state = strtoupper($reader->findString("state"));
         $this->timestamp = $reader->findString("timestamp");
         $this->count = $reader->findInt("count");
     }

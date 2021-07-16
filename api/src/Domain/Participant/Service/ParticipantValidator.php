@@ -78,7 +78,7 @@ class ParticipantValidator
         $sessionKey = $data["sessionKey"];
         if (!$this->getRepository()->checkSessionKey($sessionKey)) {
             $result = new ValidationResult();
-            $result->addError("sessionKey", "sessionKey wrong.");
+            $result->addError("sessionKey", "sessionKey wrong");
             throw new ValidationException("Please check your input", $result);
         }
     }
@@ -101,7 +101,7 @@ class ParticipantValidator
         $browserKey = $data["browserKey"];
         if (!$this->getRepository()->checkBrowserKey($browserKey)) {
             $result = new ValidationResult();
-            $result->addError("browserKey", "browserKey wrong.");
+            $result->addError("browserKey", "browserKey wrong");
             throw new ValidationException("Please check your input", $result);
         }
     }

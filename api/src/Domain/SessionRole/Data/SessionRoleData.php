@@ -32,6 +32,6 @@ class SessionRoleData
     {
         $reader = new ArrayReader($data);
         $this->username = $reader->findString("username");
-        $this->role = $reader->findString("role");
+        $this->role = strtoupper($reader->findString("role"));
     }
 }
