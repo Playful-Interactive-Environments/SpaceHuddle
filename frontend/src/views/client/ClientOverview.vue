@@ -33,6 +33,7 @@ import * as participantService from '@/services/participant-service';
 import * as sessionService from '@/services/session-service';
 import { Topic } from '@/services/topic-service';
 import FormError from '@/components/shared/atoms/FormError.vue';
+import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
 
 @Options({
   components: {
@@ -52,6 +53,7 @@ export default class ClientOverview extends Vue {
   errors: string[] = [];
 
   mounted(): void {
+    console.log("mount client overview");
     this.getSessionInfo();
     this.getTopicsAndTasks();
   }
@@ -61,10 +63,10 @@ export default class ClientOverview extends Vue {
   }
 
   async getTopicsAndTasks(): Promise<void> {
-    participantService.getTopicList().then((queryResult) => {
+    participantService.getTopicList(EndpointAuthorisationType.PARTICIPANT).then((queryResult) => {
       this.topics = queryResult;
       this.topics.forEach(async (topic) => {
-        taskService.getTaskList(topic.id).then((queryResult) => {
+        taskService.getTaskList(topic.id, EndpointAuthorisationType.PARTICIPANT).then((queryResult) => {
           topic.tasks = queryResult;
         });
       });
@@ -72,7 +74,7 @@ export default class ClientOverview extends Vue {
   }
 
   async getSessionInfo(): Promise<void> {
-    sessionService.getClientSession().then((queryResult) => {
+    sessionService.getClientSession(EndpointAuthorisationType.PARTICIPANT).then((queryResult) => {
       this.sessionName = queryResult.title;
       this.sessionDescription = queryResult.description;
       this.sessionId = queryResult.id;

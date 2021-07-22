@@ -93,7 +93,7 @@ export default class ClientJoin extends Vue {
         authService.setBrowserKey(
           participantData.participant.browserKey as string
         );
-        authService.setAccessToken(participantData.token.accessToken as string);
+        authService.setAccessTokenParticipant(participantData.token.accessToken as string);
         this.$router.push({
           name: 'client-overview',
         });

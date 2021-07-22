@@ -112,7 +112,7 @@ export default class ModeratorLogin extends Vue {
     ).then(
       (queryResult) => {
         if (queryResult.accessToken) {
-          authService.setAccessToken(queryResult.accessToken);
+          authService.setAccessTokenModerator(queryResult.accessToken);
           authService.setUserData(this.email);
           this.$router.push({
             name: 'moderator-session-overview',

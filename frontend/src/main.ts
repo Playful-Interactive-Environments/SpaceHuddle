@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import VueFinalModal from 'vue-final-modal';
+import VueCookies from 'vue3-cookies';
 import App from './App.vue';
 import router from './router';
 import '@/assets/styles/global.scss';
@@ -15,6 +16,11 @@ declare module '@vue/runtime-core' {
 const eventBus = mitt();
 const app = createApp(App);
 app.use(router);
+app.use(VueCookies as any, {
+  expireTimes: "30d",
+  secure: true,
+  sameSite: "Strict" // "Lax"
+});
 app.config.globalProperties.eventBus = eventBus;
 app.use(VueFinalModal(), {});
 app.mount('#app');

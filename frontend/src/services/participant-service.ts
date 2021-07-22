@@ -1,6 +1,7 @@
 import { Topic } from '@/services/topic-service';
 import { apiExecuteGetHandled, apiExecutePost} from '@/services/api';
-import EndpointType from '@/types/Endpoint';
+import EndpointType from '@/types/EndpointType';
+import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
 
 export enum ConnectState {
   ACTIVE = 'ACTIVE',
@@ -35,7 +36,7 @@ export const connect = async (
     {
       sessionKey,
     },
-    false
+    EndpointAuthorisationType.UNAUTHORISED
   );
 };
 
@@ -43,13 +44,16 @@ export const reconnect = async (browserKey: string): Promise<Participant> => {
   return await apiExecuteGetHandled<Participant>(
     `/${EndpointType.PARTICIPANT_RECONNECT}/${browserKey}/`,
     {},
-    false
+    EndpointAuthorisationType.UNAUTHORISED
   );
 };
 
-export const getTopicList = async (): Promise<Topic[]> => {
+export const getTopicList = async (
+  authHeaderType = EndpointAuthorisationType.PARTICIPANT
+): Promise<Topic[]> => {
   return await apiExecuteGetHandled<Topic[]>(
     `/${EndpointType.PARTICIPANT}/${EndpointType.TOPICS}/`,
-    []
+    [],
+    authHeaderType
   );
 };

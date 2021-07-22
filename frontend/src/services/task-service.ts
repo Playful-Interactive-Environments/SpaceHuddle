@@ -1,8 +1,9 @@
 import {apiEndpoint, apiExecuteGet, apiExecuteGetHandled, apiExecutePost, apiExecutePut} from '@/services/api';
 import ModuleType from '@/types/ModuleType';
 import TaskStates from '@/types/TaskStates';
-import EndpointType from '@/types/Endpoint';
+import EndpointType from '@/types/EndpointType';
 import { Idea } from './idea-service';
+import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
 
 export interface Task {
   id: string;
@@ -15,9 +16,14 @@ export interface Task {
   state: TaskStates;
 }
 
-export const getTaskById = async (taskId: string): Promise<Task> => {
+export const getTaskById = async (
+  taskId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Task> => {
   return await apiExecuteGetHandled<Task>(
-    `/${EndpointType.TASK}/${taskId}/`
+    `/${EndpointType.TASK}/${taskId}/`,
+    {},
+    authHeaderType
   );
 };
 
@@ -28,10 +34,14 @@ export const updateTask = async (data: Task): Promise<Task> => {
   );
 };
 
-export const getTaskList = async (topicId: string): Promise<Task[]> => {
+export const getTaskList = async (
+  topicId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Task[]> => {
   return await apiExecuteGetHandled<Task[]>(
     `/${EndpointType.TOPIC}/${topicId}/${EndpointType.TASKS}/`,
-    []
+    [],
+    authHeaderType
   );
 };
 

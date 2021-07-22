@@ -37,7 +37,7 @@ export default class ModeratorBrainstorming extends Vue {
     this.startIdeaInterval();
   }
 
-  destroyed(): void {
+  unmounted(): void {
     clearInterval(this.ideaInterval);
   }
 

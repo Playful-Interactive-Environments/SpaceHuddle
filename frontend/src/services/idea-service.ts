@@ -3,7 +3,8 @@ import {
   apiExecuteGetHandled,
   apiExecutePost,
 } from '@/services/api';
-import EndpointType from '@/types/Endpoint';
+import EndpointType from '@/types/EndpointType';
+import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
 
 export interface Idea {
   id: string;
@@ -27,13 +28,18 @@ export const postIdea = async (
 ): Promise<Idea> => {
   return await apiExecutePost<Idea>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.IDEA}`,
-    data
+    data,
+    EndpointAuthorisationType.PARTICIPANT
   );
 };
 
-export const getIdeasForTask = async (taskId: string): Promise<Idea[]> => {
+export const getIdeasForTask = async (
+  taskId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Idea[]> => {
   return await apiExecuteGetHandled<Idea[]>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.IDEAS}/`,
-    []
+    [],
+    authHeaderType
   );
 };

@@ -6,7 +6,8 @@ import {
   apiExecutePut
 } from '@/services/api';
 import UserType from '@/types/UserType';
-import EndpointType from '@/types/Endpoint';
+import EndpointType from '@/types/EndpointType';
+import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
 
 // TODO: move types to separate files in types folder?
 export interface Session {
@@ -21,23 +22,34 @@ export interface Session {
   title: string;
 }
 
-export const getList = async (): Promise<Session[]> => {
+export const getList = async (
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Session[]> => {
   return await apiExecuteGetHandled<Session[]>(
     `/${EndpointType.SESSIONS}/`,
-    []
+    [],
+    authHeaderType
   );
 };
 
-export const getById = async (id: string): Promise<Session> => {
+export const getById = async (
+  id: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Session> => {
   return await apiExecuteGetHandled<Session>(
-    `/${EndpointType.SESSION}/${id}/`
+    `/${EndpointType.SESSION}/${id}/`,
+    {},
+    authHeaderType
   );
 };
 
-export const getClientSession = async (): Promise<Session> => {
+export const getClientSession = async (
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Session> => {
   const result = await apiExecuteGetHandled<Session[]>(
     `/${EndpointType.SESSIONS}/`,
-    []
+    [],
+    authHeaderType
   );
   if (Array.isArray(result) && result.length > 0) {
     return result[0];
@@ -59,11 +71,13 @@ export const remove = async (id: string): Promise<void> => {
 };
 
 export const getPublicScreen = async (
-  sessionId: string
+  sessionId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Task | null> => {
   return await apiExecuteGetHandled<Task>(
     `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PUBLIC_SCREEN}/`,
-    null
+    null,
+    authHeaderType
   );
 };
 

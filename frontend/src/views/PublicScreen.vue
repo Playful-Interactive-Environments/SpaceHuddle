@@ -125,7 +125,7 @@ export default class PublicScreen extends Vue {
     this.ideaInterval = setInterval(this.getIdeas, this.interval);
   }
 
-  destroyed(): void {
+  unmounted(): void {
     clearInterval(this.ideaInterval);
   }
 }

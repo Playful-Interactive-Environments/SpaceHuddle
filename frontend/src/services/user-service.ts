@@ -1,6 +1,7 @@
 import { apiExecutePost } from '@/services/api';
 import ApiResponse from '@/types/ApiResponse';
-import EndpointType from '@/types/Endpoint';
+import EndpointType from '@/types/EndpointType';
+import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
 
 export const registerUser = async (
   email: string,
@@ -14,7 +15,7 @@ export const registerUser = async (
       password: password,
       passwordConfirmation: passwordRepeat,
     },
-    false
+    EndpointAuthorisationType.UNAUTHORISED
   );
 };
 
@@ -28,6 +29,6 @@ export const loginUser = async (
       username: email,
       password: password,
     },
-    false
+    EndpointAuthorisationType.UNAUTHORISED
   );
 };

@@ -187,9 +187,6 @@ router.beforeEach((to, from, next) => {
     (requiresUser && !isUser()) ||
     (requiresParticipant && !isParticipant())
   ) {
-    console.log(requiresAuth);
-    console.log(requiresUser);
-    console.log(requiresParticipant);
     let errorMessage = 'Authorisation has expired.';
     if (isAuthenticated()) errorMessage = 'Incorrect authorisation type.';
     app.config.globalProperties.eventBus.emit(EventType.SHOW_SNACKBAR, {
