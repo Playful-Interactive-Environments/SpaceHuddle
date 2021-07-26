@@ -53,18 +53,18 @@ final class UserValidator
         $this->validateEntity(
             $data,
             $this->validationFactory->createValidator()
-                ->notEmptyString("username")
-                ->requirePresence("username")
-                ->email("username")
-                ->notEmptyString("password")
-                ->requirePresence("password")
+                ->notEmptyString("username", "Empty: This field cannot be left empty")
+                ->requirePresence("username", "Required: This field is required")
+                ->email("username", message: "EMail: The username must be an email address.")
+                ->notEmptyString("password", "Empty: This field cannot be left empty")
+                ->requirePresence("password", "Required: This field is required")
         );
 
         $username = $data["username"];
         $password = $data["password"];
         if (!$this->getRepository()->checkPasswordForUsername($username, $password)) {
             $result = new ValidationResult();
-            $result->addError("username or password", "Username or password wrong.");
+            $result->addError("username or password", "NotExist: Username or password wrong.");
             throw new ValidationException("Please check your input", $result);
         }
     }
@@ -84,7 +84,7 @@ final class UserValidator
         $username = $data["username"];
         if ($this->getRepository()->existsUsername($username)) {
             $result = new ValidationResult();
-            $result->addError("username", "User $username already exists.");
+            $result->addError("username", "Exist: User $username already exists.");
             throw new ValidationException("Please check your input", $result);
         }
     }
@@ -98,7 +98,7 @@ final class UserValidator
      */
     public function validateExists(string $id, ?string $errorMessage = null): void
     {
-        $this->genericValidateExists($id, "The logged-in user no longer exists.");
+        $this->genericValidateExists($id, "NotExist: The logged-in user no longer exists.");
     }
 
     /**
@@ -117,7 +117,7 @@ final class UserValidator
         $oldPassword = $data["oldPassword"];
         if (!$this->repository->checkEncryptTextForId($userId, $oldPassword)) {
             $result = new ValidationResult();
-            $result->addError("password", "The old password is wrong.");
+            $result->addError("password", "NotValid: The old password is wrong.");
             throw new ValidationException("Please check your input", $result);
         }
     }
@@ -131,20 +131,20 @@ final class UserValidator
         $validator = $this->validationFactory->createValidator();
 
         return $validator
-            ->notEmptyString("username")
-            ->requirePresence("username", "create")
-            ->email("username", message: "The username must be an email address.")
-            ->notEmptyString("password")
-            ->requirePresence("password")
-            ->notEmptyString("passwordConfirmation")
-            ->requirePresence("passwordConfirmation")
-            ->minLength("password", 8, "Too short")
-            ->maxLength("password", 255, "Too long")
+            ->notEmptyString("username", "Empty: This field cannot be left empty")
+            ->requirePresence("username", "create", "Required: This field is required")
+            ->email("username", message: "EMail: The username must be an email address.")
+            ->notEmptyString("password", "Empty: This field cannot be left empty")
+            ->requirePresence("password", "Required: This field is required")
+            ->notEmptyString("passwordConfirmation", "Empty: This field cannot be left empty")
+            ->requirePresence("passwordConfirmation", "Required: This field is required")
+            ->minLength("password", 8, "TooShort: Too short")
+            ->maxLength("password", 255, "TooLong: Too long")
             ->regex(
                 "password",
                 "/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).*$/",
-                "Password must contain at least one lowercase and uppercase letter, a number and a special character."
+                "PatternMatch: Password must contain at least one lowercase and uppercase letter, a number and a special character."
             )
-            ->equalToField("passwordConfirmation", "password", "Password and confirmation do not match.");
+            ->equalToField("passwordConfirmation", "password", "Comparison: Password and confirmation do not match.");
     }
 }

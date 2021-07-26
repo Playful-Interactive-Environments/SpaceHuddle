@@ -40,15 +40,15 @@ class SessionRoleValidator
         $validator = $this->validationFactory->createValidator();
 
         return $validator
-            ->notEmptyString("username")
-            ->requirePresence("username")
-            ->notEmptyString("role")
-            ->requirePresence("role")
+            ->notEmptyString("username", "Empty: This field cannot be left empty")
+            ->requirePresence("username", "Required: This field is required")
+            ->notEmptyString("role", "Empty: This field cannot be left empty")
+            ->requirePresence("role", "Required: This field is required")
             ->add("role", "custom", [
                 "rule" => function ($value) {
                     return self::isTypeOption($value, SessionRoleType::class);
                 },
-                "message" => "Wrong session role type."
+                "message" => "Type: Wrong session role type."
             ]);
     }
 
@@ -95,8 +95,8 @@ class SessionRoleValidator
         $this->validateEntity(
             $data,
             $this->validationFactory->createValidator()
-                ->notEmptyString("username")
-                ->requirePresence("username"),
+                ->notEmptyString("username", "Empty: This field cannot be left empty")
+                ->requirePresence("username", "Required: This field is required"),
             newRecord: false
         );
 
@@ -119,7 +119,7 @@ class SessionRoleValidator
             $result = new ValidationResult();
             $result->addError(
                 "username",
-                "Username not exists."
+                "NotExist: Username not exists."
             );
             throw new ValidationException("Please check your input", $result);
         }
@@ -138,7 +138,7 @@ class SessionRoleValidator
             $result = new ValidationResult();
             $result->addError(
                 "username",
-                "One's own role cannot be changed."
+                "NoPermission: One's own role cannot be changed."
             );
             throw new ValidationException("Please check your input", $result);
         }

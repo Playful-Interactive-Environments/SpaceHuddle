@@ -48,15 +48,15 @@ class ParticipantValidator
         $validator = $this->validationFactory->createValidator();
 
         return $validator
-            ->notEmptyString("id")
-            ->requirePresence("id", "update")
-            ->notEmptyString("sessionKey")
-            ->requirePresence("sessionKey", "create")
+            ->notEmptyString("id", "Empty: This field cannot be left empty")
+            ->requirePresence("id", "update", "Required: This field is required")
+            ->notEmptyString("sessionKey", "Empty: This field cannot be left empty")
+            ->requirePresence("sessionKey", "create", "Required: This field is required")
             ->add("state", "custom", [
                 "rule" => function ($value) {
                     return self::isTypeOption($value, ParticipantState::class);
                 },
-                "message" => "Wrong participant state."
+                "message" => "Type: Wrong participant state."
             ]);
     }
 
@@ -71,14 +71,14 @@ class ParticipantValidator
     {
         $this->validateEntity($data,
             $this->validationFactory->createValidator()
-                ->notEmptyString("sessionKey")
-                ->requirePresence("sessionKey")
+                ->notEmptyString("sessionKey", "Empty: This field cannot be left empty")
+                ->requirePresence("sessionKey", "Required: This field is required")
         );
 
         $sessionKey = $data["sessionKey"];
         if (!$this->getRepository()->checkSessionKey($sessionKey)) {
             $result = new ValidationResult();
-            $result->addError("sessionKey", "sessionKey wrong");
+            $result->addError("sessionKey", "NotExist: sessionKey wrong");
             throw new ValidationException("Please check your input", $result);
         }
     }
@@ -94,14 +94,14 @@ class ParticipantValidator
     {
         $this->validateEntity($data,
             $this->validationFactory->createValidator()
-                ->notEmptyString("browserKey")
-                ->requirePresence("browserKey")
+                ->notEmptyString("browserKey", "Empty: This field cannot be left empty")
+                ->requirePresence("browserKey", "Required: This field is required")
         );
 
         $browserKey = $data["browserKey"];
         if (!$this->getRepository()->checkBrowserKey($browserKey)) {
             $result = new ValidationResult();
-            $result->addError("browserKey", "browserKey wrong");
+            $result->addError("browserKey", "NotExist: browserKey wrong");
             throw new ValidationException("Please check your input", $result);
         }
     }

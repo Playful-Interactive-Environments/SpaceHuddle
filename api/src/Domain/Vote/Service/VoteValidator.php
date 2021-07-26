@@ -37,10 +37,10 @@ class VoteValidator
         $validator = $this->validationFactory->createValidator();
 
         return $validator
-            ->notEmptyString("id")
-            ->requirePresence("id", "update")
-            ->notEmptyString("ideaId")
-            ->requirePresence("ideaId", "create");
+            ->notEmptyString("id", "Empty: This field cannot be left empty")
+            ->requirePresence("id", "update", "Required: This field is required")
+            ->notEmptyString("ideaId", "Empty: This field cannot be left empty")
+            ->requirePresence("ideaId", "create", "Required: This field is required");
     }
 
     /**
@@ -55,10 +55,10 @@ class VoteValidator
         $this->validateEntity(
             $data,
             $this->validationFactory->createValidator()
-                ->notEmptyString("ideaId")
-                ->requirePresence("ideaId")
-                ->notEmptyString("taskId")
-                ->requirePresence("taskId")
+                ->notEmptyString("ideaId", "Empty: This field cannot be left empty")
+                ->requirePresence("ideaId", "Required: This field is required")
+                ->notEmptyString("taskId", "Empty: This field cannot be left empty")
+                ->requirePresence("taskId", "Required: This field is required")
         );
 
         $taskId = $data["taskId"];
@@ -70,7 +70,7 @@ class VoteValidator
             $result = new ValidationResult();
             $result->addError(
                 "ideaId",
-                "IdeaId is not a valid idea keys or do not belong to the same topic as the task."
+                "NotValid: IdeaId is not a valid idea keys or do not belong to the same topic as the task."
             );
             throw new ValidationException("Please check your input", $result);
         }
@@ -88,8 +88,8 @@ class VoteValidator
         $this->validateEntity(
             $data,
             $this->validationFactory->createValidator()
-                ->notEmptyString("taskId")
-                ->requirePresence("taskId")
+                ->notEmptyString("taskId", "Empty: This field cannot be left empty")
+                ->requirePresence("taskId", "Required: This field is required")
         );
 
         $taskId = $data["taskId"];
@@ -107,7 +107,7 @@ class VoteValidator
             $result = new ValidationResult();
             $result->addError(
                 "taskId",
-                "The specified task has the wrong type. A VOTING task is expected."
+                "NotValid: The specified task has the wrong type. A VOTING task is expected."
             );
             throw new ValidationException("Please check your input", $result);
         }

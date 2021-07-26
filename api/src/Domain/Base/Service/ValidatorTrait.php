@@ -52,7 +52,7 @@ trait ValidatorTrait
             $result = new ValidationResult();
             if (is_null($errorMessage)) {
                 $entityName = $this->repository->getEntityName();
-                $errorMessage = "$entityName $id is not valid.";
+                $errorMessage = "NotExist: $entityName $id is not valid.";
             }
             $result->addError("id", $errorMessage);
             throw new ValidationException("Please check your input", $result);

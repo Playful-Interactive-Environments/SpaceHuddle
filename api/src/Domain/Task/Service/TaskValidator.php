@@ -39,23 +39,23 @@ class TaskValidator
         $validator = $this->validationFactory->createValidator();
 
         return $validator
-            ->notEmptyString("id")
-            ->requirePresence("id", "update")
-            ->notEmptyString("taskType")
-            ->requirePresence("taskType", "create")
-            ->notEmptyString("name")
-            ->requirePresence("name", "create")
+            ->notEmptyString("id", "Empty: This field cannot be left empty")
+            ->requirePresence("id", "update", "Required: This field is required")
+            ->notEmptyString("taskType", "Empty: This field cannot be left empty")
+            ->requirePresence("taskType", "create", "Required: This field is required")
+            ->notEmptyString("name", "Empty: This field cannot be left empty")
+            ->requirePresence("name", "create", "Required: This field is required")
             ->add("taskType", "custom", [
                 "rule" => function ($value) {
                     return self::isTypeOption($value, TaskType::class);
                 },
-                "message" => "Wrong task type."
+                "message" => "Type: Wrong task type."
             ])
             ->add("state", "custom", [
                 "rule" => function ($value) {
                     return self::isTypeOption($value, TaskState::class);
                 },
-                "message" => "Wrong task state."
+                "message" => "Type: Wrong task state."
             ]);
     }
 
@@ -69,15 +69,15 @@ class TaskValidator
         $this->validateEntity(
             $data,
             $this->validationFactory->createValidator()
-                ->notEmptyString("taskId")
-                ->requirePresence("taskId")
-                ->notEmptyArray("state")
-                ->requirePresence("state")
+                ->notEmptyString("taskId", "Empty: This field cannot be left empty")
+                ->requirePresence("taskId", "Required: This field is required")
+                ->notEmptyArray("state", "Empty: This field cannot be left empty")
+                ->requirePresence("state", "Required: This field is required")
                 ->add("state", "custom", [
                     "rule" => function ($value) {
                         return self::isTypeOption($value, TaskState::class);
                     },
-                    "message" => "Wrong task state."
+                    "message" => "Type: Wrong task state."
                 ])
         );
     }

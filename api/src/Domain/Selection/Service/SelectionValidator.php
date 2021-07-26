@@ -37,10 +37,10 @@ class SelectionValidator
         $validator = $this->validationFactory->createValidator();
 
         return $validator
-            ->notEmptyString("id")
-            ->requirePresence("id", "update")
-            ->notEmptyString("name")
-            ->requirePresence("name", "create");
+            ->notEmptyString("id", "Empty: This field cannot be left empty")
+            ->requirePresence("id", "update", "Required: This field is required")
+            ->notEmptyString("name", "Empty: This field cannot be left empty")
+            ->requirePresence("name", "create", "Required: This field is required");
     }
 
     /**
@@ -54,10 +54,10 @@ class SelectionValidator
         $this->validateEntity(
             $data,
             $this->validationFactory->createValidator()
-                ->notEmptyString("selectionId")
-                ->requirePresence("selectionId")
-                ->notEmptyArray("ideas")
-                ->requirePresence("ideas")
+                ->notEmptyString("selectionId", "Empty: This field cannot be left empty")
+                ->requirePresence("selectionId", "Required: This field is required")
+                ->notEmptyArray("ideas", "Empty: This field cannot be left empty")
+                ->requirePresence("ideas", "Required: This field is required")
         );
 
         $selectionId = $data["selectionId"];
@@ -65,9 +65,9 @@ class SelectionValidator
 
         if (!$this->repository->ideasAgreeWithSelection($selectionId, $ideas, $lookForConnected)) {
             $result = new ValidationResult();
-            $message = "Not all ideas are valid idea keys or do not belong to the same topic as the selection.";
+            $message = "NotValid: Not all ideas are valid idea keys or do not belong to the same topic as the selection.";
             if ($lookForConnected) {
-                $message = "Not all ideas are linked to the selection.";
+                $message = "NotValid: Not all ideas are linked to the selection.";
             }
             $result->addError(
                 "ideas",

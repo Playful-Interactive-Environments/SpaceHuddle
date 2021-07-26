@@ -41,15 +41,15 @@ class IdeaValidator
         $validator = $this->validationFactory->createValidator();
 
         return $validator
-            ->notEmptyString("id")
-            ->requirePresence("id", "update")
-            ->notEmptyString("keywords")
-            ->requirePresence("keywords", "create")
+            ->notEmptyString("id", "Empty: This field cannot be left empty")
+            ->requirePresence("id", "update", "Required: This field is required")
+            ->notEmptyString("keywords", "Empty: This field cannot be left empty")
+            ->requirePresence("keywords", "create", "Required: This field is required")
             ->add("state", "custom", [
                 "rule" => function ($value) {
                     return self::isTypeOption($value, IdeaState::class);
                 },
-                "message" => "Wrong idea state."
+                "message" => "Type: Wrong idea state."
             ]);
     }
 
@@ -64,7 +64,7 @@ class IdeaValidator
         $taskID = $this->repository->getTopicTask($topicId, $validStates);
         if (!isset($taskID)) {
             $result = new ValidationResult();
-            $result->addError("topicId", "Topic has no active BRAINSTORMING task.");
+            $result->addError("topicId", "NotValid: Topic has no active BRAINSTORMING task.");
             throw new ValidationException("Please check your input", $result);
         }
     }
@@ -102,8 +102,8 @@ class IdeaValidator
         $this->validateEntity(
             $data,
             $this->validationFactory->createValidator()
-                ->notEmptyString("taskId")
-                ->requirePresence("taskId")
+                ->notEmptyString("taskId", "Empty: This field cannot be left empty")
+                ->requirePresence("taskId", "Required: This field is required")
         );
 
         $taskId = $data["taskId"];
@@ -121,7 +121,7 @@ class IdeaValidator
             $result = new ValidationResult();
             $result->addError(
                 "taskId",
-                "The specified task has the wrong type. A BRAINSTORMING task is expected."
+                "NotValid: The specified task has the wrong type. A BRAINSTORMING task is expected."
             );
             throw new ValidationException("Please check your input", $result);
         }
@@ -138,7 +138,7 @@ class IdeaValidator
             $result = new ValidationResult();
             $result->addError(
                 "idea",
-                "The idea has already been submitted."
+                "Exist: The idea has already been submitted."
             );
             throw new ValidationException("Please check your input", $result);
         }

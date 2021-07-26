@@ -37,10 +37,10 @@ class CategoryValidator
         $validator = $this->validationFactory->createValidator();
 
         return $validator
-            ->notEmptyString("id")
-            ->requirePresence("id", "update")
-            ->notEmptyString("keywords")
-            ->requirePresence("keywords", "create");
+            ->notEmptyString("id", "Empty: This field cannot be left empty")
+            ->requirePresence("id", "update", "Required: This field is required")
+            ->notEmptyString("keywords", "Empty: This field cannot be left empty")
+            ->requirePresence("keywords", "create", "Required: This field is required");
     }
 
     /**
@@ -70,10 +70,10 @@ class CategoryValidator
         $this->validateEntity(
             $data,
             $this->validationFactory->createValidator()
-                ->notEmptyString("categoryId")
-                ->requirePresence("categoryId")
-                ->notEmptyArray("ideas")
-                ->requirePresence("ideas")
+                ->notEmptyString("categoryId", "Empty: This field cannot be left empty")
+                ->requirePresence("categoryId", "Required: This field is required")
+                ->notEmptyArray("ideas", "Empty: This field cannot be left empty")
+                ->requirePresence("ideas", "Required: This field is required")
         );
 
         $categoryId = $data["categoryId"];
@@ -81,9 +81,9 @@ class CategoryValidator
 
         if (!$this->repository->ideasAgreeWithCategory($categoryId, $ideas, $lookForConnected)) {
             $result = new ValidationResult();
-            $message = "Not all ideas are valid idea keys or do not belong to the same topic as the category.";
+            $message = "NotValid: Not all ideas are valid idea keys or do not belong to the same topic as the category.";
             if ($lookForConnected) {
-                $message = "Not all ideas are linked to the category.";
+                $message = "NotValid: Not all ideas are linked to the category.";
             }
             $result->addError(
                 "ideas",
@@ -124,8 +124,8 @@ class CategoryValidator
         $this->validateEntity(
             $data,
             $this->validationFactory->createValidator()
-                ->notEmptyString("taskId")
-                ->requirePresence("taskId")
+                ->notEmptyString("taskId", "Empty: This field cannot be left empty")
+                ->requirePresence("taskId", "Required: This field is required")
         );
 
         $taskId = $data["taskId"];
@@ -143,7 +143,7 @@ class CategoryValidator
             $result = new ValidationResult();
             $result->addError(
                 "taskId",
-                "The specified task has the wrong type. A CATEGORISATION task is expected."
+                "NotValid: The specified task has the wrong type. A CATEGORISATION task is expected."
             );
             throw new ValidationException("Please check your input", $result);
         }

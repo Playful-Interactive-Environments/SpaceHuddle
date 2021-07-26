@@ -37,10 +37,10 @@ final class SessionValidator
         $validator = $this->validationFactory->createValidator();
 
         return $validator
-            ->notEmptyString("id")
-            ->requirePresence("id", "update")
-            ->notEmptyString("title")
-            ->requirePresence("title", "create");
+            ->notEmptyString("id", "Empty: This field cannot be left empty")
+            ->requirePresence("id", "update", "Required: This field is required")
+            ->notEmptyString("title", "Empty: This field cannot be left empty")
+            ->requirePresence("title", "create", "Required: This field is required");
     }
 
     /**
@@ -53,8 +53,8 @@ final class SessionValidator
         $this->validateEntity(
             $data,
             $this->validationFactory->createValidator()
-                ->notEmptyString("sessionId")
-                ->requirePresence("sessionId")
+                ->notEmptyString("sessionId", "Empty: This field cannot be left empty")
+                ->requirePresence("sessionId", "Required: This field is required")
         );
 
         $sessionId = $data["sessionId"];
@@ -66,7 +66,7 @@ final class SessionValidator
                 $result = new ValidationResult();
                 $result->addError(
                     "taskId",
-                    "The task does not belong to the session or has no module and can not be set for public screen."
+                    "NotValid: The task does not belong to the session or has no module and can not be set for public screen."
                 );
                 throw new ValidationException("Please check your input", $result);
             }

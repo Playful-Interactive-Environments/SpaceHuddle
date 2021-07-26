@@ -35,9 +35,9 @@ class ResourceValidator
         $validator = $this->validationFactory->createValidator();
 
         return $validator
-            ->notEmptyString("id")
-            ->requirePresence("id", "update")
-            ->notEmptyString("title")
-            ->requirePresence("title", "create");
+            ->notEmptyString("id", "Empty: This field cannot be left empty")
+            ->requirePresence("id", "update", "Required: This field is required")
+            ->notEmptyString("title", "Empty: This field cannot be left empty")
+            ->requirePresence("title", "create", "Required: This field is required");
     }
 }
