@@ -1,6 +1,7 @@
 <template>
-  <router-view />
+  <router-view class="pre-formatted" />
   <snackbar
+    class="pre-formatted"
     v-bind:showSnackbar="showSnackbar"
     v-bind:snackbarMessage="snackbarMessage"
     v-bind:snackbarType="snackbarType"
@@ -11,7 +12,7 @@
 import { Vue, Options } from 'vue-class-component';
 import Snackbar from '@/components/shared/atoms/Snackbar.vue';
 import SnackbarType from '@/types/SnackbarType';
-import {EventType} from "@/types/EventType";
+import { EventType } from '@/types/EventType';
 
 @Options({
   components: {

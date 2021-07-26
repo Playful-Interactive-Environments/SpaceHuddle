@@ -31,7 +31,7 @@
             </template>
           </draggable>
           <AddItem
-            text="Add module"
+            :text="$t('moderator.module.overview.add')"
             @addNew="openModalModuleCreate(topic.id)"
           />
         </template>

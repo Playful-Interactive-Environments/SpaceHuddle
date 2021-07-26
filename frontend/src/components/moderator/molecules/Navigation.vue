@@ -10,14 +10,14 @@
         class="nav__item-icon nav__session-icon"
         :class="{ 'nav__item-icon--white': white }"
       />
-      Sessions
+      {{ $t("moderator.navigation.sessions") }}
     </router-link>
     <router-link to="/profile" class="nav__item">
       <div
         class="nav__item-icon nav__profile-icon"
         :class="{ 'nav__item-icon--white': white }"
       />
-      Profile
+      {{ $t("moderator.navigation.profile") }}
     </router-link>
   </nav>
 </template>

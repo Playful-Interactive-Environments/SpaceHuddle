@@ -10,9 +10,9 @@
         container--centered
       "
     >
-      <h1>Your Profile</h1>
-      <p class="profile__email">Email Address: {{ email }}</p>
-      <button class="btn btn--gradient" @click="logout">Logout</button>
+      <h1>{{ $t("moderator.profile.header") }}</h1>
+      <p class="profile__email">{{ $t("moderator.profile.info") }} {{ email }}</p>
+      <button class="btn btn--gradient" @click="logout">{{ $t("moderator.profile.submit") }}</button>
     </div>
   </div>
 </template>

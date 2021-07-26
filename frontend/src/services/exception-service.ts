@@ -1,4 +1,4 @@
-import { AxiosError } from 'axios';
+import {AxiosError, AxiosResponse} from 'axios';
 import ApiError from '@/types/ApiError';
 import app from '@/main';
 import { EventType } from '@/types/EventType';
@@ -18,9 +18,16 @@ export const addError = (errorList: string[], newError: string | string[]): stri
   if (!Array.isArray(newError))
     newError = [newError];
 
-  newError.forEach((errorItem) => {
-    if (errorList.find((error) => error === errorItem) === undefined)
-      errorList.push(errorItem);
+  newError.forEach((errorItem: string) => {
+    let errorMessage = errorItem;
+    const errorParts = errorItem.split(':');
+    if (errorParts.length > 1) {
+      const errorCode = errorParts[0];
+      const fallbackMessage = errorParts[1].trim();
+      errorMessage = app.config.globalProperties.$i18n.t2(`error.${errorCode}`, fallbackMessage);
+    }
+    if (errorList.find((error) => error === errorMessage) === undefined)
+      errorList.push(errorMessage);
   });
   return errorList;
 };
@@ -28,6 +35,29 @@ export const addError = (errorList: string[], newError: string | string[]): stri
 export const clearErrors = (errorList: string[]): string[] => {
   errorList.length = 0;
   return errorList;
+};
+
+const calcErrorPrefix = (response: AxiosResponse): string => {
+  let errorPrefix = '';
+
+  const errorUrl = response.config?.url;
+  let lastNamedUrlPart = '';
+  if (errorUrl) {
+    const errorUlrParts = errorUrl.split('/');
+    errorUlrParts.forEach((part) => {
+      if (part.length > 0 && !part.includes('-')) {
+        lastNamedUrlPart = part;
+      }
+    });
+  }
+  errorPrefix += `${lastNamedUrlPart}.`;
+
+  const errorMethode = response.config.method;
+  if (errorMethode) {
+    errorPrefix += `${errorMethode}.`;
+  }
+
+  return errorPrefix;
 };
 
 export const apiErrorHandling = async (
@@ -42,6 +72,7 @@ export const apiErrorHandling = async (
     return {};
   } else {
     errorResult = error.response?.data;
+    const errorPrefix = calcErrorPrefix(response);
 
     if (displayDBErrors) {
       if (errorResult && errorResult.error && errorResult.error.details) {
@@ -49,7 +80,7 @@ export const apiErrorHandling = async (
         const errorList = errorResult.error.details;
         if (Array.isArray(errorList)) {
           errorList.forEach((item, i) => {
-            addError(errorMessage, `${item.message}`);
+            addError(errorMessage, `${errorPrefix}${item.field}.${item.message}`);
           });
         }
         app.config.globalProperties.eventBus.emit(EventType.SHOW_SNACKBAR, {

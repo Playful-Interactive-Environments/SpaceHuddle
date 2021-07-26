@@ -8,7 +8,7 @@
     <img
       v-if="closable"
       src="@/assets/icons/cancel.svg"
-      alt="cancel"
+      alt="cancel-icon"
       role="button"
       class="icon icon--m btn--icon-only base-modal__close"
       @click="$emit('update:showModal', false)"

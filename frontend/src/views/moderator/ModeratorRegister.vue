@@ -6,27 +6,27 @@
         container container--fullheight container--centered
       "
     >
-      <h2 class="heading heading--medium heading--white">Welcome back!</h2>
+      <h2 class="heading heading--medium heading--white">{{ $t("moderator.register.login.header") }}</h2>
       <p class="register__text">
-        If you already have an account, just go ahead and login to access all
-        your existing resources.
+        {{ $t("moderator.register.login.info") }}
       </p>
       <router-link to="login">
-        <button class="btn btn--outline-white">Login</button>
+        <button class="btn btn--outline-white">{{ $t("moderator.register.login.submit") }}</button>
       </router-link>
     </section>
     <section class="container container--fullheight container--centered">
       <div class="register__content">
-        <h1 class="heading heading--medium">Register</h1>
+        <h1 class="heading heading--medium">{{ $t("moderator.register.header") }}</h1>
         <p class="register__description">
-          Please enter your personal info to create an account.
+          {{ $t("moderator.register.info") }}
+
         </p>
         <form @submit.prevent="registerUser">
-          <h3 class="heading heading--xs">Email</h3>
+          <h3 class="heading heading--xs">{{ $t("moderator.register.email") }}</h3>
           <input
             class="input input--fullwidth"
             name="email"
-            placeholder="Enter your email"
+            :placeholder="$t('moderator.register.emailInfo')"
             type="email"
             v-model.trim="email"
             autocomplete="email"
@@ -37,11 +37,11 @@
             :errors="context.$v.email.$errors"
             :isSmall="true"
           />
-          <h3 class="heading heading--xs">Password</h3>
+          <h3 class="heading heading--xs">{{ $t("moderator.register.password") }}</h3>
           <input
             class="input input--fullwidth"
             name="password"
-            placeholder="Enter your password"
+            :placeholder="$t('moderator.register.passwordInfo')"
             type="password"
             autocomplete="new-password"
             v-model.trim="password"
@@ -52,11 +52,11 @@
             :errors="context.$v.password.$errors"
             :isSmall="true"
           />
-          <h4 class="heading heading--xs">Password repeat</h4>
+          <h4 class="heading heading--xs">{{ $t("moderator.register.passwordConform") }}</h4>
           <input
             class="input input--fullwidth"
             name="passwordRepeat"
-            placeholder="Repeat your password"
+            :placeholder="$t('moderator.register.passwordConformInfo')"
             type="password"
             autocomplete="new-password"
             v-model.trim="passwordRepeat"
@@ -76,7 +76,7 @@
           />
           <form-error :errors="errors"></form-error>
           <button class="btn btn--gradient btn--fullwidth" type="submit">
-            Register
+            {{ $t("moderator.register.submit") }}
           </button>
         </form>
       </div>
@@ -104,6 +104,9 @@ import {
   addError,
   clearErrors,
 } from '@/services/exception-service';
+import * as taskService from "@/services/task-service";
+import {setModuleStyles} from "@/utils/moduleStyles";
+import * as sessionService from "@/services/session-service";
 
 @Options({
   components: {
@@ -119,7 +122,7 @@ import {
       min: minLength(8),
       max: maxLength(255),
       containsUppercase: helpers.withMessage(
-        'Password must contain at least one lowercase and uppercase letter, a number and a special character.',
+        'Password must contain at least one lowercase and uppercase letter, a number and a special character',
         (value) => {
           return (
             /[A-Z]/.test(value as string) &&
@@ -132,8 +135,7 @@ import {
     },
     passwordRepeat: {
       required,
-      min: minLength(8),
-      max: maxLength(12),
+      min: minLength(8)
     },
   },
 })
@@ -141,8 +143,13 @@ export default class ModeratorRegister extends Vue {
   email = '';
   password = '';
   passwordRepeat = '';
-  readonly passwordRepeatMsg = 'Password repetition does not match.';
+  passwordRepeatMsg = 'Password repetition does not match';
   errors: string[] = [];
+
+  async mounted(): Promise<void> {
+    this.passwordRepeatMsg = (this as any).$t('error.vuelidate.Password repetition does not match');
+    //this.passwordRepeatMsg = this.$.appContext.app.config.globalProperties.$t('error.vuelidate.Password repetition does not match');
+  }
 
   context = setup(() => {
     return {
@@ -154,6 +161,7 @@ export default class ModeratorRegister extends Vue {
     clearErrors(this.errors);
     await this.context.$v.$validate();
     if (this.context.$v.$error || this.hasMatchingPasswords) return;
+
 
     userService
       .registerUser(

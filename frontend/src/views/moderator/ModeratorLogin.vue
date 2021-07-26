@@ -2,17 +2,16 @@
   <div class="login container--fullheight">
     <section class="container container--fullheight container--centered">
       <div class="login__content">
-        <h1 class="heading heading--medium">Login</h1>
+        <h1 class="heading heading--medium">{{ $t("moderator.login.header") }}</h1>
         <p class="login__description">
-          Go ahead and login to access all your existing resources create new
-          brainstorming sessions.
+          {{ $t("moderator.login.info") }}
         </p>
         <form @submit.prevent="loginUser">
-          <h3 class="heading heading--xs">Email</h3>
+          <h3 class="heading heading--xs">{{ $t("moderator.login.email") }}</h3>
           <input
             class="input input--fullwidth"
             name="email"
-            placeholder="Enter your email"
+            :placeholder="$t('moderator.login.emailInfo')"
             type="email"
             v-model="email"
             @blur="context.$v.email.$touch()"
@@ -22,11 +21,11 @@
             :errors="context.$v.email.$errors"
             :isSmall="true"
           />
-          <h3 class="heading heading--xs">Password</h3>
+          <h3 class="heading heading--xs">{{ $t("moderator.login.password") }}</h3>
           <input
             class="input input--fullwidth"
             name="password"
-            placeholder="Enter your password"
+            :placeholder="$t('moderator.login.passwordInfo')"
             type="password"
             v-model="password"
             @blur="context.$v.password.$touch()"
@@ -38,9 +37,10 @@
           />
           <form-error :errors="errors"></form-error>
           <button class="btn btn--gradient btn--fullwidth" type="submit">
+            {{ $t("moderator.login.submit") }}
             Login
           </button>
-          <p class="login__forgot-pw" role="button">Forgot Password?</p>
+          <p class="login__forgot-pw" role="button">{{ $t("moderator.login.forgot") }}</p>
         </form>
       </div>
     </section>
@@ -51,13 +51,12 @@
       "
     >
       <div class="container--centered">
-        <h2 class="heading heading--medium heading--white">New here?</h2>
+        <h2 class="heading heading--medium heading--white">{{ $t("moderator.login.register.header") }}</h2>
         <p class="login__text">
-          Go ahead and create an account if you want to use our great
-          brainstorming tool.
+          {{ $t("moderator.login.register.info") }}
         </p>
         <router-link to="register">
-          <button class="btn btn--outline-white">Register</button>
+          <button class="btn btn--outline-white">{{ $t("moderator.login.register.submit") }}</button>
         </router-link>
       </div>
     </section>

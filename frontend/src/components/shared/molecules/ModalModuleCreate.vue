@@ -4,20 +4,20 @@
     @update:showModal="$emit('update:showModal', $event)"
   >
     <div class="session-create">
-      <h2 class="heading heading--regular">Add a Module</h2>
+      <h2 class="heading heading--regular">{{ $t("moderator.module.create.header") }}</h2>
       <p>
-        Modules are the place where all the interaction happens. You can choose
-        from 5 different types of modules.
+        {{ $t("moderator.module.create.info") }}
+
       </p>
       <form class="session-create__form">
-        <label for="moduleType" class="heading heading--xs">Module type</label>
+        <label for="moduleType" class="heading heading--xs">{{ $t("moderator.module.create.type") }}</label>
         <select
           v-model="moduleType"
           id="moduleType"
           class="select select--fullwidth"
         >
           <option v-for="type in ModuleTypeKeys" :key="type" :value="type">
-            {{ ModuleType[type] }}
+            {{ $t(`dropdown.moduleType.${ModuleType[type]}`) }}
           </option>
         </select>
         <FormError
@@ -26,13 +26,15 @@
           :isSmall="true"
         />
         <label for="title" class="heading heading--xs">{{
-          moduleType === 'BRAINSTORMING' ? 'Question' : 'Title'
+          moduleType === 'BRAINSTORMING'
+            ? $t('moderator.module.create.question')
+            : $t('moderator.module.create.title')
         }}</label>
         <input
           id="title"
           v-model="title"
           class="input input--fullwidth"
-          placeholder="e.g. What should be the name of our new app?"
+          :placeholder="$t('moderator.module.create.questionExample')"
           @blur="context.$v.title.$touch()"
         />
         <FormError
@@ -41,13 +43,13 @@
           :isSmall="true"
         />
 
-        <label for="description" class="heading heading--xs">Description</label>
+        <label for="description" class="heading heading--xs">{{ $t("moderator.module.create.description") }}</label>
         <textarea
           id="description"
           v-model="description"
           class="textarea textarea--fullwidth"
           rows="3"
-          placeholder="e.g. The purpose of the meeting is to come up with new ideas our new app."
+          :placeholder="$t('moderator.module.create.descriptionExample')"
           @blur="context.$v.description.$touch"
         />
         <FormError
@@ -60,7 +62,7 @@
           class="btn btn--gradient btn--fullwidth"
           @click.prevent="createModule"
         >
-          Create module
+          {{ $t("moderator.module.create.submit") }}
         </button>
       </form>
     </div>

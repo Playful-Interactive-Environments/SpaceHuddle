@@ -1,10 +1,10 @@
 <template>
   <div class="module-count">
     <div class="module-count__item">
-      <span class="module-count__count">2</span> Topics
+      <span class="module-count__count">2</span> {{ $t("moderator.moduleCount.topics") }}
     </div>
     <div class="module-count__item">
-      <span class="module-count__count">7</span> Modules
+      <span class="module-count__count">7</span> {{ $t("moderator.moduleCount.modules") }}
     </div>
   </div>
 </template>

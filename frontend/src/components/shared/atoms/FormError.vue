@@ -1,7 +1,7 @@
 <template>
   <ul class="form-error" :class="{ 'form-error--small': isSmall }">
     <li v-for="error in errors" class="form-error__message" :key="error">
-      {{ typeof error === 'string' ? error : error.$message }}
+      {{ typeof error === 'string' ? error : $t(`error.vuelidate.${error.$message}`) }}
     </li>
   </ul>
 </template>

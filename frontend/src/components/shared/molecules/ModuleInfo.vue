@@ -1,6 +1,6 @@
 <template>
   <div :class="{ 'module-info--centered': isClient }" class="module-info">
-    <span class="module-info__type">{{ type }}</span>
+    <span class="module-info__type">{{ $t(`dropdown.moduleType.${type}`) }}</span>
     <h3 :class="{ 'heading--regular': isClient }" class="module-info__title">
       {{ title }}
     </h3>

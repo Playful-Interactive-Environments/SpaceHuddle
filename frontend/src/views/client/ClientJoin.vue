@@ -4,25 +4,33 @@
   >
     <main class="join__content">
       <h1 class="heading heading--big heading--white">
-        Ready for <br />
-        adventure?
+        {{ $t("participant.join.header") }}
       </h1>
       <p class="join__text">
-        Just enter the code your moderator provided and you’re ready to go!
+        {{ $t("participant.join.info") }}
       </p>
       <form @submit="submit">
-        <label>
+        <label v-if="browserKey.length == 0">
           <input
             class="input input--centered input--fullwidth"
             name="sessionKey"
             v-model="sessionKey"
-            placeholder="Enter Session PIN"
+            :placeholder="$t('participant.join.pinInfo')"
             type="text"
           />
-          <form-error :errors="errors"></form-error>
         </label>
+        <label v-if="browserKey.length > 0">
+          <input
+            class="input input--centered input--fullwidth"
+            name="browserKey"
+            v-model="browserKey"
+            :placeholder="$t('participant.join.pinInfo')"
+            type="text"
+          />
+        </label>
+        <form-error :errors="errors"></form-error>
         <button class="btn btn--mint btn--fullwidth" @click="submit">
-          Join session
+          {{ $t("participant.join.submit") }}
         </button>
       </form>
     </main>
@@ -48,17 +56,20 @@ import {
 })
 export default class ClientJoin extends Vue {
   sessionKey = '';
+  browserKey = '';
   errors: string[] = [];
 
   mounted(): void {
     const browserKeyLS = authService.getBrowserKey();
-    if (browserKeyLS) this.connectToSession(browserKeyLS);
+    if (browserKeyLS) this.browserKey = browserKeyLS;
   }
 
   async submit(e: Event): Promise<void> {
     clearErrors(this.errors);
     e.preventDefault();
-    if (this.sessionKey.length > 0) {
+    if (this.browserKey.length > 0) {
+      this.connectToSession(this.browserKey);
+    } else if (this.sessionKey.length > 0) {
       this.connectToSession();
     } else {
       addError(this.errors, 'Please enter a code.');

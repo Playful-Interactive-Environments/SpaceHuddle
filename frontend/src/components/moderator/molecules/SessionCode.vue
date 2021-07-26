@@ -7,7 +7,7 @@
     >
       <img
         src="@/assets/icons/copy.svg"
-        alt="rocket-icon"
+        alt="copy-icon"
         width="20"
         height="auto"
       />
@@ -19,7 +19,7 @@
     >
       <img
         src="@/assets/icons/share.svg"
-        alt="rocket-icon"
+        alt="share-icon"
         width="20"
         height="auto"
       />

@@ -28,13 +28,13 @@
       />
       <div class="module-card__toggles" v-if="!isClient">
         <Toggle
-          label="Active"
+          :label="$t('general.moduleActive')"
           :isActive="task.state === TaskStates.ACTIVE"
           v-if="type !== ModuleType.SELECTION"
           @toggleClicked="changeActiveState"
         />
         <Toggle
-          label="Public Screen"
+          :label="$t('general.publicScreen')"
           :isActive="isOnPublicScreen"
           @toggleClicked="changePublicScreen"
         />
@@ -42,7 +42,7 @@
       <div class="module-card__drag" v-if="!isClient">
         <img
           src="@/assets/icons/drag-dots.svg"
-          alt="draggable"
+          alt="drag-icon"
           class="module-card__dots-icon"
         />
       </div>

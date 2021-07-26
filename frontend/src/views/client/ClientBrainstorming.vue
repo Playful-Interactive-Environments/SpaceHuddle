@@ -22,7 +22,8 @@
         </div>
       </div>
       <div class="grid-item brainstorming--center">
-        <div class="brainstorming--uppercase">Time Left</div>
+        <div class="brainstorming--uppercase">
+          {{ $t("participant.brainstorming.timeLeft") }}</div>
         <Timer class="brainstorming__timer" :isActive="true"></Timer>
       </div>
     </div>
@@ -40,7 +41,7 @@
           v-if="showSecondInput"
           v-model="keywords"
           class="textarea textarea--fullwidth"
-          placeholder="Please provide some keywords"
+          :placeholder="$t('participant.brainstorming.keywordInfo')"
         />
         <FormError
           v-if="
@@ -57,7 +58,7 @@
         <textarea
           id="description"
           class="textarea textarea--fullwidth"
-          placeholder="Type your idea here ..."
+          :placeholder="$t('participant.brainstorming.descriptionInfo')"
           ref="ideaTextfield"
           rows="4"
           contenteditable
@@ -75,7 +76,8 @@
             class="btn btn--mint btn--fullwidth"
             @click.prevent="submitIdea"
           >
-            Submit idea
+            {{ $t("participant.brainstorming.submit") }}
+
           </button>
           <button class="btn btn--icon btn--fullwidth" type="button">
             <img
@@ -84,7 +86,7 @@
               width="20"
               height="auto"
             />
-            <span>No ideas? Get inspired!</span>
+            <span>{{ $t("participant.brainstorming.startGame") }}</span>
           </button>
         </div>
       </slot>

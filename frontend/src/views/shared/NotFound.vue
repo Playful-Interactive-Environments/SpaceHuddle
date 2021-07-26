@@ -1,13 +1,12 @@
 <template>
   <div class="not-found">
-    <h1 class="heading heading--regular heading--white">404 - Not found</h1>
+    <h1 class="heading heading--regular heading--white">{{ $t("shared.notFound.header") }}</h1>
     <p>
-      Sorry, this page does either not exist, or you are not authorized to
-      access it.
+      {{ $t("shared.notFound.info") }}
     </p>
     <br />
     <router-link to="/">
-      <button class="btn btn--mint">Go to Homepage</button>
+      <button class="btn btn--mint">{{ $t("shared.notFound.submit") }}</button>
     </router-link>
   </div>
 </template>

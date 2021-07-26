@@ -23,6 +23,7 @@
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^4.0.0-0",
     "vue3-cookies": "^1.0.1",
+    "vue3-i18n": "^1.0.1",
     "vuedraggable": "^4.0.3"
   },
   "devDependencies": {

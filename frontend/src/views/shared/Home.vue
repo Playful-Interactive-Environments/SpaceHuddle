@@ -2,17 +2,15 @@
   <Header :hasNavigation="false" />
   <div class="container container--spaced container--fullheight-header home">
     <section class="home__content">
-      <h1 class="heading heading--big">Brainstorm to infinity and beyond!</h1>
+      <h1 class="heading heading--big">{{ $t("shared.home.header") }}</h1>
       <p class="home__text">
-        Spacehuddle takes a new approach to brainstorming with multiple people.
-        For creating new brainstorming sessions, use the Moderator tool. You can
-        then join an existing brainstorming session via the session code.
+        {{ $t("shared.home.info") }}
       </p>
       <router-link to="/login" class="home__link">
-        <button class="btn btn--gradient">Moderator tool</button>
+        <button class="btn btn--gradient">{{ $t("shared.home.login") }}</button>
       </router-link>
       <router-link to="/join">
-        <button class="btn btn--outline">Join Brainstorming</button>
+        <button class="btn btn--outline">{{ $t("shared.home.join") }}</button>
       </router-link>
     </section>
     <section class="home__img">
