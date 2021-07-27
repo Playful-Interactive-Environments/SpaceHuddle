@@ -10,20 +10,11 @@
         {{ $t("participant.join.info") }}
       </p>
       <form @submit="submit">
-        <label v-if="browserKey.length == 0">
+        <label>
           <input
             class="input input--centered input--fullwidth"
             name="sessionKey"
-            v-model="sessionKey"
-            :placeholder="$t('participant.join.pinInfo')"
-            type="text"
-          />
-        </label>
-        <label v-if="browserKey.length > 0">
-          <input
-            class="input input--centered input--fullwidth"
-            name="browserKey"
-            v-model="browserKey"
+            v-model="connectionKey"
             :placeholder="$t('participant.join.pinInfo')"
             type="text"
           />
@@ -55,35 +46,32 @@ import {
   },
 })
 export default class ParticipantJoin extends Vue {
-  sessionKey = '';
-  browserKey = '';
+  connectionKey = '';
   errors: string[] = [];
 
   mounted(): void {
     const browserKeyLS = authService.getBrowserKey();
-    if (browserKeyLS) this.browserKey = browserKeyLS;
+    if (browserKeyLS) this.connectionKey = browserKeyLS;
   }
 
   async submit(e: Event): Promise<void> {
     clearErrors(this.errors);
     e.preventDefault();
-    if (this.browserKey.length > 0) {
-      this.connectToSession(this.browserKey);
-    } else if (this.sessionKey.length > 0) {
-      this.connectToSession();
+    if (this.connectionKey.length > 0) {
+      await this.connectToSession();
     } else {
       addError(this.errors, 'Please enter a code.');
       return;
     }
   }
 
-  async connectToSession(browserKeyLS: string | null = null): Promise<void> {
-    if (browserKeyLS) {
-      participantService.reconnect(browserKeyLS).then((queryResult) => {
+  async connectToSession(): Promise<void> {
+    if (this.connectionKey.includes('.')) {
+      participantService.reconnect(this.connectionKey).then((queryResult) => {
         this.handleConnectionResult(queryResult);
       });
     } else {
-      participantService.connect(this.sessionKey).then(
+      participantService.connect(this.connectionKey).then(
         (queryResult) => {
           this.handleConnectionResult(queryResult);
         },
