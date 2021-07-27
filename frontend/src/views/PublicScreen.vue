@@ -8,8 +8,8 @@
         public-screen__error
       "
     >
-      <h2>{{ $t("shared.publicScreen.none.header") }}</h2>
-      <p>{{ $t("shared.publicScreen.none.info") }}</p>
+      <h2>{{ $t("shared.view.publicScreen.none.header") }}</h2>
+      <p>{{ $t("shared.view.publicScreen.none.info") }}</p>
     </main>
     <main
       v-else
@@ -19,7 +19,7 @@
       <section class="public-screen__overview">
         <div class="public-screen__overview-left">
           <span class="public-screen__overview-type">
-            {{ $t(`dropdown.moduleType.${ModuleType[task.taskType]}`) }}
+            {{ $t(`enum.moduleType.${ModuleType[task.taskType]}`) }}
           </span>
           <h2>{{ task.name }}</h2>
           <p>

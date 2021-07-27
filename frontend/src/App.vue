@@ -4,6 +4,7 @@
     class="pre-formatted"
     v-bind:showSnackbar="showSnackbar"
     v-bind:snackbarMessage="snackbarMessage"
+    v-bind:snackbarMessageContent="snackbarMessageContent"
     v-bind:snackbarType="snackbarType"
   ></snackbar>
 </template>
@@ -22,18 +23,17 @@ import { EventType } from '@/types/enum/EventType';
 export default class Sidebar extends Vue {
   showSnackbar = false;
   snackbarMessage = '';
+  snackbarMessageContent: [] | null = null;
   snackbarType = SnackbarType.INFO;
 
   mounted(): void {
     this.eventBus.off(EventType.SHOW_SNACKBAR);
     this.eventBus.on(EventType.SHOW_SNACKBAR, async (data) => {
       this.showSnackbar = true;
-      this.snackbarMessage = (
-        data as { type: SnackbarType; message: string }
-      ).message;
-      this.snackbarType = (
-        data as { type: SnackbarType; message: string }
-      ).type;
+      const input = data as { type: SnackbarType; message: string; messageContent: [] | null };
+      this.snackbarMessage = input.message;
+      this.snackbarType = input.type;
+      this.snackbarMessageContent = input.messageContent;
       setTimeout(() => (this.showSnackbar = false), 4000);
     });
   }

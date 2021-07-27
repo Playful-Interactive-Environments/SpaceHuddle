@@ -1,11 +1,30 @@
 {
+  "info": {
+    "copiedToClipboard": "Successfully copied to clipboard.",
+    "accountCreated": "Your account was successfully created.",
+    "updatePublicScreen": "Successfully updated public screen.",
+    "updateParticipantState": "Successfully updated participant state.",
+    "postIdea": "Thank you for the idea - {0}"
+  },
   "error": {
     "vuelidate": {
       "Value is required": "This field must be set.",
       "Value is not a valid email address": "Value is not a valid email address",
       "This field should be at least 8 long": "This field should be at least 8 long",
-      "Password must contain at least one lowercase and uppercase letter, a number and a special character": ".Password must contain at least one lowercase and uppercase letter, a number and a special character.",
+      "Password must contain at least one lowercase and uppercase letter, a number and a special character": "Password must contain at least one lowercase and uppercase letter, a number and a special character.",
       "Password repetition does not match": "Password repetition does not match."
+    },
+    "route": {
+      "authorisationExpired": "Authorisation has expired.",
+      "incorrectAuthorisationType": "Incorrect authorisation type."
+    },
+    "gui": {
+      "copyToClipboard": "Could not copy to clipboard."
+    },
+    "api": {
+      "User has no rights for this entity": "User has no rights for this entity.",
+      "User has no rights for this service": "User has no rights for this service.",
+      "No valid access token specified": "No valid access token specified"
     },
     "login": {
       "post": {
@@ -13,125 +32,169 @@
           "NotExist": "The username or password is incorrect."
         }
       }
+    },
+    "register": {
+      "post": {
+        "username": {
+          "Exist": "The email address already exists."
+        }
+      }
+    },
+    "idea": {
+      "post": {
+        "idea": {
+          "Exist": "The idea has already been submitted."
+        }
+      }
+    },
+    "participant": {
+      "join": {
+        "noCode": "Please enter a code.",
+        "codeInvalid": "Sorry, the provided code is invalid."
+      }
+    },
+    "reconnect": {
+      "get": {
+        "browserKey": {
+          "NotExist": "Sorry, the provided code is invalid."
+        }
+      }
+    },
+    "connect": {
+      "post": {
+        "sessionKey": {
+          "NotExist": "Sorry, the provided code is invalid."
+        }
+      }
     }
   },
   "moderator": {
-    "login": {
-      "header": "Login",
-      "info": "Go ahead and login to access all your existing resources create new brainstorming sessions.",
-      "email": "Email",
-      "emailInfo": "Enter your email",
-      "password": "Password",
-      "passwordInfo": "Enter your password",
-      "submit": "Login",
-      "forgot": "Forgot Password?",
-      "register": {
-        "header": "New here?",
-        "info": "Go ahead and create an account if you want to use our great brainstorming tool.",
-        "submit": "Register"
-      }
-    },
-    "register": {
-      "header": "Register",
-      "info": "Please enter your personal info to create an account.",
-      "email": "Email",
-      "emailInfo": "Enter your email",
-      "password": "Password",
-      "passwordInfo": "Enter your password",
-      "passwordConform": "Password repeat",
-      "passwordConformInfo": "Repeat your password",
-      "submit": "Register",
-      "login": {
-        "header": "Welcome back!",
-        "info": "If you already have an account, just go ahead and login to access all\n        your existing resources.",
-        "submit": "Login"
-      }
-    },
-    "profile": {
-      "header": "Your Profile",
-      "info": "Email Address: ",
-      "submit": "Logout"
-    },
-    "moduleCount": {
-      "topics": "Topics",
-      "modules": "Modules"
-    },
-    "module": {
-      "create": {
-        "header": "Add a Module",
-        "info": "Modules are the place where all the interaction happens. You can choose from 5 different types of modules.",
-        "type": "Module type",
-        "title": "Title",
-        "question": "Question",
-        "questionExample": "e.g. What should be the name of our new app?",
-        "description": "Description",
-        "descriptionExample": "e.g. The purpose of the meeting is to come up with new ideas our new app.",
-        "submit": "Create module"
-      },
-      "overview": {
-        "add": "Add module"
-      }
-    },
-    "session": {
-      "create": {
-        "header": "Create Session",
-        "info": "The session is the place that bundles all information belonging to your brainstorming adventure.",
-        "title": "Title",
-        "titleExample": "e.g. Marketing Meeting",
-        "description": "Description",
-        "descriptionExample": "e.g. The purpose of the meeting is to come up with new ideas our new app.",
+    "molecule": {
+      "moduleCount": {
         "topics": "Topics",
-        "topicsInfo": "Topics help to make a clear distinction between subjects that should have separate brainstorming modules. Tip: Keep it simple - one or two topics are usually enough!",
-        "firstTopic": "Topic 1",
-        "topicExample": "e.g. New app Name",
-        "submit": "Create session"
+        "modules": "Modules"
       },
-      "overview": {
-        "header": "Your Sessions",
-        "select": "Go to session",
-        "add": "New Session"
+      "navigation": {
+        "sessions": "Sessions",
+        "profile": "Profile"
       }
     },
-    "navigation": {
-      "sessions": "Sessions",
-      "profile": "Profile"
+    "organism": {
+      "module": {
+        "create": {
+          "header": "Add a Module",
+          "info": "Modules are the place where all the interaction happens. You can choose from 5 different types of modules.",
+          "type": "Module type",
+          "title": "Title",
+          "question": "Question",
+          "questionExample": "e.g. What should be the name of our new app?",
+          "description": "Description",
+          "descriptionExample": "e.g. The purpose of the meeting is to come up with new ideas our new app.",
+          "submit": "Create module"
+        },
+        "overview": {
+          "add": "Add module"
+        }
+      },
+      "session": {
+        "create": {
+          "header": "Create Session",
+          "info": "The session is the place that bundles all information belonging to your brainstorming adventure.",
+          "title": "Title",
+          "titleExample": "e.g. Marketing Meeting",
+          "description": "Description",
+          "descriptionExample": "e.g. The purpose of the meeting is to come up with new ideas our new app.",
+          "topics": "Topics",
+          "topicsInfo": "Topics help to make a clear distinction between subjects that should have separate brainstorming modules. Tip: Keep it simple - one or two topics are usually enough!",
+          "firstTopic": "Topic 1",
+          "topicExample": "e.g. New app Name",
+          "submit": "Create session"
+        },
+        "overview": {
+          "header": "Your Sessions",
+          "select": "Go to session",
+          "add": "New Session"
+        }
+      }
+    },
+    "view": {
+      "login": {
+        "header": "Login",
+        "info": "Go ahead and login to access all your existing resources create new brainstorming sessions.",
+        "email": "Email",
+        "emailInfo": "Enter your email",
+        "password": "Password",
+        "passwordInfo": "Enter your password",
+        "submit": "Login",
+        "forgot": "Forgot Password?",
+        "register": {
+          "header": "New here?",
+          "info": "Go ahead and create an account if you want to use our great brainstorming tool.",
+          "submit": "Register"
+        }
+      },
+      "register": {
+        "header": "Register",
+        "info": "Please enter your personal info to create an account.",
+        "email": "Email",
+        "emailInfo": "Enter your email",
+        "password": "Password",
+        "passwordInfo": "Enter your password",
+        "passwordConform": "Password repeat",
+        "passwordConformInfo": "Repeat your password",
+        "submit": "Register",
+        "login": {
+          "header": "Welcome back!",
+          "info": "If you already have an account, just go ahead and login to access all\n        your existing resources.",
+          "submit": "Login"
+        }
+      },
+      "profile": {
+        "header": "Your Profile",
+        "info": "Email Address: ",
+        "submit": "Logout"
+      }
     }
   },
   "participant": {
-    "join": {
-      "header": "Ready for\nadventure?",
-      "info": "Just enter the code your moderator provided and you’re ready to go!",
-      "pinInfo": "Enter Session PIN",
-      "submit": "Join session"
-    },
-    "brainstorming": {
-      "timeLeft": "time left",
-      "keywordInfo": "Please provide some keywords",
-      "descriptionInfo": "Type your idea here ...",
-      "submit": "Submit idea",
-      "startGame": "No ideas? Get inspired!"
-    }
-  },
-  "shared": {
-    "home": {
-      "header": "Brainstorm to infinity and beyond!",
-      "info": "Spacehuddle takes a new approach to brainstorming with multiple people. For creating new brainstorming sessions, use the Moderator tool. You can then join an existing brainstorming session via the session code.",
-      "login": "Moderator tool",
-      "join": "Join Brainstorming"
-    },
-    "notFound": {
-      "header": "404 - Not found",
-      "info": "Sorry, this page does either not exist, or you are not authorized to access it.",
-      "submit": "Go t Homepage"
-    },
-    "publicScreen": {
-      "none": {
-        "header": "Sorry, nothing here.",
-        "info": "Make sure that a module is activated for the public view."
+    "view": {
+      "join": {
+        "header": "Ready for\nadventure?",
+        "info": "Just enter the code your moderator provided and you’re ready to go!",
+        "pinInfo": "Enter Session PIN",
+        "submit": "Join session"
+      },
+      "brainstorming": {
+        "timeLeft": "time left",
+        "keywordInfo": "Please provide some keywords",
+        "descriptionInfo": "Type your idea here ...",
+        "submit": "Submit idea",
+        "startGame": "No ideas? Get inspired!"
       }
     }
   },
-  "dropdown": {
+  "shared": {
+    "view": {
+      "home": {
+        "header": "Brainstorm to infinity and beyond!",
+        "info": "Spacehuddle takes a new approach to brainstorming with multiple people. For creating new brainstorming sessions, use the Moderator tool. You can then join an existing brainstorming session via the session code.",
+        "login": "Moderator tool",
+        "join": "Join Brainstorming"
+      },
+      "notFound": {
+        "header": "404 - Not found",
+        "info": "Sorry, this page does either not exist, or you are not authorized to access it.",
+        "submit": "Go t Homepage"
+      },
+      "publicScreen": {
+        "none": {
+          "header": "Sorry, nothing here.",
+          "info": "Make sure that a module is activated for the public view."
+        }
+      }
+    }
+  },
+  "enum": {
     "moduleType": {
       "information": "information",
       "brainstorming": "brainstorming",

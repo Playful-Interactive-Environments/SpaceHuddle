@@ -4,17 +4,17 @@
     @update:showModal="$emit('update:showModal', $event)"
   >
     <div class="session-create">
-      <h2 class="heading heading--regular">{{ $t("moderator.session.create.header") }}</h2>
+      <h2 class="heading heading--regular">{{ $t("moderator.organism.session.create.header") }}</h2>
       <p>
-        {{ $t("moderator.session.create.info") }}
+        {{ $t("moderator.organism.session.create.info") }}
       </p>
       <form class="session-create__form">
-        <label for="title" class="heading heading--xs">{{ $t("moderator.session.create.title") }}</label>
+        <label for="title" class="heading heading--xs">{{ $t("moderator.organism.session.create.title") }}</label>
         <input
           id="title"
           v-model="title"
           class="input input--fullwidth"
-          :placeholder="$t('moderator.session.create.titleExample')"
+          :placeholder="$t('moderator.organism.session.create.titleExample')"
           @blur="context.$v.title.$touch()"
         />
         <FormError
@@ -23,13 +23,13 @@
           :isSmall="true"
         />
 
-        <label for="description" class="heading heading--xs">{{ $t("moderator.session.create.description") }}</label>
+        <label for="description" class="heading heading--xs">{{ $t("moderator.organism.session.create.description") }}</label>
         <textarea
           id="description"
           v-model="description"
           class="textarea textarea--fullwidth"
           rows="3"
-          :placeholder="$t('moderator.session.create.descriptionExample')"
+          :placeholder="$t('moderator.organism.session.create.descriptionExample')"
           @blur="context.$v.description.$touch"
         />
         <FormError
@@ -37,16 +37,16 @@
           :errors="context.$v.description.$errors"
           :isSmall="true"
         />
-        <h3 class="session-create__topic heading heading--small">{{ $t("moderator.session.create.topics") }}</h3>
+        <h3 class="session-create__topic heading heading--small">{{ $t("moderator.organism.session.create.topics") }}</h3>
         <p>
-          {{ $t("moderator.session.create.topicsInfo") }}
+          {{ $t("moderator.organism.session.create.topicsInfo") }}
         </p>
-        <label for="topic" class="heading heading--xs">{{ $t("moderator.session.create.firstTopic") }}</label>
+        <label for="topic" class="heading heading--xs">{{ $t("moderator.organism.session.create.firstTopic") }}</label>
         <input
           id="topic"
           v-model="topic"
           class="input input--fullwidth"
-          :placeholder="$t('moderator.session.create.topicExample')"
+          :placeholder="$t('moderator.organism.session.create.topicExample')"
           @blur="context.$v.topic.$touch()"
         />
         <FormError
@@ -59,7 +59,7 @@
           class="btn btn--gradient btn--fullwidth"
           @click.prevent="saveSession"
         >
-          {{ $t("moderator.session.create.submit") }}
+          {{ $t("moderator.organism.session.create.submit") }}
         </button>
       </form>
     </div>

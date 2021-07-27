@@ -4,10 +4,10 @@
   >
     <main class="join__content">
       <h1 class="heading heading--big heading--white">
-        {{ $t("participant.join.header") }}
+        {{ $t("participant.view.join.header") }}
       </h1>
       <p class="join__text">
-        {{ $t("participant.join.info") }}
+        {{ $t("participant.view.join.info") }}
       </p>
       <form @submit="submit">
         <label>
@@ -15,13 +15,13 @@
             class="input input--centered input--fullwidth"
             name="sessionKey"
             v-model="connectionKey"
-            :placeholder="$t('participant.join.pinInfo')"
+            :placeholder="$t('participant.view.join.pinInfo')"
             type="text"
           />
         </label>
         <form-error :errors="errors"></form-error>
         <button class="btn btn--mint btn--fullwidth" @click="submit">
-          {{ $t("participant.join.submit") }}
+          {{ $t("participant.view.join.submit") }}
         </button>
       </form>
     </main>
@@ -60,23 +60,30 @@ export default class ParticipantJoin extends Vue {
     if (this.connectionKey.length > 0) {
       await this.connectToSession();
     } else {
-      addError(this.errors, 'Please enter a code.');
+      addError(this.errors, 'participant.join.noCode');
       return;
     }
   }
 
   async connectToSession(): Promise<void> {
     if (this.connectionKey.includes('.')) {
-      participantService.reconnect(this.connectionKey).then((queryResult) => {
-        this.handleConnectionResult(queryResult);
-      });
+      participantService.reconnect(this.connectionKey).then(
+        (queryResult) => {
+          this.handleConnectionResult(queryResult);
+        },
+        (error) => {
+          console.log(error.response);
+          addError(this.errors, getErrorMessage(error));
+        }
+      );
     } else {
       participantService.connect(this.connectionKey).then(
         (queryResult) => {
           this.handleConnectionResult(queryResult);
         },
         (error) => {
-          addError(this.errors, 'Sorry, the provided code is invalid.');
+          console.log(error.response);
+          //addError(this.errors, 'participant.join.codeInvalid');
           addError(this.errors, getErrorMessage(error));
         }
       );
@@ -85,10 +92,7 @@ export default class ParticipantJoin extends Vue {
 
   handleConnectionResult(participantData: Partial<Participant> | Participant ): boolean {
     if (participantData.participant && participantData.token) {
-      if (
-        participantData.participant.state ===
-        ConnectState.ACTIVE
-      ) {
+      if (participantData.participant.state === ConnectState.ACTIVE) {
         authService.setBrowserKey(
           participantData.participant.browserKey as string
         );

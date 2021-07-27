@@ -4,20 +4,20 @@
     @update:showModal="$emit('update:showModal', $event)"
   >
     <div class="session-create">
-      <h2 class="heading heading--regular">{{ $t("moderator.module.create.header") }}</h2>
+      <h2 class="heading heading--regular">{{ $t("moderator.organism.module.create.header") }}</h2>
       <p>
-        {{ $t("moderator.module.create.info") }}
+        {{ $t("moderator.organism.module.create.info") }}
 
       </p>
       <form class="session-create__form">
-        <label for="moduleType" class="heading heading--xs">{{ $t("moderator.module.create.type") }}</label>
+        <label for="moduleType" class="heading heading--xs">{{ $t("moderator.organism.module.create.type") }}</label>
         <select
           v-model="moduleType"
           id="moduleType"
           class="select select--fullwidth"
         >
           <option v-for="type in ModuleTypeKeys" :key="type" :value="type">
-            {{ $t(`dropdown.moduleType.${ModuleType[type]}`) }}
+            {{ $t(`enum.moduleType.${ModuleType[type]}`) }}
           </option>
         </select>
         <FormError
@@ -27,14 +27,14 @@
         />
         <label for="title" class="heading heading--xs">{{
           moduleType === 'BRAINSTORMING'
-            ? $t('moderator.module.create.question')
-            : $t('moderator.module.create.title')
+            ? $t('moderator.organism.module.create.question')
+            : $t('moderator.organism.module.create.title')
         }}</label>
         <input
           id="title"
           v-model="title"
           class="input input--fullwidth"
-          :placeholder="$t('moderator.module.create.questionExample')"
+          :placeholder="$t('moderator.organism.module.create.questionExample')"
           @blur="context.$v.title.$touch()"
         />
         <FormError
@@ -43,13 +43,13 @@
           :isSmall="true"
         />
 
-        <label for="description" class="heading heading--xs">{{ $t("moderator.module.create.description") }}</label>
+        <label for="description" class="heading heading--xs">{{ $t("moderator.organism.module.create.description") }}</label>
         <textarea
           id="description"
           v-model="description"
           class="textarea textarea--fullwidth"
           rows="3"
-          :placeholder="$t('moderator.module.create.descriptionExample')"
+          :placeholder="$t('moderator.organism.module.create.descriptionExample')"
           @blur="context.$v.description.$touch"
         />
         <FormError
@@ -62,7 +62,7 @@
           class="btn btn--gradient btn--fullwidth"
           @click.prevent="createModule"
         >
-          {{ $t("moderator.module.create.submit") }}
+          {{ $t("moderator.organism.module.create.submit") }}
         </button>
       </form>
     </div>

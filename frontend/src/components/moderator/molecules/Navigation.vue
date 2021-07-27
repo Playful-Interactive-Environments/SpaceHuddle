@@ -10,14 +10,14 @@
         class="nav__item-icon nav__session-icon"
         :class="{ 'nav__item-icon--white': white }"
       />
-      {{ $t("moderator.navigation.sessions") }}
+      {{ $t("moderator.molecule.navigation.sessions") }}
     </router-link>
     <router-link to="/profile" class="nav__item">
       <div
         class="nav__item-icon nav__profile-icon"
         :class="{ 'nav__item-icon--white': white }"
       />
-      {{ $t("moderator.navigation.profile") }}
+      {{ $t("moderator.molecule.navigation.profile") }}
     </router-link>
   </nav>
 </template>

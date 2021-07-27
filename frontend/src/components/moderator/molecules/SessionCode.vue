@@ -45,13 +45,13 @@ export default class ModuleCount extends Vue {
       () => {
         this.eventBus.emit(EventType.SHOW_SNACKBAR, {
           type: SnackbarType.SUCCESS,
-          message: 'Successfully copied to clipboard.',
+          message: 'info.copiedToClipboard',
         });
       },
       () => {
         this.eventBus.emit(EventType.SHOW_SNACKBAR, {
           type: SnackbarType.ERROR,
-          message: 'Could not copy to clipboard.',
+          message: 'error.gui.copiedToClipboard',
         });
       }
     );

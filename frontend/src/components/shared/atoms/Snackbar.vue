@@ -7,7 +7,7 @@
     >
       <ul>
         <li v-for="error in errors" :key="error">
-          {{ error }}
+          {{ $i18n.translateWithFallback( error, snackbarMessageContent ) }}
         </li>
       </ul>
     </div>
@@ -24,6 +24,7 @@ export default class Snackbar extends Vue {
   @Prop({ default: 'Oops! Something went wrong' }) snackbarMessage!:
     | string
     | string[];
+  @Prop({ default: null }) snackbarMessageContent!: [] | null;
   @Prop({ default: false }) showSnackbar!: boolean;
   @Prop({ default: SnackbarType.SUCCESS }) snackbarType?: SnackbarType;
 

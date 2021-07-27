@@ -1,7 +1,11 @@
 import { Topic } from '@/types/api/Topic';
-import { apiExecuteGetHandled, apiExecutePost} from '@/services/api';
+import {
+  apiExecuteGet,
+  apiExecuteGetHandled,
+  apiExecutePost,
+} from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
-import EndpointAuthorisationType from "@/types/enum/EndpointAuthorisationType";
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Participant } from '@/types/api/Participant';
 
 export const connect = async (
@@ -17,9 +21,8 @@ export const connect = async (
 };
 
 export const reconnect = async (browserKey: string): Promise<Participant> => {
-  return await apiExecuteGetHandled<Participant>(
+  return await apiExecuteGet<Participant>(
     `/${EndpointType.PARTICIPANT_RECONNECT}/${browserKey}/`,
-    {},
     EndpointAuthorisationType.UNAUTHORISED
   );
 };

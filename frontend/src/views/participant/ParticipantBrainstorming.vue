@@ -23,7 +23,7 @@
       </div>
       <div class="grid-item brainstorming--center">
         <div class="brainstorming--uppercase">
-          {{ $t("participant.brainstorming.timeLeft") }}</div>
+          {{ $t("participant.view.brainstorming.timeLeft") }}</div>
         <Timer class="brainstorming__timer" :isActive="true"></Timer>
       </div>
     </div>
@@ -41,7 +41,7 @@
           v-if="showSecondInput"
           v-model="keywords"
           class="textarea textarea--fullwidth"
-          :placeholder="$t('participant.brainstorming.keywordInfo')"
+          :placeholder="$t('participant.view.brainstorming.keywordInfo')"
         />
         <FormError
           v-if="
@@ -58,7 +58,7 @@
         <textarea
           id="description"
           class="textarea textarea--fullwidth"
-          :placeholder="$t('participant.brainstorming.descriptionInfo')"
+          :placeholder="$t('participant.view.brainstorming.descriptionInfo')"
           ref="ideaTextfield"
           rows="4"
           contenteditable
@@ -76,7 +76,7 @@
             class="btn btn--mint btn--fullwidth"
             @click.prevent="submitIdea"
           >
-            {{ $t("participant.brainstorming.submit") }}
+            {{ $t("participant.view.brainstorming.submit") }}
 
           </button>
           <button class="btn btn--icon btn--fullwidth" type="button">
@@ -86,7 +86,7 @@
               width="20"
               height="auto"
             />
-            <span>{{ $t("participant.brainstorming.startGame") }}</span>
+            <span>{{ $t("participant.view.brainstorming.startGame") }}</span>
           </button>
         </div>
       </slot>
@@ -112,7 +112,7 @@ import * as ideaService from '@/services/idea-service';
 import {EventType} from '@/types/enum/EventType';
 import SnackbarType from '@/types/enum/SnackbarType';
 import {addError, clearErrors, getErrorMessage,} from '@/services/exception-service';
-import EndpointAuthorisationType from "@/types/enum/EndpointAuthorisationType";
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
@@ -196,7 +196,8 @@ export default class ParticipantBrainstorming extends Vue {
           setTimeout(this.setNewPlanet, 500);
           this.eventBus.emit(EventType.SHOW_SNACKBAR, {
             type: SnackbarType.SUCCESS,
-            message: `Thank you for the idea - ${queryResult.keywords}.`,
+            message: `info.postIdea`,
+            messageContent: [queryResult.keywords]
           });
         },
         (error) => {

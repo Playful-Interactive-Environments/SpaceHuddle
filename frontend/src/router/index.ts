@@ -16,11 +16,16 @@ import ModeratorVote from '@/views/moderator/ModeratorVote.vue';
 import NotFound from '@/views/shared/NotFound.vue';
 import PublicScreen from '@/views/PublicScreen.vue';
 
-import {isParticipant, isAuthenticated, isUser, removeAccessToken} from '@/services/auth-service';
+import {
+  isParticipant,
+  isAuthenticated,
+  isUser,
+  removeAccessToken,
+} from '@/services/auth-service';
 import ParticipantBrainstorming from '@/views/participant/ParticipantBrainstorming.vue';
-import app from "@/main";
-import {EventType} from "@/types/enum/EventType";
-import SnackbarType from "@/types/enum/SnackbarType";
+import app from '@/main';
+import { EventType } from '@/types/enum/EventType';
+import SnackbarType from '@/types/enum/SnackbarType';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -180,23 +185,24 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   const requiresUser = to.matched.some((record) => record.meta.requiresUser);
-  const requiresParticipant = to.matched.some((record) => record.meta.requiresParticipant);
+  const requiresParticipant = to.matched.some(
+    (record) => record.meta.requiresParticipant
+  );
 
   if (
     (requiresAuth && !isAuthenticated()) ||
     (requiresUser && !isUser()) ||
     (requiresParticipant && !isParticipant())
   ) {
-    let errorMessage = 'Authorisation has expired.';
-    if (isAuthenticated()) errorMessage = 'Incorrect authorisation type.';
+    let errorMessage = 'authorisationExpired';
+    if (isAuthenticated()) errorMessage = 'incorrectAuthorisationType';
     app.config.globalProperties.eventBus.emit(EventType.SHOW_SNACKBAR, {
       type: SnackbarType.ERROR,
-      message: errorMessage,
+      message: `error.route.${errorMessage}`,
     });
     removeAccessToken();
     next({ name: 'home' });
-  }
-  else next();
+  } else next();
 });
 
 export default router;

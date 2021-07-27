@@ -1,6 +1,6 @@
 <template>
   <div :class="{ 'module-info--centered': isParticipant }" class="module-info">
-    <span class="module-info__type">{{ $t(`dropdown.moduleType.${type}`) }}</span>
+    <span class="module-info__type">{{ $t(`enum.moduleType.${type}`) }}</span>
     <h3 :class="{ 'heading--regular': isParticipant }" class="module-info__title">
       {{ title }}
     </h3>

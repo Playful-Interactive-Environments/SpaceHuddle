@@ -2,16 +2,16 @@
   <div class="login container--fullheight">
     <section class="container container--fullheight container--centered">
       <div class="login__content">
-        <h1 class="heading heading--medium">{{ $t("moderator.login.header") }}</h1>
+        <h1 class="heading heading--medium">{{ $t("moderator.view.login.header") }}</h1>
         <p class="login__description">
-          {{ $t("moderator.login.info") }}
+          {{ $t("moderator.view.login.info") }}
         </p>
         <form @submit.prevent="loginUser">
-          <h3 class="heading heading--xs">{{ $t("moderator.login.email") }}</h3>
+          <h3 class="heading heading--xs">{{ $t("moderator.view.login.email") }}</h3>
           <input
             class="input input--fullwidth"
             name="email"
-            :placeholder="$t('moderator.login.emailInfo')"
+            :placeholder="$t('moderator.view.login.emailInfo')"
             type="email"
             v-model="email"
             @blur="context.$v.email.$touch()"
@@ -21,11 +21,11 @@
             :errors="context.$v.email.$errors"
             :isSmall="true"
           />
-          <h3 class="heading heading--xs">{{ $t("moderator.login.password") }}</h3>
+          <h3 class="heading heading--xs">{{ $t("moderator.view.login.password") }}</h3>
           <input
             class="input input--fullwidth"
             name="password"
-            :placeholder="$t('moderator.login.passwordInfo')"
+            :placeholder="$t('moderator.view.login.passwordInfo')"
             type="password"
             v-model="password"
             @blur="context.$v.password.$touch()"
@@ -37,10 +37,10 @@
           />
           <form-error :errors="errors"></form-error>
           <button class="btn btn--gradient btn--fullwidth" type="submit">
-            {{ $t("moderator.login.submit") }}
+            {{ $t("moderator.view.login.submit") }}
             Login
           </button>
-          <p class="login__forgot-pw" role="button">{{ $t("moderator.login.forgot") }}</p>
+          <p class="login__forgot-pw" role="button">{{ $t("moderator.view.login.forgot") }}</p>
         </form>
       </div>
     </section>
@@ -51,12 +51,12 @@
       "
     >
       <div class="container--centered">
-        <h2 class="heading heading--medium heading--white">{{ $t("moderator.login.register.header") }}</h2>
+        <h2 class="heading heading--medium heading--white">{{ $t("moderator.view.login.register.header") }}</h2>
         <p class="login__text">
-          {{ $t("moderator.login.register.info") }}
+          {{ $t("moderator.view.login.register.info") }}
         </p>
         <router-link to="register">
-          <button class="btn btn--outline-white">{{ $t("moderator.login.register.submit") }}</button>
+          <button class="btn btn--outline-white">{{ $t("moderator.view.login.register.submit") }}</button>
         </router-link>
       </div>
     </section>

@@ -4,7 +4,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 const JWT_KEY = 'jwt';
 const JWT_KEY_MODERATOR = 'jwt-moderator';
-const JWT_PARTICIPANT_KEY = 'jwt-participant';
+const JWT_KEY_PARTICIPANT = 'jwt-participant';
 const BROWSER_KEY = 'key';
 const USER_KEY = 'user';
 
@@ -61,11 +61,11 @@ export const getAccessTokenModerator = (): string | null => {
 };
 
 export const setAccessTokenParticipant = (jwt: string): void => {
-  app.config.globalProperties.$cookies.set(JWT_PARTICIPANT_KEY, 'Bearer ' + jwt);
+  app.config.globalProperties.$cookies.set(JWT_KEY_PARTICIPANT, 'Bearer ' + jwt);
 };
 
 export const getAccessTokenParticipant = (): string | null => {
-  return app.config.globalProperties.$cookies.get(JWT_PARTICIPANT_KEY);
+  return app.config.globalProperties.$cookies.get(JWT_KEY_PARTICIPANT);
 };
 
 export const removeAccessToken = (): void => {

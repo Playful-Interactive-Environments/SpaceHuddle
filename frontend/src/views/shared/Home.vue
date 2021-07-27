@@ -2,15 +2,15 @@
   <Header :hasNavigation="false" />
   <div class="container container--spaced container--fullheight-header home">
     <section class="home__content">
-      <h1 class="heading heading--big">{{ $t("shared.home.header") }}</h1>
+      <h1 class="heading heading--big">{{ $t("shared.view.home.header") }}</h1>
       <p class="home__text">
-        {{ $t("shared.home.info") }}
+        {{ $t("shared.view.home.info") }}
       </p>
       <router-link to="/login" class="home__link">
-        <button class="btn btn--gradient">{{ $t("shared.home.login") }}</button>
+        <button class="btn btn--gradient">{{ $t("shared.view.home.login") }}</button>
       </router-link>
       <router-link to="/join">
-        <button class="btn btn--outline">{{ $t("shared.home.join") }}</button>
+        <button class="btn btn--outline">{{ $t("shared.view.home.join") }}</button>
       </router-link>
     </section>
     <section class="home__img">

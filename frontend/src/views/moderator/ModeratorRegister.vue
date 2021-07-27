@@ -6,27 +6,27 @@
         container container--fullheight container--centered
       "
     >
-      <h2 class="heading heading--medium heading--white">{{ $t("moderator.register.login.header") }}</h2>
+      <h2 class="heading heading--medium heading--white">{{ $t("moderator.view.register.login.header") }}</h2>
       <p class="register__text">
-        {{ $t("moderator.register.login.info") }}
+        {{ $t("moderator.view.register.login.info") }}
       </p>
       <router-link to="login">
-        <button class="btn btn--outline-white">{{ $t("moderator.register.login.submit") }}</button>
+        <button class="btn btn--outline-white">{{ $t("moderator.view.register.login.submit") }}</button>
       </router-link>
     </section>
     <section class="container container--fullheight container--centered">
       <div class="register__content">
-        <h1 class="heading heading--medium">{{ $t("moderator.register.header") }}</h1>
+        <h1 class="heading heading--medium">{{ $t("moderator.view.register.header") }}</h1>
         <p class="register__description">
-          {{ $t("moderator.register.info") }}
+          {{ $t("moderator.view.register.info") }}
 
         </p>
         <form @submit.prevent="registerUser">
-          <h3 class="heading heading--xs">{{ $t("moderator.register.email") }}</h3>
+          <h3 class="heading heading--xs">{{ $t("moderator.view.register.email") }}</h3>
           <input
             class="input input--fullwidth"
             name="email"
-            :placeholder="$t('moderator.register.emailInfo')"
+            :placeholder="$t('moderator.view.register.emailInfo')"
             type="email"
             v-model.trim="email"
             autocomplete="email"
@@ -37,11 +37,11 @@
             :errors="context.$v.email.$errors"
             :isSmall="true"
           />
-          <h3 class="heading heading--xs">{{ $t("moderator.register.password") }}</h3>
+          <h3 class="heading heading--xs">{{ $t("moderator.view.register.password") }}</h3>
           <input
             class="input input--fullwidth"
             name="password"
-            :placeholder="$t('moderator.register.passwordInfo')"
+            :placeholder="$t('moderator.view.register.passwordInfo')"
             type="password"
             autocomplete="new-password"
             v-model.trim="password"
@@ -52,11 +52,11 @@
             :errors="context.$v.password.$errors"
             :isSmall="true"
           />
-          <h4 class="heading heading--xs">{{ $t("moderator.register.passwordConform") }}</h4>
+          <h4 class="heading heading--xs">{{ $t("moderator.view.register.passwordConform") }}</h4>
           <input
             class="input input--fullwidth"
             name="passwordRepeat"
-            :placeholder="$t('moderator.register.passwordConformInfo')"
+            :placeholder="$t('moderator.view.register.passwordConformInfo')"
             type="password"
             autocomplete="new-password"
             v-model.trim="passwordRepeat"
@@ -76,7 +76,7 @@
           />
           <form-error :errors="errors"></form-error>
           <button class="btn btn--gradient btn--fullwidth" type="submit">
-            {{ $t("moderator.register.submit") }}
+            {{ $t("moderator.view.register.submit") }}
           </button>
         </form>
       </div>
@@ -143,13 +143,8 @@ export default class ModeratorRegister extends Vue {
   email = '';
   password = '';
   passwordRepeat = '';
-  passwordRepeatMsg = 'Password repetition does not match';
+  readonly passwordRepeatMsg = 'error.vuelidate.Password repetition does not match';
   errors: string[] = [];
-
-  async mounted(): Promise<void> {
-    this.passwordRepeatMsg = (this as any).$t('error.vuelidate.Password repetition does not match');
-    //this.passwordRepeatMsg = this.$.appContext.app.config.globalProperties.$t('error.vuelidate.Password repetition does not match');
-  }
 
   context = setup(() => {
     return {
@@ -176,7 +171,7 @@ export default class ModeratorRegister extends Vue {
           });
           this.eventBus.emit(EventType.SHOW_SNACKBAR, {
             type: SnackbarType.SUCCESS,
-            message: 'Your account was successfully created.',
+            message: 'info.accountCreated',
           });
         },
         (error) => {

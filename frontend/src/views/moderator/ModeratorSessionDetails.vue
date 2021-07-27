@@ -31,7 +31,7 @@
             </template>
           </draggable>
           <AddItem
-            :text="$t('moderator.module.overview.add')"
+            :text="$t('moderator.organism.module.overview.add')"
             @addNew="openModalModuleCreate(topic.id)"
           />
         </template>
@@ -117,7 +117,7 @@ export default class ModeratorSessionDetails extends Vue {
         () => {
           this.eventBus.emit(EventType.SHOW_SNACKBAR, {
             type: SnackbarType.SUCCESS,
-            message: 'Successfully updated public screen.',
+            message: 'info.updatePublicScreen',
           });
         },
         (error) => {
@@ -137,7 +137,7 @@ export default class ModeratorSessionDetails extends Vue {
         () => {
           this.eventBus.emit(EventType.SHOW_SNACKBAR, {
             type: SnackbarType.SUCCESS,
-            message: 'Successfully updated participant state.',
+            message: 'info.updateParticipantState',
           });
         },
         (error) => {
