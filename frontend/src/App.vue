@@ -11,8 +11,8 @@
 <script lang="ts">
 import { Vue, Options } from 'vue-class-component';
 import Snackbar from '@/components/shared/atoms/Snackbar.vue';
-import SnackbarType from '@/types/SnackbarType';
-import { EventType } from '@/types/EventType';
+import SnackbarType from '@/types/enum/SnackbarType';
+import { EventType } from '@/types/enum/EventType';
 
 @Options({
   components: {

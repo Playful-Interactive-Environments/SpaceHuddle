@@ -1,26 +1,13 @@
-import { Task } from '@/services/task-service';
+import { Task } from '@/types/api/Task';
 import {
   apiExecuteDelete,
   apiExecuteGetHandled,
   apiExecutePost,
   apiExecutePut
 } from '@/services/api';
-import UserType from '@/types/UserType';
-import EndpointType from '@/types/EndpointType';
-import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
-
-// TODO: move types to separate files in types folder?
-export interface Session {
-  connectionKey: string;
-  creationDate: string;
-  expirationDate: string;
-  id: string;
-  maxParticipants: number;
-  description: string;
-  publicScreenModuleId: string;
-  role: UserType;
-  title: string;
-}
+import EndpointType from '@/types/enum/EndpointType';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { Session } from '@/types/api/Session';
 
 export const getList = async (
   authHeaderType = EndpointAuthorisationType.MODERATOR
@@ -43,7 +30,7 @@ export const getById = async (
   );
 };
 
-export const getClientSession = async (
+export const getParticipantSession = async (
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Session> => {
   const result = await apiExecuteGetHandled<Session[]>(

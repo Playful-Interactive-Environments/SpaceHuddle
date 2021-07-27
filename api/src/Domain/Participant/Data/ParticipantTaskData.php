@@ -6,8 +6,8 @@ use App\Domain\Task\Data\TaskData;
 use App\Domain\Topic\Data\TopicData;
 
 /**
- * Information needed to display a task in the client application.
- * @OA\Schema(description="Information needed to display a task in the client application.")
+ * Information needed to display a task in the participant application.
+ * @OA\Schema(description="Information needed to display a task in the participant application.")
  */
 class ParticipantTaskData extends TaskData
 {

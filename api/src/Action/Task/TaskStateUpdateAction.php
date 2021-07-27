@@ -8,15 +8,15 @@ use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 
 /**
- * Action for updating the client application state for a task.
+ * Action for updating the participant application state for a task.
  *
  * @OA\Put(
  *   path="/api/task/{taskId}/client_application_state/{state}/",
- *   summary="Set the client application state for the task.",
+ *   summary="Set the participant application state for the task.",
  *   tags={"Client Application"},
  *   @OA\Parameter(in="path", name="taskId", description="ID of the task to be updated", required=true),
  *   @OA\Parameter(in="path", name="state",
- *     description="display status on the client devices",
+ *     description="display status on the participant devices",
  *     required=true,
  *     @OA\Schema(ref="#/components/schemas/TaskState")),
  *   @OA\Response(response="200", description="Success",

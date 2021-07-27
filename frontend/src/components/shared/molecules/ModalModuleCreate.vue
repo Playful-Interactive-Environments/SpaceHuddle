@@ -79,7 +79,7 @@ import FormError from '@/components/shared/atoms/FormError.vue';
 import ModalBase from '@/components/shared/molecules/ModalBase.vue';
 
 import * as taskService from '@/services/task-service';
-import ModuleType from '@/types/ModuleType';
+import ModuleType from '@/types/enum/ModuleType';
 import {
   getErrorMessage,
   addError,

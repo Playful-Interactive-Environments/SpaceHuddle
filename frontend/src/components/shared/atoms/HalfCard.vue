@@ -9,7 +9,7 @@
 <script lang="ts">
 import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
-import ModuleType from '@/types/ModuleType';
+import ModuleType from '@/types/enum/ModuleType';
 import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 
 @Options({

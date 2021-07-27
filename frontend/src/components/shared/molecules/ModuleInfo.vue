@@ -1,7 +1,7 @@
 <template>
-  <div :class="{ 'module-info--centered': isClient }" class="module-info">
+  <div :class="{ 'module-info--centered': isParticipant }" class="module-info">
     <span class="module-info__type">{{ $t(`dropdown.moduleType.${type}`) }}</span>
-    <h3 :class="{ 'heading--regular': isClient }" class="module-info__title">
+    <h3 :class="{ 'heading--regular': isParticipant }" class="module-info__title">
       {{ title }}
     </h3>
     <p class="module-info__description">{{ description }}</p>
@@ -11,7 +11,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import ModuleType from '@/types/ModuleType';
+import ModuleType from '@/types/enum/ModuleType';
 
 @Options({
   components: {},
@@ -20,7 +20,7 @@ export default class ModuleInfo extends Vue {
   @Prop({ default: ModuleType.BRAINSTORMING }) type!: ModuleType;
   @Prop({ default: '' }) title!: string;
   @Prop({ default: '' }) description!: string;
-  @Prop({ default: false }) isClient!: boolean;
+  @Prop({ default: false }) isParticipant!: boolean;
 }
 </script>
 

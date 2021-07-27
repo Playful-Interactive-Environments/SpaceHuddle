@@ -24,18 +24,18 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import { Task } from '@/services/task-service';
-import { Idea } from '@/services/idea-service';
+import { Task } from '@/types/api/Task';
+import { Idea } from '@/types/api/Idea';
 import { setModuleStyles } from '@/utils/moduleStyles';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
-import ModuleType from '@/types/ModuleType';
+import ModuleType from '@/types/enum/ModuleType';
 import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import * as taskService from '@/services/task-service';
 import * as sessionService from '@/services/session-service';
-import { EventType } from '@/types/EventType';
+import { EventType } from '@/types/enum/EventType';
 import FormError from '@/components/shared/atoms/FormError.vue';
-import TaskStates from '@/types/TaskStates';
+import TaskStates from '@/types/enum/TaskStates';
 
 @Options({
   components: {
@@ -70,7 +70,7 @@ export default class ModuleDetailView extends Vue {
   }
 
   async changeActiveState(): Promise<void> {
-    this.eventBus.emit(EventType.CHANGE_CLIENT_STATE, this.task);
+    this.eventBus.emit(EventType.CHANGE_PARTICIPANT_STATE, this.task);
   }
 
   changePublicScreen(isActive: boolean): void {

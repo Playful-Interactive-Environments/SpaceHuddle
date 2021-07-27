@@ -1,5 +1,5 @@
 <template>
-  <router-link :to="isClient ? '/overview' : '/sessions'">
+  <router-link :to="isParticipant ? '/overview' : '/sessions'">
     <svg
       id="logo"
       class="logo"
@@ -36,7 +36,7 @@ import { Prop } from 'vue-property-decorator';
   components: {},
 })
 export default class Logo extends Vue {
-  @Prop({ default: false }) isClient!: boolean;
+  @Prop({ default: false }) isParticipant!: boolean;
 }
 </script>
 

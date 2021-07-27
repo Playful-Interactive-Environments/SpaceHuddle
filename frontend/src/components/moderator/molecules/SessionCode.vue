@@ -30,8 +30,8 @@
 <script lang="ts">
 import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
-import SnackbarType from '@/types/SnackbarType';
-import { EventType } from '@/types/EventType';
+import SnackbarType from '@/types/enum/SnackbarType';
+import { EventType } from '@/types/enum/EventType';
 
 @Options({
   components: {},

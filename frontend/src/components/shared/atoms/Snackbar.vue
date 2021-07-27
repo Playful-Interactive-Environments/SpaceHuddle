@@ -17,7 +17,7 @@
 <script lang="ts">
 import { Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import SnackbarType from '@/types/SnackbarType';
+import SnackbarType from '@/types/enum/SnackbarType';
 
 // use via eventbus
 export default class Snackbar extends Vue {

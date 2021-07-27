@@ -1,6 +1,6 @@
 import jwt_decode from 'jwt-decode';
 import app from '@/main';
-import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 const JWT_KEY = 'jwt';
 const JWT_KEY_MODERATOR = 'jwt-moderator';

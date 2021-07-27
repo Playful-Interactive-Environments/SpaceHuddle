@@ -37,7 +37,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Session } from '@/services/session-service';
+import { Session } from '@/types/api/Session';
 import { formatDate } from '@/utils/date';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import Card from '@/components/shared/atoms/Card.vue';

@@ -1,15 +1,7 @@
-import {apiExecuteGet, apiExecuteGetHandled, apiExecutePost} from '@/services/api';
-import { Task } from '@/services/task-service';
-import EndpointType from '@/types/EndpointType';
-import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
-
-export interface Topic {
-  id: string;
-  title: string;
-  description: string;
-  activeTaskId: string;
-  tasks?: Task[];
-}
+import { apiExecuteGetHandled, apiExecutePost } from '@/services/api';
+import EndpointType from '@/types/enum/EndpointType';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { Topic } from '@/types/api/Topic';
 
 export const postTopic = async (
   sessionId: string,

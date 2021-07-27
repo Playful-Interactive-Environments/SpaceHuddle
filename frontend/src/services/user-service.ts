@@ -1,7 +1,7 @@
 import { apiExecutePost } from '@/services/api';
-import ApiResponse from '@/types/ApiResponse';
-import EndpointType from '@/types/EndpointType';
-import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
+import ApiResponse from '@/types/api/ApiResponse';
+import EndpointType from '@/types/enum/EndpointType';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 export const registerUser = async (
   email: string,

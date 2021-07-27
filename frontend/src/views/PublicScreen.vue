@@ -67,12 +67,12 @@ import Timer from '@/components/shared/atoms/Timer.vue';
 
 import * as sessionService from '@/services/session-service';
 import * as ideaService from '@/services/idea-service';
-import { Idea } from '@/services/idea-service';
-import { Task } from '@/services/task-service';
-import ModuleType from '@/types/ModuleType';
+import { Idea } from '@/types/api/Idea';
+import { Task } from '@/types/api/Task';
+import ModuleType from '@/types/enum/ModuleType';
 
 import { setModuleStyles } from '@/utils/moduleStyles';
-import TaskStates from '@/types/TaskStates';
+import TaskStates from '@/types/enum/TaskStates';
 
 @Options({
   components: {

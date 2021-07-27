@@ -5,7 +5,7 @@ namespace App\Domain\Task\Type;
 /**
  * List of possible task states.
  * @OA\Schema(
- *   description="display status on the client devices",
+ *   description="display status on the participant devices",
  *   type="string",
  *   enum={"WAIT", "ACTIVE", "READ_ONLY", "DONE"},
  *   example="ACTIVE"

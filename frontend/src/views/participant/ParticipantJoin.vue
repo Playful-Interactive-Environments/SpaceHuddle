@@ -39,7 +39,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Participant } from '@/services/participant-service';
+import { Participant, ConnectState } from '@/types/api/Participant';
 import * as participantService from '@/services/participant-service';
 import * as authService from '@/services/auth-service';
 import FormError from '@/components/shared/atoms/FormError.vue';
@@ -54,7 +54,7 @@ import {
     FormError,
   },
 })
-export default class ClientJoin extends Vue {
+export default class ParticipantJoin extends Vue {
   sessionKey = '';
   browserKey = '';
   errors: string[] = [];
@@ -99,14 +99,14 @@ export default class ClientJoin extends Vue {
     if (participantData.participant && participantData.token) {
       if (
         participantData.participant.state ===
-        participantService.ConnectState.ACTIVE
+        ConnectState.ACTIVE
       ) {
         authService.setBrowserKey(
           participantData.participant.browserKey as string
         );
         authService.setAccessTokenParticipant(participantData.token.accessToken as string);
         this.$router.push({
-          name: 'client-overview',
+          name: 'participant-overview',
         });
         return true;
       }

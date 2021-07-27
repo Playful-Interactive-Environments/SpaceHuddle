@@ -95,10 +95,10 @@ import {
 } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
-import States from '@/types/States';
-import SnackbarType from '@/types/SnackbarType';
+import States from '@/types/enum/States';
+import SnackbarType from '@/types/enum/SnackbarType';
 import * as userService from '@/services/user-service';
-import { EventType } from '@/types/EventType';
+import { EventType } from '@/types/enum/EventType';
 import {
   getErrorMessage,
   addError,

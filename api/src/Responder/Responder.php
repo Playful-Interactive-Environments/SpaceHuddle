@@ -64,7 +64,7 @@ final class Responder
      * Creates a redirect for the given url / route name.
      *
      * This method prepares the response object to return an HTTP Redirect
-     * response to the client.
+     * response to the participant.
      *
      * @param ResponseInterface $response The response
      * @param string $destination The redirect destination (url or route name)
@@ -88,7 +88,7 @@ final class Responder
      * Creates a redirect for the given url / route name.
      *
      * This method prepares the response object to return an HTTP Redirect
-     * response to the client.
+     * response to the participant.
      *
      * @param ResponseInterface $response The response
      * @param string $routeName The redirect route name
@@ -110,7 +110,7 @@ final class Responder
      * Write JSON to the response body.
      *
      * This method prepares the response object to return an HTTP JSON
-     * response to the client.
+     * response to the participant.
      *
      * @param ResponseInterface $response The response
      * @param mixed $data The data

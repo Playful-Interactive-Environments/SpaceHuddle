@@ -12,7 +12,7 @@
           <ModuleCard
             :type="ModuleType[task.taskType]"
             :task="task"
-            :isClient="true"
+            isParticipant="true"
             :sessionId="sessionId"
           />
         </li>
@@ -23,17 +23,17 @@
 
 <script lang="ts">
 import { Vue, Options } from 'vue-class-component';
-import MenuBar from '@/components/client/molecules/Menubar.vue';
-import SessionInfo from '@/components/client/molecules/SessionInfo.vue';
+import MenuBar from '@/components/participant/molecules/Menubar.vue';
+import SessionInfo from '@/components/participant/molecules/SessionInfo.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
-import ModuleType from '@/types/ModuleType';
+import ModuleType from '@/types/enum/ModuleType';
 import * as taskService from '@/services/task-service';
 import * as participantService from '@/services/participant-service';
 import * as sessionService from '@/services/session-service';
-import { Topic } from '@/services/topic-service';
+import { Topic } from '@/types/api/Topic';
 import FormError from '@/components/shared/atoms/FormError.vue';
-import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
@@ -44,7 +44,7 @@ import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
     FormError
   },
 })
-export default class ClientOverview extends Vue {
+export default class ParticipantOverview extends Vue {
   topics: Topic[] = [];
   ModuleType = ModuleType;
   sessionName = '';
@@ -53,7 +53,6 @@ export default class ClientOverview extends Vue {
   errors: string[] = [];
 
   mounted(): void {
-    console.log("mount client overview");
     this.getSessionInfo();
     this.getTopicsAndTasks();
   }
@@ -63,22 +62,28 @@ export default class ClientOverview extends Vue {
   }
 
   async getTopicsAndTasks(): Promise<void> {
-    participantService.getTopicList(EndpointAuthorisationType.PARTICIPANT).then((queryResult) => {
-      this.topics = queryResult;
-      this.topics.forEach(async (topic) => {
-        taskService.getTaskList(topic.id, EndpointAuthorisationType.PARTICIPANT).then((queryResult) => {
-          topic.tasks = queryResult;
+    participantService
+      .getTopicList(EndpointAuthorisationType.PARTICIPANT)
+      .then((queryResult) => {
+        this.topics = queryResult;
+        this.topics.forEach(async (topic) => {
+          taskService
+            .getTaskList(topic.id, EndpointAuthorisationType.PARTICIPANT)
+            .then((queryResult) => {
+              topic.tasks = queryResult;
+            });
         });
       });
-    });
   }
 
   async getSessionInfo(): Promise<void> {
-    sessionService.getClientSession(EndpointAuthorisationType.PARTICIPANT).then((queryResult) => {
-      this.sessionName = queryResult.title;
-      this.sessionDescription = queryResult.description;
-      this.sessionId = queryResult.id;
-    });
+    sessionService
+      .getParticipantSession(EndpointAuthorisationType.PARTICIPANT)
+      .then((queryResult) => {
+        this.sessionName = queryResult.title;
+        this.sessionDescription = queryResult.description;
+        this.sessionId = queryResult.id;
+      });
   }
 }
 </script>

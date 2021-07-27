@@ -12,7 +12,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import { Idea } from '@/services/idea-service';
+import { Idea } from '@/types/api/Idea';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import * as ideaService from '@/services/idea-service';
 import ModuleDetailView from '@/components/moderator/organisms/ModuleDetailView.vue';

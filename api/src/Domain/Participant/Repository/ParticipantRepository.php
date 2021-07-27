@@ -79,7 +79,7 @@ class ParticipantRepository implements RepositoryInterface
     }
 
     /**
-     * Determine client IP address
+     * Determine participant IP address
      * @return string Client IP
      */
     private function getClientIp(): string

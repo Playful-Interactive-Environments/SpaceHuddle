@@ -1,6 +1,6 @@
 enum UserType {
   MODERATOR,
-  CLIENT,
+  PARTICIPANT,
   FACILITATOR,
 }
 

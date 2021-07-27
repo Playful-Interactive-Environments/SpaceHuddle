@@ -1,5 +1,5 @@
 export enum EventType {
   CHANGE_PUBLIC_SCREEN = 'changePublicScreen',
-  CHANGE_CLIENT_STATE = 'changeClientState',
+  CHANGE_PARTICIPANT_STATE = 'changeParticipantState',
   SHOW_SNACKBAR = 'showSnackbar',
 }

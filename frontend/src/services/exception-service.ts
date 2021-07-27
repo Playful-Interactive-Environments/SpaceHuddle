@@ -1,9 +1,9 @@
 import {AxiosError, AxiosResponse} from 'axios';
-import ApiError from '@/types/ApiError';
+import ApiError from '@/types/api/ApiError';
 import app from '@/main';
-import { EventType } from '@/types/EventType';
-import SnackbarType from '@/types/SnackbarType';
-import HttpStatusCode from '@/types/HttpStatusCode ';
+import { EventType } from '@/types/enum/EventType';
+import SnackbarType from '@/types/enum/SnackbarType';
+import HttpStatusCode from '@/types/enum/HttpStatusCode ';
 import { removeAccessToken } from '@/services/auth-service';
 
 const showLog = false;

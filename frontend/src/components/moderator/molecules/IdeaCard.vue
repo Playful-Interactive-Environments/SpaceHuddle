@@ -16,7 +16,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import * as ideaService from '@/services/idea-service';
-import { Idea } from '@/services/idea-service';
+import { Idea } from '@/types/api/Idea';
 import {
   getErrorMessage,
   addError,

@@ -33,7 +33,7 @@
           :type="type"
           :title="taskName"
           :description="taskDescription"
-          :is-client="true"
+          :is-participant="true"
         />
 
         <input
@@ -96,12 +96,12 @@
 
 <script lang="ts">
 import {Options, setup, Vue} from 'vue-class-component';
-import MenuBar from '@/components/client/molecules/Menubar.vue';
+import MenuBar from '@/components/participant/molecules/Menubar.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import HalfCard from '@/components/shared/atoms/HalfCard.vue';
 import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import Card from '@/components/shared/atoms/Card.vue';
-import ModuleType from '@/types/ModuleType';
+import ModuleType from '@/types/enum/ModuleType';
 import useVuelidate from '@vuelidate/core';
 import {Prop} from 'vue-property-decorator';
 import {setModuleStyles} from '@/utils/moduleStyles';
@@ -109,10 +109,10 @@ import {maxLength, required} from '@vuelidate/validators';
 import FormError from '@/components/shared/atoms/FormError.vue';
 import * as taskService from '@/services/task-service';
 import * as ideaService from '@/services/idea-service';
-import {EventType} from '@/types/EventType';
-import SnackbarType from '@/types/SnackbarType';
+import {EventType} from '@/types/enum/EventType';
+import SnackbarType from '@/types/enum/SnackbarType';
 import {addError, clearErrors, getErrorMessage,} from '@/services/exception-service';
-import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
+import EndpointAuthorisationType from "@/types/enum/EndpointAuthorisationType";
 
 @Options({
   components: {
@@ -133,7 +133,7 @@ import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
     }
   },
 })
-export default class ClientBrainstorming extends Vue {
+export default class ParticipantBrainstorming extends Vue {
   @Prop({ required: true }) taskId!: string;
 
   type = ModuleType.BRAINSTORMING;

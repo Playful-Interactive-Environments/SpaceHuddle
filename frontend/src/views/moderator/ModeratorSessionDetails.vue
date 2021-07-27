@@ -56,16 +56,16 @@ import Navigation from '@/components/moderator/molecules/Navigation.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import { formatDate } from '@/utils/date';
-import ModuleType from '@/types/ModuleType';
-import SnackbarType from '@/types/SnackbarType';
+import ModuleType from '@/types/enum/ModuleType';
+import SnackbarType from '@/types/enum/SnackbarType';
 import * as sessionService from '@/services/session-service';
 import * as topicService from '@/services/topic-service';
 import * as taskService from '@/services/task-service';
-import { Session } from '@/services/session-service';
-import { Topic } from '@/services/topic-service';
-import { Task } from '@/services/task-service';
-import { EventType } from '@/types/EventType';
-import TaskStates from '@/types/TaskStates';
+import { Session } from '@/types/api/Session';
+import { Topic } from '@/types/api/Topic';
+import { Task } from '@/types/api/Task';
+import { EventType } from '@/types/enum/EventType';
+import TaskStates from '@/types/enum/TaskStates';
 import {
   getErrorMessage,
   addError,
@@ -101,9 +101,9 @@ export default class ModeratorSessionDetails extends Vue {
     this.eventBus.on(EventType.CHANGE_PUBLIC_SCREEN, async (id) => {
       await this.changePublicScreen(id as string);
     });
-    this.eventBus.off(EventType.CHANGE_CLIENT_STATE);
-    this.eventBus.on(EventType.CHANGE_CLIENT_STATE, async (task) => {
-      await this.changeClientState(task as Task);
+    this.eventBus.off(EventType.CHANGE_PARTICIPANT_STATE);
+    this.eventBus.on(EventType.CHANGE_PARTICIPANT_STATE, async (task) => {
+      await this.changeParticipantState(task as Task);
     });
     await this.getTopics();
   }
@@ -126,7 +126,7 @@ export default class ModeratorSessionDetails extends Vue {
       );
   }
 
-  async changeClientState(task: Task): Promise<void> {
+  async changeParticipantState(task: Task): Promise<void> {
     clearErrors(this.errors);
     if (task) {
       task.state =
@@ -137,7 +137,7 @@ export default class ModeratorSessionDetails extends Vue {
         () => {
           this.eventBus.emit(EventType.SHOW_SNACKBAR, {
             type: SnackbarType.SUCCESS,
-            message: 'Successfully updated client state.',
+            message: 'Successfully updated participant state.',
           });
         },
         (error) => {

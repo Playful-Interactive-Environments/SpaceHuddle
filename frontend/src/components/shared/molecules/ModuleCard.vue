@@ -1,13 +1,13 @@
 <template>
   <router-link
     :to="
-      isClient ? `/task/${type}/${task.id}` : `/${type}/${sessionId}/${task.id}`
+      isParticipant ? `/task/${type}/${task.id}` : `/${type}/${sessionId}/${task.id}`
     "
   >
     <article
       ref="item"
       class="module-card"
-      :class="{ 'module-card--client': isClient }"
+      :class="{ 'module-card--participant': isParticipant }"
     >
       <img
         :src="require(`@/assets/illustrations/planets/${type}.png`)"
@@ -26,7 +26,7 @@
           !(type === ModuleType.INFORMATION || type === ModuleType.SELECTION)
         "
       />
-      <div class="module-card__toggles" v-if="!isClient">
+      <div class="module-card__toggles" v-if="!isParticipant">
         <Toggle
           :label="$t('general.moduleActive')"
           :isActive="task.state === TaskStates.ACTIVE"
@@ -39,7 +39,7 @@
           @toggleClicked="changePublicScreen"
         />
       </div>
-      <div class="module-card__drag" v-if="!isClient">
+      <div class="module-card__drag" v-if="!isParticipant">
         <img
           src="@/assets/icons/drag-dots.svg"
           alt="drag-icon"
@@ -54,13 +54,13 @@
 import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import { setModuleStyles } from '@/utils/moduleStyles';
-import { Task } from '@/services/task-service';
+import { Task } from '@/types/api/Task';
 import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import Toggle from '@/components/moderator/atoms/Toggle.vue';
-import ModuleType from '@/types/ModuleType';
-import TaskStates from '@/types/TaskStates';
-import { EventType } from '@/types/EventType';
+import ModuleType from '@/types/enum/ModuleType';
+import TaskStates from '@/types/enum/TaskStates';
+import { EventType } from '@/types/enum/EventType';
 
 @Options({
   components: {
@@ -73,7 +73,7 @@ export default class ModuleCard extends Vue {
   @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: ModuleType.BRAINSTORMING }) type!: ModuleType;
   @Prop() task!: Task;
-  @Prop({ default: false }) isClient!: boolean;
+  @Prop({ default: false }) isParticipant!: boolean;
   @Prop({ default: false }) isOnPublicScreen!: boolean;
 
   ModuleType = ModuleType;
@@ -92,7 +92,7 @@ export default class ModuleCard extends Vue {
   }
 
   async changeActiveState(): Promise<void> {
-    this.eventBus.emit(EventType.CHANGE_CLIENT_STATE, this.task);
+    this.eventBus.emit(EventType.CHANGE_PARTICIPANT_STATE, this.task);
   }
 }
 </script>
@@ -150,7 +150,7 @@ export default class ModuleCard extends Vue {
     height: auto;
   }
 
-  &--client {
+  &--participant {
     flex-direction: column;
     margin-left: 0;
     padding: 1.5rem 1.5rem 2.2rem;

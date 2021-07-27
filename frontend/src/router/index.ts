@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
-import ClientJoin from '../views/client/ClientJoin.vue';
-import ClientOverview from '@/views/client/ClientOverview.vue';
+import ParticipantJoin from '../views/participant/ParticipantJoin.vue';
+import ParticipantOverview from '@/views/participant/ParticipantOverview.vue';
 import Home from '../views/shared/Home.vue';
 import ModeratorLogin from '@/views/moderator/ModeratorLogin.vue';
 import ModeratorRegister from '@/views/moderator/ModeratorRegister.vue';
@@ -17,10 +17,10 @@ import NotFound from '@/views/shared/NotFound.vue';
 import PublicScreen from '@/views/PublicScreen.vue';
 
 import {isParticipant, isAuthenticated, isUser, removeAccessToken} from '@/services/auth-service';
-import ClientBrainstorming from '@/views/client/ClientBrainstorming.vue';
+import ParticipantBrainstorming from '@/views/participant/ParticipantBrainstorming.vue';
 import app from "@/main";
-import {EventType} from "@/types/EventType";
-import SnackbarType from "@/types/SnackbarType";
+import {EventType} from "@/types/enum/EventType";
+import SnackbarType from "@/types/enum/SnackbarType";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -133,13 +133,13 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/join',
-    name: 'client-join',
-    component: ClientJoin,
+    name: 'participant-join',
+    component: ParticipantJoin,
   },
   {
     path: '/overview',
-    name: 'client-overview',
-    component: ClientOverview,
+    name: 'participant-overview',
+    component: ParticipantOverview,
     meta: {
       requiresAuth: true,
       requiresParticipant: true,
@@ -151,8 +151,8 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/task/brainstorming/:taskId',
-    name: 'client-brainstorming',
-    component: ClientBrainstorming,
+    name: 'participant-brainstorming',
+    component: ParticipantBrainstorming,
     meta: {
       requiresAuth: true,
       requiresParticipant: true,

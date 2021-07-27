@@ -47,13 +47,13 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import { Session } from '@/services/session-service';
+import { Session } from '@/types/api/Session';
 import Logo from '@/components/shared/atoms/Logo.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
-import ModuleType from '@/types/ModuleType';
+import ModuleType from '@/types/enum/ModuleType';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import Toggle from '@/components/moderator/atoms/Toggle.vue';
-import {EventType} from "@/types/EventType";
+import {EventType} from "@/types/enum/EventType";
 
 @Options({
   components: {

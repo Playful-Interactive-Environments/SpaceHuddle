@@ -1,7 +1,10 @@
-import Axios, {AxiosInstance, AxiosRequestConfig} from 'axios';
-import {getAccessTokenModerator, getAccessTokenParticipant} from '@/services/auth-service';
-import {apiErrorHandling} from '@/services/exception-service';
-import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
+import Axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import {
+  getAccessTokenModerator,
+  getAccessTokenParticipant,
+} from '@/services/auth-service';
+import { apiErrorHandling } from '@/services/exception-service';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 const interceptorAuthHeader = (
   axiosConfig: AxiosRequestConfig,
@@ -60,11 +63,19 @@ export const apiEndpoint = (
   return axiosInstance;
 };
 
-export const API_ENDPOINT_MODERATOR = apiEndpoint(EndpointAuthorisationType.MODERATOR);
-export const API_ENDPOINT_PARTICIPANT = apiEndpoint(EndpointAuthorisationType.PARTICIPANT);
-export const API_ENDPOINT_UNAUTHORISED = apiEndpoint(EndpointAuthorisationType.UNAUTHORISED);
+export const API_ENDPOINT_MODERATOR = apiEndpoint(
+  EndpointAuthorisationType.MODERATOR
+);
+export const API_ENDPOINT_PARTICIPANT = apiEndpoint(
+  EndpointAuthorisationType.PARTICIPANT
+);
+export const API_ENDPOINT_UNAUTHORISED = apiEndpoint(
+  EndpointAuthorisationType.UNAUTHORISED
+);
 
-export const getApiEndpoint = (authHeaderType = EndpointAuthorisationType.MODERATOR): AxiosInstance => {
+export const getApiEndpoint = (
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): AxiosInstance => {
   switch (authHeaderType) {
     case EndpointAuthorisationType.MODERATOR:
       return API_ENDPOINT_MODERATOR;

@@ -1,4 +1,4 @@
-import ModuleType from '../types/ModuleType';
+import ModuleType from '../types/enum/ModuleType';
 import ModuleColors from '../types/ModuleColors';
 
 export const setModuleStyles = (ref: HTMLElement, type: ModuleType): void => {

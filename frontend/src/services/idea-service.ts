@@ -3,18 +3,9 @@ import {
   apiExecuteGetHandled,
   apiExecutePost,
 } from '@/services/api';
-import EndpointType from '@/types/EndpointType';
-import EndpointAuthorisationType from "@/types/EndpointAuthorisationType";
-
-export interface Idea {
-  id: string;
-  state: string; //what are the states of an idea??
-  timestamp: string;
-  description: string;
-  keywords: string;
-  image: string; //ignore at first?
-  link: string; //link to where??
-}
+import EndpointType from '@/types/enum/EndpointType';
+import EndpointAuthorisationType from "@/types/enum/EndpointAuthorisationType";
+import { Idea } from '@/types/api/Idea';
 
 export const deleteIdea = async (id: string): Promise<void> => {
   return await apiExecuteDelete<any>(
