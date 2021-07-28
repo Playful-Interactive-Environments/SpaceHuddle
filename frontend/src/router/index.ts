@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
-import ParticipantJoin from '../views/participant/ParticipantJoin.vue';
+import ParticipantJoin from '@/views/participant/ParticipantJoin.vue';
 import ParticipantOverview from '@/views/participant/ParticipantOverview.vue';
-import Home from '../views/shared/Home.vue';
+import Home from '@/views/shared/Home.vue';
 import ModeratorLogin from '@/views/moderator/ModeratorLogin.vue';
 import ModeratorRegister from '@/views/moderator/ModeratorRegister.vue';
 import ModeratorSessionDetails from '@/views/moderator/ModeratorSessionDetails.vue';

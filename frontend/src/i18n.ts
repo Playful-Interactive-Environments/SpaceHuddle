@@ -2,6 +2,16 @@ import { createI18n } from 'vue3-i18n';
 import de from '@/locales/de.json';
 import en from '@/locales/en.json';
 import { Messages } from 'vue3-i18n/src/types';
+import { getLocales } from '@/modules/loadComponent';
+
+const addModuleLocales = async (locale = 'en', dict: any): Promise<any> => {
+  dict.module = await getLocales(locale);
+  console.log(dict);
+  return dict;
+};
+
+addModuleLocales('de', de);
+addModuleLocales('en', en);
 
 const i18n = createI18n({
   locale: process.env.VUE_APP_I18N_LOCALE || 'en',

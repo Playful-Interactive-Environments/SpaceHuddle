@@ -1,0 +1,55 @@
+{
+  "none": {
+    "path": "none",
+    "publicScreen": "PublicScreenComponent",
+    "moderatorConfig": "",
+    "moderatorContent": "",
+    "participant": ""
+  },
+  "information": {
+    "default": {
+      "path": "information/default",
+      "publicScreen": "PublicScreenComponent",
+      "moderatorConfig": "",
+      "moderatorContent": "",
+      "participant": ""
+    }
+  },
+  "brainstorming": {
+    "default": {
+      "path": "brainstorming/default",
+      "publicScreen": "PublicScreenComponent",
+      "moderatorConfig": "",
+      "moderatorContent": "",
+      "participant": "",
+      "locales": "en, de"
+    }
+  },
+  "selection": {
+    "default": {
+      "path": "selection/default",
+      "publicScreen": "PublicScreenComponent",
+      "moderatorConfig": "",
+      "moderatorContent": "",
+      "participant": ""
+    }
+  },
+  "categorisation": {
+    "default": {
+      "path": "categorisation/default",
+      "publicScreen": "PublicScreenComponent",
+      "moderatorConfig": "",
+      "moderatorContent": "",
+      "participant": ""
+    }
+  },
+  "voting": {
+    "default": {
+      "path": "voting/default",
+      "publicScreen": "PublicScreenComponent",
+      "moderatorConfig": "",
+      "moderatorContent": "",
+      "participant": ""
+    }
+  }
+}

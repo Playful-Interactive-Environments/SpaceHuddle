@@ -2,21 +2,10 @@
   <div class="public-screen">
     <Header :white="true" />
     <main
-      v-if="!task"
-      class="
-        container container--fullheight container--centered
-        public-screen__error
-      "
-    >
-      <h2>{{ $t("shared.view.publicScreen.none.header") }}</h2>
-      <p>{{ $t("shared.view.publicScreen.none.info") }}</p>
-    </main>
-    <main
-      v-else
       class="public-screen__container container container--spaced"
       ref="container"
     >
-      <section class="public-screen__overview">
+      <section v-if="task" class="public-screen__overview">
         <div class="public-screen__overview-left">
           <span class="public-screen__overview-type">
             {{ $t(`enum.moduleType.${ModuleType[task.taskType]}`) }}
@@ -39,20 +28,7 @@
           />
         </div>
       </section>
-      <section
-        v-if="ideas.length === 0"
-        class="container container--centered public-screen__error"
-      >
-        <p>No ideas yet - stay tuned.</p>
-      </section>
-      <section v-else class="public-screen__content">
-        <IdeaCard
-          v-for="(idea, index) in ideas"
-          :idea="idea"
-          :key="index"
-          :is-deletable="false"
-        />
-      </section>
+      <PublicScreenComponent :task-id="taskId" />
     </main>
   </div>
 </template>
@@ -66,19 +42,21 @@ import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 
 import * as sessionService from '@/services/session-service';
-import * as ideaService from '@/services/idea-service';
 import { Idea } from '@/types/api/Idea';
 import { Task } from '@/types/api/Task';
 import ModuleType from '@/types/enum/ModuleType';
 
 import { setModuleStyles } from '@/utils/moduleStyles';
 import TaskStates from '@/types/enum/TaskStates';
+import { getModule, getDefaultModule } from '@/modules/loadComponent';
+import ModuleComponentType from '@/modules/ModuleComponentType';
 
 @Options({
   components: {
     Header,
     IdeaCard,
     Timer,
+    PublicScreenComponent: getDefaultModule(ModuleComponentType.PUBLIC_SCREEN),
   },
 })
 export default class PublicScreen extends Vue {
@@ -86,47 +64,34 @@ export default class PublicScreen extends Vue {
 
   task: Task | null = null;
   ideas: Idea[] = [];
-  showFallback = false;
-
-  ideaInterval!: number;
-  readonly interval = 3000;
 
   ModuleType = ModuleType;
   TaskStates = TaskStates;
 
+  get taskId(): string | null {
+    if (this.task) return this.task.id;
+    return null;
+  }
+
+  get taskType(): ModuleType | null {
+    if (this.task) return ModuleType[this.task.taskType];
+    return null;
+  }
+
   async mounted(): Promise<void> {
     sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
       this.task = queryResult;
-      if (this.task) {
-        this.getIdeas().then(() => {
-          if (this.task) {
-            setModuleStyles(
-              this.$refs.container as HTMLElement,
-              ModuleType[this.task.taskType]
-            );
-          }
-        });
-      } else {
-        this.showFallback = true;
+      const taskType = this.taskType;
+      if (this.$options.components) {
+        this.$options.components['PublicScreenComponent'] =
+          getModule(ModuleComponentType.PUBLIC_SCREEN, taskType);
       }
-      this.startIdeaInterval();
+      if (taskType) {
+        this.$nextTick(() => {
+          setModuleStyles(this.$refs.container as HTMLElement, taskType);
+        });
+      }
     });
-  }
-
-  async getIdeas(): Promise<void> {
-    if (this.task) {
-      await ideaService.getIdeasForTask(this.task.id).then((ideas) => {
-        this.ideas = ideas;
-      });
-    }
-  }
-
-  startIdeaInterval(): void {
-    this.ideaInterval = setInterval(this.getIdeas, this.interval);
-  }
-
-  unmounted(): void {
-    clearInterval(this.ideaInterval);
   }
 }
 </script>
@@ -179,6 +144,8 @@ export default class PublicScreen extends Vue {
 
   &__error {
     color: white;
+    margin: 0px;
+    padding: 0px;
   }
 }
 </style>
