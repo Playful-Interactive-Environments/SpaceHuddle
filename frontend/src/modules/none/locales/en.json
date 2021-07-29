@@ -1,0 +1,10 @@
+{
+  "publicScreen": {
+    "header": "Sorry, nothing here.",
+    "info": "Make sure that a module is activated for the public view."
+  },
+  "moderatorContent": {
+    "header": "No Task selected.",
+    "info": "Make sure that a task is selected to view it's detail content."
+  }
+}

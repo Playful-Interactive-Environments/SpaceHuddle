@@ -15,7 +15,7 @@
       <NavigationWithBack :back-route="'/session/' + sessionId" />
       <form-error :errors="errors"></form-error>
       <main class="task_definition__content">
-        <slot />
+        <ModuleContentComponent :task-id="taskId" />
       </main>
     </div>
   </div>
@@ -23,42 +23,59 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
-import { Task } from '@/types/api/Task';
-import { Idea } from '@/types/api/Idea';
-import { setModuleStyles } from '@/utils/moduleStyles';
-import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
+import { Prop, Watch } from 'vue-property-decorator';
+import { getModule, getDefaultModule } from '@/modules/loadComponent';
+
+import ModuleComponentType from '@/modules/ModuleComponentType';
 import ModuleType from '@/types/enum/ModuleType';
-import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
-import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
-import * as taskService from '@/services/task-service';
-import * as sessionService from '@/services/session-service';
-import { EventType } from '@/types/enum/EventType';
-import FormError from '@/components/shared/atoms/FormError.vue';
 import TaskStates from '@/types/enum/TaskStates';
+import { Task } from '@/types/api/Task';
+import { EventType } from '@/types/enum/EventType';
+import { setModuleStyles } from '@/utils/moduleStyles';
+
+import * as sessionService from '@/services/session-service';
+import * as taskService from '@/services/task-service';
+
+import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
+import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
+import FormError from '@/components/shared/atoms/FormError.vue';
 
 @Options({
   components: {
-    IdeaCard,
     Sidebar,
     NavigationWithBack,
-    FormError
+    FormError,
+    ModuleContentComponent: getDefaultModule(
+      ModuleComponentType.MODERATOR_CONTENT
+    ),
   },
 })
-export default class ModuleDetailView extends Vue {
+export default class ModeratorModuleContent extends Vue {
   @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: '' }) readonly taskId!: string;
 
   task: Task | null = null;
   publicScreenTask: Task | null = null;
-  ideas: Idea[] = [];
   ModuleType = ModuleType;
   TaskStates = TaskStates;
   errors: string[] = [];
 
-  async mounted(): Promise<void> {
-    taskService.getTaskById(this.taskId).then((queryResult) => {
+  get taskType(): ModuleType | null {
+    if (this.task) return ModuleType[this.task.taskType];
+    return null;
+  }
+
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(val: string): void {
+    taskService.getTaskById(val).then((queryResult) => {
       this.task = queryResult;
+      const taskType = this.taskType;
+      if (this.$options.components) {
+        this.$options.components['ModuleContentComponent'] = getModule(
+          ModuleComponentType.MODERATOR_CONTENT,
+          taskType
+        );
+      }
       setModuleStyles(
         this.$refs.item as HTMLElement,
         ModuleType[this.task.taskType]
@@ -74,7 +91,10 @@ export default class ModuleDetailView extends Vue {
   }
 
   changePublicScreen(isActive: boolean): void {
-    this.eventBus.emit(EventType.CHANGE_PUBLIC_SCREEN, isActive ? this.taskId : '{taskId}');
+    this.eventBus.emit(
+      EventType.CHANGE_PUBLIC_SCREEN,
+      isActive ? this.taskId : '{taskId}'
+    );
   }
 }
 </script>

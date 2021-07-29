@@ -38,11 +38,9 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 
 import Header from '@/components/moderator/organisms/Header.vue';
-import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 
 import * as sessionService from '@/services/session-service';
-import { Idea } from '@/types/api/Idea';
 import { Task } from '@/types/api/Task';
 import ModuleType from '@/types/enum/ModuleType';
 
@@ -54,7 +52,6 @@ import ModuleComponentType from '@/modules/ModuleComponentType';
 @Options({
   components: {
     Header,
-    IdeaCard,
     Timer,
     PublicScreenComponent: getDefaultModule(ModuleComponentType.PUBLIC_SCREEN),
   },
@@ -63,7 +60,6 @@ export default class PublicScreen extends Vue {
   @Prop() readonly sessionId!: string;
 
   task: Task | null = null;
-  ideas: Idea[] = [];
 
   ModuleType = ModuleType;
   TaskStates = TaskStates;
@@ -83,8 +79,10 @@ export default class PublicScreen extends Vue {
       this.task = queryResult;
       const taskType = this.taskType;
       if (this.$options.components) {
-        this.$options.components['PublicScreenComponent'] =
-          getModule(ModuleComponentType.PUBLIC_SCREEN, taskType);
+        this.$options.components['PublicScreenComponent'] = getModule(
+          ModuleComponentType.PUBLIC_SCREEN,
+          taskType
+        );
       }
       if (taskType) {
         this.$nextTick(() => {

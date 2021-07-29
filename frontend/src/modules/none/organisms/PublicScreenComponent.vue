@@ -5,8 +5,8 @@
       public-screen__error
     "
   >
-    <h2>{{ $t('shared.view.publicScreen.none.header') }}</h2>
-    <p>{{ $t('shared.view.publicScreen.none.info') }}</p>
+    <h2>{{ $t('module.none.publicScreen.header') }}</h2>
+    <p>{{ $t('module.none.publicScreen.info') }}</p>
   </main>
 </template>
 

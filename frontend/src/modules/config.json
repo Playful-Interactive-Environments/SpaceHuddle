@@ -3,15 +3,16 @@
     "path": "none",
     "publicScreen": "organisms/PublicScreenComponent",
     "moderatorConfig": "",
-    "moderatorContent": "",
-    "participant": ""
+    "moderatorContent": "organisms/ModeratorContentComponent",
+    "participant": "",
+    "locales": "en, de"
   },
   "information": {
     "default": {
       "path": "information/default",
       "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "",
-      "moderatorContent": "",
+      "moderatorContent": "organisms/ModeratorContentComponent",
       "participant": ""
     }
   },
@@ -20,7 +21,7 @@
       "path": "brainstorming/default",
       "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "organisms/",
-      "moderatorContent": "organisms/",
+      "moderatorContent": "organisms/ModeratorContentComponent",
       "participant": "views/",
       "locales": "en, de"
     }
@@ -30,7 +31,7 @@
       "path": "selection/default",
       "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "",
-      "moderatorContent": "",
+      "moderatorContent": "organisms/ModeratorContentComponent",
       "participant": ""
     }
   },
@@ -39,7 +40,7 @@
       "path": "categorisation/default",
       "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "",
-      "moderatorContent": "",
+      "moderatorContent": "organisms/ModeratorContentComponent",
       "participant": ""
     }
   },
@@ -48,7 +49,7 @@
       "path": "voting/default",
       "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "",
-      "moderatorContent": "",
+      "moderatorContent": "organisms/ModeratorContentComponent",
       "participant": ""
     }
   }

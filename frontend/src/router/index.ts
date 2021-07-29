@@ -7,12 +7,8 @@ import ModeratorLogin from '@/views/moderator/ModeratorLogin.vue';
 import ModeratorRegister from '@/views/moderator/ModeratorRegister.vue';
 import ModeratorSessionDetails from '@/views/moderator/ModeratorSessionDetails.vue';
 import ModeratorSessionOverview from '@/views/moderator/ModeratorSessionOverview.vue';
-import ModeratorBrainstorming from '@/views/moderator/ModeratorBrainstorming.vue';
-import ModeratorInformation from '@/views/moderator/ModeratorInformation.vue';
-import ModeratorSelection from '@/views/moderator/ModeratorSelection.vue';
-import ModeratorCategorisation from '@/views/moderator/ModeratorCategorisation.vue';
 import ModeratorProfile from '@/views/moderator/ModeratorProfile.vue';
-import ModeratorVote from '@/views/moderator/ModeratorVote.vue';
+import ModeratorModuleContent from '@/views/moderator/ModeratorModuleContent.vue';
 import NotFound from '@/views/shared/NotFound.vue';
 import PublicScreen from '@/views/PublicScreen.vue';
 
@@ -72,61 +68,9 @@ const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: '/brainstorming/:sessionId/:taskId',
-    name: 'moderator-brainstorming',
-    component: ModeratorBrainstorming,
-    props: (route) => ({
-      sessionId: route.params.sessionId,
-      taskId: route.params.taskId,
-    }),
-    meta: {
-      requiresAuth: true,
-      requiresUser: true,
-    },
-  },
-  {
-    path: '/information/:sessionId/:taskId',
-    name: 'moderator-information',
-    component: ModeratorInformation,
-    props: (route) => ({
-      sessionId: route.params.sessionId,
-      taskId: route.params.taskId,
-    }),
-    meta: {
-      requiresAuth: true,
-      requiresUser: true,
-    },
-  },
-  {
-    path: '/selection/:sessionId/:taskId',
-    name: 'moderator-selection',
-    component: ModeratorSelection,
-    props: (route) => ({
-      sessionId: route.params.sessionId,
-      taskId: route.params.taskId,
-    }),
-    meta: {
-      requiresAuth: true,
-      requiresUser: true,
-    },
-  },
-  {
-    path: '/categorisation/:sessionId/:taskId',
-    name: 'moderator-categorisation',
-    component: ModeratorCategorisation,
-    props: (route) => ({
-      sessionId: route.params.sessionId,
-      taskId: route.params.taskId,
-    }),
-    meta: {
-      requiresAuth: true,
-      requiresUser: true,
-    },
-  },
-  {
-    path: '/voting/:sessionId/:taskId',
-    name: 'moderator-vote',
-    component: ModeratorVote,
+    path: '/module-content/:sessionId/:taskId',
+    name: 'moderator-module-content',
+    component: ModeratorModuleContent,
     props: (route) => ({
       sessionId: route.params.sessionId,
       taskId: route.params.taskId,

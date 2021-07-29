@@ -1,7 +1,9 @@
 <template>
   <router-link
     :to="
-      isParticipant ? `/task/${type}/${task.id}` : `/${type}/${sessionId}/${task.id}`
+      isParticipant
+        ? `/task/${type}/${task.id}`
+        : `/module-content/${sessionId}/${task.id}`
     "
   >
     <article

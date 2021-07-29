@@ -185,12 +185,6 @@
         "header": "404 - Not found",
         "info": "Sorry, this page does either not exist, or you are not authorized to access it.",
         "submit": "Go t Homepage"
-      },
-      "publicScreen": {
-        "none": {
-          "header": "Sorry, nothing here.",
-          "info": "Make sure that a module is activated for the public view."
-        }
       }
     }
   },

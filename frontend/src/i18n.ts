@@ -6,7 +6,6 @@ import { getLocales } from '@/modules/loadComponent';
 
 const addModuleLocales = async (locale = 'en', dict: any): Promise<any> => {
   dict.module = await getLocales(locale);
-  console.log(dict);
   return dict;
 };
 

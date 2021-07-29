@@ -43,6 +43,13 @@ export const getLocales = async (locale = 'en'): Promise<any> => {
           });
         }
       }
+    } else {
+      const module = (config as any)[taskKey];
+      if (module.locales && module.locales.includes(locale)) {
+        await import(`@/modules/none/locales/${locale}.json`).then((value) => {
+          locales[taskKey] = value.default;
+        });
+      }
     }
   }
   return locales;
