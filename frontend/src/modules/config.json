@@ -1,7 +1,7 @@
 {
   "none": {
     "path": "none",
-    "publicScreen": "PublicScreenComponent",
+    "publicScreen": "organisms/PublicScreenComponent",
     "moderatorConfig": "",
     "moderatorContent": "",
     "participant": ""
@@ -9,7 +9,7 @@
   "information": {
     "default": {
       "path": "information/default",
-      "publicScreen": "PublicScreenComponent",
+      "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "",
       "moderatorContent": "",
       "participant": ""
@@ -18,17 +18,17 @@
   "brainstorming": {
     "default": {
       "path": "brainstorming/default",
-      "publicScreen": "PublicScreenComponent",
-      "moderatorConfig": "",
-      "moderatorContent": "",
-      "participant": "",
+      "publicScreen": "organisms/PublicScreenComponent",
+      "moderatorConfig": "organisms/",
+      "moderatorContent": "organisms/",
+      "participant": "views/",
       "locales": "en, de"
     }
   },
   "selection": {
     "default": {
       "path": "selection/default",
-      "publicScreen": "PublicScreenComponent",
+      "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "",
       "moderatorContent": "",
       "participant": ""
@@ -37,7 +37,7 @@
   "categorisation": {
     "default": {
       "path": "categorisation/default",
-      "publicScreen": "PublicScreenComponent",
+      "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "",
       "moderatorContent": "",
       "participant": ""
@@ -46,7 +46,7 @@
   "voting": {
     "default": {
       "path": "voting/default",
-      "publicScreen": "PublicScreenComponent",
+      "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "",
       "moderatorContent": "",
       "participant": ""

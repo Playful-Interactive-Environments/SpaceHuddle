@@ -15,9 +15,13 @@ export const getModule = (
 ): any => {
   if (taskType) {
     const module = (config as any)[taskType][moduleName];
-    return defineAsyncComponent(
-      () => import(`@/modules/${module.path}/${module[componentType]}.vue`)
-    );
+    if (module[componentType]) {
+      return defineAsyncComponent(
+        () => import(`@/modules/${module.path}/${module[componentType]}.vue`)
+      );
+    } else if (moduleName != 'default') {
+      return getModule(componentType, taskType, 'default');
+    }
   }
   return getDefaultModule(componentType);
 };

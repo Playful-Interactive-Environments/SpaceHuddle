@@ -3,7 +3,7 @@
     v-if="ideas.length === 0"
     class="container container--centered public-screen__error"
   >
-    <p>{{ $t('module.brainstorming.default.noIdeas') }}</p>
+    <p>{{ $t('module.brainstorming.default.publicScreen.noIdeas') }}</p>
   </section>
   <section v-else class="public-screen__content">
     <IdeaCard
