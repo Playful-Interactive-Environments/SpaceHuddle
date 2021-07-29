@@ -8,9 +8,7 @@
         :description="task.description"
         :moduleType="ModuleType[task.taskType]"
         :is-on-public-screen="task.id === publicScreenTask?.id"
-        :is-active="task.state === TaskStates.ACTIVE"
-        @changeActiveState="changeActiveState"
-        @changePublicScreen="changePublicScreen"
+        :task="task"
       />
       <NavigationWithBack :back-route="'/session/' + sessionId" />
       <form-error :errors="errors"></form-error>
@@ -24,13 +22,12 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import { getModule, getDefaultModule } from '@/modules/loadComponent';
+import { getAsyncModule, getAsyncDefaultModule } from '@/modules';
 
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import ModuleType from '@/types/enum/ModuleType';
 import TaskStates from '@/types/enum/TaskStates';
 import { Task } from '@/types/api/Task';
-import { EventType } from '@/types/enum/EventType';
 import { setModuleStyles } from '@/utils/moduleStyles';
 
 import * as sessionService from '@/services/session-service';
@@ -45,7 +42,7 @@ import FormError from '@/components/shared/atoms/FormError.vue';
     Sidebar,
     NavigationWithBack,
     FormError,
-    ModuleContentComponent: getDefaultModule(
+    ModuleContentComponent: getAsyncDefaultModule(
       ModuleComponentType.MODERATOR_CONTENT
     ),
   },
@@ -71,7 +68,7 @@ export default class ModeratorModuleContent extends Vue {
       this.task = queryResult;
       const taskType = this.taskType;
       if (this.$options.components) {
-        this.$options.components['ModuleContentComponent'] = getModule(
+        this.$options.components['ModuleContentComponent'] = getAsyncModule(
           ModuleComponentType.MODERATOR_CONTENT,
           taskType
         );
@@ -84,17 +81,6 @@ export default class ModeratorModuleContent extends Vue {
         this.publicScreenTask = queryResult;
       });
     });
-  }
-
-  async changeActiveState(): Promise<void> {
-    this.eventBus.emit(EventType.CHANGE_PARTICIPANT_STATE, this.task);
-  }
-
-  changePublicScreen(isActive: boolean): void {
-    this.eventBus.emit(
-      EventType.CHANGE_PUBLIC_SCREEN,
-      isActive ? this.taskId : '{taskId}'
-    );
   }
 }
 </script>

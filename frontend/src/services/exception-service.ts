@@ -79,7 +79,7 @@ export const apiErrorHandling = async (
         const errorList = errorResult.error.details;
         if (Array.isArray(errorList)) {
           errorList.forEach((item, i) => {
-            addError(errorMessage, `${errorPrefix}${item.field}.${item.message}`);
+            addError(errorMessage, `api.${errorPrefix}${item.field}.${item.message}`);
           });
         }
         app.config.globalProperties.eventBus.emit(EventType.SHOW_SNACKBAR, {
@@ -91,7 +91,7 @@ export const apiErrorHandling = async (
       } else if (response.statusText) {
         app.config.globalProperties.eventBus.emit(EventType.SHOW_SNACKBAR, {
           type: SnackbarType.ERROR,
-          message: `error.api.${response.statusText.replaceAll('.', '')}`,
+          message: `error.api.general.${response.statusText.replaceAll('.', '')}`,
         });
       }
     }

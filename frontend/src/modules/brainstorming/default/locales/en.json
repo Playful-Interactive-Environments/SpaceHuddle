@@ -1,5 +1,11 @@
 {
   "publicScreen": {
     "noIdeas": "No ideas yet - stay tuned."
+  },
+  "participant": {
+    "keywordInfo": "Please provide some keywords",
+    "descriptionInfo": "Type your idea here ...",
+    "submit": "Submit idea",
+    "startGame": "No ideas? Get inspired!"
   }
 }

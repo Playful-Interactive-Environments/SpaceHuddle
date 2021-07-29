@@ -6,5 +6,9 @@
   "moderatorContent": {
     "header": "No Task selected.",
     "info": "Make sure that a task is selected to view it's detail content."
+  },
+  "participant": {
+    "header": "No Task selected.",
+    "info": "Make sure that a task is selected to view it's content."
   }
 }

@@ -11,8 +11,9 @@
       "Value is required": "This field must be set.",
       "Value is not a valid email address": "Value is not a valid email address",
       "This field should be at least 8 long": "This field should be at least 8 long",
-      "Password must contain at least one lowercase and uppercase letter, a number and a special character": "Password must contain at least one lowercase and uppercase letter, a number and a special character.",
-      "Password repetition does not match": "Password repetition does not match."
+      "wrongPasswordSyntax": "Password must contain at least one lowercase and uppercase letter, a number and a special character.",
+      "passwordNotMatch": "Password repetition does not match.",
+      "keywordsRequired": "Your idea is very long, please provide some keywords."
     },
     "route": {
       "authorisationExpired": "Authorisation has expired.",
@@ -22,48 +23,50 @@
       "copyToClipboard": "Could not copy to clipboard."
     },
     "api": {
-      "User has no rights for this entity": "User has no rights for this entity.",
-      "User has no rights for this service": "User has no rights for this service.",
-      "No valid access token specified": "No valid access token specified"
-    },
-    "login": {
-      "post": {
-        "username or password": {
-          "NotExist": "The username or password is incorrect."
+      "general": {
+        "User has no rights for this entity": "User has no rights for this entity.",
+        "User has no rights for this service": "User has no rights for this service.",
+        "No valid access token specified": "No valid access token specified"
+      },
+      "login": {
+        "post": {
+          "username or password": {
+            "NotExist": "The username or password is incorrect."
+          }
         }
-      }
-    },
-    "register": {
-      "post": {
-        "username": {
-          "Exist": "The email address already exists."
+      },
+      "register": {
+        "post": {
+          "username": {
+            "Exist": "The email address already exists."
+          }
         }
-      }
-    },
-    "idea": {
-      "post": {
-        "idea": {
-          "Exist": "The idea has already been submitted."
+      },
+      "idea": {
+        "post": {
+          "idea": {
+            "Exist": "The idea has already been submitted."
+          }
         }
-      }
-    },
-    "participant": {
-      "join": {
-        "noCode": "Please enter a code.",
-        "codeInvalid": "Sorry, the provided code is invalid."
-      }
-    },
-    "reconnect": {
-      "get": {
-        "browserKey": {
-          "NotExist": "Sorry, the provided code is invalid."
+      },
+      "participant": {
+        "join": {
+          "noCode": "Please enter a code.",
+          "codeInvalid": "Sorry, the provided code is invalid."
         }
-      }
-    },
-    "connect": {
-      "post": {
-        "sessionKey": {
-          "NotExist": "Sorry, the provided code is invalid."
+      },
+      "reconnect": {
+        "get": {
+          "browserKey": {
+            "NotExist": "Sorry, the provided code is invalid."
+          }
+        }
+      },
+      "connect": {
+        "post": {
+          "sessionKey": {
+            "NotExist": "Sorry, the provided code is invalid."
+          }
         }
       }
     }
@@ -157,19 +160,17 @@
     }
   },
   "participant": {
+    "organism": {
+      "modelDefaultContainer": {
+        "timeLeft": "time left"
+      }
+    },
     "view": {
       "join": {
         "header": "Ready for\nadventure?",
         "info": "Just enter the code your moderator provided and you’re ready to go!",
         "pinInfo": "Enter Session PIN",
         "submit": "Join session"
-      },
-      "brainstorming": {
-        "timeLeft": "time left",
-        "keywordInfo": "Please provide some keywords",
-        "descriptionInfo": "Type your idea here ...",
-        "submit": "Submit idea",
-        "startGame": "No ideas? Get inspired!"
       }
     }
   },
@@ -190,6 +191,7 @@
   },
   "enum": {
     "moduleType": {
+      "null": "",
       "information": "information",
       "brainstorming": "brainstorming",
       "selection": "selection",

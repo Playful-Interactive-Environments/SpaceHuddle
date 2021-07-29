@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import { getRoutes } from '@/modules';
 
 import ParticipantJoin from '@/views/participant/ParticipantJoin.vue';
 import ParticipantOverview from '@/views/participant/ParticipantOverview.vue';
@@ -18,7 +19,6 @@ import {
   isUser,
   removeAccessToken,
 } from '@/services/auth-service';
-import ParticipantBrainstorming from '@/views/participant/ParticipantBrainstorming.vue';
 import app from '@/main';
 import { EventType } from '@/types/enum/EventType';
 import SnackbarType from '@/types/enum/SnackbarType';
@@ -99,16 +99,6 @@ const routes: Array<RouteRecordRaw> = [
     component: NotFound,
   },
   {
-    path: '/task/brainstorming/:taskId',
-    name: 'participant-brainstorming',
-    component: ParticipantBrainstorming,
-    meta: {
-      requiresAuth: true,
-      requiresParticipant: true,
-    },
-    props: (route) => ({ taskId: route.params.taskId }),
-  },
-  {
     path: '/public-screen/:sessionId',
     name: 'public-screen',
     component: PublicScreen,
@@ -121,12 +111,29 @@ const routes: Array<RouteRecordRaw> = [
   },
 ];
 
+let allRoutesLoaded = false;
+
+getRoutes().then((moduleRoutes) => {
+  moduleRoutes.forEach((item) => {
+    router.addRoute(item);
+  });
+  allRoutesLoaded = true;
+});
+
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes,
+  routes: routes,
 });
 
 router.beforeEach((to, from, next) => {
+  //if (!to.name && !allRoutesLoaded) {
+  if (!allRoutesLoaded) {
+    setTimeout(() => {
+      next({ path: to.path });
+    }, 200);
+    return;
+  }
+
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   const requiresUser = to.matched.some((record) => record.meta.requiresUser);
   const requiresParticipant = to.matched.some(

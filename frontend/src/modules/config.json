@@ -4,7 +4,7 @@
     "publicScreen": "organisms/PublicScreenComponent",
     "moderatorConfig": "",
     "moderatorContent": "organisms/ModeratorContentComponent",
-    "participant": "",
+    "participant": "views/ParticipantView",
     "locales": "en, de"
   },
   "information": {
@@ -13,7 +13,7 @@
       "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "",
       "moderatorContent": "organisms/ModeratorContentComponent",
-      "participant": ""
+      "participant": "views/ParticipantView"
     }
   },
   "brainstorming": {
@@ -22,7 +22,7 @@
       "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "organisms/",
       "moderatorContent": "organisms/ModeratorContentComponent",
-      "participant": "views/",
+      "participant": "views/ParticipantView",
       "locales": "en, de"
     }
   },
@@ -31,8 +31,7 @@
       "path": "selection/default",
       "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "",
-      "moderatorContent": "organisms/ModeratorContentComponent",
-      "participant": ""
+      "moderatorContent": "organisms/ModeratorContentComponent"
     }
   },
   "categorisation": {
@@ -41,7 +40,7 @@
       "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "",
       "moderatorContent": "organisms/ModeratorContentComponent",
-      "participant": ""
+      "participant": "views/ParticipantView"
     }
   },
   "voting": {
@@ -50,7 +49,7 @@
       "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "",
       "moderatorContent": "organisms/ModeratorContentComponent",
-      "participant": ""
+      "participant": "views/ParticipantView"
     }
   }
 }

@@ -2,7 +2,7 @@
   <router-link
     :to="
       isParticipant
-        ? `/task/${type}/${task.id}`
+        ? `/task/${type}/default/${task.id}`
         : `/module-content/${sessionId}/${task.id}`
     "
   >
@@ -29,17 +29,7 @@
         "
       />
       <div class="module-card__toggles" v-if="!isParticipant">
-        <Toggle
-          :label="$t('general.moduleActive')"
-          :isActive="task.state === TaskStates.ACTIVE"
-          v-if="type !== ModuleType.SELECTION"
-          @toggleClicked="changeActiveState"
-        />
-        <Toggle
-          :label="$t('general.publicScreen')"
-          :isActive="isOnPublicScreen"
-          @toggleClicked="changePublicScreen"
-        />
+        <ModuleShare :task="task" :is-on-public-screen="isOnPublicScreen" />
       </div>
       <div class="module-card__drag" v-if="!isParticipant">
         <img
@@ -59,16 +49,15 @@ import { setModuleStyles } from '@/utils/moduleStyles';
 import { Task } from '@/types/api/Task';
 import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
-import Toggle from '@/components/moderator/atoms/Toggle.vue';
+import ModuleShare from '@/components/moderator/molecules/ModuleShare.vue';
 import ModuleType from '@/types/enum/ModuleType';
 import TaskStates from '@/types/enum/TaskStates';
-import { EventType } from '@/types/enum/EventType';
 
 @Options({
   components: {
     ModuleInfo,
     Timer,
-    Toggle,
+    ModuleShare,
   },
 })
 export default class ModuleCard extends Vue {
@@ -87,14 +76,6 @@ export default class ModuleCard extends Vue {
 
   updated(): void {
     setModuleStyles(this.$refs.item as HTMLElement, this.type);
-  }
-
-  changePublicScreen(isActive: boolean): void {
-    this.eventBus.emit(EventType.CHANGE_PUBLIC_SCREEN, isActive ? this.task.id : '{taskId}');
-  }
-
-  async changeActiveState(): Promise<void> {
-    this.eventBus.emit(EventType.CHANGE_PARTICIPANT_STATE, this.task);
   }
 }
 </script>

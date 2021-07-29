@@ -20,17 +20,7 @@
     <div class="sidebar__bottom">
       <SessionCode v-if="isSession" :code="sessionConnectionKey" />
       <div class="sidebar__toggles" v-else>
-        <Toggle
-          label="Active"
-          v-if="!(moduleType === ModuleType.SELECTION)"
-          :isActive="isActive"
-          @toggleClicked="changeToggle($event, 'changeActiveState')"
-        />
-        <Toggle
-          label="Public Screen"
-          :isActive="isOnPublicScreen"
-          @toggleClicked="changeToggle($event, 'changePublicScreen')"
-        />
+        <ModuleShare v-if="task" :task="task" :is-on-public-screen="isOnPublicScreen" />
       </div>
       <router-link v-if="sessionId" :to="`/public-screen/${sessionId}`">
         <button
@@ -52,15 +42,15 @@ import Logo from '@/components/shared/atoms/Logo.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import ModuleType from '@/types/enum/ModuleType';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
-import Toggle from '@/components/moderator/atoms/Toggle.vue';
-import {EventType} from "@/types/enum/EventType";
+import ModuleShare from '@/components/moderator/molecules/ModuleShare.vue';
+import { Task } from '@/types/api/Task';
 
 @Options({
   components: {
     Logo,
     ModuleCount,
     SessionCode,
-    Toggle,
+    ModuleShare,
   },
 })
 export default class Sidebar extends Vue {
@@ -72,13 +62,9 @@ export default class Sidebar extends Vue {
   @Prop({ default: '' }) readonly description!: string;
   @Prop() readonly moduleType!: ModuleType;
   @Prop({ default: false }) readonly isOnPublicScreen!: boolean;
-  @Prop({ default: false }) readonly isActive!: boolean;
+  @Prop() task!: Task;
 
   ModuleType = ModuleType;
-
-  changeToggle(isActive: boolean, eventName: string): void {
-    this.$emit(eventName, isActive);
-  }
 }
 </script>
 

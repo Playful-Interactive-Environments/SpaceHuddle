@@ -46,14 +46,14 @@ import ModuleType from '@/types/enum/ModuleType';
 
 import { setModuleStyles } from '@/utils/moduleStyles';
 import TaskStates from '@/types/enum/TaskStates';
-import { getModule, getDefaultModule } from '@/modules/loadComponent';
+import { getAsyncModule, getAsyncDefaultModule } from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 
 @Options({
   components: {
     Header,
     Timer,
-    PublicScreenComponent: getDefaultModule(ModuleComponentType.PUBLIC_SCREEN),
+    PublicScreenComponent: getAsyncDefaultModule(ModuleComponentType.PUBLIC_SCREEN),
   },
 })
 export default class PublicScreen extends Vue {
@@ -79,7 +79,7 @@ export default class PublicScreen extends Vue {
       this.task = queryResult;
       const taskType = this.taskType;
       if (this.$options.components) {
-        this.$options.components['PublicScreenComponent'] = getModule(
+        this.$options.components['PublicScreenComponent'] = getAsyncModule(
           ModuleComponentType.PUBLIC_SCREEN,
           taskType
         );

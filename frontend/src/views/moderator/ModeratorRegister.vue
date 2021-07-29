@@ -122,7 +122,7 @@ import * as sessionService from "@/services/session-service";
       min: minLength(8),
       max: maxLength(255),
       containsUppercase: helpers.withMessage(
-        'Password must contain at least one lowercase and uppercase letter, a number and a special character',
+        'wrongPasswordSyntax',
         (value) => {
           return (
             /[A-Z]/.test(value as string) &&
@@ -143,7 +143,7 @@ export default class ModeratorRegister extends Vue {
   email = '';
   password = '';
   passwordRepeat = '';
-  readonly passwordRepeatMsg = 'error.vuelidate.Password repetition does not match';
+  readonly passwordRepeatMsg = 'error.vuelidate.passwordNotMatch';
   errors: string[] = [];
 
   context = setup(() => {

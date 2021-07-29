@@ -2,7 +2,7 @@ import { createI18n } from 'vue3-i18n';
 import de from '@/locales/de.json';
 import en from '@/locales/en.json';
 import { Messages } from 'vue3-i18n/src/types';
-import { getLocales } from '@/modules/loadComponent';
+import { getLocales } from '@/modules';
 
 const addModuleLocales = async (locale = 'en', dict: any): Promise<any> => {
   dict.module = await getLocales(locale);
