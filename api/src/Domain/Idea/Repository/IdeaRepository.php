@@ -99,9 +99,12 @@ class IdeaRepository implements RepositoryInterface
         $query = $this->queryFactory->newSelect($this->getEntityName());
         $query->select([
             "idea.*",
+            "participant.symbol",
+            "participant.color",
             "COUNT(*) AS count"
         ])
             ->innerJoin("task", "task.id = idea.task_id")
+            ->innerJoin("participant", "participant.id = idea.participant_id")
             ->andWhere($authorisation_conditions)
             ->andWhere(["task.task_type" => $this->taskType])
             ->andWhere($conditions)
@@ -120,11 +123,7 @@ class IdeaRepository implements RepositoryInterface
      */
     public function getAllOrdered(string $parentId, ?string $orderType): array
     {
-        $orderColumn = self::convertOrderType($orderType);
-        $sortOrder = [];
-        if ($orderColumn) {
-            $sortOrder = [$orderColumn];
-        }
+        $sortOrder = self::convertOrderType($orderType);
 
         $resultList = [];
         $result = $this->get([$this->getParentIdName() => $parentId], $sortOrder);
@@ -146,11 +145,7 @@ class IdeaRepository implements RepositoryInterface
      */
     public function getAllOrderedFromTopic(string $topicId, ?string $orderType): array
     {
-        $orderColumn = self::convertOrderType($orderType);
-        $sortOrder = [];
-        if ($orderColumn) {
-            $sortOrder = [$orderColumn];
-        }
+        $sortOrder = self::convertOrderType($orderType);
 
         $resultList = [];
         $result = $this->get([
@@ -169,21 +164,21 @@ class IdeaRepository implements RepositoryInterface
      * @param string|null $orderType The order by type (value of IdeaSortOrder).
      * @return string|null db sort column name
      */
-    private static function convertOrderType(?string $orderType): string | null
+    private static function convertOrderType(?string $orderType): array
     {
         switch (strtolower($orderType)) {
             case IdeaSortOrder::TIMESTAMP:
-                return 'timestamp';
+                return ['timestamp'];
             case IdeaSortOrder::ALPHABETICAL:
-                return 'keywords';
+                return ['keywords'];
             case IdeaSortOrder::STATE:
-                return 'state';
+                return ['state'];
             case IdeaSortOrder::PARTICIPANT:
-                return 'participant_id';
+                return ['symbol', 'color'];
             case IdeaSortOrder::COUNT:
-                return 'count';
+                return ['count'];
         }
-        return null;
+        return [];
     }
 
     /**
@@ -198,7 +193,16 @@ class IdeaRepository implements RepositoryInterface
 
         if ($orderColumn) {
             foreach ($resultList as $resultItem) {
-                $orderContent = $resultItem->$orderColumn;
+                if (sizeof($orderColumn) == 1) {
+                    $column = $orderColumn[0];
+                    $orderContent = $resultItem->$column;
+                } else {
+                    switch (strtolower($orderType)) {
+                        case IdeaSortOrder::PARTICIPANT:
+                            $orderContent = $resultItem->avatar->toString();
+                            break;
+                    }
+                }
 
                 switch (strtolower($orderType)) {
                     case IdeaSortOrder::TIMESTAMP:
@@ -206,12 +210,6 @@ class IdeaRepository implements RepositoryInterface
                         break;
                     case IdeaSortOrder::ALPHABETICAL:
                         $orderContent = substr($orderContent, 0, 1);
-                        break;
-                    case IdeaSortOrder::STATE:
-                        break;
-                    case IdeaSortOrder::PARTICIPANT:
-                        break;
-                    case IdeaSortOrder::COUNT:
                         break;
                 }
 

@@ -35,4 +35,8 @@ class AvatarData
         $this->color = $reader->findString("color");
         $this->symbol = $reader->findString("symbol");
     }
+
+    public function toString() {
+        return "$this->symbol$this->color";
+    }
 }

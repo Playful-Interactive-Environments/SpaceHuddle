@@ -2,6 +2,7 @@
 
 namespace App\Domain\Idea\Data;
 
+use App\Domain\Participant\Data\AvatarData;
 use Selective\ArrayReader\ArrayReader;
 
 /**
@@ -32,6 +33,19 @@ class IdeaData extends IdeaAbstract
     public ?int $count;
 
     /**
+     * To visually distinguish in the front end, each participant is assigned its own avatar.
+     * @OA\Property(ref="#/components/schemas/AvatarData")
+     */
+    public ?AvatarData $avatar;
+
+    /**
+     * Order group name.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $order;
+
+    /**
      * Creates a new idea.
      * @param array $data Idea data.
      */
@@ -43,5 +57,6 @@ class IdeaData extends IdeaAbstract
         $this->state = strtoupper($reader->findString("state"));
         $this->timestamp = $reader->findString("timestamp");
         $this->count = $reader->findInt("count");
+        $this->avatar = new AvatarData($data);
     }
 }
