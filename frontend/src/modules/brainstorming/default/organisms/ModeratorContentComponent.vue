@@ -1,20 +1,34 @@
 <template>
   <header class="brainstorming__header">
     <label for="orderType" class="heading heading--xs">{{ $t('module.brainstorming.default.moderatorContent.sortOrder') }}</label>
-    <select v-model="orderType" id="orderType" class="select select--fullwidth">
+    <select v-model="orderType" id="orderType" class="select select--fullwidth" @change="getIdeas">
       <option v-for="type in SortOrderOptions" :key="type" :value="type">
         {{ $t(`enum.ideaSortOrder.${IdeaSortOrder[type]}`) }}
       </option>
     </select>
   </header>
-  <main class="brainstorming__content">
+  <Expand v-for="(item, key) in orderGroupContent" :key="key">
+    <template v-slot:title>{{ key.toUpperCase() }}</template>
+    <template v-slot:content>
+      <main class="brainstorming__content">
+        <IdeaCard
+          :idea="idea"
+          v-for="(idea, index) in item"
+          :key="index"
+          @ideaDeleted="getIdeas"
+        />
+      </main>
+    </template>
+  </Expand>
+
+  <!--<main class="brainstorming__content">
     <IdeaCard
       :idea="idea"
       v-for="(idea, index) in ideas"
       :key="index"
       @ideaDeleted="getIdeas"
     />
-  </main>
+  </main>-->
 </template>
 
 <script lang="ts">
@@ -24,15 +38,18 @@ import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+import Expand from '@/components/shared/atoms/Expand.vue';
 
 @Options({
   components: {
     IdeaCard,
+    Expand
   },
 })
 export default class ModeratorContentComponent extends Vue {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];
+  orderGroupContent: { [name: string]: Idea[] } = {};
   readonly interval = 3000;
   ideaInterval!: number;
   orderType = this.SortOrderOptions[0];
@@ -53,7 +70,18 @@ export default class ModeratorContentComponent extends Vue {
       await ideaService
         .getIdeasForTask(this.taskId, this.orderType)
         .then((ideas) => {
+          this.orderGroupContent = {};
           this.ideas = ideas;
+          ideas.forEach((ideaItem) => {
+            if (ideaItem.order) {
+              const orderGroup = this.orderGroupContent[ideaItem.order];
+              if (!orderGroup) {
+                this.orderGroupContent[ideaItem.order] = [ideaItem];
+              } else {
+                orderGroup.push(ideaItem);
+              }
+            }
+          });
         });
     }
   }
@@ -96,6 +124,7 @@ export default class ModeratorContentComponent extends Vue {
   }
 
   &__content {
+    width: 100%;
     column-width: 22vw;
     column-gap: 1rem;
   }

@@ -6,4 +6,5 @@ export interface Idea {
   keywords: string;
   image: string; //ignore at first?
   link: string; //link to where??
+  order: string;
 }

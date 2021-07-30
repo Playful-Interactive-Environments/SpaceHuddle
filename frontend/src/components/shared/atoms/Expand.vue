@@ -3,7 +3,6 @@
     <div
       role="button"
       class="expand__title"
-      :class="{ 'expand__title--row': isRow }"
       @click="isExpanded = !isExpanded"
     >
       <h2><slot name="title"></slot></h2>
@@ -11,7 +10,7 @@
         <div
           aria-label="arrow"
           class="expand__arrow"
-          :class="{ expanded: isExpanded, 'expand__arrow--white': isRow }"
+          :class="{ expanded: isExpanded }"
         ></div>
       </div>
     </div>
@@ -22,13 +21,12 @@
       v-on:before-leave="beforeLeave"
       v-on:leave="leave"
     >
-      <ul
+      <section
         class="expand__content"
-        :class="{ 'expand__content--row': isRow }"
         v-show="isExpanded"
       >
         <slot name="content"></slot>
-      </ul>
+      </section>
     </transition>
   </div>
 </template>
@@ -40,8 +38,7 @@ import { Prop } from 'vue-property-decorator';
 @Options({
   components: {},
 })
-export default class TopicExpand extends Vue {
-  @Prop({ default: false }) isRow!: boolean;
+export default class Expand extends Vue {
   isExpanded = true;
 
   beforeEnter(el: HTMLElement): void {
@@ -88,10 +85,6 @@ export default class TopicExpand extends Vue {
     transition: transform 0.4s;
     transform-origin: center;
 
-    &--white {
-      background-color: white;
-    }
-
     &.expanded {
       transform: rotate(180deg);
     }
@@ -100,23 +93,6 @@ export default class TopicExpand extends Vue {
   &__content {
     transform-origin: top center;
     transition: height 0.25s ease-out, opacity 0.1s;
-  }
-
-  &__title--row {
-    padding: 0 2rem;
-  }
-
-  &__content--row {
-    display: flex;
-    overflow-x: scroll;
-    overflow-y: visible;
-    padding: 0 2rem;
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
   }
 }
 </style>
