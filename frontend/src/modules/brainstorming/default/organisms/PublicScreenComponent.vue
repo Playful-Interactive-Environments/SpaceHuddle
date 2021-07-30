@@ -21,6 +21,7 @@ import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import * as ideaService from '@/services/idea-service';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
+import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 
 @Options({
   components: {
@@ -40,7 +41,7 @@ export default class PublicScreenComponent extends Vue {
 
   async getIdeas(): Promise<void> {
     if (this.taskId) {
-      await ideaService.getIdeasForTask(this.taskId).then((ideas) => {
+      await ideaService.getIdeasForTask(this.taskId, IdeaSortOrder.ALPHABETICAL).then((ideas) => {
         this.ideas = ideas;
       });
     }

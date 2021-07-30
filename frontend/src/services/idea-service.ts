@@ -26,10 +26,13 @@ export const postIdea = async (
 
 export const getIdeasForTask = async (
   taskId: string,
+  orderType: string|null = null,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Idea[]> => {
+  let queryParameter = '';
+  if (orderType) queryParameter = `?order=${orderType}`;
   return await apiExecuteGetHandled<Idea[]>(
-    `/${EndpointType.TASK}/${taskId}/${EndpointType.IDEAS}/`,
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.IDEAS}/${queryParameter}`,
     [],
     authHeaderType
   );

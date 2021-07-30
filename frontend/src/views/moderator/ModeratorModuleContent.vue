@@ -93,8 +93,6 @@ export default class ModeratorModuleContent extends Vue {
 
   &__content {
     padding: 2rem;
-    column-width: 22vw;
-    column-gap: 1rem;
   }
 }
 </style>

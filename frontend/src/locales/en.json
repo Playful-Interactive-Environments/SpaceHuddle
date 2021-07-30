@@ -197,6 +197,14 @@
       "selection": "selection",
       "categorisation": "categorisation",
       "voting": "voting"
+    },
+    "ideaSortOrder": {
+      "null": "",
+      "timestamp": "timestamp",
+      "alphabetical": "alphabetical",
+      "state": "state",
+      "participant": "participant",
+      "count": "count"
     }
   },
   "general": {

@@ -7,5 +7,8 @@
     "descriptionInfo": "Type your idea here ...",
     "submit": "Submit idea",
     "startGame": "No ideas? Get inspired!"
+  },
+  "moderatorContent": {
+    "sortOrder": "order by"
   }
 }
