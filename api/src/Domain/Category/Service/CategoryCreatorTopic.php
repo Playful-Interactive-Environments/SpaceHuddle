@@ -23,7 +23,7 @@ class CategoryCreatorTopic
     {
         // Input validation
         $this->validator->validateCreate($data);
-        $this->validator->validateTopic($data["topicId"], []);
+        $this->validator->validateTopic($data, []);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Domain\Idea\Service;
 
 use App\Domain\Base\Service\ValidatorTrait;
 use App\Domain\Idea\Repository\IdeaRepository;
+use App\Domain\Idea\Type\IdeaSortOrder;
 use App\Domain\Idea\Type\IdeaState;
 use App\Domain\Participant\Type\ParticipantState;
 use App\Domain\Task\Type\TaskState;
@@ -55,12 +56,26 @@ class IdeaValidator
 
     /**
      * Topic validator.
-     * @param string $topicId Topic ID
+     * @param array<string, mixed> $data The data
      * @param array $validStates Valid states
      * @return void
      */
-    public function validateTopic(string $topicId, array $validStates): void
+    public function validateTopic(array $data, array $validStates): void
     {
+        $this->validateEntity(
+            $data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("topicId", "Empty: This field cannot be left empty")
+                ->requirePresence("topicId", "Required: This field is required")
+                ->add("order", "custom", [
+                    "rule" => function ($value) {
+                        return self::isTypeOption($value, IdeaSortOrder::class);
+                    },
+                    "message" => "Type: Wrong sort order."
+                ])
+        );
+
+        $topicId = $data["topicId"];
         $taskID = $this->repository->getTopicTask($topicId, $validStates);
         if (!isset($taskID)) {
             $result = new ValidationResult();
@@ -104,6 +119,12 @@ class IdeaValidator
             $this->validationFactory->createValidator()
                 ->notEmptyString("taskId", "Empty: This field cannot be left empty")
                 ->requirePresence("taskId", "Required: This field is required")
+                ->add("order", "custom", [
+                    "rule" => function ($value) {
+                        return self::isTypeOption($value, IdeaSortOrder::class);
+                    },
+                    "message" => "Type: Wrong sort order."
+                ])
         );
 
         $taskId = $data["taskId"];

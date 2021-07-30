@@ -25,7 +25,7 @@ class IdeaCreatorTopic
     {
         // Input validation
         $this->validator->validateCreate($data);
-        $this->validator->validateTopic($data["topicId"], [strtoupper(TaskState::ACTIVE)]);
+        $this->validator->validateTopic($data, [strtoupper(TaskState::ACTIVE)]);
     }
 
     /**

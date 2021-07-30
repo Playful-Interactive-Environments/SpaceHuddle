@@ -14,13 +14,15 @@ trait SelectTrait
     /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
+     * @param array $sortConditions The ORDER BY conditions.
      * @return object|array<object>|null The result entity(s).
      */
-    public function get(array $conditions = []): null|object|array
+    public function get(array $conditions = [], array $sortConditions = []): null|object|array
     {
         $query = $this->queryFactory->newSelect($this->getEntityName());
         $query->select(["*"])
-            ->andWhere($conditions);
+            ->andWhere($conditions)
+            ->order($sortConditions);
 
         return $this->fetchAll($query);
     }

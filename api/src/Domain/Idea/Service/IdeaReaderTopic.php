@@ -5,6 +5,7 @@ namespace App\Domain\Idea\Service;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\ServiceReaderTrait;
 use App\Domain\Task\Type\TaskState;
+use function DI\string;
 
 /**
  * Service to read all ideas for one task.
@@ -22,7 +23,7 @@ class IdeaReaderTopic
     protected function serviceValidation(array $data): void
     {
         // Input validation
-        $this->validator->validateTopic($data["topicId"], [
+        $this->validator->validateTopic($data, [
             strtoupper(TaskState::ACTIVE),
             strtoupper(TaskState::READ_ONLY)
         ]);
@@ -41,8 +42,12 @@ class IdeaReaderTopic
     ): array|object|null {
         if (array_key_exists("topicId", $data)) {
             $topicId = $data["topicId"];
+            $order = null;
+            if (array_key_exists("order", $data)) {
+                $order = $data["order"];
+            }
             // Fetch data from the database
-            return $this->repository->getAllFromTopic($topicId);
+            return $this->repository->getAllOrderedFromTopic($topicId, $order);
         }
         return null;
     }

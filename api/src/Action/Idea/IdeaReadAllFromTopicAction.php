@@ -15,6 +15,8 @@ use Fig\Http\Message\StatusCodeInterface;
  *   summary="List of all ideas for the topic.",
  *   tags={"Idea"},
  *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
+ *   @OA\Parameter(in="query", name="order", description="sort order",
+ *     @OA\Schema(ref="#/components/schemas/IdeaSortOrder")),
  *   @OA\Response(response="200", description="Success",
  *     @OA\MediaType(
  *         mediaType="application/json",

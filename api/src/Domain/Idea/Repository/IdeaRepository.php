@@ -6,6 +6,7 @@ use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Idea\Data\IdeaData;
+use App\Domain\Idea\Type\IdeaSortOrder;
 use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Task\Type\TaskType;
@@ -77,10 +78,11 @@ class IdeaRepository implements RepositoryInterface
     /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
+     * @param array $sortConditions The ORDER BY conditions.
      * @return IdeaData|array<IdeaData>|null The result entity(s).
      * @throws GenericException
      */
-    public function get(array $conditions = []): null|IdeaData|array
+    public function get(array $conditions = [], array $sortConditions = []): null|IdeaData|array
     {
         $authorisation = $this->getAuthorisation();
         $authorisation_conditions = [];
@@ -104,8 +106,78 @@ class IdeaRepository implements RepositoryInterface
             ->andWhere(["task.task_type" => $this->taskType])
             ->andWhere($conditions)
             ->distinct(["idea.task_id", "idea.keywords", "idea.description", "idea.image", "idea.link"])
-            ->order(["idea.timestamp"]);
+            ->order($sortConditions);
 
         return $this->fetchAll($query);
+    }
+
+    /**
+     * Get entity by ID.
+     * @param string $parentId The entity parent ID.
+     * @param string|null $orderType The order by type (value of IdeaSortOrder).
+     * @return array<IdeaData> The result entity list.
+     * @throws GenericException
+     */
+    public function getAllOrdered(string $parentId, ?string $orderType): array
+    {
+        $orderColumn = self::convertOrderType($orderType);
+        $sortOrder = [];
+        if ($orderColumn) {
+            $sortOrder = [$orderColumn];
+        }
+
+        $result = $this->get([$this->getParentIdName() => $parentId], $sortOrder);
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
+    }
+
+    /**
+     * Get list of entities for the topic ID.
+     * @param string $topicId The topic ID.
+     * @param string|null $orderType The order by type (value of IdeaSortOrder).
+     * @return array<object> The result entity list.
+     * @throws GenericException
+     */
+    public function getAllOrderedFromTopic(string $topicId, ?string $orderType): array
+    {
+        $orderColumn = self::convertOrderType($orderType);
+        $sortOrder = [];
+        if ($orderColumn) {
+            $sortOrder = [$orderColumn];
+        }
+
+        $result = $this->get([
+            "task.topic_id" => $topicId
+        ], $sortOrder);
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
+    }
+
+    /**
+     * Convert IdeaSortOrder to db sort column name
+     * @param string|null $orderType The order by type (value of IdeaSortOrder).
+     * @return string|null db sort column name
+     */
+    private static function convertOrderType(?string $orderType): string | null
+    {
+        switch (strtolower($orderType)) {
+            case IdeaSortOrder::TIMESTAMP:
+                return 'timestamp';
+            case IdeaSortOrder::ALPHABETICAL:
+                return 'keywords';
+            case IdeaSortOrder::STATE:
+                return 'state';
+            case IdeaSortOrder::PARTICIPANT:
+                return 'participant_id';
+        }
+        return null;
     }
 }

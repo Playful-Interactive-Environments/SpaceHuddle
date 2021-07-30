@@ -36,15 +36,17 @@ class SessionRoleRepository implements RepositoryInterface
     /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
+     * @param array $sortConditions The ORDER BY conditions.
      * @return SessionRoleData|array<SessionRoleData>|null The result entity(s).
      * @throws GenericException
      */
-    public function get(array $conditions = []): null|SessionRoleData|array
+    public function get(array $conditions = [], array $sortConditions = []): null|SessionRoleData|array
     {
         $query = $this->queryFactory->newSelect($this->getEntityName());
         $query->select(["session_role.*", "user.username"])
             ->innerJoin("user", "session_role.user_id = user.id")
-            ->andWhere($conditions);
+            ->andWhere($conditions)
+            ->order($sortConditions);
 
         return $this->fetchAll($query);
     }

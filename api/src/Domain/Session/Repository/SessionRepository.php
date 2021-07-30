@@ -77,10 +77,11 @@ class SessionRepository implements RepositoryInterface
     /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
+     * @param array $sortConditions The ORDER BY conditions.
      * @return SessionData|array<SessionData>|null The result entity(s).
      * @throws GenericException
      */
-    public function get(array $conditions = []): null|SessionData|array
+    public function get(array $conditions = [], array $sortConditions = []): null|SessionData|array
     {
         $authorisation = $this->getAuthorisation();
         $authorisation_conditions = [
@@ -96,7 +97,8 @@ class SessionRepository implements RepositoryInterface
         $query->select(["session.*", "session_permission.role"])
             ->innerJoin("session_permission", "session_permission.session_id = session.id")
             ->andWhere($authorisation_conditions)
-            ->andWhere($conditions);
+            ->andWhere($conditions)
+            ->order($sortConditions);
 
         return $this->fetchAll($query);
     }
@@ -241,7 +243,7 @@ class SessionRepository implements RepositoryInterface
                 return null;
             }
         }
-        
+
         $row = [
             "id" => $sessionId,
             "public_screen_module_id" => $moduleId

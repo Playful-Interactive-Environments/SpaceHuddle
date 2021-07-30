@@ -22,7 +22,7 @@ class CategoryReaderTopic
     protected function serviceValidation(array $data): void
     {
         // Input validation
-        $this->validator->validateTopic($data["topicId"], []);
+        $this->validator->validateTopic($data, []);
     }
 
     /**

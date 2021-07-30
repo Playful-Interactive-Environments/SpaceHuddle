@@ -97,15 +97,17 @@ class TaskRepository implements RepositoryInterface
     /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
+     * @param array $sortConditions The ORDER BY conditions.
      * @return object|array<object>|null The result entity(s).
      * @throws GenericException
      */
-    public function get(array $conditions = []): null|object|array
+    public function get(array $conditions = [], array $sortConditions = []): null|object|array
     {
         $authorisation = $this->getAuthorisation();
         $query = $this->queryFactory->newSelect($this->getEntityName());
         $query->select(["*"])
-            ->andWhere($conditions);
+            ->andWhere($conditions)
+            ->order($sortConditions);
 
         if ($authorisation->isParticipant()) {
             $query->whereInList("state", [

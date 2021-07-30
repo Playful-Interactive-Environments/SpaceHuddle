@@ -45,12 +45,20 @@ class CategoryValidator
 
     /**
      * Topic validator.
-     * @param string $topicId Topic ID
+     * @param array<string, mixed> $data The data
      * @param array $validStates Valid states
      * @return void
      */
-    public function validateTopic(string $topicId, array $validStates): void
+    public function validateTopic(array $data, array $validStates): void
     {
+        $this->validateEntity(
+            $data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("topicId", "Empty: This field cannot be left empty")
+                ->requirePresence("topicId", "Required: This field is required")
+        );
+
+        $topicId = $data["topicId"];
         $taskID = $this->repository->getTopicTask($topicId, $validStates);
         if (!isset($taskID)) {
             $result = new ValidationResult();

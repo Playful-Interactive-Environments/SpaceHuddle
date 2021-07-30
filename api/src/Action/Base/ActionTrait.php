@@ -52,8 +52,9 @@ trait ActionTrait
                 $args[$key] = null;
             }
         }
+        $urlParameter =  array_merge($args, $request->getQueryParams());
 
-        $result = $this->executeService($authorisation, $bodyData, $args);
+        $result = $this->executeService($authorisation, $bodyData, $urlParameter);
 
         // Build the HTTP response
         return $this->responder
