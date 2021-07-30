@@ -177,6 +177,8 @@ class IdeaRepository implements RepositoryInterface
                 return 'state';
             case IdeaSortOrder::PARTICIPANT:
                 return 'participant_id';
+            case IdeaSortOrder::COUNT:
+                return 'count';
         }
         return null;
     }

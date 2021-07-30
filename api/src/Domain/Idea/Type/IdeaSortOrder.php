@@ -7,7 +7,7 @@ namespace App\Domain\Idea\Type;
  * @OA\Schema(
  *   description="current sort order of the idea",
  *   type="string",
- *   enum={"TIMESTAMP", "ALPHABETICAL", "STATE", "PARTICIPANT"},
+ *   enum={"TIMESTAMP", "ALPHABETICAL", "STATE", "PARTICIPANT", "COUNT"},
  *   example="TIMESTAMP"
  * )
  */
@@ -17,4 +17,5 @@ class IdeaSortOrder
     public const ALPHABETICAL = "alphabetical";
     public const STATE = "state";
     public const PARTICIPANT = "participant";
+    public const COUNT = "count";
 }
