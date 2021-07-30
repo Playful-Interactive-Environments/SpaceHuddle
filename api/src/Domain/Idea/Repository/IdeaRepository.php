@@ -126,13 +126,15 @@ class IdeaRepository implements RepositoryInterface
             $sortOrder = [$orderColumn];
         }
 
+        $resultList = [];
         $result = $this->get([$this->getParentIdName() => $parentId], $sortOrder);
         if (is_array($result)) {
-            return $result;
+            $resultList = $result;
         } elseif (isset($result)) {
-            return [$result];
+            $resultList = [$result];
         }
-        return [];
+
+        return self::addOrderColumn($orderType, $resultList);
     }
 
     /**
@@ -150,15 +152,16 @@ class IdeaRepository implements RepositoryInterface
             $sortOrder = [$orderColumn];
         }
 
+        $resultList = [];
         $result = $this->get([
             "task.topic_id" => $topicId
         ], $sortOrder);
         if (is_array($result)) {
-            return $result;
+            $resultList = $result;
         } elseif (isset($result)) {
-            return [$result];
+            $resultList = [$result];
         }
-        return [];
+        return self::addOrderColumn($orderType, $resultList);
     }
 
     /**
@@ -181,5 +184,41 @@ class IdeaRepository implements RepositoryInterface
                 return 'count';
         }
         return null;
+    }
+
+    /**
+     * Add grouping Column for IdeaSortOrder
+     * @param string|null $orderType The order by type (value of IdeaSortOrder).
+     * @param array $resultList The database result table.
+     * @return array modified table
+     */
+    private static function addOrderColumn(?string $orderType, array $resultList): array
+    {
+        $orderColumn = self::convertOrderType($orderType);
+
+        if ($orderColumn) {
+            foreach ($resultList as $resultItem) {
+                $orderContent = $resultItem->$orderColumn;
+
+                switch (strtolower($orderType)) {
+                    case IdeaSortOrder::TIMESTAMP:
+                        $orderContent = substr($orderContent, 0, strlen($orderContent) - 3);
+                        break;
+                    case IdeaSortOrder::ALPHABETICAL:
+                        $orderContent = substr($orderContent, 0, 1);
+                        break;
+                    case IdeaSortOrder::STATE:
+                        break;
+                    case IdeaSortOrder::PARTICIPANT:
+                        break;
+                    case IdeaSortOrder::COUNT:
+                        break;
+                }
+
+                $resultItem->order = $orderContent;
+            }
+        }
+
+        return $resultList;
     }
 }
