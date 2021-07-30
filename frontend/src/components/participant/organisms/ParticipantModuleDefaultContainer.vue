@@ -82,7 +82,8 @@ export default class ParticipantModuleDefaultContainer extends Vue {
       .getTaskById(val, EndpointAuthorisationType.PARTICIPANT)
       .then((queryResult) => {
         this.task = queryResult;
-        setModuleStyles(this.$refs.item as HTMLElement, this.taskType);
+        if (this.taskType)
+          setModuleStyles(this.$refs.item as HTMLElement, this.taskType);
       });
   }
 }
