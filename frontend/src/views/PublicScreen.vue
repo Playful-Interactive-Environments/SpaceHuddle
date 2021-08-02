@@ -95,7 +95,7 @@ export default class PublicScreen extends Vue {
 </script>
 <style lang="scss" scoped>
 .public-screen {
-  background: url('../assets/illustrations/stars-background_without_dust.png');
+  background: url('~@/assets/illustrations/stars-background_without_dust.png');
   background-size: contain;
   min-height: 100vh;
 

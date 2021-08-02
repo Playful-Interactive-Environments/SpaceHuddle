@@ -12,7 +12,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 export default class Timer extends Vue {
   @Prop({ default: false }) isActive!: boolean;
   timeLeft = 360;
-  timerInterval!: number;
+  timerInterval!: any;
   readonly interval = 1000;
 
   @Watch('isActive', { immediate: true })

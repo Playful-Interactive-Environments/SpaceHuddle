@@ -15,6 +15,7 @@
     "@vuelidate/validators": "^2.0.0-alpha.17",
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
+    "element-plus": "^1.0.2-beta.65",
     "jwt-decode": "^3.1.2",
     "mitt": "^3.0.0",
     "vue": "^3.0.0",
@@ -24,8 +25,7 @@
     "vue-router": "^4.0.0-0",
     "vue3-cookies": "^1.0.1",
     "vue3-i18n": "^1.0.1",
-    "vuedraggable": "^4.0.3",
-    "vuestic-ui": "^1.1.2"
+    "vuedraggable": "^4.0.3"
   },
   "devDependencies": {
     "@types/jest": "^24.0.19",

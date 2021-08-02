@@ -32,7 +32,7 @@ export default class PublicScreenComponent extends Vue {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];
   readonly interval = 3000;
-  ideaInterval!: number;
+  ideaInterval!: any;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(val: string): void {
@@ -41,9 +41,11 @@ export default class PublicScreenComponent extends Vue {
 
   async getIdeas(): Promise<void> {
     if (this.taskId) {
-      await ideaService.getIdeasForTask(this.taskId, IdeaSortOrder.ALPHABETICAL).then((ideas) => {
-        this.ideas = ideas;
-      });
+      await ideaService
+        .getIdeasForTask(this.taskId, IdeaSortOrder.ALPHABETICAL)
+        .then((ideas) => {
+          this.ideas = ideas;
+        });
     }
   }
 

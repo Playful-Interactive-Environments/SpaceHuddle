@@ -105,7 +105,7 @@ export default class ParticipantModuleDefaultContainer extends Vue {
 .module-container {
   color: #fff;
   background: var(--color-darkblue);
-  background-image: url('../../../assets/illustrations/background.png');
+  background-image: url('~@/assets/illustrations/background.png');
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;

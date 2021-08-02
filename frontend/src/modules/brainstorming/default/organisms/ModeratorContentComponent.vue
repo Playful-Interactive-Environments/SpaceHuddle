@@ -51,7 +51,7 @@ export default class ModeratorContentComponent extends Vue {
   ideas: Idea[] = [];
   orderGroupContent: { [name: string]: Idea[] } = {};
   readonly interval = 3000;
-  ideaInterval!: number;
+  ideaInterval!: any;
   orderType = this.SortOrderOptions[0];
 
   IdeaSortOrder = IdeaSortOrder;

@@ -9,7 +9,9 @@
   "confirm": {
     "delete": {
       "message": "Do they really want to delete the entry?",
-      "title": "Delete"
+      "title": "Delete",
+      "ok": "Delete",
+      "cancel": "Cancel"
     }
   },
   "error": {

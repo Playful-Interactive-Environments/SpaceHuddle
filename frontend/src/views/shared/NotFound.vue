@@ -30,7 +30,7 @@ export default class NotFound extends Vue {}
   text-align: center;
   padding: 1rem;
   color: white;
-  background-image: url('../../assets/illustrations/bg_without_telescope.png');
+  background-image: url('~@/assets/illustrations/bg_without_telescope.png');
   background-size: cover;
 }
 </style>

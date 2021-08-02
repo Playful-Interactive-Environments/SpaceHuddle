@@ -25,7 +25,7 @@ export default class BackButton extends Vue {
   align-items: center;
 
   &__icon {
-    mask-image: url('../../../assets/icons/arrow.svg');
+    mask-image: url('~@/assets/icons/arrow.svg');
     mask-repeat: no-repeat;
     mask-position: center;
     background-color: var(--color-darkblue);

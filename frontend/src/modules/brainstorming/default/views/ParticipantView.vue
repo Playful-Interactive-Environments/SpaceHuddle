@@ -103,10 +103,10 @@ export default class ParticipantView extends Vue {
 
   activePlanetIndex = 0;
   planets = [
-    require('../../../../assets/illustrations/planets/brainstorming01.png'),
-    require('../../../../assets/illustrations/planets/brainstorming02.png'),
-    require('../../../../assets/illustrations/planets/brainstorming03.png'),
-    require('../../../../assets/illustrations/planets/brainstorming04.png'),
+    require('@/assets/illustrations/planets/brainstorming01.png'),
+    require('@/assets/illustrations/planets/brainstorming02.png'),
+    require('@/assets/illustrations/planets/brainstorming03.png'),
+    require('@/assets/illustrations/planets/brainstorming04.png'),
   ];
   description = '';
   errors: string[] = [];

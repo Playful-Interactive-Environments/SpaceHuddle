@@ -113,7 +113,7 @@ export default class ParticipantJoin extends Vue {
   padding-top: 8vh;
   color: #fff;
   background: var(--color-darkblue);
-  background-image: url('../../assets/illustrations/telescope.png');
+  background-image: url('~@/assets/illustrations/telescope.png');
   background-position: center;
   background-size: cover;
 

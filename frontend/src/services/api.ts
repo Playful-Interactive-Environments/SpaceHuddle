@@ -5,8 +5,7 @@ import {
 } from '@/services/auth-service';
 import { apiErrorHandling } from '@/services/exception-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { EventType } from '@/types/enum/EventType';
-import app from "@/main";
+import app from '@/main';
 
 const interceptorAuthHeader = (
   axiosConfig: AxiosRequestConfig,
@@ -159,67 +158,48 @@ export async function apiExecutePut<T = any>(
   return result;
 }
 
-const DELETE_CALLBACK = 'deleteCallback';
-export const declareDeleteCallback = async (): Promise<void> => {
-  const declareEvents = (): void => {
-    app.config.globalProperties.eventBus.off(DELETE_CALLBACK);
-    app.config.globalProperties.eventBus.on(DELETE_CALLBACK, async (data: any) => {
-        const input = data as {
-          url: string;
-          authHeaderType: EndpointAuthorisationType;
-          handle: boolean;
-        };
-        if (input.handle) {
-          try {
-            await getApiEndpoint(input.authHeaderType).delete<any>(input.url);
-          } catch (error) {
-            return;
-          }
-        } else {
-          await getApiEndpoint(input.authHeaderType).delete<any>(input.url);
-        }
-      }
-    );
-  };
-
-  const loaded = (app != null && app.config != null);
-  if (!loaded) {
-    await setTimeout(() => {
-      declareEvents();
-    }, 500);
-  } else {
-    declareEvents();
-  }
-};
-
-declareDeleteCallback();
-
 export async function apiExecuteDeleteHandled<T = any>(
   url: string,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<void> {
-  app.config.globalProperties.eventBus.emit(EventType.SHOW_CONFIRM, {
-    message: 'confirm.delete.message',
-    title: 'confirm.delete.title',
-    callback: DELETE_CALLBACK,
-    callbackData: { url: url, authHeaderType: authHeaderType, handle: true },
-  });
-  /*try {
-    await apiExecuteDelete(url, authHeaderType);
-  } catch (error) {
-    return;
-  }*/
+  if (await deleteConfirmDialog()) {
+    try {
+      await getApiEndpoint(authHeaderType).delete<T>(url);
+    } catch (error) {
+      return;
+    }
+  }
 }
 
 export async function apiExecuteDelete<T = any>(
   url: string,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<void> {
-  app.config.globalProperties.eventBus.emit(EventType.SHOW_CONFIRM, {
-    message: 'confirm.delete.message',
-    title: 'confirm.delete.title',
-    callback: DELETE_CALLBACK,
-    callbackData: { url: url, authHeaderType: authHeaderType, handle: false },
-  });
-  //await getApiEndpoint(authHeaderType).delete<T>(url);
+  if (await deleteConfirmDialog()) {
+    await getApiEndpoint(authHeaderType).delete<T>(url);
+  }
 }
+
+const deleteConfirmDialog = async (): Promise<boolean> => {
+  let confirmClicked = false;
+  await app.config.globalProperties
+    .$confirm(
+      app.config.globalProperties.$t('confirm.delete.message'),
+      app.config.globalProperties.$t('confirm.delete.title'),
+      {
+        confirmButtonText: app.config.globalProperties.$t('confirm.delete.ok'),
+        cancelButtonText: app.config.globalProperties.$t(
+          'confirm.delete.cancel'
+        ),
+        type: 'warning',
+        roundButton: true,
+      }
+    )
+    .then(() => {
+      confirmClicked = true;
+    })
+    .catch(() => {
+      confirmClicked = false;
+    });
+  return confirmClicked;
+};

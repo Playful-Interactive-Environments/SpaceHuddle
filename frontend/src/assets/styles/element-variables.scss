@@ -1,0 +1,14 @@
+:root {
+  --color-primary: #1d2948;
+  --color-warning: #fe6e5d;
+
+  --el-color-warning: var(--color-primary);
+  --el-color-primary: var(--color-primary);
+}
+
+.el-button{
+  &--primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+}
