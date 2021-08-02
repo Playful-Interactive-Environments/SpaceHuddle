@@ -2,6 +2,7 @@
 
 namespace App\Domain\Task\Data;
 
+use App\Domain\Module\Data\ModuleData;
 use Selective\ArrayReader\ArrayReader;
 
 /**
@@ -85,5 +86,10 @@ class TaskData
         $this->parameter = (object)json_decode($reader->findString("parameter"));
         $this->order = $reader->findInt("order");
         $this->state = strtoupper($reader->findString("state"));
+
+        $module_id = $reader->findString("module_id");
+        if ($module_id) {
+            $this->modules = [new ModuleData(["id" => $module_id])];
+        }
     }
 }

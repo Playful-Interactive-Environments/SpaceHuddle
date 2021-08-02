@@ -6,6 +6,7 @@ use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\KeyGeneratorTrait;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
+use App\Domain\Module\Repository\ModuleRepository;
 use App\Domain\Participant\Repository\ParticipantRepository;
 use App\Domain\Task\Data\TaskData;
 use App\Domain\Topic\Repository\TopicRepository;
@@ -283,7 +284,7 @@ class SessionRepository implements RepositoryInterface
     public function getPublicScreen(string $sessionId): ?object
     {
         $query = $this->queryFactory->newSelect("task");
-        $query->select(["task.*"])
+        $query->select(["task.*", "module.id as module_id"])
             ->innerJoin("module", "task.id = module.task_id")
             ->innerJoin("session", "module.id = session.public_screen_module_id")
             ->andWhere([
@@ -299,6 +300,23 @@ class SessionRepository implements RepositoryInterface
                 $result = null;
             }
         }
+
+        if (is_object($result)) {
+            $this->getDetails($result);
+        }
         return $result;
+    }
+
+    /**
+     * Get list of connected modules
+     * @param TaskData $data Task data
+     */
+    private function getDetails(TaskData $data): void
+    {
+        $moduleRepository = new ModuleRepository($this->queryFactory);
+        if (isset($data->modules) && sizeof($data->modules) > 0)
+            $data->modules = [$moduleRepository->getById($data->modules[0]->id)];
+        else
+            $data->modules = $moduleRepository->getAll($data->id);
     }
 }

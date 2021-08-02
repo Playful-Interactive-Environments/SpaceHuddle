@@ -121,7 +121,7 @@ class TaskRepository implements RepositoryInterface
         $result = $this->fetchAll($query);
         if (is_array($result)) {
             foreach ($result as $resultItem) {
-                $this->addDetails($resultItem);
+                $this->getDetails($resultItem);
             }
         } else if (is_object($result)) {
             $this->getDetails($result);
