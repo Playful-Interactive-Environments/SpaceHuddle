@@ -2,7 +2,7 @@
   <router-link
     :to="
       isParticipant
-        ? `/task/${type}/default/${task.id}`
+        ? `/task/${type}/${moduleName}/${task.id}`
         : `/module-content/${sessionId}/${task.id}`
     "
   >
@@ -69,6 +69,12 @@ export default class ModuleCard extends Vue {
 
   ModuleType = ModuleType;
   TaskStates = TaskStates;
+
+  get moduleName(): string {
+    if (this.task && this.task.modules && this.task.modules.length > 0)
+      return this.task.modules[0].name;
+    return 'default';
+  }
 
   mounted(): void {
     setModuleStyles(this.$refs.item as HTMLElement, this.type);

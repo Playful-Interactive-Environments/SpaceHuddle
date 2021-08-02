@@ -74,6 +74,12 @@ export default class PublicScreen extends Vue {
     return null;
   }
 
+  get moduleName(): string {
+    if (this.task && this.task.modules && this.task.modules.length > 0)
+      return this.task.modules[0].name;
+    return 'default';
+  }
+
   async mounted(): Promise<void> {
     sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
       this.task = queryResult;
@@ -81,7 +87,8 @@ export default class PublicScreen extends Vue {
       if (this.$options.components) {
         this.$options.components['PublicScreenComponent'] = getAsyncModule(
           ModuleComponentType.PUBLIC_SCREEN,
-          taskType
+          taskType,
+          this.moduleName
         );
       }
       if (taskType) {

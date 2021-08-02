@@ -62,6 +62,12 @@ export default class ModeratorModuleContent extends Vue {
     return null;
   }
 
+  get moduleName(): string {
+    if (this.task && this.task.modules && this.task.modules.length > 0)
+      return this.task.modules[0].name;
+    return 'default';
+  }
+
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(val: string): void {
     taskService.getTaskById(val).then((queryResult) => {
@@ -70,7 +76,8 @@ export default class ModeratorModuleContent extends Vue {
       if (this.$options.components) {
         this.$options.components['ModuleContentComponent'] = getAsyncModule(
           ModuleComponentType.MODERATOR_CONTENT,
-          taskType
+          taskType,
+          this.moduleName
         );
       }
       setModuleStyles(

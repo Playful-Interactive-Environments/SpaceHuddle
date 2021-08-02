@@ -10,4 +10,11 @@ export interface Task {
   parameter: any;
   order: number;
   state: TaskStates;
+  modules: {
+    id: string;
+    name: string;
+    order: number;
+    state: string;
+    parameter: any;
+  }[];
 }
