@@ -7,6 +7,8 @@ import router from './router';
 import '@/assets/styles/global.scss';
 import mitt, { Emitter, EventType } from 'mitt';
 import { ComponentCustomProperties } from 'vue';
+import { VuesticPlugin } from 'vuestic-ui';
+import 'vuestic-ui/dist/vuestic-ui.css';
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -26,6 +28,7 @@ app.use(VueCookies as any, {
 app.config.globalProperties.eventBus = eventBus;
 app.config.globalProperties.$t = i18n.t2;
 app.use(VueFinalModal(), {});
+app.use(VuesticPlugin);
 app.mount('#app');
 
 export default app;

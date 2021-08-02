@@ -6,6 +6,12 @@
     "updateParticipantState": "Successfully updated participant state.",
     "postIdea": "Thank you for the idea - {0}"
   },
+  "confirm": {
+    "delete": {
+      "message": "Do they really want to delete the entry?",
+      "title": "Delete"
+    }
+  },
   "error": {
     "vuelidate": {
       "Value is required": "This field must be set.",
