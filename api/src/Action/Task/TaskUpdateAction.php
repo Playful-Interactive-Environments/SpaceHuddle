@@ -15,10 +15,18 @@ use Fig\Http\Message\StatusCodeInterface;
  *   summary="Update a task.",
  *   tags={"Task"},
  *   @OA\RequestBody(
- *     required=true,
  *     @OA\MediaType(
- *         mediaType="application/json",
- *         @OA\Schema(ref="#/components/schemas/TaskData")
+ *       mediaType="application/json",
+ *       @OA\Schema(required={"id"},
+ *         @OA\Property(property="id", type="string"),
+ *         @OA\Property(property="taskType", type="string"),
+ *         @OA\Property(property="name", type="string"),
+ *         @OA\Property(property="description", type="string"),
+ *         @OA\Property(property="parameter", type="object", format="json"),
+ *         @OA\Property(property="order", type="integer"),
+ *         @OA\Property(property="state", type="string"),
+ *         @OA\Property(property="modules", type="array", @OA\Items(type="string"))
+ *       )
  *     )
  *   ),
  *   @OA\Response(response="200", description="Success",

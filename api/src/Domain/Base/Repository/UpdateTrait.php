@@ -18,6 +18,10 @@ trait UpdateTrait
      */
     public function update(object|array $data): ?object
     {
+        if (is_object($data)) {
+            $this->updateDependencies($data->id, $data);
+        }
+
         if (!is_array($data)) {
             $usedKeys = array_values($this->translateKeys((array)$data));
             $data = $this->formatDatabaseInput($data);
@@ -32,6 +36,16 @@ trait UpdateTrait
             ->execute();
 
         return $this->getById($id);
+    }
+
+    /**
+     * Update dependent data.
+     * @param string $id Primary key of the linked table entry
+     * @param array|object|null $parameter Dependent data to be included.
+     * @return void
+     */
+    protected function updateDependencies(string $id, array|object|null $parameter): void
+    {
     }
 
     /**

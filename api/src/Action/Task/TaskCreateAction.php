@@ -24,7 +24,8 @@ use Fig\Http\Message\StatusCodeInterface;
  *         @OA\Property(property="name", type="string"),
  *         @OA\Property(property="description", type="string"),
  *         @OA\Property(property="parameter", type="object", format="json"),
- *         @OA\Property(property="order", type="integer")
+ *         @OA\Property(property="order", type="integer"),
+ *         @OA\Property(property="modules", type="array", @OA\Items(type="string"))
  *       )
  *     )
  *   ),

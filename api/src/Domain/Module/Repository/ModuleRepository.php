@@ -34,6 +34,22 @@ class ModuleRepository implements RepositoryInterface
     }
 
     /**
+     * Get list of entities for the parent ID.
+     * @param string $parentId The entity parent ID.
+     * @return array<object> The result entity list.
+     */
+    public function getAll(string $parentId): array
+    {
+        $result = $this->get([$this->getParentIdName() => $parentId], ["order"]);
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
+    }
+
+    /**
      * Delete dependent data.
      * @param string $id Primary key of the linked table entry.
      * @return void

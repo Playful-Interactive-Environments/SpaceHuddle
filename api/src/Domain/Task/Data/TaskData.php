@@ -60,8 +60,20 @@ class TaskData
     public ?string $state;
 
     /**
+     * List of connected modules.
+     * @var array<ModuleData>
+     * @OA\Property(
+     *       type="array",
+     *       @OA\Items(
+     *         ref="#/components/schemas/ModuleData"
+     *       )
+     *     )
+     */
+    public array $modules;
+
+    /**
      * Creates a new task.
-     * @param array $data Participant data.
+     * @param array $data Task data.
      */
     public function __construct(array $data = [])
     {

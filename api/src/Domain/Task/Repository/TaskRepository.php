@@ -6,6 +6,7 @@ use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Idea\Repository\IdeaRepository;
+use App\Domain\Module\Data\ModuleData;
 use App\Domain\Module\Repository\ModuleRepository;
 use App\Domain\Module\Type\ModuleState;
 use App\Domain\Session\Type\SessionRoleType;
@@ -13,6 +14,7 @@ use App\Domain\Task\Data\TaskData;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Topic\Repository\TopicRepository;
 use App\Factory\QueryFactory;
+use Cake\Database\Query;
 
 /**
  * Repository
@@ -110,13 +112,31 @@ class TaskRepository implements RepositoryInterface
             ->order($sortConditions);
 
         if ($authorisation->isParticipant()) {
-            $query->whereInList("state", [
+            $query->whereInList("task.state", [
                 strtoupper(TaskState::ACTIVE),
                 strtoupper(TaskState::READ_ONLY)
             ]);
         }
 
-        return $this->fetchAll($query);
+        $result = $this->fetchAll($query);
+        if (is_array($result)) {
+            foreach ($result as $resultItem) {
+                $this->addDetails($resultItem);
+            }
+        } else if (is_object($result)) {
+            $this->getDetails($result);
+        }
+        return $result;
+    }
+
+    /**
+     * Get list of connected modules
+     * @param TaskData $data Task data
+     */
+    private function getDetails(TaskData $data): void
+    {
+        $moduleRepository = new ModuleRepository($this->queryFactory);
+        $data->modules = $moduleRepository->getAll($data->id);
     }
 
     /**
@@ -127,16 +147,65 @@ class TaskRepository implements RepositoryInterface
      */
     protected function insertDependencies(string $id, array|object|null $parameter): void
     {
-        $moduleId = uuid_create();
-
         if (is_object($parameter)) {
-            $this->queryFactory->newInsert("module", [
-                "id" => $moduleId,
-                "task_id" => $id,
-                "module_name" => $parameter->taskType,
-                "order" => 1,
-                "state" => strtoupper(ModuleState::ACTIVE)
-            ])->execute();
+            if (!isset($parameter->modules)) {
+                $parameter->modules = ["default"];
+            }
+            foreach ($parameter->modules as $key => $value) {
+                $moduleId = uuid_create();
+                $this->queryFactory->newInsert("module", [
+                    "id" => $moduleId,
+                    "task_id" => $id,
+                    "module_name" => $value,
+                    "order" => $key,
+                    "state" => strtoupper(ModuleState::ACTIVE)
+                ])->execute();
+            }
+        }
+    }
+
+    /**
+     * Update dependent data.
+     * @param string $id Primary key of the linked table entry
+     * @param array|object|null $parameter Dependent data to be included.
+     * @return void
+     */
+    protected function updateDependencies(string $id, array|object|null $parameter): void
+    {
+        if (is_object($parameter)) {
+            if (isset($parameter->modules)) {
+                foreach ($parameter->modules as $key => $value) {
+                    $existQuery = $this->queryFactory->newSelect("module");
+                    $existQuery->select(["id"])
+                        ->andWhere([
+                            "task_id" => $id,
+                            "module_name" => $value
+                        ])
+                        ->limit(1);
+
+                    if ($existQuery->execute()->rowCount() == 0) {
+                        $moduleId = uuid_create();
+                        $this->queryFactory->newInsert("module", [
+                            "id" => $moduleId,
+                            "task_id" => $id,
+                            "module_name" => $value,
+                            "order" => $key,
+                            "state" => strtoupper(ModuleState::ACTIVE)
+                        ])->execute();
+                    } else {
+                        $this->queryFactory->newUpdate("module", ["order" => $key])
+                            ->andWhere([
+                                "task_id" => $id,
+                                "module_name" => $value
+                            ])->execute();
+                    }
+                }
+
+                $this->queryFactory->newDelete("module")
+                    ->whereNotInList("module_name", $parameter->modules)
+                    ->andWhere(["task_id" => $id])
+                    ->execute();
+            }
         }
     }
 
