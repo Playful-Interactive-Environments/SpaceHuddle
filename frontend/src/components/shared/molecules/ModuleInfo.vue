@@ -1,6 +1,6 @@
 <template>
   <div :class="{ 'module-info--centered': isParticipant }" class="module-info">
-    <span class="module-info__type">{{ $t(`enum.moduleType.${type}`) }}</span>
+    <span class="module-info__type">{{ $t(`enum.taskType.${type}`) }}</span>
     <h3 :class="{ 'heading--regular': isParticipant }" class="module-info__title">
       {{ title }}
     </h3>
@@ -11,13 +11,13 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import ModuleType from '@/types/enum/ModuleType';
+import TaskType from '@/types/enum/TaskType';
 
 @Options({
   components: {},
 })
 export default class ModuleInfo extends Vue {
-  @Prop({ default: ModuleType.BRAINSTORMING }) type!: ModuleType;
+  @Prop({ default: TaskType.BRAINSTORMING }) type!: TaskType;
   @Prop({ default: '' }) title!: string;
   @Prop({ default: '' }) description!: string;
   @Prop({ default: false }) isParticipant!: boolean;

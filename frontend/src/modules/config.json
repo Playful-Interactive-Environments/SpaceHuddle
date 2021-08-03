@@ -24,6 +24,10 @@
       "moderatorContent": "organisms/ModeratorContentComponent",
       "participant": "views/ParticipantView",
       "locales": "en, de"
+    },
+    "game":  {
+      "path": "brainstorming/game",
+      "participant": "views/ParticipantView"
     }
   },
   "selection": {

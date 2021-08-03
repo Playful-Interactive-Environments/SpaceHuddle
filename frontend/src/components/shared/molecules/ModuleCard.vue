@@ -24,9 +24,7 @@
       <Timer
         class="module-card__timer"
         :isActive="task.state === TaskStates.ACTIVE"
-        v-if="
-          !(type === ModuleType.INFORMATION || type === ModuleType.SELECTION)
-        "
+        v-if="!(type === TaskType.INFORMATION || type === TaskType.SELECTION)"
       />
       <div class="module-card__toggles" v-if="!isParticipant">
         <ModuleShare :task="task" :is-on-public-screen="isOnPublicScreen" />
@@ -50,7 +48,7 @@ import { Task } from '@/types/api/Task';
 import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import ModuleShare from '@/components/moderator/molecules/ModuleShare.vue';
-import ModuleType from '@/types/enum/ModuleType';
+import TaskType from '@/types/enum/TaskType';
 import TaskStates from '@/types/enum/TaskStates';
 
 @Options({
@@ -62,12 +60,12 @@ import TaskStates from '@/types/enum/TaskStates';
 })
 export default class ModuleCard extends Vue {
   @Prop({ default: '' }) readonly sessionId!: string;
-  @Prop({ default: ModuleType.BRAINSTORMING }) type!: ModuleType;
+  @Prop({ default: TaskType.BRAINSTORMING }) type!: TaskType;
   @Prop() task!: Task;
   @Prop({ default: false }) isParticipant!: boolean;
   @Prop({ default: false }) isOnPublicScreen!: boolean;
 
-  ModuleType = ModuleType;
+  TaskType = TaskType;
   TaskStates = TaskStates;
 
   get moduleName(): string {

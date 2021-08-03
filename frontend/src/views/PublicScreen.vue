@@ -8,7 +8,7 @@
       <section v-if="task" class="public-screen__overview">
         <div class="public-screen__overview-left">
           <span class="public-screen__overview-type">
-            {{ $t(`enum.moduleType.${ModuleType[task.taskType]}`) }}
+            {{ $t(`enum.taskType.${TaskType[task.taskType]}`) }}
           </span>
           <h2>{{ task.name }}</h2>
           <p>
@@ -20,7 +20,7 @@
           <img
             :src="
               require(`@/assets/illustrations/planets/${
-                ModuleType[task.taskType]
+                TaskType[task.taskType]
               }.png`)
             "
             alt="planet"
@@ -42,7 +42,7 @@ import Timer from '@/components/shared/atoms/Timer.vue';
 
 import * as sessionService from '@/services/session-service';
 import { Task } from '@/types/api/Task';
-import ModuleType from '@/types/enum/ModuleType';
+import TaskType from '@/types/enum/TaskType';
 
 import { setModuleStyles } from '@/utils/moduleStyles';
 import TaskStates from '@/types/enum/TaskStates';
@@ -61,7 +61,7 @@ export default class PublicScreen extends Vue {
 
   task: Task | null = null;
 
-  ModuleType = ModuleType;
+  TaskType = TaskType;
   TaskStates = TaskStates;
 
   get taskId(): string | null {
@@ -69,8 +69,8 @@ export default class PublicScreen extends Vue {
     return null;
   }
 
-  get taskType(): ModuleType | null {
-    if (this.task) return ModuleType[this.task.taskType];
+  get taskType(): TaskType | null {
+    if (this.task) return TaskType[this.task.taskType];
     return null;
   }
 

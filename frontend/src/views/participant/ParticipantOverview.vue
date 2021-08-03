@@ -10,7 +10,7 @@
       <template v-slot:content>
         <li class="overview__module" v-for="task in topic.tasks" :key="task.id">
           <ModuleCard
-            :type="ModuleType[task.taskType]"
+            :type="TaskType[task.taskType]"
             :task="task"
             isParticipant="true"
             :sessionId="sessionId"
@@ -27,7 +27,7 @@ import MenuBar from '@/components/participant/molecules/Menubar.vue';
 import SessionInfo from '@/components/participant/molecules/SessionInfo.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
-import ModuleType from '@/types/enum/ModuleType';
+import TaskType from '@/types/enum/TaskType';
 import * as taskService from '@/services/task-service';
 import * as participantService from '@/services/participant-service';
 import * as sessionService from '@/services/session-service';
@@ -46,7 +46,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 })
 export default class ParticipantOverview extends Vue {
   topics: Topic[] = [];
-  ModuleType = ModuleType;
+  TaskType = TaskType;
   sessionName = '';
   sessionDescription = '';
   sessionId = '';

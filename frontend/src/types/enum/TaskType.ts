@@ -1,4 +1,4 @@
-enum ModuleType {
+enum TaskType {
   INFORMATION = 'information',
   BRAINSTORMING = 'brainstorming',
   SELECTION = 'selection',
@@ -6,4 +6,4 @@ enum ModuleType {
   VOTING = 'voting',
 }
 
-export default ModuleType;
+export default TaskType;

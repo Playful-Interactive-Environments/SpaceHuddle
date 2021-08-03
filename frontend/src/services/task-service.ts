@@ -5,7 +5,7 @@ import {
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { Task } from '@/types/api/Task';
+import { Task, TaskForSaveAction } from '@/types/api/Task';
 
 export const getTaskById = async (
   taskId: string,
@@ -18,8 +18,8 @@ export const getTaskById = async (
   );
 };
 
-export const updateTask = async (data: Task): Promise<Task> => {
-  return await apiExecutePut<Task>(`/${EndpointType.TASK}/`, data);
+export const updateTask = async (data: TaskForSaveAction): Promise<TaskForSaveAction> => {
+  return await apiExecutePut<TaskForSaveAction>(`/${EndpointType.TASK}/`, data);
 };
 
 export const getTaskList = async (
@@ -35,9 +35,9 @@ export const getTaskList = async (
 
 export const postTask = async (
   taskId: string,
-  data: Partial<Task>
-): Promise<Task> => {
-  return await apiExecutePost<Task>(
+  data: Partial<TaskForSaveAction>
+): Promise<TaskForSaveAction> => {
+  return await apiExecutePost<TaskForSaveAction>(
     `/${EndpointType.TOPIC}/${taskId}/${EndpointType.TASK}/`,
     data
   );

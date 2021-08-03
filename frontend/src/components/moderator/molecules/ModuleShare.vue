@@ -14,14 +14,14 @@
 </template>
 
 <script lang="ts">
-import {Options, Vue} from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { Task } from '@/types/api/Task';
 import { hasModule } from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import { EventType } from '@/types/enum/EventType';
 import TaskStates from '@/types/enum/TaskStates';
-import ModuleType from '@/types/enum/ModuleType';
+import TaskType from '@/types/enum/TaskType';
 import Toggle from '@/components/moderator/atoms/Toggle.vue';
 
 @Options({
@@ -37,18 +37,29 @@ export default class ModuleShare extends Vue {
   hasPublicScreenComponent = false;
   TaskStates = TaskStates;
 
-  get taskType(): ModuleType | null {
-    if (this.task) return ModuleType[this.task.taskType];
+  get taskType(): TaskType | null {
+    if (this.task) return TaskType[this.task.taskType];
     return null;
   }
 
   mounted(): void {
-    this.hasParticipantComponent = hasModule(ModuleComponentType.PARTICIPANT, this.taskType, 'default');
-    this.hasPublicScreenComponent = hasModule(ModuleComponentType.PUBLIC_SCREEN, this.taskType, 'default');
+    this.hasParticipantComponent = hasModule(
+      ModuleComponentType.PARTICIPANT,
+      this.taskType,
+      'default'
+    );
+    this.hasPublicScreenComponent = hasModule(
+      ModuleComponentType.PUBLIC_SCREEN,
+      this.taskType,
+      'default'
+    );
   }
 
   changePublicScreen(isActive: boolean): void {
-    this.eventBus.emit(EventType.CHANGE_PUBLIC_SCREEN, isActive ? this.task.id : '{taskId}');
+    this.eventBus.emit(
+      EventType.CHANGE_PUBLIC_SCREEN,
+      isActive ? this.task.id : '{taskId}'
+    );
   }
 
   async changeActiveState(): Promise<void> {

@@ -7,26 +7,40 @@
       <h2 class="heading heading--regular">{{ $t("moderator.organism.module.create.header") }}</h2>
       <p>
         {{ $t("moderator.organism.module.create.info") }}
-
       </p>
       <form class="session-create__form">
-        <label for="moduleType" class="heading heading--xs">{{ $t("moderator.organism.module.create.type") }}</label>
+        <label for="taskType" class="heading heading--xs">{{ $t("moderator.organism.module.create.taskType") }}</label>
+        <select
+          v-model="taskType"
+          id="taskType"
+          class="select select--fullwidth"
+        >
+          <option v-for="type in TaskTypeKeys" :key="type" :value="type">
+            {{ $t(`enum.taskType.${TaskType[type]}`) }}
+          </option>
+        </select>
+        <FormError
+          v-if="context.$v.taskType.$error"
+          :errors="context.$v.taskType.$errors"
+          :isSmall="true"
+        />
+        <label for="moduleType" class="heading heading--xs">{{ $t("moderator.organism.module.create.moduleType") }}</label>
         <select
           v-model="moduleType"
           id="moduleType"
           class="select select--fullwidth"
         >
           <option v-for="type in ModuleTypeKeys" :key="type" :value="type">
-            {{ $t(`enum.moduleType.${ModuleType[type]}`) }}
+            {{ $t(`enum.moduleType.${TaskType[taskType]}.${type}`) }}
           </option>
         </select>
         <FormError
-          v-if="context.$v.moduleType.$error"
-          :errors="context.$v.moduleType.$errors"
+          v-if="context.$v.taskType.$error"
+          :errors="context.$v.taskType.$errors"
           :isSmall="true"
         />
         <label for="title" class="heading heading--xs">{{
-          moduleType === 'BRAINSTORMING'
+          taskType === 'BRAINSTORMING'
             ? $t('moderator.organism.module.create.question')
             : $t('moderator.organism.module.create.title')
         }}</label>
@@ -79,12 +93,13 @@ import FormError from '@/components/shared/atoms/FormError.vue';
 import ModalBase from '@/components/shared/molecules/ModalBase.vue';
 
 import * as taskService from '@/services/task-service';
-import ModuleType from '@/types/enum/ModuleType';
+import TaskType from '@/types/enum/TaskType';
 import {
   getErrorMessage,
   addError,
   clearErrors,
 } from '@/services/exception-service';
+import { getModulesForTaskType } from '@/modules/ModuleList';
 
 @Options({
   components: {
@@ -92,7 +107,7 @@ import {
     ModalBase,
   },
   validations: {
-    moduleType: {
+    taskType: {
       required,
     },
     title: {
@@ -109,12 +124,13 @@ export default class ModalModuleCreate extends Vue {
   @Prop({ default: false }) showModal!: boolean;
   @Prop({ required: true }) topicId!: string;
 
-  moduleType = this.ModuleTypeKeys[1];
+  taskType = this.TaskTypeKeys[1];
+  moduleType = this.ModuleTypeKeys[0];
   title = '';
   description = '';
   errors: string[] = [];
 
-  ModuleType = ModuleType;
+  TaskType = TaskType;
 
   context = setup(() => {
     return {
@@ -122,12 +138,18 @@ export default class ModalModuleCreate extends Vue {
     };
   });
 
-  get ModuleTypeKeys(): Array<keyof typeof ModuleType> {
-    return Object.keys(ModuleType) as Array<keyof typeof ModuleType>;
+  get TaskTypeKeys(): Array<keyof typeof TaskType> {
+    return Object.keys(TaskType) as Array<keyof typeof TaskType>;
+  }
+
+  get ModuleTypeKeys(): string[] {
+    const list = getModulesForTaskType(this.taskType);
+    return list;
   }
 
   resetForm(): void {
-    this.moduleType = this.ModuleTypeKeys[1];
+    this.taskType = this.TaskTypeKeys[1];
+    this.moduleType = this.ModuleTypeKeys[0];
     this.title = '';
     this.description = '';
   }
@@ -139,11 +161,12 @@ export default class ModalModuleCreate extends Vue {
 
     taskService
       .postTask(this.topicId, {
-        taskType: this.moduleType,
+        taskType: this.taskType,
         name: this.title,
         description: this.description,
         parameter: {},
         order: 10,
+        modules: [this.moduleType],
       })
       .then(
         () => {

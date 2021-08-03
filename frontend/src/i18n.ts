@@ -2,10 +2,16 @@ import { createI18n } from 'vue3-i18n';
 import de from '@/locales/de.json';
 import en from '@/locales/en.json';
 import { Messages } from 'vue3-i18n/src/types';
-import { getLocales } from '@/modules';
+import { getEnumLocales, getLocales } from '@/modules';
 
 const addModuleLocales = async (locale = 'en', dict: any): Promise<any> => {
   dict.module = await getLocales(locale);
+  const enumLocales = await getEnumLocales(locale);
+  if (enumLocales != null) {
+    if (!('enum' in dict))
+      dict.enum = {};
+    dict.enum.moduleType = enumLocales;
+  }
   return dict;
 };
 

@@ -103,7 +103,6 @@ export const getLocales = async (locale = 'en'): Promise<any> => {
       locales[taskKey] = {};
       const taskType = (config as any)[taskKey];
       for (moduleKey in taskType) {
-        const moduleType = taskType[moduleKey];
         const module = (config as any)[taskKey][moduleKey];
         if (module.locales && module.locales.includes(locale)) {
           await import(`@/modules/${module.path}/locales/${locale}.json`).then(
@@ -122,6 +121,17 @@ export const getLocales = async (locale = 'en'): Promise<any> => {
       }
     }
   }
+  return locales;
+};
+
+export const getEnumLocales = async (locale = 'en'): Promise<any> => {
+  let locales: any = {};
+  await import(`@/modules/locales/${locale}.json`).then((value) => {
+      locales = value.default;
+    })
+    .catch(() => {
+      locales = {};
+    });
   return locales;
 };
 

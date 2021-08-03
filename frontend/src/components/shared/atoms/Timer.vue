@@ -38,6 +38,10 @@ export default class Timer extends Vue {
       }
     }, this.interval);
   }
+
+  unmounted(): void {
+    clearInterval(this.timerInterval);
+  }
 }
 </script>
 

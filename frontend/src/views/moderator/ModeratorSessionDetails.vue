@@ -22,7 +22,7 @@
               <li class="detail__module">
                 <ModuleCard
                   :sessionId="sessionId"
-                  :type="ModuleType[element.taskType]"
+                  :type="TaskType[element.taskType]"
                   :task="element"
                   :isOnPublicScreen="element.id === publicScreenTaskId"
                   @changePublicScreen="changePublicScreen($event)"
@@ -56,7 +56,7 @@ import Navigation from '@/components/moderator/molecules/Navigation.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import { formatDate } from '@/utils/date';
-import ModuleType from '@/types/enum/ModuleType';
+import TaskType from '@/types/enum/TaskType';
 import SnackbarType from '@/types/enum/SnackbarType';
 import * as sessionService from '@/services/session-service';
 import * as topicService from '@/services/topic-service';
@@ -64,6 +64,7 @@ import * as taskService from '@/services/task-service';
 import { Session } from '@/types/api/Session';
 import { Topic } from '@/types/api/Topic';
 import { Task } from '@/types/api/Task';
+import { convertToSaveVersion } from '@/types/api/Task';
 import { EventType } from '@/types/enum/EventType';
 import TaskStates from '@/types/enum/TaskStates';
 import {
@@ -94,7 +95,7 @@ export default class ModeratorSessionDetails extends Vue {
   addNewTopicId = '';
   errors: string[] = [];
 
-  ModuleType = ModuleType;
+  TaskType = TaskType;
 
   async mounted(): Promise<void> {
     this.eventBus.off(EventType.CHANGE_PUBLIC_SCREEN);
@@ -130,10 +131,9 @@ export default class ModeratorSessionDetails extends Vue {
     clearErrors(this.errors);
     if (task) {
       task.state =
-        task.state === TaskStates.ACTIVE
-          ? TaskStates.WAIT
-          : TaskStates.ACTIVE;
-      taskService.updateTask(task).then(
+        task.state === TaskStates.ACTIVE ? TaskStates.WAIT : TaskStates.ACTIVE;
+      const saveVersion = convertToSaveVersion(task);
+      taskService.updateTask(saveVersion).then(
         () => {
           this.eventBus.emit(EventType.SHOW_SNACKBAR, {
             type: SnackbarType.SUCCESS,

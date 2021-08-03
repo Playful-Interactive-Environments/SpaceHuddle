@@ -1,0 +1,18 @@
+{
+  "information": {
+    "default": "Default"
+  },
+  "brainstorming": {
+    "default": "Default",
+    "game": "Game"
+  },
+  "selection": {
+    "default": "Default"
+  },
+  "categorisation": {
+    "default": "Default"
+  },
+  "voting": {
+    "default": "Default"
+  }
+}

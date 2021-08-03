@@ -95,7 +95,8 @@
         "create": {
           "header": "Add a Module",
           "info": "Modules are the place where all the interaction happens. You can choose from 5 different types of modules.",
-          "type": "Module type",
+          "taskType": "Task type",
+          "moduleType": "Module type",
           "title": "Title",
           "question": "Question",
           "questionExample": "e.g. What should be the name of our new app?",
@@ -198,7 +199,7 @@
     }
   },
   "enum": {
-    "moduleType": {
+    "taskType": {
       "null": "",
       "information": "information",
       "brainstorming": "brainstorming",

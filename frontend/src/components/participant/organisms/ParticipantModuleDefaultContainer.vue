@@ -32,7 +32,7 @@ import MenuBar from '@/components/participant/molecules/Menubar.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import HalfCard from '@/components/shared/atoms/HalfCard.vue';
 import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
-import ModuleType from '@/types/enum/ModuleType';
+import TaskType from '@/types/enum/TaskType';
 import { Prop, Watch } from 'vue-property-decorator';
 import { setModuleStyles } from '@/utils/moduleStyles';
 import { maxLength, required } from '@vuelidate/validators';
@@ -61,8 +61,8 @@ export default class ParticipantModuleDefaultContainer extends Vue {
   @Prop({ required: true }) taskId!: string;
   task: Task | null = null;
 
-  get taskType(): ModuleType | null {
-    if (this.task) return ModuleType[this.task.taskType];
+  get taskType(): TaskType | null {
+    if (this.task) return TaskType[this.task.taskType];
     return null;
   }
 

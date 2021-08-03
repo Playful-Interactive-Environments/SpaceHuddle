@@ -40,7 +40,7 @@ import { Prop } from 'vue-property-decorator';
 import { Session } from '@/types/api/Session';
 import Logo from '@/components/shared/atoms/Logo.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
-import ModuleType from '@/types/enum/ModuleType';
+import TaskType from '@/types/enum/TaskType';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import ModuleShare from '@/components/moderator/molecules/ModuleShare.vue';
 import { Task } from '@/types/api/Task';
@@ -60,11 +60,11 @@ export default class Sidebar extends Vue {
   @Prop({ default: '' }) readonly title!: string;
   @Prop({ default: '' }) readonly pretitle!: string;
   @Prop({ default: '' }) readonly description!: string;
-  @Prop() readonly moduleType!: ModuleType;
+  @Prop() readonly taskType!: TaskType;
   @Prop({ default: false }) readonly isOnPublicScreen!: boolean;
   @Prop() task!: Task;
 
-  ModuleType = ModuleType;
+  TaskType = TaskType;
 }
 </script>
 

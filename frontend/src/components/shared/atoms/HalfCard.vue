@@ -9,7 +9,7 @@
 <script lang="ts">
 import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
-import ModuleType from '@/types/enum/ModuleType';
+import TaskType from '@/types/enum/TaskType';
 import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 
 @Options({
@@ -18,7 +18,7 @@ import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
   },
 })
 export default class HalfCard extends Vue {
-  @Prop({ default: ModuleType.CATEGORISATION }) type!: ModuleType;
+  @Prop({ default: TaskType.CATEGORISATION }) type!: TaskType;
 }
 </script>
 

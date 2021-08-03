@@ -6,7 +6,7 @@
         :title="task.name"
         :pretitle="task.taskType"
         :description="task.description"
-        :moduleType="ModuleType[task.taskType]"
+        taskType="TaskType[task.taskType]"
         :is-on-public-screen="task.id === publicScreenTask?.id"
         :task="task"
       />
@@ -25,7 +25,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { getAsyncModule, getAsyncDefaultModule } from '@/modules';
 
 import ModuleComponentType from '@/modules/ModuleComponentType';
-import ModuleType from '@/types/enum/ModuleType';
+import TaskType from '@/types/enum/TaskType';
 import TaskStates from '@/types/enum/TaskStates';
 import { Task } from '@/types/api/Task';
 import { setModuleStyles } from '@/utils/moduleStyles';
@@ -53,12 +53,12 @@ export default class ModeratorModuleContent extends Vue {
 
   task: Task | null = null;
   publicScreenTask: Task | null = null;
-  ModuleType = ModuleType;
+  TaskType = TaskType;
   TaskStates = TaskStates;
   errors: string[] = [];
 
-  get taskType(): ModuleType | null {
-    if (this.task) return ModuleType[this.task.taskType];
+  get taskType(): TaskType | null {
+    if (this.task) return TaskType[this.task.taskType];
     return null;
   }
 
@@ -82,7 +82,7 @@ export default class ModeratorModuleContent extends Vue {
       }
       setModuleStyles(
         this.$refs.item as HTMLElement,
-        ModuleType[this.task.taskType]
+        TaskType[this.task.taskType]
       );
       sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
         this.publicScreenTask = queryResult;
