@@ -84,7 +84,7 @@ class Selection06AddIdeasActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "This field cannot be left empty",
+                            "message" => "Empty: This field cannot be left empty",
                             "field" => "ideas"
                         ]
                     ],

@@ -41,9 +41,9 @@ class SessionRoleValidator
 
         return $validator
             ->notEmptyString("username", "Empty: This field cannot be left empty")
-            ->requirePresence("username", "Required: This field is required")
+            ->requirePresence("username", message: "Required: This field is required")
             ->notEmptyString("role", "Empty: This field cannot be left empty")
-            ->requirePresence("role", "Required: This field is required")
+            ->requirePresence("role", message: "Required: This field is required")
             ->add("role", "custom", [
                 "rule" => function ($value) {
                     return self::isTypeOption($value, SessionRoleType::class);
@@ -96,7 +96,7 @@ class SessionRoleValidator
             $data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("username", "Empty: This field cannot be left empty")
-                ->requirePresence("username", "Required: This field is required"),
+                ->requirePresence("username", message: "Required: This field is required"),
             newRecord: false
         );
 

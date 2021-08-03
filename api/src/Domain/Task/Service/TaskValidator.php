@@ -70,9 +70,9 @@ class TaskValidator
             $data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("taskId", "Empty: This field cannot be left empty")
-                ->requirePresence("taskId", "Required: This field is required")
+                ->requirePresence("taskId", message: "Required: This field is required")
                 ->notEmptyArray("state", "Empty: This field cannot be left empty")
-                ->requirePresence("state", "Required: This field is required")
+                ->requirePresence("state", message: "Required: This field is required")
                 ->add("state", "custom", [
                     "rule" => function ($value) {
                         return self::isTypeOption($value, TaskState::class);

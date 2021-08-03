@@ -20,6 +20,11 @@ use App\Action\Idea\IdeaCreateForTaskAction;
 use App\Action\Idea\IdeaReadAllFromTopicAction;
 use App\Action\Idea\IdeaReadSingleAction;
 use App\Action\Idea\IdeaUpdateAction;
+use App\Action\Module\ModuleCreateAction;
+use App\Action\Module\ModuleDeleteAction;
+use App\Action\Module\ModuleReadAllAction;
+use App\Action\Module\ModuleReadSingleAction;
+use App\Action\Module\ModuleUpdateAction;
 use App\Action\OpenApi\Version1DocAction;
 use App\Action\Participant\ParticipantConnectAction;
 use App\Action\Participant\ParticipantDeleteAction;
@@ -187,6 +192,9 @@ return function (App $app) {
         function (RouteCollectorProxy $app) {
             $app->put("/{taskId}/client_application_state/{state}[/]", TaskStateUpdateAction::class);
 
+            $app->get("/{taskId}/modules[/]", ModuleReadAllAction::class);
+            $app->post("/{taskId}/module[/]", ModuleCreateAction::class);
+
             $app->get("/{taskId}/ideas[/]", IdeaReadAllFromTaskAction::class);
             $app->post("/{taskId}/idea[/]", IdeaCreateForTaskAction::class);
 
@@ -200,6 +208,15 @@ return function (App $app) {
             $app->get("/{id}[/]", TaskReadSingleAction::class);
             $app->put("[/]", TaskUpdateAction::class);
             $app->delete("/{id}[/]", TaskDeleteAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/module",
+        function (RouteCollectorProxy $app) {
+            $app->get("/{id}[/]", ModuleReadSingleAction::class);
+            $app->put("[/]", ModuleUpdateAction::class);
+            $app->delete("/{id}[/]", ModuleDeleteAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 

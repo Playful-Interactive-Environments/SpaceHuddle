@@ -7,6 +7,7 @@ use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\InstantiateTrait;
 use App\Domain\Category\Repository\CategoryRepository;
 use App\Domain\Idea\Repository\IdeaRepository;
+use App\Domain\Module\Repository\ModuleRepository;
 use App\Domain\Participant\Repository\ParticipantRepository;
 use App\Domain\Resource\Repository\ResourceRepository;
 use App\Domain\Selection\Repository\SelectionRepository;
@@ -31,6 +32,7 @@ class InfrastructureRepository
         "session" => SessionRepository::class,
         "topic" => TopicRepository::class,
         "task" => TaskRepository::class,
+        "module" => ModuleRepository::class,
         "idea" => IdeaRepository::class,
         "category" => CategoryRepository::class,
         "selection" => SelectionRepository::class,

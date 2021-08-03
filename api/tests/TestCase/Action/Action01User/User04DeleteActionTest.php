@@ -51,7 +51,7 @@ class User04DeleteActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "The logged-in user no longer exists.",
+                            "message" => "NotExist: The logged-in user no longer exists.",
                             "field" => "id",
                         ],
                     ],

@@ -72,7 +72,7 @@ class ParticipantValidator
         $this->validateEntity($data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("sessionKey", "Empty: This field cannot be left empty")
-                ->requirePresence("sessionKey", "Required: This field is required")
+                ->requirePresence("sessionKey", message: "Required: This field is required")
         );
 
         $sessionKey = $data["sessionKey"];
@@ -95,7 +95,7 @@ class ParticipantValidator
         $this->validateEntity($data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("browserKey", "Empty: This field cannot be left empty")
-                ->requirePresence("browserKey", "Required: This field is required")
+                ->requirePresence("browserKey", message: "Required: This field is required")
         );
 
         $browserKey = $data["browserKey"];

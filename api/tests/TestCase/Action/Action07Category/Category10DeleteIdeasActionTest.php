@@ -79,7 +79,7 @@ class Category10DeleteIdeasActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "Not all ideas are linked to the category.",
+                            "message" => "NotValid: Not all ideas are linked to the category.",
                             "field" => "ideas"
                         ]
                     ],

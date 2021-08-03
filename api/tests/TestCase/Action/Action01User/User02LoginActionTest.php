@@ -68,7 +68,7 @@ class User02LoginActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "Username or password wrong.",
+                            "message" => "NotExist: Username or password wrong.",
                             "field" => "username or password",
                         ],
                     ],

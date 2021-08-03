@@ -54,7 +54,7 @@ final class SessionValidator
             $data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("sessionId", "Empty: This field cannot be left empty")
-                ->requirePresence("sessionId", "Required: This field is required")
+                ->requirePresence("sessionId", message: "Required: This field is required")
         );
 
         $sessionId = $data["sessionId"];

@@ -207,6 +207,25 @@ trait UserTestTrait
     }
 
     /**
+     * Determine first module id
+     * @return string|null json token
+     */
+    protected function getFirstModuleId() : ?string
+    {
+        $taskId = $this->getFirstTaskId();
+        $result = $this->getFirstEntity(
+            "task/$taskId/modules",
+            [
+                "name" => "php unit test module"
+            ]
+        );
+        if (is_object($result) and property_exists($result, "id")) {
+            return $result->id;
+        }
+        return "";
+    }
+
+    /**
      * Determine first idea id
      * @return string|null json token
      */

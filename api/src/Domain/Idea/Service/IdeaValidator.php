@@ -66,7 +66,7 @@ class IdeaValidator
             $data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("topicId", "Empty: This field cannot be left empty")
-                ->requirePresence("topicId", "Required: This field is required")
+                ->requirePresence("topicId", message: "Required: This field is required")
                 ->add("order", "custom", [
                     "rule" => function ($value) {
                         return self::isTypeOption($value, IdeaSortOrder::class);
@@ -118,7 +118,7 @@ class IdeaValidator
             $data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("taskId", "Empty: This field cannot be left empty")
-                ->requirePresence("taskId", "Required: This field is required")
+                ->requirePresence("taskId", message: "Required: This field is required")
                 ->add("order", "custom", [
                     "rule" => function ($value) {
                         return self::isTypeOption($value, IdeaSortOrder::class);

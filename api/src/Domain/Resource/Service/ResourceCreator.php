@@ -5,7 +5,7 @@ namespace App\Domain\Resource\Service;
 use App\Domain\Base\Service\ServiceCreatorTrait;
 
 /**
- * Topic create service.
+ * Resource create service.
  */
 class ResourceCreator
 {

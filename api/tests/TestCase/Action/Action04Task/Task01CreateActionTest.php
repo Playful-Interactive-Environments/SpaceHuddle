@@ -87,7 +87,7 @@ class Task01CreateActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "Wrong task type.",
+                            "message" => "Type: Wrong task type.",
                             "field" => "taskType",
                         ]
                     ],

@@ -54,10 +54,10 @@ final class UserValidator
             $data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("username", "Empty: This field cannot be left empty")
-                ->requirePresence("username", "Required: This field is required")
+                ->requirePresence("username", message: "Required: This field is required")
                 ->email("username", message: "EMail: The username must be an email address.")
                 ->notEmptyString("password", "Empty: This field cannot be left empty")
-                ->requirePresence("password", "Required: This field is required")
+                ->requirePresence("password", message: "Required: This field is required")
         );
 
         $username = $data["username"];
@@ -135,9 +135,9 @@ final class UserValidator
             ->requirePresence("username", "create", "Required: This field is required")
             ->email("username", message: "EMail: The username must be an email address.")
             ->notEmptyString("password", "Empty: This field cannot be left empty")
-            ->requirePresence("password", "Required: This field is required")
+            ->requirePresence("password", message: "Required: This field is required")
             ->notEmptyString("passwordConfirmation", "Empty: This field cannot be left empty")
-            ->requirePresence("passwordConfirmation", "Required: This field is required")
+            ->requirePresence("passwordConfirmation", message: "Required: This field is required")
             ->minLength("password", 8, "TooShort: Too short")
             ->maxLength("password", 255, "TooLong: Too long")
             ->regex(

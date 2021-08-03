@@ -1,25 +1,25 @@
 <?php
 
-namespace App\Test\TestCase\Action\Action06Idea;
+namespace App\Test\TestCase\Action\Action12Module;
 
 use App\Test\Traits\AppTestTrait;
-use App\Test\Traits\ParticipantTestTrait;
+use App\Test\Traits\UserTestTrait;
 use Fig\Http\Message\StatusCodeInterface;
 use Monolog\Test\TestCase;
 
 /**
  * Test.
  *
- * @coversDefaultClass \App\Action\Idea\IdeaCreateForTopicAction
+ * @coversDefaultClass \App\Action\Module\ModuleCreateAction
  */
-class Idea01CreateForTopicActionTest extends TestCase
+class Module01CreateActionTest extends TestCase
 {
-    use AppTestTrait, ParticipantTestTrait {
-        ParticipantTestTrait::getAccessToken insteadof AppTestTrait;
+    use AppTestTrait {
         AppTestTrait::setUp as private setUpAppTrait;
     }
+    use UserTestTrait;
 
-    protected ?string $topicId;
+    protected ?string $taskId;
 
     /**
      * Before each test.
@@ -29,7 +29,7 @@ class Idea01CreateForTopicActionTest extends TestCase
     protected function setUp(): void
     {
         $this->setUpAppTrait();
-        $this->topicId = $this->getFirstTopicId();
+        $this->taskId = $this->getFirstTaskId();
     }
 
     /**
@@ -37,14 +37,14 @@ class Idea01CreateForTopicActionTest extends TestCase
      *
      * @return void
      */
-    public function testCreateIdeaForTopic(): void
+    public function testCreateModule(): void
     {
-        $tableRowCount = $this->getTableRowCount("idea");
+        $tableRowCount = $this->getTableRowCount("module");
         $request = $this->createJsonRequest(
             "POST",
-            "/topic/$this->topicId/idea/",
+            "/task/$this->taskId/module/",
             [
-                "keywords" => "php unit test idea from topic"
+                "name" => "php unit test module"
             ]
         );
         $request = $this->withJwtAuth($request);
@@ -55,7 +55,7 @@ class Idea01CreateForTopicActionTest extends TestCase
         $this->assertJsonContentType($response);
 
         // Check database
-        $this->assertTableRowCount($tableRowCount+1, "idea");
+        $this->assertTableRowCount($tableRowCount+1, "module");
     }
 
     /**
@@ -63,13 +63,13 @@ class Idea01CreateForTopicActionTest extends TestCase
      *
      * @return void
      */
-    public function testCreateIdeaForTopicValidation(): void
+    public function testCreateModuleValidation(): void
     {
         $request = $this->createJsonRequest(
             "POST",
-            "/topic/$this->topicId/idea/",
+            "/task/$this->taskId/module/",
             [
-                "description" => "php unit test idea"
+                "order" => 2
             ]
         );
         $request = $this->withJwtAuth($request);
@@ -86,7 +86,7 @@ class Idea01CreateForTopicActionTest extends TestCase
                     "details" => [
                         0 => [
                             "message" => "Required: This field is required",
-                            "field" => "keywords"
+                            "field" => "name",
                         ]
                     ],
                 ],

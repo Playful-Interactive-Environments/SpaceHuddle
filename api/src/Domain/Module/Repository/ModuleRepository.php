@@ -2,10 +2,8 @@
 
 namespace App\Domain\Module\Repository;
 
-use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
-use App\Domain\Idea\Repository\IdeaRepository;
 use App\Domain\Module\Data\ModuleData;
 use App\Domain\Task\Repository\TaskRepository;
 use App\Factory\QueryFactory;
@@ -59,5 +57,22 @@ class ModuleRepository implements RepositoryInterface
         $this->queryFactory->newUpdate("session", ["public_screen_module_id" => null])
             ->andWhere(["public_screen_module_id" => $id])
             ->execute();
+    }
+
+    /**
+     * Convert to array.
+     * @param object $data The entity data
+     * @return array<string, mixed> The array
+     */
+    protected function formatDatabaseInput(object $data): array
+    {
+        return [
+            "id" => $data->id ?? null,
+            "task_id" => $data->taskId ?? null,
+            "module_name" => $data->name ?? null,
+            "order" => $data->order ?? null,
+            "state" => $data->state ?? null,
+            "parameter" => $data->parameter ?? null
+        ];
     }
 }

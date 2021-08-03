@@ -73,19 +73,19 @@ class User01RegisterActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "This field cannot be left empty",
+                            "message" => "Empty: This field cannot be left empty",
                             "field" => "username",
                         ],
                         1 => [
-                            "message" => "Too short",
+                            "message" => "TooShort: Too short",
                             "field" => "password",
                         ],
                         2 => [
-                            "message" => "Password must contain at least one lowercase and uppercase letter, a number and a special character.",
+                            "message" => "PatternMatch: Password must contain at least one lowercase and uppercase letter, a number and a special character.",
                             "field" => "password",
                         ],
                         3 => [
-                            "message" => "Password and confirmation do not match.",
+                            "message" => "Comparison: Password and confirmation do not match.",
                             "field" => "passwordConfirmation",
                         ],
                     ],

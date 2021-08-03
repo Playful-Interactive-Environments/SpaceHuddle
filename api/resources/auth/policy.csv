@@ -22,6 +22,12 @@ p, PARTICIPANT, /task/:taskId/idea/, POST
 p, PARTICIPANT, /topic/:topicId/idea/, POST
 p, MODERATOR|FACILITATOR|PARTICIPANT, /idea/, PUT
 
+p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/modules/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /module/:id/, GET
+p, MODERATOR, /module/:id/, DELETE
+p, MODERATOR, /task/:taskId/module/, POST
+p, MODERATOR, /module/, PUT
+
 p, UNKNOWN|MODERATOR|PARTICIPANT, /user/login/, POST
 p, UNKNOWN|MODERATOR|PARTICIPANT, /user/register/, POST
 p, MODERATOR, /user/, PUT

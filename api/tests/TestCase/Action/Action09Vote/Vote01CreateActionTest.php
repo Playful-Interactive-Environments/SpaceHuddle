@@ -93,7 +93,7 @@ class Vote01CreateActionTest extends TestCase
                     "details" => [
                         0 => [
                             "message" =>
-                                "IdeaId is not a valid idea keys or do not belong to the same topic as the task.",
+                                "NotValid: IdeaId is not a valid idea keys or do not belong to the same topic as the task.",
                             "field" => "ideaId",
                         ]
                     ],

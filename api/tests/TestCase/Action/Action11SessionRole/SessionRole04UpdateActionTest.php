@@ -82,7 +82,7 @@ class SessionRole04UpdateActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "Username not exists.",
+                            "message" => "NotExist: Username not exists.",
                             "field" => "username",
                         ]
                     ],

@@ -55,9 +55,9 @@ class SelectionValidator
             $data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("selectionId", "Empty: This field cannot be left empty")
-                ->requirePresence("selectionId", "Required: This field is required")
+                ->requirePresence("selectionId", message: "Required: This field is required")
                 ->notEmptyArray("ideas", "Empty: This field cannot be left empty")
-                ->requirePresence("ideas", "Required: This field is required")
+                ->requirePresence("ideas", message: "Required: This field is required")
         );
 
         $selectionId = $data["selectionId"];

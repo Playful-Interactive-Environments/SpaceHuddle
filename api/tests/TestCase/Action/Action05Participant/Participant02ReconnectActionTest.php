@@ -74,7 +74,7 @@ class Participant02ReconnectActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "browserKey wrong",
+                            "message" => "NotExist: browserKey wrong",
                             "field" => "browserKey",
                         ],
                     ],

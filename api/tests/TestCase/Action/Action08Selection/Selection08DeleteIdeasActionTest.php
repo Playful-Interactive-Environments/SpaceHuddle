@@ -79,7 +79,7 @@ class Selection08DeleteIdeasActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "Not all ideas are linked to the selection.",
+                            "message" => "NotValid: Not all ideas are linked to the selection.",
                             "field" => "ideas"
                         ]
                     ],

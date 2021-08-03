@@ -63,7 +63,7 @@ class Participant06UpdateActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "Wrong participant state.",
+                            "message" => "Type: Wrong participant state.",
                             "field" => "state",
                         ],
                     ],

@@ -56,9 +56,9 @@ class VoteValidator
             $data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("ideaId", "Empty: This field cannot be left empty")
-                ->requirePresence("ideaId", "Required: This field is required")
+                ->requirePresence("ideaId", message: "Required: This field is required")
                 ->notEmptyString("taskId", "Empty: This field cannot be left empty")
-                ->requirePresence("taskId", "Required: This field is required")
+                ->requirePresence("taskId", message: "Required: This field is required")
         );
 
         $taskId = $data["taskId"];
@@ -89,7 +89,7 @@ class VoteValidator
             $data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("taskId", "Empty: This field cannot be left empty")
-                ->requirePresence("taskId", "Required: This field is required")
+                ->requirePresence("taskId", message: "Required: This field is required")
         );
 
         $taskId = $data["taskId"];

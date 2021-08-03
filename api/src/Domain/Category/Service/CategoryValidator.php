@@ -55,7 +55,7 @@ class CategoryValidator
             $data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("topicId", "Empty: This field cannot be left empty")
-                ->requirePresence("topicId", "Required: This field is required")
+                ->requirePresence("topicId", message: "Required: This field is required")
         );
 
         $topicId = $data["topicId"];
@@ -79,9 +79,9 @@ class CategoryValidator
             $data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("categoryId", "Empty: This field cannot be left empty")
-                ->requirePresence("categoryId", "Required: This field is required")
+                ->requirePresence("categoryId", message: "Required: This field is required")
                 ->notEmptyArray("ideas", "Empty: This field cannot be left empty")
-                ->requirePresence("ideas", "Required: This field is required")
+                ->requirePresence("ideas", message: "Required: This field is required")
         );
 
         $categoryId = $data["categoryId"];
@@ -133,7 +133,7 @@ class CategoryValidator
             $data,
             $this->validationFactory->createValidator()
                 ->notEmptyString("taskId", "Empty: This field cannot be left empty")
-                ->requirePresence("taskId", "Required: This field is required")
+                ->requirePresence("taskId", message: "Required: This field is required")
         );
 
         $taskId = $data["taskId"];

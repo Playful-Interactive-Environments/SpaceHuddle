@@ -87,11 +87,11 @@ class SessionRole01CreateActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "This field is required",
+                            "message" => "Required: This field is required",
                             "field" => "username",
                         ],
                         1 => [
-                            "message" => "Wrong session role type.",
+                            "message" => "Type: Wrong session role type.",
                             "field" => "role",
                         ]
                     ],

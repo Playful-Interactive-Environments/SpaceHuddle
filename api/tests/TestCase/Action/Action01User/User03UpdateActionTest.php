@@ -69,7 +69,7 @@ class User03UpdateActionTest extends TestCase
                     "code" => 422,
                     "details" => [
                         0 => [
-                            "message" => "Password and confirmation do not match.",
+                            "message" => "Comparison: Password and confirmation do not match.",
                             "field" => "passwordConfirmation",
                         ],
                     ],
