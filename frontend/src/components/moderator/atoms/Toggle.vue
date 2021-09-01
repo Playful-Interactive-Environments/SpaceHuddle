@@ -21,11 +21,13 @@ import { Prop } from 'vue-property-decorator';
 @Options({
   components: {},
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Toggle extends Vue {
   @Prop({ default: '' }) label!: string;
   @Prop({ default: false }) isActive!: boolean;
 
-  toggleClicked(event: Event) {
+  toggleClicked(event: Event): void {
     event.stopPropagation();
     if (event.target) {
       const target = event.target as any;

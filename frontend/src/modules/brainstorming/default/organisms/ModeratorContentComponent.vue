@@ -53,6 +53,8 @@ import Expand from '@/components/shared/atoms/Expand.vue';
     Expand,
   },
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorContentComponent extends Vue {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];

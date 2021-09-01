@@ -20,7 +20,11 @@
     <div class="sidebar__bottom">
       <SessionCode v-if="isSession" :code="sessionConnectionKey" />
       <div class="sidebar__toggles" v-else>
-        <ModuleShare v-if="task" :task="task" :is-on-public-screen="isOnPublicScreen" />
+        <ModuleShare
+          v-if="task"
+          :task="task"
+          :is-on-public-screen="isOnPublicScreen"
+        />
       </div>
       <router-link v-if="sessionId" :to="`/public-screen/${sessionId}`">
         <button

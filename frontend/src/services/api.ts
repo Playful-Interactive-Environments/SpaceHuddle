@@ -7,6 +7,8 @@ import { apiErrorHandling } from '@/services/exception-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import app from '@/main';
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+
 const interceptorAuthHeader = (
   axiosConfig: AxiosRequestConfig,
   authHeaderType = EndpointAuthorisationType.MODERATOR
@@ -110,6 +112,7 @@ export async function apiExecuteGet<T = any>(
 
 export async function apiExecutePostHandled<T = any>(
   url: string,
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   body: any,
   empty: T | any = {},
   authHeaderType = EndpointAuthorisationType.MODERATOR
@@ -123,6 +126,7 @@ export async function apiExecutePostHandled<T = any>(
 
 export async function apiExecutePost<T = any>(
   url: string,
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   body: any,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<T> {
@@ -135,6 +139,7 @@ export async function apiExecutePost<T = any>(
 
 export async function apiExecutePutHandled<T = any>(
   url: string,
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   body: any,
   empty: T | any = {},
   authHeaderType = EndpointAuthorisationType.MODERATOR
@@ -148,6 +153,7 @@ export async function apiExecutePutHandled<T = any>(
 
 export async function apiExecutePut<T = any>(
   url: string,
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   body: any,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<T> {

@@ -1,6 +1,6 @@
 <template>
   <div class="menubar">
-    <Logo class="menubar__logo" isParticipant="true"/>
+    <Logo class="menubar__logo" isParticipant="true" />
     <div class="menubar__icon">|||</div>
   </div>
 </template>

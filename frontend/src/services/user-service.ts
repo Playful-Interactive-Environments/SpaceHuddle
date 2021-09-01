@@ -3,6 +3,8 @@ import ApiResponse from '@/types/api/ApiResponse';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+
 export const registerUser = async (
   email: string,
   password: string,

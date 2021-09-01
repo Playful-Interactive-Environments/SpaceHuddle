@@ -1,6 +1,8 @@
 import TaskType from '@/types/enum/TaskType';
 import TaskStates from '@/types/enum/TaskStates';
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+
 export interface Task {
   id: string;
   // see: https://www.typescriptlang.org/docs/handbook/enums.html

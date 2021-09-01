@@ -9,6 +9,8 @@ import { Prop, Watch } from 'vue-property-decorator';
 @Options({
   components: {},
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Timer extends Vue {
   @Prop({ default: false }) isActive!: boolean;
   timeLeft = 360;
