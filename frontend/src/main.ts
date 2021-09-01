@@ -10,6 +10,7 @@ import { ComponentCustomProperties } from 'vue';
 import ElementPlus from 'element-plus';
 //import 'element-plus/lib/theme-chalk/index.css';
 import 'element-plus/packages/theme-chalk/src/index.scss';
+//import 'element-theme-chalk/src/index.scss';
 import '@/assets/styles/global.scss';
 
 declare module '@vue/runtime-core' {

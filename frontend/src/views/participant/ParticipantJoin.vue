@@ -1,6 +1,6 @@
 <template>
   <div
-    class="join container container--fullheight container--centered-horizontal"
+    class="join container2 container2--fullheight container2--centered-horizontal"
   >
     <main class="join__content">
       <h1 class="heading heading--big heading--white">

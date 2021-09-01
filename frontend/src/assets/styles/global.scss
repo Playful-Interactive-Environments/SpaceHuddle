@@ -1,6 +1,7 @@
 @import '~@/assets/styles/fonts.scss';
 @import '~@/assets/styles/variables.scss';
 @import '~@/assets/styles/breakpoints.scss';
+@import '~@/assets/styles/bulma.scss';
 
 html {
   box-sizing: border-box;
@@ -279,7 +280,7 @@ body {
   border-radius: var(--border-radius-small);
 }
 
-.container {
+.container2 {
   max-width: 1480px;
   width: 100%;
   box-sizing: border-box;

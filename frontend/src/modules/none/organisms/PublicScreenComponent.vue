@@ -1,7 +1,7 @@
 <template>
   <main
     class="
-      container container--fullheight-header container--centered
+      container2 container2--fullheight-header container2--centered
       public-screen__error
     "
   >

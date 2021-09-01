@@ -29,6 +29,9 @@ i18n.t2 = (key: string, fallback_message: string, itemContent: [] | null): strin
 
   if (translation.length == 0) {
     if (fallback_message) translation = fallback_message;
+  }
+
+  if (translation.length == 0) {
     const keyParts = key.split('.');
     if (keyParts.length > 0) translation = keyParts[keyParts.length - 1];
   }

@@ -2,7 +2,7 @@
   <div class="public-screen">
     <Header :white="true" />
     <main
-      class="public-screen__container container container--spaced"
+      class="public-screen__container container2 container2--spaced"
       ref="container"
     >
       <section v-if="task" class="public-screen__overview">

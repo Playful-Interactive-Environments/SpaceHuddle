@@ -12,6 +12,7 @@ import ModeratorProfile from '@/views/moderator/ModeratorProfile.vue';
 import ModeratorModuleContent from '@/views/moderator/ModeratorModuleContent.vue';
 import NotFound from '@/views/shared/NotFound.vue';
 import PublicScreen from '@/views/PublicScreen.vue';
+import ParticipantModuleContent from '@/views/participant/ParticipantModuleContent.vue';
 
 import {
   isParticipant,
@@ -89,6 +90,18 @@ const routes: Array<RouteRecordRaw> = [
     path: '/overview',
     name: 'participant-overview',
     component: ParticipantOverview,
+    meta: {
+      requiresAuth: true,
+      requiresParticipant: true,
+    },
+  },
+  {
+    path: '/participant-module-content/:taskId',
+    name: 'participant-module-content',
+    component: ParticipantModuleContent,
+    props: (route) => ({
+      taskId: route.params.taskId,
+    }),
     meta: {
       requiresAuth: true,
       requiresParticipant: true,

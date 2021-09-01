@@ -1,6 +1,6 @@
 <template>
-  <div class="login container--fullheight">
-    <section class="container container--fullheight container--centered">
+  <div class="login container2--fullheight">
+    <section class="container2 container2--fullheight container2--centered">
       <div class="login__content">
         <h1 class="heading heading--medium">{{ $t("moderator.view.login.header") }}</h1>
         <p class="login__description">
@@ -47,10 +47,10 @@
     <section
       class="
         login__bg-section
-        container container--fullheight container--centered
+        container2 container2--fullheight container2--centered
       "
     >
-      <div class="container--centered">
+      <div class="container2--centered">
         <h2 class="heading heading--medium heading--white">{{ $t("moderator.view.login.register.header") }}</h2>
         <p class="login__text">
           {{ $t("moderator.view.login.register.info") }}

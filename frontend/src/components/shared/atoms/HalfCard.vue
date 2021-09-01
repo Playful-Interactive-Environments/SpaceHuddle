@@ -1,6 +1,6 @@
 <template>
   <div class="half-card fullwidth">
-    <div class="half-card__content container">
+    <div class="half-card__content container2 fullwidth">
       <slot />
     </div>
   </div>
@@ -47,5 +47,10 @@ export default class HalfCard extends Vue {
   margin-left: -50vw;
   margin-top: 10px;
   left: 50%;
+}
+
+.fillUp {
+  position: relative;
+  flex-grow: 1;
 }
 </style>

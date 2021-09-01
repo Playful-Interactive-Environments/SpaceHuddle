@@ -4,10 +4,10 @@
     <div
       class="
         profile__content
-        container
-        container--spaced
-        container--fullheight-header
-        container--centered
+        container2
+        container2--spaced
+        container2--fullheight-header
+        container2--centered
       "
     >
       <h1>{{ $t("moderator.view.profile.header") }}</h1>

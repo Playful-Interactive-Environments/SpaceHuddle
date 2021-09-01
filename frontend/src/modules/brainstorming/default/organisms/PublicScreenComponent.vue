@@ -1,7 +1,7 @@
 <template>
   <section
     v-if="ideas.length === 0"
-    class="container container--centered public-screen__error"
+    class="container2 container2--centered public-screen__error"
   >
     <p>{{ $t('module.brainstorming.default.publicScreen.noIdeas') }}</p>
   </section>

@@ -1,7 +1,7 @@
 <template>
   <div class="session-overview">
     <Header />
-    <main class="container container--spaced container--fullheight-header">
+    <main class="container2 container2--spaced container2--fullheight-header">
       <h1>{{ $t("moderator.organism.session.overview.header") }}</h1>
       <div class="session-overview__session-container">
         <Card v-for="session in sessions" :key="session.id">

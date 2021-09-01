@@ -71,6 +71,13 @@ export default class Expand extends Vue {
     display: flex;
     justify-content: space-between;
     cursor: pointer;
+    padding: 1rem 0.5rem;
+
+    h2 {
+      font-weight: bold;
+      font-variant: petite-caps;
+      font-size: x-large;
+    }
   }
 
   &__icon {

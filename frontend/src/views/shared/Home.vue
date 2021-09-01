@@ -1,6 +1,6 @@
 <template>
   <Header :hasNavigation="false" />
-  <div class="container container--spaced container--fullheight-header home">
+  <div class="container2 container2--spaced container2--fullheight-header home">
     <section class="home__content">
       <h1 class="heading heading--big">{{ $t("shared.view.home.header") }}</h1>
       <p class="home__text">

@@ -1,5 +1,5 @@
 <template>
-  <section class="container container--centered public-screen__error">
+  <section class="container2 container2--centered public-screen__error">
     TODO: implement vote public screen!
   </section>
 </template>

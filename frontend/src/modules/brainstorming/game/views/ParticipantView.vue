@@ -7,7 +7,11 @@
         class="module-container__planet"
       />
     </template>
-    TODO: implement game!
+    <div class="container2--centered center">
+      <span v-if="randomIdea">{{randomIdea.keywords}}</span>
+      <br>
+      <span v-if="randomIdea">{{randomIdea.description}}</span>
+    </div>
   </ParticipantModuleDefaultContainer>
 </template>
 
@@ -15,6 +19,8 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import ParticipantModuleDefaultContainer from '@/components/participant/organisms/ParticipantModuleDefaultContainer.vue';
+import * as ideaService from '@/services/idea-service';
+import { Idea } from '@/types/api/Idea.ts';
 
 @Options({
   components: {
@@ -23,7 +29,38 @@ import ParticipantModuleDefaultContainer from '@/components/participant/organism
 })
 export default class ParticipantView extends Vue {
   @Prop() readonly taskId!: string;
+  readonly interval = 10000;
+  ideaInterval!: any;
+
+  randomIdea: Idea|null = null;
+
+  async mounted(): Promise<void> {
+    await this.getTaskIdeas();
+    this.startIdeaInterval();
+  }
+
+  startIdeaInterval(): void {
+    this.ideaInterval = setInterval(this.getTaskIdeas, this.interval);
+  }
+
+  unmounted(): void {
+    clearInterval(this.ideaInterval);
+  }
+
+  async getTaskIdeas(): Promise<void> {
+    ideaService.getIdeasForTask(this.taskId).then((queryResult) => {
+      const randomIndex = Math.floor(Math.random() * queryResult.length);
+      this.randomIdea = queryResult[randomIndex];
+    });
+  }
 }
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+</style>

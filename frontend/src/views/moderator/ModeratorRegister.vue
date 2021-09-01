@@ -1,9 +1,9 @@
 <template>
-  <div class="register container--fullheight">
+  <div class="register container2--fullheight">
     <section
       class="
         register__bg-section
-        container container--fullheight container--centered
+        container2 container2--fullheight container2--centered
       "
     >
       <h2 class="heading heading--medium heading--white">{{ $t("moderator.view.register.login.header") }}</h2>
@@ -14,7 +14,7 @@
         <button class="btn btn--outline-white">{{ $t("moderator.view.register.login.submit") }}</button>
       </router-link>
     </section>
-    <section class="container container--fullheight container--centered">
+    <section class="container2 container2--fullheight container2--centered">
       <div class="register__content">
         <h1 class="heading heading--medium">{{ $t("moderator.view.register.header") }}</h1>
         <p class="register__description">

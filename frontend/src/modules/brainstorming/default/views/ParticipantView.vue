@@ -113,18 +113,12 @@ export default class ParticipantView extends Vue {
   keywords = '';
   readonly keywordsEmptyMsg = 'error.vuelidate.keywordsRequired';
   scalePlanet = false;
-  taskName = '';
-  taskDescription = '';
 
   context = setup(() => {
     return {
       $v: useVuelidate(),
     };
   });
-
-  async mounted(): Promise<void> {
-    await this.getTaskData();
-  }
 
   get keywordsEmpty(): boolean {
     return this.showSecondInput && this.keywords.length <= 0;
@@ -175,15 +169,6 @@ export default class ParticipantView extends Vue {
         this.scalePlanet = false;
       }, 1000);
     }
-  }
-
-  async getTaskData(): Promise<void> {
-    taskService
-      .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
-      .then((queryResult) => {
-        this.taskName = queryResult.name;
-        this.taskDescription = queryResult.description;
-      });
   }
 }
 </script>

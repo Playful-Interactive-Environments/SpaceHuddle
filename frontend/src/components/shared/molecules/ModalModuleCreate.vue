@@ -25,15 +25,14 @@
           :isSmall="true"
         />
         <label for="moduleType" class="heading heading--xs">{{ $t("moderator.organism.module.create.moduleType") }}</label>
-        <select
-          v-model="moduleType"
-          id="moduleType"
-          class="select select--fullwidth"
-        >
-          <option v-for="type in ModuleTypeKeys" :key="type" :value="type">
-            {{ $t(`enum.moduleType.${TaskType[taskType]}.${type}`) }}
-          </option>
-        </select>
+        <el-select v-model="moduleType" id="moduleType" multiple>
+          <el-option
+            v-for="type in ModuleTypeKeys"
+            :key="type"
+            :value="type"
+            :label="$t(`enum.moduleType.${TaskType[taskType]}.${type}`)"
+          />
+        </el-select>
         <FormError
           v-if="context.$v.taskType.$error"
           :errors="context.$v.taskType.$errors"
@@ -125,7 +124,7 @@ export default class ModalModuleCreate extends Vue {
   @Prop({ required: true }) topicId!: string;
 
   taskType = this.TaskTypeKeys[1];
-  moduleType = this.ModuleTypeKeys[0];
+  moduleType = this.ModuleTypeKeys;
   title = '';
   description = '';
   errors: string[] = [];
@@ -149,7 +148,7 @@ export default class ModalModuleCreate extends Vue {
 
   resetForm(): void {
     this.taskType = this.TaskTypeKeys[1];
-    this.moduleType = this.ModuleTypeKeys[0];
+    this.moduleType = this.ModuleTypeKeys;
     this.title = '';
     this.description = '';
   }
@@ -166,7 +165,7 @@ export default class ModalModuleCreate extends Vue {
         description: this.description,
         parameter: {},
         order: 10,
-        modules: [this.moduleType],
+        modules: this.moduleType,
       })
       .then(
         () => {

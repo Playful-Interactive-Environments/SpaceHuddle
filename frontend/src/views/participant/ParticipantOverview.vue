@@ -1,6 +1,6 @@
 <template>
-  <div class="overview container--fullheight">
-    <div class="container">
+  <div class="overview container2--fullheight">
+    <div class="container2">
       <MenuBar />
       <SessionInfo :title="sessionName" :description="sessionDescription" />
       <form-error :errors="errors"></form-error>

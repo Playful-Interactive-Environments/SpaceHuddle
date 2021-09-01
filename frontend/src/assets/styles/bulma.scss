@@ -1,0 +1,15 @@
+@charset "utf-8";
+
+// Update Bulma's global variables
+$family-sans-serif: $font-family;
+$grey-dark: gray;
+$grey-lighter: gray;
+$grey-light: silver;
+$primary: $color-darkblue;
+$link: white;
+$info: red;
+$danger: red;
+$widescreen-enabled: false;
+$fullhd-enabled: false;
+
+@import "../../../node_modules/bulma/bulma.sass";

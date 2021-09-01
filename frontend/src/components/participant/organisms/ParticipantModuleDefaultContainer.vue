@@ -1,6 +1,5 @@
 <template>
-  <div class="module-container container--fullheight container" ref="item">
-    <MenuBar />
+  <div class="module-container container2--fullheight container2" ref="item">
     <div class="grid-container">
       <div class="grid-item">
         <div class="module-container__planetDiv">
@@ -159,11 +158,12 @@ export default class ParticipantModuleDefaultContainer extends Vue {
   }
 }
 
-.container {
+.container2 {
   padding-bottom: 0;
 }
 .grid-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  margin-top: 4rem;
 }
 </style>
