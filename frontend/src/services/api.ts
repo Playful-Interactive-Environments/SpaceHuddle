@@ -14,7 +14,7 @@ const interceptorAuthHeader = (
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): AxiosRequestConfig => {
   if (authHeaderType != EndpointAuthorisationType.UNAUTHORISED) {
-    let jwt = null;
+    let jwt: string | null = null;
     switch (authHeaderType) {
       case EndpointAuthorisationType.MODERATOR:
         jwt = getAccessTokenModerator();
