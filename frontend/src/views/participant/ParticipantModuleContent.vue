@@ -16,7 +16,7 @@
               <i class="fas fa-image" aria-hidden="true"></i>
             </span>
             <span>
-              {{$t(`enum.moduleType.${taskType}.${module.name}`)}}
+              {{ $t(`enum.moduleType.${taskType}.${module.name}`) }}
             </span>
           </a>
         </li>
@@ -96,7 +96,7 @@ export default class ParticipantModuleContent extends Vue {
       });
   }
 
-  moduleNameClick(moduleName: string|null = null): void {
+  moduleNameClick(moduleName: string | null = null): void {
     if (!moduleName) {
       moduleName = this.moduleName;
     }
@@ -121,7 +121,7 @@ export default class ParticipantModuleContent extends Vue {
   padding: 10px 20px 0px 20px;
 }
 
-.menubar{
+.menubar {
   margin-bottom: 0.5rem;
 }
 </style>

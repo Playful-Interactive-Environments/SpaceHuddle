@@ -8,6 +8,8 @@ const JWT_KEY_PARTICIPANT = 'jwt-participant';
 const BROWSER_KEY = 'key';
 const USER_KEY = 'user';
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+
 export const isAuthenticated = (): boolean => {
   const jwtFromStorage = getAccessTokenModerator();
   const jwtFromStorageParticipant = getAccessTokenParticipant();
@@ -29,11 +31,17 @@ const authorisationHasProperty = (
 };
 
 export const isParticipant = (): boolean => {
-  return authorisationHasProperty('participantId', EndpointAuthorisationType.PARTICIPANT);
+  return authorisationHasProperty(
+    'participantId',
+    EndpointAuthorisationType.PARTICIPANT
+  );
 };
 
 export const isUser = (): boolean => {
-  return authorisationHasProperty('userId', EndpointAuthorisationType.MODERATOR);
+  return authorisationHasProperty(
+    'userId',
+    EndpointAuthorisationType.MODERATOR
+  );
 };
 
 export const getAccessToken = (
@@ -61,7 +69,10 @@ export const getAccessTokenModerator = (): string | null => {
 };
 
 export const setAccessTokenParticipant = (jwt: string): void => {
-  app.config.globalProperties.$cookies.set(JWT_KEY_PARTICIPANT, 'Bearer ' + jwt);
+  app.config.globalProperties.$cookies.set(
+    JWT_KEY_PARTICIPANT,
+    'Bearer ' + jwt
+  );
 };
 
 export const getAccessTokenParticipant = (): string | null => {

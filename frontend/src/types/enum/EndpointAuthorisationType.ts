@@ -1,7 +1,7 @@
 enum EndpointAuthorisationType {
   UNAUTHORISED = 'unauthorised',
   MODERATOR = 'moderator',
-  PARTICIPANT = 'participant'
+  PARTICIPANT = 'participant',
 }
 
 export default EndpointAuthorisationType;

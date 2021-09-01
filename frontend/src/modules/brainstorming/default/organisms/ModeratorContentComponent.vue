@@ -1,7 +1,14 @@
 <template>
   <header class="brainstorming__header">
-    <label for="orderType" class="heading heading--xs">{{ $t('module.brainstorming.default.moderatorContent.sortOrder') }}</label>
-    <select v-model="orderType" id="orderType" class="select select--fullwidth" @change="getIdeas">
+    <label for="orderType" class="heading heading--xs">{{
+      $t('module.brainstorming.default.moderatorContent.sortOrder')
+    }}</label>
+    <select
+      v-model="orderType"
+      id="orderType"
+      class="select select--fullwidth"
+      @change="getIdeas"
+    >
       <option v-for="type in SortOrderOptions" :key="type" :value="type">
         {{ $t(`enum.ideaSortOrder.${IdeaSortOrder[type]}`) }}
       </option>
@@ -43,7 +50,7 @@ import Expand from '@/components/shared/atoms/Expand.vue';
 @Options({
   components: {
     IdeaCard,
-    Expand
+    Expand,
   },
 })
 export default class ModeratorContentComponent extends Vue {
@@ -61,7 +68,7 @@ export default class ModeratorContentComponent extends Vue {
   }
 
   @Watch('taskId', { immediate: true })
-  onTaskIdChanged(val: string): void {
+  onTaskIdChanged(): void {
     this.getIdeas();
   }
 

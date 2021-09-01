@@ -4,12 +4,16 @@
     @update:showModal="$emit('update:showModal', $event)"
   >
     <div class="session-create">
-      <h2 class="heading heading--regular">{{ $t("moderator.organism.module.create.header") }}</h2>
+      <h2 class="heading heading--regular">
+        {{ $t('moderator.organism.module.create.header') }}
+      </h2>
       <p>
-        {{ $t("moderator.organism.module.create.info") }}
+        {{ $t('moderator.organism.module.create.info') }}
       </p>
       <form class="session-create__form">
-        <label for="taskType" class="heading heading--xs">{{ $t("moderator.organism.module.create.taskType") }}</label>
+        <label for="taskType" class="heading heading--xs">{{
+          $t('moderator.organism.module.create.taskType')
+        }}</label>
         <select
           v-model="taskType"
           id="taskType"
@@ -24,7 +28,9 @@
           :errors="context.$v.taskType.$errors"
           :isSmall="true"
         />
-        <label for="moduleType" class="heading heading--xs">{{ $t("moderator.organism.module.create.moduleType") }}</label>
+        <label for="moduleType" class="heading heading--xs">{{
+          $t('moderator.organism.module.create.moduleType')
+        }}</label>
         <el-select v-model="moduleType" id="moduleType" multiple>
           <el-option
             v-for="type in ModuleTypeKeys"
@@ -56,13 +62,17 @@
           :isSmall="true"
         />
 
-        <label for="description" class="heading heading--xs">{{ $t("moderator.organism.module.create.description") }}</label>
+        <label for="description" class="heading heading--xs">{{
+          $t('moderator.organism.module.create.description')
+        }}</label>
         <textarea
           id="description"
           v-model="description"
           class="textarea textarea--fullwidth"
           rows="3"
-          :placeholder="$t('moderator.organism.module.create.descriptionExample')"
+          :placeholder="
+            $t('moderator.organism.module.create.descriptionExample')
+          "
           @blur="context.$v.description.$touch"
         />
         <FormError
@@ -75,7 +85,7 @@
           class="btn btn--gradient btn--fullwidth"
           @click.prevent="createModule"
         >
-          {{ $t("moderator.organism.module.create.submit") }}
+          {{ $t('moderator.organism.module.create.submit') }}
         </button>
       </form>
     </div>

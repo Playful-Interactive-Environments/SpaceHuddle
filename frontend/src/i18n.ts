@@ -4,12 +4,13 @@ import en from '@/locales/en.json';
 import { Messages } from 'vue3-i18n/src/types';
 import { getEnumLocales, getLocales } from '@/modules';
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+
 const addModuleLocales = async (locale = 'en', dict: any): Promise<any> => {
   dict.module = await getLocales(locale);
   const enumLocales = await getEnumLocales(locale);
   if (enumLocales != null) {
-    if (!('enum' in dict))
-      dict.enum = {};
+    if (!('enum' in dict)) dict.enum = {};
     dict.enum.moduleType = enumLocales;
   }
   return dict;
@@ -24,7 +25,11 @@ const i18n = createI18n({
   messages: { de: de, en: en },
 });
 
-i18n.t2 = (key: string, fallback_message: string, itemContent: [] | null): string => {
+i18n.t2 = (
+  key: string,
+  fallback_message: string,
+  itemContent: [] | null
+): string => {
   let translation = i18n.t(key) as string;
 
   if (translation.length == 0) {
@@ -39,7 +44,10 @@ i18n.t2 = (key: string, fallback_message: string, itemContent: [] | null): strin
   if (itemContent && translation.length > 0) {
     let contentIndex: any;
     for (contentIndex in itemContent) {
-      translation = translation.replace(new RegExp("\\{" + contentIndex + "\\}", 'g'), itemContent[contentIndex]);
+      translation = translation.replace(
+        new RegExp('\\{' + contentIndex + '\\}', 'g'),
+        itemContent[contentIndex]
+      );
     }
   }
 
@@ -64,7 +72,11 @@ i18n.containsKey = (key: string): boolean => {
   return recursiveRetrieve(key.split('.'), i18n.en);
 };
 
-i18n.translateWithFallback = (item: string, itemContent: [] | null, prefix = ''): string => {
+i18n.translateWithFallback = (
+  item: string,
+  itemContent: [] | null,
+  prefix = ''
+): string => {
   const translateParts = item.split(':');
   if (translateParts.length > 1) {
     const translateCode = translateParts[0];

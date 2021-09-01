@@ -6,23 +6,30 @@
         container2 container2--fullheight container2--centered
       "
     >
-      <h2 class="heading heading--medium heading--white">{{ $t("moderator.view.register.login.header") }}</h2>
+      <h2 class="heading heading--medium heading--white">
+        {{ $t('moderator.view.register.login.header') }}
+      </h2>
       <p class="register__text">
-        {{ $t("moderator.view.register.login.info") }}
+        {{ $t('moderator.view.register.login.info') }}
       </p>
       <router-link to="login">
-        <button class="btn btn--outline-white">{{ $t("moderator.view.register.login.submit") }}</button>
+        <button class="btn btn--outline-white">
+          {{ $t('moderator.view.register.login.submit') }}
+        </button>
       </router-link>
     </section>
     <section class="container2 container2--fullheight container2--centered">
       <div class="register__content">
-        <h1 class="heading heading--medium">{{ $t("moderator.view.register.header") }}</h1>
+        <h1 class="heading heading--medium">
+          {{ $t('moderator.view.register.header') }}
+        </h1>
         <p class="register__description">
-          {{ $t("moderator.view.register.info") }}
-
+          {{ $t('moderator.view.register.info') }}
         </p>
         <form @submit.prevent="registerUser">
-          <h3 class="heading heading--xs">{{ $t("moderator.view.register.email") }}</h3>
+          <h3 class="heading heading--xs">
+            {{ $t('moderator.view.register.email') }}
+          </h3>
           <input
             class="input input--fullwidth"
             name="email"
@@ -37,7 +44,9 @@
             :errors="context.$v.email.$errors"
             :isSmall="true"
           />
-          <h3 class="heading heading--xs">{{ $t("moderator.view.register.password") }}</h3>
+          <h3 class="heading heading--xs">
+            {{ $t('moderator.view.register.password') }}
+          </h3>
           <input
             class="input input--fullwidth"
             name="password"
@@ -52,7 +61,9 @@
             :errors="context.$v.password.$errors"
             :isSmall="true"
           />
-          <h4 class="heading heading--xs">{{ $t("moderator.view.register.passwordConform") }}</h4>
+          <h4 class="heading heading--xs">
+            {{ $t('moderator.view.register.passwordConform') }}
+          </h4>
           <input
             class="input input--fullwidth"
             name="passwordRepeat"
@@ -76,7 +87,7 @@
           />
           <form-error :errors="errors"></form-error>
           <button class="btn btn--gradient btn--fullwidth" type="submit">
-            {{ $t("moderator.view.register.submit") }}
+            {{ $t('moderator.view.register.submit') }}
           </button>
         </form>
       </div>
@@ -95,7 +106,6 @@ import {
 } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
-import States from '@/types/enum/States';
 import SnackbarType from '@/types/enum/SnackbarType';
 import * as userService from '@/services/user-service';
 import { EventType } from '@/types/enum/EventType';
@@ -104,9 +114,6 @@ import {
   addError,
   clearErrors,
 } from '@/services/exception-service';
-import * as taskService from "@/services/task-service";
-import {setModuleStyles} from "@/utils/moduleStyles";
-import * as sessionService from "@/services/session-service";
 
 @Options({
   components: {
@@ -121,21 +128,18 @@ import * as sessionService from "@/services/session-service";
       required,
       min: minLength(8),
       max: maxLength(255),
-      containsUppercase: helpers.withMessage(
-        'wrongPasswordSyntax',
-        (value) => {
-          return (
-            /[A-Z]/.test(value as string) &&
-            /[a-z]/.test(value as string) &&
-            /[0-9]/.test(value as string) &&
-            /[#?!@$%^&*-]/.test(value as string)
-          );
-        }
-      ),
+      containsUppercase: helpers.withMessage('wrongPasswordSyntax', (value) => {
+        return (
+          /[A-Z]/.test(value as string) &&
+          /[a-z]/.test(value as string) &&
+          /[0-9]/.test(value as string) &&
+          /[#?!@$%^&*-]/.test(value as string)
+        );
+      }),
     },
     passwordRepeat: {
       required,
-      min: minLength(8)
+      min: minLength(8),
     },
   },
 })
@@ -157,13 +161,8 @@ export default class ModeratorRegister extends Vue {
     await this.context.$v.$validate();
     if (this.context.$v.$error || this.hasMatchingPasswords) return;
 
-
     userService
-      .registerUser(
-        this.email,
-        this.password,
-        this.passwordRepeat
-      )
+      .registerUser(this.email, this.password, this.passwordRepeat)
       .then(
         () => {
           this.$router.push({

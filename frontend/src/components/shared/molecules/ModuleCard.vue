@@ -2,7 +2,6 @@
   <router-link
     :to="
       isParticipant
-        //? `/task/${type}/${moduleName}/${task.id}`
         ? `/participant-module-content/${task.id}`
         : `/module-content/${sessionId}/${task.id}`
     "

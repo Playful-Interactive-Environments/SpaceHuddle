@@ -32,7 +32,9 @@
     <textarea
       id="description"
       class="textarea textarea--fullwidth"
-      :placeholder="$t('module.brainstorming.default.participant.descriptionInfo')"
+      :placeholder="
+        $t('module.brainstorming.default.participant.descriptionInfo')
+      "
       ref="ideaTextfield"
       rows="4"
       contenteditable
@@ -56,7 +58,9 @@
           width="20"
           height="auto"
         />
-        <span>{{ $t('module.brainstorming.default.participant.startGame') }}</span>
+        <span>{{
+          $t('module.brainstorming.default.participant.startGame')
+        }}</span>
       </button>
     </div>
   </ParticipantModuleDefaultContainer>
@@ -71,7 +75,6 @@ import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import useVuelidate from '@vuelidate/core';
 import { maxLength, required } from '@vuelidate/validators';
 import FormError from '@/components/shared/atoms/FormError.vue';
-import * as taskService from '@/services/task-service';
 import * as ideaService from '@/services/idea-service';
 import { EventType } from '@/types/enum/EventType';
 import SnackbarType from '@/types/enum/SnackbarType';
@@ -80,7 +83,6 @@ import {
   clearErrors,
   getErrorMessage,
 } from '@/services/exception-service';
-import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {

@@ -1,12 +1,16 @@
 <template>
   <div class="not-found">
-    <h1 class="heading heading--regular heading--white">{{ $t("shared.view.notFound.header") }}</h1>
+    <h1 class="heading heading--regular heading--white">
+      {{ $t('shared.view.notFound.header') }}
+    </h1>
     <p>
-      {{ $t("shared.view.notFound.info") }}
+      {{ $t('shared.view.notFound.info') }}
     </p>
     <br />
     <router-link to="/">
-      <button class="btn btn--mint">{{ $t("shared.view.notFound.submit") }}</button>
+      <button class="btn btn--mint">
+        {{ $t('shared.view.notFound.submit') }}
+      </button>
     </router-link>
   </div>
 </template>

@@ -18,7 +18,9 @@ export const getTaskById = async (
   );
 };
 
-export const updateTask = async (data: TaskForSaveAction): Promise<TaskForSaveAction> => {
+export const updateTask = async (
+  data: TaskForSaveAction
+): Promise<TaskForSaveAction> => {
   return await apiExecutePut<TaskForSaveAction>(`/${EndpointType.TASK}/`, data);
 };
 

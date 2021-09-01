@@ -2,7 +2,7 @@
   <router-link :to="route">
     <div class="back">
       <div class="back__icon"></div>
-      <div class="back__text">{{ $t("general.back") }}</div>
+      <div class="back__text">{{ $t('general.back') }}</div>
     </div>
   </router-link>
 </template>

@@ -4,13 +4,13 @@ import {
   apiExecutePost,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
-import EndpointAuthorisationType from "@/types/enum/EndpointAuthorisationType";
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Idea } from '@/types/api/Idea';
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+
 export const deleteIdea = async (id: string): Promise<void> => {
-  return await apiExecuteDelete<any>(
-    `/${EndpointType.IDEA}/${id}/`
-  );
+  return await apiExecuteDelete<any>(`/${EndpointType.IDEA}/${id}/`);
 };
 
 export const postIdea = async (
@@ -26,7 +26,7 @@ export const postIdea = async (
 
 export const getIdeasForTask = async (
   taskId: string,
-  orderType: string|null = null,
+  orderType: string | null = null,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Idea[]> => {
   let queryParameter = '';

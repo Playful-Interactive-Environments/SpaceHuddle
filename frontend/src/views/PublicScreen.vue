@@ -53,7 +53,9 @@ import ModuleComponentType from '@/modules/ModuleComponentType';
   components: {
     Header,
     Timer,
-    PublicScreenComponent: getAsyncDefaultModule(ModuleComponentType.PUBLIC_SCREEN),
+    PublicScreenComponent: getAsyncDefaultModule(
+      ModuleComponentType.PUBLIC_SCREEN
+    ),
   },
 })
 export default class PublicScreen extends Vue {

@@ -41,7 +41,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
     SessionInfo,
     TopicExpand,
     ModuleCard,
-    FormError
+    FormError,
   },
 })
 export default class ParticipantOverview extends Vue {

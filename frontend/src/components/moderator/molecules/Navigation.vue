@@ -10,14 +10,14 @@
         class="nav__item-icon nav__session-icon"
         :class="{ 'nav__item-icon--white': white }"
       />
-      {{ $t("moderator.molecule.navigation.sessions") }}
+      {{ $t('moderator.molecule.navigation.sessions') }}
     </router-link>
     <router-link to="/profile" class="nav__item">
       <div
         class="nav__item-icon nav__profile-icon"
         :class="{ 'nav__item-icon--white': white }"
       />
-      {{ $t("moderator.molecule.navigation.profile") }}
+      {{ $t('moderator.molecule.navigation.profile') }}
     </router-link>
   </nav>
 </template>
@@ -40,7 +40,6 @@ export default class Navigation extends Vue {
   justify-content: flex-end;
   align-items: center;
   padding: 0 2em;
-  height: var(--header-height);
 
   &__session-icon {
     @include icon-m('~@/assets/icons/session-overview.svg');

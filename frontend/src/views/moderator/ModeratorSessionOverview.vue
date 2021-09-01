@@ -2,7 +2,7 @@
   <div class="session-overview">
     <Header />
     <main class="container2 container2--spaced container2--fullheight-header">
-      <h1>{{ $t("moderator.organism.session.overview.header") }}</h1>
+      <h1>{{ $t('moderator.organism.session.overview.header') }}</h1>
       <div class="session-overview__session-container">
         <Card v-for="session in sessions" :key="session.id">
           <template v-slot:date>
@@ -16,7 +16,7 @@
             <SessionCode :code="session.connectionKey" :hasBorder="true" />
             <router-link :to="`/session/${session.id}`">
               <button class="btn btn--mint btn--fullwidth">
-                {{ $t("moderator.organism.session.overview.select") }}
+                {{ $t('moderator.organism.session.overview.select') }}
               </button>
             </router-link>
           </template>

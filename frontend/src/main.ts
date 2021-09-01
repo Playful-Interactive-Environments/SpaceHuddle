@@ -5,13 +5,14 @@ import i18n from '@/i18n';
 import App from './App.vue';
 import router from './router';
 import mitt, { Emitter, EventType } from 'mitt';
-import { ComponentCustomProperties } from 'vue';
 
 import ElementPlus from 'element-plus';
 //import 'element-plus/lib/theme-chalk/index.css';
 import 'element-plus/packages/theme-chalk/src/index.scss';
 //import 'element-theme-chalk/src/index.scss';
 import '@/assets/styles/global.scss';
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -24,9 +25,9 @@ const app = createApp(App);
 app.use(router);
 app.use(i18n as any);
 app.use(VueCookies as any, {
-  expireTimes: "30d",
+  expireTimes: '30d',
   secure: true,
-  sameSite: "Strict" // "Lax"
+  sameSite: 'Strict', // "Lax"
 });
 app.config.globalProperties.eventBus = eventBus;
 app.config.globalProperties.$t = i18n.t2;

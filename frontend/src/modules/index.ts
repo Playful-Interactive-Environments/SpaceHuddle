@@ -3,6 +3,8 @@ import config from './config.json';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import { RouteRecordRaw } from 'vue-router';
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+
 export const getAsyncDefaultModule = (componentType: string): any => {
   const module = config.none as any;
   if (module[componentType]) {
@@ -88,21 +90,16 @@ export const hasModule = (
   taskType: string | null = null,
   moduleName = 'default'
 ): boolean => {
-  if (getModuleConfig(componentType, taskType, moduleName)) {
-    return true;
-  }
-  return false;
+  return !!getModuleConfig(componentType, taskType, moduleName);
 };
 
 export const getLocales = async (locale = 'en'): Promise<any> => {
   const locales: any = {};
-  let taskKey: string;
-  let moduleKey: string;
-  for (taskKey in config) {
+  for (const taskKey in config) {
     if (taskKey != 'none') {
       locales[taskKey] = {};
       const taskType = (config as any)[taskKey];
-      for (moduleKey in taskType) {
+      for (const moduleKey in taskType) {
         const module = (config as any)[taskKey][moduleKey];
         if (module.locales && module.locales.includes(locale)) {
           await import(`@/modules/${module.path}/locales/${locale}.json`).then(
@@ -126,7 +123,8 @@ export const getLocales = async (locale = 'en'): Promise<any> => {
 
 export const getEnumLocales = async (locale = 'en'): Promise<any> => {
   let locales: any = {};
-  await import(`@/modules/locales/${locale}.json`).then((value) => {
+  await import(`@/modules/locales/${locale}.json`)
+    .then((value) => {
       locales = value.default;
     })
     .catch(() => {

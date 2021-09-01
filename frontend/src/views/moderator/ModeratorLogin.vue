@@ -2,12 +2,16 @@
   <div class="login container2--fullheight">
     <section class="container2 container2--fullheight container2--centered">
       <div class="login__content">
-        <h1 class="heading heading--medium">{{ $t("moderator.view.login.header") }}</h1>
+        <h1 class="heading heading--medium">
+          {{ $t('moderator.view.login.header') }}
+        </h1>
         <p class="login__description">
-          {{ $t("moderator.view.login.info") }}
+          {{ $t('moderator.view.login.info') }}
         </p>
         <form @submit.prevent="loginUser">
-          <h3 class="heading heading--xs">{{ $t("moderator.view.login.email") }}</h3>
+          <h3 class="heading heading--xs">
+            {{ $t('moderator.view.login.email') }}
+          </h3>
           <input
             class="input input--fullwidth"
             name="email"
@@ -21,7 +25,9 @@
             :errors="context.$v.email.$errors"
             :isSmall="true"
           />
-          <h3 class="heading heading--xs">{{ $t("moderator.view.login.password") }}</h3>
+          <h3 class="heading heading--xs">
+            {{ $t('moderator.view.login.password') }}
+          </h3>
           <input
             class="input input--fullwidth"
             name="password"
@@ -37,10 +43,12 @@
           />
           <form-error :errors="errors"></form-error>
           <button class="btn btn--gradient btn--fullwidth" type="submit">
-            {{ $t("moderator.view.login.submit") }}
+            {{ $t('moderator.view.login.submit') }}
             Login
           </button>
-          <p class="login__forgot-pw" role="button">{{ $t("moderator.view.login.forgot") }}</p>
+          <p class="login__forgot-pw" role="button">
+            {{ $t('moderator.view.login.forgot') }}
+          </p>
         </form>
       </div>
     </section>
@@ -51,12 +59,16 @@
       "
     >
       <div class="container2--centered">
-        <h2 class="heading heading--medium heading--white">{{ $t("moderator.view.login.register.header") }}</h2>
+        <h2 class="heading heading--medium heading--white">
+          {{ $t('moderator.view.login.register.header') }}
+        </h2>
         <p class="login__text">
-          {{ $t("moderator.view.login.register.info") }}
+          {{ $t('moderator.view.login.register.info') }}
         </p>
         <router-link to="register">
-          <button class="btn btn--outline-white">{{ $t("moderator.view.login.register.submit") }}</button>
+          <button class="btn btn--outline-white">
+            {{ $t('moderator.view.login.register.submit') }}
+          </button>
         </router-link>
       </div>
     </section>
@@ -70,7 +82,11 @@ import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
 import * as authService from '@/services/auth-service';
 import * as userService from '@/services/user-service';
-import {addError, clearErrors, getErrorMessage} from "@/services/exception-service";
+import {
+  addError,
+  clearErrors,
+  getErrorMessage,
+} from '@/services/exception-service';
 
 @Options({
   components: {
@@ -105,10 +121,7 @@ export default class ModeratorLogin extends Vue {
     await this.context.$v.$validate();
     if (this.context.$v.$error) return;
 
-    userService.loginUser(
-      this.email,
-      this.password
-    ).then(
+    userService.loginUser(this.email, this.password).then(
       (queryResult) => {
         if (queryResult.accessToken) {
           authService.setAccessTokenModerator(queryResult.accessToken);

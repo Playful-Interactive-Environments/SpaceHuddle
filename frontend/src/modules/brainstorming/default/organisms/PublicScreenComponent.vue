@@ -28,6 +28,8 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
     IdeaCard,
   },
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreenComponent extends Vue {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];
@@ -35,7 +37,7 @@ export default class PublicScreenComponent extends Vue {
   ideaInterval!: any;
 
   @Watch('taskId', { immediate: true })
-  onTaskIdChanged(val: string): void {
+  onTaskIdChanged(): void {
     this.getIdeas();
   }
 

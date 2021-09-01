@@ -1,10 +1,6 @@
 <template>
   <div class="expand">
-    <div
-      role="button"
-      class="expand__title"
-      @click="isExpanded = !isExpanded"
-    >
+    <div role="button" class="expand__title" @click="isExpanded = !isExpanded">
       <h2><slot name="title"></slot></h2>
       <div class="expand__icon">
         <div
@@ -21,10 +17,7 @@
       v-on:before-leave="beforeLeave"
       v-on:leave="leave"
     >
-      <section
-        class="expand__content"
-        v-show="isExpanded"
-      >
+      <section class="expand__content" v-show="isExpanded">
         <slot name="content"></slot>
       </section>
     </transition>
@@ -33,7 +26,6 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
 
 @Options({
   components: {},

@@ -1,7 +1,10 @@
 <template>
   <div :class="{ 'module-info--centered': isParticipant }" class="module-info">
     <span class="module-info__type">{{ $t(`enum.taskType.${type}`) }}</span>
-    <h3 :class="{ 'heading--regular': isParticipant }" class="module-info__title">
+    <h3
+      :class="{ 'heading--regular': isParticipant }"
+      class="module-info__title"
+    >
       {{ title }}
     </h3>
     <p class="module-info__description">{{ description }}</p>

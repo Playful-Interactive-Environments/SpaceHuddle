@@ -3,11 +3,13 @@ import {
   apiExecuteDelete,
   apiExecuteGetHandled,
   apiExecutePost,
-  apiExecutePut
+  apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Session } from '@/types/api/Session';
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 
 export const getList = async (
   authHeaderType = EndpointAuthorisationType.MODERATOR
@@ -45,16 +47,11 @@ export const getParticipantSession = async (
 };
 
 export const post = async (data: Partial<Session>): Promise<Session> => {
-  return await apiExecutePost<Session>(
-    `/${EndpointType.SESSION}/`,
-    data
-  );
+  return await apiExecutePost<Session>(`/${EndpointType.SESSION}/`, data);
 };
 
 export const remove = async (id: string): Promise<void> => {
-  return await apiExecuteDelete<any>(
-    `/${EndpointType.SESSION}/${id}/`
-  );
+  return await apiExecuteDelete<any>(`/${EndpointType.SESSION}/${id}/`);
 };
 
 export const getPublicScreen = async (

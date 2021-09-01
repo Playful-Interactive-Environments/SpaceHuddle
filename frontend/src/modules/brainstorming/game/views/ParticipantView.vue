@@ -8,9 +8,9 @@
       />
     </template>
     <div class="container2--centered center">
-      <span v-if="randomIdea">{{randomIdea.keywords}}</span>
-      <br>
-      <span v-if="randomIdea">{{randomIdea.description}}</span>
+      <span v-if="randomIdea">{{ randomIdea.keywords }}</span>
+      <br />
+      <span v-if="randomIdea">{{ randomIdea.description }}</span>
     </div>
   </ParticipantModuleDefaultContainer>
 </template>
@@ -27,12 +27,14 @@ import { Idea } from '@/types/api/Idea.ts';
     ParticipantModuleDefaultContainer,
   },
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ParticipantView extends Vue {
   @Prop() readonly taskId!: string;
   readonly interval = 10000;
   ideaInterval!: any;
 
-  randomIdea: Idea|null = null;
+  randomIdea: Idea | null = null;
 
   async mounted(): Promise<void> {
     await this.getTaskIdeas();

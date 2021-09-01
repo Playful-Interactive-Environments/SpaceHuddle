@@ -27,7 +27,7 @@
           class="btn btn--mint btn--fullwidth"
           :class="{ sidebar__button: !isSession }"
         >
-          {{ $t("general.publicScreen") }}
+          {{ $t('general.publicScreen') }}
         </button>
       </router-link>
     </div>

@@ -7,7 +7,7 @@
     >
       <ul>
         <li v-for="error in errors" :key="error">
-          {{ $i18n.translateWithFallback( error, snackbarMessageContent ) }}
+          {{ $i18n.translateWithFallback(error, snackbarMessageContent) }}
         </li>
       </ul>
     </div>
@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import { Vue } from 'vue-class-component';
-import { Prop, Watch } from 'vue-property-decorator';
+import { Prop } from 'vue-property-decorator';
 import SnackbarType from '@/types/enum/SnackbarType';
 
 // use via eventbus

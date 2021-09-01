@@ -109,7 +109,7 @@ export default class ModeratorSessionDetails extends Vue {
     await this.getTopics();
   }
 
-  async changePublicScreen(id: string|null): Promise<void> {
+  async changePublicScreen(id: string | null): Promise<void> {
     clearErrors(this.errors);
     this.publicScreenTaskId = id as string;
     sessionService

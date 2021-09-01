@@ -1,14 +1,11 @@
-<template>
-  TODO: implement information content!
-</template>
+<template>TODO: implement information content!</template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 
 @Options({
-  components: {
-  },
+  components: {},
 })
 export default class ModeratorContentComponent extends Vue {
   @Prop() readonly taskId!: string;
