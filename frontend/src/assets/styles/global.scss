@@ -259,6 +259,10 @@ body {
   }
 }
 
+.select select, .textarea, .input, .button {
+  -webkit-appearance: auto;
+}
+
 .select {
   cursor: pointer;
   -webkit-appearance: none;

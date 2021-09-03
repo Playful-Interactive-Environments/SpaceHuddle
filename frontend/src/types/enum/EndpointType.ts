@@ -1,6 +1,7 @@
 enum EndpointType {
   AUTHORIZED_USERS = 'authorized_users',
   CATEGORY = 'category',
+  CATEGORIES = 'categories',
   IDEA = 'idea',
   IDEAS = 'ideas',
   LOGIN = 'login',

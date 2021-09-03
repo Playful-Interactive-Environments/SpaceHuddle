@@ -44,7 +44,8 @@
       "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "",
       "moderatorContent": "organisms/ModeratorContentComponent",
-      "participant": "views/ParticipantView"
+      "participant": "views/ParticipantView",
+      "locales": "en"
     }
   },
   "voting": {
