@@ -17,6 +17,7 @@ use Fig\Http\Message\StatusCodeInterface;
  *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
  *   @OA\Parameter(in="query", name="order", description="sort order",
  *     @OA\Schema(ref="#/components/schemas/IdeaSortOrder")),
+ *   @OA\Parameter(in="query", name="refId", description="reference id"),
  *   @OA\Response(response="200", description="Success",
  *     @OA\MediaType(
  *         mediaType="application/json",

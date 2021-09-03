@@ -79,10 +79,11 @@ class IdeaRepository implements RepositoryInterface
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
      * @param array $sortConditions The ORDER BY conditions.
+     * @param string|null $refId The referenced taskId for sorting by categories.
      * @return IdeaData|array<IdeaData>|null The result entity(s).
      * @throws GenericException
      */
-    public function get(array $conditions = [], array $sortConditions = []): null|IdeaData|array
+    public function get(array $conditions = [], array $sortConditions = [], ?string $refId = null): null|IdeaData|array
     {
         $authorisation = $this->getAuthorisation();
         $authorisation_conditions = [];
@@ -97,19 +98,45 @@ class IdeaRepository implements RepositoryInterface
         }
 
         $query = $this->queryFactory->newSelect($this->getEntityName());
-        $query->select([
-            "idea.*",
-            "participant.symbol",
-            "participant.color",
-            "COUNT(*) AS count"
-        ])
-            ->innerJoin("task", "task.id = idea.task_id")
+        if ($refId) {
+            $query->select([
+                "idea.*",
+                "participant.symbol",
+                "participant.color",
+                "hierarchy.category_idea_id as category_id",
+                "category.keywords AS category",
+                "COUNT(*) AS count"
+            ]);
+        } else {
+            $query->select([
+                "idea.*",
+                "participant.symbol",
+                "participant.color",
+                "COUNT(*) AS count"
+            ]);
+        }
+
+        $query->innerJoin("task", "task.id = idea.task_id")
             ->innerJoin("participant", "participant.id = idea.participant_id")
             ->andWhere($authorisation_conditions)
             ->andWhere(["task.task_type" => $this->taskType])
             ->andWhere($conditions)
-            ->distinct(["idea.task_id", "idea.keywords", "idea.description", "idea.image", "idea.link"])
-            ->order($sortConditions);
+            ->distinct(["idea.task_id", "idea.keywords", "idea.description", "idea.image", "idea.link"]);
+
+        if ($refId) {
+            $query->leftJoin("hierarchy", "hierarchy.sub_idea_id = idea.id")
+                ->join([
+                    "category" => [
+                        "table" => "idea",
+                        "type" => "LEFT",
+                        "conditions" => ["hierarchy.category_idea_id = category.id", "category.task_id" => $refId]
+                    ]
+                ])
+                ->andWhere(["(category.id IS NOT NULL OR (category.id IS NULL AND hierarchy.sub_idea_id IS NULL))"]);
+        }
+
+        if (count($sortConditions) > 0)
+            $query->order($sortConditions);
 
         return $this->fetchAll($query);
     }
@@ -118,53 +145,56 @@ class IdeaRepository implements RepositoryInterface
      * Get entity by ID.
      * @param string $parentId The entity parent ID.
      * @param string|null $orderType The order by type (value of IdeaSortOrder).
+     * @param string|null $refId The referenced taskId for sorting by categories.
      * @return array<IdeaData> The result entity list.
      * @throws GenericException
      */
-    public function getAllOrdered(string $parentId, ?string $orderType): array
+    public function getAllOrdered(string $parentId, ?string $orderType, ?string $refId = null): array
     {
-        $sortOrder = self::convertOrderType($orderType);
+        $sortOrder = self::convertOrderType($orderType, $refId);
 
         $resultList = [];
-        $result = $this->get([$this->getParentIdName() => $parentId], $sortOrder);
+        $result = $this->get([$this->getParentIdName() => $parentId], $sortOrder, $refId);
         if (is_array($result)) {
             $resultList = $result;
         } elseif (isset($result)) {
             $resultList = [$result];
         }
 
-        return self::addOrderColumn($orderType, $resultList);
+        return self::addOrderColumn($orderType, $resultList, $refId);
     }
 
     /**
      * Get list of entities for the topic ID.
      * @param string $topicId The topic ID.
      * @param string|null $orderType The order by type (value of IdeaSortOrder).
+     * @param string|null $refId The referenced taskId for sorting by categories.
      * @return array<object> The result entity list.
      * @throws GenericException
      */
-    public function getAllOrderedFromTopic(string $topicId, ?string $orderType): array
+    public function getAllOrderedFromTopic(string $topicId, ?string $orderType, ?string $refId = null): array
     {
-        $sortOrder = self::convertOrderType($orderType);
+        $sortOrder = self::convertOrderType($orderType, $refId);
 
         $resultList = [];
         $result = $this->get([
             "task.topic_id" => $topicId
-        ], $sortOrder);
+        ], $sortOrder, $refId);
         if (is_array($result)) {
             $resultList = $result;
         } elseif (isset($result)) {
             $resultList = [$result];
         }
-        return self::addOrderColumn($orderType, $resultList);
+        return self::addOrderColumn($orderType, $resultList, $refId);
     }
 
     /**
      * Convert IdeaSortOrder to db sort column name
      * @param string|null $orderType The order by type (value of IdeaSortOrder).
+     * @param string|null $refId The referenced taskId for sorting by categories.
      * @return string|null db sort column name
      */
-    private static function convertOrderType(?string $orderType): array
+    private static function convertOrderType(?string $orderType, ?string $refId = null): array
     {
         switch (strtolower($orderType)) {
             case IdeaSortOrder::TIMESTAMP:
@@ -177,6 +207,9 @@ class IdeaRepository implements RepositoryInterface
                 return ['symbol', 'color'];
             case IdeaSortOrder::COUNT:
                 return ['count'];
+            case IdeaSortOrder::CATEGORISATION:
+                if ($refId)
+                    return ['category_idea_id'];
         }
         return [];
     }
@@ -185,15 +218,19 @@ class IdeaRepository implements RepositoryInterface
      * Add grouping Column for IdeaSortOrder
      * @param string|null $orderType The order by type (value of IdeaSortOrder).
      * @param array $resultList The database result table.
+     * @param string|null $refId The referenced taskId for sorting by categories.
      * @return array modified table
      */
-    private static function addOrderColumn(?string $orderType, array $resultList): array
+    private static function addOrderColumn(?string $orderType, array $resultList, ?string $refId = null): array
     {
-        $orderColumn = self::convertOrderType($orderType);
+        $orderColumn = self::convertOrderType($orderType, $refId);
 
         if ($orderColumn) {
             foreach ($resultList as $resultItem) {
-                if (sizeof($orderColumn) == 1) {
+                if (strtolower($orderType) == IdeaSortOrder::CATEGORISATION) {
+                    $column = "category";
+                    $orderContent = $resultItem->$column;
+                } elseif (sizeof($orderColumn) == 1) {
                     $column = $orderColumn[0];
                     $orderContent = $resultItem->$column;
                 } else {

@@ -46,8 +46,12 @@ class IdeaReaderTopic
             if (array_key_exists("order", $data)) {
                 $order = $data["order"];
             }
+            $refId = null;
+            if (array_key_exists("refId", $data)) {
+                $refId = $data["refId"];
+            }
             // Fetch data from the database
-            return $this->repository->getAllOrderedFromTopic($topicId, $order);
+            return $this->repository->getAllOrderedFromTopic($topicId, $order, $refId);
         }
         return null;
     }

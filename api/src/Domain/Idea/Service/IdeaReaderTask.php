@@ -41,9 +41,13 @@ class IdeaReaderTask
             if (array_key_exists("order", $data)) {
                 $order = $data["order"];
             }
+            $refId = null;
+            if (array_key_exists("refId", $data)) {
+                $refId = $data["refId"];
+            }
 
             // Fetch data from the database
-            return $this->repository->getAllOrdered($parentId, $order);
+            return $this->repository->getAllOrdered($parentId, $order, $refId);
         }
         return null;
     }
