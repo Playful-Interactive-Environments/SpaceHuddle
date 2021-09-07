@@ -12,6 +12,7 @@ use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Task\Type\TaskType;
 use App\Factory\QueryFactory;
+use function DI\add;
 
 /**
  * Repository
@@ -57,6 +58,10 @@ class CategoryRepository implements RepositoryInterface
      */
     public function get(array $conditions = [], array $sortConditions = []): null|CategoryData|array
     {
+        if (count($sortConditions) == 0) {
+            $sortConditions = ["keywords"];
+        }
+
         $authorisation = $this->getAuthorisation();
         $authorisation_conditions = [];
         if ($authorisation->isParticipant()) {

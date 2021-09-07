@@ -19,6 +19,13 @@ class TaskData
     public ?string $id;
 
     /**
+     * The topic id.
+     * @var string|null
+     * @OA\Property(example="uuid")
+     */
+    public ?string $topicId;
+
+    /**
      * The type of the task.
      * @var string|null
      * @OA\Property(ref="#/components/schemas/TaskType")
@@ -80,6 +87,7 @@ class TaskData
     {
         $reader = new ArrayReader($data);
         $this->id = $reader->findString("id");
+        $this->topicId = $reader->findString("topic_id");
         $this->taskType = strtoupper($reader->findString("task_type"));
         $this->name = $reader->findString("name");
         $this->description = $reader->findString("description");
