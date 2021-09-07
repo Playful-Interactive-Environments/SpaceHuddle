@@ -166,6 +166,12 @@ class CategoryRepository implements RepositoryInterface
      */
     public function addIdeas(string $categoryId, array $ideas): void
     {
+        $taskId = $this->queryFactory->newSelect("idea")
+            ->select(["task_id"])
+            ->andWhere(["id" => $categoryId])
+            ->execute()
+            ->fetchColumn(0);
+
         foreach ($ideas as $value) {
             $existQuery = $this->queryFactory->newSelect("hierarchy");
             $existQuery->select(["sub_idea_id"])
@@ -184,6 +190,23 @@ class CategoryRepository implements RepositoryInterface
                     ]
                 )->execute();
             }
+
+            $subQueryIdeas = $this->queryFactory->newSelect("idea")
+                ->select(["id"])
+                ->where(function ($exp, $q) {
+                    return $exp->equalFields("idea.id", "hierarchy.category_idea_id");
+                })
+                ->andWhere(["idea.task_id" => $taskId]);
+
+            $this->queryFactory->newDelete("hierarchy")
+                ->where(function ($exp, $q) use ($subQueryIdeas) {
+                    return $exp->exists($subQueryIdeas);
+                })
+                ->andWhere([
+                    "category_idea_id !=" => $categoryId,
+                    "sub_idea_id" => $value
+                ])
+                ->execute();
         }
     }
 
