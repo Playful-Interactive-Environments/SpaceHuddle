@@ -5,24 +5,14 @@
       :class="[hasBorder ? 'btn--outline-gray' : 'btn--white']"
       @click="copyToClipboard"
     >
-      <img
-        src="@/assets/icons/copy.svg"
-        alt="copy-icon"
-        width="20"
-        height="auto"
-      />
+      <font-awesome-icon icon="clone" />
       {{ code }}
     </button>
     <button
       class="btn btn--icon session-code__share"
       :class="[hasBorder ? 'btn--outline-gray' : 'btn--white']"
     >
-      <img
-        src="@/assets/icons/share.svg"
-        alt="share-icon"
-        width="20"
-        height="auto"
-      />
+      <font-awesome-icon icon="share-alt" />
     </button>
   </div>
 </template>

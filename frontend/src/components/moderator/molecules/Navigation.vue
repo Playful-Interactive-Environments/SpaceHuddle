@@ -6,17 +6,11 @@
     }"
   >
     <router-link to="/sessions" class="nav__item">
-      <div
-        class="nav__item-icon nav__session-icon"
-        :class="{ 'nav__item-icon--white': white }"
-      />
+      <font-awesome-icon icon="database" class="nav__item-icon" />
       {{ $t('moderator.molecule.navigation.sessions') }}
     </router-link>
     <router-link to="/profile" class="nav__item">
-      <div
-        class="nav__item-icon nav__profile-icon"
-        :class="{ 'nav__item-icon--white': white }"
-      />
+      <font-awesome-icon icon="user" class="nav__item-icon" />
       {{ $t('moderator.molecule.navigation.profile') }}
     </router-link>
   </nav>
@@ -40,14 +34,6 @@ export default class Navigation extends Vue {
   justify-content: flex-end;
   align-items: center;
   padding: 0 2em;
-
-  &__session-icon {
-    @include icon-m('~@/assets/icons/session-overview.svg');
-  }
-
-  &__profile-icon {
-    @include icon-m('~@/assets/icons/user.svg');
-  }
 
   &__item {
     display: flex;

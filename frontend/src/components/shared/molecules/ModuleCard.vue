@@ -30,10 +30,9 @@
         <ModuleShare :task="task" :is-on-public-screen="isOnPublicScreen" />
       </div>
       <div class="module-card__drag" v-if="!isParticipant">
-        <img
-          src="@/assets/icons/drag-dots.svg"
-          alt="drag-icon"
-          class="module-card__dots-icon"
+        <font-awesome-icon
+          icon="grip-vertical"
+          class="module-card__drag__icon"
         />
       </div>
     </article>
@@ -130,6 +129,10 @@ export default class ModuleCard extends Vue {
     width: 35px;
     align-self: stretch;
     cursor: pointer;
+
+    &__icon {
+      color: white;
+    }
   }
 
   &__dots-icon {

@@ -3,11 +3,12 @@
     <div role="button" class="expand__title" @click="isExpanded = !isExpanded">
       <h2><slot name="title"></slot></h2>
       <div class="expand__icon">
-        <div
-          aria-label="arrow"
+        <slot name="icons"></slot>
+        <font-awesome-icon
+          icon="chevron-down"
           class="expand__arrow"
           :class="{ expanded: isExpanded }"
-        ></div>
+        />
       </div>
     </div>
     <transition
@@ -79,7 +80,6 @@ export default class Expand extends Vue {
   }
 
   &__arrow {
-    @include icon-m('~@/assets/icons/arrow.svg');
     margin-right: 0.2rem;
     transition: transform 0.4s;
     transform-origin: center;

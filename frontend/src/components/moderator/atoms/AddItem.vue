@@ -4,7 +4,7 @@
     :class="{ 'add--column': isColumn }"
     @click="$emit('addNew')"
   >
-    <img src="@/assets/icons/add.svg" alt="add-icon" class="add__icon" />
+    <font-awesome-icon icon="plus" />
     <span class="add__text">{{ text }}</span>
   </div>
 </template>

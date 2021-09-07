@@ -12,6 +12,18 @@ import 'element-plus/packages/theme-chalk/src/index.scss';
 //import 'element-theme-chalk/src/index.scss';
 import '@/assets/styles/global.scss';
 
+import { library } from '@fortawesome/fontawesome-svg-core';
+// internal icons
+import { fas } from '@fortawesome/free-solid-svg-icons';
+import { far } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+
+import { fac } from '@/assets/icons/fac/index.ts';
+
+library.add(fas);
+library.add(far);
+library.add(fac);
+
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
 declare module '@vue/runtime-core' {
@@ -22,6 +34,7 @@ declare module '@vue/runtime-core' {
 
 const eventBus = mitt();
 const app = createApp(App);
+app.component('font-awesome-icon', FontAwesomeIcon);
 app.use(router);
 app.use(i18n as any);
 app.use(VueCookies as any, {

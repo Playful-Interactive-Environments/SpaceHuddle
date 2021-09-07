@@ -5,14 +5,21 @@
     content-class="base-modal__content"
     :click-to-close="false"
   >
-    <img
+    <font-awesome-icon
       v-if="closable"
-      src="@/assets/icons/cancel.svg"
+      icon="times"
+      role="button"
+      class="icon base-modal__close"
+      @click="$emit('update:showModal', false)"
+    />
+    <!--<img
+      v-if="closable"
+      src="@/assets/icons/svg/cancel.svg"
       alt="cancel-icon"
       role="button"
       class="icon icon--m btn--icon-only base-modal__close"
       @click="$emit('update:showModal', false)"
-    />
+    />-->
     <slot />
   </vue-final-modal>
 </template>
@@ -50,7 +57,6 @@ export default class ModalBase extends Vue {
 
   &__close {
     align-self: flex-end;
-    padding: 0.2rem;
     position: absolute;
   }
 }

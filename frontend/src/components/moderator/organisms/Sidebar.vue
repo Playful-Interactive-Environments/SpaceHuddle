@@ -7,7 +7,9 @@
       <!-- <router-link :to="`/session/${session.id}`"></router-link> -->
       <div class="sidebar__row">
         <div>{{ pretitle }}</div>
-        <div class="sidebar__icon" aria-label="settings" role="button"></div>
+        <div class="sidebar__icon" aria-label="settings" role="button">
+          <font-awesome-icon icon="cog" />
+        </div>
       </div>
       <h1 class="heading heading--regular heading--white">
         {{ title }}
@@ -108,14 +110,9 @@ export default class Sidebar extends Vue {
 
   &__icon {
     cursor: pointer;
-    @include icon-m(
-      '~@/assets/icons/settings.svg',
-      var(--color-darkblue-light)
-    );
-    transition: background-color 0.2s, opacity 0.5s;
 
     &:hover {
-      background-color: white;
+      color: white;
       opacity: 0.7;
     }
   }

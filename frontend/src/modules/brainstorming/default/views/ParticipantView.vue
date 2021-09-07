@@ -52,12 +52,8 @@
         {{ $t('module.brainstorming.default.participant.submit') }}
       </button>
       <button class="btn btn--icon btn--fullwidth" type="button">
-        <img
-          src="@/assets/icons/rocket.svg"
-          alt="rocket-icon"
-          width="20"
-          height="auto"
-        />
+        <!--<font-awesome-icon :icon="['fac', 'rocket']" />-->
+        <font-awesome-icon icon="rocket" />
         <span>{{
           $t('module.brainstorming.default.participant.startGame')
         }}</span>

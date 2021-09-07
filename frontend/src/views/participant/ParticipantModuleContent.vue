@@ -13,7 +13,7 @@
         >
           <a v-on:click="moduleNameClick(module.name)">
             <span class="icon">
-              <i class="fas fa-image" aria-hidden="true"></i>
+              <font-awesome-icon :icon="getModuleConfig(module.name).icon" />
             </span>
             <span>
               {{ $t(`enum.moduleType.${taskType}.${module.name}`) }}
@@ -48,6 +48,7 @@ import ModuleComponentType from '@/modules/ModuleComponentType';
 import * as taskService from '@/services/task-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import MenuBar from '@/components/participant/molecules/Menubar.vue';
+import config from '@/modules/config.json';
 
 @Options({
   components: {
@@ -94,6 +95,15 @@ export default class ParticipantModuleContent extends Vue {
         this.task = queryResult;
         this.moduleNameClick();
       });
+  }
+
+  getModuleConfig(moduleName: string): any {
+    if (this.taskType) {
+      const taskTypeConfig = (config as any)[this.taskType];
+      const moduleConfig = taskTypeConfig[moduleName];
+      return moduleConfig;
+    }
+    return {};
   }
 
   moduleNameClick(moduleName: string | null = null): void {

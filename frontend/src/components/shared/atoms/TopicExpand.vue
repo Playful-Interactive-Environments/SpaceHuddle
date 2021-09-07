@@ -8,11 +8,11 @@
     >
       <h2><slot name="title"></slot></h2>
       <div class="expand__icon">
-        <div
-          aria-label="arrow"
+        <font-awesome-icon
+          icon="chevron-down"
           class="expand__arrow"
           :class="{ expanded: isExpanded, 'expand__arrow--white': isRow }"
-        ></div>
+        />
       </div>
     </div>
     <transition
@@ -90,13 +90,12 @@ export default class TopicExpand extends Vue {
   }
 
   &__arrow {
-    @include icon-m('~@/assets/icons/arrow.svg');
     margin-right: 0.2rem;
     transition: transform 0.4s;
     transform-origin: center;
 
     &--white {
-      background-color: white;
+      color: white;
     }
 
     &.expanded {

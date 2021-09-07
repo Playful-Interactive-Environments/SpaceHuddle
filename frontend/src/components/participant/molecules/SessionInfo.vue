@@ -2,7 +2,7 @@
   <div class="session-info">
     <div class="session-info__title">{{ title }}</div>
     <div class="session-info__description">{{ description }}</div>
-    <img src="@/assets/icons/info.svg" alt="info" class="session-info__icon" />
+    <font-awesome-icon icon="info-circle" class="session-info__icon" />
   </div>
 </template>
 
