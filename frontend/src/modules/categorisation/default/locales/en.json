@@ -2,6 +2,14 @@
   "moderatorContent": {
     "categoryName": "Name",
     "categoryNamePlaceholder": "new category name ...",
-    "submit": "+"
+    "submit": "+",
+    "add": "Add category"
+  },
+  "create" : {
+    "header": "Add/Edit category",
+    "info": "Give the category a name",
+    "title": "Name",
+    "titleExample": "test category",
+    "submit": "save category"
   }
 }

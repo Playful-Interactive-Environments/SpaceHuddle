@@ -81,7 +81,6 @@ export default class ParticipantModuleContent extends Vue {
       this.task.modules.forEach((module) => {
         modules.push(module.name);
       });
-      console.log(modules);
       return modules;
     }
     return ['default'];

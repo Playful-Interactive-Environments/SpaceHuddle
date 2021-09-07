@@ -21,7 +21,8 @@
       "This field should be at least 8 long": "This field should be at least 8 long",
       "wrongPasswordSyntax": "Password must contain at least one lowercase and uppercase letter, a number and a special character.",
       "passwordNotMatch": "Password repetition does not match.",
-      "keywordsRequired": "Your idea is very long, please provide some keywords."
+      "keywordsRequired": "Your idea is very long, please provide some keywords.",
+      "noSelection": "Please select the data to be assigned."
     },
     "route": {
       "authorisationExpired": "Authorisation has expired.",

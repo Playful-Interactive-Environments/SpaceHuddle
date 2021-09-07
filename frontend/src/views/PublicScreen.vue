@@ -145,8 +145,6 @@ export default class PublicScreen extends Vue {
 
   &__content {
     margin-top: 1em;
-    column-width: 20vw;
-    column-gap: 1rem;
   }
 
   &__error {

@@ -64,3 +64,13 @@ export default class PublicScreenComponent extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.public-screen {
+  &__content {
+    margin-top: 1em;
+    column-width: 20vw;
+    column-gap: 1rem;
+  }
+}
+</style>

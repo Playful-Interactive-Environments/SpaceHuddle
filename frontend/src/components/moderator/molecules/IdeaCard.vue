@@ -1,5 +1,9 @@
 <template>
-  <div class="idea-card">
+  <div
+    class="idea-card"
+    @click="changeSelection"
+    :class="{ selected: isSelected }"
+  >
     <div>
       <div class="idea-card__idea">
         {{ hasKeywords ? idea.keywords : idea.description }}
@@ -8,7 +12,9 @@
         {{ idea.description }}
       </div>
     </div>
-    <div v-if="isDeletable" class="idea-card__delete" @click="deleteIdea"></div>
+    <div v-if="isDeletable" class="idea-card__delete" @click="deleteIdea">
+      <font-awesome-icon icon="trash" />
+    </div>
   </div>
 </template>
 
@@ -29,7 +35,15 @@ import {
 export default class IdeaCard extends Vue {
   @Prop() idea!: Idea;
   @Prop({ default: true }) isDeletable!: boolean;
+  @Prop({ default: false }) isSelectable!: boolean;
+  @Prop({ default: false, reactive: true }) isSelected!: boolean;
   errors: string[] = [];
+
+  changeSelection(): void {
+    if (this.isSelectable) {
+      this.$emit('update:isSelected', !this.isSelected);
+    }
+  }
 
   get hasKeywords(): boolean {
     return !!(this.idea.keywords && this.idea.keywords.length > 0);
@@ -77,11 +91,14 @@ export default class IdeaCard extends Vue {
     min-width: 18px;
     margin-left: 0.5rem;
     cursor: pointer;
-    @include icon-l('~@/assets/icons/trash.svg', var(--color-darkblue));
 
     &:hover {
       background-color: var(--color-red);
     }
+  }
+
+  &.selected {
+    background-color: var(--color-blue);
   }
 }
 </style>

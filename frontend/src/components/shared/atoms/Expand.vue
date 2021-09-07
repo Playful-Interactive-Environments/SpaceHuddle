@@ -3,7 +3,9 @@
     <div role="button" class="expand__title" @click="isExpanded = !isExpanded">
       <h2><slot name="title"></slot></h2>
       <div class="expand__icon">
-        <slot name="icons"></slot>
+        <span v-on:click="isExpanded = !isExpanded">
+          <slot name="icons"></slot>
+        </span>
         <font-awesome-icon
           icon="chevron-down"
           class="expand__arrow"
@@ -40,12 +42,12 @@ export default class Expand extends Vue {
   }
 
   enter(el: HTMLElement): void {
-    el.style.height = el.scrollHeight + 'px';
+    el.style.height = 'auto';
     el.style.opacity = '1';
   }
 
   beforeLeave(el: HTMLElement): void {
-    el.style.height = el.scrollHeight + 'px';
+    el.style.height = 'auto';
     el.style.opacity = '1';
   }
 

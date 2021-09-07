@@ -5,6 +5,7 @@ import TaskStates from '@/types/enum/TaskStates';
 
 export interface Task {
   id: string;
+  topicId: string;
   // see: https://www.typescriptlang.org/docs/handbook/enums.html
   taskType: keyof typeof TaskType;
   name: string;

@@ -3,14 +3,14 @@
     v-model:show-modal="showModal"
     @update:showModal="$emit('update:showModal', $event)"
   >
-    <div class="session-create">
+    <div class="module-create">
       <h2 class="heading heading--regular">
         {{ $t('moderator.organism.module.create.header') }}
       </h2>
       <p>
         {{ $t('moderator.organism.module.create.info') }}
       </p>
-      <form class="session-create__form">
+      <form class="module-create__form">
         <label for="taskType" class="heading heading--xs">{{
           $t('moderator.organism.module.create.taskType')
         }}</label>
@@ -193,7 +193,7 @@ export default class ModalModuleCreate extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.session-create {
+.module-create {
   display: flex;
   flex-direction: column;
   padding: 0 1rem;

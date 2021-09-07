@@ -27,12 +27,30 @@ export const postIdea = async (
 export const getIdeasForTask = async (
   taskId: string,
   orderType: string | null = null,
+  refId: string | null = null,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Idea[]> => {
   let queryParameter = '';
   if (orderType) queryParameter = `?order=${orderType}`;
+  if (refId && orderType) queryParameter = `${queryParameter}&refId=${refId}`;
   return await apiExecuteGetHandled<Idea[]>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.IDEAS}/${queryParameter}`,
+    [],
+    authHeaderType
+  );
+};
+
+export const getIdeasForTopic = async (
+  topicId: string,
+  orderType: string | null = null,
+  refId: string | null = null,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Idea[]> => {
+  let queryParameter = '';
+  if (orderType) queryParameter = `?order=${orderType}`;
+  if (refId && orderType) queryParameter = `${queryParameter}&refId=${refId}`;
+  return await apiExecuteGetHandled<Idea[]>(
+    `/${EndpointType.TOPIC}/${topicId}/${EndpointType.IDEAS}/${queryParameter}`,
     [],
     authHeaderType
   );
