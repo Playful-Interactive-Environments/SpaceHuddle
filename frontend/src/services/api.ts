@@ -166,11 +166,14 @@ export async function apiExecutePut<T = any>(
 
 export async function apiExecuteDeleteHandled<T = any>(
   url: string,
+  body: any = null,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<void> {
   if (await deleteConfirmDialog()) {
     try {
-      await getApiEndpoint(authHeaderType).delete<T>(url);
+      if (body)
+        await getApiEndpoint(authHeaderType).delete<T>(url, { data: body });
+      else await getApiEndpoint(authHeaderType).delete<T>(url);
     } catch (error) {
       return;
     }
@@ -179,10 +182,13 @@ export async function apiExecuteDeleteHandled<T = any>(
 
 export async function apiExecuteDelete<T = any>(
   url: string,
+  body: any = null,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<void> {
   if (await deleteConfirmDialog()) {
-    await getApiEndpoint(authHeaderType).delete<T>(url);
+    if (body)
+      await getApiEndpoint(authHeaderType).delete<T>(url, { data: body });
+    else await getApiEndpoint(authHeaderType).delete<T>(url);
   }
 }
 

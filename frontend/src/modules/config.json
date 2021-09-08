@@ -57,7 +57,8 @@
       "path": "selection/default",
       "publicScreen": "organisms/PublicScreenComponent",
       "moderatorConfig": "",
-      "moderatorContent": "organisms/ModeratorContentComponent"
+      "moderatorContent": "organisms/ModeratorContentComponent",
+      "locales": "en"
     }
   },
   "categorisation": {

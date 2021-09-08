@@ -78,8 +78,6 @@ export default class ModalCategoryCreate extends Vue {
   @Watch('categoryId', { immediate: true })
   onCategoryIdChanged(id: string): void {
     if (id) {
-      console.log("read category: ");
-      console.log(id);
       categorisationService.getCategoryById(id).then((category) => {
         this.title = category.keywords;
       });
