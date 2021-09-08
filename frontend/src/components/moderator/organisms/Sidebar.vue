@@ -7,7 +7,7 @@
       <!-- <router-link :to="`/session/${session.id}`"></router-link> -->
       <div class="sidebar__row">
         <div>{{ pretitle }}</div>
-        <div class="sidebar__icon" aria-label="settings" role="button">
+        <div class="sidebar__icon" aria-label="settings" role="button" v-on:click="$emit('openSettings', $event)">
           <font-awesome-icon icon="cog" />
         </div>
       </div>

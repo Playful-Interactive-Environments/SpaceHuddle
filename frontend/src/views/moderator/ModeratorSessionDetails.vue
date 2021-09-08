@@ -37,8 +37,8 @@
         </template>
       </TopicExpand>
     </main>
-    <ModalModuleCreate
-      v-model:show-modal="showModalModuleCreate"
+    <ModalTaskCreate
+      v-model:show-modal="showModalTaskCreate"
       :topic-id="addNewTopicId"
       @moduleCreated="getTopics"
     />
@@ -50,7 +50,7 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
-import ModalModuleCreate from '@/components/shared/molecules/ModalModuleCreate.vue';
+import ModalTaskCreate from '@/components/shared/molecules/ModalTaskCreate.vue';
 import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
 import Navigation from '@/components/moderator/molecules/Navigation.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
@@ -77,7 +77,7 @@ import {
   components: {
     AddItem,
     draggable,
-    ModalModuleCreate,
+    ModalTaskCreate,
     ModuleCard,
     Navigation,
     TopicExpand,
@@ -90,7 +90,7 @@ export default class ModeratorSessionDetails extends Vue {
   session: Session | null = null;
   topics: Topic[] = [];
   publicScreenTaskId = '';
-  showModalModuleCreate = false;
+  showModalTaskCreate = false;
   formatDate = formatDate;
   addNewTopicId = '';
   errors: string[] = [];
@@ -173,7 +173,7 @@ export default class ModeratorSessionDetails extends Vue {
 
   openModalModuleCreate(topicId: string): void {
     this.addNewTopicId = topicId;
-    this.showModalModuleCreate = true;
+    this.showModalTaskCreate = true;
   }
 }
 </script>

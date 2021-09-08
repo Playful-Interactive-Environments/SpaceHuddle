@@ -1,5 +1,9 @@
 {
   "none": {
+    "settings": {
+      "path": "none/settings",
+      "parameter": "TaskParameter"
+    },
     "icon": "times",
     "path": "none",
     "publicScreen": "organisms/PublicScreenComponent",
@@ -9,6 +13,10 @@
     "locales": "en, de"
   },
   "information": {
+    "settings": {
+      "path": "information/settings",
+      "parameter": "TaskParameter"
+    },
     "default": {
       "icon": "info",
       "path": "information/default",
@@ -19,6 +27,10 @@
     }
   },
   "brainstorming": {
+    "settings": {
+      "path": "brainstorming/settings",
+      "parameter": "TaskParameter"
+    },
     "default": {
       "icon": "brain",
       "path": "brainstorming/default",
@@ -35,6 +47,11 @@
     }
   },
   "selection": {
+    "settings": {
+      "path": "selection/settings",
+      "parameter": "TaskParameter",
+      "locales": "en"
+    },
     "default": {
       "icon": "check",
       "path": "selection/default",
@@ -44,6 +61,10 @@
     }
   },
   "categorisation": {
+    "settings": {
+      "path": "categorisation/settings",
+      "parameter": "TaskParameter"
+    },
     "default": {
       "icon": "object-group",
       "path": "categorisation/default",
@@ -55,6 +76,10 @@
     }
   },
   "voting": {
+    "settings": {
+      "path": "voting/settings",
+      "parameter": "TaskParameter"
+    },
     "default": {
       "icon": "chart-bar",
       "path": "voting/default",

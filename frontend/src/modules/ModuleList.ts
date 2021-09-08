@@ -8,5 +8,6 @@ export const getModulesForTaskType = (
 ): string[] => {
   const taskTypeName = TaskType[taskType];
   const modules = (config as any)[taskTypeName];
-  return Object.keys(modules) as string[];
+  const moduleNameList = Object.keys(modules) as string[];
+  return moduleNameList.filter(obj => obj !== 'settings');;
 };

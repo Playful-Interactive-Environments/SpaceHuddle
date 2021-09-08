@@ -5,6 +5,18 @@ import { RouteRecordRaw } from 'vue-router';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
+export const getAsyncTaskParameter = (taskType: string | null = null): any => {
+  if (taskType) {
+    const module = (config as any)[taskType];
+    if (module && module.settings && module.settings.parameter) {
+      return defineAsyncComponent(
+        () => import(`@/modules/${module.settings.path}/${module.settings.parameter}.vue`)
+      );
+    }
+  }
+  return null;
+};
+
 export const getAsyncDefaultModule = (componentType: string): any => {
   const module = config.none as any;
   if (module[componentType]) {

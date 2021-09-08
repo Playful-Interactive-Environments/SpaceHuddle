@@ -2,6 +2,7 @@
   <ModalBase
     v-model:show-modal="showModal"
     @update:showModal="$emit('update:showModal', $event)"
+    :key="taskType"
   >
     <div class="module-create">
       <h2 class="heading heading--regular">
@@ -28,6 +29,7 @@
           :errors="context.$v.taskType.$errors"
           :isSmall="true"
         />
+        <TaskParameterComponent ref="taskParameter" :taskId="taskId" />
         <label for="moduleType" class="heading heading--xs">{{
           $t('moderator.organism.module.create.moduleType')
         }}</label>
@@ -94,7 +96,7 @@
 
 <script lang="ts">
 import { Options, setup, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import useVuelidate from '@vuelidate/core';
 import { maxLength, required } from '@vuelidate/validators';
 
@@ -103,17 +105,22 @@ import ModalBase from '@/components/shared/molecules/ModalBase.vue';
 
 import * as taskService from '@/services/task-service';
 import TaskType from '@/types/enum/TaskType';
+import { TaskForSaveAction } from '@/types/api/Task';
 import {
   getErrorMessage,
   addError,
   clearErrors,
 } from '@/services/exception-service';
 import { getModulesForTaskType } from '@/modules/ModuleList';
+import { getAsyncDefaultModule, getAsyncTaskParameter } from '@/modules';
+import * as selectionService from '@/services/selection-service';
+import { CustomParameter } from '@/types/ui/CustomParameter';
 
 @Options({
   components: {
     FormError,
     ModalBase,
+    TaskParameterComponent: getAsyncDefaultModule('SELECTION')
   },
   validations: {
     taskType: {
@@ -129,9 +136,10 @@ import { getModulesForTaskType } from '@/modules/ModuleList';
     },
   },
 })
-export default class ModalModuleCreate extends Vue {
+export default class ModalTaskCreate extends Vue {
   @Prop({ default: false }) showModal!: boolean;
-  @Prop({ required: true }) topicId!: string;
+  @Prop({}) topicId!: string;
+  @Prop({}) taskId!: string;
 
   taskType = this.TaskTypeKeys[1];
   moduleType = this.ModuleTypeKeys;
@@ -146,6 +154,25 @@ export default class ModalModuleCreate extends Vue {
       $v: useVuelidate(),
     };
   });
+
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(id: string): void {
+    if (id) {
+      taskService.getTaskById(id).then((task) => {
+        this.taskType = task.taskType;
+        this.title = task.name;
+        this.description = task.description;
+      });
+    }
+  }
+
+  @Watch('taskType', { immediate: true })
+  async onTaskTypeChanged(taskType: string): Promise<void> {
+    if (this.$options.components) {
+      this.$options.components['TaskParameterComponent'] =
+        getAsyncTaskParameter(TaskType[taskType]);
+    }
+  }
 
   get TaskTypeKeys(): Array<keyof typeof TaskType> {
     return Object.keys(TaskType) as Array<keyof typeof TaskType>;
@@ -168,26 +195,53 @@ export default class ModalModuleCreate extends Vue {
     await this.context.$v.$validate();
     if (this.context.$v.$error) return;
 
-    taskService
-      .postTask(this.topicId, {
-        taskType: this.taskType,
-        name: this.title,
-        description: this.description,
-        parameter: {},
-        order: 10,
-        modules: this.moduleType,
-      })
-      .then(
-        () => {
-          this.$emit('update:showModal', false);
-          this.$emit('moduleCreated');
-          this.resetForm();
-          this.context.$v.$reset();
-        },
-        (error) => {
-          addError(this.errors, getErrorMessage(error));
-        }
-      );
+    if (this.topicId) {
+      taskService
+        .postTask(this.topicId, {
+          taskType: this.taskType,
+          name: this.title,
+          description: this.description,
+          parameter: {},
+          order: 10,
+          modules: this.moduleType,
+        })
+        .then(
+          (task) => {
+            this.taskUpdated(task,true);
+          },
+          (error) => {
+            addError(this.errors, getErrorMessage(error));
+          }
+        );
+    } else if (this.taskId) {
+      taskService
+        .putTask(this.taskId, {
+          taskType: this.taskType,
+          name: this.title,
+          description: this.description,
+          modules: this.moduleType,
+        })
+        .then(
+          (task) => {
+            this.taskUpdated(task, false);
+          },
+          (error) => {
+            addError(this.errors, getErrorMessage(error));
+          }
+        );
+    }
+  }
+
+  taskUpdated(task: TaskForSaveAction, cleanUp = true): void {
+    this.$emit('update:taskId', task.id);
+    if (this.$refs.taskParameter) {
+      const params = (this.$refs.taskParameter as CustomParameter);
+      if ('save' in params) params.save();
+    }
+    this.$emit('update:showModal', false);
+    this.$emit('moduleCreated');
+    if (cleanUp) this.resetForm();
+    this.context.$v.$reset();
   }
 }
 </script>

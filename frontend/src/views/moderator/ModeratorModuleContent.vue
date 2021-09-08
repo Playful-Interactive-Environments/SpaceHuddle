@@ -9,6 +9,7 @@
         taskType="TaskType[task.taskType]"
         :is-on-public-screen="task.id === publicScreenTask?.id"
         :task="task"
+        v-on:openSettings="editTask"
       />
       <NavigationWithBack :back-route="'/session/' + sessionId" />
       <form-error :errors="errors"></form-error>
@@ -16,6 +17,10 @@
         <ModuleContentComponent :task-id="taskId" />
       </main>
     </div>
+    <ModalTaskCreate
+      v-model:show-modal="showModalTaskCreate"
+      :task-id="taskId"
+    />
   </div>
 </template>
 
@@ -36,12 +41,14 @@ import * as taskService from '@/services/task-service';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
 import FormError from '@/components/shared/atoms/FormError.vue';
+import ModalTaskCreate from '@/components/shared/molecules/ModalTaskCreate.vue';
 
 @Options({
   components: {
     Sidebar,
     NavigationWithBack,
     FormError,
+    ModalTaskCreate,
     ModuleContentComponent: getAsyncDefaultModule(
       ModuleComponentType.MODERATOR_CONTENT
     ),
@@ -56,6 +63,7 @@ export default class ModeratorModuleContent extends Vue {
   TaskType = TaskType;
   TaskStates = TaskStates;
   errors: string[] = [];
+  showModalTaskCreate = false;
 
   get taskType(): TaskType | null {
     if (this.task) return TaskType[this.task.taskType];
@@ -88,6 +96,11 @@ export default class ModeratorModuleContent extends Vue {
         this.publicScreenTask = queryResult;
       });
     });
+  }
+
+  async editTask(): Promise<void> {
+    console.log('call edit task');
+    this.showModalTaskCreate = true;
   }
 }
 </script>

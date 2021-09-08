@@ -44,3 +44,15 @@ export const postTask = async (
     data
   );
 };
+
+export const putTask = async (
+  id: string,
+  data: Partial<TaskForSaveAction>
+): Promise<TaskForSaveAction> => {
+  data['id'] = id;
+  return await apiExecutePut<TaskForSaveAction>(
+    `/${EndpointType.TASK}`,
+    data,
+    EndpointAuthorisationType.MODERATOR
+  );
+};
