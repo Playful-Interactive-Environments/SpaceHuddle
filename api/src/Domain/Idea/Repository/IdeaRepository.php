@@ -154,7 +154,7 @@ class IdeaRepository implements RepositoryInterface
         $sortOrder = self::convertOrderType($orderType, $refId);
 
         $resultList = [];
-        $result = $this->get([$this->getParentIdName() => $parentId], $sortOrder, $refId);
+        $result = $this->get(["idea.task_id" => $parentId], $sortOrder, $refId);
         if (is_array($result)) {
             $resultList = $result;
         } elseif (isset($result)) {
