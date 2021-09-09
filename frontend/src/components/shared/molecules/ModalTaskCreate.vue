@@ -113,8 +113,8 @@ import {
 } from '@/services/exception-service';
 import { getModulesForTaskType } from '@/modules/ModuleList';
 import { getAsyncDefaultModule, getAsyncTaskParameter } from '@/modules';
-import * as selectionService from '@/services/selection-service';
 import { CustomParameter } from '@/types/ui/CustomParameter';
+import { EventType } from '@/types/enum/EventType';
 
 @Options({
   components: {
@@ -234,16 +234,17 @@ export default class ModalTaskCreate extends Vue {
     }
   }
 
-  taskUpdated(task: TaskForSaveAction, cleanUp = true): void {
+  async taskUpdated(task: TaskForSaveAction, cleanUp = true): Promise<void> {
     this.$emit('update:taskId', task.id);
     if (this.$refs.taskParameter) {
-      const params = (this.$refs.taskParameter as CustomParameter);
-      if ('save' in params) params.save();
+      const params = this.$refs.taskParameter as CustomParameter;
+      if ('save' in params) await params.save();
     }
     this.$emit('update:showModal', false);
     this.$emit('moduleCreated');
     if (cleanUp) this.resetForm();
     this.context.$v.$reset();
+    this.eventBus.emit(EventType.CHANGE_SETTINGS, {});
   }
 }
 </script>

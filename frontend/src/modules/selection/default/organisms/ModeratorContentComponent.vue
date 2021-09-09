@@ -133,7 +133,10 @@ export default class ModeratorContentComponent extends Vue {
           });
         const selectedIds: string[] = this.selection.map((idea) => idea.id);
         await ideaService
-          .getIdeasForTopic(this.task.topicId, this.orderType)
+          .getIdeasForTask(
+            this.task.parameter.brainstormingTaskId,
+            this.orderType
+          )
           .then((ideas) => {
             this.orderGroupContent = {};
             this.ideas = ideas;
@@ -206,6 +209,12 @@ export default class ModeratorContentComponent extends Vue {
 
   async mounted(): Promise<void> {
     this.startIdeaInterval();
+
+    this.eventBus.off(EventType.CHANGE_SETTINGS);
+    this.eventBus.on(EventType.CHANGE_SETTINGS, async () => {
+      await this.getTask();
+      await this.getIdeas();
+    });
   }
 
   startIdeaInterval(): void {

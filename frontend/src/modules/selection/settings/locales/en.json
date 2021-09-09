@@ -1,6 +1,7 @@
 {
   "taskParameter": {
     "name": "Selection name",
-    "nameExample": "Selection 1"
+    "nameExample": "Selection 1",
+    "brainstorming": "Selection for brainstorming task"
   }
 }

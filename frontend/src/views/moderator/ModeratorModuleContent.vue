@@ -99,7 +99,6 @@ export default class ModeratorModuleContent extends Vue {
   }
 
   async editTask(): Promise<void> {
-    console.log('call edit task');
     this.showModalTaskCreate = true;
   }
 }
