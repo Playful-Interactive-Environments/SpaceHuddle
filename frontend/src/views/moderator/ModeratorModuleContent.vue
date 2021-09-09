@@ -10,6 +10,7 @@
         :is-on-public-screen="task.id === publicScreenTask?.id"
         :task="task"
         v-on:openSettings="editTask"
+        v-on:delete="deleteTask"
       />
       <NavigationWithBack :back-route="'/session/' + sessionId" />
       <form-error :errors="errors"></form-error>
@@ -100,6 +101,11 @@ export default class ModeratorModuleContent extends Vue {
 
   async editTask(): Promise<void> {
     this.showModalTaskCreate = true;
+  }
+
+  async deleteTask(): Promise<void> {
+    await taskService.deleteTask(this.taskId);
+    this.$router.go(-1);
   }
 }
 </script>

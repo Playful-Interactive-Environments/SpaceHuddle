@@ -1,4 +1,5 @@
 import {
+  apiExecuteDelete,
   apiExecuteGetHandled,
   apiExecutePost,
   apiExecutePut,
@@ -22,6 +23,10 @@ export const updateTask = async (
   data: TaskForSaveAction
 ): Promise<TaskForSaveAction> => {
   return await apiExecutePut<TaskForSaveAction>(`/${EndpointType.TASK}/`, data);
+};
+
+export const deleteTask = async (id: string): Promise<void> => {
+  return await apiExecuteDelete<any>(`/${EndpointType.TASK}/${id}/`);
 };
 
 export const getTaskList = async (

@@ -7,8 +7,17 @@
       <!-- <router-link :to="`/session/${session.id}`"></router-link> -->
       <div class="sidebar__row">
         <div>{{ pretitle }}</div>
-        <div class="sidebar__icon" aria-label="settings" role="button" v-on:click="$emit('openSettings', $event)">
-          <font-awesome-icon icon="cog" />
+        <div class="sidebar__icon" aria-label="settings" role="button">
+          <font-awesome-icon
+            class="icon"
+            icon="trash"
+            v-on:click="$emit('delete', $event)"
+          />
+          <font-awesome-icon
+            class="icon"
+            icon="cog"
+            v-on:click="$emit('openSettings', $event)"
+          />
         </div>
       </div>
       <h1 class="heading heading--regular heading--white">
@@ -127,6 +136,10 @@ export default class Sidebar extends Vue {
 
   &__button {
     background-color: var(--module-color);
+  }
+
+  .icon {
+    margin-left: 0.5em;
   }
 }
 </style>
