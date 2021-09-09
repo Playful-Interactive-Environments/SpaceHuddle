@@ -162,12 +162,14 @@ export default class ModalTaskCreate extends Vue {
         this.taskType = task.taskType;
         this.title = task.name;
         this.description = task.description;
+        this.moduleType = task.modules.map((module) => module.name);
       });
     }
   }
 
   @Watch('taskType', { immediate: true })
   async onTaskTypeChanged(taskType: string): Promise<void> {
+    this.moduleType = this.ModuleTypeKeys;
     if (this.$options.components) {
       this.$options.components['TaskParameterComponent'] =
         getAsyncTaskParameter(TaskType[taskType]);
