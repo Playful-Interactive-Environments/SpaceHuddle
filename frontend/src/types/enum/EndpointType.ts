@@ -13,6 +13,7 @@ enum EndpointType {
   REGISTER = 'register',
   RESOURCE = 'resources',
   SELECTION = 'selection',
+  SELECTIONS = 'selections',
   SESSION = 'session',
   SESSIONS = 'sessions',
   TASK = 'task',

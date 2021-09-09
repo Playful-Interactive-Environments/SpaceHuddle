@@ -28,7 +28,6 @@
 import { Options, setup, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import * as taskService from '@/services/task-service';
-import * as selectionService from '@/services/selection-service';
 import { Task } from '@/types/api/Task';
 import { maxLength, required } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';

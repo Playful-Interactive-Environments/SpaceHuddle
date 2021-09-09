@@ -80,7 +80,8 @@
   "voting": {
     "settings": {
       "path": "voting/settings",
-      "parameter": "TaskParameter"
+      "parameter": "TaskParameter",
+      "locales": "en"
     },
     "default": {
       "icon": "chart-bar",

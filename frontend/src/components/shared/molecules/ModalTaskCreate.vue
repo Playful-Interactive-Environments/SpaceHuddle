@@ -193,8 +193,6 @@ export default class ModalTaskCreate extends Vue {
   }
 
   async saveModule(): Promise<void> {
-    console.log('save module');
-
     clearErrors(this.errors);
     await this.context.$v.$validate();
     if (this.context.$v.$error) return;

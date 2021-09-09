@@ -53,7 +53,7 @@ export const getSelectionForTopic = async (
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Selection[]> => {
   return await apiExecuteGetHandled<Selection[]>(
-    `/${EndpointType.TOPIC}/${topicId}/${EndpointType.SELECTION}`,
+    `/${EndpointType.TOPIC}/${topicId}/${EndpointType.SELECTIONS}`,
     [],
     authHeaderType
   );
