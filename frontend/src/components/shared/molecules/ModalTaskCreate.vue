@@ -85,7 +85,7 @@
         <button
           type="submit"
           class="btn btn--gradient btn--fullwidth"
-          @click.prevent="createModule"
+          @click.prevent="saveModule"
         >
           {{ $t('moderator.organism.module.create.submit') }}
         </button>
@@ -192,7 +192,9 @@ export default class ModalTaskCreate extends Vue {
     this.description = '';
   }
 
-  async createModule(): Promise<void> {
+  async saveModule(): Promise<void> {
+    console.log('save module');
+
     clearErrors(this.errors);
     await this.context.$v.$validate();
     if (this.context.$v.$error) return;

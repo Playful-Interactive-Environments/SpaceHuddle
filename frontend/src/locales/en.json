@@ -103,7 +103,7 @@
           "questionExample": "e.g. What should be the name of our new app?",
           "description": "Description",
           "descriptionExample": "e.g. The purpose of the meeting is to come up with new ideas our new app.",
-          "submit": "Create module"
+          "submit": "Save module"
         },
         "overview": {
           "add": "Add module"

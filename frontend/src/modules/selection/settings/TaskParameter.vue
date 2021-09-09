@@ -32,8 +32,8 @@
       </option>
     </select>
     <FormError
-      v-if="context.$v.selectionName.$error"
-      :errors="context.$v.selectionName.$errors"
+      v-if="context.$v.brainstormingTaskId.$error"
+      :errors="context.$v.brainstormingTaskId.$errors"
       :isSmall="true"
     />
   </section>
@@ -60,6 +60,9 @@ import TaskType from '@/types/enum/TaskType';
       required,
       max: maxLength(255),
     },
+    brainstormingTaskId : {
+      required,
+    }
   },
 })
 export default class TaskParameter extends Vue implements CustomParameter {

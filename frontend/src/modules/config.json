@@ -64,7 +64,8 @@
   "categorisation": {
     "settings": {
       "path": "categorisation/settings",
-      "parameter": "TaskParameter"
+      "parameter": "TaskParameter",
+      "locales": "en"
     },
     "default": {
       "icon": "object-group",

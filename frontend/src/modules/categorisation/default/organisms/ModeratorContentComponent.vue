@@ -131,8 +131,8 @@ export default class ModeratorContentComponent extends Vue {
 
       if (this.task) {
         await ideaService
-          .getIdeasForTopic(
-            this.task.topicId,
+          .getIdeasForTask(
+            this.task.parameter.brainstormingTaskId,
             IdeaSortOrderCategorisation,
             this.taskId
           )
