@@ -2,6 +2,7 @@
 
 namespace App\Domain\Vote\Repository;
 
+use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Idea\Data\IdeaData;
@@ -84,6 +85,33 @@ class VoteRepository implements RepositoryInterface
             ]);
 
         return ($query->execute()->rowCount() == 1);
+    }
+
+    /**
+     * Get entity.
+     * @param array $conditions The WHERE conditions to add with AND.
+     * @param array $sortConditions The ORDER BY conditions.
+     * @param string|null $refId The referenced taskId for sorting by categories.
+     * @return IdeaData|array<IdeaData>|null The result entity(s).
+     * @throws GenericException
+     */
+    public function get(array $conditions = [], array $sortConditions = []): null|object|array
+    {
+        $authorisation = $this->getAuthorisation();
+        $authorisation_conditions = [];
+        if ($authorisation->isParticipant()) {
+            $authorisation_conditions = [
+                "participant_id" => $authorisation->id
+            ];
+        }
+
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["*"])
+            ->andWhere($conditions)
+            ->andWhere($authorisation_conditions)
+            ->order($sortConditions);
+
+        return $this->fetchAll($query);
     }
 
     /**
