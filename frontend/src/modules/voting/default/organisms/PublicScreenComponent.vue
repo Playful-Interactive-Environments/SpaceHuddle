@@ -6,13 +6,27 @@
       type="bar"
       :data="chartData"
       :options="{
-        scales: {
-          y: {
-            beginAtZero: true,
-          },
-        },
         animation: {
           duration: 0,
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: 'white',
+            },
+          },
+          y: {
+            ticks: {
+              color: 'white',
+            },
+          },
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: 'white',
+            },
+          },
         },
       }"
     />
@@ -31,6 +45,8 @@ import { VoteResult } from '@/types/api/Vote';
     Vue3ChartJs,
   },
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreenComponent extends Vue {
   @Prop() readonly taskId!: string;
   votes: VoteResult[] = [];
@@ -43,17 +59,18 @@ export default class PublicScreenComponent extends Vue {
 
   get resultData(): any {
     this.votes.map((vote) => vote.idea.keywords);
-    const data = {
+    return {
       labels: this.votes.map((vote) => vote.idea.keywords),
       datasets: [
         {
-          label: (this as any).$t('module.voting.default.publicScreen.chartDataLabel'),
-          backgroundColor: '#2980b9',
+          label: (this as any).$t(
+            'module.voting.default.publicScreen.chartDataLabel'
+          ),
+          backgroundColor: '#fe6e5d',
           data: this.votes.map((vote) => vote.detailRatingSum),
         },
       ],
     };
-    return data;
   }
 
   async getVotes(): Promise<void> {
@@ -69,7 +86,7 @@ export default class PublicScreenComponent extends Vue {
 
   async updateChart(): Promise<void> {
     if (this.$refs.chartRef) {
-      const chartRef = (this.$refs.chartRef as any);
+      const chartRef = this.$refs.chartRef as any;
       chartRef.update();
     }
   }
