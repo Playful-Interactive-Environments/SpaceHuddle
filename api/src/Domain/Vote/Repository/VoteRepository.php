@@ -134,7 +134,8 @@ class VoteRepository implements RepositoryInterface
             ->innerJoin("idea", "idea.id = vote.idea_id")
             ->andWhere([
                 "vote.task_id" => $taskId
-            ])->group(["vote.idea_id", "vote.task_id"]);
+            ])->group(["vote.idea_id", "vote.task_id"])
+            ->order(["detail_rating" => "desc"]);
 
         $result = $this->fetchAll($query, VoteResultData::class);
 
