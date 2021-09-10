@@ -1,6 +1,7 @@
 {
   "publicScreen": {
-    "noIdeas": "No ideas yet - stay tuned."
+    "noIdeas": "No ideas yet - stay tuned.",
+    "chartDataLabel": "result"
   },
   "participant": {
     "skip": "skip idea"

@@ -35,8 +35,8 @@ export default class PublicScreenComponent extends Vue {
   @Prop() readonly taskId!: string;
   task: Task | null = null;
   ideas: Idea[] = [];
-  readonly interval = 3000;
-  ideaInterval!: any;
+  readonly intervalTime = 3000;
+  interval!: any;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -67,11 +67,11 @@ export default class PublicScreenComponent extends Vue {
   }
 
   startIdeaInterval(): void {
-    this.ideaInterval = setInterval(this.getIdeas, this.interval);
+    this.interval = setInterval(this.getIdeas, this.intervalTime);
   }
 
   unmounted(): void {
-    clearInterval(this.ideaInterval);
+    clearInterval(this.interval);
   }
 }
 </script>

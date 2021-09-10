@@ -20,13 +20,13 @@
         </span>
         <span v-if="!idea"> ... </span>
       </button>
-      <br/>
-      <br/>
+      <br />
+      <br />
       <span v-if="ideaPointer < ideas.length">
         {{ ideas[ideaPointer].keywords }}
       </span>
-      <br/>
-      <br/>
+      <br />
+      <br />
       <button
         type="submit"
         class="btn btn--gradient btn--fullwidth"
@@ -48,6 +48,7 @@ import * as selectService from '@/services/selection-service';
 import * as votingService from '@/services/voting-service';
 import { Idea } from '@/types/api/Idea';
 import { Vote } from '@/types/api/Vote';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
@@ -78,20 +79,22 @@ export default class ParticipantView extends Vue {
   async getVotes(): Promise<void> {
     if (this.taskId) {
       this.seats = [null, null, null];
-      await votingService.getVotes(this.taskId).then((votes) => {
-        this.votes = votes;
-        votes.forEach((vote) => {
-          if (vote.rating > 0) {
-            this.seats[vote.rating - 1] = this.ideas.filter(
+      await votingService
+        .getVotes(this.taskId, EndpointAuthorisationType.PARTICIPANT)
+        .then((votes) => {
+          this.votes = votes;
+          votes.forEach((vote) => {
+            if (vote.rating > 0) {
+              this.seats[vote.rating - 1] = this.ideas.filter(
+                (idea) => idea.id == vote.ideaId
+              )[0];
+            }
+            const ideaIndex = this.ideas.findIndex(
               (idea) => idea.id == vote.ideaId
-            )[0];
-          }
-          const ideaIndex = this.ideas.findIndex(
-            (idea) => idea.id == vote.ideaId
-          );
-          this.ideas.splice(ideaIndex, 1);
+            );
+            this.ideas.splice(ideaIndex, 1);
+          });
         });
-      });
     }
   }
 
@@ -116,7 +119,7 @@ export default class ParticipantView extends Vue {
         .postVote(this.taskId, {
           ideaId: idea.id,
           rating: slot,
-          detailRating: slot,
+          detailRating: slot > 0 ? 1 : 0,
         })
         .then((vote) => {
           this.votes.push(vote);
