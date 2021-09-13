@@ -39,12 +39,18 @@
       <main class="categorisation__content">
         <IdeaCard
           :idea="idea"
-          v-for="(idea, index) in item.ideas"
+          v-for="(idea, index) in filterIdeas(item.ideas, item.displayCount)"
           :key="index"
           :is-selectable="true"
           v-model:is-selected="ideasSelection[idea.id]"
           @ideaDeleted="getIdeas"
         />
+        <span role="button"
+          v-if="item.ideas.length > item.displayCount"
+          v-on:click="item.displayCount = 1000"
+        >
+          <font-awesome-icon icon="ellipsis-h" />
+        </span>
       </main>
     </template>
   </Expand>
@@ -77,6 +83,7 @@ import { EventType } from '@/types/enum/EventType';
 import SnackbarType from '@/types/enum/SnackbarType';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import ModalCategoryCreate from '@/modules/categorisation/default/molecules/ModalCategoryCreate.vue';
+import {registerRuntimeCompiler} from "vue";
 
 @Options({
   components: {
@@ -95,7 +102,11 @@ export default class ModeratorContentComponent extends Vue {
   ideas: Idea[] = [];
   ideasSelection: { [name: string]: boolean } = {};
   orderGroupContent: {
-    [name: string]: { ideas: Idea[]; category: Category | null };
+    [name: string]: {
+      ideas: Idea[];
+      category: Category | null;
+      displayCount: number;
+    };
   } = {};
   newCategory = {
     keywords: '',
@@ -107,6 +118,10 @@ export default class ModeratorContentComponent extends Vue {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.getIdeas();
+  }
+
+  filterIdeas(ideas: Idea[], count: number): Idea[] {
+    return ideas.slice(0, count);
   }
 
   async getTask(): Promise<void> {
@@ -121,11 +136,20 @@ export default class ModeratorContentComponent extends Vue {
     if (this.taskId) {
       if (!this.task) await this.getTask();
       await this.getCategories();
-      const orderGroupContent = { undefined: { ideas: [], category: null } };
+      let displayCount = 3;
+      if ('undefined' in this.orderGroupContent)
+        displayCount = this.orderGroupContent['undefined'].displayCount;
+      const orderGroupContent = {
+        undefined: { ideas: [], category: null, displayCount: displayCount },
+      };
       this.categories.forEach((category) => {
+        displayCount = 3;
+        if (category.keywords in this.orderGroupContent)
+          displayCount = this.orderGroupContent[category.keywords].displayCount;
         orderGroupContent[category.keywords] = {
           ideas: [],
           category: category,
+          displayCount: displayCount,
         };
       });
 
@@ -148,6 +172,7 @@ export default class ModeratorContentComponent extends Vue {
                   orderGroupContent[ideaItem.order] = {
                     ideas: [ideaItem],
                     category: null,
+                    displayCount: 3,
                   };
                 } else {
                   orderGroup.ideas.push(ideaItem);
