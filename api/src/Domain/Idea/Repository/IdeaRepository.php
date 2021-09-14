@@ -135,8 +135,9 @@ class IdeaRepository implements RepositoryInterface
                 ->andWhere(["(category.id IS NOT NULL OR (category.id IS NULL AND hierarchy.sub_idea_id IS NULL))"]);
         }
 
-        if (count($sortConditions) > 0)
+        if (count($sortConditions) > 0) {
             $query->order($sortConditions);
+        }
 
         return $this->fetchAll($query);
     }
@@ -161,7 +162,8 @@ class IdeaRepository implements RepositoryInterface
             $resultList = [$result];
         }
 
-        return self::addOrderColumn($orderType, $resultList, $refId);
+        $orderTypeList = self::convertToList($orderType);
+        return self::addOrderColumn($orderTypeList[0], $resultList, $refId);
     }
 
     /**
@@ -185,33 +187,63 @@ class IdeaRepository implements RepositoryInterface
         } elseif (isset($result)) {
             $resultList = [$result];
         }
-        return self::addOrderColumn($orderType, $resultList, $refId);
+
+        $orderTypeList = self::convertToList($orderType);
+        return self::addOrderColumn($orderTypeList[0], $resultList, $refId);
+    }
+
+    /**
+     * Converts a comma-separated string parameter to an array.
+     * @param string|null $queryParameter Comma-separated string parameter
+     * @return string[] Converted array
+     */
+    public static function convertToList(?string $queryParameter): array
+    {
+        if (isset($queryParameter)) {
+            if (str_starts_with($queryParameter, '[') && str_ends_with($queryParameter, ']')) {
+                return explode(',', substr($queryParameter, 1, -1));
+            }
+            return [$queryParameter];
+        }
+        return [];
     }
 
     /**
      * Convert IdeaSortOrder to db sort column name
      * @param string|null $orderType The order by type (value of IdeaSortOrder).
      * @param string|null $refId The referenced taskId for sorting by categories.
-     * @return string|null db sort column name
+     * @return array db sort column name
      */
     private static function convertOrderType(?string $orderType, ?string $refId = null): array
     {
-        switch (strtolower($orderType)) {
-            case IdeaSortOrder::TIMESTAMP:
-                return ['timestamp'];
-            case IdeaSortOrder::ALPHABETICAL:
-                return ['keywords'];
-            case IdeaSortOrder::STATE:
-                return ['state'];
-            case IdeaSortOrder::PARTICIPANT:
-                return ['symbol', 'color'];
-            case IdeaSortOrder::COUNT:
-                return ['count'];
-            case IdeaSortOrder::CATEGORISATION:
-                if ($refId)
-                    return ['category_idea_id'];
+        $orderList = [];
+        $orderTypeList = self::convertToList($orderType);
+
+        foreach ($orderTypeList as $orderType) {
+            switch (strtolower($orderType)) {
+                case IdeaSortOrder::TIMESTAMP:
+                    array_push($orderList, 'timestamp');
+                    break;
+                case IdeaSortOrder::ALPHABETICAL:
+                    array_push($orderList, 'keywords');
+                    break;
+                case IdeaSortOrder::STATE:
+                    array_push($orderList, 'state');
+                    break;
+                case IdeaSortOrder::PARTICIPANT:
+                    array_push($orderList, 'symbol', 'color');
+                    break;
+                case IdeaSortOrder::COUNT:
+                    array_push($orderList, 'count');
+                    break;
+                case IdeaSortOrder::CATEGORISATION:
+                    if ($refId) {
+                        array_push($orderList, 'category_idea_id');
+                    }
+                    break;
+            }
         }
-        return [];
+        return $orderList;
     }
 
     /**

@@ -121,7 +121,12 @@ class IdeaValidator
                 ->requirePresence("taskId", message: "Required: This field is required")
                 ->add("order", "custom", [
                     "rule" => function ($value) {
-                        return self::isTypeOption($value, IdeaSortOrder::class);
+                        $valueList = IdeaRepository::convertToList($value);
+                        foreach ($valueList as $value) {
+                            if (!self::isTypeOption($value, IdeaSortOrder::class))
+                                return false;
+                        }
+                        return true;
                     },
                     "message" => "Type: Wrong sort order."
                 ])
