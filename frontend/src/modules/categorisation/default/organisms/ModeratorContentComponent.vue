@@ -1,4 +1,19 @@
 <template>
+  <header class="categorisation__header">
+    <label for="orderType" class="heading heading--xs">{{
+        $t('module.categorisation.default.moderatorContent.sortOrder')
+      }}</label>
+    <select
+      v-model="orderType"
+      id="orderType"
+      class="select select--fullwidth"
+      @change="getIdeas"
+    >
+      <option v-for="type in SortOrderOptions" :key="type" :value="type">
+        {{ $t(`enum.ideaSortOrder.${IdeaSortOrder[type]}`) }}
+      </option>
+    </select>
+  </header>
   <!--<header class="categorisation__header columns">
     <label for="categoryName" class="column is-one-quarter heading heading--xs">
       {{ $t('module.categorisation.default.moderatorContent.categoryName') }}
@@ -83,7 +98,7 @@ import { EventType } from '@/types/enum/EventType';
 import SnackbarType from '@/types/enum/SnackbarType';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import ModalCategoryCreate from '@/modules/categorisation/default/molecules/ModalCategoryCreate.vue';
-import {registerRuntimeCompiler} from "vue";
+import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 
 @Options({
   components: {
@@ -115,9 +130,16 @@ export default class ModeratorContentComponent extends Vue {
   readonly interval = 10000;
   updateInterval!: any;
 
+  IdeaSortOrder = IdeaSortOrder;
+  orderType = this.SortOrderOptions[0];
+
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.getIdeas();
+  }
+
+  get SortOrderOptions(): Array<keyof typeof IdeaSortOrder> {
+    return Object.keys(IdeaSortOrder) as Array<keyof typeof IdeaSortOrder>;
   }
 
   filterIdeas(ideas: Idea[], count: number): Idea[] {
@@ -157,7 +179,7 @@ export default class ModeratorContentComponent extends Vue {
         await ideaService
           .getIdeasForTask(
             this.task.parameter.brainstormingTaskId,
-            IdeaSortOrderCategorisation,
+            `[${IdeaSortOrderCategorisation},${this.orderType}]`,
             this.taskId
           )
           .then((ideas) => {
@@ -270,10 +292,10 @@ export default class ModeratorContentComponent extends Vue {
     border-radius: var(--border-radius);
     background-color: var(--color-darkblue);
     width: 100%;
-    //display: table;
+    display: table;
 
     > * {
-      //display: table-cell;
+      display: table-cell;
     }
 
     label {

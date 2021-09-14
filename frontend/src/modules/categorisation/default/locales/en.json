@@ -3,7 +3,8 @@
     "categoryName": "Name",
     "categoryNamePlaceholder": "new category name ...",
     "submit": "+",
-    "add": "Add category"
+    "add": "Add category",
+    "sortOrder": "order by"
   },
   "create" : {
     "header": "Add/Edit category",
