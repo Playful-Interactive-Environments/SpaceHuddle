@@ -95,8 +95,8 @@ export default class ModeratorContentComponent extends Vue {
   orderGroupContent: { [name: string]: Idea[] } = {};
   ideasSelectionAdd: { [name: string]: boolean } = {};
   ideasSelectionRemove: { [name: string]: boolean } = {};
-  readonly interval = 3000;
-  ideaInterval!: any;
+  readonly intervalTime = 10000;
+  interval!: any;
   orderType = this.SortOrderOptions[0];
 
   IdeaSortOrder = IdeaSortOrder;
@@ -194,7 +194,7 @@ export default class ModeratorContentComponent extends Vue {
       }
       if (selection.length > 0) {
         await selectionService
-          .removeIdeasToSelection(this.task.parameter.selectionId, selection)
+          .removeIdeasFromSelection(this.task.parameter.selectionId, selection)
           .then(() => {
             this.getIdeas();
           });
@@ -218,11 +218,11 @@ export default class ModeratorContentComponent extends Vue {
   }
 
   startIdeaInterval(): void {
-    this.ideaInterval = setInterval(this.getIdeas, this.interval);
+    this.interval = setInterval(this.getIdeas, this.intervalTime);
   }
 
   unmounted(): void {
-    clearInterval(this.ideaInterval);
+    clearInterval(this.interval);
   }
 }
 </script>

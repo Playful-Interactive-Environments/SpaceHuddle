@@ -33,8 +33,8 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 export default class PublicScreenComponent extends Vue {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];
-  readonly interval = 3000;
-  ideaInterval!: any;
+  readonly intervalTime = 10000;
+  interval!: any;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -56,11 +56,11 @@ export default class PublicScreenComponent extends Vue {
   }
 
   startIdeaInterval(): void {
-    this.ideaInterval = setInterval(this.getIdeas, this.interval);
+    this.interval = setInterval(this.getIdeas, this.intervalTime);
   }
 
   unmounted(): void {
-    clearInterval(this.ideaInterval);
+    clearInterval(this.interval);
   }
 }
 </script>

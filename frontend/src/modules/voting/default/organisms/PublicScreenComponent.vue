@@ -54,7 +54,7 @@ export default class PublicScreenComponent extends Vue {
     labels: [],
     datasets: [],
   };
-  readonly intervalTime = 3000;
+  readonly intervalTime = 10000;
   interval!: any;
 
   get resultData(): any {

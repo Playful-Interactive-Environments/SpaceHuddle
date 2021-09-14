@@ -35,7 +35,7 @@ export default class PublicScreenComponent extends Vue {
   @Prop() readonly taskId!: string;
   task: Task | null = null;
   ideas: Idea[] = [];
-  readonly intervalTime = 3000;
+  readonly intervalTime = 10000;
   interval!: any;
 
   @Watch('taskId', { immediate: true })

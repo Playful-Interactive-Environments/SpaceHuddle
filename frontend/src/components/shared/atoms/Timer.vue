@@ -14,15 +14,15 @@ import { Prop, Watch } from 'vue-property-decorator';
 export default class Timer extends Vue {
   @Prop({ default: false }) isActive!: boolean;
   timeLeft = 360;
-  timerInterval!: any;
-  readonly interval = 1000;
+  interval!: any;
+  readonly intervalTime = 1000;
 
   @Watch('isActive', { immediate: true })
   onIsActiveChanged(val: boolean): void {
     if (val) {
       this.startTimer();
     } else {
-      clearInterval(this.timerInterval);
+      clearInterval(this.interval);
     }
   }
 
@@ -33,16 +33,16 @@ export default class Timer extends Vue {
   }
 
   startTimer(): void {
-    this.timerInterval = setInterval(() => {
+    this.interval = setInterval(() => {
       this.timeLeft -= 1;
       if (this.timeLeft <= 0) {
-        clearInterval(this.timerInterval);
+        clearInterval(this.interval);
       }
-    }, this.interval);
+    }, this.intervalTime);
   }
 
   unmounted(): void {
-    clearInterval(this.timerInterval);
+    clearInterval(this.interval);
   }
 }
 </script>

@@ -69,3 +69,15 @@ export const addIdeasToCategory = async (
     authHeaderType
   );
 };
+
+export const removeIdeasFromCategory = async (
+  categoryId: string,
+  data: Partial<string[]>,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<void> => {
+  await apiExecuteDelete<any>(
+    `/${EndpointType.CATEGORY}/${categoryId}/${EndpointType.IDEAS}`,
+    data,
+    authHeaderType
+  );
+};

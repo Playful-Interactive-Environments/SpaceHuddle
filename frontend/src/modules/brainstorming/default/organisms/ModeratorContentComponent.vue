@@ -59,8 +59,8 @@ export default class ModeratorContentComponent extends Vue {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];
   orderGroupContent: { [name: string]: Idea[] } = {};
-  readonly interval = 3000;
-  ideaInterval!: any;
+  readonly intervalTime = 10000;
+  interval!: any;
   orderType = this.SortOrderOptions[0];
 
   IdeaSortOrder = IdeaSortOrder;
@@ -100,11 +100,11 @@ export default class ModeratorContentComponent extends Vue {
   }
 
   startIdeaInterval(): void {
-    this.ideaInterval = setInterval(this.getIdeas, this.interval);
+    this.interval = setInterval(this.getIdeas, this.intervalTime);
   }
 
   unmounted(): void {
-    clearInterval(this.ideaInterval);
+    clearInterval(this.interval);
   }
 }
 </script>

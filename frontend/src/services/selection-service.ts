@@ -71,7 +71,7 @@ export const addIdeasToSelection = async (
   );
 };
 
-export const removeIdeasToSelection = async (
+export const removeIdeasFromSelection = async (
   selectionId: string,
   data: Partial<string[]>,
   authHeaderType = EndpointAuthorisationType.MODERATOR

@@ -31,8 +31,8 @@ import { Idea } from '@/types/api/Idea.ts';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ParticipantView extends Vue {
   @Prop() readonly taskId!: string;
-  readonly interval = 10000;
-  ideaInterval!: any;
+  readonly intervalTime = 10000;
+  interval!: any;
 
   randomIdea: Idea | null = null;
 
@@ -42,11 +42,11 @@ export default class ParticipantView extends Vue {
   }
 
   startIdeaInterval(): void {
-    this.ideaInterval = setInterval(this.getTaskIdeas, this.interval);
+    this.interval = setInterval(this.getTaskIdeas, this.intervalTime);
   }
 
   unmounted(): void {
-    clearInterval(this.ideaInterval);
+    clearInterval(this.interval);
   }
 
   async getTaskIdeas(): Promise<void> {

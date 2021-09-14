@@ -35,34 +35,54 @@
       <font-awesome-icon icon="plus" />
     </button>
   </header>-->
-  <Expand v-for="(item, key) in orderGroupContent" :key="key">
+  <Expand
+    v-for="(orderGroup, orderGroupKey) in orderGroupContent"
+    :key="orderGroupKey"
+  >
     <template v-slot:title>
-      {{ key.toUpperCase() }}
+      {{ orderGroupKey.toUpperCase() }}
     </template>
-    <template v-slot:icons v-if="key !== 'undefined'">
-      <span class="icon" v-on:click="addSelectedToCategory(item.category.id)">
+    <template v-slot:icons v-if="orderGroupKey !== 'undefined'">
+      <span
+        class="icon"
+        v-on:click="addSelectedToCategory(orderGroup.category.id)"
+      >
         <font-awesome-icon icon="plus" />
       </span>
-      <span class="icon" v-on:click="editCategory(item.category.id)">
+      <span class="icon" v-on:click="editCategory(orderGroup.category.id)">
         <font-awesome-icon icon="pen" />
       </span>
-      <span class="icon" v-on:click="deleteCategory(item.category.id)">
+      <span class="icon" v-on:click="deleteCategory(orderGroup.category.id)">
         <font-awesome-icon icon="trash" />
       </span>
     </template>
     <template v-slot:content>
       <main class="categorisation__content">
-        <IdeaCard
-          :idea="idea"
-          v-for="(idea, index) in filterIdeas(item.ideas, item.displayCount)"
-          :key="index"
-          :is-selectable="true"
-          v-model:is-selected="ideasSelection[idea.id]"
-          @ideaDeleted="getIdeas"
-        />
-        <span role="button"
-          v-if="item.ideas.length > item.displayCount"
-          v-on:click="item.displayCount = 1000"
+        <draggable
+          :id="orderGroup.category ? orderGroup.category.id : null"
+          v-model="orderGroup.ideas"
+          draggable=".item"
+          item-key="id"
+          group="idea"
+          @end="dragDone"
+        >
+          <template v-slot:item="{ element, index }">
+            <IdeaCard
+              v-if="index < orderGroup.displayCount"
+              :id="element.id"
+              :idea="element"
+              :is-selectable="true"
+              :key="element.id"
+              v-model:is-selected="ideasSelection[element.id]"
+              @ideaDeleted="getIdeas"
+              class="item"
+            />
+          </template>
+        </draggable>
+        <span
+          role="button"
+          v-if="orderGroup.ideas.length > orderGroup.displayCount"
+          v-on:click="orderGroup.displayCount = 1000"
         >
           <font-awesome-icon icon="ellipsis-h" />
         </span>
@@ -85,6 +105,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
+import draggable from 'vuedraggable';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import Expand from '@/components/shared/atoms/Expand.vue';
 import * as categorisationService from '@/services/categorisation-service';
@@ -106,9 +127,10 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
     Expand,
     AddItem,
     ModalCategoryCreate,
+    draggable,
   },
 })
-export default class ModeratorContentComponent extends Vue {
+export default class ModeratorContentComponent_ extends Vue {
   @Prop() readonly taskId!: string;
   showModalCategoryCreate = false;
   editCategoryId: string | null = null;
@@ -127,8 +149,8 @@ export default class ModeratorContentComponent extends Vue {
     keywords: '',
     description: '',
   };
-  readonly interval = 10000;
-  updateInterval!: any;
+  readonly intervalTime = 10000;
+  interval!: any;
 
   IdeaSortOrder = IdeaSortOrder;
   orderType = this.SortOrderOptions[0];
@@ -270,16 +292,28 @@ export default class ModeratorContentComponent extends Vue {
   }
 
   startIdeaInterval(): void {
-    this.updateInterval = setInterval(this.getIntervalContent, this.interval);
+    this.interval = setInterval(this.getIntervalContent, this.intervalTime);
   }
 
   unmounted(): void {
-    clearInterval(this.updateInterval);
+    clearInterval(this.interval);
   }
 
   openModalCategoryCreate(): void {
     this.editCategoryId = null;
     this.showModalCategoryCreate = true;
+  }
+
+  async dragDone(event: CustomEvent): Promise<void> {
+    if (event.to.id) {
+      await categorisationService.addIdeasToCategory(event.to.id, [
+        event.item.id,
+      ]);
+    } else {
+      await categorisationService.removeIdeasFromCategory(event.from.id, [
+        event.item.id,
+      ]);
+    }
   }
 }
 </script>
@@ -312,6 +346,10 @@ export default class ModeratorContentComponent extends Vue {
     column-width: 22vw;
     column-gap: 1rem;
   }
+}
+
+.item {
+  cursor: grab;
 }
 
 .column {
