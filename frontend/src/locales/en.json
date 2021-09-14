@@ -214,7 +214,8 @@
       "alphabetical": "alphabetical",
       "state": "state",
       "participant": "participant",
-      "count": "count"
+      "count": "count",
+      "categorisation": "categorisation"
     }
   },
   "general": {

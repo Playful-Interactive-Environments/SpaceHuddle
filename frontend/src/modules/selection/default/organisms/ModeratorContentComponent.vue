@@ -34,8 +34,17 @@
       class="select select--fullwidth"
       @change="getIdeas"
     >
-      <option v-for="type in SortOrderOptions" :key="type" :value="type">
-        {{ $t(`enum.ideaSortOrder.${IdeaSortOrder[type]}`) }}
+      <option
+        v-for="type in SortOrderOptions"
+        :key="type.orderType"
+        :value="type.ref ? `${type.orderType}&refId=${type.ref.id}` : type.orderType"
+      >
+        <span>
+          {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
+        </span>
+        <span v-if="type.ref">
+          - {{ type.ref.name }}
+        </span>
       </option>
     </select>
   </header>
@@ -71,13 +80,16 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
-import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+import IdeaSortOrder, {
+  IdeaSortOrderCategorisation,
+} from '@/types/enum/IdeaSortOrder';
 import Expand from '@/components/shared/atoms/Expand.vue';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import * as selectionService from '@/services/selection-service';
 import { EventType } from '@/types/enum/EventType';
 import SnackbarType from '@/types/enum/SnackbarType';
+import TaskType from '@/types/enum/TaskType';
 
 @Options({
   components: {
@@ -97,12 +109,23 @@ export default class ModeratorContentComponent extends Vue {
   ideasSelectionRemove: { [name: string]: boolean } = {};
   readonly intervalTime = 10000;
   interval!: any;
-  orderType = this.SortOrderOptions[0];
+  orderType = this.SortOrderOptions[0].orderType;
+  categoryTasks: Task[] = [];
 
   IdeaSortOrder = IdeaSortOrder;
 
-  get SortOrderOptions(): Array<keyof typeof IdeaSortOrder> {
-    return Object.keys(IdeaSortOrder) as Array<keyof typeof IdeaSortOrder>;
+  get SortOrderOptions(): { orderType: string; ref: Task | null }[] {
+    const result: { orderType: string; ref: Task | null }[] = Object.keys(
+      IdeaSortOrder
+    ).map((orderType) => {
+      return { orderType: orderType.toLowerCase(), ref: null };
+    });
+    if (this.categoryTasks) {
+      this.categoryTasks.forEach((task) => {
+        result.push({ orderType: IdeaSortOrderCategorisation, ref: task });
+      });
+    }
+    return result;
   }
 
   @Watch('taskId', { immediate: true })
@@ -114,6 +137,11 @@ export default class ModeratorContentComponent extends Vue {
     if (this.taskId) {
       await taskService.getTaskById(this.taskId).then((task) => {
         this.task = task;
+        taskService.getTaskList(task.topicId).then((tasks) => {
+          this.categoryTasks = tasks.filter(
+            (task) => task.taskType.toLowerCase() == TaskType.CATEGORISATION
+          );
+        });
       });
     }
   }
@@ -186,7 +214,9 @@ export default class ModeratorContentComponent extends Vue {
   async removeSelectedFromSelection(): Promise<void> {
     if (this.task && this.task.parameter && this.task.parameter.selectionId) {
       const selection: string[] = [];
-      for (let [ideaId, isSelected] of Object.entries(this.ideasSelectionRemove)) {
+      for (let [ideaId, isSelected] of Object.entries(
+        this.ideasSelectionRemove
+      )) {
         if (isSelected) {
           selection.push(ideaId);
           this.ideasSelectionRemove[ideaId] = false;
