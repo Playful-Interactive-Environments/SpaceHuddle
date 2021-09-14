@@ -304,7 +304,7 @@ export default class ModeratorContentComponent_ extends Vue {
     this.showModalCategoryCreate = true;
   }
 
-  async dragDone(event: CustomEvent): Promise<void> {
+  async dragDone(event: any): Promise<void> {
     if (event.to.id) {
       await categorisationService.addIdeasToCategory(event.to.id, [
         event.item.id,
