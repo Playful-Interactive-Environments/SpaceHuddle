@@ -17,6 +17,7 @@
             v-model="topics[index].tasks"
             tag="transition-group"
             item-key="order"
+            @end="dragDone(index)"
           >
             <template #item="{ element }">
               <li class="detail__module">
@@ -174,6 +175,16 @@ export default class ModeratorSessionDetails extends Vue {
   openModalModuleCreate(topicId: string): void {
     this.addNewTopicId = topicId;
     this.showModalTaskCreate = true;
+  }
+
+  dragDone(topicIndex: number): void {
+    const tasks = this.topics[topicIndex].tasks;
+    if (tasks) {
+      for (let i = 0; i < tasks.length; i++) {
+        tasks[i].order = i;
+        taskService.putTask(tasks[i].id, convertToSaveVersion(tasks[i]));
+      }
+    }
   }
 }
 </script>
