@@ -105,6 +105,9 @@ class TaskRepository implements RepositoryInterface
      */
     public function get(array $conditions = [], array $sortConditions = []): null|object|array
     {
+        if (count($sortConditions) == 0) {
+            $sortConditions = ["order"];
+        }
         $authorisation = $this->getAuthorisation();
         $query = $this->queryFactory->newSelect($this->getEntityName());
         $query->select(["*"])
