@@ -1,3 +1,3 @@
 export interface CustomParameter {
-  save(): Promise<void>;
+  save(taskId: string | null): Promise<void>;
 }

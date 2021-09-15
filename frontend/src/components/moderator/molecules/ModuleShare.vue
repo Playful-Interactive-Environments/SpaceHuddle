@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import { Task } from '@/types/api/Task';
 import { hasModule } from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
@@ -42,7 +42,8 @@ export default class ModuleShare extends Vue {
     return null;
   }
 
-  mounted(): void {
+  @Watch('task', { immediate: true })
+  onTaskChanged(val: string): void {
     this.hasParticipantComponent = hasModule(
       ModuleComponentType.PARTICIPANT,
       this.taskType,

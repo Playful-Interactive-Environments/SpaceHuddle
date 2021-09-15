@@ -19,6 +19,7 @@ import { maxLength, required } from '@vuelidate/validators';
 })
 export default class TaskParameter extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
   task: Task | null = null;
   selectionName = '';

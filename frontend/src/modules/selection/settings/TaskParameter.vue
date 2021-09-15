@@ -60,13 +60,14 @@ import TaskType from '@/types/enum/TaskType';
       required,
       max: maxLength(255),
     },
-    brainstormingTaskId : {
+    brainstormingTaskId: {
       required,
-    }
+    },
   },
 })
 export default class TaskParameter extends Vue implements CustomParameter {
   @Prop() readonly taskId!: string;
+  @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
   task: Task | null = null;
   selectionName = '';
@@ -81,13 +82,20 @@ export default class TaskParameter extends Vue implements CustomParameter {
   });
 
   async loadBrainstormingTasks(): Promise<void> {
-    if (this.task) {
-      await taskService.getTaskList(this.task.topicId).then((tasks) => {
+    const topicId = this.task ? this.task.topicId : this.topicId;
+
+    if (topicId) {
+      await taskService.getTaskList(topicId).then((tasks) => {
         this.brainstormingTasks = tasks.filter(
           (task) => task.taskType == TaskType.BRAINSTORMING.toUpperCase()
         );
       });
     }
+  }
+
+  @Watch('topicId', { immediate: true })
+  async onTopicIdChanged(): Promise<void> {
+    await this.loadBrainstormingTasks();
   }
 
   @Watch('taskId', { immediate: true })
@@ -115,35 +123,43 @@ export default class TaskParameter extends Vue implements CustomParameter {
     if (this.taskId) {
       await taskService.getTaskById(this.taskId).then((task) => {
         this.task = task;
-        this.brainstormingTaskId = task.parameter.brainstormingTaskId;
+        if (task.parameter.brainstormingTaskId)
+          this.brainstormingTaskId = task.parameter.brainstormingTaskId;
       });
       await this.loadBrainstormingTasks();
     }
   }
 
-  async save(): Promise<void> {
-    if (this.task) {
-      if (!this.task.parameter || !this.task.parameter.selectionId) {
-        await selectionService
-          .postSelection(this.task.topicId, { name: this.selectionName })
-          .then((selection) => {
-            taskService.putTask(this.taskId, {
-              parameter: {
-                selectionId: selection.id,
-                brainstormingTaskId: this.brainstormingTaskId,
-              },
-            });
-          });
-      } else {
-        await selectionService.putSelection(this.task.parameter.selectionId, {
+  async save(taskId: string | null): Promise<void> {
+    if (!taskId) taskId = this.taskId;
+    if (taskId) {
+      if (this.task && this.task.parameter && this.task.parameter.selectionId) {
+        const selectionId = this.task.parameter.selectionId;
+        await selectionService.putSelection(selectionId, {
           name: this.selectionName,
         });
         await taskService.putTask(this.taskId, {
           parameter: {
-            selectionId: this.task.parameter.selectionId,
+            selectionId: selectionId,
             brainstormingTaskId: this.brainstormingTaskId,
           },
         });
+      } else {
+        const topicId = this.task ? this.task.topicId : this.topicId;
+        if (topicId) {
+          await selectionService
+            .postSelection(topicId, { name: this.selectionName })
+            .then((selection) => {
+              if (taskId) {
+                taskService.putTask(taskId, {
+                  parameter: {
+                    selectionId: selection.id,
+                    brainstormingTaskId: this.brainstormingTaskId,
+                  },
+                });
+              }
+            });
+        }
       }
     }
   }

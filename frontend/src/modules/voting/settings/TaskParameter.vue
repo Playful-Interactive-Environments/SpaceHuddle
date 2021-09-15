@@ -49,6 +49,7 @@ import TaskType from '@/types/enum/TaskType';
 })
 export default class TaskParameter extends Vue implements CustomParameter {
   @Prop() readonly taskId!: string;
+  @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
   task: Task | null = null;
   selectionId: string | null = null;
@@ -89,9 +90,10 @@ export default class TaskParameter extends Vue implements CustomParameter {
     }
   }
 
-  async save(): Promise<void> {
-    if (this.task) {
-      await taskService.putTask(this.taskId, {
+  async save(taskId: string | null): Promise<void> {
+    if (!taskId) taskId = this.taskId;
+    if (taskId) {
+      await taskService.putTask(taskId, {
         parameter: {
           selectionId: this.selectionId,
         },

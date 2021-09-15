@@ -29,7 +29,7 @@
           :errors="context.$v.taskType.$errors"
           :isSmall="true"
         />
-        <TaskParameterComponent ref="taskParameter" :taskId="taskId" />
+        <TaskParameterComponent ref="taskParameter" :taskId="taskId" :topicId="topicId" />
         <label for="moduleType" class="heading heading--xs">{{
           $t('moderator.organism.module.create.moduleType')
         }}</label>
@@ -198,13 +198,18 @@ export default class ModalTaskCreate extends Vue {
     if (this.context.$v.$error) return;
 
     if (this.topicId) {
+      let taskCount = 0;
+      await taskService.getTaskList(this.topicId).then((tasks) => {
+        taskCount = tasks.length;
+      });
+
       taskService
         .postTask(this.topicId, {
           taskType: this.taskType,
           name: this.title,
           description: this.description,
           parameter: {},
-          order: 10,
+          order: taskCount,
           modules: this.moduleType,
         })
         .then(
@@ -235,10 +240,10 @@ export default class ModalTaskCreate extends Vue {
   }
 
   async taskUpdated(task: TaskForSaveAction, cleanUp = true): Promise<void> {
-    this.$emit('update:taskId', task.id);
+    //this.$emit('update:taskId', task.id);
     if (this.$refs.taskParameter) {
       const params = this.$refs.taskParameter as CustomParameter;
-      if ('save' in params) await params.save();
+      if ('save' in params) await params.save(task.id);
     }
     this.$emit('update:showModal', false);
     this.$emit('moduleCreated');
