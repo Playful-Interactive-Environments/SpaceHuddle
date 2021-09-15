@@ -160,10 +160,18 @@ export default class ParticipantModuleDefaultContainer extends Vue {
 
 .container2 {
   padding-bottom: 0;
+  max-height: 100vh;
+  position: relative;
 }
+
 .grid-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
   margin-top: 4rem;
+}
+
+.half-card {
+  max-height: 100%;
+  overflow: auto;
 }
 </style>
