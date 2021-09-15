@@ -7,7 +7,7 @@
         class="module-container__planet"
       />
     </template>
-    <div>
+    <div v-if="ideaPointer < ideas.length">
       <button
         v-for="(idea, index) in seats"
         :key="index"
@@ -18,7 +18,11 @@
         <span v-if="idea">
           {{ idea.keywords }}
         </span>
-        <span v-if="!idea"> ... </span>
+        <span v-if="!idea">
+          <font-awesome-icon icon="angle-double-left" />
+          {{ $t('module.voting.default.participant.emptySlot') }}
+          <font-awesome-icon icon="angle-double-right" />
+        </span>
       </button>
       <br />
       <br />
@@ -34,6 +38,9 @@
       >
         {{ $t('module.voting.default.participant.skip') }}
       </button>
+    </div>
+    <div v-if="ideaPointer >= ideas.length">
+      {{ $t('module.voting.default.participant.thanks') }}
     </div>
   </ParticipantModuleDefaultContainer>
 </template>
@@ -92,7 +99,7 @@ export default class ParticipantView extends Vue {
             const ideaIndex = this.ideas.findIndex(
               (idea) => idea.id == vote.ideaId
             );
-            this.ideas.splice(ideaIndex, 1);
+            if (ideaIndex >= 0) this.ideas.splice(ideaIndex, 1);
           });
         });
     }

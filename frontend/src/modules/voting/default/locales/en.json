@@ -4,7 +4,9 @@
     "chartDataLabel": "result"
   },
   "participant": {
-    "skip": "skip idea"
+    "skip": "skip idea",
+    "emptySlot": "insert idea to empty slot",
+    "thanks": "thanks for the vote"
   },
   "moderatorContent": {
   }
