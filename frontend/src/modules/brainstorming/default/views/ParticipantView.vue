@@ -47,18 +47,56 @@
       :isSmall="true"
     />
     <form-error :errors="errors"></form-error>
-    <div class="brainstorming--bottom">
+    <!--<div class="brainstorming--bottom">
       <button class="btn btn--mint btn--fullwidth" @click.prevent="submitIdea">
         {{ $t('module.brainstorming.default.participant.submit') }}
       </button>
       <button class="btn btn--icon btn--fullwidth" type="button">
-        <!--<font-awesome-icon :icon="['fac', 'rocket']" />-->
         <font-awesome-icon icon="rocket" />
         <span>{{
           $t('module.brainstorming.default.participant.startGame')
         }}</span>
       </button>
-    </div>
+    </div>-->
+    <nav class="level is-mobile columns is-gapless">
+      <div class="level-left column">
+        <input
+          id="link"
+          v-if="showLinkInput"
+          v-model="imageWebLink"
+          class="input input--fullwidth"
+          :placeholder="$t('module.brainstorming.default.participant.linkInfo')"
+        />
+      </div>
+      <div class="level-right column" role="button">
+        <div class="level-item" v-on:click="showLinkInput = !showLinkInput">
+          <font-awesome-icon icon="share-alt" />
+        </div>
+        <div
+          class="level-item"
+          v-on:click="showUploadDialog = !showUploadDialog"
+        >
+          <font-awesome-icon icon="paperclip" />
+        </div>
+        <div class="level-item" v-on:click="submitIdea">
+          <font-awesome-icon icon="save" />
+        </div>
+      </div>
+    </nav>
+    <my-upload
+      id="upload"
+      @crop-success="cropSuccess"
+      v-model="showUploadDialog"
+      :width="200"
+      :height="200"
+      img-format="png"
+      langType="en"
+      :no-square="true"
+      :no-circle="true"
+      :no-rotate="false"
+      :with-credentials="true"
+    ></my-upload>
+    <img :src="imgDataUrl" />
   </ParticipantModuleDefaultContainer>
 </template>
 
@@ -66,6 +104,7 @@
 import { Options, setup, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import ParticipantModuleDefaultContainer from '@/components/participant/organisms/ParticipantModuleDefaultContainer.vue';
+import myUpload from 'vue-image-crop-upload/upload-3.vue';
 
 import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import useVuelidate from '@vuelidate/core';
@@ -85,6 +124,7 @@ import {
     ParticipantModuleDefaultContainer,
     ModuleInfo,
     FormError,
+    'my-upload': myUpload,
   },
   validations: {
     keywords: {
@@ -99,6 +139,10 @@ import {
 export default class ParticipantView extends Vue {
   @Prop() readonly taskId!: string;
 
+  imgDataUrl = ''; // the datebase64 url of created image
+  showUploadDialog = false;
+  showLinkInput = false;
+
   activePlanetIndex = 0;
   planets = [
     require('@/assets/illustrations/planets/brainstorming01.png'),
@@ -109,6 +153,7 @@ export default class ParticipantView extends Vue {
   description = '';
   errors: string[] = [];
   keywords = '';
+  imageWebLink = '';
   readonly keywordsEmptyMsg = 'error.vuelidate.keywordsRequired';
   scalePlanet = false;
 
@@ -131,13 +176,15 @@ export default class ParticipantView extends Vue {
       .postIdea(this.taskId, {
         description: this.keywords.length > 0 ? this.description : '',
         keywords: this.keywords.length > 0 ? this.keywords : this.description,
-        image: '',
-        link: '',
+        image: this.imgDataUrl,
+        link: this.showLinkInput ? this.imageWebLink : '',
       })
       .then(
         (queryResult) => {
           this.description = '';
           this.keywords = '';
+          this.imageWebLink = '';
+          this.imgDataUrl = '';
           this.$nextTick(() => {
             this.context.$v.$reset();
           });
@@ -168,7 +215,27 @@ export default class ParticipantView extends Vue {
       }, 1000);
     }
   }
+
+  /**
+   * crop success
+   *
+   * [param] imgDataUrl
+   * [param] field
+   */
+  cropSuccess(imgDataUrl, field): void {
+    this.imgDataUrl = imgDataUrl;
+  }
 }
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.level-item {
+  margin: 1.3rem auto;
+  //margin-top: 0.5rem;
+  //margin-bottom: 1rem;
+}
+
+.level.is-mobile .level-item:not(:last-child) {
+  margin-bottom: auto;
+}
+</style>

@@ -11,6 +11,8 @@
       <div v-if="hasKeywords" class="idea-card__description">
         {{ idea.description }}
       </div>
+      <img v-if="idea.image" :src="idea.image" width="200" />
+      <img v-if="idea.link" :src="idea.link" width="200" />
     </div>
     <div v-if="isDeletable" class="idea-card__delete" @click="deleteIdea">
       <font-awesome-icon icon="trash" />

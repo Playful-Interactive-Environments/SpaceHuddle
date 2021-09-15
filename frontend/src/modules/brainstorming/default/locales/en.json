@@ -6,7 +6,8 @@
     "keywordInfo": "Please provide some keywords",
     "descriptionInfo": "Type your idea here ...",
     "submit": "Submit idea",
-    "startGame": "No ideas? Get inspired!"
+    "startGame": "No ideas? Get inspired!",
+    "linkInfo": "part image url from web"
   },
   "moderatorContent": {
     "sortOrder": "order by"

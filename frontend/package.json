@@ -29,6 +29,7 @@
     "vue": "^3.0.0",
     "vue-class-component": "^8.0.0-0",
     "vue-final-modal": "^3.3.1",
+    "vue-image-crop-upload": "^3.0.3",
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^4.0.0-0",
     "vue3-cookies": "^1.0.1",
