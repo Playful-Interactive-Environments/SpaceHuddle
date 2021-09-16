@@ -44,15 +44,11 @@ export default class ModuleShare extends Vue {
 
   @Watch('task', { immediate: true })
   onTaskChanged(val: string): void {
-    this.hasParticipantComponent = hasModule(
-      ModuleComponentType.PARTICIPANT,
-      this.taskType,
-      'default'
+    hasModule(ModuleComponentType.PARTICIPANT, this.taskType, 'default').then(
+      (result) => (this.hasParticipantComponent = result)
     );
-    this.hasPublicScreenComponent = hasModule(
-      ModuleComponentType.PUBLIC_SCREEN,
-      this.taskType,
-      'default'
+    hasModule(ModuleComponentType.PUBLIC_SCREEN, this.taskType, 'default').then(
+      (result) => (this.hasPublicScreenComponent = result)
     );
   }
 

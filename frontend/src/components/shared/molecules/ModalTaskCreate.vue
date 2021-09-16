@@ -2,7 +2,7 @@
   <ModalBase
     v-model:show-modal="showModal"
     @update:showModal="$emit('update:showModal', $event)"
-    :key="taskType"
+    :key="componentLoadIndex"
   >
     <div class="module-create">
       <h2 class="heading heading--regular">
@@ -29,13 +29,17 @@
           :errors="context.$v.taskType.$errors"
           :isSmall="true"
         />
-        <TaskParameterComponent ref="taskParameter" :taskId="taskId" :topicId="topicId" />
+        <TaskParameterComponent
+          ref="taskParameter"
+          :taskId="taskId"
+          :topicId="topicId"
+        />
         <label for="moduleType" class="heading heading--xs">{{
           $t('moderator.organism.module.create.moduleType')
         }}</label>
         <el-select v-model="moduleType" id="moduleType" multiple>
           <el-option
-            v-for="type in ModuleTypeKeys"
+            v-for="type in moduleTypeKeys"
             :key="type"
             :value="type"
             :label="$t(`enum.moduleType.${TaskType[taskType]}.${type}`)"
@@ -111,8 +115,7 @@ import {
   addError,
   clearErrors,
 } from '@/services/exception-service';
-import { getModulesForTaskType } from '@/modules/ModuleList';
-import { getAsyncDefaultModule, getAsyncTaskParameter } from '@/modules';
+import { getAsyncTaskParameter, getEmptyComponent, getModulesForTaskType } from '@/modules';
 import { CustomParameter } from '@/types/ui/CustomParameter';
 import { EventType } from '@/types/enum/EventType';
 
@@ -120,7 +123,7 @@ import { EventType } from '@/types/enum/EventType';
   components: {
     FormError,
     ModalBase,
-    TaskParameterComponent: getAsyncDefaultModule('SELECTION')
+    TaskParameterComponent: getEmptyComponent(),
   },
   validations: {
     taskType: {
@@ -140,9 +143,11 @@ export default class ModalTaskCreate extends Vue {
   @Prop({ default: false }) showModal!: boolean;
   @Prop({}) topicId!: string;
   @Prop({}) taskId!: string;
+  componentLoadIndex = 0;
 
+  moduleTypeKeys: string[] = [];
   taskType = this.TaskTypeKeys[1];
-  moduleType = this.ModuleTypeKeys;
+  moduleType = this.moduleTypeKeys;
   title = '';
   description = '';
   errors: string[] = [];
@@ -169,10 +174,13 @@ export default class ModalTaskCreate extends Vue {
 
   @Watch('taskType', { immediate: true })
   async onTaskTypeChanged(taskType: string): Promise<void> {
-    this.moduleType = this.ModuleTypeKeys;
+    this.loadModuleTypeKeys();
     if (this.$options.components) {
-      this.$options.components['TaskParameterComponent'] =
-        getAsyncTaskParameter(TaskType[taskType]);
+      getAsyncTaskParameter(TaskType[taskType]).then((component) => {
+        if (this.$options.components)
+          this.$options.components['TaskParameterComponent'] = component;
+        this.componentLoadIndex++;
+      });
     }
   }
 
@@ -180,14 +188,18 @@ export default class ModalTaskCreate extends Vue {
     return Object.keys(TaskType) as Array<keyof typeof TaskType>;
   }
 
-  get ModuleTypeKeys(): string[] {
-    const list = getModulesForTaskType(this.taskType);
-    return list;
+  async loadModuleTypeKeys(): Promise<void> {
+    this.moduleTypeKeys = [];
+    this.moduleType = this.moduleTypeKeys;
+    await getModulesForTaskType(this.taskType).then((result) => {
+      this.moduleTypeKeys = result;
+      this.moduleType = this.moduleTypeKeys;
+    });
   }
 
   resetForm(): void {
     this.taskType = this.TaskTypeKeys[1];
-    this.moduleType = this.ModuleTypeKeys;
+    this.moduleType = this.moduleTypeKeys;
     this.title = '';
     this.description = '';
   }

@@ -28,7 +28,7 @@
           />
         </div>
       </section>
-      <PublicScreenComponent :task-id="taskId" />
+      <PublicScreenComponent :task-id="taskId" :key="componentLoadIndex" />
     </main>
   </div>
 </template>
@@ -46,20 +46,23 @@ import TaskType from '@/types/enum/TaskType';
 
 import { setModuleStyles } from '@/utils/moduleStyles';
 import TaskStates from '@/types/enum/TaskStates';
-import { getAsyncModule, getAsyncDefaultModule } from '@/modules';
+import {
+  getAsyncModule,
+  getAsyncDefaultModule,
+  getEmptyComponent,
+} from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 
 @Options({
   components: {
     Header,
     Timer,
-    PublicScreenComponent: getAsyncDefaultModule(
-      ModuleComponentType.PUBLIC_SCREEN
-    ),
+    PublicScreenComponent: getEmptyComponent(),
   },
 })
 export default class PublicScreen extends Vue {
   @Prop() readonly sessionId!: string;
+  componentLoadIndex = 0;
 
   task: Task | null = null;
 
@@ -83,15 +86,27 @@ export default class PublicScreen extends Vue {
   }
 
   async mounted(): Promise<void> {
+    getAsyncDefaultModule(ModuleComponentType.PUBLIC_SCREEN).then(
+      (component) => {
+        if (this.$options.components)
+          this.$options.components['PublicScreenComponent'] = component;
+        this.componentLoadIndex++;
+      }
+    );
+
     sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
       this.task = queryResult;
       const taskType = this.taskType;
       if (this.$options.components) {
-        this.$options.components['PublicScreenComponent'] = getAsyncModule(
+        getAsyncModule(
           ModuleComponentType.PUBLIC_SCREEN,
           taskType,
           this.moduleName
-        );
+        ).then((component) => {
+          if (this.$options.components)
+            this.$options.components['PublicScreenComponent'] = component;
+          this.componentLoadIndex++;
+        });
       }
       if (taskType) {
         this.$nextTick(() => {

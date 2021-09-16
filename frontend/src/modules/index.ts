@@ -2,23 +2,65 @@ import { defineAsyncComponent } from 'vue';
 import config from './config.json';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import { RouteRecordRaw } from 'vue-router';
+import TaskType from '@/types/enum/TaskType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
-export const getAsyncTaskParameter = (taskType: string | null = null): any => {
+const readConfig = async (): Promise<any> => {
+  let jsonResult: any = config;
+  const configPath = process.env.VUE_APP_MODULE_CONFIG_PATH;
+  if (configPath) {
+    await fetch(configPath).then((res) => {
+      jsonResult = res.json();
+    });
+  }
+
+  return jsonResult;
+};
+
+let moduleConfig: any = config;
+let moduleConfigLoaded = false;
+readConfig().then((config) => {
+  moduleConfig = config;
+  moduleConfigLoaded = true;
+});
+
+function until(conditionFunction) {
+  const poll = (resolve) => {
+    if (conditionFunction()) resolve();
+    else setTimeout(_ => poll(resolve), 400);
+  };
+
+  return new Promise(poll);
+}
+
+export const getAsyncTaskParameter = async (
+  taskType: string | null = null
+): Promise<any> => {
+  await until(_ => moduleConfigLoaded);
   if (taskType) {
-    const module = (config as any)[taskType];
+    const module = moduleConfig[taskType];
     if (module && module.settings && module.settings.parameter) {
       return defineAsyncComponent(
-        () => import(`@/modules/${module.settings.path}/${module.settings.parameter}.vue`)
+        () =>
+          import(
+            `@/modules/${module.settings.path}/${module.settings.parameter}.vue`
+          )
       );
     }
   }
   return null;
 };
 
-export const getAsyncDefaultModule = (componentType: string): any => {
-  const module = config.none as any;
+export const getEmptyComponent = (): any => {
+  return defineAsyncComponent(() => import(`@/modules/empty.vue`));
+};
+
+export const getAsyncDefaultModule = async (
+  componentType: string
+): Promise<any> => {
+  await until(_ => moduleConfigLoaded);
+  const module = moduleConfig.none as any;
   if (module[componentType]) {
     return defineAsyncComponent(
       () => import(`@/modules/${module.path}/${module[componentType]}.vue`)
@@ -27,26 +69,28 @@ export const getAsyncDefaultModule = (componentType: string): any => {
   return null;
 };
 
-export const getAsyncModule = (
+export const getAsyncModule = async (
   componentType: string,
   taskType: string | null = null,
   moduleName = 'default'
-): any => {
+): Promise<any> => {
+  await until(_ => moduleConfigLoaded);
   if (taskType) {
-    const module = (config as any)[taskType][moduleName];
+    const module = moduleConfig[taskType][moduleName];
     if (module[componentType]) {
       return defineAsyncComponent(
         () => import(`@/modules/${module.path}/${module[componentType]}.vue`)
       );
     } else if (moduleName != 'default') {
-      return getAsyncModule(componentType, taskType, 'default');
+      return await getAsyncModule(componentType, taskType, 'default');
     }
   }
-  return getAsyncDefaultModule(componentType);
+  return await getAsyncDefaultModule(componentType);
 };
 
 const getDefaultModule = async (componentType: string): Promise<any> => {
-  const module = config.none as any;
+  await until((_) => moduleConfigLoaded);
+  const module = moduleConfig.none as any;
   if (module[componentType]) {
     let vue: any;
     await import(`@/modules/${module.path}/${module[componentType]}.vue`).then(
@@ -64,8 +108,9 @@ const getModule = async (
   taskType: string | null = null,
   moduleName = 'default'
 ): Promise<any> => {
+  await until(_ => moduleConfigLoaded);
   if (taskType) {
-    const module = (config as any)[taskType][moduleName];
+    const module = moduleConfig[taskType][moduleName];
     if (module[componentType]) {
       let vue: any;
       await import(
@@ -81,15 +126,16 @@ const getModule = async (
   return await getDefaultModule(componentType);
 };
 
-export const getModuleConfig = (
+export const getModuleConfig = async (
   componentType: string,
   taskType: string | null = null,
   moduleName = 'default'
-): any => {
+): Promise<any> => {
+  await until((_) => moduleConfigLoaded);
   if (taskType) {
-    const module = (config as any)[taskType][moduleName];
+    const module = moduleConfig[taskType][moduleName];
     if (module[componentType]) {
-      return module;
+      return module[componentType];
     } else if (moduleName != 'default') {
       return getModuleConfig(componentType, taskType, 'default');
     }
@@ -97,22 +143,25 @@ export const getModuleConfig = (
   return null;
 };
 
-export const hasModule = (
+export const hasModule = async (
   componentType: string,
   taskType: string | null = null,
   moduleName = 'default'
-): boolean => {
-  return !!getModuleConfig(componentType, taskType, moduleName);
+): Promise<boolean> => {
+  let hasModule = false;
+  await getModuleConfig(componentType, taskType, moduleName).then((result) => hasModule = !!result);
+  return hasModule;
 };
 
 export const getLocales = async (locale = 'en'): Promise<any> => {
+  await until(_ => moduleConfigLoaded);
   const locales: any = {};
-  for (const taskKey in config) {
+  for (const taskKey in moduleConfig) {
     if (taskKey != 'none') {
       locales[taskKey] = {};
-      const taskType = (config as any)[taskKey];
+      const taskType = moduleConfig[taskKey];
       for (const moduleKey in taskType) {
-        const module = (config as any)[taskKey][moduleKey];
+        const module = moduleConfig[taskKey][moduleKey];
         if (module.locales && module.locales.includes(locale)) {
           await import(`@/modules/${module.path}/locales/${locale}.json`).then(
             (value) => {
@@ -122,7 +171,7 @@ export const getLocales = async (locale = 'en'): Promise<any> => {
         }
       }
     } else {
-      const module = (config as any)[taskKey];
+      const module = moduleConfig[taskKey];
       if (module.locales && module.locales.includes(locale)) {
         await import(`@/modules/none/locales/${locale}.json`).then((value) => {
           locales[taskKey] = value.default;
@@ -134,6 +183,7 @@ export const getLocales = async (locale = 'en'): Promise<any> => {
 };
 
 export const getEnumLocales = async (locale = 'en'): Promise<any> => {
+  await until(_ => moduleConfigLoaded);
   let locales: any = {};
   await import(`@/modules/locales/${locale}.json`)
     .then((value) => {
@@ -146,12 +196,13 @@ export const getEnumLocales = async (locale = 'en'): Promise<any> => {
 };
 
 export const getRoutes = async (): Promise<Array<RouteRecordRaw>> => {
+  await until(_ => moduleConfigLoaded);
   const routes: Array<RouteRecordRaw> = [];
   let taskKey: string;
   let moduleKey: string;
-  for (taskKey in config) {
+  for (taskKey in moduleConfig) {
     if (taskKey != 'none') {
-      const taskType = (config as any)[taskKey];
+      const taskType = moduleConfig[taskKey];
       for (moduleKey in taskType) {
         const vue = await getModule(
           ModuleComponentType.PARTICIPANT,
@@ -187,4 +238,14 @@ const getRouteItem = (
     },
     props: (route) => ({ taskId: route.params.taskId }),
   };
+};
+
+export const getModulesForTaskType = async (
+  taskType: keyof typeof TaskType
+): Promise<string[]> => {
+  await until((_) => moduleConfigLoaded);
+  const taskTypeName = TaskType[taskType];
+  const modules = moduleConfig[taskTypeName];
+  const moduleNameList = Object.keys(modules) as string[];
+  return moduleNameList.filter(obj => obj !== 'settings');
 };

@@ -41,11 +41,11 @@ export const getTaskList = async (
 };
 
 export const postTask = async (
-  taskId: string,
+  topicId: string,
   data: Partial<TaskForSaveAction>
 ): Promise<TaskForSaveAction> => {
   return await apiExecutePost<TaskForSaveAction>(
-    `/${EndpointType.TOPIC}/${taskId}/${EndpointType.TASK}/`,
+    `/${EndpointType.TOPIC}/${topicId}/${EndpointType.TASK}/`,
     data
   );
 };

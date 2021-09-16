@@ -32,12 +32,13 @@ const interceptorAuthHeader = (
   return axiosConfig;
 };
 
-export const apiEndpoint = (
+export const endpoint = (
   authHeaderType = EndpointAuthorisationType.MODERATOR,
-  options?: Partial<AxiosRequestConfig>
+  options?: Partial<AxiosRequestConfig>,
+  baseURL = `${process.env.VUE_APP_API_PATH}`
 ): AxiosInstance => {
   const config = {
-    baseURL: `${process.env.VUE_APP_API_PATH}`,
+    baseURL: baseURL,
     ...options,
   };
   if (!config.baseURL.endsWith('/')) {
@@ -64,6 +65,13 @@ export const apiEndpoint = (
   );
 
   return axiosInstance;
+};
+
+export const apiEndpoint = (
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  options?: Partial<AxiosRequestConfig>
+): AxiosInstance => {
+  return endpoint(authHeaderType, options, `${process.env.VUE_APP_API_PATH}`);
 };
 
 export const API_ENDPOINT_MODERATOR = apiEndpoint(

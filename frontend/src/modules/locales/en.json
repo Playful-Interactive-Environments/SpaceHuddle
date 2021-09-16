@@ -14,5 +14,6 @@
   },
   "voting": {
     "default": "Default"
-  }
+  },
+  "empty": "config is loading"
 }

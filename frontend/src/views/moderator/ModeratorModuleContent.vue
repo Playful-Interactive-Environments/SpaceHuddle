@@ -21,6 +21,7 @@
     <ModalTaskCreate
       v-model:show-modal="showModalTaskCreate"
       :task-id="taskId"
+      :key="componentLoadIndex"
     />
   </div>
 </template>
@@ -28,7 +29,11 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import { getAsyncModule, getAsyncDefaultModule } from '@/modules';
+import {
+  getAsyncModule,
+  getAsyncDefaultModule,
+  getEmptyComponent,
+} from '@/modules';
 
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import TaskType from '@/types/enum/TaskType';
@@ -50,14 +55,13 @@ import ModalTaskCreate from '@/components/shared/molecules/ModalTaskCreate.vue';
     NavigationWithBack,
     FormError,
     ModalTaskCreate,
-    ModuleContentComponent: getAsyncDefaultModule(
-      ModuleComponentType.MODERATOR_CONTENT
-    ),
+    ModuleContentComponent: getEmptyComponent(),
   },
 })
 export default class ModeratorModuleContent extends Vue {
   @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: '' }) readonly taskId!: string;
+  componentLoadIndex = 0;
 
   task: Task | null = null;
   publicScreenTask: Task | null = null;
@@ -65,6 +69,16 @@ export default class ModeratorModuleContent extends Vue {
   TaskStates = TaskStates;
   errors: string[] = [];
   showModalTaskCreate = false;
+
+  mounted(): void {
+    getAsyncDefaultModule(ModuleComponentType.MODERATOR_CONTENT).then(
+      (component) => {
+        if (this.$options.components)
+          this.$options.components['ModuleContentComponent'] = component;
+        this.componentLoadIndex++;
+      }
+    );
+  }
 
   get taskType(): TaskType | null {
     if (this.task) return TaskType[this.task.taskType];
@@ -83,11 +97,15 @@ export default class ModeratorModuleContent extends Vue {
       this.task = queryResult;
       const taskType = this.taskType;
       if (this.$options.components) {
-        this.$options.components['ModuleContentComponent'] = getAsyncModule(
+        getAsyncModule(
           ModuleComponentType.MODERATOR_CONTENT,
           taskType,
           this.moduleName
-        );
+        ).then((component) => {
+          if (this.$options.components)
+            this.$options.components['ModuleContentComponent'] = component;
+          this.componentLoadIndex++;
+        });
       }
       setModuleStyles(
         this.$refs.item as HTMLElement,

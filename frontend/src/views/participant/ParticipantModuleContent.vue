@@ -12,8 +12,8 @@
           :class="moduleName === module.name ? 'is-active' : ''"
         >
           <a v-on:click="moduleNameClick(module.name)">
-            <span class="icon">
-              <font-awesome-icon :icon="getModuleConfig(module.name).icon" />
+            <span class="icon" v-if="module.icon">
+              <font-awesome-icon :icon="module.icon" />
             </span>
             <span>
               {{ $t(`enum.moduleType.${taskType}.${module.name}`) }}
@@ -32,7 +32,7 @@
       />
     </el-tabs>-->
   </div>
-  <ParticipantModuleComponent :task-id="taskId" />
+  <ParticipantModuleComponent :task-id="taskId" :key="componentLoadIndex" />
 </template>
 
 <script lang="ts">
@@ -43,19 +43,21 @@ import { Task } from '@/types/api/Task';
 import TaskType from '@/types/enum/TaskType';
 
 import TaskStates from '@/types/enum/TaskStates';
-import { getAsyncModule, getAsyncDefaultModule } from '@/modules';
+import {
+  getAsyncModule,
+  getAsyncDefaultModule,
+  getEmptyComponent,
+  getModuleConfig
+} from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import * as taskService from '@/services/task-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import MenuBar from '@/components/participant/molecules/Menubar.vue';
-import config from '@/modules/config.json';
 
 @Options({
   components: {
     MenuBar,
-    ParticipantModuleComponent: getAsyncDefaultModule(
-      ModuleComponentType.PARTICIPANT
-    ),
+    ParticipantModuleComponent: getEmptyComponent(),
   },
 })
 export default class ParticipantModuleContent extends Vue {
@@ -67,7 +69,16 @@ export default class ParticipantModuleContent extends Vue {
 
   TaskType = TaskType;
   TaskStates = TaskStates;
-  moduleName = this.moduleNames[0];
+  moduleName = '';
+  componentLoadIndex = 0;
+
+  mounted(): void {
+    getAsyncDefaultModule(ModuleComponentType.PARTICIPANT).then((component) => {
+      if (this.$options.components)
+        this.$options.components['ParticipantModuleComponent'] = component;
+      this.componentLoadIndex++;
+    });
+  }
 
   // eslint-disable-next-line no-undef
   get taskType(): TaskType | null {
@@ -92,31 +103,33 @@ export default class ParticipantModuleContent extends Vue {
       .getTaskById(val, EndpointAuthorisationType.PARTICIPANT)
       .then((queryResult) => {
         this.task = queryResult;
-        this.moduleNameClick();
+        this.task.modules.forEach((module) => this.setIcon(module));
+        this.moduleNameClick(this.moduleNames[0]);
       });
   }
 
-  getModuleConfig(moduleName: string): any {
-    if (this.taskType) {
-      const taskTypeConfig = (config as any)[this.taskType];
-      const moduleConfig = taskTypeConfig[moduleName];
-      return moduleConfig;
-    }
-    return {};
+  async setIcon(module: any): Promise<void> {
+    await getModuleConfig('icon', this.taskType, module.name).then(
+      (result) => (module.icon = result)
+    );
   }
 
   moduleNameClick(moduleName: string | null = null): void {
     if (!moduleName) {
       moduleName = this.moduleName;
     }
-    this.moduleName = moduleName;
+    if (moduleName) this.moduleName = moduleName;
     const taskType = this.taskType;
     if (this.$options.components) {
-      this.$options.components['ParticipantModuleComponent'] = getAsyncModule(
+      getAsyncModule(
         ModuleComponentType.PARTICIPANT,
         taskType,
         moduleName
-      );
+      ).then((component) => {
+        if (this.$options.components)
+          this.$options.components['ParticipantModuleComponent'] = component;
+        this.componentLoadIndex++;
+      });
     }
   }
 }
