@@ -2,7 +2,7 @@
   <div class="session-code">
     <button
       class="btn btn--fullwidth btn--icon"
-      :class="[hasBorder ? 'btn--outline-gray' : 'btn--white']"
+      :class="[hasBorder ? ' btn--outline btn--outline--gray' : 'btn--white']"
       @click="copyToClipboard"
     >
       <font-awesome-icon icon="clone" />
@@ -10,7 +10,7 @@
     </button>
     <button
       class="btn btn--icon session-code__share"
-      :class="[hasBorder ? 'btn--outline-gray' : 'btn--white']"
+      :class="[hasBorder ? ' btn--outline btn--outline--gray' : 'btn--white']"
     >
       <font-awesome-icon icon="share-alt" />
     </button>

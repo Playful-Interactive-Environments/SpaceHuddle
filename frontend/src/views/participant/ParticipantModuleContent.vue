@@ -32,7 +32,11 @@
       />
     </el-tabs>-->
   </div>
-  <ParticipantModuleComponent :task-id="taskId" :key="componentLoadIndex" />
+  <ParticipantModuleComponent
+    :task-id="taskId"
+    :module-id="moduleId"
+    :key="componentLoadIndex"
+  />
 </template>
 
 <script lang="ts">
@@ -47,12 +51,13 @@ import {
   getAsyncModule,
   getAsyncDefaultModule,
   getEmptyComponent,
-  getModuleConfig
+  getModuleConfig,
 } from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import * as taskService from '@/services/task-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import MenuBar from '@/components/participant/molecules/Menubar.vue';
+import { Module } from '@/types/api/Module';
 
 @Options({
   components: {
@@ -60,6 +65,8 @@ import MenuBar from '@/components/participant/molecules/Menubar.vue';
     ParticipantModuleComponent: getEmptyComponent(),
   },
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ParticipantModuleContent extends Vue {
   @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: '' }) readonly taskId!: string;
@@ -78,6 +85,21 @@ export default class ParticipantModuleContent extends Vue {
         this.$options.components['ParticipantModuleComponent'] = component;
       this.componentLoadIndex++;
     });
+  }
+
+  get module(): Module | null {
+    if (this.task) {
+      const module = this.task.modules.find(
+        (module) => module.name == this.moduleName
+      );
+      if (module) return module;
+    }
+    return null;
+  }
+
+  get moduleId(): string | null {
+    if (this.module) return this.module.id;
+    return null;
   }
 
   // eslint-disable-next-line no-undef
@@ -108,9 +130,9 @@ export default class ParticipantModuleContent extends Vue {
       });
   }
 
-  async setIcon(module: any): Promise<void> {
+  async setIcon(module: Module): Promise<void> {
     await getModuleConfig('icon', this.taskType, module.name).then(
-      (result) => (module.icon = result)
+      (result) => ((module as any).icon = result)
     );
   }
 

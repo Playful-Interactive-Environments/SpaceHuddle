@@ -5,6 +5,8 @@ enum EndpointType {
   IDEA = 'idea',
   IDEAS = 'ideas',
   LOGIN = 'login',
+  MODULE = 'module',
+  MODULES = 'modules',
   OWN_USER_ROLE = 'own_user_role',
   PARTICIPANT = 'participant',
   PARTICIPANT_CONNECT = 'participant/connect',

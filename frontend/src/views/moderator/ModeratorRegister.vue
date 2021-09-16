@@ -13,7 +13,7 @@
         {{ $t('moderator.view.register.login.info') }}
       </p>
       <router-link to="login">
-        <button class="btn btn--outline-white">
+        <button class="btn btn--outline btn--outline--white">
           {{ $t('moderator.view.register.login.submit') }}
         </button>
       </router-link>

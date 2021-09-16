@@ -8,6 +8,8 @@ import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Task, TaskForSaveAction } from '@/types/api/Task';
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+
 export const getTaskById = async (
   taskId: string,
   authHeaderType = EndpointAuthorisationType.MODERATOR
@@ -43,8 +45,8 @@ export const getTaskList = async (
 export const postTask = async (
   topicId: string,
   data: Partial<TaskForSaveAction>
-): Promise<TaskForSaveAction> => {
-  return await apiExecutePost<TaskForSaveAction>(
+): Promise<Task> => {
+  return await apiExecutePost<Task>(
     `/${EndpointType.TOPIC}/${topicId}/${EndpointType.TASK}/`,
     data
   );
@@ -53,10 +55,10 @@ export const postTask = async (
 export const putTask = async (
   id: string,
   data: Partial<TaskForSaveAction>
-): Promise<TaskForSaveAction> => {
+): Promise<Task> => {
   data['id'] = id;
-  return await apiExecutePut<TaskForSaveAction>(
-    `/${EndpointType.TASK}`,
+  return await apiExecutePut<Task>(
+    `/${EndpointType.TASK}/`,
     data,
     EndpointAuthorisationType.MODERATOR
   );

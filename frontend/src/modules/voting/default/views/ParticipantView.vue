@@ -12,7 +12,9 @@
         v-for="(idea, index) in seats"
         :key="index"
         type="submit"
-        class="btn btn--gradient btn--fullwidth"
+        class="
+          btn btn--white btn--outline btn--outline--dark-blue btn--fullwidth
+        "
         @click.prevent="vote(index + 1)"
       >
         <span v-if="idea">
@@ -24,13 +26,13 @@
           <font-awesome-icon icon="angle-double-right" />
         </span>
       </button>
-      <br />
-      <br />
       <span v-if="ideaPointer < ideas.length">
-        {{ ideas[ideaPointer].keywords }}
+        <IdeaCard
+          :idea="ideas[ideaPointer]"
+          :is-selectable="false"
+          :is-deletable="false"
+        />
       </span>
-      <br />
-      <br />
       <button
         type="submit"
         class="btn btn--gradient btn--fullwidth"
@@ -51,24 +53,43 @@ import { Prop, Watch } from 'vue-property-decorator';
 import ParticipantModuleDefaultContainer from '@/components/participant/organisms/ParticipantModuleDefaultContainer.vue';
 import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
+import * as moduleService from '@/services/module-service';
 import * as selectService from '@/services/selection-service';
 import * as votingService from '@/services/voting-service';
 import { Idea } from '@/types/api/Idea';
 import { Vote } from '@/types/api/Vote';
+import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 
 @Options({
   components: {
     ParticipantModuleDefaultContainer,
+    IdeaCard,
   },
 })
 export default class ParticipantView extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop() readonly moduleId!: string;
   task: Task | null = null;
+  module: Module | null = null;
   ideas: Idea[] = [];
   votes: Vote[] = [];
-  seats: (Idea | null)[] = [null, null, null];
+  seats: (Idea | null)[] = [];
   ideaPointer = 0;
+
+  mounted(): void {
+    if (this.seats.length == 0) {
+      this.initSeats(3);
+    }
+  }
+
+  initSeats(count: number): void {
+    this.seats = [];
+    for (let i = 0; i < count; i++) {
+      this.seats.push(null);
+    }
+  }
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -83,9 +104,25 @@ export default class ParticipantView extends Vue {
     }
   }
 
+  @Watch('moduleId', { immediate: true })
+  onModuleIdChanged(): void {
+    this.getModule();
+  }
+
+  async getModule(): Promise<void> {
+    if (this.moduleId) {
+      await moduleService.getModuleById(this.moduleId).then((module) => {
+        this.module = module;
+        if (this.seats.length != this.module.parameter.slotCount)
+          this.getVotes();
+      });
+    }
+  }
+
   async getVotes(): Promise<void> {
     if (this.taskId) {
-      this.seats = [null, null, null];
+      if (this.module) this.initSeats(this.module.parameter.slotCount);
+      else this.initSeats(3);
       await votingService
         .getVotes(this.taskId, EndpointAuthorisationType.PARTICIPANT)
         .then((votes) => {
@@ -108,6 +145,7 @@ export default class ParticipantView extends Vue {
   async getIdeas(): Promise<void> {
     if (this.taskId) {
       if (!this.task) await this.getTask();
+      if (!this.module) await this.getModule();
       if (this.task) {
         await selectService
           .getIdeasForSelection(this.task?.parameter.selectionId)

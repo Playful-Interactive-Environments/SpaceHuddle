@@ -1,8 +1,8 @@
 <template>
   <section>
     <label for="selection" class="heading heading--xs">{{
-        $t('module.voting.settings.taskParameter.selection')
-      }}</label>
+      $t('module.voting.settings.taskParameter.selection')
+    }}</label>
     <select
       v-model="selectionId"
       id="selection"
@@ -31,11 +31,10 @@ import * as taskService from '@/services/task-service';
 import * as selectionService from '@/services/selection-service';
 import { Task } from '@/types/api/Task';
 import { Selection } from '@/types/api/Selection';
-import { maxLength, required } from '@vuelidate/validators';
+import { required } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
 import { CustomParameter } from '@/types/ui/CustomParameter';
-import TaskType from '@/types/enum/TaskType';
 
 @Options({
   components: {
@@ -47,6 +46,8 @@ import TaskType from '@/types/enum/TaskType';
     },
   },
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class TaskParameter extends Vue implements CustomParameter {
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;
@@ -63,12 +64,11 @@ export default class TaskParameter extends Vue implements CustomParameter {
   });
 
   async loadSelections(): Promise<void> {
-    if (this.task) {
-      await selectionService
-        .getSelectionForTopic(this.task.topicId)
-        .then((selection) => {
-          this.selections = selection;
-        });
+    const topicId = this.task ? this.task.topicId : this.topicId;
+    if (topicId) {
+      await selectionService.getSelectionForTopic(topicId).then((selection) => {
+        this.selections = selection;
+      });
     }
   }
 
@@ -78,6 +78,11 @@ export default class TaskParameter extends Vue implements CustomParameter {
     if (this.task) {
       this.$emit('update:modelValue', this.task.parameter);
     }
+  }
+
+  @Watch('topicId', { immediate: true })
+  async onTopicIdChanged(): Promise<void> {
+    await this.loadSelections();
   }
 
   async getTask(): Promise<void> {

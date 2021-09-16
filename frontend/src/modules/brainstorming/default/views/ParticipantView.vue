@@ -102,7 +102,7 @@
 
 <script lang="ts">
 import { Options, setup, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import ParticipantModuleDefaultContainer from '@/components/participant/organisms/ParticipantModuleDefaultContainer.vue';
 import myUpload from 'vue-image-crop-upload/upload-3.vue';
 
@@ -110,6 +110,7 @@ import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 import useVuelidate from '@vuelidate/core';
 import { maxLength, required } from '@vuelidate/validators';
 import FormError from '@/components/shared/atoms/FormError.vue';
+import * as moduleService from '@/services/module-service';
 import * as ideaService from '@/services/idea-service';
 import { EventType } from '@/types/enum/EventType';
 import SnackbarType from '@/types/enum/SnackbarType';
@@ -118,6 +119,7 @@ import {
   clearErrors,
   getErrorMessage,
 } from '@/services/exception-service';
+import { Module } from '@/types/api/Module';
 
 @Options({
   components: {
@@ -138,6 +140,8 @@ import {
 })
 export default class ParticipantView extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop() readonly moduleId!: string;
+  module: Module | null = null;
 
   imgDataUrl = ''; // the datebase64 url of created image
   showUploadDialog = false;
@@ -156,6 +160,19 @@ export default class ParticipantView extends Vue {
   imageWebLink = '';
   readonly keywordsEmptyMsg = 'error.vuelidate.keywordsRequired';
   scalePlanet = false;
+
+  @Watch('moduleId', { immediate: true })
+  onModuleIdChanged(): void {
+    this.getModule();
+  }
+
+  async getModule(): Promise<void> {
+    if (this.moduleId) {
+      await moduleService.getModuleById(this.moduleId).then((module) => {
+        this.module = module;
+      });
+    }
+  }
 
   context = setup(() => {
     return {
@@ -216,13 +233,7 @@ export default class ParticipantView extends Vue {
     }
   }
 
-  /**
-   * crop success
-   *
-   * [param] imgDataUrl
-   * [param] field
-   */
-  cropSuccess(imgDataUrl, field): void {
+  cropSuccess(imgDataUrl: string): void {
     this.imgDataUrl = imgDataUrl;
   }
 }

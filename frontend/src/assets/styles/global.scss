@@ -130,44 +130,50 @@ body {
 
   &--outline {
     background-color: transparent;
-    color: var(--color-mint-dark);
-    border: 2px solid var(--color-mint-dark);
     box-sizing: border-box;
     transition: background-color 0.2s, color 0.2s;
     padding: calc(9.2rem / 16) 1rem;
 
-    &:hover {
-      background-color: var(--color-mint-dark);
+    &--mint {
+      color: var(--color-mint-dark);
+      border: 2px solid var(--color-mint-dark);
+
+      &:hover {
+        background-color: var(--color-mint-dark);
+        color: white;
+      }
+    }
+
+    &--white {
       color: white;
-      opacity: 1;
+      border: 2px solid white;
+
+      &:hover {
+        background-color: white;
+        color: var(--color-darkblue);
+      }
     }
-  }
 
-  &--outline-white {
-    background-color: transparent;
-    color: white;
-    border: 2px solid white;
-    box-sizing: border-box;
-    transition: background-color 0.2s, color 0.2s;
-    padding: calc(9.2rem / 16) 1rem;
-
-    &:hover {
-      background-color: white;
+    &--gray {
       color: var(--color-darkblue);
-      opacity: 1;
-    }
-  }
+      border: 2px solid var(--color-background-gray);
 
-  &--outline-gray {
-    background-color: transparent;
-    color: var(--color-darkblue);
-    border: 2px solid var(--color-background-gray);
-    box-sizing: border-box;
-    transition: background-color 0.2s, color 0.2s;
-    padding: calc(9.2rem / 16) 1rem;
+      &:hover {
+        background-color: var(--color-background-gray);
+      }
+    }
+
+    &--dark-blue {
+      color: var(--color-darkblue);
+      border: 2px solid var(--color-darkblue);
+      border-style: dashed;
+
+      &:hover {
+        background-color: var(--color-darkblue);
+      }
+    }
 
     &:hover {
-      background-color: var(--color-background-gray);
       opacity: 1;
     }
   }

@@ -1,5 +1,6 @@
 import TaskType from '@/types/enum/TaskType';
 import TaskStates from '@/types/enum/TaskStates';
+import { Module } from '@/types/api/Module';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -13,13 +14,7 @@ export interface Task {
   parameter: any;
   order: number;
   state: TaskStates;
-  modules: {
-    id: string;
-    name: string;
-    order: number;
-    state: string;
-    parameter: any;
-  }[];
+  modules: Module[];
 }
 
 export interface TaskForSaveAction {

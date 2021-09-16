@@ -14,8 +14,10 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import ParticipantModuleDefaultContainer from '@/components/participant/organisms/ParticipantModuleDefaultContainer.vue';
+import * as moduleService from '@/services/module-service';
+import { Module } from '@/types/api/Module';
 
 @Options({
   components: {
@@ -24,6 +26,21 @@ import ParticipantModuleDefaultContainer from '@/components/participant/organism
 })
 export default class ParticipantView extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop() readonly moduleId!: string;
+  module: Module | null = null;
+
+  @Watch('moduleId', { immediate: true })
+  onModuleIdChanged(): void {
+    this.getModule();
+  }
+
+  async getModule(): Promise<void> {
+    if (this.moduleId) {
+      await moduleService.getModuleById(this.moduleId).then((module) => {
+        this.module = module;
+      });
+    }
+  }
 }
 </script>
 

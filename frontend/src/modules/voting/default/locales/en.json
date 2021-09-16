@@ -9,5 +9,9 @@
     "thanks": "thanks for the vote"
   },
   "moderatorContent": {
+  },
+  "moderatorConfig": {
+    "slotCount": "slot count",
+    "slotCountExample": "3"
   }
 }

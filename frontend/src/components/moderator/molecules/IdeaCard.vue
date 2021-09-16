@@ -4,7 +4,7 @@
     @click="changeSelection"
     :class="{ selected: isSelected }"
   >
-    <div>
+    <div class="idea-card-content">
       <div class="idea-card__idea">
         {{ hasKeywords ? idea.keywords : idea.description }}
       </div>
@@ -67,6 +67,10 @@ export default class IdeaCard extends Vue {
 
 <style lang="scss" scoped>
 @import '~@/assets/styles/icons.scss';
+
+.idea-card-content {
+  width: 100%;
+}
 
 .idea-card {
   -webkit-column-break-inside: avoid;

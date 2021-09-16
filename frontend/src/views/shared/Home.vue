@@ -12,7 +12,7 @@
         </button>
       </router-link>
       <router-link to="/join">
-        <button class="btn btn--outline">
+        <button class="btn btn--outline btn--outline--mint">
           {{ $t('shared.view.home.join') }}
         </button>
       </router-link>
