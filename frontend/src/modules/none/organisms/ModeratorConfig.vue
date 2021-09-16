@@ -6,19 +6,18 @@
 import { Options, setup, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import * as moduleService from '@/services/module-service';
-import { required, numeric } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
-import { CustomParameter } from '@/types/ui/CustomParameter';
 import { Module } from '@/types/api/Module';
 
 @Options({
   components: {
     FormError,
   },
-  validations: {
-  },
+  validations: {},
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorConfig extends Vue {
   @Prop() readonly moduleId!: string;
   @Prop() readonly taskId!: string;

@@ -1,22 +1,19 @@
 <template>
-  <section>
-    test fallback parameter
-  </section>
+  <section></section>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import * as taskService from '@/services/task-service';
-import * as selectionService from '@/services/selection-service';
 import { Task } from '@/types/api/Task';
-import { maxLength, required } from '@vuelidate/validators';
 
 @Options({
   components: {},
-  validations: {
-  },
+  validations: {},
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class TaskParameter extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;
