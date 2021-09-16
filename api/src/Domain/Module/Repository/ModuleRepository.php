@@ -72,7 +72,7 @@ class ModuleRepository implements RepositoryInterface
             "module_name" => $data->name ?? null,
             "order" => $data->order ?? null,
             "state" => $data->state ?? null,
-            "parameter" => $data->parameter ?? null
+            "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null
         ];
     }
 }

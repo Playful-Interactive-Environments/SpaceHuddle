@@ -69,6 +69,12 @@ use Psr\Http\Message\ServerRequestInterface;
  *   @OA\Response(response="200", ref="#/components/responses/CORS")
  *   )
  * )
+ * @OA\Options(
+ *   path="/api/module/",
+ *   summary="CORS Preflight check",
+ *   tags={"CORS"},
+ *   @OA\Response(response="200", ref="#/components/responses/CORS")
+ * )
  */
 final class PreflightAction
 {
