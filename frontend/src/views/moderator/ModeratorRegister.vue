@@ -28,6 +28,21 @@
         </p>
         <form @submit.prevent="registerUser">
           <h3 class="heading heading--xs">
+            {{ $t('moderator.view.register.prototypeKey') }}
+          </h3>
+          <input
+            class="input input--fullwidth"
+            name="prototypeKey"
+            :placeholder="$t('moderator.view.register.prototypeKeyInfo')"
+            v-model="prototypeKey"
+            @blur="context.$v.prototypeKey.$touch()"
+          />
+          <FormError
+            v-if="context.$v.prototypeKey.$error"
+            :errors="context.$v.prototypeKey.$errors"
+            :isSmall="true"
+          />
+          <h3 class="heading heading--xs">
             {{ $t('moderator.view.register.email') }}
           </h3>
           <input
@@ -103,6 +118,7 @@ import {
   required,
   email,
   helpers,
+  sameAs,
 } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
@@ -123,6 +139,13 @@ import {
     email: {
       email,
       required,
+    },
+    prototypeKey: {
+      required,
+      sameAs: helpers.withMessage(
+        'This is a prototype. You need the prototype key to test the application in this state.',
+        sameAs('apple-pie')
+      ),
     },
     password: {
       required,
@@ -147,6 +170,7 @@ export default class ModeratorRegister extends Vue {
   email = '';
   password = '';
   passwordRepeat = '';
+  prototypeKey = '';
   readonly passwordRepeatMsg = 'error.vuelidate.passwordNotMatch';
   errors: string[] = [];
 

@@ -160,7 +160,9 @@
           "header": "Welcome back!",
           "info": "If you already have an account, just go ahead and login to access all\n        your existing resources.",
           "submit": "Login"
-        }
+        },
+        "prototypeKey": "prototype key",
+        "prototypeKeyInfo": "This is a prototype. You need the prototype key to test the application in this state."
       },
       "profile": {
         "header": "Your Profile",
