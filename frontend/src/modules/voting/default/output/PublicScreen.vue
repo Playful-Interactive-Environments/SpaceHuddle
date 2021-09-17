@@ -1,34 +1,36 @@
 <template>
-  <vue3-chart-js
-    id="resultChart"
-    ref="chartRef"
-    type="bar"
-    :data="chartData"
-    :options="{
-      animation: {
-        duration: 0,
-      },
-      scales: {
-        x: {
-          ticks: {
-            color: '#1d2948',
+  <section class="container2 container2--centered public-screen__error">
+    <vue3-chart-js
+      id="resultChart"
+      ref="chartRef"
+      type="bar"
+      :data="chartData"
+      :options="{
+        animation: {
+          duration: 0,
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: 'white',
+            },
+          },
+          y: {
+            ticks: {
+              color: 'white',
+            },
           },
         },
-        y: {
-          ticks: {
-            color: '#1d2948',
+        plugins: {
+          legend: {
+            labels: {
+              color: 'white',
+            },
           },
         },
-      },
-      plugins: {
-        legend: {
-          labels: {
-            color: '#1d2948',
-          },
-        },
-      },
-    }"
-  />
+      }"
+    />
+  </section>
 </template>
 
 <script lang="ts">
@@ -45,7 +47,7 @@ import { VoteResult } from '@/types/api/Vote';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModeratorContentComponent extends Vue {
+export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
   votes: VoteResult[] = [];
   chartData: any = {
@@ -102,5 +104,3 @@ export default class ModeratorContentComponent extends Vue {
   }
 }
 </script>
-
-<style scoped></style>

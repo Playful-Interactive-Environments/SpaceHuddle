@@ -6,10 +6,10 @@
     },
     "icon": "times",
     "path": "none",
-    "publicScreen": "organisms/PublicScreenComponent",
-    "moderatorConfig": "",
-    "moderatorContent": "organisms/ModeratorContentComponent",
-    "participant": "views/ParticipantView",
+    "publicScreen": "output/PublicScreen",
+    "moderatorConfig": "output/ModeratorConfig",
+    "moderatorContent": "output/ModeratorContent",
+    "participant": "output/Participant",
     "locales": "en, de"
   }
 }

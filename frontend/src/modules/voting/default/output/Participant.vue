@@ -68,7 +68,7 @@ import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
     IdeaCard,
   },
 })
-export default class ParticipantView extends Vue {
+export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
   task: Task | null = null;

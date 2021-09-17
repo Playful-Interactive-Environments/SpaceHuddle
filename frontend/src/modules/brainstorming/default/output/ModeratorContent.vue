@@ -55,7 +55,7 @@ import Expand from '@/components/shared/atoms/Expand.vue';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModeratorContentComponent extends Vue {
+export default class ModeratorContent extends Vue {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];
   orderGroupContent: { [name: string]: Idea[] } = {};

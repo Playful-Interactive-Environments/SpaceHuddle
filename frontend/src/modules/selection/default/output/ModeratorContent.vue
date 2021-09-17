@@ -99,7 +99,7 @@ import TaskType from '@/types/enum/TaskType';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModeratorContentComponent extends Vue {
+export default class ModeratorContent extends Vue {
   @Prop() readonly taskId!: string;
   task: Task | null = null;
   ideas: Idea[] = [];

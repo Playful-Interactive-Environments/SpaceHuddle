@@ -7,7 +7,7 @@ import { Prop } from 'vue-property-decorator';
 @Options({
   components: {},
 })
-export default class ModeratorContentComponent extends Vue {
+export default class ModeratorContent extends Vue {
   @Prop() readonly taskId!: string;
 }
 </script>

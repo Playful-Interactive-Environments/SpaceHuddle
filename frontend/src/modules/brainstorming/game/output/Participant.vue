@@ -31,7 +31,7 @@ import { Module } from '@/types/api/Module';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ParticipantView extends Vue {
+export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
   module: Module | null = null;

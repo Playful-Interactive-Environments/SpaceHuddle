@@ -130,7 +130,7 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
     draggable,
   },
 })
-export default class ModeratorContentComponent_ extends Vue {
+export default class ModeratorContent extends Vue {
   @Prop() readonly taskId!: string;
   showModalCategoryCreate = false;
   editCategoryId: string | null = null;

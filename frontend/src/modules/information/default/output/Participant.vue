@@ -23,7 +23,7 @@ import { Module } from '@/types/api/Module';
     ParticipantModuleDefaultContainer,
   },
 })
-export default class ParticipantView extends Vue {
+export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
   module: Module | null = null;

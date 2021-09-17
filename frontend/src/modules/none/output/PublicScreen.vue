@@ -17,7 +17,7 @@ import { Prop } from 'vue-property-decorator';
 @Options({
   components: {},
 })
-export default class PublicScreenComponent extends Vue {
+export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
 }
 </script>

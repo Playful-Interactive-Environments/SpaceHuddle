@@ -30,7 +30,7 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class PublicScreenComponent extends Vue {
+export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];
   readonly intervalTime = 10000;

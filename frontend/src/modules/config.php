@@ -36,24 +36,17 @@ function createDetailConfig($path) {
         }
     }
 
-    $pathOrganisms = "$path/organisms";
+    $pathOrganisms = "$path/output";
     if (file_exists($pathOrganisms)) {
         $organisms = scandir($pathOrganisms);
-        if (in_array("ModeratorContentComponent.vue", $organisms))
-            $detailConfig['moderatorContent'] = "organisms/ModeratorContentComponent";
-        if (in_array("PublicScreenComponent.vue", $organisms))
-            $detailConfig['publicScreen'] = "organisms/PublicScreenComponent";
+        if (in_array("ModeratorContent.vue", $organisms))
+            $detailConfig['moderatorContent'] = "output/ModeratorContent";
+        if (in_array("PublicScreen.vue", $organisms))
+            $detailConfig['publicScreen'] = "output/PublicScreen";
         if (in_array("ModeratorConfig.vue", $organisms))
-            $detailConfig['moderatorConfig'] = "organisms/ModeratorConfig";
-        if (in_array("ParticipantView.vue", $organisms))
-            $detailConfig['participant'] = "organisms/ParticipantView";
-    }
-
-    $pathViews = "$path/views";
-    if (file_exists($pathViews)) {
-        $views = scandir($pathViews);
-        if (in_array("ParticipantView.vue", $views))
-            $detailConfig['participant'] = "views/ParticipantView";
+            $detailConfig['moderatorConfig'] = "output/ModeratorConfig";
+        if (in_array("Participant.vue", $organisms))
+            $detailConfig['participant'] = "output/Participant";
     }
 
     $settingFiles = scandir($path);
