@@ -1,22 +1,19 @@
 <template>
-  <section>
-    test information parameter
-  </section>
+  <section></section>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import * as taskService from '@/services/task-service';
-import * as selectionService from '@/services/selection-service';
 import { Task } from '@/types/api/Task';
-import { maxLength, required } from '@vuelidate/validators';
 
 @Options({
   components: {},
-  validations: {
-  },
+  validations: {},
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class TaskParameter extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;
@@ -24,13 +21,16 @@ export default class TaskParameter extends Vue {
   task: Task | null = null;
   selectionName = '';
 
+  @Watch('modelValue', { immediate: true })
+  async onModelValueChanged(): Promise<void> {
+    if (this.modelValue) {
+      //todo: set default parameter
+    }
+  }
+
   @Watch('taskId', { immediate: true })
   async onTaskIdChanged(): Promise<void> {
     await this.getTask();
-    if (this.task) {
-      //info
-      this.$emit('update:modelValue', this.task.parameter);
-    }
   }
 
   async getTask(): Promise<void> {

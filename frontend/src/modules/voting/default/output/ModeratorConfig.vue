@@ -5,17 +5,17 @@
     }}</label>
     <input
       id="slotCount"
-      v-model="slotCount"
+      v-model="modelValue.slotCount"
       type="number"
       class="input input--fullwidth"
       :placeholder="
         $t('module.voting.default.moderatorConfig.slotCountExample')
       "
-      @blur="context.$v.slotCount.$touch()"
+      @blur="context.$v.modelValue.slotCount.$touch()"
     />
     <FormError
-      v-if="context.$v.slotCount.$error"
-      :errors="context.$v.slotCount.$errors"
+      v-if="context.$v.modelValue.slotCount.$error"
+      :errors="context.$v.modelValue.slotCount.$errors"
       :isSmall="true"
     />
   </section>
@@ -28,7 +28,6 @@ import * as moduleService from '@/services/module-service';
 import { required, numeric } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
-import { CustomParameter } from '@/types/ui/CustomParameter';
 import { Module } from '@/types/api/Module';
 
 @Options({
@@ -36,21 +35,22 @@ import { Module } from '@/types/api/Module';
     FormError,
   },
   validations: {
-    slotCount: {
-      required,
-      numeric,
+    modelValue: {
+      slotCount: {
+        required,
+        numeric,
+      },
     },
   },
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModeratorConfig extends Vue implements CustomParameter {
+export default class ModeratorConfig extends Vue {
   @Prop() readonly moduleId!: string;
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
   module: Module | null = null;
-  slotCount = 3;
   errors: string[] = [];
 
   context = setup(() => {
@@ -59,31 +59,22 @@ export default class ModeratorConfig extends Vue implements CustomParameter {
     };
   });
 
+  @Watch('modelValue', { immediate: true })
+  async onModelValueChanged(): Promise<void> {
+    if (this.modelValue && !this.modelValue.slotCount) {
+      this.modelValue.slotCount = 3;
+    }
+  }
+
   @Watch('moduleId', { immediate: true })
   async onModuleIdChanged(): Promise<void> {
     await this.getModule();
-    if (this.module) {
-      this.$emit('update:modelValue', this.module.parameter);
-    }
   }
 
   async getModule(): Promise<void> {
     if (this.moduleId) {
       await moduleService.getModuleById(this.moduleId).then((module) => {
         this.module = module;
-        this.slotCount = module.parameter.slotCount;
-      });
-    }
-  }
-
-  async save(moduleId: string | null): Promise<void> {
-    if (!moduleId) moduleId = this.moduleId;
-    if (moduleId) {
-      await moduleService.putModule(moduleId, {
-        order: 3,
-        parameter: {
-          slotCount: this.slotCount,
-        },
       });
     }
   }

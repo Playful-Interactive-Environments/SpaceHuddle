@@ -1,10 +1,10 @@
 <template>
-  <section>
+  <section v-if="modelValue">
     <label for="selection" class="heading heading--xs">{{
       $t('module.voting.settings.taskParameter.selection')
     }}</label>
     <select
-      v-model="selectionId"
+      v-model="modelValue.selectionId"
       id="selection"
       class="select select--fullwidth"
     >
@@ -17,8 +17,8 @@
       </option>
     </select>
     <FormError
-      v-if="context.$v.selectionId.$error"
-      :errors="context.$v.selectionId.$errors"
+      v-if="context.$v.modelValue.selectionId.$error"
+      :errors="context.$v.modelValue.selectionId.$errors"
       :isSmall="true"
     />
   </section>
@@ -41,19 +41,20 @@ import { CustomParameter } from '@/types/ui/CustomParameter';
     FormError,
   },
   validations: {
-    selectionId: {
-      required,
+    modelValue: {
+      selectionId: {
+        required,
+      },
     },
   },
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class TaskParameter extends Vue implements CustomParameter {
+export default class TaskParameter extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
   task: Task | null = null;
-  selectionId: string | null = null;
   errors: string[] = [];
   selections: Selection[] = [];
 
@@ -62,6 +63,13 @@ export default class TaskParameter extends Vue implements CustomParameter {
       $v: useVuelidate(),
     };
   });
+
+  @Watch('modelValue', { immediate: true })
+  async onModelValueChanged(): Promise<void> {
+    if (this.modelValue && !this.modelValue.selectionId) {
+      this.modelValue.selectionId = null;
+    }
+  }
 
   async loadSelections(): Promise<void> {
     const topicId = this.task ? this.task.topicId : this.topicId;
@@ -75,9 +83,6 @@ export default class TaskParameter extends Vue implements CustomParameter {
   @Watch('taskId', { immediate: true })
   async onTaskIdChanged(): Promise<void> {
     await this.getTask();
-    if (this.task) {
-      this.$emit('update:modelValue', this.task.parameter);
-    }
   }
 
   @Watch('topicId', { immediate: true })
@@ -89,20 +94,8 @@ export default class TaskParameter extends Vue implements CustomParameter {
     if (this.taskId) {
       await taskService.getTaskById(this.taskId).then((task) => {
         this.task = task;
-        this.selectionId = task.parameter.selectionId;
       });
       await this.loadSelections();
-    }
-  }
-
-  async save(taskId: string | null): Promise<void> {
-    if (!taskId) taskId = this.taskId;
-    if (taskId) {
-      await taskService.putTask(taskId, {
-        parameter: {
-          selectionId: this.selectionId,
-        },
-      });
     }
   }
 }

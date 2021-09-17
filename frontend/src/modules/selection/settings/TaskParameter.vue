@@ -19,7 +19,7 @@
       $t('module.selection.settings.taskParameter.brainstorming')
     }}</label>
     <select
-      v-model="brainstormingTaskId"
+      v-model="modelValue.brainstormingTaskId"
       id="brainstorming_task"
       class="select select--fullwidth"
     >
@@ -32,8 +32,8 @@
       </option>
     </select>
     <FormError
-      v-if="context.$v.brainstormingTaskId.$error"
-      :errors="context.$v.brainstormingTaskId.$errors"
+      v-if="context.$v.modelValue.brainstormingTaskId.$error"
+      :errors="context.$v.modelValue.brainstormingTaskId.$errors"
       :isSmall="true"
     />
   </section>
@@ -60,26 +60,44 @@ import TaskType from '@/types/enum/TaskType';
       required,
       max: maxLength(255),
     },
-    brainstormingTaskId: {
-      required,
+    modelValue: {
+      brainstormingTaskId: {
+        required,
+      },
     },
   },
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class TaskParameter extends Vue implements CustomParameter {
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
   task: Task | null = null;
-  selectionName = '';
-  brainstormingTaskId: string | null = null;
   errors: string[] = [];
   brainstormingTasks: Task[] = [];
+  selectionName = '';
 
   context = setup(() => {
     return {
       $v: useVuelidate(),
     };
   });
+
+  @Watch('modelValue', { immediate: true })
+  async onModelValueChanged(): Promise<void> {
+    if (this.modelValue) {
+      if (this.modelValue.selectionId) {
+        await selectionService
+          .getSelectionById(this.modelValue.selectionId)
+          .then((selection) => {
+            this.selectionName = selection.name;
+          });
+      }
+      if (!this.modelValue.brainstormingTaskId)
+        this.modelValue.brainstormingTaskId = null;
+    }
+  }
 
   async loadBrainstormingTasks(): Promise<void> {
     const topicId = this.task ? this.task.topicId : this.topicId;
@@ -101,63 +119,31 @@ export default class TaskParameter extends Vue implements CustomParameter {
   @Watch('taskId', { immediate: true })
   async onTaskIdChanged(): Promise<void> {
     await this.getTask();
-    if (this.task) {
-      //selection
-      this.$emit('update:modelValue', this.task.parameter);
-      if (
-        this.task.parameter &&
-        this.task.parameter.selectionId &&
-        this.selectionName.length == 0
-      ) {
-        await selectionService
-          .getSelectionById(this.task.parameter.selectionId)
-          .then((selection) => {
-            this.selectionName = selection.name;
-          });
-        //await selectionService.postSelection(this.task.topicId, {name: this.selectionName});
-      }
-    }
   }
 
   async getTask(): Promise<void> {
     if (this.taskId) {
       await taskService.getTaskById(this.taskId).then((task) => {
         this.task = task;
-        if (task.parameter.brainstormingTaskId)
-          this.brainstormingTaskId = task.parameter.brainstormingTaskId;
       });
       await this.loadBrainstormingTasks();
     }
   }
 
-  async save(taskId: string | null): Promise<void> {
-    if (!taskId) taskId = this.taskId;
-    if (taskId) {
-      if (this.task && this.task.parameter && this.task.parameter.selectionId) {
-        const selectionId = this.task.parameter.selectionId;
+  async updateParameterForSaving(): Promise<void> {
+    if (this.modelValue) {
+      if (this.modelValue.selectionId) {
+        const selectionId = this.modelValue.selectionId;
         await selectionService.putSelection(selectionId, {
           name: this.selectionName,
-        });
-        await taskService.putTask(this.taskId, {
-          parameter: {
-            selectionId: selectionId,
-            brainstormingTaskId: this.brainstormingTaskId,
-          },
         });
       } else {
         const topicId = this.task ? this.task.topicId : this.topicId;
         if (topicId) {
           await selectionService
-            .postSelection(topicId, { name: this.selectionName })
+            .postSelection(topicId, {name: this.selectionName})
             .then((selection) => {
-              if (taskId) {
-                taskService.putTask(taskId, {
-                  parameter: {
-                    selectionId: selection.id,
-                    brainstormingTaskId: this.brainstormingTaskId,
-                  },
-                });
-              }
+              this.modelValue.selectionId = selection.id;
             });
         }
       }

@@ -33,6 +33,7 @@
           ref="taskParameter"
           :taskId="taskId"
           :topicId="topicId"
+          v-model="taskParameterValues"
         />
         <label for="moduleType" class="heading heading--xs">{{
           $t('moderator.organism.module.create.moduleType')
@@ -51,15 +52,24 @@
           :isSmall="true"
         />
         <Expand
-          v-for="component in moduleParameterComponents.filter((component) => component.hasModule)"
+          v-for="component in moduleParameterComponents.filter(
+            (component) => component.hasModule
+          )"
           :key="component.componentName"
         >
-          <template v-slot:title>{{
-            $t(`enum.moduleType.${TaskType[taskType]}.${component.moduleName}`)
-          }}</template>
+          <template v-slot:title>
+            <font-awesome-icon
+              :icon="component.moduleIcon"
+              v-if="component.moduleIcon"
+            />
+            {{
+              $t(`enum.moduleType.${TaskType[taskType]}.${component.moduleName}`)
+            }}
+          </template>
           <template v-slot:content>
             <component
               :ref="component.componentName"
+              v-model="component.parameter"
               :module-id="component.moduleId"
               :is="component.componentName"
               :key="component.componentName"
@@ -124,6 +134,7 @@ import FormError from '@/components/shared/atoms/FormError.vue';
 import ModalBase from '@/components/shared/molecules/ModalBase.vue';
 
 import * as taskService from '@/services/task-service';
+import * as moduleService from '@/services/module-service';
 import TaskType from '@/types/enum/TaskType';
 import { Task } from '@/types/api/Task';
 import {
@@ -137,11 +148,14 @@ import {
   getEmptyComponent,
   getModulesForTaskType,
   hasModule,
+  getModuleConfig,
 } from '@/modules';
 import { CustomParameter } from '@/types/ui/CustomParameter';
 import { EventType } from '@/types/enum/EventType';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import Expand from '@/components/shared/atoms/Expand.vue';
+import {Module} from "@/types/api/Module";
+import {almostWhole} from "chart.js/helpers";
 
 @Options({
   components: {
@@ -164,6 +178,8 @@ import Expand from '@/components/shared/atoms/Expand.vue';
     },
   },
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModalTaskCreate extends Vue {
   @Prop({ default: false }) showModal!: boolean;
   @Prop({}) topicId!: string;
@@ -173,8 +189,10 @@ export default class ModalTaskCreate extends Vue {
   moduleParameterComponents: {
     componentName: string;
     moduleName: string | null;
+    moduleIcon: string | null;
     moduleId: string | null;
     hasModule: boolean;
+    parameter: any;
   }[] = [];
 
   moduleTypeKeys: string[] = [];
@@ -182,6 +200,7 @@ export default class ModalTaskCreate extends Vue {
   moduleType = this.moduleTypeKeys;
   title = '';
   description = '';
+  taskParameterValues: any = {};
   errors: string[] = [];
   task: Task | null = null;
 
@@ -200,6 +219,7 @@ export default class ModalTaskCreate extends Vue {
         this.taskType = task.taskType;
         this.title = task.name;
         this.description = task.description;
+        this.taskParameterValues = task.parameter ?? {};
         this.moduleType = task.modules.map((module) => module.name);
         this.task = task;
       });
@@ -220,16 +240,27 @@ export default class ModalTaskCreate extends Vue {
 
   @Watch('moduleType', { immediate: true })
   async onModuleType(moduleType: string[]): Promise<void> {
-    const addComponent = (moduleName: string, componentName: string): void => {
+    const addComponent = async (
+      moduleName: string,
+      componentName: string
+    ): Promise<void> => {
       let moduleId: string | null = null;
+      let moduleParameter: any = {};
       if (this.task) {
         const componentModule = this.task.modules.find(
           (module) => module.name == moduleName
         );
         if (componentModule) {
           moduleId = componentModule.id;
+          moduleParameter = componentModule.parameter;
         }
       }
+
+      let icon: string | null = null;
+      await getModuleConfig('icon', TaskType[this.taskType], moduleName).then(
+        (result) => (icon = result)
+      );
+
       hasModule(
         ModuleComponentType.MODERATOR_CONFIG,
         TaskType[this.taskType],
@@ -239,13 +270,15 @@ export default class ModalTaskCreate extends Vue {
           componentName: componentName,
           moduleId: moduleId,
           moduleName: moduleName,
+          moduleIcon: icon,
           hasModule: result,
+          parameter: moduleParameter,
         });
       });
     };
 
     if (this.$options.components) {
-      this.moduleParameterComponents = [];//moduleType.map((moduleName) => `ModuleParameterComponents:${moduleName}`);
+      this.moduleParameterComponents = []; //moduleType.map((moduleName) => `ModuleParameterComponents:${moduleName}`);
       moduleType.forEach((moduleName) => {
         const componentName = `ModuleParameterComponents-${this.taskType}-${moduleName}`;
         if (
@@ -286,6 +319,7 @@ export default class ModalTaskCreate extends Vue {
     this.moduleType = this.moduleTypeKeys;
     this.title = '';
     this.description = '';
+    this.taskParameterValues = {};
     this.task = null;
   }
 
@@ -293,6 +327,8 @@ export default class ModalTaskCreate extends Vue {
     clearErrors(this.errors);
     await this.context.$v.$validate();
     if (this.context.$v.$error) return;
+
+    await this.updateCustomTaskParameter();
 
     if (this.topicId) {
       let taskCount = 0;
@@ -305,13 +341,13 @@ export default class ModalTaskCreate extends Vue {
           taskType: this.taskType,
           name: this.title,
           description: this.description,
-          parameter: {},
+          parameter: this.taskParameterValues,
           order: taskCount,
           modules: this.moduleType,
         })
         .then(
           (task) => {
-            this.taskUpdated(task,true);
+            this.taskUpdated(task, true);
           },
           (error) => {
             addError(this.errors, getErrorMessage(error));
@@ -323,6 +359,7 @@ export default class ModalTaskCreate extends Vue {
           taskType: this.taskType,
           name: this.title,
           description: this.description,
+          parameter: this.taskParameterValues,
           modules: this.moduleType,
         })
         .then(
@@ -336,16 +373,34 @@ export default class ModalTaskCreate extends Vue {
     }
   }
 
-  async taskUpdated(task: Task, cleanUp = true): Promise<void> {
-    //this.$emit('update:taskId', task.id);
+  async updateCustomTaskParameter(): Promise<void> {
     if (this.$refs.taskParameter) {
       const params = this.$refs.taskParameter as CustomParameter;
-      if ('save' in params) await params.save(task.id);
+      if ('updateParameterForSaving' in params)
+        await params.updateParameterForSaving();
     }
-    task.modules.forEach((module) => {
-      const componentName = `ModuleParameterComponents-${task.taskType}-${module.name}`;
+  }
+
+  async updateCustomModuleParameter(task: Task, module: Module): Promise<void> {
+    const componentName = `ModuleParameterComponents-${task.taskType}-${module.name}`;
+    if (this.$refs[componentName]) {
       const moduleParams = this.$refs[componentName] as CustomParameter;
-      if ('save' in moduleParams) moduleParams.save(module.id);
+      if ('updateParameterForSaving' in moduleParams)
+        await moduleParams.updateParameterForSaving();
+    }
+  }
+
+  async taskUpdated(task: Task, cleanUp = true): Promise<void> {
+    task.modules.forEach((module) => {
+      this.updateCustomModuleParameter(task, module).then(() => {
+        const moduleComponent = this.moduleParameterComponents.find(
+          (component) => component.moduleName == module.name
+        );
+        if (moduleComponent) {
+          module.parameter = moduleComponent.parameter;
+          moduleService.putModule(module.id, module);
+        }
+      });
     });
     this.$emit('update:showModal', false);
     this.$emit('moduleCreated');

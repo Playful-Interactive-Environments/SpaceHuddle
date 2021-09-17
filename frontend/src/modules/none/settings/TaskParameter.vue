@@ -21,13 +21,16 @@ export default class TaskParameter extends Vue {
   task: Task | null = null;
   selectionName = '';
 
+  @Watch('modelValue', { immediate: true })
+  async onModelValueChanged(): Promise<void> {
+    if (this.modelValue) {
+      //todo: set default parameter
+    }
+  }
+
   @Watch('taskId', { immediate: true })
   async onTaskIdChanged(): Promise<void> {
     await this.getTask();
-    if (this.task) {
-      //none
-      this.$emit('update:modelValue', this.task.parameter);
-    }
   }
 
   async getTask(): Promise<void> {

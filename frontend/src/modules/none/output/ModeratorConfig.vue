@@ -35,9 +35,6 @@ export default class ModeratorConfig extends Vue {
   @Watch('moduleId', { immediate: true })
   async onModuleIdChanged(): Promise<void> {
     await this.getModule();
-    if (this.module) {
-      this.$emit('update:modelValue', this.module.parameter);
-    }
   }
 
   async getModule(): Promise<void> {
