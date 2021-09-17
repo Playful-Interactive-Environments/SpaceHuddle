@@ -16,21 +16,12 @@
               <font-awesome-icon :icon="module.icon" />
             </span>
             <span>
-              {{ $t(`enum.moduleType.${taskType}.${module.name}`) }}
+              {{ $t(`module.${taskType}.${module.name}.description.title`) }}
             </span>
           </a>
         </li>
       </ul>
     </div>
-
-    <!--<el-tabs v-model="moduleName" @tab-click="moduleNameClick" v-if="task && task.modules.length > 1">
-      <el-tab-pane
-        v-for="module in task.modules"
-        :key="module.name"
-        :name="module.name"
-        :label="$t(`enum.moduleType.${taskType}.${module.name}`)"
-      />
-    </el-tabs>-->
   </div>
   <ParticipantModuleComponent
     :task-id="taskId"

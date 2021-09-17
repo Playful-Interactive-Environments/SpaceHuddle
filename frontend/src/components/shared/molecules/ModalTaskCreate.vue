@@ -43,7 +43,7 @@
             v-for="type in moduleTypeKeys"
             :key="type"
             :value="type"
-            :label="$t(`enum.moduleType.${TaskType[taskType]}.${type}`)"
+            :label="$t(`module.${TaskType[taskType]}.${type}.description.title`)"
           />
         </el-select>
         <FormError
@@ -63,7 +63,7 @@
               v-if="component.moduleIcon"
             />
             {{
-              $t(`enum.moduleType.${TaskType[taskType]}.${component.moduleName}`)
+              $t(`module.${TaskType[taskType]}.${component.moduleName}.description.title`)
             }}
           </template>
           <template v-slot:content>

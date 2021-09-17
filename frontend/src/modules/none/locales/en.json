@@ -1,4 +1,8 @@
 {
+  "description": {
+    "title": "default fallback module",
+    "description": "fallback module"
+  },
   "publicScreen": {
     "header": "Sorry, nothing here.",
     "info": "Make sure that a module is activated for the public view."

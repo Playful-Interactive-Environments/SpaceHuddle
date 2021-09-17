@@ -1,4 +1,8 @@
 {
+  "description": {
+    "title": "hot slots",
+    "description": "selection of a defined number of ideas"
+  },
   "publicScreen": {
     "noIdeas": "No ideas yet - stay tuned.",
     "chartDataLabel": "result"

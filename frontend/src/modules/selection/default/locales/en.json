@@ -1,4 +1,8 @@
 {
+  "description": {
+    "title": "default selection",
+    "description": "select ideas for further processing"
+  },
   "publicScreen": {
     "noIdeas": "No ideas yet - stay tuned."
   },

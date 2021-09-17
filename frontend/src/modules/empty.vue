@@ -1,7 +1,7 @@
 <template>
   <!--<div class="module-container container2--fullheight container2" ref="item">
     <div class="module-container--center">
-      {{ $t('enum.moduleType.empty') }}
+      {{ $t('module.general.empty') }}
     </div>
   </div>-->
   <span></span>
@@ -9,10 +9,9 @@
 
 <script>
 export default {
-  name: "empty"
-}
+  name: 'empty',
+};
 </script>
-
 
 <style lang="scss" scoped>
 .module-container {

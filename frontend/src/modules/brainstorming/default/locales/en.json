@@ -1,4 +1,8 @@
 {
+  "description": {
+    "title": "form",
+    "description": "idea collection form"
+  },
   "publicScreen": {
     "noIdeas": "No ideas yet - stay tuned."
   },

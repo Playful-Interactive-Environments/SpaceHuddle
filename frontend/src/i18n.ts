@@ -8,10 +8,10 @@ import { getEnumLocales, getLocales } from '@/modules';
 
 const addModuleLocales = async (locale = 'en', dict: any): Promise<any> => {
   dict.module = await getLocales(locale);
-  const enumLocales = await getEnumLocales(locale);
-  if (enumLocales != null) {
-    if (!('enum' in dict)) dict.enum = {};
-    dict.enum.moduleType = enumLocales;
+  const generalLocales = await getEnumLocales(locale);
+  if (generalLocales != null) {
+    if (!('module' in dict)) dict.module = {};
+    dict.module.general = generalLocales;
   }
   return dict;
 };

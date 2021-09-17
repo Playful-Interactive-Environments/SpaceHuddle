@@ -1,4 +1,8 @@
 {
+  "description": {
+    "title": "default categorisation",
+    "description": "Define categories and assign ideas"
+  },
   "moderatorContent": {
     "categoryName": "Name",
     "categoryNamePlaceholder": "new category name ...",

@@ -1,3 +1,4 @@
 {
-  "icon": "rocket"
+  "icon": "rocket",
+  "type": "addOn"
 }
