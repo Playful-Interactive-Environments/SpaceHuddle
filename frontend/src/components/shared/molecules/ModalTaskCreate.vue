@@ -50,13 +50,22 @@
           :errors="context.$v.taskType.$errors"
           :isSmall="true"
         />
-        <component
-          :ref="component.componentName"
-          v-for="component in moduleParameterComponents"
-          :module-id="component.moduleId"
-          :is="component.componentName"
-          :key="component"
-        ></component>
+        <Expand
+          v-for="component in moduleParameterComponents.filter((component) => component.hasModule)"
+          :key="component.componentName"
+        >
+          <template v-slot:title>{{
+            $t(`enum.moduleType.${TaskType[taskType]}.${component.moduleName}`)
+          }}</template>
+          <template v-slot:content>
+            <component
+              :ref="component.componentName"
+              :module-id="component.moduleId"
+              :is="component.componentName"
+              :key="component.componentName"
+            ></component>
+          </template>
+        </Expand>
         <label for="title" class="heading heading--xs">{{
           taskType === 'BRAINSTORMING'
             ? $t('moderator.organism.module.create.question')
@@ -127,13 +136,16 @@ import {
   getAsyncModule,
   getEmptyComponent,
   getModulesForTaskType,
+  hasModule,
 } from '@/modules';
 import { CustomParameter } from '@/types/ui/CustomParameter';
 import { EventType } from '@/types/enum/EventType';
 import ModuleComponentType from '@/modules/ModuleComponentType';
+import Expand from '@/components/shared/atoms/Expand.vue';
 
 @Options({
   components: {
+    Expand,
     FormError,
     ModalBase,
     TaskParameterComponent: getEmptyComponent(),
@@ -158,7 +170,12 @@ export default class ModalTaskCreate extends Vue {
   @Prop({}) taskId!: string;
   componentLoadIndex = 0;
 
-  moduleParameterComponents: { componentName: string; moduleId: string | null }[] = [];
+  moduleParameterComponents: {
+    componentName: string;
+    moduleName: string | null;
+    moduleId: string | null;
+    hasModule: boolean;
+  }[] = [];
 
   moduleTypeKeys: string[] = [];
   taskType = this.TaskTypeKeys[1];
@@ -206,14 +223,24 @@ export default class ModalTaskCreate extends Vue {
     const addComponent = (moduleName: string, componentName: string): void => {
       let moduleId: string | null = null;
       if (this.task) {
-        const componentModule = this.task.modules.find((module) => module.name == moduleName);
+        const componentModule = this.task.modules.find(
+          (module) => module.name == moduleName
+        );
         if (componentModule) {
           moduleId = componentModule.id;
         }
       }
-      this.moduleParameterComponents.push({
-        componentName: componentName,
-        moduleId: moduleId,
+      hasModule(
+        ModuleComponentType.MODERATOR_CONFIG,
+        TaskType[this.taskType],
+        moduleName
+      ).then((result) => {
+        this.moduleParameterComponents.push({
+          componentName: componentName,
+          moduleId: moduleId,
+          moduleName: moduleName,
+          hasModule: result,
+        });
       });
     };
 
@@ -221,8 +248,15 @@ export default class ModalTaskCreate extends Vue {
       this.moduleParameterComponents = [];//moduleType.map((moduleName) => `ModuleParameterComponents:${moduleName}`);
       moduleType.forEach((moduleName) => {
         const componentName = `ModuleParameterComponents-${this.taskType}-${moduleName}`;
-        if (this.$options.components && !this.$options.components[componentName]) {
-          getAsyncModule(ModuleComponentType.MODERATOR_CONFIG, TaskType[this.taskType], moduleName).then((component) => {
+        if (
+          this.$options.components &&
+          !this.$options.components[componentName]
+        ) {
+          getAsyncModule(
+            ModuleComponentType.MODERATOR_CONFIG,
+            TaskType[this.taskType],
+            moduleName
+          ).then((component) => {
             if (this.$options.components)
               this.$options.components[componentName] = component;
             addComponent(moduleName, componentName);

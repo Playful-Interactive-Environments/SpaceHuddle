@@ -149,7 +149,9 @@ export const hasModule = async (
   moduleName = 'default'
 ): Promise<boolean> => {
   let hasModule = false;
-  await getModuleConfig(componentType, taskType, moduleName).then((result) => hasModule = !!result);
+  await getModuleConfig(componentType, taskType, moduleName).then(
+    (result) => (hasModule = !!result)
+  );
   return hasModule;
 };
 
