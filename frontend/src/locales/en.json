@@ -8,7 +8,7 @@
   },
   "confirm": {
     "delete": {
-      "message": "Do they really want to delete the entry?",
+      "message": "Do you really want to delete the entry?",
       "title": "Delete",
       "ok": "Delete",
       "cancel": "Cancel"
