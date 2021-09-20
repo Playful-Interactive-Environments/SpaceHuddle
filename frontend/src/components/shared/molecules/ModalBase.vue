@@ -4,6 +4,7 @@
     classes="base-modal__container"
     content-class="base-modal__content"
     :click-to-close="false"
+    @opened="$emit('opened')"
   >
     <font-awesome-icon
       v-if="closable"
