@@ -1,8 +1,8 @@
 <template>
   <header class="categorisation__header">
     <label for="orderType" class="heading heading--xs">{{
-        $t('module.categorisation.default.moderatorContent.sortOrder')
-      }}</label>
+      $t('module.categorisation.default.moderatorContent.sortOrder')
+    }}</label>
     <select
       v-model="orderType"
       id="orderType"
@@ -130,6 +130,8 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
     draggable,
   },
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorContent extends Vue {
   @Prop() readonly taskId!: string;
   showModalCategoryCreate = false;
@@ -304,6 +306,7 @@ export default class ModeratorContent extends Vue {
     this.showModalCategoryCreate = true;
   }
 
+  /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/
   async dragDone(event: any): Promise<void> {
     if (event.to.id) {
       await categorisationService.addIdeasToCategory(event.to.id, [

@@ -28,7 +28,7 @@ readConfig().then((config) => {
 function until(conditionFunction) {
   const poll = (resolve) => {
     if (conditionFunction()) resolve();
-    else setTimeout(_ => poll(resolve), 400);
+    else setTimeout(() => poll(resolve), 400);
   };
 
   return new Promise(poll);
@@ -37,7 +37,7 @@ function until(conditionFunction) {
 export const getAsyncTaskParameter = async (
   taskType: string | null = null
 ): Promise<any> => {
-  await until(_ => moduleConfigLoaded);
+  await until(() => moduleConfigLoaded);
   if (taskType) {
     const module = moduleConfig[taskType];
     if (module && module.settings && module.settings.parameter) {
@@ -59,7 +59,7 @@ export const getEmptyComponent = (): any => {
 export const getAsyncDefaultModule = async (
   componentType: string
 ): Promise<any> => {
-  await until(_ => moduleConfigLoaded);
+  await until(() => moduleConfigLoaded);
   const module = moduleConfig.none as any;
   if (module[componentType]) {
     return defineAsyncComponent(
@@ -74,7 +74,7 @@ export const getAsyncModule = async (
   taskType: string | null = null,
   moduleName = 'default'
 ): Promise<any> => {
-  await until(_ => moduleConfigLoaded);
+  await until(() => moduleConfigLoaded);
   if (taskType) {
     const module = moduleConfig[taskType][moduleName];
     if (module[componentType]) {
@@ -89,7 +89,7 @@ export const getAsyncModule = async (
 };
 
 const getDefaultModule = async (componentType: string): Promise<any> => {
-  await until((_) => moduleConfigLoaded);
+  await until(() => moduleConfigLoaded);
   const module = moduleConfig.none as any;
   if (module[componentType]) {
     let vue: any;
@@ -108,7 +108,7 @@ const getModule = async (
   taskType: string | null = null,
   moduleName = 'default'
 ): Promise<any> => {
-  await until(_ => moduleConfigLoaded);
+  await until(() => moduleConfigLoaded);
   if (taskType) {
     const module = moduleConfig[taskType][moduleName];
     if (module[componentType]) {
@@ -131,7 +131,7 @@ export const getModuleConfig = async (
   taskType: string | null = null,
   moduleName = 'default'
 ): Promise<any> => {
-  await until((_) => moduleConfigLoaded);
+  await until(() => moduleConfigLoaded);
   if (taskType) {
     const module = moduleConfig[taskType][moduleName];
     if (module[componentType]) {
@@ -156,7 +156,7 @@ export const hasModule = async (
 };
 
 export const getLocales = async (locale = 'en'): Promise<any> => {
-  await until(_ => moduleConfigLoaded);
+  await until(() => moduleConfigLoaded);
   const locales: any = {};
   for (const taskKey in moduleConfig) {
     if (taskKey != 'none') {
@@ -185,7 +185,7 @@ export const getLocales = async (locale = 'en'): Promise<any> => {
 };
 
 export const getEnumLocales = async (locale = 'en'): Promise<any> => {
-  await until(_ => moduleConfigLoaded);
+  await until(() => moduleConfigLoaded);
   let locales: any = {};
   await import(`@/modules/locales/${locale}.json`)
     .then((value) => {
@@ -198,7 +198,7 @@ export const getEnumLocales = async (locale = 'en'): Promise<any> => {
 };
 
 export const getRoutes = async (): Promise<Array<RouteRecordRaw>> => {
-  await until(_ => moduleConfigLoaded);
+  await until(() => moduleConfigLoaded);
   const routes: Array<RouteRecordRaw> = [];
   let taskKey: string;
   let moduleKey: string;
@@ -245,9 +245,9 @@ const getRouteItem = (
 export const getModulesForTaskType = async (
   taskType: keyof typeof TaskType
 ): Promise<string[]> => {
-  await until((_) => moduleConfigLoaded);
+  await until(() => moduleConfigLoaded);
   const taskTypeName = TaskType[taskType];
   const modules = moduleConfig[taskTypeName];
   const moduleNameList = Object.keys(modules) as string[];
-  return moduleNameList.filter(obj => obj !== 'settings');
+  return moduleNameList.filter((obj) => obj !== 'settings');
 };

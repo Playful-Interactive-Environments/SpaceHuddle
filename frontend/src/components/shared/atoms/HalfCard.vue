@@ -12,8 +12,7 @@ import { Options, Vue } from 'vue-class-component';
 import TaskType from '@/types/enum/TaskType';
 
 @Options({
-  components: {
-  },
+  components: {},
 })
 export default class HalfCard extends Vue {
   @Prop({ default: TaskType.CATEGORISATION }) type!: TaskType;
