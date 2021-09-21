@@ -67,6 +67,7 @@ import {
       max: maxLength(255),
     },
   },
+  emits: ['categoryCreated'],
 })
 export default class ModalCategoryCreate extends Vue {
   @Prop({ default: false }) showModal!: boolean;

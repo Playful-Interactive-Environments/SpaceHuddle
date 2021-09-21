@@ -71,6 +71,14 @@ export default class ModeratorModuleContent extends Vue {
   showModalTaskCreate = false;
 
   mounted(): void {
+    this.loadDefaultModule();
+  }
+
+  unmounted(): void {
+    this.loadDefaultModule();
+  }
+
+  loadDefaultModule(): void {
     getAsyncDefaultModule(ModuleComponentType.MODERATOR_CONTENT).then(
       (component) => {
         if (this.$options.components)

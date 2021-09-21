@@ -98,9 +98,11 @@ export default class Participant extends Vue {
 
   async getTask(): Promise<void> {
     if (this.taskId) {
-      await taskService.getTaskById(this.taskId).then((task) => {
-        this.task = task;
-      });
+      await taskService
+        .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
+        .then((task) => {
+          this.task = task;
+        });
     }
   }
 
@@ -111,11 +113,13 @@ export default class Participant extends Vue {
 
   async getModule(): Promise<void> {
     if (this.moduleId) {
-      await moduleService.getModuleById(this.moduleId).then((module) => {
-        this.module = module;
-        if (this.seats.length != this.module.parameter.slotCount)
-          this.getVotes();
-      });
+      await moduleService
+        .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
+        .then((module) => {
+          this.module = module;
+          if (this.seats.length != this.module.parameter.slotCount)
+            this.getVotes();
+        });
     }
   }
 
@@ -148,7 +152,10 @@ export default class Participant extends Vue {
       if (!this.module) await this.getModule();
       if (this.task) {
         await selectService
-          .getIdeasForSelection(this.task?.parameter.selectionId)
+          .getIdeasForSelection(
+            this.task?.parameter.selectionId,
+            EndpointAuthorisationType.PARTICIPANT
+          )
           .then((ideas) => {
             this.ideas = ideas;
             this.getVotes();

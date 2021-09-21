@@ -1,5 +1,6 @@
 <template>
-  <router-view class="pre-formatted" />
+  <!--<router-view class="pre-formatted" />-->
+  <router-view />
   <snackbar
     class="pre-formatted"
     v-bind:showSnackbar="showSnackbar"

@@ -71,6 +71,14 @@ export default class ParticipantModuleContent extends Vue {
   componentLoadIndex = 0;
 
   mounted(): void {
+    this.loadDefaultModule();
+  }
+
+  unmounted(): void {
+    this.loadDefaultModule();
+  }
+
+  loadDefaultModule(): void {
     getAsyncDefaultModule(ModuleComponentType.PARTICIPANT).then((component) => {
       if (this.$options.components)
         this.$options.components['ParticipantModuleComponent'] = component;

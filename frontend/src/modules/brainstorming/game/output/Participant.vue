@@ -23,6 +23,7 @@ import * as ideaService from '@/services/idea-service';
 import * as moduleService from '@/services/module-service';
 import { Idea } from '@/types/api/Idea.ts';
 import { Module } from '@/types/api/Module';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
@@ -52,9 +53,11 @@ export default class Participant extends Vue {
 
   async getModule(): Promise<void> {
     if (this.moduleId) {
-      await moduleService.getModuleById(this.moduleId).then((module) => {
-        this.module = module;
-      });
+      await moduleService
+        .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
+        .then((module) => {
+          this.module = module;
+        });
     }
   }
 
@@ -67,10 +70,17 @@ export default class Participant extends Vue {
   }
 
   async getTaskIdeas(): Promise<void> {
-    ideaService.getIdeasForTask(this.taskId).then((queryResult) => {
-      const randomIndex = Math.floor(Math.random() * queryResult.length);
-      this.randomIdea = queryResult[randomIndex];
-    });
+    ideaService
+      .getIdeasForTask(
+        this.taskId,
+        null,
+        null,
+        EndpointAuthorisationType.PARTICIPANT
+      )
+      .then((queryResult) => {
+        const randomIndex = Math.floor(Math.random() * queryResult.length);
+        this.randomIdea = queryResult[randomIndex];
+      });
   }
 }
 </script>
