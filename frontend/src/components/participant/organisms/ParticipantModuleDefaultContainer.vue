@@ -14,7 +14,7 @@
       </div>
     </div>
     <HalfCard :type="taskType">
-      <ModuleInfo
+      <TaskInfo
         :type="taskType"
         :title="taskName"
         :description="taskDescription"
@@ -30,7 +30,7 @@ import { Options, Vue } from 'vue-class-component';
 import MenuBar from '@/components/participant/molecules/Menubar.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import HalfCard from '@/components/shared/atoms/HalfCard.vue';
-import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
+import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 import TaskType from '@/types/enum/TaskType';
 import { Prop, Watch } from 'vue-property-decorator';
 import { setModuleStyles } from '@/utils/moduleStyles';
@@ -44,7 +44,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
     MenuBar,
     Timer,
     HalfCard,
-    ModuleInfo,
+    TaskInfo,
   },
   validations: {
     keywords: {

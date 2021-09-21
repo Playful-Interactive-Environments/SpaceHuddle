@@ -10,11 +10,9 @@
 import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import TaskType from '@/types/enum/TaskType';
-import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
 
 @Options({
   components: {
-    ModuleInfo,
   },
 })
 export default class HalfCard extends Vue {

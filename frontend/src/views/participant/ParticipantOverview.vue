@@ -9,7 +9,7 @@
       <template v-slot:title>{{ topic.title }}</template>
       <template v-slot:content>
         <li class="overview__module" v-for="task in topic.tasks" :key="task.id">
-          <ModuleCard
+          <TaskCard
             :type="TaskType[task.taskType]"
             :task="task"
             isParticipant="true"
@@ -26,7 +26,7 @@ import { Vue, Options } from 'vue-class-component';
 import MenuBar from '@/components/participant/molecules/Menubar.vue';
 import SessionInfo from '@/components/participant/molecules/SessionInfo.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
-import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
+import TaskCard from '@/components/shared/molecules/TaskCard.vue';
 import TaskType from '@/types/enum/TaskType';
 import * as taskService from '@/services/task-service';
 import * as participantService from '@/services/participant-service';
@@ -40,7 +40,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
     MenuBar,
     SessionInfo,
     TopicExpand,
-    ModuleCard,
+    TaskCard,
     FormError,
   },
 })

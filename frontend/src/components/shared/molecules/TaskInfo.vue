@@ -19,7 +19,7 @@ import TaskType from '@/types/enum/TaskType';
 @Options({
   components: {},
 })
-export default class ModuleInfo extends Vue {
+export default class TaskInfo extends Vue {
   @Prop({ default: TaskType.BRAINSTORMING }) type!: TaskType;
   @Prop({ default: '' }) title!: string;
   @Prop({ default: '' }) description!: string;

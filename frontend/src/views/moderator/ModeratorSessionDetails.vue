@@ -21,7 +21,7 @@
           >
             <template #item="{ element }">
               <li class="detail__module">
-                <ModuleCard
+                <TaskCard
                   :sessionId="sessionId"
                   :type="TaskType[element.taskType]"
                   :task="element"
@@ -52,7 +52,7 @@ import { Prop } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import ModalTaskCreate from '@/components/shared/molecules/ModalTaskCreate.vue';
-import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
+import TaskCard from '@/components/shared/molecules/TaskCard.vue';
 import Navigation from '@/components/moderator/molecules/Navigation.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
@@ -79,7 +79,7 @@ import {
     AddItem,
     draggable,
     ModalTaskCreate,
-    ModuleCard,
+    TaskCard,
     Navigation,
     TopicExpand,
     Sidebar,

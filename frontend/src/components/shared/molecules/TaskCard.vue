@@ -16,7 +16,7 @@
         alt="planet"
         class="module-card__planet"
       />
-      <ModuleInfo
+      <TaskInfo
         :type="type"
         :title="task.name"
         :description="task.description"
@@ -44,7 +44,7 @@ import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import { setModuleStyles } from '@/utils/moduleStyles';
 import { Task } from '@/types/api/Task';
-import ModuleInfo from '@/components/shared/molecules/ModuleInfo.vue';
+import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import ModuleShare from '@/components/moderator/molecules/ModuleShare.vue';
 import TaskType from '@/types/enum/TaskType';
@@ -52,12 +52,12 @@ import TaskStates from '@/types/enum/TaskStates';
 
 @Options({
   components: {
-    ModuleInfo,
+    TaskInfo,
     Timer,
     ModuleShare,
   },
 })
-export default class ModuleCard extends Vue {
+export default class TaskCard extends Vue {
   @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: TaskType.BRAINSTORMING }) type!: TaskType;
   @Prop() task!: Task;
