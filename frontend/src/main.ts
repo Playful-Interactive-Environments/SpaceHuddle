@@ -7,10 +7,8 @@ import router from './router';
 import mitt, { Emitter, EventType } from 'mitt';
 
 import ElementPlus from 'element-plus';
-//import 'element-plus/lib/theme-chalk/index.css';
-import 'element-plus/packages/theme-chalk/src/index.scss';
-//import 'element-theme-chalk/src/index.scss';
 import '@/assets/styles/global.scss';
+import '@/assets/styles/element-plus.scss';
 
 import { library } from '@fortawesome/fontawesome-svg-core';
 // internal icons

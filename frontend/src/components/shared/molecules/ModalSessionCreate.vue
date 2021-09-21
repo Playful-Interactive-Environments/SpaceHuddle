@@ -1,91 +1,93 @@
 <template>
-  <ModalBase
-    v-model:show-modal="showModal"
-    @update:showModal="$emit('update:showModal', $event)"
-  >
-    <div class="session-create">
-      <h2 class="heading heading--regular">
-        {{ $t('moderator.organism.session.create.header') }}
-      </h2>
+  <el-dialog v-model="showDialog" :before-close="handleClose">
+    <template #title>
+      <span class="el-dialog__title">{{
+        $t('moderator.organism.session.create.header')
+      }}</span>
+      <br />
+      <br />
       <p>
         {{ $t('moderator.organism.session.create.info') }}
       </p>
-      <form class="session-create__form">
-        <label for="title" class="heading heading--xs">{{
-          $t('moderator.organism.session.create.title')
-        }}</label>
-        <input
-          id="title"
-          v-model="title"
-          class="input input--fullwidth"
-          :placeholder="$t('moderator.organism.session.create.titleExample')"
-          @blur="context.$v.title.$touch()"
-        />
-        <FormError
-          v-if="context.$v.title.$error"
-          :errors="context.$v.title.$errors"
-          :isSmall="true"
-        />
+    </template>
 
-        <label for="description" class="heading heading--xs">{{
-          $t('moderator.organism.session.create.description')
-        }}</label>
-        <textarea
-          id="description"
-          v-model="description"
-          class="textarea textarea--fullwidth"
-          rows="3"
-          :placeholder="
-            $t('moderator.organism.session.create.descriptionExample')
-          "
-          @blur="context.$v.description.$touch"
-        />
-        <FormError
-          v-if="context.$v.description.$error"
-          :errors="context.$v.description.$errors"
-          :isSmall="true"
-        />
-        <h3 class="session-create__topic heading heading--small">
-          {{ $t('moderator.organism.session.create.topics') }}
-        </h3>
-        <p>
-          {{ $t('moderator.organism.session.create.topicsInfo') }}
-        </p>
-        <label for="topic" class="heading heading--xs">{{
-          $t('moderator.organism.session.create.firstTopic')
-        }}</label>
-        <input
-          id="topic"
-          v-model="topic"
-          class="input input--fullwidth"
-          :placeholder="$t('moderator.organism.session.create.topicExample')"
-          @blur="context.$v.topic.$touch()"
-        />
-        <FormError
-          v-if="context.$v.topic.$error"
-          :errors="context.$v.topic.$errors"
-          :isSmall="true"
-        />
-        <button
-          type="submit"
-          class="btn btn--gradient btn--fullwidth"
-          @click.prevent="saveSession"
-        >
-          {{ $t('moderator.organism.session.create.submit') }}
-        </button>
-      </form>
-    </div>
-  </ModalBase>
+    <form class="session-create__form">
+      <label for="title" class="heading heading--xs">{{
+        $t('moderator.organism.session.create.title')
+      }}</label>
+      <input
+        id="title"
+        v-model="title"
+        class="input input--fullwidth"
+        :placeholder="$t('moderator.organism.session.create.titleExample')"
+        @blur="context.$v.title.$touch()"
+      />
+      <FormError
+        v-if="context.$v.title.$error"
+        :errors="context.$v.title.$errors"
+        :isSmall="true"
+      />
+
+      <label for="description" class="heading heading--xs">{{
+        $t('moderator.organism.session.create.description')
+      }}</label>
+      <textarea
+        id="description"
+        v-model="description"
+        class="textarea textarea--fullwidth"
+        rows="3"
+        :placeholder="
+          $t('moderator.organism.session.create.descriptionExample')
+        "
+        @blur="context.$v.description.$touch"
+      />
+      <FormError
+        v-if="context.$v.description.$error"
+        :errors="context.$v.description.$errors"
+        :isSmall="true"
+      />
+      <h3 class="session-create__topic heading heading--small">
+        {{ $t('moderator.organism.session.create.topics') }}
+      </h3>
+      <p>
+        {{ $t('moderator.organism.session.create.topicsInfo') }}
+      </p>
+      <label for="topic" class="heading heading--xs">{{
+        $t('moderator.organism.session.create.firstTopic')
+      }}</label>
+      <input
+        id="topic"
+        v-model="topic"
+        class="input input--fullwidth"
+        :placeholder="$t('moderator.organism.session.create.topicExample')"
+        @blur="context.$v.topic.$touch()"
+      />
+      <FormError
+        v-if="context.$v.topic.$error"
+        :errors="context.$v.topic.$errors"
+        :isSmall="true"
+      />
+    </form>
+
+    <template #footer>
+      <button
+        type="submit"
+        class="btn btn--gradient btn--fullwidth"
+        @click.prevent="saveSession"
+      >
+        {{ $t('moderator.organism.session.create.submit') }}
+      </button>
+    </template>
+  </el-dialog>
 </template>
 
 <script lang="ts">
 import { Options, setup, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import useVuelidate from '@vuelidate/core';
 import { maxLength, required } from '@vuelidate/validators';
 
 import FormError from '@/components/shared/atoms/FormError.vue';
-import ModalBase from '@/components/shared/molecules/ModalBase.vue';
 
 import * as sessionService from '@/services/session-service';
 import * as topicService from '@/services/topic-service';
@@ -98,7 +100,6 @@ import {
 @Options({
   components: {
     FormError,
-    ModalBase,
   },
   validations: {
     title: {
@@ -129,6 +130,26 @@ export default class ModalSessionCreate extends Vue {
       $v: useVuelidate(),
     };
   });
+
+  showDialog = false;
+  @Watch('showModal', { immediate: false, flush: 'post' })
+  async onShowModalChanged(showModal: boolean): Promise<void> {
+    this.showDialog = showModal;
+  }
+
+  handleClose(done: { (): void }): void {
+    this.resetForm();
+    this.context.$v.$reset();
+    done();
+    this.$emit('update:showModal', false);
+  }
+
+  resetForm(): void {
+    this.title = '';
+    this.description = '';
+    this.topic = '';
+    this.maxNrOfTopics = 5;
+  }
 
   async saveSession(): Promise<void> {
     clearErrors(this.errors);

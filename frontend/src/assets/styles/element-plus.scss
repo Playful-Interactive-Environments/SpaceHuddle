@@ -1,0 +1,104 @@
+@import 'variables.scss';
+
+$dialog-padding: 30px;
+
+/* theme color */
+$--color-primary: #1d2948!default;
+
+$--colors: (
+        "primary": (
+                "base": #1d2948,
+        ),
+        "success": (
+                "base": #01cf9e,
+        ),
+        "warning": (
+                "base": #f1be3a,
+        ),
+        "danger": (
+                "base": #d355b5,
+        ),
+        "error": (
+                "base": #fe6e5d,
+        ),
+        "info": (
+                "base": #1d2948,
+        ),
+);
+/* icon font path, required */
+$--font-path: '~element-plus/lib/theme-chalk/fonts';
+
+
+@import "~element-plus/packages/theme-chalk/src/index";
+
+:root {
+        --color-primary: #{$color-darkblue};
+        --color-warning: #{$color-yellow};
+
+        --el-color-warning: var(--color-warning);
+        --el-color-primary: var(--color-primary);
+
+        --el-text-color-primary: var(--color-primary);
+        --el-text-color-regular: var(--color-primary);
+
+        --el-tag-font-size: var(--font-size-default);
+        --el-font-size-base: var(--font-size-default);
+        --el-font-size-large: var(--font-size-large);
+
+        --el-border-radius-small: var(--border-radius-small);
+        --el-border-radius-base: var(--border-radius-small);
+}
+
+.el-tag {
+        --el-tag-font-size: var(--font-size-default);
+        --el-tag-border-radius: var(--border-radius-small);
+}
+
+.el-dialog {
+        --el-dialog-padding-primary: #{$dialog-padding};
+
+        &__title {
+                font-weight: var(--font-weight-semibold);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+        }
+
+        &__body {
+                padding: 10px var(--el-dialog-padding-primary);
+                max-height: 50vh;
+                overflow: auto;
+        }
+}
+
+.el-input {
+        --el-input-background-color: #{$color-background-gray};
+        --el-input-icon-color: var(--color-primary);
+
+        &__icon {
+                font-weight: var(--font-weight-semibold);
+                width: 40px;
+        }
+}
+
+.el-select {
+        --el-select-input-color: var(--color-primary);
+        --el-select-input-font-size: var(--font-size-default);
+}
+
+.el-message-box {
+        --el-messagebox-border-radius: var(--border-radius-small);
+        --el-messagebox-padding-primary: #{$dialog-padding};
+
+        padding-bottom: unset;
+
+        &__title {
+                font-weight: var(--font-weight-semibold);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+        }
+
+        &__btns {
+                padding: var(--el-messagebox-padding-primary);
+                padding-top: 10px;
+        }
+}

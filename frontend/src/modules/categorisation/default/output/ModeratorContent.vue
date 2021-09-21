@@ -97,7 +97,7 @@
     v-if="task"
     v-model:show-modal="showModalCategoryCreate"
     :task-id="task.id"
-    :category-id="editCategoryId"
+    v-model:category-id="editCategoryId"
     @categoryCreated="getIdeas"
   />
 </template>

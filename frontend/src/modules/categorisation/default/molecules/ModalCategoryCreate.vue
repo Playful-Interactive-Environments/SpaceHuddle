@@ -1,51 +1,53 @@
 <template>
-  <ModalBase
-    v-model:show-modal="showModal"
-    @update:showModal="$emit('update:showModal', $event)"
-  >
-    <div class="category-create">
-      <h2 class="heading heading--regular">
-        {{ $t('module.categorisation.default.create.header') }}
-      </h2>
+  <el-dialog v-model="showDialog" :before-close="handleClose">
+    <template #title>
+      <span class="el-dialog__title">{{
+        $t('module.categorisation.default.create.header')
+      }}</span>
+      <br />
+      <br />
       <p>
         {{ $t('module.categorisation.default.create.info') }}
       </p>
-      <form class="category-create__form">
-        <label for="title" class="heading heading--xs">{{
-          $t('module.categorisation.default.create.title')
-        }}</label>
-        <input
-          id="title"
-          v-model="title"
-          class="input input--fullwidth"
-          :placeholder="$t('module.categorisation.default.create.titleExample')"
-          @blur="context.$v.title.$touch()"
-        />
-        <FormError
-          v-if="context.$v.title.$error"
-          :errors="context.$v.title.$errors"
-          :isSmall="true"
-        />
-        <button
-          type="submit"
-          class="btn btn--gradient btn--fullwidth"
-          @click.prevent="saveCategory"
-        >
-          {{ $t('module.categorisation.default.create.submit') }}
-        </button>
-      </form>
-    </div>
-  </ModalBase>
+    </template>
+
+    <form class="category-create__form">
+      <label for="title" class="heading heading--xs">{{
+        $t('module.categorisation.default.create.title')
+      }}</label>
+      <input
+        id="title"
+        v-model="title"
+        class="input input--fullwidth"
+        :placeholder="$t('module.categorisation.default.create.titleExample')"
+        @blur="context.$v.title.$touch()"
+      />
+      <FormError
+        v-if="context.$v.title.$error"
+        :errors="context.$v.title.$errors"
+        :isSmall="true"
+      />
+    </form>
+
+    <template #footer>
+      <button
+        type="submit"
+        class="btn btn--gradient btn--fullwidth"
+        @click.prevent="saveCategory"
+      >
+        {{ $t('module.categorisation.default.create.submit') }}
+      </button>
+    </template>
+  </el-dialog>
 </template>
 
 <script lang="ts">
 import { Options, setup, Vue } from 'vue-class-component';
-import {Prop, Watch} from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import useVuelidate from '@vuelidate/core';
 import { maxLength, required } from '@vuelidate/validators';
 
 import FormError from '@/components/shared/atoms/FormError.vue';
-import ModalBase from '@/components/shared/molecules/ModalBase.vue';
 
 import * as categorisationService from '@/services/categorisation-service';
 
@@ -58,7 +60,6 @@ import {
 @Options({
   components: {
     FormError,
-    ModalBase,
   },
   validations: {
     title: {
@@ -70,10 +71,16 @@ import {
 export default class ModalCategoryCreate extends Vue {
   @Prop({ default: false }) showModal!: boolean;
   @Prop({ required: true }) taskId!: string;
-  @Prop({ required: false }) categoryId!: string;
+  @Prop({ required: false }) categoryId!: string | null;
 
   title = '';
   errors: string[] = [];
+
+  showDialog = false;
+  @Watch('showModal', { immediate: false, flush: 'post' })
+  async onShowModalChanged(showModal: boolean): Promise<void> {
+    this.showDialog = showModal;
+  }
 
   @Watch('categoryId', { immediate: true })
   onCategoryIdChanged(id: string): void {
@@ -84,6 +91,13 @@ export default class ModalCategoryCreate extends Vue {
     }
   }
 
+  handleClose(done: { (): void }): void {
+    this.resetForm();
+    this.context.$v.$reset();
+    done();
+    this.$emit('update:showModal', false);
+  }
+
   context = setup(() => {
     return {
       $v: useVuelidate(),
@@ -92,6 +106,7 @@ export default class ModalCategoryCreate extends Vue {
 
   resetForm(): void {
     this.title = '';
+    this.$emit('update:categoryId', null);
   }
 
   async saveCategory(): Promise<void> {
