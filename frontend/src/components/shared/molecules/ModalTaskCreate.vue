@@ -1,10 +1,10 @@
 <template>
   <div>
     <el-dialog
-      :title="$t('moderator.organism.module.create.header')"
       v-model="showDialog"
       :before-close="handleClose"
       :key="componentLoadIndex"
+      width="80vw"
     >
       <template #title>
         <span class="el-dialog__title">{{
@@ -45,15 +45,27 @@
           <label for="moduleType" class="heading heading--xs">{{
             $t('moderator.organism.module.create.moduleType')
           }}</label>
+          <el-carousel
+            :autoplay="false"
+            type="card"
+            arrow="always"
+            height="250px"
+          >
+            <el-carousel-item
+              v-for="moduleType in moduleList"
+              :key="moduleType"
+            >
+              <ModuleCard
+                :task-type="TaskType[taskType]"
+                :moduleName="moduleType.name"
+                v-model="moduleType.selected"
+              />
+            </el-carousel-item>
+          </el-carousel>
           <el-select v-model="moduleType" id="moduleType" multiple>
-            <el-option
-              v-for="type in moduleTypeKeys"
-              :key="type"
-              :value="type"
-              :label="
-                $t(`module.${TaskType[taskType]}.${type}.description.title`)
-              "
-            />
+            <el-option v-for="type in moduleTypeKeys" :key="type" :value="type">
+              <ModuleItem :task-type="TaskType[taskType]" :moduleName="type" />
+            </el-option>
           </el-select>
           <FormError
             v-if="context.$v.taskType.$error"
@@ -170,11 +182,15 @@ import { EventType } from '@/types/enum/EventType';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import Expand from '@/components/shared/atoms/Expand.vue';
 import { Module } from '@/types/api/Module';
+import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
+import ModuleItem from '@/components/shared/molecules/ModuleItem.vue';
 
 @Options({
   components: {
     Expand,
     FormError,
+    ModuleCard,
+    ModuleItem,
     TaskParameterComponent: getEmptyComponent(),
   },
   validations: {
@@ -216,6 +232,7 @@ export default class ModalTaskCreate extends Vue {
   taskParameterValues: any = {};
   errors: string[] = [];
   task: Task | null = null;
+  moduleList: { name: string; selected: boolean }[] = [];
 
   TaskType = TaskType;
 
@@ -247,6 +264,10 @@ export default class ModalTaskCreate extends Vue {
         this.description = task.description;
         this.taskParameterValues = task.parameter ?? {};
         this.moduleType = task.modules.map((module) => module.name);
+        task.modules.forEach((module) => {
+          const listItem = this.moduleList.find((m) => m.name == module.name);
+          if (listItem) listItem.selected = true;
+        });
         this.task = task;
       });
     }
@@ -333,17 +354,24 @@ export default class ModalTaskCreate extends Vue {
   }
 
   async loadModuleTypeKeys(): Promise<void> {
+    this.moduleList = [];
     this.moduleTypeKeys = [];
     this.moduleType = this.moduleTypeKeys;
     await getModulesForTaskType(this.taskType).then((result) => {
       this.moduleTypeKeys = result;
       this.moduleType = this.moduleTypeKeys;
+      this.moduleList = this.moduleTypeKeys.map((moduleName) => {
+        return { name: moduleName, selected: false };
+      });
     });
   }
 
   resetForm(): void {
     this.taskType = this.TaskTypeKeys[1];
     this.moduleType = this.moduleTypeKeys;
+    this.moduleList = this.moduleTypeKeys.map((moduleName) => {
+      return { name: moduleName, selected: false };
+    });
     this.title = '';
     this.description = '';
     this.taskParameterValues = {};
@@ -459,5 +487,11 @@ export default class ModalTaskCreate extends Vue {
   &__topic {
     margin-top: 1rem;
   }
+}
+
+.blog-card {
+  margin: 10px;
+  box-shadow: 0 0 10px rgb(0 0 0 / 10%);
+  height: calc(100% - 20px);
 }
 </style>

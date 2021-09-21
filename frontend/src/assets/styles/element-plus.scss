@@ -102,3 +102,16 @@ $--font-path: '~element-plus/lib/theme-chalk/fonts';
                 padding-top: 10px;
         }
 }
+
+.el-card {
+        --el-card-border-radius: var(--border-radius-xs);
+
+        &__body {
+                height: 100%;
+        }
+}
+
+.el-popper {
+        font-size: var(--font-size-small);
+        line-height: 1.8;
+}
