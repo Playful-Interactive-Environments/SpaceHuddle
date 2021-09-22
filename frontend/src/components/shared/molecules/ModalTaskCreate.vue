@@ -417,6 +417,7 @@ export default class ModalTaskCreate extends Vue {
           description: this.description,
           parameter: this.taskParameterValues,
           modules: this.moduleType,
+          state: this.task?.state,
         })
         .then(
           (task) => {
