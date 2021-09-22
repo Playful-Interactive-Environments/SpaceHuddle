@@ -35,6 +35,27 @@
       <font-awesome-icon icon="plus" />
     </button>
   </header>-->
+  <div class="columns is-multiline is-mobile">
+    <draggable
+      class="column"
+      v-for="(orderGroup, orderGroupKey) in orderGroupContent"
+      :key="orderGroupKey"
+      :id="orderGroup.category ? orderGroup.category.id : null"
+      v-model="orderGroup.ideas"
+      draggable=".item"
+      item-key="id"
+      group="idea"
+      @end="dragDone"
+    >
+      <template v-slot:header>
+        <CategoryCard :category="orderGroup.category" :ideas="orderGroup.ideas">
+        </CategoryCard>
+      </template>
+      <template v-slot:item>
+        <span></span>
+      </template>
+    </draggable>
+  </div>
   <Expand
     v-for="(orderGroup, orderGroupKey) in orderGroupContent"
     :key="orderGroupKey"
@@ -128,7 +149,16 @@ import { EventType } from '@/types/enum/EventType';
 import SnackbarType from '@/types/enum/SnackbarType';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import ModalCategoryCreate from '@/modules/categorisation/default/molecules/ModalCategoryCreate.vue';
+import CategoryCard from '@/modules/categorisation/default/molecules/CategoryCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+
+interface CategoryContent {
+  [name: string]: {
+    ideas: Idea[];
+    category: Category | null;
+    displayCount: number;
+  };
+}
 
 @Options({
   components: {
@@ -136,6 +166,7 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
     Expand,
     AddItem,
     ModalCategoryCreate,
+    CategoryCard,
     draggable,
   },
 })
@@ -149,13 +180,7 @@ export default class ModeratorContent extends Vue {
   categories: Category[] = [];
   ideas: Idea[] = [];
   ideasSelection: { [name: string]: boolean } = {};
-  orderGroupContent: {
-    [name: string]: {
-      ideas: Idea[];
-      category: Category | null;
-      displayCount: number;
-    };
-  } = {};
+  orderGroupContent: CategoryContent = {};
   newCategory = {
     keywords: '',
     description: '',
@@ -165,6 +190,14 @@ export default class ModeratorContent extends Vue {
 
   IdeaSortOrder = IdeaSortOrder;
   orderType = this.SortOrderOptions[0];
+
+  get categoryContentList(): CategoryContent {
+    return Object.fromEntries(
+      Object.entries(this.orderGroupContent).filter(
+        ([key, v]) => key != 'undefined'
+      )
+    );
+  }
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {

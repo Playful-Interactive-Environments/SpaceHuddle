@@ -31,9 +31,7 @@ import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import * as ideaService from '@/services/idea-service';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
-import IdeaSortOrder, {
-  IdeaSortOrderCategorisation,
-} from '@/types/enum/IdeaSortOrder';
+import { IdeaSortOrderCategorisation } from '@/types/enum/IdeaSortOrder';
 import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
 import { Category } from '@/types/api/Category';
@@ -92,7 +90,7 @@ export default class PublicScreen extends Vue {
                 const orderGroup = orderGroupContent[ideaItem.order];
                 if (!orderGroup) {
                   orderGroupContent[ideaItem.order] = {
-                    ideas: [ideaItem]
+                    ideas: [ideaItem],
                   };
                 } else {
                   orderGroup.ideas.push(ideaItem);

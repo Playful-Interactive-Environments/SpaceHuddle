@@ -25,12 +25,9 @@
 import { Prop, Watch } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import { getModuleConfig } from '@/modules';
-import Card from '@/components/shared/atoms/Card.vue';
 
 @Options({
-  components: {
-    Card,
-  },
+  components: {},
 })
 export default class ModuleCard extends Vue {
   @Prop() moduleName!: string;
