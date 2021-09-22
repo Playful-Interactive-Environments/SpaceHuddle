@@ -40,20 +40,36 @@
     :key="orderGroupKey"
   >
     <template v-slot:title>
-      {{ orderGroupKey.toUpperCase() }}
-    </template>
-    <template v-slot:icons v-if="orderGroupKey !== 'undefined'">
       <span
-        class="icon"
-        v-on:click="addSelectedToCategory(orderGroup.category.id)"
+        v-if="orderGroup.category"
+        :style="{ color: orderGroup.category.parameter.color }"
       >
-        <font-awesome-icon icon="plus" />
+        {{ orderGroupKey.toUpperCase() }}
       </span>
-      <span class="icon" v-on:click="editCategory(orderGroup.category.id)">
-        <font-awesome-icon icon="pen" />
+      <span v-else>{{ orderGroupKey.toUpperCase() }}</span>
+    </template>
+    <template v-slot:icons>
+      <span
+        role="button"
+        class="icon"
+        v-if="orderGroup.ideas.length > orderGroup.displayCount"
+        v-on:click="orderGroup.displayCount = 1000"
+      >
+        <font-awesome-icon icon="ellipsis-h" />
       </span>
-      <span class="icon" v-on:click="deleteCategory(orderGroup.category.id)">
-        <font-awesome-icon icon="trash" />
+      <span v-if="orderGroupKey !== 'undefined'">
+        <span
+          class="icon"
+          v-on:click="addSelectedToCategory(orderGroup.category.id)"
+        >
+          <font-awesome-icon icon="plus" />
+        </span>
+        <span class="icon" v-on:click="editCategory(orderGroup.category.id)">
+          <font-awesome-icon icon="pen" />
+        </span>
+        <span class="icon" v-on:click="deleteCategory(orderGroup.category.id)">
+          <font-awesome-icon icon="trash" />
+        </span>
       </span>
     </template>
     <template v-slot:content>
@@ -79,13 +95,6 @@
             />
           </template>
         </draggable>
-        <span
-          role="button"
-          v-if="orderGroup.ideas.length > orderGroup.displayCount"
-          v-on:click="orderGroup.displayCount = 1000"
-        >
-          <font-awesome-icon icon="ellipsis-h" />
-        </span>
       </main>
     </template>
   </Expand>

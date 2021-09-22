@@ -27,6 +27,7 @@
         :errors="context.$v.title.$errors"
         :isSmall="true"
       />
+      <el-color-picker v-model="color"></el-color-picker>
     </form>
 
     <template #footer>
@@ -67,14 +68,16 @@ import {
       max: maxLength(255),
     },
   },
-  emits: ['categoryCreated'],
+  emits: ['categoryCreated', 'update:categoryId', 'update:showModal'],
 })
 export default class ModalCategoryCreate extends Vue {
   @Prop({ default: false }) showModal!: boolean;
   @Prop({ required: true }) taskId!: string;
   @Prop({ required: false }) categoryId!: string | null;
 
+  defaultColor = '#1d2948';
   title = '';
+  color = this.defaultColor;
   errors: string[] = [];
 
   showDialog = false;
@@ -88,6 +91,8 @@ export default class ModalCategoryCreate extends Vue {
     if (id) {
       categorisationService.getCategoryById(id).then((category) => {
         this.title = category.keywords;
+        if (category.parameter && category.parameter.color)
+          this.color = category.parameter.color;
       });
     }
   }
@@ -107,6 +112,7 @@ export default class ModalCategoryCreate extends Vue {
 
   resetForm(): void {
     this.title = '';
+    this.color = this.defaultColor;
     this.$emit('update:categoryId', null);
   }
 
@@ -119,6 +125,7 @@ export default class ModalCategoryCreate extends Vue {
       categorisationService
         .postCategory(this.taskId, {
           keywords: this.title,
+          parameter: { color: this.color },
         })
         .then(
           () => {
@@ -135,6 +142,7 @@ export default class ModalCategoryCreate extends Vue {
       categorisationService
         .putCategory(this.categoryId, {
           keywords: this.title,
+          parameter: { color: this.color },
         })
         .then(
           () => {
