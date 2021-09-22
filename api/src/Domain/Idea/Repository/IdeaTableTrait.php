@@ -181,7 +181,8 @@ trait IdeaTableTrait
             "state" => $data->state ?? null,
             "timestamp" => $data->timestamp ?? null,
             "task_id" => $data->taskId ?? null,
-            "participant_id" => $data->participantId ?? null
+            "participant_id" => $data->participantId ?? null,
+            "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null
         ];
     }
 }

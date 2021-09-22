@@ -46,6 +46,13 @@ class IdeaAbstract
     public ?string $link;
 
     /**
+     * Variable json parameters depending on the task type.
+     * @var object|null
+     * @OA\Property(type="object", format="json")
+     */
+    public ?object $parameter;
+
+    /**
      * Creates a new abstract of an idea.
      * @param array $data Idea data.
      */
@@ -57,5 +64,6 @@ class IdeaAbstract
         $this->keywords = $reader->findString("keywords");
         $this->image = $reader->findString("image");
         $this->link = $reader->findString("link");
+        $this->parameter = (object)json_decode($reader->findString("parameter"));
     }
 }

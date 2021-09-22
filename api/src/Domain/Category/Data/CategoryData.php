@@ -39,6 +39,13 @@ class CategoryData
     public ?string $keywords;
 
     /**
+     * Variable json parameters depending on the task type.
+     * @var object|null
+     * @OA\Property(type="object", format="json")
+     */
+    public ?object $parameter;
+
+    /**
      * Creates a new idea.
      * @param array $data Idea data.
      */
@@ -49,5 +56,6 @@ class CategoryData
         $this->description = $reader->findString("description");
         $this->keywords = $reader->findString("keywords");
         $this->timestamp = $reader->findString("timestamp");
+        $this->parameter = (object)json_decode($reader->findString("parameter"));
     }
 }
