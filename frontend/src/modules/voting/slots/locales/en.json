@@ -1,19 +1,21 @@
 {
   "description": {
-    "title": "rate",
-    "description": "rate for each idea"
+    "title": "slots",
+    "description": "selection of a defined number of ideas"
   },
   "publicScreen": {
     "noIdeas": "No ideas yet - stay tuned.",
     "chartDataLabel": "result"
   },
   "participant": {
+    "skip": "skip idea",
+    "emptySlot": "insert idea to empty slot",
     "thanks": "thanks for the vote"
   },
   "moderatorContent": {
   },
   "moderatorConfig": {
-    "maxRate": "max rate",
-    "maxRateExample": "3"
+    "slotCount": "slot count",
+    "slotCountExample": "3"
   }
 }

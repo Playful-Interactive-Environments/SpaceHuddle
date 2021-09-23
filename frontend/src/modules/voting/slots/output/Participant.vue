@@ -8,6 +8,24 @@
       />
     </template>
     <div v-if="ideaPointer < ideas.length">
+      <button
+        v-for="(idea, index) in seats"
+        :key="index"
+        type="submit"
+        class="
+          btn btn--white btn--outline btn--outline--dark-blue btn--fullwidth
+        "
+        @click.prevent="vote(index + 1)"
+      >
+        <span v-if="idea">
+          {{ idea.keywords }}
+        </span>
+        <span v-if="!idea">
+          <font-awesome-icon icon="angle-double-left" />
+          {{ $t('module.voting.slots.participant.emptySlot') }}
+          <font-awesome-icon icon="angle-double-right" />
+        </span>
+      </button>
       <span v-if="ideaPointer < ideas.length">
         <IdeaCard
           :idea="ideas[ideaPointer]"
@@ -15,14 +33,16 @@
           :is-deletable="false"
         />
       </span>
-      <el-rate
-        v-model:model-value="rate"
-        :max="maxRate"
-        v-on:change="vote($event)"
-      ></el-rate>
+      <button
+        type="submit"
+        class="btn btn--gradient btn--fullwidth"
+        @click.prevent="vote(0)"
+      >
+        {{ $t('module.voting.slots.participant.skip') }}
+      </button>
     </div>
     <div v-if="ideaPointer >= ideas.length">
-      {{ $t('module.voting.default.participant.thanks') }}
+      {{ $t('module.voting.slots.participant.thanks') }}
     </div>
   </ParticipantModuleDefaultContainer>
 </template>
@@ -55,16 +75,20 @@ export default class Participant extends Vue {
   module: Module | null = null;
   ideas: Idea[] = [];
   votes: Vote[] = [];
+  seats: (Idea | null)[] = [];
   ideaPointer = 0;
-  rate = 0;
-  maxRate = 5;
 
   mounted(): void {
-    this.initConfig(5);
+    if (this.seats.length == 0) {
+      this.initSeats(3);
+    }
   }
 
-  initConfig(count: number): void {
-    this.maxRate = count;
+  initSeats(count: number): void {
+    this.seats = [];
+    for (let i = 0; i < count; i++) {
+      this.seats.push(null);
+    }
   }
 
   @Watch('taskId', { immediate: true })
@@ -93,7 +117,7 @@ export default class Participant extends Vue {
         .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
         .then((module) => {
           this.module = module;
-          if (this.maxRate != parseInt(this.module.parameter.maxRate))
+          if (this.seats.length != this.module.parameter.slotCount)
             this.getVotes();
         });
     }
@@ -101,13 +125,18 @@ export default class Participant extends Vue {
 
   async getVotes(): Promise<void> {
     if (this.taskId) {
-      if (this.module) this.initConfig(parseInt(this.module.parameter.maxRate));
-      else this.initConfig(5);
+      if (this.module) this.initSeats(this.module.parameter.slotCount);
+      else this.initSeats(3);
       await votingService
         .getVotes(this.taskId, EndpointAuthorisationType.PARTICIPANT)
         .then((votes) => {
           this.votes = votes;
           votes.forEach((vote) => {
+            if (vote.rating > 0) {
+              this.seats[vote.rating - 1] = this.ideas.filter(
+                (idea) => idea.id == vote.ideaId
+              )[0];
+            }
             const ideaIndex = this.ideas.findIndex(
               (idea) => idea.id == vote.ideaId
             );
@@ -135,22 +164,35 @@ export default class Participant extends Vue {
     }
   }
 
-  async vote(rate: number): Promise<void> {
+  async vote(slot: number): Promise<void> {
     if (this.ideaPointer < this.ideas.length) {
       const idea = this.ideas[this.ideaPointer];
       votingService
         .postVote(this.taskId, {
           ideaId: idea.id,
-          rating: rate,
-          detailRating: rate,
+          rating: slot,
+          detailRating: slot > 0 ? 1 : 0,
         })
         .then((vote) => {
           this.votes.push(vote);
         });
-      setTimeout(() => {
-        this.rate = 0;
-        this.ideaPointer++;
-      }, 200);
+      if (slot > 0) {
+        if (this.seats[slot - 1]) {
+          const slotIdea = this.seats[slot - 1];
+          if (slotIdea) {
+            const slotVote = this.votes.filter(
+              (vote) => vote.ideaId == slotIdea?.id
+            )[0];
+            await votingService.putVote(slotVote.id, {
+              ideaId: slotIdea.id,
+              rating: 0,
+              detailRating: 0,
+            });
+          }
+        }
+        this.seats[slot - 1] = idea;
+      }
+      this.ideaPointer++;
     }
   }
 }

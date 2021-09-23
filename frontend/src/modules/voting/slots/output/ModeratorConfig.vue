@@ -1,21 +1,21 @@
 <template>
   <section>
-    <label for="maxRate" class="heading heading--xs">{{
-      $t('module.voting.default.moderatorConfig.maxRate')
+    <label for="slotCount" class="heading heading--xs">{{
+      $t('module.voting.slots.moderatorConfig.slotCount')
     }}</label>
     <input
-      id="maxRate"
-      v-model="modelValue.maxRate"
+      id="slotCount"
+      v-model="modelValue.slotCount"
       type="number"
       class="input input--fullwidth"
       :placeholder="
-        $t('module.voting.default.moderatorConfig.maxRateExample')
+        $t('module.voting.slots.moderatorConfig.slotCountExample')
       "
-      @blur="context.$v.modelValue.maxRate.$touch()"
+      @blur="context.$v.modelValue.slotCount.$touch()"
     />
     <FormError
-      v-if="context.$v.modelValue.maxRate.$error"
-      :errors="context.$v.modelValue.maxRate.$errors"
+      v-if="context.$v.modelValue.slotCount.$error"
+      :errors="context.$v.modelValue.slotCount.$errors"
       :isSmall="true"
     />
   </section>
@@ -36,7 +36,7 @@ import { Module } from '@/types/api/Module';
   },
   validations: {
     modelValue: {
-      maxRate: {
+      slotCount: {
         required,
         numeric,
       },
@@ -61,8 +61,8 @@ export default class ModeratorConfig extends Vue {
 
   @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {
-    if (this.modelValue && !this.modelValue.maxRate) {
-      this.modelValue.maxRate = 5;
+    if (this.modelValue && !this.modelValue.slotCount) {
+      this.modelValue.slotCount = 3;
     }
   }
 
