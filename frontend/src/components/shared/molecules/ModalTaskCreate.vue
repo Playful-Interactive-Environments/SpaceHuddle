@@ -271,7 +271,7 @@ export default class ModalTaskCreate extends Vue {
   }
 
   handleClose(done: { (): void }): void {
-    this.resetForm();
+    if(this.topicId) this.resetForm();
     this.context.$v.$reset();
     done();
     this.$emit('update:showModal', false);
@@ -377,7 +377,12 @@ export default class ModalTaskCreate extends Vue {
     this.moduleList = {};
     await getModulesForTaskType(this.taskType).then((result) => {
       result.forEach((moduleName, moduleIndex) => {
-        this.moduleList[moduleName] = moduleIndex == 0;
+        if (!this.task)
+          this.moduleList[moduleName] = moduleIndex == 0;
+        else
+          this.moduleList[moduleName] = this.task.modules.some(
+            (model) => model.name == moduleName
+          );
       });
     });
   }
