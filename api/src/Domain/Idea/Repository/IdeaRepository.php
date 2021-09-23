@@ -163,7 +163,10 @@ class IdeaRepository implements RepositoryInterface
         }
 
         $orderTypeList = self::convertToList($orderType);
-        return self::addOrderColumn($orderTypeList[0], $resultList, $refId);
+        if (sizeof($orderTypeList) > 0) {
+            return self::addOrderColumn($orderTypeList[0], $resultList, $refId);
+        }
+        return $resultList;
     }
 
     /**
@@ -189,7 +192,10 @@ class IdeaRepository implements RepositoryInterface
         }
 
         $orderTypeList = self::convertToList($orderType);
-        return self::addOrderColumn($orderTypeList[0], $resultList, $refId);
+        if (sizeof($orderTypeList) > 0) {
+            return self::addOrderColumn($orderTypeList[0], $resultList, $refId);
+        }
+        return $resultList;
     }
 
     /**
