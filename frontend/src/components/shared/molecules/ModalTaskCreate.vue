@@ -52,7 +52,7 @@
               :closable="moduleKeyList.length > 1"
               v-on:close="removeModuleType(tag)"
             >
-              {{ tag }}
+              {{ $t(`module.${TaskType[taskType]}.${tag}.description.title`) }}
             </el-tag>
           </div>
           <el-carousel
