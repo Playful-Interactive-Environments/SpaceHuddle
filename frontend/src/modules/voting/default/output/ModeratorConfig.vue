@@ -8,9 +8,7 @@
       v-model="modelValue.maxRate"
       type="number"
       class="input input--fullwidth"
-      :placeholder="
-        $t('module.voting.default.moderatorConfig.maxRateExample')
-      "
+      :placeholder="$t('module.voting.default.moderatorConfig.maxRateExample')"
       @blur="context.$v.modelValue.maxRate.$touch()"
     />
     <FormError

@@ -8,9 +8,7 @@
       v-model="modelValue.slotCount"
       type="number"
       class="input input--fullwidth"
-      :placeholder="
-        $t('module.voting.slots.moderatorConfig.slotCountExample')
-      "
+      :placeholder="$t('module.voting.slots.moderatorConfig.slotCountExample')"
       @blur="context.$v.modelValue.slotCount.$touch()"
     />
     <FormError
