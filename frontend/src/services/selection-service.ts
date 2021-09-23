@@ -1,12 +1,13 @@
 import {
   apiExecuteDelete,
   apiExecuteGetHandled,
-  apiExecutePost, apiExecutePut,
+  apiExecutePost,
+  apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Selection } from '@/types/api/Selection';
-import {Idea} from "@/types/api/Idea";
+import { Idea } from '@/types/api/Idea';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -21,7 +22,7 @@ export const getSelectionById = async (
   );
 };
 
-export const deleteSelection = async (id: string): Promise<void> => {
+export const deleteSelection = async (id: string): Promise<boolean> => {
   return await apiExecuteDelete<any>(`/${EndpointType.SELECTION}/${id}/`);
 };
 
@@ -75,8 +76,8 @@ export const removeIdeasFromSelection = async (
   selectionId: string,
   data: Partial<string[]>,
   authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<void> => {
-  await apiExecuteDelete<any>(
+): Promise<boolean> => {
+  return await apiExecuteDelete<any>(
     `/${EndpointType.SELECTION}/${selectionId}/${EndpointType.IDEAS}`,
     data,
     authHeaderType

@@ -176,28 +176,32 @@ export async function apiExecuteDeleteHandled<T = any>(
   url: string,
   body: any = null,
   authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<void> {
+): Promise<boolean> {
   if (await deleteConfirmDialog()) {
     try {
       if (body)
         await getApiEndpoint(authHeaderType).delete<T>(url, { data: body });
       else await getApiEndpoint(authHeaderType).delete<T>(url);
+      return true;
     } catch (error) {
-      return;
+      return false;
     }
   }
+  return false;
 }
 
 export async function apiExecuteDelete<T = any>(
   url: string,
   body: any = null,
   authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<void> {
+): Promise<boolean> {
   if (await deleteConfirmDialog()) {
     if (body)
       await getApiEndpoint(authHeaderType).delete<T>(url, { data: body });
     else await getApiEndpoint(authHeaderType).delete<T>(url);
+    return true;
   }
+  return false;
 }
 
 const deleteConfirmDialog = async (): Promise<boolean> => {

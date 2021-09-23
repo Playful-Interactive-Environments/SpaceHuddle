@@ -27,7 +27,7 @@ export const updateTask = async (
   return await apiExecutePut<TaskForSaveAction>(`/${EndpointType.TASK}/`, data);
 };
 
-export const deleteTask = async (id: string): Promise<void> => {
+export const deleteTask = async (id: string): Promise<boolean> => {
   return await apiExecuteDelete<any>(`/${EndpointType.TASK}/${id}/`);
 };
 

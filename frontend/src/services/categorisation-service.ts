@@ -1,7 +1,8 @@
 import {
   apiExecuteDelete,
   apiExecuteGetHandled,
-  apiExecutePost, apiExecutePut,
+  apiExecutePost,
+  apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
@@ -20,7 +21,7 @@ export const getCategoryById = async (
   );
 };
 
-export const deleteCategory = async (id: string): Promise<void> => {
+export const deleteCategory = async (id: string): Promise<boolean> => {
   return await apiExecuteDelete<any>(`/${EndpointType.CATEGORY}/${id}/`);
 };
 
@@ -74,8 +75,8 @@ export const removeIdeasFromCategory = async (
   categoryId: string,
   data: Partial<string[]>,
   authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<void> => {
-  await apiExecuteDelete<any>(
+): Promise<boolean> => {
+  return await apiExecuteDelete<any>(
     `/${EndpointType.CATEGORY}/${categoryId}/${EndpointType.IDEAS}`,
     data,
     authHeaderType

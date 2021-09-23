@@ -21,7 +21,7 @@ export const getModuleById = async (
   );
 };
 
-export const deleteModule = async (id: string): Promise<void> => {
+export const deleteModule = async (id: string): Promise<boolean> => {
   return await apiExecuteDelete<any>(`/${EndpointType.MODULE}/${id}/`);
 };
 

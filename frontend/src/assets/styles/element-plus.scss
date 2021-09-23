@@ -119,3 +119,11 @@ $--font-path: '~element-plus/lib/theme-chalk/fonts';
 .el-tag {
         margin-right: 10px;
 }
+
+.el-drawer {
+        overflow: auto;
+}
+
+.el-drawer.rtl, .el-drawer.ltr {
+        max-height: 100vh;
+}

@@ -72,7 +72,7 @@ import {
 })
 export default class ModalCategoryCreate extends Vue {
   @Prop({ default: false }) showModal!: boolean;
-  @Prop({ required: true }) taskId!: string;
+  @Prop({ required: false }) taskId!: string | null;
   @Prop({ required: false }) categoryId!: string | null;
 
   defaultColor = '#1d2948';
@@ -122,22 +122,24 @@ export default class ModalCategoryCreate extends Vue {
     if (this.context.$v.$error) return;
 
     if (!this.categoryId) {
-      categorisationService
-        .postCategory(this.taskId, {
-          keywords: this.title,
-          parameter: { color: this.color },
-        })
-        .then(
-          () => {
-            this.$emit('update:showModal', false);
-            this.$emit('categoryCreated');
-            this.resetForm();
-            this.context.$v.$reset();
-          },
-          (error) => {
-            addError(this.errors, getErrorMessage(error));
-          }
-        );
+      if (this.taskId) {
+        categorisationService
+          .postCategory(this.taskId, {
+            keywords: this.title,
+            parameter: { color: this.color },
+          })
+          .then(
+            (category) => {
+              this.$emit('update:showModal', false);
+              this.$emit('categoryCreated', category);
+              this.resetForm();
+              this.context.$v.$reset();
+            },
+            (error) => {
+              addError(this.errors, getErrorMessage(error));
+            }
+          );
+      }
     } else {
       categorisationService
         .putCategory(this.categoryId, {
@@ -145,10 +147,10 @@ export default class ModalCategoryCreate extends Vue {
           parameter: { color: this.color },
         })
         .then(
-          () => {
+          (category) => {
             this.$emit('update:showModal', false);
             this.$emit('update:categoryId', null);
-            this.$emit('categoryCreated');
+            this.$emit('categoryCreated', category);
             this.resetForm();
             this.context.$v.$reset();
           },

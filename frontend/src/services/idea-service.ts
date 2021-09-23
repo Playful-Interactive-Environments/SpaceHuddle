@@ -9,7 +9,7 @@ import { Idea } from '@/types/api/Idea';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
-export const deleteIdea = async (id: string): Promise<void> => {
+export const deleteIdea = async (id: string): Promise<boolean> => {
   return await apiExecuteDelete<any>(`/${EndpointType.IDEA}/${id}/`);
 };
 

@@ -14,31 +14,10 @@
       </option>
     </select>
   </header>
-  <!--<header class="categorisation__header columns">
-    <label for="categoryName" class="column is-one-quarter heading heading--xs">
-      {{ $t('module.categorisation.default.moderatorContent.categoryName') }}
-    </label>
-    <input
-      v-model="newCategory.keywords"
-      id="categoryName"
-      class="column input"
-      :placeholder="
-        $t(
-          'module.categorisation.default.moderatorContent.categoryNamePlaceholder'
-        )
-      "
-    />
-    <button
-      class="column is-one-fifth btn btn--blue"
-      @click.prevent="submitCategory"
-    >
-      <font-awesome-icon icon="plus" />
-    </button>
-  </header>-->
   <div class="columns is-multiline is-mobile">
     <draggable
       class="column"
-      v-for="(orderGroup, orderGroupKey) in orderGroupContent"
+      v-for="(orderGroup, orderGroupKey) in orderGroupContentCards"
       :key="orderGroupKey"
       :id="orderGroup.category ? orderGroup.category.id : null"
       v-model="orderGroup.ideas"
@@ -48,7 +27,11 @@
       @end="dragDone"
     >
       <template v-slot:header>
-        <CategoryCard :category="orderGroup.category" :ideas="orderGroup.ideas">
+        <CategoryCard
+          :category="orderGroup.category"
+          :ideas="orderGroup.ideas"
+          @categoryChanged="getIdeas"
+        >
         </CategoryCard>
       </template>
       <template v-slot:item>
@@ -57,7 +40,7 @@
     </draggable>
   </div>
   <Expand
-    v-for="(orderGroup, orderGroupKey) in orderGroupContent"
+    v-for="(orderGroup, orderGroupKey) in orderGroupContentSelection"
     :key="orderGroupKey"
   >
     <template v-slot:title>
@@ -112,6 +95,7 @@
               :key="element.id"
               v-model:is-selected="ideasSelection[element.id]"
               @ideaDeleted="getIdeas"
+              :is-deletable="false"
               class="item"
             />
           </template>
@@ -180,7 +164,9 @@ export default class ModeratorContent extends Vue {
   categories: Category[] = [];
   ideas: Idea[] = [];
   ideasSelection: { [name: string]: boolean } = {};
-  orderGroupContent: CategoryContent = {};
+  orderGroupContentCards: CategoryContent = {};
+  orderGroupContentSelection: CategoryContent = {};
+
   newCategory = {
     keywords: '',
     description: '',
@@ -190,14 +176,6 @@ export default class ModeratorContent extends Vue {
 
   IdeaSortOrder = IdeaSortOrder;
   orderType = this.SortOrderOptions[0];
-
-  get categoryContentList(): CategoryContent {
-    return Object.fromEntries(
-      Object.entries(this.orderGroupContent).filter(
-        ([key, v]) => key != 'undefined'
-      )
-    );
-  }
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -221,19 +199,33 @@ export default class ModeratorContent extends Vue {
   }
 
   async getIdeas(): Promise<void> {
+    const filter = (
+      list: CategoryContent,
+      getUndefined = true
+    ): CategoryContent => {
+      return Object.fromEntries(
+        Object.entries(list).filter(([key, v]) => {
+          if (!getUndefined) return key != 'undefined';
+          return key == 'undefined';
+        })
+      );
+    };
+
     if (this.taskId) {
       if (!this.task) await this.getTask();
       await this.getCategories();
       let displayCount = 3;
-      if ('undefined' in this.orderGroupContent)
-        displayCount = this.orderGroupContent['undefined'].displayCount;
+      if ('undefined' in this.orderGroupContentSelection)
+        displayCount =
+          this.orderGroupContentSelection['undefined'].displayCount;
       const orderGroupContent = {
         undefined: { ideas: [], category: null, displayCount: displayCount },
       };
       this.categories.forEach((category) => {
         displayCount = 3;
-        if (category.keywords in this.orderGroupContent)
-          displayCount = this.orderGroupContent[category.keywords].displayCount;
+        if (category.keywords in this.orderGroupContentCards)
+          displayCount =
+            this.orderGroupContentCards[category.keywords].displayCount;
         orderGroupContent[category.keywords] = {
           ideas: [],
           category: category,
@@ -270,7 +262,8 @@ export default class ModeratorContent extends Vue {
           });
       }
 
-      this.orderGroupContent = orderGroupContent;
+      this.orderGroupContentCards = filter(orderGroupContent, false);
+      this.orderGroupContentSelection = filter(orderGroupContent, true);
     }
   }
 

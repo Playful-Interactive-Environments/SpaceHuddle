@@ -50,7 +50,7 @@ export const post = async (data: Partial<Session>): Promise<Session> => {
   return await apiExecutePost<Session>(`/${EndpointType.SESSION}/`, data);
 };
 
-export const remove = async (id: string): Promise<void> => {
+export const remove = async (id: string): Promise<boolean> => {
   return await apiExecuteDelete<any>(`/${EndpointType.SESSION}/${id}/`);
 };
 

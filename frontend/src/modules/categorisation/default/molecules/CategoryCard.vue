@@ -33,18 +33,28 @@
       </el-card>
     </el-badge>
   </div>
-  <el-drawer v-model="displayDetails" modal-class="darkblue">
+  <el-drawer
+    v-model="displayDetails"
+    modal-class="darkblue"
+    :lock-scroll="false"
+  >
     <template v-slot:title>
       <h2 class="heading heading--regular" :style="{ color: categoryColor }">
         {{ categoryName }}
       </h2>
+      <span v-if="category" :style="{ color: categoryColor }">
+        <span class="icon" v-on:click="editCategory()">
+          <font-awesome-icon icon="pen" />
+        </span>
+        <span class="icon" v-on:click="deleteCategory()">
+          <font-awesome-icon icon="trash" />
+        </span>
+      </span>
     </template>
     <main
       class="categorisation__content"
       :style="{
         'background-color': categoryColor,
-        padding: '10px',
-        height: '100%',
       }"
     >
       <IdeaCard
@@ -53,12 +63,20 @@
         :id="idea.id"
         :idea="idea"
         :is-selectable="false"
-        :is-deletable="false"
+        :is-deletable="category != null"
+        :custom-delete="true"
+        @ideaDeleted="removeIdea($event)"
         class="item"
         style="height: unset"
       />
     </main>
   </el-drawer>
+  <ModalCategoryCreate
+    v-if="category"
+    v-model:show-modal="displayEditCategory"
+    v-model:category-id="category.id"
+    @categoryCreated="updateCategory($event)"
+  />
 </template>
 
 <script lang="ts">
@@ -67,11 +85,15 @@ import { Options, Vue } from 'vue-class-component';
 import { Category } from '@/types/api/Category';
 import { Idea } from '@/types/api/Idea';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
+import * as categorisationService from '@/services/categorisation-service';
+import ModalCategoryCreate from '@/modules/categorisation/default/molecules/ModalCategoryCreate.vue';
 
 @Options({
   components: {
     IdeaCard,
+    ModalCategoryCreate,
   },
+  emits: ['categoryChanged'],
 })
 export default class CategoryCard extends Vue {
   @Prop() category!: Category;
@@ -79,6 +101,7 @@ export default class CategoryCard extends Vue {
   @Prop({ default: false }) modelValue!: boolean;
 
   displayDetails = false;
+  displayEditCategory = false;
 
   get categoryName(): string {
     if (this.category) return this.category.keywords;
@@ -94,6 +117,40 @@ export default class CategoryCard extends Vue {
     if (this.category) return this.category.parameter.color;
     return 'var(--color-darkblue)';
   }
+
+  updateCategory(event: Category): void {
+    this.category.keywords = event.keywords;
+    this.category.description = event.description;
+    this.category.parameter = event.parameter;
+    this.$emit('categoryChanged');
+  }
+
+  removeIdea(event: string): void {
+    categorisationService
+      .removeIdeasFromCategory(this.category.id, [event])
+      .then((done) => {
+        if (done) {
+          const index = this.ideas.findIndex((idea) => idea.id == event);
+          if (index) this.ideas.splice(index, 1);
+          this.$emit('categoryChanged');
+        }
+      });
+  }
+
+  async editCategory(): Promise<void> {
+    this.displayEditCategory = true;
+  }
+
+  async deleteCategory(): Promise<void> {
+    await categorisationService
+      .deleteCategory(this.category.id)
+      .then((done) => {
+        if (done) {
+          this.displayDetails = false;
+          this.$emit('categoryChanged');
+        }
+      });
+  }
 }
 </script>
 
@@ -101,16 +158,13 @@ export default class CategoryCard extends Vue {
 .categorisation {
   &__content {
     width: 100%;
-    column-width: 22vw;
-    column-gap: 1rem;
+    padding: 10px;
+    height: 100%;
   }
 }
 
 .icon {
-  text-align: center;
-  width: 100%;
   margin: 0.8em 0;
-  font-size: 40pt;
 }
 
 .heading {

@@ -33,10 +33,12 @@ import {
 
 @Options({
   components: {},
+  emits: ['ideaDeleted', 'update:isSelected'],
 })
 export default class IdeaCard extends Vue {
   @Prop() idea!: Idea;
   @Prop({ default: true }) isDeletable!: boolean;
+  @Prop({ default: false }) customDelete!: boolean;
   @Prop({ default: false }) isSelectable!: boolean;
   @Prop({ default: false, reactive: true }) isSelected!: boolean;
   errors: string[] = [];
@@ -52,10 +54,15 @@ export default class IdeaCard extends Vue {
   }
 
   async deleteIdea(): Promise<void> {
+    if (this.customDelete) {
+      this.$emit('ideaDeleted', this.idea.id);
+      return;
+    }
+
     clearErrors(this.errors);
     ideaService.deleteIdea(this.idea.id).then(
       () => {
-        this.$emit('ideaDeleted');
+        this.$emit('ideaDeleted', this.idea.id);
       },
       (error) => {
         addError(this.errors, getErrorMessage(error));
