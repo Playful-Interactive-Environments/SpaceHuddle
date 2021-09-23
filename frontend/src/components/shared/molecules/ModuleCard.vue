@@ -43,7 +43,7 @@ export default class ModuleCard extends Vue {
 
   @Watch('selected', { immediate: true })
   onSelectedChanged(value: boolean): void {
-    if (this.modelValue != value) this.$emit('update:modalValue', value);
+    if (this.modelValue != value) this.$emit('update:modelValue', value);
   }
 
   @Watch('taskType', { immediate: true })

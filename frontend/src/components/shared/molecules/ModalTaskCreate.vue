@@ -45,31 +45,38 @@
           <label for="moduleType" class="heading heading--xs">{{
             $t('moderator.organism.module.create.moduleType')
           }}</label>
+          <div>
+            <el-tag
+              v-for="tag in moduleSelection"
+              :key="tag"
+              :closable="moduleKeyList.length > 1"
+              v-on:close="removeModuleType(tag)"
+            >
+              {{ tag }}
+            </el-tag>
+          </div>
           <el-carousel
+            id="moduleType"
             :autoplay="false"
             type="card"
             arrow="always"
             height="250px"
+            v-if="moduleKeyList.length > 1"
           >
             <el-carousel-item
-              v-for="moduleType in moduleList"
+              v-for="moduleType in moduleKeyList"
               :key="moduleType"
             >
               <ModuleCard
                 :task-type="TaskType[taskType]"
-                :moduleName="moduleType.name"
-                v-model="moduleType.selected"
+                :moduleName="moduleType"
+                v-model="moduleList[moduleType]"
               />
             </el-carousel-item>
           </el-carousel>
-          <el-select v-model="moduleType" id="moduleType" multiple>
-            <el-option v-for="type in moduleTypeKeys" :key="type" :value="type">
-              <ModuleItem :task-type="TaskType[taskType]" :moduleName="type" />
-            </el-option>
-          </el-select>
           <FormError
-            v-if="context.$v.taskType.$error"
-            :errors="context.$v.taskType.$errors"
+            v-if="context.$v.moduleSelection.$error"
+            :errors="context.$v.moduleSelection.$errors"
             :isSmall="true"
           />
           <Expand
@@ -205,6 +212,9 @@ import ModuleItem from '@/components/shared/molecules/ModuleItem.vue';
       required,
       max: maxLength(1000),
     },
+    moduleSelection: {
+      required,
+    },
   },
 })
 
@@ -224,15 +234,13 @@ export default class ModalTaskCreate extends Vue {
     parameter: any;
   }[] = [];
 
-  moduleTypeKeys: string[] = [];
+  moduleList: { [key: string]: boolean } = {};
   taskType = this.TaskTypeKeys[1];
-  moduleType = this.moduleTypeKeys;
   title = '';
   description = '';
   taskParameterValues: any = {};
   errors: string[] = [];
   task: Task | null = null;
-  moduleList: { name: string; selected: boolean }[] = [];
 
   TaskType = TaskType;
 
@@ -246,6 +254,20 @@ export default class ModalTaskCreate extends Vue {
   @Watch('showModal', { immediate: false, flush: 'post' })
   async onShowModalChanged(showModal: boolean): Promise<void> {
     this.showDialog = showModal;
+  }
+
+  get moduleKeyList(): string[] {
+    return Object.keys(this.moduleList);
+  }
+
+  get moduleSelection(): string[] {
+    return Object.entries(this.moduleList)
+      .filter((item) => item[1])
+      .map((item) => item[0]);
+  }
+
+  removeModuleType(tag: string): void {
+    this.moduleList[tag] = false;
   }
 
   handleClose(done: { (): void }): void {
@@ -263,10 +285,8 @@ export default class ModalTaskCreate extends Vue {
         this.title = task.name;
         this.description = task.description;
         this.taskParameterValues = task.parameter ?? {};
-        this.moduleType = task.modules.map((module) => module.name);
         task.modules.forEach((module) => {
-          const listItem = this.moduleList.find((m) => m.name == module.name);
-          if (listItem) listItem.selected = true;
+          this.moduleList[module.name] = true;
         });
         this.task = task;
       });
@@ -275,7 +295,7 @@ export default class ModalTaskCreate extends Vue {
 
   @Watch('taskType', { immediate: true })
   async onTaskTypeChanged(taskType: string): Promise<void> {
-    await this.loadModuleTypeKeys();
+    await this.loadModuleList();
     if (this.$options.components) {
       getAsyncTaskParameter(TaskType[taskType]).then((component) => {
         if (this.$options.components)
@@ -285,8 +305,8 @@ export default class ModalTaskCreate extends Vue {
     }
   }
 
-  @Watch('moduleType', { immediate: true })
-  async onModuleType(moduleType: string[]): Promise<void> {
+  @Watch('moduleSelection', { immediate: true })
+  async onModuleSelectionChanged(moduleSelection: string[]): Promise<void> {
     const addComponent = async (
       moduleName: string,
       componentName: string
@@ -326,7 +346,7 @@ export default class ModalTaskCreate extends Vue {
 
     if (this.$options.components) {
       this.moduleParameterComponents = [];
-      moduleType.forEach((moduleName) => {
+      moduleSelection.forEach((moduleName) => {
         const componentName = `ModuleParameterComponents-${this.taskType}-${moduleName}`;
         if (
           this.$options.components &&
@@ -353,25 +373,18 @@ export default class ModalTaskCreate extends Vue {
     return Object.keys(TaskType) as Array<keyof typeof TaskType>;
   }
 
-  async loadModuleTypeKeys(): Promise<void> {
-    this.moduleList = [];
-    this.moduleTypeKeys = [];
-    this.moduleType = this.moduleTypeKeys;
+  async loadModuleList(): Promise<void> {
+    this.moduleList = {};
     await getModulesForTaskType(this.taskType).then((result) => {
-      this.moduleTypeKeys = result;
-      this.moduleType = this.moduleTypeKeys;
-      this.moduleList = this.moduleTypeKeys.map((moduleName) => {
-        return { name: moduleName, selected: false };
+      result.forEach((moduleName, moduleIndex) => {
+        this.moduleList[moduleName] = moduleIndex == 0;
       });
     });
   }
 
   resetForm(): void {
     this.taskType = this.TaskTypeKeys[1];
-    this.moduleType = this.moduleTypeKeys;
-    this.moduleList = this.moduleTypeKeys.map((moduleName) => {
-      return { name: moduleName, selected: false };
-    });
+    this.loadModuleList();
     this.title = '';
     this.description = '';
     this.taskParameterValues = {};
@@ -399,7 +412,7 @@ export default class ModalTaskCreate extends Vue {
           description: this.description,
           parameter: this.taskParameterValues,
           order: taskCount,
-          modules: this.moduleType,
+          modules: this.moduleSelection,
         })
         .then(
           (task) => {
@@ -416,7 +429,7 @@ export default class ModalTaskCreate extends Vue {
           name: this.title,
           description: this.description,
           parameter: this.taskParameterValues,
-          modules: this.moduleType,
+          modules: this.moduleSelection,
           state: this.task?.state,
         })
         .then(

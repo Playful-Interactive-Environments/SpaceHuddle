@@ -79,7 +79,7 @@
           <font-awesome-icon icon="paperclip" />
         </div>
         <div class="level-item" v-on:click="submitIdea">
-          <font-awesome-icon icon="save" />
+          <font-awesome-icon icon="paper-plane" />
         </div>
       </div>
     </nav>
