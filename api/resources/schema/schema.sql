@@ -18,10 +18,10 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Datenbank: `gab`
+-- Datenbank: `spacehuddle`
 --
-CREATE DATABASE IF NOT EXISTS `gab` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `gab`;
+CREATE DATABASE IF NOT EXISTS `spacehuddle` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `spacehuddle`;
 
 -- --------------------------------------------------------
 

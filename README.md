@@ -19,7 +19,7 @@ The GAB API requires the following setup:
 1. Install a local web development environment that meets the requirements above. [XAMPP](https://www.apachefriends.org/) works well, setups using [Vagrant](https://www.vagrantup.com/), [Docker](https://www.docker.com/), or other virtual machines will work as well.
 2. If not included in your setup, install Composer following the [instructions](https://getcomposer.org/download/) for your operating system.
 3. Open a shell/terminal/command prompt, change to the `api` directory and install the dependencies by calling `composer install`.
-4. Import `db/gab.sql` into your database. This will create a database called "gab". Create a MySQL user with full permissions on the database. Enter your database credentials in `api/config/database.php`.
+4. Import `api/resources/schema.sql` into your database. This will create a database called "spacehuddle". Create a MySQL user with full permissions on the database. Enter your database credentials in `api/config/database.php`.
 
 ### API Documentation
 
