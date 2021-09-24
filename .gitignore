@@ -5,3 +5,5 @@ webalizer/
 *.cache
 api/.idea/
 .idea/
+.well-known/
+/.htaccess
