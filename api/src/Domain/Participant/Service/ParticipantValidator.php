@@ -83,7 +83,7 @@ class ParticipantValidator
         }
         if (!$this->getRepository()->checkExpirationDateForConnect($sessionKey)) {
             $result = new ValidationResult();
-            $result->addError("browserKey", "Expired: the session has expired");
+            $result->addError("sessionKey", "Expired: the session has expired");
             throw new ValidationException("Please check your input", $result);
         }
     }
