@@ -81,6 +81,11 @@ class ParticipantValidator
             $result->addError("sessionKey", "NotExist: sessionKey wrong");
             throw new ValidationException("Please check your input", $result);
         }
+        if (!$this->getRepository()->checkExpirationDateForConnect($sessionKey)) {
+            $result = new ValidationResult();
+            $result->addError("browserKey", "Expired: the session has expired");
+            throw new ValidationException("Please check your input", $result);
+        }
     }
 
     /**
@@ -102,6 +107,11 @@ class ParticipantValidator
         if (!$this->getRepository()->checkBrowserKey($browserKey)) {
             $result = new ValidationResult();
             $result->addError("browserKey", "NotExist: browserKey wrong");
+            throw new ValidationException("Please check your input", $result);
+        }
+        if (!$this->getRepository()->checkExpirationDateForReconnect($browserKey)) {
+            $result = new ValidationResult();
+            $result->addError("browserKey", "Expired: the session has expired");
             throw new ValidationException("Please check your input", $result);
         }
     }

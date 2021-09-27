@@ -142,6 +142,39 @@ class ParticipantRepository implements RepositoryInterface
     }
 
     /**
+     * Checks if the session assigned to the session key is still valid.
+     * @param string $sessionKey The session key.
+     * @return bool True if session is valid.
+     */
+    public function checkExpirationDateForConnect(string $sessionKey): bool
+    {
+        $query = $this->queryFactory->newSelect("session");
+        $query->select(["id"])
+            ->andWhere([
+                "connection_key" => $sessionKey,
+                "expiration_date >= current_timestamp()"
+            ]);
+        return ($query->execute()->rowCount() > 0);
+    }
+
+    /**
+     * Checks if the session assigned to the browser key is still valid.
+     * @param string $browserKey The browser key.
+     * @return bool True if session is valid.
+     */
+    public function checkExpirationDateForReconnect(string $browserKey): bool
+    {
+        $query = $this->queryFactory->newSelect("participant");
+        $query->select(["participant.id"])
+            ->innerJoin("session", "session.id = participant.session_id")
+            ->andWhere([
+                "participant.browser_key" => $browserKey,
+                "session.expiration_date >= current_timestamp()"
+            ]);
+        return ($query->execute()->rowCount() > 0);
+    }
+
+    /**
      * Checks if a participant is registered.
      * @param string|null $sessionId The session's ID.
      * @param string|null $ip The participant's IP hash.
