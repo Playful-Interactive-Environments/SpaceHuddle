@@ -46,6 +46,23 @@
         :errors="context.$v.description.$errors"
         :isSmall="true"
       />
+
+      <label for="expirationDate" class="heading heading--xs">{{
+          $t('moderator.organism.session.create.expirationDate')
+        }}</label>
+      <el-date-picker
+        id="expirationDate"
+        v-model="expirationDate"
+        type="date"
+        :placeholder="$t('moderator.organism.session.create.expirationDatePlaceholder')"
+      >
+      </el-date-picker>
+      <FormError
+        v-if="context.$v.expirationDate.$error"
+        :errors="context.$v.expirationDate.$errors"
+        :isSmall="true"
+      />
+
       <h3 class="session-create__topic heading heading--small">
         {{ $t('moderator.organism.session.create.topics') }}
       </h3>
@@ -110,6 +127,9 @@ import {
       required,
       max: maxLength(1000),
     },
+    expirationDate: {
+      required,
+    },
     topic: {
       required,
       max: maxLength(255),
@@ -123,6 +143,8 @@ export default class ModalSessionCreate extends Vue {
   description = '';
   topic = '';
   maxNrOfTopics = 5;
+  today = new Date();
+  expirationDate = new Date(this.today.setMonth(this.today.getMonth() + 1));
   errors: string[] = [];
 
   context = setup(() => {
@@ -161,7 +183,7 @@ export default class ModalSessionCreate extends Vue {
         title: this.title,
         description: this.description,
         maxParticipants: 100,
-        expirationDate: '2021-09-12',
+        expirationDate: this.expirationDate.toISOString().slice(0, 10),
       })
       .then(
         (session) => {

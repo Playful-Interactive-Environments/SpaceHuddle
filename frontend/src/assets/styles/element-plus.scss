@@ -127,3 +127,11 @@ $--font-path: '~element-plus/lib/theme-chalk/fonts';
 .el-drawer.rtl, .el-drawer.ltr {
         max-height: 100vh;
 }
+
+.el-input--prefix .el-input__inner {
+        padding-left: 45px;
+}
+
+.el-date-table td span {
+        text-align: center;
+}

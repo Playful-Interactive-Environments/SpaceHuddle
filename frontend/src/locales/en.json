@@ -61,20 +61,23 @@
       "participant": {
         "join": {
           "noCode": "Please enter a code.",
-          "codeInvalid": "Sorry, the provided code is invalid."
+          "codeInvalid": "Sorry, the provided code is invalid.",
+          "Expired": "The session has expired."
         }
       },
       "reconnect": {
         "get": {
           "browserKey": {
-            "NotExist": "Sorry, the provided code is invalid."
+            "NotExist": "Sorry, the provided code is invalid.",
+            "Expired": "The session has expired."
           }
         }
       },
       "connect": {
         "post": {
           "sessionKey": {
-            "NotExist": "Sorry, the provided code is invalid."
+            "NotExist": "Sorry, the provided code is invalid.",
+            "Expired": "The session has expired."
           }
         }
       }
@@ -117,6 +120,8 @@
           "titleExample": "e.g. Marketing Meeting",
           "description": "Description",
           "descriptionExample": "e.g. The purpose of the meeting is to come up with new ideas our new app.",
+          "expirationDate": "Expiration Date",
+          "expirationDatePlaceholder": "Pick a day",
           "topics": "Topics",
           "topicsInfo": "Topics help to make a clear distinction between subjects that should have separate brainstorming modules. Tip: Keep it simple - one or two topics are usually enough!",
           "firstTopic": "Topic 1",
