@@ -148,6 +148,7 @@ class SessionRepository implements RepositoryInterface
     public function insert(object $data): ?object
     {
         $data->connectionKey = $this->generateNewConnectionKey("connection_key");
+        $data->creationDate = date("Y-m-d");
         return $this->genericInsert($data);
     }
 
@@ -217,7 +218,7 @@ class SessionRepository implements RepositoryInterface
      */
     protected function formatDatabaseInput(object $data): array
     {
-        return [
+        $result = [
             "id" => $data->id ?? null,
             "title" => $data->title ?? null,
             "description" => $data->description ?? null,
@@ -226,6 +227,12 @@ class SessionRepository implements RepositoryInterface
             "expiration_date" => $data->expirationDate ?? null,
             "public_screen_module_id" => $data->publicScreenModuleId ?? null
         ];
+
+        if (property_exists($data, "creationDate")) {
+            $result["creation_date"] = $data->creationDate;
+        }
+
+        return $result;
     }
 
     /**
