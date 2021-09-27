@@ -80,7 +80,8 @@ export const getAccessTokenParticipant = (): string | null => {
 };
 
 export const removeAccessToken = (): void => {
-  app.config.globalProperties.$cookies.remove(JWT_KEY_MODERATOR);
+  //app.config.globalProperties.$cookies.remove(JWT_KEY_MODERATOR);
+  //app.config.globalProperties.$cookies.remove(JWT_KEY_PARTICIPANT);
 };
 
 export const setBrowserKey = (key: string): void => {
