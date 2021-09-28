@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading the active task to be displayed on the public screen for the session.
  *
  * @OA\Get(
- *   path="/api/session/{sessionId}/public_screen/",
+ *   path="/session/{sessionId}/public_screen/",
  *   summary="Get the aktive task to be displayed on the public screen for the session.",
  *   tags={"Public Screen"},
  *   @OA\Parameter(in="path", name="sessionId", description="ID of the session to be displayed", required=true),

@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for updating a vote.
  *
  * @OA\Put(
- *   path="/api/vote/",
+ *   path="/vote/",
  *   summary="Update a vote for the task by the logged-in participant.",
  *   tags={"Vote"},
  *   @OA\RequestBody(

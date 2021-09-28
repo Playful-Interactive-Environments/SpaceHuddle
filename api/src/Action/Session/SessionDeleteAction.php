@@ -10,7 +10,7 @@ use Fig\Http\Message\StatusCodeInterface;
 /**
  * Action for deleting a session.
  * @OA\Delete(
- *   path="/api/session/{id}/",
+ *   path="/session/{id}/",
  *   summary="Delete a session.",
  *   tags={"Session"},
  *   @OA\Parameter(in="path", name="id", description="ID of session to delete", required=true),

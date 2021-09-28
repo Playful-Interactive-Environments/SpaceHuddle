@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for updating the participant application state for a task.
  *
  * @OA\Put(
- *   path="/api/task/{taskId}/client_application_state/{state}/",
+ *   path="/task/{taskId}/client_application_state/{state}/",
  *   summary="Set the participant application state for the task.",
  *   tags={"Client Application"},
  *   @OA\Parameter(in="path", name="taskId", description="ID of the task to be updated", required=true),

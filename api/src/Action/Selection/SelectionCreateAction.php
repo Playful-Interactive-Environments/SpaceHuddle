@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for creating a new selection for the specified topic.
  *
  * @OA\Post(
- *   path="/api/topic/{topicId}/selection/",
+ *   path="/topic/{topicId}/selection/",
  *   summary="Create a new selection for the topic.",
  *   tags={"Selection"},
  *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),

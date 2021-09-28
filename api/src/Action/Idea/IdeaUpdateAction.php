@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for updating a idea.
  *
  * @OA\Put(
- *   path="/api/idea/",
+ *   path="/idea/",
  *   summary="Update a idea.",
  *   tags={"Idea"},
  *   @OA\RequestBody(

@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for updating a category.
  *
  * @OA\Put(
- *   path="/api/category/",
+ *   path="/category/",
  *   summary="Update a category.",
  *   tags={"Category"},
  *   @OA\RequestBody(

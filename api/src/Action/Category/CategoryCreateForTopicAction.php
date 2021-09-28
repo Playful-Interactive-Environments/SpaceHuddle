@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for creating a new category for the specified topic.
  *
  * @OA\Post(
- *   path="/api/topic/{topicId}/category/",
+ *   path="/topic/{topicId}/category/",
  *   summary="Create a new category for the topic.",
  *   tags={"Category"},
  *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),

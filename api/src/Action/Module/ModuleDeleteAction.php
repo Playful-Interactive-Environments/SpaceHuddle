@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for deleting a module.
  *
  * @OA\Delete(
- *   path="/api/module/{id}/",
+ *   path="/module/{id}/",
  *   summary="Delete a module.",
  *   tags={"Module"},
  *   @OA\Parameter(in="path", name="id", description="ID of module to delete", required=true),

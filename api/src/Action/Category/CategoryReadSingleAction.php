@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading the detail data for the category with the specified id.
  *
  * @OA\Get(
- *   path="/api/category/{id}/",
+ *   path="/category/{id}/",
  *   summary="Detail data for the category with the specified id.",
  *   tags={"Category"},
  *   @OA\Parameter(in="path", name="id", description="ID of category to return", required=true),

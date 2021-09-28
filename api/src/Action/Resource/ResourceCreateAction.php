@@ -12,7 +12,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for creating a new resource for the specified session.
  *
  * @OA\Post(
- *   path="/api/session/{sessionId}/resource/",
+ *   path="/session/{sessionId}/resource/",
  *   summary="Create a new resource for the session.",
  *   tags={"Resource"},
  *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),

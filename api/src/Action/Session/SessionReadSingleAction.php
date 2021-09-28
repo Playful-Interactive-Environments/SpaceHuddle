@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading the detail data for the session with the specified id.
  *
  * @OA\Get(
- *   path="/api/session/{id}/",
+ *   path="/session/{id}/",
  *   summary="Detail data for the session with the specified id.",
  *   tags={"Session"},
  *   @OA\Parameter(in="path", name="id", description="ID of session to return", required=true),

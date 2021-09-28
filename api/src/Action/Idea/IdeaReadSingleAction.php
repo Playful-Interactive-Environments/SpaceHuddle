@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading the detail data for the idea with the specified id.
  *
  * @OA\Get(
- *   path="/api/idea/{id}/",
+ *   path="/idea/{id}/",
  *   summary="Detail data for the idea with the specified id.",
  *   tags={"Idea"},
  *   @OA\Parameter(in="path", name="id", description="ID of idea to return", required=true),

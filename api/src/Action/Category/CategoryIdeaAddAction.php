@@ -12,7 +12,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for adding a list of ideas to a category.
  *
  * @OA\Post(
- *   path="/api/category/{categoryId}/ideas/",
+ *   path="/category/{categoryId}/ideas/",
  *   summary="Add list of idea_ids to a category.",
  *   tags={"Category"},
  *   @OA\Parameter(in="path", name="categoryId", description="ID of the category", required=true),

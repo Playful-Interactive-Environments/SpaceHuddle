@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for deleting a topic.
  *
  * @OA\Delete(
- *   path="/api/topic/{id}/",
+ *   path="/topic/{id}/",
  *   summary="Delete a topic.",
  *   tags={"Topic"},
  *   @OA\Parameter(in="path", name="id", description="ID of topic to delete", required=true),

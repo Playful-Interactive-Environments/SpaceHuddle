@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action to change the password for the currently logged in user.
  *
  * @OA\Put(
- *   path="/api/user/",
+ *   path="/user/",
  *   summary="Change the password of the logged-in user.",
  *   tags={"User"},
  *   @OA\RequestBody(

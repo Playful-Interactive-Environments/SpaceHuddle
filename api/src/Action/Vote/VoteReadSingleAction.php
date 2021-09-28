@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading the detail data for the vote with the specified id.
  *
  * @OA\Get(
- *   path="/api/vote/{id}/",
+ *   path="/vote/{id}/",
  *   summary="Get the task idea voting for the logged-in participant.",
  *   tags={"Vote"},
  *   @OA\Parameter(in="path", name="id", description="ID of the voting", required=true),

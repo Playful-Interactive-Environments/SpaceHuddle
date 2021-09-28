@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading a list of all topics for the currently logged-in participant.
  *
  * @OA\Get(
- *   path="/api/participant/topics/",
+ *   path="/participant/topics/",
  *   summary="List of all topics for the logged-in participant.",
  *   tags={"Participant"},
  *   @OA\Response(response="200", description="Success",

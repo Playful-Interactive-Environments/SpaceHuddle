@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for creating a new idea for the specified task.
  *
  * @OA\Post(
- *   path="/api/task/{taskId}/idea/",
+ *   path="/task/{taskId}/idea/",
  *   summary="Create a new idea for the task.",
  *   tags={"Idea"},
  *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),

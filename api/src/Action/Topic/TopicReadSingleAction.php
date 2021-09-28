@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading the detail data for the topic with the specified id.
  *
  * @OA\Get(
- *   path="/api/topic/{id}/",
+ *   path="/topic/{id}/",
  *   summary="Detail data for the topic with the specified id.",
  *   tags={"Topic"},
  *   @OA\Parameter(in="path", name="id", description="ID of topic to return", required=true),

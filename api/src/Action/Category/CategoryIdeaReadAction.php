@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action to read a list of ideas associated with the category ID.
  *
  * @OA\Get(
- *   path="/api/category/{categoryId}/ideas",
+ *   path="/category/{categoryId}/ideas",
  *   summary="Ideas for the category with the specified id.",
  *   tags={"Category"},
  *   @OA\Parameter(in="path", name="categoryId", description="ID of category to return", required=true),

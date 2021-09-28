@@ -12,7 +12,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for creating a new task for the specified topic.
  *
  * @OA\Post(
- *   path="/api/topic/{topicId}/task/",
+ *   path="/topic/{topicId}/task/",
  *   summary="Create a new task for the topic.",
  *   tags={"Task"},
  *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),

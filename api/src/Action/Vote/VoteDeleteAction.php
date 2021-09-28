@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for deleting a vote.
  *
  * @OA\Delete(
- *   path="/api/vote/{id}/",
+ *   path="/vote/{id}/",
  *   summary="Delete a voting.",
  *   tags={"Vote"},
  *   @OA\Parameter(in="path", name="id", description="ID of voting to delete", required=true),

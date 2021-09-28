@@ -26,51 +26,51 @@ use Psr\Http\Message\ServerRequestInterface;
  * )
  *
  * @OA\Options(
- *   path="/api/participant/connect/",
+ *   path="/participant/connect/",
  *   summary="CORS Preflight check",
  *   tags={"CORS"},
  *   @OA\Response(response="200", ref="#/components/responses/CORS")
  * )
  * @OA\Options(
- *   path="/api/session/",
+ *   path="/session/",
  *   summary="CORS Preflight check",
  *   tags={"CORS"},
  *   @OA\Response(response="200", ref="#/components/responses/CORS")
  * )
  * @OA\Options(
- *   path="/api/sessions/",
+ *   path="/sessions/",
  *   summary="CORS Preflight check",
  *   tags={"CORS"},
  *   @OA\Response(response="200", ref="#/components/responses/CORS")
  * )
  * @OA\Options(
- *   path="/api/sessions/{id}/",
+ *   path="/sessions/{id}/",
  *   summary="CORS Preflight check",
  *   tags={"CORS"},
  *   @OA\Response(response="200", ref="#/components/responses/CORS")
  * )
  * @OA\Options(
- *   path="/api/user/",
- *   summary="CORS Preflight check",
- *   tags={"CORS"},
- *   @OA\Response(response="200", ref="#/components/responses/CORS")
- *   )
- * )
- * @OA\Options(
- *   path="/api/user/login/",
- *   summary="CORS Preflight check",
- *   tags={"CORS"},
- *   @OA\Response(response="200", ref="#/components/responses/CORS")
- * )
- * @OA\Options(
- *   path="/api/user/register/",
+ *   path="/user/",
  *   summary="CORS Preflight check",
  *   tags={"CORS"},
  *   @OA\Response(response="200", ref="#/components/responses/CORS")
  *   )
  * )
  * @OA\Options(
- *   path="/api/module/",
+ *   path="/user/login/",
+ *   summary="CORS Preflight check",
+ *   tags={"CORS"},
+ *   @OA\Response(response="200", ref="#/components/responses/CORS")
+ * )
+ * @OA\Options(
+ *   path="/user/register/",
+ *   summary="CORS Preflight check",
+ *   tags={"CORS"},
+ *   @OA\Response(response="200", ref="#/components/responses/CORS")
+ *   )
+ * )
+ * @OA\Options(
+ *   path="/module/",
  *   summary="CORS Preflight check",
  *   tags={"CORS"},
  *   @OA\Response(response="200", ref="#/components/responses/CORS")

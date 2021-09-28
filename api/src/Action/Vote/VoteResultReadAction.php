@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading the result of the voting for the specified task.
  *
  * @OA\Get(
- *   path="/api/task/{taskId}/vote_result/",
+ *   path="/task/{taskId}/vote_result/",
  *   summary="Returns the result of the voting for the specified task.",
  *   tags={"Vote"},
  *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),

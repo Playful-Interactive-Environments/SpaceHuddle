@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for updating a session role.
  *
  * @OA\Put(
- *   path="/api/session/{sessionId}/authorized_user/",
+ *   path="/session/{sessionId}/authorized_user/",
  *   summary="Update the role of a authorized user for a session.",
  *   tags={"Session Role"},
  *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),

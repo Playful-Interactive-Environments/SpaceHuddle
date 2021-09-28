@@ -12,7 +12,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for creating a new session.
  *
  * @OA\Post(
- *   path="/api/session/",
+ *   path="/session/",
  *   summary="Create a new session.",
  *   tags={"Session"},
  *   @OA\RequestBody(

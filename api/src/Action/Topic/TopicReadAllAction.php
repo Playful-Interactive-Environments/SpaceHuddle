@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading a list of all the topics  for the specified session.
  *
  * @OA\Get(
- *   path="/api/session/{sessionId}/topics/",
+ *   path="/session/{sessionId}/topics/",
  *   summary="List of all topics for the session.",
  *   tags={"Topic"},
  *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),

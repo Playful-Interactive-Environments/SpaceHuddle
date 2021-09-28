@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for creating a new category for the specified task.
  *
  * @OA\Post(
- *   path="/api/task/{taskId}/category/",
+ *   path="/task/{taskId}/category/",
  *   summary="Create a new category for the task.",
  *   tags={"Category"},
  *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),

@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading a list of all the categories for the specified topic.
  *
  * @OA\Get(
- *   path="/api/topic/{topicId}/categories/",
+ *   path="/topic/{topicId}/categories/",
  *   summary="List of all categories for the topic.",
  *   tags={"Category"},
  *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),

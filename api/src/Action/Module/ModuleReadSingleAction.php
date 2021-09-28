@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading the detail data for the module with the specified id.
  *
  * @OA\Get(
- *   path="/api/module/{id}/",
+ *   path="/module/{id}/",
  *   summary="Detail data for the module with the specified id.",
  *   tags={"Module"},
  *   @OA\Parameter(in="path", name="id", description="ID of module to return", required=true),

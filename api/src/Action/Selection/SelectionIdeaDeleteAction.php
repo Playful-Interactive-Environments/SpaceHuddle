@@ -10,7 +10,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for deleting a list of ideas from a selection.
  *
  * @OA\Delete(
- *   path="/api/selection/{selectionId}/ideas/",
+ *   path="/selection/{selectionId}/ideas/",
  *   summary="Delete the list of idea_ids from a selection.",
  *   tags={"Selection"},
  *   @OA\Parameter(in="path", name="selectionId", description="ID of the selection", required=true),

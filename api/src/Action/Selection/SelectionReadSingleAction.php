@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading the detail data for the selection with the specified id.
  *
  * @OA\Get(
- *   path="/api/selection/{id}/",
+ *   path="/selection/{id}/",
  *   summary="Detail data for the selection with the specified id.",
  *   tags={"Selection"},
  *   @OA\Parameter(in="path", name="id", description="ID of selection to return", required=true),

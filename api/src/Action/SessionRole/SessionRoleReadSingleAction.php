@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading the detail data for the session role with the specified id.
  *
  * @OA\Get(
- *   path="/api/session/{sessionId}/own_user_role/",
+ *   path="/session/{sessionId}/own_user_role/",
  *   summary="Get the role of the username in the session.",
  *   tags={"Session Role"},
  *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),

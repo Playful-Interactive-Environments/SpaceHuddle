@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading a list of all the resources for the specified session.
  *
  * @OA\Get(
- *   path="/api/session/{sessionId}/resources/",
+ *   path="/session/{sessionId}/resources/",
  *   summary="List of all resources for the session.",
  *   tags={"Resource"},
  *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),

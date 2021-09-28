@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading the detail data for the resource with the specified id.
  *
  * @OA\Get(
- *   path="/api/resource/{id}/",
+ *   path="/resource/{id}/",
  *   summary="Detail data for the resource with the specified id.",
  *   tags={"Resource"},
  *   @OA\Parameter(in="path", name="id", description="ID of resource to return", required=true),

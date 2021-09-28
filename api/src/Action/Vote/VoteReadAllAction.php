@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading a list of all the votes for the specified topic.
  *
  * @OA\Get(
- *   path="/api/task/{taskId}/votes/",
+ *   path="/task/{taskId}/votes/",
  *   summary="Get all task votings for the logged-in participant.",
  *   tags={"Vote"},
  *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),

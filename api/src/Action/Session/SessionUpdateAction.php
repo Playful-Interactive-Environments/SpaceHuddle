@@ -10,7 +10,7 @@ use Fig\Http\Message\StatusCodeInterface;
 /**
  * Action for updating a session.
  * @OA\Put(
- *   path="/api/session/",
+ *   path="/session/",
  *   summary="Update a session.",
  *   tags={"Session"},
  *   @OA\RequestBody(

@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for creating a new vote for the specified task.
  *
  * @OA\Post(
- *   path="/api/task/{taskId}/vote/",
+ *   path="/task/{taskId}/vote/",
  *   summary="Create a new voting for the task by the logged-in participant.",
  *   tags={"Vote"},
  *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),

@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reconnecting to a session as a participant.
  *
  * @OA\Get(
- *   path="/api/participant/reconnect/{browserKey}/",
+ *   path="/participant/reconnect/{browserKey}/",
  *   summary="Reconnect to a session",
  *   tags={"Participant"},
  *   @OA\Parameter(in="path", name="browserKey", description="the generated browser_key from the last connection to

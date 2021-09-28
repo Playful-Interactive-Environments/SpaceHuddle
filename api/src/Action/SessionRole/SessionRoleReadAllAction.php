@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading a list of all the session roles for the specified session.
  *
  * @OA\Get(
- *   path="/api/session/{sessionId}/authorized_users/",
+ *   path="/session/{sessionId}/authorized_users/",
  *   summary="List of all authorized users for the session.",
  *   tags={"Session Role"},
  *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),

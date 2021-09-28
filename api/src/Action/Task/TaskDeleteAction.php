@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for deleting a task.
  *
  * @OA\Delete(
- *   path="/api/task/{id}/",
+ *   path="/task/{id}/",
  *   summary="Delete a task.",
  *   tags={"Task"},
  *   @OA\Parameter(in="path", name="id", description="ID of task to delete", required=true),

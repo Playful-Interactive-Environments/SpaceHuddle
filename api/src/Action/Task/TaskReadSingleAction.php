@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading the detail data for the task with the specified id.
  *
  * @OA\Get(
- *   path="/api/task/{id}/",
+ *   path="/task/{id}/",
  *   summary="Detail data for the task with the specified id.",
  *   tags={"Task"},
  *   @OA\Parameter(in="path", name="id", description="ID of task to return", required=true),

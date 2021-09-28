@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading a list of all the modules for the specified task.
  *
  * @OA\Get(
- *   path="/api/task/{taskId}/modules/",
+ *   path="/task/{taskId}/modules/",
  *   summary="List of all modules for the task.",
  *   tags={"Module"},
  *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),

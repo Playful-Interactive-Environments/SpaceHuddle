@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for deleting a idea.
  *
  * @OA\Delete(
- *   path="/api/idea/{id}/",
+ *   path="/idea/{id}/",
  *   summary="Delete an idea.",
  *   tags={"Idea"},
  *   @OA\Parameter(in="path", name="id", description="ID of idea to delete", required=true),

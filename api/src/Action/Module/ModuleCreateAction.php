@@ -12,7 +12,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for creating a new module for the specified task.
  *
  * @OA\Post(
- *   path="/api/task/{taskId}/module/",
+ *   path="/task/{taskId}/module/",
  *   summary="Create a new module for the task.",
  *   tags={"Module"},
  *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),

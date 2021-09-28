@@ -10,7 +10,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for adding a list of ideas to a selection.
  *
  * @OA\Post(
- *   path="/api/selection/{selectionId}/ideas/",
+ *   path="/selection/{selectionId}/ideas/",
  *   summary="Add list of idea_ids to a selection.",
  *   tags={"Selection"},
  *   @OA\Parameter(in="path", name="selectionId", description="ID of the selection", required=true),

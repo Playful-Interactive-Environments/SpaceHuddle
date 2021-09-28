@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for updating a task.
  *
  * @OA\Put(
- *   path="/api/task/",
+ *   path="/task/",
  *   summary="Update a task.",
  *   tags={"Task"},
  *   @OA\RequestBody(

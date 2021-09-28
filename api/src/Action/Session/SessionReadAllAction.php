@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading a list of all the sessions for which the user is authorized.
  *
  * @OA\Get(
- *   path="/api/sessions/",
+ *   path="/sessions/",
  *   summary="List of all sessions for which the user is authorized.",
  *   tags={"Session"},
  *   @OA\Response(response="200", description="Success",

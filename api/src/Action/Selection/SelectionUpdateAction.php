@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for updating a selection.
  *
  * @OA\Put(
- *   path="/api/selection/",
+ *   path="/selection/",
  *   summary="Update a selection.",
  *   tags={"Selection"},
  *   @OA\RequestBody(

@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for updating the task to be displayed on the public screen for the session.
  *
  * @OA\Put(
- *   path="/api/session/{sessionId}/public_screen/{taskId}/",
+ *   path="/session/{sessionId}/public_screen/{taskId}/",
  *   summary="Set a task to be displayed on the public screen for the session.",
  *   tags={"Public Screen"},
  *   @OA\Parameter(in="path", name="sessionId", description="ID of the session to be updated", required=true),

@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for updating a module.
  *
  * @OA\Put(
- *   path="/api/module/",
+ *   path="/module/",
  *   summary="Update a module.",
  *   tags={"Module"},
  *   @OA\RequestBody(

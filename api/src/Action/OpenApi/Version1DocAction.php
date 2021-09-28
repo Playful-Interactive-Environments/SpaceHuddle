@@ -20,6 +20,7 @@ use Psr\Http\Message\ServerRequestInterface;
  *   scheme="Bearer",
  *   bearerFormat="JWT"
  * )
+ * @OA\Server(url="../../api/")
  * @OA\Server(url="../../")
  * @OA\Response(
  *   response="200",

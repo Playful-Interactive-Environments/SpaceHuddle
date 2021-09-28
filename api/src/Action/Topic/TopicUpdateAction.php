@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for updating a topic.
  *
  * @OA\Put(
- *   path="/api/topic/",
+ *   path="/topic/",
  *   summary="Update a topic.",
  *   tags={"Topic"},
  *   @OA\RequestBody(

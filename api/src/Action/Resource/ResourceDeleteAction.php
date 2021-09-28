@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for deleting a resource.
  *
  * @OA\Delete(
- *   path="/api/resource/{id}/",
+ *   path="/resource/{id}/",
  *   summary="Delete a resource.",
  *   tags={"Resource"},
  *   @OA\Parameter(in="path", name="id", description="ID of resource to delete", required=true),

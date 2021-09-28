@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading a list of all the selections for the specified topic.
  *
  * @OA\Get(
- *   path="/api/topic/{topicId}/selections/",
+ *   path="/topic/{topicId}/selections/",
  *   summary="List of all selections for the topic.",
  *   tags={"Selection"},
  *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),

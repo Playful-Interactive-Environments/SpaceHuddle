@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for deleting a session role.
  *
  * @OA\Delete(
- *   path="/api/session/{sessionId}/authorized_user/{username}/",
+ *   path="/session/{sessionId}/authorized_user/{username}/",
  *   summary="Remove username for a session.",
  *   tags={"Session Role"},
  *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),

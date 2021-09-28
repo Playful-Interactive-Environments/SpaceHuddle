@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading a list of all the tasks  for the specified topic.
  *
  * @OA\Get(
- *   path="/api/topic/{topicId}/tasks/",
+ *   path="/topic/{topicId}/tasks/",
  *   summary="List of all tasks for the topic.",
  *   tags={"Task"},
  *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),

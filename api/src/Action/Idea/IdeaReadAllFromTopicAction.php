@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading a list of all the ideas for the specified topic.
  *
  * @OA\Get(
- *   path="/api/topic/{topicId}/ideas/",
+ *   path="/topic/{topicId}/ideas/",
  *   summary="List of all ideas for the topic.",
  *   tags={"Idea"},
  *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),

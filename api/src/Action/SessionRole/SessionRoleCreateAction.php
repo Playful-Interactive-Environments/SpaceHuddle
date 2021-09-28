@@ -12,7 +12,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for creating a new session role for the specified session.
  *
  * @OA\Post(
- *   path="/api/session/{sessionId}/authorized_user/",
+ *   path="/session/{sessionId}/authorized_user/",
  *   summary="Add a new authorized user to the session.",
  *   tags={"Session Role"},
  *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),

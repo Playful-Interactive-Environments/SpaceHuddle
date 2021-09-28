@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for updating a resource.
  *
  * @OA\Put(
- *   path="/api/resource/",
+ *   path="/resource/",
  *   summary="Update a resource.",
  *   tags={"Resource"},
  *   @OA\RequestBody(

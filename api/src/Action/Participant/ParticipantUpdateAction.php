@@ -10,7 +10,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action that sets participant status.
  *
  * @OA\Put(
- *   path="/api/participant/state/{state}/",
+ *   path="/participant/state/{state}/",
  *   summary="Set the participant state.",
  *   tags={"Participant"},
  *   @OA\Parameter(in="path", name="state",

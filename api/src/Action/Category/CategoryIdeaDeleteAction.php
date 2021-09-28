@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for deleting a list of ideas from a category.
  *
  * @OA\Delete(
- *   path="/api/category/{categoryId}/ideas/",
+ *   path="/category/{categoryId}/ideas/",
  *   summary="Delete the list of idea_ids from a category.",
  *   tags={"Category"},
  *   @OA\Parameter(in="path", name="categoryId", description="ID of the category", required=true),

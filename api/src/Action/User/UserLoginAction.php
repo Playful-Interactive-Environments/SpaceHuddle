@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for user login.
  *
  * @OA\Post(
- *   path="/api/user/login/",
+ *   path="/user/login/",
  *   summary="Perform a login with an existing user",
  *   tags={"User"},
  *   @OA\RequestBody(

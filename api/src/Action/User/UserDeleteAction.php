@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action to deletes the currently logged-in user.
  *
  * @OA\Delete(
- *   path="/api/user/",
+ *   path="/user/",
  *   summary="Delete the logged-in user.",
  *   tags={"User"},
  *   @OA\Response(response="200", description="Success"),

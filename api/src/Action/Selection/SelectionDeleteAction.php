@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for deleting a selection.
  *
  * @OA\Delete(
- *   path="/api/selection/{id}/",
+ *   path="/selection/{id}/",
  *   summary="Delete a selection.",
  *   tags={"Selection"},
  *   @OA\Parameter(in="path", name="id", description="ID of selection to delete", required=true),

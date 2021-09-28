@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading a list of all the tasks for the currently logged-in participant.
  *
  * @OA\Get(
- *   path="/api/participant/tasks/",
+ *   path="/participant/tasks/",
  *   summary="List of all tasks for the logged-in participant.",
  *   tags={"Participant"},
  *   @OA\Response(response="200", description="Success",

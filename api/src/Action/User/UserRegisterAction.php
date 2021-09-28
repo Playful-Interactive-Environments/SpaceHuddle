@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for registering a new user.
  * @package App\Action\User
  * @OA\Post(
- *   path="/api/user/register/",
+ *   path="/user/register/",
  *   summary="Register a new user",
  *   tags={"User"},
  *   @OA\RequestBody(

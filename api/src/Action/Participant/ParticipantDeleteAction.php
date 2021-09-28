@@ -10,7 +10,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for deleting the logged-in participant.
  *
  * @OA\Delete(
- *   path="/api/participant/",
+ *   path="/participant/",
  *   summary="Delete logged-in participant.",
  *   tags={"Participant"},
  *   @OA\Response(response="200", description="Success"),

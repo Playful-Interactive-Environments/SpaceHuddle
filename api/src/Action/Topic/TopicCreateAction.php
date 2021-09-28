@@ -12,7 +12,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for creating a new topic for the specified session.
  *
  * @OA\Post(
- *   path="/api/session/{sessionId}/topic/",
+ *   path="/session/{sessionId}/topic/",
  *   summary="Create a new topic for the session.",
  *   tags={"Topic"},
  *   @OA\Parameter(in="path", name="sessionId", description="ID of the session", required=true),

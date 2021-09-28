@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for connecting to a session as a participant.
  *
  * @OA\Post(
- *   path="/api/participant/connect/",
+ *   path="/participant/connect/",
  *   summary="Connect to a session",
  *   tags={"Participant"},
  *   @OA\RequestBody(

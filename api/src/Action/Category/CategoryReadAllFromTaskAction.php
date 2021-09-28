@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading a list of all the categories for the specified task.
  *
  * @OA\Get(
- *   path="/api/task/{taskId}/categories/",
+ *   path="/task/{taskId}/categories/",
  *   summary="List of all categories for the task.",
  *   tags={"Category"},
  *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),

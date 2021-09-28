@@ -11,7 +11,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action to read a list of ideas associated with the selection ID.
  *
  * @OA\Get(
- *   path="/api/selection/{selectionId}/ideas",
+ *   path="/selection/{selectionId}/ideas",
  *   summary="Ideas for the selection with the specified id.",
  *   tags={"Selection"},
  *   @OA\Parameter(in="path", name="selectionId", description="ID of selection to return", required=true),
