@@ -2,6 +2,7 @@
 
 namespace App\Domain\Idea\Service;
 
+use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\ValidatorTrait;
 use App\Domain\Idea\Repository\IdeaRepository;
 use App\Domain\Idea\Type\IdeaSortOrder;
@@ -58,9 +59,11 @@ class IdeaValidator
      * Topic validator.
      * @param array<string, mixed> $data The data
      * @param array $validStates Valid states
+     * @param bool $validTimer Valid if timer is active
      * @return void
+     * @throws GenericException
      */
-    public function validateTopic(array $data, array $validStates): void
+    public function validateTopic(array $data, array $validStates, bool $validTimer = false): void
     {
         $this->validateEntity(
             $data,
@@ -76,7 +79,7 @@ class IdeaValidator
         );
 
         $topicId = $data["topicId"];
-        $taskID = $this->repository->getTopicTask($topicId, $validStates);
+        $taskID = $this->repository->getTopicTask($topicId, $validStates, $validTimer);
         if (!isset($taskID)) {
             $result = new ValidationResult();
             $result->addError("topicId", "NotValid: Topic has no active BRAINSTORMING task.");
@@ -90,6 +93,7 @@ class IdeaValidator
      * @param array<string, mixed> $data The data
      *
      * @return void
+     * @throws GenericException
      */
     public function validateCreate(array $data): void
     {
@@ -100,6 +104,7 @@ class IdeaValidator
         if (array_key_exists("taskId", $data)){
             $taskId = $data["taskId"];
             $this->validateTaskType($taskId);
+            $this->validateTaskState($taskId);
         }
 
         $this->validateIdeeExists($data);
@@ -149,6 +154,21 @@ class IdeaValidator
                 "taskId",
                 "NotValid: The specified task has the wrong type. A BRAINSTORMING task is expected."
             );
+            throw new ValidationException("Please check your input", $result);
+        }
+    }
+
+    /**
+     * Validate task state.
+     * @param string $taskId Task Id to be checked.
+     * @throws GenericException
+     */
+    private function validateTaskState(string $taskId): void
+    {
+        $task = $this->repository->getParentRepository()->get(["id" => $taskId]);
+        if (!isset($task)) {
+            $result = new ValidationResult();
+            $result->addError("taskId", "NotValid: Task is not active.");
             throw new ValidationException("Please check your input", $result);
         }
     }

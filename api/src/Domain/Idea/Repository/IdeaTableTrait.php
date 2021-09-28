@@ -45,10 +45,11 @@ trait IdeaTableTrait
      * If no corresponding task has been created, NULL is returned.
      * @param string $topicId Topic ID
      * @param array $validStates Valid states
+     * @param bool $validTimer Valid if timer is active
      * @return string|null First active brainstorming task that is assigned to the topic.
      * If no corresponding task has been created, NULL is returned.
      */
-    public function getTopicTask(string $topicId, array $validStates): ?string
+    public function getTopicTask(string $topicId, array $validStates, bool $validTimer = false): ?string
     {
         $query = $this->queryFactory->newSelect("task");
         $query->select(["id"])
@@ -59,6 +60,10 @@ trait IdeaTableTrait
 
         if (sizeof($validStates) > 0) {
             $query->whereInList("state", $validStates);
+        }
+
+        if ($validTimer) {
+            $query->andWhere(["(expiration_time IS NULL OR expiration_time >= current_timestamp())"]);
         }
 
         $result = $query->execute()->fetch("assoc");

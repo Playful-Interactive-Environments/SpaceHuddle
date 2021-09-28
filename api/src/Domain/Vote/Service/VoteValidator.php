@@ -2,6 +2,7 @@
 
 namespace App\Domain\Vote\Service;
 
+use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\ValidatorTrait;
 use App\Domain\Vote\Repository\VoteRepository;
 use App\Factory\ValidationFactory;
@@ -49,6 +50,7 @@ class VoteValidator
      * @param array<string, mixed> $data The data
      *
      * @return void
+     * @throws GenericException
      */
     public function validateCreate(array $data): void
     {
@@ -65,6 +67,7 @@ class VoteValidator
         $ideaId = $data["ideaId"];
 
         $this->validateTaskType($taskId);
+        $this->validateTaskState($taskId);
 
         if (!$this->repository->ideaAgreeWithTask($taskId, $ideaId)) {
             $result = new ValidationResult();
@@ -109,6 +112,21 @@ class VoteValidator
                 "taskId",
                 "NotValid: The specified task has the wrong type. A VOTING task is expected."
             );
+            throw new ValidationException("Please check your input", $result);
+        }
+    }
+
+    /**
+     * Validate task state.
+     * @param string $taskId Task Id to be checked.
+     * @throws GenericException
+     */
+    private function validateTaskState(string $taskId): void
+    {
+        $task = $this->repository->getParentRepository()->get(["id" => $taskId]);
+        if (!isset($task)) {
+            $result = new ValidationResult();
+            $result->addError("taskId", "NotValid: Task is not active.");
             throw new ValidationException("Please check your input", $result);
         }
     }

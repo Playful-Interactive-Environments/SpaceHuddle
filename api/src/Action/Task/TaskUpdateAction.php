@@ -25,6 +25,7 @@ use Fig\Http\Message\StatusCodeInterface;
  *         @OA\Property(property="parameter", type="object", format="json"),
  *         @OA\Property(property="order", type="integer"),
  *         @OA\Property(property="state", type="string"),
+ *         @OA\Property(property="remainingTime", type="number", example=-1),
  *         @OA\Property(property="modules", type="array", @OA\Items(type="string"))
  *       )
  *     )

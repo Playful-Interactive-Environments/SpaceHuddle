@@ -21,7 +21,9 @@ use Cake\Database\Query;
  */
 class TaskRepository implements RepositoryInterface
 {
-    use RepositoryTrait;
+    use RepositoryTrait {
+        RepositoryTrait::update as private genericUpdate;
+    }
 
     /**
      * The constructor.
@@ -118,7 +120,7 @@ class TaskRepository implements RepositoryInterface
             $query->whereInList("task.state", [
                 strtoupper(TaskState::ACTIVE),
                 strtoupper(TaskState::READ_ONLY)
-            ]);
+            ])->andWhere(["(task.expiration_time IS NULL OR task.expiration_time >= current_timestamp())"]);
         }
 
         $result = $this->fetchAll($query);
@@ -126,7 +128,7 @@ class TaskRepository implements RepositoryInterface
             foreach ($result as $resultItem) {
                 $this->getDetails($resultItem);
             }
-        } else if (is_object($result)) {
+        } elseif (is_object($result)) {
             $this->getDetails($result);
         }
         return $result;
@@ -140,6 +142,38 @@ class TaskRepository implements RepositoryInterface
     {
         $moduleRepository = new ModuleRepository($this->queryFactory);
         $data->modules = $moduleRepository->getAll($data->id);
+    }
+
+    /**
+     * Update entity row.
+     * @param object|array $data The entity to change.
+     * @return object|null The result entity.
+     * @throws GenericException
+     */
+    public function update(object|array $data): ?object
+    {
+        if (is_object($data) && $data->remainingTime) {
+            $data->expirationTime = $this->expirationTime($data->remainingTime);
+            unset($data->remainingTime);
+        } elseif (is_array($data) && array_key_exists("remaining_time", $data)) {
+            $data["expiration_time"] = $this->expirationTime($data["remaining_time"]);
+            unset($data["remaining_time"]);
+        }
+        return $this->genericUpdate($data);
+    }
+
+    /**
+     * Calculate expiration time
+     * @param int $remindingTime How long should the timer run?
+     * @return string|null Expiration date
+     */
+    private function expirationTime(int $remindingTime): string|null
+    {
+        if ($remindingTime > 0) {
+            $now = strtotime("now");
+            return date("Y-m-d\TH:i:s", $now + $remindingTime);
+        }
+        return null;
     }
 
     /**
@@ -278,7 +312,7 @@ class TaskRepository implements RepositoryInterface
      */
     protected function formatDatabaseInput(object $data): array
     {
-        return [
+        $result = [
             "id" => $data->id ?? null,
             "topic_id" => $data->topicId ?? null,
             "task_type" => $data->taskType ?? null,
@@ -286,7 +320,9 @@ class TaskRepository implements RepositoryInterface
             "description" => $data->description ?? null,
             "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null,
             "order" => $data->order ?? null,
-            "state" => $data->state ?? strtoupper(TaskState::WAIT)
+            "state" => $data->state ?? strtoupper(TaskState::WAIT),
+            "expiration_time" => $data->expirationTime ?? null
         ];
+        return $result;
     }
 }

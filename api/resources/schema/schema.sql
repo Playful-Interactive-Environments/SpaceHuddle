@@ -200,6 +200,7 @@ CREATE TABLE `task` (
                         `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
                         `order` int(11) NOT NULL,
                         `state` varchar(255) DEFAULT NULL,
+                        `expiration_time` datetime DEFAULT NULL,
                         `active_module_id` char(36) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

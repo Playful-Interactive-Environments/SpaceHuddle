@@ -68,6 +68,13 @@ class TaskData
     public ?string $state;
 
     /**
+     * How long is the task active?
+     * @var int|null
+     * @OA\Property(example=-1)
+     */
+    public ?int $remainingTime;
+
+    /**
      * List of connected modules.
      * @var array<ModuleData>
      * @OA\Property(
@@ -94,6 +101,18 @@ class TaskData
         $this->parameter = (object)json_decode($reader->findString("parameter"));
         $this->order = $reader->findInt("order");
         $this->state = strtoupper($reader->findString("state"));
+        $expirationTime = $reader->findString("expiration_time");
+
+        if ($expirationTime) {
+            $expirationTime = strtotime($expirationTime);
+            if ($expirationTime) {
+                $now = strtotime("now");
+                $this->remainingTime = $expirationTime - $now;
+                if ($this->remainingTime < 0) {
+                    $this->remainingTime = 0;
+                }
+            }
+        }
 
         $module_id = $reader->findString("module_id");
         if ($module_id) {

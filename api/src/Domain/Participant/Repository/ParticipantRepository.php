@@ -231,7 +231,8 @@ class ParticipantRepository implements RepositoryInterface
             ])
             ->andWhere([
                 "participant.id" => $id,
-                "session.expiration_date >= current_timestamp()"
+                "session.expiration_date >= current_timestamp()",
+                "(task.expiration_time IS NULL OR task.expiration_time >= current_timestamp())"
             ]);
 
         $result = $this->fetchAll($query, ParticipantTaskData::class);
