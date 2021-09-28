@@ -14,6 +14,7 @@ export interface Task {
   parameter: any;
   order: number;
   state: TaskStates;
+  remainingTime: number;
   modules: Module[];
 }
 
@@ -26,6 +27,7 @@ export interface TaskForSaveAction {
   parameter: any;
   order: number;
   state: TaskStates;
+  remainingTime: number;
   modules: string[];
 }
 
@@ -38,5 +40,6 @@ export const convertToSaveVersion = (task: Task): TaskForSaveAction => {
     parameter: task.parameter,
     order: task.order,
     state: task.state,
+    remainingTime: task.remainingTime,
   } as TaskForSaveAction;
 };

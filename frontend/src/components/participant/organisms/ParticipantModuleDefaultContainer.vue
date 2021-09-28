@@ -10,7 +10,12 @@
         <div class="module-container--uppercase">
           {{ $t('participant.organism.modelDefaultContainer.timeLeft') }}
         </div>
-        <Timer class="module-container__timer" :isActive="true"></Timer>
+        <Timer
+          class="module-container__timer"
+          :isActive="true"
+          :task="task"
+          v-on:timerEnds="$router.go(-1)"
+        ></Timer>
       </div>
     </div>
     <HalfCard :type="taskType">

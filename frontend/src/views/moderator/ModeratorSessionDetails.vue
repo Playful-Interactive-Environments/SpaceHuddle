@@ -17,6 +17,7 @@
             v-model="topics[index].tasks"
             tag="transition-group"
             item-key="order"
+            handle=".task-card__drag"
             @end="dragDone(index)"
           >
             <template #item="{ element }">

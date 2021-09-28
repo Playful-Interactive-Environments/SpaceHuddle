@@ -1,42 +1,59 @@
 <template>
-  <router-link
-    :to="
-      isParticipant
-        ? `/participant-module-content/${task.id}`
-        : `/module-content/${sessionId}/${task.id}`
-    "
+  <article
+    ref="item"
+    class="task-card"
+    :class="{ 'task-card--participant': isParticipant }"
   >
-    <article
-      ref="item"
-      class="module-card"
-      :class="{ 'module-card--participant': isParticipant }"
+    <router-link
+      class="clickArea"
+      :to="
+        isParticipant
+          ? `/participant-module-content/${task.id}`
+          : `/module-content/${sessionId}/${task.id}`
+      "
     >
-      <img
-        :src="require(`@/assets/illustrations/planets/${type}.png`)"
-        alt="planet"
-        class="module-card__planet"
-      />
-      <TaskInfo
-        :type="type"
-        :title="task.name"
-        :description="task.description"
-      />
+      <span
+        class="task-card-content"
+        :class="{ 'task-card-content--participant': isParticipant }"
+      >
+        <img
+          :src="require(`@/assets/illustrations/planets/${type}.png`)"
+          alt="planet"
+          class="task-card__planet"
+        />
+        <TaskInfo
+          :type="type"
+          :title="task.name"
+          :description="task.description"
+        />
+      </span>
+    </router-link>
+
+    <span
+      class="task-card-content"
+      :class="{ 'task-card-content--participant': isParticipant }"
+    >
       <Timer
-        class="module-card__timer"
+        class="task-card__timer"
         :isActive="task.state === TaskStates.ACTIVE"
+        :task="task"
+        v-on:timerEnds="$emit('timerEnds')"
+        v-on:click="timerClicked"
         v-if="!(type === TaskType.INFORMATION || type === TaskType.SELECTION)"
       />
-      <div class="module-card__toggles" v-if="!isParticipant">
+      <div class="task-card__toggles" v-if="!isParticipant">
         <ModuleShare :task="task" :is-on-public-screen="isOnPublicScreen" />
       </div>
-      <div class="module-card__drag" v-if="!isParticipant">
-        <font-awesome-icon
-          icon="grip-vertical"
-          class="module-card__drag__icon"
-        />
+      <div class="task-card__drag" v-if="!isParticipant">
+        <font-awesome-icon icon="grip-vertical" class="task-card__drag__icon" />
       </div>
-    </article>
-  </router-link>
+    </span>
+  </article>
+  <TimerSettings
+    v-if="showTimerSettings"
+    v-model:showModal="showTimerSettings"
+    :task="task"
+  />
 </template>
 
 <script lang="ts">
@@ -49,13 +66,16 @@ import Timer from '@/components/shared/atoms/Timer.vue';
 import ModuleShare from '@/components/moderator/molecules/ModuleShare.vue';
 import TaskType from '@/types/enum/TaskType';
 import TaskStates from '@/types/enum/TaskStates';
+import TimerSettings from '@/components/moderator/organisms/TimerSettings.vue';
 
 @Options({
   components: {
     TaskInfo,
     Timer,
     ModuleShare,
+    TimerSettings,
   },
+  emits: ['timerEnds', 'changePublicScreen'],
 })
 export default class TaskCard extends Vue {
   @Prop({ default: '' }) readonly sessionId!: string;
@@ -66,6 +86,7 @@ export default class TaskCard extends Vue {
 
   TaskType = TaskType;
   TaskStates = TaskStates;
+  showTimerSettings = false;
 
   get moduleName(): string {
     if (this.task && this.task.modules && this.task.modules.length > 0)
@@ -80,11 +101,32 @@ export default class TaskCard extends Vue {
   updated(): void {
     setModuleStyles(this.$refs.item as HTMLElement, this.type);
   }
+
+  timerClicked(): void {
+    if (!this.isParticipant) {
+      this.showTimerSettings = true;
+    }
+  }
 }
 </script>
 
 <style lang="scss" scoped>
-.module-card {
+.clickArea {
+  width: 100%;
+}
+
+.task-card-content {
+  display: flex;
+  align-items: center;
+
+  &--participant {
+    flex-direction: column;
+    text-align: center;
+    color: var(--color-darkblue);
+  }
+}
+
+.task-card {
   position: relative;
   display: flex;
   justify-content: space-between;
@@ -150,13 +192,13 @@ export default class TaskCard extends Vue {
     margin-bottom: 1.5rem;
     min-height: calc(100% - 18.4px);
 
-    .module-card__planet {
+    .task-card__planet {
       position: static;
       transform: none;
       margin-bottom: 0.5rem;
     }
 
-    .module-card__timer {
+    .task-card__timer {
       position: absolute;
       bottom: 0;
       transform: translateY(50%);

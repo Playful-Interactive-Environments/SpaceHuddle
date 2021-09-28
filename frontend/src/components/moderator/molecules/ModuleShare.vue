@@ -11,6 +11,11 @@
     v-if="hasPublicScreenComponent"
     @toggleClicked="changePublicScreen"
   />
+  <TimerSettings
+    v-if="showTimerSettings"
+    v-model:showModal="showTimerSettings"
+    :task="task"
+  />
 </template>
 
 <script lang="ts">
@@ -23,9 +28,11 @@ import { EventType } from '@/types/enum/EventType';
 import TaskStates from '@/types/enum/TaskStates';
 import TaskType from '@/types/enum/TaskType';
 import Toggle from '@/components/moderator/atoms/Toggle.vue';
+import TimerSettings from '@/components/moderator/organisms/TimerSettings.vue';
 
 @Options({
   components: {
+    TimerSettings,
     Toggle,
   },
 })
@@ -36,6 +43,7 @@ export default class ModuleShare extends Vue {
   hasParticipantComponent = false;
   hasPublicScreenComponent = false;
   TaskStates = TaskStates;
+  showTimerSettings = false;
 
   get taskType(): TaskType | null {
     if (this.task) return TaskType[this.task.taskType];
@@ -43,7 +51,7 @@ export default class ModuleShare extends Vue {
   }
 
   @Watch('task', { immediate: true })
-  onTaskChanged(val: string): void {
+  onTaskChanged(): void {
     hasModule(ModuleComponentType.PARTICIPANT, this.taskType, 'default').then(
       (result) => (this.hasParticipantComponent = result)
     );
@@ -60,6 +68,8 @@ export default class ModuleShare extends Vue {
   }
 
   async changeActiveState(): Promise<void> {
+    if (this.task.state === TaskStates.WAIT) this.showTimerSettings = true;
+    if (this.task.state === TaskStates.ACTIVE) this.showTimerSettings = false;
     this.eventBus.emit(EventType.CHANGE_PARTICIPANT_STATE, this.task);
   }
 }

@@ -14,6 +14,7 @@
             :task="task"
             isParticipant="true"
             :sessionId="sessionId"
+            v-on:timerEnds="getTopicsAndTasks"
           />
         </li>
       </template>
@@ -44,6 +45,8 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
     FormError,
   },
 })
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ParticipantOverview extends Vue {
   topics: Topic[] = [];
   TaskType = TaskType;
@@ -51,10 +54,21 @@ export default class ParticipantOverview extends Vue {
   sessionDescription = '';
   sessionId = '';
   errors: string[] = [];
+  readonly intervalTime = 10000;
+  interval!: any;
 
   mounted(): void {
     this.getSessionInfo();
     this.getTopicsAndTasks();
+    this.startIdeaInterval();
+  }
+
+  startIdeaInterval(): void {
+    this.interval = setInterval(this.getTopicsAndTasks, this.intervalTime);
+  }
+
+  unmounted(): void {
+    clearInterval(this.interval);
   }
 
   get filteredTopics(): Topic[] {

@@ -16,7 +16,7 @@
           </p>
         </div>
         <div class="public-screen__overview-right">
-          <Timer :isActive="task.state === TaskStates.ACTIVE" />
+          <Timer :isActive="task.state === TaskStates.ACTIVE" :task="task" />
           <img
             :src="
               require(`@/assets/illustrations/planets/${

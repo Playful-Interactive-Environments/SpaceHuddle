@@ -5,14 +5,17 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
+import { Task } from '@/types/api/Task';
 
 @Options({
   components: {},
+  emits: ['timerEnds'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Timer extends Vue {
   @Prop({ default: false }) isActive!: boolean;
+  @Prop() task!: Task;
   timeLeft = 360;
   interval!: any;
   readonly intervalTime = 1000;
@@ -26,6 +29,14 @@ export default class Timer extends Vue {
     }
   }
 
+  @Watch('task', { immediate: true, deep: true })
+  onTaskChanged(val: Task): void {
+    if (val) {
+      this.timeLeft = val.remainingTime;
+      this.startTimer();
+    }
+  }
+
   get formattedTime(): string {
     let minutes = Math.floor(this.timeLeft / 60);
     let seconds = this.timeLeft - minutes * 60;
@@ -33,10 +44,16 @@ export default class Timer extends Vue {
   }
 
   startTimer(): void {
+    clearInterval(this.interval);
     this.interval = setInterval(() => {
       this.timeLeft -= 1;
       if (this.timeLeft <= 0) {
+        this.timeLeft = 0;
         clearInterval(this.interval);
+        this.$emit('timerEnds');
+      }
+      if (this.task) {
+        this.task.remainingTime = this.timeLeft;
       }
     }, this.intervalTime);
   }

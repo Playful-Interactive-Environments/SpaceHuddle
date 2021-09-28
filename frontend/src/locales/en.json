@@ -55,6 +55,16 @@
         "post": {
           "idea": {
             "Exist": "The idea has already been submitted."
+          },
+          "taskId": {
+            "NotValid": "The task is no longer active."
+          }
+        }
+      },
+      "vote": {
+        "post": {
+          "taskId": {
+            "NotValid": "The task is no longer active."
           }
         }
       },
@@ -95,6 +105,11 @@
       }
     },
     "organism": {
+      "timerSettings": {
+        "header": "Set Timer",
+        "time": "Timer time",
+        "submit": "Save"
+      },
       "module": {
         "create": {
           "header": "Add a Module",
