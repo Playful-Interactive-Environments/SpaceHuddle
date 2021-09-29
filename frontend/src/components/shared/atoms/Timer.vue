@@ -6,6 +6,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Task } from '@/types/api/Task';
+import * as taskService from '@/services/task-service';
 
 @Options({
   components: {},
@@ -19,6 +20,10 @@ export default class Timer extends Vue {
   timeLeft = 360;
   interval!: any;
   readonly intervalTime = 1000;
+
+  mounted(): void {
+    document.addEventListener('visibilitychange', this.syncTimeWithBackend);
+  }
 
   @Watch('isActive', { immediate: true })
   onIsActiveChanged(val: boolean): void {
@@ -34,6 +39,14 @@ export default class Timer extends Vue {
     if (val) {
       this.timeLeft = val.remainingTime;
       this.startTimer();
+    }
+  }
+
+  syncTimeWithBackend(): void {
+    if (this.task) {
+      taskService.getTaskById(this.task.id).then((task) => {
+        this.task.remainingTime = task.remainingTime;
+      });
     }
   }
 
@@ -59,6 +72,7 @@ export default class Timer extends Vue {
   }
 
   unmounted(): void {
+    document.removeEventListener('visibilitychange', this.syncTimeWithBackend);
     clearInterval(this.interval);
   }
 }
