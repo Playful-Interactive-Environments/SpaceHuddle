@@ -5,7 +5,7 @@
   "scripts": {
     "start": "vue-cli-service serve --open",
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": ".\\src\\modules\\config.bat && vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },

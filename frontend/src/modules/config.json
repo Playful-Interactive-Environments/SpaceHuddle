@@ -1,15 +1,98 @@
-{
-  "none": {
-    "settings": {
-      "path": "none/settings",
-      "parameter": "TaskParameter"
-    },
-    "icon": "times",
-    "path": "none",
-    "publicScreen": "output/PublicScreen",
-    "moderatorConfig": "output/ModeratorConfig",
-    "moderatorContent": "output/ModeratorContent",
-    "participant": "output/Participant",
-    "locales": "en, de"
-  }
-}
+{ 
+   "brainstorming": {  
+       "default": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "locales": "de,en,",  
+             "icon": "brain",  "type": "main",  
+           "path": "brainstorming/default"  
+       },  
+       "game": {  
+           "participant": "output/Participant",  
+           "locales": "en,",  
+             "icon": "rocket",  "type": "addOn",  
+           "path": "brainstorming/game"  
+       },  
+       "settings": {  
+           "parameter": "TaskParameter",  
+           "path": "brainstorming/settings"  
+       }  
+   },  
+   "categorisation": {  
+       "default": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "locales": "en,",  
+             "icon": "object-group",  "type": "main",  
+           "path": "categorisation/default"  
+       },  
+       "settings": {  
+           "parameter": "TaskParameter",  
+           "path": "categorisation/settings"  
+       }  
+   },  
+   "information": {  
+       "default": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "locales": "en,",  
+             "icon": "info",  "type": "main",  
+           "path": "information/default"  
+       },  
+       "settings": {  
+           "parameter": "TaskParameter",  
+           "path": "information/settings"  
+       }  
+   },  
+   "none": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "de,en,",  
+             "icon": "times",  "type": "main",  
+           "path": "none",  
+       "settings": {  
+           "parameter": "TaskParameter",  
+           "path": "none/settings"  
+       }  
+   },  
+   "selection": {  
+       "default": {  
+           "publicScreen": "output/PublicScreen",  
+           "moderatorContent": "output/ModeratorContent",  
+           "locales": "en,",  
+             "icon": "check",  "type": "main",  
+           "path": "selection/default"  
+       },  
+       "settings": {  
+           "parameter": "TaskParameter",  
+           "path": "selection/settings"  
+       }  
+   },  
+   "voting": {  
+       "default": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "en,",  
+             "icon": "star",  "type": "main",  
+           "path": "voting/default"  
+       },  
+       "slots": {  
+           "participant": "output/Participant",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "en,",  
+             "icon": "chart-bar",  "type": "main",  
+           "path": "voting/slots"  
+       },  
+       "settings": {  
+           "parameter": "TaskParameter",  
+           "path": "voting/settings"  
+       }  
+   }  
+} 
