@@ -1,9 +1,9 @@
 <template>
   <Toggle
     :label="$t('general.moduleActive')"
-    :isActive="task.state === TaskStates.ACTIVE"
+    :isActive="task.state === TaskStates.ACTIVE && task.remainingTime > 0"
     v-if="hasParticipantComponent"
-    @toggleClicked="changeActiveState"
+    @toggleClicked="changeActiveState($event)"
   />
   <Toggle
     :label="$t('general.publicScreen')"
@@ -21,7 +21,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import { Task } from '@/types/api/Task';
+import { convertToSaveVersion, Task } from '@/types/api/Task';
 import { hasModule } from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import { EventType } from '@/types/enum/EventType';
@@ -29,6 +29,13 @@ import TaskStates from '@/types/enum/TaskStates';
 import TaskType from '@/types/enum/TaskType';
 import Toggle from '@/components/moderator/atoms/Toggle.vue';
 import TimerSettings from '@/components/moderator/organisms/TimerSettings.vue';
+import {
+  addError,
+  clearErrors,
+  getErrorMessage,
+} from '@/services/exception-service';
+import * as taskService from '@/services/task-service';
+import SnackbarType from '@/types/enum/SnackbarType';
 
 @Options({
   components: {
@@ -39,6 +46,7 @@ import TimerSettings from '@/components/moderator/organisms/TimerSettings.vue';
 export default class ModuleShare extends Vue {
   @Prop() task!: Task;
   @Prop({ default: false }) isOnPublicScreen!: boolean;
+  errors: string[] = [];
 
   hasParticipantComponent = false;
   hasPublicScreenComponent = false;
@@ -67,10 +75,27 @@ export default class ModuleShare extends Vue {
     );
   }
 
-  async changeActiveState(): Promise<void> {
-    if (this.task.state === TaskStates.WAIT) this.showTimerSettings = true;
-    if (this.task.state === TaskStates.ACTIVE) this.showTimerSettings = false;
-    this.eventBus.emit(EventType.CHANGE_PARTICIPANT_STATE, this.task);
+  async changeActiveState(newValue: boolean): Promise<void> {
+    this.showTimerSettings = newValue;
+
+    clearErrors(this.errors);
+    if (this.task) {
+      this.task.state = newValue ? TaskStates.ACTIVE : TaskStates.WAIT;
+      const saveVersion = convertToSaveVersion(this.task);
+      taskService.updateTask(saveVersion).then(
+        () => {
+          this.eventBus.emit(EventType.SHOW_SNACKBAR, {
+            type: SnackbarType.SUCCESS,
+            message: 'info.updateParticipantState',
+          });
+        },
+        (error) => {
+          addError(this.errors, getErrorMessage(error));
+        }
+      );
+    }
+
+    //this.eventBus.emit(EventType.CHANGE_PARTICIPANT_STATE, this.task);
   }
 }
 </script>
