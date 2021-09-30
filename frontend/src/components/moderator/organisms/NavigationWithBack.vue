@@ -1,6 +1,6 @@
 <template>
   <div class="navigation-with-back">
-    <BackButton :route="backRoute" />
+    <el-page-header :content="currentRouteTitle" @back="$router.go(-1)" />
     <Navigation />
   </div>
 </template>
@@ -8,17 +8,15 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import BackButton from '@/components/moderator/atoms/BackButton.vue';
 import Navigation from '@/components/moderator/molecules/Navigation.vue';
 
 @Options({
   components: {
-    BackButton,
     Navigation,
   },
 })
 export default class NavigationWithBack extends Vue {
-  @Prop({ default: '' }) readonly backRoute!: string;
+  @Prop({ default: '' }) readonly currentRouteTitle!: string;
 }
 </script>
 

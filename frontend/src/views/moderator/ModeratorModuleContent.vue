@@ -12,7 +12,7 @@
         v-on:openSettings="editTask"
         v-on:delete="deleteTask"
       />
-      <NavigationWithBack :back-route="'/session/' + sessionId" />
+      <NavigationWithBack :current-route-title="task.taskType" />
       <form-error :errors="errors"></form-error>
       <main class="task_definition__content">
         <ModuleContentComponent :task-id="taskId" />
