@@ -1,5 +1,4 @@
 import { createApp } from 'vue';
-import VueFinalModal from 'vue-final-modal';
 import VueCookies from 'vue3-cookies';
 import i18n from '@/i18n';
 import App from './App.vue';
@@ -42,7 +41,6 @@ app.use(VueCookies as any, {
 });
 app.config.globalProperties.eventBus = eventBus;
 app.config.globalProperties.$t = i18n.t2;
-app.use(VueFinalModal(), {});
 app.use(ElementPlus);
 app.mount('#app');
 
