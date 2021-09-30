@@ -59,7 +59,6 @@ import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import { formatDate } from '@/utils/date';
 import TaskType from '@/types/enum/TaskType';
-import SnackbarType from '@/types/enum/SnackbarType';
 import * as sessionService from '@/services/session-service';
 import * as topicService from '@/services/topic-service';
 import * as taskService from '@/services/task-service';
@@ -67,11 +66,6 @@ import { Session } from '@/types/api/Session';
 import { Topic } from '@/types/api/Topic';
 import { convertToSaveVersion } from '@/types/api/Task';
 import { EventType } from '@/types/enum/EventType';
-import {
-  getErrorMessage,
-  addError,
-  clearErrors,
-} from '@/services/exception-service';
 
 @Options({
   components: {
@@ -106,21 +100,7 @@ export default class ModeratorSessionDetails extends Vue {
   }
 
   async changePublicScreen(id: string | null): Promise<void> {
-    clearErrors(this.errors);
     this.publicScreenTaskId = id as string;
-    sessionService
-      .displayOnPublicScreen(this.sessionId, this.publicScreenTaskId)
-      .then(
-        () => {
-          this.eventBus.emit(EventType.SHOW_SNACKBAR, {
-            type: SnackbarType.SUCCESS,
-            message: 'info.updatePublicScreen',
-          });
-        },
-        (error) => {
-          addError(this.errors, getErrorMessage(error));
-        }
-      );
   }
 
   async getTopics(): Promise<void> {

@@ -40,6 +40,7 @@ import {
 import * as taskService from '@/services/task-service';
 import SnackbarType from '@/types/enum/SnackbarType';
 import TaskTypeColor from '@/types/TaskTypeColor';
+import * as sessionService from '@/services/session-service';
 
 @Options({
   components: {
@@ -81,10 +82,28 @@ export default class ModuleShare extends Vue {
   }
 
   set publicScreen(newValue: boolean) {
-    this.eventBus.emit(
-      EventType.CHANGE_PUBLIC_SCREEN,
-      newValue ? this.task.id : '{taskId}'
-    );
+    if (this.task) {
+      const publicScreenTaskId = newValue ? this.task.id : '{taskId}';
+      clearErrors(this.errors);
+      sessionService
+        .displayOnPublicScreen(this.task.sessionId, publicScreenTaskId)
+        .then(
+          () => {
+            this.eventBus.emit(EventType.SHOW_SNACKBAR, {
+              type: SnackbarType.SUCCESS,
+              message: 'info.updatePublicScreen',
+            });
+
+            this.eventBus.emit(
+              EventType.CHANGE_PUBLIC_SCREEN,
+              publicScreenTaskId
+            );
+          },
+          (error) => {
+            addError(this.errors, getErrorMessage(error));
+          }
+        );
+    }
   }
 
   get participant(): boolean {

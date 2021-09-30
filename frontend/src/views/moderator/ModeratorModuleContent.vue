@@ -7,7 +7,7 @@
         :pretitle="task.taskType"
         :description="task.description"
         taskType="TaskType[task.taskType]"
-        :is-on-public-screen="task.id === publicScreenTask?.id"
+        :is-on-public-screen="task.id === publicScreenTaskId"
         :task="task"
         v-on:openSettings="editTask"
         v-on:delete="deleteTask"
@@ -48,6 +48,7 @@ import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
 import FormError from '@/components/shared/atoms/FormError.vue';
 import ModalTaskCreate from '@/components/shared/molecules/ModalTaskCreate.vue';
+import { EventType } from '@/types/enum/EventType';
 
 @Options({
   components: {
@@ -64,7 +65,7 @@ export default class ModeratorModuleContent extends Vue {
   componentLoadIndex = 0;
 
   task: Task | null = null;
-  publicScreenTask: Task | null = null;
+  publicScreenTaskId = '';
   TaskType = TaskType;
   TaskStates = TaskStates;
   errors: string[] = [];
@@ -72,6 +73,14 @@ export default class ModeratorModuleContent extends Vue {
 
   mounted(): void {
     this.loadDefaultModule();
+    this.eventBus.off(EventType.CHANGE_PUBLIC_SCREEN);
+    this.eventBus.on(EventType.CHANGE_PUBLIC_SCREEN, async (id) => {
+      await this.changePublicScreen(id as string);
+    });
+  }
+
+  async changePublicScreen(id: string | null): Promise<void> {
+    this.publicScreenTaskId = id as string;
   }
 
   unmounted(): void {
@@ -120,7 +129,8 @@ export default class ModeratorModuleContent extends Vue {
         TaskType[this.task.taskType]
       );
       sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
-        this.publicScreenTask = queryResult;
+        if (queryResult) this.publicScreenTaskId = queryResult.id;
+        else this.publicScreenTaskId = '';
       });
     });
   }
