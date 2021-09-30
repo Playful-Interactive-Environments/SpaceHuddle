@@ -41,6 +41,8 @@ $--font-path: '~element-plus/lib/theme-chalk/fonts';
         --el-text-color-primary: var(--color-primary);
         --el-text-color-regular: var(--color-primary);
 
+        --el-border-color-base:  var(--color-gray);
+
         --el-tag-font-size: var(--font-size-default);
         --el-font-size-base: var(--font-size-default);
         --el-font-size-large: var(--font-size-large);
@@ -134,4 +136,37 @@ $--font-path: '~element-plus/lib/theme-chalk/fonts';
 
 .el-date-table td span {
         text-align: center;
+}
+
+.el-switch {
+        &__label, &__label.is-active {
+                color: unset;
+        }
+}
+
+.el-switch.is-big {
+        display: flex;
+        justify-content: space-between;
+        --el-switch-core-border-radius: calc(34rem / 16);
+        --el-switch-width: calc(56rem / 16);
+        --el-switch-height: calc(30rem / 16);
+        --el-switch-button-size: calc(22rem / 16);
+
+        + .el-switch.is-big {
+                margin-top: 0.5rem;
+        }
+}
+
+.el-switch.is-big .el-switch{
+        &__action {
+                margin: calc(((var(--el-switch-height) - var(--el-switch-button-size)) / 2) - 2px);
+        }
+
+        &__core {
+                margin-top: calc(((var(--el-switch-height) - var(--el-switch-button-size)) / 2) - 2px);
+        }
+}
+
+.el-switch.is-big.is-checked .el-switch__core .el-switch__action {
+        margin-left: calc(0px - var(--el-switch-button-size) - ((var(--el-switch-height) - var(--el-switch-button-size)) / 2) + 2px);
 }

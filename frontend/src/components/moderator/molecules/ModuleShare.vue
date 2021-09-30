@@ -1,15 +1,19 @@
 <template>
-  <Toggle
-    :label="$t('general.moduleActive')"
-    :isActive="task.state === TaskStates.ACTIVE && task.remainingTime > 0"
+  <el-switch
+    class="is-big"
     v-if="hasParticipantComponent"
-    @toggleClicked="changeActiveState($event)"
+    v-model="participant"
+    :width="56"
+    :inactive-text="$t('general.moduleActive')"
+    :active-color="taskTypeColor"
   />
-  <Toggle
-    :label="$t('general.publicScreen')"
-    :isActive="isOnPublicScreen"
+  <el-switch
+    class="is-big"
     v-if="hasPublicScreenComponent"
-    @toggleClicked="changePublicScreen"
+    v-model="publicScreen"
+    :width="56"
+    :inactive-text="$t('general.publicScreen')"
+    :active-color="taskTypeColor"
   />
   <TimerSettings
     v-if="showTimerSettings"
@@ -27,7 +31,6 @@ import ModuleComponentType from '@/modules/ModuleComponentType';
 import { EventType } from '@/types/enum/EventType';
 import TaskStates from '@/types/enum/TaskStates';
 import TaskType from '@/types/enum/TaskType';
-import Toggle from '@/components/moderator/atoms/Toggle.vue';
 import TimerSettings from '@/components/moderator/organisms/TimerSettings.vue';
 import {
   addError,
@@ -36,11 +39,11 @@ import {
 } from '@/services/exception-service';
 import * as taskService from '@/services/task-service';
 import SnackbarType from '@/types/enum/SnackbarType';
+import TaskTypeColor from '@/types/TaskTypeColor';
 
 @Options({
   components: {
     TimerSettings,
-    Toggle,
   },
 })
 export default class ModuleShare extends Vue {
@@ -58,6 +61,11 @@ export default class ModuleShare extends Vue {
     return null;
   }
 
+  get taskTypeColor(): string {
+    if (this.taskType) return TaskTypeColor[this.taskType];
+    return 'gray';
+  }
+
   @Watch('task', { immediate: true })
   onTaskChanged(): void {
     hasModule(ModuleComponentType.PARTICIPANT, this.taskType, 'default').then(
@@ -68,16 +76,27 @@ export default class ModuleShare extends Vue {
     );
   }
 
-  changePublicScreen(isActive: boolean): void {
+  get publicScreen(): boolean {
+    return this.isOnPublicScreen;
+  }
+
+  set publicScreen(newValue: boolean) {
     this.eventBus.emit(
       EventType.CHANGE_PUBLIC_SCREEN,
-      isActive ? this.task.id : '{taskId}'
+      newValue ? this.task.id : '{taskId}'
     );
   }
 
-  async changeActiveState(newValue: boolean): Promise<void> {
-    this.showTimerSettings = newValue;
+  get participant(): boolean {
+    if (this.task)
+      return (
+        this.task.state === TaskStates.ACTIVE && this.task.remainingTime > 0
+      );
+    return false;
+  }
 
+  set participant(newValue: boolean) {
+    this.showTimerSettings = newValue;
     clearErrors(this.errors);
     if (this.task) {
       this.task.state = newValue ? TaskStates.ACTIVE : TaskStates.WAIT;
@@ -94,8 +113,6 @@ export default class ModuleShare extends Vue {
         }
       );
     }
-
-    //this.eventBus.emit(EventType.CHANGE_PARTICIPANT_STATE, this.task);
   }
 }
 </script>

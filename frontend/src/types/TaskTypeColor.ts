@@ -1,4 +1,4 @@
-const ModuleColors = {
+const TaskTypeColor = {
   information: 'var(--color-yellow)',
   brainstorming: 'var(--color-mint)',
   selection: 'var(--color-purple)',
@@ -6,4 +6,4 @@ const ModuleColors = {
   voting: 'var(--color-red)',
 };
 
-export default ModuleColors;
+export default TaskTypeColor;

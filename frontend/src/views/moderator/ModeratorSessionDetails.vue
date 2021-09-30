@@ -65,10 +65,8 @@ import * as topicService from '@/services/topic-service';
 import * as taskService from '@/services/task-service';
 import { Session } from '@/types/api/Session';
 import { Topic } from '@/types/api/Topic';
-import { Task } from '@/types/api/Task';
 import { convertToSaveVersion } from '@/types/api/Task';
 import { EventType } from '@/types/enum/EventType';
-import TaskStates from '@/types/enum/TaskStates';
 import {
   getErrorMessage,
   addError,
@@ -104,10 +102,6 @@ export default class ModeratorSessionDetails extends Vue {
     this.eventBus.on(EventType.CHANGE_PUBLIC_SCREEN, async (id) => {
       await this.changePublicScreen(id as string);
     });
-    this.eventBus.off(EventType.CHANGE_PARTICIPANT_STATE);
-    this.eventBus.on(EventType.CHANGE_PARTICIPANT_STATE, async (task) => {
-      await this.changeParticipantState(task as Task);
-    });
     await this.getTopics();
   }
 
@@ -127,26 +121,6 @@ export default class ModeratorSessionDetails extends Vue {
           addError(this.errors, getErrorMessage(error));
         }
       );
-  }
-
-  async changeParticipantState(task: Task): Promise<void> {
-    clearErrors(this.errors);
-    if (task) {
-      task.state =
-        task.state === TaskStates.ACTIVE ? TaskStates.WAIT : TaskStates.ACTIVE;
-      const saveVersion = convertToSaveVersion(task);
-      taskService.updateTask(saveVersion).then(
-        () => {
-          this.eventBus.emit(EventType.SHOW_SNACKBAR, {
-            type: SnackbarType.SUCCESS,
-            message: 'info.updateParticipantState',
-          });
-        },
-        (error) => {
-          addError(this.errors, getErrorMessage(error));
-        }
-      );
-    }
   }
 
   async getTopics(): Promise<void> {
