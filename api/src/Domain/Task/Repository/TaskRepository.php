@@ -112,7 +112,8 @@ class TaskRepository implements RepositoryInterface
         }
         $authorisation = $this->getAuthorisation();
         $query = $this->queryFactory->newSelect($this->getEntityName());
-        $query->select(["*"])
+        $query->select(["task.*", "topic.session_id"])
+            ->innerJoin("topic", "topic.id = task.topic_id")
             ->andWhere($conditions)
             ->order($sortConditions);
 

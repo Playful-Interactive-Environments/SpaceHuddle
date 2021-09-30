@@ -50,7 +50,8 @@ trait SelectTrait
      */
     public function getById(string $id): ?object
     {
-        $result = $this->get(["id" => $id]);
+        $tableName = $this->getEntityName();
+        $result = $this->get(["$tableName.id" => $id]);
         if (!is_object($result)) {
             throw new DomainException("Entity $this->entityName not found");
         }
