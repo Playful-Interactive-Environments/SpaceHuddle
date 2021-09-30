@@ -7,6 +7,7 @@ import { Module } from '@/types/api/Module';
 export interface Task {
   id: string;
   topicId: string;
+  sessionId: string;
   // see: https://www.typescriptlang.org/docs/handbook/enums.html
   taskType: keyof typeof TaskType;
   name: string;
