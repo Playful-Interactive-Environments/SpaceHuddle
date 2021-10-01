@@ -153,7 +153,7 @@ class TaskRepository implements RepositoryInterface
      */
     public function update(object|array $data): ?object
     {
-        if (is_object($data) && $data->remainingTime) {
+        if (is_object($data) && property_exists($data, "remainingTime")) {
             $data->expirationTime = $this->expirationTime($data->remainingTime);
             unset($data->remainingTime);
         } elseif (is_array($data) && array_key_exists("remaining_time", $data)) {
