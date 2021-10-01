@@ -85,7 +85,7 @@ class PDOErrorHandling implements ErrorHandlerInterface
                 }
             }*/
 
-            #$errorMessage = $this->getErrorMessage($exception, $statusCode, $displayErrorDetails);
+            $errorMessage = $this->getErrorMessage($exception, $statusCode, $displayErrorDetails);
         }
 
         return $this->handleException(

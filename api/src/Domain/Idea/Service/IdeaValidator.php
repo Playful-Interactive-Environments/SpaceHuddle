@@ -165,7 +165,7 @@ class IdeaValidator
      */
     private function validateTaskState(string $taskId): void
     {
-        $task = $this->repository->getParentRepository()->get(["id" => $taskId]);
+        $task = $this->repository->getParentRepository()->get(["task.id" => $taskId]);
         if (!isset($task)) {
             $result = new ValidationResult();
             $result->addError("taskId", "NotValid: Task is not active.");
