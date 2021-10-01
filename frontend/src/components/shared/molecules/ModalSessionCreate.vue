@@ -12,11 +12,11 @@
     </template>
 
     <form class="session-create__form">
-      <label for="title" class="heading heading--xs">{{
+      <label for="sessionTitle" class="heading heading--xs">{{
         $t('moderator.organism.session.create.title')
       }}</label>
       <input
-        id="title"
+        id="sessionTitle"
         v-model="title"
         class="input input--fullwidth"
         :placeholder="$t('moderator.organism.session.create.titleExample')"
@@ -47,11 +47,10 @@
         :isSmall="true"
       />
 
-      <label for="expirationDate" class="heading heading--xs">{{
+      <label class="heading heading--xs">{{
           $t('moderator.organism.session.create.expirationDate')
         }}</label>
       <el-date-picker
-        id="expirationDate"
         v-model="expirationDate"
         type="date"
         :placeholder="$t('moderator.organism.session.create.expirationDatePlaceholder')"

@@ -106,13 +106,13 @@
               ></component>
             </template>
           </Expand>
-          <label for="title" class="heading heading--xs">{{
+          <label for="taskTitle" class="heading heading--xs">{{
             taskType === 'BRAINSTORMING'
               ? $t('moderator.organism.module.create.question')
               : $t('moderator.organism.module.create.title')
           }}</label>
           <input
-            id="title"
+            id="taskTitle"
             v-model="title"
             class="input input--fullwidth"
             :placeholder="
