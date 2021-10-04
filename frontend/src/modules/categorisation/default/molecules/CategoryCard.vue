@@ -73,7 +73,7 @@
       </IdeaCard>
     </main>
   </el-drawer>
-  <ModalCategoryCreate
+  <CategorySettings
     v-if="category"
     v-model:show-modal="displayEditCategory"
     v-model:category-id="category.id"
@@ -88,12 +88,12 @@ import { Category } from '@/types/api/Category';
 import { Idea } from '@/types/api/Idea';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as categorisationService from '@/services/categorisation-service';
-import ModalCategoryCreate from '@/modules/categorisation/default/molecules/ModalCategoryCreate.vue';
+import CategorySettings from '@/modules/categorisation/default/molecules/CategorySettings.vue';
 
 @Options({
   components: {
     IdeaCard,
-    ModalCategoryCreate,
+    CategorySettings,
   },
   emits: ['categoryChanged'],
 })

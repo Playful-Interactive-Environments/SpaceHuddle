@@ -60,8 +60,12 @@
         {{ idea.description }}
       </div>
     </div>
+    <IdeaSettings
+      v-if="isEditable"
+      v-model:show-modal="showSettings"
+      :idea="idea"
+    />
   </el-card>
-  <IdeaSettings v-model:show-modal="showSettings" :idea="idea" />
 </template>
 
 <script lang="ts">

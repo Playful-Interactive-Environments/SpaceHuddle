@@ -88,11 +88,11 @@
         >
           <template v-slot:item="{ element, index }">
             <IdeaCard
+              :key="element.id"
               v-if="index < orderGroup.displayCount"
               :id="element.id"
               :idea="element"
               :is-selectable="true"
-              :key="element.id"
               v-model:is-selected="ideasSelection[element.id]"
               @ideaDeleted="getIdeas"
               :is-editable="false"
@@ -105,11 +105,11 @@
   </Expand>
   <AddItem
     :text="$t('module.categorisation.default.moderatorContent.add')"
-    @addNew="openModalCategoryCreate"
+    @addNew="openCategorySettings"
   />
-  <ModalCategoryCreate
+  <CategorySettings
     v-if="task"
-    v-model:show-modal="showModalCategoryCreate"
+    v-model:show-modal="showCategorySettings"
     :task-id="task.id"
     v-model:category-id="editCategoryId"
     @categoryCreated="getIdeas"
@@ -132,7 +132,7 @@ import { Task } from '@/types/api/Task';
 import { EventType } from '@/types/enum/EventType';
 import SnackbarType from '@/types/enum/SnackbarType';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
-import ModalCategoryCreate from '@/modules/categorisation/default/molecules/ModalCategoryCreate.vue';
+import CategorySettings from '@/modules/categorisation/default/molecules/CategorySettings.vue';
 import CategoryCard from '@/modules/categorisation/default/molecules/CategoryCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 
@@ -149,7 +149,7 @@ interface CategoryContent {
     IdeaCard,
     Expand,
     AddItem,
-    ModalCategoryCreate,
+    CategorySettings,
     CategoryCard,
     draggable,
   },
@@ -158,7 +158,7 @@ interface CategoryContent {
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorContent extends Vue {
   @Prop() readonly taskId!: string;
-  showModalCategoryCreate = false;
+  showCategorySettings = false;
   editCategoryId: string | null = null;
   task: Task | null = null;
   categories: Category[] = [];
@@ -315,7 +315,7 @@ export default class ModeratorContent extends Vue {
 
   async editCategory(categoryId: string): Promise<void> {
     this.editCategoryId = categoryId;
-    this.showModalCategoryCreate = true;
+    this.showCategorySettings = true;
   }
 
   async deleteCategory(categoryId: string): Promise<void> {
@@ -336,9 +336,9 @@ export default class ModeratorContent extends Vue {
     clearInterval(this.interval);
   }
 
-  openModalCategoryCreate(): void {
+  openCategorySettings(): void {
     this.editCategoryId = null;
-    this.showModalCategoryCreate = true;
+    this.showCategorySettings = true;
   }
 
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/

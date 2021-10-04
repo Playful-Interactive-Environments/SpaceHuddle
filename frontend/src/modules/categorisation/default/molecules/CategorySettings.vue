@@ -70,7 +70,7 @@ import {
   },
   emits: ['categoryCreated', 'update:categoryId', 'update:showModal'],
 })
-export default class ModalCategoryCreate extends Vue {
+export default class CategorySettings extends Vue {
   @Prop({ default: false }) showModal!: boolean;
   @Prop({ required: false }) taskId!: string | null;
   @Prop({ required: false }) categoryId!: string | null;
