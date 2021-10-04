@@ -57,6 +57,6 @@ export default class Navigation extends Vue {
 }
 
 .router-link-active {
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
 }
 </style>

@@ -5,12 +5,12 @@
   >
     <p>{{ $t('module.brainstorming.default.publicScreen.noIdeas') }}</p>
   </section>
-  <section v-else class="public-screen__content">
+  <section v-else class="public-screen__content layout__4columns">
     <IdeaCard
       v-for="(idea, index) in ideas"
       :idea="idea"
       :key="index"
-      :is-deletable="false"
+      :is-editable="false"
     />
   </section>
 </template>
@@ -80,8 +80,6 @@ export default class PublicScreen extends Vue {
 .public-screen {
   &__content {
     margin-top: 1em;
-    column-width: 20vw;
-    column-gap: 1rem;
   }
 }
 </style>

@@ -11,13 +11,13 @@
         {{ key.toUpperCase() }}
       </template>
       <template v-slot:content>
-        <main class="categorisation__content">
+        <main class="layout__4columns">
           <IdeaCard
             :idea="idea"
             v-for="(idea, index) in item.ideas"
             :key="index"
             :is-selectable="false"
-            :is-deletable="false"
+            :is-editable="false"
           />
         </main>
       </template>
@@ -129,11 +129,9 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.categorisation {
+.public-screen {
   &__content {
-    width: 100%;
-    column-width: 21vw;
-    column-gap: 0.5rem;
+    margin-top: 1em;
   }
 }
 

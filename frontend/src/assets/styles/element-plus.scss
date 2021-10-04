@@ -107,6 +107,8 @@ $--font-path: '~element-plus/lib/theme-chalk/fonts';
 
 .el-card {
         --el-card-border-radius: var(--border-radius-xs);
+        -webkit-column-break-inside: avoid;
+        margin-bottom: 0.5rem;
 
         &__body {
                 height: 100%;
@@ -169,4 +171,16 @@ $--font-path: '~element-plus/lib/theme-chalk/fonts';
 
 .el-switch.is-big.is-checked .el-switch__core .el-switch__action {
         margin-left: calc(0px - var(--el-switch-button-size) - ((var(--el-switch-height) - var(--el-switch-button-size)) / 2) + 2px);
+}
+.el-collapse {
+        --el-collapse-header-background-color: unset;
+        --el-collapse-content-background-color: unset;
+        --el-collapse-header-font-size: large;
+}
+
+.el-collapse-item {
+        &__header {
+                font-weight: var(--font-weight-semibold);
+                padding-left: 1rem;
+        }
 }

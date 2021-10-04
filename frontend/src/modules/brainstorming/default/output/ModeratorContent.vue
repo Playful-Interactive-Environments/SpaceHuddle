@@ -1,5 +1,5 @@
 <template>
-  <header class="brainstorming__header">
+  <header class="content_filter">
     <label for="orderType" class="heading heading--xs">{{
       $t('module.brainstorming.default.moderatorContent.sortOrder')
     }}</label>
@@ -7,17 +7,36 @@
       v-model="orderType"
       id="orderType"
       class="select select--fullwidth"
-      @change="getIdeas"
+      @change="getIdeas(true)"
     >
       <option v-for="type in SortOrderOptions" :key="type" :value="type">
         {{ $t(`enum.ideaSortOrder.${IdeaSortOrder[type]}`) }}
       </option>
     </select>
   </header>
-  <Expand v-for="(item, key) in orderGroupContent" :key="key">
+  <el-collapse v-model="openTabs">
+    <el-collapse-item
+      v-for="(item, key) in orderGroupContent"
+      :key="key"
+      :name="key"
+    >
+      <template #title>
+        <span class="layout__level>">{{ key.toUpperCase() }}</span>
+      </template>
+      <div class="layout__4columns">
+        <IdeaCard
+          :idea="idea"
+          v-for="(idea, index) in item"
+          :key="index"
+          @ideaDeleted="getIdeas()"
+        />
+      </div>
+    </el-collapse-item>
+  </el-collapse>
+  <!--<Expand v-for="(item, key) in orderGroupContent" :key="key">
     <template v-slot:title>{{ key.toUpperCase() }}</template>
     <template v-slot:content>
-      <main class="brainstorming__content">
+      <main class="layout__4columns">
         <IdeaCard
           :idea="idea"
           v-for="(idea, index) in item"
@@ -26,16 +45,7 @@
         />
       </main>
     </template>
-  </Expand>
-
-  <!--<main class="brainstorming__content">
-    <IdeaCard
-      :idea="idea"
-      v-for="(idea, index) in ideas"
-      :key="index"
-      @ideaDeleted="getIdeas"
-    />
-  </main>-->
+  </Expand>-->
 </template>
 
 <script lang="ts">
@@ -46,6 +56,7 @@ import * as ideaService from '@/services/idea-service';
 import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import Expand from '@/components/shared/atoms/Expand.vue';
+import {warn} from "element-plus/es/utils/error";
 
 @Options({
   components: {
@@ -62,6 +73,7 @@ export default class ModeratorContent extends Vue {
   readonly intervalTime = 10000;
   interval!: any;
   orderType = this.SortOrderOptions[0];
+  openTabs: string[] = [];
 
   IdeaSortOrder = IdeaSortOrder;
 
@@ -71,10 +83,11 @@ export default class ModeratorContent extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getIdeas();
+    this.getIdeas(true);
   }
 
-  async getIdeas(): Promise<void> {
+  async getIdeas(reloadTabState = false): Promise<void> {
+    const oldKeys = Object.keys(this.orderGroupContent);
     if (this.taskId) {
       await ideaService
         .getIdeasForTask(this.taskId, this.orderType)
@@ -93,6 +106,12 @@ export default class ModeratorContent extends Vue {
           });
         });
     }
+    const newKeys = Object.keys(this.orderGroupContent);
+    if (reloadTabState) this.openTabs = newKeys;
+    else {
+      const addedKeys = newKeys.filter((item) => oldKeys.indexOf(item) < 0);
+      this.openTabs = this.openTabs.concat(addedKeys);
+    }
   }
 
   async mounted(): Promise<void> {
@@ -110,32 +129,4 @@ export default class ModeratorContent extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.brainstorming {
-  &__header {
-    padding: 0.5rem 1rem;
-    margin-bottom: 1rem;
-    border-radius: var(--border-radius);
-    background-color: var(--color-darkblue);
-    width: 100%;
-    display: table;
-
-    > * {
-      display: table-cell;
-    }
-
-    label {
-      width: 20%;
-    }
-
-    .heading {
-      color: white;
-    }
-  }
-
-  &__content {
-    width: 100%;
-    column-width: 22vw;
-    column-gap: 1rem;
-  }
-}
 </style>

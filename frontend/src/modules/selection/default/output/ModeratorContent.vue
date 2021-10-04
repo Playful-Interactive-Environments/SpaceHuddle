@@ -12,19 +12,19 @@
       </span>
     </template>
     <template v-slot:content>
-      <main class="selection__content">
+      <main class="layout__4columns">
         <IdeaCard
           :idea="idea"
           v-for="(idea, index) in selection"
           :key="index"
           :is-selectable="true"
-          :is-deletable="false"
+          :is-editable="false"
           v-model:is-selected="ideasSelectionRemove[idea.id]"
         />
       </main>
     </template>
   </Expand>
-  <header class="selection__header">
+  <header class="content_filter">
     <label for="orderType" class="heading heading--xs">{{
       $t('module.selection.default.moderatorContent.sortOrder')
     }}</label>
@@ -51,27 +51,18 @@
   <Expand v-for="(item, key) in orderGroupContent" :key="key">
     <template v-slot:title>{{ key.toUpperCase() }}</template>
     <template v-slot:content>
-      <main class="selection__content">
+      <main class="layout__4columns">
         <IdeaCard
           :idea="idea"
           v-for="(idea, index) in item"
           :key="index"
-          :is-deletable="false"
+          :is-editable="false"
           :is-selectable="true"
           v-model:is-selected="ideasSelectionAdd[idea.id]"
         />
       </main>
     </template>
   </Expand>
-
-  <!--<main class="brainstorming__content">
-    <IdeaCard
-      :idea="idea"
-      v-for="(idea, index) in ideas"
-      :key="index"
-      @ideaDeleted="getIdeas"
-    />
-  </main>-->
 </template>
 
 <script lang="ts">
@@ -258,35 +249,6 @@ export default class ModeratorContent extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.selection {
-  &__header {
-    padding: 0.5rem 1rem;
-    margin-bottom: 1rem;
-    border-radius: var(--border-radius);
-    background-color: var(--color-darkblue);
-    width: 100%;
-    display: table;
-
-    > * {
-      display: table-cell;
-    }
-
-    label {
-      width: 20%;
-    }
-
-    .heading {
-      color: white;
-    }
-  }
-
-  &__content {
-    width: 100%;
-    column-width: 22vw;
-    column-gap: 1rem;
-  }
-}
-
 .column {
   margin: 0.5rem;
 }

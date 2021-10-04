@@ -2,6 +2,7 @@ import {
   apiExecuteDelete,
   apiExecuteGetHandled,
   apiExecutePost,
+  apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
@@ -21,6 +22,18 @@ export const postIdea = async (
     `/${EndpointType.TASK}/${taskId}/${EndpointType.IDEA}`,
     data,
     EndpointAuthorisationType.PARTICIPANT
+  );
+};
+
+export const putIdea = async (
+  id: string,
+  data: Partial<Idea>
+): Promise<Idea> => {
+  data['id'] = id;
+  return await apiExecutePut<Idea>(
+    `/${EndpointType.IDEA}`,
+    data,
+    EndpointAuthorisationType.MODERATOR
   );
 };
 

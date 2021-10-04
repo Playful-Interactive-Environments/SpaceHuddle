@@ -238,6 +238,12 @@
       "participant": "participant",
       "count": "count",
       "categorisation": "categorisation"
+    },
+    "ideaState": {
+      "new": "new",
+      "handled": "handled",
+      "duplicate": "duplicate",
+      "inappropriate": "inappropriate"
     }
   },
   "general": {

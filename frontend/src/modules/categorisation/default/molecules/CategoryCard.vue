@@ -63,12 +63,14 @@
         :id="idea.id"
         :idea="idea"
         :is-selectable="false"
-        :is-deletable="category != null"
-        :custom-delete="true"
-        @ideaDeleted="removeIdea($event)"
+        :is-editable="false"
         class="item"
         style="height: unset"
-      />
+      >
+        <template #action v-if="category != null">
+          <font-awesome-icon icon="trash" v-on:click="removeIdea(idea.id)" />
+        </template>
+      </IdeaCard>
     </main>
   </el-drawer>
   <ModalCategoryCreate

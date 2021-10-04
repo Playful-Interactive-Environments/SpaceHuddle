@@ -8,7 +8,7 @@ namespace App\Domain\Idea\Type;
  * @OA\Schema(
  *   description="current status of the idea",
  *   type="string",
- *   enum={"NEW", "DUPPLIKAT", "INAPPROPRIATE", "HANDLED"},
+ *   enum={"NEW", "DUPLICATE", "INAPPROPRIATE", "HANDLED"},
  *   example="NEW"
  * )
  */

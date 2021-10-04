@@ -1,0 +1,33 @@
+.layout {
+  &__4columns {
+    width: 100%;
+    column-width: 18vw;
+    column-gap: 1rem;
+  }
+
+  &__level {
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+.content_filter {
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--border-radius);
+  background-color: var(--color-darkblue);
+  width: 100%;
+  display: table;
+
+  > * {
+    display: table-cell;
+  }
+
+  label {
+    width: 20%;
+  }
+
+  .heading {
+    color: white;
+  }
+}

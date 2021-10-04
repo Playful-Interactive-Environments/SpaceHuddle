@@ -69,7 +69,7 @@ export default class Expand extends Vue {
     padding: 1rem 0.5rem;
 
     h2 {
-      font-weight: bold;
+      font-weight: var(--font-weight-bold);
       font-variant: petite-caps;
       font-size: x-large;
     }

@@ -30,7 +30,7 @@
         <IdeaCard
           :idea="ideas[ideaPointer]"
           :is-selectable="false"
-          :is-deletable="false"
+          :is-editable="false"
         />
       </span>
       <button

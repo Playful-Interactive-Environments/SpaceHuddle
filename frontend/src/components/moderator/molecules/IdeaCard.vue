@@ -1,23 +1,66 @@
 <template>
-  <div
-    class="idea-card"
-    @click="changeSelection"
-    :class="{ selected: isSelected }"
+  <el-card
+    shadow="never"
+    v-on:click="changeSelection"
+    :class="{
+      card__selected: isSelected,
+      card__new: isNew,
+      card__inappropriate: isInappropriate,
+      card__duplicate: isDuplicate,
+    }"
+    :body-style="{ padding: '0px' }"
   >
-    <div class="idea-card-content">
-      <div class="idea-card__idea">
+    <img v-if="idea.image" :src="idea.image" class="card__image" />
+    <img v-if="idea.link" :src="idea.link" class="card__image" />
+    <div style="padding: 14px">
+      <div class="card__title">
         {{ hasKeywords ? idea.keywords : idea.description }}
+        <slot name="action"></slot>
+        <el-dropdown
+          v-if="isEditable"
+          class="card__menu"
+          v-on:command="menuItemSelected($event)"
+        >
+          <span class="el-dropdown-link">
+            <font-awesome-icon icon="ellipsis-h" />
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="edit">
+                <font-awesome-icon icon="pen" />
+              </el-dropdown-item>
+              <el-dropdown-item command="delete">
+                <font-awesome-icon icon="trash" />
+              </el-dropdown-item>
+              <el-dropdown-item command="state">
+                <el-dropdown
+                  class="card__menu"
+                  placement="top-start"
+                  v-on:command="menuItemSelected($event)"
+                >
+                  <font-awesome-icon icon="star" />
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item
+                        v-for="ideaState in IdeaStates"
+                        :key="ideaState"
+                        :command="ideaState"
+                      >
+                        {{ $t(`enum.ideaState.${ideaState}`) }}
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
-      <div v-if="hasKeywords" class="idea-card__description">
+      <div v-if="hasKeywords && idea.description" class="card__content">
         {{ idea.description }}
       </div>
-      <img v-if="idea.image" :src="idea.image" width="200" />
-      <img v-if="idea.link" :src="idea.link" width="200" />
     </div>
-    <div v-if="isDeletable" class="idea-card__delete" @click="deleteIdea">
-      <font-awesome-icon icon="trash" />
-    </div>
-  </div>
+  </el-card>
 </template>
 
 <script lang="ts">
@@ -30,6 +73,7 @@ import {
   addError,
   clearErrors,
 } from '@/services/exception-service';
+import IdeaStates from '@/types/enum/IdeaStates';
 
 @Options({
   components: {},
@@ -37,11 +81,28 @@ import {
 })
 export default class IdeaCard extends Vue {
   @Prop() idea!: Idea;
-  @Prop({ default: true }) isDeletable!: boolean;
-  @Prop({ default: false }) customDelete!: boolean;
+  @Prop({ default: true }) isEditable!: boolean;
   @Prop({ default: false }) isSelectable!: boolean;
   @Prop({ default: false, reactive: true }) isSelected!: boolean;
   errors: string[] = [];
+
+  IdeaStates = IdeaStates;
+
+  get isNew(): boolean {
+    if (this.idea) return IdeaStates[this.idea.state] == IdeaStates.NEW;
+    return false;
+  }
+
+  get isInappropriate(): boolean {
+    if (this.idea)
+      return IdeaStates[this.idea.state] == IdeaStates.INAPPROPRIATE;
+    return false;
+  }
+
+  get isDuplicate(): boolean {
+    if (this.idea) return IdeaStates[this.idea.state] == IdeaStates.DUPLICATE;
+    return false;
+  }
 
   changeSelection(): void {
     if (this.isSelectable) {
@@ -54,11 +115,6 @@ export default class IdeaCard extends Vue {
   }
 
   async deleteIdea(): Promise<void> {
-    if (this.customDelete) {
-      this.$emit('ideaDeleted', this.idea.id);
-      return;
-    }
-
     clearErrors(this.errors);
     ideaService.deleteIdea(this.idea.id).then(
       () => {
@@ -69,49 +125,73 @@ export default class IdeaCard extends Vue {
       }
     );
   }
+
+  menuItemSelected(command: string): void {
+    switch (command) {
+      case 'edit':
+        break;
+      case 'delete':
+        this.deleteIdea();
+        break;
+      case 'state':
+        break;
+      case IdeaStates.NEW:
+      case IdeaStates.HANDLED:
+      case IdeaStates.DUPLICATE:
+      case IdeaStates.INAPPROPRIATE:
+        this.idea.state = command;
+        ideaService
+          .putIdea(this.idea.id, this.idea)
+          .then((idea) => (this.idea.state = idea.state));
+        break;
+    }
+  }
 }
 </script>
 
 <style lang="scss" scoped>
-@import '~@/assets/styles/icons.scss';
-
-.idea-card-content {
-  width: 100%;
-}
-
-.idea-card {
-  -webkit-column-break-inside: avoid;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: white;
-  border-radius: var(--border-radius-small);
-  padding: 1.2rem 1rem 1.2rem 1.4rem;
-  line-height: 1.2;
-  margin-bottom: 1rem;
-
-  &__idea {
-    font-weight: var(--font-weight-semibold);
+.card {
+  &__selected {
+    background-color: var(--color-blue);
   }
 
-  &__description {
+  &__new {
+    border-color: var(--el-color-warning);
+  }
+
+  &__inappropriate {
+    border-color: var(--el-color-error);
+  }
+
+  &__duplicate {
+    border-color: var(--color-mint);
+  }
+
+  &__content {
     color: var(--color-darkblue-light);
     margin-top: 0.5rem;
+    display: flex;
+    justify-content: space-between;
     word-break: break-word;
+    align-items: end;
+    text-align: justify;
   }
 
-  &__delete {
-    min-width: 18px;
-    margin-left: 0.5rem;
+  &__image {
+    width: 100%;
+    display: block;
+  }
+
+  &__menu {
+    color: var(--color-darkblue-light);
     cursor: pointer;
-
-    &:hover {
-      background-color: var(--color-red);
-    }
   }
 
-  &.selected {
-    background-color: var(--color-blue);
+  &__title {
+    font-weight: var(--font-weight-semibold);
+    align-items: start;
+    display: flex;
+    justify-content: space-between;
   }
 }
 </style>

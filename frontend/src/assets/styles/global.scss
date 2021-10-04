@@ -3,6 +3,7 @@
 @import '~@/assets/styles/breakpoints.scss';
 @import '~@/assets/styles/bulma.scss';
 @import '~@/assets/styles/third-party-components.scss';
+@import '~@/assets/styles/layout.scss';
 
 html {
   box-sizing: border-box;
@@ -229,7 +230,7 @@ body {
 
 .label {
   display: block;
-  font-weight: bold;
+  font-weight: var(--font-weight-semibold);
   margin-top: 1rem;
 }
 

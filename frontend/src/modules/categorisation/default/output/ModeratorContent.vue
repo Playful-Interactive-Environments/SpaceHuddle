@@ -1,5 +1,5 @@
 <template>
-  <header class="categorisation__header">
+  <header class="content_filter">
     <label for="orderType" class="heading heading--xs">{{
       $t('module.categorisation.default.moderatorContent.sortOrder')
     }}</label>
@@ -77,7 +77,7 @@
       </span>
     </template>
     <template v-slot:content>
-      <main class="categorisation__content">
+      <main class="layout__4columns">
         <draggable
           :id="orderGroup.category ? orderGroup.category.id : null"
           v-model="orderGroup.ideas"
@@ -95,7 +95,7 @@
               :key="element.id"
               v-model:is-selected="ideasSelection[element.id]"
               @ideaDeleted="getIdeas"
-              :is-deletable="false"
+              :is-editable="false"
               class="item"
             />
           </template>
@@ -357,35 +357,6 @@ export default class ModeratorContent extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.categorisation {
-  &__header {
-    padding: 0.5rem 1rem;
-    margin-bottom: 1rem;
-    border-radius: var(--border-radius);
-    background-color: var(--color-darkblue);
-    width: 100%;
-    display: table;
-
-    > * {
-      display: table-cell;
-    }
-
-    label {
-      width: 20%;
-    }
-
-    .heading {
-      color: white;
-    }
-  }
-
-  &__content {
-    width: 100%;
-    column-width: 22vw;
-    column-gap: 1rem;
-  }
-}
-
 .item {
   cursor: grab;
 }
