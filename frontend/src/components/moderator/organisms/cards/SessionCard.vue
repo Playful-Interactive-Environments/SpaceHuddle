@@ -16,7 +16,7 @@
 import { Prop } from 'vue-property-decorator';
 import { Vue } from 'vue-class-component';
 
-export default class Card extends Vue {
+export default class SessionCard extends Vue {
   @Prop({ default: [] }) errors!: string[];
 }
 </script>

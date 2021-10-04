@@ -31,7 +31,7 @@ import ModuleComponentType from '@/modules/ModuleComponentType';
 import { EventType } from '@/types/enum/EventType';
 import TaskStates from '@/types/enum/TaskStates';
 import TaskType from '@/types/enum/TaskType';
-import TimerSettings from '@/components/moderator/organisms/TimerSettings.vue';
+import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
 import {
   addError,
   clearErrors,

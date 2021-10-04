@@ -8,19 +8,19 @@
     >
       <template #title>
         <span class="el-dialog__title">{{
-          $t('moderator.organism.module.create.header')
+          $t('moderator.organism.settings.taskSettings.header')
         }}</span>
         <br />
         <br />
         <p>
-          {{ $t('moderator.organism.module.create.info') }}
+          {{ $t('moderator.organism.settings.taskSettings.info') }}
         </p>
       </template>
 
       <div>
         <form class="module-create__form">
           <label for="taskType" class="heading heading--xs">{{
-            $t('moderator.organism.module.create.taskType')
+            $t('moderator.organism.settings.taskSettings.taskType')
           }}</label>
           <select
             v-model="taskType"
@@ -43,7 +43,7 @@
             v-model="taskParameterValues"
           />
           <label for="moduleType" class="heading heading--xs">{{
-            $t('moderator.organism.module.create.moduleType')
+            $t('moderator.organism.settings.taskSettings.moduleType')
           }}</label>
           <div>
             <el-tag
@@ -108,15 +108,15 @@
           </Expand>
           <label for="taskTitle" class="heading heading--xs">{{
             taskType === 'BRAINSTORMING'
-              ? $t('moderator.organism.module.create.question')
-              : $t('moderator.organism.module.create.title')
+              ? $t('moderator.organism.settings.taskSettings.question')
+              : $t('moderator.organism.settings.taskSettings.title')
           }}</label>
           <input
             id="taskTitle"
             v-model="title"
             class="input input--fullwidth"
             :placeholder="
-              $t('moderator.organism.module.create.questionExample')
+              $t('moderator.organism.settings.taskSettings.questionExample')
             "
             @blur="context.$v.title.$touch()"
           />
@@ -127,7 +127,7 @@
           />
 
           <label for="description" class="heading heading--xs">{{
-            $t('moderator.organism.module.create.description')
+            $t('moderator.organism.settings.taskSettings.description')
           }}</label>
           <textarea
             id="description"
@@ -135,7 +135,7 @@
             class="textarea textarea--fullwidth"
             rows="3"
             :placeholder="
-              $t('moderator.organism.module.create.descriptionExample')
+              $t('moderator.organism.settings.taskSettings.descriptionExample')
             "
             @blur="context.$v.description.$touch"
           />
@@ -152,7 +152,7 @@
           class="btn btn--gradient btn--fullwidth"
           @click.prevent="saveModule"
         >
-          {{ $t('moderator.organism.module.create.submit') }}
+          {{ $t('moderator.organism.settings.taskSettings.submit') }}
         </button>
       </template>
     </el-dialog>
@@ -189,7 +189,7 @@ import { EventType } from '@/types/enum/EventType';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import Expand from '@/components/shared/atoms/Expand.vue';
 import { Module } from '@/types/api/Module';
-import ModuleCard from '@/components/shared/molecules/ModuleCard.vue';
+import ModuleCard from '@/components/moderator/organisms/cards/ModuleCard.vue';
 import ModuleItem from '@/components/shared/molecules/ModuleItem.vue';
 
 @Options({
@@ -219,7 +219,7 @@ import ModuleItem from '@/components/shared/molecules/ModuleItem.vue';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModalTaskCreate extends Vue {
+export default class TaskSettings extends Vue {
   @Prop({ default: false }) showModal!: boolean;
   @Prop({}) topicId!: string;
   @Prop({}) taskId!: string;

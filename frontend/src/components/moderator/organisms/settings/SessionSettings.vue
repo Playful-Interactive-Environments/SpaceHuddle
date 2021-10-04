@@ -2,24 +2,24 @@
   <el-dialog v-model="showDialog" :before-close="handleClose">
     <template #title>
       <span class="el-dialog__title">{{
-        $t('moderator.organism.session.create.header')
+        $t('moderator.organism.settings.sessionSettings.header')
       }}</span>
       <br />
       <br />
       <p>
-        {{ $t('moderator.organism.session.create.info') }}
+        {{ $t('moderator.organism.settings.sessionSettings.info') }}
       </p>
     </template>
 
     <form class="session-create__form">
       <label for="sessionTitle" class="heading heading--xs">{{
-        $t('moderator.organism.session.create.title')
+        $t('moderator.organism.settings.sessionSettings.title')
       }}</label>
       <input
         id="sessionTitle"
         v-model="title"
         class="input input--fullwidth"
-        :placeholder="$t('moderator.organism.session.create.titleExample')"
+        :placeholder="$t('moderator.organism.settings.sessionSettings.titleExample')"
         @blur="context.$v.title.$touch()"
       />
       <FormError
@@ -29,7 +29,7 @@
       />
 
       <label for="description" class="heading heading--xs">{{
-        $t('moderator.organism.session.create.description')
+        $t('moderator.organism.settings.sessionSettings.description')
       }}</label>
       <textarea
         id="description"
@@ -37,7 +37,7 @@
         class="textarea textarea--fullwidth"
         rows="3"
         :placeholder="
-          $t('moderator.organism.session.create.descriptionExample')
+          $t('moderator.organism.settings.sessionSettings.descriptionExample')
         "
         @blur="context.$v.description.$touch"
       />
@@ -48,12 +48,12 @@
       />
 
       <label class="heading heading--xs">{{
-          $t('moderator.organism.session.create.expirationDate')
+          $t('moderator.organism.settings.sessionSettings.expirationDate')
         }}</label>
       <el-date-picker
         v-model="expirationDate"
         type="date"
-        :placeholder="$t('moderator.organism.session.create.expirationDatePlaceholder')"
+        :placeholder="$t('moderator.organism.settings.sessionSettings.expirationDatePlaceholder')"
       >
       </el-date-picker>
       <FormError
@@ -63,19 +63,19 @@
       />
 
       <h3 class="session-create__topic heading heading--small">
-        {{ $t('moderator.organism.session.create.topics') }}
+        {{ $t('moderator.organism.settings.sessionSettings.topics') }}
       </h3>
       <p>
-        {{ $t('moderator.organism.session.create.topicsInfo') }}
+        {{ $t('moderator.organism.settings.sessionSettings.topicsInfo') }}
       </p>
       <label for="topic" class="heading heading--xs">{{
-        $t('moderator.organism.session.create.firstTopic')
+        $t('moderator.organism.settings.sessionSettings.firstTopic')
       }}</label>
       <input
         id="topic"
         v-model="topic"
         class="input input--fullwidth"
-        :placeholder="$t('moderator.organism.session.create.topicExample')"
+        :placeholder="$t('moderator.organism.settings.sessionSettings.topicExample')"
         @blur="context.$v.topic.$touch()"
       />
       <FormError
@@ -91,7 +91,7 @@
         class="btn btn--gradient btn--fullwidth"
         @click.prevent="saveSession"
       >
-        {{ $t('moderator.organism.session.create.submit') }}
+        {{ $t('moderator.organism.settings.sessionSettings.submit') }}
       </button>
     </template>
   </el-dialog>
@@ -135,7 +135,7 @@ import {
     },
   },
 })
-export default class ModalSessionCreate extends Vue {
+export default class SessionSettings extends Vue {
   @Prop({ default: false }) showModal!: boolean;
 
   title = '';

@@ -66,7 +66,7 @@ import Timer from '@/components/shared/atoms/Timer.vue';
 import ModuleShare from '@/components/moderator/molecules/ModuleShare.vue';
 import TaskType from '@/types/enum/TaskType';
 import TaskStates from '@/types/enum/TaskStates';
-import TimerSettings from '@/components/moderator/organisms/TimerSettings.vue';
+import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
 
 @Options({
   components: {

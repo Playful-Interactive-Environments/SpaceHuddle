@@ -40,7 +40,7 @@ import { Idea } from '@/types/api/Idea';
 import { Vote } from '@/types/api/Vote';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
+import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 
 @Options({
   components: {

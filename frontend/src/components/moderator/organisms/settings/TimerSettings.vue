@@ -2,11 +2,11 @@
   <el-dialog v-model="showSettings" width="80vw" :before-close="handleClose">
     <template #title>
       <span class="el-dialog__title">{{
-        $t('moderator.organism.timerSettings.header')
+        $t('moderator.organism.settings.timerSettings.header')
       }}</span>
     </template>
     <label class="heading heading--xs">{{
-      $t('moderator.organism.timerSettings.time')
+      $t('moderator.organism.settings.timerSettings.time')
     }}</label>
     <el-time-picker v-model="remindingTime" />
     <FormError
@@ -20,7 +20,7 @@
         class="btn btn--gradient btn--fullwidth"
         @click.prevent="saveTime"
       >
-        {{ $t('moderator.organism.timerSettings.submit') }}
+        {{ $t('moderator.organism.settings.timerSettings.submit') }}
       </button>
     </template>
   </el-dialog>

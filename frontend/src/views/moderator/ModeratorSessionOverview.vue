@@ -4,7 +4,7 @@
     <main class="container2 container2--spaced container2--fullheight-header">
       <h1>{{ $t('moderator.organism.session.overview.header') }}</h1>
       <div class="session-overview__session-container">
-        <Card v-for="session in sessions" :key="session.id">
+        <SessionCard v-for="session in sessions" :key="session.id">
           <template v-slot:date>
             {{ formatDate(session.creationDate) }}
           </template>
@@ -23,13 +23,13 @@
           <template v-slot:topics>
             <ModuleCount />
           </template>
-        </Card>
+        </SessionCard>
         <AddItem
           :text="$t('moderator.organism.session.overview.add')"
           :isColumn="true"
-          @addNew="showModalSessionCreate = true"
+          @addNew="showSettings = true"
         />
-        <ModalSessionCreate v-model:show-modal="showModalSessionCreate" />
+        <SessionSettings v-model:show-modal="showSettings" />
       </div>
     </main>
   </div>
@@ -40,9 +40,9 @@ import { Options, Vue } from 'vue-class-component';
 import { Session } from '@/types/api/Session';
 import { formatDate } from '@/utils/date';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
-import Card from '@/components/shared/atoms/Card.vue';
+import SessionCard from '@/components/moderator/organisms/cards/SessionCard.vue';
 import Header from '@/components/moderator/organisms/Header.vue';
-import ModalSessionCreate from '@/components/shared/molecules/ModalSessionCreate.vue';
+import SessionSettings from '@/components/moderator/organisms/settings/SessionSettings.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import * as sessionService from '@/services/session-service';
@@ -50,16 +50,16 @@ import * as sessionService from '@/services/session-service';
 @Options({
   components: {
     AddItem,
-    Card,
+    SessionCard,
     Header,
-    ModalSessionCreate,
+    SessionSettings,
     ModuleCount,
     SessionCode,
   },
 })
 export default class ModeratorSessionOverview extends Vue {
   sessions: Session[] = [];
-  showModalSessionCreate = false;
+  showSettings = false;
   errors: string[] = [];
 
   formatDate = formatDate;

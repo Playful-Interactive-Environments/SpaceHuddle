@@ -27,7 +27,7 @@ import { Vue, Options } from 'vue-class-component';
 import MenuBar from '@/components/participant/molecules/Menubar.vue';
 import SessionInfo from '@/components/participant/molecules/SessionInfo.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
-import TaskCard from '@/components/shared/molecules/TaskCard.vue';
+import TaskCard from '@/components/moderator/organisms/cards/TaskCard.vue';
 import TaskType from '@/types/enum/TaskType';
 import * as taskService from '@/services/task-service';
 import * as participantService from '@/services/participant-service';

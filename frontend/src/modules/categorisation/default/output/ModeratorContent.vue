@@ -120,7 +120,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
-import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
+import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import Expand from '@/components/shared/atoms/Expand.vue';
 import * as categorisationService from '@/services/categorisation-service';
 import { Category } from '@/types/api/Category';

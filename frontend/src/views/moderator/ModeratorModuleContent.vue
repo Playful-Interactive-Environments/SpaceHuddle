@@ -18,8 +18,8 @@
         <ModuleContentComponent :task-id="taskId" />
       </main>
     </div>
-    <ModalTaskCreate
-      v-model:show-modal="showModalTaskCreate"
+    <TaskSettings
+      v-model:show-modal="showSettings"
       :task-id="taskId"
       :key="componentLoadIndex"
     />
@@ -47,7 +47,7 @@ import * as taskService from '@/services/task-service';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
 import FormError from '@/components/shared/atoms/FormError.vue';
-import ModalTaskCreate from '@/components/shared/molecules/ModalTaskCreate.vue';
+import TaskSettings from '@/components/moderator/organisms/settings/TaskSettings.vue';
 import { EventType } from '@/types/enum/EventType';
 
 @Options({
@@ -55,7 +55,7 @@ import { EventType } from '@/types/enum/EventType';
     Sidebar,
     NavigationWithBack,
     FormError,
-    ModalTaskCreate,
+    TaskSettings,
     ModuleContentComponent: getEmptyComponent(),
   },
 })
@@ -69,7 +69,7 @@ export default class ModeratorModuleContent extends Vue {
   TaskType = TaskType;
   TaskStates = TaskStates;
   errors: string[] = [];
-  showModalTaskCreate = false;
+  showSettings = false;
 
   mounted(): void {
     this.loadDefaultModule();
@@ -136,7 +136,7 @@ export default class ModeratorModuleContent extends Vue {
   }
 
   async editTask(): Promise<void> {
-    this.showModalTaskCreate = true;
+    this.showSettings = true;
   }
 
   async deleteTask(): Promise<void> {

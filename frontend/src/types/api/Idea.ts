@@ -6,8 +6,8 @@ export interface Idea {
   timestamp: string;
   description: string;
   keywords: string;
-  image: string; //ignore at first?
-  link: string; //link to where??
+  image: string | null; //ignore at first?
+  link: string | null; //link to where??
   order: string;
   parameter: any;
 }

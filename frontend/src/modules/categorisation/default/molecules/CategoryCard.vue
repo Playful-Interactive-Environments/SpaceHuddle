@@ -86,7 +86,7 @@ import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import { Category } from '@/types/api/Category';
 import { Idea } from '@/types/api/Idea';
-import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
+import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as categorisationService from '@/services/categorisation-service';
 import ModalCategoryCreate from '@/modules/categorisation/default/molecules/ModalCategoryCreate.vue';
 

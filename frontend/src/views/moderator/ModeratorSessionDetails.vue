@@ -39,8 +39,8 @@
         </template>
       </TopicExpand>
     </main>
-    <ModalTaskCreate
-      v-model:show-modal="showModalTaskCreate"
+    <TaskSettings
+      v-model:show-modal="showSettings"
       :topic-id="addNewTopicId"
       @moduleCreated="getTopics"
     />
@@ -52,8 +52,8 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
-import ModalTaskCreate from '@/components/shared/molecules/ModalTaskCreate.vue';
-import TaskCard from '@/components/shared/molecules/TaskCard.vue';
+import TaskSettings from '@/components/moderator/organisms/settings/TaskSettings.vue';
+import TaskCard from '@/components/moderator/organisms/cards/TaskCard.vue';
 import Navigation from '@/components/moderator/molecules/Navigation.vue';
 import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
@@ -71,7 +71,7 @@ import { EventType } from '@/types/enum/EventType';
   components: {
     AddItem,
     draggable,
-    ModalTaskCreate,
+    TaskSettings,
     TaskCard,
     Navigation,
     TopicExpand,
@@ -84,7 +84,7 @@ export default class ModeratorSessionDetails extends Vue {
   session: Session | null = null;
   topics: Topic[] = [];
   publicScreenTaskId = '';
-  showModalTaskCreate = false;
+  showSettings = false;
   formatDate = formatDate;
   addNewTopicId = '';
   errors: string[] = [];
@@ -129,7 +129,7 @@ export default class ModeratorSessionDetails extends Vue {
 
   openModalModuleCreate(topicId: string): void {
     this.addNewTopicId = topicId;
-    this.showModalTaskCreate = true;
+    this.showSettings = true;
   }
 
   dragDone(topicIndex: number): void {

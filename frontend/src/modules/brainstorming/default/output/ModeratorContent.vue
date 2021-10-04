@@ -53,7 +53,7 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
-import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
+import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import Expand from '@/components/shared/atoms/Expand.vue';
 import {warn} from "element-plus/es/utils/error";

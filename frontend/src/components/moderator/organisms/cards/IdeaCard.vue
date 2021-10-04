@@ -61,6 +61,7 @@
       </div>
     </div>
   </el-card>
+  <IdeaSettings v-model:show-modal="showSettings" :idea="idea" />
 </template>
 
 <script lang="ts">
@@ -74,9 +75,10 @@ import {
   clearErrors,
 } from '@/services/exception-service';
 import IdeaStates from '@/types/enum/IdeaStates';
+import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
 
 @Options({
-  components: {},
+  components: { IdeaSettings },
   emits: ['ideaDeleted', 'update:isSelected'],
 })
 export default class IdeaCard extends Vue {
@@ -85,6 +87,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: false }) isSelectable!: boolean;
   @Prop({ default: false, reactive: true }) isSelected!: boolean;
   errors: string[] = [];
+  showSettings = false;
 
   IdeaStates = IdeaStates;
 
@@ -129,6 +132,7 @@ export default class IdeaCard extends Vue {
   menuItemSelected(command: string): void {
     switch (command) {
       case 'edit':
+        this.showSettings = true;
         break;
       case 'delete':
         this.deleteIdea();

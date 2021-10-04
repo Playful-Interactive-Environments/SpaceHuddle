@@ -17,7 +17,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import IdeaCard from '@/components/moderator/molecules/IdeaCard.vue';
+import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as ideaService from '@/services/idea-service';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
