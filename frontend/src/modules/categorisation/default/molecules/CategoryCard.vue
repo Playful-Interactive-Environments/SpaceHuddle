@@ -59,7 +59,10 @@
         style="height: unset"
       >
         <template #action v-if="category != null">
-          <font-awesome-icon icon="trash" v-on:click="removeIdea(idea.id)" />
+          <font-awesome-icon
+            icon="trash"
+            v-on:click="removeIdea(idea.id, $event)"
+          />
         </template>
       </IdeaCard>
     </main>
@@ -127,12 +130,13 @@ export default class CategoryCard extends Vue {
     this.$emit('categoryChanged');
   }
 
-  removeIdea(event: string): void {
+  removeIdea(ideaId: string, event: PointerEvent): void {
+    event.stopImmediatePropagation();
     categorisationService
-      .removeIdeasFromCategory(this.category.id, [event])
+      .removeIdeasFromCategory(this.category.id, [ideaId])
       .then((done) => {
         if (done) {
-          const index = this.ideas.findIndex((idea) => idea.id == event);
+          const index = this.ideas.findIndex((idea) => idea.id == ideaId);
           if (index) this.ideas.splice(index, 1);
           this.$emit('categoryChanged');
         }
