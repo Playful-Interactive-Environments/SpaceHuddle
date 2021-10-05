@@ -31,3 +31,32 @@
     color: white;
   }
 }
+
+
+.card {
+  &__content {
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    word-break: break-word;
+    align-items: end;
+    text-align: justify;
+  }
+
+  &__image {
+    width: 100%;
+    display: block;
+  }
+
+  &__menu {
+    color: var(--color-darkblue-light);
+    cursor: pointer;
+  }
+
+  &__title {
+    font-weight: var(--font-weight-semibold);
+    align-items: start;
+    display: flex;
+    justify-content: space-between;
+  }
+}

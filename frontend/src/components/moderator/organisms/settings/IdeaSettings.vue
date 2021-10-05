@@ -45,82 +45,7 @@
     <label class="heading heading--xs">{{
       $t('moderator.organism.settings.ideaSettings.image')
     }}</label>
-    <my-upload
-      id="upload"
-      @crop-success="imageUploadSuccess"
-      v-model="showUploadDialog"
-      :width="512"
-      :height="512"
-      img-format="png"
-      langType="en"
-      :no-square="true"
-      :no-circle="true"
-      :no-rotate="false"
-      :with-credentials="true"
-    ></my-upload>
-    <el-dialog v-model="showLinkInput">
-      <template #title>
-        <span class="el-dialog__title layout__level">
-          {{ $t('moderator.organism.settings.ideaSettings.link') }}
-        </span>
-      </template>
-      <span class="layout__level">
-        <input
-          id="link"
-          v-model="editLink"
-          class="input input--fullwidth"
-          :placeholder="
-            $t('moderator.organism.settings.ideaSettings.linkExample')
-          "
-          @blur="context.$v.editLink.$touch()"
-        />
-        <span style="font-size: 2rem; margin-left: 1rem">
-          <font-awesome-icon
-            icon="check-circle"
-            v-on:click="imageLinkSuccess"
-          />
-        </span>
-      </span>
-      <FormError
-        v-if="context.$v.editLink.$error"
-        :errors="context.$v.editLink.$errors"
-        :isSmall="true"
-      />
-    </el-dialog>
-    <div class="el-upload-list--picture-card">
-      <div class="el-upload-list__item">
-        <img
-          class="el-upload-list__item-thumbnail"
-          :src="image"
-          alt=""
-          v-if="image"
-        />
-        <img
-          class="el-upload-list__item-thumbnail"
-          :src="link"
-          alt=""
-          v-if="link"
-        />
-        <span class="el-upload-list__item-actions">
-          <span class="el-upload-list__item-delete" @click="editLinkInput">
-            <font-awesome-icon icon="share-alt" />
-          </span>
-          <span
-            class="el-upload-list__item-delete"
-            @click="showUploadDialog = true"
-          >
-            <font-awesome-icon icon="upload" />
-          </span>
-          <span
-            class="el-upload-list__item-delete"
-            @click="image = link = null"
-            v-if="image || link"
-          >
-            <font-awesome-icon icon="trash" />
-          </span>
-        </span>
-      </div>
-    </div>
+    <ImagePicker v-model:link="link" v-model:image="image" />
     <template #footer>
       <button
         type="submit"
@@ -142,11 +67,13 @@ import * as ideaService from '@/services/idea-service';
 import { Idea } from '@/types/api/Idea';
 
 import FormError from '@/components/shared/atoms/FormError.vue';
+import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 import myUpload from 'vue-image-crop-upload/upload-3.vue';
 
 @Options({
   components: {
     FormError,
+    ImagePicker,
     'my-upload': myUpload,
   },
   emits: ['update:showModal'],
@@ -157,9 +84,6 @@ import myUpload from 'vue-image-crop-upload/upload-3.vue';
     },
     description: {
       max: maxLength(255),
-    },
-    editLink: {
-      url,
     },
   },
 })
@@ -174,9 +98,6 @@ export default class IdeaSettings extends Vue {
   description = '';
   image: string | null = '';
   link: string | null = '';
-  editLink: string | null = '';
-  showUploadDialog = false;
-  showLinkInput = false;
 
   mounted(): void {
     this.reset();
@@ -194,12 +115,6 @@ export default class IdeaSettings extends Vue {
     this.description = this.idea.description;
     this.image = this.idea.image;
     this.link = this.idea.link;
-    this.editLink = '';
-  }
-
-  editLinkInput(): void {
-    this.showLinkInput = true;
-    this.editLink = this.link;
   }
 
   @Watch('showModal', { immediate: true })
@@ -223,21 +138,6 @@ export default class IdeaSettings extends Vue {
       $v: useVuelidate(),
     };
   });
-
-  imageUploadSuccess(imgDataUrl: string): void {
-    this.image = imgDataUrl;
-    this.link = null;
-  }
-
-  async imageLinkSuccess(): Promise<void> {
-    await this.context.$v.$reset();
-    await this.context.$v.$validate();
-    if (this.context.$v.$error) return;
-
-    this.image = null;
-    this.link = this.editLink;
-    this.showLinkInput = false;
-  }
 
   async save(): Promise<void> {
     await this.context.$v.$reset();

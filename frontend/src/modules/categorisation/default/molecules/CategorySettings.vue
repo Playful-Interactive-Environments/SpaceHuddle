@@ -2,24 +2,24 @@
   <el-dialog v-model="showDialog" :before-close="handleClose">
     <template #title>
       <span class="el-dialog__title">{{
-        $t('module.categorisation.default.create.header')
+        $t('module.categorisation.default.settings.header')
       }}</span>
       <br />
       <br />
       <p>
-        {{ $t('module.categorisation.default.create.info') }}
+        {{ $t('module.categorisation.default.settings.info') }}
       </p>
     </template>
 
     <form class="category-create__form">
       <label for="title" class="heading heading--xs">{{
-        $t('module.categorisation.default.create.title')
+        $t('module.categorisation.default.settings.title')
       }}</label>
       <input
         id="title"
         v-model="title"
         class="input input--fullwidth"
-        :placeholder="$t('module.categorisation.default.create.titleExample')"
+        :placeholder="$t('module.categorisation.default.settings.titleExample')"
         @blur="context.$v.title.$touch()"
       />
       <FormError
@@ -27,6 +27,33 @@
         :errors="context.$v.title.$errors"
         :isSmall="true"
       />
+      <label for="description" class="heading heading--xs">{{
+        $t('module.categorisation.default.settings.description')
+      }}</label>
+      <textarea
+        id="description"
+        class="textarea textarea--fullwidth"
+        :placeholder="
+          $t('module.categorisation.default.settings.descriptionExample')
+        "
+        ref="ideaTextfield"
+        rows="4"
+        contenteditable
+        v-model="description"
+        @blur="context.$v.description.$touch()"
+      ></textarea>
+      <FormError
+        v-if="context.$v.description.$error"
+        :errors="context.$v.description.$errors"
+        :isSmall="true"
+      />
+      <label class="heading heading--xs">{{
+        $t('module.categorisation.default.settings.image')
+      }}</label>
+      <ImagePicker v-model:link="link" v-model:image="image" />
+      <label class="heading heading--xs">{{
+        $t('module.categorisation.default.settings.color')
+      }}</label>
       <el-color-picker v-model="color"></el-color-picker>
     </form>
 
@@ -36,7 +63,7 @@
         class="btn btn--gradient btn--fullwidth"
         @click.prevent="saveCategory"
       >
-        {{ $t('module.categorisation.default.create.submit') }}
+        {{ $t('module.categorisation.default.settings.submit') }}
       </button>
     </template>
   </el-dialog>
@@ -49,6 +76,7 @@ import useVuelidate from '@vuelidate/core';
 import { maxLength, required } from '@vuelidate/validators';
 
 import FormError from '@/components/shared/atoms/FormError.vue';
+import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 
 import * as categorisationService from '@/services/categorisation-service';
 
@@ -61,10 +89,14 @@ import {
 @Options({
   components: {
     FormError,
+    ImagePicker,
   },
   validations: {
     title: {
       required,
+      max: maxLength(255),
+    },
+    description: {
       max: maxLength(255),
     },
   },
@@ -77,6 +109,9 @@ export default class CategorySettings extends Vue {
 
   defaultColor = '#1d2948';
   title = '';
+  description = '';
+  image: string | null = null;
+  link: string | null = null;
   color = this.defaultColor;
   errors: string[] = [];
 
@@ -91,6 +126,9 @@ export default class CategorySettings extends Vue {
     if (id) {
       categorisationService.getCategoryById(id).then((category) => {
         this.title = category.keywords;
+        this.description = category.description;
+        this.image = category.image;
+        this.link = category.link;
         if (category.parameter && category.parameter.color)
           this.color = category.parameter.color;
       });
@@ -112,6 +150,9 @@ export default class CategorySettings extends Vue {
 
   resetForm(): void {
     this.title = '';
+    this.description = '';
+    this.image = null;
+    this.link = null;
     this.color = this.defaultColor;
     this.$emit('update:categoryId', null);
   }
@@ -126,6 +167,9 @@ export default class CategorySettings extends Vue {
         categorisationService
           .postCategory(this.taskId, {
             keywords: this.title,
+            description: this.description,
+            image: this.image,
+            link: this.link,
             parameter: { color: this.color },
           })
           .then(
@@ -144,6 +188,9 @@ export default class CategorySettings extends Vue {
       categorisationService
         .putCategory(this.categoryId, {
           keywords: this.title,
+          description: this.description,
+          image: this.image,
+          link: this.link,
           parameter: { color: this.color },
         })
         .then(

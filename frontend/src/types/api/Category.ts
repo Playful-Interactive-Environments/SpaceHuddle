@@ -6,4 +6,6 @@ export interface Category {
   description: string;
   keywords: string;
   parameter: any;
+  image: string | null;
+  link: string | null;
 }

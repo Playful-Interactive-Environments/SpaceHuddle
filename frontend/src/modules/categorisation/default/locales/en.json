@@ -10,11 +10,16 @@
     "add": "Add category",
     "sortOrder": "order by"
   },
-  "create" : {
+  "settings" : {
     "header": "Add/Edit category",
     "info": "Give the category a name",
     "title": "Name",
     "titleExample": "test category",
+    "description": "description",
+    "descriptionExample": "",
+    "image": "image",
+    "link": "link",
+    "color": "color",
     "submit": "save category"
   }
 }

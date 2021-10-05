@@ -2,12 +2,12 @@
 
 export interface Idea {
   id: string;
-  state: string; //what are the states of an idea??
+  state: string;
   timestamp: string;
   description: string;
   keywords: string;
-  image: string | null; //ignore at first?
-  link: string | null; //link to where??
+  image: string | null;
+  link: string | null;
   order: string;
   parameter: any;
 }

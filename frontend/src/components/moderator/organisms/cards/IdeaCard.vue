@@ -11,7 +11,7 @@
     :body-style="{ padding: '0px' }"
   >
     <img v-if="idea.image" :src="idea.image" class="card__image" />
-    <img v-if="idea.link" :src="idea.link" class="card__image" />
+    <img v-if="idea.link && !idea.image" :src="idea.link" class="card__image" />
     <div style="padding: 14px">
       <div class="card__title">
         {{ hasKeywords ? idea.keywords : idea.description }}
@@ -177,29 +177,6 @@ export default class IdeaCard extends Vue {
 
   &__content {
     color: var(--color-darkblue-light);
-    margin-top: 0.5rem;
-    display: flex;
-    justify-content: space-between;
-    word-break: break-word;
-    align-items: end;
-    text-align: justify;
-  }
-
-  &__image {
-    width: 100%;
-    display: block;
-  }
-
-  &__menu {
-    color: var(--color-darkblue-light);
-    cursor: pointer;
-  }
-
-  &__title {
-    font-weight: var(--font-weight-semibold);
-    align-items: start;
-    display: flex;
-    justify-content: space-between;
   }
 }
 </style>

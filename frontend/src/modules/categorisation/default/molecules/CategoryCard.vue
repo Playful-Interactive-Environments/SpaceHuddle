@@ -1,38 +1,29 @@
 <template>
-  <div class="item">
-    <el-badge :value="ideas.length" class="item">
-      <el-card
-        :style="{
-          'background-color': categoryColor,
-          color: 'white',
-        }"
-        :body-style="{
-          'text-align': 'center',
-        }"
-        v-on:click="displayDetails = true"
-      >
-        <h2 class="heading heading--regular">
+  <el-badge :value="ideas.length" class="item">
+    <el-card
+      shadow="never"
+      :style="{
+        'background-color': categoryColor,
+        'border-color': categoryColor,
+        color: 'white',
+      }"
+      :body-style="{
+        padding: '0px',
+      }"
+      v-on:click="displayDetails = true"
+    >
+      <img v-if="categoryImage" :src="categoryImage" class="card__image" />
+      <img v-if="categoryLink && !categoryImage" :src="categoryLink" class="card__image" />
+      <div style="padding: 14px">
+        <div class="card__title">
           {{ categoryName }}
-        </h2>
-        <el-tooltip placement="top">
-          <template #content>
-            <div style="max-width: 50vw">
-              {{ categoryDescription }}
-            </div>
-          </template>
-          <p
-            style="
-              overflow: hidden;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-            "
-          >
-            {{ categoryDescription }}
-          </p>
-        </el-tooltip>
-      </el-card>
-    </el-badge>
-  </div>
+        </div>
+        <div v-if="categoryDescription" class="card__content">
+          {{ categoryDescription }}
+        </div>
+      </div>
+    </el-card>
+  </el-badge>
   <el-drawer
     v-model="displayDetails"
     modal-class="darkblue"
@@ -115,6 +106,16 @@ export default class CategoryCard extends Vue {
     return '';
   }
 
+  get categoryImage(): string | null {
+    if (this.category) return this.category.image;
+    return '';
+  }
+
+  get categoryLink(): string | null {
+    if (this.category) return this.category.link;
+    return '';
+  }
+
   get categoryColor(): string {
     if (this.category) return this.category.parameter.color;
     return 'var(--color-darkblue)';
@@ -177,12 +178,9 @@ export default class CategoryCard extends Vue {
   }
 }
 
+.el-card,
 .item {
   width: 100%;
-  height: 100%;
-}
-
-.el-card {
   height: 100%;
 }
 </style>
