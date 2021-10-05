@@ -91,7 +91,6 @@ import CategorySettings from '@/modules/categorisation/default/molecules/Categor
 export default class CategoryCard extends Vue {
   @Prop() category!: Category;
   @Prop() ideas!: Idea[];
-  @Prop({ default: false }) modelValue!: boolean;
 
   displayDetails = false;
   displayEditCategory = false;

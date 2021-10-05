@@ -78,15 +78,16 @@ export default class ParticipantOverview extends Vue {
   async getTopicsAndTasks(): Promise<void> {
     participantService
       .getTopicList(EndpointAuthorisationType.PARTICIPANT)
-      .then((queryResult) => {
-        this.topics = queryResult;
-        this.topics.forEach(async (topic) => {
-          taskService
+      .then(async (topics) => {
+        for (let i = 0; i < topics.length; i++) {
+          const topic = topics[i];
+          await taskService
             .getTaskList(topic.id, EndpointAuthorisationType.PARTICIPANT)
             .then((queryResult) => {
               topic.tasks = queryResult;
             });
-        });
+        }
+        this.topics = topics;
       });
   }
 

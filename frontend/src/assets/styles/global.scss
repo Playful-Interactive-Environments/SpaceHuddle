@@ -349,3 +349,14 @@ p {
 .pre-formatted {
   white-space: pre-wrap;
 }
+
+form {
+  display: flex;
+  flex-direction: column;
+
+  .input,
+  .select,
+  .textarea {
+    margin: 0 0 0.2rem;
+  }
+}

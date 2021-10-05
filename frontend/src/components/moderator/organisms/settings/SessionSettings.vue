@@ -11,7 +11,7 @@
       </p>
     </template>
 
-    <form class="session-create__form">
+    <form>
       <label for="sessionTitle" class="heading heading--xs">{{
         $t('moderator.organism.settings.sessionSettings.title')
       }}</label>
@@ -61,8 +61,8 @@
         :errors="context.$v.expirationDate.$errors"
         :isSmall="true"
       />
-
-      <h3 class="session-create__topic heading heading--small">
+      <el-divider></el-divider>
+      <h3 class="heading heading--small">
         {{ $t('moderator.organism.settings.sessionSettings.topics') }}
       </h3>
       <p>
@@ -216,24 +216,4 @@ export default class SessionSettings extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.session-create {
-  display: flex;
-  flex-direction: column;
-  padding: 0 1rem;
-  line-height: 1.2;
-
-  &__form {
-    display: flex;
-    flex-direction: column;
-
-    input,
-    textarea {
-      margin: 0 0 0.2rem;
-    }
-  }
-
-  &__topic {
-    margin-top: 1rem;
-  }
-}
 </style>

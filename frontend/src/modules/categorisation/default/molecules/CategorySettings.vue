@@ -11,7 +11,7 @@
       </p>
     </template>
 
-    <form class="category-create__form">
+    <form>
       <label for="title" class="heading heading--xs">{{
         $t('module.categorisation.default.settings.title')
       }}</label>
@@ -211,24 +211,4 @@ export default class CategorySettings extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.category-create {
-  display: flex;
-  flex-direction: column;
-  padding: 0 1rem;
-  line-height: 1.2;
-
-  &__form {
-    display: flex;
-    flex-direction: column;
-
-    input,
-    textarea {
-      margin: 0 0 0.2rem;
-    }
-  }
-
-  &__topic {
-    margin-top: 1rem;
-  }
-}
 </style>

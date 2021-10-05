@@ -132,8 +132,7 @@ export default class TaskCard extends Vue {
   justify-content: space-between;
   align-items: center;
   background-color: white;
-  border-radius: var(--border-radius);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius-xs);
   padding: 1.5rem 5rem 1.5rem 4.5rem;
   margin-left: 3rem;
 
@@ -164,7 +163,7 @@ export default class TaskCard extends Vue {
     bottom: 0;
     background-color: var(--color-mint);
     background-color: var(--module-color);
-    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    border-radius: 0 var(--border-radius-xs) var(--border-radius-xs) 0;
     display: flex;
     justify-content: center;
     align-items: center;

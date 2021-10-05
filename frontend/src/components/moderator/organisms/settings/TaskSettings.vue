@@ -18,7 +18,7 @@
       </template>
 
       <div>
-        <form class="module-create__form">
+        <form>
           <label for="taskType" class="heading heading--xs">{{
             $t('moderator.organism.settings.taskSettings.taskType')
           }}</label>
@@ -486,30 +486,4 @@ export default class TaskSettings extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.module-create {
-  display: flex;
-  flex-direction: column;
-  padding: 0 1rem;
-  line-height: 1.2;
-
-  &__form {
-    display: flex;
-    flex-direction: column;
-
-    input,
-    textarea {
-      margin: 0 0 0.2rem;
-    }
-  }
-
-  &__topic {
-    margin-top: 1rem;
-  }
-}
-
-.blog-card {
-  margin: 10px;
-  box-shadow: 0 0 10px rgb(0 0 0 / 10%);
-  height: calc(100% - 20px);
-}
 </style>

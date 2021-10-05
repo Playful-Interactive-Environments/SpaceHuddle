@@ -24,6 +24,8 @@ export default class SessionOverview extends Vue {
 
 <style lang="scss" scoped>
 .add {
+  background-color: unset;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -31,7 +33,7 @@ export default class SessionOverview extends Vue {
   gap: 0.5rem;
   border: 2px dashed var(--color-darkblue-light);
   color: var(--color-darkblue-light);
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius-xs);
   cursor: pointer;
   transition: background-color 0.2s, box-shadow 0.2s, border-color 0.2s;
 
