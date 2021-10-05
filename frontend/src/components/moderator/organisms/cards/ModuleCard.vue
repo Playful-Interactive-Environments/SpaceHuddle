@@ -1,6 +1,6 @@
 <template>
   <el-card
-    style="margin: 10px; height: calc(100% - 20px)"
+    shadow="never"
     body-style="text-align: center"
   >
     <h2 class="heading heading--regular">
