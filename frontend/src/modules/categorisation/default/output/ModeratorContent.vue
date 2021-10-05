@@ -7,7 +7,7 @@
       v-model="orderType"
       id="orderType"
       class="select select--fullwidth"
-      @change="getIdeas"
+      @change="getIdeas(true)"
     >
       <option v-for="type in SortOrderOptions" :key="type" :value="type">
         {{ $t(`enum.ideaSortOrder.${IdeaSortOrder[type]}`) }}
@@ -39,6 +39,59 @@
       </template>
     </draggable>
   </div>
+
+  <el-collapse v-model="openTabs">
+    <el-collapse-item
+      v-for="(item, key) in orderGroupContentSelection"
+      :key="key"
+      :name="key"
+    >
+      <template #title>
+        <span
+          v-if="item.category"
+          :style="{ color: item.category.parameter.color }"
+          class="layout__level"
+        >
+          {{ key.toUpperCase() }}
+        </span>
+        <span v-else class="layout__level">{{ key.toUpperCase() }}</span>
+        <span
+          role="button"
+          class="icon"
+          v-if="item.ideas.length > item.displayCount"
+          v-on:click="displayAll($event, item)"
+        >
+          <font-awesome-icon icon="ellipsis-h" />
+        </span>
+      </template>
+      <div class="layout__4columns">
+        <draggable
+          :id="item.category ? item.category.id : null"
+          v-model="item.ideas"
+          draggable=".item"
+          item-key="id"
+          group="idea"
+          @end="dragDone"
+        >
+          <template v-slot:item="{ element, index }">
+            <IdeaCard
+              :key="element.id"
+              v-if="index < item.displayCount"
+              :id="element.id"
+              :idea="element"
+              :is-selectable="true"
+              v-model:is-selected="ideasSelection[element.id]"
+              @ideaDeleted="getIdeas"
+              :is-editable="false"
+              class="item"
+            />
+          </template>
+        </draggable>
+      </div>
+    </el-collapse-item>
+  </el-collapse>
+
+  <!--
   <Expand
     v-for="(orderGroup, orderGroupKey) in orderGroupContentSelection"
     :key="orderGroupKey"
@@ -103,6 +156,7 @@
       </main>
     </template>
   </Expand>
+  -->
   <AddItem
     :text="$t('module.categorisation.default.moderatorContent.add')"
     @addNew="openCategorySettings"
@@ -137,11 +191,13 @@ import CategoryCard from '@/modules/categorisation/default/molecules/CategoryCar
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 
 interface CategoryContent {
-  [name: string]: {
-    ideas: Idea[];
-    category: Category | null;
-    displayCount: number;
-  };
+  ideas: Idea[];
+  category: Category | null;
+  displayCount: number;
+}
+
+interface CategoryContentList {
+  [name: string]: CategoryContent;
 }
 
 @Options({
@@ -164,8 +220,9 @@ export default class ModeratorContent extends Vue {
   categories: Category[] = [];
   ideas: Idea[] = [];
   ideasSelection: { [name: string]: boolean } = {};
-  orderGroupContentCards: CategoryContent = {};
-  orderGroupContentSelection: CategoryContent = {};
+  orderGroupContentCards: CategoryContentList = {};
+  orderGroupContentSelection: CategoryContentList = {};
+  openTabs: string[] = [];
 
   newCategory = {
     keywords: '',
@@ -179,7 +236,7 @@ export default class ModeratorContent extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getIdeas();
+    this.getIdeas(true);
   }
 
   get SortOrderOptions(): Array<keyof typeof IdeaSortOrder> {
@@ -190,6 +247,12 @@ export default class ModeratorContent extends Vue {
     return ideas.slice(0, count);
   }
 
+  displayAll(event: PointerEvent, item: CategoryContent): boolean {
+    event.cancelBubble = true;
+    item.displayCount = 1000;
+    return false;
+  }
+
   async getTask(): Promise<void> {
     if (this.taskId) {
       await taskService.getTaskById(this.taskId).then((task) => {
@@ -198,11 +261,12 @@ export default class ModeratorContent extends Vue {
     }
   }
 
-  async getIdeas(): Promise<void> {
+  async getIdeas(reloadTabState = false): Promise<void> {
+    const oldKeys = Object.keys(this.orderGroupContentSelection);
     const filter = (
-      list: CategoryContent,
+      list: CategoryContentList,
       getUndefined = true
-    ): CategoryContent => {
+    ): CategoryContentList => {
       return Object.fromEntries(
         Object.entries(list).filter(([key, v]) => {
           if (!getUndefined) return key != 'undefined';
@@ -264,6 +328,12 @@ export default class ModeratorContent extends Vue {
 
       this.orderGroupContentCards = filter(orderGroupContent, false);
       this.orderGroupContentSelection = filter(orderGroupContent, true);
+    }
+    const newKeys = Object.keys(this.orderGroupContentSelection);
+    if (reloadTabState) this.openTabs = newKeys;
+    else {
+      const addedKeys = newKeys.filter((item) => oldKeys.indexOf(item) < 0);
+      this.openTabs = this.openTabs.concat(addedKeys);
     }
   }
 
