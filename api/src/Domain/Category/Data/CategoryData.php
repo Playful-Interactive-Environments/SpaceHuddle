@@ -39,6 +39,20 @@ class CategoryData
     public ?string $keywords;
 
     /**
+     * Image that describes the idea.
+     * @var string|null
+     * @OA\Property(type="string", format="binary")
+     */
+    public ?string $image;
+
+    /**
+     * Link to a resource that describes the idea.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $link;
+
+    /**
      * Variable json parameters depending on the task type.
      * @var object|null
      * @OA\Property(type="object", format="json")
@@ -56,6 +70,8 @@ class CategoryData
         $this->description = $reader->findString("description");
         $this->keywords = $reader->findString("keywords");
         $this->timestamp = $reader->findString("timestamp");
+        $this->image = $reader->findString("image");
+        $this->link = $reader->findString("link");
         $this->parameter = (object)json_decode($reader->findString("parameter"));
     }
 }
