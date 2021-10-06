@@ -46,18 +46,10 @@ class IdeaData extends IdeaAbstract
     public ?string $order;
 
     /**
-     * Category name.
-     * @var string|null
-     * @OA\Property()
+     * Category.
+     * @OA\Property(ref="#/components/schemas/CategoryInfoData")
      */
-    public ?string $category;
-
-    /**
-     * Category id.
-     * @var string|null
-     * @OA\Property()
-     */
-    public ?string $category_id;
+    public ?CategoryInfoData $category;
 
     /**
      * Creates a new idea.
@@ -71,8 +63,9 @@ class IdeaData extends IdeaAbstract
         $this->state = strtoupper($reader->findString("state"));
         $this->timestamp = $reader->findString("timestamp");
         $this->count = $reader->findInt("count");
-        $this->category = $reader->findString("category");
-        $this->category_id = $reader->findString("category_id");
+        if ($reader->findString("category_id")) {
+            $this->category = new CategoryInfoData($data);
+        }
         $this->avatar = new AvatarData($data);
     }
 }

@@ -104,7 +104,8 @@ class IdeaRepository implements RepositoryInterface
                 "participant.symbol",
                 "participant.color",
                 "hierarchy.category_idea_id as category_id",
-                "category.keywords AS category",
+                "COALESCE(category.keywords, 'zzz') AS category",
+                "category.parameter AS category_parameter",
                 "COUNT(*) AS count"
             ]);
         } else {
@@ -244,7 +245,7 @@ class IdeaRepository implements RepositoryInterface
                     break;
                 case IdeaSortOrder::CATEGORISATION:
                     if ($refId) {
-                        array_push($orderList, 'category_idea_id');
+                        array_push($orderList, 'category');
                     }
                     break;
             }
@@ -266,8 +267,11 @@ class IdeaRepository implements RepositoryInterface
         if ($orderColumn) {
             foreach ($resultList as $resultItem) {
                 if (strtolower($orderType) == IdeaSortOrder::CATEGORISATION) {
-                    $column = "category";
-                    $orderContent = $resultItem->$column;
+                    if (property_exists($resultItem, "category") && isset($resultItem->category)) {
+                        $orderContent = $resultItem->category->name;
+                    } else {
+                        $orderContent = "undefined";
+                    }
                 } elseif (sizeof($orderColumn) == 1) {
                     $column = $orderColumn[0];
                     $orderContent = $resultItem->$column;
