@@ -95,6 +95,7 @@
       :no-circle="true"
       :no-rotate="false"
       :with-credentials="true"
+      ref="upload"
     ></my-upload>
     <img :src="imgDataUrl" />
   </ParticipantModuleDefaultContainer>
@@ -236,6 +237,7 @@ export default class Participant extends Vue {
 
   cropSuccess(imgDataUrl: string): void {
     this.imgDataUrl = imgDataUrl;
+    (this.$refs.upload as any).setStep(1);
   }
 }
 </script>
