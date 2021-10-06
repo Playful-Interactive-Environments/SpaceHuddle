@@ -3,7 +3,7 @@ export enum ConnectState {
   FAILED = 'Failed',
 }
 
-interface Avatar {
+export interface Avatar {
   color: string;
   symbol: string;
 }

@@ -1,5 +1,5 @@
 <template>
-  <header class="content_filter">
+  <FilterSection>
     <label for="orderType" class="heading heading--xs">{{
       $t('module.categorisation.default.moderatorContent.sortOrder')
     }}</label>
@@ -13,7 +13,7 @@
         {{ $t(`enum.ideaSortOrder.${IdeaSortOrder[type]}`) }}
       </option>
     </select>
-  </header>
+  </FilterSection>
   <div class="columns is-multiline is-mobile">
     <draggable
       class="column"
@@ -47,22 +47,16 @@
       :name="key"
     >
       <template #title>
-        <span
-          v-if="item.category"
-          :style="{ color: item.category.parameter.color }"
-          class="layout__level"
-        >
-          {{ key.toUpperCase() }}
-        </span>
-        <span v-else class="layout__level">{{ key.toUpperCase() }}</span>
-        <span
-          role="button"
-          class="icon"
-          v-if="item.ideas.length > item.displayCount"
-          v-on:click="displayAll($event, item)"
-        >
-          <font-awesome-icon icon="ellipsis-h" />
-        </span>
+        <CollapseTitle :text="key" :color="item.color">
+          <span
+            role="button"
+            class="icon"
+            v-if="item.ideas.length > item.displayCount"
+            v-on:click="item.displayCount = 1000"
+          >
+            <font-awesome-icon icon="ellipsis-h" />
+          </span>
+        </CollapseTitle>
       </template>
       <div class="layout__4columns">
         <draggable
@@ -189,11 +183,28 @@ import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import CategorySettings from '@/modules/categorisation/default/molecules/CategorySettings.vue';
 import CategoryCard from '@/modules/categorisation/default/molecules/CategoryCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
+import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
 
-interface CategoryContent {
+class CategoryContent {
   ideas: Idea[];
   category: Category | null;
   displayCount: number;
+
+  constructor(
+    category: Category | null = null,
+    ideas: Idea[] = [],
+    displayCount = 3
+  ) {
+    this.ideas = ideas;
+    this.category = category;
+    this.displayCount = displayCount;
+  }
+
+  get color(): string | null {
+    if (this.category) return this.category.parameter.color;
+    return null;
+  }
 }
 
 interface CategoryContentList {
@@ -207,6 +218,8 @@ interface CategoryContentList {
     AddItem,
     CategorySettings,
     CategoryCard,
+    CollapseTitle,
+    FilterSection,
     draggable,
   },
 })
@@ -247,12 +260,6 @@ export default class ModeratorContent extends Vue {
     return ideas.slice(0, count);
   }
 
-  displayAll(event: PointerEvent, item: CategoryContent): boolean {
-    event.cancelBubble = true;
-    item.displayCount = 1000;
-    return false;
-  }
-
   async getTask(): Promise<void> {
     if (this.taskId) {
       await taskService.getTaskById(this.taskId).then((task) => {
@@ -282,19 +289,15 @@ export default class ModeratorContent extends Vue {
       if ('undefined' in this.orderGroupContentSelection)
         displayCount =
           this.orderGroupContentSelection['undefined'].displayCount;
-      const orderGroupContent = {
-        undefined: { ideas: [], category: null, displayCount: displayCount },
+      const orderGroupContent: CategoryContentList = {
+        undefined: new CategoryContent(null, [], displayCount),
       };
       this.categories.forEach((category) => {
         displayCount = 3;
         if (category.keywords in this.orderGroupContentCards)
           displayCount =
             this.orderGroupContentCards[category.keywords].displayCount;
-        orderGroupContent[category.keywords] = {
-          ideas: [],
-          category: category,
-          displayCount: displayCount,
-        };
+        orderGroupContent[category.keywords] = new CategoryContent(category, [], displayCount);
       });
 
       if (this.task) {
@@ -313,11 +316,7 @@ export default class ModeratorContent extends Vue {
               if (ideaItem.order) {
                 const orderGroup = orderGroupContent[ideaItem.order];
                 if (!orderGroup) {
-                  orderGroupContent[ideaItem.order] = {
-                    ideas: [ideaItem],
-                    category: null,
-                    displayCount: 3,
-                  };
+                  orderGroupContent[ideaItem.order] = new CategoryContent(null, [ideaItem]);
                 } else {
                   orderGroup.ideas.push(ideaItem);
                 }

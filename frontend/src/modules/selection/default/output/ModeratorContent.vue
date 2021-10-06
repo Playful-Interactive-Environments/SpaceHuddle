@@ -1,5 +1,71 @@
 <template>
-  <Expand>
+  <FilterSection>
+    <label for="orderType" class="heading heading--xs">{{
+        $t('module.selection.default.moderatorContent.sortOrder')
+      }}</label>
+    <select
+        v-model="orderType"
+        id="orderType"
+        class="select select--fullwidth"
+        @change="getIdeas(true)"
+    >
+      <option
+          v-for="type in SortOrderOptions"
+          :key="type.orderType"
+          :value="
+          type.ref ? `${type.orderType}&refId=${type.ref.id}` : type.orderType
+        "
+      >
+        <span>
+          {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
+        </span>
+        <span v-if="type.ref"> - {{ type.ref.name }} </span>
+      </option>
+    </select>
+  </FilterSection>
+  <el-collapse v-model="openTabsSelection">
+    <el-collapse-item key="selection" name="selection">
+      <template #title>
+        <CollapseTitle
+          :text="$t('module.selection.default.moderatorContent.selection')"
+        >
+          <span
+            role="button"
+            class="icon"
+            v-if="selection.length > displayCount"
+            v-on:click="displayCount = 1000"
+          >
+            <font-awesome-icon icon="ellipsis-h" />
+          </span>
+        </CollapseTitle>
+      </template>
+
+      <div class="layout__4columns">
+        <draggable
+          key="selection"
+          id="selection"
+          v-model="selection"
+          draggable=".item"
+          item-key="id"
+          group="idea"
+          @end="dragDone"
+        >
+          <template v-slot:item="{ element, index }">
+            <IdeaCard
+              :key="element.id"
+              v-if="index < displayCount"
+              :id="element.id"
+              :idea="element"
+              :is-selectable="false"
+              :is-editable="false"
+              class="item"
+            />
+          </template>
+        </draggable>
+      </div>
+    </el-collapse-item>
+  </el-collapse>
+  <!--<Expand>
     <template v-slot:title>
       {{ $t('module.selection.default.moderatorContent.selection') }}
     </template>
@@ -23,32 +89,60 @@
         />
       </main>
     </template>
-  </Expand>
-  <header class="content_filter">
-    <label for="orderType" class="heading heading--xs">{{
-      $t('module.selection.default.moderatorContent.sortOrder')
-    }}</label>
-    <select
-      v-model="orderType"
-      id="orderType"
-      class="select select--fullwidth"
-      @change="getIdeas"
+  </Expand>-->
+  <el-collapse v-model="openTabs">
+    <el-collapse-item
+      v-for="(item, key) in orderGroupContent"
+      :key="key"
+      :name="key"
     >
-      <option
-        v-for="type in SortOrderOptions"
-        :key="type.orderType"
-        :value="type.ref ? `${type.orderType}&refId=${type.ref.id}` : type.orderType"
-      >
-        <span>
-          {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
-        </span>
-        <span v-if="type.ref">
-          - {{ type.ref.name }}
-        </span>
-      </option>
-    </select>
-  </header>
-  <Expand v-for="(item, key) in orderGroupContent" :key="key">
+      <template #title>
+        <CollapseTitle :text="key" :avatar="item.avatar" :color="item.color">
+          <span
+            role="button"
+            class="icon"
+            v-if="item.ideas.length > item.displayCount"
+            v-on:click="item.displayCount = 1000"
+          >
+            <font-awesome-icon icon="ellipsis-h" />
+          </span>
+        </CollapseTitle>
+      </template>
+      <div class="layout__4columns">
+        <draggable
+          :id="key"
+          v-model="item.ideas"
+          draggable=".item"
+          item-key="id"
+          group="idea"
+          @end="dragDone"
+        >
+          <template v-slot:item="{ element, index }">
+            <IdeaCard
+              :key="element.id"
+              v-if="index < item.displayCount"
+              :id="element.id"
+              :idea="element"
+              :is-selectable="false"
+              :is-editable="false"
+              class="item"
+            />
+          </template>
+        </draggable>
+
+        <!--<IdeaCard
+          :idea="idea"
+          v-for="(idea, index) in item.ideas"
+          :key="index"
+          :is-editable="false"
+          :is-selectable="true"
+          v-model:is-selected="ideasSelectionAdd[idea.id]"
+        />-->
+      </div>
+    </el-collapse-item>
+  </el-collapse>
+
+  <!--<Expand v-for="(item, key) in orderGroupContent" :key="key">
     <template v-slot:title>{{ key.toUpperCase() }}</template>
     <template v-slot:content>
       <main class="layout__4columns">
@@ -62,7 +156,7 @@
         />
       </main>
     </template>
-  </Expand>
+  </Expand>-->
 </template>
 
 <script lang="ts">
@@ -79,13 +173,20 @@ import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import * as selectionService from '@/services/selection-service';
 import { EventType } from '@/types/enum/EventType';
-import SnackbarType from '@/types/enum/SnackbarType';
 import TaskType from '@/types/enum/TaskType';
+import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
+import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
+import draggable from 'vuedraggable';
+import { OrderGroupList } from '@/types/api/OrderGroup';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
     IdeaCard,
     Expand,
+    CollapseTitle,
+    FilterSection,
+    draggable,
   },
 })
 
@@ -95,13 +196,17 @@ export default class ModeratorContent extends Vue {
   task: Task | null = null;
   ideas: Idea[] = [];
   selection: Idea[] = [];
-  orderGroupContent: { [name: string]: Idea[] } = {};
-  ideasSelectionAdd: { [name: string]: boolean } = {};
-  ideasSelectionRemove: { [name: string]: boolean } = {};
+  orderGroupContent: OrderGroupList = {};
+  //ideasSelectionAdd: { [name: string]: boolean } = {};
+  //ideasSelectionRemove: { [name: string]: boolean } = {};
   readonly intervalTime = 10000;
   interval!: any;
   orderType = this.SortOrderOptions[0].orderType;
   categoryTasks: Task[] = [];
+  openTabs: string[] = [];
+  openTabsSelection: string[] = ['selection'];
+  displayCount = 3;
+  isDragging = false;
 
   IdeaSortOrder = IdeaSortOrder;
 
@@ -121,7 +226,7 @@ export default class ModeratorContent extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getIdeas();
+    this.getIdeas(true);
   }
 
   async getTask(): Promise<void> {
@@ -137,7 +242,10 @@ export default class ModeratorContent extends Vue {
     }
   }
 
-  async getIdeas(): Promise<void> {
+  async getIdeas(reloadTabState = false): Promise<void> {
+    if (this.isDragging) return;
+
+    const oldKeys = Object.keys(this.orderGroupContent);
     if (this.taskId) {
       if (!this.task) await this.getTask();
       if (this.task) {
@@ -145,13 +253,27 @@ export default class ModeratorContent extends Vue {
           .getIdeasForSelection(this.task.parameter.selectionId)
           .then((ideas) => {
             this.selection = ideas;
-            ideas.forEach((ideaItem) => {
+            /*ideas.forEach((ideaItem) => {
               if (!this.ideasSelectionRemove[ideaItem.id])
                 this.ideasSelectionRemove[ideaItem.id] = false;
-            });
+            });*/
           });
         const selectedIds: string[] = this.selection.map((idea) => idea.id);
+
         await ideaService
+          .getOrderGroups(
+            this.task.parameter.brainstormingTaskId,
+            this.orderType,
+            null,
+            EndpointAuthorisationType.MODERATOR,
+            this.orderGroupContent,
+            (idea: Idea) => !selectedIds.includes(idea.id)
+          )
+          .then((result) => {
+            this.orderGroupContent = result.oderGroups;
+            this.ideas = result.ideas;
+          });
+        /*await ideaService
           .getIdeasForTask(
             this.task.parameter.brainstormingTaskId,
             this.orderType
@@ -162,23 +284,37 @@ export default class ModeratorContent extends Vue {
             ideas
               .filter((idea) => !selectedIds.includes(idea.id))
               .forEach((ideaItem) => {
-                if (!this.ideasSelectionAdd[ideaItem.id])
-                  this.ideasSelectionAdd[ideaItem.id] = false;
+                //if (!this.ideasSelectionAdd[ideaItem.id])
+                //  this.ideasSelectionAdd[ideaItem.id] = false;
                 if (ideaItem.order) {
                   const orderGroup = this.orderGroupContent[ideaItem.order];
                   if (!orderGroup) {
-                    this.orderGroupContent[ideaItem.order] = [ideaItem];
+                    let color = null;
+                    if (ideaItem.category)
+                      color = ideaItem.category.parameter.color;
+                    this.orderGroupContent[ideaItem.order] = {
+                      ideas: [ideaItem],
+                      avatar: ideaItem.avatar,
+                      color: color,
+                      displayCount: 3,
+                    };
                   } else {
-                    orderGroup.push(ideaItem);
+                    orderGroup.ideas.push(ideaItem);
                   }
                 }
               });
-          });
+          });*/
       }
+    }
+    const newKeys = Object.keys(this.orderGroupContent);
+    if (reloadTabState) this.openTabs = newKeys;
+    else {
+      const addedKeys = newKeys.filter((item) => oldKeys.indexOf(item) < 0);
+      this.openTabs = this.openTabs.concat(addedKeys);
     }
   }
 
-  async addSelectedToSelection(): Promise<void> {
+  /*async addSelectedToSelection(): Promise<void> {
     if (this.task && this.task.parameter && this.task.parameter.selectionId) {
       const selection: string[] = [];
       for (let [ideaId, isSelected] of Object.entries(this.ideasSelectionAdd)) {
@@ -226,7 +362,7 @@ export default class ModeratorContent extends Vue {
         });
       }
     }
-  }
+  }*/
 
   async mounted(): Promise<void> {
     this.startIdeaInterval();
@@ -244,6 +380,26 @@ export default class ModeratorContent extends Vue {
 
   unmounted(): void {
     clearInterval(this.interval);
+  }
+
+  /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/
+  async dragDone(event: any): Promise<void> {
+    this.isDragging = true;
+    if (this.task && this.task.parameter && this.task.parameter.selectionId) {
+      if (event.to.id == 'selection') {
+        await selectionService.addIdeasToSelection(
+          this.task.parameter.selectionId,
+          [event.item.id]
+        );
+      } else if (event.from.id == 'selection') {
+        await selectionService.removeIdeasFromSelection(
+          this.task.parameter.selectionId,
+          [event.item.id]
+        );
+      }
+    }
+    this.isDragging = false;
+    await this.getIdeas();
   }
 }
 </script>

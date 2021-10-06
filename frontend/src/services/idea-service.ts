@@ -7,6 +7,7 @@ import {
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Idea } from '@/types/api/Idea';
+import {OrderGroupList} from "@/types/api/OrderGroup";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -67,4 +68,47 @@ export const getIdeasForTopic = async (
     [],
     authHeaderType
   );
+};
+
+export const getOrderGroups = async (
+  taskId: string,
+  orderType: string | null = null,
+  refId: string | null = null,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  actualOrderGroupList: OrderGroupList = {},
+  filter: (Idea) => boolean = (Idea) => {
+    return true;
+  }
+): Promise<{ ideas: Idea[]; oderGroups: OrderGroupList }> => {
+  const orderGroupList = {};
+  let ideaList: Idea[] = [];
+  await getIdeasForTask(taskId, orderType, refId, authHeaderType).then(
+    (ideas) => {
+      ideaList = ideas;
+      ideas
+        .filter((idea) => filter(idea))
+        .forEach((ideaItem) => {
+          if (ideaItem.order) {
+            const orderGroup = orderGroupList[ideaItem.order];
+            if (!orderGroup) {
+              let displayCount = 3;
+              if (ideaItem.order in actualOrderGroupList)
+                displayCount =
+                  actualOrderGroupList[ideaItem.order].displayCount;
+              let color = null;
+              if (ideaItem.category) color = ideaItem.category.parameter.color;
+              orderGroupList[ideaItem.order] = {
+                ideas: [ideaItem],
+                avatar: ideaItem.avatar,
+                color: color,
+                displayCount: displayCount,
+              };
+            } else {
+              orderGroup.ideas.push(ideaItem);
+            }
+          }
+        });
+    }
+  );
+  return { ideas: ideaList, oderGroups: orderGroupList };
 };

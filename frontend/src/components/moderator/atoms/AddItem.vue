@@ -16,7 +16,7 @@ import { Prop } from 'vue-property-decorator';
 @Options({
   components: {},
 })
-export default class SessionOverview extends Vue {
+export default class AddItem extends Vue {
   @Prop({ default: 'Add' }) text!: string;
   @Prop({ default: false }) isColumn!: boolean;
 }

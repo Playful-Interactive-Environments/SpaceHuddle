@@ -1,5 +1,5 @@
 <template>
-  <header class="content_filter">
+  <FilterSection>
     <label for="orderType" class="heading heading--xs">{{
       $t('module.brainstorming.default.moderatorContent.sortOrder')
     }}</label>
@@ -13,7 +13,7 @@
         {{ $t(`enum.ideaSortOrder.${IdeaSortOrder[type]}`) }}
       </option>
     </select>
-  </header>
+  </FilterSection>
   <el-collapse v-model="openTabs">
     <el-collapse-item
       v-for="(item, key) in orderGroupContent"
@@ -21,12 +21,21 @@
       :name="key"
     >
       <template #title>
-        <span class="layout__level>">{{ key.toUpperCase() }}</span>
+        <CollapseTitle :text="key" :avatar="item.avatar">
+          <span
+            role="button"
+            class="icon"
+            v-if="item.ideas.length > item.displayCount"
+            v-on:click="item.displayCount = 1000"
+          >
+            <font-awesome-icon icon="ellipsis-h" />
+          </span>
+        </CollapseTitle>
       </template>
       <div class="layout__4columns">
         <IdeaCard
           :idea="idea"
-          v-for="(idea, index) in item"
+          v-for="(idea, index) in item.ideas.slice(0, item.displayCount)"
           :key="index"
           @ideaDeleted="getIdeas()"
         />
@@ -56,12 +65,17 @@ import * as ideaService from '@/services/idea-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import Expand from '@/components/shared/atoms/Expand.vue';
-import {warn} from "element-plus/es/utils/error";
+import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
+import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
+import { OrderGroupList } from '@/types/api/OrderGroup';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
     IdeaCard,
     Expand,
+    CollapseTitle,
+    FilterSection,
   },
 })
 
@@ -69,7 +83,7 @@ import {warn} from "element-plus/es/utils/error";
 export default class ModeratorContent extends Vue {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];
-  orderGroupContent: { [name: string]: Idea[] } = {};
+  orderGroupContent: OrderGroupList = {};
   readonly intervalTime = 10000;
   interval!: any;
   orderType = this.SortOrderOptions[0];
@@ -90,20 +104,16 @@ export default class ModeratorContent extends Vue {
     const oldKeys = Object.keys(this.orderGroupContent);
     if (this.taskId) {
       await ideaService
-        .getIdeasForTask(this.taskId, this.orderType)
-        .then((ideas) => {
-          this.orderGroupContent = {};
-          this.ideas = ideas;
-          ideas.forEach((ideaItem) => {
-            if (ideaItem.order) {
-              const orderGroup = this.orderGroupContent[ideaItem.order];
-              if (!orderGroup) {
-                this.orderGroupContent[ideaItem.order] = [ideaItem];
-              } else {
-                orderGroup.push(ideaItem);
-              }
-            }
-          });
+        .getOrderGroups(
+          this.taskId,
+          this.orderType,
+          null,
+          EndpointAuthorisationType.MODERATOR,
+          this.orderGroupContent
+        )
+        .then((result) => {
+          this.orderGroupContent = result.oderGroups;
+          this.ideas = result.ideas;
         });
     }
     const newKeys = Object.keys(this.orderGroupContent);
@@ -128,5 +138,4 @@ export default class ModeratorContent extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
