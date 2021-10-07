@@ -11,6 +11,7 @@
     :no-circle="true"
     :no-rotate="false"
     :with-credentials="true"
+    ref="upload"
   ></my-upload>
   <LinkSettings v-model:show-modal="showLinkInput" v-model:link="editLink" />
   <div class="el-upload-list--picture-card">
@@ -112,6 +113,7 @@ export default class ImagePicker extends Vue {
     this.$emit('update:link', null);
     this.$emit('update:image', imgDataUrl);
     this.editLink = null;
+    (this.$refs.upload as any).setStep(1);
   }
 }
 </script>
