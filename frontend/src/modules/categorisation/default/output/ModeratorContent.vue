@@ -9,8 +9,17 @@
       class="select select--fullwidth"
       @change="getIdeas(true)"
     >
-      <option v-for="type in SortOrderOptions" :key="type" :value="type">
-        {{ $t(`enum.ideaSortOrder.${IdeaSortOrder[type]}`) }}
+      <option
+        v-for="type in sortOrderOptions"
+        :key="type.orderType"
+        :value="
+          type.ref ? `${type.orderType}&refId=${type.ref.id}` : type.orderType
+        "
+      >
+        <span>
+          {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
+        </span>
+        <span v-if="type.ref"> - {{ type.ref.name }} </span>
       </option>
     </select>
   </FilterSection>
@@ -73,9 +82,7 @@
               v-if="index < item.displayCount"
               :id="element.id"
               :idea="element"
-              :is-selectable="true"
-              v-model:is-selected="ideasSelection[element.id]"
-              @ideaDeleted="getIdeas"
+              :is-selectable="false"
               :is-editable="false"
               class="item"
             />
@@ -84,73 +91,6 @@
       </div>
     </el-collapse-item>
   </el-collapse>
-
-  <!--
-  <Expand
-    v-for="(orderGroup, orderGroupKey) in orderGroupContentSelection"
-    :key="orderGroupKey"
-  >
-    <template v-slot:title>
-      <span
-        v-if="orderGroup.category"
-        :style="{ color: orderGroup.category.parameter.color }"
-      >
-        {{ orderGroupKey.toUpperCase() }}
-      </span>
-      <span v-else>{{ orderGroupKey.toUpperCase() }}</span>
-    </template>
-    <template v-slot:icons>
-      <span
-        role="button"
-        class="icon"
-        v-if="orderGroup.ideas.length > orderGroup.displayCount"
-        v-on:click="orderGroup.displayCount = 1000"
-      >
-        <font-awesome-icon icon="ellipsis-h" />
-      </span>
-      <span v-if="orderGroupKey !== 'undefined'">
-        <span
-          class="icon"
-          v-on:click="addSelectedToCategory(orderGroup.category.id)"
-        >
-          <font-awesome-icon icon="plus" />
-        </span>
-        <span class="icon" v-on:click="editCategory(orderGroup.category.id)">
-          <font-awesome-icon icon="pen" />
-        </span>
-        <span class="icon" v-on:click="deleteCategory(orderGroup.category.id)">
-          <font-awesome-icon icon="trash" />
-        </span>
-      </span>
-    </template>
-    <template v-slot:content>
-      <main class="layout__4columns">
-        <draggable
-          :id="orderGroup.category ? orderGroup.category.id : null"
-          v-model="orderGroup.ideas"
-          draggable=".item"
-          item-key="id"
-          group="idea"
-          @end="dragDone"
-        >
-          <template v-slot:item="{ element, index }">
-            <IdeaCard
-              :key="element.id"
-              v-if="index < orderGroup.displayCount"
-              :id="element.id"
-              :idea="element"
-              :is-selectable="true"
-              v-model:is-selected="ideasSelection[element.id]"
-              @ideaDeleted="getIdeas"
-              :is-editable="false"
-              class="item"
-            />
-          </template>
-        </draggable>
-      </main>
-    </template>
-  </Expand>
-  -->
   <AddItem
     :text="$t('module.categorisation.default.moderatorContent.add')"
     @addNew="openCategorySettings"
@@ -177,28 +117,21 @@ import * as taskService from '@/services/task-service';
 import { IdeaSortOrderCategorisation } from '@/types/enum/IdeaSortOrder';
 import { Idea } from '@/types/api/Idea';
 import { Task } from '@/types/api/Task';
-import { EventType } from '@/types/enum/EventType';
-import SnackbarType from '@/types/enum/SnackbarType';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import CategorySettings from '@/modules/categorisation/default/molecules/CategorySettings.vue';
 import CategoryCard from '@/modules/categorisation/default/molecules/CategoryCard.vue';
-import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
+import { OrderGroupList, SortOrderOption } from '@/types/api/OrderGroup';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 class CategoryContent {
   ideas: Idea[];
-  category: Category | null;
-  displayCount: number;
+  category: Category;
 
-  constructor(
-    category: Category | null = null,
-    ideas: Idea[] = [],
-    displayCount = 3
-  ) {
+  constructor(category: Category, ideas: Idea[] = []) {
     this.ideas = ideas;
     this.category = category;
-    this.displayCount = displayCount;
   }
 
   get color(): string | null {
@@ -232,10 +165,10 @@ export default class ModeratorContent extends Vue {
   task: Task | null = null;
   categories: Category[] = [];
   ideas: Idea[] = [];
-  ideasSelection: { [name: string]: boolean } = {};
   orderGroupContentCards: CategoryContentList = {};
-  orderGroupContentSelection: CategoryContentList = {};
+  orderGroupContentSelection: OrderGroupList = {};
   openTabs: string[] = [];
+  isDragging = false;
 
   newCategory = {
     keywords: '',
@@ -244,89 +177,84 @@ export default class ModeratorContent extends Vue {
   readonly intervalTime = 10000;
   interval!: any;
 
-  IdeaSortOrder = IdeaSortOrder;
-  orderType = this.SortOrderOptions[0];
+  sortOrderOptions: SortOrderOption[] = [];
+  orderType = '';
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.getIdeas(true);
   }
 
-  get SortOrderOptions(): Array<keyof typeof IdeaSortOrder> {
-    return Object.keys(IdeaSortOrder) as Array<keyof typeof IdeaSortOrder>;
-  }
-
-  filterIdeas(ideas: Idea[], count: number): Idea[] {
-    return ideas.slice(0, count);
-  }
-
   async getTask(): Promise<void> {
     if (this.taskId) {
       await taskService.getTaskById(this.taskId).then((task) => {
         this.task = task;
+        ideaService.getSortOrderOptions(task.topicId).then((options) => {
+          this.sortOrderOptions = options;
+          if (options.length > 0) this.orderType = options[0].orderType;
+        });
       });
     }
   }
 
   async getIdeas(reloadTabState = false): Promise<void> {
+    if (this.isDragging) return;
+
     const oldKeys = Object.keys(this.orderGroupContentSelection);
-    const filter = (
-      list: CategoryContentList,
-      getUndefined = true
-    ): CategoryContentList => {
-      return Object.fromEntries(
-        Object.entries(list).filter(([key, v]) => {
-          if (!getUndefined) return key != 'undefined';
-          return key == 'undefined';
-        })
-      );
-    };
 
     if (this.taskId) {
       if (!this.task) await this.getTask();
       await this.getCategories();
-      let displayCount = 3;
-      if ('undefined' in this.orderGroupContentSelection)
-        displayCount =
-          this.orderGroupContentSelection['undefined'].displayCount;
-      const orderGroupContent: CategoryContentList = {
-        undefined: new CategoryContent(null, [], displayCount),
-      };
+      const orderGroupContent: CategoryContentList = {};
       this.categories.forEach((category) => {
-        displayCount = 3;
-        if (category.keywords in this.orderGroupContentCards)
-          displayCount =
-            this.orderGroupContentCards[category.keywords].displayCount;
-        orderGroupContent[category.keywords] = new CategoryContent(category, [], displayCount);
+        orderGroupContent[category.keywords] = new CategoryContent(
+          category,
+          []
+        );
       });
 
       if (this.task) {
+        let categoryOrder = `[${IdeaSortOrderCategorisation},${this.orderType}]`;
+        if (
+          !this.orderType ||
+          this.orderType.startsWith(IdeaSortOrderCategorisation)
+        )
+          categoryOrder = IdeaSortOrderCategorisation;
         await ideaService
           .getIdeasForTask(
             this.task.parameter.brainstormingTaskId,
-            `[${IdeaSortOrderCategorisation},${this.orderType}]`,
+            categoryOrder,
             this.taskId
           )
           .then((ideas) => {
             this.ideas = ideas;
-            ideas.forEach((ideaItem) => {
-              if (!this.ideasSelection[ideaItem.id])
-                this.ideasSelection[ideaItem.id] = false;
-              if (!ideaItem.order) ideaItem.order = 'undefined';
-              if (ideaItem.order) {
-                const orderGroup = orderGroupContent[ideaItem.order];
-                if (!orderGroup) {
-                  orderGroupContent[ideaItem.order] = new CategoryContent(null, [ideaItem]);
-                } else {
-                  orderGroup.ideas.push(ideaItem);
+            ideas
+              .filter((ideaItem) => ideaItem.category)
+              .forEach((ideaItem) => {
+                if (ideaItem.order) {
+                  const orderGroup = orderGroupContent[ideaItem.order];
+                  if (orderGroup) {
+                    orderGroup.ideas.push(ideaItem);
+                  }
                 }
-              }
-            });
+              });
+          });
+
+        await ideaService
+          .getOrderGroups(
+            this.task.parameter.brainstormingTaskId,
+            this.orderType,
+            this.taskId,
+            EndpointAuthorisationType.MODERATOR,
+            this.orderGroupContentSelection,
+            (idea: Idea) => !idea.category
+          )
+          .then((result) => {
+            this.orderGroupContentSelection = result.oderGroups;
           });
       }
 
-      this.orderGroupContentCards = filter(orderGroupContent, false);
-      this.orderGroupContentSelection = filter(orderGroupContent, true);
+      this.orderGroupContentCards = orderGroupContent;
     }
     const newKeys = Object.keys(this.orderGroupContentSelection);
     if (reloadTabState) this.openTabs = newKeys;
@@ -346,59 +274,12 @@ export default class ModeratorContent extends Vue {
     }
   }
 
-  async getIntervalContent(): Promise<void> {
-    await this.getIdeas();
-  }
-
-  async submitCategory(): Promise<void> {
-    if (this.taskId) {
-      await categorisationService
-        .postCategory(this.taskId, this.newCategory)
-        .then(() => {
-          this.getIdeas();
-        });
-    }
-  }
-
-  async addSelectedToCategory(categoryId: string): Promise<void> {
-    const selection: string[] = [];
-    for (let [ideaId, isSelected] of Object.entries(this.ideasSelection)) {
-      if (isSelected) {
-        selection.push(ideaId);
-        this.ideasSelection[ideaId] = false;
-      }
-    }
-    if (selection.length > 0) {
-      await categorisationService
-        .addIdeasToCategory(categoryId, selection)
-        .then(() => {
-          this.getIdeas();
-        });
-    } else {
-      this.eventBus.emit(EventType.SHOW_SNACKBAR, {
-        type: SnackbarType.ERROR,
-        message: 'error.vuelidate.noSelection',
-      });
-    }
-  }
-
-  async editCategory(categoryId: string): Promise<void> {
-    this.editCategoryId = categoryId;
-    this.showCategorySettings = true;
-  }
-
-  async deleteCategory(categoryId: string): Promise<void> {
-    await categorisationService.deleteCategory(categoryId).then(() => {
-      this.getIdeas();
-    });
-  }
-
   async mounted(): Promise<void> {
     this.startIdeaInterval();
   }
 
   startIdeaInterval(): void {
-    this.interval = setInterval(this.getIntervalContent, this.intervalTime);
+    this.interval = setInterval(this.getIdeas, this.intervalTime);
   }
 
   unmounted(): void {
@@ -412,6 +293,7 @@ export default class ModeratorContent extends Vue {
 
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/
   async dragDone(event: any): Promise<void> {
+    this.isDragging = true;
     if (event.to.id) {
       await categorisationService.addIdeasToCategory(event.to.id, [
         event.item.id,
@@ -421,6 +303,8 @@ export default class ModeratorContent extends Vue {
         event.item.id,
       ]);
     }
+    await this.getIdeas();
+    this.isDragging = false;
   }
 }
 </script>
@@ -428,10 +312,6 @@ export default class ModeratorContent extends Vue {
 <style lang="scss" scoped>
 .item {
   cursor: grab;
-}
-
-.column {
-  margin: 0.5rem;
 }
 
 .icon {

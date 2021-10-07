@@ -12,8 +12,18 @@
       }"
       v-on:click="displayDetails = true"
     >
-      <img v-if="categoryImage" :src="categoryImage" class="card__image" />
-      <img v-if="categoryLink && !categoryImage" :src="categoryLink" class="card__image" />
+      <img
+        v-if="categoryImage"
+        :src="categoryImage"
+        class="card__image"
+        alt=""
+      />
+      <img
+        v-if="categoryLink && !categoryImage"
+        :src="categoryLink"
+        class="card__image"
+        alt=""
+      />
       <div style="padding: 14px">
         <div class="card__title">
           {{ categoryName }}

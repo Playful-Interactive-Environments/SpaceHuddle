@@ -1,5 +1,6 @@
 import { Idea } from '@/types/api/Idea';
 import { Avatar } from '@/types/api/Participant';
+import { Task } from '@/types/api/Task';
 
 export interface OrderGroup {
   ideas: Idea[];
@@ -10,4 +11,9 @@ export interface OrderGroup {
 
 export interface OrderGroupList {
   [name: string]: OrderGroup;
+}
+
+export interface SortOrderOption {
+  orderType: string;
+  ref: Task | null;
 }

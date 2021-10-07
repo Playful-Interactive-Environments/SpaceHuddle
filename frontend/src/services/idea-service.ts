@@ -7,7 +7,13 @@ import {
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Idea } from '@/types/api/Idea';
-import {OrderGroupList} from "@/types/api/OrderGroup";
+import { OrderGroupList, SortOrderOption } from '@/types/api/OrderGroup';
+import { Task } from '@/types/api/Task';
+import IdeaSortOrder, {
+  IdeaSortOrderCategorisation,
+} from '@/types/enum/IdeaSortOrder';
+import * as taskService from '@/services/task-service';
+import TaskType from '@/types/enum/TaskType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -70,6 +76,62 @@ export const getIdeasForTopic = async (
   );
 };
 
+export const getSortOrderOptions = async (
+  topicId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<SortOrderOption[]> => {
+  const result: SortOrderOption[] = Object.keys(IdeaSortOrder).map(
+    (orderType) => {
+      return { orderType: orderType.toLowerCase(), ref: null };
+    }
+  );
+
+  await taskService.getTaskList(topicId, authHeaderType).then((tasks) => {
+    const categoryTasks = tasks.filter(
+      (task) => task.taskType.toLowerCase() == TaskType.CATEGORISATION
+    );
+    if (categoryTasks) {
+      categoryTasks.forEach((task) => {
+        result.push({ orderType: IdeaSortOrderCategorisation, ref: task });
+      });
+    }
+  });
+  return result;
+};
+
+export const convertToOrderGroups = (
+  ideas: Idea[],
+  actualOrderGroupList: OrderGroupList = {},
+  filter: (Idea) => boolean = (Idea) => {
+    return true;
+  }
+): OrderGroupList => {
+  const orderGroupList = {};
+  ideas
+    .filter((idea) => filter(idea))
+    .forEach((ideaItem) => {
+      if (ideaItem.order) {
+        const orderGroup = orderGroupList[ideaItem.order];
+        if (!orderGroup) {
+          let displayCount = 3;
+          if (ideaItem.order in actualOrderGroupList)
+            displayCount = actualOrderGroupList[ideaItem.order].displayCount;
+          let color = null;
+          if (ideaItem.category) color = ideaItem.category.parameter.color;
+          orderGroupList[ideaItem.order] = {
+            ideas: [ideaItem],
+            avatar: ideaItem.avatar,
+            color: color,
+            displayCount: displayCount,
+          };
+        } else {
+          orderGroup.ideas.push(ideaItem);
+        }
+      }
+    });
+  return orderGroupList;
+};
+
 export const getOrderGroups = async (
   taskId: string,
   orderType: string | null = null,
@@ -80,34 +142,16 @@ export const getOrderGroups = async (
     return true;
   }
 ): Promise<{ ideas: Idea[]; oderGroups: OrderGroupList }> => {
-  const orderGroupList = {};
+  let orderGroupList = {};
   let ideaList: Idea[] = [];
   await getIdeasForTask(taskId, orderType, refId, authHeaderType).then(
     (ideas) => {
       ideaList = ideas;
-      ideas
-        .filter((idea) => filter(idea))
-        .forEach((ideaItem) => {
-          if (ideaItem.order) {
-            const orderGroup = orderGroupList[ideaItem.order];
-            if (!orderGroup) {
-              let displayCount = 3;
-              if (ideaItem.order in actualOrderGroupList)
-                displayCount =
-                  actualOrderGroupList[ideaItem.order].displayCount;
-              let color = null;
-              if (ideaItem.category) color = ideaItem.category.parameter.color;
-              orderGroupList[ideaItem.order] = {
-                ideas: [ideaItem],
-                avatar: ideaItem.avatar,
-                color: color,
-                displayCount: displayCount,
-              };
-            } else {
-              orderGroup.ideas.push(ideaItem);
-            }
-          }
-        });
+      orderGroupList = convertToOrderGroups(
+        ideas,
+        actualOrderGroupList,
+        filter
+      );
     }
   );
   return { ideas: ideaList, oderGroups: orderGroupList };

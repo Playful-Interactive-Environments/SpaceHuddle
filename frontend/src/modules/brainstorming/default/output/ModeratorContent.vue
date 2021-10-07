@@ -42,19 +42,6 @@
       </div>
     </el-collapse-item>
   </el-collapse>
-  <!--<Expand v-for="(item, key) in orderGroupContent" :key="key">
-    <template v-slot:title>{{ key.toUpperCase() }}</template>
-    <template v-slot:content>
-      <main class="layout__4columns">
-        <IdeaCard
-          :idea="idea"
-          v-for="(idea, index) in item"
-          :key="index"
-          @ideaDeleted="getIdeas"
-        />
-      </main>
-    </template>
-  </Expand>-->
 </template>
 
 <script lang="ts">
