@@ -33,7 +33,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import * as votingService from '@/services/voting-service';
 import { VoteResult } from '@/types/api/Vote';
@@ -54,6 +54,11 @@ export default class ModeratorContent extends Vue {
   };
   readonly intervalTime = 10000;
   interval!: any;
+
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    this.getVotes();
+  }
 
   get resultData(): any {
     this.votes.map((vote) => vote.idea.keywords);
