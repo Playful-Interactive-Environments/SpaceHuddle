@@ -1,27 +1,27 @@
 <template>
   <div class="overlay">
     <MenuBar />
-    <div
-      class="tabs is-fullwidth is-centered"
+    <el-tabs
+      :stretch="false"
       v-if="task && task.modules.length > 1"
+      v-model="moduleName"
+      @tab-click="(tab) => moduleNameClick(tab.paneName)"
     >
-      <ul>
-        <li
-          v-for="module in task.modules"
-          :key="module.name"
-          :class="moduleName === module.name ? 'is-active' : ''"
-        >
-          <a v-on:click="moduleNameClick(module.name)">
-            <span class="icon" v-if="module.icon">
-              <font-awesome-icon :icon="module.icon" />
-            </span>
-            <span>
-              {{ $t(`module.${taskType}.${module.name}.description.title`) }}
-            </span>
-          </a>
-        </li>
-      </ul>
-    </div>
+      <el-tab-pane
+        v-for="module in task.modules"
+        :key="module.name"
+        :name="module.name"
+      >
+        <template #label>
+          <span class="icon" v-if="module.icon">
+            <font-awesome-icon :icon="module.icon" />
+          </span>
+          <span class="text">
+            {{ $t(`module.${taskType}.${module.name}.description.title`) }}
+          </span>
+        </template>
+      </el-tab-pane>
+    </el-tabs>
   </div>
   <ParticipantModuleComponent
     :task-id="taskId"

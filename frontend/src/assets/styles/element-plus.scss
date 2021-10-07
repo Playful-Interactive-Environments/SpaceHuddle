@@ -25,9 +25,27 @@ $--colors: (
                 "base": #1d2948,
         ),
 );
+
+$--border-width-base: 1px !default;
+
+$--border-color: (
+        'base': var(--color-gray),
+        'light': var(--color-gray-inactive),
+        'lighter': #ebeef5,
+        'extra-light': #f2f6fc,
+);
+
 /* icon font path, required */
 $--font-path: '~element-plus/lib/theme-chalk/fonts';
 
+$--font-size: (
+        "extra-large": 20pt,
+        "large": 18pt,
+        "medium": 16pt,
+        "base": 14pt,
+        "small": 13pt,
+        "extra-small": 12pt,
+);
 
 @import "~element-plus/packages/theme-chalk/src/index";
 
@@ -247,5 +265,28 @@ $--font-path: '~element-plus/lib/theme-chalk/fonts';
                 &::-webkit-scrollbar {
                         display: none;
                 }
+        }
+}
+
+.el-tabs {
+        &__item {
+                color: var(--color-gray-inactive);
+                padding: 0 0.3rem;
+
+                .icon {
+                        margin-right: 0.5em;
+                        margin-left: 1em;
+                }
+                .text {
+                        margin-right: 0.7em;
+                }
+        }
+
+        &__item.is-active {
+                color: white;
+        }
+
+        &__active-bar {
+                background-color: white;
         }
 }
