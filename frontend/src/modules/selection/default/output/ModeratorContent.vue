@@ -7,7 +7,7 @@
       v-model="orderType"
       id="orderType"
       class="select select--fullwidth"
-      @change="getIdeas(true)"
+      @change="getCollapseContent(true)"
     >
       <option
         v-for="type in sortOrderOptions"
@@ -115,7 +115,6 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import Expand from '@/components/shared/atoms/Expand.vue';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import * as selectionService from '@/services/selection-service';
@@ -125,13 +124,14 @@ import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
 import draggable from 'vuedraggable';
 import { OrderGroupList, SortOrderOption } from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { reloadCollapseContent } from '@/services/gui-service';
+import { DefaultIdeaSortOrder } from '@/types/enum/IdeaSortOrder';
 
 const SELECTION_KEY = 'selection';
 
 @Options({
   components: {
     IdeaCard,
-    Expand,
     CollapseTitle,
     FilterSection,
     draggable,
@@ -154,11 +154,11 @@ export default class ModeratorContent extends Vue {
   displayCount = 3;
   isDragging = false;
   sortOrderOptions: SortOrderOption[] = [];
-  orderType = '';
+  orderType: string = DefaultIdeaSortOrder;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getIdeas(true);
+    this.getCollapseContent(true);
   }
 
   async getTask(): Promise<void> {
@@ -173,10 +173,18 @@ export default class ModeratorContent extends Vue {
     }
   }
 
-  async getIdeas(reloadTabState = false): Promise<void> {
-    if (this.isDragging) return;
+  async getCollapseContent(reloadTabState = false): Promise<void> {
+    reloadCollapseContent(
+      this.openTabs,
+      Object.keys(this.orderGroupContent),
+      this.getIdeas,
+      reloadTabState
+    ).then((tabs) => (this.openTabs = tabs));
+  }
 
-    const oldKeys = Object.keys(this.orderGroupContent);
+  async getIdeas(): Promise<string[]> {
+    if (this.isDragging) return Object.keys(this.orderGroupContent);
+
     if (this.taskId) {
       if (!this.task) await this.getTask();
       if (this.task) {
@@ -202,12 +210,7 @@ export default class ModeratorContent extends Vue {
           });
       }
     }
-    const newKeys = Object.keys(this.orderGroupContent);
-    if (reloadTabState) this.openTabs = newKeys;
-    else {
-      const addedKeys = newKeys.filter((item) => oldKeys.indexOf(item) < 0);
-      this.openTabs = this.openTabs.concat(addedKeys);
-    }
+    return Object.keys(this.orderGroupContent);
   }
 
   async mounted(): Promise<void> {
@@ -216,12 +219,12 @@ export default class ModeratorContent extends Vue {
     this.eventBus.off(EventType.CHANGE_SETTINGS);
     this.eventBus.on(EventType.CHANGE_SETTINGS, async () => {
       await this.getTask();
-      await this.getIdeas();
+      await this.getCollapseContent();
     });
   }
 
   startIdeaInterval(): void {
-    this.interval = setInterval(this.getIdeas, this.intervalTime);
+    this.interval = setInterval(this.getCollapseContent, this.intervalTime);
   }
 
   unmounted(): void {
@@ -245,7 +248,7 @@ export default class ModeratorContent extends Vue {
       }
     }
     this.isDragging = false;
-    await this.getIdeas();
+    await this.getCollapseContent();
   }
 }
 </script>

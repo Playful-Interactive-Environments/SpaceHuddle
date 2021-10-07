@@ -122,6 +122,7 @@ $--font-path: '~element-plus/lib/theme-chalk/fonts';
 
 .el-tag {
         margin-right: 10px;
+        margin-bottom: 10px;
 }
 
 .el-drawer {
@@ -176,11 +177,75 @@ $--font-path: '~element-plus/lib/theme-chalk/fonts';
         --el-collapse-header-background-color: unset;
         --el-collapse-content-background-color: unset;
         --el-collapse-header-font-size: large;
+        margin-bottom: 2rem;
 }
 
 .el-collapse-item {
         &__header {
                 font-weight: var(--font-weight-semibold);
                 padding-left: 1rem;
+        }
+
+        &__wrap {
+                overflow: unset;
+        }
+}
+
+.public-screen .el-collapse-item {
+        &__header {
+                background-color: var(--color-transparent);
+        }
+
+        &__content {
+                padding: 1rem 0;
+        }
+}
+
+.participant.el-collapse {
+        border: unset;
+}
+
+.participant .el-collapse-item {
+        &__header {
+                padding: 1rem 2rem;
+                background-color: unset;
+                color: white;
+        }
+
+        &__content {
+                display: flex;
+                overflow-x: scroll;
+                overflow-y: visible;
+                padding: 1rem 2rem;
+                -ms-overflow-style: none; /* IE and Edge */
+                scrollbar-width: none; /* Firefox */
+
+                &::-webkit-scrollbar {
+                        display: none;
+                }
+        }
+
+        &__wrap {
+                border: unset;
+        }
+}
+
+.participant_with_background .el-collapse-item {
+        &__header {
+                padding: 1rem 2rem;
+        }
+
+        &__content {
+                background-color: var(--color-transparent-light);
+                display: flex;
+                overflow-x: scroll;
+                overflow-y: visible;
+                padding: 1rem 2rem;
+                -ms-overflow-style: none; /* IE and Edge */
+                scrollbar-width: none; /* Firefox */
+
+                &::-webkit-scrollbar {
+                        display: none;
+                }
         }
 }

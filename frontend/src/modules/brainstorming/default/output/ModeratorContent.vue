@@ -7,7 +7,7 @@
       v-model="orderType"
       id="orderType"
       class="select select--fullwidth"
-      @change="getIdeas(true)"
+      @change="getCollapseContent(true)"
     >
       <option v-for="type in SortOrderOptions" :key="type" :value="type">
         {{ $t(`enum.ideaSortOrder.${IdeaSortOrder[type]}`) }}
@@ -37,7 +37,7 @@
           :idea="idea"
           v-for="(idea, index) in item.ideas.slice(0, item.displayCount)"
           :key="index"
-          @ideaDeleted="getIdeas()"
+          @ideaDeleted="getCollapseContent()"
         />
       </div>
     </el-collapse-item>
@@ -50,17 +50,18 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
-import Expand from '@/components/shared/atoms/Expand.vue';
+import IdeaSortOrder, {
+  DefaultIdeaSortOrder,
+} from '@/types/enum/IdeaSortOrder';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
 import { OrderGroupList } from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { reloadCollapseContent } from '@/services/gui-service';
 
 @Options({
   components: {
     IdeaCard,
-    Expand,
     CollapseTitle,
     FilterSection,
   },
@@ -73,7 +74,7 @@ export default class ModeratorContent extends Vue {
   orderGroupContent: OrderGroupList = {};
   readonly intervalTime = 10000;
   interval!: any;
-  orderType = this.SortOrderOptions[0];
+  orderType = DefaultIdeaSortOrder;
   openTabs: string[] = [];
 
   IdeaSortOrder = IdeaSortOrder;
@@ -84,11 +85,19 @@ export default class ModeratorContent extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getIdeas(true);
+    this.getCollapseContent(true);
   }
 
-  async getIdeas(reloadTabState = false): Promise<void> {
-    const oldKeys = Object.keys(this.orderGroupContent);
+  async getCollapseContent(reloadTabState = false): Promise<void> {
+    reloadCollapseContent(
+      this.openTabs,
+      Object.keys(this.orderGroupContent),
+      this.getIdeas,
+      reloadTabState
+    ).then((tabs) => (this.openTabs = tabs));
+  }
+
+  async getIdeas(): Promise<string[]> {
     if (this.taskId) {
       await ideaService
         .getOrderGroups(
@@ -103,12 +112,7 @@ export default class ModeratorContent extends Vue {
           this.ideas = result.ideas;
         });
     }
-    const newKeys = Object.keys(this.orderGroupContent);
-    if (reloadTabState) this.openTabs = newKeys;
-    else {
-      const addedKeys = newKeys.filter((item) => oldKeys.indexOf(item) < 0);
-      this.openTabs = this.openTabs.concat(addedKeys);
-    }
+    return Object.keys(this.orderGroupContent);
   }
 
   async mounted(): Promise<void> {
@@ -116,7 +120,7 @@ export default class ModeratorContent extends Vue {
   }
 
   startIdeaInterval(): void {
-    this.interval = setInterval(this.getIdeas, this.intervalTime);
+    this.interval = setInterval(this.getCollapseContent, this.intervalTime);
   }
 
   unmounted(): void {

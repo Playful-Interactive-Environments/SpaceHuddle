@@ -6,22 +6,35 @@
     <p>{{ $t('module.brainstorming.default.publicScreen.noIdeas') }}</p>
   </section>
   <section v-else class="public-screen__content">
-    <Expand v-for="(item, key) in orderGroupContent" :key="key">
-      <template v-slot:title>
-        {{ key.toUpperCase() }}
-      </template>
-      <template v-slot:content>
+    <el-collapse v-model="openTabs">
+      <el-collapse-item
+        v-for="(item, key) in orderGroupContent"
+        :key="key"
+        :name="key"
+      >
+        <template #title>
+          <CollapseTitle :text="key" :color="item.color">
+            <span
+              role="button"
+              class="icon"
+              v-if="item.ideas.length > item.displayCount"
+              v-on:click="item.displayCount = 1000"
+            >
+              <font-awesome-icon icon="ellipsis-h" />
+            </span>
+          </CollapseTitle>
+        </template>
         <main class="layout__4columns">
           <IdeaCard
             :idea="idea"
-            v-for="(idea, index) in item.ideas"
+            v-for="(idea, index) in item.ideas.slice(0, item.displayCount)"
             :key="index"
             :is-selectable="false"
             :is-editable="false"
           />
         </main>
-      </template>
-    </Expand>
+      </el-collapse-item>
+    </el-collapse>
   </section>
 </template>
 
@@ -35,13 +48,15 @@ import { IdeaSortOrderCategorisation } from '@/types/enum/IdeaSortOrder';
 import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
 import { Category } from '@/types/api/Category';
-import * as categorisationService from '@/services/categorisation-service';
-import Expand from '@/components/shared/atoms/Expand.vue';
+import { OrderGroupList } from '@/types/api/OrderGroup';
+import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
+import { reloadCollapseContent } from '@/services/gui-service';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
     IdeaCard,
-    Expand,
+    CollapseTitle,
   },
 })
 
@@ -51,15 +66,14 @@ export default class PublicScreen extends Vue {
   task: Task | null = null;
   categories: Category[] = [];
   ideas: Idea[] = [];
-  orderGroupContent: {
-    [name: string]: { ideas: Idea[] };
-  } = {};
+  orderGroupContent: OrderGroupList = {};
   readonly intervalTime = 10000;
   interval!: any;
+  openTabs: string[] = [];
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getIdeas();
+    this.getCollapseContent(true);
   }
 
   async getTask(): Promise<void> {
@@ -70,48 +84,35 @@ export default class PublicScreen extends Vue {
     }
   }
 
-  async getIdeas(): Promise<void> {
+  async getCollapseContent(reloadTabState = false): Promise<void> {
+    reloadCollapseContent(
+      this.openTabs,
+      Object.keys(this.orderGroupContent),
+      this.getIdeas,
+      reloadTabState
+    ).then((tabs) => (this.openTabs = tabs));
+  }
+
+  async getIdeas(): Promise<string[]> {
     if (this.taskId) {
       if (!this.task) await this.getTask();
-      await this.getCategories();
-      const orderGroupContent = {};
 
       if (this.task) {
         await ideaService
-          .getIdeasForTopic(
-            this.task.topicId,
+          .getOrderGroups(
+            this.task.parameter.brainstormingTaskId,
             IdeaSortOrderCategorisation,
-            this.taskId
+            this.taskId,
+            EndpointAuthorisationType.MODERATOR,
+            this.orderGroupContent
           )
-          .then((ideas) => {
-            this.ideas = ideas;
-            ideas.forEach((ideaItem) => {
-              if (ideaItem.order) {
-                const orderGroup = orderGroupContent[ideaItem.order];
-                if (!orderGroup) {
-                  orderGroupContent[ideaItem.order] = {
-                    ideas: [ideaItem],
-                  };
-                } else {
-                  orderGroup.ideas.push(ideaItem);
-                }
-              }
-            });
+          .then((result) => {
+            this.ideas = result.ideas;
+            this.orderGroupContent = result.oderGroups;
           });
       }
-
-      this.orderGroupContent = orderGroupContent;
     }
-  }
-
-  async getCategories(): Promise<void> {
-    if (this.taskId) {
-      await categorisationService
-        .getCategoriesForTask(this.taskId)
-        .then((categories) => {
-          this.categories = categories;
-        });
-    }
+    return Object.keys(this.orderGroupContent);
   }
 
   async mounted(): Promise<void> {
@@ -119,7 +120,7 @@ export default class PublicScreen extends Vue {
   }
 
   startIdeaInterval(): void {
-    this.interval = setInterval(this.getIdeas, this.intervalTime);
+    this.interval = setInterval(this.getCollapseContent, this.intervalTime);
   }
 
   unmounted(): void {

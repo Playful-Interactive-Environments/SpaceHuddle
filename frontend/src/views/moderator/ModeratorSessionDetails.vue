@@ -10,9 +10,15 @@
     />
     <Navigation />
     <main class="detail__content">
-      <TopicExpand v-for="(topic, index) in topics" :key="topic.id">
-        <template v-slot:title>{{ topic.title }}</template>
-        <template v-slot:content>
+      <el-collapse v-model="openTabs">
+        <el-collapse-item
+          v-for="(topic, index) in topics"
+          :key="topic.id"
+          :name="topic.id"
+        >
+          <template #title>
+            {{ topic.title }}
+          </template>
           <draggable
             v-model="topics[index].tasks"
             tag="transition-group"
@@ -21,23 +27,24 @@
             @end="dragDone(index)"
           >
             <template #item="{ element }">
-              <li class="detail__module">
+              <div class="detail__module">
                 <TaskCard
+                  class="detail__module"
                   :sessionId="sessionId"
                   :type="TaskType[element.taskType]"
                   :task="element"
                   :isOnPublicScreen="element.id === publicScreenTaskId"
                   @changePublicScreen="changePublicScreen($event)"
                 />
-              </li>
+              </div>
             </template>
           </draggable>
           <AddItem
             :text="$t('moderator.organism.module.overview.add')"
             @addNew="openModalModuleCreate(topic.id)"
           />
-        </template>
-      </TopicExpand>
+        </el-collapse-item>
+      </el-collapse>
     </main>
     <TaskSettings
       v-model:show-modal="showSettings"
@@ -55,7 +62,6 @@ import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import TaskSettings from '@/components/moderator/organisms/settings/TaskSettings.vue';
 import TaskCard from '@/components/moderator/organisms/cards/TaskCard.vue';
 import Navigation from '@/components/moderator/molecules/Navigation.vue';
-import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import { formatDate } from '@/utils/date';
 import TaskType from '@/types/enum/TaskType';
@@ -74,7 +80,6 @@ import { EventType } from '@/types/enum/EventType';
     TaskSettings,
     TaskCard,
     Navigation,
-    TopicExpand,
     Sidebar,
   },
 })
@@ -88,6 +93,7 @@ export default class ModeratorSessionDetails extends Vue {
   formatDate = formatDate;
   addNewTopicId = '';
   errors: string[] = [];
+  openTabs: string[] = [];
 
   TaskType = TaskType;
 
@@ -114,6 +120,7 @@ export default class ModeratorSessionDetails extends Vue {
             topic.tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
           });
         });
+        this.openTabs = this.topics.map((topic) => topic.id);
         this.getPublicScreen();
       });
     });

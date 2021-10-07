@@ -5,10 +5,16 @@
       <SessionInfo :title="sessionName" :description="sessionDescription" />
       <form-error :errors="errors"></form-error>
     </div>
-    <TopicExpand v-for="topic in filteredTopics" :key="topic.id" :isRow="true">
-      <template v-slot:title>{{ topic.title }}</template>
-      <template v-slot:content>
-        <li class="overview__module" v-for="task in topic.tasks" :key="task.id">
+    <el-collapse v-model="openTabs" class="white participant">
+      <el-collapse-item
+        v-for="topic in filteredTopics"
+        :key="topic.id"
+        :name="topic.id"
+      >
+        <template #title>
+          {{ topic.title }}
+        </template>
+        <span class="overview__module" v-for="task in topic.tasks" :key="task.id">
           <TaskCard
             :type="TaskType[task.taskType]"
             :task="task"
@@ -16,9 +22,9 @@
             :sessionId="sessionId"
             v-on:timerEnds="getTopicsAndTasks"
           />
-        </li>
-      </template>
-    </TopicExpand>
+        </span>
+      </el-collapse-item>
+    </el-collapse>
   </div>
 </template>
 
@@ -26,7 +32,6 @@
 import { Vue, Options } from 'vue-class-component';
 import MenuBar from '@/components/participant/molecules/Menubar.vue';
 import SessionInfo from '@/components/participant/molecules/SessionInfo.vue';
-import TopicExpand from '@/components/shared/atoms/TopicExpand.vue';
 import TaskCard from '@/components/moderator/organisms/cards/TaskCard.vue';
 import TaskType from '@/types/enum/TaskType';
 import * as taskService from '@/services/task-service';
@@ -40,7 +45,6 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
   components: {
     MenuBar,
     SessionInfo,
-    TopicExpand,
     TaskCard,
     FormError,
   },
@@ -56,6 +60,7 @@ export default class ParticipantOverview extends Vue {
   errors: string[] = [];
   readonly intervalTime = 10000;
   interval!: any;
+  openTabs: string[] = [];
 
   mounted(): void {
     this.getSessionInfo();
@@ -88,6 +93,7 @@ export default class ParticipantOverview extends Vue {
             });
         }
         this.topics = topics;
+        this.openTabs = this.topics.map((topic) => topic.id);
       });
   }
 

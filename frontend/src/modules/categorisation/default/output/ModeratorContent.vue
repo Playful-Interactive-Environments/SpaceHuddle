@@ -7,7 +7,7 @@
       v-model="orderType"
       id="orderType"
       class="select select--fullwidth"
-      @change="getIdeas(true)"
+      @change="getCollapseContent(true)"
     >
       <option
         v-for="type in sortOrderOptions"
@@ -39,7 +39,7 @@
         <CategoryCard
           :category="orderGroup.category"
           :ideas="orderGroup.ideas"
-          @categoryChanged="getIdeas"
+          @categoryChanged="getCollapseContent"
         >
         </CategoryCard>
       </template>
@@ -100,7 +100,7 @@
     v-model:show-modal="showCategorySettings"
     :task-id="task.id"
     v-model:category-id="editCategoryId"
-    @categoryCreated="getIdeas"
+    @categoryCreated="getCollapseContent"
   />
 </template>
 
@@ -109,12 +109,14 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import Expand from '@/components/shared/atoms/Expand.vue';
 import * as categorisationService from '@/services/categorisation-service';
 import { Category } from '@/types/api/Category';
 import * as ideaService from '@/services/idea-service';
 import * as taskService from '@/services/task-service';
-import { IdeaSortOrderCategorisation } from '@/types/enum/IdeaSortOrder';
+import {
+  DefaultIdeaSortOrder,
+  IdeaSortOrderCategorisation,
+} from '@/types/enum/IdeaSortOrder';
 import { Idea } from '@/types/api/Idea';
 import { Task } from '@/types/api/Task';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
@@ -124,6 +126,7 @@ import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
 import { OrderGroupList, SortOrderOption } from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { reloadCollapseContent } from '@/services/gui-service';
 
 class CategoryContent {
   ideas: Idea[];
@@ -147,7 +150,6 @@ interface CategoryContentList {
 @Options({
   components: {
     IdeaCard,
-    Expand,
     AddItem,
     CategorySettings,
     CategoryCard,
@@ -178,11 +180,11 @@ export default class ModeratorContent extends Vue {
   interval!: any;
 
   sortOrderOptions: SortOrderOption[] = [];
-  orderType = '';
+  orderType: string = DefaultIdeaSortOrder;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getIdeas(true);
+    this.getCollapseContent(true);
   }
 
   async getTask(): Promise<void> {
@@ -197,10 +199,17 @@ export default class ModeratorContent extends Vue {
     }
   }
 
-  async getIdeas(reloadTabState = false): Promise<void> {
-    if (this.isDragging) return;
+  async getCollapseContent(reloadTabState = false): Promise<void> {
+    reloadCollapseContent(
+      this.openTabs,
+      Object.keys(this.orderGroupContentSelection),
+      this.getIdeas,
+      reloadTabState
+    ).then((tabs) => (this.openTabs = tabs));
+  }
 
-    const oldKeys = Object.keys(this.orderGroupContentSelection);
+  async getIdeas(): Promise<string[]> {
+    if (this.isDragging) return Object.keys(this.orderGroupContentSelection);
 
     if (this.taskId) {
       if (!this.task) await this.getTask();
@@ -256,12 +265,7 @@ export default class ModeratorContent extends Vue {
 
       this.orderGroupContentCards = orderGroupContent;
     }
-    const newKeys = Object.keys(this.orderGroupContentSelection);
-    if (reloadTabState) this.openTabs = newKeys;
-    else {
-      const addedKeys = newKeys.filter((item) => oldKeys.indexOf(item) < 0);
-      this.openTabs = this.openTabs.concat(addedKeys);
-    }
+    return Object.keys(this.orderGroupContentSelection);
   }
 
   async getCategories(): Promise<void> {
@@ -279,7 +283,7 @@ export default class ModeratorContent extends Vue {
   }
 
   startIdeaInterval(): void {
-    this.interval = setInterval(this.getIdeas, this.intervalTime);
+    this.interval = setInterval(this.getCollapseContent, this.intervalTime);
   }
 
   unmounted(): void {
@@ -303,7 +307,7 @@ export default class ModeratorContent extends Vue {
         event.item.id,
       ]);
     }
-    await this.getIdeas();
+    await this.getCollapseContent();
     this.isDragging = false;
   }
 }

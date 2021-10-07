@@ -26,7 +26,7 @@ import { EventType } from '@/types/enum/EventType';
 @Options({
   components: {},
 })
-export default class ModuleCount extends Vue {
+export default class SessionCode extends Vue {
   @Prop({ default: false }) hasBorder!: boolean;
   @Prop({ default: '' }) code!: string;
 

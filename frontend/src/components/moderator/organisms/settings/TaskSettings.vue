@@ -79,24 +79,29 @@
             :errors="context.$v.moduleSelection.$errors"
             :isSmall="true"
           />
-          <Expand
-            v-for="component in moduleParameterComponents.filter(
-              (component) => component.hasModule
-            )"
-            :key="component.componentName"
-          >
-            <template v-slot:title>
-              <font-awesome-icon
-                :icon="component.moduleIcon"
-                v-if="component.moduleIcon"
-              />
-              {{
-                $t(
-                  `module.${TaskType[taskType]}.${component.moduleName}.description.title`
-                )
-              }}
-            </template>
-            <template v-slot:content>
+          <el-collapse v-model="openTabs" :key="openTabs.length" v-if="moduleParameterComponents.filter(
+                (component) => component.hasModule
+              ).length > 0">
+            <el-collapse-item
+              v-for="component in moduleParameterComponents.filter(
+                (component) => component.hasModule
+              )"
+              :key="component.componentName"
+              :name="component.componentName"
+            >
+              <template #title>
+                <span>
+                  <font-awesome-icon
+                    :icon="component.moduleIcon"
+                    v-if="component.moduleIcon"
+                  />
+                  {{
+                    $t(
+                      `module.${TaskType[taskType]}.${component.moduleName}.description.title`
+                    )
+                  }}
+                </span>
+              </template>
               <component
                 :ref="component.componentName"
                 v-model="component.parameter"
@@ -104,8 +109,8 @@
                 :is="component.componentName"
                 :key="component.componentName"
               ></component>
-            </template>
-          </Expand>
+            </el-collapse-item>
+          </el-collapse>
           <label for="taskTitle" class="heading heading--xs">{{
             taskType === 'BRAINSTORMING'
               ? $t('moderator.organism.settings.taskSettings.question')
@@ -187,14 +192,12 @@ import {
 import { CustomParameter } from '@/types/ui/CustomParameter';
 import { EventType } from '@/types/enum/EventType';
 import ModuleComponentType from '@/modules/ModuleComponentType';
-import Expand from '@/components/shared/atoms/Expand.vue';
 import { Module } from '@/types/api/Module';
 import ModuleCard from '@/components/moderator/organisms/cards/ModuleCard.vue';
 import ModuleItem from '@/components/shared/molecules/ModuleItem.vue';
 
 @Options({
   components: {
-    Expand,
     FormError,
     ModuleCard,
     ModuleItem,
@@ -233,6 +236,7 @@ export default class TaskSettings extends Vue {
     hasModule: boolean;
     parameter: any;
   }[] = [];
+  openTabs: string[] = [];
 
   moduleList: { [key: string]: boolean } = {};
   taskType = this.TaskTypeKeys[1];
@@ -307,6 +311,10 @@ export default class TaskSettings extends Vue {
 
   @Watch('moduleSelection', { immediate: true })
   async onModuleSelectionChanged(moduleSelection: string[]): Promise<void> {
+    const oldKeys = this.moduleParameterComponents.map(
+      (data) => data.componentName
+    );
+
     const addComponent = async (
       moduleName: string,
       componentName: string
@@ -341,6 +349,11 @@ export default class TaskSettings extends Vue {
           hasModule: result,
           parameter: moduleParameter,
         });
+        if (
+          !this.openTabs.includes(componentName) &&
+          !oldKeys.includes(componentName)
+        )
+          this.openTabs.push(componentName);
       });
     };
 
