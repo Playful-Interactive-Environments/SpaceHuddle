@@ -1,7 +1,9 @@
 <template>
   <div class="menubar">
     <Logo class="menubar__logo" isParticipant="true" />
-    <div class="menubar__icon">|||</div>
+    <router-link to="/overview">
+      <div class="menubar__icon">|||</div>
+    </router-link>
   </div>
 </template>
 
@@ -22,7 +24,6 @@ export default class Menubar extends Vue {}
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: white;
   margin-bottom: 1rem;
 
   &__logo {
@@ -36,6 +37,7 @@ export default class Menubar extends Vue {}
   &__icon {
     transform: rotate(90deg) scaleY(1.2);
     letter-spacing: 0.1rem;
+    color: white;
   }
 }
 </style>
