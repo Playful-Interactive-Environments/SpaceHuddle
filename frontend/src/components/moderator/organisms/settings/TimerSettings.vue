@@ -69,7 +69,7 @@ export default class TimerSettings extends Vue {
 
   reset(): void {
     let defaultTime = 1000 * 60 * 10;
-    if (this.task && this.task.remainingTime > 0)
+    if (this.task && this.task.remainingTime && this.task.remainingTime > 0)
       defaultTime = this.task.remainingTime * 1000;
     const remindingTime = new Date(defaultTime);
     remindingTime.setHours(

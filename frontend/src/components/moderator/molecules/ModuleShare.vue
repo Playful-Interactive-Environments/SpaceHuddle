@@ -109,7 +109,9 @@ export default class ModuleShare extends Vue {
   get participant(): boolean {
     if (this.task)
       return (
-        this.task.state === TaskStates.ACTIVE && this.task.remainingTime > 0
+        this.task.state === TaskStates.ACTIVE &&
+        this.task.remainingTime !== null &&
+        this.task.remainingTime > 0
       );
     return false;
   }

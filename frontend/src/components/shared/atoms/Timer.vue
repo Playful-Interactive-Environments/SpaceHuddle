@@ -36,7 +36,7 @@ export default class Timer extends Vue {
 
   @Watch('task', { immediate: true, deep: true })
   onTaskChanged(val: Task): void {
-    if (val) {
+    if (val && val.remainingTime) {
       this.timeLeft = val.remainingTime;
       this.startTimer();
     }

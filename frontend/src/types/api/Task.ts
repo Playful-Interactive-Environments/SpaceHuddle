@@ -15,7 +15,7 @@ export interface Task {
   parameter: any;
   order: number;
   state: TaskStates;
-  remainingTime: number;
+  remainingTime: number | null;
   modules: Module[];
 }
 
@@ -28,7 +28,7 @@ export interface TaskForSaveAction {
   parameter: any;
   order: number;
   state: TaskStates;
-  remainingTime: number;
+  remainingTime: number | null;
   modules: string[];
 }
 
