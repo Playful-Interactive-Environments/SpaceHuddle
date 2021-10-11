@@ -7,8 +7,11 @@
         v-on:click="
           $router.push(
             isParticipant
-          ? `/participant-module-content/${task.id}`
-          : `/module-content/${sessionId}/${task.id}`)">
+              ? `/participant-module-content/${task.id}`
+              : `/module-content/${sessionId}/${task.id}`
+          )
+        "
+      >
         <div class="level-item card__planet" v-if="!isParticipant">
           <img
             :src="require(`@/assets/illustrations/planets/${type}.png`)"
@@ -103,7 +106,7 @@ export default class TaskCard extends Vue {
     setModuleStyles(this.type, this.$refs.item as HTMLElement);
   }
 
-  timerClicked(event: PointerEvent): void {
+  timerClicked(): void {
     if (!this.isParticipant) {
       this.showTimerSettings = true;
     }

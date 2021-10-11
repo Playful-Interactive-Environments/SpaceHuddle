@@ -9,9 +9,7 @@
           <ModuleCount />
         </div>
       </el-header>
-      <el-main>
-
-      </el-main>
+      <el-main> </el-main>
       <el-footer>
         <div class="el-card__content">
           <SessionCode :code="session.connectionKey" :hasBorder="true" />
@@ -21,7 +19,6 @@
             </button>
           </router-link>
         </div>
-
       </el-footer>
     </el-container>
   </el-card>
@@ -50,7 +47,6 @@ export default class SessionCard extends Vue {
 
 <style lang="scss" scoped>
 .el-card {
-  //padding: 1rem 1.5rem;
   background: #fff;
   overflow: hidden;
   display: flex;

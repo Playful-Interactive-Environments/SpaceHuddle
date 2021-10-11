@@ -72,7 +72,7 @@
     display: flex;
     justify-content: space-between;
     word-break: break-word;
-    align-items: end;
+    align-items: flex-end;
     text-align: justify;
   }
 
@@ -88,7 +88,7 @@
 
   &__title {
     font-weight: var(--font-weight-semibold);
-    align-items: start;
+    align-items: flex-start;
     display: flex;
     justify-content: space-between;
   }

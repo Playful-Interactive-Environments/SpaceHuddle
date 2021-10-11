@@ -167,8 +167,7 @@ body {
 
     &--dark-blue {
       color: var(--color-darkblue);
-      border: 2px solid var(--color-darkblue);
-      border-style: dashed;
+      border: 2px dashed var(--color-darkblue);
 
       &:hover {
         background-color: var(--color-darkblue-light);

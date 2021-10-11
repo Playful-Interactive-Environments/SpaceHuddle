@@ -13,8 +13,7 @@ import Logo from '@/components/shared/atoms/Logo.vue';
     Logo,
   },
 })
-export default class PublicHeader extends Vue {
-}
+export default class PublicHeader extends Vue {}
 </script>
 
 <style lang="scss" scoped>

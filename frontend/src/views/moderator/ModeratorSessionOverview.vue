@@ -3,15 +3,8 @@
     <template v-slot:content>
       <h1>{{ $t('moderator.organism.session.overview.header') }}</h1>
       <div class="columns is-multiline is-9">
-        <div
-          v-for="session in sessions"
-          :key="session.id"
-          class="column"
-        >
-          <SessionCard
-            :session="session"
-          >
-          </SessionCard>
+        <div v-for="session in sessions" :key="session.id" class="column">
+          <SessionCard :session="session"> </SessionCard>
         </div>
         <div class="column">
           <AddItem
@@ -21,8 +14,7 @@
           />
         </div>
       </div>
-      <div class="session-overview__session-container">
-      </div>
+      <div class="session-overview__session-container"></div>
       <SessionSettings v-model:show-modal="showSettings" />
     </template>
   </ModeratorNavigationLayout>
