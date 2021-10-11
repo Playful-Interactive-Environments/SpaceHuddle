@@ -5,6 +5,7 @@
       :stretch="false"
       v-if="task && task.modules.length > 1"
       v-model="moduleName"
+      class="white"
       @tab-click="(tab) => moduleNameClick(tab.paneName)"
     >
       <el-tab-pane

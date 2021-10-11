@@ -1,34 +1,35 @@
 <template>
-  <div class="profile">
-    <Header />
-    <div
-      class="
-        profile__content
-        container2
-        container2--spaced
-        container2--fullheight-header
-        container2--centered
-      "
-    >
-      <h1>{{ $t('moderator.view.profile.header') }}</h1>
-      <p class="profile__email">
-        {{ $t('moderator.view.profile.info') }} {{ email }}
-      </p>
-      <button class="btn btn--gradient" @click="logout">
-        {{ $t('moderator.view.profile.submit') }}
-      </button>
-    </div>
-  </div>
+  <ModeratorNavigationLayout>
+    <template v-slot:content>
+      <div
+        class="
+          profile__content
+          container2
+          container2--spaced
+          container2--fullheight-header
+          container2--centered
+        "
+      >
+        <h1>{{ $t('moderator.view.profile.header') }}</h1>
+        <p class="profile__email">
+          {{ $t('moderator.view.profile.info') }} {{ email }}
+        </p>
+        <button class="btn btn--gradient" @click="logout">
+          {{ $t('moderator.view.profile.submit') }}
+        </button>
+      </div>
+    </template>
+  </ModeratorNavigationLayout>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import Header from '@/components/moderator/organisms/Header.vue';
 import * as authService from '@/services/auth-service';
+import ModeratorNavigationLayout from '@/components/moderator/organisms/Layout/ModeratorNavigationLayout.vue';
 
 @Options({
   components: {
-    Header,
+    ModeratorNavigationLayout,
   },
 })
 export default class ModeratorProfile extends Vue {

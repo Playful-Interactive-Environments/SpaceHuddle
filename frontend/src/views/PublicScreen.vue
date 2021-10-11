@@ -1,10 +1,7 @@
 <template>
   <div class="public-screen">
-    <Header :white="true" />
-    <main
-      class="public-screen__container container2 container2--spaced"
-      ref="container"
-    >
+    <PublicHeader :white="true" />
+    <main class="public-screen__container container2 container2--spaced">
       <section v-if="task" class="public-screen__overview">
         <div class="public-screen__overview-left">
           <span class="public-screen__overview-type">
@@ -37,7 +34,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 
-import Header from '@/components/moderator/organisms/Header.vue';
+import PublicHeader from '@/components/moderator/organisms/Layout/PublicHeader.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 
 import * as sessionService from '@/services/session-service';
@@ -55,7 +52,7 @@ import ModuleComponentType from '@/modules/ModuleComponentType';
 
 @Options({
   components: {
-    Header,
+    PublicHeader,
     Timer,
     PublicScreenComponent: getEmptyComponent(),
   },
@@ -110,7 +107,7 @@ export default class PublicScreen extends Vue {
       }
       if (taskType) {
         this.$nextTick(() => {
-          setModuleStyles(this.$refs.container as HTMLElement, taskType);
+          setModuleStyles(taskType);
         });
       }
     });

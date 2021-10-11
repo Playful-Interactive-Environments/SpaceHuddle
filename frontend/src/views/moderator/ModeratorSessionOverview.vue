@@ -1,24 +1,31 @@
 <template>
-  <div class="session-overview">
-    <Header />
-    <main class="container2 container2--spaced container2--fullheight-header">
+  <ModeratorNavigationLayout>
+    <template v-slot:content>
       <h1>{{ $t('moderator.organism.session.overview.header') }}</h1>
-      <div class="session-overview__session-container">
-        <SessionCard
+      <div class="columns is-multiline is-9">
+        <div
           v-for="session in sessions"
           :key="session.id"
-          :session="session"
+          class="column"
         >
-        </SessionCard>
-        <AddItem
-          :text="$t('moderator.organism.session.overview.add')"
-          :isColumn="true"
-          @addNew="showSettings = true"
-        />
-        <SessionSettings v-model:show-modal="showSettings" />
+          <SessionCard
+            :session="session"
+          >
+          </SessionCard>
+        </div>
+        <div class="column">
+          <AddItem
+            :text="$t('moderator.organism.session.overview.add')"
+            :isColumn="true"
+            @addNew="showSettings = true"
+          />
+        </div>
       </div>
-    </main>
-  </div>
+      <div class="session-overview__session-container">
+      </div>
+      <SessionSettings v-model:show-modal="showSettings" />
+    </template>
+  </ModeratorNavigationLayout>
 </template>
 
 <script lang="ts">
@@ -26,20 +33,20 @@ import { Options, Vue } from 'vue-class-component';
 import { Session } from '@/types/api/Session';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import SessionCard from '@/components/moderator/organisms/cards/SessionCard.vue';
-import Header from '@/components/moderator/organisms/Header.vue';
 import SessionSettings from '@/components/moderator/organisms/settings/SessionSettings.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import * as sessionService from '@/services/session-service';
+import ModeratorNavigationLayout from '@/components/moderator/organisms/Layout/ModeratorNavigationLayout.vue';
 
 @Options({
   components: {
     AddItem,
     SessionCard,
-    Header,
     SessionSettings,
     ModuleCount,
     SessionCode,
+    ModeratorNavigationLayout,
   },
 })
 export default class ModeratorSessionOverview extends Vue {

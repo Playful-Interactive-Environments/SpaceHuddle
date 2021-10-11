@@ -1,5 +1,5 @@
 <template>
-  <div class="module-container container2--fullheight container2" ref="item">
+  <div class="module-container container2--fullheight container2">
     <div class="grid-container">
       <div class="grid-item">
         <div class="module-container__planetDiv">
@@ -87,7 +87,7 @@ export default class ParticipantModuleDefaultContainer extends Vue {
       .then((queryResult) => {
         this.task = queryResult;
         if (this.taskType)
-          setModuleStyles(this.$refs.item as HTMLElement, this.taskType);
+          setModuleStyles(this.taskType);
       });
   }
 }

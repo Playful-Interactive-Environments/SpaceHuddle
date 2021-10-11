@@ -35,7 +35,7 @@ export default class TaskInfo extends Vue {
   font-size: var(--font-size-small);
 
   @include md {
-    max-width: 60%;
+    //max-width: 60%;
   }
 
   &__type {

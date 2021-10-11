@@ -58,7 +58,7 @@ body {
 
 .heading {
   color: var(--color-darkblue);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
   margin: 0 0 0.5rem;
 
   &--big {
@@ -66,16 +66,16 @@ body {
     line-height: 1.2;
 
     @media screen and (max-width: 768px) {
-      font-size: calc(32rem / 16);
+      font-size: calc(28rem / 16);
     }
   }
 
   &--medium {
-    font-size: calc(28rem / 16);
+    font-size: calc(24rem / 16);
   }
 
   &--regular {
-    font-size: calc(24rem / 16);
+    font-size: calc(20rem / 16);
   }
 
   &--small {

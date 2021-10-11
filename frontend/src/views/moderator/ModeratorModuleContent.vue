@@ -1,6 +1,10 @@
 <template>
-  <div class="task_definition" ref="item">
-    <div v-if="task">
+  <ModeratorNavigationLayout
+    v-if="task"
+    :current-route-title="task.taskType"
+    :key="componentLoadIndex"
+  >
+    <template v-slot:sidebar>
       <Sidebar
         :session-id="sessionId"
         :title="task.name"
@@ -12,18 +16,19 @@
         v-on:openSettings="editTask"
         v-on:delete="deleteTask"
       />
-      <NavigationWithBack :current-route-title="task.taskType" />
+    </template>
+    <template v-slot:header>
       <form-error :errors="errors"></form-error>
-      <main class="task_definition__content">
-        <ModuleContentComponent :task-id="taskId" />
-      </main>
-    </div>
-    <TaskSettings
-      v-model:show-modal="showSettings"
-      :task-id="taskId"
-      :key="componentLoadIndex"
-    />
-  </div>
+    </template>
+    <template v-slot:content>
+      <ModuleContentComponent :task-id="taskId" />
+      <TaskSettings
+        v-model:show-modal="showSettings"
+        :task-id="taskId"
+        :key="componentLoadIndex"
+      />
+    </template>
+  </ModeratorNavigationLayout>
 </template>
 
 <script lang="ts">
@@ -45,7 +50,7 @@ import * as sessionService from '@/services/session-service';
 import * as taskService from '@/services/task-service';
 
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
-import NavigationWithBack from '@/components/moderator/organisms/NavigationWithBack.vue';
+import ModeratorNavigationLayout from '@/components/moderator/organisms/Layout/ModeratorNavigationLayout.vue';
 import FormError from '@/components/shared/atoms/FormError.vue';
 import TaskSettings from '@/components/moderator/organisms/settings/TaskSettings.vue';
 import { EventType } from '@/types/enum/EventType';
@@ -53,7 +58,7 @@ import { EventType } from '@/types/enum/EventType';
 @Options({
   components: {
     Sidebar,
-    NavigationWithBack,
+    ModeratorNavigationLayout,
     FormError,
     TaskSettings,
     ModuleContentComponent: getEmptyComponent(),
@@ -124,10 +129,7 @@ export default class ModeratorModuleContent extends Vue {
           this.componentLoadIndex++;
         });
       }
-      setModuleStyles(
-        this.$refs.item as HTMLElement,
-        TaskType[this.task.taskType]
-      );
+      setModuleStyles(TaskType[this.task.taskType]);
       sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
         if (queryResult) this.publicScreenTaskId = queryResult.id;
         else this.publicScreenTaskId = '';
@@ -149,7 +151,6 @@ export default class ModeratorModuleContent extends Vue {
 <style lang="scss" scoped>
 .task_definition {
   background-color: var(--color-background-gray);
-  margin-left: var(--sidebar-width);
   min-height: 100vh;
 
   &__content {

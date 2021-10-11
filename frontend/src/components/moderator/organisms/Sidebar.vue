@@ -1,52 +1,59 @@
 <template>
-  <section class="sidebar">
-    <div class="sidebar__top">
-      <div class="sidebar__logo">
-        <Logo />
-      </div>
-      <!-- <router-link :to="`/session/${session.id}`"></router-link> -->
-      <div class="sidebar__row">
-        <div>{{ pretitle }}</div>
-        <div class="sidebar__icon" aria-label="settings" role="button">
-          <font-awesome-icon
-            class="icon"
-            icon="trash"
-            v-on:click="$emit('delete', $event)"
-          />
-          <font-awesome-icon
-            class="icon"
-            icon="cog"
-            v-on:click="$emit('openSettings', $event)"
-          />
+  <el-scrollbar class="sidebar" height="100%" max-height="100vh">
+    <el-container class="sidebar__container">
+      <el-header>
+        <div class="sidebar__top">
+          <div class="sidebar__logo">
+            <Logo />
+          </div>
+          <!-- <router-link :to="`/session/${session.id}`"></router-link> -->
+          <div class="sidebar__management">
+            <div>{{ pretitle }}</div>
+            <div class="sidebar__icon" aria-label="settings" role="button">
+              <font-awesome-icon
+                class="icon"
+                icon="trash"
+                v-on:click="$emit('delete', $event)"
+              />
+              <font-awesome-icon
+                class="icon"
+                icon="cog"
+                v-on:click="$emit('openSettings', $event)"
+              />
+            </div>
+          </div>
+          <h1 class="heading heading--regular heading--white">
+            {{ title }}
+          </h1>
+          <div class="sidebar__text">
+            {{ description }}
+          </div>
+          <ModuleCount v-if="isSession" />
         </div>
-      </div>
-      <h1 class="heading heading--regular heading--white">
-        {{ title }}
-      </h1>
-      <div class="sidebar__text">
-        {{ description }}
-      </div>
-      <ModuleCount v-if="isSession" />
-    </div>
-    <div class="sidebar__bottom">
-      <SessionCode v-if="isSession" :code="sessionConnectionKey" />
-      <div class="sidebar__toggles" v-else>
-        <ModuleShare
-          v-if="task"
-          :task="task"
-          :is-on-public-screen="isOnPublicScreen"
-        />
-      </div>
-      <router-link v-if="sessionId" :to="`/public-screen/${sessionId}`">
-        <button
-          class="btn btn--mint btn--fullwidth"
-          :class="{ sidebar__button: !isSession }"
-        >
-          {{ $t('general.publicScreen') }}
-        </button>
-      </router-link>
-    </div>
-  </section>
+      </el-header>
+      <el-main></el-main>
+      <el-footer>
+        <div class="sidebar__bottom">
+          <SessionCode v-if="isSession" :code="sessionConnectionKey" />
+          <div class="sidebar__toggles" v-else>
+            <ModuleShare
+              v-if="task"
+              :task="task"
+              :is-on-public-screen="isOnPublicScreen"
+            />
+          </div>
+          <router-link v-if="sessionId" :to="`/public-screen/${sessionId}`">
+            <button
+              class="btn btn--mint btn--fullwidth"
+              :class="{ sidebar__button: !isSession }"
+            >
+              {{ $t('general.publicScreen') }}
+            </button>
+          </router-link>
+        </div>
+      </el-footer>
+    </el-container>
+  </el-scrollbar>
 </template>
 
 <script lang="ts">
@@ -92,17 +99,15 @@ export default class Sidebar extends Vue {
   left: 0;
   top: 0;
   width: var(--sidebar-width);
-  min-width: 300px;
+  min-width: var(--sidebar-min-width);
+  height: 100%;
   min-height: 100vh;
-  height: 100vh;
   padding: 2rem 2rem 1rem;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
   color: white;
-  line-height: 1.4;
-  box-sizing: border-box;
+
+  &__container {
+    height: 100%;
+  }
 
   &__logo {
     width: 100%;
@@ -110,7 +115,7 @@ export default class Sidebar extends Vue {
     margin-bottom: 2rem;
   }
 
-  &__row {
+  &__management {
     display: flex;
     justify-content: space-between;
     color: var(--color-darkblue-light);

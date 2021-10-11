@@ -26,6 +26,7 @@ $font-size-default: 1rem;
 $font-size-small: calc(14rem / 16);
 $font-size-large: calc(18rem / 16);
 $sidebar-width: 25vw;
+$sidebar-min-width: 300px;
 $header-height: 90px;
 
 :root {
@@ -59,5 +60,6 @@ $header-height: 90px;
   --font-size-small: #{$font-size-small};
   --font-size-large: #{$font-size-large};
   --sidebar-width: #{$sidebar-width};
+  --sidebar-min-width: #{$sidebar-min-width};
   --header-height: #{$header-height};
 }

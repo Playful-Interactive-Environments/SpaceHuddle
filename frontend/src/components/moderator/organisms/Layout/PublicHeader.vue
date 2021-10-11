@@ -1,26 +1,19 @@
 <template>
   <header class="header">
     <Logo class="header__logo" />
-    <Navigation :white="white" v-if="hasNavigation" />
   </header>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
 import Logo from '@/components/shared/atoms/Logo.vue';
-import Navigation from '@/components/moderator/molecules/Navigation.vue';
 
 @Options({
   components: {
     Logo,
-    Navigation,
   },
 })
-export default class Header extends Vue {
-  @Prop({ default: true }) hasLogo!: boolean;
-  @Prop({ default: false }) white!: boolean;
-  @Prop({ default: true }) hasNavigation!: boolean;
+export default class PublicHeader extends Vue {
 }
 </script>
 

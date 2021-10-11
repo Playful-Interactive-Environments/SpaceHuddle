@@ -69,6 +69,28 @@ $--font-size: (
         --el-border-radius-base: var(--border-radius-small);
 }
 
+.el-footer {
+        --el-footer-padding: unset;
+        --el-footer-height: unset;
+}
+
+.el-header {
+        --el-header-padding: unset;
+        --el-header-height: unset;
+}
+
+.el-main {
+        --el-main-padding: 0;
+}
+
+.el-scrollbar {
+        width: 100%;
+
+        &__view {
+                height: 100%;
+        }
+}
+
 .el-tag {
         --el-tag-font-size: var(--font-size-default);
         --el-tag-border-radius: var(--border-radius-small);
@@ -125,11 +147,40 @@ $--font-size: (
 
 .el-card {
         --el-card-border-radius: var(--border-radius-xs);
+        --el-card-padding: 1.2rem 1.5rem;
         -webkit-column-break-inside: avoid;
         margin-bottom: 0.5rem;
 
         &__body {
                 height: 100%;
+        }
+}
+
+.add {
+        font-size: var(--font-size-small);
+        background-color: unset;
+        border-style: dashed;
+        color: var(--color-darkblue-light);
+        cursor: pointer;
+        gap: 0.5rem;
+
+        .el-card__body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 0.5rem;
+        }
+
+        &.add--column {
+                .el-card__body {
+                        flex-direction: column;
+                        min-height: calc(110rem / 16);
+                }
+        }
+
+        &:hover {
+                background-color: white;
+                border-style: solid;
         }
 }
 
@@ -268,7 +319,7 @@ $--font-size: (
         }
 }
 
-.el-tabs {
+.white .el-tabs {
         &__item {
                 color: var(--color-gray-inactive);
                 padding: 0 0.3rem;
@@ -280,10 +331,10 @@ $--font-size: (
                 .text {
                         margin-right: 0.7em;
                 }
-        }
 
-        &__item.is-active {
-                color: white;
+                &.is-active {
+                        color: white;
+                }
         }
 
         &__active-bar {

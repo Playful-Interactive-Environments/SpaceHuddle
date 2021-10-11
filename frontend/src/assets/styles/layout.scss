@@ -1,7 +1,7 @@
 .layout {
   &__4columns {
     width: 100%;
-    column-width: 18vw;
+    column-width: 10rem;
     column-gap: 1rem;
   }
 
@@ -15,6 +15,32 @@
       vertical-align: middle;
       margin-right: 1rem;
     }
+  }
+}
+
+.sidebar {
+  min-width: var(--sidebar-min-width);
+  width: var(--sidebar-width);
+
+  &.el-aside {
+    width: var(--sidebar-width);
+  }
+}
+
+
+@media only screen and (min-width: 650px) {
+  .sidebar {
+    &__trigger {
+      display: none;
+    }
+  }
+}
+
+@media only screen and (max-width: 649px) {
+  .el-aside.sidebar {
+    display: none;
+    width: 0;
+    min-width: 0;
   }
 }
 

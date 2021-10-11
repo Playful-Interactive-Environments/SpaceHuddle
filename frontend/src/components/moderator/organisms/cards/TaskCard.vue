@@ -1,54 +1,55 @@
 <template>
-  <article
-    ref="item"
-    class="task-card"
-    :class="{ 'task-card--participant': isParticipant }"
-  >
-    <router-link
-      class="clickArea"
-      :to="
-        isParticipant
-          ? `/participant-module-content/${task.id}`
-          : `/module-content/${sessionId}/${task.id}`
-      "
-    >
+  <el-card class="card" shadow="hover" :body-style="{ padding: '0px' }">
+    <span class="level" ref="item">
       <span
-        class="task-card-content"
-        :class="{ 'task-card-content--participant': isParticipant }"
-      >
-        <img
-          :src="require(`@/assets/illustrations/planets/${type}.png`)"
-          alt="planet"
-          class="task-card__planet"
-        />
-        <TaskInfo
-          :type="type"
-          :title="task.name"
-          :description="task.description"
-        />
+        class="level-left"
+        style="cursor: pointer"
+        v-on:click="
+          $router.push(
+            isParticipant
+          ? `/participant-module-content/${task.id}`
+          : `/module-content/${sessionId}/${task.id}`)">
+        <div class="level-item card__planet" v-if="!isParticipant">
+          <img
+            :src="require(`@/assets/illustrations/planets/${type}.png`)"
+            alt="planet"
+          />
+          <div class="card__half-card"></div>
+        </div>
+        <div class="level-item card__planet_only" v-if="isParticipant">
+          <img
+            :src="require(`@/assets/illustrations/planets/${type}.png`)"
+            alt="planet"
+          />
+        </div>
+        <div class="level-item card__info">
+          <TaskInfo
+            :type="type"
+            :title="task.name"
+            :description="task.description"
+          />
+        </div>
       </span>
-    </router-link>
-
-    <span
-      class="task-card-content"
-      :class="{ 'task-card-content--participant': isParticipant }"
-    >
-      <Timer
-        class="task-card__timer"
-        :isActive="task.state === TaskStates.ACTIVE"
-        :task="task"
-        v-on:timerEnds="$emit('timerEnds')"
-        v-on:click="timerClicked"
-        v-if="!(type === TaskType.INFORMATION || type === TaskType.SELECTION)"
-      />
-      <div class="task-card__toggles" v-if="!isParticipant">
-        <ModuleShare :task="task" :is-on-public-screen="isOnPublicScreen" />
-      </div>
-      <div class="task-card__drag" v-if="!isParticipant">
-        <font-awesome-icon icon="grip-vertical" class="task-card__drag__icon" />
-      </div>
+      <span class="level-right">
+        <Timer
+          class="card__timer level-item"
+          :isActive="task.state === TaskStates.ACTIVE"
+          :task="task"
+          v-on:timerEnds="$emit('timerEnds')"
+          v-on:click="timerClicked"
+          v-if="!(type === TaskType.INFORMATION || type === TaskType.SELECTION)"
+        />
+        <div class="level-item">
+          <div class="card__toggles" v-if="!isParticipant">
+            <ModuleShare :task="task" :is-on-public-screen="isOnPublicScreen" />
+          </div>
+        </div>
+        <div class="card__drag level-item" v-if="!isParticipant">
+          <font-awesome-icon icon="grip-vertical" class="card__drag__icon" />
+        </div>
+      </span>
     </span>
-  </article>
+  </el-card>
   <TimerSettings
     v-if="showTimerSettings"
     v-model:showModal="showTimerSettings"
@@ -95,14 +96,14 @@ export default class TaskCard extends Vue {
   }
 
   mounted(): void {
-    setModuleStyles(this.$refs.item as HTMLElement, this.type);
+    setModuleStyles(this.type, this.$refs.item as HTMLElement);
   }
 
   updated(): void {
-    setModuleStyles(this.$refs.item as HTMLElement, this.type);
+    setModuleStyles(this.type, this.$refs.item as HTMLElement);
   }
 
-  timerClicked(): void {
+  timerClicked(event: PointerEvent): void {
     if (!this.isParticipant) {
       this.showTimerSettings = true;
     }
@@ -111,6 +112,131 @@ export default class TaskCard extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.level {
+  align-items: stretch;
+}
+
+.card {
+  min-width: 18rem;
+
+  &__planet_only {
+    padding-top: 1.5rem;
+    img {
+      //margin: 0.5rem;
+      width: 8rem;
+    }
+  }
+
+  &__planet {
+    background-image: url('~@/assets/illustrations/stars-background_without_dust.png');
+    background-size: cover;
+
+    img {
+      margin: 0.5rem;
+      width: 8rem;
+    }
+  }
+
+  &__half-card {
+    background-color: white;
+    border-radius: var(--border-radius-xs) 0 0 var(--border-radius-xs);
+    width: var(--border-radius-xs);
+    align-self: stretch;
+  }
+
+  &__drag {
+    background-color: var(--color-mint);
+    background-color: var(--module-color);
+    border-radius: 0 var(--border-radius-xs) var(--border-radius-xs) 0;
+    width: 1.5rem;
+    align-self: stretch;
+    cursor: grab;
+
+    &__icon {
+      color: white;
+    }
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .level-right {
+    display: flex;
+    align-items: center;
+  }
+}
+
+@media only screen and (min-width: 950px) {
+  .level-left,
+  .level-right {
+    max-width: 50%;
+  }
+
+  .level {
+    align-items: stretch;
+  }
+
+  .level-right .level-item:not(:last-child) {
+    margin-right: 1.2rem;
+  }
+
+  .card {
+    &__info {
+      max-width: calc(100% - 10rem);
+    }
+  }
+}
+
+@media only screen and (max-width: 949px) {
+  .module-info {
+    text-align: center;
+  }
+
+  .level-item {
+    flex-direction: column;
+  }
+
+  .level,
+  .level-left,
+  .level-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .level-right {
+    align-items: center;
+  }
+
+  .level-left .level-item:not(:last-child) {
+    margin-right: 0;
+  }
+
+  .level-item:not(:last-child) {
+    margin-bottom: 0.75rem;
+  }
+
+  .level-left + .level-right {
+    margin-top: 1.5rem;
+  }
+
+  .card {
+    &__planet {
+      width: unset;
+    }
+
+    &__half-card {
+      height: var(--border-radius-xs);
+      width: unset;
+      border-radius: var(--border-radius-xs) var(--border-radius-xs) 0 0;
+    }
+
+    &__drag {
+      width: unset;
+      height: 1.5rem;
+      border-radius: 0 0 var(--border-radius-xs) var(--border-radius-xs);
+    }
+  }
+}
+
 .clickArea {
   width: 100%;
 }

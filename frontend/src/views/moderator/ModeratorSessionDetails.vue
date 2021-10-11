@@ -1,15 +1,16 @@
 <template>
-  <div v-if="session" class="detail">
-    <Sidebar
-      :is-session="true"
-      :session-id="session.id"
-      :session-connection-key="session.connectionKey"
-      :title="session.title"
-      :pretitle="formatDate(session.creationDate)"
-      :description="session.description"
-    />
-    <Navigation />
-    <main class="detail__content">
+  <ModeratorNavigationLayout v-if="session">
+    <template v-slot:sidebar>
+      <Sidebar
+        :is-session="true"
+        :session-id="session.id"
+        :session-connection-key="session.connectionKey"
+        :title="session.title"
+        :pretitle="formatDate(session.creationDate)"
+        :description="session.description"
+      />
+    </template>
+    <template v-slot:content>
       <el-collapse v-model="openTabs">
         <el-collapse-item
           v-for="(topic, index) in topics"
@@ -23,13 +24,12 @@
             v-model="topics[index].tasks"
             tag="transition-group"
             item-key="order"
-            handle=".task-card__drag"
+            handle=".card__drag"
             @end="dragDone(index)"
           >
             <template #item="{ element }">
               <div class="detail__module">
                 <TaskCard
-                  class="detail__module"
                   :sessionId="sessionId"
                   :type="TaskType[element.taskType]"
                   :task="element"
@@ -45,13 +45,13 @@
           />
         </el-collapse-item>
       </el-collapse>
-    </main>
-    <TaskSettings
-      v-model:show-modal="showSettings"
-      :topic-id="addNewTopicId"
-      @moduleCreated="getTopics"
-    />
-  </div>
+      <TaskSettings
+        v-model:show-modal="showSettings"
+        :topic-id="addNewTopicId"
+        @moduleCreated="getTopics"
+      />
+    </template>
+  </ModeratorNavigationLayout>
 </template>
 
 <script lang="ts">
@@ -61,7 +61,7 @@ import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import TaskSettings from '@/components/moderator/organisms/settings/TaskSettings.vue';
 import TaskCard from '@/components/moderator/organisms/cards/TaskCard.vue';
-import Navigation from '@/components/moderator/molecules/Navigation.vue';
+import ModeratorNavigationLayout from '@/components/moderator/organisms/Layout/ModeratorNavigationLayout.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import { formatDate } from '@/utils/date';
 import TaskType from '@/types/enum/TaskType';
@@ -79,7 +79,7 @@ import { EventType } from '@/types/enum/EventType';
     draggable,
     TaskSettings,
     TaskCard,
-    Navigation,
+    ModeratorNavigationLayout,
     Sidebar,
   },
 })
@@ -154,7 +154,6 @@ export default class ModeratorSessionDetails extends Vue {
 <style lang="scss" scoped>
 .detail {
   background-color: var(--color-background-gray);
-  margin-left: var(--sidebar-width);
   min-height: 100vh;
 
   &__content {

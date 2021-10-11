@@ -1,5 +1,5 @@
 <template>
-  <Header :hasNavigation="false" />
+  <PublicHeader />
   <div class="container2 container2--spaced container2--fullheight-header home">
     <section class="home__content">
       <h1 class="heading heading--big">{{ $t('shared.view.home.header') }}</h1>
@@ -28,11 +28,11 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import Header from '@/components/moderator/organisms/Header.vue';
+import PublicHeader from '@/components/moderator/organisms/Layout/PublicHeader.vue';
 
 @Options({
   components: {
-    Header,
+    PublicHeader,
   },
 })
 export default class Home extends Vue {}
@@ -40,6 +40,10 @@ export default class Home extends Vue {}
 
 <style lang="scss" scoped>
 @import '~@/assets/styles/breakpoints.scss';
+
+.logo-header {
+  padding: 2rem;
+}
 
 .home {
   flex: 1;
