@@ -21,8 +21,7 @@ import {
   removeAccessToken,
 } from '@/services/auth-service';
 import app from '@/main';
-import { EventType } from '@/types/enum/EventType';
-import SnackbarType from '@/types/enum/SnackbarType';
+import { ElMessage } from 'element-plus';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -160,9 +159,10 @@ router.beforeEach((to, from, next) => {
   ) {
     let errorMessage = 'authorisationExpired';
     if (isAuthenticated()) errorMessage = 'incorrectAuthorisationType';
-    app.config.globalProperties.eventBus.emit(EventType.SHOW_SNACKBAR, {
-      type: SnackbarType.ERROR,
-      message: `error.route.${errorMessage}`,
+    ElMessage({
+      message: app.config.globalProperties.$t(`error.route.${errorMessage}`),
+      type: 'error',
+      center: true,
     });
     removeAccessToken();
     next({ name: 'home' });

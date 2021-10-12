@@ -20,12 +20,12 @@
 <script lang="ts">
 import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
-import SnackbarType from '@/types/enum/SnackbarType';
-import { EventType } from '@/types/enum/EventType';
+import { ElMessage } from 'element-plus';
 
 @Options({
   components: {},
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class SessionCode extends Vue {
   @Prop({ default: false }) hasBorder!: boolean;
   @Prop({ default: '' }) code!: string;
@@ -33,15 +33,17 @@ export default class SessionCode extends Vue {
   copyToClipboard(): void {
     navigator.clipboard.writeText(this.code).then(
       () => {
-        this.eventBus.emit(EventType.SHOW_SNACKBAR, {
-          type: SnackbarType.SUCCESS,
-          message: 'info.copiedToClipboard',
+        ElMessage({
+          message: (this as any).$t('info.copyToClipboard'),
+          type: 'success',
+          center: true,
         });
       },
       () => {
-        this.eventBus.emit(EventType.SHOW_SNACKBAR, {
-          type: SnackbarType.ERROR,
-          message: 'error.gui.copiedToClipboard',
+        ElMessage({
+          message: (this as any).$t('error.gui.copyToClipboard'),
+          type: 'error',
+          center: true,
         });
       }
     );

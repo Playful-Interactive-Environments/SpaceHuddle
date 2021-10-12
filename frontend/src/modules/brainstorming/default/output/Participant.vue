@@ -47,17 +47,6 @@
       :isSmall="true"
     />
     <form-error :errors="errors"></form-error>
-    <!--<div class="brainstorming--bottom">
-      <button class="btn btn--mint btn--fullwidth" @click.prevent="submitIdea">
-        {{ $t('module.brainstorming.default.participant.submit') }}
-      </button>
-      <button class="btn btn--icon btn--fullwidth" type="button">
-        <font-awesome-icon icon="rocket" />
-        <span>{{
-          $t('module.brainstorming.default.participant.startGame')
-        }}</span>
-      </button>
-    </div>-->
     <nav class="level is-mobile columns is-gapless">
       <div class="level-left column">
         <input
@@ -97,7 +86,7 @@
       :with-credentials="true"
       ref="upload"
     ></my-upload>
-    <img :src="imgDataUrl" />
+    <img :src="imgDataUrl" alt="" />
   </ParticipantModuleDefaultContainer>
 </template>
 
@@ -112,8 +101,6 @@ import { maxLength, required } from '@vuelidate/validators';
 import FormError from '@/components/shared/atoms/FormError.vue';
 import * as moduleService from '@/services/module-service';
 import * as ideaService from '@/services/idea-service';
-import { EventType } from '@/types/enum/EventType';
-import SnackbarType from '@/types/enum/SnackbarType';
 import {
   addError,
   clearErrors,
@@ -121,6 +108,7 @@ import {
 } from '@/services/exception-service';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { ElMessage } from 'element-plus';
 
 @Options({
   components: {
@@ -138,6 +126,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
     },
   },
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
@@ -208,10 +197,13 @@ export default class Participant extends Vue {
             this.context.$v.$reset();
           });
           setTimeout(this.setNewPlanet, 500);
-          this.eventBus.emit(EventType.SHOW_SNACKBAR, {
-            type: SnackbarType.SUCCESS,
-            message: `info.postIdea`,
-            messageContent: [queryResult.keywords],
+          ElMessage({
+            message: (this as any).$i18n.translateWithFallback(
+              'info.postIdea',
+              [queryResult.keywords]
+            ),
+            type: 'success',
+            center: true,
           });
         },
         (error) => {

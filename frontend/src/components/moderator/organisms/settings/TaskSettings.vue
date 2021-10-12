@@ -79,9 +79,15 @@
             :errors="context.$v.moduleSelection.$errors"
             :isSmall="true"
           />
-          <el-collapse v-model="openTabs" :key="openTabs.length" v-if="moduleParameterComponents.filter(
+          <el-collapse
+            v-model="openTabs"
+            :key="openTabs.length"
+            v-if="
+              moduleParameterComponents.filter(
                 (component) => component.hasModule
-              ).length > 0">
+              ).length > 0
+            "
+          >
             <el-collapse-item
               v-for="component in moduleParameterComponents.filter(
                 (component) => component.hasModule
@@ -194,13 +200,11 @@ import { EventType } from '@/types/enum/EventType';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import { Module } from '@/types/api/Module';
 import ModuleCard from '@/components/moderator/organisms/cards/ModuleCard.vue';
-import ModuleItem from '@/components/shared/molecules/ModuleItem.vue';
 
 @Options({
   components: {
     FormError,
     ModuleCard,
-    ModuleItem,
     TaskParameterComponent: getEmptyComponent(),
   },
   validations: {
@@ -498,5 +502,4 @@ export default class TaskSettings extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

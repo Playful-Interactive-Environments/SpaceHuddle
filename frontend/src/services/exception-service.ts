@@ -1,10 +1,9 @@
 import { AxiosError, AxiosResponse } from 'axios';
 import ApiError from '@/types/api/ApiError';
 import app from '@/main';
-import { EventType } from '@/types/enum/EventType';
-import SnackbarType from '@/types/enum/SnackbarType';
 import HttpStatusCode from '@/types/enum/HttpStatusCode ';
 import { removeAccessToken } from '@/services/auth-service';
+import { ElMessage } from 'element-plus';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -87,20 +86,14 @@ export const apiErrorHandling = async (
             );
           });
         }
-        app.config.globalProperties.eventBus.emit(EventType.SHOW_SNACKBAR, {
-          type: SnackbarType.ERROR,
-          message: errorMessage,
-        });
 
+        reportErrors(errorMessage);
         errorResult.errorMessage = errorMessage;
       } else if (response.statusText) {
-        app.config.globalProperties.eventBus.emit(EventType.SHOW_SNACKBAR, {
-          type: SnackbarType.ERROR,
-          message: `error.api.general.${response.statusText.replaceAll(
-            '.',
-            ''
-          )}`,
-        });
+        const errorMessage: string[] = [
+          `error.api.general.${response.statusText.replaceAll('.', '')}`,
+        ];
+        reportErrors(errorMessage);
       }
     }
 
@@ -115,6 +108,17 @@ export const apiErrorHandling = async (
     }
   }
   return errorResult;
+};
+
+const reportErrors = (errors: string[]): void => {
+  console.warn('try report');
+  errors.forEach((error) => {
+    ElMessage({
+      message: app.config.globalProperties.$i18n.translateWithFallback(error),
+      type: 'error',
+      center: true,
+    });
+  });
 };
 
 export const apiErrorLog = async (error: AxiosError): Promise<void> => {

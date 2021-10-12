@@ -84,6 +84,10 @@ export const removeAccessToken = (): void => {
   //app.config.globalProperties.$cookies.remove(JWT_KEY_PARTICIPANT);
 };
 
+export const removeAccessTokenModerator = (): void => {
+  app.config.globalProperties.$cookies.remove(JWT_KEY_MODERATOR);
+};
+
 export const setBrowserKey = (key: string): void => {
   app.config.globalProperties.$cookies.set(BROWSER_KEY, key);
 };

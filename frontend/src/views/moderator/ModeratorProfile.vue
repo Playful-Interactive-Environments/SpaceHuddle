@@ -41,7 +41,7 @@ export default class ModeratorProfile extends Vue {
   }
 
   logout(): void {
-    authService.removeAccessToken();
+    authService.removeAccessTokenModerator();
     this.$router.push({ name: 'home' });
   }
 }

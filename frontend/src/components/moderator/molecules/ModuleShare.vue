@@ -38,15 +38,16 @@ import {
   getErrorMessage,
 } from '@/services/exception-service';
 import * as taskService from '@/services/task-service';
-import SnackbarType from '@/types/enum/SnackbarType';
 import TaskTypeColor from '@/types/TaskTypeColor';
 import * as sessionService from '@/services/session-service';
+import { ElMessage } from 'element-plus';
 
 @Options({
   components: {
     TimerSettings,
   },
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModuleShare extends Vue {
   @Prop() task!: Task;
   @Prop({ default: false }) isOnPublicScreen!: boolean;
@@ -89,9 +90,10 @@ export default class ModuleShare extends Vue {
         .displayOnPublicScreen(this.task.sessionId, publicScreenTaskId)
         .then(
           () => {
-            this.eventBus.emit(EventType.SHOW_SNACKBAR, {
-              type: SnackbarType.SUCCESS,
-              message: 'info.updatePublicScreen',
+            ElMessage({
+              message: (this as any).$t('info.updatePublicScreen'),
+              type: 'success',
+              center: true,
             });
 
             this.eventBus.emit(
@@ -124,9 +126,10 @@ export default class ModuleShare extends Vue {
       const saveVersion = convertToSaveVersion(this.task);
       taskService.updateTask(saveVersion).then(
         () => {
-          this.eventBus.emit(EventType.SHOW_SNACKBAR, {
-            type: SnackbarType.SUCCESS,
-            message: 'info.updateParticipantState',
+          ElMessage({
+            message: (this as any).$t('info.updateParticipantState'),
+            type: 'success',
+            center: true,
           });
         },
         (error) => {

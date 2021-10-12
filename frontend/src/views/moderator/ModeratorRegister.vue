@@ -122,14 +122,13 @@ import {
 } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 import FormError from '@/components/shared/atoms/FormError.vue';
-import SnackbarType from '@/types/enum/SnackbarType';
 import * as userService from '@/services/user-service';
-import { EventType } from '@/types/enum/EventType';
 import {
   getErrorMessage,
   addError,
   clearErrors,
 } from '@/services/exception-service';
+import { ElMessage } from 'element-plus';
 
 @Options({
   components: {
@@ -166,6 +165,7 @@ import {
     },
   },
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorRegister extends Vue {
   email = '';
   password = '';
@@ -192,9 +192,10 @@ export default class ModeratorRegister extends Vue {
           this.$router.push({
             name: 'moderator-login',
           });
-          this.eventBus.emit(EventType.SHOW_SNACKBAR, {
-            type: SnackbarType.SUCCESS,
-            message: 'info.accountCreated',
+          ElMessage({
+            message: (this as any).$t('info.accountCreated'),
+            type: 'success',
+            center: true,
           });
         },
         (error) => {

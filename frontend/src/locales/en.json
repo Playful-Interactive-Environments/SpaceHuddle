@@ -1,6 +1,6 @@
 {
   "info": {
-    "copiedToClipboard": "Successfully copied to clipboard.",
+    "copyToClipboard": "Successfully copied to clipboard.",
     "accountCreated": "Your account was successfully created.",
     "updatePublicScreen": "Successfully updated public screen.",
     "updateParticipantState": "Successfully updated participant state.",

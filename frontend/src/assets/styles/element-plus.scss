@@ -112,6 +112,48 @@ $--font-size: (
         }
 }
 
+.el-message {
+        &--success {
+                background-color: var(--el-color-success);
+                border-color: white;
+                --el-message-font-color: white;
+        }
+
+        .el-icon-success {
+                --el-message-font-color: white;
+        }
+
+        &--error {
+                background-color: var(--el-color-error);
+                border-color: white;
+                --el-message-font-color: white;
+        }
+
+        .el-icon-error {
+                --el-message-font-color: white;
+        }
+
+        &--warning {
+                background-color: var(--el-color-warning);
+                border-color: white;
+                --el-message-font-color: white;
+        }
+
+        .el-icon-warning {
+                --el-message-font-color: white;
+        }
+
+        &--info {
+                background-color: var(--el-color-info);
+                border-color: white;
+                --el-message-font-color: white;
+        }
+
+        .el-icon-info {
+                --el-message-font-color: white;
+        }
+}
+
 .el-input {
         --el-input-background-color: #{$color-background-gray};
         --el-input-icon-color: var(--color-primary);
