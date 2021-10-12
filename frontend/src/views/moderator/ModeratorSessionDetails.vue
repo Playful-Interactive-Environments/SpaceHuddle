@@ -61,7 +61,7 @@ import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import TaskSettings from '@/components/moderator/organisms/settings/TaskSettings.vue';
 import TaskCard from '@/components/moderator/organisms/cards/TaskCard.vue';
-import ModeratorNavigationLayout from '@/components/moderator/organisms/Layout/ModeratorNavigationLayout.vue';
+import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/ModeratorNavigationLayout.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import { formatDate } from '@/utils/date';
 import TaskType from '@/types/enum/TaskType';

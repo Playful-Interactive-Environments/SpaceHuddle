@@ -25,7 +25,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import * as authService from '@/services/auth-service';
-import ModeratorNavigationLayout from '@/components/moderator/organisms/Layout/ModeratorNavigationLayout.vue';
+import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/ModeratorNavigationLayout.vue';
 
 @Options({
   components: {

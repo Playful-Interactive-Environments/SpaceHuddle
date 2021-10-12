@@ -57,7 +57,7 @@ import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
 import { OrderGroupList } from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { reloadCollapseContent } from '@/services/gui-service';
+import { reloadCollapseContent } from '@/utils/collapse';
 
 @Options({
   components: {

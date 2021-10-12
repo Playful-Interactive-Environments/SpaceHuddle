@@ -8,7 +8,6 @@ import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Idea } from '@/types/api/Idea';
 import { OrderGroupList, SortOrderOption } from '@/types/api/OrderGroup';
-import { Task } from '@/types/api/Task';
 import IdeaSortOrder, {
   IdeaSortOrderCategorisation,
 } from '@/types/enum/IdeaSortOrder';
@@ -102,7 +101,7 @@ export const getSortOrderOptions = async (
 export const convertToOrderGroups = (
   ideas: Idea[],
   actualOrderGroupList: OrderGroupList = {},
-  filter: (Idea) => boolean = (Idea) => {
+  filter: (idea) => boolean = () => {
     return true;
   }
 ): OrderGroupList => {
@@ -138,7 +137,7 @@ export const getOrderGroups = async (
   refId: string | null = null,
   authHeaderType = EndpointAuthorisationType.MODERATOR,
   actualOrderGroupList: OrderGroupList = {},
-  filter: (Idea) => boolean = (Idea) => {
+  filter: (idea) => boolean = () => {
     return true;
   }
 ): Promise<{ ideas: Idea[]; oderGroups: OrderGroupList }> => {

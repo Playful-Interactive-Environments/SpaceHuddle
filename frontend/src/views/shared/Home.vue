@@ -28,7 +28,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import PublicHeader from '@/components/moderator/organisms/Layout/PublicHeader.vue';
+import PublicHeader from '@/components/moderator/organisms/layout/PublicHeader.vue';
 
 @Options({
   components: {

@@ -124,7 +124,7 @@ import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
 import draggable from 'vuedraggable';
 import { OrderGroupList, SortOrderOption } from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { reloadCollapseContent } from '@/services/gui-service';
+import { reloadCollapseContent } from '@/utils/collapse';
 import { DefaultIdeaSortOrder } from '@/types/enum/IdeaSortOrder';
 
 const SELECTION_KEY = 'selection';

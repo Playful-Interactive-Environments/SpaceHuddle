@@ -50,7 +50,7 @@ import * as taskService from '@/services/task-service';
 import { Category } from '@/types/api/Category';
 import { OrderGroupList } from '@/types/api/OrderGroup';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
-import { reloadCollapseContent } from '@/services/gui-service';
+import { reloadCollapseContent } from '@/utils/collapse';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({

@@ -50,7 +50,7 @@ import * as sessionService from '@/services/session-service';
 import * as taskService from '@/services/task-service';
 
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
-import ModeratorNavigationLayout from '@/components/moderator/organisms/Layout/ModeratorNavigationLayout.vue';
+import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/ModeratorNavigationLayout.vue';
 import FormError from '@/components/shared/atoms/FormError.vue';
 import TaskSettings from '@/components/moderator/organisms/settings/TaskSettings.vue';
 import { EventType } from '@/types/enum/EventType';

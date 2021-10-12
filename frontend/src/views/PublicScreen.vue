@@ -34,7 +34,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 
-import PublicHeader from '@/components/moderator/organisms/Layout/PublicHeader.vue';
+import PublicHeader from '@/components/moderator/organisms/layout/PublicHeader.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 
 import * as sessionService from '@/services/session-service';
