@@ -33,7 +33,7 @@ export default class HalfCard extends Vue {
   margin: 0;
 
   &__content {
-    text-align: center;
+    //text-align: center;
   }
 }
 

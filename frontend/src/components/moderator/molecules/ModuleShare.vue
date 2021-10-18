@@ -32,11 +32,6 @@ import { EventType } from '@/types/enum/EventType';
 import TaskStates from '@/types/enum/TaskStates';
 import TaskType from '@/types/enum/TaskType';
 import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
-import {
-  addError,
-  clearErrors,
-  getErrorMessage,
-} from '@/services/exception-service';
 import * as taskService from '@/services/task-service';
 import TaskTypeColor from '@/types/TaskTypeColor';
 import * as sessionService from '@/services/session-service';
@@ -51,7 +46,6 @@ import { ElMessage } from 'element-plus';
 export default class ModuleShare extends Vue {
   @Prop() task!: Task;
   @Prop({ default: false }) isOnPublicScreen!: boolean;
-  errors: string[] = [];
 
   hasParticipantComponent = false;
   hasPublicScreenComponent = false;
@@ -85,26 +79,20 @@ export default class ModuleShare extends Vue {
   set publicScreen(newValue: boolean) {
     if (this.task) {
       const publicScreenTaskId = newValue ? this.task.id : '{taskId}';
-      clearErrors(this.errors);
       sessionService
         .displayOnPublicScreen(this.task.sessionId, publicScreenTaskId)
-        .then(
-          () => {
-            ElMessage({
-              message: (this as any).$t('info.updatePublicScreen'),
-              type: 'success',
-              center: true,
-            });
+        .then(() => {
+          ElMessage({
+            message: (this as any).$t('info.updatePublicScreen'),
+            type: 'success',
+            center: true,
+          });
 
-            this.eventBus.emit(
-              EventType.CHANGE_PUBLIC_SCREEN,
-              publicScreenTaskId
-            );
-          },
-          (error) => {
-            addError(this.errors, getErrorMessage(error));
-          }
-        );
+          this.eventBus.emit(
+            EventType.CHANGE_PUBLIC_SCREEN,
+            publicScreenTaskId
+          );
+        });
     }
   }
 
@@ -120,22 +108,16 @@ export default class ModuleShare extends Vue {
 
   set participant(newValue: boolean) {
     this.showTimerSettings = newValue;
-    clearErrors(this.errors);
     if (this.task) {
       this.task.state = newValue ? TaskStates.ACTIVE : TaskStates.WAIT;
       const saveVersion = convertToSaveVersion(this.task);
-      taskService.updateTask(saveVersion).then(
-        () => {
-          ElMessage({
-            message: (this as any).$t('info.updateParticipantState'),
-            type: 'success',
-            center: true,
-          });
-        },
-        (error) => {
-          addError(this.errors, getErrorMessage(error));
-        }
-      );
+      taskService.updateTask(saveVersion).then(() => {
+        ElMessage({
+          message: (this as any).$t('info.updateParticipantState'),
+          type: 'success',
+          center: true,
+        });
+      });
     }
   }
 }

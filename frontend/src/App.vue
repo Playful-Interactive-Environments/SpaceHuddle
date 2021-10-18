@@ -9,5 +9,5 @@ import { Vue, Options } from 'vue-class-component';
 @Options({
   components: {},
 })
-export default class Sidebar extends Vue {}
+export default class App extends Vue {}
 </script>

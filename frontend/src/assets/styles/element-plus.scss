@@ -98,6 +98,7 @@ $--font-size: (
 
 .el-dialog {
         --el-dialog-padding-primary: #{$dialog-padding};
+        max-width: 60rem;
 
         &__title {
                 font-weight: var(--font-weight-semibold);
@@ -151,6 +152,44 @@ $--font-size: (
 
         .el-icon-info {
                 --el-message-font-color: white;
+        }
+}
+
+.el-form-item {
+        &__label {
+                font-size: var(--font-size-default);
+                font-weight: var(--font-weight-semibold);
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                line-height: unset;
+        }
+}
+
+.el-button {
+        &--submit {
+                --el-button-font-color: white;
+                --el-button-active-font-color: white;
+
+                background-color: var(--color-mint);
+                background: linear-gradient(
+                                90deg,
+                                var(--color-mint) 2%,
+                                var(--color-mint-dark) 50%,
+                                var(--color-mint) 98%
+                );
+                background-size: 200% 100%;
+                background-position: 100%;
+                transition: background-position 0.2s;
+
+                &:hover {
+                        color: var(--el-button-font-color);
+                        background-position: 0;
+                        opacity: 1;
+                }
+
+                &:focus {
+                        color: var(--el-button-font-color);
+                }
         }
 }
 

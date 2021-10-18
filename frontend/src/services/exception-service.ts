@@ -9,6 +9,20 @@ import { ElMessage } from 'element-plus';
 
 const showLog = false;
 
+export const getSingleTranslatedErrorMessage = (error: AxiosError): string => {
+  if (
+    error.response &&
+    error.response.data &&
+    error.response.data.errorMessage &&
+    error.response.data.errorMessage.length > 0
+  ) {
+    return app.config.globalProperties.$i18n.translateWithFallback(
+      error.response.data.errorMessage[0]
+    );
+  }
+  return '';
+};
+
 export const getErrorMessage = (error: AxiosError): string[] => {
   if (error.response && error.response.data && error.response.data.errorMessage)
     return error.response.data.errorMessage;
@@ -111,7 +125,6 @@ export const apiErrorHandling = async (
 };
 
 const reportErrors = (errors: string[]): void => {
-  console.warn('try report');
   errors.forEach((error) => {
     ElMessage({
       message: app.config.globalProperties.$i18n.translateWithFallback(error),

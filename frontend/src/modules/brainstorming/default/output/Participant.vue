@@ -10,129 +10,155 @@
         />
       </transition>
     </template>
-    <input
-      id="keywords"
-      v-if="showSecondInput"
-      v-model="keywords"
-      class="textarea textarea--fullwidth"
-      :placeholder="$t('module.brainstorming.default.participant.keywordInfo')"
-    />
-    <FormError
-      v-if="
-        context.$v.keywords.$error ||
-        (context.$v.keywords.$dirty && keywordsEmpty)
-      "
-      :errors="
-        context.$v.keywords.$error
-          ? context.$v.keywords.$errors
-          : { keywordsEmptyMsg }
-      "
-      :isSmall="true"
-    />
-    <textarea
-      id="description"
-      class="textarea textarea--fullwidth"
-      :placeholder="
-        $t('module.brainstorming.default.participant.descriptionInfo')
-      "
-      ref="ideaTextfield"
-      rows="4"
-      contenteditable
-      v-model="description"
-      @blur="context.$v.description.$touch()"
-    ></textarea>
-    <FormError
-      v-if="context.$v.description.$error"
-      :errors="context.$v.description.$errors"
-      :isSmall="true"
-    />
-    <form-error :errors="errors"></form-error>
-    <nav class="level is-mobile columns is-gapless">
-      <div class="level-left column">
-        <input
-          id="link"
-          v-if="showLinkInput"
-          v-model="imageWebLink"
-          class="input input--fullwidth"
-          :placeholder="$t('module.brainstorming.default.participant.linkInfo')"
+    <ValidationForm
+      :form-data="formData"
+      :use-default-submit="false"
+      v-on:submitDataValid="save"
+      v-on:reset="reset"
+    >
+      <el-form-item
+        v-if="showSecondInput"
+        prop="keywords"
+        :rules="[
+          defaultFormRules.ruleRequired,
+          defaultFormRules.ruleToLong(36),
+        ]"
+      >
+        <el-input
+          v-model="formData.keywords"
+          name="keywords"
+          :placeholder="
+            $t('module.brainstorming.default.participant.keywordInfo')
+          "
         />
-      </div>
-      <div class="level-right column" role="button">
-        <div class="level-item" v-on:click="showLinkInput = !showLinkInput">
-          <font-awesome-icon icon="share-alt" />
-        </div>
-        <div
-          class="level-item"
-          v-on:click="showUploadDialog = !showUploadDialog"
-        >
-          <font-awesome-icon icon="paperclip" />
-        </div>
-        <div class="level-item" v-on:click="submitIdea">
-          <font-awesome-icon icon="paper-plane" />
-        </div>
-      </div>
-    </nav>
-    <my-upload
-      id="upload"
-      @crop-success="cropSuccess"
-      v-model="showUploadDialog"
-      :width="512"
-      :height="512"
-      img-format="png"
-      langType="en"
-      :no-square="true"
-      :no-circle="true"
-      :no-rotate="false"
-      :with-credentials="true"
-      ref="upload"
-    ></my-upload>
-    <img :src="imgDataUrl" alt="" />
+      </el-form-item>
+      <el-form-item
+        prop="description"
+        :rules="[
+          defaultFormRules.ruleRequired,
+          defaultFormRules.ruleToLong(255),
+        ]"
+      >
+        <el-input
+          type="textarea"
+          rows="4"
+          v-model="formData.description"
+          name="keywords"
+          :placeholder="
+            $t('module.brainstorming.default.participant.descriptionInfo')
+          "
+          v-on:keypress="submitOnEnter"
+        />
+      </el-form-item>
+      <el-form-item prop="imageWebLink" :rules="[defaultFormRules.ruleUrl]">
+        <el-container>
+          <el-aside width="7rem">
+            <ImagePicker
+              class="media-left"
+              v-model:link="formData.imageWebLink"
+              v-model:image="formData.imgDataUrl"
+              :overlay="false"
+            />
+          </el-aside>
+          <el-container>
+            <el-main>
+              <el-input
+                v-if="showLinkInput"
+                v-model="formData.imageWebLink"
+                name="link"
+                autocomplete="on"
+                :placeholder="
+                  $t('module.brainstorming.default.participant.linkInfo')
+                "
+              />
+            </el-main>
+            <el-footer>
+              <div role="button">
+                <el-button v-on:click="showLinkInput = !showLinkInput" circle>
+                  <font-awesome-icon icon="share-alt" />
+                </el-button>
+                <el-button
+                  v-on:click="showUploadDialog = !showUploadDialog"
+                  circle
+                >
+                  <font-awesome-icon icon="paperclip" />
+                </el-button>
+                <el-button native-type="submit" circle>
+                  <font-awesome-icon icon="paper-plane" />
+                </el-button>
+              </div>
+            </el-footer>
+          </el-container>
+        </el-container>
+      </el-form-item>
+      <el-form-item
+        prop="stateMessage"
+        :rules="[defaultFormRules.ruleStateMessage]"
+      >
+        <el-input v-model="formData.stateMessage" style="display: none" />
+      </el-form-item>
+
+      <my-upload
+        id="upload"
+        @crop-success="imageUploadSuccess"
+        v-model="showUploadDialog"
+        :width="512"
+        :height="512"
+        img-format="png"
+        langType="en"
+        :no-square="true"
+        :no-circle="true"
+        :no-rotate="false"
+        :with-credentials="true"
+        ref="upload"
+      ></my-upload>
+    </ValidationForm>
   </ParticipantModuleDefaultContainer>
 </template>
 
 <script lang="ts">
-import { Options, setup, Vue } from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import ParticipantModuleDefaultContainer from '@/components/participant/organisms/ParticipantModuleDefaultContainer.vue';
 import myUpload from 'vue-image-crop-upload/upload-3.vue';
-
-import useVuelidate from '@vuelidate/core';
-import { maxLength, required } from '@vuelidate/validators';
-import FormError from '@/components/shared/atoms/FormError.vue';
 import * as moduleService from '@/services/module-service';
 import * as ideaService from '@/services/idea-service';
-import {
-  addError,
-  clearErrors,
-  getErrorMessage,
-} from '@/services/exception-service';
+import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { ElMessage } from 'element-plus';
+import ValidationForm, {
+  ValidationFormCall,
+} from '@/components/shared/molecules/ValidationForm.vue';
+import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import { ValidationData } from '@/types/ui/ValidationRule';
+import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
+import { submitOnEnter } from '@/types/ui/submit';
 
 @Options({
   components: {
     ParticipantModuleDefaultContainer,
-    FormError,
+    ValidationForm,
+    ImagePicker,
     'my-upload': myUpload,
-  },
-  validations: {
-    keywords: {
-      max: maxLength(36),
-    },
-    description: {
-      required,
-      max: maxLength(255),
-    },
   },
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Participant extends Vue {
+  defaultFormRules: ValidationRuleDefinition = defaultFormRules;
+  submitOnEnter = submitOnEnter;
+
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
   module: Module | null = null;
 
-  imgDataUrl = ''; // the datebase64 url of created image
+  formData: ValidationData = {
+    keywords: '',
+    description: '',
+    imageWebLink: null,
+    imgDataUrl: null, // the datebase64 url of created image
+  };
+
   showUploadDialog = false;
   showLinkInput = false;
 
@@ -143,11 +169,6 @@ export default class Participant extends Vue {
     require('@/assets/illustrations/planets/brainstorming03.png'),
     require('@/assets/illustrations/planets/brainstorming04.png'),
   ];
-  description = '';
-  errors: string[] = [];
-  keywords = '';
-  imageWebLink = '';
-  readonly keywordsEmptyMsg = 'error.vuelidate.keywordsRequired';
   scalePlanet = false;
 
   @Watch('moduleId', { immediate: true })
@@ -165,37 +186,33 @@ export default class Participant extends Vue {
     }
   }
 
-  context = setup(() => {
-    return {
-      $v: useVuelidate(),
-    };
-  });
-
   get keywordsEmpty(): boolean {
-    return this.showSecondInput && this.keywords.length <= 0;
+    return this.showSecondInput && this.formData.keywords.length <= 0;
   }
 
-  async submitIdea(): Promise<void> {
-    clearErrors(this.errors);
-    await this.context.$v.$validate();
-    if (this.context.$v.$error || this.keywordsEmpty) return;
+  reset(): void {
+    this.formData.keywords = '';
+    this.formData.description = '';
+    this.formData.imageWebLink = null;
+    this.formData.imgDataUrl = null;
+    this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
+  }
 
+  async save(): Promise<void> {
     ideaService
       .postIdea(this.taskId, {
-        description: this.keywords.length > 0 ? this.description : '',
-        keywords: this.keywords.length > 0 ? this.keywords : this.description,
-        image: this.imgDataUrl,
-        link: this.showLinkInput ? this.imageWebLink : '',
+        description:
+          this.formData.keywords.length > 0 ? this.formData.description : '',
+        keywords:
+          this.formData.keywords.length > 0
+            ? this.formData.keywords
+            : this.formData.description,
+        image: this.formData.imgDataUrl,
+        link: this.formData.imageWebLink,
       })
       .then(
         (queryResult) => {
-          this.description = '';
-          this.keywords = '';
-          this.imageWebLink = '';
-          this.imgDataUrl = '';
-          this.$nextTick(() => {
-            this.context.$v.$reset();
-          });
+          this.reset();
           setTimeout(this.setNewPlanet, 500);
           ElMessage({
             message: (this as any).$i18n.translateWithFallback(
@@ -207,13 +224,13 @@ export default class Participant extends Vue {
           });
         },
         (error) => {
-          addError(this.errors, getErrorMessage(error));
+          this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
         }
       );
   }
 
   get showSecondInput(): boolean {
-    return this.description.length > 60;
+    return this.formData.description.length > 60;
   }
 
   setNewPlanet(): void {
@@ -227,14 +244,27 @@ export default class Participant extends Vue {
     }
   }
 
-  cropSuccess(imgDataUrl: string): void {
-    this.imgDataUrl = imgDataUrl;
+  imageLinkChanged(): void {
+    this.formData.imgDataUrl = null;
+  }
+
+  imageUploadSuccess(imgDataUrl: string): void {
+    this.formData.imgDataUrl = imgDataUrl;
+    this.formData.imageWebLink = null;
     (this.$refs.upload as any).setStep(1);
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.el-button {
+  border: unset;
+
+  &:focus {
+    background-color: unset;
+  }
+}
+
 .level-item {
   margin: 1.3rem auto;
   //margin-top: 0.5rem;
@@ -243,5 +273,13 @@ export default class Participant extends Vue {
 
 .level.is-mobile .level-item:not(:last-child) {
   margin-bottom: auto;
+}
+
+.el-container.is-vertical {
+  padding-left: 1rem;
+}
+
+.el-footer {
+  text-align: right;
 }
 </style>

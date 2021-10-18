@@ -73,11 +73,6 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import * as ideaService from '@/services/idea-service';
 import { Idea } from '@/types/api/Idea';
-import {
-  getErrorMessage,
-  addError,
-  clearErrors,
-} from '@/services/exception-service';
 import IdeaStates from '@/types/enum/IdeaStates';
 import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
 
@@ -90,7 +85,6 @@ export default class IdeaCard extends Vue {
   @Prop({ default: true }) isEditable!: boolean;
   @Prop({ default: false }) isSelectable!: boolean;
   @Prop({ default: false, reactive: true }) isSelected!: boolean;
-  errors: string[] = [];
   showSettings = false;
 
   IdeaStates = IdeaStates;
@@ -122,15 +116,9 @@ export default class IdeaCard extends Vue {
   }
 
   async deleteIdea(): Promise<void> {
-    clearErrors(this.errors);
-    ideaService.deleteIdea(this.idea.id).then(
-      () => {
-        this.$emit('ideaDeleted', this.idea.id);
-      },
-      (error) => {
-        addError(this.errors, getErrorMessage(error));
-      }
-    );
+    ideaService.deleteIdea(this.idea.id).then(() => {
+      this.$emit('ideaDeleted', this.idea.id);
+    });
   }
 
   menuItemSelected(command: string): void {

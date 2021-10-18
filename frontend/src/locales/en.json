@@ -20,10 +20,19 @@
       "Value is not a valid email address": "Value is not a valid email address",
       "This field should be at least 8 long": "This field should be at least 8 long",
       "The value is not a valid URL address": "The value is not a valid URL address",
+      "required": "This field must be set.",
+      "email": "Value is not a valid email address",
+      "toShort": "The input is too short. The minimum length is ",
+      "toLong": "The input is too long. The maximum length is ",
+      "url": "The value is not a valid URL address",
+      "number": "The value is not a valid number",
+      "date": "The value is not a valid date",
       "wrongPasswordSyntax": "Password must contain at least one lowercase and uppercase letter, a number and a special character.",
       "passwordNotMatch": "Password repetition does not match.",
+      "keyNotMatch": "This is a prototype. You need the prototype key to test the application in this state.",
       "keywordsRequired": "Your idea is very long, please provide some keywords.",
-      "noSelection": "Please select the data to be assigned."
+      "noSelection": "Please select the data to be assigned.",
+      "validationErrors": "Not all input fields are valid. Please check your input."
     },
     "route": {
       "authorisationExpired": "Authorisation has expired.",
@@ -95,6 +104,11 @@
     }
   },
   "moderator": {
+    "atom": {
+      "imagePicker": {
+        "add": "add image"
+      }
+    },
     "molecule": {
       "moduleCount": {
         "topics": "Topics",
@@ -121,6 +135,11 @@
           "descriptionExample": "...",
           "image": "image",
           "imageExample": "",
+          "link": "link",
+          "linkExample": "",
+          "submit": "Save"
+        },
+        "linkSettings": {
           "link": "link",
           "linkExample": "",
           "submit": "Save"

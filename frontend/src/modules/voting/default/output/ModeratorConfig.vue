@@ -1,61 +1,37 @@
 <template>
-  <section>
-    <label for="maxRate" class="heading heading--xs">{{
-      $t('module.voting.default.moderatorConfig.maxRate')
-    }}</label>
-    <input
-      id="maxRate"
+  <el-form-item
+    :label="$t('module.voting.default.moderatorConfig.maxRate')"
+    :prop="`${rulePropPath}.maxRate`"
+    :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleNumber]"
+  >
+    <el-input-number
       v-model="modelValue.maxRate"
-      type="number"
-      class="input input--fullwidth"
       :placeholder="$t('module.voting.default.moderatorConfig.maxRateExample')"
-      @blur="context.$v.modelValue.maxRate.$touch()"
     />
-    <FormError
-      v-if="context.$v.modelValue.maxRate.$error"
-      :errors="context.$v.modelValue.maxRate.$errors"
-      :isSmall="true"
-    />
-  </section>
+  </el-form-item>
 </template>
 
 <script lang="ts">
-import { Options, setup, Vue } from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import * as moduleService from '@/services/module-service';
-import { required, numeric } from '@vuelidate/validators';
-import useVuelidate from '@vuelidate/core';
-import FormError from '@/components/shared/atoms/FormError.vue';
 import { Module } from '@/types/api/Module';
+import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 
 @Options({
-  components: {
-    FormError,
-  },
-  validations: {
-    modelValue: {
-      maxRate: {
-        required,
-        numeric,
-      },
-    },
-  },
+  components: {},
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorConfig extends Vue {
+  defaultFormRules: ValidationRuleDefinition = defaultFormRules;
+  @Prop() readonly rulePropPath!: string;
+
   @Prop() readonly moduleId!: string;
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
   module: Module | null = null;
-  errors: string[] = [];
-
-  context = setup(() => {
-    return {
-      $v: useVuelidate(),
-    };
-  });
 
   @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {

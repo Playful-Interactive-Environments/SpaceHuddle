@@ -8,48 +8,48 @@
         <p class="login__description">
           {{ $t('moderator.view.login.info') }}
         </p>
-        <form @submit.prevent="loginUser">
-          <h3 class="heading heading--xs">
-            {{ $t('moderator.view.login.email') }}
-          </h3>
-          <input
-            class="input input--fullwidth"
-            name="email"
-            :placeholder="$t('moderator.view.login.emailInfo')"
-            type="email"
-            v-model="email"
-            @blur="context.$v.email.$touch()"
-          />
-          <FormError
-            v-if="context.$v.email.$error"
-            :errors="context.$v.email.$errors"
-            :isSmall="true"
-          />
-          <h3 class="heading heading--xs">
-            {{ $t('moderator.view.login.password') }}
-          </h3>
-          <input
-            class="input input--fullwidth"
-            name="password"
-            :placeholder="$t('moderator.view.login.passwordInfo')"
-            type="password"
-            v-model="password"
-            @blur="context.$v.password.$touch()"
-          />
-          <FormError
-            v-if="context.$v.password.$error"
-            :errors="context.$v.password.$errors"
-            :isSmall="true"
-          />
-          <form-error :errors="errors"></form-error>
-          <button class="btn btn--gradient btn--fullwidth" type="submit">
-            {{ $t('moderator.view.login.submit') }}
-            Login
-          </button>
-          <p class="login__forgot-pw" role="button">
-            {{ $t('moderator.view.login.forgot') }}
-          </p>
-        </form>
+        <ValidationForm
+          :form-data="formData"
+          submit-label-key="moderator.view.login.submit"
+          v-on:submitDataValid="save"
+        >
+          <el-form-item
+            :label="$t('moderator.view.login.email')"
+            prop="email"
+            :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleEmail]"
+          >
+            <el-input
+              v-model="formData.email"
+              type="email"
+              name="email"
+              autocomplete="on"
+              :placeholder="$t('moderator.view.login.emailInfo')"
+            />
+          </el-form-item>
+          <el-form-item
+            :label="$t('moderator.view.login.password')"
+            prop="password"
+            :rules="[
+              defaultFormRules.ruleRequired,
+              defaultFormRules.ruleToShort(8),
+              defaultFormRules.ruleToLong(255),
+            ]"
+          >
+            <el-input
+              v-model="formData.password"
+              type="password"
+              name="password"
+              :placeholder="$t('moderator.view.login.passwordInfo')"
+            ></el-input>
+          </el-form-item>
+          <template #afterSubmit>
+            <el-form-item>
+              <p class="login__forgot-pw" role="button">
+                {{ $t('moderator.view.login.forgot') }}
+              </p>
+            </el-form-item>
+          </template>
+        </ValidationForm>
       </div>
     </section>
     <section
@@ -76,65 +76,45 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue, setup } from 'vue-class-component';
-import { maxLength, minLength, required, email } from '@vuelidate/validators';
-import useVuelidate from '@vuelidate/core';
-import FormError from '@/components/shared/atoms/FormError.vue';
+import { Options, Vue } from 'vue-class-component';
 import * as authService from '@/services/auth-service';
 import * as userService from '@/services/user-service';
-import {
-  addError,
-  clearErrors,
-  getErrorMessage,
-} from '@/services/exception-service';
+import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
+import { ValidationData } from '@/types/ui/ValidationRule';
+import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 
 @Options({
   components: {
-    FormError,
-  },
-  validations: {
-    email: {
-      email,
-      required,
-    },
-    password: {
-      required,
-      min: minLength(8),
-      max: maxLength(255),
-    },
+    ValidationForm,
   },
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorLogin extends Vue {
-  email = '';
-  password = '';
-  errors: string[] = [];
+  defaultFormRules: ValidationRuleDefinition = defaultFormRules;
 
-  context = setup(() => {
-    return {
-      $v: useVuelidate(),
-    };
-  });
+  formData: ValidationData = {
+    email: '',
+    password: '',
+  };
 
-  async loginUser(): Promise<void> {
-    clearErrors(this.errors);
-
-    await this.context.$v.$validate();
-    if (this.context.$v.$error) return;
-
-    userService.loginUser(this.email, this.password).then(
-      (queryResult) => {
-        if (queryResult.accessToken) {
-          authService.setAccessTokenModerator(queryResult.accessToken);
-          authService.setUserData(this.email);
-          this.$router.push({
-            name: 'moderator-session-overview',
-          });
+  async save(): Promise<void> {
+    await userService
+      .loginUser(this.formData.email, this.formData.password)
+      .then(
+        (queryResult) => {
+          if (queryResult.accessToken) {
+            authService.setAccessTokenModerator(queryResult.accessToken);
+            authService.setUserData(this.formData.email);
+            this.$router.push({
+              name: 'moderator-session-overview',
+            });
+          }
+        },
+        (error) => {
+          this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
         }
-      },
-      (error) => {
-        addError(this.errors, getErrorMessage(error));
-      }
-    );
+      );
   }
 }
 </script>
@@ -173,14 +153,6 @@ export default class ModeratorLogin extends Vue {
   &__forgot-pw {
     text-align: center;
     cursor: pointer;
-  }
-
-  button {
-    margin: 1.5rem 0 1rem;
-  }
-
-  input {
-    margin-top: 0;
   }
 }
 </style>

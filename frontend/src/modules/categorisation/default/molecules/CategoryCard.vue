@@ -70,7 +70,7 @@
       >
         <template #action v-if="category != null">
           <font-awesome-icon
-            icon="trash"
+            icon="ban"
             v-on:click="removeIdea(idea.id, $event)"
           />
         </template>
@@ -158,14 +158,16 @@ export default class CategoryCard extends Vue {
   }
 
   async deleteCategory(): Promise<void> {
-    await categorisationService
-      .deleteCategory(this.category.id)
-      .then((done) => {
-        if (done) {
-          this.displayDetails = false;
-          this.$emit('categoryChanged');
-        }
-      });
+    if (this.category && this.category.id) {
+      await categorisationService
+        .deleteCategory(this.category.id)
+        .then((done) => {
+          if (done) {
+            this.displayDetails = false;
+            this.$emit('categoryChanged');
+          }
+        });
+    }
   }
 }
 </script>

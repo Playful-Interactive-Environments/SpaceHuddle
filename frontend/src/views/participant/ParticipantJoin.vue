@@ -12,21 +12,23 @@
       <p class="join__text">
         {{ $t('participant.view.join.info') }}
       </p>
-      <form @submit="submit">
-        <label>
-          <input
-            class="input input--centered input--fullwidth"
-            name="sessionKey"
-            v-model="connectionKey"
+      <ValidationForm
+        :form-data="formData"
+        submit-label-key="participant.view.join.submit"
+        v-on:submitDataValid="connectToSession"
+      >
+        <el-form-item
+          prop="connectionKey"
+          :rules="[defaultFormRules.ruleRequired]"
+        >
+          <el-input
+            v-model="formData.connectionKey"
+            name="connectionKey"
+            autocomplete="on"
             :placeholder="$t('participant.view.join.pinInfo')"
-            type="text"
           />
-        </label>
-        <form-error :errors="errors"></form-error>
-        <button class="btn btn--mint btn--fullwidth" @click="submit">
-          {{ $t('participant.view.join.submit') }}
-        </button>
-      </form>
+        </el-form-item>
+      </ValidationForm>
     </main>
   </div>
 </template>
@@ -36,58 +38,45 @@ import { Options, Vue } from 'vue-class-component';
 import { Participant, ConnectState } from '@/types/api/Participant';
 import * as participantService from '@/services/participant-service';
 import * as authService from '@/services/auth-service';
-import FormError from '@/components/shared/atoms/FormError.vue';
-import {
-  getErrorMessage,
-  addError,
-  clearErrors,
-} from '@/services/exception-service';
+import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
+import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
+import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import { ValidationData } from '@/types/ui/ValidationRule';
 
 @Options({
   components: {
-    FormError,
+    ValidationForm,
   },
 })
 export default class ParticipantJoin extends Vue {
-  connectionKey = '';
-  errors: string[] = [];
+  defaultFormRules: ValidationRuleDefinition = defaultFormRules;
+
+  formData: ValidationData = {
+    connectionKey: '',
+  };
 
   mounted(): void {
     const browserKeyLS = authService.getBrowserKey();
-    if (browserKeyLS) this.connectionKey = browserKeyLS;
-  }
-
-  async submit(e: Event): Promise<void> {
-    clearErrors(this.errors);
-    e.preventDefault();
-    if (this.connectionKey.length > 0) {
-      await this.connectToSession();
-    } else {
-      addError(this.errors, 'participant.join.noCode');
-      return;
-    }
+    if (browserKeyLS) this.formData.connectionKey = browserKeyLS;
   }
 
   async connectToSession(): Promise<void> {
-    if (this.connectionKey.includes('.')) {
-      participantService.reconnect(this.connectionKey).then(
+    if (this.formData.connectionKey.includes('.')) {
+      participantService.reconnect(this.formData.connectionKey).then(
         (queryResult) => {
           this.handleConnectionResult(queryResult);
         },
         (error) => {
-          console.log(error.response);
-          addError(this.errors, getErrorMessage(error));
+          this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
         }
       );
     } else {
-      participantService.connect(this.connectionKey).then(
+      participantService.connect(this.formData.connectionKey).then(
         (queryResult) => {
           this.handleConnectionResult(queryResult);
         },
         (error) => {
-          console.log(error.response);
-          //addError(this.errors, 'participant.join.codeInvalid');
-          addError(this.errors, getErrorMessage(error));
+          this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
         }
       );
     }

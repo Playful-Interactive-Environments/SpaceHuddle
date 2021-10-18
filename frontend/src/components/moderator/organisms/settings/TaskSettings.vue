@@ -1,50 +1,58 @@
 <template>
-  <div>
-    <el-dialog
-      v-model="showDialog"
-      :before-close="handleClose"
+  <div v-if="showDialog">
+    <ValidationForm
+      :form-data="formData"
+      :use-default-submit="false"
+      v-on:submitDataValid="save"
+      v-on:reset="reset"
       :key="componentLoadIndex"
-      width="80vw"
     >
-      <template #title>
-        <span class="el-dialog__title">{{
-          $t('moderator.organism.settings.taskSettings.header')
-        }}</span>
-        <br />
-        <br />
-        <p>
-          {{ $t('moderator.organism.settings.taskSettings.info') }}
-        </p>
-      </template>
-
-      <div>
-        <form>
-          <label for="taskType" class="heading heading--xs">{{
-            $t('moderator.organism.settings.taskSettings.taskType')
-          }}</label>
-          <select
-            v-model="taskType"
-            id="taskType"
-            class="select select--fullwidth"
-          >
-            <option v-for="type in TaskTypeKeys" :key="type" :value="type">
-              {{ $t(`enum.taskType.${TaskType[type]}`) }}
-            </option>
-          </select>
-          <FormError
-            v-if="context.$v.taskType.$error"
-            :errors="context.$v.taskType.$errors"
-            :isSmall="true"
-          />
-          <TaskParameterComponent
-            ref="taskParameter"
-            :taskId="taskId"
-            :topicId="topicId"
-            v-model="taskParameterValues"
-          />
-          <label for="moduleType" class="heading heading--xs">{{
-            $t('moderator.organism.settings.taskSettings.moduleType')
-          }}</label>
+      <el-dialog
+        v-model="showDialog"
+        :before-close="handleClose"
+        :key="componentLoadIndex"
+        width="80vw"
+      >
+        <template #title>
+          <span class="el-dialog__title">{{
+            $t('moderator.organism.settings.taskSettings.header')
+          }}</span>
+          <br />
+          <br />
+          <p>
+            {{ $t('moderator.organism.settings.taskSettings.info') }}
+          </p>
+        </template>
+        <el-form-item
+          :label="$t('moderator.organism.settings.taskSettings.taskType')"
+          prop="taskType"
+          :rules="[defaultFormRules.ruleSelection]"
+        >
+          <el-select v-model="formData.taskType" class="select--fullwidth">
+            <el-option
+              v-for="type in TaskTypeKeys"
+              :key="type"
+              :value="type"
+              :label="$t(`enum.taskType.${TaskType[type]}`)"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <TaskParameterComponent
+          ref="taskParameter"
+          :taskId="taskId"
+          :topicId="topicId"
+          v-model="formData.parameter"
+          rulePropPath="parameter"
+        />
+        <el-form-item
+          :label="$t('moderator.organism.settings.taskSettings.moduleType')"
+          prop="moduleList"
+          :rules="[
+            defaultFormRules.ruleSelection,
+            { validator: validateModuleSelection },
+          ]"
+        >
           <div>
             <el-tag
               v-for="tag in moduleSelection"
@@ -52,7 +60,13 @@
               :closable="moduleKeyList.length > 1"
               v-on:close="removeModuleType(tag)"
             >
-              {{ $t(`module.${TaskType[taskType]}.${tag}.description.title`) }}
+              {{
+                $t(
+                  `module.${
+                    TaskType[formData.taskType]
+                  }.${tag}.description.title`
+                )
+              }}
             </el-tag>
           </div>
           <el-carousel
@@ -68,125 +82,107 @@
               :key="moduleType"
             >
               <ModuleCard
-                :task-type="TaskType[taskType]"
+                :task-type="TaskType[formData.taskType]"
                 :moduleName="moduleType"
-                v-model="moduleList[moduleType]"
+                v-model="formData.moduleList[moduleType]"
               />
             </el-carousel-item>
           </el-carousel>
-          <FormError
-            v-if="context.$v.moduleSelection.$error"
-            :errors="context.$v.moduleSelection.$errors"
-            :isSmall="true"
-          />
-          <el-collapse
-            v-model="openTabs"
-            :key="openTabs.length"
-            v-if="
-              moduleParameterComponents.filter(
-                (component) => component.hasModule
-              ).length > 0
-            "
+        </el-form-item>
+        <el-collapse
+          v-model="openTabs"
+          :key="openTabs.length"
+          v-if="
+            formData.moduleParameterComponents.filter(
+              (component) => component.hasModule
+            ).length > 0
+          "
+        >
+          <el-collapse-item
+            v-for="component in formData.moduleParameterComponents
+              .map((v, i) => ({ value: v, index: i }))
+              .filter((item) => item.value.hasModule)"
+            :key="component.value.componentName"
+            :name="component.value.componentName"
           >
-            <el-collapse-item
-              v-for="component in moduleParameterComponents.filter(
-                (component) => component.hasModule
-              )"
-              :key="component.componentName"
-              :name="component.componentName"
-            >
-              <template #title>
-                <span>
-                  <font-awesome-icon
-                    :icon="component.moduleIcon"
-                    v-if="component.moduleIcon"
-                  />
-                  {{
-                    $t(
-                      `module.${TaskType[taskType]}.${component.moduleName}.description.title`
-                    )
-                  }}
-                </span>
-              </template>
-              <component
-                :ref="component.componentName"
-                v-model="component.parameter"
-                :module-id="component.moduleId"
-                :is="component.componentName"
-                :key="component.componentName"
-              ></component>
-            </el-collapse-item>
-          </el-collapse>
-          <label for="taskTitle" class="heading heading--xs">{{
-            taskType === 'BRAINSTORMING'
+            <template #title>
+              <span>
+                <font-awesome-icon
+                  :icon="component.value.moduleIcon"
+                  v-if="component.value.moduleIcon"
+                />
+                {{
+                  $t(
+                    `module.${TaskType[formData.taskType]}.${
+                      component.value.moduleName
+                    }.description.title`
+                  )
+                }}
+              </span>
+            </template>
+            <component
+              :ref="component.value.componentName"
+              v-model="component.value.parameter"
+              :module-id="component.value.moduleId"
+              :is="component.value.componentName"
+              :key="component.value.componentName"
+              :rulePropPath="`moduleParameterComponents[${component.index}].parameter`"
+            ></component>
+          </el-collapse-item>
+        </el-collapse>
+        <el-form-item
+          :label="
+            formData.taskType === 'BRAINSTORMING'
               ? $t('moderator.organism.settings.taskSettings.question')
               : $t('moderator.organism.settings.taskSettings.title')
-          }}</label>
-          <input
-            id="taskTitle"
-            v-model="title"
-            class="input input--fullwidth"
+          "
+          prop="name"
+          :rules="[
+            defaultFormRules.ruleRequired,
+            defaultFormRules.ruleToLong(255),
+          ]"
+        >
+          <el-input
+            v-model="formData.name"
+            name="name"
             :placeholder="
               $t('moderator.organism.settings.taskSettings.questionExample')
             "
-            @blur="context.$v.title.$touch()"
           />
-          <FormError
-            v-if="context.$v.title.$error"
-            :errors="context.$v.title.$errors"
-            :isSmall="true"
-          />
-
-          <label for="description" class="heading heading--xs">{{
-            $t('moderator.organism.settings.taskSettings.description')
-          }}</label>
-          <textarea
-            id="description"
-            v-model="description"
-            class="textarea textarea--fullwidth"
+        </el-form-item>
+        <el-form-item
+          :label="$t('moderator.organism.settings.taskSettings.description')"
+          prop="description"
+          :rules="[defaultFormRules.ruleToLong(1000)]"
+        >
+          <el-input
+            type="textarea"
+            v-model="formData.description"
             rows="3"
             :placeholder="
               $t('moderator.organism.settings.taskSettings.descriptionExample')
             "
-            @blur="context.$v.description.$touch"
           />
-          <FormError
-            v-if="context.$v.description.$error"
-            :errors="context.$v.description.$errors"
-            :isSmall="true"
+        </el-form-item>
+        <template #footer>
+          <FromSubmitItem
+            :form-state-message="formData.stateMessage"
+            submit-label-key="moderator.organism.settings.taskSettings.submit"
           />
-        </form>
-      </div>
-      <template #footer>
-        <button
-          type="submit"
-          class="btn btn--gradient btn--fullwidth"
-          @click.prevent="saveModule"
-        >
-          {{ $t('moderator.organism.settings.taskSettings.submit') }}
-        </button>
-      </template>
-    </el-dialog>
+        </template>
+      </el-dialog>
+    </ValidationForm>
   </div>
 </template>
 
 <script lang="ts">
-import { Options, setup, Vue } from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import useVuelidate from '@vuelidate/core';
-import { maxLength, required } from '@vuelidate/validators';
-
-import FormError from '@/components/shared/atoms/FormError.vue';
-
 import * as taskService from '@/services/task-service';
 import * as moduleService from '@/services/module-service';
 import TaskType from '@/types/enum/TaskType';
 import { Task } from '@/types/api/Task';
-import {
-  getErrorMessage,
-  addError,
-  clearErrors,
-} from '@/services/exception-service';
+import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
 import {
   getAsyncTaskParameter,
   getAsyncModule,
@@ -200,63 +196,84 @@ import { EventType } from '@/types/enum/EventType';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import { Module } from '@/types/api/Module';
 import ModuleCard from '@/components/moderator/organisms/cards/ModuleCard.vue';
+import { ValidationRules } from '@/types/ui/ValidationRule';
+import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import ValidationForm, {
+  ValidationFormCall,
+} from '@/components/shared/molecules/ValidationForm.vue';
+import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+
+interface ModuleComponentDefinition {
+  componentName: string;
+  moduleName: string | null;
+  moduleIcon: string | null;
+  moduleId: string | null;
+  hasModule: boolean;
+  parameter: any;
+}
+
+interface FormDataDefinition {
+  taskType: keyof typeof TaskType;
+  name: string;
+  description: string;
+  parameter: any;
+  moduleList: { [key: string]: boolean };
+  moduleParameterComponents: ModuleComponentDefinition[];
+  stateMessage: string;
+  call: string;
+}
 
 @Options({
   components: {
-    FormError,
+    ValidationForm,
+    FromSubmitItem,
     ModuleCard,
     TaskParameterComponent: getEmptyComponent(),
   },
-  validations: {
-    taskType: {
-      required,
-    },
-    title: {
-      required,
-      max: maxLength(255),
-    },
-    description: {
-      required,
-      max: maxLength(1000),
-    },
-    moduleSelection: {
-      required,
-    },
-  },
 })
-
-/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class TaskSettings extends Vue {
+  defaultFormRules: ValidationRuleDefinition = defaultFormRules;
+
   @Prop({ default: false }) showModal!: boolean;
   @Prop({}) topicId!: string;
   @Prop({}) taskId!: string;
   componentLoadIndex = 0;
 
-  moduleParameterComponents: {
-    componentName: string;
-    moduleName: string | null;
-    moduleIcon: string | null;
-    moduleId: string | null;
-    hasModule: boolean;
-    parameter: any;
-  }[] = [];
-  openTabs: string[] = [];
+  get TaskTypeKeys(): Array<keyof typeof TaskType> {
+    return Object.keys(TaskType) as Array<keyof typeof TaskType>;
+  }
 
-  moduleList: { [key: string]: boolean } = {};
-  taskType = this.TaskTypeKeys[1];
-  title = '';
-  description = '';
-  taskParameterValues: any = {};
-  errors: string[] = [];
+  formData: FormDataDefinition = {
+    taskType: (Object.keys(TaskType) as Array<keyof typeof TaskType>)[1],
+    name: '',
+    description: '',
+    parameter: {},
+    moduleList: {},
+    moduleParameterComponents: [],
+    stateMessage: '',
+    call: '',
+  };
+  openTabs: string[] = [];
   task: Task | null = null;
 
   TaskType = TaskType;
 
-  context = setup(() => {
-    return {
-      $v: useVuelidate(),
-    };
-  });
+  validateModuleSelection(
+    rule: ValidationRules,
+    value: string,
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    callback: any
+  ): boolean {
+    if (this.moduleSelection.length > 0) {
+      callback();
+      return true;
+    } else {
+      callback(new Error((this as any).$t('error.vuelidate.required')));
+      return false;
+    }
+  }
 
   showDialog = false;
   @Watch('showModal', { immediate: false, flush: 'post' })
@@ -265,22 +282,21 @@ export default class TaskSettings extends Vue {
   }
 
   get moduleKeyList(): string[] {
-    return Object.keys(this.moduleList);
+    return Object.keys(this.formData.moduleList);
   }
 
   get moduleSelection(): string[] {
-    return Object.entries(this.moduleList)
+    return Object.entries(this.formData.moduleList)
       .filter((item) => item[1])
       .map((item) => item[0]);
   }
 
   removeModuleType(tag: string): void {
-    this.moduleList[tag] = false;
+    this.formData.moduleList[tag] = false;
   }
 
   handleClose(done: { (): void }): void {
-    if (this.topicId) this.resetForm();
-    this.context.$v.$reset();
+    if (this.topicId) this.reset();
     done();
     this.$emit('update:showModal', false);
   }
@@ -289,19 +305,19 @@ export default class TaskSettings extends Vue {
   onTaskIdChanged(id: string): void {
     if (id) {
       taskService.getTaskById(id).then((task) => {
-        this.taskType = task.taskType;
-        this.title = task.name;
-        this.description = task.description;
-        this.taskParameterValues = task.parameter ?? {};
+        this.formData.taskType = task.taskType;
+        this.formData.name = task.name;
+        this.formData.description = task.description;
+        this.formData.parameter = task.parameter ?? {};
         task.modules.forEach((module) => {
-          this.moduleList[module.name] = true;
+          this.formData.moduleList[module.name] = true;
         });
         this.task = task;
       });
     }
   }
 
-  @Watch('taskType', { immediate: true })
+  @Watch('formData.taskType', { immediate: true })
   async onTaskTypeChanged(taskType: string): Promise<void> {
     await this.loadModuleList();
     if (this.$options.components) {
@@ -315,7 +331,7 @@ export default class TaskSettings extends Vue {
 
   @Watch('moduleSelection', { immediate: true })
   async onModuleSelectionChanged(moduleSelection: string[]): Promise<void> {
-    const oldKeys = this.moduleParameterComponents.map(
+    const oldKeys = this.formData.moduleParameterComponents.map(
       (data) => data.componentName
     );
 
@@ -336,16 +352,18 @@ export default class TaskSettings extends Vue {
       }
 
       let icon: string | null = null;
-      await getModuleConfig('icon', TaskType[this.taskType], moduleName).then(
-        (result) => (icon = result)
-      );
+      await getModuleConfig(
+        'icon',
+        TaskType[this.formData.taskType],
+        moduleName
+      ).then((result) => (icon = result));
 
       hasModule(
         ModuleComponentType.MODERATOR_CONFIG,
-        TaskType[this.taskType],
+        TaskType[this.formData.taskType],
         moduleName
       ).then((result) => {
-        this.moduleParameterComponents.push({
+        this.formData.moduleParameterComponents.push({
           componentName: componentName,
           moduleId: moduleId,
           moduleName: moduleName,
@@ -362,16 +380,16 @@ export default class TaskSettings extends Vue {
     };
 
     if (this.$options.components) {
-      this.moduleParameterComponents = [];
+      this.formData.moduleParameterComponents = [];
       moduleSelection.forEach((moduleName) => {
-        const componentName = `ModuleParameterComponents-${this.taskType}-${moduleName}`;
+        const componentName = `ModuleParameterComponents-${this.formData.taskType}-${moduleName}`;
         if (
           this.$options.components &&
           !this.$options.components[componentName]
         ) {
           getAsyncModule(
             ModuleComponentType.MODERATOR_CONFIG,
-            TaskType[this.taskType],
+            TaskType[this.formData.taskType],
             moduleName
           ).then((component) => {
             if (this.$options.components)
@@ -386,38 +404,30 @@ export default class TaskSettings extends Vue {
     //this.componentLoadIndex++;
   }
 
-  get TaskTypeKeys(): Array<keyof typeof TaskType> {
-    return Object.keys(TaskType) as Array<keyof typeof TaskType>;
-  }
-
   async loadModuleList(): Promise<void> {
-    this.moduleList = {};
-    await getModulesForTaskType(this.taskType).then((result) => {
+    this.formData.moduleList = {};
+    await getModulesForTaskType(this.formData.taskType).then((result) => {
       result.forEach((moduleName, moduleIndex) => {
-        if (!this.task) this.moduleList[moduleName] = moduleIndex == 0;
+        if (!this.task) this.formData.moduleList[moduleName] = moduleIndex == 0;
         else
-          this.moduleList[moduleName] = this.task.modules.some(
+          this.formData.moduleList[moduleName] = this.task.modules.some(
             (model) => model.name == moduleName
           );
       });
     });
   }
 
-  resetForm(): void {
-    this.taskType = this.TaskTypeKeys[1];
+  reset(): void {
+    this.formData.taskType = this.TaskTypeKeys[1];
     this.loadModuleList();
-    this.title = '';
-    this.description = '';
-    this.taskParameterValues = {};
+    this.formData.name = '';
+    this.formData.description = '';
+    this.formData.parameter = {};
     this.task = null;
+    this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
-  async saveModule(): Promise<void> {
-    clearErrors(this.errors);
-    await this.context.$v.$reset();
-    await this.context.$v.$validate();
-    if (this.context.$v.$error) return;
-
+  async save(): Promise<void> {
     await this.updateCustomTaskParameter();
 
     if (this.topicId) {
@@ -428,10 +438,10 @@ export default class TaskSettings extends Vue {
 
       taskService
         .postTask(this.topicId, {
-          taskType: this.taskType,
-          name: this.title,
-          description: this.description,
-          parameter: this.taskParameterValues,
+          taskType: this.formData.taskType,
+          name: this.formData.name,
+          description: this.formData.description,
+          parameter: this.formData.parameter,
           order: taskCount,
           modules: this.moduleSelection,
         })
@@ -440,16 +450,16 @@ export default class TaskSettings extends Vue {
             this.taskUpdated(task, true);
           },
           (error) => {
-            addError(this.errors, getErrorMessage(error));
+            this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
           }
         );
     } else if (this.taskId) {
       taskService
         .putTask(this.taskId, {
-          taskType: this.taskType,
-          name: this.title,
-          description: this.description,
-          parameter: this.taskParameterValues,
+          taskType: this.formData.taskType,
+          name: this.formData.name,
+          description: this.formData.description,
+          parameter: this.formData.parameter,
           modules: this.moduleSelection,
           state: this.task?.state,
         })
@@ -458,7 +468,7 @@ export default class TaskSettings extends Vue {
             this.taskUpdated(task, false);
           },
           (error) => {
-            addError(this.errors, getErrorMessage(error));
+            this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
           }
         );
     }
@@ -484,7 +494,7 @@ export default class TaskSettings extends Vue {
   async taskUpdated(task: Task, cleanUp = true): Promise<void> {
     task.modules.forEach((module) => {
       this.updateCustomModuleParameter(task, module).then(() => {
-        const moduleComponent = this.moduleParameterComponents.find(
+        const moduleComponent = this.formData.moduleParameterComponents.find(
           (component) => component.moduleName == module.name
         );
         if (moduleComponent) {
@@ -495,11 +505,16 @@ export default class TaskSettings extends Vue {
     });
     this.$emit('update:showModal', false);
     this.$emit('moduleCreated');
-    if (cleanUp) this.resetForm();
-    this.context.$v.$reset();
+    if (cleanUp) this.reset();
     this.eventBus.emit(EventType.CHANGE_SETTINGS, {});
   }
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.el-collapse-item::v-deep .el-collapse-item {
+  &__content {
+    padding-bottom: 0;
+  }
+}
+</style>

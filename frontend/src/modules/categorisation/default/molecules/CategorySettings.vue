@@ -1,119 +1,117 @@
 <template>
-  <el-dialog v-model="showDialog" :before-close="handleClose">
-    <template #title>
-      <span class="el-dialog__title">{{
-        $t('module.categorisation.default.settings.header')
-      }}</span>
-      <br />
-      <br />
-      <p>
-        {{ $t('module.categorisation.default.settings.info') }}
-      </p>
-    </template>
-
-    <form>
-      <label for="title" class="heading heading--xs">{{
-        $t('module.categorisation.default.settings.title')
-      }}</label>
-      <input
-        id="title"
-        v-model="title"
-        class="input input--fullwidth"
-        :placeholder="$t('module.categorisation.default.settings.titleExample')"
-        @blur="context.$v.title.$touch()"
-      />
-      <FormError
-        v-if="context.$v.title.$error"
-        :errors="context.$v.title.$errors"
-        :isSmall="true"
-      />
-      <label for="description" class="heading heading--xs">{{
-        $t('module.categorisation.default.settings.description')
-      }}</label>
-      <textarea
-        id="description"
-        class="textarea textarea--fullwidth"
-        :placeholder="
-          $t('module.categorisation.default.settings.descriptionExample')
-        "
-        ref="ideaTextfield"
-        rows="4"
-        contenteditable
-        v-model="description"
-        @blur="context.$v.description.$touch()"
-      ></textarea>
-      <FormError
-        v-if="context.$v.description.$error"
-        :errors="context.$v.description.$errors"
-        :isSmall="true"
-      />
-      <label class="heading heading--xs">{{
-        $t('module.categorisation.default.settings.image')
-      }}</label>
-      <ImagePicker v-model:link="link" v-model:image="image" />
-      <label class="heading heading--xs">{{
-        $t('module.categorisation.default.settings.color')
-      }}</label>
-      <el-color-picker v-model="color"></el-color-picker>
-    </form>
-
-    <template #footer>
-      <button
-        type="submit"
-        class="btn btn--gradient btn--fullwidth"
-        @click.prevent="saveCategory"
+  <ValidationForm
+    :form-data="formData"
+    :use-default-submit="false"
+    v-on:submitDataValid="save"
+    v-on:reset="reset"
+  >
+    <el-dialog v-model="showDialog" :before-close="handleClose">
+      <template #title>
+        <span class="el-dialog__title">{{
+          $t('module.categorisation.default.settings.header')
+        }}</span>
+        <br />
+        <br />
+        <p>
+          {{ $t('module.categorisation.default.settings.info') }}
+        </p>
+      </template>
+      <el-form-item
+        :label="$t('module.categorisation.default.settings.title')"
+        prop="title"
+        :rules="[
+          defaultFormRules.ruleRequired,
+          defaultFormRules.ruleToLong(36),
+        ]"
       >
-        {{ $t('module.categorisation.default.settings.submit') }}
-      </button>
-    </template>
-  </el-dialog>
+        <el-input
+          v-model="formData.title"
+          :placeholder="
+            $t('module.categorisation.default.settings.titleExample')
+          "
+        />
+      </el-form-item>
+      <el-form-item
+        :label="$t('module.categorisation.default.settings.description')"
+        prop="description"
+        :rules="[defaultFormRules.ruleToLong(255)]"
+      >
+        <el-input
+          type="textarea"
+          v-model="formData.description"
+          rows="4"
+          :placeholder="
+            $t('module.categorisation.default.settings.descriptionExample')
+          "
+        />
+      </el-form-item>
+      <el-form-item
+        :label="$t('module.categorisation.default.settings.image')"
+        prop="image"
+      >
+        <ImagePicker
+          v-model:link="formData.link"
+          v-model:image="formData.image"
+        />
+      </el-form-item>
+      <el-form-item
+        :label="$t('module.categorisation.default.settings.color')"
+        prop="color"
+        :rules="[defaultFormRules.ruleRequired]"
+      >
+        <el-color-picker v-model="formData.color"></el-color-picker>
+      </el-form-item>
+      <template #footer>
+        <FromSubmitItem
+          :form-state-message="formData.stateMessage"
+          submit-label-key="module.categorisation.default.settings.submit"
+        />
+      </template>
+    </el-dialog>
+  </ValidationForm>
 </template>
 
 <script lang="ts">
-import { Options, setup, Vue } from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import useVuelidate from '@vuelidate/core';
-import { maxLength, required } from '@vuelidate/validators';
-
-import FormError from '@/components/shared/atoms/FormError.vue';
 import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
-
 import * as categorisationService from '@/services/categorisation-service';
-
-import {
-  getErrorMessage,
-  addError,
-  clearErrors,
-} from '@/services/exception-service';
+import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
+import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import { ValidationData } from '@/types/ui/ValidationRule';
+import ValidationForm, {
+  ValidationFormCall,
+} from '@/components/shared/molecules/ValidationForm.vue';
+import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
 
 @Options({
   components: {
-    FormError,
+    ValidationForm,
+    FromSubmitItem,
     ImagePicker,
-  },
-  validations: {
-    title: {
-      required,
-      max: maxLength(255),
-    },
-    description: {
-      max: maxLength(255),
-    },
   },
   emits: ['categoryCreated', 'update:categoryId', 'update:showModal'],
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class CategorySettings extends Vue {
+  defaultFormRules: ValidationRuleDefinition = defaultFormRules;
+
   @Prop({ default: false }) showModal!: boolean;
   @Prop({ required: false }) taskId!: string | null;
   @Prop({ required: false }) categoryId!: string | null;
 
   defaultColor = '#1d2948';
-  title = '';
-  description = '';
-  image: string | null = null;
-  link: string | null = null;
-  color = this.defaultColor;
-  errors: string[] = [];
+  formData: ValidationData = {
+    title: '',
+    description: '',
+    image: null,
+    link: null,
+    color: this.defaultColor,
+  };
+
+  mounted(): void {
+    //this.reset();
+  }
 
   showDialog = false;
   @Watch('showModal', { immediate: false, flush: 'post' })
@@ -125,84 +123,73 @@ export default class CategorySettings extends Vue {
   onCategoryIdChanged(id: string): void {
     if (id) {
       categorisationService.getCategoryById(id).then((category) => {
-        this.title = category.keywords;
-        this.description = category.description;
-        this.image = category.image;
-        this.link = category.link;
+        this.formData.title = category.keywords;
+        this.formData.description = category.description;
+        this.formData.image = category.image;
+        this.formData.link = category.link;
         if (category.parameter && category.parameter.color)
-          this.color = category.parameter.color;
+          this.formData.color = category.parameter.color;
       });
     }
   }
 
   handleClose(done: { (): void }): void {
-    this.resetForm();
-    this.context.$v.$reset();
+    //this.reset();
     done();
     this.$emit('update:showModal', false);
   }
 
-  context = setup(() => {
-    return {
-      $v: useVuelidate(),
-    };
-  });
-
-  resetForm(): void {
-    this.title = '';
-    this.description = '';
-    this.image = null;
-    this.link = null;
-    this.color = this.defaultColor;
+  reset(): void {
+    this.formData.title = '';
+    this.formData.description = '';
+    this.formData.image = null;
+    this.formData.link = null;
+    this.formData.color = this.defaultColor;
     this.$emit('update:categoryId', null);
+    this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
-  async saveCategory(): Promise<void> {
-    clearErrors(this.errors);
-    await this.context.$v.$validate();
-    if (this.context.$v.$error) return;
-
+  async save(): Promise<void> {
     if (!this.categoryId) {
       if (this.taskId) {
         categorisationService
           .postCategory(this.taskId, {
-            keywords: this.title,
-            description: this.description,
-            image: this.image,
-            link: this.link,
-            parameter: { color: this.color },
+            keywords: this.formData.title,
+            description: this.formData.description,
+            image: this.formData.image,
+            link: this.formData.link,
+            parameter: { color: this.formData.color },
           })
           .then(
             (category) => {
               this.$emit('update:showModal', false);
               this.$emit('categoryCreated', category);
-              this.resetForm();
-              this.context.$v.$reset();
+              this.reset();
             },
             (error) => {
-              addError(this.errors, getErrorMessage(error));
+              this.formData.stateMessage =
+                getSingleTranslatedErrorMessage(error);
             }
           );
       }
     } else {
       categorisationService
         .putCategory(this.categoryId, {
-          keywords: this.title,
-          description: this.description,
-          image: this.image,
-          link: this.link,
-          parameter: { color: this.color },
+          keywords: this.formData.title,
+          description: this.formData.description,
+          image: this.formData.image,
+          link: this.formData.link,
+          parameter: { color: this.formData.color },
         })
         .then(
           (category) => {
             this.$emit('update:showModal', false);
             this.$emit('update:categoryId', null);
             this.$emit('categoryCreated', category);
-            this.resetForm();
-            this.context.$v.$reset();
+            //this.reset();
           },
           (error) => {
-            addError(this.errors, getErrorMessage(error));
+            this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
           }
         );
     }
@@ -210,5 +197,4 @@ export default class CategorySettings extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

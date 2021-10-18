@@ -51,7 +51,6 @@ import * as taskService from '@/services/task-service';
 
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/ModeratorNavigationLayout.vue';
-import FormError from '@/components/shared/atoms/FormError.vue';
 import TaskSettings from '@/components/moderator/organisms/settings/TaskSettings.vue';
 import { EventType } from '@/types/enum/EventType';
 
@@ -59,7 +58,6 @@ import { EventType } from '@/types/enum/EventType';
   components: {
     Sidebar,
     ModeratorNavigationLayout,
-    FormError,
     TaskSettings,
     ModuleContentComponent: getEmptyComponent(),
   },

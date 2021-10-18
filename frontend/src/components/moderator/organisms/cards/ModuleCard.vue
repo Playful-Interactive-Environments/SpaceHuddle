@@ -1,9 +1,9 @@
 <template>
-  <el-card
-    shadow="never"
-    body-style="text-align: center"
-  >
-    <h2 class="heading heading--regular">
+  <el-card shadow="never" body-style="text-align: center">
+    <h2
+      class="heading heading--regular"
+      style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis"
+    >
       {{ $t(`module.${taskType}.${moduleName}.description.title`) }}
     </h2>
     <el-switch v-model="selected"> </el-switch>
@@ -65,10 +65,14 @@ export default class ModuleCard extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.heading {
+  margin: 0;
+}
+
 .icon {
   text-align: center;
   width: 100%;
-  margin: 0.8em 0em;
+  margin: 0.6em 0;
   font-size: 40pt;
 }
 </style>

@@ -1,66 +1,69 @@
 <template>
-  <el-dialog v-model="showDialog" :before-close="handleClose">
-    <template #title>
-      <span class="el-dialog__title">{{
-        $t('moderator.organism.settings.sessionSettings.header')
-      }}</span>
-      <br />
-      <br />
-      <p>
-        {{ $t('moderator.organism.settings.sessionSettings.info') }}
-      </p>
-    </template>
+  <ValidationForm
+    :form-data="formData"
+    :use-default-submit="false"
+    v-on:submitDataValid="save"
+    v-on:reset="reset"
+  >
+    <el-dialog v-model="showDialog" :before-close="handleClose">
+      <template #title>
+        <span class="el-dialog__title">{{
+          $t('moderator.organism.settings.sessionSettings.header')
+        }}</span>
+        <br />
+        <br />
+        <p>
+          {{ $t('moderator.organism.settings.sessionSettings.info') }}
+        </p>
+      </template>
 
-    <form>
-      <label for="sessionTitle" class="heading heading--xs">{{
-        $t('moderator.organism.settings.sessionSettings.title')
-      }}</label>
-      <input
-        id="sessionTitle"
-        v-model="title"
-        class="input input--fullwidth"
-        :placeholder="$t('moderator.organism.settings.sessionSettings.titleExample')"
-        @blur="context.$v.title.$touch()"
-      />
-      <FormError
-        v-if="context.$v.title.$error"
-        :errors="context.$v.title.$errors"
-        :isSmall="true"
-      />
-
-      <label for="description" class="heading heading--xs">{{
-        $t('moderator.organism.settings.sessionSettings.description')
-      }}</label>
-      <textarea
-        id="description"
-        v-model="description"
-        class="textarea textarea--fullwidth"
-        rows="3"
-        :placeholder="
-          $t('moderator.organism.settings.sessionSettings.descriptionExample')
-        "
-        @blur="context.$v.description.$touch"
-      />
-      <FormError
-        v-if="context.$v.description.$error"
-        :errors="context.$v.description.$errors"
-        :isSmall="true"
-      />
-
-      <label class="heading heading--xs">{{
-          $t('moderator.organism.settings.sessionSettings.expirationDate')
-        }}</label>
-      <el-date-picker
-        v-model="expirationDate"
-        type="date"
-        :placeholder="$t('moderator.organism.settings.sessionSettings.expirationDatePlaceholder')"
+      <el-form-item
+        prop="title"
+        :label="$t('moderator.organism.settings.sessionSettings.title')"
+        :rules="[
+          defaultFormRules.ruleRequired,
+          defaultFormRules.ruleToLong(255),
+        ]"
       >
-      </el-date-picker>
-      <FormError
-        v-if="context.$v.expirationDate.$error"
-        :errors="context.$v.expirationDate.$errors"
-        :isSmall="true"
-      />
+        <el-input
+          v-model="formData.title"
+          :placeholder="
+            $t('moderator.organism.settings.sessionSettings.titleExample')
+          "
+        />
+      </el-form-item>
+      <el-form-item
+        prop="description"
+        :label="$t('moderator.organism.settings.sessionSettings.description')"
+        :rules="[defaultFormRules.ruleToLong(1000)]"
+      >
+        <el-input
+          type="textarea"
+          v-model="formData.description"
+          rows="3"
+          :placeholder="
+            $t('moderator.organism.settings.sessionSettings.descriptionExample')
+          "
+        />
+      </el-form-item>
+      <el-form-item
+        prop="expirationDate"
+        :label="
+          $t('moderator.organism.settings.sessionSettings.expirationDate')
+        "
+        :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleDate]"
+      >
+        <el-date-picker
+          v-model="formData.expirationDate"
+          type="date"
+          :placeholder="
+            $t(
+              'moderator.organism.settings.sessionSettings.expirationDatePlaceholder'
+            )
+          "
+        >
+        </el-date-picker>
+      </el-form-item>
       <el-divider></el-divider>
       <h3 class="heading heading--small">
         {{ $t('moderator.organism.settings.sessionSettings.topics') }}
@@ -68,89 +71,65 @@
       <p>
         {{ $t('moderator.organism.settings.sessionSettings.topicsInfo') }}
       </p>
-      <label for="topic" class="heading heading--xs">{{
-        $t('moderator.organism.settings.sessionSettings.firstTopic')
-      }}</label>
-      <input
-        id="topic"
-        v-model="topic"
-        class="input input--fullwidth"
-        :placeholder="$t('moderator.organism.settings.sessionSettings.topicExample')"
-        @blur="context.$v.topic.$touch()"
-      />
-      <FormError
-        v-if="context.$v.topic.$error"
-        :errors="context.$v.topic.$errors"
-        :isSmall="true"
-      />
-    </form>
-
-    <template #footer>
-      <button
-        type="submit"
-        class="btn btn--gradient btn--fullwidth"
-        @click.prevent="saveSession"
+      <el-divider></el-divider>
+      <el-form-item
+        prop="topic"
+        :label="$t('moderator.organism.settings.sessionSettings.firstTopic')"
+        :rules="[
+          defaultFormRules.ruleRequired,
+          defaultFormRules.ruleToLong(255),
+        ]"
       >
-        {{ $t('moderator.organism.settings.sessionSettings.submit') }}
-      </button>
-    </template>
-  </el-dialog>
+        <el-input
+          v-model="formData.topic"
+          :placeholder="
+            $t('moderator.organism.settings.sessionSettings.firstTopicExample')
+          "
+        />
+      </el-form-item>
+      <template #footer>
+        <FromSubmitItem
+          :form-state-message="formData.stateMessage"
+          submit-label-key="moderator.organism.settings.sessionSettings.submit"
+        />
+      </template>
+    </el-dialog>
+  </ValidationForm>
 </template>
 
 <script lang="ts">
-import { Options, setup, Vue } from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import useVuelidate from '@vuelidate/core';
-import { maxLength, required } from '@vuelidate/validators';
-
-import FormError from '@/components/shared/atoms/FormError.vue';
 
 import * as sessionService from '@/services/session-service';
 import * as topicService from '@/services/topic-service';
-import {
-  getErrorMessage,
-  addError,
-  clearErrors,
-} from '@/services/exception-service';
+import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
+import ValidationForm, {
+  ValidationFormCall,
+} from '@/components/shared/molecules/ValidationForm.vue';
+import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
+import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import { ValidationData } from '@/types/ui/ValidationRule';
 
 @Options({
   components: {
-    FormError,
-  },
-  validations: {
-    title: {
-      required,
-      max: maxLength(255),
-    },
-    description: {
-      required,
-      max: maxLength(1000),
-    },
-    expirationDate: {
-      required,
-    },
-    topic: {
-      required,
-      max: maxLength(255),
-    },
+    ValidationForm,
+    FromSubmitItem,
   },
 })
 export default class SessionSettings extends Vue {
+  defaultFormRules: ValidationRuleDefinition = defaultFormRules;
   @Prop({ default: false }) showModal!: boolean;
 
-  title = '';
-  description = '';
-  topic = '';
   maxNrOfTopics = 5;
   today = new Date();
-  expirationDate = new Date(this.today.setMonth(this.today.getMonth() + 1));
-  errors: string[] = [];
 
-  context = setup(() => {
-    return {
-      $v: useVuelidate(),
-    };
-  });
+  formData: ValidationData = {
+    title: '',
+    description: '',
+    topic: '',
+    expirationDate: new Date(this.today.setMonth(this.today.getMonth() + 1)),
+  };
 
   showDialog = false;
   @Watch('showModal', { immediate: false, flush: 'post' })
@@ -159,36 +138,32 @@ export default class SessionSettings extends Vue {
   }
 
   handleClose(done: { (): void }): void {
-    this.resetForm();
-    this.context.$v.$reset();
+    this.reset();
     done();
     this.$emit('update:showModal', false);
   }
 
-  resetForm(): void {
-    this.title = '';
-    this.description = '';
-    this.topic = '';
-    this.maxNrOfTopics = 5;
+  reset(): void {
+    this.formData.title = '';
+    this.formData.description = '';
+    this.formData.topic = '';
+    this.formData.maxNrOfTopics = 5;
+    this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
-  async saveSession(): Promise<void> {
-    clearErrors(this.errors);
-    await this.context.$v.$validate();
-    if (this.context.$v.$error) return;
-
+  async save(): Promise<void> {
     sessionService
       .post({
-        title: this.title,
-        description: this.description,
+        title: this.formData.title,
+        description: this.formData.description,
         maxParticipants: 100,
-        expirationDate: this.expirationDate.toISOString().slice(0, 10),
+        expirationDate: this.formData.expirationDate.toISOString().slice(0, 10),
       })
       .then(
         (session) => {
           topicService
             .postTopic(session.id, {
-              title: this.topic,
+              title: this.formData.topic,
               description:
                 'dummy data - this field should be removed in the backend!',
             })
@@ -203,17 +178,17 @@ export default class SessionSettings extends Vue {
                 });
               },
               (error) => {
-                addError(this.errors, getErrorMessage(error));
+                this.formData.stateMessage =
+                  getSingleTranslatedErrorMessage(error);
               }
             );
         },
         (error) => {
-          addError(this.errors, getErrorMessage(error));
+          this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
         }
       );
   }
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

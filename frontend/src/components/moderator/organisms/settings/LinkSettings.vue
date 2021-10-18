@@ -1,62 +1,74 @@
 <template>
-  <el-dialog
-    v-model="showSettings"
-    :title="$t('moderator.organism.settings.ideaSettings.link')"
-    :before-close="handleClose"
+  <ValidationForm
+    :form-data="formData"
+    :use-default-submit="false"
+    v-on:submitDataValid="save"
+    v-on:reset="reset"
   >
-    <span class="layout__level">
-      <input
-        id="link"
-        v-model="editLink"
-        class="input input--fullwidth"
-        :placeholder="
-          $t('moderator.organism.settings.ideaSettings.linkExample')
-        "
-        @blur="context.$v.editLink.$touch()"
-      />
-      <span style="font-size: 2rem; margin-left: 1rem">
-        <font-awesome-icon icon="check-circle" v-on:click="save" />
-      </span>
-    </span>
-    <FormError
-      v-if="context.$v.editLink.$error"
-      :errors="context.$v.editLink.$errors"
-      :isSmall="true"
-    />
-  </el-dialog>
+    <el-dialog
+      v-model="showSettings"
+      :title="$t('moderator.organism.settings.linkSettings.link')"
+      :before-close="handleClose"
+      width="unset"
+    >
+      <el-form-item prop="editLink" :rules="[defaultFormRules.ruleUrl]">
+        <span class="layout__level">
+          <el-input
+            v-model="formData.editLink"
+            name="link"
+            autocomplete="on"
+            :placeholder="
+              $t('moderator.organism.settings.linkSettings.linkExample')
+            "
+          />
+          <span style="margin-right: 0">
+            <el-button type="primary" native-type="submit" circle>
+              <font-awesome-icon icon="check" style="font-size: 1.5rem" />
+            </el-button>
+          </span>
+        </span>
+      </el-form-item>
+      <el-form-item
+        prop="stateMessage"
+        :rules="[defaultFormRules.ruleStateMessage]"
+      >
+      </el-form-item>
+    </el-dialog>
+  </ValidationForm>
 </template>
 
 <script lang="ts">
-import { Options, Vue, setup } from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import useVuelidate from '@vuelidate/core';
-import { maxLength, required, url } from '@vuelidate/validators';
-import * as ideaService from '@/services/idea-service';
-import { Idea } from '@/types/api/Idea';
-
-import FormError from '@/components/shared/atoms/FormError.vue';
 import myUpload from 'vue-image-crop-upload/upload-3.vue';
+import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import { ValidationData } from '@/types/ui/ValidationRule';
+import ValidationForm, {
+  ValidationFormCall,
+} from '@/components/shared/molecules/ValidationForm.vue';
+import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
 
 @Options({
   components: {
-    FormError,
+    ValidationForm,
+    FromSubmitItem,
     'my-upload': myUpload,
   },
   emits: ['update:showModal', 'update:link'],
-  validations: {
-    editLink: {
-      url,
-    },
-  },
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class LinkSettings extends Vue {
+  defaultFormRules: ValidationRuleDefinition = defaultFormRules;
+
   @Prop({ default: false }) showModal!: boolean;
   @Prop({ default: null }) link!: string;
 
+  formData: ValidationData = {
+    editLink: '',
+  };
+
   showSettings = false;
-  editLink: string | null = '';
 
   mounted(): void {
     this.reset();
@@ -64,13 +76,13 @@ export default class LinkSettings extends Vue {
 
   handleClose(done: { (): void }): void {
     this.reset();
-    this.context.$v.$reset();
     done();
     this.$emit('update:showModal', false);
   }
 
   reset(): void {
-    this.editLink = this.link;
+    this.formData.editLink = this.link;
+    this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
   @Watch('showModal', { immediate: true })
@@ -82,21 +94,12 @@ export default class LinkSettings extends Vue {
   @Watch('link', { immediate: true, deep: true })
   async onLinkChanged(link: string): Promise<void> {
     if (!this.showSettings) {
-      this.editLink = link;
+      this.formData.editLink = link;
     }
   }
 
-  context = setup(() => {
-    return {
-      $v: useVuelidate(),
-    };
-  });
-
   async save(): Promise<void> {
-    await this.context.$v.$reset();
-    await this.context.$v.$validate();
-    if (this.context.$v.$error) return;
-    this.$emit('update:link', this.editLink);
+    this.$emit('update:link', this.formData.editLink);
     this.reset();
     this.showSettings = false;
     this.$emit('update:showModal', false);
@@ -104,4 +107,11 @@ export default class LinkSettings extends Vue {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.el-form-item .el-form-item {
+  margin-bottom: 1rem;
+}
+.el-button.is-circle {
+  padding: 0.5rem;
+}
+</style>

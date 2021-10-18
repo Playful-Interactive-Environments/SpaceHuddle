@@ -26,167 +26,118 @@
         <p class="register__description">
           {{ $t('moderator.view.register.info') }}
         </p>
-        <form @submit.prevent="registerUser">
-          <h3 class="heading heading--xs">
-            {{ $t('moderator.view.register.prototypeKey') }}
-          </h3>
-          <input
-            class="input input--fullwidth"
-            name="prototypeKey"
-            :placeholder="$t('moderator.view.register.prototypeKeyInfo')"
-            v-model="prototypeKey"
-            @blur="context.$v.prototypeKey.$touch()"
-          />
-          <FormError
-            v-if="context.$v.prototypeKey.$error"
-            :errors="context.$v.prototypeKey.$errors"
-            :isSmall="true"
-          />
-          <h3 class="heading heading--xs">
-            {{ $t('moderator.view.register.email') }}
-          </h3>
-          <input
-            class="input input--fullwidth"
-            name="email"
-            :placeholder="$t('moderator.view.register.emailInfo')"
-            type="email"
-            v-model.trim="email"
-            autocomplete="email"
-            @blur="context.$v.email.$touch()"
-          />
-          <FormError
-            v-if="context.$v.email.$error"
-            :errors="context.$v.email.$errors"
-            :isSmall="true"
-          />
-          <h3 class="heading heading--xs">
-            {{ $t('moderator.view.register.password') }}
-          </h3>
-          <input
-            class="input input--fullwidth"
-            name="password"
-            :placeholder="$t('moderator.view.register.passwordInfo')"
-            type="password"
-            autocomplete="new-password"
-            v-model.trim="password"
-            @blur="context.$v.password.$touch()"
-          />
-          <FormError
-            v-if="context.$v.password.$error"
-            :errors="context.$v.password.$errors"
-            :isSmall="true"
-          />
-          <h4 class="heading heading--xs">
-            {{ $t('moderator.view.register.passwordConform') }}
-          </h4>
-          <input
-            class="input input--fullwidth"
-            name="passwordRepeat"
-            :placeholder="$t('moderator.view.register.passwordConformInfo')"
-            type="password"
-            autocomplete="new-password"
-            v-model.trim="passwordRepeat"
-            @blur="context.$v.passwordRepeat.$touch()"
-          />
-          <FormError
-            v-if="
-              context.$v.passwordRepeat.$error ||
-              (context.$v.passwordRepeat.$dirty && hasMatchingPasswords)
-            "
-            :errors="
-              context.$v.passwordRepeat.$error
-                ? context.$v.passwordRepeat.$errors
-                : { passwordRepeatMsg }
-            "
-            :isSmall="true"
-          />
-          <form-error :errors="errors"></form-error>
-          <button class="btn btn--gradient btn--fullwidth" type="submit">
-            {{ $t('moderator.view.register.submit') }}
-          </button>
-        </form>
+        <ValidationForm
+          :form-data="formData"
+          submit-label-key="moderator.view.register.submit"
+          v-on:submitDataValid="save"
+          ref="dataForm"
+        >
+          <el-form-item
+            :label="$t('moderator.view.register.prototypeKey')"
+            prop="prototypeKey"
+            :rules="[
+              defaultFormRules.ruleRequired,
+              defaultFormRules.ruleMatch('apple-pie', 'keyNotMatch'),
+            ]"
+          >
+            <el-input
+              :placeholder="$t('moderator.view.register.prototypeKeyInfo')"
+              v-model="formData.prototypeKey"
+            />
+          </el-form-item>
+          <el-form-item
+            :label="$t('moderator.view.register.email')"
+            prop="email"
+            :rules="[
+              defaultFormRules.ruleRequired,
+              defaultFormRules.ruleEmail,
+            ]"
+          >
+            <el-input
+              type="email"
+              name="email"
+              autocomplete="on"
+              :placeholder="$t('moderator.view.register.emailInfo')"
+              v-model="formData.email"
+            />
+          </el-form-item>
+          <el-form-item
+            :label="$t('moderator.view.register.password')"
+            prop="password"
+            :rules="[
+              defaultFormRules.ruleRequired,
+              defaultFormRules.rulePassword,
+              defaultFormRules.ruleToShort(8),
+              defaultFormRules.ruleToLong(255),
+              defaultFormRules.ruleTrigger(dataForm, 'passwordRepeat'),
+            ]"
+          >
+            <el-input
+              type="password"
+              :placeholder="$t('moderator.view.register.passwordInfo')"
+              v-model="formData.password"
+            />
+          </el-form-item>
+          <el-form-item
+            :label="$t('moderator.view.register.passwordConform')"
+            prop="passwordRepeat"
+            :rules="[
+              defaultFormRules.ruleRequired,
+              defaultFormRules.rulePassword,
+              defaultFormRules.ruleToShort(8),
+              defaultFormRules.ruleToLong(255),
+              defaultFormRules.ruleMatch(formData.password, 'passwordNotMatch'),
+            ]"
+          >
+            <el-input
+              type="password"
+              :placeholder="$t('moderator.view.register.passwordConformInfo')"
+              v-model="formData.passwordRepeat"
+            />
+          </el-form-item>
+        </ValidationForm>
       </div>
     </section>
   </div>
 </template>
 
 <script lang="ts">
-import { Options, Vue, setup } from 'vue-class-component';
-import {
-  maxLength,
-  minLength,
-  required,
-  email,
-  helpers,
-  sameAs,
-} from '@vuelidate/validators';
-import useVuelidate from '@vuelidate/core';
-import FormError from '@/components/shared/atoms/FormError.vue';
+import { Options, Vue } from 'vue-class-component';
 import * as userService from '@/services/user-service';
-import {
-  getErrorMessage,
-  addError,
-  clearErrors,
-} from '@/services/exception-service';
+import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
 import { ElMessage } from 'element-plus';
+import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import { ValidationData } from '@/types/ui/ValidationRule';
+import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
+import ValidationMethods from '@/types/ui/ValidationMethods';
 
 @Options({
   components: {
-    FormError,
-  },
-  validations: {
-    email: {
-      email,
-      required,
-    },
-    prototypeKey: {
-      required,
-      sameAs: helpers.withMessage(
-        'This is a prototype. You need the prototype key to test the application in this state.',
-        sameAs('apple-pie')
-      ),
-    },
-    password: {
-      required,
-      min: minLength(8),
-      max: maxLength(255),
-      containsUppercase: helpers.withMessage('wrongPasswordSyntax', (value) => {
-        return (
-          /[A-Z]/.test(value as string) &&
-          /[a-z]/.test(value as string) &&
-          /[0-9]/.test(value as string) &&
-          /[#?!@$%^&*-]/.test(value as string)
-        );
-      }),
-    },
-    passwordRepeat: {
-      required,
-      min: minLength(8),
-    },
+    ValidationForm,
   },
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorRegister extends Vue {
-  email = '';
-  password = '';
-  passwordRepeat = '';
-  prototypeKey = '';
-  readonly passwordRepeatMsg = 'error.vuelidate.passwordNotMatch';
-  errors: string[] = [];
+  defaultFormRules: ValidationRuleDefinition = defaultFormRules;
 
-  context = setup(() => {
-    return {
-      $v: useVuelidate(),
-    };
-  });
+  dataForm(): ValidationMethods {
+    return this.$refs.dataForm as ValidationMethods;
+  }
 
-  async registerUser(): Promise<void> {
-    clearErrors(this.errors);
-    await this.context.$v.$validate();
-    if (this.context.$v.$error || this.hasMatchingPasswords) return;
+  formData: ValidationData = {
+    email: '',
+    password: '',
+    passwordRepeat: '',
+    prototypeKey: '',
+  };
 
-    userService
-      .registerUser(this.email, this.password, this.passwordRepeat)
+  async save(): Promise<void> {
+    await userService
+      .registerUser(
+        this.formData.email,
+        this.formData.password,
+        this.formData.passwordRepeat
+      )
       .then(
         () => {
           this.$router.push({
@@ -199,13 +150,9 @@ export default class ModeratorRegister extends Vue {
           });
         },
         (error) => {
-          addError(this.errors, getErrorMessage(error));
+          this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
         }
       );
-  }
-
-  get hasMatchingPasswords(): boolean {
-    return this.password !== this.passwordRepeat;
   }
 }
 </script>
@@ -239,19 +186,6 @@ export default class ModeratorRegister extends Vue {
   &__text {
     line-height: 1.5;
     padding: 0.5rem 2rem 0;
-  }
-
-  &__forgot-pw {
-    text-align: center;
-    cursor: pointer;
-  }
-
-  button {
-    margin: 1.5rem 0 1rem;
-  }
-
-  input {
-    margin-top: 0;
   }
 }
 </style>

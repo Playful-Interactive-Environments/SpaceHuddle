@@ -14,7 +14,11 @@
         <template #title>
           {{ topic.title }}
         </template>
-        <span class="overview__module" v-for="task in topic.tasks" :key="task.id">
+        <span
+          class="overview__module"
+          v-for="task in topic.tasks"
+          :key="task.id"
+        >
           <TaskCard
             :type="TaskType[task.taskType]"
             :task="task"
@@ -38,7 +42,6 @@ import * as taskService from '@/services/task-service';
 import * as participantService from '@/services/participant-service';
 import * as sessionService from '@/services/session-service';
 import { Topic } from '@/types/api/Topic';
-import FormError from '@/components/shared/atoms/FormError.vue';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
@@ -46,7 +49,6 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
     MenuBar,
     SessionInfo,
     TaskCard,
-    FormError,
   },
 })
 
