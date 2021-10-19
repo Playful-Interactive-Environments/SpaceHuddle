@@ -3,7 +3,6 @@
     <div class="container2">
       <MenuBar />
       <SessionInfo :title="sessionName" :description="sessionDescription" />
-      <form-error :errors="errors"></form-error>
     </div>
     <el-collapse v-model="openTabs" class="white participant">
       <el-collapse-item
@@ -59,7 +58,6 @@ export default class ParticipantOverview extends Vue {
   sessionName = '';
   sessionDescription = '';
   sessionId = '';
-  errors: string[] = [];
   readonly intervalTime = 10000;
   interval!: any;
   openTabs: string[] = [];

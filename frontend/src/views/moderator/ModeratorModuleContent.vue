@@ -17,9 +17,7 @@
         v-on:delete="deleteTask"
       />
     </template>
-    <template v-slot:header>
-      <form-error :errors="errors"></form-error>
-    </template>
+    <template v-slot:header></template>
     <template v-slot:content>
       <ModuleContentComponent :task-id="taskId" />
       <TaskSettings
@@ -71,7 +69,6 @@ export default class ModeratorModuleContent extends Vue {
   publicScreenTaskId = '';
   TaskType = TaskType;
   TaskStates = TaskStates;
-  errors: string[] = [];
   showSettings = false;
 
   mounted(): void {

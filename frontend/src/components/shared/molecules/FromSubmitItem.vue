@@ -5,9 +5,8 @@
   >
     <el-input v-model="formStateMessage" style="display: none" />
     <el-button
-      type="submit"
       native-type="submit"
-      class=".gradient btn--fullwidth"
+      class=".gradient btn--fullwidth el-button--submit"
     >
       {{ $t(submitLabelKey) }}
     </el-button>

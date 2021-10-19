@@ -9,7 +9,7 @@
       v-model="showSettings"
       :title="$t('moderator.organism.settings.linkSettings.link')"
       :before-close="handleClose"
-      width="unset"
+      width="80vw"
     >
       <el-form-item prop="editLink" :rules="[defaultFormRules.ruleUrl]">
         <span class="layout__level">
@@ -107,7 +107,7 @@ export default class LinkSettings extends Vue {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .el-form-item .el-form-item {
   margin-bottom: 1rem;
 }

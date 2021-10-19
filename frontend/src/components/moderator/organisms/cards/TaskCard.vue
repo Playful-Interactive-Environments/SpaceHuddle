@@ -154,6 +154,7 @@ export default class TaskCard extends Vue {
 
 .card {
   min-width: 18rem;
+  height: 100%;
 
   &__planet_only {
     padding-top: 1.5rem;

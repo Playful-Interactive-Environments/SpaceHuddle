@@ -5,7 +5,7 @@
     v-on:submitDataValid="save"
     v-on:reset="reset"
   >
-    <el-dialog v-model="showDialog" :before-close="handleClose">
+    <el-dialog v-model="showDialog" :before-close="handleClose" width="80vw">
       <template #title>
         <span class="el-dialog__title">{{
           $t('module.categorisation.default.settings.header')
@@ -59,7 +59,7 @@
         prop="color"
         :rules="[defaultFormRules.ruleRequired]"
       >
-        <el-color-picker v-model="formData.color"></el-color-picker>
+        <el-color-picker v-model="formData.color" />
       </el-form-item>
       <template #footer>
         <FromSubmitItem

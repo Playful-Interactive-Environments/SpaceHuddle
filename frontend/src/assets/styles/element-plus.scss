@@ -99,6 +99,7 @@ $--font-size: (
 .el-dialog {
         --el-dialog-padding-primary: #{$dialog-padding};
         max-width: 60rem;
+        min-width: fit-content;
 
         &__title {
                 font-weight: var(--font-weight-semibold);
@@ -152,6 +153,10 @@ $--font-size: (
 
         .el-icon-info {
                 --el-message-font-color: white;
+        }
+
+        &__closeBtn {
+                color: white;
         }
 }
 
