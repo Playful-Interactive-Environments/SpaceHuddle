@@ -130,6 +130,7 @@ const reportErrors = (errors: string[]): void => {
       message: app.config.globalProperties.$i18n.translateWithFallback(error),
       type: 'error',
       center: true,
+      showClose: true,
     });
   });
 };

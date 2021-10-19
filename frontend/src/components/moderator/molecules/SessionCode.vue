@@ -37,6 +37,7 @@ export default class SessionCode extends Vue {
           message: (this as any).$t('info.copyToClipboard'),
           type: 'success',
           center: true,
+          showClose: true,
         });
       },
       () => {
@@ -44,6 +45,7 @@ export default class SessionCode extends Vue {
           message: (this as any).$t('error.gui.copyToClipboard'),
           type: 'error',
           center: true,
+          showClose: true,
         });
       }
     );

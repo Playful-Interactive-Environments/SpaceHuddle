@@ -163,6 +163,7 @@ router.beforeEach((to, from, next) => {
       message: app.config.globalProperties.$t(`error.route.${errorMessage}`),
       type: 'error',
       center: true,
+      showClose: true,
     });
     removeAccessToken();
     next({ name: 'home' });

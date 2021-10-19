@@ -86,6 +86,7 @@ export default class ModuleShare extends Vue {
             message: (this as any).$t('info.updatePublicScreen'),
             type: 'success',
             center: true,
+            showClose: true,
           });
 
           this.eventBus.emit(
@@ -110,6 +111,7 @@ export default class ModuleShare extends Vue {
           message: (this as any).$t('info.updateParticipantState'),
           type: 'success',
           center: true,
+          showClose: true,
         });
       });
     }

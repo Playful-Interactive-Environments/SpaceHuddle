@@ -221,6 +221,7 @@ export default class Participant extends Vue {
             ),
             type: 'success',
             center: true,
+            showClose: true,
           });
         },
         (error) => {

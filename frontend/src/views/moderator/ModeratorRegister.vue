@@ -147,6 +147,7 @@ export default class ModeratorRegister extends Vue {
             message: (this as any).$t('info.accountCreated'),
             type: 'success',
             center: true,
+            showClose: true,
           });
         },
         (error) => {
