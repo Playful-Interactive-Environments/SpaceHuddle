@@ -47,17 +47,26 @@
         />
         <el-form-item
           :label="$t('moderator.organism.settings.taskSettings.moduleType')"
-          prop="moduleList"
+          prop="moduleListMain"
           :rules="[
             defaultFormRules.ruleSelection,
             { validator: validateModuleSelection },
           ]"
         >
           <div>
+            <el-tag v-for="tag in moduleSelectionMain" :key="tag">
+              {{
+                $t(
+                  `module.${
+                    TaskType[formData.taskType]
+                  }.${tag}.description.title`
+                )
+              }}
+            </el-tag>
             <el-tag
-              v-for="tag in moduleSelection"
+              v-for="tag in moduleSelectionAddOn"
               :key="tag"
-              :closable="moduleKeyList.length > 1"
+              :closable="true"
               v-on:close="removeModuleType(tag)"
             >
               {{
@@ -84,7 +93,8 @@
               <ModuleCard
                 :task-type="TaskType[formData.taskType]"
                 :moduleName="moduleType"
-                v-model="formData.moduleList[moduleType]"
+                v-model:mainModule="mainModule"
+                v-model="formData.moduleListAddOn[moduleType]"
               />
             </el-carousel-item>
           </el-carousel>
@@ -202,6 +212,7 @@ import ValidationForm, {
   ValidationFormCall,
 } from '@/components/shared/molecules/ValidationForm.vue';
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
+import { ModuleType } from '@/types/enum/ModuleType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -219,7 +230,8 @@ interface FormDataDefinition {
   name: string;
   description: string;
   parameter: any;
-  moduleList: { [key: string]: boolean };
+  moduleListMain: { [key: string]: boolean };
+  moduleListAddOn: { [key: string]: boolean };
   moduleParameterComponents: ModuleComponentDefinition[];
   stateMessage: string;
   call: string;
@@ -250,7 +262,8 @@ export default class TaskSettings extends Vue {
     name: '',
     description: '',
     parameter: {},
-    moduleList: {},
+    moduleListMain: {},
+    moduleListAddOn: {},
     moduleParameterComponents: [],
     stateMessage: '',
     call: '',
@@ -260,13 +273,28 @@ export default class TaskSettings extends Vue {
 
   TaskType = TaskType;
 
+  get mainModule(): string {
+    if (this.moduleSelectionMain.length > 0)
+      return this.moduleSelectionMain[0];
+    return '';
+  }
+
+  set mainModule(value: string) {
+    if (value in this.formData.moduleListMain) {
+      Object.keys(this.formData.moduleListMain).forEach(
+        (moduleName) => (this.formData.moduleListMain[moduleName] = false)
+      );
+      this.formData.moduleListMain[value] = true;
+    }
+  }
+
   validateModuleSelection(
     rule: ValidationRules,
     value: string,
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     callback: any
   ): boolean {
-    if (this.moduleSelection.length > 0) {
+    if (this.moduleSelectionMain.length > 0) {
       callback();
       return true;
     } else {
@@ -282,17 +310,33 @@ export default class TaskSettings extends Vue {
   }
 
   get moduleKeyList(): string[] {
-    return Object.keys(this.formData.moduleList);
+    return [
+      ...Object.keys(this.formData.moduleListMain),
+      ...Object.keys(this.formData.moduleListAddOn),
+    ];
   }
 
-  get moduleSelection(): string[] {
-    return Object.entries(this.formData.moduleList)
+  get moduleSelectionMain(): string[] {
+    return Object.entries(this.formData.moduleListMain)
       .filter((item) => item[1])
       .map((item) => item[0]);
   }
 
+  get moduleSelectionAddOn(): string[] {
+    return Object.entries(this.formData.moduleListAddOn)
+      .filter((item) => item[1])
+      .map((item) => item[0]);
+  }
+
+  get moduleSelection(): string[] {
+    return [...this.moduleSelectionMain, ...this.moduleSelectionAddOn];
+  }
+
   removeModuleType(tag: string): void {
-    this.formData.moduleList[tag] = false;
+    if (tag in this.formData.moduleListAddOn)
+      this.formData.moduleListAddOn[tag] = false;
+    if (tag in this.formData.moduleListMain)
+      this.formData.moduleListMain[tag] = false;
   }
 
   handleClose(done: { (): void }): void {
@@ -310,7 +354,9 @@ export default class TaskSettings extends Vue {
         this.formData.description = task.description;
         this.formData.parameter = task.parameter ?? {};
         task.modules.forEach((module) => {
-          this.formData.moduleList[module.name] = true;
+          if (module.name in this.formData.moduleListAddOn)
+            this.formData.moduleListAddOn[module.name] = true;
+          else this.mainModule = module.name;
         });
         this.task = task;
       });
@@ -405,16 +451,31 @@ export default class TaskSettings extends Vue {
   }
 
   async loadModuleList(): Promise<void> {
-    this.formData.moduleList = {};
-    await getModulesForTaskType(this.formData.taskType).then((result) => {
-      result.forEach((moduleName, moduleIndex) => {
-        if (!this.task) this.formData.moduleList[moduleName] = moduleIndex == 0;
-        else
-          this.formData.moduleList[moduleName] = this.task.modules.some(
-            (model) => model.name == moduleName
-          );
-      });
-    });
+    this.formData.moduleListMain = {};
+    this.formData.moduleListAddOn = {};
+    await getModulesForTaskType(this.formData.taskType, ModuleType.MAIN).then(
+      (result) => {
+        result.forEach((moduleName, moduleIndex) => {
+          if (!this.task)
+            this.formData.moduleListMain[moduleName] = moduleIndex == 0;
+          else
+            this.formData.moduleListMain[moduleName] = this.task.modules.some(
+              (model) => model.name == moduleName
+            );
+        });
+      }
+    );
+    await getModulesForTaskType(this.formData.taskType, ModuleType.ADDON).then(
+      (result) => {
+        result.forEach((moduleName) => {
+          if (!this.task) this.formData.moduleListAddOn[moduleName] = false;
+          else
+            this.formData.moduleListAddOn[moduleName] = this.task.modules.some(
+              (model) => model.name == moduleName
+            );
+        });
+      }
+    );
   }
 
   reset(): void {

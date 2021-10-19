@@ -3,6 +3,7 @@ import config from './config.json';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import { RouteRecordRaw } from 'vue-router';
 import TaskType from '@/types/enum/TaskType';
+import {ModuleType} from "@/types/enum/ModuleType";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -272,11 +273,14 @@ const getRouteItem = (
 };
 
 export const getModulesForTaskType = async (
-  taskType: keyof typeof TaskType
+  taskType: keyof typeof TaskType,
+  moduleType: string = ModuleType.MAIN
 ): Promise<string[]> => {
   await until(() => moduleConfigLoaded);
   const taskTypeName = TaskType[taskType];
   const modules = moduleConfig[taskTypeName];
   const moduleNameList = Object.keys(modules) as string[];
-  return moduleNameList.filter((obj) => obj !== 'settings');
+  return moduleNameList.filter(
+    (obj) => 'type' in modules[obj] && modules[obj]['type'] === moduleType
+  );
 };
