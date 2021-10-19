@@ -64,7 +64,7 @@
         :id="idea.id"
         :idea="idea"
         :is-selectable="false"
-        :is-editable="false"
+        :is-editable="true"
         class="item"
         style="height: unset"
       >

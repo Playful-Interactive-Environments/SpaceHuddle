@@ -15,46 +15,48 @@
     <div style="padding: 14px">
       <div class="card__title">
         {{ hasKeywords ? idea.keywords : idea.description }}
-        <slot name="action"></slot>
-        <el-dropdown
-          v-if="isEditable"
-          class="card__menu"
-          v-on:command="menuItemSelected($event)"
-        >
-          <span class="el-dropdown-link">
-            <font-awesome-icon icon="ellipsis-h" />
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="edit">
-                <font-awesome-icon icon="pen" />
-              </el-dropdown-item>
-              <el-dropdown-item command="delete">
-                <font-awesome-icon icon="trash" />
-              </el-dropdown-item>
-              <el-dropdown-item command="state">
-                <el-dropdown
-                  class="card__menu"
-                  placement="top-start"
-                  v-on:command="menuItemSelected($event)"
-                >
-                  <font-awesome-icon icon="star" />
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item
-                        v-for="ideaState in IdeaStates"
-                        :key="ideaState"
-                        :command="ideaState"
-                      >
-                        {{ $t(`enum.ideaState.${ideaState}`) }}
-                      </el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
+        <span class="actions">
+          <slot name="action"></slot>
+          <el-dropdown
+            v-if="isEditable"
+            class="card__menu"
+            v-on:command="menuItemSelected($event)"
+          >
+            <span class="el-dropdown-link">
+              <font-awesome-icon icon="ellipsis-h" />
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="edit">
+                  <font-awesome-icon icon="pen" />
+                </el-dropdown-item>
+                <el-dropdown-item command="delete">
+                  <font-awesome-icon icon="trash" />
+                </el-dropdown-item>
+                <el-dropdown-item command="state">
+                  <el-dropdown
+                    class="card__menu"
+                    placement="top-start"
+                    v-on:command="menuItemSelected($event)"
+                  >
+                    <font-awesome-icon icon="star" />
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <el-dropdown-item
+                          v-for="ideaState in IdeaStates"
+                          :key="ideaState"
+                          :command="ideaState"
+                        >
+                          {{ $t(`enum.ideaState.${ideaState}`) }}
+                        </el-dropdown-item>
+                      </el-dropdown-menu>
+                    </template>
+                  </el-dropdown>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </span>
       </div>
       <div v-if="hasKeywords && idea.description" class="card__content">
         {{ idea.description }}
@@ -146,6 +148,10 @@ export default class IdeaCard extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.actions::v-deep > * {
+  margin-left: 0.5rem;
+}
+
 .card {
   &__selected {
     background-color: var(--color-blue);

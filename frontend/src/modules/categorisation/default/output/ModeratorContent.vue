@@ -83,7 +83,7 @@
               :id="element.id"
               :idea="element"
               :is-selectable="false"
-              :is-editable="false"
+              :is-editable="true"
               class="item"
             />
           </template>
