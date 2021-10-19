@@ -1,5 +1,5 @@
 <template>
-  <div class="timer">{{ isActive ? formattedTime : 'inactive' }}</div>
+  <div class="timer">{{ showTime ? formattedTime : 'inactive' }}</div>
 </template>
 
 <script lang="ts">
@@ -15,9 +15,8 @@ import * as taskService from '@/services/task-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Timer extends Vue {
-  @Prop({ default: false }) isActive!: boolean;
   @Prop() task!: Task;
-  timeLeft = 360;
+  timeLeft = 0;
   interval!: any;
   readonly intervalTime = 1000;
 
@@ -25,20 +24,17 @@ export default class Timer extends Vue {
     document.addEventListener('visibilitychange', this.syncTimeWithBackend);
   }
 
-  @Watch('isActive', { immediate: true })
-  onIsActiveChanged(val: boolean): void {
-    if (val) {
-      this.startTimer();
-    } else {
-      clearInterval(this.interval);
-    }
+  get showTime(): boolean {
+    return taskService.isActive(this.task);
   }
 
   @Watch('task', { immediate: true, deep: true })
   onTaskChanged(val: Task): void {
-    if (val && val.remainingTime) {
+    if (val && val.remainingTime && this.showTime) {
       this.timeLeft = val.remainingTime;
       this.startTimer();
+    } else {
+      clearInterval(this.interval);
     }
   }
 
@@ -58,17 +54,19 @@ export default class Timer extends Vue {
 
   startTimer(): void {
     clearInterval(this.interval);
-    this.interval = setInterval(() => {
-      this.timeLeft -= 1;
-      if (this.timeLeft <= 0) {
-        this.timeLeft = 0;
-        clearInterval(this.interval);
-        this.$emit('timerEnds');
-      }
-      if (this.task) {
-        this.task.remainingTime = this.timeLeft;
-      }
-    }, this.intervalTime);
+    this.interval = setInterval(() => this.refreshTimer(), this.intervalTime);
+  }
+
+  refreshTimer(): void {
+    this.timeLeft -= 1;
+    if (this.timeLeft <= 0) {
+      this.timeLeft = 0;
+      clearInterval(this.interval);
+      this.$emit('timerEnds');
+    }
+    if (this.task) {
+      this.task.remainingTime = this.timeLeft;
+    }
   }
 
   unmounted(): void {

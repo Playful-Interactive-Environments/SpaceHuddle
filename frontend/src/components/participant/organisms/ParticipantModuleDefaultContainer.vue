@@ -12,7 +12,6 @@
         </div>
         <Timer
           class="module-container__timer"
-          :isActive="true"
           :task="task"
           v-on:timerEnds="$router.go(-1)"
         ></Timer>
@@ -39,7 +38,6 @@ import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 import TaskType from '@/types/enum/TaskType';
 import { Prop, Watch } from 'vue-property-decorator';
 import { setModuleStyles } from '@/utils/moduleStyles';
-import { maxLength, required } from '@vuelidate/validators';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
@@ -50,15 +48,6 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
     Timer,
     HalfCard,
     TaskInfo,
-  },
-  validations: {
-    keywords: {
-      max: maxLength(36),
-    },
-    description: {
-      required,
-      max: maxLength(255),
-    },
   },
 })
 export default class ParticipantModuleDefaultContainer extends Vue {

@@ -7,6 +7,7 @@ import {
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Task, TaskForSaveAction } from '@/types/api/Task';
+import TaskStates from '@/types/enum/TaskStates';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -62,4 +63,15 @@ export const putTask = async (
     data,
     EndpointAuthorisationType.MODERATOR
   );
+};
+
+export const isActive = (task: Task): boolean => {
+  if (task) {
+    return (
+      task.state === TaskStates.ACTIVE &&
+      task.remainingTime !== null &&
+      task.remainingTime > 0
+    );
+  }
+  return false;
 };

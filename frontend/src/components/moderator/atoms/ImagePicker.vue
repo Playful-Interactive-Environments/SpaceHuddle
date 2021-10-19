@@ -15,7 +15,7 @@
       ref="upload"
     ></my-upload>
     <LinkSettings v-model:show-modal="showLinkInput" v-model:link="editLink" />
-    <div class="edit stack__container">
+    <div class="edit stack__container stack__container__image">
       <div class="stack__content">
         <div v-if="!link && !image" class="empty">
           <font-awesome-icon icon="plus" />

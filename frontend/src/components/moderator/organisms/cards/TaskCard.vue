@@ -1,31 +1,49 @@
 <template>
   <el-card class="card" shadow="hover" :body-style="{ padding: '0px' }">
     <span class="level" ref="item">
-      <span
-        class="level-left"
-        style="cursor: pointer"
-        v-on:click="
-          $router.push(
-            isParticipant
-              ? `/participant-module-content/${task.id}`
-              : `/module-content/${sessionId}/${task.id}`
-          )
-        "
-      >
-        <div class="level-item card__planet" v-if="!isParticipant">
+      <span class="level-left">
+        <div
+          class="level-item card__planet stack__container link"
+          v-if="!isParticipant"
+          v-on:click="goToDetails"
+        >
+          <div class="stack__content inactive" v-if="!showTimer"></div>
+          <div class="stack__content card__planet-size">
+            <div class="image-size">
+              <Timer
+                class="card__timer link"
+                :task="task"
+                v-on:timerEnds="$emit('timerEnds')"
+                v-on:click="timerClicked"
+                v-if="showTimer"
+              />
+            </div>
+            <div class="card__half-card"></div>
+          </div>
           <img
             :src="require(`@/assets/illustrations/planets/${type}.png`)"
             alt="planet"
           />
           <div class="card__half-card"></div>
         </div>
-        <div class="level-item card__planet_only" v-if="isParticipant">
+        <div
+          class="level-item card__planet_only media link"
+          v-if="isParticipant"
+          v-on:click="goToDetails"
+        >
           <img
+            class="media-left"
             :src="require(`@/assets/illustrations/planets/${type}.png`)"
             alt="planet"
           />
+          <Timer
+            class="card__timer media-content"
+            :task="task"
+            v-on:timerEnds="$emit('timerEnds')"
+            v-if="showTimer"
+          />
         </div>
-        <div class="level-item card__info">
+        <div class="level-item card__info link" v-on:click="goToDetails">
           <TaskInfo
             :type="type"
             :title="task.name"
@@ -34,14 +52,6 @@
         </div>
       </span>
       <span class="level-right">
-        <Timer
-          class="card__timer level-item"
-          :isActive="task.state === TaskStates.ACTIVE"
-          :task="task"
-          v-on:timerEnds="$emit('timerEnds')"
-          v-on:click="timerClicked"
-          v-if="!(type === TaskType.INFORMATION || type === TaskType.SELECTION)"
-        />
         <div class="level-item">
           <div class="card__toggles" v-if="!isParticipant">
             <ModuleShare :task="task" :is-on-public-screen="isOnPublicScreen" />
@@ -71,6 +81,7 @@ import ModuleShare from '@/components/moderator/molecules/ModuleShare.vue';
 import TaskType from '@/types/enum/TaskType';
 import TaskStates from '@/types/enum/TaskStates';
 import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
+import * as taskService from '@/services/task-service';
 
 @Options({
   components: {
@@ -92,6 +103,14 @@ export default class TaskCard extends Vue {
   TaskStates = TaskStates;
   showTimerSettings = false;
 
+  goToDetails(): void {
+    this.$router.push(
+      this.isParticipant
+        ? `/participant-module-content/${this.task.id}`
+        : `/module-content/${this.sessionId}/${this.task.id}`
+    );
+  }
+
   get moduleName(): string {
     if (this.task && this.task.modules && this.task.modules.length > 0)
       return this.task.modules[0].name;
@@ -106,15 +125,29 @@ export default class TaskCard extends Vue {
     setModuleStyles(this.type, this.$refs.item as HTMLElement);
   }
 
-  timerClicked(): void {
+  timerClicked(event: PointerEvent): void {
+    event.cancelBubble;
+    event.stopImmediatePropagation();
     if (!this.isParticipant) {
       this.showTimerSettings = true;
     }
+  }
+
+  get showTimer(): boolean {
+    return taskService.isActive(this.task);
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.inactive {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.link {
+  cursor: pointer;
+}
+
 .level {
   align-items: stretch;
 }
@@ -124,6 +157,9 @@ export default class TaskCard extends Vue {
 
   &__planet_only {
     padding-top: 1.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    align-items: flex-end;
     img {
       //margin: 0.5rem;
       width: 8rem;
@@ -137,6 +173,21 @@ export default class TaskCard extends Vue {
     img {
       margin: 0.5rem;
       width: 8rem;
+    }
+  }
+
+  &__planet-size {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .image-size {
+      margin: 0.5rem;
+      width: 8rem;
+      height: 8rem;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-end;
     }
   }
 
@@ -169,9 +220,13 @@ export default class TaskCard extends Vue {
 }
 
 @media only screen and (min-width: 950px) {
-  .level-left,
+  .level-left {
+    max-width: calc(100% - 15rem);
+    width: calc(100% - 15rem);
+  }
+
   .level-right {
-    max-width: 50%;
+    max-width: 15rem;
   }
 
   .level {
@@ -185,6 +240,7 @@ export default class TaskCard extends Vue {
   .card {
     &__info {
       max-width: calc(100% - 10rem);
+      width: 100%;
     }
   }
 }
@@ -195,7 +251,7 @@ export default class TaskCard extends Vue {
   }
 
   .level-item {
-    flex-direction: column;
+    //flex-direction: column;
   }
 
   .level,
@@ -226,6 +282,12 @@ export default class TaskCard extends Vue {
       width: unset;
     }
 
+    &__planet-size {
+      flex-direction: column;
+      .image-size {
+      }
+    }
+
     &__half-card {
       height: var(--border-radius-xs);
       width: unset;
@@ -237,6 +299,11 @@ export default class TaskCard extends Vue {
       height: 1.5rem;
       border-radius: 0 0 var(--border-radius-xs) var(--border-radius-xs);
     }
+  }
+
+  .center {
+    width: 100%;
+    height: calc(100% - var(--border-radius-xs));
   }
 }
 

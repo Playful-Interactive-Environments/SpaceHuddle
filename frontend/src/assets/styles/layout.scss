@@ -99,16 +99,18 @@
   &__container {
     position: relative;
     overflow: hidden;
-    border-radius: 6px;
     background-color: #fff;
-    border: 1px solid #c0ccda;
     box-sizing: border-box;
-    width: 100%;//9rem;
-    //height: 9rem;
-    padding-top: 100%; /* 1:1 Aspect Ratio */
     margin: 0;
     //display: inline;
     vertical-align: center;
+
+    &__image {
+      border-radius: var(--border-radius-xs);
+      border: 1px solid #c0ccda;
+      width: 100%;
+      padding-top: 100%; /* 1:1 Aspect Ratio */
+    }
   }
 
   &__content {
