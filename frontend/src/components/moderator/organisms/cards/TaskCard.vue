@@ -1,6 +1,6 @@
 <template>
   <el-card class="card" shadow="hover" :body-style="{ padding: '0px' }">
-    <span class="level" ref="item">
+    <span class="level" :class="{ 'is-desktop': isParticipant }" ref="item">
       <span class="level-left">
         <div
           class="level-item card__planet stack__container link"

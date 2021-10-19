@@ -1,5 +1,7 @@
 <template>
-  <div class="overview container2--fullheight">
+  <div
+    class="overview container2 container2--fullheight container2__participant"
+  >
     <div class="container2">
       <MenuBar />
       <SessionInfo :title="sessionName" :description="sessionDescription" />
@@ -113,10 +115,9 @@ export default class ParticipantOverview extends Vue {
 .overview {
   color: #fff;
   background: var(--color-darkblue);
-  background-image: url('~@/assets/illustrations/stars-background.png');
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-size: cover;
+  background: url('~@/assets/illustrations/stars-background-repeat.png');
+  //background-attachment: fixed;
+  background-size: contain;
 
   &__module + .overview__module {
     margin-left: 1.5rem;

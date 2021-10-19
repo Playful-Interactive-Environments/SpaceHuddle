@@ -3,7 +3,7 @@ import config from './config.json';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import { RouteRecordRaw } from 'vue-router';
 import TaskType from '@/types/enum/TaskType';
-import {ModuleType} from "@/types/enum/ModuleType";
+import { ModuleType } from '@/types/enum/ModuleType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 

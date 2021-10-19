@@ -122,7 +122,6 @@ export default class ModeratorLogin extends Vue {
 <style lang="scss" scoped>
 .login {
   display: grid;
-  grid-template-columns: 5fr 3fr;
   padding: 0;
   margin: 0;
 
@@ -153,6 +152,22 @@ export default class ModeratorLogin extends Vue {
   &__forgot-pw {
     text-align: center;
     cursor: pointer;
+  }
+}
+
+@media only screen and (min-width: 950px) {
+  .login {
+    grid-template-columns: 5fr 3fr;
+  }
+}
+
+@media only screen and (max-width: 949px) {
+  .login {
+    grid-template-rows: 6fr 2fr;
+
+    section {
+      min-height: 100%;
+    }
   }
 }
 </style>

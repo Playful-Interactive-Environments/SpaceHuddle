@@ -145,3 +145,37 @@
     }
   }
 }
+
+.level {
+  &.is-desktop {
+    flex-direction: column;
+    display: flex;
+    align-items: stretch;
+
+    .level-left, .level-right {
+      flex-direction: column;
+      display: flex;
+      max-width: unset;
+      width: unset;
+      align-items: stretch;
+
+      .level-item {
+        max-width: unset;
+        width: unset;
+
+        div {
+          text-align: center;
+        }
+      }
+    }
+
+    .level-left + .level-right[data-v-7d4100c9] {
+      margin-top: 1.5rem;
+    }
+
+    .level-left .level-item:not(:last-child), .level-right .level-item:not(:last-child) {
+      margin-right: unset;
+      margin-left: unset;
+    }
+  }
+}

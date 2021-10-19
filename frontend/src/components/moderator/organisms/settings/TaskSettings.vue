@@ -274,8 +274,7 @@ export default class TaskSettings extends Vue {
   TaskType = TaskType;
 
   get mainModule(): string {
-    if (this.moduleSelectionMain.length > 0)
-      return this.moduleSelectionMain[0];
+    if (this.moduleSelectionMain.length > 0) return this.moduleSelectionMain[0];
     return '';
   }
 

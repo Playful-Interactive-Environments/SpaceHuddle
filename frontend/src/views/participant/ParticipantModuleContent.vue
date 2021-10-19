@@ -1,34 +1,36 @@
 <template>
-  <div class="overlay">
-    <MenuBar />
-    <el-tabs
-      :stretch="false"
-      v-if="task && task.modules.length > 1"
-      v-model="moduleName"
-      class="white"
-      @tab-click="(tab) => moduleNameClick(tab.paneName)"
-    >
-      <el-tab-pane
-        v-for="module in task.modules"
-        :key="module.name"
-        :name="module.name"
+  <div>
+    <div class="overlay">
+      <MenuBar />
+      <el-tabs
+        :stretch="false"
+        v-if="task && task.modules.length > 1"
+        v-model="moduleName"
+        class="white"
+        @tab-click="(tab) => moduleNameClick(tab.paneName)"
       >
-        <template #label>
-          <span class="icon" v-if="module.icon">
-            <font-awesome-icon :icon="module.icon" />
-          </span>
-          <span class="text">
-            {{ $t(`module.${taskType}.${module.name}.description.title`) }}
-          </span>
-        </template>
-      </el-tab-pane>
-    </el-tabs>
+        <el-tab-pane
+          v-for="module in task.modules"
+          :key="module.name"
+          :name="module.name"
+        >
+          <template #label>
+            <span class="icon" v-if="module.icon">
+              <font-awesome-icon :icon="module.icon" />
+            </span>
+            <span class="text">
+              {{ $t(`module.${taskType}.${module.name}.description.title`) }}
+            </span>
+          </template>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
+    <ParticipantModuleComponent
+      :task-id="taskId"
+      :module-id="moduleId"
+      :key="componentLoadIndex"
+    />
   </div>
-  <ParticipantModuleComponent
-    :task-id="taskId"
-    :module-id="moduleId"
-    :key="componentLoadIndex"
-  />
 </template>
 
 <script lang="ts">

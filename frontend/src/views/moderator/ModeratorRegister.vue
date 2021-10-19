@@ -48,10 +48,7 @@
           <el-form-item
             :label="$t('moderator.view.register.email')"
             prop="email"
-            :rules="[
-              defaultFormRules.ruleRequired,
-              defaultFormRules.ruleEmail,
-            ]"
+            :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleEmail]"
           >
             <el-input
               type="email"
@@ -161,7 +158,6 @@ export default class ModeratorRegister extends Vue {
 <style lang="scss" scoped>
 .register {
   display: grid;
-  grid-template-columns: 3fr 5fr;
   padding: 0;
   margin: 0;
 
@@ -187,6 +183,22 @@ export default class ModeratorRegister extends Vue {
   &__text {
     line-height: 1.5;
     padding: 0.5rem 2rem 0;
+  }
+}
+
+@media only screen and (min-width: 950px) {
+  .register {
+    grid-template-columns: 3fr 5fr;
+  }
+}
+
+@media only screen and (max-width: 949px) {
+  .register {
+    grid-template-rows: 2fr 6fr;
+
+    section {
+      min-height: 100%;
+    }
   }
 }
 </style>

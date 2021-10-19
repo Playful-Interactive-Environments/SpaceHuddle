@@ -10,8 +10,7 @@ import { Module } from '@/types/api/Module';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 
 @Options({
-  components: {
-  },
+  components: {},
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/

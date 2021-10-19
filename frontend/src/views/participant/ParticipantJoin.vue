@@ -2,7 +2,10 @@
   <div
     class="
       join
-      container2 container2--fullheight container2--centered-horizontal
+      container2
+      container2__participant
+      container2--fullheight
+      container2--centered-horizontal
     "
   >
     <main class="join__content">
