@@ -80,7 +80,8 @@ export const removeIdeasFromSelection = async (
   return await apiExecuteDelete<any>(
     `/${EndpointType.SELECTION}/${selectionId}/${EndpointType.IDEAS}`,
     data,
-    authHeaderType
+    authHeaderType,
+    false
   );
 };
 

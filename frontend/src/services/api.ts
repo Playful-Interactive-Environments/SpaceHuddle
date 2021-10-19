@@ -175,9 +175,10 @@ export async function apiExecutePut<T = any>(
 export async function apiExecuteDeleteHandled<T = any>(
   url: string,
   body: any = null,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  confirmCheck = true
 ): Promise<boolean> {
-  if (await deleteConfirmDialog()) {
+  if (await deleteConfirmDialog(confirmCheck)) {
     try {
       if (body)
         await getApiEndpoint(authHeaderType).delete<T>(url, { data: body });
@@ -193,9 +194,10 @@ export async function apiExecuteDeleteHandled<T = any>(
 export async function apiExecuteDelete<T = any>(
   url: string,
   body: any = null,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  confirmCheck = true
 ): Promise<boolean> {
-  if (await deleteConfirmDialog()) {
+  if (await deleteConfirmDialog(confirmCheck)) {
     if (body)
       await getApiEndpoint(authHeaderType).delete<T>(url, { data: body });
     else await getApiEndpoint(authHeaderType).delete<T>(url);
@@ -204,7 +206,9 @@ export async function apiExecuteDelete<T = any>(
   return false;
 }
 
-const deleteConfirmDialog = async (): Promise<boolean> => {
+const deleteConfirmDialog = async (confirmCheck = true): Promise<boolean> => {
+  if (!confirmCheck) return true;
+
   let confirmClicked = false;
   await app.config.globalProperties
     .$confirm(

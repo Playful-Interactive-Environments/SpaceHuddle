@@ -79,6 +79,7 @@ export const removeIdeasFromCategory = async (
   return await apiExecuteDelete<any>(
     `/${EndpointType.CATEGORY}/${categoryId}/${EndpointType.IDEAS}`,
     data,
-    authHeaderType
+    authHeaderType,
+    false
   );
 };
