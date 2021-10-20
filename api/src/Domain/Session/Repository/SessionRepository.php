@@ -15,6 +15,7 @@ use App\Domain\Session\Type\SessionRoleType;
 use App\Factory\QueryFactory;
 use App\Domain\Session\Data\SessionData;
 use DomainException;
+use Selective\ArrayReader\ArrayReader;
 
 /**
  * Repository
@@ -101,7 +102,33 @@ class SessionRepository implements RepositoryInterface
             ->andWhere($conditions)
             ->order($sortConditions);
 
-        return $this->fetchAll($query);
+        $result = $this->fetchAll($query);
+        if (is_array($result)) {
+            foreach ($result as $resultItem) {
+                $this->getInfos($resultItem);
+            }
+        } elseif (is_object($result)) {
+            $this->getInfos($result);
+        }
+        return $result;
+    }
+
+    /**
+     * Get session infos
+     * @param SessionData $data Session data
+     */
+    private function getInfos(SessionData $data): void
+    {
+        $query = $this->queryFactory->newSelect("topic");
+        $query->select(["COUNT(DISTINCT(topic.id)) AS TOPIC_COUNT", "COUNT(task.id) AS TASK_COUNT"])
+            ->leftJoin("task", "task.topic_id = topic.id")
+            ->andWhere([
+                "topic.session_id" => $data->id
+            ]);
+        $rows = $query->execute()->fetch();
+        $reader = new ArrayReader($rows);
+        $data->topicCount = $reader->findInt("0") ?? 0;
+        $data->taskCount = $reader->findInt("1") ?? 0;
     }
 
     /**

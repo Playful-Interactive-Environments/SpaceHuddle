@@ -74,6 +74,20 @@ class SessionData
     public ?string $role;
 
     /**
+     * Number of topics assigned to the session.
+     * @var int
+     * @OA\Property()
+     */
+    public int $topicCount;
+
+    /**
+     * Number of tasks assigned to the session.
+     * @var int
+     * @OA\Property()
+     */
+    public int $taskCount;
+
+    /**
      * Creates a new Participant.
      * @param array $data Participant data.
      */
@@ -89,6 +103,8 @@ class SessionData
         $this->creationDate = $reader->findString("creation_date");
         $this->publicScreenModuleId = $reader->findString("public_screen_module_id");
         $this->role = $reader->findString("role");
+        $this->topicCount = $reader->findInt("topic_count") ?? 0;
+        $this->taskCount = $reader->findInt("task_count") ?? 0;
 
         if (isset($this->role)) {
             $this->role = strtoupper($this->role);
