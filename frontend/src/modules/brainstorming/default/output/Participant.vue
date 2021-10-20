@@ -75,7 +75,7 @@
             <el-footer>
               <div role="button">
                 <el-button v-on:click="showLinkInput = !showLinkInput" circle>
-                  <font-awesome-icon icon="share-alt" />
+                  <font-awesome-icon icon="link" />
                 </el-button>
                 <el-button
                   v-on:click="showUploadDialog = !showUploadDialog"
@@ -84,7 +84,7 @@
                   <font-awesome-icon icon="paperclip" />
                 </el-button>
                 <el-button native-type="submit" circle>
-                  <font-awesome-icon icon="paper-plane" />
+                  <font-awesome-icon icon="play" />
                 </el-button>
               </div>
             </el-footer>

@@ -30,7 +30,7 @@
         v-on:webkitTransitionEnd="toggleActions"
       >
         <span @click="editLinkInput">
-          <font-awesome-icon icon="share-alt" />
+          <font-awesome-icon icon="link" />
         </span>
         <span @click="uploadImage">
           <font-awesome-icon icon="upload" />

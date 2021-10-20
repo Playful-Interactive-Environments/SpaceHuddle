@@ -6,7 +6,7 @@
     </div>
     <div class="module-count__item">
       <span class="module-count__count">{{ session.taskCount }}</span>
-      {{ $t('moderator.molecule.moduleCount.modules') }}
+      {{ $t('moderator.molecule.moduleCount.tasks') }}
     </div>
   </div>
 </template>

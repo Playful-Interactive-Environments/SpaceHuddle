@@ -1,6 +1,6 @@
 <template>
   <div
-    class="overview container2 container2--fullheight container2__participant"
+    class="overview container2--fullheight container2__participant"
   >
     <div class="container2">
       <MenuBar />
