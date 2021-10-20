@@ -3,7 +3,7 @@
     <template v-slot:sidebar>
       <Sidebar
         :is-session="true"
-        :session-id="session.id"
+        :session="session"
         :session-connection-key="session.connectionKey"
         :title="session.title"
         :pretitle="formatDate(session.creationDate)"

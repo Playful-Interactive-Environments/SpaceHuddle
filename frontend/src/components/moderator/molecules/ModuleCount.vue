@@ -1,11 +1,11 @@
 <template>
-  <div class="module-count">
+  <div class="module-count" v-if="session">
     <div class="module-count__item">
-      <span class="module-count__count">2</span>
+      <span class="module-count__count">{{ session.topicCount }}</span>
       {{ $t('moderator.molecule.moduleCount.topics') }}
     </div>
     <div class="module-count__item">
-      <span class="module-count__count">7</span>
+      <span class="module-count__count">{{ session.taskCount }}</span>
       {{ $t('moderator.molecule.moduleCount.modules') }}
     </div>
   </div>
@@ -13,11 +13,15 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import { Prop } from 'vue-property-decorator';
+import { Session } from '@/types/api/Session';
 
 @Options({
   components: {},
 })
-export default class ModuleCount extends Vue {}
+export default class ModuleCount extends Vue {
+  @Prop() session!: Session;
+}
 </script>
 
 <style lang="scss" scoped>

@@ -6,7 +6,6 @@
           <div class="sidebar__logo">
             <Logo />
           </div>
-          <!-- <router-link :to="`/session/${session.id}`"></router-link> -->
           <div class="sidebar__management">
             <div>{{ pretitle }}</div>
             <div class="sidebar__icon" aria-label="settings" role="button">
@@ -28,7 +27,7 @@
           <div class="sidebar__text">
             {{ description }}
           </div>
-          <ModuleCount v-if="isSession" />
+          <ModuleCount v-if="isSession" :session="session" />
         </div>
       </el-header>
       <el-main></el-main>
@@ -42,7 +41,7 @@
               :is-on-public-screen="isOnPublicScreen"
             />
           </div>
-          <router-link v-if="sessionId" :to="`/public-screen/${sessionId}`">
+          <router-link v-if="session.id" :to="`/public-screen/${session.id}`">
             <button
               class="btn btn--mint btn--fullwidth"
               :class="{ sidebar__button: !isSession }"
@@ -76,8 +75,8 @@ import { Task } from '@/types/api/Task';
   },
 })
 export default class Sidebar extends Vue {
-  @Prop({ default: false }) readonly isSession!: Session;
-  @Prop({ default: '' }) readonly sessionId!: string;
+  @Prop({ default: false }) readonly isSession!: boolean;
+  @Prop() readonly session!: Session;
   @Prop({ default: '' }) readonly sessionConnectionKey!: string;
   @Prop({ default: '' }) readonly title!: string;
   @Prop({ default: '' }) readonly pretitle!: string;

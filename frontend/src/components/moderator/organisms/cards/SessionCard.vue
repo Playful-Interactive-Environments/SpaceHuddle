@@ -6,7 +6,7 @@
           <p class="el-card__date">{{ formatDate(session.creationDate) }}</p>
           <h2 class="heading heading--regular">{{ session.title }}</h2>
           <p class="el-card__description">{{ session.description }}</p>
-          <ModuleCount />
+          <ModuleCount :session="session" />
         </div>
       </el-header>
       <el-main> </el-main>

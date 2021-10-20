@@ -6,7 +6,7 @@
   >
     <template v-slot:sidebar>
       <Sidebar
-        :session-id="sessionId"
+        :session="session"
         :title="task.name"
         :pretitle="task.taskType"
         :description="task.description"
@@ -42,6 +42,7 @@ import ModuleComponentType from '@/modules/ModuleComponentType';
 import TaskType from '@/types/enum/TaskType';
 import TaskStates from '@/types/enum/TaskStates';
 import { Task } from '@/types/api/Task';
+import { Session } from '@/types/api/Session';
 import { setModuleStyles } from '@/utils/moduleStyles';
 
 import * as sessionService from '@/services/session-service';
@@ -66,6 +67,7 @@ export default class ModeratorModuleContent extends Vue {
   componentLoadIndex = 0;
 
   task: Task | null = null;
+  session: Session | null = null;
   publicScreenTaskId = '';
   TaskType = TaskType;
   TaskStates = TaskStates;
@@ -106,6 +108,13 @@ export default class ModeratorModuleContent extends Vue {
     if (this.task && this.task.modules && this.task.modules.length > 0)
       return this.task.modules[0].name;
     return 'default';
+  }
+
+  @Watch('sessionId', { immediate: true })
+  onSessionIdChanged(id: string): void {
+    sessionService.getById(id).then((queryResult) => {
+      this.session = queryResult;
+    });
   }
 
   @Watch('taskId', { immediate: true })

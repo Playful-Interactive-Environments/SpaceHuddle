@@ -29,7 +29,6 @@ import { Session } from '@/types/api/Session';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import SessionCard from '@/components/moderator/organisms/cards/SessionCard.vue';
 import SessionSettings from '@/components/moderator/organisms/settings/SessionSettings.vue';
-import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import * as sessionService from '@/services/session-service';
 import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/ModeratorNavigationLayout.vue';
@@ -39,7 +38,6 @@ import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/M
     AddItem,
     SessionCard,
     SessionSettings,
-    ModuleCount,
     SessionCode,
     ModeratorNavigationLayout,
   },
