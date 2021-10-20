@@ -64,29 +64,6 @@
         >
         </el-date-picker>
       </el-form-item>
-      <el-divider></el-divider>
-      <h3 class="heading heading--small">
-        {{ $t('moderator.organism.settings.sessionSettings.topics') }}
-      </h3>
-      <p>
-        {{ $t('moderator.organism.settings.sessionSettings.topicsInfo') }}
-      </p>
-      <el-divider></el-divider>
-      <el-form-item
-        prop="topic"
-        :label="$t('moderator.organism.settings.sessionSettings.firstTopic')"
-        :rules="[
-          defaultFormRules.ruleRequired,
-          defaultFormRules.ruleToLong(255),
-        ]"
-      >
-        <el-input
-          v-model="formData.topic"
-          :placeholder="
-            $t('moderator.organism.settings.sessionSettings.firstTopicExample')
-          "
-        />
-      </el-form-item>
       <template #footer>
         <FromSubmitItem
           :form-state-message="formData.stateMessage"
@@ -116,18 +93,18 @@ import { ValidationData } from '@/types/ui/ValidationRule';
     ValidationForm,
     FromSubmitItem,
   },
+  emits: ['sessionUpdated', 'update:showModal', 'update:sessionId'],
 })
 export default class SessionSettings extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
   @Prop({ default: false }) showModal!: boolean;
+  @Prop({}) sessionId!: string;
 
-  maxNrOfTopics = 5;
   today = new Date();
 
   formData: ValidationData = {
     title: '',
     description: '',
-    topic: '',
     expirationDate: new Date(this.today.setMonth(this.today.getMonth() + 1)),
   };
 
@@ -137,8 +114,21 @@ export default class SessionSettings extends Vue {
     this.showDialog = showModal;
   }
 
+  @Watch('sessionId', { immediate: true })
+  onSessionIdChanged(id: string): void {
+    if (id) {
+      sessionService.getById(id).then((session) => {
+        this.formData.title = session.title;
+        this.formData.description = session.description;
+        this.formData.expirationDate = new Date(session.expirationDate);
+      });
+    } else {
+      this.reset();
+    }
+  }
+
   handleClose(done: { (): void }): void {
-    this.reset();
+    //this.reset();
     done();
     this.$emit('update:showModal', false);
   }
@@ -146,47 +136,60 @@ export default class SessionSettings extends Vue {
   reset(): void {
     this.formData.title = '';
     this.formData.description = '';
-    this.formData.topic = '';
-    this.formData.maxNrOfTopics = 5;
+    this.formData.expirationDate = new Date(
+      this.today.setMonth(this.today.getMonth() + 1)
+    );
     this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
+  get isoExpirationDate(): string {
+    this.formData.expirationDate.setHours(1);
+    return this.formData.expirationDate.toISOString().slice(0, 10);
+  }
+
   async save(): Promise<void> {
-    sessionService
-      .post({
-        title: this.formData.title,
-        description: this.formData.description,
-        maxParticipants: 100,
-        expirationDate: this.formData.expirationDate.toISOString().slice(0, 10),
-      })
-      .then(
-        (session) => {
-          topicService
-            .postTopic(session.id, {
-              title: this.formData.topic,
-              description:
-                'dummy data - this field should be removed in the backend!',
-            })
-            .then(
-              () => {
-                //this.$emit('update:showModal', false);
-                this.$router.push({
-                  name: 'moderator-session-details',
-                  params: {
-                    sessionId: session.id,
-                  },
-                });
+    if (!this.sessionId) {
+      sessionService
+        .post({
+          title: this.formData.title,
+          description: this.formData.description,
+          expirationDate: this.isoExpirationDate,
+        })
+        .then(
+          (session) => {
+            this.$emit('update:showModal', false);
+            this.$emit('sessionUpdated');
+            this.reset();
+            this.$router.push({
+              name: 'moderator-session-details',
+              params: {
+                sessionId: session.id,
               },
-              (error) => {
-                this.formData.stateMessage =
-                  getSingleTranslatedErrorMessage(error);
-              }
-            );
-        },
-        (error) => {
-          this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
-        }
-      );
+            });
+          },
+          (error) => {
+            this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
+          }
+        );
+    } else {
+      sessionService
+        .put(this.sessionId, {
+          title: this.formData.title,
+          description: this.formData.description,
+          expirationDate: this.isoExpirationDate,
+        })
+        .then(
+          () => {
+            this.$emit('update:showModal', false);
+            this.$emit('update:sessionId', null);
+            this.$emit('sessionUpdated');
+            //this.reset();
+          },
+          (error) => {
+            this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
+          }
+        );
+    }
   }
 }
 </script>
