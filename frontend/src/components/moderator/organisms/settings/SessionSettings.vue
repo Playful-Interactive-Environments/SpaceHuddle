@@ -79,7 +79,6 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 
 import * as sessionService from '@/services/session-service';
-import * as topicService from '@/services/topic-service';
 import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
 import ValidationForm, {
   ValidationFormCall,

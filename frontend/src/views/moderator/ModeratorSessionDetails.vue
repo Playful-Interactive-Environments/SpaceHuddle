@@ -8,6 +8,8 @@
         :title="session.title"
         :pretitle="formatDate(session.creationDate)"
         :description="session.description"
+        v-on:openSettings="editSession"
+        v-on:delete="deleteSession"
       />
     </template>
     <template v-slot:content>
@@ -71,6 +73,11 @@
         :topic-id="editTopicId"
         @topicUpdated="getTopics"
       />
+      <SessionSettings
+        v-model:show-modal="showSessionSettings"
+        :session-id="sessionId"
+        @sessionUpdated="getTopics"
+      />
     </template>
   </ModeratorNavigationLayout>
 </template>
@@ -95,6 +102,7 @@ import { convertToSaveVersion } from '@/types/api/Task';
 import { EventType } from '@/types/enum/EventType';
 import TopicSettings from '@/components/moderator/organisms/settings/TopicSettings.vue';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
+import SessionSettings from '@/components/moderator/organisms/settings/SessionSettings.vue';
 
 @Options({
   components: {
@@ -106,6 +114,7 @@ import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
     ModeratorNavigationLayout,
     Sidebar,
     CollapseTitle,
+    SessionSettings,
   },
 })
 export default class ModeratorSessionDetails extends Vue {
@@ -116,6 +125,7 @@ export default class ModeratorSessionDetails extends Vue {
   publicScreenTaskId = '';
   showTaskSettings = false;
   showTopicSettings = false;
+  showSessionSettings = false;
   formatDate = formatDate;
   addNewTopicId = '';
   editTopicId = '';
@@ -160,6 +170,16 @@ export default class ModeratorSessionDetails extends Vue {
 
   deleteTopic(topicId: string): void {
     topicService.deleteTopic(topicId).then(() => this.getTopics());
+  }
+
+  async editSession(): Promise<void> {
+    this.showSessionSettings = true;
+  }
+
+  async deleteSession(): Promise<void> {
+    await sessionService.remove(this.sessionId).then((deleted) => {
+      if (deleted) this.$router.go(-1);
+    });
   }
 
   async getPublicScreen(): Promise<void> {

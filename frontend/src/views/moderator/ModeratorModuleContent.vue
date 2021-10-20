@@ -137,8 +137,9 @@ export default class ModeratorModuleContent extends Vue {
   }
 
   async deleteTask(): Promise<void> {
-    await taskService.deleteTask(this.taskId);
-    this.$router.go(-1);
+    await taskService.deleteTask(this.taskId).then((deleted) => {
+      if (deleted) this.$router.go(-1);
+    });
   }
 }
 </script>

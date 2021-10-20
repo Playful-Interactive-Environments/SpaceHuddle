@@ -15,7 +15,10 @@
         </div>
       </div>
       <div class="session-overview__session-container"></div>
-      <SessionSettings v-model:show-modal="showSettings" />
+      <SessionSettings
+        v-model:show-modal="showSettings"
+        @sessionUpdated="getSessions"
+      />
     </template>
   </ModeratorNavigationLayout>
 </template>
@@ -47,6 +50,10 @@ export default class ModeratorSessionOverview extends Vue {
   errors: string[] = [];
 
   async mounted(): Promise<void> {
+    this.getSessions();
+  }
+
+  getSessions(): void {
     sessionService.getList().then((queryResult) => {
       this.sessions = queryResult;
     });
