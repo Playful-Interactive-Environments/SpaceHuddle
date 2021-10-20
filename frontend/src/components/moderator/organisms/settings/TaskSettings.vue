@@ -244,6 +244,7 @@ interface FormDataDefinition {
     ModuleCard,
     TaskParameterComponent: getEmptyComponent(),
   },
+  emits: ['taskUpdated', 'update:showModal'],
 })
 export default class TaskSettings extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
@@ -564,7 +565,7 @@ export default class TaskSettings extends Vue {
       });
     });
     this.$emit('update:showModal', false);
-    this.$emit('moduleCreated');
+    this.$emit('taskUpdated');
     if (cleanUp) this.reset();
     this.eventBus.emit(EventType.CHANGE_SETTINGS, {});
   }

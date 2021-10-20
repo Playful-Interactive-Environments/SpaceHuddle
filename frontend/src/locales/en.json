@@ -171,12 +171,16 @@
           "topicsInfo": "Topics help to make a clear distinction between subjects that should have separate brainstorming modules. Tip: Keep it simple - one or two topics are usually enough!",
           "firstTopic": "Topic 1",
           "topicExample": "e.g. New app Name",
-          "submit": "Create session"
-        }
-      },
-      "module": {
-        "overview": {
-          "add": "Add module"
+          "submit": "Save session"
+        },
+        "topicSettings": {
+          "header": "Create Topic",
+          "info": "Topics structure your session.",
+          "title": "Title",
+          "titleExample": "e.g. What is your favourite ...",
+          "description": "Description",
+          "descriptionExample": "",
+          "submit": "Save topic"
         }
       },
       "session": {
@@ -225,6 +229,10 @@
         "header": "Your Profile",
         "info": "Email Address: ",
         "submit": "Logout"
+      },
+      "sessionDetails": {
+        "addTask": "add task",
+        "addTopic": "add topic"
       }
     }
   },

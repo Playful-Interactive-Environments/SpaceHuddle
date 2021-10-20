@@ -1,7 +1,25 @@
-import { apiExecuteGetHandled, apiExecutePost } from '@/services/api';
+import {
+  apiExecuteDelete,
+  apiExecuteGetHandled,
+  apiExecutePost,
+  apiExecutePut,
+} from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Topic } from '@/types/api/Topic';
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+
+export const getTopicById = async (
+  id: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Topic> => {
+  return await apiExecuteGetHandled<Topic>(
+    `/${EndpointType.TOPIC}/${id}/`,
+    {},
+    authHeaderType
+  );
+};
 
 export const postTopic = async (
   sessionId: string,
@@ -11,6 +29,22 @@ export const postTopic = async (
     `/${EndpointType.SESSION}/${sessionId}/${EndpointType.TOPIC}/`,
     data
   );
+};
+
+export const putTopic = async (
+  id: string,
+  data: Partial<Topic>
+): Promise<Topic> => {
+  data['id'] = id;
+  return await apiExecutePut<Topic>(
+    `/${EndpointType.TOPIC}/`,
+    data,
+    EndpointAuthorisationType.MODERATOR
+  );
+};
+
+export const deleteTopic = async (id: string): Promise<boolean> => {
+  return await apiExecuteDelete<any>(`/${EndpointType.TOPIC}/${id}/`);
 };
 
 export const getTopicsList = async (

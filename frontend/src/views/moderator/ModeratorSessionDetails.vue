@@ -18,7 +18,18 @@
           :name="topic.id"
         >
           <template #title>
-            {{ topic.title }}
+            <CollapseTitle :text="topic.title">
+              <span role="button" class="icon" v-on:click="editTopic(topic.id)">
+                <font-awesome-icon icon="pen" />
+              </span>
+              <span
+                role="button"
+                class="icon"
+                v-on:click="deleteTopic(topic.id)"
+              >
+                <font-awesome-icon icon="trash" />
+              </span>
+            </CollapseTitle>
           </template>
           <draggable
             v-model="topics[index].tasks"
@@ -40,15 +51,25 @@
             </template>
           </draggable>
           <AddItem
-            :text="$t('moderator.organism.module.overview.add')"
+            :text="$t('moderator.view.sessionDetails.addTask')"
             @addNew="openModalModuleCreate(topic.id)"
           />
         </el-collapse-item>
       </el-collapse>
+      <AddItem
+        :text="$t('moderator.view.sessionDetails.addTopic')"
+        @addNew="showTopicSettings = true"
+      />
       <TaskSettings
-        v-model:show-modal="showSettings"
+        v-model:show-modal="showTaskSettings"
         :topic-id="addNewTopicId"
-        @moduleCreated="getTopics"
+        @taskUpdated="getTopics"
+      />
+      <TopicSettings
+        v-model:show-modal="showTopicSettings"
+        :session-id="sessionId"
+        :topic-id="editTopicId"
+        @topicUpdated="getTopics"
       />
     </template>
   </ModeratorNavigationLayout>
@@ -72,15 +93,19 @@ import { Session } from '@/types/api/Session';
 import { Topic } from '@/types/api/Topic';
 import { convertToSaveVersion } from '@/types/api/Task';
 import { EventType } from '@/types/enum/EventType';
+import TopicSettings from '@/components/moderator/organisms/settings/TopicSettings.vue';
+import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 
 @Options({
   components: {
     AddItem,
     draggable,
     TaskSettings,
+    TopicSettings,
     TaskCard,
     ModeratorNavigationLayout,
     Sidebar,
+    CollapseTitle,
   },
 })
 export default class ModeratorSessionDetails extends Vue {
@@ -89,9 +114,11 @@ export default class ModeratorSessionDetails extends Vue {
   session: Session | null = null;
   topics: Topic[] = [];
   publicScreenTaskId = '';
-  showSettings = false;
+  showTaskSettings = false;
+  showTopicSettings = false;
   formatDate = formatDate;
   addNewTopicId = '';
+  editTopicId = '';
   errors: string[] = [];
   openTabs: string[] = [];
 
@@ -126,6 +153,15 @@ export default class ModeratorSessionDetails extends Vue {
     });
   }
 
+  editTopic(topicId: string): void {
+    this.editTopicId = topicId;
+    this.showTopicSettings = true;
+  }
+
+  deleteTopic(topicId: string): void {
+    topicService.deleteTopic(topicId).then(() => this.getTopics());
+  }
+
   async getPublicScreen(): Promise<void> {
     sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
       if (queryResult) {
@@ -136,7 +172,7 @@ export default class ModeratorSessionDetails extends Vue {
 
   openModalModuleCreate(topicId: string): void {
     this.addNewTopicId = topicId;
-    this.showSettings = true;
+    this.showTaskSettings = true;
   }
 
   dragDone(topicIndex: number): void {
