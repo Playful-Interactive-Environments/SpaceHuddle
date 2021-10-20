@@ -69,8 +69,7 @@ export const isActive = (task: Task): boolean => {
   if (task) {
     return (
       task.state === TaskStates.ACTIVE &&
-      task.remainingTime !== null &&
-      task.remainingTime > 0
+      (task.remainingTime === null || task.remainingTime > 0)
     );
   }
   return false;

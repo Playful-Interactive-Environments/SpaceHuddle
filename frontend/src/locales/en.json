@@ -125,6 +125,8 @@
         "timerSettings": {
           "header": "Set Timer",
           "time": "Timer time",
+          "noTimer": "without time limit",
+          "useTimer": "with time limit",
           "submit": "Save"
         },
         "ideaSettings": {
@@ -242,6 +244,11 @@
     }
   },
   "shared": {
+    "atom": {
+      "timer": {
+        "inactive": "inactive"
+      }
+    },
     "view": {
       "home": {
         "header": "Brainstorm to infinity and beyond!",

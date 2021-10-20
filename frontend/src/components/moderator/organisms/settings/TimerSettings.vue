@@ -14,9 +14,28 @@
       <el-form-item
         prop="remindingTime"
         :label="$t('moderator.organism.settings.timerSettings.time')"
-        :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleDate]"
+        :rules="[
+          defaultFormRules.ruleRequiredIf(formData.hasTimeLimit),
+          defaultFormRules.ruleDate,
+        ]"
       >
-        <el-time-picker v-model="formData.remindingTime" />
+        <div class="level">
+          <el-switch
+            class="level-item"
+            v-model="formData.hasTimeLimit"
+            :active-text="
+              $t('moderator.organism.settings.timerSettings.useTimer')
+            "
+            :inactive-text="
+              $t('moderator.organism.settings.timerSettings.noTimer')
+            "
+          />
+          <el-time-picker
+            class="level-item"
+            v-model="formData.remindingTime"
+            :disabled="!formData.hasTimeLimit"
+          />
+        </div>
       </el-form-item>
       <template #footer>
         <FromSubmitItem
@@ -56,10 +75,12 @@ export default class TimerSettings extends Vue {
   @Prop() task!: Task;
 
   formData: ValidationData = {
+    hasTimeLimit: true,
     remindingTime: new Date(0),
   };
 
   showSettings = false;
+  defaultTime = 1000 * 60 * 10;
 
   mounted(): void {
     this.reset();
@@ -71,20 +92,30 @@ export default class TimerSettings extends Vue {
     this.$emit('update:showModal', false);
   }
 
-  reset(): void {
-    let defaultTime = 1000 * 60 * 10;
-    if (this.task && this.task.remainingTime && this.task.remainingTime > 0)
-      defaultTime = this.task.remainingTime * 1000;
-    const remindingTime = new Date(defaultTime);
+  setRemindingTime(time: number): void {
+    const remindingTime = new Date(time);
     remindingTime.setHours(
       remindingTime.getHours() + remindingTime.getTimezoneOffset() / 60
     );
     this.formData.remindingTime = remindingTime;
+  }
+
+  reset(): void {
+    this.formData.hasTimeLimit = !!(!this.task || this.task.remainingTime);
+    if (this.formData.hasTimeLimit) {
+      let time = this.defaultTime;
+      if (this.task && this.task.remainingTime && this.task.remainingTime > 0)
+        time = this.task.remainingTime * 1000;
+      this.setRemindingTime(time);
+    } else {
+      this.formData.remindingTime = null;
+    }
     this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
-  get remainingSeconds(): number {
-    if (!this.formData.remindingTime) return -1;
+  get remainingSeconds(): number | null {
+    if (!this.formData.hasTimeLimit || !this.formData.remindingTime)
+      return null;
     const remindingTime = this.formData.remindingTime;
     return (
       remindingTime.getHours() * 3600 +
@@ -96,6 +127,18 @@ export default class TimerSettings extends Vue {
   @Watch('showModal', { immediate: true })
   async onShowModalChanged(showModal: boolean): Promise<void> {
     this.showSettings = showModal;
+  }
+
+  @Watch('task', { immediate: true })
+  onTaskChanged(): void {
+    this.reset();
+  }
+
+  @Watch('formData.hasTimeLimit', { immediate: true })
+  onHasTimeLimitChanged(val: boolean): void {
+    if (val && this.formData.remindingTime === null) {
+      this.setRemindingTime(this.defaultTime);
+    }
   }
 
   save(): void {

@@ -89,6 +89,32 @@ const ruleMatch = (
   };
 };
 
+const validateRequiredId = (
+  rule: ValidationRules,
+  value: any,
+  callback: (...errors) => boolean
+): boolean => {
+  if (!(rule as any).ifCondition || value) {
+    callback();
+    return true;
+  } else {
+    callback(new Error(value));
+    return false;
+  }
+};
+
+const ruleRequiredIf = (
+  ifCondition: boolean,
+  messageKey = 'required'
+): ValidationRule => {
+  return {
+    validator: validateRequiredId,
+    ifCondition: ifCondition,
+    message: () => translateMessageKey(messageKey),
+    trigger: 'blur',
+  };
+};
+
 const ruleKeyword: ValidationRule = {
   required: true,
   message: () => translateMessageKey('keywordsRequired'),
@@ -164,6 +190,7 @@ export interface ValidationRuleDefinition {
   ruleToLong: (max: number) => ValidationRule;
   rulePassword: ValidationRule;
   ruleMatch: (match: string, message: string) => ValidationRule;
+  ruleRequiredIf: (ifCondition: boolean, message: string) => ValidationRule;
   ruleKeyword: ValidationRule;
   ruleSelection: ValidationRule;
   ruleStateMessage: ValidationRule;
@@ -184,6 +211,7 @@ export const defaultFormRules: ValidationRuleDefinition = {
   ruleToLong: ruleToLong,
   rulePassword: rulePassword,
   ruleMatch: ruleMatch,
+  ruleRequiredIf: ruleRequiredIf,
   ruleKeyword: ruleKeyword,
   ruleSelection: ruleSelection,
   ruleStateMessage: ruleStateMessage,
