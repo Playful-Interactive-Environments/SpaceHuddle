@@ -120,6 +120,8 @@ class TaskData
                     $this->remainingTime = 0;
                 }
             }
+        } else {
+            $this->remainingTime = null;
         }
 
         $module_id = $reader->findString("module_id");

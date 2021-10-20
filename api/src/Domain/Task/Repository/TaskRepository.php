@@ -168,9 +168,9 @@ class TaskRepository implements RepositoryInterface
      * @param int $remindingTime How long should the timer run?
      * @return string|null Expiration date
      */
-    private function expirationTime(int $remindingTime): string|null
+    private function expirationTime(int|null $remindingTime): string|null
     {
-        if ($remindingTime > 0) {
+        if (isset($remindingTime) && $remindingTime > 0) {
             $now = strtotime("now");
             return date("Y-m-d\TH:i:s", $now + $remindingTime);
         }
