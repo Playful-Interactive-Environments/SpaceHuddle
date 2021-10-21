@@ -14,6 +14,11 @@
         <p class="profile__email">
           {{ $t('moderator.view.profile.info') }} {{ email }}
         </p>
+        <router-link to="change-password">
+          <button class="btn btn--gradient">
+            {{ $t('moderator.view.profile.changePassword') }}
+          </button>
+        </router-link>
         <button class="btn btn--gradient" @click="logout">
           {{ $t('moderator.view.profile.submit') }}
         </button>
@@ -34,7 +39,6 @@ import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/M
 })
 export default class ModeratorProfile extends Vue {
   email = '';
-  errors: string[] = [];
 
   mounted(): void {
     this.email = authService.getUserData() || '';

@@ -44,9 +44,11 @@
           </el-form-item>
           <template #afterSubmit>
             <el-form-item>
-              <p class="login__forgot-pw" role="button">
-                {{ $t('moderator.view.login.forgot') }}
-              </p>
+              <router-link to="reset-password">
+                <p class="login__forgot-pw" role="button">
+                  {{ $t('moderator.view.login.forgot') }}
+                </p>
+              </router-link>
             </el-form-item>
           </template>
         </ValidationForm>

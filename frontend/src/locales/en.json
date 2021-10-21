@@ -228,7 +228,40 @@
       "profile": {
         "header": "Your Profile",
         "info": "Email Address: ",
+        "changePassword": "Change Password",
         "submit": "Logout"
+      },
+      "confirmEmail": {
+        "header": "Confirm your email",
+        "info": "Email Address: ",
+        "submit": "Confirm"
+      },
+      "changePassword": {
+        "header": "Change password",
+        "info": "Email Address: ",
+        "oldPassword": "Old Password",
+        "oldPasswordInfo": "Enter your password",
+        "newPassword": "New Password",
+        "newPasswordInfo": "Enter your new password",
+        "passwordConform": "Password repeat",
+        "passwordConformInfo": "Repeat your new password",
+        "submit": "Save"
+      },
+      "resetPassword": {
+        "header": "Reset password",
+        "info": "If you have forgotten your password, enter your email here and we will send you a link to reset your password.",
+        "email": "email",
+        "emailInfo": "Enter your email",
+        "submit": "Reset"
+      },
+      "forgetPassword": {
+        "header": "Reset password",
+        "info": "Email Address: ",
+        "newPassword": "New password",
+        "newPasswordInfo": "Enter your new password",
+        "passwordConform": "Password repeat",
+        "passwordConformInfo": "Repeat your new password",
+        "submit": "Save"
       },
       "sessionDetails": {
         "addTask": "add task",

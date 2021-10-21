@@ -4,11 +4,15 @@ import { getRoutes } from '@/modules';
 import ParticipantJoin from '@/views/participant/ParticipantJoin.vue';
 import ParticipantOverview from '@/views/participant/ParticipantOverview.vue';
 import Home from '@/views/shared/Home.vue';
-import ModeratorLogin from '@/views/moderator/ModeratorLogin.vue';
-import ModeratorRegister from '@/views/moderator/ModeratorRegister.vue';
+import ModeratorLogin from '@/views/moderator/User/ModeratorLogin.vue';
+import ModeratorRegister from '@/views/moderator/User/ModeratorRegister.vue';
 import ModeratorSessionDetails from '@/views/moderator/ModeratorSessionDetails.vue';
 import ModeratorSessionOverview from '@/views/moderator/ModeratorSessionOverview.vue';
-import ModeratorProfile from '@/views/moderator/ModeratorProfile.vue';
+import ModeratorProfile from '@/views/moderator/User/ModeratorProfile.vue';
+import ConfirmEmail from '@/views/moderator/User/ConfirmEmail.vue';
+import ChangePassword from '@/views/moderator/User/ChangePassword.vue';
+import ForgetPassword from '@/views/moderator/User/ForgetPassword.vue';
+import ResetPassword from '@/views/moderator/User/ResetPassword.vue';
 import ModeratorModuleContent from '@/views/moderator/ModeratorModuleContent.vue';
 import NotFound from '@/views/shared/NotFound.vue';
 import PublicScreen from '@/views/PublicScreen.vue';
@@ -40,9 +44,39 @@ const routes: Array<RouteRecordRaw> = [
     component: ModeratorRegister,
   },
   {
+    path: '/reset-password/',
+    name: 'moderator-reset-password',
+    component: ResetPassword,
+  },
+  {
+    path: '/confirm-email/:token',
+    name: 'moderator-confirm',
+    component: ConfirmEmail,
+    props: (route) => ({
+      token: route.params.token,
+    }),
+  },
+  {
+    path: '/forget-password/:token',
+    name: 'moderator-forget-password',
+    component: ForgetPassword,
+    props: (route) => ({
+      token: route.params.token,
+    }),
+  },
+  {
     path: '/profile',
     name: 'moderator-profile',
     component: ModeratorProfile,
+    meta: {
+      requiresAuth: true,
+      requiresUser: true,
+    },
+  },
+  {
+    path: '/change-password',
+    name: 'moderator-change-password',
+    component: ChangePassword,
     meta: {
       requiresAuth: true,
       requiresUser: true,
