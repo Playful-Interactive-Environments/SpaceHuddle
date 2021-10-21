@@ -97,6 +97,21 @@ final class UserRepository implements RepositoryInterface
     }
 
     /**
+     * Reset Password for username.
+     * @param string $username The username
+     * @param string $password New password
+     * @return object|null The updated user.
+     * @throws GenericException
+     */
+    public function resetPassword(string $username,  string $password): object|null
+    {
+        $this->queryFactory->newUpdate("user", ["password" => $password])
+            ->andWhere(["username" => $username])
+            ->execute();
+        return $this->getUserByName($username);
+    }
+
+    /**
      * Check user ID.
      * @param string $username The username.
      * @return bool True if exists

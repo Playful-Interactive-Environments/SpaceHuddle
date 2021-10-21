@@ -94,7 +94,7 @@ final class JwtAuth
      * @throws ConstraintViolation
      **
      */
-    private function createParsedToken(string $token): UnencryptedToken
+    public function createParsedToken(string $token): UnencryptedToken
     {
         $token = $this->configuration->parser()->parse($token);
         if (!$token instanceof UnencryptedToken) {
