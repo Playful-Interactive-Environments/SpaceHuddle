@@ -53,6 +53,7 @@ trait ParticipantConnectServiceTrait
 
         $jwt = $this->jwtAuth->createJwt(
             [
+                "action" => "login",
                 "participantId" => $participant->id,
                 "browserKey" => $participant->browserKey
             ]

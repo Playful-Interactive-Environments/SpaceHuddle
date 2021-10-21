@@ -7,3 +7,6 @@ $settings["logger"]["level"] = \Monolog\Logger::INFO;
 
 // Database
 $settings["db"]["database"] = "spacehuddle";
+
+// Application
+$settings["application"]["baseUrl"] = "https://spacehuddle.io";

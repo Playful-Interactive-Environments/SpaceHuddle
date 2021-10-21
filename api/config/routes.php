@@ -68,11 +68,13 @@ use App\Action\Topic\TopicReadSingleAction;
 use App\Action\Topic\TopicUpdateAction;
 use App\Action\User\UserChangePasswordAction;
 use App\Action\User\UserDeleteAction;
+use App\Action\User\UserForgetPasswordAction;
 use App\Action\User\UserLoginAction;
 use App\Action\User\UserRegisterAction;
 use \App\Action\Session\SessionCreateAction;
 use \App\Action\Session\SessionReadSingleAction;
 use \App\Action\Session\SessionReadAllAction;
+use App\Action\User\UserResetPasswordAction;
 use App\Action\Vote\VoteCreateAction;
 use App\Action\Vote\VoteDeleteAction;
 use App\Action\Vote\VoteReadAllAction;
@@ -110,6 +112,8 @@ return function (App $app) {
         function (RouteCollectorProxy $app) {
             $app->post("/login[/]", UserLoginAction::class);
             $app->post("/register[/]", UserRegisterAction::class);
+            $app->put("/forget-password[/]", UserForgetPasswordAction::class);
+            $app->put("/reset/{email}[/]", UserResetPasswordAction::class);
         }
     );
 

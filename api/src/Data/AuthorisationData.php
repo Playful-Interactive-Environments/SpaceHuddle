@@ -32,7 +32,7 @@ class AuthorisationData
      */
     public function __construct(?DataSet $data = null)
     {
-        if (isset($data)) {
+        if (isset($data) && $data->get("action") == "login") {
             $userId = $data->get("userId");
             $participantId = $data->get("participantId");
 

@@ -13,13 +13,18 @@ use App\Routing\JwtAuth;
 /**
  * Service.
  */
-final class UserLogin
+final class UserReset
 {
     use BaseBodyServiceTrait;
 
     protected UserRepository $repository;
     protected UserValidator $validator;
     protected JwtAuth $jwtAuth;
+
+    // Application settings
+    private function settings() {
+        return require __DIR__ . "/../../../../config/settings.php";
+    }
 
     /**
      * The constructor.
@@ -47,10 +52,11 @@ final class UserLogin
      * Validates whether the transferred data is suitable for the service.
      * @param array $data Data to be verified.
      * @return void
+     * @throws GenericException
      */
     protected function serviceValidation(array $data): void
     {
-        $this->validator->validateLogin($data);
+        $this->validator->validateUsernameExists($data["email"]);
     }
 
     /**
@@ -65,21 +71,30 @@ final class UserLogin
         array $data
     ): array|object|null {
         // Insert user and get new user ID
-        $result = $this->repository->getUserByName($data["username"]);
+        $result = $this->repository->getUserByName($data["email"]);
 
         $jwt = $this->jwtAuth->createJwt(
             [
-                "action" => "login",
-                "userId" => $result->id,
+                "action" => "reset",
                 "username" => $result->username
             ]
         );
 
-        return new TokenData([
-            "message" => "Successful login.",
-            "accessToken" => $jwt,
-            "tokenType" => "Bearer",
+        $applicationSettings = (object)$this->settings()["application"];
+        $resetUrl = "$applicationSettings->baseUrl$applicationSettings->forgetPassword";
+
+        $nachricht = "
+            <h1>Forget password for spacehuddle.io</h1>
+            <div>click this link to reset your password.</div>
+            <div>
+                <a href='$resetUrl$jwt' >reset password</a>
+            </div>";
+
+        mail($result->username, 'Forget password for spacehuddle.io', $nachricht);
+
+        return [
+            "message" => "Successful send mail",
             "expiresIn" => $this->jwtAuth->getLifetime()
-        ]);
+        ];
     }
 }

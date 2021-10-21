@@ -3,9 +3,9 @@
 namespace App\Domain\User\Service;
 
 use App\Database\TransactionInterface;
-use App\Domain\Base\Data\TokenData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\BaseBodyServiceTrait;
+use App\Domain\Base\Service\BaseManipulationServiceTrait;
 use App\Domain\User\Repository\UserRepository;
 use App\Factory\LoggerFactory;
 use App\Routing\JwtAuth;
@@ -13,13 +13,18 @@ use App\Routing\JwtAuth;
 /**
  * Service.
  */
-final class UserLogin
+final class UserForgetPassword
 {
     use BaseBodyServiceTrait;
 
     protected UserRepository $repository;
     protected UserValidator $validator;
     protected JwtAuth $jwtAuth;
+
+    // Application settings
+    private function settings() {
+        return require __DIR__ . "/../../../../config/settings.php";
+    }
 
     /**
      * The constructor.
@@ -47,10 +52,16 @@ final class UserLogin
      * Validates whether the transferred data is suitable for the service.
      * @param array $data Data to be verified.
      * @return void
+     * @throws GenericException
      */
     protected function serviceValidation(array $data): void
     {
-        $this->validator->validateLogin($data);
+        $this->validator->validatePasswordReset($data);
+        $token = $data["token"];
+        $this->jwtAuth->validateToken($token);
+        $tokenData = $this->jwtAuth->createParsedToken($token);
+        $email =  $tokenData->claims()->get("username");
+        $this->validator->validateUsernameExists($email);
     }
 
     /**
@@ -64,22 +75,15 @@ final class UserLogin
     protected function serviceExecution(
         array $data
     ): array|object|null {
-        // Insert user and get new user ID
-        $result = $this->repository->getUserByName($data["username"]);
 
-        $jwt = $this->jwtAuth->createJwt(
-            [
-                "action" => "login",
-                "userId" => $result->id,
-                "username" => $result->username
-            ]
-        );
+        $token = $data["token"];
+        $tokenData = $this->jwtAuth->createParsedToken($token);
+        $email =  $tokenData->claims()->get("username");
+        $this->repository->resetPassword($email, $data["password"]);
 
-        return new TokenData([
-            "message" => "Successful login.",
-            "accessToken" => $jwt,
-            "tokenType" => "Bearer",
-            "expiresIn" => $this->jwtAuth->getLifetime()
-        ]);
+        return (object)[
+            "state" => "Success",
+            "message" => "The password was successfully updated."
+        ];
     }
 }

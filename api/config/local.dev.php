@@ -8,3 +8,6 @@ $settings["error"]["display_error_details"] = true;
 
 // Database
 $settings["db"]["database"] = "spacehuddle";
+
+// Application
+$settings["application"]["baseUrl"] = "http://localhost:8080";

@@ -102,6 +102,26 @@ final class UserValidator
     }
 
     /**
+     * Validate if the entity exists.
+     * @param string $username The entity name
+     * @param string|null $errorMessage Custom error message
+     * @return void
+     * @throws GenericException
+     */
+    public function validateUsernameExists(string $username, ?string $errorMessage = null): void
+    {
+        if (!$this->repository->exists(["username" => $username])) {
+            $result = new ValidationResult();
+            if (is_null($errorMessage)) {
+                $entityName = $this->repository->getEntityName();
+                $errorMessage = "NotExist: $entityName $username is not valid.";
+            }
+            $result->addError("username", $errorMessage);
+            throw new ValidationException("Please check your input", $result);
+        }
+    }
+
+    /**
      * Validate password update.
      *
      * @param array<string, mixed> $data The data
@@ -121,6 +141,37 @@ final class UserValidator
             throw new ValidationException("Please check your input", $result);
         }
     }
+
+    /**
+     * Validate password update.
+     *
+     * @param array<string, mixed> $data The data
+     *
+     * @return void
+     * @throws GenericException
+     */
+    public function validatePasswordReset(array $data): void
+    {
+        $this->validateEntity(
+            $data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("token", "Empty: This field cannot be left empty")
+                ->requirePresence("token", message: "Required: This field is required")
+                ->notEmptyString("password", "Empty: This field cannot be left empty")
+                ->requirePresence("password", message: "Required: This field is required")
+                ->notEmptyString("passwordConfirmation", "Empty: This field cannot be left empty")
+                ->requirePresence("passwordConfirmation", message: "Required: This field is required")
+                ->minLength("password", 8, "TooShort: Too short")
+                ->maxLength("password", 255, "TooLong: Too long")
+                ->regex(
+                    "password",
+                    "/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).*$/",
+                    "PatternMatch: Password must contain at least one lowercase and uppercase letter, a number and a special character."
+                )
+                ->equalToField("passwordConfirmation", "password", "Comparison: Password and confirmation do not match.")
+        );
+    }
+
     /**
      * Create validator.
      *
