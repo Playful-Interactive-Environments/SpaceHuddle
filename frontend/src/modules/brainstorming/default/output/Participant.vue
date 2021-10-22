@@ -291,10 +291,6 @@ export default class Participant extends Vue {
   margin-bottom: auto;
 }
 
-.el-container.is-vertical {
-  padding-left: 1rem;
-}
-
 .el-footer {
   text-align: right;
 }

@@ -1,35 +1,35 @@
 <template>
-  <div
-    class="overview container2--fullheight container2__participant"
-  >
-    <div class="container2">
-      <MenuBar />
-      <SessionInfo :title="sessionName" :description="sessionDescription" />
-    </div>
-    <el-collapse v-model="openTabs" class="white participant">
-      <el-collapse-item
-        v-for="topic in filteredTopics"
-        :key="topic.id"
-        :name="topic.id"
-      >
-        <template #title>
-          {{ topic.title }}
-        </template>
-        <span
-          class="overview__module"
-          v-for="task in topic.tasks"
-          :key="task.id"
+  <div class="participant-background">
+    <div class="participant-container overview full-height">
+      <div class="overview__header">
+        <MenuBar />
+        <SessionInfo :title="sessionName" :description="sessionDescription" />
+      </div>
+      <el-collapse v-model="openTabs" class="white participant">
+        <el-collapse-item
+          v-for="topic in filteredTopics"
+          :key="topic.id"
+          :name="topic.id"
         >
-          <TaskCard
-            :type="TaskType[task.taskType]"
-            :task="task"
-            isParticipant="true"
-            :sessionId="sessionId"
-            v-on:timerEnds="getTopicsAndTasks"
-          />
-        </span>
-      </el-collapse-item>
-    </el-collapse>
+          <template #title>
+            {{ topic.title }}
+          </template>
+          <span
+            class="overview__module"
+            v-for="task in topic.tasks"
+            :key="task.id"
+          >
+            <TaskCard
+              :type="TaskType[task.taskType]"
+              :task="task"
+              isParticipant="true"
+              :sessionId="sessionId"
+              v-on:timerEnds="getTopicsAndTasks"
+            />
+          </span>
+        </el-collapse-item>
+      </el-collapse>
+    </div>
   </div>
 </template>
 
@@ -121,6 +121,10 @@ export default class ParticipantOverview extends Vue {
 
   &__module + .overview__module {
     margin-left: 1.5rem;
+  }
+
+  &__header {
+    padding: 1rem 2rem;
   }
 }
 </style>

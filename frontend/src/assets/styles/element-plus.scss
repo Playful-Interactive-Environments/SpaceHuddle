@@ -81,6 +81,10 @@ $--font-size: (
 
 .el-main {
         --el-main-padding: 0;
+
+        &__overflow {
+                overflow: visible;
+        }
 }
 
 .el-scrollbar {

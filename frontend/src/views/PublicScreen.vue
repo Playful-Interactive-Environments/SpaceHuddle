@@ -1,7 +1,7 @@
 <template>
   <div class="public-screen">
     <PublicHeader :white="true" />
-    <main class="public-screen__container container2 container2--spaced">
+    <main class="public-screen__container">
       <section v-if="task" class="public-screen__overview">
         <div class="public-screen__overview-left">
           <span class="public-screen__overview-type">
@@ -122,6 +122,7 @@ export default class PublicScreen extends Vue {
 
   &__container {
     padding-top: 0;
+    padding: 1rem 5rem;
   }
 
   &__overview {

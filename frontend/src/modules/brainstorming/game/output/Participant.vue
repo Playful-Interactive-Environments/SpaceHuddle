@@ -7,7 +7,7 @@
         class="module-container__planet"
       />
     </template>
-    <div class="container2--centered center">
+    <div class="centered flex-column fill">
       <span v-if="randomIdea">{{ randomIdea.keywords }}</span>
       <br />
       <span v-if="randomIdea">{{ randomIdea.description }}</span>
@@ -85,11 +85,4 @@ export default class Participant extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-.center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-}
-</style>
+<style lang="scss" scoped></style>

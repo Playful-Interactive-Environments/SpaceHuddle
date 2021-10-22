@@ -1,6 +1,6 @@
 <template>
-  <div class="login container2--fullheight">
-    <section class="container2 container2--fullheight container2--centered">
+  <div class="login">
+    <section class="full-height flex-column centered">
       <div class="login__content">
         <h1 class="heading heading--medium">
           {{ $t('moderator.view.login.header') }}
@@ -54,13 +54,8 @@
         </ValidationForm>
       </div>
     </section>
-    <section
-      class="
-        login__bg-section
-        container2 container2--fullheight container2--centered
-      "
-    >
-      <div class="container2--centered">
+    <section class="login__bg-section full-height flex-column centered">
+      <div class="centered">
         <h2 class="heading heading--medium heading--white">
           {{ $t('moderator.view.login.register.header') }}
         </h2>

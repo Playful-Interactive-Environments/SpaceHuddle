@@ -1,39 +1,41 @@
 <template>
-  <div>
-    <div class="overlay">
-      <el-page-header
-        :content="taskType"
-        :title="$t('general.back')"
-        @back="$router.go(-1)"
-      />
-      <el-tabs
-        :stretch="false"
-        v-if="task && task.modules.length > 1"
-        v-model="moduleName"
-        class="white"
-        @tab-click="(tab) => moduleNameClick(tab.paneName)"
-      >
-        <el-tab-pane
-          v-for="module in task.modules"
-          :key="module.name"
-          :name="module.name"
+  <div class="participant-background">
+    <div class="sh-content participant-container">
+      <div class="sh-overlay">
+        <el-page-header
+          :content="taskType"
+          :title="$t('general.back')"
+          @back="$router.go(-1)"
+        />
+        <el-tabs
+          :stretch="false"
+          v-if="task && task.modules.length > 1"
+          v-model="moduleName"
+          class="white"
+          @tab-click="(tab) => moduleNameClick(tab.paneName)"
         >
-          <template #label>
-            <span class="icon" v-if="module.icon">
-              <font-awesome-icon :icon="module.icon" />
-            </span>
-            <span class="text">
-              {{ $t(`module.${taskType}.${module.name}.description.title`) }}
-            </span>
-          </template>
-        </el-tab-pane>
-      </el-tabs>
+          <el-tab-pane
+            v-for="module in task.modules"
+            :key="module.name"
+            :name="module.name"
+          >
+            <template #label>
+              <span class="icon" v-if="module.icon">
+                <font-awesome-icon :icon="module.icon" />
+              </span>
+              <span class="text">
+                {{ $t(`module.${taskType}.${module.name}.description.title`) }}
+              </span>
+            </template>
+          </el-tab-pane>
+        </el-tabs>
+      </div>
+      <ParticipantModuleComponent
+        :task-id="taskId"
+        :module-id="moduleId"
+        :key="componentLoadIndex"
+      />
     </div>
-    <ParticipantModuleComponent
-      :task-id="taskId"
-      :module-id="moduleId"
-      :key="componentLoadIndex"
-    />
   </div>
 </template>
 
@@ -161,11 +163,21 @@ export default class ParticipantModuleContent extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-.overlay {
-  position: fixed;
-  top: 0px;
-  z-index: 20;
+.sh-content {
+  height: 100vh;
   width: 100%;
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+}
+
+.sh-overlay {
+  position: fixed;
+  top: 0;
+  flex: 1;
+  z-index: 20;
+  width: inherit;
+  max-width: inherit;
   padding: 10px 20px 0px 20px;
 }
 

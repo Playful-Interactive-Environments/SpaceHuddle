@@ -1,15 +1,7 @@
 <template>
   <ModeratorNavigationLayout>
     <template v-slot:content>
-      <div
-        class="
-          confirm__content
-          container2
-          container2--spaced
-          container2--fullheight-header
-          container2--centered
-        "
-      >
+      <div class="confirm__content full-height-header">
         <h1>{{ $t('moderator.view.changePassword.header') }}</h1>
         <p class="profile__email">
           {{ $t('moderator.view.changePassword.info') }} {{ email }}
@@ -156,6 +148,10 @@ export default class ChangePassword extends Vue {
       margin-top: 3rem;
       width: 100%;
       max-width: 30rem;
+
+      .el-input {
+        --el-input-background-color: white;
+      }
     }
   }
 

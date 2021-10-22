@@ -1,5 +1,5 @@
 <template>
-  <section class="container2 container2--centered public-screen__error">
+  <section class="centered public-screen__error">
     <vue3-chart-js
       id="resultChart"
       ref="chartRef"

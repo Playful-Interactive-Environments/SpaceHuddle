@@ -1,13 +1,5 @@
 <template>
-  <div
-    class="
-      confirm__content
-      container2
-      container2--spaced
-      container2--fullheight-header
-      container2--centered
-    "
-  >
+  <div class="confirm__content full-height-header">
     <h1>{{ $t('moderator.view.confirmEmail.header') }}</h1>
     <p class="profile__email">
       {{ $t('moderator.view.confirmEmail.info') }} {{ email }}

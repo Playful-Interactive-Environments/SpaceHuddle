@@ -293,49 +293,6 @@ body {
   border-radius: var(--border-radius-small);
 }
 
-.container2 {
-  //max-width: 1480px;
-  margin: 0 auto;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 1rem 2rem;
-
-  &__participant {
-    //max-width: 960px;
-  }
-
-  &__moderator {
-
-  }
-
-  &--fullheight {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-
-  &--fullheight-header {
-    display: flex;
-    flex-direction: column;
-    min-height: calc(100vh - var(--header-height));
-  }
-
-  &--spaced {
-    margin: auto;
-    padding: 1rem 5rem;
-  }
-
-  &--centered,
-  &--centered-horizontal {
-    align-items: center;
-    text-align: center;
-  }
-
-  &--centered {
-    justify-content: center;
-  }
-}
-
 p {
   margin-top: 0;
 }

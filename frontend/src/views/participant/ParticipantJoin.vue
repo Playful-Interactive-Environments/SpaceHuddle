@@ -1,38 +1,40 @@
 <template>
-  <div
-    class="
-      join
-      container2
-      container2__participant
-      container2--fullheight
-      container2--centered-horizontal
-    "
-  >
-    <main class="join__content">
-      <h1 class="heading heading--big heading--white">
-        {{ $t('participant.view.join.header') }}
-      </h1>
-      <p class="join__text">
-        {{ $t('participant.view.join.info') }}
-      </p>
-      <ValidationForm
-        :form-data="formData"
-        submit-label-key="participant.view.join.submit"
-        v-on:submitDataValid="connectToSession"
-      >
-        <el-form-item
-          prop="connectionKey"
-          :rules="[defaultFormRules.ruleRequired]"
+  <div class="participant-background">
+    <div
+      class="
+        participant-container
+        join
+        full-height
+        centered-horizontal
+        flex-column
+      "
+    >
+      <main>
+        <h1 class="heading heading--big heading--white">
+          {{ $t('participant.view.join.header') }}
+        </h1>
+        <p class="join__text">
+          {{ $t('participant.view.join.info') }}
+        </p>
+        <ValidationForm
+          :form-data="formData"
+          submit-label-key="participant.view.join.submit"
+          v-on:submitDataValid="connectToSession"
         >
-          <el-input
-            v-model="formData.connectionKey"
-            name="connectionKey"
-            autocomplete="on"
-            :placeholder="$t('participant.view.join.pinInfo')"
-          />
-        </el-form-item>
-      </ValidationForm>
-    </main>
+          <el-form-item
+            prop="connectionKey"
+            :rules="[defaultFormRules.ruleRequired]"
+          >
+            <el-input
+              v-model="formData.connectionKey"
+              name="connectionKey"
+              autocomplete="on"
+              :placeholder="$t('participant.view.join.pinInfo')"
+            />
+          </el-form-item>
+        </ValidationForm>
+      </main>
+    </div>
   </div>
 </template>
 
@@ -115,27 +117,6 @@ export default class ParticipantJoin extends Vue {
   background-image: url('~@/assets/illustrations/telescope.png');
   background-position: center;
   background-size: cover;
-
-  &::after {
-    position: fixed;
-    content: '';
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-      180deg,
-      #1d29487a 0%,
-      #1d294850 30%,
-      transparent 50%,
-      transparent 100%
-    );
-    z-index: 0;
-  }
-
-  &__content {
-    z-index: 1;
-  }
 
   &__text {
     margin-bottom: 1rem;

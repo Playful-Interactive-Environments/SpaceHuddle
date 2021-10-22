@@ -1,38 +1,41 @@
 <template>
-  <div class="module-container container2--fullheight container2">
-    <div class="grid-container">
+  <el-container class="participant-container">
+    <el-header class="grid-container">
       <div class="grid-item">
-        <div class="module-container__planetDiv">
+        <div class="participant-container__planetDiv">
           <slot name="planet" />
         </div>
       </div>
-      <div class="grid-item module-container--center">
-        <div class="module-container--uppercase">
+      <div class="grid-item participant-container--center">
+        <div class="participant-container--uppercase">
           {{ $t('participant.organism.modelDefaultContainer.timeLeft') }}
         </div>
         <Timer
-          class="module-container__timer"
+          class="participant-container__timer"
           :task="task"
           v-on:timerEnds="$router.go(-1)"
         ></Timer>
       </div>
-    </div>
-    <HalfCard :type="taskType">
-      <TaskInfo
-        :type="taskType"
-        :title="taskName"
-        :description="taskDescription"
-        :is-participant="true"
-      />
-      <slot />
-    </HalfCard>
-  </div>
+    </el-header>
+    <el-container class="half-card">
+      <el-header>
+        <TaskInfo
+          :type="taskType"
+          :title="taskName"
+          :description="taskDescription"
+          :is-participant="true"
+        />
+      </el-header>
+      <el-main class="el-main__overflow">
+        <slot />
+      </el-main>
+    </el-container>
+  </el-container>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import Timer from '@/components/shared/atoms/Timer.vue';
-import HalfCard from '@/components/shared/atoms/HalfCard.vue';
 import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 import TaskType from '@/types/enum/TaskType';
 import { Prop, Watch } from 'vue-property-decorator';
@@ -44,7 +47,6 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 @Options({
   components: {
     Timer,
-    HalfCard,
     TaskInfo,
   },
 })
@@ -92,13 +94,14 @@ export default class ParticipantModuleDefaultContainer extends Vue {
   }
 }
 
-.module-container {
+.participant-container {
   color: #fff;
   background: var(--color-darkblue);
   background-image: url('~@/assets/illustrations/background.png');
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;
+  height: 100vh;
 
   &__planetDiv {
     position: relative;
@@ -111,12 +114,6 @@ export default class ParticipantModuleDefaultContainer extends Vue {
       animation-name: planetAnimation;
       animation-duration: 0.6s;
     }
-  }
-
-  &__planet {
-    position: absolute;
-    left: 1rem;
-    width: 11rem;
   }
 
   &__timer {
@@ -137,28 +134,25 @@ export default class ParticipantModuleDefaultContainer extends Vue {
   &--center {
     margin: auto;
   }
-  &--bottom {
-    margin-top: 0.75rem;
-  }
-  .fade-enter-active,
-  .fade-leave-active {
-    transition: opacity 0.3s;
-  }
-  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-    opacity: 0;
-  }
 }
 
-.container2 {
-  padding-bottom: 0;
-  max-height: 100vh;
-  position: relative;
+.half-card {
+  flex-grow: 1;
+  justify-content: space-between;
+  //align-items: center;
+  background-color: white;
+  color: #1d2948;
+  border-radius: 30px 30px 0 0;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  margin: 0;
+  padding: 1.5rem 2rem;
 }
 
 .grid-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
   margin-top: 4rem;
+  padding: 1rem 2rem 0.7rem 2rem;
 }
 
 .half-card {

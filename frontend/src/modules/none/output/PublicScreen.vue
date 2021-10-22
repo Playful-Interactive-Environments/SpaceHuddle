@@ -1,10 +1,5 @@
 <template>
-  <main
-    class="
-      container2 container2--fullheight-header container2--centered
-      public-screen__error
-    "
-  >
+  <main class="flex-column full-height-header centered public-screen__error">
     <h2>{{ $t('module.none.publicScreen.header') }}</h2>
     <p>{{ $t('module.none.publicScreen.info') }}</p>
   </main>

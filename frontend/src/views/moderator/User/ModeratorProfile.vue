@@ -1,15 +1,7 @@
 <template>
   <ModeratorNavigationLayout>
     <template v-slot:content>
-      <div
-        class="
-          profile__content
-          container2
-          container2--spaced
-          container2--fullheight-header
-          container2--centered
-        "
-      >
+      <div class="profile__content full-height-header">
         <h1>{{ $t('moderator.view.profile.header') }}</h1>
         <p class="profile__email">
           {{ $t('moderator.view.profile.info') }} {{ email }}

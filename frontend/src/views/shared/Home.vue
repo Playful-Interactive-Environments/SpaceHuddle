@@ -1,6 +1,6 @@
 <template>
   <PublicHeader />
-  <div class="container2 container2--spaced container2--fullheight-header home">
+  <div class="home full-height-header">
     <section class="home__content">
       <h1 class="heading heading--big">{{ $t('shared.view.home.header') }}</h1>
       <p class="home__text">
@@ -46,6 +46,7 @@ export default class Home extends Vue {}
 }
 
 .home {
+  display: flex;
   flex: 1;
   align-items: center;
   box-sizing: border-box;

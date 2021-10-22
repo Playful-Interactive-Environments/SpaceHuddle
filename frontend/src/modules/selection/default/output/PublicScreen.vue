@@ -1,8 +1,5 @@
 <template>
-  <section
-    v-if="ideas.length === 0"
-    class="container2 container2--centered public-screen__error"
-  >
+  <section v-if="ideas.length === 0" class="centered public-screen__error">
     <p>{{ $t('module.brainstorming.default.publicScreen.noIdeas') }}</p>
   </section>
   <section v-else class="public-screen__content layout__4columns">
@@ -76,10 +73,4 @@ export default class PublicScreen extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-.public-screen {
-  &__content {
-    margin-top: 1em;
-  }
-}
-</style>
+<style lang="scss" scoped></style>
