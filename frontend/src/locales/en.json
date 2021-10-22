@@ -331,7 +331,7 @@
     }
   },
   "general": {
-    "back": "Back",
+    "back": "BACK",
     "publicScreen": "Public Screen",
     "moduleActive": "Active"
   }

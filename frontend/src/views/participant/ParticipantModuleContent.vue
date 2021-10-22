@@ -1,7 +1,11 @@
 <template>
   <div>
     <div class="overlay">
-      <MenuBar />
+      <el-page-header
+        :content="taskType"
+        :title="$t('general.back')"
+        @back="$router.go(-1)"
+      />
       <el-tabs
         :stretch="false"
         v-if="task && task.modules.length > 1"
@@ -50,12 +54,10 @@ import {
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import * as taskService from '@/services/task-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import MenuBar from '@/components/participant/molecules/Menubar.vue';
 import { Module } from '@/types/api/Module';
 
 @Options({
   components: {
-    MenuBar,
     ParticipantModuleComponent: getEmptyComponent(),
   },
 })
@@ -167,7 +169,11 @@ export default class ParticipantModuleContent extends Vue {
   padding: 10px 20px 0px 20px;
 }
 
-.menubar {
-  margin-bottom: 0.5rem;
+.el-page-header::v-deep {
+  color: white;
+  .el-page-header__content {
+    color: white;
+    text-transform: uppercase;
+  }
 }
 </style>

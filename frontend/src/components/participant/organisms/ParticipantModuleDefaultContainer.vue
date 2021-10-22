@@ -31,7 +31,6 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import MenuBar from '@/components/participant/molecules/Menubar.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import HalfCard from '@/components/shared/atoms/HalfCard.vue';
 import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
@@ -44,7 +43,6 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
-    MenuBar,
     Timer,
     HalfCard,
     TaskInfo,

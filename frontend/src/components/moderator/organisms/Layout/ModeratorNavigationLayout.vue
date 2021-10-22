@@ -13,6 +13,7 @@
                 v-if="currentRouteTitle.length > 0"
                 class="level-item"
                 :content="currentRouteTitle"
+                :title="$t('general.back')"
                 @back="$router.go(-1)"
               />
             </span>
