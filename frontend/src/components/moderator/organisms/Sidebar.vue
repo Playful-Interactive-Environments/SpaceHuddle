@@ -41,7 +41,11 @@
               :is-on-public-screen="isOnPublicScreen"
             />
           </div>
-          <router-link v-if="session.id" :to="`/public-screen/${session.id}`">
+          <router-link
+            v-if="session.id"
+            :to="`/public-screen/${session.id}`"
+            target="_blank"
+          >
             <button
               class="btn btn--mint btn--fullwidth"
               :class="{ sidebar__button: !isSession }"
