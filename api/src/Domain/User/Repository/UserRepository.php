@@ -105,7 +105,7 @@ final class UserRepository implements RepositoryInterface
      */
     public function resetPassword(string $username,  string $password): object|null
     {
-        $this->queryFactory->newUpdate("user", ["password" => $password])
+        $this->queryFactory->newUpdate("user", ["password" => self::encryptText($password)])
             ->andWhere(["username" => $username])
             ->execute();
         return $this->getUserByName($username);
