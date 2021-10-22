@@ -124,9 +124,8 @@
       "settings": {
         "timerSettings": {
           "header": "Set Timer",
-          "time": "Timer time",
-          "noTimer": "without time limit",
-          "useTimer": "with time limit",
+          "time": "Time limit",
+          "useTimer": "activate time limit",
           "submit": "Save"
         },
         "ideaSettings": {

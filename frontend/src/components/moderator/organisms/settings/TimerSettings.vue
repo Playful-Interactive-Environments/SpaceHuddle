@@ -20,21 +20,21 @@
         ]"
       >
         <div class="level">
-          <el-switch
-            class="level-item"
-            v-model="formData.hasTimeLimit"
-            :active-text="
-              $t('moderator.organism.settings.timerSettings.useTimer')
-            "
-            :inactive-text="
-              $t('moderator.organism.settings.timerSettings.noTimer')
-            "
-          />
-          <el-time-picker
-            class="level-item"
-            v-model="formData.remindingTime"
-            :disabled="!formData.hasTimeLimit"
-          />
+          <span class="level-left">
+            <el-switch
+              class="level-item"
+              v-model="formData.hasTimeLimit"
+              :inactive-text="
+                $t('moderator.organism.settings.timerSettings.useTimer')
+              "
+            />
+            <el-time-picker
+              v-if="formData.hasTimeLimit"
+              class="level-item"
+              v-model="formData.remindingTime"
+              :disabled="!formData.hasTimeLimit"
+            />
+          </span>
         </div>
       </el-form-item>
       <template #footer>
