@@ -25,6 +25,7 @@
         <el-image fit="cover" :src="link" alt="" v-if="link && !image" />
       </div>
       <span
+        v-if="useEditOverlay"
         class="stack__action"
         v-on:transitionend="toggleActions"
         v-on:webkitTransitionEnd="toggleActions"
@@ -61,6 +62,7 @@ import myUpload from 'vue-image-crop-upload/upload-3.vue';
 export default class ImagePicker extends Vue {
   @Prop({ default: null }) image!: string | null;
   @Prop({ default: null }) link!: string | null;
+  @Prop({ default: true }) useEditOverlay!: boolean;
 
   editLink: string | null = null;
   showUploadDialog = false;

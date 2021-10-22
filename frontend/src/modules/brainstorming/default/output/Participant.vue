@@ -57,45 +57,51 @@
               class="media-left"
               v-model:link="formData.imageWebLink"
               v-model:image="formData.imgDataUrl"
-              :overlay="false"
+              :useEditOverlay="false"
             />
           </el-aside>
-          <el-container>
-            <el-main>
-              <el-input
-                v-if="showLinkInput"
-                v-model="formData.imageWebLink"
-                name="link"
-                autocomplete="on"
-                :placeholder="
-                  $t('module.brainstorming.default.participant.linkInfo')
-                "
-              />
-            </el-main>
-            <el-footer>
-              <div role="button">
-                <el-button v-on:click="showLinkInput = !showLinkInput" circle>
-                  <font-awesome-icon icon="link" />
-                </el-button>
-                <el-button
-                  v-on:click="showUploadDialog = !showUploadDialog"
-                  circle
-                >
-                  <font-awesome-icon icon="paperclip" />
-                </el-button>
-                <el-button native-type="submit" circle>
-                  <font-awesome-icon icon="play" />
-                </el-button>
-              </div>
-            </el-footer>
-          </el-container>
+          <el-main>
+            <el-input
+              v-if="showLinkInput"
+              v-model="formData.imageWebLink"
+              name="link"
+              autocomplete="on"
+              :placeholder="
+                $t('module.brainstorming.default.participant.linkInfo')
+              "
+            />
+          </el-main>
         </el-container>
       </el-form-item>
       <el-form-item
         prop="stateMessage"
         :rules="[defaultFormRules.ruleStateMessage]"
       >
-        <el-input v-model="formData.stateMessage" style="display: none" />
+        <span class="media">
+          <div class="media-left" role="button">
+            <el-button v-on:click="showLinkInput = !showLinkInput" circle>
+              <font-awesome-icon icon="link" />
+            </el-button>
+            <el-button v-on:click="showUploadDialog = !showUploadDialog" circle>
+              <font-awesome-icon icon="paperclip" />
+            </el-button>
+            <el-button
+              v-if="formData.imgDataUrl || formData.imageWebLink"
+              v-on:click="deleteImage"
+              circle
+            >
+              <font-awesome-icon icon="trash" />
+            </el-button>
+          </div>
+          <span class="media-content">
+            <el-input v-model="formData.stateMessage" style="display: none" />
+          </span>
+          <div class="media-right" role="button">
+            <el-button native-type="submit" circle>
+              <font-awesome-icon icon="play" />
+            </el-button>
+          </div>
+        </span>
       </el-form-item>
 
       <my-upload
@@ -254,6 +260,11 @@ export default class Participant extends Vue {
     this.formData.imageWebLink = null;
     (this.$refs.upload as any).setStep(1);
   }
+
+  deleteImage(): void {
+    this.formData.imgDataUrl = null;
+    this.formData.imageWebLink = null;
+  }
 }
 </script>
 
@@ -263,6 +274,10 @@ export default class Participant extends Vue {
 
   &:focus {
     background-color: unset;
+  }
+
+  &.is-circle {
+    padding: 0.4rem;
   }
 }
 
