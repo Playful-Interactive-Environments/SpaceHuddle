@@ -1,4 +1,8 @@
-import { apiExecutePost, apiExecutePut } from '@/services/api';
+import {
+  apiExecuteDelete,
+  apiExecutePost,
+  apiExecutePut,
+} from '@/services/api';
 import ApiResponse from '@/types/api/ApiResponse';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
@@ -49,6 +53,10 @@ export const loginUser = async (
     },
     EndpointAuthorisationType.UNAUTHORISED
   );
+};
+
+export const deleteUser = async (): Promise<boolean> => {
+  return await apiExecuteDelete<any>(`/${EndpointType.USER}/`);
 };
 
 export const resetPassword = async (username: string): Promise<any> => {

@@ -22,6 +22,9 @@
         <button class="btn btn--gradient" @click="logout">
           {{ $t('moderator.view.profile.submit') }}
         </button>
+        <button class="btn btn--gradient" v-on:click="deleteUser">
+          {{ $t('moderator.view.profile.delete') }}
+        </button>
       </div>
     </template>
   </ModeratorNavigationLayout>
@@ -31,6 +34,7 @@
 import { Options, Vue } from 'vue-class-component';
 import * as authService from '@/services/auth-service';
 import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/ModeratorNavigationLayout.vue';
+import * as userService from '@/services/user-service';
 
 @Options({
   components: {
@@ -47,6 +51,13 @@ export default class ModeratorProfile extends Vue {
   logout(): void {
     authService.removeAccessTokenModerator();
     this.$router.push({ name: 'home' });
+  }
+
+  deleteUser(): void {
+    userService.deleteUser().then(() => {
+      authService.removeAccessTokenModerator();
+      this.$router.push({ name: 'home' });
+    });
   }
 }
 </script>

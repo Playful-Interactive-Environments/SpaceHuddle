@@ -43,7 +43,7 @@
           defaultFormRules.rulePassword,
           defaultFormRules.ruleToShort(8),
           defaultFormRules.ruleToLong(255),
-          defaultFormRules.ruleMatch(formData.password, 'passwordNotMatch'),
+          defaultFormRules.ruleMatch(formData.newPassword, 'passwordNotMatch'),
         ]"
       >
         <el-input

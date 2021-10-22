@@ -229,6 +229,7 @@
         "header": "Your Profile",
         "info": "Email Address: ",
         "changePassword": "Change Password",
+        "delete": "Delete Profile",
         "submit": "Logout"
       },
       "confirmEmail": {
