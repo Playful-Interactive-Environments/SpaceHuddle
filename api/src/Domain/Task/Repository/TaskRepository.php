@@ -239,6 +239,19 @@ class TaskRepository implements RepositoryInterface
                     }
                 }
 
+                $subQueryModules = $this->queryFactory->newSelect("module")
+                    ->select(["id"])
+                    ->where(function ($exp, $q) {
+                        return $exp->equalFields("module.id", "session.public_screen_module_id");
+                    })
+                    ->andWhere(["module.task_id" => $id]);
+
+                $this->queryFactory->newUpdate("session", ["public_screen_module_id" => null])
+                    ->where(function ($exp, $q) use ($subQueryModules) {
+                        return $exp->exists($subQueryModules);
+                    })
+                    ->execute();
+
                 $this->queryFactory->newDelete("module")
                     ->whereNotInList("module_name", $parameter->modules)
                     ->andWhere(["task_id" => $id])
