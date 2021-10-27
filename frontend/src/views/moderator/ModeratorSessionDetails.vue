@@ -33,6 +33,10 @@
               </span>
             </CollapseTitle>
           </template>
+          <!--<TaskTimeline
+            :topic-id="topic.id"
+            :session-id="sessionId"
+          ></TaskTimeline>-->
           <draggable
             v-model="topics[index].tasks"
             tag="transition-group"
@@ -103,6 +107,7 @@ import { EventType } from '@/types/enum/EventType';
 import TopicSettings from '@/components/moderator/organisms/settings/TopicSettings.vue';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import SessionSettings from '@/components/moderator/organisms/settings/SessionSettings.vue';
+import TaskTimeline from '@/components/moderator/organisms/TaskTimeline.vue';
 
 @Options({
   components: {
@@ -115,6 +120,7 @@ import SessionSettings from '@/components/moderator/organisms/settings/SessionSe
     Sidebar,
     CollapseTitle,
     SessionSettings,
+    TaskTimeline,
   },
 })
 export default class ModeratorSessionDetails extends Vue {
