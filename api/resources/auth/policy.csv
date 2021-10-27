@@ -64,7 +64,7 @@ p, MODERATOR, /session/, PUT
 p, MODERATOR, /session/, POST
 
 p, MODERATOR, /session/:sessionId/public_screen/:taskId/, PUT
-p, MODERATOR|PARTICIPANT, /session/:sessionId/public_screen/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/public_screen/, GET
 
 p, MODERATOR, /session/:sessionId/authorized_users/, GET
 p, MODERATOR, /session/:sessionId/authorized_user/, PUT
