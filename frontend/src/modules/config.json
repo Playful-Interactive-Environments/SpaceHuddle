@@ -8,6 +8,12 @@
              "icon": "brain",  "type": "main",  
            "path": "brainstorming/default"  
        },  
+       "gallery": {  
+           "publicScreen": "output/PublicScreen",  
+           "locales": "en,",  
+             "icon": "image",  "type": "main",  
+           "path": "brainstorming/gallery"  
+       },  
        "game": {  
            "participant": "output/Participant",  
            "locales": "en,",  
