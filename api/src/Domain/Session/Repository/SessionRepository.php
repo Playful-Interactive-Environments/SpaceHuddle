@@ -348,9 +348,10 @@ class SessionRepository implements RepositoryInterface
     private function getDetails(TaskData $data): void
     {
         $moduleRepository = new ModuleRepository($this->queryFactory);
-        if (isset($data->modules) && sizeof($data->modules) > 0)
+        /*if (isset($data->modules) && sizeof($data->modules) > 0)
             $data->modules = [$moduleRepository->getById($data->modules[0]->id)];
         else
-            $data->modules = $moduleRepository->getAll($data->id);
+            $data->modules = $moduleRepository->getAll($data->id);*/
+        $data->modules = $moduleRepository->getAll($data->id);
     }
 }
