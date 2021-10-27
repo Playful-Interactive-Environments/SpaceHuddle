@@ -102,17 +102,25 @@ export const getAsyncDefaultModule = async (
 export const getAsyncModule = async (
   componentType: string,
   taskType: string | null = null,
-  moduleName = 'default'
+  moduleName: string | string[] = 'default'
 ): Promise<any> => {
   await until(() => moduleConfigLoaded);
   if (taskType) {
-    const module = moduleConfig[taskType][moduleName];
-    if (module[componentType]) {
-      return defineAsyncComponent(
-        () => import(`@/modules/${module.path}/${module[componentType]}.vue`)
-      );
-    } else if (moduleName != 'default') {
-      return await getAsyncModule(componentType, taskType, 'default');
+    const moduleList = Array.isArray(moduleName) ? moduleName : [moduleName];
+    if (moduleList.length > 0) {
+      let module = moduleConfig[taskType][moduleList[0]];
+      let moduleIndex = 1;
+      while (moduleIndex < moduleList.length && !module[componentType]) {
+        module = moduleConfig[taskType][moduleList[moduleIndex]];
+        moduleIndex++;
+      }
+      if (module[componentType]) {
+        return defineAsyncComponent(
+          () => import(`@/modules/${module.path}/${module[componentType]}.vue`)
+        );
+      } else if (moduleName != 'default') {
+        return await getAsyncModule(componentType, taskType, 'default');
+      }
     }
   }
   return await getAsyncDefaultModule(componentType);

@@ -104,10 +104,10 @@ export default class ModeratorModuleContent extends Vue {
     return null;
   }
 
-  get moduleName(): string {
+  get moduleName(): string[] {
     if (this.task && this.task.modules && this.task.modules.length > 0)
-      return this.task.modules[0].name;
-    return 'default';
+      return this.task.modules.map((module) => module.name);
+    return ['default'];
   }
 
   @Watch('sessionId', { immediate: true })
