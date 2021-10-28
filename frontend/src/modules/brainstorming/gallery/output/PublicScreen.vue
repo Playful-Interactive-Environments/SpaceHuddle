@@ -1,6 +1,12 @@
 <template>
-  <el-carousel height="60vh" :interval="15000">
-    <el-carousel-item v-for="(idea, index) in ideas" :key="index">
+  <el-carousel
+    v-if="ideas.length > 0"
+    height="60vh"
+    type="card"
+    :initial-index="0"
+    :interval="7000"
+  >
+    <el-carousel-item v-for="(idea, index) in ideas" :key="index" :name="index">
       <div class="gallery-item">
         <IdeaCard :idea="idea" :is-editable="false" class="public-idea" />
       </div>
@@ -68,5 +74,37 @@ export default class PublicScreen extends Vue {
   justify-content: center;
   align-items: center;
   height: 100%;
+}
+
+.el-carousel::v-deep {
+  .el-carousel__mask {
+    background-color: unset;
+  }
+}
+
+.el-card {
+  width: 100%;
+  height: 100%;
+}
+
+.el-card::v-deep {
+  .el-card__body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .card__text {
+    flex-basis: auto;
+    flex-grow: 1;
+    flex-shrink: 1;
+    text-align: inherit;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+  }
 }
 </style>

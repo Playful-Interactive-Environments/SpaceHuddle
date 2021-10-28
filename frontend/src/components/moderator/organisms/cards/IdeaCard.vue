@@ -12,7 +12,7 @@
   >
     <img v-if="idea.image" :src="idea.image" class="card__image" />
     <img v-if="idea.link && !idea.image" :src="idea.link" class="card__image" />
-    <div style="padding: 14px">
+    <div class="card__text">
       <div class="card__title">
         {{ hasKeywords ? idea.keywords : idea.description }}
         <span class="actions">
@@ -171,6 +171,10 @@ export default class IdeaCard extends Vue {
 
   &__content {
     color: var(--color-darkblue-light);
+  }
+
+  &__text {
+    padding: 14px;
   }
 }
 </style>
