@@ -301,6 +301,9 @@
         "header": "404 - Not found",
         "info": "Sorry, this page does either not exist, or you are not authorized to access it.",
         "submit": "Go t Homepage"
+      },
+      "publicScreen": {
+        "connectionKey": "connection key"
       }
     }
   },

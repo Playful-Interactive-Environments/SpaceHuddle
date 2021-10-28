@@ -10,15 +10,14 @@
             :description="task.description"
             :modules="task.modules.map((module) => module.name)"
           />
-          <!--<span class="public-screen__overview-type">
-            {{ $t(`enum.taskType.${TaskType[task.taskType]}`) }}
-          </span>
-          <h2>{{ task.name }}</h2>
-          <p>
-            {{ task.description }}
-          </p>-->
         </div>
         <div class="public-screen__overview-right">
+          <span class="connection-key">
+            <h3>
+              {{ $t('shared.view.publicScreen.connectionKey') }}
+            </h3>
+            {{ session.connectionKey }}
+          </span>
           <Timer :task="task" />
           <img
             :src="
@@ -45,6 +44,7 @@ import Timer from '@/components/shared/atoms/Timer.vue';
 
 import * as sessionService from '@/services/session-service';
 import { Task } from '@/types/api/Task';
+import { Session } from '@/types/api/Session';
 import TaskType from '@/types/enum/TaskType';
 
 import { setModuleStyles } from '@/utils/moduleStyles';
@@ -70,6 +70,7 @@ export default class PublicScreen extends Vue {
   componentLoadIndex = 0;
 
   task: Task | null = null;
+  session: Session | null = null;
 
   TaskType = TaskType;
   TaskStates = TaskStates;
@@ -99,6 +100,10 @@ export default class PublicScreen extends Vue {
       }
     );
 
+    sessionService.getById(this.sessionId).then((session) => {
+      this.session = session;
+    });
+
     sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
       this.task = queryResult;
       const taskType = this.taskType;
@@ -123,6 +128,14 @@ export default class PublicScreen extends Vue {
 }
 </script>
 <style lang="scss" scoped>
+h3 {
+  font-weight: var(--font-weight-bold);
+}
+
+.connection-key {
+  padding: 1rem;
+}
+
 .module-info {
   flex-grow: unset;
 }

@@ -9,6 +9,7 @@
       {{ code }}
     </button>
     <button
+      v-if="hasSharing"
       class="btn btn--icon session-code__share"
       :class="[hasBorder ? ' btn--outline btn--outline--gray' : 'btn--white']"
     >
@@ -28,6 +29,7 @@ import { ElMessage } from 'element-plus';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class SessionCode extends Vue {
   @Prop({ default: false }) hasBorder!: boolean;
+  @Prop({ default: true }) hasSharing!: boolean;
   @Prop({ default: '' }) code!: string;
 
   copyToClipboard(): void {
