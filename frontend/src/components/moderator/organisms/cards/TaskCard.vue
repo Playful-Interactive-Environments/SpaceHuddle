@@ -48,6 +48,7 @@
             :type="type"
             :title="task.name"
             :description="task.description"
+            :modules="task.modules.map((module) => module.name)"
           />
         </div>
       </span>
@@ -242,6 +243,7 @@ export default class TaskCard extends Vue {
     &__info {
       max-width: calc(100% - 10rem);
       width: 100%;
+      display: unset;
     }
   }
 }

@@ -1,5 +1,5 @@
 <template>
-  <ParticipantModuleDefaultContainer :task-id="taskId">
+  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
     <template v-slot:planet>
       <img
         src="@/assets/illustrations/planets/brainstorming.png"
@@ -40,6 +40,11 @@ export default class Participant extends Vue {
   interval!: any;
 
   randomIdea: Idea | null = null;
+
+  get moduleName(): string {
+    if (this.module) return this.module.name;
+    return '';
+  }
 
   async mounted(): Promise<void> {
     await this.getTaskIdeas();

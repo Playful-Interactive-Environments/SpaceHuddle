@@ -1,5 +1,5 @@
 <template>
-  <ParticipantModuleDefaultContainer :task-id="taskId">
+  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
     <template v-slot:planet>
       <transition name="fade" v-for="(planet, index) in planets" :key="index">
         <img
@@ -157,6 +157,11 @@ export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
   module: Module | null = null;
+
+  get moduleName(): string {
+    if (this.module) return this.module.name;
+    return '';
+  }
 
   formData: ValidationData = {
     keywords: '',

@@ -4,13 +4,19 @@
     <main class="public-screen__container">
       <section v-if="task" class="public-screen__overview">
         <div class="public-screen__overview-left">
-          <span class="public-screen__overview-type">
+          <TaskInfo
+            :type="TaskType[task.taskType]"
+            :title="task.name"
+            :description="task.description"
+            :modules="task.modules.map((module) => module.name)"
+          />
+          <!--<span class="public-screen__overview-type">
             {{ $t(`enum.taskType.${TaskType[task.taskType]}`) }}
           </span>
           <h2>{{ task.name }}</h2>
           <p>
             {{ task.description }}
-          </p>
+          </p>-->
         </div>
         <div class="public-screen__overview-right">
           <Timer :task="task" />
@@ -49,11 +55,13 @@ import {
   getEmptyComponent,
 } from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
+import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 
 @Options({
   components: {
     PublicHeader,
     Timer,
+    TaskInfo,
     PublicScreenComponent: getEmptyComponent(),
   },
 })
@@ -115,6 +123,10 @@ export default class PublicScreen extends Vue {
 }
 </script>
 <style lang="scss" scoped>
+.module-info {
+  flex-grow: unset;
+}
+
 .public-screen {
   background: url('~@/assets/illustrations/stars-background-repeat.png');
   background-size: contain;

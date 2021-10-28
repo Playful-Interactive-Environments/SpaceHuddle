@@ -1,6 +1,11 @@
 <template>
   <div :class="{ 'module-info--centered': isParticipant }" class="module-info">
-    <span class="module-info__type">{{ $t(`enum.taskType.${type}`) }}</span>
+    <el-breadcrumb separator="|" class="module-info__type">
+      <el-breadcrumb-item>{{ $t(`enum.taskType.${type}`) }}</el-breadcrumb-item>
+      <el-breadcrumb-item v-for="module in modules" :key="module">
+        {{ $t(`module.${type}.${module}.description.title`) }}
+      </el-breadcrumb-item>
+    </el-breadcrumb>
     <h3
       :class="{ 'heading--regular': isParticipant }"
       class="module-info__title"
@@ -23,6 +28,7 @@ export default class TaskInfo extends Vue {
   @Prop({ default: TaskType.BRAINSTORMING }) type!: TaskType;
   @Prop({ default: '' }) title!: string;
   @Prop({ default: '' }) description!: string;
+  @Prop({ default: [] }) modules!: string[];
   @Prop({ default: false }) isParticipant!: boolean;
 }
 </script>
@@ -73,6 +79,18 @@ export default class TaskInfo extends Vue {
     span {
       line-height: 3em;
     }
+  }
+}
+
+.el-breadcrumb::v-deep {
+  .el-breadcrumb__inner,
+  .el-breadcrumb__item:last-child .el-breadcrumb__inner,
+  .el-breadcrumb__separator {
+    color: unset;
+  }
+
+  .el-breadcrumb__item {
+    float: unset;
   }
 }
 </style>

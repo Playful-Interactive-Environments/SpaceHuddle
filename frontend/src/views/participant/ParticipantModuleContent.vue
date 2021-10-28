@@ -130,8 +130,8 @@ export default class ParticipantModuleContent extends Vue {
     taskService
       .getTaskById(val, EndpointAuthorisationType.PARTICIPANT)
       .then((queryResult) => {
+        queryResult.modules.forEach((module) => this.setIcon(module));
         this.task = queryResult;
-        this.task.modules.forEach((module) => this.setIcon(module));
         this.moduleNameClick(this.moduleNames[0]);
       });
   }

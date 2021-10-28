@@ -23,6 +23,7 @@
           :type="taskType"
           :title="taskName"
           :description="taskDescription"
+          :modules="[module]"
           :is-participant="true"
         />
       </el-header>
@@ -52,6 +53,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 })
 export default class ParticipantModuleDefaultContainer extends Vue {
   @Prop({ required: true }) taskId!: string;
+  @Prop({ default: 'default' }) module!: string;
   task: Task | null = null;
 
   get taskType(): TaskType | null {

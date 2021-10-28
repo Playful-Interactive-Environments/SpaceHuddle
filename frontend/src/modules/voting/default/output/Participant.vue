@@ -1,5 +1,5 @@
 <template>
-  <ParticipantModuleDefaultContainer :task-id="taskId">
+  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
     <template v-slot:planet>
       <img
         src="@/assets/illustrations/planets/voting.png"
@@ -58,6 +58,11 @@ export default class Participant extends Vue {
   ideaPointer = 0;
   rate = 0;
   maxRate = 5;
+
+  get moduleName(): string {
+    if (this.module) return this.module.name;
+    return '';
+  }
 
   mounted(): void {
     this.initConfig(5);
