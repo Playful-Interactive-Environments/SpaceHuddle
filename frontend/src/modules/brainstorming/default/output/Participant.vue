@@ -52,16 +52,16 @@
       </el-form-item>
       <el-form-item prop="imageWebLink" :rules="[defaultFormRules.ruleUrl]">
         <el-container>
-          <el-aside width="7rem">
+          <el-aside width="8rem">
             <ImagePicker
               class="media-left"
               v-model:link="formData.imageWebLink"
               v-model:image="formData.imgDataUrl"
-              :useEditOverlay="false"
+              :useEditOverlay="true"
             />
           </el-aside>
           <el-main>
-            <el-input
+            <!--<el-input
               v-if="showLinkInput"
               v-model="formData.imageWebLink"
               name="link"
@@ -69,7 +69,7 @@
               :placeholder="
                 $t('module.brainstorming.default.participant.linkInfo')
               "
-            />
+            />-->
           </el-main>
         </el-container>
       </el-form-item>
@@ -78,7 +78,7 @@
         :rules="[defaultFormRules.ruleStateMessage]"
       >
         <span class="media">
-          <div class="media-left" role="button">
+          <!--<div class="media-left" role="button">
             <el-button v-on:click="showLinkInput = !showLinkInput" circle>
               <font-awesome-icon icon="link" />
             </el-button>
@@ -92,7 +92,7 @@
             >
               <font-awesome-icon icon="trash" />
             </el-button>
-          </div>
+          </div>-->
           <span class="media-content">
             <el-input v-model="formData.stateMessage" style="display: none" />
           </span>
