@@ -12,7 +12,7 @@
           />
         </div>
         <div class="public-screen__overview-right">
-          <span class="connection-key">
+          <span class="connection-key" v-if="session">
             <h3>
               {{ $t('shared.view.publicScreen.connectionKey') }}
             </h3>
