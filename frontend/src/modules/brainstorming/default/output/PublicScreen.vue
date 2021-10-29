@@ -41,9 +41,9 @@ export default class PublicScreen extends Vue {
   async getIdeas(): Promise<void> {
     if (this.taskId) {
       await ideaService
-        .getIdeasForTask(this.taskId, IdeaSortOrder.ALPHABETICAL)
+        .getIdeasForTask(this.taskId, IdeaSortOrder.TIMESTAMP)
         .then((ideas) => {
-          this.ideas = ideas;
+          this.ideas = ideas.reverse();
         });
     }
   }

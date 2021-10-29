@@ -5,8 +5,9 @@
     type="card"
     :initial-index="0"
     :interval="7000"
+    v-on:change="galleryIndexChanged"
   >
-    <el-carousel-item v-for="(idea, index) in ideas" :key="index" :name="index">
+    <el-carousel-item v-for="(idea, index) in ideas" :key="index" :name="index.toString()">
       <div class="gallery-item">
         <IdeaCard :idea="idea" :is-editable="false" class="public-idea" />
       </div>
@@ -32,6 +33,7 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];
+  galleryIndex = 0;
   readonly intervalTime = 10000;
   interval!: any;
 
@@ -43,11 +45,32 @@ export default class PublicScreen extends Vue {
   async getIdeas(): Promise<void> {
     if (this.taskId) {
       await ideaService
-        .getIdeasForTask(this.taskId, IdeaSortOrder.ALPHABETICAL)
+        .getIdeasForTask(this.taskId, IdeaSortOrder.TIMESTAMP)
         .then((ideas) => {
-          this.ideas = ideas;
+          ideas = ideas.reverse();
+          if (this.ideas.length == 0) {
+            this.ideas = ideas;
+          } else {
+            const newIdees: Idea[] = ideas.filter(
+              (idea) => !this.ideas.some((old) => old.id == idea.id)
+            );
+            this.ideas.splice(this.galleryIndex + 2, 0, ...newIdees);
+            let deleteIndex = 0;
+            while (deleteIndex > -1) {
+              deleteIndex = this.ideas.findIndex(
+                (old) => !ideas.some((idea) => idea.id == old.id)
+              );
+              if (deleteIndex > -1) {
+                this.ideas.splice(deleteIndex, 1);
+              }
+            }
+          }
         });
     }
+  }
+
+  galleryIndexChanged(newIndex: number): void {
+    this.galleryIndex = newIndex;
   }
 
   async mounted(): Promise<void> {
