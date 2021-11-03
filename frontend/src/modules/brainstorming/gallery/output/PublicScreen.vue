@@ -88,6 +88,16 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.el-carousel::v-deep {
+  .el-carousel {
+    &__item {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+
 .public-idea {
   max-width: 20rem;
 }
@@ -97,6 +107,8 @@ export default class PublicScreen extends Vue {
   justify-content: center;
   align-items: center;
   height: 100%;
+  width: 20rem;
+  max-height: 500px;
 }
 
 .el-carousel::v-deep {
