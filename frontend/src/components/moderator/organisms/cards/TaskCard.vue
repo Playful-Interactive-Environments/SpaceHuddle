@@ -403,4 +403,14 @@ export default class TaskCard extends Vue {
     }
   }
 }
+
+.level.is-desktop .level-left .level-item div.module-info::v-deep,
+.level.is-desktop .level-right .level-item div.module-info::v-deep {
+  padding: 0 1.2rem;
+  text-align: inherit;
+
+  div {
+    text-align: inherit;
+  }
+}
 </style>

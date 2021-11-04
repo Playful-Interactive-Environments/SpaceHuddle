@@ -70,7 +70,7 @@ export default class TaskInfo extends Vue {
   }
 
   &--centered {
-    text-align: center;
+    //text-align: center;
     max-width: 100%;
     font-size: var(--font-size-default);
     margin-bottom: 1em;
