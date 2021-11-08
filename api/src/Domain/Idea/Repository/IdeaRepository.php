@@ -7,6 +7,8 @@ use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Idea\Data\IdeaData;
 use App\Domain\Idea\Type\IdeaSortOrder;
+use App\Domain\Selection\Repository\SelectionRepository;
+use App\Domain\Task\Data\TaskData;
 use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Task\Type\TaskType;
@@ -45,6 +47,7 @@ class IdeaRepository implements RepositoryInterface
         );
 
         $this->taskType = strtoupper($this->taskType);
+        $this->taskTypeSelection = strtoupper($this->taskTypeSelection);
     }
 
     /**
@@ -154,6 +157,12 @@ class IdeaRepository implements RepositoryInterface
     public function getAllOrdered(string $parentId, ?string $orderType, ?string $refId = null): array
     {
         $sortOrder = self::convertOrderType($orderType, $refId);
+
+        $task = $this->getParentRepository()->getById($parentId);
+        if ($task->taskType == $this->taskTypeSelection) {
+            $selectionRepository = new SelectionRepository($this->queryFactory);
+            return $selectionRepository->getIdeas($task->parameter->selectionId);
+        }
 
         $resultList = [];
         $result = $this->get(["idea.task_id" => $parentId], $sortOrder, $refId);

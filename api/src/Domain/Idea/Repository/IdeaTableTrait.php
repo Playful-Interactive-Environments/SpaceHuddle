@@ -3,9 +3,16 @@
 namespace App\Domain\Idea\Repository;
 
 use App\Domain\Task\Type\TaskState;
+use App\Domain\Task\Type\TaskType;
 
 trait IdeaTableTrait
 {
+    /**
+     * The type of selection task.
+     * @var string
+     */
+    protected string $taskTypeSelection = TaskType::SELECTION;
+
     /**
      * Get entity by ID.
      * @param string $id The entity ID.
@@ -82,8 +89,8 @@ trait IdeaTableTrait
     {
         $query = $this->queryFactory->newSelect("task");
         $query->select(["id"])
+            ->whereInList("task_type", [$this->taskType, $this->taskTypeSelection])
             ->andWhere([
-                "task_type" => $this->taskType,
                 "id" => $taskId
             ]);
 

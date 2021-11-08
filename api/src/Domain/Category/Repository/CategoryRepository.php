@@ -47,6 +47,7 @@ class CategoryRepository implements RepositoryInterface
         );
 
         $this->taskType = strtoupper($this->taskType);
+        $this->taskTypeSelection = strtoupper($this->taskTypeSelection);
     }
 
     /**
