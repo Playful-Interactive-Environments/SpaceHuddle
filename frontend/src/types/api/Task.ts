@@ -32,6 +32,13 @@ export interface TaskForSaveAction {
   modules: string[];
 }
 
+export interface TaskSettingsData {
+  taskType: keyof typeof TaskType;
+  name: string;
+  description: string;
+  parameter: any;
+}
+
 export const convertToSaveVersion = (task: Task): TaskForSaveAction => {
   return {
     id: task.id,

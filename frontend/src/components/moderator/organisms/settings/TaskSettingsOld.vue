@@ -24,7 +24,6 @@
           </p>
         </template>
         <el-form-item
-          v-if="!taskType"
           :label="$t('moderator.organism.settings.taskSettings.taskType')"
           prop="taskType"
           :rules="[defaultFormRules.ruleSelection]"
@@ -46,47 +45,12 @@
           v-model="formData"
         />
         <el-form-item
-          :label="
-            formData.taskType === 'BRAINSTORMING'
-              ? $t('moderator.organism.settings.taskSettings.question')
-              : $t('moderator.organism.settings.taskSettings.title')
-          "
-          prop="name"
-          :rules="[
-            defaultFormRules.ruleRequired,
-            defaultFormRules.ruleToLong(255),
-          ]"
-        >
-          <el-input
-            v-model="formData.name"
-            name="name"
-            :placeholder="
-              $t('moderator.organism.settings.taskSettings.questionExample')
-            "
-          />
-        </el-form-item>
-        <el-form-item
-          :label="$t('moderator.organism.settings.taskSettings.description')"
-          prop="description"
-          :rules="[defaultFormRules.ruleToLong(1000)]"
-        >
-          <el-input
-            type="textarea"
-            v-model="formData.description"
-            rows="3"
-            :placeholder="
-              $t('moderator.organism.settings.taskSettings.descriptionExample')
-            "
-          />
-        </el-form-item>
-        <el-form-item
           :label="$t('moderator.organism.settings.taskSettings.moduleType')"
           prop="moduleListMain"
           :rules="[
             defaultFormRules.ruleSelection,
             { validator: validateModuleSelection },
           ]"
-          v-if="moduleKeyList.length > 1"
         >
           <div>
             <el-tag v-for="tag in moduleSelectionMain" :key="tag">
@@ -175,6 +139,40 @@
             ></component>
           </el-collapse-item>
         </el-collapse>
+        <el-form-item
+          :label="
+            formData.taskType === 'BRAINSTORMING'
+              ? $t('moderator.organism.settings.taskSettings.question')
+              : $t('moderator.organism.settings.taskSettings.title')
+          "
+          prop="name"
+          :rules="[
+            defaultFormRules.ruleRequired,
+            defaultFormRules.ruleToLong(255),
+          ]"
+        >
+          <el-input
+            v-model="formData.name"
+            name="name"
+            :placeholder="
+              $t('moderator.organism.settings.taskSettings.questionExample')
+            "
+          />
+        </el-form-item>
+        <el-form-item
+          :label="$t('moderator.organism.settings.taskSettings.description')"
+          prop="description"
+          :rules="[defaultFormRules.ruleToLong(1000)]"
+        >
+          <el-input
+            type="textarea"
+            v-model="formData.description"
+            rows="3"
+            :placeholder="
+              $t('moderator.organism.settings.taskSettings.descriptionExample')
+            "
+          />
+        </el-form-item>
         <template #footer>
           <FromSubmitItem
             :form-state-message="formData.stateMessage"
@@ -243,13 +241,12 @@ interface FormDataDefinition extends TaskSettingsData {
   },
   emits: ['taskUpdated', 'update:showModal'],
 })
-export default class TaskSettings extends Vue {
+export default class TaskSettingsOld extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
 
   @Prop({ default: false }) showModal!: boolean;
   @Prop({}) topicId!: string;
   @Prop({}) taskId!: string;
-  @Prop({}) taskType!: keyof typeof TaskType;
   componentLoadIndex = 0;
 
   get TaskTypeKeys(): Array<keyof typeof TaskType> {
@@ -271,11 +268,6 @@ export default class TaskSettings extends Vue {
   task: Task | null = null;
 
   TaskType = TaskType;
-
-  @Watch('taskType', { immediate: true })
-  async onPropTaskTypeChanged(): Promise<void> {
-    if (this.taskType) this.formData.taskType = this.taskType;
-  }
 
   get mainModule(): string {
     if (this.moduleSelectionMain.length > 0) return this.moduleSelectionMain[0];
@@ -482,7 +474,7 @@ export default class TaskSettings extends Vue {
   }
 
   reset(): void {
-    this.formData.taskType = this.taskType;
+    this.formData.taskType = this.TaskTypeKeys[1];
     this.loadModuleList();
     this.formData.name = '';
     this.formData.description = '';

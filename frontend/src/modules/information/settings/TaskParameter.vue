@@ -16,7 +16,6 @@ import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class TaskParameter extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
-  @Prop() readonly rulePropPath!: string;
 
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;

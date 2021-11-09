@@ -54,7 +54,7 @@ import ParticipantModuleDefaultContainer from '@/components/participant/organism
 import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
 import * as moduleService from '@/services/module-service';
-import * as selectService from '@/services/selection-service';
+import * as ideaService from '@/services/idea-service';
 import * as votingService from '@/services/voting-service';
 import { Idea } from '@/types/api/Idea';
 import { Vote } from '@/types/api/Vote';
@@ -156,9 +156,9 @@ export default class Participant extends Vue {
       if (!this.task) await this.getTask();
       if (!this.module) await this.getModule();
       if (this.task) {
-        await selectService
-          .getIdeasForSelection(
-            this.task?.parameter.selectionId,
+        await ideaService
+          .getIdeasForTask(
+            this.task.parameter.dependencyTaskId,
             EndpointAuthorisationType.PARTICIPANT
           )
           .then((ideas) => {

@@ -231,7 +231,7 @@ export default class ModeratorContent extends Vue {
           categoryOrder = IdeaSortOrderCategorisation;
         await ideaService
           .getIdeasForTask(
-            this.task.parameter.brainstormingTaskId,
+            this.task.parameter.dependencyTaskId,
             categoryOrder,
             this.taskId
           )
@@ -251,7 +251,7 @@ export default class ModeratorContent extends Vue {
 
         await ideaService
           .getOrderGroups(
-            this.task.parameter.brainstormingTaskId,
+            this.task.parameter.dependencyTaskId,
             this.orderType,
             this.taskId,
             EndpointAuthorisationType.MODERATOR,

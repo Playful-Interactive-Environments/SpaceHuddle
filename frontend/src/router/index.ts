@@ -7,6 +7,7 @@ import Home from '@/views/shared/Home.vue';
 import ModeratorLogin from '@/views/moderator/User/ModeratorLogin.vue';
 import ModeratorRegister from '@/views/moderator/User/ModeratorRegister.vue';
 import ModeratorSessionDetails from '@/views/moderator/ModeratorSessionDetails.vue';
+import ModeratorTopicDetails from '@/views/moderator/ModeratorTopicDetails.vue';
 import ModeratorSessionOverview from '@/views/moderator/ModeratorSessionOverview.vue';
 import ModeratorProfile from '@/views/moderator/User/ModeratorProfile.vue';
 import ConfirmEmail from '@/views/moderator/User/ConfirmEmail.vue';
@@ -96,6 +97,19 @@ const routes: Array<RouteRecordRaw> = [
     name: 'moderator-session-details',
     component: ModeratorSessionDetails,
     props: (route) => ({ sessionId: route.params.sessionId }),
+    meta: {
+      requiresAuth: true,
+      requiresUser: true,
+    },
+  },
+  {
+    path: '/topic/:sessionId/:topicId',
+    name: 'moderator-topic-details',
+    component: ModeratorTopicDetails,
+    props: (route) => ({
+      sessionId: route.params.sessionId,
+      topicId: route.params.topicId,
+    }),
     meta: {
       requiresAuth: true,
       requiresUser: true,

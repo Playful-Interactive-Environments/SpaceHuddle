@@ -1,26 +1,40 @@
 <template>
   <ModeratorNavigationLayout
     v-if="task"
-    :current-route-title="task.taskType"
+    :current-route-title="$t(`enum.taskType.${TaskType[task.taskType]}`)"
     :key="componentLoadIndex"
   >
     <template v-slot:sidebar>
       <Sidebar
-        :session="session"
         :title="task.name"
         :pretitle="task.taskType"
         :description="task.description"
-        taskType="TaskType[task.taskType]"
-        :is-on-public-screen="task.id === publicScreenTaskId"
-        :task="task"
         v-on:openSettings="editTask"
         v-on:delete="deleteTask"
-      />
+      >
+        <template #footerContent>
+          <div class="sidebar__toggles" v-if="task">
+            <ModuleShare
+              :task="task"
+              :is-on-public-screen="task.id === publicScreenTaskId"
+            />
+          </div>
+          <router-link
+            v-if="session.id"
+            :to="`/public-screen/${session.id}`"
+            target="_blank"
+          >
+            <button class="btn btn--mint btn--fullwidth sidebar__button">
+              {{ $t('general.publicScreen') }}
+            </button>
+          </router-link>
+        </template>
+      </Sidebar>
     </template>
     <template v-slot:header></template>
     <template v-slot:content>
       <ModuleContentComponent :task-id="taskId" />
-      <TaskSettings
+      <TaskSettingsOld
         v-model:show-modal="showSettings"
         :task-id="taskId"
         :key="componentLoadIndex"
@@ -50,14 +64,16 @@ import * as taskService from '@/services/task-service';
 
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/ModeratorNavigationLayout.vue';
-import TaskSettings from '@/components/moderator/organisms/settings/TaskSettings.vue';
+import TaskSettingsOld from '@/components/moderator/organisms/settings/TaskSettingsOld.vue';
 import { EventType } from '@/types/enum/EventType';
+import ModuleShare from '@/components/moderator/molecules/ModuleShare.vue';
 
 @Options({
   components: {
+    ModuleShare,
     Sidebar,
     ModeratorNavigationLayout,
-    TaskSettings,
+    TaskSettingsOld,
     ModuleContentComponent: getEmptyComponent(),
   },
 })
@@ -160,6 +176,12 @@ export default class ModeratorModuleContent extends Vue {
 
   &__content {
     padding: 2rem;
+  }
+}
+
+.sidebar {
+  &__toggles {
+    margin-bottom: 1rem;
   }
 }
 </style>

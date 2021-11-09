@@ -266,6 +266,8 @@
       "sessionDetails": {
         "addTask": "add task",
         "addTopic": "add topic"
+      },
+      "topicDetails": {
       }
     }
   },

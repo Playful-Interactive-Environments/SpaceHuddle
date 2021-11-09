@@ -2,15 +2,28 @@
   <ModeratorNavigationLayout v-if="session">
     <template v-slot:sidebar>
       <Sidebar
-        :is-session="true"
-        :session="session"
-        :session-connection-key="session.connectionKey"
         :title="session.title"
         :pretitle="formatDate(session.creationDate)"
         :description="session.description"
         v-on:openSettings="editSession"
         v-on:delete="deleteSession"
-      />
+      >
+        <template #headerContent>
+          <ModuleCount :session="session" />
+        </template>
+        <template #footerContent>
+          <SessionCode :code="session.connectionKey" />
+          <router-link
+            v-if="session.id"
+            :to="`/public-screen/${session.id}`"
+            target="_blank"
+          >
+            <button class="btn btn--mint btn--fullwidth">
+              {{ $t('general.publicScreen') }}
+            </button>
+          </router-link>
+        </template>
+      </Sidebar>
     </template>
     <template v-slot:content>
       <el-collapse v-model="openTabs">
@@ -20,18 +33,27 @@
           :name="topic.id"
         >
           <template #title>
-            <CollapseTitle :text="topic.title">
-              <span role="button" class="icon" v-on:click="editTopic(topic.id)">
-                <font-awesome-icon icon="pen" />
-              </span>
-              <span
-                role="button"
-                class="icon"
-                v-on:click="deleteTopic(topic.id)"
-              >
-                <font-awesome-icon icon="trash" />
-              </span>
-            </CollapseTitle>
+            <router-link
+              :to="`/topic/${sessionId}/${topic.id}`"
+              style="width: 100%"
+            >
+              <CollapseTitle :text="topic.title">
+                <span
+                  role="button"
+                  class="icon"
+                  v-on:click="editTopic(topic.id)"
+                >
+                  <font-awesome-icon icon="pen" />
+                </span>
+                <span
+                  role="button"
+                  class="icon"
+                  v-on:click="deleteTopic(topic.id)"
+                >
+                  <font-awesome-icon icon="trash" />
+                </span>
+              </CollapseTitle>
+            </router-link>
           </template>
           <!--<TaskTimeline
             :topic-id="topic.id"
@@ -66,7 +88,7 @@
         :text="$t('moderator.view.sessionDetails.addTopic')"
         @addNew="showTopicSettings = true"
       />
-      <TaskSettings
+      <TaskSettingsOld
         v-model:show-modal="showTaskSettings"
         :topic-id="addNewTopicId"
         @taskUpdated="getTopics"
@@ -91,10 +113,9 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
-import TaskSettings from '@/components/moderator/organisms/settings/TaskSettings.vue';
+import TaskSettingsOld from '@/components/moderator/organisms/settings/TaskSettingsOld.vue';
 import TaskCard from '@/components/moderator/organisms/cards/TaskCard.vue';
 import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/ModeratorNavigationLayout.vue';
-import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import { formatDate } from '@/utils/date';
 import TaskType from '@/types/enum/TaskType';
 import * as sessionService from '@/services/session-service';
@@ -108,16 +129,21 @@ import TopicSettings from '@/components/moderator/organisms/settings/TopicSettin
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import SessionSettings from '@/components/moderator/organisms/settings/SessionSettings.vue';
 import TaskTimeline from '@/components/moderator/organisms/TaskTimeline.vue';
+import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
+import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
+import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 
 @Options({
   components: {
+    ModuleCount,
+    SessionCode,
+    Sidebar,
     AddItem,
     draggable,
-    TaskSettings,
+    TaskSettingsOld,
     TopicSettings,
     TaskCard,
     ModeratorNavigationLayout,
-    Sidebar,
     CollapseTitle,
     SessionSettings,
     TaskTimeline,
@@ -135,7 +161,6 @@ export default class ModeratorSessionDetails extends Vue {
   formatDate = formatDate;
   addNewTopicId = '';
   editTopicId = '';
-  errors: string[] = [];
   openTabs: string[] = [];
 
   TaskType = TaskType;

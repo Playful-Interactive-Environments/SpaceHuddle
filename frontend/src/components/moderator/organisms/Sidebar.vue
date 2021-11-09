@@ -27,32 +27,15 @@
           <div class="sidebar__text">
             {{ description }}
           </div>
-          <ModuleCount v-if="isSession" :session="session" />
+          <slot name="headerContent"></slot>
         </div>
       </el-header>
-      <el-main></el-main>
+      <el-main>
+        <slot name="mainContent"></slot>
+      </el-main>
       <el-footer>
         <div class="sidebar__bottom">
-          <SessionCode v-if="isSession" :code="sessionConnectionKey" />
-          <div class="sidebar__toggles" v-else>
-            <ModuleShare
-              v-if="task"
-              :task="task"
-              :is-on-public-screen="isOnPublicScreen"
-            />
-          </div>
-          <router-link
-            v-if="session.id"
-            :to="`/public-screen/${session.id}`"
-            target="_blank"
-          >
-            <button
-              class="btn btn--mint btn--fullwidth"
-              :class="{ sidebar__button: !isSession }"
-            >
-              {{ $t('general.publicScreen') }}
-            </button>
-          </router-link>
+          <slot name="footerContent"></slot>
         </div>
       </el-footer>
     </el-container>
@@ -62,34 +45,17 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import { Session } from '@/types/api/Session';
 import Logo from '@/components/shared/atoms/Logo.vue';
-import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
-import TaskType from '@/types/enum/TaskType';
-import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
-import ModuleShare from '@/components/moderator/molecules/ModuleShare.vue';
-import { Task } from '@/types/api/Task';
 
 @Options({
   components: {
     Logo,
-    ModuleCount,
-    SessionCode,
-    ModuleShare,
   },
 })
 export default class Sidebar extends Vue {
-  @Prop({ default: false }) readonly isSession!: boolean;
-  @Prop() readonly session!: Session;
-  @Prop({ default: '' }) readonly sessionConnectionKey!: string;
   @Prop({ default: '' }) readonly title!: string;
   @Prop({ default: '' }) readonly pretitle!: string;
   @Prop({ default: '' }) readonly description!: string;
-  @Prop() readonly taskType!: TaskType;
-  @Prop({ default: false }) readonly isOnPublicScreen!: boolean;
-  @Prop() task!: Task;
-
-  TaskType = TaskType;
 }
 </script>
 
@@ -99,6 +65,7 @@ export default class Sidebar extends Vue {
 .sidebar {
   background-color: var(--color-darkblue);
   position: fixed;
+  z-index: 100;
   left: 0;
   top: 0;
   width: var(--sidebar-width);
@@ -136,10 +103,6 @@ export default class Sidebar extends Vue {
 
   &__text {
     margin-bottom: 1.5rem;
-  }
-
-  &__toggles {
-    margin-bottom: 1rem;
   }
 
   &__button {
