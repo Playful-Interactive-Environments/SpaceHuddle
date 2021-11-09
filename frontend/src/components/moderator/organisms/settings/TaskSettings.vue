@@ -494,7 +494,25 @@ export default class TaskSettings extends Vue {
   async save(): Promise<void> {
     await this.updateCustomTaskParameter();
 
-    if (this.topicId) {
+    if (this.taskId) {
+      taskService
+        .putTask(this.taskId, {
+          taskType: this.formData.taskType,
+          name: this.formData.name,
+          description: this.formData.description,
+          parameter: this.formData.parameter,
+          modules: this.moduleSelection,
+          state: this.task?.state,
+        })
+        .then(
+          (task) => {
+            this.taskUpdated(task, false);
+          },
+          (error) => {
+            this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
+          }
+        );
+    } else if (this.topicId) {
       let taskCount = 0;
       await taskService.getTaskList(this.topicId).then((tasks) => {
         taskCount = tasks.length;
@@ -512,24 +530,6 @@ export default class TaskSettings extends Vue {
         .then(
           (task) => {
             this.taskUpdated(task, true);
-          },
-          (error) => {
-            this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
-          }
-        );
-    } else if (this.taskId) {
-      taskService
-        .putTask(this.taskId, {
-          taskType: this.formData.taskType,
-          name: this.formData.name,
-          description: this.formData.description,
-          parameter: this.formData.parameter,
-          modules: this.moduleSelection,
-          state: this.task?.state,
-        })
-        .then(
-          (task) => {
-            this.taskUpdated(task, false);
           },
           (error) => {
             this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
