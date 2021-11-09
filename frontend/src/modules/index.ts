@@ -108,13 +108,24 @@ export const getAsyncModule = async (
   if (taskType) {
     const moduleList = Array.isArray(moduleName) ? moduleName : [moduleName];
     if (moduleList.length > 0) {
-      let module = moduleConfig[taskType][moduleList[0]];
-      let moduleIndex = 1;
-      while (moduleIndex < moduleList.length && !module[componentType]) {
-        module = moduleConfig[taskType][moduleList[moduleIndex]];
+      const modules: { order: number; module: any }[] = [];
+      let moduleIndex = 0;
+      while (moduleIndex < moduleList.length) {
+        const module = moduleConfig[taskType][moduleList[moduleIndex]];
+        if (module[componentType])
+          modules.push({
+            order:
+              module.type == 'addOn'
+                ? 1
+                : !module.path.endsWith('default')
+                ? 2
+                : 3,
+            module: module,
+          });
         moduleIndex++;
       }
-      if (module[componentType]) {
+      if (modules.length > 0) {
+        const module = modules.sort((a, b) => a.order - b.order)[0].module;
         return defineAsyncComponent(
           () => import(`@/modules/${module.path}/${module[componentType]}.vue`)
         );
@@ -167,14 +178,15 @@ const getModule = async (
 export const getModuleConfig = async (
   componentType: string,
   taskType: string | null = null,
-  moduleName = 'default'
+  moduleName = 'default',
+  includeFallback = true
 ): Promise<any> => {
   await until(() => moduleConfigLoaded);
   if (taskType) {
     const module = moduleConfig[taskType][moduleName];
     if (module[componentType]) {
       return module[componentType];
-    } else if (moduleName != 'default') {
+    } else if (moduleName != 'default' && includeFallback) {
       return getModuleConfig(componentType, taskType, 'default');
     }
   }
@@ -184,12 +196,16 @@ export const getModuleConfig = async (
 export const hasModule = async (
   componentType: string,
   taskType: string | null = null,
-  moduleName = 'default'
+  moduleName = 'default',
+  includeFallback = true
 ): Promise<boolean> => {
   let hasModule = false;
-  await getModuleConfig(componentType, taskType, moduleName).then(
-    (result) => (hasModule = !!result)
-  );
+  await getModuleConfig(
+    componentType,
+    taskType,
+    moduleName,
+    includeFallback
+  ).then((result) => (hasModule = !!result));
   return hasModule;
 };
 

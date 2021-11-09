@@ -15,7 +15,7 @@
           @tab-click="(tab) => moduleNameClick(tab.paneName)"
         >
           <el-tab-pane
-            v-for="module in task.modules"
+            v-for="module in modules"
             :key="module.name"
             :name="module.name"
           >
@@ -52,6 +52,7 @@ import {
   getAsyncDefaultModule,
   getEmptyComponent,
   getModuleConfig,
+  hasModule,
 } from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import * as taskService from '@/services/task-service';
@@ -76,6 +77,23 @@ export default class ParticipantModuleContent extends Vue {
   TaskStates = TaskStates;
   moduleName = '';
   componentLoadIndex = 0;
+
+  modules: Module[] = [];
+  loadUsedModules(): void {
+    this.modules = [];
+    if (this.task) {
+      this.task.modules.forEach((module) => {
+        hasModule(
+          ModuleComponentType.PARTICIPANT,
+          this.taskType,
+          module.name,
+          false
+        ).then((result) => {
+          if (result) this.modules.push(module);
+        });
+      });
+    }
+  }
 
   mounted(): void {
     this.loadDefaultModule();
@@ -132,6 +150,7 @@ export default class ParticipantModuleContent extends Vue {
       .then((queryResult) => {
         queryResult.modules.forEach((module) => this.setIcon(module));
         this.task = queryResult;
+        this.loadUsedModules();
         this.moduleNameClick(this.moduleNames[0]);
       });
   }
