@@ -1,0 +1,11 @@
+{
+  "description": {
+    "title": "chat",
+    "description": "..."
+  },
+  "participant": {
+    "newIdeaInfo": "submit new idea",
+    "addKeywords": "Thank you for your idea. Pleas add same keywords to this idea.",
+    "addDescription": "Thank you for your idea. Pleas add a description to this idea."
+  }
+}

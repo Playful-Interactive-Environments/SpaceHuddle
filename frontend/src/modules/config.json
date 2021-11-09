@@ -1,5 +1,11 @@
 { 
    "brainstorming": {  
+       "chat": {  
+           "participant": "output/Participant",  
+           "locales": "en,",  
+             "icon": "comment-alt",  "type": "main",  
+           "path": "brainstorming/chat"  
+       },  
        "default": {  
            "publicScreen": "output/PublicScreen",  
            "participant": "output/Participant",  
@@ -11,7 +17,7 @@
        "gallery": {  
            "publicScreen": "output/PublicScreen",  
            "locales": "en,",  
-             "icon": "image",  "type": "main",  
+             "icon": "image",  "type": "addOn",  
            "path": "brainstorming/gallery"  
        },  
        "game": {  
