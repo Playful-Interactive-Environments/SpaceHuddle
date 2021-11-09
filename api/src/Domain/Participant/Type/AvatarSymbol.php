@@ -64,7 +64,6 @@ class AvatarSymbol
     public const DOVE = "dove";
     public const DRAGON = "dragon";
     public const DRUM = "drum";
-    public const EARLYBIRDS = "earlybirds";
     public const EGG = "egg";
     public const EYE = "eye";
     public const FAN = "fan";
