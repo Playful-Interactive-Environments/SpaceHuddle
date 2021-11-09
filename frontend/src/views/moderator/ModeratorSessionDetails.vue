@@ -55,10 +55,11 @@
               </CollapseTitle>
             </router-link>
           </template>
-          <!--<TaskTimeline
+          <TaskTimeline
             :topic-id="topic.id"
             :session-id="sessionId"
-          ></TaskTimeline>-->
+            style="margin-bottom: 1rem"
+          ></TaskTimeline>
           <draggable
             v-model="topics[index].tasks"
             tag="transition-group"
