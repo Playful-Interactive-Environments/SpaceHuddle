@@ -93,7 +93,7 @@
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "en,",  
-             "icon": "chart-bar",  "type": "main",  
+             "icon": "list",  "type": "main",  
            "path": "voting/slots"  
        },  
        "settings": {  
