@@ -5,7 +5,7 @@
         <MenuBar />
         <SessionInfo :title="sessionName" :description="sessionDescription" />
       </div>
-      <el-collapse v-model="openTabs">
+      <el-collapse v-model="openTabs" class="white participant">
         <el-collapse-item
           v-for="topic in filteredTopics"
           :key="topic.id"
@@ -14,38 +14,19 @@
           <template #title>
             {{ topic.title }}
           </template>
-          <div
-            class="media link"
+          <span
+            class="overview__module"
             v-for="task in topic.tasks"
             :key="task.id"
-            :style="{
-              '--module-color': TaskTypeColor[TaskType[task.taskType]],
-            }"
-            v-on:click="$router.push(`/participant-module-content/${task.id}`)"
           >
-            <img
-              :src="
-                require(`@/assets/illustrations/planets/${
-                  TaskType[task.taskType]
-                }.png`)
-              "
-              alt="planet"
-              class="media-left"
-            />
-            <TaskInfo
-              class="media-content"
+            <TaskCard
               :type="TaskType[task.taskType]"
-              :title="task.name"
-              :description="task.description"
-              :modules="task.modules.map((module) => module.name)"
-            />
-            <Timer
-              v-if="task.remainingTime !== null"
-              class="media-right"
               :task="task"
+              isParticipant="true"
+              :sessionId="sessionId"
               v-on:timerEnds="getTopicsAndTasks"
-            ></Timer>
-          </div>
+            />
+          </span>
         </el-collapse-item>
       </el-collapse>
     </div>
@@ -63,14 +44,9 @@ import * as participantService from '@/services/participant-service';
 import * as sessionService from '@/services/session-service';
 import { Topic } from '@/types/api/Topic';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
-import Timer from '@/components/shared/atoms/Timer.vue';
-import TaskTypeColor from '@/types/TaskTypeColor';
 
 @Options({
   components: {
-    Timer,
-    TaskInfo,
     MenuBar,
     SessionInfo,
     TaskCard,
@@ -78,7 +54,7 @@ import TaskTypeColor from '@/types/TaskTypeColor';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ParticipantOverview extends Vue {
+export default class ParticipantOverviewOld extends Vue {
   topics: Topic[] = [];
   TaskType = TaskType;
   sessionName = '';
@@ -87,8 +63,6 @@ export default class ParticipantOverview extends Vue {
   readonly intervalTime = 10000;
   interval!: any;
   openTabs: string[] = [];
-
-  TaskTypeColor = TaskTypeColor;
 
   mounted(): void {
     this.getSessionInfo();
@@ -138,37 +112,6 @@ export default class ParticipantOverview extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.media {
-  background-color: var(--color-transparent);
-  &-left {
-    margin: 1rem;
-    width: 5rem;
-  }
-
-  &-content {
-    margin: 1rem;
-  }
-
-  &-right {
-    background-color: var(--module-color);
-    margin: 1rem;
-  }
-
-  + .media {
-    margin-top: unset;
-    padding-top: unset;
-  }
-}
-
-.el-collapse::v-deep {
-  margin-bottom: unset;
-  --el-collapse-header-font-color: white;
-
-  .el-collapse-item__content {
-    padding-bottom: unset;
-  }
-}
-
 .overview {
   color: #fff;
   background: var(--color-darkblue);

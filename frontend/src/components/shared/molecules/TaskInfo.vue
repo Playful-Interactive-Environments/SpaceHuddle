@@ -1,5 +1,9 @@
 <template>
-  <div :class="{ 'module-info--centered': isParticipant }" class="module-info">
+  <div
+    :class="{ 'module-info--centered': isParticipant }"
+    class="module-info"
+    :style="{ '--module-color': TaskTypeColor[type] }"
+  >
     <el-breadcrumb separator="|" class="module-info__type">
       <el-breadcrumb-item>{{ $t(`enum.taskType.${type}`) }}</el-breadcrumb-item>
       <el-breadcrumb-item v-for="module in modules" :key="module">
@@ -20,6 +24,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import TaskType from '@/types/enum/TaskType';
+import TaskTypeColor from '@/types/TaskTypeColor';
 
 @Options({
   components: {},
@@ -30,6 +35,9 @@ export default class TaskInfo extends Vue {
   @Prop({ default: '' }) description!: string;
   @Prop({ default: [] }) modules!: string[];
   @Prop({ default: false }) isParticipant!: boolean;
+
+  TaskTypeColor = TaskTypeColor;
+  TaskType = TaskType;
 }
 </script>
 
