@@ -15,6 +15,7 @@ use App\Domain\Task\Type\TaskState;
 use App\Domain\Topic\Repository\TopicRepository;
 use App\Factory\QueryFactory;
 use Cake\Database\Query;
+use App\Domain\Task\Type\TaskType;
 
 /**
  * Repository
@@ -337,6 +338,9 @@ class TaskRepository implements RepositoryInterface
             "state" => $data->state ?? strtoupper(TaskState::WAIT),
             "expiration_time" => $data->expirationTime ?? null
         ];
+
+        if ($data->taskType == strtoupper(TaskType::SELECTION))
+            $result["state"] = strtoupper(TaskState::READ_ONLY);
         return $result;
     }
 }
