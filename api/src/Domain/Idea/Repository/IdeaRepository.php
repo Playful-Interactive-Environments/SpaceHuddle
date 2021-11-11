@@ -158,10 +158,21 @@ class IdeaRepository implements RepositoryInterface
     {
         $sortOrder = self::convertOrderType($orderType, $refId);
 
-        $task = $this->getParentRepository()->getById($parentId);
-        if ($task->taskType == $this->taskTypeSelection) {
+        //$task = $this->getParentRepository()->getById($parentId);
+        $query = $this->queryFactory->newSelect("task");
+        $query->select(["*"])
+            ->andWhere(["id" => $parentId]);
+        $rows = $query->execute()->fetchAll("assoc");
+        if (is_array($rows) and sizeof($rows) > 0) {
+            if (sizeof($rows) === 1) {
+                $task = $rows[0];
+            }
+        }
+
+        if ($task["task_type"] == $this->taskTypeSelection) {
             $selectionRepository = new SelectionRepository($this->queryFactory);
-            return $selectionRepository->getIdeas($task->parameter->selectionId);
+            $taskParameter = (object)json_decode($task["parameter"]);
+            return $selectionRepository->getIdeas($taskParameter->selectionId);
         }
 
         $resultList = [];

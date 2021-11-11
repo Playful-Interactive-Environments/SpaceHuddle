@@ -95,7 +95,8 @@ class TaskRepository implements RepositoryInterface
             [
                 strtoupper(TaskState::ACTIVE),
                 strtoupper(TaskState::READ_ONLY),
-                strtoupper(TaskState::SELECTION)
+                strtoupper(TaskState::WAIT),
+                strtoupper(TaskState::DONE)
             ]
         );
     }
@@ -340,8 +341,6 @@ class TaskRepository implements RepositoryInterface
             "expiration_time" => $data->expirationTime ?? null
         ];
 
-        if ($data->taskType == strtoupper(TaskType::SELECTION))
-            $result["state"] = strtoupper(TaskState::SELECTION);
         return $result;
     }
 }

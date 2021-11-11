@@ -17,5 +17,4 @@ class TaskState
     public const ACTIVE = "active";
     public const READ_ONLY = "read_only";
     public const DONE = "done";
-    public const SELECTION = "selection";
 }
