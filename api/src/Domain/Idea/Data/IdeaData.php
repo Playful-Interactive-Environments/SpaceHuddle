@@ -3,6 +3,7 @@
 namespace App\Domain\Idea\Data;
 
 use App\Domain\Participant\Data\AvatarData;
+use phpDocumentor\Reflection\Types\Boolean;
 use Selective\ArrayReader\ArrayReader;
 
 /**
@@ -52,6 +53,20 @@ class IdeaData extends IdeaAbstract
     public ?CategoryInfoData $category;
 
     /**
+     * Participant id of the creator.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $participantId;
+
+    /**
+     * Participant is the creator of the task.
+     * @var bool|null
+     * @OA\Property()
+     */
+    public ?bool $isOwn;
+
+    /**
      * Creates a new idea.
      * @param array $data Idea data.
      */
@@ -63,6 +78,8 @@ class IdeaData extends IdeaAbstract
         $this->state = strtoupper($reader->findString("state"));
         $this->timestamp = $reader->findString("timestamp");
         $this->count = $reader->findInt("count");
+        $this->participantId = $reader->findString("participant_id");
+        $this->isOwn = false;
         if ($reader->findString("category_id")) {
             $this->category = new CategoryInfoData($data);
         }

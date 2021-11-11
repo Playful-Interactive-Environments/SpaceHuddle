@@ -2,6 +2,7 @@
 
 namespace App\Domain\Selection\Repository;
 
+use App\Data\AuthorisationData;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Idea\Data\IdeaData;
@@ -62,9 +63,10 @@ class SelectionRepository implements RepositoryInterface
     /**
      * Get list of ideas for the selection ID.
      * @param string $selectionId The selection ID.
+     * @param AuthorisationData | null $authorisation Authorisation data
      * @return array<IdeaData> The result entity list.
      */
-    public function getIdeas(string $selectionId): array
+    public function getIdeas(string $selectionId, AuthorisationData | null $authorisation = null): array
     {
         $taskType = strtoupper(TaskType::BRAINSTORMING);
         $query = $this->queryFactory->newSelect("idea");
@@ -79,11 +81,30 @@ class SelectionRepository implements RepositoryInterface
         $result = $this->fetchAll($query, IdeaData::class);
 
         if (is_array($result)) {
+            foreach ($result as $resultItem) {
+                $this->getDetails($resultItem, $authorisation);
+            }
+        } elseif (is_object($result)) {
+            $this->getDetails($result, $authorisation);
+        }
+
+        if (is_array($result)) {
             return $result;
         } elseif (isset($result)) {
             return [$result];
         }
         return [];
+    }
+
+    /**
+     * Set Properties
+     * @param IdeaData $data Idea data
+     * @param AuthorisationData $authorisation Authorisation data
+     */
+    private function getDetails(IdeaData $data, AuthorisationData $authorisation): void
+    {
+        if ($authorisation->isParticipant())
+            $data->isOwn = ($data->participantId == $authorisation->id);
     }
 
     /**

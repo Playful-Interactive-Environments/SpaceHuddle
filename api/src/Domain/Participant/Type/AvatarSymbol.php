@@ -58,7 +58,6 @@ class AvatarSymbol
     public const COUCH = "couch";
     public const CROW = "crow";
     public const CROWN = "crown";
-    public const DIASPORA = "diaspora";
     public const DICE = "dice";
     public const DOG = "dog";
     public const DOVE = "dove";

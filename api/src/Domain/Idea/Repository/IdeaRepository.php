@@ -2,6 +2,7 @@
 
 namespace App\Domain\Idea\Repository;
 
+use App\Data\AuthorisationData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
@@ -90,7 +91,7 @@ class IdeaRepository implements RepositoryInterface
     {
         $authorisation = $this->getAuthorisation();
         $authorisation_conditions = [];
-        if ($authorisation->isParticipant()) {
+        /*if ($authorisation->isParticipant()) {
             $authorisation_conditions = [
                 "idea.participant_id" => $authorisation->id,
                 "task.state IN" => [
@@ -98,7 +99,7 @@ class IdeaRepository implements RepositoryInterface
                     strtoupper(TaskState::READ_ONLY)
                 ]
             ];
-        }
+        }*/
 
         $query = $this->queryFactory->newSelect($this->getEntityName());
         if ($refId) {
@@ -106,6 +107,7 @@ class IdeaRepository implements RepositoryInterface
                 "idea.*",
                 "participant.symbol",
                 "participant.color",
+                "idea.participant_id",
                 "hierarchy.category_idea_id as category_id",
                 "COALESCE(category.keywords, 'zzz') AS category",
                 "category.parameter AS category_parameter",
@@ -143,7 +145,26 @@ class IdeaRepository implements RepositoryInterface
             $query->order($sortConditions);
         }
 
-        return $this->fetchAll($query);
+        $result = $this->fetchAll($query);
+        if (is_array($result)) {
+            foreach ($result as $resultItem) {
+                $this->getDetails($resultItem, $authorisation);
+            }
+        } elseif (is_object($result)) {
+            $this->getDetails($result, $authorisation);
+        }
+        return $result;
+    }
+
+    /**
+     * Set Properties
+     * @param AuthorisationData $authorisation Authorisation data
+     * @param IdeaData $data Idea data
+     */
+    private function getDetails(IdeaData $data, AuthorisationData $authorisation): void
+    {
+        if ($authorisation->isParticipant())
+            $data->isOwn = ($data->participantId == $authorisation->id);
     }
 
     /**
@@ -156,6 +177,7 @@ class IdeaRepository implements RepositoryInterface
      */
     public function getAllOrdered(string $parentId, ?string $orderType, ?string $refId = null): array
     {
+        $authorisation = $this->getAuthorisation();
         $sortOrder = self::convertOrderType($orderType, $refId);
 
         //$task = $this->getParentRepository()->getById($parentId);
@@ -172,7 +194,7 @@ class IdeaRepository implements RepositoryInterface
         if ($task["task_type"] == $this->taskTypeSelection) {
             $selectionRepository = new SelectionRepository($this->queryFactory);
             $taskParameter = (object)json_decode($task["parameter"]);
-            return $selectionRepository->getIdeas($taskParameter->selectionId);
+            return $selectionRepository->getIdeas($taskParameter->selectionId, $authorisation);
         }
 
         $resultList = [];
