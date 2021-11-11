@@ -94,7 +94,8 @@ class TaskRepository implements RepositoryInterface
             $id,
             [
                 strtoupper(TaskState::ACTIVE),
-                strtoupper(TaskState::READ_ONLY)
+                strtoupper(TaskState::READ_ONLY),
+                strtoupper(TaskState::SELECTION)
             ]
         );
     }
@@ -340,7 +341,7 @@ class TaskRepository implements RepositoryInterface
         ];
 
         if ($data->taskType == strtoupper(TaskType::SELECTION))
-            $result["state"] = strtoupper(TaskState::READ_ONLY);
+            $result["state"] = strtoupper(TaskState::SELECTION);
         return $result;
     }
 }
