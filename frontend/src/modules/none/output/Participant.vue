@@ -18,6 +18,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import ParticipantModuleDefaultContainer from '@/components/participant/organisms/ParticipantModuleDefaultContainer.vue';
 import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
@@ -41,9 +42,11 @@ export default class Participant extends Vue {
 
   async getModule(): Promise<void> {
     if (this.moduleId) {
-      await moduleService.getModuleById(this.moduleId).then((module) => {
-        this.module = module;
-      });
+      await moduleService
+        .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
+        .then((module) => {
+          this.module = module;
+        });
     }
   }
 }

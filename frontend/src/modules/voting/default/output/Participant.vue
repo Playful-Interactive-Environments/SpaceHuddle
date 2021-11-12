@@ -126,10 +126,12 @@ export default class Participant extends Vue {
     if (this.taskId) {
       if (!this.task) await this.getTask();
       if (!this.module) await this.getModule();
-      if (this.task) {
+      if (this.task && this.task.parameter.dependencyTaskId) {
         await ideaService
           .getIdeasForTask(
             this.task.parameter.dependencyTaskId,
+            null,
+            null,
             EndpointAuthorisationType.PARTICIPANT
           )
           .then((ideas) => {
