@@ -48,8 +48,8 @@ import TaskType from '@/types/enum/TaskType';
 
 import TaskStates from '@/types/enum/TaskStates';
 import {
-  getAsyncModule,
   getAsyncDefaultModule,
+  getAsyncModule,
   getEmptyComponent,
   getModuleConfig,
   hasModule,
@@ -58,6 +58,7 @@ import ModuleComponentType from '@/modules/ModuleComponentType';
 import * as taskService from '@/services/task-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Module } from '@/types/api/Module';
+import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
 
 @Options({
   components: {
@@ -77,6 +78,7 @@ export default class ParticipantModuleContent extends Vue {
   TaskStates = TaskStates;
   moduleName = '';
   componentLoadIndex = 0;
+  componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
 
   modules: Module[] = [];
   loadUsedModules(): void {
@@ -105,9 +107,15 @@ export default class ParticipantModuleContent extends Vue {
 
   loadDefaultModule(): void {
     getAsyncDefaultModule(ModuleComponentType.PARTICIPANT).then((component) => {
-      if (this.$options.components)
+      if (
+        this.$options.components &&
+        this.componentLoadIndex == 0 &&
+        this.componentLoadingState == ComponentLoadingState.NONE
+      ) {
+        this.componentLoadingState = ComponentLoadingState.DEFAULT;
         this.$options.components['ParticipantModuleComponent'] = component;
-      this.componentLoadIndex++;
+        this.componentLoadIndex++;
+      }
     });
   }
 
@@ -173,9 +181,11 @@ export default class ParticipantModuleContent extends Vue {
         taskType,
         moduleName
       ).then((component) => {
-        if (this.$options.components)
+        if (this.$options.components) {
+          this.componentLoadingState = ComponentLoadingState.SELECTED;
           this.$options.components['ParticipantModuleComponent'] = component;
-        this.componentLoadIndex++;
+          this.componentLoadIndex++;
+        }
       });
     }
   }

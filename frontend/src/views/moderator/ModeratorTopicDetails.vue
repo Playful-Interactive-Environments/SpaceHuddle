@@ -161,6 +161,7 @@ import {
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import { ModuleType } from '@/types/enum/ModuleType';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
+import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
 
 @Options({
   components: {
@@ -189,6 +190,7 @@ export default class ModeratorTopicDetails extends Vue {
   activeTab = TaskType.BRAINSTORMING;
   activeTask: Task | null = null;
   componentLoadIndex = 0;
+  componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
 
   TaskType = TaskType;
   TaskTypeColor = TaskTypeColor;
@@ -281,9 +283,11 @@ export default class ModeratorTopicDetails extends Vue {
         ModuleComponentType.MODERATOR_CONTENT,
         TaskType[newTask.taskType]
       ).then((component) => {
-        if (this.$options.components)
+        if (this.$options.components) {
+          this.componentLoadingState = ComponentLoadingState.SELECTED;
           this.$options.components['ModuleContentComponent'] = component;
-        this.componentLoadIndex++;
+          this.componentLoadIndex++;
+        }
         this.activeTask = newTask;
         this.activeTab = TaskType[newTask.taskType];
       });

@@ -47,8 +47,8 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import {
-  getAsyncModule,
   getAsyncDefaultModule,
+  getAsyncModule,
   getEmptyComponent,
 } from '@/modules';
 
@@ -67,6 +67,7 @@ import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/M
 import TaskSettingsOld from '@/components/moderator/organisms/settings/TaskSettingsOld.vue';
 import { EventType } from '@/types/enum/EventType';
 import ModuleShare from '@/components/moderator/molecules/ModuleShare.vue';
+import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
 
 @Options({
   components: {
@@ -81,6 +82,7 @@ export default class ModeratorModuleContent extends Vue {
   @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: '' }) readonly taskId!: string;
   componentLoadIndex = 0;
+  componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
 
   task: Task | null = null;
   session: Session | null = null;
@@ -108,9 +110,15 @@ export default class ModeratorModuleContent extends Vue {
   loadDefaultModule(): void {
     getAsyncDefaultModule(ModuleComponentType.MODERATOR_CONTENT).then(
       (component) => {
-        if (this.$options.components)
+        if (
+          this.$options.components &&
+          this.componentLoadIndex == 0 &&
+          this.componentLoadingState == ComponentLoadingState.NONE
+        ) {
+          this.componentLoadingState = ComponentLoadingState.DEFAULT;
           this.$options.components['ModuleContentComponent'] = component;
-        this.componentLoadIndex++;
+          this.componentLoadIndex++;
+        }
       }
     );
   }
@@ -144,9 +152,11 @@ export default class ModeratorModuleContent extends Vue {
           taskType,
           this.moduleName
         ).then((component) => {
-          if (this.$options.components)
+          if (this.$options.components) {
+            this.componentLoadingState = ComponentLoadingState.SELECTED;
             this.$options.components['ModuleContentComponent'] = component;
-          this.componentLoadIndex++;
+            this.componentLoadIndex++;
+          }
         });
       }
       setModuleStyles(TaskType[this.task.taskType]);
