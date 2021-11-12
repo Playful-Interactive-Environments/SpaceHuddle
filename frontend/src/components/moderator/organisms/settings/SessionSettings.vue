@@ -68,6 +68,7 @@
         <FromSubmitItem
           :form-state-message="formData.stateMessage"
           submit-label-key="moderator.organism.settings.sessionSettings.submit"
+          :disabled="isSaving"
         />
       </template>
     </el-dialog>
@@ -146,9 +147,11 @@ export default class SessionSettings extends Vue {
     return this.formData.expirationDate.toISOString().slice(0, 10);
   }
 
+  isSaving = false;
   async save(): Promise<void> {
+    this.isSaving = true;
     if (!this.sessionId) {
-      sessionService
+      await sessionService
         .post({
           title: this.formData.title,
           description: this.formData.description,
@@ -171,7 +174,7 @@ export default class SessionSettings extends Vue {
           }
         );
     } else {
-      sessionService
+      await sessionService
         .put(this.sessionId, {
           title: this.formData.title,
           description: this.formData.description,
@@ -189,6 +192,7 @@ export default class SessionSettings extends Vue {
           }
         );
     }
+    this.isSaving = false;
   }
 }
 </script>

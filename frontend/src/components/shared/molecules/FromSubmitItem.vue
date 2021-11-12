@@ -7,6 +7,8 @@
     <el-button
       native-type="submit"
       class=".gradient btn--fullwidth el-button--submit"
+      :disabled="disabled"
+      :loading="disabled"
     >
       {{ $t(submitLabelKey) }}
     </el-button>
@@ -25,6 +27,7 @@ import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 export default class FromSubmitItem extends Vue {
   @Prop({ default: '' }) formStateMessage!: string;
   @Prop({ default: 'submit' }) submitLabelKey!: string;
+  @Prop({ default: false }) disabled!: boolean;
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
 }
 </script>

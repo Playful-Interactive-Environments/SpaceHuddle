@@ -84,6 +84,7 @@
             arrow="always"
             height="250px"
             v-if="moduleKeyList.length > 1"
+            trigger="click"
           >
             <el-carousel-item
               v-for="moduleType in moduleKeyList"
@@ -177,6 +178,7 @@
           <FromSubmitItem
             :form-state-message="formData.stateMessage"
             submit-label-key="moderator.organism.settings.taskSettings.submit"
+            :disabled="isSaving"
           />
         </template>
       </el-dialog>
@@ -483,7 +485,9 @@ export default class TaskSettingsOld extends Vue {
     this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
+  isSaving = false;
   async save(): Promise<void> {
+    this.isSaving = true;
     await this.updateCustomTaskParameter();
 
     if (this.topicId) {
@@ -492,7 +496,7 @@ export default class TaskSettingsOld extends Vue {
         taskCount = tasks.length;
       });
 
-      taskService
+      await taskService
         .postTask(this.topicId, {
           taskType: this.formData.taskType,
           name: this.formData.name,
@@ -510,7 +514,7 @@ export default class TaskSettingsOld extends Vue {
           }
         );
     } else if (this.taskId) {
-      taskService
+      await taskService
         .putTask(this.taskId, {
           taskType: this.formData.taskType,
           name: this.formData.name,
@@ -528,6 +532,7 @@ export default class TaskSettingsOld extends Vue {
           }
         );
     }
+    this.isSaving = false;
   }
 
   async updateCustomTaskParameter(): Promise<void> {

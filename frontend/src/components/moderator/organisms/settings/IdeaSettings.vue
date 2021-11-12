@@ -53,6 +53,7 @@
         <FromSubmitItem
           :form-state-message="formData.stateMessage"
           submit-label-key="moderator.organism.settings.ideaSettings.submit"
+          :disabled="isSaving"
         />
       </template>
     </el-dialog>
@@ -133,7 +134,9 @@ export default class IdeaSettings extends Vue {
     }
   }
 
+  isSaving = false;
   async save(): Promise<void> {
+    this.isSaving = true;
     this.idea.keywords = this.formData.keywords;
     this.idea.description = this.formData.description;
     this.idea.image = this.formData.image;
@@ -142,6 +145,7 @@ export default class IdeaSettings extends Vue {
     this.reset();
     this.showSettings = false;
     this.$emit('update:showModal', false);
+    this.isSaving = false;
   }
 }
 </script>

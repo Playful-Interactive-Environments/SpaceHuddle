@@ -50,6 +50,7 @@
         <FromSubmitItem
           :form-state-message="formData.stateMessage"
           submit-label-key="moderator.organism.settings.topicSettings.submit"
+          :disabled="isSaving"
         />
       </template>
     </el-dialog>
@@ -117,10 +118,12 @@ export default class TopicSettings extends Vue {
     this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
+  isSaving = false;
   async save(): Promise<void> {
+    this.isSaving = true;
     if (!this.topicId) {
       if (this.sessionId) {
-        topicService
+        await topicService
           .postTopic(this.sessionId, {
             title: this.formData.title,
             description: this.formData.description,
@@ -138,7 +141,7 @@ export default class TopicSettings extends Vue {
           );
       }
     } else {
-      topicService
+      await topicService
         .putTopic(this.topicId, {
           title: this.formData.title,
           description: this.formData.description,
@@ -155,6 +158,7 @@ export default class TopicSettings extends Vue {
           }
         );
     }
+    this.isSaving = false;
   }
 }
 </script>

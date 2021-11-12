@@ -6,6 +6,7 @@
     :initial-index="0"
     :interval="7000"
     v-on:change="galleryIndexChanged"
+    trigger="click"
   >
     <el-carousel-item v-for="(idea, index) in ideas" :key="index" :name="index.toString()">
       <div class="gallery-item">
