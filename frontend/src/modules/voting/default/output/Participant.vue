@@ -21,7 +21,7 @@
         v-on:change="vote($event)"
       ></el-rate>
     </div>
-    <div v-if="ideaPointer >= ideas.length">
+    <div v-if="finished">
       {{ $t('module.voting.default.participant.thanks') }}
     </div>
   </ParticipantModuleDefaultContainer>
@@ -48,6 +48,7 @@ import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
     IdeaCard,
   },
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
@@ -58,14 +59,37 @@ export default class Participant extends Vue {
   ideaPointer = 0;
   rate = 0;
   maxRate = 5;
+  readonly intervalTime = 10000;
+  interval!: any;
 
   get moduleName(): string {
     if (this.module) return this.module.name;
     return '';
   }
 
+  get finished(): boolean {
+    return (
+      this.votes.length > 0 &&
+      this.ideaPointer >= this.ideas.length &&
+      this.ideaPointer > 0
+    );
+  }
+
   mounted(): void {
     this.initConfig(5);
+    this.startIdeaInterval();
+  }
+
+  startIdeaInterval(): void {
+    this.interval = setInterval(this.reloadIdeas, this.intervalTime);
+  }
+
+  unmounted(): void {
+    clearInterval(this.interval);
+  }
+
+  reloadIdeas(): void {
+    if (this.finished) this.getIdeas();
   }
 
   initConfig(count: number): void {
@@ -118,6 +142,7 @@ export default class Participant extends Vue {
             );
             if (ideaIndex >= 0) this.ideas.splice(ideaIndex, 1);
           });
+          this.ideaPointer = 0;
         });
     }
   }
@@ -135,6 +160,7 @@ export default class Participant extends Vue {
             EndpointAuthorisationType.PARTICIPANT
           )
           .then((ideas) => {
+            this.ideaPointer = ideas.length;
             this.ideas = ideas;
             this.getVotes();
           });
@@ -157,7 +183,7 @@ export default class Participant extends Vue {
       setTimeout(() => {
         this.rate = 0;
         this.ideaPointer++;
-      }, 200);
+      }, 2000);
     }
   }
 }
