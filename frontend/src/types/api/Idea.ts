@@ -14,4 +14,6 @@ export interface Idea {
   avatar: Avatar | null;
   category: { id: string; name: string; parameter: any };
   parameter: any;
+  participantId: string;
+  isOwn: boolean;
 }
