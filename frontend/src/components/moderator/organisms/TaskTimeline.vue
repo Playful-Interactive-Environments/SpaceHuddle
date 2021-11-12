@@ -53,6 +53,7 @@
               <el-badge
                 :value="formattedTime(element.remainingTime)"
                 :hidden="!isActive(element)"
+                :class="{ 'no-module': !hasParticipantComponent[element.id] }"
               >
                 <el-checkbox-button
                   :checked="isActive(element)"
@@ -90,6 +91,9 @@ import { ElMessage } from 'element-plus';
 import TaskStates from '@/types/enum/TaskStates';
 import { EventType } from '@/types/enum/EventType';
 import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
+import { hasModule } from '@/modules';
+import ModuleComponentType from '@/modules/ModuleComponentType';
+import TaskType from '@/types/enum/TaskType';
 
 @Options({
   components: {
@@ -108,6 +112,7 @@ export default class TaskTimeline extends Vue {
   tasks: Task[] = [];
   publicScreenTaskId = '';
   timerTask: Task | null = null;
+  hasParticipantComponent: { [name: string]: boolean } = {};
 
   get showTimerSettings(): boolean {
     return this.timerTask !== null;
@@ -134,6 +139,13 @@ export default class TaskTimeline extends Vue {
   async getTasks(): Promise<void> {
     taskService.getTaskList(this.topicId).then((tasks) => {
       this.tasks = tasks;
+      tasks.forEach((task) => {
+        hasModule(
+          ModuleComponentType.PARTICIPANT,
+          TaskType[task.taskType],
+          'default'
+        ).then((result) => (this.hasParticipantComponent[task.id] = result));
+      });
     });
   }
 
@@ -294,6 +306,10 @@ export default class TaskTimeline extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.no-module {
+  visibility: hidden;
+}
+
 .media-left {
   margin-right: unset;
   margin-top: auto;
