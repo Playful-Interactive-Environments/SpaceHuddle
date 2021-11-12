@@ -1,6 +1,8 @@
 <template>
-  <h2>{{ $t('module.none.moderatorContent.header') }}</h2>
-  <p>{{ $t('module.none.moderatorContent.info') }}</p>
+  <el-container v-loading="loading" class="fill">
+    <!--<h2>{{ $t('module.none.moderatorContent.header') }}</h2>
+    <p>{{ $t('module.none.moderatorContent.info') }}</p>-->
+  </el-container>
 </template>
 
 <script lang="ts">
@@ -12,7 +14,14 @@ import { Prop } from 'vue-property-decorator';
 })
 export default class ModeratorContent extends Vue {
   @Prop() readonly taskId!: string;
+  loading = true;
 }
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.fill::v-deep {
+  .el-loading-mask {
+    background-color: unset;
+  }
+}
+</style>

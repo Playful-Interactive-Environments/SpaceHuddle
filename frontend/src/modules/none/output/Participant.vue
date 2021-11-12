@@ -1,14 +1,16 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
-    <template v-slot:planet>
+    <!--<template v-slot:planet>
       <img
         src="@/assets/illustrations/planets/information.png"
         alt="planet"
         class="module-container__planet"
       />
-    </template>
-    <h2>{{ $t('module.none.participant.header') }}</h2>
-    <p>{{ $t('module.none.participant.info') }}</p>
+    </template>-->
+    <el-container v-loading="loading" class="fill">
+      <!--<h2>{{ $t('module.none.participant.header') }}</h2>
+    <p>{{ $t('module.none.participant.info') }}</p>-->
+    </el-container>
   </ParticipantModuleDefaultContainer>
 </template>
 
@@ -29,6 +31,7 @@ export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
   module: Module | null = null;
+  loading = true;
 
   get moduleName(): string {
     if (this.module) return this.module.name;
@@ -52,4 +55,10 @@ export default class Participant extends Vue {
 }
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.fill::v-deep {
+  .el-loading-mask {
+    background-color: unset;
+  }
+}
+</style>
