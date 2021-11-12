@@ -16,8 +16,11 @@
           <span class="media-content"></span>
         </div>
         <div class="media" v-for="idea in ideas" :key="idea.id">
+          <span class="media-left" v-if="!idea.isOwn">
+            <IdeaCard :idea="idea" :is-editable="false" class="public-idea" />
+          </span>
           <span class="media-content"></span>
-          <span class="media-right">
+          <span class="media-right" v-if="idea.isOwn">
             <IdeaCard :idea="idea" :is-editable="false" class="public-idea" />
           </span>
         </div>
@@ -217,6 +220,8 @@ export default class Participant extends Vue {
         .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
         .then((module) => {
           this.module = module;
+          if (this.module && !this.module.parameter.showAll)
+            this.ideas = this.ideas.filter((idea) => idea.isOwn);
         });
     }
   }
@@ -239,6 +244,8 @@ export default class Participant extends Vue {
       )
       .then((queryResult) => {
         this.ideas = queryResult;
+        if (this.module && !this.module.parameter.showAll)
+          this.ideas = queryResult.filter((idea) => idea.isOwn);
         this.scrollToBottom();
       });
   }
