@@ -94,7 +94,7 @@ export default class PublicScreen extends Vue {
     if (this.taskId) {
       if (!this.task) await this.getTask();
 
-      if (this.task) {
+      if (this.task && this.task.parameter.dependencyTaskId) {
         await ideaService
           .getOrderGroups(
             this.task.parameter.dependencyTaskId,

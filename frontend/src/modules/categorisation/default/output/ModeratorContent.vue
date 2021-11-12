@@ -222,7 +222,7 @@ export default class ModeratorContent extends Vue {
         );
       });
 
-      if (this.task) {
+      if (this.task && this.task.parameter.dependencyTaskId) {
         let categoryOrder = `[${IdeaSortOrderCategorisation},${this.orderType}]`;
         if (
           !this.orderType ||
