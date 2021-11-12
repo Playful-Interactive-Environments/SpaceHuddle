@@ -8,7 +8,6 @@
             :type="TaskType[task.taskType]"
             :title="task.name"
             :description="task.description"
-            :modules="task.modules.map((module) => module.name)"
           />
         </div>
         <div class="public-screen__overview-right">
@@ -94,9 +93,10 @@ export default class PublicScreen extends Vue {
   async mounted(): Promise<void> {
     getAsyncDefaultModule(ModuleComponentType.PUBLIC_SCREEN).then(
       (component) => {
-        if (this.$options.components)
+        if (this.$options.components && this.componentLoadIndex == 0) {
           this.$options.components['PublicScreenComponent'] = component;
-        this.componentLoadIndex++;
+          this.componentLoadIndex++;
+        }
       }
     );
 
@@ -133,15 +133,22 @@ h3 {
 }
 
 .connection-key {
-  padding: 1rem;
+  font-size: 2rem;
+  padding: 1rem 3rem;
+  text-align: right;
 }
 
-.module-info {
+.module-info::v-deep {
   flex-grow: unset;
+
+  h3 {
+    font-size: 1.5rem;
+  }
 }
 
 .public-screen {
-  background: url('~@/assets/illustrations/stars-background-repeat.png');
+  //background: url('~@/assets/illustrations/stars-background-repeat.png');
+  background-color: var(--color-background-gray);
   background-size: contain;
   min-height: 100vh;
 
@@ -153,13 +160,20 @@ h3 {
   &__overview {
     display: flex;
     justify-content: space-between;
-    color: white;
+    color: var(--color-primary);// white;
 
     &-planet {
       height: 9rem;
       margin-left: 2rem;
       margin-top: -20px;
       margin-right: -20px;
+
+      background-image: url('~@/assets/illustrations/bg_without_telescope.png');
+      background-position: center top;
+      background-size: cover;
+      border-radius: 50%;
+      border: 5px double white;
+      padding: 1rem;
     }
 
     &-left {
