@@ -12,6 +12,7 @@
         </div>
         <Timer
           class="participant-container__timer"
+          :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
           :task="task"
           v-on:timerEnds="$router.go(-1)"
         ></Timer>
@@ -55,6 +56,8 @@ export default class ParticipantModuleDefaultContainer extends Vue {
   @Prop({ required: true }) taskId!: string;
   @Prop({ default: 'default' }) module!: string;
   task: Task | null = null;
+
+  EndpointAuthorisationType = EndpointAuthorisationType;
 
   get taskType(): TaskType | null {
     if (this.task) return TaskType[this.task.taskType];

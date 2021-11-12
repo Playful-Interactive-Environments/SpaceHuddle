@@ -12,6 +12,7 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {},
@@ -21,6 +22,8 @@ import * as taskService from '@/services/task-service';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Timer extends Vue {
   @Prop() task!: Task;
+  @Prop({ default: EndpointAuthorisationType.MODERATOR })
+  authHeaderTyp!: EndpointAuthorisationType;
   timeLeft: number | null = 0;
   interval!: any;
   readonly intervalTime = 1000;
@@ -48,7 +51,10 @@ export default class Timer extends Vue {
 
   syncTimeWithBackend(): void {
     if (this.task) {
-      taskService.getTaskById(this.task.id).then((task) => {
+      let authHeaderTyp: EndpointAuthorisationType =
+        EndpointAuthorisationType.MODERATOR;
+      if (this.authHeaderTyp) authHeaderTyp = this.authHeaderTyp;
+      taskService.getTaskById(this.task.id, authHeaderTyp).then((task) => {
         this.task.remainingTime = task.remainingTime;
       });
     }

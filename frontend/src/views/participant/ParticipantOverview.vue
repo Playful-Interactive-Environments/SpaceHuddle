@@ -37,10 +37,10 @@
               :type="TaskType[task.taskType]"
               :title="task.name"
               :description="task.description"
-              :modules="task.modules.map((module) => module.name)"
             />
             <Timer
               v-if="task.remainingTime !== null"
+              :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
               class="media-right"
               :task="task"
               v-on:timerEnds="getTopicsAndTasks"
@@ -89,6 +89,7 @@ export default class ParticipantOverview extends Vue {
   openTabs: string[] = [];
 
   TaskTypeColor = TaskTypeColor;
+  EndpointAuthorisationType = EndpointAuthorisationType;
 
   mounted(): void {
     this.getSessionInfo();
