@@ -20,6 +20,16 @@
             :active="activeTaskIndex"
             v-on:changeActiveElement="changeTask"
           ></TaskTimeline>
+          <SessionCode v-if="session" :code="session.connectionKey" />
+          <router-link
+            v-if="sessionId"
+            :to="`/public-screen/${sessionId}`"
+            target="_blank"
+          >
+            <button class="btn btn--mint btn--fullwidth">
+              {{ $t('general.publicScreen') }}
+            </button>
+          </router-link>
         </template>
       </Sidebar>
     </template>
@@ -46,7 +56,10 @@
               alt="planet"
               style="width: 1.5rem"
             />
-            <span :style="{ color: TaskTypeColor[taskType] }">
+            <span
+              class="taskType"
+              :style="{ '--module-color': TaskTypeColor[taskType] }"
+            >
               {{ $t(`enum.taskType.${taskType}`) }}
             </span>
           </template>
@@ -108,7 +121,7 @@
         :task-type="taskSettingsType"
         :topic-id="topicId"
         :task-id="taskSettingsId"
-        @taskUpdated="getTasks"
+        @taskUpdated="reloadTasks"
       />
       <TopicSettings
         v-model:show-modal="showTopicSettings"
@@ -147,6 +160,7 @@ import {
 } from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import { ModuleType } from '@/types/enum/ModuleType';
+import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 
 @Options({
   components: {
@@ -159,6 +173,7 @@ import { ModuleType } from '@/types/enum/ModuleType';
     ModeratorNavigationLayout,
     CollapseTitle,
     TaskTimeline,
+    SessionCode,
     ModuleContentComponent: getEmptyComponent(),
   },
 })
@@ -221,11 +236,20 @@ export default class ModeratorTopicDetails extends Vue {
     this.getTasks();
   }
 
-  getTasks(): void {
-    taskService.getTaskList(this.topicId).then((tasks) => {
+  async getTasks(): Promise<void> {
+    await taskService.getTaskList(this.topicId).then((tasks) => {
       this.tasks = tasks;
-      if (this.tasks.length > this.activeTaskIndex)
-        this.changeTask(this.tasks[this.activeTaskIndex]);
+    });
+    if (this.tasks.length > this.activeTaskIndex)
+      await this.changeTask(this.tasks[this.activeTaskIndex]);
+  }
+
+  reloadTasks(taskId: string): void {
+    this.getTasks().then(() => {
+      const activeTask = this.tasks.find((task) => task.id == taskId);
+      if (activeTask) {
+        this.activeTab = TaskType[activeTask.taskType];
+      }
     });
   }
 
@@ -251,9 +275,9 @@ export default class ModeratorTopicDetails extends Vue {
     );
   }
 
-  changeTask(newTask: Task): void {
+  async changeTask(newTask: Task): Promise<void> {
     if (this.$options.components && newTask) {
-      getAsyncModule(
+      await getAsyncModule(
         ModuleComponentType.MODERATOR_CONTENT,
         TaskType[newTask.taskType]
       ).then((component) => {
@@ -291,6 +315,7 @@ export default class ModeratorTopicDetails extends Vue {
   }
 
   taskCommand(task: Task, command: string): void {
+    const activeTask = this.activeTask;
     switch (command) {
       case 'edit':
         this.taskSettingsType = task.taskType;
@@ -298,9 +323,12 @@ export default class ModeratorTopicDetails extends Vue {
         this.showTaskSettings = true;
         break;
       case 'delete':
+        if (this.activeTask?.id == task.id) this.activeTask = null;
         taskService.deleteTask(task.id).then((result) => {
           if (result) {
             this.getTasks();
+          } else if (activeTask?.id == task.id) {
+            this.activeTask = activeTask;
           }
         });
         break;
@@ -310,6 +338,20 @@ export default class ModeratorTopicDetails extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.is-disabled {
+  .taskType {
+    color: var(--el-text-color-placeholder);
+  }
+  img {
+    -webkit-filter: grayscale(1); /* Webkit */
+    filter: gray; /* IE6-9 */
+    filter: grayscale(1); /* W3C */
+  }
+}
+.taskType {
+  color: var(--module-color);
+}
+
 .el-space::v-deep {
   .el-space {
     &__item {
