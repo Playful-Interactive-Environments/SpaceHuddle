@@ -1,10 +1,13 @@
 <template>
-  <div class="public-screen">
-    <PublicHeader :white="true" />
-    <main class="public-screen__container">
-      <section v-if="task" class="public-screen__overview">
+  <el-container class="public-screen" :key="componentLoadIndex">
+    <el-header>
+      <PublicHeader />
+    </el-header>
+    <el-container class="public-screen__container">
+      <el-header class="public-screen__overview">
         <div class="public-screen__overview-left">
           <TaskInfo
+            v-if="task"
             :type="TaskType[task.taskType]"
             :title="task.name"
             :description="task.description"
@@ -17,8 +20,9 @@
             </h3>
             {{ session.connectionKey }}
           </span>
-          <Timer :task="task" />
-          <img
+          <Timer v-if="task" :task="task" />
+          <!--<img
+            v-if="task"
             :src="
               require(`@/assets/illustrations/planets/${
                 TaskType[task.taskType]
@@ -26,17 +30,19 @@
             "
             alt="planet"
             class="public-screen__overview-planet"
-          />
+          />-->
         </div>
-      </section>
-      <PublicScreenComponent :task-id="taskId" :key="componentLoadIndex" />
-    </main>
-  </div>
+      </el-header>
+      <el-main>
+        <PublicScreenComponent :task-id="taskId" :key="componentLoadIndex" />
+      </el-main>
+    </el-container>
+  </el-container>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 
 import PublicHeader from '@/components/moderator/organisms/layout/PublicHeader.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
@@ -49,12 +55,13 @@ import TaskType from '@/types/enum/TaskType';
 import { setModuleStyles } from '@/utils/moduleStyles';
 import TaskStates from '@/types/enum/TaskStates';
 import {
-  getAsyncModule,
   getAsyncDefaultModule,
+  getAsyncModule,
   getEmptyComponent,
 } from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
+import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
 
 @Options({
   components: {
@@ -64,15 +71,20 @@ import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
     PublicScreenComponent: getEmptyComponent(),
   },
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreen extends Vue {
   @Prop() readonly sessionId!: string;
   componentLoadIndex = 0;
+  componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
 
   task: Task | null = null;
   session: Session | null = null;
 
   TaskType = TaskType;
   TaskStates = TaskStates;
+
+  readonly intervalTime = 10000;
+  interval!: any;
 
   get taskId(): string | null {
     if (this.task) return this.task.id;
@@ -93,35 +105,60 @@ export default class PublicScreen extends Vue {
   async mounted(): Promise<void> {
     getAsyncDefaultModule(ModuleComponentType.PUBLIC_SCREEN).then(
       (component) => {
-        if (this.$options.components && this.componentLoadIndex == 0) {
+        if (
+          this.$options.components &&
+          this.componentLoadIndex == 0 &&
+          this.componentLoadingState == ComponentLoadingState.NONE
+        ) {
+          this.componentLoadingState = ComponentLoadingState.DEFAULT;
           this.$options.components['PublicScreenComponent'] = component;
           this.componentLoadIndex++;
         }
       }
     );
+    this.startIdeaInterval();
+  }
 
+  startIdeaInterval(): void {
+    this.interval = setInterval(this.getPublicScreenModule, this.intervalTime);
+  }
+
+  unmounted(): void {
+    clearInterval(this.interval);
+  }
+
+  @Watch('sessionId', { immediate: true })
+  async onSessionIdChanged(): Promise<void> {
     sessionService.getById(this.sessionId).then((session) => {
       this.session = session;
     });
 
+    this.getPublicScreenModule();
+  }
+
+  getPublicScreenModule(): void {
     sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
-      this.task = queryResult;
-      const taskType = this.taskType;
-      if (this.$options.components) {
-        getAsyncModule(
-          ModuleComponentType.PUBLIC_SCREEN,
-          taskType,
-          this.moduleName
-        ).then((component) => {
-          if (this.$options.components)
-            this.$options.components['PublicScreenComponent'] = component;
-          this.componentLoadIndex++;
-        });
-      }
-      if (taskType) {
-        this.$nextTick(() => {
-          setModuleStyles(taskType);
-        });
+      if (this.taskId != queryResult?.id) {
+        this.task = queryResult;
+        const taskType = this.taskType;
+        if (this.$options.components) {
+          getAsyncModule(
+            ModuleComponentType.PUBLIC_SCREEN,
+            taskType,
+            this.moduleName
+          ).then((component) => {
+            if (this.$options.components) {
+              this.componentLoadingState = ComponentLoadingState.SELECTED;
+              this.$options.components['PublicScreenComponent'] = component;
+              this.componentLoadIndex++;
+            }
+          });
+        }
+        if (taskType) {
+          this.$nextTick(() => {
+            setModuleStyles(taskType);
+          });
+        }
       }
     });
   }
@@ -155,12 +192,13 @@ h3 {
   &__container {
     padding-top: 0;
     padding: 1rem 5rem;
+    height: 100%;
   }
 
   &__overview {
     display: flex;
     justify-content: space-between;
-    color: var(--color-primary);// white;
+    color: var(--color-primary); // white;
 
     &-planet {
       height: 9rem;
@@ -200,9 +238,10 @@ h3 {
   }
 
   &__error {
-    color: white;
+    color: var(--color-primary); // white;
     margin: 0px;
     padding: 0px;
+    padding-top: 5rem;
   }
 }
 </style>
