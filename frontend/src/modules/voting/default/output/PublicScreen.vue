@@ -12,19 +12,19 @@
         scales: {
           x: {
             ticks: {
-              color: 'white',
+              color: 'var(--color-primary)',
             },
           },
           y: {
             ticks: {
-              color: 'white',
+              color: 'var(--color-primary)',
             },
           },
         },
         plugins: {
           legend: {
             labels: {
-              color: 'white',
+              color: 'var(--color-primary)',
             },
           },
         },
