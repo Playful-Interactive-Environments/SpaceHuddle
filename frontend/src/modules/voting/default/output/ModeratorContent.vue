@@ -80,8 +80,10 @@ export default class ModeratorContent extends Vue {
     if (this.taskId) {
       await votingService.getResult(this.taskId).then((votes) => {
         this.votes = votes;
-        this.chartData.labels = this.resultData.labels;
-        this.chartData.datasets = this.resultData.datasets;
+        if (this.resultData) {
+          this.chartData.labels = this.resultData.labels;
+          this.chartData.datasets = this.resultData.datasets;
+        }
         this.updateChart();
       });
     }
