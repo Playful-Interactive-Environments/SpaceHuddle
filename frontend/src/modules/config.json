@@ -2,6 +2,7 @@
    "brainstorming": {  
        "chat": {  
            "participant": "output/Participant",  
+           "moderatorConfig": "output/ModeratorConfig",  
            "locales": "en,",  
              "icon": "comment-alt",  "type": "main",  
            "path": "brainstorming/chat"  
