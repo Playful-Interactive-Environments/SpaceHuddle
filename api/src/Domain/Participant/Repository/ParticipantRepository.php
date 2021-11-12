@@ -62,7 +62,9 @@ class ParticipantRepository implements RepositoryInterface
             if (!isset($data->ip)) {
                 $data->ip = $this->getClientIp();
             }
-            $participant = $this->isRegistered($sessionId, $data->ip);
+            //todo: set unique client ip -> currently not working, several users get the same participant id
+            //$participant = $this->isRegistered($sessionId, $data->ip);
+            $participant = null;
             if (is_null($participant)) {
                 $data->sessionId = $sessionId;
                 $data->ipHash = self::encryptText($data->ip);
