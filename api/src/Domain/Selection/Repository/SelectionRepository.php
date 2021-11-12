@@ -80,12 +80,14 @@ class SelectionRepository implements RepositoryInterface
 
         $result = $this->fetchAll($query, IdeaData::class);
 
-        if (is_array($result)) {
-            foreach ($result as $resultItem) {
-                $this->getDetails($resultItem, $authorisation);
+        if (isset($authorisation)) {
+            if (is_array($result)) {
+                foreach ($result as $resultItem) {
+                    $this->getDetails($resultItem, $authorisation);
+                }
+            } elseif (is_object($result)) {
+                $this->getDetails($result, $authorisation);
             }
-        } elseif (is_object($result)) {
-            $this->getDetails($result, $authorisation);
         }
 
         if (is_array($result)) {
