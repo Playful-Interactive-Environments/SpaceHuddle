@@ -184,7 +184,7 @@ export default class Participant extends Vue {
 
   async mounted(): Promise<void> {
     await this.getTaskIdeas();
-    //this.startIdeaInterval();
+    this.startIdeaInterval();
   }
 
   scrollToBottom(delay = 100): void {
@@ -231,7 +231,7 @@ export default class Participant extends Vue {
   }
 
   unmounted(): void {
-    //clearInterval(this.interval);
+    clearInterval(this.interval);
   }
 
   async getTaskIdeas(): Promise<void> {
