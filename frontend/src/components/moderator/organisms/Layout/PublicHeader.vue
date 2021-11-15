@@ -1,6 +1,9 @@
 <template>
-  <header class="header">
-    <Logo class="header__logo" />
+  <header class="media">
+    <Logo class="media-left logo" />
+    <span class="media-content">
+      <slot></slot>
+    </span>
   </header>
 </template>
 
@@ -17,15 +20,10 @@ export default class PublicHeader extends Vue {}
 </script>
 
 <style lang="scss" scoped>
-.header {
-  height: var(--header-height);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-
-  &__logo {
-    padding: 0 2em;
-  }
+.media {
+  padding-top: 2em;
+}
+.logo {
+  padding: 0 2em;
 }
 </style>

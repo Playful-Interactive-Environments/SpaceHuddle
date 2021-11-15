@@ -2,7 +2,7 @@
   <div
     class="task-timeline"
     :class="{ 'task-timeline__vertical': direction === 'vertical' }"
-    v-if="tasks.length > 0"
+    v-if="tasks.length > 0 && !readonly"
   >
     <div
       :class="{ media: !isVertical, stretch: isVertical }"
@@ -78,6 +78,29 @@
       :task="timerTask"
     />
   </div>
+  <div
+    class="task-timeline"
+    :class="{ 'task-timeline__vertical': direction === 'vertical' }"
+    v-if="tasks.length > 0 && readonly"
+  >
+    <el-steps :direction="direction" :active="activeTaskIndex" align-center>
+      <el-step icon="-" v-for="(element, index) in tasks" :key="element.id">
+        <template #icon>
+          <img
+            :src="
+              require(`@/assets/illustrations/planets/${element.taskType.toLowerCase()}.png`)
+            "
+            alt="planet"
+          />
+        </template>
+        <template #description>
+          <span class="link" v-on:click="taskClicked(element, index)">
+            {{ element.name }}
+          </span>
+        </template>
+      </el-step>
+    </el-steps>
+  </div>
 </template>
 
 <script lang="ts">
@@ -108,6 +131,8 @@ export default class TaskTimeline extends Vue {
   @Prop() readonly sessionId!: string;
   @Prop({ default: 'horizontal' }) readonly direction!: string;
   @Prop({ default: 0 }) readonly active!: number;
+  @Prop({ default: false }) readonly readonly!: boolean;
+  @Prop() activeTaskId!: string;
 
   tasks: Task[] = [];
   publicScreenTaskId = '';
@@ -124,6 +149,12 @@ export default class TaskTimeline extends Vue {
 
   get isVertical(): boolean {
     return this.direction === 'vertical';
+  }
+
+  get activeTaskIndex(): number {
+    if (this.tasks && this.activeTaskId)
+      return this.tasks.findIndex((task) => task.id == this.activeTaskId);
+    return 0;
   }
 
   @Watch('topicId', { immediate: true })
@@ -336,6 +367,34 @@ export default class TaskTimeline extends Vue {
     &.is-finish {
       color: inherit;
     }
+  }
+
+  .is-icon {
+    width: 25px;
+  }
+
+  .el-step__description {
+    padding-top: 12.5px;
+
+    &.is-process {
+      padding-top: 0;
+    }
+  }
+
+  .is-wait img {
+    -webkit-filter: grayscale(1); /* Webkit */
+    filter: gray; /* IE6-9 */
+    filter: grayscale(1); /* W3C */
+  }
+
+  .is-process {
+    font-weight: var(--font-weight-bold);
+    .is-icon {
+      width: 50px;
+    }
+  }
+
+  .is-finish {
   }
 }
 

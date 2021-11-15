@@ -1,9 +1,15 @@
 <template>
   <el-container class="public-screen" :key="componentLoadIndex">
-    <el-header>
-      <PublicHeader />
-    </el-header>
-    <el-container class="public-screen__container">
+    <el-header class="public-screen__header">
+      <PublicHeader>
+        <TaskTimeline
+          v-if="topicId"
+          :topic-id="topicId"
+          :session-id="sessionId"
+          :activeTaskId="taskId"
+          :readonly="true"
+        ></TaskTimeline>
+      </PublicHeader>
       <el-header class="public-screen__overview">
         <div class="public-screen__overview-left">
           <TaskInfo
@@ -14,13 +20,13 @@
           />
         </div>
         <div class="public-screen__overview-right">
+          <Timer v-if="task" :task="task" />
           <span class="connection-key" v-if="session">
             <h3>
               {{ $t('shared.view.publicScreen.connectionKey') }}
             </h3>
             {{ session.connectionKey }}
           </span>
-          <Timer v-if="task" :task="task" />
           <!--<img
             v-if="task"
             :src="
@@ -33,6 +39,8 @@
           />-->
         </div>
       </el-header>
+    </el-header>
+    <el-container class="public-screen__container">
       <el-main>
         <PublicScreenComponent :task-id="taskId" :key="componentLoadIndex" />
       </el-main>
@@ -62,9 +70,11 @@ import {
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
+import TaskTimeline from '@/components/moderator/organisms/TaskTimeline.vue';
 
 @Options({
   components: {
+    TaskTimeline,
     PublicHeader,
     Timer,
     TaskInfo,
@@ -88,6 +98,11 @@ export default class PublicScreen extends Vue {
 
   get taskId(): string | null {
     if (this.task) return this.task.id;
+    return null;
+  }
+
+  get topicId(): string | null {
+    if (this.task) return this.task.topicId;
     return null;
   }
 
@@ -170,8 +185,8 @@ h3 {
 }
 
 .connection-key {
-  font-size: 2rem;
-  padding: 1rem 3rem;
+  font-size: 1.5rem;
+  padding: 1rem 0 1rem 3rem;
   text-align: right;
 }
 
@@ -188,6 +203,14 @@ h3 {
   background-color: var(--color-background-gray);
   background-size: contain;
   min-height: 100vh;
+
+  &__header {
+    position: sticky;
+    top: 0;
+    background-color: var(--color-background-gray);
+    padding: 1rem 5rem;
+    z-index: 1000;
+  }
 
   &__container {
     padding-top: 0;
