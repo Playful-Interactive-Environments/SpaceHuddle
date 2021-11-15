@@ -83,7 +83,7 @@
     :class="{ 'task-timeline__vertical': direction === 'vertical' }"
     v-if="tasks.length > 0 && readonly"
   >
-    <el-steps :direction="direction" :active="activeTaskIndex" align-center>
+    <el-steps :direction="direction" :active="activeTaskIndex" align-center class="readonly">
       <el-step icon="-" v-for="(element, index) in tasks" :key="element.id">
         <template #icon>
           <img
@@ -356,7 +356,7 @@ export default class TaskTimeline extends Vue {
   height: 100%;
 }
 
-.el-step::v-deep {
+.el-steps::v-deep {
   .el-step__icon {
     background: var(--color-background-gray);
     cursor: grab;
@@ -369,32 +369,34 @@ export default class TaskTimeline extends Vue {
     }
   }
 
-  .is-icon {
-    width: 25px;
-  }
-
-  .el-step__description {
-    padding-top: 12.5px;
-
-    &.is-process {
-      padding-top: 0;
-    }
-  }
-
-  .is-wait img {
-    -webkit-filter: grayscale(1); /* Webkit */
-    filter: gray; /* IE6-9 */
-    filter: grayscale(1); /* W3C */
-  }
-
-  .is-process {
-    font-weight: var(--font-weight-bold);
+  &.readonly {
     .is-icon {
-      width: 50px;
+      width: 25px;
     }
-  }
 
-  .is-finish {
+    .el-step__description {
+      padding-top: 12.5px;
+
+      &.is-process {
+        padding-top: 0;
+      }
+    }
+
+    .is-wait img {
+      -webkit-filter: grayscale(1); /* Webkit */
+      filter: gray; /* IE6-9 */
+      filter: grayscale(1); /* W3C */
+    }
+
+    .is-process {
+      font-weight: var(--font-weight-bold);
+      .is-icon {
+        width: 50px;
+      }
+    }
+
+    .is-finish {
+    }
   }
 }
 
