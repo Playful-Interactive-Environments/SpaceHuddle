@@ -8,6 +8,8 @@ enum IdeaSortOrder {
   COUNT = 'count',
 }
 
-export const DefaultIdeaSortOrder = IdeaSortOrder.TIMESTAMP;
+export const DefaultIdeaSortOrder = IdeaSortOrder.TIMESTAMP.toUpperCase();
+
+export const DefaultDisplayCount = 20;
 
 export default IdeaSortOrder;

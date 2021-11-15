@@ -40,7 +40,7 @@
         </CollapseTitle>
       </template>
 
-      <div class="layout__4columns">
+      <div class="layout__columns">
         <draggable
           :key="SELECTION_KEY"
           :id="SELECTION_KEY"
@@ -83,7 +83,7 @@
           </span>
         </CollapseTitle>
       </template>
-      <div class="layout__4columns">
+      <div class="layout__columns">
         <draggable
           :id="key"
           v-model="item.ideas"
@@ -125,7 +125,10 @@ import draggable from 'vuedraggable';
 import { OrderGroupList, SortOrderOption } from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { reloadCollapseContent } from '@/utils/collapse';
-import { DefaultIdeaSortOrder } from '@/types/enum/IdeaSortOrder';
+import {
+  DefaultIdeaSortOrder,
+  DefaultDisplayCount,
+} from '@/types/enum/IdeaSortOrder';
 
 const SELECTION_KEY = 'selection';
 
@@ -151,7 +154,7 @@ export default class ModeratorContent extends Vue {
   interval!: any;
   openTabs: string[] = [];
   openTabsSelection: string[] = [SELECTION_KEY];
-  displayCount = 3;
+  displayCount = DefaultDisplayCount;
   isDragging = false;
   sortOrderOptions: SortOrderOption[] = [];
   orderType: string = DefaultIdeaSortOrder;

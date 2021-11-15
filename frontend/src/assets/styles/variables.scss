@@ -1,3 +1,4 @@
+$color-purple-dark: #871a70;
 $color-purple: #d355b5;
 $color-purple-light: #e086cb;
 $color-blue: #0192d0;
@@ -30,6 +31,7 @@ $sidebar-min-width: 300px;
 $header-height: 90px;
 
 :root {
+  --color-purple-dark: #{$color-purple-dark};
   --color-purple: #{$color-purple};
   --color-purple-light: #{$color-purple-light};
   --color-blue: #{$color-blue};

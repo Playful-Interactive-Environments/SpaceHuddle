@@ -179,6 +179,7 @@ export default class PublicScreen extends Vue {
   }
 }
 </script>
+
 <style lang="scss" scoped>
 h3 {
   font-weight: var(--font-weight-bold);

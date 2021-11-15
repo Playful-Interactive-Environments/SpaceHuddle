@@ -32,12 +32,19 @@
           </span>
         </CollapseTitle>
       </template>
-      <div class="layout__4columns">
+      <div class="layout__columns">
         <IdeaCard
           :idea="idea"
           v-for="(idea, index) in item.ideas.slice(0, item.displayCount)"
           :key="index"
           @ideaDeleted="getCollapseContent()"
+        />
+        <IdeaCard
+          v-if="item.ideas.length > item.displayCount"
+          :idea="{ keywords: '...' }"
+          :is-editable="false"
+          v-on:click="item.displayCount = 1000"
+          class="showMore"
         />
       </div>
     </el-collapse-item>
@@ -49,15 +56,18 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
+import * as taskService from '@/services/task-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder, {
   DefaultIdeaSortOrder,
+  DefaultDisplayCount,
 } from '@/types/enum/IdeaSortOrder';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
 import { OrderGroupList } from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { reloadCollapseContent } from '@/utils/collapse';
+import { convertToSaveVersion } from '@/types/api/Task';
 
 @Options({
   components: {
@@ -86,6 +96,16 @@ export default class ModeratorContent extends Vue {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.getCollapseContent(true);
+    taskService.getTaskById(this.taskId).then((task) => {
+      if (
+        task.parameter &&
+        task.parameter.orderType &&
+        this.orderType != task.parameter.orderType
+      ) {
+        this.orderType = task.parameter.orderType;
+        this.getCollapseContent(true);
+      }
+    });
   }
 
   async getCollapseContent(reloadTabState = false): Promise<void> {
@@ -108,8 +128,26 @@ export default class ModeratorContent extends Vue {
           this.orderGroupContent
         )
         .then((result) => {
-          this.orderGroupContent = result.oderGroups;
+          switch (this.orderType) {
+            case IdeaSortOrder.TIMESTAMP.toUpperCase():
+            case IdeaSortOrder.ALPHABETICAL.toUpperCase():
+              this.orderGroupContent = {
+                '': {
+                  ideas: result.ideas,
+                  avatar: null,
+                  color: null,
+                  displayCount: DefaultDisplayCount,
+                },
+              };
+              break;
+            default:
+              this.orderGroupContent = result.oderGroups;
+          }
           this.ideas = result.ideas;
+          taskService.getTaskById(this.taskId).then((task) => {
+            task.parameter.orderType = this.orderType;
+            taskService.putTask(this.taskId, convertToSaveVersion(task));
+          });
         });
     }
     return Object.keys(this.orderGroupContent);
@@ -129,4 +167,11 @@ export default class ModeratorContent extends Vue {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.showMore {
+  color: var(--color-purple-dark);
+  border-color: var(--color-purple-dark);
+  background-color: var(--color-purple-light);
+  cursor: pointer;
+}
+</style>

@@ -1,8 +1,9 @@
 .layout {
-  &__4columns {
+  &__columns {
     width: 100%;
     column-width: 10rem;
     column-gap: 1rem;
+    column-fill: balance;
   }
 
   &__level {

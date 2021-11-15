@@ -10,6 +10,7 @@ import { Idea } from '@/types/api/Idea';
 import { OrderGroupList, SortOrderOption } from '@/types/api/OrderGroup';
 import IdeaSortOrder, {
   IdeaSortOrderCategorisation,
+  DefaultDisplayCount,
 } from '@/types/enum/IdeaSortOrder';
 import * as taskService from '@/services/task-service';
 import TaskType from '@/types/enum/TaskType';
@@ -112,7 +113,7 @@ export const convertToOrderGroups = (
       if (ideaItem.order) {
         const orderGroup = orderGroupList[ideaItem.order];
         if (!orderGroup) {
-          let displayCount = 3;
+          let displayCount = DefaultDisplayCount;
           if (ideaItem.order in actualOrderGroupList)
             displayCount = actualOrderGroupList[ideaItem.order].displayCount;
           let color = null;

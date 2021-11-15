@@ -2,7 +2,7 @@
   <section v-if="ideas.length === 0" class="centered public-screen__error">
     <p>{{ $t('module.brainstorming.default.publicScreen.noIdeas') }}</p>
   </section>
-  <section v-else class="public-screen__content layout__4columns">
+  <section v-else class="public-screen__content layout__columns">
     <IdeaCard
       v-for="(idea, index) in ideas"
       :idea="idea"

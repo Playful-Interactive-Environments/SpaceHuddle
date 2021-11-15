@@ -67,7 +67,7 @@
           </span>
         </CollapseTitle>
       </template>
-      <div class="layout__4columns">
+      <div class="layout__columns">
         <draggable
           :id="item.category ? item.category.id : null"
           v-model="item.ideas"

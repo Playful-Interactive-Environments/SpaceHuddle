@@ -83,7 +83,12 @@
     :class="{ 'task-timeline__vertical': direction === 'vertical' }"
     v-if="tasks.length > 0 && readonly"
   >
-    <el-steps :direction="direction" :active="activeTaskIndex" align-center class="readonly">
+    <el-steps
+      :direction="direction"
+      :active="activeTaskIndex"
+      align-center
+      class="readonly"
+    >
       <el-step icon="-" v-for="(element, index) in tasks" :key="element.id">
         <template #icon>
           <img
