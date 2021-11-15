@@ -9,7 +9,7 @@
         />
         <el-tabs
           :stretch="false"
-          v-if="task && task.modules.length > 1"
+          v-if="modules.length > 1"
           v-model="moduleName"
           class="white"
           @tab-click="(tab) => moduleNameClick(tab.paneName)"
@@ -92,6 +92,9 @@ export default class ParticipantModuleContent extends Vue {
           false
         ).then((result) => {
           if (result) this.modules.push(module);
+          if (this.modules.length == 1) {
+            this.moduleNameClick(this.moduleNames[0]);
+          }
         });
       });
     }
@@ -141,6 +144,11 @@ export default class ParticipantModuleContent extends Vue {
   }
 
   get moduleNames(): string[] {
+    if (this.modules && this.modules.length > 0) {
+      let modules: string[] = this.modules.map((module) => module.name);
+      return modules;
+    }
+
     if (this.task && this.task.modules && this.task.modules.length > 0) {
       let modules: string[] = [];
       this.task.modules.forEach((module) => {
@@ -148,6 +156,7 @@ export default class ParticipantModuleContent extends Vue {
       });
       return modules;
     }
+
     return ['default'];
   }
 
