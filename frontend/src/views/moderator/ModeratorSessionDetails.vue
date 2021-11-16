@@ -35,7 +35,7 @@
       >
         <template #item="{ element }">
           <div class="detail__module">
-            <TopicCard :sessionId="sessionId" :topic="element">
+            <TopicCard :sessionId="sessionId" :topic="element" v-on:topicDeleted="getTopics">
               <TaskTimeline
                 :topic-id="element.id"
                 :session-id="sessionId"
@@ -82,7 +82,6 @@ import * as topicService from '@/services/topic-service';
 import * as taskService from '@/services/task-service';
 import { Session } from '@/types/api/Session';
 import { Topic } from '@/types/api/Topic';
-import { convertToSaveVersion } from '@/types/api/Task';
 import { EventType } from '@/types/enum/EventType';
 import TopicSettings from '@/components/moderator/organisms/settings/TopicSettings.vue';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
@@ -197,7 +196,7 @@ export default class ModeratorSessionDetails extends Vue {
     padding: 0 3rem;
   }
 
-  &__module + .detail__module {
+  &__module {
     margin-top: 0.5rem;
     margin-bottom: 1rem;
   }
