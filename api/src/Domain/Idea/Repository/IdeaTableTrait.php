@@ -194,7 +194,8 @@ trait IdeaTableTrait
             "timestamp" => $data->timestamp ?? null,
             "task_id" => $data->taskId ?? null,
             "participant_id" => $data->participantId ?? null,
-            "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null
+            "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null,
+            "order" => $data->order ?? 0
         ];
     }
 }

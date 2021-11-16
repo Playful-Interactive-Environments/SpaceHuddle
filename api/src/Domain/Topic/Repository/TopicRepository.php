@@ -35,6 +35,27 @@ class TopicRepository implements RepositoryInterface
     }
 
     /**
+     * Get entity.
+     * @param array $conditions The WHERE conditions to add with AND.
+     * @param array $sortConditions The ORDER BY conditions.
+     * @return object|array<object>|null The result entity(s).
+     * @throws GenericException
+     */
+    public function get(array $conditions = [], array $sortConditions = []): null|object|array
+    {
+        if (count($sortConditions) == 0) {
+            $sortConditions = ["order"];
+        }
+
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["*"])
+            ->andWhere($conditions)
+            ->order($sortConditions);
+
+        return $this->fetchAll($query);
+    }
+
+    /**
      * Delete dependent data.
      * @param string $id Primary key of the linked table entry.
      * @return void
@@ -80,7 +101,8 @@ class TopicRepository implements RepositoryInterface
             "id" => $data->id ?? null,
             "session_id" => $data->sessionId ?? null,
             "title" => $data->title ?? null,
-            "description" => $data->description ?? null
+            "description" => $data->description ?? null,
+            "order" => $data->order ?? 0
         ];
     }
 }

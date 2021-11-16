@@ -334,7 +334,7 @@ class IdeaRepository implements RepositoryInterface
                         break;
                 }
 
-                $resultItem->order = $orderContent;
+                $resultItem->orderGroup = $orderContent;
             }
         }
 

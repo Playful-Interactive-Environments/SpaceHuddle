@@ -44,7 +44,7 @@ class IdeaData extends IdeaAbstract
      * @var string|null
      * @OA\Property()
      */
-    public ?string $order;
+    public ?string $orderGroup;
 
     /**
      * Category.

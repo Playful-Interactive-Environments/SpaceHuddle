@@ -336,7 +336,7 @@ class TaskRepository implements RepositoryInterface
             "name" => $data->name ?? null,
             "description" => $data->description ?? null,
             "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null,
-            "order" => $data->order ?? null,
+            "order" => $data->order ?? 0,
             "state" => $data->state ?? strtoupper(TaskState::WAIT),
             "expiration_time" => $data->expirationTime ?? null
         ];

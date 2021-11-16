@@ -21,7 +21,8 @@ use Fig\Http\Message\StatusCodeInterface;
  *       mediaType="application/json",
  *       @OA\Schema(required={"title", "description"},
  *         @OA\Property(property="title", type="string"),
- *         @OA\Property(property="description", type="string")
+ *         @OA\Property(property="description", type="string"),
+ *         @OA\Property(property="order", type="integer")
  *       )
  *     )
  *   ),

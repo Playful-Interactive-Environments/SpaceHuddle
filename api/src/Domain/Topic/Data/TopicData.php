@@ -32,6 +32,13 @@ class TopicData
     public ?string $description;
 
     /**
+     * Planned task order.
+     * @var int|null
+     * @OA\Property(example=1)
+     */
+    public ?int $order;
+
+    /**
      * Data of the active topic task.
      * @var string|null
      * @OA\Property(example=null)
@@ -48,6 +55,7 @@ class TopicData
         $this->id = $reader->findString("id");
         $this->title = $reader->findString("title");
         $this->description = $reader->findString("description");
+        $this->order = $reader->findInt("order");
         $this->activeTaskId = $reader->findString("active_task_id");
     }
 }

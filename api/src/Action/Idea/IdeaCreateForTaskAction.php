@@ -22,7 +22,8 @@ use Fig\Http\Message\StatusCodeInterface;
  *         @OA\Property(property="keywords", type="string"),
  *         @OA\Property(property="description", type="string"),
  *         @OA\Property(property="link", type="string"),
- *         @OA\Property(property="image", type="string", format="binary")
+ *         @OA\Property(property="image", type="string", format="binary"),
+ *         @OA\Property(property="order", type="integer")
  *       )
  *     )
  *   ),

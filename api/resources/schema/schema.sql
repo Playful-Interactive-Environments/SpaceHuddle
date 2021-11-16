@@ -50,7 +50,8 @@ CREATE TABLE `idea` (
                         `description` text DEFAULT NULL,
                         `image` longblob DEFAULT NULL,
                         `link` varchar(500) DEFAULT NULL,
-                        `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
+                        `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+                        `order` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -198,7 +199,7 @@ CREATE TABLE `task` (
                         `name` varchar(255) DEFAULT NULL,
                         `description` text DEFAULT NULL,
                         `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-                        `order` int(11) NOT NULL,
+                        `order` int(11) NOT NULL DEFAULT 0,
                         `state` varchar(255) DEFAULT NULL,
                         `expiration_time` datetime DEFAULT NULL,
                         `active_module_id` char(36) DEFAULT NULL
@@ -215,6 +216,7 @@ CREATE TABLE `topic` (
                          `session_id` char(36) NOT NULL,
                          `title` varchar(255) NOT NULL,
                          `description` text DEFAULT NULL,
+                         `order` int(11) NOT NULL DEFAULT 0,
                          `active_task_id` char(36) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
