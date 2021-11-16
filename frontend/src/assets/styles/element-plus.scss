@@ -435,3 +435,13 @@ $--font-size: (
 .el-radio {
         margin-right: unset;
 }
+
+
+.el-popper.is-dark {
+        color: white;
+        background: var(--color-mint-dark);
+
+        .el-popper__arrow::before {
+                background: var(--color-mint-dark);
+        }
+}
