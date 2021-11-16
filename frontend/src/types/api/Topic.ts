@@ -4,6 +4,7 @@ export interface Topic {
   id: string;
   title: string;
   description: string;
+  order: number;
   activeTaskId: string;
   tasks?: Task[];
 }

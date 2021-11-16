@@ -507,6 +507,7 @@ export default class TaskSettings extends Vue {
           parameter: this.formData.parameter,
           modules: this.moduleSelection,
           state: this.task?.state,
+          order: this.task?.order,
         })
         .then(
           (task) => {

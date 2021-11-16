@@ -68,6 +68,7 @@ import ValidationForm, {
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import { ValidationData } from '@/types/ui/ValidationRule';
+import { Topic } from '@/types/api/Topic';
 
 @Options({
   components: {
@@ -87,6 +88,8 @@ export default class TopicSettings extends Vue {
     description: '',
   };
 
+  topic: Topic | null = null;
+
   showDialog = false;
   @Watch('showModal', { immediate: false, flush: 'post' })
   async onShowModalChanged(showModal: boolean): Promise<void> {
@@ -97,6 +100,7 @@ export default class TopicSettings extends Vue {
   onTopicIdChanged(id: string): void {
     if (id) {
       topicService.getTopicById(id).then((topic) => {
+        this.topic = topic;
         this.formData.title = topic.title;
         this.formData.description = topic.description;
       });
@@ -114,6 +118,7 @@ export default class TopicSettings extends Vue {
   reset(): void {
     this.formData.title = '';
     this.formData.description = '';
+    this.topic = null;
     this.$emit('update:topicId', null);
     this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
@@ -123,10 +128,16 @@ export default class TopicSettings extends Vue {
     this.isSaving = true;
     if (!this.topicId) {
       if (this.sessionId) {
+        let topicCount = 0;
+        await topicService.getTopicsList(this.sessionId).then((topics) => {
+          topicCount = topics.length;
+        });
+
         await topicService
           .postTopic(this.sessionId, {
             title: this.formData.title,
             description: this.formData.description,
+            order: topicCount,
           })
           .then(
             () => {
@@ -145,6 +156,7 @@ export default class TopicSettings extends Vue {
         .putTopic(this.topicId, {
           title: this.formData.title,
           description: this.formData.description,
+          order: this.topic?.order,
         })
         .then(
           () => {

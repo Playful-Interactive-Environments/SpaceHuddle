@@ -10,7 +10,8 @@ export interface Idea {
   keywords: string;
   image: string | null;
   link: string | null;
-  order: string;
+  order: number;
+  orderGroup: string;
   avatar: Avatar | null;
   category: { id: string; name: string; parameter: any };
   parameter: any;

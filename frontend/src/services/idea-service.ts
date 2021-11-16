@@ -110,15 +110,16 @@ export const convertToOrderGroups = (
   ideas
     .filter((idea) => filter(idea))
     .forEach((ideaItem) => {
-      if (ideaItem.order) {
-        const orderGroup = orderGroupList[ideaItem.order];
+      if (ideaItem.orderGroup) {
+        const orderGroup = orderGroupList[ideaItem.orderGroup];
         if (!orderGroup) {
           let displayCount = DefaultDisplayCount;
-          if (ideaItem.order in actualOrderGroupList)
-            displayCount = actualOrderGroupList[ideaItem.order].displayCount;
+          if (ideaItem.orderGroup in actualOrderGroupList)
+            displayCount =
+              actualOrderGroupList[ideaItem.orderGroup].displayCount;
           let color = null;
           if (ideaItem.category) color = ideaItem.category.parameter.color;
-          orderGroupList[ideaItem.order] = {
+          orderGroupList[ideaItem.orderGroup] = {
             ideas: [ideaItem],
             avatar: ideaItem.avatar,
             color: color,

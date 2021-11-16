@@ -240,8 +240,8 @@ export default class ModeratorContent extends Vue {
             ideas
               .filter((ideaItem) => ideaItem.category)
               .forEach((ideaItem) => {
-                if (ideaItem.order) {
-                  const orderGroup = orderGroupContent[ideaItem.order];
+                if (ideaItem.orderGroup) {
+                  const orderGroup = orderGroupContent[ideaItem.orderGroup];
                   if (orderGroup) {
                     orderGroup.ideas.push(ideaItem);
                   }
