@@ -1,137 +1,155 @@
 <template>
-  <div
-    class="task-timeline"
-    :class="{ 'task-timeline__vertical': direction === 'vertical' }"
-    v-if="tasks.length > 0 && !readonly"
-  >
+  <div>
     <div
-      :class="{ media: !isVertical, stretch: isVertical }"
-      :style="{ 'grid-template-rows': `1fr ${tasks.length * 2 - 1}fr` }"
+      class="task-timeline"
+      :class="{ 'task-timeline__vertical': direction === 'vertical' }"
+      v-if="tasks.length > 0 && !readonly"
     >
-      <el-tooltip
-        placement="top-start"
-        :content="$t('moderator.organism.taskTimeline.activatePublicScreen')"
+      <div
+        :class="{ media: !isVertical, stretch: isVertical }"
+        :style="{ 'grid-template-rows': `1fr ${tasks.length * 2 - 1}fr` }"
       >
-        <el-switch
-          v-model="usePublicScreen"
-          :class="{ 'media-left': !isVertical }"
+        <el-tooltip
+          placement="top-start"
+          :content="$t('moderator.organism.taskTimeline.activatePublicScreen')"
+        >
+          <el-switch
+            v-model="usePublicScreen"
+            :class="{ 'media-left': !isVertical }"
+            :style="{
+              width: isVertical
+                ? 'auto'
+                : `calc(100% / (${activePageTasks.length} * 2))`,
+            }"
+          />
+        </el-tooltip>
+        <el-slider
+          class="media-content"
+          v-if="activePageTasks.length > 0"
+          :disabled="!usePublicScreen"
+          :max="activePageTasks.length - 1"
+          v-model="activeOnPublicScreen"
+          :vertical="isVertical"
           :style="{
-            width: isVertical ? 'auto' : `calc(100% / (${tasks.length} * 2))`,
+            margin: isVertical
+              ? '0.3rem' //`0.3rem 0.3rem 2.3rem 0.3rem`
+              : `0.3rem calc(100% / (${activePageTasks.length} * 2)) 0.3rem 0rem`,
           }"
-        />
-      </el-tooltip>
-      <el-slider
-        class="media-content"
-        v-if="tasks.length > 0"
-        :disabled="!usePublicScreen"
-        :max="tasks.length - 1"
-        v-model="activeOnPublicScreen"
-        :vertical="isVertical"
-        :style="{
-          margin: isVertical
-            ? '0.3rem' //`0.3rem 0.3rem 2.3rem 0.3rem`
-            : `0.3rem calc(100% / (${tasks.length} * 2)) 0.3rem 0rem`,
-        }"
-        :format-tooltip="tooltip"
-        :height="isVertical ? `100%` : ''"
-      ></el-slider>
-    </div>
-    <el-steps :direction="direction" :active="active" align-center>
-      <draggable
-        v-model="tasks"
-        tag="transition-group"
-        item-key="order"
-        handle=".el-step__head"
-        @end="dragDone"
-      >
-        <template #item="{ element, index }">
-          <el-step icon="-">
-            <template #icon>
-              <el-tooltip
-                placement="top"
-                :content="$t('moderator.organism.taskTimeline.changeOrder')"
-              >
-                <img
-                  :src="
-                    require(`@/assets/illustrations/planets/${element.taskType.toLowerCase()}.png`)
-                  "
-                  alt="planet"
-                />
-              </el-tooltip>
-            </template>
-            <template #title>
-              <el-badge
-                :value="formattedTime(element.remainingTime)"
-                :hidden="!isActive(element)"
-                :class="{ 'no-module': !hasParticipantComponent[element.id] }"
-              >
+          :format-tooltip="tooltip"
+          :height="isVertical ? `100%` : ''"
+        ></el-slider>
+      </div>
+      <el-steps :direction="direction" :active="active" align-center>
+        <draggable
+          v-model="activePageTasks"
+          tag="transition-group"
+          item-key="order"
+          handle=".el-step__head"
+          @end="dragDone"
+        >
+          <template #item="{ element, index }">
+            <el-step icon="-">
+              <template #icon>
                 <el-tooltip
                   placement="top"
-                  :content="
-                    $t('moderator.organism.taskTimeline.activateParticipant')
-                  "
+                  :content="$t('moderator.organism.taskTimeline.changeOrder')"
                 >
-                  <el-button
-                    :class="{ 'is-checked': isActive(element) }"
-                    v-on:click="setActive(element)"
-                    circle
-                  >
-                    <font-awesome-icon icon="mobile" />
-                  </el-button>
+                  <img
+                    :src="
+                      require(`@/assets/illustrations/planets/${element.taskType.toLowerCase()}.png`)
+                    "
+                    alt="planet"
+                  />
                 </el-tooltip>
-              </el-badge>
-            </template>
-            <template #description>
-              <el-tooltip
-                placement="top"
-                :content="$t('moderator.organism.taskTimeline.selectTask')"
-                v-if="isLinkedToTask"
-              >
-                <span class="link" v-on:click="taskClicked(element, index)">
+              </template>
+              <template #title>
+                <el-badge
+                  :value="formattedTime(element.remainingTime)"
+                  :hidden="!isActive(element)"
+                  :class="{ 'no-module': !hasParticipantComponent[element.id] }"
+                >
+                  <el-tooltip
+                    placement="top"
+                    :content="
+                      $t('moderator.organism.taskTimeline.activateParticipant')
+                    "
+                  >
+                    <el-button
+                      :class="{ 'is-checked': isActive(element) }"
+                      v-on:click="setActive(element)"
+                      circle
+                    >
+                      <font-awesome-icon icon="mobile" />
+                    </el-button>
+                  </el-tooltip>
+                </el-badge>
+              </template>
+              <template #description>
+                <el-tooltip
+                  placement="top"
+                  :content="$t('moderator.organism.taskTimeline.selectTask')"
+                  v-if="isLinkedToTask"
+                >
+                  <span class="link" v-on:click="taskClicked(element, index)">
+                    {{ element.name }}
+                  </span>
+                </el-tooltip>
+                <span v-else>
                   {{ element.name }}
                 </span>
-              </el-tooltip>
-              <span v-else>
-                {{ element.name }}
-              </span>
-            </template>
-          </el-step>
-        </template>
-      </draggable>
-    </el-steps>
-    <TimerSettings
-      v-if="showTimerSettings"
-      v-model:showModal="showTimerSettings"
-      :task="timerTask"
-    />
-  </div>
-  <div
-    class="task-timeline"
-    :class="{ 'task-timeline__vertical': direction === 'vertical' }"
-    v-else-if="tasks.length > 0 && readonly"
-  >
-    <el-steps
-      :direction="direction"
-      :active="activeTaskIndex"
-      align-center
-      class="readonly"
+              </template>
+            </el-step>
+          </template>
+        </draggable>
+      </el-steps>
+      <TimerSettings
+        v-if="showTimerSettings"
+        v-model:showModal="showTimerSettings"
+        :task="timerTask"
+      />
+    </div>
+    <div
+      class="task-timeline"
+      :class="{ 'task-timeline__vertical': direction === 'vertical' }"
+      v-else-if="tasks.length > 0 && readonly"
     >
-      <el-step icon="-" v-for="(element, index) in tasks" :key="element.id">
-        <template #icon>
-          <img
-            :src="
-              require(`@/assets/illustrations/planets/${element.taskType.toLowerCase()}.png`)
-            "
-            alt="planet"
-          />
-        </template>
-        <template #description>
-          <span class="link" v-on:click="taskClicked(element, index)">
-            {{ element.name }}
-          </span>
-        </template>
-      </el-step>
-    </el-steps>
+      <el-steps
+        :direction="direction"
+        :active="activeTaskIndex"
+        align-center
+        class="readonly"
+      >
+        <el-step
+          icon="-"
+          v-for="(element, index) in activePageTasks"
+          :key="element.id"
+        >
+          <template #icon>
+            <img
+              :src="
+                require(`@/assets/illustrations/planets/${element.taskType.toLowerCase()}.png`)
+              "
+              alt="planet"
+            />
+          </template>
+          <template #description>
+            <span class="link" v-on:click="taskClicked(element, index)">
+              {{ element.name }}
+            </span>
+          </template>
+        </el-step>
+      </el-steps>
+    </div>
+    <el-pagination
+      v-if="pages.length > 1"
+      :page-size="pageSize"
+      :pager-count="11"
+      layout="prev, pager, next"
+      :total="tasks.length"
+      v-model:current-page="activePage"
+      :class="{ 'is-vertical': direction === 'vertical' }"
+    >
+    </el-pagination>
   </div>
 </template>
 
@@ -171,6 +189,9 @@ export default class TaskTimeline extends Vue {
   publicScreenTaskId = '';
   timerTask: Task | null = null;
   hasParticipantComponent: { [name: string]: boolean } = {};
+  activePage = 1;
+  pageSize = 10;
+  pages: Task[][] = [];
 
   get showTimerSettings(): boolean {
     return this.timerTask !== null;
@@ -185,9 +206,17 @@ export default class TaskTimeline extends Vue {
   }
 
   get activeTaskIndex(): number {
-    if (this.tasks && this.activeTaskId)
-      return this.tasks.findIndex((task) => task.id == this.activeTaskId);
+    if (this.activePageTasks && this.activeTaskId)
+      return this.activePageTasks.findIndex(
+        (task) => task.id == this.activeTaskId
+      );
     return 0;
+  }
+
+  get activePageTasks(): Task[] {
+    if (this.pages.length > 0 && this.pages.length >= this.activePage)
+      return this.pages[this.activePage - 1];
+    return [];
   }
 
   @Watch('topicId', { immediate: true })
@@ -203,7 +232,14 @@ export default class TaskTimeline extends Vue {
   async getTasks(): Promise<void> {
     taskService.getTaskList(this.topicId).then((tasks) => {
       this.tasks = tasks;
-      tasks.forEach((task) => {
+      for (let i = 0; i < tasks.length / this.pageSize; i++) {
+        this.pages[i] = [];
+      }
+      tasks.forEach((task, index) => {
+        this.pages[Math.floor(index / this.pageSize)].push(task);
+        if (task.id == this.activeTaskId) {
+          this.activePage = Math.floor(index / this.pageSize) + 1;
+        }
         hasModule(
           ModuleComponentType.PARTICIPANT,
           TaskType[task.taskType],
@@ -266,8 +302,8 @@ export default class TaskTimeline extends Vue {
   }
 
   set usePublicScreen(use: boolean) {
-    if (use && this.tasks.length > 0)
-      this.publicScreenTaskId = this.tasks[0].id;
+    if (use && this.activePageTasks.length > 0)
+      this.publicScreenTaskId = this.activePageTasks[0].id;
     else if (!use) this.publicScreenTaskId = '';
     const publicScreenTaskId = this.publicScreenTaskId
       ? this.publicScreenTaskId
@@ -285,7 +321,7 @@ export default class TaskTimeline extends Vue {
   }
 
   get activeOnPublicScreen(): number {
-    const index = this.tasks.findIndex(
+    const index = this.activePageTasks.findIndex(
       (task) => task.id == this.publicScreenTaskId
     );
     if (this.isVertical && index > -1) return this.tasks.length - 1 - index;
@@ -294,9 +330,9 @@ export default class TaskTimeline extends Vue {
 
   set activeOnPublicScreen(index: number) {
     if (this.usePublicScreen) {
-      if (this.isVertical) index = this.tasks.length - 1 - index;
-      if (this.tasks.length > index) {
-        const publicTask = this.tasks[index];
+      if (this.isVertical) index = this.activePageTasks.length - 1 - index;
+      if (this.activePageTasks.length > index) {
+        const publicTask = this.activePageTasks[index];
         if (
           this.publicScreenTaskId &&
           this.publicScreenTaskId !== '' &&
@@ -363,6 +399,36 @@ export default class TaskTimeline extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.el-pagination::v-deep {
+  text-align: center;
+  button,
+  button:disabled,
+  li {
+    background-color: unset;
+  }
+
+  &.is-vertical {
+    button:enabled,
+    li {
+      color: white;
+    }
+
+    .active {
+      color: var(--color-purple);
+    }
+  }
+
+  li {
+    font-weight: var(--font-weight-default);
+    color: var(--color-primary);
+  }
+
+  .active {
+    color: var(--color-purple);
+    font-weight: var(--font-weight-bold);
+  }
+}
+
 .no-module {
   visibility: hidden;
 }

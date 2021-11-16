@@ -35,14 +35,18 @@
       >
         <template #item="{ element }">
           <div class="detail__module">
-            <TopicCard :sessionId="sessionId" :topic="element" v-on:topicDeleted="getTopics">
+            <TopicCard
+              :sessionId="sessionId"
+              :topic="element"
+              v-on:topicDeleted="getTopics"
+            >
               <TaskTimeline
                 :topic-id="element.id"
                 :session-id="sessionId"
                 style="margin-bottom: 1rem"
                 :is-linked-to-task="false"
-                v-on:changePublicScreen="reloadIndex++"
-                :key="reloadIndex"
+                v-on:changePublicScreen="publicScreenTopic = element.id"
+                :key="publicScreenTopic"
               ></TaskTimeline>
             </TopicCard>
           </div>
@@ -119,7 +123,7 @@ export default class ModeratorSessionDetails extends Vue {
   showSessionSettings = false;
   formatDate = formatDate;
   editTopicId = '';
-  reloadIndex = 0;
+  publicScreenTopic = '';
 
   TaskType = TaskType;
 
@@ -165,6 +169,7 @@ export default class ModeratorSessionDetails extends Vue {
     sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
       if (queryResult) {
         this.publicScreenTaskId = queryResult.id;
+        this.publicScreenTopic = queryResult.topicId;
       }
     });
   }

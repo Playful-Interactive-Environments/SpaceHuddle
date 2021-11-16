@@ -181,6 +181,12 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.media::v-deep {
+  .logo {
+    padding: 0;
+  }
+}
+
 h3 {
   font-weight: var(--font-weight-bold);
 }
