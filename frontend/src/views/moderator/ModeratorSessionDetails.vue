@@ -26,73 +26,31 @@
       </Sidebar>
     </template>
     <template v-slot:content>
-      <el-collapse v-model="openTabs">
-        <el-collapse-item
-          v-for="(topic, index) in topics"
-          :key="topic.id"
-          :name="topic.id"
-        >
-          <template #title>
-            <router-link
-              :to="`/topic/${sessionId}/${topic.id}`"
-              style="width: 100%"
-            >
-              <CollapseTitle :text="topic.title">
-                <span
-                  role="button"
-                  class="icon"
-                  v-on:click="editTopic(topic.id)"
-                >
-                  <font-awesome-icon icon="pen" />
-                </span>
-                <span
-                  role="button"
-                  class="icon"
-                  v-on:click="deleteTopic(topic.id)"
-                >
-                  <font-awesome-icon icon="trash" />
-                </span>
-              </CollapseTitle>
-            </router-link>
-          </template>
-          <TaskTimeline
-            :topic-id="topic.id"
-            :session-id="sessionId"
-            style="margin-bottom: 1rem"
-          ></TaskTimeline>
-          <draggable
-            v-model="topics[index].tasks"
-            tag="transition-group"
-            item-key="order"
-            handle=".card__drag"
-            @end="dragDone(index)"
-          >
-            <template #item="{ element }">
-              <div class="detail__module">
-                <TaskCard
-                  :sessionId="sessionId"
-                  :type="TaskType[element.taskType]"
-                  :task="element"
-                  :isOnPublicScreen="element.id === publicScreenTaskId"
-                  @changePublicScreen="changePublicScreen($event)"
-                />
-              </div>
-            </template>
-          </draggable>
-          <AddItem
-            :text="$t('moderator.view.sessionDetails.addTask')"
-            @addNew="openModalModuleCreate(topic.id)"
-          />
-        </el-collapse-item>
-      </el-collapse>
+      <draggable
+        v-model="topics"
+        tag="transition-group"
+        item-key="order"
+        handle=".card__drag"
+        @end="dragDone"
+      >
+        <template #item="{ element }">
+          <div class="detail__module">
+            <TopicCard :sessionId="sessionId" :topic="element">
+              <TaskTimeline
+                :topic-id="element.id"
+                :session-id="sessionId"
+                style="margin-bottom: 1rem"
+                :is-linked-to-task="false"
+                v-on:changePublicScreen="reloadIndex++"
+                :key="reloadIndex"
+              ></TaskTimeline>
+            </TopicCard>
+          </div>
+        </template>
+      </draggable>
       <AddItem
         :text="$t('moderator.view.sessionDetails.addTopic')"
         @addNew="showTopicSettings = true"
-      />
-      <TaskSettingsOld
-        v-model:show-modal="showTaskSettings"
-        :topic-id="addNewTopicId"
-        @taskUpdated="getTopics"
       />
       <TopicSettings
         v-model:show-modal="showTopicSettings"
@@ -133,9 +91,11 @@ import TaskTimeline from '@/components/moderator/organisms/TaskTimeline.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
+import TopicCard from '@/components/moderator/organisms/cards/TopicCard.vue';
 
 @Options({
   components: {
+    TopicCard,
     ModuleCount,
     SessionCode,
     Sidebar,
@@ -156,13 +116,11 @@ export default class ModeratorSessionDetails extends Vue {
   session: Session | null = null;
   topics: Topic[] = [];
   publicScreenTaskId = '';
-  showTaskSettings = false;
   showTopicSettings = false;
   showSessionSettings = false;
   formatDate = formatDate;
-  addNewTopicId = '';
   editTopicId = '';
-  openTabs: string[] = [];
+  reloadIndex = 0;
 
   TaskType = TaskType;
 
@@ -189,19 +147,9 @@ export default class ModeratorSessionDetails extends Vue {
             topic.tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
           });
         });
-        this.openTabs = this.topics.map((topic) => topic.id);
         this.getPublicScreen();
       });
     });
-  }
-
-  editTopic(topicId: string): void {
-    this.editTopicId = topicId;
-    this.showTopicSettings = true;
-  }
-
-  deleteTopic(topicId: string): void {
-    topicService.deleteTopic(topicId).then(() => this.getTopics());
   }
 
   async editSession(): Promise<void> {
@@ -222,17 +170,17 @@ export default class ModeratorSessionDetails extends Vue {
     });
   }
 
-  openModalModuleCreate(topicId: string): void {
-    this.addNewTopicId = topicId;
-    this.showTaskSettings = true;
-  }
-
-  dragDone(topicIndex: number): void {
-    const tasks = this.topics[topicIndex].tasks;
-    if (tasks) {
-      for (let i = 0; i < tasks.length; i++) {
-        tasks[i].order = i;
-        taskService.putTask(tasks[i].id, convertToSaveVersion(tasks[i]));
+  dragDone(): void {
+    if (this.topics) {
+      for (let i = 0; i < this.topics.length; i++) {
+        this.topics[i].order = i;
+        const topic = {
+          id: this.topics[i].id,
+          title: this.topics[i].title,
+          description: this.topics[i].description,
+          order: this.topics[i].order,
+        };
+        topicService.putTopic(this.topics[i].id, topic);
       }
     }
   }
@@ -250,7 +198,8 @@ export default class ModeratorSessionDetails extends Vue {
   }
 
   &__module + .detail__module {
-    margin-top: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
   }
 }
 </style>
