@@ -8,13 +8,18 @@
       :class="{ media: !isVertical, stretch: isVertical }"
       :style="{ 'grid-template-rows': `1fr ${tasks.length * 2 - 1}fr` }"
     >
-      <el-switch
-        v-model="usePublicScreen"
-        :class="{ 'media-left': !isVertical }"
-        :style="{
-          width: isVertical ? 'auto' : `calc(100% / (${tasks.length} * 2))`,
-        }"
-      />
+      <el-tooltip
+        placement="top-start"
+        :content="$t('moderator.organism.taskTimeline.activatePublicScreen')"
+      >
+        <el-switch
+          v-model="usePublicScreen"
+          :class="{ 'media-left': !isVertical }"
+          :style="{
+            width: isVertical ? 'auto' : `calc(100% / (${tasks.length} * 2))`,
+          }"
+        />
+      </el-tooltip>
       <el-slider
         class="media-content"
         v-if="tasks.length > 0"
@@ -42,12 +47,17 @@
         <template #item="{ element, index }">
           <el-step icon="-">
             <template #icon>
-              <img
-                :src="
-                  require(`@/assets/illustrations/planets/${element.taskType.toLowerCase()}.png`)
-                "
-                alt="planet"
-              />
+              <el-tooltip
+                placement="top"
+                :content="$t('moderator.organism.taskTimeline.changeOrder')"
+              >
+                <img
+                  :src="
+                    require(`@/assets/illustrations/planets/${element.taskType.toLowerCase()}.png`)
+                  "
+                  alt="planet"
+                />
+              </el-tooltip>
             </template>
             <template #title>
               <el-badge
@@ -55,16 +65,33 @@
                 :hidden="!isActive(element)"
                 :class="{ 'no-module': !hasParticipantComponent[element.id] }"
               >
-                <el-checkbox-button
-                  :checked="isActive(element)"
-                  v-on:change="setActive(element, $event)"
+                <el-tooltip
+                  placement="top"
+                  :content="
+                    $t('moderator.organism.taskTimeline.activateParticipant')
+                  "
                 >
-                  <font-awesome-icon icon="mobile" />
-                </el-checkbox-button>
+                  <el-button
+                    :class="{ 'is-checked': isActive(element) }"
+                    v-on:click="setActive(element)"
+                    circle
+                  >
+                    <font-awesome-icon icon="mobile" />
+                  </el-button>
+                </el-tooltip>
               </el-badge>
             </template>
             <template #description>
-              <span class="link" v-on:click="taskClicked(element, index)">
+              <el-tooltip
+                placement="top"
+                :content="$t('moderator.organism.taskTimeline.selectTask')"
+                v-if="isLinkedToTask"
+              >
+                <span class="link" v-on:click="taskClicked(element, index)">
+                  {{ element.name }}
+                </span>
+              </el-tooltip>
+              <span v-else>
                 {{ element.name }}
               </span>
             </template>
@@ -81,7 +108,7 @@
   <div
     class="task-timeline"
     :class="{ 'task-timeline__vertical': direction === 'vertical' }"
-    v-if="tasks.length > 0 && readonly"
+    v-else-if="tasks.length > 0 && readonly"
   >
     <el-steps
       :direction="direction"
@@ -128,7 +155,7 @@ import TaskType from '@/types/enum/TaskType';
     draggable,
     TimerSettings,
   },
-  emits: ['changeActiveElement'],
+  emits: ['changeActiveElement', 'changePublicScreen'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class TaskTimeline extends Vue {
@@ -137,6 +164,7 @@ export default class TaskTimeline extends Vue {
   @Prop({ default: 'horizontal' }) readonly direction!: string;
   @Prop({ default: 0 }) readonly active!: number;
   @Prop({ default: false }) readonly readonly!: boolean;
+  @Prop({ default: true }) readonly isLinkedToTask!: boolean;
   @Prop() activeTaskId!: string;
 
   tasks: Task[] = [];
@@ -204,23 +232,21 @@ export default class TaskTimeline extends Vue {
     return taskService.isActive(task);
   }
 
-  setActive(task: Task, newValue: boolean): void {
-    task.state = newValue ? TaskStates.ACTIVE : TaskStates.WAIT;
+  setActive(task: Task): void {
+    this.timerTask = task;
+  }
+
+  setInactive(task: Task): void {
+    task.state = TaskStates.WAIT;
     const saveVersion = convertToSaveVersion(task);
-    taskService.updateTask(saveVersion).then(() => {
-      if (newValue) this.timerTask = task;
-      ElMessage({
-        message: (this as any).$t('info.updateParticipantState'),
-        type: 'success',
-        center: true,
-        showClose: true,
-      });
-    });
+    taskService.updateTask(saveVersion);
   }
 
   tooltip(index: number): string {
-    const publicTask = this.tasks[index];
-    return publicTask.name;
+    //const publicTask = this.tasks[index];
+    return (this as any).$t(
+      'moderator.organism.taskTimeline.changePublicScreen'
+    ); // publicTask.name;
   }
 
   goToDetails(taskId: string): void {
@@ -249,12 +275,7 @@ export default class TaskTimeline extends Vue {
     sessionService
       .displayOnPublicScreen(this.sessionId, publicScreenTaskId)
       .then(() => {
-        ElMessage({
-          message: (this as any).$t('info.updatePublicScreen'),
-          type: 'success',
-          center: true,
-          showClose: true,
-        });
+        this.$emit('changePublicScreen', this.publicScreenTaskId);
 
         this.eventBus.emit(
           EventType.CHANGE_PUBLIC_SCREEN,
@@ -323,10 +344,10 @@ export default class TaskTimeline extends Vue {
       if (task.remainingTime !== null && task.remainingTime > 0) {
         task.remainingTime -= 1;
         if (task.remainingTime == 0) {
-          this.setActive(task, false);
+          this.setInactive(task);
         }
       } else if (task.state == TaskStates.ACTIVE && task.remainingTime == 0) {
-        this.setActive(task, false);
+        this.setInactive(task);
       }
     });
   }
@@ -419,24 +440,23 @@ export default class TaskTimeline extends Vue {
   }
 }
 
-.el-checkbox-button::v-deep {
-  &:first-child .el-checkbox-button__inner,
-  &:last-child .el-checkbox-button__inner {
-    border-radius: 50%;
-    border: unset;
-  }
-  .el-checkbox-button__inner {
-    color: var(--el-text-color-placeholder);
-    border-radius: 0;
-    border: unset;
-    margin-bottom: 1rem;
-    padding: 0.3rem 0.5rem;
-    font-size: var(--font-size-large);
-  }
+.el-badge::v-deep {
+  margin-right: 0.7rem;
+}
 
-  &.is-checked .el-checkbox-button__inner {
-    color: var(--color-primary);
+.el-button::v-deep {
+  &.is-circle {
+    padding: 0;
+    color: var(--color-gray-inactive);
     background-color: unset;
+    border: unset;
+    font-size: 20pt;
+    min-height: unset;
+    min-width: 25px;
+
+    &.is-checked {
+      color: var(--color-primary);
+    }
   }
 }
 
@@ -501,8 +521,8 @@ export default class TaskTimeline extends Vue {
       }
     }
 
-    .el-checkbox-button::v-deep {
-      &.is-checked .el-checkbox-button__inner {
+    .el-button::v-deep {
+      &.is-circle.is-checked {
         color: white;
       }
     }

@@ -188,6 +188,13 @@
           "select": "Go to session",
           "add": "New Session"
         }
+      },
+      "taskTimeline": {
+        "activatePublicScreen": "display this topic on the public screen",
+        "changePublicScreen": "display this task on the public screen",
+        "activateParticipant": "activate this task for the participants",
+        "changeOrder": "change the order of the tasks",
+        "selectTask": "select this task"
       }
     },
     "view": {

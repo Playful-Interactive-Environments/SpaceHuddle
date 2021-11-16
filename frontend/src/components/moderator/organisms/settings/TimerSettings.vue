@@ -42,6 +42,13 @@
           :form-state-message="formData.stateMessage"
           submit-label-key="moderator.organism.settings.timerSettings.submit"
         />
+        <el-button
+          class="deactivate"
+          v-on:click="deactivateTimer"
+          v-if="showDeactivate"
+        >
+          {{ $t('moderator.organism.settings.timerSettings.deactivate') }}
+        </el-button>
       </template>
     </el-dialog>
   </ValidationForm>
@@ -57,7 +64,8 @@ import ValidationForm, {
 } from '@/components/shared/molecules/ValidationForm.vue';
 import { ValidationData } from '@/types/ui/ValidationRule';
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
-import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
+import TaskStates from '@/types/enum/TaskStates';
 
 @Options({
   components: {
@@ -86,6 +94,10 @@ export default class TimerSettings extends Vue {
     this.reset();
   }
 
+  get showDeactivate(): boolean {
+    return this.task.state === TaskStates.ACTIVE;
+  }
+
   handleClose(done: { (): void }): void {
     this.reset();
     done();
@@ -98,6 +110,15 @@ export default class TimerSettings extends Vue {
       remindingTime.getHours() + remindingTime.getTimezoneOffset() / 60
     );
     this.formData.remindingTime = remindingTime;
+  }
+
+  deactivateTimer(): void {
+    this.task.state = TaskStates.WAIT;
+    const saveVersion = convertToSaveVersion(this.task);
+    taskService.updateTask(saveVersion);
+    this.reset();
+    this.showSettings = false;
+    this.$emit('update:showModal', false);
   }
 
   reset(): void {
@@ -142,6 +163,7 @@ export default class TimerSettings extends Vue {
   }
 
   save(): void {
+    this.task.state = TaskStates.ACTIVE;
     this.task.remainingTime = this.remainingSeconds;
     const saveVersion = convertToSaveVersion(this.task);
     taskService.updateTask(saveVersion);
@@ -152,4 +174,8 @@ export default class TimerSettings extends Vue {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.deactivate {
+  width: 100%;
+}
+</style>
