@@ -111,6 +111,7 @@ class IdeaRepository implements RepositoryInterface
                 "hierarchy.category_idea_id as category_id",
                 "COALESCE(category.keywords, 'zzz') AS category",
                 "category.parameter AS category_parameter",
+                "hierarchy.order AS hierarchy_order",
                 "COUNT(*) AS count"
             ]);
         } else {
@@ -285,10 +286,14 @@ class IdeaRepository implements RepositoryInterface
                 case IdeaSortOrder::COUNT:
                     array_push($orderList, 'count');
                     break;
+                case IdeaSortOrder::ORDER:
+                    array_push($orderList, 'order');
+                    break;
                 case IdeaSortOrder::CATEGORISATION:
                     if ($refId) {
                         array_push($orderList, 'category');
                     }
+                    array_push($orderList, 'hierarchy_order');
                     break;
             }
         }

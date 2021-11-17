@@ -31,7 +31,8 @@ USE `spacehuddle`;
 
 CREATE TABLE `hierarchy` (
                              `category_idea_id` char(36) NOT NULL,
-                             `sub_idea_id` char(36) NOT NULL
+                             `sub_idea_id` char(36) NOT NULL,
+                             `order` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -154,7 +155,8 @@ CREATE TABLE `selection` (
 
 CREATE TABLE `selection_idea` (
                                   `selection_id` char(36) NOT NULL,
-                                  `idea_id` char(36) NOT NULL
+                                  `idea_id` char(36) NOT NULL,
+                                  `order` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------

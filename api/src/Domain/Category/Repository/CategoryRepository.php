@@ -94,13 +94,14 @@ class CategoryRepository implements RepositoryInterface
     {
         $taskType = strtoupper(TaskType::BRAINSTORMING);
         $query = $this->queryFactory->newSelect("idea");
-        $query->select(["idea.*"])
+        $query->select(["idea.*", "hierarchy.order"])
             ->innerJoin("task", "task.id = idea.task_id")
             ->innerJoin("hierarchy", "hierarchy.sub_idea_id = idea.id")
             ->andWhere([
                 "task.task_type" => $taskType,
                 "hierarchy.category_idea_id" => $categoryId,
-            ]);
+            ])
+            ->order(["hierarchy.order"]);
 
         $result = $this->fetchAll($query, IdeaData::class);
 
@@ -173,7 +174,7 @@ class CategoryRepository implements RepositoryInterface
             ->execute()
             ->fetchColumn(0);
 
-        foreach ($ideas as $value) {
+        foreach ($ideas as $index => $value) {
             $existQuery = $this->queryFactory->newSelect("hierarchy");
             $existQuery->select(["sub_idea_id"])
                 ->andWhere([
@@ -187,11 +188,26 @@ class CategoryRepository implements RepositoryInterface
                     "hierarchy",
                     [
                         "category_idea_id" => $categoryId,
-                        "sub_idea_id" => $value
+                        "sub_idea_id" => $value,
+                        "order" => $index
                     ]
                 )->execute();
+            } else {
+                $this->queryFactory->newUpdate(
+                    "hierarchy",
+                    [
+                        "order" => $index
+                    ]
+                )
+                    ->andWhere([
+                        "category_idea_id" => $categoryId,
+                        "sub_idea_id" => $value
+                    ])
+                    ->execute();
             }
 
+            //each idea can only be assigned to one category
+            //delete an idea from the previous category when reassigning it
             $subQueryIdeas = $this->queryFactory->newSelect("idea")
                 ->select(["id"])
                 ->where(function ($exp, $q) {

@@ -70,13 +70,14 @@ class SelectionRepository implements RepositoryInterface
     {
         $taskType = strtoupper(TaskType::BRAINSTORMING);
         $query = $this->queryFactory->newSelect("idea");
-        $query->select(["idea.*"])
+        $query->select(["idea.*", "selection_idea.order"])
             ->innerJoin("task", "task.id = idea.task_id")
             ->innerJoin("selection_idea", "selection_idea.idea_id = idea.id")
             ->andWhere([
                 "task.task_type" => $taskType,
                 "selection_idea.selection_id" => $selectionId,
-            ]);
+            ])
+            ->order(["selection_idea.order"]);
 
         $result = $this->fetchAll($query, IdeaData::class);
 
@@ -105,8 +106,9 @@ class SelectionRepository implements RepositoryInterface
      */
     private function getDetails(IdeaData $data, AuthorisationData $authorisation): void
     {
-        if ($authorisation->isParticipant())
+        if ($authorisation->isParticipant()) {
             $data->isOwn = ($data->participantId == $authorisation->id);
+        }
     }
 
     /**
@@ -150,7 +152,7 @@ class SelectionRepository implements RepositoryInterface
      */
     public function addIdeas(string $selectionId, array $ideas): void
     {
-        foreach ($ideas as $value) {
+        foreach ($ideas as $index => $value) {
             $existQuery = $this->queryFactory->newSelect("selection_idea");
             $existQuery->select(["idea_id"])
                 ->andWhere([
@@ -164,9 +166,22 @@ class SelectionRepository implements RepositoryInterface
                     "selection_idea",
                     [
                         "selection_id" => $selectionId,
-                        "idea_id" => $value
+                        "idea_id" => $value,
+                        "order" => $index
                     ]
                 )->execute();
+            } else {
+                $this->queryFactory->newUpdate(
+                    "selection_idea",
+                    [
+                        "order" => $index
+                    ]
+                )
+                    ->andWhere([
+                        "selection_id" => $selectionId,
+                        "idea_id" => $value
+                    ])
+                    ->execute();
             }
         }
     }
