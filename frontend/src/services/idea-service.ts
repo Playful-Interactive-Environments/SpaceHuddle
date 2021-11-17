@@ -7,7 +7,11 @@ import {
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Idea } from '@/types/api/Idea';
-import { OrderGroupList, SortOrderOption } from '@/types/api/OrderGroup';
+import {
+  OrderGroup,
+  OrderGroupList,
+  SortOrderOption,
+} from '@/types/api/OrderGroup';
 import IdeaSortOrder, {
   IdeaSortOrderCategorisation,
   DefaultDisplayCount,
@@ -119,12 +123,12 @@ export const convertToOrderGroups = (
               actualOrderGroupList[ideaItem.orderGroup].displayCount;
           let color = null;
           if (ideaItem.category) color = ideaItem.category.parameter.color;
-          orderGroupList[ideaItem.orderGroup] = {
-            ideas: [ideaItem],
-            avatar: ideaItem.avatar,
-            color: color,
-            displayCount: displayCount,
-          };
+          orderGroupList[ideaItem.orderGroup] = new OrderGroup(
+            [ideaItem],
+            ideaItem.avatar,
+            color,
+            displayCount
+          );
         } else {
           orderGroup.ideas.push(ideaItem);
         }

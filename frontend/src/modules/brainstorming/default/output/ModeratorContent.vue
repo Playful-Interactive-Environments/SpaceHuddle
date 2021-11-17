@@ -9,8 +9,17 @@
       class="select select--fullwidth"
       @change="getCollapseContent(true)"
     >
-      <option v-for="type in SortOrderOptions" :key="type" :value="type">
-        {{ $t(`enum.ideaSortOrder.${IdeaSortOrder[type]}`) }}
+      <option
+        v-for="type in sortOrderOptions"
+        :key="type.orderType"
+        :value="
+          type.ref ? `${type.orderType}&refId=${type.ref.id}` : type.orderType
+        "
+      >
+        <span>
+          {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
+        </span>
+        <span v-if="type.ref"> - {{ type.ref.name }} </span>
       </option>
     </select>
   </FilterSection>
@@ -32,10 +41,26 @@
           </span>
         </CollapseTitle>
       </template>
-      <div class="layout__columns">
+      <draggable
+        v-model="item.filteredIdeas"
+        :id="key"
+        item-key="id"
+        class="layout__columns"
+        v-if="orderIsChangeable"
+        @end="dragDone"
+      >
+        <template v-slot:item="{ element }">
+          <IdeaCard
+            :idea="element"
+            :isDraggable="true"
+            @ideaDeleted="getCollapseContent()"
+          />
+        </template>
+      </draggable>
+      <div class="layout__columns" v-else>
         <IdeaCard
           :idea="idea"
-          v-for="(idea, index) in item.ideas.slice(0, item.displayCount)"
+          v-for="(idea, index) in item.filteredIdeas"
           :key="index"
           @ideaDeleted="getCollapseContent()"
         />
@@ -60,20 +85,25 @@ import * as taskService from '@/services/task-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder, {
   DefaultIdeaSortOrder,
-  DefaultDisplayCount,
 } from '@/types/enum/IdeaSortOrder';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
-import { OrderGroupList } from '@/types/api/OrderGroup';
+import {
+  OrderGroupList,
+  OrderGroup,
+  SortOrderOption,
+} from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { reloadCollapseContent } from '@/utils/collapse';
 import { convertToSaveVersion } from '@/types/api/Task';
+import draggable from 'vuedraggable';
 
 @Options({
   components: {
     IdeaCard,
     CollapseTitle,
     FilterSection,
+    draggable,
   },
 })
 
@@ -84,19 +114,28 @@ export default class ModeratorContent extends Vue {
   orderGroupContent: OrderGroupList = {};
   readonly intervalTime = 10000;
   interval!: any;
-  orderType = DefaultIdeaSortOrder;
+  orderType: string = DefaultIdeaSortOrder;
   openTabs: string[] = [];
 
   IdeaSortOrder = IdeaSortOrder;
+  sortOrderOptions: SortOrderOption[] = [];
 
-  get SortOrderOptions(): Array<keyof typeof IdeaSortOrder> {
+  /*get SortOrderOptions(): Array<keyof typeof IdeaSortOrder> {
     return Object.keys(IdeaSortOrder) as Array<keyof typeof IdeaSortOrder>;
+  }*/
+
+  get orderIsChangeable(): boolean {
+    return this.orderType === IdeaSortOrder.ORDER;
   }
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.getCollapseContent(true);
-    taskService.getTaskById(this.taskId).then((task) => {
+    taskService.getTaskById(this.taskId).then(async (task) => {
+      await ideaService.getSortOrderOptions(task.topicId).then((options) => {
+        this.sortOrderOptions = options;
+        if (options.length > 0) this.orderType = options[0].orderType;
+      });
       if (
         task.parameter &&
         task.parameter.orderType &&
@@ -128,17 +167,18 @@ export default class ModeratorContent extends Vue {
           this.orderGroupContent
         )
         .then((result) => {
+          let orderGroupName = '';
           switch (this.orderType) {
-            case IdeaSortOrder.TIMESTAMP.toUpperCase():
-            case IdeaSortOrder.ALPHABETICAL.toUpperCase():
-              this.orderGroupContent = {
-                '': {
-                  ideas: result.ideas,
-                  avatar: null,
-                  color: null,
-                  displayCount: DefaultDisplayCount,
-                },
-              };
+            case IdeaSortOrder.TIMESTAMP:
+            case IdeaSortOrder.ALPHABETICAL:
+            case IdeaSortOrder.ORDER:
+              orderGroupName = (this as any).$t(
+                `module.brainstorming.default.moderatorContent.${this.orderType}`
+              );
+              this.orderGroupContent = {};
+              this.orderGroupContent[orderGroupName] = new OrderGroup(
+                result.ideas
+              );
               break;
             default:
               this.orderGroupContent = result.oderGroups;
@@ -163,6 +203,15 @@ export default class ModeratorContent extends Vue {
 
   unmounted(): void {
     clearInterval(this.interval);
+  }
+
+  /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/
+  async dragDone(event: any): Promise<void> {
+    const key = event.from.id;
+    const ideas = this.orderGroupContent[key].filteredIdeas;
+    ideas.forEach((idea) => {
+      ideaService.putIdea(idea.id, idea);
+    });
   }
 }
 </script>

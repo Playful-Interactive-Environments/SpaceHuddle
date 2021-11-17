@@ -7,6 +7,7 @@
       card__new: isNew,
       card__inappropriate: isInappropriate,
       card__duplicate: isDuplicate,
+      draggable: isDraggable,
     }"
     :body-style="{ padding: '0px' }"
   >
@@ -87,6 +88,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: true }) isEditable!: boolean;
   @Prop({ default: false }) isSelectable!: boolean;
   @Prop({ default: false, reactive: true }) isSelected!: boolean;
+  @Prop({ default: false }) isDraggable!: boolean;
   showSettings = false;
 
   IdeaStates = IdeaStates;
@@ -150,6 +152,10 @@ export default class IdeaCard extends Vue {
 <style lang="scss" scoped>
 .actions::v-deep > * {
   margin-left: 0.5rem;
+}
+
+.draggable {
+  cursor: grab;
 }
 
 .card {

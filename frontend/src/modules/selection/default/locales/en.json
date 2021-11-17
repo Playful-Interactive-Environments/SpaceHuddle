@@ -8,6 +8,8 @@
   },
   "moderatorContent": {
     "sortOrder": "order by",
-    "selection": "Selection"
+    "selection": "Selection",
+    "unselected": "unselected",
+    "add": "drag to add to selection"
   }
 }

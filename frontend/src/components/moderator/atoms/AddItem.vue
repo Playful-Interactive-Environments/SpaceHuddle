@@ -2,7 +2,7 @@
   <el-card
     shadow="hover"
     class="add"
-    :class="{ 'add--column': isColumn }"
+    :class="{ 'add--column': isColumn, readonly: !isClickable }"
     @click="$emit('addNew')"
   >
     <font-awesome-icon icon="plus" />
@@ -20,6 +20,7 @@ import { Prop } from 'vue-property-decorator';
 export default class AddItem extends Vue {
   @Prop({ default: 'Add' }) text!: string;
   @Prop({ default: false }) isColumn!: boolean;
+  @Prop({ default: true }) isClickable!: boolean;
 }
 </script>
 
@@ -28,6 +29,17 @@ export default class AddItem extends Vue {
   &--column {
     min-height: calc(110rem / 16);
     height: 100%;
+  }
+}
+
+.readonly {
+  &.add {
+    cursor: unset;
+
+    &:hover {
+      background-color: inherit;
+      border-style: dashed;
+    }
   }
 }
 </style>

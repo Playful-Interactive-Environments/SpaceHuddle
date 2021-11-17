@@ -24,7 +24,7 @@
         <main class="layout__columns">
           <IdeaCard
             :idea="idea"
-            v-for="(idea, index) in item.ideas.slice(0, item.displayCount)"
+            v-for="(idea, index) in item.filteredIdeas"
             :key="index"
             :is-selectable="false"
             :is-editable="false"

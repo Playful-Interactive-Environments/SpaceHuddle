@@ -14,6 +14,9 @@
     "linkInfo": "part image url from web"
   },
   "moderatorContent": {
-    "sortOrder": "order by"
+    "sortOrder": "order by",
+    "order": "drag to change the order",
+    "timestamp": "Chronological order of ideas",
+    "alphabetical": "alphabetical order of ideas"
   }
 }

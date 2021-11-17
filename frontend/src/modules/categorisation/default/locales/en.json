@@ -8,7 +8,8 @@
     "categoryNamePlaceholder": "new category name ...",
     "submit": "+",
     "add": "Add category",
-    "sortOrder": "order by"
+    "sortOrder": "order by",
+    "undefined": "ideas which have not yet been categorised"
   },
   "settings" : {
     "header": "Add/Edit category",
@@ -20,6 +21,7 @@
     "image": "image",
     "link": "link",
     "color": "color",
-    "submit": "save category"
+    "submit": "save category",
+    "undefined": "ideas which have not yet been categorised"
   }
 }

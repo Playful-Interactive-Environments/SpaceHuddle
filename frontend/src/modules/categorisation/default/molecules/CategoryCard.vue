@@ -24,14 +24,42 @@
         class="card__image"
         alt=""
       />
-      <div style="padding: 14px">
+      <div class="card__text">
+        <div class="card__title">
+          {{ categoryName }}
+          <span class="actions">
+            <el-dropdown
+              class="card__menu"
+              v-on:command="menuItemSelected($event)"
+            >
+              <span class="el-dropdown-link">
+                <font-awesome-icon icon="ellipsis-h" />
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="edit">
+                    <font-awesome-icon icon="pen" />
+                  </el-dropdown-item>
+                  <el-dropdown-item command="delete">
+                    <font-awesome-icon icon="trash" />
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </span>
+        </div>
+        <div v-if="categoryDescription" class="card__content">
+          {{ categoryDescription }}
+        </div>
+      </div>
+      <!--<div style="padding: 14px">
         <div class="card__title">
           {{ categoryName }}
         </div>
         <div v-if="categoryDescription" class="card__content">
           {{ categoryDescription }}
         </div>
-      </div>
+      </div>-->
     </el-card>
   </el-badge>
   <el-drawer
@@ -101,6 +129,7 @@ import CategorySettings from '@/modules/categorisation/default/molecules/Categor
   },
   emits: ['categoryChanged'],
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class CategoryCard extends Vue {
   @Prop() category!: Category;
   @Prop() ideas!: Idea[];
@@ -110,7 +139,7 @@ export default class CategoryCard extends Vue {
 
   get categoryName(): string {
     if (this.category) return this.category.keywords;
-    return 'undefined';
+    return (this as any).$t('module.categorisation.default.settings.undefined');
   }
 
   get categoryDescription(): string {
@@ -169,6 +198,17 @@ export default class CategoryCard extends Vue {
         });
     }
   }
+
+  menuItemSelected(command: string): void {
+    switch (command) {
+      case 'edit':
+        this.editCategory();
+        break;
+      case 'delete':
+        this.deleteCategory();
+        break;
+    }
+  }
 }
 </script>
 
@@ -197,5 +237,15 @@ export default class CategoryCard extends Vue {
 .item {
   width: 100%;
   height: 100%;
+}
+
+.card {
+  &__text {
+    padding: 14px;
+  }
+}
+
+.el-dropdown-link {
+  color: white;
 }
 </style>

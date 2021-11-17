@@ -45,22 +45,26 @@
           "
         />
       </el-form-item>
-      <el-form-item
-        :label="$t('module.categorisation.default.settings.image')"
-        prop="image"
-      >
-        <ImagePicker
-          v-model:link="formData.link"
-          v-model:image="formData.image"
-        />
-      </el-form-item>
-      <el-form-item
-        :label="$t('module.categorisation.default.settings.color')"
-        prop="color"
-        :rules="[defaultFormRules.ruleRequired]"
-      >
-        <el-color-picker v-model="formData.color" />
-      </el-form-item>
+      <div class="columns is-mobile">
+        <el-form-item
+          :label="$t('module.categorisation.default.settings.image')"
+          prop="image"
+          class="column"
+        >
+          <ImagePicker
+            v-model:link="formData.link"
+            v-model:image="formData.image"
+          />
+        </el-form-item>
+        <el-form-item
+          :label="$t('module.categorisation.default.settings.color')"
+          prop="color"
+          :rules="[defaultFormRules.ruleRequired]"
+          class="column"
+        >
+          <el-color-picker v-model="formData.color" />
+        </el-form-item>
+      </div>
       <template #footer>
         <FromSubmitItem
           :form-state-message="formData.stateMessage"
@@ -83,6 +87,7 @@ import ValidationForm, {
   ValidationFormCall,
 } from '@/components/shared/molecules/ValidationForm.vue';
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
+import { Idea } from '@/types/api/Idea';
 
 @Options({
   components: {
@@ -99,6 +104,7 @@ export default class CategorySettings extends Vue {
   @Prop({ default: false }) showModal!: boolean;
   @Prop({ required: false }) taskId!: string | null;
   @Prop({ required: false }) categoryId!: string | null;
+  @Prop({ default: [] }) addIdeas!: Idea[];
 
   defaultColor = '#1d2948';
   formData: ValidationData = {
@@ -162,6 +168,13 @@ export default class CategorySettings extends Vue {
           })
           .then(
             (category) => {
+              if (this.addIdeas.length > 0) {
+                categorisationService.addIdeasToCategory(
+                  category.id,
+                  this.addIdeas.map((idea) => idea.id)
+                );
+              }
+
               this.$emit('update:showModal', false);
               this.$emit('categoryCreated', category);
               this.reset();

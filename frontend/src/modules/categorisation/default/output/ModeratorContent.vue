@@ -23,28 +23,76 @@
       </option>
     </select>
   </FilterSection>
-  <div class="columns is-multiline is-mobile">
+  <div class="columns is-multiline is-mobile drag-footer">
     <draggable
       class="column"
       v-for="(orderGroup, orderGroupKey) in orderGroupContentCards"
       :key="orderGroupKey"
       :id="orderGroup.category ? orderGroup.category.id : null"
       v-model="orderGroup.ideas"
-      draggable=".item"
+      draggable=".drag-item"
       item-key="id"
       group="idea"
       @end="dragDone"
     >
       <template v-slot:header>
         <CategoryCard
+          v-if="orderGroup.category.id !== addCategoryKey"
           :category="orderGroup.category"
           :ideas="orderGroup.ideas"
           @categoryChanged="getCollapseContent"
         >
         </CategoryCard>
+        <AddItem
+          v-else
+          :text="$t('module.categorisation.default.moderatorContent.add')"
+          :is-column="true"
+          @addNew="openCategorySettings"
+        />
       </template>
       <template v-slot:item>
         <span></span>
+      </template>
+    </draggable>
+  </div>
+  <div class="columns is-multiline is-mobile">
+    <draggable
+      class="column group-items"
+      v-for="(orderGroup, orderGroupKey) in orderGroupContentCards"
+      :key="orderGroupKey"
+      :id="orderGroup.category ? orderGroup.category.id : null"
+      v-model="orderGroup.ideas"
+      draggable=".drag-item"
+      item-key="id"
+      group="idea"
+      @end="dragDone"
+    >
+      <!--<template v-slot:header>
+        <CategoryCard
+          v-if="orderGroup.category.id !== addCategoryKey"
+          :category="orderGroup.category"
+          :ideas="orderGroup.ideas"
+          @categoryChanged="getCollapseContent"
+        >
+        </CategoryCard>
+        <AddItem
+          v-else
+          :text="$t('module.categorisation.default.moderatorContent.add')"
+          :is-column="true"
+          @addNew="openCategorySettings"
+        />
+      </template>-->
+      <template v-slot:item="{ element }">
+        <IdeaCard
+          :key="element.id"
+          :id="element.id"
+          :idea="element"
+          :is-selectable="false"
+          :is-editable="true"
+          :isDraggable="true"
+          class="drag-item el-main"
+          :style="{ 'border-color': orderGroup.category.parameter.color }"
+        />
       </template>
     </draggable>
   </div>
@@ -71,7 +119,7 @@
         <draggable
           :id="item.category ? item.category.id : null"
           v-model="item.ideas"
-          draggable=".item"
+          draggable=".drag-item"
           item-key="id"
           group="idea"
           @end="dragDone"
@@ -84,21 +132,19 @@
               :idea="element"
               :is-selectable="false"
               :is-editable="true"
-              class="item"
+              :isDraggable="true"
+              class="drag-item"
             />
           </template>
         </draggable>
       </div>
     </el-collapse-item>
   </el-collapse>
-  <AddItem
-    :text="$t('module.categorisation.default.moderatorContent.add')"
-    @addNew="openCategorySettings"
-  />
   <CategorySettings
     v-if="task"
     v-model:show-modal="showCategorySettings"
     :task-id="task.id"
+    :addIdeas="orderGroupContentCards[addCategoryKey].ideas"
     v-model:category-id="editCategoryId"
     @categoryCreated="getCollapseContent"
   />
@@ -113,7 +159,7 @@ import * as categorisationService from '@/services/categorisation-service';
 import { Category } from '@/types/api/Category';
 import * as ideaService from '@/services/idea-service';
 import * as taskService from '@/services/task-service';
-import {
+import IdeaSortOrder, {
   DefaultIdeaSortOrder,
   IdeaSortOrderCategorisation,
 } from '@/types/enum/IdeaSortOrder';
@@ -124,7 +170,11 @@ import CategorySettings from '@/modules/categorisation/default/molecules/Categor
 import CategoryCard from '@/modules/categorisation/default/molecules/CategoryCard.vue';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
-import { OrderGroupList, SortOrderOption } from '@/types/api/OrderGroup';
+import {
+  OrderGroup,
+  OrderGroupList,
+  SortOrderOption,
+} from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { reloadCollapseContent } from '@/utils/collapse';
 
@@ -167,6 +217,13 @@ export default class ModeratorContent extends Vue {
   task: Task | null = null;
   categories: Category[] = [];
   ideas: Idea[] = [];
+
+  readonly addCategoryKey = '<new>';
+  addCategory = new CategoryContent({
+    id: this.addCategoryKey,
+    keywords: this.addCategoryKey,
+    parameter: { color: 'white' },
+  } as Category);
   orderGroupContentCards: CategoryContentList = {};
   orderGroupContentSelection: OrderGroupList = {};
   openTabs: string[] = [];
@@ -185,6 +242,30 @@ export default class ModeratorContent extends Vue {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.getCollapseContent(true);
+  }
+
+  @Watch('showCategorySettings', { immediate: true })
+  onShowCategorySettingsChanged(): void {
+    if (
+      !this.showCategorySettings &&
+      this.addCategoryKey in this.orderGroupContentCards
+    ) {
+      this.orderGroupContentCards[this.addCategoryKey].ideas.forEach((idea) => {
+        const orderGroupName = (this as any).$t(
+          'module.categorisation.default.moderatorContent.undefined'
+        );
+        switch (this.orderType) {
+          case IdeaSortOrder.TIMESTAMP:
+          case IdeaSortOrder.ALPHABETICAL:
+          case IdeaSortOrder.ORDER:
+            this.orderGroupContentSelection[orderGroupName].ideas.push(idea);
+            break;
+          default:
+            this.orderGroupContentSelection[idea.orderGroup].ideas.push(idea);
+        }
+      });
+      this.orderGroupContentCards[this.addCategoryKey].ideas = [];
+    }
   }
 
   async getTask(): Promise<void> {
@@ -259,11 +340,25 @@ export default class ModeratorContent extends Vue {
             (idea: Idea) => !idea.category
           )
           .then((result) => {
-            this.orderGroupContentSelection = result.oderGroups;
+            const orderGroupName = (this as any).$t(
+              'module.categorisation.default.moderatorContent.undefined'
+            );
+            switch (this.orderType) {
+              case IdeaSortOrder.TIMESTAMP:
+              case IdeaSortOrder.ALPHABETICAL:
+              case IdeaSortOrder.ORDER:
+                this.orderGroupContentSelection = {};
+                this.orderGroupContentSelection[orderGroupName] =
+                  new OrderGroup(result.ideas.filter((idea) => !idea.category));
+                break;
+              default:
+                this.orderGroupContentSelection = result.oderGroups;
+            }
           });
       }
 
       this.orderGroupContentCards = orderGroupContent;
+      this.orderGroupContentCards[this.addCategoryKey] = this.addCategory;
     }
     return Object.keys(this.orderGroupContentSelection);
   }
@@ -279,6 +374,7 @@ export default class ModeratorContent extends Vue {
   }
 
   async mounted(): Promise<void> {
+    this.orderGroupContentCards[this.addCategoryKey] = this.addCategory;
     this.startIdeaInterval();
   }
 
@@ -299,9 +395,21 @@ export default class ModeratorContent extends Vue {
   async dragDone(event: any): Promise<void> {
     this.isDragging = true;
     if (event.to.id) {
-      await categorisationService.addIdeasToCategory(event.to.id, [
-        event.item.id,
-      ]);
+      if (event.to.id === this.addCategoryKey) {
+        this.openCategorySettings();
+      } else {
+        const category = this.categories.find(
+          (category) => category.id == event.to.id
+        );
+        if (category) {
+          await categorisationService.addIdeasToCategory(
+            event.to.id,
+            this.orderGroupContentCards[category.keywords].ideas.map(
+              (idea) => idea.id
+            )
+          );
+        }
+      }
     } else {
       await categorisationService.removeIdeasFromCategory(event.from.id, [
         event.item.id,
@@ -314,6 +422,30 @@ export default class ModeratorContent extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.group-items {
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.drag-footer::v-deep {
+  .column {
+    .el-card,
+    .item {
+      height: 100%;
+    }
+  }
+}
+
+.column::v-deep {
+  max-width: 25%;
+  min-width: 10rem;
+
+  .el-card,
+  .item {
+    height: unset;
+  }
+}
+
 .item {
   cursor: grab;
 }

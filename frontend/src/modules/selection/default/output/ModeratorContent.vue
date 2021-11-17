@@ -50,6 +50,14 @@
           group="idea"
           @end="dragDone"
         >
+          <template v-slot:header>
+            <AddItem
+              :text="$t('module.selection.default.moderatorContent.add')"
+              :isColumn="true"
+              :is-clickable="false"
+              v-if="selection.length === 0"
+            />
+          </template>
           <template v-slot:item="{ element, index }">
             <IdeaCard
               :key="element.id"
@@ -58,6 +66,7 @@
               :idea="element"
               :is-selectable="false"
               :is-editable="false"
+              :isDraggable="true"
               class="item"
             />
           </template>
@@ -100,6 +109,7 @@
               :idea="element"
               :is-selectable="false"
               :is-editable="false"
+              :isDraggable="true"
               class="item"
             />
           </template>
@@ -122,13 +132,18 @@ import { EventType } from '@/types/enum/EventType';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
 import draggable from 'vuedraggable';
-import { OrderGroupList, SortOrderOption } from '@/types/api/OrderGroup';
+import {
+  OrderGroup,
+  OrderGroupList,
+  SortOrderOption,
+} from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { reloadCollapseContent } from '@/utils/collapse';
-import {
+import IdeaSortOrder, {
   DefaultIdeaSortOrder,
   DefaultDisplayCount,
 } from '@/types/enum/IdeaSortOrder';
+import AddItem from '@/components/moderator/atoms/AddItem.vue';
 
 const SELECTION_KEY = 'selection';
 
@@ -137,6 +152,7 @@ const SELECTION_KEY = 'selection';
     IdeaCard,
     CollapseTitle,
     FilterSection,
+    AddItem,
     draggable,
   },
 })
@@ -208,7 +224,21 @@ export default class ModeratorContent extends Vue {
             (idea: Idea) => !selectedIds.includes(idea.id)
           )
           .then((result) => {
-            this.orderGroupContent = result.oderGroups;
+            const orderGroupName = (this as any).$t(
+              'module.selection.default.moderatorContent.unselected'
+            );
+            switch (this.orderType) {
+              case IdeaSortOrder.TIMESTAMP:
+              case IdeaSortOrder.ALPHABETICAL:
+              case IdeaSortOrder.ORDER:
+                this.orderGroupContent = {};
+                this.orderGroupContent[orderGroupName] = new OrderGroup(
+                  result.ideas.filter((idea) => !selectedIds.includes(idea.id))
+                );
+                break;
+              default:
+                this.orderGroupContent = result.oderGroups;
+            }
             this.ideas = result.ideas;
           });
       }
@@ -241,7 +271,7 @@ export default class ModeratorContent extends Vue {
       if (event.to.id == SELECTION_KEY) {
         await selectionService.addIdeasToSelection(
           this.task.parameter.selectionId,
-          [event.item.id]
+          this.selection.map((idea) => idea.id) // [event.item.id]
         );
       } else if (event.from.id == SELECTION_KEY) {
         await selectionService.removeIdeasFromSelection(

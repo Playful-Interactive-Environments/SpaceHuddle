@@ -160,7 +160,6 @@ import * as taskService from '@/services/task-service';
 import { convertToSaveVersion, Task } from '@/types/api/Task';
 import draggable from 'vuedraggable';
 import * as sessionService from '@/services/session-service';
-import { ElMessage } from 'element-plus';
 import TaskStates from '@/types/enum/TaskStates';
 import { EventType } from '@/types/enum/EventType';
 import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
@@ -342,12 +341,6 @@ export default class TaskTimeline extends Vue {
             .displayOnPublicScreen(this.sessionId, publicTask.id)
             .then(() => {
               this.publicScreenTaskId = publicTask.id;
-              ElMessage({
-                message: (this as any).$t('info.updatePublicScreen'),
-                type: 'success',
-                center: true,
-                showClose: true,
-              });
 
               this.eventBus.emit(
                 EventType.CHANGE_PUBLIC_SCREEN,
