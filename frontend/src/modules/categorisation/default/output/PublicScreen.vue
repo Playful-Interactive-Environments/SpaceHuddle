@@ -210,7 +210,7 @@ export default class PublicScreen extends Vue {
 }
 
 .column::v-deep {
-  max-width: 25%;
+  max-width: 16rem;
   min-width: 10rem;
 
   .el-card,
