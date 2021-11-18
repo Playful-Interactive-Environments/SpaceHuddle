@@ -52,25 +52,42 @@
           {{ categoryDescription }}
         </div>
       </div>
-      <!--<div style="padding: 14px">
-        <div class="card__title">
-          {{ categoryName }}
-        </div>
-        <div v-if="categoryDescription" class="card__content">
-          {{ categoryDescription }}
-        </div>
-      </div>-->
     </el-card>
   </el-badge>
   <el-drawer
     v-model="displayDetails"
     modal-class="darkblue"
     :lock-scroll="false"
+    size="60%"
   >
     <template v-slot:title>
-      <h2 class="heading heading--regular" :style="{ color: categoryColor }">
-        {{ categoryName }}
-      </h2>
+      <div class="media">
+        <div class="media-left">
+          <img
+            v-if="categoryImage"
+            :src="categoryImage"
+            class="header__image"
+            alt=""
+          />
+          <img
+            v-if="categoryLink && !categoryImage"
+            :src="categoryLink"
+            class="header__image"
+            alt=""
+          />
+        </div>
+        <div class="media-content">
+          <h2
+            class="heading heading--regular"
+            :style="{ color: categoryColor }"
+          >
+            {{ categoryName }}
+          </h2>
+          <div v-if="categoryDescription" >
+            {{ categoryDescription }}
+          </div>
+        </div>
+      </div>
       <span v-if="category" :style="{ color: categoryColor }">
         <span class="icon" v-on:click="editCategory()">
           <font-awesome-icon icon="pen" />
@@ -81,28 +98,31 @@
       </span>
     </template>
     <main
-      class="categorisation__content"
+      class="categorisation__content layout__columns"
       :style="{
         'background-color': categoryColor,
       }"
+      v-if="category && ideas"
     >
-      <IdeaCard
-        v-for="idea in ideas"
-        :key="idea.id"
-        :id="idea.id"
-        :idea="idea"
-        :is-selectable="false"
-        :is-editable="true"
-        class="item"
-        style="height: unset"
-      >
-        <template #action v-if="category != null">
-          <font-awesome-icon
-            icon="ban"
-            v-on:click="removeIdea(idea.id, $event)"
-          />
+      <draggable v-model="ideaList" item-key="id" @end="dragDone" group="idea">
+        <template v-slot:item="{ element }">
+          <IdeaCard
+            :id="element.id"
+            :idea="element"
+            :is-selectable="false"
+            :is-editable="true"
+            class="item"
+            style="height: unset"
+          >
+            <template #action v-if="category != null">
+              <font-awesome-icon
+                icon="ban"
+                v-on:click="removeIdea(element.id, $event)"
+              />
+            </template>
+          </IdeaCard>
         </template>
-      </IdeaCard>
+      </draggable>
     </main>
   </el-drawer>
   <CategorySettings
@@ -121,13 +141,15 @@ import { Idea } from '@/types/api/Idea';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as categorisationService from '@/services/categorisation-service';
 import CategorySettings from '@/modules/categorisation/default/molecules/CategorySettings.vue';
+import draggable from 'vuedraggable';
 
 @Options({
   components: {
     IdeaCard,
     CategorySettings,
+    draggable,
   },
-  emits: ['categoryChanged'],
+  emits: ['categoryChanged', 'update:ideas'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class CategoryCard extends Vue {
@@ -136,6 +158,14 @@ export default class CategoryCard extends Vue {
 
   displayDetails = false;
   displayEditCategory = false;
+
+  get ideaList(): Idea[] {
+    return this.ideas;
+  }
+
+  set ideaList(ideas: Idea[]) {
+    this.$emit('update:ideas', ideas);
+  }
 
   get categoryName(): string {
     if (this.category) return this.category.keywords;
@@ -209,6 +239,14 @@ export default class CategoryCard extends Vue {
         break;
     }
   }
+
+  /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/
+  async dragDone(): Promise<void> {
+    await categorisationService.addIdeasToCategory(
+      this.category.id,
+      this.ideas.map((idea) => idea.id)
+    );
+  }
 }
 </script>
 
@@ -230,6 +268,13 @@ export default class CategoryCard extends Vue {
 
   &__undefined {
     color: var(--color-darkblue);
+  }
+}
+
+.header {
+  &__image {
+    width: 10rem;
+    border-radius: var(--border-radius-xs);
   }
 }
 

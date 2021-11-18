@@ -23,78 +23,80 @@
       </option>
     </select>
   </FilterSection>
-  <div class="columns is-multiline is-mobile drag-footer">
-    <draggable
-      class="column"
-      v-for="(orderGroup, orderGroupKey) in orderGroupContentCards"
-      :key="orderGroupKey"
-      :id="orderGroup.category ? orderGroup.category.id : null"
-      v-model="orderGroup.ideas"
-      draggable=".drag-item"
-      item-key="id"
-      group="idea"
-      @end="dragDone"
-    >
-      <template v-slot:header>
-        <CategoryCard
-          v-if="orderGroup.category.id !== addCategoryKey"
-          :category="orderGroup.category"
-          :ideas="orderGroup.ideas"
-          @categoryChanged="getCollapseContent"
-        >
-        </CategoryCard>
-        <AddItem
-          v-else
-          :text="$t('module.categorisation.default.moderatorContent.add')"
-          :is-column="true"
-          @addNew="openCategorySettings"
-        />
-      </template>
-      <template v-slot:item>
-        <span></span>
-      </template>
-    </draggable>
-  </div>
-  <div class="columns is-multiline is-mobile">
-    <draggable
-      class="column group-items"
-      v-for="(orderGroup, orderGroupKey) in orderGroupContentCards"
-      :key="orderGroupKey"
-      :id="orderGroup.category ? orderGroup.category.id : null"
-      v-model="orderGroup.ideas"
-      draggable=".drag-item"
-      item-key="id"
-      group="idea"
-      @end="dragDone"
-    >
-      <!--<template v-slot:header>
-        <CategoryCard
-          v-if="orderGroup.category.id !== addCategoryKey"
-          :category="orderGroup.category"
-          :ideas="orderGroup.ideas"
-          @categoryChanged="getCollapseContent"
-        >
-        </CategoryCard>
-        <AddItem
-          v-else
-          :text="$t('module.categorisation.default.moderatorContent.add')"
-          :is-column="true"
-          @addNew="openCategorySettings"
-        />
-      </template>-->
-      <template v-slot:item="{ element }">
-        <IdeaCard
-          :key="element.id"
-          :id="element.id"
-          :idea="element"
-          :is-selectable="false"
-          :is-editable="true"
-          :isDraggable="true"
-          class="drag-item el-main"
-          :style="{ 'border-color': orderGroup.category.parameter.color }"
-        />
-      </template>
-    </draggable>
+  <div class="scroll-x">
+    <div class="columns is-mobile drag-header">
+      <draggable
+        class="column"
+        v-for="(orderGroup, orderGroupKey) in orderGroupContentCards"
+        :key="orderGroupKey"
+        :id="orderGroup.category ? orderGroup.category.id : null"
+        v-model="orderGroup.ideas"
+        draggable=".drag-item"
+        item-key="id"
+        group="idea"
+        @end="dragDone"
+      >
+        <template v-slot:header>
+          <CategoryCard
+            v-if="orderGroup.category.id !== addCategoryKey"
+            :category="orderGroup.category"
+            v-model:ideas="orderGroup.ideas"
+            @categoryChanged="getCollapseContent"
+          >
+          </CategoryCard>
+          <AddItem
+            v-else
+            :text="$t('module.categorisation.default.moderatorContent.add')"
+            :is-column="true"
+            @addNew="openCategorySettings"
+          />
+        </template>
+        <template v-slot:item>
+          <span></span>
+        </template>
+      </draggable>
+    </div>
+    <div class="columns is-mobile">
+      <draggable
+        class="column group-items"
+        v-for="(orderGroup, orderGroupKey) in orderGroupContentCards"
+        :key="orderGroupKey"
+        :id="orderGroup.category ? orderGroup.category.id : null"
+        v-model="orderGroup.ideas"
+        draggable=".drag-item"
+        item-key="id"
+        group="idea"
+        @end="dragDone"
+      >
+        <!--<template v-slot:header>
+          <CategoryCard
+            v-if="orderGroup.category.id !== addCategoryKey"
+            :category="orderGroup.category"
+            v-model:ideas="orderGroup.ideas"
+            @categoryChanged="getCollapseContent"
+          >
+          </CategoryCard>
+          <AddItem
+            v-else
+            :text="$t('module.categorisation.default.moderatorContent.add')"
+            :is-column="true"
+            @addNew="openCategorySettings"
+          />
+        </template>-->
+        <template v-slot:item="{ element }">
+          <IdeaCard
+            :key="element.id"
+            :id="element.id"
+            :idea="element"
+            :is-selectable="false"
+            :is-editable="true"
+            :isDraggable="true"
+            class="drag-item el-main"
+            :style="{ 'border-color': orderGroup.category.parameter.color }"
+          />
+        </template>
+      </draggable>
+    </div>
   </div>
 
   <el-collapse v-model="openTabs">
@@ -422,12 +424,18 @@ export default class ModeratorContent extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.scroll-x {
+  overflow-x: auto;
+  padding: 1rem 1rem;
+  margin: 0 -1rem;
+}
+
 .group-items {
   max-height: 50vh;
   overflow-y: auto;
 }
 
-.drag-footer::v-deep {
+.drag-header::v-deep {
   .column {
     .el-card,
     .item {
