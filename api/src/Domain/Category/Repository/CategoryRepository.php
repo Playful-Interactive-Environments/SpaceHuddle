@@ -69,7 +69,9 @@ class CategoryRepository implements RepositoryInterface
             $authorisation_conditions = [
                 "task.state IN" => [
                     strtoupper(TaskState::ACTIVE),
-                    strtoupper(TaskState::READ_ONLY)
+                    strtoupper(TaskState::READ_ONLY),
+                    strtoupper(TaskState::WAIT),
+                    strtoupper(TaskState::DONE)
                 ]
             ];
         }

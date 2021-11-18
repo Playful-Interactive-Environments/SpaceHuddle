@@ -123,7 +123,9 @@ class TaskRepository implements RepositoryInterface
         if ($authorisation->isParticipant()) {
             $query->whereInList("task.state", [
                 strtoupper(TaskState::ACTIVE),
-                strtoupper(TaskState::READ_ONLY)
+                strtoupper(TaskState::READ_ONLY),
+                strtoupper(TaskState::WAIT),
+                strtoupper(TaskState::DONE)
             ])->andWhere(["(task.expiration_time IS NULL OR task.expiration_time >= current_timestamp())"]);
         }
 
@@ -136,6 +138,29 @@ class TaskRepository implements RepositoryInterface
             $this->getDetails($result);
         }
         return $result;
+    }
+
+    /**
+     * Get list of entities for the parent ID.
+     * @param string $parentId The entity parent ID.
+     * @return array<object> The result entity list.
+     */
+    public function getAll(string $parentId): array
+    {
+        $conditions = [$this->getParentIdName() => $parentId];
+        $authorisation = $this->getAuthorisation();
+        if ($authorisation->isParticipant()) {
+            $active = strtoupper(TaskState::ACTIVE);
+            $read = strtoupper(TaskState::READ_ONLY);
+            array_push($conditions, "task.state IN ('$active', '$read')");
+        }
+        $result = $this->get($conditions);
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
     }
 
     /**
