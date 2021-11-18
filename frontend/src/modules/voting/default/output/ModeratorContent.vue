@@ -13,10 +13,14 @@
           ticks: {
             color: '#1d2948',
           },
+          grid: {
+            display: false,
+          },
         },
         y: {
           ticks: {
             color: '#1d2948',
+            stepSize: 1,
           },
         },
       },

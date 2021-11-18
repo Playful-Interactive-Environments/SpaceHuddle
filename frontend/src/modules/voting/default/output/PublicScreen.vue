@@ -1,5 +1,5 @@
 <template>
-  <section class="centered public-screen__error">
+  <section class="centered public-screen__content chart">
     <vue3-chart-js
       id="resultChart"
       ref="chartRef"
@@ -12,19 +12,23 @@
         scales: {
           x: {
             ticks: {
-              color: 'var(--color-primary)',
+              color: '#1d2948',
+            },
+            grid: {
+              display: false,
             },
           },
           y: {
             ticks: {
-              color: 'var(--color-primary)',
+              color: '#1d2948',
+              stepSize: 1,
             },
           },
         },
         plugins: {
           legend: {
             labels: {
-              color: 'var(--color-primary)',
+              color: '#1d2948',
             },
           },
         },
@@ -109,3 +113,9 @@ export default class PublicScreen extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.chart {
+  max-width: 120vh;
+}
+</style>
