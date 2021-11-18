@@ -8,6 +8,7 @@
           :session-id="sessionId"
           :activeTaskId="taskId"
           :readonly="true"
+          :authHeaderTyp="authHeaderTyp"
         ></TaskTimeline>
       </PublicHeader>
       <el-header class="public-screen__overview">
@@ -42,7 +43,11 @@
     </el-header>
     <el-container class="public-screen__container">
       <el-main class="public-screen__main">
-        <PublicScreenComponent :task-id="taskId" :key="componentLoadIndex" />
+        <PublicScreenComponent
+          :task-id="taskId"
+          :key="componentLoadIndex"
+          :authHeaderTyp="authHeaderTyp"
+        />
       </el-main>
     </el-container>
   </el-container>
@@ -71,6 +76,7 @@ import ModuleComponentType from '@/modules/ModuleComponentType';
 import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
 import TaskTimeline from '@/components/moderator/organisms/TaskTimeline.vue';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
@@ -84,6 +90,8 @@ import TaskTimeline from '@/components/moderator/organisms/TaskTimeline.vue';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreen extends Vue {
   @Prop() readonly sessionId!: string;
+  @Prop({ default: EndpointAuthorisationType.MODERATOR })
+  authHeaderTyp!: EndpointAuthorisationType;
   componentLoadIndex = 0;
   componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
 
@@ -144,38 +152,42 @@ export default class PublicScreen extends Vue {
 
   @Watch('sessionId', { immediate: true })
   async onSessionIdChanged(): Promise<void> {
-    sessionService.getById(this.sessionId).then((session) => {
-      this.session = session;
-    });
+    sessionService
+      .getById(this.sessionId, this.authHeaderTyp)
+      .then((session) => {
+        this.session = session;
+      });
 
     this.getPublicScreenModule();
   }
 
   getPublicScreenModule(): void {
-    sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
-      if (this.taskId != queryResult?.id) {
-        this.task = queryResult;
-        const taskType = this.taskType;
-        if (this.$options.components) {
-          getAsyncModule(
-            ModuleComponentType.PUBLIC_SCREEN,
-            taskType,
-            this.moduleName
-          ).then((component) => {
-            if (this.$options.components) {
-              this.componentLoadingState = ComponentLoadingState.SELECTED;
-              this.$options.components['PublicScreenComponent'] = component;
-              this.componentLoadIndex++;
-            }
-          });
+    sessionService
+      .getPublicScreen(this.sessionId, this.authHeaderTyp)
+      .then((queryResult) => {
+        if (this.taskId != queryResult?.id) {
+          this.task = queryResult;
+          const taskType = this.taskType;
+          if (this.$options.components) {
+            getAsyncModule(
+              ModuleComponentType.PUBLIC_SCREEN,
+              taskType,
+              this.moduleName
+            ).then((component) => {
+              if (this.$options.components) {
+                this.componentLoadingState = ComponentLoadingState.SELECTED;
+                this.$options.components['PublicScreenComponent'] = component;
+                this.componentLoadIndex++;
+              }
+            });
+          }
+          if (taskType) {
+            this.$nextTick(() => {
+              setModuleStyles(taskType);
+            });
+          }
         }
-        if (taskType) {
-          this.$nextTick(() => {
-            setModuleStyles(taskType);
-          });
-        }
-      }
-    });
+      });
   }
 }
 </script>

@@ -31,6 +31,9 @@
               autocomplete="on"
               :placeholder="$t('participant.view.join.pinInfo')"
             />
+            <p v-if="browserKeyIsSet" class="join__info">
+              {{ $t('participant.view.join.browserKeyInfo') }}
+            </p>
           </el-form-item>
         </ValidationForm>
       </main>
@@ -47,6 +50,7 @@ import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import { ValidationData } from '@/types/ui/ValidationRule';
+import { Prop } from 'vue-property-decorator';
 
 @Options({
   components: {
@@ -55,6 +59,7 @@ import { ValidationData } from '@/types/ui/ValidationRule';
 })
 export default class ParticipantJoin extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
+  @Prop({ default: '' }) readonly connectionKey!: string;
 
   formData: ValidationData = {
     connectionKey: '',
@@ -63,6 +68,13 @@ export default class ParticipantJoin extends Vue {
   mounted(): void {
     const browserKeyLS = authService.getBrowserKey();
     if (browserKeyLS) this.formData.connectionKey = browserKeyLS;
+
+    if (this.connectionKey) this.formData.connectionKey = this.connectionKey;
+  }
+
+  get browserKeyIsSet(): boolean {
+    const browserKeyLS = authService.getBrowserKey();
+    return this.formData.connectionKey === browserKeyLS;
   }
 
   async connectToSession(): Promise<void> {
@@ -111,6 +123,7 @@ export default class ParticipantJoin extends Vue {
 
 <style lang="scss" scoped>
 .join {
+  padding: 4rem;
   padding-top: 8vh;
   color: #fff;
   background: var(--color-darkblue);
@@ -120,6 +133,14 @@ export default class ParticipantJoin extends Vue {
 
   &__text {
     margin-bottom: 1rem;
+  }
+
+  &__info {
+    max-width: 80%;
+    text-align: center;
+    margin: auto;
+    line-height: 2rem;
+    padding-top: 1rem;
   }
 }
 </style>

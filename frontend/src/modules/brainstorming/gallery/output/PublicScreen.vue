@@ -8,7 +8,11 @@
     v-on:change="galleryIndexChanged"
     trigger="click"
   >
-    <el-carousel-item v-for="(idea, index) in ideas" :key="index" :name="index.toString()">
+    <el-carousel-item
+      v-for="(idea, index) in ideas"
+      :key="index"
+      :name="index.toString()"
+    >
       <div class="gallery-item">
         <IdeaCard :idea="idea" :is-editable="false" class="public-idea" />
       </div>
@@ -23,6 +27,7 @@ import * as ideaService from '@/services/idea-service';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
@@ -33,6 +38,8 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: EndpointAuthorisationType.MODERATOR })
+  authHeaderTyp!: EndpointAuthorisationType;
   ideas: Idea[] = [];
   galleryIndex = 0;
   readonly intervalTime = 10000;
@@ -46,7 +53,12 @@ export default class PublicScreen extends Vue {
   async getIdeas(): Promise<void> {
     if (this.taskId) {
       await ideaService
-        .getIdeasForTask(this.taskId, IdeaSortOrder.TIMESTAMP)
+        .getIdeasForTask(
+          this.taskId,
+          IdeaSortOrder.TIMESTAMP,
+          null,
+          this.authHeaderTyp
+        )
         .then((ideas) => {
           ideas = ideas.reverse();
           if (this.ideas.length == 0) {

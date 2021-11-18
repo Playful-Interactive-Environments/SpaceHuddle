@@ -27,6 +27,7 @@ import {
 } from '@/services/auth-service';
 import app from '@/main';
 import { ElMessage } from 'element-plus';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -129,9 +130,12 @@ const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: '/join',
+    path: '/join/:connectionKey?',
     name: 'participant-join',
     component: ParticipantJoin,
+    props: (route) => ({
+      connectionKey: route.params.connectionKey,
+    }),
   },
   {
     path: '/overview',
@@ -159,7 +163,7 @@ const routes: Array<RouteRecordRaw> = [
     component: NotFound,
   },
   {
-    path: '/public-screen/:sessionId',
+    path: '/public-screen/:sessionId/:authHeaderTyp?',
     name: 'public-screen',
     component: PublicScreen,
     meta: {
@@ -167,6 +171,9 @@ const routes: Array<RouteRecordRaw> = [
     },
     props: (route) => ({
       sessionId: route.params.sessionId,
+      authHeaderTyp: route.params.authHeaderTyp
+        ? route.params.authHeaderTyp
+        : EndpointAuthorisationType.MODERATOR,
     }),
   },
 ];

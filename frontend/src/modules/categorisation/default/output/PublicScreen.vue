@@ -87,6 +87,8 @@ import * as categorisationService from '@/services/categorisation-service';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: EndpointAuthorisationType.MODERATOR })
+  authHeaderTyp!: EndpointAuthorisationType;
   task: Task | null = null;
   categories: Category[] = [];
   ideas: Idea[] = [];
@@ -102,9 +104,11 @@ export default class PublicScreen extends Vue {
 
   async getTask(): Promise<void> {
     if (this.taskId) {
-      await taskService.getTaskById(this.taskId).then((task) => {
-        this.task = task;
-      });
+      await taskService
+        .getTaskById(this.taskId, this.authHeaderTyp)
+        .then((task) => {
+          this.task = task;
+        });
     }
   }
 
@@ -128,13 +132,17 @@ export default class PublicScreen extends Vue {
       if (!this.task) await this.getTask();
       await this.getCategories();
 
-      if (this.task && this.task.parameter.dependencyTaskId) {
+      if (
+        this.task &&
+        this.task.parameter &&
+        this.task.parameter.dependencyTaskId
+      ) {
         await ideaService
           .getOrderGroups(
             this.task.parameter.dependencyTaskId,
             IdeaSortOrderCategorisation,
             this.taskId,
-            EndpointAuthorisationType.MODERATOR,
+            this.authHeaderTyp,
             this.orderGroupContent
           )
           .then((result) => {
@@ -149,7 +157,7 @@ export default class PublicScreen extends Vue {
   async getCategories(): Promise<void> {
     if (this.taskId) {
       await categorisationService
-        .getCategoriesForTask(this.taskId)
+        .getCategoriesForTask(this.taskId, this.authHeaderTyp)
         .then((categories) => {
           this.categories = categories;
         });

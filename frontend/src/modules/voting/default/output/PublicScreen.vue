@@ -43,6 +43,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import * as votingService from '@/services/voting-service';
 import { VoteResult } from '@/types/api/Vote';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
@@ -53,6 +54,8 @@ import { VoteResult } from '@/types/api/Vote';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: EndpointAuthorisationType.MODERATOR })
+  authHeaderTyp!: EndpointAuthorisationType;
   votes: VoteResult[] = [];
   chartData: any = {
     labels: [],
@@ -84,12 +87,14 @@ export default class PublicScreen extends Vue {
 
   async getVotes(): Promise<void> {
     if (this.taskId) {
-      await votingService.getResult(this.taskId).then((votes) => {
-        this.votes = votes;
-        this.chartData.labels = this.resultData.labels;
-        this.chartData.datasets = this.resultData.datasets;
-        this.updateChart();
-      });
+      await votingService
+        .getResult(this.taskId, this.authHeaderTyp)
+        .then((votes) => {
+          this.votes = votes;
+          this.chartData.labels = this.resultData.labels;
+          this.chartData.datasets = this.resultData.datasets;
+          this.updateChart();
+        });
     }
   }
 

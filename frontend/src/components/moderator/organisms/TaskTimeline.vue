@@ -166,6 +166,7 @@ import TimerSettings from '@/components/moderator/organisms/settings/TimerSettin
 import { hasModule } from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import TaskType from '@/types/enum/TaskType';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
@@ -183,6 +184,8 @@ export default class TaskTimeline extends Vue {
   @Prop({ default: false }) readonly readonly!: boolean;
   @Prop({ default: true }) readonly isLinkedToTask!: boolean;
   @Prop() activeTaskId!: string;
+  @Prop({ default: EndpointAuthorisationType.MODERATOR })
+  authHeaderTyp!: EndpointAuthorisationType;
 
   tasks: Task[] = [];
   publicScreenTaskId = '';
@@ -205,10 +208,12 @@ export default class TaskTimeline extends Vue {
   }
 
   get activeTaskIndex(): number {
-    if (this.activePageTasks && this.activeTaskId)
-      return this.activePageTasks.findIndex(
+    if (this.activePageTasks && this.activeTaskId) {
+      const index = this.activePageTasks.findIndex(
         (task) => task.id == this.activeTaskId
       );
+      if (index > -1) return index;
+    }
     return 0;
   }
 
@@ -229,7 +234,7 @@ export default class TaskTimeline extends Vue {
   }
 
   async getTasks(): Promise<void> {
-    taskService.getTaskList(this.topicId).then((tasks) => {
+    taskService.getTaskList(this.topicId, this.authHeaderTyp).then((tasks) => {
       this.tasks = tasks;
       for (let i = 0; i < tasks.length / this.pageSize; i++) {
         this.pages[i] = [];
@@ -289,11 +294,13 @@ export default class TaskTimeline extends Vue {
   }
 
   async getPublicScreen(): Promise<void> {
-    sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
-      if (queryResult) {
-        this.publicScreenTaskId = queryResult.id;
-      }
-    });
+    sessionService
+      .getPublicScreen(this.sessionId, this.authHeaderTyp)
+      .then((queryResult) => {
+        if (queryResult) {
+          this.publicScreenTaskId = queryResult.id;
+        }
+      });
   }
 
   get usePublicScreen(): boolean {

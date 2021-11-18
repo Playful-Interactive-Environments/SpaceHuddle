@@ -20,6 +20,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
@@ -30,6 +31,8 @@ import { Task } from '@/types/api/Task';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: EndpointAuthorisationType.MODERATOR })
+  authHeaderTyp!: EndpointAuthorisationType;
   task: Task | null = null;
   ideas: Idea[] = [];
   readonly intervalTime = 10000;
@@ -42,9 +45,11 @@ export default class PublicScreen extends Vue {
 
   async getTask(): Promise<void> {
     if (this.taskId) {
-      await taskService.getTaskById(this.taskId).then((task) => {
-        this.task = task;
-      });
+      await taskService
+        .getTaskById(this.taskId, this.authHeaderTyp)
+        .then((task) => {
+          this.task = task;
+        });
     }
   }
 
@@ -52,7 +57,10 @@ export default class PublicScreen extends Vue {
     if (this.taskId) {
       if (!this.task) await this.getTask();
       await selectService
-        .getIdeasForSelection(this.task?.parameter.selectionId)
+        .getIdeasForSelection(
+          this.task?.parameter.selectionId,
+          this.authHeaderTyp
+        )
         .then((ideas) => {
           this.ideas = ideas;
         });

@@ -11,7 +11,7 @@
         :is-editable="false"
       />
     </section>
-    <section class="layout__columns">
+    <section class="layout__columns" v-if="isModerator">
       <IdeaCard
         v-for="(idea, index) in newIdeas"
         :idea="idea"
@@ -31,6 +31,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import IdeaStates from '@/types/enum/IdeaStates';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
@@ -41,6 +42,8 @@ import IdeaStates from '@/types/enum/IdeaStates';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: EndpointAuthorisationType.MODERATOR })
+  authHeaderTyp!: EndpointAuthorisationType;
   ideas: Idea[] = [];
   readonly intervalTime = 10000;
   interval!: any;
@@ -52,6 +55,10 @@ export default class PublicScreen extends Vue {
     this.getIdeas();
   }
 
+  get isModerator(): boolean {
+    return this.authHeaderTyp === EndpointAuthorisationType.MODERATOR;
+  }
+
   get newIdeas(): Idea[] {
     return this.ideas
       .filter((idea) => idea.state === IdeaStates.NEW.toUpperCase())
@@ -59,22 +66,27 @@ export default class PublicScreen extends Vue {
   }
 
   get oldIdeas(): Idea[] {
-    return this.ideas.filter(
-      (idea) => idea.state !== IdeaStates.NEW.toUpperCase()
-    );
+    if (this.isModerator) {
+      return this.ideas.filter(
+        (idea) => idea.state !== IdeaStates.NEW.toUpperCase()
+      );
+    }
+    return this.ideas;
   }
 
   async getIdeas(): Promise<void> {
     if (this.taskId) {
       let orderType = IdeaSortOrder.TIMESTAMP;
 
-      await taskService.getTaskById(this.taskId).then((task) => {
-        if (task.parameter && task.parameter.orderType)
-          orderType = task.parameter.orderType;
-      });
+      await taskService
+        .getTaskById(this.taskId, this.authHeaderTyp)
+        .then((task) => {
+          if (task.parameter && task.parameter.orderType)
+            orderType = task.parameter.orderType;
+        });
 
       await ideaService
-        .getIdeasForTask(this.taskId, orderType)
+        .getIdeasForTask(this.taskId, orderType, null, this.authHeaderTyp)
         .then((ideas) => {
           if (orderType.toUpperCase() == IdeaSortOrder.TIMESTAMP.toUpperCase())
             this.ideas = ideas.reverse();
@@ -97,12 +109,13 @@ export default class PublicScreen extends Vue {
 
   startIdeaInterval(): void {
     this.interval = setInterval(this.getIdeas, this.intervalTime);
-    this.intervalNew = setInterval(this.changeState, this.intervalTimeNew);
+    if (this.isModerator)
+      this.intervalNew = setInterval(this.changeState, this.intervalTimeNew);
   }
 
   unmounted(): void {
     clearInterval(this.interval);
-    clearInterval(this.intervalNew);
+    if (this.isModerator) clearInterval(this.intervalNew);
   }
 }
 </script>

@@ -237,7 +237,7 @@ export default class ModeratorTopicDetails extends Vue {
   }
 
   displayTimerSettings(task: Task | null): void {
-    setTimeout(() => this.timerTask = task, 500);
+    setTimeout(() => (this.timerTask = task), 500);
   }
 
   getModuleIcon(task: Task): string {
