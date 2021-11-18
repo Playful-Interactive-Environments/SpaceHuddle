@@ -9,6 +9,11 @@
         v-on:delete="deleteSession"
       >
         <template #headerContent>
+          <span :class="{expired: isExpired}">
+            {{
+              $t('moderator.organism.settings.sessionSettings.expirationDate')
+            }}: {{ formatDate(session.expirationDate) }}
+          </span>
           <ModuleCount :session="session" />
         </template>
         <template #footerContent>
@@ -127,6 +132,14 @@ export default class ModeratorSessionDetails extends Vue {
 
   TaskType = TaskType;
 
+  get isExpired(): boolean {
+    if (this.session) {
+      const date = new Date(this.session.expirationDate);
+      return date <= new Date();
+    }
+    return true;
+  }
+
   async mounted(): Promise<void> {
     this.eventBus.off(EventType.CHANGE_PUBLIC_SCREEN);
     this.eventBus.on(EventType.CHANGE_PUBLIC_SCREEN, async (id) => {
@@ -205,5 +218,9 @@ export default class ModeratorSessionDetails extends Vue {
     margin-top: 0.5rem;
     margin-bottom: 1rem;
   }
+}
+
+.expired {
+  color: var(--color-red);
 }
 </style>
