@@ -65,7 +65,6 @@
               :id="element.id"
               :idea="element"
               :is-selectable="false"
-              :is-editable="false"
               :isDraggable="true"
               class="item"
             />
@@ -108,7 +107,6 @@
               :id="element.id"
               :idea="element"
               :is-selectable="false"
-              :is-editable="false"
               :isDraggable="true"
               class="item"
             />
