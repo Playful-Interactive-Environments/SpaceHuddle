@@ -2,8 +2,32 @@
   <section v-if="ideas.length === 0" class="centered public-screen__error">
     <p>{{ $t('module.brainstorming.default.publicScreen.noIdeas') }}</p>
   </section>
-  <section v-else class="public-screen__content">
-    <el-collapse v-model="openTabs">
+  <section v-else class="public-screen__content fixHead">
+    <el-container>
+      <el-header class="columns is-mobile sticky-header">
+        <div class="column" v-for="category in categories" :key="category.id">
+          <CategoryCard
+            :category="category"
+            :ideas="categoryIdeas(category)"
+            :isEditable="false"
+          >
+          </CategoryCard>
+        </div>
+      </el-header>
+      <el-main class="columns is-mobile">
+        <div class="column" v-for="category in categories" :key="category.id">
+          <IdeaCard
+            :idea="idea"
+            v-for="(idea, index) in categoryIdeas(category)"
+            :key="index"
+            :is-selectable="false"
+            :is-editable="false"
+            :style="{ 'border-color': category.parameter.color }"
+          />
+        </div>
+      </el-main>
+    </el-container>
+    <!--<el-collapse v-model="openTabs">
       <el-collapse-item
         v-for="(item, key) in orderGroupContent"
         :key="key"
@@ -31,7 +55,7 @@
           />
         </main>
       </el-collapse-item>
-    </el-collapse>
+    </el-collapse>-->
   </section>
 </template>
 
@@ -49,9 +73,12 @@ import { OrderGroupList } from '@/types/api/OrderGroup';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import { reloadCollapseContent } from '@/utils/collapse';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import CategoryCard from '@/modules/categorisation/default/molecules/CategoryCard.vue';
+import * as categorisationService from '@/services/categorisation-service';
 
 @Options({
   components: {
+    CategoryCard,
     IdeaCard,
     CollapseTitle,
   },
@@ -81,6 +108,12 @@ export default class PublicScreen extends Vue {
     }
   }
 
+  categoryIdeas(category: Category): Idea[] {
+    if (category.keywords in this.orderGroupContent)
+      return this.orderGroupContent[category.keywords].ideas;
+    return [];
+  }
+
   async getCollapseContent(reloadTabState = false): Promise<void> {
     reloadCollapseContent(
       this.openTabs,
@@ -93,6 +126,7 @@ export default class PublicScreen extends Vue {
   async getIdeas(): Promise<string[]> {
     if (this.taskId) {
       if (!this.task) await this.getTask();
+      await this.getCategories();
 
       if (this.task && this.task.parameter.dependencyTaskId) {
         await ideaService
@@ -112,6 +146,16 @@ export default class PublicScreen extends Vue {
     return Object.keys(this.orderGroupContent);
   }
 
+  async getCategories(): Promise<void> {
+    if (this.taskId) {
+      await categorisationService
+        .getCategoriesForTask(this.taskId)
+        .then((categories) => {
+          this.categories = categories;
+        });
+    }
+  }
+
   async mounted(): Promise<void> {
     this.startIdeaInterval();
   }
@@ -127,6 +171,22 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.fixHead {
+  padding-right: 1rem;
+  padding-bottom: 1rem;
+  overflow-y: auto;
+  height: 68vh;
+
+  .sticky-header {
+    position: sticky;
+    top: 0;
+  }
+}
+
+.el-main {
+  overflow: unset;
+}
+
 .expand {
   &__header {
     color: white;
@@ -135,5 +195,27 @@ export default class PublicScreen extends Vue {
 
 .expand > :first-child {
   color: white;
+}
+
+.sticky-header::v-deep {
+  background-color: var(--color-background-gray);
+
+  .column {
+    background-color: var(--color-background-gray);
+    .el-card,
+    .item {
+      height: 100%;
+    }
+  }
+}
+
+.column::v-deep {
+  max-width: 25%;
+  min-width: 10rem;
+
+  .el-card,
+  .item {
+    height: unset;
+  }
 }
 </style>

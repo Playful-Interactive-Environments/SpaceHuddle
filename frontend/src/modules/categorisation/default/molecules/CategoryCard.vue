@@ -10,7 +10,7 @@
       :body-style="{
         padding: '0px',
       }"
-      v-on:click="displayDetails = true"
+      v-on:click="showDetails"
     >
       <img
         v-if="categoryImage"
@@ -27,7 +27,7 @@
       <div class="card__text">
         <div class="card__title">
           {{ categoryName }}
-          <span class="actions">
+          <span class="actions" v-if="isEditable">
             <el-dropdown
               class="card__menu"
               v-on:command="menuItemSelected($event)"
@@ -154,7 +154,8 @@ import draggable from 'vuedraggable';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class CategoryCard extends Vue {
   @Prop() category!: Category;
-  @Prop() ideas!: Idea[];
+  @Prop({ default: [] }) ideas!: Idea[];
+  @Prop({ default: true }) isEditable!: boolean;
 
   displayDetails = false;
   displayEditCategory = false;
@@ -190,6 +191,10 @@ export default class CategoryCard extends Vue {
   get categoryColor(): string {
     if (this.category) return this.category.parameter.color;
     return 'var(--color-darkblue)';
+  }
+
+  showDetails(): void {
+    if (this.isEditable) this.displayDetails = true;
   }
 
   updateCategory(event: Category): void {

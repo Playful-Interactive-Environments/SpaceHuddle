@@ -41,7 +41,7 @@
       </el-header>
     </el-header>
     <el-container class="public-screen__container">
-      <el-main>
+      <el-main class="public-screen__main">
         <PublicScreenComponent :task-id="taskId" :key="componentLoadIndex" />
       </el-main>
     </el-container>
@@ -181,6 +181,10 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.el-main {
+  overflow: unset;
+}
+
 .media::v-deep {
   .logo {
     padding: 0;
@@ -223,6 +227,12 @@ h3 {
     padding-top: 0;
     padding: 1rem 5rem;
     height: 100%;
+  }
+
+  &__main {
+    overflow-x: auto;
+    margin: 0 -5rem;
+    padding: 0 5rem 1rem 5rem;
   }
 
   &__overview {
