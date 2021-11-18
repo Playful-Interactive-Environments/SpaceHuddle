@@ -182,6 +182,13 @@
             submit-label-key="moderator.organism.settings.taskSettings.submit"
             :disabled="isSaving"
           />
+          <el-button
+            type="primary"
+            v-on:click="saveAndActivate"
+            v-if="hasParticipantModule"
+          >
+            {{ $t('moderator.organism.settings.taskSettings.saveAndActivate') }}
+          </el-button>
         </template>
       </el-dialog>
     </ValidationForm>
@@ -195,14 +202,15 @@ import * as taskService from '@/services/task-service';
 import * as moduleService from '@/services/module-service';
 import TaskType from '@/types/enum/TaskType';
 import { Task, TaskSettingsData } from '@/types/api/Task';
+import TaskStates from '@/types/enum/TaskStates';
 import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
 import {
-  getAsyncTaskParameter,
   getAsyncModule,
+  getAsyncTaskParameter,
   getEmptyComponent,
+  getModuleConfig,
   getModulesForTaskType,
   hasModule,
-  getModuleConfig,
 } from '@/modules';
 import { CustomParameter } from '@/types/ui/CustomParameter';
 import { EventType } from '@/types/enum/EventType';
@@ -210,12 +218,13 @@ import ModuleComponentType from '@/modules/ModuleComponentType';
 import { Module } from '@/types/api/Module';
 import ModuleCard from '@/components/moderator/organisms/cards/ModuleCard.vue';
 import { ValidationRules } from '@/types/ui/ValidationRule';
-import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import ValidationForm, {
   ValidationFormCall,
 } from '@/components/shared/molecules/ValidationForm.vue';
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
 import { ModuleType } from '@/types/enum/ModuleType';
+import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -238,12 +247,13 @@ interface FormDataDefinition extends TaskSettingsData {
 
 @Options({
   components: {
+    TimerSettings,
     ValidationForm,
     FromSubmitItem,
     ModuleCard,
     TaskParameterComponent: getEmptyComponent(),
   },
-  emits: ['taskUpdated', 'update:showModal'],
+  emits: ['taskUpdated', 'showTimerSettings', 'update:showModal'],
 })
 export default class TaskSettings extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
@@ -455,6 +465,15 @@ export default class TaskSettings extends Vue {
     //this.componentLoadIndex++;
   }
 
+  participantModuleList: { [name: string]: boolean } = {};
+  get hasParticipantModule(): boolean {
+    let hasParticipantModule = false;
+    this.moduleSelection.forEach((moduleName) => {
+      if (this.participantModuleList[moduleName]) hasParticipantModule = true;
+    });
+    return hasParticipantModule;
+  }
+
   async loadModuleList(): Promise<void> {
     this.formData.moduleListMain = {};
     this.formData.moduleListAddOn = {};
@@ -481,6 +500,18 @@ export default class TaskSettings extends Vue {
         });
       }
     );
+
+    this.participantModuleList = {};
+    this.moduleKeyList.forEach((moduleName) => {
+      this.participantModuleList[moduleName] = false;
+      hasModule(
+        ModuleComponentType.PARTICIPANT,
+        TaskType[this.formData.taskType],
+        moduleName
+      ).then((result) => {
+        this.participantModuleList[moduleName] = result;
+      });
+    });
   }
 
   reset(): void {
@@ -493,8 +524,16 @@ export default class TaskSettings extends Vue {
     this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
+  async saveAndActivate(): Promise<void> {
+    if (this.task) this.task.state = TaskStates.ACTIVE;
+    await this.save(TaskStates.ACTIVE).then((task) => {
+      this.$emit('showTimerSettings', task);
+    });
+  }
+
   isSaving = false;
-  async save(): Promise<void> {
+  async save(state: TaskStates = TaskStates.WAIT): Promise<Task | null> {
+    let saveTask: Task | null = this.task;
     this.isSaving = true;
     await this.updateCustomTaskParameter();
 
@@ -529,11 +568,13 @@ export default class TaskSettings extends Vue {
           name: this.formData.name,
           description: this.formData.description,
           parameter: this.formData.parameter,
+          state: state,
           order: taskCount,
           modules: this.moduleSelection,
         })
         .then(
           (task) => {
+            saveTask = task;
             this.taskUpdated(task, true);
           },
           (error) => {
@@ -542,6 +583,7 @@ export default class TaskSettings extends Vue {
         );
     }
     this.isSaving = false;
+    return saveTask;
   }
 
   async updateCustomTaskParameter(): Promise<void> {
@@ -586,5 +628,9 @@ export default class TaskSettings extends Vue {
   &__content {
     padding-bottom: 0;
   }
+}
+
+.el-button {
+  width: 100%;
 }
 </style>

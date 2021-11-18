@@ -122,11 +122,17 @@
         :topic-id="topicId"
         :task-id="taskSettingsId"
         @taskUpdated="reloadTasks"
+        @showTimerSettings="displayTimerSettings"
       />
       <TopicSettings
         v-model:show-modal="showTopicSettings"
         :session-id="sessionId"
         :topic-id="topicId"
+      />
+      <TimerSettings
+        v-if="showTimerSettings"
+        v-model:showModal="showTimerSettings"
+        :task="timerTask"
       />
     </template>
   </ModeratorNavigationLayout>
@@ -162,9 +168,11 @@ import ModuleComponentType from '@/modules/ModuleComponentType';
 import { ModuleType } from '@/types/enum/ModuleType';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
+import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
 
 @Options({
   components: {
+    TimerSettings,
     AddItem,
     TaskInfo,
     TaskCard,
@@ -217,6 +225,19 @@ export default class ModeratorTopicDetails extends Vue {
         });
       });
     });
+  }
+
+  timerTask: Task | null = null;
+  get showTimerSettings(): boolean {
+    return this.timerTask !== null;
+  }
+
+  set showTimerSettings(show: boolean) {
+    if (!show) this.timerTask = null;
+  }
+
+  displayTimerSettings(task: Task | null): void {
+    setTimeout(() => this.timerTask = task, 500);
   }
 
   getModuleIcon(task: Task): string {

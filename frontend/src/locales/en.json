@@ -155,7 +155,8 @@
           "questionExample": "e.g. What should be the name of our new app?",
           "description": "Description",
           "descriptionExample": "e.g. The purpose of the meeting is to come up with new ideas our new app.",
-          "submit": "Save module"
+          "submit": "Save module",
+          "saveAndActivate": "Save and activate module"
         },
         "sessionSettings": {
           "header": "Create Session",
