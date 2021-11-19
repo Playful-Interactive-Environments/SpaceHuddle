@@ -11,7 +11,8 @@
     "descriptionInfo": "Type your idea here ...",
     "submit": "Submit idea",
     "startGame": "No ideas? Get inspired!",
-    "linkInfo": "part image url from web"
+    "linkInfo": "part image url from web",
+    "remainingCharacters":  "remaining characters "
   },
   "moderatorContent": {
     "sortOrder": "order by",

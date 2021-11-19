@@ -52,7 +52,7 @@ const ruleToLong = (max: number): ValidationRule => {
   return {
     max: max,
     message: () => `${translateMessageKey('toLong')} ${max}`,
-    trigger: 'blur',
+    trigger: ['blur', 'change'],
   };
 };
 

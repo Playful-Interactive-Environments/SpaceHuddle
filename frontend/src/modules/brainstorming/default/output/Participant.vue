@@ -31,6 +31,12 @@
             $t('module.brainstorming.default.participant.keywordInfo')
           "
         />
+        <span class="info">
+          {{
+            $t('module.brainstorming.default.participant.remainingCharacters')
+          }}:
+          {{ 36 - formData.keywords.length }}
+        </span>
       </el-form-item>
       <el-form-item
         prop="description"
@@ -49,6 +55,12 @@
           "
           v-on:keypress="submitOnEnter"
         />
+        <span class="info">
+          {{
+            $t('module.brainstorming.default.participant.remainingCharacters')
+          }}:
+          {{ 255 - formData.description.length }}
+        </span>
       </el-form-item>
       <el-form-item prop="imageWebLink" :rules="[defaultFormRules.ruleUrl]">
         <el-container>
@@ -298,5 +310,13 @@ export default class Participant extends Vue {
 
 .el-footer {
   text-align: right;
+}
+
+.info {
+  color: var(--color-primary);
+  float: right;
+  font-size: 12px;
+  line-height: 1;
+  padding-top: 4px;
 }
 </style>
