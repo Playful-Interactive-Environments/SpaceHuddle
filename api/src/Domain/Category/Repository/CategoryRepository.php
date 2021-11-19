@@ -60,7 +60,7 @@ class CategoryRepository implements RepositoryInterface
     public function get(array $conditions = [], array $sortConditions = []): null|CategoryData|array
     {
         if (count($sortConditions) == 0) {
-            $sortConditions = ["keywords"];
+            $sortConditions = ["order"];
         }
 
         $authorisation = $this->getAuthorisation();
