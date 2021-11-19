@@ -118,6 +118,10 @@
         "sessions": "Sessions",
         "profile": "Profile",
         "settings": "Settings"
+      },
+      "sessionCode": {
+        "shareSubject": "join spacehuddle.io session",
+        "shareBody": "connection key: @KEY \nlink: @LINK"
       }
     },
     "organism": {

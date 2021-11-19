@@ -12,6 +12,7 @@
       v-if="hasSharing"
       class="btn btn--icon session-code__share"
       :class="[hasBorder ? ' btn--outline btn--outline--gray' : 'btn--white']"
+      v-on:click="share"
     >
       <font-awesome-icon icon="share-alt" />
     </button>
@@ -51,6 +52,18 @@ export default class SessionCode extends Vue {
         });
       }
     );
+  }
+
+  share(): void {
+    const subject = (this as any).$t(
+      'moderator.molecule.sessionCode.shareSubject'
+    );
+    const body = (this as any)
+      .$t('moderator.molecule.sessionCode.shareBody')
+      .replace('@KEY', this.code)
+      .replace('@LINK', `${window.location.origin}/join/${this.code}`)
+      .replace('\n', '%0D%0A');
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
   }
 }
 </script>
