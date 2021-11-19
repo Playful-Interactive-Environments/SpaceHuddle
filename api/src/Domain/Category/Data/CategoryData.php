@@ -60,6 +60,13 @@ class CategoryData
     public ?object $parameter;
 
     /**
+     * Planned task order.
+     * @var int|null
+     * @OA\Property(example=1)
+     */
+    public ?int $order;
+
+    /**
      * Creates a new idea.
      * @param array $data Idea data.
      */
@@ -73,5 +80,6 @@ class CategoryData
         $this->image = $reader->findString("image");
         $this->link = $reader->findString("link");
         $this->parameter = (object)json_decode($reader->findString("parameter"));
+        $this->order = $reader->findInt("order");
     }
 }
