@@ -14,6 +14,17 @@ export class CategoryContent {
     if (this.category) return this.category.parameter.color;
     return null;
   }
+
+  get id(): string | null {
+    if (this.category) return this.category.id;
+    return null;
+  }
+
+  get order(): number {
+    if (this.category && typeof this.category.order !== 'undefined')
+      return this.category.order;
+    return 100000;
+  }
 }
 
 export interface CategoryContentList {

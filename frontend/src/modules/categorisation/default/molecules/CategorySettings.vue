@@ -104,6 +104,7 @@ export default class CategorySettings extends Vue {
   @Prop({ default: false }) showModal!: boolean;
   @Prop({ required: false }) taskId!: string | null;
   @Prop({ required: false }) categoryId!: string | null;
+  @Prop({ default: 0 }) order!: number;
   @Prop({ default: [] }) addIdeas!: Idea[];
 
   defaultColor = '#1d2948';
@@ -113,6 +114,7 @@ export default class CategorySettings extends Vue {
     image: null,
     link: null,
     color: this.defaultColor,
+    order: this.order,
   };
 
   mounted(): void {
@@ -133,6 +135,7 @@ export default class CategorySettings extends Vue {
         this.formData.description = category.description;
         this.formData.image = category.image;
         this.formData.link = category.link;
+        this.formData.order = category.order;
         if (category.parameter && category.parameter.color)
           this.formData.color = category.parameter.color;
       });
@@ -151,6 +154,7 @@ export default class CategorySettings extends Vue {
     this.formData.image = null;
     this.formData.link = null;
     this.formData.color = this.defaultColor;
+    this.formData.order = this.order;
     this.$emit('update:categoryId', null);
     this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
@@ -165,6 +169,7 @@ export default class CategorySettings extends Vue {
             image: this.formData.image,
             link: this.formData.link,
             parameter: { color: this.formData.color },
+            order: this.order,
           })
           .then(
             (category) => {
@@ -193,6 +198,7 @@ export default class CategorySettings extends Vue {
           image: this.formData.image,
           link: this.formData.link,
           parameter: { color: this.formData.color },
+          order: this.formData.order,
         })
         .then(
           (category) => {

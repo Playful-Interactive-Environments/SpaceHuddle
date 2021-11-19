@@ -8,4 +8,5 @@ export interface Category {
   parameter: any;
   image: string | null;
   link: string | null;
+  order: number;
 }

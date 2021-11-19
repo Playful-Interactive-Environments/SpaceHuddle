@@ -24,46 +24,53 @@
     </select>
   </FilterSection>
   <div class="scroll-x">
-    <div class="columns is-mobile drag-header">
-      <draggable
-        class="column"
-        v-for="(orderGroup, orderGroupKey) in orderGroupContentCards"
-        :key="orderGroupKey"
-        :id="orderGroup.category ? orderGroup.category.id : null"
-        v-model="orderGroup.ideas"
-        draggable=".drag-item"
-        item-key="id"
-        group="idea"
-        @end="dragDone"
-      >
-        <template v-slot:header>
-          <CategoryCard
-            v-if="orderGroup.category.id !== addCategoryKey"
-            :category="orderGroup.category"
-            v-model:ideas="orderGroup.ideas"
-            @categoryChanged="getCollapseContent"
-          >
-          </CategoryCard>
-          <AddItem
-            v-else
-            :text="$t('module.categorisation.default.moderatorContent.add')"
-            :is-column="true"
-            @addNew="openCategorySettings"
-          />
-        </template>
-        <template v-slot:item>
-          <span></span>
-        </template>
-      </draggable>
-    </div>
+    <draggable
+      class="columns is-mobile drag-header"
+      v-model="orderGroupContentCardValues"
+      handle=".drag-item"
+      item-key="id"
+      group="category"
+      @end="dragCategory"
+    >
+      <template v-slot:item="{ element }">
+        <draggable
+          :id="element.id"
+          class="column"
+          v-model="element.ideas"
+          handle=".drag-item-none"
+          item-key="id"
+          group="idea"
+        >
+          <template v-slot:header>
+            <CategoryCard
+              v-if="element.category.id !== addCategoryKey"
+              :category="element.category"
+              v-model:ideas="element.ideas"
+              @categoryChanged="getCollapseContent"
+              class="drag-item"
+            >
+            </CategoryCard>
+            <AddItem
+              v-else
+              :text="$t('module.categorisation.default.moderatorContent.add')"
+              :is-column="true"
+              @addNew="openCategorySettings"
+            />
+          </template>
+          <template v-slot:item>
+            <span></span>
+          </template>
+        </draggable>
+      </template>
+    </draggable>
     <div class="columns is-mobile">
       <draggable
         class="column group-items"
-        v-for="(orderGroup, orderGroupKey) in orderGroupContentCards"
-        :key="orderGroupKey"
+        v-for="orderGroup in orderGroupContentCardValues"
+        :key="orderGroup.id"
         :id="orderGroup.category ? orderGroup.category.id : null"
         v-model="orderGroup.ideas"
-        draggable=".drag-item"
+        handle=".drag-item"
         item-key="id"
         group="idea"
         @end="dragDone"
@@ -121,7 +128,7 @@
         <draggable
           :id="item.category ? item.category.id : null"
           v-model="item.ideas"
-          draggable=".drag-item"
+          handle=".drag-item"
           item-key="id"
           group="idea"
           @end="dragDone"
@@ -147,6 +154,7 @@
     v-model:show-modal="showCategorySettings"
     :task-id="task.id"
     :addIdeas="orderGroupContentCards[addCategoryKey].ideas"
+    :order="categories.length"
     v-model:category-id="editCategoryId"
     @categoryCreated="getCollapseContent"
   />
@@ -225,6 +233,18 @@ export default class ModeratorContent extends Vue {
 
   sortOrderOptions: SortOrderOption[] = [];
   orderType: string = DefaultIdeaSortOrder;
+
+  get orderGroupContentCardValues(): CategoryContent[] {
+    return Object.values(this.orderGroupContentCards).sort(
+      (a, b) => a.order - b.order
+    );
+  }
+
+  set orderGroupContentCardValues(list: CategoryContent[]) {
+    list.forEach((item, index) => {
+      if (item.id !== this.addCategoryKey) item.category.order = index;
+    });
+  }
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -378,6 +398,12 @@ export default class ModeratorContent extends Vue {
     this.showCategorySettings = true;
   }
 
+  async dragCategory(): Promise<void> {
+    this.categories.forEach((category) => {
+      categorisationService.putCategory(category.id, category);
+    });
+  }
+
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/
   async dragDone(event: any): Promise<void> {
     this.isDragging = true;
@@ -445,5 +471,9 @@ export default class ModeratorContent extends Vue {
 
 .icon {
   margin-right: 0.5em;
+}
+
+.drag-item {
+  cursor: grab;
 }
 </style>

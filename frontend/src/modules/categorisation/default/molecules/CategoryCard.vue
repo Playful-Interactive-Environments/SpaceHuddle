@@ -1,136 +1,143 @@
 <template>
-  <el-badge :value="ideas.length" class="item">
-    <el-card
-      shadow="never"
-      :style="{
-        'background-color': categoryColor,
-        'border-color': categoryColor,
-        color: 'white',
-      }"
-      :body-style="{
-        padding: '0px',
-      }"
-      v-on:click="showDetails"
-    >
-      <img
-        v-if="categoryImage"
-        :src="categoryImage"
-        class="card__image"
-        alt=""
-      />
-      <img
-        v-if="categoryLink && !categoryImage"
-        :src="categoryLink"
-        class="card__image"
-        alt=""
-      />
-      <div class="card__text">
-        <div class="card__title">
-          {{ categoryName }}
-          <span class="actions" v-if="isEditable">
-            <el-dropdown
-              class="card__menu"
-              v-on:command="menuItemSelected($event)"
-            >
-              <span class="el-dropdown-link">
-                <font-awesome-icon icon="ellipsis-h" />
-              </span>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="edit">
-                    <font-awesome-icon icon="pen" />
-                  </el-dropdown-item>
-                  <el-dropdown-item command="delete">
-                    <font-awesome-icon icon="trash" />
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </span>
-        </div>
-        <div v-if="categoryDescription" class="card__content">
-          {{ categoryDescription }}
-        </div>
-      </div>
-    </el-card>
-  </el-badge>
-  <el-drawer
-    v-model="displayDetails"
-    modal-class="darkblue"
-    :lock-scroll="false"
-    size="60%"
-  >
-    <template v-slot:title>
-      <div class="media">
-        <div class="media-left">
-          <img
-            v-if="categoryImage"
-            :src="categoryImage"
-            class="header__image"
-            alt=""
-          />
-          <img
-            v-if="categoryLink && !categoryImage"
-            :src="categoryLink"
-            class="header__image"
-            alt=""
-          />
-        </div>
-        <div class="media-content">
-          <h2
-            class="heading heading--regular"
-            :style="{ color: categoryColor }"
-          >
+  <div class="item">
+    <el-badge :value="ideas.length" class="item">
+      <el-card
+        shadow="never"
+        :style="{
+          'background-color': categoryColor,
+          'border-color': categoryColor,
+          color: 'white',
+        }"
+        :body-style="{
+          padding: '0px',
+        }"
+        v-on:click="showDetails"
+      >
+        <img
+          v-if="categoryImage"
+          :src="categoryImage"
+          class="card__image"
+          alt=""
+        />
+        <img
+          v-if="categoryLink && !categoryImage"
+          :src="categoryLink"
+          class="card__image"
+          alt=""
+        />
+        <div class="card__text">
+          <div class="card__title">
             {{ categoryName }}
-          </h2>
-          <div v-if="categoryDescription" >
+            <span class="actions" v-if="isEditable">
+              <el-dropdown
+                class="card__menu"
+                v-on:command="menuItemSelected($event)"
+              >
+                <span class="el-dropdown-link">
+                  <font-awesome-icon icon="ellipsis-h" />
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="edit">
+                      <font-awesome-icon icon="pen" />
+                    </el-dropdown-item>
+                    <el-dropdown-item command="delete">
+                      <font-awesome-icon icon="trash" />
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </span>
+          </div>
+          <div v-if="categoryDescription" class="card__content">
             {{ categoryDescription }}
           </div>
         </div>
-      </div>
-      <span v-if="category" :style="{ color: categoryColor }">
-        <span class="icon" v-on:click="editCategory()">
-          <font-awesome-icon icon="pen" />
-        </span>
-        <span class="icon" v-on:click="deleteCategory()">
-          <font-awesome-icon icon="trash" />
-        </span>
-      </span>
-    </template>
-    <main
-      class="categorisation__content layout__columns"
-      :style="{
-        'background-color': categoryColor,
-      }"
-      v-if="category && ideas"
+      </el-card>
+    </el-badge>
+    <el-drawer
+      v-model="displayDetails"
+      modal-class="darkblue"
+      :lock-scroll="false"
+      size="60%"
     >
-      <draggable v-model="ideaList" item-key="id" @end="dragDone" group="idea">
-        <template v-slot:item="{ element }">
-          <IdeaCard
-            :id="element.id"
-            :idea="element"
-            :is-selectable="false"
-            :is-editable="true"
-            class="item"
-            style="height: unset"
-          >
-            <template #action v-if="category != null">
-              <font-awesome-icon
-                icon="ban"
-                v-on:click="removeIdea(element.id, $event)"
-              />
-            </template>
-          </IdeaCard>
-        </template>
-      </draggable>
-    </main>
-  </el-drawer>
-  <CategorySettings
-    v-if="category"
-    v-model:show-modal="displayEditCategory"
-    v-model:category-id="category.id"
-    @categoryCreated="updateCategory($event)"
-  />
+      <template v-slot:title>
+        <div class="media">
+          <div class="media-left">
+            <img
+              v-if="categoryImage"
+              :src="categoryImage"
+              class="header__image"
+              alt=""
+            />
+            <img
+              v-if="categoryLink && !categoryImage"
+              :src="categoryLink"
+              class="header__image"
+              alt=""
+            />
+          </div>
+          <div class="media-content">
+            <h2
+              class="heading heading--regular"
+              :style="{ color: categoryColor }"
+            >
+              {{ categoryName }}
+            </h2>
+            <div v-if="categoryDescription" >
+              {{ categoryDescription }}
+            </div>
+          </div>
+        </div>
+        <span v-if="category" :style="{ color: categoryColor }">
+          <span class="icon" v-on:click="editCategory()">
+            <font-awesome-icon icon="pen" />
+          </span>
+          <span class="icon" v-on:click="deleteCategory()">
+            <font-awesome-icon icon="trash" />
+          </span>
+        </span>
+      </template>
+      <main
+        class="categorisation__content layout__columns"
+        :style="{
+          'background-color': categoryColor,
+        }"
+        v-if="category && ideas"
+      >
+        <draggable
+          v-model="ideaList"
+          item-key="id"
+          @end="dragDone"
+          group="idea"
+        >
+          <template v-slot:item="{ element }">
+            <IdeaCard
+              :id="element.id"
+              :idea="element"
+              :is-selectable="false"
+              :is-editable="true"
+              class="item"
+              style="height: unset"
+            >
+              <template #action v-if="category != null">
+                <font-awesome-icon
+                  icon="ban"
+                  v-on:click="removeIdea(element.id, $event)"
+                />
+              </template>
+            </IdeaCard>
+          </template>
+        </draggable>
+      </main>
+    </el-drawer>
+    <CategorySettings
+      v-if="category"
+      v-model:show-modal="displayEditCategory"
+      v-model:category-id="category.id"
+      @categoryCreated="updateCategory($event)"
+    />
+  </div>
 </template>
 
 <script lang="ts">
