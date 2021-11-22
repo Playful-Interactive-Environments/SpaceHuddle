@@ -16,7 +16,7 @@
         prop="keywords"
         :rules="[
           defaultFormRules.ruleRequired,
-          defaultFormRules.ruleToLong(36),
+          defaultFormRules.ruleToLong(MAX_KEYWORDS_LENGTH),
         ]"
       >
         <el-input
@@ -25,11 +25,17 @@
             $t('moderator.organism.settings.ideaSettings.keywordsExample')
           "
         />
+        <span class="info">
+          {{
+            $t('module.brainstorming.default.participant.remainingCharacters')
+          }}:
+          {{ MAX_KEYWORDS_LENGTH - formData.keywords.length }}
+        </span>
       </el-form-item>
       <el-form-item
         :label="$t('moderator.organism.settings.ideaSettings.description')"
         prop="description"
-        :rules="[defaultFormRules.ruleToLong(255)]"
+        :rules="[defaultFormRules.ruleToLong(MAX_DESCRIPTION_LENGTH)]"
       >
         <el-input
           type="textarea"
@@ -39,6 +45,12 @@
             $t('moderator.organism.settings.ideaSettings.descriptionExample')
           "
         />
+        <span class="info">
+          {{
+            $t('module.brainstorming.default.participant.remainingCharacters')
+          }}:
+          {{ MAX_DESCRIPTION_LENGTH - formData.description.length }}
+        </span>
       </el-form-item>
       <el-form-item
         :label="$t('moderator.organism.settings.ideaSettings.image')"
@@ -73,6 +85,7 @@ import ValidationForm, {
   ValidationFormCall,
 } from '@/components/shared/molecules/ValidationForm.vue';
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
+import { MAX_DESCRIPTION_LENGTH, MAX_KEYWORDS_LENGTH } from '@/types/api/Idea';
 
 @Options({
   components: {
@@ -90,6 +103,9 @@ export default class IdeaSettings extends Vue {
 
   @Prop({ default: false }) showModal!: boolean;
   @Prop() idea!: Idea;
+
+  MAX_KEYWORDS_LENGTH = MAX_KEYWORDS_LENGTH;
+  MAX_DESCRIPTION_LENGTH = MAX_DESCRIPTION_LENGTH;
 
   formData: ValidationData = {
     keywords: '',
@@ -150,4 +166,12 @@ export default class IdeaSettings extends Vue {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.info {
+  color: var(--color-primary);
+  float: right;
+  font-size: 12px;
+  line-height: 1;
+  padding-top: 4px;
+}
+</style>

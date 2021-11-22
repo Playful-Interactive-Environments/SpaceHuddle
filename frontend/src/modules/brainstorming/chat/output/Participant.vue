@@ -21,23 +21,35 @@
           </span>
           <span class="media-content"></span>
           <span class="media-right" v-if="idea.isOwn">
-            <IdeaCard :idea="idea" :is-editable="false" class="public-idea" />
+            <IdeaCard
+              :idea="idea"
+              :is-editable="true"
+              :canChangeState="false"
+              class="public-idea"
+              @ideaDeleted="getTaskIdeas"
+            />
           </span>
         </div>
         <div class="media" v-if="newIdea.link || newIdea.image">
           <span class="media-content"></span>
-          <img
-            v-if="newIdea.link"
-            class="media-right"
-            :src="newIdea.link"
-            alt="idea image"
-          />
-          <img
-            v-if="newIdea.image"
-            class="media-right"
-            :src="newIdea.image"
-            alt="idea image"
-          />
+          <span class="media-right" v-if="newIdea.link">
+            <img :src="newIdea.link" alt="idea image" />
+            <br/>
+            <font-awesome-icon
+              class="edit"
+              icon="trash"
+              v-on:click="newIdea.link = ''"
+            />
+          </span>
+          <span class="media-right" v-if="newIdea.image">
+            <img :src="newIdea.image" alt="idea image" />
+            <br/>
+            <font-awesome-icon
+              class="edit"
+              icon="trash"
+              v-on:click="newIdea.image = ''"
+            />
+          </span>
         </div>
         <div class="media" v-if="newIdea.link || newIdea.image">
           <span class="media-left">
@@ -49,6 +61,11 @@
           <span class="media-content"></span>
           <span class="media-right">
             {{ newIdea.description }}
+            <font-awesome-icon
+              class="edit"
+              icon="trash"
+              v-on:click="newIdea.description = ''"
+            />
           </span>
         </div>
         <div class="media" v-if="newIdea.description">
@@ -59,32 +76,52 @@
         </div>
       </el-main>
       <el-footer>
-        <el-form v-model="formData" @submit="saveIdea" class="media">
-          <el-input
-            class="media-content"
-            v-model="formData.newIdea"
-            :placeholder="
-              $t('module.brainstorming.chat.participant.newIdeaInfo')
-            "
-          ></el-input>
-          <el-button
-            v-if="!newIdea.link"
-            class="media-right"
-            type="primary"
-            circle
-            v-on:click="addImage"
+        <ValidationForm
+          :form-data="formData"
+          :use-default-submit="false"
+          v-on:submitDataValid="saveIdea"
+        >
+          <el-form-item
+            prop="newIdeaInput"
+            :rules="[
+              defaultFormRules.ruleRequired,
+              defaultFormRules.ruleToLong(MAX_INPUT_LENGTH),
+            ]"
           >
-            <font-awesome-icon icon="paperclip"></font-awesome-icon>
-          </el-button>
-          <el-button
-            class="media-right"
-            type="primary"
-            native-type="submit"
-            circle
-          >
-            <font-awesome-icon icon="play"></font-awesome-icon>
-          </el-button>
-        </el-form>
+            <div class="media">
+              <el-input
+                class="media-content"
+                v-model="formData.newIdeaInput"
+                :placeholder="
+                  $t('module.brainstorming.chat.participant.newIdeaInfo')
+                "
+              ></el-input>
+              <el-button
+                v-if="!newIdea.link"
+                class="media-right"
+                type="primary"
+                circle
+                v-on:click="addImage"
+              >
+                <font-awesome-icon icon="paperclip"></font-awesome-icon>
+              </el-button>
+              <el-button
+                class="media-right"
+                type="primary"
+                native-type="submit"
+                circle
+              >
+                <font-awesome-icon icon="play"></font-awesome-icon>
+              </el-button>
+            </div>
+            <span class="info">
+              {{
+                $t('module.brainstorming.default.participant.remainingCharacters')
+              }}:
+              {{ MAX_INPUT_LENGTH - formData.newIdeaInput.length }}
+            </span>
+          </el-form-item>
+        </ValidationForm>
       </el-footer>
     </el-container>
 
@@ -119,9 +156,13 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import myUpload from 'vue-image-crop-upload/upload-3.vue';
+import { MAX_DESCRIPTION_LENGTH, MAX_KEYWORDS_LENGTH } from '@/types/api/Idea';
+import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 
 @Options({
   components: {
+    ValidationForm,
     IdeaCard,
     ParticipantModuleDefaultContainer,
     'my-upload': myUpload,
@@ -130,6 +171,7 @@ import myUpload from 'vue-image-crop-upload/upload-3.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Participant extends Vue {
+  defaultFormRules: ValidationRuleDefinition = defaultFormRules;
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
   module: Module | null = null;
@@ -139,23 +181,32 @@ export default class Participant extends Vue {
   ideas: Idea[] = [];
   showUploadDialog = false;
 
+  get MAX_INPUT_LENGTH(): number {
+    if (
+      this.formData.newIdeaInput.startsWith('http') ||
+      this.formData.newIdeaInput.startsWith('www')
+    )
+      return MAX_DESCRIPTION_LENGTH;
+    if (this.newIdea.description) return MAX_KEYWORDS_LENGTH;
+    return MAX_DESCRIPTION_LENGTH;
+  }
+
   formData: any = {
-    newIdea: '',
+    newIdeaInput: '',
   };
 
   newIdea: Idea | any = {};
 
-  saveIdea(event: Event): void {
-    event.preventDefault();
+  saveIdea(): void {
     if (
-      this.formData.newIdea.startsWith('http') ||
-      this.formData.newIdea.startsWith('www')
+      this.formData.newIdeaInput.startsWith('http') ||
+      this.formData.newIdeaInput.startsWith('www')
     ) {
-      if (!this.newIdea.image) this.newIdea.link = this.formData.newIdea;
-    } else if (this.formData.newIdea.length > 60)
-      this.newIdea.description = this.formData.newIdea;
-    else this.newIdea.keywords = this.formData.newIdea;
-    this.formData.newIdea = '';
+      if (!this.newIdea.image) this.newIdea.link = this.formData.newIdeaInput;
+    } else if (this.formData.newIdeaInput.length > MAX_KEYWORDS_LENGTH)
+      this.newIdea.description = this.formData.newIdeaInput;
+    else this.newIdea.keywords = this.formData.newIdeaInput;
+    this.formData.newIdeaInput = '';
     this.scrollToBottom(0);
     if (this.newIdea.keywords) {
       ideaService.postIdea(this.taskId, this.newIdea).then((done) => {
@@ -286,8 +337,20 @@ export default class Participant extends Vue {
 
   span.media-right {
     background-color: var(--color-mint-light);
+    border: 3px solid var(--color-mint-light);
     border-radius: 1rem 1rem 0 1rem;
-    padding: 1rem;
+    padding: 0.5rem;
+
+    img {
+      margin: -0.5rem;
+      margin-bottom: 0;
+      overflow: hidden;
+    }
+
+    .fa-trash {
+      padding-top: 0.2rem;
+      padding-left: 0.2rem;
+    }
   }
 
   img.media-right {
@@ -332,5 +395,17 @@ export default class Participant extends Vue {
   bottom: 0; //-1.5rem;
   padding: 1rem 0;
   background-color: white;
+}
+
+.info {
+  color: var(--color-primary);
+  float: right;
+  font-size: 12px;
+  line-height: 1;
+  padding-top: 4px;
+}
+
+.edit {
+  float: right;
 }
 </style>

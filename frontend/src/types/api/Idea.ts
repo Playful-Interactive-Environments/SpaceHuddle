@@ -18,3 +18,6 @@ export interface Idea {
   participantId: string;
   isOwn: boolean;
 }
+
+export const MAX_KEYWORDS_LENGTH = 60;
+export const MAX_DESCRIPTION_LENGTH = 1000;

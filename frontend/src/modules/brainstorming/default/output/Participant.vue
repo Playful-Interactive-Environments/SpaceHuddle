@@ -21,7 +21,7 @@
         prop="keywords"
         :rules="[
           defaultFormRules.ruleRequired,
-          defaultFormRules.ruleToLong(36),
+          defaultFormRules.ruleToLong(MAX_KEYWORDS_LENGTH),
         ]"
       >
         <el-input
@@ -35,14 +35,14 @@
           {{
             $t('module.brainstorming.default.participant.remainingCharacters')
           }}:
-          {{ 36 - formData.keywords.length }}
+          {{ MAX_KEYWORDS_LENGTH - formData.keywords.length }}
         </span>
       </el-form-item>
       <el-form-item
         prop="description"
         :rules="[
           defaultFormRules.ruleRequired,
-          defaultFormRules.ruleToLong(255),
+          defaultFormRules.ruleToLong(MAX_DESCRIPTION_LENGTH),
         ]"
       >
         <el-input
@@ -59,7 +59,7 @@
           {{
             $t('module.brainstorming.default.participant.remainingCharacters')
           }}:
-          {{ 255 - formData.description.length }}
+          {{ MAX_DESCRIPTION_LENGTH - formData.description.length }}
         </span>
       </el-form-item>
       <el-form-item prop="imageWebLink" :rules="[defaultFormRules.ruleUrl]">
@@ -152,6 +152,7 @@ import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import { ValidationData } from '@/types/ui/ValidationRule';
 import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 import { submitOnEnter } from '@/types/ui/submit';
+import { MAX_DESCRIPTION_LENGTH, MAX_KEYWORDS_LENGTH } from '@/types/api/Idea';
 
 @Options({
   components: {
@@ -169,6 +170,9 @@ export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
   module: Module | null = null;
+
+  MAX_KEYWORDS_LENGTH = MAX_KEYWORDS_LENGTH;
+  MAX_DESCRIPTION_LENGTH = MAX_DESCRIPTION_LENGTH;
 
   get moduleName(): string {
     if (this.module) return this.module.name;
@@ -254,7 +258,7 @@ export default class Participant extends Vue {
   }
 
   get showSecondInput(): boolean {
-    return this.formData.description.length > 60;
+    return this.formData.description.length > MAX_KEYWORDS_LENGTH;
   }
 
   setNewPlanet(): void {

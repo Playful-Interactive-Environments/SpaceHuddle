@@ -34,7 +34,7 @@
                 <el-dropdown-item command="delete">
                   <font-awesome-icon icon="trash" />
                 </el-dropdown-item>
-                <el-dropdown-item command="state">
+                <el-dropdown-item command="state" v-if="canChangeState">
                   <el-dropdown
                     class="card__menu"
                     placement="top-start"
@@ -86,6 +86,7 @@ import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings
 export default class IdeaCard extends Vue {
   @Prop() idea!: Idea;
   @Prop({ default: true }) isEditable!: boolean;
+  @Prop({ default: true }) canChangeState!: boolean;
   @Prop({ default: false }) isSelectable!: boolean;
   @Prop({ default: false, reactive: true }) isSelected!: boolean;
   @Prop({ default: false }) isDraggable!: boolean;
