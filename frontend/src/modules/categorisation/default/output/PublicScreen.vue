@@ -27,35 +27,6 @@
         </div>
       </el-main>
     </el-container>
-    <!--<el-collapse v-model="openTabs">
-      <el-collapse-item
-        v-for="(item, key) in orderGroupContent"
-        :key="key"
-        :name="key"
-      >
-        <template #title>
-          <CollapseTitle :text="key" :color="item.color">
-            <span
-              role="button"
-              class="icon"
-              v-if="item.ideas.length > item.displayCount"
-              v-on:click="item.displayCount = 1000"
-            >
-              <font-awesome-icon icon="ellipsis-h" />
-            </span>
-          </CollapseTitle>
-        </template>
-        <main class="layout__columns">
-          <IdeaCard
-            :idea="idea"
-            v-for="(idea, index) in item.filteredIdeas"
-            :key="index"
-            :is-selectable="false"
-            :is-editable="false"
-          />
-        </main>
-      </el-collapse-item>
-    </el-collapse>-->
   </section>
 </template>
 
@@ -187,7 +158,7 @@ export default class PublicScreen extends Vue {
 
   .sticky-header {
     position: sticky;
-    top: 0;
+    top: -2px;
   }
 }
 
@@ -224,6 +195,16 @@ export default class PublicScreen extends Vue {
   .el-card,
   .item {
     height: unset;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .fixHead {
+    max-width: 100vw;
+    margin-right: -2.5rem;
+    margin-left: -2.5rem;
+    padding-right: 2.5rem;
+    padding-left: 2.5rem;
   }
 }
 </style>

@@ -318,7 +318,8 @@
         "submit": "Go t Homepage"
       },
       "publicScreen": {
-        "connectionKey": "connection key"
+        "connectionKey": "connection key",
+        "title": "public screen"
       }
     }
   },

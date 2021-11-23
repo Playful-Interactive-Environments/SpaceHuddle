@@ -1,5 +1,9 @@
 <template>
-  <el-container class="public-screen" :key="componentLoadIndex">
+  <el-container
+    class="public-screen"
+    :key="componentLoadIndex"
+    v-if="isModerator"
+  >
     <el-header class="public-screen__header">
       <PublicHeader>
         <TaskTimeline
@@ -40,6 +44,30 @@
           />-->
         </div>
       </el-header>
+    </el-header>
+    <el-container class="public-screen__container">
+      <el-main class="public-screen__main">
+        <PublicScreenComponent
+          :task-id="taskId"
+          :key="componentLoadIndex"
+          :authHeaderTyp="authHeaderTyp"
+        />
+      </el-main>
+    </el-container>
+  </el-container>
+  <el-container v-else class="public-screen" :key="componentLoadIndex">
+    <el-page-header
+      :content="$t('shared.view.publicScreen.title')"
+      :title="$t('general.back')"
+      @back="$router.go(-1)"
+    />
+    <el-header class="public-screen__header">
+      <TaskInfo
+        v-if="task"
+        :type="TaskType[task.taskType]"
+        :title="task.name"
+        :description="task.description"
+      />
     </el-header>
     <el-container class="public-screen__container">
       <el-main class="public-screen__main">
@@ -103,6 +131,10 @@ export default class PublicScreen extends Vue {
 
   readonly intervalTime = 10000;
   interval!: any;
+
+  get isModerator(): boolean {
+    return this.authHeaderTyp === EndpointAuthorisationType.MODERATOR;
+  }
 
   get taskId(): string | null {
     if (this.task) return this.task.id;
@@ -291,9 +323,36 @@ h3 {
 
   &__error {
     color: var(--color-primary); // white;
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
     padding-top: 5rem;
   }
+}
+
+@media screen and (max-width: 768px) {
+  .el-page-header {
+    padding: 1rem 2.5rem;
+    color: var(--color-primary);
+    text-transform: uppercase;
+  }
+
+  .public-screen {
+    overflow: auto;
+    &__header {
+      padding: 1rem 2.5rem;
+    }
+
+    &__container {
+      padding: 1rem 0;
+    }
+
+    &__main {
+      padding: 0 2.5rem;
+      margin: 0;
+    }
+  }
+}
+
+@media screen and (min-width: 769px), print {
 }
 </style>

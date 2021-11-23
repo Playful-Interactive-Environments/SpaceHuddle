@@ -50,7 +50,7 @@ export default class Menubar extends Vue {
           this.$router.resolve(
             `/public-screen/${this.sessionId}/${EndpointAuthorisationType.PARTICIPANT}`
           ).href,
-          '_blank'
+          '_self'
         );
         break;
       case 'join':
