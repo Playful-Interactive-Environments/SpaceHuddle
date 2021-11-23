@@ -8,6 +8,7 @@
       />
     </template>
     <div v-if="ideaPointer < ideas.length">
+      {{ $t('module.voting.slots.participant.info') }}
       <button
         v-for="(idea, index) in seats"
         :key="index"
@@ -18,7 +19,9 @@
         @click.prevent="vote(index + 1)"
       >
         <span v-if="idea">
-          {{ idea.keywords }}
+          {{ $t('module.voting.slots.participant.replace') }} "{{
+            idea.keywords
+          }}"
         </span>
         <span v-if="!idea">
           <font-awesome-icon icon="angle-double-left" />

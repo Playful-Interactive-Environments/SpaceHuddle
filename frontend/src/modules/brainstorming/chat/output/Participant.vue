@@ -34,7 +34,7 @@
           <span class="media-content"></span>
           <span class="media-right" v-if="newIdea.link">
             <img :src="newIdea.link" alt="idea image" />
-            <br/>
+            <br />
             <font-awesome-icon
               class="edit"
               icon="trash"
@@ -43,7 +43,7 @@
           </span>
           <span class="media-right" v-if="newIdea.image">
             <img :src="newIdea.image" alt="idea image" />
-            <br/>
+            <br />
             <font-awesome-icon
               class="edit"
               icon="trash"
@@ -116,7 +116,9 @@
             </div>
             <span class="info">
               {{
-                $t('module.brainstorming.default.participant.remainingCharacters')
+                $t(
+                  'module.brainstorming.default.participant.remainingCharacters'
+                )
               }}:
               {{ MAX_INPUT_LENGTH - formData.newIdeaInput.length }}
             </span>

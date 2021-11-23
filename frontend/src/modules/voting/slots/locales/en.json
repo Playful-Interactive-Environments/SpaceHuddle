@@ -10,7 +10,9 @@
   "participant": {
     "skip": "skip idea",
     "emptySlot": "insert idea to empty slot",
-    "thanks": "thanks for the vote"
+    "thanks": "thanks for the vote",
+    "replace": "replace",
+    "info": "Assign the first ideas to the slots and overwrite them as soon as a better idea is displayed. For each idea, check whether it is better than the ones already assigned. Each slot can be overwritten as often as you like, so that in the end only the best ones remain."
   },
   "moderatorContent": {
   },

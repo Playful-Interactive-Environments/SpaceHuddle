@@ -111,8 +111,8 @@ export default class ParticipantModuleDefaultContainer extends Vue {
   &__planetDiv {
     position: relative;
     left: 1rem;
-    width: 11rem;
-    height: 11rem;
+    width: 8rem;
+    height: 8rem;
     transition: transform 0.2;
 
     &--animation {
@@ -156,7 +156,7 @@ export default class ParticipantModuleDefaultContainer extends Vue {
 .grid-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  margin-top: 4rem;
+  margin-top: 3rem;
   padding: 1rem 2rem 0.7rem 2rem;
 }
 

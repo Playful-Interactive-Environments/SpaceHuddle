@@ -5,6 +5,7 @@ export interface Vote {
   ideaId: string;
   rating: number;
   detailRating: number;
+  timestamp: string;
 }
 
 export interface VoteResult {

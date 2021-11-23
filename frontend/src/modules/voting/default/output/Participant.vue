@@ -18,11 +18,34 @@
       <el-rate
         v-model:model-value="rate"
         :max="maxRate"
-        v-on:change="vote($event)"
+        v-on:change="saveVoting($event)"
       ></el-rate>
     </div>
     <div v-if="finished">
       {{ $t('module.voting.default.participant.thanks') }}
+    </div>
+    <br />
+    <br />
+    <div
+      class="media"
+      v-for="vote in votes.sort((a, b) =>
+        b.timestamp.localeCompare(a.timestamp)
+      )"
+      :key="vote.id"
+    >
+      <IdeaCard
+        v-if="voteIdea(vote.ideaId)"
+        class="media-left"
+        :idea="voteIdea(vote.ideaId)"
+        :is-selectable="false"
+        :is-editable="false"
+      />
+      <el-rate
+        class="media-content"
+        v-model:model-value="vote.rating"
+        :max="maxRate"
+        v-on:change="saveVoting($event, vote)"
+      ></el-rate>
     </div>
   </ParticipantModuleDefaultContainer>
 </template>
@@ -55,6 +78,7 @@ export default class Participant extends Vue {
   task: Task | null = null;
   module: Module | null = null;
   ideas: Idea[] = [];
+  allIdeas: Idea[] = [];
   votes: Vote[] = [];
   ideaPointer = 0;
   rate = 0;
@@ -68,11 +92,7 @@ export default class Participant extends Vue {
   }
 
   get finished(): boolean {
-    return (
-      this.votes.length > 0 &&
-      this.ideaPointer >= this.ideas.length &&
-      this.ideaPointer > 0
-    );
+    return this.votes.length > 0 && this.ideaPointer >= this.ideas.length;
   }
 
   mounted(): void {
@@ -82,6 +102,10 @@ export default class Participant extends Vue {
 
   startIdeaInterval(): void {
     this.interval = setInterval(this.reloadIdeas, this.intervalTime);
+  }
+
+  voteIdea(ideaId: string | null): Idea | undefined {
+    return this.allIdeas.find((idea) => idea.id === ideaId);
   }
 
   unmounted(): void {
@@ -160,6 +184,7 @@ export default class Participant extends Vue {
             EndpointAuthorisationType.PARTICIPANT
           )
           .then((ideas) => {
+            this.allIdeas = [...ideas];
             this.ideaPointer = ideas.length;
             this.ideas = ideas;
             this.getVotes();
@@ -168,25 +193,43 @@ export default class Participant extends Vue {
     }
   }
 
-  async vote(rate: number): Promise<void> {
-    if (this.ideaPointer < this.ideas.length) {
-      const idea = this.ideas[this.ideaPointer];
-      votingService
-        .postVote(this.taskId, {
-          ideaId: idea.id,
-          rating: rate,
-          detailRating: rate,
-        })
-        .then((vote) => {
-          this.votes.push(vote);
-        });
-      setTimeout(() => {
-        this.rate = 0;
-        this.ideaPointer++;
-      }, 2000);
-    }
+  scrollToTop(delay = 100): void {
+    const element = document.getElementsByClassName('half-card')[0];
+    setTimeout(() => {
+      element.scrollTop = 0;
+    }, delay);
+  }
+
+  async saveVoting(rate: number, vote: Vote | null = null): Promise<void> {
+    setTimeout(() => {
+      if (!vote) {
+        if (this.ideaPointer < this.ideas.length) {
+          const idea = this.ideas[this.ideaPointer];
+          votingService
+            .postVote(this.taskId, {
+              ideaId: idea.id,
+              rating: rate,
+              detailRating: rate,
+            })
+            .then((vote) => {
+              this.votes.push(vote);
+            });
+          this.rate = 0;
+          this.ideaPointer++;
+          this.scrollToTop(0);
+        }
+      } else {
+        vote.rating = rate;
+        vote.detailRating = rate;
+        votingService.putVote(vote.id, vote);
+      }
+    }, 1000);
   }
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.media-left {
+  width: 10rem;
+}
+</style>
