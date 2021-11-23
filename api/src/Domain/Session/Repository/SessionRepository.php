@@ -7,6 +7,7 @@ use App\Domain\Base\Repository\KeyGeneratorTrait;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Module\Repository\ModuleRepository;
+use App\Domain\Participant\Data\ParticipantInfoData;
 use App\Domain\Participant\Repository\ParticipantRepository;
 use App\Domain\Task\Data\TaskData;
 use App\Domain\Topic\Repository\TopicRepository;
@@ -149,7 +150,7 @@ class SessionRepository implements RepositoryInterface
     }
 
     /**
-     * Get entity by ID.
+     * Get list of entities for the parent ID.
      * @param string $parentId The entity parent ID.
      * @return array<SessionData> The result entity list.
      * @throws GenericException
@@ -159,6 +160,55 @@ class SessionRepository implements RepositoryInterface
         $result = $this->get([
             #"session_permission.user_state" => "active"
         ]);
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
+    }
+
+    /**
+     * Get list of entities for the connection keys.
+     * @param string $parentId The entity parent ID.
+     * @return array<SessionData> The result entity list.
+     * @throws GenericException
+     */
+    public function getListByKeys(array $keys): array
+    {
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["connection_key", "title"])
+            ->andWhere(["expiration_date >= current_timestamp()"])
+            ->whereInList("connection_key", $keys);
+
+        $rows = $query->execute()->fetchAll("assoc");
+        if (is_array($rows) and sizeof($rows) > 0) {
+            $result = [];
+            foreach ($rows as $resultItem) {
+                array_push($result, $resultItem);
+            }
+            return $result;
+        }
+        return [];
+    }
+
+    /**
+     * Get list of participants for the session ID.
+     * @param string $sessionId The session ID.
+     * @return array<ParticipantInfoData> The result entity list.
+     */
+    public function getParticipants(string $sessionId): array
+    {
+        $query = $this->queryFactory->newSelect("participant");
+        $query->select(["participant.*", "COUNT(*) AS idea_count"])
+            ->innerJoin("idea", "idea.participant_id = participant.id")
+            ->andWhere([
+                "session_id" => $sessionId,
+            ])
+            ->group(["participant.id"]);
+
+        $result = $this->fetchAll($query, ParticipantInfoData::class);
+
         if (is_array($result)) {
             return $result;
         } elseif (isset($result)) {

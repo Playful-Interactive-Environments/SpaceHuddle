@@ -169,7 +169,7 @@ class IdeaRepository implements RepositoryInterface
     }
 
     /**
-     * Get entity by ID.
+     * Get list of entities for the parent ID.
      * @param string $parentId The entity parent ID.
      * @param string|null $orderType The order by type (value of IdeaSortOrder).
      * @param string|null $refId The referenced taskId for sorting by categories.

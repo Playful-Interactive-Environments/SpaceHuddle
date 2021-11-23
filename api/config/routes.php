@@ -49,6 +49,8 @@ use App\Action\Selection\SelectionUpdateAction;
 use App\Action\Session\PublicScreenReadAction;
 use App\Action\Session\PublicScreenUpdateAction;
 use App\Action\Session\SessionDeleteAction;
+use App\Action\Session\SessionParticipantReadAction;
+use App\Action\Session\SessionReadInfosAction;
 use App\Action\Session\SessionUpdateAction;
 use App\Action\SessionRole\SessionRoleCreateAction;
 use App\Action\SessionRole\SessionRoleDeleteAction;
@@ -139,6 +141,13 @@ return function (App $app) {
     )->add(JwtAuthMiddleware::class);
 
     $app->group(
+        "/session-infos",
+        function (RouteCollectorProxy $app) {
+            $app->post("[/]", SessionReadInfosAction::class);
+        }
+    );
+
+    $app->group(
         "/sessions",
         function (RouteCollectorProxy $app) {
             $app->get("[/]", SessionReadAllAction::class);
@@ -162,6 +171,8 @@ return function (App $app) {
             $app->delete("/{sessionId}/authorized_user/{username}[/]", SessionRoleDeleteAction::class);
             $app->get("/{sessionId}/own_user_role[/]", SessionRoleReadSingleAction::class);
             $app->get("/{sessionId}/authorized_users[/]", SessionRoleReadAllAction::class);
+
+            $app->get("/{sessionId}/participants[/]", SessionParticipantReadAction::class);
 
             $app->post("[/]", SessionCreateAction::class);
             $app->get("/{id}[/]", SessionReadSingleAction::class);
