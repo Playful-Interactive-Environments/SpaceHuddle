@@ -7,6 +7,7 @@ export interface Avatar {
   color: string;
   symbol: string;
 }
+
 export interface Participant {
   participant: {
     id: string;
@@ -20,4 +21,14 @@ export interface Participant {
     tokenType: string;
     expiresIn: number;
   };
+}
+
+export interface ParticipantInfo {
+  participant: {
+    id: string;
+    browserKey: string;
+    state: ConnectState;
+    avatar: Avatar;
+  };
+  idea_count: number;
 }

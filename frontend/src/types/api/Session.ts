@@ -13,3 +13,8 @@ export interface Session {
   topicCount: number;
   taskCount: number;
 }
+
+export interface SessionInfo {
+  connectionKey: string;
+  title: string;
+}

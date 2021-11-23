@@ -18,6 +18,7 @@ enum EndpointType {
   SELECTIONS = 'selections',
   SESSION = 'session',
   SESSIONS = 'sessions',
+  SESSION_INFOS = 'session_infos',
   TASK = 'task',
   TASKS = 'tasks',
   TOPIC = 'topic',
