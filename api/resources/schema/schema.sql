@@ -234,7 +234,8 @@ CREATE TABLE `vote` (
                         `participant_id` char(36) DEFAULT NULL,
                         `idea_id` char(36) NOT NULL,
                         `rating` int(11) NOT NULL,
-                        `detail_rating` float DEFAULT NULL
+                        `detail_rating` float DEFAULT NULL,
+                        `timestamp` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --

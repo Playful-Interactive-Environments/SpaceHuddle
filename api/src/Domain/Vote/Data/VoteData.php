@@ -39,6 +39,13 @@ class VoteData
     public ?float $detailRating;
 
     /**
+     * Time of idea storage.
+     * @var string|null
+     * @OA\Property(format="date")
+     */
+    public ?string $timestamp;
+
+    /**
      * Creates a new vote.
      * @param array $data Vote data.
      */
@@ -49,5 +56,6 @@ class VoteData
         $this->ideaId = $reader->findString("idea_id");
         $this->rating = $reader->findInt("rating");
         $this->detailRating = $reader->findFloat("detail_rating");
+        $this->timestamp = $reader->findString("timestamp");
     }
 }
