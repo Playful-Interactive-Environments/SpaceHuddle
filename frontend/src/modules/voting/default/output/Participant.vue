@@ -229,7 +229,7 @@ export default class Participant extends Vue {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .media-left {
   width: 50%;
 }
@@ -242,6 +242,12 @@ export default class Participant extends Vue {
 .el-divider {
   background-color: var(--color-primary);
   height: 2px;
+}
+
+.el-rate {
+  --el-rate-font-size: 2rem;
+  --el-rate-icon-size: 2rem;
+  height: unset;
 }
 
 @media only screen and (max-width: 400px) {
