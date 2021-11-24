@@ -502,16 +502,18 @@ export default class TaskSettings extends Vue {
     );
 
     this.participantModuleList = {};
-    this.moduleKeyList.forEach((moduleName) => {
-      this.participantModuleList[moduleName] = false;
-      hasModule(
-        ModuleComponentType.PARTICIPANT,
-        TaskType[this.formData.taskType],
-        moduleName
-      ).then((result) => {
-        this.participantModuleList[moduleName] = result;
+    if (this.moduleKeyList) {
+      this.moduleKeyList.forEach((moduleName) => {
+        this.participantModuleList[moduleName] = false;
+        hasModule(
+          ModuleComponentType.PARTICIPANT,
+          TaskType[this.formData.taskType],
+          moduleName
+        ).then((result) => {
+          this.participantModuleList[moduleName] = result;
+        });
       });
-    });
+    }
   }
 
   reset(): void {
