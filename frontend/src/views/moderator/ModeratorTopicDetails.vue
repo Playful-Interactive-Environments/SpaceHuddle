@@ -34,14 +34,6 @@
       </Sidebar>
     </template>
     <template v-slot:content>
-      <!--<TaskTimeline
-        v-if="tasks"
-        :topic-id="topicId"
-        :session-id="sessionId"
-        :active="activeTaskIndex"
-        v-on:changeActiveElement="changeTask"
-      ></TaskTimeline>
-      <el-divider></el-divider>-->
       <el-tabs v-model="activeTab">
         <el-tab-pane
           v-for="taskType in Object.values(TaskType)"
@@ -274,6 +266,14 @@ export default class ModeratorTopicDetails extends Vue {
         this.activeTab = TaskType[activeTask.taskType];
       }
     });
+  }
+
+  @Watch('activeTab', { immediate: true })
+  onActiveTabChanged(): void {
+    const activeTabTask = this.tasks.find(
+      (task) => TaskType[task.taskType] === this.activeTab
+    );
+    if (activeTabTask) this.changeTask(activeTabTask);
   }
 
   /*@Watch('activeTask', { immediate: true })
