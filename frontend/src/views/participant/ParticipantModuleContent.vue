@@ -79,6 +79,8 @@ export default class ParticipantModuleContent extends Vue {
   moduleName = '';
   componentLoadIndex = 0;
   componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
+  readonly intervalTime = 10000;
+  interval!: any;
 
   modules: Module[] = [];
   loadUsedModules(): void {
@@ -102,10 +104,22 @@ export default class ParticipantModuleContent extends Vue {
 
   mounted(): void {
     this.loadDefaultModule();
+    this.startModuleInterval();
+  }
+
+  startModuleInterval(): void {
+    this.interval = setInterval(this.checkModuleState, this.intervalTime);
   }
 
   unmounted(): void {
     this.loadDefaultModule();
+    clearInterval(this.interval);
+  }
+
+  checkModuleState(): void {
+    taskService.getTaskById(this.taskId).then((task) => {
+      if (!taskService.isActive(task)) this.$router.go(-1);
+    });
   }
 
   loadDefaultModule(): void {
