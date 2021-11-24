@@ -223,6 +223,11 @@ export default class TaskTimeline extends Vue {
     return [];
   }
 
+  set activePageTasks(tasks: Task[]) {
+    if (this.pages.length > 0 && this.pages.length >= this.activePage)
+      this.pages[this.activePage - 1] = tasks;
+  }
+
   @Watch('topicId', { immediate: true })
   async onTopicIdChanged(): Promise<void> {
     await this.getTasks();
@@ -254,7 +259,7 @@ export default class TaskTimeline extends Vue {
   }
 
   dragDone(): void {
-    const tasks = this.tasks;
+    const tasks = this.activePageTasks;
     if (tasks) {
       for (let i = 0; i < tasks.length; i++) {
         tasks[i].order = i;
