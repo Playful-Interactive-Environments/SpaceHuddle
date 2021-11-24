@@ -200,6 +200,10 @@ export default class ModeratorTopicDetails extends Vue {
       const activeId = this.activeTask.id;
       return this.tasks.findIndex((t) => t.id == activeId);
     }
+    const index = this.tasks.findIndex(
+      (t) => TaskType[t.taskType] === TaskType.BRAINSTORMING
+    );
+    if (index) return index;
     return 0;
   }
 
