@@ -2,13 +2,14 @@ import { Task } from '@/types/api/Task';
 import {
   apiExecuteDelete,
   apiExecuteGetHandled,
-  apiExecutePost, apiExecutePostHandled,
+  apiExecutePost,
+  apiExecutePostHandled,
   apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import {Session, SessionInfo} from '@/types/api/Session';
-import {ParticipantInfo} from "@/types/api/Participant";
+import { Session, SessionInfo } from '@/types/api/Session';
+import { ParticipantInfo } from '@/types/api/Participant';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -102,9 +103,9 @@ export const getSessionInfos = async (
 export const getParticipants = async (
   sessionId: string,
   authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<ParticipantInfo | null> => {
-  return await apiExecuteGetHandled<ParticipantInfo>(
-    `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PARTICIPANT}/`,
+): Promise<ParticipantInfo[]> => {
+  return await apiExecuteGetHandled<ParticipantInfo[]>(
+    `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PARTICIPANTS}/`,
     null,
     authHeaderType
   );

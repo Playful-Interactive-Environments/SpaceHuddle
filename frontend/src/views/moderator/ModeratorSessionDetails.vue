@@ -16,6 +16,20 @@
           </span>
           <ModuleCount :session="session" />
         </template>
+        <template #mainContent>
+          <el-space wrap class="participant-list">
+            <el-badge
+              v-for="participant in participants"
+              :key="participant.id"
+              :value="participant.ideaCount"
+            >
+              <font-awesome-icon
+                :icon="participant.avatar.symbol"
+                :style="{ color: participant.avatar.color }"
+              ></font-awesome-icon>
+            </el-badge>
+          </el-space>
+        </template>
         <template #footerContent>
           <SessionCode :code="session.connectionKey" />
           <router-link
@@ -100,6 +114,7 @@ import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import TopicCard from '@/components/moderator/organisms/cards/TopicCard.vue';
+import { ParticipantInfo } from '@/types/api/Participant';
 
 @Options({
   components: {
@@ -129,6 +144,9 @@ export default class ModeratorSessionDetails extends Vue {
   formatDate = formatDate;
   editTopicId = '';
   publicScreenTopic = '';
+  participants: ParticipantInfo[] = [];
+  readonly intervalTime = 3000;
+  interval!: any;
 
   TaskType = TaskType;
 
@@ -146,6 +164,15 @@ export default class ModeratorSessionDetails extends Vue {
       await this.changePublicScreen(id as string);
     });
     await this.getTopics();
+    this.startIdeaInterval();
+  }
+
+  startIdeaInterval(): void {
+    this.interval = setInterval(this.getParticipants, this.intervalTime);
+  }
+
+  unmounted(): void {
+    clearInterval(this.interval);
   }
 
   async changePublicScreen(id: string | null): Promise<void> {
@@ -165,6 +192,12 @@ export default class ModeratorSessionDetails extends Vue {
         });
         this.getPublicScreen();
       });
+    });
+  }
+
+  async getParticipants(): Promise<void> {
+    sessionService.getParticipants(this.sessionId).then((queryResult) => {
+      this.participants = queryResult;
     });
   }
 
@@ -222,5 +255,16 @@ export default class ModeratorSessionDetails extends Vue {
 
 .expired {
   color: var(--color-red);
+}
+
+.participant-list::v-deep {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  font-size: 1.5rem;
+
+  .el-space__item {
+    padding-top: 1rem;
+    padding-right: 1rem;
+  }
 }
 </style>

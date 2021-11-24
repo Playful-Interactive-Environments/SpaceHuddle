@@ -24,11 +24,9 @@ export interface Participant {
 }
 
 export interface ParticipantInfo {
-  participant: {
-    id: string;
-    browserKey: string;
-    state: ConnectState;
-    avatar: Avatar;
-  };
-  idea_count: number;
+  id: string;
+  browserKey: string;
+  state: ConnectState;
+  avatar: Avatar;
+  ideaCount: number;
 }
