@@ -9,6 +9,7 @@ use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Module\Repository\ModuleRepository;
 use App\Domain\Participant\Data\ParticipantInfoData;
 use App\Domain\Participant\Repository\ParticipantRepository;
+use App\Domain\Session\Data\SessionInfo;
 use App\Domain\Task\Data\TaskData;
 use App\Domain\Topic\Repository\TopicRepository;
 use App\Domain\User\Repository\UserRepository;
@@ -185,7 +186,7 @@ class SessionRepository implements RepositoryInterface
         if (is_array($rows) and sizeof($rows) > 0) {
             $result = [];
             foreach ($rows as $resultItem) {
-                array_push($result, $resultItem);
+                array_push($result, new SessionInfo($resultItem));
             }
             return $result;
         }
