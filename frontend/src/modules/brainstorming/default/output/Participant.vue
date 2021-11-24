@@ -1,5 +1,13 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
+    <div class="media">
+      <span class="media-content"></span>
+      <el-badge
+        class="link media-right"
+        :value="ideas.length"
+        v-on:click="showHistory = true"
+      ></el-badge>
+    </div>
     <template v-slot:planet>
       <transition name="fade" v-for="(planet, index) in planets" :key="index">
         <img
@@ -131,6 +139,22 @@
         ref="upload"
       ></my-upload>
     </ValidationForm>
+    <el-drawer
+      class="idea-list"
+      v-model="showHistory"
+      :title="$t('module.brainstorming.default.participant.ideas')"
+      size="50%"
+    >
+      <IdeaCard
+        v-for="idea in ideas"
+        :key="idea.id"
+        :idea="idea"
+        :is-selectable="false"
+        :is-editable="true"
+        :canChangeState="false"
+      >
+      </IdeaCard>
+    </el-drawer>
   </ParticipantModuleDefaultContainer>
 </template>
 
@@ -152,10 +176,17 @@ import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import { ValidationData } from '@/types/ui/ValidationRule';
 import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 import { submitOnEnter } from '@/types/ui/submit';
-import { MAX_DESCRIPTION_LENGTH, MAX_KEYWORDS_LENGTH } from '@/types/api/Idea';
+import {
+  Idea,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_KEYWORDS_LENGTH,
+} from '@/types/api/Idea';
+import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 
 @Options({
   components: {
+    IdeaCard,
     ParticipantModuleDefaultContainer,
     ValidationForm,
     ImagePicker,
@@ -170,6 +201,8 @@ export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
   module: Module | null = null;
+  ideas: Idea[] = [];
+  showHistory = false;
 
   MAX_KEYWORDS_LENGTH = MAX_KEYWORDS_LENGTH;
   MAX_DESCRIPTION_LENGTH = MAX_DESCRIPTION_LENGTH;
@@ -201,6 +234,11 @@ export default class Participant extends Vue {
   @Watch('moduleId', { immediate: true })
   onModuleIdChanged(): void {
     this.getModule();
+  }
+
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    this.getTaskIdeas();
   }
 
   async getModule(): Promise<void> {
@@ -250,6 +288,7 @@ export default class Participant extends Vue {
             center: true,
             showClose: true,
           });
+          this.ideas.splice(0, 0, queryResult);
         },
         (error) => {
           this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
@@ -285,6 +324,19 @@ export default class Participant extends Vue {
   deleteImage(): void {
     this.formData.imgDataUrl = null;
     this.formData.imageWebLink = null;
+  }
+
+  async getTaskIdeas(): Promise<void> {
+    ideaService
+      .getIdeasForTask(
+        this.taskId,
+        IdeaSortOrder.TIMESTAMP,
+        null,
+        EndpointAuthorisationType.PARTICIPANT
+      )
+      .then((queryResult) => {
+        this.ideas = queryResult.filter((idea) => idea.isOwn).reverse();
+      });
   }
 }
 </script>
@@ -322,5 +374,9 @@ export default class Participant extends Vue {
   font-size: 12px;
   line-height: 1;
   padding-top: 4px;
+}
+
+.el-card {
+  margin: 1rem;
 }
 </style>

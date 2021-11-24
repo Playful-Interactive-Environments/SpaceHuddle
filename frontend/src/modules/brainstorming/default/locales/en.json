@@ -12,7 +12,8 @@
     "submit": "Submit idea",
     "startGame": "No ideas? Get inspired!",
     "linkInfo": "part image url from web",
-    "remainingCharacters":  "remaining characters "
+    "remainingCharacters":  "remaining characters ",
+    "ideas": "your ideas"
   },
   "moderatorContent": {
     "sortOrder": "order by",
