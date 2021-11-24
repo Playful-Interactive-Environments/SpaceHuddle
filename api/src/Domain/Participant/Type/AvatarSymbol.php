@@ -40,7 +40,6 @@ class AvatarSymbol
     public const CAR = "car";
     public const CARROT = "carrot";
     public const CAT = "cat";
-    public const CENTOS = "centos";
     public const CERTIFICATE = "certificate";
     public const CHAIR = "chair";
     public const CHEESE = "cheese";
@@ -71,7 +70,6 @@ class AvatarSymbol
     public const FISH = "fish";
     public const FLAG = "flag";
     public const FLUSHED = "flushed";
-    public const FLY = "fly";
     public const FROG = "frog";
     public const FUTBOL = "futbol";
     public const GAMEPAD = "gamepad";
@@ -114,7 +112,6 @@ class AvatarSymbol
     public const SPIDER = "spider";
     public const STAR = "star";
     public const SUN = "sun";
-    public const SUSE = "suse";
     public const TOOTH = "tooth";
     public const TRACTOR = "tractor";
     public const TRAIN = "train";
