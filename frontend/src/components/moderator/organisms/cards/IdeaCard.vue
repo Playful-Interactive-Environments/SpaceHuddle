@@ -11,13 +11,19 @@
     }"
     :body-style="{ padding: '0px' }"
   >
-    <img v-if="idea.image" :src="idea.image" class="card__image" />
-    <img v-if="idea.link && !idea.image" :src="idea.link" class="card__image" />
+    <img v-if="idea.image" :src="idea.image" class="card__image" alt="" />
+    <img
+      v-if="idea.link && !idea.image"
+      :src="idea.link"
+      class="card__image"
+      alt=""
+    />
     <div class="card__text">
       <div class="card__title">
         {{ hasKeywords ? idea.keywords : idea.description }}
         <span class="actions">
           <slot name="action"></slot>
+          <font-awesome-icon :icon="stateIcon" :style="{ color: stateColor }" />
           <el-dropdown
             v-if="isEditable"
             class="card__menu"
@@ -98,6 +104,34 @@ export default class IdeaCard extends Vue {
   showSettings = false;
 
   IdeaStates = IdeaStates;
+
+  get stateIcon(): string {
+    switch (IdeaStates[this.idea.state]) {
+      case IdeaStates.NEW:
+        return 'circle';
+      case IdeaStates.INAPPROPRIATE:
+        return 'times';
+      case IdeaStates.DUPLICATE:
+        return 'clone';
+      case IdeaStates.HANDLED:
+        return 'check';
+    }
+    return '';
+  }
+
+  get stateColor(): string {
+    switch (IdeaStates[this.idea.state]) {
+      case IdeaStates.NEW:
+        return '#f1be3a';
+      case IdeaStates.INAPPROPRIATE:
+        return '#fe6e5d';
+      case IdeaStates.DUPLICATE:
+        return '#01cf9e';
+      case IdeaStates.HANDLED:
+        return '#999999';
+    }
+    return '#999999';
+  }
 
   get isNew(): boolean {
     if (this.idea) return IdeaStates[this.idea.state] == IdeaStates.NEW;
