@@ -1,22 +1,20 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
-    <div class="media">
-      <span class="media-content"></span>
+    <template v-slot:planet>
       <el-badge
         class="link media-right"
         :value="ideas.length"
         v-on:click="showHistory = true"
-      ></el-badge>
-    </div>
-    <template v-slot:planet>
-      <transition name="fade" v-for="(planet, index) in planets" :key="index">
-        <img
-          v-if="activePlanetIndex === index"
-          :src="planets[index]"
-          alt="planet"
-          class="brainstorming__planet"
-        />
-      </transition>
+      >
+        <transition name="fade" v-for="(planet, index) in planets" :key="index">
+          <img
+            v-if="activePlanetIndex === index"
+            :src="planets[index]"
+            alt="planet"
+            class="brainstorming__planet"
+          />
+        </transition>
+      </el-badge>
     </template>
     <ValidationForm
       :form-data="formData"
@@ -140,20 +138,22 @@
       ></my-upload>
     </ValidationForm>
     <el-drawer
-      class="idea-list"
       v-model="showHistory"
       :title="$t('module.brainstorming.default.participant.ideas')"
-      size="50%"
+      size="70%"
     >
-      <IdeaCard
-        v-for="idea in ideas"
-        :key="idea.id"
-        :idea="idea"
-        :is-selectable="false"
-        :is-editable="true"
-        :canChangeState="false"
-      >
-      </IdeaCard>
+      <div class="layout__columns">
+        <IdeaCard
+          v-for="idea in ideas"
+          :key="idea.id"
+          :idea="idea"
+          :is-selectable="false"
+          :is-editable="true"
+          :canChangeState="false"
+          @ideaDeleted="getTaskIdeas"
+        >
+        </IdeaCard>
+      </div>
     </el-drawer>
   </ParticipantModuleDefaultContainer>
 </template>
@@ -222,7 +222,6 @@ export default class Participant extends Vue {
   showUploadDialog = false;
   showLinkInput = false;
 
-  activePlanetIndex = 0;
   planets = [
     require('@/assets/illustrations/planets/brainstorming01.png'),
     require('@/assets/illustrations/planets/brainstorming02.png'),
@@ -300,10 +299,13 @@ export default class Participant extends Vue {
     return this.formData.description.length > MAX_KEYWORDS_LENGTH;
   }
 
+  get activePlanetIndex(): number {
+    if (this.ideas.length < this.planets.length) return this.ideas.length;
+    return this.planets.length - 1;
+  }
+
   setNewPlanet(): void {
-    if (this.activePlanetIndex < this.planets.length - 1) {
-      this.activePlanetIndex++;
-    } else {
+    if (this.ideas.length >= this.planets.length) {
       this.scalePlanet = true;
       setTimeout(() => {
         this.scalePlanet = false;
@@ -376,7 +378,18 @@ export default class Participant extends Vue {
   padding-top: 4px;
 }
 
-.el-card {
-  margin: 1rem;
+.layout__columns {
+  padding: 1rem;
+}
+
+.el-badge::v-deep {
+  .el-badge__content--primary {
+    right: calc(1rem + var(--el-badge-size) / 2);
+    top: calc(1rem + var(--el-badge-size) / 2);
+    background-color: white;
+    color: var(--color-mint-dark);
+    font-weight: var(--font-weight-bold);
+    font-size: 1rem;
+  }
 }
 </style>

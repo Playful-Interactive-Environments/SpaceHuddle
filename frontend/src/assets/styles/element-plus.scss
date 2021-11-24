@@ -284,6 +284,10 @@ $--font-size: (
         margin-bottom: 10px;
 }
 
+.el-message-box {
+        max-width: 100vw;
+}
+
 .el-drawer {
         --el-drawer-background-color: var(--color-background-gray);
         overflow: auto;
