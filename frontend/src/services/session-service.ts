@@ -92,8 +92,8 @@ export const displayOnPublicScreen = async (
 export const getSessionInfos = async (
   connection_keys: string[],
   authHeaderType = EndpointAuthorisationType.UNAUTHORISED
-): Promise<SessionInfo | null> => {
-  return await apiExecutePostHandled<SessionInfo>(
+): Promise<SessionInfo[]> => {
+  return await apiExecutePostHandled<SessionInfo[]>(
     `/${EndpointType.SESSION_INFOS}/`,
     connection_keys,
     authHeaderType

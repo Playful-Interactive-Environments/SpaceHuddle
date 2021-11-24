@@ -5,7 +5,8 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 const JWT_KEY = 'jwt';
 const JWT_KEY_MODERATOR = 'jwt-moderator';
 const JWT_KEY_PARTICIPANT = 'jwt-participant';
-const BROWSER_KEY = 'key';
+const BROWSER_KEYS = 'keys';
+const LAST_BROWSER_KEY = 'key';
 const USER_KEY = 'user';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -89,11 +90,24 @@ export const removeAccessTokenModerator = (): void => {
 };
 
 export const setBrowserKey = (key: string): void => {
-  app.config.globalProperties.$cookies.set(BROWSER_KEY, key);
+  app.config.globalProperties.$cookies.set(LAST_BROWSER_KEY, key);
+  const keys = getBrowserKeys();
+  if (!keys.includes(key)) keys.push(key);
+  app.config.globalProperties.$cookies.set(BROWSER_KEYS, JSON.stringify(keys));
 };
 
-export const getBrowserKey = (): string | null => {
-  return app.config.globalProperties.$cookies.get(BROWSER_KEY);
+export const getBrowserKeys = (): string[] => {
+  let keys = eval(app.config.globalProperties.$cookies.get(BROWSER_KEYS));
+  if (!keys || !Array.isArray(keys) || keys.length === 0) {
+    const key = getLastBrowserKey();
+    if (!key) keys = [];
+    else keys = [key];
+  }
+  return keys;
+};
+
+export const getLastBrowserKey = (): string | null => {
+  return app.config.globalProperties.$cookies.get(LAST_BROWSER_KEY);
 };
 
 export const setUserData = (email: string): void => {

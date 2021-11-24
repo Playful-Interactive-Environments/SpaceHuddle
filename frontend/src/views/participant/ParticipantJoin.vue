@@ -21,19 +21,27 @@
           submit-label-key="participant.view.join.submit"
           v-on:submitDataValid="connectToSession"
         >
-          <el-form-item
-            prop="connectionKey"
-            :rules="[defaultFormRules.ruleRequired]"
-          >
+          <el-form-item prop="browserKey" v-if="browserKeyIsSet">
+            <el-select v-model="formData.browserKey">
+              <el-option
+                v-for="info in recentlyUsedKeys"
+                :key="info.connectionKey"
+                :label="info.title"
+                :value="info.connectionKey"
+              >
+              </el-option>
+            </el-select>
+            <p class="join__info">
+              {{ $t('participant.view.join.browserKeyInfo') }}
+            </p>
+          </el-form-item>
+          <el-form-item prop="connectionKey" :rules="validateRules">
             <el-input
               v-model="formData.connectionKey"
               name="connectionKey"
               autocomplete="on"
               :placeholder="$t('participant.view.join.pinInfo')"
             />
-            <p v-if="browserKeyIsSet" class="join__info">
-              {{ $t('participant.view.join.browserKeyInfo') }}
-            </p>
           </el-form-item>
         </ValidationForm>
       </main>
@@ -49,8 +57,10 @@ import * as authService from '@/services/auth-service';
 import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
-import { ValidationData } from '@/types/ui/ValidationRule';
+import { ValidationData, ValidationRule } from '@/types/ui/ValidationRule';
 import { Prop } from 'vue-property-decorator';
+import * as sessionService from '@/services/session-service';
+import { SessionInfo } from '@/types/api/Session';
 
 @Options({
   components: {
@@ -60,26 +70,66 @@ import { Prop } from 'vue-property-decorator';
 export default class ParticipantJoin extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
   @Prop({ default: '' }) readonly connectionKey!: string;
+  recentlyUsedKeys: SessionInfo[] = [];
 
   formData: ValidationData = {
     connectionKey: '',
+    browserKey: '',
   };
 
+  get validateRules(): ValidationRule[] {
+    if (this.recentlyUsedKeys.length === 0)
+      return [this.defaultFormRules.ruleRequired];
+    return [];
+  }
+
   mounted(): void {
-    const browserKeyLS = authService.getBrowserKey();
-    if (browserKeyLS) this.formData.connectionKey = browserKeyLS;
+    const browserKeys = authService.getBrowserKeys();
+    const connectionKeys = browserKeys.map((bKey) => bKey.split('.')[0]);
+    sessionService.getSessionInfos(connectionKeys).then((infos) => {
+      infos.forEach((info) => {
+        const bKey = browserKeys.find((bKey) =>
+          bKey.startsWith(info.connectionKey)
+        );
+        if (bKey) info.connectionKey = bKey;
+      });
+      this.recentlyUsedKeys = infos;
+      const lastBrowserKey = authService.getLastBrowserKey();
+      if (lastBrowserKey) this.formData.browserKey = lastBrowserKey;
+
+      if (this.connectionKey) {
+        const rejoinByUrlKey = infos.find((info) =>
+          info.connectionKey.startsWith(this.connectionKey)
+        );
+        if (rejoinByUrlKey) {
+          this.formData.browserKey = rejoinByUrlKey.connectionKey;
+          this.formData.connectionKey = '';
+        }
+      }
+    });
 
     if (this.connectionKey) this.formData.connectionKey = this.connectionKey;
   }
 
   get browserKeyIsSet(): boolean {
-    const browserKeyLS = authService.getBrowserKey();
-    return this.formData.connectionKey === browserKeyLS;
+    return this.recentlyUsedKeys.length > 0;
   }
 
   async connectToSession(): Promise<void> {
-    if (this.formData.connectionKey.includes('.')) {
-      participantService.reconnect(this.formData.connectionKey).then(
+    let connectionKey = this.formData.connectionKey
+      ? this.formData.connectionKey
+      : this.formData.browserKey;
+    if (!connectionKey.includes('.')) {
+      const recentlyUsedKey = this.recentlyUsedKeys.find((info) =>
+        info.connectionKey.startsWith(connectionKey)
+      );
+      if (recentlyUsedKey) {
+        connectionKey = recentlyUsedKey.connectionKey;
+      }
+    }
+
+    if (connectionKey.includes('.')) {
+      participantService.reconnect(connectionKey).then(
         (queryResult) => {
           this.handleConnectionResult(queryResult);
         },
@@ -88,7 +138,7 @@ export default class ParticipantJoin extends Vue {
         }
       );
     } else {
-      participantService.connect(this.formData.connectionKey).then(
+      participantService.connect(connectionKey).then(
         (queryResult) => {
           this.handleConnectionResult(queryResult);
         },
@@ -142,5 +192,9 @@ export default class ParticipantJoin extends Vue {
     line-height: 2rem;
     padding-top: 1rem;
   }
+}
+
+.el-select {
+  width: 100%;
 }
 </style>

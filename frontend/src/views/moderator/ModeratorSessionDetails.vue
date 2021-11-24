@@ -9,7 +9,7 @@
         v-on:delete="deleteSession"
       >
         <template #headerContent>
-          <span :class="{expired: isExpired}">
+          <span :class="{ expired: isExpired }">
             {{
               $t('moderator.organism.settings.sessionSettings.expirationDate')
             }}: {{ formatDate(session.expirationDate) }}
@@ -133,6 +133,7 @@ import { ParticipantInfo } from '@/types/api/Participant';
     TaskTimeline,
   },
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorSessionDetails extends Vue {
   @Prop() readonly sessionId!: string;
 
