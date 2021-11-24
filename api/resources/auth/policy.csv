@@ -62,7 +62,7 @@ p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:id/, GET
 p, MODERATOR, /session/:id/, DELETE
 p, MODERATOR, /session/, PUT
 p, MODERATOR, /session/, POST
-p, UNKNOWN|MODERATOR|FACILITATOR|PARTICIPANT, /session-infos/, POST
+p, UNKNOWN|MODERATOR|FACILITATOR|PARTICIPANT, /session_infos/, POST
 p, MODERATOR|FACILITATOR, /session/:sessionId/participants/, GET
 
 p, MODERATOR, /session/:sessionId/public_screen/:taskId/, PUT

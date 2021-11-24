@@ -12,7 +12,7 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for reading a list of all the sessions for which the user is authorized.
  *
  * @OA\POST(
- *   path="/session-infos/",
+ *   path="/session_infos/",
  *   summary="List of all session infos for the connection keys.",
  *   tags={"Session"},
  *   @OA\RequestBody(

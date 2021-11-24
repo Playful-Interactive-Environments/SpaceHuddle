@@ -141,7 +141,7 @@ return function (App $app) {
     )->add(JwtAuthMiddleware::class);
 
     $app->group(
-        "/session-infos",
+        "/session_infos",
         function (RouteCollectorProxy $app) {
             $app->post("[/]", SessionReadInfosAction::class);
         }
