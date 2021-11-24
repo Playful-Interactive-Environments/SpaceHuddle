@@ -11,7 +11,7 @@
         :is-editable="false"
       />
     </section>
-    <section class="layout__columns" v-if="isModerator">
+    <section class="layout__columns new" v-if="isModerator">
       <IdeaCard
         v-for="(idea, index) in newIdeas"
         :idea="idea"
@@ -124,5 +124,9 @@ export default class PublicScreen extends Vue {
 .public-screen__content {
   display: grid;
   grid-template-columns: 80% 20%;
+}
+
+.new {
+  padding-left: 1rem;
 }
 </style>
