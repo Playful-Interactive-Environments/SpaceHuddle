@@ -59,7 +59,11 @@
           </el-dropdown>
         </span>
       </div>
-      <div v-if="hasKeywords && idea.description" class="card__content">
+      <div
+        v-if="hasKeywords && idea.description"
+        class="card__content"
+        :class="{ 'cut-text': cutLongTexts }"
+      >
         {{ idea.description }}
       </div>
     </div>
@@ -90,6 +94,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: false }) isSelectable!: boolean;
   @Prop({ default: false, reactive: true }) isSelected!: boolean;
   @Prop({ default: false }) isDraggable!: boolean;
+  @Prop({ default: false }) cutLongTexts!: boolean;
   showSettings = false;
 
   IdeaStates = IdeaStates;
@@ -183,5 +188,15 @@ export default class IdeaCard extends Vue {
   &__text {
     padding: 14px;
   }
+}
+
+.cut-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+
+  text-overflow: ellipsis;
+
+  overflow: hidden;
 }
 </style>

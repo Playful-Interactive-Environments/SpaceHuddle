@@ -7,15 +7,15 @@
         class="module-container__planet"
       />
     </template>
-    <div v-if="ideaPointer < ideas.length">
-      <span v-if="ideaPointer < ideas.length">
-        <IdeaCard
-          :idea="ideas[ideaPointer]"
-          :is-selectable="false"
-          :is-editable="false"
-        />
-      </span>
+    <div class="media" v-if="ideaPointer < ideas.length">
+      <IdeaCard
+        class="media-left"
+        :idea="ideas[ideaPointer]"
+        :is-selectable="false"
+        :is-editable="false"
+      />
       <el-rate
+        class="media-content"
         v-model:model-value="rate"
         :max="maxRate"
         v-on:change="saveVoting($event)"
@@ -25,7 +25,7 @@
       {{ $t('module.voting.default.participant.thanks') }}
     </div>
     <br />
-    <br />
+    <el-divider v-if="votes.length > 0"></el-divider>
     <div
       class="media"
       v-for="vote in votes.sort((a, b) =>
@@ -39,6 +39,7 @@
         :idea="voteIdea(vote.ideaId)"
         :is-selectable="false"
         :is-editable="false"
+        :cutLongTexts="true"
       />
       <el-rate
         class="media-content"
@@ -230,6 +231,25 @@ export default class Participant extends Vue {
 
 <style scoped>
 .media-left {
-  width: 10rem;
+  width: 50%;
+}
+
+.media-content {
+  align-self: center;
+  text-align: center;
+}
+
+.el-divider {
+  background-color: var(--color-primary);
+  height: 2px;
+}
+
+@media only screen and (max-width: 400px) {
+  .media {
+    display: block;
+  }
+  .media-left {
+    width: unset;
+  }
 }
 </style>
