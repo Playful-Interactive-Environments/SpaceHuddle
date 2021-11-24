@@ -84,37 +84,48 @@ export default class ParticipantJoin extends Vue {
   }
 
   mounted(): void {
+    if (this.connectionKey) this.formData.connectionKey = this.connectionKey;
+
     const browserKeys = authService.getBrowserKeys();
-    const connectionKeys = browserKeys.map((bKey) => bKey.split('.')[0]);
-    sessionService.getSessionInfos(connectionKeys).then(
-      (infos) => {
-        infos.forEach((info) => {
-          const bKey = browserKeys.find((bKey) =>
-            bKey.startsWith(info.connectionKey)
-          );
-          if (bKey) info.connectionKey = bKey;
-        });
-        this.recentlyUsedKeys = infos;
-        const lastBrowserKey = authService.getLastBrowserKey();
-        if (lastBrowserKey) this.formData.browserKey = lastBrowserKey;
+    if (browserKeys.length > 0) {
+      const connectionKeys = browserKeys.map((bKey) => bKey.split('.')[0]);
+      sessionService.getSessionInfos(connectionKeys).then(
+        (infos) => {
+          if (infos && Array.isArray(infos)) {
+            infos.forEach((info) => {
+              const bKey = browserKeys.find((bKey) =>
+                bKey.startsWith(info.connectionKey)
+              );
+              if (bKey) info.connectionKey = bKey;
+            });
+            this.recentlyUsedKeys = infos;
+            const lastBrowserKey = authService.getLastBrowserKey();
+            if (lastBrowserKey) this.formData.browserKey = lastBrowserKey;
 
-        if (this.connectionKey) {
-          const rejoinByUrlKey = infos.find((info) =>
-            info.connectionKey.startsWith(this.connectionKey)
-          );
-          if (rejoinByUrlKey) {
-            this.formData.browserKey = rejoinByUrlKey.connectionKey;
-            this.formData.connectionKey = '';
+            if (this.connectionKey) {
+              const rejoinByUrlKey = infos.find((info) =>
+                info.connectionKey.startsWith(this.connectionKey)
+              );
+              if (rejoinByUrlKey) {
+                this.formData.browserKey = rejoinByUrlKey.connectionKey;
+                this.formData.connectionKey = '';
+              }
+            }
+          } else {
+            this.setDefaultKey();
           }
+        },
+        () => {
+          this.setDefaultKey();
         }
-      },
-      () => {
-        this.formData.connectionKey = authService.getLastBrowserKey();
-        if (this.connectionKey)
-          this.formData.connectionKey = this.connectionKey;
-      }
-    );
+      );
+    } else {
+      this.setDefaultKey();
+    }
+  }
 
+  setDefaultKey(): void {
+    this.formData.connectionKey = authService.getLastBrowserKey();
     if (this.connectionKey) this.formData.connectionKey = this.connectionKey;
   }
 

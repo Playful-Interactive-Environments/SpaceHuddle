@@ -96,6 +96,7 @@ export const getSessionInfos = async (
   return await apiExecutePostHandled<SessionInfo[]>(
     `/${EndpointType.SESSION_INFOS}/`,
     connection_keys,
+    null,
     authHeaderType
   );
 };
