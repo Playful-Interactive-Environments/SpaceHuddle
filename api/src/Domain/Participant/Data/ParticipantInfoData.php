@@ -15,7 +15,7 @@ class ParticipantInfoData extends ParticipantData
      * @var int
      * @OA\Property(example="uuid")
      */
-    public int $idea_count;
+    public int $ideaCount;
 
     /**
      * Creates a new Participant.
@@ -25,6 +25,6 @@ class ParticipantInfoData extends ParticipantData
     {
         parent::__construct($data);
         $reader = new ArrayReader($data);
-        $this->idea_count = $reader->findInt("idea_count");
+        $this->ideaCount = $reader->findInt("idea_count");
     }
 }
