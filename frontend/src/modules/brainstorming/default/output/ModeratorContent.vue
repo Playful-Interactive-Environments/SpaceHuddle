@@ -56,6 +56,15 @@
             @ideaDeleted="getCollapseContent()"
           />
         </template>
+        <template v-slot:footer>
+          <IdeaCard
+            v-if="item.ideas.length > item.displayCount"
+            :idea="{ keywords: '...' }"
+            :is-editable="false"
+            v-on:click="item.displayCount = 1000"
+            class="showMore"
+          />
+        </template>
       </draggable>
       <div class="layout__columns" v-else>
         <IdeaCard
@@ -168,6 +177,7 @@ export default class ModeratorContent extends Vue {
         )
         .then((result) => {
           let orderGroupName = '';
+          let orderGroupContent: OrderGroupList = {};
           switch (this.orderType) {
             case IdeaSortOrder.TIMESTAMP:
             case IdeaSortOrder.ALPHABETICAL:
@@ -175,14 +185,17 @@ export default class ModeratorContent extends Vue {
               orderGroupName = (this as any).$t(
                 `module.brainstorming.default.moderatorContent.${this.orderType}`
               );
-              this.orderGroupContent = {};
-              this.orderGroupContent[orderGroupName] = new OrderGroup(
-                result.ideas
-              );
+              orderGroupContent[orderGroupName] = new OrderGroup(result.ideas);
               break;
             default:
-              this.orderGroupContent = result.oderGroups;
+              orderGroupContent = result.oderGroups;
           }
+          Object.keys(orderGroupContent).forEach((key) => {
+            if (key in this.orderGroupContent)
+              orderGroupContent[key].displayCount =
+                this.orderGroupContent[key].displayCount;
+          });
+          this.orderGroupContent = orderGroupContent;
           this.ideas = result.ideas;
           taskService.getTaskById(this.taskId).then((task) => {
             task.parameter.orderType = this.orderType;

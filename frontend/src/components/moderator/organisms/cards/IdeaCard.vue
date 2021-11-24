@@ -23,7 +23,7 @@
         {{ hasKeywords ? idea.keywords : idea.description }}
         <span class="actions">
           <slot name="action"></slot>
-          <font-awesome-icon :icon="stateIcon" :style="{ color: stateColor }" />
+          <font-awesome-icon v-if="stateIcon" :icon="stateIcon" :style="{ color: stateColor }" />
           <el-dropdown
             v-if="isEditable"
             class="card__menu"

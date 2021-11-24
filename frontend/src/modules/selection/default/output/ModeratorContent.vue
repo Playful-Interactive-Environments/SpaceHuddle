@@ -67,6 +67,16 @@
               :is-selectable="false"
               :isDraggable="true"
               class="item"
+              @ideaDeleted="getCollapseContent"
+            />
+          </template>
+          <template v-slot:footer>
+            <IdeaCard
+              v-if="selection.length > displayCount"
+              :idea="{ keywords: '...' }"
+              :is-editable="false"
+              v-on:click="displayCount = 1000"
+              class="showMore"
             />
           </template>
         </draggable>
@@ -109,6 +119,16 @@
               :is-selectable="false"
               :isDraggable="true"
               class="item"
+              @ideaDeleted="getCollapseContent"
+            />
+          </template>
+          <template v-slot:footer>
+            <IdeaCard
+              v-if="item.ideas.length > item.displayCount"
+              :idea="{ keywords: '...' }"
+              :is-editable="false"
+              v-on:click="item.displayCount = 1000"
+              class="showMore"
             />
           </template>
         </draggable>
@@ -225,18 +245,24 @@ export default class ModeratorContent extends Vue {
             const orderGroupName = (this as any).$t(
               'module.selection.default.moderatorContent.unselected'
             );
+            let orderGroupContent: OrderGroupList = {};
             switch (this.orderType) {
               case IdeaSortOrder.TIMESTAMP:
               case IdeaSortOrder.ALPHABETICAL:
               case IdeaSortOrder.ORDER:
-                this.orderGroupContent = {};
-                this.orderGroupContent[orderGroupName] = new OrderGroup(
+                orderGroupContent[orderGroupName] = new OrderGroup(
                   result.ideas.filter((idea) => !selectedIds.includes(idea.id))
                 );
                 break;
               default:
-                this.orderGroupContent = result.oderGroups;
+                orderGroupContent = result.oderGroups;
             }
+            Object.keys(orderGroupContent).forEach((key) => {
+              if (key in this.orderGroupContent)
+                orderGroupContent[key].displayCount =
+                  this.orderGroupContent[key].displayCount;
+            });
+            this.orderGroupContent = orderGroupContent;
             this.ideas = result.ideas;
           });
       }
@@ -287,5 +313,12 @@ export default class ModeratorContent extends Vue {
 <style lang="scss" scoped>
 .icon {
   margin-right: 0.5em;
+}
+
+.showMore {
+  color: var(--color-purple-dark);
+  border-color: var(--color-purple-dark);
+  background-color: var(--color-purple-light);
+  cursor: pointer;
 }
 </style>

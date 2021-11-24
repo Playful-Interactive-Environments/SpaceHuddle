@@ -75,21 +75,6 @@
         group="idea"
         @end="dragDone"
       >
-        <!--<template v-slot:header>
-          <CategoryCard
-            v-if="orderGroup.category.id !== addCategoryKey"
-            :category="orderGroup.category"
-            v-model:ideas="orderGroup.ideas"
-            @categoryChanged="getCollapseContent"
-          >
-          </CategoryCard>
-          <AddItem
-            v-else
-            :text="$t('module.categorisation.default.moderatorContent.add')"
-            :is-column="true"
-            @addNew="openCategorySettings"
-          />
-        </template>-->
         <template v-slot:item="{ element }">
           <IdeaCard
             :key="element.id"
@@ -100,6 +85,7 @@
             :isDraggable="true"
             class="drag-item el-main"
             :style="{ 'border-color': orderGroup.category.parameter.color }"
+            @ideaDeleted="getCollapseContent"
           />
         </template>
       </draggable>
@@ -143,6 +129,16 @@
               :is-editable="true"
               :isDraggable="true"
               class="drag-item"
+              @ideaDeleted="getCollapseContent"
+            />
+          </template>
+          <template v-slot:footer>
+            <IdeaCard
+              v-if="item.ideas.length > item.displayCount"
+              :idea="{ keywords: '...' }"
+              :is-editable="false"
+              v-on:click="item.displayCount = 1000"
+              class="showMore"
             />
           </template>
         </draggable>
@@ -350,17 +346,24 @@ export default class ModeratorContent extends Vue {
             const orderGroupName = (this as any).$t(
               'module.categorisation.default.moderatorContent.undefined'
             );
+            let orderGroupContentSelection: OrderGroupList = {};
             switch (this.orderType) {
               case IdeaSortOrder.TIMESTAMP:
               case IdeaSortOrder.ALPHABETICAL:
               case IdeaSortOrder.ORDER:
-                this.orderGroupContentSelection = {};
-                this.orderGroupContentSelection[orderGroupName] =
-                  new OrderGroup(result.ideas.filter((idea) => !idea.category));
+                orderGroupContentSelection[orderGroupName] = new OrderGroup(
+                  result.ideas.filter((idea) => !idea.category)
+                );
                 break;
               default:
-                this.orderGroupContentSelection = result.oderGroups;
+                orderGroupContentSelection = result.oderGroups;
             }
+            Object.keys(orderGroupContentSelection).forEach((key) => {
+              if (key in this.orderGroupContentSelection)
+                orderGroupContentSelection[key].displayCount =
+                  this.orderGroupContentSelection[key].displayCount;
+            });
+            this.orderGroupContentSelection = orderGroupContentSelection;
           });
       }
 
@@ -475,5 +478,12 @@ export default class ModeratorContent extends Vue {
 
 .drag-item {
   cursor: grab;
+}
+
+.showMore {
+  color: var(--color-purple-dark);
+  border-color: var(--color-purple-dark);
+  background-color: var(--color-purple-light);
+  cursor: pointer;
 }
 </style>
