@@ -8,7 +8,8 @@
     "chartDataLabel": "result"
   },
   "participant": {
-    "thanks": "thanks for the vote"
+    "thanks": "thanks for the vote",
+    "waiting": "stay tuned: ideas will soon be released for voting"
   },
   "moderatorContent": {
   },

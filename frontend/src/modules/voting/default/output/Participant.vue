@@ -24,11 +24,14 @@
     <div v-if="finished">
       {{ $t('module.voting.default.participant.thanks') }}
     </div>
+    <div v-if="waiting">
+      {{ $t('module.voting.default.participant.waiting') }}
+    </div>
     <br />
-    <el-divider v-if="votes.length > 0"></el-divider>
+    <el-divider v-if="validVotes.length > 0"></el-divider>
     <div
       class="media"
-      v-for="vote in votes.sort((a, b) =>
+      v-for="vote in validVotes.sort((a, b) =>
         b.timestamp.localeCompare(a.timestamp)
       )"
       :key="vote.id"
@@ -93,7 +96,17 @@ export default class Participant extends Vue {
   }
 
   get finished(): boolean {
-    return this.votes.length > 0 && this.ideaPointer >= this.ideas.length;
+    return this.validVotes.length > 0 && this.ideaPointer >= this.ideas.length;
+  }
+
+  get waiting(): boolean {
+    return this.allIdeas.length === 0;
+  }
+
+  get validVotes(): Vote[] {
+    return this.votes.filter((vote) =>
+      this.allIdeas.find((idea) => idea.id === vote.ideaId)
+    );
   }
 
   mounted(): void {

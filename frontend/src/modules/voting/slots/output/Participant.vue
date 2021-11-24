@@ -47,6 +47,9 @@
     <div v-if="finished">
       {{ $t('module.voting.slots.participant.thanks') }}
     </div>
+    <div v-if="waiting">
+      {{ $t('module.voting.slots.participant.waiting') }}
+    </div>
   </ParticipantModuleDefaultContainer>
 </template>
 
@@ -90,11 +93,11 @@ export default class Participant extends Vue {
   }
 
   get finished(): boolean {
-    return (
-      this.votes.length > 0 &&
-      this.ideaPointer >= this.ideas.length &&
-      this.ideaPointer > 0
-    );
+    return this.votes.length > 0 && this.ideaPointer >= this.ideas.length;
+  }
+
+  get waiting(): boolean {
+    return this.ideas.length === 0 && this.votes.length === 0;
   }
 
   mounted(): void {
