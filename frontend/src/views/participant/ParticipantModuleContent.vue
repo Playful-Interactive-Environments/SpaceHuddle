@@ -117,9 +117,11 @@ export default class ParticipantModuleContent extends Vue {
   }
 
   checkModuleState(): void {
-    taskService.getTaskById(this.taskId).then((task) => {
-      if (!taskService.isActive(task)) this.$router.go(-1);
-    });
+    taskService
+      .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
+      .then((task) => {
+        if (!taskService.isActive(task)) this.$router.go(-1);
+      });
   }
 
   loadDefaultModule(): void {
