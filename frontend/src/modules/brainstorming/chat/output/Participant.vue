@@ -95,6 +95,7 @@
                 :placeholder="
                   $t('module.brainstorming.chat.participant.newIdeaInfo')
                 "
+                v-on:blur="leaveField"
               ></el-input>
               <el-button
                 v-if="!newIdea.link"
@@ -160,7 +161,9 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import myUpload from 'vue-image-crop-upload/upload-3.vue';
 import { MAX_DESCRIPTION_LENGTH, MAX_KEYWORDS_LENGTH } from '@/types/api/Idea';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
-import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
+import ValidationForm, {
+  ValidationFormCall,
+} from '@/components/shared/molecules/ValidationForm.vue';
 
 @Options({
   components: {
@@ -218,6 +221,11 @@ export default class Participant extends Vue {
         }
       });
     }
+  }
+
+  leaveField(): void {
+    if (!this.formData.newIdeaInput)
+      this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
   addImage(): void {
@@ -368,8 +376,10 @@ export default class Participant extends Vue {
   }
 
   button.media-right {
-    margin-left: 1rem;
-    padding: 0.5rem 0.8rem;
+    margin-left: 0.5rem;
+    padding: 0;
+    aspect-ratio: 1;
+    flex-shrink: 0;
   }
 
   &-left {
