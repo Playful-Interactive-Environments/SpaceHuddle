@@ -214,7 +214,7 @@ export default class Participant extends Vue {
       ideaService.postIdea(this.taskId, this.newIdea).then((done) => {
         if (done) {
           this.newIdea = {};
-          this.getTaskIdeas();
+          this.getTaskIdeas(true);
         }
       });
     }
@@ -236,7 +236,7 @@ export default class Participant extends Vue {
   }
 
   async mounted(): Promise<void> {
-    await this.getTaskIdeas();
+    await this.getTaskIdeas(true);
     this.startIdeaInterval();
   }
 
@@ -245,6 +245,11 @@ export default class Participant extends Vue {
     setTimeout(() => {
       element.scrollTop = element.scrollHeight - element.clientHeight;
     }, delay);
+  }
+
+  scrollIsBottom(): boolean {
+    const element = document.getElementsByClassName('half-card')[0];
+    return element.scrollTop === element.scrollHeight - element.clientHeight;
   }
 
   @Watch('taskId', { immediate: true })
@@ -287,7 +292,8 @@ export default class Participant extends Vue {
     clearInterval(this.interval);
   }
 
-  async getTaskIdeas(): Promise<void> {
+  async getTaskIdeas(scrollToBottom = false): Promise<void> {
+    const scrollIsBottom = this.scrollIsBottom();
     ideaService
       .getIdeasForTask(
         this.taskId,
@@ -299,7 +305,7 @@ export default class Participant extends Vue {
         this.ideas = queryResult;
         if (this.module && !this.module.parameter.showAll)
           this.ideas = queryResult.filter((idea) => idea.isOwn);
-        this.scrollToBottom();
+        if (scrollToBottom || scrollIsBottom) this.scrollToBottom();
       });
   }
 }
