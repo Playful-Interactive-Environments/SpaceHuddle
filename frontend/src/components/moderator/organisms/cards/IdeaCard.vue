@@ -23,11 +23,13 @@
         {{ hasKeywords ? idea.keywords : idea.description }}
         <span class="actions">
           <slot name="action"></slot>
-          <font-awesome-icon
-            v-if="stateIcon"
-            :icon="stateIcon"
-            :style="{ color: stateColor }"
-          />
+          <span class="state">
+            <font-awesome-icon
+              v-if="stateIcon"
+              :icon="stateIcon"
+              :style="{ color: stateColor }"
+            />
+          </span>
           <el-dropdown
             v-if="isEditable"
             class="card__menu"
@@ -112,7 +114,7 @@ export default class IdeaCard extends Vue {
   get stateIcon(): string {
     switch (IdeaStates[this.idea.state]) {
       case IdeaStates.NEW:
-        return 'circle';
+        return 'star';
       case IdeaStates.INAPPROPRIATE:
         return 'times';
       case IdeaStates.DUPLICATE:
@@ -225,6 +227,22 @@ export default class IdeaCard extends Vue {
 
   &__text {
     padding: 14px;
+  }
+
+  &__title {
+    align-items: center;
+  }
+}
+
+.state {
+  background-color: var(--color-background-gray);
+  border-radius: 50%;
+  aspect-ratio: 1;
+  height: 1.5rem;
+  display: inline-flex;
+
+  svg {
+    margin: auto;
   }
 }
 
