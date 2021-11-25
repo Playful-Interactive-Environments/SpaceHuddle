@@ -129,17 +129,12 @@ export default class ModeratorContent extends Vue {
   IdeaSortOrder = IdeaSortOrder;
   sortOrderOptions: SortOrderOption[] = [];
 
-  /*get SortOrderOptions(): Array<keyof typeof IdeaSortOrder> {
-    return Object.keys(IdeaSortOrder) as Array<keyof typeof IdeaSortOrder>;
-  }*/
-
   get orderIsChangeable(): boolean {
     return this.orderType === IdeaSortOrder.ORDER;
   }
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getCollapseContent(true);
     taskService.getTaskById(this.taskId).then(async (task) => {
       await ideaService.getSortOrderOptions(task.topicId).then((options) => {
         this.sortOrderOptions = options;
@@ -151,8 +146,8 @@ export default class ModeratorContent extends Vue {
         this.orderType != task.parameter.orderType
       ) {
         this.orderType = task.parameter.orderType;
-        this.getCollapseContent(true);
       }
+      await this.getCollapseContent(true);
     });
   }
 
