@@ -172,6 +172,16 @@ $--font-size: (
                 text-transform: uppercase;
                 line-height: unset;
         }
+
+        &__content {
+                line-height: unset;
+        }
+
+        &__error {
+                z-index: 50;
+                text-align: right;
+                width: 100%;
+        }
 }
 
 .el-button {

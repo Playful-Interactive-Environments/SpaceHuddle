@@ -25,7 +25,12 @@
             $t('moderator.organism.settings.ideaSettings.keywordsExample')
           "
         />
-        <span class="info">
+        <span
+          class="info"
+          :class="{
+            error: MAX_KEYWORDS_LENGTH < formData.keywords.length,
+          }"
+        >
           {{
             $t('module.brainstorming.default.participant.remainingCharacters')
           }}:
@@ -45,7 +50,12 @@
             $t('moderator.organism.settings.ideaSettings.descriptionExample')
           "
         />
-        <span class="info">
+        <span
+          class="info"
+          :class="{
+            error: MAX_DESCRIPTION_LENGTH < formData.description.length,
+          }"
+        >
           {{
             $t('module.brainstorming.default.participant.remainingCharacters')
           }}:
@@ -166,12 +176,4 @@ export default class IdeaSettings extends Vue {
 }
 </script>
 
-<style scoped>
-.info {
-  color: var(--color-primary);
-  float: right;
-  font-size: 12px;
-  line-height: 1;
-  padding-top: 4px;
-}
-</style>
+<style scoped></style>

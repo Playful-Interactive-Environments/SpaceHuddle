@@ -37,7 +37,12 @@
             $t('module.brainstorming.default.participant.keywordInfo')
           "
         />
-        <span class="info">
+        <span
+          class="info"
+          :class="{
+            error: MAX_KEYWORDS_LENGTH < formData.keywords.length,
+          }"
+        >
           {{
             $t('module.brainstorming.default.participant.remainingCharacters')
           }}:
@@ -61,7 +66,12 @@
           "
           v-on:keypress="submitOnEnter"
         />
-        <span class="info">
+        <span
+          class="info"
+          :class="{
+            error: MAX_DESCRIPTION_LENGTH < formData.description.length,
+          }"
+        >
           {{
             $t('module.brainstorming.default.participant.remainingCharacters')
           }}:
@@ -368,14 +378,6 @@ export default class Participant extends Vue {
 
 .el-footer {
   text-align: right;
-}
-
-.info {
-  color: var(--color-primary);
-  float: right;
-  font-size: 12px;
-  line-height: 1;
-  padding-top: 4px;
 }
 
 .layout__columns {

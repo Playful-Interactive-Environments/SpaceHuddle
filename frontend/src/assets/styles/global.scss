@@ -315,6 +315,19 @@ p {
   cursor: pointer;
 }
 
+.info {
+  color: var(--color-primary);
+  font-size: 12px;
+  padding-top: 4px;
+  width: 100%;
+  text-align: right;
+  display: block;
+}
+
+.error {
+  color: var(--color-purple);
+}
+
 .pre-formatted {
   white-space: pre-wrap;
 }

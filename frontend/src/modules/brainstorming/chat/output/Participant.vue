@@ -115,7 +115,12 @@
                 <font-awesome-icon icon="play"></font-awesome-icon>
               </el-button>
             </div>
-            <span class="info">
+            <span
+              class="info"
+              :class="{
+                error: MAX_INPUT_LENGTH < formData.newIdeaInput.length,
+              }"
+            >
               {{
                 $t(
                   'module.brainstorming.default.participant.remainingCharacters'
@@ -413,14 +418,6 @@ export default class Participant extends Vue {
   bottom: 0; //-1.5rem;
   padding: 1rem 0;
   background-color: white;
-}
-
-.info {
-  color: var(--color-primary);
-  float: right;
-  font-size: 12px;
-  line-height: 1;
-  padding-top: 4px;
 }
 
 .edit {
