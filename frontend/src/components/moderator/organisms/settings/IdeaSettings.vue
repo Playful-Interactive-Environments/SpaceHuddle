@@ -128,7 +128,7 @@ export default class IdeaSettings extends Vue {
 
   reset(): void {
     this.formData.keywords = this.idea.keywords;
-    this.formData.description = this.idea.description;
+    this.formData.description = this.idea.description ?? '';
     this.formData.image = this.idea.image;
     this.formData.link = this.idea.link;
     this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
@@ -144,7 +144,7 @@ export default class IdeaSettings extends Vue {
   async onIdeaChanged(idea: Idea): Promise<void> {
     if (!this.showSettings) {
       this.formData.keywords = idea.keywords;
-      this.formData.description = idea.description;
+      this.formData.description = idea.description ?? '';
       this.formData.image = idea.image;
       this.formData.link = idea.link;
     }
