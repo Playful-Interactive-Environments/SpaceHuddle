@@ -191,7 +191,7 @@ export default class ParticipantJoin extends Vue {
 
 <style lang="scss" scoped>
 .join {
-  padding: 4rem;
+  padding: min(10vw, 4rem);
   padding-top: 8vh;
   color: #fff;
   background: var(--color-darkblue);
@@ -204,10 +204,9 @@ export default class ParticipantJoin extends Vue {
   }
 
   &__info {
-    max-width: 80%;
     text-align: center;
     margin: auto;
-    line-height: 2rem;
+    line-height: 1rem;
     padding-top: 1rem;
   }
 }
