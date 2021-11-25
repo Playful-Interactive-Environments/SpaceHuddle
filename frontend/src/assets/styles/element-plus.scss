@@ -302,6 +302,11 @@ $--font-size: (
         --el-drawer-background-color: var(--color-background-gray);
         overflow: auto;
         background-color: var(--el-drawer-background-color);
+
+        &__header > :first-child {
+                font-weight: var(--font-weight-bold);
+                text-transform: uppercase;
+        }
 }
 
 .el-drawer.rtl, .el-drawer.ltr {

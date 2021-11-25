@@ -152,6 +152,7 @@
       :title="$t('module.brainstorming.default.participant.ideas')"
       size="70%"
     >
+      <el-divider></el-divider>
       <div class="layout__columns">
         <IdeaCard
           v-for="idea in ideas"
@@ -393,5 +394,11 @@ export default class Participant extends Vue {
     font-weight: var(--font-weight-bold);
     font-size: 1rem;
   }
+}
+
+.el-divider--horizontal {
+  background-color: var(--color-gray-inactive);
+  margin: 0 1.5rem 1rem 1.5rem;
+  width: calc(100% - 3rem);
 }
 </style>

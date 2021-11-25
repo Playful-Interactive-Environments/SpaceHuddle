@@ -84,7 +84,7 @@
             >
               {{ categoryName }}
             </h2>
-            <div v-if="categoryDescription" >
+            <div v-if="categoryDescription">
               {{ categoryDescription }}
             </div>
           </div>
@@ -304,5 +304,10 @@ export default class CategoryCard extends Vue {
 
 .el-dropdown-link {
   color: white;
+}
+
+.media-content {
+  font-weight: var(--font-weight-default);
+  text-transform: initial;
 }
 </style>
