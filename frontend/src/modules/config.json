@@ -34,8 +34,7 @@
    },  
    "categorisation": {  
        "default": {  
-           "publicScreen": "output/PublicScreen",  
-           "participant": "output/Participant",  
+           "publicScreen": "output/PublicScreen",
            "moderatorContent": "output/ModeratorContent",  
            "locales": "en,",  
              "icon": "object-group",  "type": "main",  
