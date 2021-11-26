@@ -424,19 +424,25 @@ export default class TaskSettings extends Vue {
         TaskType[this.formData.taskType],
         moduleName
       ).then((result) => {
-        this.formData.moduleParameterComponents.push({
-          componentName: componentName,
-          moduleId: moduleId,
-          moduleName: moduleName,
-          moduleIcon: icon,
-          hasModule: result,
-          parameter: moduleParameter,
-        });
         if (
-          !this.openTabs.includes(componentName) &&
-          !oldKeys.includes(componentName)
-        )
-          this.openTabs.push(componentName);
+          !this.formData.moduleParameterComponents.find(
+            (component) => component.componentName === componentName
+          )
+        ) {
+          this.formData.moduleParameterComponents.push({
+            componentName: componentName,
+            moduleId: moduleId,
+            moduleName: moduleName,
+            moduleIcon: icon,
+            hasModule: result,
+            parameter: moduleParameter,
+          });
+          if (
+            !this.openTabs.includes(componentName) &&
+            !oldKeys.includes(componentName)
+          )
+            this.openTabs.push(componentName);
+        }
       });
     };
 
