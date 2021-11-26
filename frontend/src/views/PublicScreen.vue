@@ -329,11 +329,15 @@ h3 {
   }
 }
 
+.el-page-header {
+  padding: 2rem 5rem;
+  color: var(--color-primary);
+  text-transform: uppercase;
+}
+
 @media screen and (max-width: 768px) {
   .el-page-header {
     padding: 1rem 2.5rem;
-    color: var(--color-primary);
-    text-transform: uppercase;
   }
 
   .public-screen {
