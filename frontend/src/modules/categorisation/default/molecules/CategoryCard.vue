@@ -132,7 +132,7 @@
       </main>
     </el-drawer>
     <CategorySettings
-      v-if="category"
+      v-if="category && isEditable"
       v-model:show-modal="displayEditCategory"
       v-model:category-id="category.id"
       @categoryCreated="updateCategory($event)"
