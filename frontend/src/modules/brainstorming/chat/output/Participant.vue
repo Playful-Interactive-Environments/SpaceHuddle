@@ -385,6 +385,7 @@ export default class Participant extends Vue {
     padding: 0;
     aspect-ratio: 1;
     flex-shrink: 0;
+    height: 2rem;
   }
 
   &-left {
