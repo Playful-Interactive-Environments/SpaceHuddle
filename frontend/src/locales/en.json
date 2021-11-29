@@ -112,7 +112,8 @@
     "molecule": {
       "moduleCount": {
         "topics": "Topics",
-        "tasks": "Tasks"
+        "tasks": "Tasks",
+        "participants": "Participants"
       },
       "navigation": {
         "sessions": "Sessions",

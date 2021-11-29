@@ -8,19 +8,54 @@
       <span class="module-count__count">{{ session.taskCount }}</span>
       {{ $t('moderator.molecule.moduleCount.tasks') }}
     </div>
+    <div class="module-count__item">
+      <span class="module-count__count">{{ participants.length }}</span>
+      {{ $t('moderator.molecule.moduleCount.participants') }}
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import { Session } from '@/types/api/Session';
+import * as sessionService from '@/services/session-service';
+import { ParticipantInfo } from '@/types/api/Participant';
 
 @Options({
   components: {},
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModuleCount extends Vue {
   @Prop() session!: Session;
+  participants: ParticipantInfo[] = [];
+  readonly intervalTime = 3000;
+  interval!: any;
+
+  mounted(): void {
+    this.startInterval();
+  }
+
+  startInterval(): void {
+    this.interval = setInterval(this.getParticipants, this.intervalTime);
+  }
+
+  unmounted(): void {
+    clearInterval(this.interval);
+  }
+
+  @Watch('session', { immediate: true })
+  async onSessionChanged(): Promise<void> {
+    this.getParticipants();
+  }
+
+  async getParticipants(): Promise<void> {
+    if (this.session) {
+      sessionService.getParticipants(this.session.id).then((queryResult) => {
+        this.participants = queryResult;
+      });
+    }
+  }
 }
 </script>
 
