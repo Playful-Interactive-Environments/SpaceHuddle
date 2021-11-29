@@ -201,8 +201,8 @@ class SessionRepository implements RepositoryInterface
     public function getParticipants(string $sessionId): array
     {
         $query = $this->queryFactory->newSelect("participant");
-        $query->select(["participant.*", "COUNT(*) AS idea_count"])
-            ->innerJoin("idea", "idea.participant_id = participant.id")
+        $query->select(["participant.*", "COUNT(idea.id) AS idea_count"])
+            ->leftJoin("idea", "idea.participant_id = participant.id")
             ->andWhere([
                 "session_id" => $sessionId,
             ])
