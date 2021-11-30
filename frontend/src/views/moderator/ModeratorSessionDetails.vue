@@ -16,20 +16,6 @@
           </span>
           <ModuleCount :session="session" />
         </template>
-        <template #mainContent>
-          <el-space wrap class="participant-list">
-            <el-badge
-              v-for="participant in participants"
-              :key="participant.id"
-              :value="participant.ideaCount"
-            >
-              <font-awesome-icon
-                :icon="participant.avatar.symbol"
-                :style="{ color: participant.avatar.color }"
-              ></font-awesome-icon>
-            </el-badge>
-          </el-space>
-        </template>
         <template #footerContent>
           <SessionCode :code="session.connectionKey" />
           <router-link
@@ -256,16 +242,5 @@ export default class ModeratorSessionDetails extends Vue {
 
 .expired {
   color: var(--color-red);
-}
-
-.participant-list::v-deep {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  font-size: 1.5rem;
-
-  .el-space__item {
-    padding-top: 1rem;
-    padding-right: 1rem;
-  }
 }
 </style>

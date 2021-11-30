@@ -8,10 +8,26 @@
       <span class="module-count__count">{{ session.taskCount }}</span>
       {{ $t('moderator.molecule.moduleCount.tasks') }}
     </div>
-    <div class="module-count__item">
-      <span class="module-count__count">{{ participants.length }}</span>
-      {{ $t('moderator.molecule.moduleCount.participants') }}
-    </div>
+    <el-popover trigger="click" width="20vw">
+      <template #reference>
+        <div class="module-count__item">
+          <span class="module-count__count">{{ participants.length }}</span>
+          {{ $t('moderator.molecule.moduleCount.participants') }}
+        </div>
+      </template>
+      <el-space wrap class="participant-list">
+        <el-badge
+          v-for="participant in participants"
+          :key="participant.id"
+          :value="participant.ideaCount"
+        >
+          <font-awesome-icon
+            :icon="participant.avatar.symbol"
+            :style="{ color: participant.avatar.color }"
+          ></font-awesome-icon>
+        </el-badge>
+      </el-space>
+    </el-popover>
   </div>
 </template>
 
@@ -84,6 +100,17 @@ export default class ModuleCount extends Vue {
     font-size: var(--font-size-default);
     border-radius: 100px;
     margin-right: 0.2rem;
+  }
+}
+
+.participant-list::v-deep {
+  font-size: 1.5rem;
+  overflow-y: auto;
+  max-height: 50vh;
+
+  .el-space__item {
+    padding-top: 0.5rem;
+    padding-right: 0.5rem;
   }
 }
 </style>
