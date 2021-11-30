@@ -124,9 +124,9 @@ class IdeaRepository implements RepositoryInterface
         }
 
         $query->innerJoin("task", "task.id = idea.task_id")
-            ->innerJoin("participant", "participant.id = idea.participant_id")
+            ->leftJoin("participant", "participant.id = idea.participant_id")
+            ->whereInList("task.task_type", [$this->taskType, $this->taskTypeInformation])
             ->andWhere($authorisation_conditions)
-            ->andWhere(["task.task_type" => $this->taskType])
             ->andWhere($conditions)
             ->distinct(["idea.task_id", "idea.keywords", "idea.description", "idea.image", "idea.link"]);
 

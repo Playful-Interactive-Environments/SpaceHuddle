@@ -14,6 +14,12 @@ trait IdeaTableTrait
     protected string $taskTypeSelection = TaskType::SELECTION;
 
     /**
+     * The type of information task.
+     * @var string
+     */
+    protected string $taskTypeInformation = TaskType::INFORMATION;
+
+    /**
      * Get entity by ID.
      * @param string $id The entity ID.
      * @return object|null The result entity.
@@ -89,7 +95,7 @@ trait IdeaTableTrait
     {
         $query = $this->queryFactory->newSelect("task");
         $query->select(["id"])
-            ->whereInList("task_type", [$this->taskType, $this->taskTypeSelection])
+            ->whereInList("task_type", [$this->taskType, $this->taskTypeSelection, $this->taskTypeInformation])
             ->andWhere([
                 "id" => $taskId
             ]);
