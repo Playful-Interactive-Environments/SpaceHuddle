@@ -22,6 +22,7 @@
             :type="TaskType[task.taskType]"
             :title="task.name"
             :description="task.description"
+            :shortenDescription="false"
           />
         </div>
         <div class="public-screen__overview-right">
@@ -67,6 +68,7 @@
         :type="TaskType[task.taskType]"
         :title="task.name"
         :description="task.description"
+        :shortenDescription="false"
       />
     </el-header>
     <el-container class="public-screen__container">

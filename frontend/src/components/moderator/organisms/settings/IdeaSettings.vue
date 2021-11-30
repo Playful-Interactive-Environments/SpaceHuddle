@@ -7,7 +7,8 @@
   >
     <el-dialog v-model="showSettings" width="80vw" :before-close="handleClose">
       <template #title>
-        <span class="el-dialog__title">{{
+        <span class="el-dialog__title" v-if="title">{{ title }}</span>
+        <span class="el-dialog__title" v-else>{{
           $t('moderator.organism.settings.ideaSettings.header')
         }}</span>
       </template>
@@ -96,6 +97,7 @@ import ValidationForm, {
 } from '@/components/shared/molecules/ValidationForm.vue';
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
 import { MAX_DESCRIPTION_LENGTH, MAX_KEYWORDS_LENGTH } from '@/types/api/Idea';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
@@ -112,6 +114,8 @@ export default class IdeaSettings extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
 
   @Prop({ default: false }) showModal!: boolean;
+  @Prop({ default: null }) title!: string | null;
+  @Prop({ default: null }) taskId!: string | null;
   @Prop() idea!: Idea;
 
   MAX_KEYWORDS_LENGTH = MAX_KEYWORDS_LENGTH;
@@ -167,7 +171,15 @@ export default class IdeaSettings extends Vue {
     this.idea.description = this.formData.description;
     this.idea.image = this.formData.image;
     this.idea.link = this.formData.link;
-    await ideaService.putIdea(this.idea.id, this.idea);
+    if (this.idea.id) {
+      await ideaService.putIdea(this.idea.id, this.idea);
+    } else if (this.taskId) {
+      await ideaService.postIdea(
+        this.taskId,
+        this.idea,
+        EndpointAuthorisationType.MODERATOR
+      );
+    }
     this.reset();
     this.showSettings = false;
     this.$emit('update:showModal', false);

@@ -16,7 +16,12 @@
     >
       {{ title }}
     </h3>
-    <p class="module-info__description">{{ description }}</p>
+    <p
+      class="module-info__description"
+      :class="{ shortDescription: shortenDescription }"
+    >
+      {{ description }}
+    </p>
   </div>
 </template>
 
@@ -35,6 +40,7 @@ export default class TaskInfo extends Vue {
   @Prop({ default: '' }) description!: string;
   @Prop({ default: [] }) modules!: string[];
   @Prop({ default: false }) isParticipant!: boolean;
+  @Prop({ default: true }) shortenDescription!: boolean;
 
   TaskTypeColor = TaskTypeColor;
   TaskType = TaskType;
@@ -45,6 +51,7 @@ export default class TaskInfo extends Vue {
 @import '~@/assets/styles/breakpoints.scss';
 
 .module-info {
+  margin-top: 2rem;
   flex-grow: 1;
   font-size: var(--font-size-small);
 
@@ -66,14 +73,11 @@ export default class TaskInfo extends Vue {
   &__description {
     margin-top: 0.5rem;
     line-height: 1.2;
+    text-align: justify;
+
     @include md {
       margin-top: 0;
       line-height: 1.3;
-      display: -webkit-box;
-      line-clamp: 1;
-      -webkit-line-clamp: 1;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
     }
   }
 
@@ -88,6 +92,14 @@ export default class TaskInfo extends Vue {
       line-height: 3em;
     }
   }
+}
+
+.shortDescription {
+  display: -webkit-box;
+  line-clamp: 1;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .el-breadcrumb::v-deep {

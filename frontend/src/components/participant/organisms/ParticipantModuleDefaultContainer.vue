@@ -26,6 +26,7 @@
           :description="taskDescription"
           :modules="[module]"
           :is-participant="true"
+          :shortenDescription="false"
         />
       </el-header>
       <el-main class="el-main__overflow">

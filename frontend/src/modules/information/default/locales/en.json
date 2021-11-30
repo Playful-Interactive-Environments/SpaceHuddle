@@ -1,6 +1,13 @@
 {
   "description": {
-    "title": "default",
+    "title": "stimulus material",
     "description": "show information about the topic"
+  },
+  "moderatorContent": {
+    "add": "add stimulus content",
+    "settingsTitle": "stimulus content settings"
+  },
+  "publicScreen": {
+    "noIdeas": "No stimulus content added."
   }
 }

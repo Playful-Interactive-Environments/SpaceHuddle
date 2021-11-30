@@ -23,7 +23,7 @@
         {{ hasKeywords ? idea.keywords : idea.description }}
         <span class="actions">
           <slot name="action"></slot>
-          <span class="state">
+          <span class="state" v-if="showState">
             <font-awesome-icon
               v-if="stateIcon"
               :icon="stateIcon"
@@ -103,6 +103,7 @@ export default class IdeaCard extends Vue {
   @Prop() idea!: Idea;
   @Prop({ default: true }) isEditable!: boolean;
   @Prop({ default: true }) canChangeState!: boolean;
+  @Prop({ default: true }) showState!: boolean;
   @Prop({ default: false }) isSelectable!: boolean;
   @Prop({ default: false, reactive: true }) isSelected!: boolean;
   @Prop({ default: false }) isDraggable!: boolean;

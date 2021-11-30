@@ -27,12 +27,13 @@ export const deleteIdea = async (id: string): Promise<boolean> => {
 
 export const postIdea = async (
   taskId: string,
-  data: Partial<Idea>
+  data: Partial<Idea>,
+  authHeaderType = EndpointAuthorisationType.PARTICIPANT
 ): Promise<Idea> => {
   return await apiExecutePost<Idea>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.IDEA}`,
     data,
-    EndpointAuthorisationType.PARTICIPANT
+    authHeaderType
   );
 };
 
