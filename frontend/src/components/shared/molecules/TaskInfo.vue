@@ -74,6 +74,7 @@ export default class TaskInfo extends Vue {
     margin-top: 0.5rem;
     line-height: 1.2;
     text-align: justify;
+    white-space: pre-line;
 
     @include md {
       margin-top: 0;
