@@ -6,6 +6,7 @@ use App\Domain\Base\Repository\AuthorisationTrait;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\InstantiateTrait;
 use App\Domain\Category\Repository\CategoryRepository;
+use App\Domain\Hierarchy\Repository\HierarchyRepository;
 use App\Domain\Idea\Repository\IdeaRepository;
 use App\Domain\Module\Repository\ModuleRepository;
 use App\Domain\Participant\Repository\ParticipantRepository;
@@ -35,6 +36,7 @@ class InfrastructureRepository
         "module" => ModuleRepository::class,
         "idea" => IdeaRepository::class,
         "category" => CategoryRepository::class,
+        "hierarchy" => HierarchyRepository::class,
         "selection" => SelectionRepository::class,
         "vote" => VoteRepository::class,
         "resource" => ResourceRepository::class,

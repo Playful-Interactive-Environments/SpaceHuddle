@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Category\Data;
+namespace App\Domain\Hierarchy\Data;
 
 use App\Domain\Idea\Data\IdeaAbstract;
 use Selective\ArrayReader\ArrayReader;
@@ -9,7 +9,7 @@ use Selective\ArrayReader\ArrayReader;
  * Represents a category.
  * @OA\Schema(description="category description")
  */
-class CategoryData extends IdeaAbstract
+class HierarchyData extends IdeaAbstract
 {
     /**
      * Time of group storage.
@@ -17,6 +17,13 @@ class CategoryData extends IdeaAbstract
      * @OA\Property(format="date")
      */
     public ?string $timestamp;
+
+    /**
+     * ID of the parent node.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $parentId;
 
     /**
      * Creates a new idea.
@@ -27,5 +34,6 @@ class CategoryData extends IdeaAbstract
         parent::__construct($data);
         $reader = new ArrayReader($data);
         $this->timestamp = $reader->findString("timestamp");
+        $this->parentId = $reader->findString("parent_id");
     }
 }

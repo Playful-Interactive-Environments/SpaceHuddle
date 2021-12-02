@@ -12,6 +12,11 @@ use App\Action\Category\CategoryReadAllFromTaskAction;
 use App\Action\Category\CategoryReadAllFromTopicAction;
 use App\Action\Category\CategoryReadSingleAction;
 use App\Action\Category\CategoryUpdateAction;
+use App\Action\Hierarchy\HierarchyCreateAction;
+use App\Action\Hierarchy\HierarchyDeleteAction;
+use App\Action\Hierarchy\HierarchyReadAllAction;
+use App\Action\Hierarchy\HierarchyReadSingleAction;
+use App\Action\Hierarchy\HierarchyUpdateAction;
 use App\Action\Home\HomeAction;
 use App\Action\Idea\IdeaCreateForTopicAction;
 use App\Action\Idea\IdeaDeleteAction;
@@ -216,6 +221,10 @@ return function (App $app) {
             $app->get("/{taskId}/categories[/]", CategoryReadAllFromTaskAction::class);
             $app->post("/{taskId}/category[/]", CategoryCreateForTaskAction::class);
 
+            $app->get("/{taskId}/hierarchies/{parentHierarchyId}[/]", HierarchyReadAllAction::class);
+            $app->get("/{taskId}/hierarchies[/]", HierarchyReadAllAction::class);
+            $app->post("/{taskId}/hierarchy[/]", HierarchyCreateAction::class);
+
             $app->get("/{taskId}/votes[/]", VoteReadAllAction::class);
             $app->get("/{taskId}/vote_result[/]", VoteResultReadAction::class);
             $app->post("/{taskId}/vote[/]", VoteCreateAction::class);
@@ -254,6 +263,15 @@ return function (App $app) {
             $app->get("/{id}[/]", CategoryReadSingleAction::class);
             $app->put("[/]", CategoryUpdateAction::class);
             $app->delete("/{id}[/]", CategoryDeleteAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/hierarchy",
+        function (RouteCollectorProxy $app) {
+            $app->get("/{id}[/]", HierarchyReadSingleAction::class);
+            $app->put("[/]", HierarchyUpdateAction::class);
+            $app->delete("/{id}[/]", HierarchyDeleteAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 
