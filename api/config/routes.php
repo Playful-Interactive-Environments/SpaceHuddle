@@ -82,8 +82,12 @@ use \App\Action\Session\SessionCreateAction;
 use \App\Action\Session\SessionReadSingleAction;
 use \App\Action\Session\SessionReadAllAction;
 use App\Action\User\UserResetPasswordAction;
+use App\Action\View\ViewReadAllAction;
+use App\Action\View\ViewReadSingleAction;
 use App\Action\Vote\VoteCreateAction;
 use App\Action\Vote\VoteDeleteAction;
+use App\Action\Vote\VoteHierarchyReadAllAction;
+use App\Action\Vote\VoteHierarchyResultReadAction;
 use App\Action\Vote\VoteReadAllAction;
 use App\Action\Vote\VoteReadSingleAction;
 use App\Action\Vote\VoteResultReadAction;
@@ -189,6 +193,8 @@ return function (App $app) {
     $app->group(
         "/topic",
         function (RouteCollectorProxy $app) {
+            $app->get("/{topicId}/views[/]", ViewReadAllAction::class);
+
             $app->post("/{topicId}/task[/]", TaskCreateAction::class);
             $app->get("/{topicId}/tasks[/]", TaskReadAllAction::class);
 
@@ -269,6 +275,9 @@ return function (App $app) {
     $app->group(
         "/hierarchy",
         function (RouteCollectorProxy $app) {
+            $app->get("/{parentId}/vote_result[/]", VoteHierarchyResultReadAction::class);
+            $app->get("/{parentId}/votes[/]", VoteHierarchyReadAllAction::class);
+
             $app->get("/{id}[/]", HierarchyReadSingleAction::class);
             $app->put("[/]", HierarchyUpdateAction::class);
             $app->delete("/{id}[/]", HierarchyDeleteAction::class);
@@ -285,6 +294,13 @@ return function (App $app) {
             $app->get("/{id}[/]", SelectionReadSingleAction::class);
             $app->put("[/]", SelectionUpdateAction::class);
             $app->delete("/{id}[/]", SelectionDeleteAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/view",
+        function (RouteCollectorProxy $app) {
+            $app->get("/{type}/{typeId}[/]", ViewReadSingleAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 

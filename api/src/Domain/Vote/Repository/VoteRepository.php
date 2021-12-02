@@ -121,24 +121,88 @@ class VoteRepository implements RepositoryInterface
      */
     public function getResult(string $taskId): array
     {
-        $query = $this->queryFactory->newSelect("vote");
+        $query = $this->queryFactory->newSelect("vote_result");
         $query->select([
             "idea.id",
             "idea.keywords",
             "idea.description",
             "idea.image",
             "idea.link",
-            "SUM(vote.rating) AS rating",
-            "SUM(vote.detail_rating) AS detail_rating"
+            "vote_result.sum_rating AS rating",
+            "vote_result.sum_detail_rating AS detail_rating"
         ])
-            ->innerJoin("idea", "idea.id = vote.idea_id")
+            ->innerJoin("idea", "idea.id = vote_result.idea_id")
             ->andWhere([
-                "vote.task_id" => $taskId
-            ])->group(["vote.idea_id", "vote.task_id"])
+                "vote_result.task_id" => $taskId
+            ])
             ->order(["detail_rating" => "desc"]);
 
         $result = $this->fetchAll($query, VoteResultData::class);
 
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
+    }
+
+    /**
+     * Read the result of the voting for the parent idea ID.
+     * @param string $parent_id The parent idea ID.
+     * @return array<object> The voting result.
+     */
+    public function getHierarchyResult(string $parent_id): array
+    {
+        $query = $this->queryFactory->newSelect("vote_result_hierarchy");
+        $query->select([
+            "idea.id",
+            "idea.keywords",
+            "idea.description",
+            "idea.image",
+            "idea.link",
+            "vote_result_hierarchy.sum_rating AS rating",
+            "vote_result_hierarchy.sum_detail_rating AS detail_rating"
+        ])
+            ->innerJoin("idea", "idea.id = vote_result_hierarchy.idea_id")
+            ->andWhere([
+                "vote_result_hierarchy.parent_idea_id" => $parent_id
+            ])
+            ->order(["detail_rating" => "desc"]);
+
+        $result = $this->fetchAll($query, VoteResultData::class);
+
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
+    }
+
+    /**
+     * Get list of entities for the parent ID.
+     * @param string $parentId The entity parent ID.
+     * @return array<object> The result entity list.
+     */
+    public function getAllForHierarchy(string $parentId): array
+    {
+        $authorisation = $this->getAuthorisation();
+        $authorisation_conditions = [];
+        if ($authorisation->isParticipant()) {
+            $authorisation_conditions = [
+                "participant_id" => $authorisation->id
+            ];
+        }
+
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["vote.*"])
+            ->innerJoin("hierarchy_idea", "hierarchy_idea.child_idea_id = vote.idea_id")
+            ->andWhere(["hierarchy_idea.parent_idea_id" => $parentId])
+            ->andWhere($authorisation_conditions)
+            ->order("hierarchy_idea.order");
+
+        $result = $this->fetchAll($query);
         if (is_array($result)) {
             return $result;
         } elseif (isset($result)) {

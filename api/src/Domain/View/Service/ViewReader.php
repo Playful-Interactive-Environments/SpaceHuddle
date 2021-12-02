@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Domain\Vote\Service;
+namespace App\Domain\View\Service;
 
 use App\Domain\Base\Service\ServiceReaderTrait;
 
 /**
- * Service to read all votes for one task
+ * Service to read all categories for one task.
  */
-class VoteReader
+class ViewReader
 {
     use ServiceReaderTrait;
-    use VoteServiceTrait;
+    use ViewServiceTrait;
 
     /**
      * Validates whether the transferred data is suitable for the service.

@@ -3,18 +3,18 @@
 namespace App\Action\Vote;
 
 use App\Action\Base\ActionTrait;
-use App\Domain\Vote\Service\VoteReader;
+use App\Domain\Vote\Service\VoteHierarchyReader;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 
 /**
- * Action for reading a list of all the votes for the specified task.
+ * Action for reading a list of all the votes for the specified hierarchy idea.
  *
  * @OA\Get(
- *   path="/task/{taskId}/votes/",
- *   summary="Get all task votings for the logged-in participant.",
+ *   path="/hierarchy/{parentId}/votes/",
+ *   summary="Get all hierarchy idea votings for the logged-in participant.",
  *   tags={"Vote"},
- *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
+ *   @OA\Parameter(in="path", name="parentId", description="ID of the hierarchy idea", required=true),
  *   @OA\Response(response="200", description="Success",
  *     @OA\MediaType(
  *         mediaType="application/json",
@@ -25,18 +25,18 @@ use Fig\Http\Message\StatusCodeInterface;
  *   security={{"api_key": {}}, {"bearerAuth": {}}}
  * )
  */
-class VoteReadAllAction
+class VoteHierarchyReadAllAction
 {
     use ActionTrait;
-    protected VoteReader $service;
+    protected VoteHierarchyReader $service;
 
     /**
      * The constructor.
      *
      * @param Responder $responder The responder
-     * @param VoteReader $service The service
+     * @param VoteHierarchyReader $service The service
      */
-    public function __construct(Responder $responder, VoteReader $service)
+    public function __construct(Responder $responder, VoteHierarchyReader $service)
     {
         $this->setUp($responder);
         $this->service = $service;

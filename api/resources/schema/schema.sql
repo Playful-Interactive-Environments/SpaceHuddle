@@ -458,15 +458,20 @@ ALTER TABLE `vote`
 -- Struktur des Views `session_permission`
 --
 
-CREATE VIEW session_permission (user_id, user_type, user_state, session_id, role) AS
-SELECT
+CREATE OR REPLACE VIEW session_permission (
+    user_id,
+    user_type,
+    user_state,
+    session_id,
+    role
+) AS SELECT
     user_id,
     'USER' COLLATE utf8mb4_unicode_ci AS user_type,
     'ACTIVE' COLLATE utf8mb4_unicode_ci AS user_state,
     session_id,
     role
 FROM session_role
-UNION
+UNION ALL
 SELECT
     id as user_id,
     'PARTICIPANT' COLLATE utf8mb4_unicode_ci AS user_type,
@@ -477,6 +482,204 @@ SELECT
         WHEN 'INACTIVE' THEN 'INACTIVE'
         END AS role
 from participant;
+
+CREATE OR REPLACE VIEW hierarchy_idea(
+    parent_idea_id,
+    child_idea_id,
+    `order`
+) AS SELECT
+    hierarchy.category_idea_id,
+    hierarchy.sub_idea_id,
+    hierarchy.`order`
+FROM
+    hierarchy
+INNER JOIN idea parent_idea ON
+    hierarchy.category_idea_id = parent_idea.id
+INNER JOIN idea child_idea ON
+    hierarchy.sub_idea_id = child_idea.id
+WHERE
+    parent_idea.task_id = child_idea.task_id;
+
+CREATE OR REPLACE VIEW vote_result(
+    task_id,
+    idea_id,
+    sum_rating,
+    sum_detail_rating,
+    avg_rating,
+    avg_detail_rating,
+    count_rating,
+    count_detail_rating
+) AS SELECT
+    vote.task_id,
+    vote.idea_id,
+    SUM(vote.rating) AS sum_rating,
+    SUM(vote.detail_rating) AS sum_detail_rating,
+    AVG(vote.rating) AS avg_rating,
+    AVG(vote.detail_rating) AS avg_detail_rating,
+    COUNT(vote.rating) AS count_rating,
+    COUNT(vote.detail_rating) AS count_detail_rating
+FROM
+    vote
+GROUP BY
+    vote.idea_id,
+    vote.task_id
+ORDER BY
+    vote.task_id,
+    sum_detail_rating
+DESC;
+
+CREATE OR REPLACE VIEW vote_result_hierarchy(
+    task_id,
+    parent_idea_id,
+    idea_id,
+    sum_rating,
+    sum_detail_rating,
+    avg_rating,
+    avg_detail_rating,
+    count_rating,
+    count_detail_rating
+) AS SELECT
+    vote_result.task_id,
+    hierarchy_idea.parent_idea_id,
+    vote_result.idea_id,
+    vote_result.sum_rating,
+    vote_result.sum_detail_rating,
+    vote_result.avg_rating,
+    vote_result.avg_detail_rating,
+    vote_result.count_rating,
+    vote_result.count_detail_rating
+FROM
+    vote_result
+INNER JOIN hierarchy_idea ON
+    hierarchy_idea.child_idea_id = vote_result.idea_id;
+
+CREATE OR REPLACE VIEW selection_view (type, id, topic_id, name, detail_type) AS
+SELECT
+    'SELECTION' COLLATE utf8mb4_unicode_ci AS type,
+    id,
+    topic_id,
+    name,
+    '' COLLATE utf8mb4_unicode_ci AS detail_type
+FROM
+    selection
+UNION ALL
+SELECT
+    'TASK' COLLATE utf8mb4_unicode_ci AS type,
+    id,
+    topic_id,
+    name,
+    task_type COLLATE utf8mb4_unicode_ci AS detail_type
+FROM
+    task
+WHERE
+    task_type IN ('BRAINSTORMING', 'CATEGORISATION', 'INFORMATION')
+UNION ALL
+SELECT
+    'VOTE' COLLATE utf8mb4_unicode_ci AS type,
+    id,
+    topic_id,
+    name,
+    '' COLLATE utf8mb4_unicode_ci AS detail_type
+FROM
+    task
+WHERE
+    task.task_type = 'VOTING'
+UNION ALL
+SELECT
+    'HIERARCHY' COLLATE utf8mb4_unicode_ci AS type,
+    idea.id,
+    task.topic_id,
+    idea.keywords AS name,
+    task.task_type COLLATE utf8mb4_unicode_ci AS detail_type
+FROM
+    idea
+INNER JOIN task ON
+    task.id = idea.task_id
+WHERE
+    EXISTS(
+    SELECT
+        1
+    FROM
+        hierarchy
+    WHERE
+        hierarchy.category_idea_id = idea.id
+);
+
+CREATE OR REPLACE VIEW selection_view_idea_selection (parent_id, idea_id, `order`) AS
+SELECT
+        selection_id AS type_id,
+        idea_id,
+        `order`
+FROM
+    selection_idea;
+
+CREATE OR REPLACE VIEW selection_view_idea_task (parent_id, idea_id, `order`) AS
+SELECT
+        task_id AS type_id,
+        id AS idea_id,
+        `order`
+FROM
+    idea
+WHERE
+    NOT EXISTS(
+    SELECT
+        1
+    FROM
+        hierarchy
+    INNER JOIN idea parent_idea ON
+        hierarchy.category_idea_id = parent_idea.id
+    WHERE
+        hierarchy.sub_idea_id = idea.id AND parent_idea.task_id = idea.task_id
+);
+
+CREATE OR REPLACE VIEW selection_view_idea_vote (parent_id, idea_id, `order`) AS
+SELECT
+        task_id AS type_id,
+        idea_id,
+        sum_detail_rating
+FROM
+    vote_result;
+
+CREATE OR REPLACE VIEW selection_view_idea_hierarchy (parent_id, idea_id, `order`) AS
+SELECT
+        category_idea_id AS type_id,
+        sub_idea_id AS idea_id,
+        `order`
+FROM
+    hierarchy;
+
+CREATE OR REPLACE VIEW selection_view_idea (type, parent_id, idea_id, `order`) AS
+SELECT
+    'SELECTION' COLLATE utf8mb4_unicode_ci AS type,
+    parent_id,
+    idea_id,
+    `order`
+FROM
+    selection_view_idea_selection
+UNION ALL
+SELECT
+    'TASK' COLLATE utf8mb4_unicode_ci AS type,
+    parent_id,
+    idea_id,
+    `order`
+FROM
+    selection_view_idea_task
+UNION ALL
+SELECT
+    'VOTE' COLLATE utf8mb4_unicode_ci AS type,
+    parent_id,
+    idea_id,
+    `order`
+FROM
+    selection_view_idea_vote
+UNION ALL
+SELECT
+    'HIERARCHY' COLLATE utf8mb4_unicode_ci AS type,
+    parent_id,
+    idea_id,
+    `order`
+FROM
+    selection_view_idea_hierarchy;
 
 COMMIT;
 

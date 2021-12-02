@@ -93,12 +93,17 @@ p, MODERATOR, /topic/:id/, DELETE
 p, MODERATOR, /session/:sessionId/topic/, POST
 p, MODERATOR, /topic/, PUT
 
+p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/views/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /view/:type/:typeId/, GET
+
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/vote_result/, GET
-p, MODERATOR|PARTICIPANT, /vote/:id/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /hierarchy/:parentId/vote_result/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /vote/:id/, GET
 p, MODERATOR|PARTICIPANT, /vote/:id/, DELETE
-p, MODERATOR|PARTICIPANT, /task/:taskId/votes/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /hierarchy/:parentId/votes/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /hierarchy/:parentId/vote_result/, GET
 p, PARTICIPANT, /task/:taskId/vote/, POST
-p, MODERATOR|PARTICIPANT, /vote/, PUT
+p, MODERATOR|FACILITATOR|PARTICIPANT, /vote/, PUT
 
 g, MODERATOR, USER
 g, FACILITATOR, USER

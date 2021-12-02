@@ -1,42 +1,42 @@
 <?php
 
-namespace App\Action\Vote;
+namespace App\Action\View;
 
 use App\Action\Base\ActionTrait;
-use App\Domain\Vote\Service\VoteReader;
+use App\Domain\View\Service\ViewReader;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 
 /**
- * Action for reading a list of all the votes for the specified task.
+ * Action for reading a list of all the views for the specified topic.
  *
  * @OA\Get(
- *   path="/task/{taskId}/votes/",
- *   summary="Get all task votings for the logged-in participant.",
- *   tags={"Vote"},
- *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
+ *   path="/topic/{topicId}/views",
+ *   summary="List of all views for the topic.",
+ *   tags={"View"},
+ *   @OA\Parameter(in="path", name="topicId", description="ID of the topic", required=true),
  *   @OA\Response(response="200", description="Success",
  *     @OA\MediaType(
  *         mediaType="application/json",
- *         @OA\Schema(type="array", @OA\Items(ref="#/components/schemas/VoteData")),
+ *         @OA\Schema(type="array", @OA\Items(ref="#/components/schemas/ViewData")),
  *     )
  *   ),
  *   @OA\Response(response="404", description="Not Found"),
  *   security={{"api_key": {}}, {"bearerAuth": {}}}
  * )
  */
-class VoteReadAllAction
+class ViewReadAllAction
 {
     use ActionTrait;
-    protected VoteReader $service;
+    protected ViewReader $service;
 
     /**
      * The constructor.
      *
      * @param Responder $responder The responder
-     * @param VoteReader $service The service
+     * @param ViewReader $service The service
      */
-    public function __construct(Responder $responder, VoteReader $service)
+    public function __construct(Responder $responder, ViewReader $service)
     {
         $this->setUp($responder);
         $this->service = $service;

@@ -100,6 +100,23 @@ class VoteValidator
     }
 
     /**
+     * Validate read.
+     *
+     * @param array<string, mixed> $data The data
+     *
+     * @return void
+     */
+    public function validateHierarchyRead(array $data): void
+    {
+        $this->validateEntity(
+            $data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("parentId", "Empty: This field cannot be left empty")
+                ->requirePresence("parentId", message: "Required: This field is required")
+        );
+    }
+
+    /**
      * Validate task type.
      * @param string $taskId Task Id to be checked.
      * @return void
