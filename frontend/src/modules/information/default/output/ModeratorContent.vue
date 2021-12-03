@@ -37,7 +37,6 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
-import * as taskService from '@/services/task-service';
 import * as ideaService from '@/services/idea-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
@@ -82,9 +81,7 @@ export default class ModeratorContent extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    taskService.getTaskById(this.taskId).then(() => {
-      this.getIdeas();
-    });
+    this.getIdeas();
   }
 
   @Watch('showSettings', { immediate: true })

@@ -56,6 +56,7 @@ import {
 } from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import * as taskService from '@/services/task-service';
+import * as timerService from '@/services/timer-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Module } from '@/types/api/Module';
 import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
@@ -120,7 +121,7 @@ export default class ParticipantModuleContent extends Vue {
     taskService
       .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
       .then((task) => {
-        if (!taskService.isActive(task)) this.$router.go(-1);
+        if (!timerService.isActive(task)) this.$router.go(-1);
       });
   }
 
@@ -161,8 +162,7 @@ export default class ParticipantModuleContent extends Vue {
 
   get moduleNames(): string[] {
     if (this.modules && this.modules.length > 0) {
-      let modules: string[] = this.modules.map((module) => module.name);
-      return modules;
+      return this.modules.map((module) => module.name);
     }
 
     if (this.task && this.task.modules && this.task.modules.length > 0) {

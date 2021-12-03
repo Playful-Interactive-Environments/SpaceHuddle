@@ -1,4 +1,5 @@
 {
   "icon": "object-group",
-  "type": "main"
+  "type": "main",
+  "syncPublicParticipant": false
 }

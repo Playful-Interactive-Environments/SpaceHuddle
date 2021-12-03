@@ -57,8 +57,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import * as taskService from '@/services/task-service';
-import { convertToSaveVersion, Task } from '@/types/api/Task';
+import * as timerService from '@/services/timer-service';
 import ValidationForm, {
   ValidationFormCall,
 } from '@/components/shared/molecules/ValidationForm.vue';
@@ -66,6 +65,7 @@ import { ValidationData } from '@/types/ui/ValidationRule';
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
 import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import TaskStates from '@/types/enum/TaskStates';
+import { TimerEntity } from '@/types/enum/TimerEntity';
 
 @Options({
   components: {
@@ -80,7 +80,18 @@ export default class TimerSettings extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
 
   @Prop({ default: false }) showModal!: boolean;
-  @Prop() task!: Task;
+  @Prop({ default: TimerEntity.TASK }) entityName!: string;
+  @Prop() entity!: any;
+  @Prop({ default: null }) defaultTimerSeconds!: number | null;
+
+  get defaultTime(): number {
+    if (this.defaultTimerSeconds) return this.defaultTimerSeconds;
+    return 60 * 10;
+  }
+
+  get hasTimeLimitByDefault(): boolean {
+    return this.defaultTimerSeconds !== null;
+  }
 
   formData: ValidationData = {
     hasTimeLimit: true,
@@ -88,14 +99,13 @@ export default class TimerSettings extends Vue {
   };
 
   showSettings = false;
-  defaultTime = 1000 * 60 * 10;
 
   mounted(): void {
     this.reset();
   }
 
   get showDeactivate(): boolean {
-    return this.task.state === TaskStates.ACTIVE;
+    return this.entityState === TaskStates.ACTIVE;
   }
 
   handleClose(done: { (): void }): void {
@@ -105,28 +115,53 @@ export default class TimerSettings extends Vue {
   }
 
   setRemindingTime(time: number): void {
-    const remindingTime = new Date(time);
-    remindingTime.setHours(
-      remindingTime.getHours() + remindingTime.getTimezoneOffset() / 60
-    );
-    this.formData.remindingTime = remindingTime;
+    this.formData.remindingTime = timerService.getDate(time);
+  }
+
+  get entityState(): string {
+    if ('state' in this.entity) return this.entity.state;
+    return '';
+  }
+
+  set entityState(value: string) {
+    if ('state' in this.entity) this.entity.state = value;
+  }
+
+  get entityRemainingTime(): number | null {
+    if ('remainingTime' in this.entity) return this.entity.remainingTime;
+    else if ('parameter' in this.entity)
+      return this.entity.parameter.remainingTime;
+    return null;
+  }
+
+  set entityRemainingTime(value: number | null) {
+    if ('remainingTime' in this.entity) this.entity.remainingTime = value;
+    else if ('parameter' in this.entity)
+      this.entity.parameter.remainingTime = value;
   }
 
   deactivateTimer(): void {
-    this.task.state = TaskStates.WAIT;
-    const saveVersion = convertToSaveVersion(this.task);
-    taskService.updateTask(saveVersion);
+    this.entityState = TaskStates.WAIT;
+    timerService.update(this.entityName, this.entity.id, this.entity);
     this.reset();
     this.showSettings = false;
     this.$emit('update:showModal', false);
   }
 
   reset(): void {
-    this.formData.hasTimeLimit = !!(!this.task || this.task.remainingTime);
+    this.formData.hasTimeLimit = !!(
+      !this.entity ||
+      this.entityRemainingTime ||
+      this.hasTimeLimitByDefault
+    );
     if (this.formData.hasTimeLimit) {
       let time = this.defaultTime;
-      if (this.task && this.task.remainingTime && this.task.remainingTime > 0)
-        time = this.task.remainingTime * 1000;
+      if (
+        this.entity &&
+        this.entityRemainingTime &&
+        this.entityRemainingTime > 0
+      )
+        time = this.entityRemainingTime;
       this.setRemindingTime(time);
     } else {
       this.formData.remindingTime = null;
@@ -137,12 +172,8 @@ export default class TimerSettings extends Vue {
   get remainingSeconds(): number | null {
     if (!this.formData.hasTimeLimit || !this.formData.remindingTime)
       return null;
-    const remindingTime = this.formData.remindingTime;
-    return (
-      remindingTime.getHours() * 3600 +
-      remindingTime.getMinutes() * 60 +
-      remindingTime.getSeconds()
-    );
+
+    return timerService.getSeconds(this.formData.remindingTime);
   }
 
   @Watch('showModal', { immediate: true })
@@ -150,8 +181,8 @@ export default class TimerSettings extends Vue {
     this.showSettings = showModal;
   }
 
-  @Watch('task', { immediate: true })
-  onTaskChanged(): void {
+  @Watch('entity', { immediate: true })
+  onEntityChanged(): void {
     this.reset();
   }
 
@@ -163,10 +194,9 @@ export default class TimerSettings extends Vue {
   }
 
   save(): void {
-    this.task.state = TaskStates.ACTIVE;
-    this.task.remainingTime = this.remainingSeconds;
-    const saveVersion = convertToSaveVersion(this.task);
-    taskService.updateTask(saveVersion);
+    this.entityState = TaskStates.ACTIVE;
+    this.entityRemainingTime = this.remainingSeconds;
+    timerService.update(this.entityName, this.entity.id, this.entity);
     this.reset();
     this.showSettings = false;
     this.$emit('update:showModal', false);

@@ -95,12 +95,11 @@ import { EventType } from '@/types/enum/EventType';
 import TopicSettings from '@/components/moderator/organisms/settings/TopicSettings.vue';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import SessionSettings from '@/components/moderator/organisms/settings/SessionSettings.vue';
-import TaskTimeline from '@/components/moderator/organisms/TaskTimeline.vue';
+import TaskTimeline from '@/components/moderator/organisms/Timeline/TaskTimeline.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import TopicCard from '@/components/moderator/organisms/cards/TopicCard.vue';
-import { ParticipantInfo } from '@/types/api/Participant';
 
 @Options({
   components: {
@@ -131,7 +130,6 @@ export default class ModeratorSessionDetails extends Vue {
   formatDate = formatDate;
   editTopicId = '';
   publicScreenTopic = '';
-  participants: ParticipantInfo[] = [];
   readonly intervalTime = 3000;
   interval!: any;
 
@@ -151,15 +149,6 @@ export default class ModeratorSessionDetails extends Vue {
       await this.changePublicScreen(id as string);
     });
     await this.getTopics();
-    this.startIdeaInterval();
-  }
-
-  startIdeaInterval(): void {
-    this.interval = setInterval(this.getParticipants, this.intervalTime);
-  }
-
-  unmounted(): void {
-    clearInterval(this.interval);
   }
 
   async changePublicScreen(id: string | null): Promise<void> {
@@ -179,12 +168,6 @@ export default class ModeratorSessionDetails extends Vue {
         });
         this.getPublicScreen();
       });
-    });
-  }
-
-  async getParticipants(): Promise<void> {
-    sessionService.getParticipants(this.sessionId).then((queryResult) => {
-      this.participants = queryResult;
     });
   }
 

@@ -26,7 +26,7 @@
           />
         </div>
         <div class="public-screen__overview-right">
-          <Timer v-if="task" :task="task" />
+          <Timer v-if="task" :entity="task" />
           <span class="connection-key" v-if="session">
             <h3>
               {{ $t('shared.view.publicScreen.connectionKey') }}
@@ -105,7 +105,7 @@ import {
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
-import TaskTimeline from '@/components/moderator/organisms/TaskTimeline.vue';
+import TaskTimeline from '@/components/moderator/organisms/Timeline/TaskTimeline.vue';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({

@@ -4,7 +4,7 @@
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "en,",  
-             "icon": "comment-alt",  "type": "main",  
+             "icon": "comment-alt",  "type": "main",  "syncPublicParticipant": false,  
            "path": "brainstorming/chat"  
        },  
        "default": {  
@@ -12,19 +12,19 @@
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "locales": "de,en,",  
-             "icon": "brain",  "type": "main",  
+             "icon": "brain",  "type": "main",  "syncPublicParticipant": false,  
            "path": "brainstorming/default"  
        },  
        "gallery": {  
            "publicScreen": "output/PublicScreen",  
            "locales": "en,",  
-             "icon": "image",  "type": "addOn",  
+             "icon": "image",  "type": "addOn",  "syncPublicParticipant": false,  
            "path": "brainstorming/gallery"  
        },  
        "game": {  
            "participant": "output/Participant",  
            "locales": "en,",  
-             "icon": "rocket",  "type": "addOn",  
+             "icon": "rocket",  "type": "addOn",  "syncPublicParticipant": false,  
            "path": "brainstorming/game"  
        },  
        "settings": {  
@@ -34,10 +34,10 @@
    },  
    "categorisation": {  
        "default": {  
-           "publicScreen": "output/PublicScreen",
+           "publicScreen": "output/PublicScreen",  
            "moderatorContent": "output/ModeratorContent",  
            "locales": "en,",  
-             "icon": "object-group",  "type": "main",  
+             "icon": "object-group",  "type": "main",  "syncPublicParticipant": false,  
            "path": "categorisation/default"  
        },  
        "settings": {  
@@ -51,8 +51,15 @@
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "locales": "en,",  
-             "icon": "info",  "type": "main",  
+             "icon": "info",  "type": "main",  "syncPublicParticipant": false,
            "path": "information/default"  
+       },  
+       "quiz": {  
+           "moderatorContent": "output/ModeratorContent",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "en,",  
+             "icon": "gamepad",  "type": "main",  "syncPublicParticipant": true,  
+           "path": "information/quiz"  
        },  
        "settings": {  
            "parameter": "TaskParameter",  
@@ -65,7 +72,7 @@
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
-             "icon": "times",  "type": "main",  
+             "icon": "times",  "type": "main",  "syncPublicParticipant": false,  
            "path": "none",  
        "settings": {  
            "parameter": "TaskParameter",  
@@ -77,7 +84,7 @@
            "publicScreen": "output/PublicScreen",  
            "moderatorContent": "output/ModeratorContent",  
            "locales": "en,",  
-             "icon": "check",  "type": "main",  
+             "icon": "check",  "type": "main",  "syncPublicParticipant": false,  
            "path": "selection/default"  
        },  
        "settings": {  
@@ -92,14 +99,14 @@
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "en,",  
-             "icon": "star",  "type": "main",  
+             "icon": "star",  "type": "main",  "syncPublicParticipant": false,  
            "path": "voting/default"  
        },  
        "slots": {  
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "en,",  
-             "icon": "list",  "type": "main",  
+             "icon": "list",  "type": "main",  "syncPublicParticipant": false,  
            "path": "voting/slots"  
        },  
        "settings": {  

@@ -7,6 +7,7 @@ import {
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Category } from '@/types/api/Category';
+import { Idea } from '@/types/api/Idea';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -54,6 +55,17 @@ export const getCategoriesForTask = async (
 ): Promise<Category[]> => {
   return await apiExecuteGetHandled<Category[]>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.CATEGORIES}`,
+    [],
+    authHeaderType
+  );
+};
+
+export const getCategoryIdeas = async (
+  id: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Idea[]> => {
+  return await apiExecuteGetHandled<Idea[]>(
+    `/${EndpointType.CATEGORY}/${id}/${EndpointType.IDEAS}`,
     [],
     authHeaderType
   );

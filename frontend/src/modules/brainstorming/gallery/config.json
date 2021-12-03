@@ -1,4 +1,5 @@
 {
   "icon": "image",
-  "type": "addOn"
+  "type": "addOn",
+  "syncPublicParticipant": false
 }

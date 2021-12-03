@@ -1,4 +1,5 @@
 {
   "icon": "info",
-  "type": "main"
+  "type": "main",
+  "syncPublicParticipant": false
 }

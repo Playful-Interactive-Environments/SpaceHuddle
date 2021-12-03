@@ -42,7 +42,7 @@
               v-if="task.remainingTime !== null"
               :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
               class="media-right"
-              :task="task"
+              :entity="task"
               v-on:timerEnds="getTopicsAndTasks"
             ></Timer>
           </div>

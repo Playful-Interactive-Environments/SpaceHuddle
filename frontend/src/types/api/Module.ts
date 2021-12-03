@@ -5,5 +5,6 @@ export interface Module {
   name: string;
   order: number;
   state: string;
+  syncPublicParticipant: boolean;
   parameter: any;
 }

@@ -18,7 +18,7 @@
   <TimerSettings
     v-if="showTimerSettings"
     v-model:showModal="showTimerSettings"
-    :task="task"
+    :entity="task"
   />
 </template>
 
@@ -33,6 +33,7 @@ import TaskStates from '@/types/enum/TaskStates';
 import TaskType from '@/types/enum/TaskType';
 import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
 import * as taskService from '@/services/task-service';
+import * as timerService from '@/services/timer-service';
 import TaskTypeColor from '@/types/TaskTypeColor';
 import * as sessionService from '@/services/session-service';
 import { ElMessage } from 'element-plus';
@@ -98,7 +99,7 @@ export default class ModuleShare extends Vue {
   }
 
   get participant(): boolean {
-    return taskService.isActive(this.task);
+    return timerService.isActive(this.task);
   }
 
   set participant(newValue: boolean) {

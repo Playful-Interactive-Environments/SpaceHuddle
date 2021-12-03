@@ -42,7 +42,29 @@ export const getResult = async (
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<VoteResult[]> => {
   return await apiExecuteGetHandled<VoteResult[]>(
-    `/${EndpointType.TASK}/${taskId}/${EndpointType.VOTE_RESULTS}`,
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.VOTE_RESULT}`,
+    [],
+    authHeaderType
+  );
+};
+
+export const getHierarchyVotes = async (
+  parentIdeaId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Vote[]> => {
+  return await apiExecuteGetHandled<Vote[]>(
+    `/${EndpointType.HIERARCHY}/${parentIdeaId}/${EndpointType.VOTES}`,
+    [],
+    authHeaderType
+  );
+};
+
+export const getHierarchyResult = async (
+  parentIdeaId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<VoteResult[]> => {
+  return await apiExecuteGetHandled<VoteResult[]>(
+    `/${EndpointType.HIERARCHY}/${parentIdeaId}/${EndpointType.VOTE_RESULT}`,
     [],
     authHeaderType
   );

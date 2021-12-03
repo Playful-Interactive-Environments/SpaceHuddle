@@ -43,7 +43,7 @@
         <draggable
           v-model="activePageTasks"
           tag="transition-group"
-          item-key="order"
+          item-key="id"
           handle=".el-step__head"
           @end="dragDone"
         >
@@ -87,7 +87,7 @@
               <template #description>
                 <el-tooltip
                   placement="top"
-                  :content="$t('moderator.organism.taskTimeline.selectTask')"
+                  :content="$t('moderator.organism.taskTimeline.selectItem')"
                   v-if="isLinkedToTask"
                 >
                   <span class="link" v-on:click="taskClicked(element, index)">
@@ -105,7 +105,7 @@
       <TimerSettings
         v-if="showTimerSettings"
         v-model:showModal="showTimerSettings"
-        :task="timerTask"
+        :entity="timerTask"
       />
     </div>
     <div
@@ -157,6 +157,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import * as taskService from '@/services/task-service';
+import * as timerService from '@/services/timer-service';
 import { convertToSaveVersion, Task } from '@/types/api/Task';
 import draggable from 'vuedraggable';
 import * as sessionService from '@/services/session-service';
@@ -253,7 +254,11 @@ export default class TaskTimeline extends Vue {
           ModuleComponentType.PARTICIPANT,
           TaskType[task.taskType],
           'default'
-        ).then((result) => (this.hasParticipantComponent[task.id] = result));
+        ).then(
+          (result) =>
+            (this.hasParticipantComponent[task.id] =
+              result && !task.syncPublicParticipant)
+        );
       });
     });
   }
@@ -274,7 +279,7 @@ export default class TaskTimeline extends Vue {
   }
 
   isActive(task: Task): boolean {
-    return taskService.isActive(task);
+    return timerService.isActive(task);
   }
 
   setActive(task: Task): void {
@@ -335,7 +340,8 @@ export default class TaskTimeline extends Vue {
     const index = this.activePageTasks.findIndex(
       (task) => task.id == this.publicScreenTaskId
     );
-    if (this.isVertical && index > -1) return this.tasks.length - 1 - index;
+    if (this.isVertical && index > -1)
+      return this.activePageTasks.length - 1 - index;
     return index;
   }
 
@@ -406,11 +412,6 @@ export default class TaskTimeline extends Vue {
 <style lang="scss" scoped>
 .el-pagination::v-deep {
   text-align: center;
-  button,
-  button:disabled,
-  li {
-    background-color: unset;
-  }
 
   &.is-vertical {
     button:enabled,
@@ -421,16 +422,6 @@ export default class TaskTimeline extends Vue {
     .active {
       color: var(--color-purple);
     }
-  }
-
-  li {
-    font-weight: var(--font-weight-default);
-    color: var(--color-primary);
-  }
-
-  .active {
-    color: var(--color-purple);
-    font-weight: var(--font-weight-bold);
   }
 }
 
@@ -512,7 +503,7 @@ export default class TaskTimeline extends Vue {
 }
 
 .el-badge::v-deep {
-  margin-right: 0.7rem;
+  //margin-right: 0.7rem;
 }
 
 .el-button::v-deep {

@@ -1,4 +1,5 @@
 {
   "icon": "rocket",
-  "type": "addOn"
+  "type": "addOn",
+  "syncPublicParticipant": false
 }

@@ -124,7 +124,7 @@
       <TimerSettings
         v-if="showTimerSettings"
         v-model:showModal="showTimerSettings"
-        :task="timerTask"
+        :entity="timerTask"
       />
     </template>
   </ModeratorNavigationLayout>
@@ -143,7 +143,7 @@ import { Task } from '@/types/api/Task';
 import { Session } from '@/types/api/Session';
 import TopicSettings from '@/components/moderator/organisms/settings/TopicSettings.vue';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
-import TaskTimeline from '@/components/moderator/organisms/TaskTimeline.vue';
+import TaskTimeline from '@/components/moderator/organisms/Timeline/TaskTimeline.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import TaskType from '@/types/enum/TaskType';
 import TaskTypeColor from '@/types/TaskTypeColor';
@@ -233,7 +233,7 @@ export default class ModeratorTopicDetails extends Vue {
   }
 
   displayTimerSettings(task: Task | null): void {
-    setTimeout(() => (this.timerTask = task), 500);
+    setTimeout(() => (this.timerTask = task ? task : null), 500);
   }
 
   getModuleIcon(task: Task): string {
@@ -258,6 +258,14 @@ export default class ModeratorTopicDetails extends Vue {
   async getTasks(): Promise<void> {
     await taskService.getTaskList(this.topicId).then((tasks) => {
       this.tasks = tasks;
+      if (
+        !this.activeTask &&
+        !this.tasks.find(
+          (task) => TaskType[task.taskType] == TaskType.BRAINSTORMING
+        )
+      ) {
+        this.activeTask = this.tasks[0];
+      }
     });
     if (this.tasks.length > this.activeTaskIndex)
       await this.changeTask(this.tasks[this.activeTaskIndex]);
@@ -306,7 +314,8 @@ export default class ModeratorTopicDetails extends Vue {
     if (this.$options.components && newTask) {
       await getAsyncModule(
         ModuleComponentType.MODERATOR_CONTENT,
-        TaskType[newTask.taskType]
+        TaskType[newTask.taskType],
+        newTask.modules[0].name
       ).then((component) => {
         if (this.$options.components) {
           this.componentLoadingState = ComponentLoadingState.SELECTED;

@@ -12,7 +12,7 @@
             <div class="image-size">
               <Timer
                 class="card__timer link"
-                :task="task"
+                :entity="task"
                 v-on:timerEnds="$emit('timerEnds')"
                 v-on:click="timerClicked"
                 v-if="showTimer"
@@ -38,7 +38,7 @@
           />
           <Timer
             class="card__timer media-content"
-            :task="task"
+            :entity="task"
             v-on:timerEnds="$emit('timerEnds')"
             v-if="showTimer"
           />
@@ -67,7 +67,7 @@
   <TimerSettings
     v-if="showTimerSettings"
     v-model:showModal="showTimerSettings"
-    :task="task"
+    :entity="task"
   />
 </template>
 
@@ -82,7 +82,7 @@ import ModuleShare from '@/components/moderator/molecules/ModuleShare.vue';
 import TaskType from '@/types/enum/TaskType';
 import TaskStates from '@/types/enum/TaskStates';
 import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
-import * as taskService from '@/services/task-service';
+import * as timerService from '@/services/timer-service';
 
 @Options({
   components: {
@@ -135,7 +135,7 @@ export default class TaskCard extends Vue {
   }
 
   get showTimer(): boolean {
-    return taskService.isActive(this.task);
+    return timerService.isActive(this.task);
   }
 }
 </script>

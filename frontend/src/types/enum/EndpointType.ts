@@ -2,6 +2,8 @@ enum EndpointType {
   AUTHORIZED_USERS = 'authorized_users',
   CATEGORY = 'category',
   CATEGORIES = 'categories',
+  HIERARCHY = 'hierarchy',
+  HIERARCHIES = 'hierarchies',
   IDEA = 'idea',
   IDEAS = 'ideas',
   LOGIN = 'login',
@@ -25,9 +27,11 @@ enum EndpointType {
   TOPIC = 'topic',
   TOPICS = 'topics',
   USER = 'user',
+  VIEW = 'view',
+  VIEWS = 'views',
   VOTE = 'vote',
   VOTES = 'votes',
-  VOTE_RESULTS = 'vote_result',
+  VOTE_RESULT = 'vote_result',
 }
 
 export default EndpointType;

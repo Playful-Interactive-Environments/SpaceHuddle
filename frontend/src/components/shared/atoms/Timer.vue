@@ -11,8 +11,9 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Task } from '@/types/api/Task';
-import * as taskService from '@/services/task-service';
+import * as timerService from '@/services/timer-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { TimerEntity } from '@/types/enum/TimerEntity';
 
 @Options({
   components: {},
@@ -21,7 +22,8 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Timer extends Vue {
-  @Prop() task!: Task;
+  @Prop({ default: TimerEntity.TASK }) entityName!: string;
+  @Prop() entity!: any;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   timeLeft: number | null = 0;
@@ -33,11 +35,11 @@ export default class Timer extends Vue {
   }
 
   get showTime(): boolean {
-    return taskService.isActive(this.task);
+    return timerService.isActive(this.entity);
   }
 
-  @Watch('task', { immediate: true, deep: true })
-  onTaskChanged(val: Task): void {
+  @Watch('entity', { immediate: true, deep: true })
+  onEntityChanged(val: Task): void {
     if (this.showTime) {
       if (val) this.timeLeft = val.remainingTime;
       if (val && val.remainingTime) {
@@ -50,13 +52,16 @@ export default class Timer extends Vue {
   }
 
   syncTimeWithBackend(): void {
-    if (this.task) {
+    if (this.entity) {
       let authHeaderTyp: EndpointAuthorisationType =
         EndpointAuthorisationType.MODERATOR;
       if (this.authHeaderTyp) authHeaderTyp = this.authHeaderTyp;
-      taskService.getTaskById(this.task.id, authHeaderTyp).then((task) => {
-        this.task.remainingTime = task.remainingTime;
-      });
+      timerService
+        .get(this.entityName, this.entity.id, authHeaderTyp)
+        .then((item) => {
+          const remainingTime = timerService.getRemainingTime(item);
+          timerService.setRemainingTime(this.entity, remainingTime);
+        });
     }
   }
 
@@ -82,8 +87,8 @@ export default class Timer extends Vue {
         clearInterval(this.interval);
         this.$emit('timerEnds');
       }
-      if (this.task) {
-        this.task.remainingTime = this.timeLeft;
+      if (this.entity) {
+        timerService.setRemainingTime(this.entity, this.timeLeft);
       }
     }
   }

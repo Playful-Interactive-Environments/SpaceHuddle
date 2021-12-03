@@ -13,7 +13,7 @@
         <Timer
           class="participant-container__timer"
           :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
-          :task="task"
+          :entity="task"
           v-on:timerEnds="$router.go(-1)"
         ></Timer>
       </div>

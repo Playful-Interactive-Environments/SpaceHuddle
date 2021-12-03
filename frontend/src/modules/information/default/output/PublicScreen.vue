@@ -1,7 +1,4 @@
 <template>
-  <section v-if="ideas.length === 0" class="centered public-screen__error">
-    <p>{{ $t('module.brainstorming.default.publicScreen.noIdeas') }}</p>
-  </section>
   <section class="layout__columns">
     <IdeaCard
       v-for="(idea, index) in ideas"

@@ -1,0 +1,19 @@
+{
+  "description": {
+    "title": "quiz",
+    "description": "check the state of knowledge "
+  },
+  "moderatorConfig": {
+    "answerCount": "answer options"
+  },
+  "moderatorContent": {
+    "question": "question",
+    "questionExample": "what is ...",
+    "answer": "answer",
+    "answerExample": "option",
+    "submit": "save"
+  },
+  "publicScreen": {
+    "noIdeas": "No stimulus content added."
+  }
+}

@@ -619,8 +619,16 @@ export default class TaskSettings extends Vue {
         );
         if (moduleComponent) {
           module.parameter = moduleComponent.parameter;
-          moduleService.putModule(module.id, module);
         }
+        getModuleConfig(
+          'syncPublicParticipant',
+          TaskType[task.taskType],
+          module.name,
+          false
+        ).then((result) => {
+          module.syncPublicParticipant = result;
+          moduleService.putModule(module.id, module);
+        });
       });
     });
     this.$emit('update:showModal', false);

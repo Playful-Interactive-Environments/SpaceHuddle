@@ -16,6 +16,8 @@ export interface Task {
   order: number;
   state: TaskStates;
   remainingTime: number | null;
+  activeOnParticipant: boolean;
+  syncPublicParticipant: boolean;
   modules: Module[];
 }
 
