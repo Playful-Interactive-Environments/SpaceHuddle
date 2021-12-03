@@ -82,6 +82,20 @@ class TaskData
     public ?int $remainingTime;
 
     /**
+     * Is task active on participant?
+     * @var bool|null
+     * @OA\Property()
+     */
+    public ?bool $activeOnParticipant;
+
+    /**
+     * Control public screen and participant view synchronously.
+     * @var bool|null
+     * @OA\Property()
+     */
+    public ?bool $syncPublicParticipant;
+
+    /**
      * List of connected modules.
      * @var array<ModuleData>
      * @OA\Property(
@@ -123,6 +137,9 @@ class TaskData
         } else {
             $this->remainingTime = null;
         }
+
+        $this->activeOnParticipant = $reader->findString("active_on_participant") !== null;
+        $this->syncPublicParticipant = $reader->findString("synchro_task") !== null;
 
         $module_id = $reader->findString("module_id");
         if ($module_id) {

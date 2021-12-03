@@ -23,6 +23,7 @@ use Fig\Http\Message\StatusCodeInterface;
  *         @OA\Property(property="name", type="string"),
  *         @OA\Property(property="order", type="integer"),
  *         @OA\Property(property="state", type="string"),
+ *         @OA\Property(property="syncPublicParticipant", type="boolean"),
  *         @OA\Property(property="parameter", type="object", format="json"),
  *       )
  *     )

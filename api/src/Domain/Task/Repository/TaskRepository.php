@@ -115,19 +115,17 @@ class TaskRepository implements RepositoryInterface
         }
         $authorisation = $this->getAuthorisation();
         $query = $this->queryFactory->newSelect($this->getEntityName());
-        $query->select(["task.*", "topic.session_id"])
+        $query->select([
+            "task.*",
+            "topic.session_id",
+            "participant_task.id AS active_on_participant",
+            "synchro_task.id AS synchro_task"
+        ])
             ->innerJoin("topic", "topic.id = task.topic_id")
+            ->leftJoin("participant_task", "participant_task.id = task.id")
+            ->leftJoin("synchro_task", "synchro_task.id = task.id")
             ->andWhere($conditions)
             ->order($sortConditions);
-
-        if ($authorisation->isParticipant()) {
-            $query->whereInList("task.state", [
-                strtoupper(TaskState::ACTIVE),
-                strtoupper(TaskState::READ_ONLY),
-                strtoupper(TaskState::WAIT),
-                strtoupper(TaskState::DONE)
-            ])->andWhere(["(task.expiration_time IS NULL OR task.expiration_time >= current_timestamp())"]);
-        }
 
         $result = $this->fetchAll($query);
         if (is_array($result)) {
@@ -150,9 +148,7 @@ class TaskRepository implements RepositoryInterface
         $conditions = [$this->getParentIdName() => $parentId];
         $authorisation = $this->getAuthorisation();
         if ($authorisation->isParticipant()) {
-            $active = strtoupper(TaskState::ACTIVE);
-            $read = strtoupper(TaskState::READ_ONLY);
-            array_push($conditions, "task.state IN ('$active', '$read')");
+            array_push($conditions, "participant_task.id IS NOT NULL");
         }
         $result = $this->get($conditions);
         if (is_array($result)) {

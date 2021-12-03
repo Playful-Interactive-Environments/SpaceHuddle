@@ -72,6 +72,7 @@ class ModuleRepository implements RepositoryInterface
             "module_name" => $data->name ?? null,
             "order" => $data->order ?? null,
             "state" => $data->state ?? null,
+            "sync_public_participant" => $data->syncPublicParticipant,
             "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null
         ];
     }

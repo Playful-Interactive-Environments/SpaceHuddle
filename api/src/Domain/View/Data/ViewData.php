@@ -32,6 +32,13 @@ class ViewData
     public ?string $id;
 
     /**
+     * Connected Task ID of the view.
+     * @var string|null
+     * @OA\Property(example="uuid")
+     */
+    public ?string $taskId;
+
+    /**
      * name of the view.
      * @var string|null
      * @OA\Property()
@@ -48,6 +55,7 @@ class ViewData
         $this->type = $reader->findString("type");
         $this->detailType = $reader->findString("detail_type");
         $this->id = $reader->findString("id");
+        $this->taskId = $reader->findString("task_id");
         $this->name = $reader->findString("name");
     }
 }

@@ -134,7 +134,7 @@ class HierarchyRepository implements RepositoryInterface
             array_push($conditions, "hierarchy.category_idea_id IS NULL");
         }
         $resultList = [];
-        $result = $this->get($conditions);
+        $result = $this->get($conditions, ["idea.order"]);
         if (is_array($result)) {
             $resultList = $result;
         } elseif (isset($result)) {

@@ -79,6 +79,7 @@ CREATE TABLE `module` (
                           `module_name` varchar(255) NOT NULL,
                           `order` int(11) NOT NULL,
                           `state` varchar(255) NOT NULL,
+                          `sync_public_participant` BIT(1),
                           `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -553,19 +554,25 @@ FROM
 INNER JOIN hierarchy_idea ON
     hierarchy_idea.child_idea_id = vote_result.idea_id;
 
-CREATE OR REPLACE VIEW selection_view (type, id, topic_id, name, detail_type) AS
+CREATE OR REPLACE VIEW selection_view (type, id, task_id, topic_id, name, detail_type) AS
 SELECT
     'SELECTION' COLLATE utf8mb4_unicode_ci AS type,
-    id,
-    topic_id,
-    name,
+    selection.id,
+    task.id as task_id,
+    selection.topic_id,
+    selection.name,
     '' COLLATE utf8mb4_unicode_ci AS detail_type
 FROM
     selection
+LEFT JOIN task ON
+    task.task_type = 'SELECTION'
+    AND task.topic_id = selection.topic_id
+    AND JSON_CONTAINS(task.parameter, JSON_QUOTE(selection.id), '$.selectionId')
 UNION ALL
 SELECT
     'TASK' COLLATE utf8mb4_unicode_ci AS type,
     id,
+    id as task_id,
     topic_id,
     name,
     task_type COLLATE utf8mb4_unicode_ci AS detail_type
@@ -577,6 +584,7 @@ UNION ALL
 SELECT
     'VOTE' COLLATE utf8mb4_unicode_ci AS type,
     id,
+    id as task_id,
     topic_id,
     name,
     '' COLLATE utf8mb4_unicode_ci AS detail_type
@@ -588,6 +596,7 @@ UNION ALL
 SELECT
     'HIERARCHY' COLLATE utf8mb4_unicode_ci AS type,
     idea.id,
+    idea.task_id,
     task.topic_id,
     idea.keywords AS name,
     task.task_type COLLATE utf8mb4_unicode_ci AS detail_type
@@ -680,6 +689,52 @@ SELECT
     `order`
 FROM
     selection_view_idea_hierarchy;
+
+CREATE OR REPLACE VIEW synchro_task (id) AS
+SELECT
+    task.id
+FROM
+    task
+WHERE
+    (
+        EXISTS(
+            SELECT
+                 1
+            FROM
+                 module
+            WHERE
+                 module.task_id = task.id AND module.sync_public_participant
+        )
+);
+
+CREATE OR REPLACE VIEW participant_task (id) AS
+SELECT
+    task.id
+FROM
+    task
+INNER JOIN topic ON topic.id = task.topic_id
+INNER JOIN session ON session.id = topic.session_id
+WHERE
+    (
+        EXISTS(
+            SELECT
+                 1
+            FROM
+                 module
+            WHERE
+                 module.task_id = task.id AND session.public_screen_module_id = module.id
+        ) AND EXISTS(
+            SELECT
+                 1
+            FROM
+                 module
+            WHERE
+                 module.task_id = task.id AND module.sync_public_participant
+        )
+    ) OR (
+        task.state IN('ACTIVE', 'READ_ONLY') AND(
+        task.expiration_time IS NULL OR task.expiration_time >= CURRENT_TIMESTAMP())
+    );
 
 COMMIT;
 
