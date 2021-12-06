@@ -189,13 +189,14 @@ export default class ModeratorContent extends Vue {
 
   @Watch('publicQuestion', { immediate: true })
   async onPublicQuestionChanged(): Promise<void> {
+    if (this.publicQuestion) this.editQuestion = this.publicQuestion;
     if (this.task) {
       this.task.parameter['activeQuestion'] = this.publicQuestion?.question.id;
       await taskService.updateTask(convertToSaveVersion(this.task));
     }
   }
 
-  @Watch('editQuestion', { immediate: true })
+  //@Watch('editQuestion', { immediate: true })
   async onEditQuestionChanged(): Promise<void> {
     if (this.editQuestion) this.formData = this.editQuestion;
   }

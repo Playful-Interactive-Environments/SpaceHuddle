@@ -15,9 +15,9 @@
           <TaskTimeline
             v-if="tasks"
             direction="vertical"
-            :topic-id="topicId"
-            :session-id="sessionId"
-            :active="activeTaskIndex"
+            :topicId="topicId"
+            :sessionId="sessionId"
+            :activeTaskId="activeTaskId"
             v-on:changeActiveElement="changeTask"
           ></TaskTimeline>
           <SessionCode v-if="session" :code="session.connectionKey" />
@@ -207,6 +207,18 @@ export default class ModeratorTopicDetails extends Vue {
     return 0;
   }
 
+  get activeTaskId(): string {
+    if (this.activeTask) {
+      return this.activeTask.id;
+    }
+    const brainstormingTask = this.tasks.find(
+      (t) => TaskType[t.taskType] === TaskType.BRAINSTORMING
+    );
+    if (brainstormingTask) return brainstormingTask.id;
+    if (this.tasks.length > 0) return this.tasks[0].id;
+    return '';
+  }
+
   moduleIcon: { [name: string]: { [name: string]: string } } = {};
   mounted(): void {
     Object.keys(TaskType).forEach((taskTypeName) => {
@@ -237,7 +249,9 @@ export default class ModeratorTopicDetails extends Vue {
   }
 
   getModuleIcon(task: Task): string {
-    return this.moduleIcon[task.taskType][task.modules[0].name];
+    if (task && task.modules.length > 0)
+      return this.moduleIcon[task.taskType][task.modules[0].name];
+    return 'circle';
   }
 
   @Watch('sessionId', { immediate: true })

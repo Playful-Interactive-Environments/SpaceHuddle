@@ -351,6 +351,7 @@ export default class ProcessTimeline extends Vue {
             this.timerContent = publicItem;
           }
           this.$emit('update:publicScreen', publicItem);
+          this.$emit('changePublicScreen', publicItem);
         }
       }
     }
@@ -529,15 +530,19 @@ export default class ProcessTimeline extends Vue {
 
     .stretch {
       position: relative;
-      top: -2rem;
       display: inline-flex;
       flex-direction: column;
       gap: 1rem;
+      margin-bottom: 1rem;
     }
 
     .el-switch::v-deep.is-checked .el-switch__core {
       border-color: var(--color-darkblue-light);
       background-color: var(--color-darkblue-light);
+    }
+
+    .el-steps {
+      margin-top: 2rem;
     }
 
     .el-step::v-deep {
