@@ -154,21 +154,25 @@ class VoteRepository implements RepositoryInterface
      */
     public function getHierarchyResult(string $parent_id): array
     {
-        $query = $this->queryFactory->newSelect("vote_result_hierarchy");
+        $query = $this->queryFactory->newSelect("hierarchy_idea");
         $query->select([
             "idea.id",
             "idea.keywords",
             "idea.description",
             "idea.image",
             "idea.link",
-            "vote_result_hierarchy.sum_rating AS rating",
-            "vote_result_hierarchy.sum_detail_rating AS detail_rating"
+            "IFNULL(vote_result_hierarchy.sum_rating, 0) AS rating",
+            "IFNULL(vote_result_hierarchy.sum_detail_rating, 0) AS detail_rating"
         ])
-            ->innerJoin("idea", "idea.id = vote_result_hierarchy.idea_id")
+            ->innerJoin("idea", "idea.id = hierarchy_idea.child_idea_id")
+            ->leftJoin("vote_result_hierarchy", [
+                "vote_result_hierarchy.parent_idea_id = hierarchy_idea.parent_idea_id",
+                "vote_result_hierarchy.idea_id = hierarchy_idea.child_idea_id"
+                ])
             ->andWhere([
-                "vote_result_hierarchy.parent_idea_id" => $parent_id
+                "hierarchy_idea.parent_idea_id" => $parent_id
             ])
-            ->order(["detail_rating" => "desc"]);
+            ->order(["hierarchy_idea.order" => "asc"]);
 
         $result = $this->fetchAll($query, VoteResultData::class);
 
