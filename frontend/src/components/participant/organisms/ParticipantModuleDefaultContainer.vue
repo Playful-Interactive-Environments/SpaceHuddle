@@ -14,7 +14,7 @@
           class="participant-container__timer"
           :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
           :entity="task"
-          v-on:timerEnds="$router.go(-1)"
+          v-on:timerEnds="goBack"
         ></Timer>
       </div>
     </el-header>
@@ -59,6 +59,17 @@ export default class ParticipantModuleDefaultContainer extends Vue {
   task: Task | null = null;
 
   EndpointAuthorisationType = EndpointAuthorisationType;
+
+  goBack(): void {
+    if (!this.isSyncedWithPublicScreen) this.$router.go(-1);
+  }
+
+  get isSyncedWithPublicScreen(): boolean {
+    if (this.task && this.task.modules) {
+      return !!this.task.modules.find((module) => module.syncPublicParticipant);
+    }
+    return false;
+  }
 
   get taskType(): TaskType | null {
     if (this.task) return TaskType[this.task.taskType];

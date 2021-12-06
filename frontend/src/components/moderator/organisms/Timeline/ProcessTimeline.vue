@@ -387,18 +387,19 @@ export default class ProcessTimeline extends Vue {
 
   refreshTimer(): void {
     this.modelValue.forEach((item) => {
-      const timerEntity = this.getTimerEntity(item);
-      let remainingTime = timerService.getRemainingTime(timerEntity);
-      const state = timerService.getState(timerEntity);
-      if (remainingTime !== null && remainingTime > 0) {
-        remainingTime -= 1;
-        if (remainingTime == 0) {
-          this.changeParticipant(timerEntity, false);
-        } else {
+      if (this.hasParticipantOption(item)) {
+        const timerEntity = this.getTimerEntity(item);
+        let remainingTime = timerService.getRemainingTime(timerEntity);
+        const state = timerService.getState(timerEntity);
+        if (remainingTime !== null && remainingTime > 0) {
+          remainingTime -= 1;
+          if (remainingTime == 0) {
+            this.changeParticipant(timerEntity, false);
+          }
           timerService.setRemainingTime(timerEntity, remainingTime);
+        } else if (state == TaskStates.ACTIVE && remainingTime == 0) {
+          this.changeParticipant(timerEntity, false);
         }
-      } else if (state == TaskStates.ACTIVE && remainingTime == 0) {
-        this.changeParticipant(timerEntity, false);
       }
     });
   }

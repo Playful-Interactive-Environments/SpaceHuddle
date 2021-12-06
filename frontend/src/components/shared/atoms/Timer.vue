@@ -10,7 +10,6 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import { Task } from '@/types/api/Task';
 import * as timerService from '@/services/timer-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { TimerEntity } from '@/types/enum/TimerEntity';
@@ -32,6 +31,7 @@ export default class Timer extends Vue {
 
   mounted(): void {
     document.addEventListener('visibilitychange', this.syncTimeWithBackend);
+    this.startTimer();
   }
 
   get showTime(): boolean {
@@ -39,15 +39,10 @@ export default class Timer extends Vue {
   }
 
   @Watch('entity', { immediate: true, deep: true })
-  onEntityChanged(val: Task): void {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  onEntityChanged(val: any): void {
     if (this.showTime) {
-      if (val) this.timeLeft = val.remainingTime;
-      if (val && val.remainingTime) {
-        this.startTimer();
-      } else if (this.interval) {
-        clearInterval(this.interval);
-        if (this.timeLeft !== null) this.$emit('timerEnds');
-      }
+      if (val) this.timeLeft = timerService.getRemainingTime(val);
     }
   }
 
@@ -60,7 +55,16 @@ export default class Timer extends Vue {
         .get(this.entityName, this.entity.id, authHeaderTyp)
         .then((item) => {
           const remainingTime = timerService.getRemainingTime(item);
+          const state = timerService.getState(item);
+          this.timeLeft = remainingTime;
           timerService.setRemainingTime(this.entity, remainingTime);
+
+          if (
+            timerService.getState(item) !== timerService.getState(this.entity)
+          ) {
+            timerService.setState(this.entity, state);
+            if (!timerService.isActive(this.entity)) this.$emit('timerEnds');
+          }
         });
     }
   }
@@ -84,13 +88,13 @@ export default class Timer extends Vue {
       this.timeLeft -= 1;
       if (this.timeLeft <= 0) {
         this.timeLeft = 0;
-        clearInterval(this.interval);
         this.$emit('timerEnds');
       }
       if (this.entity) {
         timerService.setRemainingTime(this.entity, this.timeLeft);
       }
     }
+    this.syncTimeWithBackend();
   }
 
   unmounted(): void {

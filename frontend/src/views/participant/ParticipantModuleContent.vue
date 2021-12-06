@@ -56,6 +56,7 @@ import {
 } from '@/modules';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import * as taskService from '@/services/task-service';
+import * as sessionService from '@/services/session-service';
 import * as timerService from '@/services/timer-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Module } from '@/types/api/Module';
@@ -69,7 +70,6 @@ import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ParticipantModuleContent extends Vue {
-  @Prop({ default: '' }) readonly sessionId!: string;
   @Prop({ default: '' }) readonly taskId!: string;
 
   // eslint-disable-next-line no-undef
@@ -118,11 +118,29 @@ export default class ParticipantModuleContent extends Vue {
   }
 
   checkModuleState(): void {
-    taskService
-      .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
-      .then((task) => {
-        if (!timerService.isActive(task)) this.$router.go(-1);
-      });
+    if (!this.isSyncedWithPublicScreen) {
+      taskService
+        .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
+        .then((task) => {
+          if (!timerService.isActive(task)) this.$router.go(-1);
+        });
+    } else if (this.task) {
+      sessionService
+        .getPublicScreen(
+          this.task.sessionId,
+          EndpointAuthorisationType.PARTICIPANT
+        )
+        .then((task) => {
+          if (task?.id !== this.taskId) this.$router.go(-1);
+        });
+    }
+  }
+
+  get isSyncedWithPublicScreen(): boolean {
+    if (this.task && this.task.modules) {
+      return !!this.task.modules.find((module) => module.syncPublicParticipant);
+    }
+    return false;
   }
 
   loadDefaultModule(): void {
