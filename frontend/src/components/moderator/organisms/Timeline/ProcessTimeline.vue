@@ -30,7 +30,7 @@
         </el-tooltip>
         <el-slider
           class="media-content"
-          v-if="activePageContentList.length > 1"
+          v-if="activePageContentList.length > minPublicSliderCount"
           :disabled="!usePublicScreen"
           :max="activePageContentList.length - 1"
           v-model="activeOnPublicScreen"
@@ -243,6 +243,10 @@ export default class ProcessTimeline extends Vue {
   activePage = 1;
   pageSize = 10;
   pages: any[][] = [];
+
+  get minPublicSliderCount(): number {
+    return this.isVertical ? 1 : 0;
+  }
 
   @Watch('modelValue.length', { immediate: true })
   async onModelValueChanged(): Promise<void> {
