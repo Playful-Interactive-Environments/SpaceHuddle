@@ -342,3 +342,7 @@ form {
     margin: 0 0 0.2rem;
   }
 }
+
+.disabled {
+  color: var(--color-gray-inactive);
+}

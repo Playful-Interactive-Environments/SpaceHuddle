@@ -30,7 +30,7 @@
         </el-tooltip>
         <el-slider
           class="media-content"
-          v-if="activePageContentList.length > 0"
+          v-if="activePageContentList.length > 1"
           :disabled="!usePublicScreen"
           :max="activePageContentList.length - 1"
           v-model="activeOnPublicScreen"
@@ -43,6 +43,11 @@
           :format-tooltip="tooltip"
           :height="isVertical ? `100%` : ''"
         ></el-slider>
+        <font-awesome-icon
+          v-else
+          icon="desktop"
+          :class="{ disabled: !usePublicScreen }"
+        ></font-awesome-icon>
       </div>
       <el-steps
         :direction="direction"
