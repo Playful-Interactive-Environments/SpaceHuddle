@@ -15,13 +15,15 @@ trait AuthorisationRoleTrait
      * @param string|null $id Primary key to be checked.
      * @param Query $query Database query that determines the role.
      * @param bool $checkParentRole If true, then determine the role from the parent element.
+     * @param bool $checkReadRole If true, then determine the parent read role.
      * @return string|null Role with which the user is authorised to access the entry.
      * @throws GenericException
      */
     private function getAuthorisationRoleFromQuery(
         ?string $id,
         Query $query,
-        bool $checkParentRole = true
+        bool $checkParentRole = true,
+        bool $checkReadRole = false
     ): ?string {
         $authorisation = $this->getAuthorisation();
         if (is_null($id)) {
@@ -32,6 +34,8 @@ trait AuthorisationRoleTrait
             if ($itemCount > 0) {
                 if ($checkParentRole) {
                     $parentId = $statement->fetch("assoc")[$this->getParentIdName()];
+                    if ($checkReadRole)
+                        return $this->getParentRepository()->getAuthorisationReadRole($parentId);
                     return $this->getParentRepository()->getAuthorisationRole($parentId);
                 } else {
                     $result = $statement->fetch("assoc");
@@ -49,6 +53,7 @@ trait AuthorisationRoleTrait
      * @param array $conditions The WHERE conditions to add with AND.
      * @param string|null $entityName Name of the rights table.
      * @param bool $checkParentRole If true, then determine the role from the parent element.
+     * @param bool $checkReadRole If true, then determine the parent read role.
      * @return string|null Role with which the user is authorised to access the entry.
      * @throws GenericException
      */
@@ -56,7 +61,8 @@ trait AuthorisationRoleTrait
         ?string $id,
         array $conditions = [],
         ?string $entityName = null,
-        bool $checkParentRole = true
+        bool $checkParentRole = true,
+        bool $checkReadRole = false
     ): ?string {
         if (is_null($entityName)) {
             $entityName = $this->getEntityName();
@@ -67,19 +73,21 @@ trait AuthorisationRoleTrait
         $query = $this->queryFactory->newSelect($entityName);
         $query->select(["*"])
             ->andWhere($conditions);
-        return $this->getAuthorisationRoleFromQuery($id, $query, $checkParentRole);
+        return $this->getAuthorisationRoleFromQuery($id, $query, $checkParentRole, $checkReadRole);
     }
 
     /**
      * Checks the access role via which the logged-in user may access the entry with the specified primary key.
      * @param string|null $id Primary key to be checked.
+     * @param bool $checkReadRole If true, then determine the parent read role.
      * @return string|null Role with which the user is authorised to access the entry.
      * @throws GenericException
      */
     public function getAuthorisationRole(
-        ?string $id
+        ?string $id,
+        bool $checkReadRole = false
     ): ?string {
-        return $this->getAuthorisationRoleFromCondition($id, ["id" => $id]);
+        return $this->getAuthorisationRoleFromCondition($id, ["id" => $id], null, true, $checkReadRole);
     }
 
     /**
@@ -90,6 +98,6 @@ trait AuthorisationRoleTrait
      */
     public function getAuthorisationReadRole(?string $id): ?string
     {
-        return $this->getAuthorisationRole($id);
+        return $this->getAuthorisationRole($id, true);
     }
 }
