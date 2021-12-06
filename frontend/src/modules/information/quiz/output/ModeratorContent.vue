@@ -210,6 +210,11 @@ export default class ModeratorContent extends Vue {
     if (this.editQuestion) this.formData = this.editQuestion;
   }
 
+  @Watch('formData', { immediate: true })
+  async onFormDataChanged(): Promise<void> {
+    await this.getVotes();
+  }
+
   hasParticipantOption(item: Question): boolean {
     if (this.publicQuestion)
       return item.question.id === this.publicQuestion.question.id;
@@ -397,6 +402,11 @@ export default class ModeratorContent extends Vue {
           this.chartData.datasets = this.resultData.datasets;
           this.updateChart();
         });
+    } else {
+      this.votes = [];
+      this.chartData.labels = this.resultData.labels;
+      this.chartData.datasets = this.resultData.datasets;
+      this.updateChart();
     }
   }
 
