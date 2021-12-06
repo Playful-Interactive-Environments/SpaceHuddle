@@ -28,7 +28,7 @@
         <el-form-item
           :label="$t('module.information.quiz.moderatorContent.question')"
           prop="question.keywords"
-          :rules="[defaultFormRules.ruleRequired]"
+          :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleToLong(400)]"
         >
           <template #label>
             <div class="media">
@@ -59,6 +59,22 @@
           />
         </el-form-item>
         <el-form-item
+          :label="
+            $t('module.information.quiz.moderatorContent.explanation')
+          "
+          :prop="`question.description`"
+          :rules="[defaultFormRules.ruleToLong(1000)]"
+        >
+          <el-input
+            v-model="formData.question.description"
+            type="textarea"
+            rows="3"
+            :placeholder="
+              $t('module.information.quiz.moderatorContent.explanationExample')
+            "
+          />
+        </el-form-item>
+        <el-form-item
           v-for="(answer, index) in formData.answers"
           :key="index"
           :label="
@@ -67,7 +83,7 @@
             (index + 1)
           "
           :prop="`answers[${index}].keywords`"
-          :rules="[defaultFormRules.ruleRequired]"
+          :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleToLong(400)]"
         >
           <div class="media" v-if="index < formData.answers.length">
             <el-checkbox
@@ -175,13 +191,6 @@ export default class ModeratorContent extends Vue {
   publicQuestion: Question | null = null;
   editQuestion: Question | null = null;
   ideas: Idea[] = [];
-  addIdea: any = {
-    keywords: '',
-    description: '',
-    link: null,
-    image: null, // the datebase64 url of created image
-  };
-  showSettings = false;
   readonly intervalTime = 10000;
   interval!: any;
   answerCount = 4;
@@ -355,22 +364,6 @@ export default class ModeratorContent extends Vue {
           }
           this.questions = result;
           if (publicQuestion) this.publicQuestion = publicQuestion;
-
-          /*this.questions = [];
-          questions.forEach((question) => {
-            hierarchyService
-              .getList(this.taskId, question.id)
-              .then((answers) => {
-                const item: Question = {
-                  question: question,
-                  answers: answers,
-                };
-                this.questions.push(item);
-                if (question.id == this.task?.parameter.activeQuestion) {
-                  this.publicQuestion = item;
-                }
-              });
-          });*/
           this.getVotes();
         });
     }
@@ -426,32 +419,6 @@ export default class ModeratorContent extends Vue {
     clearInterval(this.interval);
   }
 
-  /*async mounted(): Promise<void> {
-    this.startIdeaInterval();
-  }
-
-  startIdeaInterval(): void {
-    this.interval = setInterval(this.getIdeas, this.intervalTime);
-  }
-
-  unmounted(): void {
-    clearInterval(this.interval);
-  }
-
-  @Watch('showSettings', { immediate: true })
-  onShowSettingsChanged(): void {
-    if (!this.showSettings) {
-      this.addIdea.keywords = '';
-      this.addIdea.description = '';
-      this.addIdea.image = null;
-      this.addIdea.link = null;
-      this.getIdeas();
-    } else {
-      this.addIdea.order = this.ideas.length;
-      this.addIdea.parameter = [];
-    }
-  }*/
-
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/
   async dragDone(list: any[]): Promise<void> {
     list.forEach((question, index) => {
@@ -464,4 +431,8 @@ export default class ModeratorContent extends Vue {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.el-input {
+  --el-input-background-color: white;
+}
+</style>

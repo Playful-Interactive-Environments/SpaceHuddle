@@ -9,6 +9,8 @@
   "moderatorContent": {
     "question": "question",
     "questionExample": "what is ...",
+    "explanation": "explanation",
+    "explanationExample": "the answer of the question is ...",
     "answer": "answer",
     "answerExample": "option",
     "submit": "save"
