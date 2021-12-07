@@ -16,6 +16,7 @@
     "submit": "save"
   },
   "publicScreen": {
-    "noIdeas": "No stimulus content added."
+    "chartDataLabelCorrect": "correct",
+    "chartDataLabelIncorrect": "incorrect"
   }
 }

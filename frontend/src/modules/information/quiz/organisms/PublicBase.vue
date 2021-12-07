@@ -3,7 +3,11 @@
     <el-space
       direction="vertical"
       class="fill"
-      v-if="publicQuestion && (statePointer >= 0 || !isActive)"
+      v-if="
+        publicQuestion &&
+        publicQuestion.question &&
+        (statePointer >= 0 || !isActive)
+      "
     >
       <div class="question">
         {{ publicQuestion.question.keywords }}
@@ -11,7 +15,14 @@
       <slot name="answers"></slot>
     </el-space>
   </div>
-  <div v-if="showExplanation || showStatistics" class="explanation">
+  <div
+    v-if="
+      publicQuestion &&
+      publicQuestion.question &&
+      (showExplanation || showStatistics)
+    "
+    class="explanation"
+  >
     {{ publicQuestion.question.description }}
   </div>
   <div v-if="showStatistics">
@@ -32,6 +43,7 @@
             grid: {
               display: false,
             },
+            stacked: true,
           },
           y: {
             ticks: {
@@ -211,20 +223,45 @@ export default class PublicBase extends Vue {
   }
 
   get resultData(): any {
+    const labelCorrect = (this as any).$t(
+      'module.information.quiz.publicScreen.chartDataLabelCorrect'
+    );
+    const labelIncorrect = (this as any).$t(
+      'module.information.quiz.publicScreen.chartDataLabelIncorrect'
+    );
     return {
       labels: this.vote_result.map((vote) => vote.idea.keywords),
       datasets: [
         {
-          label: (this as any).$t(
-            'module.voting.default.publicScreen.chartDataLabel'
+          label: labelCorrect,
+          backgroundColor: '#f1be3a',
+          data: this.vote_result.map((vote) =>
+            vote.idea.parameter.isCorrect ? vote.detailRatingSum : 0
           ),
+        },
+        {
+          label: labelIncorrect,
+          backgroundColor: '#fe6e5d',
+          data: this.vote_result.map((vote) =>
+            vote.idea.parameter.isCorrect ? 0 : vote.detailRatingSum
+          ),
+        },
+      ],
+    };
+    /*return {
+      labels: this.vote_result.map((vote) => vote.idea.keywords),
+      datasets: [
+        {
+          label: this.vote_result[0].idea.parameter.isCorrect
+            ? labelCorrect
+            : labelIncorrect,
           backgroundColor: this.vote_result.map((vote) =>
             vote.idea.parameter.isCorrect ? '#f1be3a' : '#fe6e5d'
           ),
           data: this.vote_result.map((vote) => vote.detailRatingSum),
         },
       ],
-    };
+    };*/
   }
 
   async getVotes(): Promise<void> {
