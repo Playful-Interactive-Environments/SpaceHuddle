@@ -43,10 +43,11 @@ class VoteRepository implements RepositoryInterface
     public function taskHasCorrectTaskType(string $taskId): bool
     {
         $taskTypeVotes = strtoupper(TaskType::VOTING);
+        $taskTypeInformation = strtoupper(TaskType::INFORMATION);
         $query = $this->queryFactory->newSelect("task");
         $query->select(["id"])
+            ->whereInList("task_type", [$taskTypeVotes, $taskTypeInformation])
             ->andWhere([
-                "task_type" => $taskTypeVotes,
                 "id" => $taskId
             ]);
 
@@ -78,8 +79,6 @@ class VoteRepository implements RepositoryInterface
                 ]
             ])
             ->andWhere([
-                "idea_task.task_type" => $taskTypeIdeas,
-                "vote_task.task_type" => $taskTypeVotes,
                 "vote_task.id" => $taskId,
                 "idea.id" => $ideaId,
             ]);
@@ -128,6 +127,8 @@ class VoteRepository implements RepositoryInterface
             "idea.description",
             "idea.image",
             "idea.link",
+            "idea.order",
+            "idea.parameter",
             "vote_result.sum_rating AS rating",
             "vote_result.sum_detail_rating AS detail_rating"
         ])
@@ -161,6 +162,8 @@ class VoteRepository implements RepositoryInterface
             "idea.description",
             "idea.image",
             "idea.link",
+            "idea.order",
+            "idea.parameter",
             "IFNULL(vote_result_hierarchy.sum_rating, 0) AS rating",
             "IFNULL(vote_result_hierarchy.sum_detail_rating, 0) AS detail_rating"
         ])

@@ -76,7 +76,7 @@ class IdeaRepository implements RepositoryInterface
      */
     public function getAuthorisationReadRole(?string $id): ?string
     {
-        return $this->getAuthorisationRoleFromCondition($id, ["id" => $id]);
+        return $this->getAuthorisationRoleFromCondition($id, ["id" => $id], null, true, true);
     }
 
     /**
