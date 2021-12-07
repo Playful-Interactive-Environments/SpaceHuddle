@@ -355,7 +355,7 @@ export default class TaskSettings extends Vue {
   }
 
   handleClose(done: { (): void }): void {
-    if (this.topicId) this.reset();
+    if (!this.taskId) this.reset();
     done();
     this.$emit('update:showModal', false);
   }
