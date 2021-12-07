@@ -1,7 +1,14 @@
 import { Vote, VoteResult } from '@/types/api/Vote';
-import { apiExecuteGetHandled, apiExecutePost, apiExecutePut } from '@/services/api';
+import {
+  apiExecuteDelete,
+  apiExecuteGetHandled,
+  apiExecutePost,
+  apiExecutePut,
+} from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 
 export const postVote = async (
   taskId: string,
@@ -23,6 +30,19 @@ export const putVote = async (
     `/${EndpointType.VOTE}/`,
     data,
     EndpointAuthorisationType.PARTICIPANT
+  );
+};
+
+export const deleteVote = async (
+  id: string,
+  authHeaderType = EndpointAuthorisationType.PARTICIPANT,
+  confirmCheck = false
+): Promise<boolean> => {
+  return await apiExecuteDelete<any>(
+    `/${EndpointType.VOTE}/${id}/`,
+    null,
+    authHeaderType,
+    confirmCheck
   );
 };
 

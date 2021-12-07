@@ -28,7 +28,10 @@
         <el-form-item
           :label="$t('module.information.quiz.moderatorContent.question')"
           prop="question.keywords"
-          :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleToLong(400)]"
+          :rules="[
+            defaultFormRules.ruleRequired,
+            defaultFormRules.ruleToLong(400),
+          ]"
         >
           <template #label>
             <div class="media">
@@ -59,9 +62,7 @@
           />
         </el-form-item>
         <el-form-item
-          :label="
-            $t('module.information.quiz.moderatorContent.explanation')
-          "
+          :label="$t('module.information.quiz.moderatorContent.explanation')"
           :prop="`question.description`"
           :rules="[defaultFormRules.ruleToLong(1000)]"
         >
@@ -83,7 +84,10 @@
             (index + 1)
           "
           :prop="`answers[${index}].keywords`"
-          :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleToLong(400)]"
+          :rules="[
+            defaultFormRules.ruleRequired,
+            defaultFormRules.ruleToLong(400),
+          ]"
         >
           <div class="media" v-if="index < formData.answers.length">
             <el-checkbox
@@ -97,7 +101,20 @@
                 $t('module.information.quiz.moderatorContent.answerExample')
               "
             />
+            <span class="icons">
+              <font-awesome-icon
+                icon="trash"
+                class="link"
+                v-on:click="deleteAnswer(answer)"
+              />
+            </span>
           </div>
+        </el-form-item>
+        <el-form-item>
+          <AddItem
+            :text="$t('module.information.quiz.moderatorContent.addAnswer')"
+            @addNew="addAnswer"
+          />
         </el-form-item>
       </ValidationForm>
       <vue3-chart-js
@@ -164,11 +181,7 @@ import { VoteResult } from '@/types/api/Vote';
 import * as votingService from '@/services/voting-service';
 import { TimerEntity } from '@/types/enum/TimerEntity';
 import { convertToSaveVersion, Task } from '@/types/api/Task';
-
-interface Question {
-  question: Hierarchy;
-  answers: Hierarchy[];
-}
+import { Question } from '@/modules/information/quiz/types/Question';
 
 @Options({
   components: {
@@ -205,7 +218,7 @@ export default class ModeratorContent extends Vue {
     }
   }
 
-  //@Watch('editQuestion', { immediate: true })
+  @Watch('editQuestion', { immediate: true })
   async onEditQuestionChanged(): Promise<void> {
     if (this.editQuestion) this.formData = this.editQuestion;
   }
@@ -248,6 +261,20 @@ export default class ModeratorContent extends Vue {
     this.formData = this.getEmptyQuestion();
   }
 
+  addAnswer(): void {
+    this.formData.answers.push(
+      this.getEmptyHierarchy(this.formData.answers.length, true)
+    );
+  }
+
+  deleteAnswer(answer: Hierarchy): void {
+    if (answer.id) {
+      hierarchyService.deleteHierarchy(answer.id);
+    }
+    const index = this.formData.answers.indexOf(answer);
+    this.formData.answers.splice(index, 1);
+  }
+
   saveQuestion(): void {
     if (this.formData.question.id) {
       hierarchyService.putHierarchy(
@@ -256,6 +283,22 @@ export default class ModeratorContent extends Vue {
       );
       this.formData.answers.forEach((answer) => {
         if (answer.id) hierarchyService.putHierarchy(answer.id, answer);
+        else {
+          answer.parentId = this.formData.question.id;
+          hierarchyService
+            .postHierarchy(this.taskId, {
+              parentId: answer.parentId,
+              keywords: answer.keywords,
+              description: answer.description,
+              link: answer.link,
+              image: answer.image,
+              parameter: answer.parameter,
+              order: answer.order,
+            })
+            .then((hierarchy) => {
+              answer.id = hierarchy.id;
+            });
+        }
       });
     } else {
       hierarchyService
@@ -369,13 +412,12 @@ export default class ModeratorContent extends Vue {
           }
           this.questions = result;
           if (publicQuestion) this.publicQuestion = publicQuestion;
-          this.getVotes();
+          await this.getVotes();
         });
     }
   }
 
   get resultData(): any {
-    this.votes.map((vote) => vote.idea.keywords);
     return {
       labels: this.votes.map((vote) => vote.idea.keywords),
       datasets: [
@@ -406,7 +448,7 @@ export default class ModeratorContent extends Vue {
       this.votes = [];
       this.chartData.labels = this.resultData.labels;
       this.chartData.datasets = this.resultData.datasets;
-      this.updateChart();
+      await this.updateChart();
     }
   }
 
@@ -444,5 +486,12 @@ export default class ModeratorContent extends Vue {
 <style scoped>
 .el-input {
   --el-input-background-color: white;
+}
+
+.icons {
+  height: 100%;
+  align-items: center;
+  margin: auto;
+  padding-left: 0.5rem;
 }
 </style>
