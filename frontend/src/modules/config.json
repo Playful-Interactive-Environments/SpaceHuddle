@@ -51,10 +51,12 @@
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "locales": "en,",  
-             "icon": "info",  "type": "main",  "syncPublicParticipant": false,
+             "icon": "info",  "type": "main",  "syncPublicParticipant": false,  
            "path": "information/default"  
        },  
        "quiz": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "en,",  

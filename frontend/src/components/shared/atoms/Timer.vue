@@ -1,5 +1,5 @@
 <template>
-  <div class="timer">
+  <div class="timer" v-if="showTime">
     <span v-if="timeLeft !== null">{{
       showTime ? formattedTime : $t('shared.atom.timer.inactive')
     }}</span>
