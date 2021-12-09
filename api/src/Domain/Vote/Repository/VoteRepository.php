@@ -55,6 +55,32 @@ class VoteRepository implements RepositoryInterface
     }
 
     /**
+     * Checks if the voting is already done.
+     * @param string $taskId Task Id to be checked.
+     * @param string $ideaId Idea Id to be checked.
+     * @return bool If true, the vote exists.
+     */
+    public function votingExists(string $taskId, string $ideaId): bool
+    {
+        $authorisation = $this->getAuthorisation();
+        $conditions = [
+            "task_id" => $taskId,
+            "idea_id" => $ideaId
+        ];
+        if ($authorisation->isParticipant()) {
+            $conditions["participant_id"] = $authorisation->id;
+        } else {
+            array_push($conditions, "participant_id IS NULL");
+        }
+
+        $query = $this->queryFactory->newSelect("vote");
+        $query->select(["id"])
+            ->andWhere($conditions);
+
+        return ($query->execute()->rowCount() >= 1);
+    }
+
+    /**
      * Checks if the ideas fit the voting task.
      * @param string $taskId The voting task ID.
      * @param string $ideaId The ideas to be voted.

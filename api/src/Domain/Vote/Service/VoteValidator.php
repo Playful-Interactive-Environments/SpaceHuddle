@@ -57,6 +57,8 @@ class VoteValidator
         $this->validateEntity(
             $data,
             $this->validationFactory->createValidator()
+                ->notEmptyString("id", "Empty: This field cannot be left empty")
+                ->requirePresence("id", "update", "Required: This field is required")
                 ->notEmptyString("ideaId", "Empty: This field cannot be left empty")
                 ->requirePresence("ideaId", message: "Required: This field is required")
                 ->notEmptyString("taskId", "Empty: This field cannot be left empty")
@@ -76,6 +78,10 @@ class VoteValidator
                 "NotValid: IdeaId is not a valid idea keys or do not belong to the same topic as the task."
             );
             throw new ValidationException("Please check your input", $result);
+        }
+
+        if (!isset($data["id"])) {
+            $this->votingExists($taskId, $ideaId);
         }
     }
 
@@ -144,6 +150,20 @@ class VoteValidator
         if (!isset($task)) {
             $result = new ValidationResult();
             $result->addError("taskId", "NotValid: Task is not active.");
+            throw new ValidationException("Please check your input", $result);
+        }
+    }
+
+    /**
+     * Validate voting already done.
+     * @param string $taskId Task Id to be checked.
+     * @param string $ideaId Idea Id to be checked.
+     */
+    private function votingExists(string $taskId, string $ideaId): void
+    {
+        if ($this->repository->votingExists($taskId, $ideaId)) {
+            $result = new ValidationResult();
+            $result->addError("taskId, ideaId", "NotValid: Voting already done.");
             throw new ValidationException("Please check your input", $result);
         }
     }
