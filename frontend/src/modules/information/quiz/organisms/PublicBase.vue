@@ -26,41 +26,7 @@
     {{ publicQuestion.question.description }}
   </div>
   <div v-if="showStatistics">
-    <vue3-chart-js
-      id="resultChart"
-      ref="chartRef"
-      type="bar"
-      :data="chartData"
-      :options="{
-        animation: {
-          duration: 2000,
-        },
-        scales: {
-          x: {
-            ticks: {
-              color: '#1d2948',
-            },
-            grid: {
-              display: false,
-            },
-            stacked: true,
-          },
-          y: {
-            ticks: {
-              color: '#1d2948',
-              stepSize: 1,
-            },
-          },
-        },
-        plugins: {
-          legend: {
-            labels: {
-              color: '#1d2948',
-            },
-          },
-        },
-      }"
-    />
+    <QuizResult :voteResult="voteResult" :change="false" />
   </div>
 </template>
 
@@ -81,6 +47,7 @@ import { Hierarchy } from '@/types/api/Hierarchy';
 import * as taskService from '@/services/task-service';
 import * as hierarchyService from '@/services/hierarchy-service';
 import * as votingService from '@/services/voting-service';
+import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
 
 export interface PublicAnswerData {
   answer: Hierarchy;
@@ -90,6 +57,7 @@ export interface PublicAnswerData {
 @Options({
   components: {
     Vue3ChartJs,
+    QuizResult,
   },
   emits: ['changePublicAnswers', 'changePublicQuestion', 'changeQuizState'],
 })
@@ -102,11 +70,7 @@ export default class PublicBase extends Vue {
   task: Task | null = null;
   questions: Question[] = [];
   publicQuestion: Question | null = null;
-  vote_result: VoteResult[] = [];
-  chartData: any = {
-    labels: [],
-    datasets: [],
-  };
+  voteResult: VoteResult[] = [];
 
   quizState: QuizState = QuizState.ACTIVE_CREATE_QUESTION;
   statePointer = 0;
@@ -117,7 +81,7 @@ export default class PublicBase extends Vue {
   }
 
   get hasVotes(): boolean {
-    return !!this.vote_result.find((vote) => vote.ratingSum > 0);
+    return !!this.voteResult.find((vote) => vote.ratingSum > 0);
   }
 
   get showQuestion(): boolean {
@@ -222,72 +186,15 @@ export default class PublicBase extends Vue {
     }
   }
 
-  get resultData(): any {
-    const labelCorrect = (this as any).$t(
-      'module.information.quiz.publicScreen.chartDataLabelCorrect'
-    );
-    const labelIncorrect = (this as any).$t(
-      'module.information.quiz.publicScreen.chartDataLabelIncorrect'
-    );
-    return {
-      labels: this.vote_result.map((vote) => vote.idea.keywords),
-      datasets: [
-        {
-          label: labelCorrect,
-          backgroundColor: '#f1be3a',
-          data: this.vote_result.map((vote) =>
-            vote.idea.parameter.isCorrect ? vote.detailRatingSum : 0
-          ),
-        },
-        {
-          label: labelIncorrect,
-          backgroundColor: '#fe6e5d',
-          data: this.vote_result.map((vote) =>
-            vote.idea.parameter.isCorrect ? 0 : vote.detailRatingSum
-          ),
-        },
-      ],
-    };
-    /*return {
-      labels: this.vote_result.map((vote) => vote.idea.keywords),
-      datasets: [
-        {
-          label: this.vote_result[0].idea.parameter.isCorrect
-            ? labelCorrect
-            : labelIncorrect,
-          backgroundColor: this.vote_result.map((vote) =>
-            vote.idea.parameter.isCorrect ? '#f1be3a' : '#fe6e5d'
-          ),
-          data: this.vote_result.map((vote) => vote.detailRatingSum),
-        },
-      ],
-    };*/
-  }
-
   async getVotes(): Promise<void> {
     if (this.activeQuestionId) {
       await votingService
         .getHierarchyResult(this.activeQuestionId)
         .then((votes) => {
-          this.vote_result = votes;
-          this.chartData.labels = this.resultData.labels;
-          this.chartData.datasets = this.resultData.datasets;
-          this.updateChart();
+          this.voteResult = votes;
         });
     } else {
-      this.vote_result = [];
-      if (this.resultData) {
-        this.chartData.labels = this.resultData.labels;
-        this.chartData.datasets = this.resultData.datasets;
-        await this.updateChart();
-      }
-    }
-  }
-
-  async updateChart(): Promise<void> {
-    if (this.$refs.chartRef) {
-      const chartRef = this.$refs.chartRef as any;
-      chartRef.update();
+      this.voteResult = [];
     }
   }
 

@@ -101,12 +101,12 @@
                 $t('module.information.quiz.moderatorContent.answerExample')
               "
             />
-            <span class="icons">
-              <font-awesome-icon
-                icon="trash"
-                class="link"
-                v-on:click="deleteAnswer(answer)"
-              />
+            <span
+              class="icons"
+              v-if="formData.answers.length > minAnswerCount"
+              v-on:click="deleteAnswer(answer)"
+            >
+              <font-awesome-icon icon="trash" class="link" />
             </span>
           </div>
         </el-form-item>
@@ -117,40 +117,7 @@
           />
         </el-form-item>
       </ValidationForm>
-      <vue3-chart-js
-        id="resultChart"
-        ref="chartRef"
-        type="bar"
-        :data="chartData"
-        :options="{
-          animation: {
-            duration: 0,
-          },
-          scales: {
-            x: {
-              ticks: {
-                color: '#1d2948',
-              },
-              grid: {
-                display: false,
-              },
-            },
-            y: {
-              ticks: {
-                color: '#1d2948',
-                stepSize: 1,
-              },
-            },
-          },
-          plugins: {
-            legend: {
-              labels: {
-                color: '#1d2948',
-              },
-            },
-          },
-        }"
-      />
+      <QuizResult :voteResult="votes" :update="true" />
       <el-pagination
         layout="prev, pager, next"
         :page-size="1"
@@ -182,6 +149,7 @@ import * as votingService from '@/services/voting-service';
 import { TimerEntity } from '@/types/enum/TimerEntity';
 import { convertToSaveVersion, Task } from '@/types/api/Task';
 import { Question } from '@/modules/information/quiz/types/Question';
+import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
 
 @Options({
   components: {
@@ -192,6 +160,7 @@ import { Question } from '@/modules/information/quiz/types/Question';
     IdeaCard,
     draggable,
     Vue3ChartJs,
+    QuizResult,
   },
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -206,7 +175,8 @@ export default class ModeratorContent extends Vue {
   ideas: Idea[] = [];
   readonly intervalTime = 10000;
   interval!: any;
-  answerCount = 4;
+  minAnswerCount = 2;
+  answerCount = this.minAnswerCount;
   defaultQuestionTime: number | null = null;
 
   @Watch('publicQuestion', { immediate: true })
@@ -236,10 +206,6 @@ export default class ModeratorContent extends Vue {
 
   formData: Question = this.getEmptyQuestion();
   votes: VoteResult[] = [];
-  chartData: any = {
-    labels: [],
-    datasets: [],
-  };
 
   TimerEntity = TimerEntity;
 
@@ -417,45 +383,15 @@ export default class ModeratorContent extends Vue {
     }
   }
 
-  get resultData(): any {
-    return {
-      labels: this.votes.map((vote) => vote.idea.keywords),
-      datasets: [
-        {
-          label: (this as any).$t(
-            'module.voting.default.publicScreen.chartDataLabel'
-          ),
-          backgroundColor: this.votes.map((vote) =>
-            vote.idea.parameter.isCorrect ? '#f1be3a' : '#fe6e5d'
-          ),
-          data: this.votes.map((vote) => vote.detailRatingSum),
-        },
-      ],
-    };
-  }
-
   async getVotes(): Promise<void> {
     if (this.formData.question.id) {
       await votingService
         .getHierarchyResult(this.formData.question.id)
         .then((votes) => {
           this.votes = votes;
-          this.chartData.labels = this.resultData.labels;
-          this.chartData.datasets = this.resultData.datasets;
-          this.updateChart();
         });
     } else {
       this.votes = [];
-      this.chartData.labels = this.resultData.labels;
-      this.chartData.datasets = this.resultData.datasets;
-      await this.updateChart();
-    }
-  }
-
-  async updateChart(): Promise<void> {
-    if (this.$refs.chartRef) {
-      const chartRef = this.$refs.chartRef as any;
-      chartRef.update();
     }
   }
 

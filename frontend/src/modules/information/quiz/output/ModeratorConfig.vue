@@ -66,7 +66,7 @@ export default class ModeratorConfig extends Vue {
   @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {
     if (this.modelValue && !this.modelValue.answerCount) {
-      this.modelValue.answerCount = 4;
+      this.modelValue.answerCount = 2;
     }
     if (this.modelValue && !this.modelValue.defaultQuestionTime) {
       this.modelValue.defaultQuestionTime = this.defaultTime;
