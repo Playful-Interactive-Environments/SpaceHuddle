@@ -1,6 +1,7 @@
 <template>
   <PublicBase
     :taskId="taskId"
+    :authHeaderTyp="authHeaderTyp"
     v-on:changePublicAnswers="(answers) => publicAnswerList = answers"
   >
     <template #answers>

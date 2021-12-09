@@ -65,6 +65,8 @@ export interface PublicAnswerData {
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicBase extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: EndpointAuthorisationType.MODERATOR })
+  authHeaderTyp!: EndpointAuthorisationType;
   readonly intervalTime = 1000;
   interval!: any;
   task: Task | null = null;
@@ -148,26 +150,24 @@ export default class PublicBase extends Vue {
   }
 
   async getTask(): Promise<void> {
-    await taskService.getTaskById(this.taskId).then((task) => {
-      this.task = task;
-    });
+    await taskService
+      .getTaskById(this.taskId, this.authHeaderTyp)
+      .then((task) => {
+        this.task = task;
+      });
   }
 
   async getHierarchies(): Promise<void> {
     if (this.taskId) {
       await hierarchyService
-        .getList(
-          this.taskId,
-          '{parentHierarchyId}',
-          EndpointAuthorisationType.MODERATOR
-        )
+        .getList(this.taskId, '{parentHierarchyId}', this.authHeaderTyp)
         .then(async (questions) => {
           const result: Question[] = [];
           let publicQuestion: Question | null = null;
           for (const index in questions) {
             const question = questions[index];
             await hierarchyService
-              .getList(this.taskId, question.id)
+              .getList(this.taskId, question.id, this.authHeaderTyp)
               .then((answers) => {
                 const item: Question = {
                   question: question,
@@ -189,7 +189,7 @@ export default class PublicBase extends Vue {
   async getVotes(): Promise<void> {
     if (this.activeQuestionId) {
       await votingService
-        .getHierarchyResult(this.activeQuestionId)
+        .getHierarchyResult(this.activeQuestionId, this.authHeaderTyp)
         .then((votes) => {
           this.voteResult = votes;
         });

@@ -9,9 +9,10 @@
     </template>
     <PublicBase
       :taskId="taskId"
+      :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
       v-on:changeQuizState="getTask"
-      v-on:changePublicQuestion="(id) => activeQuestionId = id"
-      v-on:changePublicAnswers="(answers) => publicAnswerList = answers"
+      v-on:changePublicQuestion="(id) => (activeQuestionId = id)"
+      v-on:changePublicAnswers="(answers) => (publicAnswerList = answers)"
     >
       <template #answers>
         <el-space direction="vertical" class="fill">
@@ -68,6 +69,7 @@ export default class Participant extends Vue {
   module: Module | null = null;
   task: Task | null = null;
   votes: Vote[] = [];
+  EndpointAuthorisationType = EndpointAuthorisationType;
 
   get isActive(): boolean {
     if (this.task) return timerService.isActive(this.task);
@@ -88,14 +90,16 @@ export default class Participant extends Vue {
       this.isSavingList.push(answerId);
       const vote = this.votes.find((vote) => vote.ideaId == answerId);
       if (vote) {
-        await votingService.deleteVote(vote.id).then((result) => {
-          if (result) {
-            const index = this.votes.findIndex(
-              (vote) => vote.ideaId == answerId
-            );
-            this.votes.splice(index, 1);
-          }
-        });
+        await votingService
+          .deleteVote(vote.id, EndpointAuthorisationType.PARTICIPANT)
+          .then((result) => {
+            if (result) {
+              const index = this.votes.findIndex(
+                (vote) => vote.ideaId == answerId
+              );
+              this.votes.splice(index, 1);
+            }
+          });
       } else {
         await votingService
           .postVote(this.taskId, {
@@ -134,9 +138,11 @@ export default class Participant extends Vue {
   }
 
   async getTask(): Promise<void> {
-    await taskService.getTaskById(this.taskId).then((task) => {
-      this.task = task;
-    });
+    await taskService
+      .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
+      .then((task) => {
+        this.task = task;
+      });
   }
 
   async getModule(): Promise<void> {
@@ -152,7 +158,10 @@ export default class Participant extends Vue {
   async getVotes(): Promise<void> {
     if (this.activeQuestionId) {
       await votingService
-        .getHierarchyVotes(this.activeQuestionId)
+        .getHierarchyVotes(
+          this.activeQuestionId,
+          EndpointAuthorisationType.PARTICIPANT
+        )
         .then((votes) => {
           this.votes = votes;
         });
