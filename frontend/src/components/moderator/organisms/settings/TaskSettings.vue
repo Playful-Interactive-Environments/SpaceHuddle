@@ -39,6 +39,101 @@
             </el-option>
           </el-select>
         </el-form-item>
+        <el-form-item
+          v-if="showInput"
+          :label="$t('moderator.organism.settings.taskSettings.input')"
+        >
+          <table class="input-table">
+            <colgroup>
+              <col />
+              <col style="width: 10rem" />
+              <col style="width: 12rem" />
+              <col style="width: 12rem" />
+              <col />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>
+                  {{ $t('moderator.organism.settings.taskSettings.source') }}
+                </th>
+                <th>
+                  {{ $t('moderator.organism.settings.taskSettings.maxCount') }}
+                </th>
+                <th>
+                  {{ $t('moderator.organism.settings.taskSettings.filter') }}
+                </th>
+                <th>
+                  {{ $t('moderator.organism.settings.taskSettings.order') }}
+                </th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="input in formData.input" :key="input.view">
+                <td>
+                  <el-select v-model="input.view" class="select--fullwidth">
+                    <el-option
+                      v-for="view in possibleViews"
+                      :key="view"
+                      :value="getViewKey(view)"
+                      :label="getViewName(view)"
+                    >
+                    </el-option>
+                  </el-select>
+                </td>
+                <td>
+                  <el-input-number v-model="input.maxCount" />
+                </td>
+                <td>
+                  <el-select
+                    v-model="input.filter"
+                    class="select--fullwidth"
+                    multiple
+                  >
+                    <el-option
+                      v-for="state in IdeaStateKeys"
+                      :key="state"
+                      :value="state"
+                      :label="$t(`enum.ideaState.${IdeaStates[state]}`)"
+                    >
+                    </el-option>
+                  </el-select>
+                </td>
+                <td>
+                  <select
+                    v-model="input.order"
+                    class="select select--fullwidth"
+                  >
+                    <option
+                      v-for="type in sortOrderOptions"
+                      :key="type.orderType"
+                      :value="
+                        type.ref
+                          ? `${type.orderType}&refId=${type.ref.id}`
+                          : type.orderType
+                      "
+                    >
+                      <span>
+                        {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
+                      </span>
+                      <span v-if="type.ref"> - {{ type.ref.name }} </span>
+                    </option>
+                  </select>
+                </td>
+                <td
+                  v-on:click="deleteInput(input)"
+                  v-if="formData.input.length > inputMinCount"
+                >
+                  <font-awesome-icon class="link" icon="trash" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <AddItem
+            :text="$t('moderator.organism.settings.taskSettings.addInput')"
+            @addNew="addInput"
+          />
+        </el-form-item>
         <TaskParameterComponent
           ref="taskParameter"
           :taskId="taskId"
@@ -200,6 +295,7 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import * as taskService from '@/services/task-service';
 import * as moduleService from '@/services/module-service';
+import * as viewService from '@/services/view-service';
 import TaskType from '@/types/enum/TaskType';
 import { Task, TaskSettingsData } from '@/types/api/Task';
 import TaskStates from '@/types/enum/TaskStates';
@@ -225,6 +321,12 @@ import ValidationForm, {
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
 import { ModuleType } from '@/types/enum/ModuleType';
 import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
+import { View } from '@/types/api/View';
+import IdeaStates from '@/types/enum/IdeaStates';
+import { SortOrderOption } from '@/types/api/OrderGroup';
+import * as ideaService from '@/services/idea-service';
+import AddItem from '@/components/moderator/atoms/AddItem.vue';
+import ViewType from '@/types/enum/ViewType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -237,12 +339,26 @@ interface ModuleComponentDefinition {
   parameter: any;
 }
 
+interface InputData {
+  view: string;
+  maxCount: number | undefined;
+  filter: string[];
+  order: string;
+}
+
 interface FormDataDefinition extends TaskSettingsData {
+  input: InputData[];
   moduleListMain: { [key: string]: boolean };
   moduleListAddOn: { [key: string]: boolean };
   moduleParameterComponents: ModuleComponentDefinition[];
   stateMessage: string;
   call: string;
+}
+
+enum InputOption {
+  YES = 'yes',
+  NO = 'no',
+  OPTIONAL = 'optional',
 }
 
 @Options({
@@ -251,6 +367,7 @@ interface FormDataDefinition extends TaskSettingsData {
     ValidationForm,
     FromSubmitItem,
     ModuleCard,
+    AddItem,
     TaskParameterComponent: getEmptyComponent(),
   },
   emits: ['taskUpdated', 'showTimerSettings', 'update:showModal'],
@@ -270,6 +387,7 @@ export default class TaskSettings extends Vue {
 
   formData: FormDataDefinition = {
     taskType: (Object.keys(TaskType) as Array<keyof typeof TaskType>)[1],
+    input: [],
     name: '',
     description: '',
     parameter: {},
@@ -281,8 +399,58 @@ export default class TaskSettings extends Vue {
   };
   openTabs: string[] = [];
   task: Task | null = null;
+  inputOption: InputOption = InputOption.NO;
+  inputOptionViews: View[] = [];
+  sortOrderOptions: SortOrderOption[] = [];
 
   TaskType = TaskType;
+  ViewType = ViewType;
+  IdeaStates = IdeaStates;
+  IdeaStateKeys = Object.keys(IdeaStates);
+
+  getEmptyInput(): InputData {
+    return {
+      view:
+        this.possibleViews.length > 0
+          ? this.getViewKey(this.possibleViews[0])
+          : '',
+      maxCount: undefined,
+      filter: Object.keys(IdeaStates),
+      order: 'order',
+    };
+  }
+
+  get possibleViews(): View[] {
+    if (this.taskId)
+      return this.inputOptionViews.filter(
+        (view) => view.taskId !== this.taskId
+      );
+    return this.inputOptionViews;
+  }
+
+  addInput(): void {
+    this.formData.input.push(this.getEmptyInput());
+  }
+
+  deleteInput(input: InputData): void {
+    const index = this.formData.input.findIndex((item) => input === item);
+    if (index > -1) {
+      this.formData.input.splice(index, 1);
+    }
+  }
+
+  getViewName(view: View): string {
+    const $t = (this as any).$t;
+    const type = $t(`enum.viewType.${ViewType[view.type]}`);
+    const detailType = view.detailType
+      ? ' - ' + $t(`enum.taskType.${TaskType[view.detailType]}`)
+      : '';
+    return `${type}${detailType} - ${view.name}`;
+  }
+
+  getViewKey(view: View): string {
+    return `${view.type}.${view.id}`;
+  }
 
   @Watch('taskType', { immediate: true })
   async onPropTaskTypeChanged(): Promise<void> {
@@ -318,6 +486,40 @@ export default class TaskSettings extends Vue {
     }
   }
 
+  async updateInputOption(): Promise<void> {
+    let input = InputOption.NO;
+    for (const moduleIndex in this.moduleKeyList) {
+      const moduleName = this.moduleKeyList[moduleIndex];
+      if (this.moduleList[moduleName]) {
+        await getModuleConfig(
+          'input',
+          TaskType[this.formData.taskType],
+          moduleName
+        ).then((result) => {
+          switch (result) {
+            case InputOption.YES:
+              input = result;
+              break;
+            case InputOption.OPTIONAL:
+              if (input !== InputOption.YES) input = result;
+              break;
+          }
+        });
+      }
+    }
+    this.inputOption = input;
+    this.setDefaultInput();
+  }
+
+  setDefaultInput(): void {
+    if (
+      this.inputOption === InputOption.YES &&
+      this.formData.input.length === 0
+    ) {
+      this.formData.input.push(this.getEmptyInput());
+    }
+  }
+
   showDialog = false;
   @Watch('showModal', { immediate: false, flush: 'post' })
   async onShowModalChanged(showModal: boolean): Promise<void> {
@@ -329,6 +531,27 @@ export default class TaskSettings extends Vue {
       ...Object.keys(this.formData.moduleListMain),
       ...Object.keys(this.formData.moduleListAddOn),
     ];
+  }
+
+  get moduleList(): { [name: string]: boolean } {
+    return Object.assign(
+      {},
+      this.formData.moduleListMain,
+      this.formData.moduleListAddOn
+    );
+  }
+
+  @Watch('moduleList', { immediate: true, deep: true })
+  async onModuleListChanged(): Promise<void> {
+    await this.updateInputOption();
+  }
+
+  get showInput(): boolean {
+    return this.inputOption !== InputOption.NO;
+  }
+
+  get inputMinCount(): number {
+    return this.inputOption === InputOption.YES ? 1 : 0;
   }
 
   get moduleSelectionMain(): string[] {
@@ -368,6 +591,15 @@ export default class TaskSettings extends Vue {
         this.formData.name = task.name;
         this.formData.description = task.description;
         this.formData.parameter = task.parameter ?? {};
+        if (this.formData.parameter.input)
+          this.formData.input = this.formData.parameter.input.map((input) => {
+            return {
+              view: this.getViewKey(input.view),
+              maxCount: input.maxCount ? input.maxCount : undefined,
+              filter: input.filter,
+              order: input.order,
+            };
+          });
         task.modules.forEach((module) => {
           if (module.name in this.formData.moduleListAddOn)
             this.formData.moduleListAddOn[module.name] = true;
@@ -375,7 +607,29 @@ export default class TaskSettings extends Vue {
         });
         this.task = task;
       });
+    } else {
+      this.task = null;
+      this.mainModule = 'default';
     }
+  }
+
+  @Watch('topicId', { immediate: true })
+  onTopicIdChanged(): void {
+    this.loadInputViews();
+    ideaService.getSortOrderOptions(this.topicId).then((options) => {
+      this.sortOrderOptions = options;
+    });
+  }
+
+  async loadInputViews(): Promise<void> {
+    viewService.getList(this.topicId).then((views) => {
+      this.inputOptionViews = views.filter(
+        (item) =>
+          ViewType[item.type] !== ViewType.HIERARCHY ||
+          !item.detailType ||
+          TaskType[item.detailType] !== TaskType.INFORMATION
+      );
+    });
   }
 
   @Watch('formData.taskType', { immediate: true })
@@ -523,12 +777,13 @@ export default class TaskSettings extends Vue {
   }
 
   reset(): void {
+    this.task = null;
     this.formData.taskType = this.taskType;
     this.loadModuleList();
     this.formData.name = '';
     this.formData.description = '';
     this.formData.parameter = {};
-    this.task = null;
+    this.formData.input = [];
     this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
@@ -544,6 +799,25 @@ export default class TaskSettings extends Vue {
     let saveTask: Task | null = this.task;
     this.isSaving = true;
     await this.updateCustomTaskParameter();
+    this.formData.parameter.input = this.formData.input.map((input) => {
+      const view = this.inputOptionViews.find(
+        (view) => this.getViewKey(view) === input.view
+      );
+      if (view)
+        return {
+          view: {
+            type: view.type,
+            id: view.id,
+          },
+          maxCount: input.maxCount ? input.maxCount : null,
+          filter: input.filter,
+          order: input.order,
+        };
+      return {};
+    });
+    this.formData.parameter.input = this.formData.parameter.input.filter(
+      (input) => input !== {}
+    );
 
     if (this.taskId) {
       await taskService
@@ -648,5 +922,22 @@ export default class TaskSettings extends Vue {
 
 .el-button {
   width: 100%;
+}
+
+.input-table {
+  width: 100%;
+
+  td,
+  th {
+    padding: 0.5rem;
+  }
+}
+
+.el-select::v-deep {
+  .el-select__tags > span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }
 </style>

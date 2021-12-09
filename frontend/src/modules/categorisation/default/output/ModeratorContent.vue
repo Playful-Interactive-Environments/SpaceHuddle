@@ -165,6 +165,7 @@ import * as categorisationService from '@/services/categorisation-service';
 import { Category } from '@/types/api/Category';
 import * as ideaService from '@/services/idea-service';
 import * as taskService from '@/services/task-service';
+import * as viewService from '@/services/view-service';
 import IdeaSortOrder, {
   DefaultIdeaSortOrder,
   IdeaSortOrderCategorisation,
@@ -306,19 +307,15 @@ export default class ModeratorContent extends Vue {
         );
       });
 
-      if (this.task && this.task.parameter.dependencyTaskId) {
+      if (this.task && this.task.parameter.input) {
         let categoryOrder = `[${IdeaSortOrderCategorisation},${this.orderType}]`;
         if (
           !this.orderType ||
           this.orderType.startsWith(IdeaSortOrderCategorisation)
         )
           categoryOrder = IdeaSortOrderCategorisation;
-        await ideaService
-          .getIdeasForTask(
-            this.task.parameter.dependencyTaskId,
-            categoryOrder,
-            this.taskId
-          )
+        await viewService
+          .getIdeas(this.task.parameter.input, categoryOrder, this.taskId)
           .then((ideas) => {
             this.ideas = ideas;
             ideas
@@ -333,9 +330,9 @@ export default class ModeratorContent extends Vue {
               });
           });
 
-        await ideaService
+        await viewService
           .getOrderGroups(
-            this.task.parameter.dependencyTaskId,
+            this.task.parameter.input,
             this.orderType,
             this.taskId,
             EndpointAuthorisationType.MODERATOR,

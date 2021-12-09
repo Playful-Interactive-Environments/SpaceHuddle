@@ -33,7 +33,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import * as ideaService from '@/services/idea-service';
+import * as viewService from '@/services/view-service';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import { IdeaSortOrderCategorisation } from '@/types/enum/IdeaSortOrder';
@@ -103,14 +103,10 @@ export default class PublicScreen extends Vue {
       if (!this.task) await this.getTask();
       await this.getCategories();
 
-      if (
-        this.task &&
-        this.task.parameter &&
-        this.task.parameter.dependencyTaskId
-      ) {
-        await ideaService
+      if (this.task && this.task.parameter && this.task.parameter.input) {
+        await viewService
           .getOrderGroups(
-            this.task.parameter.dependencyTaskId,
+            this.task.parameter.input,
             IdeaSortOrderCategorisation,
             this.taskId,
             this.authHeaderTyp,

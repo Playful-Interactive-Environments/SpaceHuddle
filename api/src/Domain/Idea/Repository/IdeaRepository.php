@@ -264,7 +264,7 @@ class IdeaRepository implements RepositoryInterface
      * @param string|null $refId The referenced taskId for sorting by categories.
      * @return array db sort column name
      */
-    private static function convertOrderType(?string $orderType, ?string $refId = null): array
+    public static function convertOrderType(?string $orderType, ?string $refId = null): array
     {
         $orderList = [];
         $orderTypeList = self::convertToList($orderType);
@@ -307,7 +307,7 @@ class IdeaRepository implements RepositoryInterface
      * @param string|null $refId The referenced taskId for sorting by categories.
      * @return array modified table
      */
-    private static function addOrderColumn(?string $orderType, array $resultList, ?string $refId = null): array
+    public static function addOrderColumn(?string $orderType, array $resultList, ?string $refId = null): array
     {
         $orderColumn = self::convertOrderType($orderType, $refId);
 

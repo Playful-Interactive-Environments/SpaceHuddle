@@ -1,5 +1,6 @@
 {
   "icon": "object-group",
   "type": "main",
+  "input": "yes",
   "syncPublicParticipant": false
 }

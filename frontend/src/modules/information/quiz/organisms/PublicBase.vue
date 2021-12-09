@@ -139,7 +139,7 @@ export default class PublicBase extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getTask().then((task) => {
+    this.getTask().then(() => {
       if (this.isActive) {
         this.quizState = QuizState.ACTIVE_CREATE_QUESTION;
       } else {

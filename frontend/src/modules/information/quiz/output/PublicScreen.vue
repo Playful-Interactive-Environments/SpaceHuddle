@@ -2,7 +2,7 @@
   <PublicBase
     :taskId="taskId"
     :authHeaderTyp="authHeaderTyp"
-    v-on:changePublicAnswers="(answers) => publicAnswerList = answers"
+    v-on:changePublicAnswers="(answers) => (publicAnswerList = answers)"
   >
     <template #answers>
       <el-space direction="vertical" class="fill">

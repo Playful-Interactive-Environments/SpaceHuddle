@@ -142,6 +142,7 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
+import * as viewService from '@/services/view-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
@@ -232,9 +233,9 @@ export default class ModeratorContent extends Vue {
           });
         const selectedIds: string[] = this.selection.map((idea) => idea.id);
 
-        await ideaService
+        await viewService
           .getOrderGroups(
-            this.task.parameter.brainstormingTaskId,
+            this.task.parameter.input,
             this.orderType,
             null,
             EndpointAuthorisationType.MODERATOR,

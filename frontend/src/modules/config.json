@@ -4,7 +4,7 @@
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "en,",  
-             "icon": "comment-alt",  "type": "main",  "syncPublicParticipant": false,  
+             "icon": "comment-alt",  "type": "main",  "input": "optional",  "syncPublicParticipant": false,  
            "path": "brainstorming/chat"  
        },  
        "default": {  
@@ -12,19 +12,19 @@
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "locales": "de,en,",  
-             "icon": "brain",  "type": "main",  "syncPublicParticipant": false,  
+             "icon": "brain",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
            "path": "brainstorming/default"  
        },  
        "gallery": {  
            "publicScreen": "output/PublicScreen",  
            "locales": "en,",  
-             "icon": "image",  "type": "addOn",  "syncPublicParticipant": false,  
+             "icon": "image",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
            "path": "brainstorming/gallery"  
        },  
        "game": {  
            "participant": "output/Participant",  
            "locales": "en,",  
-             "icon": "rocket",  "type": "addOn",  "syncPublicParticipant": false,  
+             "icon": "rocket",  "type": "addOn",  "input": "optional",  "syncPublicParticipant": false,  
            "path": "brainstorming/game"  
        },  
        "settings": {  
@@ -37,7 +37,7 @@
            "publicScreen": "output/PublicScreen",  
            "moderatorContent": "output/ModeratorContent",  
            "locales": "en,",  
-             "icon": "object-group",  "type": "main",  "syncPublicParticipant": false,  
+             "icon": "object-group",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  
            "path": "categorisation/default"  
        },  
        "settings": {  
@@ -51,7 +51,7 @@
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "locales": "en,",  
-             "icon": "info",  "type": "main",  "syncPublicParticipant": false,  
+             "icon": "info",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
            "path": "information/default"  
        },  
        "quiz": {  
@@ -60,7 +60,7 @@
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "en,",  
-             "icon": "gamepad",  "type": "main",  "syncPublicParticipant": true,  
+             "icon": "gamepad",  "type": "main",  "input": "no",  "syncPublicParticipant": true,  
            "path": "information/quiz"  
        },  
        "settings": {  
@@ -74,7 +74,7 @@
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
-             "icon": "times",  "type": "main",  "syncPublicParticipant": false,  
+             "icon": "times",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
            "path": "none",  
        "settings": {  
            "parameter": "TaskParameter",  
@@ -86,7 +86,7 @@
            "publicScreen": "output/PublicScreen",  
            "moderatorContent": "output/ModeratorContent",  
            "locales": "en,",  
-             "icon": "check",  "type": "main",  "syncPublicParticipant": false,  
+             "icon": "check",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  
            "path": "selection/default"  
        },  
        "settings": {  
@@ -101,14 +101,14 @@
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "en,",  
-             "icon": "star",  "type": "main",  "syncPublicParticipant": false,  
+             "icon": "star",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  
            "path": "voting/default"  
        },  
        "slots": {  
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "en,",  
-             "icon": "list",  "type": "main",  "syncPublicParticipant": false,  
+             "icon": "list",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  
            "path": "voting/slots"  
        },  
        "settings": {  

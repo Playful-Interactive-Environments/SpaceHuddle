@@ -1,5 +1,6 @@
 {
   "icon": "brain",
   "type": "main",
+  "input": "no",
   "syncPublicParticipant": false
 }

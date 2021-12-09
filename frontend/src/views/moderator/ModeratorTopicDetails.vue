@@ -346,6 +346,7 @@ export default class ModeratorTopicDetails extends Vue {
   taskSettingsId: string | null = null;
   displayTaskSettings(taskType: string): void {
     this.taskSettingsType = taskType.toUpperCase();
+    this.taskSettingsId = null;
     this.showTaskSettings = true;
   }
 

@@ -1,5 +1,6 @@
 {
   "icon": "gamepad",
   "type": "main",
+  "input": "no",
   "syncPublicParticipant": true
 }

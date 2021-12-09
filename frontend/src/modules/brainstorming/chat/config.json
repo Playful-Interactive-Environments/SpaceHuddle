@@ -1,5 +1,6 @@
 {
   "icon": "comment-alt",
   "type": "main",
+  "input": "optional",
   "syncPublicParticipant": false
 }

@@ -154,6 +154,12 @@
           "header": "Add a Module",
           "info": "Modules are the place where all the interaction happens. You can choose from 5 different types of modules.",
           "taskType": "Task type",
+          "input": "Input",
+          "source": "source",
+          "maxCount": "max count",
+          "filter": "filter",
+          "order": "order",
+          "addInput": "add input",
           "moduleType": "Module type",
           "title": "Title",
           "question": "Question",
@@ -355,6 +361,12 @@
       "handled": "handled",
       "duplicate": "duplicate",
       "inappropriate": "inappropriate"
+    },
+    "viewType": {
+      "task": "task",
+      "selection": "selection",
+      "vote": "vote",
+      "hierarchy": "hierarchy"
     }
   },
   "general": {

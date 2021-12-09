@@ -1,5 +1,6 @@
 {
   "icon": "list",
   "type": "main",
+  "input": "yes",
   "syncPublicParticipant": false
 }

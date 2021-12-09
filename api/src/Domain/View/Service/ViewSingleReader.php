@@ -42,10 +42,22 @@ class ViewSingleReader
         if (array_key_exists("typeId", $data)) {
             $typeId = $data["typeId"];
         }
+        $order = null;
+        if (array_key_exists("order", $data)) {
+            $order = $data["order"];
+        }
+        $refId = null;
+        if (array_key_exists("refId", $data)) {
+            $refId = $data["refId"];
+        }
+        $filter = null;
+        if (array_key_exists("filter", $data)) {
+            $filter = json_decode($data["filter"]);
+        }
 
         if (isset($type) and isset($typeId)) {
             // Fetch data from the database
-            return $this->repository->getDetails($type, $typeId);
+            return $this->repository->getDetails($type, $typeId, $order, $refId, $filter);
         }
         return null;
     }

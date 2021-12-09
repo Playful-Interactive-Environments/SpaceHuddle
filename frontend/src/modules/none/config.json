@@ -1,5 +1,6 @@
 {
   "icon": "times",
   "type": "main",
+  "input": "no",
   "syncPublicParticipant": false
 }
