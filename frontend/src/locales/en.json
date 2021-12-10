@@ -167,7 +167,8 @@
           "description": "Description",
           "descriptionExample": "e.g. The purpose of the meeting is to come up with new ideas our new app.",
           "submit": "Save module",
-          "saveAndActivate": "Save and activate module"
+          "saveAndActivate": "Save and activate module",
+          "moduleSearch": "type in a search module name"
         },
         "sessionSettings": {
           "header": "Create Session",

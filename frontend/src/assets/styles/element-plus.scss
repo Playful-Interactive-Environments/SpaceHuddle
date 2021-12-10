@@ -221,6 +221,12 @@ $--font-size: (
                 font-weight: var(--font-weight-semibold);
                 width: 40px;
         }
+
+        &__suffix-inner > svg,
+        &__prefix-inner > svg {
+                margin-right: 0.8rem;
+                margin-left: 0.8rem;
+        }
 }
 
 .el-select {

@@ -208,6 +208,19 @@
               }}
             </el-tag>
           </div>
+          <el-input
+            class="search"
+            v-model="moduleSearch"
+            :clearable="true"
+            :placeholder="
+            $t('moderator.organism.settings.taskSettings.moduleSearch')
+          "
+            v-if="moduleKeyList.length > 1"
+          >
+            <template #suffix>
+              <font-awesome-icon icon="search" />
+            </template>
+          </el-input>
           <el-scrollbar>
             <div class="flex-content">
               <!--<p v-for="item in 50" :key="item" class="scrollbar-demo-item">
@@ -407,6 +420,7 @@ export default class TaskSettings extends Vue {
   componentLoadIndex = 0;
   usedModuleNames: string[] = [];
   hideNotUsesModules = true;
+  moduleSearch = '';
 
   get TaskTypeKeys(): Array<keyof typeof TaskType> {
     return Object.keys(TaskType) as Array<keyof typeof TaskType>;
@@ -500,7 +514,9 @@ export default class TaskSettings extends Vue {
             this.formData.moduleListAddOn
           );
           this.usedModuleNames = [...mainModules, ...addOnModules];
-          this.hideNotUsesModules = mainModules.length > 0;
+          this.hideNotUsesModules =
+            mainModules.length > 0 &&
+            modules.length < this.moduleKeyList.length;
           if (!this.taskId) {
             if (mainModules.length > 0) {
               this.mainModule = mainModules[0];
@@ -595,8 +611,18 @@ export default class TaskSettings extends Vue {
   }
 
   get displayModuleList(): string[] {
-    if (this.hideNotUsesModules) return this.usedModuleNames;
-    return this.moduleKeyList;
+    const moduleNames = this.hideNotUsesModules
+      ? this.usedModuleNames
+      : this.moduleKeyList;
+    if (this.moduleSearch) {
+      return moduleNames.filter((moduleName) => {
+        const name = (this as any).$t(
+          `module.${this.formData.taskType.toLowerCase()}.${moduleName}.description.title`
+        );
+        return name.toLowerCase().includes(this.moduleSearch.toLowerCase());
+      });
+    }
+    return moduleNames;
   }
 
   get moduleList(): { [name: string]: boolean } {
@@ -1028,5 +1054,22 @@ export default class TaskSettings extends Vue {
   border-color: var(--color-purple-dark);
   background-color: var(--color-purple-light);
   cursor: pointer;
+}
+
+.el-input::v-deep {
+  &.search {
+    margin-bottom: 1rem;
+
+    .el-input__inner {
+      font-size: var(--font-size-small);
+      font-style: italic;
+      color: var(--color-gray-dark);
+      border-color: var(--color-gray);
+    }
+
+    .el-input__suffix {
+      color: var(--color-gray-dark);
+    }
+  }
 }
 </style>
