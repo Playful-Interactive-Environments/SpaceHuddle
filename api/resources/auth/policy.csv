@@ -34,6 +34,7 @@ p, MODERATOR|FACILITATOR|PARTICIPANT, /module/:id/, GET
 p, MODERATOR, /module/:id/, DELETE
 p, MODERATOR, /task/:taskId/module/, POST
 p, MODERATOR, /module/, PUT
+p, MODERATOR|FACILITATOR, /module_names/:taskType/, GET
 
 p, UNKNOWN|MODERATOR|PARTICIPANT, /user/login/, POST
 p, UNKNOWN|MODERATOR|PARTICIPANT, /user/register/, POST

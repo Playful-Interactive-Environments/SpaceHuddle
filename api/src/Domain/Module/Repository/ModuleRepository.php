@@ -48,6 +48,36 @@ class ModuleRepository implements RepositoryInterface
     }
 
     /**
+     * Get list of used modules from the user for the task type.
+     * @param string $taskType The module task type.
+     * @return array<object> The result entity list.
+     */
+    public function getUserModules(string $taskType): array
+    {
+        $authorisation = $this->getAuthorisation();
+        $conditions = ["task_type" => $taskType];
+        if ($authorisation->isUser()) {
+            $conditions["user_id"] = $authorisation->id;
+        }
+
+        $query = $this->queryFactory->newSelect("user_module");
+        $query->select(["module_name"])
+            ->andWhere($conditions)
+            ->order("module_name")
+            ->distinct("module_name");
+
+        $rows = $query->execute()->fetchAll("assoc");
+        if (is_array($rows) and sizeof($rows) > 0) {
+            $result = [];
+            foreach ($rows as $resultItem) {
+                array_push($result, $resultItem["module_name"]);
+            }
+            return $result;
+        }
+        return [];
+    }
+
+    /**
      * Delete dependent data.
      * @param string $id Primary key of the linked table entry.
      * @return void

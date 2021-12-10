@@ -30,6 +30,7 @@ use App\Action\Module\ModuleDeleteAction;
 use App\Action\Module\ModuleReadAllAction;
 use App\Action\Module\ModuleReadSingleAction;
 use App\Action\Module\ModuleUpdateAction;
+use App\Action\Module\UsedModuleNamesReadAction;
 use App\Action\OpenApi\Version1DocAction;
 use App\Action\Participant\ParticipantConnectAction;
 use App\Action\Participant\ParticipantDeleteAction;
@@ -247,6 +248,13 @@ return function (App $app) {
             $app->get("/{id}[/]", ModuleReadSingleAction::class);
             $app->put("[/]", ModuleUpdateAction::class);
             $app->delete("/{id}[/]", ModuleDeleteAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/module_names",
+        function (RouteCollectorProxy $app) {
+            $app->get("/{taskType}[/]", UsedModuleNamesReadAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 

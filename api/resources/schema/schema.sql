@@ -736,6 +736,17 @@ WHERE
         task.expiration_time IS NULL OR task.expiration_time >= CURRENT_TIMESTAMP())
     );
 
+CREATE OR REPLACE VIEW user_module (user_id, task_type, module_name) AS
+SELECT DISTINCT
+    user_id,
+    task_type,
+    module_name
+FROM
+    module
+        INNER JOIN task ON task.id = module.task_id
+        INNER JOIN topic ON topic.id = task.topic_id
+        INNER JOIN session_role ON session_role.session_id = topic.session_id;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
