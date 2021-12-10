@@ -89,6 +89,7 @@ $--font-size: (
 
 .el-scrollbar {
         width: 100%;
+        max-width: 100vw;
 
         &__view {
                 height: 100%;

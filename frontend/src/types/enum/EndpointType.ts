@@ -9,6 +9,7 @@ enum EndpointType {
   LOGIN = 'login',
   MODULE = 'module',
   MODULES = 'modules',
+  MODULE_NAMES = 'module_names',
   OWN_USER_ROLE = 'own_user_role',
   PARTICIPANT = 'participant',
   PARTICIPANTS = 'participants',

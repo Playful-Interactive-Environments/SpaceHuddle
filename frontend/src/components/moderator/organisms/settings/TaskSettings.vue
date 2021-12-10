@@ -208,7 +208,30 @@
               }}
             </el-tag>
           </div>
-          <el-carousel
+          <el-scrollbar>
+            <div class="flex-content">
+              <!--<p v-for="item in 50" :key="item" class="scrollbar-demo-item">
+                {{ item }}
+              </p>-->
+              <ModuleCard
+                v-for="moduleType in displayModuleList"
+                :key="moduleType"
+                :task-type="TaskType[formData.taskType]"
+                :moduleName="moduleType"
+                v-model:mainModule="mainModule"
+                v-model="formData.moduleListAddOn[moduleType]"
+              />
+              <IdeaCard
+                v-if="hideNotUsesModules"
+                :idea="{ keywords: '...' }"
+                :is-editable="false"
+                :show-state="false"
+                v-on:click="hideNotUsesModules = false"
+                class="showMore"
+              />
+            </div>
+          </el-scrollbar>
+          <!--<el-carousel
             id="moduleType"
             :autoplay="false"
             type="card"
@@ -228,7 +251,7 @@
                 v-model="formData.moduleListAddOn[moduleType]"
               />
             </el-carousel-item>
-          </el-carousel>
+          </el-carousel>-->
         </el-form-item>
         <el-collapse
           v-model="openTabs"
@@ -327,6 +350,7 @@ import { SortOrderOption } from '@/types/api/OrderGroup';
 import * as ideaService from '@/services/idea-service';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import ViewType from '@/types/enum/ViewType';
+import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -363,6 +387,7 @@ enum InputOption {
 
 @Options({
   components: {
+    IdeaCard,
     TimerSettings,
     ValidationForm,
     FromSubmitItem,
@@ -380,6 +405,8 @@ export default class TaskSettings extends Vue {
   @Prop({}) taskId!: string;
   @Prop({}) taskType!: keyof typeof TaskType;
   componentLoadIndex = 0;
+  usedModuleNames: string[] = [];
+  hideNotUsesModules = true;
 
   get TaskTypeKeys(): Array<keyof typeof TaskType> {
     return Object.keys(TaskType) as Array<keyof typeof TaskType>;
@@ -455,6 +482,40 @@ export default class TaskSettings extends Vue {
   @Watch('taskType', { immediate: true })
   async onPropTaskTypeChanged(): Promise<void> {
     if (this.taskType) this.formData.taskType = this.taskType;
+  }
+
+  @Watch('formData.taskType', { immediate: true })
+  async onPropFormTaskTypeChanged(): Promise<void> {
+    this.hideNotUsesModules = false;
+    if (this.formData.taskType) {
+      moduleService
+        .getUsedModuleNames(this.formData.taskType)
+        .then((modules) => {
+          const mainModules = this.getIntersection(
+            modules,
+            this.formData.moduleListMain
+          );
+          const addOnModules = this.getIntersection(
+            modules,
+            this.formData.moduleListAddOn
+          );
+          this.usedModuleNames = [...mainModules, ...addOnModules];
+          this.hideNotUsesModules = mainModules.length > 0;
+          if (!this.taskId) {
+            if (mainModules.length > 0) {
+              this.mainModule = mainModules[0];
+            }
+          }
+        });
+    }
+  }
+
+  private getIntersection(
+    usedModules: string[],
+    modules: { [name: string]: boolean }
+  ): string[] {
+    const mainModules = Object.keys(modules);
+    return mainModules.filter((value) => usedModules.includes(value));
   }
 
   get mainModule(): string {
@@ -533,6 +594,11 @@ export default class TaskSettings extends Vue {
     ];
   }
 
+  get displayModuleList(): string[] {
+    if (this.hideNotUsesModules) return this.usedModuleNames;
+    return this.moduleKeyList;
+  }
+
   get moduleList(): { [name: string]: boolean } {
     return Object.assign(
       {},
@@ -581,6 +647,7 @@ export default class TaskSettings extends Vue {
     if (!this.taskId) this.reset();
     done();
     this.$emit('update:showModal', false);
+    this.hideNotUsesModules = true;
   }
 
   @Watch('taskId', { immediate: true })
@@ -939,5 +1006,27 @@ export default class TaskSettings extends Vue {
     white-space: nowrap;
     text-overflow: ellipsis;
   }
+}
+
+.el-scrollbar {
+  max-width: 80vw;
+}
+
+.flex-content {
+  display: flex;
+  margin-bottom: 1rem;
+
+  .el-card {
+    flex-shrink: 0;
+    width: 15rem;
+    margin: 0 0.5rem;
+  }
+}
+
+.showMore {
+  color: var(--color-purple-dark);
+  border-color: var(--color-purple-dark);
+  background-color: var(--color-purple-light);
+  cursor: pointer;
 }
 </style>

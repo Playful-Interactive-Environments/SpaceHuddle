@@ -57,3 +57,13 @@ export const putModule = async (
     EndpointAuthorisationType.MODERATOR
   );
 };
+
+export const getUsedModuleNames = async (
+  taskType: string
+): Promise<string[]> => {
+  return await apiExecuteGetHandled<string[]>(
+    `/${EndpointType.MODULE_NAMES}/${taskType}/`,
+    [],
+    EndpointAuthorisationType.MODERATOR
+  );
+};
