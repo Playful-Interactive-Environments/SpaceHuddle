@@ -56,6 +56,7 @@ class ViewRepository implements RepositoryInterface
         ?string $countOrderType = null,
         ?string $countRefId = null
     ): array {
+        $type = strtolower($type);
         if (!$orderType) {
             $orderType = $countOrderType;
         }
