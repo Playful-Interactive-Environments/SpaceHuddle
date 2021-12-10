@@ -54,10 +54,22 @@ class ViewSingleReader
         if (array_key_exists("filter", $data)) {
             $filter = json_decode($data["filter"]);
         }
+        $count = null;
+        if (array_key_exists("count", $data)) {
+            $count = $data["count"];
+        }
+        $countOrder = null;
+        if (array_key_exists("countOrder", $data)) {
+            $countOrder = $data["countOrder"];
+        }
+        $countRefId = null;
+        if (array_key_exists("countRefId", $data)) {
+            $countRefId = $data["countRefId"];
+        }
 
         if (isset($type) and isset($typeId)) {
             // Fetch data from the database
-            return $this->repository->getDetails($type, $typeId, $order, $refId, $filter);
+            return $this->repository->getDetails($type, $typeId, $order, $refId, $filter, $count, $countOrder, $countRefId);
         }
         return null;
     }
