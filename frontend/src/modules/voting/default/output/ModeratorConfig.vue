@@ -6,6 +6,7 @@
   >
     <el-input-number
       v-model="modelValue.maxRate"
+      :min="2"
       :placeholder="$t('module.voting.default.moderatorConfig.maxRateExample')"
     />
   </el-form-item>

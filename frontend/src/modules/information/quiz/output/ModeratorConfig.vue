@@ -6,6 +6,7 @@
   >
     <el-input-number
       v-model="modelValue.answerCount"
+      :min="2"
       :placeholder="
         $t('module.information.default.moderatorConfig.answerCountExample')
       "

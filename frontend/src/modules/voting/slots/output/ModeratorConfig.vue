@@ -6,6 +6,7 @@
   >
     <el-input-number
       v-model="modelValue.slotCount"
+      :min="1"
       :placeholder="$t('module.voting.slots.moderatorConfig.slotCountExample')"
     />
   </el-form-item>

@@ -81,8 +81,16 @@
                     </el-option>
                   </el-select>
                 </td>
-                <td>
-                  <el-input-number v-model="input.maxCount" />
+                <td style="display: inline-flex; align-items: center">
+                  <el-switch
+                    v-model="input.hasMaxCount"
+                    style="padding-right: 0.5rem"
+                  />
+                  <el-input-number
+                    :disabled="!input.hasMaxCount"
+                    v-model="input.maxCountInput"
+                    :min="1"
+                  />
                 </td>
                 <td>
                   <el-select
@@ -213,8 +221,8 @@
             v-model="moduleSearch"
             :clearable="true"
             :placeholder="
-            $t('moderator.organism.settings.taskSettings.moduleSearch')
-          "
+              $t('moderator.organism.settings.taskSettings.moduleSearch')
+            "
             v-if="moduleKeyList.length > 1"
           >
             <template #suffix>
@@ -376,11 +384,45 @@ interface ModuleComponentDefinition {
   parameter: any;
 }
 
-interface InputData {
-  view: string;
-  maxCount: number | undefined;
-  filter: string[];
-  order: string;
+class InputData {
+  view = '';
+  maxCount: number | null = null;
+  filter: string[] = [];
+  order = '';
+
+  oldMaxCount = 10;
+
+  constructor(
+    view: string,
+    maxCount: number | null,
+    filter: string[],
+    order: string
+  ) {
+    this.view = view;
+    this.maxCount = maxCount;
+    this.filter = filter;
+    this.order = order;
+  }
+
+  get hasMaxCount(): boolean {
+    return !!this.maxCount;
+  }
+
+  set hasMaxCount(value: boolean) {
+    if (value) this.maxCount = this.oldMaxCount;
+    else {
+      if (this.maxCount) this.oldMaxCount = this.maxCount;
+      this.maxCount = null;
+    }
+  }
+
+  get maxCountInput(): number | undefined {
+    return this.maxCount ? this.maxCount : undefined;
+  }
+
+  set maxCountInput(value: number | undefined) {
+    this.maxCount = this.maxCount ? this.maxCount : null;
+  }
 }
 
 interface FormDataDefinition extends TaskSettingsData {
@@ -450,15 +492,14 @@ export default class TaskSettings extends Vue {
   IdeaStateKeys = Object.keys(IdeaStates);
 
   getEmptyInput(): InputData {
-    return {
-      view:
-        this.possibleViews.length > 0
-          ? this.getViewKey(this.possibleViews[0])
-          : '',
-      maxCount: undefined,
-      filter: Object.keys(IdeaStates),
-      order: 'order',
-    };
+    return new InputData(
+      this.possibleViews.length > 0
+        ? this.getViewKey(this.possibleViews[0])
+        : '',
+      null,
+      Object.keys(IdeaStates),
+      'order'
+    );
   }
 
   get possibleViews(): View[] {
@@ -686,12 +727,12 @@ export default class TaskSettings extends Vue {
         this.formData.parameter = task.parameter ?? {};
         if (this.formData.parameter.input)
           this.formData.input = this.formData.parameter.input.map((input) => {
-            return {
-              view: this.getViewKey(input.view),
-              maxCount: input.maxCount ? input.maxCount : undefined,
-              filter: input.filter,
-              order: input.order,
-            };
+            return new InputData(
+              this.getViewKey(input.view),
+              input.maxCount,
+              input.filter,
+              input.order
+            );
           });
         task.modules.forEach((module) => {
           if (module.name in this.formData.moduleListAddOn)
@@ -902,7 +943,7 @@ export default class TaskSettings extends Vue {
             type: view.type,
             id: view.id,
           },
-          maxCount: input.maxCount ? input.maxCount : null,
+          maxCount: input.maxCount,
           filter: input.filter,
           order: input.order,
         };
@@ -1071,5 +1112,9 @@ export default class TaskSettings extends Vue {
       color: var(--color-gray-dark);
     }
   }
+}
+
+.el-input-number {
+  width: 140px;
 }
 </style>
