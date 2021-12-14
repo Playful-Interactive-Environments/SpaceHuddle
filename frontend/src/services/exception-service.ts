@@ -83,6 +83,12 @@ export const apiErrorHandling = async (
   const response = error.response;
   let errorResult: any = {};
   if (!response) {
+    if (error.message == 'Network Error') {
+      removeAccessToken();
+      app.config.globalProperties.$router.push({
+        name: 'home',
+      });
+    }
     return {};
   } else {
     errorResult = error.response?.data;
