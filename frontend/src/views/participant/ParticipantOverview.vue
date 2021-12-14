@@ -94,10 +94,10 @@ export default class ParticipantOverview extends Vue {
   mounted(): void {
     this.getSessionInfo();
     this.getTopicsAndTasks();
-    this.startIdeaInterval();
+    this.startInterval();
   }
 
-  startIdeaInterval(): void {
+  startInterval(): void {
     this.interval = setInterval(this.getTopicsAndTasks, this.intervalTime);
   }
 

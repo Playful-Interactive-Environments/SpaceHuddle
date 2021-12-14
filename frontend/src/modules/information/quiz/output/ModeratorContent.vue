@@ -8,13 +8,17 @@
       :canDisablePublicTimeline="false"
       :isLinkedToDetails="true"
       :startParticipantOnPublicChange="true"
-      keyPropertyName="question"
-      :getTitle="(item) => item.question.keywords"
-      :getKey="(item) => item.question.id"
-      :getTimerEntity="(item) => task"
+      keyPropertyName="id"
+      :defaultTimerSeconds="defaultQuestionTime"
       :hasParticipantOption="hasParticipantOption"
       :contentListIcon="(item) => null"
-      :defaultTimerSeconds="defaultQuestionTime"
+      :getKey="(item) => item.id"
+      :getTitle="(item) => item.keywords"
+      :getTimerEntity="(item) => task"
+      :itemIsEquals="
+        (a, b) => (!a && !b) || (a && b && a.question.id === b.question.id)
+      "
+      :displayItem="(item) => item.question"
       @changeOrder="dragDone"
       @changeActiveElement="onEditQuestionChanged"
     >
@@ -181,16 +185,24 @@ export default class ModeratorContent extends Vue {
 
   @Watch('publicQuestion', { immediate: true })
   async onPublicQuestionChanged(): Promise<void> {
-    if (this.publicQuestion) this.editQuestion = this.publicQuestion;
+    if (this.publicQuestion && !this.editQuestion)
+      this.editQuestion = this.publicQuestion;
     if (this.task) {
       this.task.parameter['activeQuestion'] = this.publicQuestion?.question.id;
       await taskService.updateTask(convertToSaveVersion(this.task));
     }
   }
 
+  setFormData(question: Question): void {
+    this.formData = {
+      question: Object.assign({}, question.question),
+      answers: question.answers.map((answer) => Object.assign({}, answer)),
+    };
+  }
+
   @Watch('editQuestion', { immediate: true })
   async onEditQuestionChanged(): Promise<void> {
-    if (this.editQuestion) this.formData = this.editQuestion;
+    if (this.editQuestion) this.setFormData(this.editQuestion);
   }
 
   @Watch('formData', { immediate: true })
@@ -198,9 +210,8 @@ export default class ModeratorContent extends Vue {
     await this.getVotes();
   }
 
-  hasParticipantOption(item: Question): boolean {
-    if (this.publicQuestion)
-      return item.question.id === this.publicQuestion.question.id;
+  hasParticipantOption(item: Hierarchy): boolean {
+    if (this.publicQuestion) return item.id === this.publicQuestion.question.id;
     return false;
   }
 
@@ -219,7 +230,7 @@ export default class ModeratorContent extends Vue {
 
   set editQuestionIndex(index: number) {
     index = index - 1;
-    if (index < this.questions.length) this.formData = this.questions[index];
+    if (index < this.questions.length) this.setFormData(this.questions[index]);
     else this.setupEmptyQuestion();
   }
 
@@ -243,29 +254,30 @@ export default class ModeratorContent extends Vue {
 
   saveQuestion(): void {
     if (this.formData.question.id) {
-      hierarchyService.putHierarchy(
-        this.formData.question.id,
-        this.formData.question
-      );
-      this.formData.answers.forEach((answer) => {
-        if (answer.id) hierarchyService.putHierarchy(answer.id, answer);
-        else {
-          answer.parentId = this.formData.question.id;
-          hierarchyService
-            .postHierarchy(this.taskId, {
-              parentId: answer.parentId,
-              keywords: answer.keywords,
-              description: answer.description,
-              link: answer.link,
-              image: answer.image,
-              parameter: answer.parameter,
-              order: answer.order,
-            })
-            .then((hierarchy) => {
-              answer.id = hierarchy.id;
-            });
-        }
-      });
+      hierarchyService
+        .putHierarchy(this.formData.question.id, this.formData.question)
+        .then(() => {
+          this.formData.answers.forEach((answer) => {
+            if (answer.id) hierarchyService.putHierarchy(answer.id, answer);
+            else {
+              answer.parentId = this.formData.question.id;
+              hierarchyService
+                .postHierarchy(this.taskId, {
+                  parentId: answer.parentId,
+                  keywords: answer.keywords,
+                  description: answer.description,
+                  link: answer.link,
+                  image: answer.image,
+                  parameter: answer.parameter,
+                  order: answer.order,
+                })
+                .then((hierarchy) => {
+                  answer.id = hierarchy.id;
+                });
+            }
+          });
+          this.getHierarchies();
+        });
     } else {
       hierarchyService
         .postHierarchy(this.taskId, {
@@ -396,11 +408,24 @@ export default class ModeratorContent extends Vue {
   }
 
   async mounted(): Promise<void> {
-    this.startIdeaInterval();
+    this.startInterval();
   }
 
-  startIdeaInterval(): void {
-    this.interval = setInterval(this.getVotes, this.intervalTime);
+  startInterval(): void {
+    this.interval = setInterval(this.reloadData, this.intervalTime);
+  }
+
+  reloadData(): void {
+    this.getVotes();
+    taskService.getTaskById(this.taskId).then((task) => {
+      this.task = task;
+      const module = task.modules.find((module) => module.name == 'quiz');
+      if (module) {
+        this.answerCount = module.parameter.answerCount;
+        this.defaultQuestionTime = module.parameter.defaultQuestionTime;
+      }
+      this.getHierarchies();
+    });
   }
 
   unmounted(): void {

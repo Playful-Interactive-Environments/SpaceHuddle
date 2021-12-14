@@ -42,19 +42,31 @@ import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/M
     ModeratorNavigationLayout,
   },
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorSessionOverview extends Vue {
   sessions: Session[] = [];
   showSettings = false;
   errors: string[] = [];
+  readonly intervalTime = 10000;
+  interval!: any;
 
   async mounted(): Promise<void> {
     this.getSessions();
+    this.startInterval();
   }
 
   getSessions(): void {
     sessionService.getList().then((queryResult) => {
       this.sessions = queryResult;
     });
+  }
+
+  startInterval(): void {
+    this.interval = setInterval(this.getSessions, this.intervalTime);
+  }
+
+  unmounted(): void {
+    clearInterval(this.interval);
   }
 }
 </script>

@@ -44,7 +44,7 @@
           :height="isVertical ? `100%` : ''"
         ></el-slider>
         <font-awesome-icon
-          v-else
+          v-else-if="activePageContentList.length > 0"
           icon="desktop"
           :class="{ disabled: !usePublicScreen }"
         ></font-awesome-icon>
@@ -55,7 +55,7 @@
         align-center
       >
         <draggable
-          v-model="activePageContentList"
+          v-model="activePageDisplayContentList"
           tag="transition-group"
           :item-key="keyPropertyName"
           handle=".el-step__head"
@@ -145,7 +145,7 @@
       >
         <el-step
           icon="-"
-          v-for="(element, index) in activePageContentList"
+          v-for="(element, index) in activePageDisplayContentList"
           :key="element.id"
         >
           <template #icon>
@@ -160,7 +160,7 @@
           </template>
           <template #description>
             <span class="link" v-on:click="itemClicked(element)">
-              {{ element.name }}
+              {{ getTitle(element) }}
             </span>
           </template>
         </el-step>
@@ -238,6 +238,13 @@ export default class ProcessTimeline extends Vue {
   @Prop({ default: (item) => null }) readonly getTimerEntity!: (
     item: any
   ) => any | null;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  @Prop({ default: (a, b) => a === b }) readonly itemIsEquals!: (
+    a: any,
+    b: any
+  ) => boolean;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  @Prop({ default: (item) => item }) readonly displayItem!: (item: any) => any;
 
   timerContent: any | null = null;
   activePage = 1;
@@ -249,17 +256,20 @@ export default class ProcessTimeline extends Vue {
   }
 
   @Watch('modelValue.length', { immediate: true })
+  @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {
     if (this.modelValue) {
+      const pages: any[][] = [];
       for (let i = 0; i < this.modelValue.length / this.pageSize; i++) {
-        this.pages[i] = [];
+        pages[i] = [];
       }
       this.modelValue.forEach((item, index) => {
-        this.pages[Math.floor(index / this.pageSize)].push(item);
+        pages[Math.floor(index / this.pageSize)].push(item);
         if (item == this.activeItem) {
           this.activePage = Math.floor(index / this.pageSize) + 1;
         }
       });
+      this.pages = pages;
     }
   }
 
@@ -291,9 +301,11 @@ export default class ProcessTimeline extends Vue {
 
   get activeContentIndex(): number {
     if (this.activePageContentList && this.activeItem) {
-      const index = this.activePageContentList.findIndex(
-        (item) => item == this.activeItem
-      );
+      const index = this.activeItem
+        ? this.activePageContentList.findIndex((item) =>
+            this.itemIsEquals(item, this.activeItem)
+          )
+        : -1;
       if (index > -1) return index;
     }
     return 0;
@@ -310,14 +322,34 @@ export default class ProcessTimeline extends Vue {
       this.pages[this.activePage - 1] = items;
   }
 
+  get activePageDisplayContentList(): any[] {
+    return this.activePageContentList.map((item) => this.displayItem(item));
+  }
+
+  set activePageDisplayContentList(items: any[]) {
+    const newList: any[] = [];
+    items.forEach((item, index) => {
+      newList[index] = this.getContentItem(this.getKey(item));
+    });
+    this.activePageContentList = newList;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  getContentItem(key: any): any {
+    return this.modelValue.find(
+      (item) => this.getKey(this.displayItem(item)) === key
+    );
+  }
+
   dragDone(): void {
     this.$emit('changeOrder', this.activePageContentList);
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   itemClicked(item: any): void {
-    this.$emit('update:activeItem', item);
-    this.$emit('changeActiveElement', item);
+    const result = this.getContentItem(this.getKey(item));
+    this.$emit('update:activeItem', result);
+    this.$emit('changeActiveElement', result);
   }
 
   tooltip(): string {
@@ -341,9 +373,11 @@ export default class ProcessTimeline extends Vue {
   }
 
   get activeOnPublicScreen(): number {
-    const index = this.activePageContentList.findIndex(
-      (item) => item === this.publicScreen
-    );
+    const index = this.publicScreen
+      ? this.activePageContentList.findIndex((item) =>
+          this.itemIsEquals(item, this.publicScreen)
+        )
+      : -1;
     if (this.isVertical && index > -1)
       return this.activePageContentList.length - 1 - index;
     return index;

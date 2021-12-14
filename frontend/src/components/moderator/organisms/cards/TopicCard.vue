@@ -11,6 +11,7 @@
         <span class="level-right">
           <div class="level-item settings">
             <el-dropdown
+              v-if="canModify"
               class="card__menu"
               v-on:command="menuItemSelected($event)"
             >
@@ -61,6 +62,7 @@ import TopicSettings from '@/components/moderator/organisms/settings/TopicSettin
 export default class TopicCard extends Vue {
   @Prop({ default: '' }) readonly sessionId!: string;
   @Prop() topic!: Topic;
+  @Prop({ default: true }) readonly canModify!: boolean;
   showSettings = false;
 
   goToDetails(): void {

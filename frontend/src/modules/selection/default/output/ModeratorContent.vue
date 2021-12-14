@@ -272,17 +272,21 @@ export default class ModeratorContent extends Vue {
   }
 
   async mounted(): Promise<void> {
-    this.startIdeaInterval();
+    this.startInterval();
 
     this.eventBus.off(EventType.CHANGE_SETTINGS);
     this.eventBus.on(EventType.CHANGE_SETTINGS, async () => {
-      await this.getTask();
-      await this.getCollapseContent();
+      await this.reloadData();
     });
   }
 
-  startIdeaInterval(): void {
-    this.interval = setInterval(this.getCollapseContent, this.intervalTime);
+  async reloadData(): Promise<void> {
+    await this.getTask();
+    await this.getCollapseContent();
+  }
+
+  startInterval(): void {
+    this.interval = setInterval(this.reloadData, this.intervalTime);
   }
 
   unmounted(): void {

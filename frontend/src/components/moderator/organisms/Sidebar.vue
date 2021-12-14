@@ -7,18 +7,15 @@
             <Logo />
           </div>
           <div class="sidebar__management">
-            <div>{{ pretitle }}</div>
+            <div>{{ preTitle }}</div>
             <div class="sidebar__icon" aria-label="settings" role="button">
-              <font-awesome-icon
-                class="icon"
-                icon="trash"
-                v-on:click="$emit('delete', $event)"
-              />
-              <font-awesome-icon
-                class="icon"
-                icon="cog"
-                v-on:click="$emit('openSettings', $event)"
-              />
+              <span v-on:click="$emit('delete', $event)">
+                <font-awesome-icon class="icon" icon="trash" v-if="canModify" />
+              </span>
+              <span v-on:click="$emit('openSettings', $event)">
+                <font-awesome-icon class="icon" icon="cog" v-if="canModify" />
+              </span>
+              <slot name="settings"></slot>
             </div>
           </div>
           <h1 class="heading heading--regular heading--white">
@@ -54,8 +51,9 @@ import Logo from '@/components/shared/atoms/Logo.vue';
 })
 export default class Sidebar extends Vue {
   @Prop({ default: '' }) readonly title!: string;
-  @Prop({ default: '' }) readonly pretitle!: string;
+  @Prop({ default: '' }) readonly preTitle!: string;
   @Prop({ default: '' }) readonly description!: string;
+  @Prop({ default: true }) readonly canModify!: boolean;
 }
 </script>
 

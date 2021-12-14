@@ -21,6 +21,8 @@
     :getKey="(item) => item.id"
     :getTitle="(item) => item.name"
     :getTimerEntity="(item) => item"
+    :itemIsEquals="(a, b) => (!a && !b) || (a && b && a.id === b.id)"
+    :displayItem="(item) => item"
     @changeOrder="dragDone"
     @changeActiveElement="onEditTaskChanged"
     @changePublicScreen="onPublicTaskChanged"
@@ -67,6 +69,8 @@ export default class TaskTimeline extends Vue {
   publicTask: Task | null = null;
   editTask: Task | null = null;
   hasParticipantComponent: { [name: string]: boolean } = {};
+  readonly intervalTime = 3000;
+  interval!: any;
 
   TimerEntity = TimerEntity;
 
@@ -141,6 +145,18 @@ export default class TaskTimeline extends Vue {
       task.order = index;
       taskService.putTask(task.id, convertToSaveVersion(task));
     });
+  }
+
+  mounted(): void {
+    this.startInterval();
+  }
+
+  startInterval(): void {
+    this.interval = setInterval(this.getTasks, this.intervalTime);
+  }
+
+  unmounted(): void {
+    clearInterval(this.interval);
   }
 }
 </script>

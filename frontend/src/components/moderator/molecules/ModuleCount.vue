@@ -8,6 +8,10 @@
       <span class="module-count__count">{{ session.taskCount }}</span>
       {{ $t('moderator.molecule.moduleCount.tasks') }}
     </div>
+    <div class="module-count__item">
+      <span class="module-count__count">{{ users.length }}</span>
+      {{ $t('moderator.molecule.moduleCount.users') }}
+    </div>
     <el-popover trigger="click" width="20vw">
       <template #reference>
         <div class="module-count__item">
@@ -36,7 +40,9 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Session } from '@/types/api/Session';
 import * as sessionService from '@/services/session-service';
+import * as sessionRoleService from '@/services/session-role-service';
 import { ParticipantInfo } from '@/types/api/Participant';
+import { SessionRole } from '@/types/api/SessionRole';
 
 @Options({
   components: {},
@@ -45,6 +51,7 @@ import { ParticipantInfo } from '@/types/api/Participant';
 export default class ModuleCount extends Vue {
   @Prop() session!: Session;
   participants: ParticipantInfo[] = [];
+  users: SessionRole[] = [];
   readonly intervalTime = 3000;
   interval!: any;
 
@@ -53,7 +60,7 @@ export default class ModuleCount extends Vue {
   }
 
   startInterval(): void {
-    this.interval = setInterval(this.getParticipants, this.intervalTime);
+    this.interval = setInterval(this.onSessionChanged, this.intervalTime);
   }
 
   unmounted(): void {
@@ -62,13 +69,22 @@ export default class ModuleCount extends Vue {
 
   @Watch('session', { immediate: true })
   async onSessionChanged(): Promise<void> {
-    this.getParticipants();
+    await this.getParticipants();
+    await this.getUsers();
   }
 
   async getParticipants(): Promise<void> {
     if (this.session) {
       sessionService.getParticipants(this.session.id).then((queryResult) => {
         this.participants = queryResult;
+      });
+    }
+  }
+
+  async getUsers(): Promise<void> {
+    if (this.session) {
+      sessionRoleService.getList(this.session.id).then((queryResult) => {
+        this.users = queryResult;
       });
     }
   }

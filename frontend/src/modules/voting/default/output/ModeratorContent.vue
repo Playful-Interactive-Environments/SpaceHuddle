@@ -41,6 +41,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import * as votingService from '@/services/voting-service';
 import { VoteResult } from '@/types/api/Vote';
+import { EventType } from '@/types/enum/EventType';
 
 @Options({
   components: {
@@ -101,10 +102,15 @@ export default class ModeratorContent extends Vue {
   }
 
   async mounted(): Promise<void> {
-    this.startIdeaInterval();
+    this.startInterval();
+
+    this.eventBus.off(EventType.CHANGE_SETTINGS);
+    this.eventBus.on(EventType.CHANGE_SETTINGS, async () => {
+      await this.getVotes();
+    });
   }
 
-  startIdeaInterval(): void {
+  startInterval(): void {
     this.interval = setInterval(this.getVotes, this.intervalTime);
   }
 

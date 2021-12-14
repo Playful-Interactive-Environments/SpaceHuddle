@@ -173,10 +173,10 @@ export default class PublicScreen extends Vue {
         }
       }
     );
-    this.startIdeaInterval();
+    this.startInterval();
   }
 
-  startIdeaInterval(): void {
+  startInterval(): void {
     this.interval = setInterval(this.getPublicScreenModule, this.intervalTime);
   }
 

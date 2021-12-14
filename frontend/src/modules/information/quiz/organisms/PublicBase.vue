@@ -293,10 +293,10 @@ export default class PublicBase extends Vue {
   }
 
   async mounted(): Promise<void> {
-    this.startIdeaInterval();
+    this.startInterval();
   }
 
-  startIdeaInterval(): void {
+  startInterval(): void {
     this.interval = setInterval(this.checkState, this.intervalTime);
   }
 

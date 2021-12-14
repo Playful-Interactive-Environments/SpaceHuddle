@@ -48,7 +48,7 @@ export default class Participant extends Vue {
 
   async mounted(): Promise<void> {
     await this.getTaskIdeas();
-    this.startIdeaInterval();
+    this.startInterval();
   }
 
   @Watch('moduleId', { immediate: true })
@@ -66,7 +66,7 @@ export default class Participant extends Vue {
     }
   }
 
-  startIdeaInterval(): void {
+  startInterval(): void {
     this.interval = setInterval(this.getTaskIdeas, this.intervalTime);
   }
 

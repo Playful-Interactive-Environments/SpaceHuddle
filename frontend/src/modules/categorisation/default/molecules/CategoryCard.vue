@@ -121,10 +121,9 @@
               style="height: unset"
             >
               <template #action v-if="category != null">
-                <font-awesome-icon
-                  icon="ban"
-                  v-on:click="removeIdea(element.id, $event)"
-                />
+                <span v-on:click="removeIdea(element.id, $event)">
+                  <font-awesome-icon icon="ban" />
+                </span>
               </template>
             </IdeaCard>
           </template>

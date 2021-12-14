@@ -35,20 +35,16 @@
           <span class="media-right" v-if="newIdea.link">
             <img :src="newIdea.link" alt="idea image" />
             <br />
-            <font-awesome-icon
-              class="edit"
-              icon="trash"
-              v-on:click="newIdea.link = ''"
-            />
+            <span v-on:click="newIdea.link = ''">
+              <font-awesome-icon class="edit" icon="trash" />
+            </span>
           </span>
           <span class="media-right" v-if="newIdea.image">
             <img :src="newIdea.image" alt="idea image" />
             <br />
-            <font-awesome-icon
-              class="edit"
-              icon="trash"
-              v-on:click="newIdea.image = ''"
-            />
+            <span v-on:click="newIdea.image = ''">
+              <font-awesome-icon class="edit" icon="trash" />
+            </span>
           </span>
         </div>
         <div class="media" v-if="newIdea.link || newIdea.image">
@@ -61,11 +57,9 @@
           <span class="media-content"></span>
           <span class="media-right">
             {{ newIdea.description }}
-            <font-awesome-icon
-              class="edit"
-              icon="trash"
-              v-on:click="newIdea.description = ''"
-            />
+            <span v-on:click="newIdea.description = ''">
+              <font-awesome-icon class="edit" icon="trash" />
+            </span>
           </span>
         </div>
         <div class="media" v-if="newIdea.description">
@@ -250,7 +244,7 @@ export default class Participant extends Vue {
 
   async mounted(): Promise<void> {
     await this.getTaskIdeas(true);
-    this.startIdeaInterval();
+    this.startInterval();
   }
 
   scrollToBottom(delay = 100): void {
@@ -297,7 +291,7 @@ export default class Participant extends Vue {
     }
   }
 
-  startIdeaInterval(): void {
+  startInterval(): void {
     this.interval = setInterval(this.getTaskIdeas, this.intervalTime);
   }
 

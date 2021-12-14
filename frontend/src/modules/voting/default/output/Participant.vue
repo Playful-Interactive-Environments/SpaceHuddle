@@ -111,10 +111,10 @@ export default class Participant extends Vue {
 
   mounted(): void {
     this.initConfig(5);
-    this.startIdeaInterval();
+    this.startInterval();
   }
 
-  startIdeaInterval(): void {
+  startInterval(): void {
     this.interval = setInterval(this.reloadIdeas, this.intervalTime);
   }
 

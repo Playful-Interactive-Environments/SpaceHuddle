@@ -3,11 +3,23 @@
     <template v-slot:sidebar>
       <Sidebar
         :title="session.title"
-        :pretitle="formatDate(session.creationDate)"
+        :preTitle="formatDate(session.creationDate)"
         :description="session.description"
+        :canModify="isModerator"
         v-on:openSettings="editSession"
         v-on:delete="deleteSession"
       >
+        <template #settings>
+          <span v-on:click="disconnect" v-if="!isModerator">
+            <font-awesome-icon
+              class="icon"
+              icon="user-slash"
+            ></font-awesome-icon>
+          </span>
+          <span v-else v-on:click="showRoles = true">
+            <font-awesome-icon class="icon" icon="users"></font-awesome-icon>
+          </span>
+        </template>
         <template #headerContent>
           <span :class="{ expired: isExpired }">
             {{
@@ -43,6 +55,7 @@
             <TopicCard
               :sessionId="sessionId"
               :topic="element"
+              :canModify="isModerator"
               v-on:topicDeleted="getTopics"
             >
               <TaskTimeline
@@ -58,6 +71,7 @@
         </template>
       </draggable>
       <AddItem
+        v-if="isModerator"
         :text="$t('moderator.view.sessionDetails.addTopic')"
         @addNew="showTopicSettings = true"
       />
@@ -72,13 +86,18 @@
         :session-id="sessionId"
         @sessionUpdated="getTopics"
       />
+      <FacilitatorSettings
+        v-if="isModerator"
+        v-model:showModal="showRoles"
+        :sessionId="sessionId"
+      />
     </template>
   </ModeratorNavigationLayout>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import TaskSettingsOld from '@/components/moderator/organisms/settings/TaskSettingsOld.vue';
@@ -87,6 +106,7 @@ import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/M
 import { formatDate } from '@/utils/date';
 import TaskType from '@/types/enum/TaskType';
 import * as sessionService from '@/services/session-service';
+import * as sessionRoleService from '@/services/session-role-service';
 import * as topicService from '@/services/topic-service';
 import * as taskService from '@/services/task-service';
 import { Session } from '@/types/api/Session';
@@ -100,9 +120,12 @@ import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import TopicCard from '@/components/moderator/organisms/cards/TopicCard.vue';
+import FacilitatorSettings from '@/components/moderator/organisms/settings/FacilitatorSettings.vue';
+import UserType from '@/types/enum/UserType';
 
 @Options({
   components: {
+    FacilitatorSettings,
     TopicCard,
     ModuleCount,
     SessionCode,
@@ -123,10 +146,12 @@ export default class ModeratorSessionDetails extends Vue {
   @Prop() readonly sessionId!: string;
 
   session: Session | null = null;
+  sessionRole = '';
   topics: Topic[] = [];
   publicScreenTaskId = '';
   showTopicSettings = false;
   showSessionSettings = false;
+  showRoles = false;
   formatDate = formatDate;
   editTopicId = '';
   publicScreenTopic = '';
@@ -134,6 +159,10 @@ export default class ModeratorSessionDetails extends Vue {
   interval!: any;
 
   TaskType = TaskType;
+
+  get isModerator(): boolean {
+    return this.sessionRole === UserType.MODERATOR;
+  }
 
   get isExpired(): boolean {
     if (this.session) {
@@ -147,6 +176,14 @@ export default class ModeratorSessionDetails extends Vue {
     this.eventBus.off(EventType.CHANGE_PUBLIC_SCREEN);
     this.eventBus.on(EventType.CHANGE_PUBLIC_SCREEN, async (id) => {
       await this.changePublicScreen(id as string);
+    });
+    this.startInterval();
+  }
+
+  @Watch('sessionId', { immediate: true })
+  async onSessionIdChanged(): Promise<void> {
+    await sessionRoleService.getOwn(this.sessionId).then((role) => {
+      this.sessionRole = role.role;
     });
     await this.getTopics();
   }
@@ -204,6 +241,20 @@ export default class ModeratorSessionDetails extends Vue {
       }
     }
   }
+
+  startInterval(): void {
+    this.interval = setInterval(this.getTopics, this.intervalTime);
+  }
+
+  unmounted(): void {
+    clearInterval(this.interval);
+  }
+
+  disconnect(): void {
+    sessionRoleService.removeOwn(this.sessionId).then((deleted) => {
+      if (deleted) this.$router.go(-1);
+    });
+  }
 }
 </script>
 
@@ -225,5 +276,9 @@ export default class ModeratorSessionDetails extends Vue {
 
 .expired {
   color: var(--color-red);
+}
+
+.icon {
+  margin-left: 0.5em;
 }
 </style>

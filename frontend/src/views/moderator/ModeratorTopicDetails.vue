@@ -8,6 +8,7 @@
       <Sidebar
         :title="topic.title"
         :description="topic.description"
+        :canModify="isModerator"
         v-on:openSettings="editTopic"
         v-on:delete="deleteTopic"
       >
@@ -150,6 +151,8 @@ import TaskTypeColor from '@/types/TaskTypeColor';
 import TaskCard from '@/components/moderator/organisms/cards/TaskCard.vue';
 import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
+import UserType from '@/types/enum/UserType';
+import * as sessionRoleService from '@/services/session-role-service';
 import {
   getAsyncModule,
   getEmptyComponent,
@@ -178,22 +181,31 @@ import TimerSettings from '@/components/moderator/organisms/settings/TimerSettin
     ModuleContentComponent: getEmptyComponent(),
   },
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorTopicDetails extends Vue {
   @Prop() readonly sessionId!: string;
   @Prop() readonly topicId!: string;
 
   topic: Topic | null = null;
   session: Session | null = null;
+  sessionRole = '';
   showTaskSettings = false;
   showTopicSettings = false;
   tasks: Task[] = [];
   activeTab = TaskType.BRAINSTORMING;
+  previousActiveTask: Task | null = null;
   activeTask: Task | null = null;
   componentLoadIndex = 0;
   componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
+  readonly intervalTime = 3000;
+  interval!: any;
 
   TaskType = TaskType;
   TaskTypeColor = TaskTypeColor;
+
+  get isModerator(): boolean {
+    return this.sessionRole === UserType.MODERATOR;
+  }
 
   get activeTaskIndex(): number {
     if (this.tasks && this.activeTask) {
@@ -221,9 +233,15 @@ export default class ModeratorTopicDetails extends Vue {
 
   moduleIcon: { [name: string]: { [name: string]: string } } = {};
   mounted(): void {
+    this.loadTaskTypes();
+    this.startInterval();
+  }
+
+  loadTaskTypes(): void {
     Object.keys(TaskType).forEach((taskTypeName) => {
       const taskType = taskTypeName as unknown as keyof typeof TaskType;
-      this.moduleIcon[taskTypeName] = {};
+      if (!(taskTypeName in this.moduleIcon))
+        this.moduleIcon[taskTypeName] = {};
       getModulesForTaskType(taskType, ModuleType.MAIN).then((modules) => {
         modules.forEach((moduleName) => {
           this.moduleIcon[taskTypeName][moduleName] = 'circle';
@@ -256,6 +274,9 @@ export default class ModeratorTopicDetails extends Vue {
 
   @Watch('sessionId', { immediate: true })
   onSessionIdChanged(): void {
+    sessionRoleService.getOwn(this.sessionId).then((role) => {
+      this.sessionRole = role.role;
+    });
     sessionService.getById(this.sessionId).then((session) => {
       this.session = session;
     });
@@ -294,6 +315,19 @@ export default class ModeratorTopicDetails extends Vue {
     });
   }
 
+  reloadData(): void {
+    topicService.getTopicById(this.topicId).then((topic) => {
+      this.topic = topic;
+    });
+    const taskId = this.activeTaskId;
+    this.getTasks().then(() => {
+      const activeTask = this.tasks.find((task) => task.id == taskId);
+      if (activeTask) {
+        this.activeTab = TaskType[activeTask.taskType];
+      }
+    });
+  }
+
   @Watch('activeTab', { immediate: true })
   onActiveTabChanged(): void {
     const activeTabTask = this.tasks.find(
@@ -324,8 +358,16 @@ export default class ModeratorTopicDetails extends Vue {
     );
   }
 
+  hasNewActiveTask(newTask: Task): boolean {
+    return (
+      !this.previousActiveTask ||
+      !newTask ||
+      this.previousActiveTask.id !== newTask.id
+    );
+  }
+
   async changeTask(newTask: Task): Promise<void> {
-    if (this.$options.components && newTask) {
+    if (this.$options.components && newTask && this.hasNewActiveTask(newTask)) {
       await getAsyncModule(
         ModuleComponentType.MODERATOR_CONTENT,
         TaskType[newTask.taskType],
@@ -337,6 +379,7 @@ export default class ModeratorTopicDetails extends Vue {
           this.componentLoadIndex++;
         }
         this.activeTask = newTask;
+        this.previousActiveTask = this.activeTask;
         this.activeTab = TaskType[newTask.taskType];
       });
     }
@@ -386,6 +429,14 @@ export default class ModeratorTopicDetails extends Vue {
         });
         break;
     }
+  }
+
+  startInterval(): void {
+    this.interval = setInterval(this.reloadData, this.intervalTime);
+  }
+
+  unmounted(): void {
+    clearInterval(this.interval);
   }
 }
 </script>

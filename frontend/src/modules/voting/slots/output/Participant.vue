@@ -104,10 +104,10 @@ export default class Participant extends Vue {
     if (this.seats.length == 0) {
       this.initSeats(3);
     }
-    this.startIdeaInterval();
+    this.startInterval();
   }
 
-  startIdeaInterval(): void {
+  startInterval(): void {
     this.interval = setInterval(this.reloadIdeas, this.intervalTime);
   }
 

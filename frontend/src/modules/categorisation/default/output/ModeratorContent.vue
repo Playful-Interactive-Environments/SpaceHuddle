@@ -188,6 +188,7 @@ import {
   CategoryContent,
   CategoryContentList,
 } from '@/types/api/CategoryContent';
+import { EventType } from '@/types/enum/EventType';
 
 @Options({
   components: {
@@ -382,11 +383,21 @@ export default class ModeratorContent extends Vue {
 
   async mounted(): Promise<void> {
     this.orderGroupContentCards[this.addCategoryKey] = this.addCategory;
-    this.startIdeaInterval();
+    this.startInterval();
+
+    this.eventBus.off(EventType.CHANGE_SETTINGS);
+    this.eventBus.on(EventType.CHANGE_SETTINGS, async () => {
+      await this.reloadData();
+    });
   }
 
-  startIdeaInterval(): void {
-    this.interval = setInterval(this.getCollapseContent, this.intervalTime);
+  startInterval(): void {
+    this.interval = setInterval(this.reloadData, this.intervalTime);
+  }
+
+  async reloadData(): Promise<void> {
+    await this.getTask();
+    await this.getCollapseContent();
   }
 
   unmounted(): void {

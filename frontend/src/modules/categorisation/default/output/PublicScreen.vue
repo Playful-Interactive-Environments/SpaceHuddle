@@ -132,10 +132,10 @@ export default class PublicScreen extends Vue {
   }
 
   async mounted(): Promise<void> {
-    this.startIdeaInterval();
+    this.startInterval();
   }
 
-  startIdeaInterval(): void {
+  startInterval(): void {
     this.interval = setInterval(this.getCollapseContent, this.intervalTime);
   }
 

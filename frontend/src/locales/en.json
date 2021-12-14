@@ -100,6 +100,13 @@
             "Expired": "The session has expired."
           }
         }
+      },
+      "authorized_user": {
+        "post": {
+          "username": {
+            "NotExist": "User not exists"
+          }
+        }
       }
     }
   },
@@ -113,7 +120,8 @@
       "moduleCount": {
         "topics": "Topics",
         "tasks": "Tasks",
-        "participants": "Participants"
+        "participants": "Participants",
+        "users": "Users"
       },
       "navigation": {
         "sessions": "Sessions",
@@ -149,6 +157,11 @@
           "link": "link",
           "linkExample": "",
           "submit": "Save"
+        },
+        "facilitatorSettings": {
+          "header": "manage co authors",
+          "info": "insert the email address of a desired co author",
+          "email": "email"
         },
         "taskSettings": {
           "header": "Add a Module",

@@ -104,10 +104,10 @@ export default class PublicScreen extends Vue {
   }
 
   async mounted(): Promise<void> {
-    this.startIdeaInterval();
+    this.startInterval();
   }
 
-  startIdeaInterval(): void {
+  startInterval(): void {
     this.interval = setInterval(this.getIdeas, this.intervalTime);
     if (this.isModerator)
       this.intervalNew = setInterval(this.changeState, this.intervalTimeNew);

@@ -7,7 +7,7 @@
     <template v-slot:sidebar>
       <Sidebar
         :title="task.name"
-        :pretitle="task.taskType"
+        :preTitle="task.taskType"
         :description="task.description"
         v-on:openSettings="editTask"
         v-on:delete="deleteTask"
