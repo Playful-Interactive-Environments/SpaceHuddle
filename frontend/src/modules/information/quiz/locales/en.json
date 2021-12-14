@@ -18,5 +18,8 @@
   "publicScreen": {
     "chartDataLabelCorrect": "correct",
     "chartDataLabelIncorrect": "incorrect"
+  },
+  "participant": {
+    "thanks": "Your answer has been saved. You can still change the answer until the timer expires."
   }
 }

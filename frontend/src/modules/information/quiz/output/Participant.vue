@@ -33,6 +33,9 @@
             {{ answer.answer.keywords }}
           </el-button>
         </el-space>
+        <span v-if="votes.length > 0">
+          {{ $t('module.information.quiz.participant.thanks') }}
+        </span>
       </template>
     </PublicBase>
   </ParticipantModuleDefaultContainer>
