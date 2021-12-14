@@ -9,7 +9,7 @@ use App\Domain\Idea\Type\IdeaState;
 /**
  * Delete session role service.
  */
-class SessionRoleDeleter
+class SessionRoleDeleterOwn
 {
     use ServiceDeleterTrait;
     use SessionRoleServiceTrait;
@@ -22,7 +22,7 @@ class SessionRoleDeleter
     protected function serviceValidation(array $data): void
     {
         // Input validation
-        $this->validator->validateDelete($data);
+        $this->validator->validateDeleteOwn($data);
     }
 
     /**
@@ -36,17 +36,12 @@ class SessionRoleDeleter
     protected function serviceExecution(
         array $data
     ): array|object|null {
-        $email = $data["username"];
-        $sessionName = $this->repository->getSessionName($data["sessionId"]);
-        $this->repository->delete((object)$data);
+        $sessionId = $data["sessionId"];
+        $this->repository->deleteOwn($sessionId);
 
-        $result = (object)[
+        return (object)[
             "state" => "Success",
             "message" => "Session role was successfully deleted."
         ];
-
-        $message = "<h1>You have been removed as co-moderator for the session $sessionName on spacehuddle.io</h1>";
-        mail($email, "You have been removed as co-moderator for the session $sessionName on spacehuddle.io", $message);
-        return $result;
     }
 }

@@ -1,7 +1,7 @@
 p, UNKNOWN, /, GET
 p, UNKNOWN, /docs/v1/, GET
 
-p, MODERATOR, /task/:taskId/client_application_state/:state/, PUT
+p, MODERATOR|FACILITATOR, /task/:taskId/client_application_state/:state/, PUT
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/categories/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/categories/, GET
@@ -31,9 +31,9 @@ p, MODERATOR|FACILITATOR|PARTICIPANT, /idea/, PUT
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/modules/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /module/:id/, GET
-p, MODERATOR, /module/:id/, DELETE
-p, MODERATOR, /task/:taskId/module/, POST
-p, MODERATOR, /module/, PUT
+p, MODERATOR|FACILITATOR, /module/:id/, DELETE
+p, MODERATOR|FACILITATOR, /task/:taskId/module/, POST
+p, MODERATOR|FACILITATOR, /module/, PUT
 p, MODERATOR|FACILITATOR, /module_names/:taskType/, GET
 
 p, UNKNOWN|MODERATOR|PARTICIPANT, /user/login/, POST
@@ -52,9 +52,9 @@ p, PARTICIPANT, /participant/topics/, GET
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/resources/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /resource/:id/, GET
-p, MODERATOR, /resource/:id/, DELETE
-p, MODERATOR, /session/:sessionId/resource/, POST
-p, MODERATOR, /resource/, PUT
+p, MODERATOR|FACILITATOR, /resource/:id/, DELETE
+p, MODERATOR|FACILITATOR, /session/:sessionId/resource/, POST
+p, MODERATOR|FACILITATOR, /resource/, PUT
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/selections/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /selection/:id/, GET
@@ -73,7 +73,7 @@ p, MODERATOR, /session/, POST
 p, UNKNOWN|MODERATOR|FACILITATOR|PARTICIPANT, /session_infos/, POST
 p, MODERATOR|FACILITATOR, /session/:sessionId/participants/, GET
 
-p, MODERATOR, /session/:sessionId/public_screen/:taskId/, PUT
+p, MODERATOR|FACILITATOR, /session/:sessionId/public_screen/:taskId/, PUT
 p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/public_screen/, GET
 
 p, MODERATOR, /session/:sessionId/authorized_users/, GET
@@ -81,18 +81,19 @@ p, MODERATOR, /session/:sessionId/authorized_user/, PUT
 p, MODERATOR, /session/:sessionId/authorized_user/, POST
 p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/own_user_role/, GET
 p, MODERATOR, /session/:sessionId/authorized_user/:username/, DELETE
+p, MODERATOR|FACILITATOR, /session/:sessionId/own_user_role/, DELETE
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/tasks/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/, GET
-p, MODERATOR, /task/:id/, DELETE
-p, MODERATOR, /topic/:topicId/task/, POST
-p, MODERATOR, /task/, PUT
+p, MODERATOR|FACILITATOR, /task/:id/, DELETE
+p, MODERATOR|FACILITATOR, /topic/:topicId/task/, POST
+p, MODERATOR|FACILITATOR, /task/, PUT
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/topics/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:id/, GET
 p, MODERATOR, /topic/:id/, DELETE
 p, MODERATOR, /session/:sessionId/topic/, POST
-p, MODERATOR, /topic/, PUT
+p, MODERATOR|FACILITATOR, /topic/, PUT
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/views/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /view/:type/:typeId/, GET

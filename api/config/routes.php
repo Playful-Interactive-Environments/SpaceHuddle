@@ -60,6 +60,7 @@ use App\Action\Session\SessionReadInfosAction;
 use App\Action\Session\SessionUpdateAction;
 use App\Action\SessionRole\SessionRoleCreateAction;
 use App\Action\SessionRole\SessionRoleDeleteAction;
+use App\Action\SessionRole\SessionRoleDeleteOwnAction;
 use App\Action\SessionRole\SessionRoleReadAllAction;
 use App\Action\SessionRole\SessionRoleReadSingleAction;
 use App\Action\SessionRole\SessionRoleUpdateAction;
@@ -181,6 +182,7 @@ return function (App $app) {
             $app->delete("/{sessionId}/authorized_user/{username}[/]", SessionRoleDeleteAction::class);
             $app->get("/{sessionId}/own_user_role[/]", SessionRoleReadSingleAction::class);
             $app->get("/{sessionId}/authorized_users[/]", SessionRoleReadAllAction::class);
+            $app->delete("/{sessionId}/own_user_role[/]", SessionRoleDeleteOwnAction::class);
 
             $app->get("/{sessionId}/participants[/]", SessionParticipantReadAction::class);
 

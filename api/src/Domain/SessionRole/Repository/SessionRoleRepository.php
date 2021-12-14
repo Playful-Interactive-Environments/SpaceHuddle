@@ -91,12 +91,31 @@ class SessionRoleRepository implements RepositoryInterface
     }
 
     /**
+     * Get session name by session ID.
+     * @param string $sessionId The session ID.
+     * @return SessionRoleData|null The session name.
+     */
+    public function getSessionName(string $sessionId): ?string
+    {
+        $query = $this->queryFactory->newSelect("session");
+        $query->select(["title"])
+            ->andWhere(["id" => $sessionId]);
+
+        $rows = $query->execute()->fetchAll("assoc");
+        if (is_array($rows) and sizeof($rows) > 0) {
+            return $rows[0]["title"];
+        }
+
+        return "";
+    }
+
+    /**
      * Verifies that the username entered is the logged in user.
      * @param string $username Username to check.
-     * @return string|null If true, the username entered is the logged in user.
+     * @return bool If true, the username entered is the logged in user.
      * @throws GenericException
      */
-    public function isOwnUsername(string $username): ?string
+    public function isOwnUsername(string $username): bool
     {
         $authorisation = $this->getAuthorisation();
         if ($authorisation->isUser()) {
@@ -201,6 +220,25 @@ class SessionRoleRepository implements RepositoryInterface
                 "user_id" => $data->userId
             ])
             ->execute();
+    }
+
+    /**
+     * Delete entity row for logged in user.
+     * @param string $sessionId The session role data
+     * @return void
+     * @throws GenericException
+     */
+    public function deleteOwn(string $sessionId): void
+    {
+        $authorisation = $this->getAuthorisation();
+        if ($authorisation->isUser()) {
+            $this->queryFactory->newDelete($this->getEntityName())
+                ->andWhere([
+                    "session_id" => $sessionId,
+                    "user_id" => $authorisation->id
+                ])
+                ->execute();
+        }
     }
 
     /**

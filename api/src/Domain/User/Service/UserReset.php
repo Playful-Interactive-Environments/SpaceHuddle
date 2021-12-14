@@ -83,14 +83,14 @@ final class UserReset
         $applicationSettings = (object)$this->settings()["application"];
         $resetUrl = "$applicationSettings->baseUrl$applicationSettings->forgetPassword";
 
-        $nachricht = "
+        $message = "
             <h1>Forget password for spacehuddle.io</h1>
             <div>click this link to reset your password.</div>
             <div>
                 <a href='$resetUrl$jwt' >reset password</a>
             </div>";
 
-        mail($result->username, 'Forget password for spacehuddle.io', $nachricht);
+        mail($result->username, 'Forget password for spacehuddle.io', $message);
 
         return [
             "message" => "Successful send mail",

@@ -2,6 +2,7 @@
 
 namespace App\Domain\SessionRole\Service;
 
+use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\ValidatorTrait;
 use App\Domain\Session\Type\SessionRoleType;
 use App\Domain\SessionRole\Repository\SessionRoleRepository;
@@ -95,6 +96,8 @@ class SessionRoleValidator
         $this->validateEntity(
             $data,
             $this->validationFactory->createValidator()
+                ->notEmptyString("sessionId", "Empty: This field cannot be left empty")
+                ->requirePresence("sessionId", message: "Required: This field is required")
                 ->notEmptyString("username", "Empty: This field cannot be left empty")
                 ->requirePresence("username", message: "Required: This field is required"),
             newRecord: false
@@ -103,6 +106,36 @@ class SessionRoleValidator
         $username = $data["username"];
         $this->validateUsername($username);
         $this->validateOwnUser($username);
+    }
+
+    /**
+     * Validate update.
+     *
+     * @param array<string, mixed> $data The data
+     *
+     * @return void
+     * @throws GenericException
+     */
+    public function validateDeleteOwn(array $data): void
+    {
+        $this->validateEntity(
+            $data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("sessionId", "Empty: This field cannot be left empty")
+                ->requirePresence("sessionId", message: "Required: This field is required"),
+            newRecord: false
+        );
+
+        $sessionId = $data["sessionId"];
+        $role = $this->repository->getById($sessionId);
+        if ($role && strtolower($role->role) != SessionRoleType::FACILITATOR) {
+            $result = new ValidationResult();
+            $result->addError(
+                "user",
+                "NoPermission: Only FACILITATOR role can be disconnected."
+            );
+            throw new ValidationException("Please check your input", $result);
+        }
     }
 
 
@@ -124,8 +157,6 @@ class SessionRoleValidator
             throw new ValidationException("Please check your input", $result);
         }
     }
-
-
 
     /**
      * Validate if username is own user.
