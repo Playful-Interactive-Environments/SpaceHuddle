@@ -76,7 +76,7 @@ p, MODERATOR|FACILITATOR, /session/:sessionId/participants/, GET
 p, MODERATOR|FACILITATOR, /session/:sessionId/public_screen/:taskId/, PUT
 p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/public_screen/, GET
 
-p, MODERATOR, /session/:sessionId/authorized_users/, GET
+p, MODERATOR|FACILITATOR, /session/:sessionId/authorized_users/, GET
 p, MODERATOR, /session/:sessionId/authorized_user/, PUT
 p, MODERATOR, /session/:sessionId/authorized_user/, POST
 p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/own_user_role/, GET
