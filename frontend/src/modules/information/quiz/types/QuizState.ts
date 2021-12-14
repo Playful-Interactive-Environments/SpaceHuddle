@@ -16,6 +16,6 @@ export const QuizStateProperty: { [name: string]: { time: number } } = {
   [QuizState.DONE_THANKS]: { time: 10 },
   [QuizState.DONE_WAIT]: { time: 0 },
   [QuizState.RESULT_ANSWER]: { time: 5 },
-  [QuizState.RESULT_EXPLANATION]: { time: 10 },
+  [QuizState.RESULT_EXPLANATION]: { time: 5 },
   [QuizState.RESULT_STATISTICS]: { time: 0 },
 };

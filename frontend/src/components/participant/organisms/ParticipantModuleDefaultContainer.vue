@@ -68,7 +68,7 @@ export default class ParticipantModuleDefaultContainer extends Vue {
     if (this.task && this.task.modules) {
       return !!this.task.modules.find((module) => module.syncPublicParticipant);
     }
-    return false;
+    return true;
   }
 
   get taskType(): TaskType | null {
