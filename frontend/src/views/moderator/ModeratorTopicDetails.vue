@@ -319,13 +319,7 @@ export default class ModeratorTopicDetails extends Vue {
     topicService.getTopicById(this.topicId).then((topic) => {
       this.topic = topic;
     });
-    const taskId = this.activeTaskId;
-    this.getTasks().then(() => {
-      const activeTask = this.tasks.find((task) => task.id == taskId);
-      if (activeTask) {
-        this.activeTab = TaskType[activeTask.taskType];
-      }
-    });
+    this.getTasks();
   }
 
   @Watch('activeTab', { immediate: true })

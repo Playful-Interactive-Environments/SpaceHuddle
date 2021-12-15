@@ -748,6 +748,7 @@ export default class TaskSettings extends Vue {
   }
 
   @Watch('topicId', { immediate: true })
+  @Watch('showModal', { immediate: true })
   onTopicIdChanged(): void {
     this.loadInputViews();
     ideaService.getSortOrderOptions(this.topicId).then((options) => {
