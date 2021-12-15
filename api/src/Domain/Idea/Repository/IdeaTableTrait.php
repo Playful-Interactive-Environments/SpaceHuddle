@@ -2,6 +2,8 @@
 
 namespace App\Domain\Idea\Repository;
 
+use App\Domain\Selection\Repository\SelectionRepository;
+use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Task\Type\TaskType;
 
@@ -129,6 +131,21 @@ trait IdeaTableTrait
      */
     protected function deleteDependencies(string $id): void
     {
+        $query = $this->queryFactory->newSelect("task_input");
+        $query->select(["task_id", "input_type"]);
+        $query->whereInList("input_type", ["HIERARCHY"])
+            ->andWhere(["input_id" => $id]);
+
+        $result = $query->execute()->fetchAll("assoc");
+        if (is_array($result)) {
+            $task = new TaskRepository($this->queryFactory);
+            foreach ($result as $resultItem) {
+                $taskId = $resultItem["task_id"];
+                $inputType = $resultItem["input_type"];
+                $task->removeTaskDependency($taskId, $inputType, $id);
+            }
+        }
+
         $this->queryFactory->newDelete("vote")
             ->andWhere(["idea_id" => $id])
             ->execute();

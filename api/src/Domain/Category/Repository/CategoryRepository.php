@@ -124,7 +124,6 @@ class CategoryRepository implements RepositoryInterface
      */
     public function ideasAgreeWithCategory(string $categoryId, array $ideas, bool $lookForConnected = false): bool
     {
-        $taskTypeIdeas = strtoupper(TaskType::BRAINSTORMING);
         $taskTypeCategory = strtoupper(TaskType::CATEGORISATION);
         $query = $this->queryFactory->newSelect("idea");
         $query->select(["idea.id"])
@@ -147,7 +146,6 @@ class CategoryRepository implements RepositoryInterface
             ])
             ->whereInList("idea.id", $ideas)
             ->andWhere([
-                "idea_task.task_type" => $taskTypeIdeas,
                 "category_task.task_type" => $taskTypeCategory,
                 "category.id" => $categoryId,
             ]);

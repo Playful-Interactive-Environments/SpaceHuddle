@@ -9,6 +9,7 @@ use App\Domain\Idea\Repository\IdeaRepository;
 use App\Domain\Module\Data\ModuleData;
 use App\Domain\Module\Repository\ModuleRepository;
 use App\Domain\Module\Type\ModuleState;
+use App\Domain\Selection\Repository\SelectionRepository;
 use App\Domain\Session\Type\SessionRoleType;
 use App\Domain\Task\Data\TaskData;
 use App\Domain\Task\Type\TaskState;
@@ -296,13 +297,75 @@ class TaskRepository implements RepositoryInterface
     }
 
     /**
+     * Remove task dependencies in json parameters.
+     * @param string $taskId Task that contains the parameters to be cleaned.
+     * @param string $dependencyType Type of the dependency.
+     * @param string $dependencyId Id of the dependency.
+     * @return void
+     */
+    public function removeTaskDependency(string $taskId, string $dependencyType, string $dependencyId): void
+    {
+        $query = $this->queryFactory->newSelect("task");
+        $query->select(["parameter", "task_type"]);
+        $query->andWhere(["id" => $taskId]);
+
+        $result = $query->execute()->fetchAll("assoc");
+        if (is_array($result)) {
+            foreach ($result as $resultItem) {
+                $parameter = json_decode($resultItem["parameter"]);
+                foreach ($parameter->input as $index => $input) {
+                    if ($input->view->type == $dependencyType and $input->view->id == $dependencyId) {
+                        unset($parameter->input[$index]);
+                    }
+                }
+                $this->queryFactory->newUpdate("task", ["parameter" => json_encode($parameter)])
+                    ->andWhere(["id" => $taskId])
+                    ->execute();
+                $taskType = strtolower($resultItem["task_type"]);
+                if (
+                    in_array($taskType, [TaskType::SELECTION, TaskType::CATEGORISATION, TaskType::VOTING]) and
+                    count($parameter->input) == 0
+                ) {
+                    $this->deleteById($taskId);
+                }
+            }
+        }
+    }
+
+    /**
      * Delete dependent data.
      * @param string $id Primary key of the linked table entry.
      * @return void
-     * @throws GenericException
      */
     protected function deleteDependencies(string $id): void
     {
+        $query = $this->queryFactory->newSelect("task_input");
+        $query->select(["task_id", "input_type"]);
+        $query->whereInList("input_type", ["TASK", "VOTE"])
+            ->andWhere(["input_id" => $id]);
+
+        $result = $query->execute()->fetchAll("assoc");
+        if (is_array($result)) {
+            foreach ($result as $resultItem) {
+                $taskId = $resultItem["task_id"];
+                $inputType = $resultItem["input_type"];
+                $this->removeTaskDependency($taskId, $inputType, $id);
+            }
+        }
+
+        $query = $this->queryFactory->newSelect("task_selection");
+        $query->select(["selection_id"]);
+        $query->andWhere(["task_id" => $id]);
+
+        $result = $query->execute()->fetchAll("assoc");
+        if (is_array($result)) {
+            $selection = new SelectionRepository($this->queryFactory);
+            foreach ($result as $resultItem) {
+                $selectionId = $resultItem["selection_id"];
+                $selection->deleteById($selectionId);
+            }
+        }
+
         $query = $this->queryFactory->newSelect("idea");
         $query->select(["id"]);
         $query->andWhere(["task_id" => $id]);

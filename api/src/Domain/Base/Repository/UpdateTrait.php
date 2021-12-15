@@ -14,7 +14,6 @@ trait UpdateTrait
      * Update entity row.
      * @param object|array $data The entity to change.
      * @return object|null The result entity.
-     * @throws GenericException
      */
     public function update(object|array $data): ?object
     {

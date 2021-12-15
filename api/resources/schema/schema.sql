@@ -747,6 +747,197 @@ FROM
         INNER JOIN topic ON topic.id = task.topic_id
         INNER JOIN session_role ON session_role.session_id = topic.session_id;
 
+CREATE OR REPLACE VIEW task_input (task_id, input_type, input_id, max_count, filter, `order`) AS
+SELECT
+    id AS task_id,
+    JSON_UNQUOTE(
+        JSON_EXTRACT(
+            parameter,
+            CONCAT('$.input[', idx, '].view.type')
+        )
+    ) AS input_type,
+    JSON_UNQUOTE(
+        JSON_EXTRACT(
+            parameter,
+            CONCAT('$.input[', idx, '].view.id')
+        )
+    ) AS input_id,
+    NULLIF(
+        LOWER(
+            JSON_EXTRACT(
+                    parameter,
+                    CONCAT('$.input[', idx, '].maxCount')
+                )
+        ), 'null'
+    ) AS max_count,
+    JSON_EXTRACT(
+        parameter,
+        CONCAT('$.input[', idx, '].filter')
+    ) AS filter,
+    JSON_UNQUOTE(
+        JSON_EXTRACT(
+            parameter,
+            CONCAT('$.input[', idx, '].order')
+        )
+    ) AS `order`
+FROM
+    task
+JOIN(
+        SELECT 0 AS idx
+        UNION
+        SELECT
+            1 AS idx
+        UNION
+        SELECT
+            2 AS idx
+        UNION
+        SELECT
+            3 AS idx
+        UNION
+        SELECT
+            4 AS idx
+        UNION
+        SELECT
+            5 AS idx
+        UNION
+        SELECT
+            6 AS idx
+        UNION
+        SELECT
+            7 AS idx
+        UNION
+        SELECT
+            8 AS idx
+        UNION
+        SELECT
+            9 AS idx
+        UNION
+        SELECT
+            10 AS idx
+        UNION
+        SELECT
+            11 AS idx
+        UNION
+        SELECT
+            12 AS idx
+        UNION
+        SELECT
+            13 AS idx
+        UNION
+        SELECT
+            14 AS idx
+        UNION
+        SELECT
+            15 AS idx
+        UNION
+        SELECT
+            16 AS idx
+        UNION
+        SELECT
+            17 AS idx
+        UNION
+        SELECT
+            18 AS idx
+        UNION
+        SELECT
+            19 AS idx
+        UNION
+        SELECT
+            20 AS idx
+    ) AS INDEXES
+WHERE
+    JSON_EXTRACT(
+            parameter,
+            CONCAT('$.input[', idx, ']')
+        ) IS NOT NULL;
+
+CREATE OR REPLACE VIEW task_selection (task_id, task_type, selection_id) AS
+SELECT
+    id AS task_id,
+    task_type,
+    JSON_UNQUOTE(
+        JSON_EXTRACT(
+            parameter,
+            CONCAT('$.selectionId[', idx, ']')
+        )
+    ) AS selection_id
+FROM
+    task
+JOIN(
+        SELECT 0 AS idx
+        UNION
+        SELECT
+            1 AS idx
+        UNION
+        SELECT
+            2 AS idx
+        UNION
+        SELECT
+            3 AS idx
+        UNION
+        SELECT
+            4 AS idx
+        UNION
+        SELECT
+            5 AS idx
+        UNION
+        SELECT
+            6 AS idx
+        UNION
+        SELECT
+            7 AS idx
+        UNION
+        SELECT
+            8 AS idx
+        UNION
+        SELECT
+            9 AS idx
+        UNION
+        SELECT
+            10 AS idx
+        UNION
+        SELECT
+            11 AS idx
+        UNION
+        SELECT
+            12 AS idx
+        UNION
+        SELECT
+            13 AS idx
+        UNION
+        SELECT
+            14 AS idx
+        UNION
+        SELECT
+            15 AS idx
+        UNION
+        SELECT
+            16 AS idx
+        UNION
+        SELECT
+            17 AS idx
+        UNION
+        SELECT
+            18 AS idx
+        UNION
+        SELECT
+            19 AS idx
+        UNION
+        SELECT
+            20 AS idx
+    ) AS INDEXES
+WHERE
+    JSON_EXTRACT(
+        parameter,
+        CONCAT('$.selectionId[', idx, ']')
+    ) IS NOT NULL
+AND
+    JSON_UNQUOTE(
+        JSON_EXTRACT(
+            parameter,
+            CONCAT('$.selectionId[', idx, ']')
+        )) != '';
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
