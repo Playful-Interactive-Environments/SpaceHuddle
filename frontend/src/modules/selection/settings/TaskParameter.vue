@@ -8,6 +8,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import * as taskService from '@/services/task-service';
 import { Task, TaskSettingsData } from '@/types/api/Task';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import * as selectionService from '@/services/selection-service';
 
 @Options({
   components: {},
@@ -39,6 +40,26 @@ export default class TaskParameter extends Vue {
       await taskService.getTaskById(this.taskId).then((task) => {
         this.task = task;
       });
+    }
+  }
+
+  async updateParameterForSaving(): Promise<void> {
+    if (this.modelValue.parameter) {
+      if (this.modelValue.parameter.selectionId) {
+        const selectionId = this.modelValue.parameter.selectionId;
+        await selectionService.putSelection(selectionId, {
+          name: this.modelValue.name,
+        });
+      } else {
+        const topicId = this.task ? this.task.topicId : this.topicId;
+        if (topicId) {
+          await selectionService
+            .postSelection(topicId, { name: this.modelValue.name })
+            .then((selection) => {
+              this.modelValue.parameter.selectionId = selection.id;
+            });
+        }
+      }
     }
   }
 }
