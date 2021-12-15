@@ -2,7 +2,7 @@ import { AxiosError, AxiosResponse } from 'axios';
 import ApiError from '@/types/api/ApiError';
 import app from '@/main';
 import HttpStatusCode from '@/types/enum/HttpStatusCode ';
-import { removeAccessToken } from '@/services/auth-service';
+import { removeAccessToken, isUser } from '@/services/auth-service';
 import { ElMessage } from 'element-plus';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -117,13 +117,16 @@ export const apiErrorHandling = async (
       }
     }
 
-    if (
-      response.status == HttpStatusCode.UNAUTHORIZED ||
-      response.status == HttpStatusCode.FORBIDDEN
-    ) {
+    if (response.status == HttpStatusCode.UNAUTHORIZED) {
       removeAccessToken();
       app.config.globalProperties.$router.push({
         name: 'home',
+      });
+    }
+
+    if (response.status == HttpStatusCode.FORBIDDEN) {
+      app.config.globalProperties.$router.push({
+        name: isUser() ? 'moderator-session-overview' : 'participant-overview',
       });
     }
   }

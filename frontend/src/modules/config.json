@@ -4,7 +4,7 @@
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "en,",  
-             "icon": "comment-alt",  "type": "main",  "input": "optional",  "syncPublicParticipant": false,  
+             "icon": "comment-alt",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
            "path": "brainstorming/chat"  
        },  
        "default": {  
