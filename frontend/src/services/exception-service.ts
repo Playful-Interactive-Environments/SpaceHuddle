@@ -9,17 +9,22 @@ import { ElMessage } from 'element-plus';
 
 const showLog = false;
 
-export const getSingleTranslatedErrorMessage = (error: AxiosError): string => {
+export const getSingleErrorKey = (error: AxiosError): string => {
   if (
     error.response &&
     error.response.data &&
     error.response.data.errorMessage &&
     error.response.data.errorMessage.length > 0
   ) {
-    return app.config.globalProperties.$i18n.translateWithFallback(
-      error.response.data.errorMessage[0]
-    );
+    return error.response.data.errorMessage[0];
   }
+  return '';
+};
+
+export const getSingleTranslatedErrorMessage = (error: AxiosError): string => {
+  const errorKey = getSingleErrorKey(error);
+  if (errorKey.length > 0)
+    return app.config.globalProperties.$i18n.translateWithFallback(errorKey);
   return '';
 };
 

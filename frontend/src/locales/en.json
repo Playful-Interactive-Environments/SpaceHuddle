@@ -245,7 +245,8 @@
           "header": "New here?",
           "info": "Go ahead and create an account if you want to use our great brainstorming tool.",
           "submit": "Register"
-        }
+        },
+        "confirm": "Resend confirmation mail"
       },
       "register": {
         "header": "Register",

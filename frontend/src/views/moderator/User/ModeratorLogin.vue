@@ -49,6 +49,15 @@
                   {{ $t('moderator.view.login.forgot') }}
                 </p>
               </router-link>
+              <br />
+              <p
+                class="login__forgot-pw"
+                role="button"
+                v-if="displayConfirm"
+                v-on:click="resendConfirm"
+              >
+                {{ $t('moderator.view.login.confirm') }}
+              </p>
             </el-form-item>
           </template>
         </ValidationForm>
@@ -76,7 +85,10 @@
 import { Options, Vue } from 'vue-class-component';
 import * as authService from '@/services/auth-service';
 import * as userService from '@/services/user-service';
-import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
+import {
+  getSingleErrorKey,
+  getSingleTranslatedErrorMessage,
+} from '@/services/exception-service';
 import { ValidationData } from '@/types/ui/ValidationRule';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
@@ -89,6 +101,7 @@ import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorLogin extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
+  displayConfirm = false;
 
   formData: ValidationData = {
     email: '',
@@ -110,8 +123,14 @@ export default class ModeratorLogin extends Vue {
         },
         (error) => {
           this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
+          this.displayConfirm =
+            getSingleErrorKey(error).includes('NotConfirmed');
         }
       );
+  }
+
+  resendConfirm(): void {
+    userService.sendConfirmMail(this.formData.email);
   }
 }
 </script>
