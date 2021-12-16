@@ -3,6 +3,7 @@
 namespace App\Domain\SessionRole\Service;
 
 use App\Domain\Base\Repository\GenericException;
+use App\Domain\Base\Service\MailTrait;
 use App\Domain\Base\Service\ServiceDeleterTrait;
 use App\Domain\Idea\Type\IdeaState;
 
@@ -13,6 +14,7 @@ class SessionRoleDeleter
 {
     use ServiceDeleterTrait;
     use SessionRoleServiceTrait;
+    use MailTrait;
 
     /**
      * Validates whether the transferred data is suitable for the service.
@@ -45,8 +47,11 @@ class SessionRoleDeleter
             "message" => "Session role was successfully deleted."
         ];
 
-        $message = "<h1>You have been removed as co-moderator for the session $sessionName on spacehuddle.io</h1>";
-        mail($email, "You have been removed as co-moderator for the session $sessionName on spacehuddle.io", $message);
+        $this->sendMail(
+            $email,
+            "You have been removed as co-moderator for the session $sessionName on spacehuddle.io",
+            ""
+        );
         return $result;
     }
 }

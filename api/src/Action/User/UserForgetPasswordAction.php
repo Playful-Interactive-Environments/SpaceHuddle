@@ -26,8 +26,7 @@ use Fig\Http\Message\StatusCodeInterface;
  *     )
  *   ),
  *   @OA\Response(response="200", description="Success"),
- *   @OA\Response(response="404", description="Not Found"),
- *   security={{"api_key": {}}, {"bearerAuth": {}}}
+ *   @OA\Response(response="404", description="Not Found")
  * )
  */
 class UserForgetPasswordAction

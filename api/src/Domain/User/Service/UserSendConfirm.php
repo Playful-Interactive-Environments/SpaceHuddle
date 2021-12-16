@@ -3,7 +3,6 @@
 namespace App\Domain\User\Service;
 
 use App\Database\TransactionInterface;
-use App\Domain\Base\Data\TokenData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\BaseBodyServiceTrait;
 use App\Domain\Base\Service\MailTrait;
@@ -14,7 +13,7 @@ use App\Routing\JwtAuth;
 /**
  * Service.
  */
-final class UserLogin
+final class UserSendConfirm
 {
     use BaseBodyServiceTrait;
     use MailTrait;
@@ -49,10 +48,11 @@ final class UserLogin
      * Validates whether the transferred data is suitable for the service.
      * @param array $data Data to be verified.
      * @return void
+     * @throws GenericException
      */
     protected function serviceValidation(array $data): void
     {
-        $this->validator->validateLogin($data);
+        $this->validator->validateUsernameExists($data["email"]);
     }
 
     /**
@@ -67,21 +67,20 @@ final class UserLogin
         array $data
     ): array|object|null {
         // Insert user and get new user ID
-        $result = $this->repository->getUserByName($data["username"]);
+        $result = $this->repository->getUserByName($data["email"]);
 
-        $jwt = $this->jwtAuth->createJwt(
-            [
-                "action" => "login",
-                "userId" => $result->id,
-                "username" => $result->username
-            ]
+        $this->sendMailWithTokenUrl(
+            $result->username,
+            "Confirm your email for spacehuddle.io",
+            "Click this link to confirm your email.",
+            "confirm email",
+            "confirm",
+            "confirm"
         );
 
-        return new TokenData([
-            "message" => "Successful login.",
-            "accessToken" => $jwt,
-            "tokenType" => "Bearer",
+        return [
+            "message" => "Successful send mail",
             "expiresIn" => $this->jwtAuth->getLifetime()
-        ]);
+        ];
     }
 }

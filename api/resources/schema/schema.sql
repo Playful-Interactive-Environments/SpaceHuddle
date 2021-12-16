@@ -64,7 +64,9 @@ CREATE TABLE `idea` (
 CREATE TABLE `user` (
                         `id` char(36) NOT NULL,
                         `username` varchar(255) NOT NULL,
-                        `password` varchar(255) NOT NULL
+                        `password` varchar(255) NOT NULL,
+                        `confirmed` BIT(1) DEFAULT 0,
+                        `creation_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------

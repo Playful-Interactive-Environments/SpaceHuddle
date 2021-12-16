@@ -3,8 +3,8 @@
 namespace App\Domain\SessionRole\Service;
 
 use App\Domain\Base\Repository\GenericException;
+use App\Domain\Base\Service\MailTrait;
 use App\Domain\Base\Service\ServiceCreatorTrait;
-use App\Domain\Session\Repository\SessionRepository;
 
 /**
  * Topic create service.
@@ -13,11 +13,7 @@ class SessionRoleCreator
 {
     use ServiceCreatorTrait;
     use SessionRoleServiceTrait;
-
-    // Application settings
-    private function settings() {
-        return require __DIR__ . "/../../../../config/settings.php";
-    }
+    use MailTrait;
 
     /**
      * Executes the repository instructions assigned to the service.
@@ -36,17 +32,14 @@ class SessionRoleCreator
         // Insert entity and get new ID
         $result = $this->repository->insert((object)$data);
 
-        $applicationSettings = (object)$this->settings()["application"];
-        $resetUrl = "$applicationSettings->baseUrl$applicationSettings->session";
-
-        $message = "
-            <h1>You have been activated as co-moderator for a new session on spacehuddle.io</h1>
-            <div>log in to join the session</div>
-            <div>
-                <a href='$resetUrl$sessionId' >$sessionName</a>
-            </div>";
-
-        mail($email, 'You have been activated as co-moderator for a new session on spacehuddle.io', $message);
+        $this->sendMailWithUrl(
+            $email,
+            "You have been activated as co-moderator for a new session on spacehuddle.io",
+            "Log in to join the session.",
+            $sessionName,
+            "session",
+            $sessionId
+        );
         return $result;
     }
 }

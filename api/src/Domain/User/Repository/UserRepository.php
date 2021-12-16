@@ -112,6 +112,20 @@ final class UserRepository implements RepositoryInterface
     }
 
     /**
+     * Confirm email address.
+     * @param string $username The username
+     * @return object|null The updated user.
+     * @throws GenericException
+     */
+    public function confirmEmail(string $username): object|null
+    {
+        $this->queryFactory->newUpdate("user", ["confirmed" => 1])
+            ->andWhere(["username" => $username])
+            ->execute();
+        return $this->getUserByName($username);
+    }
+
+    /**
      * Check user ID.
      * @param string $username The username.
      * @return bool True if exists
@@ -131,6 +145,16 @@ final class UserRepository implements RepositoryInterface
     public function checkPasswordForUsername(string $username, string $password): bool
     {
         return self::checkEncryptText(["username" => $username], $password);
+    }
+
+    /**
+     * Checks whether the specified user is confirmed.
+     * @param string $username The username.
+     * @return bool True if user is confirmed.
+     */
+    public function checkUsernameConfirmed(string $username): bool
+    {
+        return self::exists(["username" => $username, "confirmed" => 1]);
     }
 
     /**

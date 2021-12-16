@@ -3,10 +3,8 @@
 namespace App\Domain\User\Service;
 
 use App\Database\TransactionInterface;
-use App\Domain\Base\Data\TokenData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\BaseBodyServiceTrait;
-use App\Domain\Base\Service\MailTrait;
 use App\Domain\User\Repository\UserRepository;
 use App\Factory\LoggerFactory;
 use App\Routing\JwtAuth;
@@ -14,10 +12,9 @@ use App\Routing\JwtAuth;
 /**
  * Service.
  */
-final class UserLogin
+final class UserConfirm
 {
     use BaseBodyServiceTrait;
-    use MailTrait;
 
     protected UserRepository $repository;
     protected UserValidator $validator;
@@ -49,10 +46,18 @@ final class UserLogin
      * Validates whether the transferred data is suitable for the service.
      * @param array $data Data to be verified.
      * @return void
+     * @throws GenericException
      */
     protected function serviceValidation(array $data): void
     {
-        $this->validator->validateLogin($data);
+        $this->validator->validateToken($data);
+        $token = $data["token"];
+        $this->jwtAuth->validateToken($token);
+        $tokenData = $this->jwtAuth->createParsedToken($token);
+        $email =  $tokenData->claims()->get("username");
+        $this->validator->validateUsernameExists($email);
+        $action =  $tokenData->claims()->get("action");
+        $this->validator->validateTokenAction($action, "confirm");
     }
 
     /**
@@ -66,22 +71,14 @@ final class UserLogin
     protected function serviceExecution(
         array $data
     ): array|object|null {
-        // Insert user and get new user ID
-        $result = $this->repository->getUserByName($data["username"]);
+        $token = $data["token"];
+        $tokenData = $this->jwtAuth->createParsedToken($token);
+        $email =  $tokenData->claims()->get("username");
+        $this->repository->confirmEmail($email);
 
-        $jwt = $this->jwtAuth->createJwt(
-            [
-                "action" => "login",
-                "userId" => $result->id,
-                "username" => $result->username
-            ]
-        );
-
-        return new TokenData([
-            "message" => "Successful login.",
-            "accessToken" => $jwt,
-            "tokenType" => "Bearer",
-            "expiresIn" => $this->jwtAuth->getLifetime()
-        ]);
+        return (object)[
+            "state" => "Success",
+            "message" => "The email was successfully confirmed."
+        ];
     }
 }

@@ -21,11 +21,6 @@ final class UserForgetPassword
     protected UserValidator $validator;
     protected JwtAuth $jwtAuth;
 
-    // Application settings
-    private function settings() {
-        return require __DIR__ . "/../../../../config/settings.php";
-    }
-
     /**
      * The constructor.
      *
@@ -62,6 +57,8 @@ final class UserForgetPassword
         $tokenData = $this->jwtAuth->createParsedToken($token);
         $email =  $tokenData->claims()->get("username");
         $this->validator->validateUsernameExists($email);
+        $action =  $tokenData->claims()->get("action");
+        $this->validator->validateTokenAction($action, "reset");
     }
 
     /**

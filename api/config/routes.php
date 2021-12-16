@@ -76,6 +76,7 @@ use App\Action\Topic\TopicReadAllAction;
 use App\Action\Topic\TopicReadSingleAction;
 use App\Action\Topic\TopicUpdateAction;
 use App\Action\User\UserChangePasswordAction;
+use App\Action\User\UserConfirmAction;
 use App\Action\User\UserDeleteAction;
 use App\Action\User\UserForgetPasswordAction;
 use App\Action\User\UserLoginAction;
@@ -84,6 +85,7 @@ use \App\Action\Session\SessionCreateAction;
 use \App\Action\Session\SessionReadSingleAction;
 use \App\Action\Session\SessionReadAllAction;
 use App\Action\User\UserResetPasswordAction;
+use App\Action\User\UserSendConfirmAction;
 use App\Action\View\ViewReadAllAction;
 use App\Action\View\ViewReadSingleAction;
 use App\Action\Vote\VoteCreateAction;
@@ -127,6 +129,8 @@ return function (App $app) {
             $app->post("/register[/]", UserRegisterAction::class);
             $app->put("/forget-password[/]", UserForgetPasswordAction::class);
             $app->put("/reset/{email}[/]", UserResetPasswordAction::class);
+            $app->put("/send-confirm/{email}[/]", UserSendConfirmAction::class);
+            $app->put("/confirm/{token}[/]", UserConfirmAction::class);
         }
     );
 

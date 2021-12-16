@@ -40,6 +40,8 @@ p, UNKNOWN|MODERATOR|PARTICIPANT, /user/login/, POST
 p, UNKNOWN|MODERATOR|PARTICIPANT, /user/register/, POST
 p, UNKNOWN|MODERATOR|PARTICIPANT, /user/forget-password/, PUT
 p, UNKNOWN|MODERATOR|PARTICIPANT, /user/reset/:email/, PUT
+p, UNKNOWN|MODERATOR|PARTICIPANT, /user/confirm/:token/, PUT
+p, UNKNOWN|MODERATOR|PARTICIPANT, /user/send-confirm/:email/, PUT
 p, MODERATOR, /user/, PUT
 p, MODERATOR, /user/, DELETE
 

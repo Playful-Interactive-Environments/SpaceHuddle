@@ -3,39 +3,39 @@
 
 namespace App\Action\User;
 
-use App\Domain\User\Service\UserReset;
+use App\Domain\User\Service\UserSendConfirm;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 
 /**
- * Action to send a mail to reset the password.
+ * Action to send a mail to confirm the email.
  *
  * @OA\Put(
- *   path="/user/reset/{email}/",
- *   summary="Send a mail to reset the password for the email",
+ *   path="/user/send-confirm/{email}/",
+ *   summary="Send a mail to confirm the email",
  *   tags={"User"},
  *   @OA\Parameter(
  *     in="path",
  *     name="email",
- *     description="email address for which the password should be reset",
+ *     description="email address witch should be confirmed",
  *     required=true
  *     ),
  *   @OA\Response(response="200", description="Success"),
  *   @OA\Response(response="404", description="Not Found")
  * )
  */
-class UserResetPasswordAction
+class UserSendConfirmAction
 {
     use UserSelfActionTrait;
-    protected UserReset $service;
+    protected UserSendConfirm $service;
 
     /**
      * The constructor.
      *
      * @param Responder $responder The responder
-     * @param UserReset $service The service
+     * @param UserSendConfirm $service The service
      */
-    public function __construct(Responder $responder, UserReset $service)
+    public function __construct(Responder $responder, UserSendConfirm $service)
     {
         $this->setUp($responder);
         $this->service = $service;

@@ -93,9 +93,9 @@ class SessionRoleRepository implements RepositoryInterface
     /**
      * Get session name by session ID.
      * @param string $sessionId The session ID.
-     * @return SessionRoleData|null The session name.
+     * @return string The session name.
      */
-    public function getSessionName(string $sessionId): ?string
+    public function getSessionName(string $sessionId): string
     {
         $query = $this->queryFactory->newSelect("session");
         $query->select(["title"])

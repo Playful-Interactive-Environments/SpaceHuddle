@@ -67,6 +67,11 @@ final class UserValidator
             $result->addError("username or password", "NotExist: Username or password wrong.");
             throw new ValidationException("Please check your input", $result);
         }
+        if (!$this->getRepository()->checkUsernameConfirmed($username)) {
+            $result = new ValidationResult();
+            $result->addError("username", "NotConfirmed: Email was not confirmed.");
+            throw new ValidationException("Please confirm your email by clicking the link in the mail", $result);
+        }
     }
 
     /**
@@ -148,7 +153,6 @@ final class UserValidator
      * @param array<string, mixed> $data The data
      *
      * @return void
-     * @throws GenericException
      */
     public function validatePasswordReset(array $data): void
     {
@@ -170,6 +174,41 @@ final class UserValidator
                 )
                 ->equalToField("passwordConfirmation", "password", "Comparison: Password and confirmation do not match.")
         );
+    }
+
+    /**
+     * Validate token.
+     *
+     * @param array<string, mixed> $data The data
+     *
+     * @return void
+     */
+    public function validateToken(array $data): void
+    {
+        $this->validateEntity(
+            $data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("token", "Empty: This field cannot be left empty")
+                ->requirePresence("token", message: "Required: This field is required")
+        );
+    }
+
+    /**
+     * Validate action.
+     *
+     * @param string $sourceAction Source action
+     * @param string $targetAction Target action
+     *
+     * @return void
+     * @throws GenericException
+     */
+    public function validateTokenAction(string $sourceAction, string $targetAction): void
+    {
+        if ($sourceAction != $targetAction) {
+            $result = new ValidationResult();
+            $result->addError("token", "WrongAction: The token was not created for this action.");
+            throw new ValidationException("Please check your input", $result);
+        }
     }
 
     /**

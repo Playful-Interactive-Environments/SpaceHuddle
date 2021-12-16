@@ -3,9 +3,9 @@
 namespace App\Domain\User\Service;
 
 use App\Database\TransactionInterface;
-use App\Domain\Base\Data\TokenData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\BaseBodyServiceTrait;
+use App\Domain\Base\Service\MailTrait;
 use App\Domain\User\Repository\UserRepository;
 use App\Factory\LoggerFactory;
 use App\Routing\JwtAuth;
@@ -16,15 +16,11 @@ use App\Routing\JwtAuth;
 final class UserReset
 {
     use BaseBodyServiceTrait;
+    use MailTrait;
 
     protected UserRepository $repository;
     protected UserValidator $validator;
     protected JwtAuth $jwtAuth;
-
-    // Application settings
-    private function settings() {
-        return require __DIR__ . "/../../../../config/settings.php";
-    }
 
     /**
      * The constructor.
@@ -73,24 +69,14 @@ final class UserReset
         // Insert user and get new user ID
         $result = $this->repository->getUserByName($data["email"]);
 
-        $jwt = $this->jwtAuth->createJwt(
-            [
-                "action" => "reset",
-                "username" => $result->username
-            ]
+        $this->sendMailWithTokenUrl(
+            $result->username,
+            "Forget password for spacehuddle.io",
+            "Click this link to reset your password.",
+            "reset password",
+            "forgetPassword",
+            "reset"
         );
-
-        $applicationSettings = (object)$this->settings()["application"];
-        $resetUrl = "$applicationSettings->baseUrl$applicationSettings->forgetPassword";
-
-        $message = "
-            <h1>Forget password for spacehuddle.io</h1>
-            <div>click this link to reset your password.</div>
-            <div>
-                <a href='$resetUrl$jwt' >reset password</a>
-            </div>";
-
-        mail($result->username, 'Forget password for spacehuddle.io', $message);
 
         return [
             "message" => "Successful send mail",
