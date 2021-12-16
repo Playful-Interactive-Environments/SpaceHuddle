@@ -241,6 +241,17 @@ CREATE TABLE `vote` (
                         `timestamp` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `vote`
+--
+
+CREATE TABLE `tutorial` (
+    `user_id` CHAR(36) NOT NULL ,
+    `step` VARCHAR(255) NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;
+
 --
 -- Indizes der exportierten Tabellen
 --
@@ -358,6 +369,11 @@ ALTER TABLE `vote`
   ADD KEY `vote_ibfk_idea` (`idea_id`);
 
 --
+-- Indizes für die Tabelle `tutorial`
+--
+ALTER TABLE `tutorial` ADD PRIMARY KEY(`user_id`, `step`);
+
+--
 -- Constraints der exportierten Tabellen
 --
 
@@ -454,6 +470,12 @@ ALTER TABLE `vote`
     ADD CONSTRAINT `vote_ibfk_idea` FOREIGN KEY (`idea_id`) REFERENCES `idea` (`id`),
   ADD CONSTRAINT `vote_ibfk_participant` FOREIGN KEY (`participant_id`) REFERENCES `participant` (`id`),
   ADD CONSTRAINT `vote_ibfk_task` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`);
+
+--
+-- Constraints der Tabelle `tutorial`
+--
+ALTER TABLE `tutorial`
+    ADD CONSTRAINT `tutorial_ibfk_user` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`);
 
 -- --------------------------------------------------------
 

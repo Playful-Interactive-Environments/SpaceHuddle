@@ -5,8 +5,8 @@ namespace App\Domain\View\Data;
 use Selective\ArrayReader\ArrayReader;
 
 /**
- * Represents a category.
- * @OA\Schema(description="category description")
+ * Represents a view.
+ * @OA\Schema(description="view description")
  */
 class ViewData
 {

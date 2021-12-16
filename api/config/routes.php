@@ -75,6 +75,8 @@ use App\Action\Topic\TopicDeleteAction;
 use App\Action\Topic\TopicReadAllAction;
 use App\Action\Topic\TopicReadSingleAction;
 use App\Action\Topic\TopicUpdateAction;
+use App\Action\Tutorial\TutorialCreateAction;
+use App\Action\Tutorial\TutorialReadAllAction;
 use App\Action\User\UserChangePasswordAction;
 use App\Action\User\UserConfirmAction;
 use App\Action\User\UserDeleteAction;
@@ -333,6 +335,20 @@ return function (App $app) {
             $app->get("/{id}[/]", ResourceReadSingleAction::class);
             $app->put("[/]", ResourceUpdateAction::class);
             $app->delete("/{id}[/]", ResourceDeleteAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/tutorial_steps",
+        function (RouteCollectorProxy $app) {
+            $app->get("[/]", TutorialReadAllAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/tutorial_step",
+        function (RouteCollectorProxy $app) {
+            $app->post("/{step}[/]", TutorialCreateAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 
