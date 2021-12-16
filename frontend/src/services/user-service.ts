@@ -59,9 +59,10 @@ export const deleteUser = async (): Promise<boolean> => {
   return await apiExecuteDelete<any>(`/${EndpointType.USER}/`);
 };
 
-export const resetPassword = async (username: string): Promise<any> => {
-  return await apiExecutePut<any>(
+export const resetPassword = async (username: string): Promise<ApiResponse> => {
+  return await apiExecutePut<ApiResponse>(
     `/${EndpointType.USER}/reset/${username}/`,
+    null,
     EndpointAuthorisationType.UNAUTHORISED
   );
 };
@@ -70,14 +71,30 @@ export const changeForgetPassword = async (
   token: string,
   newPassword: string,
   passwordRepeat: string
-): Promise<any> => {
-  return await apiExecutePut<any>(
+): Promise<ApiResponse> => {
+  return await apiExecutePut<ApiResponse>(
     `/${EndpointType.USER}/forget-password/`,
     {
       token: token,
       password: newPassword,
       passwordConfirmation: passwordRepeat,
     },
-    EndpointAuthorisationType.MODERATOR
+    EndpointAuthorisationType.UNAUTHORISED
+  );
+};
+
+export const confirmEmail = async (token: string): Promise<ApiResponse> => {
+  return await apiExecutePut<ApiResponse>(
+    `/${EndpointType.USER}/confirm/${token}/`,
+    null,
+    EndpointAuthorisationType.UNAUTHORISED
+  );
+};
+
+export const sendConfirmMail = async (email: string): Promise<ApiResponse> => {
+  return await apiExecutePut<ApiResponse>(
+    `/${EndpointType.USER}/send-confirm/${email}/`,
+    null,
+    EndpointAuthorisationType.UNAUTHORISED
   );
 };

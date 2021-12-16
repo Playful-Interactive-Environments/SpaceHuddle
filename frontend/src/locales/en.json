@@ -97,7 +97,8 @@
         "post": {
           "sessionKey": {
             "NotExist": "Sorry, the provided code is invalid.",
-            "Expired": "The session has expired."
+            "Expired": "The session has expired.",
+            "NotConfirmed": "Email was not confirmed."
           }
         }
       },
@@ -272,6 +273,9 @@
         "submit": "Logout"
       },
       "confirmEmail": {
+        "thanks": "Thank you for confirming your email. Follow the link to login.",
+        "home": "Go to login",
+        "failed": "The token for confirmation is wrong.",
         "header": "Confirm your email",
         "info": "Email Address: ",
         "submit": "Confirm"

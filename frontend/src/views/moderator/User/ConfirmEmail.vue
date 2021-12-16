@@ -1,12 +1,22 @@
 <template>
   <div class="confirm__content full-height-header">
-    <h1>{{ $t('moderator.view.confirmEmail.header') }}</h1>
-    <p class="profile__email">
-      {{ $t('moderator.view.confirmEmail.info') }} {{ email }}
-    </p>
-    <button class="btn btn--gradient" @click="confirm">
-      {{ $t('moderator.view.confirmEmail.submit') }}
-    </button>
+    <div v-if="confirmed">
+      <h1>{{ $t('moderator.view.confirmEmail.thanks') }}</h1>
+      <p class="profile__email">
+        {{ $t('moderator.view.confirmEmail.info') }} {{ email }}
+      </p>
+      <router-link to="/">
+        <p role="button" class="link">
+          {{ $t('moderator.view.confirmEmail.home') }}
+        </p>
+      </router-link>
+    </div>
+    <div v-if="failed" class="error">
+      <h1>{{ $t('moderator.view.confirmEmail.failed') }}</h1>
+      <p class="profile__email">
+        {{ errorMessage }}
+      </p>
+    </div>
   </div>
 </template>
 
@@ -14,6 +24,14 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import jwt_decode from 'jwt-decode';
+import * as userService from '@/services/user-service';
+import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
+
+enum Confirm {
+  WAIT,
+  DONE,
+  FAILED,
+}
 
 @Options({
   components: {},
@@ -22,15 +40,34 @@ import jwt_decode from 'jwt-decode';
 export default class ConfirmEmail extends Vue {
   @Prop() readonly token!: string;
   email = '';
+  errorMessage = '';
+  confirm: Confirm = Confirm.WAIT;
 
-  mounted(): void {
-    const decoded = jwt_decode(this.token) as any;
-    this.email = decoded.username;
+  get confirmed(): boolean {
+    return this.confirm === Confirm.DONE;
   }
 
-  confirm(): void {
-    //todo: implement backend to confirm email
-    this.$router.push({ name: 'home' });
+  get failed(): boolean {
+    return this.confirm === Confirm.FAILED;
+  }
+
+  mounted(): void {
+    try {
+      const decoded = jwt_decode(this.token) as any;
+      userService.confirmEmail(this.token).then(
+        () => {
+          this.email = decoded.username;
+          this.confirm = Confirm.DONE;
+        },
+        (error) => {
+          this.errorMessage = getSingleTranslatedErrorMessage(error);
+          this.confirm = Confirm.FAILED;
+        }
+      );
+    } catch (exception) {
+      this.errorMessage = exception.message;
+      this.confirm = Confirm.FAILED;
+    }
   }
 }
 </script>
@@ -55,5 +92,14 @@ export default class ConfirmEmail extends Vue {
   &__email {
     margin-bottom: 2rem;
   }
+}
+
+.link {
+  font-style: italic;
+  text-decoration: underline;
+}
+
+.error {
+  color: var(--el-color-error);
 }
 </style>
