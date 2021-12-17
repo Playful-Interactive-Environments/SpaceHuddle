@@ -392,5 +392,36 @@
     "back": "BACK",
     "publicScreen": "Public Screen",
     "moduleActive": "Active"
+  },
+  "tutorial": {
+    "sessionOverview": {
+      "add": "click this button to create your first session"
+    },
+    "sessionDetails": {
+      "addTopic": "A session can consist of several topics. Click this button to create your first topic.",
+      "selectTopic": "A session can consist of several topics. Click this to display the details of the topic.",
+      "changeOrder": "Change the order of the topics by drag and drop."
+    },
+    "processTimeline": {
+      "activatePublicScreen": "activate this switch to display this content on the public screen",
+      "changePublicScreen": "move the slider to change the item on the public screen",
+      "activateParticipant": "click on the cellphone to activate this item for the participants",
+      "changeOrder": "change the order of the items by drag and drop along the timeline",
+      "selectItem": "click on the item title to display the item details"
+    },
+    "taskTimeline": {
+      "activatePublicScreen": "activate this switch to display this topic on the public screen",
+      "changePublicScreen": "move the slider to change the task on the public screen",
+      "activateParticipant": "click on the cellphone to activate this task for the participants",
+      "changeOrder": "change the order of the tasks by drag and drop along the timeline",
+      "selectItem": "click on the task title to display the task details"
+    },
+    "taskSettings":  {
+      "inputSource": "Define the sources that serve as the basis for this task.",
+      "inputMaxCount": "How many records of this source do you want to use as a basis? If no input is made, all records of the source are used.",
+      "inputFilter": "Here you can filter the data records of the selected source according to status.",
+      "inputOrder": "In which order should the source data be sorted for further processing? The sorting also determines the selection of the data sets if the field max count has a value.",
+      "inputAdd": "The task can obtain source data from several sources. Click the button to add another source."
+    }
   }
 }

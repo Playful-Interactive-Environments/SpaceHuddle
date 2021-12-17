@@ -1,6 +1,8 @@
 import jwt_decode from 'jwt-decode';
 import app from '@/main';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as tutorialService from '@/services/tutorial-service';
+import { Tutorial } from '@/types/api/Tutorial';
 
 const JWT_KEY = 'jwt';
 const JWT_KEY_MODERATOR = 'jwt-moderator';
@@ -8,8 +10,23 @@ const JWT_KEY_PARTICIPANT = 'jwt-participant';
 const BROWSER_KEYS = 'keys';
 const LAST_BROWSER_KEY = 'key';
 const USER_KEY = 'user';
+const tutorialSteps: Tutorial[] = [];
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
+
+export const getTutorialSteps = async (): Promise<Tutorial[]> => {
+  if (tutorialSteps.length == 0) {
+    await tutorialService.getList().then((list) => {
+      tutorialSteps.push(...list);
+    });
+  }
+  return tutorialSteps;
+};
+
+export const addTutorialStep = (data: Tutorial): void => {
+  tutorialSteps.push(data);
+  tutorialService.postStep(data);
+};
 
 export const isAuthenticated = (): boolean => {
   const jwtFromStorage = getAccessTokenModerator();
@@ -63,6 +80,9 @@ export const setAccessToken = (jwt: string): void => {
 
 export const setAccessTokenModerator = (jwt: string): void => {
   app.config.globalProperties.$cookies.set(JWT_KEY_MODERATOR, 'Bearer ' + jwt);
+  tutorialService.getList().then((list) => {
+    tutorialSteps.push(...list);
+  });
 };
 
 export const getAccessTokenModerator = (): string | null => {

@@ -53,18 +53,48 @@
             </colgroup>
             <thead>
               <tr>
-                <th>
-                  {{ $t('moderator.organism.settings.taskSettings.source') }}
-                </th>
-                <th>
-                  {{ $t('moderator.organism.settings.taskSettings.maxCount') }}
-                </th>
-                <th>
-                  {{ $t('moderator.organism.settings.taskSettings.filter') }}
-                </th>
-                <th>
-                  {{ $t('moderator.organism.settings.taskSettings.order') }}
-                </th>
+                <TutorialStep
+                  step="inputSource"
+                  type="taskSettings"
+                  :order="0"
+                  :displayAllDuplicates="true"
+                >
+                  <th>
+                    {{ $t('moderator.organism.settings.taskSettings.source') }}
+                  </th>
+                </TutorialStep>
+                <TutorialStep
+                  step="inputMaxCount"
+                  type="taskSettings"
+                  :order="1"
+                  :displayAllDuplicates="true"
+                >
+                  <th>
+                    {{
+                      $t('moderator.organism.settings.taskSettings.maxCount')
+                    }}
+                  </th>
+                </TutorialStep>
+                <TutorialStep
+                  step="inputFilter"
+                  type="taskSettings"
+                  :order="2"
+                  :displayAllDuplicates="true"
+                >
+                  <th>
+                    {{ $t('moderator.organism.settings.taskSettings.filter') }}
+                  </th>
+                </TutorialStep>
+                <TutorialStep
+                  step="inputOrder"
+                  type="taskSettings"
+                  :order="3"
+                  :displayAllDuplicates="true"
+                >
+                  <th>
+                    {{ $t('moderator.organism.settings.taskSettings.order') }}
+                  </th>
+                </TutorialStep>
                 <th></th>
               </tr>
             </thead>
@@ -137,10 +167,18 @@
               </tr>
             </tbody>
           </table>
-          <AddItem
-            :text="$t('moderator.organism.settings.taskSettings.addInput')"
-            @addNew="addInput"
-          />
+          <TutorialStep
+            v-if="possibleViews.length > 1 && formData.input.length < 20"
+            step="inputAdd"
+            type="taskSettings"
+            :order="4"
+            :displayAllDuplicates="true"
+          >
+            <AddItem
+              :text="$t('moderator.organism.settings.taskSettings.addInput')"
+              @addNew="addInput"
+            />
+          </TutorialStep>
         </el-form-item>
         <TaskParameterComponent
           ref="taskParameter"
@@ -372,6 +410,7 @@ import * as ideaService from '@/services/idea-service';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import ViewType from '@/types/enum/ViewType';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
+import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -442,6 +481,7 @@ enum InputOption {
 
 @Options({
   components: {
+    TutorialStep,
     IdeaCard,
     TimerSettings,
     ValidationForm,

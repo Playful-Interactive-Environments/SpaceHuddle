@@ -26,6 +26,7 @@
     "jwt-decode": "^3.1.2",
     "mitt": "^3.0.0",
     "node-sass": "^6.0.1",
+    "uuid": "^8.3.2",
     "vue": "^3.0.0",
     "vue-class-component": "^8.0.0-0",
     "vue-image-crop-upload": "^3.0.3",

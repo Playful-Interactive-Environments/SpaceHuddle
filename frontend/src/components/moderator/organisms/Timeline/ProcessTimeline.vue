@@ -9,45 +9,53 @@
         :class="{ media: !isVertical, stretch: isVertical }"
         :style="{ 'grid-template-rows': `1fr ${modelValue.length * 2 - 1}fr` }"
       >
-        <el-tooltip
-          :class="{ 'no-module': !canDisablePublicTimeline }"
-          placement="top-start"
-          :content="
-            $t(
-              `moderator.organism.${translationModuleName}.activatePublicScreen`
-            )
-          "
+        <TutorialStep
+          :disableTutorial="!canDisablePublicTimeline || readonly"
+          step="activatePublicScreen"
+          :type="translationModuleName"
+          :order="0"
         >
           <el-switch
             v-model="usePublicScreen"
-            :class="{ 'media-left': !isVertical }"
+            :class="{
+              'no-module': !canDisablePublicTimeline,
+              'media-left': !isVertical,
+            }"
             :style="{
               width: isVertical
                 ? 'auto'
                 : `calc(100% / (${activePageContentList.length} * 2))`,
             }"
           />
-        </el-tooltip>
-        <el-slider
-          class="media-content"
-          v-if="activePageContentList.length > minPublicSliderCount"
-          :disabled="!usePublicScreen"
-          :max="activePageContentList.length - 1"
-          v-model="activeOnPublicScreen"
-          :vertical="isVertical"
-          :style="{
-            margin: isVertical
-              ? '0.3rem' //`0.3rem 0.3rem 2.3rem 0.3rem`
-              : `0.3rem calc(100% / (${activePageContentList.length} * 2)) 0.3rem 0rem`,
-          }"
-          :format-tooltip="tooltip"
-          :height="isVertical ? `100%` : ''"
-        ></el-slider>
-        <font-awesome-icon
-          v-else-if="activePageContentList.length > 0"
-          icon="desktop"
-          :class="{ disabled: !usePublicScreen }"
-        ></font-awesome-icon>
+        </TutorialStep>
+        <TutorialStep
+          :disableTutorial="readonly || modelValue.length < 2"
+          step="changePublicScreen"
+          :type="translationModuleName"
+          :order="1"
+        >
+          <el-slider
+            class="media-content"
+            v-if="activePageContentList.length > minPublicSliderCount"
+            :disabled="!usePublicScreen"
+            :max="activePageContentList.length - 1"
+            v-model="activeOnPublicScreen"
+            :vertical="isVertical"
+            :style="{
+              margin: isVertical
+                ? '0.3rem' //`0.3rem 0.3rem 2.3rem 0.3rem`
+                : `0.3rem calc(100% / (${activePageContentList.length} * 2)) 0.3rem 0rem`,
+            }"
+            :format-tooltip="tooltip"
+            :show-tooltip="false"
+            :height="isVertical ? `100%` : ''"
+          ></el-slider>
+          <font-awesome-icon
+            v-else-if="activePageContentList.length > 0"
+            icon="desktop"
+            :class="{ disabled: !usePublicScreen }"
+          ></font-awesome-icon>
+        </TutorialStep>
       </div>
       <el-steps
         :direction="direction"
@@ -64,13 +72,11 @@
           <template #item="{ element, index }">
             <el-step icon="-" :id="getKey(element)">
               <template #icon>
-                <el-tooltip
-                  placement="top"
-                  :content="
-                    $t(
-                      `moderator.organism.${translationModuleName}.changeOrder`
-                    )
-                  "
+                <TutorialStep
+                  :disableTutorial="readonly || modelValue.length < 2"
+                  step="changeOrder"
+                  :type="translationModuleName"
+                  :order="2"
                 >
                   <img
                     v-if="contentListIcon(element)"
@@ -78,7 +84,7 @@
                     alt=""
                   />
                   <span v-else class="circle">{{ index }}</span>
-                </el-tooltip>
+                </TutorialStep>
               </template>
               <template #title>
                 <el-badge
@@ -86,13 +92,11 @@
                   :hidden="!isParticipantActive(element)"
                   :class="{ 'no-module': !hasParticipantOption(element) }"
                 >
-                  <el-tooltip
-                    placement="top"
-                    :content="
-                      $t(
-                        `moderator.organism.${translationModuleName}.activateParticipant`
-                      )
-                    "
+                  <TutorialStep
+                    :disableTutorial="readonly"
+                    step="activateParticipant"
+                    :type="translationModuleName"
+                    :order="4"
                   >
                     <el-button
                       :class="{ 'is-checked': isParticipantActive(element) }"
@@ -101,21 +105,21 @@
                     >
                       <font-awesome-icon icon="mobile" />
                     </el-button>
-                  </el-tooltip>
+                  </TutorialStep>
                 </el-badge>
               </template>
               <template #description>
-                <el-tooltip
-                  placement="top"
-                  :content="
-                    $t(`moderator.organism.${translationModuleName}.selectItem`)
-                  "
+                <TutorialStep
                   v-if="isLinkedToDetails"
+                  :disableTutorial="readonly || modelValue.length < 2"
+                  step="selectItem"
+                  :type="translationModuleName"
+                  :order="3"
                 >
                   <span class="link" v-on:click="itemClicked(element)">
                     {{ getTitle(element) }}
                   </span>
-                </el-tooltip>
+                </TutorialStep>
                 <span v-else>
                   {{ getTitle(element) }}
                 </span>
@@ -159,7 +163,7 @@
             }}</font-awesome-icon>
           </template>
           <template #description>
-            <span class="link" v-on:click="itemClicked(element)">
+            <span>
               {{ getTitle(element) }}
             </span>
           </template>
@@ -188,9 +192,11 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as timerService from '@/services/timer-service';
 import { TimerEntity } from '@/types/enum/TimerEntity';
 import TaskStates from '@/types/enum/TaskStates';
+import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 
 @Options({
   components: {
+    TutorialStep,
     draggable,
     TimerSettings,
   },
@@ -498,6 +504,10 @@ export default class ProcessTimeline extends Vue {
   }
 
   &.readonly {
+    .el-step__icon {
+      cursor: unset;
+    }
+
     .is-icon {
       width: 25px;
     }

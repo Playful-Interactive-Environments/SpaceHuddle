@@ -7,11 +7,13 @@
           <SessionCard :session="session"> </SessionCard>
         </div>
         <div class="column">
-          <AddItem
-            :text="$t('moderator.organism.session.overview.add')"
-            :isColumn="true"
-            @addNew="showSettings = true"
-          />
+          <TutorialStep step="add" type="sessionOverview" :order="0">
+            <AddItem
+              :text="$t('moderator.organism.session.overview.add')"
+              :isColumn="true"
+              @addNew="showSettings = true"
+            />
+          </TutorialStep>
         </div>
       </div>
       <div class="session-overview__session-container"></div>
@@ -32,9 +34,11 @@ import SessionSettings from '@/components/moderator/organisms/settings/SessionSe
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import * as sessionService from '@/services/session-service';
 import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/ModeratorNavigationLayout.vue';
+import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 
 @Options({
   components: {
+    TutorialStep,
     AddItem,
     SessionCard,
     SessionSettings,
