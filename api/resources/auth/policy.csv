@@ -68,7 +68,7 @@ p, MODERATOR|FACILITATOR, /selection/:selectionId/ideas/, POST
 p, MODERATOR|FACILITATOR, /selection/:selectionId/ideas/, DELETE
 
 p, MODERATOR|FACILITATOR, /tutorial_steps/, GET
-p, MODERATOR|FACILITATOR, /tutorial_step/:step/, POST
+p, MODERATOR|FACILITATOR, /tutorial_step/, POST
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /sessions/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:id/, GET

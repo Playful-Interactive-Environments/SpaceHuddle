@@ -248,8 +248,10 @@ CREATE TABLE `vote` (
 --
 
 CREATE TABLE `tutorial` (
-    `user_id` CHAR(36) NOT NULL ,
-    `step` VARCHAR(255) NOT NULL
+    `user_id` CHAR(36) NOT NULL,
+    `step` VARCHAR(255) NOT NULL,
+    `type` VARCHAR(255) NOT NULL,
+    `order` int(11) NOT NULL DEFAULT 0
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -371,7 +373,7 @@ ALTER TABLE `vote`
 --
 -- Indizes für die Tabelle `tutorial`
 --
-ALTER TABLE `tutorial` ADD PRIMARY KEY(`user_id`, `step`);
+ALTER TABLE `tutorial` ADD PRIMARY KEY(`user_id`, `step`, `type`);
 
 --
 -- Constraints der exportierten Tabellen

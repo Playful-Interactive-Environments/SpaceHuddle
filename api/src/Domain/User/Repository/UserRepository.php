@@ -189,6 +189,10 @@ final class UserRepository implements RepositoryInterface
         $this->queryFactory->newDelete("session_role")
             ->andWhere(["user_id" => $id])
             ->execute();
+
+        $this->queryFactory->newDelete("tutorial")
+            ->andWhere(["user_id" => $id])
+            ->execute();
     }
 
 

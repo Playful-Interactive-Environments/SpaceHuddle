@@ -348,7 +348,7 @@ return function (App $app) {
     $app->group(
         "/tutorial_step",
         function (RouteCollectorProxy $app) {
-            $app->post("/{step}[/]", TutorialCreateAction::class);
+            $app->post("[/]", TutorialCreateAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 

@@ -46,8 +46,8 @@ class ViewData
     public ?string $name;
 
     /**
-     * Creates a new idea.
-     * @param array $data Idea data.
+     * Creates a new view.
+     * @param array $data View data.
      */
     public function __construct(array $data = [])
     {

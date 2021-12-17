@@ -12,10 +12,16 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for creating a new tutorial for the specified topic.
  *
  * @OA\Post(
- *   path="/tutorial_step/{step}/",
+ *   path="/tutorial_step/",
  *   summary="Add a new read tutral step to the user list.",
  *   tags={"Tutorial"},
- *   @OA\Parameter(in="path", name="step", description="tutorial step name", required=true),
+ *   @OA\RequestBody(
+ *     required=true,
+ *     @OA\MediaType(
+ *         mediaType="application/json",
+ *         @OA\Schema(ref="#/components/schemas/TutorialData")
+ *     )
+ *   ),
  *   @OA\Response(response="200", description="Success",
  *     @OA\JsonContent(ref="#/components/schemas/TutorialData"),
  *   ),

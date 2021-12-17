@@ -82,14 +82,19 @@ class TutorialRepository implements RepositoryInterface
     {
         $authorisation = $this->getAuthorisation();
         if ($authorisation->isUser()) {
-            $result = $this->get(["step" => $data->step]);
+            $condition = [
+                "step" => $data->step,
+                "type" => $data->type
+            ];
+            $result = $this->get($condition);
             if (is_null($result)) {
-                $condition = [
-                    "user_id" => $authorisation->id,
-                    "step" => $data->step
-                ];
-                $itemCount = $this->queryFactory->newInsert($this->getEntityName(), $condition)
-                    ->execute()->rowCount();
+                $data->userId = $authorisation->id;
+                $usedKeys = array_values($this->translateKeys((array)$data));
+                $row = $this->formatDatabaseInput($data);
+                $row = $this->unsetUnused($row, $usedKeys);
+                $this->queryFactory
+                    ->newInsert($this->getEntityName(), $row)
+                    ->execute();
 
                 return $this->get($condition);
             }
@@ -106,7 +111,9 @@ class TutorialRepository implements RepositoryInterface
     {
         $result = [
             "user_id" => $data->userId ?? null,
-            "step" => $data->step ?? null
+            "step" => $data->step ?? null,
+            "type" => $data->type ?? null,
+            "order" => $data->order ?? 0
         ];
 
         return $result;
