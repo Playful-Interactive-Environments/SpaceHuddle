@@ -246,7 +246,8 @@
           "info": "Go ahead and create an account if you want to use our great brainstorming tool.",
           "submit": "Register"
         },
-        "confirm": "Resend confirmation mail"
+        "confirm": "Resend confirmation mail",
+        "confirmSend": "Confirmation email has been sent. Please also check your junk mail folder in case the mail does not appear."
       },
       "register": {
         "header": "Register",
@@ -297,7 +298,8 @@
         "info": "If you have forgotten your password, enter your email here and we will send you a link to reset your password.",
         "email": "email",
         "emailInfo": "Enter your email",
-        "submit": "Reset"
+        "submit": "Reset",
+        "mailSend": "Reset email has been sent. Please also check your junk mail folder in case the mail does not appear."
       },
       "forgetPassword": {
         "header": "Reset password",

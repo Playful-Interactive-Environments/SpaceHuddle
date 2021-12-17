@@ -35,6 +35,7 @@ import { ValidationData } from '@/types/ui/ValidationRule';
 import * as userService from '@/services/user-service';
 import { Prop } from 'vue-property-decorator';
 import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
+import { ElMessage } from 'element-plus';
 
 @Options({
   components: {
@@ -53,6 +54,12 @@ export default class ResetPassword extends Vue {
   async save(): Promise<void> {
     await userService.resetPassword(this.formData.email).then(
       () => {
+        ElMessage({
+          message: (this as any).$t('moderator.view.resetPassword.mailSend'),
+          type: 'success',
+          center: true,
+          showClose: true,
+        });
         this.$router.push({ name: 'moderator-login' });
       },
       (error) => {

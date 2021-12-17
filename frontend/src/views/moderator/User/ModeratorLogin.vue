@@ -92,6 +92,7 @@ import {
 import { ValidationData } from '@/types/ui/ValidationRule';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
+import { ElMessage } from 'element-plus';
 
 @Options({
   components: {
@@ -130,7 +131,14 @@ export default class ModeratorLogin extends Vue {
   }
 
   resendConfirm(): void {
-    userService.sendConfirmMail(this.formData.email);
+    userService.sendConfirmMail(this.formData.email).then(() => {
+      ElMessage({
+        message: (this as any).$t('moderator.view.login.confirmSend'),
+        type: 'success',
+        center: true,
+        showClose: true,
+      });
+    });
   }
 }
 </script>
