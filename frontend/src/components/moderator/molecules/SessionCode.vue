@@ -6,16 +6,20 @@
       @click="copyToClipboard"
     >
       <font-awesome-icon icon="clone" />
-      {{ code }}
+      <TutorialStep type="sessionDetails" step="connectionCode" :order="1">
+        <span>{{ code }}</span>
+      </TutorialStep>
     </button>
-    <button
-      v-if="hasSharing"
-      class="btn btn--icon session-code__share"
-      :class="[hasBorder ? ' btn--outline btn--outline--gray' : 'btn--white']"
-      v-on:click="share"
-    >
-      <font-awesome-icon icon="share-alt" />
-    </button>
+    <TutorialStep type="sessionDetails" step="shareCode" :order="2">
+      <button
+        v-if="hasSharing"
+        class="btn btn--icon session-code__share"
+        :class="[hasBorder ? ' btn--outline btn--outline--gray' : 'btn--white']"
+        v-on:click="share"
+      >
+        <font-awesome-icon icon="share-alt" />
+      </button>
+    </TutorialStep>
   </div>
 </template>
 
@@ -23,9 +27,10 @@
 import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import { ElMessage } from 'element-plus';
+import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 
 @Options({
-  components: {},
+  components: { TutorialStep },
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class SessionCode extends Vue {

@@ -14,9 +14,21 @@
         width="80vw"
       >
         <template #title>
-          <span class="el-dialog__title">{{
-            $t('moderator.organism.settings.taskSettings.header')
-          }}</span>
+          <span class="el-dialog__title">
+            {{ $t('moderator.organism.settings.taskSettings.header') }}
+            <el-dropdown>
+              <span class="el-dropdown-link">
+                <font-awesome-icon icon="info-circle" />
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item v-on:click="reactivateTutorial">
+                    {{ $t('tutorial.reactivate') }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </span>
           <br />
           <br />
           <p>
@@ -39,10 +51,19 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item
-          v-if="showInput"
-          :label="$t('moderator.organism.settings.taskSettings.input')"
-        >
+        <el-form-item v-if="showInput">
+          <template #label>
+            <TutorialStep
+              type="taskSettings"
+              step="input"
+              :order="0"
+              :displayAllDuplicates="true"
+            >
+              <span>
+                {{ $t('moderator.organism.settings.taskSettings.input') }}
+              </span>
+            </TutorialStep>
+          </template>
           <table class="input-table">
             <colgroup>
               <col />
@@ -56,7 +77,7 @@
                 <TutorialStep
                   step="inputSource"
                   type="taskSettings"
-                  :order="0"
+                  :order="1"
                   :displayAllDuplicates="true"
                 >
                   <th>
@@ -66,7 +87,7 @@
                 <TutorialStep
                   step="inputMaxCount"
                   type="taskSettings"
-                  :order="1"
+                  :order="2"
                   :displayAllDuplicates="true"
                 >
                   <th>
@@ -78,7 +99,7 @@
                 <TutorialStep
                   step="inputFilter"
                   type="taskSettings"
-                  :order="2"
+                  :order="3"
                   :displayAllDuplicates="true"
                 >
                   <th>
@@ -88,7 +109,7 @@
                 <TutorialStep
                   step="inputOrder"
                   type="taskSettings"
-                  :order="3"
+                  :order="4"
                   :displayAllDuplicates="true"
                 >
                   <th>
@@ -171,7 +192,7 @@
             v-if="possibleViews.length > 1 && formData.input.length < 20"
             step="inputAdd"
             type="taskSettings"
-            :order="4"
+            :order="5"
             :displayAllDuplicates="true"
           >
             <AddItem
@@ -187,17 +208,28 @@
           v-model="formData"
         />
         <el-form-item
-          :label="
-            formData.taskType === 'BRAINSTORMING'
-              ? $t('moderator.organism.settings.taskSettings.question')
-              : $t('moderator.organism.settings.taskSettings.title')
-          "
           prop="name"
           :rules="[
             defaultFormRules.ruleRequired,
             defaultFormRules.ruleToLong(255),
           ]"
         >
+          <template #label>
+            <TutorialStep
+              type="taskSettings"
+              step="title"
+              :order="6"
+              :displayAllDuplicates="true"
+            >
+              <span>
+                {{
+                  formData.taskType === 'BRAINSTORMING'
+                    ? $t('moderator.organism.settings.taskSettings.question')
+                    : $t('moderator.organism.settings.taskSettings.title')
+                }}
+              </span>
+            </TutorialStep>
+          </template>
           <el-input
             v-model="formData.name"
             name="name"
@@ -221,7 +253,6 @@
           />
         </el-form-item>
         <el-form-item
-          :label="$t('moderator.organism.settings.taskSettings.moduleType')"
           prop="moduleListMain"
           :rules="[
             defaultFormRules.ruleSelection,
@@ -229,6 +260,18 @@
           ]"
           v-if="moduleKeyList.length > 1"
         >
+          <template #label>
+            <TutorialStep
+              type="taskSettings"
+              step="module"
+              :order="7"
+              :displayAllDuplicates="true"
+            >
+              <span>
+                {{ $t('moderator.organism.settings.taskSettings.moduleType') }}
+              </span>
+            </TutorialStep>
+          </template>
           <div>
             <el-tag v-for="tag in moduleSelectionMain" :key="tag">
               {{
@@ -254,19 +297,26 @@
               }}
             </el-tag>
           </div>
-          <el-input
-            class="search"
-            v-model="moduleSearch"
-            :clearable="true"
-            :placeholder="
-              $t('moderator.organism.settings.taskSettings.moduleSearch')
-            "
-            v-if="moduleKeyList.length > 1"
+          <TutorialStep
+            type="taskSettings"
+            step="searchModule"
+            :order="8"
+            :displayAllDuplicates="true"
           >
-            <template #suffix>
-              <font-awesome-icon icon="search" />
-            </template>
-          </el-input>
+            <el-input
+              class="search"
+              v-model="moduleSearch"
+              :clearable="true"
+              :placeholder="
+                $t('moderator.organism.settings.taskSettings.moduleSearch')
+              "
+              v-if="moduleKeyList.length > 1"
+            >
+              <template #suffix>
+                <font-awesome-icon icon="search" />
+              </template>
+            </el-input>
+          </TutorialStep>
           <el-scrollbar>
             <div class="flex-content">
               <!--<p v-for="item in 50" :key="item" class="scrollbar-demo-item">
@@ -279,15 +329,26 @@
                 :moduleName="moduleType"
                 v-model:mainModule="mainModule"
                 v-model="formData.moduleListAddOn[moduleType]"
+                :displayTutorial="displayModuleTutorial(moduleType)"
               />
-              <IdeaCard
+              <TutorialStep
                 v-if="hideNotUsesModules"
-                :idea="{ keywords: '...' }"
-                :is-editable="false"
-                :show-state="false"
-                v-on:click="hideNotUsesModules = false"
-                class="showMore"
-              />
+                type="taskSettings"
+                step="unusedModule"
+                :order="9"
+                :displayAllDuplicates="true"
+              >
+                <AddItem
+                  :text="
+                    $t(
+                      'moderator.organism.settings.taskSettings.displayAllModules'
+                    )
+                  "
+                  :isColumn="true"
+                  @addNew="hideNotUsesModules = false"
+                  class="showMore"
+                />
+              </TutorialStep>
             </div>
           </el-scrollbar>
           <!--<el-carousel
@@ -409,8 +470,8 @@ import { SortOrderOption } from '@/types/api/OrderGroup';
 import * as ideaService from '@/services/idea-service';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import ViewType from '@/types/enum/ViewType';
-import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
+import { reactivateTutorial } from '@/services/auth-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -482,7 +543,6 @@ enum InputOption {
 @Options({
   components: {
     TutorialStep,
-    IdeaCard,
     TimerSettings,
     ValidationForm,
     FromSubmitItem,
@@ -503,6 +563,10 @@ export default class TaskSettings extends Vue {
   usedModuleNames: string[] = [];
   hideNotUsesModules = true;
   moduleSearch = '';
+
+  reactivateTutorial(): void {
+    reactivateTutorial('taskSettings', this.eventBus);
+  }
 
   get TaskTypeKeys(): Array<keyof typeof TaskType> {
     return Object.keys(TaskType) as Array<keyof typeof TaskType>;
@@ -689,6 +753,21 @@ export default class TaskSettings extends Vue {
       ...Object.keys(this.formData.moduleListMain),
       ...Object.keys(this.formData.moduleListAddOn),
     ];
+  }
+
+  displayModuleTutorial(moduleName: string): boolean {
+    const displayList = this.displayModuleList;
+    const index = displayList.indexOf(moduleName);
+    if (index === 0) return true;
+    else if (index > 0) {
+      const addOnList = Object.keys(this.formData.moduleListAddOn);
+      const indexAddOn = addOnList.indexOf(moduleName);
+      if (indexAddOn === 0) return true;
+      else if (indexAddOn > 0) {
+        if (!addOnList.includes(displayList[index - 1])) return true;
+      }
+    }
+    return false;
   }
 
   get displayModuleList(): string[] {
@@ -1134,8 +1213,10 @@ export default class TaskSettings extends Vue {
 .showMore {
   color: var(--color-purple-dark);
   border-color: var(--color-purple-dark);
-  background-color: var(--color-purple-light);
+  //background-color: var(--color-purple-light);
   cursor: pointer;
+  height: unset;
+  //height: 100%;
 }
 
 .el-input::v-deep {

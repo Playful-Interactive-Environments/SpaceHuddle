@@ -12,6 +12,20 @@
         v-on:openSettings="editTopic"
         v-on:delete="deleteTopic"
       >
+        <template #settings>
+          <el-dropdown>
+            <span class="el-dropdown-link">
+              <font-awesome-icon class="icon" icon="info-circle" />
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item v-on:click="reactivateTutorial">
+                  {{ $t('tutorial.reactivate') }}
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </template>
         <template #footerContent>
           <TaskTimeline
             v-if="tasks"
@@ -49,61 +63,85 @@
               alt="planet"
               style="width: 1.5rem"
             />
-            <span
-              class="taskType"
-              :style="{ '--module-color': TaskTypeColor[taskType] }"
+            <TutorialStep
+              type="topicDetails"
+              step="taskType"
+              :order="1"
+              :width="450"
+              placement="bottom"
+              :disableTutorial="taskType !== TaskType.BRAINSTORMING"
             >
-              {{ $t(`enum.taskType.${taskType}`) }}
-            </span>
+              <span
+                class="taskType"
+                :style="{ '--module-color': TaskTypeColor[taskType] }"
+              >
+                {{ $t(`enum.taskType.${taskType}`) }}
+              </span>
+            </TutorialStep>
           </template>
           <el-space wrap>
-            <el-card
-              v-for="task in tasks.filter(
+            <TutorialStep
+              v-for="(task, index) in tasks.filter(
                 (task) => TaskType[task.taskType] === taskType
               )"
               :key="task.id"
-              v-on:click="changeTask(task)"
-              :style="{ '--module-color': TaskTypeColor[taskType] }"
-              class="link"
-              :class="{ selected: isActive(task) }"
+              type="topicDetails"
+              step="selectTask"
+              :order="3"
+              :displayAllDuplicates="true"
+              :disableTutorial="index !== 0"
             >
-              <p class="media">
-                <font-awesome-icon
-                  class="media-left"
-                  :icon="getModuleIcon(task)"
-                ></font-awesome-icon>
-                <span class="media-content"></span>
-                <el-dropdown
-                  class="card__menu media-right"
-                  v-on:command="taskCommand(task, $event)"
-                >
-                  <span class="el-dropdown-link">
-                    <font-awesome-icon icon="ellipsis-h" />
-                  </span>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item command="edit">
-                        <font-awesome-icon icon="pen" />
-                      </el-dropdown-item>
-                      <el-dropdown-item command="delete">
-                        <font-awesome-icon icon="trash" />
-                      </el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-              </p>
-              <TaskInfo
-                :title="task.name"
-                :description="task.description"
-                :type="TaskType[task.taskType]"
-                :modules="task.modules.map((module) => module.name)"
-              ></TaskInfo>
-            </el-card>
-            <AddItem
-              :text="$t('moderator.view.sessionDetails.addTask')"
-              :isColumn="true"
-              @addNew="displayTaskSettings(taskType)"
-            />
+              <el-card
+                v-on:click="changeTask(task)"
+                :style="{ '--module-color': TaskTypeColor[taskType] }"
+                class="link"
+                :class="{ selected: isActive(task) }"
+              >
+                <p class="media">
+                  <font-awesome-icon
+                    class="media-left"
+                    :icon="getModuleIcon(task)"
+                  ></font-awesome-icon>
+                  <span class="media-content"></span>
+                  <el-dropdown
+                    class="card__menu media-right"
+                    v-on:command="taskCommand(task, $event)"
+                  >
+                    <span class="el-dropdown-link">
+                      <font-awesome-icon icon="ellipsis-h" />
+                    </span>
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <el-dropdown-item command="edit">
+                          <font-awesome-icon icon="pen" />
+                        </el-dropdown-item>
+                        <el-dropdown-item command="delete">
+                          <font-awesome-icon icon="trash" />
+                        </el-dropdown-item>
+                      </el-dropdown-menu>
+                    </template>
+                  </el-dropdown>
+                </p>
+                <TaskInfo
+                  :title="task.name"
+                  :description="task.description"
+                  :type="TaskType[task.taskType]"
+                  :modules="task.modules.map((module) => module.name)"
+                ></TaskInfo>
+              </el-card>
+            </TutorialStep>
+            <TutorialStep
+              type="topicDetails"
+              step="addTask"
+              :order="2"
+              :displayAllDuplicates="true"
+            >
+              <AddItem
+                :text="$t('moderator.view.sessionDetails.addTask')"
+                :isColumn="true"
+                @addNew="displayTaskSettings(taskType)"
+              />
+            </TutorialStep>
           </el-space>
         </el-tab-pane>
       </el-tabs>
@@ -164,9 +202,12 @@ import { ModuleType } from '@/types/enum/ModuleType';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
 import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
+import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
+import { reactivateTutorial } from '@/services/auth-service';
 
 @Options({
   components: {
+    TutorialStep,
     TimerSettings,
     AddItem,
     TaskInfo,
@@ -202,6 +243,11 @@ export default class ModeratorTopicDetails extends Vue {
 
   TaskType = TaskType;
   TaskTypeColor = TaskTypeColor;
+
+  reactivateTutorial(): void {
+    reactivateTutorial('topicDetails', this.eventBus);
+    reactivateTutorial('taskTimeline', this.eventBus);
+  }
 
   get isModerator(): boolean {
     return this.sessionRole === UserType.MODERATOR;
@@ -477,5 +523,10 @@ export default class ModeratorTopicDetails extends Vue {
 
 p {
   margin-bottom: 0.5rem;
+}
+
+.icon {
+  color: var(--color-darkblue-light);
+  margin-left: 0.5em;
 }
 </style>

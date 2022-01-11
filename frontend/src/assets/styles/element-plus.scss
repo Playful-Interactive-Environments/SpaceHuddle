@@ -527,3 +527,7 @@ $--font-size: (
                 font-weight: var(--font-weight-bold);
         }
 }
+
+.el-dropdown-menu__item:hover {
+        font-weight: bold;
+}

@@ -9,7 +9,8 @@
     "submit": "+",
     "add": "Add category",
     "sortOrder": "order by",
-    "undefined": "ideas which have not yet been categorised"
+    "undefined": "ideas which have not yet been categorised",
+    "displayAll": "display all"
   },
   "settings" : {
     "header": "Add/Edit category",

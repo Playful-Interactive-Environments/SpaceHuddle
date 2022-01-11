@@ -32,5 +32,4 @@ export default class CollapseTitle extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

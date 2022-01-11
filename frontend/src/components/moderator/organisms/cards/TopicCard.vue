@@ -30,9 +30,14 @@
               </template>
             </el-dropdown>
           </div>
-          <div class="card__drag level-item">
-            <font-awesome-icon icon="grip-vertical" class="card__drag__icon" />
-          </div>
+          <TutorialStep type="sessionDetails" step="changeOrder" :order="7">
+            <div class="card__drag level-item">
+              <font-awesome-icon
+                icon="grip-vertical"
+                class="card__drag__icon"
+              />
+            </div>
+          </TutorialStep>
         </span>
       </span>
     </el-card>
@@ -54,9 +59,10 @@ import { Options, Vue } from 'vue-class-component';
 import { Topic } from '@/types/api/Topic';
 import * as topicService from '@/services/topic-service';
 import TopicSettings from '@/components/moderator/organisms/settings/TopicSettings.vue';
+import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 
 @Options({
-  components: { TopicSettings },
+  components: { TutorialStep, TopicSettings },
   emits: ['topicDeleted', 'topicUpdated'],
 })
 export default class TopicCard extends Vue {

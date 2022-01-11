@@ -3,6 +3,8 @@ import app from '@/main';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as tutorialService from '@/services/tutorial-service';
 import { Tutorial } from '@/types/api/Tutorial';
+import { EventType } from '@/types/enum/EventType';
+import { Emitter } from 'mitt';
 
 const JWT_KEY = 'jwt';
 const JWT_KEY_MODERATOR = 'jwt-moderator';
@@ -17,15 +19,45 @@ const tutorialSteps: Tutorial[] = [];
 export const getTutorialSteps = async (): Promise<Tutorial[]> => {
   if (tutorialSteps.length == 0) {
     await tutorialService.getList().then((list) => {
-      tutorialSteps.push(...list);
+      list.forEach((data) => {
+        if (
+          !tutorialSteps.find(
+            (step) => step.step === data.step && step.type === data.type
+          )
+        )
+          tutorialSteps.push(data);
+      });
     });
   }
   return tutorialSteps;
 };
 
-export const addTutorialStep = (data: Tutorial): void => {
-  tutorialSteps.push(data);
+export const reactivateTutorial = async (
+  type: string,
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  eventBus: Emitter<Record<EventType, unknown>>
+): Promise<void> => {
+  let index = tutorialSteps.findIndex((step) => step.type === type);
+  while (index >= 0) {
+    tutorialSteps.splice(index, 1);
+    index = tutorialSteps.findIndex((step) => step.type === type);
+  }
+  eventBus.emit(EventType.CHANGE_TUTORIAL, tutorialSteps);
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const addTutorialStep = (
+  data: Tutorial,
+  eventBus: Emitter<Record<EventType, unknown>>
+): void => {
+  if (
+    !tutorialSteps.find(
+      (step) => step.step === data.step && step.type === data.type
+    )
+  )
+    tutorialSteps.push(data);
   tutorialService.postStep(data);
+  eventBus.emit(EventType.CHANGE_TUTORIAL, tutorialSteps);
 };
 
 export const isAuthenticated = (): boolean => {

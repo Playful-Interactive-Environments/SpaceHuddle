@@ -10,15 +10,41 @@
         v-on:delete="deleteSession"
       >
         <template #settings>
-          <span v-on:click="disconnect" v-if="!isModerator">
-            <font-awesome-icon
-              class="icon"
-              icon="user-slash"
-            ></font-awesome-icon>
-          </span>
-          <span v-else v-on:click="showRoles = true">
-            <font-awesome-icon class="icon" icon="users"></font-awesome-icon>
-          </span>
+          <TutorialStep
+            v-if="!isModerator"
+            type="sessionDetails"
+            step="disconnect"
+            :order="4"
+          >
+            <span v-on:click="disconnect">
+              <font-awesome-icon
+                class="icon"
+                icon="user-slash"
+              ></font-awesome-icon>
+            </span>
+          </TutorialStep>
+          <TutorialStep
+            v-else
+            type="sessionDetails"
+            step="coModerator"
+            :order="4"
+          >
+            <span v-on:click="showRoles = true">
+              <font-awesome-icon class="icon" icon="users"></font-awesome-icon>
+            </span>
+          </TutorialStep>
+          <el-dropdown>
+            <span class="el-dropdown-link">
+              <font-awesome-icon class="icon" icon="info-circle" />
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item v-on:click="reactivateTutorial">
+                  {{ $t('tutorial.reactivate') }}
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </template>
         <template #headerContent>
           <span :class="{ expired: isExpired }">
@@ -30,15 +56,17 @@
         </template>
         <template #footerContent>
           <SessionCode :code="session.connectionKey" />
-          <router-link
-            v-if="session.id"
-            :to="`/public-screen/${session.id}`"
-            target="_blank"
-          >
-            <button class="btn btn--mint btn--fullwidth">
-              {{ $t('general.publicScreen') }}
-            </button>
-          </router-link>
+          <TutorialStep type="sessionDetails" step="publicScreen" :order="3">
+            <router-link
+              v-if="session.id"
+              :to="`/public-screen/${session.id}`"
+              target="_blank"
+            >
+              <button class="btn btn--mint btn--fullwidth">
+                {{ $t('general.publicScreen') }}
+              </button>
+            </router-link>
+          </TutorialStep>
         </template>
       </Sidebar>
     </template>
@@ -52,29 +80,43 @@
       >
         <template #item="{ element }">
           <div class="detail__module">
-            <TopicCard
-              :sessionId="sessionId"
-              :topic="element"
-              :canModify="isModerator"
-              v-on:topicDeleted="getTopics"
+            <TutorialStep
+              type="sessionDetails"
+              step="selectTopic"
+              :order="6"
+              :width="450"
             >
-              <TaskTimeline
-                :topic-id="element.id"
-                :session-id="sessionId"
-                style="margin-bottom: 1rem"
-                :is-linked-to-task="false"
-                v-on:changePublicScreen="publicScreenTopic = element.id"
-                :key="publicScreenTopic"
-              ></TaskTimeline>
-            </TopicCard>
+              <TopicCard
+                :sessionId="sessionId"
+                :topic="element"
+                :canModify="isModerator"
+                v-on:topicDeleted="getTopics"
+              >
+                <TaskTimeline
+                  :topic-id="element.id"
+                  :session-id="sessionId"
+                  style="margin-bottom: 1rem"
+                  :is-linked-to-task="false"
+                  v-on:changePublicScreen="publicScreenTopic = element.id"
+                  :key="publicScreenTopic"
+                ></TaskTimeline>
+              </TopicCard>
+            </TutorialStep>
           </div>
         </template>
       </draggable>
-      <AddItem
+      <TutorialStep
         v-if="isModerator"
-        :text="$t('moderator.view.sessionDetails.addTopic')"
-        @addNew="showTopicSettings = true"
-      />
+        type="sessionDetails"
+        step="addTopic"
+        :order="5"
+        :width="450"
+      >
+        <AddItem
+          :text="$t('moderator.view.sessionDetails.addTopic')"
+          @addNew="showTopicSettings = true"
+        />
+      </TutorialStep>
       <TopicSettings
         v-model:show-modal="showTopicSettings"
         :session-id="sessionId"
@@ -122,9 +164,12 @@ import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import TopicCard from '@/components/moderator/organisms/cards/TopicCard.vue';
 import FacilitatorSettings from '@/components/moderator/organisms/settings/FacilitatorSettings.vue';
 import UserType from '@/types/enum/UserType';
+import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
+import { reactivateTutorial } from '@/services/auth-service';
 
 @Options({
   components: {
+    TutorialStep,
     FacilitatorSettings,
     TopicCard,
     ModuleCount,
@@ -159,6 +204,11 @@ export default class ModeratorSessionDetails extends Vue {
   interval!: any;
 
   TaskType = TaskType;
+
+  reactivateTutorial(): void {
+    reactivateTutorial('sessionDetails', this.eventBus);
+    reactivateTutorial('taskTimeline', this.eventBus);
+  }
 
   get isModerator(): boolean {
     return this.sessionRole === UserType.MODERATOR;
@@ -279,6 +329,7 @@ export default class ModeratorSessionDetails extends Vue {
 }
 
 .icon {
+  color: var(--color-darkblue-light);
   margin-left: 0.5em;
 }
 </style>

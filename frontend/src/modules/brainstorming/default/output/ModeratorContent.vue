@@ -57,11 +57,13 @@
           />
         </template>
         <template v-slot:footer>
-          <IdeaCard
+          <AddItem
             v-if="item.ideas.length > item.displayCount"
-            :idea="{ keywords: '...' }"
-            :is-editable="false"
-            v-on:click="item.displayCount = 1000"
+            :text="
+              $t('module.brainstorming.default.moderatorContent.displayAll')
+            "
+            :isColumn="false"
+            @addNew="item.displayCount = 1000"
             class="showMore"
           />
         </template>
@@ -73,11 +75,11 @@
           :key="index"
           @ideaDeleted="getCollapseContent()"
         />
-        <IdeaCard
+        <AddItem
           v-if="item.ideas.length > item.displayCount"
-          :idea="{ keywords: '...' }"
-          :is-editable="false"
-          v-on:click="item.displayCount = 1000"
+          :text="$t('module.brainstorming.default.moderatorContent.displayAll')"
+          :isColumn="false"
+          @addNew="item.displayCount = 1000"
           class="showMore"
         />
       </div>
@@ -106,9 +108,11 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { reloadCollapseContent } from '@/utils/collapse';
 import { convertToSaveVersion } from '@/types/api/Task';
 import draggable from 'vuedraggable';
+import AddItem from '@/components/moderator/atoms/AddItem.vue';
 
 @Options({
   components: {
+    AddItem,
     IdeaCard,
     CollapseTitle,
     FilterSection,
@@ -228,7 +232,12 @@ export default class ModeratorContent extends Vue {
 .showMore {
   color: var(--color-purple-dark);
   border-color: var(--color-purple-dark);
-  background-color: var(--color-purple-light);
   cursor: pointer;
+}
+
+.el-card::v-deep {
+  .el-card__body {
+    padding: 14px;
+  }
 }
 </style>

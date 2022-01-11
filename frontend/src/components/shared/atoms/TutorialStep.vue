@@ -1,5 +1,11 @@
 <template>
-  <el-popover placement="top" :width="300" trigger="manual" :visible="showStep">
+  <span v-observe-visibility="visibilityChanged"></span>
+  <el-popover
+    :placement="placement"
+    :width="width"
+    trigger="manual"
+    :visible="showStep"
+  >
     <div class="text">
       {{ $t(`tutorial.${type}.${step}`) }}
     </div>
@@ -15,9 +21,9 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import * as tutorialService from '@/services/tutorial-service';
-import { getTutorialSteps } from '@/services/auth-service';
+import { getTutorialSteps, addTutorialStep } from '@/services/auth-service';
 import { Tutorial } from '@/types/api/Tutorial';
+import { EventType } from '@/types/enum/EventType';
 import { v4 as uuidv4 } from 'uuid';
 
 const reservedTutorialSteps: {
@@ -40,9 +46,16 @@ export default class TutorialStep extends Vue {
   @Prop({ default: false }) readonly disableTutorial!: boolean;
   @Prop({ default: 0 }) minDuplicates!: number;
   @Prop({ default: false }) displayAllDuplicates!: boolean;
+  @Prop({ default: 'top' }) placement!: string;
+  @Prop({ default: 300 }) width!: number;
   activateTutorial = false;
   tutorialSteps: Tutorial[] = [];
+  dbLoaded = false;
   uuid = uuidv4();
+  reloadCount = 0;
+  lastReloadNo = -1;
+  isVisible = false;
+  //boundary = 'document';
 
   get stepKey(): string {
     return `${this.type}.${this.step}`;
@@ -57,7 +70,30 @@ export default class TutorialStep extends Vue {
   }
 
   mounted(): void {
-    getTutorialSteps().then((steps) => (this.tutorialSteps = steps));
+    getTutorialSteps().then((steps) => {
+      this.tutorialSteps = steps;
+      this.dbLoaded = true;
+    });
+
+    this.eventBus.on(EventType.CHANGE_TUTORIAL, async () => {
+      this.reloadCount++;
+    });
+
+    /*if (this.$el) {
+      const domContentParent = this.$el.nextSibling;
+      console.log(domContentParent);
+      domContentParent.addEventListener('v-observe-visibility', this.visibilityChanged);
+      domContentParent.id = this.uuid;
+      this.boundary = domContentParent;
+      domContentParent.ObserveVisibility = this.visibilityChanged;
+    }*/
+  }
+
+  visibilityChanged(
+    isVisible: boolean,
+    entry: IntersectionObserverEntry
+  ): void {
+    this.isVisible = isVisible;
   }
 
   @Watch('disableTutorial', { immediate: true, deep: true })
@@ -86,8 +122,22 @@ export default class TutorialStep extends Vue {
   }
 
   removeFromReservationList(): void {
-    if (this.isReservedByUuid(this.uuid)) {
-      delete reservedTutorialSteps[this.stepKey];
+    const reservation = Object.values(reservedTutorialSteps).find(
+      (step) =>
+        step.tutorial.type === this.type && step.tutorial.step === this.step
+    );
+    if (reservation) {
+      const duplicateIndex = reservation.duplicate.indexOf(this.uuid);
+      if (duplicateIndex >= 0) reservation.duplicate.splice(duplicateIndex, 1);
+      else if (this.isReservedByUuid(this.uuid)) {
+        if (reservation.duplicate.length > 0) {
+          reservation.reservedBy = reservation.duplicate[0];
+          reservation.duplicate.splice(0, 1);
+        } else {
+          reservation.reservedBy = '';
+          delete reservedTutorialSteps[this.stepKey];
+        }
+      }
     }
   }
 
@@ -97,7 +147,16 @@ export default class TutorialStep extends Vue {
     return false;
   }
 
-  getPreviousOrder(): number {
+  showDuplicate(): boolean {
+    if (reservedTutorialSteps[this.stepKey])
+      return (
+        reservedTutorialSteps[this.stepKey].duplicate.length >=
+        this.minDuplicates
+      );
+    return true;
+  }
+
+  getPreviousOrder(): number[] {
     const previousOrders = Object.values(reservedTutorialSteps)
       .filter(
         (reservation) =>
@@ -105,11 +164,12 @@ export default class TutorialStep extends Vue {
           reservation.tutorial.order < this.order
       )
       .map((reservation) => reservation.tutorial.order)
-      .sort()
-      .reverse();
+      .sort(function (a, b) {
+        return b - a;
+      });
 
-    if (previousOrders.length > 0) return previousOrders[0];
-    return -1;
+    if (previousOrders.length > 0) return previousOrders;
+    return [];
   }
 
   getIncludeStep(): boolean {
@@ -119,21 +179,27 @@ export default class TutorialStep extends Vue {
   }
 
   calcShowStep(): boolean {
-    const previousOrder = this.getPreviousOrder();
+    const previousOrders = this.getPreviousOrder();
+    const previousTutorialSteps = this.tutorialSteps.filter(
+      (tutorial) =>
+        tutorial.type == this.type && previousOrders.includes(tutorial.order)
+    );
     const previousStepsDone =
-      previousOrder == -1 ||
-      !!this.tutorialSteps.find(
-        (tutorial) =>
-          tutorial.type == this.type && tutorial.order == previousOrder
-      );
+      previousOrders.length === 0 ||
+      previousTutorialSteps.length === previousOrders.length;
+    const reload = this.reloadCount != this.lastReloadNo;
+    this.lastReloadNo = this.reloadCount;
+
     return (
+      this.isVisible &&
+      (reload || this.dbLoaded) &&
       !this.disableTutorial &&
       this.activateTutorial &&
       this.uuid.length > 0 &&
       (this.displayAllDuplicates || this.isReservedByUuid(this.uuid)) &&
       !this.getIncludeStep() &&
       previousStepsDone &&
-      reservedTutorialSteps[this.stepKey].duplicate.length >= this.minDuplicates
+      this.showDuplicate()
     );
   }
 
@@ -144,8 +210,9 @@ export default class TutorialStep extends Vue {
   stepDone(): void {
     const item = this.tutorialItem;
     if (!this.getIncludeStep()) {
-      this.tutorialSteps.push(item);
-      tutorialService.postStep(item);
+      addTutorialStep(item, this.eventBus);
+      //this.tutorialSteps.push(item);
+      //tutorialService.postStep(item);
     }
   }
 }

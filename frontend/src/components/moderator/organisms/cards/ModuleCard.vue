@@ -6,13 +6,26 @@
     >
       {{ $t(`module.${taskType}.${moduleName}.description.title`) }}
     </h2>
-    <el-switch v-model="selected" v-if="moduleType !== ModuleType.MAIN" />
-    <el-radio
-      v-model="mainModuleName"
-      :label="moduleName"
-      v-if="moduleType === ModuleType.MAIN"
-      >{{}}</el-radio
+    <TutorialStep
+      v-if="moduleType !== ModuleType.MAIN"
+      type="taskSettings"
+      step="additionalModule"
+      :order="11"
+      :displayAllDuplicates="true"
+      :disableTutorial="!displayTutorial"
     >
+      <el-switch v-model="selected" />
+    </TutorialStep>
+    <TutorialStep
+      v-else
+      type="taskSettings"
+      step="baseModule"
+      :order="10"
+      :displayAllDuplicates="true"
+      :disableTutorial="!displayTutorial"
+    >
+      <el-radio v-model="mainModuleName" :label="moduleName">{{}}</el-radio>
+    </TutorialStep>
     <div class="icon"><font-awesome-icon :icon="icon" v-if="icon" /></div>
     <el-tooltip placement="top">
       <template #content>
@@ -32,9 +45,12 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import { getModuleConfig } from '@/modules';
 import { ModuleType } from '@/types/enum/ModuleType';
+import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 
 @Options({
-  components: {},
+  components: {
+    TutorialStep,
+  },
   emits: ['update:modelValue', 'update:mainModule'],
 })
 export default class ModuleCard extends Vue {
@@ -42,6 +58,7 @@ export default class ModuleCard extends Vue {
   @Prop() taskType!: string;
   @Prop({ default: false }) modelValue!: boolean;
   @Prop({ default: '' }) mainModule!: string;
+  @Prop({ default: true }) displayTutorial!: boolean;
   icon: string | null = null;
   moduleType: string | null = null;
 

@@ -71,11 +71,11 @@
             />
           </template>
           <template v-slot:footer>
-            <IdeaCard
+            <AddItem
               v-if="selection.length > displayCount"
-              :idea="{ keywords: '...' }"
-              :is-editable="false"
-              v-on:click="displayCount = 1000"
+              :text="$t('module.selection.default.moderatorContent.displayAll')"
+              :isColumn="false"
+              @addNew="displayCount = 1000"
               class="showMore"
             />
           </template>
@@ -123,10 +123,10 @@
             />
           </template>
           <template v-slot:footer>
-            <IdeaCard
+            <AddItem
               v-if="item.ideas.length > item.displayCount"
-              :idea="{ keywords: '...' }"
-              :is-editable="false"
+              :text="$t('module.selection.default.moderatorContent.displayAll')"
+              :isColumn="false"
               v-on:click="item.displayCount = 1000"
               class="showMore"
             />
@@ -323,7 +323,12 @@ export default class ModeratorContent extends Vue {
 .showMore {
   color: var(--color-purple-dark);
   border-color: var(--color-purple-dark);
-  background-color: var(--color-purple-light);
   cursor: pointer;
+}
+
+.el-card::v-deep {
+  .el-card__body {
+    padding: 14px;
+  }
 }
 </style>

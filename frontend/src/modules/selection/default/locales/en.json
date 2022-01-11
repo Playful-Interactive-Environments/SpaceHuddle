@@ -10,6 +10,7 @@
     "sortOrder": "order by",
     "selection": "Selection",
     "unselected": "unselected",
-    "add": "drag to add to selection"
+    "add": "drag to add to selection",
+    "displayAll": "display all"
   }
 }

@@ -4,6 +4,7 @@ import i18n from '@/i18n';
 import App from './App.vue';
 import router from './router';
 import mitt, { Emitter, EventType } from 'mitt';
+import VueObserveVisibility from 'vue3-observe-visibility2';
 
 import ElementPlus from 'element-plus';
 import '@/assets/styles/global.scss';
@@ -42,6 +43,7 @@ app.use(VueCookies as any, {
 app.config.globalProperties.eventBus = eventBus;
 app.config.globalProperties.$t = i18n.t2;
 app.use(ElementPlus);
+app.use(VueObserveVisibility);
 app.mount('#app');
 
 export default app;

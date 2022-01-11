@@ -182,7 +182,8 @@
           "descriptionExample": "e.g. The purpose of the meeting is to come up with new ideas our new app.",
           "submit": "Save module",
           "saveAndActivate": "Save and activate module",
-          "moduleSearch": "type in a search module name"
+          "moduleSearch": "type in a search module name",
+          "displayAllModules": "display all modules"
         },
         "sessionSettings": {
           "header": "Create Session",
@@ -396,13 +397,24 @@
     "moduleActive": "Active"
   },
   "tutorial": {
+    "reactivate": "Reactivate Tutorial",
     "sessionOverview": {
       "add": "click this button to create your first session"
     },
     "sessionDetails": {
       "addTopic": "A session can consist of several topics. Click this button to create your first topic.",
       "selectTopic": "A session can consist of several topics. Click this to display the details of the topic.",
-      "changeOrder": "Change the order of the topics by drag and drop."
+      "changeOrder": "Change the order of the topics by drag and drop.",
+      "publicScreen": "Open public screen view.",
+      "connectionCode": "Participants can connect to this session with this code.",
+      "shareCode": "Share the code by sending an invitation to all participants.",
+      "coModerator": "Add co-moderators",
+      "disconnect": "Disconnect from session"
+    },
+    "topicDetails": {
+      "taskType": "You can define tasks of different types. Tasks build on each other and serve as input for further tasks. The starting point is brainstorming. By creating a first brainstorming task, the greyed-out tasks become available.",
+      "addTask": "A topic can consist of several tasks. Click this button to create your first task.",
+      "selectTask": "A topic can consist of several tasks. Click this to display the details of the task."
     },
     "processTimeline": {
       "activatePublicScreen": "activate this switch to display this content on the public screen",
@@ -419,11 +431,18 @@
       "selectItem": "click on the task title to display the task details"
     },
     "taskSettings":  {
+      "input": "Tasks build on each other and serve as input for further tasks.",
       "inputSource": "Define the sources that serve as the basis for this task.",
       "inputMaxCount": "How many records of this source do you want to use as a basis? If no input is made, all records of the source are used.",
       "inputFilter": "Here you can filter the data records of the selected source according to status.",
       "inputOrder": "In which order should the source data be sorted for further processing? The sorting also determines the selection of the data sets if the field max count has a value.",
-      "inputAdd": "The task can obtain source data from several sources. Click the button to add another source."
+      "inputAdd": "The task can obtain source data from several sources. Click the button to add another source.",
+      "title": "Fill in the input fields to describe the task.",
+      "module": "Several modules are available for this task type. Select a basic module (recognisable by the round radio buttons) and any number of additional modules (recognisable by the long toggle buttons).",
+      "unusedModule": "For reasons of simplicity, only those modules that have already been used by you are displayed by default.",
+      "baseModule": "Click on the radio button to expand the basic module.",
+      "additionalModule": "Activate the toggle button to activate the supplementary module.",
+      "searchModule": "Search module by name."
     }
   }
 }
