@@ -11,7 +11,7 @@ use App\Domain\Base\Service\ServiceCreatorTrait;
 final class UserCreator
 {
     use ServiceCreatorTrait;
-    use UserServiceTrait;
+    use UserServiceJwtTrait;
     use MailTrait;
 
     /**

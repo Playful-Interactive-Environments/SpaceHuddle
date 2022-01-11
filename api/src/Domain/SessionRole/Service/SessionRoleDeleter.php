@@ -5,7 +5,6 @@ namespace App\Domain\SessionRole\Service;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\MailTrait;
 use App\Domain\Base\Service\ServiceDeleterTrait;
-use App\Domain\Idea\Type\IdeaState;
 
 /**
  * Delete session role service.

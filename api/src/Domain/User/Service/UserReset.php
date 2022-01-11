@@ -2,13 +2,9 @@
 
 namespace App\Domain\User\Service;
 
-use App\Database\TransactionInterface;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\BaseBodyServiceTrait;
 use App\Domain\Base\Service\MailTrait;
-use App\Domain\User\Repository\UserRepository;
-use App\Factory\LoggerFactory;
-use App\Routing\JwtAuth;
 
 /**
  * Service.
@@ -16,33 +12,8 @@ use App\Routing\JwtAuth;
 final class UserReset
 {
     use BaseBodyServiceTrait;
+    use UserServiceJwtTrait;
     use MailTrait;
-
-    protected UserRepository $repository;
-    protected UserValidator $validator;
-    protected JwtAuth $jwtAuth;
-
-    /**
-     * The constructor.
-     *
-     * @param UserRepository $repository The repository
-     * @param UserValidator $validator The validator
-     * @param TransactionInterface $transaction The transaction
-     * @param LoggerFactory $loggerFactory The logger factory
-     * @param JwtAuth $jwtAuth The jwt authorization
-     */
-    public function __construct(
-        UserRepository $repository,
-        UserValidator $validator,
-        TransactionInterface $transaction,
-        LoggerFactory $loggerFactory,
-        JwtAuth $jwtAuth
-    ) {
-        $this->setUp($transaction, $loggerFactory);
-        $this->repository = $repository;
-        $this->validator = $validator;
-        $this->jwtAuth = $jwtAuth;
-    }
 
     /**
      * Validates whether the transferred data is suitable for the service.
