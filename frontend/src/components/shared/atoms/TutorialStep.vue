@@ -1,5 +1,8 @@
 <template>
-  <span v-observe-visibility="visibilityChanged"></span>
+  <span
+    ref="visibilityObserver"
+    v-observe-visibility="visibilityChanged"
+  ></span>
   <el-popover
     :placement="placement"
     :width="width"
@@ -79,11 +82,17 @@ export default class TutorialStep extends Vue {
       this.reloadCount++;
     });
 
+    const visibilityObserver = this.$refs.visibilityObserver as any;
+    const domContent = visibilityObserver.nextSibling.nextSibling;
+    if (visibilityObserver && domContent) {
+      domContent.id = this.uuid;
+      domContent.appendChild(visibilityObserver);
+    }
+
     /*if (this.$el) {
-      const domContentParent = this.$el.nextSibling;
+      const domContentParent = this.$el;//.nextSibling;
       console.log(domContentParent);
       domContentParent.addEventListener('v-observe-visibility', this.visibilityChanged);
-      domContentParent.id = this.uuid;
       this.boundary = domContentParent;
       domContentParent.ObserveVisibility = this.visibilityChanged;
     }*/
