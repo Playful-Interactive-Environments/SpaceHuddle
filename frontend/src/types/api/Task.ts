@@ -19,6 +19,7 @@ export interface Task {
   activeOnParticipant: boolean;
   syncPublicParticipant: boolean;
   modules: Module[];
+  participantCount: number;
 }
 
 export interface TaskForSaveAction {

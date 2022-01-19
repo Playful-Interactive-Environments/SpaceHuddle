@@ -312,10 +312,11 @@
         "submit": "Save"
       },
       "sessionDetails": {
-        "addTask": "add task",
         "addTopic": "add topic"
       },
       "topicDetails": {
+        "addTask": "add task",
+        "participantCount": "participant count"
       }
     }
   },

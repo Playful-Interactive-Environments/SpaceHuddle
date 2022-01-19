@@ -137,7 +137,7 @@
               :displayAllDuplicates="true"
             >
               <AddItem
-                :text="$t('moderator.view.sessionDetails.addTask')"
+                :text="$t('moderator.view.topicDetails.addTask')"
                 :isColumn="true"
                 @addNew="displayTaskSettings(taskType)"
               />
@@ -145,6 +145,11 @@
           </el-space>
         </el-tab-pane>
       </el-tabs>
+      <el-divider></el-divider>
+      <div v-if="activeTask">
+        <span class="label">{{ $t('moderator.view.topicDetails.participantCount') }}: &emsp;</span>
+        <span>{{ activeTask.participantCount }}</span>
+      </div>
       <el-divider></el-divider>
       <ModuleContentComponent v-if="activeTask" :task-id="activeTask.id" />
       <TaskSettings
@@ -528,5 +533,10 @@ p {
 .icon {
   color: var(--color-darkblue-light);
   margin-left: 0.5em;
+}
+
+.label {
+  display: inline;
+  text-transform: uppercase;
 }
 </style>
