@@ -108,6 +108,13 @@ class TaskData
     public array $modules;
 
     /**
+     * Number of participants who have worked on this task.
+     * @var int|null
+     * @OA\Property()
+     */
+    public ?int $participantCount;
+
+    /**
      * Creates a new task.
      * @param array $data Task data.
      */
@@ -124,6 +131,7 @@ class TaskData
         $this->order = $reader->findInt("order");
         $this->state = strtoupper($reader->findString("state"));
         $expirationTime = $reader->findString("expiration_time");
+        $this->participantCount = $reader->findInt("participant_count");
 
         if ($expirationTime) {
             $expirationTime = strtotime($expirationTime);

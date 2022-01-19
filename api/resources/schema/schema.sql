@@ -964,6 +964,25 @@ AND
             CONCAT('$.selectionId[', idx, ']')
         )) != '';
 
+CREATE OR REPLACE VIEW task_info (task_id, task_type, participant_count) AS
+SELECT
+    vote.task_id,
+    task.task_type,
+    COUNT(DISTINCT vote.participant_id) AS participant_count
+FROM
+    vote
+        INNER JOIN task ON task.id = vote.task_id
+UNION
+SELECT
+    idea.task_id,
+    task.task_type,
+    COUNT(DISTINCT idea.participant_id) AS participant_count
+FROM
+    idea
+        INNER JOIN task ON task.id = idea.task_id
+WHERE
+        task.task_type LIKE 'BRAINSTORMING';
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

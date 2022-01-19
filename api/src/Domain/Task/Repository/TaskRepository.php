@@ -118,11 +118,13 @@ class TaskRepository implements RepositoryInterface
         $query = $this->queryFactory->newSelect($this->getEntityName());
         $query->select([
             "task.*",
+            "task_info.participant_count",
             "topic.session_id",
             "participant_task.id AS active_on_participant",
             "synchro_task.id AS synchro_task"
         ])
             ->innerJoin("topic", "topic.id = task.topic_id")
+            ->innerJoin("task_info", "task_info.task_id = task.id")
             ->leftJoin("participant_task", "participant_task.id = task.id")
             ->leftJoin("synchro_task", "synchro_task.id = task.id")
             ->andWhere($conditions)
