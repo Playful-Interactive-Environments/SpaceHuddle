@@ -104,12 +104,13 @@ const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: '/topic/:sessionId/:topicId',
+    path: '/topic/:sessionId/:topicId/:taskId?',
     name: 'moderator-topic-details',
     component: ModeratorTopicDetails,
     props: (route) => ({
       sessionId: route.params.sessionId,
       topicId: route.params.topicId,
+      taskId: route.params.taskId,
     }),
     meta: {
       requiresAuth: true,

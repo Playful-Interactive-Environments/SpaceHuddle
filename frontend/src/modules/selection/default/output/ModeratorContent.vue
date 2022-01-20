@@ -275,8 +275,10 @@ export default class ModeratorContent extends Vue {
     this.startInterval();
 
     this.eventBus.off(EventType.CHANGE_SETTINGS);
-    this.eventBus.on(EventType.CHANGE_SETTINGS, async () => {
-      await this.reloadData();
+    this.eventBus.on(EventType.CHANGE_SETTINGS, async (taskId) => {
+      if (this.taskId === taskId) {
+        await this.reloadData();
+      }
     });
   }
 

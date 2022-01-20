@@ -147,31 +147,33 @@
       </el-tabs>
       <el-divider></el-divider>
       <div v-if="activeTask">
-        <span class="label">{{ $t('moderator.view.topicDetails.participantCount') }}: &emsp;</span>
+        <span class="label">
+          {{ $t('moderator.view.topicDetails.participantCount') }}: &emsp;
+        </span>
         <span>{{ activeTask.participantCount }}</span>
       </div>
       <el-divider></el-divider>
-      <ModuleContentComponent v-if="activeTask" :task-id="activeTask.id" />
-      <TaskSettings
-        v-model:show-modal="showTaskSettings"
-        :task-type="taskSettingsType"
-        :topic-id="topicId"
-        :task-id="taskSettingsId"
-        @taskUpdated="reloadTasks"
-        @showTimerSettings="displayTimerSettings"
-      />
-      <TopicSettings
-        v-model:show-modal="showTopicSettings"
-        :session-id="sessionId"
-        :topic-id="topicId"
-      />
-      <TimerSettings
-        v-if="showTimerSettings"
-        v-model:showModal="showTimerSettings"
-        :entity="timerTask"
-      />
+      <ModuleContentComponent v-if="activeTask" :task-id="activeTaskId" />
     </template>
   </ModeratorNavigationLayout>
+  <TaskSettings
+    v-model:show-modal="showTaskSettings"
+    :task-type="taskSettingsType"
+    :topic-id="topicId"
+    :task-id="taskSettingsId"
+    @taskUpdated="reloadTasks"
+    @showTimerSettings="displayTimerSettings"
+  />
+  <TopicSettings
+    v-model:show-modal="showTopicSettings"
+    :session-id="sessionId"
+    :topic-id="topicId"
+  />
+  <TimerSettings
+    v-if="showTimerSettings"
+    v-model:showModal="showTimerSettings"
+    :entity="timerTask"
+  />
 </template>
 
 <script lang="ts">
@@ -231,6 +233,7 @@ import { reactivateTutorial } from '@/services/auth-service';
 export default class ModeratorTopicDetails extends Vue {
   @Prop() readonly sessionId!: string;
   @Prop() readonly topicId!: string;
+  @Prop() readonly taskId!: string;
 
   topic: Topic | null = null;
   session: Session | null = null;
@@ -338,7 +341,12 @@ export default class ModeratorTopicDetails extends Vue {
     topicService.getTopicById(this.topicId).then((topic) => {
       this.topic = topic;
     });
-    this.getTasks();
+    this.getTasks().then(() => {
+      if (this.taskId) {
+        const queryTask = this.tasks.find((task) => task.id === this.taskId);
+        if (queryTask) this.changeTask(queryTask);
+      }
+    });
   }
 
   async getTasks(): Promise<void> {
@@ -358,19 +366,26 @@ export default class ModeratorTopicDetails extends Vue {
   }
 
   reloadTasks(taskId: string): void {
+    const newTaskIsAdded = !this.tasks.find((task) => task.id == taskId);
     this.getTasks().then(() => {
       const activeTask = this.tasks.find((task) => task.id == taskId);
       if (activeTask) {
+        if (newTaskIsAdded) {
+          this.changeTask(activeTask);
+        }
         this.activeTab = TaskType[activeTask.taskType];
       }
     });
   }
 
+  pauseReload = false;
   reloadData(): void {
-    topicService.getTopicById(this.topicId).then((topic) => {
-      this.topic = topic;
-    });
-    this.getTasks();
+    if (!this.pauseReload) {
+      topicService.getTopicById(this.topicId).then((topic) => {
+        this.topic = topic;
+      });
+      this.getTasks();
+    }
   }
 
   @Watch('activeTab', { immediate: true })
@@ -426,6 +441,7 @@ export default class ModeratorTopicDetails extends Vue {
         this.activeTask = newTask;
         this.previousActiveTask = this.activeTask;
         this.activeTab = TaskType[newTask.taskType];
+        this.$router.replace({ params: { taskId: newTask.id } });
       });
     }
   }
@@ -464,13 +480,19 @@ export default class ModeratorTopicDetails extends Vue {
         this.showTaskSettings = true;
         break;
       case 'delete':
+        this.pauseReload = true;
         if (this.activeTask?.id == task.id) this.activeTask = null;
         taskService.deleteTask(task.id).then((result) => {
           if (result) {
-            this.getTasks();
+            this.getTasks().then(() => {
+              if (activeTask) {
+                this.activeTab = TaskType[activeTask.taskType];
+              }
+            });
           } else if (activeTask?.id == task.id) {
             this.activeTask = activeTask;
           }
+          this.pauseReload = false;
         });
         break;
     }

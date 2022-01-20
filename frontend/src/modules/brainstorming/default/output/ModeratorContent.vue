@@ -109,6 +109,7 @@ import { reloadCollapseContent } from '@/utils/collapse';
 import { convertToSaveVersion } from '@/types/api/Task';
 import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
+import { EventType } from '@/types/enum/EventType';
 
 @Options({
   components: {
@@ -207,6 +208,13 @@ export default class ModeratorContent extends Vue {
 
   async mounted(): Promise<void> {
     this.startInterval();
+
+    this.eventBus.off(EventType.CHANGE_SETTINGS);
+    this.eventBus.on(EventType.CHANGE_SETTINGS, async (taskId) => {
+      if (this.taskId === taskId) {
+        await this.getCollapseContent();
+      }
+    });
   }
 
   startInterval(): void {

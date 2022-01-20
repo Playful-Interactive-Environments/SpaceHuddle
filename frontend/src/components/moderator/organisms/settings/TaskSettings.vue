@@ -863,6 +863,7 @@ export default class TaskSettings extends Vue {
     } else {
       this.task = null;
       this.mainModule = 'default';
+      if (this.formData.taskType) this.reset();
     }
   }
 
@@ -1032,12 +1033,13 @@ export default class TaskSettings extends Vue {
 
   reset(): void {
     this.task = null;
-    this.formData.taskType = this.taskType;
+    if (this.taskType) this.formData.taskType = this.taskType;
     this.loadModuleList();
     this.formData.name = '';
     this.formData.description = '';
     this.formData.parameter = {};
     this.formData.input = [];
+    this.setDefaultInput();
     this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
@@ -1162,7 +1164,7 @@ export default class TaskSettings extends Vue {
     this.$emit('update:showModal', false);
     this.$emit('taskUpdated', task.id);
     if (cleanUp) this.reset();
-    this.eventBus.emit(EventType.CHANGE_SETTINGS, {});
+    this.eventBus.emit(EventType.CHANGE_SETTINGS, task.id);
   }
 }
 </script>
