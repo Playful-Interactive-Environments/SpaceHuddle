@@ -972,6 +972,7 @@ SELECT
 FROM
     vote
         INNER JOIN task ON task.id = vote.task_id
+GROUP BY vote.task_id
 UNION
 SELECT
     idea.task_id,
@@ -981,7 +982,8 @@ FROM
     idea
         INNER JOIN task ON task.id = idea.task_id
 WHERE
-        task.task_type LIKE 'BRAINSTORMING';
+        task.task_type LIKE 'BRAINSTORMING'
+GROUP BY idea.task_id;
 
 COMMIT;
 
