@@ -1,6 +1,6 @@
 interface ApiError {
   state?: string;
-  errorMessage?: string,
+  errorMessage?: string;
   error?: {
     message: string;
     code: string;

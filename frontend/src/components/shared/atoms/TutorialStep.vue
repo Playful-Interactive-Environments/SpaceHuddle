@@ -58,7 +58,6 @@ export default class TutorialStep extends Vue {
   reloadCount = 0;
   lastReloadNo = -1;
   isVisible = false;
-  //boundary = 'document';
 
   get stepKey(): string {
     return `${this.type}.${this.step}`;
@@ -88,14 +87,6 @@ export default class TutorialStep extends Vue {
       domContent.id = this.uuid;
       domContent.appendChild(visibilityObserver);
     }
-
-    /*if (this.$el) {
-      const domContentParent = this.$el;//.nextSibling;
-      console.log(domContentParent);
-      domContentParent.addEventListener('v-observe-visibility', this.visibilityChanged);
-      this.boundary = domContentParent;
-      domContentParent.ObserveVisibility = this.visibilityChanged;
-    }*/
   }
 
   visibilityChanged(
@@ -220,8 +211,6 @@ export default class TutorialStep extends Vue {
     const item = this.tutorialItem;
     if (!this.getIncludeStep()) {
       addTutorialStep(item, this.eventBus);
-      //this.tutorialSteps.push(item);
-      //tutorialService.postStep(item);
     }
   }
 }

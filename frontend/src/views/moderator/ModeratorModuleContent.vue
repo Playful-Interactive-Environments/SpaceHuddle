@@ -34,7 +34,7 @@
     <template v-slot:header></template>
     <template v-slot:content>
       <ModuleContentComponent :task-id="taskId" />
-      <TaskSettingsOld
+      <TaskSettings
         v-model:show-modal="showSettings"
         :task-id="taskId"
         :key="componentLoadIndex"
@@ -64,7 +64,7 @@ import * as taskService from '@/services/task-service';
 
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/ModeratorNavigationLayout.vue';
-import TaskSettingsOld from '@/components/moderator/organisms/settings/TaskSettingsOld.vue';
+import TaskSettings from '@/components/moderator/organisms/settings/TaskSettings.vue';
 import { EventType } from '@/types/enum/EventType';
 import ModuleShare from '@/components/moderator/molecules/ModuleShare.vue';
 import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
@@ -74,7 +74,7 @@ import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
     ModuleShare,
     Sidebar,
     ModeratorNavigationLayout,
-    TaskSettingsOld,
+    TaskSettings,
     ModuleContentComponent: getEmptyComponent(),
   },
 })

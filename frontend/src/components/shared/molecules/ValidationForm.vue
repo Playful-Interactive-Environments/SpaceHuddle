@@ -97,7 +97,6 @@ export default class ValidationForm extends Vue implements ValidationMethods {
       if (valid) {
         this.$emit('submitDataValid');
       } else {
-        //form?.scrollToField(Object.keys(fields)[0]);
         this.formData.stateMessage = (this as any).$t(
           'error.vuelidate.validationErrors'
         );

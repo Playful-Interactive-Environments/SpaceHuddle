@@ -16,7 +16,7 @@ export class CanvasBodies {
   ctx!: CanvasRenderingContext2D;
   canvasWidth = 0;
   canvasHeight = 0;
-  bodies: { [key: string]: any }[] = [];
+  bodies: { [key: string]: string | number | boolean }[] = [];
   texts: {
     text: string;
     x: number;
@@ -95,7 +95,7 @@ export class CanvasBodies {
     y: number,
     width: number,
     height: number,
-    options: { [key: string]: any } = {}
+    options: { [key: string]: string | number | boolean } = {}
   ): void {
     const body = Bodies.rectangle(x, y, width, height, options);
     Composite.add(engine.world, body);
@@ -106,7 +106,7 @@ export class CanvasBodies {
     x: number,
     y: number,
     radius: number,
-    options: { [key: string]: any } = {}
+    options: { [key: string]: string | number | boolean } = {}
   ): void {
     const body = Bodies.circle(x, y, radius, options);
     Composite.add(engine.world, body);
@@ -224,7 +224,7 @@ export class CanvasBodies {
           1,
           body.position.x,
           body.position.y,
-          options.gradientSize
+          options.gradientSize as number
         );
         grd.addColorStop(0, `#FFFFFF${gradOpacity}`);
         grd.addColorStop(1, '#FFFFFF00');
@@ -237,10 +237,10 @@ export class CanvasBodies {
       this.ctx.fill();
       if (options.text) {
         this.showText(
-          options.text,
+          options.text as string,
           body.position.x,
           body.position.y,
-          options.gradientSize,
+          options.gradientSize as number,
           `#27133B${hexOpacity}`,
           body.angle
         );

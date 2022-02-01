@@ -236,7 +236,7 @@ export default class Participant extends Vue {
     this.changeText();
   }
 
-  draw(e: any): void {
+  draw(e: MouseEvent): void {
     this.mousePos = [e.offsetX, e.offsetY];
   }
 
