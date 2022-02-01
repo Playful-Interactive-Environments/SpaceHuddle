@@ -393,22 +393,12 @@ export default class ModeratorTopicDetails extends Vue {
     const activeTabTask = this.tasks.find(
       (task) => TaskType[task.taskType] === this.activeTab
     );
-    if (activeTabTask) this.changeTask(activeTabTask);
+    if (
+      activeTabTask &&
+      (!this.activeTask || this.activeTask.taskType !== activeTabTask.taskType)
+    )
+      this.changeTask(activeTabTask);
   }
-
-  /*@Watch('activeTask', { immediate: true })
-  onActiveTaskChanged(): void {
-    if (this.$options.components && this.activeTask) {
-      getAsyncModule(
-        ModuleComponentType.MODERATOR_CONTENT,
-        TaskType[this.activeTask.taskType]
-      ).then((component) => {
-        if (this.$options.components)
-          this.$options.components['ModuleContentComponent'] = component;
-        this.componentLoadIndex++;
-      });
-    }
-  }*/
 
   taskTypeAvailable(taskType: TaskType): boolean {
     if (taskType == TaskType.BRAINSTORMING || taskType == TaskType.INFORMATION)
