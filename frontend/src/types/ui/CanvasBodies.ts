@@ -56,20 +56,24 @@ export class CanvasBodies {
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     this.clearBodies();
+    this.setGravity(0, 1, 0);
   }
 
-  readonly defaultGravityScale = 0.00005;
-  setGravity(x: number, y: number): void {
+  readonly defaultGravityScale = 0.0005;
+  setGravity(x: number, y: number, z: number): void {
     engine.gravity = {
       x: x,
       y: y,
-      scale: this.defaultGravityScale,
+      scale: this.defaultGravityScale * (1 - z),
     };
   }
 
   startAnimation(): void {
     this.animationTimeline.animationFrame = 0;
-    const force = engine.gravity.scale === this.defaultGravityScale ? 10 : 20;
+    this.addShakingForce();
+  }
+
+  addShakingForce(force = 10): void {
     engine.world.bodies.forEach((body, index) => {
       const options = this.bodies[index];
       if (options.text) {

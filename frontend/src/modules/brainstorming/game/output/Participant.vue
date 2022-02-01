@@ -12,6 +12,11 @@
         {{ char }}
       </span>
     </div>
+    <!--<div class="overlay">
+      <el-button v-on:click="isShaking()">shake</el-button>
+      <div>{{ shakingStartTime }}</div>
+      <div>{{ shakeCount }}</div>
+    </div>-->
   </div>
 </template>
 
@@ -25,6 +30,7 @@ import { Idea } from '@/types/api/Idea.ts';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { CanvasBodies } from '@/types/ui/CanvasBodies';
+import NoSleep from 'nosleep.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const orientations: string[][] = [
@@ -58,6 +64,7 @@ export default class Participant extends Vue {
   mousePos: any = null;
   bodies!: CanvasBodies;
   shakeEvent: any;
+  noSleep!: NoSleep;
 
   changeText(): void {
     if (this.randomIdea && this.$refs.textAnimation) {
@@ -71,8 +78,8 @@ export default class Participant extends Vue {
           this.bodies.addText(
             span.innerHTML,
             (rect.left + rect.right) / 2 - rectAnimation.x,
-            (rect.top + rect.bottom) / 2 - rectAnimation.y,
-            70,
+            rect.top + rect.height / 2, // (rect.top + rect.bottom) / 2 - rectAnimation.y,
+            48,
             '#FFFFFFFF'
           );
         }
@@ -99,38 +106,128 @@ export default class Participant extends Vue {
     return '';
   }
 
-  async mounted(): Promise<void> {
-    if (this.$refs.canvas) {
-      (this.$refs.canvas as any).width = (
-        this.$refs.canvas as any
-      ).parentElement.offsetWidth;
-      (this.$refs.canvas as any).height = (
-        this.$refs.canvas as any
-      ).parentElement.offsetHeight;
-      this.vueCanvas = (this.$refs.canvas as any).getContext('2d');
-    }
-    window.addEventListener('deviceorientation', this.onOrientationChange);
-    await this.getTaskIdeas();
-    this.startInterval();
+  changeFullScreen = false;
+  isInFullScreen(): boolean {
+    const doc = document as any;
+    return (
+      !!document.fullscreenElement ||
+      !!doc.webkitFullscreenElement ||
+      !!doc.mozFullScreenElement ||
+      !!doc.msFullscreenElement
+    );
+  }
 
-    this.setupPhysics();
-    this.drawingInterval = setInterval(() => {
-      this.update_drawing();
-    }, this.drawingIntervalTime);
-    this.setupShaking();
+  async requestFullscreen(): Promise<void> {
+    if (!this.isInFullScreen()) {
+      this.changeFullScreen = true;
+      const docElm = document.documentElement as any;
+      if (docElm.requestFullscreen) {
+        await docElm.requestFullscreen();
+      } else if (docElm.mozRequestFullScreen) {
+        await docElm.mozRequestFullScreen();
+      } else if (docElm.webkitRequestFullScreen) {
+        await docElm.webkitRequestFullScreen();
+      } else if (docElm.msRequestFullscreen) {
+        await docElm.msRequestFullscreen();
+      }
+    }
+  }
+
+  async exitFullscreen(): Promise<void> {
+    if (this.changeFullScreen && this.isInFullScreen()) {
+      const doc = document as any;
+      if (doc.exitFullscreen) {
+        await doc.exitFullscreen();
+      } else if (doc.webkitExitFullscreen) {
+        await doc.webkitExitFullscreen();
+      } else if (doc.mozCancelFullScreen) {
+        await doc.mozCancelFullScreen();
+      } else if (doc.msExitFullscreen) {
+        await doc.msExitFullscreen();
+      }
+    }
+  }
+
+  async mounted(): Promise<void> {
+    await this.requestFullscreen();
+    window.screen.orientation
+      .lock('portrait-primary')
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      .catch(function () {});
+    setTimeout(() => {
+      if (this.$refs.canvas) {
+        (this.$refs.canvas as any).width = (
+          this.$refs.canvas as any
+        ).parentElement.offsetWidth;
+        (this.$refs.canvas as any).height = (
+          this.$refs.canvas as any
+        ).parentElement.offsetHeight;
+        this.vueCanvas = (this.$refs.canvas as any).getContext('2d');
+      }
+      window.addEventListener('deviceorientation', this.onOrientationChange);
+      this.startInterval();
+
+      this.setupPhysics();
+      this.drawingInterval = setInterval(() => {
+        this.update_drawing();
+      }, this.drawingIntervalTime);
+      this.setupShaking();
+    }, 100);
+    this.noSleep = new NoSleep();
+    this.noSleep.enable();
+    await this.getTaskIdeas();
   }
 
   setupShaking(): void {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const Shake = require('shake.js');
-    this.shakeEvent = new Shake({ threshold: 15 });
+    this.shakeEvent = new Shake({ threshold: 15, timeout: 1000 });
     this.shakeEvent.start();
     window.addEventListener('shake', this.isShaking, false);
   }
 
+  shakingStartTime = 0;
+  lastShakingTime = 0;
+  shakingDurationTime = 10 * 1000;
+  maxShakingDelay = 4 * 1000;
+  shakeCount = 0;
   isShaking(): void {
-    this.getTaskIdeas();
-    //this.changeText();
+    const animationInterval = 1000;
+    const shakingTime = Date.now();
+    const actualShakingForce = (): number => {
+      const actualTime = Date.now();
+      const directionCount = Math.ceil(
+        (actualTime - this.shakingStartTime) / animationInterval
+      );
+      return directionCount % 2 === 0 ? 20 : -10;
+    };
+    const animateShaking = (): void => {
+      if (this.lastShakingTime === shakingTime) {
+        this.bodies.addShakingForce(actualShakingForce());
+        setTimeout(() => {
+          const animationTime = Date.now();
+          if (shakingTime + this.maxShakingDelay > animationTime) {
+            animateShaking();
+          }
+        }, animationInterval);
+      }
+    };
+
+    if (
+      !this.lastShakingTime ||
+      this.lastShakingTime + this.maxShakingDelay < shakingTime
+    ) {
+      this.shakingStartTime = shakingTime;
+      this.shakeCount = 0;
+    }
+    this.lastShakingTime = shakingTime;
+    this.shakeCount++;
+
+    if (this.shakingStartTime + this.shakingDurationTime < shakingTime) {
+      this.getTaskIdeas();
+    } else {
+      animateShaking();
+    }
   }
 
   setupPhysics(): void {
@@ -140,8 +237,14 @@ export default class Participant extends Vue {
       this.vueCanvasHeight
     );
     const letterCount = 26;
-    for (let i = 0; i < 100; i++) {
-      const r = Math.floor(Math.random() * 15 + 15);
+    const circleCount = 100;
+    const fillFactor = 1.5;
+    const areaPerCircle =
+      (this.vueCanvasWidth * this.vueCanvasHeight) / circleCount / fillFactor;
+    const maxRadius = Math.sqrt(areaPerCircle / Math.PI);
+    const minRadius = maxRadius / 2;
+    for (let i = 0; i < circleCount; i++) {
+      const r = Math.floor(Math.random() * (maxRadius - minRadius) + minRadius);
       const x = Math.floor(Math.random() * (this.vueCanvasWidth - r * 2) + r);
       const y = Math.floor(Math.random() * (this.vueCanvasHeight - r * 2) + r);
       const a = 'A';
@@ -191,7 +294,7 @@ export default class Participant extends Vue {
       );
       // transform an upward-pointing vector to device coordinates
       const vec = q.conjugate().rotateVector([0, 0, 1]);
-      this.bodies.setGravity(vec[0], vec[1]);
+      this.bodies.setGravity(-vec[0], vec[1], vec[1]);
     }
   }
 
@@ -211,10 +314,12 @@ export default class Participant extends Vue {
   }
 
   startInterval(): void {
-    this.interval = setInterval(this.getTaskIdeas, this.intervalTime);
+    //this.interval = setInterval(this.getTaskIdeas, this.intervalTime);
   }
 
-  unmounted(): void {
+  async unmounted(): Promise<void> {
+    await this.exitFullscreen();
+    this.noSleep.disable();
     clearInterval(this.interval);
     clearInterval(this.drawingInterval);
     this.shakeEvent.stop();
@@ -260,16 +365,42 @@ export default class Participant extends Vue {
 }
 
 .text-animation {
+  margin: 0;
   position: absolute;
-  height: 100vh;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  //height: 100vh;
   width: 100%;
-  top: 0;
+  //top: 0;
   z-index: -1;
   text-align: center;
-  vertical-align: middle;
-  line-height: 100vh;
+  //vertical-align: middle;
+  //line-height: 100vh;
   font-family: Arial, sans-serif;
-  font-size: 70px;
+  font-size: 48px;
+  padding: 0 5rem;
+}
+
+.overlay {
+  margin: 0;
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  //height: 100vh;
+  //width: 100%;
+  //top: 0;
+  //bottom: 0;
+  //margin: auto;
+  z-index: 10;
+  text-align: center;
+  //vertical-align: middle;
+  //line-height: 100vh;
+  font-family: Arial, sans-serif;
+  font-size: 48px;
 }
 
 html,
