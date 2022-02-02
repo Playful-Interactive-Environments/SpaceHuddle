@@ -1,16 +1,17 @@
+import { isNumber } from 'chart.js/helpers';
+import * as Matter from 'matter-js/build/matter.js';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const Matter = require('@/../node_modules/matter-js/build/matter.js');
+//const Matter = require('@/../node_modules/matter-js/build/matter.js');
 
-// module aliases
-const Engine = Matter.Engine,
-  Runner = Matter.Runner,
-  Bodies = Matter.Bodies,
-  Body = Matter.Body,
-  Composite = Matter.Composite;
-
-const engine = Engine.create();
-const runner = Runner.create();
-Runner.run(runner, engine);
+export interface Keyframe {
+  keyframe: number;
+  position?: [number, number, number];
+  opacity?: number;
+  textProgress?: number;
+  source?: Keyframe;
+  target?: Keyframe;
+}
 
 export class CanvasBodies {
   ctx!: CanvasRenderingContext2D;
@@ -25,68 +26,172 @@ export class CanvasBodies {
     color: string;
     angle: number;
     animation: {
-      startX: number;
-      startY: number;
+      path: [number, number][];
       startSize: number;
       startAngle: number;
     };
   }[] = [];
   animationTimeline: {
-    fadeAnimationLength: number;
     animationFrame: number;
-    fadeInAnimationStart: number;
-    fadeOutAnimationStart: number;
-    startOpacity: number;
-    targetOpacity: number;
+    animationDelta: number;
+    animationEnd: number;
   } = {
-    fadeAnimationLength: 10,
     animationFrame: -1,
-    fadeInAnimationStart: 0,
-    fadeOutAnimationStart: 80,
-    startOpacity: 0,
-    targetOpacity: 255,
+    animationDelta: 1,
+    animationEnd: -1,
   };
 
+  animationKeyframes: Keyframe[] = [
+    { keyframe: 0, opacity: 255 },
+    { keyframe: 20, textProgress: 0 },
+    { keyframe: 30, opacity: 0 },
+    { keyframe: 100, textProgress: 100 },
+    { keyframe: 150, opacity: 0, textProgress: 100 },
+  ];
+
+  mouseConstraint!: typeof Matter.MouseConstraint;
+
+  engine!: typeof Matter.Engine;
+  runner!: typeof Matter.Runner;
   constructor(
     ctx: CanvasRenderingContext2D,
     canvasWidth: number,
-    canvasHeight: number
+    canvasHeight: number,
+    canvas: HTMLCanvasElement
   ) {
+    this.engine = Matter.Engine.create();
+    this.runner = Matter.Runner.create();
+    Matter.Runner.run(this.runner, this.engine);
+
     this.ctx = ctx;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     this.clearBodies();
     this.setGravity(0, 1, 0);
+
+    // add mouse control
+    const mouse = Matter.Mouse.create(canvas);
+    this.mouseConstraint = Matter.MouseConstraint.create(this.engine, {
+      mouse: mouse,
+      constraint: {
+        stiffness: 0.2,
+      },
+    });
+    Matter.Composite.add(this.engine.world, this.mouseConstraint);
+  }
+
+  private getKeyframeValue(keyframe: number): Keyframe {
+    const animationKeyframes = this.animationKeyframes.sort((a, b) =>
+      a.keyframe > b.keyframe ? 1 : 0
+    );
+    const frame: Keyframe = {
+      keyframe: keyframe,
+    };
+    const findTarget = (
+      predicate: (value: Keyframe, index: number, obj: Keyframe[]) => boolean
+    ): Keyframe | undefined => {
+      const list = animationKeyframes
+        .filter(
+          (frame, index, obj) =>
+            keyframe <= frame.keyframe && predicate(frame, index, obj)
+        )
+        .sort((a, b) => (a.keyframe > b.keyframe ? 1 : 0));
+
+      if (list.length > 0) return list[0];
+    };
+    const findSource = (
+      predicate: (value: Keyframe, index: number, obj: Keyframe[]) => boolean
+    ): Keyframe | undefined => {
+      const list = animationKeyframes
+        .filter(
+          (frame, index, obj) =>
+            keyframe > frame.keyframe && predicate(frame, index, obj)
+        )
+        .sort((a, b) => (a.keyframe > b.keyframe ? 1 : 0));
+
+      if (list.length > 0) return list[list.length - 1];
+    };
+    const setProperty = (
+      propertyName: string,
+      source: Keyframe | undefined,
+      target: Keyframe | undefined
+    ): void => {
+      if (source && target) {
+        const opacityDelta =
+          (target[propertyName] - source[propertyName]) /
+          (target.keyframe - source.keyframe);
+        frame[propertyName] =
+          source[propertyName] + opacityDelta * (keyframe - source.keyframe);
+      } else if (target && target.keyframe === keyframe) {
+        frame[propertyName] = target[propertyName];
+      }
+      frame.source = source;
+      frame.target = target;
+    };
+
+    setProperty(
+      'opacity',
+      findSource((frame) => frame.opacity !== undefined),
+      findTarget((frame) => frame.opacity !== undefined)
+    );
+    setProperty(
+      'position',
+      findSource((frame) => frame.position !== undefined),
+      findTarget((frame) => frame.position !== undefined)
+    );
+    setProperty(
+      'textProgress',
+      findSource((frame) => frame.textProgress !== undefined),
+      findTarget((frame) => frame.textProgress !== undefined)
+    );
+    return frame;
+  }
+
+  private isLastKeyframe(): boolean {
+    return (
+      this.animationKeyframes.filter(
+        (frame) => frame.keyframe > this.animationTimeline.animationFrame
+      ).length === 0 ||
+      this.animationTimeline.animationFrame >=
+        this.animationTimeline.animationEnd
+    );
   }
 
   readonly defaultGravityScale = 0.0005;
   setGravity(x: number, y: number, z: number): void {
-    engine.gravity = {
+    this.engine.gravity = {
       x: x,
       y: y,
       scale: this.defaultGravityScale * (1 - z),
     };
   }
 
-  startAnimation(): void {
-    this.animationTimeline.animationFrame = 0;
-    this.addShakingForce();
+  startAnimation(runtime = 20): boolean {
+    let returnValue = false;
+    if (this.animationTimeline.animationFrame == -1) {
+      this.animationTimeline.animationFrame = 0;
+      returnValue = true;
+    }
+    this.animationTimeline.animationDelta = 1;
+    this.animationTimeline.animationEnd =
+      this.animationTimeline.animationFrame + runtime;
+    return returnValue;
   }
 
   addShakingForce(force = 10): void {
-    engine.world.bodies.forEach((body, index) => {
+    this.engine.world.bodies.forEach((body, index) => {
       const options = this.bodies[index];
       if (options.text) {
-        Body.setVelocity(body, {
-          x: -engine.gravity.x * force,
-          y: -engine.gravity.y * force,
+        Matter.Body.setVelocity(body, {
+          x: -this.engine.gravity.x * force,
+          y: -this.engine.gravity.y * force,
         });
       }
     });
   }
 
   clearBodies(): void {
-    Composite.clear(engine.world);
+    Matter.Composite.clear(this.engine.world);
     this.bodies = [];
   }
 
@@ -101,8 +206,8 @@ export class CanvasBodies {
     height: number,
     options: { [key: string]: string | number | boolean } = {}
   ): void {
-    const body = Bodies.rectangle(x, y, width, height, options);
-    Composite.add(engine.world, body);
+    const body = Matter.Bodies.rectangle(x, y, width, height, options);
+    Matter.Composite.add(this.engine.world, body);
     this.bodies.push(options);
   }
 
@@ -112,8 +217,8 @@ export class CanvasBodies {
     radius: number,
     options: { [key: string]: string | number | boolean } = {}
   ): void {
-    const body = Bodies.circle(x, y, radius, options);
-    Composite.add(engine.world, body);
+    const body = Matter.Bodies.circle(x, y, radius, options);
+    Matter.Composite.add(this.engine.world, body);
     this.bodies.push(options);
   }
 
@@ -125,16 +230,18 @@ export class CanvasBodies {
     color = '#FFFFFFFF',
     angle = 0
   ): void {
+    const path: [number, number][] = [];
+    for (let i = 0; i < 8; i++) {
+      path.push([
+        Math.floor(Math.random() * this.canvasWidth),
+        Math.floor(Math.random() * this.canvasHeight),
+      ]);
+    }
+    path.push([x, y]);
     const animation = {
-      startX: Math.floor(Math.random() * this.canvasWidth),
-      startY: Math.floor(Math.random() * this.canvasHeight),
-      startSize: size / 3,
-      startOpacity: 0,
-      targetOpacity: 255,
-      startAngle: angle,
-      animationLength: 15,
-      animationFrame: 0,
-      fadeOutAnimationStart: 80,
+      path: path,
+      startSize: size / Math.floor(Math.random() * 5 + 2),
+      startAngle: Math.floor(Math.random() * 360),
     };
     this.texts.push({
       text: text,
@@ -147,59 +254,42 @@ export class CanvasBodies {
     });
   }
 
+  private readonly pressFactor = 3;
+  pressBody(): void {
+    setTimeout(() => {
+      if (this.mouseConstraint.body) {
+        const body = this.mouseConstraint.body;
+        if (body.scaleFactor) body.scaleFactor *= this.pressFactor;
+        else body.scaleFactor = this.pressFactor;
+        Matter.Body.scale(body, this.pressFactor, this.pressFactor);
+      }
+    }, 100);
+  }
+
+  releaseBody(): void {
+    const body = this.mouseConstraint.body;
+    setTimeout(() => {
+      if (body) {
+        const pressFactor = body.scaleFactor
+          ? body.scaleFactor
+          : this.pressFactor;
+        body.scaleFactor = 1;
+        Matter.Body.scale(body, 1 / pressFactor, 1 / pressFactor);
+      }
+    }, 500);
+  }
+
   clearTexts(): void {
     this.texts = [];
   }
 
-  private fadeInAnimationIsRunning(): boolean {
-    return (
-      this.animationTimeline.animationFrame >=
-        this.animationTimeline.fadeInAnimationStart &&
-      this.animationTimeline.animationFrame <=
-        this.animationTimeline.fadeInAnimationStart +
-          this.animationTimeline.fadeAnimationLength
-    );
-  }
-
-  private fadeOutAnimationIsRunning(): boolean {
-    return (
-      this.animationTimeline.animationFrame >=
-        this.animationTimeline.fadeOutAnimationStart &&
-      this.animationTimeline.animationFrame <=
-        this.animationTimeline.fadeOutAnimationStart +
-          this.animationTimeline.fadeAnimationLength
-    );
-  }
-
-  private animationTextIsActive(): boolean {
-    return (
-      this.animationTimeline.animationFrame >=
-        this.animationTimeline.fadeInAnimationStart &&
-      this.animationTimeline.animationFrame <=
-        this.animationTimeline.fadeOutAnimationStart +
-          this.animationTimeline.fadeAnimationLength
-    );
-  }
-
-  private interpolationFrame(): number {
-    if (this.fadeInAnimationIsRunning())
-      return this.animationTimeline.animationFrame;
-    if (this.fadeOutAnimationIsRunning())
-      return (
-        this.animationTimeline.fadeAnimationLength -
-        this.animationTimeline.animationFrame +
-        this.animationTimeline.fadeOutAnimationStart
-      );
-    return -1;
-  }
-
   completeAnimation(): void {
-    runner.enabled = true;
+    this.runner.enabled = true;
 
-    engine.world.bodies.forEach((body, index) => {
+    this.engine.world.bodies.forEach((body, index) => {
       const options = this.bodies[index];
       if (options.text) {
-        Body.setVelocity(body, { x: 0, y: 0 });
+        Matter.Body.setVelocity(body, { x: 0, y: 0 });
       }
     });
   }
@@ -209,7 +299,20 @@ export class CanvasBodies {
     if (gradOpacity.length === 1) gradOpacity = `0${gradOpacity}`;
     let hexOpacity = opacity.toString(16);
     if (hexOpacity.length === 1) hexOpacity = `0${hexOpacity}`;
-    engine.world.bodies.forEach((body, index) => {
+    this.engine.world.bodies.forEach((body, index) => {
+      if (
+        body.position.x < 0 ||
+        body.position.x > this.canvasWidth ||
+        body.position.y < 0 ||
+        body.position.y > this.canvasHeight
+      ) {
+        const position = Matter.Vector.create(
+          Math.floor(Math.random() * this.canvasWidth),
+          Math.floor(Math.random() * this.canvasHeight)
+        );
+        Matter.Body.setPosition(body, position);
+      }
+
       const options = this.bodies[index];
       this.ctx.beginPath();
       const start = body.vertices[0];
@@ -220,7 +323,7 @@ export class CanvasBodies {
       }
       this.ctx.closePath();
 
-      if (options.gradientSize) {
+      if (options.gradientSize && isNumber(options.gradientSize)) {
         // Create gradient
         const grd = this.ctx.createRadialGradient(
           body.position.x,
@@ -252,6 +355,14 @@ export class CanvasBodies {
     });
   }
 
+  private enableEngine(value: boolean): void {
+    if (value) {
+      if (!this.runner.enabled) this.completeAnimation();
+    } else {
+      if (this.runner.enabled) this.runner.enabled = false;
+    }
+  }
+
   show(): void {
     const interpolate = (
       start: number,
@@ -261,72 +372,71 @@ export class CanvasBodies {
     ): number => {
       return start + (step / stepCount) * (end - start);
     };
-    const interpolationFrame = this.interpolationFrame();
 
     this.clearCanvas();
-    if (!this.animationTextIsActive()) this.showBodies(255);
+    if (this.animationTimeline.animationFrame === -1) this.showBodies(255);
     else {
-      if (
-        this.fadeOutAnimationIsRunning() &&
-        interpolationFrame === this.animationTimeline.fadeAnimationLength
-      ) {
-        this.completeAnimation();
-      }
-      let opacity = interpolate(
-        this.animationTimeline.startOpacity,
-        this.animationTimeline.targetOpacity,
-        interpolationFrame,
-        this.animationTimeline.fadeAnimationLength
+      const frame = this.getKeyframeValue(
+        this.animationTimeline.animationFrame
       );
-      if (opacity < 0 || opacity > 255) {
-        opacity = 0;
+      if (frame && frame.opacity !== undefined) {
+        const opacity = Math.floor(frame.opacity);
+        this.showBodies(opacity);
+        this.enableEngine(frame.opacity !== 0);
       }
-      opacity = Math.floor(opacity);
-      if (this.fadeInAnimationIsRunning() || this.fadeOutAnimationIsRunning()) {
-        this.showBodies(255 - opacity);
+      if (frame && frame.textProgress !== undefined) {
+        const textProgress = frame.textProgress;
+        const textProgressLength = 100;
+        let opacity = interpolate(0, 255, textProgress, textProgressLength);
+        if (opacity < 0 || opacity > 255) {
+          opacity = 0;
+        }
+        opacity = Math.floor(opacity);
         let hexOpacity = opacity.toString(16);
         if (hexOpacity.length === 1) hexOpacity = `0${hexOpacity}`;
+
         this.texts.forEach((text) => {
+          const delta = textProgressLength / (text.animation.path.length - 1);
+          const pathIndexStart = Math.floor(textProgress / delta);
+          const pathIndexEnd =
+            pathIndexStart < text.animation.path.length - 1
+              ? pathIndexStart + 1
+              : pathIndexStart;
           this.showText(
             text.text,
             interpolate(
-              text.animation.startX,
-              text.x,
-              interpolationFrame,
-              this.animationTimeline.fadeAnimationLength
+              text.animation.path[pathIndexStart][0],
+              text.animation.path[pathIndexEnd][0],
+              textProgress % delta,
+              delta
             ),
             interpolate(
-              text.animation.startY,
-              text.y,
-              interpolationFrame,
-              this.animationTimeline.fadeAnimationLength
+              text.animation.path[pathIndexStart][1],
+              text.animation.path[pathIndexEnd][1],
+              textProgress % delta,
+              delta
             ),
             interpolate(
               text.animation.startSize,
               text.size,
-              interpolationFrame,
-              this.animationTimeline.fadeAnimationLength
+              textProgress,
+              textProgressLength
             ),
             `${text.color.substr(0, 7)}${hexOpacity}`,
-            text.angle
-          );
-        });
-      } else {
-        if (runner.enabled) runner.enabled = false;
-        this.texts.forEach((text) => {
-          this.showText(
-            text.text,
-            text.x,
-            text.y,
-            text.size,
-            text.color,
-            text.angle
+            interpolate(
+              text.animation.startAngle,
+              text.angle,
+              textProgress,
+              textProgressLength
+            )
           );
         });
       }
     }
+    if (this.isLastKeyframe()) this.animationTimeline.animationDelta = -1;
     if (this.animationTimeline.animationFrame >= 0)
-      this.animationTimeline.animationFrame++;
+      this.animationTimeline.animationFrame +=
+        this.animationTimeline.animationDelta;
   }
 
   showText(

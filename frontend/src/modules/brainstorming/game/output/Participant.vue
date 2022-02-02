@@ -12,11 +12,11 @@
         {{ char }}
       </span>
     </div>
-    <!--<div class="overlay">
-      <el-button v-on:click="isShaking()">shake</el-button>
-      <div>{{ shakingStartTime }}</div>
-      <div>{{ shakeCount }}</div>
-    </div>-->
+    <div class="overlay">
+      <div class="icon link" v-on:click="isShaking()">
+        <font-awesome-icon :icon="['fac', 'shake']" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -69,7 +69,7 @@ export default class Participant extends Vue {
   changeText(): void {
     if (this.randomIdea && this.$refs.textAnimation) {
       this.bodies.clearTexts();
-      this.bodies.startAnimation();
+      //this.bodies.startAnimation(50);
       const textAnimation = this.$refs.textAnimation as any;
       const rectAnimation = textAnimation.getBoundingClientRect();
       textAnimation.childNodes.forEach((span) => {
@@ -78,7 +78,7 @@ export default class Participant extends Vue {
           this.bodies.addText(
             span.innerHTML,
             (rect.left + rect.right) / 2 - rectAnimation.x,
-            rect.top + rect.height / 2, // (rect.top + rect.bottom) / 2 - rectAnimation.y,
+            rect.top + rect.height / 2,
             48,
             '#FFFFFFFF'
           );
@@ -175,7 +175,20 @@ export default class Participant extends Vue {
     }, 100);
     this.noSleep = new NoSleep();
     this.noSleep.enable();
-    await this.getTaskIdeas();
+    //await this.getTaskIdeas();
+
+    window.addEventListener('mousedown', this.mousedown);
+    window.addEventListener('mouseup', this.mouseup);
+    window.addEventListener('touchstart', this.mousedown);
+    window.addEventListener('touchend', this.mouseup);
+  }
+
+  private mousedown(): void {
+    this.bodies.pressBody();
+  }
+
+  private mouseup(): void {
+    this.bodies.releaseBody();
   }
 
   setupShaking(): void {
@@ -188,15 +201,13 @@ export default class Participant extends Vue {
 
   shakingStartTime = 0;
   lastShakingTime = 0;
-  shakingDurationTime = 10 * 1000;
   maxShakingDelay = 4 * 1000;
-  shakeCount = 0;
   isShaking(): void {
     const animationInterval = 1000;
     const shakingTime = Date.now();
     const actualShakingForce = (): number => {
       const actualTime = Date.now();
-      const directionCount = Math.ceil(
+      const directionCount = Math.floor(
         (actualTime - this.shakingStartTime) / animationInterval
       );
       return directionCount % 2 === 0 ? 20 : -10;
@@ -213,76 +224,76 @@ export default class Participant extends Vue {
       }
     };
 
-    if (
-      !this.lastShakingTime ||
-      this.lastShakingTime + this.maxShakingDelay < shakingTime
-    ) {
-      this.shakingStartTime = shakingTime;
-      this.shakeCount = 0;
-    }
     this.lastShakingTime = shakingTime;
-    this.shakeCount++;
 
-    if (this.shakingStartTime + this.shakingDurationTime < shakingTime) {
+    if (this.bodies.startAnimation(50)) {
+      this.shakingStartTime = shakingTime;
       this.getTaskIdeas();
-    } else {
-      animateShaking();
     }
+    animateShaking();
   }
 
   setupPhysics(): void {
-    this.bodies = new CanvasBodies(
-      this.vueCanvas,
-      this.vueCanvasWidth,
-      this.vueCanvasHeight
-    );
-    const letterCount = 26;
-    const circleCount = 100;
-    const fillFactor = 1.5;
-    const areaPerCircle =
-      (this.vueCanvasWidth * this.vueCanvasHeight) / circleCount / fillFactor;
-    const maxRadius = Math.sqrt(areaPerCircle / Math.PI);
-    const minRadius = maxRadius / 2;
-    for (let i = 0; i < circleCount; i++) {
-      const r = Math.floor(Math.random() * (maxRadius - minRadius) + minRadius);
-      const x = Math.floor(Math.random() * (this.vueCanvasWidth - r * 2) + r);
-      const y = Math.floor(Math.random() * (this.vueCanvasHeight - r * 2) + r);
-      const a = 'A';
-      const text = String.fromCharCode(a.charCodeAt(0) + (i % letterCount));
-      this.bodies.addCircle(x, y, r, { text: text, gradientSize: r });
+    if (this.$refs.canvas) {
+      this.bodies = new CanvasBodies(
+        this.vueCanvas,
+        this.vueCanvasWidth,
+        this.vueCanvasHeight,
+        this.$refs.canvas as HTMLCanvasElement
+      );
+      const letterCount = 26;
+      const circleCount = 100;
+      const fillFactor = 1.5;
+      const areaPerCircle =
+        (this.vueCanvasWidth * this.vueCanvasHeight) / circleCount / fillFactor;
+      const maxRadius = Math.sqrt(areaPerCircle / Math.PI);
+      const minRadius = maxRadius / 2;
+      for (let i = 0; i < circleCount; i++) {
+        const r = Math.floor(Math.random() * (maxRadius - minRadius) + minRadius);
+        const x = Math.floor(Math.random() * (this.vueCanvasWidth - r * 2) + r);
+        const y = Math.floor(Math.random() * (this.vueCanvasHeight - r * 2) + r);
+        const a = 'A';
+        const text = String.fromCharCode(a.charCodeAt(0) + (i % letterCount));
+        this.bodies.addCircle(x, y, r, { text: text, gradientSize: r });
+      }
+      const borderSize = 1;
+      this.bodies.addRect(
+        this.vueCanvasWidth / 2,
+        this.vueCanvasHeight - borderSize / 2,
+        this.vueCanvasWidth,
+        borderSize,
+        { isStatic: true }
+      );
+      this.bodies.addRect(
+        this.vueCanvasWidth / 2,
+        borderSize / 2,
+        this.vueCanvasWidth,
+        borderSize,
+        { isStatic: true }
+      );
+      this.bodies.addRect(
+        borderSize / 2,
+        this.vueCanvasHeight / 2,
+        borderSize,
+        this.vueCanvasHeight,
+        { isStatic: true }
+      );
+      this.bodies.addRect(
+        this.vueCanvasWidth - borderSize / 2,
+        this.vueCanvasHeight / 2,
+        borderSize,
+        this.vueCanvasHeight,
+        { isStatic: true }
+      );
     }
-    const borderSize = 1;
-    this.bodies.addRect(
-      this.vueCanvasWidth / 2,
-      this.vueCanvasHeight - borderSize / 2,
-      this.vueCanvasWidth,
-      borderSize,
-      { isStatic: true }
-    );
-    this.bodies.addRect(
-      this.vueCanvasWidth / 2,
-      borderSize / 2,
-      this.vueCanvasWidth,
-      borderSize,
-      { isStatic: true }
-    );
-    this.bodies.addRect(
-      borderSize / 2,
-      this.vueCanvasHeight / 2,
-      borderSize,
-      this.vueCanvasHeight,
-      { isStatic: true }
-    );
-    this.bodies.addRect(
-      this.vueCanvasWidth - borderSize / 2,
-      this.vueCanvasHeight / 2,
-      borderSize,
-      this.vueCanvasHeight,
-      { isStatic: true }
-    );
   }
 
   onOrientationChange(ev: DeviceOrientationEvent): void {
+    const vec = this.deviceOrientationEventToVector(ev);
+    this.bodies.setGravity(-vec[0], vec[1], vec[1]);
+  }
+
+  deviceOrientationEventToVector(ev: DeviceOrientationEvent): [number, number, number] {
     if (ev.alpha && ev.beta && ev.gamma) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const Quaternion = require('quaternion');
@@ -293,9 +304,9 @@ export default class Participant extends Vue {
         'ZXY'
       );
       // transform an upward-pointing vector to device coordinates
-      const vec = q.conjugate().rotateVector([0, 0, 1]);
-      this.bodies.setGravity(-vec[0], vec[1], vec[1]);
+      return q.conjugate().rotateVector([0, 0, 1]) as [number, number, number];
     }
+    return [0, 0, 0];
   }
 
   @Watch('moduleId', { immediate: true })
@@ -322,6 +333,7 @@ export default class Participant extends Vue {
     this.noSleep.disable();
     clearInterval(this.interval);
     clearInterval(this.drawingInterval);
+    window.removeEventListener('shake', this.isShaking, false);
     this.shakeEvent.stop();
   }
 
@@ -336,9 +348,10 @@ export default class Participant extends Vue {
       .then((queryResult) => {
         const randomIndex = Math.floor(Math.random() * queryResult.length);
         this.randomIdea = queryResult[randomIndex];
+        setTimeout(() => {
+          this.changeText();
+        }, 100);
       });
-
-    this.changeText();
   }
 
   draw(e: MouseEvent): void {
@@ -371,13 +384,9 @@ export default class Participant extends Vue {
   left: 50%;
   -ms-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
-  //height: 100vh;
   width: 100%;
-  //top: 0;
   z-index: -1;
   text-align: center;
-  //vertical-align: middle;
-  //line-height: 100vh;
   font-family: Arial, sans-serif;
   font-size: 48px;
   padding: 0 5rem;
@@ -386,21 +395,13 @@ export default class Participant extends Vue {
 .overlay {
   margin: 0;
   position: absolute;
-  top: 20%;
-  left: 50%;
-  -ms-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-  //height: 100vh;
-  //width: 100%;
-  //top: 0;
-  //bottom: 0;
-  //margin: auto;
+  bottom: 10%;
+  width: 100%;
   z-index: 10;
   text-align: center;
-  //vertical-align: middle;
-  //line-height: 100vh;
   font-family: Arial, sans-serif;
-  font-size: 48px;
+  font-size: 12px;
+  white-space: pre-line;
 }
 
 html,
@@ -410,5 +411,10 @@ body {
 
 body {
   overflow: hidden;
+}
+
+.icon {
+  font-size: 72pt;
+  color: #ffffff77;
 }
 </style>

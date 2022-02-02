@@ -24,7 +24,7 @@
        "game": {  
            "participant": "output/Participant",  
            "locales": "en,",  
-             "icon": "rocket",  "type": "addOn",  "input": "optional",  "syncPublicParticipant": false,  
+             "icon": "bowling-ball",  "type": "addOn",  "input": "optional",  "syncPublicParticipant": false,  
            "path": "brainstorming/game"  
        },  
        "settings": {  
