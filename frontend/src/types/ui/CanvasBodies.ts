@@ -2,13 +2,14 @@ import { isNumber } from 'chart.js/helpers';
 import * as Matter from 'matter-js/build/matter.js';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-//const Matter = require('@/../node_modules/matter-js/build/matter.js');
 
 export interface Keyframe {
   keyframe: number;
-  position?: [number, number, number];
+  position?: 'random';
   opacity?: number;
   textProgress?: number;
+  force?: [number, number] | 'random';
+  forceDirection?: 1 | -1 | 'both';
   source?: Keyframe;
   target?: Keyframe;
 }
@@ -42,9 +43,21 @@ export class CanvasBodies {
   };
 
   animationKeyframes: Keyframe[] = [
-    { keyframe: 0, opacity: 255 },
-    { keyframe: 20, textProgress: 0 },
-    { keyframe: 30, opacity: 0 },
+    { keyframe: 0, opacity: 255, force: 'random' },
+    { keyframe: 5, force: 'random' },
+    { keyframe: 10, force: 'random' },
+    { keyframe: 15, force: 'random' },
+    { keyframe: 20, textProgress: 0, force: 'random' },
+    { keyframe: 25, force: 'random' },
+    { keyframe: 30, force: 'random' },
+    { keyframe: 35, force: 'random' },
+    {
+      keyframe: 40,
+      force: 'random',
+      forceDirection: 'both',
+      position: 'random',
+      opacity: 0,
+    },
     { keyframe: 100, textProgress: 100 },
     { keyframe: 150, opacity: 0, textProgress: 100 },
   ];
@@ -117,16 +130,23 @@ export class CanvasBodies {
       target: Keyframe | undefined
     ): void => {
       if (source && target) {
-        const opacityDelta =
+        const delta =
           (target[propertyName] - source[propertyName]) /
           (target.keyframe - source.keyframe);
         frame[propertyName] =
-          source[propertyName] + opacityDelta * (keyframe - source.keyframe);
+          source[propertyName] + delta * (keyframe - source.keyframe);
       } else if (target && target.keyframe === keyframe) {
         frame[propertyName] = target[propertyName];
       }
       frame.source = source;
       frame.target = target;
+    };
+    const setFrameProperty = (propertyName: string): void => {
+      const propertyFrame = animationKeyframes.find(
+        (frame) =>
+          keyframe === frame.keyframe && frame[propertyName] !== undefined
+      );
+      if (propertyFrame) frame[propertyName] = propertyFrame[propertyName];
     };
 
     setProperty(
@@ -135,15 +155,13 @@ export class CanvasBodies {
       findTarget((frame) => frame.opacity !== undefined)
     );
     setProperty(
-      'position',
-      findSource((frame) => frame.position !== undefined),
-      findTarget((frame) => frame.position !== undefined)
-    );
-    setProperty(
       'textProgress',
       findSource((frame) => frame.textProgress !== undefined),
       findTarget((frame) => frame.textProgress !== undefined)
     );
+    setFrameProperty('force');
+    setFrameProperty('forceDirection');
+    setFrameProperty('position');
     return frame;
   }
 
@@ -257,10 +275,8 @@ export class CanvasBodies {
   private readonly pressFactor = 3;
   pressBody(): void {
     setTimeout(() => {
-      if (this.mouseConstraint.body) {
-        const body = this.mouseConstraint.body;
-        if (body.scaleFactor) body.scaleFactor *= this.pressFactor;
-        else body.scaleFactor = this.pressFactor;
+      const body = this.mouseConstraint.body;
+      if (body && body.circleRadius === body.gradientSize) {
         Matter.Body.scale(body, this.pressFactor, this.pressFactor);
       }
     }, 100);
@@ -269,11 +285,8 @@ export class CanvasBodies {
   releaseBody(): void {
     const body = this.mouseConstraint.body;
     setTimeout(() => {
-      if (body) {
-        const pressFactor = body.scaleFactor
-          ? body.scaleFactor
-          : this.pressFactor;
-        body.scaleFactor = 1;
+      if (body && body.circleRadius > body.gradientSize) {
+        const pressFactor = body.circleRadius / body.gradientSize;
         Matter.Body.scale(body, 1 / pressFactor, 1 / pressFactor);
       }
     }, 500);
@@ -381,8 +394,52 @@ export class CanvasBodies {
       );
       if (frame && frame.opacity !== undefined) {
         const opacity = Math.floor(frame.opacity);
-        this.showBodies(opacity);
         this.enableEngine(frame.opacity !== 0);
+      }
+      if (frame && frame.position !== undefined) {
+        if (frame.position === 'random') {
+          this.engine.world.bodies.forEach((body, index) => {
+            const options = this.bodies[index];
+            if (options.text) {
+              const position = Matter.Vector.create(
+                Math.floor(Math.random() * this.canvasWidth),
+                Math.floor(Math.random() * this.canvasHeight)
+              );
+              Matter.Body.setPosition(body, position);
+            }
+          });
+        }
+      }
+      const useForce = (): boolean => {
+        if (frame.forceDirection !== undefined) {
+          if (frame.forceDirection === 'both') return true;
+          return this.animationTimeline.animationDelta === frame.forceDirection;
+        }
+        return this.animationTimeline.animationDelta === 1;
+      };
+      if (frame && frame.force !== undefined && useForce()) {
+        const getRandomForceValue = (): number => {
+          const value = Math.random() * 80 - 40;
+          if (value >= 0 && value < 10) return value + 10;
+          if (value < 0 && value > -10) return value - 10;
+          return value;
+        };
+        let x = frame.force !== 'random' ? frame.force[0] : 0;
+        let y = frame.force !== 'random' ? frame.force[1] : 0;
+        this.engine.world.bodies.forEach((body, index) => {
+          const options = this.bodies[index];
+          if (options.text) {
+            if (frame.force === 'random') {
+              x = getRandomForceValue();
+              y = getRandomForceValue();
+            }
+            Matter.Body.setVelocity(body, { x: x, y: y });
+          }
+        });
+      }
+      if (frame && frame.opacity !== undefined) {
+        const opacity = Math.floor(frame.opacity);
+        this.showBodies(opacity);
       }
       if (frame && frame.textProgress !== undefined) {
         const textProgress = frame.textProgress;

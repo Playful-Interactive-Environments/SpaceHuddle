@@ -12,7 +12,7 @@
         {{ char }}
       </span>
     </div>
-    <div class="overlay">
+    <div class="overlay disable-text-selection">
       <div class="icon link" v-on:click="isShaking()">
         <font-awesome-icon :icon="['fac', 'shake']" />
       </div>
@@ -194,7 +194,7 @@ export default class Participant extends Vue {
   setupShaking(): void {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const Shake = require('shake.js');
-    this.shakeEvent = new Shake({ threshold: 15, timeout: 1000 });
+    this.shakeEvent = new Shake({ threshold: 10, timeout: 500 });
     this.shakeEvent.start();
     window.addEventListener('shake', this.isShaking, false);
   }
@@ -230,7 +230,7 @@ export default class Participant extends Vue {
       this.shakingStartTime = shakingTime;
       this.getTaskIdeas();
     }
-    animateShaking();
+    //animateShaking();
   }
 
   setupPhysics(): void {
@@ -249,9 +249,13 @@ export default class Participant extends Vue {
       const maxRadius = Math.sqrt(areaPerCircle / Math.PI);
       const minRadius = maxRadius / 2;
       for (let i = 0; i < circleCount; i++) {
-        const r = Math.floor(Math.random() * (maxRadius - minRadius) + minRadius);
+        const r = Math.floor(
+          Math.random() * (maxRadius - minRadius) + minRadius
+        );
         const x = Math.floor(Math.random() * (this.vueCanvasWidth - r * 2) + r);
-        const y = Math.floor(Math.random() * (this.vueCanvasHeight - r * 2) + r);
+        const y = Math.floor(
+          Math.random() * (this.vueCanvasHeight - r * 2) + r
+        );
         const a = 'A';
         const text = String.fromCharCode(a.charCodeAt(0) + (i % letterCount));
         this.bodies.addCircle(x, y, r, { text: text, gradientSize: r });
@@ -293,7 +297,9 @@ export default class Participant extends Vue {
     this.bodies.setGravity(-vec[0], vec[1], vec[1]);
   }
 
-  deviceOrientationEventToVector(ev: DeviceOrientationEvent): [number, number, number] {
+  deviceOrientationEventToVector(
+    ev: DeviceOrientationEvent
+  ): [number, number, number] {
     if (ev.alpha && ev.beta && ev.gamma) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const Quaternion = require('quaternion');
