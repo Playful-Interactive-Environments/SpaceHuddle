@@ -31,15 +31,27 @@ export class CanvasBodies {
       startSize: number;
       startAngle: number;
     };
-  }[] = [];
+  }[][] = [];
   animationTimeline: {
     animationFrame: number;
+    infoTextFrame: number;
     animationDelta: number;
     animationEnd: number;
+    maxRunningFrame: number;
+    animationCompletedFrame: number;
+    textAnimationId: number;
+    textAnimationStartId: number;
+    textAnimationKeepId: number;
   } = {
     animationFrame: -1,
+    infoTextFrame: 0,
     animationDelta: 1,
-    animationEnd: -1,
+    animationEnd: 0,
+    maxRunningFrame: 0,
+    animationCompletedFrame: 100,
+    textAnimationId: 0,
+    textAnimationStartId: 1,
+    textAnimationKeepId: 2,
   };
 
   animationKeyframes: Keyframe[] = [
@@ -184,10 +196,19 @@ export class CanvasBodies {
     };
   }
 
-  startAnimation(runtime = 20): boolean {
+  startAnimation(
+    runtime = 20,
+    textAnimationId = 0,
+    textAnimationStartId = 1,
+    textAnimationKeepId = 2
+  ): boolean {
+    this.animationTimeline.textAnimationId = textAnimationId;
+    this.animationTimeline.textAnimationStartId = textAnimationStartId;
+    this.animationTimeline.textAnimationKeepId = textAnimationKeepId;
     let returnValue = false;
     if (this.animationTimeline.animationFrame == -1) {
       this.animationTimeline.animationFrame = 0;
+      this.animationTimeline.maxRunningFrame = 0;
       returnValue = true;
     }
     this.animationTimeline.animationDelta = 1;
@@ -246,7 +267,8 @@ export class CanvasBodies {
     y: number,
     size = 24,
     color = '#FFFFFFFF',
-    angle = 0
+    angle = 0,
+    textId = 0
   ): void {
     const path: [number, number][] = [];
     for (let i = 0; i < 8; i++) {
@@ -261,7 +283,8 @@ export class CanvasBodies {
       startSize: size / Math.floor(Math.random() * 5 + 2),
       startAngle: Math.floor(Math.random() * 360),
     };
-    this.texts.push({
+    if (this.texts[textId] === undefined) this.texts[textId] = [];
+    this.texts[textId].push({
       text: text,
       x: x,
       y: y,
@@ -292,8 +315,8 @@ export class CanvasBodies {
     }, 500);
   }
 
-  clearTexts(): void {
-    this.texts = [];
+  clearTexts(textId = 0): void {
+    this.texts[textId] = [];
   }
 
   completeAnimation(): void {
@@ -376,7 +399,9 @@ export class CanvasBodies {
     }
   }
 
+  frame = 0;
   show(): void {
+    this.frame++;
     const interpolate = (
       start: number,
       end: number,
@@ -452,48 +477,119 @@ export class CanvasBodies {
         let hexOpacity = opacity.toString(16);
         if (hexOpacity.length === 1) hexOpacity = `0${hexOpacity}`;
 
-        this.texts.forEach((text) => {
-          const delta = textProgressLength / (text.animation.path.length - 1);
-          const pathIndexStart = Math.floor(textProgress / delta);
-          const pathIndexEnd =
-            pathIndexStart < text.animation.path.length - 1
-              ? pathIndexStart + 1
-              : pathIndexStart;
-          this.showText(
-            text.text,
-            interpolate(
-              text.animation.path[pathIndexStart][0],
-              text.animation.path[pathIndexEnd][0],
-              textProgress % delta,
-              delta
-            ),
-            interpolate(
-              text.animation.path[pathIndexStart][1],
-              text.animation.path[pathIndexEnd][1],
-              textProgress % delta,
-              delta
-            ),
-            interpolate(
-              text.animation.startSize,
-              text.size,
-              textProgress,
-              textProgressLength
-            ),
-            `${text.color.substr(0, 7)}${hexOpacity}`,
-            interpolate(
-              text.animation.startAngle,
-              text.angle,
-              textProgress,
-              textProgressLength
-            )
-          );
-        });
+        this.animateText(
+          this.animationTimeline.textAnimationId,
+          textProgressLength,
+          textProgress,
+          hexOpacity
+        );
       }
     }
-    if (this.isLastKeyframe()) this.animationTimeline.animationDelta = -1;
+    if (this.isLastKeyframe()) {
+      this.animationTimeline.animationDelta = -1;
+      this.animationTimeline.infoTextFrame = 0;
+    }
     if (this.animationTimeline.animationFrame >= 0)
       this.animationTimeline.animationFrame +=
         this.animationTimeline.animationDelta;
+    if (
+      this.animationTimeline.maxRunningFrame <
+      this.animationTimeline.animationFrame
+    )
+      this.animationTimeline.maxRunningFrame =
+        this.animationTimeline.animationFrame;
+
+    if (
+      this.animationTimeline.animationDelta === -1 &&
+      this.animationTimeline.maxRunningFrame > 0 &&
+      this.animationTimeline.maxRunningFrame <
+        this.animationTimeline.animationCompletedFrame
+    ) {
+      const textProgressLength = 20;
+      const textProgress =
+        this.animationTimeline.infoTextFrame < textProgressLength
+          ? this.animationTimeline.infoTextFrame
+          : textProgressLength;
+      this.animateText(
+        this.animationTimeline.textAnimationKeepId,
+        textProgressLength,
+        textProgress,
+        '55'
+      );
+      this.animationTimeline.infoTextFrame++;
+    }
+
+    if (
+      this.animationTimeline.animationDelta === 1 &&
+      this.animationTimeline.maxRunningFrame === 0 &&
+      this.frame > 200
+    ) {
+      const textProgressLength = 20;
+      const textProgress =
+        this.animationTimeline.infoTextFrame < textProgressLength
+          ? this.animationTimeline.infoTextFrame
+          : textProgressLength;
+      this.animateText(
+        this.animationTimeline.textAnimationStartId,
+        textProgressLength,
+        textProgress,
+        '55'
+      );
+      this.animationTimeline.infoTextFrame++;
+    }
+  }
+
+  animateText(
+    textId: number,
+    textProgressLength: number,
+    textProgress: number,
+    hexOpacity: string
+  ): void {
+    const interpolate = (
+      start: number,
+      end: number,
+      step: number,
+      stepCount: number
+    ): number => {
+      return start + (step / stepCount) * (end - start);
+    };
+
+    this.texts[textId].forEach((text) => {
+      const delta = textProgressLength / (text.animation.path.length - 1);
+      const pathIndexStart = Math.floor(textProgress / delta);
+      const pathIndexEnd =
+        pathIndexStart < text.animation.path.length - 1
+          ? pathIndexStart + 1
+          : pathIndexStart;
+      this.showText(
+        text.text,
+        interpolate(
+          text.animation.path[pathIndexStart][0],
+          text.animation.path[pathIndexEnd][0],
+          textProgress % delta,
+          delta
+        ),
+        interpolate(
+          text.animation.path[pathIndexStart][1],
+          text.animation.path[pathIndexEnd][1],
+          textProgress % delta,
+          delta
+        ),
+        interpolate(
+          text.animation.startSize,
+          text.size,
+          textProgress,
+          textProgressLength
+        ),
+        `${text.color.substr(0, 7)}${hexOpacity}`,
+        interpolate(
+          text.animation.startAngle,
+          text.angle,
+          textProgress,
+          textProgressLength
+        )
+      );
+    });
   }
 
   showText(

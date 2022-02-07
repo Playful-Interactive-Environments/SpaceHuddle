@@ -2,5 +2,9 @@
   "description": {
     "title": "eight ball",
     "description": "Get inspired for new ideas"
+  },
+  "participant": {
+    "keepShaking": "keep shaking",
+    "startShaking": "start shaking"
   }
 }

@@ -12,6 +12,26 @@
         {{ char }}
       </span>
     </div>
+    <div class="text-animation" ref="textAnimationKeepShaking">
+      <span
+        v-for="(char, index) in $t(
+          'module.brainstorming.game.participant.keepShaking'
+        )"
+        :key="index"
+      >
+        {{ char }}
+      </span>
+    </div>
+    <div class="text-animation" ref="textAnimationStartShaking">
+      <span
+        v-for="(char, index) in $t(
+          'module.brainstorming.game.participant.startShaking'
+        )"
+        :key="index"
+      >
+        {{ char }}
+      </span>
+    </div>
     <div class="overlay disable-text-selection">
       <div class="icon link" v-on:click="isShaking()">
         <font-awesome-icon :icon="['fac', 'shake']" />
@@ -32,6 +52,9 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { CanvasBodies } from '@/types/ui/CanvasBodies';
 import NoSleep from 'nosleep.js';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const o9n = require('o9n');
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const orientations: string[][] = [
   ['landscape left', 'landscape right'], // device x axis points up/down
@@ -41,6 +64,12 @@ const orientations: string[][] = [
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const rad: number = Math.PI / 180;
+
+enum TextType {
+  Inspiration = 0,
+  StartShaking = 1,
+  KeepShaking = 2,
+}
 
 @Options({
   components: {
@@ -67,10 +96,21 @@ export default class Participant extends Vue {
   noSleep!: NoSleep;
 
   changeText(): void {
-    if (this.randomIdea && this.$refs.textAnimation) {
-      this.bodies.clearTexts();
+    if (this.randomIdea) {
+      this.setBodyText(
+        this.$refs.textAnimation,
+        TextType.Inspiration,
+        '#FFFFFFFF'
+      );
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  setBodyText(textSpan: any, textId: number, color: string): void {
+    if (textSpan) {
+      this.bodies.clearTexts(textId);
       //this.bodies.startAnimation(50);
-      const textAnimation = this.$refs.textAnimation as any;
+      const textAnimation = textSpan as any;
       const rectAnimation = textAnimation.getBoundingClientRect();
       textAnimation.childNodes.forEach((span) => {
         if (span.tagName === 'SPAN') {
@@ -80,7 +120,9 @@ export default class Participant extends Vue {
             (rect.left + rect.right) / 2 - rectAnimation.x,
             rect.top + rect.height / 2,
             48,
-            '#FFFFFFFF'
+            color,
+            0,
+            textId
           );
         }
       });
@@ -150,7 +192,7 @@ export default class Participant extends Vue {
 
   async mounted(): Promise<void> {
     await this.requestFullscreen();
-    window.screen.orientation
+    await o9n.orientation
       .lock('portrait-primary')
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       .catch(function () {});
@@ -173,14 +215,15 @@ export default class Participant extends Vue {
       }, this.drawingIntervalTime);
       this.setupShaking();
     }, 100);
-    this.noSleep = new NoSleep();
-    this.noSleep.enable();
     //await this.getTaskIdeas();
 
     window.addEventListener('mousedown', this.mousedown);
     window.addEventListener('mouseup', this.mouseup);
     window.addEventListener('touchstart', this.mousedown);
     window.addEventListener('touchend', this.mouseup);
+
+    this.noSleep = new NoSleep();
+    this.noSleep.enable();
   }
 
   private mousedown(): void {
@@ -226,7 +269,7 @@ export default class Participant extends Vue {
 
     this.lastShakingTime = shakingTime;
 
-    if (this.bodies.startAnimation(50)) {
+    if (this.bodies.startAnimation(50, TextType.Inspiration, TextType.StartShaking, TextType.KeepShaking)) {
       this.shakingStartTime = shakingTime;
       this.getTaskIdeas();
     }
@@ -289,6 +332,17 @@ export default class Participant extends Vue {
         this.vueCanvasHeight,
         { isStatic: true }
       );
+
+      this.setBodyText(
+        this.$refs.textAnimationStartShaking,
+        TextType.StartShaking,
+        '#FFFFFF44'
+      );
+      this.setBodyText(
+        this.$refs.textAnimationKeepShaking,
+        TextType.KeepShaking,
+        '#FFFFFF44'
+      );
     }
   }
 
@@ -336,7 +390,7 @@ export default class Participant extends Vue {
 
   async unmounted(): Promise<void> {
     await this.exitFullscreen();
-    this.noSleep.disable();
+    if (this.noSleep) this.noSleep.disable();
     clearInterval(this.interval);
     clearInterval(this.drawingInterval);
     window.removeEventListener('shake', this.isShaking, false);
