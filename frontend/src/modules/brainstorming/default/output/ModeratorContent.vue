@@ -1,28 +1,31 @@
 <template>
-  <FilterSection>
-    <label for="orderType" class="heading heading--xs">{{
-      $t('module.brainstorming.default.moderatorContent.sortOrder')
-    }}</label>
-    <select
-      v-model="orderType"
-      id="orderType"
-      class="select select--fullwidth"
-      @change="getCollapseContent(true)"
-    >
-      <option
-        v-for="type in sortOrderOptions"
-        :key="type.orderType"
-        :value="
-          type.ref ? `${type.orderType}&refId=${type.ref.id}` : type.orderType
-        "
-      >
-        <span>
-          {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
-        </span>
-        <span v-if="type.ref"> - {{ type.ref.name }} </span>
-      </option>
-    </select>
-  </FilterSection>
+  <div class="level filter_options">
+    <div class="level-left"></div>
+    <div class="level-right">
+      <div class="level-item">
+        <el-select v-model="orderType" @change="getCollapseContent(true)">
+          <template v-slot:prefix>
+            <font-awesome-icon icon="sort" />
+          </template>
+          <el-option
+            v-for="type in sortOrderOptions"
+            :key="type.orderType"
+            :value="
+              type.ref
+                ? `${type.orderType}&refId=${type.ref.id}`
+                : type.orderType
+            "
+            :label="$t(`enum.ideaSortOrder.${type.orderType}`)"
+          >
+            <span>
+              {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
+            </span>
+            <span v-if="type.ref"> - {{ type.ref.name }} </span>
+          </el-option>
+        </el-select>
+      </div>
+    </div>
+  </div>
   <el-collapse v-model="openTabs">
     <el-collapse-item
       v-for="(item, key) in orderGroupContent"
@@ -247,5 +250,9 @@ export default class ModeratorContent extends Vue {
   .el-card__body {
     padding: 14px;
   }
+}
+
+.filter_options {
+  margin-bottom: 5px;
 }
 </style>

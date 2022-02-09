@@ -26,6 +26,14 @@
             </template>
           </el-dropdown>
         </template>
+        <template #headerContent>
+          <div v-if="activeTask">
+            <span class="label">
+              {{ $t('moderator.view.topicDetails.participantCount') }}: &emsp;
+            </span>
+            <span>{{ activeTask.participantCount }}</span>
+          </div>
+        </template>
         <template #footerContent>
           <TaskTimeline
             v-if="tasks"
@@ -145,13 +153,6 @@
           </el-space>
         </el-tab-pane>
       </el-tabs>
-      <el-divider></el-divider>
-      <div v-if="activeTask">
-        <span class="label">
-          {{ $t('moderator.view.topicDetails.participantCount') }}: &emsp;
-        </span>
-        <span>{{ activeTask.participantCount }}</span>
-      </div>
       <el-divider></el-divider>
       <ModuleContentComponent v-if="activeTask" :task-id="activeTaskId" />
     </template>
@@ -550,5 +551,6 @@ p {
 .label {
   display: inline;
   text-transform: uppercase;
+  color: white;
 }
 </style>

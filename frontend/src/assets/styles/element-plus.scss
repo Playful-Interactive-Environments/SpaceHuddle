@@ -227,6 +227,10 @@ $--font-size: (
                 margin-right: 0.8rem;
                 margin-left: 0.8rem;
         }
+
+        &__prefix {
+                left: 15px;
+        }
 }
 
 .el-select {

@@ -1,28 +1,31 @@
 <template>
-  <FilterSection>
-    <label for="orderType" class="heading heading--xs">{{
-      $t('module.selection.default.moderatorContent.sortOrder')
-    }}</label>
-    <select
-      v-model="orderType"
-      id="orderType"
-      class="select select--fullwidth"
-      @change="getCollapseContent(true)"
-    >
-      <option
-        v-for="type in sortOrderOptions"
-        :key="type.orderType"
-        :value="
-          type.ref ? `${type.orderType}&refId=${type.ref.id}` : type.orderType
-        "
-      >
-        <span>
-          {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
-        </span>
-        <span v-if="type.ref"> - {{ type.ref.name }} </span>
-      </option>
-    </select>
-  </FilterSection>
+  <div class="level filter_options">
+    <div class="level-left"></div>
+    <div class="level-right">
+      <div class="level-item">
+        <el-select v-model="orderType" @change="getCollapseContent(true)">
+          <template v-slot:prefix>
+            <font-awesome-icon icon="sort" />
+          </template>
+          <el-option
+            v-for="type in sortOrderOptions"
+            :key="type.orderType"
+            :value="
+              type.ref
+                ? `${type.orderType}&refId=${type.ref.id}`
+                : type.orderType
+            "
+            :label="$t(`enum.ideaSortOrder.${type.orderType}`)"
+          >
+            <span>
+              {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
+            </span>
+            <span v-if="type.ref"> - {{ type.ref.name }} </span>
+          </el-option>
+        </el-select>
+      </div>
+    </div>
+  </div>
   <el-collapse v-model="openTabsSelection">
     <el-collapse-item :key="SELECTION_KEY" :name="SELECTION_KEY">
       <template #title>
@@ -145,7 +148,7 @@ import * as ideaService from '@/services/idea-service';
 import * as viewService from '@/services/view-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as taskService from '@/services/task-service';
-import { Task } from '@/types/api/Task';
+import { convertToSaveVersion, Task } from '@/types/api/Task';
 import * as selectionService from '@/services/selection-service';
 import { EventType } from '@/types/enum/EventType';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
@@ -201,12 +204,19 @@ export default class ModeratorContent extends Vue {
 
   async getTask(): Promise<void> {
     if (this.taskId) {
-      await taskService.getTaskById(this.taskId).then((task) => {
+      await taskService.getTaskById(this.taskId).then(async (task) => {
         this.task = task;
-        ideaService.getSortOrderOptions(task.topicId).then((options) => {
+        await ideaService.getSortOrderOptions(task.topicId).then((options) => {
           this.sortOrderOptions = options;
           if (options.length > 0) this.orderType = options[0].orderType;
         });
+        if (
+          task.parameter &&
+          task.parameter.orderType &&
+          this.orderType != task.parameter.orderType
+        ) {
+          this.orderType = task.parameter.orderType;
+        }
       });
     }
   }
@@ -265,6 +275,10 @@ export default class ModeratorContent extends Vue {
             });
             this.orderGroupContent = orderGroupContent;
             this.ideas = result.ideas;
+            taskService.getTaskById(this.taskId).then((task) => {
+              task.parameter.orderType = this.orderType;
+              taskService.putTask(this.taskId, convertToSaveVersion(task));
+            });
           });
       }
     }
@@ -332,5 +346,9 @@ export default class ModeratorContent extends Vue {
   .el-card__body {
     padding: 14px;
   }
+}
+
+.filter_options {
+  margin-bottom: 5px;
 }
 </style>
