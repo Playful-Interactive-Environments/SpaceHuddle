@@ -85,17 +85,15 @@ export default class TaskTimeline extends Vue {
   }
 
   async onPublicTaskChanged(): Promise<void> {
-    if (this.publicTask) {
-      sessionService
-        .displayOnPublicScreen(this.sessionId, this.publicTask.id)
-        .then(() => {
-          this.eventBus.emit(
-            EventType.CHANGE_PUBLIC_SCREEN,
-            this.publicTask?.id
-          );
-        });
-    }
-    if (this.publicTask) this.$emit('changePublicScreen', this.publicTask.id);
+    const publicScreenTaskId = this.publicTask
+      ? this.publicTask.id
+      : '{taskId}';
+    sessionService
+      .displayOnPublicScreen(this.sessionId, publicScreenTaskId)
+      .then(() => {
+        this.eventBus.emit(EventType.CHANGE_PUBLIC_SCREEN, this.publicTask?.id);
+      });
+    this.$emit('changePublicScreen', this.publicTask?.id);
   }
 
   @Watch('activeTaskId', { immediate: true })
