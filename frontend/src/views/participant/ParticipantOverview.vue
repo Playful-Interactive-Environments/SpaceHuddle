@@ -173,7 +173,7 @@ export default class ParticipantOverview extends Vue {
 .overview {
   color: #fff;
   background: var(--color-darkblue);
-  background: url('~@/assets/illustrations/stars-background-repeat.png');
+  background: url('~@/assets/illustrations/stars-background-dark.png');
   //background-attachment: fixed;
   background-size: contain;
 

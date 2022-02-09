@@ -256,7 +256,7 @@ h3 {
 }
 
 .public-screen {
-  //background: url('~@/assets/illustrations/stars-background-repeat.png');
+  //background: url('~@/assets/illustrations/stars-background-dark.png');
   background-color: var(--color-background-gray);
   background-size: contain;
   min-height: 100vh;

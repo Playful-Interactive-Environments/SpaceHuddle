@@ -11,7 +11,10 @@
       </el-breadcrumb-item>
     </el-breadcrumb>
     <h3
-      :class="{ 'heading--regular': isParticipant }"
+      :class="{
+        'heading--regular': isParticipant,
+        shortDescription: shortenDescription,
+      }"
       class="module-info__title"
     >
       {{ title }}
@@ -101,6 +104,7 @@ export default class TaskInfo extends Vue {
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-align: left;
 }
 
 .el-breadcrumb::v-deep {
