@@ -7,12 +7,19 @@
       height="360"
       v-on:mousemove="draw"
     />
-    <div class="text-animation" v-if="randomIdea" ref="textAnimation">
+    <div
+      class="text-animation text-animation-center"
+      v-if="randomIdea"
+      ref="textAnimation"
+    >
       <span v-for="(char, index) in randomIdea.keywords" :key="index">
         {{ char }}
       </span>
     </div>
-    <div class="text-animation" ref="textAnimationKeepShaking">
+    <div
+      class="text-animation text-animation-bottom"
+      ref="textAnimationKeepShaking"
+    >
       <span
         v-for="(char, index) in $t(
           'module.brainstorming.game.participant.keepShaking'
@@ -22,10 +29,26 @@
         {{ char }}
       </span>
     </div>
-    <div class="text-animation" ref="textAnimationStartShaking">
+    <div
+      class="text-animation text-animation-bottom text-animation-small"
+      ref="textAnimationStartShaking"
+    >
       <span
         v-for="(char, index) in $t(
           'module.brainstorming.game.participant.startShaking'
+        )"
+        :key="index"
+      >
+        {{ char }}
+      </span>
+    </div>
+    <div
+      class="text-animation text-animation-center"
+      ref="textAnimationNoInspiration"
+    >
+      <span
+        v-for="(char, index) in $t(
+          'module.brainstorming.game.participant.noInspiration'
         )"
         :key="index"
       >
@@ -44,13 +67,15 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import ParticipantModuleDefaultContainer from '@/components/participant/organisms/ParticipantModuleDefaultContainer.vue';
-import * as ideaService from '@/services/idea-service';
 import * as moduleService from '@/services/module-service';
 import { Idea } from '@/types/api/Idea.ts';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { CanvasBodies } from '@/types/ui/CanvasBodies';
 import NoSleep from 'nosleep.js';
+import * as viewService from '@/services/view-service';
+import * as taskService from '@/services/task-service';
+import { Task } from '@/types/api/Task';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const o9n = require('o9n');
@@ -81,6 +106,7 @@ enum TextType {
 export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
+  task: Task | null = null;
   module: Module | null = null;
   readonly intervalTime = 100000;
   interval!: any;
@@ -95,6 +121,21 @@ export default class Participant extends Vue {
   shakeEvent: any;
   noSleep!: NoSleep;
 
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    this.getTask();
+  }
+
+  async getTask(): Promise<void> {
+    if (this.taskId) {
+      await taskService
+        .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
+        .then((task) => {
+          this.task = task;
+        });
+    }
+  }
+
   changeText(): void {
     if (this.randomIdea) {
       this.setBodyText(
@@ -102,11 +143,23 @@ export default class Participant extends Vue {
         TextType.Inspiration,
         '#FFFFFFFF'
       );
+    } else {
+      this.setBodyText(
+        this.$refs.textAnimationNoInspiration,
+        TextType.Inspiration,
+        '#FFFFFFFF'
+      );
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  setBodyText(textSpan: any, textId: number, color: string): void {
+  setBodyText(
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    textSpan: any,
+    textId: number,
+    color: string,
+    animationPathCount = 8,
+    textSize = 48
+  ): void {
     if (textSpan) {
       this.bodies.clearTexts(textId);
       //this.bodies.startAnimation(50);
@@ -119,10 +172,11 @@ export default class Participant extends Vue {
             span.innerHTML,
             (rect.left + rect.right) / 2 - rectAnimation.x,
             rect.top + rect.height / 2,
-            48,
+            textSize,
             color,
             0,
-            textId
+            textId,
+            animationPathCount
           );
         }
       });
@@ -261,6 +315,7 @@ export default class Participant extends Vue {
         setTimeout(() => {
           const animationTime = Date.now();
           if (shakingTime + this.maxShakingDelay > animationTime) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             animateShaking();
           }
         }, animationInterval);
@@ -269,7 +324,14 @@ export default class Participant extends Vue {
 
     this.lastShakingTime = shakingTime;
 
-    if (this.bodies.startAnimation(50, TextType.Inspiration, TextType.StartShaking, TextType.KeepShaking)) {
+    if (
+      this.bodies.startAnimation(
+        50,
+        TextType.Inspiration,
+        TextType.StartShaking,
+        TextType.KeepShaking
+      )
+    ) {
       this.shakingStartTime = shakingTime;
       this.getTaskIdeas();
     }
@@ -336,12 +398,15 @@ export default class Participant extends Vue {
       this.setBodyText(
         this.$refs.textAnimationStartShaking,
         TextType.StartShaking,
-        '#FFFFFF44'
+        '#FFFFFF44',
+        1,
+        24
       );
       this.setBodyText(
         this.$refs.textAnimationKeepShaking,
         TextType.KeepShaking,
-        '#FFFFFF44'
+        '#FFFFFF44',
+        1
       );
     }
   }
@@ -398,20 +463,22 @@ export default class Participant extends Vue {
   }
 
   async getTaskIdeas(): Promise<void> {
-    ideaService
-      .getIdeasForTask(
-        this.taskId,
-        null,
-        null,
-        EndpointAuthorisationType.PARTICIPANT
-      )
-      .then((queryResult) => {
-        const randomIndex = Math.floor(Math.random() * queryResult.length);
-        this.randomIdea = queryResult[randomIndex];
-        setTimeout(() => {
-          this.changeText();
-        }, 100);
-      });
+    if (this.task) {
+      viewService
+        .getIdeas(
+          this.task.parameter.input,
+          null,
+          null,
+          EndpointAuthorisationType.PARTICIPANT
+        )
+        .then((queryResult) => {
+          const randomIndex = Math.floor(Math.random() * queryResult.length);
+          this.randomIdea = queryResult[randomIndex];
+          setTimeout(() => {
+            this.changeText();
+          }, 100);
+        });
+    }
   }
 
   draw(e: MouseEvent): void {
@@ -440,7 +507,6 @@ export default class Participant extends Vue {
 .text-animation {
   margin: 0;
   position: absolute;
-  top: 50%;
   left: 50%;
   -ms-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
@@ -450,12 +516,24 @@ export default class Participant extends Vue {
   font-family: Arial, sans-serif;
   font-size: 48px;
   padding: 0 5rem;
+
+  &-center {
+    top: 50%;
+  }
+
+  &-bottom {
+    bottom: 15%;
+  }
+
+  &-small {
+    font-size: 24px;
+  }
 }
 
 .overlay {
   margin: 0;
   position: absolute;
-  bottom: 10%;
+  bottom: 5%;
   width: 100%;
   z-index: 10;
   text-align: center;

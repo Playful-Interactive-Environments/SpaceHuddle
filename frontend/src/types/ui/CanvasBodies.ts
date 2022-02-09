@@ -268,10 +268,11 @@ export class CanvasBodies {
     size = 24,
     color = '#FFFFFFFF',
     angle = 0,
-    textId = 0
+    textId = 0,
+    animationPathCount = 8
   ): void {
     const path: [number, number][] = [];
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < animationPathCount; i++) {
       path.push([
         Math.floor(Math.random() * this.canvasWidth),
         Math.floor(Math.random() * this.canvasHeight),
@@ -402,14 +403,6 @@ export class CanvasBodies {
   frame = 0;
   show(): void {
     this.frame++;
-    const interpolate = (
-      start: number,
-      end: number,
-      step: number,
-      stepCount: number
-    ): number => {
-      return start + (step / stepCount) * (end - start);
-    };
 
     this.clearCanvas();
     if (this.animationTimeline.animationFrame === -1) this.showBodies(255);
@@ -419,7 +412,7 @@ export class CanvasBodies {
       );
       if (frame && frame.opacity !== undefined) {
         const opacity = Math.floor(frame.opacity);
-        this.enableEngine(frame.opacity !== 0);
+        this.enableEngine(opacity !== 0);
       }
       if (frame && frame.position !== undefined) {
         if (frame.position === 'random') {
@@ -469,19 +462,11 @@ export class CanvasBodies {
       if (frame && frame.textProgress !== undefined) {
         const textProgress = frame.textProgress;
         const textProgressLength = 100;
-        let opacity = interpolate(0, 255, textProgress, textProgressLength);
-        if (opacity < 0 || opacity > 255) {
-          opacity = 0;
-        }
-        opacity = Math.floor(opacity);
-        let hexOpacity = opacity.toString(16);
-        if (hexOpacity.length === 1) hexOpacity = `0${hexOpacity}`;
 
         this.animateText(
           this.animationTimeline.textAnimationId,
           textProgressLength,
-          textProgress,
-          hexOpacity
+          textProgress
         );
       }
     }
@@ -505,7 +490,7 @@ export class CanvasBodies {
       this.animationTimeline.maxRunningFrame <
         this.animationTimeline.animationCompletedFrame
     ) {
-      const textProgressLength = 20;
+      const textProgressLength = 15;
       const textProgress =
         this.animationTimeline.infoTextFrame < textProgressLength
           ? this.animationTimeline.infoTextFrame
@@ -514,7 +499,7 @@ export class CanvasBodies {
         this.animationTimeline.textAnimationKeepId,
         textProgressLength,
         textProgress,
-        '55'
+        100
       );
       this.animationTimeline.infoTextFrame++;
     }
@@ -524,7 +509,7 @@ export class CanvasBodies {
       this.animationTimeline.maxRunningFrame === 0 &&
       this.frame > 200
     ) {
-      const textProgressLength = 20;
+      const textProgressLength = 15;
       const textProgress =
         this.animationTimeline.infoTextFrame < textProgressLength
           ? this.animationTimeline.infoTextFrame
@@ -533,7 +518,7 @@ export class CanvasBodies {
         this.animationTimeline.textAnimationStartId,
         textProgressLength,
         textProgress,
-        '55'
+        100
       );
       this.animationTimeline.infoTextFrame++;
     }
@@ -543,7 +528,7 @@ export class CanvasBodies {
     textId: number,
     textProgressLength: number,
     textProgress: number,
-    hexOpacity: string
+    targetOpacity = 255
   ): void {
     const interpolate = (
       start: number,
@@ -554,42 +539,60 @@ export class CanvasBodies {
       return start + (step / stepCount) * (end - start);
     };
 
-    this.texts[textId].forEach((text) => {
-      const delta = textProgressLength / (text.animation.path.length - 1);
-      const pathIndexStart = Math.floor(textProgress / delta);
-      const pathIndexEnd =
-        pathIndexStart < text.animation.path.length - 1
-          ? pathIndexStart + 1
-          : pathIndexStart;
-      this.showText(
-        text.text,
-        interpolate(
-          text.animation.path[pathIndexStart][0],
-          text.animation.path[pathIndexEnd][0],
-          textProgress % delta,
-          delta
-        ),
-        interpolate(
-          text.animation.path[pathIndexStart][1],
-          text.animation.path[pathIndexEnd][1],
-          textProgress % delta,
-          delta
-        ),
-        interpolate(
-          text.animation.startSize,
-          text.size,
-          textProgress,
-          textProgressLength
-        ),
-        `${text.color.substr(0, 7)}${hexOpacity}`,
-        interpolate(
-          text.animation.startAngle,
-          text.angle,
-          textProgress,
-          textProgressLength
-        )
-      );
-    });
+    let opacity = interpolate(
+      0,
+      targetOpacity,
+      textProgress,
+      textProgressLength
+    );
+    if (opacity < 0) {
+      opacity = 0;
+    }
+    if (opacity > targetOpacity) {
+      opacity = targetOpacity;
+    }
+    opacity = Math.floor(opacity);
+    let hexOpacity = opacity.toString(16);
+    if (hexOpacity.length === 1) hexOpacity = `0${hexOpacity}`;
+
+    if (this.texts[textId] !== undefined) {
+      this.texts[textId].forEach((text) => {
+        const delta = textProgressLength / (text.animation.path.length - 1);
+        const pathIndexStart = Math.floor(textProgress / delta);
+        const pathIndexEnd =
+          pathIndexStart < text.animation.path.length - 1
+            ? pathIndexStart + 1
+            : pathIndexStart;
+        this.showText(
+          text.text,
+          interpolate(
+            text.animation.path[pathIndexStart][0],
+            text.animation.path[pathIndexEnd][0],
+            textProgress % delta,
+            delta
+          ),
+          interpolate(
+            text.animation.path[pathIndexStart][1],
+            text.animation.path[pathIndexEnd][1],
+            textProgress % delta,
+            delta
+          ),
+          interpolate(
+            text.animation.startSize,
+            text.size,
+            textProgress,
+            textProgressLength
+          ),
+          `${text.color.substr(0, 7)}${hexOpacity}`,
+          interpolate(
+            text.animation.startAngle,
+            text.angle,
+            textProgress,
+            textProgressLength
+          )
+        );
+      });
+    }
   }
 
   showText(

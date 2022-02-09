@@ -5,6 +5,7 @@
   },
   "participant": {
     "keepShaking": "keep shaking",
-    "startShaking": "start shaking"
+    "startShaking": "Start shaking to get inspiration from other users. Use these ideas as an impetus for your own ideas.",
+    "noInspiration": "No texts would be delivered yet. Please be patient for a moment."
   }
 }
