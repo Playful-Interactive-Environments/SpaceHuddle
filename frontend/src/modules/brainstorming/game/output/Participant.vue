@@ -76,6 +76,9 @@ import NoSleep from 'nosleep.js';
 import * as viewService from '@/services/view-service';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
+import IdeaStates from '@/types/enum/IdeaStates';
+import ViewType from '@/types/enum/ViewType';
+import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const o9n = require('o9n');
@@ -464,13 +467,16 @@ export default class Participant extends Vue {
 
   async getTaskIdeas(): Promise<void> {
     if (this.task) {
+      const inputs: any[] = [];
+      inputs.push(...(this.task.parameter.input as any[]));
+      inputs.push({
+        view: { type: ViewType.TASK.toUpperCase(), id: this.taskId },
+        maxCount: null,
+        filter: Object.keys(IdeaStates),
+        order: IdeaSortOrder.ORDER,
+      });
       viewService
-        .getIdeas(
-          this.task.parameter.input,
-          null,
-          null,
-          EndpointAuthorisationType.PARTICIPANT
-        )
+        .getIdeas(inputs, null, null, EndpointAuthorisationType.PARTICIPANT)
         .then((queryResult) => {
           const randomIndex = Math.floor(Math.random() * queryResult.length);
           this.randomIdea = queryResult[randomIndex];
