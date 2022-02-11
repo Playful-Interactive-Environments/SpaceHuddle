@@ -11,11 +11,11 @@ use Fig\Http\Message\StatusCodeInterface;
  * Action for downloading a data export file.
  *
  * @OA\Get(
- *   path="/topic/{id}/export/{eportType}/",
+ *   path="/topic/{id}/export/{exportType}/",
  *   summary="Download file for the topic with the specified id.",
  *   tags={"Topic"},
  *   @OA\Parameter(in="path", name="id", description="ID of the topic to be exported", required=true),
- *   @OA\Parameter(in="path", name="eportType", description="export output format", required=true,
+ *   @OA\Parameter(in="path", name="exportType", description="export output format", required=true,
  *     @OA\Schema(ref="#/components/schemas/ExportType")),
  *   @OA\Response(response="200", description="Success",
  *     @OA\JsonContent(ref="#/components/schemas/ExportData"),
