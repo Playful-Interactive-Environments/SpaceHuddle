@@ -110,14 +110,14 @@ class TopicRepository implements RepositoryInterface
         $path = "export/$id";
         if (!is_dir($path)) {
             mkdir($path);
-        } else {
+        } /*else {
             $files = glob("$path/*", GLOB_MARK);
             foreach ($files as $file) {
                 if (!is_dir($file)) {
                     unlink($file);
                 }
             }
-        }
+        }*/
         $spreadsheet = new Spreadsheet();
         $spreadsheet->removeSheetByIndex(0);
 
