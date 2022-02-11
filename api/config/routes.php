@@ -98,6 +98,7 @@ use App\Action\Vote\VoteReadAllAction;
 use App\Action\Vote\VoteReadSingleAction;
 use App\Action\Vote\VoteResultReadAction;
 use App\Action\Vote\VoteUpdateAction;
+use App\Action\Topic\TopicExportAction;
 use App\Middleware\JwtAuthMiddleware;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
@@ -219,6 +220,8 @@ return function (App $app) {
             $app->get("/{id}[/]", TopicReadSingleAction::class);
             $app->put("[/]", TopicUpdateAction::class);
             $app->delete("/{id}[/]", TopicDeleteAction::class);
+
+            $app->get("/{id}/export/{exportType}[/]", TopicExportAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 

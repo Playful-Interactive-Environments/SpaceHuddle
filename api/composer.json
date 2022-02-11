@@ -42,6 +42,7 @@
         "nyholm/psr7": "^1.4",
         "nyholm/psr7-server": "^1.0",
         "php-di/php-di": "^6",
+        "phpoffice/phpspreadsheet": "^1.21",
         "selective/array-reader": "^1.1",
         "selective/basepath": "^2",
         "selective/validation": "^1.1",

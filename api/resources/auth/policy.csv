@@ -99,6 +99,7 @@ p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:id/, GET
 p, MODERATOR, /topic/:id/, DELETE
 p, MODERATOR, /session/:sessionId/topic/, POST
 p, MODERATOR|FACILITATOR, /topic/, PUT
+p, MODERATOR|FACILITATOR, /topic/:id/export/:exportType/, GET
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/views/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /view/:type/:typeId/, GET
