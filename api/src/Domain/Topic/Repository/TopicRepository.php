@@ -17,6 +17,8 @@ use App\Factory\QueryFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Writer\Exception;
+use PhpOffice\PhpSpreadsheet\Writer\Ods;
+use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Selective\ArrayReader\ArrayReader;
 
@@ -123,7 +125,6 @@ class TopicRepository implements RepositoryInterface
             }
         }
         $spreadsheet = new Spreadsheet();
-        setlocale(LC_ALL, 'en_US.UTF-8');
         $spreadsheet->removeSheetByIndex(0);
 
         //get task
@@ -216,9 +217,15 @@ class TopicRepository implements RepositoryInterface
                             $detailValue = $detailReader->findString($columnName);
                             if (strpos($columnName, "image") !== false && $detailValue) {
                                 $imageName = $detailReader->findString("category_id");
-                                if (!$imageName || $columnName == "image") $imageName = $detailReader->findString("id");
+                                if (!$imageName || $columnName == "image") {
+                                    $imageName = $detailReader->findString("id");
+                                }
                                 $imageDescription = $detailReader->findString("keywords");
-                                $imagePath = $this->convertBase64ToImage($detailValue, $path . DIRECTORY_SEPARATOR, $imageName);
+                                $imagePath = $this->convertBase64ToImage(
+                                    $detailValue,
+                                    $path . DIRECTORY_SEPARATOR,
+                                    $imageName
+                                );
 
                                 $drawing = new Drawing();
                                 $drawing->setName($imageName);
@@ -228,9 +235,10 @@ class TopicRepository implements RepositoryInterface
                                 $drawing->setWidth(200);
                                 $drawing->setWorksheet($sheet);
                                 $actualRowHeight = $sheet->getRowDimension($rowNumber)->getRowHeight("px");
-                                if ($actualRowHeight < $drawing->getHeight())
+                                if ($actualRowHeight < $drawing->getHeight()) {
                                     $sheet->getRowDimension($rowNumber)
                                         ->setRowHeight($drawing->getHeight(), "px");
+                                }
                             } else {
                                 $sheet->setCellValue("$columnLetter$rowNumber", $detailValue);
                             }
@@ -248,14 +256,27 @@ class TopicRepository implements RepositoryInterface
                 }
             }
         }
+        $spreadsheet->setActiveSheetIndex(0);
 
         $url = null;
-        if (strtolower($exportType) == ExportType::XLSX) {
-            $url = $path . DIRECTORY_SEPARATOR . "topic-export-$id.xlsx";
-            $writer = new Xlsx($spreadsheet);
-            ob_end_clean();
-            $writer->save($url);
+        switch (strtolower($exportType)) {
+            case ExportType::XLSX:
+                $url = $path . DIRECTORY_SEPARATOR . "topic-export-$id.xlsx";
+                $writer = new Xlsx($spreadsheet);
+                $writer->save($url);
+                break;
+            case ExportType::XLS:
+                $url = $path . DIRECTORY_SEPARATOR . "topic-export-$id.xls";
+                $writer = new Xls($spreadsheet);
+                $writer->save($url);
+                break;
+            case ExportType::ODS:
+                $url = $path . DIRECTORY_SEPARATOR . "topic-export-$id.ods";
+                $writer = new Ods($spreadsheet);
+                $writer->save($url);
+                break;
         }
+
         if ($url) {
             $exportPath = $_SERVER["REQUEST_SCHEME"] . '://' . $_SERVER["HTTP_HOST"] .
                 str_replace("index.php", "", $_SERVER["PHP_SELF"]);
@@ -263,6 +284,19 @@ class TopicRepository implements RepositoryInterface
             $url = "$exportPath$url";
         }
         return new ExportData($url);
+    }
+
+    /**
+     * Check if there is something to export
+     * @param string $id Id of the topic to be exported
+     * @return bool If true, export is valid
+     */
+    public function hasExportData(string $id): bool
+    {
+        $query = $this->queryFactory->newSelect("task");
+        $query->select(["*"])
+            ->andWhere(["topic_id" => $id]);
+        return $query->execute()->count() > 0;
     }
 
     /**

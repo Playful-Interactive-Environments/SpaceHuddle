@@ -7,6 +7,8 @@ use App\Domain\Topic\Repository\TopicRepository;
 use App\Domain\Topic\Type\ExportType;
 use App\Factory\ValidationFactory;
 use Cake\Validation\Validator;
+use Selective\Validation\Exception\ValidationException;
+use Selective\Validation\ValidationResult;
 
 /**
  * Topic validation service.
@@ -24,6 +26,17 @@ class TopicValidator
     public function __construct(TopicRepository $repository, ValidationFactory $validationFactory)
     {
         $this->setUp($repository, $validationFactory);
+    }
+
+    /**
+     * Convert RepositoryInterface to UserRepository.
+     * @return TopicRepository UserRepository
+     */
+    protected function getRepository(): TopicRepository
+    {
+        if ($this->repository instanceof TopicRepository) {
+            return $this->repository;
+        }
     }
 
     /**
@@ -63,5 +76,11 @@ class TopicValidator
                         "message" => "Type: Wrong export type."
                     ])
         );
+
+        if (!$this->getRepository()->hasExportData($data["id"])) {
+            $result = new ValidationResult();
+            $result->addError("id", "NoData: This topic does not contain data to export.");
+            throw new ValidationException("Please check your input", $result);
+        }
     }
 }
