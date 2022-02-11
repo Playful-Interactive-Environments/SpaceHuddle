@@ -107,17 +107,17 @@ class TopicRepository implements RepositoryInterface
      */
     public function export(string $id, string $exportType): ExportData | null
     {
-        $path = "export/$id";
+        $path = "export\\$id";
         if (!is_dir($path)) {
             mkdir($path);
-        } /*else {
-            $files = glob("$path/*", GLOB_MARK);
+        } else {
+            $files = glob("$path\\*", GLOB_MARK);
             foreach ($files as $file) {
                 if (!is_dir($file)) {
                     unlink($file);
                 }
             }
-        }*/
+        }
         $spreadsheet = new Spreadsheet();
         $spreadsheet->removeSheetByIndex(0);
 
@@ -213,7 +213,7 @@ class TopicRepository implements RepositoryInterface
                                 $imageName = $detailReader->findString("category_id");
                                 if (!$imageName || $columnName == "image") $imageName = $detailReader->findString("id");
                                 $imageDescription = $detailReader->findString("keywords");
-                                $imagePath = $this->convertBase64ToImage($detailValue, "$path/", $imageName);
+                                $imagePath = $this->convertBase64ToImage($detailValue, "$path\\", $imageName);
 
                                 $drawing = new Drawing();
                                 $drawing->setName($imageName);
@@ -246,13 +246,14 @@ class TopicRepository implements RepositoryInterface
 
         $url = null;
         if (strtolower($exportType) == ExportType::XLSX) {
-            $url = "$path/topic-export-$id.xlsx";
+            $url = "$path\\topic-export-$id.xlsx";
             $writer = new Xlsx($spreadsheet);
             $writer->save($url);
         }
         if ($url) {
             $exportPath = $_SERVER["REQUEST_SCHEME"] . '://' . $_SERVER["HTTP_HOST"] .
                 str_replace("index.php", "", $_SERVER["PHP_SELF"]);
+            $url = str_replace("\\", "/", $url);
             $url = "$exportPath$url";
         }
         return new ExportData($url);
