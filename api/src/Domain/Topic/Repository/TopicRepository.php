@@ -123,7 +123,7 @@ class TopicRepository implements RepositoryInterface
             }
         }
         $spreadsheet = new Spreadsheet();
-        setlocale(LC_ALL, 'en');
+        setlocale(LC_ALL, 'en_US.UTF-8');
         $spreadsheet->removeSheetByIndex(0);
 
         //get task
