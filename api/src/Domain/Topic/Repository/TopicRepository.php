@@ -255,7 +255,7 @@ class TopicRepository implements RepositoryInterface
             $writer = new Xlsx($spreadsheet);
             ob_end_clean();
             $writer->save($url);
-            exit();
+            die;
         }
         if ($url) {
             $exportPath = $_SERVER["REQUEST_SCHEME"] . '://' . $_SERVER["HTTP_HOST"] .
