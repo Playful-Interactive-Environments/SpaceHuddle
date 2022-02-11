@@ -107,7 +107,11 @@ class TopicRepository implements RepositoryInterface
      */
     public function export(string $id, string $exportType): ExportData | null
     {
-        $path = "export" . DIRECTORY_SEPARATOR . $id;
+        $path = "export";
+        if (!is_dir($path)) {
+            mkdir($path);
+        }
+        $path = $path . DIRECTORY_SEPARATOR . $id;
         if (!is_dir($path)) {
             mkdir($path);
         } else {
@@ -119,6 +123,7 @@ class TopicRepository implements RepositoryInterface
             }
         }
         $spreadsheet = new Spreadsheet();
+        setlocale(LC_ALL, 'en');
         $spreadsheet->removeSheetByIndex(0);
 
         //get task
