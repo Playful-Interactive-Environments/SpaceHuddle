@@ -253,6 +253,7 @@ class TopicRepository implements RepositoryInterface
         if (strtolower($exportType) == ExportType::XLSX) {
             $url = $path . DIRECTORY_SEPARATOR . "topic-export-$id.xlsx";
             $writer = new Xlsx($spreadsheet);
+            ob_end_clean();
             $writer->save($url);
         }
         if ($url) {
