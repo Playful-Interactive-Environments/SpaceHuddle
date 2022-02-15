@@ -15,6 +15,9 @@ use App\Domain\Topic\Type\ExportType;
 use App\Domain\Topic\Type\ViewType;
 use App\Factory\QueryFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Writer\Exception;
 use PhpOffice\PhpSpreadsheet\Writer\Ods;
@@ -208,6 +211,26 @@ class TopicRepository implements RepositoryInterface
                 $alphas = range('A', 'Z');
                 foreach ($exportColumns as $columnIndex => $columnName) {
                     $sheet->setCellValue("$alphas[$columnIndex]1", $columnName);
+                    $styleArray = [
+                        'font' => [
+                            'bold' => true,
+                        ],
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                        ],
+                        'borders' => [
+                            'bottom' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                            ],
+                        ],
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'color' => [
+                                'argb' => 'FFA0A0A0',
+                            ],
+                        ],
+                    ];
+                    $sheet->getStyle("$alphas[$columnIndex]1")->applyFromArray($styleArray);
                 }
                 $rowNumber = 1;
                 if (is_array($detailRows) and sizeof($detailRows) > 0) {
