@@ -277,13 +277,7 @@ class TopicRepository implements RepositoryInterface
                 break;
         }
 
-        if ($url) {
-            $exportPath = $_SERVER["REQUEST_SCHEME"] . '://' . $_SERVER["HTTP_HOST"] .
-                str_replace("index.php", "", $_SERVER["PHP_SELF"]);
-            $url = str_replace(DIRECTORY_SEPARATOR, "/", $url);
-            $url = "$exportPath$url";
-        }
-        return new ExportData($url);
+        return new ExportData($url, $path);
     }
 
     /**
