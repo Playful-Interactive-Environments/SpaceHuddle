@@ -92,11 +92,6 @@ export default class Sidebar extends Vue {
 
   &__icon {
     cursor: pointer;
-
-    &:hover {
-      color: white;
-      opacity: 0.7;
-    }
   }
 
   &__text {
@@ -109,6 +104,11 @@ export default class Sidebar extends Vue {
 
   .icon {
     margin-left: 0.5em;
+
+    &:hover {
+      color: white;
+      opacity: 0.7;
+    }
   }
 }
 </style>

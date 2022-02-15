@@ -329,5 +329,10 @@ export default class ModeratorSessionDetails extends Vue {
 .icon {
   color: var(--color-darkblue-light);
   margin-left: 0.5em;
+
+  &:hover {
+    color: white;
+    opacity: 0.7;
+  }
 }
 </style>

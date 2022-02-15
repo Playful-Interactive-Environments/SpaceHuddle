@@ -381,6 +381,11 @@ export default class ModeratorTopicDetails extends Vue {
         )
       ) {
         this.activeTask = this.tasks[0];
+      } else {
+        const activeTask = this.tasks.find(
+          (task) => task.id == this.activeTaskId
+        );
+        if (activeTask) this.activeTask = activeTask;
       }
     });
     if (this.tasks.length > this.activeTaskIndex)
@@ -520,10 +525,32 @@ export default class ModeratorTopicDetails extends Vue {
 
   download(): void {
     topicService.exportTopic(this.topicId, 'XLSX').then((result) => {
-      window.open(
-        `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${result.base64}`
+      const blob = this.convertBase64toBlob(
+        result.base64,
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       );
+      const blobURL = URL.createObjectURL(blob);
+      window.open(blobURL, '_self');
     });
+  }
+
+  convertBase64toBlob(content: string, contentType: string): Blob {
+    contentType = contentType || '';
+    const sliceSize = 512;
+    const byteCharacters = window.atob(content); //method which converts base64 to binary
+    const byteArrays: Uint8Array[] = [];
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+    return new Blob(byteArrays, {
+      type: contentType,
+    }); //statement which creates the blob
   }
 }
 </script>
@@ -575,6 +602,11 @@ p {
 .icon {
   color: var(--color-darkblue-light);
   margin-left: 0.5em;
+
+  &:hover {
+    color: white;
+    opacity: 0.7;
+  }
 }
 
 .label {
