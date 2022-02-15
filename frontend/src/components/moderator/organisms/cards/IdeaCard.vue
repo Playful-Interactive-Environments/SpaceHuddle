@@ -83,6 +83,7 @@
       v-if="isEditable"
       v-model:show-modal="showSettings"
       :idea="idea"
+      :authHeaderTyp="authHeaderTyp"
     />
   </el-card>
 </template>
@@ -94,6 +95,7 @@ import * as ideaService from '@/services/idea-service';
 import { Idea } from '@/types/api/Idea';
 import IdeaStates from '@/types/enum/IdeaStates';
 import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: { IdeaSettings },
@@ -108,6 +110,8 @@ export default class IdeaCard extends Vue {
   @Prop({ default: false, reactive: true }) isSelected!: boolean;
   @Prop({ default: false }) isDraggable!: boolean;
   @Prop({ default: false }) cutLongTexts!: boolean;
+  @Prop({ default: EndpointAuthorisationType.MODERATOR })
+  authHeaderTyp!: EndpointAuthorisationType;
   showSettings = false;
 
   IdeaStates = IdeaStates;
@@ -167,7 +171,7 @@ export default class IdeaCard extends Vue {
   }
 
   async deleteIdea(): Promise<void> {
-    ideaService.deleteIdea(this.idea.id).then(() => {
+    ideaService.deleteIdea(this.idea.id, this.authHeaderTyp).then(() => {
       this.$emit('ideaDeleted', this.idea.id);
     });
   }
@@ -188,7 +192,7 @@ export default class IdeaCard extends Vue {
       case IdeaStates.INAPPROPRIATE:
         this.idea.state = command;
         ideaService
-          .putIdea(this.idea.id, this.idea)
+          .putIdea(this.idea.id, this.idea, this.authHeaderTyp)
           .then((idea) => (this.idea.state = idea.state));
         break;
     }

@@ -26,6 +26,7 @@
               :is-editable="true"
               :canChangeState="false"
               class="public-idea"
+              :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
               @ideaDeleted="getTaskIdeas"
             />
           </span>
@@ -184,6 +185,7 @@ export default class Participant extends Vue {
   interval!: any;
   ideas: Idea[] = [];
   showUploadDialog = false;
+  EndpointAuthorisationType = EndpointAuthorisationType;
 
   get MAX_INPUT_LENGTH(): number {
     if (

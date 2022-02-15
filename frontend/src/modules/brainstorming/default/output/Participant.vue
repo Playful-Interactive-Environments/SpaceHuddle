@@ -161,6 +161,7 @@
           :is-selectable="false"
           :is-editable="true"
           :canChangeState="false"
+          :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
           @ideaDeleted="getTaskIdeas"
         >
         </IdeaCard>
@@ -217,6 +218,7 @@ export default class Participant extends Vue {
 
   MAX_KEYWORDS_LENGTH = MAX_KEYWORDS_LENGTH;
   MAX_DESCRIPTION_LENGTH = MAX_DESCRIPTION_LENGTH;
+  EndpointAuthorisationType = EndpointAuthorisationType;
 
   get moduleName(): string {
     if (this.module) return this.module.name;

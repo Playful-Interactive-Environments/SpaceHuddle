@@ -21,8 +21,15 @@ import TaskType from '@/types/enum/TaskType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
-export const deleteIdea = async (id: string): Promise<boolean> => {
-  return await apiExecuteDelete<any>(`/${EndpointType.IDEA}/${id}/`);
+export const deleteIdea = async (
+  id: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<boolean> => {
+  return await apiExecuteDelete<any>(
+    `/${EndpointType.IDEA}/${id}/`,
+    null,
+    authHeaderType
+  );
 };
 
 export const postIdea = async (
@@ -39,13 +46,14 @@ export const postIdea = async (
 
 export const putIdea = async (
   id: string,
-  data: Partial<Idea>
+  data: Partial<Idea>,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Idea> => {
   data['id'] = id;
   return await apiExecutePut<Idea>(
     `/${EndpointType.IDEA}`,
     data,
-    EndpointAuthorisationType.MODERATOR
+    authHeaderType
   );
 };
 

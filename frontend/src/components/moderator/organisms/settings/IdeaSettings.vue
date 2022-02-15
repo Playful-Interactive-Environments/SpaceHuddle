@@ -117,6 +117,8 @@ export default class IdeaSettings extends Vue {
   @Prop({ default: null }) title!: string | null;
   @Prop({ default: null }) taskId!: string | null;
   @Prop() idea!: Idea;
+  @Prop({ default: EndpointAuthorisationType.MODERATOR })
+  authHeaderTyp!: EndpointAuthorisationType;
 
   MAX_KEYWORDS_LENGTH = MAX_KEYWORDS_LENGTH;
   MAX_DESCRIPTION_LENGTH = MAX_DESCRIPTION_LENGTH;
@@ -172,7 +174,7 @@ export default class IdeaSettings extends Vue {
     this.idea.image = this.formData.image;
     this.idea.link = this.formData.link;
     if (this.idea.id) {
-      await ideaService.putIdea(this.idea.id, this.idea);
+      await ideaService.putIdea(this.idea.id, this.idea, this.authHeaderTyp);
     } else if (this.taskId) {
       await ideaService.postIdea(
         this.taskId,
