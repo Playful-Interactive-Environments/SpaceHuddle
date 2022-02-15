@@ -7,6 +7,7 @@ import {
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Topic } from '@/types/api/Topic';
+import { TopicExport } from '@/types/api/TopicExport';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -54,6 +55,18 @@ export const getTopicsList = async (
   return await apiExecuteGetHandled<Topic[]>(
     `/${EndpointType.SESSION}/${sessionId}/${EndpointType.TOPICS}/`,
     [],
+    authHeaderType
+  );
+};
+
+export const exportTopic = async (
+  topicId: string,
+  exportType: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<TopicExport> => {
+  return await apiExecuteGetHandled<TopicExport>(
+    `/${EndpointType.TOPIC}/${topicId}/${EndpointType.EXPORT}/${exportType}/`,
+    {},
     authHeaderType
   );
 };

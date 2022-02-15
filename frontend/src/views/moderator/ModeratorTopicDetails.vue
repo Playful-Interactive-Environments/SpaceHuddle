@@ -13,6 +13,19 @@
         v-on:delete="deleteTopic"
       >
         <template #settings>
+          <TutorialStep
+            v-if="isModerator"
+            type="sessionDetails"
+            step="coModerator"
+            :order="4"
+          >
+            <span v-on:click="showRoles = true">
+              <font-awesome-icon class="icon" icon="users"></font-awesome-icon>
+            </span>
+          </TutorialStep>
+          <span v-on:click="download">
+            <font-awesome-icon class="icon" icon="download"></font-awesome-icon>
+          </span>
           <el-dropdown>
             <span class="el-dropdown-link">
               <font-awesome-icon class="icon" icon="info-circle" />
@@ -175,6 +188,11 @@
     v-model:showModal="showTimerSettings"
     :entity="timerTask"
   />
+  <FacilitatorSettings
+    v-if="isModerator"
+    v-model:showModal="showRoles"
+    :sessionId="sessionId"
+  />
 </template>
 
 <script lang="ts">
@@ -211,6 +229,7 @@ import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
 import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
+import FacilitatorSettings from '@/components/moderator/organisms/settings/FacilitatorSettings.vue';
 import { reactivateTutorial } from '@/services/auth-service';
 
 @Options({
@@ -227,6 +246,7 @@ import { reactivateTutorial } from '@/services/auth-service';
     CollapseTitle,
     TaskTimeline,
     SessionCode,
+    FacilitatorSettings,
     ModuleContentComponent: getEmptyComponent(),
   },
 })
@@ -247,6 +267,7 @@ export default class ModeratorTopicDetails extends Vue {
   activeTask: Task | null = null;
   componentLoadIndex = 0;
   componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
+  showRoles = false;
   readonly intervalTime = 3000;
   interval!: any;
 
@@ -495,6 +516,14 @@ export default class ModeratorTopicDetails extends Vue {
 
   unmounted(): void {
     clearInterval(this.interval);
+  }
+
+  download(): void {
+    topicService.exportTopic(this.topicId, 'XLSX').then((result) => {
+      window.open(
+        `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${result.base64}`
+      );
+    });
   }
 }
 </script>
