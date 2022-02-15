@@ -141,7 +141,7 @@ class TopicRepository implements RepositoryInterface
                 $name = $reader->findString("name");
                 $taskType = $reader->findString("task_type");
                 if ($name) {
-                    $name = preg_replace('/[^a-zA-Z0-9]/','', $name);
+                    $name = preg_replace('/[^a-zA-Z0-9]/', ' ', $name);
                     $sheet->setTitle(substr($name, 0, 31));
                 }
 
@@ -209,6 +209,7 @@ class TopicRepository implements RepositoryInterface
                 foreach ($exportColumns as $columnIndex => $columnName) {
                     $sheet->setCellValue("$alphas[$columnIndex]1", $columnName);
                 }
+                $rowNumber = 1;
                 if (is_array($detailRows) and sizeof($detailRows) > 0) {
                     foreach ($detailRows as $detailIndex => $detailItem) {
                         $rowNumber = $detailIndex + 2;
@@ -242,6 +243,9 @@ class TopicRepository implements RepositoryInterface
                                 }
                             } else {
                                 $sheet->setCellValue("$columnLetter$rowNumber", $detailValue);
+                                if (strpos($columnName, "link") !== false && $detailValue) {
+                                    $sheet->getCell("$columnLetter$rowNumber")->getHyperlink()->setUrl($detailValue);
+                                }
                             }
                         }
                     }
@@ -251,6 +255,20 @@ class TopicRepository implements RepositoryInterface
                     $columnLetter = $alphas[$columnIndex];
                     if (strpos($columnName, "image") !== false) {
                         $sheet->getColumnDimension($columnLetter)->setWidth(200, "px");
+                    } elseif (strpos($columnName, "description") !== false) {
+                        $sheet->getColumnDimension($columnLetter)->setWidth(300, "px");
+                        $sheet->getStyle($columnLetter."1:".$columnLetter.$rowNumber)
+                            ->getAlignment()->setWrapText(true);
+                        $sheet->setSelectedCell("A1");
+                    } elseif (strpos($columnName, "link") !== false) {
+                        $sheet->getColumnDimension($columnLetter)->setWidth(300, "px");
+                        $sheet->getStyle($columnLetter."1:".$columnLetter.$rowNumber)
+                            ->getAlignment()->setWrapText(true);
+                        if ($rowNumber > 1) {
+                            $sheet->getStyle($columnLetter."2:".$columnLetter.$rowNumber)
+                                ->getFont()->getColor()->setARGB("FF0000FF");
+                        }
+                        $sheet->setSelectedCell("A1");
                     } else {
                         $sheet->getColumnDimension($columnLetter)->setAutoSize(true);
                     }
