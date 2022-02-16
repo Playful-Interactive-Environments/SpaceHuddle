@@ -18,6 +18,13 @@ class TopicData
     public ?string $id;
 
     /**
+     * The session id.
+     * @var string|null
+     * @OA\Property(example="uuid")
+     */
+    public ?string $sessionId;
+
+    /**
      * The topic title.
      * @var string|null
      * @OA\Property()
@@ -53,6 +60,7 @@ class TopicData
     {
         $reader = new ArrayReader($data);
         $this->id = $reader->findString("id");
+        $this->sessionId = $reader->findString("session_id");
         $this->title = $reader->findString("title");
         $this->description = $reader->findString("description");
         $this->order = $reader->findInt("order");

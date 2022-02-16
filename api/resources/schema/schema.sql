@@ -758,8 +758,16 @@ WHERE
                  module.task_id = task.id AND module.sync_public_participant
         )
     ) OR (
-        task.state IN('ACTIVE', 'READ_ONLY') AND(
-        task.expiration_time IS NULL OR task.expiration_time >= CURRENT_TIMESTAMP())
+        task.state IN('ACTIVE', 'READ_ONLY')
+            AND (task.expiration_time IS NULL OR task.expiration_time >= CURRENT_TIMESTAMP())
+            AND NOT EXISTS(
+                SELECT
+                    1
+                FROM
+                    module
+                WHERE
+                        module.task_id = task.id AND module.sync_public_participant
+            )
     );
 
 CREATE OR REPLACE VIEW user_module (user_id, task_type, module_name) AS
