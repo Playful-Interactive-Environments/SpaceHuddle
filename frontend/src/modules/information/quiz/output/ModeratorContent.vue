@@ -137,6 +137,8 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import * as taskService from '@/services/task-service';
+import * as topicService from '@/services/topic-service';
+import * as sessionService from '@/services/session-service';
 import * as hierarchyService from '@/services/hierarchy-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
@@ -173,8 +175,10 @@ export default class ModeratorContent extends Vue {
 
   @Prop() readonly taskId!: string;
   task: Task | null = null;
+  sessionId!: string;
   questions: Question[] = [];
   publicQuestion: Question | null = null;
+  publicTask: Task | null = null;
   editQuestion: Question | null = null;
   ideas: Idea[] = [];
   readonly intervalTime = 10000;
@@ -211,6 +215,7 @@ export default class ModeratorContent extends Vue {
   }
 
   hasParticipantOption(item: Hierarchy): boolean {
+    if (!this.publicTask || this.publicTask.id !== this.taskId) return false;
     if (this.publicQuestion) return item.id === this.publicQuestion.question.id;
     return false;
   }
@@ -324,6 +329,9 @@ export default class ModeratorContent extends Vue {
   onTaskIdChanged(): void {
     taskService.getTaskById(this.taskId).then((task) => {
       this.task = task;
+      topicService.getTopicById(task.topicId).then((topic) => {
+        this.sessionId = topic.sessionId;
+      });
       const module = task.modules.find((module) => module.name == 'quiz');
       if (module) {
         this.answerCount = module.parameter.answerCount;
@@ -332,6 +340,15 @@ export default class ModeratorContent extends Vue {
       this.setupEmptyQuestion();
       this.getHierarchies();
     });
+  }
+
+  @Watch('sessionId', { immediate: true })
+  onSessionIdChanged(): void {
+    if (this.sessionId) {
+      sessionService.getPublicScreen(this.sessionId).then((task) => {
+        this.publicTask = task;
+      });
+    }
   }
 
   getEmptyHierarchy(
@@ -426,6 +443,7 @@ export default class ModeratorContent extends Vue {
       }
       this.getHierarchies();
     });
+    this.onSessionIdChanged();
   }
 
   unmounted(): void {
