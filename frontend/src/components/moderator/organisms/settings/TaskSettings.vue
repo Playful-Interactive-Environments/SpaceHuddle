@@ -35,22 +35,6 @@
             {{ $t('moderator.organism.settings.taskSettings.info') }}
           </p>
         </template>
-        <el-form-item
-          v-if="!taskType"
-          :label="$t('moderator.organism.settings.taskSettings.taskType')"
-          prop="taskType"
-          :rules="[defaultFormRules.ruleSelection]"
-        >
-          <el-select v-model="formData.taskType" class="select--fullwidth">
-            <el-option
-              v-for="type in TaskTypeKeys"
-              :key="type"
-              :value="type"
-              :label="$t(`enum.taskType.${TaskType[type]}`)"
-            >
-            </el-option>
-          </el-select>
-        </el-form-item>
         <el-form-item v-if="showInput">
           <template #label>
             <TutorialStep
@@ -201,12 +185,6 @@
             />
           </TutorialStep>
         </el-form-item>
-        <TaskParameterComponent
-          ref="taskParameter"
-          :taskId="taskId"
-          :topicId="topicId"
-          v-model="formData"
-        />
         <el-form-item
           prop="name"
           :rules="[
@@ -223,7 +201,7 @@
             >
               <span>
                 {{
-                  formData.taskType === 'BRAINSTORMING'
+                  taskTypes.includes(TaskType.BRAINSTORMING)
                     ? $t('moderator.organism.settings.taskSettings.question')
                     : $t('moderator.organism.settings.taskSettings.title')
                 }}
@@ -258,7 +236,7 @@
             defaultFormRules.ruleSelection,
             { validator: validateModuleSelection },
           ]"
-          v-if="moduleKeyList.length > 1"
+          v-if="possibleModuleTaskList.length > 1"
         >
           <template #label>
             <TutorialStep
@@ -276,23 +254,23 @@
             <el-tag v-for="tag in moduleSelectionMain" :key="tag">
               {{
                 $t(
-                  `module.${
-                    TaskType[formData.taskType]
-                  }.${tag}.description.title`
+                  `module.${TaskType[tag.taskType.toUpperCase()]}.${
+                    tag.moduleName
+                  }.description.title`
                 )
               }}
             </el-tag>
             <el-tag
               v-for="tag in moduleSelectionAddOn"
-              :key="tag"
+              :key="tag.moduleName"
               :closable="true"
               v-on:close="removeModuleType(tag)"
             >
               {{
                 $t(
-                  `module.${
-                    TaskType[formData.taskType]
-                  }.${tag}.description.title`
+                  `module.${TaskType[tag.taskType.toUpperCase()]}.${
+                    tag.moduleName
+                  }.description.title`
                 )
               }}
             </el-tag>
@@ -310,7 +288,7 @@
               :placeholder="
                 $t('moderator.organism.settings.taskSettings.moduleSearch')
               "
-              v-if="moduleKeyList.length > 1"
+              v-if="possibleModuleTaskList.length > 1"
             >
               <template #suffix>
                 <font-awesome-icon icon="search" />
@@ -319,16 +297,12 @@
           </TutorialStep>
           <el-scrollbar>
             <div class="flex-content">
-              <!--<p v-for="item in 50" :key="item" class="scrollbar-demo-item">
-                {{ item }}
-              </p>-->
               <ModuleCard
                 v-for="moduleType in displayModuleList"
-                :key="moduleType"
-                :task-type="TaskType[formData.taskType]"
-                :moduleName="moduleType"
+                :key="moduleType.moduleName"
+                :moduleTask="moduleType"
                 v-model:mainModule="mainModule"
-                v-model="formData.moduleListAddOn[moduleType]"
+                v-model="moduleType.active"
                 :displayTutorial="displayModuleTutorial(moduleType)"
               />
               <TutorialStep
@@ -351,28 +325,13 @@
               </TutorialStep>
             </div>
           </el-scrollbar>
-          <!--<el-carousel
-            id="moduleType"
-            :autoplay="false"
-            type="card"
-            arrow="always"
-            height="250px"
-            v-if="moduleKeyList.length > 1"
-            trigger="click"
-          >
-            <el-carousel-item
-              v-for="moduleType in moduleKeyList"
-              :key="moduleType"
-            >
-              <ModuleCard
-                :task-type="TaskType[formData.taskType]"
-                :moduleName="moduleType"
-                v-model:mainModule="mainModule"
-                v-model="formData.moduleListAddOn[moduleType]"
-              />
-            </el-carousel-item>
-          </el-carousel>-->
         </el-form-item>
+        <TaskParameterComponent
+          ref="taskParameter"
+          :taskId="taskId"
+          :topicId="topicId"
+          v-model="formData"
+        />
         <el-collapse
           v-model="openTabs"
           :key="openTabs.length"
@@ -397,7 +356,7 @@
                 />
                 {{
                   $t(
-                    `module.${TaskType[formData.taskType]}.${
+                    `module.${TaskType[component.value.taskType]}.${
                       component.value.moduleName
                     }.description.title`
                   )
@@ -440,7 +399,7 @@ import * as taskService from '@/services/task-service';
 import * as moduleService from '@/services/module-service';
 import * as viewService from '@/services/view-service';
 import TaskType from '@/types/enum/TaskType';
-import { Task, TaskSettingsData } from '@/types/api/Task';
+import { Task } from '@/types/api/Task';
 import TaskStates from '@/types/enum/TaskStates';
 import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
 import {
@@ -450,6 +409,7 @@ import {
   getModuleConfig,
   getModulesForTaskType,
   hasModule,
+  ModuleTask,
 } from '@/modules';
 import { CustomParameter } from '@/types/ui/CustomParameter';
 import { EventType } from '@/types/enum/EventType';
@@ -477,6 +437,7 @@ import { reactivateTutorial } from '@/services/auth-service';
 
 interface ModuleComponentDefinition {
   componentName: string;
+  taskType: string | null;
   moduleName: string | null;
   moduleIcon: string | null;
   moduleId: string | null;
@@ -525,10 +486,25 @@ class InputData {
   }
 }
 
-interface FormDataDefinition extends TaskSettingsData {
+class ModuleTaskProperty extends ModuleTask {
+  active = false;
+
+  static createFromModuleTask(moduleTask: ModuleTask): ModuleTaskProperty {
+    return new ModuleTaskProperty(moduleTask.taskType, moduleTask.moduleName);
+  }
+
+  static createEmpty(): ModuleTaskProperty {
+    return ModuleTaskProperty.createFromModuleTask(ModuleTask.createEmpty());
+  }
+}
+
+interface FormDataDefinition {
+  name: string;
+  description: string;
+  parameter: any;
   input: InputData[];
-  moduleListMain: { [key: string]: boolean };
-  moduleListAddOn: { [key: string]: boolean };
+  moduleListMain: ModuleTaskProperty[];
+  moduleListAddOn: ModuleTaskProperty[];
   moduleParameterComponents: ModuleComponentDefinition[];
   stateMessage: string;
   call: string;
@@ -553,33 +529,30 @@ enum InputOption {
   emits: ['taskUpdated', 'showTimerSettings', 'update:showModal'],
 })
 export default class TaskSettings extends Vue {
-  defaultFormRules: ValidationRuleDefinition = defaultFormRules;
-
+  //#region Props
   @Prop({ default: false }) showModal!: boolean;
   @Prop({}) topicId!: string;
   @Prop({}) taskId!: string;
-  @Prop({}) taskType!: keyof typeof TaskType;
+  @Prop({ default: [] }) taskTypes!: (keyof typeof TaskType)[];
+  //#endregion Props
+
+  //#region Variables
+  defaultFormRules: ValidationRuleDefinition = defaultFormRules;
+
   componentLoadIndex = 0;
-  usedModuleNames: string[] = [];
+  usedModuleList: ModuleTaskProperty[] = [];
+  userModuleList: ModuleTask[] = [];
+  addOneListUnfiltered: ModuleTaskProperty[] = [];
   hideNotUsesModules = true;
   moduleSearch = '';
 
-  reactivateTutorial(): void {
-    reactivateTutorial('taskSettings', this.eventBus);
-  }
-
-  get TaskTypeKeys(): Array<keyof typeof TaskType> {
-    return Object.keys(TaskType) as Array<keyof typeof TaskType>;
-  }
-
   formData: FormDataDefinition = {
-    taskType: (Object.keys(TaskType) as Array<keyof typeof TaskType>)[1],
     input: [],
     name: '',
     description: '',
     parameter: {},
-    moduleListMain: {},
-    moduleListAddOn: {},
+    moduleListMain: [],
+    moduleListAddOn: [],
     moduleParameterComponents: [],
     stateMessage: '',
     call: '',
@@ -594,7 +567,92 @@ export default class TaskSettings extends Vue {
   ViewType = ViewType;
   IdeaStates = IdeaStates;
   IdeaStateKeys = Object.keys(IdeaStates);
+  //#endregion Variables
 
+  //#region Load / Reset / Leave
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    if (this.taskId) {
+      taskService.getTaskById(this.taskId).then((task) => {
+        this.mainModule = new ModuleTask(task.taskType, 'default');
+        this.formData.name = task.name;
+        this.formData.description = task.description;
+        this.formData.parameter = task.parameter ?? {};
+        if (this.formData.parameter.input)
+          this.formData.input = this.formData.parameter.input.map((input) => {
+            return new InputData(
+              this.getViewKey(input.view),
+              input.maxCount,
+              input.filter,
+              input.order
+            );
+          });
+        task.modules.forEach((module) => {
+          const addOn = this.formData.moduleListAddOn.find((item) =>
+            item.like(task.taskType, module.name)
+          );
+          if (addOn) addOn.active = true;
+          else this.mainModule = new ModuleTask(task.taskType, module.name);
+        });
+        this.task = task;
+      });
+    } else {
+      this.task = null;
+      this.mainModule = new ModuleTask('', 'default');
+      this.reset();
+    }
+  }
+
+  reset(): void {
+    this.task = null;
+    this.loadModuleList();
+    this.loadParticipantModuleList();
+    this.formData.name = '';
+    this.formData.description = '';
+    this.formData.parameter = {};
+    this.formData.input = [];
+    this.setDefaultInput();
+    this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
+  }
+
+  handleClose(done: { (): void }): void {
+    if (!this.taskId) this.reset();
+    done();
+    this.closeDialog();
+  }
+
+  closeDialog(): void {
+    this.$emit('update:showModal', false);
+    this.loadUserModuleList().then(() => {
+      this.resetHideNotUsesModules();
+    });
+  }
+  //#endregion Load / Reset / Leave
+
+  //#region Tutorial
+  reactivateTutorial(): void {
+    reactivateTutorial('taskSettings', this.eventBus);
+  }
+
+  displayModuleTutorial(module: ModuleTask): boolean {
+    const displayList = this.displayModuleList;
+    const index = displayList.findIndex((item) => item.eq(module));
+    if (index === 0) return true;
+    else if (index > 0) {
+      const addOnList = this.formData.moduleListAddOn;
+      const indexAddOn = addOnList.findIndex((item) => item.eq(module));
+      if (indexAddOn === 0) return true;
+      else if (indexAddOn > 0) {
+        const displayItem = displayList[index - 1];
+        if (addOnList.findIndex((item) => item.eq(displayItem)) >= 0)
+          return true;
+      }
+    }
+    return false;
+  }
+  //#endregion Tutorial
+
+  //#region Input
   getEmptyInput(): InputData {
     return new InputData(
       this.possibleViews.length > 0
@@ -638,85 +696,15 @@ export default class TaskSettings extends Vue {
     return `${view.type}.${view.id}`;
   }
 
-  @Watch('taskType', { immediate: true })
-  async onPropTaskTypeChanged(): Promise<void> {
-    if (this.taskType) this.formData.taskType = this.taskType;
-  }
-
-  @Watch('formData.taskType', { immediate: true })
-  async onPropFormTaskTypeChanged(): Promise<void> {
-    this.hideNotUsesModules = false;
-    if (this.formData.taskType) {
-      moduleService
-        .getUsedModuleNames(this.formData.taskType)
-        .then((modules) => {
-          const mainModules = this.getIntersection(
-            modules,
-            this.formData.moduleListMain
-          );
-          const addOnModules = this.getIntersection(
-            modules,
-            this.formData.moduleListAddOn
-          );
-          this.usedModuleNames = [...mainModules, ...addOnModules];
-          this.hideNotUsesModules =
-            mainModules.length > 0 &&
-            modules.length < this.moduleKeyList.length;
-          if (!this.taskId) {
-            if (mainModules.length > 0) {
-              this.mainModule = mainModules[0];
-            }
-          }
-        });
-    }
-  }
-
-  private getIntersection(
-    usedModules: string[],
-    modules: { [name: string]: boolean }
-  ): string[] {
-    const mainModules = Object.keys(modules);
-    return mainModules.filter((value) => usedModules.includes(value));
-  }
-
-  get mainModule(): string {
-    if (this.moduleSelectionMain.length > 0) return this.moduleSelectionMain[0];
-    return '';
-  }
-
-  set mainModule(value: string) {
-    if (value in this.formData.moduleListMain) {
-      Object.keys(this.formData.moduleListMain).forEach(
-        (moduleName) => (this.formData.moduleListMain[moduleName] = false)
-      );
-      this.formData.moduleListMain[value] = true;
-    }
-  }
-
-  validateModuleSelection(
-    rule: ValidationRules,
-    value: string,
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    callback: any
-  ): boolean {
-    if (this.moduleSelectionMain.length > 0) {
-      callback();
-      return true;
-    } else {
-      callback(new Error((this as any).$t('error.vuelidate.required')));
-      return false;
-    }
-  }
-
   async updateInputOption(): Promise<void> {
     let input = InputOption.NO;
-    for (const moduleIndex in this.moduleKeyList) {
-      const moduleName = this.moduleKeyList[moduleIndex];
-      if (this.moduleList[moduleName]) {
+    for (const module of this.possibleModuleTaskList) {
+      const item = this.moduleList.find((item) => item.eq(module));
+      if (item) {
         await getModuleConfig(
           'input',
-          TaskType[this.formData.taskType],
-          moduleName
+          TaskType[item.taskType.toUpperCase()],
+          item.moduleName
         ).then((result) => {
           switch (result) {
             case InputOption.YES:
@@ -742,129 +730,12 @@ export default class TaskSettings extends Vue {
     }
   }
 
-  showDialog = false;
-  @Watch('showModal', { immediate: false, flush: 'post' })
-  async onShowModalChanged(showModal: boolean): Promise<void> {
-    this.showDialog = showModal;
-  }
-
-  get moduleKeyList(): string[] {
-    return [
-      ...Object.keys(this.formData.moduleListMain),
-      ...Object.keys(this.formData.moduleListAddOn),
-    ];
-  }
-
-  displayModuleTutorial(moduleName: string): boolean {
-    const displayList = this.displayModuleList;
-    const index = displayList.indexOf(moduleName);
-    if (index === 0) return true;
-    else if (index > 0) {
-      const addOnList = Object.keys(this.formData.moduleListAddOn);
-      const indexAddOn = addOnList.indexOf(moduleName);
-      if (indexAddOn === 0) return true;
-      else if (indexAddOn > 0) {
-        if (!addOnList.includes(displayList[index - 1])) return true;
-      }
-    }
-    return false;
-  }
-
-  get displayModuleList(): string[] {
-    const moduleNames = this.hideNotUsesModules
-      ? this.usedModuleNames
-      : this.moduleKeyList;
-    if (this.moduleSearch) {
-      return moduleNames.filter((moduleName) => {
-        const name = (this as any).$t(
-          `module.${this.formData.taskType.toLowerCase()}.${moduleName}.description.title`
-        );
-        return name.toLowerCase().includes(this.moduleSearch.toLowerCase());
-      });
-    }
-    return moduleNames;
-  }
-
-  get moduleList(): { [name: string]: boolean } {
-    return Object.assign(
-      {},
-      this.formData.moduleListMain,
-      this.formData.moduleListAddOn
-    );
-  }
-
-  @Watch('moduleList', { immediate: true, deep: true })
-  async onModuleListChanged(): Promise<void> {
-    await this.updateInputOption();
-  }
-
   get showInput(): boolean {
     return this.inputOption !== InputOption.NO;
   }
 
   get inputMinCount(): number {
     return this.inputOption === InputOption.YES ? 1 : 0;
-  }
-
-  get moduleSelectionMain(): string[] {
-    return Object.entries(this.formData.moduleListMain)
-      .filter((item) => item[1])
-      .map((item) => item[0]);
-  }
-
-  get moduleSelectionAddOn(): string[] {
-    return Object.entries(this.formData.moduleListAddOn)
-      .filter((item) => item[1])
-      .map((item) => item[0]);
-  }
-
-  get moduleSelection(): string[] {
-    return [...this.moduleSelectionMain, ...this.moduleSelectionAddOn];
-  }
-
-  removeModuleType(tag: string): void {
-    if (tag in this.formData.moduleListAddOn)
-      this.formData.moduleListAddOn[tag] = false;
-    if (tag in this.formData.moduleListMain)
-      this.formData.moduleListMain[tag] = false;
-  }
-
-  handleClose(done: { (): void }): void {
-    if (!this.taskId) this.reset();
-    done();
-    this.$emit('update:showModal', false);
-    this.hideNotUsesModules = true;
-  }
-
-  @Watch('taskId', { immediate: true })
-  onTaskIdChanged(id: string): void {
-    if (id) {
-      taskService.getTaskById(id).then((task) => {
-        this.formData.taskType = task.taskType;
-        this.formData.name = task.name;
-        this.formData.description = task.description;
-        this.formData.parameter = task.parameter ?? {};
-        if (this.formData.parameter.input)
-          this.formData.input = this.formData.parameter.input.map((input) => {
-            return new InputData(
-              this.getViewKey(input.view),
-              input.maxCount,
-              input.filter,
-              input.order
-            );
-          });
-        task.modules.forEach((module) => {
-          if (module.name in this.formData.moduleListAddOn)
-            this.formData.moduleListAddOn[module.name] = true;
-          else this.mainModule = module.name;
-        });
-        this.task = task;
-      });
-    } else {
-      this.task = null;
-      this.mainModule = 'default';
-      if (this.formData.taskType) this.reset();
-    }
   }
 
   @Watch('topicId', { immediate: true })
@@ -886,26 +757,241 @@ export default class TaskSettings extends Vue {
       );
     });
   }
+  //#endregion Input
 
-  @Watch('formData.taskType', { immediate: true })
-  async onTaskTypeChanged(taskType: string): Promise<void> {
-    await this.loadModuleList();
-    if (this.$options.components) {
-      getAsyncTaskParameter(TaskType[taskType]).then((component) => {
-        if (this.$options.components)
-          this.$options.components['TaskParameterComponent'] = component;
-        this.componentLoadIndex++;
+  //#region Modules
+  private async loadModuleList(): Promise<void> {
+    this.addOneListUnfiltered = [];
+    await getModulesForTaskType(this.taskTypes, ModuleType.ADDON).then(
+      (result) => {
+        result.forEach((module) => {
+          const property = ModuleTaskProperty.createFromModuleTask(module);
+          if (this.task)
+            property.active = this.task.modules.some((moduleTask) =>
+              module.like(this.task?.taskType, moduleTask.name)
+            );
+          this.addOneListUnfiltered.push(property);
+        });
+      }
+    );
+    this.formData.moduleListMain = [];
+    await getModulesForTaskType(this.taskTypes, ModuleType.MAIN).then(
+      (result) => {
+        result.forEach((module, moduleIndex) => {
+          const property = ModuleTaskProperty.createFromModuleTask(module);
+          if (!this.task) property.active = moduleIndex == 0;
+          else
+            property.active = this.task.modules.some((moduleTask) =>
+              module.like(this.task?.taskType, moduleTask.name)
+            );
+          this.formData.moduleListMain.push(property);
+        });
+      }
+    );
+  }
+
+  private async loadParticipantModuleList(): Promise<void> {
+    this.participantModuleList = [];
+    if (this.possibleModuleTaskList) {
+      this.possibleModuleTaskList.forEach((module) => {
+        const participantModule = new ModuleTaskProperty(
+          module.taskType,
+          module.moduleName
+        );
+        this.participantModuleList.push(participantModule);
+        if (participantModule) {
+          participantModule.active = false;
+          hasModule(
+            ModuleComponentType.PARTICIPANT,
+            TaskType[module.taskType],
+            module.moduleName
+          ).then((result) => {
+            participantModule.active = result;
+          });
+        }
       });
     }
   }
 
+  private async loadUserModuleList(): Promise<void> {
+    this.userModuleList = [];
+    for (const taskType of this.taskTypes) {
+      await moduleService.getUsedModuleNames(taskType).then((typeModules) => {
+        for (const moduleName of typeModules)
+          this.userModuleList.push(new ModuleTask(taskType, moduleName));
+      });
+    }
+  }
+
+  @Watch('taskTypes', { immediate: true })
+  async onTaskTypesChanged(): Promise<void> {
+    this.hideNotUsesModules = false;
+    await this.loadUserModuleList();
+    await this.loadModuleList();
+    const mainModules = this.getIntersection(
+      this.userModuleList,
+      this.formData.moduleListMain
+    );
+    if (!this.taskId) {
+      if (mainModules.length > 0) {
+        this.mainModule = mainModules[0];
+      }
+    }
+  }
+
+  @Watch('taskType', { immediate: true })
+  async onTaskTypeChanged(): Promise<void> {
+    if (this.taskType) {
+      this.formData.moduleListAddOn = this.addOneListUnfiltered.filter(
+        (item) => item.taskType.toUpperCase() == this.taskType
+      );
+      await this.loadParticipantModuleList();
+
+      if (this.$options.components) {
+        getAsyncTaskParameter(TaskType[this.taskType]).then((component) => {
+          if (this.$options.components)
+            this.$options.components['TaskParameterComponent'] = component;
+          this.componentLoadIndex++;
+        });
+      }
+
+      this.resetHideNotUsesModules();
+    }
+  }
+
+  private resetHideNotUsesModules(): void {
+    this.hideNotUsesModules = false;
+
+    const mainModules = this.getIntersection(
+      this.userModuleList,
+      this.formData.moduleListMain
+    );
+    const addOnModules = this.getIntersection(
+      this.userModuleList,
+      this.formData.moduleListAddOn
+    );
+    this.usedModuleList = [...mainModules, ...addOnModules];
+    this.hideNotUsesModules =
+      mainModules.length > 0 &&
+      this.userModuleList.length < this.possibleModuleTaskList.length;
+  }
+
+  private getIntersection(
+    usedModules: ModuleTask[],
+    modules: ModuleTaskProperty[]
+  ): ModuleTaskProperty[] {
+    return modules.filter((value) =>
+      usedModules.find((item) => item.eq(value))
+    );
+  }
+
+  get mainModule(): ModuleTask {
+    if (this.moduleSelectionMain.length > 0) return this.moduleSelectionMain[0];
+    return ModuleTask.createEmpty();
+  }
+
+  set mainModule(value: ModuleTask) {
+    const item = this.formData.moduleListMain.find((item) => item.eq(value));
+    if (item) {
+      for (const obj of this.formData.moduleListMain) {
+        obj.active = false;
+      }
+      item.active = true;
+    }
+  }
+
+  get taskType(): keyof typeof TaskType | undefined {
+    const taskType = TaskType[this.mainModule.taskType.toUpperCase()];
+    if (taskType) return taskType.toUpperCase();
+    return taskType;
+  }
+
+  validateModuleSelection(
+    rule: ValidationRules,
+    value: string,
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    callback: any
+  ): boolean {
+    if (this.moduleSelectionMain.length > 0) {
+      callback();
+      return true;
+    } else {
+      callback(new Error((this as any).$t('error.vuelidate.required')));
+      return false;
+    }
+  }
+
+  showDialog = false;
+  @Watch('showModal', { immediate: false, flush: 'post' })
+  async onShowModalChanged(showModal: boolean): Promise<void> {
+    this.showDialog = showModal;
+  }
+
+  get possibleModuleTaskList(): ModuleTaskProperty[] {
+    return [...this.formData.moduleListMain, ...this.formData.moduleListAddOn];
+  }
+
+  get displayModuleList(): ModuleTaskProperty[] {
+    const moduleNames = this.hideNotUsesModules
+      ? this.usedModuleList
+      : this.possibleModuleTaskList;
+    if (this.moduleSearch) {
+      return moduleNames.filter((module) => {
+        const name = (this as any).$t(
+          `module.${module.taskType.toLowerCase()}.${
+            module.moduleName
+          }.description.title`
+        );
+        return name.toLowerCase().includes(this.moduleSearch.toLowerCase());
+      });
+    }
+    return moduleNames;
+  }
+
+  get moduleList(): ModuleTaskProperty[] {
+    return [...this.formData.moduleListMain, ...this.formData.moduleListAddOn];
+  }
+
+  @Watch('moduleList', { immediate: true, deep: true })
+  async onModuleListChanged(): Promise<void> {
+    await this.updateInputOption();
+  }
+
+  get moduleSelectionMain(): ModuleTask[] {
+    return this.formData.moduleListMain
+      .filter((item) => item.active)
+      .map((item) => item);
+  }
+
+  get moduleSelectionAddOn(): ModuleTask[] {
+    return this.formData.moduleListAddOn
+      .filter((item) => item.active)
+      .map((item) => item);
+  }
+
+  get moduleSelection(): ModuleTask[] {
+    return [...this.moduleSelectionMain, ...this.moduleSelectionAddOn];
+  }
+
+  removeModuleType(moduleTask: ModuleTask): void {
+    const addOn = this.formData.moduleListAddOn.find((item) =>
+      item.eq(moduleTask)
+    );
+    if (addOn) addOn.active = false;
+    const main = this.formData.moduleListMain.find((item) =>
+      item.eq(moduleTask)
+    );
+    if (main) main.active = false;
+  }
+
   @Watch('moduleSelection', { immediate: true })
-  async onModuleSelectionChanged(moduleSelection: string[]): Promise<void> {
+  async onModuleSelectionChanged(): Promise<void> {
     const oldKeys = this.formData.moduleParameterComponents.map(
       (data) => data.componentName
     );
 
     const addComponent = async (
+      taskType: string,
       moduleName: string,
       componentName: string
     ): Promise<void> => {
@@ -922,15 +1008,13 @@ export default class TaskSettings extends Vue {
       }
 
       let icon: string | null = null;
-      await getModuleConfig(
-        'icon',
-        TaskType[this.formData.taskType],
-        moduleName
-      ).then((result) => (icon = result));
+      await getModuleConfig('icon', TaskType[taskType], moduleName).then(
+        (result) => (icon = result)
+      );
 
       hasModule(
         ModuleComponentType.MODERATOR_CONFIG,
-        TaskType[this.formData.taskType],
+        TaskType[taskType],
         moduleName
       ).then((result) => {
         if (
@@ -942,6 +1026,7 @@ export default class TaskSettings extends Vue {
             componentName: componentName,
             moduleId: moduleId,
             moduleName: moduleName,
+            taskType: taskType,
             moduleIcon: icon,
             hasModule: result,
             parameter: moduleParameter,
@@ -957,92 +1042,49 @@ export default class TaskSettings extends Vue {
 
     if (this.$options.components) {
       this.formData.moduleParameterComponents = [];
-      moduleSelection.forEach((moduleName) => {
-        const componentName = `ModuleParameterComponents-${this.formData.taskType}-${moduleName}`;
+      this.moduleSelection.forEach((module) => {
+        const componentName = `ModuleParameterComponents-${module.taskType}-${module.moduleName}`;
         if (
           this.$options.components &&
           !this.$options.components[componentName]
         ) {
           getAsyncModule(
             ModuleComponentType.MODERATOR_CONFIG,
-            TaskType[this.formData.taskType],
-            moduleName
+            TaskType[module.taskType.toUpperCase()],
+            module.moduleName
           ).then((component) => {
             if (this.$options.components)
               this.$options.components[componentName] = component;
-            addComponent(moduleName, componentName);
+            addComponent(
+              module.taskType.toUpperCase(),
+              module.moduleName,
+              componentName
+            );
           });
         } else {
-          addComponent(moduleName, componentName);
+          addComponent(
+            module.taskType.toUpperCase(),
+            module.moduleName,
+            componentName
+          );
         }
       });
     }
     //this.componentLoadIndex++;
   }
 
-  participantModuleList: { [name: string]: boolean } = {};
+  participantModuleList: ModuleTaskProperty[] = [];
   get hasParticipantModule(): boolean {
     let hasParticipantModule = false;
-    this.moduleSelection.forEach((moduleName) => {
-      if (this.participantModuleList[moduleName]) hasParticipantModule = true;
+    this.moduleSelection.forEach((module) => {
+      if (this.participantModuleList.find((item) => item.eq(module)))
+        hasParticipantModule = true;
     });
     return hasParticipantModule;
   }
+  //#endregion Modules
 
-  async loadModuleList(): Promise<void> {
-    this.formData.moduleListMain = {};
-    this.formData.moduleListAddOn = {};
-    await getModulesForTaskType(this.formData.taskType, ModuleType.MAIN).then(
-      (result) => {
-        result.forEach((moduleName, moduleIndex) => {
-          if (!this.task)
-            this.formData.moduleListMain[moduleName] = moduleIndex == 0;
-          else
-            this.formData.moduleListMain[moduleName] = this.task.modules.some(
-              (model) => model.name == moduleName
-            );
-        });
-      }
-    );
-    await getModulesForTaskType(this.formData.taskType, ModuleType.ADDON).then(
-      (result) => {
-        result.forEach((moduleName) => {
-          if (!this.task) this.formData.moduleListAddOn[moduleName] = false;
-          else
-            this.formData.moduleListAddOn[moduleName] = this.task.modules.some(
-              (model) => model.name == moduleName
-            );
-        });
-      }
-    );
-
-    this.participantModuleList = {};
-    if (this.moduleKeyList) {
-      this.moduleKeyList.forEach((moduleName) => {
-        this.participantModuleList[moduleName] = false;
-        hasModule(
-          ModuleComponentType.PARTICIPANT,
-          TaskType[this.formData.taskType],
-          moduleName
-        ).then((result) => {
-          this.participantModuleList[moduleName] = result;
-        });
-      });
-    }
-  }
-
-  reset(): void {
-    this.task = null;
-    if (this.taskType) this.formData.taskType = this.taskType;
-    this.loadModuleList();
-    this.formData.name = '';
-    this.formData.description = '';
-    this.formData.parameter = {};
-    this.formData.input = [];
-    this.setDefaultInput();
-    this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
-  }
-
+  //#region Save
   async saveAndActivate(): Promise<void> {
     if (this.task) this.task.state = TaskStates.ACTIVE;
     await this.save(TaskStates.ACTIVE).then((task) => {
@@ -1078,11 +1120,11 @@ export default class TaskSettings extends Vue {
     if (this.taskId) {
       await taskService
         .putTask(this.taskId, {
-          taskType: this.formData.taskType,
+          taskType: this.taskType,
           name: this.formData.name,
           description: this.formData.description,
           parameter: this.formData.parameter,
-          modules: this.moduleSelection,
+          modules: this.moduleSelection.map((item) => item.moduleName),
           state: this.task?.state,
           order: this.task?.order,
         })
@@ -1102,13 +1144,13 @@ export default class TaskSettings extends Vue {
 
       await taskService
         .postTask(this.topicId, {
-          taskType: this.formData.taskType,
+          taskType: this.taskType,
           name: this.formData.name,
           description: this.formData.description,
           parameter: this.formData.parameter,
           state: state,
           order: taskCount,
-          modules: this.moduleSelection,
+          modules: this.moduleSelection.map((item) => item.moduleName),
         })
         .then(
           (task) => {
@@ -1161,11 +1203,12 @@ export default class TaskSettings extends Vue {
         });
       });
     });
-    this.$emit('update:showModal', false);
+    this.closeDialog();
     this.$emit('taskUpdated', task.id);
     if (cleanUp) this.reset();
     this.eventBus.emit(EventType.CHANGE_SETTINGS, task.id);
   }
+  //#endregion Save
 }
 </script>
 

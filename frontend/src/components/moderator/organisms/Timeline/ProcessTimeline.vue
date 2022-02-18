@@ -78,10 +78,10 @@
                   :type="translationModuleName"
                   :order="2"
                 >
-                  <img
+                  <font-awesome-icon
                     v-if="contentListIcon(element)"
-                    :src="contentListIcon(element)"
-                    alt=""
+                    :icon="contentListIcon(element)"
+                    :style="{ color: contentListColor(element) }"
                   />
                   <span v-else class="circle">{{ index }}</span>
                 </TutorialStep>
@@ -153,14 +153,17 @@
           :key="element.id"
         >
           <template #icon>
-            <img
+            <!--<img
               v-if="contentListIcon(element)"
               :src="contentListIcon(element)"
               alt=""
+            />-->
+            <font-awesome-icon
+              v-if="contentListIcon(element)"
+              :icon="contentListIcon(element)"
+              :style="{ color: contentListColor(element) }"
             />
-            <font-awesome-icon v-else icon="circle">{{
-              index
-            }}</font-awesome-icon>
+            <span v-else class="circle">{{ index }}</span>
           </template>
           <template #description>
             <span>
@@ -229,9 +232,13 @@ export default class ProcessTimeline extends Vue {
     item: any
   ) => boolean;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  @Prop({ default: (item) => null }) readonly contentListColor!: (
+    item: any
+  ) => string | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   @Prop({ default: (item) => null }) readonly contentListIcon!: (
     item: any
-  ) => string | null;
+  ) => string | undefined;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   @Prop({ default: (item) => '' }) readonly getKey!: (
     item: any

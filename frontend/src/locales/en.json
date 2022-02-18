@@ -369,6 +369,12 @@
       "categorisation": "categorisation",
       "voting": "voting"
     },
+    "taskCategory": {
+      "informing": "informing",
+      "brainstorming": "brainstorming",
+      "structuring": "structuring",
+      "evaluating": "evaluating"
+    },
     "ideaSortOrder": {
       "null": "",
       "timestamp": "timestamp",

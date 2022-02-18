@@ -142,7 +142,6 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
-import TaskCard from '@/components/moderator/organisms/cards/TaskCard.vue';
 import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/ModeratorNavigationLayout.vue';
 import { formatDate } from '@/utils/date';
 import TaskType from '@/types/enum/TaskType';
@@ -177,7 +176,6 @@ import { reactivateTutorial } from '@/services/auth-service';
     AddItem,
     draggable,
     TopicSettings,
-    TaskCard,
     ModeratorNavigationLayout,
     CollapseTitle,
     SessionSettings,

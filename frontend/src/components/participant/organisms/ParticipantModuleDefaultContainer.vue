@@ -1,7 +1,18 @@
 <template>
   <el-container class="participant-container">
     <el-header class="grid-container">
-      <div class="grid-item">
+      <div class="right">
+        <div class="participant-container--uppercase">
+          {{ $t('participant.organism.modelDefaultContainer.timeLeft') }}
+        </div>
+        <Timer
+          class="participant-container__timer"
+          :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+          :entity="task"
+          v-on:timerEnds="goBack"
+        ></Timer>
+      </div>
+      <!--<div class="grid-item">
         <div class="participant-container__planetDiv">
           <slot name="planet" />
         </div>
@@ -16,7 +27,7 @@
           :entity="task"
           v-on:timerEnds="goBack"
         ></Timer>
-      </div>
+      </div>-->
     </el-header>
     <el-container class="half-card">
       <el-header>
@@ -109,6 +120,12 @@ export default class ParticipantModuleDefaultContainer extends Vue {
   100% {
     transform: scale(1);
   }
+}
+
+.right {
+  position: absolute;
+  top: 1rem;
+  right: 2rem;
 }
 
 .participant-container {

@@ -48,6 +48,19 @@ const readConfig = async (): Promise<any> => {
   return jsonResult;
 };
 
+interface ModuleConfigItem {
+  publicScreen?: string;
+  participant?: string;
+  moderatorContent?: string;
+  locales?: string;
+  icon?: string;
+  type?: string;
+  input?: string;
+  syncPublicParticipant?: boolean;
+  path: string;
+  parameter?: string;
+}
+
 let moduleConfig: any = config;
 let moduleConfigLoaded = false;
 readConfig().then((config) => {
@@ -296,15 +309,61 @@ const getRouteItem = (
   };
 };
 
+export class ModuleTask {
+  taskType: string;
+  moduleName: string;
+
+  constructor(taskType: string, moduleName: string) {
+    this.taskType = taskType;
+    this.moduleName = moduleName;
+  }
+
+  get key(): string {
+    return `${this.taskType}-${this.moduleName}`;
+  }
+
+  static createEmpty(): ModuleTask {
+    return new ModuleTask('', '');
+  }
+
+  eq(value: ModuleTask): boolean {
+    return (
+      value.taskType.toUpperCase() === this.taskType.toUpperCase() &&
+      value.moduleName.toUpperCase() === this.moduleName.toUpperCase()
+    );
+  }
+
+  like(taskType: string | undefined, moduleName: string): boolean {
+    if (taskType)
+      return (
+        taskType.toUpperCase() === this.taskType.toUpperCase() &&
+        moduleName.toUpperCase() === this.moduleName.toUpperCase()
+      );
+    return false;
+  }
+}
+
 export const getModulesForTaskType = async (
-  taskType: keyof typeof TaskType,
+  taskTypes: (keyof typeof TaskType)[],
   moduleType: string = ModuleType.MAIN
-): Promise<string[]> => {
+): Promise<ModuleTask[]> => {
   await until(() => moduleConfigLoaded);
-  const taskTypeName = TaskType[taskType];
-  const modules = moduleConfig[taskTypeName];
-  const moduleNameList = Object.keys(modules) as string[];
-  return moduleNameList.filter(
-    (obj) => 'type' in modules[obj] && modules[obj]['type'] === moduleType
-  );
+  const modules: {
+    taskType: string;
+    moduleName: string;
+    module: ModuleConfigItem;
+  }[] = [];
+  for (const taskType of taskTypes) {
+    const taskTypeName = TaskType[taskType.toUpperCase()];
+    for (const moduleName in moduleConfig[taskTypeName]) {
+      modules.push({
+        taskType: taskType,
+        moduleName: moduleName,
+        module: moduleConfig[taskTypeName][moduleName],
+      });
+    }
+  }
+  return modules
+    .filter((obj) => obj.module.type && obj.module.type === moduleType)
+    .map((obj) => new ModuleTask(obj.taskType, obj.moduleName));
 };

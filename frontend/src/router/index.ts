@@ -14,7 +14,6 @@ import ConfirmEmail from '@/views/moderator/User/ConfirmEmail.vue';
 import ChangePassword from '@/views/moderator/User/ChangePassword.vue';
 import ForgetPassword from '@/views/moderator/User/ForgetPassword.vue';
 import ResetPassword from '@/views/moderator/User/ResetPassword.vue';
-import ModeratorModuleContent from '@/views/moderator/ModeratorModuleContent.vue';
 import NotFound from '@/views/shared/NotFound.vue';
 import PublicScreen from '@/views/PublicScreen.vue';
 import ParticipantModuleContent from '@/views/participant/ParticipantModuleContent.vue';
@@ -110,19 +109,6 @@ const routes: Array<RouteRecordRaw> = [
     props: (route) => ({
       sessionId: route.params.sessionId,
       topicId: route.params.topicId,
-      taskId: route.params.taskId,
-    }),
-    meta: {
-      requiresAuth: true,
-      requiresUser: true,
-    },
-  },
-  {
-    path: '/module-content/:sessionId/:taskId',
-    name: 'moderator-module-content',
-    component: ModeratorModuleContent,
-    props: (route) => ({
-      sessionId: route.params.sessionId,
       taskId: route.params.taskId,
     }),
     meta: {

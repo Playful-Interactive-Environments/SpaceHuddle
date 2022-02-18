@@ -72,38 +72,51 @@
     <template v-slot:content>
       <el-tabs v-model="activeTab">
         <el-tab-pane
-          v-for="taskType in Object.values(TaskType)"
-          :key="taskType"
-          :label="$t(`enum.taskType.${taskType}`)"
-          :name="taskType"
-          :disabled="!taskTypeAvailable(taskType)"
+          v-for="taskCategory in Object.keys(TaskCategory)"
+          :key="taskCategory"
+          :label="$t(`enum.taskCategory.${taskCategory}`)"
+          :name="taskCategory"
+          :disabled="!taskTypeAvailable(taskCategory)"
         >
           <template #label>
-            <img
+            <!--<img
               :src="require(`@/assets/illustrations/planets/${taskType}.png`)"
               alt="planet"
               style="width: 1.5rem"
-            />
+            />-->
             <TutorialStep
               type="topicDetails"
               step="taskType"
               :order="1"
               :width="450"
               placement="bottom"
-              :disableTutorial="taskType !== TaskType.BRAINSTORMING"
+              :disableTutorial="
+                !TaskCategory[taskCategory].taskTypes.includes(
+                  TaskType.BRAINSTORMING
+                )
+              "
             >
               <span
                 class="taskType"
-                :style="{ '--module-color': TaskTypeColor[taskType] }"
+                :style="{ '--module-color': TaskCategory[taskCategory].color }"
               >
-                {{ $t(`enum.taskType.${taskType}`) }}
+                <font-awesome-icon
+                  :icon="TaskCategory[taskCategory].icon"
+                  class="taskType"
+                  :style="{
+                    '--module-color': TaskCategory[taskCategory].color,
+                  }"
+                />
+                {{ $t(`enum.taskCategory.${taskCategory}`) }}
               </span>
             </TutorialStep>
           </template>
           <el-space wrap>
             <TutorialStep
-              v-for="(task, index) in tasks.filter(
-                (task) => TaskType[task.taskType] === taskType
+              v-for="(task, index) in tasks.filter((task) =>
+                TaskCategory[taskCategory].taskTypes.includes(
+                  TaskType[task.taskType]
+                )
               )"
               :key="task.id"
               type="topicDetails"
@@ -114,7 +127,7 @@
             >
               <el-card
                 v-on:click="changeTask(task)"
-                :style="{ '--module-color': TaskTypeColor[taskType] }"
+                :style="{ '--module-color': TaskCategory[taskCategory].color }"
                 class="link"
                 :class="{ selected: isActive(task) }"
               >
@@ -160,7 +173,7 @@
               <AddItem
                 :text="$t('moderator.view.topicDetails.addTask')"
                 :isColumn="true"
-                @addNew="displayTaskSettings(taskType)"
+                @addNew="displayTaskSettings(taskCategory)"
               />
             </TutorialStep>
           </el-space>
@@ -172,7 +185,7 @@
   </ModeratorNavigationLayout>
   <TaskSettings
     v-model:show-modal="showTaskSettings"
-    :task-type="taskSettingsType"
+    :task-types="taskSettingsTypes"
     :topic-id="topicId"
     :task-id="taskSettingsId"
     @taskUpdated="reloadTasks"
@@ -211,8 +224,10 @@ import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import TaskTimeline from '@/components/moderator/organisms/Timeline/TaskTimeline.vue';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
 import TaskType from '@/types/enum/TaskType';
-import TaskTypeColor from '@/types/TaskTypeColor';
-import TaskCard from '@/components/moderator/organisms/cards/TaskCard.vue';
+import TaskCategory, {
+  getCategoryOfType,
+  TaskCategoryOption,
+} from '@/types/enum/TaskCategory';
 import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import UserType from '@/types/enum/UserType';
@@ -238,7 +253,6 @@ import { reactivateTutorial } from '@/services/auth-service';
     TimerSettings,
     AddItem,
     TaskInfo,
-    TaskCard,
     Sidebar,
     TaskSettings,
     TopicSettings,
@@ -262,7 +276,7 @@ export default class ModeratorTopicDetails extends Vue {
   showTaskSettings = false;
   showTopicSettings = false;
   tasks: Task[] = [];
-  activeTab = TaskType.BRAINSTORMING;
+  activeTab = TaskCategoryOption.BRAINSTORMING;
   previousActiveTask: Task | null = null;
   activeTask: Task | null = null;
   componentLoadIndex = 0;
@@ -272,7 +286,7 @@ export default class ModeratorTopicDetails extends Vue {
   interval!: any;
 
   TaskType = TaskType;
-  TaskTypeColor = TaskTypeColor;
+  TaskCategory = TaskCategory;
 
   reactivateTutorial(): void {
     reactivateTutorial('topicDetails', this.eventBus);
@@ -318,11 +332,11 @@ export default class ModeratorTopicDetails extends Vue {
       const taskType = taskTypeName as unknown as keyof typeof TaskType;
       if (!(taskTypeName in this.moduleIcon))
         this.moduleIcon[taskTypeName] = {};
-      getModulesForTaskType(taskType, ModuleType.MAIN).then((modules) => {
-        modules.forEach((moduleName) => {
-          this.moduleIcon[taskTypeName][moduleName] = 'circle';
-          getModuleConfig('icon', TaskType[taskType], moduleName).then(
-            (icon) => (this.moduleIcon[taskType][moduleName] = icon)
+      getModulesForTaskType([taskType], ModuleType.MAIN).then((modules) => {
+        modules.forEach((module) => {
+          this.moduleIcon[taskTypeName][module.moduleName] = 'circle';
+          getModuleConfig('icon', TaskType[taskType], module.moduleName).then(
+            (icon) => (this.moduleIcon[taskType][module.moduleName] = icon)
           );
         });
       });
@@ -397,10 +411,10 @@ export default class ModeratorTopicDetails extends Vue {
     this.getTasks().then(() => {
       const activeTask = this.tasks.find((task) => task.id == taskId);
       if (activeTask) {
-        if (newTaskIsAdded) {
+        if (newTaskIsAdded || !this.hasNewActiveTask(activeTask)) {
           this.changeTask(activeTask);
         }
-        this.activeTab = TaskType[activeTask.taskType];
+        this.setActiveTab(activeTask.taskType);
       }
     });
   }
@@ -417,8 +431,9 @@ export default class ModeratorTopicDetails extends Vue {
 
   @Watch('activeTab', { immediate: true })
   onActiveTabChanged(): void {
-    const activeTabTask = this.tasks.find(
-      (task) => TaskType[task.taskType] === this.activeTab
+    const taskCategory = TaskCategory[this.activeTab];
+    const activeTabTask = this.tasks.find((task) =>
+      taskCategory.taskTypes.includes(TaskType[task.taskType])
     );
     if (
       activeTabTask &&
@@ -427,8 +442,11 @@ export default class ModeratorTopicDetails extends Vue {
       this.changeTask(activeTabTask);
   }
 
-  taskTypeAvailable(taskType: TaskType): boolean {
-    if (taskType == TaskType.BRAINSTORMING || taskType == TaskType.INFORMATION)
+  taskTypeAvailable(taskCategory: string): boolean {
+    if (
+      TaskCategory[taskCategory].taskTypes.includes(TaskType.BRAINSTORMING) ||
+      TaskCategory[taskCategory].taskTypes.includes(TaskType.INFORMATION)
+    )
       return true;
     return !!this.tasks.find(
       (task) => TaskType[task.taskType] === TaskType.BRAINSTORMING
@@ -443,8 +461,20 @@ export default class ModeratorTopicDetails extends Vue {
     );
   }
 
+  hasNewActiveTaskType(newTask: Task): boolean {
+    return (
+      !this.previousActiveTask ||
+      !newTask ||
+      this.previousActiveTask.taskType !== newTask.taskType
+    );
+  }
+
   async changeTask(newTask: Task): Promise<void> {
-    if (this.$options.components && newTask && this.hasNewActiveTask(newTask)) {
+    if (
+      this.$options.components &&
+      newTask &&
+      (this.hasNewActiveTask(newTask) || this.hasNewActiveTaskType(newTask))
+    ) {
       await getAsyncModule(
         ModuleComponentType.MODERATOR_CONTENT,
         TaskType[newTask.taskType],
@@ -457,18 +487,30 @@ export default class ModeratorTopicDetails extends Vue {
         }
         this.activeTask = newTask;
         this.previousActiveTask = this.activeTask;
-        this.activeTab = TaskType[newTask.taskType];
+        this.setActiveTab(newTask.taskType);
         this.$router.replace({ params: { taskId: newTask.id } });
       });
     }
   }
 
-  taskSettingsType = '';
+  private setActiveTab(taskType: string): void {
+    const taskCategory = getCategoryOfType(TaskType[taskType.toUpperCase()]);
+    if (taskCategory)
+      this.activeTab = TaskCategoryOption[taskCategory.toUpperCase()];
+  }
+
+  taskSettingsCategory: string | undefined = '';
   taskSettingsId: string | null = null;
-  displayTaskSettings(taskType: string): void {
-    this.taskSettingsType = taskType.toUpperCase();
+  displayTaskSettings(taskCategory: string): void {
+    this.taskSettingsCategory = taskCategory;
     this.taskSettingsId = null;
     this.showTaskSettings = true;
+  }
+
+  get taskSettingsTypes(): string[] {
+    if (this.taskSettingsCategory && TaskCategory[this.taskSettingsCategory])
+      return TaskCategory[this.taskSettingsCategory].taskTypes;
+    return [];
   }
 
   isActive(task: Task): boolean {
@@ -492,7 +534,7 @@ export default class ModeratorTopicDetails extends Vue {
     const activeTask = this.activeTask;
     switch (command) {
       case 'edit':
-        this.taskSettingsType = task.taskType;
+        this.taskSettingsCategory = getCategoryOfType(TaskType[task.taskType]);
         this.taskSettingsId = task.id;
         this.showTaskSettings = true;
         break;
@@ -503,7 +545,7 @@ export default class ModeratorTopicDetails extends Vue {
           if (result) {
             this.getTasks().then(() => {
               if (activeTask) {
-                this.activeTab = TaskType[activeTask.taskType];
+                this.setActiveTab(activeTask.taskType);
               }
             });
           } else if (activeTask?.id == task.id) {

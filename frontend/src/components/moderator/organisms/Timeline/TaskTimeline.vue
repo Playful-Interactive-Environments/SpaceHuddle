@@ -1,5 +1,5 @@
 <template>
-  <ProcessTimeline
+  <!--<ProcessTimeline
     v-model="tasks"
     v-model:publicScreen="publicTask"
     v-model:activeItem="editTask"
@@ -27,6 +27,33 @@
     @changeActiveElement="onEditTaskChanged"
     @changePublicScreen="onPublicTaskChanged"
   >
+  </ProcessTimeline>-->
+  <ProcessTimeline
+    v-model="tasks"
+    v-model:publicScreen="publicTask"
+    v-model:activeItem="editTask"
+    translationModuleName="taskTimeline"
+    :entityName="TimerEntity.TASK"
+    :direction="direction"
+    :readonly="readonly"
+    :canDisablePublicTimeline="true"
+    :isLinkedToDetails="isLinkedToTask"
+    :startParticipantOnPublicChange="false"
+    keyPropertyName="id"
+    :defaultTimerSeconds="null"
+    :authHeaderTyp="authHeaderTyp"
+    :hasParticipantOption="(item) => hasParticipantComponent[item.id]"
+    :contentListIcon="contentListIcon"
+    :contentListColor="contentListColor"
+    :getKey="(item) => item.id"
+    :getTitle="(item) => item.name"
+    :getTimerEntity="(item) => item"
+    :itemIsEquals="(a, b) => (!a && !b) || (a && b && a.id === b.id)"
+    :displayItem="(item) => item"
+    @changeOrder="dragDone"
+    @changeActiveElement="onEditTaskChanged"
+    @changePublicScreen="onPublicTaskChanged"
+  >
   </ProcessTimeline>
 </template>
 
@@ -45,6 +72,10 @@ import TaskType from '@/types/enum/TaskType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import ProcessTimeline from '@/components/moderator/organisms/Timeline/ProcessTimeline.vue';
 import { TimerEntity } from '@/types/enum/TimerEntity';
+import TaskCategory, {
+  getCategoryOfType,
+  TaskCategoryType,
+} from '@/types/enum/TaskCategory';
 
 @Options({
   components: {
@@ -73,6 +104,28 @@ export default class TaskTimeline extends Vue {
   interval!: any;
 
   TimerEntity = TimerEntity;
+
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  contentListIcon(item: any): string | undefined {
+    const category = this.getTaskCategory(item);
+    return category?.icon;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  contentListColor(item: any): string | undefined {
+    const category = this.getTaskCategory(item);
+    return category?.color;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  getTaskCategory(item: any): TaskCategoryType | undefined {
+    if (item) {
+      const taskCategory = getCategoryOfType(
+        TaskType[item.taskType.toUpperCase()]
+      );
+      if (taskCategory) return TaskCategory[taskCategory];
+    }
+  }
 
   getTaskFromId(id: string): Task | null {
     const task = this.tasks.find((task) => task.id == id);

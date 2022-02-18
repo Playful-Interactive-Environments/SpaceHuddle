@@ -4,7 +4,11 @@
       class="heading heading--regular"
       style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis"
     >
-      {{ $t(`module.${taskType}.${moduleName}.description.title`) }}
+      {{
+        $t(
+          `module.${moduleTask.taskType}.${moduleTask.moduleName}.description.title`
+        )
+      }}
     </h2>
     <TutorialStep
       v-if="moduleType !== ModuleType.MAIN"
@@ -24,17 +28,25 @@
       :displayAllDuplicates="true"
       :disableTutorial="!displayTutorial"
     >
-      <el-radio v-model="mainModuleName" :label="moduleName">{{}}</el-radio>
+      <el-radio v-model="mainModuleName" :label="moduleTask.key">{{}}</el-radio>
     </TutorialStep>
     <div class="icon"><font-awesome-icon :icon="icon" v-if="icon" /></div>
     <el-tooltip placement="top">
       <template #content>
         <div style="max-width: 50vw">
-          {{ $t(`module.${taskType}.${moduleName}.description.description`) }}
+          {{
+            $t(
+              `module.${moduleTask.taskType}.${moduleTask.moduleName}.description.description`
+            )
+          }}
         </div>
       </template>
       <p style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis">
-        {{ $t(`module.${taskType}.${moduleName}.description.description`) }}
+        {{
+          $t(
+            `module.${moduleTask.taskType}.${moduleTask.moduleName}.description.description`
+          )
+        }}
       </p>
     </el-tooltip>
   </el-card>
@@ -43,7 +55,7 @@
 <script lang="ts">
 import { Prop, Watch } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
-import { getModuleConfig } from '@/modules';
+import { getModuleConfig, ModuleTask } from '@/modules';
 import { ModuleType } from '@/types/enum/ModuleType';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 
@@ -54,10 +66,9 @@ import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
   emits: ['update:modelValue', 'update:mainModule'],
 })
 export default class ModuleCard extends Vue {
-  @Prop() moduleName!: string;
-  @Prop() taskType!: string;
+  @Prop() moduleTask!: ModuleTask;
   @Prop({ default: false }) modelValue!: boolean;
-  @Prop({ default: '' }) mainModule!: string;
+  @Prop({ default: ModuleTask.createEmpty() }) mainModule!: ModuleTask;
   @Prop({ default: true }) displayTutorial!: boolean;
   icon: string | null = null;
   moduleType: string | null = null;
@@ -73,30 +84,31 @@ export default class ModuleCard extends Vue {
   }
 
   get mainModuleName(): string {
-    return this.mainModule;
+    return this.mainModule.key;
   }
 
   set mainModuleName(value: string) {
-    this.$emit('update:mainModule', value);
+    if (value === this.moduleTask.key) {
+      this.$emit('update:mainModule', this.moduleTask);
+    }
   }
 
-  @Watch('taskType', { immediate: true })
-  onTaskTypeChanged(): void {
-    this.loadModuleConfig();
-  }
-
-  @Watch('module', { immediate: true })
-  onModuleChanged(): void {
+  @Watch('moduleTask', { immediate: true })
+  onModuleTaskChanged(): void {
     this.loadModuleConfig();
   }
 
   async loadModuleConfig(): Promise<void> {
-    await getModuleConfig('icon', this.taskType, this.moduleName).then(
-      (result) => (this.icon = result)
-    );
-    await getModuleConfig('type', this.taskType, this.moduleName).then(
-      (result) => (this.moduleType = result)
-    );
+    await getModuleConfig(
+      'icon',
+      this.moduleTask.taskType,
+      this.moduleTask.moduleName
+    ).then((result) => (this.icon = result));
+    await getModuleConfig(
+      'type',
+      this.moduleTask.taskType,
+      this.moduleTask.moduleName
+    ).then((result) => (this.moduleType = result));
   }
 }
 </script>

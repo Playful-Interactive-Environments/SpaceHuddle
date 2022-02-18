@@ -19,11 +19,18 @@
             v-for="task in topic.tasks"
             :key="task.id"
             :style="{
-              '--module-color': TaskTypeColor[TaskType[task.taskType]],
+              '--module-color': getColor(task),
             }"
             v-on:click="$router.push(`/participant-module-content/${task.id}`)"
           >
-            <img
+            <font-awesome-icon
+              :icon="getIcon(task)"
+              class="media-left"
+              :style="{
+                color: getColor(task),
+              }"
+            />
+            <!--<img
               :src="
                 require(`@/assets/illustrations/planets/${
                   TaskType[task.taskType]
@@ -31,7 +38,7 @@
               "
               alt="planet"
               class="media-left"
-            />
+            />-->
             <TaskInfo
               class="media-content"
               :type="TaskType[task.taskType]"
@@ -53,10 +60,9 @@
 </template>
 
 <script lang="ts">
-import { Vue, Options } from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
 import MenuBar from '@/components/participant/molecules/Menubar.vue';
 import SessionInfo from '@/components/participant/molecules/SessionInfo.vue';
-import TaskCard from '@/components/moderator/organisms/cards/TaskCard.vue';
 import TaskType from '@/types/enum/TaskType';
 import * as taskService from '@/services/task-service';
 import * as participantService from '@/services/participant-service';
@@ -65,7 +71,8 @@ import { Topic } from '@/types/api/Topic';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
-import TaskTypeColor from '@/types/TaskTypeColor';
+import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
+import { Task } from '@/types/api/Task';
 
 @Options({
   components: {
@@ -73,7 +80,6 @@ import TaskTypeColor from '@/types/TaskTypeColor';
     TaskInfo,
     MenuBar,
     SessionInfo,
-    TaskCard,
   },
 })
 
@@ -87,9 +93,19 @@ export default class ParticipantOverview extends Vue {
   readonly intervalTime = 10000;
   interval!: any;
   openTabs: string[] = [];
-
-  TaskTypeColor = TaskTypeColor;
   EndpointAuthorisationType = EndpointAuthorisationType;
+
+  getColor(task: Task): string | undefined {
+    if (task.taskType) {
+      return getColorOfType(TaskType[task.taskType.toUpperCase()]);
+    }
+  }
+
+  getIcon(task: Task): string | undefined {
+    if (task.taskType) {
+      return getIconOfType(TaskType[task.taskType.toUpperCase()]);
+    }
+  }
 
   mounted(): void {
     this.getSessionInfo();
@@ -184,5 +200,9 @@ export default class ParticipantOverview extends Vue {
   &__header {
     padding: 1rem 2rem;
   }
+}
+
+.media-left {
+  font-size: 2.5rem;
 }
 </style>
