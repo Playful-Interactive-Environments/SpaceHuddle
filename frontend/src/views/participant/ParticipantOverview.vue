@@ -12,7 +12,9 @@
           :name="topic.id"
         >
           <template #title>
-            {{ topic.title }}
+            <span>
+              {{ topic.title }}
+            </span>
           </template>
           <div
             class="media link"
@@ -199,5 +201,17 @@ export default class ParticipantOverview extends Vue {
 
 .media-left {
   font-size: 2.5rem;
+}
+
+.el-collapse-item::v-deep {
+  .el-collapse-item__header {
+    span {
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
 }
 </style>
