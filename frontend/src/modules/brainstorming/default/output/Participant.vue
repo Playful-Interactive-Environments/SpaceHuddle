@@ -121,6 +121,12 @@
               <font-awesome-icon icon="trash" />
             </el-button>
           </div>-->
+          <div class="media-left">
+            <el-button v-on:click="showHistory = true" type="primary">
+              {{ $t('module.brainstorming.default.participant.ideas') }}:
+              {{ ideas.length }}
+            </el-button>
+          </div>
           <span class="media-content">
             <el-input v-model="formData.stateMessage" style="display: none" />
           </span>
@@ -360,12 +366,13 @@ export default class Participant extends Vue {
 .el-button {
   border: unset;
 
-  &:focus {
-    background-color: unset;
-  }
-
   &.is-circle {
     padding: 0.4rem;
+
+    &:focus,
+    &:hover {
+      background-color: unset;
+    }
   }
 }
 
