@@ -510,6 +510,10 @@ export default class ProcessTimeline extends Vue {
     }
   }
 
+  .is-icon {
+    font-size: var(--font-size-large);
+  }
+
   &.readonly {
     .el-step__icon {
       cursor: unset;
@@ -517,6 +521,7 @@ export default class ProcessTimeline extends Vue {
 
     .is-icon {
       width: 25px;
+      font-size: var(--font-size-large);
     }
 
     .el-step__description {
@@ -537,6 +542,7 @@ export default class ProcessTimeline extends Vue {
       font-weight: var(--font-weight-bold);
       .is-icon {
         width: 50px;
+        font-size: var(--font-size-xxlarge);
       }
     }
 
