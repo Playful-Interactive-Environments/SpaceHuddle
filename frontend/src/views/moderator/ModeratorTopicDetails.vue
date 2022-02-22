@@ -157,9 +157,7 @@
                   </el-dropdown>
                 </p>
                 <TaskInfo
-                  :title="task.name"
-                  :description="task.description"
-                  :type="TaskType[task.taskType]"
+                  :taskId="task.id"
                   :modules="task.modules.map((module) => module.name)"
                 ></TaskInfo>
               </el-card>
@@ -329,7 +327,7 @@ export default class ModeratorTopicDetails extends Vue {
 
   loadTaskTypes(): void {
     Object.keys(TaskType).forEach((taskTypeName) => {
-      const taskType = taskTypeName as unknown as keyof typeof TaskType;
+      const taskType = taskTypeName as keyof typeof TaskType;
       if (!(taskTypeName in this.moduleIcon))
         this.moduleIcon[taskTypeName] = {};
       getModulesForTaskType([taskType], ModuleType.MAIN).then((modules) => {
@@ -610,13 +608,14 @@ export default class ModeratorTopicDetails extends Vue {
 }
 .taskType {
   color: var(--module-color);
+  font-size: var(--font-size-default);
 }
 
 .el-space::v-deep {
   .el-space {
     &__item {
       max-width: 18rem;
-      height: 12rem;
+      height: 10rem;
     }
   }
 }

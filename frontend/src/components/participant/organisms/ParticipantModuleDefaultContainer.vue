@@ -32,9 +32,7 @@
     <el-container class="half-card">
       <el-header>
         <TaskInfo
-          :type="taskType"
-          :title="taskName"
-          :description="taskDescription"
+          :taskId="taskId"
           :modules="[module]"
           :is-participant="true"
           :shortenDescription="false"

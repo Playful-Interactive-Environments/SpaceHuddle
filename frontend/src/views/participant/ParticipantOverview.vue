@@ -39,12 +39,7 @@
               alt="planet"
               class="media-left"
             />-->
-            <TaskInfo
-              class="media-content"
-              :type="TaskType[task.taskType]"
-              :title="task.name"
-              :description="task.description"
-            />
+            <TaskInfo class="media-content" :taskId="task.id" />
             <Timer
               v-if="task.remainingTime !== null"
               :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"

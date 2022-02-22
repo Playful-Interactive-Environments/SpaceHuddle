@@ -17,17 +17,14 @@
       </PublicHeader>
       <el-header class="public-screen__overview">
         <div class="public-screen__overview-left">
-          <TaskInfo
-            v-if="task"
-            :type="TaskType[task.taskType]"
-            :title="task.name"
-            :description="task.description"
-            :shortenDescription="false"
-          />
+          <TaskInfo v-if="task" :taskId="taskId" :shortenDescription="false" />
         </div>
         <div class="public-screen__overview-right">
           <Timer v-if="task" :entity="task" />
           <span class="connection-key" v-if="session">
+            <span class="session-info">
+              {{ session.title }}
+            </span>
             <h3>
               {{ $t('shared.view.publicScreen.connectionKey') }}
             </h3>
@@ -63,13 +60,7 @@
       @back="$router.go(-1)"
     />
     <el-header class="public-screen__header">
-      <TaskInfo
-        v-if="task"
-        :type="TaskType[task.taskType]"
-        :title="task.name"
-        :description="task.description"
-        :shortenDescription="false"
-      />
+      <TaskInfo v-if="task" :taskId="taskId" :shortenDescription="false" />
     </el-header>
     <el-container class="public-screen__container">
       <el-main class="public-screen__main">
@@ -360,5 +351,12 @@ h3 {
 }
 
 @media screen and (min-width: 769px), print {
+}
+
+.session-info {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--module-color);
+  font-size: var(--font-size-small);
 }
 </style>
