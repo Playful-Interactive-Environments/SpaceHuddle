@@ -699,12 +699,11 @@ export default class TaskSettings extends Vue {
   async updateInputOption(): Promise<void> {
     let input = InputOption.NO;
     for (const module of this.possibleModuleTaskList) {
-      const item = this.moduleList.find((item) => item.eq(module));
-      if (item) {
+      if (module.active) {
         await getModuleConfig(
           'input',
-          TaskType[item.taskType.toUpperCase()],
-          item.moduleName
+          TaskType[module.taskType.toUpperCase()],
+          module.moduleName
         ).then((result) => {
           switch (result) {
             case InputOption.YES:
@@ -798,15 +797,15 @@ export default class TaskSettings extends Vue {
           module.taskType,
           module.moduleName
         );
-        this.participantModuleList.push(participantModule);
         if (participantModule) {
           participantModule.active = false;
           hasModule(
             ModuleComponentType.PARTICIPANT,
-            TaskType[module.taskType],
+            TaskType[module.taskType.toUpperCase()],
             module.moduleName
           ).then((result) => {
             participantModule.active = result;
+            this.participantModuleList.push(participantModule);
           });
         }
       });
@@ -1077,7 +1076,7 @@ export default class TaskSettings extends Vue {
   get hasParticipantModule(): boolean {
     let hasParticipantModule = false;
     this.moduleSelection.forEach((module) => {
-      if (this.participantModuleList.find((item) => item.eq(module)))
+      if (this.participantModuleList.find((item) => item.eq(module) && item.active))
         hasParticipantModule = true;
     });
     return hasParticipantModule;

@@ -70,7 +70,6 @@ export default class TaskInfo extends Vue {
                 mainList.find((main) => main.moduleName === module.name)
               )
               .map((module) => module.name);
-            console.log(this.mainModule);
           });
         }
       });
