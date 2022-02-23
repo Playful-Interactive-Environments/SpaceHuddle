@@ -38,6 +38,7 @@ import { getColorOfType } from '@/types/enum/TaskCategory';
 import * as taskService from '@/services/task-service';
 import { ModuleType } from '@/types/enum/ModuleType';
 import { getModulesForTaskType } from '@/modules';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {},
@@ -47,6 +48,8 @@ export default class TaskInfo extends Vue {
   @Prop({ default: false }) isParticipant!: boolean;
   @Prop({ default: true }) shortenDescription!: boolean;
   @Prop({ default: [] }) modules!: string[];
+  @Prop({ default: EndpointAuthorisationType.MODERATOR })
+  authHeaderTyp!: EndpointAuthorisationType;
 
   taskType: TaskType | null = null;
   title = '';
@@ -56,7 +59,7 @@ export default class TaskInfo extends Vue {
   @Watch('taskId', { immediate: true })
   async onTaskIdChanged(): Promise<void> {
     if (this.taskId) {
-      taskService.getTaskById(this.taskId).then((task) => {
+      taskService.getTaskById(this.taskId, this.authHeaderTyp).then((task) => {
         this.taskType = TaskType[task.taskType.toUpperCase()];
         this.title = task.name;
         this.description = task.description;

@@ -20,8 +20,8 @@
           </div>
           <div class="image">
             <img
-              src="@/assets/illustrations/rocket.png"
-              alt="rocket"
+              src="@/assets/illustrations/planets/brainstorming.png"
+              alt="planet"
             />
           </div>
         </div>
@@ -34,25 +34,27 @@
             :name="topic.id"
           >
             <template #title>
-            <span>
-              {{ topic.title }}
-            </span>
+              <span>
+                {{ topic.title }}
+              </span>
             </template>
             <div
               class="media link"
               v-for="task in topic.tasks"
               :key="task.id"
               :style="{
-              '--module-color': getColor(task),
-            }"
-              v-on:click="$router.push(`/participant-module-content/${task.id}`)"
+                '--module-color': getColor(task),
+              }"
+              v-on:click="
+                $router.push(`/participant-module-content/${task.id}`)
+              "
             >
               <font-awesome-icon
                 :icon="getIcon(task)"
                 class="media-left"
                 :style="{
-                color: getColor(task),
-              }"
+                  color: getColor(task),
+                }"
               />
               <!--<img
                 :src="
@@ -63,7 +65,11 @@
                 alt="planet"
                 class="media-left"
               />-->
-              <TaskInfo class="media-content" :taskId="task.id" />
+              <TaskInfo
+                class="media-content"
+                :taskId="task.id"
+                :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+              />
               <Timer
                 v-if="task.remainingTime !== null"
                 :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
@@ -269,11 +275,11 @@ export default class ParticipantOverview extends Vue {
       min-width: 5rem;
       max-width: 5rem;
 
-      -webkit-transform:rotate(-65deg);
+      /*-webkit-transform: rotate(-65deg);
       -moz-transform: rotate(-65deg);
       -ms-transform: rotate(-65deg);
       -o-transform: rotate(-65deg);
-      transform: rotate(-65deg) translate(0, -20px);
+      transform: rotate(-65deg) translate(0, -20px);*/
       //padding: 1rem;
     }
   }
