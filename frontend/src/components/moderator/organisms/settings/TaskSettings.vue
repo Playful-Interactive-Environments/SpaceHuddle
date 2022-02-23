@@ -1076,7 +1076,11 @@ export default class TaskSettings extends Vue {
   get hasParticipantModule(): boolean {
     let hasParticipantModule = false;
     this.moduleSelection.forEach((module) => {
-      if (this.participantModuleList.find((item) => item.eq(module) && item.active))
+      if (
+        this.participantModuleList.find(
+          (item) => item.eq(module) && item.active
+        )
+      )
         hasParticipantModule = true;
     });
     return hasParticipantModule;

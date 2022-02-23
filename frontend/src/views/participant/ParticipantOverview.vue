@@ -1,58 +1,81 @@
 <template>
   <div class="participant-background">
-    <div class="participant-container overview full-height">
-      <div class="overview__header">
-        <MenuBar />
-        <SessionInfo :title="sessionName" :description="sessionDescription" />
-      </div>
-      <el-collapse v-model="openTabs">
-        <el-collapse-item
-          v-for="topic in filteredTopics"
-          :key="topic.id"
-          :name="topic.id"
-        >
-          <template #title>
+    <el-container class="participant-container full-height">
+      <el-header class="overview">
+        <div class="overview__header">
+          <MenuBar />
+          <!--<SessionInfo :title="sessionName" :description="sessionDescription" />-->
+        </div>
+        <div class="overview__infobox">
+          <div>
+            <span class="overview__info">
+              {{ sessionName }}
+            </span>
+            <span
+              class="overview__info overview__info__description"
+              v-if="sessionDescription"
+            >
+              {{ sessionDescription }}
+            </span>
+          </div>
+          <div class="image">
+            <img
+              src="@/assets/illustrations/rocket.png"
+              alt="rocket"
+            />
+          </div>
+        </div>
+      </el-header>
+      <el-main>
+        <el-collapse v-model="openTabs">
+          <el-collapse-item
+            v-for="topic in filteredTopics"
+            :key="topic.id"
+            :name="topic.id"
+          >
+            <template #title>
             <span>
               {{ topic.title }}
             </span>
-          </template>
-          <div
-            class="media link"
-            v-for="task in topic.tasks"
-            :key="task.id"
-            :style="{
+            </template>
+            <div
+              class="media link"
+              v-for="task in topic.tasks"
+              :key="task.id"
+              :style="{
               '--module-color': getColor(task),
             }"
-            v-on:click="$router.push(`/participant-module-content/${task.id}`)"
-          >
-            <font-awesome-icon
-              :icon="getIcon(task)"
-              class="media-left"
-              :style="{
+              v-on:click="$router.push(`/participant-module-content/${task.id}`)"
+            >
+              <font-awesome-icon
+                :icon="getIcon(task)"
+                class="media-left"
+                :style="{
                 color: getColor(task),
               }"
-            />
-            <!--<img
-              :src="
-                require(`@/assets/illustrations/planets/${
-                  TaskType[task.taskType]
-                }.png`)
-              "
-              alt="planet"
-              class="media-left"
-            />-->
-            <TaskInfo class="media-content" :taskId="task.id" />
-            <Timer
-              v-if="task.remainingTime !== null"
-              :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
-              class="media-right"
-              :entity="task"
-              v-on:timerEnds="getTopicsAndTasks"
-            ></Timer>
-          </div>
-        </el-collapse-item>
-      </el-collapse>
-    </div>
+              />
+              <!--<img
+                :src="
+                  require(`@/assets/illustrations/planets/${
+                    TaskType[task.taskType]
+                  }.png`)
+                "
+                alt="planet"
+                class="media-left"
+              />-->
+              <TaskInfo class="media-content" :taskId="task.id" />
+              <Timer
+                v-if="task.remainingTime !== null"
+                :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+                class="media-right"
+                :entity="task"
+                v-on:timerEnds="getTopicsAndTasks"
+              ></Timer>
+            </div>
+          </el-collapse-item>
+        </el-collapse>
+      </el-main>
+    </el-container>
   </div>
 </template>
 
@@ -152,8 +175,16 @@ export default class ParticipantOverview extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.participant-container {
+  //background-color: white;
+  border-right: var(--color-primary) 1px solid;
+  border-left: var(--color-primary) 1px solid;
+}
+
 .media {
-  background-color: var(--color-transparent);
+  border-top: 1px solid rgba(128, 128, 128, 0.5);
+  //background-color: var(--color-transparent);
+  //color: var(--el-color-white);
   &-left {
     margin: 1rem;
     width: 5rem;
@@ -177,16 +208,47 @@ export default class ParticipantOverview extends Vue {
 .el-collapse::v-deep {
   margin-bottom: unset;
   --el-collapse-header-font-color: white;
+  border: unset;
 
-  .el-collapse-item__content {
-    padding-bottom: unset;
+  .el-collapse-item {
+    border-radius: 1rem;
+    background-color: white;
+    //background-color: var(--color-transparent-dark);
+    margin: 1rem;
+
+    &__wrap {
+      border: unset;
+    }
+
+    &__content {
+      padding-bottom: unset;
+    }
   }
+}
+
+.el-main::v-deep {
+  margin-top: -1rem;
 }
 
 .overview {
   color: #fff;
   background: var(--color-darkblue);
-  background: url('~@/assets/illustrations/stars-background-dark.png');
+  background-image: url('~@/assets/illustrations/stars-background-dark.png');
+  mask-image: radial-gradient(
+      circle farthest-corner at 100% 100%,
+      transparent 69%,
+      white 70%
+    ),
+    radial-gradient(
+      circle farthest-corner at 0% 100%,
+      transparent 69%,
+      white 70%
+    ),
+    linear-gradient(white, white);
+  mask-size: 1rem 1rem, 1rem 1rem, 100% calc(100% - 1rem + 1px);
+  mask-position: bottom left, bottom right, top left;
+  mask-repeat: no-repeat;
+  padding-bottom: 1rem;
   //background-attachment: fixed;
   background-size: contain;
 
@@ -195,7 +257,43 @@ export default class ParticipantOverview extends Vue {
   }
 
   &__header {
-    padding: 1rem 2rem;
+    padding: 1rem 1rem;
+  }
+
+  &__infobox {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+
+    .image {
+      min-width: 5rem;
+      max-width: 5rem;
+
+      -webkit-transform:rotate(-65deg);
+      -moz-transform: rotate(-65deg);
+      -ms-transform: rotate(-65deg);
+      -o-transform: rotate(-65deg);
+      transform: rotate(-65deg) translate(0, -20px);
+      //padding: 1rem;
+    }
+  }
+
+  &__info {
+    //background-color: var(--color-transparent-dark);
+    //color: var(--color-primary);
+    font-weight: var(--font-weight-semibold);
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    overflow: hidden;
+
+    &__description {
+      padding-top: 0.5rem;
+      font-weight: var(--font-weight-default);
+      font-size: var(--font-size-small);
+    }
   }
 }
 
@@ -211,6 +309,7 @@ export default class ParticipantOverview extends Vue {
       -webkit-box-orient: vertical;
       text-overflow: ellipsis;
       overflow: hidden;
+      color: var(--color-primary);
     }
   }
 }

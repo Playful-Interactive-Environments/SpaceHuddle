@@ -1,23 +1,21 @@
 <template>
   <div class="menubar">
-    <Logo class="menubar__logo" isParticipant="true" />
-    <router-link to="/overview">
-      <el-dropdown v-on:command="menuItemSelected($event)">
-        <span class="el-dropdown-link">
-          <font-awesome-icon icon="bars" />
-        </span>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item command="publicScreen">
-              <font-awesome-icon icon="desktop" />
-            </el-dropdown-item>
-            <el-dropdown-item command="join">
-              <font-awesome-icon icon="sign-out-alt" />
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-    </router-link>
+    <font-awesome-icon :icon="['fac', 'logoWithName']" class="logo" />
+    <el-dropdown v-on:command="menuItemSelected($event)">
+      <span class="el-dropdown-link">
+        <font-awesome-icon icon="bars" />
+      </span>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <el-dropdown-item command="publicScreen">
+            <font-awesome-icon icon="desktop" />
+          </el-dropdown-item>
+          <el-dropdown-item command="join">
+            <font-awesome-icon icon="sign-out-alt" />
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
   </div>
 </template>
 
@@ -70,14 +68,10 @@ export default class Menubar extends Vue {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  //margin-bottom: 1rem;
+}
 
-  &__logo {
-    font-weight: var(--font-weight-bold);
-    display: flex;
-    align-items: center;
-    width: 40vw;
-    margin-bottom: -6px;
-  }
+.logo {
+  color: var(--color-mint);
 }
 </style>

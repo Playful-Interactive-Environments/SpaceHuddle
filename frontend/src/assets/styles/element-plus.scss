@@ -402,6 +402,12 @@ $--font-size: (
         --el-collapse-content-background-color: unset;
         --el-collapse-header-font-size: large;
         margin-bottom: 2rem;
+        //border-top: 0 solid var(--el-collapse-border-color);
+        //border-bottom: 0 solid var(--el-collapse-border-color);
+}
+
+.el-collapse-item__wrap {
+        //border-bottom: 0 solid var(--el-collapse-border-color);
 }
 
 .el-collapse-item {
