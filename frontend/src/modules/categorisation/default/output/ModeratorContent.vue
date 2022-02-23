@@ -15,7 +15,10 @@
                 ? `${type.orderType}&refId=${type.ref.id}`
                 : type.orderType
             "
-            :label="$t(`enum.ideaSortOrder.${type.orderType}`)"
+            :label="
+              $t(`enum.ideaSortOrder.${type.orderType}`) +
+              (type.ref ? ` - ${type.ref.name}` : '')
+            "
           >
             <span>
               {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
