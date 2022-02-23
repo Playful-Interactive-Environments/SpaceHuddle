@@ -20,7 +20,12 @@
     />
     <div class="card__text">
       <div class="card__title">
-        {{ hasKeywords ? idea.keywords : idea.description }}
+        <span
+          ref="title"
+          :class="{ threeLineText: cutLongTexts || limitedTextLength }"
+        >
+          {{ hasKeywords ? idea.keywords : idea.description }}
+        </span>
         <span class="actions">
           <slot name="action"></slot>
           <span class="state" v-if="showState">
@@ -72,11 +77,18 @@
         </span>
       </div>
       <div
+        ref="description"
         v-if="hasKeywords && idea.description"
         class="card__content"
-        :class="{ 'cut-text': cutLongTexts }"
+        :class="{ threeLineText: cutLongTexts || limitedTextLength }"
       >
         {{ idea.description }}
+      </div>
+      <div v-if="limitedTextLength" class="collapse">
+        <font-awesome-icon
+          icon="angle-down"
+          @click="limitedTextLength = !limitedTextLength"
+        />
       </div>
     </div>
     <IdeaSettings
@@ -90,7 +102,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import * as ideaService from '@/services/idea-service';
 import { Idea } from '@/types/api/Idea';
 import IdeaStates from '@/types/enum/IdeaStates';
@@ -113,8 +125,24 @@ export default class IdeaCard extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   showSettings = false;
+  limitedTextLength = false;
 
   IdeaStates = IdeaStates;
+
+  @Watch('idea.keywords', { immediate: true })
+  @Watch('idea.description', { immediate: true })
+  onIdeaChanged(): void {
+    setTimeout(() => {
+      const titleControl: HTMLElement = this.$refs.title as HTMLElement;
+      if (titleControl) {
+        if (titleControl.clientHeight > 70) this.limitedTextLength = true;
+      }
+      const descriptionControl: HTMLElement = this.$refs.description as HTMLElement;
+      if (descriptionControl) {
+        if (descriptionControl.clientHeight > 70) this.limitedTextLength = true;
+      }
+    }, 100);
+  }
 
   get stateIcon(): string {
     switch (IdeaStates[this.idea.state]) {
@@ -251,13 +279,8 @@ export default class IdeaCard extends Vue {
   }
 }
 
-.cut-text {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-
-  text-overflow: ellipsis;
-
-  overflow: hidden;
+.collapse {
+  display: flex;
+  justify-content: end;
 }
 </style>

@@ -18,10 +18,10 @@
               <slot name="settings"></slot>
             </div>
           </div>
-          <h1 class="heading heading--regular heading--white">
+          <h1 class="heading heading--regular heading--white threeLineText">
             {{ title }}
           </h1>
-          <div class="sidebar__text">
+          <div class="sidebar__text threeLineText">
             {{ description }}
           </div>
           <slot name="headerContent"></slot>

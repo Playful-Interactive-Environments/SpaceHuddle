@@ -541,3 +541,12 @@ $--font-size: (
 .el-dropdown-menu__item:hover {
         font-weight: bold;
 }
+
+.el-page-header__content {
+        max-width: 20rem;
+        display: -webkit-box;
+        line-clamp: 1;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+}

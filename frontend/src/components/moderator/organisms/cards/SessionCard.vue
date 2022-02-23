@@ -4,8 +4,10 @@
       <el-header>
         <div>
           <p class="el-card__date">{{ formatDate(session.creationDate) }}</p>
-          <h2 class="heading heading--regular">{{ session.title }}</h2>
-          <p class="el-card__description">{{ session.description }}</p>
+          <h2 class="heading heading--regular threeLineText">{{ session.title }}</h2>
+          <p class="el-card__description threeLineText">
+            {{ session.description }}
+          </p>
           <ModuleCount :session="session" />
         </div>
       </el-header>
@@ -62,11 +64,6 @@ export default class SessionCard extends Vue {
   }
 
   &__description {
-    line-clamp: 3;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
     text-align: justify;
   }
 

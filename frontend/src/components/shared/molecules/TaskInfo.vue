@@ -15,7 +15,7 @@
     <h3
       :class="{
         'heading--regular': isParticipant,
-        shortDescription: shortenDescription,
+        twoLineText: shortenDescription,
       }"
       class="module-info__title"
     >
@@ -23,7 +23,7 @@
     </h3>
     <p
       class="module-info__description"
-      :class="{ shortDescription: shortenDescription }"
+      :class="{ twoLineText: shortenDescription }"
     >
       {{ description }}
     </p>
@@ -60,20 +60,22 @@ export default class TaskInfo extends Vue {
   async onTaskIdChanged(): Promise<void> {
     if (this.taskId) {
       taskService.getTaskById(this.taskId, this.authHeaderTyp).then((task) => {
-        this.taskType = TaskType[task.taskType.toUpperCase()];
         this.title = task.name;
         this.description = task.description;
-        if (this.taskType && this.modules.length === 0) {
-          getModulesForTaskType(
-            [task.taskType.toUpperCase() as keyof typeof TaskType],
-            ModuleType.MAIN
-          ).then((mainList) => {
-            this.mainModule = task.modules
-              .filter((module) =>
-                mainList.find((main) => main.moduleName === module.name)
-              )
-              .map((module) => module.name);
-          });
+        if (task.taskType) {
+          this.taskType = TaskType[task.taskType.toUpperCase()];
+          if (this.taskType && this.modules.length === 0) {
+            getModulesForTaskType(
+              [task.taskType.toUpperCase() as keyof typeof TaskType],
+              ModuleType.MAIN
+            ).then((mainList) => {
+              this.mainModule = task.modules
+                .filter((module) =>
+                  mainList.find((main) => main.moduleName === module.name)
+                )
+                .map((module) => module.name);
+            });
+          }
         }
       });
     }
@@ -98,6 +100,7 @@ export default class TaskInfo extends Vue {
 .module-info {
   flex-grow: 1;
   font-size: var(--font-size-small);
+  text-align: left;
 
   @include md {
     //max-width: 60%;
@@ -137,15 +140,6 @@ export default class TaskInfo extends Vue {
       line-height: 3em;
     }
   }
-}
-
-.shortDescription {
-  display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-align: left;
 }
 
 .el-breadcrumb::v-deep {

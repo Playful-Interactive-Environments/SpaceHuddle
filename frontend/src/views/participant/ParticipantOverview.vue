@@ -8,11 +8,11 @@
         </div>
         <div class="overview__infobox">
           <div>
-            <span class="overview__info">
+            <span class="overview__info twoLineText">
               {{ sessionName }}
             </span>
             <span
-              class="overview__info overview__info__description"
+              class="overview__info__description twoLineText"
               v-if="sessionDescription"
             >
               {{ sessionDescription }}
@@ -34,7 +34,7 @@
             :name="topic.id"
           >
             <template #title>
-              <span>
+              <span class="oneLineText">
                 {{ topic.title }}
               </span>
             </template>
@@ -288,12 +288,6 @@ export default class ParticipantOverview extends Vue {
     //background-color: var(--color-transparent-dark);
     //color: var(--color-primary);
     font-weight: var(--font-weight-semibold);
-    display: -webkit-box;
-    line-clamp: 2;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    text-overflow: ellipsis;
-    overflow: hidden;
 
     &__description {
       padding-top: 0.5rem;
@@ -309,14 +303,7 @@ export default class ParticipantOverview extends Vue {
 
 .el-collapse-item::v-deep {
   .el-collapse-item__header {
-    span {
-      display: -webkit-box;
-      -webkit-line-clamp: 1;
-      -webkit-box-orient: vertical;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      color: var(--color-primary);
-    }
+    color: var(--color-primary);
   }
 }
 </style>

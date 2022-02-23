@@ -41,7 +41,7 @@
           }}
         </div>
       </template>
-      <p style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis">
+      <p class="oneLineText">
         {{
           $t(
             `module.${moduleTask.taskType}.${moduleTask.moduleName}.description.description`
