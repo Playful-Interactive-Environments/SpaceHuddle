@@ -8,6 +8,7 @@
       <div
         :class="{ media: !isVertical, stretch: isVertical }"
         :style="{ 'grid-template-rows': `1fr ${modelValue.length * 2 - 1}fr` }"
+        v-if="hasPublicSlider"
       >
         <TutorialStep
           :disableTutorial="!canDisablePublicTimeline || readonly"
@@ -223,6 +224,7 @@ export default class ProcessTimeline extends Vue {
   @Prop({ default: true }) readonly canDisablePublicTimeline!: boolean;
   @Prop({ default: true }) readonly isLinkedToDetails!: boolean;
   @Prop({ default: false }) readonly startParticipantOnPublicChange!: boolean;
+  @Prop({ default: true }) readonly hasPublicSlider!: boolean;
   @Prop({ default: 'id' }) readonly keyPropertyName!: string;
   @Prop({ default: null }) defaultTimerSeconds!: number | null;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })

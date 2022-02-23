@@ -19,6 +19,7 @@
         (a, b) => (!a && !b) || (a && b && a.question.id === b.question.id)
       "
       :displayItem="(item) => item.question"
+      :hasPublicSlider="hasPublicSlider"
       @changeOrder="dragDone"
       @changeActiveElement="onEditQuestionChanged"
     >
@@ -218,6 +219,10 @@ export default class ModeratorContent extends Vue {
     if (!this.publicTask || this.publicTask.id !== this.taskId) return false;
     if (this.publicQuestion) return item.id === this.publicQuestion.question.id;
     return false;
+  }
+
+  get hasPublicSlider(): boolean {
+    return !!this.publicTask && this.publicTask.id === this.taskId;
   }
 
   formData: Question = this.getEmptyQuestion();
