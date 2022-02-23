@@ -262,7 +262,8 @@ class ParticipantRepository implements RepositoryInterface
             ->andWhere([
                 "participant.id" => $id,
                 "session.expiration_date >= current_timestamp()"
-            ]);
+            ])
+            ->order(["topic.order"]);
 
         $result = $this->fetchAll($query, TopicData::class);
         if (isset($result)) {

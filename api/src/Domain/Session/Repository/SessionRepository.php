@@ -87,6 +87,10 @@ class SessionRepository implements RepositoryInterface
      */
     public function get(array $conditions = [], array $sortConditions = []): null|SessionData|array
     {
+        if (count($sortConditions) == 0) {
+            $sortConditions = ["creation_date"];
+        }
+
         $authorisation = $this->getAuthorisation();
         $authorisation_conditions = [
             "session_permission.user_id" => $authorisation->id,
