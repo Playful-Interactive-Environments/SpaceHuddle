@@ -5,7 +5,8 @@
     :class="{
       card__selected: isSelected,
       card__new: isNew,
-      card__inappropriate: isInappropriate,
+      card__thumbs_up: isThumbsUp,
+      card__thumbs_down: isThumbsDown,
       card__duplicate: isDuplicate,
       draggable: isDraggable,
     }"
@@ -28,7 +29,7 @@
         </span>
         <span class="actions">
           <slot name="action"></slot>
-          <span class="state" v-if="showState">
+          <span class="state" v-if="showState && stateIcon">
             <font-awesome-icon
               v-if="stateIcon"
               :icon="stateIcon"
@@ -148,9 +149,11 @@ export default class IdeaCard extends Vue {
   get stateIcon(): string {
     switch (IdeaStates[this.idea.state]) {
       case IdeaStates.NEW:
-        return 'star';
-      case IdeaStates.INAPPROPRIATE:
-        return 'times';
+        return '';
+      case IdeaStates.THUMBS_DOWN:
+        return 'thumbs-down';
+      case IdeaStates.THUMBS_UP:
+        return 'thumbs-up';
       case IdeaStates.DUPLICATE:
         return 'clone';
       case IdeaStates.HANDLED:
@@ -163,10 +166,12 @@ export default class IdeaCard extends Vue {
     switch (IdeaStates[this.idea.state]) {
       case IdeaStates.NEW:
         return '#f1be3a';
-      case IdeaStates.INAPPROPRIATE:
+      case IdeaStates.THUMBS_DOWN:
         return '#fe6e5d';
-      case IdeaStates.DUPLICATE:
+      case IdeaStates.THUMBS_UP:
         return '#01cf9e';
+      case IdeaStates.DUPLICATE:
+        return '#0192d0';
       case IdeaStates.HANDLED:
         return '#999999';
     }
@@ -178,9 +183,13 @@ export default class IdeaCard extends Vue {
     return false;
   }
 
-  get isInappropriate(): boolean {
-    if (this.idea)
-      return IdeaStates[this.idea.state] == IdeaStates.INAPPROPRIATE;
+  get isThumbsDown(): boolean {
+    if (this.idea) return IdeaStates[this.idea.state] == IdeaStates.THUMBS_DOWN;
+    return false;
+  }
+
+  get isThumbsUp(): boolean {
+    if (this.idea) return IdeaStates[this.idea.state] == IdeaStates.THUMBS_UP;
     return false;
   }
 
@@ -218,7 +227,8 @@ export default class IdeaCard extends Vue {
       case IdeaStates.NEW:
       case IdeaStates.HANDLED:
       case IdeaStates.DUPLICATE:
-      case IdeaStates.INAPPROPRIATE:
+      case IdeaStates.THUMBS_DOWN:
+      case IdeaStates.THUMBS_UP:
         this.idea.state = command;
         ideaService
           .putIdea(this.idea.id, this.idea, this.authHeaderTyp)
@@ -247,12 +257,16 @@ export default class IdeaCard extends Vue {
     border-color: var(--el-color-warning);
   }
 
-  &__inappropriate {
+  &__thumbs_down {
     border-color: var(--el-color-error);
   }
 
-  &__duplicate {
+  &__thumbs_up {
     border-color: var(--color-mint);
+  }
+
+  &__duplicate {
+    border-color: var(--color-blue);
   }
 
   &__content {

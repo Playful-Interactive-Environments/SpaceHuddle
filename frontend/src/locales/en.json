@@ -386,10 +386,11 @@
       "order": "custom"
     },
     "ideaState": {
-      "new": "new",
+      "new": "none",
       "handled": "handled",
       "duplicate": "duplicate",
-      "inappropriate": "inappropriate"
+      "thumbs_down": "thumbs down",
+      "thumbs_up": "thumbs up"
     },
     "viewType": {
       "task": "task",
