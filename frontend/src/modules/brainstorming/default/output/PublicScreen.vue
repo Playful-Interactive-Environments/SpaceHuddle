@@ -47,8 +47,7 @@ export default class PublicScreen extends Vue {
   ideas: Idea[] = [];
   readonly intervalTime = 10000;
   interval!: any;
-  readonly intervalTimeNew = 5000;
-  intervalNew!: any;
+  readonly newTimeSpan = 10000;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -60,15 +59,23 @@ export default class PublicScreen extends Vue {
   }
 
   get newIdeas(): Idea[] {
+    const currentDate = new Date();
     return this.ideas
-      .filter((idea) => idea.state === IdeaStates.NEW.toUpperCase())
+      .filter(
+        (idea) =>
+          currentDate.getTime() - new Date(idea.timestamp).getTime() <=
+          this.newTimeSpan
+      )
       .slice(0, 3);
   }
 
   get oldIdeas(): Idea[] {
     if (this.isModerator) {
+      const currentDate = new Date();
       return this.ideas.filter(
-        (idea) => idea.state !== IdeaStates.NEW.toUpperCase()
+        (idea) =>
+          currentDate.getTime() - new Date(idea.timestamp).getTime() >
+          this.newTimeSpan
       );
     }
     return this.ideas;
@@ -95,27 +102,16 @@ export default class PublicScreen extends Vue {
     }
   }
 
-  changeState(): void {
-    const ideas = this.newIdeas;
-    if (ideas.length > 0) {
-      ideas[0].state = IdeaStates.HANDLED.toUpperCase();
-      ideaService.putIdea(ideas[0].id, ideas[0]);
-    }
-  }
-
   async mounted(): Promise<void> {
     this.startInterval();
   }
 
   startInterval(): void {
     this.interval = setInterval(this.getIdeas, this.intervalTime);
-    if (this.isModerator)
-      this.intervalNew = setInterval(this.changeState, this.intervalTimeNew);
   }
 
   unmounted(): void {
     clearInterval(this.interval);
-    if (this.isModerator) clearInterval(this.intervalNew);
   }
 }
 </script>
