@@ -30,7 +30,6 @@ import * as taskService from '@/services/task-service';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
-import IdeaStates from '@/types/enum/IdeaStates';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
