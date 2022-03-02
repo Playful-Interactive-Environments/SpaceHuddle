@@ -1,42 +1,56 @@
 <template>
-  <div class="participant-background">
-    <div class="sh-content participant-container">
-      <div class="sh-overlay">
-        <el-page-header
-          :content="taskType"
-          :title="$t('general.back')"
-          @back="$router.go(-1)"
-        />
-        <el-tabs
-          :stretch="false"
-          v-if="modules.length > 1"
-          v-model="moduleName"
-          class="white"
-          @tab-click="(tab) => moduleNameClick(tab.paneName)"
-        >
-          <el-tab-pane
-            v-for="module in modules"
-            :key="module.name"
-            :name="module.name"
-          >
-            <template #label>
-              <span class="icon" v-if="module.icon">
-                <font-awesome-icon :icon="module.icon" />
-              </span>
-              <span class="text">
-                {{ $t(`module.${taskType}.${module.name}.description.title`) }}
-              </span>
-            </template>
-          </el-tab-pane>
-        </el-tabs>
-      </div>
-      <ParticipantModuleComponent
-        :task-id="taskId"
-        :module-id="moduleId"
-        :key="componentLoadIndex"
+  <ParticipantDefaultContainer
+    :key="componentLoadIndex"
+    :useFullSize="useFullSize"
+    :backgroundClass="backgroundClass"
+  >
+    <template #header>
+      <el-page-header
+        :content="taskType"
+        :title="$t('general.back')"
+        @back="$router.go(-1)"
       />
-    </div>
-  </div>
+      <el-tabs
+        :stretch="false"
+        v-if="modules.length > 1"
+        v-model="moduleName"
+        class="white"
+        @tab-click="(tab) => moduleNameClick(tab.paneName)"
+      >
+        <el-tab-pane
+          v-for="module in modules"
+          :key="module.name"
+          :name="module.name"
+        >
+          <template #label>
+            <span class="awesome-icon" v-if="module.icon">
+              <font-awesome-icon :icon="module.icon" />
+            </span>
+            <span class="text">
+              {{ $t(`module.${taskType}.${module.name}.description.title`) }}
+            </span>
+          </template>
+        </el-tab-pane>
+      </el-tabs>
+      <div class="right">
+        <div class="uppercase">
+          {{ $t('participant.organism.modelDefaultContainer.timeLeft') }}
+        </div>
+        <Timer
+          class="timer"
+          :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+          :entity="task"
+          v-on:timerEnds="goBack"
+        ></Timer>
+      </div>
+    </template>
+    <ParticipantModuleComponent
+      :task-id="taskId"
+      :module-id="moduleId"
+      v-model:useFullSize="useFullSize"
+      v-model:backgroundClass="backgroundClass"
+    />
+  </ParticipantDefaultContainer>
 </template>
 
 <script lang="ts">
@@ -61,9 +75,13 @@ import * as timerService from '@/services/timer-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Module } from '@/types/api/Module';
 import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
+import ParticipantDefaultContainer from '@/components/participant/organisms/layout/ParticipantDefaultContainer.vue';
+import Timer from '@/components/shared/atoms/Timer.vue';
 
 @Options({
   components: {
+    Timer,
+    ParticipantDefaultContainer,
     ParticipantModuleComponent: getEmptyComponent(),
   },
 })
@@ -82,6 +100,14 @@ export default class ParticipantModuleContent extends Vue {
   componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
   readonly intervalTime = 10000;
   interval!: any;
+  useFullSize = false;
+  backgroundClass = '';
+
+  EndpointAuthorisationType = EndpointAuthorisationType;
+
+  goBack(): void {
+    if (!this.isSyncedWithPublicScreen) this.$router.go(-1);
+  }
 
   modules: Module[] = [];
   loadUsedModules(): void {
@@ -213,6 +239,8 @@ export default class ParticipantModuleContent extends Vue {
   }
 
   moduleNameClick(moduleName: string | null = null): void {
+    this.useFullSize = false;
+    this.backgroundClass = '';
     if (!moduleName) {
       moduleName = this.moduleName;
     }
@@ -234,6 +262,7 @@ export default class ParticipantModuleContent extends Vue {
   }
 }
 </script>
+
 <style lang="scss" scoped>
 .sh-content {
   height: 100vh;
@@ -250,7 +279,7 @@ export default class ParticipantModuleContent extends Vue {
   z-index: 20;
   width: inherit;
   max-width: inherit;
-  padding: 10px 20px 0px 20px;
+  padding: 10px 20px 0 20px;
 }
 
 .el-page-header::v-deep {
@@ -258,6 +287,37 @@ export default class ParticipantModuleContent extends Vue {
   .el-page-header__content {
     color: white;
     text-transform: uppercase;
+  }
+}
+
+.right {
+  position: absolute;
+  top: 1rem;
+  right: 2rem;
+}
+
+.timer {
+  text-transform: uppercase;
+  color: white;
+  font-size: 1.2rem;
+  padding: 0;
+  background-color: transparent;
+}
+
+.uppercase {
+  text-transform: uppercase;
+  color: white;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.el-tabs::v-deep {
+  .el-tabs__header {
+    margin: 0;
+  }
+
+  .el-tabs__nav-wrap::after {
+    background-color: var(--color-gray-inactive);
   }
 }
 </style>

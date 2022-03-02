@@ -8,7 +8,11 @@
         <el-scrollbar>
           <div class="level">
             <span class="level-left">
-              <Logo v-if="!hasSidebar" class="main-layout__logo" />
+              <font-awesome-icon
+                v-if="!hasSidebar"
+                :icon="['fac', 'logoWithName']"
+                class="logo"
+              />
               <el-page-header
                 v-if="currentRouteTitle.length > 0"
                 class="level-item"
@@ -64,12 +68,10 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
-import Logo from '@/components/shared/atoms/Logo.vue';
 
 @Options({
   components: {
     Sidebar,
-    Logo,
   },
 })
 export default class ModeratorNavigationLayout extends Vue {
@@ -84,8 +86,6 @@ export default class ModeratorNavigationLayout extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '~@/assets/styles/icons.scss';
-
 .main-layout {
   background-color: var(--color-background-gray);
   min-height: 100vh;
@@ -138,5 +138,9 @@ export default class ModeratorNavigationLayout extends Vue {
 
 .router-link-active {
   font-weight: var(--font-weight-bold);
+}
+
+.logo {
+  font-size: 1.3rem;
 }
 </style>

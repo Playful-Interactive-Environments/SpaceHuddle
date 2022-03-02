@@ -92,6 +92,7 @@
                   :value="formattedTime(element)"
                   :hidden="!isParticipantActive(element)"
                   :class="{ 'no-module': !hasParticipantOption(element) }"
+                  type="primary"
                 >
                   <TutorialStep
                     :disableTutorial="readonly"
@@ -100,11 +101,12 @@
                     :order="4"
                   >
                     <el-button
+                      class="gables"
                       :class="{ 'is-checked': isParticipantActive(element) }"
                       v-on:click="timerContent = element"
                       circle
                     >
-                      <font-awesome-icon icon="mobile" />
+                      <font-awesome-icon icon="mobile-button" />
                     </el-button>
                   </TutorialStep>
                 </el-badge>
@@ -554,6 +556,8 @@ export default class ProcessTimeline extends Vue {
 }
 
 .el-slider::v-deep {
+  --el-slider-runway-bg-color: var(--color-gray-dark);
+
   .el-slider__button {
     mask-image: url('~@/assets/icons/svg/public-screen.svg');
     mask-repeat: no-repeat;
@@ -565,10 +569,6 @@ export default class ProcessTimeline extends Vue {
     border-radius: unset;
     width: calc(var(--el-slider-button-size) + 4px);
   }
-}
-
-.el-badge::v-deep {
-  //margin-right: 0.7rem;
 }
 
 .el-button::v-deep {
@@ -588,6 +588,7 @@ export default class ProcessTimeline extends Vue {
 }
 
 .el-badge::v-deep {
+  //margin-right: 0.7rem;
   .el-badge__content--primary {
     right: calc(5px + var(--el-badge-size) / 2);
   }
@@ -638,6 +639,10 @@ export default class ProcessTimeline extends Vue {
     }
 
     .el-slider::v-deep {
+      &.is-vertical {
+        flex: 1;
+      }
+
       .el-slider__button {
         background-color: var(--color-primary);
         border-color: white;
@@ -648,11 +653,11 @@ export default class ProcessTimeline extends Vue {
       }
 
       .el-slider__bar {
-        background-color: var(--el-slider-runway-background-color);
+        background-color: var(--el-slider-runway-bg-color);
       }
 
       .el-slider__runway {
-        background-color: white;
+        background-color: unset;
       }
     }
 

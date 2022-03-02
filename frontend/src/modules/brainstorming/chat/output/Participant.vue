@@ -1,132 +1,121 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
-    <template v-slot:planet>
-      <img
-        src="@/assets/illustrations/planets/brainstorming.png"
-        alt="planet"
-        class="module-container__planet"
-      />
-    </template>
-    <el-container class="fill">
-      <el-main>
-        <div class="media" v-if="task">
-          <span class="media-left">
-            {{ task.name }}
-          </span>
-          <span class="media-content"></span>
-        </div>
-        <div class="media" v-for="idea in ideas" :key="idea.id">
-          <span class="media-left" v-if="!idea.isOwn">
-            <IdeaCard :idea="idea" :is-editable="false" class="public-idea" />
-          </span>
-          <span class="media-content"></span>
-          <span class="media-right" v-if="idea.isOwn">
-            <IdeaCard
-              :idea="idea"
-              :is-editable="true"
-              :canChangeState="false"
-              class="public-idea"
-              :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
-              @ideaDeleted="getTaskIdeas"
-            />
-          </span>
-        </div>
-        <div class="media" v-if="newIdea.link || newIdea.image">
-          <span class="media-content"></span>
-          <span class="media-right" v-if="newIdea.link">
-            <img :src="newIdea.link" alt="idea image" />
-            <br />
-            <span v-on:click="newIdea.link = ''">
-              <font-awesome-icon class="edit" icon="trash" />
-            </span>
-          </span>
-          <span class="media-right" v-if="newIdea.image">
-            <img :src="newIdea.image" alt="idea image" />
-            <br />
-            <span v-on:click="newIdea.image = ''">
-              <font-awesome-icon class="edit" icon="trash" />
-            </span>
-          </span>
-        </div>
-        <div class="media" v-if="newIdea.link || newIdea.image">
-          <span class="media-left">
-            {{ $t('module.brainstorming.chat.participant.addDescription') }}
-          </span>
-          <span class="media-content"></span>
-        </div>
-        <div class="media" v-if="newIdea.description">
-          <span class="media-content"></span>
-          <span class="media-right">
-            {{ newIdea.description }}
-            <span v-on:click="newIdea.description = ''">
-              <font-awesome-icon class="edit" icon="trash" />
-            </span>
-          </span>
-        </div>
-        <div class="media" v-if="newIdea.description">
-          <span class="media-left">
-            {{ $t('module.brainstorming.chat.participant.addKeywords') }}
-          </span>
-          <span class="media-content"></span>
-        </div>
-      </el-main>
-      <el-footer>
-        <ValidationForm
-          :form-data="formData"
-          :use-default-submit="false"
-          v-on:submitDataValid="saveIdea"
+    <template #footer>
+      <ValidationForm
+        :form-data="formData"
+        :use-default-submit="false"
+        v-on:submitDataValid="saveIdea"
+      >
+        <el-form-item
+          prop="newIdeaInput"
+          :rules="[
+            defaultFormRules.ruleRequired,
+            defaultFormRules.ruleToLong(MAX_INPUT_LENGTH),
+          ]"
         >
-          <el-form-item
-            prop="newIdeaInput"
-            :rules="[
-              defaultFormRules.ruleRequired,
-              defaultFormRules.ruleToLong(MAX_INPUT_LENGTH),
-            ]"
-          >
-            <div class="media">
-              <el-input
-                class="media-content"
-                v-model="formData.newIdeaInput"
-                :placeholder="
-                  $t('module.brainstorming.chat.participant.newIdeaInfo')
-                "
-                v-on:blur="leaveField"
-              ></el-input>
-              <el-button
-                v-if="!newIdea.link"
-                class="media-right"
-                type="primary"
-                circle
-                v-on:click="addImage"
-              >
-                <font-awesome-icon icon="paperclip"></font-awesome-icon>
-              </el-button>
-              <el-button
-                class="media-right"
-                type="primary"
-                native-type="submit"
-                circle
-              >
-                <font-awesome-icon icon="play"></font-awesome-icon>
-              </el-button>
-            </div>
-            <span
-              class="info"
-              :class="{
-                error: MAX_INPUT_LENGTH < formData.newIdeaInput.length,
-              }"
+          <div class="media">
+            <el-input
+              class="media-content"
+              v-model="formData.newIdeaInput"
+              :placeholder="
+                $t('module.brainstorming.chat.participant.newIdeaInfo')
+              "
+              v-on:blur="leaveField"
+            ></el-input>
+            <el-button
+              v-if="!newIdea.link"
+              class="media-right"
+              type="primary"
+              circle
+              v-on:click="addImage"
             >
-              {{
-                $t(
-                  'module.brainstorming.default.participant.remainingCharacters'
-                )
-              }}:
-              {{ MAX_INPUT_LENGTH - formData.newIdeaInput.length }}
-            </span>
-          </el-form-item>
-        </ValidationForm>
-      </el-footer>
-    </el-container>
+              <font-awesome-icon icon="paperclip"></font-awesome-icon>
+            </el-button>
+            <el-button
+              class="media-right"
+              type="primary"
+              native-type="submit"
+              circle
+            >
+              <font-awesome-icon icon="play"></font-awesome-icon>
+            </el-button>
+          </div>
+          <span
+            class="info"
+            :class="{
+              error: MAX_INPUT_LENGTH < formData.newIdeaInput.length,
+            }"
+          >
+            {{
+              $t(
+                'module.brainstorming.default.participant.remainingCharacters'
+              )
+            }}:
+            {{ MAX_INPUT_LENGTH - formData.newIdeaInput.length }}
+          </span>
+        </el-form-item>
+      </ValidationForm>
+    </template>
+    <div class="media" v-if="task">
+      <span class="media-left">
+        {{ task.name }}
+      </span>
+      <span class="media-content"></span>
+    </div>
+    <div class="media" v-for="idea in ideas" :key="idea.id">
+      <span class="media-left" v-if="!idea.isOwn">
+        <IdeaCard :idea="idea" :is-editable="false" class="public-idea" />
+      </span>
+      <span class="media-content"></span>
+      <span class="media-right" v-if="idea.isOwn">
+        <IdeaCard
+          :idea="idea"
+          :is-editable="true"
+          :canChangeState="false"
+          class="public-idea"
+          :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
+          @ideaDeleted="getTaskIdeas"
+        />
+      </span>
+    </div>
+    <div class="media" v-if="newIdea.link || newIdea.image">
+      <span class="media-content"></span>
+      <span class="media-right" v-if="newIdea.link">
+        <img :src="newIdea.link" alt="idea image" />
+        <br />
+        <span v-on:click="newIdea.link = ''">
+          <font-awesome-icon class="edit" icon="trash" />
+        </span>
+      </span>
+      <span class="media-right" v-if="newIdea.image">
+        <img :src="newIdea.image" alt="idea image" />
+        <br />
+        <span v-on:click="newIdea.image = ''">
+          <font-awesome-icon class="edit" icon="trash" />
+        </span>
+      </span>
+    </div>
+    <div class="media" v-if="newIdea.link || newIdea.image">
+      <span class="media-left">
+        {{ $t('module.brainstorming.chat.participant.addDescription') }}
+      </span>
+      <span class="media-content"></span>
+    </div>
+    <div class="media" v-if="newIdea.description">
+      <span class="media-content"></span>
+      <span class="media-right">
+        {{ newIdea.description }}
+        <span v-on:click="newIdea.description = ''">
+          <font-awesome-icon class="edit" icon="trash" />
+        </span>
+      </span>
+    </div>
+    <div class="media" v-if="newIdea.description">
+      <span class="media-left">
+        {{ $t('module.brainstorming.chat.participant.addKeywords') }}
+      </span>
+      <span class="media-content"></span>
+    </div>
 
     <my-upload
       id="upload"
@@ -148,7 +137,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import ParticipantModuleDefaultContainer from '@/components/participant/organisms/ParticipantModuleDefaultContainer.vue';
+import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
 import * as ideaService from '@/services/idea-service';
 import * as taskService from '@/services/task-service';
 import * as moduleService from '@/services/module-service';
@@ -250,15 +239,13 @@ export default class Participant extends Vue {
   }
 
   scrollToBottom(delay = 100): void {
-    const element = document.getElementsByClassName('half-card')[0];
     setTimeout(() => {
-      element.scrollTop = element.scrollHeight - element.clientHeight;
+      window.scroll(0, document.body.scrollHeight);
     }, delay);
   }
 
   scrollIsBottom(): boolean {
-    const element = document.getElementsByClassName('half-card')[0];
-    return element.scrollTop === element.scrollHeight - element.clientHeight;
+    return window.scrollY === document.body.scrollHeight - window.innerHeight;
   }
 
   @Watch('taskId', { immediate: true })
@@ -390,31 +377,6 @@ export default class Participant extends Vue {
     border-radius: 1rem 1rem 1rem 0;
     padding: 1rem;
   }
-}
-
-.el-footer {
-  margin-top: 1rem;
-}
-
-/*.el-main {
-  overflow: auto;
-}
-
-.fill {
-  max-height: 80vh;
-}*/
-
-.participant-container::v-deep {
-  .half-card {
-    padding: 1.5rem 2rem 0 2rem;
-  }
-}
-
-.el-footer {
-  position: sticky;
-  bottom: 0; //-1.5rem;
-  padding: 1rem 0;
-  background-color: white;
 }
 
 .edit {

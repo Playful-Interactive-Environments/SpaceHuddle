@@ -72,9 +72,9 @@
           {{ $t('moderator.view.login.register.info') }}
         </p>
         <router-link to="register">
-          <button class="btn btn--outline btn--outline--white">
+          <el-button class="outline" type="info">
             {{ $t('moderator.view.login.register.submit') }}
-          </button>
+          </el-button>
         </router-link>
       </div>
     </section>

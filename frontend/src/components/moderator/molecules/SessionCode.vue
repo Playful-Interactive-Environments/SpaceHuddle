@@ -1,24 +1,24 @@
 <template>
   <div class="session-code">
-    <button
-      class="btn btn--fullwidth btn--icon"
-      :class="[hasBorder ? ' btn--outline btn--outline--gray' : 'btn--white']"
+    <el-button
+      :type="buttonType"
+      class="fullwidth stretch"
       @click="copyToClipboard"
     >
       <font-awesome-icon icon="clone" />
       <TutorialStep type="sessionDetails" step="connectionCode" :order="1">
         <span>{{ code }}</span>
       </TutorialStep>
-    </button>
+    </el-button>
     <TutorialStep type="sessionDetails" step="shareCode" :order="2">
-      <button
+      <el-button
+        :type="buttonType"
         v-if="hasSharing"
-        class="btn btn--icon session-code__share"
-        :class="[hasBorder ? ' btn--outline btn--outline--gray' : 'btn--white']"
+        class="session-code__share"
         v-on:click="share"
       >
         <font-awesome-icon icon="share-alt" />
-      </button>
+      </el-button>
     </TutorialStep>
   </div>
 </template>
@@ -34,7 +34,7 @@ import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class SessionCode extends Vue {
-  @Prop({ default: false }) hasBorder!: boolean;
+  @Prop({ default: 'default' }) buttonType!: string;
   @Prop({ default: true }) hasSharing!: boolean;
   @Prop({ default: '' }) code!: string;
 

@@ -108,7 +108,7 @@
         <CollapseTitle :text="key" :color="item.color">
           <span
             role="button"
-            class="icon"
+            class="awesome-icon"
             v-if="item.ideas.length > item.displayCount"
             v-on:click="item.displayCount = 1000"
           >
@@ -182,7 +182,6 @@ import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import CategorySettings from '@/modules/categorisation/default/molecules/CategorySettings.vue';
 import CategoryCard from '@/modules/categorisation/default/molecules/CategoryCard.vue';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
-import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
 import {
   OrderGroup,
   OrderGroupList,
@@ -203,7 +202,6 @@ import { EventType } from '@/types/enum/EventType';
     CategorySettings,
     CategoryCard,
     CollapseTitle,
-    FilterSection,
     draggable,
   },
 })
@@ -499,7 +497,7 @@ export default class ModeratorContent extends Vue {
   cursor: grab;
 }
 
-.icon {
+.awesome-icon {
   margin-right: 0.5em;
 }
 

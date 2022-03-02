@@ -24,6 +24,7 @@
           v-for="participant in participants"
           :key="participant.id"
           :value="participant.ideaCount"
+          type="primary"
         >
           <font-awesome-icon
             :icon="participant.avatar.symbol"

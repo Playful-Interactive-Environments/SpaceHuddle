@@ -1,94 +1,77 @@
 <template>
-  <div class="participant-background">
-    <el-container class="participant-container full-height">
-      <el-header class="overview">
-        <div class="overview__header">
-          <MenuBar />
-          <!--<SessionInfo :title="sessionName" :description="sessionDescription" />-->
-        </div>
-        <div class="overview__infobox">
-          <div>
-            <span class="overview__info twoLineText">
-              {{ sessionName }}
-            </span>
-            <span
-              class="overview__info__description twoLineText"
-              v-if="sessionDescription"
-            >
-              {{ sessionDescription }}
-            </span>
-          </div>
-          <div class="image">
-            <img
-              src="@/assets/illustrations/planets/brainstorming.png"
-              alt="planet"
-            />
-          </div>
-        </div>
-      </el-header>
-      <el-main>
-        <el-collapse v-model="openTabs">
-          <el-collapse-item
-            v-for="topic in filteredTopics"
-            :key="topic.id"
-            :name="topic.id"
+  <ParticipantDefaultContainer>
+    <template #header>
+      <div class="participant-header__header">
+        <MenuBar />
+      </div>
+      <div class="participant-header__infobox">
+        <div>
+          <span class="participant-header__info twoLineText">
+            {{ sessionName }}
+          </span>
+          <span
+            class="participant-header__info__description twoLineText"
+            v-if="sessionDescription"
           >
-            <template #title>
-              <span class="oneLineText">
-                {{ topic.title }}
-              </span>
-            </template>
-            <div
-              class="media link"
-              v-for="task in topic.tasks"
-              :key="task.id"
-              :style="{
-                '--module-color': getColor(task),
-              }"
-              v-on:click="
-                $router.push(`/participant-module-content/${task.id}`)
-              "
-            >
-              <font-awesome-icon
-                :icon="getIcon(task)"
-                class="media-left"
-                :style="{
-                  color: getColor(task),
-                }"
-              />
-              <!--<img
-                :src="
-                  require(`@/assets/illustrations/planets/${
-                    TaskType[task.taskType]
-                  }.png`)
-                "
-                alt="planet"
-                class="media-left"
-              />-->
-              <TaskInfo
-                class="media-content"
-                :taskId="task.id"
-                :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
-              />
-              <Timer
-                v-if="task.remainingTime !== null"
-                :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
-                class="media-right"
-                :entity="task"
-                v-on:timerEnds="getTopicsAndTasks"
-              ></Timer>
-            </div>
-          </el-collapse-item>
-        </el-collapse>
-      </el-main>
-    </el-container>
-  </div>
+            {{ sessionDescription }}
+          </span>
+        </div>
+        <div class="image">
+          <img
+            src="@/assets/illustrations/planets/brainstorming.png"
+            alt="planet"
+          />
+        </div>
+      </div>
+    </template>
+    <el-collapse v-model="openTabs">
+      <el-collapse-item
+        v-for="topic in filteredTopics"
+        :key="topic.id"
+        :name="topic.id"
+      >
+        <template #title>
+          <span class="oneLineText">
+            {{ topic.title }}
+          </span>
+        </template>
+        <div
+          class="media link"
+          v-for="task in topic.tasks"
+          :key="task.id"
+          :style="{
+            '--module-color': getColor(task),
+          }"
+          v-on:click="$router.push(`/participant-module-content/${task.id}`)"
+        >
+          <font-awesome-icon
+            :icon="getIcon(task)"
+            class="media-left"
+            :style="{
+              color: getColor(task),
+            }"
+          />
+          <TaskInfo
+            class="media-content"
+            :taskId="task.id"
+            :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+          />
+          <Timer
+            v-if="task.remainingTime !== null"
+            :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+            class="media-right"
+            :entity="task"
+            v-on:timerEnds="getTopicsAndTasks"
+          ></Timer>
+        </div>
+      </el-collapse-item>
+    </el-collapse>
+  </ParticipantDefaultContainer>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import MenuBar from '@/components/participant/molecules/Menubar.vue';
-import SessionInfo from '@/components/participant/molecules/SessionInfo.vue';
 import TaskType from '@/types/enum/TaskType';
 import * as taskService from '@/services/task-service';
 import * as participantService from '@/services/participant-service';
@@ -99,13 +82,14 @@ import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import { Task } from '@/types/api/Task';
+import ParticipantDefaultContainer from '@/components/participant/organisms/layout/ParticipantDefaultContainer.vue';
 
 @Options({
   components: {
+    ParticipantDefaultContainer,
     Timer,
     TaskInfo,
     MenuBar,
-    SessionInfo,
   },
 })
 
@@ -181,12 +165,6 @@ export default class ParticipantOverview extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.participant-container {
-  //background-color: white;
-  border-right: var(--color-primary) 1px solid;
-  border-left: var(--color-primary) 1px solid;
-}
-
 .media {
   border-top: 1px solid rgba(128, 128, 128, 0.5);
   //background-color: var(--color-transparent);
@@ -211,6 +189,36 @@ export default class ParticipantOverview extends Vue {
   }
 }
 
+.participant-header {
+  &__header {
+    padding-bottom: 2rem;
+  }
+
+  &__infobox {
+    display: flex;
+    justify-content: space-between;
+
+    .image {
+      min-width: 5rem;
+      max-width: 5rem;
+    }
+  }
+
+  &__info {
+    font-weight: var(--font-weight-semibold);
+
+    &__description {
+      padding-top: 0.5rem;
+      font-weight: var(--font-weight-default);
+      font-size: var(--font-size-small);
+    }
+  }
+}
+
+.media-left {
+  font-size: 2.5rem;
+}
+
 .el-collapse::v-deep {
   margin-bottom: unset;
   --el-collapse-header-font-color: white;
@@ -229,81 +237,6 @@ export default class ParticipantOverview extends Vue {
     &__content {
       padding-bottom: unset;
     }
-  }
-}
-
-.el-main::v-deep {
-  margin-top: -1rem;
-}
-
-.overview {
-  color: #fff;
-  background: var(--color-darkblue);
-  background-image: url('~@/assets/illustrations/stars-background-dark.png');
-  mask-image: radial-gradient(
-      circle farthest-corner at 100% 100%,
-      transparent 69%,
-      white 70%
-    ),
-    radial-gradient(
-      circle farthest-corner at 0% 100%,
-      transparent 69%,
-      white 70%
-    ),
-    linear-gradient(white, white);
-  mask-size: 1rem 1rem, 1rem 1rem, 100% calc(100% - 1rem + 1px);
-  mask-position: bottom left, bottom right, top left;
-  mask-repeat: no-repeat;
-  padding-bottom: 1rem;
-  //background-attachment: fixed;
-  background-size: contain;
-
-  &__module + .overview__module {
-    margin-left: 1.5rem;
-  }
-
-  &__header {
-    padding: 1rem 1rem;
-  }
-
-  &__infobox {
-    display: flex;
-    justify-content: space-between;
-    padding: 1rem;
-
-    .image {
-      min-width: 5rem;
-      max-width: 5rem;
-
-      /*-webkit-transform: rotate(-65deg);
-      -moz-transform: rotate(-65deg);
-      -ms-transform: rotate(-65deg);
-      -o-transform: rotate(-65deg);
-      transform: rotate(-65deg) translate(0, -20px);*/
-      //padding: 1rem;
-    }
-  }
-
-  &__info {
-    //background-color: var(--color-transparent-dark);
-    //color: var(--color-primary);
-    font-weight: var(--font-weight-semibold);
-
-    &__description {
-      padding-top: 0.5rem;
-      font-weight: var(--font-weight-default);
-      font-size: var(--font-size-small);
-    }
-  }
-}
-
-.media-left {
-  font-size: 2.5rem;
-}
-
-.el-collapse-item::v-deep {
-  .el-collapse-item__header {
-    color: var(--color-primary);
   }
 }
 </style>

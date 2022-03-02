@@ -21,14 +21,11 @@
 
 <script lang="ts">
 import { Vue, Options } from 'vue-class-component';
-import Logo from '@/components/shared/atoms/Logo.vue';
 import * as sessionService from '@/services/session-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
-  components: {
-    Logo,
-  },
+  components: {},
 })
 export default class Menubar extends Vue {
   sessionId = '';

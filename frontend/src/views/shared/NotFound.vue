@@ -8,9 +8,9 @@
     </p>
     <br />
     <router-link to="/">
-      <button class="btn btn--mint">
+      <el-button type="info">
         {{ $t('shared.view.notFound.submit') }}
-      </button>
+      </el-button>
     </router-link>
   </div>
 </template>

@@ -39,7 +39,7 @@
         <CollapseTitle :text="key" :avatar="item.avatar">
           <span
             role="button"
-            class="icon"
+            class="awesome-icon"
             v-if="item.ideas.length > item.displayCount"
             v-on:click="item.displayCount = 1000"
           >
@@ -104,7 +104,6 @@ import IdeaSortOrder, {
   DefaultIdeaSortOrder,
 } from '@/types/enum/IdeaSortOrder';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
-import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
 import {
   OrderGroupList,
   OrderGroup,
@@ -122,7 +121,6 @@ import { EventType } from '@/types/enum/EventType';
     AddItem,
     IdeaCard,
     CollapseTitle,
-    FilterSection,
     draggable,
   },
 })

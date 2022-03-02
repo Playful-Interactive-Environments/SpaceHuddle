@@ -1,13 +1,7 @@
 <template>
   <div class="participant-background">
     <div
-      class="
-        participant-container
-        join
-        full-height
-        centered-horizontal
-        flex-column
-      "
+      class="participant-container join full-height centered-horizontal flex-column"
     >
       <main>
         <h1 class="heading heading--big heading--white">

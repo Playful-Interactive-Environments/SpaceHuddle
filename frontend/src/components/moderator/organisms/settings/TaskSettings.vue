@@ -143,11 +143,8 @@
                   </el-select>
                 </td>
                 <td>
-                  <select
-                    v-model="input.order"
-                    class="select select--fullwidth"
-                  >
-                    <option
+                  <el-select v-model="input.order" class="select--fullwidth">
+                    <el-option
                       v-for="type in sortOrderOptions"
                       :key="type.orderType"
                       :value="
@@ -164,8 +161,8 @@
                         {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
                       </span>
                       <span v-if="type.ref"> - {{ type.ref.name }} </span>
-                    </option>
-                  </select>
+                    </el-option>
+                  </el-select>
                 </td>
                 <td
                   v-on:click="deleteInput(input)"
@@ -1244,6 +1241,10 @@ export default class TaskSettings extends Vue {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+  }
+
+  .el-select__tags .el-tag--info {
+    background-color: unset;
   }
 }
 

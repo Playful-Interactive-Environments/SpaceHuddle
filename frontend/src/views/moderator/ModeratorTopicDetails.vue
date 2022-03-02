@@ -20,15 +20,21 @@
             :order="4"
           >
             <span v-on:click="showRoles = true">
-              <font-awesome-icon class="icon" icon="users"></font-awesome-icon>
+              <font-awesome-icon
+                class="awesome-icon"
+                icon="users"
+              ></font-awesome-icon>
             </span>
           </TutorialStep>
           <span v-on:click="download">
-            <font-awesome-icon class="icon" icon="download"></font-awesome-icon>
+            <font-awesome-icon
+              class="awesome-icon"
+              icon="download"
+            ></font-awesome-icon>
           </span>
           <el-dropdown>
             <span class="el-dropdown-link">
-              <font-awesome-icon class="icon" icon="info-circle" />
+              <font-awesome-icon class="awesome-icon" icon="info-circle" />
             </span>
             <template #dropdown>
               <el-dropdown-menu>
@@ -62,9 +68,9 @@
             :to="`/public-screen/${sessionId}`"
             target="_blank"
           >
-            <button class="btn btn--mint btn--fullwidth">
+            <el-button type="info" class="fullwidth">
               {{ $t('general.publicScreen') }}
-            </button>
+            </el-button>
           </router-link>
         </template>
       </Sidebar>
@@ -79,11 +85,6 @@
           :disabled="!taskTypeAvailable(taskCategory)"
         >
           <template #label>
-            <!--<img
-              :src="require(`@/assets/illustrations/planets/${taskType}.png`)"
-              alt="planet"
-              style="width: 1.5rem"
-            />-->
             <TutorialStep
               type="topicDetails"
               step="taskType"
@@ -640,7 +641,7 @@ p {
   margin-bottom: 0.5rem;
 }
 
-.icon {
+.awesome-icon {
   color: var(--color-darkblue-light);
   margin-left: 0.5em;
 

@@ -7,14 +7,14 @@
         {{ $t('shared.view.home.info') }}
       </p>
       <router-link to="/login" class="home__link">
-        <button class="btn btn--gradient">
+        <el-button type="info" class="el-button--submit">
           {{ $t('shared.view.home.login') }}
-        </button>
+        </el-button>
       </router-link>
       <router-link to="/join">
-        <button class="btn btn--outline btn--outline--mint">
+        <el-button class="outline">
           {{ $t('shared.view.home.join') }}
-        </button>
+        </el-button>
       </router-link>
     </section>
     <section class="home__img">

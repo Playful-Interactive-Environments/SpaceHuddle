@@ -1,6 +1,9 @@
 <template>
   <header class="media">
-    <Logo class="media-left logo" />
+    <font-awesome-icon
+      :icon="['fac', 'logoWithName']"
+      class="media-left logo"
+    />
     <span class="media-content">
       <slot></slot>
     </span>
@@ -9,12 +12,9 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import Logo from '@/components/shared/atoms/Logo.vue';
 
 @Options({
-  components: {
-    Logo,
-  },
+  components: {},
 })
 export default class PublicHeader extends Vue {}
 </script>

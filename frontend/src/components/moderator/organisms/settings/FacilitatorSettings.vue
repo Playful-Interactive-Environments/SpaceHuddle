@@ -63,7 +63,11 @@
         prop="stateMessage"
         :rules="[defaultFormRules.ruleStateMessage]"
       >
-        <el-input v-model="formData.stateMessage" style="display: none" />
+        <el-input
+          v-model="formData.stateMessage"
+          class="hide"
+          input-style="display: none"
+        />
       </el-form-item>
     </ValidationForm>
   </el-dialog>
@@ -187,7 +191,7 @@ export default class LinkSettings extends Vue {
   padding: 0.5rem;
 }
 
-.icon {
+.awesome-icon {
   margin-left: 0.5em;
 }
 </style>

@@ -7,16 +7,24 @@
           {{ $t('moderator.view.profile.info') }} {{ email }}
         </p>
         <router-link to="change-password">
-          <button class="btn btn--gradient">
+          <el-button type="info" class="static-width el-button--submit">
             {{ $t('moderator.view.profile.changePassword') }}
-          </button>
+          </el-button>
         </router-link>
-        <button class="btn btn--gradient" @click="logout">
+        <el-button
+          type="info"
+          class="static-width el-button--submit"
+          @click="logout"
+        >
           {{ $t('moderator.view.profile.submit') }}
-        </button>
-        <button class="btn btn--gradient" v-on:click="deleteUser">
+        </el-button>
+        <el-button
+          type="info"
+          class="static-width el-button--submit"
+          v-on:click="deleteUser"
+        >
           {{ $t('moderator.view.profile.delete') }}
-        </button>
+        </el-button>
       </div>
     </template>
   </ModeratorNavigationLayout>

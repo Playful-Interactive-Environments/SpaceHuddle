@@ -37,7 +37,7 @@
         >
           <span
             role="button"
-            class="icon"
+            class="awesome-icon"
             v-if="selection.length > displayCount"
             v-on:click="displayCount = 1000"
           >
@@ -99,7 +99,7 @@
         <CollapseTitle :text="key" :avatar="item.avatar" :color="item.color">
           <span
             role="button"
-            class="icon"
+            class="awesome-icon"
             v-if="item.ideas.length > item.displayCount"
             v-on:click="item.displayCount = 1000"
           >
@@ -155,7 +155,6 @@ import { convertToSaveVersion, Task } from '@/types/api/Task';
 import * as selectionService from '@/services/selection-service';
 import { EventType } from '@/types/enum/EventType';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
-import FilterSection from '@/components/moderator/atoms/FilterSection.vue';
 import draggable from 'vuedraggable';
 import {
   OrderGroup,
@@ -176,7 +175,6 @@ const SELECTION_KEY = 'selection';
   components: {
     IdeaCard,
     CollapseTitle,
-    FilterSection,
     AddItem,
     draggable,
   },
@@ -335,7 +333,7 @@ export default class ModeratorContent extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.icon {
+.awesome-icon {
   margin-right: 0.5em;
 }
 

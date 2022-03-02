@@ -4,7 +4,9 @@
       <el-header>
         <div>
           <p class="el-card__date">{{ formatDate(session.creationDate) }}</p>
-          <h2 class="heading heading--regular threeLineText">{{ session.title }}</h2>
+          <h2 class="heading heading--regular threeLineText">
+            {{ session.title }}
+          </h2>
           <p class="el-card__description threeLineText">
             {{ session.description }}
           </p>
@@ -14,11 +16,11 @@
       <el-main> </el-main>
       <el-footer>
         <div class="el-card__content">
-          <SessionCode :code="session.connectionKey" :hasBorder="true" />
+          <SessionCode :code="session.connectionKey" button-type="primary" />
           <router-link :to="`/session/${session.id}`">
-            <button class="btn btn--mint btn--fullwidth">
+            <el-button class="fullwidth" type="info">
               {{ $t('moderator.organism.session.overview.select') }}
-            </button>
+            </el-button>
           </router-link>
         </div>
       </el-footer>

@@ -30,7 +30,9 @@
     >
       <el-radio v-model="mainModuleName" :label="moduleTask.key">{{}}</el-radio>
     </TutorialStep>
-    <div class="icon"><font-awesome-icon :icon="icon" v-if="icon" /></div>
+    <div class="awesome-icon">
+      <font-awesome-icon :icon="icon" v-if="icon" />
+    </div>
     <el-tooltip placement="top">
       <template #content>
         <div style="max-width: 50vw">
@@ -122,10 +124,9 @@ export default class ModuleCard extends Vue {
   margin: 0;
 }
 
-.icon {
+.awesome-icon {
   text-align: center;
   width: 100%;
-  margin: 0.6em 0;
   font-size: 40pt;
 }
 </style>

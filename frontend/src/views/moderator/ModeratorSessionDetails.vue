@@ -18,7 +18,7 @@
           >
             <span v-on:click="disconnect">
               <font-awesome-icon
-                class="icon"
+                class="awesome-icon"
                 icon="user-slash"
               ></font-awesome-icon>
             </span>
@@ -30,12 +30,15 @@
             :order="4"
           >
             <span v-on:click="showRoles = true">
-              <font-awesome-icon class="icon" icon="users"></font-awesome-icon>
+              <font-awesome-icon
+                class="awesome-icon"
+                icon="users"
+              ></font-awesome-icon>
             </span>
           </TutorialStep>
           <el-dropdown>
             <span class="el-dropdown-link">
-              <font-awesome-icon class="icon" icon="info-circle" />
+              <font-awesome-icon class="awesome-icon" icon="info-circle" />
             </span>
             <template #dropdown>
               <el-dropdown-menu>
@@ -62,9 +65,9 @@
               :to="`/public-screen/${session.id}`"
               target="_blank"
             >
-              <button class="btn btn--mint btn--fullwidth">
+              <el-button type="info" class="fullwidth">
                 {{ $t('general.publicScreen') }}
-              </button>
+              </el-button>
             </router-link>
           </TutorialStep>
         </template>
@@ -324,7 +327,7 @@ export default class ModeratorSessionDetails extends Vue {
   color: var(--color-red);
 }
 
-.icon {
+.awesome-icon {
   color: var(--color-darkblue-light);
   margin-left: 0.5em;
 

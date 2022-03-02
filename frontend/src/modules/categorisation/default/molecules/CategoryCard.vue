@@ -1,6 +1,6 @@
 <template>
   <div class="item">
-    <el-badge :value="ideas.length" class="item">
+    <el-badge :value="ideas.length" class="item" type="primary">
       <el-card
         shadow="never"
         :style="{
@@ -90,10 +90,10 @@
           </div>
         </div>
         <span v-if="category" :style="{ color: categoryColor }">
-          <span class="icon" v-on:click="editCategory()">
+          <span class="awesome-icon" v-on:click="editCategory()">
             <font-awesome-icon icon="pen" />
           </span>
-          <span class="icon" v-on:click="deleteCategory()">
+          <span class="awesome-icon" v-on:click="deleteCategory()">
             <font-awesome-icon icon="trash" />
           </span>
         </span>
@@ -270,7 +270,7 @@ export default class CategoryCard extends Vue {
   }
 }
 
-.icon {
+.awesome-icon {
   margin: 0.8em 0;
 }
 

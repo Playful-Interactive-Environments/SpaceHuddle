@@ -3,10 +3,14 @@
     prop="stateMessage"
     :rules="[defaultFormRules.ruleStateMessage]"
   >
-    <el-input v-model="formStateMessage" style="display: none" />
+    <el-input
+      v-model="formStateMessage"
+      class="hide"
+      input-style="display: none"
+    />
     <el-button
       native-type="submit"
-      class=".gradient btn--fullwidth el-button--submit"
+      class="fullwidth el-button--submit"
       :disabled="disabled"
       :loading="disabled"
     >

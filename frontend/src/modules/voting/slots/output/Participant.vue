@@ -1,21 +1,11 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
-    <template v-slot:planet>
-      <img
-        src="@/assets/illustrations/planets/voting.png"
-        alt="planet"
-        class="module-container__planet"
-      />
-    </template>
     <div v-if="ideaPointer < ideas.length">
       {{ $t('module.voting.slots.participant.info') }}
-      <button
+      <el-button
         v-for="(idea, index) in seats"
         :key="index"
-        type="submit"
-        class="
-          btn btn--white btn--outline btn--outline--dark-blue btn--fullwidth
-        "
+        class="fullwidth outline-dashed"
         @click.prevent="vote(index + 1)"
       >
         <span v-if="idea">
@@ -28,7 +18,7 @@
           {{ $t('module.voting.slots.participant.emptySlot') }}
           <font-awesome-icon icon="angle-double-right" />
         </span>
-      </button>
+      </el-button>
       <span v-if="ideaPointer < ideas.length">
         <IdeaCard
           :idea="ideas[ideaPointer]"
@@ -36,13 +26,14 @@
           :is-editable="false"
         />
       </span>
-      <button
-        type="submit"
-        class="btn btn--gradient btn--fullwidth"
+      <el-button
+        type="warning"
+        nativeType="submit"
+        class="fullwidth"
         @click.prevent="vote(0)"
       >
         {{ $t('module.voting.slots.participant.skip') }}
-      </button>
+      </el-button>
     </div>
     <div v-if="finished">
       {{ $t('module.voting.slots.participant.thanks') }}
@@ -56,7 +47,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import ParticipantModuleDefaultContainer from '@/components/participant/organisms/ParticipantModuleDefaultContainer.vue';
+import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
 import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
 import * as moduleService from '@/services/module-service';

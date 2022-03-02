@@ -1,12 +1,5 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
-    <template v-slot:planet>
-      <img
-        src="@/assets/illustrations/planets/information.png"
-        alt="planet"
-        class="module-container__planet"
-      />
-    </template>
     <section class="layout__columns">
       <IdeaCard
         v-for="(idea, index) in ideas"
@@ -22,7 +15,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import ParticipantModuleDefaultContainer from '@/components/participant/organisms/ParticipantModuleDefaultContainer.vue';
+import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
 import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';

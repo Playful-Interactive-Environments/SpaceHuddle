@@ -56,7 +56,7 @@
       </span>
     </div>
     <div class="overlay disable-text-selection">
-      <div class="icon link" v-on:click="isShaking()">
+      <div class="awesome-icon link" v-on:click="isShaking()">
         <font-awesome-icon :icon="['fac', 'shake']" />
       </div>
     </div>
@@ -66,12 +66,12 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import ParticipantModuleDefaultContainer from '@/components/participant/organisms/ParticipantModuleDefaultContainer.vue';
+import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
 import * as moduleService from '@/services/module-service';
 import { Idea } from '@/types/api/Idea.ts';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { CanvasBodies } from '@/types/ui/CanvasBodies';
+import { CanvasBodies } from '@/modules/brainstorming/game/types/CanvasBodies';
 import NoSleep from 'nosleep.js';
 import * as viewService from '@/services/view-service';
 import * as taskService from '@/services/task-service';
@@ -103,6 +103,7 @@ enum TextType {
   components: {
     ParticipantModuleDefaultContainer,
   },
+  emits: ['update:useFullSize'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -163,6 +164,7 @@ export default class Participant extends Vue {
     animationPathCount = 8,
     textSize = 48
   ): void {
+    const top = textSpan.parentNode.getBoundingClientRect().top;
     if (textSpan) {
       this.bodies.clearTexts(textId);
       //this.bodies.startAnimation(50);
@@ -174,7 +176,7 @@ export default class Participant extends Vue {
           this.bodies.addText(
             span.innerHTML,
             (rect.left + rect.right) / 2 - rectAnimation.x,
-            rect.top + rect.height / 2,
+            rect.top + rect.height / 2 - top,
             textSize,
             color,
             0,
@@ -249,6 +251,8 @@ export default class Participant extends Vue {
 
   async mounted(): Promise<void> {
     await this.requestFullscreen();
+    this.$emit('update:useFullSize', true);
+    this.$emit('update:backgroundClass', 'star-background');
     await o9n.orientation
       .lock('portrait-primary')
       // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -374,28 +378,28 @@ export default class Participant extends Vue {
         this.vueCanvasHeight - borderSize / 2,
         this.vueCanvasWidth,
         borderSize,
-        { isStatic: true }
+        { isStatic: true, isHidden: true }
       );
       this.bodies.addRect(
         this.vueCanvasWidth / 2,
         borderSize / 2,
         this.vueCanvasWidth,
         borderSize,
-        { isStatic: true }
+        { isStatic: true, isHidden: true }
       );
       this.bodies.addRect(
         borderSize / 2,
         this.vueCanvasHeight / 2,
         borderSize,
         this.vueCanvasHeight,
-        { isStatic: true }
+        { isStatic: true, isHidden: true }
       );
       this.bodies.addRect(
         this.vueCanvasWidth - borderSize / 2,
         this.vueCanvasHeight / 2,
         borderSize,
         this.vueCanvasHeight,
-        { isStatic: true }
+        { isStatic: true, isHidden: true }
       );
 
       this.setBodyText(
@@ -497,15 +501,21 @@ export default class Participant extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-.canvas-container {
-  color: #fff;
+<style lang="scss">
+.star-background {
   background: var(--color-darkblue);
   background-image: url('~@/assets/illustrations/background.png');
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;
-  height: 100vh;
+}
+</style>
+
+<style lang="scss" scoped>
+.canvas-container {
+  color: #fff;
+  flex-grow: 1;
+  top: 0;
   width: 100%;
   position: relative;
 }
@@ -557,7 +567,7 @@ body {
   overflow: hidden;
 }
 
-.icon {
+.awesome-icon {
   font-size: 72pt;
   color: #ffffff77;
 }

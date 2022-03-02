@@ -4,16 +4,24 @@
       <el-header>
         <div class="sidebar__top">
           <div class="sidebar__logo">
-            <Logo />
+            <font-awesome-icon :icon="['fac', 'logoWithName']" class="logo" />
           </div>
           <div class="sidebar__management">
             <div>{{ preTitle }}</div>
             <div class="sidebar__icon" aria-label="settings" role="button">
               <span v-on:click="$emit('delete', $event)">
-                <font-awesome-icon class="icon" icon="trash" v-if="canModify" />
+                <font-awesome-icon
+                  class="awesome-icon"
+                  icon="trash"
+                  v-if="canModify"
+                />
               </span>
               <span v-on:click="$emit('openSettings', $event)">
-                <font-awesome-icon class="icon" icon="cog" v-if="canModify" />
+                <font-awesome-icon
+                  class="awesome-icon"
+                  icon="cog"
+                  v-if="canModify"
+                />
               </span>
               <slot name="settings"></slot>
             </div>
@@ -42,12 +50,9 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import Logo from '@/components/shared/atoms/Logo.vue';
 
 @Options({
-  components: {
-    Logo,
-  },
+  components: {},
 })
 export default class Sidebar extends Vue {
   @Prop({ default: '' }) readonly title!: string;
@@ -58,8 +63,6 @@ export default class Sidebar extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '~@/assets/styles/icons.scss';
-
 .sidebar {
   background-color: var(--color-darkblue);
   position: fixed;
@@ -81,6 +84,7 @@ export default class Sidebar extends Vue {
     width: 100%;
     height: 2rem;
     margin-bottom: 2rem;
+    font-size: 1.3rem;
   }
 
   &__management {
@@ -102,7 +106,7 @@ export default class Sidebar extends Vue {
     background-color: var(--module-color);
   }
 
-  .icon {
+  .awesome-icon {
     margin-left: 0.5em;
 
     &:hover {

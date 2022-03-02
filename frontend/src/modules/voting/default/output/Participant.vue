@@ -1,12 +1,5 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
-    <template v-slot:planet>
-      <img
-        src="@/assets/illustrations/planets/voting.png"
-        alt="planet"
-        class="module-container__planet"
-      />
-    </template>
     <div class="media" v-if="ideaPointer < ideas.length">
       <IdeaCard
         class="media-left"
@@ -57,7 +50,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import ParticipantModuleDefaultContainer from '@/components/participant/organisms/ParticipantModuleDefaultContainer.vue';
+import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
 import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
 import * as moduleService from '@/services/module-service';
@@ -208,9 +201,8 @@ export default class Participant extends Vue {
   }
 
   scrollToTop(delay = 100): void {
-    const element = document.getElementsByClassName('half-card')[0];
     setTimeout(() => {
-      element.scrollTop = 0;
+      window.scroll(0, document.body.scrollHeight);
     }, delay);
   }
 

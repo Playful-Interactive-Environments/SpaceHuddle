@@ -137,7 +137,8 @@ export default class IdeaCard extends Vue {
       if (titleControl) {
         if (titleControl.clientHeight > 70) this.limitedTextLength = true;
       }
-      const descriptionControl: HTMLElement = this.$refs.description as HTMLElement;
+      const descriptionControl: HTMLElement = this.$refs
+        .description as HTMLElement;
       if (descriptionControl) {
         if (descriptionControl.clientHeight > 70) this.limitedTextLength = true;
       }

@@ -1,21 +1,5 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
-    <template v-slot:planet>
-      <el-badge
-        class="link media-right"
-        :value="ideas.length"
-        v-on:click="showHistory = true"
-      >
-        <transition name="fade" v-for="(planet, index) in planets" :key="index">
-          <img
-            v-if="activePlanetIndex === index"
-            :src="planets[index]"
-            alt="planet"
-            class="brainstorming__planet"
-          />
-        </transition>
-      </el-badge>
-    </template>
     <ValidationForm
       :form-data="formData"
       :use-default-submit="false"
@@ -128,7 +112,11 @@
             </el-button>
           </div>
           <span class="media-content">
-            <el-input v-model="formData.stateMessage" style="display: none" />
+            <el-input
+              v-model="formData.stateMessage"
+              class="hide"
+              input-style="display: none"
+            />
           </span>
           <div class="media-right" role="button">
             <el-button native-type="submit" circle>
@@ -179,7 +167,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import ParticipantModuleDefaultContainer from '@/components/participant/organisms/ParticipantModuleDefaultContainer.vue';
+import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
 import myUpload from 'vue-image-crop-upload/upload-3.vue';
 import * as moduleService from '@/services/module-service';
 import * as ideaService from '@/services/idea-service';

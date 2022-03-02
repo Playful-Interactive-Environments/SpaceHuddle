@@ -351,43 +351,45 @@ export class CanvasBodies {
       }
 
       const options = this.bodies[index];
-      this.ctx.beginPath();
-      const start = body.vertices[0];
-      this.ctx.moveTo(start.x, start.y);
-      for (let i = 1; i < body.vertices.length; i += 1) {
-        const to = body.vertices[i];
-        this.ctx.lineTo(to.x, to.y);
-      }
-      this.ctx.closePath();
+      if (!options.isHidden) {
+        this.ctx.beginPath();
+        const start = body.vertices[0];
+        this.ctx.moveTo(start.x, start.y);
+        for (let i = 1; i < body.vertices.length; i += 1) {
+          const to = body.vertices[i];
+          this.ctx.lineTo(to.x, to.y);
+        }
+        this.ctx.closePath();
 
-      if (options.gradientSize && isNumber(options.gradientSize)) {
-        // Create gradient
-        const grd = this.ctx.createRadialGradient(
-          body.position.x,
-          body.position.y,
-          1,
-          body.position.x,
-          body.position.y,
-          options.gradientSize as number
-        );
-        grd.addColorStop(0, `#FFFFFF${gradOpacity}`);
-        grd.addColorStop(1, '#FFFFFF00');
+        if (options.gradientSize && isNumber(options.gradientSize)) {
+          // Create gradient
+          const grd = this.ctx.createRadialGradient(
+            body.position.x,
+            body.position.y,
+            1,
+            body.position.x,
+            body.position.y,
+            options.gradientSize as number
+          );
+          grd.addColorStop(0, `#FFFFFF${gradOpacity}`);
+          grd.addColorStop(1, '#FFFFFF00');
 
-        this.ctx.fillStyle = grd;
-      } else {
-        this.ctx.fillStyle = `#FFFFFF${hexOpacity}`;
-      }
+          this.ctx.fillStyle = grd;
+        } else {
+          this.ctx.fillStyle = `#FFFFFF${hexOpacity}`;
+        }
 
-      this.ctx.fill();
-      if (options.text) {
-        this.showText(
-          options.text as string,
-          body.position.x,
-          body.position.y,
-          options.gradientSize as number,
-          `#27133B${hexOpacity}`,
-          body.angle
-        );
+        this.ctx.fill();
+        if (options.text) {
+          this.showText(
+            options.text as string,
+            body.position.x,
+            body.position.y,
+            options.gradientSize as number,
+            `#27133B${hexOpacity}`,
+            body.angle
+          );
+        }
       }
     });
   }

@@ -1,6 +1,5 @@
 @import '~@/assets/styles/fonts.scss';
 @import '~@/assets/styles/variables.scss';
-@import '~@/assets/styles/breakpoints.scss';
 @import '~@/assets/styles/bulma.scss';
 @import '~@/assets/styles/third-party-components.scss';
 @import '~@/assets/styles/layout.scss';
@@ -94,221 +93,14 @@ body {
   }
 }
 
-.btn {
-  font-family: var(--font-family);
-  font-size: var(--font-size-default);
-  color: white;
-  background-color: var(--color-darkblue);
-  border: none;
-  border-radius: 100px;
-  white-space: nowrap;
-  cursor: pointer;
-  padding: 0.7rem 1rem;
-  width: 200px;
-  margin: 0.25rem auto;
-  transition: background-color 0.2s, opacity 0.2s;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &--gradient {
-    background-color: var(--color-mint);
-    background: linear-gradient(
-      90deg,
-      var(--color-mint) 2%,
-      var(--color-mint-dark) 50%,
-      var(--color-mint) 98%
-    );
-    background-size: 200% 100%;
-    background-position: 100%;
-    transition: background-position 0.2s;
-
-    &:hover {
-      background-position: 0;
-      opacity: 1;
-    }
-  }
-
-  &--outline {
-    background-color: transparent;
-    box-sizing: border-box;
-    transition: background-color 0.2s, color 0.2s;
-    padding: calc(9.2rem / 16) 1rem;
-
-    &--mint {
-      color: var(--color-mint-dark);
-      border: 2px solid var(--color-mint-dark);
-
-      &:hover {
-        background-color: var(--color-mint-dark);
-        color: white;
-      }
-    }
-
-    &--white {
-      color: white;
-      border: 2px solid white;
-
-      &:hover {
-        background-color: white;
-        color: var(--color-darkblue);
-      }
-    }
-
-    &--gray {
-      color: var(--color-darkblue);
-      border: 2px solid var(--color-background-gray);
-
-      &:hover {
-        background-color: var(--color-background-gray);
-      }
-    }
-
-    &--dark-blue {
-      color: var(--color-darkblue);
-      border: 2px dashed var(--color-darkblue);
-
-      &:hover {
-        background-color: var(--color-darkblue-light);
-      }
-    }
-
-    &:hover {
-      opacity: 1;
-    }
-  }
-
-  &--mint {
-    background-color: var(--color-mint);
-  }
-
-  &--blue {
-    background-color: var(--color-blue);
-  }
-
-  &--yellow {
-    background-color: var(--color-yellow);
-  }
-
-  &--red {
-    background-color: var(--color-red);
-  }
-
-  &--purple {
-    background-color: var(--color-purple);
-  }
-
-  &--white {
-    background-color: white;
-    color: var(--color-darkblue);
-  }
-
-  &--icon {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.8rem;
-    padding: 0;
-    height: calc(40.57rem / 16);
-  }
-
-  &--icon-only {
-    &:hover {
-      cursor: pointer;
-    }
-  }
-
-  &--wide {
-    width: 300px;
-  }
-
-  &--fullwidth {
-    width: 100%;
-  }
-}
-
 .label {
   display: block;
   font-weight: var(--font-weight-semibold);
   margin-top: 1rem;
 }
 
-.input,
-.select,
-.textarea {
-  font-family: var(--font-family);
-  font-size: var(--font-size-default);
-  color: var(--color-darkblue);
-  background-color: var(--color-background-gray);
-  padding: 0.7rem 1.2rem;
-  border-radius: 100px;
-  border: none;
-  margin: 0.5rem auto;
-  width: 300px;
-
-  &::placeholder {
-    color: var(--color-darkblue-light);
-  }
-
-  &:focus {
-    outline: none;
-    border: 1px solid var(--color-mint-light);
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 200ms;
-  }
-
-  &--fullwidth {
-    width: 100%;
-  }
-
-  &--centered {
-    text-align: center;
-  }
-}
-
-.select select, .textarea, .input, .button {
-  -webkit-appearance: auto;
-}
-
-.select {
-  cursor: pointer;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background-image: url('~@/assets/icons/svg/arrow.svg');
-  background-size: 0.8em;
-  background-repeat: no-repeat;
-  background-position: right 1em top 50%;
-  text-transform: capitalize;
-  position: unset;
-
-  option {
-    text-transform: capitalize;
-    font-family: var(--font-family), Arial, sans-serif;
-  }
-}
-
-.textarea {
-  border-radius: var(--border-radius-small);
-}
-
 p {
   margin-top: 0;
-}
-
-.icon {
-  &--s {
-    width: 15px;
-  }
-
-  &--m {
-    width: 20px;
-  }
-
-  &--l {
-    width: 25px;
-  }
 }
 
 .link {
@@ -383,4 +175,12 @@ form {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.logo {
+  color: var(--color-mint);
+}
+
+.hide {
+  display: none;
 }
