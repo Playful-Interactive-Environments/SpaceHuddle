@@ -223,6 +223,7 @@ export default class ParticipantOverview extends Vue {
   margin-bottom: unset;
   --el-collapse-header-font-color: white;
   border: unset;
+  width: 100%;
 
   .el-collapse-item {
     border-radius: 1rem;
