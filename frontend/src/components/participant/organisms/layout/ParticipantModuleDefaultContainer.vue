@@ -6,6 +6,7 @@
         :modules="[module]"
         :is-participant="true"
         :shortenDescription="false"
+        :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
       />
     </el-header>
     <el-main class="el-main__overflow">
