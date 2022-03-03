@@ -202,7 +202,7 @@ export default class Participant extends Vue {
 
   scrollToTop(delay = 100): void {
     setTimeout(() => {
-      window.scroll(0, document.body.scrollHeight);
+      window.scroll(0, 0);
     }, delay);
   }
 

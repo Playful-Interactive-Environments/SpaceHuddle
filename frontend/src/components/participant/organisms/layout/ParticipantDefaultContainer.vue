@@ -30,6 +30,16 @@ import { Prop } from 'vue-property-decorator';
 export default class ParticipantDefaultContainer extends Vue {
   @Prop({ default: false }) readonly useFullSize!: boolean;
   @Prop({ default: '' }) readonly backgroundClass!: string;
+
+  mounted(): void {
+    this.scrollToTop(50);
+  }
+
+  scrollToTop(delay = 100): void {
+    setTimeout(() => {
+      window.scroll(0, 0);
+    }, delay);
+  }
 }
 </script>
 
@@ -49,17 +59,13 @@ export default class ParticipantDefaultContainer extends Vue {
   position: sticky;
   top: 0;
   color: #fff;
-  mask-size: var(--corner-radius) var(--corner-radius),
-    var(--corner-radius) var(--corner-radius),
-    100% calc(100% - var(--corner-radius) + 1px);
-  mask-position: bottom left, bottom right, top left;
-  mask-repeat: no-repeat;
-  padding: 1rem 1rem calc(1rem + var(--corner-radius)) 1rem;
+  padding: 1rem;
 
   &__background {
     background: var(--color-darkblue);
-    background-image: url('~@/assets/illustrations/stars-background-dark.png');
-    background-size: contain;
+    background-image: url('~@/assets/illustrations/background.png');
+    //background-image: url('~@/assets/illustrations/stars-background-dark.png');
+    //background-size: contain;
     mask-image: radial-gradient(
         circle farthest-corner at 100% 100%,
         transparent 69%,
@@ -71,6 +77,12 @@ export default class ParticipantDefaultContainer extends Vue {
         white 70%
       ),
       linear-gradient(white, white);
+    mask-size: var(--corner-radius) var(--corner-radius),
+      var(--corner-radius) var(--corner-radius),
+      100% calc(100% - var(--corner-radius) + 1px);
+    mask-position: bottom left, bottom right, top left;
+    mask-repeat: no-repeat;
+    padding: 1rem 1rem calc(1rem + var(--corner-radius)) 1rem;
   }
 
   &__fixedHead {

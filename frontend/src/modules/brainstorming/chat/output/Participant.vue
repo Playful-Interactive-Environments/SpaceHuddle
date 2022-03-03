@@ -96,7 +96,7 @@
       </span>
     </div>
     <div class="media" v-if="newIdea.link || newIdea.image">
-      <span class="media-left">
+      <span class="media-left media-left-error">
         {{ $t('module.brainstorming.chat.participant.addDescription') }}
       </span>
       <span class="media-content"></span>
@@ -111,7 +111,7 @@
       </span>
     </div>
     <div class="media" v-if="newIdea.description">
-      <span class="media-left">
+      <span class="media-left media-left-error">
         {{ $t('module.brainstorming.chat.participant.addKeywords') }}
       </span>
       <span class="media-content"></span>
@@ -376,6 +376,10 @@ export default class Participant extends Vue {
     //border: 3px solid var(--color-yellow-light);
     border-radius: 1rem 1rem 1rem 0;
     padding: 1rem;
+
+    &-error {
+      background-color: var(--color-red-light);
+    }
   }
 }
 
