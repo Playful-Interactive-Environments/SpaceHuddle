@@ -292,7 +292,7 @@
               v-if="possibleModuleTaskList.length > 1"
             >
               <template #suffix>
-                <font-awesome-icon icon="search" />
+                <font-awesome-icon icon="search" class="el-icon" />
               </template>
             </el-input>
           </TutorialStep>

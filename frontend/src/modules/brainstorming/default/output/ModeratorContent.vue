@@ -5,7 +5,7 @@
       <div class="level-item">
         <el-select v-model="orderType" @change="getCollapseContent(true)">
           <template v-slot:prefix>
-            <font-awesome-icon icon="sort" />
+            <font-awesome-icon icon="sort" class="el-icon" />
           </template>
           <el-option
             v-for="type in sortOrderOptions"

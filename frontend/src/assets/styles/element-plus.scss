@@ -322,32 +322,23 @@ $--font-size: (
 
         &__icon {
                 font-weight: var(--font-weight-semibold);
-                width: 40px;
         }
 
         &__suffix {
                 right: 0;
         }
 
-        &__suffix-inner,
-        &__prefix-inner {
-                display: block;
-        }
-
-        &__suffix-inner > svg,
-        &__suffix-inner > i,
-        &__prefix-inner > svg {
-                margin-right: 0.8rem;
-                margin-left: 0.8rem;
-        }
-
-
-        &__suffix-inner > i {
-                padding-bottom: 0.2rem;
-        }
-
         &__prefix {
-                left: 15px;
+                left: 0;
+        }
+
+        &__suffix .el-icon {
+                margin-right: 0.8rem;
+                height: inherit;
+        }
+
+        &__prefix .el-icon {
+                margin-left: 0.8rem;
         }
 
         &__inner {
@@ -357,6 +348,10 @@ $--font-size: (
 
         &.hide {
                 display: none;
+        }
+
+        .el-input__icon {
+                display: inline-flex;
         }
 }
 
