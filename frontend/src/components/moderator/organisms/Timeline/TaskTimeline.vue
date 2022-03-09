@@ -1,33 +1,4 @@
 <template>
-  <!--<ProcessTimeline
-    v-model="tasks"
-    v-model:publicScreen="publicTask"
-    v-model:activeItem="editTask"
-    translationModuleName="taskTimeline"
-    :entityName="TimerEntity.TASK"
-    :direction="direction"
-    :readonly="readonly"
-    :canDisablePublicTimeline="true"
-    :isLinkedToDetails="isLinkedToTask"
-    :startParticipantOnPublicChange="false"
-    keyPropertyName="id"
-    :defaultTimerSeconds="null"
-    :authHeaderTyp="authHeaderTyp"
-    :hasParticipantOption="(item) => hasParticipantComponent[item.id]"
-    :contentListIcon="
-      (item) =>
-        require(`@/assets/illustrations/planets/${item.taskType.toLowerCase()}.png`)
-    "
-    :getKey="(item) => item.id"
-    :getTitle="(item) => item.name"
-    :getTimerEntity="(item) => item"
-    :itemIsEquals="(a, b) => (!a && !b) || (a && b && a.id === b.id)"
-    :displayItem="(item) => item"
-    @changeOrder="dragDone"
-    @changeActiveElement="onEditTaskChanged"
-    @changePublicScreen="onPublicTaskChanged"
-  >
-  </ProcessTimeline>-->
   <ProcessTimeline
     v-model="tasks"
     v-model:publicScreen="publicTask"

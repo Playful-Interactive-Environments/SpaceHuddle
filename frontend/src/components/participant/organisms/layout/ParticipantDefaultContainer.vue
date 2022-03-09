@@ -64,7 +64,6 @@ export default class ParticipantDefaultContainer extends Vue {
   &__background {
     background: var(--color-darkblue);
     background-image: url('~@/assets/illustrations/background.png');
-    //background-image: url('~@/assets/illustrations/stars-background-dark.png');
     //background-size: contain;
     mask-image: radial-gradient(
         circle farthest-corner at 100% 100%,

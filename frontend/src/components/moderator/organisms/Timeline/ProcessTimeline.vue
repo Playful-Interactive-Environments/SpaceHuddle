@@ -657,7 +657,8 @@ export default class ProcessTimeline extends Vue {
       }
 
       .el-slider__runway {
-        background-color: unset;
+        background-color: white;
+        max-width: var(--el-slider-height);
       }
     }
 
