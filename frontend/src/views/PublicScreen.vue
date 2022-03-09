@@ -30,22 +30,13 @@
             </h3>
             {{ session.connectionKey }}
           </span>
-          <!--<img
-            v-if="task"
-            :src="
-              require(`@/assets/illustrations/planets/${
-                TaskType[task.taskType]
-              }.png`)
-            "
-            alt="planet"
-            class="public-screen__overview-planet"
-          />-->
         </div>
       </el-header>
     </el-header>
     <el-container class="public-screen__container">
       <el-main class="public-screen__main">
         <PublicScreenComponent
+          v-if="task"
           :task-id="taskId"
           :key="componentLoadIndex"
           :authHeaderTyp="authHeaderTyp"
@@ -65,6 +56,7 @@
     <el-container class="public-screen__container">
       <el-main class="public-screen__main">
         <PublicScreenComponent
+          v-if="task"
           :task-id="taskId"
           :key="componentLoadIndex"
           :authHeaderTyp="authHeaderTyp"
@@ -144,9 +136,9 @@ export default class PublicScreen extends Vue {
     return null;
   }
 
-  get moduleName(): string[] {
-    if (this.task && this.task.modules && this.task.modules.length > 0)
-      return this.task.modules.map((module) => module.name);
+  getModuleName(task: Task): string[] {
+    if (task && task.modules && task.modules.length > 0)
+      return task.modules.map((module) => module.name);
     return ['default'];
   }
 
@@ -173,6 +165,7 @@ export default class PublicScreen extends Vue {
 
   unmounted(): void {
     clearInterval(this.interval);
+    this.task = null;
   }
 
   @Watch('sessionId', { immediate: true })
@@ -190,26 +183,29 @@ export default class PublicScreen extends Vue {
     sessionService
       .getPublicScreen(this.sessionId, this.authHeaderTyp)
       .then((queryResult) => {
-        if (this.taskId != queryResult?.id) {
-          this.task = queryResult;
-          const taskType = this.taskType;
-          if (this.$options.components) {
-            getAsyncModule(
-              ModuleComponentType.PUBLIC_SCREEN,
-              taskType,
-              this.moduleName
-            ).then((component) => {
-              if (this.$options.components) {
-                this.componentLoadingState = ComponentLoadingState.SELECTED;
-                this.$options.components['PublicScreenComponent'] = component;
-                this.componentLoadIndex++;
-              }
-            });
-          }
-          if (taskType) {
-            this.$nextTick(() => {
-              setModuleStyles(taskType);
-            });
+        if (this.taskId !== queryResult?.id) {
+          this.task = null;
+          if (queryResult) {
+            const taskType = TaskType[queryResult.taskType];
+            if (this.$options.components) {
+              getAsyncModule(
+                ModuleComponentType.PUBLIC_SCREEN,
+                taskType,
+                this.getModuleName(queryResult)
+              ).then((component) => {
+                if (this.$options.components) {
+                  this.componentLoadingState = ComponentLoadingState.SELECTED;
+                  this.$options.components['PublicScreenComponent'] = component;
+                  this.componentLoadIndex++;
+                  this.task = queryResult;
+                }
+              });
+            }
+            if (taskType) {
+              this.$nextTick(() => {
+                setModuleStyles(taskType);
+              });
+            }
           }
         }
       });
@@ -247,7 +243,6 @@ h3 {
 }
 
 .public-screen {
-  //background: url('~@/assets/illustrations/stars-background-dark.png');
   background-color: var(--color-background-gray);
   background-size: contain;
   min-height: 100vh;
@@ -275,21 +270,7 @@ h3 {
   &__overview {
     display: flex;
     justify-content: space-between;
-    color: var(--color-primary); // white;
-
-    &-planet {
-      height: 9rem;
-      margin-left: 2rem;
-      margin-top: -20px;
-      margin-right: -20px;
-
-      background-image: url('~@/assets/illustrations/bg_without_telescope.png');
-      background-position: center top;
-      background-size: cover;
-      border-radius: 50%;
-      border: 5px double white;
-      padding: 1rem;
-    }
+    color: var(--color-primary);
 
     &-left {
       display: flex;

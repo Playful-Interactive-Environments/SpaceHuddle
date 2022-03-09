@@ -562,6 +562,9 @@ export default class ModeratorTopicDetails extends Vue {
 
   unmounted(): void {
     clearInterval(this.interval);
+    this.topic = null;
+    this.tasks = [];
+    this.activeTask = null;
   }
 
   download(): void {

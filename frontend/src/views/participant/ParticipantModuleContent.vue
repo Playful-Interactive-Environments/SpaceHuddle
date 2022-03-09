@@ -12,7 +12,7 @@
       />
       <el-tabs
         :stretch="false"
-        v-if="modules.length > 1"
+        v-if="task && modules.length > 1"
         v-model="moduleName"
         class="white"
         @tab-click="(tab) => moduleNameClick(tab.paneName)"
@@ -32,7 +32,7 @@
           </template>
         </el-tab-pane>
       </el-tabs>
-      <div class="right">
+      <div class="right" v-if="task">
         <div class="uppercase">
           {{ $t('participant.organism.modelDefaultContainer.timeLeft') }}
         </div>
@@ -45,6 +45,7 @@
       </div>
     </template>
     <ParticipantModuleComponent
+      v-if="task"
       :task-id="taskId"
       :module-id="moduleId"
       v-model:useFullSize="useFullSize"
@@ -141,6 +142,7 @@ export default class ParticipantModuleContent extends Vue {
   unmounted(): void {
     this.loadDefaultModule();
     clearInterval(this.interval);
+    this.task = null;
   }
 
   checkModuleState(): void {
