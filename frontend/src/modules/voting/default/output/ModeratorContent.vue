@@ -42,6 +42,7 @@ import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import * as votingService from '@/services/voting-service';
 import { VoteResult } from '@/types/api/Vote';
 import { EventType } from '@/types/enum/EventType';
+import { IModeratorContent } from '@/types/ui/IModeratorContent';
 
 @Options({
   components: {
@@ -50,7 +51,7 @@ import { EventType } from '@/types/enum/EventType';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModeratorContent extends Vue {
+export default class ModeratorContent extends Vue implements IModeratorContent {
   @Prop() readonly taskId!: string;
   votes: VoteResult[] = [];
   chartData: any = {
@@ -61,7 +62,7 @@ export default class ModeratorContent extends Vue {
   interval!: any;
 
   @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
+  reloadTaskSettings(): void {
     this.getVotes();
   }
 

@@ -227,17 +227,21 @@ export default class ParticipantModuleContent extends Vue {
     taskService
       .getTaskById(val, EndpointAuthorisationType.PARTICIPANT)
       .then((queryResult) => {
-        queryResult.modules.forEach((module) => this.setIcon(module));
         this.task = queryResult;
+        queryResult.modules.forEach((module) => this.setIcon(module));
         this.loadUsedModules();
         this.moduleNameClick(this.moduleNames[0]);
       });
   }
 
   async setIcon(module: Module): Promise<void> {
-    await getModuleConfig('icon', this.taskType, module.name).then(
-      (result) => ((module as any).icon = result)
-    );
+    await getModuleConfig('icon', this.taskType, module.name).then((icon) => {
+      getModuleConfig('iconPrefix', this.taskType, module.name).then(
+        (iconPrefix) => {
+          (module as any).icon = [iconPrefix, icon];
+        }
+      );
+    });
   }
 
   moduleNameClick(moduleName: string | null = null): void {

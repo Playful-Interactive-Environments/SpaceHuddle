@@ -8,13 +8,18 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
+import { IModeratorContent } from '@/types/ui/IModeratorContent';
 
 @Options({
   components: {},
 })
-export default class ModeratorContent extends Vue {
+export default class ModeratorContent extends Vue implements IModeratorContent {
   @Prop() readonly taskId!: string;
   loading = true;
+
+  reloadTaskSettings(): void {
+    //
+  }
 }
 </script>
 

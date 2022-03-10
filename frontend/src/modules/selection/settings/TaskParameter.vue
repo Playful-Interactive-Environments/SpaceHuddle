@@ -9,13 +9,14 @@ import * as taskService from '@/services/task-service';
 import { Task, TaskSettingsData } from '@/types/api/Task';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import * as selectionService from '@/services/selection-service';
+import { CustomParameter } from '@/types/ui/CustomParameter';
 
 @Options({
   components: {},
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class TaskParameter extends Vue {
+export default class TaskParameter extends Vue implements CustomParameter {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
 
   @Prop() readonly taskId!: string;

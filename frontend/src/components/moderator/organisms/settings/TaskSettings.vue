@@ -440,7 +440,7 @@ interface ModuleComponentDefinition {
   componentName: string;
   taskType: string | null;
   moduleName: string | null;
-  moduleIcon: string | null;
+  moduleIcon: string[] | null;
   moduleId: string | null;
   hasModule: boolean;
   parameter: any;
@@ -1007,9 +1007,15 @@ export default class TaskSettings extends Vue {
         }
       }
 
-      let icon: string | null = null;
+      let icon: string[] | null = null;
       await getModuleConfig('icon', TaskType[taskType], moduleName).then(
-        (result) => (icon = result)
+        (result) => {
+          getModuleConfig('iconPrefix', TaskType[taskType], moduleName).then(
+            (iconPrefix) => {
+              icon = [iconPrefix, result];
+            }
+          );
+        }
       );
 
       hasModule(
@@ -1043,7 +1049,9 @@ export default class TaskSettings extends Vue {
     if (this.$options.components) {
       this.formData.moduleParameterComponents = [];
       this.moduleSelection.forEach((module) => {
-        const componentName = `ModuleParameterComponents-${module.taskType}-${module.moduleName}`;
+        const componentName = `ModuleParameterComponents-${
+          TaskType[module.taskType.toUpperCase()]
+        }-${module.moduleName}`;
         if (
           this.$options.components &&
           !this.$options.components[componentName]
@@ -1179,34 +1187,38 @@ export default class TaskSettings extends Vue {
   }
 
   async updateCustomModuleParameter(task: Task, module: Module): Promise<void> {
-    const componentName = `ModuleParameterComponents-${task.taskType}-${module.name}`;
+    const componentName = `ModuleParameterComponents-${
+      TaskType[task.taskType.toUpperCase()]
+    }-${module.name}`;
     if (this.$refs[componentName]) {
-      const moduleParams = this.$refs[componentName] as CustomParameter;
+      let moduleParams = this.$refs[componentName] as CustomParameter;
+      if (Array.isArray(moduleParams) && moduleParams.length > 0) {
+        moduleParams = moduleParams[moduleParams.length - 1] as CustomParameter;
+      }
       if ('updateParameterForSaving' in moduleParams)
         await moduleParams.updateParameterForSaving();
     }
   }
 
   async taskUpdated(task: Task, cleanUp = true): Promise<void> {
-    task.modules.forEach((module) => {
-      this.updateCustomModuleParameter(task, module).then(() => {
-        const moduleComponent = this.formData.moduleParameterComponents.find(
-          (component) => component.moduleName == module.name
-        );
-        if (moduleComponent) {
-          module.parameter = moduleComponent.parameter;
-        }
-        getModuleConfig(
-          'syncPublicParticipant',
-          TaskType[task.taskType],
-          module.name,
-          false
-        ).then((result) => {
-          module.syncPublicParticipant = result;
-          moduleService.putModule(module.id, module);
-        });
+    for (const module of task.modules) {
+      await this.updateCustomModuleParameter(task, module);
+      const moduleComponent = this.formData.moduleParameterComponents.find(
+        (component) => component.moduleName == module.name
+      );
+      if (moduleComponent) {
+        module.parameter = moduleComponent.parameter;
+      }
+      await getModuleConfig(
+        'syncPublicParticipant',
+        TaskType[task.taskType],
+        module.name,
+        false
+      ).then((result) => {
+        module.syncPublicParticipant = result;
       });
-    });
+      await moduleService.putModule(module.id, module);
+    }
     this.closeDialog();
     this.$emit('taskUpdated', task.id);
     if (cleanUp) this.reset();

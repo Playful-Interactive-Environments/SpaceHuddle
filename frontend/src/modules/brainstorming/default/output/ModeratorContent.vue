@@ -115,6 +115,7 @@ import { convertToSaveVersion } from '@/types/api/Task';
 import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { EventType } from '@/types/enum/EventType';
+import { IModeratorContent } from '@/types/ui/IModeratorContent';
 
 @Options({
   components: {
@@ -126,7 +127,7 @@ import { EventType } from '@/types/enum/EventType';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModeratorContent extends Vue {
+export default class ModeratorContent extends Vue implements IModeratorContent {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];
   orderGroupContent: OrderGroupList = {};
@@ -143,7 +144,7 @@ export default class ModeratorContent extends Vue {
   }
 
   @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
+  reloadTaskSettings(): void {
     taskService.getTaskById(this.taskId).then(async (task) => {
       await ideaService.getSortOrderOptions(task.topicId).then((options) => {
         this.sortOrderOptions = options;

@@ -168,6 +168,7 @@ import IdeaSortOrder, {
   DefaultDisplayCount,
 } from '@/types/enum/IdeaSortOrder';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
+import { IModeratorContent } from '@/types/ui/IModeratorContent';
 
 const SELECTION_KEY = 'selection';
 
@@ -181,7 +182,7 @@ const SELECTION_KEY = 'selection';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModeratorContent extends Vue {
+export default class ModeratorContent extends Vue implements IModeratorContent {
   @Prop() readonly taskId!: string;
   readonly SELECTION_KEY = SELECTION_KEY;
 
@@ -199,7 +200,7 @@ export default class ModeratorContent extends Vue {
   orderType: string = DefaultIdeaSortOrder;
 
   @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
+  reloadTaskSettings(): void {
     this.getCollapseContent(true);
   }
 

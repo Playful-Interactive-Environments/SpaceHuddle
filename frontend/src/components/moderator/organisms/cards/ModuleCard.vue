@@ -72,7 +72,7 @@ export default class ModuleCard extends Vue {
   @Prop({ default: false }) modelValue!: boolean;
   @Prop({ default: ModuleTask.createEmpty() }) mainModule!: ModuleTask;
   @Prop({ default: true }) displayTutorial!: boolean;
-  icon: string | null = null;
+  icon: string[] | null = null;
   moduleType: string | null = null;
 
   ModuleType = ModuleType;
@@ -105,7 +105,13 @@ export default class ModuleCard extends Vue {
       'icon',
       this.moduleTask.taskType,
       this.moduleTask.moduleName
-    ).then((result) => (this.icon = result));
+    ).then((icon) => {
+      getModuleConfig(
+        'iconPrefix',
+        this.moduleTask.taskType,
+        this.moduleTask.moduleName
+      ).then((iconPrefix) => (this.icon = [iconPrefix, icon]));
+    });
     await getModuleConfig(
       'type',
       this.moduleTask.taskType,

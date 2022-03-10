@@ -179,7 +179,11 @@
         </el-tab-pane>
       </el-tabs>
       <el-divider></el-divider>
-      <ModuleContentComponent v-if="activeTask" :task-id="activeTaskId" />
+      <ModuleContentComponent
+        v-if="activeTask"
+        :task-id="activeTaskId"
+        ref="moduleContent"
+      />
     </template>
   </ModeratorNavigationLayout>
   <TaskSettings
@@ -217,6 +221,7 @@ import * as taskService from '@/services/task-service';
 import * as sessionService from '@/services/session-service';
 import { Topic } from '@/types/api/Topic';
 import { Task } from '@/types/api/Task';
+import { Module } from '@/types/api/Module';
 import { Session } from '@/types/api/Session';
 import TopicSettings from '@/components/moderator/organisms/settings/TopicSettings.vue';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
@@ -245,6 +250,7 @@ import TimerSettings from '@/components/moderator/organisms/settings/TimerSettin
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 import FacilitatorSettings from '@/components/moderator/organisms/settings/FacilitatorSettings.vue';
 import { reactivateTutorial } from '@/services/auth-service';
+import { IModeratorContent } from '@/types/ui/IModeratorContent';
 
 @Options({
   components: {
@@ -320,7 +326,7 @@ export default class ModeratorTopicDetails extends Vue {
     return '';
   }
 
-  moduleIcon: { [name: string]: { [name: string]: string } } = {};
+  moduleIcon: { [name: string]: { [name: string]: string[] } } = {};
   mounted(): void {
     this.loadTaskTypes();
     this.startInterval();
@@ -333,9 +339,21 @@ export default class ModeratorTopicDetails extends Vue {
         this.moduleIcon[taskTypeName] = {};
       getModulesForTaskType([taskType], ModuleType.MAIN).then((modules) => {
         modules.forEach((module) => {
-          this.moduleIcon[taskTypeName][module.moduleName] = 'circle';
+          this.moduleIcon[taskTypeName][module.moduleName] = ['fas', 'circle'];
           getModuleConfig('icon', TaskType[taskType], module.moduleName).then(
-            (icon) => (this.moduleIcon[taskType][module.moduleName] = icon)
+            (icon) => {
+              getModuleConfig(
+                'iconPrefix',
+                TaskType[taskType],
+                module.moduleName
+              ).then(
+                (iconPrefix) =>
+                  (this.moduleIcon[taskType][module.moduleName] = [
+                    iconPrefix,
+                    icon,
+                  ])
+              );
+            }
           );
         });
       });
@@ -355,10 +373,10 @@ export default class ModeratorTopicDetails extends Vue {
     setTimeout(() => (this.timerTask = task ? task : null), 500);
   }
 
-  getModuleIcon(task: Task): string {
+  getModuleIcon(task: Task): string[] {
     if (task && task.modules.length > 0)
       return this.moduleIcon[task.taskType][task.modules[0].name];
-    return 'circle';
+    return ['fas', 'circle'];
   }
 
   @Watch('sessionId', { immediate: true })
@@ -416,6 +434,11 @@ export default class ModeratorTopicDetails extends Vue {
         this.setActiveTab(activeTask.taskType);
       }
     });
+    if (this.activeTask && this.activeTask.id === taskId) {
+      const moduleContent = this.$refs.moduleContent as IModeratorContent;
+      if (moduleContent && 'reloadTaskSettings' in moduleContent)
+        moduleContent.reloadTaskSettings();
+    }
   }
 
   pauseReload = false;
@@ -468,11 +491,37 @@ export default class ModeratorTopicDetails extends Vue {
     );
   }
 
+  hasNewActiveTaskModule(newTask: Task): boolean {
+    const compareModules = (
+      previousModules: Module[],
+      newModules: Module[]
+    ): boolean => {
+      for (const newModule of newModules) {
+        if (
+          !previousModules.find(
+            (previousModule) => newModule.name === previousModule.name
+          )
+        )
+          return false;
+      }
+      return true;
+    };
+
+    return (
+      !this.previousActiveTask ||
+      !newTask ||
+      this.previousActiveTask.modules.length !== newTask.modules.length ||
+      !compareModules(this.previousActiveTask.modules, newTask.modules)
+    );
+  }
+
   async changeTask(newTask: Task): Promise<void> {
     if (
       this.$options.components &&
       newTask &&
-      (this.hasNewActiveTask(newTask) || this.hasNewActiveTaskType(newTask))
+      (this.hasNewActiveTask(newTask) ||
+        this.hasNewActiveTaskType(newTask) ||
+        this.hasNewActiveTaskModule(newTask))
     ) {
       await getAsyncModule(
         ModuleComponentType.MODERATOR_CONTENT,

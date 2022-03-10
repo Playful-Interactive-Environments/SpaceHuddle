@@ -44,6 +44,7 @@ import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
+import { IModeratorContent } from '@/types/ui/IModeratorContent';
 
 @Options({
   components: {
@@ -54,7 +55,7 @@ import AddItem from '@/components/moderator/atoms/AddItem.vue';
   },
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModeratorContent extends Vue {
+export default class ModeratorContent extends Vue implements IModeratorContent {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];
   addIdea: any = {
@@ -80,7 +81,7 @@ export default class ModeratorContent extends Vue {
   }
 
   @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
+  reloadTaskSettings(): void {
     this.getIdeas();
   }
 

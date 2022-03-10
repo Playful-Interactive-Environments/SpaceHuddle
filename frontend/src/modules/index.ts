@@ -54,6 +54,7 @@ interface ModuleConfigItem {
   moderatorContent?: string;
   locales?: string;
   icon?: string;
+  iconPrefix?: string;
   type?: string;
   input?: string;
   syncPublicParticipant?: boolean;
