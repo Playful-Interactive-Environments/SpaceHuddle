@@ -8,11 +8,11 @@ use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 
 /**
- * Action for reading the result of the voting for the specified task.
+ * Action for reading the parent result of the voting for the specified task.
  *
  * @OA\Get(
- *   path="/task/{taskId}/vote_result/",
- *   summary="Returns the result of the voting for the specified task.",
+ *   path="/task/{taskId}/vote_result_parent/",
+ *   summary="Returns the parent result of the voting for the specified task.",
  *   tags={"Vote"},
  *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
  *   @OA\Response(response="200", description="Success",

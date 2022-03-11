@@ -156,13 +156,59 @@ class VoteRepository implements RepositoryInterface
             "idea.order",
             "idea.parameter",
             "vote_result.sum_rating AS rating",
-            "vote_result.sum_detail_rating AS detail_rating"
+            "vote_result.sum_detail_rating AS detail_rating",
+            "vote_result.count_participant AS count_participant"
         ])
             ->innerJoin("idea", "idea.id = vote_result.idea_id")
             ->andWhere([
                 "vote_result.task_id" => $taskId
             ])
             ->order(["detail_rating" => "desc"]);
+
+        $result = $this->fetchAll($query, VoteResultData::class);
+
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
+    }
+
+    /**
+     * Read the result of the voting for the task ID.
+     * @param string $taskId The task ID.
+     * @return array<object> The voting result.
+     */
+    public function getParentResult(string $taskId): array
+    {
+        $subQuery = $this->queryFactory->newSelect("hierarchy_idea")
+            ->select(["parent_idea_id"])
+            ->where(function ($exp, $q) {
+                return $exp->equalFields("hierarchy_idea.parent_idea_id", "idea.id");
+            });
+
+        $query = $this->queryFactory->newSelect("idea");
+        $query->select([
+            "idea.id",
+            "idea.keywords",
+            "idea.description",
+            "idea.image",
+            "idea.link",
+            "idea.order",
+            "idea.parameter",
+            "IFNULL(vote_result_parent.sum_rating, 0) AS rating",
+            "IFNULL(vote_result_parent.sum_detail_rating, 0) AS detail_rating",
+            "IFNULL(vote_result_parent.count_participant, 0) AS count_participant"
+        ])
+            ->leftJoin("vote_result_parent", "idea.id = vote_result_parent.idea_id")
+            ->andWhere([
+                "idea.task_id" => $taskId
+            ])
+            ->where(function ($exp, $q) use ($subQuery) {
+                return $exp->exists($subQuery);
+            })
+            ->order(["idea.order" => "asc"]);
 
         $result = $this->fetchAll($query, VoteResultData::class);
 
@@ -191,7 +237,8 @@ class VoteRepository implements RepositoryInterface
             "idea.order",
             "idea.parameter",
             "IFNULL(vote_result_hierarchy.sum_rating, 0) AS rating",
-            "IFNULL(vote_result_hierarchy.sum_detail_rating, 0) AS detail_rating"
+            "IFNULL(vote_result_hierarchy.sum_detail_rating, 0) AS detail_rating",
+            "IFNULL(vote_result_hierarchy.count_participant, 0) AS count_participant"
         ])
             ->innerJoin("idea", "idea.id = hierarchy_idea.child_idea_id")
             ->leftJoin("vote_result_hierarchy", [

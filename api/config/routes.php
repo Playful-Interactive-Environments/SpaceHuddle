@@ -97,6 +97,7 @@ use App\Action\Vote\VoteHierarchyResultReadAction;
 use App\Action\Vote\VoteReadAllAction;
 use App\Action\Vote\VoteReadSingleAction;
 use App\Action\Vote\VoteResultReadAction;
+use App\Action\Vote\VoteParentResultReadAction;
 use App\Action\Vote\VoteUpdateAction;
 use App\Action\Topic\TopicExportAction;
 use App\Middleware\JwtAuthMiddleware;
@@ -245,6 +246,7 @@ return function (App $app) {
 
             $app->get("/{taskId}/votes[/]", VoteReadAllAction::class);
             $app->get("/{taskId}/vote_result[/]", VoteResultReadAction::class);
+            $app->get("/{taskId}/vote_result_parent[/]", VoteParentResultReadAction::class);
             $app->post("/{taskId}/vote[/]", VoteCreateAction::class);
 
             $app->get("/{id}[/]", TaskReadSingleAction::class);

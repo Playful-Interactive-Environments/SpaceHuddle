@@ -535,7 +535,8 @@ CREATE OR REPLACE VIEW vote_result(
     avg_rating,
     avg_detail_rating,
     count_rating,
-    count_detail_rating
+    count_detail_rating,
+    count_participant
 ) AS SELECT
     vote.task_id,
     vote.idea_id,
@@ -544,7 +545,8 @@ CREATE OR REPLACE VIEW vote_result(
     AVG(vote.rating) AS avg_rating,
     AVG(vote.detail_rating) AS avg_detail_rating,
     COUNT(vote.rating) AS count_rating,
-    COUNT(vote.detail_rating) AS count_detail_rating
+    COUNT(vote.detail_rating) AS count_detail_rating,
+    COUNT(distinct vote.participant_id) AS count_participant
 FROM
     vote
 GROUP BY
@@ -564,7 +566,8 @@ CREATE OR REPLACE VIEW vote_result_hierarchy(
     avg_rating,
     avg_detail_rating,
     count_rating,
-    count_detail_rating
+    count_detail_rating,
+    count_participant
 ) AS SELECT
     vote_result.task_id,
     hierarchy_idea.parent_idea_id,
@@ -574,11 +577,44 @@ CREATE OR REPLACE VIEW vote_result_hierarchy(
     vote_result.avg_rating,
     vote_result.avg_detail_rating,
     vote_result.count_rating,
-    vote_result.count_detail_rating
+    vote_result.count_detail_rating,
+    vote_result.count_participant
 FROM
     vote_result
 INNER JOIN hierarchy_idea ON
     hierarchy_idea.child_idea_id = vote_result.idea_id;
+
+CREATE OR REPLACE VIEW vote_result_parent(
+    task_id,
+    idea_id,
+    sum_rating,
+    sum_detail_rating,
+    avg_rating,
+    avg_detail_rating,
+    count_rating,
+    count_detail_rating,
+    count_participant
+) AS SELECT
+    vote.task_id,
+    hierarchy_idea.parent_idea_id,
+    SUM(vote.rating) AS sum_rating,
+    SUM(vote.detail_rating) AS sum_detail_rating,
+    AVG(vote.rating) AS avg_rating,
+    AVG(vote.detail_rating) AS avg_detail_rating,
+    COUNT(vote.participant_id) AS count_rating,
+    COUNT(vote.participant_id) AS count_detail_rating,
+    COUNT(distinct vote.participant_id) AS count_participant
+FROM
+    vote
+INNER JOIN hierarchy_idea ON
+    hierarchy_idea.child_idea_id = vote.idea_id
+GROUP BY
+    vote.task_id,
+    hierarchy_idea.parent_idea_id
+ORDER BY
+    vote.task_id,
+    sum_detail_rating
+DESC;
 
 CREATE OR REPLACE VIEW selection_view (type, id, task_id, topic_id, name, detail_type) AS
 SELECT

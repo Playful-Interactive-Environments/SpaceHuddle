@@ -33,6 +33,13 @@ class VoteResultData
     public ?float $detailRatingSum;
 
     /**
+     * Number of participants who have cast a vote.
+     * @var int|null
+     * @OA\Property()
+     */
+    public ?int $countParticipant;
+
+    /**
      * Creates a new vote result.
      * @param array $data Vote result data.
      */
@@ -43,5 +50,6 @@ class VoteResultData
         $reader = new ArrayReader($data);
         $this->ratingSum = $reader->findInt("rating");
         $this->detailRatingSum = $reader->findFloat("detail_rating");
+        $this->countParticipant = $reader->findInt("count_participant");
     }
 }
