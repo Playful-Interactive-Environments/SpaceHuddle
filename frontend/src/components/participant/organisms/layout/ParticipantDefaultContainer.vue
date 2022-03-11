@@ -47,6 +47,8 @@ export default class ParticipantDefaultContainer extends Vue {
 .el-main::v-deep {
   margin-top: calc(-1 * var(--corner-radius));
   display: flex;
+  max-width: inherit;
+  overflow: inherit;
 }
 
 .participant-container {

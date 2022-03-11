@@ -12,9 +12,9 @@
     <el-main class="el-main__overflow">
       <slot />
     </el-main>
-    <el-affix v-if="!!$slots.footer" position="bottom" :offset="20">
+    <el-footer v-if="!!$slots.footer" class="fixed">
       <slot name="footer"></slot>
-    </el-affix>
+    </el-footer>
   </el-container>
 </template>
 
@@ -95,6 +95,8 @@ export default class ParticipantModuleDefaultContainer extends Vue {
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   margin: 0;
   padding: 1rem 2rem;
+  max-width: inherit;
+  position: relative;
 }
 
 .el-affix::v-deep {
@@ -116,5 +118,12 @@ export default class ParticipantModuleDefaultContainer extends Vue {
     flex-direction: row;
     width: 100%;
   }
+}
+
+.fixed {
+  position: sticky;
+  background-color: white;
+  margin-bottom: -1rem;
+  padding: 1rem 0;
 }
 </style>
