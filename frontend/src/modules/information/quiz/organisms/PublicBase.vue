@@ -77,7 +77,10 @@ import * as taskService from '@/services/task-service';
 import * as hierarchyService from '@/services/hierarchy-service';
 import * as votingService from '@/services/voting-service';
 import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
-import { QuestionType } from '@/modules/information/quiz/types/QuestionType';
+import {
+  QuestionType,
+  moduleNameValid,
+} from '@/modules/information/quiz/types/QuestionType';
 
 export interface PublicAnswerData {
   answer: Hierarchy;
@@ -239,7 +242,9 @@ export default class PublicBase extends Vue {
       .getTaskById(this.taskId, this.authHeaderTyp)
       .then((task) => {
         this.task = task;
-        const module = task.modules.find((module) => module.name == 'quiz');
+        const module = task.modules.find((module) =>
+          moduleNameValid(module.name)
+        );
         if (module) {
           this.questionType =
             QuestionType[module.parameter.questionType.toUpperCase()];

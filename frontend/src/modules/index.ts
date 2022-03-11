@@ -7,6 +7,8 @@ import { ModuleType } from '@/types/enum/ModuleType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
+const defaultModuleName = 'default';
+
 const isObject = (item) => {
   return item && typeof item === 'object' && !Array.isArray(item);
 };
@@ -116,7 +118,7 @@ export const getAsyncDefaultModule = async (
 export const getAsyncModule = async (
   componentType: string,
   taskType: string | null = null,
-  moduleName: string | string[] = 'default'
+  moduleName: string | string[] = defaultModuleName
 ): Promise<any> => {
   await until(() => moduleConfigLoaded);
   if (taskType) {
@@ -124,14 +126,16 @@ export const getAsyncModule = async (
     if (moduleList.length > 0) {
       const modules: { order: number; module: any }[] = [];
       let moduleIndex = 0;
+      let fallback = defaultModuleName;
       while (moduleIndex < moduleList.length) {
         const module = moduleConfig[taskType][moduleList[moduleIndex]];
+        if (module.fallback) fallback = module.fallback;
         if (module[componentType])
           modules.push({
             order:
               module.type == 'addOn'
                 ? 1
-                : !module.path.endsWith('default')
+                : !module.path.endsWith(defaultModuleName)
                 ? 2
                 : 3,
             module: module,
@@ -143,8 +147,8 @@ export const getAsyncModule = async (
         return defineAsyncComponent(
           () => import(`@/modules/${module.path}/${module[componentType]}.vue`)
         );
-      } else if (moduleName != 'default') {
-        return await getAsyncModule(componentType, taskType, 'default');
+      } else if (moduleName != defaultModuleName) {
+        return await getAsyncModule(componentType, taskType, fallback);
       }
     }
   }
@@ -169,7 +173,7 @@ const getDefaultModule = async (componentType: string): Promise<any> => {
 const getModule = async (
   componentType: string,
   taskType: string | null = null,
-  moduleName = 'default'
+  moduleName = defaultModuleName
 ): Promise<any> => {
   await until(() => moduleConfigLoaded);
   if (taskType) {
@@ -182,17 +186,34 @@ const getModule = async (
         vue = value.default;
       });
       return vue;
-    } else if (moduleName != 'default') {
-      return await getModule(componentType, taskType, 'default');
+    } else if (moduleName != defaultModuleName) {
+      return await getModule(
+        componentType,
+        taskType,
+        getFallback(taskType, moduleName)
+      );
     }
   }
   return await getDefaultModule(componentType);
 };
 
+const getFallback = (
+  taskType: string | null = null,
+  moduleName = defaultModuleName
+): string => {
+  if (taskType) {
+    const module = moduleConfig[taskType][moduleName];
+    return module && module.fallback && module.fallback !== moduleName
+      ? module.fallback.toString()
+      : defaultModuleName;
+  }
+  return defaultModuleName;
+};
+
 export const getModuleConfig = async (
   componentType: string,
   taskType: string | null = null,
-  moduleName = 'default',
+  moduleName = defaultModuleName,
   includeFallback = true
 ): Promise<any> => {
   await until(() => moduleConfigLoaded);
@@ -200,8 +221,12 @@ export const getModuleConfig = async (
     const module = moduleConfig[taskType][moduleName];
     if (module[componentType]) {
       return module[componentType];
-    } else if (moduleName != 'default' && includeFallback) {
-      return getModuleConfig(componentType, taskType, 'default');
+    } else if (moduleName != defaultModuleName && includeFallback) {
+      return getModuleConfig(
+        componentType,
+        taskType,
+        getFallback(taskType, moduleName)
+      );
     }
   }
   return null;
@@ -210,7 +235,7 @@ export const getModuleConfig = async (
 export const hasModule = async (
   componentType: string,
   taskType: string | null = null,
-  moduleName = 'default',
+  moduleName = defaultModuleName,
   includeFallback = true
 ): Promise<boolean> => {
   let hasModule = false;
@@ -286,7 +311,7 @@ export const getRoutes = async (): Promise<Array<RouteRecordRaw>> => {
     } else {
       const vue = await getDefaultModule(ModuleComponentType.PARTICIPANT);
       if (vue) {
-        routes.push(getRouteItem(taskKey, 'default', vue));
+        routes.push(getRouteItem(taskKey, defaultModuleName, vue));
       }
     }
   }

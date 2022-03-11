@@ -86,7 +86,10 @@ import PublicBase, {
 import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
 import * as timerService from '@/services/timer-service';
-import { QuestionType } from '@/modules/information/quiz/types/QuestionType';
+import {
+  QuestionType,
+  moduleNameValid,
+} from '@/modules/information/quiz/types/QuestionType';
 import { QuestionPhase } from '@/modules/information/quiz/types/QuestionState';
 import * as hierarchyService from '@/services/hierarchy-service';
 
@@ -212,8 +215,8 @@ export default class Participant extends Vue {
       .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
       .then((task) => {
         this.task = task;
-        const module = this.task.modules.find(
-          (module) => module.name == 'quiz'
+        const module = this.task.modules.find((module) =>
+          moduleNameValid(module.name)
         );
         if (module) {
           this.questionType =

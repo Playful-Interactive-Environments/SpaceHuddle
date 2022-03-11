@@ -6,7 +6,7 @@
     :taskId="taskId"
     :topicId="topicId"
     v-model="modelValue"
-    :limitQuestionType="QuestionType.QUIZ"
+    :limitQuestionType="QuestionType.SURVEY"
   />
 </template>
 
@@ -36,6 +36,7 @@ export default class ModeratorConfig
 
   async updateParameterForSaving(): Promise<void> {
     const customConfig = this.$refs.customConfig as CustomParameter;
+    console.log(customConfig);
     if (customConfig) await customConfig.updateParameterForSaving();
   }
 

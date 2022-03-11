@@ -166,7 +166,10 @@ import { TimerEntity } from '@/types/enum/TimerEntity';
 import { convertToSaveVersion, Task } from '@/types/api/Task';
 import { Question } from '@/modules/information/quiz/types/Question';
 import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
-import { QuestionType } from '@/modules/information/quiz/types/QuestionType';
+import {
+  QuestionType,
+  moduleNameValid,
+} from '@/modules/information/quiz/types/QuestionType';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
 
 @Options({
@@ -360,13 +363,17 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       topicService.getTopicById(task.topicId).then((topic) => {
         this.sessionId = topic.sessionId;
       });
-      const module = task.modules.find((module) => module.name == 'quiz');
+      console.log(task.modules);
+      const module = task.modules.find((module) =>
+        moduleNameValid(module.name)
+      );
       if (module) {
         this.answerCount = module.parameter.answerCount;
         this.questionType =
           QuestionType[module.parameter.questionType.toUpperCase()];
         this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
         this.defaultQuestionTime = module.parameter.defaultQuestionTime;
+        console.log(this.questionType);
       }
       this.getHierarchies();
     });
@@ -466,7 +473,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.getVotes();
     taskService.getTaskById(this.taskId).then((task) => {
       this.task = task;
-      const module = task.modules.find((module) => module.name == 'quiz');
+      const module = task.modules.find((module) =>
+        moduleNameValid(module.name)
+      );
       if (module) {
         this.answerCount = module.parameter.answerCount;
         this.defaultQuestionTime = module.parameter.defaultQuestionTime;
