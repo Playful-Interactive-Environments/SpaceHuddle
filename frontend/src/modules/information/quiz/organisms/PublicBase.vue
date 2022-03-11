@@ -1,4 +1,14 @@
 <template>
+  <el-steps
+    v-if="publicQuestion"
+    :active="publicQuestionIndex"
+    finish-status="success"
+  >
+    <el-step
+      v-for="question in questions"
+      :key="question.question.id"
+    ></el-step>
+  </el-steps>
   <div v-if="showQuestion" class="fill">
     <el-space
       direction="vertical"
@@ -15,6 +25,12 @@
       <slot name="answers"></slot>
     </el-space>
   </div>
+  <div v-if="(showExplanation || showStatistics) && publicQuestion">
+    <span class="explanation result">
+      {{ publicQuestion.question.order + 1 }}.
+      {{ publicQuestion.question.keywords }}
+    </span>
+  </div>
   <div
     v-if="
       publicQuestion &&
@@ -25,8 +41,20 @@
   >
     {{ publicQuestion.question.description }}
   </div>
-  <div v-if="showStatistics">
-    <QuizResult :voteResult="voteResult" :change="false" />
+  <div v-if="showStatistics && publicQuestion">
+    <QuizResult
+      :voteResult="voteResult"
+      :change="false"
+      :questionType="questionType"
+    />
+  </div>
+  <div v-if="showStatistics && !publicQuestion">
+    <QuizResult
+      :voteResult="voteResult"
+      resultColumn="countParticipant"
+      :change="false"
+      :questionType="QuestionType.SURVEY"
+    />
   </div>
 </template>
 
@@ -39,19 +67,23 @@ import { Task } from '@/types/api/Task';
 import { Question } from '@/modules/information/quiz/types/Question';
 import { VoteResult } from '@/types/api/Vote';
 import {
-  QuizState,
+  QuestionPhase,
+  QuestionState,
   QuizStateProperty,
-} from '@/modules/information/quiz/types/QuizState';
+} from '@/modules/information/quiz/types/QuestionState';
 import * as timerService from '@/services/timer-service';
 import { Hierarchy } from '@/types/api/Hierarchy';
 import * as taskService from '@/services/task-service';
 import * as hierarchyService from '@/services/hierarchy-service';
 import * as votingService from '@/services/voting-service';
 import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
+import { QuestionType } from '@/modules/information/quiz/types/QuestionType';
 
 export interface PublicAnswerData {
   answer: Hierarchy;
   isHighlighted: boolean;
+  isHighlightedTemporarily: boolean;
+  isFinished: boolean;
 }
 
 @Options({
@@ -65,6 +97,10 @@ export interface PublicAnswerData {
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicBase extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: true }) readonly usePublicQuestion!: boolean;
+  @Prop({ default: -1 }) readonly activeQuestionIndex!: number;
+  @Prop({ default: QuestionPhase.RESULT })
+  readonly activeQuestionPhase!: QuestionPhase;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   readonly intervalTime = 1000;
@@ -73,12 +109,20 @@ export default class PublicBase extends Vue {
   questions: Question[] = [];
   publicQuestion: Question | null = null;
   voteResult: VoteResult[] = [];
+  questionType: QuestionType = QuestionType.QUIZ;
+  moderatedQuestionFlow = true;
 
-  quizState: QuizState = QuizState.ACTIVE_CREATE_QUESTION;
+  questionState: QuestionState = QuestionState.ACTIVE_CREATE_QUESTION;
   statePointer = 0;
 
+  QuestionType = QuestionType;
+
   get isActive(): boolean {
-    if (this.task) return timerService.isActive(this.task);
+    if (this.moderatedQuestionFlow) {
+      if (this.task) return timerService.isActive(this.task);
+    } else {
+      return this.activeQuestionPhase === QuestionPhase.ANSWER;
+    }
     return false;
   }
 
@@ -89,16 +133,18 @@ export default class PublicBase extends Vue {
   get showQuestion(): boolean {
     return (
       this.isActive ||
-      (this.quizState === QuizState.RESULT_ANSWER && this.hasVotes)
+      (this.questionState === QuestionState.RESULT_ANSWER && this.hasVotes)
     );
   }
 
   get showExplanation(): boolean {
-    return this.quizState === QuizState.RESULT_EXPLANATION && this.hasVotes;
+    return (
+      this.questionState === QuestionState.RESULT_EXPLANATION && this.hasVotes
+    );
   }
 
   get showStatistics(): boolean {
-    return this.quizState === QuizState.RESULT_STATISTICS && this.hasVotes;
+    return this.questionState === QuestionState.RESULT_STATISTICS;
   }
 
   get remainingTime(): number {
@@ -108,15 +154,24 @@ export default class PublicBase extends Vue {
   }
 
   get activeQuestionId(): string | null {
-    if (this.task && this.task.parameter) {
+    if (
+      this.task &&
+      this.task.parameter &&
+      (this.moderatedQuestionFlow || this.usePublicQuestion)
+    ) {
       return this.task.parameter.activeQuestion;
+    } else if (
+      this.questions.length > this.activeQuestionIndex &&
+      this.activeQuestionIndex >= 0
+    ) {
+      return this.questions[this.activeQuestionIndex].question.id;
     }
     return '';
   }
 
   get publicAnswers(): Hierarchy[] {
     if (this.publicQuestion) {
-      if (this.quizState == QuizState.ACTIVE_CREATE_QUESTION)
+      if (this.questionState == QuestionState.ACTIVE_CREATE_QUESTION)
         if (this.statePointer > 0)
           return this.publicQuestion.answers.slice(0, this.statePointer - 1);
         else return [];
@@ -125,13 +180,37 @@ export default class PublicBase extends Vue {
     return [];
   }
 
+  get publicQuestionIndex(): number {
+    if (this.publicQuestion)
+      return this.questions.findIndex(
+        (question) => question.question.id === this.publicQuestion?.question.id
+      );
+    return -1;
+  }
+
+  finishedAnswer(answer: Hierarchy): boolean {
+    if (this.publicQuestion && this.questionType === QuestionType.QUIZ) {
+      if (this.questionState == QuestionState.RESULT_ANSWER) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   highlightAnswer(answer: Hierarchy): boolean {
-    if (this.publicQuestion) {
-      if (this.quizState == QuizState.ACTIVE_LAST_CHANGE) {
+    if (this.publicQuestion && this.questionType === QuestionType.QUIZ) {
+      if (this.questionState == QuestionState.RESULT_ANSWER) {
+        return answer.parameter.isCorrect;
+      }
+    }
+    return false;
+  }
+
+  highlightAnswerTemporarily(answer: Hierarchy): boolean {
+    if (this.publicQuestion && this.questionType === QuestionType.QUIZ) {
+      if (this.questionState == QuestionState.ACTIVE_LAST_CHANGE) {
         const index = this.publicQuestion.answers.indexOf(answer);
         return index === this.statePointer;
-      } else if (this.quizState == QuizState.RESULT_ANSWER) {
-        return answer.parameter.isCorrect;
       }
     }
     return false;
@@ -140,13 +219,19 @@ export default class PublicBase extends Vue {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.getTask().then(() => {
-      if (this.isActive) {
-        this.quizState = QuizState.ACTIVE_CREATE_QUESTION;
-      } else {
-        this.quizState = QuizState.RESULT_ANSWER;
-      }
+      this.initQuestionState();
     });
     this.getHierarchies();
+  }
+
+  private initQuestionState(): void {
+    if (this.isActive) {
+      this.questionState = QuestionState.ACTIVE_CREATE_QUESTION;
+    } else {
+      this.questionState = this.moderatedQuestionFlow
+        ? QuestionState.RESULT_ANSWER
+        : QuestionState.RESULT_STATISTICS;
+    }
   }
 
   async getTask(): Promise<void> {
@@ -154,6 +239,12 @@ export default class PublicBase extends Vue {
       .getTaskById(this.taskId, this.authHeaderTyp)
       .then((task) => {
         this.task = task;
+        const module = task.modules.find((module) => module.name == 'quiz');
+        if (module) {
+          this.questionType =
+            QuestionType[module.parameter.questionType.toUpperCase()];
+          this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
+        }
       });
   }
 
@@ -180,7 +271,14 @@ export default class PublicBase extends Vue {
               });
           }
           this.questions = result;
-          if (publicQuestion) this.publicQuestion = publicQuestion;
+          if (this.moderatedQuestionFlow || this.usePublicQuestion) {
+            if (publicQuestion) this.publicQuestion = publicQuestion;
+          } else if (
+            this.activeQuestionIndex >= 0 &&
+            this.activeQuestionIndex < this.questions.length
+          ) {
+            this.publicQuestion = this.questions[this.activeQuestionIndex];
+          }
           await this.getVotes();
         });
     }
@@ -194,88 +292,102 @@ export default class PublicBase extends Vue {
           this.voteResult = votes;
         });
     } else {
-      this.voteResult = [];
+      await votingService
+        .getParentResult(this.taskId, this.authHeaderTyp)
+        .then((votes) => {
+          this.voteResult = votes;
+        });
+      //this.voteResult = [];
     }
   }
 
-  async checkState(): Promise<void> {
-    const oldQuizState = this.quizState;
+  @Watch('activeQuestionIndex', { immediate: true })
+  onActiveQuestionIndexChanged(): void {
+    this.checkState(true);
+  }
+
+  async checkState(staticUpdate = false): Promise<void> {
+    const oldQuizState = this.questionState;
     const oldState = this.isActive;
     const oldQuestionId = this.activeQuestionId;
     await this.getTask();
-    if (oldState !== this.isActive || oldQuestionId !== this.activeQuestionId) {
+    if (
+      staticUpdate ||
+      oldState !== this.isActive ||
+      oldQuestionId !== this.activeQuestionId
+    ) {
       this.statePointer = -1;
-      if (this.isActive) {
-        this.quizState = QuizState.ACTIVE_CREATE_QUESTION;
-      } else {
-        this.quizState = QuizState.RESULT_ANSWER;
-      }
+      this.initQuestionState();
       await this.getHierarchies();
     }
 
-    switch (this.quizState) {
-      case QuizState.ACTIVE_CREATE_QUESTION:
+    switch (this.questionState) {
+      case QuestionState.ACTIVE_CREATE_QUESTION:
         this.statePointer++;
         if (
           this.publicQuestion &&
           this.statePointer > this.publicQuestion.answers.length
         ) {
-          this.quizState = QuizState.ACTIVE_WAIT_FOR_VOTE;
+          this.questionState = QuestionState.ACTIVE_WAIT_FOR_VOTE;
         }
         break;
-      case QuizState.ACTIVE_WAIT_FOR_VOTE:
+      case QuestionState.ACTIVE_WAIT_FOR_VOTE:
         if (
+          this.moderatedQuestionFlow &&
           this.remainingTime <
-          QuizStateProperty[QuizState.ACTIVE_WAIT_FOR_VOTE].time
+            QuizStateProperty[QuestionState.ACTIVE_WAIT_FOR_VOTE].time
         ) {
-          this.quizState = QuizState.ACTIVE_LAST_CHANGE;
+          this.questionState = QuestionState.ACTIVE_LAST_CHANGE;
           this.statePointer = 0;
         }
         break;
-      case QuizState.ACTIVE_LAST_CHANGE:
+      case QuestionState.ACTIVE_LAST_CHANGE:
         if (this.publicQuestion) {
           this.statePointer =
             (this.statePointer + 1) % this.publicQuestion.answers.length;
         }
         break;
-      case QuizState.DONE_THANKS:
-        this.statePointer++;
-        if (this.statePointer > QuizStateProperty[QuizState.DONE_THANKS].time) {
-          this.quizState = QuizState.DONE_WAIT;
-        }
-        break;
-      case QuizState.DONE_WAIT:
-        break;
-      case QuizState.RESULT_ANSWER:
+      case QuestionState.DONE_THANKS:
         this.statePointer++;
         if (
-          this.statePointer > QuizStateProperty[QuizState.RESULT_ANSWER].time
+          this.statePointer > QuizStateProperty[QuestionState.DONE_THANKS].time
         ) {
-          this.statePointer = 0;
-          this.quizState = this.publicQuestion?.question.description
-            ? QuizState.RESULT_EXPLANATION
-            : QuizState.RESULT_STATISTICS;
+          this.questionState = QuestionState.DONE_WAIT;
         }
         break;
-      case QuizState.RESULT_EXPLANATION:
+      case QuestionState.DONE_WAIT:
+        break;
+      case QuestionState.RESULT_ANSWER:
         this.statePointer++;
         if (
           this.statePointer >
-          QuizStateProperty[QuizState.RESULT_EXPLANATION].time
+          QuizStateProperty[QuestionState.RESULT_ANSWER].time
         ) {
           this.statePointer = 0;
-          this.quizState = QuizState.RESULT_STATISTICS;
+          this.questionState = this.publicQuestion?.question.description
+            ? QuestionState.RESULT_EXPLANATION
+            : QuestionState.RESULT_STATISTICS;
         }
         break;
-      case QuizState.RESULT_STATISTICS:
+      case QuestionState.RESULT_EXPLANATION:
+        this.statePointer++;
+        if (
+          this.statePointer >
+          QuizStateProperty[QuestionState.RESULT_EXPLANATION].time
+        ) {
+          this.statePointer = 0;
+          this.questionState = QuestionState.RESULT_STATISTICS;
+        }
+        break;
+      case QuestionState.RESULT_STATISTICS:
         break;
     }
 
-    if (oldQuizState !== this.quizState) {
-      this.$emit('changeQuizState', this.quizState);
+    if (oldQuizState !== this.questionState) {
+      this.$emit('changeQuizState', this.questionState);
     }
 
-    if (oldQuestionId !== this.activeQuestionId) {
+    if (staticUpdate || oldQuestionId !== this.activeQuestionId) {
       this.$emit('changePublicQuestion', this.activeQuestionId);
     }
 
@@ -285,7 +397,9 @@ export default class PublicBase extends Vue {
         this.publicAnswers.map((answer) => {
           return {
             answer: answer,
+            isHighlightedTemporarily: this.highlightAnswerTemporarily(answer),
             isHighlighted: this.highlightAnswer(answer),
+            isFinished: this.finishedAnswer(answer),
           };
         })
       );
@@ -318,12 +432,13 @@ export default class PublicBase extends Vue {
 }
 
 .question {
-  border: 1px solid var(--color-primary);
-  border-radius: var(--border-radius);
-  padding: 1rem;
+  //border: 1px solid var(--color-primary);
+  //border-radius: var(--border-radius);
+  //padding: 1rem;
   font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xlarge);
   text-transform: uppercase;
-  text-align: center;
+  //text-align: center;
   color: var(--color-primary);
   margin: 1em 0;
 }
@@ -332,5 +447,14 @@ export default class PublicBase extends Vue {
   width: 100%;
   text-align: justify;
   white-space: pre-line;
+}
+
+.result {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.el-steps {
+  margin-bottom: 2rem;
 }
 </style>

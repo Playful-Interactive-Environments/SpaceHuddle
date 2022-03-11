@@ -12,4 +12,5 @@ export interface VoteResult {
   idea: Idea;
   ratingSum: number;
   detailRatingSum: number;
+  countParticipant: number;
 }

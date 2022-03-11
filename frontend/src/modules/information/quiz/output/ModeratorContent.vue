@@ -1,15 +1,19 @@
 <template>
   <div>
+    <h1 class="heading heading--medium">
+      {{ $t(`module.information.quiz.enum.questionType.${questionType}`) }}
+    </h1>
     <ProcessTimeline
       v-model="questions"
       v-model:publicScreen="publicQuestion"
       v-model:activeItem="editQuestion"
       :entityName="TimerEntity.TASK"
-      :canDisablePublicTimeline="false"
+      :canDisablePublicTimeline="!moderatedQuestionFlow"
       :isLinkedToDetails="true"
-      :startParticipantOnPublicChange="true"
+      :startParticipantOnPublicChange="moderatedQuestionFlow"
       keyPropertyName="id"
       :defaultTimerSeconds="defaultQuestionTime"
+      :hasParticipantToggle="moderatedQuestionFlow"
       :hasParticipantOption="hasParticipantOption"
       :contentListIcon="(item) => null"
       :getKey="(item) => item.id"
@@ -19,7 +23,7 @@
         (a, b) => (!a && !b) || (a && b && a.question.id === b.question.id)
       "
       :displayItem="(item) => item.question"
-      :hasPublicSlider="hasPublicSlider"
+      :hasPublicSlider="hasPublicSlider || !moderatedQuestionFlow"
       @changeOrder="dragDone"
       @changeActiveElement="onEditQuestionChanged"
     >
@@ -96,6 +100,7 @@
         >
           <div class="media" v-if="index < formData.answers.length">
             <el-checkbox
+              v-if="questionType === QuestionType.QUIZ"
               class="media-left"
               v-model="answer.parameter.isCorrect"
             ></el-checkbox>
@@ -122,7 +127,11 @@
           />
         </el-form-item>
       </ValidationForm>
-      <QuizResult :voteResult="votes" :update="true" />
+      <QuizResult
+        :voteResult="votes"
+        :update="true"
+        :questionType="questionType"
+      />
       <el-pagination
         layout="prev, pager, next"
         :page-size="1"
@@ -148,7 +157,7 @@ import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import ProcessTimeline from '@/components/moderator/organisms/Timeline/ProcessTimeline.vue';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
-import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import { Hierarchy } from '@/types/api/Hierarchy';
 import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import { VoteResult } from '@/types/api/Vote';
@@ -157,6 +166,8 @@ import { TimerEntity } from '@/types/enum/TimerEntity';
 import { convertToSaveVersion, Task } from '@/types/api/Task';
 import { Question } from '@/modules/information/quiz/types/Question';
 import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
+import { QuestionType } from '@/modules/information/quiz/types/QuestionType';
+import { IModeratorContent } from '@/types/ui/IModeratorContent';
 
 @Options({
   components: {
@@ -171,7 +182,7 @@ import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
   },
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModeratorContent extends Vue {
+export default class ModeratorContent extends Vue implements IModeratorContent {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
 
   @Prop() readonly taskId!: string;
@@ -186,7 +197,11 @@ export default class ModeratorContent extends Vue {
   interval!: any;
   minAnswerCount = 2;
   answerCount = this.minAnswerCount;
+  questionType: QuestionType = QuestionType.QUIZ;
+  moderatedQuestionFlow = true;
   defaultQuestionTime: number | null = null;
+
+  QuestionType = QuestionType;
 
   @Watch('publicQuestion', { immediate: true })
   async onPublicQuestionChanged(): Promise<void> {
@@ -289,6 +304,8 @@ export default class ModeratorContent extends Vue {
           this.getHierarchies();
         });
     } else {
+      if (this.formData.question.order === null)
+        this.formData.question.order = this.questions.length;
       hierarchyService
         .postHierarchy(this.taskId, {
           keywords: this.formData.question.keywords,
@@ -332,7 +349,13 @@ export default class ModeratorContent extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    taskService.getTaskById(this.taskId).then((task) => {
+    this.reloadTaskSettings().then(() => {
+      this.setupEmptyQuestion();
+    });
+  }
+
+  async reloadTaskSettings(): Promise<void> {
+    await taskService.getTaskById(this.taskId).then((task) => {
       this.task = task;
       topicService.getTopicById(task.topicId).then((topic) => {
         this.sessionId = topic.sessionId;
@@ -340,9 +363,11 @@ export default class ModeratorContent extends Vue {
       const module = task.modules.find((module) => module.name == 'quiz');
       if (module) {
         this.answerCount = module.parameter.answerCount;
+        this.questionType =
+          QuestionType[module.parameter.questionType.toUpperCase()];
+        this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
         this.defaultQuestionTime = module.parameter.defaultQuestionTime;
       }
-      this.setupEmptyQuestion();
       this.getHierarchies();
     });
   }

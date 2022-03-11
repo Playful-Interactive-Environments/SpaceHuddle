@@ -1,5 +1,6 @@
 {
-  "icon": "gamepad",
+  "icon": "questions",
+  "iconPrefix": "fac",
   "type": "main",
   "input": "no",
   "syncPublicParticipant": true

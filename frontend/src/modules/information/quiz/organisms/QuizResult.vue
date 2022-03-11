@@ -41,6 +41,7 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import { VoteResult } from '@/types/api/Vote';
+import { QuestionType } from '@/modules/information/quiz/types/QuestionType';
 
 @Options({
   components: {
@@ -52,6 +53,8 @@ import { VoteResult } from '@/types/api/Vote';
 export default class QuizResult extends Vue {
   @Prop({ default: [] }) readonly voteResult!: VoteResult[];
   @Prop({ default: false }) readonly update!: boolean;
+  @Prop({ default: QuestionType.QUIZ }) readonly questionType!: QuestionType;
+  @Prop({ default: 'detailRatingSum' }) readonly resultColumn!: string;
   chartData: any = {
     labels: [],
     datasets: [],
@@ -73,39 +76,41 @@ export default class QuizResult extends Vue {
     const labelIncorrect = (this as any).$t(
       'module.information.quiz.publicScreen.chartDataLabelIncorrect'
     );
-    return {
-      labels: this.voteResult.map((vote) => vote.idea.keywords),
-      datasets: [
-        {
-          label: labelCorrect,
-          backgroundColor: '#f1be3a',
-          data: this.voteResult.map((vote) =>
-            vote.idea.parameter.isCorrect ? vote.detailRatingSum : 0
-          ),
-        },
-        {
-          label: labelIncorrect,
-          backgroundColor: '#fe6e5d',
-          data: this.voteResult.map((vote) =>
-            vote.idea.parameter.isCorrect ? 0 : vote.detailRatingSum
-          ),
-        },
-      ],
-    };
-    /*return {
-      labels: this.voteResult.map((vote) => vote.idea.keywords),
-      datasets: [
-        {
-          label: this.voteResult[0].idea.parameter.isCorrect
-            ? labelCorrect
-            : labelIncorrect,
-          backgroundColor: this.voteResult.map((vote) =>
-            vote.idea.parameter.isCorrect ? '#f1be3a' : '#fe6e5d'
-          ),
-          data: this.vote_result.map((vote) => vote.detailRatingSum),
-        },
-      ],
-    };*/
+    const labelResult = (this as any).$t(
+      'module.information.quiz.publicScreen.chartDataLabelResult'
+    );
+    if (this.questionType === QuestionType.QUIZ) {
+      return {
+        labels: this.voteResult.map((vote) => vote.idea.keywords),
+        datasets: [
+          {
+            label: labelCorrect,
+            backgroundColor: '#01cf9e',
+            data: this.voteResult.map((vote) =>
+              vote.idea.parameter.isCorrect ? vote[this.resultColumn] : 0
+            ),
+          },
+          {
+            label: labelIncorrect,
+            backgroundColor: '#fe6e5d',
+            data: this.voteResult.map((vote) =>
+              vote.idea.parameter.isCorrect ? 0 : vote[this.resultColumn]
+            ),
+          },
+        ],
+      };
+    } else {
+      return {
+        labels: this.voteResult.map((vote) => vote.idea.keywords),
+        datasets: [
+          {
+            label: labelResult,
+            backgroundColor: '#f1be3a',
+            data: this.voteResult.map((vote) => vote[this.resultColumn]),
+          },
+        ],
+      };
+    }
   }
 
   async updateChart(): Promise<void> {

@@ -1,6 +1,6 @@
 <template>
   <el-form-item
-    :label="$t('module.information.default.moderatorConfig.answerCount')"
+    :label="$t('module.information.quiz.moderatorConfig.answerCount')"
     :prop="`${rulePropPath}.answerCount`"
     :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleNumber]"
   >
@@ -8,12 +8,43 @@
       v-model="modelValue.answerCount"
       :min="2"
       :placeholder="
-        $t('module.information.default.moderatorConfig.answerCountExample')
+        $t('module.information.quiz.moderatorConfig.answerCountExample')
       "
     />
   </el-form-item>
   <el-form-item
-    :label="$t('module.information.default.moderatorConfig.time')"
+    :label="$t('module.information.quiz.moderatorConfig.questionType')"
+    :prop="`${rulePropPath}.questionType`"
+  >
+    <el-select v-model="modelValue.questionType">
+      <el-option
+        v-for="questionType in Object.values(QuestionType)"
+        :key="questionType"
+        :value="questionType"
+        :label="$t(`module.information.quiz.enum.questionType.${questionType}`)"
+      >
+      </el-option>
+    </el-select>
+  </el-form-item>
+  <el-form-item
+    v-if="modelValue.questionType === QuestionType.QUIZ"
+    :label="$t('module.information.quiz.moderatorConfig.moderatedQuestionFlow')"
+    :prop="`${rulePropPath}.moderatedQuestionFlow`"
+  >
+    <el-switch
+      class="level-item"
+      v-model="modelValue.moderatedQuestionFlow"
+      :inactive-text="
+        $t('module.information.quiz.moderatorConfig.moderatedQuestionFlow')
+      "
+    />
+  </el-form-item>
+  <el-form-item
+    v-if="
+      modelValue.moderatedQuestionFlow &&
+      modelValue.questionType === QuestionType.QUIZ
+    "
+    :label="$t('module.information.quiz.moderatorConfig.time')"
     :prop="`${rulePropPath}.defaultQuestionTime`"
     :rules="[
       defaultFormRules.ruleRequiredIf(modelValue.hasTimeLimit),
@@ -47,13 +78,18 @@ import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import * as timerService from '@/services/timer-service';
+import { QuestionType } from '@/modules/information/quiz/types/QuestionType';
+import { CustomParameter, CustomSync } from '@/types/ui/CustomParameter';
 
 @Options({
   components: {},
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModeratorConfig extends Vue {
+export default class ModeratorConfig
+  extends Vue
+  implements CustomParameter, CustomSync
+{
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
   @Prop() readonly rulePropPath!: string;
 
@@ -64,10 +100,21 @@ export default class ModeratorConfig extends Vue {
   module: Module | null = null;
   defaultTime = 60;
 
+  QuestionType = QuestionType;
+
   @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {
     if (this.modelValue && !this.modelValue.answerCount) {
       this.modelValue.answerCount = 2;
+    }
+    if (this.modelValue && !this.modelValue.questionType) {
+      this.modelValue.questionType = QuestionType.QUIZ;
+    }
+    if (
+      this.modelValue &&
+      this.modelValue.moderatedQuestionFlow === undefined
+    ) {
+      this.modelValue.moderatedQuestionFlow = true;
     }
     if (this.modelValue && !this.modelValue.defaultQuestionTime) {
       this.modelValue.defaultQuestionTime = this.defaultTime;
@@ -104,6 +151,29 @@ export default class ModeratorConfig extends Vue {
         this.module = module;
       });
     }
+  }
+
+  async updateParameterForSaving(): Promise<void> {
+    if (
+      this.modelValue &&
+      this.modelValue.questionType === QuestionType.SURVEY
+    ) {
+      delete this.modelValue.moderatedQuestionFlow;
+    }
+
+    if (this.modelValue && !this.modelValue.moderatedQuestionFlow) {
+      delete this.modelValue.defaultQuestionTime;
+    }
+  }
+
+  customSyncPublicParticipant(): boolean {
+    if (
+      this.modelValue &&
+      this.modelValue.moderatedQuestionFlow !== undefined
+    ) {
+      return this.modelValue.moderatedQuestionFlow;
+    }
+    return false;
   }
 }
 </script>

@@ -10,7 +10,11 @@
           v-for="answer in publicAnswerList"
           :key="answer.answer.id"
           class="answer"
-          :class="{ plain: !answer.isHighlighted }"
+          :class="{
+            correct: answer.answer.parameter.isCorrect && answer.isFinished,
+            wrong: !answer.answer.parameter.isCorrect && answer.isFinished,
+            plain: answer.isHighlightedTemporarily,
+          }"
         >
           {{ answer.answer.keywords }}
         </div>
@@ -48,18 +52,34 @@ export default class PublicScreen extends Vue {
 
 <style lang="scss" scoped>
 .answer {
-  border: 1px solid var(--color-primary);
+  --el-button-text-color: var(--el-color-white);
+  --el-button-bg-color: var(--color-darkblue);
+  --el-button-border-color: var(--color-darkblue-light);
+
+  border: 3px solid var(--color-primary);
   border-radius: var(--border-radius);
-  padding: 1rem;
+  padding: 1rem 3rem;
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
-  text-align: center;
-  color: white;
-  background-color: var(--color-primary);
+  //text-align: center;
+  //color: white;
+  //background-color: var(--color-primary);
+  border-color: var(--el-button-border-color);
+  color: var(--el-button-text-color);
+  background-color: var(--el-button-bg-color);
 }
 
 .plain {
-  color: var(--color-primary);
-  background-color: var(--color-darkblue-light);
+  --el-button-text-color: var(--el-color-primary);
+  --el-button-bg-color: var(--el-color-primary-light-9);
+  --el-button-border-color: var(--color-darkblue-light);
+}
+
+.correct {
+  --el-button-border-color: var(--color-mint);
+}
+
+.wrong {
+  --el-button-border-color: var(--color-red);
 }
 </style>

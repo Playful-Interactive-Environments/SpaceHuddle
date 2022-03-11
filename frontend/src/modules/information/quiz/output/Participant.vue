@@ -1,8 +1,35 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
+    <template #footer>
+      <span class="previousNext">
+        <el-button
+          type="primary"
+          class="el-button--submit"
+          native-type="submit"
+          :disabled="!hasPreviousQuestion"
+          v-if="!moderatedQuestionFlow"
+          @click="goToPreviousQuestion"
+        >
+          {{ $t('module.information.quiz.participant.previous') }}
+        </el-button>
+        <el-button
+          type="primary"
+          class="el-button--submit"
+          native-type="submit"
+          :disabled="!hasNextQuestion"
+          v-if="!moderatedQuestionFlow"
+          @click="goToNextQuestion"
+        >
+          {{ $t('module.information.quiz.participant.next') }}
+        </el-button>
+      </span>
+    </template>
     <PublicBase
       :taskId="taskId"
       :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
+      :usePublicQuestion="false"
+      :activeQuestionIndex="activeQuestionIndex"
+      :activeQuestionPhase="QuestionPhase.ANSWER"
       v-on:changeQuizState="getTask"
       v-on:changePublicQuestion="(id) => (activeQuestionId = id)"
       v-on:changePublicAnswers="(answers) => (publicAnswerList = answers)"
@@ -13,21 +40,31 @@
             v-for="answer in publicAnswerList"
             type="primary"
             :key="answer.answer.id"
-            class="link"
-            :plain="!answer.isHighlighted"
+            class="link outline-thick"
+            :class="{
+              correct: answer.answer.parameter.isCorrect && answer.isFinished,
+              wrong: !answer.answer.parameter.isCorrect && answer.isFinished,
+            }"
+            :plain="answer.isHighlightedTemporarily"
             :disabled="!isActive"
             :loading="isSaving(answer.answer.id)"
             v-on:click="changeVote(answer.answer.id)"
           >
-            <font-awesome-icon
-              v-if="isAnswerSelected(answer.answer.id)"
-              icon="check"
-            />
+            <template #icon>
+              <font-awesome-icon
+                v-if="isAnswerSelected(answer.answer.id)"
+                icon="circle-check"
+              />
+              <font-awesome-icon v-else :icon="['far', 'circle']" />
+            </template>
             {{ answer.answer.keywords }}
           </el-button>
         </el-space>
-        <span v-if="votes.length > 0">
-          {{ $t('module.information.quiz.participant.thanks') }}
+        <span v-if="votes.length > 0 && moderatedQuestionFlow">
+          {{ $t('module.information.quiz.participant.thanksModerated') }}
+        </span>
+        <span v-if="votes.length > 0 && !moderatedQuestionFlow">
+          {{ $t('module.information.quiz.participant.thanksIndividual') }}
         </span>
       </template>
     </PublicBase>
@@ -49,6 +86,9 @@ import PublicBase, {
 import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
 import * as timerService from '@/services/timer-service';
+import { QuestionType } from '@/modules/information/quiz/types/QuestionType';
+import { QuestionPhase } from '@/modules/information/quiz/types/QuestionState';
+import * as hierarchyService from '@/services/hierarchy-service';
 
 @Options({
   components: {
@@ -66,10 +106,44 @@ export default class Participant extends Vue {
   task: Task | null = null;
   votes: Vote[] = [];
   EndpointAuthorisationType = EndpointAuthorisationType;
+  activeQuestionIndex = -1;
+  questionCount = 0;
+  questionType: QuestionType = QuestionType.QUIZ;
+  moderatedQuestionFlow = true;
+
+  QuestionPhase = QuestionPhase;
 
   get isActive(): boolean {
     if (this.task) return timerService.isActive(this.task);
     return false;
+  }
+
+  loadQuestionCount(): void {
+    hierarchyService
+      .getList(
+        this.taskId,
+        '{parentHierarchyId}',
+        EndpointAuthorisationType.PARTICIPANT
+      )
+      .then(async (questions) => {
+        this.questionCount = questions.length;
+      });
+  }
+
+  get hasNextQuestion(): boolean {
+    return this.activeQuestionIndex + 1 < this.questionCount;
+  }
+
+  goToNextQuestion(): void {
+    if (this.hasNextQuestion) this.activeQuestionIndex++;
+  }
+
+  get hasPreviousQuestion(): boolean {
+    return this.activeQuestionIndex > 0;
+  }
+
+  goToPreviousQuestion(): void {
+    if (this.hasPreviousQuestion) this.activeQuestionIndex--;
   }
 
   isAnswerSelected(answerId: string): boolean {
@@ -138,6 +212,18 @@ export default class Participant extends Vue {
       .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
       .then((task) => {
         this.task = task;
+        const module = this.task.modules.find(
+          (module) => module.name == 'quiz'
+        );
+        if (module) {
+          this.questionType =
+            QuestionType[module.parameter.questionType.toUpperCase()];
+          this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
+          if (!this.moderatedQuestionFlow && this.activeQuestionIndex === -1) {
+            this.activeQuestionIndex = 0;
+          }
+        }
+        this.loadQuestionCount();
       });
   }
 
@@ -192,5 +278,21 @@ export default class Participant extends Vue {
   width: 100%;
   text-align: justify;
   white-space: pre-line;
+}
+
+.previousNext {
+  width: 100%;
+  display: inline-flex;
+  justify-content: space-between;
+
+  .el-button {
+    margin-left: unset;
+    margin-right: unset;
+  }
+}
+
+.el-button {
+  padding: 1rem 2rem;
+  justify-content: left;
 }
 </style>

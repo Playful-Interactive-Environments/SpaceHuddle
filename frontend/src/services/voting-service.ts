@@ -68,6 +68,17 @@ export const getResult = async (
   );
 };
 
+export const getParentResult = async (
+  taskId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<VoteResult[]> => {
+  return await apiExecuteGetHandled<VoteResult[]>(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.VOTE_RESULT_PARENT}`,
+    [],
+    authHeaderType
+  );
+};
+
 export const getHierarchyVotes = async (
   parentIdeaId: string,
   authHeaderType = EndpointAuthorisationType.MODERATOR

@@ -386,4 +386,8 @@ export default class Participant extends Vue {
 .edit {
   float: right;
 }
+
+.el-form-item--default {
+  margin-bottom: 0;
+}
 </style>

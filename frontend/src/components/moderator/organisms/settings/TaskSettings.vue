@@ -412,7 +412,7 @@ import {
   hasModule,
   ModuleTask,
 } from '@/modules';
-import { CustomParameter } from '@/types/ui/CustomParameter';
+import { CustomParameter, CustomSync } from '@/types/ui/CustomParameter';
 import { EventType } from '@/types/enum/EventType';
 import ModuleComponentType from '@/modules/ModuleComponentType';
 import { Module } from '@/types/api/Module';
@@ -1197,18 +1197,14 @@ export default class TaskSettings extends Vue {
       }
       if ('updateParameterForSaving' in moduleParams)
         await moduleParams.updateParameterForSaving();
+      if ('customSyncPublicParticipant' in moduleParams) {
+        module.syncPublicParticipant = (moduleParams as CustomSync).customSyncPublicParticipant();
+      }
     }
   }
 
   async taskUpdated(task: Task, cleanUp = true): Promise<void> {
     for (const module of task.modules) {
-      await this.updateCustomModuleParameter(task, module);
-      const moduleComponent = this.formData.moduleParameterComponents.find(
-        (component) => component.moduleName == module.name
-      );
-      if (moduleComponent) {
-        module.parameter = moduleComponent.parameter;
-      }
       await getModuleConfig(
         'syncPublicParticipant',
         TaskType[task.taskType],
@@ -1217,6 +1213,13 @@ export default class TaskSettings extends Vue {
       ).then((result) => {
         module.syncPublicParticipant = result;
       });
+      await this.updateCustomModuleParameter(task, module);
+      const moduleComponent = this.formData.moduleParameterComponents.find(
+        (component) => component.moduleName == module.name
+      );
+      if (moduleComponent) {
+        module.parameter = moduleComponent.parameter;
+      }
       await moduleService.putModule(module.id, module);
     }
     this.closeDialog();

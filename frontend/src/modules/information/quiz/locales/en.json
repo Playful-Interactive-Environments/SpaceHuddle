@@ -1,10 +1,14 @@
 {
   "description": {
-    "title": "quiz",
+    "title": "participant questions",
     "description": "check the state of knowledge "
   },
   "moderatorConfig": {
-    "answerCount": "answer options"
+    "answerCount": "answer options",
+    "moderatedQuestionFlow": "moderated question flow",
+    "questionType": "question type",
+    "time": "time",
+    "answerCountExample": 3
   },
   "moderatorContent": {
     "question": "question",
@@ -13,13 +17,24 @@
     "explanationExample": "the answer of the question is ...",
     "answer": "answer",
     "answerExample": "option",
-    "submit": "save"
+    "submit": "save",
+    "addAnswer": "add answer"
   },
   "publicScreen": {
     "chartDataLabelCorrect": "correct",
-    "chartDataLabelIncorrect": "incorrect"
+    "chartDataLabelIncorrect": "incorrect",
+    "chartDataLabelResult": "result"
   },
   "participant": {
-    "thanks": "Your answer has been saved. You can still change the answer until the timer expires."
+    "thanksModerated": "Your answer has been saved. You can still change the answer until the timer expires.",
+    "thanksIndividual": "Your answer has been saved. You can still change the answer.",
+    "previous": "previous",
+    "next": "next"
+  },
+  "enum": {
+    "questionType": {
+      "quiz": "quiz",
+      "survey": "survey"
+    }
   }
 }

@@ -89,6 +89,7 @@
               </template>
               <template #title>
                 <el-badge
+                  v-if="hasParticipantToggle"
                   :value="formattedTime(element)"
                   :hidden="!isParticipantActive(element)"
                   :class="{ 'no-module': !hasParticipantOption(element) }"
@@ -227,6 +228,7 @@ export default class ProcessTimeline extends Vue {
   @Prop({ default: true }) readonly isLinkedToDetails!: boolean;
   @Prop({ default: false }) readonly startParticipantOnPublicChange!: boolean;
   @Prop({ default: true }) readonly hasPublicSlider!: boolean;
+  @Prop({ default: true }) readonly hasParticipantToggle!: boolean;
   @Prop({ default: 'id' }) readonly keyPropertyName!: string;
   @Prop({ default: null }) defaultTimerSeconds!: number | null;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
