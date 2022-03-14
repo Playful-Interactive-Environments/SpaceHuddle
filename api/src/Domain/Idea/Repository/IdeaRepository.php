@@ -84,6 +84,7 @@ class IdeaRepository implements RepositoryInterface
      * @param array $conditions The WHERE conditions to add with AND.
      * @param array $sortConditions The ORDER BY conditions.
      * @param string|null $refId The referenced taskId for sorting by categories.
+     * @param string|null $orderType Order by type.
      * @return IdeaData|array<IdeaData>|null The result entity(s).
      * @throws GenericException
      */
@@ -106,9 +107,9 @@ class IdeaRepository implements RepositoryInterface
         if ($refId && $orderType == IdeaSortOrder::HIERARCHY) {
             $query->select([
                 "idea.*",
-                "participant.symbol",
-                "participant.color",
-                "idea.participant_id",
+                "MAX(participant.symbol) AS symbol",
+                "MAX(participant.color) AS color",
+                "MAX(participant.id) AS participant_id",
                 "hierarchy.category_idea_id as category_id",
                 "COALESCE(category.keywords, 'zzz') AS category",
                 "category.parameter AS category_parameter",
@@ -118,22 +119,29 @@ class IdeaRepository implements RepositoryInterface
         } elseif ($refId && $orderType == IdeaSortOrder::VIEW) {
             $query->select([
                 "idea.*",
-                "participant.symbol",
-                "participant.color",
+                "MAX(participant.symbol) AS symbol",
+                "MAX(participant.color) AS color",
+                "MAX(participant.id) AS participant_id",
                 "selection_view_idea.order AS order",
                 "COUNT(*) AS count"
             ]);
         } else {
             $query->select([
                 "idea.*",
-                "participant.symbol",
-                "participant.color",
+                "MAX(participant.symbol) AS symbol",
+                "MAX(participant.color) AS color",
+                "MAX(participant.id) AS participant_id",
                 "COUNT(*) AS count"
             ]);
         }
 
+        $participantConditions = ["participant.id = idea.participant_id"];
+        if ($authorisation->isParticipant()) {
+            $participantConditions["participant.id"] = $authorisation->id;
+        }
+
         $query->innerJoin("task", "task.id = idea.task_id")
-            ->leftJoin("participant", "participant.id = idea.participant_id")
+            ->leftJoin("participant", $participantConditions)
             ->whereInList("task.task_type", [$this->taskType, $this->taskTypeInformation])
             ->andWhere($authorisation_conditions)
             ->andWhere($conditions)
@@ -149,19 +157,11 @@ class IdeaRepository implements RepositoryInterface
                     ]
                 ])
                 ->andWhere(["(category.id IS NOT NULL OR (category.id IS NULL AND hierarchy.sub_idea_id IS NULL))"]);
-            /*$pos = array_search('hierarchy', $sortConditions);
-            if ($pos !== false) {
-                $sortConditions[$pos] = 'category';
-            }*/
         } elseif ($refId && $orderType == IdeaSortOrder::VIEW) {
             $query->leftJoin(
                 "selection_view_idea",
                 ["selection_view_idea.idea_id = idea.id", "selection_view_idea.parent_id" => $refId]
             );
-            /*$pos = array_search('view', $sortConditions);
-            if ($pos !== false) {
-                $sortConditions[$pos] = 'order';
-            }*/
         }
 
         if (count($sortConditions) > 0) {

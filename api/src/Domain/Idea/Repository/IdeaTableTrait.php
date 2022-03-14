@@ -177,9 +177,14 @@ trait IdeaTableTrait
     {
         $taskId = $data->taskId ?? $this->getTopicTask($data->topicId, [strtoupper(TaskState::ACTIVE)]);
         if (isset($taskId)) {
+            $authorisation = $this->getAuthorisation();
+            $participant_id = $data->participantId ?? null;
+            if ($authorisation->isParticipant()) {
+                $participant_id = $data->participantId ?? $authorisation->id;
+            }
             $condition = [
                 "task_id" => $taskId,
-                "participant_id" => $data->participantId ?? null,
+                "participant_id" => $participant_id,
                 "keywords" => $data->keywords ?? null,
                 "description" => $data->description ?? null,
                 "image" => $data->image ?? null,
