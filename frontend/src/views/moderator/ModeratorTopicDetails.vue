@@ -46,11 +46,13 @@
           </el-dropdown>
         </template>
         <template #headerContent>
-          <div v-if="activeTask">
-            <span class="label">
-              {{ $t('moderator.view.topicDetails.participantCount') }}: &emsp;
-            </span>
-            <span>{{ activeTask.participantCount }}</span>
+          <div v-if="activeTask" class="module-count">
+            <div class="module-count__item">
+              <span class="module-count__count">
+                {{ activeTask.participantCount }}
+              </span>
+              {{ $t('moderator.view.topicDetails.participantCount') }}
+            </div>
           </div>
         </template>
         <template #footerContent>
@@ -707,5 +709,32 @@ p {
   display: inline;
   text-transform: uppercase;
   color: white;
+}
+
+.module-count {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-small);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 1rem;
+  line-height: 1;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+
+  &__item {
+    white-space: nowrap;
+  }
+
+  &__count {
+    background-color: var(--color-mint);
+    color: white;
+    padding: 0.1rem 0.7rem;
+    letter-spacing: 0;
+    font-size: var(--font-size-default);
+    border-radius: 100px;
+    margin-right: 0.2rem;
+  }
 }
 </style>
