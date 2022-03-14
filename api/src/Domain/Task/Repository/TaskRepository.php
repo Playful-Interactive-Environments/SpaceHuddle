@@ -145,6 +145,7 @@ class TaskRepository implements RepositoryInterface
      * Get list of entities for the parent ID.
      * @param string $parentId The entity parent ID.
      * @return array<object> The result entity list.
+     * @throws GenericException
      */
     public function getAll(string $parentId): array
     {
@@ -154,6 +155,29 @@ class TaskRepository implements RepositoryInterface
             array_push($conditions, "participant_task.id IS NOT NULL");
         }
         $result = $this->get($conditions);
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
+    }
+
+    /**
+     * Get list of dependent entities for the task ID.
+     * @param string $id The entity dependent task ID.
+     * @return array<object> The result entity list.
+     */
+    public function getDependent(string $id): array
+    {
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select([
+            "task.*"
+        ])
+            ->innerJoin("task_input", "task_input.task_id = task.id")
+            ->andWhere(["task_input.input_id" => $id]);
+
+        $result = $this->fetchAll($query);
         if (is_array($result)) {
             return $result;
         } elseif (isset($result)) {

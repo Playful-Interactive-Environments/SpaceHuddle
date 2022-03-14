@@ -87,10 +87,11 @@ class IdeaRepository implements RepositoryInterface
      * @return IdeaData|array<IdeaData>|null The result entity(s).
      * @throws GenericException
      */
-    public function get(array $conditions = [], array $sortConditions = [], ?string $refId = null): null|IdeaData|array
+    public function get(array $conditions = [], array $sortConditions = [], ?string $refId = null, ?string $orderType = null): null|IdeaData|array
     {
         $authorisation = $this->getAuthorisation();
         $authorisation_conditions = [];
+        $orderType = strtolower($orderType);
         /*if ($authorisation->isParticipant()) {
             $authorisation_conditions = [
                 "idea.participant_id" => $authorisation->id,
@@ -102,7 +103,7 @@ class IdeaRepository implements RepositoryInterface
         }*/
 
         $query = $this->queryFactory->newSelect($this->getEntityName());
-        if ($refId) {
+        if ($refId && $orderType == IdeaSortOrder::HIERARCHY) {
             $query->select([
                 "idea.*",
                 "participant.symbol",
@@ -112,6 +113,14 @@ class IdeaRepository implements RepositoryInterface
                 "COALESCE(category.keywords, 'zzz') AS category",
                 "category.parameter AS category_parameter",
                 "hierarchy.order AS hierarchy_order",
+                "COUNT(*) AS count"
+            ]);
+        } elseif ($refId && $orderType == IdeaSortOrder::VIEW) {
+            $query->select([
+                "idea.*",
+                "participant.symbol",
+                "participant.color",
+                "selection_view_idea.order AS order",
                 "COUNT(*) AS count"
             ]);
         } else {
@@ -130,7 +139,7 @@ class IdeaRepository implements RepositoryInterface
             ->andWhere($conditions)
             ->distinct(["idea.task_id", "idea.keywords", "idea.description", "idea.image", "idea.link"]);
 
-        if ($refId) {
+        if ($refId && $orderType == IdeaSortOrder::HIERARCHY) {
             $query->leftJoin("hierarchy", "hierarchy.sub_idea_id = idea.id")
                 ->join([
                     "category" => [
@@ -140,11 +149,26 @@ class IdeaRepository implements RepositoryInterface
                     ]
                 ])
                 ->andWhere(["(category.id IS NOT NULL OR (category.id IS NULL AND hierarchy.sub_idea_id IS NULL))"]);
+            /*$pos = array_search('hierarchy', $sortConditions);
+            if ($pos !== false) {
+                $sortConditions[$pos] = 'category';
+            }*/
+        } elseif ($refId && $orderType == IdeaSortOrder::VIEW) {
+            $query->leftJoin(
+                "selection_view_idea",
+                ["selection_view_idea.idea_id = idea.id", "selection_view_idea.parent_id" => $refId]
+            );
+            /*$pos = array_search('view', $sortConditions);
+            if ($pos !== false) {
+                $sortConditions[$pos] = 'order';
+            }*/
         }
 
         if (count($sortConditions) > 0) {
             $query->order($sortConditions);
         }
+
+        //echo $query->sql();
 
         $result = $this->fetchAll($query);
         if (is_array($result)) {
@@ -164,8 +188,9 @@ class IdeaRepository implements RepositoryInterface
      */
     private function getDetails(IdeaData $data, AuthorisationData $authorisation): void
     {
-        if ($authorisation->isParticipant())
+        if ($authorisation->isParticipant()) {
             $data->isOwn = ($data->participantId == $authorisation->id);
+        }
     }
 
     /**
@@ -199,7 +224,7 @@ class IdeaRepository implements RepositoryInterface
         }
 
         $resultList = [];
-        $result = $this->get(["idea.task_id" => $parentId], $sortOrder, $refId);
+        $result = $this->get(["idea.task_id" => $parentId], $sortOrder, $refId, $orderType);
         if (is_array($result)) {
             $resultList = $result;
         } elseif (isset($result)) {
@@ -228,7 +253,7 @@ class IdeaRepository implements RepositoryInterface
         $resultList = [];
         $result = $this->get([
             "task.topic_id" => $topicId
-        ], $sortOrder, $refId);
+        ], $sortOrder, $refId, $orderType);
         if (is_array($result)) {
             $resultList = $result;
         } elseif (isset($result)) {
@@ -289,11 +314,14 @@ class IdeaRepository implements RepositoryInterface
                 case IdeaSortOrder::ORDER:
                     array_push($orderList, 'order');
                     break;
-                case IdeaSortOrder::CATEGORISATION:
+                case IdeaSortOrder::HIERARCHY:
                     if ($refId) {
                         array_push($orderList, 'category');
                     }
                     array_push($orderList, 'hierarchy_order');
+                    break;
+                case IdeaSortOrder::VIEW:
+                    array_push($orderList, 'selection_view_idea.order');
                     break;
             }
         }
@@ -313,9 +341,15 @@ class IdeaRepository implements RepositoryInterface
 
         if ($orderColumn) {
             foreach ($resultList as $resultItem) {
-                if (strtolower($orderType) == IdeaSortOrder::CATEGORISATION) {
+                if (strtolower($orderType) == IdeaSortOrder::HIERARCHY) {
                     if (property_exists($resultItem, "category") && isset($resultItem->category)) {
                         $orderContent = $resultItem->category->name;
+                    } else {
+                        $orderContent = "undefined";
+                    }
+                } elseif (strtolower($orderType) == IdeaSortOrder::VIEW) {
+                    if (property_exists($resultItem, "order") && isset($resultItem->order)) {
+                        $orderContent = $resultItem->order;
                     } else {
                         $orderContent = "undefined";
                     }

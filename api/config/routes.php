@@ -67,6 +67,7 @@ use App\Action\SessionRole\SessionRoleUpdateAction;
 use App\Action\Task\TaskCreateAction;
 use App\Action\Task\TaskDeleteAction;
 use App\Action\Task\TaskReadAllAction;
+use App\Action\Task\TaskReadDependentAction;
 use App\Action\Task\TaskReadSingleAction;
 use App\Action\Task\TaskStateUpdateAction;
 use App\Action\Task\TaskUpdateAction;
@@ -250,6 +251,7 @@ return function (App $app) {
             $app->post("/{taskId}/vote[/]", VoteCreateAction::class);
 
             $app->get("/{id}[/]", TaskReadSingleAction::class);
+            $app->get("/{id}/dependent[/]", TaskReadDependentAction::class);
             $app->put("[/]", TaskUpdateAction::class);
             $app->delete("/{id}[/]", TaskDeleteAction::class);
         }

@@ -89,6 +89,7 @@ p, MODERATOR, /session/:sessionId/authorized_user/:username/, DELETE
 p, MODERATOR|FACILITATOR, /session/:sessionId/own_user_role/, DELETE
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/tasks/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/dependent/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/, GET
 p, MODERATOR|FACILITATOR, /task/:id/, DELETE
 p, MODERATOR|FACILITATOR, /topic/:topicId/task/, POST
