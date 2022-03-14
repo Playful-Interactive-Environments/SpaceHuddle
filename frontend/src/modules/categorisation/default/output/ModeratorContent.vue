@@ -105,7 +105,7 @@
       :name="key"
     >
       <template #title>
-        <CollapseTitle :text="key" :color="item.color">
+        <CollapseTitle :text="key" :avatar="item.avatar">
           <span
             role="button"
             class="awesome-icon"
@@ -195,6 +195,7 @@ import {
 } from '@/types/api/CategoryContent';
 import { EventType } from '@/types/enum/EventType';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
+import ViewType from '@/types/enum/ViewType';
 
 @Options({
   components: {
@@ -282,10 +283,20 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     if (this.taskId) {
       await taskService.getTaskById(this.taskId).then(async (task) => {
         this.task = task;
-        await ideaService.getSortOrderOptions(task.id).then((options) => {
-          this.sortOrderOptions = options;
-          if (options.length > 0) this.orderType = options[0].orderType;
-        });
+        let sortOrderTaskId = null;
+        if (
+          task.parameter.input.length === 1 &&
+          task.parameter.input[0].view.type.toLowerCase() === ViewType.TASK
+        )
+          sortOrderTaskId = task.parameter.input[0].view.id;
+        await ideaService
+          .getSortOrderOptions(sortOrderTaskId)
+          .then((options) => {
+            this.sortOrderOptions = options.filter(
+              (option) => option.ref?.id !== this.taskId
+            );
+            if (options.length > 0) this.orderType = options[0].orderType;
+          });
         if (
           task.parameter &&
           task.parameter.orderType &&
@@ -321,14 +332,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       });
 
       if (this.task && this.task.parameter.input) {
-        let categoryOrder = `[${IdeaSortOrderHierarchy},${this.orderType}]`;
-        if (
-          !this.orderType ||
-          this.orderType.startsWith(IdeaSortOrderHierarchy)
-        )
-          categoryOrder = IdeaSortOrderHierarchy;
         await viewService
-          .getIdeas(this.task.parameter.input, categoryOrder, this.taskId)
+          .getIdeas(
+            this.task.parameter.input,
+            IdeaSortOrderHierarchy,
+            this.taskId
+          )
           .then((ideas) => {
             this.ideas = ideas;
             ideas
@@ -351,7 +360,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           .getOrderGroups(
             this.task.parameter.input,
             this.orderType,
-            this.taskId,
+            null,
             EndpointAuthorisationType.MODERATOR,
             this.orderGroupContentSelection,
             (idea: Idea) => !idea.category
@@ -361,15 +370,35 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
               'module.categorisation.default.moderatorContent.undefined'
             );
             let orderGroupContentSelection: OrderGroupList = {};
+            let orderGroupKeys: string[] = [];
             switch (this.orderType) {
               case IdeaSortOrder.TIMESTAMP:
               case IdeaSortOrder.ALPHABETICAL:
               case IdeaSortOrder.ORDER:
                 orderGroupContentSelection[orderGroupName] = new OrderGroup(
-                  result.ideas.filter((idea) => !idea.category)
+                  result.ideas.filter((idea) =>
+                    this.ideas.find(
+                      (categoryIdea) =>
+                        categoryIdea.id === idea.id && !categoryIdea.category
+                    )
+                  )
                 );
                 break;
               default:
+                orderGroupKeys = Object.keys(result.oderGroups);
+                for (const orderGroup of orderGroupKeys) {
+                  const orderGroupIdeas = result.oderGroups[
+                    orderGroup
+                  ].ideas.filter((idea) =>
+                    this.ideas.find(
+                      (categoryIdea) =>
+                        categoryIdea.id === idea.id && !categoryIdea.category
+                    )
+                  );
+                  result.oderGroups[orderGroup].ideas = orderGroupIdeas;
+                  if (orderGroupIdeas.length === 0)
+                    delete result.oderGroups[orderGroup];
+                }
                 orderGroupContentSelection = result.oderGroups;
             }
             Object.keys(orderGroupContentSelection).forEach((key) => {

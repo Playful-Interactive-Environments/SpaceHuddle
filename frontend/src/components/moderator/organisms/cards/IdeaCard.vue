@@ -25,6 +25,9 @@
           ref="title"
           :class="{ threeLineText: cutLongTexts || limitedTextLength }"
         >
+          <span v-if="idea.count > 1" class="idea-count">
+            {{ idea.count }}x
+          </span>
           {{ hasKeywords ? idea.keywords : idea.description }}
         </span>
         <span class="actions">
@@ -297,5 +300,10 @@ export default class IdeaCard extends Vue {
 .collapse {
   display: flex;
   justify-content: end;
+}
+
+.idea-count {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-mint);
 }
 </style>

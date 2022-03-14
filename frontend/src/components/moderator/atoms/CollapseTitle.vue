@@ -1,7 +1,14 @@
 <template>
   <span class="layout__level">
-    <span v-if="displayAvatar" :style="{ color: avatar.color }">
-      <font-awesome-icon :icon="avatar.symbol" />
+    <span v-if="displayAvatar">
+      <span
+        v-for="item in avatar"
+        :key="item.symbol"
+        :style="{ color: item.color }"
+      >
+        <font-awesome-icon :icon="item.symbol" />
+        &nbsp;
+      </span>
     </span>
     <span v-else-if="color" :style="{ color: color }">
       {{ text.toUpperCase() }}
@@ -24,10 +31,13 @@ import { Avatar } from '@/types/api/Participant';
 export default class CollapseTitle extends Vue {
   @Prop({ default: '' }) text!: string;
   @Prop({ default: null }) color!: string | null;
-  @Prop({ default: null }) avatar!: Avatar | null;
+  @Prop({ default: null }) avatar!: Avatar[];
 
   get displayAvatar(): boolean {
-    return this.text == `${this.avatar?.symbol}${this.avatar?.color}`;
+    const avatarDisplayText = this.avatar
+      .map((avatar) => `${avatar.symbol}${avatar.color}`)
+      .join(' ');
+    return this.text == avatarDisplayText;
   }
 }
 </script>

@@ -169,6 +169,7 @@ import IdeaSortOrder, {
 } from '@/types/enum/IdeaSortOrder';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
+import ViewType from '@/types/enum/ViewType';
 
 const SELECTION_KEY = 'selection';
 
@@ -208,10 +209,20 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     if (this.taskId) {
       await taskService.getTaskById(this.taskId).then(async (task) => {
         this.task = task;
-        await ideaService.getSortOrderOptions(task.id).then((options) => {
-          this.sortOrderOptions = options;
-          if (options.length > 0) this.orderType = options[0].orderType;
-        });
+        let sortOrderTaskId = null;
+        if (
+          task.parameter.input.length === 1 &&
+          task.parameter.input[0].view.type.toLowerCase() === ViewType.TASK
+        )
+          sortOrderTaskId = task.parameter.input[0].view.id;
+        await ideaService
+          .getSortOrderOptions(sortOrderTaskId)
+          .then((options) => {
+            this.sortOrderOptions = options.filter(
+              (option) => option.ref?.id !== this.taskId
+            );
+            if (options.length > 0) this.orderType = options[0].orderType;
+          });
         if (
           task.parameter &&
           task.parameter.orderType &&

@@ -60,8 +60,14 @@
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "en,",  
-             "icon": "gamepad",  "type": "main",  "input": "no",  "syncPublicParticipant": true,  
+             "icon": "questions-check",  "iconPrefix": "fac",  "type": "main",  "input": "no",  "syncPublicParticipant": true,  
            "path": "information/quiz"  
+       },  
+       "survey": {  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "en,",  
+             "icon": "questions",  "iconPrefix": "fac",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "fallback": "quiz",  
+           "path": "information/survey"  
        },  
        "settings": {  
            "parameter": "TaskParameter",  
@@ -74,7 +80,7 @@
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
-             "icon": "times",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
+             "icon": "times",  "iconPrefix": "fas",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
            "path": "none",  
        "settings": {  
            "parameter": "TaskParameter",  

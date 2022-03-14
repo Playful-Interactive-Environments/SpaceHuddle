@@ -12,11 +12,12 @@ export interface Idea {
   link: string | null;
   order: number;
   orderGroup: string;
-  avatar: Avatar | null;
+  avatar: Avatar[];
   category: { id: string; name: string; parameter: any };
   parameter: any;
   participantId: string;
   isOwn: boolean;
+  count: number;
 }
 
 export const MAX_KEYWORDS_LENGTH = 60;

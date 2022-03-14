@@ -5,13 +5,13 @@ import { DefaultDisplayCount } from '@/types/enum/IdeaSortOrder';
 
 export class OrderGroup {
   ideas: Idea[] = [];
-  avatar: Avatar | null = null;
+  avatar: Avatar[] = [];
   color: string | null = null;
   displayCount: number = DefaultDisplayCount;
 
   constructor(
     ideas: Idea[],
-    avatar: Avatar | null = null,
+    avatar: Avatar[] = [],
     color: string | null = null,
     displayCount: number = DefaultDisplayCount
   ) {
