@@ -20,63 +20,20 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import Timer from '@/components/shared/atoms/Timer.vue';
 import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
-import TaskType from '@/types/enum/TaskType';
-import { Prop, Watch } from 'vue-property-decorator';
-import { setModuleStyles } from '@/utils/moduleStyles';
-import * as taskService from '@/services/task-service';
-import { Task } from '@/types/api/Task';
+import { Prop } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
-    Timer,
     TaskInfo,
   },
 })
 export default class ParticipantModuleDefaultContainer extends Vue {
   @Prop({ required: true }) taskId!: string;
   @Prop({ default: 'default' }) module!: string;
-  task: Task | null = null;
 
   EndpointAuthorisationType = EndpointAuthorisationType;
-
-  goBack(): void {
-    if (!this.isSyncedWithPublicScreen) this.$router.go(-1);
-  }
-
-  get isSyncedWithPublicScreen(): boolean {
-    if (this.task && this.task.modules) {
-      return !!this.task.modules.find((module) => module.syncPublicParticipant);
-    }
-    return true;
-  }
-
-  get taskType(): TaskType | null {
-    if (this.task) return TaskType[this.task.taskType];
-    return null;
-  }
-
-  get taskName(): string | null {
-    if (this.task) return this.task.name;
-    return null;
-  }
-
-  get taskDescription(): string | null {
-    if (this.task) return this.task.description;
-    return null;
-  }
-
-  @Watch('taskId', { immediate: true })
-  onTaskIdChanged(val: string): void {
-    taskService
-      .getTaskById(val, EndpointAuthorisationType.PARTICIPANT)
-      .then((queryResult) => {
-        this.task = queryResult;
-        if (this.taskType) setModuleStyles(this.taskType);
-      });
-  }
 }
 </script>
 

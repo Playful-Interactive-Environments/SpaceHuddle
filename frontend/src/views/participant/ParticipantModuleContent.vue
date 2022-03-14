@@ -107,7 +107,11 @@ export default class ParticipantModuleContent extends Vue {
   EndpointAuthorisationType = EndpointAuthorisationType;
 
   goBack(): void {
-    if (!this.isSyncedWithPublicScreen) this.$router.go(-1);
+    if (
+      !this.isSyncedWithPublicScreen &&
+      this.$router.currentRoute.value.name === 'participant-module-content'
+    )
+      this.$router.go(-1);
   }
 
   modules: Module[] = [];
@@ -150,7 +154,12 @@ export default class ParticipantModuleContent extends Vue {
       taskService
         .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
         .then((task) => {
-          if (!timerService.isActive(task)) this.$router.go(-1);
+          if (
+            !timerService.isActive(task) &&
+            this.$router.currentRoute.value.name ===
+              'participant-module-content'
+          )
+            this.$router.go(-1);
         });
     } else if (this.task) {
       sessionService
@@ -159,7 +168,12 @@ export default class ParticipantModuleContent extends Vue {
           EndpointAuthorisationType.PARTICIPANT
         )
         .then((task) => {
-          if (task?.id !== this.taskId) this.$router.go(-1);
+          if (
+            task?.id !== this.taskId &&
+            this.$router.currentRoute.value.name ===
+              'participant-module-content'
+          )
+            this.$router.go(-1);
         });
     }
   }
