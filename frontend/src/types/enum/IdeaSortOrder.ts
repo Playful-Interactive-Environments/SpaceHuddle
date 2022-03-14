@@ -1,4 +1,5 @@
-export const IdeaSortOrderCategorisation = 'categorisation';
+export const IdeaSortOrderHierarchy = 'hierarchy';
+export const IdeaSortOrderView = 'view';
 
 enum IdeaSortOrder {
   TIMESTAMP = 'timestamp',

@@ -382,7 +382,8 @@
       "state": "state",
       "participant": "participant",
       "count": "count",
-      "categorisation": "categorisation",
+      "hierarchy": "categorisation",
+      "view": "voting",
       "order": "custom"
     },
     "ideaState": {

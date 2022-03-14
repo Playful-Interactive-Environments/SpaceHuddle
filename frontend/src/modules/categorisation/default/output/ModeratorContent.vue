@@ -174,7 +174,7 @@ import * as taskService from '@/services/task-service';
 import * as viewService from '@/services/view-service';
 import IdeaSortOrder, {
   DefaultIdeaSortOrder,
-  IdeaSortOrderCategorisation,
+  IdeaSortOrderHierarchy,
 } from '@/types/enum/IdeaSortOrder';
 import { Idea } from '@/types/api/Idea';
 import { convertToSaveVersion, Task } from '@/types/api/Task';
@@ -282,7 +282,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     if (this.taskId) {
       await taskService.getTaskById(this.taskId).then(async (task) => {
         this.task = task;
-        await ideaService.getSortOrderOptions(task.topicId).then((options) => {
+        await ideaService.getSortOrderOptions(task.id).then((options) => {
           this.sortOrderOptions = options;
           if (options.length > 0) this.orderType = options[0].orderType;
         });
@@ -321,12 +321,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       });
 
       if (this.task && this.task.parameter.input) {
-        let categoryOrder = `[${IdeaSortOrderCategorisation},${this.orderType}]`;
+        let categoryOrder = `[${IdeaSortOrderHierarchy},${this.orderType}]`;
         if (
           !this.orderType ||
-          this.orderType.startsWith(IdeaSortOrderCategorisation)
+          this.orderType.startsWith(IdeaSortOrderHierarchy)
         )
-          categoryOrder = IdeaSortOrderCategorisation;
+          categoryOrder = IdeaSortOrderHierarchy;
         await viewService
           .getIdeas(this.task.parameter.input, categoryOrder, this.taskId)
           .then((ideas) => {

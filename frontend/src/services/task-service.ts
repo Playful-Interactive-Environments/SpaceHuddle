@@ -42,6 +42,17 @@ export const getTaskList = async (
   );
 };
 
+export const getDependentTaskList = async (
+  taskId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Task[]> => {
+  return await apiExecuteGetHandled<Task[]>(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.DEPENDENT}/`,
+    [],
+    authHeaderType
+  );
+};
+
 export const postTask = async (
   topicId: string,
   data: Partial<TaskForSaveAction>

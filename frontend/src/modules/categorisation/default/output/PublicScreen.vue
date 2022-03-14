@@ -36,7 +36,7 @@ import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as viewService from '@/services/view-service';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
-import { IdeaSortOrderCategorisation } from '@/types/enum/IdeaSortOrder';
+import { IdeaSortOrderHierarchy } from '@/types/enum/IdeaSortOrder';
 import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
 import { Category } from '@/types/api/Category';
@@ -107,7 +107,7 @@ export default class PublicScreen extends Vue {
         await viewService
           .getOrderGroups(
             this.task.parameter.input,
-            IdeaSortOrderCategorisation,
+            IdeaSortOrderHierarchy,
             this.taskId,
             this.authHeaderTyp,
             this.orderGroupContent

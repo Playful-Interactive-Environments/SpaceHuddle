@@ -146,7 +146,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
     taskService.getTaskById(this.taskId).then(async (task) => {
-      await ideaService.getSortOrderOptions(task.topicId).then((options) => {
+      await ideaService.getSortOrderOptions(task.id).then((options) => {
         this.sortOrderOptions = options;
         if (options.length > 0) this.orderType = options[0].orderType;
       });

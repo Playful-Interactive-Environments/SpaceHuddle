@@ -13,8 +13,9 @@ import {
   SortOrderOption,
 } from '@/types/api/OrderGroup';
 import IdeaSortOrder, {
-  IdeaSortOrderCategorisation,
+  IdeaSortOrderHierarchy,
   DefaultDisplayCount,
+  IdeaSortOrderView,
 } from '@/types/enum/IdeaSortOrder';
 import * as taskService from '@/services/task-service';
 import TaskType from '@/types/enum/TaskType';
@@ -90,7 +91,7 @@ export const getIdeasForTopic = async (
 };
 
 export const getSortOrderOptions = async (
-  topicId: string,
+  taskId: string | null,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<SortOrderOption[]> => {
   const result: SortOrderOption[] = Object.keys(IdeaSortOrder).map(
@@ -99,16 +100,28 @@ export const getSortOrderOptions = async (
     }
   );
 
-  await taskService.getTaskList(topicId, authHeaderType).then((tasks) => {
-    const categoryTasks = tasks.filter(
-      (task) => task.taskType.toLowerCase() == TaskType.CATEGORISATION
-    );
-    if (categoryTasks) {
-      categoryTasks.forEach((task) => {
-        result.push({ orderType: IdeaSortOrderCategorisation, ref: task });
+  if (taskId) {
+    await taskService
+      .getDependentTaskList(taskId, authHeaderType)
+      .then((tasks) => {
+        const categoryTasks = tasks.filter(
+          (task) => task.taskType.toLowerCase() == TaskType.CATEGORISATION
+        );
+        if (categoryTasks) {
+          categoryTasks.forEach((task) => {
+            result.push({ orderType: IdeaSortOrderHierarchy, ref: task });
+          });
+        }
+        const votingTasks = tasks.filter(
+          (task) => task.taskType.toLowerCase() == TaskType.VOTING
+        );
+        if (votingTasks) {
+          votingTasks.forEach((task) => {
+            result.push({ orderType: IdeaSortOrderView, ref: task });
+          });
+        }
       });
-    }
-  });
+  }
   return result;
 };
 

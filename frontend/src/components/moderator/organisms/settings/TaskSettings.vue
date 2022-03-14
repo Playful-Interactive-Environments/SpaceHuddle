@@ -742,7 +742,7 @@ export default class TaskSettings extends Vue {
   @Watch('showModal', { immediate: true })
   onTopicIdChanged(): void {
     this.loadInputViews();
-    ideaService.getSortOrderOptions(this.topicId).then((options) => {
+    ideaService.getSortOrderOptions(null).then((options) => {
       this.sortOrderOptions = options;
     });
   }
@@ -1198,7 +1198,9 @@ export default class TaskSettings extends Vue {
       if ('updateParameterForSaving' in moduleParams)
         await moduleParams.updateParameterForSaving();
       if ('customSyncPublicParticipant' in moduleParams) {
-        module.syncPublicParticipant = (moduleParams as CustomSync).customSyncPublicParticipant();
+        module.syncPublicParticipant = (
+          moduleParams as CustomSync
+        ).customSyncPublicParticipant();
       }
     }
   }

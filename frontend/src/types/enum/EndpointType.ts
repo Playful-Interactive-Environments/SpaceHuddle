@@ -3,6 +3,7 @@ enum EndpointType {
   AUTHORIZED_USER = 'authorized_user',
   CATEGORY = 'category',
   CATEGORIES = 'categories',
+  DEPENDENT = 'dependent',
   EXPORT = 'export',
   HIERARCHY = 'hierarchy',
   HIERARCHIES = 'hierarchies',
