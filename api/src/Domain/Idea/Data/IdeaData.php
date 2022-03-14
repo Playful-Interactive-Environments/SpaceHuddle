@@ -3,7 +3,6 @@
 namespace App\Domain\Idea\Data;
 
 use App\Domain\Participant\Data\AvatarData;
-use phpDocumentor\Reflection\Types\Boolean;
 use Selective\ArrayReader\ArrayReader;
 
 /**
@@ -35,9 +34,15 @@ class IdeaData extends IdeaAbstract
 
     /**
      * To visually distinguish in the front end, each participant is assigned its own avatar.
-     * @OA\Property(ref="#/components/schemas/AvatarData")
+     * @var array<AvatarData>
+     * @OA\Property(
+     *       type="array",
+     *       @OA\Items(
+     *         ref="#/components/schemas/AvatarData"
+     *       )
+     *     )
      */
-    public ?AvatarData $avatar;
+    public array $avatar;
 
     /**
      * Order group name.
@@ -83,6 +88,20 @@ class IdeaData extends IdeaAbstract
         if ($reader->findString("category_id")) {
             $this->category = new CategoryInfoData($data);
         }
-        $this->avatar = new AvatarData($data);
+        $avatar = new AvatarData($data);
+        if (str_contains($avatar->color, ",")) {
+            $colors = explode(",", $avatar->color);
+            $symbols = explode(",", $avatar->symbol);
+            $avatarList = [];
+            for ($i = 0; $i < sizeof($colors); $i++) {
+                if ($colors[$i]) {
+                    $avatarItem = new AvatarData(["color" => $colors[$i], "symbol" => $symbols[$i]]);
+                    array_push($avatarList, $avatarItem);
+                }
+            }
+            $this->avatar = $avatarList;
+        } else {
+            $this->avatar = [$avatar];
+        }
     }
 }

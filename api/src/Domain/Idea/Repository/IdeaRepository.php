@@ -103,36 +103,38 @@ class IdeaRepository implements RepositoryInterface
             ];
         }*/
 
-        $query = $this->queryFactory->newSelect($this->getEntityName());
-        if ($refId && $orderType == IdeaSortOrder::HIERARCHY) {
-            $query->select([
+        $defaultColumns = [
+            "idea.*",
+            "GROUP_CONCAT(participant.symbol) AS symbol",
+            "GROUP_CONCAT(participant.color) AS color",
+            "participant.id AS participant_id",
+            "COUNT(*) AS count"
+        ];
+
+        if ($authorisation->isParticipant()) {
+            $defaultColumns = [
                 "idea.*",
                 "MAX(participant.symbol) AS symbol",
                 "MAX(participant.color) AS color",
                 "MAX(participant.id) AS participant_id",
+                "COUNT(*) AS count"
+            ];
+        }
+
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        if ($refId && $orderType == IdeaSortOrder::HIERARCHY) {
+            $query->select(array_merge($defaultColumns, [
                 "hierarchy.category_idea_id as category_id",
                 "COALESCE(category.keywords, 'zzz') AS category",
                 "category.parameter AS category_parameter",
-                "hierarchy.order AS hierarchy_order",
-                "COUNT(*) AS count"
-            ]);
+                "hierarchy.order AS hierarchy_order"
+            ]));
         } elseif ($refId && $orderType == IdeaSortOrder::VIEW) {
-            $query->select([
-                "idea.*",
-                "MAX(participant.symbol) AS symbol",
-                "MAX(participant.color) AS color",
-                "MAX(participant.id) AS participant_id",
-                "selection_view_idea.order AS order",
-                "COUNT(*) AS count"
-            ]);
+            $query->select(array_merge($defaultColumns, [
+                "selection_view_idea.order AS order"
+            ]));
         } else {
-            $query->select([
-                "idea.*",
-                "MAX(participant.symbol) AS symbol",
-                "MAX(participant.color) AS color",
-                "MAX(participant.id) AS participant_id",
-                "COUNT(*) AS count"
-            ]);
+            $query->select($defaultColumns);
         }
 
         $participantConditions = ["participant.id = idea.participant_id"];
@@ -359,7 +361,15 @@ class IdeaRepository implements RepositoryInterface
                 } else {
                     switch (strtolower($orderType)) {
                         case IdeaSortOrder::PARTICIPANT:
-                            $orderContent = $resultItem->avatar->toString();
+                            if (sizeof($resultItem->avatar) > 0)
+                                $orderContent = "";
+                                for ($i = 0; $i < sizeof($resultItem->avatar); $i++) {
+                                    $itemAvatar = $resultItem->avatar[$i]->toString();
+                                    if (strlen($orderContent) > 0)
+                                        $orderContent = "$orderContent $itemAvatar";
+                                    else
+                                        $orderContent = $itemAvatar;
+                                }
                             break;
                     }
                 }

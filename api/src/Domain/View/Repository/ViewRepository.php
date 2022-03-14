@@ -6,6 +6,7 @@ use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Idea\Data\IdeaData;
 use App\Domain\Idea\Repository\IdeaRepository;
+use App\Domain\Idea\Type\IdeaSortOrder;
 use App\Domain\Topic\Repository\TopicRepository;
 use App\Domain\View\Data\ViewData;
 use App\Factory\QueryFactory;
@@ -56,6 +57,8 @@ class ViewRepository implements RepositoryInterface
         ?string $countOrderType = null,
         ?string $countRefId = null
     ): array {
+        $authorisation = $this->getAuthorisation();
+        $orderType = strtolower($orderType);
         $type = strtolower($type);
         if (!$orderType) {
             $orderType = $countOrderType;
@@ -67,32 +70,48 @@ class ViewRepository implements RepositoryInterface
 
         $query = $this->queryFactory->newSelect("selection_view_idea_$type AS view_idea");
 
-        if ($refId) {
-            $query->select([
+        $defaultColumns = [
+            "idea.*",
+            "view_idea.order",
+            "GROUP_CONCAT(participant.symbol) AS symbol",
+            "GROUP_CONCAT(participant.color) AS color",
+            "participant.id AS participant_id",
+            "COUNT(*) AS count"
+        ];
+
+        if ($authorisation->isParticipant()) {
+            $defaultColumns = [
                 "idea.*",
                 "view_idea.order",
-                "participant.symbol",
-                "participant.color",
-                "idea.participant_id",
+                "MAX(participant.symbol) AS symbol",
+                "MAX(participant.color) AS color",
+                "MAX(participant.id) AS participant_id",
+                "COUNT(*) AS count"
+            ];
+        }
+
+        if ($refId && str_contains($orderType, IdeaSortOrder::HIERARCHY)) {
+            $query->select(array_merge($defaultColumns, [
                 "hierarchy.category_idea_id as category_id",
                 "COALESCE(category.keywords, 'zzz') AS category",
                 "category.parameter AS category_parameter",
-                "hierarchy.order AS hierarchy_order",
-                "COUNT(*) AS count"
-            ]);
+                "hierarchy.order AS hierarchy_order"
+            ]));
+        } elseif ($refId && str_contains($orderType, IdeaSortOrder::VIEW)) {
+            $query->select(array_merge($defaultColumns, [
+                "selection_view_idea.order AS order"
+            ]));
         } else {
-            $query->select([
-                "idea.*",
-                "view_idea.order",
-                "participant.symbol",
-                "participant.color",
-                "COUNT(*) AS count"
-            ]);
+            $query->select($defaultColumns);
         }
 
+        $participantConditions = ["participant.id = idea.participant_id"];
+        if ($authorisation->isParticipant()) {
+            $participantConditions["participant.id"] = $authorisation->id;
+        }
 
         $query->innerJoin("idea", "idea.id = view_idea.idea_id")
-            ->leftJoin("participant", "participant.id = idea.participant_id")
+            ->leftJoin("participant", $participantConditions)
             ->andWhere([
                 "view_idea.parent_id" => $typeId
             ])
@@ -102,7 +121,7 @@ class ViewRepository implements RepositoryInterface
             $query->whereInList("idea.state", $filter);
         }
 
-        if ($refId) {
+        if ($refId && str_contains($orderType, IdeaSortOrder::HIERARCHY)) {
             $query->leftJoin("hierarchy", "hierarchy.sub_idea_id = idea.id")
                 ->join([
                     "category" => [
@@ -112,8 +131,12 @@ class ViewRepository implements RepositoryInterface
                     ]
                 ])
                 ->andWhere(["(category.id IS NOT NULL OR (category.id IS NULL AND hierarchy.sub_idea_id IS NULL))"]);
+        } elseif ($refId && str_contains($orderType, IdeaSortOrder::VIEW)) {
+            $query->leftJoin(
+                "selection_view_idea",
+                ["selection_view_idea.idea_id = idea.id", "selection_view_idea.parent_id" => $refId]
+            );
         }
-
 
         if ($count && ($orderType != $countOrderType || $refId != $countRefId)) {
             $ideaList = $this->getDetailSet($type, $typeId, $countOrderType, $countRefId, $filter, $count);
