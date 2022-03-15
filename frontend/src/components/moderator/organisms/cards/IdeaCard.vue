@@ -168,15 +168,15 @@ export default class IdeaCard extends Vue {
   get stateColor(): string {
     switch (IdeaStates[this.idea.state]) {
       case IdeaStates.NEW:
-        return '#f1be3a';
+        return '#999999';
       case IdeaStates.THUMBS_DOWN:
         return '#fe6e5d';
       case IdeaStates.THUMBS_UP:
         return '#01cf9e';
       case IdeaStates.DUPLICATE:
-        return '#0192d0';
+        return '#f1be3a';
       case IdeaStates.HANDLED:
-        return '#999999';
+        return '#0192d0';
     }
     return '#999999';
   }
