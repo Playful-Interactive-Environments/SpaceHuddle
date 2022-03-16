@@ -137,15 +137,15 @@ export const convertToOrderGroups = (
     .filter((idea) => filter(idea))
     .forEach((ideaItem) => {
       if (ideaItem.orderGroup) {
-        const orderGroup = orderGroupList[ideaItem.orderGroup];
+        const groupKey = `${ideaItem.orderGroup} `;
+        const orderGroup = orderGroupList[groupKey];
         if (!orderGroup) {
           let displayCount = DefaultDisplayCount;
-          if (ideaItem.orderGroup in actualOrderGroupList)
-            displayCount =
-              actualOrderGroupList[ideaItem.orderGroup].displayCount;
+          if (groupKey in actualOrderGroupList)
+            displayCount = actualOrderGroupList[groupKey].displayCount;
           let color = null;
           if (ideaItem.category) color = ideaItem.category.parameter.color;
-          orderGroupList[ideaItem.orderGroup] = new OrderGroup(
+          orderGroupList[groupKey] = new OrderGroup(
             [ideaItem],
             ideaItem.avatar,
             color,
