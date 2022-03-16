@@ -154,6 +154,7 @@
           :idea="idea"
           :is-selectable="false"
           :is-editable="true"
+          :show-state="false"
           :canChangeState="false"
           :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
           @ideaDeleted="getTaskIdeas"

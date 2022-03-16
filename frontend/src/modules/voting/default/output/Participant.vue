@@ -6,6 +6,7 @@
         :idea="ideas[ideaPointer]"
         :is-selectable="false"
         :is-editable="false"
+        :show-state="false"
       />
       <el-rate
         class="media-content"
@@ -36,6 +37,7 @@
         :is-selectable="false"
         :is-editable="false"
         :cutLongTexts="true"
+        :show-state="false"
       />
       <el-rate
         class="media-content"

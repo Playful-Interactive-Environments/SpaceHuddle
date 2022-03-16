@@ -24,6 +24,7 @@
           :idea="ideas[ideaPointer]"
           :is-selectable="false"
           :is-editable="false"
+          :show-state="false"
         />
       </span>
       <el-button

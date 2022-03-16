@@ -64,13 +64,19 @@
     </div>
     <div class="media" v-for="idea in ideas" :key="idea.id">
       <span class="media-left" v-if="!idea.isOwn">
-        <IdeaCard :idea="idea" :is-editable="false" class="public-idea" />
+        <IdeaCard
+          :idea="idea"
+          :is-editable="false"
+          class="public-idea"
+          :show-state="false"
+        />
       </span>
       <span class="media-content"></span>
       <span class="media-right" v-if="idea.isOwn">
         <IdeaCard
           :idea="idea"
           :is-editable="true"
+          :show-state="false"
           :canChangeState="false"
           class="public-idea"
           :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
