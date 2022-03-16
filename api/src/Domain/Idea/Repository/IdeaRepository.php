@@ -323,7 +323,7 @@ class IdeaRepository implements RepositoryInterface
                     array_push($orderList, 'hierarchy_order');
                     break;
                 case IdeaSortOrder::VIEW:
-                    array_push($orderList, 'selection_view_idea.order');
+                    $orderList['selection_view_idea.order'] = 'desc';
                     break;
             }
         }
