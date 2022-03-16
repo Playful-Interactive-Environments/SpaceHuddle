@@ -5,6 +5,7 @@
     :class="{
       card__selected: isSelected,
       card__new: isNew,
+      card__handled: isHandled,
       card__thumbs_up: isThumbsUp,
       card__thumbs_down: isThumbsDown,
       card__duplicate: isDuplicate,
@@ -186,6 +187,11 @@ export default class IdeaCard extends Vue {
     return false;
   }
 
+  get isHandled(): boolean {
+    if (this.idea) return IdeaStates[this.idea.state] == IdeaStates.HANDLED;
+    return false;
+  }
+
   get isThumbsDown(): boolean {
     if (this.idea) return IdeaStates[this.idea.state] == IdeaStates.THUMBS_DOWN;
     return false;
@@ -257,7 +263,11 @@ export default class IdeaCard extends Vue {
   }
 
   &__new {
-    border-color: var(--el-color-warning);
+    border-color: var(--el-card-border-color);
+  }
+
+  &__handled {
+    border-color: var(--color-blue);
   }
 
   &__thumbs_down {
@@ -269,7 +279,7 @@ export default class IdeaCard extends Vue {
   }
 
   &__duplicate {
-    border-color: var(--color-blue);
+    border-color: var(--el-color-warning);
   }
 
   &__content {
