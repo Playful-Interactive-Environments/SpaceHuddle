@@ -6,6 +6,7 @@
         :preTitle="formatDate(session.creationDate)"
         :description="session.description"
         :canModify="isModerator"
+        :session="session"
         v-on:openSettings="editSession"
         v-on:delete="deleteSession"
       >
@@ -57,7 +58,7 @@
           </span>
           <ModuleCount :session="session" />
         </template>
-        <template #footerContent>
+        <!--<template #footerContent>
           <SessionCode :code="session.connectionKey" />
           <TutorialStep type="sessionDetails" step="publicScreen" :order="3">
             <router-link
@@ -70,7 +71,7 @@
               </el-button>
             </router-link>
           </TutorialStep>
-        </template>
+        </template>-->
       </Sidebar>
     </template>
     <template v-slot:content>

@@ -120,11 +120,14 @@
                   :type="translationModuleName"
                   :order="3"
                 >
-                  <span class="link" v-on:click="itemClicked(element)">
+                  <span
+                    class="link threeLineText"
+                    v-on:click="itemClicked(element)"
+                  >
                     {{ getTitle(element) }}
                   </span>
                 </TutorialStep>
-                <span v-else>
+                <span v-else class="threeLineText">
                   {{ getTitle(element) }}
                 </span>
               </template>

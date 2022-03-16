@@ -316,7 +316,8 @@
       },
       "topicDetails": {
         "addTask": "add task",
-        "participantCount": "participants"
+        "participantCount": "participants",
+        "topic": "topic"
       }
     }
   },

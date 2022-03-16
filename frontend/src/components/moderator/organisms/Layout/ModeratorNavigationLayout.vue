@@ -6,7 +6,7 @@
     <el-container>
       <el-header>
         <el-scrollbar>
-          <div class="level">
+          <div class="level" v-if="!hasSidebar">
             <span class="level-left">
               <font-awesome-icon
                 v-if="!hasSidebar"
@@ -27,10 +27,10 @@
                 'nav--white': white,
               }"
             >
-              <router-link to="/sessions" class="level-item">
+              <!--<router-link to="/sessions" class="level-item">
                 <font-awesome-icon icon="database" class="nav__item-icon" />
                 {{ $t('moderator.molecule.navigation.sessions') }}
-              </router-link>
+              </router-link>-->
               <router-link to="/profile" class="level-item">
                 <font-awesome-icon icon="user" class="nav__item-icon" />
                 {{ $t('moderator.molecule.navigation.profile') }}
@@ -86,13 +86,17 @@ export default class ModeratorNavigationLayout extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.el-aside {
+  overflow: unset;
+}
+
 .main-layout {
   background-color: var(--color-background-gray);
   min-height: 100vh;
 
   &__content {
     flex-grow: 1;
-    padding: 0 2rem;
+    padding: 1rem 2rem;
   }
 }
 

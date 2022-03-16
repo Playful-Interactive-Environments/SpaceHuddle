@@ -8,7 +8,9 @@
       <Sidebar
         :title="topic.title"
         :description="topic.description"
+        :pre-title="topicTitle"
         :canModify="isModerator"
+        :session="session"
         v-on:openSettings="editTopic"
         v-on:delete="deleteTopic"
       >
@@ -54,16 +56,226 @@
               {{ $t('moderator.view.topicDetails.participantCount') }}
             </div>
           </div>
+          <el-collapse accordion v-model="activeTab">
+            <el-collapse-item
+              v-for="taskCategory in Object.keys(TaskCategory)"
+              :key="taskCategory"
+              :name="taskCategory"
+              :style="{
+                '--module-color': TaskCategory[taskCategory].color,
+              }"
+            >
+              <template #title>
+                <TutorialStep
+                  type="topicDetails"
+                  step="taskType"
+                  :order="1"
+                  :width="450"
+                  placement="bottom"
+                  :disableTutorial="
+                    !TaskCategory[taskCategory].taskTypes.includes(
+                      TaskType.BRAINSTORMING
+                    )
+                  "
+                >
+                  <span
+                    class="taskType"
+                    :style="{
+                      '--module-color': TaskCategory[taskCategory].color,
+                    }"
+                  >
+                    <font-awesome-icon
+                      :icon="TaskCategory[taskCategory].icon"
+                      :style="{
+                        '--module-color': TaskCategory[taskCategory].color,
+                      }"
+                    />
+                    <span class="taskCategory">
+                      {{ $t(`enum.taskCategory.${taskCategory}`) }}
+                    </span>
+                  </span>
+                </TutorialStep>
+              </template>
+              <el-space wrap fill>
+                <TutorialStep
+                  v-for="(task, index) in tasks.filter((task) =>
+                    TaskCategory[taskCategory].taskTypes.includes(
+                      TaskType[task.taskType]
+                    )
+                  )"
+                  :key="task.id"
+                  type="topicDetails"
+                  step="selectTask"
+                  :order="3"
+                  :displayAllDuplicates="true"
+                  :disableTutorial="index !== 0"
+                >
+                  <el-card
+                    v-on:click="changeTask(task)"
+                    :style="{
+                      '--module-color': TaskCategory[taskCategory].color,
+                    }"
+                    class="link"
+                    :class="{ selected: isActive(task) }"
+                  >
+                    <p class="media">
+                      <font-awesome-icon
+                        class="media-left"
+                        :icon="getModuleIcon(task)"
+                      ></font-awesome-icon>
+                      <span class="media-content"></span>
+                      <el-dropdown
+                        class="card__menu media-right"
+                        v-on:command="taskCommand(task, $event)"
+                      >
+                        <span class="el-dropdown-link">
+                          <font-awesome-icon icon="ellipsis-h" />
+                        </span>
+                        <template #dropdown>
+                          <el-dropdown-menu>
+                            <el-dropdown-item command="edit">
+                              <font-awesome-icon icon="pen" />
+                            </el-dropdown-item>
+                            <el-dropdown-item command="delete">
+                              <font-awesome-icon icon="trash" />
+                            </el-dropdown-item>
+                          </el-dropdown-menu>
+                        </template>
+                      </el-dropdown>
+                    </p>
+                    <TaskInfo
+                      :taskId="task.id"
+                      :modules="task.modules.map((module) => module.name)"
+                    ></TaskInfo>
+                  </el-card>
+                </TutorialStep>
+                <TutorialStep
+                  type="topicDetails"
+                  step="addTask"
+                  :order="2"
+                  :displayAllDuplicates="true"
+                >
+                  <AddItem
+                    :text="$t('moderator.view.topicDetails.addTask')"
+                    :isColumn="true"
+                    @addNew="displayTaskSettings(taskCategory)"
+                  />
+                </TutorialStep>
+              </el-space>
+            </el-collapse-item>
+          </el-collapse>
+          <!--<el-tabs v-model="activeTab">
+            <el-tab-pane
+              v-for="taskCategory in Object.keys(TaskCategory)"
+              :key="taskCategory"
+              :label="$t(`enum.taskCategory.${taskCategory}`)"
+              :name="taskCategory"
+              :disabled="!taskTypeAvailable(taskCategory)"
+            >
+              <template #label>
+                <TutorialStep
+                  type="topicDetails"
+                  step="taskType"
+                  :order="1"
+                  :width="450"
+                  placement="bottom"
+                  :disableTutorial="
+                    !TaskCategory[taskCategory].taskTypes.includes(
+                      TaskType.BRAINSTORMING
+                    )
+                  "
+                >
+                  <span
+                    class="taskType"
+                    :style="{
+                      '--module-color': TaskCategory[taskCategory].color,
+                    }"
+                  >
+                    <font-awesome-icon
+                      :icon="TaskCategory[taskCategory].icon"
+                      :style="{
+                        '--module-color': TaskCategory[taskCategory].color,
+                      }"
+                    />
+                    <span
+                      class="taskCategory"
+                      v-if="activeTab === taskCategory"
+                    >
+                      {{ $t(`enum.taskCategory.${taskCategory}`) }}
+                    </span>
+                  </span>
+                </TutorialStep>
+              </template>
+              <el-space wrap>
+                <TutorialStep
+                  v-for="(task, index) in tasks.filter((task) =>
+                    TaskCategory[taskCategory].taskTypes.includes(
+                      TaskType[task.taskType]
+                    )
+                  )"
+                  :key="task.id"
+                  type="topicDetails"
+                  step="selectTask"
+                  :order="3"
+                  :displayAllDuplicates="true"
+                  :disableTutorial="index !== 0"
+                >
+                  <el-card
+                    v-on:click="changeTask(task)"
+                    :style="{
+                      '--module-color': TaskCategory[taskCategory].color,
+                    }"
+                    class="link"
+                    :class="{ selected: isActive(task) }"
+                  >
+                    <p class="media">
+                      <font-awesome-icon
+                        class="media-left"
+                        :icon="getModuleIcon(task)"
+                      ></font-awesome-icon>
+                      <span class="media-content"></span>
+                      <el-dropdown
+                        class="card__menu media-right"
+                        v-on:command="taskCommand(task, $event)"
+                      >
+                        <span class="el-dropdown-link">
+                          <font-awesome-icon icon="ellipsis-h" />
+                        </span>
+                        <template #dropdown>
+                          <el-dropdown-menu>
+                            <el-dropdown-item command="edit">
+                              <font-awesome-icon icon="pen" />
+                            </el-dropdown-item>
+                            <el-dropdown-item command="delete">
+                              <font-awesome-icon icon="trash" />
+                            </el-dropdown-item>
+                          </el-dropdown-menu>
+                        </template>
+                      </el-dropdown>
+                    </p>
+                    <TaskInfo
+                      :taskId="task.id"
+                      :modules="task.modules.map((module) => module.name)"
+                    ></TaskInfo>
+                  </el-card>
+                </TutorialStep>
+                <TutorialStep
+                  type="topicDetails"
+                  step="addTask"
+                  :order="2"
+                  :displayAllDuplicates="true"
+                >
+                  <AddItem
+                    :text="$t('moderator.view.topicDetails.addTask')"
+                    :isColumn="true"
+                    @addNew="displayTaskSettings(taskCategory)"
+                  />
+                </TutorialStep>
+              </el-space>
+            </el-tab-pane>
+          </el-tabs>-->
         </template>
-        <template #footerContent>
-          <TaskTimeline
-            v-if="tasks"
-            direction="vertical"
-            :topicId="topicId"
-            :sessionId="sessionId"
-            :activeTaskId="activeTaskId"
-            v-on:changeActiveElement="changeTask"
-          ></TaskTimeline>
+        <!--<template #footerContent>
           <SessionCode v-if="session" :code="session.connectionKey" />
           <router-link
             v-if="sessionId"
@@ -74,112 +286,17 @@
               {{ $t('general.publicScreen') }}
             </el-button>
           </router-link>
-        </template>
+        </template>-->
       </Sidebar>
     </template>
     <template v-slot:content>
-      <el-tabs v-model="activeTab">
-        <el-tab-pane
-          v-for="taskCategory in Object.keys(TaskCategory)"
-          :key="taskCategory"
-          :label="$t(`enum.taskCategory.${taskCategory}`)"
-          :name="taskCategory"
-          :disabled="!taskTypeAvailable(taskCategory)"
-        >
-          <template #label>
-            <TutorialStep
-              type="topicDetails"
-              step="taskType"
-              :order="1"
-              :width="450"
-              placement="bottom"
-              :disableTutorial="
-                !TaskCategory[taskCategory].taskTypes.includes(
-                  TaskType.BRAINSTORMING
-                )
-              "
-            >
-              <span
-                class="taskType"
-                :style="{ '--module-color': TaskCategory[taskCategory].color }"
-              >
-                <font-awesome-icon
-                  :icon="TaskCategory[taskCategory].icon"
-                  class="taskType"
-                  :style="{
-                    '--module-color': TaskCategory[taskCategory].color,
-                  }"
-                />
-                {{ $t(`enum.taskCategory.${taskCategory}`) }}
-              </span>
-            </TutorialStep>
-          </template>
-          <el-space wrap>
-            <TutorialStep
-              v-for="(task, index) in tasks.filter((task) =>
-                TaskCategory[taskCategory].taskTypes.includes(
-                  TaskType[task.taskType]
-                )
-              )"
-              :key="task.id"
-              type="topicDetails"
-              step="selectTask"
-              :order="3"
-              :displayAllDuplicates="true"
-              :disableTutorial="index !== 0"
-            >
-              <el-card
-                v-on:click="changeTask(task)"
-                :style="{ '--module-color': TaskCategory[taskCategory].color }"
-                class="link"
-                :class="{ selected: isActive(task) }"
-              >
-                <p class="media">
-                  <font-awesome-icon
-                    class="media-left"
-                    :icon="getModuleIcon(task)"
-                  ></font-awesome-icon>
-                  <span class="media-content"></span>
-                  <el-dropdown
-                    class="card__menu media-right"
-                    v-on:command="taskCommand(task, $event)"
-                  >
-                    <span class="el-dropdown-link">
-                      <font-awesome-icon icon="ellipsis-h" />
-                    </span>
-                    <template #dropdown>
-                      <el-dropdown-menu>
-                        <el-dropdown-item command="edit">
-                          <font-awesome-icon icon="pen" />
-                        </el-dropdown-item>
-                        <el-dropdown-item command="delete">
-                          <font-awesome-icon icon="trash" />
-                        </el-dropdown-item>
-                      </el-dropdown-menu>
-                    </template>
-                  </el-dropdown>
-                </p>
-                <TaskInfo
-                  :taskId="task.id"
-                  :modules="task.modules.map((module) => module.name)"
-                ></TaskInfo>
-              </el-card>
-            </TutorialStep>
-            <TutorialStep
-              type="topicDetails"
-              step="addTask"
-              :order="2"
-              :displayAllDuplicates="true"
-            >
-              <AddItem
-                :text="$t('moderator.view.topicDetails.addTask')"
-                :isColumn="true"
-                @addNew="displayTaskSettings(taskCategory)"
-              />
-            </TutorialStep>
-          </el-space>
-        </el-tab-pane>
-      </el-tabs>
+      <TaskTimeline
+        v-if="tasks"
+        :topicId="topicId"
+        :sessionId="sessionId"
+        :activeTaskId="activeTaskId"
+        v-on:changeActiveElement="changeTask"
+      ></TaskTimeline>
       <el-divider></el-divider>
       <ModuleContentComponent
         v-if="activeTask"
@@ -402,6 +519,14 @@ export default class ModeratorTopicDetails extends Vue {
         if (queryTask) this.changeTask(queryTask);
       }
     });
+  }
+
+  get topicTitle(): string {
+    if (this.topic)
+      return `${this.topic.order + 1}. ${(this as any).$t(
+        'moderator.view.topicDetails.topic'
+      )}`;
+    return '';
   }
 
   async getTasks(): Promise<void> {
@@ -661,22 +786,97 @@ export default class ModeratorTopicDetails extends Vue {
     filter: grayscale(1); /* W3C */
   }
 }
+
 .taskType {
-  color: var(--module-color);
+  color: white;
   font-size: var(--font-size-default);
+}
+
+.el-collapse::v-deep {
+  margin: 1rem 0;
+  border-top: unset;
+  border-bottom: unset;
+
+  .el-collapse-item__header {
+    margin: 0.3rem 0;
+    padding: 0.5rem 1rem;
+    background-color: var(--module-color);
+    border-radius: 0.5rem;
+    color: white;
+    height: unset;
+    line-height: unset;
+    border-bottom: unset;
+
+    &.is-active {
+      outline: 2px solid white;
+      outline-offset: -2px;
+    }
+  }
+
+  .el-collapse-item__wrap {
+    border-bottom: unset;
+  }
+
+  .el-collapse-item__content {
+    padding-bottom: unset;
+  }
+
+  .taskType {
+    width: 100%;
+  }
+
+  .taskCategory {
+    padding-left: 0.5rem;
+  }
+}
+
+.el-tabs::v-deep {
+  --el-tab-item-padding: 0.1rem;
+  padding: 1rem 0;
+
+  .taskType {
+    background-color: var(--module-color);
+    border-radius: 0.5rem;
+    padding: 0.2rem 0.4rem;
+    min-width: 1.8rem;
+    text-align: center;
+    display: block;
+  }
+
+  .taskCategory {
+    padding-left: 0.5rem;
+  }
+
+  .is-active .taskType {
+    outline: 2px solid white;
+    outline-offset: -2px;
+  }
+
+  .el-tabs__active-bar,
+  .el-tabs__nav-wrap::after {
+    background-color: unset;
+  }
 }
 
 .el-space::v-deep {
   .el-space {
     &__item {
-      max-width: 18rem;
-      height: 10rem;
+      width: 100%;
     }
   }
 }
 
 .el-card {
-  height: 100%;
+  margin-bottom: unset;
+}
+
+.add::v-deep {
+  &.add--column,
+  &.add--column .el-card__body {
+    min-height: unset;
+    padding: 0.1rem;
+    flex-direction: row;
+  }
 }
 
 .module-info::v-deep {
@@ -688,6 +888,7 @@ export default class ModeratorTopicDetails extends Vue {
 .selected {
   border-width: 3px;
   border-color: var(--color-purple);
+  border-color: var(--module-color);
   //background-color: var(--color-yellow-light);
 }
 
