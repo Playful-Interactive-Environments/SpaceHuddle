@@ -34,10 +34,13 @@ export default class CollapseTitle extends Vue {
   @Prop({ default: null }) avatar!: Avatar[];
 
   get displayAvatar(): boolean {
-    const avatarDisplayText = this.avatar
-      .map((avatar) => `${avatar.symbol}${avatar.color}`)
-      .join(' ');
-    return this.text == avatarDisplayText;
+    if (this.avatar) {
+      const avatarDisplayText = this.avatar
+        .map((avatar) => `${avatar.symbol}${avatar.color}`)
+        .join(' ');
+      return this.text == avatarDisplayText;
+    }
+    return false;
   }
 }
 </script>

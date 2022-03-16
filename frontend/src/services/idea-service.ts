@@ -137,7 +137,9 @@ export const convertToOrderGroups = (
     .filter((idea) => filter(idea))
     .forEach((ideaItem) => {
       if (ideaItem.orderGroup) {
-        const groupKey = `${ideaItem.orderGroup} `;
+        const groupKey = isNaN(parseInt(ideaItem.orderGroup))
+          ? ideaItem.orderGroup
+          : `${ideaItem.orderGroup} `;
         const orderGroup = orderGroupList[groupKey];
         if (!orderGroup) {
           let displayCount = DefaultDisplayCount;
