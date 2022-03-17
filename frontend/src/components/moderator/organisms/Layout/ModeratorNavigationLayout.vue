@@ -86,10 +86,6 @@ export default class ModeratorNavigationLayout extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.el-aside {
-  overflow: unset;
-}
-
 .main-layout {
   background-color: var(--color-background-gray);
   min-height: 100vh;

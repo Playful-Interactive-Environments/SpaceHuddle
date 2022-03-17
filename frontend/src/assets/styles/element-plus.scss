@@ -292,7 +292,7 @@ $--font-size: (
                 --el-button-disabled-border-color: var(--color-red-light);
         }
 
-        &.stretch span {
+        &.stretch > span {
                 display: flex;
                 gap: 0.8rem;
         }

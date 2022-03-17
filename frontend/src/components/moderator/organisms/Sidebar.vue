@@ -144,7 +144,7 @@ export default class Sidebar extends Vue {
   min-width: var(--sidebar-min-width);
   height: 100%;
   min-height: 100vh;
-  padding: 2rem 2rem 5rem;
+  padding: 1.5rem 1.5rem 4rem;
   color: white;
 
   &__footer {
@@ -153,7 +153,7 @@ export default class Sidebar extends Vue {
     bottom: 0;
     width: var(--sidebar-width);
     min-width: var(--sidebar-min-width);
-    padding: 1rem 2rem;
+    padding: 0.5rem 1.5rem 1rem;
     background-color: var(--color-darkblue);
   }
 
