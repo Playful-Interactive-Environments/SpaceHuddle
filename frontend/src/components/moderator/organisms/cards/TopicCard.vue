@@ -199,10 +199,6 @@ export default class TopicCard extends Vue {
     text-align: center;
   }
 
-  .level-item {
-    //flex-direction: column;
-  }
-
   .level,
   .level-left,
   .level-right {

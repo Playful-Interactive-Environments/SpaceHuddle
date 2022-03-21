@@ -160,11 +160,6 @@
           :key="element.id"
         >
           <template #icon>
-            <!--<img
-              v-if="contentListIcon(element)"
-              :src="contentListIcon(element)"
-              alt=""
-            />-->
             <font-awesome-icon
               v-if="contentListIcon(element)"
               :icon="contentListIcon(element)"

@@ -72,17 +72,7 @@
               :useEditOverlay="true"
             />
           </el-aside>
-          <el-main>
-            <!--<el-input
-              v-if="showLinkInput"
-              v-model="formData.imageWebLink"
-              name="link"
-              autocomplete="on"
-              :placeholder="
-                $t('module.brainstorming.default.participant.linkInfo')
-              "
-            />-->
-          </el-main>
+          <el-main></el-main>
         </el-container>
       </el-form-item>
       <el-form-item
@@ -90,21 +80,6 @@
         :rules="[defaultFormRules.ruleStateMessage]"
       >
         <span class="media">
-          <!--<div class="media-left" role="button">
-            <el-button v-on:click="showLinkInput = !showLinkInput" circle>
-              <font-awesome-icon icon="link" />
-            </el-button>
-            <el-button v-on:click="showUploadDialog = !showUploadDialog" circle>
-              <font-awesome-icon icon="paperclip" />
-            </el-button>
-            <el-button
-              v-if="formData.imgDataUrl || formData.imageWebLink"
-              v-on:click="deleteImage"
-              circle
-            >
-              <font-awesome-icon icon="trash" />
-            </el-button>
-          </div>-->
           <div class="media-left">
             <el-button v-on:click="showHistory = true" type="primary">
               {{ $t('module.brainstorming.default.participant.ideas') }}:

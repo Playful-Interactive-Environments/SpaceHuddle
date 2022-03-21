@@ -36,7 +36,6 @@ export default class ModeratorConfig
 
   async updateParameterForSaving(): Promise<void> {
     const customConfig = this.$refs.customConfig as CustomParameter;
-    console.log(customConfig);
     if (customConfig) await customConfig.updateParameterForSaving();
   }
 

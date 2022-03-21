@@ -4,13 +4,10 @@
       <el-header>
         <div class="sidebar__top">
           <div class="sidebar__page-header">
+            <div class="sidebar__logo">
+              <font-awesome-icon :icon="['fac', 'logoWithName']" class="logo" />
+            </div>
             <span>
-              <el-page-header
-                v-if="showBack"
-                :content="currentRouteTitle"
-                :title="$t('general.back')"
-                @back="$router.go(-1)"
-              />
               <router-link to="/sessions">
                 <font-awesome-icon icon="home" />
               </router-link>
@@ -18,20 +15,21 @@
                 <font-awesome-icon icon="user" />
               </router-link>
             </span>
-            <div class="sidebar__logo">
-              <font-awesome-icon :icon="['fac', 'logoWithName']" class="logo" />
-            </div>
           </div>
           <div class="sidebar__management">
-            <div>{{ preTitle }}</div>
+            <div v-if="!!$slots.management">
+              <slot name="management" />
+            </div>
+            <div v-else>
+              <el-page-header
+                v-if="showBack"
+                :content="currentRouteTitle"
+                :title="$t('general.back')"
+                @back="$router.go(-1)"
+              />
+            </div>
             <div class="sidebar__icon" aria-label="settings" role="button">
-              <span v-on:click="$emit('delete', $event)">
-                <font-awesome-icon
-                  class="awesome-icon"
-                  icon="trash"
-                  v-if="canModify"
-                />
-              </span>
+              <slot name="settings" />
               <span v-on:click="$emit('openSettings', $event)">
                 <font-awesome-icon
                   class="awesome-icon"
@@ -39,7 +37,13 @@
                   v-if="canModify"
                 />
               </span>
-              <slot name="settings"></slot>
+              <span v-on:click="$emit('delete', $event)">
+                <font-awesome-icon
+                  class="awesome-icon"
+                  icon="trash"
+                  v-if="canModify"
+                />
+              </span>
             </div>
           </div>
           <h1 class="heading heading--regular heading--white threeLineText">
@@ -55,43 +59,6 @@
       <el-main>
         <slot name="mainContent"></slot>
       </el-main>
-      <!--<el-footer>
-        <div class="sidebar__bottom">
-          <slot name="footerContent"></slot>
-        </div>
-      </el-footer>-->
-      <!--<el-affix position="bottom" :offset="15">
-        <div class="sidebar__bottom" v-if="session">
-          <SessionCode :code="session.connectionKey" />
-          <TutorialStep type="sessionDetails" step="publicScreen" :order="3">
-            <router-link
-              v-if="session.id"
-              :to="`/public-screen/${session.id}`"
-              target="_blank"
-            >
-              <el-button type="info" class="fullwidth">
-                {{ $t('general.publicScreen') }}
-              </el-button>
-            </router-link>
-          </TutorialStep>
-        </div>
-      </el-affix>-->
-      <!--<el-footer>
-        <div class="sidebar__bottom session-code" v-if="session">
-          <SessionCode :code="session.connectionKey" />
-          <TutorialStep type="sessionDetails" step="publicScreen" :order="3">
-            <router-link
-              v-if="session.id"
-              :to="`/public-screen/${session.id}`"
-              target="_blank"
-            >
-              <el-button type="info">
-                <font-awesome-icon :icon="['fac', 'presentation']" />
-              </el-button>
-            </router-link>
-          </TutorialStep>
-        </div>
-      </el-footer>-->
     </el-container>
   </el-scrollbar>
   <div class="sidebar__footer">
@@ -121,10 +88,10 @@ import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 
 @Options({
   components: { SessionCode, TutorialStep },
+  emits: ['openSettings', 'delete'],
 })
 export default class Sidebar extends Vue {
   @Prop({ default: '' }) readonly title!: string;
-  @Prop({ default: '' }) readonly preTitle!: string;
   @Prop({ default: '' }) readonly description!: string;
   @Prop({ default: true }) readonly canModify!: boolean;
   @Prop({ default: '' }) readonly currentRouteTitle!: string;
@@ -161,16 +128,16 @@ export default class Sidebar extends Vue {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    //height: 2rem;
     margin-bottom: 2rem;
 
     span {
       display: inline-flex;
+      align-items: center;
 
       a {
         color: white;
         font-size: 14px;
-        margin-right: 0.6rem;
+        margin-left: 0.6rem;
         margin-top: 0;
       }
     }
@@ -185,14 +152,14 @@ export default class Sidebar extends Vue {
   }
 
   &__logo {
-    font-size: 14px;
+    font-size: 1.3rem;
   }
 
   &__management {
     display: flex;
     justify-content: space-between;
     color: var(--color-darkblue-light);
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     text-transform: uppercase;
   }
 
@@ -237,11 +204,10 @@ export default class Sidebar extends Vue {
 }
 
 .el-page-header::v-deep {
-  color: white;
+  --el-border-color-base: var(--color-darkblue-light);
   line-height: unset;
   display: inline-block;
   .el-page-header__content {
-    color: white;
     text-transform: uppercase;
     font-size: 14px;
   }

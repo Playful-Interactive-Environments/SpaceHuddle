@@ -4,14 +4,25 @@
     class="module-info"
     :style="{ '--module-color': getColor() }"
   >
-    <el-breadcrumb separator="|" class="module-info__type" v-if="taskType">
-      <!--<el-breadcrumb-item>
-        {{ $t(`enum.taskType.${taskType}`) }}
-      </el-breadcrumb-item>-->
-      <el-breadcrumb-item v-for="module in moduleInfo" :key="module">
-        {{ $t(`module.${taskType}.${module}.description.title`) }}
-      </el-breadcrumb-item>
-    </el-breadcrumb>
+    <span class="media">
+      <span class="media-left" v-if="!!$slots.moduleInfoLeft">
+        <slot name="moduleInfoLeft" />
+      </span>
+      <span class="media-content">
+        <el-breadcrumb
+          separator=" | "
+          class="module-info__type oneLineText"
+          v-if="taskType"
+        >
+          <el-breadcrumb-item v-for="module in moduleInfo" :key="module">
+            {{ $t(`module.${taskType}.${module}.description.title`) }}
+          </el-breadcrumb-item>
+        </el-breadcrumb>
+      </span>
+      <span class="media-right" v-if="!!$slots.moduleInfoRight">
+        <slot name="moduleInfoRight" />
+      </span>
+    </span>
     <h3
       :class="{
         'heading--regular': isParticipant,
@@ -24,6 +35,7 @@
     <p
       class="module-info__description"
       :class="{ twoLineText: shortenDescription }"
+      v-if="description"
     >
       {{ description }}
     </p>
@@ -95,6 +107,18 @@ export default class TaskInfo extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.media-content {
+  align-self: center;
+}
+.media-left {
+  align-self: center;
+  margin-right: 0.5rem;
+}
+.media-right {
+  align-self: center;
+  margin-left: 0.5rem;
+}
+
 @import '~@/assets/styles/breakpoints.scss';
 
 .module-info {
@@ -102,8 +126,9 @@ export default class TaskInfo extends Vue {
   font-size: var(--font-size-small);
   text-align: left;
 
-  @include md {
-    //max-width: 60%;
+  h3 {
+    margin-top: 0.5rem;
+    line-height: 1.2;
   }
 
   &__type {
@@ -130,14 +155,13 @@ export default class TaskInfo extends Vue {
   }
 
   &--centered {
-    //text-align: center;
     max-width: 100%;
     font-size: var(--font-size-default);
     margin-bottom: 1em;
     line-height: 1.75em;
 
     span {
-      line-height: 3em;
+      line-height: 2em;
     }
   }
 }
@@ -151,6 +175,7 @@ export default class TaskInfo extends Vue {
 
   .el-breadcrumb__item {
     float: unset;
+    display: inline;
   }
 }
 </style>

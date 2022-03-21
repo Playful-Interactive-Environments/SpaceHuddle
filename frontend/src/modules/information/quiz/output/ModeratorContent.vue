@@ -363,7 +363,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       topicService.getTopicById(task.topicId).then((topic) => {
         this.sessionId = topic.sessionId;
       });
-      console.log(task.modules);
       const module = task.modules.find((module) =>
         moduleNameValid(module.name)
       );
@@ -373,7 +372,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           QuestionType[module.parameter.questionType.toUpperCase()];
         this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
         this.defaultQuestionTime = module.parameter.defaultQuestionTime;
-        console.log(this.questionType);
       }
       this.getHierarchies();
     });

@@ -3,13 +3,15 @@
     <template v-slot:sidebar>
       <Sidebar
         :title="session.title"
-        :preTitle="formatDate(session.creationDate)"
         :description="session.description"
         :canModify="isModerator"
         :session="session"
         v-on:openSettings="editSession"
         v-on:delete="deleteSession"
       >
+        <template #management>
+          {{ formatDate(session.creationDate) }}
+        </template>
         <template #settings>
           <TutorialStep
             v-if="!isModerator"
@@ -58,20 +60,6 @@
           </span>
           <ModuleCount :session="session" />
         </template>
-        <!--<template #footerContent>
-          <SessionCode :code="session.connectionKey" />
-          <TutorialStep type="sessionDetails" step="publicScreen" :order="3">
-            <router-link
-              v-if="session.id"
-              :to="`/public-screen/${session.id}`"
-              target="_blank"
-            >
-              <el-button type="info" class="fullwidth">
-                {{ $t('general.publicScreen') }}
-              </el-button>
-            </router-link>
-          </TutorialStep>
-        </template>-->
       </Sidebar>
     </template>
     <template v-slot:content>

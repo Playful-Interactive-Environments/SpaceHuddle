@@ -8,7 +8,6 @@
       <Sidebar
         :title="topic.title"
         :description="topic.description"
-        :pre-title="topicTitle"
         :canModify="isModerator"
         :session="session"
         v-on:openSettings="editTopic"
@@ -48,14 +47,6 @@
           </el-dropdown>
         </template>
         <template #headerContent>
-          <div v-if="activeTask" class="module-count">
-            <div class="module-count__item">
-              <span class="module-count__count">
-                {{ activeTask.participantCount }}
-              </span>
-              {{ $t('moderator.view.topicDetails.participantCount') }}
-            </div>
-          </div>
           <el-collapse accordion v-model="activeTab">
             <el-collapse-item
               v-for="taskCategory in Object.keys(TaskCategory)"
@@ -98,6 +89,18 @@
               </template>
               <el-space wrap fill>
                 <TutorialStep
+                  type="topicDetails"
+                  step="addTask"
+                  :order="2"
+                  :displayAllDuplicates="true"
+                >
+                  <AddItem
+                    :text="$t('moderator.view.topicDetails.addTask')"
+                    :isColumn="true"
+                    @addNew="displayTaskSettings(taskCategory)"
+                  />
+                </TutorialStep>
+                <TutorialStep
                   v-for="(task, index) in tasks.filter((task) =>
                     TaskCategory[taskCategory].taskTypes.includes(
                       TaskType[task.taskType]
@@ -118,175 +121,43 @@
                     class="link"
                     :class="{ selected: isActive(task) }"
                   >
-                    <p class="media">
-                      <font-awesome-icon
-                        class="media-left"
-                        :icon="getModuleIcon(task)"
-                      ></font-awesome-icon>
-                      <span class="media-content"></span>
-                      <el-dropdown
-                        class="card__menu media-right"
-                        v-on:command="taskCommand(task, $event)"
-                      >
-                        <span class="el-dropdown-link">
-                          <font-awesome-icon icon="ellipsis-h" />
-                        </span>
-                        <template #dropdown>
-                          <el-dropdown-menu>
-                            <el-dropdown-item command="edit">
-                              <font-awesome-icon icon="pen" />
-                            </el-dropdown-item>
-                            <el-dropdown-item command="delete">
-                              <font-awesome-icon icon="trash" />
-                            </el-dropdown-item>
-                          </el-dropdown-menu>
-                        </template>
-                      </el-dropdown>
-                    </p>
                     <TaskInfo
                       :taskId="task.id"
                       :modules="task.modules.map((module) => module.name)"
-                    ></TaskInfo>
+                    >
+                      <template #moduleInfoLeft>
+                        <span class="person">
+                          <font-awesome-icon icon="user-group" />
+                          {{ task.participantCount }}
+                        </span>
+                      </template>
+                      <template #moduleInfoRight>
+                        <el-dropdown
+                          class="card__menu media-right"
+                          v-on:command="taskCommand(task, $event)"
+                        >
+                          <span class="el-dropdown-link">
+                            <font-awesome-icon icon="ellipsis-h" />
+                          </span>
+                          <template #dropdown>
+                            <el-dropdown-menu>
+                              <el-dropdown-item command="edit">
+                                <font-awesome-icon icon="pen" />
+                              </el-dropdown-item>
+                              <el-dropdown-item command="delete">
+                                <font-awesome-icon icon="trash" />
+                              </el-dropdown-item>
+                            </el-dropdown-menu>
+                          </template>
+                        </el-dropdown>
+                      </template>
+                    </TaskInfo>
                   </el-card>
-                </TutorialStep>
-                <TutorialStep
-                  type="topicDetails"
-                  step="addTask"
-                  :order="2"
-                  :displayAllDuplicates="true"
-                >
-                  <AddItem
-                    :text="$t('moderator.view.topicDetails.addTask')"
-                    :isColumn="true"
-                    @addNew="displayTaskSettings(taskCategory)"
-                  />
                 </TutorialStep>
               </el-space>
             </el-collapse-item>
           </el-collapse>
-          <!--<el-tabs v-model="activeTab">
-            <el-tab-pane
-              v-for="taskCategory in Object.keys(TaskCategory)"
-              :key="taskCategory"
-              :label="$t(`enum.taskCategory.${taskCategory}`)"
-              :name="taskCategory"
-              :disabled="!taskTypeAvailable(taskCategory)"
-            >
-              <template #label>
-                <TutorialStep
-                  type="topicDetails"
-                  step="taskType"
-                  :order="1"
-                  :width="450"
-                  placement="bottom"
-                  :disableTutorial="
-                    !TaskCategory[taskCategory].taskTypes.includes(
-                      TaskType.BRAINSTORMING
-                    )
-                  "
-                >
-                  <span
-                    class="taskType"
-                    :style="{
-                      '--module-color': TaskCategory[taskCategory].color,
-                    }"
-                  >
-                    <font-awesome-icon
-                      :icon="TaskCategory[taskCategory].icon"
-                      :style="{
-                        '--module-color': TaskCategory[taskCategory].color,
-                      }"
-                    />
-                    <span
-                      class="taskCategory"
-                      v-if="activeTab === taskCategory"
-                    >
-                      {{ $t(`enum.taskCategory.${taskCategory}`) }}
-                    </span>
-                  </span>
-                </TutorialStep>
-              </template>
-              <el-space wrap>
-                <TutorialStep
-                  v-for="(task, index) in tasks.filter((task) =>
-                    TaskCategory[taskCategory].taskTypes.includes(
-                      TaskType[task.taskType]
-                    )
-                  )"
-                  :key="task.id"
-                  type="topicDetails"
-                  step="selectTask"
-                  :order="3"
-                  :displayAllDuplicates="true"
-                  :disableTutorial="index !== 0"
-                >
-                  <el-card
-                    v-on:click="changeTask(task)"
-                    :style="{
-                      '--module-color': TaskCategory[taskCategory].color,
-                    }"
-                    class="link"
-                    :class="{ selected: isActive(task) }"
-                  >
-                    <p class="media">
-                      <font-awesome-icon
-                        class="media-left"
-                        :icon="getModuleIcon(task)"
-                      ></font-awesome-icon>
-                      <span class="media-content"></span>
-                      <el-dropdown
-                        class="card__menu media-right"
-                        v-on:command="taskCommand(task, $event)"
-                      >
-                        <span class="el-dropdown-link">
-                          <font-awesome-icon icon="ellipsis-h" />
-                        </span>
-                        <template #dropdown>
-                          <el-dropdown-menu>
-                            <el-dropdown-item command="edit">
-                              <font-awesome-icon icon="pen" />
-                            </el-dropdown-item>
-                            <el-dropdown-item command="delete">
-                              <font-awesome-icon icon="trash" />
-                            </el-dropdown-item>
-                          </el-dropdown-menu>
-                        </template>
-                      </el-dropdown>
-                    </p>
-                    <TaskInfo
-                      :taskId="task.id"
-                      :modules="task.modules.map((module) => module.name)"
-                    ></TaskInfo>
-                  </el-card>
-                </TutorialStep>
-                <TutorialStep
-                  type="topicDetails"
-                  step="addTask"
-                  :order="2"
-                  :displayAllDuplicates="true"
-                >
-                  <AddItem
-                    :text="$t('moderator.view.topicDetails.addTask')"
-                    :isColumn="true"
-                    @addNew="displayTaskSettings(taskCategory)"
-                  />
-                </TutorialStep>
-              </el-space>
-            </el-tab-pane>
-          </el-tabs>-->
         </template>
-        <!--<template #footerContent>
-          <SessionCode v-if="session" :code="session.connectionKey" />
-          <router-link
-            v-if="sessionId"
-            :to="`/public-screen/${sessionId}`"
-            target="_blank"
-          >
-            <el-button type="info" class="fullwidth">
-              {{ $t('general.publicScreen') }}
-            </el-button>
-          </router-link>
-        </template>-->
       </Sidebar>
     </template>
     <template v-slot:content>
@@ -650,21 +521,31 @@ export default class ModeratorTopicDetails extends Vue {
         this.hasNewActiveTaskType(newTask) ||
         this.hasNewActiveTaskModule(newTask))
     ) {
-      await getAsyncModule(
-        ModuleComponentType.MODERATOR_CONTENT,
-        TaskType[newTask.taskType],
-        newTask.modules[0].name
-      ).then((component) => {
-        if (this.$options.components) {
-          this.componentLoadingState = ComponentLoadingState.SELECTED;
-          this.$options.components['ModuleContentComponent'] = component;
-          this.componentLoadIndex++;
-        }
+      if (
+        this.hasNewActiveTaskType(newTask) ||
+        this.hasNewActiveTaskModule(newTask)
+      ) {
+        await getAsyncModule(
+          ModuleComponentType.MODERATOR_CONTENT,
+          TaskType[newTask.taskType],
+          newTask.modules[0].name
+        ).then((component) => {
+          console.log(component);
+          if (this.$options.components) {
+            this.componentLoadingState = ComponentLoadingState.SELECTED;
+            this.$options.components['ModuleContentComponent'] = component;
+            this.componentLoadIndex++;
+          }
+          this.activeTask = newTask;
+          this.previousActiveTask = this.activeTask;
+          this.setActiveTab(newTask.taskType);
+          this.$router.replace({ params: { taskId: newTask.id } });
+        });
+      } else {
         this.activeTask = newTask;
         this.previousActiveTask = this.activeTask;
-        this.setActiveTab(newTask.taskType);
-        this.$router.replace({ params: { taskId: newTask.id } });
-      });
+        await this.$router.replace({ params: { taskId: newTask.id } });
+      }
     }
   }
 
@@ -797,19 +678,24 @@ export default class ModeratorTopicDetails extends Vue {
   border-top: unset;
   border-bottom: unset;
 
+  .el-collapse-item {
+    border: solid var(--module-color) 1px;
+    border-radius: var(--border-radius-xs);
+    margin-top: 0.5rem;
+  }
+
   .el-collapse-item__header {
-    margin: 0.3rem 0;
+    --header-radius: calc(var(--border-radius-xs) - 2px);
     padding: 0.5rem 1rem;
     background-color: var(--module-color);
-    border-radius: 0.5rem;
+    border-radius: var(--header-radius);
     color: white;
     height: unset;
     line-height: unset;
     border-bottom: unset;
 
     &.is-active {
-      outline: 2px solid white;
-      outline-offset: -2px;
+      border-radius: var(--header-radius) var(--header-radius) 0 0;
     }
   }
 
@@ -818,7 +704,7 @@ export default class ModeratorTopicDetails extends Vue {
   }
 
   .el-collapse-item__content {
-    padding-bottom: unset;
+    padding: 0.5rem;
   }
 
   .taskType {
@@ -836,7 +722,7 @@ export default class ModeratorTopicDetails extends Vue {
 
   .taskType {
     background-color: var(--module-color);
-    border-radius: 0.5rem;
+    border-radius: var(--border-radius-xs);
     padding: 0.2rem 0.4rem;
     min-width: 1.8rem;
     text-align: center;
@@ -866,8 +752,26 @@ export default class ModeratorTopicDetails extends Vue {
   }
 }
 
-.el-card {
+.el-card::v-deep {
   margin-bottom: unset;
+  .el-card__body {
+    padding: 0.5rem 0.8rem;
+  }
+
+  .person {
+    font-weight: var(--font-weight-semibold);
+    font-size: 0.7rem;
+    //background-color: var(--module-color);
+    border: solid var(--module-color) 1px;
+    border-radius: var(--border-radius-xs);
+    padding: 0.3rem;
+  }
+}
+
+.selected {
+  .person {
+    background-color: var(--module-color);
+  }
 }
 
 .add::v-deep {
@@ -879,17 +783,10 @@ export default class ModeratorTopicDetails extends Vue {
   }
 }
 
-.module-info::v-deep {
-  .el-breadcrumb__item {
-    float: left;
-  }
-}
-
 .selected {
   border-width: 3px;
   border-color: var(--color-purple);
   border-color: var(--module-color);
-  //background-color: var(--color-yellow-light);
 }
 
 p {
