@@ -203,6 +203,7 @@ CREATE TABLE `task` (
                         `task_type` varchar(255) NOT NULL,
                         `name` varchar(255) DEFAULT NULL,
                         `description` text DEFAULT NULL,
+                        `keywords` varchar(50) DEFAULT NULL,
                         `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
                         `order` int(11) NOT NULL DEFAULT 0,
                         `state` varchar(255) DEFAULT NULL,
