@@ -232,6 +232,18 @@
           />
         </el-form-item>
         <el-form-item
+          :label="$t('moderator.organism.settings.taskSettings.keywords')"
+          prop="keywords"
+          :rules="[defaultFormRules.ruleToLong(50)]"
+        >
+          <el-input
+            v-model="formData.keywords"
+            :placeholder="
+              $t('moderator.organism.settings.taskSettings.keywordsExample')
+            "
+          />
+        </el-form-item>
+        <el-form-item
           prop="moduleListMain"
           :rules="[
             defaultFormRules.ruleSelection,
@@ -502,6 +514,7 @@ class ModuleTaskProperty extends ModuleTask {
 interface FormDataDefinition {
   name: string;
   description: string;
+  keywords: string;
   parameter: any;
   input: InputData[];
   moduleListMain: ModuleTaskProperty[];
@@ -551,6 +564,7 @@ export default class TaskSettings extends Vue {
     input: [],
     name: '',
     description: '',
+    keywords: '',
     parameter: {},
     moduleListMain: [],
     moduleListAddOn: [],
@@ -578,6 +592,7 @@ export default class TaskSettings extends Vue {
         this.mainModule = new ModuleTask(task.taskType, 'default');
         this.formData.name = task.name;
         this.formData.description = task.description;
+        this.formData.keywords = task.keywords;
         this.formData.parameter = task.parameter ?? {};
         if (this.formData.parameter.input)
           this.formData.input = this.formData.parameter.input.map((input) => {
@@ -610,6 +625,7 @@ export default class TaskSettings extends Vue {
     this.loadParticipantModuleList();
     this.formData.name = '';
     this.formData.description = '';
+    this.formData.keywords = '';
     this.formData.parameter = {};
     this.formData.input = [];
     this.setDefaultInput();
@@ -1135,6 +1151,7 @@ export default class TaskSettings extends Vue {
           taskType: this.taskType,
           name: this.formData.name,
           description: this.formData.description,
+          keywords: this.formData.keywords,
           parameter: this.formData.parameter,
           modules: this.moduleSelection.map((item) => item.moduleName),
           state: this.task?.state,
@@ -1159,6 +1176,7 @@ export default class TaskSettings extends Vue {
           taskType: this.taskType,
           name: this.formData.name,
           description: this.formData.description,
+          keywords: this.formData.keywords,
           parameter: this.formData.parameter,
           state: state,
           order: taskCount,

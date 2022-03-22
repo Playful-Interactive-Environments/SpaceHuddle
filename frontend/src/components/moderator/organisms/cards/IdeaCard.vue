@@ -175,7 +175,7 @@ export default class IdeaCard extends Vue {
       case IdeaStates.THUMBS_UP:
         return '#01cf9e';
       case IdeaStates.DUPLICATE:
-        return '#f1be3a';
+        return '#f3a40a';
       case IdeaStates.HANDLED:
         return '#0192d0';
     }

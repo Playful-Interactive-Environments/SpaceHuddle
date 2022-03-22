@@ -123,6 +123,8 @@ export default class ModuleCount extends Vue {
 .participant-list::v-deep {
   font-size: 1.5rem;
   overflow-y: auto;
+  scrollbar-color: var(--color-primary) var(--color-gray);
+  scrollbar-width: thin;
   max-height: 50vh;
 
   .el-space__item {

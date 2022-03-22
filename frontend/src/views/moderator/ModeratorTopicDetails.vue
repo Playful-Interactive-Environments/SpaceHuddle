@@ -530,7 +530,6 @@ export default class ModeratorTopicDetails extends Vue {
           TaskType[newTask.taskType],
           newTask.modules[0].name
         ).then((component) => {
-          console.log(component);
           if (this.$options.components) {
             this.componentLoadingState = ComponentLoadingState.SELECTED;
             this.$options.components['ModuleContentComponent'] = component;

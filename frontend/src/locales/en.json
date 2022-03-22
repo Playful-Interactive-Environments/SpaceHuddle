@@ -140,7 +140,8 @@
           "header": "Set Timer",
           "time": "Time limit",
           "useTimer": "activate time limit",
-          "submit": "Save"
+          "submit": "Save",
+          "deactivate": "deactivate"
         },
         "ideaSettings": {
           "header": "Idea settings",
@@ -180,6 +181,8 @@
           "questionExample": "e.g. What should be the name of our new app?",
           "description": "Description",
           "descriptionExample": "e.g. The purpose of the meeting is to come up with new ideas our new app.",
+          "keywords": "Keywords for timeline",
+          "keywordsExample": "keyword",
           "submit": "Save module",
           "saveAndActivate": "Save and activate module",
           "moduleSearch": "type in a search module name",

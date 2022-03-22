@@ -72,28 +72,20 @@
       >
         <template #item="{ element }">
           <div class="detail__module">
-            <TutorialStep
-              type="sessionDetails"
-              step="selectTopic"
-              :order="6"
-              :width="450"
+            <TopicCard
+              :sessionId="sessionId"
+              :topic="element"
+              :canModify="isModerator"
+              v-on:topicDeleted="getTopics"
             >
-              <TopicCard
-                :sessionId="sessionId"
-                :topic="element"
-                :canModify="isModerator"
-                v-on:topicDeleted="getTopics"
-              >
-                <TaskTimeline
-                  :topic-id="element.id"
-                  :session-id="sessionId"
-                  style="margin-bottom: 1rem"
-                  :is-linked-to-task="false"
-                  v-on:changePublicScreen="publicScreenTopic = element.id"
-                  :key="publicScreenTopic"
-                ></TaskTimeline>
-              </TopicCard>
-            </TutorialStep>
+              <TaskTimeline
+                :topic-id="element.id"
+                :session-id="sessionId"
+                :is-linked-to-task="false"
+                v-on:changePublicScreen="publicScreenTopic = element.id"
+                :key="publicScreenTopic"
+              ></TaskTimeline>
+            </TopicCard>
           </div>
         </template>
       </draggable>

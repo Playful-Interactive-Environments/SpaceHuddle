@@ -5,7 +5,6 @@
     v-model:activeItem="editTask"
     translationModuleName="taskTimeline"
     :entityName="TimerEntity.TASK"
-    :direction="direction"
     :readonly="readonly"
     :canDisablePublicTimeline="true"
     :isLinkedToDetails="isLinkedToTask"
@@ -17,7 +16,7 @@
     :contentListIcon="contentListIcon"
     :contentListColor="contentListColor"
     :getKey="(item) => item.id"
-    :getTitle="(item) => item.name"
+    :getTitle="(item) => (item.keywords ? item.keywords : item.name)"
     :getTimerEntity="(item) => item"
     :itemIsEquals="(a, b) => (!a && !b) || (a && b && a.id === b.id)"
     :displayItem="(item) => item"
@@ -60,7 +59,6 @@ import TaskCategory, {
 export default class TaskTimeline extends Vue {
   @Prop() readonly topicId!: string;
   @Prop() readonly sessionId!: string;
-  @Prop({ default: 'horizontal' }) readonly direction!: string;
   @Prop({ default: false }) readonly readonly!: boolean;
   @Prop({ default: true }) readonly isLinkedToTask!: boolean;
   @Prop() activeTaskId!: string;

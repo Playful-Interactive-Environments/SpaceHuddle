@@ -1,46 +1,59 @@
 <template>
   <div class="card__extension">
-    <el-card class="card" shadow="hover" :body-style="{ padding: '0px' }">
-      <span class="level" ref="item">
-        <span class="level-left">
-          <div class="level-item card__info link" v-on:click="goToDetails">
-            <h3 class="twoLineText">{{ topic.title }}</h3>
-            <p class="twoLineText">{{ topic.description }}</p>
-          </div>
-        </span>
-        <span class="level-right">
-          <div class="level-item settings">
-            <el-dropdown
-              v-if="canModify"
-              class="card__menu"
-              v-on:command="menuItemSelected($event)"
-            >
-              <span class="el-dropdown-link">
-                <font-awesome-icon icon="ellipsis-h" />
-              </span>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="edit">
-                    <font-awesome-icon icon="pen" />
-                  </el-dropdown-item>
-                  <el-dropdown-item command="delete">
-                    <font-awesome-icon icon="trash" />
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </div>
-          <TutorialStep type="sessionDetails" step="changeOrder" :order="7">
-            <div class="card__drag level-item">
-              <font-awesome-icon
-                icon="grip-vertical"
-                class="card__drag__icon"
-              />
+    <TutorialStep
+      type="sessionDetails"
+      step="selectTopic"
+      :order="6"
+      :width="450"
+      placement="bottom"
+    >
+      <el-card class="card" shadow="hover" :body-style="{ padding: '0px' }">
+        <span class="level" ref="item">
+          <span class="level-left">
+            <div class="level-item card__info link" v-on:click="goToDetails">
+              <h3 class="twoLineText">{{ topic.title }}</h3>
+              <p class="twoLineText">{{ topic.description }}</p>
             </div>
-          </TutorialStep>
+          </span>
+          <span class="level-right">
+            <div class="level-item settings">
+              <el-dropdown
+                v-if="canModify"
+                class="card__menu"
+                v-on:command="menuItemSelected($event)"
+              >
+                <span class="el-dropdown-link">
+                  <font-awesome-icon icon="ellipsis-h" />
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="edit">
+                      <font-awesome-icon icon="pen" />
+                    </el-dropdown-item>
+                    <el-dropdown-item command="delete">
+                      <font-awesome-icon icon="trash" />
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
+            <TutorialStep
+              type="sessionDetails"
+              step="changeOrder"
+              :order="7"
+              placement="left"
+            >
+              <div class="card__drag level-item">
+                <font-awesome-icon
+                  icon="grip-vertical"
+                  class="card__drag__icon"
+                />
+              </div>
+            </TutorialStep>
+          </span>
         </span>
-      </span>
-    </el-card>
+      </el-card>
+    </TutorialStep>
     <div class="card__extension__slot">
       <slot></slot>
     </div>

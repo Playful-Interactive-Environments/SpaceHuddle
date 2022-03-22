@@ -105,7 +105,7 @@ export default class QuizResult extends Vue {
         datasets: [
           {
             label: labelResult,
-            backgroundColor: '#f1be3a',
+            backgroundColor: '#f3a40a',
             data: this.voteResult.map((vote) => vote[this.resultColumn]),
           },
         ],

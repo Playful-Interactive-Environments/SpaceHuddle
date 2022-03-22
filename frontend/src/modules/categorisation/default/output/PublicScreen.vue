@@ -150,6 +150,8 @@ export default class PublicScreen extends Vue {
   padding-right: 1rem;
   padding-bottom: 1rem;
   overflow-y: auto;
+  scrollbar-color: var(--color-primary) var(--color-gray);
+  scrollbar-width: thin;
   height: 68vh;
 
   .sticky-header {

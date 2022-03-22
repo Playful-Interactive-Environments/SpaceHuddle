@@ -495,6 +495,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 <style lang="scss" scoped>
 .scroll-x {
   overflow-x: auto;
+  scrollbar-color: var(--color-primary) var(--color-gray);
+  scrollbar-width: thin;
   padding: 1rem 1rem;
   margin: 0 -1rem;
 }
@@ -502,6 +504,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 .group-items {
   max-height: 50vh;
   overflow-y: auto;
+  scrollbar-color: var(--color-primary) var(--color-gray);
+  scrollbar-width: thin;
 }
 
 .drag-header::v-deep {

@@ -12,6 +12,7 @@ export interface Task {
   taskType: keyof typeof TaskType;
   name: string;
   description: string;
+  keywords: string;
   parameter: any;
   order: number;
   state: TaskStates;
@@ -28,6 +29,7 @@ export interface TaskForSaveAction {
   taskType: keyof typeof TaskType;
   name: string;
   description: string;
+  keywords: string;
   parameter: any;
   order: number;
   state: TaskStates;
@@ -39,6 +41,7 @@ export interface TaskSettingsData {
   taskType: keyof typeof TaskType;
   name: string;
   description: string;
+  keywords: string;
   parameter: any;
 }
 
@@ -48,6 +51,7 @@ export const convertToSaveVersion = (task: Task): TaskForSaveAction => {
     taskType: task.taskType,
     name: task.name,
     description: task.description,
+    keywords: task.keywords,
     parameter: task.parameter,
     order: task.order,
     state: task.state,

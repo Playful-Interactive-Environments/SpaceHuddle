@@ -5,7 +5,7 @@
     v-if="isModerator"
   >
     <el-header class="public-screen__header">
-      <PublicHeader>
+      <PublicHeader class="public-header">
         <TaskTimeline
           v-if="topicId"
           :topic-id="topicId"
@@ -214,6 +214,10 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.public-header {
+  padding-top: 1rem;
+}
+
 .el-main {
   overflow: unset;
 }
@@ -263,6 +267,8 @@ h3 {
 
   &__main {
     overflow-x: auto;
+    scrollbar-color: var(--color-primary) var(--color-gray);
+    scrollbar-width: thin;
     margin: 0 -5rem;
     padding: 0 5rem 1rem 5rem;
   }
@@ -316,6 +322,8 @@ h3 {
 
   .public-screen {
     overflow: auto;
+    scrollbar-color: var(--color-primary) var(--color-gray);
+    scrollbar-width: thin;
     &__header {
       padding: 1rem 2.5rem;
     }

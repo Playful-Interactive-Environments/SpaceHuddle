@@ -1,116 +1,122 @@
 <template>
-  <div>
-    <div
-      class="process-timeline"
-      :class="{ 'process-timeline__vertical': direction === 'vertical' }"
-      v-if="modelValue.length > 0 && !readonly"
-    >
+  <div
+    class="process-timeline-container"
+    :style="{
+      '--slider-steps': `${sliderSteps}`,
+      '--slider-position': activeOnPublicScreen,
+    }"
+  >
+    <div class="process-timeline" v-if="modelValue.length > 0 && !readonly">
       <div
-        :class="{ media: !isVertical, stretch: isVertical }"
-        :style="{ 'grid-template-rows': `1fr ${modelValue.length * 2 - 1}fr` }"
+        class="public-slider"
         v-if="hasPublicSlider"
+        :style="{
+          '--margin-side': `calc(100% / (${sliderSteps} * 2))`,
+        }"
       >
-        <TutorialStep
-          :disableTutorial="!canDisablePublicTimeline || readonly"
-          step="activatePublicScreen"
-          :type="translationModuleName"
-          :order="0"
+        <div
+          class="publicScreenViewDisabled"
+          :class="{
+            hide:
+              getDBPublicIndex(activeOnPublicScreen) !== -1 ||
+              !canDisablePublicTimeline,
+          }"
         >
-          <el-switch
-            v-model="usePublicScreen"
-            :class="{
-              'no-module': !canDisablePublicTimeline,
-              'media-left': !isVertical,
-            }"
-            :style="{
-              width: isVertical
-                ? 'auto'
-                : `calc(100% / (${activePageContentList.length} * 2))`,
-            }"
-          />
-        </TutorialStep>
+          <font-awesome-icon :icon="['fac', 'presentation']" />
+        </div>
         <TutorialStep
           :disableTutorial="readonly || modelValue.length < 2"
           step="changePublicScreen"
           :type="translationModuleName"
           :order="1"
+          placement="bottom"
         >
           <el-slider
-            class="media-content"
-            v-if="activePageContentList.length > minPublicSliderCount"
-            :disabled="!usePublicScreen"
-            :max="activePageContentList.length - 1"
+            v-if="sliderSteps - 1 > minPublicSliderCount"
+            :max="sliderSteps - 1"
             v-model="activeOnPublicScreen"
-            :vertical="isVertical"
-            :style="{
-              margin: isVertical
-                ? '0.3rem' //`0.3rem 0.3rem 2.3rem 0.3rem`
-                : `0.3rem calc(100% / (${activePageContentList.length} * 2)) 0.3rem 0rem`,
-            }"
             :format-tooltip="tooltip"
             :show-tooltip="false"
-            :height="isVertical ? `100%` : ''"
           ></el-slider>
-          <font-awesome-icon
-            v-else-if="activePageContentList.length > 0"
-            icon="desktop"
-            :class="{ disabled: !usePublicScreen }"
-          ></font-awesome-icon>
         </TutorialStep>
       </div>
       <el-steps
-        :direction="direction"
         :active="activeContentIndex"
         align-center
+        :style="{
+          'margin-left': canDisablePublicTimeline
+            ? `calc(100% / (${sliderSteps}))`
+            : 0,
+        }"
       >
         <draggable
           v-model="activePageDisplayContentList"
           tag="transition-group"
           :item-key="keyPropertyName"
-          handle=".el-step__head"
+          handle=".processIcon"
           @end="dragDone"
         >
           <template #item="{ element, index }">
-            <el-step icon="-" :id="getKey(element)">
+            <el-step
+              icon="-"
+              :id="getKey(element)"
+              :style="{
+                '--module-color': getContentListColor(element),
+                '--description-padding': hasParticipantToggle ? '3rem' : '12px',
+              }"
+            >
               <template #icon>
-                <TutorialStep
-                  :disableTutorial="readonly || modelValue.length < 2"
-                  step="changeOrder"
-                  :type="translationModuleName"
-                  :order="2"
-                >
-                  <font-awesome-icon
-                    v-if="contentListIcon(element)"
-                    :icon="contentListIcon(element)"
-                    :style="{ color: contentListColor(element) }"
-                  />
-                  <span v-else class="circle">{{ index }}</span>
-                </TutorialStep>
-              </template>
-              <template #title>
-                <el-badge
-                  v-if="hasParticipantToggle"
-                  :value="formattedTime(element)"
-                  :hidden="!isParticipantActive(element)"
-                  :class="{ 'no-module': !hasParticipantOption(element) }"
-                  type="primary"
-                >
+                <div class="timelineIcon">
+                  <div
+                    v-if="hasPublicSlider"
+                    class="publicScreenView"
+                    :class="{
+                      hide: getDBPublicIndex(activeOnPublicScreen) !== index,
+                    }"
+                  >
+                    <font-awesome-icon :icon="['fac', 'presentation']" />
+                  </div>
                   <TutorialStep
+                    :disableTutorial="readonly || modelValue.length < 2"
+                    step="changeOrder"
+                    :type="translationModuleName"
+                    :order="2"
+                    placement="bottom"
+                  >
+                    <span>
+                      <font-awesome-icon
+                        class="processIcon"
+                        v-if="contentListIcon(element)"
+                        :icon="contentListIcon(element)"
+                      />
+                      <span v-else class="processIcon withoutIcon">
+                        {{ index }}
+                      </span>
+                    </span>
+                  </TutorialStep>
+                  <TutorialStep
+                    v-if="hasParticipantToggle"
                     :disableTutorial="readonly"
                     step="activateParticipant"
                     :type="translationModuleName"
                     :order="4"
+                    placement="bottom"
                   >
-                    <el-button
-                      class="gables"
-                      :class="{ 'is-checked': isParticipantActive(element) }"
+                    <div
+                      class="participantView"
+                      :class="{
+                        'is-checked': isParticipantActive(element),
+                        'no-module': !hasParticipantOption(element),
+                      }"
                       v-on:click="timerContent = element"
-                      circle
                     >
-                      <font-awesome-icon icon="mobile-button" />
-                    </el-button>
+                      <span class="time" v-if="isParticipantActive(element)">
+                        {{ formattedTime(element) }}
+                      </span>
+                      <font-awesome-icon icon="mobile-screen-button" />
+                    </div>
                   </TutorialStep>
-                </el-badge>
+                </div>
               </template>
               <template #description>
                 <TutorialStep
@@ -119,6 +125,7 @@
                   step="selectItem"
                   :type="translationModuleName"
                   :order="3"
+                  placement="bottom"
                 >
                   <span
                     class="link threeLineText"
@@ -144,16 +151,10 @@
       />
     </div>
     <div
-      class="process-timeline"
-      :class="{ 'process-timeline__vertical': direction === 'vertical' }"
+      class="process-timeline readonly"
       v-else-if="modelValue.length > 0 && readonly"
     >
-      <el-steps
-        :direction="direction"
-        :active="activeContentIndex"
-        align-center
-        class="readonly"
-      >
+      <el-steps :active="activeContentIndex" align-center class="readonly">
         <el-step
           icon="-"
           v-for="(element, index) in activePageDisplayContentList"
@@ -163,9 +164,9 @@
             <font-awesome-icon
               v-if="contentListIcon(element)"
               :icon="contentListIcon(element)"
-              :style="{ color: contentListColor(element) }"
+              :style="{ color: getContentListColor(element) }"
             />
-            <span v-else class="circle">{{ index }}</span>
+            <span v-else class="withoutIcon">{{ index }}</span>
           </template>
           <template #description>
             <span>
@@ -182,7 +183,6 @@
       layout="prev, pager, next"
       :total="modelValue.length"
       v-model:current-page="activePage"
-      :class="{ 'is-vertical': direction === 'vertical' }"
     >
     </el-pagination>
   </div>
@@ -220,7 +220,6 @@ export default class ProcessTimeline extends Vue {
   @Prop({ default: null }) activeItem!: any | null;
   @Prop({ default: 'processTimeline' }) readonly translationModuleName!: string;
   @Prop({ default: TimerEntity.TASK }) entityName!: string;
-  @Prop({ default: 'horizontal' }) readonly direction!: string;
   @Prop({ default: false }) readonly readonly!: boolean;
   @Prop({ default: true }) readonly canDisablePublicTimeline!: boolean;
   @Prop({ default: true }) readonly isLinkedToDetails!: boolean;
@@ -265,11 +264,26 @@ export default class ProcessTimeline extends Vue {
 
   timerContent: any | null = null;
   activePage = 1;
-  pageSize = 10;
+  pageSize = 1000;
   pages: any[][] = [];
 
   get minPublicSliderCount(): number {
-    return this.isVertical ? 1 : 0;
+    return 0;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  getContentListColor(item: any): string {
+    if (this.contentListColor) {
+      const color = this.contentListColor(item);
+      if (color) return color;
+    }
+    return 'var(--color-primary)';
+  }
+
+  get sliderSteps(): number {
+    if (this.canDisablePublicTimeline)
+      return this.activePageContentList.length + 1;
+    return this.activePageContentList.length;
   }
 
   @Watch('modelValue.length', { immediate: true })
@@ -310,10 +324,6 @@ export default class ProcessTimeline extends Vue {
 
   set showTimerSettings(value: boolean) {
     if (!value) this.timerContent = null;
-  }
-
-  get isVertical(): boolean {
-    return this.direction === 'vertical';
   }
 
   get activeContentIndex(): number {
@@ -375,8 +385,8 @@ export default class ProcessTimeline extends Vue {
     );
   }
 
-  get usePublicScreen(): boolean {
-    return this.activeOnPublicScreen > -1 || !this.canDisablePublicTimeline;
+  /*get usePublicScreen(): boolean {
+    return this.activeOnPublicScreen > 0 || !this.canDisablePublicTimeline;
   }
 
   set usePublicScreen(use: boolean) {
@@ -387,34 +397,39 @@ export default class ProcessTimeline extends Vue {
       this.$emit('update:publicScreen', null);
       this.$emit('changePublicScreen', null);
     }
-  }
+  }*/
 
   get activeOnPublicScreen(): number {
-    const index = this.publicScreen
+    let index = this.publicScreen
       ? this.activePageContentList.findIndex((item) =>
           this.itemIsEquals(item, this.publicScreen)
         )
       : -1;
-    if (this.isVertical && index > -1)
-      return this.activePageContentList.length - 1 - index;
-    return index;
+    return this.getSliderPublicIndex(index);
   }
 
   set activeOnPublicScreen(index: number) {
-    if (this.usePublicScreen) {
-      if (this.isVertical)
-        index = this.activePageContentList.length - 1 - index;
-      if (this.activePageContentList.length > index) {
-        const publicItem = this.activePageContentList[index];
-        if (this.publicScreen !== publicItem) {
-          if (this.publicScreen && this.startParticipantOnPublicChange) {
-            this.timerContent = publicItem;
-          }
-          this.$emit('update:publicScreen', publicItem);
-          this.$emit('changePublicScreen', publicItem);
+    if (this.sliderSteps > index) {
+      index = this.getDBPublicIndex(index);
+      const publicItem = this.activePageContentList[index];
+      if (this.publicScreen !== publicItem) {
+        if (this.publicScreen && this.startParticipantOnPublicChange) {
+          this.timerContent = publicItem;
         }
+        this.$emit('update:publicScreen', publicItem);
+        this.$emit('changePublicScreen', publicItem);
       }
     }
+  }
+
+  getDBPublicIndex(index: number): number {
+    if (this.canDisablePublicTimeline) return index - 1;
+    return index;
+  }
+
+  getSliderPublicIndex(index: number): number {
+    if (this.canDisablePublicTimeline) return index + 1;
+    return index;
   }
 
   formattedTime(item: any | null): string {
@@ -466,29 +481,112 @@ export default class ProcessTimeline extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.public-slider {
+  display: flex;
+  position: relative;
+}
+
+.publicScreenView,
+.participantView,
+.publicScreenViewDisabled {
+  color: white;
+  height: 3.7rem;
+  width: 1.9rem;
+  --tag-border-radius: 0.4rem;
+  margin: auto;
+  font-size: 1rem;
+  position: absolute;
+  z-index: 100;
+  cursor: pointer;
+}
+
+.publicScreenView,
+.participantView {
+  background-color: var(--module-color);
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+.publicScreenView {
+  pointer-events: none;
+  top: -2.5rem;
+  border-radius: var(--tag-border-radius) var(--tag-border-radius) 0 0;
+  border-bottom-width: 0;
+  padding-top: 0.2rem;
+}
+
+.publicScreenViewDisabled {
+  height: 2.5rem;
+  pointer-events: none;
+  text-align: center;
+  background-color: var(--color-background-gray);
+  border-radius: var(--tag-border-radius) var(--tag-border-radius) 0 0;
+  border-width: 2px;
+  border-style: dashed;
+  border-color: var(--color-gray-inactive);
+  border-bottom-width: 0;
+  color: var(--color-gray-inactive);
+  left: var(--margin-side);
+  transform: translate(-50%, 0.3rem);
+
+  svg {
+    padding-top: 0.2rem;
+  }
+}
+
+.participantView {
+  background-color: var(--color-background-gray);
+  border-radius: 0 0 var(--tag-border-radius) var(--tag-border-radius);
+  border-width: 2px;
+  border-style: dashed;
+  border-color: var(--color-gray-inactive);
+  border-top-width: 0;
+  padding-top: 2.3rem;
+  display: flex;
+  flex-direction: column;
+  color: var(--color-gray-inactive);
+
+  &.is-checked {
+    border-width: 0;
+    color: white;
+    border-color: var(--color-primary);
+    background-color: var(--module-color);
+  }
+
+  .time {
+    border-radius: var(--tag-border-radius);
+    padding: 0 0.1rem;
+    font-size: 0.7rem;
+    background-color: var(--module-color);
+    position: absolute;
+    left: 50%;
+    top: 1.4rem;
+    transform: translate(-50%, 0);
+  }
+}
+
+.processIcon {
+  cursor: grab;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background-color: var(--color-background-gray);
+  border-radius: var(--border-radius-xs);
+  border: 2px solid var(--color-primary);
+  padding: 0.4rem;
+  aspect-ratio: 1 / 1;
+  margin: -0.2rem 0;
+  color: var(--module-color);
+}
+
 .el-pagination::v-deep {
   text-align: center;
-
-  &.is-vertical {
-    button:enabled,
-    li {
-      color: white;
-    }
-
-    .active {
-      color: var(--color-purple);
-    }
-  }
 }
 
 .no-module {
   visibility: hidden;
-}
-
-.media-left {
-  margin-right: unset;
-  margin-top: auto;
-  margin-bottom: auto;
 }
 
 .public-screen-slider {
@@ -501,9 +599,12 @@ export default class ProcessTimeline extends Vue {
 }
 
 .el-steps::v-deep {
+  .el-step__line {
+    background-color: var(--color-primary);
+  }
+
   .el-step__icon {
     background: var(--color-background-gray);
-    cursor: grab;
   }
 
   .el-step__title {
@@ -515,7 +616,36 @@ export default class ProcessTimeline extends Vue {
   }
 
   .is-icon {
+    width: 40px;
     font-size: var(--font-size-large);
+  }
+
+  .is-process {
+    font-weight: var(--font-weight-bold);
+    .is-icon {
+      width: 55px;
+      font-size: var(--font-size-xxlarge);
+
+      .processIcon {
+        background-color: var(--color-primary);
+      }
+    }
+  }
+
+  .el-step__description {
+    padding-top: var(--description-padding);
+    line-height: 0.8rem;
+
+    &.is-wait {
+      color: var(--color-primary);
+    }
+  }
+
+  .el-step.is-center {
+    .el-step__description {
+      padding-left: 10%;
+      padding-right: 10%;
+    }
   }
 
   &.readonly {
@@ -546,7 +676,7 @@ export default class ProcessTimeline extends Vue {
       font-weight: var(--font-weight-bold);
       .is-icon {
         width: 50px;
-        font-size: var(--font-size-xxlarge);
+        font-size: var(--font-size-xxxlarge);
       }
     }
 
@@ -557,138 +687,93 @@ export default class ProcessTimeline extends Vue {
 
 .el-slider::v-deep {
   --el-slider-runway-bg-color: var(--color-gray-dark);
+  margin: 0.3rem var(--margin-side);
 
   .el-slider__button {
-    mask-image: url('~@/assets/icons/svg/public-screen.svg');
-    mask-repeat: no-repeat;
-    mask-position: center;
-    mask-size: contain;
-    background-color: white;
-    border-width: 4px 5px 8px 4px;
-    border-color: var(--color-primary);
-    border-radius: unset;
-    width: calc(var(--el-slider-button-size) + 4px);
+    width: 1rem;
+    height: 1rem;
+    display: none;
+  }
+
+  .el-slider__bar {
+    --height: 0.5rem;
+    --background_color: var(--color-primary);
+    background-image: linear-gradient(
+        315deg,
+        var(--background_color) 25%,
+        transparent 25%
+      ),
+      linear-gradient(225deg, var(--background_color) 25%, transparent 25%);
+    background-position-x: 0, 0;
+    background-position-y: calc(var(--height) / 2), calc(var(--height) / 2);
+    background-size: var(--height) var(--height);
+    background-color: var(--color-background-gray);
+    height: var(--height);
+  }
+
+  .el-slider__runway {
+    --height: 0.5rem;
+    --background_color: var(--color-primary);
+    background-image: linear-gradient(
+        135deg,
+        var(--background_color) 25%,
+        transparent 25%
+      ),
+      linear-gradient(45deg, var(--background_color) 25%, transparent 25%);
+    background-position-y: calc(var(--height) / 2), calc(var(--height) / 2);
+    background-size: var(--height) var(--height);
+    --step-size: calc(100% / (var(--slider-steps) - 1));
+    --slider-marker: calc(var(--step-size) * var(--slider-position));
+    --color-none: #{rgba(#000, 0.2)};
+    --mask: linear-gradient(
+      90deg,
+      var(--color-none) 0%,
+      var(--color-none) calc(var(--slider-marker) - var(--step-size)),
+      red var(--slider-marker),
+      var(--color-none) calc(var(--slider-marker) + var(--step-size)),
+      var(--color-none) 100%
+    );
+    -webkit-mask: var(--mask);
+    mask: var(--mask);
+    background-color: var(--color-background-gray);
+    height: var(--height);
   }
 }
 
-.el-button::v-deep {
-  &.is-circle {
-    padding: 0;
-    color: var(--color-gray-inactive);
-    background-color: unset;
-    border: unset;
-    font-size: 20pt;
-    min-height: unset;
-    min-width: 25px;
-
-    &.is-checked {
-      color: var(--color-primary);
-    }
+.is-process {
+  .withoutIcon {
+    height: 2.5rem;
   }
 }
 
-.el-badge::v-deep {
-  //margin-right: 0.7rem;
-  .el-badge__content--primary {
-    right: calc(5px + var(--el-badge-size) / 2);
-  }
-}
-
-.process-timeline {
-  &__vertical {
-    display: flex;
-
-    .stretch {
-      position: relative;
-      display: inline-flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .el-switch::v-deep.is-checked .el-switch__core {
-      border-color: var(--color-darkblue-light);
-      background-color: var(--color-darkblue-light);
-    }
-
-    .el-steps {
-      margin-top: 2rem;
-    }
-
-    .el-step::v-deep {
-      .el-step__icon {
-        background-color: var(--color-primary);
-      }
-
-      .el-step__title {
-        margin-top: unset;
-      }
-
-      .el-step__main {
-        display: flex;
-
-        .el-step__description {
-          padding: 0.6rem;
-
-          &.is-process,
-          &.is-finish {
-            color: white;
-          }
-        }
-      }
-    }
-
-    .el-slider::v-deep {
-      &.is-vertical {
-        flex: 1;
-      }
-
-      .el-slider__button {
-        background-color: var(--color-primary);
-        border-color: white;
-      }
-
-      .el-slider__runway.disabled .el-slider__button {
-        border-color: var(--el-slider-disable-color);
-      }
-
-      .el-slider__bar {
-        background-color: var(--el-slider-runway-bg-color);
-      }
-
-      .el-slider__runway {
-        background-color: white;
-        max-width: var(--el-slider-height);
-      }
-    }
-
-    .el-button::v-deep {
-      &.is-circle.is-checked {
-        color: white;
-      }
-    }
-
-    .el-badge::v-deep {
-      .el-badge__content--primary {
-        background-color: white;
-        color: var(--color-primary);
-        border-color: var(--color-primary);
-      }
-    }
-  }
-}
-
-.circle {
-  border-radius: 50%;
+.withoutIcon {
   border-style: solid;
   border-width: 2px;
+  height: 1.5rem;
   display: inline-flex;
   text-align: center;
   justify-content: center;
   align-items: center;
-  aspect-ratio: 1;
   flex-shrink: 0;
-  height: 1.5rem;
+  aspect-ratio: 1;
+  padding: initial;
   font-weight: var(--font-weight-bold);
+  background-color: white;
+}
+
+.process-timeline-container {
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-color: var(--color-primary) var(--color-gray);
+  scrollbar-width: thin;
+  padding-bottom: 0.5rem;
+
+  .readonly {
+    margin-top: 0.5rem;
+  }
+}
+
+.process-timeline {
+  min-width: calc(var(--slider-steps) * 5rem);
 }
 </style>

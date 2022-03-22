@@ -2,6 +2,8 @@
   <span
     ref="visibilityObserver"
     v-observe-visibility="visibilityChanged"
+    :id="uuid"
+    class="visibilityObserver"
   ></span>
   <el-popover
     :placement="placement"
@@ -142,8 +144,15 @@ export default class TutorialStep extends Vue {
   }
 
   isReservedByUuid(uuid: string): boolean {
-    if (reservedTutorialSteps[this.stepKey])
+    if (reservedTutorialSteps[this.stepKey]) {
+      const dom = document.getElementById(
+        reservedTutorialSteps[this.stepKey].reservedBy
+      );
+      if (!dom) {
+        reservedTutorialSteps[this.stepKey].reservedBy = this.uuid;
+      }
       return reservedTutorialSteps[this.stepKey].reservedBy === uuid;
+    }
     return false;
   }
 
@@ -226,5 +235,10 @@ export default class TutorialStep extends Vue {
   width: 100%;
   display: inline-flex;
   justify-content: right;
+}
+
+.visibilityObserver {
+  position: absolute;
+  background-color: transparent;
 }
 </style>
