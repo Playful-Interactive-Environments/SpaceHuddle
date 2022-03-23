@@ -295,6 +295,37 @@ export default class ProcessTimeline extends Vue {
     this.oldScrollLeft = scrollContainer ? scrollContainer.scrollLeft : 0;
   }
 
+  scrollParentToChild(parent: HTMLElement, child: HTMLElement): void {
+    // Where is the parent on page
+    const parentRect = parent.getBoundingClientRect();
+    // What can you see?
+    const parentViewableArea = {
+      height: parent.clientHeight,
+      width: parent.clientWidth,
+    };
+
+    // Where is the child
+    const childRect = child.getBoundingClientRect();
+    // Is the child viewable?
+    const isViewable =
+      childRect.left >= parentRect.left &&
+      childRect.right <= parentRect.left + parentViewableArea.width;
+
+    // if you can't see the child try to scroll parent
+    if (!isViewable) {
+      // Should we scroll using top or bottom? Find the smaller ABS adjustment
+      const scrollLeft = childRect.left - parentRect.left;
+      const scrollRight = childRect.right - parentRect.right;
+      if (Math.abs(scrollLeft) < Math.abs(scrollRight)) {
+        // we're near the top of the list
+        parent.scrollLeft += scrollLeft;
+      } else {
+        // we're near the bottom of the list
+        parent.scrollLeft += scrollRight;
+      }
+    }
+  }
+
   @Watch('modelValue.length', { immediate: true })
   @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {
@@ -320,7 +351,7 @@ export default class ProcessTimeline extends Vue {
         if (activeKey) {
           const activeDom = document.getElementById(activeKey);
           if (activeDom) {
-            activeDom.scrollIntoView();
+            this.scrollParentToChild(scrollContainer, activeDom);
           }
         }
       }
