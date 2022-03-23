@@ -1,10 +1,12 @@
 <template>
   <div
+    ref="scrollContainer"
     class="process-timeline-container"
     :style="{
       '--slider-steps': `${sliderSteps}`,
       '--slider-position': activeOnPublicScreen,
     }"
+    @scroll="onScroll"
   >
     <div class="process-timeline" v-if="modelValue.length > 0 && !readonly">
       <div
@@ -83,7 +85,7 @@
                     :order="2"
                     placement="bottom"
                   >
-                    <span>
+                    <span @click="itemClicked(element)">
                       <font-awesome-icon
                         class="processIcon"
                         v-if="contentListIcon(element)"
@@ -228,6 +230,7 @@ export default class ProcessTimeline extends Vue {
   @Prop({ default: true }) readonly hasParticipantToggle!: boolean;
   @Prop({ default: 'id' }) readonly keyPropertyName!: string;
   @Prop({ default: null }) defaultTimerSeconds!: number | null;
+  @Prop({ default: 'var(--color-primary)' }) readonly accentColor!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -277,13 +280,19 @@ export default class ProcessTimeline extends Vue {
       const color = this.contentListColor(item);
       if (color) return color;
     }
-    return 'var(--color-primary)';
+    return this.accentColor;
   }
 
   get sliderSteps(): number {
     if (this.canDisablePublicTimeline)
       return this.activePageContentList.length + 1;
     return this.activePageContentList.length;
+  }
+
+  oldScrollLeft = 0;
+  onScroll(): void {
+    const scrollContainer = this.$refs.scrollContainer as HTMLElement;
+    this.oldScrollLeft = scrollContainer ? scrollContainer.scrollLeft : 0;
   }
 
   @Watch('modelValue.length', { immediate: true })
@@ -301,6 +310,20 @@ export default class ProcessTimeline extends Vue {
         }
       });
       this.pages = pages;
+    }
+    const scrollContainer = this.$refs.scrollContainer as HTMLElement;
+    if (scrollContainer) {
+      if (this.oldScrollLeft !== 0)
+        scrollContainer.scrollTo(this.oldScrollLeft, 0);
+      else if (this.activeItem) {
+        const activeKey = this.getKey(this.activeItem);
+        if (activeKey) {
+          const activeDom = document.getElementById(activeKey);
+          if (activeDom) {
+            activeDom.scrollIntoView();
+          }
+        }
+      }
     }
   }
 
@@ -384,20 +407,6 @@ export default class ProcessTimeline extends Vue {
       `moderator.organism.${this.translationModuleName}.changePublicScreen`
     );
   }
-
-  /*get usePublicScreen(): boolean {
-    return this.activeOnPublicScreen > 0 || !this.canDisablePublicTimeline;
-  }
-
-  set usePublicScreen(use: boolean) {
-    if (use && this.activePageContentList.length > 0) {
-      this.$emit('update:publicScreen', this.activePageContentList[0]);
-      this.$emit('changePublicScreen', this.activePageContentList[0]);
-    } else if (!use) {
-      this.$emit('update:publicScreen', null);
-      this.$emit('changePublicScreen', null);
-    }
-  }*/
 
   get activeOnPublicScreen(): number {
     let index = this.publicScreen
@@ -524,7 +533,7 @@ export default class ProcessTimeline extends Vue {
   border-width: 2px;
   border-style: dashed;
   border-color: var(--color-gray-inactive);
-  border-bottom-width: 0;
+  //border-bottom-width: 0;
   color: var(--color-gray-inactive);
   left: var(--margin-side);
   transform: translate(-50%, 0.3rem);
@@ -628,6 +637,10 @@ export default class ProcessTimeline extends Vue {
 
       .processIcon {
         background-color: var(--color-primary);
+      }
+
+      .withoutIcon {
+        color: white;
       }
     }
   }
@@ -742,14 +755,14 @@ export default class ProcessTimeline extends Vue {
 
 .is-process {
   .withoutIcon {
-    height: 2.5rem;
+    height: 2.9rem;
   }
 }
 
 .withoutIcon {
   border-style: solid;
   border-width: 2px;
-  height: 1.5rem;
+  height: 2.1rem;
   display: inline-flex;
   text-align: center;
   justify-content: center;

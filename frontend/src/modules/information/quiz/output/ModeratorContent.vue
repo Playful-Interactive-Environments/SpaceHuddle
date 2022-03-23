@@ -24,6 +24,7 @@
       "
       :displayItem="(item) => item.question"
       :hasPublicSlider="hasPublicSlider || !moderatedQuestionFlow"
+      accentColor="var(--color-yellow)"
       @changeOrder="dragDone"
       @changeActiveElement="onEditQuestionChanged"
     >
