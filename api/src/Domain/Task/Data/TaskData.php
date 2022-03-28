@@ -75,6 +75,13 @@ class TaskData
     public ?int $order;
 
     /**
+     * Planned topic order.
+     * @var int|null
+     * @OA\Property(example=1)
+     */
+    public ?int $topicOrder;
+
+    /**
      * Current status of the task.
      * @var string|null
      * @OA\Property(ref="#/components/schemas/TaskState")
@@ -137,6 +144,7 @@ class TaskData
         $this->keywords = $reader->findString("keywords");
         $this->parameter = (object)json_decode($reader->findString("parameter"));
         $this->order = $reader->findInt("order");
+        $this->topicOrder = $reader->findInt("topic_order");
         $this->state = strtoupper($reader->findString("state"));
         $expirationTime = $reader->findString("expiration_time");
         $this->participantCount = $reader->findInt("participant_count");

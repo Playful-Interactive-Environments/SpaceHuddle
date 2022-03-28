@@ -175,7 +175,7 @@ class SessionRepository implements RepositoryInterface
 
     /**
      * Get list of entities for the connection keys.
-     * @param string $parentId The entity parent ID.
+     * @param array $keys The entity connection keys.
      * @return array<SessionData> The result entity list.
      * @throws GenericException
      */
@@ -373,9 +373,10 @@ class SessionRepository implements RepositoryInterface
     public function getPublicScreen(string $sessionId): ?object
     {
         $query = $this->queryFactory->newSelect("task");
-        $query->select(["task.*", "module.id as module_id"])
+        $query->select(["task.*", "module.id as module_id", "topic.order as topic_order"])
             ->innerJoin("module", "task.id = module.task_id")
             ->innerJoin("session", "module.id = session.public_screen_module_id")
+            ->innerJoin("topic", "topic.id = task.topic_id")
             ->andWhere([
                 "session.id" => $sessionId
             ]);

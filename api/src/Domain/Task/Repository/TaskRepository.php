@@ -121,7 +121,8 @@ class TaskRepository implements RepositoryInterface
             "IFNULL(task_info.participant_count, 0) AS participant_count",
             "topic.session_id",
             "participant_task.id AS active_on_participant",
-            "synchro_task.id AS synchro_task"
+            "synchro_task.id AS synchro_task",
+            "topic.order as topic_order"
         ])
             ->innerJoin("topic", "topic.id = task.topic_id")
             ->leftJoin("task_info", "task_info.task_id = task.id")
