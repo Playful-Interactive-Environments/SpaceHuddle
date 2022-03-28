@@ -225,7 +225,8 @@
         "changePublicScreen": "display this item on the public screen",
         "activateParticipant": "activate this item for the participants",
         "changeOrder": "change the order of the items",
-        "selectItem": "select this item"
+        "selectItem": "select this item",
+        "otherTopic": "topic"
       },
       "taskTimeline": {
         "activatePublicScreen": "display this topic on the public screen",

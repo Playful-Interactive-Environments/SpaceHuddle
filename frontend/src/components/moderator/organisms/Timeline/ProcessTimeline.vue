@@ -16,16 +16,6 @@
           '--margin-side': `calc(100% / (${sliderSteps} * 2))`,
         }"
       >
-        <div
-          class="publicScreenViewDisabled"
-          :class="{
-            hide:
-              getDBPublicIndex(activeOnPublicScreen) !== -1 ||
-              !canDisablePublicTimeline,
-          }"
-        >
-          <font-awesome-icon :icon="['fac', 'presentation']" />
-        </div>
         <TutorialStep
           :disableTutorial="readonly || modelValue.length < 2"
           step="changePublicScreen"
@@ -42,108 +32,150 @@
           ></el-slider>
         </TutorialStep>
       </div>
-      <el-steps
-        :active="activeContentIndex"
-        align-center
-        :style="{
-          'margin-left': canDisablePublicTimeline
-            ? `calc(100% / (${sliderSteps}))`
-            : 0,
-        }"
-      >
-        <draggable
-          v-model="activePageDisplayContentList"
-          tag="transition-group"
-          :item-key="keyPropertyName"
-          handle=".processIcon"
-          @end="dragDone"
+      <div class="media">
+        <span
+          class="media-left"
+          :style="{
+            width: canDisablePublicTimeline
+              ? `calc(100% / (${sliderSteps}))`
+              : 0,
+          }"
         >
-          <template #item="{ element, index }">
-            <el-step
-              icon="-"
-              :id="getKey(element)"
-              :style="{
-                '--module-color': getContentListColor(element),
-                '--description-padding': hasParticipantToggle ? '3rem' : '12px',
+          <div
+            class="timelineIcon"
+            :class="{
+              selected: getDBPublicIndex(activeOnPublicScreen) === -1,
+            }"
+          >
+            <div
+              v-if="hasPublicSlider"
+              class="publicScreenView publicScreenViewDisabled"
+              :class="{
+                hide: getDBPublicIndex(activeOnPublicScreen) !== -1,
               }"
             >
-              <template #icon>
-                <div class="timelineIcon">
-                  <div
-                    v-if="hasPublicSlider"
-                    class="publicScreenView"
-                    :class="{
-                      hide: getDBPublicIndex(activeOnPublicScreen) !== index,
-                    }"
-                  >
-                    <font-awesome-icon :icon="['fac', 'presentation']" />
+              <font-awesome-icon :icon="['fac', 'presentation']" />
+            </div>
+            <span class="home" v-if="!useOtherPublicScreenTopic">
+              <font-awesome-icon class="processIcon" icon="home" />
+            </span>
+            <span
+              class="home useOtherPublicScreenTopic"
+              @click="noPublicScreen"
+              v-else
+            >
+              <span class="processIcon">
+                <font-awesome-icon icon="home" />
+                <span class="topicInfo">
+                  {{ $t('moderator.organism.processTimeline.otherTopic') }}
+                  {{ publicScreenTopic }}
+                </span>
+              </span>
+            </span>
+          </div>
+          <i class="line"></i>
+        </span>
+        <el-steps
+          class="media-content"
+          :active="activeContentIndex"
+          align-center
+        >
+          <draggable
+            v-model="activePageDisplayContentList"
+            tag="transition-group"
+            :item-key="keyPropertyName"
+            handle=".processIcon"
+            @end="dragDone"
+          >
+            <template #item="{ element, index }">
+              <el-step
+                icon="-"
+                :id="getKey(element)"
+                :style="{
+                  '--module-color': getContentListColor(element),
+                  '--description-padding': hasParticipantToggle
+                    ? '3rem'
+                    : '12px',
+                }"
+              >
+                <template #icon>
+                  <div class="timelineIcon">
+                    <div
+                      v-if="hasPublicSlider"
+                      class="publicScreenView"
+                      :class="{
+                        hide: getDBPublicIndex(activeOnPublicScreen) !== index,
+                      }"
+                    >
+                      <font-awesome-icon :icon="['fac', 'presentation']" />
+                    </div>
+                    <TutorialStep
+                      :disableTutorial="readonly || modelValue.length < 2"
+                      step="changeOrder"
+                      :type="translationModuleName"
+                      :order="2"
+                      placement="bottom"
+                    >
+                      <span @click="itemClicked(element)">
+                        <font-awesome-icon
+                          class="processIcon"
+                          v-if="contentListIcon(element)"
+                          :icon="contentListIcon(element)"
+                        />
+                        <span v-else class="processIcon withoutIcon">
+                          {{ index }}
+                        </span>
+                      </span>
+                    </TutorialStep>
+                    <TutorialStep
+                      v-if="hasParticipantToggle"
+                      :disableTutorial="readonly"
+                      step="activateParticipant"
+                      :type="translationModuleName"
+                      :order="4"
+                      placement="bottom"
+                    >
+                      <div
+                        class="participantView"
+                        :class="{
+                          'is-checked': isParticipantActive(element),
+                          'no-module': !hasParticipantOption(element),
+                        }"
+                        v-on:click="timerContent = element"
+                      >
+                        <span class="time" v-if="isParticipantActive(element)">
+                          {{ formattedTime(element) }}
+                        </span>
+                        <font-awesome-icon icon="mobile-screen-button" />
+                      </div>
+                    </TutorialStep>
                   </div>
+                </template>
+                <template #description>
                   <TutorialStep
+                    v-if="isLinkedToDetails"
                     :disableTutorial="readonly || modelValue.length < 2"
-                    step="changeOrder"
+                    step="selectItem"
                     :type="translationModuleName"
-                    :order="2"
+                    :order="3"
                     placement="bottom"
                   >
-                    <span @click="itemClicked(element)">
-                      <font-awesome-icon
-                        class="processIcon"
-                        v-if="contentListIcon(element)"
-                        :icon="contentListIcon(element)"
-                      />
-                      <span v-else class="processIcon withoutIcon">
-                        {{ index }}
-                      </span>
+                    <span
+                      class="link threeLineText"
+                      v-on:click="itemClicked(element)"
+                    >
+                      {{ getTitle(element) }}
                     </span>
                   </TutorialStep>
-                  <TutorialStep
-                    v-if="hasParticipantToggle"
-                    :disableTutorial="readonly"
-                    step="activateParticipant"
-                    :type="translationModuleName"
-                    :order="4"
-                    placement="bottom"
-                  >
-                    <div
-                      class="participantView"
-                      :class="{
-                        'is-checked': isParticipantActive(element),
-                        'no-module': !hasParticipantOption(element),
-                      }"
-                      v-on:click="timerContent = element"
-                    >
-                      <span class="time" v-if="isParticipantActive(element)">
-                        {{ formattedTime(element) }}
-                      </span>
-                      <font-awesome-icon icon="mobile-screen-button" />
-                    </div>
-                  </TutorialStep>
-                </div>
-              </template>
-              <template #description>
-                <TutorialStep
-                  v-if="isLinkedToDetails"
-                  :disableTutorial="readonly || modelValue.length < 2"
-                  step="selectItem"
-                  :type="translationModuleName"
-                  :order="3"
-                  placement="bottom"
-                >
-                  <span
-                    class="link threeLineText"
-                    v-on:click="itemClicked(element)"
-                  >
+                  <span v-else class="threeLineText">
                     {{ getTitle(element) }}
                   </span>
-                </TutorialStep>
-                <span v-else class="threeLineText">
-                  {{ getTitle(element) }}
-                </span>
-              </template>
-            </el-step>
-          </template>
-        </draggable>
-      </el-steps>
+                </template>
+              </el-step>
+            </template>
+          </draggable>
+        </el-steps>
+      </div>
       <TimerSettings
         v-if="showTimerSettings"
         v-model:showModal="showTimerSettings"
@@ -219,6 +251,7 @@ import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 export default class ProcessTimeline extends Vue {
   @Prop({ default: [] }) modelValue!: any[];
   @Prop({ default: null }) publicScreen!: any | null;
+  @Prop({ default: null }) publicScreenTopic!: number | null;
   @Prop({ default: null }) activeItem!: any | null;
   @Prop({ default: 'processTimeline' }) readonly translationModuleName!: string;
   @Prop({ default: TimerEntity.TASK }) entityName!: string;
@@ -439,6 +472,17 @@ export default class ProcessTimeline extends Vue {
     );
   }
 
+  noPublicScreen(): void {
+    this.activeOnPublicScreen = 0;
+  }
+
+  get useOtherPublicScreenTopic(): boolean {
+    return (
+      this.getDBPublicIndex(this.activeOnPublicScreen) === -1 &&
+      !!this.publicScreen
+    );
+  }
+
   get activeOnPublicScreen(): number {
     let index = this.publicScreen
       ? this.activePageContentList.findIndex((item) =>
@@ -564,10 +608,7 @@ export default class ProcessTimeline extends Vue {
   border-width: 2px;
   border-style: dashed;
   border-color: var(--color-gray-inactive);
-  //border-bottom-width: 0;
   color: var(--color-gray-inactive);
-  left: var(--margin-side);
-  transform: translate(-50%, 0.3rem);
 
   svg {
     padding-top: 0.2rem;
@@ -819,5 +860,65 @@ export default class ProcessTimeline extends Vue {
 
 .process-timeline {
   min-width: calc(var(--slider-steps) * 5rem);
+}
+
+.media-left {
+  margin-right: 0;
+  text-align: center;
+  align-items: center;
+  position: relative;
+
+  .timelineIcon {
+    margin-top: 1.01rem;
+  }
+
+  .is-process {
+    font-size: var(--font-size-xxxlarge);
+
+    .processIcon {
+      background-color: var(--color-primary);
+      color: white;
+    }
+  }
+
+  .home {
+    position: relative;
+    margin-top: 2rem;
+    line-height: 0.8;
+
+    .processIcon {
+      padding: unset;
+      background-color: var(--color-primary);
+
+      svg {
+        padding: 0.4rem;
+        background-color: var(--color-background-gray);
+        border-radius: calc(var(--border-radius-xs) - 2px);
+      }
+    }
+
+    svg.processIcon {
+      padding: 0.4rem;
+      background-color: var(--color-background-gray);
+    }
+  }
+
+  .useOtherPublicScreenTopic {
+    .topicInfo {
+      color: white;
+      font-size: 6pt;
+      white-space: nowrap;
+      line-height: 0.4;
+    }
+  }
+}
+
+.line {
+  background-color: var(--color-primary);
+  position: absolute;
+  height: 2px;
+  top: 11px;
+  left: calc(50% + 1.3rem);
+  right: -50%;
 }
 </style>

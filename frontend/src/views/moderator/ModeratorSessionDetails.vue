@@ -35,7 +35,7 @@
             <span v-on:click="showRoles = true">
               <font-awesome-icon
                 class="awesome-icon"
-                icon="users"
+                icon="user-group"
               ></font-awesome-icon>
             </span>
           </TutorialStep>

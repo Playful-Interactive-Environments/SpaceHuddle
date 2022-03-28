@@ -23,7 +23,7 @@
             <span v-on:click="showRoles = true">
               <font-awesome-icon
                 class="awesome-icon"
-                icon="users"
+                icon="user-group"
               ></font-awesome-icon>
             </span>
           </TutorialStep>
@@ -70,18 +70,20 @@
                   "
                 >
                   <span
-                    class="taskType"
+                    class="taskType media"
                     :style="{
                       '--module-color': TaskCategory[taskCategory].color,
                     }"
                   >
-                    <font-awesome-icon
-                      :icon="TaskCategory[taskCategory].icon"
-                      :style="{
-                        '--module-color': TaskCategory[taskCategory].color,
-                      }"
-                    />
-                    <span class="taskCategory">
+                    <span class="media-left">
+                      <font-awesome-icon
+                        :icon="TaskCategory[taskCategory].icon"
+                        :style="{
+                          '--module-color': TaskCategory[taskCategory].color,
+                        }"
+                      />
+                    </span>
+                    <span class="taskCategory media-content">
                       {{ $t(`enum.taskCategory.${taskCategory}`) }}
                     </span>
                   </span>
@@ -127,9 +129,10 @@
                     >
                       <template #moduleInfoLeft>
                         <span class="person">
-                          <font-awesome-icon icon="user-group" />
+                          <font-awesome-icon icon="users" />
                           {{ task.participantCount }}
                         </span>
+                        <span class="separator"> | </span>
                       </template>
                       <template #moduleInfoRight>
                         <el-dropdown
@@ -670,6 +673,12 @@ export default class ModeratorTopicDetails extends Vue {
 .taskType {
   color: white;
   font-size: var(--font-size-default);
+
+  .media-left {
+    width: 1.5rem;
+    text-align: center;
+    margin-right: 0;
+  }
 }
 
 .el-collapse::v-deep {
@@ -678,9 +687,9 @@ export default class ModeratorTopicDetails extends Vue {
   border-bottom: unset;
 
   .el-collapse-item {
-    border: solid var(--module-color) 1px;
     border-radius: var(--border-radius-xs);
     margin-top: 0.5rem;
+    background-color: var(--color-background-gray);
   }
 
   .el-collapse-item__header {
@@ -715,32 +724,8 @@ export default class ModeratorTopicDetails extends Vue {
   }
 }
 
-.el-tabs::v-deep {
-  --el-tab-item-padding: 0.1rem;
-  padding: 1rem 0;
-
-  .taskType {
-    background-color: var(--module-color);
-    border-radius: var(--border-radius-xs);
-    padding: 0.2rem 0.4rem;
-    min-width: 1.8rem;
-    text-align: center;
-    display: block;
-  }
-
-  .taskCategory {
-    padding-left: 0.5rem;
-  }
-
-  .is-active .taskType {
-    outline: 2px solid white;
-    outline-offset: -2px;
-  }
-
-  .el-tabs__active-bar,
-  .el-tabs__nav-wrap::after {
-    background-color: unset;
-  }
+.el-dropdown::v-deep {
+  color: var(--module-color);
 }
 
 .el-space::v-deep {
@@ -760,16 +745,28 @@ export default class ModeratorTopicDetails extends Vue {
   .person {
     font-weight: var(--font-weight-semibold);
     font-size: 0.7rem;
-    //background-color: var(--module-color);
-    border: solid var(--module-color) 1px;
+    color: var(--module-color);
     border-radius: var(--border-radius-xs);
     padding: 0.3rem;
+  }
+
+  .separator {
+    color: var(--module-color);
+    font-weight: var(--font-weight-semibold);
   }
 }
 
 .selected {
   .person {
-    background-color: var(--module-color);
+    color: white;
+  }
+
+  .separator {
+    color: white;
+  }
+
+  .el-dropdown::v-deep {
+    color: white;
   }
 }
 
@@ -782,10 +779,22 @@ export default class ModeratorTopicDetails extends Vue {
   }
 }
 
+.module-info::v-deep {
+  .media-right {
+    margin-left: 0.2rem;
+  }
+}
+
 .selected {
   border-width: 3px;
-  border-color: var(--color-purple);
   border-color: var(--module-color);
+  background-color: var(--module-color);
+
+  .module-info::v-deep {
+    .module-info__type {
+      color: white;
+    }
+  }
 }
 
 p {

@@ -3,6 +3,7 @@
     v-model="tasks"
     v-model:publicScreen="publicTask"
     v-model:activeItem="editTask"
+    :publicScreenTopic="publicScreenTopic"
     translationModuleName="taskTimeline"
     :entityName="TimerEntity.TASK"
     :readonly="readonly"
@@ -73,6 +74,12 @@ export default class TaskTimeline extends Vue {
   interval!: any;
 
   TimerEntity = TimerEntity;
+
+  get publicScreenTopic(): number | null {
+    if (this.publicTask) return this.publicTask.topicOrder + 1;
+    if (this.tasks.length > 0) return this.tasks[0].topicOrder + 1;
+    return null;
+  }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   contentListIcon(item: any): string | undefined {
@@ -153,8 +160,9 @@ export default class TaskTimeline extends Vue {
       .getPublicScreen(this.sessionId, this.authHeaderTyp)
       .then((queryResult) => {
         if (queryResult) {
-          const task = this.getTaskFromId(queryResult.id);
-          if (task) this.publicTask = task;
+          this.publicTask = queryResult;
+          //const task = this.getTaskFromId(queryResult.id);
+          //if (task) this.publicTask = task;
         }
       });
   }

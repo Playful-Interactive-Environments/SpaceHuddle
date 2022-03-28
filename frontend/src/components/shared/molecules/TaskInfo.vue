@@ -171,6 +171,7 @@ export default class TaskInfo extends Vue {
   .el-breadcrumb__item:last-child .el-breadcrumb__inner,
   .el-breadcrumb__separator {
     color: unset;
+    margin: unset;
   }
 
   .el-breadcrumb__item {

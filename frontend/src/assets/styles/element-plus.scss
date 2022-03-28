@@ -421,6 +421,7 @@ $--font-size: (
         font-size: var(--font-size-small);
         background-color: unset;
         border-style: dashed;
+        border-width: 2px;
         color: var(--color-darkblue-light);
         cursor: pointer;
         gap: 0.5rem;
