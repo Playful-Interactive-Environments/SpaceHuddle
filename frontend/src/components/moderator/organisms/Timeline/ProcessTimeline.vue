@@ -35,10 +35,9 @@
       <div class="media">
         <span
           class="media-left"
+          v-if="canDisablePublicTimeline"
           :style="{
-            width: canDisablePublicTimeline
-              ? `calc(100% / (${sliderSteps}))`
-              : 0,
+            width: `calc(100% / (${sliderSteps}))`,
           }"
         >
           <div
@@ -57,7 +56,7 @@
               <font-awesome-icon :icon="['fac', 'presentation']" />
             </div>
             <span class="home" v-if="!useOtherPublicScreenTopic">
-              <font-awesome-icon class="processIcon" icon="home" />
+              <font-awesome-icon class="processIcon homeIcon" icon="home" />
             </span>
             <span
               class="home useOtherPublicScreenTopic"
@@ -65,9 +64,9 @@
               v-else
             >
               <span class="processIcon">
-                <font-awesome-icon icon="home" />
+                <font-awesome-icon icon="home" class="homeIcon" />
                 <span class="topicInfo">
-                  {{ $t('moderator.organism.processTimeline.otherTopic') }}
+                  <font-awesome-icon icon="bookmark" />
                   {{ publicScreenTopic }}
                 </span>
               </span>
@@ -153,7 +152,6 @@
                 </template>
                 <template #description>
                   <TutorialStep
-                    v-if="isLinkedToDetails"
                     :disableTutorial="readonly || modelValue.length < 2"
                     step="selectItem"
                     :type="translationModuleName"
@@ -167,9 +165,6 @@
                       {{ getTitle(element) }}
                     </span>
                   </TutorialStep>
-                  <span v-else class="threeLineText">
-                    {{ getTitle(element) }}
-                  </span>
                 </template>
               </el-step>
             </template>
@@ -464,6 +459,16 @@ export default class ProcessTimeline extends Vue {
     const result = this.getContentItem(this.getKey(item));
     this.$emit('update:activeItem', result);
     this.$emit('changeActiveElement', result);
+    if (
+      !this.isLinkedToDetails &&
+      'id' in result &&
+      'topicId' in result &&
+      'sessionId' in result
+    ) {
+      this.$router.push(
+        `/topic/${result.sessionId}/${result.topicId}/${result.id}`
+      );
+    }
   }
 
   tooltip(): string {
@@ -888,16 +893,24 @@ export default class ProcessTimeline extends Vue {
 
     .processIcon {
       padding: unset;
-      background-color: var(--color-primary);
+      //background-color: var(--color-primary);
 
-      svg {
+      .homeIcon {
         padding: 0.4rem;
-        background-color: var(--color-background-gray);
+      }
+
+      .topicInfo {
+        display: block;
+        margin: -1px;
+        padding: 0.2rem;
+        background-color: var(--color-primary);
+        //color: white;
+        //background-color: var(--color-background-gray);
         border-radius: calc(var(--border-radius-xs) - 2px);
       }
     }
 
-    svg.processIcon {
+    .homeIcon.processIcon {
       padding: 0.4rem;
       background-color: var(--color-background-gray);
     }
@@ -906,7 +919,7 @@ export default class ProcessTimeline extends Vue {
   .useOtherPublicScreenTopic {
     .topicInfo {
       color: white;
-      font-size: 6pt;
+      font-size: 8pt;
       white-space: nowrap;
       line-height: 0.4;
     }
