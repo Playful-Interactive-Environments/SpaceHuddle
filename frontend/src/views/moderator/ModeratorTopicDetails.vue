@@ -89,7 +89,7 @@
                   </span>
                 </TutorialStep>
               </template>
-              <el-space wrap fill>
+              <el-space wrap fill :key="reloadTaskIndex">
                 <TutorialStep
                   type="topicDetails"
                   step="addTask"
@@ -278,6 +278,7 @@ export default class ModeratorTopicDetails extends Vue {
   previousActiveTask: Task | null = null;
   activeTask: Task | null = null;
   componentLoadIndex = 0;
+  reloadTaskIndex = 0;
   componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
   showRoles = false;
   readonly intervalTime = 3000;
@@ -404,6 +405,7 @@ export default class ModeratorTopicDetails extends Vue {
   }
 
   async getTasks(): Promise<void> {
+    let activeTask: Task | undefined = undefined;
     await taskService.getTaskList(this.topicId).then((tasks) => {
       this.tasks = tasks;
       if (
@@ -412,16 +414,15 @@ export default class ModeratorTopicDetails extends Vue {
           (task) => TaskType[task.taskType] == TaskType.BRAINSTORMING
         )
       ) {
-        this.activeTask = this.tasks[0];
+        activeTask = this.tasks[0];
       } else {
-        const activeTask = this.tasks.find(
-          (task) => task.id == this.activeTaskId
-        );
-        if (activeTask) this.activeTask = activeTask;
+        activeTask = this.tasks.find((task) => task.id == this.activeTaskId);
       }
     });
-    if (this.tasks.length > this.activeTaskIndex)
-      await this.changeTask(this.tasks[this.activeTaskIndex]);
+    if (activeTask) await this.changeTask(activeTask);
+    else this.activeTask = null;
+    /*if (this.tasks.length > this.activeTaskIndex)
+      await this.changeTask(this.tasks[this.activeTaskIndex]);*/
   }
 
   reloadTasks(taskId: string): void {
@@ -434,6 +435,7 @@ export default class ModeratorTopicDetails extends Vue {
         }
         this.setActiveTab(activeTask.taskType);
       }
+      this.reloadTaskIndex++;
     });
     if (this.activeTask && this.activeTask.id === taskId) {
       const moduleContent = this.$refs.moduleContent as IModeratorContent;
@@ -607,7 +609,7 @@ export default class ModeratorTopicDetails extends Vue {
               }
             });
           } else if (activeTask?.id == task.id) {
-            this.activeTask = activeTask;
+            this.changeTask(activeTask);
           }
           this.pauseReload = false;
         });
