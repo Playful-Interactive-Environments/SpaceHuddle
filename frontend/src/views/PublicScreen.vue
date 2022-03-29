@@ -1,8 +1,6 @@
 <template>
-  <el-container
-    class="public-screen"
-    :key="componentLoadIndex"
-    v-if="isModerator && !task"
+  <el-container class="no-public-screen"
+    v-if="isModerator && task === null"
   >
     <el-header>
       <PublicHeader class="public-header"></PublicHeader>
@@ -392,47 +390,52 @@ h3 {
   font-size: var(--font-size-small);
 }
 
-.el-header {
-  position: fixed;
-  width: 100vw;
-  top: 0;
-  left: 0;
-  padding: 0 1rem;
-}
+.no-public-screen {
+  background-color: var(--color-background-gray);
+  min-height: 100vh;
 
-.el-main {
-  padding: 1rem;
+  .el-header {
+    position: fixed;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    padding: 0 1rem;
+  }
 
-  .media {
-    margin: 5rem 5rem 15rem;
+  .el-main {
+    padding: 1rem;
 
-    h1 {
-      font-size: var(--font-size-xxlarge);
-      font-weight: var(--font-weight-semibold);
-      line-height: 1.8;
-    }
+    .media {
+      margin: 5rem 5rem 15rem;
 
-    .media-right {
-      margin-left: 5rem;
-      font-size: 2.9rem;
-      font-family: monospace;
-      svg {
-        display: flex;
+      h1 {
+        font-size: var(--font-size-xxlarge);
+        font-weight: var(--font-weight-semibold);
+        line-height: 1.8;
+      }
+
+      .media-right {
+        margin-left: 5rem;
+        font-size: 2.9rem;
+        font-family: monospace;
+        svg {
+          display: flex;
+        }
       }
     }
   }
-}
 
-.el-footer {
-  position: fixed;
-  width: 100vw;
-  bottom: 0;
-  left: 0;
-  line-height: 0;
+  .el-footer {
+    position: fixed;
+    width: 100vw;
+    bottom: 0;
+    left: 0;
+    line-height: 0;
 
-  img {
-    height: 30rem;
-    max-width: unset;
+    img {
+      height: 30rem;
+      max-width: unset;
+    }
   }
 }
 </style>
