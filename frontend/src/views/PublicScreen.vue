@@ -2,7 +2,42 @@
   <el-container
     class="public-screen"
     :key="componentLoadIndex"
-    v-if="isModerator"
+    v-if="isModerator && !task"
+  >
+    <el-header>
+      <PublicHeader class="public-header"></PublicHeader>
+    </el-header>
+    <el-main>
+      <div class="media" v-if="session">
+        <div class="media-content">
+          <h1>
+            {{ session.title }}
+          </h1>
+          <span>
+            {{ session.description }}
+          </span>
+        </div>
+        <div class="media-right">
+          {{ session.connectionKey }}
+          <QrcodeVue
+            foreground="#1d2948"
+            background="#f4f4f4"
+            render-as="svg"
+            :value="joinLink"
+            :size="200"
+            level="H"
+          />
+        </div>
+      </div>
+    </el-main>
+    <el-footer>
+      <img src="@/assets/illustrations/telescope_corner.png" alt="telescope" />
+    </el-footer>
+  </el-container>
+  <el-container
+    class="public-screen"
+    :key="componentLoadIndex"
+    v-else-if="isModerator"
   >
     <el-header class="public-screen__header">
       <PublicHeader class="public-header">
@@ -90,6 +125,7 @@ import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
 import TaskTimeline from '@/components/moderator/organisms/Timeline/TaskTimeline.vue';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import QrcodeVue from 'qrcode.vue';
 
 @Options({
   components: {
@@ -97,6 +133,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
     PublicHeader,
     Timer,
     TaskInfo,
+    QrcodeVue,
     PublicScreenComponent: getEmptyComponent(),
   },
 })
@@ -116,6 +153,12 @@ export default class PublicScreen extends Vue {
 
   readonly intervalTime = 10000;
   interval!: any;
+
+  get joinLink(): string {
+    if (this.session)
+      return `${window.location.origin}/join/${this.session.connectionKey}`;
+    return `${window.location.origin}/join/`;
+  }
 
   get isModerator(): boolean {
     return this.authHeaderTyp === EndpointAuthorisationType.MODERATOR;
@@ -347,5 +390,49 @@ h3 {
   letter-spacing: 1px;
   color: var(--module-color);
   font-size: var(--font-size-small);
+}
+
+.el-header {
+  position: fixed;
+  width: 100vw;
+  top: 0;
+  left: 0;
+  padding: 0 1rem;
+}
+
+.el-main {
+  padding: 1rem;
+
+  .media {
+    margin: 5rem 5rem 15rem;
+
+    h1 {
+      font-size: var(--font-size-xxlarge);
+      font-weight: var(--font-weight-semibold);
+      line-height: 1.8;
+    }
+
+    .media-right {
+      margin-left: 5rem;
+      font-size: 2.9rem;
+      font-family: monospace;
+      svg {
+        display: flex;
+      }
+    }
+  }
+}
+
+.el-footer {
+  position: fixed;
+  width: 100vw;
+  bottom: 0;
+  left: 0;
+  line-height: 0;
+
+  img {
+    height: 30rem;
+    max-width: unset;
+  }
 }
 </style>

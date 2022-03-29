@@ -26,6 +26,7 @@
     "node-sass": "^6.0.1",
     "nosleep.js": "^0.12.0",
     "o9n": "^2.1.1",
+    "qrcode.vue": "^3.3.3",
     "quaternion": "^1.2.1",
     "shake.js": "^1.2.2",
     "uuid": "^8.3.2",
