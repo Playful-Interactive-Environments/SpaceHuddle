@@ -77,6 +77,7 @@ export const getIdeas = async (
     }
   }
   const result: Idea[] = [];
+  const dbCalls: Promise<Idea[]>[] = [];
   for (const index in input) {
     const item = input[index];
     const orderParts = item.order.split('&refId=');
@@ -86,7 +87,7 @@ export const getIdeas = async (
       countOrderType = orderParts[0];
       countRefId = orderParts[1];
     }
-    await getDetail(
+    const dbCall = getDetail(
       item.view.type,
       item.view.id,
       orderType ? orderType : countOrderType,
@@ -96,11 +97,14 @@ export const getIdeas = async (
       countOrderType,
       countRefId,
       authHeaderType
-    ).then((inputResult) => {
+    );
+    dbCall.then((inputResult) => {
       if (item.maxCount) inputResult = inputResult.slice(0, item.maxCount);
       result.push(...inputResult);
     });
+    dbCalls.push(dbCall);
   }
+  await Promise.all(dbCalls);
   if (input.length > 1)
     return result.filter(
       (item, index) => result.findIndex((item2) => item2.id == item.id) == index
