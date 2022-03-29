@@ -435,14 +435,16 @@
       "changePublicScreen": "move the slider to change the item on the public screen",
       "activateParticipant": "click on the cellphone to activate this item for the participants",
       "changeOrder": "change the order of the items by drag and drop along the timeline",
-      "selectItem": "click on the item title to display the item details"
+      "selectItem": "click on the item title to display the item details",
+      "showNullPublicScreen": "set the public screen slider to this position to display overview on the public screen"
     },
     "taskTimeline": {
       "activatePublicScreen": "activate this switch to display this topic on the public screen",
       "changePublicScreen": "move the slider to change the task on the public screen",
       "activateParticipant": "click on the cellphone to activate this task for the participants",
       "changeOrder": "change the order of the tasks by drag and drop along the timeline",
-      "selectItem": "click on the task title to display the task details"
+      "selectItem": "click on the task title to display the task details",
+      "showNullPublicScreen": "set the public screen slider to this position to display the connection key on the public screen"
     },
     "taskSettings":  {
       "input": "Tasks build on each other and serve as input for further tasks.",

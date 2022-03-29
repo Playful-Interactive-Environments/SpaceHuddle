@@ -1,7 +1,5 @@
 <template>
-  <el-container class="no-public-screen"
-    v-if="isModerator && task === null"
-  >
+  <el-container class="no-public-screen" v-if="isModerator && task === null">
     <el-header>
       <PublicHeader class="public-header"></PublicHeader>
     </el-header>

@@ -33,13 +33,7 @@
         </TutorialStep>
       </div>
       <div class="media">
-        <span
-          class="media-left"
-          v-if="canDisablePublicTimeline"
-          :style="{
-            width: `calc(100% / (${sliderSteps}))`,
-          }"
-        >
+        <span class="media-left" v-if="canDisablePublicTimeline">
           <div
             class="timelineIcon"
             :class="{
@@ -55,22 +49,37 @@
             >
               <font-awesome-icon :icon="['fac', 'presentation']" />
             </div>
-            <span class="home" v-if="!useOtherPublicScreenTopic">
-              <font-awesome-icon class="processIcon homeIcon" icon="home" />
-            </span>
-            <span
-              class="home useOtherPublicScreenTopic"
-              @click="noPublicScreen"
+            <TutorialStep
+              v-if="!useOtherPublicScreenTopic"
+              step="showNullPublicScreen"
+              :type="translationModuleName"
+              :order="5"
+              placement="bottom"
+            >
+              <span class="home">
+                <font-awesome-icon class="processIcon homeIcon" icon="home" />
+              </span>
+            </TutorialStep>
+            <TutorialStep
+              step="showNullPublicScreen"
+              :type="translationModuleName"
+              :order="5"
+              placement="bottom"
               v-else
             >
-              <span class="processIcon">
-                <font-awesome-icon icon="home" class="homeIcon" />
-                <span class="topicInfo">
-                  <font-awesome-icon icon="bookmark" />
-                  {{ publicScreenTopic }}
+              <span
+                class="home useOtherPublicScreenTopic"
+                @click="noPublicScreen"
+              >
+                <span class="processIcon">
+                  <font-awesome-icon icon="home" class="homeIcon" />
+                  <span class="topicInfo">
+                    <font-awesome-icon icon="bookmark" />
+                    {{ publicScreenTopic }}
+                  </span>
                 </span>
               </span>
-            </span>
+            </TutorialStep>
           </div>
           <i class="line"></i>
         </span>
@@ -725,6 +734,21 @@ export default class ProcessTimeline extends Vue {
   .el-step__description {
     padding-top: var(--description-padding);
     line-height: 0.8rem;
+    /* These are technically the same, but use both */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+
+    -ms-word-break: break-all;
+    /* This is the dangerous one in WebKit, as it breaks things wherever */
+    word-break: break-all;
+    /* Instead use this non-standard one: */
+    word-break: break-word;
+
+    /* Adds a hyphen where the word breaks, if supported (No Blink) */
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
 
     &.is-wait {
       color: var(--color-primary);
@@ -869,6 +893,7 @@ export default class ProcessTimeline extends Vue {
 
 .media-left {
   margin-right: 0;
+  width: calc(100% / var(--slider-steps));
   text-align: center;
   align-items: center;
   position: relative;

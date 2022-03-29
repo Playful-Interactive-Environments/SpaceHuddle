@@ -27,7 +27,9 @@
         />
         <div class="card__text">
           <div class="card__title">
-            {{ categoryName }}
+            <span class="threeLineText">
+              {{ categoryName }}
+            </span>
             <span class="actions" v-if="isEditable">
               <el-dropdown
                 class="card__menu"
@@ -49,7 +51,7 @@
               </el-dropdown>
             </span>
           </div>
-          <div v-if="categoryDescription" class="card__content">
+          <div v-if="categoryDescription" class="card__content threeLineText">
             {{ categoryDescription }}
           </div>
         </div>

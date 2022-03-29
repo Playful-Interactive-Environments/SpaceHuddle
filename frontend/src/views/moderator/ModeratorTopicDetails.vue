@@ -729,6 +729,8 @@ export default class ModeratorTopicDetails extends Vue {
 }
 
 .el-space::v-deep {
+  width: 100%;
+
   .el-space {
     &__item {
       width: 100%;
