@@ -56,14 +56,16 @@ export default class PublicScreen extends Vue {
   async getIdeas(): Promise<void> {
     if (this.taskId) {
       if (!this.task) await this.getTask();
-      await selectService
-        .getIdeasForSelection(
-          this.task?.parameter.selectionId,
-          this.authHeaderTyp
-        )
-        .then((ideas) => {
-          this.ideas = ideas;
-        });
+      if (this.task?.parameter.selectionId) {
+        await selectService
+          .getIdeasForSelection(
+            this.task?.parameter.selectionId,
+            this.authHeaderTyp
+          )
+          .then((ideas) => {
+            this.ideas = ideas;
+          });
+      }
     }
   }
 

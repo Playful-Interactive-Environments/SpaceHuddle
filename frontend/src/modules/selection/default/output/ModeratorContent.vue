@@ -248,7 +248,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
     if (this.taskId) {
       if (!this.task) await this.getTask();
-      if (this.task) {
+      if (this.task && this.task.parameter.selectionId) {
         await selectionService
           .getIdeasForSelection(this.task.parameter.selectionId)
           .then((ideas) => {
