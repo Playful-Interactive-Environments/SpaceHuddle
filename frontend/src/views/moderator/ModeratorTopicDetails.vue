@@ -457,14 +457,15 @@ export default class ModeratorTopicDetails extends Vue {
   @Watch('activeTab', { immediate: true })
   onActiveTabChanged(): void {
     const taskCategory = TaskCategory[this.activeTab];
-    const activeTabTask = this.tasks.find((task) =>
+    const activeTabTasks = this.tasks.filter((task) =>
       taskCategory.taskTypes.includes(TaskType[task.taskType])
     );
     if (
-      activeTabTask &&
-      (!this.activeTask || this.activeTask.taskType !== activeTabTask.taskType)
+      activeTabTasks.length > 0 &&
+      (!this.activeTask ||
+        !activeTabTasks.find((task) => task.id == this.activeTaskId))
     )
-      this.changeTask(activeTabTask);
+      this.changeTask(activeTabTasks[0]);
   }
 
   taskTypeAvailable(taskCategory: string): boolean {
