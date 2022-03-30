@@ -82,7 +82,7 @@
                 :topic-id="element.id"
                 :session-id="sessionId"
                 :is-linked-to-task="false"
-                v-on:changePublicScreen="publicScreenTopic = element.id"
+                v-on:changePublicScreen="setPublicTopic($event, element.id)"
                 :key="publicScreenTopic"
               ></TaskTimeline>
             </TopicCard>
@@ -184,6 +184,10 @@ export default class ModeratorSessionDetails extends Vue {
   interval!: any;
 
   TaskType = TaskType;
+
+  setPublicTopic(publicTaskId: string | null, publicTopicId: string | null) {
+    this.publicScreenTopic = publicTaskId ? publicTopicId as string : '';
+  }
 
   reactivateTutorial(): void {
     reactivateTutorial('sessionDetails', this.eventBus);
