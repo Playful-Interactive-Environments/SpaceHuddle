@@ -251,8 +251,14 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   @Watch('taskId', { immediate: true })
-  reloadTaskSettings(): void {
-    this.getCollapseContent(true);
+  async reloadTaskSettings(): Promise<void> {
+    this.ideas = [];
+    this.openTabs = [];
+    this.orderGroupContentSelection = {};
+    this.orderGroupContentCards = {};
+    this.orderGroupContentCards[this.addCategoryKey] = this.addCategory;
+    await this.getTask();
+    await this.getCollapseContent(true);
   }
 
   @Watch('showCategorySettings', { immediate: true })
@@ -319,9 +325,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   async getIdeas(): Promise<string[]> {
     if (this.isDragging) return Object.keys(this.orderGroupContentSelection);
+    const startTaskId = this.taskId;
 
-    if (this.taskId) {
-      if (!this.task) await this.getTask();
+    if (startTaskId) {
+      if (!this.task || this.task.id !== startTaskId) await this.getTask();
       await this.getCategories();
       const orderGroupContent: CategoryContentList = {};
       this.categories.forEach((category) => {
@@ -332,13 +339,22 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       });
 
       if (this.task && this.task.parameter.input) {
-        await viewService
-          .getIdeas(
-            this.task.parameter.input,
-            IdeaSortOrderHierarchy,
-            this.taskId
-          )
-          .then((ideas) => {
+        const getCategorizedIdeas = viewService.getIdeas(
+          this.task.parameter.input,
+          IdeaSortOrderHierarchy,
+          startTaskId
+        );
+        const getUncategorizedIdeas = viewService.getOrderGroups(
+          this.task.parameter.input,
+          this.orderType,
+          null,
+          EndpointAuthorisationType.MODERATOR,
+          this.orderGroupContentSelection,
+          (idea: Idea) => !idea.category
+        );
+
+        await getCategorizedIdeas.then((ideas) => {
+          if (this.taskId === startTaskId) {
             this.ideas = ideas;
             ideas
               .filter((ideaItem) => ideaItem.category)
@@ -350,22 +366,15 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
                   }
                 }
               });
-            taskService.getTaskById(this.taskId).then((task) => {
+            taskService.getTaskById(startTaskId).then((task) => {
               task.parameter.orderType = this.orderType;
               taskService.putTask(convertToSaveVersion(task));
             });
-          });
+          }
+        });
 
-        await viewService
-          .getOrderGroups(
-            this.task.parameter.input,
-            this.orderType,
-            null,
-            EndpointAuthorisationType.MODERATOR,
-            this.orderGroupContentSelection,
-            (idea: Idea) => !idea.category
-          )
-          .then((result) => {
+        await getUncategorizedIdeas.then((result) => {
+          if (this.taskId === startTaskId) {
             const orderGroupName = (this as any).$t(
               'module.categorisation.default.moderatorContent.undefined'
             );
@@ -407,7 +416,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
                   this.orderGroupContentSelection[key].displayCount;
             });
             this.orderGroupContentSelection = orderGroupContentSelection;
-          });
+          }
+        });
       }
 
       this.orderGroupContentCards = orderGroupContent;
