@@ -528,6 +528,21 @@ INNER JOIN idea child_idea ON
 WHERE
     parent_idea.task_id = child_idea.task_id;
 
+CREATE OR REPLACE VIEW hierarchy_task(
+    category_idea_id,
+    sub_idea_id,
+    `order`,
+    task_id
+) AS SELECT
+     hierarchy.category_idea_id,
+     hierarchy.sub_idea_id,
+     hierarchy.`order`,
+     parent_idea.task_id
+ FROM
+     hierarchy
+ INNER JOIN idea parent_idea ON
+     hierarchy.category_idea_id = parent_idea.id;
+
 CREATE OR REPLACE VIEW vote_result(
     task_id,
     idea_id,
