@@ -1,7 +1,10 @@
 <template>
   <el-container class="no-public-screen" v-if="isModerator && task === null">
     <el-header>
-      <PublicHeader class="public-header"></PublicHeader>
+      <PublicHeader class="public-header">
+        {{ $t('shared.view.publicScreen.connectTo') }}
+        {{ joinLink }}
+      </PublicHeader>
     </el-header>
     <el-main>
       <div class="media" v-if="session">
@@ -398,6 +401,13 @@ h3 {
     top: 0;
     left: 0;
     padding: 0 1rem;
+
+    .public-header::v-deep {
+      .media-content {
+        text-align: right;
+        margin-right: 2rem;
+      }
+    }
   }
 
   .el-main {
@@ -432,6 +442,7 @@ h3 {
 
     img {
       height: 30rem;
+      max-height: 50vh;
       max-width: unset;
     }
   }

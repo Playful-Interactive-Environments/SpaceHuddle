@@ -361,7 +361,8 @@
       },
       "publicScreen": {
         "connectionKey": "connection key",
-        "title": "public screen"
+        "title": "public screen",
+        "connectTo": "connect to"
       }
     }
   },
