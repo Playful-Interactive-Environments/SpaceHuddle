@@ -185,8 +185,11 @@ export default class ModeratorSessionDetails extends Vue {
 
   TaskType = TaskType;
 
-  setPublicTopic(publicTaskId: string | null, publicTopicId: string | null) {
-    this.publicScreenTopic = publicTaskId ? publicTopicId as string : '';
+  setPublicTopic(
+    publicTaskId: string | null,
+    publicTopicId: string | null
+  ): void {
+    this.publicScreenTopic = publicTaskId ? (publicTopicId as string) : '';
   }
 
   reactivateTutorial(): void {
