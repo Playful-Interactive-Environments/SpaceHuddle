@@ -229,7 +229,7 @@ export default class Participant extends Vue {
       } else {
         vote.rating = rate;
         vote.detailRating = rate;
-        votingService.putVote(vote.id, vote);
+        votingService.putVote(vote);
       }
     }, 1000);
   }

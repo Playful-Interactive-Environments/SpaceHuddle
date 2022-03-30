@@ -38,10 +38,8 @@ export const postSelection = async (
 };
 
 export const putSelection = async (
-  id: string,
   data: Partial<Selection>
 ): Promise<Selection> => {
-  data['id'] = id;
   return await apiExecutePut<Selection>(
     `/${EndpointType.SELECTION}`,
     data,

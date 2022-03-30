@@ -290,7 +290,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
             this.ideas = result.ideas;
             taskService.getTaskById(this.taskId).then((task) => {
               task.parameter.orderType = this.orderType;
-              taskService.putTask(this.taskId, convertToSaveVersion(task));
+              taskService.putTask(convertToSaveVersion(task));
             });
           });
       }

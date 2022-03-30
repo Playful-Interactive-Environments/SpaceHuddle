@@ -192,7 +192,8 @@ export default class CategorySettings extends Vue {
       }
     } else {
       categorisationService
-        .putCategory(this.categoryId, {
+        .putCategory({
+          id: this.categoryId,
           keywords: this.formData.title,
           description: this.formData.description,
           image: this.formData.image,

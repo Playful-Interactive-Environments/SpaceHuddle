@@ -153,7 +153,8 @@ export default class TopicSettings extends Vue {
       }
     } else {
       await topicService
-        .putTopic(this.topicId, {
+        .putTopic({
+          id: this.topicId,
           title: this.formData.title,
           description: this.formData.description,
           order: this.topic?.order,

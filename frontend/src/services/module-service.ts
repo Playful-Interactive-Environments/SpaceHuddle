@@ -47,10 +47,8 @@ export const postModule = async (
 };
 
 export const putModule = async (
-  id: string,
   data: Partial<Module>
 ): Promise<Module> => {
-  data['id'] = id;
   return await apiExecutePut<Module>(
     `/${EndpointType.MODULE}/`,
     data,

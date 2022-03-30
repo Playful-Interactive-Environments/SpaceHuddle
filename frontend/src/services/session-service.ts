@@ -53,10 +53,8 @@ export const post = async (data: Partial<Session>): Promise<Session> => {
 };
 
 export const put = async (
-  id: string,
   data: Partial<Session>
 ): Promise<Session> => {
-  data['id'] = id;
   return await apiExecutePut<Session>(
     `/${EndpointType.SESSION}/`,
     data,

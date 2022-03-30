@@ -21,12 +21,6 @@ export const getTaskById = async (
   );
 };
 
-export const updateTask = async (
-  data: TaskForSaveAction
-): Promise<TaskForSaveAction> => {
-  return await apiExecutePut<TaskForSaveAction>(`/${EndpointType.TASK}/`, data);
-};
-
 export const deleteTask = async (id: string): Promise<boolean> => {
   return await apiExecuteDelete<any>(`/${EndpointType.TASK}/${id}/`);
 };
@@ -64,10 +58,8 @@ export const postTask = async (
 };
 
 export const putTask = async (
-  id: string,
   data: Partial<TaskForSaveAction>
 ): Promise<Task> => {
-  data['id'] = id;
   return await apiExecutePut<Task>(
     `/${EndpointType.TASK}/`,
     data,

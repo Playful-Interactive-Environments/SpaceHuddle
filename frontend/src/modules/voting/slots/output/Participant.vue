@@ -214,7 +214,8 @@ export default class Participant extends Vue {
             const slotVote = this.votes.filter(
               (vote) => vote.ideaId == slotIdea?.id
             )[0];
-            await votingService.putVote(slotVote.id, {
+            await votingService.putVote({
+              id: slotVote.id,
               ideaId: slotIdea.id,
               rating: 0,
               detailRating: 0,

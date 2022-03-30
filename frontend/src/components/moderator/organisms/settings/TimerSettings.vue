@@ -142,7 +142,7 @@ export default class TimerSettings extends Vue {
 
   deactivateTimer(): void {
     this.entityState = TaskStates.WAIT;
-    timerService.update(this.entityName, this.entity.id, this.entity);
+    timerService.update(this.entityName, this.entity);
     this.reset();
     this.showSettings = false;
     this.$emit('update:showModal', false);
@@ -196,7 +196,7 @@ export default class TimerSettings extends Vue {
   save(): void {
     this.entityState = TaskStates.ACTIVE;
     this.entityRemainingTime = this.remainingSeconds;
-    timerService.update(this.entityName, this.entity.id, this.entity);
+    timerService.update(this.entityName, this.entity);
     this.reset();
     this.showSettings = false;
     this.$emit('update:showModal', false);

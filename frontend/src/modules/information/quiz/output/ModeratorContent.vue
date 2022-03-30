@@ -168,8 +168,8 @@ import { convertToSaveVersion, Task } from '@/types/api/Task';
 import { Question } from '@/modules/information/quiz/types/Question';
 import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
 import {
-  QuestionType,
   moduleNameValid,
+  QuestionType,
 } from '@/modules/information/quiz/types/QuestionType';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
 
@@ -213,7 +213,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       this.editQuestion = this.publicQuestion;
     if (this.task) {
       this.task.parameter['activeQuestion'] = this.publicQuestion?.question.id;
-      await taskService.updateTask(convertToSaveVersion(this.task));
+      await taskService.putTask(convertToSaveVersion(this.task));
     }
   }
 
@@ -283,30 +283,28 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   saveQuestion(): void {
     if (this.formData.question.id) {
-      hierarchyService
-        .putHierarchy(this.formData.question.id, this.formData.question)
-        .then(() => {
-          this.formData.answers.forEach((answer) => {
-            if (answer.id) hierarchyService.putHierarchy(answer.id, answer);
-            else {
-              answer.parentId = this.formData.question.id;
-              hierarchyService
-                .postHierarchy(this.taskId, {
-                  parentId: answer.parentId,
-                  keywords: answer.keywords,
-                  description: answer.description,
-                  link: answer.link,
-                  image: answer.image,
-                  parameter: answer.parameter,
-                  order: answer.order,
-                })
-                .then((hierarchy) => {
-                  answer.id = hierarchy.id;
-                });
-            }
-          });
-          this.getHierarchies();
+      hierarchyService.putHierarchy(this.formData.question).then(() => {
+        this.formData.answers.forEach((answer) => {
+          if (answer.id) hierarchyService.putHierarchy(answer);
+          else {
+            answer.parentId = this.formData.question.id;
+            hierarchyService
+              .postHierarchy(this.taskId, {
+                parentId: answer.parentId,
+                keywords: answer.keywords,
+                description: answer.description,
+                link: answer.link,
+                image: answer.image,
+                parameter: answer.parameter,
+                order: answer.order,
+              })
+              .then((hierarchy) => {
+                answer.id = hierarchy.id;
+              });
+          }
         });
+        this.getHierarchies();
+      });
     } else {
       if (this.formData.question.order === null)
         this.formData.question.order = this.questions.length;
@@ -369,8 +367,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       );
       if (module) {
         this.answerCount = module.parameter.answerCount;
-        this.questionType =
-          QuestionType[module.parameter.questionType.toUpperCase()];
+        if (module.parameter.questionType) {
+          this.questionType =
+            QuestionType[module.parameter.questionType.toUpperCase()];
+        } else {
+          this.questionType = QuestionType.QUIZ;
+        }
         this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
         this.defaultQuestionTime = module.parameter.defaultQuestionTime;
       }
@@ -493,7 +495,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     list.forEach((question, index) => {
       if (question.question.id) {
         question.question.order = index;
-        hierarchyService.putHierarchy(question.question.id, question.question);
+        hierarchyService.putHierarchy(question.question);
       }
     });
   }

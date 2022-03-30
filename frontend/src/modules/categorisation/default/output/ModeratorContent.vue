@@ -352,7 +352,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
               });
             taskService.getTaskById(this.taskId).then((task) => {
               task.parameter.orderType = this.orderType;
-              taskService.putTask(this.taskId, convertToSaveVersion(task));
+              taskService.putTask(convertToSaveVersion(task));
             });
           });
 
@@ -458,7 +458,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   async dragCategory(): Promise<void> {
     this.categories.forEach((category) => {
-      categorisationService.putCategory(category.id, category);
+      categorisationService.putCategory(category);
     });
   }
 

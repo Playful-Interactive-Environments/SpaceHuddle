@@ -174,7 +174,7 @@ export default class IdeaSettings extends Vue {
     this.idea.image = this.formData.image;
     this.idea.link = this.formData.link;
     if (this.idea.id) {
-      await ideaService.putIdea(this.idea.id, this.idea, this.authHeaderTyp);
+      await ideaService.putIdea(this.idea, this.authHeaderTyp);
     } else if (this.taskId) {
       await ideaService.postIdea(
         this.taskId,

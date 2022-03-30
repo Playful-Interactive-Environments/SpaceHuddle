@@ -175,7 +175,8 @@ export default class SessionSettings extends Vue {
         );
     } else {
       await sessionService
-        .put(this.sessionId, {
+        .put({
+          id: this.sessionId,
           title: this.formData.title,
           description: this.formData.description,
           expirationDate: this.isoExpirationDate,

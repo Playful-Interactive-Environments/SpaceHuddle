@@ -7,11 +7,9 @@ import TaskStates from '@/types/enum/TaskStates';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export const update = async (
   entity: string,
-  id: string,
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   data: any
 ): Promise<any> => {
-  data['id'] = id;
   if (Object.values(TimerEntity).find((item) => item == entity)) {
     if (entity == TimerEntity.TASK) data = convertToSaveVersion(data);
     return await apiExecutePut<any>(

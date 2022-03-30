@@ -37,10 +37,8 @@ export const postHierarchy = async (
 };
 
 export const putHierarchy = async (
-  id: string,
   data: Partial<Hierarchy>
 ): Promise<Hierarchy> => {
-  data['id'] = id;
   return await apiExecutePut<Hierarchy>(
     `/${EndpointType.HIERARCHY}`,
     data,

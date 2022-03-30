@@ -1147,7 +1147,8 @@ export default class TaskSettings extends Vue {
 
     if (this.taskId) {
       await taskService
-        .putTask(this.taskId, {
+        .putTask({
+          id: this.taskId,
           taskType: this.taskType,
           name: this.formData.name,
           description: this.formData.description,
@@ -1240,7 +1241,7 @@ export default class TaskSettings extends Vue {
       if (moduleComponent) {
         module.parameter = moduleComponent.parameter;
       }
-      await moduleService.putModule(module.id, module);
+      await moduleService.putModule(module);
     }
     this.closeDialog();
     this.$emit('taskUpdated', task.id);

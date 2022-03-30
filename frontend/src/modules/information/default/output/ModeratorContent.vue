@@ -118,7 +118,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   async dragDone(): Promise<void> {
     this.ideas.forEach((idea, index) => {
       idea.order = index;
-      ideaService.putIdea(idea.id, idea);
+      ideaService.putIdea(idea);
     });
   }
 }

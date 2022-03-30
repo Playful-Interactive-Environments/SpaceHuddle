@@ -46,11 +46,9 @@ export const postIdea = async (
 };
 
 export const putIdea = async (
-  id: string,
   data: Partial<Idea>,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Idea> => {
-  data['id'] = id;
   return await apiExecutePut<Idea>(
     `/${EndpointType.IDEA}`,
     data,

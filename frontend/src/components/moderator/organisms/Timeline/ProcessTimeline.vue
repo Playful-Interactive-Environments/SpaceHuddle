@@ -405,7 +405,7 @@ export default class ProcessTimeline extends Vue {
     if (active) this.timerContent = item;
     else {
       timerService.setState(item, TaskStates.WAIT);
-      timerService.update(this.entityName, item.id, item);
+      timerService.update(this.entityName, item);
     }
   }
 

@@ -267,7 +267,7 @@ export default class ModeratorSessionDetails extends Vue {
           description: this.topics[i].description,
           order: this.topics[i].order,
         };
-        topicService.putTopic(this.topics[i].id, topic);
+        topicService.putTopic(topic);
       }
     }
   }

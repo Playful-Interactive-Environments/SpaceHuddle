@@ -33,10 +33,8 @@ export const postTopic = async (
 };
 
 export const putTopic = async (
-  id: string,
   data: Partial<Topic>
 ): Promise<Topic> => {
-  data['id'] = id;
   return await apiExecutePut<Topic>(
     `/${EndpointType.TOPIC}/`,
     data,

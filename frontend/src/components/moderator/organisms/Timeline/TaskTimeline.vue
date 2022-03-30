@@ -171,7 +171,7 @@ export default class TaskTimeline extends Vue {
   async dragDone(list: any[]): Promise<void> {
     list.forEach((task, index) => {
       task.order = index;
-      taskService.putTask(task.id, convertToSaveVersion(task));
+      taskService.putTask(convertToSaveVersion(task));
     });
   }
 

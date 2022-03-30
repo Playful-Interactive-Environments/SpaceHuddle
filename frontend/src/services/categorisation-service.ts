@@ -38,10 +38,8 @@ export const postCategory = async (
 };
 
 export const putCategory = async (
-  id: string,
   data: Partial<Category>
 ): Promise<Category> => {
-  data['id'] = id;
   return await apiExecutePut<Category>(
     `/${EndpointType.CATEGORY}`,
     data,

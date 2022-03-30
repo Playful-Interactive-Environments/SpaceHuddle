@@ -48,7 +48,8 @@ export default class TaskParameter extends Vue implements CustomParameter {
     if (this.modelValue.parameter) {
       if (this.modelValue.parameter.selectionId) {
         const selectionId = this.modelValue.parameter.selectionId;
-        await selectionService.putSelection(selectionId, {
+        await selectionService.putSelection({
+          id: selectionId,
           name: this.modelValue.name,
         });
       } else {
