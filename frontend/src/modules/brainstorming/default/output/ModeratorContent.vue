@@ -171,11 +171,13 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   async getIdeas(): Promise<string[]> {
-    if (this.taskId) {
+    const taskId = this.taskId;
+    const orderType = this.orderType;
+    if (taskId) {
       await ideaService
         .getOrderGroups(
-          this.taskId,
-          this.orderType,
+          taskId,
+          orderType,
           null,
           EndpointAuthorisationType.MODERATOR,
           this.orderGroupContent
@@ -183,12 +185,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         .then((result) => {
           let orderGroupName = '';
           let orderGroupContent: OrderGroupList = {};
-          switch (this.orderType) {
+          switch (orderType) {
             case IdeaSortOrder.TIMESTAMP:
             case IdeaSortOrder.ALPHABETICAL:
             case IdeaSortOrder.ORDER:
               orderGroupName = (this as any).$t(
-                `module.brainstorming.default.moderatorContent.${this.orderType}`
+                `module.brainstorming.default.moderatorContent.${orderType}`
               );
               orderGroupContent[orderGroupName] = new OrderGroup(result.ideas);
               break;
@@ -202,8 +204,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           });
           this.orderGroupContent = orderGroupContent;
           this.ideas = result.ideas;
-          taskService.getTaskById(this.taskId).then((task) => {
-            task.parameter.orderType = this.orderType;
+          taskService.getTaskById(taskId).then((task) => {
+            task.parameter.orderType = orderType;
             taskService.putTask(convertToSaveVersion(task));
           });
         });
