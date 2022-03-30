@@ -87,6 +87,7 @@
           class="media-content"
           :active="activeContentIndex"
           align-center
+          :key="timelineKey"
         >
           <draggable
             v-model="activePageDisplayContentList"
@@ -459,7 +460,9 @@ export default class ProcessTimeline extends Vue {
     );
   }
 
+  timelineKey = 0;
   dragDone(): void {
+    this.timelineKey++;
     this.$emit('changeOrder', this.activePageContentList);
   }
 
