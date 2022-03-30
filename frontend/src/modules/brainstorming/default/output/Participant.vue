@@ -3,6 +3,15 @@
     :task-id="taskId"
     :module="moduleName"
   >
+    <div id="preloader">
+      <img src="../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png">
+      <img src="../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png">
+      <img src="../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png">
+      <img src="../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png">
+      <img src="../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-1.png">
+      <img src="../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-2.png">
+      <img src="../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png">
+    </div>
     <div id="backgroundImage"></div>
 
     <div id="Platform"></div>
@@ -887,4 +896,13 @@ button#Cargo {
   margin-left: auto;
   margin-right: auto;
 }
+
+#preloader {
+  position: fixed;
+  width: 0%;
+  height: 0%;
+
+  display: none;
+}
+
 </style>
