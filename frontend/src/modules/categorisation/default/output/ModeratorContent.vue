@@ -252,6 +252,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   @Watch('taskId', { immediate: true })
   async reloadTaskSettings(): Promise<void> {
+    this.categories = [];
     this.ideas = [];
     this.openTabs = [];
     this.orderGroupContentSelection = {};
