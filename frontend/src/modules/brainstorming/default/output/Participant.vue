@@ -1,5 +1,5 @@
 <template>
-  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName" @wheel.prevent>
+  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
     <div id="preloader">
       <img
         src="../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png"
@@ -28,6 +28,14 @@
       <img
         src="../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png"
         alt="Rocket-fire-launch-3"
+      />
+      <img
+          src="../../../../assets/illustrations/Form/ButtonGrey.png"
+          alt="ButtonGrey"
+      />
+      <img
+          src="../../../../assets/illustrations/Form/ButtonRed.png"
+          alt="ButtonRed"
       />
     </div>
     <div
@@ -63,9 +71,8 @@
           showTextInput = true;
           showImgInput = false;
         "
-
             class="window"
-            :class="{ redWindow: !isFormValid() }"
+            :class="{ redWindow: !isFormValid() && !doTakeoff}"
             id="editText"
         ></button>
         <button
@@ -348,7 +355,7 @@ export default class Participant extends Vue {
     if (this.formData.description.length <= 0) {
       return false;
     } else if (
-      this.formData.description.length >= this.MAX_DESCRIPTION_LENGTH
+      this.formData.description.length > this.MAX_DESCRIPTION_LENGTH
     ) {
       return false;
     } else if (this.keywordsEmpty) {
@@ -539,7 +546,7 @@ ParticipantModuleDefaultContainer {
   position: absolute;
   width: 85%;
   height: 15%;
-  top: 83%;
+  top: 81%;
   left: 0;
   right: 0;
   margin-left: auto;
@@ -570,7 +577,7 @@ ParticipantModuleDefaultContainer {
 #RocketContainer {
   position: absolute;
   width: 70%;
-  height: 80%;
+  height: 75%;
 
   top: 25%;
 
@@ -683,27 +690,27 @@ ParticipantModuleDefaultContainer {
 @keyframes takeoffMove {
   0% {
     top: 25%;
-    left: 1%;
+    left: 0.1%;
     right: 0%;
   }
   2% {
     top: 25%;
-    right: 1%;
+    right: 0.2%;
     left: 0%;
   }
   4% {
     top: 25%;
-    left: 1%;
+    left: 0.4%;
     right: 0%;
   }
   6% {
     top: 25%;
-    right: 1%;
+    right: 0.6%;
     left: 0%;
   }
   8% {
     top: 25%;
-    left: 1%;
+    left: 0.9%;
     right: 0%;
   }
   10% {
@@ -883,7 +890,23 @@ button#editText.redWindow {
   margin-left: auto;
   margin-right: auto;
 
-  top: 35%;
+  top: 34%;
+}
+
+.el-form-item#textErrorMessage::v-deep {
+  .el-form-item__error {
+    position: absolute;
+    width: auto;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+
+    top: 60%;
+
+    text-align: center;
+    padding: 4% 3%;
+  }
 }
 
 .el-form-item#keywordInsert {
@@ -893,26 +916,15 @@ button#editText.redWindow {
   right: 0;
   margin-left: auto;
   margin-right: auto;
-  top: 51%;
-}
-
-.el-form-item#textErrorMessage {
-  position: absolute;
-  width: 90%;
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-
-  top: 35%;
+  top: 50%;
 }
 
 #LaunchButton {
   position: absolute;
   width: 55%;
-  height: 15%;
+  height: 17%;
 
-  top: 85%;
+  top: 83%;
   left: 0;
   right: 0;
   margin-left: auto;
@@ -922,15 +934,17 @@ button#editText.redWindow {
   background-position: right;
   background-repeat: no-repeat;
   background-image: url('../../../../assets/illustrations/Form/ButtonRed.png');
+  transition: 0.2s;
 }
 
 #LaunchButton.disabled {
   background-image: url('../../../../assets/illustrations/Form/ButtonGrey.png');
+  transition: 0.2s;
 }
 
 .el-button#LaunchButtonPressable {
   position: absolute;
-  width: 60%;
+  width: 65%;
   height: 27%;
 
   top: 7%;
@@ -946,19 +960,21 @@ button#editText.redWindow {
   background-color: #fe6e5d;
   border: 2px solid #992a2a;
   border-radius: 20px 0px 20px 20px;
+  transition: 0.2s;
 }
 
 .el-button#LaunchButtonPressable.disabled {
   color: #475989;
   background-color: #c4ccde;
   border: 2px solid #475989;
+  transition: 0.2s;
 }
 
 .el-form-item#imageInsert {
   position: absolute;
 
 
-  top: 49%;
+  top: 47%;
   left: 0;
   right: 0;
   margin-left: auto;
@@ -985,7 +1001,7 @@ button#editText.redWindow {
   width: auto;
   position: absolute;
   right: 0;
-  top: -14px;
+  top: -18px;
   padding: 0.5% 2%;
   background-color: var(--color-mint);
   border-radius: 20px;
@@ -996,6 +1012,17 @@ button#editText.redWindow {
   background-color: var(--color-red);
 }
 
+.el-form-item::v-deep {
+  .el-form-item__error {
+    width: auto;
+    position: absolute;
+    left: 0;
 
+    padding: 1% 4%;
+    background-color: var(--color-red);
+    border-radius: 20px;
+    color: white;
+  }
+}
 
 </style>
