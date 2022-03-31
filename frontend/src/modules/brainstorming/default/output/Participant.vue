@@ -1,5 +1,5 @@
 <template>
-  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
+  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName" @wheel.prevent>
     <div id="preloader">
       <img
         src="../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png"
@@ -30,44 +30,65 @@
         alt="Rocket-fire-launch-3"
       />
     </div>
-    <div id="backgroundImage"></div>
-
-    <div id="Platform"></div>
     <div
-      id="Rocket"
-      :class="{ rocketAnimate: doTakeoff }"
-      v-on:animationend="
+      id="backgroundImage"
+      v-on:click="
+        showTextInput = false;
+        showImgInput = false;
+      "
+    ></div>
+
+    <div id="Platform" v-on:click="
+        showTextInput = false;
+        showImgInput = false;
+      "></div>
+    <div id="RocketContainer"
+         :class="{ rocketAnimateMove: doTakeoff }"
+    >
+      <div id="Rocket"
+          :class="{ rocketAnimateSprite: doTakeoff }"
+          v-on:animationend="
         doTakeoff = false;
         showTextInput = true;
       "
-    >
-      <button
-        v-on:click="
+          v-on:click="
+        showTextInput = false;
+        showImgInput = false;
+      "
+      >
+      </div>
+      <div id="rocketButtons">
+        <button
+            v-on:click="
           showTextInput = true;
           showImgInput = false;
         "
-        class="window"
-        id="editText"
-      ></button>
-      <button
-        v-on:click="
+
+            class="window"
+            :class="{ redWindow: !isFormValid() }"
+            id="editText"
+        ></button>
+        <button
+            v-on:click="
           showImgInput = true;
           showTextInput = false;
         "
-        class="window"
-        id="Image"
-      ></button>
-      <el-button
-        v-on:click="
+            class="window"
+            id="Image"
+        ></button>
+        <el-button
+            v-on:click="
           showHistory = true;
           showImgInput = false;
           showTextInput = false;
         "
-        type="primary"
-        class="window"
-        id="Cargo"
-      ></el-button>
+            type="primary"
+            class="window"
+            id="Cargo"
+        ></el-button>
+      </div>
     </div>
+
 
     <ValidationForm
       :form-data="formData"
@@ -332,14 +353,11 @@ export default class Participant extends Vue {
       return false;
     } else if (this.keywordsEmpty) {
       return false;
-    } else if (
-      this.showSecondInput &&
-      this.formData.keywords.length >= MAX_KEYWORDS_LENGTH
-    ) {
-      return false;
-    } else {
-      return true;
-    }
+    } else
+      return !(
+        this.showSecondInput &&
+        this.formData.keywords.length >= MAX_KEYWORDS_LENGTH
+      );
   }
 
   reset(): void {
@@ -435,6 +453,8 @@ export default class Participant extends Vue {
       targetElement.className = 'unhidden';
     }
   }
+
+
 }
 </script>
 
@@ -511,6 +531,8 @@ ParticipantModuleDefaultContainer {
   mask-image: url('../../../../assets/illustrations/Form/Mask.png');
   mask-size: contain;
   mask-repeat: repeat;
+
+
 }
 
 #Platform {
@@ -531,15 +553,13 @@ ParticipantModuleDefaultContainer {
 
 #Rocket {
   position: absolute;
-  width: 70%;
-  height: 80%;
+  width: 100%;
+  height: 100%;
 
   left: 0;
   right: 0;
   margin-left: auto;
   margin-right: auto;
-
-  top: 25%;
 
   background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png');
   background-size: contain;
@@ -547,8 +567,120 @@ ParticipantModuleDefaultContainer {
   background-repeat: no-repeat;
 }
 
-@keyframes takeoff {
-  /*Position keyframes (shake, takeoff)*/
+#RocketContainer {
+  position: absolute;
+  width: 70%;
+  height: 80%;
+
+  top: 25%;
+
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@keyframes takeoffSprite {
+  /*Sprite changes (couldn't find a way to loop keyframes within animation)*/
+  0% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png');
+  }
+  6% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
+  }
+  7% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
+  }
+  12% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-1.png');
+  }
+  18% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-1.png');
+  }
+  19% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-2.png');
+  }
+  24% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-2.png');
+  }
+  25% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
+  }
+  30% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
+  }
+  31% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+  }
+  36% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+  }
+
+  37% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+  }
+  42% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+  }
+  43% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
+  }
+  48% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
+  }
+  49% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+  }
+  54% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+  }
+
+  55% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+  }
+  60% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+  }
+  61% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
+  }
+  66% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
+  }
+  72% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+  }
+  73% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+  }
+
+  78% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+  }
+  79% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+  }
+  84% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
+  }
+  85% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
+  }
+  90% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+  }
+  91% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+  }
+
+  96% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+  }
+  97% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+  }
+}
+@keyframes takeoffMove {
   0% {
     top: 25%;
     left: 1%;
@@ -680,109 +812,18 @@ ParticipantModuleDefaultContainer {
   100% {
     top: -100%;
   }
-
-  /*Sprite changes (couldn't find a way to loop keyframes within animation)*/
-  0% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png');
-  }
-  6% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
-  }
-  7% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
-  }
-  12% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-1.png');
-  }
-  18% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-1.png');
-  }
-  19% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-2.png');
-  }
-  24% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-2.png');
-  }
-  25% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
-  }
-  30% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
-  }
-  31% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
-  }
-  36% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
-  }
-
-  37% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
-  }
-  42% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
-  }
-  43% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
-  }
-  48% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
-  }
-  49% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
-  }
-  54% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
-  }
-
-  55% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
-  }
-  60% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
-  }
-  61% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
-  }
-  66% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
-  }
-  72% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
-  }
-  73% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
-  }
-
-  78% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
-  }
-  79% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
-  }
-  84% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
-  }
-  85% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
-  }
-  90% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
-  }
-  91% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
-  }
-
-  96% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
-  }
-  97% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
-  }
 }
 
-.rocketAnimate {
-  animation-name: takeoff;
+.rocketAnimateSprite {
+  animation-name: takeoffSprite;
+  animation-duration: 5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 2;
+  animation-direction: alternate;
+}
+
+.rocketAnimateMove {
+  animation-name: takeoffMove;
   animation-duration: 5s;
   animation-timing-function: ease-in-out;
   animation-iteration-count: 2;
@@ -820,6 +861,10 @@ button#Image {
 button#Cargo {
   background-image: url('../../../../assets/illustrations/Form/Window 3.png');
   top: 53%;
+}
+
+button#editText.redWindow {
+  background-image: url('../../../../assets/illustrations/Form/Window 1-error.png');
 }
 
 .el-form-item.hidden {
@@ -865,7 +910,7 @@ button#Cargo {
 #LaunchButton {
   position: absolute;
   width: 55%;
-  height: 20%;
+  height: 15%;
 
   top: 85%;
   left: 0;
@@ -912,6 +957,7 @@ button#Cargo {
 .el-form-item#imageInsert {
   position: absolute;
 
+
   top: 49%;
   left: 0;
   right: 0;
@@ -938,15 +984,18 @@ button#Cargo {
 .info {
   width: auto;
   position: absolute;
-
-  right: 0%;
-  bottom: -20%;
-
-  padding-right: 2%;
-  padding-left: 2%;
+  right: 0;
+  top: -14px;
+  padding: 0.5% 2%;
+  background-color: var(--color-mint);
   border-radius: 20px;
-  background-color: #ffffff;
-
+  color: white;
 }
+
+.info.error {
+  background-color: var(--color-red);
+}
+
+
 
 </style>
