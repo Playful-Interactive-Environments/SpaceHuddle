@@ -1,21 +1,46 @@
 <template>
-  <ParticipantModuleDefaultContainer
-    :task-id="taskId"
-    :module="moduleName"
-  >
+  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
     <div id="preloader">
-      <img src="../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png">
-      <img src="../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png">
-      <img src="../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png">
-      <img src="../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png">
-      <img src="../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-1.png">
-      <img src="../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-2.png">
-      <img src="../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png">
+      <img
+        src="../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png"
+        alt="Rocket-fire-none"
+      />
+      <img
+        src="../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png"
+        alt="Rocket-fire-1"
+      />
+      <img
+        src="../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png"
+        alt="Rocket-fire-2"
+      />
+      <img
+        src="../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png"
+        alt="Rocket-fire-3"
+      />
+      <img
+        src="../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-1.png"
+        alt="Rocket-fire-launch-1"
+      />
+      <img
+        src="../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-2.png"
+        alt="Rocket-fire-launch-2"
+      />
+      <img
+        src="../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png"
+        alt="Rocket-fire-launch-3"
+      />
     </div>
     <div id="backgroundImage"></div>
 
     <div id="Platform"></div>
-    <div id="Rocket" :class="{ rocketAnimate: doTakeoff }" v-on:animationend="doTakeoff = false; showTextInput = true;">
+    <div
+      id="Rocket"
+      :class="{ rocketAnimate: doTakeoff }"
+      v-on:animationend="
+        doTakeoff = false;
+        showTextInput = true;
+      "
+    >
       <button
         v-on:click="
           showTextInput = true;
@@ -33,13 +58,16 @@
         id="Image"
       ></button>
       <el-button
-        v-on:click="showHistory = true; showImgInput = false; showTextInput = false;"
+        v-on:click="
+          showHistory = true;
+          showImgInput = false;
+          showTextInput = false;
+        "
         type="primary"
         class="window"
         id="Cargo"
       ></el-button>
     </div>
-
 
     <ValidationForm
       :form-data="formData"
@@ -129,7 +157,7 @@
         id="textErrorMessage"
       >
         <span class="media">
-          <span class="media-content" >
+          <span class="media-content">
             <el-input
               v-model="formData.stateMessage"
               class="hide"
@@ -156,14 +184,18 @@
 
       <div id="LaunchButton" :class="{ disabled: !isFormValid() }">
         <el-button
-            native-type="submit"
-            id="LaunchButtonPressable"
-            :class="{ disabled: !isFormValid() }"
-            :disabled="!isFormValid()"
-            v-on:click="doTakeoff = isFormValid(); showImgInput = false; showTextInput = false;"
-        >LAUNCH</el-button>
+          native-type="submit"
+          id="LaunchButtonPressable"
+          :class="{ disabled: !isFormValid() }"
+          :disabled="!isFormValid()"
+          v-on:click="
+            doTakeoff = isFormValid();
+            showImgInput = false;
+            showTextInput = false;
+          "
+          >LAUNCH</el-button
+        >
       </div>
-
     </ValidationForm>
     <el-drawer
       v-model="showHistory"
@@ -224,9 +256,6 @@ import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
     'my-upload': myUpload,
   },
 })
-
-
-
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Participant extends Vue {
@@ -297,11 +326,16 @@ export default class Participant extends Vue {
   isFormValid(): boolean {
     if (this.formData.description.length <= 0) {
       return false;
-    } else if (this.formData.description.length >= this.MAX_DESCRIPTION_LENGTH) {
+    } else if (
+      this.formData.description.length >= this.MAX_DESCRIPTION_LENGTH
+    ) {
       return false;
     } else if (this.keywordsEmpty) {
       return false;
-    } else if (this.showSecondInput && this.formData.keywords.length >= MAX_KEYWORDS_LENGTH) {
+    } else if (
+      this.showSecondInput &&
+      this.formData.keywords.length >= MAX_KEYWORDS_LENGTH
+    ) {
       return false;
     } else {
       return true;
@@ -401,7 +435,6 @@ export default class Participant extends Vue {
       targetElement.className = 'unhidden';
     }
   }
-
 }
 </script>
 
@@ -478,7 +511,6 @@ ParticipantModuleDefaultContainer {
   mask-image: url('../../../../assets/illustrations/Form/Mask.png');
   mask-size: contain;
   mask-repeat: repeat;
-
 }
 
 #Platform {
@@ -901,8 +933,20 @@ button#Cargo {
   position: fixed;
   width: 0%;
   height: 0%;
+}
 
-  display: none;
+.info {
+  width: auto;
+  position: absolute;
+
+  right: 0%;
+  bottom: -20%;
+
+  padding-right: 2%;
+  padding-left: 2%;
+  border-radius: 20px;
+  background-color: #ffffff;
+
 }
 
 </style>
