@@ -697,6 +697,8 @@ export default class ProcessTimeline extends Vue {
 }
 
 .el-steps::v-deep {
+  overflow-x: unset;
+
   .el-step__line {
     background-color: var(--color-primary);
   }

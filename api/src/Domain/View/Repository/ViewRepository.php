@@ -122,7 +122,14 @@ class ViewRepository implements RepositoryInterface
         }
 
         if ($refId && str_contains($orderType, IdeaSortOrder::HIERARCHY)) {
-            $query->leftJoin("hierarchy", "hierarchy.sub_idea_id = idea.id")
+            $query
+                ->join([
+                    "hierarchy" => [
+                        "table" => "hierarchy_task",
+                        "type" => "LEFT",
+                        "conditions" => ["hierarchy.sub_idea_id = idea.id", "hierarchy.task_id" => $refId]
+                    ]
+                ])
                 ->join([
                     "category" => [
                         "table" => "idea",
