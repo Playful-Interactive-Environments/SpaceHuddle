@@ -30,12 +30,12 @@
         alt="Rocket-fire-launch-3"
       />
       <img
-          src="../../../../assets/illustrations/Form/ButtonGrey.png"
-          alt="ButtonGrey"
+        src="../../../../assets/illustrations/Form/ButtonGrey.png"
+        alt="ButtonGrey"
       />
       <img
-          src="../../../../assets/illustrations/Form/ButtonRed.png"
-          alt="ButtonRed"
+        src="../../../../assets/illustrations/Form/ButtonRed.png"
+        alt="ButtonRed"
       />
     </div>
     <div
@@ -46,56 +46,56 @@
       "
     ></div>
 
-    <div id="Platform" v-on:click="
-        showTextInput = false;
-        showImgInput = false;
-      "></div>
-    <div id="RocketContainer"
-         :class="{ rocketAnimateMove: doTakeoff }"
-    >
-      <div id="Rocket"
-          :class="{ rocketAnimateSprite: doTakeoff }"
-          v-on:animationend="
-        doTakeoff = false;
-        showTextInput = true;
-      "
-          v-on:click="
+    <div
+      id="Platform"
+      v-on:click="
         showTextInput = false;
         showImgInput = false;
       "
-      >
-      </div>
+    ></div>
+    <div id="RocketContainer" :class="{ rocketAnimateMove: doTakeoff }">
+      <div
+        id="Rocket"
+        :class="{ rocketAnimateSprite: doTakeoff }"
+        v-on:animationend="
+          doTakeoff = false;
+          showTextInput = true;
+        "
+        v-on:click="
+          showTextInput = false;
+          showImgInput = false;
+        "
+      ></div>
       <div id="rocketButtons">
         <button
-            v-on:click="
-          showTextInput = true;
-          showImgInput = false;
-        "
-            class="window"
-            :class="{ redWindow: !isFormValid() && !doTakeoff}"
-            id="editText"
+          v-on:click="
+            showTextInput = true;
+            showImgInput = false;
+          "
+          class="window"
+          :class="{ redWindow: !isFormValid() && !doTakeoff }"
+          id="editText"
         ></button>
         <button
-            v-on:click="
-          showImgInput = true;
-          showTextInput = false;
-        "
-            class="window"
-            id="Image"
+          v-on:click="
+            showImgInput = true;
+            showTextInput = false;
+          "
+          class="window"
+          id="Image"
         ></button>
         <el-button
-            v-on:click="
-          showHistory = true;
-          showImgInput = false;
-          showTextInput = false;
-        "
-            type="primary"
-            class="window"
-            id="Cargo"
+          v-on:click="
+            showHistory = true;
+            showImgInput = false;
+            showTextInput = false;
+          "
+          type="primary"
+          class="window"
+          id="Cargo"
         ></el-button>
       </div>
     </div>
-
 
     <ValidationForm
       :form-data="formData"
@@ -275,6 +275,10 @@ import {
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 
+setTimeout(()=>
+        document.querySelector("meta[name=viewport]")!.setAttribute("content", "height=" + screen.height + "px, width=device-width, initial-scale=1.0")
+    , 300);
+
 @Options({
   components: {
     IdeaCard,
@@ -317,6 +321,8 @@ export default class Participant extends Vue {
   showTextInput = true;
   showImgInput = false;
 
+  fillScreen = false;
+
   doTakeoff = false;
 
   planets = [
@@ -354,9 +360,7 @@ export default class Participant extends Vue {
   isFormValid(): boolean {
     if (this.formData.description.length <= 0) {
       return false;
-    } else if (
-      this.formData.description.length > this.MAX_DESCRIPTION_LENGTH
-    ) {
+    } else if (this.formData.description.length > this.MAX_DESCRIPTION_LENGTH) {
       return false;
     } else if (this.keywordsEmpty) {
       return false;
@@ -462,6 +466,7 @@ export default class Participant extends Vue {
   }
 
 
+
 }
 </script>
 
@@ -478,6 +483,7 @@ export default class Participant extends Vue {
     }
   }
 }
+
 
 .level-item {
   margin: 1.3rem auto;
@@ -538,8 +544,6 @@ ParticipantModuleDefaultContainer {
   mask-image: url('../../../../assets/illustrations/Form/Mask.png');
   mask-size: contain;
   mask-repeat: repeat;
-
-
 }
 
 #Platform {
@@ -691,129 +695,129 @@ ParticipantModuleDefaultContainer {
   0% {
     top: 25%;
     left: 0.1%;
-    right: 0%;
+    right: 0;
   }
   2% {
     top: 25%;
     right: 0.2%;
-    left: 0%;
+    left: 0;
   }
   4% {
     top: 25%;
     left: 0.4%;
-    right: 0%;
+    right: 0;
   }
   6% {
     top: 25%;
     right: 0.6%;
-    left: 0%;
+    left: 0;
   }
   8% {
     top: 25%;
     left: 0.9%;
-    right: 0%;
+    right: 0;
   }
   10% {
     top: 25%;
     right: 1%;
-    left: 0%;
+    left: 0;
   }
   12% {
     top: 25%;
     left: 1%;
-    right: 0%;
+    right: 0;
   }
   14% {
     top: 25%;
     right: 1%;
-    left: 0%;
+    left: 0;
   }
   16% {
     top: 25%;
     left: 1%;
-    right: 0%;
+    right: 0;
   }
   18% {
     top: 25%;
     right: 1%;
-    left: 0%;
+    left: 0;
   }
 
   20% {
     left: 1%;
-    right: 0%;
+    right: 0;
   }
   22% {
     right: 1%;
-    left: 0%;
+    left: 0;
   }
   24% {
     left: 0.9%;
-    right: 0%;
+    right: 0;
   }
   26% {
     right: 0.8%;
-    left: 0%;
+    left: 0;
   }
   28% {
     left: 0.7%;
-    right: 0%;
+    right: 0;
   }
   30% {
     right: 0.6%;
-    left: 0%;
+    left: 0;
   }
   32% {
     left: 0.5%;
-    right: 0%;
+    right: 0;
   }
   34% {
     right: 0.5%;
-    left: 0%;
+    left: 0;
   }
   36% {
     left: 0.4%;
-    right: 0%;
+    right: 0;
   }
   38% {
     right: 0.4%;
-    left: 0%;
+    left: 0;
   }
   40% {
     left: 0.3%;
-    right: 0%;
+    right: 0;
   }
   42% {
     right: 0.3%;
-    left: 0%;
+    left: 0;
   }
   44% {
     left: 0.3%;
-    right: 0%;
+    right: 0;
   }
   46% {
     right: 0.2%;
-    left: 0%;
+    left: 0;
   }
   48% {
     left: 0.2%;
-    right: 0%;
+    right: 0;
   }
   50% {
     right: 0.2%;
-    left: 0%;
+    left: 0;
   }
   52% {
     left: 0.1%;
-    right: 0%;
+    right: 0;
   }
   54% {
     right: 0.1%;
-    left: 0%;
+    left: 0;
   }
   56% {
-    left: 0%;
-    right: 0%;
+    left: 0;
+    right: 0;
   }
 
   100% {
@@ -919,6 +923,8 @@ button#editText.redWindow {
   top: 50%;
 }
 
+
+
 #LaunchButton {
   position: absolute;
   width: 55%;
@@ -973,7 +979,6 @@ button#editText.redWindow {
 .el-form-item#imageInsert {
   position: absolute;
 
-
   top: 47%;
   left: 0;
   right: 0;
@@ -993,8 +998,8 @@ button#editText.redWindow {
 
 #preloader {
   position: fixed;
-  width: 0%;
-  height: 0%;
+  width: 0;
+  height: 0;
 }
 
 .info {
@@ -1024,5 +1029,4 @@ button#editText.redWindow {
     color: white;
   }
 }
-
 </style>
