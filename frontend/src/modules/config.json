@@ -12,7 +12,7 @@
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "locales": "de,en,",  
-             "icon": "brain",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
+             "icon": "rocket-launch",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
            "path": "brainstorming/default"  
        },  
        "gallery": {  
