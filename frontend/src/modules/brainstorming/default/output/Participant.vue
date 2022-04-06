@@ -275,9 +275,16 @@ import {
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 
-setTimeout(()=>
-        document.querySelector("meta[name=viewport]")!.setAttribute("content", "height=" + screen.height + "px, width=device-width, initial-scale=1.0")
-    , 300);
+setTimeout(
+  () =>
+    document
+      .querySelector('meta[name=viewport]')!
+      .setAttribute(
+        'content',
+        'height=' + screen.height + 'px, width=device-width, initial-scale=1.0'
+      ),
+  300
+);
 
 @Options({
   components: {
@@ -367,7 +374,7 @@ export default class Participant extends Vue {
     } else
       return !(
         this.showSecondInput &&
-        this.formData.keywords.length >= MAX_KEYWORDS_LENGTH
+        this.formData.keywords.length > MAX_KEYWORDS_LENGTH
       );
   }
 
@@ -464,9 +471,6 @@ export default class Participant extends Vue {
       targetElement.className = 'unhidden';
     }
   }
-
-
-
 }
 </script>
 
@@ -483,7 +487,6 @@ export default class Participant extends Vue {
     }
   }
 }
-
 
 .level-item {
   margin: 1.3rem auto;
@@ -922,8 +925,6 @@ button#editText.redWindow {
   margin-right: auto;
   top: 50%;
 }
-
-
 
 #LaunchButton {
   position: absolute;

@@ -1,40 +1,120 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
-    <div v-if="ideaPointer < ideas.length">
-      {{ $t('module.voting.slots.participant.info') }}
-      <el-button
-        v-for="(idea, index) in seats"
-        :key="index"
-        class="fullwidth outline-dashed"
-        @click.prevent="vote(index + 1)"
-      >
-        <span v-if="idea">
-          {{ $t('module.voting.slots.participant.replace') }} "{{
-            idea.keywords
-          }}"
+    <div id="backgroundImage"></div>
+
+    <div>
+      <!--      {{ $t('module.voting.slots.participant.info') }}-->
+
+      <div id="rocketMask">
+        <div
+          id="rocketColumn"
+          v-on:scroll="getHeightPercentage()"
+          :class="{ rocketColBig: seats.length <= 3, hidden: ElementHidden }"
+          v-on:animationend="ElementHidden = true"
+        >
+          <div
+            v-for="(idea, index) in seats"
+            :key="index"
+            class="rocketDiv"
+            :class="{ rocketDivBig: seats.length <= 3 }"
+          >
+            <img
+              :class="{
+                rocketBotImg: index === 0,
+                rocketMidImg: index > 0 && index < seats.length - 1,
+                rocketTopImg: index === seats.length - 1,
+              }"
+              class="rocketImg"
+            />
+            <el-button
+              @click.prevent="vote(index + 1)"
+              v-on:click="scrollRocketToBottom()"
+              class="rocketWindow"
+              :class="{
+                rocketBotWindow: index === 0,
+                rocketMidWindow: index > 0 && index < seats.length - 1,
+                rocketTopWindow: index === seats.length - 1,
+                rocketWindowAstronaut: idea,
+              }"
+            >
+              <span
+                v-if="idea"
+                class="idea"
+                :class="{ ideaBig: seats.length <= 3 }"
+              >
+                <span style="color: var(--color-red)">{{
+                  $t('module.voting.slots.participant.replace')
+                }}</span>
+                "{{ idea.keywords }}"
+              </span>
+              <span
+                v-if="!idea"
+                class="idea"
+                :class="{ ideaBig: seats.length <= 3 }"
+              >
+                <font-awesome-icon icon="angle-double-left" />
+                {{ $t('module.voting.slots.participant.emptySlot') }}
+                <font-awesome-icon icon="angle-double-right" />
+              </span>
+            </el-button>
+          </div>
+          <img
+            id="fire"
+            src=""
+            alt="fire"
+            v-on:animationend="ElementHidden = true"
+            :class="{ hidden: ElementHidden, FireBig: seats.length <= 3 }"
+          />
+        </div>
+
+        <div id="Platform" :class="{ PlatformBig: seats.length <= 3 }">
+          <img id="backPlatform" src="" alt="platform" />
+          <img id="frontPlatform" src="" alt="platform" />
+          <img id="extendPlatform" src="" alt="platform" />
+        </div>
+      </div>
+
+      <div id="ideaAndSkip">
+        <span v-if="ideaPointer < ideas.length">
+          <IdeaCard
+            :idea="ideas[ideaPointer]"
+            :is-selectable="false"
+            :is-editable="false"
+            :show-state="false"
+            class="ideaCard"
+            v-on:click="showIdeaOverlay = true"
+          />
         </span>
-        <span v-if="!idea">
-          <font-awesome-icon icon="angle-double-left" />
-          {{ $t('module.voting.slots.participant.emptySlot') }}
-          <font-awesome-icon icon="angle-double-right" />
+        <el-button
+          type="warning"
+          nativeType="submit"
+          class="skipButton"
+          @click.prevent="vote(0)"
+        >
+          {{ $t('module.voting.slots.participant.skip') }}
+        </el-button>
+      </div>
+
+      <div id="ideaAndSkipOverlay" v-if="showIdeaOverlay">
+        <div
+          id="backgroundOfOverlay"
+          v-on:click="showIdeaOverlay = false"
+        ></div>
+        <span v-if="ideaPointer < ideas.length" class="ideaCardSpan">
+          <font-awesome-icon
+            icon="plus"
+            class="x"
+            v-on:click="showIdeaOverlay = false"
+          />
+          <IdeaCard
+            :idea="ideas[ideaPointer]"
+            :is-selectable="false"
+            :is-editable="false"
+            :show-state="false"
+            class="ideaCard"
+          />
         </span>
-      </el-button>
-      <span v-if="ideaPointer < ideas.length">
-        <IdeaCard
-          :idea="ideas[ideaPointer]"
-          :is-selectable="false"
-          :is-editable="false"
-          :show-state="false"
-        />
-      </span>
-      <el-button
-        type="warning"
-        nativeType="submit"
-        class="fullwidth"
-        @click.prevent="vote(0)"
-      >
-        {{ $t('module.voting.slots.participant.skip') }}
-      </el-button>
+      </div>
     </div>
     <div v-if="finished">
       {{ $t('module.voting.slots.participant.thanks') }}
@@ -227,7 +307,697 @@ export default class Participant extends Vue {
       this.ideaPointer++;
     }
   }
+
+  growIdea = true;
+  shrinkIdea = false;
+
+  ElementHidden = false;
+
+  showIdeaOverlay = false;
+
+  getHeightPercentage(): void {
+    let viewportHeight = window.innerHeight;
+    let ideas = document.getElementsByClassName('idea');
+
+    for (let i = 0; i < ideas.length; i++) {
+      let top = ideas[i].getBoundingClientRect().top;
+      if (
+        100 - (top / viewportHeight) * 100 < 8 ||
+        (top / viewportHeight) * 100 < 40
+      ) {
+        ideas[i].classList.add('ideaShrink');
+        ideas[i].classList.remove('ideaGrow');
+      } else {
+        ideas[i].classList.add('ideaGrow');
+        ideas[i].classList.remove('ideaShrink');
+      }
+    }
+  }
+
+  scrollRocketToBottom(): void {
+    let rocket = document.getElementById('rocketColumn');
+    let fire = document.getElementById('fire');
+    if (rocket != null && fire != null && this.finished) {
+      console.log('test2');
+      rocket.scrollTo({ top: rocket.scrollHeight, behavior: 'smooth' });
+      rocket.classList.add('rocketAnimateMove');
+      fire.classList.add('rocketAnimateSprite');
+    }
+  }
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+ParticipantModuleDefaultContainer {
+  overflow: hidden;
+  color: var(--color-gray);
+}
+
+#backgroundImage {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  background-image: url('../../../../assets/illustrations/Slots/Background.png');
+  background-size: 100%;
+  background-position: bottom;
+  background-repeat: no-repeat;
+
+  mask-image: url('../../../../assets/illustrations/Slots/Mask.png');
+  mask-size: contain;
+  mask-repeat: repeat-x;
+}
+
+div#rocketMask {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  top: 0;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  mask-image: url('../../../../assets/illustrations/Slots/Mask.png');
+  mask-size: contain;
+  mask-repeat: repeat;
+
+  overflow: hidden;
+}
+
+@keyframes takeoffSprite {
+  /*Sprite changes (couldn't find a way to loop keyframes within animation)*/
+  0% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-none.png');
+  }
+  6% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-3.png');
+  }
+  7% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-3.png');
+  }
+  12% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-1.png');
+  }
+  18% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-1.png');
+  }
+  19% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-2.png');
+  }
+  24% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-2.png');
+  }
+  25% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-3.png');
+  }
+  30% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-3.png');
+  }
+  31% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+  }
+  36% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+  }
+
+  37% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+  }
+  42% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+  }
+  43% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-2.png');
+  }
+  48% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-2.png');
+  }
+  49% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+  }
+  54% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+  }
+
+  55% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+  }
+  60% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+  }
+  61% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-2.png');
+  }
+  66% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-2.png');
+  }
+  72% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+  }
+  73% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+  }
+
+  78% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+  }
+  79% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+  }
+  84% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-2.png');
+  }
+  85% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-2.png');
+  }
+  90% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+  }
+  91% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+  }
+
+  96% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+  }
+  97% {
+    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+  }
+}
+@keyframes takeoffMove {
+  0% {
+    bottom: 0;
+    left: 0.1%;
+    right: 0;
+  }
+  2% {
+    bottom: 0;
+    right: 0.2%;
+    left: 0;
+  }
+  4% {
+    bottom: 0;
+    left: 0.4%;
+    right: 0;
+  }
+  6% {
+    bottom: 0;
+    right: 0.6%;
+    left: 0;
+  }
+  8% {
+    bottom: 0;
+    left: 0.9%;
+    right: 0;
+  }
+  10% {
+    bottom: 0;
+    right: 1%;
+    left: 0;
+  }
+  12% {
+    bottom: 0;
+    left: 1%;
+    right: 0;
+  }
+  14% {
+    bottom: 0;
+    right: 1%;
+    left: 0;
+  }
+  16% {
+    bottom: 0;
+    left: 1%;
+    right: 0;
+  }
+  18% {
+    bottom: 0;
+    right: 1%;
+    left: 0;
+  }
+
+  20% {
+    left: 1%;
+    right: 0;
+  }
+  22% {
+    right: 1%;
+    left: 0;
+  }
+  24% {
+    left: 0.9%;
+    right: 0;
+  }
+  26% {
+    right: 0.8%;
+    left: 0;
+  }
+  28% {
+    left: 0.7%;
+    right: 0;
+  }
+  30% {
+    right: 0.6%;
+    left: 0;
+    overflow: visible;
+  }
+  32% {
+    left: 0.5%;
+    right: 0;
+  }
+  34% {
+    right: 0.5%;
+    left: 0;
+  }
+  36% {
+    left: 0.4%;
+    right: 0;
+  }
+  38% {
+    right: 0.4%;
+    left: 0;
+  }
+  40% {
+    left: 0.3%;
+    right: 0;
+  }
+  42% {
+    right: 0.3%;
+    left: 0;
+  }
+  44% {
+    left: 0.3%;
+    right: 0;
+  }
+  46% {
+    right: 0.2%;
+    left: 0;
+  }
+  48% {
+    left: 0.2%;
+    right: 0;
+  }
+  50% {
+    right: 0.2%;
+    left: 0;
+  }
+  52% {
+    left: 0.1%;
+    right: 0;
+  }
+  54% {
+    right: 0.1%;
+    left: 0;
+  }
+  56% {
+    left: 0;
+    right: 0;
+  }
+  100% {
+    bottom: 110%;
+    overflow: visible;
+  }
+}
+
+.rocketAnimateSprite {
+  animation-name: takeoffSprite;
+  animation-duration: 5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+  animation-direction: normal;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.rocketAnimateMove {
+  animation-name: takeoffMove;
+  animation-duration: 5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+  animation-direction: normal;
+}
+
+div#rocketColumn {
+  overflow-y: scroll;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  display: flex;
+  flex-direction: column-reverse;
+
+  align-items: flex-start;
+
+  padding: 80% 0 10% 3%;
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+div#rocketColumn::-webkit-scrollbar {
+  display: none;
+}
+
+img#fire {
+  position: absolute;
+  bottom: -4.5%;
+
+  left: 8%;
+  margin-left: auto;
+  margin-right: auto;
+
+  height: auto;
+  width: 30%;
+  content: url('../../../../assets/illustrations/Slots/fire/fire-none.png');
+  z-index: 1;
+}
+
+img#fire.FireBig {
+  bottom: -7%;
+  width: 35%;
+}
+
+.rocketDiv {
+  width: 40%;
+  height: auto;
+  position: relative;
+}
+
+.rocketDivBig {
+  width: 50%;
+}
+
+div#rocketColumn.rocketColBig {
+  overflow: hidden;
+  padding: 80% 0 8% 0.5%;
+}
+
+.rocketImg {
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  height: 100%;
+
+  position: relative;
+
+  z-index: 2;
+}
+
+.rocketTopImg {
+  content: url('../../../../assets/illustrations/Slots/Rocket parts/Top.png');
+}
+
+.rocketMidImg {
+  content: url('../../../../assets/illustrations/Slots/Rocket parts/Mid.png');
+}
+
+.rocketBotImg {
+  content: url('../../../../assets/illustrations/Slots/Rocket parts/Bot.png');
+}
+
+.el-button.rocketWindow {
+  position: absolute;
+  left: 0;
+  right: 0;
+
+  width: 35%;
+
+  margin-left: auto;
+  margin-right: auto;
+
+  background-color: transparent;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-image: url('../../../../assets/illustrations/Slots/Rocket parts/Window.png');
+
+  z-index: 3;
+}
+
+.el-button.rocketWindowAstronaut {
+  background-image: url('../../../../assets/illustrations/Slots/Rocket parts/Window Astronaut.png');
+  transition: 0.5s;
+}
+
+.el-button.rocketMidWindow {
+  bottom: 3%;
+  height: 70%;
+}
+
+.el-button.rocketTopWindow {
+  bottom: 2%;
+  height: 50%;
+}
+
+.el-button.rocketBotWindow {
+  top: 12%;
+  height: 41%;
+}
+
+div#Platform {
+  position: absolute;
+  left: -5%;
+  bottom: 0%;
+  width: 55%;
+  height: auto;
+}
+
+div#Platform.PlatformBig {
+  left: -7%;
+  width: 62%;
+}
+
+img#frontPlatform {
+  position: absolute;
+  bottom: 1.5%;
+  content: url('../../../../assets/illustrations/Slots/PlatformFront.png');
+  z-index: 4;
+}
+img#backPlatform {
+  position: absolute;
+  bottom: 1.4%;
+  content: url('../../../../assets/illustrations/Slots/PlatformBack.png');
+
+  z-index: 0;
+}
+
+img#extendPlatform {
+  position: absolute;
+  bottom: 0%;
+  content: url('../../../../assets/illustrations/Slots/PlatformExtension.png');
+
+  z-index: 0;
+}
+
+span.idea {
+  display: table;
+  position: absolute;
+
+  width: 480%;
+  height: auto;
+  text-align: left;
+  white-space: normal;
+  word-break: break-all;
+
+  left: 80%;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  padding: 15% 15%;
+
+  background-color: white;
+  border-radius: 20px;
+}
+
+span.idea.ideaBig {
+  width: 385% !important;
+}
+
+span.ideaShrink {
+  transform: scale(0);
+  opacity: 0;
+  transition: 0.1s;
+}
+
+span.ideaGrow {
+  transform: scale(1);
+  opacity: 100;
+  transition: 0.1s;
+}
+
+.ideaCard {
+  width: 100%;
+  max-height: 93%;
+
+  z-index: 5;
+  margin-top: 4%;
+  margin-bottom: 0%;
+  padding: 2%;
+
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.25);
+  border: 3px solid var(--color-darkblue);
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+#ideaAndSkip::v-deep .el-card__body {
+  display: flex;
+  flex-direction: row;
+
+  height: 10%;
+}
+
+#ideaAndSkip::v-deep .card__image {
+  height: 26%;
+  width: 26%;
+  border-radius: 20px;
+}
+
+#ideaAndSkip::v-deep .card__text {
+  padding: 1% 1% 1% 3%;
+  height: 98%;
+  overflow: scroll;
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+#ideaAndSkip::v-deep .card__text::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.ideaCard::-webkit-scrollbar {
+  display: none;
+}
+
+.el-button.skipButton {
+  width: 30%;
+  font-size: var(--font-size-small);
+
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.25);
+  padding: 0;
+  z-index: 5;
+}
+
+div#ideaAndSkip {
+  position: absolute;
+  width: 94%;
+  height: 15%;
+
+  top: 24%;
+
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+div#ideaAndSkipOverlay {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  height: 100%;
+  width: 100%;
+  border: 1px solid red;
+  z-index: 7;
+}
+
+div#ideaAndSkipOverlay #backgroundOfOverlay {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  height: 100%;
+  width: 100%;
+
+  background-color: #00000050;
+  z-index: 7;
+}
+
+div#ideaAndSkipOverlay .ideaCardSpan {
+  position: absolute;
+
+  width: 95%;
+  max-height: 70%;
+  min-height: 40%;
+
+  z-index: 7;
+  margin: auto;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  background-color: transparent;
+}
+
+div#ideaAndSkipOverlay .ideaCard {
+  position: absolute;
+
+  overflow-y: scroll;
+
+  width: 100%;
+  height: auto;
+  min-height: 40%;
+  max-height: 100%;
+
+  padding: 2%;
+  margin-top: 0;
+
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.25);
+  border: 3px solid var(--color-darkblue);
+}
+#ideaAndSkipOverlay::v-deep .card__image {
+  border-radius: 20px;
+}
+
+div#ideaAndSkipOverlay .x {
+  position: absolute;
+  width: 10%;
+  height: 10%;
+
+  top: -8%;
+  right: 0;
+
+  color: white;
+
+  transform: rotate(45deg);
+
+  z-index: 8;
+  background-color: transparent;
+}
+</style>
