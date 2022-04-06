@@ -852,7 +852,7 @@ span.ideaGrow {
 
   z-index: 5;
   margin-top: 4%;
-  margin-bottom: 0%;
+  margin-bottom: 0;
   padding: 2%;
 
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.25);
@@ -928,7 +928,6 @@ div#ideaAndSkipOverlay {
 
   height: 100%;
   width: 100%;
-  border: 1px solid red;
   z-index: 7;
 }
 
