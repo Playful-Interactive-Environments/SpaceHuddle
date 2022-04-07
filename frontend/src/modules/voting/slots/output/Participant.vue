@@ -1,126 +1,140 @@
 <template>
-  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
+  <ParticipantModuleDefaultContainer
+    :task-id="taskId"
+    :module="moduleName"
+    id="Container"
+  >
+    <div id="loadingScreen" :class="{ hidden: loadingScreenEnd }">
+      <span>loading...</span>
+    </div>
     <div id="backgroundImage"></div>
-
-    <div>
-      <!--      {{ $t('module.voting.slots.participant.info') }}-->
-
-      <div id="rocketMask">
+    <!--      {{ $t('module.voting.slots.participant.info') }}-->
+    <div
+      id="rocketMask"
+      :class="{ rocketMaskSmall: heightCheck() || smallHeight }"
+    >
+      <div
+        id="rocketColumn"
+        v-on:scroll="getHeightPercentage()"
+        :class="{
+          rocketColBig: seats.length <= 3 && enoughHeight,
+          blockScrolling: !enoughHeight || smallHeight,
+          hidden: ElementHidden
+        }"
+        v-on:animationend="ElementHidden = true"
+      >
         <div
-          id="rocketColumn"
-          v-on:scroll="getHeightPercentage()"
-          :class="{ rocketColBig: seats.length <= 3, hidden: ElementHidden }"
-          v-on:animationend="ElementHidden = true"
+          v-for="(idea, index) in seats"
+          :key="index"
+          class="rocketDiv"
+          :class="{ rocketDivBig: seats.length <= 3 && enoughHeight }"
         >
           <div
-            v-for="(idea, index) in seats"
-            :key="index"
-            class="rocketDiv"
-            :class="{ rocketDivBig: seats.length <= 3 }"
+            :class="{
+              rocketBotImg: index === 0,
+              rocketMidImg: index > 0 && index < seats.length - 1,
+              rocketTopImg: index === seats.length - 1,
+            }"
+            class="rocketImg"
+          ></div>
+          <el-button
+            @click.prevent="vote(index + 1)"
+            v-on:click="scrollRocketToBottom()"
+            class="rocketWindow"
+            :class="{
+              rocketBotWindow: index === 0,
+              rocketMidWindow: index > 0 && index < seats.length - 1,
+              rocketTopWindow: index === seats.length - 1,
+              rocketWindowAstronaut: idea,
+            }"
           >
-            <img
-              :class="{
-                rocketBotImg: index === 0,
-                rocketMidImg: index > 0 && index < seats.length - 1,
-                rocketTopImg: index === seats.length - 1,
-              }"
-              class="rocketImg"
-            />
-            <el-button
-              @click.prevent="vote(index + 1)"
-              v-on:click="scrollRocketToBottom()"
-              class="rocketWindow"
-              :class="{
-                rocketBotWindow: index === 0,
-                rocketMidWindow: index > 0 && index < seats.length - 1,
-                rocketTopWindow: index === seats.length - 1,
-                rocketWindowAstronaut: idea,
-              }"
+            <span
+              v-if="idea"
+              class="idea"
+              :class="{ ideaBig: seats.length <= 3 && enoughHeight }"
             >
-              <span
-                v-if="idea"
-                class="idea"
-                :class="{ ideaBig: seats.length <= 3 }"
-              >
-                <span style="color: var(--color-red)">{{
-                  $t('module.voting.slots.participant.replace')
-                }}</span>
-                "{{ idea.keywords }}"
-              </span>
-              <span
-                v-if="!idea"
-                class="idea"
-                :class="{ ideaBig: seats.length <= 3 }"
-              >
-                <font-awesome-icon icon="angle-double-left" />
-                {{ $t('module.voting.slots.participant.emptySlot') }}
-                <font-awesome-icon icon="angle-double-right" />
-              </span>
-            </el-button>
-          </div>
-          <img
-            id="fire"
-            src=""
-            alt="fire"
-            v-on:animationend="ElementHidden = true"
-            :class="{ hidden: ElementHidden, FireBig: seats.length <= 3 }"
-          />
+              <span style="color: var(--color-red)">{{
+                $t('module.voting.slots.participant.replace')
+              }}</span>
+              "{{ idea.keywords }}"
+            </span>
+            <span
+              v-if="!idea"
+              class="idea"
+              :class="{ ideaBig: seats.length <= 3 && enoughHeight }"
+            >
+              <font-awesome-icon icon="angle-double-left" />
+              {{ $t('module.voting.slots.participant.emptySlot') }}
+              <font-awesome-icon icon="angle-double-right" />
+            </span>
+          </el-button>
         </div>
-
-        <div id="Platform" :class="{ PlatformBig: seats.length <= 3 }">
-          <img id="backPlatform" src="" alt="platform" />
-          <img id="frontPlatform" src="" alt="platform" />
-          <img id="extendPlatform" src="" alt="platform" />
-        </div>
+        <img
+          id="fire"
+          src=""
+          alt="fire"
+          v-on:animationend="ElementHidden = true"
+          :class="{
+            hidden: ElementHidden,
+            FireBig: seats.length <= 3 && enoughHeight,
+          }"
+        />
       </div>
 
-      <div id="ideaAndSkip">
-        <span v-if="ideaPointer < ideas.length">
-          <IdeaCard
-            :idea="ideas[ideaPointer]"
-            :is-selectable="false"
-            :is-editable="false"
-            :show-state="false"
-            class="ideaCard"
-            v-on:click="showIdeaOverlay = true"
-          />
-        </span>
-        <el-button
-          type="warning"
-          nativeType="submit"
-          class="skipButton"
-          @click.prevent="vote(0)"
-        >
-          {{ $t('module.voting.slots.participant.skip') }}
-        </el-button>
+      <div
+        id="Platform"
+        :class="{ PlatformBig: seats.length <= 3 && enoughHeight }"
+      >
+        <img id="backPlatform" src="" alt="platform" />
+        <img id="frontPlatform" src="" alt="platform" />
+        <img id="extendPlatform" src="" alt="platform" />
       </div>
+    </div>
 
-      <div id="ideaAndSkipOverlay" v-if="showIdeaOverlay">
-        <div
-          id="backgroundOfOverlay"
+    <div id="ideaAndSkip">
+      <el-button
+        type="warning"
+        nativeType="submit"
+        class="skipButton"
+        @click.prevent="vote(0)"
+        v-if="ideaPointer < ideas.length"
+      >
+        {{ $t('module.voting.slots.participant.skip') }}
+      </el-button>
+      <span v-if="ideaPointer < ideas.length">
+        <IdeaCard
+          :idea="ideas[ideaPointer]"
+          :is-selectable="false"
+          :is-editable="false"
+          :show-state="false"
+          class="ideaCard"
+          v-on:click="showIdeaOverlay = true"
+        />
+      </span>
+    </div>
+
+    <div id="ideaAndSkipOverlay" v-if="showIdeaOverlay">
+      <div id="backgroundOfOverlay" v-on:click="showIdeaOverlay = false"></div>
+      <span v-if="ideaPointer < ideas.length" class="ideaCardSpan">
+        <font-awesome-icon
+          icon="plus"
+          class="x"
           v-on:click="showIdeaOverlay = false"
-        ></div>
-        <span v-if="ideaPointer < ideas.length" class="ideaCardSpan">
-          <font-awesome-icon
-            icon="plus"
-            class="x"
-            v-on:click="showIdeaOverlay = false"
-          />
-          <IdeaCard
-            :idea="ideas[ideaPointer]"
-            :is-selectable="false"
-            :is-editable="false"
-            :show-state="false"
-            class="ideaCard"
-          />
-        </span>
-      </div>
+        />
+        <IdeaCard
+          :idea="ideas[ideaPointer]"
+          :is-selectable="false"
+          :is-editable="false"
+          :show-state="false"
+          class="ideaCard"
+        />
+      </span>
     </div>
-    <div v-if="finished">
-      {{ $t('module.voting.slots.participant.thanks') }}
+    <div v-if="finished" class="infoText">
+      <span>{{ $t('module.voting.slots.participant.thanks') }}</span>
     </div>
-    <div v-if="waiting">
-      {{ $t('module.voting.slots.participant.waiting') }}
+    <div v-if="waiting" style="display: none">
+      <span>{{ $t('module.voting.slots.participant.waiting') }}</span>
     </div>
   </ParticipantModuleDefaultContainer>
 </template>
@@ -169,6 +183,16 @@ export default class Participant extends Vue {
   }
 
   get waiting(): boolean {
+    if (this.ideas.length === 0 && this.votes.length === 0) {
+      console.log('waiting');
+    } else {
+      let element = document.getElementById('loadingScreen');
+      if (element != null) {
+        element.classList.add('zeroOpacity');
+        setTimeout(() => element!.classList.add('hidden'), 2000);
+        let rocket = document.getElementById('rocketColumn');
+      }
+    }
     return this.ideas.length === 0 && this.votes.length === 0;
   }
 
@@ -177,6 +201,7 @@ export default class Participant extends Vue {
       this.initSeats(3);
     }
     this.startInterval();
+    window.addEventListener('resize', this.heightCheck);
   }
 
   startInterval(): void {
@@ -185,6 +210,7 @@ export default class Participant extends Vue {
 
   unmounted(): void {
     clearInterval(this.interval);
+    window.removeEventListener('resize', this.heightCheck);
   }
 
   reloadIdeas(): void {
@@ -315,21 +341,28 @@ export default class Participant extends Vue {
 
   showIdeaOverlay = false;
 
+  enoughHeight = true;
+  smallHeight = false;
+
+  loadingScreenEnd = false;
+
   getHeightPercentage(): void {
     let viewportHeight = window.innerHeight;
     let ideas = document.getElementsByClassName('idea');
 
-    for (let i = 0; i < ideas.length; i++) {
-      let top = ideas[i].getBoundingClientRect().top;
-      if (
-        100 - (top / viewportHeight) * 100 < 8 ||
-        (top / viewportHeight) * 100 < 40
-      ) {
-        ideas[i].classList.add('ideaShrink');
-        ideas[i].classList.remove('ideaGrow');
-      } else {
-        ideas[i].classList.add('ideaGrow');
-        ideas[i].classList.remove('ideaShrink');
+    if (this.enoughHeight) {
+      for (let i = 0; i < ideas.length; i++) {
+        let top = ideas[i].getBoundingClientRect().top;
+        if (
+          100 - (top / viewportHeight) * 100 < 22 ||
+          (top / viewportHeight) * 100 < 27
+        ) {
+          ideas[i].classList.add('ideaShrink');
+          ideas[i].classList.remove('ideaGrow');
+        } else {
+          ideas[i].classList.add('ideaGrow');
+          ideas[i].classList.remove('ideaShrink');
+        }
       }
     }
   }
@@ -344,6 +377,16 @@ export default class Participant extends Vue {
       fire.classList.add('rocketAnimateSprite');
     }
   }
+
+  heightCheck(): boolean {
+    let element = document.getElementById('backgroundImage');
+
+    if (element != null) {
+      this.smallHeight = element.scrollHeight * 0.9 < element.scrollWidth;
+      this.enoughHeight = element.scrollHeight * 0.7 > element.scrollWidth;
+    }
+    return this.smallHeight;
+  }
 }
 </script>
 
@@ -351,6 +394,48 @@ export default class Participant extends Vue {
 ParticipantModuleDefaultContainer {
   overflow: hidden;
   color: var(--color-gray);
+}
+
+div#loadingScreen {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  background-color: var(--color-darkblue);
+  z-index: 100;
+
+  display: flex;
+  justify-items: center;
+  align-items: center;
+
+  opacity: 1;
+}
+
+div#loadingScreen > span {
+  color: white;
+  font-size: var(--font-size-large);
+  position: relative;
+  margin: auto;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.zeroOpacity {
+  opacity: 0 !important;
+  transition: 2s;
+}
+
+.fullOpacity {
+  opacity: 1 !important;
+  transition: 2s;
 }
 
 #backgroundImage {
@@ -390,6 +475,15 @@ div#rocketMask {
   mask-repeat: repeat;
 
   overflow: hidden;
+
+  transition: 1s;
+}
+
+div#rocketMask.rocketMaskSmall {
+  width: 70%;
+  left: 0;
+
+  transition: 1s;
 }
 
 @keyframes takeoffSprite {
@@ -494,52 +588,52 @@ div#rocketMask {
 }
 @keyframes takeoffMove {
   0% {
-    bottom: 0;
+    bottom: 12%;
     left: 0.1%;
     right: 0;
   }
   2% {
-    bottom: 0;
+    bottom: 12%;
     right: 0.2%;
     left: 0;
   }
   4% {
-    bottom: 0;
+    bottom: 12%;
     left: 0.4%;
     right: 0;
   }
   6% {
-    bottom: 0;
+    bottom: 12%;
     right: 0.6%;
     left: 0;
   }
   8% {
-    bottom: 0;
+    bottom: 12%;
     left: 0.9%;
     right: 0;
   }
   10% {
-    bottom: 0;
+    bottom: 12%;
     right: 1%;
     left: 0;
   }
   12% {
-    bottom: 0;
+    bottom: 12%;
     left: 1%;
     right: 0;
   }
   14% {
-    bottom: 0;
+    bottom: 12%;
     right: 1%;
     left: 0;
   }
   16% {
-    bottom: 0;
+    bottom: 12%;
     left: 1%;
     right: 0;
   }
   18% {
-    bottom: 0;
+    bottom: 12%;
     right: 1%;
     left: 0;
   }
@@ -653,7 +747,7 @@ div#rocketColumn {
   width: 100%;
   height: 100%;
 
-  bottom: 0;
+  bottom: 12%;
   left: 0;
   right: 0;
   margin-left: auto;
@@ -669,6 +763,8 @@ div#rocketColumn {
   /* Hide scrollbar for IE, Edge and Firefox */
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+
+  transition: 1s;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -685,29 +781,43 @@ img#fire {
   margin-right: auto;
 
   height: auto;
-  width: 30%;
+  width: 28%;
   content: url('../../../../assets/illustrations/Slots/fire/fire-none.png');
   z-index: 1;
+
+  transition: 1s;
 }
 
 img#fire.FireBig {
   bottom: -7%;
   width: 35%;
+
+  transition: 1s;
 }
 
 .rocketDiv {
   width: 40%;
   height: auto;
   position: relative;
+
+  transition: 1s;
 }
 
 .rocketDivBig {
   width: 50%;
+
+  transition: 1s;
 }
 
 div#rocketColumn.rocketColBig {
   overflow: hidden;
   padding: 80% 0 8% 0.5%;
+  transition: 1s;
+}
+
+div#rocketColumn.blockScrolling {
+  overflow: hidden;
+  transition: 1s;
 }
 
 .rocketImg {
@@ -717,6 +827,7 @@ div#rocketColumn.rocketColBig {
   margin-right: auto;
 
   height: 100%;
+  width: 100%;
 
   position: relative;
 
@@ -777,14 +888,18 @@ div#rocketColumn.rocketColBig {
 div#Platform {
   position: absolute;
   left: -5%;
-  bottom: 0%;
+  bottom: 12%;
   width: 55%;
   height: auto;
+
+  transition: 1s;
 }
 
 div#Platform.PlatformBig {
   left: -7%;
   width: 62%;
+
+  transition: 1s;
 }
 
 img#frontPlatform {
@@ -803,7 +918,6 @@ img#backPlatform {
 
 img#extendPlatform {
   position: absolute;
-  bottom: 0%;
   content: url('../../../../assets/illustrations/Slots/PlatformExtension.png');
 
   z-index: 0;
@@ -847,11 +961,14 @@ span.ideaGrow {
 }
 
 .ideaCard {
+  position: relative;
   width: 100%;
   max-height: 93%;
 
+  bottom: 0;
+
   z-index: 5;
-  margin-top: 4%;
+  margin-top: 0;
   margin-bottom: 0;
   padding: 2%;
 
@@ -866,6 +983,8 @@ span.ideaGrow {
 #ideaAndSkip::v-deep .el-card__body {
   display: flex;
   flex-direction: row;
+
+  align-items: center;
 
   height: 10%;
 }
@@ -907,9 +1026,9 @@ span.ideaGrow {
 div#ideaAndSkip {
   position: absolute;
   width: 94%;
-  height: 15%;
+  height: auto;
 
-  top: 24%;
+  bottom: 2%;
 
   left: 0;
   right: 0;
@@ -919,6 +1038,8 @@ div#ideaAndSkip {
 
 div#ideaAndSkipOverlay {
   position: absolute;
+
+  overflow: hidden;
 
   top: 0;
   left: 0;
@@ -998,5 +1119,38 @@ div#ideaAndSkipOverlay .x {
 
   z-index: 8;
   background-color: transparent;
+}
+
+div.infoText {
+  position: absolute;
+
+  width: 50%;
+  height: 100%;
+
+  margin: auto;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  opacity: 1;
+}
+
+div.infoText > span {
+  position: absolute;
+
+  text-align: center;
+
+  font-size: var(--font-size-large);
+  color: white;
+
+  width: 100%;
+  height: 10%;
+
+  margin: auto;
+  top: 30%;
+
+  left: 0;
+  right: 0;
 }
 </style>
