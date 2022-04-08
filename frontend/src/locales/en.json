@@ -135,6 +135,11 @@
       }
     },
     "organism": {
+      "cards": {
+        "moduleCard": {
+          "addOn": "add-on"
+        }
+      },
       "settings": {
         "timerSettings": {
           "header": "Set Timer",
@@ -167,7 +172,9 @@
         },
         "taskSettings": {
           "header": "Add a Module",
-          "info": "Modules are the place where all the interaction happens. You can choose from 5 different types of modules.",
+          "info": "Modules are the place where all the interaction happens.",
+          "preview-header": "Preview",
+          "preview-info": "This data serves as input for the module.",
           "taskType": "Task type",
           "input": "Input",
           "source": "source",
@@ -185,6 +192,9 @@
           "keywordsExample": "keyword",
           "submit": "Save module",
           "saveAndActivate": "Save and activate module",
+          "edit": "Edit module",
+          "confirm": "Confirm module",
+          "confirmAndActivate": "Confirm and activate module",
           "moduleSearch": "type in a search module name",
           "displayAllModules": "display all modules"
         },

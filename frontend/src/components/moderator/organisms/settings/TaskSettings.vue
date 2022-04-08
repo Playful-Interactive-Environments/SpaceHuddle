@@ -1,5 +1,5 @@
 <template>
-  <div v-if="showDialog">
+  <div v-if="showDialog" v-loading.fullscreen.lock="loading">
     <ValidationForm
       :form-data="formData"
       :use-default-submit="false"
@@ -14,391 +14,473 @@
         width="80vw"
       >
         <template #title>
-          <span class="el-dialog__title">
-            {{ $t('moderator.organism.settings.taskSettings.header') }}
-            <el-dropdown>
-              <span class="el-dropdown-link">
-                <font-awesome-icon icon="info-circle" />
-              </span>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item v-on:click="reactivateTutorial">
-                    {{ $t('tutorial.reactivate') }}
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </span>
-          <br />
-          <br />
-          <p>
-            {{ $t('moderator.organism.settings.taskSettings.info') }}
-          </p>
-        </template>
-        <el-form-item v-if="showInput">
-          <template #label>
-            <TutorialStep
-              type="taskSettings"
-              step="input"
-              :order="0"
-              :displayAllDuplicates="true"
-            >
-              <span>
-                {{ $t('moderator.organism.settings.taskSettings.input') }}
-              </span>
-            </TutorialStep>
-          </template>
-          <table class="input-table">
-            <colgroup>
-              <col />
-              <col style="width: 10rem" />
-              <col style="width: 12rem" />
-              <col style="width: 12rem" />
-              <col />
-            </colgroup>
-            <thead>
-              <tr>
-                <TutorialStep
-                  step="inputSource"
-                  type="taskSettings"
-                  :order="1"
-                  :displayAllDuplicates="true"
-                >
-                  <th>
-                    {{ $t('moderator.organism.settings.taskSettings.source') }}
-                  </th>
-                </TutorialStep>
-                <TutorialStep
-                  step="inputMaxCount"
-                  type="taskSettings"
-                  :order="2"
-                  :displayAllDuplicates="true"
-                >
-                  <th>
-                    {{
-                      $t('moderator.organism.settings.taskSettings.maxCount')
-                    }}
-                  </th>
-                </TutorialStep>
-                <TutorialStep
-                  step="inputFilter"
-                  type="taskSettings"
-                  :order="3"
-                  :displayAllDuplicates="true"
-                >
-                  <th>
-                    {{ $t('moderator.organism.settings.taskSettings.filter') }}
-                  </th>
-                </TutorialStep>
-                <TutorialStep
-                  step="inputOrder"
-                  type="taskSettings"
-                  :order="4"
-                  :displayAllDuplicates="true"
-                >
-                  <th>
-                    {{ $t('moderator.organism.settings.taskSettings.order') }}
-                  </th>
-                </TutorialStep>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="input in formData.input" :key="input.view">
-                <td>
-                  <el-select v-model="input.view" class="select--fullwidth">
-                    <el-option
-                      v-for="view in possibleViews"
-                      :key="view"
-                      :value="getViewKey(view)"
-                      :label="getViewName(view)"
-                    >
-                    </el-option>
-                  </el-select>
-                </td>
-                <td style="display: inline-flex; align-items: center">
-                  <el-switch
-                    v-model="input.hasMaxCount"
-                    style="padding-right: 0.5rem"
-                  />
-                  <el-input-number
-                    :disabled="!input.hasMaxCount"
-                    v-model="input.maxCountInput"
-                    :min="1"
-                  />
-                </td>
-                <td>
-                  <el-select
-                    v-model="input.filter"
-                    class="select--fullwidth"
-                    multiple
-                  >
-                    <el-option
-                      v-for="state in IdeaStateKeys"
-                      :key="state"
-                      :value="state"
-                      :label="$t(`enum.ideaState.${IdeaStates[state]}`)"
-                    >
-                    </el-option>
-                  </el-select>
-                </td>
-                <td>
-                  <el-select v-model="input.order" class="select--fullwidth">
-                    <el-option
-                      v-for="type in sortOrderOptions"
-                      :key="type.orderType"
-                      :value="
-                        type.ref
-                          ? `${type.orderType}&refId=${type.ref.id}`
-                          : type.orderType
-                      "
-                      :label="
-                        $t(`enum.ideaSortOrder.${type.orderType}`) +
-                        (type.ref ? ` - ${type.ref.name}` : '')
-                      "
-                    >
-                      <span>
-                        {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
-                      </span>
-                      <span v-if="type.ref"> - {{ type.ref.name }} </span>
-                    </el-option>
-                  </el-select>
-                </td>
-                <td
-                  v-on:click="deleteInput(input)"
-                  v-if="formData.input.length > inputMinCount"
-                >
-                  <font-awesome-icon class="link" icon="trash" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <TutorialStep
-            v-if="possibleViews.length > 1 && formData.input.length < 20"
-            step="inputAdd"
-            type="taskSettings"
-            :order="5"
-            :displayAllDuplicates="true"
-          >
-            <AddItem
-              :text="$t('moderator.organism.settings.taskSettings.addInput')"
-              @addNew="addInput"
-            />
-          </TutorialStep>
-        </el-form-item>
-        <el-form-item
-          prop="name"
-          :rules="[
-            defaultFormRules.ruleRequired,
-            defaultFormRules.ruleToLong(255),
-          ]"
-        >
-          <template #label>
-            <TutorialStep
-              type="taskSettings"
-              step="title"
-              :order="6"
-              :displayAllDuplicates="true"
-            >
-              <span>
-                {{
-                  taskTypes.includes(TaskType.BRAINSTORMING)
-                    ? $t('moderator.organism.settings.taskSettings.question')
-                    : $t('moderator.organism.settings.taskSettings.title')
-                }}
-              </span>
-            </TutorialStep>
-          </template>
-          <el-input
-            v-model="formData.name"
-            name="name"
-            :placeholder="
-              $t('moderator.organism.settings.taskSettings.questionExample')
-            "
-          />
-        </el-form-item>
-        <el-form-item
-          :label="$t('moderator.organism.settings.taskSettings.description')"
-          prop="description"
-          :rules="[defaultFormRules.ruleToLong(1000)]"
-        >
-          <el-input
-            type="textarea"
-            v-model="formData.description"
-            rows="3"
-            :placeholder="
-              $t('moderator.organism.settings.taskSettings.descriptionExample')
-            "
-          />
-        </el-form-item>
-        <el-form-item
-          :label="$t('moderator.organism.settings.taskSettings.keywords')"
-          prop="keywords"
-          :rules="[defaultFormRules.ruleToLong(50)]"
-        >
-          <el-input
-            v-model="formData.keywords"
-            :placeholder="
-              $t('moderator.organism.settings.taskSettings.keywordsExample')
-            "
-          />
-        </el-form-item>
-        <el-form-item
-          prop="moduleListMain"
-          :rules="[
-            defaultFormRules.ruleSelection,
-            { validator: validateModuleSelection },
-          ]"
-          v-if="possibleModuleTaskList.length > 1"
-        >
-          <template #label>
-            <TutorialStep
-              type="taskSettings"
-              step="module"
-              :order="7"
-              :displayAllDuplicates="true"
-            >
-              <span>
-                {{ $t('moderator.organism.settings.taskSettings.moduleType') }}
-              </span>
-            </TutorialStep>
-          </template>
-          <div>
-            <el-tag v-for="tag in moduleSelectionMain" :key="tag">
-              {{
-                $t(
-                  `module.${TaskType[tag.taskType.toUpperCase()]}.${
-                    tag.moduleName
-                  }.description.title`
-                )
-              }}
-            </el-tag>
-            <el-tag
-              v-for="tag in moduleSelectionAddOn"
-              :key="tag.moduleName"
-              :closable="true"
-              v-on:close="removeModuleType(tag)"
-            >
-              {{
-                $t(
-                  `module.${TaskType[tag.taskType.toUpperCase()]}.${
-                    tag.moduleName
-                  }.description.title`
-                )
-              }}
-            </el-tag>
+          <div v-if="isEditStep">
+            <span class="el-dialog__title">
+              {{ $t('moderator.organism.settings.taskSettings.header') }}
+              <el-dropdown>
+                <span class="el-dropdown-link">
+                  <font-awesome-icon icon="info-circle" />
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item v-on:click="reactivateTutorial">
+                      {{ $t('tutorial.reactivate') }}
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </span>
+            <br />
+            <br />
+            <p>
+              {{ $t('moderator.organism.settings.taskSettings.info') }}
+            </p>
           </div>
-          <TutorialStep
-            type="taskSettings"
-            step="searchModule"
-            :order="8"
-            :displayAllDuplicates="true"
+          <div v-else>
+            <span class="el-dialog__title">
+              {{
+                $t('moderator.organism.settings.taskSettings.preview-header')
+              }}
+            </span>
+            <br />
+            <br />
+            <p>
+              {{ $t('moderator.organism.settings.taskSettings.preview-info') }}
+            </p>
+          </div>
+        </template>
+        <div v-if="isEditStep">
+          <el-form-item
+            prop="moduleListMain"
+            :rules="[
+              defaultFormRules.ruleSelection,
+              { validator: validateModuleSelection },
+            ]"
+            v-if="possibleModuleTaskList.length > 1"
           >
-            <el-input
-              class="search"
-              v-model="moduleSearch"
-              :clearable="true"
-              :placeholder="
-                $t('moderator.organism.settings.taskSettings.moduleSearch')
-              "
-              v-if="possibleModuleTaskList.length > 1"
-            >
-              <template #suffix>
-                <font-awesome-icon icon="search" class="el-icon" />
-              </template>
-            </el-input>
-          </TutorialStep>
-          <el-scrollbar>
-            <div class="flex-content">
-              <ModuleCard
-                v-for="moduleType in displayModuleList"
-                :key="moduleType.moduleName"
-                :moduleTask="moduleType"
-                v-model:mainModule="mainModule"
-                v-model="moduleType.active"
-                :displayTutorial="displayModuleTutorial(moduleType)"
-              />
+            <template #label>
               <TutorialStep
-                v-if="hideNotUsesModules"
                 type="taskSettings"
-                step="unusedModule"
-                :order="9"
+                step="module"
+                :order="7"
                 :displayAllDuplicates="true"
               >
-                <AddItem
-                  :text="
-                    $t(
-                      'moderator.organism.settings.taskSettings.displayAllModules'
-                    )
-                  "
-                  :isColumn="true"
-                  @addNew="hideNotUsesModules = false"
-                  class="showMore"
-                />
+                <span>
+                  {{
+                    $t('moderator.organism.settings.taskSettings.moduleType')
+                  }}
+                </span>
               </TutorialStep>
-            </div>
-          </el-scrollbar>
-        </el-form-item>
-        <TaskParameterComponent
-          ref="taskParameter"
-          :taskId="taskId"
-          :topicId="topicId"
-          v-model="formData"
-        />
-        <el-collapse
-          v-model="openTabs"
-          :key="openTabs.length"
-          v-if="
-            formData.moduleParameterComponents.filter(
-              (component) => component.hasModule
-            ).length > 0
-          "
-        >
-          <el-collapse-item
-            v-for="component in formData.moduleParameterComponents
-              .map((v, i) => ({ value: v, index: i }))
-              .filter((item) => item.value.hasModule)"
-            :key="component.value.componentName"
-            :name="component.value.componentName"
-          >
-            <template #title>
-              <span>
-                <font-awesome-icon
-                  :icon="component.value.moduleIcon"
-                  v-if="component.value.moduleIcon"
-                />
-                {{
-                  $t(
-                    `module.${TaskType[component.value.taskType]}.${
-                      component.value.moduleName
-                    }.description.title`
-                  )
-                }}
-              </span>
             </template>
-            <component
-              :ref="component.value.componentName"
-              v-model="component.value.parameter"
-              :module-id="component.value.moduleId"
-              :is="component.value.componentName"
-              :key="component.value.componentName"
-              :rulePropPath="`moduleParameterComponents[${component.index}].parameter`"
-            ></component>
-          </el-collapse-item>
-        </el-collapse>
-        <template #footer>
-          <FromSubmitItem
-            :form-state-message="formData.stateMessage"
-            submit-label-key="moderator.organism.settings.taskSettings.submit"
-            :disabled="isSaving"
-          />
-          <el-button
-            type="primary"
-            v-on:click="saveAndActivate"
-            v-if="hasParticipantModule"
+            <div class="level module-selection" v-if="useModuleFilter">
+              <div class="level-left">
+                <div class="level-item">
+                  <el-tag v-for="tag in moduleSelectionMain" :key="tag">
+                    {{
+                      $t(
+                        `module.${TaskType[tag.taskType.toUpperCase()]}.${
+                          tag.moduleName
+                        }.description.title`
+                      )
+                    }}
+                  </el-tag>
+                  <el-tag
+                    v-for="tag in moduleSelectionAddOn"
+                    :key="tag.moduleName"
+                    :closable="true"
+                    v-on:close="removeModuleType(tag)"
+                  >
+                    {{
+                      $t(
+                        `module.${TaskType[tag.taskType.toUpperCase()]}.${
+                          tag.moduleName
+                        }.description.title`
+                      )
+                    }}
+                  </el-tag>
+                </div>
+              </div>
+              <div class="level-right">
+                <TutorialStep
+                  type="taskSettings"
+                  step="searchModule"
+                  :order="8"
+                  :displayAllDuplicates="true"
+                >
+                  <el-input
+                    class="search"
+                    v-model="moduleSearch"
+                    :clearable="true"
+                    :placeholder="
+                      $t(
+                        'moderator.organism.settings.taskSettings.moduleSearch'
+                      )
+                    "
+                  >
+                    <template #suffix>
+                      <font-awesome-icon icon="search" class="el-icon" />
+                    </template>
+                  </el-input>
+                </TutorialStep>
+              </div>
+            </div>
+            <el-scrollbar ref="moduleScrollbar" always>
+              <div class="flex-content">
+                <ModuleCard
+                  v-for="moduleType in displayModuleList"
+                  :key="moduleType.moduleName"
+                  :moduleTask="moduleType"
+                  v-model:mainModule="mainModule"
+                  v-model="moduleType.active"
+                  :displayTutorial="displayModuleTutorial(moduleType)"
+                />
+                <TutorialStep
+                  v-if="hideNotUsesModules"
+                  type="taskSettings"
+                  step="unusedModule"
+                  :order="9"
+                  :displayAllDuplicates="true"
+                >
+                  <AddItem
+                    :text="
+                      $t(
+                        'moderator.organism.settings.taskSettings.displayAllModules'
+                      )
+                    "
+                    :isColumn="true"
+                    @addNew="hideNotUsesModules = false"
+                    class="showMore"
+                  />
+                </TutorialStep>
+              </div>
+            </el-scrollbar>
+          </el-form-item>
+          <el-form-item v-if="showInput">
+            <template #label>
+              <TutorialStep
+                type="taskSettings"
+                step="input"
+                :order="0"
+                :displayAllDuplicates="true"
+              >
+                <span>
+                  {{ $t('moderator.organism.settings.taskSettings.input') }}
+                </span>
+              </TutorialStep>
+            </template>
+            <table class="input-table">
+              <colgroup>
+                <col />
+                <col style="width: 12rem" />
+                <col style="width: 12rem" />
+                <col style="width: 10rem" />
+                <col />
+              </colgroup>
+              <thead>
+                <tr>
+                  <TutorialStep
+                    step="inputSource"
+                    type="taskSettings"
+                    :order="1"
+                    :displayAllDuplicates="true"
+                  >
+                    <th>
+                      {{
+                        $t('moderator.organism.settings.taskSettings.source')
+                      }}
+                    </th>
+                  </TutorialStep>
+                  <TutorialStep
+                    step="inputFilter"
+                    type="taskSettings"
+                    :order="3"
+                    :displayAllDuplicates="true"
+                  >
+                    <th>
+                      {{
+                        $t('moderator.organism.settings.taskSettings.filter')
+                      }}
+                    </th>
+                  </TutorialStep>
+                  <TutorialStep
+                    step="inputOrder"
+                    type="taskSettings"
+                    :order="4"
+                    :displayAllDuplicates="true"
+                  >
+                    <th>
+                      {{ $t('moderator.organism.settings.taskSettings.order') }}
+                    </th>
+                  </TutorialStep>
+                  <TutorialStep
+                    step="inputMaxCount"
+                    type="taskSettings"
+                    :order="2"
+                    :displayAllDuplicates="true"
+                  >
+                    <th>
+                      {{
+                        $t('moderator.organism.settings.taskSettings.maxCount')
+                      }}
+                    </th>
+                  </TutorialStep>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="input in formData.input" :key="input.view">
+                  <td>
+                    <el-select v-model="input.view" class="select--fullwidth">
+                      <el-option
+                        v-for="view in possibleViews"
+                        :key="view"
+                        :value="getViewKey(view)"
+                        :label="getViewName(view)"
+                      >
+                      </el-option>
+                    </el-select>
+                  </td>
+                  <td>
+                    <el-select
+                      v-model="input.filter"
+                      class="select--fullwidth"
+                      multiple
+                    >
+                      <el-option
+                        v-for="state in IdeaStateKeys"
+                        :key="state"
+                        :value="state"
+                        :label="$t(`enum.ideaState.${IdeaStates[state]}`)"
+                      >
+                      </el-option>
+                    </el-select>
+                  </td>
+                  <td>
+                    <el-select v-model="input.order" class="select--fullwidth">
+                      <el-option
+                        v-for="type in sortOrderOptions"
+                        :key="type.orderType"
+                        :value="
+                          type.ref
+                            ? `${type.orderType}&refId=${type.ref.id}`
+                            : type.orderType
+                        "
+                        :label="
+                          $t(`enum.ideaSortOrder.${type.orderType}`) +
+                          (type.ref ? ` - ${type.ref.name}` : '')
+                        "
+                      >
+                        <span>
+                          {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
+                        </span>
+                        <span v-if="type.ref"> - {{ type.ref.name }} </span>
+                      </el-option>
+                    </el-select>
+                  </td>
+                  <td style="display: inline-flex; align-items: center">
+                    <el-switch
+                      v-model="input.hasMaxCount"
+                      style="padding-right: 0.5rem"
+                    />
+                    <el-input-number
+                      :disabled="!input.hasMaxCount"
+                      v-model="input.maxCountInput"
+                      :min="1"
+                    />
+                  </td>
+                  <td
+                    v-on:click="deleteInput(input)"
+                    v-if="formData.input.length > inputMinCount"
+                  >
+                    <font-awesome-icon class="link" icon="trash" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <TutorialStep
+              v-if="possibleViews.length > 1 && formData.input.length < 20"
+              step="inputAdd"
+              type="taskSettings"
+              :order="5"
+              :displayAllDuplicates="true"
+            >
+              <AddItem
+                :text="$t('moderator.organism.settings.taskSettings.addInput')"
+                @addNew="addInput"
+              />
+            </TutorialStep>
+          </el-form-item>
+          <el-form-item
+            prop="name"
+            :rules="[
+              defaultFormRules.ruleRequired,
+              defaultFormRules.ruleToLong(255),
+            ]"
           >
-            {{ $t('moderator.organism.settings.taskSettings.saveAndActivate') }}
-          </el-button>
+            <template #label>
+              <TutorialStep
+                type="taskSettings"
+                step="title"
+                :order="6"
+                :displayAllDuplicates="true"
+              >
+                <span>
+                  {{
+                    taskTypes.includes(TaskType.BRAINSTORMING)
+                      ? $t('moderator.organism.settings.taskSettings.question')
+                      : $t('moderator.organism.settings.taskSettings.title')
+                  }}
+                </span>
+              </TutorialStep>
+            </template>
+            <el-input
+              v-model="formData.name"
+              name="name"
+              :placeholder="
+                $t('moderator.organism.settings.taskSettings.questionExample')
+              "
+            />
+          </el-form-item>
+          <el-form-item
+            :label="$t('moderator.organism.settings.taskSettings.description')"
+            prop="description"
+            :rules="[defaultFormRules.ruleToLong(1000)]"
+          >
+            <el-input
+              type="textarea"
+              v-model="formData.description"
+              rows="3"
+              :placeholder="
+                $t(
+                  'moderator.organism.settings.taskSettings.descriptionExample'
+                )
+              "
+            />
+          </el-form-item>
+          <el-form-item
+            :label="$t('moderator.organism.settings.taskSettings.keywords')"
+            prop="keywords"
+            :rules="[defaultFormRules.ruleToLong(50)]"
+          >
+            <el-input
+              v-model="formData.keywords"
+              :placeholder="
+                $t('moderator.organism.settings.taskSettings.keywordsExample')
+              "
+            />
+          </el-form-item>
+          <TaskParameterComponent
+            ref="taskParameter"
+            :taskId="internalTaskId"
+            :topicId="topicId"
+            v-model="formData"
+          />
+          <el-collapse
+            v-model="openTabs"
+            :key="openTabs.length"
+            v-if="
+              formData.moduleParameterComponents.filter(
+                (component) => component.hasModule
+              ).length > 0
+            "
+          >
+            <el-collapse-item
+              v-for="component in formData.moduleParameterComponents
+                .map((v, i) => ({ value: v, index: i }))
+                .filter((item) => item.value.hasModule)"
+              :key="component.value.componentName"
+              :name="component.value.componentName"
+            >
+              <template #title>
+                <span>
+                  <font-awesome-icon
+                    :icon="component.value.moduleIcon"
+                    v-if="component.value.moduleIcon"
+                  />
+                  {{
+                    $t(
+                      `module.${TaskType[component.value.taskType]}.${
+                        component.value.moduleName
+                      }.description.title`
+                    )
+                  }}
+                </span>
+              </template>
+              <component
+                :ref="component.value.componentName"
+                v-model="component.value.parameter"
+                :module-id="component.value.moduleId"
+                :is="component.value.componentName"
+                :key="component.value.componentName"
+                :rulePropPath="`moduleParameterComponents[${component.index}].parameter`"
+              ></component>
+            </el-collapse-item>
+          </el-collapse>
+        </div>
+        <section
+          v-else
+          class="layout__columns"
+          v-loading.fullscreen.lock="previewLoading"
+        >
+          <IdeaCard
+            v-for="(idea, index) in previewData"
+            :idea="idea"
+            :key="index"
+            :is-editable="false"
+          />
+        </section>
+        <template #footer>
+          <div class="level">
+            <FromSubmitItem
+              class="level-item"
+              v-if="isEditStep"
+              :form-state-message="formData.stateMessage"
+              submit-label-key="moderator.organism.settings.taskSettings.submit"
+              :disabled="isSaving"
+            />
+            <el-button
+              class="level-item"
+              type="primary"
+              v-on:click="saveAndActivate"
+              v-if="isEditStep && !showPreview"
+            >
+              {{
+                $t('moderator.organism.settings.taskSettings.saveAndActivate')
+              }}
+            </el-button>
+            <el-button
+              class="level-item"
+              v-on:click="isEditStep = true"
+              v-if="!isEditStep"
+            >
+              <template #icon>
+                <font-awesome-icon icon="pen" />
+              </template>
+              {{ $t('moderator.organism.settings.taskSettings.edit') }}
+            </el-button>
+            <el-button
+              type="primary"
+              v-on:click="confirm"
+              v-if="!isEditStep"
+              :disabled="isSaving"
+              class="el-button--submit level-item"
+            >
+              {{ $t('moderator.organism.settings.taskSettings.confirm') }}
+            </el-button>
+            <el-button
+              class="level-item"
+              type="primary"
+              v-on:click="confirmAndActivate"
+              v-if="hasParticipantModule && !isEditStep"
+              :disabled="isSaving"
+            >
+              {{
+                $t(
+                  'moderator.organism.settings.taskSettings.confirmAndActivate'
+                )
+              }}
+            </el-button>
+          </div>
         </template>
       </el-dialog>
     </ValidationForm>
@@ -445,6 +527,9 @@ import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import ViewType from '@/types/enum/ViewType';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 import { reactivateTutorial } from '@/services/auth-service';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { Idea } from '@/types/api/Idea';
+import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -532,6 +617,7 @@ enum InputOption {
 
 @Options({
   components: {
+    IdeaCard,
     TutorialStep,
     TimerSettings,
     ValidationForm,
@@ -577,6 +663,12 @@ export default class TaskSettings extends Vue {
   inputOption: InputOption = InputOption.NO;
   inputOptionViews: View[] = [];
   sortOrderOptions: SortOrderOption[] = [];
+  moduleScrollbar: { sizeWidth: string } = { sizeWidth: '' };
+  isEditStep = true;
+  internalTaskId: string | null = null;
+  previewData: Idea[] = [];
+  loading = false;
+  previewLoading = false;
 
   TaskType = TaskType;
   ViewType = ViewType;
@@ -586,54 +678,65 @@ export default class TaskSettings extends Vue {
 
   //#region Load / Reset / Leave
   @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
-    if (this.taskId) {
-      taskService.getTaskById(this.taskId).then((task) => {
-        this.mainModule = new ModuleTask(task.taskType, 'default');
-        this.formData.name = task.name;
-        this.formData.description = task.description;
-        this.formData.keywords = task.keywords;
-        this.formData.parameter = task.parameter ?? {};
-        if (this.formData.parameter.input)
-          this.formData.input = this.formData.parameter.input.map((input) => {
-            return new InputData(
-              this.getViewKey(input.view),
-              input.maxCount,
-              input.filter,
-              input.order
+  async onTaskIdChanged(): Promise<void> {
+    if (this.internalTaskId !== this.taskId) {
+      this.loading = true;
+      this.internalTaskId = this.taskId;
+      if (this.taskId) {
+        await taskService.getTaskById(this.taskId).then((task) => {
+          this.mainModule = new ModuleTask(task.taskType, 'default');
+          this.formData.name = task.name;
+          this.formData.description = task.description;
+          this.formData.keywords = task.keywords;
+          this.formData.parameter = task.parameter ?? {};
+          if (this.formData.parameter.input)
+            this.formData.input = this.formData.parameter.input.map((input) => {
+              return new InputData(
+                this.getViewKey(input.view),
+                input.maxCount,
+                input.filter,
+                input.order
+              );
+            });
+          task.modules.forEach((module) => {
+            const addOn = this.formData.moduleListAddOn.find((item) =>
+              item.like(task.taskType, module.name)
             );
+            if (addOn) addOn.active = true;
+            else this.mainModule = new ModuleTask(task.taskType, module.name);
           });
-        task.modules.forEach((module) => {
-          const addOn = this.formData.moduleListAddOn.find((item) =>
-            item.like(task.taskType, module.name)
-          );
-          if (addOn) addOn.active = true;
-          else this.mainModule = new ModuleTask(task.taskType, module.name);
+          this.task = task;
         });
-        this.task = task;
-      });
-    } else {
-      this.task = null;
-      this.mainModule = new ModuleTask('', 'default');
-      this.reset();
+      } else {
+        this.task = null;
+        this.mainModule = new ModuleTask('', 'default');
+        this.reset();
+      }
+      this.loading = false;
     }
   }
 
   reset(): void {
+    this.previewData = [];
+    this.isEditStep = true;
+    this.internalTaskId = null;
     this.task = null;
-    this.loadModuleList();
-    this.loadParticipantModuleList();
     this.formData.name = '';
     this.formData.description = '';
     this.formData.keywords = '';
     this.formData.parameter = {};
     this.formData.input = [];
+    this.formData.moduleListMain = [];
+    this.formData.moduleListAddOn = [];
+    this.formData.moduleParameterComponents = [];
+    this.formData.stateMessage = '';
+    this.loadModuleList();
+    this.loadParticipantModuleList();
     this.setDefaultInput();
     this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
   handleClose(done: { (): void }): void {
-    if (!this.taskId) this.reset();
     done();
     this.closeDialog();
   }
@@ -682,9 +785,9 @@ export default class TaskSettings extends Vue {
   }
 
   get possibleViews(): View[] {
-    if (this.taskId)
+    if (this.internalTaskId)
       return this.inputOptionViews.filter(
-        (view) => view.taskId !== this.taskId
+        (view) => view.taskId !== this.internalTaskId
       );
     return this.inputOptionViews;
   }
@@ -746,6 +849,12 @@ export default class TaskSettings extends Vue {
     }
   }
 
+  get showPreview(): boolean {
+    return (
+      this.inputOption !== InputOption.NO && this.formData.input.length > 0
+    );
+  }
+
   get showInput(): boolean {
     return this.inputOption !== InputOption.NO;
   }
@@ -776,6 +885,14 @@ export default class TaskSettings extends Vue {
   //#endregion Input
 
   //#region Modules
+  hasModuleScrollbar = false;
+  @Watch('moduleScrollbar.sizeWidth')
+  onModuleScrollbarChanged(): void {
+    if (this.moduleScrollbar) {
+      this.hasModuleScrollbar = this.moduleScrollbar.sizeWidth !== '';
+    }
+  }
+
   private async loadModuleList(): Promise<void> {
     this.addOneListUnfiltered = [];
     await getModulesForTaskType(this.taskTypes, ModuleType.ADDON).then(
@@ -848,7 +965,7 @@ export default class TaskSettings extends Vue {
       this.userModuleList,
       this.formData.moduleListMain
     );
-    if (!this.taskId) {
+    if (!this.internalTaskId) {
       if (mainModules.length > 0) {
         this.mainModule = mainModules[0];
       }
@@ -941,6 +1058,18 @@ export default class TaskSettings extends Vue {
   @Watch('showModal', { immediate: false, flush: 'post' })
   async onShowModalChanged(showModal: boolean): Promise<void> {
     this.showDialog = showModal;
+
+    if (showModal) {
+      this.isEditStep = true;
+      this.onTaskIdChanged();
+      setTimeout(() => {
+        this.moduleScrollbar = this.$refs.moduleScrollbar as {
+          sizeWidth: string;
+        };
+      }, 1000);
+    } else {
+      this.reset();
+    }
   }
 
   get possibleModuleTaskList(): ModuleTaskProperty[] {
@@ -962,6 +1091,10 @@ export default class TaskSettings extends Vue {
       });
     }
     return moduleNames;
+  }
+
+  get useModuleFilter(): boolean {
+    return this.possibleModuleTaskList.length >= 8;
   }
 
   get moduleList(): ModuleTaskProperty[] {
@@ -1113,6 +1246,14 @@ export default class TaskSettings extends Vue {
   //#endregion Modules
 
   //#region Save
+  async confirmAndActivate(): Promise<void> {
+    if (this.task) this.task.state = TaskStates.ACTIVE;
+    await this.save(TaskStates.ACTIVE).then((task) => {
+      this.$emit('showTimerSettings', task);
+      this.confirm();
+    });
+  }
+
   async saveAndActivate(): Promise<void> {
     if (this.task) this.task.state = TaskStates.ACTIVE;
     await this.save(TaskStates.ACTIVE).then((task) => {
@@ -1144,11 +1285,12 @@ export default class TaskSettings extends Vue {
     this.formData.parameter.input = this.formData.parameter.input.filter(
       (input) => input !== {}
     );
+    this.loadPreviewData();
 
-    if (this.taskId) {
+    if (this.internalTaskId) {
       await taskService
         .putTask({
-          id: this.taskId,
+          id: this.internalTaskId,
           taskType: this.taskType,
           name: this.formData.name,
           description: this.formData.description,
@@ -1160,7 +1302,7 @@ export default class TaskSettings extends Vue {
         })
         .then(
           (task) => {
-            this.taskUpdated(task, false);
+            this.taskUpdated(task);
           },
           (error) => {
             this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
@@ -1186,7 +1328,9 @@ export default class TaskSettings extends Vue {
         .then(
           (task) => {
             saveTask = task;
-            this.taskUpdated(task, true);
+            this.task = task;
+            this.internalTaskId = task.id;
+            this.taskUpdated(task);
           },
           (error) => {
             this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
@@ -1194,7 +1338,12 @@ export default class TaskSettings extends Vue {
         );
     }
     this.isSaving = false;
+    if (this.showPreview) this.isEditStep = false;
     return saveTask;
+  }
+
+  confirm(): void {
+    this.closeDialog();
   }
 
   async updateCustomTaskParameter(): Promise<void> {
@@ -1224,7 +1373,7 @@ export default class TaskSettings extends Vue {
     }
   }
 
-  async taskUpdated(task: Task, cleanUp = true): Promise<void> {
+  async taskUpdated(task: Task): Promise<void> {
     for (const module of task.modules) {
       await getModuleConfig(
         'syncPublicParticipant',
@@ -1243,10 +1392,28 @@ export default class TaskSettings extends Vue {
       }
       await moduleService.putModule(module);
     }
-    this.closeDialog();
+    if (!this.showPreview) {
+      this.closeDialog();
+    }
     this.$emit('taskUpdated', task.id);
-    if (cleanUp) this.reset();
     this.eventBus.emit(EventType.CHANGE_SETTINGS, task.id);
+  }
+
+  async loadPreviewData(): Promise<void> {
+    this.previewLoading = true;
+    if (this.formData && this.formData.parameter) {
+      await viewService
+        .getIdeas(
+          this.formData.parameter.input,
+          null,
+          null,
+          EndpointAuthorisationType.MODERATOR
+        )
+        .then((ideas) => {
+          this.previewData = ideas;
+        });
+    }
+    this.previewLoading = false;
   }
   //#endregion Save
 }
@@ -1257,10 +1424,6 @@ export default class TaskSettings extends Vue {
   &__content {
     padding-bottom: 0;
   }
-}
-
-.el-button {
-  width: 100%;
 }
 
 .input-table {
@@ -1327,5 +1490,59 @@ export default class TaskSettings extends Vue {
 
 .el-input-number {
   width: 140px;
+}
+
+.select--fullwidth {
+  width: 100%;
+}
+
+.add::v-deep {
+  .el-card__body {
+    min-height: unset;
+    padding: 0.5rem;
+  }
+}
+
+.level:not(:last-child) {
+  margin-bottom: 0;
+}
+
+.el-dialog__footer {
+  .level-item {
+    width: 10rem;
+    max-width: 100%;
+
+    .el-button {
+      margin: 0;
+    }
+  }
+
+  .level-item:not(:last-child) {
+    margin-right: 1rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .level-left + .level-right {
+    margin-top: 0;
+  }
+}
+
+.module-selection {
+  .level-right {
+    min-width: 50%;
+  }
+}
+
+.el-collapse::v-deep {
+  margin-bottom: 0;
+
+  .el-collapse-item__header {
+    padding-left: 0;
+  }
+}
+
+.layout__columns {
+  width: calc(80vw - 2 * var(--el-dialog-padding-primary));
 }
 </style>

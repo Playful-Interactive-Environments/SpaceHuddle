@@ -98,6 +98,7 @@ $--font-size: (
 }
 
 .el-dialog {
+        background-color: var(--color-background-gray);
         --el-dialog-padding-primary: #{$dialog-padding};
         max-width: 60rem;
         min-width: fit-content;
@@ -112,6 +113,11 @@ $--font-size: (
                 padding: 10px var(--el-dialog-padding-primary);
                 max-height: 50vh;
                 overflow: auto;
+        }
+        &__footer {
+                .el-form-item--default {
+                        margin-bottom: 0;
+                }
         }
 }
 

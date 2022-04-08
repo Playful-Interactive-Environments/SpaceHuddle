@@ -1,5 +1,16 @@
 <template>
-  <el-card shadow="never" body-style="text-align: center">
+  <el-card
+    shadow="never"
+    body-style="text-align: center"
+    :class="{
+      addOn__boarder: isAddOn,
+      selected: selected,
+    }"
+    :style="{
+      '--module-color': getColor(),
+    }"
+    @click="toggleSelection"
+  >
     <h2
       class="heading heading--regular"
       style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis"
@@ -10,28 +21,11 @@
         )
       }}
     </h2>
-    <TutorialStep
-      v-if="moduleType !== ModuleType.MAIN"
-      type="taskSettings"
-      step="additionalModule"
-      :order="11"
-      :displayAllDuplicates="true"
-      :disableTutorial="!displayTutorial"
-    >
-      <el-switch v-model="selected" />
-    </TutorialStep>
-    <TutorialStep
-      v-else
-      type="taskSettings"
-      step="baseModule"
-      :order="10"
-      :displayAllDuplicates="true"
-      :disableTutorial="!displayTutorial"
-    >
-      <el-radio v-model="mainModuleName" :label="moduleTask.key">{{}}</el-radio>
-    </TutorialStep>
     <div class="awesome-icon">
       <font-awesome-icon :icon="icon" v-if="icon" />
+    </div>
+    <div v-if="isAddOn" class="addOn__text">
+      {{ $t('moderator.organism.cards.moduleCard.addOn') }}
     </div>
     <el-tooltip placement="top">
       <template #content>
@@ -43,7 +37,7 @@
           }}
         </div>
       </template>
-      <p class="oneLineText">
+      <p :class="{ twoLineText: !isAddOn, oneLineText: isAddOn }">
         {{
           $t(
             `module.${moduleTask.taskType}.${moduleTask.moduleName}.description.description`
@@ -60,6 +54,8 @@ import { Options, Vue } from 'vue-class-component';
 import { getModuleConfig, ModuleTask } from '@/modules';
 import { ModuleType } from '@/types/enum/ModuleType';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
+import { getColorOfType } from '@/types/enum/TaskCategory';
+import TaskType from '@/types/enum/TaskType';
 
 @Options({
   components: {
@@ -77,6 +73,10 @@ export default class ModuleCard extends Vue {
 
   ModuleType = ModuleType;
 
+  get isAddOn(): boolean {
+    return this.moduleType !== ModuleType.MAIN;
+  }
+
   get selected(): boolean {
     return this.modelValue;
   }
@@ -92,6 +92,14 @@ export default class ModuleCard extends Vue {
   set mainModuleName(value: string) {
     if (value === this.moduleTask.key) {
       this.$emit('update:mainModule', this.moduleTask);
+    }
+  }
+
+  toggleSelection(): void {
+    if (this.isAddOn) {
+      this.selected = !this.selected;
+    } else {
+      this.mainModuleName = this.moduleTask.key;
     }
   }
 
@@ -118,6 +126,12 @@ export default class ModuleCard extends Vue {
       this.moduleTask.moduleName
     ).then((result) => (this.moduleType = result));
   }
+
+  getColor(): string | undefined {
+    if (this.moduleTask.taskType) {
+      return getColorOfType(this.moduleTask.taskType as TaskType);
+    }
+  }
 }
 </script>
 
@@ -134,5 +148,32 @@ export default class ModuleCard extends Vue {
   text-align: center;
   width: 100%;
   font-size: 40pt;
+}
+
+.addOn {
+  &__text {
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+  }
+
+  &__boarder {
+    border-style: dashed;
+  }
+}
+
+.el-card {
+  border-width: 2px;
+  border-color: var(--color-primary);
+  --el-card-padding: 0.7rem 1rem;
+  word-break: break-word;
+}
+
+.selected {
+  background-color: var(--module-color);
+  color: white;
+
+  .heading {
+    color: white;
+  }
 }
 </style>
