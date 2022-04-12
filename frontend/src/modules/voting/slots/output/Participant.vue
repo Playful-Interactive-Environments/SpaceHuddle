@@ -473,20 +473,22 @@ export default class Participant extends Vue {
     this.ideas = [];
     this.ideaPointer = 0;
 
-    let subtractIndex = 0;
-    for (let i = 0; i < this.secondIdeaArray.length; i++) {
-      let replace = true;
-      for (let j = 0; j < this.seats.length; j++) {
-        if (
-          this.seats[j]?.keywords == this.secondIdeaArray[i].keywords &&
-          this.seats[j]?.description == this.secondIdeaArray[i].description
-        ) {
-          replace = false;
-          subtractIndex++;
+    if (!this.finishedAndLaunched) {
+      let subtractIndex = 0;
+      for (let i = 0; i < this.secondIdeaArray.length; i++) {
+        let replace = true;
+        for (let j = 0; j < this.seats.length; j++) {
+          if (
+            this.seats[j]?.keywords == this.secondIdeaArray[i].keywords &&
+            this.seats[j]?.description == this.secondIdeaArray[i].description
+          ) {
+            replace = false;
+            subtractIndex++;
+          }
         }
-      }
-      if (replace) {
-        this.ideas[i - subtractIndex] = this.secondIdeaArray[i];
+        if (replace) {
+          this.ideas[i - subtractIndex] = this.secondIdeaArray[i];
+        }
       }
     }
     this.printArray();
