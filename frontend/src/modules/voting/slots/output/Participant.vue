@@ -5,7 +5,7 @@
     id="Container"
   >
     <div id="loadingScreen" :class="{ hidden: loadingScreenEnd }">
-      <span>loading...</span>
+      <span>{{ $t('module.voting.slots.participant.waiting') }}...</span>
     </div>
     <div id="backgroundImage"></div>
     <!--      {{ $t('module.voting.slots.participant.info') }}-->
@@ -19,7 +19,7 @@
         :class="{
           rocketColBig: seats.length <= 3 && enoughHeight,
           blockScrolling: !enoughHeight || smallHeight,
-          hidden: ElementHidden
+          hidden: ElementHidden,
         }"
         v-on:animationend="ElementHidden = true"
       >
@@ -39,7 +39,6 @@
           ></div>
           <el-button
             @click.prevent="vote(index + 1)"
-            v-on:click="scrollRocketToBottom()"
             class="rocketWindow"
             :class="{
               rocketBotWindow: index === 0,
@@ -60,7 +59,7 @@
             </span>
             <span
               v-if="!idea"
-              class="idea"
+              class="idea, emptyIdea"
               :class="{ ideaBig: seats.length <= 3 && enoughHeight }"
             >
               <font-awesome-icon icon="angle-double-left" />
@@ -108,8 +107,41 @@
           :is-editable="false"
           :show-state="false"
           class="ideaCard"
-          v-on:click="showIdeaOverlay = true"
+          v-on:click="
+            showIdeaOverlay = true;
+            printArray();
+          "
         />
+      </span>
+      <span
+        id="endOfIdeas"
+        v-if="ideaPointer >= ideas.length"
+        v-on:click="printArray()"
+      >
+        <span v-if="allSlotsFilled()">You have seen all ideas! Cycle through unused ideas again?</span>
+        <span v-if="!allSlotsFilled()">You have seen all ideas, but not all slots have been filled!</span>
+        <span id="endOfIdeasButtons">
+          <el-button
+            class="endButtons"
+            id="yes"
+            v-on:click="replaceIdeaArray()"
+            v-if="allSlotsFilled()"
+            >Yes</el-button>
+
+          <el-button
+            class="endButtons"
+            id="launch"
+            v-on:click="scrollRocketToBottom()"
+            v-if="allSlotsFilled()"
+            >no, launch</el-button>
+
+          <el-button
+            class="endButtons"
+            id="notAllSlotsButton"
+            v-on:click="replaceIdeaArray()"
+            v-if="!allSlotsFilled()"
+            >Cycle through ideas again</el-button>
+        </span>
       </span>
     </div>
 
@@ -130,7 +162,7 @@
         />
       </span>
     </div>
-    <div v-if="finished" class="infoText">
+    <div id="thanksText">
       <span>{{ $t('module.voting.slots.participant.thanks') }}</span>
     </div>
     <div v-if="waiting" style="display: none">
@@ -179,20 +211,27 @@ export default class Participant extends Vue {
   }
 
   get finished(): boolean {
-    return this.votes.length > 0 && this.ideaPointer >= this.ideas.length;
+    return (
+      this.votes.length > 0 &&
+      this.ideaPointer >= this.ideas.length &&
+      this.finishedAndLaunched
+    );
   }
 
   get waiting(): boolean {
+    //Changes Paul Start
     if (this.ideas.length === 0 && this.votes.length === 0) {
       console.log('waiting');
     } else {
       let element = document.getElementById('loadingScreen');
-      if (element != null) {
+      if (element != null && !element.classList.contains('zeroOpacity')) {
+        this.replaceIdeaArray();
+        console.log("this was the start of all");
         element.classList.add('zeroOpacity');
         setTimeout(() => element!.classList.add('hidden'), 2000);
-        let rocket = document.getElementById('rocketColumn');
       }
     }
+    //Changes Paul End
     return this.ideas.length === 0 && this.votes.length === 0;
   }
 
@@ -201,7 +240,9 @@ export default class Participant extends Vue {
       this.initSeats(3);
     }
     this.startInterval();
+    //Changes Paul Start
     window.addEventListener('resize', this.heightCheck);
+    //Changes Paul End
   }
 
   startInterval(): void {
@@ -273,7 +314,8 @@ export default class Participant extends Vue {
             const ideaIndex = this.ideas.findIndex(
               (idea) => idea.id == vote.ideaId
             );
-            if (ideaIndex >= 0) this.ideas.splice(ideaIndex, 1);
+            //if (ideaIndex >= 0) this.ideas.splice(ideaIndex, 1);
+            //this.printArray();
           });
           this.ideaPointer = 0;
         });
@@ -295,6 +337,9 @@ export default class Participant extends Vue {
           .then((ideas) => {
             this.ideaPointer = ideas.length;
             this.ideas = ideas;
+            for (let i = 0; i < ideas.length; i++) {
+              this.secondIdeaArray[i] = ideas[i];
+            }
             this.getVotes();
           });
       }
@@ -312,6 +357,9 @@ export default class Participant extends Vue {
         })
         .then((vote) => {
           this.votes.push(vote);
+          for (let i = 0; i < this.votes.length; i++) {
+            console.log("vote " + i + ": " + this.votes[i].rating);
+          }
         });
       if (slot > 0) {
         if (this.seats[slot - 1]) {
@@ -334,6 +382,7 @@ export default class Participant extends Vue {
     }
   }
 
+  //Changes Paul Start
   growIdea = true;
   shrinkIdea = false;
 
@@ -345,6 +394,7 @@ export default class Participant extends Vue {
   smallHeight = false;
 
   loadingScreenEnd = false;
+  finishedAndLaunched = false;
 
   getHeightPercentage(): void {
     let viewportHeight = window.innerHeight;
@@ -370,11 +420,21 @@ export default class Participant extends Vue {
   scrollRocketToBottom(): void {
     let rocket = document.getElementById('rocketColumn');
     let fire = document.getElementById('fire');
+    this.finishedAndLaunched = true;
     if (rocket != null && fire != null && this.finished) {
       console.log('test2');
       rocket.scrollTo({ top: rocket.scrollHeight, behavior: 'smooth' });
       rocket.classList.add('rocketAnimateMove');
       fire.classList.add('rocketAnimateSprite');
+      let endCard = document.getElementById('endOfIdeas');
+      if (endCard != null) {
+        endCard.classList.add('hidden');
+      }
+      let thanksText = document.getElementById('thanksText');
+      if (thanksText != null) {
+        thanksText.classList.add('notHidden');
+        setTimeout(() => thanksText!.classList.add('fullOpacity'), 2000);
+      }
     }
   }
 
@@ -387,6 +447,49 @@ export default class Participant extends Vue {
     }
     return this.smallHeight;
   }
+
+  secondIdeaArray: Idea[] = [];
+
+  replaceIdeaArray(): void {
+    this.ideas = [];
+    this.ideaPointer = 0;
+
+    let subtractIndex = 0;
+    for (let i = 0; i < this.secondIdeaArray.length; i++) {
+      let replace = true;
+      for (let j = 0; j < this.seats.length; j++) {
+        if (
+          this.seats[j]?.keywords == this.secondIdeaArray[i].keywords &&
+          this.seats[j]?.description == this.secondIdeaArray[i].description
+        ) {
+          replace = false;
+          subtractIndex++;
+        }
+      }
+      if (replace) {
+        this.ideas[i-subtractIndex] = this.secondIdeaArray[i];
+      }
+    }
+    this.printArray();
+  }
+
+  printArray(): void {
+    let string = '';
+    for (let i = 0; i < this.ideas.length; i++) {
+      string += 'idea ' + i + ': ' + this.ideas[i]?.keywords + ', ' + '\n';
+    }
+    console.log(string);
+  }
+
+  allSlotsFilled(): boolean {
+    for (let i = 0; i < this.seats.length; i++) {
+      if (this.seats[i] == null) {
+        return false;
+      }
+    }
+    return true;
+  }
+  //Changes Paul End
 }
 </script>
 
@@ -418,6 +521,8 @@ div#loadingScreen {
 }
 
 div#loadingScreen > span {
+  width: 70%;
+  text-align: center;
   color: white;
   font-size: var(--font-size-large);
   position: relative;
@@ -436,6 +541,10 @@ div#loadingScreen > span {
 .fullOpacity {
   opacity: 1 !important;
   transition: 2s;
+}
+
+.notHidden {
+  display: inline !important;
 }
 
 #backgroundImage {
@@ -837,11 +946,9 @@ div#rocketColumn.blockScrolling {
 .rocketTopImg {
   content: url('../../../../assets/illustrations/Slots/Rocket parts/Top.png');
 }
-
 .rocketMidImg {
   content: url('../../../../assets/illustrations/Slots/Rocket parts/Mid.png');
 }
-
 .rocketBotImg {
   content: url('../../../../assets/illustrations/Slots/Rocket parts/Bot.png');
 }
@@ -874,12 +981,10 @@ div#rocketColumn.blockScrolling {
   bottom: 3%;
   height: 70%;
 }
-
 .el-button.rocketTopWindow {
   bottom: 2%;
   height: 50%;
 }
-
 .el-button.rocketBotWindow {
   top: 12%;
   height: 41%;
@@ -915,7 +1020,6 @@ img#backPlatform {
 
   z-index: 0;
 }
-
 img#extendPlatform {
   position: absolute;
   content: url('../../../../assets/illustrations/Slots/PlatformExtension.png');
@@ -923,7 +1027,7 @@ img#extendPlatform {
   z-index: 0;
 }
 
-span.idea {
+span.idea, span.emptyIdea {
   display: table;
   position: absolute;
 
@@ -944,7 +1048,7 @@ span.idea {
   border-radius: 20px;
 }
 
-span.idea.ideaBig {
+span.idea.ideaBig , span.emptyIdea.ideaBig {
   width: 385% !important;
 }
 
@@ -958,6 +1062,59 @@ span.ideaGrow {
   transform: scale(1);
   opacity: 100;
   transition: 0.1s;
+}
+
+span#endOfIdeas {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  height: 70%;
+
+  bottom: 0;
+
+  color: white;
+  text-align: center;
+
+  justify-items: center;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+
+  z-index: 5;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 2%;
+
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.25);
+  border: 3px solid white;
+  background-color: var(--color-darkblue);
+
+  border-radius: 10px;
+}
+
+span#endOfIdeas > span#endOfIdeasButtons {
+  display: flex;
+  flex-direction: row;
+
+  text-align: center;
+
+  width: 100%;
+}
+
+span#endOfIdeas > span {
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+
+.el-button.endButtons {
+  width: 40%;
+}
+
+.el-button.endButtons#notAllSlotsButton {
+  width: 95%;
 }
 
 .ideaCard {
@@ -998,7 +1155,6 @@ span.ideaGrow {
 #ideaAndSkip::v-deep .card__text {
   padding: 1% 1% 1% 3%;
   height: 98%;
-  overflow: scroll;
   /* Hide scrollbar for IE, Edge and Firefox */
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
@@ -1121,7 +1277,7 @@ div#ideaAndSkipOverlay .x {
   background-color: transparent;
 }
 
-div.infoText {
+div#thanksText {
   position: absolute;
 
   width: 50%;
@@ -1133,10 +1289,11 @@ div.infoText {
   left: 0;
   right: 0;
 
-  opacity: 1;
+  opacity: 0;
+  display: none;
 }
 
-div.infoText > span {
+div#thanksText > span {
   position: absolute;
 
   text-align: center;
@@ -1148,7 +1305,8 @@ div.infoText > span {
   height: 10%;
 
   margin: auto;
-  top: 30%;
+  top: 0;
+  bottom: 0;
 
   left: 0;
   right: 0;
