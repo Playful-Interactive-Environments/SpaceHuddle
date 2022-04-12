@@ -13,7 +13,12 @@
     "thanks": "thanks for the vote",
     "waiting": "stay tuned: ideas will soon be released for voting",
     "replace": "replace",
-    "info": "Assign the first ideas to the slots and overwrite them as soon as a better idea is displayed. For each idea, check whether it is better than the ones already assigned. Each slot can be overwritten as often as you like, so that in the end only the best ones remain."
+    "info": "Assign the first ideas to the slots and overwrite them as soon as a better idea is displayed. For each idea, check whether it is better than the ones already assigned. Each slot can be overwritten as often as you like, so that in the end only the best ones remain.",
+    "again": "You have seen all ideas! Cycle through unused ideas again?",
+    "emptySlop": "You have seen all ideas, but not all slots have been filled!",
+    "yes": "Yes",
+    "no": "No, launch",
+    "cycle": "Cycle through ideas again"
   },
   "moderatorContent": {
   },

@@ -118,29 +118,38 @@
         v-if="ideaPointer >= ideas.length"
         v-on:click="printArray()"
       >
-        <span v-if="allSlotsFilled()">You have seen all ideas! Cycle through unused ideas again?</span>
-        <span v-if="!allSlotsFilled()">You have seen all ideas, but not all slots have been filled!</span>
+        <span v-if="allSlotsFilled()">
+          {{ $t('module.voting.slots.participant.again') }}
+        </span>
+        <span v-if="!allSlotsFilled()">
+          {{ $t('module.voting.slots.participant.emptySlop') }}
+        </span>
         <span id="endOfIdeasButtons">
           <el-button
             class="endButtons"
             id="yes"
             v-on:click="replaceIdeaArray()"
             v-if="allSlotsFilled()"
-            >Yes</el-button>
-
+          >
+            {{ $t('module.voting.slots.participant.yes') }}
+          </el-button>
           <el-button
             class="endButtons"
             id="launch"
             v-on:click="scrollRocketToBottom()"
             v-if="allSlotsFilled()"
-            >no, launch</el-button>
+          >
+            {{ $t('module.voting.slots.participant.no') }}
+          </el-button>
 
           <el-button
             class="endButtons"
             id="notAllSlotsButton"
             v-on:click="replaceIdeaArray()"
             v-if="!allSlotsFilled()"
-            >Cycle through ideas again</el-button>
+          >
+            {{ $t('module.voting.slots.participant.cycle') }}
+          </el-button>
         </span>
       </span>
     </div>
@@ -226,9 +235,9 @@ export default class Participant extends Vue {
       let element = document.getElementById('loadingScreen');
       if (element != null && !element.classList.contains('zeroOpacity')) {
         this.replaceIdeaArray();
-        console.log("this was the start of all");
+        console.log('this was the start of all');
         element.classList.add('zeroOpacity');
-        setTimeout(() => element!.classList.add('hidden'), 2000);
+        setTimeout(() => element?.classList.add('hidden'), 2000);
       }
     }
     //Changes Paul End
@@ -314,9 +323,11 @@ export default class Participant extends Vue {
             const ideaIndex = this.ideas.findIndex(
               (idea) => idea.id == vote.ideaId
             );
-            //if (ideaIndex >= 0) this.ideas.splice(ideaIndex, 1);
-            //this.printArray();
+            if (ideaIndex >= 0) this.ideas.splice(ideaIndex, 1);
           });
+          if (this.ideas.length === 0) {
+            this.replaceIdeaArray();
+          }
           this.ideaPointer = 0;
         });
     }
@@ -349,20 +360,28 @@ export default class Participant extends Vue {
   async vote(slot: number): Promise<void> {
     if (this.ideaPointer < this.ideas.length) {
       const idea = this.ideas[this.ideaPointer];
-      votingService
-        .postVote(this.taskId, {
-          ideaId: idea.id,
-          rating: slot,
-          detailRating: slot > 0 ? 1 : 0,
-        })
-        .then((vote) => {
-          this.votes.push(vote);
-          for (let i = 0; i < this.votes.length; i++) {
-            console.log("vote " + i + ": " + this.votes[i].rating);
-          }
-        });
+      const vote = this.votes.find((vote) => vote.ideaId === idea.id);
+      if (!vote) {
+        votingService
+          .postVote(this.taskId, {
+            ideaId: idea.id,
+            rating: slot,
+            detailRating: slot > 0 ? 1 : 0,
+          })
+          .then((vote) => {
+            this.votes.push(vote);
+            for (let i = 0; i < this.votes.length; i++) {
+              console.log('vote ' + i + ': ' + this.votes[i].rating);
+            }
+          });
+      } else {
+        vote.rating = slot;
+        vote.detailRating = slot > 0 ? 1 : 0;
+        await votingService.putVote(vote);
+      }
       if (slot > 0) {
-        if (this.seats[slot - 1]) {
+        const seatIdea = this.seats[slot - 1];
+        if (seatIdea && seatIdea.id !== idea.id) {
           const slotIdea = this.seats[slot - 1];
           if (slotIdea) {
             const slotVote = this.votes.filter(
@@ -433,7 +452,7 @@ export default class Participant extends Vue {
       let thanksText = document.getElementById('thanksText');
       if (thanksText != null) {
         thanksText.classList.add('notHidden');
-        setTimeout(() => thanksText!.classList.add('fullOpacity'), 2000);
+        setTimeout(() => thanksText?.classList.add('fullOpacity'), 2000);
       }
     }
   }
@@ -467,7 +486,7 @@ export default class Participant extends Vue {
         }
       }
       if (replace) {
-        this.ideas[i-subtractIndex] = this.secondIdeaArray[i];
+        this.ideas[i - subtractIndex] = this.secondIdeaArray[i];
       }
     }
     this.printArray();
@@ -1027,7 +1046,8 @@ img#extendPlatform {
   z-index: 0;
 }
 
-span.idea, span.emptyIdea {
+span.idea,
+span.emptyIdea {
   display: table;
   position: absolute;
 
@@ -1048,7 +1068,8 @@ span.idea, span.emptyIdea {
   border-radius: 20px;
 }
 
-span.idea.ideaBig , span.emptyIdea.ideaBig {
+span.idea.ideaBig,
+span.emptyIdea.ideaBig {
   width: 385% !important;
 }
 
