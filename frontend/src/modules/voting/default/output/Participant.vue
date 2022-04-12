@@ -1,20 +1,43 @@
 <template>
-  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
+  <div id="starImageBackground">
+    <div id="starImageContainer">
+      <img
+        src="../../../../assets/illustrations/Voting/starDesat.png"
+        alt="star"
+        class="starImage"
+      />
+      <img
+        src="../../../../assets/illustrations/Voting/starGlow.png"
+        alt="star"
+        class="starImage"
+        id="glowingStar"
+        :style="{ '--star-opacity': getOpacity() }"
+      />
+    </div>
+  </div>
+
+  <ParticipantModuleDefaultContainer
+    :task-id="taskId"
+    :module="moduleName"
+    id="PMDC"
+  >
     <div class="media" v-if="ideaPointer < ideas.length">
       <IdeaCard
-        class="media-left"
+        class="media-left, IdeaCard"
         :idea="ideas[ideaPointer]"
         :is-selectable="false"
         :is-editable="false"
         :show-state="false"
+        v-on:click="showIdeaOverlay = true; currentRateIdea = true;"
       />
       <el-rate
-        class="media-content"
+        class="media-content, ratingStars"
         v-model:model-value="rate"
         :max="maxRate"
         v-on:change="saveVoting($event)"
       ></el-rate>
     </div>
+
     <div v-if="finished">
       {{ $t('module.voting.default.participant.thanks') }}
     </div>
@@ -32,19 +55,54 @@
     >
       <IdeaCard
         v-if="voteIdea(vote.ideaId)"
-        class="media-left"
+        class="IdeaCard"
         :idea="voteIdea(vote.ideaId)"
         :is-selectable="false"
         :is-editable="false"
         :cutLongTexts="true"
         :show-state="false"
+        v-on:click="
+          showIdeaOverlay = true;
+          voteIdOverlay = voteIdea(vote.ideaId);
+          currentRateIdea = false;
+        "
       />
       <el-rate
-        class="media-content"
+        class="media-content, ratingStars"
         v-model:model-value="vote.rating"
         :max="maxRate"
         v-on:change="saveVoting($event, vote)"
       ></el-rate>
+    </div>
+
+    <div id="ideaAndSkipOverlay" v-if="showIdeaOverlay">
+      <div id="backgroundOfOverlay" v-on:click="showIdeaOverlay = false"></div>
+      <span class="ideaCardSpan">
+        <font-awesome-icon
+          icon="plus"
+          class="x"
+          v-on:click="showIdeaOverlay = false"
+        />
+
+        <IdeaCard
+          v-if="ideaPointer < ideas.length && currentRateIdea"
+          :idea="ideas[ideaPointer]"
+          :is-selectable="false"
+          :is-editable="false"
+          :show-state="false"
+          class="ideaCardOverlay"
+        />
+        <IdeaCard
+          v-if="voteIdOverlay && !currentRateIdea"
+          class="ideaCardOverlay"
+          :idea="voteIdOverlay"
+          :is-selectable="false"
+          :is-editable="false"
+          :cutLongTexts="true"
+          :show-state="false"
+        />
+        <span id="clickOut" v-on:click="showIdeaOverlay = false"></span>
+      </span>
     </div>
   </ParticipantModuleDefaultContainer>
 </template>
@@ -84,6 +142,7 @@ export default class Participant extends Vue {
   maxRate = 5;
   readonly intervalTime = 10000;
   interval!: any;
+  starOpacity = 0;
 
   get moduleName(): string {
     if (this.module) return this.module.name;
@@ -233,6 +292,17 @@ export default class Participant extends Vue {
       }
     }, 1000);
   }
+
+  showIdeaOverlay = false;
+  voteIdOverlay: Idea | null = null;
+  currentRateIdea = false;
+
+  getOpacity(): number {
+    if (this.waiting) {
+      return 0;
+    }
+    return (1 / this.ideas.length) * this.ideaPointer;
+  }
 }
 </script>
 
@@ -265,4 +335,214 @@ export default class Participant extends Vue {
     width: unset;
   }
 }
+
+.media {
+  display: flex;
+  flex-direction: column;
+}
+
+#PMDC {
+  border-radius: 30px 30px 0px 0px;
+  position: absolute;
+  top: 35%;
+  min-height: 65%;
+
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  z-index: 1;
+}
+
+#starImageBackground {
+  position: absolute;
+
+  max-width: inherit;
+  height: 100%;
+
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  background-image: url('../../../../assets/illustrations/Voting/StarsSpace.png');
+  background-size: contain;
+
+  z-index: 0;
+}
+
+#starImageContainer {
+  position: absolute;
+
+  height: 28.5%;
+
+  top: 0;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.starImage {
+  position: absolute;
+  height: 100%;
+
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.starImage#glowingStar {
+  opacity: var(--star-opacity);
+}
+
+.IdeaCard {
+  width: 100%;
+  background-color: var(--color-darkblue);
+  border: 3px solid var(--color-darkblue-light);
+  padding: 3%;
+}
+
+.IdeaCard::v-deep .el-card__body {
+  display: flex;
+  flex-direction: row;
+
+  align-items: center;
+
+  height: 10%;
+
+  border-radius: 10px;
+  color: white;
+}
+
+.IdeaCard::v-deep .card__image {
+  height: 26%;
+  width: 26%;
+  border-radius: 20px;
+
+  background-color: var(--color-gray);
+}
+
+.IdeaCard::v-deep .card__text {
+  padding: 1% 1% 1% 3%;
+  height: 98%;
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.IdeaCard::v-deep .card__text::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.IdeaCard::-webkit-scrollbar {
+  display: none;
+}
+
+div#ideaAndSkipOverlay {
+  position: fixed;
+
+  overflow: hidden;
+
+  top: 0;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  height: 100%;
+  width: 100%;
+}
+
+div#ideaAndSkipOverlay #backgroundOfOverlay {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  height: 100%;
+  width: 100%;
+
+  background-color: #00000050;
+  z-index: 7;
+}
+
+div#ideaAndSkipOverlay .ideaCardSpan {
+  position: absolute;
+
+  width: 95%;
+  max-height: 70%;
+  min-height: 40%;
+
+  z-index: 7;
+  margin: auto;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  background-color: transparent;
+}
+
+div#ideaAndSkipOverlay .ideaCardOverlay {
+  position: absolute;
+
+  overflow-y: scroll;
+
+  width: 100%;
+  height: auto;
+  min-height: 40%;
+  max-height: 100%;
+
+  padding: 2%;
+  margin-top: 0;
+
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.25);
+  border: 3px solid var(--color-darkblue);
+}
+#ideaAndSkipOverlay::v-deep .card__image {
+  border-radius: 20px;
+}
+
+div#ideaAndSkipOverlay .x {
+  position: absolute;
+  width: 10%;
+  height: 10%;
+
+  top: -8%;
+  right: 0;
+
+  color: white;
+
+  transform: rotate(45deg);
+
+  z-index: 8;
+  background-color: transparent;
+}
+
+span#clickOut {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.el-rate.ratingStars {
+  display: flex;
+
+  justify-content: center;
+
+  width: 100%;
+}
+
+.el-rate.ratingStars::v-deep path {
+  color: var(--color-red);
+}
+
 </style>

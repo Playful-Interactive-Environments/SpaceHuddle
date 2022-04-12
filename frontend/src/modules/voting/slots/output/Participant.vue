@@ -169,6 +169,7 @@
           :show-state="false"
           class="ideaCard"
         />
+        <span id="clickOut" v-on:click="showIdeaOverlay = false"></span>
       </span>
     </div>
     <div id="thanksText">
@@ -1298,6 +1299,12 @@ div#ideaAndSkipOverlay .x {
 
   z-index: 8;
   background-color: transparent;
+}
+
+span#clickOut {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 div#thanksText {
