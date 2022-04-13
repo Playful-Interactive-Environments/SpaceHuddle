@@ -192,8 +192,9 @@ export const filterIdeas = (
   if (textFilter && textFilter.length > 0) {
     ideaList = ideaList.filter(
       (item) =>
-        item.keywords.includes(textFilter) ||
-        (item.description && item.description.includes(textFilter))
+        item.keywords.toLowerCase().includes(textFilter.toLowerCase()) ||
+        (item.description &&
+          item.description.toLowerCase().includes(textFilter.toLowerCase()))
     );
   }
   if (stateFilter && stateFilter.length > 0) {
