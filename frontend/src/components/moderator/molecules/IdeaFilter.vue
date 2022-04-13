@@ -147,21 +147,18 @@ export default class IdeaFilter extends Vue {
           task.parameter.input[0].view.type.toLowerCase() === ViewType.TASK
         )
           sortOrderTaskId = task.parameter.input[0].view.id;
-        await ideaService
-          .getSortOrderOptions(sortOrderTaskId)
-          .then((options) => {
-            this.sortOrderOptions = options.filter(
-              (option) => option.ref?.id !== this.taskId
+        ideaService.getSortOrderOptions(sortOrderTaskId).then((options) => {
+          this.sortOrderOptions = options.filter(
+            (option) => option.ref?.id !== this.taskId
+          );
+          if (task.parameter.input.length < 2) {
+            this.sortOrderOptions = this.sortOrderOptions.filter(
+              (option) => option.orderType !== IdeaSortOrder.INPUT.toLowerCase()
             );
-            if (task.parameter.input.length < 2) {
-              this.sortOrderOptions = this.sortOrderOptions.filter(
-                (option) =>
-                  option.orderType !== IdeaSortOrder.INPUT.toLowerCase()
-              );
-            }
-            if (options.length > 0 && !this.modelValue.orderType)
-              this.modelValue.orderType = options[0].orderType;
-          });
+          }
+          if (options.length > 0 && !this.modelValue.orderType)
+            this.modelValue.orderType = options[0].orderType;
+        });
 
         if (task.parameter && 'syncUserId' in task.parameter) {
           this.syncUserId = task.parameter.syncUserId;
@@ -173,18 +170,36 @@ export default class IdeaFilter extends Vue {
           });
         }
         if (this.syncToPublicScreen) {
+          let updateProperties = false;
           if (
             task.parameter &&
             task.parameter.orderType &&
-            this.modelValue.orderType != task.parameter.orderType
+            this.modelValue.orderType !== task.parameter.orderType
           ) {
             this.modelValue.orderType = task.parameter.orderType;
+            updateProperties = true;
           }
-          if (task.parameter && task.parameter.stateFilter) {
+          if (
+            task.parameter &&
+            task.parameter.stateFilter &&
+            this.modelValue.stateFilter.length !==
+              task.parameter.stateFilter.length
+          ) {
             this.modelValue.stateFilter = task.parameter.stateFilter;
+            updateProperties = true;
           }
-          if (task.parameter && task.parameter.textFilter) {
+          if (
+            task.parameter &&
+            task.parameter.textFilter &&
+            this.modelValue.textFilter !== task.parameter.textFilter
+          ) {
             this.modelValue.textFilter = task.parameter.textFilter;
+            updateProperties = true;
+          }
+
+          if (updateProperties) {
+            this.$emit('update', this.modelValue);
+            this.$emit('change', this.modelValue);
           }
         }
       });

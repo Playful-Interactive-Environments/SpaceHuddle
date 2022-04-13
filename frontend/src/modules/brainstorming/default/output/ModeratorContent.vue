@@ -74,9 +74,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import IdeaSortOrder, {
-  DefaultIdeaSortOrder,
-} from '@/types/enum/IdeaSortOrder';
+import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import { OrderGroupList, OrderGroup } from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
@@ -107,7 +105,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   orderGroupContent: OrderGroupList = {};
   readonly intervalTime = 10000;
   interval!: any;
-  orderType: string = DefaultIdeaSortOrder;
   openTabs: string[] = [];
   filter: FilterData = { ...defaultFilterData };
 
