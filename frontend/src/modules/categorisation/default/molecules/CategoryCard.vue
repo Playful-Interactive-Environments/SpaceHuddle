@@ -273,7 +273,7 @@ export default class CategoryCard extends Vue {
 }
 
 .awesome-icon {
-  margin: 0.8em 0;
+  margin: 0.8em 6px;
 }
 
 .heading {
@@ -295,6 +295,10 @@ export default class CategoryCard extends Vue {
 .item {
   width: 100%;
   height: 100%;
+}
+
+.el-card {
+  margin-bottom: 0;
 }
 
 .card {

@@ -340,11 +340,13 @@ export default class Participant extends Vue {
       if (!this.module) await this.getModule();
       if (this.task && this.task.parameter.input) {
         await viewService
-          .getIdeas(
+          .getViewIdeas(
+            this.task.topicId,
             this.task.parameter.input,
             null,
             null,
-            EndpointAuthorisationType.PARTICIPANT
+            EndpointAuthorisationType.PARTICIPANT,
+            (this as any).$t
           )
           .then((ideas) => {
             this.ideaPointer = ideas.length;

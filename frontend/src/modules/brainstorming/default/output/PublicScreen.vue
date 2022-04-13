@@ -31,6 +31,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { defaultFilterData } from '@/components/moderator/molecules/IdeaFilter.vue';
 
 @Options({
   components: {
@@ -82,19 +83,36 @@ export default class PublicScreen extends Vue {
 
   async getIdeas(): Promise<void> {
     if (this.taskId) {
-      let orderType = IdeaSortOrder.TIMESTAMP;
+      const filter = { ...defaultFilterData };
 
       await taskService
         .getTaskById(this.taskId, this.authHeaderTyp)
         .then((task) => {
           if (task.parameter && task.parameter.orderType)
-            orderType = task.parameter.orderType;
+            filter.orderType = task.parameter.orderType;
+          if (task.parameter && task.parameter.orderType)
+            filter.stateFilter = task.parameter.stateFilter;
+          if (task.parameter && task.parameter.orderType)
+            filter.textFilter = task.parameter.textFilter;
         });
 
       await ideaService
-        .getIdeasForTask(this.taskId, orderType, null, this.authHeaderTyp)
+        .getIdeasForTask(
+          this.taskId,
+          filter.orderType,
+          null,
+          this.authHeaderTyp
+        )
         .then((ideas) => {
-          if (orderType.toUpperCase() == IdeaSortOrder.TIMESTAMP.toUpperCase())
+          ideas = ideaService.filterIdeas(
+            ideas,
+            filter.stateFilter,
+            filter.textFilter
+          );
+          if (
+            filter.orderType.toUpperCase() ==
+            IdeaSortOrder.TIMESTAMP.toUpperCase()
+          )
             this.ideas = ideas.reverse();
           else this.ideas = ideas;
         });

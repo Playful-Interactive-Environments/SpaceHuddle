@@ -208,7 +208,7 @@
             <span v-else class="withoutIcon">{{ index }}</span>
           </template>
           <template #description>
-            <span>
+            <span class="threeLineText">
               {{ getTitle(element) }}
             </span>
           </template>

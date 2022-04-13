@@ -392,6 +392,16 @@ $--font-size: (
 .el-select {
         --el-select-input-color: var(--color-primary);
         --el-select-input-font-size: var(--font-size-default);
+
+        .el-select__tags > span {
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+        }
+
+        .el-select__tags .el-tag--info {
+                background-color: unset;
+        }
 }
 
 .el-message-box {

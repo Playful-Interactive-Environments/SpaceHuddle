@@ -13,7 +13,11 @@
     <span v-else-if="color" :style="{ color: color }">
       {{ text.toUpperCase() }}
     </span>
-    <span v-else>{{ text.toUpperCase() }}</span>
+    <span v-else>
+      <el-tooltip placement="top" :content="text">
+        {{ text.toUpperCase() }}
+      </el-tooltip>
+    </span>
     <span v-on:click="$event.cancelBubble = true">
       <slot></slot>
     </span>

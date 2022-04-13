@@ -183,3 +183,21 @@ export const getOrderGroups = async (
   );
   return { ideas: ideaList, oderGroups: orderGroupList };
 };
+
+export const filterIdeas = (
+  ideaList: Idea[],
+  stateFilter: string[],
+  textFilter: string
+): Idea[] => {
+  if (textFilter && textFilter.length > 0) {
+    ideaList = ideaList.filter(
+      (item) =>
+        item.keywords.includes(textFilter) ||
+        (item.description && item.description.includes(textFilter))
+    );
+  }
+  if (stateFilter && stateFilter.length > 0) {
+    ideaList = ideaList.filter((item) => stateFilter.includes(item.state));
+  }
+  return ideaList;
+};

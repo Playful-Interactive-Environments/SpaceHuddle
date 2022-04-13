@@ -1,146 +1,147 @@
 <template>
-  <div class="level filter_options">
-    <div class="level-left"></div>
-    <div class="level-right">
-      <div class="level-item">
-        <el-select v-model="orderType" @change="getCollapseContent(true)">
-          <template v-slot:prefix>
-            <font-awesome-icon icon="sort" class="el-icon" />
-          </template>
-          <el-option
-            v-for="type in sortOrderOptions"
-            :key="type.orderType"
-            :value="
-              type.ref
-                ? `${type.orderType}&refId=${type.ref.id}`
-                : type.orderType
-            "
-            :label="
-              $t(`enum.ideaSortOrder.${type.orderType}`) +
-              (type.ref ? ` - ${type.ref.name}` : '')
-            "
+  <IdeaFilter
+    :taskId="taskId"
+    v-model="filter"
+    @change="getCollapseContent(true)"
+  />
+  <div ref="data" class="media">
+    <div class="media-left unselected">
+      <el-scrollbar
+        native
+        :height="`calc(100vh - ${topContentPosition}px - 1rem)`"
+      >
+        <el-collapse v-model="openTabs">
+          <el-collapse-item
+            v-for="(item, key) in orderGroupContent"
+            :key="key"
+            :name="key"
           >
-            <span>
-              {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
-            </span>
-            <span v-if="type.ref"> - {{ type.ref.name }} </span>
-          </el-option>
-        </el-select>
-      </div>
+            <template #title>
+              <CollapseTitle
+                :text="key"
+                :avatar="item.avatar"
+                :color="item.color"
+              >
+                <span
+                  role="button"
+                  class="awesome-icon"
+                  v-if="item.ideas.length > item.displayCount"
+                  v-on:click="item.displayCount = 1000"
+                >
+                  <font-awesome-icon icon="ellipsis-h" />
+                </span>
+              </CollapseTitle>
+            </template>
+            <div class="layout__columns">
+              <draggable
+                :id="key"
+                v-model="item.ideas"
+                draggable=".item"
+                item-key="id"
+                group="idea"
+                @end="dragDone"
+              >
+                <template v-slot:item="{ element, index }">
+                  <IdeaCard
+                    :key="element.id"
+                    v-if="index < item.displayCount"
+                    :id="element.id"
+                    :idea="element"
+                    :is-selectable="false"
+                    :isDraggable="true"
+                    class="item"
+                    @ideaDeleted="getCollapseContent"
+                  />
+                </template>
+                <template v-slot:footer>
+                  <AddItem
+                    v-if="item.ideas.length > item.displayCount"
+                    :text="
+                      $t('module.selection.default.moderatorContent.displayAll')
+                    "
+                    :isColumn="false"
+                    v-on:click="item.displayCount = 1000"
+                    class="showMore"
+                  />
+                </template>
+              </draggable>
+            </div>
+          </el-collapse-item>
+        </el-collapse>
+      </el-scrollbar>
+    </div>
+    <div class="media-content">
+      <el-scrollbar
+        native
+        :height="`calc(100vh - ${topContentPosition}px - 1rem)`"
+      >
+        <el-collapse v-model="openTabsSelection">
+          <el-collapse-item :key="SELECTION_KEY" :name="SELECTION_KEY">
+            <template #title>
+              <CollapseTitle
+                :text="
+                  $t('module.selection.default.moderatorContent.selection')
+                "
+              >
+                <span
+                  role="button"
+                  class="awesome-icon"
+                  v-if="selection.length > displayCount"
+                  v-on:click="displayCount = 1000"
+                >
+                  <font-awesome-icon icon="ellipsis-h" />
+                </span>
+              </CollapseTitle>
+            </template>
+
+            <div class="layout__columns">
+              <draggable
+                :key="SELECTION_KEY"
+                :id="SELECTION_KEY"
+                v-model="selection"
+                draggable=".item"
+                item-key="id"
+                group="idea"
+                @end="dragDone"
+              >
+                <template v-slot:header>
+                  <AddItem
+                    :text="$t('module.selection.default.moderatorContent.add')"
+                    :isColumn="true"
+                    :is-clickable="false"
+                    v-if="selection.length === 0"
+                  />
+                </template>
+                <template v-slot:item="{ element, index }">
+                  <IdeaCard
+                    :key="element.id"
+                    v-if="index < displayCount"
+                    :id="element.id"
+                    :idea="element"
+                    :is-selectable="false"
+                    :isDraggable="true"
+                    class="item"
+                    @ideaDeleted="getCollapseContent"
+                  />
+                </template>
+                <template v-slot:footer>
+                  <AddItem
+                    v-if="selection.length > displayCount"
+                    :text="
+                      $t('module.selection.default.moderatorContent.displayAll')
+                    "
+                    :isColumn="false"
+                    @addNew="displayCount = 1000"
+                    class="showMore"
+                  />
+                </template>
+              </draggable>
+            </div>
+          </el-collapse-item>
+        </el-collapse>
+      </el-scrollbar>
     </div>
   </div>
-  <el-collapse v-model="openTabsSelection">
-    <el-collapse-item :key="SELECTION_KEY" :name="SELECTION_KEY">
-      <template #title>
-        <CollapseTitle
-          :text="$t('module.selection.default.moderatorContent.selection')"
-        >
-          <span
-            role="button"
-            class="awesome-icon"
-            v-if="selection.length > displayCount"
-            v-on:click="displayCount = 1000"
-          >
-            <font-awesome-icon icon="ellipsis-h" />
-          </span>
-        </CollapseTitle>
-      </template>
-
-      <div class="layout__columns">
-        <draggable
-          :key="SELECTION_KEY"
-          :id="SELECTION_KEY"
-          v-model="selection"
-          draggable=".item"
-          item-key="id"
-          group="idea"
-          @end="dragDone"
-        >
-          <template v-slot:header>
-            <AddItem
-              :text="$t('module.selection.default.moderatorContent.add')"
-              :isColumn="true"
-              :is-clickable="false"
-              v-if="selection.length === 0"
-            />
-          </template>
-          <template v-slot:item="{ element, index }">
-            <IdeaCard
-              :key="element.id"
-              v-if="index < displayCount"
-              :id="element.id"
-              :idea="element"
-              :is-selectable="false"
-              :isDraggable="true"
-              class="item"
-              @ideaDeleted="getCollapseContent"
-            />
-          </template>
-          <template v-slot:footer>
-            <AddItem
-              v-if="selection.length > displayCount"
-              :text="$t('module.selection.default.moderatorContent.displayAll')"
-              :isColumn="false"
-              @addNew="displayCount = 1000"
-              class="showMore"
-            />
-          </template>
-        </draggable>
-      </div>
-    </el-collapse-item>
-  </el-collapse>
-  <el-collapse v-model="openTabs">
-    <el-collapse-item
-      v-for="(item, key) in orderGroupContent"
-      :key="key"
-      :name="key"
-    >
-      <template #title>
-        <CollapseTitle :text="key" :avatar="item.avatar" :color="item.color">
-          <span
-            role="button"
-            class="awesome-icon"
-            v-if="item.ideas.length > item.displayCount"
-            v-on:click="item.displayCount = 1000"
-          >
-            <font-awesome-icon icon="ellipsis-h" />
-          </span>
-        </CollapseTitle>
-      </template>
-      <div class="layout__columns">
-        <draggable
-          :id="key"
-          v-model="item.ideas"
-          draggable=".item"
-          item-key="id"
-          group="idea"
-          @end="dragDone"
-        >
-          <template v-slot:item="{ element, index }">
-            <IdeaCard
-              :key="element.id"
-              v-if="index < item.displayCount"
-              :id="element.id"
-              :idea="element"
-              :is-selectable="false"
-              :isDraggable="true"
-              class="item"
-              @ideaDeleted="getCollapseContent"
-            />
-          </template>
-          <template v-slot:footer>
-            <AddItem
-              v-if="item.ideas.length > item.displayCount"
-              :text="$t('module.selection.default.moderatorContent.displayAll')"
-              :isColumn="false"
-              v-on:click="item.displayCount = 1000"
-              class="showMore"
-            />
-          </template>
-        </draggable>
-      </div>
-    </el-collapse-item>
-  </el-collapse>
 </template>
 
 <script lang="ts">
@@ -151,25 +152,21 @@ import * as ideaService from '@/services/idea-service';
 import * as viewService from '@/services/view-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as taskService from '@/services/task-service';
-import { convertToSaveVersion, Task } from '@/types/api/Task';
+import { Task } from '@/types/api/Task';
 import * as selectionService from '@/services/selection-service';
 import { EventType } from '@/types/enum/EventType';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import draggable from 'vuedraggable';
-import {
-  OrderGroup,
-  OrderGroupList,
-  SortOrderOption,
-} from '@/types/api/OrderGroup';
+import { OrderGroup, OrderGroupList } from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { reloadCollapseContent } from '@/utils/collapse';
-import IdeaSortOrder, {
-  DefaultIdeaSortOrder,
-  DefaultDisplayCount,
-} from '@/types/enum/IdeaSortOrder';
+import IdeaSortOrder, { DefaultDisplayCount } from '@/types/enum/IdeaSortOrder';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
-import ViewType from '@/types/enum/ViewType';
+import IdeaFilter, {
+  defaultFilterData,
+  FilterData,
+} from '@/components/moderator/molecules/IdeaFilter.vue';
 
 const SELECTION_KEY = 'selection';
 
@@ -179,6 +176,7 @@ const SELECTION_KEY = 'selection';
     CollapseTitle,
     AddItem,
     draggable,
+    IdeaFilter,
   },
 })
 
@@ -197,8 +195,17 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   openTabsSelection: string[] = [SELECTION_KEY];
   displayCount = DefaultDisplayCount;
   isDragging = false;
-  sortOrderOptions: SortOrderOption[] = [];
-  orderType: string = DefaultIdeaSortOrder;
+  filter: FilterData = { ...defaultFilterData };
+
+  topContentPosition = 80;
+
+  loadTopPositions(): void {
+    if (this.$refs.data) {
+      this.topContentPosition = (
+        this.$refs.data as HTMLElement
+      ).getBoundingClientRect().top;
+    }
+  }
 
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
@@ -209,27 +216,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     if (this.taskId) {
       await taskService.getTaskById(this.taskId).then(async (task) => {
         this.task = task;
-        let sortOrderTaskId = null;
-        if (
-          task.parameter.input.length === 1 &&
-          task.parameter.input[0].view.type.toLowerCase() === ViewType.TASK
-        )
-          sortOrderTaskId = task.parameter.input[0].view.id;
-        await ideaService
-          .getSortOrderOptions(sortOrderTaskId)
-          .then((options) => {
-            this.sortOrderOptions = options.filter(
-              (option) => option.ref?.id !== this.taskId
-            );
-            if (options.length > 0) this.orderType = options[0].orderType;
-          });
-        if (
-          task.parameter &&
-          task.parameter.orderType &&
-          this.orderType != task.parameter.orderType
-        ) {
-          this.orderType = task.parameter.orderType;
-        }
       });
     }
   }
@@ -252,17 +238,25 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         await selectionService
           .getIdeasForSelection(this.task.parameter.selectionId)
           .then((ideas) => {
-            this.selection = ideas;
+            this.selection = ideaService.filterIdeas(
+              ideas,
+              this.filter.stateFilter,
+              this.filter.textFilter
+            );
           });
         const selectedIds: string[] = this.selection.map((idea) => idea.id);
 
         await viewService
-          .getOrderGroups(
+          .getViewOrderGroups(
+            this.task.topicId,
             this.task.parameter.input,
-            this.orderType,
+            this.filter.orderType,
             null,
             EndpointAuthorisationType.MODERATOR,
             this.orderGroupContent,
+            (this as any).$t,
+            this.filter.stateFilter,
+            this.filter.textFilter,
             (idea: Idea) => !selectedIds.includes(idea.id)
           )
           .then((result) => {
@@ -270,7 +264,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
               'module.selection.default.moderatorContent.unselected'
             );
             let orderGroupContent: OrderGroupList = {};
-            switch (this.orderType) {
+            switch (this.filter.orderType) {
               case IdeaSortOrder.TIMESTAMP:
               case IdeaSortOrder.ALPHABETICAL:
               case IdeaSortOrder.ORDER:
@@ -288,10 +282,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
             });
             this.orderGroupContent = orderGroupContent;
             this.ideas = result.ideas;
-            taskService.getTaskById(this.taskId).then((task) => {
-              task.parameter.orderType = this.orderType;
-              taskService.putTask(convertToSaveVersion(task));
-            });
           });
       }
     }
@@ -307,6 +297,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         await this.reloadData();
       }
     });
+    setTimeout(() => {
+      this.loadTopPositions();
+    }, 500);
   }
 
   async reloadData(): Promise<void> {
@@ -361,7 +354,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 }
 
-.filter_options {
-  margin-bottom: 5px;
+.unselected {
+  max-width: 50%;
+  min-width: 10rem;
+  padding-right: 1rem;
+  border-right: 2px var(--color-primary) solid;
 }
 </style>

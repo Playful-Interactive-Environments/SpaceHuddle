@@ -1,34 +1,9 @@
 <template>
-  <div class="level filter_options">
-    <div class="level-left"></div>
-    <div class="level-right">
-      <div class="level-item">
-        <el-select v-model="orderType" @change="getCollapseContent(true)">
-          <template v-slot:prefix>
-            <font-awesome-icon icon="sort" class="el-icon" />
-          </template>
-          <el-option
-            v-for="type in sortOrderOptions"
-            :key="type.orderType"
-            :value="
-              type.ref
-                ? `${type.orderType}&refId=${type.ref.id}`
-                : type.orderType
-            "
-            :label="
-              $t(`enum.ideaSortOrder.${type.orderType}`) +
-              (type.ref ? ` - ${type.ref.name}` : '')
-            "
-          >
-            <span>
-              {{ $t(`enum.ideaSortOrder.${type.orderType}`) }}
-            </span>
-            <span v-if="type.ref"> - {{ type.ref.name }} </span>
-          </el-option>
-        </el-select>
-      </div>
-    </div>
-  </div>
+  <IdeaFilter
+    :taskId="taskId"
+    v-model="filter"
+    @change="getCollapseContent(true)"
+  />
   <el-collapse v-model="openTabs">
     <el-collapse-item
       v-for="(item, key) in orderGroupContent"
@@ -98,24 +73,22 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
-import * as taskService from '@/services/task-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder, {
   DefaultIdeaSortOrder,
 } from '@/types/enum/IdeaSortOrder';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
-import {
-  OrderGroupList,
-  OrderGroup,
-  SortOrderOption,
-} from '@/types/api/OrderGroup';
+import { OrderGroupList, OrderGroup } from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { reloadCollapseContent } from '@/utils/collapse';
-import { convertToSaveVersion } from '@/types/api/Task';
 import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { EventType } from '@/types/enum/EventType';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
+import IdeaFilter, {
+  defaultFilterData,
+  FilterData,
+} from '@/components/moderator/molecules/IdeaFilter.vue';
 
 @Options({
   components: {
@@ -123,6 +96,7 @@ import { IModeratorContent } from '@/types/ui/IModeratorContent';
     IdeaCard,
     CollapseTitle,
     draggable,
+    IdeaFilter,
   },
 })
 
@@ -135,30 +109,15 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   interval!: any;
   orderType: string = DefaultIdeaSortOrder;
   openTabs: string[] = [];
-
-  IdeaSortOrder = IdeaSortOrder;
-  sortOrderOptions: SortOrderOption[] = [];
+  filter: FilterData = { ...defaultFilterData };
 
   get orderIsChangeable(): boolean {
-    return this.orderType === IdeaSortOrder.ORDER;
+    return this.filter.orderType === IdeaSortOrder.ORDER;
   }
 
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
-    taskService.getTaskById(this.taskId).then(async (task) => {
-      await ideaService.getSortOrderOptions(task.id).then((options) => {
-        this.sortOrderOptions = options;
-        if (options.length > 0) this.orderType = options[0].orderType;
-      });
-      if (
-        task.parameter &&
-        task.parameter.orderType &&
-        this.orderType != task.parameter.orderType
-      ) {
-        this.orderType = task.parameter.orderType;
-      }
-      await this.getCollapseContent(true);
-    });
+    this.getCollapseContent(true);
   }
 
   async getCollapseContent(reloadTabState = false): Promise<void> {
@@ -172,7 +131,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   async getIdeas(): Promise<string[]> {
     const taskId = this.taskId;
-    const orderType = this.orderType;
+    const orderType = this.filter.orderType;
     if (taskId) {
       await ideaService
         .getOrderGroups(
@@ -189,12 +148,24 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
             case IdeaSortOrder.TIMESTAMP:
             case IdeaSortOrder.ALPHABETICAL:
             case IdeaSortOrder.ORDER:
+              result.ideas = ideaService.filterIdeas(
+                result.ideas,
+                this.filter.stateFilter,
+                this.filter.textFilter
+              );
               orderGroupName = (this as any).$t(
                 `module.brainstorming.default.moderatorContent.${orderType}`
               );
               orderGroupContent[orderGroupName] = new OrderGroup(result.ideas);
               break;
             default:
+              for (const key of Object.keys(result.oderGroups)) {
+                result.oderGroups[key].ideas = ideaService.filterIdeas(
+                  result.oderGroups[key].ideas,
+                  this.filter.stateFilter,
+                  this.filter.textFilter
+                );
+              }
               orderGroupContent = result.oderGroups;
           }
           Object.keys(orderGroupContent).forEach((key) => {
@@ -204,10 +175,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           });
           this.orderGroupContent = orderGroupContent;
           this.ideas = result.ideas;
-          taskService.getTaskById(taskId).then((task) => {
-            task.parameter.orderType = orderType;
-            taskService.putTask(convertToSaveVersion(task));
-          });
         });
     }
     return Object.keys(this.orderGroupContent);
@@ -254,9 +221,5 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   .el-card__body {
     padding: 14px;
   }
-}
-
-.filter_options {
-  margin-bottom: 5px;
 }
 </style>

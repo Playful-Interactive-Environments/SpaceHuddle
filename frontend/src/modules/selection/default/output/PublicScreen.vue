@@ -16,11 +16,16 @@
 import { Options, Vue } from 'vue-class-component';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as selectService from '@/services/selection-service';
+import * as ideaService from '@/services/idea-service';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import {
+  defaultFilterData,
+  FilterData,
+} from '@/components/moderator/molecules/IdeaFilter.vue';
 
 @Options({
   components: {
@@ -37,6 +42,7 @@ export default class PublicScreen extends Vue {
   ideas: Idea[] = [];
   readonly intervalTime = 10000;
   interval!: any;
+  filter: FilterData = { ...defaultFilterData };
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -55,15 +61,28 @@ export default class PublicScreen extends Vue {
 
   async getIdeas(): Promise<void> {
     if (this.taskId) {
-      if (!this.task) await this.getTask();
+      await this.getTask();
+      //if (!this.task) await this.getTask();
       if (this.task?.parameter.selectionId) {
+        const filter = { ...defaultFilterData };
+        if (this.task.parameter && this.task.parameter.orderType)
+          filter.orderType = this.task.parameter.orderType;
+        if (this.task.parameter && this.task.parameter.orderType)
+          filter.stateFilter = this.task.parameter.stateFilter;
+        if (this.task.parameter && this.task.parameter.orderType)
+          filter.textFilter = this.task.parameter.textFilter;
+
         await selectService
           .getIdeasForSelection(
             this.task?.parameter.selectionId,
             this.authHeaderTyp
           )
           .then((ideas) => {
-            this.ideas = ideas;
+            this.ideas = ideaService.filterIdeas(
+              ideas,
+              filter.stateFilter,
+              filter.textFilter
+            );
           });
       }
     }

@@ -400,7 +400,8 @@
       "count": "count",
       "hierarchy": "categorisation",
       "view": "voting",
-      "order": "custom"
+      "order": "custom",
+      "input": "input source"
     },
     "ideaState": {
       "new": "none",

@@ -80,6 +80,20 @@ const authorisationHasProperty = (
   return false;
 };
 
+const getAuthorisationProperty = (
+  propertyName: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): any => {
+  const jwtFromStorage = getAccessToken(authHeaderType);
+  if (jwtFromStorage != null) {
+    const decoded = jwt_decode(jwtFromStorage) as any;
+    if (decoded && propertyName in decoded) {
+      return decoded[propertyName];
+    }
+  }
+  return null;
+};
+
 export const isParticipant = (): boolean => {
   return authorisationHasProperty(
     'participantId',
@@ -92,6 +106,13 @@ export const isUser = (): boolean => {
     'userId',
     EndpointAuthorisationType.MODERATOR
   );
+};
+
+export const getUserId = (): string => {
+  return getAuthorisationProperty(
+    'userId',
+    EndpointAuthorisationType.MODERATOR
+  ) as string;
 };
 
 export const getAccessToken = (

@@ -12,6 +12,7 @@ export interface Idea {
   link: string | null;
   order: number;
   orderGroup: string;
+  orderText: string;
   avatar: Avatar[];
   category: { id: string; name: string; parameter: any };
   parameter: any;

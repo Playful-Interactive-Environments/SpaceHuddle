@@ -480,7 +480,14 @@ export default class Participant extends Vue {
         order: IdeaSortOrder.ORDER,
       });
       viewService
-        .getIdeas(inputs, null, null, EndpointAuthorisationType.PARTICIPANT)
+        .getViewIdeas(
+          this.task.topicId,
+          inputs,
+          null,
+          null,
+          EndpointAuthorisationType.PARTICIPANT,
+          (this as any).$t
+        )
         .then((queryResult) => {
           const randomIndex = Math.floor(Math.random() * queryResult.length);
           this.randomIdea = queryResult[randomIndex];

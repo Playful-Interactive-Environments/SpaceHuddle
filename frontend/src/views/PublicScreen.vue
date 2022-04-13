@@ -69,12 +69,18 @@
     </el-header>
     <el-container class="public-screen__container">
       <el-main class="public-screen__main">
-        <PublicScreenComponent
-          v-if="task"
-          :task-id="taskId"
-          :key="componentLoadIndex"
-          :authHeaderTyp="authHeaderTyp"
-        />
+        <div ref="scrollContent"></div>
+        <el-scrollbar
+          native
+          :height="`calc(100vh - ${topContentPosition}px - 2rem)`"
+        >
+          <PublicScreenComponent
+            v-if="task"
+            :task-id="taskId"
+            :key="componentLoadIndex"
+            :authHeaderTyp="authHeaderTyp"
+          />
+        </el-scrollbar>
       </el-main>
     </el-container>
   </el-container>
@@ -153,6 +159,22 @@ export default class PublicScreen extends Vue {
   readonly intervalTime = 10000;
   interval!: any;
 
+  topContentPosition = 250;
+
+  loadTopPositions(): void {
+    if (this.$refs.scrollContent) {
+      this.topContentPosition = Math.floor(
+        (this.$refs.scrollContent as HTMLElement).getBoundingClientRect().top
+      );
+    }
+  }
+
+  updated(): void {
+    setTimeout(() => {
+      this.loadTopPositions();
+    }, 500);
+  }
+
   get joinLink(): string {
     if (this.session)
       return `${window.location.origin}/join/${this.session.connectionKey}`;
@@ -222,6 +244,7 @@ export default class PublicScreen extends Vue {
   }
 
   getPublicScreenModule(): void {
+    this.loadTopPositions();
     sessionService
       .getPublicScreen(this.sessionId, this.authHeaderTyp)
       .then((queryResult) => {

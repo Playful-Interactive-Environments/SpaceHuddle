@@ -519,7 +519,7 @@ import ValidationForm, {
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
 import { ModuleType } from '@/types/enum/ModuleType';
 import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
-import { View } from '@/types/api/View';
+import { View, getViewName, getViewKey } from '@/types/api/View';
 import IdeaStates from '@/types/enum/IdeaStates';
 import { SortOrderOption } from '@/types/api/OrderGroup';
 import * as ideaService from '@/services/idea-service';
@@ -805,15 +805,11 @@ export default class TaskSettings extends Vue {
 
   getViewName(view: View): string {
     const $t = (this as any).$t;
-    const type = $t(`enum.viewType.${ViewType[view.type]}`);
-    const detailType = view.detailType
-      ? ' - ' + $t(`enum.taskType.${TaskType[view.detailType]}`)
-      : '';
-    return `${type}${detailType} - ${view.name}`;
+    return getViewName(view, $t);
   }
 
   getViewKey(view: View): string {
-    return `${view.type}.${view.id}`;
+    return getViewKey(view);
   }
 
   async updateInputOption(): Promise<void> {
@@ -1403,11 +1399,13 @@ export default class TaskSettings extends Vue {
     this.previewLoading = true;
     if (this.formData && this.formData.parameter) {
       await viewService
-        .getIdeas(
+        .getViewIdeas(
+          this.topicId,
           this.formData.parameter.input,
           null,
           null,
-          EndpointAuthorisationType.MODERATOR
+          EndpointAuthorisationType.MODERATOR,
+          (this as any).$t
         )
         .then((ideas) => {
           this.previewData = ideas;
@@ -1432,18 +1430,6 @@ export default class TaskSettings extends Vue {
   td,
   th {
     padding: 0.5rem;
-  }
-}
-
-.el-select::v-deep {
-  .el-select__tags > span {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-
-  .el-select__tags .el-tag--info {
-    background-color: unset;
   }
 }
 

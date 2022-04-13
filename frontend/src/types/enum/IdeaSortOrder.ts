@@ -8,6 +8,7 @@ enum IdeaSortOrder {
   PARTICIPANT = 'participant',
   COUNT = 'count',
   ORDER = 'order',
+  INPUT = 'input',
 }
 
 export const DefaultIdeaSortOrder = IdeaSortOrder.ORDER;

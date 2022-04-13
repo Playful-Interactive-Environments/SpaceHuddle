@@ -5,20 +5,34 @@
   <section v-else class="public-screen__content fixHead">
     <el-container>
       <el-header class="columns is-mobile sticky-header">
+        <div class="column">
+          <CategoryCard :ideas="categoryIdeas('undefined')" :isEditable="false">
+          </CategoryCard>
+        </div>
         <div class="column" v-for="category in categories" :key="category.id">
           <CategoryCard
             :category="category"
-            :ideas="categoryIdeas(category)"
+            :ideas="categoryIdeas(category.keywords)"
             :isEditable="false"
           >
           </CategoryCard>
         </div>
       </el-header>
       <el-main class="columns is-mobile">
+        <div class="column">
+          <IdeaCard
+            :idea="idea"
+            v-for="(idea, index) in categoryIdeas('undefined')"
+            :key="index"
+            :is-selectable="false"
+            :is-editable="false"
+            :style="{ 'border-color': 'var(--color-primary)' }"
+          />
+        </div>
         <div class="column" v-for="category in categories" :key="category.id">
           <IdeaCard
             :idea="idea"
-            v-for="(idea, index) in categoryIdeas(category)"
+            v-for="(idea, index) in categoryIdeas(category.keywords)"
             :key="index"
             :is-selectable="false"
             :is-editable="false"
@@ -46,6 +60,7 @@ import { reloadCollapseContent } from '@/utils/collapse';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import CategoryCard from '@/modules/categorisation/default/molecules/CategoryCard.vue';
 import * as categorisationService from '@/services/categorisation-service';
+import { defaultFilterData } from '@/components/moderator/molecules/IdeaFilter.vue';
 
 @Options({
   components: {
@@ -83,9 +98,9 @@ export default class PublicScreen extends Vue {
     }
   }
 
-  categoryIdeas(category: Category): Idea[] {
-    if (category.keywords in this.orderGroupContent)
-      return this.orderGroupContent[category.keywords].ideas;
+  categoryIdeas(category: string): Idea[] {
+    if (category in this.orderGroupContent)
+      return this.orderGroupContent[category].ideas;
     return [];
   }
 
@@ -100,17 +115,30 @@ export default class PublicScreen extends Vue {
 
   async getIdeas(): Promise<string[]> {
     if (this.taskId) {
-      if (!this.task) await this.getTask();
+      await this.getTask();
+      //if (!this.task) await this.getTask();
       await this.getCategories();
 
       if (this.task && this.task.parameter && this.task.parameter.input) {
+        const filter = { ...defaultFilterData };
+        if (this.task.parameter && this.task.parameter.orderType)
+          filter.orderType = this.task.parameter.orderType;
+        if (this.task.parameter && this.task.parameter.orderType)
+          filter.stateFilter = this.task.parameter.stateFilter;
+        if (this.task.parameter && this.task.parameter.orderType)
+          filter.textFilter = this.task.parameter.textFilter;
+
         await viewService
-          .getOrderGroups(
+          .getViewOrderGroups(
+            this.task.topicId,
             this.task.parameter.input,
             IdeaSortOrderHierarchy,
             this.taskId,
             this.authHeaderTyp,
-            this.orderGroupContent
+            this.orderGroupContent,
+            (this as any).$t,
+            filter.stateFilter,
+            filter.textFilter
           )
           .then((result) => {
             this.ideas = result.ideas;
@@ -152,7 +180,7 @@ export default class PublicScreen extends Vue {
   overflow-y: auto;
   scrollbar-color: var(--color-primary) var(--color-gray);
   scrollbar-width: thin;
-  height: 68vh;
+  //height: 68vh;
 
   .sticky-header {
     position: sticky;
