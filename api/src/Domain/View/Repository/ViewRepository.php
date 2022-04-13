@@ -168,7 +168,12 @@ class ViewRepository implements RepositoryInterface
 
         $orderTypeList = IdeaRepository::convertToList($orderType);
         if (sizeof($orderTypeList) > 0) {
-            return IdeaRepository::addOrderColumn($orderTypeList[0], $resultList, $refId);
+            $resultList = IdeaRepository::addOrderColumn($orderTypeList[0], $resultList, $refId);
+            if ($orderTypeList[0] === IdeaSortOrder::INPUT) {
+                foreach ($resultList as $resultItem) {
+                    $resultItem->orderGroup = "$type.$typeId";
+                }
+            }
         }
         return $resultList;
     }

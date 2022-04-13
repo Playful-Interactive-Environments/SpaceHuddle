@@ -135,13 +135,13 @@ class SelectionRepository implements RepositoryInterface
      */
     public function getIdeas(string $selectionId, AuthorisationData | null $authorisation = null): array
     {
-        $taskType = strtoupper(TaskType::BRAINSTORMING);
+        //$taskType = strtoupper(TaskType::BRAINSTORMING);
         $query = $this->queryFactory->newSelect("idea");
         $query->select(["idea.*", "selection_idea.order"])
             ->innerJoin("task", "task.id = idea.task_id")
             ->innerJoin("selection_idea", "selection_idea.idea_id = idea.id")
             ->andWhere([
-                "task.task_type" => $taskType,
+                //"task.task_type" => $taskType,
                 "selection_idea.selection_id" => $selectionId,
             ])
             ->order(["selection_idea.order"]);
@@ -187,14 +187,14 @@ class SelectionRepository implements RepositoryInterface
      */
     public function ideasAgreeWithSelection(string $selectionId, array $ideas, bool $lookForConnected = false): bool
     {
-        $taskTypeIdeas = strtoupper(TaskType::BRAINSTORMING);
+        //$taskTypeIdeas = strtoupper(TaskType::BRAINSTORMING);
         $query = $this->queryFactory->newSelect("idea");
         $query->select(["idea.id"])
             ->innerJoin("task", "task.id = idea.task_id")
             ->innerJoin("selection", "selection.topic_id = task.topic_id")
             ->whereInList("idea.id", $ideas)
             ->andWhere([
-                "task.task_type" => $taskTypeIdeas,
+                //"task.task_type" => $taskTypeIdeas,
                 "selection.id" => $selectionId,
             ]);
 

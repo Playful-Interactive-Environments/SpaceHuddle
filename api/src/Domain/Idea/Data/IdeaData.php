@@ -52,6 +52,13 @@ class IdeaData extends IdeaAbstract
     public ?string $orderGroup;
 
     /**
+     * Order text.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $orderText;
+
+    /**
      * Category.
      * @OA\Property(ref="#/components/schemas/CategoryInfoData")
      */

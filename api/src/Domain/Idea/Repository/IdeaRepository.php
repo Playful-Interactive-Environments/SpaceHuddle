@@ -150,7 +150,14 @@ class IdeaRepository implements RepositoryInterface
             ->distinct(["idea.task_id", "idea.keywords", "idea.description", "idea.image", "idea.link"]);
 
         if ($refId && $orderType == IdeaSortOrder::HIERARCHY) {
-            $query->leftJoin("hierarchy", "hierarchy.sub_idea_id = idea.id")
+            $query
+                ->join([
+                    "hierarchy" => [
+                        "table" => "hierarchy_task",
+                        "type" => "LEFT",
+                        "conditions" => ["hierarchy.sub_idea_id = idea.id", "hierarchy.task_id" => $refId]
+                    ]
+                ])
                 ->join([
                     "category" => [
                         "table" => "idea",
@@ -298,6 +305,7 @@ class IdeaRepository implements RepositoryInterface
 
         foreach ($orderTypeList as $orderType) {
             switch (strtolower($orderType)) {
+                case IdeaSortOrder::INPUT:
                 case IdeaSortOrder::TIMESTAMP:
                     array_push($orderList, 'timestamp');
                     break;
@@ -355,6 +363,8 @@ class IdeaRepository implements RepositoryInterface
                     } else {
                         $orderContent = "undefined";
                     }
+                } elseif (strtolower($orderType) == IdeaSortOrder::INPUT) {
+                    $orderContent = "-";
                 } elseif (sizeof($orderColumn) == 1) {
                     $column = $orderColumn[0];
                     $orderContent = $resultItem->$column;
@@ -384,6 +394,16 @@ class IdeaRepository implements RepositoryInterface
                 }
 
                 $resultItem->orderGroup = $orderContent;
+                $resultItem->orderText = '';
+                if (strtolower($orderType) == IdeaSortOrder::HIERARCHY) {
+                    $resultItem->orderText = $orderContent;
+                } else {
+                    foreach ($orderColumn as $column) {
+                        if (property_exists($resultItem, $column) && isset($resultItem->$column)) {
+                            $resultItem->orderText .= json_encode($resultItem->$column);
+                        }
+                    }
+                }
             }
         }
 
