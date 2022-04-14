@@ -10,3 +10,5 @@ export interface Category {
   link: string | null;
   order: number;
 }
+
+export const CategoryUndefined = 'undefined';

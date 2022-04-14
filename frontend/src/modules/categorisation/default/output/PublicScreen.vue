@@ -6,7 +6,10 @@
     <el-container>
       <el-header class="columns is-mobile sticky-header">
         <div class="column">
-          <CategoryCard :ideas="categoryIdeas('undefined')" :isEditable="false">
+          <CategoryCard
+            :ideas="categoryIdeas(CategoryUndefined)"
+            :isEditable="false"
+          >
           </CategoryCard>
         </div>
         <div class="column" v-for="category in categories" :key="category.id">
@@ -22,7 +25,7 @@
         <div class="column">
           <IdeaCard
             :idea="idea"
-            v-for="(idea, index) in categoryIdeas('undefined')"
+            v-for="(idea, index) in categoryIdeas(CategoryUndefined)"
             :key="index"
             :is-selectable="false"
             :is-editable="false"
@@ -53,7 +56,7 @@ import { Idea } from '@/types/api/Idea';
 import { IdeaSortOrderHierarchy } from '@/types/enum/IdeaSortOrder';
 import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
-import { Category } from '@/types/api/Category';
+import { Category, CategoryUndefined } from '@/types/api/Category';
 import { OrderGroupList } from '@/types/api/OrderGroup';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import { reloadCollapseContent } from '@/utils/collapse';
@@ -82,6 +85,7 @@ export default class PublicScreen extends Vue {
   readonly intervalTime = 10000;
   interval!: any;
   openTabs: string[] = [];
+  CategoryUndefined = CategoryUndefined;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -128,22 +132,40 @@ export default class PublicScreen extends Vue {
         if (this.task.parameter && this.task.parameter.orderType)
           filter.textFilter = this.task.parameter.textFilter;
 
-        await viewService
-          .getViewOrderGroups(
-            this.task.topicId,
-            this.task.parameter.input,
-            IdeaSortOrderHierarchy,
-            this.taskId,
-            this.authHeaderTyp,
-            this.orderGroupContent,
-            (this as any).$t,
-            filter.stateFilter,
-            filter.textFilter
-          )
-          .then((result) => {
-            this.ideas = result.ideas;
-            this.orderGroupContent = result.oderGroups;
-          });
+        const getCategorizedIdeas = viewService.getViewOrderGroups(
+          this.task.topicId,
+          this.task.parameter.input,
+          IdeaSortOrderHierarchy,
+          this.taskId,
+          this.authHeaderTyp,
+          this.orderGroupContent,
+          (this as any).$t,
+          filter.stateFilter,
+          filter.textFilter
+        );
+        const getUncategorizedIdeas = viewService.getViewIdeas(
+          this.task.topicId,
+          this.task.parameter.input,
+          filter.orderType,
+          null,
+          EndpointAuthorisationType.MODERATOR,
+          (this as any).$t,
+          filter.stateFilter,
+          filter.textFilter
+        );
+        await getCategorizedIdeas.then((result) => {
+          this.ideas = result.ideas;
+          this.orderGroupContent = result.oderGroups;
+        });
+        await getUncategorizedIdeas.then((result) => {
+          this.orderGroupContent[CategoryUndefined].ideas = result.filter(
+            (idea) =>
+              this.ideas.find(
+                (categoryIdea) =>
+                  categoryIdea.id === idea.id && !categoryIdea.category
+              )
+          );
+        });
       }
     }
     return Object.keys(this.orderGroupContent);

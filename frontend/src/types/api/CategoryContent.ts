@@ -1,5 +1,5 @@
 import { Idea } from '@/types/api/Idea';
-import { Category } from '@/types/api/Category';
+import { Category, CategoryUndefined } from '@/types/api/Category';
 
 export class CategoryContent {
   ideas: Idea[];
@@ -21,7 +21,7 @@ export class CategoryContent {
   }
 
   get order(): number {
-    if (this.category && typeof this.category.order !== 'undefined')
+    if (this.category && typeof this.category.order !== CategoryUndefined)
       return this.category.order;
     return 100000;
   }
