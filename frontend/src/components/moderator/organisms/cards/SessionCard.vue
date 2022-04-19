@@ -4,10 +4,10 @@
       <el-header>
         <div>
           <p class="el-card__date">{{ formatDate(session.creationDate) }}</p>
-          <h2 class="heading heading--regular threeLineText">
+          <h2 class="heading heading--regular threeLineText line-break">
             {{ session.title }}
           </h2>
-          <p class="el-card__description threeLineText">
+          <p class="el-card__description threeLineText line-break">
             {{ session.description }}
           </p>
           <ModuleCount :session="session" />

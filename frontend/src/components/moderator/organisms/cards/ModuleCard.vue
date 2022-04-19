@@ -12,7 +12,7 @@
     @click="toggleSelection"
   >
     <h2
-      class="heading heading--regular"
+      class="heading heading--regular line-break"
       style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis"
     >
       {{
@@ -29,7 +29,7 @@
     </div>
     <el-tooltip placement="top">
       <template #content>
-        <div style="max-width: 50vw">
+        <div style="max-width: 50vw" class="line-break">
           {{
             $t(
               `module.${moduleTask.taskType}.${moduleTask.moduleName}.description.description`
@@ -37,7 +37,10 @@
           }}
         </div>
       </template>
-      <p :class="{ twoLineText: !isAddOn, oneLineText: isAddOn }">
+      <p
+        :class="{ twoLineText: !isAddOn, oneLineText: isAddOn }"
+        class="line-break"
+      >
         {{
           $t(
             `module.${moduleTask.taskType}.${moduleTask.moduleName}.description.description`

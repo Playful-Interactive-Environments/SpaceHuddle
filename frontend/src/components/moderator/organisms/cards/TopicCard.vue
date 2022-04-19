@@ -11,8 +11,8 @@
         <span class="level" ref="item">
           <span class="level-left">
             <div class="level-item card__info link" v-on:click="goToDetails">
-              <h3 class="twoLineText">{{ topic.title }}</h3>
-              <p class="twoLineText">{{ topic.description }}</p>
+              <h3 class="twoLineText line-break">{{ topic.title }}</h3>
+              <p class="twoLineText line-break">{{ topic.description }}</p>
             </div>
           </span>
           <span class="level-right">

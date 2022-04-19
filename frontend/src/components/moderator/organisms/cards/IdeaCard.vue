@@ -24,6 +24,7 @@
       <div class="card__title">
         <span
           ref="title"
+          class="line-break"
           :class="{ threeLineText: cutLongTexts || limitedTextLength }"
         >
           <span v-if="idea.count > 1" class="idea-count">
@@ -84,7 +85,7 @@
       <div
         ref="description"
         v-if="hasKeywords && idea.description"
-        class="card__content"
+        class="card__content line-break"
         :class="{ threeLineText: cutLongTexts || limitedTextLength }"
       >
         {{ idea.description }}
