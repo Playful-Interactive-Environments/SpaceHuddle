@@ -378,7 +378,7 @@ h3 {
 
   &__container {
     //margin-top: calc(-1 * var(--corner-radius));
-    padding: 0;// var(--side-padding);
+    padding: 0;
     height: 100%;
   }
 
@@ -396,7 +396,7 @@ h3 {
     overflow-x: auto;
     scrollbar-color: var(--color-primary) var(--color-gray);
     scrollbar-width: thin;
-    margin: 0;// calc(-1 * var(--side-padding));
+    margin: 0;
 
     .el-scrollbar::v-deep {
       .el-scrollbar__wrap {
@@ -475,7 +475,7 @@ h3 {
     }
 
     &__container {
-      padding: 0;// 1rem 0;
+      padding: 0;
     }
 
     &__main {
@@ -519,7 +519,8 @@ h3 {
     padding: 1rem;
 
     .media {
-      margin: var(--side-padding) var(--side-padding) calc(3 * var(--side-padding));
+      margin: var(--side-padding) var(--side-padding)
+        calc(3 * var(--side-padding));
 
       h1 {
         font-size: var(--font-size-xxlarge);

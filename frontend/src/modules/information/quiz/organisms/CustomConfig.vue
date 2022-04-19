@@ -84,6 +84,7 @@ import { CustomParameter, CustomSync } from '@/types/ui/CustomParameter';
 
 @Options({
   components: {},
+  emits: ['update'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -127,6 +128,11 @@ export default class ModeratorConfig
     if (this.modelValue && !this.modelValue.defaultQuestionTime) {
       this.modelValue.defaultQuestionTime = this.defaultTime;
     }
+  }
+
+  @Watch('modelValue.moderatedQuestionFlow', { immediate: true })
+  onModeratedQuestionFlowChanged(): void {
+    this.$emit('update');
   }
 
   get hasTimeLimit(): boolean {

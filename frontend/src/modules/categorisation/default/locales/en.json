@@ -9,7 +9,7 @@
     "submit": "+",
     "add": "Add category",
     "sortOrder": "order by",
-    "undefined": "ideas which have not yet been categorised",
+    "undefined": "uncategorised",
     "displayAll": "display all"
   },
   "settings" : {
@@ -23,6 +23,6 @@
     "link": "link",
     "color": "color",
     "submit": "save category",
-    "undefined": "ideas which have not yet been categorised"
+    "undefined": "uncategorised"
   }
 }

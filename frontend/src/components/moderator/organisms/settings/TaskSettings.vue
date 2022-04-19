@@ -413,6 +413,7 @@
                 :is="component.value.componentName"
                 :key="component.value.componentName"
                 :rulePropPath="`moduleParameterComponents[${component.index}].parameter`"
+                @update="updateSyncPublicParticipant"
               ></component>
             </el-collapse-item>
           </el-collapse>
@@ -442,7 +443,7 @@
               class="level-item"
               type="primary"
               v-on:click="saveAndActivate"
-              v-if="isEditStep && !showPreview"
+              v-if="isEditStep && !showPreview && canActivateModule"
             >
               {{
                 $t('moderator.organism.settings.taskSettings.saveAndActivate')
@@ -471,7 +472,7 @@
               class="level-item"
               type="primary"
               v-on:click="confirmAndActivate"
-              v-if="hasParticipantModule && !isEditStep"
+              v-if="!isEditStep && canActivateModule"
               :disabled="isSaving"
             >
               {{
@@ -645,6 +646,7 @@ export default class TaskSettings extends Vue {
   addOneListUnfiltered: ModuleTaskProperty[] = [];
   hideNotUsesModules = true;
   moduleSearch = '';
+  syncPublicParticipant = false;
 
   formData: FormDataDefinition = {
     input: [],
@@ -881,6 +883,10 @@ export default class TaskSettings extends Vue {
   //#endregion Input
 
   //#region Modules
+  get canActivateModule(): boolean {
+    return this.hasParticipantModule && !this.syncPublicParticipant;
+  }
+
   hasModuleScrollbar = false;
   @Watch('moduleScrollbar.sizeWidth')
   onModuleScrollbarChanged(): void {
@@ -1189,6 +1195,8 @@ export default class TaskSettings extends Vue {
             this.openTabs.push(componentName);
         }
       });
+
+      this.updateSyncPublicParticipant();
     };
 
     if (this.$options.components) {
@@ -1224,6 +1232,22 @@ export default class TaskSettings extends Vue {
       });
     }
     //this.componentLoadIndex++;
+  }
+
+  updateSyncPublicParticipant(): void {
+    if (this.taskType) {
+      const taskType = TaskType[this.taskType];
+      const moduleName = this.mainModule.moduleName;
+      this.getStaticSyncProperty(taskType, moduleName).then((result) => {
+        this.getCustomSyncProperty(taskType, moduleName).then(
+          (customResult) => {
+            if (customResult !== undefined)
+              this.syncPublicParticipant = !!result && !!customResult;
+            else this.syncPublicParticipant = !!result;
+          }
+        );
+      });
+    }
   }
 
   participantModuleList: ModuleTaskProperty[] = [];
@@ -1351,9 +1375,21 @@ export default class TaskSettings extends Vue {
   }
 
   async updateCustomModuleParameter(task: Task, module: Module): Promise<void> {
-    const componentName = `ModuleParameterComponents-${
-      TaskType[task.taskType.toUpperCase()]
-    }-${module.name}`;
+    await this.getCustomSyncProperty(
+      TaskType[task.taskType.toUpperCase()],
+      module.name
+    ).then((result) => {
+      if (result !== undefined && result !== null)
+        module.syncPublicParticipant = result;
+    });
+  }
+
+  async getCustomSyncProperty(
+    taskType: TaskType,
+    moduleName: string
+  ): Promise<boolean | undefined | null> {
+    let syncPublicParticipant: boolean | undefined = undefined;
+    const componentName = `ModuleParameterComponents-${taskType}-${moduleName}`;
     if (this.$refs[componentName]) {
       let moduleParams = this.$refs[componentName] as CustomParameter;
       if (Array.isArray(moduleParams) && moduleParams.length > 0) {
@@ -1362,22 +1398,37 @@ export default class TaskSettings extends Vue {
       if ('updateParameterForSaving' in moduleParams)
         await moduleParams.updateParameterForSaving();
       if ('customSyncPublicParticipant' in moduleParams) {
-        module.syncPublicParticipant = (
+        syncPublicParticipant = (
           moduleParams as CustomSync
         ).customSyncPublicParticipant();
       }
     }
+    return syncPublicParticipant;
+  }
+
+  async getStaticSyncProperty(
+    taskType: TaskType,
+    moduleName: string
+  ): Promise<boolean | null> {
+    let syncPublicParticipant = false;
+    await getModuleConfig(
+      'syncPublicParticipant',
+      taskType,
+      moduleName,
+      false
+    ).then((result) => {
+      syncPublicParticipant = result;
+    });
+    return syncPublicParticipant;
   }
 
   async taskUpdated(task: Task): Promise<void> {
     for (const module of task.modules) {
-      await getModuleConfig(
-        'syncPublicParticipant',
+      await this.getStaticSyncProperty(
         TaskType[task.taskType],
-        module.name,
-        false
+        module.name
       ).then((result) => {
-        module.syncPublicParticipant = result;
+        if (result !== null) module.syncPublicParticipant = result;
       });
       await this.updateCustomModuleParameter(task, module);
       const moduleComponent = this.formData.moduleParameterComponents.find(
