@@ -21,6 +21,7 @@
     :getTimerEntity="(item) => item"
     :itemIsEquals="(a, b) => (!a && !b) || (a && b && a.id === b.id)"
     :displayItem="(item) => item"
+    :darkMode="darkMode"
     @changeOrder="dragDone"
     @changeActiveElement="onEditTaskChanged"
     @changePublicScreen="onPublicTaskChanged"
@@ -65,6 +66,7 @@ export default class TaskTimeline extends Vue {
   @Prop() activeTaskId!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
+  @Prop({ default: false }) readonly darkMode!: boolean;
 
   tasks: Task[] = [];
   publicTask: Task | null = null;

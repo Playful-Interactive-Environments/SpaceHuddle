@@ -6,6 +6,7 @@
       '--slider-steps': `${sliderSteps}`,
       '--slider-position': activeOnPublicScreen,
     }"
+    :class="{ darkMode: darkMode }"
     @scroll="onScroll"
   >
     <div class="process-timeline" v-if="modelValue.length > 0 && !readonly">
@@ -268,7 +269,7 @@ export default class ProcessTimeline extends Vue {
   @Prop({ default: true }) readonly hasParticipantToggle!: boolean;
   @Prop({ default: 'id' }) readonly keyPropertyName!: string;
   @Prop({ default: null }) defaultTimerSeconds!: number | null;
-  @Prop({ default: 'var(--color-primary)' }) readonly accentColor!: string;
+  @Prop({ default: 'var(--color-foreground)' }) readonly accentColor!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -302,6 +303,7 @@ export default class ProcessTimeline extends Vue {
   ) => boolean;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   @Prop({ default: (item) => item }) readonly displayItem!: (item: any) => any;
+  @Prop({ default: false }) readonly darkMode!: boolean;
 
   timerContent: any | null = null;
   activePage = 1;
@@ -590,7 +592,7 @@ export default class ProcessTimeline extends Vue {
 .publicScreenView,
 .participantView,
 .publicScreenViewDisabled {
-  color: white;
+  color: var(--color-background);
   height: 3.7rem;
   width: 1.9rem;
   --tag-border-radius: 0.4rem;
@@ -620,7 +622,7 @@ export default class ProcessTimeline extends Vue {
   height: 2.5rem;
   pointer-events: none;
   text-align: center;
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
   border-radius: var(--tag-border-radius) var(--tag-border-radius) 0 0;
   border-width: 2px;
   border-style: dashed;
@@ -633,7 +635,7 @@ export default class ProcessTimeline extends Vue {
 }
 
 .participantView {
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
   border-radius: 0 0 var(--tag-border-radius) var(--tag-border-radius);
   border-width: 2px;
   border-style: dashed;
@@ -646,8 +648,8 @@ export default class ProcessTimeline extends Vue {
 
   &.is-checked {
     border-width: 0;
-    color: white;
-    border-color: var(--color-primary);
+    color: var(--color-background);
+    border-color: var(--color-foreground);
     background-color: var(--module-color);
   }
 
@@ -670,9 +672,9 @@ export default class ProcessTimeline extends Vue {
   top: 50%;
   transform: translate(-50%, -50%);
   z-index: 1000;
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
   border-radius: var(--border-radius-xs);
-  border: 2px solid var(--color-primary);
+  border: 2px solid var(--color-foreground);
   padding: 0.4rem;
   aspect-ratio: 1 / 1;
   margin: -0.2rem 0;
@@ -700,11 +702,12 @@ export default class ProcessTimeline extends Vue {
   overflow-x: unset;
 
   .el-step__line {
-    background-color: var(--color-primary);
+    background-color: var(--color-foreground);
   }
 
   .el-step__icon {
-    background: var(--color-background-gray);
+    background: var(--color-background);
+    border-radius: var(--corner-radius);
   }
 
   .el-step__title {
@@ -727,11 +730,11 @@ export default class ProcessTimeline extends Vue {
       font-size: var(--font-size-xxlarge);
 
       .processIcon {
-        background-color: var(--color-primary);
+        background-color: var(--color-foreground);
       }
 
       .withoutIcon {
-        color: white;
+        color: var(--color-background);
       }
     }
   }
@@ -742,6 +745,7 @@ export default class ProcessTimeline extends Vue {
     /* These are technically the same, but use both */
     overflow-wrap: break-word;
     word-wrap: break-word;
+    color: var(--color-foreground);
 
     -ms-word-break: break-all;
     /* This is the dangerous one in WebKit, as it breaks things wherever */
@@ -756,7 +760,7 @@ export default class ProcessTimeline extends Vue {
     hyphens: auto;
 
     &.is-wait {
-      color: var(--color-primary);
+      color: var(--color-foreground);
     }
   }
 
@@ -816,7 +820,7 @@ export default class ProcessTimeline extends Vue {
 
   .el-slider__bar {
     --height: 0.5rem;
-    --background_color: var(--color-primary);
+    --background_color: var(--color-foreground);
     background-image: linear-gradient(
         315deg,
         var(--background_color) 25%,
@@ -826,13 +830,13 @@ export default class ProcessTimeline extends Vue {
     background-position-x: 0, 0;
     background-position-y: calc(var(--height) / 2), calc(var(--height) / 2);
     background-size: var(--height) var(--height);
-    background-color: var(--color-background-gray);
+    background-color: var(--color-background);
     height: var(--height);
   }
 
   .el-slider__runway {
     --height: 0.5rem;
-    --background_color: var(--color-primary);
+    --background_color: var(--color-foreground);
     background-image: linear-gradient(
         135deg,
         var(--background_color) 25%,
@@ -854,7 +858,7 @@ export default class ProcessTimeline extends Vue {
     );
     -webkit-mask: var(--mask);
     mask: var(--mask);
-    background-color: var(--color-background-gray);
+    background-color: var(--color-background);
     height: var(--height);
   }
 }
@@ -877,13 +881,15 @@ export default class ProcessTimeline extends Vue {
   aspect-ratio: 1;
   padding: initial;
   font-weight: var(--font-weight-bold);
-  background-color: white;
+  background-color: var(--color-background);
 }
 
 .process-timeline-container {
+  --color-foreground: var(--color-primary);
+  --color-background: var(--color-background-gray);
   overflow-x: auto;
   overflow-y: visible;
-  scrollbar-color: var(--color-primary) var(--color-gray);
+  scrollbar-color: var(--color-foreground) var(--color-gray);
   scrollbar-width: thin;
   padding-bottom: 0.5rem;
 
@@ -915,8 +921,8 @@ export default class ProcessTimeline extends Vue {
     font-size: var(--font-size-xxxlarge);
 
     .processIcon {
-      background-color: var(--color-primary);
-      color: white;
+      background-color: var(--color-foreground);
+      color: var(--color-background);
     }
   }
 
@@ -927,7 +933,7 @@ export default class ProcessTimeline extends Vue {
 
     .processIcon {
       padding: unset;
-      //background-color: var(--color-primary);
+      //background-color: var(--color-foreground);
 
       &.link {
         cursor: pointer;
@@ -941,16 +947,16 @@ export default class ProcessTimeline extends Vue {
         display: block;
         margin: -1px;
         padding: 0.2rem;
-        background-color: var(--color-primary);
-        //color: white;
-        //background-color: var(--color-background-gray);
+        background-color: var(--color-foreground);
+        //color: var(--color-background);
+        //background-color: var(--color-background);
         border-radius: calc(var(--border-radius-xs) - 2px);
       }
     }
 
     .homeIcon.processIcon {
       padding: 0.4rem;
-      background-color: var(--color-background-gray);
+      background-color: var(--color-background);
       cursor: unset;
       color: var(--color-gray-inactive);
       border-color: var(--color-gray-inactive);
@@ -959,7 +965,7 @@ export default class ProcessTimeline extends Vue {
 
   .useOtherPublicScreenTopic {
     .topicInfo {
-      color: white;
+      color: var(--color-background);
       font-size: 8pt;
       white-space: nowrap;
       line-height: 0.4;
@@ -968,11 +974,16 @@ export default class ProcessTimeline extends Vue {
 }
 
 .line {
-  background-color: var(--color-primary);
+  background-color: var(--color-foreground);
   position: absolute;
   height: 2px;
   top: 11px;
   left: calc(50% + 1.3rem);
   right: -50%;
+}
+
+.darkMode {
+  --color-foreground: white;
+  --color-background: var(--color-primary);
 }
 </style>

@@ -67,6 +67,20 @@ export const setRemainingTime = (data: any, value: number | null): any => {
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const getTotalTime = (data: any): number | null => {
+  const parameter = 'parameter' in data ? data.parameter : {};
+  if ('totalTime' in parameter) return parameter.totalTime;
+  return null;
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const setTotalTime = (data: any, value: number | null): any => {
+  const parameter = 'parameter' in data ? data.parameter : {};
+  if ('totalTime' in parameter) parameter.totalTime = value;
+  return data;
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const isActive = (data: any): boolean => {
   if (data) {
     const state: string = getState(data);

@@ -8,7 +8,7 @@
       <span class="media-left" v-if="!!$slots.moduleInfoLeft">
         <slot name="moduleInfoLeft" />
       </span>
-      <span class="media-content">
+      <span class="media-content" v-if="showType">
         <el-breadcrumb
           separator=" | "
           class="module-info__type oneLineText"
@@ -59,6 +59,7 @@ export default class TaskInfo extends Vue {
   @Prop() taskId!: string;
   @Prop({ default: false }) isParticipant!: boolean;
   @Prop({ default: true }) shortenDescription!: boolean;
+  @Prop({ default: true }) showType!: boolean;
   @Prop({ default: [] }) modules!: string[];
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;

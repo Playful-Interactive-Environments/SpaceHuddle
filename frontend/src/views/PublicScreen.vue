@@ -38,18 +38,18 @@
     :key="componentLoadIndex"
     v-else-if="isModerator"
   >
-    <el-header class="public-screen__header">
-      <PublicHeader class="public-header">
-        <TaskTimeline
-          v-if="topicId"
-          :topic-id="topicId"
-          :session-id="sessionId"
-          :activeTaskId="taskId"
-          :readonly="true"
-          :authHeaderTyp="authHeaderTyp"
-        ></TaskTimeline>
-      </PublicHeader>
-      <el-header class="public-screen__overview">
+    <el-header class="public-screen__header star-header">
+      <PublicHeader class="public-header"> </PublicHeader>
+      <TaskTimeline
+        v-if="topicId"
+        :topic-id="topicId"
+        :session-id="sessionId"
+        :activeTaskId="taskId"
+        :readonly="true"
+        :authHeaderTyp="authHeaderTyp"
+        :darkMode="true"
+      ></TaskTimeline>
+      <!--<el-header class="public-screen__overview">
         <div class="public-screen__overview-left">
           <TaskInfo v-if="task" :taskId="taskId" :shortenDescription="false" />
         </div>
@@ -65,15 +65,23 @@
             {{ session.connectionKey }}
           </span>
         </div>
-      </el-header>
+      </el-header>-->
     </el-header>
+    <el-container class="public-screen__timer">
+      <el-header>
+        <TimerProgress class="timer-process" v-if="task" :entity="task" />
+      </el-header>
+    </el-container>
     <el-container class="public-screen__container">
       <el-main class="public-screen__main">
         <div ref="scrollContent"></div>
         <el-scrollbar
           native
-          :height="`calc(100vh - ${topContentPosition}px - 2rem)`"
+          :height="`calc(100vh - ${topContentPosition}px - 0.1rem)`"
         >
+          <h3 v-if="task" class="heading--regular twoLineText">
+            {{ task.name }}
+          </h3>
           <PublicScreenComponent
             v-if="task"
             :task-id="taskId"
@@ -84,14 +92,23 @@
       </el-main>
     </el-container>
   </el-container>
-  <el-container v-else class="public-screen" :key="componentLoadIndex">
-    <el-page-header
-      :content="$t('shared.view.publicScreen.title')"
-      :title="$t('general.back')"
-      @back="$router.go(-1)"
-    />
+  <el-container
+    v-else
+    class="public-screen participant"
+    :key="componentLoadIndex"
+  >
     <el-header class="public-screen__header">
-      <TaskInfo v-if="task" :taskId="taskId" :shortenDescription="false" />
+      <el-page-header
+        :content="$t('shared.view.publicScreen.title')"
+        :title="$t('general.back')"
+        @back="$router.go(-1)"
+      />
+      <TaskInfo
+        v-if="task"
+        :taskId="taskId"
+        :shortenDescription="false"
+        :showType="false"
+      />
     </el-header>
     <el-container class="public-screen__container">
       <el-main class="public-screen__main">
@@ -131,9 +148,11 @@ import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
 import TaskTimeline from '@/components/moderator/organisms/Timeline/TaskTimeline.vue';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import QrcodeVue from 'qrcode.vue';
+import TimerProgress from '@/components/shared/atoms/TimerProgress.vue';
 
 @Options({
   components: {
+    TimerProgress,
     TaskTimeline,
     PublicHeader,
     Timer,
@@ -247,13 +266,13 @@ export default class PublicScreen extends Vue {
     this.loadTopPositions();
     sessionService
       .getPublicScreen(this.sessionId, this.authHeaderTyp)
-      .then((queryResult) => {
+      .then(async (queryResult) => {
         if (this.taskId !== queryResult?.id) {
-          this.task = null;
+          let task: Task | null = null;
           if (queryResult) {
             const taskType = TaskType[queryResult.taskType];
             if (this.$options.components) {
-              getAsyncModule(
+              await getAsyncModule(
                 ModuleComponentType.PUBLIC_SCREEN,
                 taskType,
                 this.getModuleName(queryResult)
@@ -262,7 +281,7 @@ export default class PublicScreen extends Vue {
                   this.componentLoadingState = ComponentLoadingState.SELECTED;
                   this.$options.components['PublicScreenComponent'] = component;
                   this.componentLoadIndex++;
-                  this.task = queryResult;
+                  task = queryResult;
                 }
               });
             }
@@ -272,6 +291,7 @@ export default class PublicScreen extends Vue {
               });
             }
           }
+          this.task = task;
         }
       });
   }
@@ -279,18 +299,15 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.timer-process {
+  position: relative;
+  top: -0.8rem;
+  padding: 0 calc(var(--corner-radius) + 2rem);
+  z-index: 100;
+}
+
 .public-header {
   padding-top: 1rem;
-}
-
-.el-main {
-  overflow: unset;
-}
-
-.media::v-deep {
-  .logo {
-    padding: 0;
-  }
 }
 
 h3 {
@@ -315,27 +332,80 @@ h3 {
   background-color: var(--color-background-gray);
   background-size: contain;
   min-height: 100vh;
+  --corner-radius: 5rem;
+  --side-padding: 3rem;
 
   &__header {
     position: sticky;
     top: 0;
     background-color: var(--color-background-gray);
-    padding: 1rem 5rem;
+    padding: 1rem var(--side-padding);
     z-index: 1000;
+
+    &.star-header {
+      background: var(--color-darkblue);
+      background-image: url('~@/assets/illustrations/stars-background.png');
+      background-size: contain;
+      mask-image: radial-gradient(
+          circle farthest-corner at 100% 100%,
+          transparent 69%,
+          white 70%
+        ),
+        radial-gradient(
+          circle farthest-corner at 0% 100%,
+          transparent 69%,
+          white 70%
+        ),
+        linear-gradient(white, white);
+      mask-size: var(--corner-radius) var(--corner-radius),
+        var(--corner-radius) var(--corner-radius),
+        100% calc(100% - var(--corner-radius) + 1px);
+      mask-position: bottom left, bottom right, top left;
+      mask-repeat: no-repeat;
+      padding: 0 1rem calc(1rem + var(--corner-radius)) 1rem;
+    }
+
+    .el-main {
+      overflow: unset;
+    }
+
+    .media::v-deep {
+      .logo {
+        padding: 0;
+      }
+    }
   }
 
   &__container {
-    padding-top: 0;
-    padding: 1rem 5rem;
+    //margin-top: calc(-1 * var(--corner-radius));
+    padding: 0;// var(--side-padding);
     height: 100%;
+  }
+
+  &__timer {
+    height: 0;
+    z-index: 2000;
+    margin-top: calc(-1 * var(--corner-radius));
+
+    .el-header {
+      height: 0;
+    }
   }
 
   &__main {
     overflow-x: auto;
     scrollbar-color: var(--color-primary) var(--color-gray);
     scrollbar-width: thin;
-    margin: 0 -5rem;
-    padding: 0 5rem 1rem 5rem;
+    margin: 0;// calc(-1 * var(--side-padding));
+
+    .el-scrollbar::v-deep {
+      .el-scrollbar__wrap {
+        padding: 0 var(--side-padding);
+      }
+      .el-scrollbar__view {
+        padding-top: 2rem;
+      }
+    }
   }
 
   &__overview {
@@ -362,27 +432,38 @@ h3 {
     }
   }
 
-  &__content {
-    margin-top: 1em;
-  }
-
   &__error {
     color: var(--color-primary); // white;
     margin: 0;
     padding: 0;
-    padding-top: 5rem;
+    padding-top: var(--side-padding);
+  }
+}
+
+h3 {
+  padding-bottom: 1rem;
+}
+
+.participant {
+  .public-screen__container {
+    padding: 0 var(--side-padding);
+  }
+
+  h3 {
+    padding-top: 1rem;
+    padding-bottom: 0;
   }
 }
 
 .el-page-header {
-  padding: 2rem 5rem;
+  //padding: 2rem 5rem;
   color: var(--color-primary);
   text-transform: uppercase;
 }
 
 @media screen and (max-width: 768px) {
   .el-page-header {
-    padding: 1rem 2.5rem;
+    //padding: 1rem 2.5rem;
   }
 
   .public-screen {
@@ -394,7 +475,7 @@ h3 {
     }
 
     &__container {
-      padding: 1rem 0;
+      padding: 0;// 1rem 0;
     }
 
     &__main {
@@ -417,6 +498,7 @@ h3 {
 .no-public-screen {
   background-color: var(--color-background-gray);
   min-height: 100vh;
+  --side-padding: 5rem;
 
   .el-header {
     position: fixed;
@@ -437,7 +519,7 @@ h3 {
     padding: 1rem;
 
     .media {
-      margin: 5rem 5rem 15rem;
+      margin: var(--side-padding) var(--side-padding) calc(3 * var(--side-padding));
 
       h1 {
         font-size: var(--font-size-xxlarge);
@@ -446,7 +528,7 @@ h3 {
       }
 
       .media-right {
-        margin-left: 5rem;
+        margin-left: var(--side-padding);
         font-size: 2.9rem;
         font-family: monospace;
         svg {
@@ -469,5 +551,9 @@ h3 {
       max-width: unset;
     }
   }
+}
+
+.process-timeline-container {
+  max-width: calc(100vw - 2rem);
 }
 </style>

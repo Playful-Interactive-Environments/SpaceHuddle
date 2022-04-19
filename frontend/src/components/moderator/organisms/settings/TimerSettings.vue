@@ -138,6 +138,7 @@ export default class TimerSettings extends Vue {
     if ('remainingTime' in this.entity) this.entity.remainingTime = value;
     else if ('parameter' in this.entity)
       this.entity.parameter.remainingTime = value;
+    if ('parameter' in this.entity) this.entity.parameter.totalTime = value;
   }
 
   deactivateTimer(): void {
