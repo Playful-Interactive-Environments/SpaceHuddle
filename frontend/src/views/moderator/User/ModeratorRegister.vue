@@ -27,7 +27,7 @@
           v-on:submitDataValid="save"
           ref="dataForm"
         >
-          <el-form-item
+          <!--<el-form-item
             :label="$t('moderator.view.register.prototypeKey')"
             prop="prototypeKey"
             :rules="[
@@ -39,7 +39,7 @@
               :placeholder="$t('moderator.view.register.prototypeKeyInfo')"
               v-model="formData.prototypeKey"
             />
-          </el-form-item>
+          </el-form-item>-->
           <el-form-item
             :label="$t('moderator.view.register.email')"
             prop="email"
@@ -120,7 +120,7 @@ export default class ModeratorRegister extends Vue {
     email: '',
     password: '',
     passwordRepeat: '',
-    prototypeKey: '',
+    //prototypeKey: '',
   };
 
   async save(): Promise<void> {
