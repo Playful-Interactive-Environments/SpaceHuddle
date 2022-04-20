@@ -198,6 +198,7 @@
         <el-step
           icon="-"
           v-for="(element, index) in activePageDisplayContentList"
+          :id="getKey(element)"
           :key="element.id"
         >
           <template #icon>
@@ -984,6 +985,6 @@ export default class ProcessTimeline extends Vue {
 
 .darkMode {
   --color-foreground: white;
-  --color-background: var(--color-primary);
+  --color-background: #313050;// var(--color-primary);
 }
 </style>
