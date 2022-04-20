@@ -10,6 +10,7 @@
       card__thumbs_down: isThumbsDown,
       card__duplicate: isDuplicate,
       draggable: isDraggable,
+      'idea-transform': fadeIn,
     }"
     :body-style="{ padding: '0px' }"
   >
@@ -134,6 +135,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: false, reactive: true }) isSelected!: boolean;
   @Prop({ default: false }) isDraggable!: boolean;
   @Prop({ default: false }) cutLongTexts!: boolean;
+  @Prop({ default: false }) fadeIn!: boolean;
   @Prop({ default: CollapseIdeas.custom }) collapseIdeas!: CollapseIdeas;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
@@ -142,6 +144,15 @@ export default class IdeaCard extends Vue {
   isLongText = false;
 
   IdeaStates = IdeaStates;
+
+  @Watch('fadeIn', { immediate: true })
+  onFadeInChanged(): void {
+    if (this.fadeIn) {
+      setTimeout(() => {
+        this.$emit('update:fadeIn', false);
+      }, 3000);
+    }
+  }
 
   @Watch('collapseIdeas', { immediate: true })
   onCollapseIdeasChanged(): void {
@@ -339,5 +350,21 @@ export default class IdeaCard extends Vue {
 .idea-count {
   font-weight: var(--font-weight-bold);
   color: var(--color-mint);
+}
+
+.idea-transform {
+  animation: fadein 3s;
+  -moz-animation: fadein 3s; /* Firefox */
+  -webkit-animation: fadein 3s; /* Safari and Chrome */
+  -o-animation: fadein 3s; /* Opera */
+}
+
+@keyframes fadein {
+  from {
+    transform: rotateX(90deg) scale(1, 0);
+  }
+  to {
+    transform: rotateX(0deg) scale(1, 1);
+  }
 }
 </style>

@@ -10,17 +10,19 @@
         :key="index"
         :is-editable="false"
         v-model:collapseIdeas="filter.collapseIdeas"
+        v-model:fadeIn="ideaTransform[idea.id]"
       />
     </section>
-    <section class="layout__columns new" v-if="isModerator">
+    <!--<section class="layout__columns new" v-if="isModerator">
       <IdeaCard
         v-for="(idea, index) in newIdeas"
         :idea="idea"
         :key="index"
         :is-editable="false"
         v-model:collapseIdeas="filter.collapseIdeas"
+        v-model:fadeIn="ideaTransform[idea.id]"
       />
-    </section>
+    </section>-->
   </div>
 </template>
 
@@ -50,6 +52,7 @@ export default class PublicScreen extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   ideas: Idea[] = [];
+  ideaTransform: { [id: string]: boolean } = {};
   readonly intervalTime = 10000;
   interval!: any;
   readonly newTimeSpan = 10000;
@@ -76,18 +79,19 @@ export default class PublicScreen extends Vue {
   }
 
   get oldIdeas(): Idea[] {
-    if (this.isModerator) {
+    /*if (this.isModerator) {
       const currentDate = new Date();
       return this.ideas.filter(
         (idea) =>
           currentDate.getTime() - new Date(idea.timestamp).getTime() >
           this.newTimeSpan
       );
-    }
+    }*/
     return this.ideas;
   }
 
   async getIdeas(): Promise<void> {
+    const currentDate = new Date();
     if (this.taskId) {
       const filter = { ...defaultFilterData };
 
@@ -125,6 +129,15 @@ export default class PublicScreen extends Vue {
           )
             this.ideas = ideas.reverse();
           else this.ideas = ideas;
+
+          this.ideaTransform = Object.assign(
+            {},
+            ...this.ideas.map((idea) => {
+              const timeSpan =
+                currentDate.getTime() - new Date(idea.timestamp).getTime();
+              return { [idea.id]: timeSpan <= this.newTimeSpan };
+            })
+          );
         });
     }
   }
@@ -145,8 +158,8 @@ export default class PublicScreen extends Vue {
 
 <style lang="scss" scoped>
 .public-screen__content {
-  display: grid;
-  grid-template-columns: 80% 20%;
+  //display: grid;
+  //grid-template-columns: 80% 20%;
 }
 
 .new {
