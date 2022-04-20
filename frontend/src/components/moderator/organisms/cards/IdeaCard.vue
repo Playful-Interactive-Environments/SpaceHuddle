@@ -360,11 +360,19 @@ export default class IdeaCard extends Vue {
 }
 
 @keyframes fadein {
-  from {
+  0% {
     transform: rotateX(90deg) scale(1, 0);
+    background-color: var(--color-primary);
+    color: white;
   }
-  to {
+  50% {
+    background-color: var(--color-primary);
+    color: white;
+  }
+  100% {
     transform: rotateX(0deg) scale(1, 1);
+    background-color: white;
+    color: var(--color-primary);
   }
 }
 </style>
