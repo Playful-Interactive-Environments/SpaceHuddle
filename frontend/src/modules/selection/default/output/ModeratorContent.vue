@@ -49,6 +49,7 @@
                     :idea="element"
                     :is-selectable="false"
                     :isDraggable="true"
+                    v-model:collapseIdeas="filter.collapseIdeas"
                     class="item"
                     @ideaDeleted="getCollapseContent"
                   />
@@ -120,6 +121,7 @@
                     :idea="element"
                     :is-selectable="false"
                     :isDraggable="true"
+                    v-model:collapseIdeas="filter.collapseIdeas"
                     class="item"
                     @ideaDeleted="getCollapseContent"
                   />

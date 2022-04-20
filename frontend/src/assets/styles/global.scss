@@ -188,3 +188,11 @@ form {
 .line-break {
   white-space: pre-line;
 }
+
+.active {
+  color: var(--color-primary);
+}
+
+.inactive {
+  color: var(--color-gray-dark);
+}

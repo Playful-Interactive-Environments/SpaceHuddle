@@ -11,6 +11,20 @@
       </div>
     </div>
     <div class="level-right">
+      <div
+        class="level-item link"
+        :class="{ inactive: !isCollapseActive }"
+        @click="collapseChanged(true)"
+      >
+        <font-awesome-icon icon="angle-up" />
+      </div>
+      <div
+        class="level-item link"
+        :class="{ inactive: !isExpandActive }"
+        @click="collapseChanged(false)"
+      >
+        <font-awesome-icon icon="angle-down" />
+      </div>
       <div class="level-item">
         <el-input v-model="modelValue.textFilter" @change="change" clearable>
           <template #prefix>
@@ -79,17 +93,20 @@ import * as authService from '@/services/auth-service';
 import * as sessionRoleService from '@/services/session-role-service';
 import UserType from '@/types/enum/UserType';
 import TaskType from '@/types/enum/TaskType';
+import { CollapseIdeas } from '@/components/moderator/organisms/cards/IdeaCard.vue';
 
 export interface FilterData {
   orderType: string;
   stateFilter: string[];
   textFilter: string;
+  collapseIdeas: CollapseIdeas;
 }
 
-export const defaultFilterData = {
+export const defaultFilterData: FilterData = {
   orderType: DefaultIdeaSortOrder,
   stateFilter: Object.keys(IdeaStates),
   textFilter: '',
+  collapseIdeas: CollapseIdeas.custom,
 };
 
 @Options({
@@ -112,6 +129,19 @@ export default class IdeaFilter extends Vue {
 
   readonly intervalTime = 10000;
   interval!: any;
+
+  @Watch('modelValue.collapseIdeas', { immediate: true })
+  onCollapseIdeasChanged(): void {
+    if (this.task && this.syncToPublicScreen) this.saveParameterChanges();
+  }
+
+  get isCollapseActive(): boolean {
+    return this.modelValue.collapseIdeas === CollapseIdeas.collapseAll;
+  }
+
+  get isExpandActive(): boolean {
+    return this.modelValue.collapseIdeas === CollapseIdeas.expandAll;
+  }
 
   get syncToPublicScreen(): boolean {
     return this.syncUserId === this.ownUserId;
@@ -196,6 +226,14 @@ export default class IdeaFilter extends Vue {
             this.modelValue.textFilter = task.parameter.textFilter;
             updateProperties = true;
           }
+          if (
+            task.parameter &&
+            task.parameter.collapseIdeas &&
+            this.modelValue.collapseIdeas !== task.parameter.collapseIdeas
+          ) {
+            this.modelValue.collapseIdeas = task.parameter.collapseIdeas;
+            updateProperties = true;
+          }
 
           if (updateProperties) {
             this.$emit('update', this.modelValue);
@@ -215,10 +253,12 @@ export default class IdeaFilter extends Vue {
           task.parameter.orderType = this.modelValue.orderType;
           task.parameter.stateFilter = this.modelValue.stateFilter;
           task.parameter.textFilter = this.modelValue.textFilter;
+          task.parameter.collapseIdeas = this.modelValue.collapseIdeas;
         } else if (!this.syncUserId) {
           task.parameter.orderType = defaultFilterData.orderType;
           task.parameter.stateFilter = defaultFilterData.stateFilter;
           task.parameter.textFilter = defaultFilterData.textFilter;
+          task.parameter.collapseIdeas = defaultFilterData.collapseIdeas;
         }
         task.parameter.syncUserId = this.syncUserId;
         taskService.putTask(convertToSaveVersion(task)).then(() => {
@@ -239,6 +279,12 @@ export default class IdeaFilter extends Vue {
     this.$emit('change', this.modelValue);
     if (this.syncToPublicScreen) this.saveParameterChanges();
   }
+
+  collapseChanged(collapse: boolean): void {
+    if (collapse) this.modelValue.collapseIdeas = CollapseIdeas.collapseAll;
+    else this.modelValue.collapseIdeas = CollapseIdeas.expandAll;
+    this.change();
+  }
 }
 </script>
 
@@ -253,6 +299,7 @@ export default class IdeaFilter extends Vue {
 .link {
   background-color: var(--color-background-gray);
   z-index: 10;
+  padding: 0 0.5rem;
 }
 
 .filter_options {

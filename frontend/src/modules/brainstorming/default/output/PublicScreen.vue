@@ -9,6 +9,7 @@
         :idea="idea"
         :key="index"
         :is-editable="false"
+        v-model:collapseIdeas="filter.collapseIdeas"
       />
     </section>
     <section class="layout__columns new" v-if="isModerator">
@@ -17,6 +18,7 @@
         :idea="idea"
         :key="index"
         :is-editable="false"
+        v-model:collapseIdeas="filter.collapseIdeas"
       />
     </section>
   </div>
@@ -31,7 +33,10 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { defaultFilterData } from '@/components/moderator/molecules/IdeaFilter.vue';
+import {
+  defaultFilterData,
+  FilterData,
+} from '@/components/moderator/molecules/IdeaFilter.vue';
 
 @Options({
   components: {
@@ -48,6 +53,7 @@ export default class PublicScreen extends Vue {
   readonly intervalTime = 10000;
   interval!: any;
   readonly newTimeSpan = 10000;
+  filter: FilterData = { ...defaultFilterData };
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -90,11 +96,15 @@ export default class PublicScreen extends Vue {
         .then((task) => {
           if (task.parameter && task.parameter.orderType)
             filter.orderType = task.parameter.orderType;
-          if (task.parameter && task.parameter.orderType)
+          if (task.parameter && task.parameter.stateFilter)
             filter.stateFilter = task.parameter.stateFilter;
-          if (task.parameter && task.parameter.orderType)
+          if (task.parameter && task.parameter.textFilter)
             filter.textFilter = task.parameter.textFilter;
+          if (task.parameter && task.parameter.collapseIdeas)
+            filter.collapseIdeas = task.parameter.collapseIdeas;
         });
+
+      this.filter = filter;
 
       await ideaService
         .getIdeasForTask(

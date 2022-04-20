@@ -46,6 +46,7 @@
                     :is-selectable="false"
                     :is-editable="true"
                     :isDraggable="true"
+                    v-model:collapseIdeas="filter.collapseIdeas"
                     class="drag-item"
                     @ideaDeleted="getCollapseContent"
                   />
@@ -133,6 +134,7 @@
                 :is-selectable="false"
                 :is-editable="true"
                 :isDraggable="true"
+                v-model:collapseIdeas="filter.collapseIdeas"
                 class="drag-item el-main"
                 :style="{ 'border-color': orderGroup.category.parameter.color }"
                 @ideaDeleted="getCollapseContent"

@@ -8,6 +8,7 @@
       :idea="idea"
       :key="index"
       :is-editable="false"
+      v-model:collapseIdeas="filter.collapseIdeas"
     />
   </section>
 </template>
@@ -67,10 +68,14 @@ export default class PublicScreen extends Vue {
         const filter = { ...defaultFilterData };
         if (this.task.parameter && this.task.parameter.orderType)
           filter.orderType = this.task.parameter.orderType;
-        if (this.task.parameter && this.task.parameter.orderType)
+        if (this.task.parameter && this.task.parameter.stateFilter)
           filter.stateFilter = this.task.parameter.stateFilter;
-        if (this.task.parameter && this.task.parameter.orderType)
+        if (this.task.parameter && this.task.parameter.textFilter)
           filter.textFilter = this.task.parameter.textFilter;
+        if (this.task.parameter && this.task.parameter.collapseIdeas)
+          filter.collapseIdeas = this.task.parameter.collapseIdeas;
+
+        this.filter = filter;
 
         await selectService
           .getIdeasForSelection(

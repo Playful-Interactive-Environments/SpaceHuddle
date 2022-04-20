@@ -90,10 +90,10 @@
       >
         {{ idea.description }}
       </div>
-      <div v-if="limitedTextLength" class="collapse">
+      <div v-if="isLongText && !cutLongTexts" class="collapse">
         <font-awesome-icon
-          icon="angle-down"
-          @click="limitedTextLength = !limitedTextLength"
+          :icon="limitedTextLength ? 'angle-down' : 'angle-up'"
+          @click="collapseChanged"
         />
       </div>
     </div>
@@ -115,9 +115,15 @@ import IdeaStates from '@/types/enum/IdeaStates';
 import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
+export enum CollapseIdeas {
+  collapseAll = 'collapseAll',
+  expandAll = 'expandAll',
+  custom = 'custom',
+}
+
 @Options({
   components: { IdeaSettings },
-  emits: ['ideaDeleted', 'update:isSelected'],
+  emits: ['ideaDeleted', 'update:isSelected', 'update:collapseIdeas'],
 })
 export default class IdeaCard extends Vue {
   @Prop() idea!: Idea;
@@ -128,12 +134,22 @@ export default class IdeaCard extends Vue {
   @Prop({ default: false, reactive: true }) isSelected!: boolean;
   @Prop({ default: false }) isDraggable!: boolean;
   @Prop({ default: false }) cutLongTexts!: boolean;
+  @Prop({ default: CollapseIdeas.custom }) collapseIdeas!: CollapseIdeas;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   showSettings = false;
   limitedTextLength = false;
+  isLongText = false;
 
   IdeaStates = IdeaStates;
+
+  @Watch('collapseIdeas', { immediate: true })
+  onCollapseIdeasChanged(): void {
+    if (this.collapseIdeas !== CollapseIdeas.custom) {
+      this.limitedTextLength =
+        this.isLongText && this.collapseIdeas === CollapseIdeas.collapseAll;
+    }
+  }
 
   @Watch('idea.keywords', { immediate: true })
   @Watch('idea.description', { immediate: true })
@@ -141,13 +157,15 @@ export default class IdeaCard extends Vue {
     setTimeout(() => {
       const titleControl: HTMLElement = this.$refs.title as HTMLElement;
       if (titleControl) {
-        if (titleControl.clientHeight > 70) this.limitedTextLength = true;
+        if (titleControl.clientHeight > 70) this.isLongText = true;
       }
       const descriptionControl: HTMLElement = this.$refs
         .description as HTMLElement;
       if (descriptionControl) {
-        if (descriptionControl.clientHeight > 70) this.limitedTextLength = true;
+        if (descriptionControl.clientHeight > 70) this.isLongText = true;
       }
+      this.limitedTextLength =
+        this.isLongText && this.collapseIdeas !== CollapseIdeas.expandAll;
     }, 100);
   }
 
@@ -245,6 +263,11 @@ export default class IdeaCard extends Vue {
           .then((idea) => (this.idea.state = idea.state));
         break;
     }
+  }
+
+  collapseChanged(): void {
+    this.limitedTextLength = !this.limitedTextLength;
+    this.$emit('update:collapseIdeas', CollapseIdeas.custom);
   }
 }
 </script>

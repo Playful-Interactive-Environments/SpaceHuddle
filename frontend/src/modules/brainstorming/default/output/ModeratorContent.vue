@@ -34,6 +34,7 @@
           <IdeaCard
             :idea="element"
             :isDraggable="true"
+            v-model:collapseIdeas="filter.collapseIdeas"
             @ideaDeleted="getCollapseContent()"
           />
         </template>
@@ -54,6 +55,7 @@
           :idea="idea"
           v-for="(idea, index) in item.filteredIdeas"
           :key="index"
+          v-model:collapseIdeas="filter.collapseIdeas"
           @ideaDeleted="getCollapseContent()"
         />
         <AddItem

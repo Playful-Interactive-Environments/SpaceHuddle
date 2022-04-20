@@ -30,6 +30,7 @@
             :is-selectable="false"
             :is-editable="false"
             :style="{ 'border-color': 'var(--color-primary)' }"
+            v-model:collapseIdeas="filter.collapseIdeas"
           />
         </div>
         <div class="column" v-for="category in categories" :key="category.id">
@@ -40,6 +41,7 @@
             :is-selectable="false"
             :is-editable="false"
             :style="{ 'border-color': category.parameter.color }"
+            v-model:collapseIdeas="filter.collapseIdeas"
           />
         </div>
       </el-main>
@@ -63,7 +65,10 @@ import { reloadCollapseContent } from '@/utils/collapse';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import CategoryCard from '@/modules/categorisation/default/molecules/CategoryCard.vue';
 import * as categorisationService from '@/services/categorisation-service';
-import { defaultFilterData } from '@/components/moderator/molecules/IdeaFilter.vue';
+import {
+  defaultFilterData,
+  FilterData,
+} from '@/components/moderator/molecules/IdeaFilter.vue';
 
 @Options({
   components: {
@@ -86,6 +91,7 @@ export default class PublicScreen extends Vue {
   interval!: any;
   openTabs: string[] = [];
   CategoryUndefined = CategoryUndefined;
+  filter: FilterData = { ...defaultFilterData };
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -127,10 +133,14 @@ export default class PublicScreen extends Vue {
         const filter = { ...defaultFilterData };
         if (this.task.parameter && this.task.parameter.orderType)
           filter.orderType = this.task.parameter.orderType;
-        if (this.task.parameter && this.task.parameter.orderType)
+        if (this.task.parameter && this.task.parameter.stateFilter)
           filter.stateFilter = this.task.parameter.stateFilter;
-        if (this.task.parameter && this.task.parameter.orderType)
+        if (this.task.parameter && this.task.parameter.textFilter)
           filter.textFilter = this.task.parameter.textFilter;
+        if (this.task.parameter && this.task.parameter.collapseIdeas)
+          filter.collapseIdeas = this.task.parameter.collapseIdeas;
+
+        this.filter = filter;
 
         const getCategorizedIdeas = viewService.getViewOrderGroups(
           this.task.topicId,
