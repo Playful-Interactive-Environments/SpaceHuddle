@@ -1,5 +1,6 @@
 <template>
   <el-card
+    ref="ideaCard"
     shadow="never"
     v-on:click="changeSelection"
     :class="{
@@ -13,6 +14,7 @@
       'idea-transform': fadeIn,
     }"
     :body-style="{ padding: '0px' }"
+    :style="{ '--card-height': ideaHeight }"
   >
     <img v-if="idea.image" :src="idea.image" class="card__image" alt="" />
     <img
@@ -124,8 +126,14 @@ export enum CollapseIdeas {
 
 @Options({
   components: { IdeaSettings },
-  emits: ['ideaDeleted', 'update:isSelected', 'update:collapseIdeas'],
+  emits: [
+    'ideaDeleted',
+    'update:isSelected',
+    'update:collapseIdeas',
+    'update:fadeIn',
+  ],
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class IdeaCard extends Vue {
   @Prop() idea!: Idea;
   @Prop({ default: true }) isEditable!: boolean;
@@ -142,12 +150,16 @@ export default class IdeaCard extends Vue {
   showSettings = false;
   limitedTextLength = false;
   isLongText = false;
+  ideaHeight = '50px';
 
   IdeaStates = IdeaStates;
 
   @Watch('fadeIn', { immediate: true })
   onFadeInChanged(): void {
     if (this.fadeIn) {
+      setTimeout(() => {
+        this.ideaHeight = this.getHeight();
+      }, 500);
       setTimeout(() => {
         this.$emit('update:fadeIn', false);
       }, 3000);
@@ -168,16 +180,24 @@ export default class IdeaCard extends Vue {
     setTimeout(() => {
       const titleControl: HTMLElement = this.$refs.title as HTMLElement;
       if (titleControl) {
-        if (titleControl.clientHeight > 70) this.isLongText = true;
+        this.isLongText = titleControl.clientHeight > 70;
       }
       const descriptionControl: HTMLElement = this.$refs
         .description as HTMLElement;
       if (descriptionControl) {
-        if (descriptionControl.clientHeight > 70) this.isLongText = true;
+        this.isLongText = descriptionControl.clientHeight > 70;
       }
       this.limitedTextLength =
         this.isLongText && this.collapseIdeas !== CollapseIdeas.expandAll;
     }, 100);
+  }
+
+  getHeight(): string {
+    const card = this.$refs.ideaCard as any;
+    if (card && card.$el && card.$el.offsetHeight) {
+      return `${card.$el.offsetHeight}px`;
+    }
+    return '50px';
   }
 
   get stateIcon(): string {
@@ -352,27 +372,43 @@ export default class IdeaCard extends Vue {
   color: var(--color-mint);
 }
 
-.idea-transform {
-  animation: fadein 3s;
-  -moz-animation: fadein 3s; /* Firefox */
-  -webkit-animation: fadein 3s; /* Safari and Chrome */
-  -o-animation: fadein 3s; /* Opera */
+.el-card.idea-transform {
+  visibility: hidden;
+  --margin-delta: 0px;
+  animation: fadein 3.5s linear;
+  -moz-animation: fadein 3.5s linear; /* Firefox */
+  -webkit-animation: fadein 3.5s linear; /* Safari and Chrome */
+  -o-animation: fadein 3.5s linear; /* Opera */
+  box-sizing: border-box;
+  margin: 0 0 calc(var(--margin-delta) + 0.5rem) 0;
+  transform-origin: 50% 0;
 }
 
 @keyframes fadein {
   0% {
-    transform: rotateX(90deg) scale(1, 0);
+    transform: scaleY(0);
+    visibility: hidden;
+    display: none;
+  }
+  15% {
+    visibility: visible;
+    display: block;
+    transform: scaleY(0);
     background-color: var(--color-primary);
     color: white;
+    --margin-delta: calc(-1 * var(--card-height));
   }
   50% {
+    transform: scaleY(0.5);
     background-color: var(--color-primary);
     color: white;
+    --margin-delta: calc(-1 * var(--card-height) / 2);
   }
   100% {
-    transform: rotateX(0deg) scale(1, 1);
+    transform: scaleY(1);
     background-color: white;
     color: var(--color-primary);
+    --margin-delta: 0px;
   }
 }
 </style>
