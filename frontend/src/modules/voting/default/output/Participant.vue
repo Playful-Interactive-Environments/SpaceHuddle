@@ -143,6 +143,8 @@ export default class Participant extends Vue {
   readonly intervalTime = 10000;
   interval!: any;
   starOpacity = 0;
+  initIdeaNumber = 0;
+
 
   get moduleName(): string {
     if (this.module) return this.module.name;
@@ -257,6 +259,7 @@ export default class Participant extends Vue {
             this.allIdeas = [...ideas];
             this.ideaPointer = ideas.length;
             this.ideas = ideas;
+            this.initIdeaNumber = ideas.length;
             this.getVotes();
           });
       }
@@ -300,10 +303,18 @@ export default class Participant extends Vue {
   currentRateIdea = false;
 
   getOpacity(): number {
-    if (this.waiting) {
+    let number = this.ideaPointer + (this.initIdeaNumber - this.ideas.length);
+    let opacityNum = (1 / this.initIdeaNumber) * number;
+    if (opacityNum == 1 && this.ideaPointer == 0) {
+      return opacityNum;
+    } else if (opacityNum != 1) {
+      console.log(
+          this.initIdeaNumber + ', ' + number + ', ' + opacityNum
+      );
+      return opacityNum;
+    } else {
       return 0;
     }
-    return (1 / this.ideas.length) * this.ideaPointer;
   }
 }
 </script>
@@ -346,7 +357,7 @@ export default class Participant extends Vue {
 #PMDC {
   border-radius: 30px 30px 0px 0px;
   position: absolute;
-  top: 35%;
+  top: 30%;
   min-height: 65%;
 
   left: 0;
@@ -377,7 +388,7 @@ export default class Participant extends Vue {
 #starImageContainer {
   position: absolute;
 
-  height: 28.5%;
+  height: 23%;
 
   top: 0;
   left: 0;
@@ -397,7 +408,25 @@ export default class Participant extends Vue {
 }
 
 .starImage#glowingStar {
+  transition: 2s;
   opacity: var(--star-opacity);
+}
+
+#glowingStar.lightUp {
+  animation-name: takeoffSprite;
+  animation-duration: 5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+  animation-direction: normal;
+}
+
+@keyframes lightUpKeyframes {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: var(--star-opacity);
+  }
 }
 
 .IdeaCard {
@@ -457,7 +486,7 @@ div#ideaAndSkipOverlay {
   margin-right: auto;
 
   height: 100%;
-  width: 100%;
+  max-width: 760px;
 }
 
 div#ideaAndSkipOverlay #backgroundOfOverlay {
@@ -546,5 +575,4 @@ span#clickOut {
 .el-rate.ratingStars::v-deep path {
   color: var(--color-red);
 }
-
 </style>

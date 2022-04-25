@@ -198,6 +198,10 @@ $--font-size: (
         }
 }
 
+.el-rate .el-rate__icon.hover {
+      transform: unset;
+}
+
 .el-button {
         //--el-button-font-color: white;
         //color: var(--el-button-font-color, var(--el-text-color-regular));

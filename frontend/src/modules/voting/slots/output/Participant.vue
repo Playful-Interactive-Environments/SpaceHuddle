@@ -1146,7 +1146,7 @@ span#endOfIdeas > span {
 .ideaCard {
   position: relative;
   width: 100%;
-  max-height: 93%;
+  max-height: 75%;
 
   bottom: 0;
 
@@ -1167,15 +1167,17 @@ span#endOfIdeas > span {
   display: flex;
   flex-direction: row;
 
-  align-items: center;
 
-  height: 10%;
+  justify-items: center;
+
+  height: 20%;
 }
 
 #ideaAndSkip::v-deep .card__image {
   height: 26%;
   width: 26%;
   border-radius: 20px;
+  padding: 1% 1% 1% 0;
 }
 
 #ideaAndSkip::v-deep .card__text {
@@ -1208,7 +1210,7 @@ span#endOfIdeas > span {
 div#ideaAndSkip {
   position: absolute;
   width: 94%;
-  height: auto;
+  height: 22%;
 
   bottom: 2%;
 
