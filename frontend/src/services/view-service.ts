@@ -140,6 +140,7 @@ export const getViewOrderGroups = async (
   topicId: string,
   input: InputData[],
   orderType: string | null = null,
+  orderAsc = true,
   refId: string | null = null,
   authHeaderType = EndpointAuthorisationType.MODERATOR,
   actualOrderGroupList: OrderGroupList = {},
@@ -162,7 +163,7 @@ export const getViewOrderGroups = async (
     stateFilter,
     textFilter
   ).then((ideas) => {
-    ideaList = ideas;
+    ideaList = orderAsc ? ideas : ideas.reverse();
     orderGroupList = convertToOrderGroups(ideas, actualOrderGroupList, filter);
   });
   return { ideas: ideaList, oderGroups: orderGroupList };

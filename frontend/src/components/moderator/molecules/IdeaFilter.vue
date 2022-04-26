@@ -59,19 +59,28 @@
       </div>
     </div>
     <div class="level-right">
+      <div class="level-item link" @click="changeOrderAsc">
+        <font-awesome-icon
+          :icon="
+            modelValue.orderAsc
+              ? 'arrow-down-short-wide'
+              : 'arrow-up-short-wide'
+          "
+        />
+      </div>
       <div
         class="level-item link"
         :class="{ inactive: !isCollapseActive }"
         @click="collapseChanged(true)"
       >
-        <font-awesome-icon icon="angle-up" />
+        <font-awesome-icon icon="window-minimize" />
       </div>
       <div
         class="level-item link"
         :class="{ inactive: !isExpandActive }"
         @click="collapseChanged(false)"
       >
-        <font-awesome-icon icon="angle-down" />
+        <font-awesome-icon icon="window-maximize" />
       </div>
       <div
         class="level-item link"
@@ -106,6 +115,7 @@ import { ElMessage } from 'element-plus';
 
 export interface FilterData {
   orderType: string;
+  orderAsc: boolean;
   stateFilter: string[];
   textFilter: string;
   collapseIdeas: CollapseIdeas;
@@ -113,6 +123,7 @@ export interface FilterData {
 
 export const defaultFilterData: FilterData = {
   orderType: DefaultIdeaSortOrder,
+  orderAsc: true,
   stateFilter: Object.keys(IdeaStates),
   textFilter: '',
   collapseIdeas: CollapseIdeas.custom,
@@ -292,7 +303,6 @@ export default class IdeaFilter extends Vue {
       type: this.syncToPublicScreen ? 'success' : 'error',
       center: true,
       showClose: true,
-      duration: 9000000,
     });
   }
 
@@ -300,6 +310,11 @@ export default class IdeaFilter extends Vue {
     this.$emit('update', this.modelValue);
     this.$emit('change', this.modelValue);
     if (this.syncToPublicScreen) this.saveParameterChanges();
+  }
+
+  changeOrderAsc(): void {
+    this.modelValue.orderAsc = !this.modelValue.orderAsc;
+    this.change();
   }
 
   collapseChanged(collapse: boolean): void {

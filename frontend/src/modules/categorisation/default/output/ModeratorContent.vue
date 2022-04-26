@@ -325,6 +325,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           this.task.topicId,
           this.task.parameter.input,
           this.filter.orderType,
+          this.filter.orderAsc,
           null,
           EndpointAuthorisationType.MODERATOR,
           this.orderGroupContentSelection,

@@ -135,6 +135,8 @@
       },
       "ideaFilter": {
         "filterPlaceholder": "filter by text...",
+        "filterByState": "filter by state",
+        "order": "order",
         "syncActiveMessage": "Synchronization of the filter settings with the public screen enabled",
         "syncDeactivateMessage": "Synchronization of the filter settings with the public screen disabled"
       }

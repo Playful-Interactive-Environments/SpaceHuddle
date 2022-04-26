@@ -136,6 +136,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         .getOrderGroups(
           taskId,
           orderType,
+          this.filter.orderAsc,
           null,
           EndpointAuthorisationType.MODERATOR,
           this.orderGroupContent

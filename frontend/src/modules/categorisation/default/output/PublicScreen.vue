@@ -146,6 +146,7 @@ export default class PublicScreen extends Vue {
           this.task.topicId,
           this.task.parameter.input,
           IdeaSortOrderHierarchy,
+          true,
           this.taskId,
           this.authHeaderTyp,
           this.orderGroupContent,
