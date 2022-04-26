@@ -13,7 +13,8 @@
     "startGame": "No ideas? Get inspired!",
     "linkInfo": "part image url from web",
     "remainingCharacters":  "remaining characters ",
-    "ideas": "your ideas"
+    "ideas": "your ideas",
+    "loading": "loading, please wait"
   },
   "moderatorContent": {
     "sortOrder": "order by",

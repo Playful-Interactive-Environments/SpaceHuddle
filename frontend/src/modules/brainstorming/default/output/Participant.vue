@@ -1,42 +1,9 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
-    <div id="preloader">
-      <img
-        src="../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png"
-        alt="Rocket-fire-none"
-      />
-      <img
-        src="../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png"
-        alt="Rocket-fire-1"
-      />
-      <img
-        src="../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png"
-        alt="Rocket-fire-2"
-      />
-      <img
-        src="../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png"
-        alt="Rocket-fire-3"
-      />
-      <img
-        src="../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-1.png"
-        alt="Rocket-fire-launch-1"
-      />
-      <img
-        src="../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-2.png"
-        alt="Rocket-fire-launch-2"
-      />
-      <img
-        src="../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png"
-        alt="Rocket-fire-launch-3"
-      />
-      <img
-        src="../../../../assets/illustrations/Form/ButtonGrey.png"
-        alt="ButtonGrey"
-      />
-      <img
-        src="../../../../assets/illustrations/Form/ButtonRed.png"
-        alt="ButtonRed"
-      />
+    <div id="loadingScreen">
+      <span
+        >{{ $t('module.brainstorming.default.participant.loading') }}...</span
+      >
     </div>
     <div
       id="backgroundImage"
@@ -340,6 +307,35 @@ export default class Participant extends Vue {
   ];
   scalePlanet = false;
 
+  images: HTMLImageElement[] = [];
+  preload = [
+    '../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png',
+    '../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png',
+    '../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png',
+    '../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png',
+    '../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-1.png',
+    '../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-2.png',
+    '../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png',
+    '../../../../assets/illustrations/Form/ButtonGrey',
+    '../../../../assets/illustrations/Form/ButtonRed',
+    '../../../../assets/illustrations/Form/Platform 1',
+    '../../../../assets/illustrations/Form/Background',
+  ];
+
+  waiting(): boolean {
+    let element = document.getElementById('loadingScreen');
+    if (element != null && !element.classList.contains('zeroOpacity')) {
+      for (let i = 0; i < this.preload.length; i++) {
+        this.images[i] = new Image();
+        this.images[i].src = this.preload[i];
+      }
+      setTimeout(() => element?.classList.add('zeroOpacity'), 1000);
+      setTimeout(() => element?.classList.add('hidden'), 3000);
+      return true;
+    }
+    return false;
+  }
+
   @Watch('moduleId', { immediate: true })
   onModuleIdChanged(): void {
     this.getModule();
@@ -348,6 +344,10 @@ export default class Participant extends Vue {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.getTaskIdeas();
+  }
+
+  mounted() {
+    this.waiting();
   }
 
   async getModule(): Promise<void> {
@@ -526,6 +526,49 @@ export default class Participant extends Vue {
 ParticipantModuleDefaultContainer {
   overflow: hidden;
   color: var(--color-gray);
+}
+
+.zeroOpacity {
+  opacity: 0 !important;
+  transition: 2s;
+}
+
+.hidden {
+  display: none !important;
+}
+
+div#loadingScreen {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  background-color: var(--color-darkblue);
+  z-index: 100;
+
+  display: flex;
+  justify-items: center;
+  align-items: center;
+
+  opacity: 1;
+}
+
+div#loadingScreen > span {
+  width: 70%;
+  text-align: center;
+  color: white;
+  font-size: var(--font-size-large);
+  position: relative;
+  margin: auto;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
 }
 
 #backgroundImage {

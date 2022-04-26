@@ -228,6 +228,26 @@ export default class Participant extends Vue {
     );
   }
 
+  images: HTMLImageElement[] = [];
+  preload = [
+    '../../../../assets/illustrations/Slots/Rocket parts/Bot.png',
+    '../../../../assets/illustrations/Slots/Rocket parts/Mid.png',
+    '../../../../assets/illustrations/Slots/Rocket parts/Top.png',
+    '../../../../assets/illustrations/Slots/Rocket parts/Window Astronaut.png',
+    '../../../../assets/illustrations/Slots/Rocket parts/Window.png',
+    '../../../../assets/illustrations/Slots/Rocket parts/fire-none.png',
+    '../../../../assets/illustrations/Slots/Rocket parts/fire-1.png',
+    '../../../../assets/illustrations/Slots/Rocket parts/fire-2.png',
+    '../../../../assets/illustrations/Slots/Rocket parts/fire-3.png',
+    '../../../../assets/illustrations/Slots/Rocket parts/fire-launch-1.png',
+    '../../../../assets/illustrations/Slots/Rocket parts/fire-launch-2.png',
+    '../../../../assets/illustrations/Slots/Rocket parts/fire-launch-3.png',
+    '../../../../assets/illustrations/Slots/PlatformBack.png',
+    '../../../../assets/illustrations/Slots/PlatformFront.png',
+    '../../../../assets/illustrations/Slots/PlatformExtension',
+    '../../../../assets/illustrations/Slots/Mask',
+  ];
+
   get waiting(): boolean {
     //Changes Paul Start
     if (this.ideas.length === 0 && this.votes.length === 0) {
@@ -236,7 +256,12 @@ export default class Participant extends Vue {
       let element = document.getElementById('loadingScreen');
       if (element != null && !element.classList.contains('zeroOpacity')) {
         this.replaceIdeaArray();
-        console.log('this was the start of all');
+
+        for (let i = 0; i < this.preload.length; i++) {
+          this.images[i] = new Image();
+          this.images[i].src = this.preload[i];
+        }
+
         element.classList.add('zeroOpacity');
         setTimeout(() => element?.classList.add('hidden'), 2000);
       }
@@ -251,6 +276,7 @@ export default class Participant extends Vue {
     }
     this.startInterval();
     //Changes Paul Start
+    this.waiting;
     window.addEventListener('resize', this.heightCheck);
     //Changes Paul End
   }
