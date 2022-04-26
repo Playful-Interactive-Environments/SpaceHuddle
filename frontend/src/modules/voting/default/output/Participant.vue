@@ -1,4 +1,7 @@
 <template>
+  <div id="loadingScreen">
+    <span>{{ $t('module.voting.slots.participant.waiting') }}...</span>
+  </div>
   <div id="starImageBackground">
     <div id="starImageContainer">
       <img
@@ -155,7 +158,25 @@ export default class Participant extends Vue {
     return this.validVotes.length > 0 && this.ideaPointer >= this.ideas.length;
   }
 
+  images: HTMLImageElement[] = [];
+  preload = [
+    '../../../../assets/illustrations/Voting/starDesat.png',
+    '../../../../assets/illustrations/Voting/starGlow.png',
+    '../../../../assets/illustrations/Voting/StarsSpace.png',
+  ];
+
   get waiting(): boolean {
+    if (this.allIdeas.length != 0) {
+      let element = document.getElementById('loadingScreen');
+      if (element != null && !element.classList.contains('zeroOpacity')) {
+        for (let i = 0; i < this.preload.length; i++) {
+          this.images[i] = new Image();
+          this.images[i].src = this.preload[i];
+        }
+        element.classList.add('zeroOpacity');
+        setTimeout(() => element?.classList.add('hidden'), 2000);
+      }
+    }
     return this.allIdeas.length === 0;
   }
 
@@ -168,6 +189,7 @@ export default class Participant extends Vue {
   mounted(): void {
     this.initConfig(5);
     this.startInterval();
+    this.waiting;
   }
 
   startInterval(): void {
@@ -366,6 +388,51 @@ export default class Participant extends Vue {
   margin-right: auto;
 
   z-index: 1;
+}
+
+div#loadingScreen {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  max-width: 760px;
+
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+
+  background-color: var(--color-darkblue);
+
+  display: flex;
+  justify-items: center;
+  align-items: center;
+
+  opacity: 1;
+  z-index: 2;
+}
+
+div#loadingScreen > span {
+  width: 70%;
+  text-align: center;
+  color: white;
+  font-size: var(--font-size-large);
+  position: relative;
+  margin: auto;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.zeroOpacity {
+  opacity: 0 !important;
+  transition: 2s;
+}
+
+.hidden {
+  display: none !important;
 }
 
 #starImageBackground {
