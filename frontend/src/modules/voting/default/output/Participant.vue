@@ -1,6 +1,11 @@
 <template>
   <div id="loadingScreen">
-    <span>{{ $t('module.voting.slots.participant.waiting') }}...</span>
+    <span>{{ $t('module.voting.default.participant.waiting') }}...</span>
+    <span
+        id="loading"
+        v-loading="true"
+        element-loading-background="rgba(0, 0, 0, 0)"
+    ></span>
   </div>
   <div id="starImageBackground">
     <div id="starImageContainer">
@@ -408,6 +413,7 @@ div#loadingScreen {
   display: flex;
   justify-items: center;
   align-items: center;
+  flex-direction: column;
 
   opacity: 1;
   z-index: 2;
@@ -419,11 +425,21 @@ div#loadingScreen > span {
   color: white;
   font-size: var(--font-size-large);
   position: relative;
-  margin: auto;
+  margin: auto auto 0;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
+}
+
+div#loadingScreen > span#loading {
+  margin-top: 50px;
+  margin-bottom: auto;
+}
+
+div#loadingScreen > span#loading::v-deep .path {
+  stroke: white;
+  stroke-width: 4;
 }
 
 .zeroOpacity {
@@ -642,4 +658,5 @@ span#clickOut {
 .el-rate.ratingStars::v-deep path {
   color: var(--color-red);
 }
+
 </style>
