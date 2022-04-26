@@ -174,22 +174,29 @@ export default class IdeaCard extends Vue {
     }
   }
 
+  lengthIsCalculating = false;
   @Watch('idea.keywords', { immediate: true })
   @Watch('idea.description', { immediate: true })
   onIdeaChanged(): void {
-    setTimeout(() => {
-      const titleControl: HTMLElement = this.$refs.title as HTMLElement;
-      if (titleControl) {
-        this.isLongText = titleControl.clientHeight > 70;
-      }
-      const descriptionControl: HTMLElement = this.$refs
-        .description as HTMLElement;
-      if (descriptionControl) {
-        this.isLongText = descriptionControl.clientHeight > 70;
-      }
-      this.limitedTextLength =
-        this.isLongText && this.collapseIdeas !== CollapseIdeas.expandAll;
-    }, 100);
+    if (!this.lengthIsCalculating) {
+      this.lengthIsCalculating = true;
+      setTimeout(() => {
+        let isLongText = false;
+        const titleControl: HTMLElement = this.$refs.title as HTMLElement;
+        if (titleControl) {
+          if (titleControl.clientHeight > 70) isLongText = true;
+        }
+        const descriptionControl: HTMLElement = this.$refs
+          .description as HTMLElement;
+        if (descriptionControl) {
+          if (descriptionControl.clientHeight > 70) isLongText = true;
+        }
+        this.isLongText = isLongText;
+        this.limitedTextLength =
+          this.isLongText && this.collapseIdeas !== CollapseIdeas.expandAll;
+        this.lengthIsCalculating = false;
+      }, 100);
+    }
   }
 
   getHeight(): string {
