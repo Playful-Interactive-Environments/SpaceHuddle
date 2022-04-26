@@ -165,7 +165,7 @@ export default class ModeratorRegister extends Vue {
   }
 
   &__content {
-    width: 35vw;
+    width: calc(var(--app-width) * 0.35);
     max-width: 520px;
     text-align: left;
   }
@@ -190,6 +190,7 @@ export default class ModeratorRegister extends Vue {
 @media only screen and (max-width: 949px) {
   .register {
     grid-template-rows: 2fr 6fr;
+    height: var(--app-height);
 
     section {
       min-height: 100%;

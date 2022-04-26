@@ -5,7 +5,7 @@
     v-on:submitDataValid="save"
     v-on:reset="reset"
   >
-    <el-dialog v-model="showDialog" :before-close="handleClose" width="80vw">
+    <el-dialog v-model="showDialog" :before-close="handleClose" width="calc(var(--app-width) * 0.8)">
       <template #title>
         <span class="el-dialog__title">{{
           $t('module.categorisation.default.settings.header')

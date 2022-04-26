@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="showSettings" :before-close="handleClose" width="80vw">
+  <el-dialog v-model="showSettings" :before-close="handleClose" width="calc(var(--app-width) * 0.8)">
     <template #title>
       <span class="el-dialog__title">
         {{ $t('moderator.organism.settings.facilitatorSettings.header') }}

@@ -8,7 +8,7 @@
     <div class="media-left no-category" ref="noCategoryColumn">
       <el-scrollbar
         native
-        :height="`calc(100vh - ${topNoCategoryColumn}px - 1rem)`"
+        :height="`calc(var(--app-height) - ${topNoCategoryColumn}px - 1rem)`"
       >
         <el-collapse v-model="openTabs">
           <el-collapse-item
@@ -123,7 +123,7 @@
             group="idea"
             @end="dragDone"
             :style="{
-              'max-height': `calc(100vh - ${topCategoryColumns}px - 1rem)`,
+              'max-height': `calc(var(--app-height) - ${topCategoryColumns}px - 1rem)`,
             }"
           >
             <template v-slot:item="{ element }">
@@ -530,7 +530,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 }
 
 .group-items {
-  max-height: 50vh;
+  max-height: calc(var(--app-height) / 2);
   overflow-y: auto;
   scrollbar-color: var(--color-primary) var(--color-gray);
   scrollbar-width: thin;

@@ -185,8 +185,8 @@ export default class ParticipantJoin extends Vue {
 
 <style lang="scss" scoped>
 .join {
-  padding: min(10vw, 4rem);
-  padding-top: 8vh;
+  padding: min(calc(var(--app-width) * 0.1), 4rem);
+  padding-top: calc(var(--app-height) * 0.08);
   color: #fff;
   background: var(--color-darkblue);
   background-image: url('~@/assets/illustrations/telescope.png');

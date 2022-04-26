@@ -219,7 +219,7 @@ import { Session } from '@/types/api/Session';
 import TopicSettings from '@/components/moderator/organisms/settings/TopicSettings.vue';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import TaskTimeline from '@/components/moderator/organisms/Timeline/TaskTimeline.vue';
-import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
+import Sidebar from '@/components/moderator/organisms/layout/Sidebar.vue';
 import TaskType from '@/types/enum/TaskType';
 import TaskCategory, {
   getCategoryOfType,

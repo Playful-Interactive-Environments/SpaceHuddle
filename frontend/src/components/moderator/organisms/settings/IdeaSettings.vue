@@ -5,7 +5,7 @@
     v-on:submitDataValid="save"
     v-on:reset="reset"
   >
-    <el-dialog v-model="showSettings" width="80vw" :before-close="handleClose">
+    <el-dialog v-model="showSettings" width="calc(var(--app-width) * 0.8)" :before-close="handleClose">
       <template #title>
         <span class="el-dialog__title" v-if="title">{{ title }}</span>
         <span class="el-dialog__title" v-else>{{

@@ -30,7 +30,7 @@ $font-size-large: calc(18rem / 16);
 $font-size-xlarge: calc(24rem / 16);
 $font-size-xxlarge: calc(32rem / 16);
 $font-size-xxxlarge: calc(36rem / 16);
-$sidebar-width: 25vw;
+$sidebar-width: calc(var(--app-width) / 4);
 $sidebar-min-width: 300px;
 $header-height: 90px;
 

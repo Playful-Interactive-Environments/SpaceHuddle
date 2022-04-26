@@ -1,7 +1,7 @@
 <template>
   <el-carousel
     v-if="ideas.length > 0"
-    height="60vh"
+    height="calc(var(--app-height) * 0.6)"
     type="card"
     :initial-index="0"
     :interval="7000"

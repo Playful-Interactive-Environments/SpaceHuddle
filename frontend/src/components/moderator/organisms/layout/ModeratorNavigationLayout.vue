@@ -5,6 +5,9 @@
     </el-aside>
     <el-container>
       <el-header>
+        <div class="sidebar__mobile_header">
+          <SidebarHeader v-model:sidebar-visible="displaySettings" />
+        </div>
         <el-scrollbar>
           <div class="level" v-if="!hasSidebar">
             <span class="level-left">
@@ -55,6 +58,7 @@
     direction="ltr"
     size="300px"
     :key="displaySettings"
+    custom-class="sidebar"
   >
     <slot name="sidebar"></slot>
   </el-drawer>
@@ -63,17 +67,28 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
+import Sidebar from '@/components/moderator/organisms/layout/Sidebar.vue';
+import SidebarHeader from '@/components/moderator/organisms/layout/SidebarHeader.vue';
+import { EventType } from '@/types/enum/EventType';
 
 @Options({
   components: {
+    SidebarHeader,
     Sidebar,
   },
+  emits: ['update:sidebarVisible'],
 })
 export default class ModeratorNavigationLayout extends Vue {
   @Prop({ default: false }) white!: boolean;
   @Prop({ default: '' }) readonly currentRouteTitle!: string;
   displaySettings = false;
+
+  mounted(): void {
+    this.eventBus.off(EventType.CHANGE_SIDEBAR_VISIBILITY);
+    this.eventBus.on(EventType.CHANGE_SIDEBAR_VISIBILITY, async (visible) => {
+      this.displaySettings = visible as boolean;
+    });
+  }
 
   get hasSidebar(): boolean {
     return !!this.$slots.sidebar;
@@ -84,7 +99,7 @@ export default class ModeratorNavigationLayout extends Vue {
 <style lang="scss" scoped>
 .main-layout {
   background-color: var(--color-background-gray);
-  min-height: 100vh;
+  min-height: var(--app-height);
 
   &__content {
     flex-grow: 1;

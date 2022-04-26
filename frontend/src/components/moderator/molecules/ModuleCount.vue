@@ -12,7 +12,7 @@
       <span class="module-count__count">{{ users.length }}</span>
       {{ $t('moderator.molecule.moduleCount.users') }}
     </div>
-    <el-popover trigger="click" width="20vw">
+    <el-popover trigger="click" width="calc(var(--app-width) * 0.2)">
       <template #reference>
         <div class="module-count__item">
           <span class="module-count__count">{{ participants.length }}</span>
@@ -125,7 +125,7 @@ export default class ModuleCount extends Vue {
   overflow-y: auto;
   scrollbar-color: var(--color-primary) var(--color-gray);
   scrollbar-width: thin;
-  max-height: 50vh;
+  max-height: calc(var(--app-height) / 2);
 
   .el-space__item {
     padding-top: 0.5rem;

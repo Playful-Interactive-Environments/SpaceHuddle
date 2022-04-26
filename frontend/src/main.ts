@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import VueCookies from 'vue3-cookies';
 import i18n from '@/i18n';
+import setViewportVariables from '@/vunit';
 import App from './App.vue';
 import router from './router';
 import mitt, { Emitter, EventType } from 'mitt';
@@ -45,5 +46,7 @@ app.config.globalProperties.$t = i18n.t2;
 app.use(ElementPlus);
 app.use(VueObserveVisibility);
 app.mount('#app');
+
+setViewportVariables();
 
 export default app;

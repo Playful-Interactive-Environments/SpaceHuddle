@@ -29,7 +29,7 @@
     </div>
     <el-tooltip placement="top">
       <template #content>
-        <div style="max-width: 50vw" class="line-break">
+        <div style="max-width: calc(var(--app-width) * 0.5)" class="line-break">
           {{
             $t(
               `module.${moduleTask.taskType}.${moduleTask.moduleName}.description.description`

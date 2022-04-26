@@ -9,7 +9,7 @@
       v-model="showSettings"
       :title="$t('moderator.organism.settings.linkSettings.link')"
       :before-close="handleClose"
-      width="80vw"
+      width="calc(var(--app-width) * 0.8)"
     >
       <el-form-item prop="editLink" :rules="[defaultFormRules.ruleUrl]">
         <span class="layout__level">

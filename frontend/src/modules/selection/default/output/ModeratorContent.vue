@@ -8,7 +8,7 @@
     <div class="media-left unselected">
       <el-scrollbar
         native
-        :height="`calc(100vh - ${topContentPosition}px - 1rem)`"
+        :height="`calc(var(--app-height) - ${topContentPosition}px - 1rem)`"
       >
         <el-collapse v-model="openTabs">
           <el-collapse-item
@@ -74,7 +74,7 @@
     <div class="media-content">
       <el-scrollbar
         native
-        :height="`calc(100vh - ${topContentPosition}px - 1rem)`"
+        :height="`calc(var(--app-height) - ${topContentPosition}px - 1rem)`"
       >
         <el-collapse v-model="openTabsSelection">
           <el-collapse-item :key="SELECTION_KEY" :name="SELECTION_KEY">

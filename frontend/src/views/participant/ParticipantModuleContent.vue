@@ -285,7 +285,7 @@ export default class ParticipantModuleContent extends Vue {
 
 <style lang="scss" scoped>
 .sh-content {
-  height: 100vh;
+  height: var(--app-height);
   width: 100%;
   position: relative;
   display: flex;

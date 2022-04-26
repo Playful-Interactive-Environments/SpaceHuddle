@@ -57,10 +57,10 @@ export default class Home extends Vue {}
   text-align: center;
 
   &__content {
-    max-width: 100vw;
+    max-width: var(--app-width);
 
     @include md {
-      max-width: 35vw;
+      max-width: calc(var(--app-width) * 0.35);
     }
   }
 
@@ -81,10 +81,10 @@ export default class Home extends Vue {}
   }
 
   &__img {
-    max-width: 75vw;
+    max-width: calc(var(--app-width) * 0.75);
 
     @include md {
-      max-width: 50vw;
+      max-width: calc(var(--app-width) / 2);
     }
   }
 

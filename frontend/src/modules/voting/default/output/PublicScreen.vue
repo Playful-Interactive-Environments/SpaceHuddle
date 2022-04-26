@@ -121,6 +121,6 @@ export default class PublicScreen extends Vue {
 
 <style lang="scss" scoped>
 .chart {
-  max-width: 120vh;
+  max-width: calc(var(--app-height) * 1.2);
 }
 </style>

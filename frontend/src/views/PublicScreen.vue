@@ -77,7 +77,7 @@
         <div ref="scrollContent"></div>
         <el-scrollbar
           native
-          :height="`calc(100vh - ${topContentPosition}px - 0.1rem)`"
+          :height="`calc(var(--app-height) - ${topContentPosition}px - 0.1rem)`"
         >
           <h3 v-if="task" class="heading--regular twoLineText">
             {{ task.name }}
@@ -331,7 +331,7 @@ h3 {
 .public-screen {
   background-color: var(--color-background-gray);
   background-size: contain;
-  min-height: 100vh;
+  min-height: var(--app-height);
   --corner-radius: 5rem;
   --side-padding: 3rem;
 
@@ -497,12 +497,12 @@ h3 {
 
 .no-public-screen {
   background-color: var(--color-background-gray);
-  min-height: 100vh;
+  min-height: var(--app-height);
   --side-padding: 5rem;
 
   .el-header {
     position: fixed;
-    width: 100vw;
+    width: var(--app-width);
     top: 0;
     left: 0;
     padding: 0 1rem;
@@ -541,20 +541,20 @@ h3 {
 
   .el-footer {
     position: fixed;
-    width: 100vw;
+    width: var(--app-width);
     bottom: 0;
     left: 0;
     line-height: 0;
 
     img {
       height: 30rem;
-      max-height: 50vh;
+      max-height: calc(var(--app-height) / 2);
       max-width: unset;
     }
   }
 }
 
 .process-timeline-container {
-  max-width: calc(100vw - 2rem);
+  max-width: calc(var(--app-width) - 2rem);
 }
 </style>

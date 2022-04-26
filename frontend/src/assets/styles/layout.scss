@@ -25,9 +25,20 @@
 
   &.el-aside {
     width: var(--sidebar-width);
+    height: 100%;
   }
 }
 
+.sidebar__mobile_header,
+.sidebar__page-header span.toggleSidebarButton {
+  display: none;
+}
+
+.sidebar__mobile_header {
+  background-color: var(--color-primary);
+  padding: 1rem;
+  color: white;
+}
 
 @media only screen and (min-width: 650px) {
   .sidebar {
@@ -38,6 +49,11 @@
 }
 
 @media only screen and (max-width: 649px) {
+  .sidebar__mobile_header,
+  .sidebar__page-header span.toggleSidebarButton {
+    display: block;
+  }
+
   .el-aside.sidebar {
     display: none;
     width: 0;
@@ -191,11 +207,11 @@
 }
 
 .full-height {
-  min-height: 100vh;
+  min-height: var(--app-height);
 }
 
 .full-height-header {
-  min-height: calc(100vh - var(--header-height));
+  min-height: calc(var(--app-height) - var(--header-height));
 }
 
 .fill {

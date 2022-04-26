@@ -11,7 +11,7 @@
         v-model="showDialog"
         :before-close="handleClose"
         :key="componentLoadIndex"
-        width="80vw"
+        width="calc(var(--app-width) * 0.8)"
       >
         <template #title>
           <div v-if="isEditStep">
@@ -1485,7 +1485,7 @@ export default class TaskSettings extends Vue {
 }
 
 .el-scrollbar {
-  max-width: 80vw;
+  max-width: calc(var(--app-width) * 0.8);
 }
 
 .flex-content {
@@ -1580,6 +1580,6 @@ export default class TaskSettings extends Vue {
 }
 
 .layout__columns {
-  width: calc(80vw - 2 * var(--el-dialog-padding-primary));
+  width: calc(calc(var(--app-width) * 0.8) - 2 * var(--el-dialog-padding-primary));
 }
 </style>

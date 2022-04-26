@@ -212,7 +212,7 @@ export default class PublicScreen extends Vue {
   overflow-y: auto;
   scrollbar-color: var(--color-primary) var(--color-gray);
   scrollbar-width: thin;
-  //height: 68vh;
+  //height: calc(var(--app-height) * 0.68);
 
   .sticky-header {
     position: sticky;
@@ -258,7 +258,7 @@ export default class PublicScreen extends Vue {
 
 @media screen and (max-width: 768px) {
   .fixHead {
-    max-width: 100vw;
+    max-width: var(--app-width);
     margin-right: -2.5rem;
     margin-left: -2.5rem;
     padding-right: 2.5rem;

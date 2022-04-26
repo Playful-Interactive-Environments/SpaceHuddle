@@ -1,9 +1,32 @@
+/* theme color */
+@forward "~element-plus/theme-chalk/src/common/var.scss" with (
+  $colors: (
+        "primary": (
+                "base": #1d2948,
+        ),
+        "success": (
+                "base": #01cf9e,
+        ),
+        "warning": (
+                "base": #f3a40a,
+        ),
+        "danger": (
+                "base": #d355b5,
+        ),
+        "error": (
+                "base": #fe6e5d,
+        ),
+        "info": (
+                "base": #1d2948,
+        ),
+  )
+);
 @import 'variables.scss';
 
 $dialog-padding: 30px;
 
 /* theme color */
-$--color-primary: #1d2948!default;
+/*$--color-primary: #1d2948!default;
 
 $--colors: (
         "primary": (
@@ -24,7 +47,7 @@ $--colors: (
         "info": (
                 "base": #1d2948,
         ),
-);
+);*/
 
 $--border-width-base: 1px !default;
 
@@ -90,7 +113,7 @@ $--font-size: (
 
 .el-scrollbar {
         width: 100%;
-        max-width: 100vw;
+        max-width: var(--app-width);
 
         &__view {
                 height: 100%;
@@ -111,7 +134,7 @@ $--font-size: (
 
         &__body {
                 padding: 10px var(--el-dialog-padding-primary);
-                max-height: 50vh;
+                max-height: calc(var(--app-height) / 2);
                 overflow: auto;
         }
         &__footer {
@@ -174,6 +197,10 @@ $--font-size: (
                         --el-message-text-color: white;
                 }
         }
+}
+
+.el-message .el-message__closeBtn {
+        color: white;
 }
 
 .el-form-item--default .el-form-item,
@@ -482,7 +509,7 @@ $--font-size: (
 }
 
 .el-message-box {
-        max-width: 100vw;
+        max-width: var(--app-width);
 }
 
 .el-drawer {
@@ -497,7 +524,7 @@ $--font-size: (
 }
 
 .el-drawer.rtl, .el-drawer.ltr {
-        max-height: 100vh;
+        max-height: var(--app-height);
 }
 
 .el-input--prefix .el-input__inner {

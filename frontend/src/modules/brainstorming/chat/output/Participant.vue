@@ -331,7 +331,7 @@ export default class Participant extends Vue {
     flex-shrink: unset;
     max-width: 22rem;
     overflow: hidden;
-    //max-width: 25vw;
+    //max-width: calc(var(--app-width) / 4);
     //border: 3px solid var(--color-mint-light);
 
     .el-card {
@@ -342,7 +342,7 @@ export default class Participant extends Vue {
   }
 
   &-content {
-    min-width: 10vw;
+    min-width: calc(var(--app-width) * 0.1);
   }
 
   span.media-right {

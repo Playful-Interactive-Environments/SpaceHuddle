@@ -140,7 +140,7 @@ import TopicSettings from '@/components/moderator/organisms/settings/TopicSettin
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import SessionSettings from '@/components/moderator/organisms/settings/SessionSettings.vue';
 import TaskTimeline from '@/components/moderator/organisms/Timeline/TaskTimeline.vue';
-import Sidebar from '@/components/moderator/organisms/Sidebar.vue';
+import Sidebar from '@/components/moderator/organisms/layout/Sidebar.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import TopicCard from '@/components/moderator/organisms/cards/TopicCard.vue';
@@ -298,7 +298,7 @@ export default class ModeratorSessionDetails extends Vue {
 <style lang="scss" scoped>
 .detail {
   background-color: var(--color-background-gray);
-  min-height: 100vh;
+  min-height: var(--app-height);
 
   &__content {
     flex-grow: 1;

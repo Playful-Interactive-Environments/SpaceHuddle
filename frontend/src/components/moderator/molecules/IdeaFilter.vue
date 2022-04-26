@@ -1,32 +1,13 @@
 <template>
   <div class="level filter_options">
     <div class="level-left">
-      <div
-        class="level-item link"
-        :class="{ disabled: !syncToPublicScreen }"
-        @click="linkWithPublicScreen"
-      >
-        <font-awesome-icon icon="link" v-if="syncToPublicScreen" />
-        <font-awesome-icon icon="link-slash" v-else />
-      </div>
-    </div>
-    <div class="level-right">
-      <div
-        class="level-item link"
-        :class="{ inactive: !isCollapseActive }"
-        @click="collapseChanged(true)"
-      >
-        <font-awesome-icon icon="angle-up" />
-      </div>
-      <div
-        class="level-item link"
-        :class="{ inactive: !isExpandActive }"
-        @click="collapseChanged(false)"
-      >
-        <font-awesome-icon icon="angle-down" />
-      </div>
       <div class="level-item">
-        <el-input v-model="modelValue.textFilter" @change="change" clearable>
+        <el-input
+          v-model="modelValue.textFilter"
+          :placeholder="$t('moderator.molecule.ideaFilter.filterPlaceholder')"
+          @change="change"
+          clearable
+        >
           <template #prefix>
             <font-awesome-icon icon="filter" />
           </template>
@@ -39,6 +20,9 @@
           multiple
           @change="change"
         >
+          <template v-slot:prefix>
+            <font-awesome-icon icon="filter" class="el-icon" />
+          </template>
           <el-option
             v-for="state in IdeaStateKeys"
             :key="state"
@@ -74,6 +58,30 @@
         </el-select>
       </div>
     </div>
+    <div class="level-right">
+      <div
+        class="level-item link"
+        :class="{ inactive: !isCollapseActive }"
+        @click="collapseChanged(true)"
+      >
+        <font-awesome-icon icon="angle-up" />
+      </div>
+      <div
+        class="level-item link"
+        :class="{ inactive: !isExpandActive }"
+        @click="collapseChanged(false)"
+      >
+        <font-awesome-icon icon="angle-down" />
+      </div>
+      <div
+        class="level-item link"
+        :class="{ disabled: !syncToPublicScreen }"
+        @click="linkWithPublicScreen"
+      >
+        <font-awesome-icon icon="link" v-if="syncToPublicScreen" />
+        <font-awesome-icon icon="link-slash" v-else />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -94,6 +102,7 @@ import * as sessionRoleService from '@/services/session-role-service';
 import UserType from '@/types/enum/UserType';
 import TaskType from '@/types/enum/TaskType';
 import { CollapseIdeas } from '@/components/moderator/organisms/cards/IdeaCard.vue';
+import { ElMessage } from 'element-plus';
 
 export interface FilterData {
   orderType: string;
@@ -272,6 +281,19 @@ export default class IdeaFilter extends Vue {
     if (this.syncToPublicScreen) this.syncUserId = '';
     else this.syncUserId = this.ownUserId;
     this.saveParameterChanges();
+    ElMessage({
+      message: (this as any).$t(
+        `moderator.molecule.ideaFilter.${
+          this.syncToPublicScreen
+            ? 'syncActiveMessage'
+            : 'syncDeactivateMessage'
+        }`
+      ),
+      type: this.syncToPublicScreen ? 'success' : 'error',
+      center: true,
+      showClose: true,
+      duration: 9000000,
+    });
   }
 
   change(): void {
@@ -304,6 +326,9 @@ export default class IdeaFilter extends Vue {
 
 .filter_options {
   margin-bottom: 5px;
+  overflow-x: auto;
+  scrollbar-color: var(--color-primary) var(--color-gray);
+  scrollbar-width: thin;
 }
 
 .disabled {

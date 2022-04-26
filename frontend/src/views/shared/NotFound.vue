@@ -29,7 +29,7 @@ export default class NotFound extends Vue {}
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 100vh;
+  min-height: var(--app-height);
   align-items: center;
   text-align: center;
   padding: 1rem;

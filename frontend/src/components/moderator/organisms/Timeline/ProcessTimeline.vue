@@ -57,9 +57,9 @@
               :order="5"
               placement="bottom"
             >
-              <span class="home">
+              <div class="home">
                 <font-awesome-icon class="processIcon homeIcon" icon="home" />
-              </span>
+              </div>
             </TutorialStep>
             <TutorialStep
               step="publicScreenForOtherTopic"
@@ -68,7 +68,7 @@
               placement="bottom"
               v-else
             >
-              <span
+              <div
                 class="home useOtherPublicScreenTopic"
                 @click="noPublicScreen"
               >
@@ -79,7 +79,7 @@
                     {{ publicScreenTopic }}
                   </span>
                 </span>
-              </span>
+              </div>
             </TutorialStep>
           </div>
           <i class="line"></i>
@@ -678,6 +678,8 @@ export default class ProcessTimeline extends Vue {
   border: 2px solid var(--color-foreground);
   padding: 0.4rem;
   aspect-ratio: 1 / 1;
+  height: 1.1rem;
+  width: 1.1rem;
   margin: -0.2rem 0;
   color: var(--module-color);
 }
@@ -867,6 +869,7 @@ export default class ProcessTimeline extends Vue {
 .is-process {
   .withoutIcon {
     height: 2.9rem;
+    width: 2.9rem;
   }
 }
 
@@ -874,6 +877,7 @@ export default class ProcessTimeline extends Vue {
   border-style: solid;
   border-width: 2px;
   height: 2.1rem;
+  width: 2.1rem;
   display: inline-flex;
   text-align: center;
   justify-content: center;
@@ -929,7 +933,7 @@ export default class ProcessTimeline extends Vue {
 
   .home {
     position: relative;
-    margin-top: 2rem;
+    //margin-top: 2rem;
     line-height: 0.8;
 
     .processIcon {

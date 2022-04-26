@@ -132,6 +132,11 @@
       "sessionCode": {
         "shareSubject": "join spacehuddle.io session",
         "shareBody": "connection key: @KEY \nlink: @LINK"
+      },
+      "ideaFilter": {
+        "filterPlaceholder": "filter by text...",
+        "syncActiveMessage": "Synchronization of the filter settings with the public screen enabled",
+        "syncDeactivateMessage": "Synchronization of the filter settings with the public screen disabled"
       }
     },
     "organism": {

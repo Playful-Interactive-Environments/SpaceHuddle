@@ -1,21 +1,9 @@
 <template>
-  <el-scrollbar class="sidebar" height="100%" max-height="100vh">
+  <el-scrollbar class="sidebar" height="100%" max-height="var(--app-height)">
     <el-container class="sidebar__container">
       <el-header>
         <div class="sidebar__top">
-          <div class="sidebar__page-header">
-            <div class="sidebar__logo">
-              <font-awesome-icon :icon="['fac', 'logoWithName']" class="logo" />
-            </div>
-            <span>
-              <router-link to="/sessions">
-                <font-awesome-icon icon="home" />
-              </router-link>
-              <router-link to="/profile">
-                <font-awesome-icon icon="user" />
-              </router-link>
-            </span>
-          </div>
+          <SidebarHeader />
           <div class="sidebar__management">
             <div v-if="!!$slots.management">
               <slot name="management" />
@@ -85,9 +73,10 @@ import { Prop } from 'vue-property-decorator';
 import { Session } from '@/types/api/Session';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
+import SidebarHeader from '@/components/moderator/organisms/layout/SidebarHeader.vue';
 
 @Options({
-  components: { SessionCode, TutorialStep },
+  components: { SidebarHeader, SessionCode, TutorialStep },
   emits: ['openSettings', 'delete'],
 })
 export default class Sidebar extends Vue {
@@ -97,6 +86,11 @@ export default class Sidebar extends Vue {
   @Prop({ default: '' }) readonly currentRouteTitle!: string;
   @Prop({ default: true }) readonly showBack!: boolean;
   @Prop() readonly session!: Session;
+
+  get info(): string {
+    const doc = document.documentElement;
+    return `${window.innerWidth}, ${window.innerHeight}, ${window.outerWidth}, ${window.outerHeight}, ${doc.clientWidth}, ${doc.clientHeight}, ${window.screen.availWidth}, ${window.screen.availHeight}`;
+  }
 }
 </script>
 
@@ -110,14 +104,17 @@ export default class Sidebar extends Vue {
   width: var(--sidebar-width);
   min-width: var(--sidebar-min-width);
   height: 100%;
-  min-height: 100vh;
+  min-height: var(--app-height);
+  max-height: var(--app-height);
   padding: 1.5rem 1.5rem 4rem;
   color: white;
 
   &__footer {
     position: fixed;
     z-index: 200;
-    bottom: 0;
+    left: 0;
+    top: calc(var(--app-height) - 4rem);
+    //bottom: 0;
     width: var(--sidebar-width);
     min-width: var(--sidebar-min-width);
     padding: 0.5rem 1.5rem 1rem;
@@ -125,22 +122,7 @@ export default class Sidebar extends Vue {
   }
 
   &__page-header {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
     margin-bottom: 2rem;
-
-    span {
-      display: inline-flex;
-      align-items: center;
-
-      a {
-        color: white;
-        font-size: 14px;
-        margin-left: 0.6rem;
-        margin-top: 0;
-      }
-    }
   }
 
   &__container {
