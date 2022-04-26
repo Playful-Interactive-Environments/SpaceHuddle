@@ -349,4 +349,9 @@ export default class IdeaFilter extends Vue {
 .disabled {
   color: var(--color-purple);
 }
+
+.el-select,
+.el-input {
+  width: 12rem;
+}
 </style>
