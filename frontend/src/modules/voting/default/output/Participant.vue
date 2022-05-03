@@ -2,9 +2,9 @@
   <div id="loadingScreen">
     <span>{{ $t('module.voting.default.participant.waiting') }}...</span>
     <span
-        id="loading"
-        v-loading="true"
-        element-loading-background="rgba(0, 0, 0, 0)"
+      id="loading"
+      v-loading="true"
+      element-loading-background="rgba(0, 0, 0, 0)"
     ></span>
   </div>
   <div id="starImageBackground">
@@ -29,6 +29,7 @@
     :module="moduleName"
     id="PMDC"
   >
+    <div id="preloader"></div>
     <div class="media" v-if="ideaPointer < ideas.length">
       <IdeaCard
         class="media-left, IdeaCard"
@@ -36,7 +37,10 @@
         :is-selectable="false"
         :is-editable="false"
         :show-state="false"
-        v-on:click="showIdeaOverlay = true; currentRateIdea = true;"
+        v-on:click="
+          showIdeaOverlay = true;
+          currentRateIdea = true;
+        "
       />
       <el-rate
         class="media-content, ratingStars"
@@ -153,7 +157,6 @@ export default class Participant extends Vue {
   starOpacity = 0;
   initIdeaNumber = 0;
 
-
   get moduleName(): string {
     if (this.module) return this.module.name;
     return '';
@@ -163,23 +166,18 @@ export default class Participant extends Vue {
     return this.validVotes.length > 0 && this.ideaPointer >= this.ideas.length;
   }
 
-  images: HTMLImageElement[] = [];
-  preload = [
-    '../../../../assets/illustrations/Voting/starDesat.png',
-    '../../../../assets/illustrations/Voting/starGlow.png',
-    '../../../../assets/illustrations/Voting/StarsSpace.png',
-  ];
-
   get waiting(): boolean {
     if (this.allIdeas.length != 0) {
       let element = document.getElementById('loadingScreen');
+
       if (element != null && !element.classList.contains('zeroOpacity')) {
-        for (let i = 0; i < this.preload.length; i++) {
-          this.images[i] = new Image();
-          this.images[i].src = this.preload[i];
-        }
-        element.classList.add('zeroOpacity');
-        setTimeout(() => element?.classList.add('hidden'), 2000);
+
+        var preload = document.getElementById('preloader');
+        preload?.classList.add('PreloadSprites');
+
+        setTimeout(() => preload?.classList.remove('PreloadSprites'), 1000);
+        setTimeout(() => element?.classList.add('zeroOpacity'), 1000);
+        setTimeout(() => element?.classList.add('hidden'), 3000);
       }
     }
     return this.allIdeas.length === 0;
@@ -335,9 +333,7 @@ export default class Participant extends Vue {
     if (opacityNum == 1 && this.ideaPointer == 0) {
       return opacityNum;
     } else if (opacityNum != 1) {
-      console.log(
-          this.initIdeaNumber + ', ' + number + ', ' + opacityNum
-      );
+      console.log(this.initIdeaNumber + ', ' + number + ', ' + opacityNum);
       return opacityNum;
     } else {
       return 0;
@@ -382,7 +378,7 @@ export default class Participant extends Vue {
 }
 
 #PMDC {
-  border-radius: 30px 30px 0px 0px;
+  border-radius: 30px 30px 0 0;
   position: absolute;
   top: 30%;
   min-height: 65%;
@@ -440,6 +436,25 @@ div#loadingScreen > span#loading {
 div#loadingScreen > span#loading::v-deep .path {
   stroke: white;
   stroke-width: 4;
+}
+
+@keyframes preloadSprites {
+  /*Sprite changes (couldn't find a way to loop keyframes within animation)*/
+  0% {
+    background-image: url('../../../../assets/illustrations/Voting/starDesat.png');
+  }
+  10% {
+    background-image: url('../../../../assets/illustrations/Voting/starGlow.png');
+  }
+  20% {
+    background-image: url('../../../../assets/illustrations/Voting/StarsSpace.png');
+  }
+}
+
+.PreloadSprites {
+  animation-name: preloadSprites;
+  animation-duration: 0.5s;
+  animation-iteration-count: 1;
 }
 
 .zeroOpacity {
@@ -658,5 +673,4 @@ span#clickOut {
 .el-rate.ratingStars::v-deep path {
   color: var(--color-red);
 }
-
 </style>

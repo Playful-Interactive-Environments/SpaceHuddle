@@ -4,6 +4,7 @@
     :module="moduleName"
     id="Container"
   >
+    <div id="preloader"></div>
     <div id="loadingScreen" :class="{ hidden: loadingScreenEnd }">
       <span>{{ $t('module.voting.slots.participant.waiting') }}...</span>
       <span
@@ -233,26 +234,6 @@ export default class Participant extends Vue {
     );
   }
 
-  images: HTMLImageElement[] = [];
-  preload = [
-    '../../../../assets/illustrations/Slots/Rocket parts/Bot.png',
-    '../../../../assets/illustrations/Slots/Rocket parts/Mid.png',
-    '../../../../assets/illustrations/Slots/Rocket parts/Top.png',
-    '../../../../assets/illustrations/Slots/Rocket parts/Window Astronaut.png',
-    '../../../../assets/illustrations/Slots/Rocket parts/Window.png',
-    '../../../../assets/illustrations/Slots/Rocket parts/fire-none.png',
-    '../../../../assets/illustrations/Slots/Rocket parts/fire-1.png',
-    '../../../../assets/illustrations/Slots/Rocket parts/fire-2.png',
-    '../../../../assets/illustrations/Slots/Rocket parts/fire-3.png',
-    '../../../../assets/illustrations/Slots/Rocket parts/fire-launch-1.png',
-    '../../../../assets/illustrations/Slots/Rocket parts/fire-launch-2.png',
-    '../../../../assets/illustrations/Slots/Rocket parts/fire-launch-3.png',
-    '../../../../assets/illustrations/Slots/PlatformBack.png',
-    '../../../../assets/illustrations/Slots/PlatformFront.png',
-    '../../../../assets/illustrations/Slots/PlatformExtension',
-    '../../../../assets/illustrations/Slots/Mask',
-  ];
-
   get waiting(): boolean {
     //Changes Paul Start
     if (this.ideas.length === 0 && this.votes.length === 0) {
@@ -262,13 +243,12 @@ export default class Participant extends Vue {
       if (element != null && !element.classList.contains('zeroOpacity')) {
         this.replaceIdeaArray();
 
-        for (let i = 0; i < this.preload.length; i++) {
-          this.images[i] = new Image();
-          this.images[i].src = this.preload[i];
-        }
+        var preload = document.getElementById('preloader');
+        preload?.classList.add('PreloadSprites');
 
-        element.classList.add('zeroOpacity');
-        setTimeout(() => element?.classList.add('hidden'), 2000);
+        setTimeout(() => preload?.classList.remove('PreloadSprites'), 1000);
+        setTimeout(() => element?.classList.add('zeroOpacity'), 1000);
+        setTimeout(() => element?.classList.add('hidden'), 3000);
       }
     }
     //Changes Paul End
@@ -599,6 +579,16 @@ div#loadingScreen > span#loading::v-deep .path {
   stroke-width: 4;
 }
 
+div#cache {
+  position: absolute;
+  z-index: -1000;
+  opacity: 0;
+}
+
+div#cache image {
+  position: absolute;
+}
+
 .zeroOpacity {
   opacity: 0 !important;
   transition: 2s;
@@ -894,6 +884,40 @@ div#rocketMask.rocketMaskSmall {
     bottom: 110%;
     overflow: visible;
   }
+}
+
+@keyframes preloadSprites {
+  /*Sprite changes (couldn't find a way to loop keyframes within animation)*/
+  0% {
+    background-image: url('../../../../assets/illustrations/Slots/fire/fire-none.png');
+  }
+  10% {
+    background-image: url('../../../../assets/illustrations/Slots/fire/fire-launch-1.png');
+  }
+  20% {
+    background-image: url('../../../../assets/illustrations/Slots/fire/fire-launch-2.png');
+  }
+  30% {
+    background-image: url('../../../../assets/illustrations/Slots/fire/fire-launch-3.png');
+  }
+  40% {
+    background-image: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+  }
+  50% {
+    background-image: url('../../../../assets/illustrations/Slots/fire/fire-2.png');
+  }
+  60% {
+    background-image: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+  }
+  70% {
+    background-image: url('../../../../assets/illustrations/Slots/Rocket parts/Window Astronaut.png');
+  }
+}
+
+.PreloadSprites {
+  animation-name: preloadSprites;
+  animation-duration: 0.5s;
+  animation-iteration-count: 1;
 }
 
 .rocketAnimateSprite {

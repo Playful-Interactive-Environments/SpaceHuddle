@@ -1,13 +1,14 @@
 <template>
-  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
+  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName" id="PMDC">
+    <div id="preloader"></div>
     <div id="loadingScreen">
       <span
         >{{ $t('module.brainstorming.default.participant.loading') }}...</span
       >
       <span
-          id="loading"
-          v-loading="true"
-          element-loading-background="rgba(0, 0, 0, 0)"
+        id="loading"
+        v-loading="true"
+        element-loading-background="rgba(0, 0, 0, 0)"
       ></span>
     </div>
     <div
@@ -38,6 +39,7 @@
           showImgInput = false;
         "
       ></div>
+
       <div id="rocketButtons">
         <button
           v-on:click="
@@ -312,28 +314,14 @@ export default class Participant extends Vue {
   ];
   scalePlanet = false;
 
-  images: HTMLImageElement[] = [];
-  preload = [
-    '../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png',
-    '../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png',
-    '../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png',
-    '../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png',
-    '../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-1.png',
-    '../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-2.png',
-    '../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png',
-    '../../../../assets/illustrations/Form/ButtonGrey',
-    '../../../../assets/illustrations/Form/ButtonRed',
-    '../../../../assets/illustrations/Form/Platform 1',
-    '../../../../assets/illustrations/Form/Background',
-  ];
-
   waiting(): boolean {
     let element = document.getElementById('loadingScreen');
     if (element != null && !element.classList.contains('zeroOpacity')) {
-      for (let i = 0; i < this.preload.length; i++) {
-        this.images[i] = new Image();
-        this.images[i].src = this.preload[i];
-      }
+
+      var preload = document.getElementById('preloader');
+      preload?.classList.add('PreloadSprites');
+
+      setTimeout(() => preload?.classList.remove('PreloadSprites'), 1000);
       setTimeout(() => element?.classList.add('zeroOpacity'), 1000);
       setTimeout(() => element?.classList.add('hidden'), 3000);
       return true;
@@ -585,6 +573,16 @@ div#loadingScreen > span#loading {
 div#loadingScreen > span#loading::v-deep .path {
   stroke: white;
   stroke-width: 4;
+}
+
+div#cache {
+  position: absolute;
+  z-index: 1000;
+  opacity: 1;
+}
+
+div#cache image {
+  position: absolute;
 }
 
 #backgroundImage {
@@ -885,6 +883,40 @@ div#loadingScreen > span#loading::v-deep .path {
   100% {
     top: -100%;
   }
+}
+
+@keyframes preloadSprites {
+  /*Sprite changes (couldn't find a way to loop keyframes within animation)*/
+  0% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png');
+  }
+  10% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+  }
+  20% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
+  }
+  30% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+  }
+  40% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-1.png');
+  }
+  50% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-2.png');
+  }
+  60% {
+    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
+  }
+  70% {
+    background-image: url('../../../../assets/illustrations/Form/ButtonRed.png');
+  }
+}
+
+.PreloadSprites {
+  animation-name: preloadSprites;
+  animation-duration: 0.5s;
+  animation-iteration-count: 1;
 }
 
 .rocketAnimateSprite {
