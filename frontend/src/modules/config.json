@@ -21,6 +21,12 @@
              "icon": "image",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
            "path": "brainstorming/gallery"  
        },  
+       "planetview": {  
+        "publicScreen": "output/PublicScreen",  
+        "locales": "en,",  
+          "icon": "globe",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
+        "path": "brainstorming/planetview"  
+    },  
        "game": {  
            "participant": "output/Participant",  
            "locales": "en,",  
