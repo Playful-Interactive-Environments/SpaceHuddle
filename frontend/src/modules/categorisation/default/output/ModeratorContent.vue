@@ -153,7 +153,7 @@
     :addIdeas="orderGroupContentCards[addCategoryKey].ideas"
     :order="categories.length"
     v-model:category-id="editCategoryId"
-    @categoryCreated="getCollapseContent"
+    @categoryCreated="categoryCreated"
   />
 </template>
 
@@ -284,6 +284,20 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         this.task = task;
       });
     }
+  }
+
+  async categoryCreated(category: Category): Promise<void> {
+    if (this.orderGroupContentCards[this.addCategoryKey].ideas.length > 0) {
+      const idea = this.orderGroupContentCards[this.addCategoryKey].ideas[0];
+      this.history.push({
+        toCategoryId: category.id,
+        fromCategoryId: idea.category ? idea.category.id : '',
+        ideas: this.orderGroupContentCards[this.addCategoryKey].ideas.map(
+          (idea) => idea.id
+        ),
+      });
+    }
+    await this.getCollapseContent();
   }
 
   async getCollapseContent(reloadTabState = false): Promise<void> {
@@ -472,6 +486,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/
   async dragDone(event: any): Promise<void> {
     this.isDragging = true;
+    await this.addToHistory(event);
     if (event.to.id) {
       if (event.to.id === this.addCategoryKey) {
         this.openCategorySettings();
@@ -495,6 +510,57 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     }
     await this.getCollapseContent();
     this.isDragging = false;
+  }
+
+  history: { toCategoryId: string; fromCategoryId: string; ideas: string[] }[] =
+    [];
+  historyIndex = -1;
+  async addToHistory(event: any): Promise<void> {
+    this.history.length = this.historyIndex + 1;
+    if (event.to.id) {
+      if (event.to.id !== this.addCategoryKey) {
+        const category = this.categories.find(
+          (category) => category.id == event.to.id
+        );
+        if (category) {
+          this.history.push({
+            toCategoryId: event.to.id,
+            fromCategoryId: event.from.id,
+            ideas: this.orderGroupContentCards[category.keywords].ideas.map(
+              (idea) => idea.id
+            ),
+          });
+        }
+      }
+    } else if (event.from.id) {
+      this.history.push({
+        toCategoryId: event.to.id,
+        fromCategoryId: event.from.id,
+        ideas: [event.item.id],
+      });
+    }
+    this.historyIndex = this.history.length - 1;
+  }
+
+  async executeHistoryStep(index = -1): Promise<void> {
+    if (this.history.length > 0) {
+      const historyStep =
+        index > -1 && this.history.length > index
+          ? this.history[index]
+          : this.history[this.history.length - 1];
+      if (historyStep.toCategoryId) {
+        await categorisationService.addIdeasToCategory(
+          historyStep.toCategoryId,
+          historyStep.ideas
+        );
+      } else if (historyStep.fromCategoryId) {
+        await categorisationService.removeIdeasFromCategory(
+          historyStep.fromCategoryId,
+          historyStep.ideas
+        );
+      }
+      await this.getCollapseContent();
+    }
   }
 }
 </script>
