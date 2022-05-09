@@ -389,6 +389,7 @@ export default class IdeaCard extends Vue {
   box-sizing: border-box;
   margin: 0 0 calc(var(--margin-delta) + 0.5rem) 0;
   transform-origin: 50% 0;
+  //transition: all 0.3s ease-in-out;
 }
 
 @keyframes fadein {
