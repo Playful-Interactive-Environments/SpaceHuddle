@@ -108,6 +108,7 @@
         :taskId="taskId"
         :shortenDescription="false"
         :showType="false"
+        :authHeaderTyp="authHeaderTyp"
       />
     </el-header>
     <el-container class="public-screen__container">
