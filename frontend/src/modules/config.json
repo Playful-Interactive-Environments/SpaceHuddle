@@ -1,5 +1,11 @@
 { 
    "brainstorming": {  
+       "animation": {  
+           "publicScreen": "output/PublicScreen",  
+           "locales": "en,",  
+             "icon": "film",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
+           "path": "brainstorming/animation"  
+       },  
        "chat": {  
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  

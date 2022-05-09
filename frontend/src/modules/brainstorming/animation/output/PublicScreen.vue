@@ -139,7 +139,7 @@ export default class PublicScreen extends Vue {
     flex-shrink: 1;
     text-align: inherit;
 
-    display: flex;
+    display: block;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -160,6 +160,10 @@ export default class PublicScreen extends Vue {
   animation-iteration-count: infinite;
   min-height: 100%;
   padding-bottom: 10rem;
+}
+
+.layout__columns {
+  column-width: 15rem;
 }
 
 @keyframes bounce {
