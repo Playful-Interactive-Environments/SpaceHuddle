@@ -1,7 +1,7 @@
 <template>
   <div class="menubar">
     <font-awesome-icon :icon="['fac', 'logoWithName']" class="logo" />
-    <el-dropdown v-on:command="menuItemSelected($event)">
+    <!--<el-dropdown v-on:command="menuItemSelected($event)">
       <span class="el-dropdown-link">
         <font-awesome-icon icon="bars" />
       </span>
@@ -15,7 +15,7 @@
           </el-dropdown-item>
         </el-dropdown-menu>
       </template>
-    </el-dropdown>
+    </el-dropdown>-->
   </div>
 </template>
 

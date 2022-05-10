@@ -1,5 +1,5 @@
 <template>
-  <ParticipantDefaultContainer>
+  <ParticipantDefaultContainer class="participant-overview">
     <template #header>
       <div class="participant-header__header">
         <MenuBar />
@@ -66,6 +66,24 @@
         </div>
       </el-collapse-item>
     </el-collapse>
+    <router-link
+      :to="`/public-screen/${this.sessionId}/${EndpointAuthorisationType.PARTICIPANT}`"
+    >
+      <el-button class="fullwidth">
+        <template #icon>
+          <font-awesome-icon :icon="['fac', 'presentation']" />
+        </template>
+        {{ $t('participant.view.overview.publicScreen') }}
+      </el-button>
+    </router-link>
+    <router-link to="/join">
+      <el-button class="fullwidth">
+        <template #icon>
+          <font-awesome-icon icon="sign-out-alt" />
+        </template>
+        {{ $t('participant.view.overview.disconnect') }}
+      </el-button>
+    </router-link>
   </ParticipantDefaultContainer>
 </template>
 
@@ -165,6 +183,26 @@ export default class ParticipantOverview extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.el-button.fullwidth::v-deep {
+  margin: 0 1rem 1rem;
+  width: calc(100% - 2rem);
+  justify-content: flex-start;
+
+  .el-icon {
+    margin-right: 5.6rem;
+  }
+}
+
+.participant-overview::v-deep {
+  .el-main {
+    display: block;
+
+    .el-collapse {
+      margin-bottom: 1rem;
+    }
+  }
+}
+
 .media {
   border-top: 1px solid rgba(128, 128, 128, 0.5);
   //background-color: var(--color-transparent);
