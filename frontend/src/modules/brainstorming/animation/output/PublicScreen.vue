@@ -117,36 +117,6 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.public-idea {
-  max-width: 20rem;
-}
-
-.el-card {
-  width: 100%;
-  height: 100%;
-}
-
-.el-card::v-deep {
-  .el-card__body {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .card__text {
-    flex-basis: auto;
-    flex-grow: 1;
-    flex-shrink: 1;
-    text-align: inherit;
-
-    display: block;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-  }
-}
-
 .grid {
   display: grid;
   grid-template-rows: 1fr 1fr;

@@ -3,8 +3,14 @@
        "animation": {  
            "publicScreen": "output/PublicScreen",  
            "locales": "en,",  
-             "icon": "film",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
+             "icon": "space_invaders",  "iconPrefix": "fac",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
            "path": "brainstorming/animation"  
+       },  
+       "card_shuffle_animation": {  
+           "publicScreen": "output/PublicScreen",  
+           "locales": "en,",  
+             "icon": "layer-group",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
+           "path": "brainstorming/card_shuffle_animation"  
        },  
        "chat": {  
            "participant": "output/Participant",  
