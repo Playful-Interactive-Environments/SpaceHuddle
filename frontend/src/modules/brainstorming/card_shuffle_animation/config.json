@@ -1,6 +1,5 @@
 {
-  "icon": "space_invaders",
-  "iconPrefix": "fac",
+  "icon": "layer-group",
   "type": "addOn",
   "input": "no",
   "syncPublicParticipant": false

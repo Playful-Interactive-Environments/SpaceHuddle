@@ -112,6 +112,7 @@ import UserType from '@/types/enum/UserType';
 import TaskType from '@/types/enum/TaskType';
 import { CollapseIdeas } from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import { ElMessage } from 'element-plus';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 export interface FilterData {
   orderType: string;
@@ -127,6 +128,28 @@ export const defaultFilterData: FilterData = {
   stateFilter: Object.keys(IdeaStates),
   textFilter: '',
   collapseIdeas: CollapseIdeas.custom,
+};
+
+export const getFilterForTask = async (
+  taskId: string,
+  authHeaderTyp = EndpointAuthorisationType.MODERATOR
+): Promise<FilterData> => {
+  const filter = { ...defaultFilterData };
+
+  await taskService.getTaskById(taskId, authHeaderTyp).then((task) => {
+    if (task.parameter && task.parameter.orderType)
+      filter.orderType = task.parameter.orderType;
+    if (task.parameter && task.parameter.stateFilter)
+      filter.stateFilter = task.parameter.stateFilter;
+    if (task.parameter && task.parameter.textFilter)
+      filter.textFilter = task.parameter.textFilter;
+    if (task.parameter && 'collapseIdeas' in task.parameter)
+      filter.collapseIdeas = task.parameter.collapseIdeas;
+    if (task.parameter && 'orderAsc' in task.parameter)
+      filter.orderAsc = task.parameter.orderAsc;
+  });
+
+  return filter;
 };
 
 @Options({
@@ -271,11 +294,13 @@ export default class IdeaFilter extends Vue {
       taskService.getTaskById(this.taskId).then((task) => {
         if (this.syncToPublicScreen) {
           task.parameter.orderType = this.modelValue.orderType;
+          task.parameter.orderAsc = this.modelValue.orderAsc;
           task.parameter.stateFilter = this.modelValue.stateFilter;
           task.parameter.textFilter = this.modelValue.textFilter;
           task.parameter.collapseIdeas = this.modelValue.collapseIdeas;
         } else if (!this.syncUserId) {
           task.parameter.orderType = defaultFilterData.orderType;
+          task.parameter.orderAsc = defaultFilterData.orderAsc;
           task.parameter.stateFilter = defaultFilterData.stateFilter;
           task.parameter.textFilter = defaultFilterData.textFilter;
           task.parameter.collapseIdeas = defaultFilterData.collapseIdeas;

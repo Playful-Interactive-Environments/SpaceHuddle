@@ -276,7 +276,8 @@ export default class PublicScreen extends Vue {
               await getAsyncModule(
                 ModuleComponentType.PUBLIC_SCREEN,
                 taskType,
-                this.getModuleName(queryResult)
+                this.getModuleName(queryResult),
+                this.isModerator
               ).then((component) => {
                 if (this.$options.components) {
                   this.componentLoadingState = ComponentLoadingState.SELECTED;

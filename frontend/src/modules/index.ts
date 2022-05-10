@@ -118,7 +118,8 @@ export const getAsyncDefaultModule = async (
 export const getAsyncModule = async (
   componentType: string,
   taskType: string | null = null,
-  moduleName: string | string[] = defaultModuleName
+  moduleName: string | string[] = defaultModuleName,
+  useAddOns = true
 ): Promise<any> => {
   await until(() => moduleConfigLoaded);
   if (taskType) {
@@ -130,7 +131,7 @@ export const getAsyncModule = async (
       while (moduleIndex < moduleList.length) {
         const module = moduleConfig[taskType][moduleList[moduleIndex]];
         if (module.fallback) fallback = module.fallback;
-        if (module[componentType])
+        if (module[componentType] && (useAddOns || module.type !== 'addOn'))
           modules.push({
             order:
               module.type == 'addOn'

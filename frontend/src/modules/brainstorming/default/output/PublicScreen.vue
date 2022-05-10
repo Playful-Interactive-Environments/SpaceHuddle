@@ -30,14 +30,13 @@
 import { Options, Vue } from 'vue-class-component';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as ideaService from '@/services/idea-service';
-import * as taskService from '@/services/task-service';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
-import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import {
   defaultFilterData,
   FilterData,
+  getFilterForTask,
 } from '@/components/moderator/molecules/IdeaFilter.vue';
 
 @Options({
@@ -93,42 +92,25 @@ export default class PublicScreen extends Vue {
   async getIdeas(): Promise<void> {
     const currentDate = new Date();
     if (this.taskId) {
-      const filter = { ...defaultFilterData };
-
-      await taskService
-        .getTaskById(this.taskId, this.authHeaderTyp)
-        .then((task) => {
-          if (task.parameter && task.parameter.orderType)
-            filter.orderType = task.parameter.orderType;
-          if (task.parameter && task.parameter.stateFilter)
-            filter.stateFilter = task.parameter.stateFilter;
-          if (task.parameter && task.parameter.textFilter)
-            filter.textFilter = task.parameter.textFilter;
-          if (task.parameter && task.parameter.collapseIdeas)
-            filter.collapseIdeas = task.parameter.collapseIdeas;
-        });
-
-      this.filter = filter;
+      await getFilterForTask(this.taskId, this.authHeaderTyp).then((filter) => {
+        this.filter = filter;
+      });
 
       await ideaService
         .getIdeasForTask(
           this.taskId,
-          filter.orderType,
+          this.filter.orderType,
           null,
           this.authHeaderTyp
         )
         .then((ideas) => {
+          ideas = this.filter.orderAsc ? ideas : ideas.reverse();
           ideas = ideaService.filterIdeas(
             ideas,
-            filter.stateFilter,
-            filter.textFilter
+            this.filter.stateFilter,
+            this.filter.textFilter
           );
-          if (
-            filter.orderType.toUpperCase() ==
-            IdeaSortOrder.TIMESTAMP.toUpperCase()
-          )
-            this.ideas = ideas.reverse();
-          else this.ideas = ideas;
+          this.ideas = ideas;
 
           this.ideaTransform = Object.assign(
             {},
