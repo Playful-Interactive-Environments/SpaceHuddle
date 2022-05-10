@@ -3,6 +3,16 @@
     <h1 class="heading heading--medium">
       {{ $t(`module.information.quiz.enum.questionType.${questionType}`) }}
     </h1>
+
+    <div id="quizDiv">
+      <QuizResult
+          :voteResult="votes"
+          :update="true"
+          :questionType="questionType"
+          :height="30"
+      />
+    </div>
+
     <ProcessTimeline
       v-model="questions"
       v-model:publicScreen="publicQuestion"
@@ -128,17 +138,6 @@
           />
         </el-form-item>
       </ValidationForm>
-      <QuizResult
-        :voteResult="votes"
-        :update="true"
-        :questionType="questionType"
-      />
-      <el-pagination
-        layout="prev, pager, next"
-        :page-size="1"
-        :total="questions.length + 1"
-        v-model:current-page="editQuestionIndex"
-      ></el-pagination>
     </div>
   </div>
 </template>
@@ -513,4 +512,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   margin: auto;
   padding-left: 0.5rem;
 }
+
+div#quizDiv {
+
+}
+
 </style>

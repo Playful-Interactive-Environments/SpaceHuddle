@@ -29,7 +29,9 @@
     "thanksModerated": "Your answer has been saved. You can still change the answer until the timer expires.",
     "thanksIndividual": "Your answer has been saved. You can still change the answer.",
     "previous": "previous",
-    "next": "next"
+    "next": "next",
+    "submit": "submit",
+    "waiting": "Please wait. Questions and answers are being loaded."
   },
   "enum": {
     "questionType": {

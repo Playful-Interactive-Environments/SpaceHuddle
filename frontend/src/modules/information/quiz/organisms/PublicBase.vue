@@ -175,9 +175,10 @@ export default class PublicBase extends Vue {
   get publicAnswers(): Hierarchy[] {
     if (this.publicQuestion) {
       if (this.questionState == QuestionState.ACTIVE_CREATE_QUESTION)
-        if (this.statePointer > 0)
-          return this.publicQuestion.answers.slice(0, this.statePointer - 1);
-        else return [];
+        if (this.statePointer > 0) {
+          //return this.publicQuestion.answers.slice(0, this.statePointer - 1);
+          return this.publicQuestion.answers;
+        }else return [];
       return this.publicQuestion.answers;
     }
     return [];
@@ -406,7 +407,7 @@ export default class PublicBase extends Vue {
             isHighlighted: this.highlightAnswer(answer),
             isFinished: this.finishedAnswer(answer),
           };
-        })
+        }),
       );
     }
   }

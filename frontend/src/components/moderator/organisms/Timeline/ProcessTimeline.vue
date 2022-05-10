@@ -133,7 +133,7 @@
                           :icon="contentListIcon(element)"
                         />
                         <span v-else class="processIcon withoutIcon">
-                          {{ index }}
+                          {{ index+1 }}
                         </span>
                       </span>
                     </TutorialStep>
