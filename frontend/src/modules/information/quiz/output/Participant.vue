@@ -7,16 +7,16 @@
         element-loading-background="rgba(0, 0, 0, 0)"
     ></span>
   </div>
-  <div id="QuizImageBackground">
+  <div id="QuizImageBackground" v-if="hasImage">
     <div id="QuizImageContainer">
       <img
-          src="../../../../assets/illustrations/Quiz/QuizImage.jpg"
+          :src="getImageSrc"
           alt="quizImage"
           class="QuizImage"
       />
     </div>
   </div>
-  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName" id="PMDC">
+  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName" :class="{PMDC: hasImage}" >
     <div id="preloader"></div>
     <template #footer>
       <span class="previousNext">
@@ -167,6 +167,20 @@ export default class Participant extends Vue {
 
   mounted(): void {
     this.loading;
+  }
+
+  get hasImage(): boolean {
+    //check if the question has an image and return true or false
+    return false;
+  }
+  
+  get getImageSrc(): string {
+    if (this.hasImage) {
+      //check image src and return. this is just a dummy picture for now
+      return require('../../../../assets/illustrations/Quiz/QuizImage.jpg');
+    } else {
+      return '';
+    }
   }
 
   get isActive(): boolean {
@@ -367,7 +381,7 @@ export default class Participant extends Vue {
   justify-content: left;
 }
 
-#PMDC {
+.PMDC {
   border-radius: 30px 30px 0 0;
   position: absolute;
   top: 30%;
@@ -462,6 +476,8 @@ div#loadingScreen > span#loading::v-deep .path {
   position: absolute;
 
   height: 23%;
+
+  width: 60%;
 
   top: 3%;
   left: 0;
