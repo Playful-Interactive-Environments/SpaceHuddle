@@ -176,7 +176,8 @@ CREATE TABLE `session` (
                            `max_participants` int(11) DEFAULT NULL,
                            `expiration_date` date DEFAULT NULL,
                            `creation_date` date NOT NULL DEFAULT current_timestamp(),
-                           `public_screen_module_id` char(36) DEFAULT NULL
+                           `public_screen_module_id` char(36) DEFAULT NULL,
+                           `allow_anonymous` BIT(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------

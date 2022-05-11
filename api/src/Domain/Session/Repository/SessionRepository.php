@@ -54,28 +54,38 @@ class SessionRepository implements RepositoryInterface
     public function getAuthorisationRole(?string $id): ?string
     {
         $authorisation = $this->getAuthorisation();
-        $conditions = [
-            "session_id" => $id,
-            "user_id" => $authorisation->id,
-            "user_type" => $authorisation->type
-        ];
-        $role = $this->getAuthorisationRoleFromCondition(
-            $id,
-            $conditions,
-            "session_permission",
-            false
-        );
+        if (!is_null($authorisation->id)) {
+            $conditions = [
+                "session_id" => $id,
+                "user_id" => $authorisation->id,
+                "user_type" => $authorisation->type
+            ];
+            $role = $this->getAuthorisationRoleFromCondition(
+                $id,
+                $conditions,
+                "session_permission",
+                false
+            );
 
-        if ($authorisation->isParticipant() and $role == strtoupper(SessionRoleType::PARTICIPANT)) {
-            $result = $this->get([
-                "session.id" => $id
-            ]);
-            if (!is_object($result)) {
-                return strtoupper(SessionRoleType::EXPIRED);
+            if ($authorisation->isParticipant() and $role == strtoupper(SessionRoleType::PARTICIPANT)) {
+                $result = $this->get([
+                    "session.id" => $id
+                ]);
+                if (!is_object($result)) {
+                    return strtoupper(SessionRoleType::EXPIRED);
+                }
             }
-        }
 
-        return $role;
+            return $role;
+        } else {
+            $query = $this->queryFactory->newSelect("session");
+            $query->select(["'anonymous' AS role"])
+                ->andWhere([
+                    "id" => $id,
+                    "allow_anonymous" => 1,
+                ]);
+            return $this->getAuthorisationRoleFromQuery($id, $query, false);
+        }
     }
 
     /**
@@ -102,9 +112,16 @@ class SessionRepository implements RepositoryInterface
         }
 
         $query = $this->queryFactory->newSelect($this->getEntityName());
-        $query->select(["session.*", "session_permission.role"])
-            ->innerJoin("session_permission", "session_permission.session_id = session.id")
-            ->andWhere($authorisation_conditions)
+        if (is_null($authorisation->id)) {
+            $authorisation_conditions = [
+                "allow_anonymous" => 1,
+            ];
+            $query->select(["session.*", "'anonymous' AS role"]);
+        } else {
+            $query->select(["session.*", "session_permission.role"])
+                ->innerJoin("session_permission", "session_permission.session_id = session.id");
+        }
+        $query->andWhere($authorisation_conditions)
             ->andWhere($conditions)
             ->order($sortConditions);
 
@@ -307,7 +324,8 @@ class SessionRepository implements RepositoryInterface
             "connection_key" => $data->connectionKey ?? null,
             "max_participants" => $data->maxParticipants ?? null,
             "expiration_date" => $data->expirationDate ?? null,
-            "public_screen_module_id" => $data->publicScreenModuleId ?? null
+            "public_screen_module_id" => $data->publicScreenModuleId ?? null,
+            "allow_anonymous" => $data->allowAnonymous ?? null
         ];
 
         if (property_exists($data, "creationDate")) {

@@ -31,6 +31,9 @@ class SessionRoleType
     public const UNKNOWN = "unknown";
 
     /** @var string */
+    public const ANONYMOUS = "anonymous";
+
+    /** @var string */
     public const EXPIRED = "expired";
 
     /**
@@ -47,7 +50,7 @@ class SessionRoleType
             return strtoupper(self::PARTICIPANT);
         }
         if (strtoupper($authorisationRoleType) === strtoupper(AuthorisationType::NONE)) {
-            return strtoupper(self::UNKNOWN);
+            return strtoupper(self::ANONYMOUS);
         }
         return strtoupper(self::UNKNOWN);
     }

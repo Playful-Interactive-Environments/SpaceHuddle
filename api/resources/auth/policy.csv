@@ -1,9 +1,9 @@
-p, UNKNOWN, /, GET
-p, UNKNOWN, /docs/v1/, GET
+p, UNKNOWN|ANONYMOUS, /, GET
+p, UNKNOWN|ANONYMOUS, /docs/v1/, GET
 
 p, MODERATOR|FACILITATOR, /task/:taskId/client_application_state/:state/, PUT
 
-p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/categories/, GET
+p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/categories/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/categories/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /category/:id/, GET
 p, MODERATOR|FACILITATOR, /category/:id/, DELETE
@@ -15,13 +15,13 @@ p, MODERATOR|FACILITATOR|PARTICIPANT, /category/:categoryId/ideas/, POST
 p, MODERATOR|FACILITATOR|PARTICIPANT, /category/:categoryId/ideas/, DELETE
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/hierarchies/, GET
-p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/hierarchies/:parentHierarchyId/, GET
+p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/hierarchies/:parentHierarchyId/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /hierarchy/:id/, GET
 p, MODERATOR|FACILITATOR, /hierarchy/:id/, DELETE
 p, MODERATOR|FACILITATOR, /task/:taskId/hierarchy/, POST
 p, MODERATOR|FACILITATOR, /hierarchy/, PUT
 
-p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/ideas/, GET
+p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/ideas/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/ideas/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /idea/:id/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /idea/:id/, DELETE
@@ -36,17 +36,17 @@ p, MODERATOR|FACILITATOR, /task/:taskId/module/, POST
 p, MODERATOR|FACILITATOR, /module/, PUT
 p, MODERATOR|FACILITATOR, /module_names/:taskType/, GET
 
-p, UNKNOWN|MODERATOR|PARTICIPANT, /user/login/, POST
-p, UNKNOWN|MODERATOR|PARTICIPANT, /user/register/, POST
-p, UNKNOWN|MODERATOR|PARTICIPANT, /user/forget-password/, PUT
-p, UNKNOWN|MODERATOR|PARTICIPANT, /user/reset/:email/, PUT
-p, UNKNOWN|MODERATOR|PARTICIPANT, /user/confirm/:token/, PUT
-p, UNKNOWN|MODERATOR|PARTICIPANT, /user/send-confirm/:email/, PUT
+p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /user/login/, POST
+p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /user/register/, POST
+p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /user/forget-password/, PUT
+p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /user/reset/:email/, PUT
+p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /user/confirm/:token/, PUT
+p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /user/send-confirm/:email/, PUT
 p, MODERATOR, /user/, PUT
 p, MODERATOR, /user/, DELETE
 
-p, UNKNOWN|MODERATOR|PARTICIPANT, /participant/connect/, POST
-p, UNKNOWN|MODERATOR|PARTICIPANT, /participant/reconnect/:browserKey/, GET
+p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /participant/connect/, POST
+p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /participant/reconnect/:browserKey/, GET
 p, MODERATOR|PARTICIPANT|INACTIVE, /participant/state/:state/, PUT
 p, MODERATOR|PARTICIPANT|INACTIVE, /participant/, DELETE
 p, PARTICIPANT, /participant/tasks/, GET
@@ -63,7 +63,7 @@ p, MODERATOR|FACILITATOR|PARTICIPANT, /selection/:id/, GET
 p, MODERATOR|FACILITATOR, /selection/:id/, DELETE
 p, MODERATOR|FACILITATOR, /topic/:topicId/selection/, POST
 p, MODERATOR|FACILITATOR, /selection/, PUT
-p, MODERATOR|FACILITATOR|PARTICIPANT, /selection/:selectionId/ideas/, GET
+p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /selection/:selectionId/ideas/, GET
 p, MODERATOR|FACILITATOR, /selection/:selectionId/ideas/, POST
 p, MODERATOR|FACILITATOR, /selection/:selectionId/ideas/, DELETE
 
@@ -71,15 +71,15 @@ p, MODERATOR|FACILITATOR, /tutorial_steps/, GET
 p, MODERATOR|FACILITATOR, /tutorial_step/, POST
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /sessions/, GET
-p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:id/, GET
+p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /session/:id/, GET
 p, MODERATOR, /session/:id/, DELETE
 p, MODERATOR, /session/, PUT
 p, MODERATOR, /session/, POST
-p, UNKNOWN|MODERATOR|FACILITATOR|PARTICIPANT, /session_infos/, POST
+p, UNKNOWN|ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /session_infos/, POST
 p, MODERATOR|FACILITATOR, /session/:sessionId/participants/, GET
 
 p, MODERATOR|FACILITATOR, /session/:sessionId/public_screen/:taskId/, PUT
-p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/public_screen/, GET
+p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/public_screen/, GET
 
 p, MODERATOR|FACILITATOR, /session/:sessionId/authorized_users/, GET
 p, MODERATOR, /session/:sessionId/authorized_user/, PUT
@@ -88,9 +88,9 @@ p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/own_user_role/, GET
 p, MODERATOR, /session/:sessionId/authorized_user/:username/, DELETE
 p, MODERATOR|FACILITATOR, /session/:sessionId/own_user_role/, DELETE
 
-p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/tasks/, GET
+p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/tasks/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/dependent/, GET
-p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/, GET
+p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/, GET
 p, MODERATOR|FACILITATOR, /task/:id/, DELETE
 p, MODERATOR|FACILITATOR, /topic/:topicId/task/, POST
 p, MODERATOR|FACILITATOR, /task/, PUT
@@ -102,12 +102,12 @@ p, MODERATOR, /session/:sessionId/topic/, POST
 p, MODERATOR|FACILITATOR, /topic/, PUT
 p, MODERATOR|FACILITATOR, /topic/:id/export/:exportType/, GET
 
-p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/views/, GET
-p, MODERATOR|FACILITATOR|PARTICIPANT, /view/:type/:typeId/, GET
+p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/views/, GET
+p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /view/:type/:typeId/, GET
 
-p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/vote_result/, GET
-p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/vote_result_parent/, GET
-p, MODERATOR|FACILITATOR|PARTICIPANT, /hierarchy/:parentId/vote_result/, GET
+p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/vote_result/, GET
+p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/vote_result_parent/, GET
+p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /hierarchy/:parentId/vote_result/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /vote/:id/, GET
 p, MODERATOR|PARTICIPANT, /vote/:id/, DELETE
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:taskId/votes/, GET
@@ -120,3 +120,4 @@ g, FACILITATOR, USER
 g, PARTICIPANT, PARTICIPANT
 g, INACTIVE, PARTICIPANT
 g, UNKNOWN, NONE
+g, ANONYMOUS, NONE

@@ -88,6 +88,13 @@ class SessionData
     public int $taskCount;
 
     /**
+     * Allow everyone to view public screen.
+     * @var bool
+     * @OA\Property()
+     */
+    public bool $allowAnonymous;
+
+    /**
      * Creates a new Participant.
      * @param array $data Participant data.
      */
@@ -105,6 +112,7 @@ class SessionData
         $this->role = $reader->findString("role");
         $this->topicCount = $reader->findInt("topic_count") ?? 0;
         $this->taskCount = $reader->findInt("task_count") ?? 0;
+        $this->allowAnonymous = $reader->findBool("allow_anonymous") ?? false;
 
         if (isset($this->role)) {
             $this->role = strtoupper($this->role);

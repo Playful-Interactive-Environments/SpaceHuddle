@@ -177,8 +177,16 @@ return function (App $app) {
     $app->group(
         "/session",
         function (RouteCollectorProxy $app) {
-            $app->put("/{sessionId}/public_screen/{taskId}[/]", PublicScreenUpdateAction::class);
             $app->get("/{sessionId}/public_screen[/]", PublicScreenReadAction::class);
+            $app->get("/{id}[/]", SessionReadSingleAction::class);
+        }
+    );
+
+    $app->group(
+        "/session",
+        function (RouteCollectorProxy $app) {
+            $app->put("/{sessionId}/public_screen/{taskId}[/]", PublicScreenUpdateAction::class);
+            //$app->get("/{sessionId}/public_screen[/]", PublicScreenReadAction::class);
 
             $app->post("/{sessionId}/topic[/]", TopicCreateAction::class);
             $app->get("/{sessionId}/topics[/]", TopicReadAllAction::class);
@@ -196,7 +204,7 @@ return function (App $app) {
             $app->get("/{sessionId}/participants[/]", SessionParticipantReadAction::class);
 
             $app->post("[/]", SessionCreateAction::class);
-            $app->get("/{id}[/]", SessionReadSingleAction::class);
+            //$app->get("/{id}[/]", SessionReadSingleAction::class);
             $app->put("[/]", SessionUpdateAction::class);
             $app->delete("/{id}[/]", SessionDeleteAction::class);
         }
@@ -206,9 +214,17 @@ return function (App $app) {
         "/topic",
         function (RouteCollectorProxy $app) {
             $app->get("/{topicId}/views[/]", ViewReadAllAction::class);
+            $app->get("/{topicId}/tasks[/]", TaskReadAllAction::class);
+        }
+    );
+
+    $app->group(
+        "/topic",
+        function (RouteCollectorProxy $app) {
+            //$app->get("/{topicId}/views[/]", ViewReadAllAction::class);
 
             $app->post("/{topicId}/task[/]", TaskCreateAction::class);
-            $app->get("/{topicId}/tasks[/]", TaskReadAllAction::class);
+            //$app->get("/{topicId}/tasks[/]", TaskReadAllAction::class);
 
             $app->get("/{topicId}/ideas[/]", IdeaReadAllFromTopicAction::class);
             $app->post("/{topicId}/idea[/]", IdeaCreateForTopicAction::class);
@@ -230,27 +246,39 @@ return function (App $app) {
     $app->group(
         "/task",
         function (RouteCollectorProxy $app) {
+            $app->get("/{taskId}/ideas[/]", IdeaReadAllFromTaskAction::class);
+            $app->get("/{taskId}/categories[/]", CategoryReadAllFromTaskAction::class);
+            $app->get("/{taskId}/hierarchies/{parentHierarchyId}[/]", HierarchyReadAllAction::class);
+            $app->get("/{taskId}/vote_result[/]", VoteResultReadAction::class);
+            $app->get("/{taskId}/vote_result_parent[/]", VoteParentResultReadAction::class);
+            $app->get("/{id}[/]", TaskReadSingleAction::class);
+        }
+    );
+
+    $app->group(
+        "/task",
+        function (RouteCollectorProxy $app) {
             $app->put("/{taskId}/client_application_state/{state}[/]", TaskStateUpdateAction::class);
 
             $app->get("/{taskId}/modules[/]", ModuleReadAllAction::class);
             $app->post("/{taskId}/module[/]", ModuleCreateAction::class);
 
-            $app->get("/{taskId}/ideas[/]", IdeaReadAllFromTaskAction::class);
+            //$app->get("/{taskId}/ideas[/]", IdeaReadAllFromTaskAction::class);
             $app->post("/{taskId}/idea[/]", IdeaCreateForTaskAction::class);
 
-            $app->get("/{taskId}/categories[/]", CategoryReadAllFromTaskAction::class);
+            //$app->get("/{taskId}/categories[/]", CategoryReadAllFromTaskAction::class);
             $app->post("/{taskId}/category[/]", CategoryCreateForTaskAction::class);
 
-            $app->get("/{taskId}/hierarchies/{parentHierarchyId}[/]", HierarchyReadAllAction::class);
+            //$app->get("/{taskId}/hierarchies/{parentHierarchyId}[/]", HierarchyReadAllAction::class);
             $app->get("/{taskId}/hierarchies[/]", HierarchyReadAllAction::class);
             $app->post("/{taskId}/hierarchy[/]", HierarchyCreateAction::class);
 
             $app->get("/{taskId}/votes[/]", VoteReadAllAction::class);
-            $app->get("/{taskId}/vote_result[/]", VoteResultReadAction::class);
-            $app->get("/{taskId}/vote_result_parent[/]", VoteParentResultReadAction::class);
+            //$app->get("/{taskId}/vote_result[/]", VoteResultReadAction::class);
+            //$app->get("/{taskId}/vote_result_parent[/]", VoteParentResultReadAction::class);
             $app->post("/{taskId}/vote[/]", VoteCreateAction::class);
 
-            $app->get("/{id}[/]", TaskReadSingleAction::class);
+            //$app->get("/{id}[/]", TaskReadSingleAction::class);
             $app->get("/{id}/dependent[/]", TaskReadDependentAction::class);
             $app->put("[/]", TaskUpdateAction::class);
             $app->delete("/{id}[/]", TaskDeleteAction::class);
@@ -299,6 +327,13 @@ return function (App $app) {
         "/hierarchy",
         function (RouteCollectorProxy $app) {
             $app->get("/{parentId}/vote_result[/]", VoteHierarchyResultReadAction::class);
+        }
+    );
+
+    $app->group(
+        "/hierarchy",
+        function (RouteCollectorProxy $app) {
+            //$app->get("/{parentId}/vote_result[/]", VoteHierarchyResultReadAction::class);
             $app->get("/{parentId}/votes[/]", VoteHierarchyReadAllAction::class);
 
             $app->get("/{id}[/]", HierarchyReadSingleAction::class);
@@ -311,6 +346,13 @@ return function (App $app) {
         "/selection",
         function (RouteCollectorProxy $app) {
             $app->get("/{selectionId}/ideas[/]", SelectionIdeaReadAction::class);
+        }
+    );
+
+    $app->group(
+        "/selection",
+        function (RouteCollectorProxy $app) {
+            //$app->get("/{selectionId}/ideas[/]", SelectionIdeaReadAction::class);
             $app->post("/{selectionId}/ideas[/]", SelectionIdeaAddAction::class);
             $app->delete("/{selectionId}/ideas[/]", SelectionIdeaDeleteAction::class);
 
@@ -325,7 +367,7 @@ return function (App $app) {
         function (RouteCollectorProxy $app) {
             $app->get("/{type}/{typeId}[/]", ViewReadSingleAction::class);
         }
-    )->add(JwtAuthMiddleware::class);
+    );
 
     $app->group(
         "/vote",
