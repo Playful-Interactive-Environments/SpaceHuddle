@@ -68,6 +68,7 @@ import * as categorisationService from '@/services/categorisation-service';
 import {
   defaultFilterData,
   FilterData,
+  getFilterForTask,
 } from '@/components/moderator/molecules/IdeaFilter.vue';
 
 @Options({
@@ -130,17 +131,7 @@ export default class PublicScreen extends Vue {
       await this.getCategories();
 
       if (this.task && this.task.parameter && this.task.parameter.input) {
-        const filter = { ...defaultFilterData };
-        if (this.task.parameter && this.task.parameter.orderType)
-          filter.orderType = this.task.parameter.orderType;
-        if (this.task.parameter && this.task.parameter.stateFilter)
-          filter.stateFilter = this.task.parameter.stateFilter;
-        if (this.task.parameter && this.task.parameter.textFilter)
-          filter.textFilter = this.task.parameter.textFilter;
-        if (this.task.parameter && this.task.parameter.collapseIdeas)
-          filter.collapseIdeas = this.task.parameter.collapseIdeas;
-
-        this.filter = filter;
+        this.filter = getFilterForTask(this.task);
 
         const getCategorizedIdeas = viewService.getViewOrderGroups(
           this.task.topicId,
@@ -151,19 +142,20 @@ export default class PublicScreen extends Vue {
           this.authHeaderTyp,
           this.orderGroupContent,
           (this as any).$t,
-          filter.stateFilter,
-          filter.textFilter
+          this.filter.stateFilter,
+          this.filter.textFilter
         );
         const getUncategorizedIdeas = viewService.getViewIdeas(
           this.task.topicId,
           this.task.parameter.input,
-          filter.orderType,
+          this.filter.orderType,
           null,
-          EndpointAuthorisationType.MODERATOR,
+          this.authHeaderTyp,
           (this as any).$t,
-          filter.stateFilter,
-          filter.textFilter
+          this.filter.stateFilter,
+          this.filter.textFilter
         );
+
         await getCategorizedIdeas.then((result) => {
           this.ideas = result.ideas;
           this.orderGroupContent = result.oderGroups;

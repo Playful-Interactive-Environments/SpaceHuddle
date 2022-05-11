@@ -36,7 +36,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import {
   defaultFilterData,
   FilterData,
-  getFilterForTask,
+  getFilterForTaskId,
 } from '@/components/moderator/molecules/IdeaFilter.vue';
 
 @Options({
@@ -107,9 +107,11 @@ export default class PublicScreen extends Vue {
 
   async getIdeas(): Promise<void> {
     if (this.taskId) {
-      await getFilterForTask(this.taskId, this.authHeaderTyp).then((filter) => {
-        this.filter = filter;
-      });
+      await getFilterForTaskId(this.taskId, this.authHeaderTyp).then(
+        (filter) => {
+          this.filter = filter;
+        }
+      );
 
       await ideaService
         .getIdeasForTask(

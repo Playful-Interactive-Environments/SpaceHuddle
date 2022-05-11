@@ -154,7 +154,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'public-screen',
     component: PublicScreen,
     meta: {
-      requiresAuth: true,
+      requiresAuth: false,
     },
     props: (route) => ({
       sessionId: route.params.sessionId,

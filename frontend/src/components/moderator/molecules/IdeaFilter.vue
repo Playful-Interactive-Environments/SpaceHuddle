@@ -130,24 +130,32 @@ export const defaultFilterData: FilterData = {
   collapseIdeas: CollapseIdeas.custom,
 };
 
-export const getFilterForTask = async (
+export const getFilterForTaskId = async (
   taskId: string,
   authHeaderTyp = EndpointAuthorisationType.MODERATOR
 ): Promise<FilterData> => {
-  const filter = { ...defaultFilterData };
+  let filter = { ...defaultFilterData };
 
   await taskService.getTaskById(taskId, authHeaderTyp).then((task) => {
-    if (task.parameter && task.parameter.orderType)
-      filter.orderType = task.parameter.orderType;
-    if (task.parameter && task.parameter.stateFilter)
-      filter.stateFilter = task.parameter.stateFilter;
-    if (task.parameter && task.parameter.textFilter)
-      filter.textFilter = task.parameter.textFilter;
-    if (task.parameter && 'collapseIdeas' in task.parameter)
-      filter.collapseIdeas = task.parameter.collapseIdeas;
-    if (task.parameter && 'orderAsc' in task.parameter)
-      filter.orderAsc = task.parameter.orderAsc;
+    filter = getFilterForTask(task);
   });
+
+  return filter;
+};
+
+export const getFilterForTask = (task: Task): FilterData => {
+  const filter = { ...defaultFilterData };
+
+  if (task.parameter && task.parameter.orderType)
+    filter.orderType = task.parameter.orderType;
+  if (task.parameter && task.parameter.stateFilter)
+    filter.stateFilter = task.parameter.stateFilter;
+  if (task.parameter && task.parameter.textFilter)
+    filter.textFilter = task.parameter.textFilter;
+  if (task.parameter && 'collapseIdeas' in task.parameter)
+    filter.collapseIdeas = task.parameter.collapseIdeas;
+  if (task.parameter && 'orderAsc' in task.parameter)
+    filter.orderAsc = task.parameter.orderAsc;
 
   return filter;
 };

@@ -205,6 +205,10 @@ export default class PublicScreen extends Vue {
     return this.authHeaderTyp === EndpointAuthorisationType.MODERATOR;
   }
 
+  get isParticipant(): boolean {
+    return this.authHeaderTyp === EndpointAuthorisationType.PARTICIPANT;
+  }
+
   get taskId(): string | null {
     if (this.task) return this.task.id;
     return null;
@@ -277,7 +281,7 @@ export default class PublicScreen extends Vue {
                 ModuleComponentType.PUBLIC_SCREEN,
                 taskType,
                 this.getModuleName(queryResult),
-                this.isModerator
+                !this.isParticipant
               ).then((component) => {
                 if (this.$options.components) {
                   this.componentLoadingState = ComponentLoadingState.SELECTED;

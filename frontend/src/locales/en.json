@@ -175,7 +175,9 @@
         "facilitatorSettings": {
           "header": "manage co authors",
           "info": "insert the email address of a desired co author",
-          "email": "email"
+          "email": "email",
+          "allowAnonymous": "allow everyone to view public screen",
+          "publicScreen": "Anonymous Public Link"
         },
         "taskSettings": {
           "header": "Add a Module",

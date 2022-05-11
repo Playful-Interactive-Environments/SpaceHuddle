@@ -1,5 +1,9 @@
 <template>
-  <el-dialog v-model="showSettings" :before-close="handleClose" width="calc(var(--app-width) * 0.8)">
+  <el-dialog
+    v-model="showSettings"
+    :before-close="handleClose"
+    width="calc(var(--app-width) * 0.8)"
+  >
     <template #title>
       <span class="el-dialog__title">
         {{ $t('moderator.organism.settings.facilitatorSettings.header') }}
@@ -60,6 +64,29 @@
         </span>
       </el-form-item>
       <el-form-item
+        :label="
+          $t('moderator.organism.settings.facilitatorSettings.allowAnonymous')
+        "
+        prop="allowAnonymous"
+        class="allow"
+      >
+        <el-switch v-model="formData.allowAnonymous" />
+        <router-link
+          v-if="formData.allowAnonymous"
+          :to="`/public-screen/${sessionId}/unauthorisied`"
+          target="_blank"
+        >
+          <el-button type="info">
+            <template #icon>
+              <font-awesome-icon :icon="['fac', 'presentation']" />
+            </template>
+            {{
+              $t('moderator.organism.settings.facilitatorSettings.publicScreen')
+            }}
+          </el-button>
+        </router-link>
+      </el-form-item>
+      <el-form-item
         prop="stateMessage"
         :rules="[defaultFormRules.ruleStateMessage]"
       >
@@ -84,6 +111,7 @@ import ValidationForm, {
 } from '@/components/shared/molecules/ValidationForm.vue';
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
 import * as sessionRoleService from '@/services/session-role-service';
+import * as sessionService from '@/services/session-service';
 import { SessionRole } from '@/types/api/SessionRole';
 import UserType from '@/types/enum/UserType';
 import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
@@ -110,6 +138,7 @@ export default class LinkSettings extends Vue {
 
   formData: ValidationData = {
     email: '',
+    allowAnonymous: false,
   };
 
   showSettings = false;
@@ -139,12 +168,42 @@ export default class LinkSettings extends Vue {
   @Watch('sessionId', { immediate: true })
   async onSessionIdChanged(): Promise<void> {
     await this.loadRoles();
+    await this.loadAnonymous();
   }
 
   async loadRoles(): Promise<void> {
     if (this.sessionId) {
       sessionRoleService.getList(this.sessionId).then((roles) => {
         this.roles = roles.filter((role) => role.username !== this.own);
+      });
+    }
+  }
+
+  dataLoaded = false;
+  async loadAnonymous(): Promise<void> {
+    if (this.sessionId) {
+      sessionService.getById(this.sessionId).then((session) => {
+        this.formData.allowAnonymous = session.allowAnonymous;
+        this.dataLoaded = true;
+      });
+    }
+  }
+
+  @Watch('formData.allowAnonymous', { immediate: true })
+  async onAllowAnonymousChanged(): Promise<void> {
+    if (this.dataLoaded) {
+      await this.saveAnonymous();
+    }
+  }
+
+  async saveAnonymous(): Promise<void> {
+    if (this.sessionId) {
+      console.log('save');
+      sessionService.getById(this.sessionId).then((session) => {
+        if (session.allowAnonymous !== this.formData.allowAnonymous) {
+          session.allowAnonymous = this.formData.allowAnonymous;
+          sessionService.put(session);
+        }
       });
     }
   }
@@ -188,10 +247,27 @@ export default class LinkSettings extends Vue {
 }
 
 .el-button.is-circle {
-  padding: 0.5rem;
+  padding: 0.7rem;
 }
 
 .awesome-icon {
   margin-left: 0.5em;
+}
+
+.el-table::v-deep {
+  .cell {
+    span {
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+.el-form-item::v-deep {
+  &.allow {
+    .el-form-item__content {
+      display: flex;
+      justify-content: space-between;
+    }
+  }
 }
 </style>

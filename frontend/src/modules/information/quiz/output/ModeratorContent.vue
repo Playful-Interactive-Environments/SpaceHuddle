@@ -6,10 +6,10 @@
 
     <div id="quizDiv">
       <QuizResult
-          :voteResult="votes"
-          :update="true"
-          :questionType="questionType"
-          :height="30"
+        :voteResult="votes"
+        :update="true"
+        :questionType="questionType"
+        :height="30"
       />
     </div>
 
@@ -235,7 +235,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   hasParticipantOption(item: Hierarchy): boolean {
     if (!this.publicTask || this.publicTask.id !== this.taskId) return false;
-    if (this.publicQuestion) return item.id === this.publicQuestion.question.id;
+    if (this.publicQuestion && this.moderatedQuestionFlow)
+      return item.id === this.publicQuestion.question.id;
     return false;
   }
 

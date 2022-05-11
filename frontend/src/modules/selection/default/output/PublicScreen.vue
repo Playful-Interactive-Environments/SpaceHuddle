@@ -26,6 +26,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import {
   defaultFilterData,
   FilterData,
+  getFilterForTask,
 } from '@/components/moderator/molecules/IdeaFilter.vue';
 
 @Options({
@@ -65,17 +66,7 @@ export default class PublicScreen extends Vue {
       await this.getTask();
       //if (!this.task) await this.getTask();
       if (this.task?.parameter.selectionId) {
-        const filter = { ...defaultFilterData };
-        if (this.task.parameter && this.task.parameter.orderType)
-          filter.orderType = this.task.parameter.orderType;
-        if (this.task.parameter && this.task.parameter.stateFilter)
-          filter.stateFilter = this.task.parameter.stateFilter;
-        if (this.task.parameter && this.task.parameter.textFilter)
-          filter.textFilter = this.task.parameter.textFilter;
-        if (this.task.parameter && this.task.parameter.collapseIdeas)
-          filter.collapseIdeas = this.task.parameter.collapseIdeas;
-
-        this.filter = filter;
+        this.filter = getFilterForTask(this.task);
 
         await selectService
           .getIdeasForSelection(
@@ -83,10 +74,11 @@ export default class PublicScreen extends Vue {
             this.authHeaderTyp
           )
           .then((ideas) => {
+            ideas = this.filter.orderAsc ? ideas : ideas.reverse();
             this.ideas = ideaService.filterIdeas(
               ideas,
-              filter.stateFilter,
-              filter.textFilter
+              this.filter.stateFilter,
+              this.filter.textFilter
             );
           });
       }
