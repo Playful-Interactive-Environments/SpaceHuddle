@@ -69,7 +69,11 @@
     </el-header>
     <el-container class="public-screen__timer">
       <el-header>
-        <TimerProgress class="timer-process" v-if="task" :entity="task" />
+        <TimerProgress
+          class="timer-process"
+          v-if="task !== null"
+          :entity="task"
+        />
       </el-header>
     </el-container>
     <el-container class="public-screen__container">
@@ -384,12 +388,14 @@ h3 {
 
   &__container {
     //margin-top: calc(-1 * var(--corner-radius));
+    margin-top: 1rem;
     padding: 0;
     height: 100%;
   }
 
   &__timer {
     height: 0;
+    max-height: 0;
     z-index: 2000;
     margin-top: calc(-1 * var(--corner-radius));
 
