@@ -57,11 +57,14 @@ export default class PublicScreen extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    this.active = true;
     this.stackCards();
   }
 
   shuffleDelay = 150;
   stackCards(): void {
+    if (!this.active) return;
+
     const cardList = this.$refs.cardList as HTMLElement;
     const cardCount = cardList ? cardList.children.length : 0;
     if (cardList && cardCount > 0) {
@@ -86,6 +89,8 @@ export default class PublicScreen extends Vue {
   }
 
   spreadCards(): void {
+    if (!this.active) return;
+
     const cardList = this.$refs.cardList as HTMLElement;
     const cardCount = cardList ? cardList.children.length : 0;
     if (cardList && cardCount > 0) {
@@ -141,12 +146,15 @@ export default class PublicScreen extends Vue {
     this.columnWidth = Math.floor(windowWidth / this.columnCount);
   }
 
+  active = false;
   async mounted(): Promise<void> {
+    this.active = true;
     window.addEventListener('resize', this.calcCardGrid);
     this.calcCardGrid();
   }
 
   unmounted(): void {
+    this.active = false;
     window.removeEventListener('resize', this.calcCardGrid);
   }
 }
