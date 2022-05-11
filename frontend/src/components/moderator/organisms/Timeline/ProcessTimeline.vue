@@ -678,8 +678,8 @@ export default class ProcessTimeline extends Vue {
   border: 2px solid var(--color-foreground);
   padding: 0.4rem;
   aspect-ratio: 1 / 1;
-  height: 1.1rem;
-  width: 1.1rem;
+  //height: 1.1rem;
+  //width: 1.1rem;
   margin: -0.2rem 0;
   color: var(--module-color);
 }
