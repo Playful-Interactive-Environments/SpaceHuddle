@@ -171,7 +171,6 @@ export default class Participant extends Vue {
       let element = document.getElementById('loadingScreen');
 
       if (element != null && !element.classList.contains('zeroOpacity')) {
-
         var preload = document.getElementById('preloader');
         preload?.classList.add('PreloadSprites');
 
@@ -381,7 +380,7 @@ export default class Participant extends Vue {
   border-radius: 30px 30px 0 0;
   position: absolute;
   top: 30%;
-  min-height: 65%;
+  min-height: 70%;
 
   left: 0;
   right: 0;

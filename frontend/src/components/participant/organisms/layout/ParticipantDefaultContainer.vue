@@ -62,7 +62,6 @@ export default class ParticipantDefaultContainer extends Vue {
   top: 0;
   color: #fff;
   padding: 1rem;
-
   &__background {
     background: var(--color-darkblue);
     background-image: url('~@/assets/illustrations/background.png');

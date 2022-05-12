@@ -4,7 +4,9 @@
     ref="chartRef"
     type="bar"
     :data="chartData"
+    :height="100"
     :options="{
+      indexAxis: 'y',
       animation: {
         duration: update ? 0 : 2000,
       },
@@ -12,22 +14,21 @@
         x: {
           ticks: {
             color: '#1d2948',
+            stepSize: 1,
           },
           grid: {
             display: false,
           },
           stacked: true,
         },
-        y: {
-          ticks: {
-            color: '#1d2948',
-            stepSize: 1,
-          },
-        },
       },
       plugins: {
         legend: {
+          position: 'top',
+          align: 'end',
           labels: {
+            boxWidth: 30,
+            boxHeight: 30,
             color: '#1d2948',
           },
         },
@@ -60,12 +61,52 @@ export default class QuizResult extends Vue {
     datasets: [],
   };
 
+  axisID = 'yaxisID';
+  labelLineLimit = 2;
+
+  get chartHeight(): number {
+    if (this.voteResult.length * 10 * 2 <= 140) {
+      return this.voteResult.length * 10 * 2;
+    } else {
+      return 140;
+    }
+  }
+
   @Watch('voteResult', { immediate: true })
   onVoteResultChanged(): void {
     if (this.resultData) {
       this.chartData.labels = this.resultData.labels;
       this.chartData.datasets = this.resultData.datasets;
       this.updateChart();
+    }
+  }
+
+  breakString(str, limit): string[] | string {
+    if (str.length > limit) {
+      let stringArray = [''];
+      let brokenString = '';
+      let lineLimit = this.labelLineLimit;
+      for (let i = 0, count = 0; i < str.length && lineLimit > 0; i++) {
+        if ((count >= limit && str[i] === ' ') || count >= limit + 5) {
+          if (str[i] !== ' ') {
+            brokenString += '-';
+          }
+          count = 0;
+          stringArray.push(brokenString);
+          brokenString = '';
+          lineLimit--;
+        } else {
+          count++;
+          brokenString += str[i];
+        }
+      }
+      if (lineLimit == 0) {
+        stringArray[stringArray.length - 1] =
+          stringArray[stringArray.length - 1] + '...';
+      }
+      return stringArray;
+    } else {
+      return str;
     }
   }
 
@@ -81,7 +122,9 @@ export default class QuizResult extends Vue {
     );
     if (this.questionType === QuestionType.QUIZ) {
       return {
-        labels: this.voteResult.map((vote) => vote.idea.keywords),
+        labels: this.voteResult.map((vote) =>
+          this.breakString(vote.idea.keywords, 35)
+        ),
         datasets: [
           {
             label: labelCorrect,
@@ -89,6 +132,10 @@ export default class QuizResult extends Vue {
             data: this.voteResult.map((vote) =>
               vote.idea.parameter.isCorrect ? vote[this.resultColumn] : 0
             ),
+            borderRadius: 5,
+            borderSkipped: false,
+            yAxisID: 1,
+            color: '#1d2948',
           },
           {
             label: labelIncorrect,
@@ -96,6 +143,10 @@ export default class QuizResult extends Vue {
             data: this.voteResult.map((vote) =>
               vote.idea.parameter.isCorrect ? 0 : vote[this.resultColumn]
             ),
+            borderRadius: 5,
+            borderSkipped: false,
+            yAxisID: 1,
+            color: '#1d2948',
           },
         ],
       };

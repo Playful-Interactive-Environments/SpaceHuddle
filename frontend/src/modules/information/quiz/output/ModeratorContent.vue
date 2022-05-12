@@ -4,12 +4,11 @@
       {{ $t(`module.information.quiz.enum.questionType.${questionType}`) }}
     </h1>
 
-    <div id="quizDiv">
+    <div>
       <QuizResult
         :voteResult="votes"
         :update="true"
         :questionType="questionType"
-        :height="30"
       />
     </div>
 
@@ -513,9 +512,4 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   margin: auto;
   padding-left: 0.5rem;
 }
-
-div#quizDiv {
-
-}
-
 </style>

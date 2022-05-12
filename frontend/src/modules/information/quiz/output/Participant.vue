@@ -2,21 +2,21 @@
   <div id="loadingScreen">
     <span>{{ $t('module.information.quiz.participant.waiting') }}...</span>
     <span
-        id="loading"
-        v-loading="true"
-        element-loading-background="rgba(0, 0, 0, 0)"
+      id="loading"
+      v-loading="true"
+      element-loading-background="rgba(0, 0, 0, 0)"
     ></span>
   </div>
   <div id="QuizImageBackground" v-if="hasImage">
     <div id="QuizImageContainer">
-      <img
-          :src="getImageSrc"
-          alt="quizImage"
-          class="QuizImage"
-      />
+      <img :src="getImageSrc" alt="quizImage" class="QuizImage" />
     </div>
   </div>
-  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName" :class="{PMDC: hasImage}" >
+  <ParticipantModuleDefaultContainer
+    :task-id="taskId"
+    :module="moduleName"
+    :class="{ PMDC: hasImage }"
+  >
     <div id="preloader"></div>
     <template #footer>
       <span class="previousNext">
@@ -27,7 +27,7 @@
           :disabled="!hasPreviousQuestion"
           v-if="!moderatedQuestionFlow"
           @click="goToPreviousQuestion"
-          :class="{submitScreenButton: submitScreen}"
+          :class="{ submitScreenButton: submitScreen }"
         >
           {{ $t('module.information.quiz.participant.previous') }}
         </el-button>
@@ -42,13 +42,15 @@
           {{ $t('module.information.quiz.participant.next') }}
         </el-button>
         <el-button
-            type="primary"
-            class="el-button--submit"
-            native-type="submit"
-            :disabled="hasNextQuestion"
-            v-if="!moderatedQuestionFlow && !hasNextQuestion && !submitScreen"
-            @click="goToSubmitScreen"
-        > {{ $t('module.information.quiz.participant.submit') }} </el-button>
+          type="primary"
+          class="el-button--submit"
+          native-type="submit"
+          :disabled="hasNextQuestion"
+          v-if="!moderatedQuestionFlow && !hasNextQuestion && !submitScreen"
+          @click="goToSubmitScreen"
+        >
+          {{ $t('module.information.quiz.participant.submit') }}
+        </el-button>
       </span>
     </template>
     <PublicBase
@@ -97,7 +99,10 @@
       </template>
     </PublicBase>
     <div id="submitScreen" v-if="submitScreen">
-      <span>Thank you for the vote. You can go back and edit your answers if you want to.</span>
+      <span
+        >Thank you for the vote. You can go back and edit your answers if you
+        want to.</span
+      >
     </div>
   </ParticipantModuleDefaultContainer>
 </template>
@@ -153,7 +158,6 @@ export default class Participant extends Vue {
     let element = document.getElementById('loadingScreen');
 
     if (element != null && !element.classList.contains('zeroOpacity')) {
-
       var preload = document.getElementById('preloader');
       preload?.classList.add('PreloadSprites');
 
@@ -173,7 +177,7 @@ export default class Participant extends Vue {
     //check if the question has an image and return true or false
     return false;
   }
-  
+
   get getImageSrc(): string {
     if (this.hasImage) {
       //check image src and return. this is just a dummy picture for now
@@ -499,7 +503,8 @@ div#loadingScreen > span#loading::v-deep .path {
   border: 10px solid var(--color-darkblue-light);
 }
 
-.el-space::v-deep .el-button.el-button--primary.el-button--default.link.outline-thick:hover {
+.el-space::v-deep
+  .el-button.el-button--primary.el-button--default.link.outline-thick:hover {
   background-color: var(--color-darkblue);
   border-color: var(--color-darkblue-light);
 }
@@ -527,5 +532,4 @@ div#loadingScreen > span#loading::v-deep .path {
   align-items: center;
   align-content: center;
 }
-
 </style>
