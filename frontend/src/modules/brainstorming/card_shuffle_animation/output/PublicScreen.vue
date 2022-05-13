@@ -18,7 +18,8 @@
         <IdeaCard
           :idea="idea"
           :is-editable="false"
-          :cutLongTexts="true"
+          :cutLongTexts="false"
+          :ignore-limited-description-length="true"
           class="public-idea"
         />
       </li>
@@ -204,6 +205,7 @@ export default class PublicScreen extends Vue {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+
   }
 
   .card__text {
@@ -214,7 +216,7 @@ export default class PublicScreen extends Vue {
 
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    //justify-content: space-between;
     //align-items: center;
     gap: 0.5rem;
   }

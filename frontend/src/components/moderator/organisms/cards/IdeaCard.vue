@@ -89,11 +89,11 @@
         ref="description"
         v-if="hasKeywords && idea.description"
         class="card__content line-break"
-        :class="{ threeLineText: cutLongTexts || limitedTextLength }"
+        :class="{ threeLineText: cutLongTexts || (limitedTextLength && !ignoreLimitedDescriptionLength) }"
       >
         {{ idea.description }}
       </div>
-      <div v-if="isLongText && !cutLongTexts" class="collapse">
+      <div v-if="isLongText && !cutLongTexts && !ignoreLimitedDescriptionLength" class="collapse">
         <font-awesome-icon
           :icon="limitedTextLength ? 'angle-down' : 'angle-up'"
           @click="collapseChanged"
@@ -144,6 +144,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: false }) isDraggable!: boolean;
   @Prop({ default: false }) cutLongTexts!: boolean;
   @Prop({ default: false }) fadeIn!: boolean;
+  @Prop({ default: false }) ignoreLimitedDescriptionLength!: boolean;
   @Prop({ default: CollapseIdeas.custom }) collapseIdeas!: CollapseIdeas;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
