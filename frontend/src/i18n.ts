@@ -19,8 +19,10 @@ const addModuleLocales = async (locale = 'en', dict: any): Promise<any> => {
 addModuleLocales('de', de);
 addModuleLocales('en', en);
 
+const language = navigator.language.substr(0, 2);
+
 const i18n = createI18n({
-  locale: process.env.VUE_APP_I18N_LOCALE || 'en',
+  locale: language || process.env.VUE_APP_I18N_LOCALE || 'en',
   fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'en',
   messages: { de: de, en: en },
 });

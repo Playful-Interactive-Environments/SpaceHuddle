@@ -159,7 +159,9 @@ const routes: Array<RouteRecordRaw> = [
     props: (route) => ({
       sessionId: route.params.sessionId,
       authHeaderTyp: route.params.authHeaderTyp
-        ? route.params.authHeaderTyp
+        ? route.params.authHeaderTyp === 'everyone'
+          ? EndpointAuthorisationType.UNAUTHORISED
+          : route.params.authHeaderTyp
         : EndpointAuthorisationType.MODERATOR,
     }),
   },
@@ -187,6 +189,7 @@ router.beforeEach((to, from, next) => {
     }, 200);
     return;
   }
+  //const i18n = (router as any).i18n;
 
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   const requiresUser = to.matched.some((record) => record.meta.requiresUser);

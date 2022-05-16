@@ -73,7 +73,7 @@
         <el-switch v-model="formData.allowAnonymous" />
         <router-link
           v-if="formData.allowAnonymous"
-          :to="`/public-screen/${sessionId}/unauthorisied`"
+          :to="`/public-screen/${sessionId}/everyone`"
           target="_blank"
         >
           <el-button type="info">

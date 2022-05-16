@@ -2,20 +2,20 @@
    "brainstorming": {  
        "animation": {  
            "publicScreen": "output/PublicScreen",  
-           "locales": "en,",  
+           "locales": "de,en,",  
              "icon": "space_invaders",  "iconPrefix": "fac",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
            "path": "brainstorming/animation"  
        },  
        "card_shuffle_animation": {  
            "publicScreen": "output/PublicScreen",  
-           "locales": "en,",  
+           "locales": "de,en,",  
              "icon": "layer-group",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
            "path": "brainstorming/card_shuffle_animation"  
        },  
        "chat": {  
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
-           "locales": "en,",  
+           "locales": "de,en,",  
              "icon": "comment-alt",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
            "path": "brainstorming/chat"  
        },  
@@ -29,13 +29,13 @@
        },  
        "gallery": {  
            "publicScreen": "output/PublicScreen",  
-           "locales": "en,",  
+           "locales": "de,en,",  
              "icon": "image",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
            "path": "brainstorming/gallery"  
        },  
        "game": {  
            "participant": "output/Participant",  
-           "locales": "en,",  
+           "locales": "de,en,",  
              "icon": "bowling-ball",  "type": "addOn",  "input": "optional",  "syncPublicParticipant": false,  
            "path": "brainstorming/game"  
        },  
@@ -48,7 +48,7 @@
        "default": {  
            "publicScreen": "output/PublicScreen",  
            "moderatorContent": "output/ModeratorContent",  
-           "locales": "en,",  
+           "locales": "de,en,",  
              "icon": "object-group",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  
            "path": "categorisation/default"  
        },  
@@ -62,7 +62,7 @@
            "publicScreen": "output/PublicScreen",  
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
-           "locales": "en,",  
+           "locales": "de,en,",  
              "icon": "info",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
            "path": "information/default"  
        },  
@@ -71,7 +71,7 @@
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
-           "locales": "en,",  
+           "locales": "de,en,",  
              "icon": "questions-check",  "iconPrefix": "fac",  "type": "main",  "input": "no",  "syncPublicParticipant": true,  
            "path": "information/quiz"  
        },  
@@ -103,7 +103,7 @@
        "default": {  
            "publicScreen": "output/PublicScreen",  
            "moderatorContent": "output/ModeratorContent",  
-           "locales": "en,",  
+           "locales": "de,en,",  
              "icon": "check",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  
            "path": "selection/default"  
        },  
@@ -118,14 +118,14 @@
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
-           "locales": "en,",  
+           "locales": "de,en,",  
              "icon": "star",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  
            "path": "voting/default"  
        },  
        "slots": {  
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
-           "locales": "en,",  
+           "locales": "de,en,",  
              "icon": "list",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  
            "path": "voting/slots"  
        },  

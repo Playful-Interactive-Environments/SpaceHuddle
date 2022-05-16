@@ -458,6 +458,7 @@ $--font-size: (
         --el-card-padding: 1.2rem 1.5rem;
         -webkit-column-break-inside: avoid;
         margin-bottom: 0.5rem;
+        word-break: break-word;
 
         &__body {
                 height: 100%;

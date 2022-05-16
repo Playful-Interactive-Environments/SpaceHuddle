@@ -47,6 +47,8 @@ app.use(ElementPlus);
 app.use(VueObserveVisibility);
 app.mount('#app');
 
+//(router as any).i18n = i18n;
+
 setViewportVariables();
 
 export default app;

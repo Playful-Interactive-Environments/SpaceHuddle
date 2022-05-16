@@ -83,9 +83,17 @@
           native
           :height="`calc(var(--app-height) - ${topContentPosition}px - 0.1rem)`"
         >
-          <h3 v-if="task" class="heading--regular twoLineText">
+          <TaskInfo
+            v-if="task"
+            :taskId="taskId"
+            :shortenDescription="false"
+            :showType="false"
+            :authHeaderTyp="authHeaderTyp"
+            class="header-info"
+          />
+          <!--<h3 v-if="task" class="heading--regular twoLineText">
             {{ task.name }}
-          </h3>
+          </h3>-->
           <PublicScreenComponent
             v-if="task"
             :task-id="taskId"
@@ -103,10 +111,14 @@
   >
     <el-header class="public-screen__header">
       <el-page-header
+        v-if="isParticipant"
         :content="$t('shared.view.publicScreen.title')"
         :title="$t('general.back')"
         @back="$router.go(-1)"
       />
+      <div class="logo-header" v-else>
+        <font-awesome-icon :icon="['fac', 'logoWithName']" class="logo" />
+      </div>
       <TaskInfo
         v-if="task"
         :taskId="taskId"
@@ -309,6 +321,10 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.logo-header {
+  text-align: right;
+}
+
 .timer-process {
   position: relative;
   top: -0.8rem;
@@ -328,6 +344,10 @@ h3 {
   font-size: 1.5rem;
   padding: 1rem 0 1rem 3rem;
   text-align: right;
+}
+
+.header-info {
+  margin-bottom: 1rem;
 }
 
 .module-info::v-deep {
