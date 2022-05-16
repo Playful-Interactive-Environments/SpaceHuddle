@@ -227,6 +227,13 @@ export default class ParticipantOverview extends Vue {
   }
 }
 
+.media.link svg {
+  margin: auto 0;
+  margin-left: 1.5rem;
+  margin-right: 0.5rem;
+  width: 40px;
+}
+
 .participant-header {
   &__header {
     padding-bottom: 2rem;
