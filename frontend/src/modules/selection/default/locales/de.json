@@ -1,0 +1,16 @@
+{
+  "description": {
+    "title": "selection",
+    "description": "Wähle Ideen für die Weiterverwendung aus"
+  },
+  "publicScreen": {
+    "noIdeas": "Noch keine Ideen - Bleib dran."
+  },
+  "moderatorContent": {
+    "sortOrder": "Sortieren nach",
+    "selection": "Selektion",
+    "unselected": "nicht selektiert",
+    "add": "Füge Ideen zur Auswahl durch drag and drop hinzu",
+    "displayAll": "Alle anzeigen"
+  }
+}

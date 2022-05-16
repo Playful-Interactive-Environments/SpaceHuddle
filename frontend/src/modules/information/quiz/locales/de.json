@@ -1,0 +1,42 @@
+{
+  "description": {
+    "title": "quiz",
+    "description": "Rufe den Wissensstatus ab "
+  },
+  "moderatorConfig": {
+    "answerCount": "Antwortoptionen",
+    "moderatedQuestionFlow": "Moderierter Fragenfluss",
+    "questionType": "Fragentyp",
+    "time": "Zeit",
+    "answerCountExample": 3
+  },
+  "moderatorContent": {
+    "question": "Frage",
+    "questionExample": "Was ist ...",
+    "explanation": "Erklärung",
+    "explanationExample": "Die Antwort auf die Frage ist ...",
+    "answer": "Antwort",
+    "answerExample": "Option",
+    "submit": "speichern",
+    "addAnswer": "Antwort hinzufügen"
+  },
+  "publicScreen": {
+    "chartDataLabelCorrect": "Richtig",
+    "chartDataLabelIncorrect": "Falsch",
+    "chartDataLabelResult": "Ergebnis"
+  },
+  "participant": {
+    "thanksModerated": "Deine Antworten wurde gespeichert. Du kannst sie noch bearbeiten, solange der Timer noch läuft",
+    "thanksIndividual": "Deine Antwort wurde gespeichert. Du kannst sie noch bearbeiten.",
+    "previous": "zurück",
+    "next": "weiter",
+    "submit": "bestätigung",
+    "waiting": "Bitte warten. Fragen und Antworten werden geladen."
+  },
+  "enum": {
+    "questionType": {
+      "quiz": "quiz",
+      "survey": "survey"
+    }
+  }
+}

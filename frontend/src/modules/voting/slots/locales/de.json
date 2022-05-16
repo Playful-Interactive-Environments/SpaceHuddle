@@ -1,0 +1,29 @@
+{
+  "description": {
+    "title": "slots",
+    "description": "Auswahl einer bestimmten Anzahl von Ideen"
+  },
+  "publicScreen": {
+    "noIdeas": "Noch keine Ideen - Bleib dran.",
+    "chartDataLabel": "Ergebnis"
+  },
+  "participant": {
+    "skip": "Idee überspringen",
+    "emptySlot": "Füge Idee in ein leeres Feld ein",
+    "thanks": "Danke für die Bewertung",
+    "waiting": "Bleib dran: Ideen werden bald zur Bewertung freigegeben",
+    "replace": "ersetzen",
+    "info": "Assign the first ideas to the slots and overwrite them as soon as a better idea is displayed. For each idea, check whether it is better than the ones already assigned. Each slot can be overwritten as often as you like, so that in the end only the best ones remain.",
+    "again": "Du hast alle Ideen gesehen. Nochmal alle nicht ausgewählten Ideen durchgehen?",
+    "emptySlop": "Du hast alle Ideen gesehen, aber nicht alle Felder sind ausgefüllt!",
+    "yes": "Ja",
+    "no": "Nein, Launch",
+    "cycle": "Erneut durch Ideen durchgehen"
+  },
+  "moderatorContent": {
+  },
+  "moderatorConfig": {
+    "slotCount": "Feld Anzahl",
+    "slotCountExample": "3"
+  }
+}

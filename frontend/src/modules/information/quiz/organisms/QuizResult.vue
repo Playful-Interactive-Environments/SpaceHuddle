@@ -4,8 +4,9 @@
     ref="chartRef"
     type="bar"
     :data="chartData"
-    :height="100"
+    :height="160"
     :options="{
+      maintainAspectRatio: 'false',
       indexAxis: 'y',
       animation: {
         duration: update ? 0 : 2000,
@@ -61,15 +62,18 @@ export default class QuizResult extends Vue {
     datasets: [],
   };
 
+  chartHeight = 100;
   axisID = 'yaxisID';
   labelLineLimit = 2;
 
-  get chartHeight(): number {
+  CalcChartHeight(): void {
     if (this.voteResult.length * 10 * 2 <= 140) {
-      return this.voteResult.length * 10 * 2;
+      console.log(this.voteResult.length + " test");
+      this.chartHeight = this.voteResult.length * 10 * 2;
     } else {
-      return 140;
+      this.chartHeight = 140;
     }
+    this.updateChart();
   }
 
   @Watch('voteResult', { immediate: true })

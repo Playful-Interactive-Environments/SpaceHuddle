@@ -1,5 +1,26 @@
 {
+  "description": {
+    "title": "idea launch",
+    "description": "Standardformular zum Sammeln neuer Ideen. Es können Kurzbeschreibung, Langtext, Bild und Link eingegeben werden. Die Kurzbeschreibung ist erforderlich, die anderen Felder sind optional."
+  },
   "publicScreen": {
-    "noIdeas": "Noch keine Ideen - bleiben Sie dran."
+    "noIdeas": "Noch keine Ideen - Bleib dran."
+  },
+  "participant": {
+    "keywordInfo": "Bitte gib ein paar Schlüsselwörter an",
+    "descriptionInfo": "Gib deine Idee hier ein ...",
+    "submit": "Idee einreichen",
+    "startGame": "Keine Ideen? werde inspiriert!",
+    "linkInfo": "Teilbild-Url aus dem Internet",
+    "remainingCharacters":  "Verbleibende Zeichen ",
+    "ideas": "Deine Ideen",
+    "loading": "wird geladen, bitte warten"
+  },
+  "moderatorContent": {
+    "sortOrder": "Sortiere nach",
+    "order": "Verändere die Ordnung durch drag and drop",
+    "timestamp": "Chronologische Ordnung der Ideen",
+    "alphabetical": "Alphabetische Ordnung der Ideen",
+    "displayAll": "Alle Anzeigen"
   }
 }

@@ -221,4 +221,5 @@ export default class PublicScreen extends Vue {
     gap: 0.5rem;
   }
 }
+
 </style>

@@ -4,7 +4,7 @@
     "accountCreated": "Your account was successfully created.",
     "updatePublicScreen": "Successfully updated public screen.",
     "updateParticipantState": "Successfully updated participant state.",
-    "postIdea": "Thank you for the idea - {0}"
+    "postIdea": "Thank you for the idea! - {0}"
   },
   "confirm": {
     "delete": {

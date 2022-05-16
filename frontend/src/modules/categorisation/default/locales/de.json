@@ -1,0 +1,28 @@
+{
+  "description": {
+    "title": "categorisation",
+    "description": "Definiere Kategorien und ordne Ideen zu"
+  },
+  "moderatorContent": {
+    "categoryName": "Name",
+    "categoryNamePlaceholder": "Name der neuen Kategorie ...",
+    "submit": "+",
+    "add": "Neue Kategorie",
+    "sortOrder": "Sortieren nach",
+    "undefined": "nicht kategorisiert",
+    "displayAll": "Alle anzeigen"
+  },
+  "settings" : {
+    "header": "Kategorie erstellen/bearbeiten",
+    "info": "Gib der Kategorie einen Namen",
+    "title": "Name",
+    "titleExample": "Test Kategorie",
+    "description": "Beschreibung",
+    "descriptionExample": "",
+    "image": "Bild",
+    "link": "Link",
+    "color": "Farbe",
+    "submit": "Kategorie speichern",
+    "undefined": "nicht kategorisiert"
+  }
+}

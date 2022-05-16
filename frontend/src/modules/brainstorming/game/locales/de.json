@@ -1,0 +1,11 @@
+{
+  "description": {
+    "title": "eight ball",
+    "description": "Werde inspiriert für die Ideenfindung"
+  },
+  "participant": {
+    "keepShaking": "Schüttel weiter",
+    "startShaking": "Schütteln, um Inspiration von anderen Nutzern zu bekommen. Nutze diese Ideen als Anstoß für eigene Ideen.",
+    "noInspiration": "Es wurden noch keine Ideen verfasst. Bitte habe etwas Geduld."
+  }
+}
