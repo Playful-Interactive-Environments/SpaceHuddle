@@ -347,7 +347,7 @@
   "participant": {
     "organism": {
       "modelDefaultContainer": {
-        "timeLeft": "Verbleibende Zeit"
+        "timeLeft": "Zeit"
       }
     },
     "view": {
@@ -399,10 +399,10 @@
       "voting": "Bewertung"
     },
     "taskCategory": {
-      "informing": "Informierung",
-      "brainstorming": "Brainstorming",
-      "structuring": "Strukturierung",
-      "evaluating": "Bewertung"
+      "informing": "Informieren",
+      "brainstorming": "Brainstormen",
+      "structuring": "Strukturieren",
+      "evaluating": "Bewerten"
     },
     "ideaSortOrder": {
       "null": "",
