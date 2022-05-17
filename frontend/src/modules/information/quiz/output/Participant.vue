@@ -352,7 +352,7 @@ export default class Participant extends Vue {
   height: auto;
 }
 
-.question {
+/*.question {
   border: 1px solid var(--color-primary);
   border-radius: var(--border-radius);
   padding: 1rem;
@@ -361,6 +361,12 @@ export default class Participant extends Vue {
   text-align: center;
   color: var(--color-primary);
   margin: 1em 0;
+}*/
+
+.module-content::v-deep div.question {
+  text-transform: none;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--el-font-size-extra-large);
 }
 
 .explanation {
@@ -507,6 +513,21 @@ div#loadingScreen > span#loading::v-deep .path {
   .el-button.el-button--primary.el-button--default.link.outline-thick:hover {
   background-color: var(--color-darkblue);
   border-color: var(--color-darkblue-light);
+}
+
+.el-space::v-deep
+.el-button.el-button--primary.el-button--default.link > span {
+  width: 100%;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  text-align: left;
+  margin-left: 4%;
+}
+
+.el-space::v-deep
+.el-button.el-button--primary.el-button--default.link {
+  height: auto;
+  padding: 2% 5% 2% 5%;
 }
 
 .el-space::v-deep .fa-circle-check > path {
