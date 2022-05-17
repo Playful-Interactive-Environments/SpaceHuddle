@@ -198,7 +198,6 @@ export default class LinkSettings extends Vue {
 
   async saveAnonymous(): Promise<void> {
     if (this.sessionId) {
-      console.log('save');
       sessionService.getById(this.sessionId).then((session) => {
         if (session.allowAnonymous !== this.formData.allowAnonymous) {
           session.allowAnonymous = this.formData.allowAnonymous;

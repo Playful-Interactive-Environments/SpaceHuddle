@@ -28,6 +28,8 @@ import app from '@/main';
 import { ElMessage } from 'element-plus';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -146,10 +148,6 @@ const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: '/:catchAll(.*)',
-    component: NotFound,
-  },
-  {
     path: '/public-screen/:sessionId/:authHeaderTyp?',
     name: 'public-screen',
     component: PublicScreen,
@@ -164,6 +162,10 @@ const routes: Array<RouteRecordRaw> = [
           : route.params.authHeaderTyp
         : EndpointAuthorisationType.MODERATOR,
     }),
+  },
+  {
+    path: '/:catchAll(.*)',
+    component: NotFound,
   },
 ];
 
@@ -185,11 +187,20 @@ router.beforeEach((to, from, next) => {
   //if (!to.name && !allRoutesLoaded) {
   if (!allRoutesLoaded) {
     setTimeout(() => {
-      next({ path: to.path });
+      next({
+        path: to.path,
+        query: to.query,
+      });
     }, 200);
     return;
   }
-  //const i18n = (router as any).i18n;
+  const i18n = (router as any).i18n;
+  if (to.query.locale) {
+    const locale = to.query.locale as string;
+    if (i18n.containsLocale(locale)) {
+      i18n.setLocale(locale);
+    }
+  }
 
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   const requiresUser = to.matched.some((record) => record.meta.requiresUser);

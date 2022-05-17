@@ -1322,6 +1322,7 @@ export default class TaskSettings extends Vue {
         })
         .then(
           (task) => {
+            saveTask = task;
             this.taskUpdated(task);
           },
           (error) => {

@@ -19,12 +19,23 @@ const addModuleLocales = async (locale = 'en', dict: any): Promise<any> => {
 addModuleLocales('de', de);
 addModuleLocales('en', en);
 
+const messages = { de: de, en: en };
+
 const language = navigator.language.substr(0, 2);
+const locale =
+  language && Object.keys(messages).includes(language)
+    ? language
+    : process.env.VUE_APP_I18N_LOCALE || 'en';
 
 const i18n = createI18n({
-  locale: language || process.env.VUE_APP_I18N_LOCALE || 'en',
+  locale: locale,
   fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'en',
-  messages: { de: de, en: en },
+  messages: messages,
+});
+
+const i18nFallback = createI18n({
+  locale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'en',
+  messages: messages,
 });
 
 i18n.t2 = (
@@ -33,6 +44,10 @@ i18n.t2 = (
   itemContent: [] | null
 ): string => {
   let translation = i18n.t(key) as string;
+
+  if (translation.length === 0) {
+    translation = i18nFallback.t(key);
+  }
 
   if (translation.length == 0) {
     if (fallback_message) translation = fallback_message;
@@ -54,6 +69,10 @@ i18n.t2 = (
   }
 
   return translation;
+};
+
+i18n.containsLocale = (locale: string): boolean => {
+  return Object.keys(i18n.messages).includes(locale);
 };
 
 i18n.containsKey = (key: string): boolean => {

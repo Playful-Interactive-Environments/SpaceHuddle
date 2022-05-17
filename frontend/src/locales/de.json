@@ -373,8 +373,8 @@
     "view": {
       "home": {
         "header": "Brainstorming - Zur Unendlichkeit und noch viel weiter!",
-        "info": "Spacehuddle takes a new approach to brainstorming with multiple people. For creating new brainstorming sessions, use the Moderator tool. You can then join an existing brainstorming session via the session code.",
-        "login": "Moderator tool",
+        "info": "Spacehuddle verfolgt einen neuen Ansatz für das Brainstorming mit mehreren Personen. Um eine neue Brainstorming-Session zu erstellen, verwendest du bitte das Moderator-Tool. Du kannst aber auch einer bestehenden Brainstorming-Session mit Hilfe eines Session-Codes beitreten.",
+        "login": "Moderator-Tool",
         "join": "Join Brainstorming"
       },
       "notFound": {
