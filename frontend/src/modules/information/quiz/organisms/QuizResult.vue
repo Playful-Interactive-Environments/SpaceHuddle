@@ -4,9 +4,10 @@
     ref="chartRef"
     type="bar"
     :data="chartData"
-    :height="160"
+    :height="100"
     :options="{
       maintainAspectRatio: 'false',
+      responsive: 'false',
       indexAxis: 'y',
       animation: {
         duration: update ? 0 : 2000,
@@ -62,17 +63,17 @@ export default class QuizResult extends Vue {
     datasets: [],
   };
 
-  chartHeight = 100;
   axisID = 'yaxisID';
   labelLineLimit = 2;
 
-  CalcChartHeight(): void {
-    if (this.voteResult.length * 10 * 2 <= 140) {
-      console.log(this.voteResult.length + " test");
-      this.chartHeight = this.voteResult.length * 10 * 2;
-    } else {
-      this.chartHeight = 140;
-    }
+  get chartHeight(): number {
+    //console.log(this.voteResult.length * 13);
+    return this.voteResult.length * 13;
+  }
+
+  @Watch('chartHeight', { immediate: true })
+  onChartHeightChanged(): void {
+    //console.log('update');
     this.updateChart();
   }
 
@@ -127,7 +128,7 @@ export default class QuizResult extends Vue {
     if (this.questionType === QuestionType.QUIZ) {
       return {
         labels: this.voteResult.map((vote) =>
-          this.breakString(vote.idea.keywords, 35)
+          this.breakString(vote.idea.keywords, 34)
         ),
         datasets: [
           {
@@ -177,4 +178,6 @@ export default class QuizResult extends Vue {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+
+</style>

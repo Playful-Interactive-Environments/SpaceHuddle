@@ -2,7 +2,7 @@
   "info": {
     "copyToClipboard": "Erfolgreich in Zwischenablage gespeichert.",
     "accountCreated": "Dein Konto wurde erfolgreich erstellt.",
-    "updatePublicScreen": "Geteilte Sicht erfolgreich aktualisiert.",
+    "updatePublicScreen": "Publikumsansicht erfolgreich aktualisiert.",
     "updateParticipantState": "Teilnehmerstatus erfolgreich aktualisiert.",
     "postIdea": "Vielen Dank für deine Idee! - {0}"
   },
@@ -134,11 +134,11 @@
         "shareBody": "Verbindungsschlüssel: @KEY \nlink: @LINK"
       },
       "ideaFilter": {
-        "filterPlaceholder": "Nach text filtern...",
+        "filterPlaceholder": "Nach Text filtern...",
         "filterByState": "Nach Status filtern",
         "order": "Sortierung",
-        "syncActiveMessage": "Synchronisierung der Filtereinstellungen mit der geteilten Sicht aktiviert",
-        "syncDeactivateMessage": "Synchronisierung der Filtereinstellungen mit der geteilten Sicht deaktiviert"
+        "syncActiveMessage": "Synchronisierung der Filtereinstellungen mit der Publikumsansicht aktiviert",
+        "syncDeactivateMessage": "Synchronisierung der Filtereinstellungen mit der Publikumsansicht deaktiviert"
       }
     },
     "organism": {
@@ -176,8 +176,8 @@
           "header": "Co-Autoren verwalten",
           "info": "Füge die E-Mail des gewünschten Co-Autors ein",
           "email": "E-Mail",
-          "allowAnonymous": "Jedem Zugriff auf die geteilte Sicht erlauben",
-          "publicScreen": "Anonymer Link zur geteilten Sicht"
+          "allowAnonymous": "Jedem Zugriff auf die Publikumsansicht erlauben",
+          "publicScreen": "Anonymer Link zur Publikumsansicht"
         },
         "taskSettings": {
           "header": "Modul hinzufügen",
@@ -240,16 +240,16 @@
         }
       },
       "processTimeline": {
-        "activatePublicScreen": "Stelle diesen Inhalt auf der geteilten Sicht dar",
-        "changePublicScreen": "Stelle dieses Element auf der geteilten Sicht dar",
+        "activatePublicScreen": "Stelle diesen Inhalt auf der Publikumsansicht dar",
+        "changePublicScreen": "Stelle dieses Element auf der Publikumsansicht dar",
         "activateParticipant": "Aktiviere dieses Element für die Teilnehmer",
         "changeOrder": "Verändere die Ordnung der Elemente",
         "selectItem": "Selektiere dieses Element",
         "otherTopic": "Thema"
       },
       "taskTimeline": {
-        "activatePublicScreen": "Stelle diesen Inhalt auf der geteilten Sicht dar",
-        "changePublicScreen": "Stelle diese Aufgabe auf der geteilten Sicht dar",
+        "activatePublicScreen": "Stelle diesen Inhalt auf der Publikumsansicht dar",
+        "changePublicScreen": "Stelle diese Aufgabe auf der Publikumsansicht dar",
         "activateParticipant": "Aktiviere diese Aufgabe für die Teilnehmer",
         "changeOrder": "Verändere die Ordnung der Aufgaben",
         "selectItem": "Selektiere diese Aufgabe"
@@ -257,13 +257,13 @@
     },
     "view": {
       "login": {
-        "header": "Login",
+        "header": "Anmelden",
         "info": "Melden Sie sich an, um auf alle vorhandenen Ressourcen zuzugreifen und neue Brainstorming-Sitzungen zu erstellen.",
         "email": "E-Mail",
         "emailInfo": "Gib deine E-Mail ein",
         "password": "Passwort",
         "passwordInfo": "Gib dein Passwort ein",
-        "submit": "Login",
+        "submit": "Anmelden",
         "forgot": "Passwort vergessen?",
         "register": {
           "header": "Neu hier?",
@@ -286,7 +286,7 @@
         "login": {
           "header": "Willkommen zurück!",
           "info": "Wenn du bereits einen Account hast dann melde dich an um auf\n deine existierenden Ressourcen zugreifen zu können.",
-          "submit": "Login"
+          "submit": "Anmelden"
         },
         "prototypeKey": "Prototyp-Schlüssel",
         "prototypeKeyInfo": "Dies ist ein Prototyp. Um die Applikation zu testen wird ein Prototyp-Schlüssel benötigt."
@@ -296,11 +296,11 @@
         "info": "E-Mail Adresse: ",
         "changePassword": "Passwort ändern",
         "delete": "Profil löschen",
-        "submit": "Logout"
+        "submit": "Abmelden"
       },
       "confirmEmail": {
         "thanks": "Danke für das Bestätigen deiner E-Mail. Folge dem Link um dich anzumelden.",
-        "home": "Zum Login",
+        "home": "Zur Anmeldung",
         "failed": "Das Token für die Bestätigung ist falsch.",
         "header": "Bestätige deine E-Mail",
         "info": "E-Mail Adresse: ",
@@ -355,12 +355,12 @@
         "header": "Bereit für\n ein Abenteuer?",
         "info": "Gib den Code ein, den dein Moderator zur Verfügung stellt. Dann bist du bereit!",
         "browserKeyInfo": "Deine letzten Sitzungen wurden gespeichert. Du kannst früheren Sitzungen über die Liste erneut beitreten, falls diese noch offen zur Teilnahme sind. Falls du einer neuen Sitzung beitreten willst, gib den neuen Sitzungs-Pincode ein.",
-        "pinInfo": "Enter Session PIN",
-        "submit": "Join session"
+        "pinInfo": "Sitzungspincode eingeben",
+        "submit": "Sitzung beitreten"
       },
       "overview": {
-        "publicScreen": "Geteilte Sicht",
-        "disconnect": "Logout"
+        "publicScreen": "Publikumsansicht",
+        "disconnect": "Abmelden"
       }
     }
   },
@@ -375,7 +375,7 @@
         "header": "Brainstorming - Zur Unendlichkeit und noch viel weiter!",
         "info": "Spacehuddle verfolgt einen neuen Ansatz für das Brainstorming mit mehreren Personen. Um eine neue Brainstorming-Session zu erstellen, verwendest du bitte das Moderator-Tool. Du kannst aber auch einer bestehenden Brainstorming-Session mit Hilfe eines Session-Codes beitreten.",
         "login": "Moderator-Tool",
-        "join": "Join Brainstorming"
+        "join": "Brainstorming beitreten"
       },
       "notFound": {
         "header": "404 - Nicht gefunden",
@@ -384,7 +384,7 @@
       },
       "publicScreen": {
         "connectionKey": "Verbindungsschlüssel",
-        "title": "Geteilte Sicht",
+        "title": "Publikumsansicht",
         "connectTo": "Verbinden mit"
       }
     }
@@ -432,7 +432,7 @@
   },
   "general": {
     "back": "ZURÜCK",
-    "publicScreen": "Geteilte Sicht",
+    "publicScreen": "Publikumsansicht",
     "moduleActive": "Aktiv"
   },
   "tutorial": {
@@ -444,7 +444,7 @@
       "addTopic": "Eine Session kann mehrere Themen enthalten. Klicke diesen Knopf um dein erstes Thema zu erstellen.",
       "selectTopic": "Eine Sitzung kann mehrere Themen enthalten. Klicke diesen Knopf um die Details des Themas anzuzeigen.",
       "changeOrder": "Verändere die Ordnung der Themen über drag and drop.",
-      "publicScreen": "Öffne die geteilte Sicht.",
+      "publicScreen": "Öffne die Publikumsansicht.",
       "connectionCode": "Teilnehmer können der Sitzung über diesen Code beitreten.",
       "shareCode": "Teile den Code indem du eine Einladung an alle Teilnehmer schickst.",
       "coModerator": "Co-Moderatoren hinzufügen",
@@ -456,22 +456,22 @@
       "selectTask": "Ein Thema kann mehrere Aufgaben enthalten. Klicke diesen Knopf um die Details der Aufgabe anzuzeigen."
     },
     "processTimeline": {
-      "activatePublicScreen": "Aktiviere diesen Schalter um den Inhalt auf der geteilten Sicht darzustellen",
-      "changePublicScreen": "Bewege den Regler, um das Element auf der geteilten Sicht zu wechseln",
+      "activatePublicScreen": "Aktiviere diesen Schalter um den Inhalt auf der Publikumsansicht darzustellen",
+      "changePublicScreen": "Bewege den Regler, um das Element auf der Publikumsansicht zu wechseln",
       "activateParticipant": "Klicke auf das Handy um das Element für alle Teilnehmer zu aktivieren",
       "changeOrder": "Verändere die Ordnung der Elemente über drag and drop.",
       "selectItem": "Klicke auf den Titel des Elements, um dessen Details anzuzeigen",
-      "showNullPublicScreen": "Setze den Regler auf diese Position, um eine Übersicht der geteilten Sicht anzuzeigen",
-      "publicScreenForOtherTopic": "Die geteilte Sicht ist einem anderen Thema zugeteilt. Die Übersicht der geteilten Sicht kann durch diesen Schalter angezeigt werden."
+      "showNullPublicScreen": "Setze den Regler auf diese Position, um eine Übersicht der Publikumsansicht anzuzeigen",
+      "publicScreenForOtherTopic": "Die Publikumsansicht ist einem anderen Thema zugeteilt. Die Übersicht der Publikumsansicht kann durch diesen Schalter angezeigt werden."
     },
     "taskTimeline": {
-      "activatePublicScreen": "Aktiviere diesen Schalter um das Thema auf der geteilten Sicht darzustellen",
-      "changePublicScreen": "Bewege den Regler, um die Aufgabe auf der geteilten Sicht zu wechseln.",
+      "activatePublicScreen": "Aktiviere diesen Schalter um das Thema auf der Publikumsansicht darzustellen",
+      "changePublicScreen": "Bewege den Regler, um die Aufgabe auf der Publikumsansicht zu wechseln.",
       "activateParticipant": "Klicke auf das Handy um die Aufgabe für alle Teilnehmer zu aktivieren",
       "changeOrder": "Verändere die Ordnung der Aufgaben über drag and drop",
       "selectItem": "Klicke auf den Titel der Aufgabe, um deren Details anzuzeigen",
-      "showNullPublicScreen": "Setze den Regler auf diese Position, um den Verbindungsschlüssel auf der geteilten Sicht anzuzeigen",
-      "publicScreenForOtherTopic": "Die geteilte Sicht ist einem anderen Thema zugeteilt. Der Verbindungsschlüssel kann durch diesen Schalter auf der geteilten Sicht angezeigt werden."
+      "showNullPublicScreen": "Setze den Regler auf diese Position, um den Verbindungsschlüssel auf der Publikumsansicht anzuzeigen",
+      "publicScreenForOtherTopic": "Die Publikumsansicht ist einem anderen Thema zugeteilt. Der Verbindungsschlüssel kann durch diesen Schalter auf der Publikumsansicht angezeigt werden."
     },
     "taskSettings":  {
       "input": "Aufgaben bauen aufeinander auf und können für weitere Aktivitäten verwendet werden.",

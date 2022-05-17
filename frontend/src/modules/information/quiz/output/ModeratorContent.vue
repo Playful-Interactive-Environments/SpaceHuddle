@@ -232,6 +232,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     await this.getVotes();
   }
 
+  get chartHeight(): number {
+    console.log(this.votes.length * 13);
+    return this.votes.length * 13;
+  }
+
   hasParticipantOption(item: Hierarchy): boolean {
     if (!this.publicTask || this.publicTask.id !== this.taskId) return false;
     if (this.publicQuestion && this.moderatedQuestionFlow)
@@ -512,4 +517,5 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   margin: auto;
   padding-left: 0.5rem;
 }
+
 </style>
