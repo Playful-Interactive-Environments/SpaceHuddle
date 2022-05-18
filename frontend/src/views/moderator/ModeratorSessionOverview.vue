@@ -78,6 +78,10 @@ export default class ModeratorSessionOverview extends Vue {
 <style lang="scss" scoped>
 @import '~@/assets/styles/breakpoints.scss';
 
+.column {
+  max-width: 20%;
+}
+
 .session-overview {
   background-color: var(--color-background-gray);
 

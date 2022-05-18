@@ -10,11 +10,12 @@
           <p class="el-card__description threeLineText line-break">
             {{ session.description }}
           </p>
-          <ModuleCount :session="session" />
+
         </div>
       </el-header>
       <el-main> </el-main>
       <el-footer>
+        <ModuleCount :session="session" />
         <div class="el-card__content">
           <SessionCode :code="session.connectionKey" button-type="primary" />
           <router-link :to="`/session/${session.id}`">
@@ -66,11 +67,16 @@ export default class SessionCard extends Vue {
   }
 
   &__description {
-    text-align: justify;
+    text-align: left;
   }
 
   &__content {
     margin-top: 0.5rem;
   }
 }
+
+ModuleCount {
+  margin-bottom: 0.5rem;
+}
+
 </style>
