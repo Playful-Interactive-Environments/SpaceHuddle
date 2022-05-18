@@ -2,21 +2,43 @@
   <div class="module-count" v-if="session">
     <div class="module-count__item">
       <span class="module-count__count">{{ session.topicCount }}</span>
-      {{ $t('moderator.molecule.moduleCount.topics') }}
+      <span class="module-name" v-if="session.topicCount === 1">
+        {{ $t('moderator.molecule.moduleCount.topics') }}
+      </span>
+      <span
+        class="module-name" v-else>
+        {{ $t('moderator.molecule.moduleCountPlural.topics') }}
+      </span>
     </div>
     <div class="module-count__item">
       <span class="module-count__count">{{ session.taskCount }}</span>
-      {{ $t('moderator.molecule.moduleCount.tasks') }}
+      <span class="module-name" v-if="session.taskCount === 1">
+        {{ $t('moderator.molecule.moduleCount.tasks') }}
+      </span>
+      <span
+        class="module-name" v-else>
+        {{ $t('moderator.molecule.moduleCountPlural.tasks') }}
+      </span>
     </div>
     <div class="module-count__item">
       <span class="module-count__count">{{ users.length }}</span>
-      {{ $t('moderator.molecule.moduleCount.users') }}
+      <span class="module-name" v-if="users.length === 1">
+        {{ $t('moderator.molecule.moduleCount.users') }}
+      </span>
+      <span class="module-name" v-else>
+        {{ $t('moderator.molecule.moduleCountPlural.users') }}
+      </span>
     </div>
     <el-popover trigger="click" width="calc(var(--app-width) * 0.2)">
       <template #reference>
         <div class="module-count__item">
           <span class="module-count__count">{{ participants.length }}</span>
-          {{ $t('moderator.molecule.moduleCount.participants') }}
+          <span class="module-name" v-if="participants.length === 1">
+            {{ $t('moderator.molecule.moduleCount.participants') }}
+          </span>
+          <span class="module-name" v-else>
+            {{ $t('moderator.molecule.moduleCountPlural.participants') }}
+          </span>
         </div>
       </template>
       <el-space wrap class="participant-list">
@@ -118,6 +140,10 @@ export default class ModuleCount extends Vue {
     border-radius: 100px;
     margin-right: 0.2rem;
   }
+}
+
+.module-name {
+  margin-left: 5px;
 }
 
 .participant-list::v-deep {

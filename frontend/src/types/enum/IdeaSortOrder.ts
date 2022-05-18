@@ -4,11 +4,11 @@ export const IdeaSortOrderView = 'view';
 enum IdeaSortOrder {
   TIMESTAMP = 'timestamp',
   ALPHABETICAL = 'alphabetical',
-  STATE = 'state',
   PARTICIPANT = 'participant',
   COUNT = 'count',
-  ORDER = 'order',
+  STATE = 'state',
   INPUT = 'input',
+  ORDER = 'order',
 }
 
 export const DefaultIdeaSortOrder = IdeaSortOrder.ORDER;

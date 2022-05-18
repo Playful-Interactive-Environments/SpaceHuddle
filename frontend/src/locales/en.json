@@ -119,10 +119,16 @@
     },
     "molecule": {
       "moduleCount": {
+        "topics": "Topic",
+        "tasks": "Task",
+        "participants": "Participant",
+        "users": "Moderator"
+      },
+      "moduleCountPlural": {
         "topics": "Topics",
         "tasks": "Tasks",
         "participants": "Participants",
-        "users": "Users"
+        "users": "Moderators"
       },
       "navigation": {
         "sessions": "Sessions",
@@ -406,11 +412,11 @@
     },
     "ideaSortOrder": {
       "null": "",
-      "timestamp": "timestamp",
+      "timestamp": "chronological",
       "alphabetical": "alphabetical",
-      "state": "state",
+      "state": "status",
       "participant": "participant",
-      "count": "count",
+      "count": "frequency",
       "hierarchy": "categorisation",
       "view": "voting",
       "order": "custom",
