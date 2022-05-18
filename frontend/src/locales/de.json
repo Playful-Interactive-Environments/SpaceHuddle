@@ -359,7 +359,7 @@
     "view": {
       "join": {
         "header": "Bereit für\n ein Abenteuer?",
-        "info": "Gib den Code ein, den dein Moderator zur Verfügung stellt. Dann bist du bereit!",
+        "info": "Gib den Code ein, den dein*e Moderator*in zur Verfügung stellt. Dann bist du bereit!",
         "browserKeyInfo": "Deine letzten Sitzungen wurden gespeichert. Du kannst früheren Sitzungen über die Liste erneut beitreten, falls diese noch offen zur Teilnahme sind. Falls du einer neuen Sitzung beitreten willst, gib den neuen Sitzungs-Pincode ein.",
         "pinInfo": "Sitzungspincode eingeben",
         "submit": "Sitzung beitreten"
@@ -379,8 +379,8 @@
     "view": {
       "home": {
         "header": "Brainstorming - Zur Unendlichkeit und noch viel weiter!",
-        "info": "Spacehuddle verfolgt einen neuen Ansatz für das Brainstorming mit mehreren Personen. Um eine neue Brainstorming-Session zu erstellen, verwende bitte das Moderator-Tool. Du kannst aber auch einer bestehenden Brainstorming-Session mit Hilfe eines Session-Codes beitreten.",
-        "login": "Moderator-Tool",
+        "info": "Spacehuddle verfolgt einen neuen Ansatz für das Brainstorming mit mehreren Personen. Um eine neue Brainstorming-Session zu erstellen, verwende bitte die Moderation. Du kannst aber auch einer bestehenden Brainstorming-Session mit Hilfe eines Session-Codes beitreten.",
+        "login": "Moderation",
         "join": "Brainstorming beitreten"
       },
       "notFound": {
