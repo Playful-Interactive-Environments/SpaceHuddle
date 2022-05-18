@@ -118,7 +118,8 @@ export default class ModuleCount extends Vue {
 .module-count {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   font-size: var(--font-size-small);
   text-transform: uppercase;
   letter-spacing: 2px;

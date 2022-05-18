@@ -79,7 +79,8 @@ export default class ModeratorSessionOverview extends Vue {
 @import '~@/assets/styles/breakpoints.scss';
 
 .column {
-  max-width: 20%;
+  max-width: 25rem;
+  min-width: 20rem;
 }
 
 .session-overview {
