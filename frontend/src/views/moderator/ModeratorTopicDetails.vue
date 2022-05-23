@@ -53,8 +53,12 @@
               :key="taskCategory"
               :name="taskCategory"
               :style="{
-                '--module-color': TaskCategory[taskCategory].color,
+                '--module-color': taskTypeAvailable(taskCategory)
+                  ? TaskCategory[taskCategory].color
+                  : inactiveColor,
               }"
+              :class="{ 'is-disabled': !taskTypeAvailable(taskCategory) }"
+              :disabled="!taskTypeAvailable(taskCategory)"
             >
               <template #title>
                 <TutorialStep
@@ -244,6 +248,7 @@ import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 import FacilitatorSettings from '@/components/moderator/organisms/settings/FacilitatorSettings.vue';
 import { reactivateTutorial } from '@/services/auth-service';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
+import { color } from 'chart.js/helpers';
 
 @Options({
   components: {
@@ -275,6 +280,7 @@ export default class ModeratorTopicDetails extends Vue {
   showTopicSettings = false;
   tasks: Task[] = [];
   activeTab = TaskCategoryOption.BRAINSTORMING;
+  previousActiveTab = TaskCategoryOption.BRAINSTORMING;
   previousActiveTask: Task | null = null;
   activeTask: Task | null = null;
   componentLoadIndex = 0;
@@ -286,6 +292,8 @@ export default class ModeratorTopicDetails extends Vue {
 
   TaskType = TaskType;
   TaskCategory = TaskCategory;
+
+  inactiveColor = color([192, 196, 204]);
 
   reactivateTutorial(): void {
     reactivateTutorial('topicDetails', this.eventBus);
@@ -456,16 +464,18 @@ export default class ModeratorTopicDetails extends Vue {
 
   @Watch('activeTab', { immediate: true })
   onActiveTabChanged(): void {
-    const taskCategory = TaskCategory[this.activeTab];
-    const activeTabTasks = this.tasks.filter((task) =>
-      taskCategory.taskTypes.includes(TaskType[task.taskType])
-    );
-    if (
-      activeTabTasks.length > 0 &&
-      (!this.activeTask ||
-        !activeTabTasks.find((task) => task.id == this.activeTaskId))
-    )
-      this.changeTask(activeTabTasks[0]);
+    if (this.activeTab == this.previousActiveTab) {
+      const taskCategory = TaskCategory[this.activeTab];
+      const activeTabTasks = this.tasks.filter((task) =>
+          taskCategory.taskTypes.includes(TaskType[task.taskType])
+      );
+      if (
+          activeTabTasks.length > 0 &&
+          (!this.activeTask ||
+              !activeTabTasks.find((task) => task.id == this.activeTaskId))
+      )
+        this.changeTask(activeTabTasks[0]);
+    }
   }
 
   taskTypeAvailable(taskCategory: string): boolean {
@@ -556,6 +566,7 @@ export default class ModeratorTopicDetails extends Vue {
 
   private setActiveTab(taskType: string): void {
     const taskCategory = getCategoryOfType(TaskType[taskType.toUpperCase()]);
+    this.previousActiveTab = this.activeTab;
     if (taskCategory)
       this.activeTab = TaskCategoryOption[taskCategory.toUpperCase()];
   }
@@ -664,7 +675,8 @@ export default class ModeratorTopicDetails extends Vue {
 <style lang="scss" scoped>
 .is-disabled {
   .taskType {
-    color: var(--el-text-color-placeholder);
+    //color: var(--el-text-color-placeholder);
+    color: var(--color-darkblue);
   }
   img {
     -webkit-filter: grayscale(1); /* Webkit */
