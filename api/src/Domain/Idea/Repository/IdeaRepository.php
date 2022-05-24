@@ -104,7 +104,17 @@ class IdeaRepository implements RepositoryInterface
         }*/
 
         $defaultColumns = [
-            "idea.*",
+            "idea.id",
+            "idea.keywords",
+            "idea.description",
+            "idea.image_timestamp",
+            "idea.link",
+            "idea.order",
+            "idea.parameter",
+            "idea.participant_id",
+            "idea.state",
+            "idea.task_id",
+            "idea.timestamp",
             "GROUP_CONCAT(participant.symbol) AS symbol",
             "GROUP_CONCAT(participant.color) AS color",
             "participant.id AS participant_id",
@@ -113,7 +123,17 @@ class IdeaRepository implements RepositoryInterface
 
         if ($authorisation->isParticipant()) {
             $defaultColumns = [
-                "idea.*",
+                "idea.id",
+                "idea.keywords",
+                "idea.description",
+                "idea.image_timestamp",
+                "idea.link",
+                "idea.order",
+                "idea.parameter",
+                "idea.participant_id",
+                "idea.state",
+                "idea.task_id",
+                "idea.timestamp",
                 "MAX(participant.symbol) AS symbol",
                 "MAX(participant.color) AS color",
                 "MAX(participant.id) AS participant_id",

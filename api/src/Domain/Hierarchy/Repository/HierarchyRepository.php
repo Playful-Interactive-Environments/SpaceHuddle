@@ -101,7 +101,20 @@ class HierarchyRepository implements RepositoryInterface
             ]);
 
         $query = $this->queryFactory->newSelect($this->getEntityName());
-        $query->select(["idea.*", "hierarchy.category_idea_id AS parent_id"])
+        $query->select([
+            "idea.id",
+            "idea.keywords",
+            "idea.description",
+            "idea.image_timestamp",
+            "idea.link",
+            "idea.order",
+            "idea.parameter",
+            "idea.participant_id",
+            "idea.state",
+            "idea.task_id",
+            "idea.timestamp",
+            "hierarchy.category_idea_id AS parent_id"
+        ])
             ->innerJoin("task", "task.id = idea.task_id")
             ->leftJoin("hierarchy", [
                 "hierarchy.sub_idea_id = idea.id",

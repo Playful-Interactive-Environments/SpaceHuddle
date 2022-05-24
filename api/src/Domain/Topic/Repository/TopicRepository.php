@@ -162,7 +162,17 @@ class TopicRepository implements RepositoryInterface
 
                 if (strtolower($taskType) == TaskType::VOTING) {
                     $detailQuery->select([
-                        "idea.*",
+                        "idea.id",
+                        "idea.keywords",
+                        "idea.description",
+                        "idea.image_timestamp",
+                        "idea.link",
+                        "idea.order",
+                        "idea.parameter",
+                        "idea.participant_id",
+                        "idea.state",
+                        "idea.task_id",
+                        "idea.timestamp",
                         "vote_result.count_rating as count",
                         "vote_result.sum_detail_rating as sum"
                     ])
@@ -172,7 +182,17 @@ class TopicRepository implements RepositoryInterface
                     $exportColumns = ["keywords", "description", "image", "link", "count", "sum"];
                 } elseif (strtolower($taskType) == TaskType::CATEGORISATION) {
                     $detailQuery->select([
-                        "idea.*",
+                        "idea.id",
+                        "idea.keywords",
+                        "idea.description",
+                        "idea.image_timestamp",
+                        "idea.link",
+                        "idea.order",
+                        "idea.parameter",
+                        "idea.participant_id",
+                        "idea.state",
+                        "idea.task_id",
+                        "idea.timestamp",
                         "category.keywords as category_keywords",
                         "category.description as category_description",
                         "category.image as category_image",
@@ -202,7 +222,19 @@ class TopicRepository implements RepositoryInterface
                         "link"
                     ];
                 } else {
-                    $detailQuery->select(["idea.*"])
+                    $detailQuery->select([
+                        "idea.id",
+                        "idea.keywords",
+                        "idea.description",
+                        "idea.image_timestamp",
+                        "idea.link",
+                        "idea.order",
+                        "idea.parameter",
+                        "idea.participant_id",
+                        "idea.state",
+                        "idea.task_id",
+                        "idea.timestamp"
+                    ])
                         ->order("selection_view_idea.order");
                     $detailRows = $detailQuery->execute()->fetchAll("assoc");
                     $exportColumns = ["keywords", "description", "image", "link"];

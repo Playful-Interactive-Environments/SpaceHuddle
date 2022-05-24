@@ -71,7 +71,17 @@ class ViewRepository implements RepositoryInterface
         $query = $this->queryFactory->newSelect("selection_view_idea_$type AS view_idea");
 
         $defaultColumns = [
-            "idea.*",
+            "idea.id",
+            "idea.keywords",
+            "idea.description",
+            "idea.image_timestamp",
+            "idea.link",
+            "idea.order",
+            "idea.parameter",
+            "idea.participant_id",
+            "idea.state",
+            "idea.task_id",
+            "idea.timestamp",
             "view_idea.order",
             "GROUP_CONCAT(participant.symbol) AS symbol",
             "GROUP_CONCAT(participant.color) AS color",
@@ -81,7 +91,17 @@ class ViewRepository implements RepositoryInterface
 
         if ($authorisation->isParticipant()) {
             $defaultColumns = [
-                "idea.*",
+                "idea.id",
+                "idea.keywords",
+                "idea.description",
+                "idea.image_timestamp",
+                "idea.link",
+                "idea.order",
+                "idea.parameter",
+                "idea.participant_id",
+                "idea.state",
+                "idea.task_id",
+                "idea.timestamp",
                 "view_idea.order",
                 "MAX(participant.symbol) AS symbol",
                 "MAX(participant.color) AS color",

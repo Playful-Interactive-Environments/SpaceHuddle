@@ -77,7 +77,19 @@ class CategoryRepository implements RepositoryInterface
         }
 
         $query = $this->queryFactory->newSelect($this->getEntityName());
-        $query->select(["idea.*"])
+        $query->select([
+            "idea.id",
+            "idea.keywords",
+            "idea.description",
+            "idea.image_timestamp",
+            "idea.link",
+            "idea.order",
+            "idea.parameter",
+            "idea.participant_id",
+            "idea.state",
+            "idea.task_id",
+            "idea.timestamp"
+        ])
             ->innerJoin("task", "task.id = idea.task_id")
             ->andWhere($authorisation_conditions)
             ->andWhere(["task.task_type" => $this->taskType])
@@ -96,7 +108,20 @@ class CategoryRepository implements RepositoryInterface
     {
         $taskType = strtoupper(TaskType::BRAINSTORMING);
         $query = $this->queryFactory->newSelect("idea");
-        $query->select(["idea.*", "hierarchy.order"])
+        $query->select([
+            "idea.id",
+            "idea.keywords",
+            "idea.description",
+            "idea.image_timestamp",
+            "idea.link",
+            "idea.order",
+            "idea.parameter",
+            "idea.participant_id",
+            "idea.state",
+            "idea.task_id",
+            "idea.timestamp",
+            "hierarchy.order"
+        ])
             ->innerJoin("task", "task.id = idea.task_id")
             ->innerJoin("hierarchy", "hierarchy.sub_idea_id = idea.id")
             ->andWhere([
