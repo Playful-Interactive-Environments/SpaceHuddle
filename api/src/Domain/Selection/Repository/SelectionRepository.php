@@ -137,7 +137,20 @@ class SelectionRepository implements RepositoryInterface
     {
         //$taskType = strtoupper(TaskType::BRAINSTORMING);
         $query = $this->queryFactory->newSelect("idea");
-        $query->select(["idea.*", "selection_idea.order"])
+        $query->select([
+            "idea.id",
+            "idea.keywords",
+            "idea.description",
+            "idea.image_timestamp",
+            "idea.link",
+            "idea.order",
+            "idea.parameter",
+            "idea.participant_id",
+            "idea.state",
+            "idea.task_id",
+            "idea.timestamp",
+            "selection_idea.order"
+        ])
             ->innerJoin("task", "task.id = idea.task_id")
             ->innerJoin("selection_idea", "selection_idea.idea_id = idea.id")
             ->andWhere([
