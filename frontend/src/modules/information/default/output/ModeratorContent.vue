@@ -29,6 +29,7 @@
       :taskId="taskId"
       :idea="addIdea"
       :title="$t('module.information.default.moderatorContent.settingsTitle')"
+      @updateData="addData"
     />
   </div>
 </template>
@@ -87,16 +88,18 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   @Watch('showSettings', { immediate: true })
   onShowSettingsChanged(): void {
-    if (!this.showSettings) {
-      this.addIdea.keywords = '';
-      this.addIdea.description = '';
-      this.addIdea.image = null;
-      this.addIdea.link = null;
-      this.getIdeas();
-    } else {
+    if (this.showSettings) {
       this.addIdea.order = this.ideas.length;
       this.addIdea.parameter = [];
     }
+  }
+
+  addData(newIdea: Idea): void {
+    this.addIdea.keywords = '';
+    this.addIdea.description = '';
+    this.addIdea.image = null;
+    this.addIdea.link = null;
+    this.ideas.push(newIdea);
   }
 
   async getIdeas(): Promise<void> {

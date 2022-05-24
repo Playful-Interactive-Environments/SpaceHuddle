@@ -9,6 +9,7 @@ enum EndpointType {
   HIERARCHIES = 'hierarchies',
   IDEA = 'idea',
   IDEAS = 'ideas',
+  IMAGE = 'image',
   LOGIN = 'login',
   MODULE = 'module',
   MODULES = 'modules',

@@ -9,6 +9,7 @@ export interface Idea {
   description: string;
   keywords: string;
   image: string | null;
+  imageTimestamp: string | null;
   link: string | null;
   order: number;
   orderGroup: string;
@@ -19,6 +20,12 @@ export interface Idea {
   participantId: string;
   isOwn: boolean;
   count: number;
+}
+
+export interface IdeaImage {
+  id: string;
+  image: string | null;
+  imageTimestamp: string | null;
 }
 
 export const MAX_KEYWORDS_LENGTH = 60;

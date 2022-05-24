@@ -5,7 +5,11 @@
     v-on:submitDataValid="save"
     v-on:reset="reset"
   >
-    <el-dialog v-model="showSettings" width="calc(var(--app-width) * 0.8)" :before-close="handleClose">
+    <el-dialog
+      v-model="showSettings"
+      width="calc(var(--app-width) * 0.8)"
+      :before-close="handleClose"
+    >
       <template #title>
         <span class="el-dialog__title" v-if="title">{{ title }}</span>
         <span class="el-dialog__title" v-else>{{
@@ -106,7 +110,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
     ImagePicker,
     'my-upload': myUpload,
   },
-  emits: ['update:showModal'],
+  emits: ['update:showModal', 'updateData'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -174,13 +178,17 @@ export default class IdeaSettings extends Vue {
     this.idea.image = this.formData.image;
     this.idea.link = this.formData.link;
     if (this.idea.id) {
-      await ideaService.putIdea(this.idea, this.authHeaderTyp);
+      await ideaService
+        .putIdea(this.idea, this.authHeaderTyp)
+        .then((queryResult) => {
+          this.$emit('updateData', queryResult);
+        });
     } else if (this.taskId) {
-      await ideaService.postIdea(
-        this.taskId,
-        this.idea,
-        EndpointAuthorisationType.MODERATOR
-      );
+      await ideaService
+        .postIdea(this.taskId, this.idea, EndpointAuthorisationType.MODERATOR)
+        .then((queryResult) => {
+          this.$emit('updateData', queryResult);
+        });
     }
     this.reset();
     this.showSettings = false;

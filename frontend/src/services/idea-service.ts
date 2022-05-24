@@ -6,7 +6,7 @@ import {
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { Idea } from '@/types/api/Idea';
+import { Idea, IdeaImage } from '@/types/api/Idea';
 import {
   OrderGroup,
   OrderGroupList,
@@ -19,8 +19,25 @@ import IdeaSortOrder, {
 } from '@/types/enum/IdeaSortOrder';
 import * as taskService from '@/services/task-service';
 import TaskType from '@/types/enum/TaskType';
+const imageDB: IdeaImage[] = [];
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
+
+function fireEvent(
+  name: string,
+  target: EventTarget,
+  param1: any,
+  param2: any
+): void {
+  //Ready: create a generic event
+  const evt = document.createEvent('Events');
+  //Aim: initialize it to be the event we want
+  evt.initEvent(name, true, true); //true for can bubble, true for cancelable
+  (evt as any).param1 = param1;
+  (evt as any).param2 = param2;
+  //FIRE!
+  target.dispatchEvent(evt);
+}
 
 export const deleteIdea = async (
   id: string,
@@ -33,27 +50,121 @@ export const deleteIdea = async (
   );
 };
 
+export const deleteIdeaIdea = async (
+  id: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<void> => {
+  await apiExecuteDelete<any>(
+    `/${EndpointType.IDEA}/${id}/${EndpointType.IMAGE}/`,
+    null,
+    authHeaderType,
+    false
+  );
+};
+
 export const postIdea = async (
   taskId: string,
   data: Partial<Idea>,
   authHeaderType = EndpointAuthorisationType.PARTICIPANT
 ): Promise<Idea> => {
-  return await apiExecutePost<Idea>(
+  const image = data.image;
+  delete data.image;
+  const idea = await apiExecutePost<Idea>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.IDEA}`,
     data,
     authHeaderType
   );
+  if (image) {
+    idea.image = image;
+    putIdeaImage({ id: idea.id, image: image }, authHeaderType);
+    addIdeaImage(idea.id, image, idea.imageTimestamp);
+  }
+  return idea;
 };
 
 export const putIdea = async (
   data: Partial<Idea>,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Idea> => {
-  return await apiExecutePut<Idea>(
+  const image = data.image;
+  delete data.image;
+  const dbCalls: Promise<void>[] = [];
+  const dbItem = imageDB.find((db) => db.id === data.id);
+  if ((dbItem && dbItem.image !== image) || (!dbItem && image)) {
+    if (image)
+      dbCalls.push(putIdeaImage({ id: data.id, image: image }, authHeaderType));
+    else if (data.id) dbCalls.push(deleteIdeaIdea(data.id, authHeaderType));
+  }
+  const idea = await apiExecutePut<Idea>(
     `/${EndpointType.IDEA}`,
     data,
     authHeaderType
   );
+  if (image) {
+    idea.image = image;
+    addIdeaImage(idea.id, image, idea.imageTimestamp);
+  }
+  return idea;
+};
+
+export const putIdeaImage = async (
+  data: Partial<IdeaImage>,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<void> => {
+  await apiExecutePut<IdeaImage>(
+    `/${EndpointType.IDEA}/${EndpointType.IMAGE}/`,
+    data,
+    authHeaderType
+  );
+};
+
+export const getIdeaImage = async (
+  ideaId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<IdeaImage> => {
+  return await apiExecuteGetHandled<IdeaImage>(
+    `/${EndpointType.IDEA}/${ideaId}/${EndpointType.IMAGE}/`,
+    null,
+    authHeaderType
+  );
+};
+
+const getIdeaImages = async (
+  ideas: Idea[],
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Idea[]> => {
+  const dbCalls: Promise<IdeaImage>[] = [];
+  for (const idea of ideas) {
+    if (idea.imageTimestamp) {
+      const dbItem = imageDB.find((db) => db.id === idea.id);
+      if (dbItem) idea.image = dbItem.image;
+      if (!dbItem || dbItem.imageTimestamp !== idea.imageTimestamp) {
+        const dbCall = getIdeaImage(idea.id, authHeaderType);
+        dbCall.then((imageResult) => {
+          addIdeaImage(
+            imageResult.id,
+            imageResult.image,
+            imageResult.imageTimestamp
+          );
+          idea.image = imageResult.image;
+        });
+        dbCalls.push(dbCall);
+      }
+    }
+  }
+  //await Promise.all(dbCalls);
+  return ideas;
+};
+
+const addIdeaImage = (
+  id: string,
+  image: string | null,
+  imageTimestamp: string | null = null
+): void => {
+  const index = imageDB.findIndex((db) => db.id === id);
+  if (index > -1) imageDB.splice(index, 1);
+  imageDB.push({ id: id, image: image, imageTimestamp: imageTimestamp });
+  fireEvent('imageLoaded', window, id, image);
 };
 
 export const getIdeasForTask = async (
@@ -65,11 +176,12 @@ export const getIdeasForTask = async (
   let queryParameter = '';
   if (orderType) queryParameter = `?order=${orderType}`;
   if (refId && orderType) queryParameter = `${queryParameter}&refId=${refId}`;
-  return await apiExecuteGetHandled<Idea[]>(
+  const ideas = await apiExecuteGetHandled<Idea[]>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.IDEAS}/${queryParameter}`,
     [],
     authHeaderType
   );
+  return await getIdeaImages(ideas, authHeaderType);
 };
 
 export const getIdeasForTopic = async (
@@ -81,11 +193,12 @@ export const getIdeasForTopic = async (
   let queryParameter = '';
   if (orderType) queryParameter = `?order=${orderType}`;
   if (refId && orderType) queryParameter = `${queryParameter}&refId=${refId}`;
-  return await apiExecuteGetHandled<Idea[]>(
+  const ideas = await apiExecuteGetHandled<Idea[]>(
     `/${EndpointType.TOPIC}/${topicId}/${EndpointType.IDEAS}/${queryParameter}`,
     [],
     authHeaderType
   );
+  return await getIdeaImages(ideas, authHeaderType);
 };
 
 export const getSortOrderOptions = async (

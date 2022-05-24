@@ -89,11 +89,18 @@
         ref="description"
         v-if="hasKeywords && idea.description"
         class="card__content line-break"
-        :class="{ threeLineText: cutLongTexts || (limitedTextLength && !ignoreLimitedDescriptionLength) }"
+        :class="{
+          threeLineText:
+            cutLongTexts ||
+            (limitedTextLength && !ignoreLimitedDescriptionLength),
+        }"
       >
         {{ idea.description }}
       </div>
-      <div v-if="isLongText && !cutLongTexts && !ignoreLimitedDescriptionLength" class="collapse">
+      <div
+        v-if="isLongText && !cutLongTexts && !ignoreLimitedDescriptionLength"
+        class="collapse"
+      >
         <font-awesome-icon
           :icon="limitedTextLength ? 'angle-down' : 'angle-up'"
           @click="collapseChanged"
@@ -105,6 +112,7 @@
       v-model:show-modal="showSettings"
       :idea="idea"
       :authHeaderTyp="authHeaderTyp"
+      @updateData="updateData"
     />
   </el-card>
 </template>
@@ -155,6 +163,21 @@ export default class IdeaCard extends Vue {
 
   IdeaStates = IdeaStates;
 
+  imageLoaded(event: Event): void {
+    const id = (event as any).param1;
+    if (id === this.idea.id) {
+      this.idea.image = (event as any).param2;
+    }
+  }
+
+  mounted(): void {
+    window.addEventListener('imageLoaded', this.imageLoaded, false);
+  }
+
+  unmounted(): void {
+    window.removeEventListener('imageLoaded', this.imageLoaded);
+  }
+
   @Watch('fadeIn', { immediate: true })
   onFadeInChanged(): void {
     if (this.fadeIn) {
@@ -198,6 +221,13 @@ export default class IdeaCard extends Vue {
         this.lengthIsCalculating = false;
       }, 100);
     }
+  }
+
+  updateData(newIdea: Idea): void {
+    this.idea.keywords = newIdea.keywords;
+    this.idea.description = newIdea.description;
+    this.idea.link = newIdea.link;
+    this.idea.image = newIdea.image;
   }
 
   getHeight(): string {

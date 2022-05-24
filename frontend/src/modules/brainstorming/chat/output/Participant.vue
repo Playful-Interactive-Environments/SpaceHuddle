@@ -182,6 +182,11 @@ export default class Participant extends Vue {
   showUploadDialog = false;
   EndpointAuthorisationType = EndpointAuthorisationType;
 
+  imageLoaded(): void {
+    const scrollIsBottom = this.scrollIsBottom();
+    if (scrollIsBottom) this.scrollToBottom();
+  }
+
   get MAX_INPUT_LENGTH(): number {
     if (
       this.formData.newIdeaInput.startsWith('http') ||
@@ -210,10 +215,12 @@ export default class Participant extends Vue {
     this.formData.newIdeaInput = '';
     this.scrollToBottom(0);
     if (this.newIdea.keywords) {
-      ideaService.postIdea(this.taskId, this.newIdea).then((done) => {
-        if (done) {
+      ideaService.postIdea(this.taskId, this.newIdea).then((queryResult) => {
+        if (queryResult) {
           this.newIdea = {};
-          this.getTaskIdeas(true);
+          this.ideas.push(queryResult);
+          const scrollIsBottom = this.scrollIsBottom();
+          if (scrollIsBottom) this.scrollToBottom();
         }
       });
     }
@@ -240,6 +247,7 @@ export default class Participant extends Vue {
   }
 
   async mounted(): Promise<void> {
+    window.addEventListener('imageLoaded', this.imageLoaded, false);
     await this.getTaskIdeas(true);
     this.startInterval();
   }
@@ -291,6 +299,7 @@ export default class Participant extends Vue {
   }
 
   unmounted(): void {
+    window.removeEventListener('imageLoaded', this.imageLoaded);
     clearInterval(this.interval);
   }
 
