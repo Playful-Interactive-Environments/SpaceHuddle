@@ -20,11 +20,14 @@ use App\Action\Hierarchy\HierarchyUpdateAction;
 use App\Action\Home\HomeAction;
 use App\Action\Idea\IdeaCreateForTopicAction;
 use App\Action\Idea\IdeaDeleteAction;
+use App\Action\Idea\IdeaDeleteImageAction;
 use App\Action\Idea\IdeaReadAllFromTaskAction;
 use App\Action\Idea\IdeaCreateForTaskAction;
 use App\Action\Idea\IdeaReadAllFromTopicAction;
+use App\Action\Idea\IdeaReadImageAction;
 use App\Action\Idea\IdeaReadSingleAction;
 use App\Action\Idea\IdeaUpdateAction;
+use App\Action\Idea\IdeaUpdateImageAction;
 use App\Action\Module\ModuleCreateAction;
 use App\Action\Module\ModuleDeleteAction;
 use App\Action\Module\ModuleReadAllAction;
@@ -304,6 +307,16 @@ return function (App $app) {
     $app->group(
         "/idea",
         function (RouteCollectorProxy $app) {
+            $app->get("/{id}/image[/]", IdeaReadImageAction::class);
+        }
+    );
+
+    $app->group(
+        "/idea",
+        function (RouteCollectorProxy $app) {
+            $app->put("/image[/]", IdeaUpdateImageAction::class);
+            $app->delete("/{id}/image[/]", IdeaDeleteImageAction::class);
+
             $app->get("/{id}[/]", IdeaReadSingleAction::class);
             $app->put("[/]", IdeaUpdateAction::class);
             $app->delete("/{id}[/]", IdeaDeleteAction::class);

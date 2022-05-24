@@ -50,6 +50,7 @@ CREATE TABLE `idea` (
                         `keywords` varchar(255) NOT NULL,
                         `description` text DEFAULT NULL,
                         `image` longblob DEFAULT NULL,
+                        `image_timestamp` datetime NULL DEFAULT NULL,
                         `link` varchar(500) DEFAULT NULL,
                         `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
                         `order` int(11) NOT NULL DEFAULT 0

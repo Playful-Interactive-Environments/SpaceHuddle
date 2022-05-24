@@ -32,13 +32,6 @@ class IdeaAbstract
     public ?string $keywords;
 
     /**
-     * Image that describes the idea.
-     * @var string|null
-     * @OA\Property(type="string", format="binary")
-     */
-    public ?string $image;
-
-    /**
      * Link to a resource that describes the idea.
      * @var string|null
      * @OA\Property()
@@ -69,7 +62,6 @@ class IdeaAbstract
         $this->id = $reader->findString("id");
         $this->description = $reader->findString("description");
         $this->keywords = $reader->findString("keywords");
-        $this->image = $reader->findString("image");
         $this->link = $reader->findString("link");
         $this->parameter = (object)json_decode($reader->findString("parameter"));
         $this->order = $reader->findInt("order");

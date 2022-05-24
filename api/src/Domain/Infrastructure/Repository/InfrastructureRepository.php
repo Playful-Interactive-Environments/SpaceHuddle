@@ -35,6 +35,7 @@ class InfrastructureRepository
         "task" => TaskRepository::class,
         "module" => ModuleRepository::class,
         "idea" => IdeaRepository::class,
+        "image" => IdeaRepository::class,
         "category" => CategoryRepository::class,
         "hierarchy" => HierarchyRepository::class,
         "selection" => SelectionRepository::class,

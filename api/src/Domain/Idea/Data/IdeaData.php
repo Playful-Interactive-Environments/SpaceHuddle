@@ -26,6 +26,13 @@ class IdeaData extends IdeaAbstract
     public ?string $timestamp;
 
     /**
+     * Time of image storage.
+     * @var string|null
+     * @OA\Property(format="date")
+     */
+    public ?string $imageTimestamp;
+
+    /**
      * Idea count.
      * @var int|null
      * @OA\Property()
@@ -89,6 +96,7 @@ class IdeaData extends IdeaAbstract
         $reader = new ArrayReader($data);
         $this->state = strtoupper($reader->findString("state"));
         $this->timestamp = $reader->findString("timestamp");
+        $this->imageTimestamp = $reader->findString("image_timestamp");
         $this->count = $reader->findInt("count");
         $this->participantId = $reader->findString("participant_id");
         $this->isOwn = false;

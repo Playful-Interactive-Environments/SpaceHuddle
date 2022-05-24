@@ -2,10 +2,10 @@
 
 namespace App\Domain\Idea\Repository;
 
-use App\Domain\Selection\Repository\SelectionRepository;
 use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Task\Type\TaskType;
+use App\Domain\Idea\Data\ImageData;
 
 trait IdeaTableTrait
 {
@@ -35,6 +35,59 @@ trait IdeaTableTrait
             throw new DomainException("Entity $this->entityName not found");
         }
         return $result;
+    }
+
+    /**
+     * Get image for entity
+     * @param string $id The entity ID.
+     * @return object|null The result image.
+     */
+    public function getImage(string $id): ?object
+    {
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["idea.id", "idea.image", "idea.image_timestamp"])
+            ->andWhere([
+                "idea.id" => $id
+            ]);
+
+        $result = $this->fetchAll($query, ImageData::class);
+        if (!is_object($result)) {
+            throw new DomainException("Entity $this->entityName not found");
+        }
+        return $result;
+    }
+
+    /**
+     * Set the image for a entity row.
+     * @param object $data The data to be inserted
+     */
+    public function setImage(object $data): void
+    {
+        $image_data = [
+            "image" => $data->image ?? null,
+            "image_timestamp" => date("Y-m-d H:i:s")
+        ];
+
+        $this->queryFactory->newUpdate($this->getEntityName(), $image_data)
+            ->andWhere(["id" => $data->id])
+            ->execute();
+    }
+
+    /**
+     * Delete image from entity
+     * @param string $id The entity ID.
+     * @return void
+     */
+    public function deleteImage(string $id): void
+    {
+        $image_data = [
+            "image" => null,
+            "image_timestamp" => null
+        ];
+
+        $this->queryFactory->newUpdate($this->getEntityName(), $image_data)
+            ->andWhere(["id" => $id])
+            ->execute();
     }
 
     /**
@@ -216,7 +269,6 @@ trait IdeaTableTrait
             "id" => $data->id ?? null,
             "description" => $data->description ?? null,
             "keywords" => $data->keywords ?? null,
-            "image" => $data->image ?? null,
             "link" => $data->link ?? null,
             "state" => $data->state ?? null,
             "timestamp" => $data->timestamp ?? null,
