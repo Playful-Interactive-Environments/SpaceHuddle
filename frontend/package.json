@@ -1,6 +1,6 @@
 {
   "name": "spacehuddle",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "scripts": {
     "start": "vue-cli-service serve --open",

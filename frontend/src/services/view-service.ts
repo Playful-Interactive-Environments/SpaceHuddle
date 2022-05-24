@@ -4,7 +4,11 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Idea } from '@/types/api/Idea';
 import { View, getViewName, getViewKey } from '@/types/api/View';
 import { OrderGroupList } from '@/types/api/OrderGroup';
-import { convertToOrderGroups, filterIdeas } from '@/services/idea-service';
+import {
+  convertToOrderGroups,
+  filterIdeas,
+  getIdeaImages,
+} from '@/services/idea-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -56,11 +60,12 @@ export const getDetail = async (
     const parameterString = `countRefId=${countRefId}`;
     queryParameter = pushQueryParameter(queryParameter, parameterString);
   }
-  return await apiExecuteGetHandled<Idea[]>(
+  const result = await apiExecuteGetHandled<Idea[]>(
     `/${EndpointType.VIEW}/${type}/${typeId}/${queryParameter}`,
     [],
     authHeaderType
   );
+  return await getIdeaImages(result, authHeaderType);
 };
 
 export const getViewIdeas = async (
@@ -133,7 +138,8 @@ export const getViewIdeas = async (
     return result.filter(
       (item, index) => result.findIndex((item2) => item2.id == item.id) == index
     );
-  return result;
+
+  return await getIdeaImages(result, authHeaderType);
 };
 
 export const getViewOrderGroups = async (

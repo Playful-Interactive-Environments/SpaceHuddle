@@ -8,6 +8,7 @@ import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Selection } from '@/types/api/Selection';
 import { Idea } from '@/types/api/Idea';
+import { getIdeaImages } from '@/services/idea-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -87,9 +88,10 @@ export const getIdeasForSelection = async (
   selectionId: string,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Idea[]> => {
-  return await apiExecuteGetHandled<Idea[]>(
+  const ideas = await apiExecuteGetHandled<Idea[]>(
     `/${EndpointType.SELECTION}/${selectionId}/${EndpointType.IDEAS}`,
     [],
     authHeaderType
   );
+  return await getIdeaImages(ideas, authHeaderType);
 };

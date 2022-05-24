@@ -129,7 +129,7 @@ export const getIdeaImage = async (
   );
 };
 
-const getIdeaImages = async (
+export const getIdeaImages = async (
   ideas: Idea[],
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Idea[]> => {
