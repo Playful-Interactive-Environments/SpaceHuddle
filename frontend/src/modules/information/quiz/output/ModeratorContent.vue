@@ -233,7 +233,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   get chartHeight(): number {
-    console.log(this.votes.length * 13);
     return this.votes.length * 13;
   }
 
@@ -517,5 +516,4 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   margin: auto;
   padding-left: 0.5rem;
 }
-
 </style>

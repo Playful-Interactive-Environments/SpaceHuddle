@@ -32,9 +32,7 @@ export const postTopic = async (
   );
 };
 
-export const putTopic = async (
-  data: Partial<Topic>
-): Promise<Topic> => {
+export const putTopic = async (data: Partial<Topic>): Promise<Topic> => {
   return await apiExecutePut<Topic>(
     `/${EndpointType.TOPIC}/`,
     data,

@@ -1581,6 +1581,8 @@ export default class TaskSettings extends Vue {
 }
 
 .layout__columns {
-  width: calc(calc(var(--app-width) * 0.8) - 2 * var(--el-dialog-padding-primary));
+  width: calc(
+    calc(var(--app-width) * 0.8) - 2 * var(--el-dialog-padding-primary)
+  );
 }
 </style>

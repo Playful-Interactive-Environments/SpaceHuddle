@@ -1,5 +1,9 @@
 <template>
-  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName" id="PMDC">
+  <ParticipantModuleDefaultContainer
+    :task-id="taskId"
+    :module="moduleName"
+    id="PMDC"
+  >
     <div id="preloader"></div>
     <div id="loadingScreen">
       <span
@@ -249,16 +253,15 @@ import {
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 
-setTimeout(
-  () =>
-    document
-      .querySelector('meta[name=viewport]')!
-      .setAttribute(
-        'content',
-        'height=' + screen.height + 'px, width=device-width, initial-scale=1.0'
-      ),
-  300
-);
+setTimeout(() => {
+  const viewport = document.querySelector('meta[name=viewport]');
+  if (viewport) {
+    viewport.setAttribute(
+      'content',
+      'height=' + screen.height + 'px, width=device-width, initial-scale=1.0'
+    );
+  }
+}, 300);
 
 @Options({
   components: {
@@ -298,11 +301,8 @@ export default class Participant extends Vue {
   };
 
   showUploadDialog = false;
-  showLinkInput = false;
   showTextInput = true;
   showImgInput = false;
-
-  fillScreen = false;
 
   doTakeoff = false;
 
@@ -317,8 +317,7 @@ export default class Participant extends Vue {
   waiting(): boolean {
     let element = document.getElementById('loadingScreen');
     if (element != null && !element.classList.contains('zeroOpacity')) {
-
-      var preload = document.getElementById('preloader');
+      const preload = document.getElementById('preloader');
       preload?.classList.add('PreloadSprites');
 
       setTimeout(() => preload?.classList.remove('PreloadSprites'), 1000);
@@ -339,7 +338,7 @@ export default class Participant extends Vue {
     this.getTaskIdeas();
   }
 
-  mounted() {
+  mounted(): void {
     this.waiting();
   }
 

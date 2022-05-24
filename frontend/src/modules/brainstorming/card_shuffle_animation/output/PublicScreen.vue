@@ -205,7 +205,6 @@ export default class PublicScreen extends Vue {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-
   }
 
   .card__text {
@@ -221,5 +220,4 @@ export default class PublicScreen extends Vue {
     gap: 0.5rem;
   }
 }
-
 </style>

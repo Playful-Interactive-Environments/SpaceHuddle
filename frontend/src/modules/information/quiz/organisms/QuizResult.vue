@@ -67,13 +67,11 @@ export default class QuizResult extends Vue {
   labelLineLimit = 2;
 
   get chartHeight(): number {
-    //console.log(this.voteResult.length * 13);
     return this.voteResult.length * 13;
   }
 
   @Watch('chartHeight', { immediate: true })
   onChartHeightChanged(): void {
-    //console.log('update');
     this.updateChart();
   }
 
@@ -86,7 +84,7 @@ export default class QuizResult extends Vue {
     }
   }
 
-  breakString(str, limit): string[] | string {
+  breakString(str: string, limit: number): string[] | string {
     if (str.length > limit) {
       let stringArray = [''];
       let brokenString = '';
@@ -178,6 +176,4 @@ export default class QuizResult extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>

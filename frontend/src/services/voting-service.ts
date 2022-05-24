@@ -21,9 +21,7 @@ export const postVote = async (
   );
 };
 
-export const putVote = async (
-  data: Partial<Vote>
-): Promise<Vote> => {
+export const putVote = async (data: Partial<Vote>): Promise<Vote> => {
   return await apiExecutePut<Vote>(
     `/${EndpointType.VOTE}/`,
     data,

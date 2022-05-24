@@ -10,7 +10,6 @@
           <p class="el-card__description threeLineText line-break">
             {{ session.description }}
           </p>
-
         </div>
       </el-header>
       <el-main> </el-main>
@@ -78,5 +77,4 @@ export default class SessionCard extends Vue {
 ModuleCount {
   margin-bottom: 0.5rem;
 }
-
 </style>

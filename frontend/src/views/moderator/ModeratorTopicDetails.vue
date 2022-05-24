@@ -467,12 +467,12 @@ export default class ModeratorTopicDetails extends Vue {
     if (this.activeTab == this.previousActiveTab) {
       const taskCategory = TaskCategory[this.activeTab];
       const activeTabTasks = this.tasks.filter((task) =>
-          taskCategory.taskTypes.includes(TaskType[task.taskType])
+        taskCategory.taskTypes.includes(TaskType[task.taskType])
       );
       if (
-          activeTabTasks.length > 0 &&
-          (!this.activeTask ||
-              !activeTabTasks.find((task) => task.id == this.activeTaskId))
+        activeTabTasks.length > 0 &&
+        (!this.activeTask ||
+          !activeTabTasks.find((task) => task.id == this.activeTaskId))
       )
         this.changeTask(activeTabTasks[0]);
     }

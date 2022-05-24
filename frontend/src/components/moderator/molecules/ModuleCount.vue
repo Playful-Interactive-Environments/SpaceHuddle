@@ -5,8 +5,7 @@
       <span class="module-name" v-if="session.topicCount === 1">
         {{ $t('moderator.molecule.moduleCount.topics') }}
       </span>
-      <span
-        class="module-name" v-else>
+      <span class="module-name" v-else>
         {{ $t('moderator.molecule.moduleCountPlural.topics') }}
       </span>
     </div>
@@ -15,8 +14,7 @@
       <span class="module-name" v-if="session.taskCount === 1">
         {{ $t('moderator.molecule.moduleCount.tasks') }}
       </span>
-      <span
-        class="module-name" v-else>
+      <span class="module-name" v-else>
         {{ $t('moderator.molecule.moduleCountPlural.tasks') }}
       </span>
     </div>

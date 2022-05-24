@@ -8,9 +8,9 @@
     <div id="loadingScreen" :class="{ hidden: loadingScreenEnd }">
       <span>{{ $t('module.voting.slots.participant.waiting') }}...</span>
       <span
-          id="loading"
-          v-loading="true"
-          element-loading-background="rgba(0, 0, 0, 0)"
+        id="loading"
+        v-loading="true"
+        element-loading-background="rgba(0, 0, 0, 0)"
       ></span>
     </div>
     <div id="backgroundImage"></div>
@@ -113,17 +113,10 @@
           :is-editable="false"
           :show-state="false"
           class="ideaCard"
-          v-on:click="
-            showIdeaOverlay = true;
-            printArray();
-          "
+          v-on:click="showIdeaOverlay = true"
         />
       </span>
-      <span
-        id="endOfIdeas"
-        v-if="ideaPointer >= ideas.length"
-        v-on:click="printArray()"
-      >
+      <span id="endOfIdeas" v-if="ideaPointer >= ideas.length">
         <span v-if="allSlotsFilled()">
           {{ $t('module.voting.slots.participant.again') }}
         </span>
@@ -236,9 +229,7 @@ export default class Participant extends Vue {
 
   get waiting(): boolean {
     //Changes Paul Start
-    if (this.ideas.length === 0 && this.votes.length === 0) {
-      console.log('waiting');
-    } else {
+    if (this.ideas.length > 0 || this.votes.length > 0) {
       let element = document.getElementById('loadingScreen');
       if (element != null && !element.classList.contains('zeroOpacity')) {
         this.replaceIdeaArray();
@@ -384,9 +375,6 @@ export default class Participant extends Vue {
           })
           .then((vote) => {
             this.votes.push(vote);
-            for (let i = 0; i < this.votes.length; i++) {
-              console.log('vote ' + i + ': ' + this.votes[i].rating);
-            }
           });
       } else {
         vote.rating = slot;
@@ -417,7 +405,6 @@ export default class Participant extends Vue {
 
   //Changes Paul Start
   growIdea = true;
-  shrinkIdea = false;
 
   ElementHidden = false;
 
@@ -455,7 +442,6 @@ export default class Participant extends Vue {
     let fire = document.getElementById('fire');
     this.finishedAndLaunched = true;
     if (rocket != null && fire != null && this.finished) {
-      console.log('test2');
       rocket.scrollTo({ top: rocket.scrollHeight, behavior: 'smooth' });
       rocket.classList.add('rocketAnimateMove');
       fire.classList.add('rocketAnimateSprite');
@@ -505,15 +491,6 @@ export default class Participant extends Vue {
         }
       }
     }
-    this.printArray();
-  }
-
-  printArray(): void {
-    let string = '';
-    for (let i = 0; i < this.ideas.length; i++) {
-      string += 'idea ' + i + ': ' + this.ideas[i]?.keywords + ', ' + '\n';
-    }
-    console.log(string);
   }
 
   allSlotsFilled(): boolean {
@@ -1232,7 +1209,6 @@ span#endOfIdeas > span {
 #ideaAndSkip::v-deep .el-card__body {
   display: flex;
   flex-direction: row;
-
 
   justify-items: center;
 

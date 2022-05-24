@@ -332,7 +332,6 @@ export default class Participant extends Vue {
     if (opacityNum == 1 && this.ideaPointer == 0) {
       return opacityNum;
     } else if (opacityNum != 1) {
-      console.log(this.initIdeaNumber + ', ' + number + ', ' + opacityNum);
       return opacityNum;
     } else {
       return 0;

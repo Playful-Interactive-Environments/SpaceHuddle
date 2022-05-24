@@ -515,8 +515,7 @@ div#loadingScreen > span#loading::v-deep .path {
   border-color: var(--color-darkblue-light);
 }
 
-.el-space::v-deep
-.el-button.el-button--primary.el-button--default.link > span {
+.el-space::v-deep .el-button.el-button--primary.el-button--default.link > span {
   width: 100%;
   white-space: pre-line;
   overflow-wrap: anywhere;
@@ -524,8 +523,7 @@ div#loadingScreen > span#loading::v-deep .path {
   margin-left: 4%;
 }
 
-.el-space::v-deep
-.el-button.el-button--primary.el-button--default.link {
+.el-space::v-deep .el-button.el-button--primary.el-button--default.link {
   height: auto;
   padding: 2% 5% 2% 5%;
 }
