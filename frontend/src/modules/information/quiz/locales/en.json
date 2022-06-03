@@ -18,7 +18,8 @@
     "answer": "answer",
     "answerExample": "option",
     "submit": "save",
-    "addAnswer": "add answer"
+    "addAnswer": "add answer",
+    "noQuestionSelected": "No question selected."
   },
   "publicScreen": {
     "chartDataLabelCorrect": "correct",
@@ -26,11 +27,11 @@
     "chartDataLabelResult": "result"
   },
   "participant": {
-    "thanksModerated": "Your answer has been saved. You can still change the answer until the timer expires.",
-    "thanksIndividual": "Your answer has been saved. You can still change the answer.",
+    "thanksModerated": "Your answer has been saved.",
+    "thanksIndividual": "Your answer has been saved.",
     "previous": "previous",
     "next": "next",
-    "submit": "submit",
+    "submit": "Save",
     "waiting": "Please wait. Questions and answers are being loaded."
   },
   "enum": {

@@ -18,7 +18,8 @@
     "answer": "Antwort",
     "answerExample": "Option",
     "submit": "speichern",
-    "addAnswer": "Antwort hinzufügen"
+    "addAnswer": "Antwort hinzufügen",
+    "noQuestionSelected": "Keine Frage ausgewählt."
   },
   "publicScreen": {
     "chartDataLabelCorrect": "Richtig",
@@ -26,11 +27,11 @@
     "chartDataLabelResult": "Ergebnis"
   },
   "participant": {
-    "thanksModerated": "Deine Antworten wurde gespeichert. Du kannst sie noch bearbeiten, solange der Timer noch läuft",
-    "thanksIndividual": "Deine Antwort wurde gespeichert. Du kannst sie noch bearbeiten.",
+    "thanksModerated": "Deine Antwort wurde gespeichert.",
+    "thanksIndividual": "Deine Antwort wurde gespeichert.",
     "previous": "zurück",
     "next": "weiter",
-    "submit": "bestätigung",
+    "submit": "Speichern",
     "waiting": "Bitte warten. Fragen und Antworten werden geladen."
   },
   "enum": {

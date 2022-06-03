@@ -4,12 +4,22 @@
       {{ $t(`module.information.quiz.enum.questionType.${questionType}`) }}
     </h1>
 
-    <div>
+    <div id="QuizDiv">
       <QuizResult
+        v-if="questionType === QuestionType.QUIZ"
         :voteResult="votes"
         :update="true"
         :questionType="questionType"
+        :show-legend="true"
       />
+      <QuizResult
+        v-else
+        :voteResult="votes"
+        :update="true"
+        :questionType="questionType"
+        :show-legend="false"
+      />
+      <span id="noQuestionSelectedSpan" v-if="!editQuestion">{{ $t('module.information.quiz.moderatorContent.noQuestionSelected') }}</span>
     </div>
 
     <ProcessTimeline
@@ -516,4 +526,27 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   margin: auto;
   padding-left: 0.5rem;
 }
+
+#QuizDiv {
+  position: relative;
+
+  width: auto;
+  height: auto;
+}
+
+#noQuestionSelectedSpan {
+  position: absolute;
+  height: auto;
+  width: auto;
+
+  text-align: center;
+  font-size: var(--font-size-large);
+
+  left: 0;
+  right: 0;
+  top: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 </style>

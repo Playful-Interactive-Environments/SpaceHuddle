@@ -1,6 +1,5 @@
 <template>
   <vue3-chart-js
-    id="resultChart"
     ref="chartRef"
     type="bar"
     :data="chartData"
@@ -26,6 +25,7 @@
       },
       plugins: {
         legend: {
+          display: showLegend,
           position: 'top',
           align: 'end',
           labels: {
@@ -58,6 +58,8 @@ export default class QuizResult extends Vue {
   @Prop({ default: false }) readonly update!: boolean;
   @Prop({ default: QuestionType.QUIZ }) readonly questionType!: QuestionType;
   @Prop({ default: 'detailRatingSum' }) readonly resultColumn!: string;
+  @Prop({ default: true }) readonly showLegend!: true;
+
   chartData: any = {
     labels: [],
     datasets: [],
@@ -75,11 +77,21 @@ export default class QuizResult extends Vue {
     this.updateChart();
   }
 
+  async mounted(): Promise<void> {
+    if (this.resultData) {
+      this.chartData.labels = this.resultData.labels;
+      this.chartData.datasets = this.resultData.datasets;
+      this.checkLabels();
+      this.updateChart();
+    }
+  }
+
   @Watch('voteResult', { immediate: true })
   onVoteResultChanged(): void {
     if (this.resultData) {
       this.chartData.labels = this.resultData.labels;
       this.chartData.datasets = this.resultData.datasets;
+      this.checkLabels();
       this.updateChart();
     }
   }
@@ -161,9 +173,57 @@ export default class QuizResult extends Vue {
             label: labelResult,
             backgroundColor: '#f3a40a',
             data: this.voteResult.map((vote) => vote[this.resultColumn]),
+            borderRadius: 5,
+            borderSkipped: false,
+            yAxisID: 1,
+            color: '#1d2948',
           },
         ],
       };
+
+    }
+  }
+
+  checkLabels(): void {
+    const labelCorrect = (this as any).$t(
+        'module.information.quiz.publicScreen.chartDataLabelCorrect'
+    );
+    const labelIncorrect = (this as any).$t(
+        'module.information.quiz.publicScreen.chartDataLabelIncorrect'
+    );
+
+    let deleteCorrect;
+    let deleteIncorrect;
+
+    for (let i = 0; i < this.chartData.datasets.length; i++) {
+      if (this.chartData.datasets[i].label == labelCorrect) {
+        let count = 0;
+        for (let j = 0; j < this.chartData.datasets[i].data.length; j++) {
+          if (this.chartData.datasets[i].data[j] > 0) {
+            count++;
+          }
+        }
+        if (count <= 0) {
+          deleteCorrect = i;
+        }
+      }
+      if (this.chartData.datasets[i].label == labelIncorrect) {
+        let count = 0;
+        for (let j = 0; j < this.chartData.datasets[i].data.length; j++) {
+          if (this.chartData.datasets[i].data[j] > 0) {
+            count++;
+          }
+        }
+        if (count <= 0) {
+          deleteCorrect = i;
+        }
+      }
+    }
+    if (deleteCorrect != undefined) {
+      this.chartData.datasets.splice(deleteCorrect, 1);
+    }
+    if (deleteIncorrect != undefined) {
+      this.chartData.datasets.splice(deleteIncorrect, 1);
     }
   }
 

@@ -25,7 +25,7 @@
           class="el-button--submit"
           native-type="submit"
           :disabled="!hasPreviousQuestion"
-          v-if="!moderatedQuestionFlow"
+          v-if="!moderatedQuestionFlow && !submitScreen"
           @click="goToPreviousQuestion"
           :class="{ submitScreenButton: submitScreen }"
         >
@@ -90,18 +90,12 @@
             {{ answer.answer.keywords }}
           </el-button>
         </el-space>
-        <span v-if="votes.length > 0 && moderatedQuestionFlow">
-          {{ $t('module.information.quiz.participant.thanksModerated') }}
-        </span>
-        <span v-if="votes.length > 0 && !moderatedQuestionFlow">
-          {{ $t('module.information.quiz.participant.thanksIndividual') }}
-        </span>
       </template>
     </PublicBase>
     <div id="submitScreen" v-if="submitScreen">
       <span
-        >Thank you for the vote. You can go back and edit your answers if you
-        want to.</span
+        >{{ $t('module.information.quiz.participant.thanksIndividual') }} +
+        {{ getScoreString }}</span
       >
     </div>
   </ParticipantModuleDefaultContainer>
@@ -115,7 +109,7 @@ import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as votingService from '@/services/voting-service';
-import { Vote } from '@/types/api/Vote';
+import { Vote, VoteResult } from '@/types/api/Vote';
 import PublicBase, {
   PublicAnswerData,
 } from '@/modules/information/quiz/organisms/PublicBase.vue';
@@ -128,9 +122,11 @@ import {
 } from '@/modules/information/quiz/types/QuestionType';
 import { QuestionPhase } from '@/modules/information/quiz/types/QuestionState';
 import * as hierarchyService from '@/services/hierarchy-service';
+import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
 
 @Options({
   components: {
+    QuizResult,
     ParticipantModuleDefaultContainer,
     PublicBase,
   },
