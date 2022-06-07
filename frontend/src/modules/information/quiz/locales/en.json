@@ -24,7 +24,7 @@
   "publicScreen": {
     "chartDataLabelCorrect": "correct",
     "chartDataLabelIncorrect": "incorrect",
-    "chartDataLabelResult": "result"
+    "chartDataLabelResult": "participants"
   },
   "participant": {
     "thanksModerated": "Your answer has been saved.",

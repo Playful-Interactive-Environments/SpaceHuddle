@@ -6,18 +6,10 @@
 
     <div id="QuizDiv">
       <QuizResult
-        v-if="questionType === QuestionType.QUIZ"
         :voteResult="votes"
         :update="true"
         :questionType="questionType"
         :show-legend="true"
-      />
-      <QuizResult
-        v-else
-        :voteResult="votes"
-        :update="true"
-        :questionType="questionType"
-        :show-legend="false"
       />
       <span id="noQuestionSelectedSpan" v-if="!editQuestion">{{ $t('module.information.quiz.moderatorContent.noQuestionSelected') }}</span>
     </div>

@@ -24,7 +24,7 @@
   "publicScreen": {
     "chartDataLabelCorrect": "Richtig",
     "chartDataLabelIncorrect": "Falsch",
-    "chartDataLabelResult": "Ergebnis"
+    "chartDataLabelResult": "Teilnehmer*innen"
   },
   "participant": {
     "thanksModerated": "Deine Antwort wurde gespeichert.",
