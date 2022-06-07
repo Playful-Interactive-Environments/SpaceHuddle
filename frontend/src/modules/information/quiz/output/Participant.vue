@@ -93,10 +93,10 @@
       </template>
     </PublicBase>
     <div id="submitScreen" v-if="submitScreen">
-      <span
-        >{{ $t('module.information.quiz.participant.thanksIndividual') }} +
-        {{ getScoreString }}</span
-      >
+      <span>{{
+        $t('module.information.quiz.participant.thanksIndividual')
+      }}</span>
+      <span id="ScoreString" v-if="isQuiz">{{ getScoreString }}</span>
     </div>
   </ParticipantModuleDefaultContainer>
 </template>
@@ -109,7 +109,7 @@ import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as votingService from '@/services/voting-service';
-import { Vote, VoteResult } from '@/types/api/Vote';
+import { Vote } from '@/types/api/Vote';
 import PublicBase, {
   PublicAnswerData,
 } from '@/modules/information/quiz/organisms/PublicBase.vue';
@@ -117,8 +117,8 @@ import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
 import * as timerService from '@/services/timer-service';
 import {
-  QuestionType,
   moduleNameValid,
+  QuestionType,
 } from '@/modules/information/quiz/types/QuestionType';
 import { QuestionPhase } from '@/modules/information/quiz/types/QuestionState';
 import * as hierarchyService from '@/services/hierarchy-service';
@@ -145,10 +145,16 @@ export default class Participant extends Vue {
   questionCount = 0;
   questionType: QuestionType = QuestionType.QUIZ;
   moderatedQuestionFlow = true;
+  score = 0;
+  voteResults: boolean[] = [];
 
   QuestionPhase = QuestionPhase;
 
   submitScreen = false;
+
+  get isQuiz(): boolean {
+    return this.questionType === QuestionType.QUIZ;
+  }
 
   get loading(): boolean {
     let element = document.getElementById('loadingScreen');
@@ -172,6 +178,52 @@ export default class Participant extends Vue {
   get hasImage(): boolean {
     //check if the question has an image and return true or false
     return false;
+  }
+
+  get getScoreString(): string {
+    let score = 0;
+    for (let i = 0; i < this.voteResults.length; i++) {
+      if (this.voteResults[i]) {
+        score++;
+      }
+    }
+    return score + '/' + this.questionCount;
+  }
+
+  checkScore(): void {
+    let voteScore = 0;
+    let maxScore = 0;
+    for (let i = 0; i < this.publicAnswerList.length; i++) {
+      for (let j = 0; j < this.votes.length; j++) {
+        if (this.publicAnswerList[i].answer.id == this.votes[j].ideaId) {
+          if (
+            this.votes[j].rating == 1 &&
+            this.publicAnswerList[i].answer.parameter.isCorrect
+          ) {
+            voteScore++;
+          } else if (
+            this.votes[j].rating == 0 &&
+            this.publicAnswerList[i].answer.parameter.isCorrect
+          ) {
+            voteScore--;
+          } else if (
+            this.votes[j].rating == 1 &&
+            !this.publicAnswerList[i].answer.parameter.isCorrect
+          ) {
+            voteScore--;
+          } else if (
+            this.votes[j].rating == 0 &&
+            !this.publicAnswerList[i].answer.parameter.isCorrect
+          ) {
+            voteScore++;
+          }
+        }
+      }
+      if (this.publicAnswerList[i].answer.parameter.isCorrect) {
+        maxScore++;
+      }
+    }
+    this.voteResults[this.activeQuestionIndex] = maxScore == voteScore;
   }
 
   get getImageSrc(): string {
@@ -205,6 +257,7 @@ export default class Participant extends Vue {
   }
 
   goToNextQuestion(): void {
+    this.checkScore();
     if (this.submitScreen) {
       this.submitScreen = false;
     }
@@ -212,6 +265,7 @@ export default class Participant extends Vue {
   }
 
   goToSubmitScreen(): void {
+    this.checkScore();
     this.activeQuestionIndex++;
     this.submitScreen = true;
   }
@@ -221,6 +275,7 @@ export default class Participant extends Vue {
   }
 
   goToPreviousQuestion(): void {
+    this.checkScore();
     if (this.submitScreen) {
       this.submitScreen = false;
     }
@@ -546,5 +601,12 @@ div#loadingScreen > span#loading::v-deep .path {
   justify-items: center;
   align-items: center;
   align-content: center;
+}
+
+#ScoreString {
+  display: block;
+  font-size: var(--font-size-xxxxlarge);
+  font-weight: var(--font-weight-bold);
+  margin-top: 2rem;
 }
 </style>

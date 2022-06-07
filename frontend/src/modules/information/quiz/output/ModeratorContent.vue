@@ -11,7 +11,9 @@
         :questionType="questionType"
         :show-legend="true"
       />
-      <span id="noQuestionSelectedSpan" v-if="!editQuestion">{{ $t('module.information.quiz.moderatorContent.noQuestionSelected') }}</span>
+      <span id="noQuestionSelectedSpan" v-if="!editQuestion">{{
+        $t('module.information.quiz.moderatorContent.noQuestionSelected')
+      }}</span>
     </div>
 
     <ProcessTimeline
@@ -540,5 +542,4 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   margin-left: auto;
   margin-right: auto;
 }
-
 </style>

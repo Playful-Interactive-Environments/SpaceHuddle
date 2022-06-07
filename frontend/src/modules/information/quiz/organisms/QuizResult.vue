@@ -180,16 +180,15 @@ export default class QuizResult extends Vue {
           },
         ],
       };
-
     }
   }
 
   checkLabels(): void {
     const labelCorrect = (this as any).$t(
-        'module.information.quiz.publicScreen.chartDataLabelCorrect'
+      'module.information.quiz.publicScreen.chartDataLabelCorrect'
     );
     const labelIncorrect = (this as any).$t(
-        'module.information.quiz.publicScreen.chartDataLabelIncorrect'
+      'module.information.quiz.publicScreen.chartDataLabelIncorrect'
     );
 
     let deleteCorrect;
