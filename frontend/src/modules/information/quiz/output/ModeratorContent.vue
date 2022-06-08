@@ -212,7 +212,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   @Watch('publicQuestion', { immediate: true })
   async onPublicQuestionChanged(): Promise<void> {
     if (this.publicQuestion && !this.editQuestion)
+    if (this.publicQuestion != null) {
       this.editQuestion = this.publicQuestion;
+    }
     if (this.task) {
       this.task.parameter['activeQuestion'] = this.publicQuestion?.question.id;
       await taskService.putTask(convertToSaveVersion(this.task));
