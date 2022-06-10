@@ -166,6 +166,7 @@ class TopicRepository implements RepositoryInterface
                         "idea.keywords",
                         "idea.description",
                         "idea.image_timestamp",
+                        "idea.id AS image_id",
                         "idea.link",
                         "idea.order",
                         "idea.parameter",
@@ -186,6 +187,7 @@ class TopicRepository implements RepositoryInterface
                         "idea.keywords",
                         "idea.description",
                         "idea.image_timestamp",
+                        "idea.id AS image_id",
                         "idea.link",
                         "idea.order",
                         "idea.parameter",
@@ -227,6 +229,7 @@ class TopicRepository implements RepositoryInterface
                         "idea.keywords",
                         "idea.description",
                         "idea.image_timestamp",
+                        "idea.id AS image_id",
                         "idea.link",
                         "idea.order",
                         "idea.parameter",
@@ -272,31 +275,48 @@ class TopicRepository implements RepositoryInterface
                         foreach ($exportColumns as $columnIndex => $columnName) {
                             $columnLetter = $alphas[$columnIndex];
                             $detailValue = $detailReader->findString($columnName);
-                            if (strpos($columnName, "image") !== false && $detailValue) {
-                                $imageName = $detailReader->findString("category_id");
-                                if (!$imageName || $columnName == "image") {
-                                    $imageName = $detailReader->findString("id");
+                            $hasImage = false;
+                            if (strpos($columnName, "image") !== false) {
+                                $imageId = $detailReader->findString("image_id");
+                                $queryImage = $this->queryFactory->newSelect("idea");
+                                $queryImage->select(["image"])
+                                    ->andWhere(["id" => $imageId]);
+                                $imageRows = $queryImage->execute()->fetchAll("assoc");
+                                if (is_array($rows) and sizeof($rows) > 0) {
+                                    $imageReader = new ArrayReader($imageRows[0]);
+                                    $detailValue = $imageReader->findString($columnName);
                                 }
-                                $imageDescription = $detailReader->findString("keywords");
-                                $imagePath = $this->convertBase64ToImage(
-                                    $detailValue,
-                                    $path . DIRECTORY_SEPARATOR,
-                                    $imageName
-                                );
+                                if ($detailValue) {
+                                    $imageName = $detailReader->findString("category_id");
+                                    if (!$imageName || $columnName == "image") {
+                                        $imageName = $detailReader->findString("id");
+                                    }
+                                    $imageDescription = $detailReader->findString("keywords");
+                                    $imagePath = $this->convertBase64ToImage(
+                                        $detailValue,
+                                        $path . DIRECTORY_SEPARATOR,
+                                        $imageName
+                                    );
 
-                                $drawing = new Drawing();
-                                $drawing->setName($imageName);
-                                $drawing->setDescription($imageDescription);
-                                $drawing->setPath($imagePath);
-                                $drawing->setCoordinates("$columnLetter$rowNumber");
-                                $drawing->setWidth(200);
-                                $drawing->setWorksheet($sheet);
-                                $actualRowHeight = $sheet->getRowDimension($rowNumber)->getRowHeight("px");
-                                if ($actualRowHeight < $drawing->getHeight()) {
-                                    $sheet->getRowDimension($rowNumber)
-                                        ->setRowHeight($drawing->getHeight(), "px");
+                                    if ($imagePath != "") {
+                                        $drawing = new Drawing();
+                                        $drawing->setName($imageName);
+                                        $drawing->setDescription($imageDescription);
+                                        $drawing->setPath($imagePath);
+                                        $drawing->setCoordinates("$columnLetter$rowNumber");
+                                        $drawing->setWidth(200);
+                                        $drawing->setWorksheet($sheet);
+                                        $actualRowHeight = $sheet->getRowDimension($rowNumber)->getRowHeight("px");
+                                        if ($actualRowHeight < $drawing->getHeight()) {
+                                            $sheet->getRowDimension($rowNumber)
+                                                ->setRowHeight($drawing->getHeight(), "px");
+                                        }
+                                        $hasImage = true;
+                                    }
                                 }
-                            } else {
+                            }
+
+                            if (!$hasImage) {
                                 $sheet->setCellValue("$columnLetter$rowNumber", $detailValue);
                                 if (strpos($columnName, "link") !== false && $detailValue) {
                                     $sheet->getCell("$columnLetter$rowNumber")->getHyperlink()->setUrl($detailValue);
@@ -385,6 +405,10 @@ class TopicRepository implements RepositoryInterface
             /*@ Get type of image ex. png, jpg, etc. */
             // $imageType[1] will return type
             $imageTypePieces = explode("image/", $stringPieces[0]);
+
+            if (sizeof($imageTypePieces) < 2) {
+                return "";
+            }
 
             $imageType = $imageTypePieces[1];
 
