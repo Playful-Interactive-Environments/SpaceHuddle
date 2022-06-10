@@ -2,7 +2,7 @@
 
 // Production environment
 
-$settings["error"]["display_error_details"] = false;
+$settings["error"]["display_error_details"] = true;
 $settings["logger"]["level"] = \Monolog\Logger::INFO;
 
 // Database
