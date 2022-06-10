@@ -298,7 +298,7 @@ class TopicRepository implements RepositoryInterface
                                         $imageName
                                     );
 
-                                    if ($imagePath != "") {
+                                    /*if ($imagePath != "") {
                                         $drawing = new Drawing();
                                         $drawing->setName($imageName);
                                         $drawing->setDescription($imageDescription);
@@ -312,7 +312,7 @@ class TopicRepository implements RepositoryInterface
                                                 ->setRowHeight($drawing->getHeight(), "px");
                                         }
                                         $hasImage = true;
-                                    }
+                                    }*/
                                 }
                             }
 
