@@ -371,7 +371,7 @@ class TopicRepository implements RepositoryInterface
                 break;
         }
 
-        return "";//new ExportData($url, $path);
+        return new ExportData($url, $path);
     }
 
     /**
