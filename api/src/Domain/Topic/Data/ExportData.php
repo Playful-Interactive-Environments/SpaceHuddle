@@ -44,7 +44,7 @@ class ExportData
             $files = glob($path . DIRECTORY_SEPARATOR . "*", GLOB_MARK);
             foreach ($files as $file) {
                 if (!is_dir($file)) {
-                    //unlink($file);
+                    unlink($file);
                 }
             }
             rmdir($path);
