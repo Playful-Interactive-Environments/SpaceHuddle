@@ -276,7 +276,6 @@ class TopicRepository implements RepositoryInterface
                             $columnLetter = $alphas[$columnIndex];
                             $detailValue = $detailReader->findString($columnName);
                             $hasImage = false;
-                            /*
                             if (strpos($columnName, "image") !== false) {
                                 $imageId = $detailReader->findString("image_id");
                                 $queryImage = $this->queryFactory->newSelect("idea");
@@ -316,7 +315,6 @@ class TopicRepository implements RepositoryInterface
                                     }
                                 }
                             }
-                            */
 
                             if (!$hasImage) {
                                 $sheet->setCellValue("$columnLetter$rowNumber", $detailValue);
