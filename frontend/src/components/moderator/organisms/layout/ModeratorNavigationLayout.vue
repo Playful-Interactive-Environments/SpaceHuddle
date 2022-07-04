@@ -30,6 +30,10 @@
                 'nav--white': white,
               }"
             >
+              <router-link to="/sessions" class="level-item">
+                <font-awesome-icon icon="home" class="nav__item-icon" />
+                {{ $t('moderator.molecule.navigation.sessions') }}
+              </router-link>
               <router-link to="/profile" class="level-item">
                 <font-awesome-icon icon="user" class="nav__item-icon" />
                 {{ $t('moderator.molecule.navigation.profile') }}
@@ -149,5 +153,9 @@ export default class ModeratorNavigationLayout extends Vue {
 
 .router-link-active {
   font-weight: var(--font-weight-bold);
+}
+
+.el-page-header {
+  margin-left: 3rem;
 }
 </style>

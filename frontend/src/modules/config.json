@@ -1,11 +1,5 @@
 { 
    "brainstorming": {  
-       "animation": {  
-           "publicScreen": "output/PublicScreen",  
-           "locales": "de,en,",  
-             "icon": "space_invaders",  "iconPrefix": "fac",  "type": "addOn",  "input": "no",  "syncPublicParticipant": false,  
-           "path": "brainstorming/animation"  
-       },  
        "card_shuffle_animation": {  
            "publicScreen": "output/PublicScreen",  
            "locales": "de,en,",  

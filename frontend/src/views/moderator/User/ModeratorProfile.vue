@@ -1,5 +1,7 @@
 <template>
-  <ModeratorNavigationLayout>
+  <ModeratorNavigationLayout
+    :currentRouteTitle="$t('moderator.molecule.navigation.profile')"
+  >
     <template v-slot:content>
       <div class="profile__content full-height-header">
         <h1>{{ $t('moderator.view.profile.header') }}</h1>

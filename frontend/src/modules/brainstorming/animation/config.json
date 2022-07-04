@@ -1,7 +1,0 @@
-{
-  "icon": "space_invaders",
-  "iconPrefix": "fac",
-  "type": "addOn",
-  "input": "no",
-  "syncPublicParticipant": false
-}

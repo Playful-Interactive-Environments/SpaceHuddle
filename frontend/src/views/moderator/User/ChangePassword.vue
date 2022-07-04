@@ -1,5 +1,7 @@
 <template>
-  <ModeratorNavigationLayout>
+  <ModeratorNavigationLayout
+    :currentRouteTitle="$t('moderator.view.changePassword.header')"
+  >
     <template v-slot:content>
       <div class="confirm__content full-height-header">
         <h1>{{ $t('moderator.view.changePassword.header') }}</h1>
