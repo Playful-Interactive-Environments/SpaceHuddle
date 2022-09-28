@@ -73,5 +73,244 @@ npm run test:unit
 npm run lint
 ```
 
-#### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Technology stack
+
+SpaceHuddle is built on the following technologies. Visit the websites to learn more about their use.
+
+- Typescript: programming language `https://www.typescriptlang.org/`
+- Sass: css styling language `https://sass-lang.com/`
+- ESLint: code linter `https://eslint.org/`
+- VUE3: JavaScript Framework `https://vuejs.org/guide/introduction.html`
+- Vue Class Component: class-style syntax `https://class-component.vuejs.org/`
+- Element Plus: component library `https://element-plus.org/en-US/component/button.html`
+- Bulma: responsive web interfaces `https://bulma.io/`
+- Font Awesome: icon library `https://fontawesome.com/`
+- i18n: translation module `https://www.npmjs.com/package/i18n`
+- Axios: backend access `https://axios-http.com/`
+- Chart.js: chart components `https://www.chartjs.org/`
+- Matter-js: physics engine `https://brm.io/matter-js/`
+
+### Develop your own modules
+
+1. Navigate to the folder `frontend/src/modules` and choose one of the following 5 subdirectory depending on the module type to be developed.
+   1. information: information phase preceding the brainstorming (e.g. inspirational material, explaining the initial situation, evaluating the initial state (quiz, survey)).
+   2. brainstorming: idea collection
+   3. categorisation: structuring ideas
+   4. selection: restrict ideas for further use
+   5. voting: evaluate ideas
+2. Create your own module subdirectory in the desired type folder.
+3. Configure module
+   1. Create `config.json` file within your module folder
+   2. Set the properties required for your module in the json file
+      - `icon`: name of the fontawesome icon to be assigned to the module (`https://fontawesome.com/`)
+      - `iconPrefix`: optional if the icon category is not fas
+      - `type`: choose one of the two options `main` or `addOn`. `main` modules stand alone. `addOn`s extend any `main` module of the same type.
+      - `input`: Input indicates whether the module uses other modules as an input source. Choose one of the three option `yes`, `no`, `optional`.
+      - `syncPublicParticipant`: Indicates whether the flow of the client module can be controlled by the moderator. Choose one of the two option `true`, `false`.
+      - `fallback`: optional if a module extends another module
+4. Set up multilingualism for module
+   1. Create a `locals` folder within your module folder.
+   2. Add a `[language abbreviation].json` to the `locales` folder for all available languages.
+   3. Structure of the language files
+      ```
+      {
+         "description": {
+            "title": "...",
+            "description": "..."
+         },
+         "publicScreen": {
+            "...": "...",
+            "...": "..."
+         },
+         "participant": {
+            "...": "...",
+            "...": "..."
+         },
+         "moderatorContent": {
+            "...": "...",
+            "...": "..."
+         },
+         "moderatorConfig": {
+            "...": "...",
+            "...": "..."
+         }
+      }
+      ```
+   4. The sections `publicScreen`, `participant`, `moderatorContent`, `moderatorConfig` are optional and should only help to structure the code.
+   5. Replace the `"..."` information with your own content.
+   6. The translation text can be embedded in the vue code as follows.
+      ```
+      $t('module.!moduletype!.!modulename!.!outputType!.!translationKey!')
+      ```
+      - `!moduletype!`: Specifies the name of the module type folder (`selection`, `categorisation`, `brainstorming`, `information`, `voting`)
+      - `!modulename!`: Specifies the name of the module folder
+      - `!outputType!`: Specifies the view name (`publicScreen`, `participant`, `moderatorContent`, `moderatorConfig`)
+      - `!translationKey!`: Specifies the translation key 
+5. Develop your module.
+   1. Create a `output` folder within your module folder.
+   2. Create a `ModeratorContent.vue` file in the `output` folder if you need a moderator view in your module that differs from the default view.
+      In the following example, replace the information between ! and !, and expand the functionality according to individual needs.
+      ```
+      <template>
+      !html section!
+      </template>
+      
+      <script lang="ts">
+      import { Options, Vue } from 'vue-class-component';
+      import { Prop } from 'vue-property-decorator';
+      import { IModeratorContent } from '@/types/ui/IModeratorContent';
+      
+      @Options({
+        components: {},
+      })
+      export default class ModeratorContent extends Vue implements IModeratorContent {
+        @Prop() readonly taskId!: string;
+      }
+      </script>
+      
+      <style lang="scss" scoped>
+      !scss section!
+      </style>
+      ```
+   3. Create a `ModeratorConfig.vue` file in the `output` folder if you need individual adjustable configuration parameters for the moderator in your module.
+      In the following example, replace the information between ! and !, and expand the functionality according to individual needs.
+      ```
+      <template>
+         <el-form-item
+         :label="$t('module.!moduletype!.!modulename!.moderatorConfig.!parametername!')"
+         :prop="`${rulePropPath}.!parametername!`"
+         :rules="[defaultFormRules.ruleRequired]"
+         >
+          <el-input-number
+            v-model="modelValue.!parametername!"
+            :placeholder="$t('module.!moduletype!.!modulename!.moderatorConfig.!parameternameExample!')"
+          />
+        </el-form-item>
+      </template>
+      
+      <script lang="ts">
+      import { Options, Vue } from 'vue-class-component';
+      import { Prop, Watch } from 'vue-property-decorator';
+      import * as moduleService from '@/services/module-service';
+      import { Module } from '@/types/api/Module';
+      import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+      
+      @Options({
+        components: {},
+      })
+      
+      /* eslint-disable @typescript-eslint/no-explicit-any*/
+      export default class ModeratorConfig extends Vue {
+        defaultFormRules: ValidationRuleDefinition = defaultFormRules;
+        @Prop() readonly rulePropPath!: string;
+      
+        @Prop() readonly moduleId!: string;
+        @Prop() readonly taskId!: string;
+        @Prop() readonly topicId!: string;
+        @Prop({ default: {} }) modelValue!: any;
+        module: Module | null = null;
+      
+        @Watch('modelValue', { immediate: true })
+        async onModelValueChanged(): Promise<void> {
+          if (this.modelValue && !this.modelValue.!parametername!) {
+            this.modelValue.!parametername! = !parameternameDefaultValue!;
+          }
+        }
+      
+        @Watch('moduleId', { immediate: true })
+        async onModuleIdChanged(): Promise<void> {
+          await this.getModule();
+        }
+      
+        async getModule(): Promise<void> {
+          if (this.moduleId) {
+            await moduleService.getModuleById(this.moduleId).then((module) => {
+              this.module = module;
+            });
+          }
+        }
+      }
+      </script>
+      ```
+   4. Create a `participant.vue` file in the `output` folder if you need a participant view for your module that differs from the default view.
+      In the following example, replace the information between ! and !, and expand the functionality according to individual needs.
+      ```
+      <template>
+        <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
+          !html section!
+        </ParticipantModuleDefaultContainer>
+      </template>
+      
+      <script lang="ts">
+      import { Options, Vue } from 'vue-class-component';
+      import { Prop, Watch } from 'vue-property-decorator';
+      import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
+      import * as moduleService from '@/services/module-service';
+      import { Module } from '@/types/api/Module';
+      import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+      
+      @Options({
+        components: {
+          ParticipantModuleDefaultContainer,
+        },
+      })
+      export default class Participant extends Vue {
+        @Prop() readonly taskId!: string;
+        @Prop() readonly moduleId!: string;
+        module: Module | null = null;
+      
+        get moduleName(): string {
+          if (this.module) return this.module.name;
+          return '';
+        }
+      
+        @Watch('moduleId', { immediate: true })
+        onModuleIdChanged(): void {
+          this.getModule();
+        }
+      
+        async getModule(): Promise<void> {
+          if (this.moduleId) {
+            await moduleService
+              .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
+              .then((module) => {
+                this.module = module;
+              });
+          }
+        }
+      }
+      </script>
+      
+      <style lang="scss" scoped>
+      !scss section!
+      </style>
+
+      ```
+   5. Create a `PublicScreen.vue` file in the `output` folder if you need an individual public screen for your module that differs from the default view.
+      In the following example, replace the information between ! and !, and expand the functionality according to individual needs.
+      ```
+      <template>
+      !html section!
+      </template>
+      
+      <script lang="ts">
+      import { Options, Vue } from 'vue-class-component';
+      import { Prop } from 'vue-property-decorator';
+      import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+      
+      @Options({
+        components: {},
+      })
+      export default class PublicScreen extends Vue {
+        @Prop() readonly taskId!: string;
+        @Prop({ default: EndpointAuthorisationType.MODERATOR })
+        authHeaderTyp!: EndpointAuthorisationType;
+      }
+      </script>
+      
+      <style lang="scss" scoped>
+      !scss section!
+      </style>
+      ```
+   6. Develop additional components and types required for the module within the module folder. Structure this into subdirectories `types`, `organisms`, `molecules` and `atoms` depending on what the module requires. All these folders are optional.
+   
