@@ -28,6 +28,7 @@ public/.env
 
 env.php
 config/env.php
+config/local.prod.php
 
 #!public/assets/
 #public/assets/*

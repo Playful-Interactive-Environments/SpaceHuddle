@@ -2,9 +2,10 @@
 
 // Developers desktop/workstation
 
+// Error reporting
+$settings["error"]["display_error_details"] = true;
 error_reporting(E_ALL);
 ini_set("display_errors", "1");
-$settings["error"]["display_error_details"] = true;
 
 // Database
 $settings["db"]["database"] = "spacehuddle";
