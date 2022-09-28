@@ -278,7 +278,7 @@ export default class PublicBase extends Vue {
           }
           this.questions = result;
           if (this.moderatedQuestionFlow || this.usePublicQuestion) {
-            if (publicQuestion) this.publicQuestion = publicQuestion;
+            this.publicQuestion = publicQuestion;
           } else if (
             this.activeQuestionIndex >= 0 &&
             this.activeQuestionIndex < this.questions.length
