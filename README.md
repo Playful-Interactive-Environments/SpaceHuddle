@@ -313,4 +313,170 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
       </style>
       ```
    6. Develop additional components and types required for the module within the module folder. Structure this into subdirectories `types`, `organisms`, `molecules` and `atoms` depending on what the module requires. All these folders are optional.
+   7. The implementation of the access to the backend interfaces can be found in the folder `frontend/src/services`. To illustrate their use, here is an example implementation for querying all ideas of a task.
+      ```
+      <template>
+      !html section!
+      </template>
+      
+      <script lang="ts">
+      import { Options, Vue } from 'vue-class-component';
+      import { Prop } from 'vue-property-decorator';
+      import { IModeratorContent } from '@/types/ui/IModeratorContent';
+      import * as ideaService from '@/services/idea-service';
+      import { Idea } from '@/types/api/Idea.ts';
+      import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+      import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+      
+      @Options({
+        components: {},
+      })
+      export default class ModeratorContent extends Vue implements IModeratorContent {
+         @Prop() readonly taskId!: string;
+         ideas: Idea[] = [];
+         activeIdea!: Idea;
+      
+         async getIdeas(): Promise<void> {
+            if (this.taskId) {
+            await ideaService
+               .getIdeasForTask(
+                 this.taskId,
+                 IdeaSortOrder.TIMESTAMP,
+                 null,
+                 EndpointAuthorisationType.MODERATOR
+               )
+               .then((queryResult) => {
+                 this.ideas = queryResult;
+               });
+            }
+         }
+      
+         async save(): Promise<void> {
+            if (this.activeIdea.id) {
+               await ideaService
+                  .putIdea(this.activeIdea, EndpointAuthorisationType.MODERATOR)
+                  .then((queryResult) => {
+                     //todo
+                  });
+            } else if (this.taskId) {
+               await ideaService
+               .postIdea(this.taskId, this.activeIdea, EndpointAuthorisationType.MODERATOR)
+               .then((queryResult) => {
+                  if (queryResult) {
+                   this.activeIdea = {};
+                   this.ideas.push(queryResult);
+                 }
+               });
+            }
+         }
+      }
+      </script>
+      
+      <style lang="scss" scoped>
+      !scss section!
+      </style>
+      ```
+      - `GET` is used to read data.
+      - `POST` is used for the initial insertion of data.
+      - `PUT` for changing already inserted data.
+      - `DELETE` for deleting data.
+   8. Under `frontend/src/components` custom VUE components such as entity cards (e.g. `IdeaCard`), entity change dialogs (e.g. `IdeaSettings`) or layout components (e.g. `ParticipantModuleDefaultContainer`) can be found.
+      ```
+      <template>
+        <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
+          ...
+         <div class="media" v-for="idea in ideas" :key="idea.id">
+            <IdeaCard
+                :idea="idea"
+                :is-editable="false"
+                class="public-idea"
+                :show-state="false"
+              />
+         </div>
+          ...
+        </ParticipantModuleDefaultContainer>
+      </template>
+      
+      <script lang="ts">
+      import { Options, Vue } from 'vue-class-component';
+      import { Prop, Watch } from 'vue-property-decorator';
+      import * as moduleService from '@/services/module-service';
+      import { Module } from '@/types/api/Module';
+      import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+      import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
+      import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
+      
+      @Options({
+        components: {
+            ParticipantModuleDefaultContainer,
+            IdeaCard
+        },
+      })
+      export default class Participant extends Vue {
+        @Prop() readonly taskId!: string;
+        @Prop() readonly moduleId!: string;
+        module: Module | null = null;
+        ideas: Idea[] = [];
+      
+        get moduleName(): string {
+          if (this.module) return this.module.name;
+          return '';
+        }
+      
+        ...
+      }
+      </script>
+      
+      <style lang="scss" scoped>
+      .public-idea {
+         max-width: 20rem;
+      }
+      ...
+      </style>
    
+      ```
+      If these components are to be used in the module in a way that differs from the predefined implementation, we kindly request that you implement an individual development of the components in the module folder. The components can be copied as a template for this purpose.
+   9. If data is to be updated automatically by the backend, this can be solved via an interval. It is important to deactivate the interval when leaving the page, otherwise it will continue to run.
+      ```
+      <template>
+      !html section!
+      </template>
+      
+      <script lang="ts">
+      import { Options, Vue } from 'vue-class-component';
+      import { Prop } from 'vue-property-decorator';
+      import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+      
+      @Options({
+        components: {},
+      })
+      export default class PublicScreen extends Vue {
+        @Prop() readonly taskId!: string;
+        @Prop({ default: EndpointAuthorisationType.MODERATOR })
+        authHeaderTyp!: EndpointAuthorisationType;
+      
+         readonly intervalTime = 3000;
+         interval!: any;
+         
+         mounted(): void {
+            this.startInterval();
+         }
+         
+         startInterval(): void {
+            this.interval = setInterval(this.getIdeas, this.intervalTime);
+         }
+         
+         unmounted(): void {
+            clearInterval(this.interval);
+         }
+         
+         async getIdeas(): Promise<void> {
+            ...
+         }
+      }
+      </script>
+      
+      <style lang="scss" scoped>
+      !scss section!
+      </style>
+      ```
