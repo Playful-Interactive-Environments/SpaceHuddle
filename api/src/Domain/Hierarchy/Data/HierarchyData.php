@@ -26,6 +26,20 @@ class HierarchyData extends IdeaAbstract
     public ?string $parentId;
 
     /**
+     * Participant id of the creator.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $participantId;
+
+    /**
+     * Participant is the creator of the task.
+     * @var bool|null
+     * @OA\Property()
+     */
+    public ?bool $isOwn;
+
+    /**
      * Creates a new idea.
      * @param array $data Idea data.
      */
@@ -35,5 +49,7 @@ class HierarchyData extends IdeaAbstract
         $reader = new ArrayReader($data);
         $this->timestamp = $reader->findString("timestamp");
         $this->parentId = $reader->findString("parent_id");
+        $this->participantId = $reader->findString("participant_id");
+        $this->isOwn = false;
     }
 }

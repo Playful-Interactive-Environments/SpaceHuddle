@@ -2,6 +2,7 @@
 
 namespace App\Domain\Hierarchy\Repository;
 
+use App\Data\AuthorisationData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
@@ -10,7 +11,6 @@ use App\Domain\Idea\Repository\IdeaTableTrait;
 use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskState;
 use App\Factory\QueryFactory;
-use function DI\add;
 
 /**
  * Repository
@@ -126,7 +126,27 @@ class HierarchyRepository implements RepositoryInterface
             ->andWhere($conditions)
             ->order($sortConditions);
 
-        return $this->fetchAll($query);
+        $result = $this->fetchAll($query);
+        if (is_array($result)) {
+            foreach ($result as $resultItem) {
+                $this->getDetails($resultItem, $authorisation);
+            }
+        } elseif (is_object($result)) {
+            $this->getDetails($result, $authorisation);
+        }
+        return $result;
+    }
+
+    /**
+     * Set Properties
+     * @param AuthorisationData $authorisation Authorisation data
+     * @param HierarchyData $data Idea data
+     */
+    private function getDetails(HierarchyData $data, AuthorisationData $authorisation): void
+    {
+        if ($authorisation->isParticipant()) {
+            $data->isOwn = ($data->participantId == $authorisation->id);
+        }
     }
 
     /**
