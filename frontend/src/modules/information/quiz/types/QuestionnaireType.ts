@@ -1,4 +1,4 @@
-export enum QuestionType {
+export enum QuestionnaireType {
   QUIZ = 'quiz',
   SURVEY = 'survey',
 }

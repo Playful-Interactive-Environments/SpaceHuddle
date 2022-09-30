@@ -7,6 +7,12 @@ import {
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Hierarchy } from '@/types/api/Hierarchy';
+import { VoteResult } from '@/types/api/Vote';
+import {
+  getQuestionResultStorageFromHierarchy,
+  QuestionResultStorage,
+} from '@/modules/information/quiz/types/Question';
+import * as votingService from '@/services/voting-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -21,28 +27,39 @@ export const getById = async (
   );
 };
 
-export const deleteHierarchy = async (id: string): Promise<boolean> => {
-  return await apiExecuteDelete<any>(`/${EndpointType.HIERARCHY}/${id}/`);
+export const deleteHierarchy = async (
+  id: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  confirmCheck = true
+): Promise<boolean> => {
+  return await apiExecuteDelete<any>(
+    `/${EndpointType.HIERARCHY}/${id}/`,
+    null,
+    authHeaderType,
+    confirmCheck
+  );
 };
 
 export const postHierarchy = async (
   taskId: string,
-  data: Partial<Hierarchy>
+  data: Partial<Hierarchy>,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Hierarchy> => {
   return await apiExecutePost<Hierarchy>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.HIERARCHY}`,
     data,
-    EndpointAuthorisationType.MODERATOR
+    authHeaderType
   );
 };
 
 export const putHierarchy = async (
-  data: Partial<Hierarchy>
+  data: Partial<Hierarchy>,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Hierarchy> => {
   return await apiExecutePut<Hierarchy>(
     `/${EndpointType.HIERARCHY}`,
     data,
-    EndpointAuthorisationType.MODERATOR
+    authHeaderType
   );
 };
 
@@ -56,4 +73,80 @@ export const getList = async (
     [],
     authHeaderType
   );
+};
+
+export const getHierarchyResult = async (
+  taskId: string,
+  parentHierarchyId: string | null,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<VoteResult[]> => {
+  let votes: VoteResult[] = [];
+  await getList(taskId, parentHierarchyId, authHeaderType).then((answers) => {
+    const result = answers
+      .filter(
+        (v, i, a) => a.findIndex((item) => item.keywords === v.keywords) === i
+      )
+      .sort((a, b) =>
+        a.keywords < b.keywords ? -1 : a.keywords > b.keywords ? 1 : 0
+      );
+    votes = result.map((item) => {
+      const count = answers.filter(
+        (answer) => item.keywords === answer.keywords
+      ).length;
+      return {
+        idea: item,
+        ratingSum: count,
+        detailRatingSum: count,
+        countParticipant: count,
+      };
+    });
+  });
+  return votes;
+};
+
+export const getParentResult = async (
+  taskId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<VoteResult[]> => {
+  const votes: VoteResult[] = await votingService.getParentResult(
+    taskId,
+    authHeaderType
+  );
+  const questions = await getList(
+    taskId,
+    '{parentHierarchyId}',
+    authHeaderType
+  );
+  for (
+    let questionIndex = 0;
+    questionIndex < questions.length;
+    questionIndex++
+  ) {
+    const question = questions[questionIndex];
+    if (question.id) {
+      const questionResultStorage: QuestionResultStorage =
+        getQuestionResultStorageFromHierarchy(question);
+      if (questionResultStorage === QuestionResultStorage.CHILD_HIERARCHY) {
+        const questionResult = await getList(
+          taskId,
+          question.id,
+          authHeaderType
+        );
+        const vote = votes.find((item) => item.idea.id === question.id);
+        if (vote) {
+          vote.ratingSum = questionResult.length;
+          vote.detailRatingSum = questionResult.length;
+          vote.countParticipant = questionResult.length;
+        } else {
+          votes.splice(questionIndex, 0, {
+            idea: question,
+            ratingSum: questionResult.length,
+            detailRatingSum: questionResult.length,
+            countParticipant: questionResult.length,
+          });
+        }
+      }
+    }
+  }
+  return votes;
 };

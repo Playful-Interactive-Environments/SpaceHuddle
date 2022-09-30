@@ -434,6 +434,14 @@
       "selection": "Selektion",
       "vote": "Bewertung",
       "hierarchy": "Hierarchie"
+    },
+    "questionType": {
+      "multichoice": "Multichoice",
+      "singlechoice":  "Singlechoice",
+      "rating": "Rating",
+      "slider": "Slider",
+      "number": "Number",
+      "text": "Text"
     }
   },
   "general": {

@@ -1,4 +1,5 @@
 import { Idea } from '@/types/api/Idea';
+import { Hierarchy } from '@/types/api/Hierarchy';
 
 export interface Vote {
   id: string;
@@ -9,7 +10,7 @@ export interface Vote {
 }
 
 export interface VoteResult {
-  idea: Idea;
+  idea: Idea | Hierarchy;
   ratingSum: number;
   detailRatingSum: number;
   countParticipant: number;

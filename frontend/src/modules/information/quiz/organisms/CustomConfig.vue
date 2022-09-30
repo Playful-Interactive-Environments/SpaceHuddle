@@ -79,7 +79,7 @@ import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import * as timerService from '@/services/timer-service';
-import { QuestionType } from '@/modules/information/quiz/types/QuestionType';
+import { QuestionnaireType } from '@/modules/information/quiz/types/QuestionnaireType';
 import { CustomParameter, CustomSync } from '@/types/ui/CustomParameter';
 
 @Options({
@@ -99,11 +99,11 @@ export default class ModeratorConfig
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
-  @Prop({ default: null }) limitQuestionType!: QuestionType | null;
+  @Prop({ default: null }) limitQuestionType!: QuestionnaireType | null;
   module: Module | null = null;
   defaultTime = 60;
 
-  QuestionType = QuestionType;
+  QuestionType = QuestionnaireType;
 
   @Watch('limitQuestionType', { immediate: true })
   onLimitQuestionTypeChanged(): void {
@@ -117,7 +117,7 @@ export default class ModeratorConfig
       this.modelValue.answerCount = 2;
     }
     if (this.modelValue && !this.modelValue.questionType) {
-      this.modelValue.questionType = QuestionType.QUIZ;
+      this.modelValue.questionType = QuestionnaireType.QUIZ;
     }
     if (
       this.modelValue &&
@@ -170,7 +170,7 @@ export default class ModeratorConfig
   async updateParameterForSaving(): Promise<void> {
     if (
       this.modelValue &&
-      this.modelValue.questionType === QuestionType.SURVEY
+      this.modelValue.questionType === QuestionnaireType.SURVEY
     ) {
       delete this.modelValue.moderatedQuestionFlow;
     }

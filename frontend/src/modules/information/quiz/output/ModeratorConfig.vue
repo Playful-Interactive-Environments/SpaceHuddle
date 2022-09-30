@@ -14,7 +14,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import { QuestionType } from '@/modules/information/quiz/types/QuestionType';
+import { QuestionnaireType } from '@/modules/information/quiz/types/QuestionnaireType';
 import { CustomParameter, CustomSync } from '@/types/ui/CustomParameter';
 import CustomConfig from '@/modules/information/quiz/organisms/CustomConfig.vue';
 
@@ -34,7 +34,7 @@ export default class ModeratorConfig
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
 
-  QuestionType = QuestionType;
+  QuestionType = QuestionnaireType;
 
   async updateParameterForSaving(): Promise<void> {
     const customConfig = this.$refs.customConfig as CustomParameter;

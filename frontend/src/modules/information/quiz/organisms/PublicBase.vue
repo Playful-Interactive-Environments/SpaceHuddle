@@ -46,6 +46,7 @@
       :voteResult="voteResult"
       :change="false"
       :questionType="questionType"
+      :update="true"
     />
   </div>
   <div v-if="showStatistics && !publicQuestion">
@@ -54,6 +55,7 @@
       resultColumn="countParticipant"
       :change="false"
       :questionType="QuestionType.SURVEY"
+      :update="true"
     />
   </div>
 </template>
@@ -64,7 +66,12 @@ import { Prop, Watch } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import { Task } from '@/types/api/Task';
-import { Question } from '@/modules/information/quiz/types/Question';
+import {
+  getQuestionResultStorageFromHierarchy,
+  getQuestionTypeFromHierarchy,
+  Question,
+  QuestionResultStorage,
+} from '@/modules/information/quiz/types/Question';
 import { VoteResult } from '@/types/api/Vote';
 import {
   QuestionPhase,
@@ -78,9 +85,9 @@ import * as hierarchyService from '@/services/hierarchy-service';
 import * as votingService from '@/services/voting-service';
 import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
 import {
-  QuestionType,
   moduleNameValid,
-} from '@/modules/information/quiz/types/QuestionType';
+  QuestionnaireType,
+} from '@/modules/information/quiz/types/QuestionnaireType';
 
 export interface PublicAnswerData {
   answer: Hierarchy;
@@ -112,13 +119,13 @@ export default class PublicBase extends Vue {
   questions: Question[] = [];
   publicQuestion: Question | null = null;
   voteResult: VoteResult[] = [];
-  questionType: QuestionType = QuestionType.QUIZ;
+  questionType: QuestionnaireType = QuestionnaireType.QUIZ;
   moderatedQuestionFlow = true;
 
   questionState: QuestionState = QuestionState.ACTIVE_CREATE_QUESTION;
   statePointer = 0;
 
-  QuestionType = QuestionType;
+  QuestionType = QuestionnaireType;
 
   get isActive(): boolean {
     if (this.moderatedQuestionFlow) {
@@ -156,20 +163,38 @@ export default class PublicBase extends Vue {
     return 0;
   }
 
-  get activeQuestionId(): string | null {
+  getActiveQuestionId(): string | null {
     if (
       this.task &&
       this.task.parameter &&
       (this.moderatedQuestionFlow || this.usePublicQuestion)
     ) {
       return this.task.parameter.activeQuestion;
+    } else {
+      const activeQuestion = this.getActiveQuestion();
+      if (activeQuestion) return activeQuestion.id;
+    }
+    return '';
+  }
+
+  getActiveQuestion(): Hierarchy | null {
+    if (
+      this.task &&
+      this.task.parameter &&
+      (this.moderatedQuestionFlow || this.usePublicQuestion)
+    ) {
+      const activeQuestionId = this.task.parameter.activeQuestion;
+      const question = this.questions.find(
+        (item) => item.question.id === activeQuestionId
+      );
+      if (question) return question.question;
     } else if (
       this.questions.length > this.activeQuestionIndex &&
       this.activeQuestionIndex >= 0
     ) {
-      return this.questions[this.activeQuestionIndex].question.id;
+      return this.questions[this.activeQuestionIndex].question;
     }
-    return '';
+    return null;
   }
 
   get publicAnswers(): Hierarchy[] {
@@ -193,7 +218,7 @@ export default class PublicBase extends Vue {
   }
 
   finishedAnswer(answer: Hierarchy): boolean {
-    if (this.publicQuestion && this.questionType === QuestionType.QUIZ) {
+    if (this.publicQuestion && this.questionType === QuestionnaireType.QUIZ) {
       if (this.questionState == QuestionState.RESULT_ANSWER) {
         return true;
       }
@@ -202,7 +227,7 @@ export default class PublicBase extends Vue {
   }
 
   highlightAnswer(answer: Hierarchy): boolean {
-    if (this.publicQuestion && this.questionType === QuestionType.QUIZ) {
+    if (this.publicQuestion && this.questionType === QuestionnaireType.QUIZ) {
       if (this.questionState == QuestionState.RESULT_ANSWER) {
         return answer.parameter.isCorrect;
       }
@@ -211,7 +236,7 @@ export default class PublicBase extends Vue {
   }
 
   highlightAnswerTemporarily(answer: Hierarchy): boolean {
-    if (this.publicQuestion && this.questionType === QuestionType.QUIZ) {
+    if (this.publicQuestion && this.questionType === QuestionnaireType.QUIZ) {
       if (this.questionState == QuestionState.ACTIVE_LAST_CHANGE) {
         const index = this.publicQuestion.answers.indexOf(answer);
         return index === this.statePointer;
@@ -221,8 +246,8 @@ export default class PublicBase extends Vue {
   }
 
   @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
-    this.getTask().then(() => {
+  async onTaskIdChanged(): Promise<void> {
+    await this.getTask().then(() => {
       this.initQuestionState();
     });
     this.getHierarchies();
@@ -248,7 +273,7 @@ export default class PublicBase extends Vue {
         );
         if (module) {
           this.questionType =
-            QuestionType[module.parameter.questionType.toUpperCase()];
+            QuestionnaireType[module.parameter.questionType.toUpperCase()];
           this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
         }
       });
@@ -256,6 +281,7 @@ export default class PublicBase extends Vue {
 
   async getHierarchies(): Promise<void> {
     if (this.taskId) {
+      const activeQuestionId = this.getActiveQuestionId();
       await hierarchyService
         .getList(this.taskId, '{parentHierarchyId}', this.authHeaderTyp)
         .then(async (questions) => {
@@ -263,18 +289,33 @@ export default class PublicBase extends Vue {
           let publicQuestion: Question | null = null;
           for (const index in questions) {
             const question = questions[index];
-            await hierarchyService
-              .getList(this.taskId, question.id, this.authHeaderTyp)
-              .then((answers) => {
-                const item: Question = {
-                  question: question,
-                  answers: answers,
-                };
-                result.push(item);
-                if (question.id == this.activeQuestionId) {
-                  publicQuestion = item;
-                }
-              });
+            const questionResultStorage: QuestionResultStorage =
+              getQuestionResultStorageFromHierarchy(question);
+            if (questionResultStorage === QuestionResultStorage.VOTING) {
+              await hierarchyService
+                .getList(this.taskId, question.id, this.authHeaderTyp)
+                .then((answers) => {
+                  const item: Question = {
+                    questionType: getQuestionTypeFromHierarchy(question),
+                    question: question,
+                    answers: answers,
+                  };
+                  result.push(item);
+                  if (question.id === activeQuestionId) {
+                    publicQuestion = item;
+                  }
+                });
+            } else {
+              const item: Question = {
+                questionType: getQuestionTypeFromHierarchy(question),
+                question: question,
+                answers: [],
+              };
+              result.push(item);
+              if (question.id === activeQuestionId) {
+                publicQuestion = item;
+              }
+            }
           }
           this.questions = result;
           if (this.moderatedQuestionFlow || this.usePublicQuestion) {
@@ -291,14 +332,25 @@ export default class PublicBase extends Vue {
   }
 
   async getVotes(): Promise<void> {
-    if (this.activeQuestionId) {
-      await votingService
-        .getHierarchyResult(this.activeQuestionId, this.authHeaderTyp)
-        .then((votes) => {
-          this.voteResult = votes;
-        });
+    const activeQuestionId = this.getActiveQuestionId();
+    if (activeQuestionId) {
+      const questionResultStorage: QuestionResultStorage =
+        getQuestionResultStorageFromHierarchy(this.getActiveQuestion());
+      if (questionResultStorage === QuestionResultStorage.VOTING) {
+        await votingService
+          .getHierarchyResult(activeQuestionId, this.authHeaderTyp)
+          .then((votes) => {
+            this.voteResult = votes;
+          });
+      } else {
+        await hierarchyService
+          .getHierarchyResult(this.taskId, activeQuestionId, this.authHeaderTyp)
+          .then((votes) => {
+            this.voteResult = votes;
+          });
+      }
     } else {
-      await votingService
+      await hierarchyService
         .getParentResult(this.taskId, this.authHeaderTyp)
         .then((votes) => {
           this.voteResult = votes;
@@ -315,12 +367,13 @@ export default class PublicBase extends Vue {
   async checkState(staticUpdate = false): Promise<void> {
     const oldQuizState = this.questionState;
     const oldState = this.isActive;
-    const oldQuestionId = this.activeQuestionId;
+    const oldQuestionId = this.getActiveQuestionId();
     await this.getTask();
     if (
       staticUpdate ||
       oldState !== this.isActive ||
-      oldQuestionId !== this.activeQuestionId
+      oldQuestionId !== this.getActiveQuestionId() ||
+      this.showStatistics
     ) {
       this.statePointer = -1;
       this.initQuestionState();
@@ -349,8 +402,10 @@ export default class PublicBase extends Vue {
         break;
       case QuestionState.ACTIVE_LAST_CHANGE:
         if (this.publicQuestion) {
-          this.statePointer =
-            (this.statePointer + 1) % this.publicQuestion.answers.length;
+          const answerCount = this.publicQuestion.answers.length;
+          if (answerCount > 0) {
+            this.statePointer = (this.statePointer + 1) % answerCount;
+          }
         }
         break;
       case QuestionState.DONE_THANKS:
@@ -393,8 +448,8 @@ export default class PublicBase extends Vue {
       this.$emit('changeQuizState', this.questionState);
     }
 
-    if (staticUpdate || oldQuestionId !== this.activeQuestionId) {
-      this.$emit('changePublicQuestion', this.activeQuestionId);
+    if (staticUpdate || oldQuestionId !== this.getActiveQuestionId()) {
+      this.$emit('changePublicQuestion', this.getActiveQuestion());
     }
 
     if (this.publicQuestion) {

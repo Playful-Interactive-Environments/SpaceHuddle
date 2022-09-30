@@ -41,16 +41,18 @@ function fireEvent(
 
 export const deleteIdea = async (
   id: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  confirmCheck = true
 ): Promise<boolean> => {
   return await apiExecuteDelete<any>(
     `/${EndpointType.IDEA}/${id}/`,
     null,
-    authHeaderType
+    authHeaderType,
+    confirmCheck
   );
 };
 
-export const deleteIdeaIdea = async (
+export const deleteIdeaImage = async (
   id: string,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<void> => {
@@ -93,7 +95,7 @@ export const putIdea = async (
   if ((dbItem && dbItem.image !== image) || (!dbItem && image)) {
     if (image)
       dbCalls.push(putIdeaImage({ id: data.id, image: image }, authHeaderType));
-    else if (data.id) dbCalls.push(deleteIdeaIdea(data.id, authHeaderType));
+    else if (data.id) dbCalls.push(deleteIdeaImage(data.id, authHeaderType));
   }
   const idea = await apiExecutePut<Idea>(
     `/${EndpointType.IDEA}`,

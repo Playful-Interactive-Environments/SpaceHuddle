@@ -44,7 +44,7 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import { VoteResult } from '@/types/api/Vote';
-import { QuestionType } from '@/modules/information/quiz/types/QuestionType';
+import { QuestionnaireType } from '@/modules/information/quiz/types/QuestionnaireType';
 
 @Options({
   components: {
@@ -56,7 +56,8 @@ import { QuestionType } from '@/modules/information/quiz/types/QuestionType';
 export default class QuizResult extends Vue {
   @Prop({ default: [] }) readonly voteResult!: VoteResult[];
   @Prop({ default: false }) readonly update!: boolean;
-  @Prop({ default: QuestionType.QUIZ }) readonly questionType!: QuestionType;
+  @Prop({ default: QuestionnaireType.QUIZ })
+  readonly questionType!: QuestionnaireType;
   @Prop({ default: 'detailRatingSum' }) readonly resultColumn!: string;
   @Prop({ default: true }) readonly showLegend!: true;
 
@@ -135,7 +136,7 @@ export default class QuizResult extends Vue {
     const labelResult = (this as any).$t(
       'module.information.quiz.publicScreen.chartDataLabelResult'
     );
-    if (this.questionType === QuestionType.QUIZ) {
+    if (this.questionType === QuestionnaireType.QUIZ) {
       return {
         labels: this.voteResult.map((vote) =>
           this.breakString(vote.idea.keywords, 34)

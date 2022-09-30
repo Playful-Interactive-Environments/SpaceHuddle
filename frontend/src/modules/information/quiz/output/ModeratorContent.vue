@@ -49,12 +49,9 @@
         v-on:submitDataValid="saveQuestion"
       >
         <el-form-item
-          :label="$t('module.information.quiz.moderatorContent.question')"
-          prop="question.keywords"
-          :rules="[
-            defaultFormRules.ruleRequired,
-            defaultFormRules.ruleToLong(400),
-          ]"
+          :label="$t('module.information.quiz.moderatorContent.questionType')"
+          prop="questionType"
+          :rules="[defaultFormRules.ruleRequired]"
         >
           <template #label>
             <div class="media">
@@ -77,6 +74,24 @@
               </span>
             </div>
           </template>
+          <el-select v-model="formData.questionType" class="select--fullwidth">
+            <el-option
+              v-for="questionType in Object.values(QuestionType)"
+              :key="questionType"
+              :value="questionType"
+              :label="$t(`enum.questionType.${questionType}`)"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item
+          :label="$t('module.information.quiz.moderatorContent.question')"
+          prop="question.keywords"
+          :rules="[
+            defaultFormRules.ruleRequired,
+            defaultFormRules.ruleToLong(400),
+          ]"
+        >
           <el-input
             v-model="formData.question.keywords"
             :placeholder="
@@ -99,7 +114,7 @@
           />
         </el-form-item>
         <el-form-item
-          v-for="(answer, index) in formData.answers"
+          v-for="(answer, index) in formAnswers"
           :key="index"
           :label="
             $t('module.information.quiz.moderatorContent.answer') +
@@ -114,9 +129,10 @@
         >
           <div class="media" v-if="index < formData.answers.length">
             <el-checkbox
-              v-if="questionType === QuestionType.QUIZ"
+              v-if="questionType === QuestionnaireType.QUIZ"
               class="media-left"
               v-model="answer.parameter.isCorrect"
+              v-on:change="correctCheckboxChanged(answer)"
             ></el-checkbox>
             <el-input
               class="media-content"
@@ -134,10 +150,47 @@
             </span>
           </div>
         </el-form-item>
-        <el-form-item>
+        <el-form-item
+          v-if="
+            formData.questionType === QuestionType.MULTICHOICE ||
+            formData.questionType === QuestionType.SINGLECHOICE
+          "
+        >
           <AddItem
             :text="$t('module.information.quiz.moderatorContent.addAnswer')"
             @addNew="addAnswer"
+          />
+        </el-form-item>
+        <el-form-item
+          v-if="formData.questionType === QuestionType.NUMBER"
+          :label="$t('module.information.quiz.moderatorContent.minValue')"
+          prop="question.parameter.minValue"
+          :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleNumber]"
+        >
+          <el-input-number
+            v-model="formData.question.parameter.minValue"
+            :min="0"
+            :max="formData.question.parameter.maxValue"
+          />
+        </el-form-item>
+        <el-form-item
+          v-if="
+            formData.questionType === QuestionType.NUMBER ||
+            formData.questionType === QuestionType.RATING ||
+            formData.questionType === QuestionType.SLIDER
+          "
+          :label="$t('module.information.quiz.moderatorContent.maxValue')"
+          prop="question.parameter.maxValue"
+          :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleNumber]"
+        >
+          <el-input-number
+            v-model="formData.question.parameter.maxValue"
+            :min="
+              formData.question.parameter.minValue
+                ? formData.question.parameter.minValue
+                : 0
+            "
+            :max="formData.questionType === QuestionType.RATING ? 15 : 10000"
           />
         </el-form-item>
       </ValidationForm>
@@ -167,12 +220,18 @@ import { VoteResult } from '@/types/api/Vote';
 import * as votingService from '@/services/voting-service';
 import { TimerEntity } from '@/types/enum/TimerEntity';
 import { convertToSaveVersion, Task } from '@/types/api/Task';
-import { Question } from '@/modules/information/quiz/types/Question';
+import {
+  getQuestionResultStorageFromQuestionType,
+  getQuestionTypeFromHierarchy,
+  Question,
+  QuestionResultStorage,
+  QuestionType,
+} from '@/modules/information/quiz/types/Question';
 import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
 import {
   moduleNameValid,
-  QuestionType,
-} from '@/modules/information/quiz/types/QuestionType';
+  QuestionnaireType,
+} from '@/modules/information/quiz/types/QuestionnaireType';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
 
 @Options({
@@ -203,18 +262,39 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   interval!: any;
   minAnswerCount = 2;
   answerCount = this.minAnswerCount;
-  questionType: QuestionType = QuestionType.QUIZ;
+  questionType: QuestionnaireType = QuestionnaireType.QUIZ;
   moderatedQuestionFlow = true;
   defaultQuestionTime: number | null = null;
 
+  QuestionnaireType = QuestionnaireType;
   QuestionType = QuestionType;
+
+  get correctFormAnswer(): Hierarchy | undefined {
+    return this.formData.answers.find((item) => item.parameter.isCorrect);
+  }
+
+  set correctFormAnswer(value: Hierarchy | undefined) {
+    this.formData.answers.forEach((item) => (item.parameter.isCorrect = false));
+    if (value) {
+      value.parameter.isCorrect = true;
+    }
+  }
+
+  get formAnswers(): Hierarchy[] {
+    if (
+      this.formData.questionType === QuestionType.MULTICHOICE ||
+      this.formData.questionType === QuestionType.SINGLECHOICE
+    )
+      return this.formData.answers;
+    return [];
+  }
 
   @Watch('publicQuestion', { immediate: true })
   async onPublicQuestionChanged(): Promise<void> {
     if (this.publicQuestion && !this.editQuestion)
-    if (this.publicQuestion != null) {
-      this.editQuestion = this.publicQuestion;
-    }
+      if (this.publicQuestion) {
+        this.editQuestion = this.publicQuestion;
+      }
     if (this.task) {
       this.task.parameter['activeQuestion'] = this.publicQuestion?.question.id;
       await taskService.putTask(convertToSaveVersion(this.task));
@@ -223,6 +303,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   setFormData(question: Question): void {
     this.formData = {
+      questionType: getQuestionTypeFromHierarchy(question.question),
       question: Object.assign({}, question.question),
       answers: question.answers.map((answer) => Object.assign({}, answer)),
     };
@@ -236,6 +317,44 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   @Watch('formData', { immediate: true })
   async onFormDataChanged(): Promise<void> {
     await this.getVotes();
+  }
+
+  @Watch('formData.questionType', { immediate: true })
+  async onQuestionTypeChanged(): Promise<void> {
+    if (this.formData.questionType === QuestionType.SINGLECHOICE) {
+      const correctAnswers = this.formData.answers.filter(
+        (item) => item.parameter.isCorrect
+      );
+      for (let i = 1; i < correctAnswers.length; i++) {
+        correctAnswers[i].parameter.isCorrect = false;
+      }
+    }
+
+    if (this.formData.questionType === QuestionType.NUMBER) {
+      if (!this.formData.question.parameter.minValue)
+        this.formData.question.parameter.minValue = 0;
+      if (!this.formData.question.parameter.maxValue)
+        this.formData.question.parameter.maxValue = 100;
+    } else if (
+      this.formData.questionType === QuestionType.SLIDER ||
+      this.formData.questionType === QuestionType.RATING
+    ) {
+      delete this.formData.question.parameter.minValue;
+      if (!this.formData.question.parameter.maxValue)
+        this.formData.question.parameter.maxValue = 10;
+    } else {
+      delete this.formData.question.parameter.maxValue;
+      delete this.formData.question.parameter.minValue;
+    }
+  }
+
+  correctCheckboxChanged(answer: Hierarchy): void {
+    if (
+      this.formData.questionType === QuestionType.SINGLECHOICE &&
+      answer.parameter.isCorrect
+    ) {
+      this.correctFormAnswer = answer;
+    }
   }
 
   get chartHeight(): number {
@@ -291,28 +410,35 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   saveQuestion(): void {
+    this.formData.question.parameter.questionType = this.formData.questionType;
     if (this.formData.question.id) {
       hierarchyService.putHierarchy(this.formData.question).then(() => {
-        this.formData.answers.forEach((answer) => {
-          if (answer.id) hierarchyService.putHierarchy(answer);
-          else {
-            answer.parentId = this.formData.question.id;
-            hierarchyService
-              .postHierarchy(this.taskId, {
-                parentId: answer.parentId,
-                keywords: answer.keywords,
-                description: answer.description,
-                link: answer.link,
-                image: answer.image,
-                parameter: answer.parameter,
-                order: answer.order,
-              })
-              .then((hierarchy) => {
-                answer.id = hierarchy.id;
-              });
-          }
-        });
-        this.getHierarchies();
+        if (
+          getQuestionResultStorageFromQuestionType(
+            this.formData.questionType
+          ) === QuestionResultStorage.VOTING
+        ) {
+          this.formData.answers.forEach((answer) => {
+            if (answer.id) hierarchyService.putHierarchy(answer);
+            else {
+              answer.parentId = this.formData.question.id;
+              hierarchyService
+                .postHierarchy(this.taskId, {
+                  parentId: answer.parentId,
+                  keywords: answer.keywords,
+                  description: answer.description,
+                  link: answer.link,
+                  image: answer.image,
+                  parameter: answer.parameter,
+                  order: answer.order,
+                })
+                .then((hierarchy) => {
+                  answer.id = hierarchy.id;
+                });
+            }
+          });
+          this.getHierarchies();
+        }
       });
     } else {
       if (this.formData.question.order === null)
@@ -326,21 +452,33 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           parameter: this.formData.question.parameter,
           order: this.formData.question.order,
         })
-        .then((question) => {
-          this.formData.answers.forEach((answer) => {
-            answer.parentId = question.id;
-            hierarchyService.postHierarchy(this.taskId, {
-              parentId: answer.parentId,
-              keywords: answer.keywords,
-              description: answer.description,
-              link: answer.link,
-              image: answer.image,
-              parameter: answer.parameter,
-              order: answer.order,
+        .then(async (question) => {
+          this.formData.question.id = question.id;
+          if (
+            getQuestionResultStorageFromQuestionType(
+              this.formData.questionType
+            ) === QuestionResultStorage.VOTING
+          ) {
+            for (const answer of this.formData.answers) {
+              answer.parentId = question.id;
+              await hierarchyService.postHierarchy(this.taskId, {
+                parentId: answer.parentId,
+                keywords: answer.keywords,
+                description: answer.description,
+                link: answer.link,
+                image: answer.image,
+                parameter: answer.parameter,
+                order: answer.order,
+              });
+            }
+            this.getHierarchies().then(() => {
+              this.setupEmptyQuestion();
             });
-          });
-          this.setupEmptyQuestion();
-          this.getHierarchies();
+          } else {
+            this.getHierarchies().then(() => {
+              this.setupEmptyQuestion();
+            });
+          }
         });
     }
   }
@@ -378,9 +516,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         this.answerCount = module.parameter.answerCount;
         if (module.parameter.questionType) {
           this.questionType =
-            QuestionType[module.parameter.questionType.toUpperCase()];
+            QuestionnaireType[module.parameter.questionType.toUpperCase()];
         } else {
-          this.questionType = QuestionType.QUIZ;
+          this.questionType = QuestionnaireType.QUIZ;
         }
         this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
         this.defaultQuestionTime = module.parameter.defaultQuestionTime;
@@ -410,8 +548,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       link: null,
       image: null,
       timestamp: null,
-      parameter: forAnswer ? { isCorrect: false } : {},
+      parameter: forAnswer
+        ? { isCorrect: false }
+        : { questionType: QuestionType.MULTICHOICE },
       order: order,
+      isOwn: false,
     };
   }
 
@@ -421,6 +562,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       answers.push(this.getEmptyHierarchy(index, true));
     }
     return {
+      questionType: QuestionType.MULTICHOICE,
       question: this.getEmptyHierarchy(),
       answers: answers,
     };
@@ -439,18 +581,35 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           let publicQuestion: Question | null = null;
           for (const index in questions) {
             const question = questions[index];
-            await hierarchyService
-              .getList(this.taskId, question.id)
-              .then((answers) => {
-                const item: Question = {
-                  question: question,
-                  answers: answers,
-                };
-                result.push(item);
-                if (question.id == this.task?.parameter.activeQuestion) {
-                  publicQuestion = item;
-                }
-              });
+            const questionType: QuestionType =
+              getQuestionTypeFromHierarchy(question);
+            const questionResultStorage: QuestionResultStorage =
+              getQuestionResultStorageFromQuestionType(questionType);
+            if (questionResultStorage === QuestionResultStorage.VOTING) {
+              await hierarchyService
+                .getList(this.taskId, question.id)
+                .then((answers) => {
+                  const item: Question = {
+                    questionType: questionType,
+                    question: question,
+                    answers: answers,
+                  };
+                  result.push(item);
+                  if (question.id == this.task?.parameter.activeQuestion) {
+                    publicQuestion = item;
+                  }
+                });
+            } else {
+              const item: Question = {
+                questionType: questionType,
+                question: question,
+                answers: [],
+              };
+              result.push(item);
+              if (question.id == this.task?.parameter.activeQuestion) {
+                publicQuestion = item;
+              }
+            }
           }
           this.questions = result;
           if (publicQuestion) this.publicQuestion = publicQuestion;
@@ -461,11 +620,22 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   async getVotes(): Promise<void> {
     if (this.formData.question.id) {
-      await votingService
-        .getHierarchyResult(this.formData.question.id)
-        .then((votes) => {
-          this.votes = votes;
-        });
+      if (
+        getQuestionResultStorageFromQuestionType(this.formData.questionType) ===
+        QuestionResultStorage.VOTING
+      ) {
+        await votingService
+          .getHierarchyResult(this.formData.question.id)
+          .then((votes) => {
+            this.votes = votes;
+          });
+      } else {
+        await hierarchyService
+          .getHierarchyResult(this.taskId, this.formData.question.id)
+          .then((votes) => {
+            this.votes = votes;
+          });
+      }
     } else {
       this.votes = [];
     }
@@ -514,6 +684,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 <style scoped>
 .el-input {
   --el-input-background-color: white;
+}
+
+.select--fullwidth {
+  width: 100%;
 }
 
 .icons {

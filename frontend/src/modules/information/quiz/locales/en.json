@@ -6,17 +6,20 @@
   "moderatorConfig": {
     "answerCount": "answer options",
     "moderatedQuestionFlow": "moderated question flow",
-    "questionType": "question type",
+    "questionType": "questionnaire type",
     "time": "time",
     "answerCountExample": 3
   },
   "moderatorContent": {
+    "questionType": "question type",
     "question": "question",
     "questionExample": "what is ...",
     "explanation": "explanation",
     "explanationExample": "the answer of the question is ...",
     "answer": "answer",
     "answerExample": "option",
+    "minValue": "min value",
+    "maxValue": "max value",
     "submit": "save",
     "addAnswer": "add answer",
     "noQuestionSelected": "No question selected."

@@ -10,4 +10,5 @@ export interface Hierarchy {
   image: string | null;
   link: string | null;
   order: number | null;
+  isOwn: boolean;
 }

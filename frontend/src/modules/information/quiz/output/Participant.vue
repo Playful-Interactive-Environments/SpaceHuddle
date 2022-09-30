@@ -60,12 +60,19 @@
       :activeQuestionIndex="activeQuestionIndex"
       :activeQuestionPhase="QuestionPhase.ANSWER"
       v-on:changeQuizState="getTask"
-      v-on:changePublicQuestion="(id) => (activeQuestionId = id)"
+      v-on:changePublicQuestion="(question) => (activeQuestion = question)"
       v-on:changePublicAnswers="(answers) => (publicAnswerList = answers)"
       v-if="!submitScreen"
     >
       <template #answers>
-        <el-space direction="vertical" class="fill">
+        <el-space
+          direction="vertical"
+          class="fill"
+          v-if="
+            activeQuestionType === QuestionType.MULTICHOICE ||
+            activeQuestionType === QuestionType.SINGLECHOICE
+          "
+        >
           <el-button
             v-for="answer in publicAnswerList"
             type="primary"
@@ -90,6 +97,32 @@
             {{ answer.answer.keywords }}
           </el-button>
         </el-space>
+        <el-rate
+          v-else-if="activeQuestionType === QuestionType.RATING"
+          :max="activeQuestion.parameter.maxValue"
+          v-model="activeAnswer.numValue"
+          v-on:change="onAnswerValueChanged"
+        ></el-rate>
+        <el-slider
+          v-else-if="activeQuestionType === QuestionType.SLIDER"
+          :max="activeQuestion.parameter.maxValue"
+          v-model="activeAnswer.numValue"
+          v-on:change="onAnswerValueChanged"
+        ></el-slider>
+        <el-input-number
+          v-else-if="activeQuestionType === QuestionType.NUMBER"
+          :max="activeQuestion.parameter.maxValue"
+          :min="activeQuestion.parameter.minValue"
+          v-model="activeAnswer.numValue"
+          v-on:change="onAnswerValueChanged"
+        ></el-input-number>
+        <el-input
+          v-else-if="activeQuestionType === QuestionType.TEXT"
+          type="textarea"
+          rows="3"
+          v-model="activeAnswer.textValue"
+          v-on:change="onAnswerValueChanged"
+        ></el-input>
       </template>
     </PublicBase>
     <div id="submitScreen" v-if="submitScreen">
@@ -118,11 +151,19 @@ import * as taskService from '@/services/task-service';
 import * as timerService from '@/services/timer-service';
 import {
   moduleNameValid,
-  QuestionType,
-} from '@/modules/information/quiz/types/QuestionType';
+  QuestionnaireType,
+} from '@/modules/information/quiz/types/QuestionnaireType';
 import { QuestionPhase } from '@/modules/information/quiz/types/QuestionState';
 import * as hierarchyService from '@/services/hierarchy-service';
+import * as ideaService from '@/services/idea-service';
 import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
+import {
+  getQuestionResultStorageFromQuestionType,
+  getQuestionTypeFromHierarchy,
+  QuestionResultStorage,
+  QuestionType,
+} from '@/modules/information/quiz/types/Question';
+import { Hierarchy } from '@/types/api/Hierarchy';
 
 @Options({
   components: {
@@ -136,31 +177,48 @@ export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
   publicAnswerList: PublicAnswerData[] = [];
-  activeQuestionId = '';
+  activeQuestion: Hierarchy | null = null;
   module: Module | null = null;
   task: Task | null = null;
   votes: Vote[] = [];
   EndpointAuthorisationType = EndpointAuthorisationType;
   activeQuestionIndex = -1;
   questionCount = 0;
-  questionType: QuestionType = QuestionType.QUIZ;
+  questionnaireType: QuestionnaireType = QuestionnaireType.QUIZ;
   moderatedQuestionFlow = true;
   score = 0;
   voteResults: boolean[] = [];
 
+  activeAnswer: { numValue: number | null; textValue: string | null } = {
+    numValue: null,
+    textValue: null,
+  };
+
   QuestionPhase = QuestionPhase;
+  QuestionType = QuestionType;
 
   submitScreen = false;
 
+  get activeQuestionId(): string {
+    if (this.activeQuestion && this.activeQuestion.id) {
+      return this.activeQuestion.id;
+    }
+    return '';
+  }
+
+  get activeQuestionType(): QuestionType {
+    return getQuestionTypeFromHierarchy(this.activeQuestion);
+  }
+
   get isQuiz(): boolean {
-    return this.questionType === QuestionType.QUIZ;
+    return this.questionnaireType === QuestionnaireType.QUIZ;
   }
 
   get loading(): boolean {
     let element = document.getElementById('loadingScreen');
 
     if (element != null && !element.classList.contains('zeroOpacity')) {
-      var preload = document.getElementById('preloader');
+      const preload = document.getElementById('preloader');
       preload?.classList.add('PreloadSprites');
 
       setTimeout(() => preload?.classList.remove('PreloadSprites'), 1000);
@@ -291,19 +349,73 @@ export default class Participant extends Vue {
     return this.isSavingList.includes(answerId);
   }
 
+  //@Watch('activeAnswer.numValue', { immediate: true })
+  //@Watch('activeAnswer.textValue', { immediate: true })
+  async onAnswerValueChanged(): Promise<void> {
+    if (
+      getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
+      QuestionResultStorage.CHILD_HIERARCHY
+    ) {
+      const deleteAnswer = (answerId: string): void => {
+        ideaService.deleteIdea(
+          answerId,
+          EndpointAuthorisationType.PARTICIPANT,
+          false
+        );
+      };
+      let answerValue: any = null;
+      if (this.activeQuestionType === QuestionType.TEXT)
+        answerValue = this.activeAnswer.textValue;
+      if (
+        this.activeQuestionType === QuestionType.NUMBER ||
+        this.activeQuestionType === QuestionType.RATING ||
+        this.activeQuestionType === QuestionType.SLIDER
+      )
+        answerValue = this.activeAnswer.numValue;
+      const answer = (
+        await hierarchyService.getList(
+          this.taskId,
+          this.activeQuestionId,
+          EndpointAuthorisationType.PARTICIPANT
+        )
+      ).find((item) => item.isOwn);
+      if (answer && answer.id) {
+        if (answerValue) {
+          answer.keywords = answerValue.toString();
+          await hierarchyService.putHierarchy(
+            answer,
+            EndpointAuthorisationType.PARTICIPANT
+          );
+        } else {
+          deleteAnswer(answer.id);
+        }
+      } else if (answerValue) {
+        await hierarchyService.postHierarchy(
+          this.taskId,
+          {
+            parentId: this.activeQuestionId,
+            keywords: answerValue.toString(),
+            order: 0,
+          },
+          EndpointAuthorisationType.PARTICIPANT
+        );
+      }
+    }
+  }
+
   async changeVote(answerId: string): Promise<void> {
     if (!this.isSaving(answerId)) {
       this.isSavingList.push(answerId);
-      const vote = this.votes.find((vote) => vote.ideaId == answerId);
+      const vote = this.votes.find((vote) => vote.ideaId === answerId);
       if (vote) {
         await votingService
           .deleteVote(vote.id, EndpointAuthorisationType.PARTICIPANT)
           .then((result) => {
             if (result) {
               const index = this.votes.findIndex(
-                (vote) => vote.ideaId == answerId
+                (vote) => vote.ideaId === answerId
               );
-              this.votes.splice(index, 1);
+              if (index > -1) this.votes.splice(index, 1);
             }
           });
       } else {
@@ -319,6 +431,21 @@ export default class Participant extends Vue {
       }
       const index = this.isSavingList.indexOf(answerId);
       this.isSavingList.splice(index, 1);
+    }
+    if (this.activeQuestionType === QuestionType.SINGLECHOICE) {
+      const deleteVotes = this.votes.filter((vote) => vote.ideaId !== answerId);
+      for (const deleteVote of deleteVotes) {
+        await votingService
+          .deleteVote(deleteVote.id, EndpointAuthorisationType.PARTICIPANT)
+          .then((result) => {
+            if (result) {
+              const index = this.votes.findIndex(
+                (vote) => vote.ideaId === deleteVote.ideaId
+              );
+              if (index > -1) this.votes.splice(index, 1);
+            }
+          });
+      }
     }
   }
 
@@ -352,8 +479,8 @@ export default class Participant extends Vue {
           moduleNameValid(module.name)
         );
         if (module) {
-          this.questionType =
-            QuestionType[module.parameter.questionType.toUpperCase()];
+          this.questionnaireType =
+            QuestionnaireType[module.parameter.questionType.toUpperCase()];
           this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
           if (!this.moderatedQuestionFlow && this.activeQuestionIndex === -1) {
             this.activeQuestionIndex = 0;
@@ -374,15 +501,41 @@ export default class Participant extends Vue {
   }
 
   async getVotes(): Promise<void> {
-    if (this.activeQuestionId) {
-      await votingService
-        .getHierarchyVotes(
-          this.activeQuestionId,
-          EndpointAuthorisationType.PARTICIPANT
-        )
-        .then((votes) => {
-          this.votes = votes;
-        });
+    if (
+      getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
+      QuestionResultStorage.VOTING
+    ) {
+      if (this.activeQuestionId) {
+        await votingService
+          .getHierarchyVotes(
+            this.activeQuestionId,
+            EndpointAuthorisationType.PARTICIPANT
+          )
+          .then((votes) => {
+            this.votes = votes;
+          });
+      }
+    } else {
+      const answers = await hierarchyService.getList(
+        this.taskId,
+        this.activeQuestionId,
+        EndpointAuthorisationType.PARTICIPANT
+      );
+      const answer = answers.find((item) => item.isOwn);
+      if (answer) {
+        if (this.activeQuestionType === QuestionType.TEXT) {
+          this.activeAnswer.textValue = answer.keywords;
+        } else if (
+          this.activeQuestionType === QuestionType.NUMBER ||
+          this.activeQuestionType === QuestionType.RATING ||
+          this.activeQuestionType === QuestionType.SLIDER
+        ) {
+          this.activeAnswer.numValue = parseInt(answer.keywords);
+        }
+      } else {
+        this.activeAnswer.textValue = null;
+        this.activeAnswer.numValue = 0;
+      }
     }
   }
 }
