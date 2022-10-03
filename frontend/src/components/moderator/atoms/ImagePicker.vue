@@ -1,19 +1,9 @@
 <template>
   <div class="stack">
-    <my-upload
-      id="upload"
-      @crop-success="imageUploadSuccess"
-      v-model="showUploadDialog"
-      :width="512"
-      :height="512"
-      img-format="png"
-      langType="en"
-      :no-square="true"
-      :no-circle="true"
-      :no-rotate="false"
-      :with-credentials="true"
-      ref="upload"
-    ></my-upload>
+    <ImageUploader
+      v-model:show-modal="showUploadDialog"
+      v-model="base64ImageUrl"
+    />
     <LinkSettings v-model:show-modal="showLinkInput" v-model:link="editLink" />
     <div class="edit stack__container stack__container__image">
       <div class="stack__content">
@@ -48,12 +38,12 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import LinkSettings from '@/components/moderator/organisms/settings/LinkSettings.vue';
-import myUpload from 'vue-image-crop-upload/upload-3.vue';
+import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
 
 @Options({
   components: {
+    ImageUploader,
     LinkSettings,
-    'my-upload': myUpload,
   },
   emits: ['update:image', 'update:link'],
 })
@@ -68,6 +58,7 @@ export default class ImagePicker extends Vue {
   showUploadDialog = false;
   showLinkInput = false;
   actionsActive = false;
+  base64ImageUrl: string | null = null;
 
   toggleActions(event: TransitionEvent): void {
     if (event.propertyName == 'opacity') {
@@ -123,6 +114,13 @@ export default class ImagePicker extends Vue {
     this.$emit('update:image', imgDataUrl);
     this.editLink = null;
     (this.$refs.upload as any).setStep(1);
+  }
+
+  @Watch('base64ImageUrl', { immediate: true })
+  onBase64ImageUrlChanged(): void {
+    this.$emit('update:link', null);
+    this.$emit('update:image', this.base64ImageUrl);
+    this.editLink = null;
   }
 }
 </script>

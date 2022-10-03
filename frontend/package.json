@@ -31,6 +31,7 @@
     "shake.js": "^1.2.2",
     "uuid": "^8.3.2",
     "vue": "^3.2.31",
+    "vue-advanced-cropper": "^2.8.3",
     "vue-class-component": "^8.0.0-0",
     "vue-image-crop-upload": "^3.0.3",
     "vue-property-decorator": "^9.1.2",

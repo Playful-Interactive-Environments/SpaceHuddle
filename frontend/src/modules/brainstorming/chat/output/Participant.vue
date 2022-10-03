@@ -123,20 +123,10 @@
       <span class="media-content"></span>
     </div>
 
-    <my-upload
-      id="upload"
-      @crop-success="imageUploadSuccess"
-      v-model="showUploadDialog"
-      :width="512"
-      :height="512"
-      img-format="png"
-      langType="en"
-      :no-square="true"
-      :no-circle="true"
-      :no-rotate="false"
-      :with-credentials="true"
-      ref="upload"
-    ></my-upload>
+    <ImageUploader
+      v-model:show-modal="showUploadDialog"
+      v-model="base64ImageUrl"
+    />
   </ParticipantModuleDefaultContainer>
 </template>
 
@@ -153,19 +143,19 @@ import { Task } from '@/types/api/Task';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
-import myUpload from 'vue-image-crop-upload/upload-3.vue';
 import { MAX_DESCRIPTION_LENGTH, MAX_KEYWORDS_LENGTH } from '@/types/api/Idea';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import ValidationForm, {
   ValidationFormCall,
 } from '@/components/shared/molecules/ValidationForm.vue';
+import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
 
 @Options({
   components: {
     ValidationForm,
     IdeaCard,
     ParticipantModuleDefaultContainer,
-    'my-upload': myUpload,
+    ImageUploader,
   },
 })
 
@@ -180,6 +170,7 @@ export default class Participant extends Vue {
   interval!: any;
   ideas: Idea[] = [];
   showUploadDialog = false;
+  base64ImageUrl: string | null = null;
   EndpointAuthorisationType = EndpointAuthorisationType;
 
   imageLoaded(): void {
@@ -239,6 +230,12 @@ export default class Participant extends Vue {
     this.newIdea.image = imgDataUrl;
     this.scrollToBottom(0);
     (this.$refs.upload as any).setStep(1);
+  }
+
+  @Watch('base64ImageUrl', { immediate: true })
+  onBase64ImageUrlChanged(): void {
+    this.newIdea.image = this.base64ImageUrl;
+    this.scrollToBottom(0);
   }
 
   get moduleName(): string {

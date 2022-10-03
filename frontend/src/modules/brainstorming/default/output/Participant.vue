@@ -173,20 +173,10 @@
         </span>
       </el-form-item>
 
-      <my-upload
-        id="upload"
-        @crop-success="imageUploadSuccess"
-        v-model="showUploadDialog"
-        :width="512"
-        :height="512"
-        img-format="png"
-        langType="en"
-        :no-square="true"
-        :no-circle="true"
-        :no-rotate="false"
-        :with-credentials="true"
-        ref="upload"
-      ></my-upload>
+      <ImageUploader
+        v-model:show-modal="showUploadDialog"
+        v-model="base64ImageUrl"
+      />
 
       <div id="LaunchButton" :class="{ disabled: !isFormValid() }">
         <el-button
@@ -231,7 +221,6 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
-import myUpload from 'vue-image-crop-upload/upload-3.vue';
 import * as moduleService from '@/services/module-service';
 import * as ideaService from '@/services/idea-service';
 import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
@@ -252,6 +241,7 @@ import {
 } from '@/types/api/Idea';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
+import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
 
 setTimeout(() => {
   const viewport = document.querySelector('meta[name=viewport]');
@@ -269,7 +259,7 @@ setTimeout(() => {
     ParticipantModuleDefaultContainer,
     ValidationForm,
     ImagePicker,
-    'my-upload': myUpload,
+    ImageUploader,
   },
 })
 
@@ -283,6 +273,7 @@ export default class Participant extends Vue {
   module: Module | null = null;
   ideas: Idea[] = [];
   showHistory = false;
+  base64ImageUrl: string | null = null;
 
   MAX_KEYWORDS_LENGTH = MAX_KEYWORDS_LENGTH;
   MAX_DESCRIPTION_LENGTH = MAX_DESCRIPTION_LENGTH;
@@ -433,10 +424,10 @@ export default class Participant extends Vue {
     this.formData.imgDataUrl = null;
   }
 
-  imageUploadSuccess(imgDataUrl: string): void {
-    this.formData.imgDataUrl = imgDataUrl;
+  @Watch('base64ImageUrl', { immediate: true })
+  onBase64ImageUrlChanged(): void {
+    this.formData.imgDataUrl = this.base64ImageUrl;
     this.formData.imageWebLink = null;
-    (this.$refs.upload as any).setStep(1);
   }
 
   deleteImage(): void {

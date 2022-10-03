@@ -376,6 +376,14 @@
         "inactive": "inactive"
       }
     },
+    "organism": {
+      "imageUploader": {
+        "header": "upload and crop image",
+        "uploadText": "Drop file here or click to upload",
+        "uploadTip": "jpg/png files with a size less than 500kb",
+        "save": "Done"
+      }
+    },
     "view": {
       "home": {
         "header": "Brainstorm to infinity and beyond!",
