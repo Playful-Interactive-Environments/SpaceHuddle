@@ -78,6 +78,7 @@ export const getList = async (
 export const getHierarchyResult = async (
   taskId: string,
   parentHierarchyId: string | null,
+  correctValue: string | null,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<VoteResult[]> => {
   let votes: VoteResult[] = [];
@@ -93,6 +94,8 @@ export const getHierarchyResult = async (
       const count = answers.filter(
         (answer) => item.keywords === answer.keywords
       ).length;
+      if (correctValue)
+        item.parameter.isCorrect = item.keywords === correctValue.toString();
       return {
         idea: item,
         ratingSum: count,

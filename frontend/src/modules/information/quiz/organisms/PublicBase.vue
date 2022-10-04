@@ -257,9 +257,11 @@ export default class PublicBase extends Vue {
     if (this.isActive) {
       this.questionState = QuestionState.ACTIVE_CREATE_QUESTION;
     } else {
-      this.questionState = this.moderatedQuestionFlow
-        ? QuestionState.RESULT_ANSWER
-        : QuestionState.RESULT_STATISTICS;
+      this.questionState =
+        this.moderatedQuestionFlow &&
+        this.questionState !== QuestionState.RESULT_STATISTICS
+          ? QuestionState.RESULT_ANSWER
+          : QuestionState.RESULT_STATISTICS;
     }
   }
 
@@ -344,7 +346,12 @@ export default class PublicBase extends Vue {
           });
       } else {
         await hierarchyService
-          .getHierarchyResult(this.taskId, activeQuestionId, this.authHeaderTyp)
+          .getHierarchyResult(
+            this.taskId,
+            activeQuestionId,
+            this.getActiveQuestion()?.parameter.correctValue,
+            this.authHeaderTyp
+          )
           .then((votes) => {
             this.voteResult = votes;
           });

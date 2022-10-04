@@ -20,6 +20,7 @@
     "answerExample": "Option",
     "minValue": "Minimum",
     "maxValue": "Maximum",
+    "correctValue": "Richtiger Wert",
     "submit": "speichern",
     "addAnswer": "Antwort hinzufügen",
     "noQuestionSelected": "Keine Frage ausgewählt."

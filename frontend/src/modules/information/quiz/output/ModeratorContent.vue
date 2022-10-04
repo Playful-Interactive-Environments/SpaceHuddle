@@ -193,6 +193,27 @@
             :max="formData.questionType === QuestionType.RATING ? 15 : 10000"
           />
         </el-form-item>
+        <el-form-item
+          v-if="
+            (formData.questionType === QuestionType.NUMBER ||
+              formData.questionType === QuestionType.RATING ||
+              formData.questionType === QuestionType.SLIDER) &&
+            questionType === QuestionnaireType.QUIZ
+          "
+          :label="$t('module.information.quiz.moderatorContent.correctValue')"
+          prop="question.parameter.correctValue"
+          :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleNumber]"
+        >
+          <el-input-number
+            v-model="formData.question.parameter.correctValue"
+            :min="
+              formData.question.parameter.minValue
+                ? formData.question.parameter.minValue
+                : 0
+            "
+            :max="formData.question.parameter.maxValue"
+          />
+        </el-form-item>
       </ValidationForm>
     </div>
   </div>
@@ -631,7 +652,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           });
       } else {
         await hierarchyService
-          .getHierarchyResult(this.taskId, this.formData.question.id)
+          .getHierarchyResult(
+            this.taskId,
+            this.formData.question.id,
+            this.formData.question.parameter?.correctValue
+          )
           .then((votes) => {
             this.votes = votes;
           });
