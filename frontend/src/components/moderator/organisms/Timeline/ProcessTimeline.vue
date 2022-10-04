@@ -107,6 +107,13 @@
                     ? '3rem'
                     : '12px',
                 }"
+                :status="
+                  index === activeContentIndex
+                    ? 'process'
+                    : index < activeContentIndex
+                    ? 'finish'
+                    : 'wait'
+                "
               >
                 <template #icon>
                   <div class="timelineIcon">
@@ -200,6 +207,13 @@
           v-for="(element, index) in activePageDisplayContentList"
           :id="getKey(element)"
           :key="element.id"
+          :status="
+            index === activeContentIndex
+              ? 'process'
+              : index < activeContentIndex
+              ? 'finish'
+              : 'wait'
+          "
         >
           <template #icon>
             <font-awesome-icon
