@@ -19,6 +19,13 @@ class HierarchyData extends IdeaAbstract
     public ?string $timestamp;
 
     /**
+     * Time of image storage.
+     * @var string|null
+     * @OA\Property(format="date")
+     */
+    public ?string $imageTimestamp;
+
+    /**
      * ID of the parent node.
      * @var string|null
      * @OA\Property()
@@ -48,6 +55,7 @@ class HierarchyData extends IdeaAbstract
         parent::__construct($data);
         $reader = new ArrayReader($data);
         $this->timestamp = $reader->findString("timestamp");
+        $this->imageTimestamp = $reader->findString("image_timestamp");
         $this->parentId = $reader->findString("parent_id");
         $this->participantId = $reader->findString("participant_id");
         $this->isOwn = false;
