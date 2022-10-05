@@ -84,35 +84,49 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item
-          :label="$t('module.information.quiz.moderatorContent.question')"
-          prop="question.keywords"
-          :rules="[
-            defaultFormRules.ruleRequired,
-            defaultFormRules.ruleToLong(400),
-          ]"
-        >
-          <el-input
-            v-model="formData.question.keywords"
-            :placeholder="
-              $t('module.information.quiz.moderatorContent.questionExample')
-            "
-          />
-        </el-form-item>
-        <el-form-item
-          :label="$t('module.information.quiz.moderatorContent.explanation')"
-          :prop="`question.description`"
-          :rules="[defaultFormRules.ruleToLong(1000)]"
-        >
-          <el-input
-            v-model="formData.question.description"
-            type="textarea"
-            rows="3"
-            :placeholder="
-              $t('module.information.quiz.moderatorContent.explanationExample')
-            "
-          />
-        </el-form-item>
+        <div class="image-layout">
+          <div class="image-layout--form-data">
+            <el-form-item
+              :label="$t('module.information.quiz.moderatorContent.question')"
+              prop="question.keywords"
+              :rules="[
+                defaultFormRules.ruleRequired,
+                defaultFormRules.ruleToLong(400),
+              ]"
+            >
+              <el-input
+                v-model="formData.question.keywords"
+                :placeholder="
+                  $t('module.information.quiz.moderatorContent.questionExample')
+                "
+              />
+            </el-form-item>
+            <el-form-item
+              :label="
+                $t('module.information.quiz.moderatorContent.explanation')
+              "
+              :prop="`question.description`"
+              :rules="[defaultFormRules.ruleToLong(1000)]"
+            >
+              <el-input
+                v-model="formData.question.description"
+                type="textarea"
+                rows="3"
+                :placeholder="
+                  $t(
+                    'module.information.quiz.moderatorContent.explanationExample'
+                  )
+                "
+              />
+            </el-form-item>
+          </div>
+          <div class="image-layout--image">
+            <ImagePicker
+              v-model:link="formData.question.link"
+              v-model:image="formData.question.image"
+            />
+          </div>
+        </div>
         <el-form-item
           v-for="(answer, index) in formAnswers"
           :key="index"
@@ -140,6 +154,11 @@
               :placeholder="
                 $t('module.information.quiz.moderatorContent.answerExample')
               "
+            />
+            <ImagePicker
+              class="answerImage"
+              v-model:link="answer.link"
+              v-model:image="answer.image"
             />
             <span
               class="icons"
@@ -254,9 +273,11 @@ import {
   QuestionnaireType,
 } from '@/modules/information/quiz/types/QuestionnaireType';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
+import ImagePicker from "@/components/moderator/atoms/ImagePicker.vue";
 
 @Options({
   components: {
+    ImagePicker,
     ValidationForm,
     ProcessTimeline,
     AddItem,
@@ -569,6 +590,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       link: null,
       image: null,
       timestamp: null,
+      imageTimestamp: null,
       parameter: forAnswer
         ? { isCorrect: false }
         : { questionType: QuestionType.MULTICHOICE },
@@ -706,7 +728,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .el-input {
   --el-input-background-color: white;
 }
@@ -742,5 +764,34 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   top: 50%;
   margin-left: auto;
   margin-right: auto;
+}
+
+.image-layout {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  &--form-data {
+    width: 100%;
+  }
+  &--image {
+    width: 12rem;
+    margin-top: 2rem;
+    margin-left: 1rem;
+  }
+}
+
+.answerImage.stack::v-deep {
+  min-width: 4.5rem;
+  max-height: 2.5rem;
+  margin-left: 0.5rem;
+  font-size: 0.7rem;
+  position: relative;
+  top: -2rem;
+
+  .stack__action {
+    font-size: 1rem;
+    gap: 0.3rem;
+  }
 }
 </style>

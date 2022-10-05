@@ -7,6 +7,7 @@ export interface Hierarchy {
   description: string | null;
   keywords: string;
   parameter: any | null;
+  imageTimestamp: string | null;
   image: string | null;
   link: string | null;
   order: number | null;

@@ -3,16 +3,21 @@
     <ImageUploader
       v-model:show-modal="showUploadDialog"
       v-model="base64ImageUrl"
+      v-on:imageChanged="imageChanged"
     />
-    <LinkSettings v-model:show-modal="showLinkInput" v-model:link="editLink" />
+    <LinkSettings
+      v-model:show-modal="showLinkInput"
+      v-model:link="editLink"
+      v-on:imageChanged="imageChanged"
+    />
     <div class="edit stack__container stack__container__image">
       <div class="stack__content">
         <div v-if="!link && !image" class="empty">
           <font-awesome-icon icon="plus" />
           <span>{{ $t('moderator.atom.imagePicker.add') }}</span>
         </div>
-        <el-image fit="cover" :src="image" alt="" v-if="image" />
-        <el-image fit="cover" :src="link" alt="" v-if="link && !image" />
+        <el-image fit="contain" :src="image" alt="" v-if="image" />
+        <el-image fit="contain" :src="link" alt="" v-if="link && !image" />
       </div>
       <span
         v-if="useEditOverlay"
@@ -45,7 +50,7 @@ import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
     ImageUploader,
     LinkSettings,
   },
-  emits: ['update:image', 'update:link'],
+  emits: ['update:image', 'update:link', 'change'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -106,6 +111,7 @@ export default class ImagePicker extends Vue {
       this.$emit('update:link', null);
       this.$emit('update:image', null);
       this.editLink = null;
+      this.$emit('change', null);
     }
   }
 
@@ -114,6 +120,12 @@ export default class ImagePicker extends Vue {
     this.$emit('update:image', imgDataUrl);
     this.editLink = null;
     (this.$refs.upload as any).setStep(1);
+  }
+
+  imageChanged(): void {
+    setTimeout(() => {
+      this.$emit('change', null);
+    }, 100);
   }
 
   @Watch('base64ImageUrl', { immediate: true })

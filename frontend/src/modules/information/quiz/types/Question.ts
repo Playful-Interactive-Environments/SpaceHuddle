@@ -7,6 +7,7 @@ export enum QuestionType {
   SLIDER = 'slider',
   NUMBER = 'number',
   TEXT = 'text',
+  IMAGE = 'image',
 }
 
 export enum QuestionResultStorage {

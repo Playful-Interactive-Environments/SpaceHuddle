@@ -449,7 +449,8 @@
       "rating": "Rating",
       "slider": "Slider",
       "number": "Number",
-      "text": "Text"
+      "text": "Text",
+      "image": "Image"
     }
   },
   "general": {

@@ -54,7 +54,7 @@ import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
     FromSubmitItem,
     'my-upload': myUpload,
   },
-  emits: ['update:showModal', 'update:link'],
+  emits: ['update:showModal', 'update:link', 'imageChanged'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -103,6 +103,7 @@ export default class LinkSettings extends Vue {
     this.reset();
     this.showSettings = false;
     this.$emit('update:showModal', false);
+    this.$emit('imageChanged', null);
   }
 }
 </script>

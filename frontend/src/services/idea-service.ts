@@ -19,6 +19,7 @@ import IdeaSortOrder, {
 } from '@/types/enum/IdeaSortOrder';
 import * as taskService from '@/services/task-service';
 import TaskType from '@/types/enum/TaskType';
+import { Hierarchy } from '@/types/api/Hierarchy';
 const imageDB: IdeaImage[] = [];
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -78,7 +79,7 @@ export const postIdea = async (
   );
   if (image) {
     idea.image = image;
-    putIdeaImage({ id: idea.id, image: image }, authHeaderType);
+    await putIdeaImage({ id: idea.id, image: image }, authHeaderType);
     addIdeaImage(idea.id, image, idea.imageTimestamp);
   }
   return idea;
@@ -135,9 +136,16 @@ export const getIdeaImages = async (
   ideas: Idea[],
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Idea[]> => {
+  return (await getItemImages(ideas, authHeaderType)) as Idea[];
+};
+
+export const getItemImages = async (
+  ideas: Idea[] | Hierarchy[],
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Idea[] | Hierarchy[]> => {
   const dbCalls: Promise<IdeaImage>[] = [];
   for (const idea of ideas) {
-    if (idea.imageTimestamp) {
+    if (idea.imageTimestamp && idea.id) {
       const dbItem = imageDB.find((db) => db.id === idea.id);
       if (dbItem) idea.image = dbItem.image;
       if (!dbItem || dbItem.imageTimestamp !== idea.imageTimestamp) {
@@ -158,7 +166,12 @@ export const getIdeaImages = async (
   return ideas;
 };
 
-const addIdeaImage = (
+export const itemImageChanged = (id: string, image: string | null): boolean => {
+  const dbItem = imageDB.find((db) => db.id === id);
+  return !!((dbItem && dbItem.image !== image) || (!dbItem && image));
+};
+
+export const addIdeaImage = (
   id: string,
   image: string | null,
   imageTimestamp: string | null = null

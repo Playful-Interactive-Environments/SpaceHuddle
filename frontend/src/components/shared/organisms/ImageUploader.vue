@@ -70,10 +70,11 @@ import { getBase64ImageType, isValidFileType, UploadData } from '@/utils/file';
 import { ElFile } from 'element-plus/es/components/upload/src/upload.type';
 import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
+import 'vue-advanced-cropper/dist/theme.classic.css';
 
 @Options({
   components: { Cropper },
-  emits: ['update:showModal'],
+  emits: ['update:showModal', 'imageChanged'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -123,6 +124,7 @@ export default class ImageUploader extends Vue {
       const base64 = canvas?.toDataURL(this.uploadData.type);
       this.$emit('update:modelValue', base64);
       this.$emit('update:showModal', false);
+      this.$emit('imageChanged', null);
       this.reset();
     }
   }
@@ -171,6 +173,23 @@ export default class ImageUploader extends Vue {
     width: unset;
     height: unset;
     padding: 2rem;
+  }
+}
+
+.vue-advanced-cropper::v-deep {
+  .vue-advanced-cropper__background,
+  .vue-advanced-cropper__foreground {
+    background: white;
+  }
+
+  .vue-simple-handler {
+    background: var(--color-primary);
+  }
+
+  .vue-simple-line {
+    border-color: var(--color-primary);
+    border-style: dashed;
+    border-width: 0.5;
   }
 }
 

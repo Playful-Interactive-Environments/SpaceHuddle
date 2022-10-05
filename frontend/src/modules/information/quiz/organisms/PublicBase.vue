@@ -19,6 +19,18 @@
         (statePointer >= 0 || !isActive)
       "
     >
+      <img
+        v-if="publicQuestion.question.image"
+        :src="publicQuestion.question.image"
+        class="question-image"
+        alt=""
+      />
+      <img
+        v-if="publicQuestion.question.link && !publicQuestion.question.image"
+        :src="publicQuestion.question.link"
+        class="question-image"
+        alt=""
+      />
       <div class="question">
         {{ publicQuestion.question.keywords }}
       </div>
@@ -160,7 +172,7 @@ export default class PublicBase extends Vue {
   get remainingTime(): number {
     const time = timerService.getRemainingTime(this.task);
     if (time) return time;
-    return 0;
+    return QuizStateProperty[QuestionState.ACTIVE_WAIT_FOR_VOTE].time;
   }
 
   getActiveQuestionId(): string | null {
@@ -492,10 +504,6 @@ export default class PublicBase extends Vue {
 .el-space::v-deep {
   .el-space__item {
     width: 100%;
-
-    button {
-      width: 100%;
-    }
   }
 }
 
@@ -524,5 +532,10 @@ export default class PublicBase extends Vue {
 
 .el-steps {
   margin-bottom: 2rem;
+}
+
+.question-image {
+  max-height: 30vh;
+  object-fit: contain;
 }
 </style>

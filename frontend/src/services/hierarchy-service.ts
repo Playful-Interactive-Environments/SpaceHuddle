@@ -13,6 +13,8 @@ import {
   QuestionResultStorage,
 } from '@/modules/information/quiz/types/Question';
 import * as votingService from '@/services/voting-service';
+import * as ideaService from '@/services/idea-service';
+import {deleteIdeaImage, itemImageChanged, putIdeaImage} from "@/services/idea-service";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -45,22 +47,50 @@ export const postHierarchy = async (
   data: Partial<Hierarchy>,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Hierarchy> => {
-  return await apiExecutePost<Hierarchy>(
+  const image = data.image;
+  delete data.image;
+  const hierarchy = await apiExecutePost<Hierarchy>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.HIERARCHY}`,
     data,
     authHeaderType
   );
+  if (image && hierarchy.id) {
+    hierarchy.image = image;
+    await ideaService.putIdeaImage(
+      { id: hierarchy.id, image: image },
+      authHeaderType
+    );
+    ideaService.addIdeaImage(hierarchy.id, image, hierarchy.imageTimestamp);
+  }
+  return hierarchy;
 };
 
 export const putHierarchy = async (
   data: Partial<Hierarchy>,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Hierarchy> => {
-  return await apiExecutePut<Hierarchy>(
+  const image = data.image !== undefined ? data.image : null;
+  delete data.image;
+  const imageChanged = data.id ? itemImageChanged(data.id, image) : false;
+  console.log('putHierarchy');
+  const hierarchy = await apiExecutePut<Hierarchy>(
     `/${EndpointType.HIERARCHY}`,
     data,
     authHeaderType
   );
+  if (imageChanged && hierarchy.id) {
+    if (image) {
+      hierarchy.image = image;
+      await ideaService.putIdeaImage(
+        { id: hierarchy.id, image: image },
+        authHeaderType
+      );
+      ideaService.addIdeaImage(hierarchy.id, image, hierarchy.imageTimestamp);
+    } else {
+      await deleteIdeaImage(hierarchy.id, authHeaderType);
+    }
+  }
+  return hierarchy;
 };
 
 export const getList = async (
@@ -68,11 +98,22 @@ export const getList = async (
   parentHierarchyId: string | null,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Hierarchy[]> => {
-  return await apiExecuteGetHandled<Hierarchy[]>(
+  const items = await apiExecuteGetHandled<Hierarchy[]>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.HIERARCHIES}/${parentHierarchyId}`,
     [],
     authHeaderType
   );
+  return await getHierarchyImages(items, authHeaderType);
+};
+
+export const getHierarchyImages = async (
+  items: Hierarchy[],
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Hierarchy[]> => {
+  return (await ideaService.getItemImages(
+    items,
+    authHeaderType
+  )) as Hierarchy[];
 };
 
 export const getHierarchyResult = async (

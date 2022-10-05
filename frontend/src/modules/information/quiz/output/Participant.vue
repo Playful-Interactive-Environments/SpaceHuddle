@@ -95,6 +95,18 @@
               <font-awesome-icon v-else :icon="['far', 'circle']" />
             </template>
             {{ answer.answer.keywords }}
+            <img
+              v-if="answer.answer.image"
+              :src="answer.answer.image"
+              class="question-image"
+              alt=""
+            />
+            <img
+              v-if="answer.answer.link && !answer.answer.image"
+              :src="answer.answer.link"
+              class="question-image"
+              alt=""
+            />
           </el-button>
         </el-space>
         <el-rate
@@ -123,6 +135,24 @@
           v-model="activeAnswer.textValue"
           v-on:change="onAnswerValueChanged"
         ></el-input>
+        <div v-else-if="activeQuestionType === QuestionType.IMAGE">
+          <ImagePicker
+            v-model:link="activeAnswer.link"
+            v-model:image="activeAnswer.image"
+            v-on:change="onAnswerValueChanged"
+          />
+          <br/>
+          <label>
+            {{ $t('module.information.quiz.participant.imageKeywords') }}
+          </label>
+          <el-input
+            v-model="activeAnswer.textValue"
+            v-on:change="onAnswerValueChanged"
+            :placeholder="
+              $t('module.information.quiz.participant.imageKeywords')
+            "
+          ></el-input>
+        </div>
       </template>
     </PublicBase>
     <div id="submitScreen" v-if="submitScreen">
@@ -164,9 +194,11 @@ import {
   QuestionType,
 } from '@/modules/information/quiz/types/Question';
 import { Hierarchy } from '@/types/api/Hierarchy';
+import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 
 @Options({
   components: {
+    ImagePicker,
     QuizResult,
     ParticipantModuleDefaultContainer,
     PublicBase,
@@ -189,9 +221,16 @@ export default class Participant extends Vue {
   score = 0;
   voteResults: boolean[] = [];
 
-  activeAnswer: { numValue: number | null; textValue: string | null } = {
+  activeAnswer: {
+    numValue: number | null;
+    textValue: string | null;
+    link: string | null;
+    image: string | null;
+  } = {
     numValue: null,
     textValue: null,
+    link: null,
+    image: null,
   };
 
   QuestionPhase = QuestionPhase;
@@ -349,21 +388,23 @@ export default class Participant extends Vue {
     return this.isSavingList.includes(answerId);
   }
 
-  //@Watch('activeAnswer.numValue', { immediate: true })
-  //@Watch('activeAnswer.textValue', { immediate: true })
   async onAnswerValueChanged(): Promise<void> {
     if (
       getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
       QuestionResultStorage.CHILD_HIERARCHY
     ) {
       const deleteAnswer = (answerId: string): void => {
-        ideaService.deleteIdea(
-          answerId,
-          EndpointAuthorisationType.PARTICIPANT,
-          false
-        );
+        if (answerId) {
+          ideaService.deleteIdea(
+            answerId,
+            EndpointAuthorisationType.PARTICIPANT,
+            false
+          );
+        }
       };
       let answerValue: any = null;
+      let answerLink: string | null = null;
+      let answerImage: string | null = null;
       if (this.activeQuestionType === QuestionType.TEXT)
         answerValue = this.activeAnswer.textValue;
       if (
@@ -372,6 +413,12 @@ export default class Participant extends Vue {
         this.activeQuestionType === QuestionType.SLIDER
       )
         answerValue = this.activeAnswer.numValue;
+      if (this.activeQuestionType === QuestionType.IMAGE) {
+        answerValue = this.activeAnswer.textValue;
+        answerLink = this.activeAnswer.link;
+        answerImage = this.activeAnswer.image;
+        if (!answerValue) answerValue = '...';
+      }
       const answer = (
         await hierarchyService.getList(
           this.taskId,
@@ -382,12 +429,15 @@ export default class Participant extends Vue {
       if (answer && answer.id) {
         if (answerValue) {
           answer.keywords = answerValue.toString();
+          answer.link = answerLink;
+          answer.image = answerImage;
           await hierarchyService.putHierarchy(
             answer,
             EndpointAuthorisationType.PARTICIPANT
           );
         } else {
           deleteAnswer(answer.id);
+          answer.id = null;
         }
       } else if (answerValue) {
         await hierarchyService.postHierarchy(
@@ -531,6 +581,10 @@ export default class Participant extends Vue {
           this.activeQuestionType === QuestionType.SLIDER
         ) {
           this.activeAnswer.numValue = parseInt(answer.keywords);
+        } else if (this.activeQuestionType === QuestionType.IMAGE) {
+          this.activeAnswer.textValue = answer.keywords;
+          this.activeAnswer.link = answer.link;
+          this.activeAnswer.image = answer.image;
         }
       } else {
         this.activeAnswer.textValue = null;
@@ -545,10 +599,6 @@ export default class Participant extends Vue {
 .el-space::v-deep {
   .el-space__item {
     width: 100%;
-
-    button {
-      width: 100%;
-    }
   }
 }
 
@@ -761,5 +811,25 @@ div#loadingScreen > span#loading::v-deep .path {
   font-size: var(--font-size-xxxxlarge);
   font-weight: var(--font-weight-bold);
   margin-top: 2rem;
+}
+
+.el-button::v-deep {
+  > span {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.question-image {
+  height: 5rem;
+  object-fit: contain;
+  background-color: white;
+  margin: -0.8rem -2.1rem -0.8rem 0.5rem;
+  border-radius: 0 0.8rem 0.8rem 0;
+}
+
+label {
+  font-weight: var(--font-weight-semibold);
 }
 </style>
