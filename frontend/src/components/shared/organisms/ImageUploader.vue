@@ -28,12 +28,12 @@
         </div>
       </template>
     </el-upload>
-    <div v-else :no-border="true" class="upload-example">
-      <div class="upload-example__cropper-wrapper">
+    <div v-else :no-border="true" class="image-upload">
+      <div class="image-upload__cropper-wrapper">
         <cropper
           ref="cropper"
           :src="uploadData.url"
-          class="upload-example__cropper"
+          class="image-upload__cropper"
           check-orientation
           :canvas="{
             minWidth: 0,
@@ -43,13 +43,13 @@
           :default-size="defaultSize"
         />
         <div
-          class="upload-example__reset-button"
+          class="image-upload__reset-button"
           title="Reset Image"
           @click="reset()"
         >
           <font-awesome-icon icon="rotate-right" />
         </div>
-        <div class="upload-example__file-type" v-if="uploadData.type">
+        <div class="image-upload__file-type" v-if="uploadData.type">
           {{ uploadData.type }}
         </div>
       </div>
@@ -129,6 +129,7 @@ export default class ImageUploader extends Vue {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   defaultSize({ imageSize, visibleArea }) {
     return {
       width: (visibleArea || imageSize).width,
@@ -193,7 +194,7 @@ export default class ImageUploader extends Vue {
   }
 }
 
-.upload-example {
+.image-upload {
   max-width: 75vw;
   overflow: hidden;
   margin-top: 20px;

@@ -1,7 +1,7 @@
 import { Hierarchy } from '@/types/api/Hierarchy';
 
 export enum QuestionType {
-  MULTICHOICE = 'multichoice',
+  MULTIPLECHOICE = 'multiplechoice',
   SINGLECHOICE = 'singlechoice',
   RATING = 'rating',
   SLIDER = 'slider',
@@ -9,6 +9,21 @@ export enum QuestionType {
   TEXT = 'text',
   IMAGE = 'image',
 }
+
+export const SurveyQuestionType: QuestionType[] = [
+  QuestionType.MULTIPLECHOICE,
+  QuestionType.SINGLECHOICE,
+  QuestionType.RATING,
+  QuestionType.SLIDER,
+  QuestionType.NUMBER,
+  QuestionType.TEXT,
+];
+export const QuizQuestionType: QuestionType[] = [
+  QuestionType.MULTIPLECHOICE,
+  QuestionType.SINGLECHOICE,
+  QuestionType.SLIDER,
+  QuestionType.NUMBER,
+];
 
 export enum QuestionResultStorage {
   VOTING = 'voting',
@@ -27,7 +42,7 @@ export const getQuestionTypeFromHierarchy = (
   if (question && question.parameter.questionType) {
     return question.parameter.questionType;
   }
-  return QuestionType.MULTICHOICE;
+  return QuestionType.MULTIPLECHOICE;
 };
 
 export const getQuestionResultStorageFromHierarchy = (
@@ -42,7 +57,7 @@ export const getQuestionResultStorageFromQuestionType = (
   questionType: QuestionType
 ): QuestionResultStorage => {
   if (
-    questionType === QuestionType.MULTICHOICE ||
+    questionType === QuestionType.MULTIPLECHOICE ||
     questionType === QuestionType.SINGLECHOICE
   )
     return QuestionResultStorage.VOTING;

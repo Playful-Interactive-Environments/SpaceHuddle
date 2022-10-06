@@ -69,7 +69,7 @@
           direction="vertical"
           class="fill"
           v-if="
-            activeQuestionType === QuestionType.MULTICHOICE ||
+            activeQuestionType === QuestionType.MULTIPLECHOICE ||
             activeQuestionType === QuestionType.SINGLECHOICE
           "
         >
@@ -117,9 +117,11 @@
         ></el-rate>
         <el-slider
           v-else-if="activeQuestionType === QuestionType.SLIDER"
+          :min="activeQuestion.parameter.minValue"
           :max="activeQuestion.parameter.maxValue"
           v-model="activeAnswer.numValue"
           v-on:change="onAnswerValueChanged"
+          :marks="activeQuestionRange"
         ></el-slider>
         <el-input-number
           v-else-if="activeQuestionType === QuestionType.NUMBER"
@@ -141,7 +143,7 @@
             v-model:image="activeAnswer.image"
             v-on:change="onAnswerValueChanged"
           />
-          <br/>
+          <br />
           <label>
             {{ $t('module.information.quiz.participant.imageKeywords') }}
           </label>
@@ -237,6 +239,22 @@ export default class Participant extends Vue {
   QuestionType = QuestionType;
 
   submitScreen = false;
+
+  get activeQuestionRange(): number[] {
+    if (this.activeQuestion) {
+      const end = this.activeQuestion.parameter.maxValue
+        ? this.activeQuestion.parameter.maxValue
+        : 100;
+      const start = this.activeQuestion.parameter.minValue
+        ? this.activeQuestion.parameter.minValue
+        : 0;
+      console.log([...Array(end - start + 1).keys()].map((x) => x + start));
+      return [...Array(end - start + 1).keys()].map((x) =>
+        (x + start).toString()
+      );
+    }
+    return [];
+  }
 
   get activeQuestionId(): string {
     if (this.activeQuestion && this.activeQuestion.id) {
@@ -831,5 +849,11 @@ div#loadingScreen > span#loading::v-deep .path {
 
 label {
   font-weight: var(--font-weight-semibold);
+}
+
+.el-slider::v-deep {
+  .el-slider__stop {
+    width: 0.1px;
+  }
 }
 </style>

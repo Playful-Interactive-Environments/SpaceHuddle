@@ -382,6 +382,10 @@
         "uploadText": "Datei hier ablegen oder zum Hochladen anklicken",
         "uploadTip": "jpg/png-Dateien mit einer Größe von weniger als 500kb",
         "save": "Erledigt"
+      },
+      "drawingUploader": {
+        "header": "Eine Skizze erstellen",
+        "save": "Erledigt"
       }
     },
     "view": {
@@ -444,8 +448,8 @@
       "hierarchy": "Hierarchie"
     },
     "questionType": {
-      "multichoice": "Multichoice",
-      "singlechoice":  "Singlechoice",
+      "multiplechoice": "Multiple Choice",
+      "singlechoice":  "Single Choice",
       "rating": "Rating",
       "slider": "Slider",
       "number": "Number",

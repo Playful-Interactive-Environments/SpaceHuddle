@@ -10,6 +10,11 @@
       v-model:link="editLink"
       v-on:imageChanged="imageChanged"
     />
+    <DrawingUpload
+      v-model:show-modal="showDrawingInput"
+      v-model="base64ImageUrl"
+      v-on:imageChanged="imageChanged"
+    />
     <div class="edit stack__container stack__container__image">
       <div class="stack__content">
         <div v-if="!link && !image" class="empty">
@@ -31,6 +36,9 @@
         <span @click="uploadImage">
           <font-awesome-icon icon="upload" />
         </span>
+        <span @click="uploadDrawing">
+          <font-awesome-icon icon="pencil" />
+        </span>
         <span @click="deleteImage" v-if="image || link">
           <font-awesome-icon icon="trash" />
         </span>
@@ -44,9 +52,11 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import LinkSettings from '@/components/moderator/organisms/settings/LinkSettings.vue';
 import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
+import DrawingUpload from '@/components/shared/organisms/DrawingUpload.vue';
 
 @Options({
   components: {
+    DrawingUpload,
     ImageUploader,
     LinkSettings,
   },
@@ -62,6 +72,7 @@ export default class ImagePicker extends Vue {
   editLink: string | null = null;
   showUploadDialog = false;
   showLinkInput = false;
+  showDrawingInput = false;
   actionsActive = false;
   base64ImageUrl: string | null = null;
 
@@ -97,6 +108,12 @@ export default class ImagePicker extends Vue {
   uploadImage(): void {
     if (this.actionsActive) {
       this.showUploadDialog = true;
+    }
+  }
+
+  uploadDrawing(): void {
+    if (this.actionsActive) {
+      this.showDrawingInput = true;
     }
   }
 

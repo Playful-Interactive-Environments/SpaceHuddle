@@ -57,7 +57,8 @@
     <QuizResult
       :voteResult="voteResult"
       :change="false"
-      :questionType="questionType"
+      questionnaireType="questionType"
+      :questionType="activeQuestionType"
       :update="true"
     />
   </div>
@@ -66,7 +67,8 @@
       :voteResult="voteResult"
       resultColumn="countParticipant"
       :change="false"
-      :questionType="QuestionType.SURVEY"
+      questionnaireType="QuestionType.SURVEY"
+      :questionType="activeQuestionType"
       :update="true"
     />
   </div>
@@ -83,6 +85,7 @@ import {
   getQuestionTypeFromHierarchy,
   Question,
   QuestionResultStorage,
+  QuestionType,
 } from '@/modules/information/quiz/types/Question';
 import { VoteResult } from '@/types/api/Vote';
 import {
@@ -131,7 +134,7 @@ export default class PublicBase extends Vue {
   questions: Question[] = [];
   publicQuestion: Question | null = null;
   voteResult: VoteResult[] = [];
-  questionType: QuestionnaireType = QuestionnaireType.QUIZ;
+  questionnaireType: QuestionnaireType = QuestionnaireType.QUIZ;
   moderatedQuestionFlow = true;
 
   questionState: QuestionState = QuestionState.ACTIVE_CREATE_QUESTION;
@@ -175,7 +178,7 @@ export default class PublicBase extends Vue {
     return QuizStateProperty[QuestionState.ACTIVE_WAIT_FOR_VOTE].time;
   }
 
-  getActiveQuestionId(): string | null {
+  get activeQuestionId(): string | null {
     if (
       this.task &&
       this.task.parameter &&
@@ -183,13 +186,20 @@ export default class PublicBase extends Vue {
     ) {
       return this.task.parameter.activeQuestion;
     } else {
-      const activeQuestion = this.getActiveQuestion();
+      const activeQuestion = this.activeQuestion;
       if (activeQuestion) return activeQuestion.id;
     }
     return '';
   }
 
-  getActiveQuestion(): Hierarchy | null {
+  get activeQuestionType(): QuestionType {
+    if (this.activeQuestion && this.activeQuestion.parameter.questionType) {
+      return this.activeQuestion.parameter.questionType;
+    }
+    return QuestionType.MULTIPLECHOICE;
+  }
+
+  get activeQuestion(): Hierarchy | null {
     if (
       this.task &&
       this.task.parameter &&
@@ -230,7 +240,10 @@ export default class PublicBase extends Vue {
   }
 
   finishedAnswer(answer: Hierarchy): boolean {
-    if (this.publicQuestion && this.questionType === QuestionnaireType.QUIZ) {
+    if (
+      this.publicQuestion &&
+      this.questionnaireType === QuestionnaireType.QUIZ
+    ) {
       if (this.questionState == QuestionState.RESULT_ANSWER) {
         return true;
       }
@@ -239,7 +252,10 @@ export default class PublicBase extends Vue {
   }
 
   highlightAnswer(answer: Hierarchy): boolean {
-    if (this.publicQuestion && this.questionType === QuestionnaireType.QUIZ) {
+    if (
+      this.publicQuestion &&
+      this.questionnaireType === QuestionnaireType.QUIZ
+    ) {
       if (this.questionState == QuestionState.RESULT_ANSWER) {
         return answer.parameter.isCorrect;
       }
@@ -248,7 +264,10 @@ export default class PublicBase extends Vue {
   }
 
   highlightAnswerTemporarily(answer: Hierarchy): boolean {
-    if (this.publicQuestion && this.questionType === QuestionnaireType.QUIZ) {
+    if (
+      this.publicQuestion &&
+      this.questionnaireType === QuestionnaireType.QUIZ
+    ) {
       if (this.questionState == QuestionState.ACTIVE_LAST_CHANGE) {
         const index = this.publicQuestion.answers.indexOf(answer);
         return index === this.statePointer;
@@ -286,7 +305,7 @@ export default class PublicBase extends Vue {
           moduleNameValid(module.name)
         );
         if (module) {
-          this.questionType =
+          this.questionnaireType =
             QuestionnaireType[module.parameter.questionType.toUpperCase()];
           this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
         }
@@ -295,7 +314,7 @@ export default class PublicBase extends Vue {
 
   async getHierarchies(): Promise<void> {
     if (this.taskId) {
-      const activeQuestionId = this.getActiveQuestionId();
+      const activeQuestionId = this.activeQuestionId;
       await hierarchyService
         .getList(this.taskId, '{parentHierarchyId}', this.authHeaderTyp)
         .then(async (questions) => {
@@ -346,10 +365,10 @@ export default class PublicBase extends Vue {
   }
 
   async getVotes(): Promise<void> {
-    const activeQuestionId = this.getActiveQuestionId();
+    const activeQuestionId = this.activeQuestionId;
     if (activeQuestionId) {
       const questionResultStorage: QuestionResultStorage =
-        getQuestionResultStorageFromHierarchy(this.getActiveQuestion());
+        getQuestionResultStorageFromHierarchy(this.activeQuestion);
       if (questionResultStorage === QuestionResultStorage.VOTING) {
         await votingService
           .getHierarchyResult(activeQuestionId, this.authHeaderTyp)
@@ -361,7 +380,7 @@ export default class PublicBase extends Vue {
           .getHierarchyResult(
             this.taskId,
             activeQuestionId,
-            this.getActiveQuestion()?.parameter.correctValue,
+            this.activeQuestion?.parameter.correctValue,
             this.authHeaderTyp
           )
           .then((votes) => {
@@ -386,12 +405,12 @@ export default class PublicBase extends Vue {
   async checkState(staticUpdate = false): Promise<void> {
     const oldQuizState = this.questionState;
     const oldState = this.isActive;
-    const oldQuestionId = this.getActiveQuestionId();
+    const oldQuestionId = this.activeQuestionId;
     await this.getTask();
     if (
       staticUpdate ||
       oldState !== this.isActive ||
-      oldQuestionId !== this.getActiveQuestionId() ||
+      oldQuestionId !== this.activeQuestionId ||
       this.showStatistics
     ) {
       this.statePointer = -1;
@@ -467,8 +486,8 @@ export default class PublicBase extends Vue {
       this.$emit('changeQuizState', this.questionState);
     }
 
-    if (staticUpdate || oldQuestionId !== this.getActiveQuestionId()) {
-      this.$emit('changePublicQuestion', this.getActiveQuestion());
+    if (staticUpdate || oldQuestionId !== this.activeQuestionId) {
+      this.$emit('changePublicQuestion', this.activeQuestion);
     }
 
     if (this.publicQuestion) {

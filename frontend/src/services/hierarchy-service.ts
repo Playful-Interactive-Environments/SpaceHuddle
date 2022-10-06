@@ -14,7 +14,7 @@ import {
 } from '@/modules/information/quiz/types/Question';
 import * as votingService from '@/services/voting-service';
 import * as ideaService from '@/services/idea-service';
-import {deleteIdeaImage, itemImageChanged, putIdeaImage} from "@/services/idea-service";
+import { deleteIdeaImage, itemImageChanged } from '@/services/idea-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 

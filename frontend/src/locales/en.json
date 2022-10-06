@@ -382,6 +382,10 @@
         "uploadText": "Drop file here or click to upload",
         "uploadTip": "jpg/png files with a size less than 500kb",
         "save": "Done"
+      },
+      "drawingUploader": {
+        "header": "create a sketch",
+        "save": "Done"
       }
     },
     "view": {
@@ -444,8 +448,8 @@
       "hierarchy": "hierarchy"
     },
     "questionType": {
-      "multichoice": "Multichoice",
-      "singlechoice":  "Singlechoice",
+      "multiplechoice": "Multiple Choice",
+      "singlechoice":  "Single Choice",
       "rating": "Rating",
       "slider": "Slider",
       "number": "Number",

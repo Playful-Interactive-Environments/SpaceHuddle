@@ -1,14 +1,15 @@
 <template>
   <div>
     <h1 class="heading heading--medium">
-      {{ $t(`module.information.quiz.enum.questionType.${questionType}`) }}
+      {{ $t(`module.information.quiz.enum.questionType.${questionnaireType}`) }}
     </h1>
 
     <div id="QuizDiv">
       <QuizResult
         :voteResult="votes"
         :update="true"
-        :questionType="questionType"
+        questionnaireType="questionnaireType"
+        :questionType="formData.questionType"
         :show-legend="true"
       />
       <span id="noQuestionSelectedSpan" v-if="!editQuestion">{{
@@ -76,7 +77,7 @@
           </template>
           <el-select v-model="formData.questionType" class="select--fullwidth">
             <el-option
-              v-for="questionType in Object.values(QuestionType)"
+              v-for="questionType in QuestionTypeList"
               :key="questionType"
               :value="questionType"
               :label="$t(`enum.questionType.${questionType}`)"
@@ -143,7 +144,7 @@
         >
           <div class="media" v-if="index < formData.answers.length">
             <el-checkbox
-              v-if="questionType === QuestionnaireType.QUIZ"
+              v-if="questionnaireType === QuestionnaireType.QUIZ"
               class="media-left"
               v-model="answer.parameter.isCorrect"
               v-on:change="correctCheckboxChanged(answer)"
@@ -171,7 +172,7 @@
         </el-form-item>
         <el-form-item
           v-if="
-            formData.questionType === QuestionType.MULTICHOICE ||
+            formData.questionType === QuestionType.MULTIPLECHOICE ||
             formData.questionType === QuestionType.SINGLECHOICE
           "
         >
@@ -181,7 +182,10 @@
           />
         </el-form-item>
         <el-form-item
-          v-if="formData.questionType === QuestionType.NUMBER"
+          v-if="
+            formData.questionType === QuestionType.NUMBER ||
+            formData.questionType === QuestionType.SLIDER
+          "
           :label="$t('module.information.quiz.moderatorContent.minValue')"
           prop="question.parameter.minValue"
           :rules="[defaultFormRules.ruleRequired, defaultFormRules.ruleNumber]"
@@ -217,7 +221,7 @@
             (formData.questionType === QuestionType.NUMBER ||
               formData.questionType === QuestionType.RATING ||
               formData.questionType === QuestionType.SLIDER) &&
-            questionType === QuestionnaireType.QUIZ
+            questionnaireType === QuestionnaireType.QUIZ
           "
           :label="$t('module.information.quiz.moderatorContent.correctValue')"
           prop="question.parameter.correctValue"
@@ -266,6 +270,8 @@ import {
   Question,
   QuestionResultStorage,
   QuestionType,
+  QuizQuestionType,
+  SurveyQuestionType,
 } from '@/modules/information/quiz/types/Question';
 import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
 import {
@@ -273,7 +279,7 @@ import {
   QuestionnaireType,
 } from '@/modules/information/quiz/types/QuestionnaireType';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
-import ImagePicker from "@/components/moderator/atoms/ImagePicker.vue";
+import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 
 @Options({
   components: {
@@ -304,12 +310,18 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   interval!: any;
   minAnswerCount = 2;
   answerCount = this.minAnswerCount;
-  questionType: QuestionnaireType = QuestionnaireType.QUIZ;
+  questionnaireType: QuestionnaireType = QuestionnaireType.QUIZ;
   moderatedQuestionFlow = true;
   defaultQuestionTime: number | null = null;
 
   QuestionnaireType = QuestionnaireType;
   QuestionType = QuestionType;
+
+  get QuestionTypeList(): QuestionType[] {
+    return this.questionnaireType === QuestionnaireType.QUIZ
+      ? QuizQuestionType
+      : SurveyQuestionType;
+  }
 
   get correctFormAnswer(): Hierarchy | undefined {
     return this.formData.answers.find((item) => item.parameter.isCorrect);
@@ -324,7 +336,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   get formAnswers(): Hierarchy[] {
     if (
-      this.formData.questionType === QuestionType.MULTICHOICE ||
+      this.formData.questionType === QuestionType.MULTIPLECHOICE ||
       this.formData.questionType === QuestionType.SINGLECHOICE
     )
       return this.formData.answers;
@@ -372,15 +384,15 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       }
     }
 
-    if (this.formData.questionType === QuestionType.NUMBER) {
+    if (
+      this.formData.questionType === QuestionType.NUMBER ||
+      this.formData.questionType === QuestionType.SLIDER
+    ) {
       if (!this.formData.question.parameter.minValue)
         this.formData.question.parameter.minValue = 0;
       if (!this.formData.question.parameter.maxValue)
         this.formData.question.parameter.maxValue = 100;
-    } else if (
-      this.formData.questionType === QuestionType.SLIDER ||
-      this.formData.questionType === QuestionType.RATING
-    ) {
+    } else if (this.formData.questionType === QuestionType.RATING) {
       delete this.formData.question.parameter.minValue;
       if (!this.formData.question.parameter.maxValue)
         this.formData.question.parameter.maxValue = 10;
@@ -557,10 +569,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       if (module) {
         this.answerCount = module.parameter.answerCount;
         if (module.parameter.questionType) {
-          this.questionType =
+          this.questionnaireType =
             QuestionnaireType[module.parameter.questionType.toUpperCase()];
         } else {
-          this.questionType = QuestionnaireType.QUIZ;
+          this.questionnaireType = QuestionnaireType.QUIZ;
         }
         this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
         this.defaultQuestionTime = module.parameter.defaultQuestionTime;
@@ -593,7 +605,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       imageTimestamp: null,
       parameter: forAnswer
         ? { isCorrect: false }
-        : { questionType: QuestionType.MULTICHOICE },
+        : { questionType: QuestionType.MULTIPLECHOICE },
       order: order,
       isOwn: false,
     };
@@ -605,7 +617,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       answers.push(this.getEmptyHierarchy(index, true));
     }
     return {
-      questionType: QuestionType.MULTICHOICE,
+      questionType: QuestionType.MULTIPLECHOICE,
       question: this.getEmptyHierarchy(),
       answers: answers,
     };

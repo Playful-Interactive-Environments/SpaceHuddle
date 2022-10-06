@@ -32,6 +32,15 @@
               <font-awesome-icon icon="paperclip"></font-awesome-icon>
             </el-button>
             <el-button
+              v-if="!newIdea.link"
+              class="media-right"
+              type="primary"
+              circle
+              v-on:click="addDrawing"
+            >
+              <font-awesome-icon icon="pencil"></font-awesome-icon>
+            </el-button>
+            <el-button
               class="media-right"
               type="primary"
               native-type="submit"
@@ -127,6 +136,10 @@
       v-model:show-modal="showUploadDialog"
       v-model="base64ImageUrl"
     />
+    <DrawingUpload
+      v-model:show-modal="showDrawingDialog"
+      v-model="base64ImageUrl"
+    />
   </ParticipantModuleDefaultContainer>
 </template>
 
@@ -149,9 +162,11 @@ import ValidationForm, {
   ValidationFormCall,
 } from '@/components/shared/molecules/ValidationForm.vue';
 import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
+import DrawingUpload from '@/components/shared/organisms/DrawingUpload.vue';
 
 @Options({
   components: {
+    DrawingUpload,
     ValidationForm,
     IdeaCard,
     ParticipantModuleDefaultContainer,
@@ -170,6 +185,7 @@ export default class Participant extends Vue {
   interval!: any;
   ideas: Idea[] = [];
   showUploadDialog = false;
+  showDrawingDialog = false;
   base64ImageUrl: string | null = null;
   EndpointAuthorisationType = EndpointAuthorisationType;
 
@@ -224,6 +240,10 @@ export default class Participant extends Vue {
 
   addImage(): void {
     this.showUploadDialog = true;
+  }
+
+  addDrawing(): void {
+    this.showDrawingDialog = true;
   }
 
   imageUploadSuccess(imgDataUrl: string): void {

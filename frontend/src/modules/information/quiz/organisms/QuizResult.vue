@@ -1,5 +1,19 @@
 <template>
+  <div
+    v-if="
+      questionType === QuestionType.TEXT || questionType === QuestionType.IMAGE
+    "
+    class="layout__columns"
+  >
+    <IdeaCard
+      v-for="(item, index) in voteResult"
+      :key="index"
+      :idea="item.idea"
+      :is-editable="false"
+    />
+  </div>
   <vue3-chart-js
+    v-else
     ref="chartRef"
     type="bar"
     :data="chartData"
@@ -45,10 +59,13 @@ import { Prop, Watch } from 'vue-property-decorator';
 import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import { VoteResult } from '@/types/api/Vote';
 import { QuestionnaireType } from '@/modules/information/quiz/types/QuestionnaireType';
+import { QuestionType } from '@/modules/information/quiz/types/Question';
+import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 
 @Options({
   components: {
     Vue3ChartJs,
+    IdeaCard,
   },
 })
 
@@ -57,9 +74,13 @@ export default class QuizResult extends Vue {
   @Prop({ default: [] }) readonly voteResult!: VoteResult[];
   @Prop({ default: false }) readonly update!: boolean;
   @Prop({ default: QuestionnaireType.QUIZ })
-  readonly questionType!: QuestionnaireType;
+  readonly questionnaireType!: QuestionnaireType;
+  @Prop({ default: QuestionType.MULTIPLECHOICE })
+  readonly questionType!: QuestionType;
   @Prop({ default: 'detailRatingSum' }) readonly resultColumn!: string;
   @Prop({ default: true }) readonly showLegend!: true;
+
+  QuestionType = QuestionType;
 
   chartData: any = {
     labels: [],
@@ -136,7 +157,7 @@ export default class QuizResult extends Vue {
     const labelResult = (this as any).$t(
       'module.information.quiz.publicScreen.chartDataLabelResult'
     );
-    if (this.questionType === QuestionnaireType.QUIZ) {
+    if (this.questionnaireType === QuestionnaireType.QUIZ) {
       return {
         labels: this.voteResult.map((vote) =>
           this.breakString(vote.idea.keywords, 34)
