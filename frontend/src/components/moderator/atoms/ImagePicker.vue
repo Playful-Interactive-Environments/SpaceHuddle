@@ -24,25 +24,30 @@
         <el-image fit="contain" :src="image" alt="" v-if="image" />
         <el-image fit="contain" :src="link" alt="" v-if="link && !image" />
       </div>
-      <span
+      <div
         v-if="useEditOverlay"
         class="stack__action"
+        :class="{ gridOverlay: image || link }"
         v-on:transitionend="toggleActions"
         v-on:webkitTransitionEnd="toggleActions"
       >
-        <span @click="editLinkInput">
+        <span @click="editLinkInput" :class="{ gridItem: image || link }">
           <font-awesome-icon icon="link" />
         </span>
-        <span @click="uploadImage">
+        <span @click="uploadImage" :class="{ gridItem: image || link }">
           <font-awesome-icon icon="upload" />
         </span>
-        <span @click="uploadDrawing">
+        <span @click="uploadDrawing" :class="{ gridItem: image || link }">
           <font-awesome-icon icon="pencil" />
         </span>
-        <span @click="deleteImage" v-if="image || link">
+        <span
+          @click="deleteImage"
+          v-if="image || link"
+          class="gridItem"
+        >
           <font-awesome-icon icon="trash" />
         </span>
-      </span>
+      </div>
     </div>
   </div>
 </template>
@@ -172,5 +177,17 @@ export default class ImagePicker extends Vue {
 
 .edit {
   cursor: pointer;
+}
+
+.gridOverlay {
+  display: grid;
+  grid-gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.gridItem {
+  display: flex;
+  justify-content: center;
 }
 </style>
