@@ -15,6 +15,7 @@
       ref="VueCanvasDrawing"
       v-model:image="uploadData"
       :width="canvasWidth"
+      :height="canvasHeight"
       :color="color"
       :lineWidth="lineWidth"
       :eraser="eraser"
@@ -104,8 +105,15 @@ export default class DrawingUpload extends Vue {
 
   get canvasWidth(): number {
     const screenWidth = window.innerWidth;
-    if (screenWidth > 1024) return 1024;
-    return screenWidth - 100;
+    const max = 1024;
+    const border = 100;
+    if (screenWidth > max + border) return max;
+    return screenWidth - border;
+  }
+
+  get canvasHeight(): number {
+    const screenHeight = window.innerHeight;
+    return (screenHeight / 5) * 2;
   }
 
   @Watch('showModal', { immediate: true })
