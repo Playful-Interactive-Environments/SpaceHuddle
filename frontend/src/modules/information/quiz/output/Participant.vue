@@ -240,7 +240,7 @@ export default class Participant extends Vue {
 
   submitScreen = false;
 
-  get activeQuestionRange(): number[] {
+  get activeQuestionRange(): number[] | { [key: number]: string } {
     if (this.activeQuestion) {
       const end = this.activeQuestion.parameter.maxValue
         ? this.activeQuestion.parameter.maxValue
@@ -248,10 +248,22 @@ export default class Participant extends Vue {
       const start = this.activeQuestion.parameter.minValue
         ? this.activeQuestion.parameter.minValue
         : 0;
-      console.log([...Array(end - start + 1).keys()].map((x) => x + start));
-      return [...Array(end - start + 1).keys()].map((x) =>
-        (x + start).toString()
-      );
+      const rangeCount = end - start + 1;
+      if (rangeCount <= 5) {
+        return [...Array(rangeCount).keys()].map((x) => (x + start).toString());
+      } else {
+        const markerValues = [
+          start,
+          Math.floor(rangeCount / 4 + start),
+          Math.floor(rangeCount / 2 + start),
+          Math.floor((rangeCount / 4) * 3 + start),
+          end,
+        ];
+        return Object.assign(
+          {},
+          ...markerValues.map((x) => ({ [x]: x.toString() }))
+        );
+      }
     }
     return [];
   }
@@ -842,9 +854,10 @@ div#loadingScreen > span#loading::v-deep .path {
 .question-image {
   height: 5rem;
   object-fit: contain;
-  background-color: white;
-  margin: -0.8rem -2.1rem -0.8rem 0.5rem;
-  border-radius: 0 0.8rem 0.8rem 0;
+  background-color: var(--color-primary);
+  //margin: -0.8rem -2.1rem -0.8rem 0.5rem;
+  //border-radius: 0 0.8rem 0.8rem 0;
+  border-radius: 0.8rem;
 }
 
 label {

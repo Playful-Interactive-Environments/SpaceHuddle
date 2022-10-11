@@ -46,6 +46,8 @@ a {
 body {
   margin: 0;
   padding: 0;
+  width: 100vw;
+  height: 100vh;
   font-size: var(--font-size-default);
   font-family: var(--font-family);
   font-weight: var(--font-weight-default);

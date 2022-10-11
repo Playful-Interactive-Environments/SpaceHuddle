@@ -193,6 +193,11 @@ export default class ModeratorLogin extends Vue {
     section {
       min-height: 100%;
     }
+
+    &__content {
+      width: calc(var(--app-width) * 0.9);
+      max-width: 520px;
+    }
   }
 }
 </style>

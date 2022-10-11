@@ -2,6 +2,7 @@
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
     <template #footer>
       <ValidationForm
+        ref="inputForm"
         :form-data="formData"
         :use-default-submit="false"
         v-on:submitDataValid="saveIdea"
@@ -20,10 +21,15 @@
               :placeholder="
                 $t('module.brainstorming.chat.participant.newIdeaInfo')
               "
+              type="textarea"
+              :rows="1"
+              :autosize="{ minRows: 1, maxRows: 10 }"
               v-on:blur="leaveField"
+              v-on:focus="focusField"
+              v-on:input="changeField"
             ></el-input>
             <el-button
-              v-if="!newIdea.link"
+              v-if="!newIdea.link && !inputHasFocus"
               class="media-right"
               type="primary"
               circle
@@ -32,7 +38,7 @@
               <font-awesome-icon icon="paperclip"></font-awesome-icon>
             </el-button>
             <el-button
-              v-if="!newIdea.link"
+              v-if="!newIdea.link && !inputHasFocus"
               class="media-right"
               type="primary"
               circle
@@ -65,12 +71,12 @@
         </el-form-item>
       </ValidationForm>
     </template>
-    <div class="media" v-if="task">
+    <!--<div class="media" v-if="task">
       <span class="media-left">
         {{ task.name }}
       </span>
       <span class="media-content"></span>
-    </div>
+    </div>-->
     <div class="media" v-for="idea in ideas" :key="idea.id">
       <span class="media-left" v-if="!idea.isOwn">
         <IdeaCard
@@ -233,9 +239,21 @@ export default class Participant extends Vue {
     }
   }
 
+  inputHasFocus = false;
   leaveField(): void {
+    this.inputHasFocus = false;
     if (!this.formData.newIdeaInput)
       this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
+  }
+
+  focusField(): void {
+    this.inputHasFocus = true;
+  }
+
+  changeField(inputValue: string): void {
+    if (this.$refs.inputForm && inputValue.includes('\n')) {
+      (this.$refs.inputForm as any).submitData();
+    }
   }
 
   addImage(): void {

@@ -243,16 +243,6 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
 
-setTimeout(() => {
-  const viewport = document.querySelector('meta[name=viewport]');
-  if (viewport) {
-    viewport.setAttribute(
-      'content',
-      'height=' + screen.height + 'px, width=device-width, initial-scale=1.0'
-    );
-  }
-}, 300);
-
 @Options({
   components: {
     IdeaCard,

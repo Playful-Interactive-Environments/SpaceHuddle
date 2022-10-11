@@ -72,7 +72,6 @@ export const putHierarchy = async (
   const image = data.image !== undefined ? data.image : null;
   delete data.image;
   const imageChanged = data.id ? itemImageChanged(data.id, image) : false;
-  console.log('putHierarchy');
   const hierarchy = await apiExecutePut<Hierarchy>(
     `/${EndpointType.HIERARCHY}`,
     data,
