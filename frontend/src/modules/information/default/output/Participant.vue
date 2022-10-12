@@ -34,6 +34,8 @@ import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
+  @Prop({ default: false }) readonly useFullSize!: boolean;
+  @Prop({ default: '' }) readonly backgroundClass!: string;
   module: Module | null = null;
   ideas: Idea[] = [];
   readonly intervalTime = 10000;

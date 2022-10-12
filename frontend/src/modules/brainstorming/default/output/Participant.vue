@@ -260,6 +260,8 @@ export default class Participant extends Vue {
 
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
+  @Prop({ default: false }) readonly useFullSize!: boolean;
+  @Prop({ default: '' }) readonly backgroundClass!: string;
   module: Module | null = null;
   ideas: Idea[] = [];
   showHistory = false;

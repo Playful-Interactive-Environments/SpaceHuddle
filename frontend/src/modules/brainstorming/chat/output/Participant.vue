@@ -185,6 +185,8 @@ export default class Participant extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
+  @Prop({ default: false }) readonly useFullSize!: boolean;
+  @Prop({ default: '' }) readonly backgroundClass!: string;
   module: Module | null = null;
   task: Task | null = null;
   readonly intervalTime = 10000;

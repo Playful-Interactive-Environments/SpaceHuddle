@@ -257,6 +257,8 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
       export default class Participant extends Vue {
         @Prop() readonly taskId!: string;
         @Prop() readonly moduleId!: string;
+        @Prop({ default: false }) readonly useFullSize!: boolean;
+        @Prop({ default: '' }) readonly backgroundClass!: string;
         module: Module | null = null;
       
         get moduleName(): string {
@@ -415,6 +417,8 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
       export default class Participant extends Vue {
         @Prop() readonly taskId!: string;
         @Prop() readonly moduleId!: string;
+        @Prop({ default: false }) readonly useFullSize!: boolean;
+        @Prop({ default: '' }) readonly backgroundClass!: string;
         module: Module | null = null;
         ideas: Idea[] = [];
       

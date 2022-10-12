@@ -35,7 +35,7 @@
           type="primary"
           class="el-button--submit"
           native-type="submit"
-          :disabled="!hasNextQuestion"
+          :disabled="!hasNextQuestion || !questionAnswered"
           v-if="!moderatedQuestionFlow && hasNextQuestion"
           @click="goToNextQuestion"
         >
@@ -45,7 +45,7 @@
           type="primary"
           class="el-button--submit"
           native-type="submit"
-          :disabled="hasNextQuestion"
+          :disabled="hasNextQuestion || !questionAnswered"
           v-if="!moderatedQuestionFlow && !hasNextQuestion && !submitScreen"
           @click="goToSubmitScreen"
         >
@@ -127,6 +127,7 @@
           v-else-if="activeQuestionType === QuestionType.NUMBER"
           :max="activeQuestion.parameter.maxValue"
           :min="activeQuestion.parameter.minValue"
+          :value-on-clear="null"
           v-model="activeAnswer.numValue"
           v-on:change="onAnswerValueChanged"
         ></el-input-number>
@@ -210,6 +211,8 @@ import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
+  @Prop({ default: false }) readonly useFullSize!: boolean;
+  @Prop({ default: '' }) readonly backgroundClass!: string;
   publicAnswerList: PublicAnswerData[] = [];
   activeQuestion: Hierarchy | null = null;
   module: Module | null = null;
@@ -298,7 +301,9 @@ export default class Participant extends Vue {
     return false;
   }
 
+  initData = true;
   mounted(): void {
+    this.initData = true;
     this.loading;
   }
 
@@ -318,39 +323,54 @@ export default class Participant extends Vue {
   }
 
   checkScore(): void {
-    let voteScore = 0;
-    let maxScore = 0;
-    for (let i = 0; i < this.publicAnswerList.length; i++) {
-      for (let j = 0; j < this.votes.length; j++) {
-        if (this.publicAnswerList[i].answer.id == this.votes[j].ideaId) {
-          if (
-            this.votes[j].rating == 1 &&
-            this.publicAnswerList[i].answer.parameter.isCorrect
-          ) {
-            voteScore++;
-          } else if (
-            this.votes[j].rating == 0 &&
-            this.publicAnswerList[i].answer.parameter.isCorrect
-          ) {
-            voteScore--;
-          } else if (
-            this.votes[j].rating == 1 &&
-            !this.publicAnswerList[i].answer.parameter.isCorrect
-          ) {
-            voteScore--;
-          } else if (
-            this.votes[j].rating == 0 &&
-            !this.publicAnswerList[i].answer.parameter.isCorrect
-          ) {
-            voteScore++;
+    if (
+      getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
+      QuestionResultStorage.VOTING
+    ) {
+      let voteScore = 0;
+      let maxScore = 0;
+      for (let i = 0; i < this.publicAnswerList.length; i++) {
+        for (let j = 0; j < this.votes.length; j++) {
+          if (this.publicAnswerList[i].answer.id == this.votes[j].ideaId) {
+            if (
+              this.votes[j].rating == 1 &&
+              this.publicAnswerList[i].answer.parameter.isCorrect
+            ) {
+              voteScore++;
+            } else if (
+              this.votes[j].rating == 0 &&
+              this.publicAnswerList[i].answer.parameter.isCorrect
+            ) {
+              voteScore--;
+            } else if (
+              this.votes[j].rating == 1 &&
+              !this.publicAnswerList[i].answer.parameter.isCorrect
+            ) {
+              voteScore--;
+            } else if (
+              this.votes[j].rating == 0 &&
+              !this.publicAnswerList[i].answer.parameter.isCorrect
+            ) {
+              voteScore++;
+            }
           }
         }
+        if (this.publicAnswerList[i].answer.parameter.isCorrect) {
+          maxScore++;
+        }
       }
-      if (this.publicAnswerList[i].answer.parameter.isCorrect) {
-        maxScore++;
+      this.voteResults[this.activeQuestionIndex] = maxScore === voteScore;
+    } else {
+      if (
+        this.activeQuestionType === QuestionType.NUMBER ||
+        this.activeQuestionType === QuestionType.RATING ||
+        this.activeQuestionType === QuestionType.SLIDER
+      ) {
+        this.voteResults[this.activeQuestionIndex] =
+          this.activeAnswer.numValue ===
+          this.activeQuestion?.parameter.correctValue;
       }
     }
-    this.voteResults[this.activeQuestionIndex] = maxScore == voteScore;
   }
 
   get getImageSrc(): string {
@@ -383,12 +403,14 @@ export default class Participant extends Vue {
     return this.activeQuestionIndex + 1 < this.questionCount;
   }
 
-  goToNextQuestion(): void {
+  goToNextQuestion(event: PointerEvent | null, initData = false): void {
+    this.initData = initData;
     this.checkScore();
     if (this.submitScreen) {
       this.submitScreen = false;
     }
     if (this.hasNextQuestion) this.activeQuestionIndex++;
+    else this.goToSubmitScreen();
   }
 
   goToSubmitScreen(): void {
@@ -402,6 +424,7 @@ export default class Participant extends Vue {
   }
 
   goToPreviousQuestion(): void {
+    this.initData = false;
     this.checkScore();
     if (this.submitScreen) {
       this.submitScreen = false;
@@ -468,6 +491,10 @@ export default class Participant extends Vue {
         } else {
           deleteAnswer(answer.id);
           answer.id = null;
+          this.activeAnswer.numValue = null;
+          this.activeAnswer.textValue = null;
+          this.activeAnswer.link = null;
+          this.activeAnswer.image = null;
         }
       } else if (answerValue) {
         await hierarchyService.postHierarchy(
@@ -480,6 +507,7 @@ export default class Participant extends Vue {
           EndpointAuthorisationType.PARTICIPANT
         );
       }
+      this.questionAnswered = this.getQuestionAnswered();
     }
   }
 
@@ -527,6 +555,7 @@ export default class Participant extends Vue {
           });
       }
     }
+    this.questionAnswered = this.getQuestionAnswered();
   }
 
   get moduleName(): string {
@@ -580,6 +609,32 @@ export default class Participant extends Vue {
     }
   }
 
+  questionAnswered = false;
+  getQuestionAnswered(): boolean {
+    if (
+      getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
+      QuestionResultStorage.VOTING
+    ) {
+      return this.votes.length > 0;
+    } else {
+      if (this.activeQuestionType === QuestionType.TEXT) {
+        return !!this.activeAnswer.textValue;
+      } else if (
+        this.activeQuestionType === QuestionType.NUMBER ||
+        this.activeQuestionType === QuestionType.RATING ||
+        this.activeQuestionType === QuestionType.SLIDER
+      ) {
+        return this.activeAnswer.numValue !== null;
+      } else if (this.activeQuestionType === QuestionType.IMAGE) {
+        return (
+          (!!this.activeAnswer.link || !!this.activeAnswer.image) &&
+          !!this.activeAnswer.textValue
+        );
+      }
+    }
+    return false;
+  }
+
   async getVotes(): Promise<void> {
     if (
       getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
@@ -618,8 +673,12 @@ export default class Participant extends Vue {
         }
       } else {
         this.activeAnswer.textValue = null;
-        this.activeAnswer.numValue = 0;
+        this.activeAnswer.numValue = null;
       }
+    }
+    this.questionAnswered = this.getQuestionAnswered();
+    if (!this.moderatedQuestionFlow && this.initData) {
+      if (this.questionAnswered) this.goToNextQuestion(null, true);
     }
   }
 }
