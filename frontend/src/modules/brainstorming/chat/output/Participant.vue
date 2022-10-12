@@ -249,7 +249,7 @@ export default class Participant extends Vue {
   }
 
   focusField(): void {
-    this.inputHasFocus = true;
+    //this.inputHasFocus = true;
   }
 
   changeField(inputValue: string): void {
