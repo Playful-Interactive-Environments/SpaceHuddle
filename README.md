@@ -31,7 +31,7 @@ The SpaceHuddle API requires the following setup:
 
 API documentation and testing are done using [Swagger](https://swagger.io/). The documentation is located in `api/documentation`.
 
-To run it, point your browser to <http://{hostname}/{path}/api/documentation/>, e.g., <http://localhost/api/documention> or <http://localhost/SpaceHuddle/api/documentation>.
+To run it, point your browser to <http://{hostname}/{path}/api/docs/v1>, e.g., <http://localhost/api/docs/v1> or <http://localhost/SpaceHuddle/api/docs/v1>.
 
 To test the various API endpoints, select one from the list, adapt the proposed request body if necessary and press "Execute". You will see the server response below.
 
