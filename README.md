@@ -49,6 +49,15 @@ To test for a *participant*, use the following steps:
 3. copy the value for `access_token`, click the button "Authorize" in the upper right corner and enter the token in the field for `bearerAuth`,
 4. execute any arbitrary REST call for the client tool.
 
+###Technology stack
+
+The SpaceHuddle-API is built on the following technologies. Visit the websites to learn more about their use.
+
+- PHP 8.0: programming language `https://www.php.net/`
+- Slim: micro framework for PHP `https://www.slimframework.com/`
+- CakePHP: database query framework `https://cakephp.org/`
+- Swagger-PHP: REST API documentation `https://zircote.github.io/swagger-php/`
+
 ## SpaceHuddle frontend
 
 ### Installation
@@ -314,7 +323,7 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
       !scss section!
       </style>
       ```
-   6. Develop additional components and types required for the module within the module folder. Structure this into subdirectories `types`, `organisms`, `molecules` and `atoms` depending on what the module requires. All these folders are optional.
+   6. Develop additional components and types required for the module within the module folder. Spacehuddle uses atomic design to structure the files. Therefore, depending on what is required, structure the subdirectories into `types`, `organisms`, `molecules` and `atoms`. All these folders are optional.
    7. The implementation of the access to the backend interfaces can be found in the folder `frontend/src/services`. To illustrate their use, here is an example implementation for querying all ideas of a task.
       ```
       <template>
