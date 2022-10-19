@@ -62,7 +62,8 @@ The SpaceHuddle-API is built on the following technologies. Visit the websites t
 
 ### Installation
 1. Adjust the properties in the `frontend/.env` file
-2. Install dependencies with: `npm install`
+2. Download and install Node `https://nodejs.org/en/download/`. Use a Node version that is lower or equal to 14
+3. Install dependencies with: `npm install`
 
 #### Compiles and hot-reloads for development
 You can use either `npm start` or `npm run serve`.
