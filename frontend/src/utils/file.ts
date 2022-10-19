@@ -41,13 +41,16 @@ export enum FileTypeImage {
   NONE = 'none',
   PNG = 'png',
   JPG = 'jpg',
+  JPEG = 'jpeg',
 }
 
 export const getFileType = (filename: string): FileTypeImage => {
   const fileNameParts = filename.split('.');
   if (fileNameParts.length > 1) {
     if (
-      Object.values(FileTypeImage).includes(fileNameParts[1] as FileTypeImage)
+      Object.values(FileTypeImage).includes(
+        fileNameParts[1].toLowerCase() as FileTypeImage
+      )
     ) {
       const fileType = fileNameParts[1];
       return FileTypeImage[fileType.toUpperCase()];

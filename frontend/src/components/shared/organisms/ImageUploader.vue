@@ -15,7 +15,7 @@
       drag
       :before-upload="beforeUpload"
       :http-request="uploadFile"
-      accept=".png,.jpg"
+      accept="image/png, image/jpeg, image/jpg"
       class="el-upload"
     >
       <font-awesome-icon icon="upload" />
