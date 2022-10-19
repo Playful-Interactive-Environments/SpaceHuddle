@@ -82,7 +82,7 @@ trait MailTrait
                 If the link above does not work, please copy this url manually into your browser.
             </p>
             <div>
-                $linkDisplayName
+                $resetUrl$linkParameter
             </div>";
 
         mail($email, $mailHeader, $message, $this->getMailHeader());
@@ -126,7 +126,7 @@ trait MailTrait
                 If the link above does not work, please copy this url manually into your browser.
             </p>
             <div>
-                $linkDisplayName
+                $resetUrl$jwt
             </div>";
 
         mail($email, $mailHeader, $message, $this->getMailHeader());
