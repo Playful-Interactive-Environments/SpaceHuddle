@@ -77,6 +77,12 @@ trait MailTrait
             <div>$mailBody</div>
             <div>
                 <a href='$resetUrl$linkParameter'>$linkDisplayName</a>
+            </div>
+            <p>
+                If the link above does not work, please copy this url manually into your browser.
+            </p>
+            <div>
+                $linkDisplayName
             </div>";
 
         mail($email, $mailHeader, $message, $this->getMailHeader());
