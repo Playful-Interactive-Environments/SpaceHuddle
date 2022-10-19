@@ -68,7 +68,7 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
 import * as moduleService from '@/services/module-service';
-import { Idea } from '@/types/api/Idea.ts';
+import { Idea } from '@/types/api/Idea';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { CanvasBodies } from '@/modules/brainstorming/game/types/CanvasBodies';

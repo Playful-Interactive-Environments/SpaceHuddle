@@ -156,7 +156,7 @@ import ParticipantModuleDefaultContainer from '@/components/participant/organism
 import * as ideaService from '@/services/idea-service';
 import * as taskService from '@/services/task-service';
 import * as moduleService from '@/services/module-service';
-import { Idea } from '@/types/api/Idea.ts';
+import { Idea } from '@/types/api/Idea';
 import { Module } from '@/types/api/Module';
 import { Task } from '@/types/api/Task';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';

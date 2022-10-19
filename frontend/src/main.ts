@@ -17,7 +17,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
-import { fac } from '@/assets/icons/fac/index.ts';
+import { fac } from '@/assets/icons/fac';
 
 library.add(fas);
 library.add(far);
