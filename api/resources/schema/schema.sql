@@ -66,7 +66,7 @@ CREATE TABLE `user` (
                         `id` char(36) NOT NULL,
                         `username` varchar(255) NOT NULL,
                         `password` varchar(255) NOT NULL,
-                        `confirmed` BIT(1) DEFAULT 0,
+                        `confirmed` TINYINT(1) DEFAULT 0,
                         `creation_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -82,7 +82,7 @@ CREATE TABLE `module` (
                           `module_name` varchar(255) NOT NULL,
                           `order` int(11) NOT NULL,
                           `state` varchar(255) NOT NULL,
-                          `sync_public_participant` BIT(1),
+                          `sync_public_participant` TINYINT(1),
                           `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -178,7 +178,7 @@ CREATE TABLE `session` (
                            `expiration_date` date DEFAULT NULL,
                            `creation_date` date NOT NULL DEFAULT current_timestamp(),
                            `public_screen_module_id` char(36) DEFAULT NULL,
-                           `allow_anonymous` BIT(1) DEFAULT 0
+                           `allow_anonymous` TINYINT(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
