@@ -23,7 +23,6 @@ class IdeaImageUpdater
     protected function serviceExecution(
         array $data
     ): array|object|null {
-        $this->repository->setImage((object)$data);
-        return null;
+        return $this->repository->setImage((object)$data);
     }
 }

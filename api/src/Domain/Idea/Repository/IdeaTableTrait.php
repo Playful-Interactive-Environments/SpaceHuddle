@@ -61,7 +61,7 @@ trait IdeaTableTrait
      * Set the image for a entity row.
      * @param object $data The data to be inserted
      */
-    public function setImage(object $data): void
+    public function setImage(object $data): array | object | null
     {
         $image_data = [
             "image" => $data->image ?? null,
@@ -71,6 +71,16 @@ trait IdeaTableTrait
         $this->queryFactory->newUpdate($this->getEntityName(), $image_data)
             ->andWhere(["id" => $data->id])
             ->execute();
+
+        $query = $this->queryFactory->newSelect("idea");
+        $result = $query->select(["image_timestamp"])
+            ->andWhere(["id" => $data->id])
+            ->execute()
+            ->fetch("assoc");
+        if ($result) {
+            return $result;
+        }
+        return null;
     }
 
     /**
