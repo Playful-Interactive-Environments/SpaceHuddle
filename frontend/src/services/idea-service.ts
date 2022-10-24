@@ -6,7 +6,7 @@ import {
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { Idea, IdeaImage } from '@/types/api/Idea';
+import { Idea, IdeaImage, IdeaTimestamp } from '@/types/api/Idea';
 import {
   OrderGroup,
   OrderGroupList,
@@ -80,7 +80,7 @@ export const postIdea = async (
   if (image) {
     idea.image = image;
     await putIdeaImage({ id: idea.id, image: image }, authHeaderType);
-    addIdeaImage(idea.id, image, idea.imageTimestamp);
+    //addIdeaImage(idea.id, image, idea.imageTimestamp);
   }
   return idea;
 };
@@ -105,7 +105,7 @@ export const putIdea = async (
   );
   if (image) {
     idea.image = image;
-    addIdeaImage(idea.id, image, idea.imageTimestamp);
+    //addIdeaImage(idea.id, image, idea.imageTimestamp);
   }
   return idea;
 };
@@ -114,11 +114,13 @@ export const putIdeaImage = async (
   data: Partial<IdeaImage>,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<void> => {
-  await apiExecutePut<IdeaImage>(
+  const result = await apiExecutePut<IdeaTimestamp>(
     `/${EndpointType.IDEA}/${EndpointType.IMAGE}/`,
     data,
     authHeaderType
   );
+  if (data.id && data.image)
+    addIdeaImage(data.id, data.image, result.image_timestamp);
 };
 
 export const getIdeaImage = async (

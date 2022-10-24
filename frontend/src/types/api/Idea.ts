@@ -28,5 +28,9 @@ export interface IdeaImage {
   imageTimestamp: string | null;
 }
 
+export interface IdeaTimestamp {
+  image_timestamp: string | null;
+}
+
 export const MAX_KEYWORDS_LENGTH = 60;
 export const MAX_DESCRIPTION_LENGTH = 1000;

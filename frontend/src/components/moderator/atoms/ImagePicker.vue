@@ -40,11 +40,7 @@
         <span @click="uploadDrawing" :class="{ gridItem: image || link }">
           <font-awesome-icon icon="pencil" />
         </span>
-        <span
-          @click="deleteImage"
-          v-if="image || link"
-          class="gridItem"
-        >
+        <span @click="deleteImage" v-if="image || link" class="gridItem">
           <font-awesome-icon icon="trash" />
         </span>
       </div>
@@ -100,6 +96,7 @@ export default class ImagePicker extends Vue {
     this.$emit('update:link', link);
     if (link) {
       this.$emit('update:image', null);
+      this.base64ImageUrl = null;
     }
   }
 
@@ -108,6 +105,7 @@ export default class ImagePicker extends Vue {
     if (image) {
       this.editLink = null;
     }
+    this.base64ImageUrl = image;
   }
 
   uploadImage(): void {
@@ -133,6 +131,7 @@ export default class ImagePicker extends Vue {
       this.$emit('update:link', null);
       this.$emit('update:image', null);
       this.editLink = null;
+      this.base64ImageUrl = null;
       this.$emit('change', null);
     }
   }
@@ -140,6 +139,7 @@ export default class ImagePicker extends Vue {
   imageUploadSuccess(imgDataUrl: string): void {
     this.$emit('update:link', null);
     this.$emit('update:image', imgDataUrl);
+    this.base64ImageUrl = imgDataUrl;
     this.editLink = null;
     (this.$refs.upload as any).setStep(1);
   }
@@ -152,9 +152,11 @@ export default class ImagePicker extends Vue {
 
   @Watch('base64ImageUrl', { immediate: true })
   onBase64ImageUrlChanged(): void {
-    this.$emit('update:link', null);
-    this.$emit('update:image', this.base64ImageUrl);
-    this.editLink = null;
+    if (this.base64ImageUrl) {
+      this.$emit('update:link', null);
+      this.$emit('update:image', this.base64ImageUrl);
+      this.editLink = null;
+    }
   }
 }
 </script>
