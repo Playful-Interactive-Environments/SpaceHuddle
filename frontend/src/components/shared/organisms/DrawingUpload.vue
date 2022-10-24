@@ -3,6 +3,7 @@
     v-model="showSettings"
     width="calc(var(--app-width) * 0.8)"
     :before-close="handleClose"
+    custom-class="drawing-dialog"
   >
     <template #title>
       <span class="el-dialog__title">{{
@@ -19,6 +20,8 @@
       :color="color"
       :lineWidth="lineWidth"
       :eraser="eraser"
+      :background-image="base64BackgroundImageUrl"
+      background-color="#ffffff"
     />
     <div v-else :no-border="true" class="image-upload">
       <div class="image-upload__cropper-wrapper">
@@ -60,6 +63,21 @@
             <font-awesome-icon icon="pen" />
           </el-button>
           <el-color-picker v-model="color" />
+          <el-button
+            circle
+            type="primary"
+            v-on:click="showBackgroundUploadDialog = true"
+          >
+            <font-awesome-icon icon="image" />
+          </el-button>
+          <el-button
+            v-if="base64BackgroundImageUrl"
+            circle
+            type="primary"
+            v-on:click="deleteBackgroundImage"
+          >
+            <font-awesome-icon :icon="['fac', 'no_image']" />
+          </el-button>
         </div>
         <div class="level-left" v-else></div>
         <div class="level-right">
@@ -74,6 +92,11 @@
       </div>
     </template>
   </el-dialog>
+  <ImageUploader
+    v-model:show-modal="showBackgroundUploadDialog"
+    v-model="base64BackgroundImageUrl"
+    v-on:imageChanged="backgroundImageChanged"
+  />
 </template>
 
 <script lang="ts">
@@ -85,9 +108,10 @@ import VueDrawingCanvas from 'vue-drawing-canvas';
 import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import 'vue-advanced-cropper/dist/theme.classic.css';
+import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
 
 @Options({
-  components: { VueDrawingCanvas, Cropper },
+  components: { VueDrawingCanvas, Cropper, ImageUploader },
   emits: ['update:showModal', 'imageChanged'],
 })
 
@@ -102,8 +126,11 @@ export default class DrawingUpload extends Vue {
   eraser = false;
   lineWidth = 1;
   crop = false;
+  showBackgroundUploadDialog = false;
+  base64BackgroundImageUrl: string | null = null;
+  backgroundAspect = 1;
 
-  get canvasWidth(): number {
+  get defaultCanvasWidth(): number {
     const screenWidth = window.innerWidth;
     const max = 1024;
     const border = 100;
@@ -111,18 +138,40 @@ export default class DrawingUpload extends Vue {
     return screenWidth - border;
   }
 
-  get canvasHeight(): number {
+  get defaultCanvasHeight(): number {
     const screenHeight = window.innerHeight;
     return (screenHeight / 5) * 2;
   }
 
+  get defaultAspect(): number {
+    return this.defaultCanvasWidth / this.defaultCanvasHeight;
+  }
+
+  get canvasWidth(): number {
+    if (this.base64BackgroundImageUrl) {
+      if (this.defaultAspect > this.backgroundAspect)
+        return this.canvasHeight * this.backgroundAspect;
+    }
+    return this.defaultCanvasWidth;
+  }
+
+  get canvasHeight(): number {
+    if (this.base64BackgroundImageUrl) {
+      if (this.defaultAspect < this.backgroundAspect)
+        return this.canvasWidth / this.backgroundAspect;
+    }
+    return this.defaultCanvasHeight;
+  }
+
   @Watch('showModal', { immediate: true })
   async onShowModalChanged(showModal: boolean): Promise<void> {
+    this.base64BackgroundImageUrl = '';
     this.reset();
     this.showSettings = showModal;
   }
 
   mounted(): void {
+    this.base64BackgroundImageUrl = '';
     this.reset();
   }
 
@@ -180,6 +229,19 @@ export default class DrawingUpload extends Vue {
       }
     }
   }
+
+  backgroundImageChanged(aspect: number): void {
+    this.backgroundAspect = aspect;
+    (this.$refs.VueCanvasDrawing as any)?.redraw();
+  }
+
+  deleteBackgroundImage(): void {
+    this.base64BackgroundImageUrl = null;
+    const drawingCanvas = this.$refs.VueCanvasDrawing as any;
+    if (drawingCanvas) {
+      drawingCanvas.redraw();
+    }
+  }
 }
 </script>
 
@@ -225,6 +287,19 @@ export default class DrawingUpload extends Vue {
     display: flex;
     justify-content: center;
     margin-top: 17px;
+  }
+}
+
+.drawing-canvas {
+  background-color: white;
+}
+</style>
+
+<style lang="scss">
+.drawing-dialog {
+  .el-dialog__body {
+    display: flex;
+    justify-content: center;
   }
 }
 </style>

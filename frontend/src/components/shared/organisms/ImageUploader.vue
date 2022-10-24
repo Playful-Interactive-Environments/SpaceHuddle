@@ -23,8 +23,19 @@
         {{ $t('shared.organism.imageUploader.uploadText') }}
       </div>
       <template #tip>
-        <div class="el-upload__tip">
-          {{ $t('shared.organism.imageUploader.uploadTip') }}
+        <div class="media">
+          <div class="el-upload__tip media-content">
+            {{ $t('shared.organism.imageUploader.uploadTip') }}
+          </div>
+          <el-button
+            v-if="supportPasteFromClipboard"
+            class="media-right"
+            circle
+            type="primary"
+            v-on:click="pasteFromClipboard"
+          >
+            <font-awesome-icon icon="paste" />
+          </el-button>
         </div>
       </template>
     </el-upload>
@@ -65,7 +76,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { getBase64ImageType, isValidFileType, UploadData } from '@/utils/file';
 import { ElFile } from 'element-plus/es/components/upload/src/upload.type';
 import { Cropper } from 'vue-advanced-cropper';
@@ -84,6 +95,7 @@ export default class ImageUploader extends Vue {
 
   showSettings = false;
   uploadData: UploadData | null = null;
+  supportPasteFromClipboard = true;
 
   @Watch('showModal', { immediate: true })
   async onShowModalChanged(showModal: boolean): Promise<void> {
@@ -105,6 +117,17 @@ export default class ImageUploader extends Vue {
   }
 
   mounted(): void {
+    this.supportPasteFromClipboard =
+      navigator.userAgent.indexOf('Firefox') === -1;
+    if (this.supportPasteFromClipboard) {
+      (navigator.permissions as any)
+        .query({
+          name: 'clipboard-read',
+        })
+        .then((permission) => {
+          this.supportPasteFromClipboard = permission.state !== 'denied';
+        });
+    }
     this.reset();
   }
 
@@ -120,11 +143,11 @@ export default class ImageUploader extends Vue {
 
   saveChanges(): void {
     if (this.uploadData) {
-      const { canvas } = (this.$refs.cropper as any)?.getResult();
+      const { canvas, coordinates } = (this.$refs.cropper as any)?.getResult();
       const base64 = canvas?.toDataURL(this.uploadData.type);
       this.$emit('update:modelValue', base64);
       this.$emit('update:showModal', false);
-      this.$emit('imageChanged', null);
+      this.$emit('imageChanged', coordinates.width / coordinates.height);
       this.reset();
     }
   }
@@ -156,6 +179,68 @@ export default class ImageUploader extends Vue {
       (this as any).$t('shared.organism.imageUploader.wrongType')
     );
     return false;
+  }
+
+  async pasteFromClipboard(): Promise<void> {
+    const permission = await (navigator.permissions as any).query({
+      name: 'clipboard-read',
+    });
+    let allowClipboard = permission.state === 'granted';
+    if (permission.state === 'prompt') {
+      await ElMessageBox.confirm(
+        (this as any).$t('shared.organism.imageUploader.clipboardInfo'),
+        (this as any).$t('shared.organism.imageUploader.clipboardInfoTitle'),
+        {
+          confirmButtonText: (this as any).$t(
+            'shared.organism.imageUploader.clipboardInfoOk'
+          ),
+          cancelButtonText: (this as any).$t(
+            'shared.organism.imageUploader.clipboardInfoCancel'
+          ),
+          type: 'warning',
+        }
+      )
+        .then(() => {
+          allowClipboard = true;
+        })
+        .catch(() => {
+          allowClipboard = false;
+        });
+    } else if (permission.state === 'denied') {
+      ElMessage({
+        message: (this as any).$t(
+          'shared.organism.imageUploader.clipboardNotAllowed'
+        ),
+        type: 'error',
+        center: true,
+        showClose: true,
+      });
+      allowClipboard = false;
+    }
+
+    if (allowClipboard) {
+      const clipboardContents = await (navigator.clipboard as any).read();
+      const imageType = 'image/png';
+      for (const item of clipboardContents) {
+        if (!item.types.includes(imageType)) {
+          ElMessage({
+            message: (this as any).$t(
+              'shared.organism.imageUploader.pasteNoImage'
+            ),
+            type: 'error',
+            center: true,
+            showClose: true,
+          });
+        } else {
+          const blob = await item.getType(imageType);
+          this.uploadData = {
+            name: 'clipboard',
+            url: URL.createObjectURL(blob),
+            type: imageType,
+          };
+        }
+      }
+    }
   }
 }
 </script>
@@ -261,5 +346,9 @@ export default class ImageUploader extends Vue {
     font-size: 12px;
     color: white;
   }
+}
+
+.el-button.is-circle {
+  padding: 8px 13px;
 }
 </style>
