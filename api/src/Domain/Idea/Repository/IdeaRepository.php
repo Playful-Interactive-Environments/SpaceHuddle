@@ -371,11 +371,14 @@ class IdeaRepository implements RepositoryInterface
 
         if ($orderColumn) {
             foreach ($resultList as $resultItem) {
+                $orderText = '';
                 if (strtolower($orderType) == IdeaSortOrder::HIERARCHY) {
                     if (property_exists($resultItem, "category") && isset($resultItem->category)) {
                         $orderContent = $resultItem->category->name;
+                        $orderText = $resultItem->category->id;
                     } else {
                         $orderContent = "undefined";
+                        $orderText = $orderContent;
                     }
                 } elseif (strtolower($orderType) == IdeaSortOrder::VIEW) {
                     if (property_exists($resultItem, "order") && isset($resultItem->order)) {
@@ -416,7 +419,7 @@ class IdeaRepository implements RepositoryInterface
                 $resultItem->orderGroup = $orderContent;
                 $resultItem->orderText = '';
                 if (strtolower($orderType) == IdeaSortOrder::HIERARCHY) {
-                    $resultItem->orderText = $orderContent;
+                    $resultItem->orderText = $orderText;
                 } else {
                     foreach ($orderColumn as $column) {
                         if (property_exists($resultItem, $column) && isset($resultItem->$column)) {
