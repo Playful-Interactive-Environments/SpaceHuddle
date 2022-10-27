@@ -221,10 +221,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   openTabs: string[] = [];
   isDragging = false;
 
-  newCategory = {
-    keywords: '',
-    description: '',
-  };
   readonly intervalTime = 10000;
   interval!: any;
 
@@ -318,10 +314,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       await this.getCategories();
       const orderGroupContent: CategoryContentList = {};
       this.categories.forEach((category) => {
-        orderGroupContent[category.keywords] = new CategoryContent(
-          category,
-          []
-        );
+        orderGroupContent[category.id] = new CategoryContent(category, []);
       });
 
       if (this.task && this.task.parameter.input) {
@@ -333,7 +326,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           EndpointAuthorisationType.MODERATOR,
           (this as any).$t,
           this.filter.stateFilter,
-          this.filter.textFilter
+          this.filter.textFilter,
+          false
         );
         const getUncategorizedIdeas = viewService.getViewOrderGroups(
           this.task.topicId,
@@ -345,7 +339,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           this.orderGroupContentSelection,
           (this as any).$t,
           this.filter.stateFilter,
-          this.filter.textFilter
+          this.filter.textFilter,
+          () => {
+            return true;
+          },
+          false
         );
 
         await getCategorizedIdeas.then((ideas) => {
@@ -354,8 +352,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
             ideas
               .filter((ideaItem) => ideaItem.category)
               .forEach((ideaItem) => {
-                if (ideaItem.orderGroup) {
-                  const orderGroup = orderGroupContent[ideaItem.orderGroup];
+                if (ideaItem.orderText) {
+                  const orderGroup = orderGroupContent[ideaItem.orderText];
                   if (orderGroup) {
                     orderGroup.ideas.push(ideaItem);
                   }
@@ -497,7 +495,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         if (category) {
           await categorisationService.addIdeasToCategory(
             event.to.id,
-            this.orderGroupContentCards[category.keywords].ideas.map(
+            this.orderGroupContentCards[category.id].ideas.map(
               (idea) => idea.id
             )
           );
@@ -526,7 +524,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           this.history.push({
             toCategoryId: event.to.id,
             fromCategoryId: event.from.id,
-            ideas: this.orderGroupContentCards[category.keywords].ideas.map(
+            ideas: this.orderGroupContentCards[category.id].ideas.map(
               (idea) => idea.id
             ),
           });

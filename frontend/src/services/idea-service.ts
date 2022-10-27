@@ -258,16 +258,20 @@ export const convertToOrderGroups = (
   actualOrderGroupList: OrderGroupList = {},
   filter: (idea) => boolean = () => {
     return true;
-  }
+  },
+  useOrderGroup = true
 ): OrderGroupList => {
   const orderGroupList = {};
   ideas
     .filter((idea) => filter(idea))
     .forEach((ideaItem) => {
-      if (ideaItem.orderGroup) {
-        const groupKey = isNaN(parseInt(ideaItem.orderGroup))
-          ? ideaItem.orderGroup
-          : `${ideaItem.orderGroup} `;
+      const orderKeyText = useOrderGroup
+        ? ideaItem.orderGroup
+        : ideaItem.orderText;
+      if (orderKeyText) {
+        const groupKey = !/^-?\d+$/.test(orderKeyText) //isNaN(parseInt(orderKeyText))
+          ? orderKeyText
+          : `${orderKeyText} `;
         const orderGroup = orderGroupList[groupKey];
         if (!orderGroup) {
           let displayCount = DefaultDisplayCount;
@@ -298,7 +302,8 @@ export const getOrderGroups = async (
   actualOrderGroupList: OrderGroupList = {},
   filter: (idea) => boolean = () => {
     return true;
-  }
+  },
+  useOrderGroup = true
 ): Promise<{ ideas: Idea[]; oderGroups: OrderGroupList }> => {
   let orderGroupList = {};
   let ideaList: Idea[] = [];
@@ -308,7 +313,8 @@ export const getOrderGroups = async (
       orderGroupList = convertToOrderGroups(
         ideas,
         actualOrderGroupList,
-        filter
+        filter,
+        useOrderGroup
       );
     }
   );

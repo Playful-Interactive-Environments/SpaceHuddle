@@ -76,7 +76,8 @@ export const getViewIdeas = async (
   authHeaderType = EndpointAuthorisationType.MODERATOR,
   $t: null | ((key: string) => string) = null,
   stateFilter: string[] = [],
-  textFilter = ''
+  textFilter = '',
+  useOrderGroup = true
 ): Promise<Idea[]> => {
   const viewName = getList(topicId, authHeaderType);
   let viewNameList: View[] = [];
@@ -121,9 +122,11 @@ export const getViewIdeas = async (
   dbCalls.push(viewName);
   await Promise.all(dbCalls);
   for (const resultItem of result) {
+    const orderKeyText = useOrderGroup
+      ? resultItem.orderGroup
+      : resultItem.orderText;
     const inputItemView = viewNameList.find(
-      (view) =>
-        getViewKey(view).toLowerCase() === resultItem.orderGroup.toLowerCase()
+      (view) => getViewKey(view).toLowerCase() === orderKeyText.toLowerCase()
     );
     if (inputItemView) {
       resultItem.orderGroup = getViewName(inputItemView, $t);
@@ -155,7 +158,8 @@ export const getViewOrderGroups = async (
   textFilter = '',
   filter: (idea) => boolean = () => {
     return true;
-  }
+  },
+  useOrderGroup = true
 ): Promise<{ ideas: Idea[]; oderGroups: OrderGroupList }> => {
   let orderGroupList = {};
   let ideaList: Idea[] = [];
@@ -170,7 +174,12 @@ export const getViewOrderGroups = async (
     textFilter
   ).then((ideas) => {
     ideaList = orderAsc ? ideas : ideas.reverse();
-    orderGroupList = convertToOrderGroups(ideas, actualOrderGroupList, filter);
+    orderGroupList = convertToOrderGroups(
+      ideas,
+      actualOrderGroupList,
+      filter,
+      useOrderGroup
+    );
   });
   return { ideas: ideaList, oderGroups: orderGroupList };
 };

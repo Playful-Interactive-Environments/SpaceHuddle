@@ -15,7 +15,7 @@
         <div class="column" v-for="category in categories" :key="category.id">
           <CategoryCard
             :category="category"
-            :ideas="categoryIdeas(category.keywords)"
+            :ideas="categoryIdeas(category.id)"
             :isEditable="false"
           >
           </CategoryCard>
@@ -36,7 +36,7 @@
         <div class="column" v-for="category in categories" :key="category.id">
           <IdeaCard
             :idea="idea"
-            v-for="(idea, index) in categoryIdeas(category.keywords)"
+            v-for="(idea, index) in categoryIdeas(category.id)"
             :key="index"
             :is-selectable="false"
             :is-editable="false"
@@ -110,8 +110,9 @@ export default class PublicScreen extends Vue {
   }
 
   categoryIdeas(category: string): Idea[] {
-    if (category in this.orderGroupContent)
+    if (category in this.orderGroupContent) {
       return this.orderGroupContent[category].ideas;
+    }
     return [];
   }
 
@@ -143,7 +144,11 @@ export default class PublicScreen extends Vue {
           this.orderGroupContent,
           (this as any).$t,
           this.filter.stateFilter,
-          this.filter.textFilter
+          this.filter.textFilter,
+          () => {
+            return true;
+          },
+          false
         );
         const getUncategorizedIdeas = viewService.getViewIdeas(
           this.task.topicId,
@@ -153,7 +158,8 @@ export default class PublicScreen extends Vue {
           this.authHeaderTyp,
           (this as any).$t,
           this.filter.stateFilter,
-          this.filter.textFilter
+          this.filter.textFilter,
+          false
         );
 
         await getCategorizedIdeas.then((result) => {
