@@ -161,13 +161,15 @@ export default class PublicScreen extends Vue {
           this.orderGroupContent = result.oderGroups;
         });
         await getUncategorizedIdeas.then((result) => {
-          this.orderGroupContent[CategoryUndefined].ideas = result.filter(
-            (idea) =>
-              this.ideas.find(
-                (categoryIdea) =>
-                  categoryIdea.id === idea.id && !categoryIdea.category
-              )
-          );
+          if (this.orderGroupContent[CategoryUndefined]) {
+            this.orderGroupContent[CategoryUndefined].ideas = result.filter(
+              (idea) =>
+                this.ideas.find(
+                  (categoryIdea) =>
+                    categoryIdea.id === idea.id && !categoryIdea.category
+                )
+            );
+          }
         });
       }
     }
