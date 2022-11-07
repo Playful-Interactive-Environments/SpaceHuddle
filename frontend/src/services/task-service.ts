@@ -29,11 +29,13 @@ export const getTaskList = async (
   topicId: string,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Task[]> => {
-  return await apiExecuteGetHandled<Task[]>(
+  const result = await apiExecuteGetHandled<Task[]>(
     `/${EndpointType.TOPIC}/${topicId}/${EndpointType.TASKS}/`,
     [],
     authHeaderType
   );
+  if (result && Array.isArray(result)) return result;
+  return [];
 };
 
 export const getDependentTaskList = async (
