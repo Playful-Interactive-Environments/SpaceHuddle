@@ -78,7 +78,6 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getBase64ImageType, isValidFileType, UploadData } from '@/utils/file';
-import { ElFile } from 'element-plus/es/components/upload/src/upload.type';
 import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import 'vue-advanced-cropper/dist/theme.classic.css';
@@ -171,7 +170,7 @@ export default class ImageUploader extends Vue {
     return true;
   }
 
-  beforeUpload(file: ElFile): boolean {
+  beforeUpload(file: any): boolean {
     if (isValidFileType(file.name)) {
       return true;
     }

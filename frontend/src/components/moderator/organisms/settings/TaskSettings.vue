@@ -1303,7 +1303,7 @@ export default class TaskSettings extends Vue {
       return {};
     });
     this.formData.parameter.input = this.formData.parameter.input.filter(
-      (input) => input !== {}
+      (input) => Object.keys(input).length > 0
     );
     this.loadPreviewData();
 
@@ -1400,7 +1400,7 @@ export default class TaskSettings extends Vue {
         await moduleParams.updateParameterForSaving();
       if ('customSyncPublicParticipant' in moduleParams) {
         syncPublicParticipant = (
-          moduleParams as CustomSync
+          moduleParams as unknown as CustomSync
         ).customSyncPublicParticipant();
       }
     }

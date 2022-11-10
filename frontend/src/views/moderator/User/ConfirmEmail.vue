@@ -64,7 +64,7 @@ export default class ConfirmEmail extends Vue {
           this.confirm = Confirm.FAILED;
         }
       );
-    } catch (exception) {
+    } catch (exception: any) {
       if (exception) this.errorMessage = exception.message;
       this.confirm = Confirm.FAILED;
     }

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "module": "es2020",
+    "target": "esnext",
+    "module": "esnext",
     "strict": true,
     "allowJs": true,
     "jsx": "preserve",
@@ -23,7 +23,7 @@
       "@/*": ["src/*"]
     },
     "lib": [
-      "es2020",
+      "esnext",
       "dom",
       "dom.iterable",
       "scripthost"

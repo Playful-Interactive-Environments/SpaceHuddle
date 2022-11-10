@@ -19,8 +19,8 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 import { fac } from '@/assets/icons/fac';
 
-library.add(fas);
-library.add(far);
+library.add(fas as any);
+library.add(far as any);
 library.add(fac);
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
