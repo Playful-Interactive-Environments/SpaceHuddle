@@ -79,6 +79,8 @@ const calcErrorPrefix = (response: AxiosResponse): string => {
   return errorPrefix;
 };
 
+let errorHistory: number[] = [];
+
 export const apiErrorHandling = async (
   error: AxiosError,
   displayDBErrors = true
@@ -89,10 +91,15 @@ export const apiErrorHandling = async (
   let errorResult: any = {};
   if (!response) {
     if (error.message == 'Network Error') {
-      removeAccessToken();
-      app.config.globalProperties.$router.push({
-        name: 'home',
-      });
+      errorHistory = errorHistory.filter((item) => item > Date.now() - 2000);
+      if (errorHistory.length > 10) {
+        removeAccessToken();
+        app.config.globalProperties.$router.push({
+          name: 'home',
+        });
+      } else {
+        errorHistory.push(Date.now());
+      }
     }
     return {};
   } else {
