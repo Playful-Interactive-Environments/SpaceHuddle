@@ -93,6 +93,7 @@ export const apiErrorHandling = async (
     if (error.message == 'Network Error') {
       errorHistory = errorHistory.filter((item) => item > Date.now() - 2000);
       if (errorHistory.length > 10) {
+        errorHistory.length = 0;
         removeAccessToken();
         app.config.globalProperties.$router.push({
           name: 'home',
