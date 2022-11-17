@@ -220,8 +220,8 @@ export default class DrawingUpload extends Vue {
       if (!this.crop) {
         this.crop = true;
       } else {
-        const { canvas } = (this.$refs.cropper as any)?.getResult();
-        const base64 = canvas?.toDataURL('png');
+        const result = (this.$refs.cropper as any)?.getResult();
+        const base64 = result.canvas?.toDataURL('png');
         this.$emit('update:modelValue', base64);
         this.$emit('update:showModal', false);
         this.$emit('imageChanged', null);

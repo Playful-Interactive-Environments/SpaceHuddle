@@ -232,11 +232,11 @@ export default class Participant extends Vue {
   get waiting(): boolean {
     //Changes Paul Start
     if (this.ideas.length > 0 || this.votes.length > 0) {
-      let element = document.getElementById('loadingScreen');
+      const element = document.getElementById('loadingScreen');
       if (element != null && !element.classList.contains('zeroOpacity')) {
         this.replaceIdeaArray();
 
-        var preload = document.getElementById('preloader');
+        const preload = document.getElementById('preloader');
         preload?.classList.add('PreloadSprites');
 
         setTimeout(() => preload?.classList.remove('PreloadSprites'), 1000);
@@ -419,12 +419,12 @@ export default class Participant extends Vue {
   finishedAndLaunched = false;
 
   getHeightPercentage(): void {
-    let viewportHeight = window.innerHeight;
-    let ideas = document.getElementsByClassName('idea');
+    const viewportHeight = window.innerHeight;
+    const ideas = document.getElementsByClassName('idea');
 
     if (this.enoughHeight) {
       for (let i = 0; i < ideas.length; i++) {
-        let top = ideas[i].getBoundingClientRect().top;
+        const top = ideas[i].getBoundingClientRect().top;
         if (
           100 - (top / viewportHeight) * 100 < 22 ||
           (top / viewportHeight) * 100 < 27
@@ -440,18 +440,18 @@ export default class Participant extends Vue {
   }
 
   scrollRocketToBottom(): void {
-    let rocket = document.getElementById('rocketColumn');
-    let fire = document.getElementById('fire');
+    const rocket = document.getElementById('rocketColumn');
+    const fire = document.getElementById('fire');
     this.finishedAndLaunched = true;
     if (rocket != null && fire != null && this.finished) {
       rocket.scrollTo({ top: rocket.scrollHeight, behavior: 'smooth' });
       rocket.classList.add('rocketAnimateMove');
       fire.classList.add('rocketAnimateSprite');
-      let endCard = document.getElementById('endOfIdeas');
+      const endCard = document.getElementById('endOfIdeas');
       if (endCard != null) {
         endCard.classList.add('hidden');
       }
-      let thanksText = document.getElementById('thanksText');
+      const thanksText = document.getElementById('thanksText');
       if (thanksText != null) {
         thanksText.classList.add('notHidden');
         setTimeout(() => thanksText?.classList.add('fullOpacity'), 2000);
@@ -460,7 +460,7 @@ export default class Participant extends Vue {
   }
 
   heightCheck(): boolean {
-    let element = document.getElementById('backgroundImage');
+    const element = document.getElementById('backgroundImage');
 
     if (element != null) {
       this.smallHeight = element.scrollHeight * 0.9 < element.scrollWidth;

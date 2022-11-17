@@ -120,7 +120,7 @@ export default class QuizResult extends Vue {
 
   breakString(str: string, limit: number): string[] | string {
     if (str.length > limit) {
-      let stringArray = [''];
+      const stringArray = [''];
       let brokenString = '';
       let lineLimit = this.labelLineLimit;
       for (let i = 0, count = 0; i < str.length && lineLimit > 0; i++) {

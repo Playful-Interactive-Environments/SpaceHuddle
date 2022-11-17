@@ -71,8 +71,8 @@ export default class Timer extends Vue {
 
   get formattedTime(): string {
     if (this.timeLeft !== null) {
-      let minutes = Math.floor(this.timeLeft / 60);
-      let seconds = this.timeLeft - minutes * 60;
+      const minutes = Math.floor(this.timeLeft / 60);
+      const seconds = this.timeLeft - minutes * 60;
       return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
     }
     return '';

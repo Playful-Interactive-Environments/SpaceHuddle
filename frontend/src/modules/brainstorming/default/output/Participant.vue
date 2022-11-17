@@ -298,7 +298,7 @@ export default class Participant extends Vue {
   scalePlanet = false;
 
   waiting(): boolean {
-    let element = document.getElementById('loadingScreen');
+    const element = document.getElementById('loadingScreen');
     if (element != null && !element.classList.contains('zeroOpacity')) {
       const preload = document.getElementById('preloader');
       preload?.classList.add('PreloadSprites');
@@ -441,7 +441,7 @@ export default class Participant extends Vue {
   }
 
   unhide(elementID: string): void {
-    var targetElement = document.getElementById(elementID);
+    const targetElement = document.getElementById(elementID);
     if (targetElement !== null) {
       targetElement.className = 'unhidden';
     }

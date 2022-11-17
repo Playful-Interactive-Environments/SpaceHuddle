@@ -170,10 +170,10 @@ export default class Participant extends Vue {
 
   get waiting(): boolean {
     if (this.allIdeas.length != 0) {
-      let element = document.getElementById('loadingScreen');
+      const element = document.getElementById('loadingScreen');
 
       if (element != null && !element.classList.contains('zeroOpacity')) {
-        var preload = document.getElementById('preloader');
+        const preload = document.getElementById('preloader');
         preload?.classList.add('PreloadSprites');
 
         setTimeout(() => preload?.classList.remove('PreloadSprites'), 1000);
@@ -329,8 +329,8 @@ export default class Participant extends Vue {
   currentRateIdea = false;
 
   getOpacity(): number {
-    let number = this.ideaPointer + (this.initIdeaNumber - this.ideas.length);
-    let opacityNum = (1 / this.initIdeaNumber) * number;
+    const number = this.ideaPointer + (this.initIdeaNumber - this.ideas.length);
+    const opacityNum = (1 / this.initIdeaNumber) * number;
     if (opacityNum == 1 && this.ideaPointer == 0) {
       return opacityNum;
     } else if (opacityNum != 1) {

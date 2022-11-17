@@ -518,7 +518,7 @@ export default class ProcessTimeline extends Vue {
   }
 
   get activeOnPublicScreen(): number {
-    let index = this.publicScreen
+    const index = this.publicScreen
       ? this.activePageContentList.findIndex((item) =>
           this.itemIsEquals(item, this.publicScreen)
         )
@@ -554,8 +554,8 @@ export default class ProcessTimeline extends Vue {
     if (item !== null) {
       const timeLeft = timerService.getRemainingTime(this.getTimerEntity(item));
       if (timeLeft) {
-        let minutes = Math.floor(timeLeft / 60);
-        let seconds = timeLeft - minutes * 60;
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft - minutes * 60;
         return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
       }
     }

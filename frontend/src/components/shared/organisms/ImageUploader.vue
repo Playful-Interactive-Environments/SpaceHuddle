@@ -142,11 +142,15 @@ export default class ImageUploader extends Vue {
 
   saveChanges(): void {
     if (this.uploadData) {
-      const { canvas, coordinates } = (this.$refs.cropper as any)?.getResult();
-      const base64 = canvas?.toDataURL(this.uploadData.type);
+      //const { canvas, coordinates } = (this.$refs.cropper as any)?.getResult();
+      const result = (this.$refs.cropper as any)?.getResult();
+      const base64 = result.canvas?.toDataURL(this.uploadData.type);
       this.$emit('update:modelValue', base64);
       this.$emit('update:showModal', false);
-      this.$emit('imageChanged', coordinates.width / coordinates.height);
+      this.$emit(
+        'imageChanged',
+        result.coordinates.width / result.coordinates.height
+      );
       this.reset();
     }
   }

@@ -98,8 +98,8 @@ export default class TimerProgress extends Vue {
 
   formatTime(time: number | null): string {
     if (time !== null) {
-      let minutes = Math.floor(time / 60);
-      let seconds = time - minutes * 60;
+      const minutes = Math.floor(time / 60);
+      const seconds = time - minutes * 60;
       return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
     }
     return '';

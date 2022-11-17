@@ -287,7 +287,7 @@ export default class Participant extends Vue {
   }
 
   get loading(): boolean {
-    let element = document.getElementById('loadingScreen');
+    const element = document.getElementById('loadingScreen');
 
     if (element != null && !element.classList.contains('zeroOpacity')) {
       const preload = document.getElementById('preloader');

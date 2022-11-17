@@ -226,7 +226,7 @@ export default class ParticipantModuleContent extends Vue {
     }
 
     if (this.task && this.task.modules && this.task.modules.length > 0) {
-      let modules: string[] = [];
+      const modules: string[] = [];
       this.task.modules.forEach((module) => {
         modules.push(module.name);
       });
