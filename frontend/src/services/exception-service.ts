@@ -13,10 +13,10 @@ export const getSingleErrorKey = (error: AxiosError): string => {
   if (
     error.response &&
     error.response.data &&
-    error.response.data.errorMessage &&
-    error.response.data.errorMessage.length > 0
+    (error.response.data as any).errorMessage &&
+    (error.response.data as any).errorMessage.length > 0
   ) {
-    return error.response.data.errorMessage[0];
+    return (error.response.data as any).errorMessage[0];
   }
   return '';
 };
@@ -29,8 +29,12 @@ export const getSingleTranslatedErrorMessage = (error: AxiosError): string => {
 };
 
 export const getErrorMessage = (error: AxiosError): string[] => {
-  if (error.response && error.response.data && error.response.data.errorMessage)
-    return error.response.data.errorMessage;
+  if (
+    error.response &&
+    (error.response.data as any) &&
+    (error.response.data as any).errorMessage
+  )
+    return (error.response.data as any).errorMessage;
   return [];
 };
 
@@ -92,6 +96,12 @@ export const apiErrorHandling = async (
   if (!response) {
     if (error.message == 'Network Error') {
       errorHistory = errorHistory.filter((item) => item > Date.now() - 2000);
+      console.log(
+        errorHistory.length,
+        Date.now(),
+        errorHistory,
+        errorHistory.length > 0 ? errorHistory[0] - Date.now() : -1
+      );
       if (errorHistory.length > 10) {
         errorHistory.length = 0;
         removeAccessToken();
