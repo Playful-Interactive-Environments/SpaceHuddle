@@ -101,11 +101,13 @@ final class JwtClaimMiddleware implements MiddlewareInterface
             $debugOutput = [
                 "status" => "JwtClaim Unauthorized",
                 "uri" => json_encode($request->getUri()->getPath()),
+                "type" => $request->getMethod(),
                 "header" => json_encode($request->getHeaders())
             ];
             $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
             return $this->responseFactory->createResponse()
                 ->withHeader("Content-Type", "application/json")
+                ->withHeader('Access-Control-Allow-Origin', '*')
                 ->withStatus(401, "Unauthorized");
         }
         return $handler->handle($request);

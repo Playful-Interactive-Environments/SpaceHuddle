@@ -73,6 +73,7 @@ final class JwtAuthMiddleware implements MiddlewareInterface
             $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
             return $this->responseFactory->createResponse()
                 ->withHeader("Content-Type", "application/json")
+                ->withHeader('Access-Control-Allow-Origin', '*')
                 ->withStatus(401, "Unauthorized");
         }
         return $handler->handle($request);

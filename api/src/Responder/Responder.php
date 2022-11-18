@@ -53,7 +53,9 @@ final class Responder
     public function createResponse(): ResponseInterface
     {
         $this->errorLogger && $this->errorLogger->info("createResponse");
-        return $this->responseFactory->createResponse()->withHeader("Content-Type", "text/html; charset=utf-8");
+        return $this->responseFactory->createResponse()
+            ->withHeader("Content-Type", "text/html; charset=utf-8")
+            ->withHeader('Access-Control-Allow-Origin', '*');
     }
 
     /**
