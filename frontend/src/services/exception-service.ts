@@ -105,17 +105,17 @@ export const apiErrorHandling = async (
         errorHistory.length,
         Date.now(),
         errorHistory,
-        errorHistory.length > 0 ? errorHistory[0] - Date.now() : -1
+        errorHistory.length > 0 ? errorHistory[0] - Date.now() : -1,
+        error
       );
-      if (errorHistory.length > 10) {
+      /*if (errorHistory.length > 10) {
         errorHistory.length = 0;
         removeAccessToken();
         app.config.globalProperties.$router.push({
           name: 'home',
         });
-      } else {
-        errorHistory.push(Date.now());
-      }
+      }*/
+      errorHistory.push(Date.now());
     }
     return {};
   } else {
@@ -174,7 +174,7 @@ const reportErrors = (errors: string[]): void => {
 
 export const apiErrorLog = async (error: AxiosError): Promise<void> => {
   if (showLog) {
-    if (error.response) console.error(error.response.data);
+    if (error.response) console.error(error.response.data.error.message);
     else console.error(error);
   }
   if (showLog && error.response && error.response.config) {
