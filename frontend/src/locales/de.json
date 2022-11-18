@@ -45,7 +45,8 @@
       "general": {
         "User has no rights for this entity": "Nutzer*in hat keine Rechte für diese Entität.",
         "User has no rights for this service": "Nutzer*in hat keine Rechte für diesen Service.",
-        "No valid access token specified": "Kein gültiges Zugriffstoken angegeben"
+        "No valid access token specified": "Kein gültiges Zugriffstoken angegeben",
+        "Unauthorized": "Der Benutzer ist nicht eingeloggt oder der Zugriffscode ist abgelaufen."
       },
       "login": {
         "post": {

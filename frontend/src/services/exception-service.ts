@@ -122,7 +122,7 @@ export const apiErrorHandling = async (
     errorResult = error.response?.data;
     const errorPrefix = calcErrorPrefix(response);
 
-    if (displayDBErrors) {
+    if (displayDBErrors && window.location.pathname.length > 10) {
       if (errorResult && errorResult.error && errorResult.error.details) {
         const errorMessage: string[] = [];
         const errorList = errorResult.error.details;
@@ -145,14 +145,14 @@ export const apiErrorHandling = async (
       }
     }
 
-    if (response.status == HttpStatusCode.UNAUTHORIZED) {
+    if (response.status === HttpStatusCode.UNAUTHORIZED) {
       removeAccessToken();
       app.config.globalProperties.$router.push({
         name: 'home',
       });
     }
 
-    if (response.status == HttpStatusCode.FORBIDDEN) {
+    if (response.status === HttpStatusCode.FORBIDDEN) {
       app.config.globalProperties.$router.push({
         name: isUser() ? 'moderator-session-overview' : 'participant-overview',
       });
