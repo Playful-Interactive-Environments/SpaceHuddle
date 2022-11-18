@@ -60,6 +60,7 @@ final class CorsMiddleware implements MiddlewareInterface
         $debugOutput = [
             "uri" => json_encode($request->getUri()->getPath()),
             "browser" => $userAgent[count($userAgent) - 1],
+            "type" => $request->getMethod(),
             "response" => json_encode($response->getHeaders()),
             "header" => json_encode($request->getHeaders())
         ];

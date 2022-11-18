@@ -71,6 +71,7 @@ final class JwtClaimMiddleware implements MiddlewareInterface
         $debugOutput = [
             "uri" => json_encode($request->getUri()->getPath()),
             "browser" => $userAgent[count($userAgent) - 1],
+            "type" => $request->getMethod(),
             "header" => json_encode($request->getHeaders())
         ];
         $this->logger && $this->logger->info(json_encode($debugOutput));
