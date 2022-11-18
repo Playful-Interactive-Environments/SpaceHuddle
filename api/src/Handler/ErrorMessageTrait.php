@@ -5,9 +5,24 @@ use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
+use App\Factory\LoggerFactory;
+use Psr\Log\LoggerInterface;
 
 trait ErrorMessageTrait
 {
+    private LoggerInterface $errorLogger;
+
+    /**
+     * ErrorMessageTrait constructor.
+     * @param LoggerFactory $loggerFactory The response factory
+     */
+    public function initErrorLog(LoggerFactory $loggerFactory)
+    {
+        $this->errorLogger = $loggerFactory
+            ->addFileHandler("userError.log")
+            ->createLogger();
+    }
+
     /**
      * Get error message.
      *
@@ -29,6 +44,11 @@ trait ErrorMessageTrait
                 $this->getExceptionText($exception)
             );
         }
+        $debugOutput = [
+            "status" => $statusCode,
+            "error" => $errorMessage
+        ];
+        $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
 
         return $errorMessage;
     }

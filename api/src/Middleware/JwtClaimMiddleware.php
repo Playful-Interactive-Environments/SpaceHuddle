@@ -9,6 +9,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use App\Factory\LoggerFactory;
+use Psr\Log\LoggerInterface;
 
 /**
  * JWT Claim middleware.
@@ -25,18 +27,29 @@ final class JwtClaimMiddleware implements MiddlewareInterface
      */
     private ResponseFactoryInterface $responseFactory;
 
+    private LoggerInterface $logger;
+    private LoggerInterface $errorLogger;
+
     /**
      * The constructor.
      *
      * @param JwtAuth $jwtAuth The JWT auth
      * @param ResponseFactoryInterface $responseFactory The response factory
+     * @param LoggerFactory $loggerFactory The response factory
      */
     public function __construct(
         JwtAuth $jwtAuth,
-        ResponseFactoryInterface $responseFactory
+        ResponseFactoryInterface $responseFactory,
+        LoggerFactory $loggerFactory
     ) {
         $this->jwtAuth = $jwtAuth;
         $this->responseFactory = $responseFactory;
+        $this->logger = $loggerFactory
+            ->addFileHandler("debug.log")
+            ->createLogger();
+        $this->errorLogger = $loggerFactory
+            ->addFileHandler("userError.log")
+            ->createLogger();
     }
 
     /**
@@ -60,6 +73,12 @@ final class JwtClaimMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
         $token = $this->jwtAuth->validateToken($credentials);
+        $debugOutput = [
+          "uri" => json_encode($request->getUri()->getPath()),
+          "header" => json_encode($request->getHeaders())
+        ];
+        $this->logger && $this->logger->info(json_encode($debugOutput));
+
         if ($token) {
             // Append valid token
             $request = $request->withAttribute("token", $token);
@@ -76,6 +95,12 @@ final class JwtClaimMiddleware implements MiddlewareInterface
             // Append the authorisation as request attribute
             $request = $request->withAttribute("authorisation", new AuthorisationData($token->claims()));
         } else {
+            $debugOutput = [
+                "status" => "JwtClaim Unauthorized",
+                "uri" => json_encode($request->getUri()->getPath()),
+                "header" => json_encode($request->getHeaders())
+            ];
+            $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
             return $this->responseFactory->createResponse()
                 ->withHeader("Content-Type", "application/json")
                 ->withStatus(401, "Unauthorized");

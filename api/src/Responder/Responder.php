@@ -7,6 +7,8 @@ use Psr\Http\Message\ResponseInterface;
 use Slim\Interfaces\RouteParserInterface;
 use Slim\Views\PhpRenderer;
 use function http_build_query;
+use App\Factory\LoggerFactory;
+use Psr\Log\LoggerInterface;
 
 /**
  * A generic responder.
@@ -19,21 +21,28 @@ final class Responder
 
     private ResponseFactoryInterface $responseFactory;
 
+    private LoggerInterface $errorLogger;
+
     /**
      * The constructor.
      *
      * @param PhpRenderer $phpRenderer The template engine
      * @param RouteParserInterface $routeParser The route parser
      * @param ResponseFactoryInterface $responseFactory The response factory
+     * @param LoggerFactory $loggerFactory The response factory
      */
     public function __construct(
         PhpRenderer $phpRenderer,
         RouteParserInterface $routeParser,
-        ResponseFactoryInterface $responseFactory
+        ResponseFactoryInterface $responseFactory,
+        LoggerFactory $loggerFactory
     ) {
         $this->phpRenderer = $phpRenderer;
         $this->responseFactory = $responseFactory;
         $this->routeParser = $routeParser;
+        $this->errorLogger = $loggerFactory
+            ->addFileHandler("userError.log")
+            ->createLogger();
     }
 
     /**
@@ -43,6 +52,7 @@ final class Responder
      */
     public function createResponse(): ResponseInterface
     {
+        $this->errorLogger && $this->errorLogger->info("createResponse");
         return $this->responseFactory->createResponse()->withHeader("Content-Type", "text/html; charset=utf-8");
     }
 

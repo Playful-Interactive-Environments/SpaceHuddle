@@ -2,6 +2,8 @@
 
 namespace App\Handler;
 
+use App\Factory\LoggerFactory;
+use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -15,8 +17,26 @@ use Throwable;
  */
 class GenericErrorHandling implements ErrorHandlerInterface
 {
-    use HandlerSetupTrait;
+    use HandlerSetupTrait {
+        HandlerSetupTrait::__construct as private setUp;
+    }
     use ErrorMessageTrait;
+
+    /**
+     * The constructor.
+     *
+     * @param Responder $responder The responder
+     * @param ResponseFactoryInterface $responseFactory The response factory
+     * @param LoggerFactory $loggerFactory The logger factory
+     */
+    public function __construct(
+        Responder $responder,
+        ResponseFactoryInterface $responseFactory,
+        LoggerFactory $loggerFactory
+    ) {
+        $this->setUp($responder, $responseFactory, $loggerFactory);
+        $this->initErrorLog($loggerFactory);
+    }
 
     /**
      * Invoke.

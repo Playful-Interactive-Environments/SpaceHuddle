@@ -19,8 +19,26 @@ use Throwable;
  */
 final class DefaultErrorHandler
 {
-    use HandlerSetupTrait;
+    use HandlerSetupTrait {
+        HandlerSetupTrait::__construct as private setUp;
+    }
     use ErrorMessageTrait;
+
+    /**
+     * The constructor.
+     *
+     * @param Responder $responder The responder
+     * @param ResponseFactoryInterface $responseFactory The response factory
+     * @param LoggerFactory $loggerFactory The logger factory
+     */
+    public function __construct(
+        Responder $responder,
+        ResponseFactoryInterface $responseFactory,
+        LoggerFactory $loggerFactory
+    ) {
+        $this->setUp($responder, $responseFactory, $loggerFactory);
+        $this->initErrorLog($loggerFactory);
+    }
 
     /**
      * Invoke.

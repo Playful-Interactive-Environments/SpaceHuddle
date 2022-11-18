@@ -41,6 +41,7 @@ class PDOErrorHandling implements ErrorHandlerInterface
         TransactionInterface $transaction
     ) {
         $this->setUp($responder, $responseFactory, $loggerFactory);
+        $this->initErrorLog($loggerFactory);
         $this->transaction = $transaction;
     }
 

@@ -14,6 +14,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\App;
 use Slim\Routing\RouteContext;
+use App\Factory\LoggerFactory;
+use Psr\Log\LoggerInterface;
 
 /**
  * Authorization middleware using Casbin.
@@ -40,22 +42,29 @@ final class AuthorizationMiddleware
      */
     private PermissionService $service;
 
+    private LoggerInterface $errorLogger;
+
     /**
      * @param App $app The Slim app.
      * @param Enforcer $enforcer Casbin Enforcer class.
      * @param ResponseFactoryInterface $responseFactory The response factory.
      * @param PermissionService $service The permission service.
+     * @param LoggerFactory $loggerFactory The response factory
      */
     public function __construct(
         App $app,
         Enforcer $enforcer,
         ResponseFactoryInterface $responseFactory,
-        PermissionService $service
+        PermissionService $service,
+        LoggerFactory $loggerFactory
     ) {
         $this->app = $app;
         $this->enforcer = $enforcer;
         $this->responseFactory = $responseFactory;
         $this->service = $service;
+        $this->errorLogger = $loggerFactory
+            ->addFileHandler("userError.log")
+            ->createLogger();
     }
 
     /**
@@ -107,6 +116,12 @@ final class AuthorizationMiddleware
                     $action
                 );
                 if (!$this->enforcer->enforce($authorisationType, $sessionRole, $uriPath, $action)) {
+                    $debugOutput = [
+                        "status" => "User has no rights for this entity.",
+                        "uri" => json_encode($request->getUri()->getPath()),
+                        "header" => json_encode($request->getHeaders())
+                    ];
+                    $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
                     return $this->responseFactory->createResponse()
                         ->withHeader("Content-Type", "application/json")
                         ->withStatus(
@@ -115,6 +130,12 @@ final class AuthorizationMiddleware
                         );
                 }
             } elseif (strtoupper($authorisation->type) != strtoupper(AuthorisationType::NONE)) {
+                $debugOutput = [
+                    "status" => "User has no rights for this service.",
+                    "uri" => json_encode($request->getUri()->getPath()),
+                    "header" => json_encode($request->getHeaders())
+                ];
+                $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
                 return $this->responseFactory->createResponse()
                     ->withHeader("Content-Type", "application/json")
                     ->withStatus(
@@ -122,6 +143,12 @@ final class AuthorizationMiddleware
                         "User has no rights for this service."
                     );
             } else {
+                $debugOutput = [
+                    "status" => "No valid access token specified.",
+                    "uri" => json_encode($request->getUri()->getPath()),
+                    "header" => json_encode($request->getHeaders())
+                ];
+                $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
                 return $this->responseFactory->createResponse()
                     ->withHeader("Content-Type", "application/json")
                     ->withStatus(
