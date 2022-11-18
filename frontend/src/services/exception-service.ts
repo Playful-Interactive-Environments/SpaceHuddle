@@ -95,8 +95,13 @@ export const apiErrorHandling = async (
   let errorResult: any = {};
   if (!response) {
     if (error.message == 'Network Error') {
+      const tzOffset = new Date().getTimezoneOffset() * 60000; //offset in milliseconds
+      const localISOTime = new Date(Date.now() - tzOffset)
+        .toISOString()
+        .slice(0, -1);
       errorHistory = errorHistory.filter((item) => item > Date.now() - 2000);
       console.log(
+        localISOTime,
         errorHistory.length,
         Date.now(),
         errorHistory,

@@ -45,7 +45,7 @@ final class JwtClaimMiddleware implements MiddlewareInterface
         $this->jwtAuth = $jwtAuth;
         $this->responseFactory = $responseFactory;
         $this->logger = $loggerFactory
-            ->addFileHandler("debug.log")
+            ->addFileHandler("jwtClaimDebug.log")
             ->createLogger();
         $this->errorLogger = $loggerFactory
             ->addFileHandler("userError.log")
@@ -67,17 +67,19 @@ final class JwtClaimMiddleware implements MiddlewareInterface
         $authorization = explode(" ", (string)$request->getHeaderLine("Authorization"));
         $type = $authorization[0] ?? "";
         $credentials = $authorization[1] ?? "";
+        $userAgent = explode(" ", (string)$request->getHeaderLine("User-Agent"));
+        $debugOutput = [
+            "uri" => json_encode($request->getUri()->getPath()),
+            "browser" => $userAgent[count($userAgent) - 1],
+            "header" => json_encode($request->getHeaders())
+        ];
+        $this->logger && $this->logger->info(json_encode($debugOutput));
         if ($type !== "Bearer") {
             // Append the authorisation as request attribute
             $request = $request->withAttribute("authorisation", new AuthorisationData());
             return $handler->handle($request);
         }
         $token = $this->jwtAuth->validateToken($credentials);
-        $debugOutput = [
-          "uri" => json_encode($request->getUri()->getPath()),
-          "header" => json_encode($request->getHeaders())
-        ];
-        $this->logger && $this->logger->info(json_encode($debugOutput));
 
         if ($token) {
             // Append valid token
