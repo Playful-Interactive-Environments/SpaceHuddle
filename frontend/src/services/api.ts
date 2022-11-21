@@ -106,6 +106,13 @@ export async function apiExecuteGetHandled<T = any>(
   try {
     return await apiExecuteGet(url, authHeaderType);
   } catch (error) {
+    if (error.message == 'Network Error') {
+      try {
+        return await apiExecuteGet(url, authHeaderType);
+      } catch (error) {
+        return empty as T;
+      }
+    }
     return empty as T;
   }
 }

@@ -103,8 +103,6 @@ export const apiErrorHandling = async (
       console.log(
         localISOTime,
         errorHistory.length,
-        Date.now(),
-        errorHistory,
         errorHistory.length > 0 ? errorHistory[0] - Date.now() : -1,
         error
       );
