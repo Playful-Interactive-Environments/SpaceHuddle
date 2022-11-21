@@ -35,7 +35,7 @@ trait ErrorMessageTrait
     private function getErrorMessage(Throwable $exception, int $statusCode, bool $displayErrorDetails): string
     {
         $reasonPhrase = $this->responseFactory->createResponse()
-            ->withHeader('Access-Control-Allow-Origin', '*')
+            //->withHeader('Access-Control-Allow-Origin', '*')
             ->withStatus($statusCode)->getReasonPhrase();
         $errorMessage = sprintf("%s %s", $statusCode, $reasonPhrase);
 
@@ -154,8 +154,8 @@ trait ErrorMessageTrait
         $this->logError($request, $exception, $logErrors);
 
         // Render response
-        $response = $this->responseFactory->createResponse()
-            ->withHeader('Access-Control-Allow-Origin', '*');
+        $response = $this->responseFactory->createResponse();
+            //->withHeader('Access-Control-Allow-Origin', '*');
         $response = $this->responder->withJson($response, [
             "error" => [
                 "message" => $errorMessage,

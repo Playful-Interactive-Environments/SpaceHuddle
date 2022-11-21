@@ -54,8 +54,8 @@ final class Responder
     {
         $this->errorLogger && $this->errorLogger->info("createResponse");
         return $this->responseFactory->createResponse()
-            ->withHeader("Content-Type", "text/html; charset=utf-8")
-            ->withHeader('Access-Control-Allow-Origin', '*');
+            //->withHeader('Access-Control-Allow-Origin', '*')
+            ->withHeader("Content-Type", "text/html; charset=utf-8");
     }
 
     /**

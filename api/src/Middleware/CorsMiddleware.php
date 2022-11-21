@@ -48,7 +48,7 @@ final class CorsMiddleware implements MiddlewareInterface
         $requestHeaders = $request->getHeaderLine('Access-Control-Request-Headers');
         $response = $handler->handle($request);
         $response = $response
-            ->withHeader('Access-Control-Allow-Origin', '*')
+            //->withHeader('Access-Control-Allow-Origin', '*')
             ->withHeader('Access-Control-Allow-Methods', implode(', ', $methods))
             ->withHeader('Access-Control-Allow-Headers', $requestHeaders ?: '*')
             ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')

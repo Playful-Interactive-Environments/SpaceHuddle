@@ -124,7 +124,7 @@ final class AuthorizationMiddleware
                     $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
                     return $this->responseFactory->createResponse()
                         ->withHeader("Content-Type", "application/json")
-                        ->withHeader('Access-Control-Allow-Origin', '*')
+                        //->withHeader('Access-Control-Allow-Origin', '*')
                         ->withStatus(
                             StatusCodeInterface::STATUS_FORBIDDEN,
                             "User has no rights for this entity."
@@ -139,7 +139,7 @@ final class AuthorizationMiddleware
                 $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
                 return $this->responseFactory->createResponse()
                     ->withHeader("Content-Type", "application/json")
-                    ->withHeader('Access-Control-Allow-Origin', '*')
+                    //->withHeader('Access-Control-Allow-Origin', '*')
                     ->withStatus(
                         StatusCodeInterface::STATUS_FORBIDDEN,
                         "User has no rights for this service."
@@ -153,7 +153,7 @@ final class AuthorizationMiddleware
                 $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
                 return $this->responseFactory->createResponse()
                     ->withHeader("Content-Type", "application/json")
-                    ->withHeader('Access-Control-Allow-Origin', '*')
+                    //->withHeader('Access-Control-Allow-Origin', '*')
                     ->withStatus(
                         StatusCodeInterface::STATUS_UNAUTHORIZED,
                         "No valid access token specified."
