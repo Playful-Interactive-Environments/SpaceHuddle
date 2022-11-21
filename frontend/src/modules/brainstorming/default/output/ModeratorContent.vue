@@ -78,7 +78,7 @@ import * as ideaService from '@/services/idea-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
-import { OrderGroupList, OrderGroup } from '@/types/api/OrderGroup';
+import { OrderGroup, OrderGroupList } from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { reloadCollapseContent } from '@/utils/collapse';
 import draggable from 'vuedraggable';
@@ -204,7 +204,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     const key = event.from.id;
     const ideas = this.orderGroupContent[key].filteredIdeas;
     ideas.forEach((idea) => {
-      ideaService.putIdea(idea);
+      ideaService.putIdea(idea, EndpointAuthorisationType.MODERATOR, false);
     });
   }
 }

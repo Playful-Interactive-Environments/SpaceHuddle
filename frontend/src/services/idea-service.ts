@@ -71,6 +71,7 @@ export const postIdea = async (
   authHeaderType = EndpointAuthorisationType.PARTICIPANT
 ): Promise<Idea> => {
   const image = data.image;
+  data = { ...data };
   delete data.image;
   const idea = await apiExecutePost<Idea>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.IDEA}`,
@@ -87,16 +88,22 @@ export const postIdea = async (
 
 export const putIdea = async (
   data: Partial<Idea>,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  effectImages = true
 ): Promise<Idea> => {
   const image = data.image;
+  data = { ...data };
   delete data.image;
-  const dbCalls: Promise<void>[] = [];
-  const dbItem = imageDB.find((db) => db.id === data.id);
-  if ((dbItem && dbItem.image !== image) || (!dbItem && image)) {
-    if (image)
-      dbCalls.push(putIdeaImage({ id: data.id, image: image }, authHeaderType));
-    else if (data.id) dbCalls.push(deleteIdeaImage(data.id, authHeaderType));
+  if (effectImages) {
+    const dbItem = imageDB.find((db) => db.id === data.id);
+    if ((dbItem && dbItem.image !== image) || (!dbItem && image)) {
+      const dbCalls: Promise<void>[] = [];
+      if (image)
+        dbCalls.push(
+          putIdeaImage({ id: data.id, image: image }, authHeaderType)
+        );
+      else if (data.id) dbCalls.push(deleteIdeaImage(data.id, authHeaderType));
+    }
   }
   const idea = await apiExecutePut<Idea>(
     `/${EndpointType.IDEA}`,

@@ -328,7 +328,7 @@ export default class IdeaCard extends Vue {
       case IdeaStates.THUMBS_UP:
         this.idea.state = command;
         ideaService
-          .putIdea(this.idea, this.authHeaderTyp)
+          .putIdea(this.idea, this.authHeaderTyp, false)
           .then((idea) => (this.idea.state = idea.state));
         break;
     }
