@@ -62,9 +62,9 @@ final class AuthorizationMiddleware
         $this->enforcer = $enforcer;
         $this->responseFactory = $responseFactory;
         $this->service = $service;
-        /*$this->errorLogger = $loggerFactory
+        $this->errorLogger = $loggerFactory
             ->addFileHandler("userError.log")
-            ->createLogger();*/
+            ->createLogger();
     }
 
     /**

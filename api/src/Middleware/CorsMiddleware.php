@@ -25,9 +25,9 @@ final class CorsMiddleware implements MiddlewareInterface
     public function __construct(
         LoggerFactory $loggerFactory
     ) {
-        /*$this->logger = $loggerFactory
+        $this->logger = $loggerFactory
             ->addFileHandler("coreDebug.log")
-            ->createLogger();*/
+            ->createLogger();
     }
 
     /**

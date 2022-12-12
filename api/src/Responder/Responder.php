@@ -40,9 +40,9 @@ final class Responder
         $this->phpRenderer = $phpRenderer;
         $this->responseFactory = $responseFactory;
         $this->routeParser = $routeParser;
-        /*$this->errorLogger = $loggerFactory
+        $this->errorLogger = $loggerFactory
             ->addFileHandler("userError.log")
-            ->createLogger();*/
+            ->createLogger();
     }
 
     /**

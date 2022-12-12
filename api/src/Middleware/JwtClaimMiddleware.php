@@ -44,12 +44,12 @@ final class JwtClaimMiddleware implements MiddlewareInterface
     ) {
         $this->jwtAuth = $jwtAuth;
         $this->responseFactory = $responseFactory;
-        /*$this->logger = $loggerFactory
+        $this->logger = $loggerFactory
             ->addFileHandler("jwtClaimDebug.log")
             ->createLogger();
         $this->errorLogger = $loggerFactory
             ->addFileHandler("userError.log")
-            ->createLogger();*/
+            ->createLogger();
     }
 
     /**

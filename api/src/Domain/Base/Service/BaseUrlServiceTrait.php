@@ -27,9 +27,9 @@ trait BaseUrlServiceTrait
         LoggerFactory $loggerFactory
     ): void {
         $this->transaction = $transaction;
-        /*$this->logger = $loggerFactory
+        $this->logger = $loggerFactory
             ->addFileHandler("service.log")
-            ->createLogger();*/
+            ->createLogger();
     }
 
     /**
