@@ -71,6 +71,6 @@ trait BaseManipulationServiceTrait
         }
 
         // Logging
-        $this->logger->info($message);
+        //$this->logger->info($message);
     }
 }

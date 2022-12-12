@@ -25,7 +25,7 @@ final class JwtAuthMiddleware implements MiddlewareInterface
      */
     private ResponseFactoryInterface $responseFactory;
 
-    private LoggerInterface $errorLogger;
+    //private LoggerInterface $errorLogger;
 
     /**
      * The constructor.
@@ -41,9 +41,9 @@ final class JwtAuthMiddleware implements MiddlewareInterface
     ) {
         $this->jwtAuth = $jwtAuth;
         $this->responseFactory = $responseFactory;
-        $this->errorLogger = $loggerFactory
+        /*$this->errorLogger = $loggerFactory
             ->addFileHandler("userError.log")
-            ->createLogger();
+            ->createLogger();*/
     }
 
     /**
@@ -65,12 +65,12 @@ final class JwtAuthMiddleware implements MiddlewareInterface
 
         $token = explode(" ", (string)$request->getHeaderLine("Authorization"))[1] ?? "";
         if (!$token || !$this->jwtAuth->validateToken($token)) {
-            $debugOutput = [
+            /*$debugOutput = [
                 "status" => "JwtAut Unauthorized",
                 "uri" => json_encode($request->getUri()->getPath()),
                 "header" => json_encode($request->getHeaders())
             ];
-            $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
+            $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));*/
             return $this->responseFactory->createResponse()
                 ->withHeader("Content-Type", "application/json")
                 //->withHeader('Access-Control-Allow-Origin', '*')

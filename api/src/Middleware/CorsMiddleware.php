@@ -15,7 +15,7 @@ use Slim\Routing\RouteContext;
  */
 final class CorsMiddleware implements MiddlewareInterface
 {
-    private LoggerInterface $logger;
+    //private LoggerInterface $logger;
 
     /**
      * The constructor.
@@ -25,9 +25,9 @@ final class CorsMiddleware implements MiddlewareInterface
     public function __construct(
         LoggerFactory $loggerFactory
     ) {
-        $this->logger = $loggerFactory
+        /*$this->logger = $loggerFactory
             ->addFileHandler("coreDebug.log")
-            ->createLogger();
+            ->createLogger();*/
     }
 
     /**
@@ -57,14 +57,14 @@ final class CorsMiddleware implements MiddlewareInterface
             ->withHeader('Access-Control-Allow-Credentials', 'true');
 
         $userAgent = explode(" ", (string)$request->getHeaderLine("User-Agent"));
-        $debugOutput = [
+        /*$debugOutput = [
             "uri" => json_encode($request->getUri()->getPath()),
             "browser" => $userAgent[count($userAgent) - 1],
             "type" => $request->getMethod(),
             "response" => json_encode($response->getHeaders()),
             "header" => json_encode($request->getHeaders())
         ];
-        $this->logger && $this->logger->info(json_encode($debugOutput));
+        $this->logger && $this->logger->info(json_encode($debugOutput));*/
         // Optional: Allow Ajax CORS requests with Authorization header
         return $response;
     }

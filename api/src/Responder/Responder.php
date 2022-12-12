@@ -21,7 +21,7 @@ final class Responder
 
     private ResponseFactoryInterface $responseFactory;
 
-    private LoggerInterface $errorLogger;
+    //private LoggerInterface $errorLogger;
 
     /**
      * The constructor.
@@ -40,9 +40,9 @@ final class Responder
         $this->phpRenderer = $phpRenderer;
         $this->responseFactory = $responseFactory;
         $this->routeParser = $routeParser;
-        $this->errorLogger = $loggerFactory
+        /*$this->errorLogger = $loggerFactory
             ->addFileHandler("userError.log")
-            ->createLogger();
+            ->createLogger();*/
     }
 
     /**
@@ -52,7 +52,7 @@ final class Responder
      */
     public function createResponse(): ResponseInterface
     {
-        $this->errorLogger && $this->errorLogger->info("createResponse");
+        //$this->errorLogger && $this->errorLogger->info("createResponse");
         return $this->responseFactory->createResponse()
             //->withHeader('Access-Control-Allow-Origin', '*')
             ->withHeader("Content-Type", "text/html; charset=utf-8");

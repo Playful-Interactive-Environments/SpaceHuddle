@@ -42,7 +42,7 @@ final class AuthorizationMiddleware
      */
     private PermissionService $service;
 
-    private LoggerInterface $errorLogger;
+    //private LoggerInterface $errorLogger;
 
     /**
      * @param App $app The Slim app.
@@ -62,9 +62,9 @@ final class AuthorizationMiddleware
         $this->enforcer = $enforcer;
         $this->responseFactory = $responseFactory;
         $this->service = $service;
-        $this->errorLogger = $loggerFactory
+        /*$this->errorLogger = $loggerFactory
             ->addFileHandler("userError.log")
-            ->createLogger();
+            ->createLogger();*/
     }
 
     /**
@@ -116,12 +116,12 @@ final class AuthorizationMiddleware
                     $action
                 );
                 if (!$this->enforcer->enforce($authorisationType, $sessionRole, $uriPath, $action)) {
-                    $debugOutput = [
+                    /*$debugOutput = [
                         "status" => "User has no rights for this entity.",
                         "uri" => json_encode($request->getUri()->getPath()),
                         "header" => json_encode($request->getHeaders())
                     ];
-                    $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
+                    $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));*/
                     return $this->responseFactory->createResponse()
                         ->withHeader("Content-Type", "application/json")
                         //->withHeader('Access-Control-Allow-Origin', '*')
@@ -131,12 +131,12 @@ final class AuthorizationMiddleware
                         );
                 }
             } elseif (strtoupper($authorisation->type) != strtoupper(AuthorisationType::NONE)) {
-                $debugOutput = [
+                /*$debugOutput = [
                     "status" => "User has no rights for this service.",
                     "uri" => json_encode($request->getUri()->getPath()),
                     "header" => json_encode($request->getHeaders())
                 ];
-                $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
+                $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));*/
                 return $this->responseFactory->createResponse()
                     ->withHeader("Content-Type", "application/json")
                     //->withHeader('Access-Control-Allow-Origin', '*')
@@ -145,12 +145,12 @@ final class AuthorizationMiddleware
                         "User has no rights for this service."
                     );
             } else {
-                $debugOutput = [
+                /*$debugOutput = [
                     "status" => "No valid access token specified.",
                     "uri" => json_encode($request->getUri()->getPath()),
                     "header" => json_encode($request->getHeaders())
                 ];
-                $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
+                $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));*/
                 return $this->responseFactory->createResponse()
                     ->withHeader("Content-Type", "application/json")
                     //->withHeader('Access-Control-Allow-Origin', '*')

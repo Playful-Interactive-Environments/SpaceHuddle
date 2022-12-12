@@ -16,7 +16,7 @@ trait HandlerSetupTrait
 
     private ResponseFactoryInterface $responseFactory;
 
-    private LoggerInterface $logger;
+    //private LoggerInterface $logger;
 
     /**
      * The constructor.
@@ -32,8 +32,8 @@ trait HandlerSetupTrait
     ) {
         $this->responder = $responder;
         $this->responseFactory = $responseFactory;
-        $this->logger = $loggerFactory
+        /*$this->logger = $loggerFactory
             ->addFileHandler("error.log")
-            ->createLogger();
+            ->createLogger();*/
     }
 }

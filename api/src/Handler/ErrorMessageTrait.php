@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
 
 trait ErrorMessageTrait
 {
-    private LoggerInterface $errorLogger;
+    //private LoggerInterface $errorLogger;
 
     /**
      * ErrorMessageTrait constructor.
@@ -18,9 +18,9 @@ trait ErrorMessageTrait
      */
     public function initErrorLog(LoggerFactory $loggerFactory)
     {
-        $this->errorLogger = $loggerFactory
+        /*$this->errorLogger = $loggerFactory
             ->addFileHandler("userError.log")
-            ->createLogger();
+            ->createLogger();*/
     }
 
     /**
@@ -46,11 +46,11 @@ trait ErrorMessageTrait
                 $this->getExceptionText($exception)
             );
         }
-        $debugOutput = [
+        /*$debugOutput = [
             "status" => $statusCode,
             "error" => $errorMessage
         ];
-        $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
+        $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));*/
 
         return $errorMessage;
     }
@@ -119,7 +119,7 @@ trait ErrorMessageTrait
         bool $logErrors
     ): void {
         // Log error
-        if ($logErrors) {
+        /*if ($logErrors) {
             $this->logger->error(
                 sprintf(
                     "Error: [%s] %s, Method: %s, Path: %s",
@@ -129,7 +129,7 @@ trait ErrorMessageTrait
                     $request->getUri()->getPath()
                 )
             );
-        }
+        }*/
     }
 
     /**

@@ -27,8 +27,8 @@ final class JwtClaimMiddleware implements MiddlewareInterface
      */
     private ResponseFactoryInterface $responseFactory;
 
-    private LoggerInterface $logger;
-    private LoggerInterface $errorLogger;
+    /*private LoggerInterface $logger;
+    private LoggerInterface $errorLogger;*/
 
     /**
      * The constructor.
@@ -44,12 +44,12 @@ final class JwtClaimMiddleware implements MiddlewareInterface
     ) {
         $this->jwtAuth = $jwtAuth;
         $this->responseFactory = $responseFactory;
-        $this->logger = $loggerFactory
+        /*$this->logger = $loggerFactory
             ->addFileHandler("jwtClaimDebug.log")
             ->createLogger();
         $this->errorLogger = $loggerFactory
             ->addFileHandler("userError.log")
-            ->createLogger();
+            ->createLogger();*/
     }
 
     /**
@@ -68,13 +68,13 @@ final class JwtClaimMiddleware implements MiddlewareInterface
         $type = $authorization[0] ?? "";
         $credentials = $authorization[1] ?? "";
         $userAgent = explode(" ", (string)$request->getHeaderLine("User-Agent"));
-        $debugOutput = [
+        /*$debugOutput = [
             "uri" => json_encode($request->getUri()->getPath()),
             "browser" => $userAgent[count($userAgent) - 1],
             "type" => $request->getMethod(),
             "header" => json_encode($request->getHeaders())
         ];
-        $this->logger && $this->logger->info(json_encode($debugOutput));
+        $this->logger && $this->logger->info(json_encode($debugOutput));*/
         if ($type !== "Bearer") {
             // Append the authorisation as request attribute
             $request = $request->withAttribute("authorisation", new AuthorisationData());
@@ -98,13 +98,13 @@ final class JwtClaimMiddleware implements MiddlewareInterface
             // Append the authorisation as request attribute
             $request = $request->withAttribute("authorisation", new AuthorisationData($token->claims()));
         } else {
-            $debugOutput = [
+            /*$debugOutput = [
                 "status" => "JwtClaim Unauthorized",
                 "uri" => json_encode($request->getUri()->getPath()),
                 "type" => $request->getMethod(),
                 "header" => json_encode($request->getHeaders())
             ];
-            $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));
+            $this->errorLogger && $this->errorLogger->info(json_encode($debugOutput));*/
             return $this->responseFactory->createResponse()
                 ->withHeader("Content-Type", "application/json")
                 //->withHeader('Access-Control-Allow-Origin', '*')
