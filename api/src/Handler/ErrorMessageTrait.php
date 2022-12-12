@@ -18,9 +18,9 @@ trait ErrorMessageTrait
      */
     public function initErrorLog(LoggerFactory $loggerFactory)
     {
-        $this->errorLogger = $loggerFactory
+        /*$this->errorLogger = $loggerFactory
             ->addFileHandler("userError.log")
-            ->createLogger();
+            ->createLogger();*/
     }
 
     /**

@@ -112,9 +112,9 @@ return [
         $settings = $container->get("settings")["error"];
         $app = $container->get(App::class);
 
-        $logger = $container->get(LoggerFactory::class)
+        /*$logger = $container->get(LoggerFactory::class)
             ->addFileHandler("error.log")
-            ->createLogger();
+            ->createLogger();*/
 
         $errorMiddleware = new ErrorMiddleware(
             $app->getCallableResolver(),
