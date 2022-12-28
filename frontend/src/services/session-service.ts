@@ -107,3 +107,15 @@ export const getParticipants = async (
     authHeaderType
   );
 };
+
+export const clone = async (
+  sessionId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Session> => {
+  return apiExecutePostHandled<Session>(
+    `/${EndpointType.SESSION}/${sessionId}/clone`,
+    null,
+    null,
+    authHeaderType
+  );
+};

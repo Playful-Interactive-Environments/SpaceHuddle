@@ -137,8 +137,8 @@ export const getAsyncModule = async (
               module.type == 'addOn'
                 ? 1
                 : !module.path.endsWith(defaultModuleName)
-                ? 2
-                : 3,
+                  ? 2
+                  : 3,
             module: module,
           });
         moduleIndex++;
@@ -239,14 +239,12 @@ export const hasModule = async (
   moduleName = defaultModuleName,
   includeFallback = true
 ): Promise<boolean> => {
-  let hasModule = false;
-  await getModuleConfig(
+  return getModuleConfig(
     componentType,
     taskType,
     moduleName,
     includeFallback
-  ).then((result) => (hasModule = !!result));
-  return hasModule;
+  ).then((result) => !!result);
 };
 
 export const getLocales = async (locale = 'en'): Promise<any> => {

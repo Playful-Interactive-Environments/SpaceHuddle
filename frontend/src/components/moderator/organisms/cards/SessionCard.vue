@@ -17,6 +17,9 @@
         <ModuleCount :session="session" />
         <div class="el-card__content">
           <SessionCode :code="session.connectionKey" button-type="primary" />
+          <el-button :onclick="cloneSession" type="info">
+            WIP: Clone activity
+          </el-button>
           <router-link :to="`/session/${session.id}`">
             <el-button class="fullwidth" type="info">
               {{ $t('moderator.organism.session.overview.select') }}
@@ -33,6 +36,7 @@ import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import { Session } from '@/types/api/Session';
 import { formatDate } from '@/utils/date';
+import { clone } from '@/services/session-service';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 
@@ -46,6 +50,13 @@ export default class SessionCard extends Vue {
   @Prop() session!: Session;
 
   formatDate = formatDate;
+
+  async cloneSession() {
+    if (confirm('Do you really want to clone this session?')) {
+      const clonedSession = await clone(this.session.id);
+      this.$router.push(`/session/${clonedSession.id}`);
+    }
+  }
 }
 </script>
 
