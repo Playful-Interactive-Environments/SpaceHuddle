@@ -304,7 +304,7 @@ class SessionRepository implements RepositoryInterface
                     "name" => $tasks[$j]->name,
                     "description" => $tasks[$j]->description,
                     "order" => $tasks[$j]->order,
-                    "parameter" => $tasks[$j]->parameter, // TODO
+                    "parameter" => $tasks[$j]->parameter ?? "{}",
                     "userId" => $userId,
                     "topicId" => $newTopic->id,
                     "state" => $tasks[$j]->state,
@@ -324,7 +324,7 @@ class SessionRepository implements RepositoryInterface
                         "order" => $module->order,
                         "state" => $module->state,
                         "syncPublicParticipant" => $module->syncPublicParticipant,
-                        "parameter" => $module->parameter,
+                        "parameter" => $module->parameter ?? null,
                         "userId" => $userId,
                     ];
                     $moduleRepository->insert((object)$newModule);
@@ -351,7 +351,7 @@ class SessionRepository implements RepositoryInterface
                         "taskId" => $newTask->id,
                         "keywords" => $ideas[$k]->keywords,
                         "description" => $ideas[$k]->description,
-                        "parameter" => $ideas[$k]->parameter,
+                        "parameter" => $ideas[$k]->parameter ?? null,
                         "link" => $ideas[$k]->link,
                         "order" => $ideas[$k]->order,
                         "state" => $ideas[$k]->state,
@@ -385,7 +385,7 @@ class SessionRepository implements RepositoryInterface
 
             // Correct all parameters of tasks
             foreach ($newTasks as $task) {
-                if (!is_string($task->parameter)) {
+                if (!is_string($task->parameter) || strlen($task->parameter) == 0) {
                     continue;
                 }
                 foreach ($newTasks as $oldId => $replaceTask) {
