@@ -1,11 +1,13 @@
 <template>
   <div v-if="showTime && totalTime">
     <el-progress
+      v-if="!isQuiz"
       :text-inside="true"
       :stroke-width="26"
       :percentage="percentage"
       :format="formatProcess"
     />
+    <p v-if="isQuiz" class="quiz-timer">{{ formatProcess() }}</p>
   </div>
 </template>
 
@@ -26,6 +28,7 @@ export default class TimerProgress extends Vue {
   @Prop({ default: TimerEntity.TASK }) entityName!: string;
   @Prop() entity!: any;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
+  @Prop() isQuiz = false;
   authHeaderTyp!: EndpointAuthorisationType;
   timeLeft: number | null = 0;
   totalTime: number | null = null;

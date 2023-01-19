@@ -198,3 +198,94 @@ form {
 .inactive {
   color: var(--color-gray-dark);
 }
+
+
+/* ANIMATIONS */
+
+@keyframes fadeRight {
+  0%{
+    transform: translateX(-3rem);
+    opacity: 0;
+  }
+  100%{
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeLeft {
+  0%{
+    transform: translateX(3rem);
+    opacity: 0;
+  }
+  100%{
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeDown {
+  0%{
+    transform: translateY(-3rem);
+    opacity: 0;
+  }
+  100%{
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeUp {
+  0%{
+    transform: translateY(3rem);
+    opacity: 0;
+  }
+  100%{
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.fade-right{
+  opacity: 0;
+  animation: fadeRight 0.5s forwards ease;
+}
+
+.fade-left{
+  opacity: 0;
+  animation: fadeLeft 0.5s forwards ease;
+}
+
+.fade-up{
+  opacity: 0;
+  animation: fadeUp 0.5s forwards ease;
+}
+
+.fade-down{
+  opacity: 0;
+  animation: fadeDown 0.5s forwards ease;
+}
+
+.anim-delay-sm{
+  animation-delay: 500ms;
+}
+
+.anim-delay-md{
+  animation-delay: 1000ms;
+}
+
+.anim-delay-lg{
+  animation-delay: 1500ms;
+}
+
+.anim-delay-xl{
+  animation-delay: 2000ms;
+}
+
+.anim-delay-2xl{
+  animation-delay: 3000ms;
+}
+
+.anim-slow{
+  animation-duration: 1s;
+}

@@ -412,6 +412,7 @@ class SessionRepository implements RepositoryInterface
         if (is_object($result)) {
             $this->getDetails($result);
         }
+
         return $result;
     }
 

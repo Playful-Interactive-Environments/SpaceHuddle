@@ -38,7 +38,7 @@
     :key="componentLoadIndex"
     v-else-if="isModerator"
   >
-    <el-header class="public-screen__header star-header">
+    <el-header class="public-screen__header" :class="[task?.taskType === 'INFORMATION' ? 'black-header' : 'star-header']">
       <PublicHeader class="public-header"> </PublicHeader>
       <TaskTimeline
         v-if="topicId"
@@ -71,35 +71,48 @@
       <el-header>
         <TimerProgress
           class="timer-process"
-          v-if="task !== null"
+          v-if="task !== null && taskType !== TaskType.INFORMATION"
           :entity="task"
         />
       </el-header>
     </el-container>
-    <el-container class="public-screen__container">
-      <el-main class="public-screen__main">
+    <el-container :class="[taskType === TaskType.INFORMATION ? 'public-screen__container__stars' : 'public-screen__container']">
+      <el-main :class="[taskType === TaskType.INFORMATION ? 'public-screen__main__stars' : 'public-screen__main']">
         <div ref="scrollContent"></div>
         <el-scrollbar
           native
           :height="`calc(var(--app-height) - ${topContentPosition}px - 0.1rem)`"
         >
-          <TaskInfo
-            v-if="task"
-            :taskId="taskId"
-            :shortenDescription="false"
-            :showType="false"
-            :authHeaderTyp="authHeaderTyp"
-            class="header-info"
-          />
-          <!--<h3 v-if="task" class="heading--regular twoLineText">
-            {{ task.name }}
-          </h3>-->
-          <PublicScreenComponent
-            v-if="task"
-            :task-id="taskId"
-            :key="componentLoadIndex"
-            :authHeaderTyp="authHeaderTyp"
-          />
+          <div :class="{'quiz-layout': taskType === TaskType.INFORMATION}">
+            <TaskInfo
+              v-if="task"
+              :taskId="taskId"
+              :shortenDescription="false"
+              :showType="false"
+              :authHeaderTyp="authHeaderTyp"
+              class="header-info fade-down anim-delay-md anim-slow"
+            />
+            <div class="timer fade-right anim-delay-xl anim-slow" v-if="taskType === TaskType.INFORMATION">
+              <p v-if="task?.remainingTime && task.remainingTime > 0">Answer on your device!</p>
+              <p v-else>Time's up!</p>
+              <div v-if="task?.remainingTime && task.remainingTime > 0" class="timer__container">
+                <div class="timer__container__icon">
+                  <img src="@/assets/icons/svg/clock.svg" alt="timer" >
+                </div>
+                <TimerProgress class="timer__container__text" :entity="task" :isQuiz="true"/>
+              </div>
+            </div>
+            <p class="participants fade-up anim-delay-2xl anim-slow">{{ task?.participantCount ?? 5 }} participants</p>
+            <!--<h3 v-if="task" class="heading--regular twoLineText">
+              {{ task.name }}
+            </h3>-->
+            <!-- <PublicScreenComponent
+              v-if="task"
+              :task-id="taskId"
+              :key="componentLoadIndex"
+              :authHeaderTyp="authHeaderTyp"
+            /> -->
+          </div>
         </el-scrollbar>
       </el-main>
     </el-container>
@@ -314,6 +327,7 @@ export default class PublicScreen extends Vue {
             }
           }
           this.task = task;
+          console.log(task)
         }
       });
   }
@@ -348,6 +362,8 @@ h3 {
 
 .header-info {
   margin-bottom: 1rem;
+  color: white;
+  text-align: center;
 }
 
 .module-info::v-deep {
@@ -395,6 +411,27 @@ h3 {
       padding: 0 1rem calc(1rem + var(--corner-radius)) 1rem;
     }
 
+    &.black-header {
+      background: black;
+      mask-image: radial-gradient(
+          circle farthest-corner at 100% 100%,
+          transparent 69%,
+          white 70%
+        ),
+        radial-gradient(
+          circle farthest-corner at 0% 100%,
+          transparent 69%,
+          white 70%
+        ),
+        linear-gradient(white, white);
+      mask-size: var(--corner-radius) var(--corner-radius),
+        var(--corner-radius) var(--corner-radius),
+        100% calc(100% - var(--corner-radius) + 1px);
+      mask-position: bottom left, bottom right, top left;
+      mask-repeat: no-repeat;
+      padding: 0 1rem calc(1rem + var(--corner-radius)) 1rem;
+    }
+
     .el-main {
       overflow: unset;
     }
@@ -411,6 +448,10 @@ h3 {
     margin-top: 1rem;
     padding: 0;
     height: 100%;
+
+    &__stars {
+      margin-top: 0;
+    }
   }
 
   &__timer {
@@ -436,6 +477,23 @@ h3 {
       }
       .el-scrollbar__view {
         padding-top: 2rem;
+      }
+    }
+
+    &__stars{
+      background-color: var(--color-darkblue);
+      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3)), url('~@/assets/illustrations/quiz-background.jpg');
+      background-position: center;
+      background-size: cover;
+      color: white;
+
+      .el-scrollbar::v-deep {
+        .el-scrollbar__wrap {
+          padding: 0 var(--side-padding);
+        }
+        .el-scrollbar__view {
+          padding-top: 2rem;
+        }
       }
     }
   }
@@ -588,5 +646,59 @@ h3 {
 
 .process-timeline-container {
   max-width: calc(var(--app-width) - 2rem);
+}
+
+.quiz-layout{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding-bottom: 2rem;
+}
+
+.timer{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+
+  p{
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  &__container{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    &__icon{
+      background-color: white;
+      width: fit-content;
+      height: fit-content;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      padding: 0.8rem;
+
+      img{
+        height: 1.8rem;
+      }
+    }
+
+    &__text{
+      font-weight: bold;
+      font-style: italic;
+      font-size: 2.5rem;
+      width: 7rem;
+    }
+  }
+}
+
+.participants{
+  font-weight: 500;
+  color: rgba(255,255,255,0.7);
 }
 </style>
