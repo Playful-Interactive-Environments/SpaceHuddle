@@ -243,7 +243,9 @@
         "overview": {
           "header": "Your Sessions",
           "select": "Go to session",
-          "add": "New Session"
+          "add": "New Session",
+          "clone": "Clone Session",
+          "clonePrompt": "Do you really want to clone this session?"
         }
       },
       "processTimeline": {
@@ -456,7 +458,7 @@
     },
     "questionType": {
       "multiplechoice": "Multiple Choice",
-      "singlechoice":  "Single Choice",
+      "singlechoice": "Single Choice",
       "rating": "Rating",
       "slider": "Slider",
       "number": "Number",
@@ -507,7 +509,7 @@
       "showNullPublicScreen": "set the public screen slider to this position to display the connection key on the public screen",
       "publicScreenForOtherTopic": "The Public Screen is assigned to a different topic. By clicking on this switch, the connection key view can be activated on the public screen."
     },
-    "taskSettings":  {
+    "taskSettings": {
       "input": "Tasks build on each other and serve as input for further tasks.",
       "inputSource": "Define the sources that serve as the basis for this task.",
       "inputMaxCount": "How many records of this source do you want to use as a basis? If no input is made, all records of the source are used.",
