@@ -1,8 +1,7 @@
 <template>
-  <h1 v-if="!publicQuestion" class="fade-down anim-delay-md anim-slow">{{ task?.name }}</h1>
-
   <div class="question-container fade-down anim-slow">
     <h1 v-if="publicQuestion">{{ publicQuestion.question.order + 1 }}. {{ publicQuestion.question.keywords }}</h1>
+    <h1 v-else>{{ task?.name }}</h1>
     <div v-if="publicQuestion" class="countdown" v-bind:key="publicQuestion.question.id"></div>
   </div>
 
@@ -44,7 +43,7 @@
       <slot name="answers"></slot>
     </el-space>
   </div>
-  <div  v-if="showStatistics && publicQuestion" class="fade-right anim-slow">
+  <div v-if="showStatistics && publicQuestion" class="fade-right anim-slow" v-bind:key="publicQuestion.question.id">
     <!-- <div
       v-if="
         publicQuestion &&
@@ -630,12 +629,12 @@ h1{
   }
 
   .correct{
-    animation: rightAnswer 4s 5s ease forwards;
+    animation: rightAnswer 4s 5.5s ease forwards;
   }
 
   .wrong{
     opacity: 1;
-    animation: wrongAnswer 4s 5s ease forwards;
+    animation: wrongAnswer 4s 5.5s ease forwards;
   }
 }
 
