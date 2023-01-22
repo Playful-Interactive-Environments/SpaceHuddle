@@ -289,3 +289,21 @@ form {
 .anim-slow{
   animation-duration: 1s;
 }
+
+@keyframes spaceShip {
+  0%{
+    transform: translateY(0%);
+  }
+  50%{
+    transform: translateY(30%);
+  }
+  100%{
+    transform: translateY(0%);
+  }
+}
+
+.anim-hover{
+  opacity: 0;
+  animation: fadeUp 1s forwards, spaceShip 3s infinite ease-in-out;
+  animation-delay: 3000ms;
+}

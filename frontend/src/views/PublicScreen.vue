@@ -85,33 +85,23 @@
         >
           <div :class="{'quiz-layout': taskType === TaskType.INFORMATION}">
             <TaskInfo
-              v-if="task"
+              v-if="task && taskType !== TaskType.INFORMATION"
               :taskId="taskId"
               :shortenDescription="false"
               :showType="false"
               :authHeaderTyp="authHeaderTyp"
               class="header-info fade-down anim-delay-md anim-slow"
             />
-            <div class="timer fade-right anim-delay-xl anim-slow" v-if="taskType === TaskType.INFORMATION">
-              <p v-if="task?.remainingTime && task.remainingTime > 0">Answer on your device!</p>
-              <p v-else>Time's up!</p>
-              <div v-if="task?.remainingTime && task.remainingTime > 0" class="timer__container">
-                <div class="timer__container__icon">
-                  <img src="@/assets/icons/svg/clock.svg" alt="timer" >
-                </div>
-                <TimerProgress class="timer__container__text" :entity="task" :isQuiz="true"/>
-              </div>
-            </div>
-            <p class="participants fade-up anim-delay-2xl anim-slow">{{ task?.participantCount ?? 5 }} participants</p>
             <!--<h3 v-if="task" class="heading--regular twoLineText">
               {{ task.name }}
             </h3>-->
-            <!-- <PublicScreenComponent
+            <PublicScreenComponent
               v-if="task"
+              :task="task"
               :task-id="taskId"
               :key="componentLoadIndex"
               :authHeaderTyp="authHeaderTyp"
-            /> -->
+            />
           </div>
         </el-scrollbar>
       </el-main>
@@ -655,50 +645,7 @@ h3 {
   justify-content: space-between;
   height: 100%;
   padding-bottom: 2rem;
+  position: relative;
 }
 
-.timer{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-
-  p{
-    font-size: 1.3rem;
-    font-weight: 600;
-  }
-
-  &__container{
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-
-    &__icon{
-      background-color: white;
-      width: fit-content;
-      height: fit-content;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 50%;
-      padding: 0.8rem;
-
-      img{
-        height: 1.8rem;
-      }
-    }
-
-    &__text{
-      font-weight: bold;
-      font-style: italic;
-      font-size: 2.5rem;
-      width: 7rem;
-    }
-  }
-}
-
-.participants{
-  font-weight: 500;
-  color: rgba(255,255,255,0.7);
-}
 </style>

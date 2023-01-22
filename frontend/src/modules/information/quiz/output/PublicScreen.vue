@@ -21,6 +21,19 @@
       </el-space>
     </template>
   </PublicBase>
+
+  <div class="spaceship test1 anim-hover">
+    <img src="@/assets/icons/svg/spaceship.svg" alt="space ship" >
+    <p>Philip</p>
+  </div>
+  <div class="spaceship test2 anim-hover">
+    <img src="@/assets/icons/svg/spaceship.svg" alt="space ship" >
+    <p>Jane</p>
+  </div>
+  <div class="spaceship test3 anim-hover">
+    <img src="@/assets/icons/svg/spaceship.svg" alt="space ship" >
+    <p>Chris</p>
+  </div>
 </template>
 
 <script lang="ts">
@@ -30,6 +43,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import PublicBase, {
   PublicAnswerData,
 } from '@/modules/information/quiz/organisms/PublicBase.vue';
+import { Task } from '@/types/api/Task';
 
 @Options({
   components: {
@@ -40,6 +54,7 @@ import PublicBase, {
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop() readonly task: Task | null = null;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   publicAnswerList: PublicAnswerData[] = [];
@@ -81,5 +96,42 @@ export default class PublicScreen extends Vue {
 
 .wrong {
   --el-button-border-color: var(--color-red);
+}
+
+.spaceship{
+  position: absolute;
+
+  img{
+    width: 5rem;
+    height: 5rem;
+
+    position: absolute;
+    bottom: 1.7rem;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  p{
+    color: black;
+    font-weight: 600;
+    background-color: white;
+    padding: 0.5rem;
+    border-radius: 5px;
+  }
+}
+
+.test1{
+  left: 5rem;
+  top: 50%;
+}
+
+.test2{
+  right: 12rem;
+  top: 20%;
+}
+
+.test3{
+  right: 3rem;
+  top: 70%;
 }
 </style>

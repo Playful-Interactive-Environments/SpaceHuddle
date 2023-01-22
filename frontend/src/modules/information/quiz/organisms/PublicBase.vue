@@ -1,14 +1,21 @@
 <template>
-  <el-steps
-    v-if="publicQuestion"
-    :active="publicQuestionIndex"
-    finish-status="success"
-  >
-    <el-step
-      v-for="question in questions"
-      :key="question.question.id"
-    ></el-step>
-  </el-steps>
+  <h1 v-if="!publicQuestion" class="fade-down anim-delay-md anim-slow">{{ task?.name }}</h1>
+
+  <div class="question-container fade-down anim-slow">
+    <h1 v-if="publicQuestion">{{ publicQuestion.question.order + 1 }}. {{ publicQuestion.question.keywords }}</h1>
+    <div v-if="publicQuestion" class="countdown" v-bind:key="publicQuestion.question.id"></div>
+  </div>
+
+  <div v-if="!publicQuestion" class="timer fade-right anim-delay-xl anim-slow">
+    <p v-if="task?.remainingTime && task.remainingTime > 0">Answer on your device!</p>
+    <p v-else>Time's up!<br><span>Waiting for the moderator</span></p>
+    <div v-if="task?.remainingTime && task.remainingTime > 0" class="timer__container">
+      <div class="timer__container__icon">
+        <img src="@/assets/icons/svg/clock.svg" alt="timer" >
+      </div>
+      <TimerProgress class="timer__container__text" :entity="task" :isQuiz="true"/>
+    </div>
+  </div>
   <div v-if="showQuestion" class="fill">
     <el-space
       direction="vertical"
@@ -37,41 +44,29 @@
       <slot name="answers"></slot>
     </el-space>
   </div>
-  <div v-if="(showExplanation || showStatistics) && publicQuestion">
-    <span class="explanation result">
-      {{ publicQuestion.question.order + 1 }}.
-      {{ publicQuestion.question.keywords }}
-    </span>
+  <div  v-if="showStatistics && publicQuestion" class="fade-right anim-slow">
+    <!-- <div
+      v-if="
+        publicQuestion &&
+        publicQuestion.question &&
+        (showExplanation || showStatistics)
+      "
+      class="explanation"
+    >
+      {{ publicQuestion.question.description }}
+    </div> -->
+    <div class="answers">
+      <p v-for="answer in publicQuestion.answers" v-bind:key="answer.id" 
+      :class="{
+          correct: answer.parameter.isCorrect,
+          wrong: !answer.parameter.isCorrect,
+      }">
+        {{ answer.keywords }}
+      </p>
+    </div>
   </div>
-  <div
-    v-if="
-      publicQuestion &&
-      publicQuestion.question &&
-      (showExplanation || showStatistics)
-    "
-    class="explanation"
-  >
-    {{ publicQuestion.question.description }}
-  </div>
-  <div v-if="showStatistics && publicQuestion">
-    <QuizResult
-      :voteResult="voteResult"
-      :change="false"
-      questionnaireType="questionType"
-      :questionType="activeQuestionType"
-      :update="true"
-    />
-  </div>
-  <div v-if="showStatistics && !publicQuestion">
-    <QuizResult
-      :voteResult="voteResult"
-      resultColumn="countParticipant"
-      :change="false"
-      questionnaireType="QuestionType.SURVEY"
-      :questionType="activeQuestionType"
-      :update="true"
-    />
-  </div>
+  <p class="participants fade-up anim-delay-2xl anim-slow">
+    {{ task?.participantCount }} participants</p>
 </template>
 
 <script lang="ts">
@@ -540,7 +535,7 @@ export default class PublicBase extends Vue {
 
 .explanation {
   width: 100%;
-  text-align: justify;
+  text-align: center;
   white-space: pre-line;
 }
 
@@ -556,5 +551,135 @@ export default class PublicBase extends Vue {
 .question-image {
   max-height: 30vh;
   object-fit: contain;
+}
+
+h1{
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.timer{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+
+  p{
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: center;
+
+    span{
+      font-size: 1rem;
+      opacity: 0.7;
+      font-weight: normal;
+    }
+  }
+
+  &__container{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    &__icon{
+      background-color: white;
+      width: fit-content;
+      height: fit-content;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      padding: 0.8rem;
+
+      img{
+        height: 1.8rem;
+      }
+    }
+
+    &__text{
+      font-weight: bold;
+      font-style: italic;
+      font-size: 2.5rem;
+      width: 7rem;
+    }
+  }
+}
+
+.participants{
+  font-weight: 500;
+  color: rgba(255,255,255,0.7);
+}
+
+.answers{
+  max-width: 30vw;
+  display: flex;
+  justify-content: space-evenly;
+  gap: 1vw;
+  flex-flow: wrap;
+  
+  p{
+    width: 14vw;
+    min-height: 5rem;
+    font-size: 1.2rem;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .correct{
+    animation: rightAnswer 4s 5s ease forwards;
+  }
+
+  .wrong{
+    opacity: 1;
+    animation: wrongAnswer 4s 5s ease forwards;
+  }
+}
+
+@keyframes rightAnswer {
+  0%{
+    border-color: rgba(255,255,255,0.1);
+    background-color: rgba(0,0,0,0.5);
+  }
+  100%{
+    border-color: rgb(0, 222, 0);
+    background-color: rgba(1, 94, 1, 0.393);
+  }
+}
+
+@keyframes wrongAnswer {
+  0%{
+    opacity: 1;
+  }
+  100%{
+    opacity: 0.6;
+  }
+}
+
+.question-container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .countdown{
+    width: 30vw;
+    height: 0.3rem;
+    background-color: #01cf9e;
+    margin-top: 1rem;
+    border-radius: 10px;
+    animation: countdown 5s 0.5s forwards ease-in;
+  }
+}
+
+@keyframes countdown {
+  0%{
+    width: 30vw;
+  }
+  100%{
+    width: 0;
+  }
 }
 </style>
