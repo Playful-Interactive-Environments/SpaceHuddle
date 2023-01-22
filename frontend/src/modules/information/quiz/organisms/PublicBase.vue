@@ -97,6 +97,7 @@ import {
   moduleNameValid,
   QuestionnaireType,
 } from '@/modules/information/quiz/types/QuestionnaireType';
+import TimerProgress from '@/components/shared/atoms/TimerProgress.vue';
 
 export interface PublicAnswerData {
   answer: Hierarchy;
@@ -109,6 +110,7 @@ export interface PublicAnswerData {
   components: {
     Vue3ChartJs,
     QuizResult,
+    TimerProgress
   },
   emits: ['changePublicAnswers', 'changePublicQuestion', 'changeQuizState'],
 })
