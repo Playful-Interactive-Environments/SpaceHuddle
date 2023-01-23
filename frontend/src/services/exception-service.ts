@@ -4,6 +4,9 @@ import app from '@/main';
 import HttpStatusCode from '@/types/enum/HttpStatusCode ';
 import { removeAccessToken, isUser } from '@/services/auth-service';
 import { ElMessage } from 'element-plus';
+import i18n from '../i18n';
+
+const { t } = i18n.global;
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -23,8 +26,9 @@ export const getSingleErrorKey = (error: AxiosError): string => {
 
 export const getSingleTranslatedErrorMessage = (error: AxiosError): string => {
   const errorKey = getSingleErrorKey(error);
-  if (errorKey.length > 0)
-    return app.config.globalProperties.$i18n.translateWithFallback(errorKey);
+  if (errorKey.length > 0) {
+    t(errorKey);
+  }
   return '';
 };
 
@@ -162,7 +166,7 @@ export const apiErrorHandling = async (
 const reportErrors = (errors: string[]): void => {
   errors.forEach((error) => {
     ElMessage({
-      message: app.config.globalProperties.$i18n.translateWithFallback(error),
+      message: t(error),
       type: 'error',
       center: true,
       showClose: true,

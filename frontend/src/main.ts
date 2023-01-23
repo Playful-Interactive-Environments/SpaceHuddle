@@ -42,12 +42,9 @@ app.use(VueCookies as any, {
   sameSite: 'Strict', // "Lax"
 });
 app.config.globalProperties.eventBus = eventBus;
-app.config.globalProperties.$t = i18n.t2;
 app.use(ElementPlus);
 app.use(VueObserveVisibility);
 app.mount('#app');
-
-(router as any).i18n = i18n;
 
 setViewportVariables();
 

@@ -49,7 +49,6 @@ import { clone } from '@/services/session-service';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import { ElMessageBox } from 'element-plus';
-import app from '@/main';
 
 @Options({
   components: {
@@ -75,18 +74,13 @@ export default class SessionCard extends Vue {
   async cloneSession(): Promise<void> {
     try {
       await ElMessageBox.confirm(
-        app.config.globalProperties.$i18n.translateWithFallback(
-          'moderator.organism.session.overview.clonePrompt'
-        ),
-        app.config.globalProperties.$i18n.translateWithFallback(
-          'moderator.organism.session.overview.clone'
-        ),
+        this.$t('moderator.organism.session.overview.clonePrompt'),
+        this.$t('moderator.organism.session.overview.clone'),
         {
           boxType: 'confirm',
-          confirmButtonText:
-            app.config.globalProperties.$i18n.translateWithFallback(
-              'moderator.organism.session.overview.clone'
-            ),
+          confirmButtonText: this.$t(
+            'moderator.organism.session.overview.clone'
+          ),
         }
       );
       const clonedSession = await clone(this.session.id);

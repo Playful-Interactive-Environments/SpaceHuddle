@@ -378,10 +378,7 @@ export default class Participant extends Vue {
           this.reset();
           setTimeout(this.setNewPlanet, 500);
           ElMessage({
-            message: (this as any).$i18n.translateWithFallback(
-              'info.postIdea',
-              [queryResult.keywords]
-            ),
+            message: this.$t('info.postIdea', [queryResult.keywords]),
             type: 'success',
             center: true,
             showClose: true,
