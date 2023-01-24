@@ -32,13 +32,11 @@
         <ModuleCount :session="session" />
         <div class="el-card__content">
           <SessionCode :code="session.connectionKey" button-type="primary" />
-          <div class="session-link-container">
-            <router-link :to="`/session/${session.id}`" class="flex-grow">
-              <el-button class="fullwidth" type="info">
-                {{ $t('moderator.organism.session.overview.select') }}
-              </el-button>
-            </router-link>
-          </div>
+          <router-link :to="`/session/${session.id}`" class="flex-grow">
+            <el-button class="fullwidth" type="info">
+              {{ $t('moderator.organism.session.overview.select') }}
+            </el-button>
+          </router-link>
         </div>
       </el-footer>
     </el-container>
@@ -154,13 +152,6 @@ export default class SessionCard extends Vue {
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
-}
-
-.session-link-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 5px;
 }
 
 .flex-grow {
