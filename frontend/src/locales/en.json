@@ -52,6 +52,9 @@
         "post": {
           "username or password": {
             "NotExist": "The username or password is incorrect."
+          },
+          "username": {
+            "NotConfirmed": "Email was not confirmed."
           }
         }
       },

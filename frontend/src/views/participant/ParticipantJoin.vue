@@ -141,23 +141,23 @@ export default class ParticipantJoin extends Vue {
     }
 
     if (connectionKey.includes('.')) {
-      participantService.reconnect(connectionKey).then(
-        (queryResult) => {
+      participantService
+        .reconnect(connectionKey)
+        .then((queryResult) => {
           this.handleConnectionResult(queryResult);
-        },
-        (error) => {
+        })
+        .catch((error) => {
           this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
-        }
-      );
+        });
     } else {
-      participantService.connect(connectionKey).then(
-        (queryResult) => {
+      participantService
+        .connect(connectionKey)
+        .then((queryResult) => {
           this.handleConnectionResult(queryResult);
-        },
-        (error) => {
+        })
+        .catch((error) => {
           this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
-        }
-      );
+        });
     }
   }
 
