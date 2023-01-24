@@ -6,16 +6,19 @@
       </div>
       <div class="participant-header__infobox">
         <div>
-          <span class="participant-header__info twoLineText">
+          <span class="participant-header__info threeLineText">
             {{ sessionName }}
           </span>
           <span
-            class="participant-header__info__description twoLineText"
+            class="participant-header__info__description threeLineText"
             v-if="sessionDescription"
           >
             {{ sessionDescription }}
           </span>
         </div>
+        <span class="participant-header__info threeLineText">
+            {{ sessionName }}
+        </span>
         <div class="image">
           <img
             src="@/assets/illustrations/planets/brainstorming.png"
@@ -118,6 +121,7 @@ export default class ParticipantOverview extends Vue {
   sessionName = '';
   sessionDescription = '';
   sessionId = '';
+  nickname = '';
   readonly intervalTime = 10000;
   interval!: any;
   openTabs: string[] = [];

@@ -14,6 +14,7 @@ export interface Participant {
     browserKey: string;
     state: ConnectState;
     avatar: Avatar;
+    nickname: string;
   };
   token: {
     message: string;
@@ -29,4 +30,5 @@ export interface ParticipantInfo {
   state: ConnectState;
   avatar: Avatar;
   ideaCount: number;
+  nickname: string;
 }

@@ -5,12 +5,14 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Participant } from '@/types/api/Participant';
 
 export const connect = async (
-  sessionKey: string
+  sessionKey: string,
+  nickname: string
 ): Promise<Participant | Partial<Participant>> => {
   return await apiExecutePost<Participant>(
     `/${EndpointType.PARTICIPANT_CONNECT}/`,
     {
-      sessionKey,
+      sessionKey: sessionKey,
+      nickname: nickname,
     },
     EndpointAuthorisationType.UNAUTHORISED
   );

@@ -38,6 +38,13 @@ class ParticipantData
     public ?AvatarData $avatar;
 
     /**
+     * Nickname provided by the participant
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $nickname;
+
+    /**
      * Creates a new Participant.
      * @param array $data Participant data.
      */
@@ -48,5 +55,6 @@ class ParticipantData
         $this->browserKey = $reader->findString("browser_key");
         $this->state = strtoupper($reader->findString("state"));
         $this->avatar = new AvatarData($data);
+        $this->nickname = $reader->findString("nickname");
     }
 }

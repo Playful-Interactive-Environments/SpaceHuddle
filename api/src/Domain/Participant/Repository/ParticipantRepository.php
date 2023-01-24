@@ -51,6 +51,7 @@ class ParticipantRepository implements RepositoryInterface
      */
     public function connect(object $data): ?ParticipantData
     {
+        echo json_encode($data);
         $query = $this->queryFactory->newSelect("session");
         $query->select(["id"])
             ->andWhere([
@@ -72,8 +73,10 @@ class ParticipantRepository implements RepositoryInterface
                 $data->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
                 $data->symbol = AvatarSymbol::getRandomValue();
                 $data->state = ParticipantState::ACTIVE;
+                
 
                 $participant = $this->insert($data);
+                $participant->nickname = $data->nickname;
             }
             return $participant;
         }
@@ -290,7 +293,8 @@ class ParticipantRepository implements RepositoryInterface
             "state" => $data->state ?? null,
             "color" => $data->color ?? null,
             "symbol" => $data->symbol ?? null,
-            "ip_hash" => $data->ipHash ?? null
+            "ip_hash" => $data->ipHash ?? null,
+            "nickname" => $data->nickname ?? null
         ];
     }
 }
