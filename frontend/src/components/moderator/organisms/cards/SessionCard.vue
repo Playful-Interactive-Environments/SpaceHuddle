@@ -40,6 +40,11 @@
       </el-footer>
     </el-container>
   </el-card>
+  <SessionSettings
+    v-model:show-modal="showSettings"
+    :session-id="clonedId"
+    @sessionUpdated="onClonedSessionUpdated"
+  />
 </template>
 
 <script lang="ts">
@@ -49,6 +54,7 @@ import { Session } from '@/types/api/Session';
 import { formatDate } from '@/utils/date';
 import { clone } from '@/services/session-service';
 import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
+import SessionSettings from '@/components/moderator/organisms/settings/SessionSettings.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import { ElMessageBox } from 'element-plus';
 
@@ -56,12 +62,16 @@ import { ElMessageBox } from 'element-plus';
   components: {
     SessionCode,
     ModuleCount,
+    SessionSettings,
   },
 })
 export default class SessionCard extends Vue {
   @Prop() session!: Session;
 
   formatDate = formatDate;
+
+  clonedId = '';
+  showSettings = false;
 
   menuItemSelected(command: string): void {
     switch (command) {
@@ -71,6 +81,10 @@ export default class SessionCard extends Vue {
       default:
         break;
     }
+  }
+
+  onClonedSessionUpdated(): void {
+    this.$router.push(`/session/${this.clonedId}`);
   }
 
   async cloneSession(): Promise<void> {
@@ -86,7 +100,8 @@ export default class SessionCard extends Vue {
         }
       );
       const clonedSession = await clone(this.session.id);
-      this.$router.push(`/session/${clonedSession.id}`);
+      this.clonedId = clonedSession.id;
+      this.showSettings = true;
     } catch {
       // do nothing if the MessageBox is declined
     }
