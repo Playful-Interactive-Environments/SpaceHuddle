@@ -3,7 +3,19 @@
     <el-container style="height: 100%">
       <el-header>
         <div>
-          <p class="el-card__date">{{ formatDate(session.creationDate) }}</p>
+          <div class="top-container">
+            <p class="el-card__date">{{ formatDate(session.creationDate) }}</p>
+            <el-dropdown class="card__menu" v-on:command="menuItemSelected">
+              <span class="el-dropdown-link">
+                <font-awesome-icon icon="ellipsis-h" />
+              </span>
+              <template #dropdown>
+                <el-dropdown-item command="clone">
+                  {{ $t('moderator.organism.session.overview.clone') }}
+                </el-dropdown-item>
+              </template>
+            </el-dropdown>
+          </div>
           <h2 class="heading heading--regular threeLineText line-break">
             {{ session.title }}
           </h2>
@@ -23,16 +35,6 @@
                 {{ $t('moderator.organism.session.overview.select') }}
               </el-button>
             </router-link>
-            <el-dropdown class="card__menu" v-on:command="menuItemSelected">
-              <span class="el-dropdown-link">
-                <font-awesome-icon icon="ellipsis-h" />
-              </span>
-              <template #dropdown>
-                <el-dropdown-item command="clone">
-                  {{ $t('moderator.organism.session.overview.clone') }}
-                </el-dropdown-item>
-              </template>
-            </el-dropdown>
           </div>
         </div>
       </el-footer>
@@ -115,6 +117,13 @@ export default class SessionCard extends Vue {
   &__content {
     margin-top: 0.5rem;
   }
+}
+
+.top-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .session-link-container {
