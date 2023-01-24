@@ -163,8 +163,6 @@ export default class ParticipantJoin extends Vue {
         }
       );
     } else {
-      console.log(this.formData.nickname.replace(/[^0-9a-z]/gi, ''));
-      console.log(connectionKey);
       participantService.connect(connectionKey, this.formData.nickname.replace(/[^0-9a-z]/gi, '')).then(
         (queryResult) => {
           console.log(queryResult);

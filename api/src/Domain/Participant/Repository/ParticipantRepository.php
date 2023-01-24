@@ -51,7 +51,6 @@ class ParticipantRepository implements RepositoryInterface
      */
     public function connect(object $data): ?ParticipantData
     {
-        echo json_encode($data);
         $query = $this->queryFactory->newSelect("session");
         $query->select(["id"])
             ->andWhere([
