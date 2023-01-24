@@ -219,6 +219,7 @@
         },
         "sessionSettings": {
           "header": "Create Session",
+          "headerEdit": "Edit Session",
           "info": "The session is the place that bundles all information belonging to your brainstorming adventure.",
           "title": "Title",
           "titleExample": "e.g. Marketing Meeting",
@@ -247,6 +248,7 @@
           "header": "Your Sessions",
           "select": "Go to session",
           "add": "New Session",
+          "edit": "Edit Session",
           "clone": "Clone Session",
           "clonePrompt": "Do you really want to clone this session?"
         }

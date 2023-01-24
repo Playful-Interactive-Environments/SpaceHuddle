@@ -10,6 +10,9 @@
                 <font-awesome-icon icon="ellipsis-h" />
               </span>
               <template #dropdown>
+                <el-dropdown-item command="edit">
+                  {{ $t('moderator.organism.session.overview.edit') }}
+                </el-dropdown-item>
                 <el-dropdown-item command="clone">
                   {{ $t('moderator.organism.session.overview.clone') }}
                 </el-dropdown-item>
@@ -42,8 +45,8 @@
   </el-card>
   <SessionSettings
     v-model:show-modal="showSettings"
-    :session-id="clonedId"
-    @sessionUpdated="onClonedSessionUpdated"
+    :session-id="sessionEditId"
+    @sessionUpdated="onSessionUpdated"
   />
 </template>
 
@@ -64,13 +67,14 @@ import { ElMessageBox } from 'element-plus';
     ModuleCount,
     SessionSettings,
   },
+  emits: ['updated'],
 })
 export default class SessionCard extends Vue {
   @Prop() session!: Session;
 
   formatDate = formatDate;
 
-  clonedId = '';
+  sessionEditId = '';
   showSettings = false;
 
   menuItemSelected(command: string): void {
@@ -78,13 +82,24 @@ export default class SessionCard extends Vue {
       case 'clone':
         this.cloneSession();
         break;
+      case 'edit':
+        this.sessionEditId = this.session.id;
+        this.showSettings = true;
+        break;
       default:
         break;
     }
   }
 
-  onClonedSessionUpdated(): void {
-    this.$router.push(`/session/${this.clonedId}`);
+  onSessionUpdated(): void {
+    this.showSettings = false;
+
+    // If a session has been cloned, navigate to the new session
+    if (this.session.id !== this.sessionEditId) {
+      this.$router.push(`/session/${this.sessionEditId}`);
+    } else {
+      this.$emit('updated');
+    }
   }
 
   async cloneSession(): Promise<void> {
@@ -100,7 +115,7 @@ export default class SessionCard extends Vue {
         }
       );
       const clonedSession = await clone(this.session.id);
-      this.clonedId = clonedSession.id;
+      this.sessionEditId = clonedSession.id;
       this.showSettings = true;
     } catch {
       // do nothing if the MessageBox is declined

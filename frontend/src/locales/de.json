@@ -219,6 +219,7 @@
         },
         "sessionSettings": {
           "header": "Sitzung erstellen",
+          "headerEdit": "Sitzung bearbeiten",
           "info": "Die Sitzung ist, wo alle Informationen des Brainstorming-Abenteuers gebündelt werden",
           "title": "Titel",
           "titleExample": "e.g. Marketing-Treffen",
@@ -247,6 +248,7 @@
           "header": "Deine Sitzungen",
           "select": "Zur Sitzung",
           "add": "Neue Sitzung",
+          "edit": "Sitzung bearbeiten",
           "clone": "Duplizieren",
           "clonePrompt": "Wollen Sie diese Sitzung wirklich duplozieren?"
         }
