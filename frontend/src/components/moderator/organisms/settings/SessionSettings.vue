@@ -8,7 +8,9 @@
     <el-dialog v-model="showDialog" :before-close="handleClose">
       <template #title>
         <span class="el-dialog__title">{{
-          $t('moderator.organism.settings.sessionSettings.header')
+          sessionId
+            ? $t('moderator.organism.settings.sessionSettings.headerEdit')
+            : $t('moderator.organism.settings.sessionSettings.header')
         }}</span>
         <br />
         <br />

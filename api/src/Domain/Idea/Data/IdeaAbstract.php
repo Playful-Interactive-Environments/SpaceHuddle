@@ -63,7 +63,7 @@ class IdeaAbstract
         $this->description = $reader->findString("description");
         $this->keywords = $reader->findString("keywords");
         $this->link = $reader->findString("link");
-        $this->parameter = (object)json_decode($reader->findString("parameter"));
+        $this->parameter = (object)json_decode($reader->findString("parameter") ?? "{}");
         $this->order = $reader->findInt("order");
     }
 }

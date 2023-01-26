@@ -45,7 +45,7 @@ export const loginUser = async (
   email: string,
   password: string
 ): Promise<ApiResponse> => {
-  return await apiExecutePost<ApiResponse>(
+  return apiExecutePost<ApiResponse>(
     `/${EndpointType.USER}/${EndpointType.LOGIN}/`,
     {
       username: email,

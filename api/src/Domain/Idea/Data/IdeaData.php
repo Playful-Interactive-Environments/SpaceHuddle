@@ -104,7 +104,7 @@ class IdeaData extends IdeaAbstract
             $this->category = new CategoryInfoData($data);
         }
         $avatar = new AvatarData($data);
-        if (str_contains($avatar->color, ",")) {
+        if (str_contains($avatar->color ?? "", ",")) {
             $colors = explode(",", $avatar->color);
             $symbols = explode(",", $avatar->symbol);
             $avatarList = [];

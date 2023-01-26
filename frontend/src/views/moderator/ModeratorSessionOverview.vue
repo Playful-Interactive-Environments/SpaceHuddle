@@ -4,7 +4,7 @@
       <h1>{{ $t('moderator.organism.session.overview.header') }}</h1>
       <div class="columns is-multiline is-9">
         <div v-for="session in sessions" :key="session.id" class="column">
-          <SessionCard :session="session"> </SessionCard>
+          <SessionCard :session="session" @updated="getSessions"> </SessionCard>
         </div>
         <div class="column">
           <TutorialStep step="add" type="sessionOverview" :order="0">

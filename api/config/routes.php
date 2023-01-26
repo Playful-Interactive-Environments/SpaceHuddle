@@ -88,6 +88,7 @@ use App\Action\User\UserForgetPasswordAction;
 use App\Action\User\UserLoginAction;
 use App\Action\User\UserRegisterAction;
 use \App\Action\Session\SessionCreateAction;
+use \App\Action\Session\SessionCloneAction;
 use \App\Action\Session\SessionReadSingleAction;
 use \App\Action\Session\SessionReadAllAction;
 use App\Action\User\UserResetPasswordAction;
@@ -196,6 +197,8 @@ return function (App $app) {
 
             $app->post("/{sessionId}/resource[/]", ResourceCreateAction::class);
             $app->get("/{sessionId}/resources[/]", ResourceReadAllAction::class);
+
+            $app->post("/{sessionId}/clone[/]", SessionCloneAction::class);
 
             $app->post("/{sessionId}/authorized_user[/]", SessionRoleCreateAction::class);
             $app->put("/{sessionId}/authorized_user[/]", SessionRoleUpdateAction::class);

@@ -5,8 +5,10 @@ namespace App\Domain\Topic\Repository;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
+use App\Domain\Module\Repository\ModuleRepository;
 use App\Domain\Selection\Repository\SelectionRepository;
 use App\Domain\Session\Repository\SessionRepository;
+use App\Domain\Task\Data\TaskData;
 use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskType;
 use App\Domain\Topic\Data\ExportData;
@@ -442,5 +444,154 @@ class TopicRepository implements RepositoryInterface
             "description" => $data->description ?? null,
             "order" => $data->order ?? 0
         ];
+    }
+
+    /**
+     * @throws GenericException
+     * @throws Exception
+     */
+    public function clone(string $id, string $newSessionId, string $userId): object
+    {
+        $taskRepository = new TaskRepository($this->queryFactory);
+        $moduleRepository = new ModuleRepository($this->queryFactory);
+        $taskRepository->setAuthorisation($this->getAuthorisation());
+        $moduleRepository->setAuthorisation($this->getAuthorisation());
+
+        $topic = $this->getById($id);
+
+        if (!$topic instanceof TopicData) {
+            throw new Exception("Topic not found");
+        }
+
+        $newTopic = [
+            "title" => $topic->title,
+            "description" => $topic->description,
+            "userId" => $userId,
+            "sessionId" => $newSessionId,
+        ];
+        $newTopic = $this->insert((object)$newTopic);
+        if (!$newTopic instanceof TopicData) {
+            throw new Exception("Topic not created");
+        }
+
+        $tasks = $taskRepository->getAll($topic->id ?? "");
+        $newTasks = [];
+
+        for ($j = 0; $j < sizeof($tasks); $j++) {
+            if (!$tasks[$j] instanceof TaskData) {
+                throw new Exception("Task not found");
+            }
+
+            $newTask = [
+                "taskType" => $tasks[$j]->taskType,
+                "name" => $tasks[$j]->name,
+                "description" => $tasks[$j]->description,
+                "order" => $tasks[$j]->order,
+                "parameter" => $tasks[$j]->parameter ?? "{}",
+                "userId" => $userId,
+                "topicId" => $newTopic->id,
+                "state" => $tasks[$j]->state,
+            ];
+            $newTask = $taskRepository->insert((object)$newTask);
+
+            $newTasks[$tasks[$j]->id] = $newTask;
+
+            // Clone modules
+            $needsIdeasCloned = false;
+            $modules = $moduleRepository->getAll($tasks[$j]->id ?? "");
+
+            foreach ($modules as $module) {
+                $newModule = [
+                    "taskId" => $newTask->id,
+                    "name" => $module->name,
+                    "order" => $module->order,
+                    "state" => $module->state,
+                    "syncPublicParticipant" => $module->syncPublicParticipant,
+                    "parameter" => $module->parameter ?? null,
+                    "userId" => $userId,
+                ];
+                $moduleRepository->insert((object)$newModule);
+                if ($module->name === "quiz") {
+                    $needsIdeasCloned = true;
+                }
+            }
+
+            if (!$needsIdeasCloned) {
+                continue;
+            }
+
+            // Clone ideas if applicable
+            $ideaRepository = new IdeaRepository($this->queryFactory);
+            $ideaRepository->setAuthorisation($this->getAuthorisation());
+            $ideas = $ideaRepository->getAll($tasks[$j]->id);
+
+            $hierarchyRepository = new HierarchyRepository($this->queryFactory);
+            $hierarchyRepository->setAuthorisation($this->getAuthorisation());
+            $newIdeas = [];
+            $hierarchiesToCreate = [];
+            for ($k = 0; $k < sizeof($ideas); $k++) {
+                $newIdea = [
+                    "taskId" => $newTask->id,
+                    "keywords" => $ideas[$k]->keywords,
+                    "description" => $ideas[$k]->description,
+                    "parameter" => $ideas[$k]->parameter ?? null,
+                    "link" => $ideas[$k]->link,
+                    "order" => $ideas[$k]->order,
+                    "state" => $ideas[$k]->state,
+                    "userId" => $userId,
+                ];
+                $newIdea = $ideaRepository->insert((object)$newIdea);
+                $newIdeas[] = $newIdea;
+                $hierarchies = $hierarchyRepository->get(["hierarchy.category_idea_id" => $ideas[$k]->id]) ?? [];
+                foreach ($hierarchies as $hierarchy) {
+                    $hierarchiesToCreate[] = [
+                        "upperId" => $newIdea->id,
+                        "lowerIdx" => $this->findIndex($hierarchy->id, $ideas),
+                        "order" => $hierarchy->order,
+                        "keywords" => $hierarchy->keywords,
+                    ];
+                }
+            }
+
+            // All ideas have been cloned, now clone hierarchies
+            foreach ($hierarchiesToCreate as $hierarchy) {
+                $this->queryFactory->newInsert(
+                    "hierarchy",
+                    [
+                        "sub_idea_id" => $newIdeas[$hierarchy["lowerIdx"]]->id,
+                        "category_idea_id" => $hierarchy["upperId"],
+                        "order" => $hierarchy["order"]
+                    ]
+                )->execute();
+            }
+        }
+
+        // Correct all parameters of tasks
+        foreach ($newTasks as $task) {
+            if (!is_string($task->parameter) || strlen($task->parameter) == 0) {
+                continue;
+            }
+            foreach ($newTasks as $oldId => $replaceTask) {
+                str_replace($oldId, $replaceTask->id, $task->parameter);
+            }
+            $taskRepository->update($task);
+        }
+
+        return $newTopic;
+    }
+
+    /**
+     * @param string $id The id to search for
+     * @param array $array The array to search in
+     * @return int The index of the found id within the array
+     */
+    private function findIndex(string $id, array $array): int
+    {
+        for ($i = 0; $i < sizeof($array); $i++) {
+            if ($array[$i]->id === $id) {
+                return $i;
+            }
+        }
+        return -1;
     }
 }
