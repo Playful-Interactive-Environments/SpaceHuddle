@@ -15,6 +15,7 @@ use App\Domain\Session\Data\SessionInfo;
 use App\Domain\Task\Data\TaskData;
 use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskState;
+use App\Domain\Topic\Data\TopicData;
 use App\Domain\Topic\Repository\TopicRepository;
 use App\Domain\User\Repository\UserRepository;
 use App\Domain\Session\Type\SessionRoleType;
@@ -264,14 +265,13 @@ class SessionRepository implements RepositoryInterface
     public function clone(string $id, string $userId): ?object
     {
         $topicRepository = new TopicRepository($this->queryFactory);
-        $taskRepository = new TaskRepository($this->queryFactory);
-        $moduleRepository = new ModuleRepository($this->queryFactory);
-
         $topicRepository->setAuthorisation($this->getAuthorisation());
-        $taskRepository->setAuthorisation($this->getAuthorisation());
-        $moduleRepository->setAuthorisation($this->getAuthorisation());
 
         $session = $this->getById($id);
+
+        if (is_null($session)) {
+            throw new DomainException("Session not found");
+        }
 
         $newSession = [
             "title" => $session->title,
@@ -280,137 +280,21 @@ class SessionRepository implements RepositoryInterface
             "expirationDate" => $session->expirationDate,
             "userId" => $userId,
         ];
-
         $newSession = $this->insert((object)$newSession);
+
+        if (is_null($newSession) || !isset($newSession->id)) {
+            throw new DomainException("Session not created");
+        }
 
         $topics = $topicRepository->getAll($id);
 
-        for ($i = 0; $i < sizeof($topics); $i++) {
-            $newTopic = [
-                "title" => $topics[$i]->title,
-                "description" => $topics[$i]->description,
-                "userId" => $userId,
-                "sessionId" => $newSession->id,
-            ];
-            $newTopic = $topicRepository->insert((object)$newTopic);
-
-            $tasks = $taskRepository->getAll($topics[$i]->id);
-            $newTasks = [];
-
-            for ($j = 0; $j < sizeof($tasks); $j++) {
-                // Clone task
-                $newTask = [
-                    "taskType" => $tasks[$j]->taskType,
-                    "name" => $tasks[$j]->name,
-                    "description" => $tasks[$j]->description,
-                    "order" => $tasks[$j]->order,
-                    "parameter" => $tasks[$j]->parameter ?? "{}",
-                    "userId" => $userId,
-                    "topicId" => $newTopic->id,
-                    "state" => $tasks[$j]->state,
-                ];
-                $newTask = $taskRepository->insert((object)$newTask);
-
-                $newTasks[$tasks[$j]->id] = $newTask;
-
-                // Clone modules
-                $needsIdeasCloned = false;
-                $modules = $moduleRepository->getAll($tasks[$j]->id);
-
-                foreach ($modules as $module) {
-                    $newModule = [
-                        "taskId" => $newTask->id,
-                        "name" => $module->name,
-                        "order" => $module->order,
-                        "state" => $module->state,
-                        "syncPublicParticipant" => $module->syncPublicParticipant,
-                        "parameter" => $module->parameter ?? null,
-                        "userId" => $userId,
-                    ];
-                    $moduleRepository->insert((object)$newModule);
-                    if ($module->name === "quiz") {
-                        $needsIdeasCloned = true;
-                    }
-                }
-
-                if (!$needsIdeasCloned) {
-                    continue;
-                }
-
-                // Clone ideas if applicable
-                $ideaRepository = new IdeaRepository($this->queryFactory);
-                $ideaRepository->setAuthorisation($this->getAuthorisation());
-                $ideas = $ideaRepository->getAll($tasks[$j]->id);
-
-                $hierarchyRepository = new HierarchyRepository($this->queryFactory);
-                $hierarchyRepository->setAuthorisation($this->getAuthorisation());
-                $newIdeas = [];
-                $hierarchiesToCreate = [];
-                for ($k = 0; $k < sizeof($ideas); $k++) {
-                    $newIdea = [
-                        "taskId" => $newTask->id,
-                        "keywords" => $ideas[$k]->keywords,
-                        "description" => $ideas[$k]->description,
-                        "parameter" => $ideas[$k]->parameter ?? null,
-                        "link" => $ideas[$k]->link,
-                        "order" => $ideas[$k]->order,
-                        "state" => $ideas[$k]->state,
-                        "userId" => $userId,
-                    ];
-                    $newIdea = $ideaRepository->insert((object)$newIdea);
-                    $newIdeas[] = $newIdea;
-                    $hierarchies = $hierarchyRepository->get(["hierarchy.category_idea_id" => $ideas[$k]->id]) ?? [];
-                    foreach ($hierarchies as $hierarchy) {
-                        $hierarchiesToCreate[] = [
-                            "upperId" => $newIdea->id,
-                            "lowerIdx" => $this->findIndex($hierarchy->id, $ideas),
-                            "order" => $hierarchy->order,
-                            "keywords" => $hierarchy->keywords,
-                        ];
-                    }
-                }
-
-                // All ideas have been cloned, now clone hierarchies
-                foreach ($hierarchiesToCreate as $hierarchy) {
-                    $this->queryFactory->newInsert(
-                        "hierarchy",
-                        [
-                            "sub_idea_id" => $newIdeas[$hierarchy["lowerIdx"]]->id,
-                            "category_idea_id" => $hierarchy["upperId"],
-                            "order" => $hierarchy["order"]
-                        ]
-                    )->execute();
-                }
-            }
-
-            // Correct all parameters of tasks
-            foreach ($newTasks as $task) {
-                if (!is_string($task->parameter) || strlen($task->parameter) == 0) {
-                    continue;
-                }
-                foreach ($newTasks as $oldId => $replaceTask) {
-                    str_replace($oldId, $replaceTask->id, $task->parameter);
-                }
-                $taskRepository->update($task);
+        foreach ($topics as $topic) {
+            if ($topic instanceof TopicData && !is_null($topic->id)) {
+                $topicRepository->clone($topic->id, $newSession->id, $userId);
             }
         }
 
         return $newSession;
-    }
-
-    /**
-     * @param string $id The id to search for
-     * @param array $array The array to search in
-     * @return int The index of the found id within the array
-     */
-    private function findIndex(string $id, array $array): int
-    {
-        for ($i = 0; $i < sizeof($array); $i++) {
-            if ($array[$i]->id === $id) {
-                return $i;
-            }
-        }
-        return -1;
     }
 
     /**
