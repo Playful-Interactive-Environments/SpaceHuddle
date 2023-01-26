@@ -1,11 +1,11 @@
 <template>
-  <div class="question-container fade-down anim-slow">
+  <div v-if="!showQuestion" class="question-container fade-down anim-slow">
     <h1 v-if="publicQuestion">{{ publicQuestion.question.order + 1 }}. {{ publicQuestion.question.keywords }}</h1>
     <h1 v-else>{{ task?.name }}</h1>
     <div v-if="publicQuestion" class="countdown" v-bind:key="publicQuestion.question.id"></div>
   </div>
 
-  <div v-if="!publicQuestion" class="timer fade-right anim-delay-xl anim-slow">
+  <div v-if="!publicQuestion && !showQuestion" class="timer fade-right anim-delay-xl anim-slow">
     <p v-if="task?.remainingTime && task.remainingTime > 0">Answer on your device!</p>
     <p v-else>Time's up!<br><span>Waiting for the moderator</span></p>
     <div v-if="task?.remainingTime && task.remainingTime > 0" class="timer__container">
@@ -43,7 +43,7 @@
       <slot name="answers"></slot>
     </el-space>
   </div>
-  <div v-if="showStatistics && publicQuestion" class="fade-right anim-slow" v-bind:key="publicQuestion.question.id">
+  <div v-if="showStatistics && publicQuestion" v-bind:key="publicQuestion.question.id">
     <!-- <div
       v-if="
         publicQuestion &&
@@ -55,13 +55,20 @@
       {{ publicQuestion.question.description }}
     </div> -->
     <div class="answers">
-      <p v-for="answer in publicQuestion.answers" v-bind:key="answer.id" 
+      <div v-for="answer in voteResult.sort((a, b) => {
+        if(a.countParticipant < b.countParticipant) return 1
+        if(a.countParticipant > b.countParticipant) return -1
+        return 0
+      })" v-bind:key="answer.idea.id" 
       :class="{
-          correct: answer.parameter.isCorrect,
-          wrong: !answer.parameter.isCorrect,
+          correct: answer.idea.parameter.isCorrect,
+          wrong: !answer.idea.parameter.isCorrect,
       }">
-        {{ answer.keywords }}
-      </p>
+        <p>{{ answer.idea.keywords }}
+          <br>
+          <span>{{ voteResult.find(option => option.idea.id === answer.idea.id)?.countParticipant }} votes</span>
+        </p>
+      </div>
     </div>
   </div>
   <p class="participants fade-up anim-delay-2xl anim-slow">
@@ -612,14 +619,14 @@ h1{
 }
 
 .answers{
-  max-width: 30vw;
+  max-width: 50vw;
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   gap: 1vw;
   flex-flow: wrap;
-  
-  p{
-    width: 14vw;
+
+  div{
+    width: 20vw;
     min-height: 5rem;
     font-size: 1.2rem;
     background-color: rgba(0,0,0,0.5);
@@ -628,15 +635,117 @@ h1{
     align-items: center;
     border-radius: 10px;
     border: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+
+    span{
+      opacity: 0.7;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    p{
+      padding: 1rem;
+    }
+
+    opacity: 0;
+    animation: fadeDown 1s ease forwards;
+    &:first-of-type{
+      animation-delay: 1s;
+    }
+    &:nth-of-type(2){
+      animation-delay: 3s;
+    }
+    &:nth-of-type(3){
+      animation-delay: 5s;
+    }
+    &:nth-of-type(4){
+      animation-delay: 6s;
+    }
+    &:nth-of-type(5){
+      animation-delay: 6.5s;
+    }
+    &:nth-of-type(6){
+      animation-delay: 6.9s;
+    }
+    &:nth-of-type(7){
+      animation-delay: 7.2s;
+    }
+    animation-delay: 8s;
   }
 
   .correct{
-    animation: rightAnswer 4s 5.5s ease forwards;
+    opacity: 0;
+
+    animation-name: fadeDown, rightAnswer;
+    animation-duration: 1s, 4s;
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;
+
+    &:first-of-type{
+      animation-delay: 1s, 8s;
+    }
+    &:nth-of-type(2){
+      animation-delay: 3s, 8s;
+    }
+    &:nth-of-type(3){
+      animation-delay: 5s, 8s;
+    }
+    &:nth-of-type(4){
+      animation-delay: 6s, 8s;
+    }
+    &:nth-of-type(5){
+      animation-delay: 6.5s, 8s;
+    }
+    &:nth-of-type(6){
+      animation-delay: 6.9s, 8s;
+    }
+    &:nth-of-type(7){
+      animation-delay: 7.2s, 8s;
+    }
+    animation-delay: 8s, 8s;
   }
 
   .wrong{
+    opacity: 0;
+
+    animation-name: fadeDown, wrongAnswer;
+    animation-duration: 1s, 4s;
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;
+
+    &:first-of-type{
+      animation-delay: 1s, 8s;
+    }
+    &:nth-of-type(2){
+      animation-delay: 3s, 8s;
+    }
+    &:nth-of-type(3){
+      animation-delay: 5s, 8s;
+    }
+    &:nth-of-type(4){
+      animation-delay: 6s, 8s;
+    }
+    &:nth-of-type(5){
+      animation-delay: 6.5s, 8s;
+    }
+    &:nth-of-type(6){
+      animation-delay: 6.9s, 8s;
+    }
+    &:nth-of-type(7){
+      animation-delay: 7.2s, 8s;
+    }
+    animation-delay: 8s, 8s;
+  }
+}
+
+@keyframes fadeDown {
+  0%{
+    transform: translateY(-3rem);
+    opacity: 0;
+  }
+  100%{
+    transform: translateY(0);
     opacity: 1;
-    animation: wrongAnswer 4s 5.5s ease forwards;
   }
 }
 
@@ -671,7 +780,7 @@ h1{
     background-color: #01cf9e;
     margin-top: 1rem;
     border-radius: 10px;
-    animation: countdown 5s 0.5s forwards ease-in;
+    animation: countdown 8s 0.5s forwards ease-in;
   }
 }
 
