@@ -111,7 +111,8 @@ CREATE TABLE `participant` (
                                `state` varchar(255) NOT NULL DEFAULT '''ACTIVE''',
                                `color` varchar(255) DEFAULT NULL,
                                `symbol` varchar(255) DEFAULT NULL,
-                               `ip_hash` varchar(255) NOT NULL
+                               `ip_hash` varchar(255) NOT NULL,
+                               `nickname` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------

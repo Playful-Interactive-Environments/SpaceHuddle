@@ -99,13 +99,13 @@ trait ValidatorTrait
             $validator = $this->createValidator();
         }
 
-        $validationResult = $this->validationFactory->createValidationResult(
-            $validator->validate($data, $newRecord)
-        );
+        // $validationResult = $this->validationFactory->createValidationResult(
+        //     $validator->validate($data, $newRecord)
+        // );
 
-        if ($validationResult->fails()) {
-            throw new ValidationException("Please check your input", $validationResult);
-        }
+        // if ($validationResult->fails()) {
+        //     throw new ValidationException("Please check your input", $validationResult);
+        // }
     }
 
     /**

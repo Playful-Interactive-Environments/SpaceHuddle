@@ -363,7 +363,8 @@
         "info": "Gib den Code ein, den dein*e Moderator*in zur Verfügung stellt. Dann bist du bereit!",
         "browserKeyInfo": "Deine letzten Sitzungen wurden gespeichert. Du kannst früheren Sitzungen über die Liste erneut beitreten, falls diese noch offen zur Teilnahme sind. Falls du einer neuen Sitzung beitreten willst, gib den neuen Sitzungs-Pincode ein.",
         "pinInfo": "Sitzungspincode eingeben",
-        "submit": "Sitzung beitreten"
+        "submit": "Sitzung beitreten",
+        "nicknameEntry": "Geben Sie einen Spitznamen mit weniger als 16 Zeichen ein"
       },
       "overview": {
         "publicScreen": "Publikumsansicht",

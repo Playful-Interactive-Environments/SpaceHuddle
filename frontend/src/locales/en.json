@@ -363,7 +363,8 @@
         "info": "Just enter the code your moderator provided and you’re ready to go!",
         "browserKeyInfo": "Your last individual connections have been saved. You can rejoin past sessions if the sessions are still open for participation by selecting them from the list. If you want to join a new session, please enter the new session PIN.",
         "pinInfo": "Enter Session PIN",
-        "submit": "Join session"
+        "submit": "Join session",
+        "nicknameEntry": "Enter a nickname fewer than 16 characters."
       },
       "overview": {
         "publicScreen": "Public View",
