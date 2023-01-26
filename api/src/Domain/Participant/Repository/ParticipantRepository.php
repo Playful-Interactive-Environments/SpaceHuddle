@@ -72,7 +72,8 @@ class ParticipantRepository implements RepositoryInterface
                 $data->color = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
                 $data->symbol = AvatarSymbol::getRandomValue();
                 $data->state = ParticipantState::ACTIVE;
-                
+                if (is_null($data->nickname) || $data->nickname == "")
+                    $data->nickname = $data->symbol;
 
                 $participant = $this->insert($data);
                 $participant->nickname = $data->nickname;
