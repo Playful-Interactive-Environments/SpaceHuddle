@@ -92,7 +92,7 @@ class IdeaRepository implements RepositoryInterface
     {
         $authorisation = $this->getAuthorisation();
         $authorisation_conditions = [];
-        $orderType = strtolower($orderType);
+        $orderType = strtolower($orderType ?? "");
         /*if ($authorisation->isParticipant()) {
             $authorisation_conditions = [
                 "idea.participant_id" => $authorisation->id,

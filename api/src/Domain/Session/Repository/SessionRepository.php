@@ -6,11 +6,16 @@ use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\KeyGeneratorTrait;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
+use App\Domain\Hierarchy\Repository\HierarchyRepository;
+use App\Domain\Idea\Repository\IdeaRepository;
 use App\Domain\Module\Repository\ModuleRepository;
 use App\Domain\Participant\Data\ParticipantInfoData;
 use App\Domain\Participant\Repository\ParticipantRepository;
 use App\Domain\Session\Data\SessionInfo;
 use App\Domain\Task\Data\TaskData;
+use App\Domain\Task\Repository\TaskRepository;
+use App\Domain\Task\Type\TaskState;
+use App\Domain\Topic\Data\TopicData;
 use App\Domain\Topic\Repository\TopicRepository;
 use App\Domain\User\Repository\UserRepository;
 use App\Domain\Session\Type\SessionRoleType;
@@ -249,6 +254,47 @@ class SessionRepository implements RepositoryInterface
         $data->connectionKey = $this->generateNewConnectionKey("connection_key");
         $data->creationDate = date("Y-m-d");
         return $this->genericInsert($data);
+    }
+
+    /**
+     * @param string $id The session id to clone
+     * @param string $userId The id of the user
+     * @return object|null The new session
+     * @throws GenericException
+     */
+    public function clone(string $id, string $userId): ?object
+    {
+        $topicRepository = new TopicRepository($this->queryFactory);
+        $topicRepository->setAuthorisation($this->getAuthorisation());
+
+        $session = $this->getById($id);
+
+        if (is_null($session)) {
+            throw new DomainException("Session not found");
+        }
+
+        $newSession = [
+            "title" => $session->title,
+            "description" => $session->description,
+            "maxParticipants" => $session->maxParticipants,
+            "expirationDate" => $session->expirationDate,
+            "userId" => $userId,
+        ];
+        $newSession = $this->insert((object)$newSession);
+
+        if (is_null($newSession) || !isset($newSession->id)) {
+            throw new DomainException("Session not created");
+        }
+
+        $topics = $topicRepository->getAll($id);
+
+        foreach ($topics as $topic) {
+            if ($topic instanceof TopicData && !is_null($topic->id)) {
+                $topicRepository->clone($topic->id, $newSession->id, $userId);
+            }
+        }
+
+        return $newSession;
     }
 
     /**

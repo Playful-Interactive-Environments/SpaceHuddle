@@ -93,6 +93,7 @@ import { ValidationData } from '@/types/ui/ValidationRule';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 import { ElMessage } from 'element-plus';
+import axios from 'axios';
 
 @Options({
   components: {
@@ -110,24 +111,24 @@ export default class ModeratorLogin extends Vue {
   };
 
   async save(): Promise<void> {
-    await userService
-      .loginUser(this.formData.email, this.formData.password)
-      .then(
-        (queryResult) => {
-          if (queryResult.accessToken) {
-            authService.setAccessTokenModerator(queryResult.accessToken);
-            authService.setUserData(this.formData.email);
-            this.$router.push({
-              name: 'moderator-session-overview',
-            });
-          }
-        },
-        (error) => {
-          this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
-          this.displayConfirm =
-            getSingleErrorKey(error).includes('NotConfirmed');
-        }
+    try {
+      const result = await userService.loginUser(
+        this.formData.email,
+        this.formData.password
       );
+      if (result.accessToken) {
+        authService.setAccessTokenModerator(result.accessToken);
+        authService.setUserData(this.formData.email);
+        this.$router.push({
+          name: 'moderator-session-overview',
+        });
+      }
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
+        this.displayConfirm = getSingleErrorKey(error).includes('NotConfirmed');
+      }
+    }
   }
 
   resendConfirm(): void {

@@ -11,7 +11,7 @@ import ElementPlus from 'element-plus';
 import '@/assets/styles/global.scss';
 import '@/assets/styles/element-plus.scss';
 
-import { library } from '@fortawesome/fontawesome-svg-core';
+import { IconPack, library } from '@fortawesome/fontawesome-svg-core';
 // internal icons
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { far } from '@fortawesome/free-regular-svg-icons';
@@ -19,8 +19,8 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 import { fac } from '@/assets/icons/fac';
 
-library.add(fas as any);
-library.add(far as any);
+library.add(fas as IconPack);
+library.add(far as IconPack);
 library.add(fac);
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -35,19 +35,16 @@ const eventBus = mitt();
 const app = createApp(App);
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.use(router);
-app.use(i18n as any);
+app.use(i18n);
 app.use(VueCookies as any, {
   expireTimes: '30d',
   secure: true,
   sameSite: 'Strict', // "Lax"
 });
 app.config.globalProperties.eventBus = eventBus;
-app.config.globalProperties.$t = i18n.t2;
 app.use(ElementPlus);
 app.use(VueObserveVisibility);
 app.mount('#app');
-
-(router as any).i18n = i18n;
 
 setViewportVariables();
 

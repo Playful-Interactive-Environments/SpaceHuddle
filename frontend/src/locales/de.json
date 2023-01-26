@@ -52,6 +52,9 @@
         "post": {
           "username or password": {
             "NotExist": "Der Nutzername oder Passwort ist falsch."
+          },
+          "username": {
+            "NotConfirmed": "E-Mail wurde nicht bestätigt."
           }
         }
       },
@@ -216,6 +219,7 @@
         },
         "sessionSettings": {
           "header": "Sitzung erstellen",
+          "headerEdit": "Sitzung bearbeiten",
           "info": "Die Sitzung ist, wo alle Informationen des Brainstorming-Abenteuers gebündelt werden",
           "title": "Titel",
           "titleExample": "e.g. Marketing-Treffen",
@@ -243,7 +247,10 @@
         "overview": {
           "header": "Deine Sitzungen",
           "select": "Zur Sitzung",
-          "add": "Neue Sitzung"
+          "add": "Neue Sitzung",
+          "edit": "Sitzung bearbeiten",
+          "clone": "Duplizieren",
+          "clonePrompt": "Wollen Sie diese Sitzung wirklich duplozieren?"
         }
       },
       "processTimeline": {
@@ -456,7 +463,7 @@
     },
     "questionType": {
       "multiplechoice": "Multiple Choice",
-      "singlechoice":  "Single Choice",
+      "singlechoice": "Single Choice",
       "rating": "Rating",
       "slider": "Slider",
       "number": "Number",
@@ -507,7 +514,7 @@
       "showNullPublicScreen": "Setze den Regler auf diese Position, um den Verbindungsschlüssel auf der Publikumsansicht anzuzeigen",
       "publicScreenForOtherTopic": "Die Publikumsansicht ist einem anderen Thema zugeteilt. Der Verbindungsschlüssel kann durch diesen Schalter auf der Publikumsansicht angezeigt werden."
     },
-    "taskSettings":  {
+    "taskSettings": {
       "input": "Aufgaben bauen aufeinander auf und können für weitere Aktivitäten verwendet werden.",
       "inputSource": "Definiere die Quelle, die als Basis für diese Aufgabe dient.",
       "inputMaxCount": "Wie viele Datensätze dieser Quelle möchten Sie als Basis verwenden? Falls keine Eingabe gemacht wird, werden alle Datensätze genutzt.",

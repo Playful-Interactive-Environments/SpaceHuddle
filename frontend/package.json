@@ -33,11 +33,11 @@
     "vue": "^3.2.31",
     "vue-advanced-cropper": "^2.8.3",
     "vue-class-component": "^8.0.0-0",
+    "vue-i18n": "^9.2.2",
     "vue-image-crop-upload": "^3.0.3",
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^4.0.13",
     "vue3-cookies": "^1.0.6",
-    "vue3-i18n": "^1.1.5",
     "vue3-observe-visibility2": "0.0.3",
     "vuedraggable": "^4.1.0"
   },

@@ -112,22 +112,28 @@ export default class ModuleCard extends Vue {
   }
 
   async loadModuleConfig(): Promise<void> {
-    await getModuleConfig(
-      'icon',
-      this.moduleTask.taskType,
-      this.moduleTask.moduleName
-    ).then((icon) => {
+    const configs = [
+      getModuleConfig(
+        'icon',
+        this.moduleTask.taskType,
+        this.moduleTask.moduleName
+      ),
       getModuleConfig(
         'iconPrefix',
         this.moduleTask.taskType,
         this.moduleTask.moduleName
-      ).then((iconPrefix) => (this.icon = [iconPrefix, icon]));
+      ),
+      getModuleConfig(
+        'type',
+        this.moduleTask.taskType,
+        this.moduleTask.moduleName
+      ),
+    ];
+
+    Promise.all(configs).then(([icon, iconPrefix, moduleType]) => {
+      this.icon = [iconPrefix, icon];
+      this.moduleType = moduleType;
     });
-    await getModuleConfig(
-      'type',
-      this.moduleTask.taskType,
-      this.moduleTask.moduleName
-    ).then((result) => (this.moduleType = result));
   }
 
   getColor(): string | undefined {

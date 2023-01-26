@@ -4,28 +4,82 @@ import app from '@/main';
 import HttpStatusCode from '@/types/enum/HttpStatusCode ';
 import { removeAccessToken, isUser } from '@/services/auth-service';
 import { ElMessage } from 'element-plus';
+import i18n from '../i18n';
+
+const { t } = i18n.global;
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
 const showLog = false;
 
 export const getSingleErrorKey = (error: AxiosError): string => {
-  if (
-    error.response &&
-    error.response.data &&
-    (error.response.data as any).errorMessage &&
-    (error.response.data as any).errorMessage.length > 0
-  ) {
-    return (error.response.data as any).errorMessage[0];
+  const errorMessage = error.response?.data?.error?.details?.[0]?.message;
+  if (errorMessage) {
+    let field = error.response?.data?.error?.details?.[0]?.field as
+      | string
+      | undefined;
+    field &&= field + '.';
+    return `${field ?? ''}${errorMessage}`;
   }
-  return '';
+
+  return error.response?.data?.errorMessage?.[0] ?? '';
 };
 
 export const getSingleTranslatedErrorMessage = (error: AxiosError): string => {
+  const keyPrefix = calcErrorPrefix(error.response);
   const errorKey = getSingleErrorKey(error);
-  if (errorKey.length > 0)
-    return app.config.globalProperties.$i18n.translateWithFallback(errorKey);
-  return '';
+  return getErrorMessageWithFallback(errorKey, undefined, keyPrefix);
+};
+
+export const getErrorMessageWithFallback = (
+  item: string,
+  itemContent?: string[],
+  prefix = ''
+): string => {
+  let translation = '';
+  const translateParts = item.split(':');
+  if (translateParts.length > 1) {
+    const translateCode = translateParts[0];
+    const fallbackMessage = translateParts[1].trim();
+    translation = translateOrGetFallback(
+      `error.api.${prefix}${translateCode}`,
+      fallbackMessage,
+      itemContent
+    );
+  } else {
+    translation = translateOrGetFallback(
+      `error.api.${prefix}${item}`,
+      item,
+      itemContent
+    );
+  }
+
+  return translation;
+};
+
+const translateOrGetFallback = (
+  key: string,
+  fallback: string,
+  itemContent?: string[]
+) => {
+  let translation = t(key) || fallback;
+
+  if (translation.length === 0) {
+    const keyParts = key.split('.');
+    if (keyParts.length > 0) translation = keyParts[keyParts.length - 1];
+  }
+
+  if (itemContent && translation.length > 0) {
+    let contentIndex: any;
+    for (contentIndex in itemContent) {
+      translation = translation.replace(
+        new RegExp('\\{' + contentIndex + '\\}', 'g'),
+        itemContent[contentIndex]
+      );
+    }
+  }
+
+  return translation;
 };
 
 export const getErrorMessage = (error: AxiosError): string[] => {
@@ -49,8 +103,10 @@ export const addError = (
     let errorMessage = `${prefix}${errorItem}`;
     if (!errorMessage.startsWith('error.'))
       errorMessage = `error.${errorMessage}`;
-    if (errorList.find((error) => error === errorMessage) === undefined)
+
+    if (!errorList.includes(errorMessage)) {
       errorList.push(errorMessage);
+    }
   });
   return errorList;
 };
@@ -60,10 +116,10 @@ export const clearErrors = (errorList: string[]): string[] => {
   return errorList;
 };
 
-const calcErrorPrefix = (response: AxiosResponse): string => {
+const calcErrorPrefix = (response?: AxiosResponse): string => {
   let errorPrefix = '';
 
-  const errorUrl = response.config?.url;
+  const errorUrl = response?.config?.url;
   let lastNamedUrlPart = '';
   if (errorUrl) {
     const errorUlrParts = errorUrl.split('/');
@@ -75,7 +131,7 @@ const calcErrorPrefix = (response: AxiosResponse): string => {
   }
   errorPrefix += `${lastNamedUrlPart}.`;
 
-  const errorMethode = response.config.method;
+  const errorMethode = response?.config.method;
   if (errorMethode) {
     errorPrefix += `${errorMethode}.`;
   }
@@ -126,9 +182,13 @@ export const apiErrorHandling = async (
         const errorList = errorResult.error.details;
         if (Array.isArray(errorList)) {
           errorList.forEach((item) => {
+            let message = item.message as string;
+            if (message.includes(':')) {
+              message = message.split(':')[0];
+            }
             addError(
               errorMessage,
-              `api.${errorPrefix}${item.field}.${item.message}`
+              `api.${errorPrefix}${item.field}.${message}`
             );
           });
         }
@@ -162,7 +222,7 @@ export const apiErrorHandling = async (
 const reportErrors = (errors: string[]): void => {
   errors.forEach((error) => {
     ElMessage({
-      message: app.config.globalProperties.$i18n.translateWithFallback(error),
+      message: t(error),
       type: 'error',
       center: true,
       showClose: true,
