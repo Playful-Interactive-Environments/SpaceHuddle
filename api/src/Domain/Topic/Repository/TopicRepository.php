@@ -545,13 +545,17 @@ class TopicRepository implements RepositoryInterface
                 $newIdea = $ideaRepository->insert((object)$newIdea);
                 $newIdeas[] = $newIdea;
                 $hierarchies = $hierarchyRepository->get(["hierarchy.category_idea_id" => $ideas[$k]->id]) ?? [];
+                if (!is_array($hierarchies)) $hierarchies = [$hierarchies];
                 foreach ($hierarchies as $hierarchy) {
-                    $hierarchiesToCreate[] = [
-                        "upperId" => $newIdea->id,
-                        "lowerIdx" => $this->findIndex($hierarchy->id, $ideas),
-                        "order" => $hierarchy->order,
-                        "keywords" => $hierarchy->keywords,
-                    ];
+                    $lowerIdx = $this->findIndex($hierarchy->id, $ideas);
+                    if ($lowerIdx > -1) {
+                        $hierarchiesToCreate[] = [
+                            "upperId" => $newIdea->id,
+                            "lowerIdx" => $lowerIdx,
+                            "order" => $hierarchy->order,
+                            "keywords" => $hierarchy->keywords,
+                        ];
+                    }
                 }
             }
 
