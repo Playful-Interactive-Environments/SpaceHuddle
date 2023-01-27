@@ -452,7 +452,7 @@ class TopicRepository implements RepositoryInterface
      * @throws GenericException
      * @throws Exception
      */
-    public function clone(string $id, string $newSessionId, string $userId): object
+    public function clone(string $id, string $userId, ?string $newParentId): object
     {
         $taskRepository = new TaskRepository($this->queryFactory);
         $moduleRepository = new ModuleRepository($this->queryFactory);
@@ -469,7 +469,7 @@ class TopicRepository implements RepositoryInterface
             "title" => $topic->title,
             "description" => $topic->description,
             "userId" => $userId,
-            "sessionId" => $newSessionId,
+            "sessionId" => $newParentId ?? $topic->sessionId,
         ];
         $newTopic = $this->insert((object)$newTopic);
         if (!$newTopic instanceof TopicData) {

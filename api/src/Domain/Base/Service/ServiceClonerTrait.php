@@ -3,6 +3,7 @@
 namespace App\Domain\Base\Service;
 
 use App\Domain\Base\Repository\GenericException;
+use PhpOffice\PhpSpreadsheet\Writer\Exception;
 
 /**
  * Description of the common insert service functionality.
@@ -21,7 +22,7 @@ trait ServiceClonerTrait
     protected function serviceValidation(array $data): void
     {
         // Input validation
-        $this->validator->validateExists($data["sessionId"]);
+        $this->validator->validateExists($data["id"]);
     }
 
     /**
@@ -29,13 +30,13 @@ trait ServiceClonerTrait
      *
      * @param array $data Input data from the request.
      *
-     * @return string|null Repository answer.
-     * @throws GenericException
+     * @return object|null The newly created entity.
+     * @throws GenericException|Exception
      */
     protected function serviceExecution(
         array $data
     ): object|null {
         // Clone an entity by its ID and return the new ID
-        return $this->repository->clone($data["sessionId"], $data["userId"]);
+        return $this->repository->clone($data["id"], $data["userId"], null);
     }
 }

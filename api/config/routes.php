@@ -74,6 +74,7 @@ use App\Action\Task\TaskReadDependentAction;
 use App\Action\Task\TaskReadSingleAction;
 use App\Action\Task\TaskStateUpdateAction;
 use App\Action\Task\TaskUpdateAction;
+use App\Action\Topic\TopicCloneAction;
 use App\Action\Topic\TopicCreateAction;
 use App\Action\Topic\TopicDeleteAction;
 use App\Action\Topic\TopicReadAllAction;
@@ -198,7 +199,7 @@ return function (App $app) {
             $app->post("/{sessionId}/resource[/]", ResourceCreateAction::class);
             $app->get("/{sessionId}/resources[/]", ResourceReadAllAction::class);
 
-            $app->post("/{sessionId}/clone[/]", SessionCloneAction::class);
+            $app->post("/{id}/clone[/]", SessionCloneAction::class);
 
             $app->post("/{sessionId}/authorized_user[/]", SessionRoleCreateAction::class);
             $app->put("/{sessionId}/authorized_user[/]", SessionRoleUpdateAction::class);
@@ -221,6 +222,7 @@ return function (App $app) {
         function (RouteCollectorProxy $app) {
             $app->get("/{topicId}/views[/]", ViewReadAllAction::class);
             $app->get("/{topicId}/tasks[/]", TaskReadAllAction::class);
+            $app->post("/{id}/clone[/]", TopicCloneAction::class);
         }
     );
 

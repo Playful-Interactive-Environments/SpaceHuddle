@@ -258,7 +258,7 @@ class SessionRepository implements RepositoryInterface
      * @return object|null The new session
      * @throws GenericException
      */
-    public function clone(string $id, string $userId): ?object
+    public function clone(string $id, string $userId, ?string $newParentId): ?object
     {
         $topicRepository = new TopicRepository($this->queryFactory);
         $topicRepository->setAuthorisation($this->getAuthorisation());
@@ -286,7 +286,7 @@ class SessionRepository implements RepositoryInterface
 
         foreach ($topics as $topic) {
             if ($topic instanceof TopicData && !is_null($topic->id)) {
-                $topicRepository->clone($topic->id, $newSession->id, $userId);
+                $topicRepository->clone($topic->id, $userId, $newSession->id);
             }
         }
 
