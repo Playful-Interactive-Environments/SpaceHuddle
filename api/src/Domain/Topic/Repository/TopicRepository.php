@@ -5,6 +5,8 @@ namespace App\Domain\Topic\Repository;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
+use App\Domain\Hierarchy\Repository\HierarchyRepository;
+use App\Domain\Idea\Repository\IdeaRepository;
 use App\Domain\Module\Repository\ModuleRepository;
 use App\Domain\Selection\Repository\SelectionRepository;
 use App\Domain\Session\Repository\SessionRepository;
