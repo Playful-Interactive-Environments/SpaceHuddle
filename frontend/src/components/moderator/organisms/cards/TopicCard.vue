@@ -30,6 +30,9 @@
                     <el-dropdown-item command="edit">
                       <font-awesome-icon icon="pen" />
                     </el-dropdown-item>
+                    <el-dropdown-item command="clone">
+                      <font-awesome-icon icon="clone" />
+                    </el-dropdown-item>
                     <el-dropdown-item command="delete">
                       <font-awesome-icon icon="trash" />
                     </el-dropdown-item>
@@ -60,7 +63,7 @@
     <TopicSettings
       v-model:show-modal="showSettings"
       :session-id="sessionId"
-      :topic-id="topic.id"
+      :topic-id="editingTopicId"
       v-on:topicUpdated="reload"
     />
   </div>
@@ -73,6 +76,7 @@ import { Topic } from '@/types/api/Topic';
 import * as topicService from '@/services/topic-service';
 import TopicSettings from '@/components/moderator/organisms/settings/TopicSettings.vue';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
+import { ElMessageBox } from 'element-plus';
 
 @Options({
   components: { TutorialStep, TopicSettings },
@@ -83,6 +87,7 @@ export default class TopicCard extends Vue {
   @Prop() topic!: Topic;
   @Prop({ default: true }) readonly canModify!: boolean;
   showSettings = false;
+  editingTopicId = this.topic.id;
 
   goToDetails(): void {
     this.$router.push(`/topic/${this.sessionId}/${this.topic.id}`);
@@ -105,11 +110,33 @@ export default class TopicCard extends Vue {
   menuItemSelected(command: string): void {
     switch (command) {
       case 'edit':
+        this.editingTopicId = this.topic.id;
         this.showSettings = true;
+        break;
+      case 'clone':
+        this.cloneTopic();
         break;
       case 'delete':
         this.deleteTopic();
         break;
+    }
+  }
+
+  async cloneTopic(): Promise<void> {
+    try {
+      await ElMessageBox.confirm(
+        this.$t('moderator.organism.topic.overview.clonePrompt'),
+        this.$t('moderator.organism.topic.overview.clone'),
+        {
+          boxType: 'confirm',
+          confirmButtonText: this.$t('moderator.organism.topic.overview.clone'),
+        }
+      );
+      const clonedTopic = await topicService.clone(this.topic.id);
+      this.editingTopicId = clonedTopic.id;
+      this.showSettings = true;
+    } catch {
+      // do nothing if the MessageBox is declined
     }
   }
 }
