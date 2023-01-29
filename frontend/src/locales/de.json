@@ -250,7 +250,13 @@
           "add": "Neue Sitzung",
           "edit": "Sitzung bearbeiten",
           "clone": "Duplizieren",
-          "clonePrompt": "Wollen Sie diese Sitzung wirklich duplozieren?"
+          "clonePrompt": "Wollen Sie diese Sitzung wirklich duplizieren?"
+        }
+      },
+      "topic": {
+        "overview": {
+          "clone": "Duplizieren",
+          "clonePrompt": "Wollen die dieses Thema wirklich duplizieren?"
         }
       },
       "processTimeline": {

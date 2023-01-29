@@ -2,6 +2,7 @@ import {
   apiExecuteDelete,
   apiExecuteGetHandled,
   apiExecutePost,
+  apiExecutePostHandled,
   apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
@@ -63,6 +64,18 @@ export const exportTopic = async (
   return await apiExecuteGetHandled<TopicExport>(
     `/${EndpointType.TOPIC}/${topicId}/${EndpointType.EXPORT}/${exportType}/`,
     {},
+    authHeaderType
+  );
+};
+
+export const clone = async (
+  topicId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Topic> => {
+  return apiExecutePostHandled<Topic>(
+    `/${EndpointType.TOPIC}/${topicId}/clone`,
+    null,
+    null,
     authHeaderType
   );
 };

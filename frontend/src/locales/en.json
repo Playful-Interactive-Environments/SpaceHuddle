@@ -253,6 +253,12 @@
           "clonePrompt": "Do you really want to clone this session?"
         }
       },
+      "topic": {
+        "overview": {
+          "clone": "Clone Topic",
+          "clonePrompt": "Do you really want to clone this topic?"
+        }
+      },
       "processTimeline": {
         "activatePublicScreen": "display this content on the public screen",
         "changePublicScreen": "display this item on the public screen",
