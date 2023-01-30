@@ -87,7 +87,11 @@ export default class TopicCard extends Vue {
   @Prop() topic!: Topic;
   @Prop({ default: true }) readonly canModify!: boolean;
   showSettings = false;
-  editingTopicId = this.topic.id;
+  editingTopicId = '';
+
+  mounted(): void {
+    this.editingTopicId = this.topic.id;
+  }
 
   goToDetails(): void {
     this.$router.push(`/topic/${this.sessionId}/${this.topic.id}`);
