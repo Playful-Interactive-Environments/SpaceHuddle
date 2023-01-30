@@ -456,8 +456,12 @@ class TopicRepository implements RepositoryInterface
     {
         $taskRepository = new TaskRepository($this->queryFactory);
         $moduleRepository = new ModuleRepository($this->queryFactory);
+
         $taskRepository->setAuthorisation($this->getAuthorisation());
         $moduleRepository->setAuthorisation($this->getAuthorisation());
+
+        $selectionRepository = new SelectionRepository($this->queryFactory);
+        $selectionRepository->setAuthorisation($this->getAuthorisation());
 
         $topic = $this->getById($id);
 
@@ -476,9 +480,21 @@ class TopicRepository implements RepositoryInterface
             throw new Exception("Topic not created");
         }
 
+        // clone and remember all selections
+        $selections = $selectionRepository->getAll($id);
+        $newSelections = [];
+        foreach ($selections as $selection) {
+            $newSelection = [
+                "topicId" => $newTopic->id,
+                "name" => $selection->name,
+            ];
+            $newSelection = $selectionRepository->insert((object)$newSelection);
+            $newSelections[$selection->id] = $newSelection->id;
+        }
+
+        // clone and remember all tasks
         $tasks = $taskRepository->getAll($topic->id ?? "");
         $newTasks = [];
-
         for ($j = 0; $j < sizeof($tasks); $j++) {
             if (!$tasks[$j] instanceof TaskData) {
                 throw new Exception("Task not found");
@@ -513,7 +529,7 @@ class TopicRepository implements RepositoryInterface
                     "userId" => $userId,
                 ];
                 $moduleRepository->insert((object)$newModule);
-                if ($module->name === "quiz") {
+                if ($module->name === "quiz" || $module->name === "survey") {
                     $needsIdeasCloned = true;
                 }
             }
@@ -526,6 +542,9 @@ class TopicRepository implements RepositoryInterface
             $ideaRepository = new IdeaRepository($this->queryFactory);
             $ideaRepository->setAuthorisation($this->getAuthorisation());
             $ideas = $ideaRepository->getAll($tasks[$j]->id);
+            $ideas = array_values(array_filter($ideas, function ($idea) {
+                return $idea->participantId == null;
+            }));
 
             $hierarchyRepository = new HierarchyRepository($this->queryFactory);
             $hierarchyRepository->setAuthorisation($this->getAuthorisation());
@@ -574,13 +593,20 @@ class TopicRepository implements RepositoryInterface
 
         // Correct all parameters of tasks
         foreach ($newTasks as $task) {
-            if (!is_string($task->parameter) || strlen($task->parameter) == 0) {
+            $parameter = json_encode($task->parameter);
+            if (!is_string($parameter) || strlen($parameter) === 0) {
                 continue;
             }
             foreach ($newTasks as $oldId => $replaceTask) {
-                str_replace($oldId, $replaceTask->id, $task->parameter);
+                $parameter = str_replace($oldId, $replaceTask->id, $parameter);
             }
-            $taskRepository->update($task);
+            foreach ($newSelections as $oldId => $replaceSelection) {
+                $parameter = str_replace($oldId, $replaceSelection, $parameter);
+            }
+            $this->queryFactory
+                ->newUpdate("task", ["parameter" => $parameter])
+                ->andWhere(["id" => $task->id])
+                ->execute();
         }
 
         return $newTopic;

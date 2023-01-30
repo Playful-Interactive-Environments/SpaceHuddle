@@ -66,7 +66,7 @@ trait ErrorMessageTrait
         $trace_list = $exception->getTrace();
         $traceIndex = 0;
         foreach ($trace_list as $trace) {
-            if (!str_contains($trace["file"], "vendor")) {
+            if (!str_contains($trace["file"] ?? "", "vendor")) {
                 $file = $trace["file"];
                 $line = $trace["line"];
                 return [

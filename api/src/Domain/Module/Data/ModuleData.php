@@ -62,10 +62,12 @@ class ModuleData
         $this->id = $reader->findString("id");
         $this->name = $reader->findString("module_name");
         $this->order = $reader->findInt("order");
-        $this->state = strtoupper($reader->findString("state"));
+        $this->state = strtoupper($reader->findString("state") ?? "");
         $this->syncPublicParticipant = $reader->findBool("sync_public_participant");
-        if ($reader->findString("parameter") != null)  {
-            $this->parameter = (object)json_decode($reader->findString("parameter"), false);
+
+        $parameter = $reader->findString("parameter");
+        if ($parameter != null) {
+            $this->parameter = (object)json_decode($parameter);
         }
     }
 }
