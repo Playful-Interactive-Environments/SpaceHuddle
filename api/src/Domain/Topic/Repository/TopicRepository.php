@@ -469,10 +469,13 @@ class TopicRepository implements RepositoryInterface
             throw new Exception("Topic not found");
         }
 
+        $order = $newParentId ? $topic->order : $this->getMaxOrder($topic->sessionId) + 1;
+
         $newTopic = [
             "title" => $topic->title,
             "description" => $topic->description,
             "userId" => $userId,
+            "order" => $order,
             "sessionId" => $newParentId ?? $topic->sessionId,
         ];
         $newTopic = $this->insert((object)$newTopic);
@@ -625,5 +628,23 @@ class TopicRepository implements RepositoryInterface
             }
         }
         return -1;
+    }
+
+    /**
+     * @param ?string $sessionId The id of the session
+     * @return int The maximum order of any topic within the given session
+     */
+    private function getMaxOrder(?string $sessionId): int
+    {
+        if ($sessionId === null) {
+            return 0;
+        }
+
+        $maxOrder = $this->queryFactory->newSelect("topic")
+            ->select("MAX(`order`) as maxOrder")
+            ->andWhere(["session_id" => $sessionId])
+            ->execute()
+            ->fetch("assoc")["maxOrder"];
+        return $maxOrder ?? 0;
     }
 }
