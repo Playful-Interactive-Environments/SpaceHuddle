@@ -518,7 +518,7 @@ class TopicRepository implements RepositoryInterface
             $newTasks[$tasks[$j]->id] = $newTask;
 
             // Clone modules
-            $needsIdeasCloned = false;
+            $needsIdeasCloned = strtolower($newTask->taskType ?? "") === TaskType::INFORMATION;
             $modules = $moduleRepository->getAll($tasks[$j]->id ?? "");
 
             foreach ($modules as $module) {
@@ -531,10 +531,7 @@ class TopicRepository implements RepositoryInterface
                     "parameter" => $module->parameter ?? null,
                     "userId" => $userId,
                 ];
-                $moduleRepository->insert((object)$newModule);
-                if ($module->name === "quiz" || $module->name === "survey") {
-                    $needsIdeasCloned = true;
-                }
+                $newModule = $moduleRepository->insert((object)$newModule);
             }
 
             if (!$needsIdeasCloned) {
@@ -570,14 +567,16 @@ class TopicRepository implements RepositoryInterface
                 if (!is_array($hierarchies)) $hierarchies = [$hierarchies];
                 foreach ($hierarchies as $hierarchy) {
                     $lowerIdx = $this->findIndex($hierarchy->id, $ideas);
-                    if ($lowerIdx > -1) {
-                        $hierarchiesToCreate[] = [
-                            "upperId" => $newIdea->id,
-                            "lowerIdx" => $lowerIdx,
-                            "order" => $hierarchy->order,
-                            "keywords" => $hierarchy->keywords,
-                        ];
+                    if ($lowerIdx === -1) {
+                        // The idea was not found, meaning it was an answer provided by a participant
+                        continue;
                     }
+
+                    $hierarchiesToCreate[] = [
+                        "upperId" => $newIdea->id,
+                        "lowerIdx" => $lowerIdx,
+                        "order" => $hierarchy->order,
+                    ];
                 }
             }
 
@@ -620,8 +619,12 @@ class TopicRepository implements RepositoryInterface
      * @param array $array The array to search in
      * @return int The index of the found id within the array
      */
-    private function findIndex(string $id, array $array): int
+    private function findIndex(?string $id, array $array): int
     {
+        if ($id === null) {
+            return -1;
+        }
+
         for ($i = 0; $i < sizeof($array); $i++) {
             if ($array[$i]->id === $id) {
                 return $i;
