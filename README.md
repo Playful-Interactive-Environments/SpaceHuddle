@@ -49,7 +49,7 @@ To test for a *participant*, use the following steps:
 3. copy the value for `access_token`, click the button "Authorize" in the upper right corner and enter the token in the field for `bearerAuth`,
 4. execute any arbitrary REST call for the client tool.
 
-###Technology stack
+### Technology stack
 
 The SpaceHuddle-API is built on the following technologies. Visit the websites to learn more about their use.
 
