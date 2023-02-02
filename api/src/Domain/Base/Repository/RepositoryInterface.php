@@ -59,10 +59,11 @@ interface RepositoryInterface
     /**
      * Insert entity row.
      * @param object $data The data to be inserted
+     * @param bool $insertDependencies If false, ignore insertDependencies function
      * @return object|null The new created entity
      * @throws GenericException
      */
-    public function insert(object $data): ?object;
+    public function insert(object $data, bool $insertDependencies = true): ?object;
 
     /**
      * Update entity row.

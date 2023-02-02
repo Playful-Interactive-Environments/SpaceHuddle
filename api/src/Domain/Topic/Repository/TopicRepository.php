@@ -513,15 +513,15 @@ class TopicRepository implements RepositoryInterface
                 "topicId" => $newTopic->id,
                 "state" => $tasks[$j]->state,
             ];
-            $newTask = $taskRepository->insert((object)$newTask);
+            $newTask = $taskRepository->insert((object)$newTask, false);
 
             $newTasks[$tasks[$j]->id] = $newTask;
 
             // Clone modules
             $needsIdeasCloned = strtolower($newTask->taskType ?? "") === TaskType::INFORMATION;
-            $modules = $moduleRepository->getAll($tasks[$j]->id ?? "");
+            //$modules = $moduleRepository->getAll($tasks[$j]->id ?? "");
 
-            foreach ($modules as $module) {
+            foreach ($tasks[$j]->modules as $module) {
                 $newModule = [
                     "taskId" => $newTask->id,
                     "name" => $module->name,

@@ -154,10 +154,11 @@ class SessionRoleRepository implements RepositoryInterface
     /**
      * Insert session row.
      * @param object $data The session role data
+     * @param bool $insertDependencies If false, ignore insertDependencies function
      * @return object|null The new session
      * @throws GenericException
      */
-    public function insert(object $data): ?object
+    public function insert(object $data, bool $insertDependencies = true): ?object
     {
         $result = $this->getByUsername($data->sessionId, $data->username);
         if (is_null($result)) {

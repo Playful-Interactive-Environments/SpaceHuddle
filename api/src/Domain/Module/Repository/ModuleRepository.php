@@ -102,7 +102,7 @@ class ModuleRepository implements RepositoryInterface
             "module_name" => $data->name ?? null,
             "order" => $data->order ?? null,
             "state" => $data->state ?? null,
-            "sync_public_participant" => $this->convertBoolToTinyInt($data->syncPublicParticipant),
+            "sync_public_participant" => isset($data->syncPublicParticipant) ? $this->convertBoolToTinyInt($data->syncPublicParticipant) : null,
             "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null
         ];
     }

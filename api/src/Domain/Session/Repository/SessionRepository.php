@@ -243,13 +243,14 @@ class SessionRepository implements RepositoryInterface
     /**
      * Insert session row.
      * @param object $data The session data
+     * @param bool $insertDependencies If false, ignore insertDependencies function
      * @return object|null The new session
      */
-    public function insert(object $data): ?object
+    public function insert(object $data, bool $insertDependencies = true): ?object
     {
         $data->connectionKey = $this->generateNewConnectionKey("connection_key");
         $data->creationDate = date("Y-m-d");
-        return $this->genericInsert($data);
+        return $this->genericInsert($data, $insertDependencies);
     }
 
     /**
@@ -367,7 +368,7 @@ class SessionRepository implements RepositoryInterface
             "max_participants" => $data->maxParticipants ?? null,
             "expiration_date" => $data->expirationDate ?? null,
             "public_screen_module_id" => $data->publicScreenModuleId ?? null,
-            "allow_anonymous" => $this->convertBoolToTinyInt($data->allowAnonymous)
+            "allow_anonymous" => isset($data->allowAnonymous) ? $this->convertBoolToTinyInt($data->allowAnonymous) : null
         ];
 
         if (property_exists($data, "creationDate")) {

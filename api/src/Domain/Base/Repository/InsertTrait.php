@@ -11,9 +11,10 @@ trait InsertTrait
     /**
      * Insert entity row.
      * @param object $data The data to be inserted
+     * @param bool $insertDependencies If false, ignore insertDependencies function
      * @return object|null The new created entity
      */
-    public function insert(object $data): ?object
+    public function insert(object $data, bool $insertDependencies = true): ?object
     {
         $data->id = uuid_create();
 
@@ -24,7 +25,7 @@ trait InsertTrait
         $itemCount = $this->queryFactory->newInsert($this->getEntityName(), $row)
             ->execute()->rowCount();
 
-        if ($itemCount > 0 and array_key_exists("id", $row)) {
+        if ($insertDependencies && $itemCount > 0 and array_key_exists("id", $row)) {
             $this->insertDependencies($data->id, $data);
         }
 

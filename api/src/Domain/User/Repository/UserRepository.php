@@ -48,13 +48,14 @@ final class UserRepository implements RepositoryInterface
     /**
      * Insert user row.
      * @param object $data The user data
+     * @param bool $insertDependencies If false, ignore insertDependencies function
      * @return object|null The new user
      * @throws GenericException
      */
-    public function insert(object $data): object|null
+    public function insert(object $data, bool $insertDependencies = true): object|null
     {
         $data->password = self::encryptText($data->password);
-        return $this->genericInsert($data);
+        return $this->genericInsert($data, $insertDependencies);
     }
 
     /**
