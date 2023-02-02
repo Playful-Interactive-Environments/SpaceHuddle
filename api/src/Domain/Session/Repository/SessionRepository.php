@@ -367,7 +367,7 @@ class SessionRepository implements RepositoryInterface
             "max_participants" => $data->maxParticipants ?? null,
             "expiration_date" => $data->expirationDate ?? null,
             "public_screen_module_id" => $data->publicScreenModuleId ?? null,
-            "allow_anonymous" => (int)$data->allowAnonymous ?? null
+            "allow_anonymous" => $this->convertBoolToTinyInt($data->allowAnonymous)
         ];
 
         if (property_exists($data, "creationDate")) {

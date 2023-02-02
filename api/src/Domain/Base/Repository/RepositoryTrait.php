@@ -40,4 +40,15 @@ trait RepositoryTrait
         $this->queryFactory = $queryFactory;
         $this->setGenerics($queryFactory, $entityName, $resultClass, $parentIdName, $parentRepository);
     }
+
+    protected function convertBoolToTinyInt(bool | null $value): int | null
+    {
+        if (!isset($value)) {
+            return null;
+        }
+        if ($value) {
+            return 1;
+        }
+        return 0;
+    }
 }
