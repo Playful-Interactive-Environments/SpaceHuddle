@@ -13,16 +13,17 @@ const { t } = i18n.global;
 const showLog = false;
 
 export const getSingleErrorKey = (error: AxiosError): string => {
-  const errorMessage = error.response?.data?.error?.details?.[0]?.message;
+  const errorMessage = (error.response?.data as any)?.error?.details?.[0]
+    ?.message;
   if (errorMessage) {
-    let field = error.response?.data?.error?.details?.[0]?.field as
+    let field = (error.response?.data as any)?.error?.details?.[0]?.field as
       | string
       | undefined;
     field &&= field + '.';
     return `${field ?? ''}${errorMessage}`;
   }
 
-  return error.response?.data?.errorMessage?.[0] ?? '';
+  return (error.response?.data as any)?.errorMessage?.[0] ?? '';
 };
 
 export const getSingleTranslatedErrorMessage = (error: AxiosError): string => {
@@ -176,7 +177,8 @@ export const apiErrorHandling = async (
     errorResult = error.response?.data;
     const errorPrefix = calcErrorPrefix(response);
 
-    if (displayDBErrors && window.location.pathname.length > 10) {
+    if (displayDBErrors) {
+      // } && window.location.pathname.length > 10) {
       if (errorResult && errorResult.error && errorResult.error.details) {
         const errorMessage: string[] = [];
         const errorList = errorResult.error.details;
@@ -220,6 +222,7 @@ export const apiErrorHandling = async (
 };
 
 const reportErrors = (errors: string[]): void => {
+  console.log('reportErrors', errors);
   errors.forEach((error) => {
     ElMessage({
       message: t(error),
@@ -232,7 +235,8 @@ const reportErrors = (errors: string[]): void => {
 
 export const apiErrorLog = async (error: AxiosError): Promise<void> => {
   if (showLog) {
-    if (error.response) console.error(error.response.data.error.message);
+    if (error.response)
+      console.error((error.response.data as any).error.message);
     else console.error(error);
   }
   if (showLog && error.response && error.response.config) {

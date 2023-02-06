@@ -185,22 +185,23 @@ export default class Sidebar extends Vue {
   }
 }
 
-.el-page-header::v-deep {
+.el-page-header {
   --el-border-color-base: var(--color-darkblue-light);
   line-height: unset;
   display: inline-block;
-  .el-page-header__content {
-    text-transform: uppercase;
-    font-size: 14px;
-  }
+}
 
-  .el-page-header__left {
-    margin-right: 20px;
-  }
+.el-page-header::v-deep(.el-page-header__content) {
+  text-transform: uppercase;
+  font-size: 14px;
+}
 
-  .el-page-header__left::after {
-    right: -10px;
-  }
+.el-page-header::v-deep(.el-page-header__left) {
+  margin-right: 20px;
+}
+
+.el-page-header::v-deep(.el-page-header__left)::after {
+  right: -10px;
 }
 
 .el-divider--horizontal {

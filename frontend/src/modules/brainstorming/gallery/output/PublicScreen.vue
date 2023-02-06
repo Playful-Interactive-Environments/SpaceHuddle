@@ -101,14 +101,10 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.el-carousel::v-deep {
-  .el-carousel {
-    &__item {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-  }
+.el-carousel::v-deep(.el-carousel__item) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .public-idea {
@@ -124,10 +120,8 @@ export default class PublicScreen extends Vue {
   max-height: 500px;
 }
 
-.el-carousel::v-deep {
-  .el-carousel__mask {
-    background-color: unset;
-  }
+.el-carousel::v-deep(.el-carousel__mask) {
+  background-color: unset;
 }
 
 .el-card {
@@ -135,24 +129,22 @@ export default class PublicScreen extends Vue {
   height: 100%;
 }
 
-.el-card::v-deep {
-  .el-card__body {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
+.el-card::v-deep(.el-card__body) {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
 
-  .card__text {
-    flex-basis: auto;
-    flex-grow: 1;
-    flex-shrink: 1;
-    text-align: inherit;
+.el-card::v-deep(.card__text) {
+  flex-basis: auto;
+  flex-grow: 1;
+  flex-shrink: 1;
+  text-align: inherit;
 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-  }
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
 }
 </style>

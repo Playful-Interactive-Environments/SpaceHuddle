@@ -145,7 +145,7 @@ export default class ModuleCard extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.el-radio::v-deep .el-radio__label {
+.el-radio::v-deep(.el-radio__label) {
   padding-left: unset;
 }
 

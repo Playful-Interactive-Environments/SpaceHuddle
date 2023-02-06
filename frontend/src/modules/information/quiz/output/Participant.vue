@@ -1,23 +1,23 @@
 <template>
-  <div id="loadingScreen">
-    <span>{{ $t('module.information.quiz.participant.waiting') }}...</span>
-    <span
-      id="loading"
-      v-loading="true"
-      element-loading-background="rgba(0, 0, 0, 0)"
-    ></span>
-  </div>
-  <div id="QuizImageBackground" v-if="hasImage">
-    <div id="QuizImageContainer">
-      <img :src="getImageSrc" alt="quizImage" class="QuizImage" />
-    </div>
-  </div>
   <ParticipantModuleDefaultContainer
     :task-id="taskId"
     :module="moduleName"
     :class="{ PMDC: hasImage }"
   >
     <div id="preloader"></div>
+    <div id="loadingScreen">
+      <span>{{ $t('module.information.quiz.participant.waiting') }}...</span>
+      <span
+        id="loading"
+        v-loading="true"
+        element-loading-background="rgba(0, 0, 0, 0)"
+      ></span>
+    </div>
+    <div id="QuizImageBackground" v-if="hasImage">
+      <div id="QuizImageContainer">
+        <img :src="getImageSrc" alt="quizImage" class="QuizImage" />
+      </div>
+    </div>
     <template #footer>
       <span class="previousNext">
         <el-button
@@ -376,7 +376,7 @@ export default class Participant extends Vue {
   get getImageSrc(): string {
     if (this.hasImage) {
       //check image src and return. this is just a dummy picture for now
-      return require('../../../../assets/illustrations/Quiz/QuizImage.jpg');
+      return require('@/assets/illustrations/Quiz/QuizImage.jpg');
     } else {
       return '';
     }
@@ -685,10 +685,8 @@ export default class Participant extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.el-space::v-deep {
-  .el-space__item {
-    width: 100%;
-  }
+.el-space::v-deep(.el-space__item) {
+  width: 100%;
 }
 
 .el-footer {
@@ -706,7 +704,7 @@ export default class Participant extends Vue {
   margin: 1em 0;
 }*/
 
-.module-content::v-deep div.question {
+.module-content::v-deep(.question) {
   text-transform: none;
   font-weight: var(--font-weight-bold);
   font-size: var(--el-font-size-extra-large);
@@ -748,7 +746,7 @@ export default class Participant extends Vue {
   z-index: 1;
 }
 
-#PMDC::v-deep .el-steps {
+#PMDC::v-deep(.el-steps) {
   margin-bottom: 3%;
 }
 
@@ -794,7 +792,7 @@ div#loadingScreen > span#loading {
   margin-bottom: auto;
 }
 
-div#loadingScreen > span#loading::v-deep .path {
+div#loadingScreen > span#loading::v-deep(.path) {
   stroke: white;
   stroke-width: 4;
 }
@@ -819,7 +817,7 @@ div#loadingScreen > span#loading::v-deep .path {
   margin-left: auto;
   margin-right: auto;
 
-  background-image: url('../../../../assets/illustrations/Voting/StarsSpace.png');
+  background-image: url('@/assets/illustrations/Voting/StarsSpace.png');
   background-size: contain;
 
   z-index: 0;
@@ -852,30 +850,33 @@ div#loadingScreen > span#loading::v-deep .path {
   border: 10px solid var(--color-darkblue-light);
 }
 
-.el-space::v-deep
-  .el-button.el-button--primary.el-button--default.link.outline-thick:hover {
+.el-space::v-deep(.outline-thick):hover {
   background-color: var(--color-darkblue);
   border-color: var(--color-darkblue-light);
 }
 
-.el-space::v-deep .el-button.el-button--primary.el-button--default.link > span {
+.el-space::v-deep(.link) > span {
   width: 100%;
   white-space: pre-line;
   overflow-wrap: anywhere;
   text-align: left;
   margin-left: 4%;
+
+  img {
+    background-color: white;
+  }
 }
 
-.el-space::v-deep .el-button.el-button--primary.el-button--default.link {
+.el-space::v-deep(.link) {
   height: auto;
   padding: 2% 5% 2% 5%;
 }
 
-.el-space::v-deep .fa-circle-check > path {
+.el-space::v-deep(.fa-circle-check) > path {
   fill: var(--color-yellow);
 }
 
-.el-space::v-deep .fa-circle > path {
+.el-space::v-deep(.fa-circle) > path {
   fill: var(--color-darkblue-light);
 }
 
@@ -902,12 +903,10 @@ div#loadingScreen > span#loading::v-deep .path {
   margin-top: 2rem;
 }
 
-.el-button::v-deep {
-  > span {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-  }
+.el-button::v-deep(> span) {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .question-image {
@@ -923,9 +922,7 @@ label {
   font-weight: var(--font-weight-semibold);
 }
 
-.el-slider::v-deep {
-  .el-slider__stop {
-    width: 0.1px;
-  }
+.el-slider::v-deep(.el-slider__stop) {
+  width: 0.1px;
 }
 </style>

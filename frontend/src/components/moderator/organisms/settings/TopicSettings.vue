@@ -6,7 +6,7 @@
     v-on:reset="reset"
   >
     <el-dialog v-model="showDialog" :before-close="handleClose">
-      <template #title>
+      <template #header>
         <span class="el-dialog__title">{{
           $t('moderator.organism.settings.topicSettings.header')
         }}</span>

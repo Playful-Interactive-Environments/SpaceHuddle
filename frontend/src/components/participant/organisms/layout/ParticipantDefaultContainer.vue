@@ -44,7 +44,7 @@ export default class ParticipantDefaultContainer extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.el-main::v-deep {
+.el-main {
   margin-top: calc(-1 * var(--corner-radius));
   display: flex;
   max-width: inherit;

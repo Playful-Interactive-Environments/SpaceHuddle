@@ -4,7 +4,7 @@
     :before-close="handleClose"
     width="calc(var(--app-width) * 0.8)"
   >
-    <template #title>
+    <template #header>
       <span class="el-dialog__title">
         {{ $t('moderator.organism.settings.facilitatorSettings.header') }}
       </span>
@@ -253,20 +253,16 @@ export default class LinkSettings extends Vue {
   margin-left: 0.5em;
 }
 
-.el-table::v-deep {
-  .cell {
-    span {
-      margin-right: 0.5rem;
-    }
+.el-table::v-deep(.cell) {
+  span {
+    margin-right: 0.5rem;
   }
 }
 
-.el-form-item::v-deep {
-  &.allow {
-    .el-form-item__content {
-      display: flex;
-      justify-content: space-between;
-    }
+.allow.el-form-item::v-deep(.el-form-item__content) {
+  .el-form-item__content {
+    display: flex;
+    justify-content: space-between;
   }
 }
 </style>

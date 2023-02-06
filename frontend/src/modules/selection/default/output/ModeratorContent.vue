@@ -351,10 +351,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   cursor: pointer;
 }
 
-.el-card::v-deep {
-  .el-card__body {
-    padding: 14px;
-  }
+.el-card::v-deep(.el-card__body) {
+  padding: 14px;
 }
 
 .unselected {

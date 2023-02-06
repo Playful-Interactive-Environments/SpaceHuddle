@@ -62,7 +62,7 @@
     direction="ltr"
     size="300px"
     :key="displaySettings"
-    custom-class="sidebar"
+    class="sidebar"
   >
     <slot name="sidebar"></slot>
   </el-drawer>

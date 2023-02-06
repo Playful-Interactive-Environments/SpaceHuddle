@@ -564,15 +564,13 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 </script>
 
 <style lang="scss" scoped>
-.add::v-deep {
-  &.add--column {
-    min-height: unset;
+.add--column.add {
+  min-height: unset;
+}
 
-    .el-card__body {
-      min-height: unset;
-      padding: 5px 14px;
-    }
-  }
+.add--column.add::v-deep(.el-card__body) {
+  min-height: unset;
+  padding: 5px 14px;
 }
 
 .no-category {
@@ -602,23 +600,24 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   padding: 0 0.75rem;
 }
 
-.drag-header::v-deep {
-  .column {
-    .el-card,
-    .item {
-      height: 100%;
-    }
+.drag-header::v-deep(.column) {
+  .el-card,
+  .item {
+    height: 100%;
   }
 }
 
-.column::v-deep {
+.column {
   max-width: 25%;
   min-width: 10rem;
+}
 
-  .el-card,
-  .item {
-    height: unset;
-  }
+.column::v-deep(.el-card) {
+  height: unset;
+}
+
+.column::v-deep(.item) {
+  height: unset;
 }
 
 .item {
@@ -639,9 +638,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   cursor: pointer;
 }
 
-.el-card::v-deep {
-  .el-card__body {
-    padding: 14px;
-  }
+.el-card::v-deep(.el-card__body) {
+  padding: 14px;
 }
 </style>

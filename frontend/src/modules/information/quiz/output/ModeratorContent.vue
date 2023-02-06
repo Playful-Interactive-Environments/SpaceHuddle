@@ -57,7 +57,9 @@
           <template #label>
             <div class="media">
               <span class="media-content">
-                {{ $t('module.information.quiz.moderatorContent.question') }}
+                {{
+                  $t('module.information.quiz.moderatorContent.questionType')
+                }}
               </span>
               <span class="media-right" v-if="formData.question.id">
                 <font-awesome-icon
@@ -243,9 +245,9 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-import { Prop, Watch } from 'vue-property-decorator';
-import { Idea } from '@/types/api/Idea';
+import {Options, Vue} from 'vue-class-component';
+import {Prop, Watch} from 'vue-property-decorator';
+import {Idea} from '@/types/api/Idea';
 import * as taskService from '@/services/task-service';
 import * as topicService from '@/services/topic-service';
 import * as sessionService from '@/services/session-service';
@@ -257,13 +259,13 @@ import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import ProcessTimeline from '@/components/moderator/organisms/Timeline/ProcessTimeline.vue';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
-import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
-import { Hierarchy } from '@/types/api/Hierarchy';
+import {defaultFormRules, ValidationRuleDefinition} from '@/utils/formRules';
+import {Hierarchy} from '@/types/api/Hierarchy';
 import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
-import { VoteResult } from '@/types/api/Vote';
+import {VoteResult} from '@/types/api/Vote';
 import * as votingService from '@/services/voting-service';
-import { TimerEntity } from '@/types/enum/TimerEntity';
-import { convertToSaveVersion, Task } from '@/types/api/Task';
+import {TimerEntity} from '@/types/enum/TimerEntity';
+import {convertToSaveVersion, Task} from '@/types/api/Task';
 import {
   getQuestionResultStorageFromQuestionType,
   getQuestionTypeFromHierarchy,
@@ -274,11 +276,8 @@ import {
   SurveyQuestionType,
 } from '@/modules/information/quiz/types/Question';
 import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
-import {
-  moduleNameValid,
-  QuestionnaireType,
-} from '@/modules/information/quiz/types/QuestionnaireType';
-import { IModeratorContent } from '@/types/ui/IModeratorContent';
+import {moduleNameValid, QuestionnaireType,} from '@/modules/information/quiz/types/QuestionnaireType';
+import {IModeratorContent} from '@/types/ui/IModeratorContent';
 import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 
 @Options({
@@ -394,11 +393,23 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         this.formData.question.parameter.maxValue = 100;
     } else if (this.formData.questionType === QuestionType.RATING) {
       delete this.formData.question.parameter.minValue;
-      if (!this.formData.question.parameter.maxValue)
+      if (
+        !this.formData.question.parameter.maxValue ||
+        this.formData.question.parameter.maxValue > 10
+      )
         this.formData.question.parameter.maxValue = 10;
     } else {
       delete this.formData.question.parameter.maxValue;
       delete this.formData.question.parameter.minValue;
+    }
+
+    if (
+      getQuestionResultStorageFromQuestionType(this.formData.questionType) ===
+        QuestionResultStorage.VOTING &&
+      this.formData.answers.length == 0
+    ) {
+      this.addAnswer();
+      this.addAnswer();
     }
   }
 
@@ -447,6 +458,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   setupEmptyQuestion(): void {
     this.formData = this.getEmptyQuestion();
+    this.editQuestion = null;
   }
 
   addAnswer(): void {
@@ -463,59 +475,20 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.formData.answers.splice(index, 1);
   }
 
-  saveQuestion(): void {
+  async saveQuestion(): Promise<void> {
     this.formData.question.parameter.questionType = this.formData.questionType;
     if (this.formData.question.id) {
-      hierarchyService.putHierarchy(this.formData.question).then(() => {
-        if (
-          getQuestionResultStorageFromQuestionType(
-            this.formData.questionType
-          ) === QuestionResultStorage.VOTING
-        ) {
-          this.formData.answers.forEach((answer) => {
-            if (answer.id) hierarchyService.putHierarchy(answer);
-            else {
-              answer.parentId = this.formData.question.id;
-              hierarchyService
-                .postHierarchy(this.taskId, {
-                  parentId: answer.parentId,
-                  keywords: answer.keywords,
-                  description: answer.description,
-                  link: answer.link,
-                  image: answer.image,
-                  parameter: answer.parameter,
-                  order: answer.order,
-                })
-                .then((hierarchy) => {
-                  answer.id = hierarchy.id;
-                });
-            }
-          });
-          this.getHierarchies();
-        }
-      });
-    } else {
-      if (this.formData.question.order === null)
-        this.formData.question.order = this.questions.length;
-      hierarchyService
-        .postHierarchy(this.taskId, {
-          keywords: this.formData.question.keywords,
-          description: this.formData.question.description,
-          link: this.formData.question.link,
-          image: this.formData.question.image,
-          parameter: this.formData.question.parameter,
-          order: this.formData.question.order,
-        })
-        .then(async (question) => {
-          this.formData.question.id = question.id;
-          if (
-            getQuestionResultStorageFromQuestionType(
-              this.formData.questionType
-            ) === QuestionResultStorage.VOTING
-          ) {
-            for (const answer of this.formData.answers) {
-              answer.parentId = question.id;
-              await hierarchyService.postHierarchy(this.taskId, {
+      await hierarchyService.putHierarchy(this.formData.question);
+      if (
+        getQuestionResultStorageFromQuestionType(this.formData.questionType) ===
+        QuestionResultStorage.VOTING
+      ) {
+        this.formData.answers.forEach((answer) => {
+          if (answer.id) hierarchyService.putHierarchy(answer);
+          else {
+            answer.parentId = this.formData.question.id;
+            hierarchyService
+              .postHierarchy(this.taskId, {
                 parentId: answer.parentId,
                 keywords: answer.keywords,
                 description: answer.description,
@@ -523,17 +496,71 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
                 image: answer.image,
                 parameter: answer.parameter,
                 order: answer.order,
+              })
+              .then((hierarchy) => {
+                answer.id = hierarchy.id;
               });
-            }
-            this.getHierarchies().then(() => {
-              this.setupEmptyQuestion();
-            });
-          } else {
-            this.getHierarchies().then(() => {
-              this.setupEmptyQuestion();
-            });
           }
         });
+        await this.getHierarchies();
+      } else if (
+        this.editQuestion &&
+        getQuestionResultStorageFromQuestionType(
+          this.editQuestion.questionType
+        ) === QuestionResultStorage.VOTING
+      ) {
+        for (const answer of this.editQuestion.answers) {
+          if (answer.id)
+            await hierarchyService.deleteHierarchy(
+              answer.id,
+              EndpointAuthorisationType.MODERATOR,
+              false
+            );
+        }
+      }
+      this.editQuestion = {
+        questionType: this.formData.questionType,
+        question: Object.assign({}, this.formData.question),
+        answers: this.formData.answers.map((answer) =>
+          Object.assign({}, answer)
+        ),
+      };
+    } else {
+      if (this.formData.question.order === null)
+        this.formData.question.order = this.questions.length;
+      const question = await hierarchyService.postHierarchy(this.taskId, {
+        keywords: this.formData.question.keywords,
+        description: this.formData.question.description,
+        link: this.formData.question.link,
+        image: this.formData.question.image,
+        parameter: this.formData.question.parameter,
+        order: this.formData.question.order,
+      });
+      this.formData.question.id = question.id;
+      if (
+        getQuestionResultStorageFromQuestionType(this.formData.questionType) ===
+        QuestionResultStorage.VOTING
+      ) {
+        for (const answer of this.formData.answers) {
+          answer.parentId = question.id;
+          await hierarchyService.postHierarchy(this.taskId, {
+            parentId: answer.parentId,
+            keywords: answer.keywords,
+            description: answer.description,
+            link: answer.link,
+            image: answer.image,
+            parameter: answer.parameter,
+            order: answer.order,
+          });
+        }
+        this.getHierarchies().then(() => {
+          this.setupEmptyQuestion();
+        });
+      } else {
+        this.getHierarchies().then(() => {
+          this.setupEmptyQuestion();
+        });
+      }
     }
   }
 
@@ -553,32 +580,30 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.reloadTaskSettings().then(() => {
-      this.setupEmptyQuestion();
+      if (this.questions.length === 0) this.setupEmptyQuestion();
+      else this.editQuestion = this.questions[0];
     });
   }
 
   async reloadTaskSettings(): Promise<void> {
-    await taskService.getTaskById(this.taskId).then((task) => {
-      this.task = task;
-      topicService.getTopicById(task.topicId).then((topic) => {
-        this.sessionId = topic.sessionId;
-      });
-      const module = task.modules.find((module) =>
-        moduleNameValid(module.name)
-      );
-      if (module) {
-        this.answerCount = module.parameter.answerCount;
-        if (module.parameter.questionType) {
-          this.questionnaireType =
-            QuestionnaireType[module.parameter.questionType.toUpperCase()];
-        } else {
-          this.questionnaireType = QuestionnaireType.QUIZ;
-        }
-        this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
-        this.defaultQuestionTime = module.parameter.defaultQuestionTime;
-      }
-      this.getHierarchies();
+    const task = await taskService.getTaskById(this.taskId);
+    this.task = task;
+    topicService.getTopicById(task.topicId).then((topic) => {
+      this.sessionId = topic.sessionId;
     });
+    const module = task.modules.find((module) => moduleNameValid(module.name));
+    if (module) {
+      this.answerCount = module.parameter.answerCount;
+      if (module.parameter.questionType) {
+        this.questionnaireType =
+          QuestionnaireType[module.parameter.questionType.toUpperCase()];
+      } else {
+        this.questionnaireType = QuestionnaireType.QUIZ;
+      }
+      this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
+      this.defaultQuestionTime = module.parameter.defaultQuestionTime;
+    }
+    await this.getHierarchies();
   }
 
   @Watch('sessionId', { immediate: true })
@@ -625,51 +650,48 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   async getHierarchies(): Promise<void> {
     if (this.taskId) {
-      await hierarchyService
-        .getList(
-          this.taskId,
-          '{parentHierarchyId}',
-          EndpointAuthorisationType.MODERATOR
-        )
-        .then(async (questions) => {
-          const result: Question[] = [];
-          let publicQuestion: Question | null = null;
-          for (const index in questions) {
-            const question = questions[index];
-            const questionType: QuestionType =
-              getQuestionTypeFromHierarchy(question);
-            const questionResultStorage: QuestionResultStorage =
-              getQuestionResultStorageFromQuestionType(questionType);
-            if (questionResultStorage === QuestionResultStorage.VOTING) {
-              await hierarchyService
-                .getList(this.taskId, question.id)
-                .then((answers) => {
-                  const item: Question = {
-                    questionType: questionType,
-                    question: question,
-                    answers: answers,
-                  };
-                  result.push(item);
-                  if (question.id == this.task?.parameter.activeQuestion) {
-                    publicQuestion = item;
-                  }
-                });
-            } else {
+      const questions = await hierarchyService.getList(
+        this.taskId,
+        '{parentHierarchyId}',
+        EndpointAuthorisationType.MODERATOR
+      );
+      const result: Question[] = [];
+      let publicQuestion: Question | null = null;
+      for (const index in questions) {
+        const question = questions[index];
+        const questionType: QuestionType =
+          getQuestionTypeFromHierarchy(question);
+        const questionResultStorage: QuestionResultStorage =
+          getQuestionResultStorageFromQuestionType(questionType);
+        if (questionResultStorage === QuestionResultStorage.VOTING) {
+          await hierarchyService
+            .getList(this.taskId, question.id)
+            .then((answers) => {
               const item: Question = {
                 questionType: questionType,
                 question: question,
-                answers: [],
+                answers: answers,
               };
               result.push(item);
               if (question.id == this.task?.parameter.activeQuestion) {
                 publicQuestion = item;
               }
-            }
+            });
+        } else {
+          const item: Question = {
+            questionType: questionType,
+            question: question,
+            answers: [],
+          };
+          result.push(item);
+          if (question.id == this.task?.parameter.activeQuestion) {
+            publicQuestion = item;
           }
-          this.questions = result;
-          if (publicQuestion) this.publicQuestion = publicQuestion;
-          await this.getVotes();
-        });
+        }
+      }
+      this.questions = result;
+      if (publicQuestion) this.publicQuestion = publicQuestion;
+      await this.getVotes();
     }
   }
 
@@ -793,17 +815,17 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 }
 
-.answerImage.stack::v-deep {
+.answerImage.stack {
   min-width: 4.5rem;
   max-height: 2.5rem;
   margin-left: 0.5rem;
   font-size: 0.7rem;
   position: relative;
   top: -2rem;
+}
 
-  .stack__action {
-    font-size: 1rem;
-    gap: 0.3rem;
-  }
+.answerImage.stack::v-deep(.stack__action) {
+  font-size: 1rem;
+  gap: 0.3rem;
 }
 </style>

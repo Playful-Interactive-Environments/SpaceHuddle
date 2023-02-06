@@ -121,6 +121,7 @@ $--font-size: (
 }
 
 .el-dialog {
+        margin: var(--el-dialog-margin-top, 15vh) auto 0;
         background-color: var(--color-background-gray);
         --el-dialog-padding-primary: #{$dialog-padding};
         max-width: 60rem;
@@ -141,6 +142,13 @@ $--font-size: (
                 .el-form-item--default {
                         margin-bottom: 0;
                 }
+        }
+}
+
+.el-dialog.big {
+        --el-dialog-margin-top: 10vh;
+        .el-dialog__body {
+                max-height: 80vh;
         }
 }
 
@@ -389,21 +397,33 @@ $--font-size: (
                 font-weight: var(--font-weight-semibold);
         }
 
-        &__suffix {
+        &__suffix, &--suffix {
                 right: 0;
+
+                .el-input__wrapper {
+                        padding-right: 0;
+                }
         }
 
-        &__prefix {
+        &__prefix, &--prefix {
                 left: 0;
+
+                .el-input__wrapper {
+                        padding-left: 0;
+                }
+
+                &-inner {
+                        padding: 0 0.5rem;
+                }
         }
 
-        &__suffix .el-icon {
-                margin-right: 0.8rem;
-                height: inherit;
+        &__suffix .el-icon, &--suffix .el-icon {
+                margin-right: 0.5rem;
+                //height: inherit;
         }
 
-        &__prefix .el-icon {
-                margin-left: 0.8rem;
+        &__prefix .el-icon, &--prefix .el-icon {
+                //margin-left: 0.8rem;
         }
 
         &__inner {
@@ -420,6 +440,10 @@ $--font-size: (
         }
 }
 
+.el-input--prefix .el-input__inner {
+        //padding-left: 45px;
+}
+
 .el-select {
         --el-select-input-color: var(--color-primary);
         --el-select-input-font-size: var(--font-size-default);
@@ -432,6 +456,10 @@ $--font-size: (
 
         .el-select__tags .el-tag--info {
                 background-color: unset;
+        }
+
+        .el-select-tags-wrapper.has-prefix {
+                margin-left: 33px;
         }
 }
 
@@ -511,6 +539,7 @@ $--font-size: (
 
 .el-message-box {
         max-width: var(--app-width);
+        width: auto;
 }
 
 .el-drawer {
@@ -526,10 +555,6 @@ $--font-size: (
 
 .el-drawer.rtl, .el-drawer.ltr {
         max-height: var(--app-height);
-}
-
-.el-input--prefix .el-input__inner {
-        padding-left: 45px;
 }
 
 .el-date-table td span {

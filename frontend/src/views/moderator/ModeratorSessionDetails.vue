@@ -64,14 +64,14 @@
     </template>
     <template v-slot:content>
       <draggable
+        v-if="topics"
         v-model="topics"
-        tag="transition-group"
         item-key="order"
         handle=".card__drag"
         @end="dragDone"
       >
         <template #item="{ element }">
-          <div class="detail__module">
+          <div class="detail__module" :key="element.order">
             <TopicCard
               :sessionId="sessionId"
               :topic="element"
@@ -89,6 +89,34 @@
           </div>
         </template>
       </draggable>
+      <!--<draggable
+        :list="topics"
+        tag="transition-group"
+        item-key="order"
+        handle=".card__drag"
+        @end="dragDone"
+      >
+        <div
+          class="detail__module"
+          v-for="element in topics"
+          :key="element.order"
+        >
+          <TopicCard
+            :sessionId="sessionId"
+            :topic="element"
+            :canModify="isModerator"
+            v-on:topicDeleted="getTopics"
+          >
+            <TaskTimeline
+              :topic-id="element.id"
+              :session-id="sessionId"
+              :is-linked-to-task="false"
+              v-on:changePublicScreen="setPublicTopic($event, element.id)"
+              :key="publicScreenTopic"
+            ></TaskTimeline>
+          </TopicCard>
+        </div>
+      </draggable>-->
       <TutorialStep
         v-if="isModerator"
         type="sessionDetails"
@@ -124,7 +152,6 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/ModeratorNavigationLayout.vue';
 import { formatDate } from '@/utils/date';
@@ -148,6 +175,8 @@ import FacilitatorSettings from '@/components/moderator/organisms/settings/Facil
 import UserType from '@/types/enum/UserType';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 import { reactivateTutorial } from '@/services/auth-service';
+//import { VueDraggableNext as draggable } from 'vue-draggable-next';
+import draggable from 'vuedraggable';
 
 @Options({
   components: {
@@ -250,9 +279,12 @@ export default class ModeratorSessionDetails extends Vue {
   }
 
   async deleteSession(): Promise<void> {
-    await sessionService.remove(this.sessionId).then((deleted) => {
-      if (deleted) this.$router.go(-1);
-    });
+    clearInterval(this.interval);
+    setTimeout(() => {
+      sessionService.remove(this.sessionId).then((deleted) => {
+        if (deleted) this.$router.go(-1);
+      });
+    }, 100);
   }
 
   async getPublicScreen(): Promise<void> {

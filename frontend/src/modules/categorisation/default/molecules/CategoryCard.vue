@@ -66,7 +66,7 @@
       :lock-scroll="false"
       size="60%"
     >
-      <template v-slot:title>
+      <template v-slot:header>
         <div class="media">
           <div class="media-left">
             <img

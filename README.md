@@ -20,7 +20,7 @@ The SpaceHuddle API requires the following setup:
 2. Check out the GitHub project on your webserver (for XAMPP for example in the directory `\xampp\htdocs\SpaceHuddle`).
 3. If not included in your setup, install Composer following the [instructions](https://getcomposer.org/download/) for your operating system.
 4. Open a shell/terminal/command prompt, change to the `api` directory and install the dependencies by calling `composer install`.
-5. Import `api/resources/schema.sql` into your database. This will create a database called "spacehuddle". Create a MySQL user with full permissions on the database. Enter your database credentials in `api/config/database.php`.
+5. Import `api/resources/schema.sql` into your database. This will create a database called "spacehuddle". Create a MySQL user with full permissions on the database. Enter your database credentials in `api/config/env.php` (see item 7).
 6. Create a public and private key and copy them into the directory `api/resources/keys`
     -  `openssl genrsa -out private.pem 2048`
     -  `openssl rsa -in private.pem -outform PEM -pubout -out public.pem`

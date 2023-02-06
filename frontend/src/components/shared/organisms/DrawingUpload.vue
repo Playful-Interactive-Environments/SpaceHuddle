@@ -3,9 +3,9 @@
     v-model="showSettings"
     width="calc(var(--app-width) * 0.8)"
     :before-close="handleClose"
-    custom-class="drawing-dialog"
+    class="drawing-dialog"
   >
-    <template #title>
+    <template #header>
       <span class="el-dialog__title">{{
         $t('shared.organism.drawingUploader.header')
       }}</span>
@@ -112,7 +112,7 @@ import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
 
 @Options({
   components: { VueDrawingCanvas, Cropper, ImageUploader },
-  emits: ['update:showModal', 'imageChanged'],
+  emits: ['update:modelValue', 'update:showModal', 'imageChanged'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -251,21 +251,19 @@ export default class DrawingUpload extends Vue {
   margin-right: 0.5rem;
 }
 
-.vue-advanced-cropper::v-deep {
-  .vue-advanced-cropper__background,
-  .vue-advanced-cropper__foreground {
-    background: white;
-  }
+.vue-advanced-cropper::v-deep(.vue-advanced-cropper__background),
+.vue-advanced-cropper::v-deep(.vue-advanced-cropper__foreground) {
+  background: white;
+}
 
-  .vue-simple-handler {
-    background: var(--color-primary);
-  }
+.vue-advanced-cropper::v-deep(.vue-simple-handler) {
+  background: var(--color-primary);
+}
 
-  .vue-simple-line {
-    border-color: var(--color-primary);
-    border-style: dashed;
-    border-width: 0.5;
-  }
+.vue-advanced-cropper::v-deep(.vue-simple-line) {
+  border-color: var(--color-primary);
+  border-style: dashed;
+  border-width: 0.5px;
 }
 
 .image-upload {

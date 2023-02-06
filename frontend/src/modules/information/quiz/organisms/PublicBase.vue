@@ -520,10 +520,8 @@ export default class PublicBase extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.el-space::v-deep {
-  .el-space__item {
-    width: 100%;
-  }
+.el-space::v-deep(.el-space__item) {
+  width: 100%;
 }
 
 .question {

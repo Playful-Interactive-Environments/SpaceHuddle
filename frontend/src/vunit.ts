@@ -13,7 +13,7 @@ const appViewport = () => {
       );*/
       viewport.setAttribute(
         'content',
-        `height=${window.innerHeight}px,width=${window.innerWidth}px,initial-scale=1.0`
+        `height=${window.innerHeight},width=${window.innerWidth},initial-scale=1.0`
       );
     }
   }, 300);

@@ -235,26 +235,29 @@ export default class PublicScreen extends Vue {
   color: white;
 }
 
-.sticky-header::v-deep {
+.sticky-header {
   background-color: var(--color-background-gray);
+}
 
-  .column {
-    background-color: var(--color-background-gray);
-    .el-card,
-    .item {
-      height: 100%;
-    }
+.sticky-header::v-deep(.column) {
+  background-color: var(--color-background-gray);
+  .el-card,
+  .item {
+    height: 100%;
   }
 }
 
-.column::v-deep {
+.column {
   max-width: 16rem;
   min-width: 10rem;
+}
 
-  .el-card,
-  .item {
-    height: unset;
-  }
+.column::v-deep(.el-card) {
+  height: unset;
+}
+
+.column::v-deep(.item) {
+  height: unset;
 }
 
 @media screen and (max-width: 768px) {

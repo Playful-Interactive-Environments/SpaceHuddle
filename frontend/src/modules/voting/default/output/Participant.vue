@@ -1,35 +1,32 @@
 <template>
-  <div id="loadingScreen">
-    <span>{{ $t('module.voting.default.participant.waiting') }}...</span>
-    <span
-      id="loading"
-      v-loading="true"
-      element-loading-background="rgba(0, 0, 0, 0)"
-    ></span>
-  </div>
-  <div id="starImageBackground">
-    <div id="starImageContainer">
-      <img
-        src="../../../../assets/illustrations/Voting/starDesat.png"
-        alt="star"
-        class="starImage"
-      />
-      <img
-        src="../../../../assets/illustrations/Voting/starGlow.png"
-        alt="star"
-        class="starImage"
-        id="glowingStar"
-        :style="{ '--star-opacity': getOpacity() }"
-      />
-    </div>
-  </div>
-
-  <ParticipantModuleDefaultContainer
-    :task-id="taskId"
-    :module="moduleName"
-    id="PMDC"
-  >
+  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
+    <template #header>
+      <div id="starImageBackground">
+        <div id="starImageContainer">
+          <img
+            src="@/assets/illustrations/Voting/starDesat.png"
+            alt="star"
+            class="starImage"
+          />
+          <img
+            src="@/assets/illustrations/Voting/starGlow.png"
+            alt="star"
+            class="starImage"
+            id="glowingStar"
+            :style="{ '--star-opacity': getOpacity() }"
+          />
+        </div>
+      </div>
+    </template>
     <div id="preloader"></div>
+    <div id="loadingScreen">
+      <span>{{ $t('module.voting.default.participant.waiting') }}...</span>
+      <span
+        id="loading"
+        v-loading="true"
+        element-loading-background="rgba(0, 0, 0, 0)"
+      ></span>
+    </div>
     <div class="media" v-if="ideaPointer < ideas.length">
       <IdeaCard
         class="media-left, IdeaCard"
@@ -87,35 +84,25 @@
       ></el-rate>
     </div>
 
-    <div id="ideaAndSkipOverlay" v-if="showIdeaOverlay">
-      <div id="backgroundOfOverlay" v-on:click="showIdeaOverlay = false"></div>
-      <span class="ideaCardSpan">
-        <font-awesome-icon
-          icon="plus"
-          class="x"
-          v-on:click="showIdeaOverlay = false"
-        />
-
-        <IdeaCard
-          v-if="ideaPointer < ideas.length && currentRateIdea"
-          :idea="ideas[ideaPointer]"
-          :is-selectable="false"
-          :is-editable="false"
-          :show-state="false"
-          class="ideaCardOverlay"
-        />
-        <IdeaCard
-          v-if="voteIdOverlay && !currentRateIdea"
-          class="ideaCardOverlay"
-          :idea="voteIdOverlay"
-          :is-selectable="false"
-          :is-editable="false"
-          :cutLongTexts="true"
-          :show-state="false"
-        />
-        <span id="clickOut" v-on:click="showIdeaOverlay = false"></span>
-      </span>
-    </div>
+    <el-dialog v-model="showIdeaOverlay" class="big">
+      <IdeaCard
+        v-if="ideaPointer < ideas.length && currentRateIdea"
+        :idea="ideas[ideaPointer]"
+        :is-selectable="false"
+        :is-editable="false"
+        :show-state="false"
+        class="ideaCardOverlay"
+      />
+      <IdeaCard
+        v-if="voteIdOverlay && !currentRateIdea"
+        class="ideaCardOverlay"
+        :idea="voteIdOverlay"
+        :is-selectable="false"
+        :is-editable="false"
+        :cutLongTexts="true"
+        :show-state="false"
+      />
+    </el-dialog>
   </ParticipantModuleDefaultContainer>
 </template>
 
@@ -377,20 +364,6 @@ export default class Participant extends Vue {
   flex-direction: column;
 }
 
-#PMDC {
-  border-radius: 30px 30px 0 0;
-  position: absolute;
-  top: 30%;
-  min-height: 70%;
-
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-
-  z-index: 1;
-}
-
 div#loadingScreen {
   position: absolute;
   width: 100%;
@@ -433,7 +406,7 @@ div#loadingScreen > span#loading {
   margin-bottom: auto;
 }
 
-div#loadingScreen > span#loading::v-deep .path {
+div#loadingScreen > span#loading::v-deep(.path) {
   stroke: white;
   stroke-width: 4;
 }
@@ -441,13 +414,13 @@ div#loadingScreen > span#loading::v-deep .path {
 @keyframes preloadSprites {
   /*Sprite changes (couldn't find a way to loop keyframes within animation)*/
   0% {
-    background-image: url('../../../../assets/illustrations/Voting/starDesat.png');
+    background-image: url('@/assets/illustrations/Voting/starDesat.png');
   }
   10% {
-    background-image: url('../../../../assets/illustrations/Voting/starGlow.png');
+    background-image: url('@/assets/illustrations/Voting/starGlow.png');
   }
   20% {
-    background-image: url('../../../../assets/illustrations/Voting/StarsSpace.png');
+    background-image: url('@/assets/illustrations/Voting/StarsSpace.png');
   }
 }
 
@@ -467,26 +440,21 @@ div#loadingScreen > span#loading::v-deep .path {
 }
 
 #starImageBackground {
-  position: absolute;
-
   max-width: inherit;
-  height: 100%;
+  padding-bottom: 2rem;
 
   left: 0;
   right: 0;
-  margin-left: auto;
-  margin-right: auto;
 
-  background-image: url('../../../../assets/illustrations/Voting/StarsSpace.png');
+  background-image: url('@/assets/illustrations/Voting/StarsSpace.png');
   background-size: contain;
 
   z-index: 0;
 }
 
 #starImageContainer {
-  position: absolute;
-
-  height: 23%;
+  position: relative;
+  height: 30vh;
 
   top: 0;
   left: 0;
@@ -497,7 +465,8 @@ div#loadingScreen > span#loading::v-deep .path {
 
 .starImage {
   position: absolute;
-  height: 100%;
+  height: 30vh;
+  align-self: center;
 
   left: 0;
   right: 0;
@@ -534,7 +503,7 @@ div#loadingScreen > span#loading::v-deep .path {
   padding: 3%;
 }
 
-.IdeaCard::v-deep .el-card__body {
+.IdeaCard::v-deep(.el-card__body) {
   display: flex;
   flex-direction: row;
 
@@ -546,7 +515,7 @@ div#loadingScreen > span#loading::v-deep .path {
   color: white;
 }
 
-.IdeaCard::v-deep .card__image {
+.IdeaCard::v-deep(.card__image) {
   height: 26%;
   width: 26%;
   border-radius: 20px;
@@ -554,7 +523,7 @@ div#loadingScreen > span#loading::v-deep .path {
   background-color: var(--color-gray);
 }
 
-.IdeaCard::v-deep .card__text {
+.IdeaCard::v-deep(.card__text) {
   padding: 1% 1% 1% 3%;
   height: 98%;
   /* Hide scrollbar for IE, Edge and Firefox */
@@ -563,103 +532,13 @@ div#loadingScreen > span#loading::v-deep .path {
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
-.IdeaCard::v-deep .card__text::-webkit-scrollbar {
+.IdeaCard::v-deep(.card__text)::-webkit-scrollbar {
   display: none;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
 .IdeaCard::-webkit-scrollbar {
   display: none;
-}
-
-div#ideaAndSkipOverlay {
-  position: fixed;
-
-  overflow: hidden;
-
-  top: 0;
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-
-  height: 100%;
-  max-width: 760px;
-}
-
-div#ideaAndSkipOverlay #backgroundOfOverlay {
-  position: absolute;
-
-  top: 0;
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-
-  height: 100%;
-  width: 100%;
-
-  background-color: #00000050;
-  z-index: 7;
-}
-
-div#ideaAndSkipOverlay .ideaCardSpan {
-  position: absolute;
-
-  width: 95%;
-  max-height: 70%;
-  min-height: 40%;
-
-  z-index: 7;
-  margin: auto;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-
-  background-color: transparent;
-}
-
-div#ideaAndSkipOverlay .ideaCardOverlay {
-  position: absolute;
-
-  overflow-y: scroll;
-
-  width: 100%;
-  height: auto;
-  min-height: 40%;
-  max-height: 100%;
-
-  padding: 2%;
-  margin-top: 0;
-
-  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.25);
-  border: 3px solid var(--color-darkblue);
-}
-#ideaAndSkipOverlay::v-deep .card__image {
-  border-radius: 20px;
-}
-
-div#ideaAndSkipOverlay .x {
-  position: absolute;
-  width: 10%;
-  height: 10%;
-
-  top: -8%;
-  right: 0;
-
-  color: white;
-
-  transform: rotate(45deg);
-
-  z-index: 8;
-  background-color: transparent;
-}
-
-span#clickOut {
-  display: block;
-  width: 100%;
-  height: 100%;
 }
 
 .el-rate.ratingStars {
@@ -670,7 +549,7 @@ span#clickOut {
   width: 100%;
 }
 
-.el-rate.ratingStars::v-deep path {
+.el-rate.ratingStars::v-deep(path) {
   color: var(--color-red);
 }
 </style>

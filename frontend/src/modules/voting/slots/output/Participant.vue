@@ -553,7 +553,7 @@ div#loadingScreen > span#loading {
   margin-bottom: auto;
 }
 
-div#loadingScreen > span#loading::v-deep .path {
+div#loadingScreen > span#loading::v-deep(.path) {
   stroke: white;
   stroke-width: 4;
 }
@@ -593,12 +593,12 @@ div#cache image {
   margin-left: auto;
   margin-right: auto;
 
-  background-image: url('../../../../assets/illustrations/Slots/Background.png');
+  background-image: url('@/assets/illustrations/Slots/Background.png');
   background-size: 100%;
   background-position: bottom;
   background-repeat: no-repeat;
 
-  mask-image: url('../../../../assets/illustrations/Slots/Mask.png');
+  mask-image: url('@/assets/illustrations/Slots/Mask.png');
   mask-size: contain;
   mask-repeat: repeat-x;
 }
@@ -614,7 +614,7 @@ div#rocketMask {
   margin-left: auto;
   margin-right: auto;
 
-  mask-image: url('../../../../assets/illustrations/Slots/Mask.png');
+  mask-image: url('@/assets/illustrations/Slots/Mask.png');
   mask-size: contain;
   mask-repeat: repeat;
 
@@ -633,101 +633,101 @@ div#rocketMask.rocketMaskSmall {
 @keyframes takeoffSprite {
   /*Sprite changes (couldn't find a way to loop keyframes within animation)*/
   0% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-none.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-none.png');
   }
   6% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-3.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-launch-3.png');
   }
   7% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-3.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-launch-3.png');
   }
   12% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-1.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-launch-1.png');
   }
   18% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-1.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-launch-1.png');
   }
   19% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-2.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-launch-2.png');
   }
   24% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-2.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-launch-2.png');
   }
   25% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-3.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-launch-3.png');
   }
   30% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-launch-3.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-launch-3.png');
   }
   31% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-3.png');
   }
   36% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-3.png');
   }
 
   37% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-1.png');
   }
   42% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-1.png');
   }
   43% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-2.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-2.png');
   }
   48% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-2.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-2.png');
   }
   49% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-3.png');
   }
   54% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-3.png');
   }
 
   55% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-1.png');
   }
   60% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-1.png');
   }
   61% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-2.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-2.png');
   }
   66% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-2.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-2.png');
   }
   72% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-3.png');
   }
   73% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-3.png');
   }
 
   78% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-1.png');
   }
   79% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-1.png');
   }
   84% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-2.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-2.png');
   }
   85% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-2.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-2.png');
   }
   90% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-3.png');
   }
   91% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-3.png');
   }
 
   96% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-1.png');
   }
   97% {
-    content: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+    content: url('@/assets/illustrations/Slots/fire/fire-1.png');
   }
 }
 @keyframes takeoffMove {
@@ -868,28 +868,28 @@ div#rocketMask.rocketMaskSmall {
 @keyframes preloadSprites {
   /*Sprite changes (couldn't find a way to loop keyframes within animation)*/
   0% {
-    background-image: url('../../../../assets/illustrations/Slots/fire/fire-none.png');
+    background-image: url('@/assets/illustrations/Slots/fire/fire-none.png');
   }
   10% {
-    background-image: url('../../../../assets/illustrations/Slots/fire/fire-launch-1.png');
+    background-image: url('@/assets/illustrations/Slots/fire/fire-launch-1.png');
   }
   20% {
-    background-image: url('../../../../assets/illustrations/Slots/fire/fire-launch-2.png');
+    background-image: url('@/assets/illustrations/Slots/fire/fire-launch-2.png');
   }
   30% {
-    background-image: url('../../../../assets/illustrations/Slots/fire/fire-launch-3.png');
+    background-image: url('@/assets/illustrations/Slots/fire/fire-launch-3.png');
   }
   40% {
-    background-image: url('../../../../assets/illustrations/Slots/fire/fire-1.png');
+    background-image: url('@/assets/illustrations/Slots/fire/fire-1.png');
   }
   50% {
-    background-image: url('../../../../assets/illustrations/Slots/fire/fire-2.png');
+    background-image: url('@/assets/illustrations/Slots/fire/fire-2.png');
   }
   60% {
-    background-image: url('../../../../assets/illustrations/Slots/fire/fire-3.png');
+    background-image: url('@/assets/illustrations/Slots/fire/fire-3.png');
   }
   70% {
-    background-image: url('../../../../assets/illustrations/Slots/Rocket parts/Window Astronaut.png');
+    background-image: url('@/assets/illustrations/Slots/Rocket parts/Window Astronaut.png');
   }
 }
 
@@ -960,7 +960,7 @@ img#fire {
 
   height: auto;
   width: 28%;
-  content: url('../../../../assets/illustrations/Slots/fire/fire-none.png');
+  content: url('@/assets/illustrations/Slots/fire/fire-none.png');
   z-index: 1;
 
   transition: 1s;
@@ -1013,13 +1013,13 @@ div#rocketColumn.blockScrolling {
 }
 
 .rocketTopImg {
-  content: url('../../../../assets/illustrations/Slots/Rocket parts/Top.png');
+  content: url('@/assets/illustrations/Slots/Rocket parts/Top.png');
 }
 .rocketMidImg {
-  content: url('../../../../assets/illustrations/Slots/Rocket parts/Mid.png');
+  content: url('@/assets/illustrations/Slots/Rocket parts/Mid.png');
 }
 .rocketBotImg {
-  content: url('../../../../assets/illustrations/Slots/Rocket parts/Bot.png');
+  content: url('@/assets/illustrations/Slots/Rocket parts/Bot.png');
 }
 
 .el-button.rocketWindow {
@@ -1036,13 +1036,13 @@ div#rocketColumn.blockScrolling {
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  background-image: url('../../../../assets/illustrations/Slots/Rocket parts/Window.png');
+  background-image: url('@/assets/illustrations/Slots/Rocket parts/Window.png');
 
   z-index: 3;
 }
 
 .el-button.rocketWindowAstronaut {
-  background-image: url('../../../../assets/illustrations/Slots/Rocket parts/Window Astronaut.png');
+  background-image: url('@/assets/illustrations/Slots/Rocket parts/Window Astronaut.png');
   transition: 0.5s;
 }
 
@@ -1079,19 +1079,19 @@ div#Platform.PlatformBig {
 img#frontPlatform {
   position: absolute;
   bottom: 1.5%;
-  content: url('../../../../assets/illustrations/Slots/PlatformFront.png');
+  content: url('@/assets/illustrations/Slots/PlatformFront.png');
   z-index: 4;
 }
 img#backPlatform {
   position: absolute;
   bottom: 1.4%;
-  content: url('../../../../assets/illustrations/Slots/PlatformBack.png');
+  content: url('@/assets/illustrations/Slots/PlatformBack.png');
 
   z-index: 0;
 }
 img#extendPlatform {
   position: absolute;
-  content: url('../../../../assets/illustrations/Slots/PlatformExtension.png');
+  content: url('@/assets/illustrations/Slots/PlatformExtension.png');
 
   z-index: 0;
 }
@@ -1208,7 +1208,7 @@ span#endOfIdeas > span {
   scrollbar-width: none; /* Firefox */
 }
 
-#ideaAndSkip::v-deep .el-card__body {
+#ideaAndSkip::v-deep(.el-card__body) {
   display: flex;
   flex-direction: row;
 
@@ -1217,14 +1217,14 @@ span#endOfIdeas > span {
   height: 20%;
 }
 
-#ideaAndSkip::v-deep .card__image {
+#ideaAndSkip::v-deep(.card__image) {
   height: 26%;
   width: 26%;
   border-radius: 20px;
   padding: 1% 1% 1% 0;
 }
 
-#ideaAndSkip::v-deep .card__text {
+#ideaAndSkip::v-deep(.card__text) {
   padding: 1% 1% 1% 3%;
   height: 98%;
   /* Hide scrollbar for IE, Edge and Firefox */
@@ -1233,7 +1233,7 @@ span#endOfIdeas > span {
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
-#ideaAndSkip::v-deep .card__text::-webkit-scrollbar {
+#ideaAndSkip::v-deep(.card__text)::-webkit-scrollbar {
   display: none;
 }
 
@@ -1329,7 +1329,7 @@ div#ideaAndSkipOverlay .ideaCard {
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.25);
   border: 3px solid var(--color-darkblue);
 }
-#ideaAndSkipOverlay::v-deep .card__image {
+#ideaAndSkipOverlay::v-deep(.card__image) {
   border-radius: 20px;
 }
 

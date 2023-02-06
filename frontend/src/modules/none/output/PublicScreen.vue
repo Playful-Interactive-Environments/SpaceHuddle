@@ -28,12 +28,12 @@ export default class PublicScreen extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.el-empty::v-deep {
+.el-empty {
   margin-top: 8rem;
   color: var(--el-text-color-secondary);
+}
 
-  .el-loading-mask {
-    background-color: unset;
-  }
+.el-empty::v-deep(.el-loading-mask) {
+  background-color: unset;
 }
 </style>

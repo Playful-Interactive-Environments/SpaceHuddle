@@ -1,6 +1,17 @@
 <template>
   <el-container class="module-content">
-    <el-header>
+    <el-header v-if="$slots.header" class="slotsHeader">
+      <slot name="header"></slot>
+      <TaskInfo
+        :taskId="taskId"
+        :modules="[module]"
+        :is-participant="true"
+        :shortenDescription="false"
+        :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+        class="infoSection"
+      />
+    </el-header>
+    <el-header v-else>
       <TaskInfo
         :taskId="taskId"
         :modules="[module]"
@@ -38,6 +49,22 @@ export default class ParticipantModuleDefaultContainer extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.slotsHeader {
+  max-width: inherit;
+  margin: -1rem -2rem 0 -2rem;
+  left: 0;
+  right: 0;
+  z-index: 0;
+}
+
+.infoSection {
+  max-width: inherit;
+  margin-top: -1.5rem;
+  border-radius: 30px 30px 0 0;
+  background-color: white;
+  padding: 1rem 2rem;
+}
+
 .right {
   position: absolute;
   top: 1rem;
@@ -56,25 +83,23 @@ export default class ParticipantModuleDefaultContainer extends Vue {
   position: relative;
 }
 
-.el-affix::v-deep {
-  .el-affix--fixed {
-    background-color: white;
-    padding: 1rem 0;
-    margin-bottom: -1.3rem;
-  }
+.el-affix::v-deep(.el-affix--fixed) {
+  background-color: white;
+  padding: 1rem 0;
+  margin-bottom: -1.3rem;
+}
 
-  .el-form {
-    margin-bottom: 2.3rem;
-  }
+.el-affix::v-deep(.el-form) {
+  margin-bottom: 2.3rem;
+}
 
-  .el-form-item--default {
-    margin-bottom: 0;
-  }
+.el-affix::v-deep(.el-form-item--default) {
+  margin-bottom: 0;
+}
 
-  .media {
-    flex-direction: row;
-    width: 100%;
-  }
+.el-affix::v-deep(.media) {
+  flex-direction: row;
+  width: 100%;
 }
 
 .fixed {

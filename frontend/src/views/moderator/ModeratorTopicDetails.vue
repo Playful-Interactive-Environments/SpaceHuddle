@@ -597,9 +597,12 @@ export default class ModeratorTopicDetails extends Vue {
   }
 
   deleteTopic(): void {
-    topicService.deleteTopic(this.topicId).then((deleted) => {
-      if (deleted) this.$router.go(-1);
-    });
+    clearInterval(this.interval);
+    setTimeout(() => {
+      topicService.deleteTopic(this.topicId).then((deleted) => {
+        if (deleted) this.$router.go(-1);
+      });
+    }, 100);
   }
 
   taskCommand(task: Task, command: string): void {
@@ -696,81 +699,80 @@ export default class ModeratorTopicDetails extends Vue {
   }
 }
 
-.el-collapse::v-deep {
+.el-collapse {
   margin: 1rem 0;
   border-top: unset;
   border-bottom: unset;
+}
 
-  .el-collapse-item {
-    border-radius: var(--border-radius-xs);
-    margin-top: 0.5rem;
-    background-color: var(--color-background-gray);
-  }
+.el-collapse::v-deep(.el-collapse-item) {
+  border-radius: var(--border-radius-xs);
+  margin-top: 0.5rem;
+  background-color: var(--color-background-gray);
+}
 
-  .el-collapse-item__header {
-    --header-radius: calc(var(--border-radius-xs) - 2px);
-    padding: 0.5rem 1rem;
-    background-color: var(--module-color);
-    border-radius: var(--header-radius);
-    color: white;
-    height: unset;
-    line-height: unset;
-    border-bottom: unset;
+.el-collapse::v-deep(.el-collapse-item__header) {
+  --header-radius: calc(var(--border-radius-xs) - 2px);
+  padding: 0.5rem 1rem;
+  background-color: var(--module-color);
+  border-radius: var(--header-radius);
+  color: white;
+  height: unset;
+  line-height: unset;
+  border-bottom: unset;
 
-    &.is-active {
-      border-radius: var(--header-radius) var(--header-radius) 0 0;
-    }
-  }
-
-  .el-collapse-item__wrap {
-    border-bottom: unset;
-  }
-
-  .el-collapse-item__content {
-    padding: 0.5rem;
-  }
-
-  .taskType {
-    width: 100%;
-  }
-
-  .taskCategory {
-    padding-left: 0.5rem;
+  &.is-active {
+    border-radius: var(--header-radius) var(--header-radius) 0 0;
   }
 }
 
-.el-dropdown::v-deep {
+.el-collapse::v-deep(.el-collapse-item__wrap) {
+  border-bottom: unset;
+}
+
+.el-collapse::v-deep(.el-collapse-item__content) {
+  padding: 0.5rem;
+}
+
+.el-collapse::v-deep(.taskType) {
+  width: 100%;
+}
+
+.el-collapse::v-deep(.taskCategory) {
+  padding-left: 0.5rem;
+}
+
+.el-dropdown {
   color: var(--module-color);
 }
 
-.el-space::v-deep {
+.el-space {
   width: 100%;
-
-  .el-space {
-    &__item {
-      width: 100%;
-    }
-  }
 }
 
-.el-card::v-deep {
+.el-space::v-deep(.el-space__item) {
+  width: 100%;
+}
+
+.el-card {
   margin-bottom: unset;
-  .el-card__body {
-    padding: 0.5rem 0.8rem;
-  }
+}
 
-  .person {
-    font-weight: var(--font-weight-semibold);
-    font-size: 0.7rem;
-    color: var(--module-color);
-    border-radius: var(--border-radius-xs);
-    padding: 0.3rem;
-  }
+.el-card::v-deep(.el-card__body) {
+  padding: 0.5rem 0.8rem;
+}
 
-  .separator {
-    color: var(--module-color);
-    font-weight: var(--font-weight-semibold);
-  }
+.el-card::v-deep(.person) {
+  font-weight: var(--font-weight-semibold);
+  font-size: 0.7rem;
+  color: var(--module-color);
+  border-radius: var(--border-radius-xs);
+  padding: 0.3rem;
+}
+
+.el-card::v-deep(.separator) {
+  color: var(--module-color);
+  font-weight: var(--font-weight-semibold);
 }
 
 .selected {
@@ -782,24 +784,20 @@ export default class ModeratorTopicDetails extends Vue {
     color: white;
   }
 
-  .el-dropdown::v-deep {
+  .el-dropdown {
     color: white;
   }
 }
 
-.add::v-deep {
-  &.add--column,
-  &.add--column .el-card__body {
-    min-height: unset;
-    padding: 0.1rem;
-    flex-direction: row;
-  }
+.add--column.add,
+.add--column.add::v-deep(.el-card__body) {
+  min-height: unset;
+  padding: 0.1rem;
+  flex-direction: row;
 }
 
-.module-info::v-deep {
-  .media-right {
-    margin-left: 0.2rem;
-  }
+.module-info::v-deep(.media-right) {
+  margin-left: 0.2rem;
 }
 
 .selected {
@@ -807,10 +805,8 @@ export default class ModeratorTopicDetails extends Vue {
   border-color: var(--module-color);
   background-color: var(--module-color);
 
-  .module-info::v-deep {
-    .module-info__type {
-      color: white;
-    }
+  .module-info::v-deep(.module-info__type) {
+    color: white;
   }
 }
 

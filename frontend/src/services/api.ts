@@ -1,4 +1,8 @@
-import Axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import Axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosRequestHeaders,
+} from 'axios';
 import {
   getAccessTokenModerator,
   getAccessTokenParticipant,
@@ -27,7 +31,7 @@ const interceptorAuthHeader = (
 
     axiosConfig.headers = {
       Authorization: jwt,
-    };
+    } as any;
   }
   return axiosConfig;
 };
@@ -105,7 +109,7 @@ export async function apiExecuteGetHandled<T = any>(
 ): Promise<T> {
   try {
     return await apiExecuteGet(url, authHeaderType);
-  } catch (error) {
+  } catch (error: any) {
     if (error.message == 'Network Error') {
       try {
         return await apiExecuteGet(url, authHeaderType);

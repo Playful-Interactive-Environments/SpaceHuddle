@@ -4,7 +4,7 @@
     width="calc(var(--app-width) * 0.8)"
     :before-close="handleClose"
   >
-    <template #title>
+    <template #header>
       <span class="el-dialog__title">{{
         $t('shared.organism.imageUploader.header')
       }}</span>
@@ -249,37 +249,36 @@ export default class ImageUploader extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.el-upload::v-deep {
+.el-upload {
+  display: inline-block;
   --image-size: 122px;
   text-align: left;
   width: 100%;
-
-  .el-upload {
-    width: 100%;
-  }
-
-  .el-upload-dragger {
-    width: unset;
-    height: unset;
-    padding: 2rem;
-  }
 }
 
-.vue-advanced-cropper::v-deep {
-  .vue-advanced-cropper__background,
-  .vue-advanced-cropper__foreground {
-    background: white;
-  }
+.el-upload::v-deep(.el-upload) {
+  width: 100%;
+}
 
-  .vue-simple-handler {
-    background: var(--color-primary);
-  }
+.el-upload::v-deep(.el-upload-dragger) {
+  width: unset;
+  height: unset;
+  padding: 2rem;
+}
 
-  .vue-simple-line {
-    border-color: var(--color-primary);
-    border-style: dashed;
-    border-width: 0.5;
-  }
+.vue-advanced-cropper::v-deep(.vue-advanced-cropper__background),
+.vue-advanced-cropper::v-deep(.vue-advanced-cropper__foreground) {
+  background: white;
+}
+
+.vue-advanced-cropper::v-deep(.vue-simple-handler) {
+  background: var(--color-primary);
+}
+
+.vue-advanced-cropper::v-deep(.vue-simple-line) {
+  border-color: var(--color-primary);
+  border-style: dashed;
+  border-width: 0.5px;
 }
 
 .image-upload {

@@ -15,7 +15,9 @@
           v-if="taskType"
         >
           <el-breadcrumb-item v-for="module in moduleInfo" :key="module">
-            {{ $t(`module.${taskType}.${module}.description.title`) }}
+            <span v-if="module">
+              {{ $t(`module.${taskType}.${module}.description.title`) }}
+            </span>
           </el-breadcrumb-item>
         </el-breadcrumb>
       </span>
@@ -146,7 +148,7 @@ export default class TaskInfo extends Vue {
   &__description {
     margin-top: 0.5rem;
     line-height: 1.2;
-    text-align: justify;
+    text-align: left;
     white-space: pre-line;
 
     @include md {
@@ -167,17 +169,15 @@ export default class TaskInfo extends Vue {
   }
 }
 
-.el-breadcrumb::v-deep {
-  .el-breadcrumb__inner,
-  .el-breadcrumb__item:last-child .el-breadcrumb__inner,
-  .el-breadcrumb__separator {
-    color: unset;
-    margin: unset;
-  }
+.el-breadcrumb::v-deep(.el-breadcrumb__inner),
+.el-breadcrumb::v-deep(.el-breadcrumb__item):last-child .el-breadcrumb__inner,
+.el-breadcrumb::v-deep(.el-breadcrumb__separator) {
+  color: unset;
+  margin: unset;
+}
 
-  .el-breadcrumb__item {
-    float: unset;
-    display: inline;
-  }
+.el-breadcrumb::v-deep(.el-breadcrumb__item) {
+  float: unset;
+  display: inline;
 }
 </style>

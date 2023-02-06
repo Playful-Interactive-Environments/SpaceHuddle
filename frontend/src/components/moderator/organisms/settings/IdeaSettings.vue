@@ -10,7 +10,7 @@
       width="calc(var(--app-width) * 0.8)"
       :before-close="handleClose"
     >
-      <template #title>
+      <template #header>
         <span class="el-dialog__title" v-if="title">{{ title }}</span>
         <span class="el-dialog__title" v-else>{{
           $t('moderator.organism.settings.ideaSettings.header')

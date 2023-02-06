@@ -302,12 +302,13 @@ export default class ParticipantModuleContent extends Vue {
   padding: 10px 20px 0 20px;
 }
 
-.el-page-header::v-deep {
+.el-page-header {
   color: white;
-  .el-page-header__content {
-    color: white;
-    text-transform: uppercase;
-  }
+}
+
+.el-page-header::v-deep(.el-page-header__content) {
+  color: white;
+  text-transform: uppercase;
 }
 
 .right {
@@ -331,13 +332,11 @@ export default class ParticipantModuleContent extends Vue {
   text-align: center;
 }
 
-.el-tabs::v-deep {
-  .el-tabs__header {
-    margin: 0;
-  }
+.el-tabs::v-deep(.el-tabs__header) {
+  margin: 0;
+}
 
-  .el-tabs__nav-wrap::after {
-    background-color: var(--color-gray-inactive);
-  }
+.el-tabs::v-deep(.el-tabs__nav-wrap)::after {
+  background-color: var(--color-gray-inactive);
 }
 </style>

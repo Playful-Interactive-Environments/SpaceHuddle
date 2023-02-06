@@ -350,12 +350,12 @@ h3 {
   margin-bottom: 1rem;
 }
 
-.module-info::v-deep {
+.module-info {
   flex-grow: unset;
+}
 
-  h3 {
-    font-size: 1.5rem;
-  }
+.module-info::v-deep(h3) {
+  font-size: 1.5rem;
 }
 
 .public-screen {
@@ -399,10 +399,8 @@ h3 {
       overflow: unset;
     }
 
-    .media::v-deep {
-      .logo {
-        padding: 0;
-      }
+    .media::v-deep(.logo) {
+      padding: 0;
     }
   }
 
@@ -430,13 +428,12 @@ h3 {
     scrollbar-width: thin;
     margin: 0;
 
-    .el-scrollbar::v-deep {
-      .el-scrollbar__wrap {
-        padding: 0 var(--side-padding);
-      }
-      .el-scrollbar__view {
-        padding-top: 2rem;
-      }
+    .el-scrollbar::v-deep(.el-scrollbar__wrap) {
+      padding: 0 var(--side-padding);
+    }
+
+    .el-scrollbar::v-deep(.el-scrollbar__view) {
+      padding-top: 2rem;
     }
   }
 
@@ -539,11 +536,9 @@ h3 {
     left: 0;
     padding: 0 1rem;
 
-    .public-header::v-deep {
-      .media-content {
-        text-align: right;
-        margin-right: 2rem;
-      }
+    .public-header::v-deep(.media-content) {
+      text-align: right;
+      margin-right: 2rem;
     }
   }
 

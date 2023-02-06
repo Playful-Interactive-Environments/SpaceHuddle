@@ -10,7 +10,7 @@
       :before-close="handleClose"
       width="calc(var(--app-width) * 0.8)"
     >
-      <template #title>
+      <template #header>
         <span class="el-dialog__title">{{
           $t('module.categorisation.default.settings.header')
         }}</span>

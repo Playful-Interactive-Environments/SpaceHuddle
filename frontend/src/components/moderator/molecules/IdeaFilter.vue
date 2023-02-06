@@ -359,11 +359,9 @@ export default class IdeaFilter extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.el-input::v-deep {
-  .el-input__prefix-inner {
-    padding: 0 0.5rem;
-    margin: auto;
-  }
+.el-input::v-deep(.el-input__prefix-inner) {
+  padding: 0 0.5rem;
+  margin: auto;
 }
 
 .link {

@@ -8,7 +8,7 @@
     "moderatedQuestionFlow": "Moderierter Fragenfluss",
     "questionType": "Fragebogentyp",
     "time": "Zeit",
-    "answerCountExample": 3
+    "answerCountExample": "3"
   },
   "moderatorContent": {
     "questionType": "Fragetyp",

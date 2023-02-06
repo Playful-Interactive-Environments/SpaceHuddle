@@ -200,24 +200,22 @@ export default class PublicScreen extends Vue {
   height: 100%;
 }
 
-.el-card::v-deep {
-  .el-card__body {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
+.el-card::v-deep(.el-card__body) {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
 
-  .card__text {
-    flex-basis: auto;
-    flex-grow: 1;
-    flex-shrink: 1;
-    text-align: inherit;
+.el-card::v-deep(.card__text) {
+  flex-basis: auto;
+  flex-grow: 1;
+  flex-shrink: 1;
+  text-align: inherit;
 
-    display: flex;
-    flex-direction: column;
-    //justify-content: space-between;
-    //align-items: center;
-    gap: 0.5rem;
-  }
+  display: flex;
+  flex-direction: column;
+  //justify-content: space-between;
+  //align-items: center;
+  gap: 0.5rem;
 }
 </style>

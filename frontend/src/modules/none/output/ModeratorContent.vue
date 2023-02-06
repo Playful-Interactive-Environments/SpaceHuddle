@@ -24,9 +24,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 </script>
 
 <style lang="scss" scoped>
-.fill::v-deep {
-  .el-loading-mask {
-    background-color: unset;
-  }
+.fill::v-deep(.el-loading-mask) {
+  background-color: unset;
 }
 </style>

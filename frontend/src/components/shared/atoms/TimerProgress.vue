@@ -139,9 +139,7 @@ export default class TimerProgress extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.el-progress::v-deep {
-  .el-progress-bar__outer {
-    border: 1px var(--color-primary) solid;
-  }
+.el-progress::v-deep(.el-progress-bar__outer) {
+  border: 1px var(--color-primary) solid;
 }
 </style>

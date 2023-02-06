@@ -99,6 +99,7 @@
           >
             <template #item="{ element, index }">
               <el-step
+                :key="index"
                 icon="-"
                 :id="getKey(element)"
                 :style="{
@@ -698,7 +699,7 @@ export default class ProcessTimeline extends Vue {
   color: var(--module-color);
 }
 
-.el-pagination::v-deep {
+.el-pagination {
   text-align: center;
 }
 
@@ -715,169 +716,168 @@ export default class ProcessTimeline extends Vue {
   height: 100%;
 }
 
-.el-steps::v-deep {
+.el-steps {
   overflow-x: unset;
+}
 
-  .el-step__line {
-    background-color: var(--color-foreground);
+.el-steps::v-deep(.el-step__line) {
+  background-color: var(--color-foreground);
+}
+
+.el-steps::v-deep(.el-step__line-inner) {
+  border-style: none;
+}
+
+.el-steps::v-deep(.el-step__icon) {
+  background: var(--color-background);
+  border-radius: var(--corner-radius);
+}
+
+.el-steps::v-deep(.el-step__title) {
+  margin-top: 0.5rem;
+  &.is-process,
+  &.is-finish {
+    color: inherit;
   }
+}
 
-  .el-step__icon {
-    background: var(--color-background);
-    border-radius: var(--corner-radius);
-  }
+.el-steps::v-deep(.is-icon) {
+  width: 40px;
+  font-size: var(--font-size-large);
+}
 
-  .el-step__title {
-    margin-top: 0.5rem;
-    &.is-process,
-    &.is-finish {
-      color: inherit;
-    }
-  }
-
+.el-steps::v-deep(.is-process) {
+  font-weight: var(--font-weight-bold);
   .is-icon {
-    width: 40px;
-    font-size: var(--font-size-large);
-  }
+    width: 55px;
+    font-size: var(--font-size-xxlarge);
 
-  .is-process {
-    font-weight: var(--font-weight-bold);
-    .is-icon {
-      width: 55px;
-      font-size: var(--font-size-xxlarge);
-
-      .processIcon {
-        background-color: var(--color-foreground);
-      }
-
-      .withoutIcon {
-        color: var(--color-background);
-      }
-    }
-  }
-
-  .el-step__description {
-    padding-top: var(--description-padding);
-    line-height: 0.8rem;
-    /* These are technically the same, but use both */
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    color: var(--color-foreground);
-
-    -ms-word-break: break-all;
-    /* This is the dangerous one in WebKit, as it breaks things wherever */
-    word-break: break-all;
-    /* Instead use this non-standard one: */
-    word-break: break-word;
-
-    /* Adds a hyphen where the word breaks, if supported (No Blink) */
-    -ms-hyphens: auto;
-    -moz-hyphens: auto;
-    -webkit-hyphens: auto;
-    hyphens: auto;
-
-    &.is-wait {
-      color: var(--color-foreground);
-    }
-  }
-
-  .el-step.is-center {
-    .el-step__description {
-      padding-left: 10%;
-      padding-right: 10%;
-    }
-  }
-
-  &.readonly {
-    .el-step__icon {
-      cursor: unset;
+    .processIcon {
+      background-color: var(--color-foreground);
     }
 
-    .is-icon {
-      width: 25px;
-      font-size: var(--font-size-large);
-    }
-
-    .el-step__description {
-      padding-top: 12.5px;
-
-      &.is-process {
-        padding-top: 0;
-      }
-    }
-
-    .is-wait img {
-      -webkit-filter: grayscale(1); /* Webkit */
-      filter: gray; /* IE6-9 */
-      filter: grayscale(1); /* W3C */
-    }
-
-    .is-process {
-      font-weight: var(--font-weight-bold);
-      .is-icon {
-        width: 50px;
-        font-size: var(--font-size-xxxlarge);
-      }
-    }
-
-    .is-finish {
+    .withoutIcon {
+      color: var(--color-background);
     }
   }
 }
 
-.el-slider::v-deep {
+.el-steps::v-deep(.el-step__description) {
+  padding-top: var(--description-padding);
+  line-height: 0.8rem;
+  /* These are technically the same, but use both */
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  color: var(--color-foreground);
+
+  -ms-word-break: break-all;
+  /* This is the dangerous one in WebKit, as it breaks things wherever */
+  word-break: break-all;
+  /* Instead use this non-standard one: */
+  word-break: break-word;
+
+  /* Adds a hyphen where the word breaks, if supported (No Blink) */
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+
+  &.is-wait {
+    color: var(--color-foreground);
+  }
+}
+
+.el-steps::v-deep(.el-step.is-center) {
+  .el-step__description {
+    padding-left: 10%;
+    padding-right: 10%;
+  }
+}
+
+.readonly.el-steps::v-deep(.el-step__icon) {
+  cursor: unset;
+}
+
+.readonly.el-steps::v-deep(.is-icon) {
+  width: 25px;
+  font-size: var(--font-size-large);
+}
+
+.readonly.el-steps::v-deep(.el-step__description) {
+  padding-top: 12.5px;
+
+  &.is-process {
+    padding-top: 0;
+  }
+}
+
+.readonly.el-steps::v-deep(.is-wait img) {
+  -webkit-filter: grayscale(1); /* Webkit */
+  filter: gray; /* IE6-9 */
+  filter: grayscale(1); /* W3C */
+}
+
+.readonly.el-steps::v-deep(.is-process) {
+  font-weight: var(--font-weight-bold);
+  .is-icon {
+    width: 50px;
+    font-size: var(--font-size-xxxlarge);
+  }
+}
+
+.el-slider {
   --el-slider-runway-bg-color: var(--color-gray-dark);
   margin: 0.3rem var(--margin-side);
+}
 
-  .el-slider__button {
-    width: 1rem;
-    height: 1rem;
-    display: none;
-  }
+.el-slider::v-deep(.el-slider__button) {
+  width: 1rem;
+  height: 1rem;
+  display: none;
+}
 
-  .el-slider__bar {
-    --height: 0.5rem;
-    --background_color: var(--color-foreground);
-    background-image: linear-gradient(
-        315deg,
-        var(--background_color) 25%,
-        transparent 25%
-      ),
-      linear-gradient(225deg, var(--background_color) 25%, transparent 25%);
-    background-position-x: 0, 0;
-    background-position-y: calc(var(--height) / 2), calc(var(--height) / 2);
-    background-size: var(--height) var(--height);
-    background-color: var(--color-background);
-    height: var(--height);
-  }
+.el-slider::v-deep(.el-slider__bar) {
+  --height: 0.5rem;
+  --background_color: var(--color-foreground);
+  background-image: linear-gradient(
+      315deg,
+      var(--background_color) 25%,
+      transparent 25%
+  ),
+  linear-gradient(225deg, var(--background_color) 25%, transparent 25%);
+  background-position-x: 0, 0;
+  background-position-y: calc(var(--height) / 2), calc(var(--height) / 2);
+  background-size: var(--height) var(--height);
+  background-color: var(--color-background);
+  height: var(--height);
+}
 
-  .el-slider__runway {
-    --height: 0.5rem;
-    --background_color: var(--color-foreground);
-    background-image: linear-gradient(
-        135deg,
-        var(--background_color) 25%,
-        transparent 25%
-      ),
-      linear-gradient(45deg, var(--background_color) 25%, transparent 25%);
-    background-position-y: calc(var(--height) / 2), calc(var(--height) / 2);
-    background-size: var(--height) var(--height);
-    --step-size: calc(100% / (var(--slider-steps) - 1));
-    --slider-marker: calc(var(--step-size) * var(--slider-position));
-    --color-none: #{rgba(#000, 0.2)};
-    --mask: linear-gradient(
+.el-slider::v-deep(.el-slider__runway) {
+  --height: 0.5rem;
+  --background_color: var(--color-foreground);
+  background-image: linear-gradient(
+      135deg,
+      var(--background_color) 25%,
+      transparent 25%
+  ),
+  linear-gradient(45deg, var(--background_color) 25%, transparent 25%);
+  background-position-y: calc(var(--height) / 2), calc(var(--height) / 2);
+  background-size: var(--height) var(--height);
+  --step-size: calc(100% / (var(--slider-steps) - 1));
+  --slider-marker: calc(var(--step-size) * var(--slider-position));
+  --color-none: #{rgba(#000, 0.2)};
+  --mask: linear-gradient(
       90deg,
       var(--color-none) 0%,
       var(--color-none) calc(var(--slider-marker) - var(--step-size)),
       red var(--slider-marker),
       var(--color-none) calc(var(--slider-marker) + var(--step-size)),
       var(--color-none) 100%
-    );
-    -webkit-mask: var(--mask);
-    mask: var(--mask);
-    background-color: var(--color-background);
-    height: var(--height);
-  }
+  );
+  -webkit-mask: var(--mask);
+  mask: var(--mask);
+  background-color: var(--color-background);
+  height: var(--height);
 }
 
 .is-process {

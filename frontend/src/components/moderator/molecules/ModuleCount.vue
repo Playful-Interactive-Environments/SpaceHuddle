@@ -145,16 +145,16 @@ export default class ModuleCount extends Vue {
   margin-left: 5px;
 }
 
-.participant-list::v-deep {
+.participant-list {
   font-size: 1.5rem;
   overflow-y: auto;
   scrollbar-color: var(--color-primary) var(--color-gray);
   scrollbar-width: thin;
   max-height: calc(var(--app-height) / 2);
+}
 
-  .el-space__item {
-    padding-top: 0.5rem;
-    padding-right: 0.5rem;
-  }
+.participant-list::v-deep(.el-space__item) {
+  padding-top: 0.5rem;
+  padding-right: 0.5rem;
 }
 </style>

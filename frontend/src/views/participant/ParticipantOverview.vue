@@ -183,23 +183,21 @@ export default class ParticipantOverview extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.el-button.fullwidth::v-deep {
+.el-button.fullwidth {
   margin: 0 1rem 1rem;
   width: calc(100% - 2rem);
   justify-content: flex-start;
-
-  .el-icon {
-    margin-right: 5.6rem;
-  }
 }
 
-.participant-overview::v-deep {
-  .el-main {
-    display: block;
+.el-button.fullwidth::v-deep(.el-icon) {
+  margin-right: 5.6rem;
+}
 
-    .el-collapse {
-      margin-bottom: 1rem;
-    }
+.participant-overview::v-deep(.el-main) {
+  display: block;
+
+  .el-collapse {
+    margin-bottom: 1rem;
   }
 }
 
@@ -264,25 +262,25 @@ export default class ParticipantOverview extends Vue {
   font-size: 2.5rem;
 }
 
-.el-collapse::v-deep {
+.el-collapse {
   margin-bottom: unset;
   --el-collapse-header-font-color: white;
   border: unset;
   width: 100%;
+}
 
-  .el-collapse-item {
-    border-radius: 1rem;
-    background-color: white;
-    //background-color: var(--color-transparent-dark);
-    margin: 1rem;
+.el-collapse::v-deep(.el-collapse-item) {
+  border-radius: 1rem;
+  background-color: white;
+  //background-color: var(--color-transparent-dark);
+  margin: 1rem;
+}
 
-    &__wrap {
-      border: unset;
-    }
+.el-collapse::v-deep(.el-collapse-item__wrap) {
+  border: unset;
+}
 
-    &__content {
-      padding-bottom: unset;
-    }
-  }
+.el-collapse::v-deep(.el-collapse-item__content) {
+  padding-bottom: unset;
 }
 </style>

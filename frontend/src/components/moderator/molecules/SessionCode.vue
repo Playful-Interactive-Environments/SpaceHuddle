@@ -3,7 +3,7 @@
     <el-button
       :type="buttonType"
       class="fullwidth stretch"
-      @click="copyToClipboard"
+      @click="copyToClipboard(code)"
     >
       <font-awesome-icon icon="clone" />
       <TutorialStep type="sessionDetails" step="connectionCode" :order="1">
@@ -15,7 +15,7 @@
         :type="buttonType"
         v-if="hasSharing"
         class="session-code__share"
-        v-on:click="share"
+        v-on:click="copyToClipboard(connectionLink)"
       >
         <font-awesome-icon icon="share-alt" />
       </el-button>
@@ -38,8 +38,12 @@ export default class SessionCode extends Vue {
   @Prop({ default: true }) hasSharing!: boolean;
   @Prop({ default: '' }) code!: string;
 
-  copyToClipboard(): void {
-    navigator.clipboard.writeText(this.code).then(
+  get connectionLink(): string {
+    return `${window.location.origin}/join/${this.code}`;
+  }
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(
       () => {
         ElMessage({
           message: (this as any).$t('info.copyToClipboard'),
@@ -66,7 +70,7 @@ export default class SessionCode extends Vue {
     const body = (this as any)
       .$t('moderator.molecule.sessionCode.shareBody')
       .replace('@KEY', this.code)
-      .replace('@LINK', `${window.location.origin}/join/${this.code}`)
+      .replace('@LINK', this.connectionLink)
       .replace('\n', '%0D%0A');
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   }

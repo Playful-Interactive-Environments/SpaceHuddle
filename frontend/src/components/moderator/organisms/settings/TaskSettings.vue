@@ -13,7 +13,7 @@
         :key="componentLoadIndex"
         width="calc(var(--app-width) * 0.8)"
       >
-        <template #title>
+        <template #header>
           <div v-if="isEditStep">
             <span class="el-dialog__title">
               {{ $t('moderator.organism.settings.taskSettings.header') }}
@@ -1470,10 +1470,8 @@ export default class TaskSettings extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.el-collapse-item::v-deep .el-collapse-item {
-  &__content {
-    padding-bottom: 0;
-  }
+.el-collapse-item::v-deep(.el-collapse-item__content) {
+  padding-bottom: 0;
 }
 
 .input-table {
@@ -1509,21 +1507,19 @@ export default class TaskSettings extends Vue {
   //height: 100%;
 }
 
-.el-input::v-deep {
-  &.search {
-    margin-bottom: 1rem;
+.search.el-input {
+  margin-bottom: 1rem;
+}
 
-    .el-input__inner {
-      font-size: var(--font-size-small);
-      font-style: italic;
-      color: var(--color-gray-dark);
-      border-color: var(--color-gray);
-    }
+.search.el-input::v-deep(.el-input__inner) {
+  font-size: var(--font-size-small);
+  font-style: italic;
+  color: var(--color-gray-dark);
+  border-color: var(--color-gray);
+}
 
-    .el-input__suffix {
-      color: var(--color-gray-dark);
-    }
-  }
+.search.el-input::v-deep(.el-input__suffix) {
+  color: var(--color-gray-dark);
 }
 
 .el-input-number {
@@ -1534,11 +1530,9 @@ export default class TaskSettings extends Vue {
   width: 100%;
 }
 
-.add::v-deep {
-  .el-card__body {
-    min-height: unset;
-    padding: 0.5rem;
-  }
+.add::v-deep(.el-card__body) {
+  min-height: unset;
+  padding: 0.5rem;
 }
 
 .level:not(:last-child) {
@@ -1572,12 +1566,12 @@ export default class TaskSettings extends Vue {
   }
 }
 
-.el-collapse::v-deep {
+.el-collapse {
   margin-bottom: 0;
+}
 
-  .el-collapse-item__header {
-    padding-left: 0;
-  }
+.el-collapse::v-deep(.el-collapse-item__header) {
+  padding-left: 0;
 }
 
 .layout__columns {

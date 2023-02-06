@@ -239,9 +239,6 @@ export default class TopicCard extends Vue {
 }
 
 @media only screen and (max-width: 949px) {
-  .module-info {
-    text-align: center;
-  }
 
   .level,
   .level-left,
@@ -282,15 +279,5 @@ export default class TopicCard extends Vue {
 
 .clickArea {
   width: 100%;
-}
-
-.level.is-desktop .level-left .level-item div.module-info::v-deep,
-.level.is-desktop .level-right .level-item div.module-info::v-deep {
-  padding: 0 1.2rem;
-  text-align: inherit;
-
-  div {
-    text-align: inherit;
-  }
 }
 </style>

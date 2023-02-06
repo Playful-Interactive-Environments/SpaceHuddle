@@ -7,6 +7,7 @@
     :topicId="topicId"
     v-model="modelValue"
     :limitQuestionType="QuestionType.SURVEY"
+    @update="$emit('update')"
   />
 </template>
 
@@ -19,6 +20,7 @@ import CustomConfig from '@/modules/information/quiz/organisms/CustomConfig.vue'
 
 @Options({
   components: { CustomConfig },
+  emits: ['update'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/

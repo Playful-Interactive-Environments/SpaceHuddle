@@ -342,7 +342,7 @@ export default class IdeaCard extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.actions::v-deep > * {
+.actions::v-deep(> *) {
   margin-left: 0.5rem;
 }
 

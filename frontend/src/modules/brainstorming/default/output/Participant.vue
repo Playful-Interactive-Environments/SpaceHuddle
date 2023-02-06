@@ -478,15 +478,13 @@ export default class Participant extends Vue {
   padding: 1rem;
 }
 
-.el-badge::v-deep {
-  .el-badge__content--primary {
-    right: calc(1rem + var(--el-badge-size) / 2);
-    top: calc(1rem + var(--el-badge-size) / 2);
-    background-color: white;
-    color: var(--color-mint-dark);
-    font-weight: var(--font-weight-bold);
-    font-size: 1rem;
-  }
+.el-badge::v-deep(.el-badge__content--primary) {
+  right: calc(1rem + var(--el-badge-size) / 2);
+  top: calc(1rem + var(--el-badge-size) / 2);
+  background-color: white;
+  color: var(--color-mint-dark);
+  font-weight: var(--font-weight-bold);
+  font-size: 1rem;
 }
 
 .el-divider--horizontal {
@@ -549,7 +547,7 @@ div#loadingScreen > span#loading {
   margin-bottom: auto;
 }
 
-div#loadingScreen > span#loading::v-deep .path {
+div#loadingScreen > span#loading::v-deep(.path) {
   stroke: white;
   stroke-width: 4;
 }
@@ -575,12 +573,12 @@ div#cache image {
   margin-left: auto;
   margin-right: auto;
 
-  background-image: url('../../../../assets/illustrations/Form/Background.png');
+  background-image: url('@/assets/illustrations/Form/Background.png');
   background-size: 100%;
   background-position: bottom;
   background-repeat: no-repeat;
 
-  mask-image: url('../../../../assets/illustrations/Form/Mask.png');
+  mask-image: url('@/assets/illustrations/Form/Mask.png');
   mask-size: contain;
   mask-repeat: repeat;
 }
@@ -595,7 +593,7 @@ div#cache image {
   margin-left: auto;
   margin-right: auto;
 
-  background-image: url('../../../../assets/illustrations/Form/Platform 1.png');
+  background-image: url('@/assets/illustrations/Form/Platform 1.png');
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
@@ -611,7 +609,7 @@ div#cache image {
   margin-left: auto;
   margin-right: auto;
 
-  background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png');
+  background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-none.png');
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
@@ -633,101 +631,101 @@ div#cache image {
 @keyframes takeoffSprite {
   /*Sprite changes (couldn't find a way to loop keyframes within animation)*/
   0% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-none.png');
   }
   6% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
   }
   7% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
   }
   12% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-1.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-launch-1.png');
   }
   18% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-1.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-launch-1.png');
   }
   19% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-2.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-launch-2.png');
   }
   24% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-2.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-launch-2.png');
   }
   25% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
   }
   30% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
   }
   31% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-3.png');
   }
   36% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-3.png');
   }
 
   37% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-1.png');
   }
   42% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-1.png');
   }
   43% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-2.png');
   }
   48% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-2.png');
   }
   49% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-3.png');
   }
   54% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-3.png');
   }
 
   55% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-1.png');
   }
   60% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-1.png');
   }
   61% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-2.png');
   }
   66% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-2.png');
   }
   72% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-3.png');
   }
   73% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-3.png');
   }
 
   78% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-1.png');
   }
   79% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-1.png');
   }
   84% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-2.png');
   }
   85% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-2.png');
   }
   90% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-3.png');
   }
   91% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-3.png');
   }
 
   96% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-1.png');
   }
   97% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-1.png');
   }
 }
 @keyframes takeoffMove {
@@ -867,28 +865,28 @@ div#cache image {
 @keyframes preloadSprites {
   /*Sprite changes (couldn't find a way to loop keyframes within animation)*/
   0% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-none.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-none.png');
   }
   10% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-1.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-1.png');
   }
   20% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-2.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-2.png');
   }
   30% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-3.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-3.png');
   }
   40% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-1.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-launch-1.png');
   }
   50% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-2.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-launch-2.png');
   }
   60% {
-    background-image: url('../../../../assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
+    background-image: url('@/assets/illustrations/Form/rocket/Rocket-fire-launch-3.png');
   }
   70% {
-    background-image: url('../../../../assets/illustrations/Form/ButtonRed.png');
+    background-image: url('@/assets/illustrations/Form/ButtonRed.png');
   }
 }
 
@@ -933,22 +931,22 @@ button.window {
 }
 
 button#editText {
-  background-image: url('../../../../assets/illustrations/Form/Window 1.png');
+  background-image: url('@/assets/illustrations/Form/Window 1.png');
   top: 14%;
 }
 
 button#Image {
-  background-image: url('../../../../assets/illustrations/Form/Window 2.png');
+  background-image: url('@/assets/illustrations/Form/Window 2.png');
   top: 33.5%;
 }
 
 button#Cargo {
-  background-image: url('../../../../assets/illustrations/Form/Window 3.png');
+  background-image: url('@/assets/illustrations/Form/Window 3.png');
   top: 53%;
 }
 
 button#editText.redWindow {
-  background-image: url('../../../../assets/illustrations/Form/Window 1-error.png');
+  background-image: url('@/assets/illustrations/Form/Window 1-error.png');
 }
 
 .el-form-item.hidden {
@@ -970,20 +968,18 @@ button#editText.redWindow {
   top: 34%;
 }
 
-.el-form-item#textErrorMessage::v-deep {
-  .el-form-item__error {
-    position: absolute;
-    width: auto;
-    left: 0;
-    right: 0;
-    margin-left: auto;
-    margin-right: auto;
+.el-form-item#textErrorMessage::v-deep(.el-form-item__error) {
+  position: absolute;
+  width: auto;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
 
-    top: 60%;
+  top: 60%;
 
-    text-align: center;
-    padding: 4% 3%;
-  }
+  text-align: center;
+  padding: 4% 3%;
 }
 
 .el-form-item#keywordInsert {
@@ -1010,12 +1006,12 @@ button#editText.redWindow {
   background-size: contain;
   background-position: right;
   background-repeat: no-repeat;
-  background-image: url('../../../../assets/illustrations/Form/ButtonRed.png');
+  background-image: url('@/assets/illustrations/Form/ButtonRed.png');
   transition: 0.2s;
 }
 
 #LaunchButton.disabled {
-  background-image: url('../../../../assets/illustrations/Form/ButtonGrey.png');
+  background-image: url('@/assets/illustrations/Form/ButtonGrey.png');
   transition: 0.2s;
 }
 
@@ -1088,16 +1084,14 @@ button#editText.redWindow {
   background-color: var(--color-red);
 }
 
-.el-form-item::v-deep {
-  .el-form-item__error {
-    width: auto;
-    position: absolute;
-    left: 0;
+.el-form-item::v-deep(.el-form-item__error) {
+  width: auto;
+  position: absolute;
+  left: 0;
 
-    padding: 1% 4%;
-    background-color: var(--color-red);
-    border-radius: 20px;
-    color: white;
-  }
+  padding: 1% 4%;
+  background-color: var(--color-red);
+  border-radius: 20px;
+  color: white;
 }
 </style>
