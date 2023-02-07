@@ -14,7 +14,7 @@
     <vue-markdown :source="imprint.support" />
 
     <h2>{{ $t('shared.view.imprint.liability') }}</h2>
-    <vue-markdown :source="imprint.liability" />
+    <vue-markdown :source="imprint.liability" /><!---->
   </div>
   <footer>
     <footer>
@@ -28,8 +28,8 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import PublicHeader from '@/components/moderator/organisms/layout/PublicHeader.vue';
-import * as imprint from '@/../public/assets/imprint.json';
 import VueMarkdown from 'vue-markdown-render';
+import { apiExecuteGet } from '@/services/config-service';
 
 @Options({
   components: {
@@ -38,9 +38,18 @@ import VueMarkdown from 'vue-markdown-render';
   },
 })
 export default class Imprint extends Vue {
-  imprint = imprint;
+  imprint: { [key: string]: string } = {
+    imprint: '',
+    owner: '',
+    rights: '',
+    support: '',
+    liability: '',
+  };
   mounted(): void {
-    console.log(imprint);
+    const url = 'assets/imprint.json';
+    apiExecuteGet(url).then((result) => {
+      this.imprint = result;
+    });
   }
 }
 </script>
