@@ -413,7 +413,16 @@
         "header": "Brainstorm to infinity and beyond!",
         "info": "Spacehuddle takes a new approach to brainstorming with multiple people. For creating new brainstorming sessions, use the Moderator tool. You can then join an existing brainstorming session via the session code.",
         "login": "Moderator tool",
-        "join": "Join Brainstorming"
+        "join": "Join Brainstorming",
+        "imprint": "Imprint"
+      },
+      "imprint": {
+        "imprint": "Imprint",
+        "owner": "Media owner and publisher",
+        "rights": "Image rights",
+        "support": "Support",
+        "liability": "Liability",
+        "home": "Home"
       },
       "notFound": {
         "header": "404 - Not found",

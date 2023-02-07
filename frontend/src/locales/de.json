@@ -413,7 +413,16 @@
         "header": "Brainstorming - Zur Unendlichkeit und noch viel weiter!",
         "info": "Spacehuddle verfolgt einen neuen Ansatz für das Brainstorming mit mehreren Personen. Um eine neue Brainstorming-Session zu erstellen, verwende bitte die Moderation. Du kannst aber auch einer bestehenden Brainstorming-Session mit Hilfe eines Session-Codes beitreten.",
         "login": "Moderation",
-        "join": "Brainstorming beitreten"
+        "join": "Brainstorming beitreten",
+        "imprint": "Impressum"
+      },
+      "imprint": {
+        "imprint": "Imprint",
+        "owner": "Medieninhaber und Herausgeber",
+        "rights": "Bildrechte",
+        "support": "Support",
+        "liability": "Haftung",
+        "home": "Startseite"
       },
       "notFound": {
         "header": "404 - Nicht gefunden",

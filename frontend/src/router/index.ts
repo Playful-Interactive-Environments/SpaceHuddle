@@ -17,6 +17,7 @@ import ResetPassword from '@/views/moderator/User/ResetPassword.vue';
 import NotFound from '@/views/shared/NotFound.vue';
 import PublicScreen from '@/views/PublicScreen.vue';
 import ParticipantModuleContent from '@/views/participant/ParticipantModuleContent.vue';
+import Imprint from '@/views/shared/Imprint.vue';
 
 import {
   isParticipant,
@@ -36,6 +37,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/',
     name: 'home',
     component: Home,
+  },
+  {
+    path: '/imprint',
+    name: 'imprint',
+    component: Imprint,
   },
   {
     path: '/login',

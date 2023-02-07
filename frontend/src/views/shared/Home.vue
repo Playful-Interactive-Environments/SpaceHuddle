@@ -24,6 +24,11 @@
       />
     </section>
   </div>
+  <footer>
+    <a @click="$router.push(`/imprint`)">
+      {{ $t('shared.view.home.imprint') }}
+    </a>
+  </footer>
 </template>
 
 <script lang="ts">
@@ -95,5 +100,9 @@ export default class Home extends Vue {}
     gap: 3rem;
     text-align: left;
   }
+}
+
+footer {
+  padding: 0 4rem;
 }
 </style>
