@@ -3,6 +3,7 @@
 namespace App\Domain\Selection\Repository;
 
 use App\Data\AuthorisationData;
+use App\Domain\Base\Data\ModificationData;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Idea\Data\IdeaData;
@@ -177,6 +178,28 @@ class SelectionRepository implements RepositoryInterface
             return [$result];
         }
         return [];
+    }
+
+    /**
+     * Get last modification date of ideas for the selection ID.
+     * @param string $selectionId The selection ID.
+     * @param AuthorisationData | null $authorisation Authorisation data
+     * @return ModificationData Modification Data
+     */
+    public function getIdeasModification(string $selectionId, AuthorisationData | null $authorisation = null): ModificationData
+    {
+        $query = $this->queryFactory->newSelect("idea");
+        $query->select([
+            "idea.modification_date"
+        ])
+            ->innerJoin("task", "task.id = idea.task_id")
+            ->innerJoin("selection_idea", "selection_idea.idea_id = idea.id")
+            ->andWhere([
+                //"task.task_type" => $taskType,
+                "selection_idea.selection_id" => $selectionId,
+            ])
+            ->order(["modification_date" => "DESC"]);
+        return $this->getLastModificationTimestamp($query);
     }
 
     /**

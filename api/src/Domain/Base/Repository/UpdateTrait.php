@@ -3,6 +3,8 @@
 
 namespace App\Domain\Base\Repository;
 
+use Cake\Chronos\Date;
+
 /**
  * Trait that provides the update database entries functionality.
  */
@@ -29,6 +31,7 @@ trait UpdateTrait
 
         $id = $data["id"];
         unset($data["id"]);
+        $data["modification_date"] = date('Y-m-d H:i:s');
 
         $this->queryFactory->newUpdate($this->getEntityName(), $data)
             ->andWhere(["id" => $id])

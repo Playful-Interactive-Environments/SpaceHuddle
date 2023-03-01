@@ -2,6 +2,7 @@
 
 namespace App\Domain\SessionRole\Repository;
 
+use App\Domain\Base\Data\ModificationData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
@@ -52,6 +53,22 @@ class SessionRoleRepository implements RepositoryInterface
     }
 
     /**
+     * Has entity changes
+     * @param array $conditions The WHERE conditions to add with AND.
+     * @return ModificationData Modification Data
+     * @throws GenericException
+     */
+    public function lastModificationByConditions(array $conditions = []): ModificationData
+    {
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["session_role.modification_date"])
+            ->andWhere($conditions)
+            ->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
+    }
+
+    /**
      * Get entity by ID.
      * @param string $id The entity ID.
      * @return SessionRoleData|null The result entity.
@@ -71,6 +88,24 @@ class SessionRoleRepository implements RepositoryInterface
             return $result;
         }
         return null;
+    }
+
+    /**
+     * Has entity changes
+     * @param string $id The entity ID.
+     * @return ModificationData Modification Data
+     * @throws GenericException
+     */
+    public function lastModificationById(string $id): ModificationData
+    {
+        $authorisation = $this->getAuthorisation();
+        if ($authorisation->isUser()) {
+            return $this->lastModificationByConditions([
+                "session_role.session_id" => $id,
+                "session_role.user_id" =>  $authorisation->id
+            ]);
+        }
+        return ModificationData::getEmpty();
     }
 
     /**
@@ -196,7 +231,12 @@ class SessionRoleRepository implements RepositoryInterface
         }
         $data["user_id"] = $this->getUserId($username);
 
-        $query = $this->queryFactory->newUpdate($this->getEntityName(), ["role" => $data["role"]])
+        $query = $this->queryFactory->newUpdate(
+            $this->getEntityName(),
+            [
+                "role" => $data["role"],
+                "modification_date" => date('Y-m-d H:i:s')
+            ])
             ->andWhere([
                 "session_id" => $data["session_id"],
                 "user_id" => $data["user_id"],

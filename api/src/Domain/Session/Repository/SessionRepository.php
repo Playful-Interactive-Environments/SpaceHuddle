@@ -2,6 +2,7 @@
 
 namespace App\Domain\Session\Repository;
 
+use App\Domain\Base\Data\ModificationData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\KeyGeneratorTrait;
 use App\Domain\Base\Repository\RepositoryInterface;
@@ -138,6 +139,46 @@ class SessionRepository implements RepositoryInterface
     }
 
     /**
+     * Has entity changes
+     * @param array $conditions The WHERE conditions to add with AND.
+     * @return ModificationData Modification Data
+     * @throws GenericException
+     */
+    public function hasChangesByConditions(array $conditions = []): ModificationData
+    {
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $authorisation = $this->getAuthorisation();
+        $authorisation_conditions = [
+            "session_permission.user_id" => $authorisation->id,
+            "session_permission.user_type" => $authorisation->type
+        ];
+        if (is_null($authorisation->id)) {
+            $authorisation_conditions = [
+                "allow_anonymous" => 1,
+            ];
+        } else {
+            $query->innerJoin("session_permission", "session_permission.session_id = session.id");
+        }
+        $query->select(["modification_date"])
+            ->andWhere($authorisation_conditions);
+        if (sizeof($conditions) > 0) $query->andWhere($conditions);
+        $query->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
+    }
+
+    /**
+     * Has changes for the parent ID
+     * @param string $parentId The entity parent ID.
+     * @return ModificationData Modification Data
+     * @throws GenericException
+     */
+    public function lastModificationByParentId(string $parentId): ModificationData
+    {
+        return $this->lastModificationByConditions([]);
+    }
+
+    /**
      * Get session infos
      * @param SessionData $data Session data
      */
@@ -153,6 +194,35 @@ class SessionRepository implements RepositoryInterface
         $reader = new ArrayReader($rows);
         $data->topicCount = $reader->findInt("0") ?? 0;
         $data->taskCount = $reader->findInt("1") ?? 0;
+    }
+
+    /**
+     * Get session infos modification
+     * @param int $sessionId Session data
+     * @return ModificationData Modification Data
+     */
+    private function getInfosModification(int $sessionId): ModificationData
+    {
+        $query = $this->queryFactory->newSelect("topic");
+        $query->select(["modification_date"])
+            ->andWhere([
+                "topic.session_id" => $sessionId
+            ])
+            ->order(["modification_date" => "DESC"]);
+        $topicTimestamp = $this->getLastModificationTimestamp($query);
+        $query = $this->queryFactory->newSelect("topic");
+        $query->select(["task.modification_date"])
+            ->leftJoin("task", "task.topic_id = topic.id")
+            ->andWhere([
+                "topic.session_id" => $sessionId
+            ])
+            ->order(["modification_date" => "DESC"]);
+        $taskTimestamp = $this->getLastModificationTimestamp($query);
+        return new ModificationData([
+            "lastModification" => max($topicTimestamp->lastModification, $taskTimestamp->lastModification),
+            "callTimestamp" => min($topicTimestamp->callTimestamp, $taskTimestamp->callTimestamp),
+            "rowCount" => $topicTimestamp->rowCount + $taskTimestamp->rowCount
+        ]);
     }
 
     /**
@@ -216,6 +286,23 @@ class SessionRepository implements RepositoryInterface
     }
 
     /**
+     * Get last modification date of entities for the connection keys.
+     * @param array $keys The entity connection keys.
+     * @return ModificationData Modification Data
+     * @throws GenericException
+     */
+    public function getListByKeysModification(array $keys): ModificationData
+    {
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["modification_date"])
+            ->andWhere(["expiration_date >= current_timestamp()"])
+            ->whereInList("connection_key", $keys)
+            ->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
+    }
+
+    /**
      * Get list of participants for the session ID.
      * @param string $sessionId The session ID.
      * @return array<ParticipantInfoData> The result entity list.
@@ -238,6 +325,23 @@ class SessionRepository implements RepositoryInterface
             return [$result];
         }
         return [];
+    }
+
+    /**
+     * Get last modification date of participants for the session ID.
+     * @param string $sessionId The session ID.
+     * @return ModificationData Modification Data
+     */
+    public function getParticipantsModification(string $sessionId): ModificationData
+    {
+        $query = $this->queryFactory->newSelect("participant");
+        $query->select(["participant.modification_date"])
+            ->andWhere([
+                "session_id" => $sessionId,
+            ])
+            ->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
     }
 
     /**
@@ -456,6 +560,26 @@ class SessionRepository implements RepositoryInterface
             $this->getDetails($result);
         }
         return $result;
+    }
+
+    /**
+     * Get the active session task displayed on the public screen.
+     * @param string $sessionId The session id.
+     * @return ModificationData Modification Data
+     */
+    public function getPublicScreenModification(string $sessionId): ModificationData
+    {
+        $query = $this->queryFactory->newSelect("task");
+        $query->select(["task.modification_date"])
+            ->innerJoin("module", "task.id = module.task_id")
+            ->innerJoin("session", "module.id = session.public_screen_module_id")
+            ->innerJoin("topic", "topic.id = task.topic_id")
+            ->andWhere([
+                "session.id" => $sessionId
+            ])
+            ->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
     }
 
     /**

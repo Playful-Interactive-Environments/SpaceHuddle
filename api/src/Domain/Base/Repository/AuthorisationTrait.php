@@ -37,4 +37,14 @@ trait AuthorisationTrait
             throw new GenericException("Authorisation data not set.");
         }
     }
+
+    /**
+     * Gets the authorisation condition for the entity.
+     * @param AuthorisationData $authorisation Current authorisation data.
+     * @return array authorisation condition
+     */
+    protected function getAuthorisationCondition(AuthorisationData $authorisation): array
+    {
+        return [];
+    }
 }

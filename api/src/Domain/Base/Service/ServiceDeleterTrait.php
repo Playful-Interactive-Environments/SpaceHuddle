@@ -34,12 +34,13 @@ trait ServiceDeleterTrait
         array $data
     ): array|object|null {
         $id = $data["id"];
-        $this->repository->deleteById($id);// Commit all changes
+        $parentId = $this->repository->deleteById($id, true);// Commit all changes
 
         $entityName = $this->repository->getEntityName();
         return (object)[
             "state" => "Success",
-            "message" => "$entityName was successfully deleted."
+            "message" => "$entityName was successfully deleted.",
+            "parentId" => $parentId
         ];
     }
 }

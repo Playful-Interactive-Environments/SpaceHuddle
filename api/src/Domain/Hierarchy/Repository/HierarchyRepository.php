@@ -3,6 +3,7 @@
 namespace App\Domain\Hierarchy\Repository;
 
 use App\Data\AuthorisationData;
+use App\Domain\Base\Data\ModificationData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
@@ -64,6 +65,27 @@ class HierarchyRepository implements RepositoryInterface
     }
 
     /**
+     * Gets the authorisation condition for the entity.
+     * @param AuthorisationData $authorisation Current authorisation data.
+     * @return array authorisation condition
+     */
+    protected function getAuthorisationCondition(AuthorisationData $authorisation): array
+    {
+        $authorisation_conditions = [];
+        if ($authorisation->isParticipant()) {
+            $authorisation_conditions = [
+                "task.state IN" => [
+                    strtoupper(TaskState::ACTIVE),
+                    strtoupper(TaskState::READ_ONLY),
+                    strtoupper(TaskState::WAIT),
+                    strtoupper(TaskState::DONE)
+                ]
+            ];
+        }
+        return $authorisation_conditions;
+    }
+
+    /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
      * @param array $sortConditions The ORDER BY conditions.
@@ -77,17 +99,7 @@ class HierarchyRepository implements RepositoryInterface
         }
 
         $authorisation = $this->getAuthorisation();
-        $authorisation_conditions = [];
-        if ($authorisation->isParticipant()) {
-            $authorisation_conditions = [
-                "task.state IN" => [
-                    strtoupper(TaskState::ACTIVE),
-                    strtoupper(TaskState::READ_ONLY),
-                    strtoupper(TaskState::WAIT),
-                    strtoupper(TaskState::DONE)
-                ]
-            ];
-        }
+        $authorisation_conditions = $this->getAuthorisationCondition($authorisation);
 
         $subQueryIdeas = $this->queryFactory->newSelect("idea AS parent_idea")
             ->select(["id"])
@@ -97,6 +109,16 @@ class HierarchyRepository implements RepositoryInterface
                 },
                 function ($exp, $q) {
                     return $exp->equalFields("parent_idea.task_id", "idea.task_id");
+                },
+            ]);
+
+        $subQueryChildCount = $this->queryFactory->newSelect("hierarchy AS children")
+            ->select(function ($q) {
+                return ['count' => $q->func()->count('children.sub_idea_id')];
+            })
+            ->where([
+                function ($exp, $q) {
+                    return $exp->equalFields("children.category_idea_id", "idea.id");
                 },
             ]);
 
@@ -113,7 +135,8 @@ class HierarchyRepository implements RepositoryInterface
             "idea.state",
             "idea.task_id",
             "idea.timestamp",
-            "hierarchy.category_idea_id AS parent_id"
+            "hierarchy.category_idea_id AS parent_id",
+            "child_count" => $subQueryChildCount
         ])
             ->innerJoin("task", "task.id = idea.task_id")
             ->leftJoin("hierarchy", [
@@ -135,6 +158,27 @@ class HierarchyRepository implements RepositoryInterface
             $this->getDetails($result, $authorisation);
         }
         return $result;
+    }
+
+    /**
+     * Has entity changes
+     * @param array $conditions The WHERE conditions to add with AND.
+     * @return ModificationData Modification Data
+     * @throws GenericException
+     */
+    public function lastModificationByConditions(array $conditions = []): ModificationData
+    {
+        $authorisation = $this->getAuthorisation();
+        $authorisation_conditions = $this->getAuthorisationCondition($authorisation);
+
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["modification_date"])
+            ->innerJoin("task", "task.id = idea.task_id")
+            ->andWhere($authorisation_conditions)
+            ->andWhere($conditions)
+            ->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
     }
 
     /**
@@ -174,6 +218,25 @@ class HierarchyRepository implements RepositoryInterface
             $resultList = [$result];
         }
         return $resultList;
+    }
+
+    /**
+     * Has changes for the parent ID
+     * @param string $parentId The entity parent ID.
+     * @return ModificationData Modification Data
+     * @throws GenericException
+     */
+    public function lastModificationByParentSpecial(string $taskId, string | null $hierarchyParentId): ModificationData
+    {
+        $conditions = [
+            "idea.task_id" => $taskId
+        ];
+        if (isset($hierarchyParentId)) {
+            $conditions["hierarchy.category_idea_id"] = $hierarchyParentId;
+        } else {
+            array_push($conditions, "hierarchy.category_idea_id IS NULL");
+        }
+        return $this->lastModificationByConditions($conditions);
     }
 
     /**

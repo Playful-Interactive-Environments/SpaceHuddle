@@ -2,6 +2,8 @@
 
 namespace App\Domain\Task\Repository;
 
+use App\Data\AuthorisationData;
+use App\Domain\Base\Data\ModificationData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
@@ -165,6 +167,22 @@ class TaskRepository implements RepositoryInterface
     }
 
     /**
+     * Has changes for the parent ID
+     * @param string $parentId The entity parent ID.
+     * @return ModificationData Modification Data
+     * @throws GenericException
+     */
+    public function lastModificationByParentId(string $parentId): ModificationData
+    {
+        $conditions = [$this->getParentIdName() => $parentId];
+        $authorisation = $this->getAuthorisation();
+        if ($authorisation->isParticipant()) {
+            array_push($conditions, "participant_task.id IS NOT NULL");
+        }
+        return $this->lastModificationByConditions($conditions);
+    }
+
+    /**
      * Get list of dependent entities for the task ID.
      * @param string $id The entity dependent task ID.
      * @return array<object> The result entity list.
@@ -185,6 +203,25 @@ class TaskRepository implements RepositoryInterface
             return [$result];
         }
         return [];
+    }
+
+    /**
+     * Get last modification date of dependent entities for the task ID.
+     * @param string $id The entity dependent task ID.
+     * @return ModificationData Modification Data
+     * @throws GenericException
+     */
+    public function getDependentModification(string $id): ModificationData
+    {
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select([
+            "task.modification_date"
+        ])
+            ->innerJoin("task_input", "task_input.task_id = task.id")
+            ->andWhere(["task_input.input_id" => $id])
+            ->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
     }
 
     /**

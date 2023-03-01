@@ -2,6 +2,7 @@
 
 namespace App\Domain\View\Repository;
 
+use App\Domain\Base\Data\ModificationData;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Idea\Data\IdeaData;
@@ -196,6 +197,97 @@ class ViewRepository implements RepositoryInterface
             }
         }
         return $resultList;
+    }
+
+    /**
+     * Read all task input ideas
+     * @param string $taskId Task id
+     * @param string|null $orderType The order by type (value of IdeaSortOrder).
+     * @param string|null $refId The referenced taskId for sorting by categories.
+     * @return array List of ideas
+     */
+    public function getTaskInputDetails(
+        string $taskId,
+        ?string $orderType = null,
+        ?string $refId = null
+    ): array {
+        $query = $this->queryFactory->newSelect("task");
+        $query->select([
+            "parameter"
+        ])
+            ->andWhere(["id" => $taskId]);
+
+        $taskData = $query->execute()->fetchAll()[0];
+        $parameter = json_decode($taskData[0]);
+        $resultList = [];
+        if (property_exists($parameter, "input")) {
+            $inputs = $parameter->input;
+            foreach ($inputs as $input) {
+                $data = $this->getDetails(
+                    $input->view->type,
+                    $input->view->id,
+                    $orderType ?? $input->order,
+                    $orderType ? $refId : $input->refId,
+                    $input->filter,
+                    $input->maxCount,
+                    $input->order,
+                    property_exists($input, "refId") ? $input->refId : null
+                );
+                $resultList = array_merge($resultList, $data);
+            }
+        }
+        return $resultList;
+    }
+
+    /**
+     * Read the last modification timestamp of the view.
+     * @param string $type Type of the view.
+     * @param string $typeId The ID of the view.
+     * @param string|null $orderType The order by type (value of IdeaSortOrder).
+     * @param string|null $refId The referenced taskId for sorting by categories.
+     * @param array|null $filter Filter ideas by idea state.
+     * @param int|null $count Max return records count.
+     * @param string|null $countOrderType Use a different sorting for the determination of the elements contained in the return set.
+     * @param string|null $countRefId Use a different sorting for the determination of the elements contained in the return set.
+     * @return ModificationData Modification Data
+     */
+    public function getDetailsModification(
+        string $type,
+        string $typeId,
+        ?string $orderType = null,
+        ?string $refId = null,
+        ?array $filter = null,
+        ?int $count = null,
+        ?string $countOrderType = null,
+        ?string $countRefId = null
+    ): ModificationData {
+        $orderType = strtolower($orderType);
+        $type = strtolower($type);
+        if (!$orderType) {
+            $orderType = $countOrderType;
+        }
+        if (!$refId) {
+            $refId = $countRefId;
+        }
+
+        $query = $this->queryFactory->newSelect("selection_view_idea_$type AS view_idea");
+        $query->select(["idea.modification_date"]);
+
+        $query->innerJoin("idea", "idea.id = view_idea.idea_id")
+            ->andWhere([
+                "view_idea.parent_id" => $typeId
+            ]);
+
+        if (isset($filter) and count($filter) > 0) {
+            $query->whereInList("idea.state", $filter);
+        }
+
+        if ($count && ($orderType != $countOrderType || $refId != $countRefId)) {
+            $ideaList = $this->getDetailSet($type, $typeId, $countOrderType, $countRefId, $filter, $count);
+            $query->whereInList("idea.id", $ideaList);
+        }
+
+        return $this->getLastModificationTimestamp($query);
     }
 
     /**

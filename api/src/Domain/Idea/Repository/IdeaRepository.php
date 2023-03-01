@@ -24,6 +24,7 @@ class IdeaRepository implements RepositoryInterface
         IdeaTableTrait::getById insteadof RepositoryTrait;
         IdeaTableTrait::deleteDependencies insteadof RepositoryTrait;
         IdeaTableTrait::formatDatabaseInput insteadof RepositoryTrait;
+        IdeaTableTrait::lastModificationByConditions insteadof RepositoryTrait;
     }
 
     /**
@@ -80,6 +81,26 @@ class IdeaRepository implements RepositoryInterface
     }
 
     /**
+     * Gets the authorisation condition for the entity.
+     * @param AuthorisationData $authorisation Current authorisation data.
+     * @return array authorisation condition
+     */
+    protected function getAuthorisationCondition(AuthorisationData $authorisation): array
+    {
+        $authorisation_conditions = [];
+        /*if ($authorisation->isParticipant()) {
+            $authorisation_conditions = [
+                "idea.participant_id" => $authorisation->id,
+                "task.state IN" => [
+                    strtoupper(TaskState::ACTIVE),
+                    strtoupper(TaskState::READ_ONLY)
+                ]
+            ];
+        }*/
+        return $authorisation_conditions;
+    }
+
+    /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
      * @param array $sortConditions The ORDER BY conditions.
@@ -91,17 +112,8 @@ class IdeaRepository implements RepositoryInterface
     public function get(array $conditions = [], array $sortConditions = [], ?string $refId = null, ?string $orderType = null): null|IdeaData|array
     {
         $authorisation = $this->getAuthorisation();
-        $authorisation_conditions = [];
+        $authorisation_conditions = $this->getAuthorisationCondition($authorisation);
         $orderType = strtolower($orderType ?? "");
-        /*if ($authorisation->isParticipant()) {
-            $authorisation_conditions = [
-                "idea.participant_id" => $authorisation->id,
-                "task.state IN" => [
-                    strtoupper(TaskState::ACTIVE),
-                    strtoupper(TaskState::READ_ONLY)
-                ]
-            ];
-        }*/
 
         $defaultColumns = [
             "idea.id",
@@ -394,15 +406,20 @@ class IdeaRepository implements RepositoryInterface
                 } else {
                     switch (strtolower($orderType)) {
                         case IdeaSortOrder::PARTICIPANT:
-                            if (sizeof($resultItem->avatar) > 0)
+                            if (sizeof($resultItem->avatar) > 0) {
                                 $orderContent = "";
                                 for ($i = 0; $i < sizeof($resultItem->avatar); $i++) {
+                                    if ($resultItem->avatar[$i]->color == null)
+                                        $resultItem->avatar[$i]->color = "#000000";
+                                    if ($resultItem->avatar[$i]->symbol == null)
+                                        $resultItem->avatar[$i]->symbol = "user";
                                     $itemAvatar = $resultItem->avatar[$i]->toString();
                                     if (strlen($orderContent) > 0)
                                         $orderContent = "$orderContent $itemAvatar";
                                     else
                                         $orderContent = $itemAvatar;
                                 }
+                            }
                             break;
                     }
                 }

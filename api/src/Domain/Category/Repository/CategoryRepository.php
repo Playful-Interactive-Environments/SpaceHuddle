@@ -2,6 +2,8 @@
 
 namespace App\Domain\Category\Repository;
 
+use App\Data\AuthorisationData;
+use App\Domain\Base\Data\ModificationData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
@@ -23,6 +25,7 @@ class CategoryRepository implements RepositoryInterface
         IdeaTableTrait::getById insteadof RepositoryTrait;
         IdeaTableTrait::deleteDependencies insteadof RepositoryTrait;
         IdeaTableTrait::formatDatabaseInput insteadof RepositoryTrait;
+        IdeaTableTrait::lastModificationByConditions insteadof RepositoryTrait;
     }
 
     /**
@@ -51,6 +54,27 @@ class CategoryRepository implements RepositoryInterface
     }
 
     /**
+     * Gets the authorisation condition for the entity.
+     * @param AuthorisationData $authorisation Current authorisation data.
+     * @return array authorisation condition
+     */
+    protected function getAuthorisationCondition(AuthorisationData $authorisation): array
+    {
+        $authorisation_conditions = [];
+        if ($authorisation->isParticipant()) {
+            $authorisation_conditions = [
+                "task.state IN" => [
+                    strtoupper(TaskState::ACTIVE),
+                    strtoupper(TaskState::READ_ONLY),
+                    strtoupper(TaskState::WAIT),
+                    strtoupper(TaskState::DONE)
+                ]
+            ];
+        }
+        return $authorisation_conditions;
+    }
+
+    /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
      * @param array $sortConditions The ORDER BY conditions.
@@ -64,17 +88,7 @@ class CategoryRepository implements RepositoryInterface
         }
 
         $authorisation = $this->getAuthorisation();
-        $authorisation_conditions = [];
-        if ($authorisation->isParticipant()) {
-            $authorisation_conditions = [
-                "task.state IN" => [
-                    strtoupper(TaskState::ACTIVE),
-                    strtoupper(TaskState::READ_ONLY),
-                    strtoupper(TaskState::WAIT),
-                    strtoupper(TaskState::DONE)
-                ]
-            ];
-        }
+        $authorisation_conditions = $this->getAuthorisationCondition($authorisation);
 
         $query = $this->queryFactory->newSelect($this->getEntityName());
         $query->select([
@@ -138,6 +152,29 @@ class CategoryRepository implements RepositoryInterface
             return [$result];
         }
         return [];
+    }
+
+    /**
+     * Get last modification date of ideas for the category ID.
+     * @param string $categoryId The category ID.
+     * @return ModificationData Modification Data
+     */
+    public function getIdeasModification(string $categoryId): ModificationData
+    {
+        $taskType = strtoupper(TaskType::BRAINSTORMING);
+        $query = $this->queryFactory->newSelect("idea");
+        $query->select([
+            "idea.modification_date",
+        ])
+            ->innerJoin("task", "task.id = idea.task_id")
+            ->innerJoin("hierarchy", "hierarchy.sub_idea_id = idea.id")
+            ->andWhere([
+                "task.task_type" => $taskType,
+                "hierarchy.category_idea_id" => $categoryId,
+            ])
+            ->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
     }
 
     /**

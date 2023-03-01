@@ -96,6 +96,7 @@ use App\Action\User\UserResetPasswordAction;
 use App\Action\User\UserSendConfirmAction;
 use App\Action\View\ViewReadAllAction;
 use App\Action\View\ViewReadSingleAction;
+use App\Action\View\ViewReadTaskInputAction;
 use App\Action\Vote\VoteCreateAction;
 use App\Action\Vote\VoteDeleteAction;
 use App\Action\Vote\VoteHierarchyReadAllAction;
@@ -260,6 +261,7 @@ return function (App $app) {
             $app->get("/{taskId}/vote_result[/]", VoteResultReadAction::class);
             $app->get("/{taskId}/vote_result_parent[/]", VoteParentResultReadAction::class);
             $app->get("/{id}[/]", TaskReadSingleAction::class);
+            $app->get("/{taskId}/input[/]", ViewReadTaskInputAction::class);
         }
     );
 

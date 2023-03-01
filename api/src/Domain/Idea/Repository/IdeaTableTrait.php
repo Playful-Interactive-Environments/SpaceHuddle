@@ -2,6 +2,8 @@
 
 namespace App\Domain\Idea\Repository;
 
+use App\Domain\Base\Data\ModificationData;
+use App\Domain\Base\Repository\GenericException;
 use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Task\Type\TaskType;
@@ -35,6 +37,28 @@ trait IdeaTableTrait
             throw new DomainException("Entity $this->entityName not found");
         }
         return $result;
+    }
+
+    /**
+     * Has entity changes
+     * @param array $conditions The WHERE conditions to add with AND.
+     * @return ModificationData Modification Data
+     * @throws GenericException
+     */
+    public function lastModificationByConditions(array $conditions = []): ModificationData
+    {
+        $authorisation = $this->getAuthorisation();
+        $authorisation_conditions = $this->getAuthorisationCondition($authorisation);
+
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["idea.modification_date"])
+            ->innerJoin("task", "task.id = idea.task_id")
+            ->andWhere($authorisation_conditions)
+            ->andWhere(["task.task_type" => $this->taskType])
+            ->andWhere($conditions)
+            ->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
     }
 
     /**
@@ -116,6 +140,19 @@ trait IdeaTableTrait
             return [$result];
         }
         return [];
+    }
+
+    /**
+     * Has changes for the topic ID
+     * @param string $topicId The entity parent ID.
+     * @return ModificationData Modification Data
+     * @throws GenericException
+     */
+    public function lastModificationByTopicId(string $topicId): ModificationData
+    {
+        return $this->lastModificationByConditions([
+            "task.topic_id" => $topicId
+        ]);
     }
 
     /**

@@ -47,6 +47,13 @@ class HierarchyData extends IdeaAbstract
     public ?bool $isOwn;
 
     /**
+     * Number of child elements.
+     * @var int|null
+     * @OA\Property()
+     */
+    public ?int $childCount;
+
+    /**
      * Creates a new idea.
      * @param array $data Idea data.
      */
@@ -58,6 +65,7 @@ class HierarchyData extends IdeaAbstract
         $this->imageTimestamp = $reader->findString("image_timestamp");
         $this->parentId = $reader->findString("parent_id");
         $this->participantId = $reader->findString("participant_id");
+        $this->childCount = $reader->findInt("child_count");
         $this->isOwn = false;
     }
 }

@@ -2,11 +2,14 @@
 
 namespace App\Domain\Vote\Repository;
 
+use App\Data\AuthorisationData;
+use App\Domain\Base\Data\ModificationData;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Idea\Data\IdeaData;
 use App\Domain\Task\Repository\TaskRepository;
+use App\Domain\Task\Type\TaskState;
 use App\Domain\Task\Type\TaskType;
 use App\Domain\Vote\Data\VoteData;
 use App\Domain\Vote\Data\VoteResultData;
@@ -113,6 +116,22 @@ class VoteRepository implements RepositoryInterface
     }
 
     /**
+     * Gets the authorisation condition for the entity.
+     * @param AuthorisationData $authorisation Current authorisation data.
+     * @return array authorisation condition
+     */
+    protected function getAuthorisationCondition(AuthorisationData $authorisation): array
+    {
+        $authorisation_conditions = [];
+        if ($authorisation->isParticipant()) {
+            $authorisation_conditions = [
+                "participant_id" => $authorisation->id
+            ];
+        }
+        return $authorisation_conditions;
+    }
+
+    /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
      * @param array $sortConditions The ORDER BY conditions.
@@ -123,12 +142,7 @@ class VoteRepository implements RepositoryInterface
     public function get(array $conditions = [], array $sortConditions = []): null|object|array
     {
         $authorisation = $this->getAuthorisation();
-        $authorisation_conditions = [];
-        if ($authorisation->isParticipant()) {
-            $authorisation_conditions = [
-                "participant_id" => $authorisation->id
-            ];
-        }
+        $authorisation_conditions = $this->getAuthorisationCondition($authorisation);
 
         $query = $this->queryFactory->newSelect($this->getEntityName());
         $query->select(["*"])
@@ -137,6 +151,17 @@ class VoteRepository implements RepositoryInterface
             ->order($sortConditions);
 
         return $this->fetchAll($query);
+    }
+
+    /**
+     * Has entity changes
+     * @param array $conditions The WHERE conditions to add with AND.
+     * @return ModificationData Modification Data
+     * @throws GenericException
+     */
+    public function lastModificationByConditions(array $conditions = []): ModificationData
+    {
+        return $this->lastModificationByConditionsAuthorised($conditions);
     }
 
     /**
@@ -289,6 +314,98 @@ class VoteRepository implements RepositoryInterface
             return [$result];
         }
         return [];
+    }
+
+    /**
+     * Read last modification timestamp of the voting for the task ID.
+     * @param string $taskId The task ID.
+     * @return ModificationData Modification Data
+     */
+    public function getResultModification(string $taskId): ModificationData
+    {
+        $query = $this->queryFactory->newSelect("vote_result");
+        $query->select([
+            "vote_result.modification_date",
+        ])
+            ->andWhere([
+                "vote_result.task_id" => $taskId
+            ])
+            ->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
+    }
+
+    /**
+     * Read last modification timestamp of the voting for the task ID.
+     * @param string $taskId The task ID.
+     * @return ModificationData Modification Data
+     */
+    public function getParentResultModification(string $taskId): ModificationData
+    {
+        $subQuery = $this->queryFactory->newSelect("hierarchy_idea")
+            ->select(["parent_idea_id"])
+            ->where(function ($exp, $q) {
+                return $exp->equalFields("hierarchy_idea.parent_idea_id", "idea.id");
+            });
+
+        $query = $this->queryFactory->newSelect("idea");
+        $query->select([
+            "idea.modification_date",
+        ])
+            ->andWhere([
+                "idea.task_id" => $taskId
+            ])
+            ->where(function ($exp, $q) use ($subQuery) {
+                return $exp->exists($subQuery);
+            })
+            ->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
+    }
+
+    /**
+     * Read last modification timestamp of the voting for the parent idea ID.
+     * @param string $parent_id The parent idea ID.
+     * @return ModificationData Modification Data
+     */
+    public function getHierarchyResultModification(string $parent_id): ModificationData
+    {
+        $query = $this->queryFactory->newSelect("hierarchy_idea");
+        $query->select([
+            "idea.modification_date"
+        ])
+            ->innerJoin("idea", "idea.id = hierarchy_idea.child_idea_id")
+            ->andWhere([
+                "hierarchy_idea.parent_idea_id" => $parent_id
+            ])
+            ->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
+    }
+
+    /**
+     * Get last modification timestamp of entities for the parent ID.
+     * @param string $parentId The entity parent ID.
+     * @return ModificationData Modification Data
+     */
+    public function getAllForHierarchyModification(string $parentId): ModificationData
+    {
+        $authorisation = $this->getAuthorisation();
+        $authorisation_conditions = [];
+        if ($authorisation->isParticipant()) {
+            $authorisation_conditions = [
+                "participant_id" => $authorisation->id
+            ];
+        }
+
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["vote.modification_date"])
+            ->innerJoin("hierarchy_idea", "hierarchy_idea.child_idea_id = vote.idea_id")
+            ->andWhere(["hierarchy_idea.parent_idea_id" => $parentId])
+            ->andWhere($authorisation_conditions)
+            ->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Domain\Participant\Repository;
 
+use App\Domain\Base\Data\ModificationData;
 use App\Domain\Base\Repository\EncryptTrait;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\KeyGeneratorTrait;
@@ -249,6 +250,32 @@ class ParticipantRepository implements RepositoryInterface
     }
 
     /**
+     * Has entity changes
+     * @param string $id The entity ID.
+     * @return ModificationData Modification Data
+     */
+    public function getTasksModification(string $id): ModificationData
+    {
+        $query = $this->queryFactory->newSelect("task");
+        $query->select(["task.modification_date"])
+            ->innerJoin("topic", "topic.id = task.topic_id")
+            ->innerJoin("session", "session.id = topic.session_id")
+            ->innerJoin("participant", "participant.session_id = session.id")
+            ->whereInList("task.state", [
+                strtoupper(TaskState::ACTIVE),
+                strtoupper(TaskState::READ_ONLY)
+            ])
+            ->andWhere([
+                "participant.id" => $id,
+                "session.expiration_date >= current_timestamp()",
+                "(task.expiration_time IS NULL OR task.expiration_time >= current_timestamp())"
+            ])
+            ->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
+    }
+
+    /**
      * List all topics for the current participant.
      * @param string $id The entity ID.
      * @return array A list of topics in JSON format.
@@ -274,6 +301,26 @@ class ParticipantRepository implements RepositoryInterface
         }
 
         return [];
+    }
+
+    /**
+     * Has entity changes
+     * @param string $id The entity ID.
+     * @return ModificationData Modification Data
+     */
+    public function getTopicsModification(string $id): ModificationData
+    {
+        $query = $this->queryFactory->newSelect("topic");
+        $query->select(["topic.modification_date"])
+            ->innerJoin("session", "session.id = topic.session_id")
+            ->innerJoin("participant", "participant.session_id = session.id")
+            ->andWhere([
+                "participant.id" => $id,
+                "session.expiration_date >= current_timestamp()",
+            ])
+            ->order(["modification_date" => "DESC"]);
+
+        return $this->getLastModificationTimestamp($query);
     }
 
     /**

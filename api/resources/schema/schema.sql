@@ -32,7 +32,8 @@ USE `spacehuddle`;
 CREATE TABLE `hierarchy` (
                              `category_idea_id` char(36) NOT NULL,
                              `sub_idea_id` char(36) NOT NULL,
-                             `order` int(11) NOT NULL DEFAULT 0
+                             `order` int(11) NOT NULL DEFAULT 0,
+                             `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -53,7 +54,8 @@ CREATE TABLE `idea` (
                         `image_timestamp` datetime NULL DEFAULT NULL,
                         `link` varchar(500) DEFAULT NULL,
                         `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-                        `order` int(11) NOT NULL DEFAULT 0
+                        `order` int(11) NOT NULL DEFAULT 0,
+                        `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -67,7 +69,8 @@ CREATE TABLE `user` (
                         `username` varchar(255) NOT NULL,
                         `password` varchar(255) NOT NULL,
                         `confirmed` TINYINT(1) DEFAULT 0,
-                        `creation_date` datetime NOT NULL DEFAULT current_timestamp()
+                        `creation_date` datetime NOT NULL DEFAULT current_timestamp(),
+                        `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -83,7 +86,8 @@ CREATE TABLE `module` (
                           `order` int(11) NOT NULL,
                           `state` varchar(255) NOT NULL,
                           `sync_public_participant` TINYINT(1),
-                          `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
+                          `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+                          `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -95,7 +99,8 @@ CREATE TABLE `module` (
 CREATE TABLE `module_state` (
                                 `module_id` char(36) NOT NULL,
                                 `participant_id` char(36) NOT NULL,
-                                `state` varchar(255) NOT NULL
+                                `state` varchar(255) NOT NULL,
+                                `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -111,7 +116,8 @@ CREATE TABLE `participant` (
                                `state` varchar(255) NOT NULL DEFAULT '''ACTIVE''',
                                `color` varchar(255) DEFAULT NULL,
                                `symbol` varchar(255) DEFAULT NULL,
-                               `ip_hash` varchar(255) NOT NULL
+                               `ip_hash` varchar(255) NOT NULL,
+                               `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -122,7 +128,8 @@ CREATE TABLE `participant` (
 
 CREATE TABLE `random_idea` (
                                `idea_id` char(36) NOT NULL,
-                               `participant_id` char(36) NOT NULL
+                               `participant_id` char(36) NOT NULL,
+                               `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -136,7 +143,8 @@ CREATE TABLE `resource` (
                             `session_id` char(36) NOT NULL,
                             `title` varchar(255) NOT NULL,
                             `image` longblob DEFAULT NULL,
-                            `link` varchar(255) DEFAULT NULL
+                            `link` varchar(255) DEFAULT NULL,
+                            `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -148,7 +156,8 @@ CREATE TABLE `resource` (
 CREATE TABLE `selection` (
                              `id` char(36) NOT NULL,
                              `topic_id` char(36) NOT NULL,
-                             `name` varchar(255) NOT NULL
+                             `name` varchar(255) NOT NULL,
+                             `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -160,7 +169,8 @@ CREATE TABLE `selection` (
 CREATE TABLE `selection_idea` (
                                   `selection_id` char(36) NOT NULL,
                                   `idea_id` char(36) NOT NULL,
-                                  `order` int(11) NOT NULL DEFAULT 0
+                                  `order` int(11) NOT NULL DEFAULT 0,
+                                  `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -177,6 +187,7 @@ CREATE TABLE `session` (
                            `max_participants` int(11) DEFAULT NULL,
                            `expiration_date` date DEFAULT NULL,
                            `creation_date` date NOT NULL DEFAULT current_timestamp(),
+                           `modification_date` datetime NOT NULL DEFAULT current_timestamp(),
                            `public_screen_module_id` char(36) DEFAULT NULL,
                            `allow_anonymous` TINYINT(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -190,7 +201,8 @@ CREATE TABLE `session` (
 CREATE TABLE `session_role` (
                                 `session_id` char(36) NOT NULL,
                                 `user_id` char(36) NOT NULL,
-                                `role` varchar(255) NOT NULL
+                                `role` varchar(255) NOT NULL,
+                                `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -210,7 +222,8 @@ CREATE TABLE `task` (
                         `order` int(11) NOT NULL DEFAULT 0,
                         `state` varchar(255) DEFAULT NULL,
                         `expiration_time` datetime DEFAULT NULL,
-                        `active_module_id` char(36) DEFAULT NULL
+                        `active_module_id` char(36) DEFAULT NULL,
+                        `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -225,7 +238,8 @@ CREATE TABLE `topic` (
                          `title` varchar(255) NOT NULL,
                          `description` text DEFAULT NULL,
                          `order` int(11) NOT NULL DEFAULT 0,
-                         `active_task_id` char(36) DEFAULT NULL
+                         `active_task_id` char(36) DEFAULT NULL,
+                         `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -241,7 +255,8 @@ CREATE TABLE `vote` (
                         `idea_id` char(36) NOT NULL,
                         `rating` int(11) NOT NULL,
                         `detail_rating` float DEFAULT NULL,
-                        `timestamp` datetime NOT NULL DEFAULT current_timestamp()
+                        `timestamp` datetime NOT NULL DEFAULT current_timestamp(),
+                        `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -254,7 +269,8 @@ CREATE TABLE `tutorial` (
     `user_id` CHAR(36) NOT NULL,
     `step` VARCHAR(255) NOT NULL,
     `type` VARCHAR(255) NOT NULL,
-    `order` int(11) NOT NULL DEFAULT 0
+    `order` int(11) NOT NULL DEFAULT 0,
+    `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -634,14 +650,15 @@ ORDER BY
     sum_detail_rating
 DESC;
 
-CREATE OR REPLACE VIEW selection_view (type, id, task_id, topic_id, name, detail_type) AS
+CREATE OR REPLACE VIEW selection_view (type, id, task_id, topic_id, name, detail_type, modification_date) AS
 SELECT
     'SELECTION' COLLATE utf8mb4_unicode_ci AS type,
     selection.id,
     task.id as task_id,
     selection.topic_id,
     selection.name,
-    '' COLLATE utf8mb4_unicode_ci AS detail_type
+    '' COLLATE utf8mb4_unicode_ci AS detail_type,
+    selection.modification_date
 FROM
     selection
 LEFT JOIN task ON
@@ -655,7 +672,8 @@ SELECT
     id as task_id,
     topic_id,
     name,
-    task_type COLLATE utf8mb4_unicode_ci AS detail_type
+    task_type COLLATE utf8mb4_unicode_ci AS detail_type,
+    modification_date
 FROM
     task
 WHERE
@@ -667,7 +685,8 @@ SELECT
     id as task_id,
     topic_id,
     name,
-    '' COLLATE utf8mb4_unicode_ci AS detail_type
+    '' COLLATE utf8mb4_unicode_ci AS detail_type,
+    modification_date
 FROM
     task
 WHERE
@@ -679,7 +698,8 @@ SELECT
     idea.task_id,
     task.topic_id,
     idea.keywords AS name,
-    task.task_type COLLATE utf8mb4_unicode_ci AS detail_type
+    task.task_type COLLATE utf8mb4_unicode_ci AS detail_type,
+    idea.modification_date
 FROM
     idea
 INNER JOIN task ON

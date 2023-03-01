@@ -95,7 +95,7 @@ interface RepositoryInterface
      * @return void
      * @throws GenericException
      */
-    public function deleteById(string $id): void;
+    public function deleteById(string $id, bool $returnParent = false): string | null;
 
     /**
      * Get the entity table name.
