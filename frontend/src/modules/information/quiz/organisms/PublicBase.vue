@@ -295,7 +295,8 @@ export default class PublicBase extends Vue {
       getQuestionResultStorageFromHierarchy(oldValue);
     if (
       newQuestionResultStorage !== oldQuestionResultStorage ||
-      newValue?.id !== oldValue?.id
+      newValue?.id !== oldValue?.id ||
+      (newValue === null && oldValue === undefined)
     ) {
       cashService.deregisterAllGet(this.updateParentVotes);
       cashService.deregisterAllGet(this.updateVotes);

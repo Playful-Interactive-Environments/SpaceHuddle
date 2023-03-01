@@ -659,6 +659,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       this.moderatedQuestionFlow = false;
       this.defaultQuestionTime = null;
     }
+    this.initPublicQuestion();
   }
 
   updateQuestions(items: Hierarchy[]): void {
@@ -675,8 +676,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       );
     });
     this.questions = questions;
-    const activeQuestionId = this.task?.parameter?.activeQuestion?.id;
-    let publicQuestion: Question | null = null;
     newQuestions.forEach(async (question) => {
       hierarchyService.registerGetList(
         this.taskId,
@@ -685,16 +684,21 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         EndpointAuthorisationType.MODERATOR,
         60
       );
-      if (question.question.id === activeQuestionId) {
-        publicQuestion = question;
-      }
     });
-    if (publicQuestion) this.publicQuestion = publicQuestion;
     if (this.initQuestion) {
+      this.initPublicQuestion();
       if (this.questions.length === 0) this.setupEmptyQuestion();
       else this.editQuestion = this.questions[0];
     }
     this.initQuestion = false;
+  }
+
+  initPublicQuestion(): void {
+    const activeQuestionId = this.task?.parameter?.activeQuestion;
+    const publicQuestion: Question | undefined = this.questions.find(
+      (question) => question.question.id === activeQuestionId
+    );
+    if (publicQuestion) this.publicQuestion = publicQuestion;
   }
 
   deregisterGetAnswers(questions: string[] | null = null): void {
