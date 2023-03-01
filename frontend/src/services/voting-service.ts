@@ -1,12 +1,12 @@
 import { Vote, VoteResult } from '@/types/api/Vote';
 import {
   apiExecuteDelete,
-  apiExecuteGetHandled,
   apiExecutePost,
   apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from '@/services/cash-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -42,57 +42,127 @@ export const deleteVote = async (
   );
 };
 
-export const getVotes = async (
+export const registerGetVotes = (
   taskId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Vote[]> => {
-  return await apiExecuteGetHandled<Vote[]>(
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Vote[]> => {
+  return cashService.registerSimplifiedGet<Vote[]>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.VOTES}`,
+    callback,
     [],
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
   );
 };
 
-export const getResult = async (
+export const deregisterGetVotes = (
   taskId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<VoteResult[]> => {
-  return await apiExecuteGetHandled<VoteResult[]>(
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.VOTES}`,
+    callback
+  );
+};
+
+export const registerGetResult = (
+  taskId: string,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<VoteResult[]> => {
+  return cashService.registerSimplifiedGet<VoteResult[]>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.VOTE_RESULT}`,
+    callback,
     [],
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
   );
 };
 
-export const getParentResult = async (
+export const deregisterGetResult = (
   taskId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<VoteResult[]> => {
-  return await apiExecuteGetHandled<VoteResult[]>(
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.VOTE_RESULT}`,
+    callback
+  );
+};
+
+export const registerGetParentResult = (
+  taskId: string,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<VoteResult[]> => {
+  return cashService.registerSimplifiedGet<VoteResult[]>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.VOTE_RESULT_PARENT}`,
+    callback,
     [],
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
   );
 };
 
-export const getHierarchyVotes = async (
+export const deregisterGetParentResult = (
+  taskId: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.VOTE_RESULT_PARENT}`,
+    callback
+  );
+};
+
+export const registerGetHierarchyVotes = (
   parentIdeaId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Vote[]> => {
-  return await apiExecuteGetHandled<Vote[]>(
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Vote[]> => {
+  return cashService.registerSimplifiedGet<Vote[]>(
     `/${EndpointType.HIERARCHY}/${parentIdeaId}/${EndpointType.VOTES}`,
+    callback,
     [],
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
   );
 };
 
-export const getHierarchyResult = async (
+export const deregisterGetHierarchyVotes = (
   parentIdeaId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<VoteResult[]> => {
-  return await apiExecuteGetHandled<VoteResult[]>(
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.HIERARCHY}/${parentIdeaId}/${EndpointType.VOTES}`,
+    callback
+  );
+};
+
+export const registerGetHierarchyResult = (
+  parentIdeaId: string,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<VoteResult[]> => {
+  return cashService.registerSimplifiedGet<VoteResult[]>(
     `/${EndpointType.HIERARCHY}/${parentIdeaId}/${EndpointType.VOTE_RESULT}`,
+    callback,
     [],
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const deregisterGetHierarchyResult = (
+  parentIdeaId: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.HIERARCHY}/${parentIdeaId}/${EndpointType.VOTE_RESULT}`,
+    callback
   );
 };

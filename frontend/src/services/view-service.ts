@@ -3,24 +3,10 @@ import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Idea } from '@/types/api/Idea';
 import { View, getViewName, getViewKey } from '@/types/api/View';
-import { OrderGroupList } from '@/types/api/OrderGroup';
-import {
-  convertToOrderGroups,
-  filterIdeas,
-  getIdeaImages,
-} from '@/services/idea-service';
+import * as ideaService from '@/services/idea-service';
+import * as cashService from '@/services/cash-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-
-interface InputData {
-  view: {
-    type: string;
-    id: string;
-  };
-  maxCount: number | null;
-  filter: string[];
-  order: string;
-}
 
 const pushQueryParameter = (
   queryParameter: string,
@@ -30,7 +16,7 @@ const pushQueryParameter = (
   else return `?${parameterString}`;
 };
 
-export const getDetail = async (
+const getDetailQueryParameter = (
   type: string,
   typeId: string,
   orderType: string | null = null,
@@ -38,11 +24,34 @@ export const getDetail = async (
   filter: string[] | null = null,
   count: number | null,
   countOrderType: string | null = null,
-  countRefId: string | null = null,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Idea[]> => {
+  countRefId: string | null = null
+): string => {
+  let queryParameter = getDetailParameter(
+    type,
+    typeId,
+    orderType,
+    refId,
+    filter,
+    count,
+    countOrderType,
+    countRefId
+  );
+  if (queryParameter.length > 0) queryParameter = `?${queryParameter}`;
+  return queryParameter;
+};
+
+export const getDetailParameter = (
+  type: string,
+  typeId: string,
+  orderType: string | null = null,
+  refId: string | null = null,
+  filter: string[] | null = null,
+  count: number | null,
+  countOrderType: string | null = null,
+  countRefId: string | null = null
+): string => {
   let queryParameter = '';
-  if (orderType) queryParameter = `?order=${orderType}`;
+  if (orderType) queryParameter = `order=${orderType}`;
   if (refId && orderType) queryParameter = `${queryParameter}&refId=${refId}`;
   if (filter && filter.length > 0) {
     const parameterString = `filter=${JSON.stringify(filter)}`;
@@ -60,137 +69,176 @@ export const getDetail = async (
     const parameterString = `countRefId=${countRefId}`;
     queryParameter = pushQueryParameter(queryParameter, parameterString);
   }
+  return queryParameter;
+};
+
+export const registerGetDetail = (
+  type: string,
+  typeId: string,
+  orderType: string | null = null,
+  refId: string | null = null,
+  filter: string[] | null = null,
+  count: number | null,
+  countOrderType: string | null = null,
+  countRefId: string | null = null,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Idea[]> => {
+  const queryParameter = getDetailQueryParameter(
+    type,
+    typeId,
+    orderType,
+    refId,
+    filter,
+    count,
+    countOrderType,
+    countRefId
+  );
+  return cashService.registerSimplifiedGet<Idea[]>(
+    `/${EndpointType.VIEW}/${type}/${typeId}/${queryParameter}`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds,
+    async (ideas: Idea[]) => {
+      return await ideaService.getIdeaImages(ideas, authHeaderType);
+    }
+  );
+};
+
+export const deregisterGetDetail = (
+  type: string,
+  typeId: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.VIEW}/${type}/${typeId}/`,
+    callback
+  );
+};
+
+export const getDetail = async (
+  type: string,
+  typeId: string,
+  orderType: string | null = null,
+  refId: string | null = null,
+  filter: string[] | null = null,
+  count: number | null,
+  countOrderType: string | null = null,
+  countRefId: string | null = null,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Idea[]> => {
+  const queryParameter = getDetailQueryParameter(
+    type,
+    typeId,
+    orderType,
+    refId,
+    filter,
+    count,
+    countOrderType,
+    countRefId
+  );
   const result = await apiExecuteGetHandled<Idea[]>(
     `/${EndpointType.VIEW}/${type}/${typeId}/${queryParameter}`,
     [],
     authHeaderType
   );
-  return await getIdeaImages(result, authHeaderType);
+  return await ideaService.getIdeaImages(result, authHeaderType);
 };
 
-export const getViewIdeas = async (
-  topicId: string,
-  input: InputData[],
+export const registerGetInputIdeas = (
+  taskId: string,
   orderType: string | null = null,
   refId: string | null = null,
+  callback: (result: any) => void,
   authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5,
+  customKeyPrefix = ''
+): cashService.SimplifiedCashEntry<Idea[]> => {
+  const queryParameter = ideaService.getQueryParameter(orderType, refId);
+  return cashService.registerSimplifiedGet<Idea[]>(
+    `/${EndpointType.TASK}/${taskId}/input/${queryParameter}`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds,
+    async (ideas: Idea[]) => {
+      return await ideaService.getIdeaImages(ideas, authHeaderType);
+    },
+    null,
+    customKeyPrefix
+  );
+};
+
+export const deregisterGetInputIdeas = (
+  taskId: string,
+  callback: (result: any) => void,
+  customKeyPrefix = ''
+): void => {
+  return cashService.deregisterGet(
+    `${customKeyPrefix}/${EndpointType.TASK}/${taskId}/input/`,
+    callback
+  );
+};
+
+export const customizeView = (
+  ideas: Idea[],
+  views: View[] | null = null,
   $t: null | ((key: string) => string) = null,
   stateFilter: string[] = [],
   textFilter = '',
+  inputLength = 1,
   useOrderGroup = true
-): Promise<Idea[]> => {
-  const viewName = getList(topicId, authHeaderType);
-  let viewNameList: View[] = [];
-  viewName.then((list) => {
-    viewNameList = list;
-  });
-  if (orderType) {
-    const constOrderParts = orderType.split('&refId=');
-    if (constOrderParts.length > 1) {
-      refId = constOrderParts[1];
-      orderType = constOrderParts[0];
+): Idea[] => {
+  if (views) {
+    for (const resultItem of ideas) {
+      const orderKeyText = useOrderGroup
+        ? resultItem.orderGroup
+        : resultItem.orderText;
+      const inputItemView = views.find(
+        (view) => getViewKey(view).toLowerCase() === orderKeyText.toLowerCase()
+      );
+      if (inputItemView) {
+        resultItem.orderGroup = getViewName(inputItemView, $t);
+      }
     }
   }
-  let result: Idea[] = [];
-  const dbCalls: Promise<Idea[] | View[]>[] = [];
-  for (const index in input) {
-    const item = input[index];
-    const orderParts = item.order.split('&refId=');
-    let countRefId: string | null = null;
-    let countOrderType: string | null = item.order;
-    if (orderParts.length > 1) {
-      countOrderType = orderParts[0];
-      countRefId = orderParts[1];
-    }
-    const dbCall = getDetail(
-      item.view.type,
-      item.view.id,
-      orderType ? orderType : countOrderType,
-      orderType ? refId : countRefId,
-      item.filter,
-      item.maxCount,
-      countOrderType,
-      countRefId,
-      authHeaderType
-    );
-    dbCall.then((inputResult) => {
-      if (item.maxCount) inputResult = inputResult.slice(0, item.maxCount);
-      result.push(...inputResult);
-    });
-    dbCalls.push(dbCall);
-  }
-  dbCalls.push(viewName);
-  await Promise.all(dbCalls);
-  for (const resultItem of result) {
-    const orderKeyText = useOrderGroup
-      ? resultItem.orderGroup
-      : resultItem.orderText;
-    const inputItemView = viewNameList.find(
-      (view) => getViewKey(view).toLowerCase() === orderKeyText.toLowerCase()
-    );
-    if (inputItemView) {
-      resultItem.orderGroup = getViewName(inputItemView, $t);
-    }
-  }
-  result = filterIdeas(result, stateFilter, textFilter);
+  ideas = ideaService.filterIdeas(ideas, stateFilter, textFilter);
   const orderText = (idea: Idea): string => {
     return `${idea.orderGroup} ${idea.orderText} ${idea.id}`;
   };
-  result = result.sort((a, b) => orderText(a).localeCompare(orderText(b)));
-  if (input.length > 1)
-    return result.filter(
-      (item, index) => result.findIndex((item2) => item2.id == item.id) == index
+  ideas = ideas.sort((a, b) => orderText(a).localeCompare(orderText(b)));
+  if (inputLength > 1) {
+    return ideas.filter(
+      (item, index) => ideas.findIndex((item2) => item2.id == item.id) == index
     );
+  }
 
-  return await getIdeaImages(result, authHeaderType);
+  return ideas;
 };
 
-export const getViewOrderGroups = async (
+export const registerGetList = (
   topicId: string,
-  input: InputData[],
-  orderType: string | null = null,
-  orderAsc = true,
-  refId: string | null = null,
+  callback: (result: any) => void,
   authHeaderType = EndpointAuthorisationType.MODERATOR,
-  actualOrderGroupList: OrderGroupList = {},
-  $t: null | ((key: string) => string) = null,
-  stateFilter: string[] = [],
-  textFilter = '',
-  filter: (idea) => boolean = () => {
-    return true;
-  },
-  useOrderGroup = true
-): Promise<{ ideas: Idea[]; oderGroups: OrderGroupList }> => {
-  let orderGroupList = {};
-  let ideaList: Idea[] = [];
-  await getViewIdeas(
-    topicId,
-    input,
-    orderType,
-    refId,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<View[]> => {
+  return cashService.registerSimplifiedGet<View[]>(
+    `/${EndpointType.TOPIC}/${topicId}/${EndpointType.VIEWS}`,
+    callback,
+    [],
     authHeaderType,
-    $t,
-    stateFilter,
-    textFilter
-  ).then((ideas) => {
-    ideaList = orderAsc ? ideas : ideas.reverse();
-    orderGroupList = convertToOrderGroups(
-      ideas,
-      actualOrderGroupList,
-      filter,
-      useOrderGroup
-    );
-  });
-  return { ideas: ideaList, oderGroups: orderGroupList };
+    maxDelaySeconds
+  );
 };
 
-export const getList = async (
+export const deregisterGetList = (
   topicId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<View[]> => {
-  return await apiExecuteGetHandled<View[]>(
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
     `/${EndpointType.TOPIC}/${topicId}/${EndpointType.VIEWS}`,
-    [],
-    authHeaderType
+    callback
   );
 };

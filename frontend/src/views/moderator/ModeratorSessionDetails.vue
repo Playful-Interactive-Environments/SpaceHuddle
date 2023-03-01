@@ -76,47 +76,18 @@
               :sessionId="sessionId"
               :topic="element"
               :canModify="isModerator"
-              v-on:topicDeleted="getTopics"
+              v-on:topicDeleted="deleteTopic"
             >
               <TaskTimeline
                 :topic-id="element.id"
                 :session-id="sessionId"
                 :is-linked-to-task="false"
-                v-on:changePublicScreen="setPublicTopic($event, element.id)"
                 :key="publicScreenTopic"
               ></TaskTimeline>
             </TopicCard>
           </div>
         </template>
       </draggable>
-      <!--<draggable
-        :list="topics"
-        tag="transition-group"
-        item-key="order"
-        handle=".card__drag"
-        @end="dragDone"
-      >
-        <div
-          class="detail__module"
-          v-for="element in topics"
-          :key="element.order"
-        >
-          <TopicCard
-            :sessionId="sessionId"
-            :topic="element"
-            :canModify="isModerator"
-            v-on:topicDeleted="getTopics"
-          >
-            <TaskTimeline
-              :topic-id="element.id"
-              :session-id="sessionId"
-              :is-linked-to-task="false"
-              v-on:changePublicScreen="setPublicTopic($event, element.id)"
-              :key="publicScreenTopic"
-            ></TaskTimeline>
-          </TopicCard>
-        </div>
-      </draggable>-->
       <TutorialStep
         v-if="isModerator"
         type="sessionDetails"
@@ -133,12 +104,12 @@
         v-model:show-modal="showTopicSettings"
         :session-id="sessionId"
         :topic-id="editTopicId"
-        @topicUpdated="getTopics"
+        @topicUpdated="reloadTopics"
       />
       <SessionSettings
         v-model:show-modal="showSessionSettings"
         :session-id="sessionId"
-        @sessionUpdated="getTopics"
+        @sessionUpdated="reloadSession"
       />
       <FacilitatorSettings
         v-if="isModerator"
@@ -162,7 +133,6 @@ import * as topicService from '@/services/topic-service';
 import * as taskService from '@/services/task-service';
 import { Session } from '@/types/api/Session';
 import { Topic } from '@/types/api/Topic';
-import { EventType } from '@/types/enum/EventType';
 import TopicSettings from '@/components/moderator/organisms/settings/TopicSettings.vue';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import SessionSettings from '@/components/moderator/organisms/settings/SessionSettings.vue';
@@ -174,9 +144,12 @@ import TopicCard from '@/components/moderator/organisms/cards/TopicCard.vue';
 import FacilitatorSettings from '@/components/moderator/organisms/settings/FacilitatorSettings.vue';
 import UserType from '@/types/enum/UserType';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
-import { reactivateTutorial } from '@/services/auth-service';
-//import { VueDraggableNext as draggable } from 'vue-draggable-next';
 import draggable from 'vuedraggable';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from '@/services/cash-service';
+import { Task } from '@/types/api/Task';
+import { SessionRole } from '@/types/api/SessionRole';
+import { reactivateTutorial } from '@/services/tutorial-service';
 
 @Options({
   components: {
@@ -209,17 +182,8 @@ export default class ModeratorSessionDetails extends Vue {
   formatDate = formatDate;
   editTopicId = '';
   publicScreenTopic = '';
-  readonly intervalTime = 3000;
-  interval!: any;
 
   TaskType = TaskType;
-
-  setPublicTopic(
-    publicTaskId: string | null,
-    publicTopicId: string | null
-  ): void {
-    this.publicScreenTopic = publicTaskId ? (publicTopicId as string) : '';
-  }
 
   reactivateTutorial(): void {
     reactivateTutorial('sessionDetails', this.eventBus);
@@ -238,40 +202,115 @@ export default class ModeratorSessionDetails extends Vue {
     return true;
   }
 
-  async mounted(): Promise<void> {
-    this.eventBus.off(EventType.CHANGE_PUBLIC_SCREEN);
-    this.eventBus.on(EventType.CHANGE_PUBLIC_SCREEN, async (id) => {
-      await this.changePublicScreen(id as string);
-    });
-    this.startInterval();
-  }
-
+  topicsCashEntry!: cashService.SimplifiedCashEntry<Topic[]>;
+  sessionCashEntry!: cashService.SimplifiedCashEntry<Session>;
   @Watch('sessionId', { immediate: true })
   async onSessionIdChanged(): Promise<void> {
-    await sessionRoleService.getOwn(this.sessionId).then((role) => {
-      this.sessionRole = role.role;
+    this.sessionCashEntry = sessionService.registerGetById(
+      this.sessionId,
+      this.updateSession,
+      EndpointAuthorisationType.MODERATOR,
+      10 * 60
+    );
+    this.topicsCashEntry = topicService.registerGetTopicsList(
+      this.sessionId,
+      this.updateTopics,
+      EndpointAuthorisationType.MODERATOR,
+      2 * 60
+    );
+
+    sessionService.registerGetPublicScreen(
+      this.sessionId,
+      this.updatePublicTask,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+    sessionRoleService.registerGetOwn(
+      this.sessionId,
+      this.updateRole,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+  }
+
+  updateRole(role: SessionRole): void {
+    this.sessionRole = role.role;
+  }
+
+  updateSession(session: Session): void {
+    this.session = session;
+  }
+
+  reloadSession(): void {
+    this.sessionCashEntry.refreshData();
+  }
+
+  updateTopics(topics: Topic[]): void {
+    const deletedTopics = this.topics
+      .filter((tOld) => {
+        return !topics.find((tNew) => tNew.id === tOld.id);
+      })
+      .map((t) => t.id);
+    this.deregisterGetTasks(deletedTopics);
+    const newTopics = topics.filter((tNew) => {
+      return !this.topics.find((tOld) => tNew.id === tOld.id);
     });
-    await this.getTopics();
+    this.topics = topics;
+    newTopics.forEach(async (topic) => {
+      taskService.registerGetTaskList(
+        topic.id,
+        this.updateTasks,
+        EndpointAuthorisationType.MODERATOR,
+        5 * 60
+      );
+    });
+  }
+
+  updatePublicTask(task: Task): void {
+    if (task) {
+      this.publicScreenTaskId = task.id;
+      this.publicScreenTopic = task.topicId;
+    } else {
+      this.publicScreenTaskId = '';
+      this.publicScreenTopic = '';
+    }
   }
 
   async changePublicScreen(id: string | null): Promise<void> {
     this.publicScreenTaskId = id as string;
   }
 
-  async getTopics(): Promise<void> {
-    sessionService.getById(this.sessionId).then((queryResult) => {
-      this.session = queryResult;
-      topicService.getTopicsList(this.session.id).then((queryResult) => {
-        this.topics = queryResult;
-        this.topics.forEach(async (topic) => {
-          taskService.getTaskList(topic.id).then((queryResult) => {
-            topic.tasks = queryResult;
-            topic.tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
-          });
-        });
-        this.getPublicScreen();
-      });
+  deregisterGetTasks(topics: string[] | null = null): void {
+    if (!topics) topics = this.topics.map((t) => t.id);
+    topics.forEach(async (topic) => {
+      taskService.deregisterGetTaskList(topic, this.updateTasks);
     });
+  }
+
+  reloadTopics(topic: Topic): void {
+    const storedTopic = this.topics.find((t) => t.id === topic.id);
+    if (storedTopic) {
+      storedTopic.title = topic.title;
+      storedTopic.description = topic.description;
+      storedTopic.order = topic.order;
+      storedTopic.activeTaskId = topic.activeTaskId;
+    }
+  }
+
+  deleteTopic(topicId: string): void {
+    this.deregisterGetTasks([topicId]);
+    const index = this.topics.findIndex((t) => t.id === topicId);
+    if (index > -1) {
+      this.topics.splice(index, 1);
+    }
+  }
+
+  updateTasks(tasks: Task[], topicId: string): void {
+    const topic = this.topics.find((topic) => topic.id === topicId);
+    if (topic) {
+      topic.tasks = tasks;
+      topic.tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
+    }
   }
 
   async editSession(): Promise<void> {
@@ -279,21 +318,12 @@ export default class ModeratorSessionDetails extends Vue {
   }
 
   async deleteSession(): Promise<void> {
-    clearInterval(this.interval);
+    this.unmounted();
     setTimeout(() => {
       sessionService.remove(this.sessionId).then((deleted) => {
         if (deleted) this.$router.go(-1);
       });
     }, 100);
-  }
-
-  async getPublicScreen(): Promise<void> {
-    sessionService.getPublicScreen(this.sessionId).then((queryResult) => {
-      if (queryResult) {
-        this.publicScreenTaskId = queryResult.id;
-        this.publicScreenTopic = queryResult.topicId;
-      }
-    });
   }
 
   dragDone(): void {
@@ -311,12 +341,12 @@ export default class ModeratorSessionDetails extends Vue {
     }
   }
 
-  startInterval(): void {
-    this.interval = setInterval(this.getTopics, this.intervalTime);
-  }
-
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateSession);
+    cashService.deregisterAllGet(this.updateTasks);
+    cashService.deregisterAllGet(this.updateTopics);
+    cashService.deregisterAllGet(this.updateRole);
+    cashService.deregisterAllGet(this.updatePublicTask);
   }
 
   disconnect(): void {

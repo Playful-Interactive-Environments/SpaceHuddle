@@ -26,10 +26,11 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import { getTutorialSteps, addTutorialStep } from '@/services/auth-service';
 import { Tutorial } from '@/types/api/Tutorial';
 import { EventType } from '@/types/enum/EventType';
 import { v4 as uuidv4 } from 'uuid';
+import * as tutorialService from '@/services/tutorial-service';
+import * as cashService from '@/services/cash-service';
 
 const reservedTutorialSteps: {
   [key: string]: {
@@ -74,10 +75,7 @@ export default class TutorialStep extends Vue {
   }
 
   mounted(): void {
-    getTutorialSteps().then((steps) => {
-      this.tutorialSteps = steps;
-      this.dbLoaded = true;
-    });
+    tutorialService.registerGetList(this.updateTutorial);
 
     this.eventBus.on(EventType.CHANGE_TUTORIAL, async () => {
       this.reloadCount++;
@@ -91,8 +89,14 @@ export default class TutorialStep extends Vue {
     }
   }
 
+  updateTutorial(steps: Tutorial[]): void {
+    this.tutorialSteps = steps;
+    this.dbLoaded = true;
+  }
+
   visibilityChanged(
     isVisible: boolean,
+    //eslint-disable-next-line @typescript-eslint/no-unused-vars
     entry: IntersectionObserverEntry
   ): void {
     this.isVisible = isVisible;
@@ -121,6 +125,7 @@ export default class TutorialStep extends Vue {
 
   unmounted(): void {
     this.removeFromReservationList();
+    cashService.deregisterAllGet(this.updateTutorial);
   }
 
   removeFromReservationList(): void {
@@ -219,7 +224,7 @@ export default class TutorialStep extends Vue {
   stepDone(): void {
     const item = this.tutorialItem;
     if (!this.getIncludeStep()) {
-      addTutorialStep(item, this.eventBus);
+      tutorialService.addTutorialStep(item, this.eventBus);
     }
   }
 }

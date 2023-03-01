@@ -4,6 +4,7 @@ import ModuleComponentType from '@/modules/ModuleComponentType';
 import { RouteRecordRaw } from 'vue-router';
 import TaskType from '@/types/enum/TaskType';
 import { ModuleType } from '@/types/enum/ModuleType';
+import { until } from '@/utils/wait';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -71,15 +72,6 @@ readConfig().then((config) => {
   moduleConfigLoaded = true;
 });
 
-function until(conditionFunction) {
-  const poll = (resolve) => {
-    if (conditionFunction()) resolve();
-    else setTimeout(() => poll(resolve), 400);
-  };
-
-  return new Promise(poll);
-}
-
 export const getAsyncTaskParameter = async (
   taskType: string | null = null
 ): Promise<any> => {
@@ -137,8 +129,8 @@ export const getAsyncModule = async (
               module.type == 'addOn'
                 ? 1
                 : !module.path.endsWith(defaultModuleName)
-                  ? 2
-                  : 3,
+                ? 2
+                : 3,
             module: module,
           });
         moduleIndex++;
@@ -352,10 +344,15 @@ export class ModuleTask {
   }
 
   eq(value: ModuleTask): boolean {
-    return (
-      value.taskType.toUpperCase() === this.taskType.toUpperCase() &&
-      value.moduleName.toUpperCase() === this.moduleName.toUpperCase()
-    );
+    const taskTypeEq =
+      value.taskType && this.taskType
+        ? value.taskType.toUpperCase() === this.taskType.toUpperCase()
+        : value.taskType === this.taskType;
+    const moduleNameEq =
+      value.moduleName && this.moduleName
+        ? value.moduleName.toUpperCase() === this.moduleName.toUpperCase()
+        : value.moduleName === this.moduleName;
+    return taskTypeEq && moduleNameEq;
   }
 
   like(taskType: string | undefined, moduleName: string): boolean {

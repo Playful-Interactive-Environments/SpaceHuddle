@@ -87,8 +87,11 @@ import ValidationForm, {
   ValidationFormCall,
 } from '@/components/shared/molecules/ValidationForm.vue';
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
-import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import { ValidationData } from '@/types/ui/ValidationRule';
+import { Session } from '@/types/api/Session';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -116,21 +119,32 @@ export default class SessionSettings extends Vue {
     this.showDialog = showModal;
   }
 
+  sessionCash!: cashService.SimplifiedCashEntry<Session>;
   @Watch('sessionId', { immediate: true })
   onSessionIdChanged(id: string): void {
     if (id) {
-      sessionService.getById(id).then((session) => {
-        this.formData.title = session.title;
-        this.formData.description = session.description;
-        this.formData.expirationDate = new Date(session.expirationDate);
-      });
+      this.sessionCash = sessionService.registerGetById(
+        this.sessionId,
+        this.updateSession,
+        EndpointAuthorisationType.MODERATOR,
+        60 * 60
+      );
     } else {
       this.reset();
     }
   }
 
+  updateSession(session: Session): void {
+    this.formData.title = session.title;
+    this.formData.description = session.description;
+    this.formData.expirationDate = new Date(session.expirationDate);
+  }
+
+  unmounted(): void {
+    cashService.deregisterAllGet(this.updateSession);
+  }
+
   handleClose(done: { (): void }): void {
-    //this.reset();
     done();
     this.$emit('update:showModal', false);
   }
@@ -188,7 +202,7 @@ export default class SessionSettings extends Vue {
             this.$emit('update:showModal', false);
             this.$emit('update:sessionId', null);
             this.$emit('sessionUpdated');
-            //this.reset();
+            if (this.sessionCash) this.sessionCash.refreshData();
           },
           (error) => {
             this.formData.stateMessage = getSingleTranslatedErrorMessage(error);

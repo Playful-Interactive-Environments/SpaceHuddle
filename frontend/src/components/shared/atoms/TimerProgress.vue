@@ -15,6 +15,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import * as timerService from '@/services/timer-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { TimerEntity } from '@/types/enum/TimerEntity';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {},
@@ -33,12 +34,46 @@ export default class TimerProgress extends Vue {
   readonly intervalTime = 1000;
 
   mounted(): void {
-    document.addEventListener('visibilitychange', this.syncTimeWithBackend);
+    document.addEventListener('visibilitychange', this.reloadTimer);
     this.startTimer();
   }
 
   get showTime(): boolean {
     return timerService.isActive(this.entity);
+  }
+
+  timerCash!: cashService.SimplifiedCashEntry<any>;
+  @Watch('entity.id', { immediate: true })
+  onEntityIdChanged(): void {
+    let authHeaderTyp: EndpointAuthorisationType =
+      EndpointAuthorisationType.MODERATOR;
+    if (this.authHeaderTyp) authHeaderTyp = this.authHeaderTyp;
+    this.timerCash = timerService.registerGet(
+      this.entityName,
+      this.entity.id,
+      this.updateTimer,
+      authHeaderTyp,
+      20
+    );
+  }
+
+  updateTimer(item: any): void {
+    const remainingTime = timerService.getRemainingTime(item);
+    const state = timerService.getState(item);
+    const totalTime = timerService.getTotalTime(item);
+    this.timeLeft = remainingTime;
+    this.totalTime = totalTime;
+    timerService.setTotalTime(this.entity, totalTime);
+    timerService.setRemainingTime(this.entity, remainingTime);
+
+    if (timerService.getState(item) !== timerService.getState(this.entity)) {
+      timerService.setState(this.entity, state);
+      if (!timerService.isActive(this.entity)) this.$emit('timerEnds');
+    }
+  }
+
+  reloadTimer(): void {
+    this.timerCash.refreshData();
   }
 
   @Watch('entity', { immediate: true, deep: true })
@@ -49,32 +84,6 @@ export default class TimerProgress extends Vue {
         this.timeLeft = timerService.getRemainingTime(val);
         this.totalTime = timerService.getTotalTime(val);
       }
-    }
-  }
-
-  syncTimeWithBackend(): void {
-    if (this.entity) {
-      let authHeaderTyp: EndpointAuthorisationType =
-        EndpointAuthorisationType.MODERATOR;
-      if (this.authHeaderTyp) authHeaderTyp = this.authHeaderTyp;
-      timerService
-        .get(this.entityName, this.entity.id, authHeaderTyp)
-        .then((item) => {
-          const remainingTime = timerService.getRemainingTime(item);
-          const state = timerService.getState(item);
-          const totalTime = timerService.getTotalTime(item);
-          this.timeLeft = remainingTime;
-          this.totalTime = totalTime;
-          timerService.setTotalTime(this.entity, totalTime);
-          timerService.setRemainingTime(this.entity, remainingTime);
-
-          if (
-            timerService.getState(item) !== timerService.getState(this.entity)
-          ) {
-            timerService.setState(this.entity, state);
-            if (!timerService.isActive(this.entity)) this.$emit('timerEnds');
-          }
-        });
     }
   }
 
@@ -128,11 +137,11 @@ export default class TimerProgress extends Vue {
         timerService.setRemainingTime(this.entity, this.timeLeft);
       }
     }
-    this.syncTimeWithBackend();
   }
 
   unmounted(): void {
-    document.removeEventListener('visibilitychange', this.syncTimeWithBackend);
+    cashService.deregisterAllGet(this.updateTimer);
+    document.removeEventListener('visibilitychange', this.reloadTimer);
     clearInterval(this.interval);
   }
 }

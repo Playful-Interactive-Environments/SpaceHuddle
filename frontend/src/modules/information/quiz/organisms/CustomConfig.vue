@@ -81,6 +81,8 @@ import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import * as timerService from '@/services/timer-service';
 import { QuestionnaireType } from '@/modules/information/quiz/types/QuestionnaireType';
 import { CustomParameter, CustomSync } from '@/types/ui/CustomParameter';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from "@/services/cash-service";
 
 @Options({
   components: {},
@@ -156,15 +158,22 @@ export default class ModeratorConfig
 
   @Watch('moduleId', { immediate: true })
   async onModuleIdChanged(): Promise<void> {
-    await this.getModule();
+    if (this.moduleId) {
+      moduleService.registerGetModuleById(
+        this.moduleId,
+        this.updateModule,
+        EndpointAuthorisationType.MODERATOR,
+        60 * 60
+      );
+    }
   }
 
-  async getModule(): Promise<void> {
-    if (this.moduleId) {
-      await moduleService.getModuleById(this.moduleId).then((module) => {
-        this.module = module;
-      });
-    }
+  updateModule(module: Module): void {
+    this.module = module;
+  }
+
+  unmounted(): void {
+    cashService.deregisterAllGet(this.updateModule);
   }
 
   async updateParameterForSaving(): Promise<void> {

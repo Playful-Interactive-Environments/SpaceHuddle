@@ -29,7 +29,7 @@
     "quaternion": "^1.4.0",
     "shake.js": "^1.2.2",
     "uuid": "^9.0.0",
-    "vue": "^3.2.31",
+    "vue": "^3.2.47",
     "vue-advanced-cropper": "^2.8.8",
     "vue-class-component": "^8.0.0-0",
     "vue-draggable-next": "^2.1.1",

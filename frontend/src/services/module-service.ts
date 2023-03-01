@@ -1,38 +1,63 @@
 import {
   apiExecuteDelete,
-  apiExecuteGetHandled,
   apiExecutePost,
   apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Module } from '@/types/api/Module';
+import * as cashService from '@/services/cash-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
-export const getModuleById = async (
+export const registerGetModuleById = (
   moduleId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Module> => {
-  return await apiExecuteGetHandled<Module>(
+  callback: (result: Module) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Module> => {
+  return cashService.registerSimplifiedGet<Module>(
     `/${EndpointType.MODULE}/${moduleId}/`,
+    callback,
     {},
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
   );
+};
+
+export const deregisterGetModuleById = (
+  moduleId: string,
+  callback: (result: Module) => void
+): void => {
+  cashService.deregisterGet(`/${EndpointType.MODULE}/${moduleId}/`, callback);
 };
 
 export const deleteModule = async (id: string): Promise<boolean> => {
   return await apiExecuteDelete<any>(`/${EndpointType.MODULE}/${id}/`);
 };
 
-export const getModuleList = async (
+export const registerGetModuleList = (
   taskId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Module[]> => {
-  return await apiExecuteGetHandled<Module[]>(
+  callback: (result: Module[]) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Module[]> => {
+  return cashService.registerSimplifiedGet<Module[]>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.MODULES}/`,
+    callback,
     [],
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const deregisterGetModuleList = (
+  taskId: string,
+  callback: (result: Module[]) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.MODULES}/`,
+    callback
   );
 };
 
@@ -54,12 +79,28 @@ export const putModule = async (data: Partial<Module>): Promise<Module> => {
   );
 };
 
-export const getUsedModuleNames = async (
-  taskType: string
-): Promise<string[]> => {
-  return await apiExecuteGetHandled<string[]>(
+export const registerGetUsedModuleNames = (
+  taskType: string,
+  callback: (result: string[], taskType: string) => void,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<string[]> => {
+  return cashService.registerSimplifiedGet<string[]>(
     `/${EndpointType.MODULE_NAMES}/${taskType}/`,
+    callback,
     [],
-    EndpointAuthorisationType.MODERATOR
+    EndpointAuthorisationType.MODERATOR,
+    maxDelaySeconds,
+    null,
+    [taskType]
+  );
+};
+
+export const deregisterGetUsedModuleNames = (
+  taskType: string,
+  callback: (result: string[], taskType: string) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.MODULE_NAMES}/${taskType}/`,
+    callback
   );
 };

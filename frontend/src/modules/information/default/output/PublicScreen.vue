@@ -18,6 +18,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from "@/services/cash-service";
 
 @Options({
   components: {
@@ -31,43 +32,25 @@ export default class PublicScreen extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   ideas: Idea[] = [];
-  readonly intervalTime = 10000;
-  interval!: any;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getIdeas();
+    ideaService.registerGetIdeasForTask(
+      this.taskId,
+      IdeaSortOrder.ORDER,
+      null,
+      this.updateIdeas,
+      this.authHeaderTyp,
+      2 * 60
+    );
   }
 
-  get isModerator(): boolean {
-    return this.authHeaderTyp === EndpointAuthorisationType.MODERATOR;
-  }
-
-  async getIdeas(): Promise<void> {
-    if (this.taskId) {
-      await ideaService
-        .getIdeasForTask(
-          this.taskId,
-          IdeaSortOrder.ORDER,
-          null,
-          this.authHeaderTyp
-        )
-        .then((ideas) => {
-          this.ideas = ideas;
-        });
-    }
-  }
-
-  async mounted(): Promise<void> {
-    this.startInterval();
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.getIdeas, this.intervalTime);
+  updateIdeas(ideas: Idea[]): void {
+    this.ideas = ideas;
   }
 
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateIdeas);
   }
 }
 </script>

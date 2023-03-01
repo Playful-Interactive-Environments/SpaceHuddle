@@ -85,14 +85,18 @@
           <i class="line"></i>
         </span>
         <el-steps
+          v-if="activePageDisplayContentList"
           class="media-content"
           :active="activeContentIndex"
           align-center
           :key="timelineKey"
         >
+          <!--transition-group-->
           <draggable
             v-model="activePageDisplayContentList"
-            tag="transition-group"
+            tag="div"
+            :animation="150"
+            class="el-steps el-steps--horizontal media-content"
             :item-key="keyPropertyName"
             handle=".processIcon"
             @end="dragDone"
@@ -843,9 +847,9 @@ export default class ProcessTimeline extends Vue {
       315deg,
       var(--background_color) 25%,
       transparent 25%
-  ),
-  linear-gradient(225deg, var(--background_color) 25%, transparent 25%);
-  background-position-x: 0, 0;
+    ),
+    linear-gradient(225deg, var(--background_color) 25%, transparent 25%);
+  background-position-x: 0;
   background-position-y: calc(var(--height) / 2), calc(var(--height) / 2);
   background-size: var(--height) var(--height);
   background-color: var(--color-background);
@@ -859,20 +863,20 @@ export default class ProcessTimeline extends Vue {
       135deg,
       var(--background_color) 25%,
       transparent 25%
-  ),
-  linear-gradient(45deg, var(--background_color) 25%, transparent 25%);
+    ),
+    linear-gradient(45deg, var(--background_color) 25%, transparent 25%);
   background-position-y: calc(var(--height) / 2), calc(var(--height) / 2);
   background-size: var(--height) var(--height);
   --step-size: calc(100% / (var(--slider-steps) - 1));
   --slider-marker: calc(var(--step-size) * var(--slider-position));
   --color-none: #{rgba(#000, 0.2)};
   --mask: linear-gradient(
-      90deg,
-      var(--color-none) 0%,
-      var(--color-none) calc(var(--slider-marker) - var(--step-size)),
-      red var(--slider-marker),
-      var(--color-none) calc(var(--slider-marker) + var(--step-size)),
-      var(--color-none) 100%
+    90deg,
+    var(--color-none) 0%,
+    var(--color-none) calc(var(--slider-marker) - var(--step-size)),
+    red var(--slider-marker),
+    var(--color-none) calc(var(--slider-marker) + var(--step-size)),
+    var(--color-none) 100%
   );
   -webkit-mask: var(--mask);
   mask: var(--mask);

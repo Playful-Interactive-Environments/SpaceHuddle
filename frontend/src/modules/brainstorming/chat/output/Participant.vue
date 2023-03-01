@@ -95,7 +95,7 @@
           :canChangeState="false"
           class="public-idea"
           :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
-          @ideaDeleted="getTaskIdeas"
+          @ideaDeleted="reloadIdeas"
         />
       </span>
     </div>
@@ -156,19 +156,23 @@ import ParticipantModuleDefaultContainer from '@/components/participant/organism
 import * as ideaService from '@/services/idea-service';
 import * as taskService from '@/services/task-service';
 import * as moduleService from '@/services/module-service';
-import { Idea } from '@/types/api/Idea';
+import {
+  Idea,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_KEYWORDS_LENGTH,
+} from '@/types/api/Idea';
 import { Module } from '@/types/api/Module';
 import { Task } from '@/types/api/Task';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
-import { MAX_DESCRIPTION_LENGTH, MAX_KEYWORDS_LENGTH } from '@/types/api/Idea';
-import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import ValidationForm, {
   ValidationFormCall,
 } from '@/components/shared/molecules/ValidationForm.vue';
 import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
 import DrawingUpload from '@/components/shared/organisms/DrawingUpload.vue';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -189,8 +193,6 @@ export default class Participant extends Vue {
   @Prop({ default: '' }) readonly backgroundClass!: string;
   module: Module | null = null;
   task: Task | null = null;
-  readonly intervalTime = 10000;
-  interval!: any;
   ideas: Idea[] = [];
   showUploadDialog = false;
   showDrawingDialog = false;
@@ -285,8 +287,6 @@ export default class Participant extends Vue {
 
   async mounted(): Promise<void> {
     window.addEventListener('imageLoaded', this.imageLoaded, false);
-    await this.getTaskIdeas(true);
-    this.startInterval();
   }
 
   scrollToBottom(delay = 100): void {
@@ -299,62 +299,65 @@ export default class Participant extends Vue {
     return window.scrollY === document.body.scrollHeight - window.innerHeight;
   }
 
+  ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getTask();
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+    this.ideaCash = ideaService.registerGetIdeasForTask(
+      this.taskId,
+      IdeaSortOrder.TIMESTAMP,
+      null,
+      this.updateIdeas,
+      EndpointAuthorisationType.PARTICIPANT,
+      30
+    );
   }
 
-  async getTask(): Promise<void> {
-    if (this.taskId) {
-      await taskService
-        .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
-        .then((task) => {
-          this.task = task;
-        });
-    }
+  updateTask(task: Task): void {
+    this.task = task;
+  }
+
+  updateIdeas(ideas: Idea[]): void {
+    const init = this.ideas.length === 0;
+    const scrollIsBottom = this.scrollIsBottom();
+    this.ideas = ideas;
+    if (this.module && !this.module.parameter.showAll)
+      this.ideas = ideas.filter((idea) => idea.isOwn);
+    if (init || scrollIsBottom) this.scrollToBottom();
+  }
+
+  reloadIdeas(): void {
+    this.ideaCash.refreshData();
   }
 
   @Watch('moduleId', { immediate: true })
   onModuleIdChanged(): void {
-    this.getModule();
-  }
-
-  async getModule(): Promise<void> {
     if (this.moduleId) {
-      await moduleService
-        .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
-        .then((module) => {
-          this.module = module;
-          if (this.module && !this.module.parameter.showAll)
-            this.ideas = this.ideas.filter((idea) => idea.isOwn);
-        });
+      moduleService.registerGetModuleById(
+        this.moduleId,
+        this.updateModule,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
     }
   }
 
-  startInterval(): void {
-    this.interval = setInterval(this.getTaskIdeas, this.intervalTime);
+  updateModule(module: Module): void {
+    this.module = module;
+    if (this.module && !this.module.parameter.showAll)
+      this.ideas = this.ideas.filter((idea) => idea.isOwn);
   }
 
   unmounted(): void {
     window.removeEventListener('imageLoaded', this.imageLoaded);
-    clearInterval(this.interval);
-  }
-
-  async getTaskIdeas(scrollToBottom = false): Promise<void> {
-    const scrollIsBottom = this.scrollIsBottom();
-    ideaService
-      .getIdeasForTask(
-        this.taskId,
-        IdeaSortOrder.TIMESTAMP,
-        null,
-        EndpointAuthorisationType.PARTICIPANT
-      )
-      .then((queryResult) => {
-        this.ideas = queryResult;
-        if (this.module && !this.module.parameter.showAll)
-          this.ideas = queryResult.filter((idea) => idea.isOwn);
-        if (scrollToBottom || scrollIsBottom) this.scrollToBottom();
-      });
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateModule);
+    cashService.deregisterAllGet(this.updateIdeas);
   }
 }
 </script>

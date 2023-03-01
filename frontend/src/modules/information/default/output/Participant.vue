@@ -23,6 +23,7 @@ import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
+import * as cashService from "@/services/cash-service";
 
 @Options({
   components: {
@@ -38,8 +39,6 @@ export default class Participant extends Vue {
   @Prop({ default: '' }) readonly backgroundClass!: string;
   module: Module | null = null;
   ideas: Idea[] = [];
-  readonly intervalTime = 10000;
-  interval!: any;
 
   get moduleName(): string {
     if (this.module) return this.module.name;
@@ -48,49 +47,39 @@ export default class Participant extends Vue {
 
   @Watch('moduleId', { immediate: true })
   onModuleIdChanged(): void {
-    this.getModule();
+    if (this.moduleId) {
+      moduleService.registerGetModuleById(
+        this.moduleId,
+        this.updateModule,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
+    }
   }
 
-  async getModule(): Promise<void> {
-    if (this.moduleId) {
-      await moduleService
-        .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
-        .then((module) => {
-          this.module = module;
-        });
-    }
+  updateModule(module: Module): void {
+    this.module = module;
   }
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getIdeas();
+    ideaService.registerGetIdeasForTask(
+      this.taskId,
+      IdeaSortOrder.ORDER,
+      null,
+      this.updateIdeas,
+      EndpointAuthorisationType.PARTICIPANT,
+      10
+    );
   }
 
-  async getIdeas(): Promise<void> {
-    if (this.taskId) {
-      await ideaService
-        .getIdeasForTask(
-          this.taskId,
-          IdeaSortOrder.ORDER,
-          null,
-          EndpointAuthorisationType.PARTICIPANT
-        )
-        .then((ideas) => {
-          this.ideas = ideas;
-        });
-    }
-  }
-
-  async mounted(): Promise<void> {
-    this.startInterval();
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.getIdeas, this.intervalTime);
+  updateIdeas(ideas: Idea[]): void {
+    this.ideas = ideas;
   }
 
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateIdeas);
+    cashService.deregisterAllGet(this.updateModule);
   }
 }
 </script>

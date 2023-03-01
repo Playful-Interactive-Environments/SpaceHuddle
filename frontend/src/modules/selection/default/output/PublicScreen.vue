@@ -28,6 +28,7 @@ import {
   FilterData,
   getFilterForTask,
 } from '@/components/moderator/molecules/IdeaFilter.vue';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -41,60 +42,49 @@ export default class PublicScreen extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   task: Task | null = null;
+  selectionId: string | null = null;
   ideas: Idea[] = [];
-  readonly intervalTime = 10000;
-  interval!: any;
   filter: FilterData = { ...defaultFilterData };
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getIdeas();
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      this.authHeaderTyp,
+      60 * 60
+    );
   }
 
-  async getTask(): Promise<void> {
-    if (this.taskId) {
-      await taskService
-        .getTaskById(this.taskId, this.authHeaderTyp)
-        .then((task) => {
-          this.task = task;
-        });
-    }
+  updateTask(task: Task): void {
+    this.task = task;
+    this.selectionId = this.task.parameter.selectionId;
   }
 
-  async getIdeas(): Promise<void> {
-    if (this.taskId) {
-      await this.getTask();
-      //if (!this.task) await this.getTask();
-      if (this.task?.parameter.selectionId) {
-        this.filter = getFilterForTask(this.task);
-
-        await selectService
-          .getIdeasForSelection(
-            this.task?.parameter.selectionId,
-            this.authHeaderTyp
-          )
-          .then((ideas) => {
-            ideas = this.filter.orderAsc ? ideas : ideas.reverse();
-            this.ideas = ideaService.filterIdeas(
-              ideas,
-              this.filter.stateFilter,
-              this.filter.textFilter
-            );
-          });
-      }
-    }
+  @Watch('selectionId', { immediate: true })
+  onSelectionIdChanged(): void {
+    if (this.selectionId)
+      selectService.registerGetIdeasForSelection(
+        this.selectionId,
+        this.updateIdeas,
+        EndpointAuthorisationType.MODERATOR,
+        10
+      );
   }
 
-  async mounted(): Promise<void> {
-    this.startInterval();
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.getIdeas, this.intervalTime);
+  updateIdeas(ideas: Idea[]): void {
+    if (this.task) this.filter = getFilterForTask(this.task);
+    ideas = this.filter.orderAsc ? ideas : ideas.reverse();
+    this.ideas = ideaService.filterIdeas(
+      ideas,
+      this.filter.stateFilter,
+      this.filter.textFilter
+    );
   }
 
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateIdeas);
   }
 }
 </script>

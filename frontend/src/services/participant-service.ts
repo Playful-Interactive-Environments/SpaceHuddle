@@ -3,6 +3,7 @@ import { apiExecuteGetHandled, apiExecutePost } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Participant } from '@/types/api/Participant';
+import * as cashService from '@/services/cash-service';
 
 export const connect = async (
   sessionKey: string
@@ -24,12 +25,25 @@ export const reconnect = async (browserKey: string): Promise<Participant> => {
   );
 };
 
-export const getTopicList = async (
-  authHeaderType = EndpointAuthorisationType.PARTICIPANT
-): Promise<Topic[]> => {
-  return await apiExecuteGetHandled<Topic[]>(
+export const registerGetTopicList = (
+  callback: (result: Topic[]) => void,
+  authHeaderType = EndpointAuthorisationType.PARTICIPANT,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Topic[]> => {
+  return cashService.registerSimplifiedGet<Topic[]>(
     `/${EndpointType.PARTICIPANT}/${EndpointType.TOPICS}/`,
+    callback,
     [],
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const deregisterGetTopicList = (
+  callback: (result: Topic[]) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.PARTICIPANT}/${EndpointType.TOPICS}/`,
+    callback
   );
 };

@@ -160,7 +160,7 @@ import draggable from 'vuedraggable';
     CategorySettings,
     draggable,
   },
-  emits: ['categoryChanged', 'update:ideas'],
+  emits: ['categoryChanged', 'categoryDeleted', 'update:ideas'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class CategoryCard extends Vue {
@@ -239,7 +239,7 @@ export default class CategoryCard extends Vue {
         .then((done) => {
           if (done) {
             this.displayDetails = false;
-            this.$emit('categoryChanged');
+            this.$emit('categoryDeleted');
           }
         });
     }

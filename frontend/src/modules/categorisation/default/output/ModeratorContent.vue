@@ -1,9 +1,5 @@
 <template>
-  <IdeaFilter
-    :taskId="taskId"
-    v-model="filter"
-    @change="getCollapseContent(true)"
-  />
+  <IdeaFilter :taskId="taskId" v-model="filter" @change="refreshInput(true)" />
   <div ref="data" class="media">
     <div class="media-left no-category" ref="noCategoryColumn">
       <el-scrollbar
@@ -48,7 +44,7 @@
                     :isDraggable="true"
                     v-model:collapseIdeas="filter.collapseIdeas"
                     class="drag-item"
-                    @ideaDeleted="getCollapseContent"
+                    @ideaDeleted="refreshInAndOutput"
                   />
                 </template>
                 <template v-slot:footer>
@@ -79,36 +75,23 @@
           @end="dragCategory"
         >
           <template v-slot:item="{ element }">
-            <draggable
-              :id="element.id"
-              class="column"
-              v-model="element.ideas"
-              handle=".drag-item-none"
-              item-key="id"
-              group="idea"
-            >
-              <template v-slot:header>
-                <CategoryCard
-                  v-if="element.category.id !== addCategoryKey"
-                  :category="element.category"
-                  v-model:ideas="element.ideas"
-                  @categoryChanged="getCollapseContent"
-                  class="drag-item"
-                >
-                </CategoryCard>
-                <AddItem
-                  v-else
-                  :text="
-                    $t('module.categorisation.default.moderatorContent.add')
-                  "
-                  :is-column="true"
-                  @addNew="openCategorySettings"
-                />
-              </template>
-              <template v-slot:item>
-                <span></span>
-              </template>
-            </draggable>
+            <div class="column">
+              <CategoryCard
+                v-if="element.category.id !== addCategoryKey"
+                :category="element.category"
+                v-model:ideas="element.ideas"
+                @categoryChanged="refreshCategories"
+                @categoryDeleted="refreshOutputAndCategories"
+                class="drag-item"
+              >
+              </CategoryCard>
+              <AddItem
+                v-else
+                :text="$t('module.categorisation.default.moderatorContent.add')"
+                :is-column="true"
+                @addNew="openCategorySettings"
+              />
+            </div>
           </template>
         </draggable>
         <div class="columns is-mobile" ref="categoryColumns">
@@ -126,6 +109,16 @@
               'max-height': `calc(var(--app-height) - ${topCategoryColumns}px - 1rem)`,
             }"
           >
+            <template v-slot:header>
+              <AddItem
+                :text="
+                  $t('module.categorisation.default.moderatorContent.dragIdea')
+                "
+                :is-column="true"
+                :is-clickable="false"
+                :display-plus="false"
+              />
+            </template>
             <template v-slot:item="{ element }">
               <IdeaCard
                 :key="element.id"
@@ -137,7 +130,7 @@
                 v-model:collapseIdeas="filter.collapseIdeas"
                 class="drag-item el-main"
                 :style="{ 'border-color': orderGroup.category.parameter.color }"
-                @ideaDeleted="getCollapseContent"
+                @ideaDeleted="refreshInAndOutput"
               />
             </template>
           </draggable>
@@ -177,7 +170,7 @@ import CategoryCard from '@/modules/categorisation/default/molecules/CategoryCar
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import { OrderGroup, OrderGroupList } from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { reloadCollapseContent } from '@/utils/collapse';
+import { reloadCollapseTabs } from '@/utils/collapse';
 import {
   CategoryContent,
   CategoryContentList,
@@ -188,6 +181,9 @@ import IdeaFilter, {
   defaultFilterData,
   FilterData,
 } from '@/components/moderator/molecules/IdeaFilter.vue';
+import * as cashService from '@/services/cash-service';
+import { View } from '@/types/api/View';
+import * as ideaService from '@/services/idea-service';
 
 @Options({
   components: {
@@ -221,9 +217,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   openTabs: string[] = [];
   isDragging = false;
 
-  readonly intervalTime = 10000;
-  interval!: any;
-
   filter: FilterData = { ...defaultFilterData };
 
   get orderGroupContentCardValues(): CategoryContent[] {
@@ -238,16 +231,84 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     });
   }
 
+  categoryCash!: cashService.SimplifiedCashEntry<Category[]>;
+  inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
+  outputCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   async reloadTaskSettings(): Promise<void> {
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+    this.categoryCash = categorisationService.registerGetCategoriesForTask(
+      this.taskId,
+      this.updateCategories,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+    this.inputCash = viewService.registerGetInputIdeas(
+      this.taskId,
+      this.filter.orderType,
+      null,
+      this.updateInputIdeas,
+      EndpointAuthorisationType.MODERATOR,
+      30
+    );
+    this.outputCash = viewService.registerGetInputIdeas(
+      this.taskId,
+      IdeaSortOrderHierarchy,
+      this.taskId,
+      this.updateCategorisedIdeas,
+      EndpointAuthorisationType.MODERATOR,
+      30,
+      'categorised::'
+    );
     this.categories = [];
     this.ideas = [];
     this.openTabs = [];
     this.orderGroupContentSelection = {};
     this.orderGroupContentCards = {};
     this.orderGroupContentCards[this.addCategoryKey] = this.addCategory;
-    await this.getTask();
-    await this.getCollapseContent(true);
+  }
+
+  @Watch('task.topicId', { immediate: true })
+  onTopicIdChanged(): void {
+    if (this.task) {
+      viewService.registerGetList(
+        this.task.topicId,
+        this.updateViews,
+        EndpointAuthorisationType.MODERATOR,
+        60 * 60
+      );
+    }
+  }
+
+  updateTask(task: Task): void {
+    this.task = task;
+  }
+
+  views: View[] = [];
+  updateViews(views: View[]): void {
+    this.views = views;
+  }
+
+  inputIdeas: Idea[] = [];
+  updateInputIdeas(ideas: Idea[]): void {
+    this.inputIdeas = ideas;
+    this.updateIdeas();
+  }
+
+  categorisedIdeas: Idea[] = [];
+  updateCategorisedIdeas(ideas: Idea[]): void {
+    this.categorisedIdeas = ideas;
+    this.updateIdeas();
+  }
+
+  updateCategories(categories: Category[]): void {
+    this.categories = categories;
+    this.updateIdeas();
   }
 
   @Watch('showCategorySettings', { immediate: true })
@@ -274,11 +335,14 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     }
   }
 
-  async getTask(): Promise<void> {
-    if (this.taskId) {
-      await taskService.getTaskById(this.taskId).then(async (task) => {
-        this.task = task;
-      });
+  @Watch('filter.orderType', { deep: true, immediate: true })
+  onFilterDataChanged(): void {
+    if (this.inputCash) {
+      this.inputCash.parameter.urlParameter = ideaService.getIdeaListParameter(
+        this.filter.orderType,
+        null
+      );
+      this.inputCash.refreshData();
     }
   }
 
@@ -292,137 +356,132 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           (idea) => idea.id
         ),
       });
+      this.refreshOutput();
     }
-    await this.getCollapseContent();
+    await this.refreshCategories();
   }
 
-  async getCollapseContent(reloadTabState = false): Promise<void> {
-    reloadCollapseContent(
-      this.openTabs,
-      Object.keys(this.orderGroupContentSelection),
-      this.getIdeas,
-      reloadTabState
-    ).then((tabs) => (this.openTabs = tabs));
+  reloadTabState = true;
+  refreshCategories(reloadTabState = false): void {
+    this.reloadTabState = reloadTabState;
+    if (this.categoryCash) this.categoryCash.refreshData();
   }
 
-  async getIdeas(): Promise<string[]> {
-    if (this.isDragging) return Object.keys(this.orderGroupContentSelection);
-    const startTaskId = this.taskId;
+  refreshOutputAndCategories(reloadTabState = false): void {
+    this.reloadTabState = reloadTabState;
+    if (this.categoryCash) this.categoryCash.refreshData();
+    if (this.outputCash) this.outputCash.refreshData();
+  }
 
-    if (startTaskId) {
-      if (!this.task || this.task.id !== startTaskId) await this.getTask();
-      await this.getCategories();
-      const orderGroupContent: CategoryContentList = {};
-      this.categories.forEach((category) => {
-        orderGroupContent[category.id] = new CategoryContent(category, []);
+  refreshInput(reloadTabState = false): void {
+    this.reloadTabState = reloadTabState;
+    if (this.inputCash) this.inputCash.refreshData();
+  }
+
+  refreshOutput(reloadTabState = false): void {
+    this.reloadTabState = reloadTabState;
+    if (this.outputCash) this.outputCash.refreshData();
+  }
+
+  refreshInAndOutput(reloadTabState = false): void {
+    this.reloadTabState = reloadTabState;
+    if (this.outputCash) this.outputCash.refreshData();
+    if (this.inputCash) this.inputCash.refreshData();
+  }
+
+  updateIdeas(): void {
+    if (this.isDragging) return;
+    const orderGroupContent: CategoryContentList = {};
+    this.categories.forEach((category) => {
+      orderGroupContent[category.id] = new CategoryContent(category, []);
+    });
+    const categorizedIdeas = viewService.customizeView(
+      this.categorisedIdeas,
+      this.views,
+      (this as any).$t,
+      this.filter.stateFilter,
+      this.filter.textFilter,
+      this.task ? this.task.parameter.input.length : 1,
+      false
+    );
+    categorizedIdeas
+      .filter((ideaItem) => ideaItem.category)
+      .forEach((ideaItem) => {
+        if (ideaItem.orderText) {
+          const orderGroup = orderGroupContent[ideaItem.orderText];
+          if (orderGroup) {
+            orderGroup.ideas.push(ideaItem);
+          }
+        }
       });
-
-      if (this.task && this.task.parameter.input) {
-        const getCategorizedIdeas = viewService.getViewIdeas(
-          this.task.topicId,
-          this.task.parameter.input,
-          IdeaSortOrderHierarchy,
-          startTaskId,
-          EndpointAuthorisationType.MODERATOR,
-          (this as any).$t,
-          this.filter.stateFilter,
-          this.filter.textFilter,
-          false
-        );
-        const getUncategorizedIdeas = viewService.getViewOrderGroups(
-          this.task.topicId,
-          this.task.parameter.input,
-          this.filter.orderType,
-          this.filter.orderAsc,
-          null,
-          EndpointAuthorisationType.MODERATOR,
-          this.orderGroupContentSelection,
-          (this as any).$t,
-          this.filter.stateFilter,
-          this.filter.textFilter,
-          () => {
-            return true;
-          },
-          false
-        );
-
-        await getCategorizedIdeas.then((ideas) => {
-          if (this.taskId === startTaskId) {
-            this.ideas = ideas;
-            ideas
-              .filter((ideaItem) => ideaItem.category)
-              .forEach((ideaItem) => {
-                if (ideaItem.orderText) {
-                  const orderGroup = orderGroupContent[ideaItem.orderText];
-                  if (orderGroup) {
-                    orderGroup.ideas.push(ideaItem);
-                  }
-                }
-              });
-          }
-        });
-
-        await getUncategorizedIdeas.then((result) => {
-          if (this.taskId === startTaskId) {
-            const orderGroupName = (this as any).$t(
-              'module.categorisation.default.moderatorContent.undefined'
-            );
-            let orderGroupContentSelection: OrderGroupList = {};
-            let orderGroupKeys: string[] = [];
-            switch (this.filter.orderType) {
-              case IdeaSortOrder.TIMESTAMP:
-              case IdeaSortOrder.ALPHABETICAL:
-              case IdeaSortOrder.ORDER:
-                orderGroupContentSelection[orderGroupName] = new OrderGroup(
-                  result.ideas.filter((idea) =>
-                    this.ideas.find(
-                      (categoryIdea) =>
-                        categoryIdea.id === idea.id && !categoryIdea.category
-                    )
-                  )
-                );
-                break;
-              default:
-                orderGroupKeys = Object.keys(result.oderGroups);
-                for (const orderGroup of orderGroupKeys) {
-                  const orderGroupIdeas = result.oderGroups[
-                    orderGroup
-                  ].ideas.filter((idea) =>
-                    this.ideas.find(
-                      (categoryIdea) =>
-                        categoryIdea.id === idea.id && !categoryIdea.category
-                    )
-                  );
-                  result.oderGroups[orderGroup].ideas = orderGroupIdeas;
-                  if (orderGroupIdeas.length === 0)
-                    delete result.oderGroups[orderGroup];
-                }
-                orderGroupContentSelection = result.oderGroups;
-            }
-            Object.keys(orderGroupContentSelection).forEach((key) => {
-              if (key in this.orderGroupContentSelection)
-                orderGroupContentSelection[key].displayCount =
-                  this.orderGroupContentSelection[key].displayCount;
-            });
-            this.orderGroupContentSelection = orderGroupContentSelection;
-          }
-        });
+    this.ideas = categorizedIdeas;
+    const uncategorizedIdeas = ideaService.getOrderGroups(
+      viewService.customizeView(
+        this.inputIdeas,
+        this.views,
+        (this as any).$t,
+        this.filter.stateFilter,
+        this.filter.textFilter,
+        this.task ? this.task.parameter.input.length : 1
+      ),
+      this.filter.orderAsc,
+      this.orderGroupContentSelection,
+      () => {
+        return true;
       }
-
-      this.orderGroupContentCards = orderGroupContent;
-      this.orderGroupContentCards[this.addCategoryKey] = this.addCategory;
+    );
+    const orderGroupName = (this as any).$t(
+      'module.categorisation.default.moderatorContent.undefined'
+    );
+    let orderGroupContentSelection: OrderGroupList = {};
+    let orderGroupKeys: string[] = [];
+    switch (this.filter.orderType) {
+      case IdeaSortOrder.TIMESTAMP:
+      case IdeaSortOrder.ALPHABETICAL:
+      case IdeaSortOrder.ORDER:
+        orderGroupContentSelection[orderGroupName] = new OrderGroup(
+          uncategorizedIdeas.ideas.filter((idea) =>
+            this.ideas.find(
+              (categoryIdea) =>
+                categoryIdea.id === idea.id && !categoryIdea.category
+            )
+          )
+        );
+        break;
+      default:
+        orderGroupKeys = Object.keys(uncategorizedIdeas.oderGroups);
+        for (const orderGroup of orderGroupKeys) {
+          const orderGroupIdeas = uncategorizedIdeas.oderGroups[
+            orderGroup
+          ].ideas.filter((idea) =>
+            this.ideas.find(
+              (categoryIdea) =>
+                categoryIdea.id === idea.id && !categoryIdea.category
+            )
+          );
+          uncategorizedIdeas.oderGroups[orderGroup].ideas = orderGroupIdeas;
+          if (orderGroupIdeas.length === 0)
+            delete uncategorizedIdeas.oderGroups[orderGroup];
+        }
+        orderGroupContentSelection = uncategorizedIdeas.oderGroups;
     }
-    return Object.keys(this.orderGroupContentSelection);
-  }
+    Object.keys(orderGroupContentSelection).forEach((key) => {
+      if (key in this.orderGroupContentSelection)
+        orderGroupContentSelection[key].displayCount =
+          this.orderGroupContentSelection[key].displayCount;
+    });
+    const oldTabs = Object.keys(this.orderGroupContentSelection);
+    this.orderGroupContentSelection = orderGroupContentSelection;
+    this.orderGroupContentCards = orderGroupContent;
+    this.orderGroupContentCards[this.addCategoryKey] = this.addCategory;
 
-  async getCategories(): Promise<void> {
-    if (this.taskId) {
-      await categorisationService
-        .getCategoriesForTask(this.taskId)
-        .then((categories) => {
-          this.categories = categories;
-        });
-    }
+    reloadCollapseTabs(
+      this.openTabs,
+      oldTabs,
+      Object.keys(this.orderGroupContentSelection),
+      this.reloadTabState
+    ).then((tabs) => (this.openTabs = tabs));
+    this.reloadTabState = false;
   }
 
   topNoCategoryColumn = 80;
@@ -430,23 +489,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   async mounted(): Promise<void> {
     this.orderGroupContentCards[this.addCategoryKey] = this.addCategory;
-    this.startInterval();
-
     this.eventBus.off(EventType.CHANGE_SETTINGS);
+    //eslint-disable-next-line @typescript-eslint/no-unused-vars
     this.eventBus.on(EventType.CHANGE_SETTINGS, async (taskId) => {
-      if (this.taskId === taskId) {
-        await this.reloadData();
-      }
+      this.refreshInput();
     });
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.reloadData, this.intervalTime);
-  }
-
-  async reloadData(): Promise<void> {
-    await this.getTask();
-    await this.getCollapseContent();
   }
 
   updated(): void {
@@ -467,7 +514,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateViews);
+    cashService.deregisterAllGet(this.updateInputIdeas);
+    cashService.deregisterAllGet(this.updateCategorisedIdeas);
+    cashService.deregisterAllGet(this.updateCategories);
   }
 
   openCategorySettings(): void {
@@ -500,13 +551,14 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
             )
           );
         }
+        this.refreshOutput();
       }
     } else if (event.from.id) {
       await categorisationService.removeIdeasFromCategory(event.from.id, [
         event.item.id,
       ]);
+      this.refreshOutput();
     }
-    await this.getCollapseContent();
     this.isDragging = false;
   }
 
@@ -557,7 +609,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           historyStep.ideas
         );
       }
-      await this.getCollapseContent();
+      this.refreshInAndOutput();
+      this.refreshCategories();
     }
   }
 }

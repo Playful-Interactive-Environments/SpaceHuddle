@@ -82,7 +82,7 @@ import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import { Task } from '@/types/api/Task';
 import {
   getQuestionResultStorageFromHierarchy,
-  getQuestionTypeFromHierarchy,
+  getQuestionResultStorageFromQuestionType,
   Question,
   QuestionResultStorage,
   QuestionType,
@@ -103,6 +103,8 @@ import {
   moduleNameValid,
   QuestionnaireType,
 } from '@/modules/information/quiz/types/QuestionnaireType';
+import { until } from '@/utils/wait';
+import * as cashService from '@/services/cash-service';
 
 export interface PublicAnswerData {
   answer: Hierarchy;
@@ -121,6 +123,7 @@ export interface PublicAnswerData {
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PublicBase extends Vue {
+  //#region Veriables
   @Prop() readonly taskId!: string;
   @Prop({ default: true }) readonly usePublicQuestion!: boolean;
   @Prop({ default: -1 }) readonly activeQuestionIndex!: number;
@@ -139,9 +142,9 @@ export default class PublicBase extends Vue {
 
   questionState: QuestionState = QuestionState.ACTIVE_CREATE_QUESTION;
   statePointer = 0;
+  //#endregion properties
 
-  QuestionType = QuestionnaireType;
-
+  //#region get / set
   get isActive(): boolean {
     if (this.moderatedQuestionFlow) {
       if (this.task) return timerService.isActive(this.task);
@@ -223,7 +226,6 @@ export default class PublicBase extends Vue {
     if (this.publicQuestion) {
       if (this.questionState == QuestionState.ACTIVE_CREATE_QUESTION)
         if (this.statePointer > 0) {
-          //return this.publicQuestion.answers.slice(0, this.statePointer - 1);
           return this.publicQuestion.answers;
         } else return [];
       return this.publicQuestion.answers;
@@ -238,7 +240,9 @@ export default class PublicBase extends Vue {
       );
     return -1;
   }
+  //#endregion get / set
 
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
   finishedAnswer(answer: Hierarchy): boolean {
     if (
       this.publicQuestion &&
@@ -276,12 +280,201 @@ export default class PublicBase extends Vue {
     return false;
   }
 
+  resultCash: cashService.SimplifiedCashEntry<VoteResult[]> | null = null;
+  resultParentCash: cashService.SimplifiedCashEntry<VoteResult[]> | null = null;
+  resultHierarchyCash: cashService.SimplifiedCashEntry<Hierarchy[]> | null =
+    null;
+  @Watch('activeQuestion', { immediate: true })
+  async onActiveQuestionChanged(
+    newValue: Hierarchy | null,
+    oldValue: Hierarchy | null
+  ): Promise<void> {
+    const newQuestionResultStorage =
+      getQuestionResultStorageFromHierarchy(newValue);
+    const oldQuestionResultStorage =
+      getQuestionResultStorageFromHierarchy(oldValue);
+    if (
+      newQuestionResultStorage !== oldQuestionResultStorage ||
+      newValue?.id !== oldValue?.id
+    ) {
+      cashService.deregisterAllGet(this.updateParentVotes);
+      cashService.deregisterAllGet(this.updateVotes);
+      cashService.deregisterAllGet(this.updateHierarchyResult);
+      this.resultParentCash = null;
+      this.resultCash = null;
+      this.resultHierarchyCash = null;
+      if (!newValue?.id) {
+        this.resultParentCash = votingService.registerGetParentResult(
+          this.taskId,
+          this.updateParentVotes,
+          this.authHeaderTyp,
+          30
+        );
+      } else {
+        if (newQuestionResultStorage === QuestionResultStorage.VOTING) {
+          this.resultCash = votingService.registerGetHierarchyResult(
+            newValue?.id,
+            this.updateVotes,
+            this.authHeaderTyp,
+            30
+          );
+        } else {
+          this.resultHierarchyCash = hierarchyService.registerGetList(
+            this.taskId,
+            newValue?.id,
+            this.updateHierarchyResult,
+            this.authHeaderTyp,
+            30
+          );
+        }
+      }
+    }
+  }
+
+  updateVotes(votes: VoteResult[]): void {
+    if (
+      this.activeQuestionId &&
+      getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
+        QuestionResultStorage.VOTING
+    ) {
+      this.voteResult = votes;
+    }
+  }
+
+  updateParentVotes(votes: VoteResult[]): void {
+    if (!this.activeQuestionId) {
+      this.voteResult = hierarchyService.getParentResult(
+        votes,
+        this.questionHierarchy
+      );
+    }
+  }
+
+  taskCash!: cashService.SimplifiedCashEntry<Task>;
   @Watch('taskId', { immediate: true })
   async onTaskIdChanged(): Promise<void> {
-    await this.getTask().then(() => {
+    this.taskCash = taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      this.authHeaderTyp,
+      60
+    );
+    hierarchyService.registerGetQuestions(
+      this.taskId,
+      this.updateQuestions,
+      this.authHeaderTyp,
+      60 * 60
+    );
+  }
+
+  questionHierarchy: Hierarchy[] = [];
+  updateQuestions(questions: Hierarchy[]): void {
+    this.questionHierarchy = questions;
+    if (!this.activeQuestion?.id) {
+      this.voteResult = [
+        ...hierarchyService.getParentResult(
+          this.voteResult,
+          this.questionHierarchy
+        ),
+      ];
+    }
+    this.questions = hierarchyService.convertToQuestions(questions);
+    this.updatePublicQuestion();
+  }
+
+  updatePublicQuestion(): void {
+    let newPublicQuestion: Question | null = null;
+    const activeQuestionId = this.activeQuestionId;
+    if (this.moderatedQuestionFlow || this.usePublicQuestion) {
+      const publicQuestion: Question | undefined = this.questions.find(
+        (question) => question.question.id === activeQuestionId
+      );
+      newPublicQuestion = publicQuestion ? publicQuestion : null;
+    } else if (
+      this.activeQuestionIndex >= 0 &&
+      this.activeQuestionIndex < this.questions.length
+    ) {
+      newPublicQuestion = this.questions[this.activeQuestionIndex];
+    }
+    const hasNewQuestion =
+      newPublicQuestion?.question.id !== this.publicQuestion?.question.id;
+    if (hasNewQuestion) {
+      if (this.publicQuestion?.question.id) {
+        this.deregisterGetAnswers([this.publicQuestion?.question.id]);
+      }
+      this.publicQuestion = newPublicQuestion;
+      if (newPublicQuestion?.question.id) {
+        hierarchyService.registerGetList(
+          this.taskId,
+          newPublicQuestion?.question.id,
+          this.updateAnswers,
+          this.authHeaderTyp,
+          60
+        );
+      }
       this.initQuestionState();
+    }
+    this.$emit('changePublicQuestion', this.activeQuestion);
+  }
+
+  deregisterGetAnswers(questions: string[] | null = null): void {
+    if (!questions)
+      questions = this.questions
+        .filter((q) => q.question.id)
+        .map((q) => q.question.id as string);
+    questions.forEach(async (question) => {
+      hierarchyService.deregisterGetList(
+        this.taskId,
+        question,
+        this.updateAnswers
+      );
     });
-    this.getHierarchies();
+  }
+
+  updateAnswers(answers: Hierarchy[]): void {
+    if (answers.length > 0) {
+      const question = this.questions.find(
+        (question) => question.question.id === answers[0].parentId
+      );
+      if (question) {
+        const questionResultStorage: QuestionResultStorage =
+          getQuestionResultStorageFromQuestionType(question.questionType);
+        if (questionResultStorage === QuestionResultStorage.VOTING) {
+          question.answers = answers;
+        }
+      }
+    }
+  }
+
+  updateHierarchyResult(answers: Hierarchy[]): void {
+    if (
+      this.activeQuestionId &&
+      getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
+        QuestionResultStorage.CHILD_HIERARCHY
+    ) {
+      this.voteResult = hierarchyService.getHierarchyResult(
+        answers,
+        this.activeQuestion?.parameter.correctValue
+      );
+    }
+  }
+
+  updateTask(task: Task): void {
+    const init = !this.task;
+    this.task = task;
+    const module = task.modules.find((module) => moduleNameValid(module.name));
+    if (module) {
+      this.questionnaireType =
+        QuestionnaireType[module.parameter.questionType.toUpperCase()];
+      this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
+      if (this.moderatedQuestionFlow && this.taskCash) {
+        this.taskCash.updateCallback(this.updateTask, 1);
+      } else {
+        this.taskCash.updateCallback(this.updateTask, 60);
+      }
+    }
+    if (init) this.initQuestionState();
+    this.updatePublicQuestion();
   }
 
   private initQuestionState(): void {
@@ -296,127 +489,28 @@ export default class PublicBase extends Vue {
     }
   }
 
-  async getTask(): Promise<void> {
-    await taskService
-      .getTaskById(this.taskId, this.authHeaderTyp)
-      .then((task) => {
-        this.task = task;
-        const module = task.modules.find((module) =>
-          moduleNameValid(module.name)
-        );
-        if (module) {
-          this.questionnaireType =
-            QuestionnaireType[module.parameter.questionType.toUpperCase()];
-          this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
-        }
-      });
-  }
-
-  async getHierarchies(): Promise<void> {
-    if (this.taskId) {
-      const activeQuestionId = this.activeQuestionId;
-      await hierarchyService
-        .getList(this.taskId, '{parentHierarchyId}', this.authHeaderTyp)
-        .then(async (questions) => {
-          const result: Question[] = [];
-          let publicQuestion: Question | null = null;
-          for (const index in questions) {
-            const question = questions[index];
-            const questionResultStorage: QuestionResultStorage =
-              getQuestionResultStorageFromHierarchy(question);
-            if (questionResultStorage === QuestionResultStorage.VOTING) {
-              await hierarchyService
-                .getList(this.taskId, question.id, this.authHeaderTyp)
-                .then((answers) => {
-                  const item: Question = {
-                    questionType: getQuestionTypeFromHierarchy(question),
-                    question: question,
-                    answers: answers,
-                  };
-                  result.push(item);
-                  if (question.id === activeQuestionId) {
-                    publicQuestion = item;
-                  }
-                });
-            } else {
-              const item: Question = {
-                questionType: getQuestionTypeFromHierarchy(question),
-                question: question,
-                answers: [],
-              };
-              result.push(item);
-              if (question.id === activeQuestionId) {
-                publicQuestion = item;
-              }
-            }
-          }
-          this.questions = result;
-          if (this.moderatedQuestionFlow || this.usePublicQuestion) {
-            this.publicQuestion = publicQuestion;
-          } else if (
-            this.activeQuestionIndex >= 0 &&
-            this.activeQuestionIndex < this.questions.length
-          ) {
-            this.publicQuestion = this.questions[this.activeQuestionIndex];
-          }
-          await this.getVotes();
-        });
-    }
-  }
-
-  async getVotes(): Promise<void> {
-    const activeQuestionId = this.activeQuestionId;
-    if (activeQuestionId) {
-      const questionResultStorage: QuestionResultStorage =
-        getQuestionResultStorageFromHierarchy(this.activeQuestion);
-      if (questionResultStorage === QuestionResultStorage.VOTING) {
-        await votingService
-          .getHierarchyResult(activeQuestionId, this.authHeaderTyp)
-          .then((votes) => {
-            this.voteResult = votes;
-          });
-      } else {
-        await hierarchyService
-          .getHierarchyResult(
-            this.taskId,
-            activeQuestionId,
-            this.activeQuestion?.parameter.correctValue,
-            this.authHeaderTyp
-          )
-          .then((votes) => {
-            this.voteResult = votes;
-          });
-      }
-    } else {
-      await hierarchyService
-        .getParentResult(this.taskId, this.authHeaderTyp)
-        .then((votes) => {
-          this.voteResult = votes;
-        });
-      //this.voteResult = [];
-    }
-  }
-
   @Watch('activeQuestionIndex', { immediate: true })
   onActiveQuestionIndexChanged(): void {
+    this.updatePublicQuestion();
     this.checkState(true);
   }
 
+  oldIsActive = false;
   async checkState(staticUpdate = false): Promise<void> {
     const oldQuizState = this.questionState;
-    const oldState = this.isActive;
     const oldQuestionId = this.activeQuestionId;
-    await this.getTask();
+    await until(() => !!this.task);
+    const newIsActive = this.isActive;
     if (
       staticUpdate ||
-      oldState !== this.isActive ||
-      oldQuestionId !== this.activeQuestionId ||
-      this.showStatistics
+      this.oldIsActive !== newIsActive ||
+      oldQuestionId !== this.activeQuestionId
+      //|| this.showStatistics
     ) {
       this.statePointer = -1;
       this.initQuestionState();
-      await this.getHierarchies();
     }
+    this.oldIsActive = newIsActive;
 
     switch (this.questionState) {
       case QuestionState.ACTIVE_CREATE_QUESTION:
@@ -460,7 +554,9 @@ export default class PublicBase extends Vue {
         this.statePointer++;
         if (
           this.statePointer >
-          QuizStateProperty[QuestionState.RESULT_ANSWER].time
+            QuizStateProperty[QuestionState.RESULT_ANSWER].time ||
+          getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
+            QuestionResultStorage.CHILD_HIERARCHY
         ) {
           this.statePointer = 0;
           this.questionState = this.publicQuestion?.question.description
@@ -479,6 +575,12 @@ export default class PublicBase extends Vue {
         }
         break;
       case QuestionState.RESULT_STATISTICS:
+        if (this.statePointer === 0) {
+          if (this.resultCash) this.resultCash.refreshData();
+          if (this.resultHierarchyCash) this.resultHierarchyCash.refreshData();
+          if (this.resultParentCash) this.resultParentCash.refreshData();
+        }
+        this.statePointer++;
         break;
     }
 
@@ -515,6 +617,12 @@ export default class PublicBase extends Vue {
 
   unmounted(): void {
     clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateVotes);
+    cashService.deregisterAllGet(this.updateHierarchyResult);
+    cashService.deregisterAllGet(this.updateParentVotes);
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateQuestions);
+    cashService.deregisterAllGet(this.updateAnswers);
   }
 }
 </script>

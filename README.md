@@ -62,7 +62,7 @@ The SpaceHuddle-API is built on the following technologies. Visit the websites t
 
 ### Installation
 1. Adjust the properties in the `frontend/.env` file
-2. Download and install Node `https://nodejs.org/en/download/`. Use a Node version that is lower or equal to 14
+2. Download and install Node `https://nodejs.org/en/download/`. Use a Node version that is lower or equal to 19.2.0
 3. Install dependencies with: `npm install`
 
 #### Compiles and hot-reloads for development
@@ -155,7 +155,7 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
       - `!moduletype!`: Specifies the name of the module type folder (`selection`, `categorisation`, `brainstorming`, `information`, `voting`)
       - `!modulename!`: Specifies the name of the module folder
       - `!outputType!`: Specifies the view name (`publicScreen`, `participant`, `moderatorContent`, `moderatorConfig`)
-      - `!translationKey!`: Specifies the translation key 
+      - `!translationKey!`: Specifies the translation key
 5. Develop your module.
    1. Create a `output` folder within your module folder.
    2. Create a `ModeratorContent.vue` file in the `output` folder if you need a moderator view in your module that differs from the default view.
@@ -164,12 +164,12 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
       <template>
       !html section!
       </template>
-      
+
       <script lang="ts">
       import { Options, Vue } from 'vue-class-component';
       import { Prop } from 'vue-property-decorator';
       import { IModeratorContent } from '@/types/ui/IModeratorContent';
-      
+
       @Options({
         components: {},
       })
@@ -177,7 +177,7 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
         @Prop() readonly taskId!: string;
       }
       </script>
-      
+
       <style lang="scss" scoped>
       !scss section!
       </style>
@@ -197,47 +197,55 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
           />
         </el-form-item>
       </template>
-      
+
       <script lang="ts">
       import { Options, Vue } from 'vue-class-component';
       import { Prop, Watch } from 'vue-property-decorator';
       import * as moduleService from '@/services/module-service';
       import { Module } from '@/types/api/Module';
       import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
-      
+      import * as cashService from '@/services/cash-service';
+
       @Options({
         components: {},
       })
-      
+
       /* eslint-disable @typescript-eslint/no-explicit-any*/
       export default class ModeratorConfig extends Vue {
         defaultFormRules: ValidationRuleDefinition = defaultFormRules;
         @Prop() readonly rulePropPath!: string;
-      
+
         @Prop() readonly moduleId!: string;
         @Prop() readonly taskId!: string;
         @Prop() readonly topicId!: string;
         @Prop({ default: {} }) modelValue!: any;
         module: Module | null = null;
-      
+
         @Watch('modelValue', { immediate: true })
         async onModelValueChanged(): Promise<void> {
           if (this.modelValue && !this.modelValue.!parametername!) {
             this.modelValue.!parametername! = !parameternameDefaultValue!;
           }
         }
-      
+
         @Watch('moduleId', { immediate: true })
         async onModuleIdChanged(): Promise<void> {
-          await this.getModule();
-        }
-      
-        async getModule(): Promise<void> {
           if (this.moduleId) {
-            await moduleService.getModuleById(this.moduleId).then((module) => {
-              this.module = module;
-            });
+            moduleService.registerGetModuleById(
+              this.moduleId,
+              this.updateModule,
+              EndpointAuthorisationType.MODERATOR,
+              60 * 60
+            );
           }
+        }
+
+        updateModule(module: Module): void {
+          this.module = module;
+        }
+
+        unmounted(): void {
+          cashService.deregisterAllGet(this.updateModule);
         }
       }
       </script>
@@ -250,7 +258,7 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
           !html section!
         </ParticipantModuleDefaultContainer>
       </template>
-      
+
       <script lang="ts">
       import { Options, Vue } from 'vue-class-component';
       import { Prop, Watch } from 'vue-property-decorator';
@@ -258,7 +266,8 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
       import * as moduleService from '@/services/module-service';
       import { Module } from '@/types/api/Module';
       import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-      
+      import * as cashService from '@/services/cash-service';
+
       @Options({
         components: {
           ParticipantModuleDefaultContainer,
@@ -270,29 +279,34 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
         @Prop({ default: false }) readonly useFullSize!: boolean;
         @Prop({ default: '' }) readonly backgroundClass!: string;
         module: Module | null = null;
-      
+
         get moduleName(): string {
           if (this.module) return this.module.name;
           return '';
         }
-      
+
         @Watch('moduleId', { immediate: true })
         onModuleIdChanged(): void {
-          this.getModule();
-        }
-      
-        async getModule(): Promise<void> {
           if (this.moduleId) {
-            await moduleService
-              .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
-              .then((module) => {
-                this.module = module;
-              });
+            moduleService.registerGetModuleById(
+              this.moduleId,
+              this.updateModule,
+              EndpointAuthorisationType.PARTICIPANT,
+              60 * 60
+            );
           }
+        }
+
+        updateModule(module: Module): void {
+          this.module = module;
+        }
+
+        unmounted(): void {
+          cashService.deregisterAllGet(this.updateModule);
         }
       }
       </script>
-      
+
       <style lang="scss" scoped>
       !scss section!
       </style>
@@ -304,12 +318,12 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
       <template>
       !html section!
       </template>
-      
+
       <script lang="ts">
       import { Options, Vue } from 'vue-class-component';
       import { Prop } from 'vue-property-decorator';
       import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-      
+
       @Options({
         components: {},
       })
@@ -319,7 +333,7 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
         authHeaderTyp!: EndpointAuthorisationType;
       }
       </script>
-      
+
       <style lang="scss" scoped>
       !scss section!
       </style>
@@ -330,7 +344,7 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
       <template>
       !html section!
       </template>
-      
+
       <script lang="ts">
       import { Options, Vue } from 'vue-class-component';
       import { Prop } from 'vue-property-decorator';
@@ -339,56 +353,62 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
       import { Idea } from '@/types/api/Idea.ts';
       import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
       import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-      
+      import * as cashService from '@/services/cash-service';
+
       @Options({
         components: {},
       })
       export default class ModeratorContent extends Vue implements IModeratorContent {
-         @Prop() readonly taskId!: string;
-         ideas: Idea[] = [];
-         activeIdea!: Idea;
-      
-         async getIdeas(): Promise<void> {
-            if (this.taskId) {
-            await ideaService
-               .getIdeasForTask(
-                 this.taskId,
-                 IdeaSortOrder.TIMESTAMP,
-                 null,
-                 EndpointAuthorisationType.MODERATOR
-               )
-               .then((queryResult) => {
-                 this.ideas = queryResult;
-               });
-            }
-         }
-      
-         async save(): Promise<void> {
-            if (this.activeIdea.id) {
-               await ideaService
-                  .putIdea(this.activeIdea, EndpointAuthorisationType.MODERATOR)
-                  .then((queryResult) => {
-                     //todo
-                  });
-            } else if (this.taskId) {
-               await ideaService
-               .postIdea(this.taskId, this.activeIdea, EndpointAuthorisationType.MODERATOR)
-               .then((queryResult) => {
-                  if (queryResult) {
-                   this.activeIdea = {};
-                   this.ideas.push(queryResult);
-                 }
-               });
-            }
-         }
+        @Prop() readonly taskId!: string;
+        ideas: Idea[] = [];
+        activeIdea!: Idea;
+
+        @Watch('taskId', { immediate: true })
+        onTaskIdChanged(): void {
+          ideaService.registerGetIdeasForTask(
+            this.taskId,
+            IdeaSortOrder.TIMESTAMP,
+            null,
+            this.updateIdeas,
+            EndpointAuthorisationType.MODERATOR,
+            2 * 60
+          );
+        }
+
+        updateIdeas(ideas: Idea[]): void {
+          this.ideas = ideas;
+        }
+
+        unmounted(): void {
+          cashService.deregisterAllGet(this.updateIdeas);
+        }
+
+        async save(): Promise<void> {
+          if (this.activeIdea.id) {
+             await ideaService
+                .putIdea(this.activeIdea, EndpointAuthorisationType.MODERATOR)
+                .then((queryResult) => {
+                   //todo
+                });
+          } else if (this.taskId) {
+             await ideaService
+             .postIdea(this.taskId, this.activeIdea, EndpointAuthorisationType.MODERATOR)
+             .then((queryResult) => {
+                if (queryResult) {
+                 this.activeIdea = {};
+                 this.ideas.push(queryResult);
+               }
+             });
+          }
+        }
       }
       </script>
-      
+
       <style lang="scss" scoped>
       !scss section!
       </style>
       ```
-      - `GET` is used to read data.
+      - `GET` is used to read data. Get calls are implemented by registering them at the client-side cash to prevent multiple loading of data by different components. An update interval can be specified by which the data is reloaded from the backend. If no regular update is to take place, the value is to be set to 24 * 60 * 60 seconds = 1 day. It is important to disable the registration when leaving the page, otherwise the update will continue.
       - `POST` is used for the initial insertion of data.
       - `PUT` for changing already inserted data.
       - `DELETE` for deleting data.
@@ -408,16 +428,15 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
           ...
         </ParticipantModuleDefaultContainer>
       </template>
-      
+
       <script lang="ts">
       import { Options, Vue } from 'vue-class-component';
       import { Prop, Watch } from 'vue-property-decorator';
-      import * as moduleService from '@/services/module-service';
       import { Module } from '@/types/api/Module';
       import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
       import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
       import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-      
+
       @Options({
         components: {
             ParticipantModuleDefaultContainer,
@@ -431,36 +450,37 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
         @Prop({ default: '' }) readonly backgroundClass!: string;
         module: Module | null = null;
         ideas: Idea[] = [];
-      
+
         get moduleName(): string {
           if (this.module) return this.module.name;
           return '';
         }
-      
+
         ...
       }
       </script>
-      
+
       <style lang="scss" scoped>
       .public-idea {
          max-width: 20rem;
       }
       ...
       </style>
-   
+
       ```
       If these components are to be used in the module in a way that differs from the predefined implementation, we kindly request that you implement an individual development of the components in the module folder. The components can be copied as a template for this purpose.
-   9. If data is to be updated automatically by the backend, this can be solved via an interval. It is important to deactivate the interval when leaving the page, otherwise it will continue to run.
+   9. If data should be updated automatically from the backend, this can be solved by registering at client side cash. It is important to disable the registration when leaving the page, otherwise the update will continue.
       ```
       <template>
       !html section!
       </template>
-      
+
       <script lang="ts">
       import { Options, Vue } from 'vue-class-component';
       import { Prop } from 'vue-property-decorator';
       import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-      
+      import * as cashService from '@/services/cash-service';
+
       @Options({
         components: {},
       })
@@ -468,28 +488,29 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
         @Prop() readonly taskId!: string;
         @Prop({ default: EndpointAuthorisationType.MODERATOR })
         authHeaderTyp!: EndpointAuthorisationType;
-      
-         readonly intervalTime = 3000;
-         interval!: any;
-         
-         mounted(): void {
-            this.startInterval();
-         }
-         
-         startInterval(): void {
-            this.interval = setInterval(this.getIdeas, this.intervalTime);
-         }
-         
-         unmounted(): void {
-            clearInterval(this.interval);
-         }
-         
-         async getIdeas(): Promise<void> {
-            ...
-         }
+
+        @Watch('taskId', { immediate: true })
+        onTaskIdChanged(): void {
+          ideaService.registerGetIdeasForTask(
+            this.taskId,
+            IdeaSortOrder.TIMESTAMP,
+            null,
+            this.updateIdeas,
+            EndpointAuthorisationType.MODERATOR,
+            2 * 60
+          );
+        }
+
+        updateIdeas(ideas: Idea[]): void {
+          this.ideas = ideas;
+        }
+
+        unmounted(): void {
+          cashService.deregisterAllGet(this.updateIdeas);
+        }
       }
       </script>
-      
+
       <style lang="scss" scoped>
       !scss section!
       </style>

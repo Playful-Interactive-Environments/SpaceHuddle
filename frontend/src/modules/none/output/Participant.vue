@@ -14,6 +14,7 @@ import ParticipantModuleDefaultContainer from '@/components/participant/organism
 import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -35,17 +36,22 @@ export default class Participant extends Vue {
 
   @Watch('moduleId', { immediate: true })
   onModuleIdChanged(): void {
-    this.getModule();
+    if (this.moduleId) {
+      moduleService.registerGetModuleById(
+        this.moduleId,
+        this.updateModule,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
+    }
   }
 
-  async getModule(): Promise<void> {
-    if (this.moduleId) {
-      await moduleService
-        .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
-        .then((module) => {
-          this.module = module;
-        });
-    }
+  updateModule(module: Module): void {
+    this.module = module;
+  }
+
+  unmounted(): void {
+    cashService.deregisterAllGet(this.updateModule);
   }
 }
 </script>

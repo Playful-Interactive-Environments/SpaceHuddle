@@ -1,8 +1,4 @@
-import Axios, {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosRequestHeaders,
-} from 'axios';
+import Axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import {
   getAccessTokenModerator,
   getAccessTokenParticipant,
@@ -108,11 +104,11 @@ export async function apiExecuteGetHandled<T = any>(
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<T> {
   try {
-    return await apiExecuteGet(url, authHeaderType);
+    return await apiExecuteGet<T>(url, authHeaderType);
   } catch (error: any) {
     if (error.message == 'Network Error') {
       try {
-        return await apiExecuteGet(url, authHeaderType);
+        return await apiExecuteGet<T>(url, authHeaderType);
       } catch (error) {
         return empty as T;
       }
@@ -125,6 +121,7 @@ export async function apiExecuteGet<T = any>(
   url: string,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<T> {
+  console.warn(url);
   const { data: result } = await getApiEndpoint(authHeaderType).get<T>(url);
   return result;
 }
@@ -156,7 +153,7 @@ export async function apiExecutePost<T = any>(
   return result;
 }
 
-export async function apiExecutePutHandled<T = any>(
+/*export async function apiExecutePutHandled<T = any>(
   url: string,
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   body: any,
@@ -168,7 +165,7 @@ export async function apiExecutePutHandled<T = any>(
   } catch (error) {
     return empty as T;
   }
-}
+}*/
 
 export async function apiExecutePut<T = any>(
   url: string,
@@ -183,7 +180,7 @@ export async function apiExecutePut<T = any>(
   return result;
 }
 
-export async function apiExecuteDeleteHandled<T = any>(
+/*export async function apiExecuteDeleteHandled<T = any>(
   url: string,
   body: any = null,
   authHeaderType = EndpointAuthorisationType.MODERATOR,
@@ -200,7 +197,7 @@ export async function apiExecuteDeleteHandled<T = any>(
     }
   }
   return false;
-}
+}*/
 
 export async function apiExecuteDelete<T = any>(
   url: string,
@@ -210,7 +207,9 @@ export async function apiExecuteDelete<T = any>(
 ): Promise<boolean> {
   if (await deleteConfirmDialog(confirmCheck)) {
     if (body)
-      await getApiEndpoint(authHeaderType).delete<T>(url, { data: body });
+      await getApiEndpoint(authHeaderType).delete<T>(url, {
+        data: body,
+      });
     else await getApiEndpoint(authHeaderType).delete<T>(url);
     return true;
   }

@@ -93,6 +93,7 @@ export default class ValidationForm extends Vue implements ValidationMethods {
     if (event) event.preventDefault();
     this.formData.stateMessage = '';
     const form = this.dataForm();
+    //eslint-disable-next-line @typescript-eslint/no-unused-vars
     form?.validate(async (valid, fields) => {
       if (valid) {
         this.$emit('submitDataValid');

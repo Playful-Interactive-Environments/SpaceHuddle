@@ -64,6 +64,8 @@ import * as sessionService from '@/services/session-service';
 import * as sessionRoleService from '@/services/session-role-service';
 import { ParticipantInfo } from '@/types/api/Participant';
 import { SessionRole } from '@/types/api/SessionRole';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {},
@@ -73,41 +75,34 @@ export default class ModuleCount extends Vue {
   @Prop() session!: Session;
   participants: ParticipantInfo[] = [];
   users: SessionRole[] = [];
-  readonly intervalTime = 3000;
-  interval!: any;
-
-  mounted(): void {
-    this.startInterval();
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.onSessionChanged, this.intervalTime);
-  }
 
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateParticipantCount);
+    cashService.deregisterAllGet(this.updateUserCount);
   }
 
-  @Watch('session', { immediate: true })
-  async onSessionChanged(): Promise<void> {
-    await this.getParticipants();
-    await this.getUsers();
+  @Watch('session.id', { immediate: true })
+  async onSessionIdChanged(): Promise<void> {
+    sessionService.registerGetParticipants(
+      this.session.id,
+      this.updateParticipantCount,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 5
+    );
+    sessionRoleService.registerGetList(
+      this.session.id,
+      this.updateUserCount,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 5
+    );
   }
 
-  async getParticipants(): Promise<void> {
-    if (this.session) {
-      sessionService.getParticipants(this.session.id).then((queryResult) => {
-        this.participants = queryResult;
-      });
-    }
+  updateParticipantCount(queryResult: ParticipantInfo[]): void {
+    this.participants = queryResult;
   }
 
-  async getUsers(): Promise<void> {
-    if (this.session) {
-      sessionRoleService.getList(this.session.id).then((queryResult) => {
-        this.users = queryResult;
-      });
-    }
+  updateUserCount(queryResult: SessionRole[]): void {
+    this.users = queryResult;
   }
 }
 </script>

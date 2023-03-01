@@ -113,6 +113,8 @@ import TaskType from '@/types/enum/TaskType';
 import { CollapseIdeas } from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import { ElMessage } from 'element-plus';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { SessionRole } from '@/types/api/SessionRole';
+import * as cashService from "@/services/cash-service";
 
 export interface FilterData {
   orderType: string;
@@ -128,19 +130,6 @@ export const defaultFilterData: FilterData = {
   stateFilter: Object.keys(IdeaStates),
   textFilter: '',
   collapseIdeas: CollapseIdeas.custom,
-};
-
-export const getFilterForTaskId = async (
-  taskId: string,
-  authHeaderTyp = EndpointAuthorisationType.MODERATOR
-): Promise<FilterData> => {
-  let filter = { ...defaultFilterData };
-
-  await taskService.getTaskById(taskId, authHeaderTyp).then((task) => {
-    filter = getFilterForTask(task);
-  });
-
-  return filter;
 };
 
 export const getFilterForTask = (task: Task): FilterData => {
@@ -177,13 +166,28 @@ export default class IdeaFilter extends Vue {
   sortOrderOptions: SortOrderOption[] = [];
   IdeaStates = IdeaStates;
   IdeaStateKeys = Object.keys(IdeaStates);
-
-  readonly intervalTime = 10000;
-  interval!: any;
+  sessionId = '';
 
   @Watch('modelValue.collapseIdeas', { immediate: true })
   onCollapseIdeasChanged(): void {
     if (this.task && this.syncToPublicScreen) this.saveParameterChanges();
+  }
+
+  @Watch('sessionId', { immediate: true })
+  onSessionIdChanged(): void {
+    if (this.sessionId) {
+      sessionRoleService.registerGetOwn(
+        this.sessionId,
+        this.updateRole,
+        EndpointAuthorisationType.MODERATOR,
+        60 * 60
+      );
+    }
+  }
+
+  sessionRole: UserType = UserType.MODERATOR;
+  updateRole(role: SessionRole): void {
+    this.sessionRole = role.role;
   }
 
   get isCollapseActive(): boolean {
@@ -200,123 +204,147 @@ export default class IdeaFilter extends Vue {
 
   mounted(): void {
     this.ownUserId = authService.getUserId();
-    this.startInterval();
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.getTask, this.intervalTime);
   }
 
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateDependentTasks);
+    cashService.deregisterAllGet(this.updateRole);
   }
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getTask();
+    taskService.registerGetTaskById(this.taskId, this.updateTask);
+    if (this.sortOrderTaskId) {
+      taskService.registerGetDependentTaskList(
+        this.sortOrderTaskId,
+        this.updateDependentTasks,
+        EndpointAuthorisationType.MODERATOR,
+        60 * 60
+      );
+    }
   }
 
-  async getTask(): Promise<void> {
-    if (this.taskId && !this.isSaving) {
-      await taskService.getTaskById(this.taskId).then(async (task) => {
-        this.task = task;
-        let sortOrderTaskId: string | null = null;
-        if (TaskType[task.taskType] === TaskType.BRAINSTORMING) {
-          sortOrderTaskId = task.id;
-        } else if (
-          task.parameter.input.length === 1 &&
-          task.parameter.input[0].view.type.toLowerCase() === ViewType.TASK
-        )
-          sortOrderTaskId = task.parameter.input[0].view.id;
-        ideaService.getSortOrderOptions(sortOrderTaskId).then((options) => {
-          this.sortOrderOptions = options.filter(
-            (option) => option.ref?.id !== this.taskId
+  sortOrderTaskId: string | null = null;
+  getSortOrderTaskId(): string | null {
+    let sortOrderTaskId: string | null = null;
+    if (TaskType[this.task.taskType] === TaskType.BRAINSTORMING) {
+      sortOrderTaskId = this.task.id;
+    } else if (
+      this.task.parameter.input.length > 0 &&
+      this.task.parameter.input[0].view.type.toLowerCase() === ViewType.TASK
+    )
+      sortOrderTaskId = this.task.parameter.input[0].view.id;
+    return sortOrderTaskId;
+  }
+
+  updateTask(task: Task): void {
+    if (!this.isSaving) {
+      this.task = task;
+      this.sessionId = task.sessionId;
+      const sortOrderTaskId = this.getSortOrderTaskId();
+      if (this.sortOrderTaskId !== sortOrderTaskId) {
+        if (this.sortOrderTaskId) {
+          taskService.deregisterGetDependentTaskList(
+            this.sortOrderTaskId,
+            this.updateDependentTasks
           );
-          if (task.parameter.input.length < 2) {
-            this.sortOrderOptions = this.sortOrderOptions.filter(
-              (option) => option.orderType !== IdeaSortOrder.INPUT.toLowerCase()
-            );
-          }
-          if (options.length > 0 && !this.modelValue.orderType)
-            this.modelValue.orderType = options[0].orderType;
-        });
-
-        if (task.parameter && 'syncUserId' in task.parameter) {
-          this.syncUserId = task.parameter.syncUserId;
+        }
+        if (sortOrderTaskId) {
+          this.sortOrderTaskId = sortOrderTaskId;
+          taskService.registerGetDependentTaskList(
+            sortOrderTaskId,
+            this.updateDependentTasks
+          );
         } else {
-          sessionRoleService.getOwn(task.sessionId).then((role) => {
-            if (role.role === UserType.MODERATOR) {
-              this.syncUserId = this.ownUserId;
-            }
-          });
+          this.updateDependentTasks([]);
         }
-        if (this.syncToPublicScreen) {
-          let updateProperties = false;
-          if (
-            task.parameter &&
-            task.parameter.orderType &&
-            this.modelValue.orderType !== task.parameter.orderType
-          ) {
-            this.modelValue.orderType = task.parameter.orderType;
-            updateProperties = true;
-          }
-          if (
-            task.parameter &&
-            task.parameter.stateFilter &&
-            this.modelValue.stateFilter.length !==
-              task.parameter.stateFilter.length
-          ) {
-            this.modelValue.stateFilter = task.parameter.stateFilter;
-            updateProperties = true;
-          }
-          if (
-            task.parameter &&
-            task.parameter.textFilter &&
-            this.modelValue.textFilter !== task.parameter.textFilter
-          ) {
-            this.modelValue.textFilter = task.parameter.textFilter;
-            updateProperties = true;
-          }
-          if (
-            task.parameter &&
-            task.parameter.collapseIdeas &&
-            this.modelValue.collapseIdeas !== task.parameter.collapseIdeas
-          ) {
-            this.modelValue.collapseIdeas = task.parameter.collapseIdeas;
-            updateProperties = true;
-          }
+      }
+      if (task.parameter && 'syncUserId' in task.parameter) {
+        this.syncUserId = task.parameter.syncUserId;
+      } else {
+        if (this.sessionRole === UserType.MODERATOR) {
+          this.syncUserId = this.ownUserId;
+        }
+      }
+      if (this.syncToPublicScreen) {
+        let updateProperties = false;
+        if (
+          task.parameter &&
+          task.parameter.orderType &&
+          this.modelValue.orderType !== task.parameter.orderType
+        ) {
+          this.modelValue.orderType = task.parameter.orderType;
+          updateProperties = true;
+        }
+        if (
+          task.parameter &&
+          task.parameter.stateFilter &&
+          this.modelValue.stateFilter.length !==
+            task.parameter.stateFilter.length
+        ) {
+          this.modelValue.stateFilter = task.parameter.stateFilter;
+          updateProperties = true;
+        }
+        if (
+          task.parameter &&
+          task.parameter.textFilter &&
+          this.modelValue.textFilter !== task.parameter.textFilter
+        ) {
+          this.modelValue.textFilter = task.parameter.textFilter;
+          updateProperties = true;
+        }
+        if (
+          task.parameter &&
+          task.parameter.collapseIdeas &&
+          this.modelValue.collapseIdeas !== task.parameter.collapseIdeas
+        ) {
+          this.modelValue.collapseIdeas = task.parameter.collapseIdeas;
+          updateProperties = true;
+        }
 
-          if (updateProperties) {
-            this.$emit('update', this.modelValue);
-            this.$emit('change', this.modelValue);
-          }
+        if (updateProperties) {
+          this.$emit('update', this.modelValue);
+          this.$emit('change', this.modelValue);
         }
-      });
+      }
     }
+  }
+
+  updateDependentTasks(data: Task[]): void {
+    const options = ideaService.getSortOrderOptions(data);
+    this.sortOrderOptions = options.filter(
+      (option) => option.ref?.id !== this.taskId
+    );
+    if (this.task.parameter.input.length < 2) {
+      this.sortOrderOptions = this.sortOrderOptions.filter(
+        (option) => option.orderType !== IdeaSortOrder.INPUT.toLowerCase()
+      );
+    }
+    if (options.length > 0 && !this.modelValue.orderType)
+      this.modelValue.orderType = options[0].orderType;
   }
 
   isSaving = false;
   saveParameterChanges(): void {
-    if (this.taskId) {
+    if (this.task) {
       this.isSaving = true;
-      taskService.getTaskById(this.taskId).then((task) => {
-        if (this.syncToPublicScreen) {
-          task.parameter.orderType = this.modelValue.orderType;
-          task.parameter.orderAsc = this.modelValue.orderAsc;
-          task.parameter.stateFilter = this.modelValue.stateFilter;
-          task.parameter.textFilter = this.modelValue.textFilter;
-          task.parameter.collapseIdeas = this.modelValue.collapseIdeas;
-        } else if (!this.syncUserId) {
-          task.parameter.orderType = defaultFilterData.orderType;
-          task.parameter.orderAsc = defaultFilterData.orderAsc;
-          task.parameter.stateFilter = defaultFilterData.stateFilter;
-          task.parameter.textFilter = defaultFilterData.textFilter;
-          task.parameter.collapseIdeas = defaultFilterData.collapseIdeas;
-        }
-        task.parameter.syncUserId = this.syncUserId;
-        taskService.putTask(convertToSaveVersion(task)).then(() => {
-          this.isSaving = false;
-        });
+      if (this.syncToPublicScreen) {
+        this.task.parameter.orderType = this.modelValue.orderType;
+        this.task.parameter.orderAsc = this.modelValue.orderAsc;
+        this.task.parameter.stateFilter = this.modelValue.stateFilter;
+        this.task.parameter.textFilter = this.modelValue.textFilter;
+        this.task.parameter.collapseIdeas = this.modelValue.collapseIdeas;
+      } else if (!this.syncUserId) {
+        this.task.parameter.orderType = defaultFilterData.orderType;
+        this.task.parameter.orderAsc = defaultFilterData.orderAsc;
+        this.task.parameter.stateFilter = defaultFilterData.stateFilter;
+        this.task.parameter.textFilter = defaultFilterData.textFilter;
+        this.task.parameter.collapseIdeas = defaultFilterData.collapseIdeas;
+      }
+      this.task.parameter.syncUserId = this.syncUserId;
+      taskService.putTask(convertToSaveVersion(this.task)).then(() => {
+        this.isSaving = false;
       });
     }
   }

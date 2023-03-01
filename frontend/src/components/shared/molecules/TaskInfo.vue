@@ -53,6 +53,8 @@ import * as taskService from '@/services/task-service';
 import { ModuleType } from '@/types/enum/ModuleType';
 import { getModulesForTaskType } from '@/modules';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { Task } from '@/types/api/Task';
+import * as cashService from "@/services/cash-service";
 
 @Options({
   components: {},
@@ -74,25 +76,32 @@ export default class TaskInfo extends Vue {
   @Watch('taskId', { immediate: true })
   async onTaskIdChanged(): Promise<void> {
     if (this.taskId) {
-      taskService.getTaskById(this.taskId, this.authHeaderTyp).then((task) => {
-        this.title = task.name;
-        this.description = task.description;
-        if (task.taskType) {
-          this.taskType = TaskType[task.taskType.toUpperCase()];
-          if (this.taskType && this.modules.length === 0) {
-            getModulesForTaskType(
-              [task.taskType.toUpperCase() as keyof typeof TaskType],
-              ModuleType.MAIN
-            ).then((mainList) => {
-              this.mainModule = task.modules
-                .filter((module) =>
-                  mainList.find((main) => main.moduleName === module.name)
-                )
-                .map((module) => module.name);
-            });
-          }
-        }
-      });
+      taskService.registerGetTaskById(
+        this.taskId,
+        this.updateTask,
+        this.authHeaderTyp,
+        60 * 60
+      );
+    }
+  }
+
+  updateTask(task: Task): void {
+    this.title = task.name;
+    this.description = task.description;
+    if (task.taskType) {
+      this.taskType = TaskType[task.taskType.toUpperCase()];
+      if (this.taskType && this.modules.length === 0) {
+        getModulesForTaskType(
+          [task.taskType.toUpperCase() as keyof typeof TaskType],
+          ModuleType.MAIN
+        ).then((mainList) => {
+          this.mainModule = task.modules
+            .filter((module) =>
+              mainList.find((main) => main.moduleName === module.name)
+            )
+            .map((module) => module.name);
+        });
+      }
     }
   }
 
@@ -105,6 +114,10 @@ export default class TaskInfo extends Vue {
   get moduleInfo(): string[] {
     if (this.modules.length > 0) return this.modules;
     return this.mainModule;
+  }
+
+  unmounted(): void {
+    cashService.deregisterAllGet(this.updateTask);
   }
 }
 </script>

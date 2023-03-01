@@ -48,6 +48,7 @@ import TaskCategory, {
   getCategoryOfType,
   TaskCategoryType,
 } from '@/types/enum/TaskCategory';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -72,8 +73,6 @@ export default class TaskTimeline extends Vue {
   publicTask: Task | null = null;
   editTask: Task | null = null;
   hasParticipantComponent: { [name: string]: boolean } = {};
-  readonly intervalTime = 3000;
-  interval!: any;
 
   TimerEntity = TimerEntity;
 
@@ -122,6 +121,7 @@ export default class TaskTimeline extends Vue {
     sessionService
       .displayOnPublicScreen(this.sessionId, publicScreenTaskId)
       .then(() => {
+        this.cashPublicScreen.refreshData();
         this.eventBus.emit(EventType.CHANGE_PUBLIC_SCREEN, this.publicTask?.id);
       });
     this.$emit('changePublicScreen', this.publicTask?.id);
@@ -134,39 +134,60 @@ export default class TaskTimeline extends Vue {
   }
 
   @Watch('topicId', { immediate: true })
-  async onTopicIdChanged(): Promise<void> {
-    await this.getTasks();
+  async onTopicIdChanged(newValue: string, oldValue: string): Promise<void> {
+    if (newValue !== oldValue) {
+      if (oldValue) {
+        taskService.deregisterGetTaskList(oldValue, this.updateTasks);
+      }
+      taskService.registerGetTaskList(
+        this.topicId,
+        this.updateTasks,
+        this.authHeaderTyp,
+        30 * 60
+      );
+    }
   }
 
-  async getTasks(): Promise<void> {
-    taskService.getTaskList(this.topicId, this.authHeaderTyp).then((tasks) => {
-      this.tasks = tasks;
-      if (this.activeTaskId) this.onActiveTaskIdChanged();
-      this.getPublicScreen();
-      tasks.forEach((task) => {
-        hasModule(
-          ModuleComponentType.PARTICIPANT,
-          TaskType[task.taskType],
-          'default'
-        ).then(
-          (result) =>
-            (this.hasParticipantComponent[task.id] =
-              result && !task.syncPublicParticipant)
+  cashPublicScreen!: cashService.SimplifiedCashEntry<Task | null>;
+  @Watch('sessionId', { immediate: true })
+  async onSessionIdChanged(newValue: string, oldValue: string): Promise<void> {
+    if (newValue !== oldValue) {
+      if (oldValue) {
+        sessionService.deregisterGetPublicScreen(
+          oldValue,
+          this.updatePublicScreen
         );
-      });
+      }
+      this.cashPublicScreen = sessionService.registerGetPublicScreen(
+        this.sessionId,
+        this.updatePublicScreen,
+        this.authHeaderTyp,
+        5 * 60
+      );
+    }
+  }
+
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
+  updateTasks(tasks: Task[], topicId: string): void {
+    this.tasks = tasks;
+    if (this.activeTaskId) this.onActiveTaskIdChanged();
+    tasks.forEach((task) => {
+      hasModule(
+        ModuleComponentType.PARTICIPANT,
+        TaskType[task.taskType],
+        'default'
+      ).then(
+        (result) =>
+          (this.hasParticipantComponent[task.id] =
+            result && !task.syncPublicParticipant)
+      );
     });
   }
 
-  async getPublicScreen(): Promise<void> {
-    sessionService
-      .getPublicScreen(this.sessionId, this.authHeaderTyp)
-      .then((queryResult) => {
-        if (queryResult) {
-          this.publicTask = queryResult;
-          //const task = this.getTaskFromId(queryResult.id);
-          //if (task) this.publicTask = task;
-        }
-      });
+  updatePublicScreen(task: Task | null): void {
+    if (task) {
+      this.publicTask = task;
+    }
   }
 
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/
@@ -177,16 +198,9 @@ export default class TaskTimeline extends Vue {
     });
   }
 
-  mounted(): void {
-    this.startInterval();
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.getTasks, this.intervalTime);
-  }
-
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateTasks);
+    cashService.deregisterAllGet(this.updatePublicScreen);
   }
 }
 </script>

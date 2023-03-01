@@ -78,6 +78,7 @@ import { Module } from '@/types/api/Module';
 import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
 import ParticipantDefaultContainer from '@/components/participant/organisms/layout/ParticipantDefaultContainer.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -99,8 +100,6 @@ export default class ParticipantModuleContent extends Vue {
   moduleName = '';
   componentLoadIndex = 0;
   componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
-  readonly intervalTime = 10000;
-  interval!: any;
   useFullSize = false;
   backgroundClass = '';
 
@@ -136,46 +135,13 @@ export default class ParticipantModuleContent extends Vue {
 
   mounted(): void {
     this.loadDefaultModule();
-    this.startModuleInterval();
-  }
-
-  startModuleInterval(): void {
-    this.interval = setInterval(this.checkModuleState, this.intervalTime);
   }
 
   unmounted(): void {
     this.loadDefaultModule();
-    clearInterval(this.interval);
     this.task = null;
-  }
-
-  checkModuleState(): void {
-    if (!this.isSyncedWithPublicScreen) {
-      taskService
-        .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
-        .then((task) => {
-          if (
-            !timerService.isActive(task) &&
-            this.$router.currentRoute.value.name ===
-              'participant-module-content'
-          )
-            this.$router.go(-1);
-        });
-    } else if (this.task) {
-      sessionService
-        .getPublicScreen(
-          this.task.sessionId,
-          EndpointAuthorisationType.PARTICIPANT
-        )
-        .then((task) => {
-          if (
-            task?.id !== this.taskId &&
-            this.$router.currentRoute.value.name ===
-              'participant-module-content'
-          )
-            this.$router.go(-1);
-        });
-    }
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updatePublicTask);
   }
 
   get isSyncedWithPublicScreen(): boolean {
@@ -237,15 +203,44 @@ export default class ParticipantModuleContent extends Vue {
   }
 
   @Watch('taskId', { immediate: true })
-  onTaskIdChanged(val: string): void {
-    taskService
-      .getTaskById(val, EndpointAuthorisationType.PARTICIPANT)
-      .then((queryResult) => {
-        this.task = queryResult;
-        queryResult.modules.forEach((module) => this.setIcon(module));
-        this.loadUsedModules();
-        this.moduleNameClick(this.moduleNames[0]);
-      });
+  onTaskIdChanged(): void {
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.PARTICIPANT,
+      2 * 60
+    );
+  }
+
+  updateTask(task: Task): void {
+    if (!this.task) {
+      this.task = task;
+      task.modules.forEach((module) => this.setIcon(module));
+      this.loadUsedModules();
+      this.moduleNameClick(this.moduleNames[0]);
+      sessionService.registerGetPublicScreen(
+        this.task.sessionId,
+        this.updatePublicTask,
+        EndpointAuthorisationType.PARTICIPANT,
+        2 * 60
+      );
+    }
+
+    if (
+      !this.isSyncedWithPublicScreen &&
+      !timerService.isActive(task) &&
+      this.$router.currentRoute.value.name === 'participant-module-content'
+    )
+      this.$router.go(-1);
+  }
+
+  updatePublicTask(task: Task): void {
+    if (
+      this.isSyncedWithPublicScreen &&
+      task?.id !== this.taskId &&
+      this.$router.currentRoute.value.name === 'participant-module-content'
+    )
+      this.$router.go(-1);
   }
 
   async setIcon(module: Module): Promise<void> {

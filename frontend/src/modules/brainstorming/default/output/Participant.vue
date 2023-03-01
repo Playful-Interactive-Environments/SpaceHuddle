@@ -209,7 +209,7 @@
           :show-state="false"
           :canChangeState="false"
           :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
-          @ideaDeleted="getTaskIdeas"
+          @ideaDeleted="refreshIdeas"
         >
         </IdeaCard>
       </div>
@@ -242,6 +242,7 @@ import {
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -313,26 +314,48 @@ export default class Participant extends Vue {
 
   @Watch('moduleId', { immediate: true })
   onModuleIdChanged(): void {
-    this.getModule();
+    if (this.moduleId) {
+      moduleService.registerGetModuleById(
+        this.moduleId,
+        this.updateModule,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
+    }
   }
 
+  updateModule(module: Module): void {
+    this.module = module;
+  }
+
+  ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getTaskIdeas();
+    this.ideaCash = ideaService.registerGetIdeasForTask(
+      this.taskId,
+      IdeaSortOrder.TIMESTAMP,
+      null,
+      this.updateIdeas,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+  }
+
+  updateIdeas(ideas: Idea[]): void {
+    this.ideas = ideas.filter((idea) => idea.isOwn).reverse();
+  }
+
+  refreshIdeas(): void {
+    this.ideaCash.refreshData();
   }
 
   mounted(): void {
     this.waiting();
   }
 
-  async getModule(): Promise<void> {
-    if (this.moduleId) {
-      await moduleService
-        .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
-        .then((module) => {
-          this.module = module;
-        });
-    }
+  unmounted(): void {
+    cashService.deregisterAllGet(this.updateIdeas);
+    cashService.deregisterAllGet(this.updateModule);
   }
 
   get keywordsEmpty(): boolean {
@@ -422,19 +445,6 @@ export default class Participant extends Vue {
   deleteImage(): void {
     this.formData.imgDataUrl = null;
     this.formData.imageWebLink = null;
-  }
-
-  async getTaskIdeas(): Promise<void> {
-    ideaService
-      .getIdeasForTask(
-        this.taskId,
-        IdeaSortOrder.TIMESTAMP,
-        null,
-        EndpointAuthorisationType.PARTICIPANT
-      )
-      .then((queryResult) => {
-        this.ideas = queryResult.filter((idea) => idea.isOwn).reverse();
-      });
   }
 
   unhide(elementID: string): void {

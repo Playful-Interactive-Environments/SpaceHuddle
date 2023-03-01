@@ -30,14 +30,17 @@
 import { Options, Vue } from 'vue-class-component';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as ideaService from '@/services/idea-service';
+import * as taskService from '@/services/task-service';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import {
   defaultFilterData,
   FilterData,
-  getFilterForTaskId,
+  getFilterForTask,
 } from '@/components/moderator/molecules/IdeaFilter.vue';
+import { Task } from '@/types/api/Task';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -52,14 +55,54 @@ export default class PublicScreen extends Vue {
   authHeaderTyp!: EndpointAuthorisationType;
   ideas: Idea[] = [];
   ideaTransform: { [id: string]: boolean } = {};
-  readonly intervalTime = 10000;
-  interval!: any;
   readonly newTimeSpan = 10000;
   filter: FilterData = { ...defaultFilterData };
 
+  ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getIdeas();
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.MODERATOR,
+      30
+    );
+    this.ideaCash = ideaService.registerGetIdeasForTask(
+      this.taskId,
+      this.filter.orderType,
+      null,
+      this.updateIdeas,
+      this.authHeaderTyp,
+      20
+    );
+  }
+
+  updateTask(task: Task): void {
+    this.filter = getFilterForTask(task);
+    this.ideaCash.parameter.urlParameter = ideaService.getIdeaListParameter(
+      this.filter.orderType,
+      null
+    );
+  }
+
+  updateIdeas(ideas: Idea[]): void {
+    const currentDate = new Date();
+    ideas = this.filter.orderAsc ? ideas : ideas.reverse();
+    ideas = ideaService.filterIdeas(
+      ideas,
+      this.filter.stateFilter,
+      this.filter.textFilter
+    );
+    this.ideas = ideas;
+
+    this.ideaTransform = Object.assign(
+      {},
+      ...this.ideas.map((idea) => {
+        const timeSpan =
+          currentDate.getTime() - new Date(idea.timestamp).getTime();
+        return { [idea.id]: timeSpan <= this.newTimeSpan };
+      })
+    );
   }
 
   get isModerator(): boolean {
@@ -78,64 +121,12 @@ export default class PublicScreen extends Vue {
   }
 
   get oldIdeas(): Idea[] {
-    /*if (this.isModerator) {
-      const currentDate = new Date();
-      return this.ideas.filter(
-        (idea) =>
-          currentDate.getTime() - new Date(idea.timestamp).getTime() >
-          this.newTimeSpan
-      );
-    }*/
     return this.ideas;
   }
 
-  async getIdeas(): Promise<void> {
-    const currentDate = new Date();
-    if (this.taskId) {
-      await getFilterForTaskId(this.taskId, this.authHeaderTyp).then(
-        (filter) => {
-          this.filter = filter;
-        }
-      );
-
-      await ideaService
-        .getIdeasForTask(
-          this.taskId,
-          this.filter.orderType,
-          null,
-          this.authHeaderTyp
-        )
-        .then((ideas) => {
-          ideas = this.filter.orderAsc ? ideas : ideas.reverse();
-          ideas = ideaService.filterIdeas(
-            ideas,
-            this.filter.stateFilter,
-            this.filter.textFilter
-          );
-          this.ideas = ideas;
-
-          this.ideaTransform = Object.assign(
-            {},
-            ...this.ideas.map((idea) => {
-              const timeSpan =
-                currentDate.getTime() - new Date(idea.timestamp).getTime();
-              return { [idea.id]: timeSpan <= this.newTimeSpan };
-            })
-          );
-        });
-    }
-  }
-
-  async mounted(): Promise<void> {
-    this.startInterval();
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.getIdeas, this.intervalTime);
-  }
-
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateIdeas);
   }
 }
 </script>

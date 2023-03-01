@@ -120,6 +120,8 @@ import { Vote } from '@/types/api/Vote';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
+import * as cashService from '@/services/cash-service';
+import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 
 @Options({
   components: {
@@ -141,8 +143,6 @@ export default class Participant extends Vue {
   ideaPointer = 0;
   rate = 0;
   maxRate = 5;
-  readonly intervalTime = 10000;
-  interval!: any;
   starOpacity = 0;
   initIdeaNumber = 0;
 
@@ -179,12 +179,7 @@ export default class Participant extends Vue {
 
   mounted(): void {
     this.initConfig(5);
-    this.startInterval();
     this.waiting;
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.reloadIdeas, this.intervalTime);
   }
 
   voteIdea(ideaId: string | null): Idea | undefined {
@@ -192,90 +187,99 @@ export default class Participant extends Vue {
   }
 
   unmounted(): void {
-    clearInterval(this.interval);
-  }
-
-  reloadIdeas(): void {
-    if (this.finished) this.getIdeas();
+    cashService.deregisterAllGet(this.updateVotes);
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateModule);
+    cashService.deregisterAllGet(this.updateInputIdeas);
   }
 
   initConfig(count: number): void {
     this.maxRate = count;
   }
 
+  inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
+  votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getIdeas();
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+    this.inputCash = viewService.registerGetInputIdeas(
+      this.taskId,
+      IdeaSortOrder.TIMESTAMP,
+      null,
+      this.updateInputIdeas,
+      EndpointAuthorisationType.PARTICIPANT,
+      30
+    );
+    this.votingCash = votingService.registerGetVotes(
+      this.taskId,
+      this.updateVotes,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
   }
 
-  async getTask(): Promise<void> {
-    if (this.taskId) {
-      await taskService
-        .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
-        .then((task) => {
-          this.task = task;
-        });
-    }
+  updateTask(task: Task): void {
+    this.task = task;
+  }
+
+  inputIdeas: Idea[] = [];
+  updateInputIdeas(ideas: Idea[]): void {
+    this.inputIdeas = ideas;
+    this.updateIdeas();
+  }
+
+  updateVotes(votes: Vote[]): void {
+    this.votes = votes;
+    votes.forEach((vote) => {
+      const ideaIndex = this.ideas.findIndex((idea) => idea.id == vote.ideaId);
+      if (ideaIndex >= 0) this.ideas.splice(ideaIndex, 1);
+    });
+    this.ideaPointer = 0;
+  }
+
+  updateIdeas(): void {
+    const ideas = viewService.customizeView(
+      this.inputIdeas,
+      null,
+      (this as any).$t,
+      [],
+      '',
+      this.task ? this.task.parameter.input.length : 1
+    );
+    this.allIdeas = [...ideas];
+    this.ideaPointer = ideas.length;
+    this.ideas = ideas;
+    this.initIdeaNumber = ideas.length;
+    this.getVotes();
   }
 
   @Watch('moduleId', { immediate: true })
   onModuleIdChanged(): void {
-    this.getModule();
+    if (this.moduleId) {
+      moduleService.registerGetModuleById(
+        this.moduleId,
+        this.updateModule,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
+    }
   }
 
-  async getModule(): Promise<void> {
-    if (this.moduleId) {
-      await moduleService
-        .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
-        .then((module) => {
-          this.module = module;
-          if (this.maxRate != parseInt(this.module.parameter.maxRate))
-            this.getVotes();
-        });
-    }
+  updateModule(module: Module): void {
+    this.module = module;
+    if (this.maxRate != parseInt(this.module.parameter.maxRate))
+      this.getVotes();
   }
 
   async getVotes(): Promise<void> {
     if (this.taskId) {
       if (this.module) this.initConfig(parseInt(this.module.parameter.maxRate));
       else this.initConfig(5);
-      await votingService
-        .getVotes(this.taskId, EndpointAuthorisationType.PARTICIPANT)
-        .then((votes) => {
-          this.votes = votes;
-          votes.forEach((vote) => {
-            const ideaIndex = this.ideas.findIndex(
-              (idea) => idea.id == vote.ideaId
-            );
-            if (ideaIndex >= 0) this.ideas.splice(ideaIndex, 1);
-          });
-          this.ideaPointer = 0;
-        });
-    }
-  }
-
-  async getIdeas(): Promise<void> {
-    if (this.taskId) {
-      if (!this.task) await this.getTask();
-      if (!this.module) await this.getModule();
-      if (this.task && this.task.parameter.input) {
-        await viewService
-          .getViewIdeas(
-            this.task.topicId,
-            this.task.parameter.input,
-            null,
-            null,
-            EndpointAuthorisationType.PARTICIPANT,
-            (this as any).$t
-          )
-          .then((ideas) => {
-            this.allIdeas = [...ideas];
-            this.ideaPointer = ideas.length;
-            this.ideas = ideas;
-            this.initIdeaNumber = ideas.length;
-            this.getVotes();
-          });
-      }
     }
   }
 

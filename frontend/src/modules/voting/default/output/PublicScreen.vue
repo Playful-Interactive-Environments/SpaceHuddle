@@ -44,6 +44,7 @@ import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import * as votingService from '@/services/voting-service';
 import { VoteResult } from '@/types/api/Vote';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -61,12 +62,21 @@ export default class PublicScreen extends Vue {
     labels: [],
     datasets: [],
   };
-  readonly intervalTime = 10000;
-  interval!: any;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getVotes();
+    votingService.registerGetResult(
+      this.taskId,
+      this.updateVotes,
+      this.authHeaderTyp
+    );
+  }
+
+  updateVotes(votes: VoteResult[]): void {
+    this.votes = votes;
+    this.chartData.labels = this.resultData.labels;
+    this.chartData.datasets = this.resultData.datasets;
+    this.updateChart();
   }
 
   get resultData(): any {
@@ -85,19 +95,6 @@ export default class PublicScreen extends Vue {
     };
   }
 
-  async getVotes(): Promise<void> {
-    if (this.taskId) {
-      await votingService
-        .getResult(this.taskId, this.authHeaderTyp)
-        .then((votes) => {
-          this.votes = votes;
-          this.chartData.labels = this.resultData.labels;
-          this.chartData.datasets = this.resultData.datasets;
-          this.updateChart();
-        });
-    }
-  }
-
   async updateChart(): Promise<void> {
     if (this.$refs.chartRef) {
       const chartRef = this.$refs.chartRef as any;
@@ -105,16 +102,8 @@ export default class PublicScreen extends Vue {
     }
   }
 
-  async mounted(): Promise<void> {
-    this.startInterval();
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.getVotes, this.intervalTime);
-  }
-
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateVotes);
   }
 }
 </script>

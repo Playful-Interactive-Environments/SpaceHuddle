@@ -86,8 +86,6 @@ export default class QuizResult extends Vue {
     labels: [],
     datasets: [],
   };
-
-  axisID = 'yaxisID';
   labelLineLimit = 2;
 
   get chartHeight(): number {

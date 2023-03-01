@@ -1,9 +1,5 @@
 <template>
-  <IdeaFilter
-    :taskId="taskId"
-    v-model="filter"
-    @change="getCollapseContent(true)"
-  />
+  <IdeaFilter :taskId="taskId" v-model="filter" @change="reloadIdeas(true)" />
   <el-collapse v-model="openTabs">
     <el-collapse-item
       v-for="(item, key) in orderGroupContent"
@@ -35,7 +31,7 @@
             :idea="element"
             :isDraggable="true"
             v-model:collapseIdeas="filter.collapseIdeas"
-            @ideaDeleted="getCollapseContent()"
+            @ideaDeleted="reloadIdeas()"
           />
         </template>
         <template v-slot:footer>
@@ -56,7 +52,7 @@
           v-for="(idea, index) in item.filteredIdeas"
           :key="index"
           v-model:collapseIdeas="filter.collapseIdeas"
-          @ideaDeleted="getCollapseContent()"
+          @ideaDeleted="reloadIdeas()"
         />
         <AddItem
           v-if="item.ideas.length > item.displayCount"
@@ -80,7 +76,7 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import { OrderGroup, OrderGroupList } from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { reloadCollapseContent } from '@/utils/collapse';
+import { reloadCollapseTabs } from '@/utils/collapse';
 import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { EventType } from '@/types/enum/EventType';
@@ -89,6 +85,7 @@ import IdeaFilter, {
   defaultFilterData,
   FilterData,
 } from '@/components/moderator/molecules/IdeaFilter.vue';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -105,10 +102,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];
   orderGroupContent: OrderGroupList = {};
-  readonly intervalTime = 10000;
-  interval!: any;
   openTabs: string[] = [];
   filter: FilterData = { ...defaultFilterData };
+  cashEntry!: cashService.SimplifiedCashEntry<Idea[]>;
 
   get orderIsChangeable(): boolean {
     return this.filter.orderType === IdeaSortOrder.ORDER;
@@ -116,87 +112,89 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
-    this.getCollapseContent(true);
+    this.cashEntry = ideaService.registerGetIdeasForTask(
+      this.taskId,
+      this.filter.orderType,
+      null,
+      this.updateIdeas,
+      EndpointAuthorisationType.MODERATOR,
+      20
+    );
   }
 
-  async getCollapseContent(reloadTabState = false): Promise<void> {
-    reloadCollapseContent(
-      this.openTabs,
-      Object.keys(this.orderGroupContent),
-      this.getIdeas,
-      reloadTabState
-    ).then((tabs) => (this.openTabs = tabs));
-  }
-
-  async getIdeas(): Promise<string[]> {
-    const taskId = this.taskId;
+  updateIdeas(ideas: Idea[]): void {
     const orderType = this.filter.orderType;
-    if (taskId) {
-      await ideaService
-        .getOrderGroups(
-          taskId,
-          orderType,
-          this.filter.orderAsc,
-          null,
-          EndpointAuthorisationType.MODERATOR,
-          this.orderGroupContent
-        )
-        .then((result) => {
-          let orderGroupName = '';
-          let orderGroupContent: OrderGroupList = {};
-          switch (orderType) {
-            case IdeaSortOrder.TIMESTAMP:
-            case IdeaSortOrder.ALPHABETICAL:
-            case IdeaSortOrder.ORDER:
-              result.ideas = ideaService.filterIdeas(
-                result.ideas,
-                this.filter.stateFilter,
-                this.filter.textFilter
-              );
-              orderGroupName = (this as any).$t(
-                `module.brainstorming.default.moderatorContent.${orderType}`
-              );
-              orderGroupContent[orderGroupName] = new OrderGroup(result.ideas);
-              break;
-            default:
-              for (const key of Object.keys(result.oderGroups)) {
-                result.oderGroups[key].ideas = ideaService.filterIdeas(
-                  result.oderGroups[key].ideas,
-                  this.filter.stateFilter,
-                  this.filter.textFilter
-                );
-              }
-              orderGroupContent = result.oderGroups;
-          }
-          Object.keys(orderGroupContent).forEach((key) => {
-            if (key in this.orderGroupContent)
-              orderGroupContent[key].displayCount =
-                this.orderGroupContent[key].displayCount;
-          });
-          this.orderGroupContent = orderGroupContent;
-          this.ideas = result.ideas;
-        });
+    const dataList = ideaService.getOrderGroups(
+      ideas,
+      this.filter.orderAsc,
+      this.orderGroupContent
+    );
+    let orderGroupName = '';
+    let orderGroupContent: OrderGroupList = {};
+    switch (orderType) {
+      case IdeaSortOrder.TIMESTAMP:
+      case IdeaSortOrder.ALPHABETICAL:
+      case IdeaSortOrder.ORDER:
+        dataList.ideas = ideaService.filterIdeas(
+          dataList.ideas,
+          this.filter.stateFilter,
+          this.filter.textFilter
+        );
+        orderGroupName = (this as any).$t(
+          `module.brainstorming.default.moderatorContent.${orderType}`
+        );
+        orderGroupContent[orderGroupName] = new OrderGroup(dataList.ideas);
+        break;
+      default:
+        for (const key of Object.keys(dataList.oderGroups)) {
+          dataList.oderGroups[key].ideas = ideaService.filterIdeas(
+            dataList.oderGroups[key].ideas,
+            this.filter.stateFilter,
+            this.filter.textFilter
+          );
+        }
+        orderGroupContent = dataList.oderGroups;
     }
-    return Object.keys(this.orderGroupContent);
+    Object.keys(orderGroupContent).forEach((key) => {
+      if (key in this.orderGroupContent)
+        orderGroupContent[key].displayCount =
+          this.orderGroupContent[key].displayCount;
+    });
+    const oldTabs = Object.keys(this.orderGroupContent);
+    this.orderGroupContent = orderGroupContent;
+    this.ideas = dataList.ideas;
+    const newTabs = Object.keys(this.orderGroupContent);
+
+    reloadCollapseTabs(
+      this.openTabs,
+      oldTabs,
+      newTabs,
+      this.reloadTabState
+    ).then((tabs) => (this.openTabs = tabs));
+    this.reloadTabState = false;
+  }
+
+  reloadTabState = true;
+  reloadIdeas(reloadTabState = false): void {
+    this.cashEntry.parameter.urlParameter = ideaService.getIdeaListParameter(
+      this.filter.orderType,
+      null
+    );
+    this.reloadTabState = reloadTabState;
+    this.cashEntry.refreshData();
   }
 
   async mounted(): Promise<void> {
-    this.startInterval();
-
     this.eventBus.off(EventType.CHANGE_SETTINGS);
     this.eventBus.on(EventType.CHANGE_SETTINGS, async (taskId) => {
       if (this.taskId === taskId) {
-        await this.getCollapseContent();
+        this.reloadIdeas();
       }
     });
   }
 
-  startInterval(): void {
-    this.interval = setInterval(this.getCollapseContent, this.intervalTime);
-  }
-
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateIdeas);
   }
 
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/

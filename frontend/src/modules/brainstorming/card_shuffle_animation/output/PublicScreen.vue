@@ -37,8 +37,11 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import {
   defaultFilterData,
   FilterData,
-  getFilterForTaskId,
+  getFilterForTask,
 } from '@/components/moderator/molecules/IdeaFilter.vue';
+import * as taskService from '@/services/task-service';
+import { Task } from '@/types/api/Task';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -52,14 +55,45 @@ export default class PublicScreen extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   ideas: Idea[] = [];
-  readonly intervalTime = 10000;
-  interval!: any;
   filter: FilterData = { ...defaultFilterData };
 
+  ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.MODERATOR,
+      2 * 60
+    );
+    this.ideaCash = ideaService.registerGetIdeasForTask(
+      this.taskId,
+      this.filter.orderType,
+      null,
+      this.updateIdeas,
+      this.authHeaderTyp,
+      2 * 60
+    );
     this.active = true;
     this.stackCards();
+  }
+
+  updateTask(task: Task): void {
+    this.filter = getFilterForTask(task);
+    this.ideaCash.parameter.urlParameter = ideaService.getIdeaListParameter(
+      this.filter.orderType,
+      null
+    );
+  }
+
+  updateIdeas(ideas: Idea[]): void {
+    ideas = this.filter.orderAsc ? ideas : ideas.reverse();
+    ideas = ideaService.filterIdeas(
+      ideas,
+      this.filter.stateFilter,
+      this.filter.textFilter
+    );
+    this.ideas = ideas;
   }
 
   shuffleDelay = 150;
@@ -81,11 +115,7 @@ export default class PublicScreen extends Vue {
       }
     }
     setTimeout(() => {
-      this.getIdeas().then(() => {
-        setTimeout(() => {
-          this.spreadCards();
-        }, 1000);
-      });
+      this.spreadCards();
     }, cardCount * this.shuffleDelay);
   }
 
@@ -111,33 +141,6 @@ export default class PublicScreen extends Vue {
     }, cardCount * this.shuffleDelay + 10000);
   }
 
-  async getIdeas(): Promise<void> {
-    if (this.taskId) {
-      await getFilterForTaskId(this.taskId, this.authHeaderTyp).then(
-        (filter) => {
-          this.filter = filter;
-        }
-      );
-
-      await ideaService
-        .getIdeasForTask(
-          this.taskId,
-          this.filter.orderType,
-          null,
-          this.authHeaderTyp
-        )
-        .then((ideas) => {
-          ideas = this.filter.orderAsc ? ideas : ideas.reverse();
-          ideas = ideaService.filterIdeas(
-            ideas,
-            this.filter.stateFilter,
-            this.filter.textFilter
-          );
-          this.ideas = ideas;
-        });
-    }
-  }
-
   columnCount = 5;
   columnWidth = 200;
   calcCardGrid(): void {
@@ -157,6 +160,8 @@ export default class PublicScreen extends Vue {
   unmounted(): void {
     this.active = false;
     window.removeEventListener('resize', this.calcCardGrid);
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateIdeas);
   }
 }
 </script>

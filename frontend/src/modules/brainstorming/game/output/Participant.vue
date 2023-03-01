@@ -76,9 +76,8 @@ import NoSleep from 'nosleep.js';
 import * as viewService from '@/services/view-service';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
-import IdeaStates from '@/types/enum/IdeaStates';
-import ViewType from '@/types/enum/ViewType';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+import * as ideaService from '@/services/idea-service';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const o9n = require('o9n');
@@ -114,8 +113,6 @@ export default class Participant extends Vue {
   @Prop({ default: '' }) readonly backgroundClass!: string;
   task: Task | null = null;
   module: Module | null = null;
-  readonly intervalTime = 100000;
-  interval!: any;
 
   randomIdea: Idea | null = null;
 
@@ -129,17 +126,44 @@ export default class Participant extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getTask();
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+    viewService.registerGetInputIdeas(
+      this.taskId,
+      IdeaSortOrder.TIMESTAMP,
+      null,
+      this.updateInputIdeas,
+      EndpointAuthorisationType.PARTICIPANT,
+      30
+    );
+    ideaService.registerGetIdeasForTask(
+      this.taskId,
+      IdeaSortOrder.TIMESTAMP,
+      null,
+      this.updateTaskIdeas,
+      EndpointAuthorisationType.PARTICIPANT,
+      30
+    );
   }
 
-  async getTask(): Promise<void> {
-    if (this.taskId) {
-      await taskService
-        .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
-        .then((task) => {
-          this.task = task;
-        });
-    }
+  updateTask(task: Task): void {
+    this.task = task;
+  }
+
+  inputIdeas: Idea[] = [];
+  updateInputIdeas(ideas: Idea[]): void {
+    this.inputIdeas = ideas;
+    this.updateIdeas();
+  }
+
+  taskIdeas: Idea[] = [];
+  updateTaskIdeas(ideas: Idea[]): void {
+    this.taskIdeas = ideas;
+    this.updateIdeas();
   }
 
   changeText(): void {
@@ -167,9 +191,8 @@ export default class Participant extends Vue {
     textSize = 48
   ): void {
     const top = textSpan.parentNode.getBoundingClientRect().top;
-    if (textSpan) {
+    if (textSpan && this.bodies) {
       this.bodies.clearTexts(textId);
-      //this.bodies.startAnimation(50);
       const textAnimation = textSpan as any;
       const rectAnimation = textAnimation.getBoundingClientRect();
       textAnimation.childNodes.forEach((span) => {
@@ -270,7 +293,6 @@ export default class Participant extends Vue {
         this.vueCanvas = (this.$refs.canvas as any).getContext('2d');
       }
       window.addEventListener('deviceorientation', this.onOrientationChange);
-      this.startInterval();
 
       this.setupPhysics();
       this.drawingInterval = setInterval(() => {
@@ -278,7 +300,6 @@ export default class Participant extends Vue {
       }, this.drawingIntervalTime);
       this.setupShaking();
     }, 100);
-    //await this.getTaskIdeas();
 
     window.addEventListener('mousedown', this.mousedown);
     window.addEventListener('mouseup', this.mouseup);
@@ -318,6 +339,7 @@ export default class Participant extends Vue {
       );
       return directionCount % 2 === 0 ? 20 : -10;
     };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const animateShaking = (): void => {
       if (this.lastShakingTime === shakingTime) {
         this.bodies.addShakingForce(actualShakingForce());
@@ -342,9 +364,8 @@ export default class Participant extends Vue {
       )
     ) {
       this.shakingStartTime = shakingTime;
-      this.getTaskIdeas();
+      this.chooseRandomIdea();
     }
-    //animateShaking();
   }
 
   setupPhysics(): void {
@@ -445,59 +466,50 @@ export default class Participant extends Vue {
 
   @Watch('moduleId', { immediate: true })
   onModuleIdChanged(): void {
-    this.getModule();
-  }
-
-  async getModule(): Promise<void> {
     if (this.moduleId) {
-      await moduleService
-        .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
-        .then((module) => {
-          this.module = module;
-        });
+      moduleService.registerGetModuleById(
+        this.moduleId,
+        this.updateModule,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
     }
   }
 
-  startInterval(): void {
-    //this.interval = setInterval(this.getTaskIdeas, this.intervalTime);
+  updateModule(module: Module): void {
+    this.module = module;
   }
 
   async unmounted(): Promise<void> {
     await this.exitFullscreen();
     if (this.noSleep) this.noSleep.disable();
-    clearInterval(this.interval);
     clearInterval(this.drawingInterval);
     window.removeEventListener('shake', this.isShaking, false);
     this.shakeEvent.stop();
+    taskService.deregisterGetTaskById(this.taskId, this.updateTask);
+    moduleService.deregisterGetModuleById(this.moduleId, this.updateModule);
+    viewService.deregisterGetInputIdeas(this.taskId, this.updateInputIdeas);
   }
 
-  async getTaskIdeas(): Promise<void> {
-    if (this.task) {
-      const inputs: any[] = [];
-      inputs.push(...(this.task.parameter.input as any[]));
-      inputs.push({
-        view: { type: ViewType.TASK.toUpperCase(), id: this.taskId },
-        maxCount: null,
-        filter: Object.keys(IdeaStates),
-        order: IdeaSortOrder.ORDER,
-      });
-      viewService
-        .getViewIdeas(
-          this.task.topicId,
-          inputs,
-          null,
-          null,
-          EndpointAuthorisationType.PARTICIPANT,
-          (this as any).$t
-        )
-        .then((queryResult) => {
-          const randomIndex = Math.floor(Math.random() * queryResult.length);
-          this.randomIdea = queryResult[randomIndex];
-          setTimeout(() => {
-            this.changeText();
-          }, 100);
-        });
-    }
+  allIdeas: Idea[] = [];
+  updateIdeas(): void {
+    this.allIdeas = viewService.customizeView(
+      [...this.inputIdeas, ...this.taskIdeas],
+      null,
+      (this as any).$t,
+      [],
+      '',
+      this.task ? this.task.parameter.input.length : 1
+    );
+    this.chooseRandomIdea();
+  }
+
+  chooseRandomIdea(): void {
+    const randomIndex = Math.floor(Math.random() * this.allIdeas.length);
+    this.randomIdea = this.allIdeas[randomIndex];
+    setTimeout(() => {
+      this.changeText();
+    }, 100);
   }
 
   draw(e: MouseEvent): void {

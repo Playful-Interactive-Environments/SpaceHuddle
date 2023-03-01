@@ -1,9 +1,5 @@
 <template>
-  <IdeaFilter
-    :taskId="taskId"
-    v-model="filter"
-    @change="getCollapseContent(true)"
-  />
+  <IdeaFilter :taskId="taskId" v-model="filter" @change="refreshInput(true)" />
   <div ref="data" class="media">
     <div class="media-left unselected">
       <el-scrollbar
@@ -51,7 +47,7 @@
                     :isDraggable="true"
                     v-model:collapseIdeas="filter.collapseIdeas"
                     class="item"
-                    @ideaDeleted="getCollapseContent"
+                    @ideaDeleted="refreshInAndOutput"
                   />
                 </template>
                 <template v-slot:footer>
@@ -123,7 +119,7 @@
                     :isDraggable="true"
                     v-model:collapseIdeas="filter.collapseIdeas"
                     class="item"
-                    @ideaDeleted="getCollapseContent"
+                    @ideaDeleted="refreshInAndOutput"
                   />
                 </template>
                 <template v-slot:footer>
@@ -152,16 +148,18 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import * as viewService from '@/services/view-service';
+import * as cashService from '@/services/cash-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import * as selectionService from '@/services/selection-service';
+import * as selectService from '@/services/selection-service';
 import { EventType } from '@/types/enum/EventType';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import draggable from 'vuedraggable';
 import { OrderGroup, OrderGroupList } from '@/types/api/OrderGroup';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { reloadCollapseContent } from '@/utils/collapse';
+import { reloadCollapseTabs } from '@/utils/collapse';
 import IdeaSortOrder, { DefaultDisplayCount } from '@/types/enum/IdeaSortOrder';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
@@ -169,6 +167,7 @@ import IdeaFilter, {
   defaultFilterData,
   FilterData,
 } from '@/components/moderator/molecules/IdeaFilter.vue';
+import { View } from '@/types/api/View';
 
 const SELECTION_KEY = 'selection';
 
@@ -188,11 +187,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   readonly SELECTION_KEY = SELECTION_KEY;
 
   task: Task | null = null;
+  selectionId: string | null = null;
   ideas: Idea[] = [];
   selection: Idea[] = [];
   orderGroupContent: OrderGroupList = {};
-  readonly intervalTime = 10000;
-  interval!: any;
   openTabs: string[] = [];
   openTabsSelection: string[] = [SELECTION_KEY];
   displayCount = DefaultDisplayCount;
@@ -209,95 +207,155 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     }
   }
 
+  inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
-    this.getCollapseContent(true);
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+    this.inputCash = viewService.registerGetInputIdeas(
+      this.taskId,
+      this.filter.orderType,
+      null,
+      this.updateInputIdeas,
+      EndpointAuthorisationType.MODERATOR,
+      30
+    );
   }
 
-  async getTask(): Promise<void> {
-    if (this.taskId) {
-      await taskService.getTaskById(this.taskId).then(async (task) => {
-        this.task = task;
-      });
+  @Watch('task.topicId', { immediate: true })
+  onTopicIdChanged(): void {
+    if (this.task) {
+      viewService.registerGetList(
+        this.task.topicId,
+        this.updateViews,
+        EndpointAuthorisationType.MODERATOR,
+        60 * 60
+      );
     }
   }
 
-  async getCollapseContent(reloadTabState = false): Promise<void> {
-    reloadCollapseContent(
+  updateTask(task: Task): void {
+    this.task = task;
+    this.selectionId = this.task?.parameter?.selectionId;
+  }
+
+  views: View[] = [];
+  updateViews(views: View[]): void {
+    this.views = views;
+  }
+
+  inputIdeas: Idea[] = [];
+  updateInputIdeas(ideas: Idea[]): void {
+    this.inputIdeas = ideas;
+    this.updateIdeas();
+  }
+
+  selectionCash!: cashService.SimplifiedCashEntry<Idea[]>;
+  @Watch('selectionId', { immediate: true })
+  onSelectionIdChanged(): void {
+    if (this.selectionId)
+      this.selectionCash = selectService.registerGetIdeasForSelection(
+        this.selectionId,
+        this.updateSelectedIdeas,
+        EndpointAuthorisationType.MODERATOR,
+        10
+      );
+  }
+
+  @Watch('filter.orderType', { deep: true, immediate: true })
+  onFilterDataChanged(): void {
+    if (this.inputCash) {
+      this.inputCash.parameter.urlParameter = ideaService.getIdeaListParameter(
+        this.filter.orderType,
+        null
+      );
+      this.inputCash.refreshData();
+    }
+  }
+
+  reloadTabState = true;
+  refreshSelection(reloadTabState = false): void {
+    this.reloadTabState = reloadTabState;
+    if (this.selectionCash) this.selectionCash.refreshData();
+  }
+
+  refreshInput(reloadTabState = false): void {
+    this.reloadTabState = reloadTabState;
+    if (this.inputCash) this.inputCash.refreshData();
+  }
+
+  refreshInAndOutput(reloadTabState = false): void {
+    this.reloadTabState = reloadTabState;
+    if (this.selectionCash) this.selectionCash.refreshData();
+    if (this.inputCash) this.inputCash.refreshData();
+  }
+
+  updateSelectedIdeas(ideas: Idea[]): void {
+    this.selection = ideaService.filterIdeas(
+      ideas,
+      this.filter.stateFilter,
+      this.filter.textFilter
+    );
+    this.updateIdeas();
+  }
+
+  updateIdeas(): void {
+    const selectedIds: string[] = this.selection.map((idea) => idea.id);
+    const ideas = ideaService.getOrderGroups(
+      viewService.customizeView(
+        this.inputIdeas,
+        this.views,
+        (this as any).$t,
+        this.filter.stateFilter,
+        this.filter.textFilter,
+        this.task ? this.task.parameter.input.length : 1
+      ),
+      this.filter.orderAsc,
+      this.orderGroupContent,
+      (idea: Idea) => !selectedIds.includes(idea.id)
+    );
+    const orderGroupName = (this as any).$t(
+      'module.selection.default.moderatorContent.unselected'
+    );
+    let orderGroupContent: OrderGroupList = {};
+    switch (this.filter.orderType) {
+      case IdeaSortOrder.TIMESTAMP:
+      case IdeaSortOrder.ALPHABETICAL:
+      case IdeaSortOrder.ORDER:
+        orderGroupContent[orderGroupName] = new OrderGroup(
+          ideas.ideas.filter((idea) => !selectedIds.includes(idea.id))
+        );
+        break;
+      default:
+        orderGroupContent = ideas.oderGroups;
+    }
+    Object.keys(orderGroupContent).forEach((key) => {
+      if (key in this.orderGroupContent)
+        orderGroupContent[key].displayCount =
+          this.orderGroupContent[key].displayCount;
+    });
+    const oldTabs = Object.keys(this.orderGroupContent);
+    this.orderGroupContent = orderGroupContent;
+    this.ideas = ideas.ideas;
+
+    reloadCollapseTabs(
       this.openTabs,
+      oldTabs,
       Object.keys(this.orderGroupContent),
-      this.getIdeas,
-      reloadTabState
+      this.reloadTabState
     ).then((tabs) => (this.openTabs = tabs));
-  }
-
-  async getIdeas(): Promise<string[]> {
-    if (this.isDragging) return Object.keys(this.orderGroupContent);
-
-    if (this.taskId) {
-      if (!this.task) await this.getTask();
-      if (this.task && this.task.parameter.selectionId) {
-        await selectionService
-          .getIdeasForSelection(this.task.parameter.selectionId)
-          .then((ideas) => {
-            this.selection = ideaService.filterIdeas(
-              ideas,
-              this.filter.stateFilter,
-              this.filter.textFilter
-            );
-          });
-        const selectedIds: string[] = this.selection.map((idea) => idea.id);
-
-        await viewService
-          .getViewOrderGroups(
-            this.task.topicId,
-            this.task.parameter.input,
-            this.filter.orderType,
-            this.filter.orderAsc,
-            null,
-            EndpointAuthorisationType.MODERATOR,
-            this.orderGroupContent,
-            (this as any).$t,
-            this.filter.stateFilter,
-            this.filter.textFilter,
-            (idea: Idea) => !selectedIds.includes(idea.id)
-          )
-          .then((result) => {
-            const orderGroupName = (this as any).$t(
-              'module.selection.default.moderatorContent.unselected'
-            );
-            let orderGroupContent: OrderGroupList = {};
-            switch (this.filter.orderType) {
-              case IdeaSortOrder.TIMESTAMP:
-              case IdeaSortOrder.ALPHABETICAL:
-              case IdeaSortOrder.ORDER:
-                orderGroupContent[orderGroupName] = new OrderGroup(
-                  result.ideas.filter((idea) => !selectedIds.includes(idea.id))
-                );
-                break;
-              default:
-                orderGroupContent = result.oderGroups;
-            }
-            Object.keys(orderGroupContent).forEach((key) => {
-              if (key in this.orderGroupContent)
-                orderGroupContent[key].displayCount =
-                  this.orderGroupContent[key].displayCount;
-            });
-            this.orderGroupContent = orderGroupContent;
-            this.ideas = result.ideas;
-          });
-      }
-    }
-    return Object.keys(this.orderGroupContent);
+    this.reloadTabState = false;
   }
 
   async mounted(): Promise<void> {
-    this.startInterval();
-
     this.eventBus.off(EventType.CHANGE_SETTINGS);
     this.eventBus.on(EventType.CHANGE_SETTINGS, async (taskId) => {
       if (this.taskId === taskId) {
-        await this.reloadData();
+        this.refreshInput();
       }
     });
     setTimeout(() => {
@@ -305,17 +363,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     }, 500);
   }
 
-  async reloadData(): Promise<void> {
-    await this.getTask();
-    await this.getCollapseContent();
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.reloadData, this.intervalTime);
-  }
-
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateViews);
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateInputIdeas);
+    cashService.deregisterAllGet(this.updateSelectedIdeas);
   }
 
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/
@@ -335,7 +387,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       }
     }
     this.isDragging = false;
-    await this.getCollapseContent();
+    this.refreshSelection();
   }
 }
 </script>

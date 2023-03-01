@@ -17,9 +17,10 @@ import IdeaSortOrder, {
   DefaultDisplayCount,
   IdeaSortOrderView,
 } from '@/types/enum/IdeaSortOrder';
-import * as taskService from '@/services/task-service';
 import TaskType from '@/types/enum/TaskType';
 import { Hierarchy } from '@/types/api/Hierarchy';
+import * as cashService from '@/services/cash-service';
+import { Task } from '@/types/api/Task';
 const imageDB: IdeaImage[] = [];
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -130,7 +131,7 @@ export const putIdeaImage = async (
     addIdeaImage(data.id, data.image, result.image_timestamp);
 };
 
-export const getIdeaImage = async (
+const getIdeaImage = async (
   ideaId: string,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<IdeaImage> => {
@@ -191,73 +192,114 @@ export const addIdeaImage = (
   fireEvent('imageLoaded', window, id, image);
 };
 
-export const getIdeasForTask = async (
+export const getQueryParameter = (
+  orderType: string | null = null,
+  refId: string | null = null
+): string => {
+  let queryParameter = getIdeaListParameter(orderType, refId);
+  if (queryParameter.length > 0) queryParameter = `?${queryParameter}`;
+  return queryParameter;
+};
+
+export const getIdeaListParameter = (
+  orderType: string | null = null,
+  refId: string | null = null
+): string => {
+  let queryParameter = '';
+  if (orderType) queryParameter = `order=${orderType}`;
+  if (refId && orderType) queryParameter = `${queryParameter}&refId=${refId}`;
+  return queryParameter;
+};
+
+export const registerGetIdeasForTask = (
   taskId: string,
   orderType: string | null = null,
   refId: string | null = null,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Idea[]> => {
-  let queryParameter = '';
-  if (orderType) queryParameter = `?order=${orderType}`;
-  if (refId && orderType) queryParameter = `${queryParameter}&refId=${refId}`;
-  const ideas = await apiExecuteGetHandled<Idea[]>(
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Idea[]> => {
+  const queryParameter = getQueryParameter(orderType, refId);
+  return cashService.registerSimplifiedGet<Idea[]>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.IDEAS}/${queryParameter}`,
+    callback,
     [],
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds,
+    async (ideas: Idea[]) => {
+      return await getIdeaImages(ideas, authHeaderType);
+    }
   );
-  return await getIdeaImages(ideas, authHeaderType);
 };
 
-export const getIdeasForTopic = async (
+export const deregisterGetIdeasForTask = (
+  taskId: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.IDEAS}/`,
+    callback
+  );
+};
+
+export const registerGetIdeasForTopic = (
   topicId: string,
   orderType: string | null = null,
   refId: string | null = null,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Idea[]> => {
-  let queryParameter = '';
-  if (orderType) queryParameter = `?order=${orderType}`;
-  if (refId && orderType) queryParameter = `${queryParameter}&refId=${refId}`;
-  const ideas = await apiExecuteGetHandled<Idea[]>(
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Idea[]> => {
+  const queryParameter = getQueryParameter(orderType, refId);
+  return cashService.registerSimplifiedGet<Idea[]>(
     `/${EndpointType.TOPIC}/${topicId}/${EndpointType.IDEAS}/${queryParameter}`,
+    callback,
     [],
-    authHeaderType
-  );
-  return await getIdeaImages(ideas, authHeaderType);
-};
-
-export const getSortOrderOptions = async (
-  taskId: string | null,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<SortOrderOption[]> => {
-  const result: SortOrderOption[] = Object.keys(IdeaSortOrder).map(
-    (orderType) => {
-      return { orderType: orderType.toLowerCase(), ref: null };
+    authHeaderType,
+    maxDelaySeconds,
+    async (ideas: Idea[]) => {
+      return await getIdeaImages(ideas, authHeaderType);
     }
   );
+};
 
-  if (taskId) {
-    await taskService
-      .getDependentTaskList(taskId, authHeaderType)
-      .then((tasks) => {
-        const categoryTasks = tasks.filter(
-          (task) => task.taskType.toLowerCase() == TaskType.CATEGORISATION
-        );
-        if (categoryTasks) {
-          categoryTasks.forEach((task) => {
-            result.push({ orderType: IdeaSortOrderHierarchy, ref: task });
-          });
-        }
-        const votingTasks = tasks.filter(
-          (task) => task.taskType.toLowerCase() == TaskType.VOTING
-        );
-        if (votingTasks) {
-          votingTasks.forEach((task) => {
-            result.push({ orderType: IdeaSortOrderView, ref: task });
-          });
-        }
+export const deregisterGetIdeasForTopic = (
+  topicId: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.TOPIC}/${topicId}/${EndpointType.IDEAS}/`,
+    callback
+  );
+};
+
+export const getSortOrderOptions = (tasks: Task[]): SortOrderOption[] => {
+  const ideaSortOrderOptions: SortOrderOption[] = Object.keys(
+    IdeaSortOrder
+  ).map((orderType) => {
+    return { orderType: orderType.toLowerCase(), ref: null };
+  });
+
+  const categoryTasks = tasks.filter(
+    (task) => task.taskType.toLowerCase() == TaskType.CATEGORISATION
+  );
+  if (categoryTasks) {
+    categoryTasks.forEach((task) => {
+      ideaSortOrderOptions.push({
+        orderType: IdeaSortOrderHierarchy,
+        ref: task,
       });
+    });
   }
-  return result;
+  const votingTasks = tasks.filter(
+    (task) => task.taskType.toLowerCase() == TaskType.VOTING
+  );
+  if (votingTasks) {
+    votingTasks.forEach((task) => {
+      ideaSortOrderOptions.push({ orderType: IdeaSortOrderView, ref: task });
+    });
+  }
+  return ideaSortOrderOptions;
 };
 
 export const convertToOrderGroups = (
@@ -300,30 +342,21 @@ export const convertToOrderGroups = (
   return orderGroupList;
 };
 
-export const getOrderGroups = async (
-  taskId: string,
-  orderType: string | null = null,
+export const getOrderGroups = (
+  ideas: Idea[],
   orderAsc = true,
-  refId: string | null = null,
-  authHeaderType = EndpointAuthorisationType.MODERATOR,
   actualOrderGroupList: OrderGroupList = {},
   filter: (idea) => boolean = () => {
     return true;
   },
   useOrderGroup = true
-): Promise<{ ideas: Idea[]; oderGroups: OrderGroupList }> => {
-  let orderGroupList = {};
-  let ideaList: Idea[] = [];
-  await getIdeasForTask(taskId, orderType, refId, authHeaderType).then(
-    (ideas) => {
-      ideaList = orderAsc ? ideas : ideas.reverse();
-      orderGroupList = convertToOrderGroups(
-        ideas,
-        actualOrderGroupList,
-        filter,
-        useOrderGroup
-      );
-    }
+): { ideas: Idea[]; oderGroups: OrderGroupList } => {
+  const ideaList: Idea[] = orderAsc ? ideas : ideas.reverse();
+  const orderGroupList = convertToOrderGroups(
+    ideas,
+    actualOrderGroupList,
+    filter,
+    useOrderGroup
   );
   return { ideas: ideaList, oderGroups: orderGroupList };
 };

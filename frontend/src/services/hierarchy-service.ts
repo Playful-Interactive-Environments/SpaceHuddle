@@ -1,6 +1,5 @@
 import {
   apiExecuteDelete,
-  apiExecuteGetHandled,
   apiExecutePost,
   apiExecutePut,
 } from '@/services/api';
@@ -10,23 +9,36 @@ import { Hierarchy } from '@/types/api/Hierarchy';
 import { VoteResult } from '@/types/api/Vote';
 import {
   getQuestionResultStorageFromHierarchy,
+  getQuestionTypeFromHierarchy,
+  Question,
   QuestionResultStorage,
 } from '@/modules/information/quiz/types/Question';
-import * as votingService from '@/services/voting-service';
 import * as ideaService from '@/services/idea-service';
+import * as cashService from '@/services/cash-service';
 import { deleteIdeaImage, itemImageChanged } from '@/services/idea-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
-export const getById = async (
+export const registerGetById = (
   id: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Hierarchy> => {
-  return await apiExecuteGetHandled<Hierarchy>(
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Hierarchy> => {
+  return cashService.registerSimplifiedGet<Hierarchy>(
     `/${EndpointType.HIERARCHY}/${id}/`,
+    callback,
     {},
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
   );
+};
+
+export const deregisterGetById = (
+  id: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(`/${EndpointType.HIERARCHY}/${id}/`, callback);
 };
 
 export const deleteHierarchy = async (
@@ -92,17 +104,71 @@ export const putHierarchy = async (
   return hierarchy;
 };
 
-export const getList = async (
+export const registerGetList = (
   taskId: string,
   parentHierarchyId: string | null,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Hierarchy[]> => {
-  const items = await apiExecuteGetHandled<Hierarchy[]>(
+  callback: (result: any, parentID: string | null) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Hierarchy[]> => {
+  return cashService.registerSimplifiedGet<Hierarchy[]>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.HIERARCHIES}/${parentHierarchyId}`,
+    callback,
     [],
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds,
+    async (items: Hierarchy[]) => {
+      return await getHierarchyImages(items, authHeaderType);
+    },
+    [parentHierarchyId]
   );
-  return await getHierarchyImages(items, authHeaderType);
+};
+
+export const deregisterGetList = (
+  taskId: string,
+  parentHierarchyId: string | null,
+  callback: (result: any, parentID: string | null) => void
+): void => {
+  return cashService.deregisterGet(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.HIERARCHIES}/${parentHierarchyId}`,
+    callback
+  );
+};
+
+export const registerGetQuestions = (
+  taskId: string,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Hierarchy[]> => {
+  return registerGetList(
+    taskId,
+    '{parentHierarchyId}',
+    callback,
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const deregisterGetQuestions = (
+  taskId: string,
+  callback: (result: any) => void
+): void => {
+  deregisterGetList(taskId, '{parentHierarchyId}', callback);
+};
+
+export const convertToQuestions = (items: Hierarchy[]): Question[] => {
+  const result: Question[] = [];
+  for (const index in items) {
+    const question = items[index];
+    const item: Question = {
+      questionType: getQuestionTypeFromHierarchy(question),
+      question: question,
+      answers: [],
+    };
+    result.push(item);
+  }
+  return result;
 };
 
 export const getHierarchyImages = async (
@@ -115,51 +181,38 @@ export const getHierarchyImages = async (
   )) as Hierarchy[];
 };
 
-export const getHierarchyResult = async (
-  taskId: string,
-  parentHierarchyId: string | null,
-  correctValue: string | null,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<VoteResult[]> => {
+export const getHierarchyResult = (
+  answers: Hierarchy[],
+  correctValue: string | null
+): VoteResult[] => {
   let votes: VoteResult[] = [];
-  await getList(taskId, parentHierarchyId, authHeaderType).then((answers) => {
-    const result = answers
-      .filter(
-        (v, i, a) => a.findIndex((item) => item.keywords === v.keywords) === i
-      )
-      .sort((a, b) =>
-        a.keywords < b.keywords ? -1 : a.keywords > b.keywords ? 1 : 0
-      );
-    votes = result.map((item) => {
-      const count = answers.filter(
-        (answer) => item.keywords === answer.keywords
-      ).length;
-      if (correctValue)
-        item.parameter.isCorrect = item.keywords === correctValue.toString();
-      return {
-        idea: item,
-        ratingSum: count,
-        detailRatingSum: count,
-        countParticipant: count,
-      };
-    });
+  const result = answers
+    .filter(
+      (v, i, a) => a.findIndex((item) => item.keywords === v.keywords) === i
+    )
+    .sort((a, b) =>
+      a.keywords < b.keywords ? -1 : a.keywords > b.keywords ? 1 : 0
+    );
+  votes = result.map((item) => {
+    const count = answers.filter(
+      (answer) => item.keywords === answer.keywords
+    ).length;
+    if (correctValue)
+      item.parameter.isCorrect = item.keywords === correctValue.toString();
+    return {
+      idea: item,
+      ratingSum: count,
+      detailRatingSum: count,
+      countParticipant: count,
+    };
   });
   return votes;
 };
 
-export const getParentResult = async (
-  taskId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<VoteResult[]> => {
-  const votes: VoteResult[] = await votingService.getParentResult(
-    taskId,
-    authHeaderType
-  );
-  const questions = await getList(
-    taskId,
-    '{parentHierarchyId}',
-    authHeaderType
-  );
+export const getParentResult = (
+  votes: VoteResult[],
+  questions: Hierarchy[]
+): VoteResult[] => {
   for (
     let questionIndex = 0;
     questionIndex < questions.length;
@@ -170,22 +223,17 @@ export const getParentResult = async (
       const questionResultStorage: QuestionResultStorage =
         getQuestionResultStorageFromHierarchy(question);
       if (questionResultStorage === QuestionResultStorage.CHILD_HIERARCHY) {
-        const questionResult = await getList(
-          taskId,
-          question.id,
-          authHeaderType
-        );
         const vote = votes.find((item) => item.idea.id === question.id);
         if (vote) {
-          vote.ratingSum = questionResult.length;
-          vote.detailRatingSum = questionResult.length;
-          vote.countParticipant = questionResult.length;
+          vote.ratingSum = question.childCount;
+          vote.detailRatingSum = question.childCount;
+          vote.countParticipant = question.childCount;
         } else {
           votes.splice(questionIndex, 0, {
             idea: question,
-            ratingSum: questionResult.length,
-            detailRatingSum: questionResult.length,
-            countParticipant: questionResult.length,
+            ratingSum: question.childCount,
+            detailRatingSum: question.childCount,
+            countParticipant: question.childCount,
           });
         }
       }

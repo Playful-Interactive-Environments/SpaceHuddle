@@ -1,8 +1,9 @@
-import { apiExecuteGetHandled, apiExecutePut } from '@/services/api';
+import { apiExecutePut } from '@/services/api';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { TimerEntity } from '@/types/enum/TimerEntity';
 import { convertToSaveVersion } from '@/types/api/Task';
 import TaskStates from '@/types/enum/TaskStates';
+import * as cashService from '@/services/cash-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export const update = async (
@@ -21,19 +22,28 @@ export const update = async (
   return null;
 };
 
-export const get = async (
+export const registerGet = (
   entity: string,
   id: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<any> => {
-  if (Object.values(TimerEntity).find((item) => item == entity)) {
-    return await apiExecuteGetHandled<any>(
-      `/${entity}/${id}/`,
-      {},
-      authHeaderType
-    );
-  }
-  return null;
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<any> => {
+  return cashService.registerSimplifiedGet<any>(
+    `/${entity}/${id}/`,
+    callback,
+    {},
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const deregisterGet = (
+  entity: string,
+  id: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(`/${entity}/${id}/`, callback);
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

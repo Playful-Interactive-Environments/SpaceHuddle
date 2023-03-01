@@ -4,7 +4,7 @@
       <h1>{{ $t('moderator.organism.session.overview.header') }}</h1>
       <div class="columns is-multiline is-9">
         <div v-for="session in sessions" :key="session.id" class="column">
-          <SessionCard :session="session" @updated="getSessions"> </SessionCard>
+          <SessionCard :session="session" @updated="refreshSessions" />
         </div>
         <div class="column">
           <TutorialStep step="add" type="sessionOverview" :order="0">
@@ -19,7 +19,7 @@
       <div class="session-overview__session-container"></div>
       <SessionSettings
         v-model:show-modal="showSettings"
-        @sessionUpdated="getSessions"
+        @sessionUpdated="refreshSessions"
       />
     </template>
   </ModeratorNavigationLayout>
@@ -35,6 +35,8 @@ import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import * as sessionService from '@/services/session-service';
 import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/ModeratorNavigationLayout.vue';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -51,26 +53,26 @@ export default class ModeratorSessionOverview extends Vue {
   sessions: Session[] = [];
   showSettings = false;
   errors: string[] = [];
-  readonly intervalTime = 10000;
-  interval!: any;
 
+  sessionCash!: cashService.SimplifiedCashEntry<Session[]>;
   async mounted(): Promise<void> {
-    this.getSessions();
-    this.startInterval();
+    this.sessionCash = sessionService.registerGetList(
+      this.updateSessions,
+      EndpointAuthorisationType.MODERATOR,
+      2 * 60
+    );
   }
 
-  getSessions(): void {
-    sessionService.getList().then((queryResult) => {
-      this.sessions = queryResult;
-    });
+  updateSessions(sessions: Session[]): void {
+    this.sessions = sessions;
   }
 
-  startInterval(): void {
-    this.interval = setInterval(this.getSessions, this.intervalTime);
+  refreshSessions(): void {
+    this.sessionCash.refreshData();
   }
 
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateSessions);
   }
 }
 </script>

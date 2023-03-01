@@ -1,51 +1,99 @@
 import {
   apiExecuteDelete,
-  apiExecuteGetHandled,
   apiExecutePost,
   apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Task, TaskForSaveAction } from '@/types/api/Task';
+import * as cashService from '@/services/cash-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
-export const getTaskById = async (
+export const registerGetTaskById = (
   taskId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Task> => {
-  return await apiExecuteGetHandled<Task>(
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Task> => {
+  return cashService.registerSimplifiedGet<Task>(
     `/${EndpointType.TASK}/${taskId}/`,
+    callback,
     {},
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
   );
+};
+
+export const deregisterGetTaskById = (
+  taskId: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(`/${EndpointType.TASK}/${taskId}/`, callback);
 };
 
 export const deleteTask = async (id: string): Promise<boolean> => {
   return await apiExecuteDelete<any>(`/${EndpointType.TASK}/${id}/`);
 };
 
-export const getTaskList = async (
+export const registerGetTaskList = (
   topicId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Task[]> => {
-  const result = await apiExecuteGetHandled<Task[]>(
+  callback: (result: Task[], topicId: string) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Task[]> => {
+  return cashService.registerSimplifiedGet<Task[]>(
     `/${EndpointType.TOPIC}/${topicId}/${EndpointType.TASKS}/`,
+    callback,
     [],
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds,
+    async (result: Task[]) => {
+      if (result && Array.isArray(result)) return result;
+      return [];
+    },
+    [topicId]
   );
-  if (result && Array.isArray(result)) return result;
-  return [];
 };
 
-export const getDependentTaskList = async (
+export const deregisterGetTaskList = (
+  topicId: string,
+  callback: (result: Task[], topicId: string) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.TOPIC}/${topicId}/${EndpointType.TASKS}/`,
+    callback
+  );
+};
+
+export const refreshGetTaskList = (topicId: string): void => {
+  cashService.refreshCash(
+    `/${EndpointType.TOPIC}/${topicId}/${EndpointType.TASKS}/`
+  );
+};
+
+export const registerGetDependentTaskList = (
   taskId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Task[]> => {
-  return await apiExecuteGetHandled<Task[]>(
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Task[]> => {
+  return cashService.registerSimplifiedGet<Task[]>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.DEPENDENT}/`,
+    callback,
     [],
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const deregisterGetDependentTaskList = (
+  taskId: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.DEPENDENT}/`,
+    callback
   );
 };
 

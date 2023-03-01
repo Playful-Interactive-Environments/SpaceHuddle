@@ -59,7 +59,7 @@
       :usePublicQuestion="false"
       :activeQuestionIndex="activeQuestionIndex"
       :activeQuestionPhase="QuestionPhase.ANSWER"
-      v-on:changeQuizState="getTask"
+      v-on:changeQuizState="changeQuizState"
       v-on:changePublicQuestion="(question) => (activeQuestion = question)"
       v-on:changePublicAnswers="(answers) => (publicAnswerList = answers)"
       v-if="!submitScreen"
@@ -191,6 +191,7 @@ import * as hierarchyService from '@/services/hierarchy-service';
 import * as ideaService from '@/services/idea-service';
 import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
 import {
+  getQuestionResultStorageFromHierarchy,
   getQuestionResultStorageFromQuestionType,
   getQuestionTypeFromHierarchy,
   QuestionResultStorage,
@@ -198,6 +199,7 @@ import {
 } from '@/modules/information/quiz/types/Question';
 import { Hierarchy } from '@/types/api/Hierarchy';
 import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -387,18 +389,6 @@ export default class Participant extends Vue {
     return false;
   }
 
-  loadQuestionCount(): void {
-    hierarchyService
-      .getList(
-        this.taskId,
-        '{parentHierarchyId}',
-        EndpointAuthorisationType.PARTICIPANT
-      )
-      .then(async (questions) => {
-        this.questionCount = questions.length;
-      });
-  }
-
   get hasNextQuestion(): boolean {
     return this.activeQuestionIndex + 1 < this.questionCount;
   }
@@ -472,13 +462,7 @@ export default class Participant extends Vue {
         answerImage = this.activeAnswer.image;
         if (!answerValue) answerValue = '...';
       }
-      const answer = (
-        await hierarchyService.getList(
-          this.taskId,
-          this.activeQuestionId,
-          EndpointAuthorisationType.PARTICIPANT
-        )
-      ).find((item) => item.isOwn);
+      const answer = this.storedActiveAnswer;
       if (answer && answer.id) {
         if (answerValue) {
           answer.keywords = answerValue.toString();
@@ -565,48 +549,123 @@ export default class Participant extends Vue {
 
   @Watch('moduleId', { immediate: true })
   onModuleIdChanged(): void {
-    this.getModule();
+    if (this.moduleId) {
+      moduleService.registerGetModuleById(
+        this.moduleId,
+        this.updateModule,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
+    }
   }
 
-  @Watch('activeQuestionId', { immediate: true })
-  onActiveQuestionIdChanged(): void {
-    this.getTask();
-    this.getVotes();
+  updateModule(module: Module): void {
+    this.module = module;
+  }
+
+  @Watch('activeQuestion', { immediate: true })
+  async onActiveQuestionChanged(
+    newValue: Hierarchy | null,
+    oldValue: Hierarchy | null
+  ): Promise<void> {
+    const newQuestionResultStorage =
+      getQuestionResultStorageFromHierarchy(newValue);
+    const oldQuestionResultStorage =
+      getQuestionResultStorageFromHierarchy(oldValue);
+    if (
+      newQuestionResultStorage !== oldQuestionResultStorage ||
+      newValue?.id !== oldValue?.id
+    ) {
+      cashService.deregisterAllGet(this.updateAnswers);
+      cashService.deregisterAllGet(this.updateVotes);
+      if (newValue?.id) {
+        if (newQuestionResultStorage === QuestionResultStorage.VOTING) {
+          votingService.registerGetHierarchyVotes(
+            newValue?.id,
+            this.updateVotes,
+            EndpointAuthorisationType.PARTICIPANT,
+            60 * 60
+          );
+        } else {
+          hierarchyService.registerGetList(
+            this.taskId,
+            newValue.id,
+            this.updateAnswers,
+            EndpointAuthorisationType.PARTICIPANT,
+            60 * 60
+          );
+        }
+      }
+    }
+  }
+
+  updateVotes(votes: Vote[]): void {
+    this.votes = votes;
+    this.skipAnswerQuestions();
+  }
+
+  storedActiveAnswer!: Hierarchy | undefined;
+  updateAnswers(answers: Hierarchy[]): void {
+    const answer = answers.find((item) => item.isOwn);
+    this.storedActiveAnswer = answer;
+    if (answer) {
+      if (this.activeQuestionType === QuestionType.TEXT) {
+        this.activeAnswer.textValue = answer.keywords;
+      } else if (
+        this.activeQuestionType === QuestionType.NUMBER ||
+        this.activeQuestionType === QuestionType.RATING ||
+        this.activeQuestionType === QuestionType.SLIDER
+      ) {
+        this.activeAnswer.numValue = parseInt(answer.keywords);
+      } else if (this.activeQuestionType === QuestionType.IMAGE) {
+        this.activeAnswer.textValue = answer.keywords;
+        this.activeAnswer.link = answer.link;
+        this.activeAnswer.image = answer.image;
+      }
+    } else {
+      this.activeAnswer.textValue = null;
+      this.activeAnswer.numValue = null;
+    }
+    this.skipAnswerQuestions();
   }
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getTask();
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+    hierarchyService.registerGetQuestions(
+      this.taskId,
+      this.updateQuestions,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
   }
 
-  async getTask(): Promise<void> {
-    await taskService
-      .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
-      .then((task) => {
-        this.task = task;
-        const module = this.task.modules.find((module) =>
-          moduleNameValid(module.name)
-        );
-        if (module) {
-          this.questionnaireType =
-            QuestionnaireType[module.parameter.questionType.toUpperCase()];
-          this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
-          if (!this.moderatedQuestionFlow && this.activeQuestionIndex === -1) {
-            this.activeQuestionIndex = 0;
-          }
-        }
-        this.loadQuestionCount();
-      });
+  updateQuestions(questions: Hierarchy[]): void {
+    this.questionCount = questions.length;
   }
 
-  async getModule(): Promise<void> {
-    if (this.moduleId) {
-      await moduleService
-        .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
-        .then((module) => {
-          this.module = module;
-        });
+  updateTask(task: Task): void {
+    this.task = task;
+    const module = this.task.modules.find((module) =>
+      moduleNameValid(module.name)
+    );
+    if (module) {
+      this.questionnaireType =
+        QuestionnaireType[module.parameter.questionType.toUpperCase()];
+      this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
+      if (!this.moderatedQuestionFlow && this.activeQuestionIndex === -1) {
+        this.activeQuestionIndex = 0;
+      }
     }
+  }
+
+  changeQuizState(): void {
+    //todo
   }
 
   questionAnswered = false;
@@ -635,51 +694,19 @@ export default class Participant extends Vue {
     return false;
   }
 
-  async getVotes(): Promise<void> {
-    if (
-      getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
-      QuestionResultStorage.VOTING
-    ) {
-      if (this.activeQuestionId) {
-        await votingService
-          .getHierarchyVotes(
-            this.activeQuestionId,
-            EndpointAuthorisationType.PARTICIPANT
-          )
-          .then((votes) => {
-            this.votes = votes;
-          });
-      }
-    } else {
-      const answers = await hierarchyService.getList(
-        this.taskId,
-        this.activeQuestionId,
-        EndpointAuthorisationType.PARTICIPANT
-      );
-      const answer = answers.find((item) => item.isOwn);
-      if (answer) {
-        if (this.activeQuestionType === QuestionType.TEXT) {
-          this.activeAnswer.textValue = answer.keywords;
-        } else if (
-          this.activeQuestionType === QuestionType.NUMBER ||
-          this.activeQuestionType === QuestionType.RATING ||
-          this.activeQuestionType === QuestionType.SLIDER
-        ) {
-          this.activeAnswer.numValue = parseInt(answer.keywords);
-        } else if (this.activeQuestionType === QuestionType.IMAGE) {
-          this.activeAnswer.textValue = answer.keywords;
-          this.activeAnswer.link = answer.link;
-          this.activeAnswer.image = answer.image;
-        }
-      } else {
-        this.activeAnswer.textValue = null;
-        this.activeAnswer.numValue = null;
-      }
-    }
+  skipAnswerQuestions(): void {
     this.questionAnswered = this.getQuestionAnswered();
     if (!this.moderatedQuestionFlow && this.initData) {
       if (this.questionAnswered) this.goToNextQuestion(null, true);
     }
+  }
+
+  unmounted(): void {
+    cashService.deregisterAllGet(this.updateModule);
+    cashService.deregisterAllGet(this.updateAnswers);
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateVotes);
+    cashService.deregisterAllGet(this.updateQuestions);
   }
 }
 </script>
@@ -692,17 +719,6 @@ export default class Participant extends Vue {
 .el-footer {
   height: auto;
 }
-
-/*.question {
-  border: 1px solid var(--color-primary);
-  border-radius: var(--border-radius);
-  padding: 1rem;
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  text-align: center;
-  color: var(--color-primary);
-  margin: 1em 0;
-}*/
 
 .module-content::v-deep(.question) {
   text-transform: none;

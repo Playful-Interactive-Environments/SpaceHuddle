@@ -14,7 +14,6 @@
       ></span>
     </div>
     <div id="backgroundImage"></div>
-    <!--      {{ $t('module.voting.slots.participant.info') }}-->
     <div
       id="rocketMask"
       :class="{ rocketMaskSmall: heightCheck() || smallHeight }"
@@ -194,6 +193,8 @@ import { Vote } from '@/types/api/Vote';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
+import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -213,8 +214,6 @@ export default class Participant extends Vue {
   votes: Vote[] = [];
   seats: (Idea | null)[] = [];
   ideaPointer = 0;
-  readonly intervalTime = 10000;
-  interval!: any;
 
   get moduleName(): string {
     if (this.module) return this.module.name;
@@ -252,24 +251,18 @@ export default class Participant extends Vue {
     if (this.seats.length == 0) {
       this.initSeats(3);
     }
-    this.startInterval();
     //Changes Paul Start
     this.waiting;
     window.addEventListener('resize', this.heightCheck);
     //Changes Paul End
   }
 
-  startInterval(): void {
-    this.interval = setInterval(this.reloadIdeas, this.intervalTime);
-  }
-
   unmounted(): void {
-    clearInterval(this.interval);
     window.removeEventListener('resize', this.heightCheck);
-  }
-
-  reloadIdeas(): void {
-    if (this.finished) this.getIdeas();
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateVotes);
+    cashService.deregisterAllGet(this.updateModule);
+    cashService.deregisterAllGet(this.updateInputIdeas);
   }
 
   initSeats(count: number): void {
@@ -279,88 +272,97 @@ export default class Participant extends Vue {
     }
   }
 
+  inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
+  votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getIdeas();
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+    this.inputCash = viewService.registerGetInputIdeas(
+      this.taskId,
+      IdeaSortOrder.TIMESTAMP,
+      null,
+      this.updateInputIdeas,
+      EndpointAuthorisationType.PARTICIPANT,
+      30
+    );
+    this.votingCash = votingService.registerGetVotes(
+      this.taskId,
+      this.updateVotes,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
   }
 
-  async getTask(): Promise<void> {
-    if (this.taskId) {
-      await taskService
-        .getTaskById(this.taskId, EndpointAuthorisationType.PARTICIPANT)
-        .then((task) => {
-          this.task = task;
-        });
+  updateTask(task: Task): void {
+    this.task = task;
+  }
+
+  inputIdeas: Idea[] = [];
+  updateInputIdeas(ideas: Idea[]): void {
+    this.inputIdeas = ideas;
+    this.updateIdeas();
+  }
+
+  updateVotes(votes: Vote[]): void {
+    this.votes = votes;
+    votes.forEach((vote) => {
+      if (vote.rating > 0) {
+        this.seats[vote.rating - 1] = this.ideas.filter(
+          (idea) => idea.id == vote.ideaId
+        )[0];
+      }
+      const ideaIndex = this.ideas.findIndex((idea) => idea.id == vote.ideaId);
+      if (ideaIndex >= 0) this.ideas.splice(ideaIndex, 1);
+    });
+    if (this.ideas.length === 0) {
+      this.replaceIdeaArray();
     }
+    this.ideaPointer = 0;
+  }
+
+  updateIdeas(): void {
+    const ideas = viewService.customizeView(
+      this.inputIdeas,
+      null,
+      (this as any).$t,
+      [],
+      '',
+      this.task ? this.task.parameter.input.length : 1
+    );
+    this.ideaPointer = ideas.length;
+    this.ideas = ideas;
+    for (let i = 0; i < ideas.length; i++) {
+      this.secondIdeaArray[i] = ideas[i];
+    }
+    this.getVotes();
   }
 
   @Watch('moduleId', { immediate: true })
   onModuleIdChanged(): void {
-    this.getModule();
+    if (this.moduleId) {
+      moduleService.registerGetModuleById(
+        this.moduleId,
+        this.updateModule,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
+    }
   }
 
-  async getModule(): Promise<void> {
-    if (this.moduleId) {
-      await moduleService
-        .getModuleById(this.moduleId, EndpointAuthorisationType.PARTICIPANT)
-        .then((module) => {
-          this.module = module;
-          if (this.seats.length != this.module.parameter.slotCount)
-            this.getVotes();
-        });
-    }
+  updateModule(module: Module): void {
+    this.module = module;
+    if (this.seats.length != this.module.parameter.slotCount) this.getVotes();
   }
 
   async getVotes(): Promise<void> {
     if (this.taskId) {
       if (this.module) this.initSeats(this.module.parameter.slotCount);
       else this.initSeats(3);
-      await votingService
-        .getVotes(this.taskId, EndpointAuthorisationType.PARTICIPANT)
-        .then((votes) => {
-          this.votes = votes;
-          votes.forEach((vote) => {
-            if (vote.rating > 0) {
-              this.seats[vote.rating - 1] = this.ideas.filter(
-                (idea) => idea.id == vote.ideaId
-              )[0];
-            }
-            const ideaIndex = this.ideas.findIndex(
-              (idea) => idea.id == vote.ideaId
-            );
-            if (ideaIndex >= 0) this.ideas.splice(ideaIndex, 1);
-          });
-          if (this.ideas.length === 0) {
-            this.replaceIdeaArray();
-          }
-          this.ideaPointer = 0;
-        });
-    }
-  }
-
-  async getIdeas(): Promise<void> {
-    if (this.taskId) {
-      if (!this.task) await this.getTask();
-      if (!this.module) await this.getModule();
-      if (this.task && this.task.parameter.input) {
-        await viewService
-          .getViewIdeas(
-            this.task.topicId,
-            this.task.parameter.input,
-            null,
-            null,
-            EndpointAuthorisationType.PARTICIPANT,
-            (this as any).$t
-          )
-          .then((ideas) => {
-            this.ideaPointer = ideas.length;
-            this.ideas = ideas;
-            for (let i = 0; i < ideas.length; i++) {
-              this.secondIdeaArray[i] = ideas[i];
-            }
-            this.getVotes();
-          });
-      }
     }
   }
 
@@ -406,8 +408,6 @@ export default class Participant extends Vue {
   }
 
   //Changes Paul Start
-  growIdea = true;
-
   ElementHidden = false;
 
   showIdeaOverlay = false;

@@ -49,23 +49,6 @@
         :authHeaderTyp="authHeaderTyp"
         :darkMode="true"
       ></TaskTimeline>
-      <!--<el-header class="public-screen__overview">
-        <div class="public-screen__overview-left">
-          <TaskInfo v-if="task" :taskId="taskId" :shortenDescription="false" />
-        </div>
-        <div class="public-screen__overview-right">
-          <Timer v-if="task" :entity="task" />
-          <span class="connection-key" v-if="session">
-            <span class="session-info">
-              {{ session.title }}
-            </span>
-            <h3>
-              {{ $t('shared.view.publicScreen.connectionKey') }}
-            </h3>
-            {{ session.connectionKey }}
-          </span>
-        </div>
-      </el-header>-->
     </el-header>
     <el-container class="public-screen__timer">
       <el-header>
@@ -91,9 +74,6 @@
             :authHeaderTyp="authHeaderTyp"
             class="header-info"
           />
-          <!--<h3 v-if="task" class="heading--regular twoLineText">
-            {{ task.name }}
-          </h3>-->
           <PublicScreenComponent
             v-if="task"
             :task-id="taskId"
@@ -166,6 +146,7 @@ import TaskTimeline from '@/components/moderator/organisms/Timeline/TaskTimeline
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import QrcodeVue from 'qrcode.vue';
 import TimerProgress from '@/components/shared/atoms/TimerProgress.vue';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -191,9 +172,6 @@ export default class PublicScreen extends Vue {
 
   TaskType = TaskType;
   TaskStates = TaskStates;
-
-  readonly intervalTime = 10000;
-  interval!: any;
 
   topContentPosition = 250;
 
@@ -260,62 +238,62 @@ export default class PublicScreen extends Vue {
         }
       }
     );
-    this.startInterval();
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.getPublicScreenModule, this.intervalTime);
   }
 
   unmounted(): void {
-    clearInterval(this.interval);
     this.task = null;
+    cashService.deregisterAllGet(this.updateSession);
+    cashService.deregisterAllGet(this.updatePublicTask);
   }
 
   @Watch('sessionId', { immediate: true })
   async onSessionIdChanged(): Promise<void> {
-    sessionService
-      .getById(this.sessionId, this.authHeaderTyp)
-      .then((session) => {
-        this.session = session;
-      });
-
-    this.getPublicScreenModule();
+    sessionService.registerGetById(
+      this.sessionId,
+      this.updateSession,
+      this.authHeaderTyp,
+      60 * 60
+    );
+    sessionService.registerGetPublicScreen(
+      this.sessionId,
+      this.updatePublicTask,
+      this.authHeaderTyp,
+      10
+    );
   }
 
-  getPublicScreenModule(): void {
-    this.loadTopPositions();
-    sessionService
-      .getPublicScreen(this.sessionId, this.authHeaderTyp)
-      .then(async (queryResult) => {
-        if (this.taskId !== queryResult?.id) {
-          let task: Task | null = null;
-          if (queryResult) {
-            const taskType = TaskType[queryResult.taskType];
+  updateSession(session: Session): void {
+    this.session = session;
+  }
+
+  async updatePublicTask(queryResult: Task): Promise<void> {
+    if (this.taskId !== queryResult?.id) {
+      let task: Task | null = null;
+      if (queryResult) {
+        const taskType = TaskType[queryResult.taskType];
+        if (this.$options.components) {
+          await getAsyncModule(
+            ModuleComponentType.PUBLIC_SCREEN,
+            taskType,
+            this.getModuleName(queryResult),
+            !this.isParticipant
+          ).then((component) => {
             if (this.$options.components) {
-              await getAsyncModule(
-                ModuleComponentType.PUBLIC_SCREEN,
-                taskType,
-                this.getModuleName(queryResult),
-                !this.isParticipant
-              ).then((component) => {
-                if (this.$options.components) {
-                  this.componentLoadingState = ComponentLoadingState.SELECTED;
-                  this.$options.components['PublicScreenComponent'] = component;
-                  this.componentLoadIndex++;
-                  task = queryResult;
-                }
-              });
+              this.componentLoadingState = ComponentLoadingState.SELECTED;
+              this.$options.components['PublicScreenComponent'] = component;
+              this.componentLoadIndex++;
+              task = queryResult;
             }
-            if (taskType) {
-              this.$nextTick(() => {
-                setModuleStyles(taskType);
-              });
-            }
-          }
-          this.task = task;
+          });
         }
-      });
+        if (taskType) {
+          this.$nextTick(() => {
+            setModuleStyles(taskType);
+          });
+        }
+      }
+      this.task = task;
+    }
   }
 }
 </script>

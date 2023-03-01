@@ -520,17 +520,19 @@ import ValidationForm, {
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
 import { ModuleType } from '@/types/enum/ModuleType';
 import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
-import { View, getViewName, getViewKey } from '@/types/api/View';
+import { getViewKey, getViewName, View } from '@/types/api/View';
 import IdeaStates from '@/types/enum/IdeaStates';
 import { SortOrderOption } from '@/types/api/OrderGroup';
 import * as ideaService from '@/services/idea-service';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import ViewType from '@/types/enum/ViewType';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
-import { reactivateTutorial } from '@/services/auth-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Idea } from '@/types/api/Idea';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
+import * as cashService from '@/services/cash-service';
+import { reactivateTutorial } from '@/services/tutorial-service';
+import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -679,36 +681,27 @@ export default class TaskSettings extends Vue {
   //#endregion Variables
 
   //#region Load / Reset / Leave
+  unmounted(): void {
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateTaskCount);
+    cashService.deregisterAllGet(this.updateModuleName);
+    cashService.deregisterAllGet(this.updateInput);
+    cashService.deregisterAllGet(this.updateViews);
+  }
+
+  taskCash!: cashService.SimplifiedCashEntry<Task>;
   @Watch('taskId', { immediate: true })
   async onTaskIdChanged(): Promise<void> {
     if (this.internalTaskId !== this.taskId) {
       this.loading = true;
       this.internalTaskId = this.taskId;
       if (this.taskId) {
-        await taskService.getTaskById(this.taskId).then((task) => {
-          this.mainModule = new ModuleTask(task.taskType, 'default');
-          this.formData.name = task.name;
-          this.formData.description = task.description;
-          this.formData.keywords = task.keywords;
-          this.formData.parameter = task.parameter ?? {};
-          if (this.formData.parameter.input)
-            this.formData.input = this.formData.parameter.input.map((input) => {
-              return new InputData(
-                this.getViewKey(input.view),
-                input.maxCount,
-                input.filter,
-                input.order
-              );
-            });
-          task.modules.forEach((module) => {
-            const addOn = this.formData.moduleListAddOn.find((item) =>
-              item.like(task.taskType, module.name)
-            );
-            if (addOn) addOn.active = true;
-            else this.mainModule = new ModuleTask(task.taskType, module.name);
-          });
-          this.task = task;
-        });
+        this.taskCash = taskService.registerGetTaskById(
+          this.taskId,
+          this.updateTask,
+          EndpointAuthorisationType.MODERATOR,
+          60 * 60
+        );
       } else {
         this.task = null;
         this.mainModule = new ModuleTask('', 'default');
@@ -716,6 +709,61 @@ export default class TaskSettings extends Vue {
       }
       this.loading = false;
     }
+  }
+
+  inputCash: cashService.SimplifiedCashEntry<Idea[]> | null = null;
+  @Watch('internalTaskId', { immediate: true })
+  onTaskChanged(newValue: string | null, oldValue: string | null): void {
+    if (oldValue) {
+      this.inputCash = null;
+      viewService.deregisterGetInputIdeas(oldValue, this.updateInput);
+    }
+    if (newValue) {
+      this.inputCash = viewService.registerGetInputIdeas(
+        newValue,
+        IdeaSortOrder.TIMESTAMP,
+        null,
+        this.updateInput,
+        EndpointAuthorisationType.MODERATOR,
+        60 * 60 * 24
+      );
+    }
+  }
+
+  updateInput(ideas: Idea[]): void {
+    this.previewData = ideas;
+    this.previewLoading = false;
+  }
+
+  updateTask(task: Task): void {
+    this.mainModule = new ModuleTask(task.taskType, 'default');
+    this.formData.name = task.name;
+    this.formData.description = task.description;
+    this.formData.keywords = task.keywords;
+    this.formData.parameter = task.parameter ?? {};
+    if (this.formData.parameter.input)
+      this.formData.input = this.formData.parameter.input.map((input) => {
+        return new InputData(
+          this.getViewKey(input.view),
+          input.maxCount,
+          input.filter,
+          input.order
+        );
+      });
+    task.modules.forEach((module) => {
+      const addOn = this.formData.moduleListAddOn.find((item) =>
+        item.like(task.taskType, module.name)
+      );
+      if (addOn) addOn.active = true;
+      else this.mainModule = new ModuleTask(task.taskType, module.name);
+    });
+    this.task = task;
+  }
+
+  taskCount = 0;
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
+  updateTaskCount(tasks: Task[], topicId: string): void {
+    this.taskCount = tasks.length;
   }
 
   reset(): void {
@@ -745,9 +793,7 @@ export default class TaskSettings extends Vue {
 
   closeDialog(): void {
     this.$emit('update:showModal', false);
-    this.loadUserModuleList().then(() => {
-      this.resetHideNotUsesModules();
-    });
+    this.resetHideNotUsesModules();
   }
   //#endregion Load / Reset / Leave
 
@@ -861,24 +907,31 @@ export default class TaskSettings extends Vue {
     return this.inputOption === InputOption.YES ? 1 : 0;
   }
 
+  taskListCash!: cashService.SimplifiedCashEntry<Task[]>;
   @Watch('topicId', { immediate: true })
-  @Watch('showModal', { immediate: true })
   onTopicIdChanged(): void {
-    this.loadInputViews();
-    ideaService.getSortOrderOptions(null).then((options) => {
-      this.sortOrderOptions = options;
-    });
+    viewService.registerGetList(
+      this.topicId,
+      this.updateViews,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+    this.sortOrderOptions = ideaService.getSortOrderOptions([]);
+    this.taskListCash = taskService.registerGetTaskList(
+      this.topicId,
+      this.updateTaskCount,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
   }
 
-  async loadInputViews(): Promise<void> {
-    viewService.getList(this.topicId).then((views) => {
-      this.inputOptionViews = views.filter(
-        (item) =>
-          ViewType[item.type] !== ViewType.HIERARCHY ||
-          !item.detailType ||
-          TaskType[item.detailType] !== TaskType.INFORMATION
-      );
-    });
+  updateViews(views: View[]): void {
+    this.inputOptionViews = views.filter(
+      (item) =>
+        ViewType[item.type] !== ViewType.HIERARCHY ||
+        !item.detailType ||
+        TaskType[item.detailType] !== TaskType.INFORMATION
+    );
   }
   //#endregion Input
 
@@ -948,20 +1001,29 @@ export default class TaskSettings extends Vue {
     }
   }
 
-  private async loadUserModuleList(): Promise<void> {
-    this.userModuleList = [];
-    for (const taskType of this.taskTypes) {
-      await moduleService.getUsedModuleNames(taskType).then((typeModules) => {
-        for (const moduleName of typeModules)
-          this.userModuleList.push(new ModuleTask(taskType, moduleName));
-      });
-    }
-  }
-
   @Watch('taskTypes', { immediate: true })
-  async onTaskTypesChanged(): Promise<void> {
+  async onTaskTypesChanged(
+    newValue: (keyof typeof TaskType)[],
+    oldValue: (keyof typeof TaskType)[]
+  ): Promise<void> {
+    if (oldValue) {
+      const deletedTypes = oldValue.filter(
+        (o) => !newValue.find((n) => n === o)
+      );
+      this.deregisterTaskTypes(deletedTypes);
+    }
+    const newTypes = oldValue
+      ? newValue.filter((n) => !oldValue.find((o) => n === o))
+      : newValue;
+    newTypes.forEach((type) => {
+      moduleService.registerGetUsedModuleNames(
+        type,
+        this.updateModuleName,
+        60 * 60
+      );
+    });
+
     this.hideNotUsesModules = false;
-    await this.loadUserModuleList();
     await this.loadModuleList();
     const mainModules = this.getIntersection(
       this.userModuleList,
@@ -972,6 +1034,17 @@ export default class TaskSettings extends Vue {
         this.mainModule = mainModules[0];
       }
     }
+  }
+
+  updateModuleName(typeModules: string[], taskType: string): void {
+    for (const moduleName of typeModules)
+      this.userModuleList.push(new ModuleTask(taskType, moduleName));
+  }
+
+  deregisterTaskTypes(types: (keyof typeof TaskType)[]): void {
+    types.forEach((type) => {
+      moduleService.deregisterGetUsedModuleNames(type, this.updateModuleName);
+    });
   }
 
   @Watch('taskType', { immediate: true })
@@ -1059,6 +1132,7 @@ export default class TaskSettings extends Vue {
   showDialog = false;
   @Watch('showModal', { immediate: false, flush: 'post' })
   async onShowModalChanged(showModal: boolean): Promise<void> {
+    this.sortOrderOptions = ideaService.getSortOrderOptions([]);
     this.showDialog = showModal;
 
     if (showModal) {
@@ -1231,7 +1305,6 @@ export default class TaskSettings extends Vue {
         }
       });
     }
-    //this.componentLoadIndex++;
   }
 
   updateSyncPublicParticipant(): void {
@@ -1305,9 +1378,9 @@ export default class TaskSettings extends Vue {
     this.formData.parameter.input = this.formData.parameter.input.filter(
       (input) => Object.keys(input).length > 0
     );
-    this.loadPreviewData();
 
     if (this.internalTaskId) {
+      this.previewLoading = true;
       await taskService
         .putTask({
           id: this.internalTaskId,
@@ -1322,19 +1395,19 @@ export default class TaskSettings extends Vue {
         })
         .then(
           (task) => {
+            if (this.inputCash) this.inputCash.refreshData();
             saveTask = task;
             this.taskUpdated(task);
+            if (this.taskCash) this.taskCash.refreshData();
+            this.taskListCash.refreshData();
           },
           (error) => {
+            this.previewLoading = false;
             this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
           }
         );
     } else if (this.topicId) {
-      let taskCount = 0;
-      await taskService.getTaskList(this.topicId).then((tasks) => {
-        taskCount = tasks.length;
-      });
-
+      this.previewLoading = true;
       await taskService
         .postTask(this.topicId, {
           taskType: this.taskType,
@@ -1343,7 +1416,7 @@ export default class TaskSettings extends Vue {
           keywords: this.formData.keywords,
           parameter: this.formData.parameter,
           state: state,
-          order: taskCount,
+          order: this.taskCount,
           modules: this.moduleSelection.map((item) => item.moduleName),
         })
         .then(
@@ -1352,8 +1425,10 @@ export default class TaskSettings extends Vue {
             this.task = task;
             this.internalTaskId = task.id;
             this.taskUpdated(task);
+            this.taskListCash.refreshData();
           },
           (error) => {
+            this.previewLoading = false;
             this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
           }
         );
@@ -1443,27 +1518,8 @@ export default class TaskSettings extends Vue {
     if (!this.showPreview) {
       this.closeDialog();
     }
-    this.$emit('taskUpdated', task.id);
+    this.$emit('taskUpdated', task);
     this.eventBus.emit(EventType.CHANGE_SETTINGS, task.id);
-  }
-
-  async loadPreviewData(): Promise<void> {
-    this.previewLoading = true;
-    if (this.formData && this.formData.parameter) {
-      await viewService
-        .getViewIdeas(
-          this.topicId,
-          this.formData.parameter.input,
-          null,
-          null,
-          EndpointAuthorisationType.MODERATOR,
-          (this as any).$t
-        )
-        .then((ideas) => {
-          this.previewData = ideas;
-        });
-    }
-    this.previewLoading = false;
   }
   //#endregion Save
 }

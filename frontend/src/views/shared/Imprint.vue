@@ -47,7 +47,7 @@ export default class Imprint extends Vue {
   };
   mounted(): void {
     const url = 'assets/imprint.json';
-    apiExecuteGet(url).then((result) => {
+    apiExecuteGet<{ [key: string]: string }>(url).then((result) => {
       this.imprint = result;
     });
   }

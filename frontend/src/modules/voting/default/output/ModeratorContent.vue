@@ -43,6 +43,7 @@ import * as votingService from '@/services/voting-service';
 import { VoteResult } from '@/types/api/Vote';
 import { EventType } from '@/types/enum/EventType';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -58,12 +59,23 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     labels: [],
     datasets: [],
   };
-  readonly intervalTime = 10000;
-  interval!: any;
 
+  voteCashEntry!: cashService.SimplifiedCashEntry<VoteResult[]>;
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
-    this.getVotes();
+    this.voteCashEntry = votingService.registerGetResult(
+      this.taskId,
+      this.updateVotes
+    );
+  }
+
+  updateVotes(votes: VoteResult[]): void {
+    this.votes = votes;
+    if (this.resultData) {
+      this.chartData.labels = this.resultData.labels;
+      this.chartData.datasets = this.resultData.datasets;
+    }
+    this.updateChart();
   }
 
   get resultData(): any {
@@ -82,19 +94,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     };
   }
 
-  async getVotes(): Promise<void> {
-    if (this.taskId) {
-      await votingService.getResult(this.taskId).then((votes) => {
-        this.votes = votes;
-        if (this.resultData) {
-          this.chartData.labels = this.resultData.labels;
-          this.chartData.datasets = this.resultData.datasets;
-        }
-        this.updateChart();
-      });
-    }
-  }
-
   async updateChart(): Promise<void> {
     if (this.$refs.chartRef) {
       const chartRef = this.$refs.chartRef as any;
@@ -103,22 +102,16 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   async mounted(): Promise<void> {
-    this.startInterval();
-
     this.eventBus.off(EventType.CHANGE_SETTINGS);
     this.eventBus.on(EventType.CHANGE_SETTINGS, async (taskId) => {
       if (this.taskId === taskId) {
-        await this.getVotes();
+        this.voteCashEntry.refreshData();
       }
     });
   }
 
-  startInterval(): void {
-    this.interval = setInterval(this.getVotes, this.intervalTime);
-  }
-
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateVotes);
   }
 }
 </script>

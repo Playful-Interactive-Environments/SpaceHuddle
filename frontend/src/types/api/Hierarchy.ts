@@ -12,4 +12,5 @@ export interface Hierarchy {
   link: string | null;
   order: number | null;
   isOwn: boolean;
+  childCount: number;
 }

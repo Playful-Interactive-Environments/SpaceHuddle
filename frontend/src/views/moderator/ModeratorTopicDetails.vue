@@ -246,9 +246,12 @@ import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
 import TimerSettings from '@/components/moderator/organisms/settings/TimerSettings.vue';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 import FacilitatorSettings from '@/components/moderator/organisms/settings/FacilitatorSettings.vue';
-import { reactivateTutorial } from '@/services/auth-service';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
 import { color } from 'chart.js/helpers';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from '@/services/cash-service';
+import { SessionRole } from '@/types/api/SessionRole';
+import { reactivateTutorial } from '@/services/tutorial-service';
 
 @Options({
   components: {
@@ -287,8 +290,6 @@ export default class ModeratorTopicDetails extends Vue {
   reloadTaskIndex = 0;
   componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
   showRoles = false;
-  readonly intervalTime = 3000;
-  interval!: any;
 
   TaskType = TaskType;
   TaskCategory = TaskCategory;
@@ -331,7 +332,6 @@ export default class ModeratorTopicDetails extends Vue {
   moduleIcon: { [name: string]: { [name: string]: string[] } } = {};
   mounted(): void {
     this.loadTaskTypes();
-    this.startInterval();
   }
 
   loadTaskTypes(): void {
@@ -383,25 +383,67 @@ export default class ModeratorTopicDetails extends Vue {
 
   @Watch('sessionId', { immediate: true })
   onSessionIdChanged(): void {
-    sessionRoleService.getOwn(this.sessionId).then((role) => {
-      this.sessionRole = role.role;
-    });
-    sessionService.getById(this.sessionId).then((session) => {
-      this.session = session;
-    });
+    sessionService.registerGetById(
+      this.sessionId,
+      this.updateSession,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+    sessionRoleService.registerGetOwn(
+      this.sessionId,
+      this.updateRole,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
   }
 
+  updateRole(role: SessionRole): void {
+    this.sessionRole = role.role;
+  }
+
+  updateSession(session: Session): void {
+    this.session = session;
+  }
+
+  taskCash!: cashService.SimplifiedCashEntry<Task[]>;
   @Watch('topicId', { immediate: true })
   onTopicIdChanged(): void {
-    topicService.getTopicById(this.topicId).then((topic) => {
-      this.topic = topic;
-    });
-    this.getTasks().then(() => {
-      if (this.taskId) {
-        const queryTask = this.tasks.find((task) => task.id === this.taskId);
-        if (queryTask) this.changeTask(queryTask);
-      }
-    });
+    topicService.registerGetTopicById(
+      this.topicId,
+      this.updateTopic,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+    this.taskCash = taskService.registerGetTaskList(
+      this.topicId,
+      this.updateTasks,
+      EndpointAuthorisationType.MODERATOR,
+      30
+    );
+  }
+
+  updateTopic(topic: Topic): void {
+    this.topic = topic;
+  }
+
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
+  updateTasks(tasks: Task[], topicId: string): void {
+    let activeTask: Task | undefined = undefined;
+    this.tasks = tasks;
+    if (!this.activeTask && this.taskId) {
+      activeTask = this.tasks.find((task) => task.id === this.taskId);
+    } else if (
+      !this.activeTask &&
+      !this.tasks.find(
+        (task) => TaskType[task.taskType] == TaskType.BRAINSTORMING
+      )
+    ) {
+      activeTask = this.tasks[0];
+    } else {
+      activeTask = this.tasks.find((task) => task.id == this.activeTaskId);
+    }
+    if (activeTask) this.changeTask(activeTask);
+    else this.activeTask = null;
   }
 
   get topicTitle(): string {
@@ -412,40 +454,14 @@ export default class ModeratorTopicDetails extends Vue {
     return '';
   }
 
-  async getTasks(): Promise<void> {
-    let activeTask: Task | undefined = undefined;
-    await taskService.getTaskList(this.topicId).then((tasks) => {
-      this.tasks = tasks;
-      if (
-        !this.activeTask &&
-        !this.tasks.find(
-          (task) => TaskType[task.taskType] == TaskType.BRAINSTORMING
-        )
-      ) {
-        activeTask = this.tasks[0];
-      } else {
-        activeTask = this.tasks.find((task) => task.id == this.activeTaskId);
-      }
-    });
-    if (activeTask) await this.changeTask(activeTask);
-    else this.activeTask = null;
-    /*if (this.tasks.length > this.activeTaskIndex)
-      await this.changeTask(this.tasks[this.activeTaskIndex]);*/
-  }
-
-  reloadTasks(taskId: string): void {
-    const newTaskIsAdded = !this.tasks.find((task) => task.id == taskId);
-    this.getTasks().then(() => {
-      const activeTask = this.tasks.find((task) => task.id == taskId);
-      if (activeTask) {
-        if (newTaskIsAdded || !this.hasNewActiveTask(activeTask)) {
-          this.changeTask(activeTask);
-        }
-        this.setActiveTab(activeTask.taskType);
-      }
-      this.reloadTaskIndex++;
-    });
-    if (this.activeTask && this.activeTask.id === taskId) {
+  reloadTasks(task: Task): void {
+    const changeIndex = this.tasks.findIndex((t) => t.id == task.id);
+    if (changeIndex === -1) {
+      this.tasks.push(task);
+      this.changeTask(task);
+    } else this.tasks[changeIndex] = task;
+    this.reloadTaskIndex++;
+    if (this.activeTask && this.activeTask.id === task.id) {
       const moduleContent = this.$refs.moduleContent as IModeratorContent;
       if (moduleContent && 'reloadTaskSettings' in moduleContent)
         moduleContent.reloadTaskSettings();
@@ -453,14 +469,6 @@ export default class ModeratorTopicDetails extends Vue {
   }
 
   pauseReload = false;
-  reloadData(): void {
-    if (!this.pauseReload) {
-      topicService.getTopicById(this.topicId).then((topic) => {
-        this.topic = topic;
-      });
-      this.getTasks();
-    }
-  }
 
   @Watch('activeTab', { immediate: true })
   onActiveTabChanged(): void {
@@ -597,7 +605,9 @@ export default class ModeratorTopicDetails extends Vue {
   }
 
   deleteTopic(): void {
-    clearInterval(this.interval);
+    sessionService.deregisterGetById(this.sessionId, this.updateSession);
+    topicService.deregisterGetTopicById(this.topicId, this.updateTopic);
+    sessionRoleService.deregisterGetOwn(this.sessionId, this.updateRole);
     setTimeout(() => {
       topicService.deleteTopic(this.topicId).then((deleted) => {
         if (deleted) this.$router.go(-1);
@@ -618,11 +628,13 @@ export default class ModeratorTopicDetails extends Vue {
         if (this.activeTask?.id == task.id) this.activeTask = null;
         taskService.deleteTask(task.id).then((result) => {
           if (result) {
-            this.getTasks().then(() => {
-              if (activeTask) {
-                this.setActiveTab(activeTask.taskType);
-              }
-            });
+            const index = this.tasks.findIndex((t) => t.id === task.id);
+            if (index > -1) {
+              this.tasks.splice(index, 1);
+            }
+            if (activeTask) {
+              this.setActiveTab(activeTask.taskType);
+            }
           } else if (activeTask?.id == task.id) {
             this.changeTask(activeTask);
           }
@@ -632,15 +644,14 @@ export default class ModeratorTopicDetails extends Vue {
     }
   }
 
-  startInterval(): void {
-    this.interval = setInterval(this.reloadData, this.intervalTime);
-  }
-
   unmounted(): void {
-    clearInterval(this.interval);
     this.topic = null;
     this.tasks = [];
     this.activeTask = null;
+    cashService.deregisterAllGet(this.updateTopic);
+    cashService.deregisterAllGet(this.updateRole);
+    cashService.deregisterAllGet(this.updateSession);
+    cashService.deregisterAllGet(this.updateTasks);
   }
 
   download(): void {

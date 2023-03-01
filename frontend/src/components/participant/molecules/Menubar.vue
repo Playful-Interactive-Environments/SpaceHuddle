@@ -23,6 +23,8 @@
 import { Vue, Options } from 'vue-class-component';
 import * as sessionService from '@/services/session-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { Session } from '@/types/api/Session';
+import * as cashService from "@/services/cash-service";
 
 @Options({
   components: {},
@@ -31,11 +33,19 @@ export default class Menubar extends Vue {
   sessionId = '';
 
   mounted(): void {
-    sessionService
-      .getParticipantSession(EndpointAuthorisationType.PARTICIPANT)
-      .then((queryResult) => {
-        this.sessionId = queryResult.id;
-      });
+    sessionService.registerGetParticipantSession(
+      this.updateSession,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+  }
+
+  updateSession(session: Session): void {
+    this.sessionId = session.id;
+  }
+
+  unmounted(): void {
+    cashService.deregisterAllGet(this.updateSession);
   }
 
   menuItemSelected(command: string): void {

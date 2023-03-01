@@ -13,7 +13,7 @@
           :isDraggable="true"
           :canChangeState="false"
           :showState="false"
-          @ideaDeleted="getIdeas()"
+          @ideaDeleted="refreshIdeas()"
         />
       </template>
       <template v-slot:footer>
@@ -46,6 +46,7 @@ import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -66,24 +67,30 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     image: null, // the datebase64 url of created image
   };
   showSettings = false;
-  readonly intervalTime = 10000;
-  interval!: any;
-
-  async mounted(): Promise<void> {
-    this.startInterval();
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.getIdeas, this.intervalTime);
-  }
 
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateIdeas);
   }
 
+  ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
-    this.getIdeas();
+    this.ideaCash = ideaService.registerGetIdeasForTask(
+      this.taskId,
+      IdeaSortOrder.ORDER,
+      null,
+      this.updateIdeas,
+      EndpointAuthorisationType.MODERATOR,
+      10
+    );
+  }
+
+  updateIdeas(ideas: Idea[]): void {
+    this.ideas = ideas;
+  }
+
+  refreshIdeas(): void {
+    this.ideaCash.refreshData();
   }
 
   @Watch('showSettings', { immediate: true })
@@ -100,21 +107,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.addIdea.image = null;
     this.addIdea.link = null;
     this.ideas.push(newIdea);
-  }
-
-  async getIdeas(): Promise<void> {
-    if (this.taskId) {
-      await ideaService
-        .getIdeasForTask(
-          this.taskId,
-          IdeaSortOrder.ORDER,
-          null,
-          EndpointAuthorisationType.MODERATOR
-        )
-        .then((result) => {
-          this.ideas = result;
-        });
-    }
   }
 
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/

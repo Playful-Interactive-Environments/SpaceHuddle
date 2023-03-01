@@ -61,7 +61,7 @@
             :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
             class="media-right"
             :entity="task"
-            v-on:timerEnds="getTopicsAndTasks"
+            v-on:timerEnds="refreshTask(task)"
           ></Timer>
         </div>
       </el-collapse-item>
@@ -101,6 +101,8 @@ import Timer from '@/components/shared/atoms/Timer.vue';
 import { getColorOfType, getIconOfType } from '@/types/enum/TaskCategory';
 import { Task } from '@/types/api/Task';
 import ParticipantDefaultContainer from '@/components/participant/organisms/layout/ParticipantDefaultContainer.vue';
+import { Session } from '@/types/api/Session';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -118,8 +120,6 @@ export default class ParticipantOverview extends Vue {
   sessionName = '';
   sessionDescription = '';
   sessionId = '';
-  readonly intervalTime = 10000;
-  interval!: any;
   openTabs: string[] = [];
   EndpointAuthorisationType = EndpointAuthorisationType;
 
@@ -135,49 +135,79 @@ export default class ParticipantOverview extends Vue {
     }
   }
 
+  topicCash!: cashService.SimplifiedCashEntry<Topic[]>;
   mounted(): void {
-    this.getSessionInfo();
-    this.getTopicsAndTasks();
-    this.startInterval();
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.getTopicsAndTasks, this.intervalTime);
+    sessionService.registerGetParticipantSession(
+      this.updateSession,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+    this.topicCash = participantService.registerGetTopicList(
+      this.updateTopics,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
   }
 
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateSession);
+    cashService.deregisterAllGet(this.updateTopics);
+    cashService.deregisterAllGet(this.updateTasks);
+  }
+
+  updateSession(session: Session): void {
+    this.sessionName = session.title;
+    this.sessionDescription = session.description;
+    this.sessionId = session.id;
+  }
+
+  updateTopics(topics: Topic[]): void {
+    const deletedTopics = this.topics
+      .filter((tOld) => {
+        return !topics.find((tNew) => tNew.id === tOld.id);
+      })
+      .map((t) => t.id);
+    this.deregisterGetTasks(deletedTopics);
+    const newTopics = topics.filter((tNew) => {
+      return !this.topics.find((tOld) => tNew.id === tOld.id);
+    });
+    newTopics.forEach(async (topic) => {
+      taskService.registerGetTaskList(
+        topic.id,
+        this.updateTasks,
+        EndpointAuthorisationType.PARTICIPANT,
+        5 * 60
+      );
+    });
+    this.topics = topics;
+    this.openTabs = this.topics.map((topic) => topic.id);
+  }
+
+  refreshTopics(): void {
+    this.topicCash.refreshData();
+  }
+
+  refreshTask(task: Task): void {
+    taskService.refreshGetTaskList(task.topicId);
+  }
+
+  deregisterGetTasks(topics: string[] | null = null): void {
+    if (!topics) topics = this.topics.map((t) => t.id);
+    topics.forEach(async (topic) => {
+      taskService.deregisterGetTaskList(topic, this.updateTasks);
+    });
+  }
+
+  updateTasks(tasks: Task[], topicId: string): void {
+    const topic = this.topics.find((topic) => topic.id === topicId);
+    if (topic) {
+      topic.tasks = tasks;
+      topic.tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
+    }
   }
 
   get filteredTopics(): Topic[] {
     return this.topics.filter((topic) => topic.tasks && topic.tasks.length > 0);
-  }
-
-  async getTopicsAndTasks(): Promise<void> {
-    participantService
-      .getTopicList(EndpointAuthorisationType.PARTICIPANT)
-      .then(async (topics) => {
-        for (let i = 0; i < topics.length; i++) {
-          const topic = topics[i];
-          await taskService
-            .getTaskList(topic.id, EndpointAuthorisationType.PARTICIPANT)
-            .then((queryResult) => {
-              topic.tasks = queryResult;
-            });
-        }
-        this.topics = topics;
-        this.openTabs = this.topics.map((topic) => topic.id);
-      });
-  }
-
-  async getSessionInfo(): Promise<void> {
-    sessionService
-      .getParticipantSession(EndpointAuthorisationType.PARTICIPANT)
-      .then((queryResult) => {
-        this.sessionName = queryResult.title;
-        this.sessionDescription = queryResult.description;
-        this.sessionId = queryResult.id;
-      });
   }
 }
 </script>

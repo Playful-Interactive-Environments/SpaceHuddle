@@ -10,6 +10,8 @@ import { Task, TaskSettingsData } from '@/types/api/Task';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import * as selectionService from '@/services/selection-service';
 import { CustomParameter } from '@/types/ui/CustomParameter';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {},
@@ -33,15 +35,22 @@ export default class TaskParameter extends Vue implements CustomParameter {
 
   @Watch('taskId', { immediate: true })
   async onTaskIdChanged(): Promise<void> {
-    await this.getTask();
+    if (this.taskId) {
+      taskService.registerGetTaskById(
+        this.taskId,
+        this.updateTask,
+        EndpointAuthorisationType.MODERATOR,
+        60 * 60
+      );
+    }
   }
 
-  async getTask(): Promise<void> {
-    if (this.taskId) {
-      await taskService.getTaskById(this.taskId).then((task) => {
-        this.task = task;
-      });
-    }
+  updateTask(task: Task): void {
+    this.task = task;
+  }
+
+  unmounted(): void {
+    cashService.deregisterAllGet(this.updateTask);
   }
 
   async updateParameterForSaving(): Promise<void> {

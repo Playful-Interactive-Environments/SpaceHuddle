@@ -1,6 +1,5 @@
 import {
   apiExecuteDelete,
-  apiExecuteGetHandled,
   apiExecutePost,
   apiExecutePut,
 } from '@/services/api';
@@ -9,18 +8,30 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Category } from '@/types/api/Category';
 import { Idea } from '@/types/api/Idea';
 import { getIdeaImages } from '@/services/idea-service';
+import * as cashService from '@/services/cash-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
-export const getCategoryById = async (
+export const registerGetCategoryById = (
   id: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Category> => {
-  return await apiExecuteGetHandled<Category>(
+  callback: (result: Category) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Category> => {
+  return cashService.registerSimplifiedGet<Category>(
     `/${EndpointType.CATEGORY}/${id}/`,
+    callback,
     {},
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
   );
+};
+
+export const deregisterGetCategoryById = (
+  id: string,
+  callback: (result: Category) => void
+): void => {
+  cashService.deregisterGet(`/${EndpointType.CATEGORY}/${id}/`, callback);
 };
 
 export const deleteCategory = async (id: string): Promise<boolean> => {
@@ -48,27 +59,57 @@ export const putCategory = async (
   );
 };
 
-export const getCategoriesForTask = async (
+export const registerGetCategoriesForTask = (
   taskId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Category[]> => {
-  return await apiExecuteGetHandled<Category[]>(
+  callback: (result: Category[]) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Category[]> => {
+  return cashService.registerSimplifiedGet<Category[]>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.CATEGORIES}`,
+    callback,
     [],
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
   );
 };
 
-export const getCategoryIdeas = async (
-  id: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Idea[]> => {
-  const result = await apiExecuteGetHandled<Idea[]>(
-    `/${EndpointType.CATEGORY}/${id}/${EndpointType.IDEAS}`,
-    [],
-    authHeaderType
+export const deregisterGetCategoriesForTask = (
+  taskId: string,
+  callback: (result: Category[]) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.CATEGORIES}`,
+    callback
   );
-  return await getIdeaImages(result, authHeaderType);
+};
+
+export const registerGetCategoryIdeas = (
+  id: string,
+  callback: (result: Idea[]) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Idea[]> => {
+  return cashService.registerSimplifiedGet<Idea[]>(
+    `/${EndpointType.CATEGORY}/${id}/${EndpointType.IDEAS}`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds,
+    async (ideas: Idea[]) => {
+      return await getIdeaImages(ideas, authHeaderType);
+    }
+  );
+};
+
+export const deregisterGetCategoryIdeas = (
+  id: string,
+  callback: (result: Idea[]) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.CATEGORY}/${id}/${EndpointType.IDEAS}`,
+    callback
+  );
 };
 
 export const addIdeasToCategory = async (

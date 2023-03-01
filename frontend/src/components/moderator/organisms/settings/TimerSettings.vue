@@ -33,10 +33,10 @@
               "
             />
             <el-time-picker
-              v-if="formData.hasTimeLimit"
               class="level-item"
               v-model="formData.remindingTime"
               :disabled="!formData.hasTimeLimit"
+              :style="{ display: formData.hasTimeLimit ? 'block' : 'none' }"
             />
           </span>
         </div>

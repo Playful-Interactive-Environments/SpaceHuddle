@@ -84,7 +84,7 @@ import 'vue-advanced-cropper/dist/theme.classic.css';
 
 @Options({
   components: { Cropper },
-  emits: ['update:showModal', 'imageChanged'],
+  emits: ['update:showModal', 'update:modelValue', 'imageChanged'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -98,7 +98,6 @@ export default class ImageUploader extends Vue {
 
   @Watch('showModal', { immediate: true })
   async onShowModalChanged(showModal: boolean): Promise<void> {
-    //this.uploadData = null;
     this.showSettings = showModal;
   }
 
@@ -142,7 +141,6 @@ export default class ImageUploader extends Vue {
 
   saveChanges(): void {
     if (this.uploadData) {
-      //const { canvas, coordinates } = (this.$refs.cropper as any)?.getResult();
       const result = (this.$refs.cropper as any)?.getResult();
       const base64 = result.canvas?.toDataURL(this.uploadData.type);
       this.$emit('update:modelValue', base64);

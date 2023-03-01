@@ -116,6 +116,9 @@ import { SessionRole } from '@/types/api/SessionRole';
 import UserType from '@/types/enum/UserType';
 import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
 import * as authService from '@/services/auth-service';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { Session } from '@/types/api/Session';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -133,6 +136,7 @@ export default class LinkSettings extends Vue {
   @Prop({ default: false }) showModal!: boolean;
   @Prop({ default: '' }) sessionId!: string;
 
+  session!: Session;
   roles: SessionRole[] = [];
   own = '';
 
@@ -165,29 +169,38 @@ export default class LinkSettings extends Vue {
     this.reset();
   }
 
+  roleCash!: cashService.SimplifiedCashEntry<SessionRole[]>;
   @Watch('sessionId', { immediate: true })
   async onSessionIdChanged(): Promise<void> {
-    await this.loadRoles();
-    await this.loadAnonymous();
+    sessionService.registerGetById(
+      this.sessionId,
+      this.updateSession,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+    sessionRoleService.registerGetList(
+      this.sessionId,
+      this.updateRole,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
   }
 
-  async loadRoles(): Promise<void> {
-    if (this.sessionId) {
-      sessionRoleService.getList(this.sessionId).then((roles) => {
-        this.roles = roles.filter((role) => role.username !== this.own);
-      });
-    }
+  updateSession(session: Session): void {
+    this.session = session;
+    this.formData.allowAnonymous = session.allowAnonymous;
+    this.dataLoaded = true;
   }
 
+  updateRole(roles: SessionRole[]): void {
+    this.roles = roles.filter((role) => role.username !== this.own);
+  }
+
+  unmounted(): void {
+    cashService.deregisterAllGet(this.updateSession);
+    cashService.deregisterAllGet(this.updateRole);
+  }
   dataLoaded = false;
-  async loadAnonymous(): Promise<void> {
-    if (this.sessionId) {
-      sessionService.getById(this.sessionId).then((session) => {
-        this.formData.allowAnonymous = session.allowAnonymous;
-        this.dataLoaded = true;
-      });
-    }
-  }
 
   @Watch('formData.allowAnonymous', { immediate: true })
   async onAllowAnonymousChanged(): Promise<void> {
@@ -197,13 +210,9 @@ export default class LinkSettings extends Vue {
   }
 
   async saveAnonymous(): Promise<void> {
-    if (this.sessionId) {
-      sessionService.getById(this.sessionId).then((session) => {
-        if (session.allowAnonymous !== this.formData.allowAnonymous) {
-          session.allowAnonymous = this.formData.allowAnonymous;
-          sessionService.put(session);
-        }
-      });
+    if (this.session.allowAnonymous !== this.formData.allowAnonymous) {
+      this.session.allowAnonymous = this.formData.allowAnonymous;
+      sessionService.put(this.session);
     }
   }
 
@@ -230,7 +239,9 @@ export default class LinkSettings extends Vue {
     await sessionRoleService
       .remove(this.sessionId, this.roles[index].username)
       .then((result) => {
-        if (result) this.loadRoles();
+        if (result) {
+          this.roleCash.refreshData();
+        }
       });
   }
 

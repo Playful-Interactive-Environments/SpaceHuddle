@@ -66,9 +66,11 @@ import ValidationForm, {
   ValidationFormCall,
 } from '@/components/shared/molecules/ValidationForm.vue';
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
-import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import { ValidationData } from '@/types/ui/ValidationRule';
 import { Topic } from '@/types/api/Topic';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -96,17 +98,41 @@ export default class TopicSettings extends Vue {
     this.showDialog = showModal;
   }
 
+  topicListCash!: cashService.SimplifiedCashEntry<Topic[]>;
+  @Watch('sessionId', { immediate: true })
+  onSessionIdChanged(): void {
+    this.topicListCash = topicService.registerGetTopicsList(
+      this.sessionId,
+      this.updateTopicCount,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+  }
+
+  topicCount = 0;
+  updateTopicCount(topics: Topic[]): void {
+    this.topicCount = topics.length;
+  }
+
+  topicCash!: cashService.SimplifiedCashEntry<Topic>;
   @Watch('topicId', { immediate: true })
   onTopicIdChanged(id: string): void {
     if (id) {
-      topicService.getTopicById(id).then((topic) => {
-        this.topic = topic;
-        this.formData.title = topic.title;
-        this.formData.description = topic.description;
-      });
+      this.topicCash = topicService.registerGetTopicById(
+        this.topicId,
+        this.updateTopic,
+        EndpointAuthorisationType.MODERATOR,
+        60 * 60
+      );
     } else {
       this.reset();
     }
+  }
+
+  updateTopic(topic: Topic): void {
+    this.topic = topic;
+    this.formData.title = topic.title;
+    this.formData.description = topic.description;
   }
 
   handleClose(done: { (): void }): void {
@@ -128,22 +154,18 @@ export default class TopicSettings extends Vue {
     this.isSaving = true;
     if (!this.topicId) {
       if (this.sessionId) {
-        let topicCount = 0;
-        await topicService.getTopicsList(this.sessionId).then((topics) => {
-          topicCount = topics.length;
-        });
-
         await topicService
           .postTopic(this.sessionId, {
             title: this.formData.title,
             description: this.formData.description,
-            order: topicCount,
+            order: this.topicCount,
           })
           .then(
-            () => {
+            (topic) => {
               this.$emit('update:showModal', false);
-              this.$emit('topicUpdated');
+              this.$emit('topicUpdated', topic);
               this.reset();
+              this.topicListCash.refreshData();
             },
             (error) => {
               this.formData.stateMessage =
@@ -160,11 +182,12 @@ export default class TopicSettings extends Vue {
           order: this.topic?.order,
         })
         .then(
-          () => {
+          (topic) => {
             this.$emit('update:showModal', false);
             this.$emit('update:topicId', null);
-            this.$emit('topicUpdated');
-            //this.reset();
+            this.$emit('topicUpdated', topic);
+            this.topicListCash.refreshData();
+            if (this.topicCash) this.topicCash.refreshData();
           },
           (error) => {
             this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
@@ -172,6 +195,11 @@ export default class TopicSettings extends Vue {
         );
     }
     this.isSaving = false;
+  }
+
+  unmounted(): void {
+    cashService.deregisterAllGet(this.updateTopic);
+    cashService.deregisterAllGet(this.updateTopicCount);
   }
 }
 </script>

@@ -85,13 +85,16 @@ import { Prop, Watch } from 'vue-property-decorator';
 import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 import * as categorisationService from '@/services/categorisation-service';
 import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
-import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
+import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import { ValidationData } from '@/types/ui/ValidationRule';
 import ValidationForm, {
   ValidationFormCall,
 } from '@/components/shared/molecules/ValidationForm.vue';
 import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
 import { Idea } from '@/types/api/Idea';
+import { Category } from '@/types/api/Category';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -121,33 +124,40 @@ export default class CategorySettings extends Vue {
     order: this.order,
   };
 
-  mounted(): void {
-    //this.reset();
-  }
-
   showDialog = false;
   @Watch('showModal', { immediate: false, flush: 'post' })
   async onShowModalChanged(showModal: boolean): Promise<void> {
     this.showDialog = showModal;
   }
 
+  categoryCash!: cashService.SimplifiedCashEntry<Category>;
   @Watch('categoryId', { immediate: true })
   onCategoryIdChanged(id: string): void {
     if (id) {
-      categorisationService.getCategoryById(id).then((category) => {
-        this.formData.title = category.keywords;
-        this.formData.description = category.description;
-        this.formData.image = category.image;
-        this.formData.link = category.link;
-        this.formData.order = category.order;
-        if (category.parameter && category.parameter.color)
-          this.formData.color = category.parameter.color;
-      });
+      this.categoryCash = categorisationService.registerGetCategoryById(
+        id,
+        this.updateCategory,
+        EndpointAuthorisationType.MODERATOR,
+        60 * 60
+      );
     }
   }
 
+  updateCategory(category: Category): void {
+    this.formData.title = category.keywords;
+    this.formData.description = category.description;
+    this.formData.image = category.image;
+    this.formData.link = category.link;
+    this.formData.order = category.order;
+    if (category.parameter && category.parameter.color)
+      this.formData.color = category.parameter.color;
+  }
+
+  unmounted(): void {
+    cashService.deregisterAllGet(this.updateCategory);
+  }
+
   handleClose(done: { (): void }): void {
-    //this.reset();
     done();
     this.$emit('update:showModal', false);
   }
@@ -210,7 +220,7 @@ export default class CategorySettings extends Vue {
             this.$emit('update:showModal', false);
             this.$emit('update:categoryId', null);
             this.$emit('categoryCreated', category);
-            //this.reset();
+            if (this.categoryCash) this.categoryCash.refreshData();
           },
           (error) => {
             this.formData.stateMessage = getSingleTranslatedErrorMessage(error);

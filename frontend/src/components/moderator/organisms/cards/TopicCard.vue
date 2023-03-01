@@ -80,7 +80,7 @@ import { ElMessageBox } from 'element-plus';
 
 @Options({
   components: { TutorialStep, TopicSettings },
-  emits: ['topicDeleted', 'topicUpdated'],
+  emits: ['topicDeleted'],
 })
 export default class TopicCard extends Vue {
   @Prop({ default: '' }) readonly sessionId!: string;
@@ -97,12 +97,9 @@ export default class TopicCard extends Vue {
     this.$router.push(`/topic/${this.sessionId}/${this.topic.id}`);
   }
 
-  async reload(): Promise<void> {
-    topicService.getTopicById(this.topic.id).then((topic) => {
-      this.topic.title = topic.title;
-      this.topic.description = topic.description;
-      this.$emit('topicUpdated', this.topic.id);
-    });
+  async reload(topic: Topic): Promise<void> {
+    this.topic.title = topic.title;
+    this.topic.description = topic.description;
   }
 
   async deleteTopic(): Promise<void> {
@@ -239,7 +236,6 @@ export default class TopicCard extends Vue {
 }
 
 @media only screen and (max-width: 949px) {
-
   .level,
   .level-left,
   .level-right {

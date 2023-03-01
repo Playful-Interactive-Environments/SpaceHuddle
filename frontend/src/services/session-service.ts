@@ -1,7 +1,6 @@
 import { Task } from '@/types/api/Task';
 import {
   apiExecuteDelete,
-  apiExecuteGetHandled,
   apiExecutePost,
   apiExecutePostHandled,
   apiExecutePut,
@@ -10,42 +9,74 @@ import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Session, SessionInfo } from '@/types/api/Session';
 import { ParticipantInfo } from '@/types/api/Participant';
+import * as cashService from '@/services/cash-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
-export const getList = async (
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Session[]> => {
-  return await apiExecuteGetHandled<Session[]>(
+export const registerGetList = (
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Session[]> => {
+  return cashService.registerSimplifiedGet<Session[]>(
     `/${EndpointType.SESSIONS}/`,
+    callback,
     [],
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
   );
 };
 
-export const getById = async (
+export const deregisterGetList = (callback: (result: any) => void): void => {
+  cashService.deregisterGet(`/${EndpointType.SESSIONS}/`, callback);
+};
+
+export const registerGetById = (
   id: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Session> => {
-  return await apiExecuteGetHandled<Session>(
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Session> => {
+  return cashService.registerSimplifiedGet<Session>(
     `/${EndpointType.SESSION}/${id}/`,
+    callback,
     {},
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
   );
 };
 
-export const getParticipantSession = async (
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Session> => {
-  const result = await apiExecuteGetHandled<Session[]>(
+export const deregisterGetById = (
+  id: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(`/${EndpointType.SESSION}/${id}/`, callback);
+};
+
+export const registerGetParticipantSession = (
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.CashEntry<Session[], Session> => {
+  return cashService.registerGet<Session[], Session>(
     `/${EndpointType.SESSIONS}/`,
+    callback,
     [],
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds,
+    async (result: Session[]) => {
+      if (Array.isArray(result) && result.length > 0) {
+        return result[0];
+      }
+      return {} as Session;
+    }
   );
-  if (Array.isArray(result) && result.length > 0) {
-    return result[0];
-  }
-  return {} as Session;
+};
+
+export const deregisterGetParticipantSession = (
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(`/${EndpointType.SESSIONS}/`, callback);
 };
 
 export const post = async (data: Partial<Session>): Promise<Session> => {
@@ -64,14 +95,28 @@ export const remove = async (id: string): Promise<boolean> => {
   return await apiExecuteDelete<any>(`/${EndpointType.SESSION}/${id}/`);
 };
 
-export const getPublicScreen = async (
+export const registerGetPublicScreen = (
   sessionId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Task | null> => {
-  return await apiExecuteGetHandled<Task>(
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Task | null> => {
+  return cashService.registerSimplifiedGet<Task | null>(
     `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PUBLIC_SCREEN}/`,
+    callback,
     null,
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const deregisterGetPublicScreen = (
+  sessionId: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PUBLIC_SCREEN}/`,
+    callback
   );
 };
 
@@ -97,14 +142,28 @@ export const getSessionInfos = async (
   );
 };
 
-export const getParticipants = async (
+export const registerGetParticipants = (
   sessionId: string,
-  authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<ParticipantInfo[]> => {
-  return await apiExecuteGetHandled<ParticipantInfo[]>(
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): void => {
+  cashService.registerSimplifiedGet<ParticipantInfo[]>(
     `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PARTICIPANTS}/`,
+    callback,
     null,
-    authHeaderType
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const deregisterGetParticipants = (
+  sessionId: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PARTICIPANTS}/`,
+    callback
   );
 };
 

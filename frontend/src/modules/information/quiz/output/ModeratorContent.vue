@@ -245,9 +245,9 @@
 </template>
 
 <script lang="ts">
-import {Options, Vue} from 'vue-class-component';
-import {Prop, Watch} from 'vue-property-decorator';
-import {Idea} from '@/types/api/Idea';
+import { Options, Vue } from 'vue-class-component';
+import { Prop, Watch } from 'vue-property-decorator';
+import { Idea } from '@/types/api/Idea';
 import * as taskService from '@/services/task-service';
 import * as topicService from '@/services/topic-service';
 import * as sessionService from '@/services/session-service';
@@ -259,13 +259,14 @@ import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import ProcessTimeline from '@/components/moderator/organisms/Timeline/ProcessTimeline.vue';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
-import {defaultFormRules, ValidationRuleDefinition} from '@/utils/formRules';
-import {Hierarchy} from '@/types/api/Hierarchy';
+import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
+import { Hierarchy } from '@/types/api/Hierarchy';
 import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
-import {VoteResult} from '@/types/api/Vote';
+import { VoteResult } from '@/types/api/Vote';
 import * as votingService from '@/services/voting-service';
-import {TimerEntity} from '@/types/enum/TimerEntity';
-import {convertToSaveVersion, Task} from '@/types/api/Task';
+import * as cashService from '@/services/cash-service';
+import { TimerEntity } from '@/types/enum/TimerEntity';
+import { convertToSaveVersion, Task } from '@/types/api/Task';
 import {
   getQuestionResultStorageFromQuestionType,
   getQuestionTypeFromHierarchy,
@@ -276,9 +277,13 @@ import {
   SurveyQuestionType,
 } from '@/modules/information/quiz/types/Question';
 import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
-import {moduleNameValid, QuestionnaireType,} from '@/modules/information/quiz/types/QuestionnaireType';
-import {IModeratorContent} from '@/types/ui/IModeratorContent';
+import {
+  moduleNameValid,
+  QuestionnaireType,
+} from '@/modules/information/quiz/types/QuestionnaireType';
+import { IModeratorContent } from '@/types/ui/IModeratorContent';
 import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
+import { Topic } from '@/types/api/Topic';
 
 @Options({
   components: {
@@ -305,12 +310,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   publicTask: Task | null = null;
   editQuestion: Question | null = null;
   ideas: Idea[] = [];
-  readonly intervalTime = 10000;
-  interval!: any;
   minAnswerCount = 2;
   answerCount = this.minAnswerCount;
   questionnaireType: QuestionnaireType = QuestionnaireType.QUIZ;
-  moderatedQuestionFlow = true;
+  moderatedQuestionFlow = false;
   defaultQuestionTime: number | null = null;
 
   QuestionnaireType = QuestionnaireType;
@@ -368,8 +371,52 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   @Watch('formData', { immediate: true })
-  async onFormDataChanged(): Promise<void> {
-    await this.getVotes();
+  async onFormDataChanged(
+    newValue: Question,
+    oldValue: Question
+  ): Promise<void> {
+    const oldQuestionResultStorage = oldValue
+      ? getQuestionResultStorageFromQuestionType(oldValue.questionType)
+      : null;
+    const newQuestionResultStorage = getQuestionResultStorageFromQuestionType(
+      newValue.questionType
+    );
+    if (
+      newQuestionResultStorage !== oldQuestionResultStorage ||
+      newValue?.question?.id !== oldValue?.question?.id
+    ) {
+      cashService.deregisterAllGet(this.updateVotes);
+      cashService.deregisterAllGet(this.updateHierarchyResult);
+      if (newValue?.question?.id) {
+        if (newQuestionResultStorage === QuestionResultStorage.VOTING) {
+          votingService.registerGetHierarchyResult(
+            newValue.question.id,
+            this.updateVotes,
+            EndpointAuthorisationType.MODERATOR,
+            30
+          );
+        } else {
+          hierarchyService.registerGetList(
+            this.taskId,
+            newValue.question.id,
+            this.updateHierarchyResult,
+            EndpointAuthorisationType.MODERATOR,
+            30
+          );
+        }
+      }
+    }
+  }
+
+  updateHierarchyResult(answers: Hierarchy[]): void {
+    this.votes = hierarchyService.getHierarchyResult(
+      answers,
+      this.formData.question.parameter?.correctValue
+    );
+  }
+
+  updateVotes(votes: VoteResult[]): void {
+    this.votes = votes;
   }
 
   @Watch('formData.questionType', { immediate: true })
@@ -431,10 +478,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     if (this.publicQuestion && this.moderatedQuestionFlow)
       return item.id === this.publicQuestion.question.id;
     return false;
-  }
-
-  get hasPublicSlider(): boolean {
-    return !!this.publicTask && this.publicTask.id === this.taskId;
   }
 
   formData: Question = this.getEmptyQuestion();
@@ -502,7 +545,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
               });
           }
         });
-        await this.getHierarchies();
+        this.questionCash.refreshData();
       } else if (
         this.editQuestion &&
         getQuestionResultStorageFromQuestionType(
@@ -553,11 +596,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
             order: answer.order,
           });
         }
-        this.getHierarchies().then(() => {
+        this.questionCash.refreshData().then(() => {
           this.setupEmptyQuestion();
         });
       } else {
-        this.getHierarchies().then(() => {
+        this.questionCash.refreshData().then(() => {
           this.setupEmptyQuestion();
         });
       }
@@ -570,48 +613,178 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         .deleteHierarchy(this.formData.question.id)
         .then((result) => {
           if (result) {
-            this.getHierarchies();
+            this.questionCash.refreshData();
             this.setupEmptyQuestion();
           }
         });
     }
   }
 
+  questionCash!: cashService.SimplifiedCashEntry<Hierarchy[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.reloadTaskSettings().then(() => {
-      if (this.questions.length === 0) this.setupEmptyQuestion();
-      else this.editQuestion = this.questions[0];
-    });
+    taskService.registerGetTaskById(this.taskId, this.updateTask);
+    this.questionCash = hierarchyService.registerGetQuestions(
+      this.taskId,
+      this.updateQuestions,
+      EndpointAuthorisationType.MODERATOR,
+      60
+    );
   }
 
-  async reloadTaskSettings(): Promise<void> {
-    const task = await taskService.getTaskById(this.taskId);
+  initQuestion = false;
+  updateTask(task: Task): void {
+    const init = !this.task;
+    this.initQuestion = init;
     this.task = task;
-    topicService.getTopicById(task.topicId).then((topic) => {
-      this.sessionId = topic.sessionId;
-    });
     const module = task.modules.find((module) => moduleNameValid(module.name));
-    if (module) {
+    if (module && module.parameter) {
       this.answerCount = module.parameter.answerCount;
-      if (module.parameter.questionType) {
+      if (module.parameter?.questionType) {
         this.questionnaireType =
           QuestionnaireType[module.parameter.questionType.toUpperCase()];
       } else {
         this.questionnaireType = QuestionnaireType.QUIZ;
       }
+      const questionFlowChanged =
+        this.moderatedQuestionFlow !== module.parameter.moderatedQuestionFlow;
       this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
+      if (init || questionFlowChanged) {
+        this.registerPublicScreen();
+      }
       this.defaultQuestionTime = module.parameter.defaultQuestionTime;
+    } else if (init) {
+      this.answerCount = 1;
+      this.questionnaireType = QuestionnaireType.QUIZ;
+      this.moderatedQuestionFlow = false;
+      this.defaultQuestionTime = null;
     }
-    await this.getHierarchies();
   }
 
-  @Watch('sessionId', { immediate: true })
-  onSessionIdChanged(): void {
+  updateQuestions(items: Hierarchy[]): void {
+    const questions = hierarchyService.convertToQuestions(items);
+    const deletedQuestions = this.questions
+      .filter((qOld) => {
+        return !questions.find((qNew) => qNew.question.id === qOld.question.id);
+      })
+      .map((q) => q.question.id as string);
+    this.deregisterGetAnswers(deletedQuestions);
+    const newQuestions = questions.filter((qNew) => {
+      return !this.questions.find(
+        (qOld) => qNew.question.id === qOld.question.id
+      );
+    });
+    this.questions = questions;
+    const activeQuestionId = this.task?.parameter?.activeQuestion?.id;
+    let publicQuestion: Question | null = null;
+    newQuestions.forEach(async (question) => {
+      hierarchyService.registerGetList(
+        this.taskId,
+        question.question.id,
+        this.updateAnswers,
+        EndpointAuthorisationType.MODERATOR,
+        60
+      );
+      if (question.question.id === activeQuestionId) {
+        publicQuestion = question;
+      }
+    });
+    if (publicQuestion) this.publicQuestion = publicQuestion;
+    if (this.initQuestion) {
+      if (this.questions.length === 0) this.setupEmptyQuestion();
+      else this.editQuestion = this.questions[0];
+    }
+    this.initQuestion = false;
+  }
+
+  deregisterGetAnswers(questions: string[] | null = null): void {
+    if (!questions)
+      questions = this.questions
+        .filter((q) => q.question.id)
+        .map((q) => q.question.id as string);
+    questions.forEach(async (question) => {
+      hierarchyService.deregisterGetList(
+        this.taskId,
+        question,
+        this.updateAnswers
+      );
+    });
+  }
+
+  updateAnswers(answers: Hierarchy[], questionId: string | null): void {
+    if (questionId) {
+      const question = this.questions.find(
+        (question) => question.question.id === questionId
+      );
+      if (question) {
+        const questionResultStorage: QuestionResultStorage =
+          getQuestionResultStorageFromQuestionType(question.questionType);
+        if (questionResultStorage === QuestionResultStorage.VOTING) {
+          const changes = question.answers.length !== answers.length;
+          question.answers = answers;
+          if (changes && question === this.editQuestion) {
+            this.setFormData(this.editQuestion);
+          }
+        } else {
+          //
+        }
+      }
+    }
+  }
+
+  @Watch('task.topicId', { immediate: true })
+  onTopicIdChanged(newValue: string | null, oldValue: string | null): void {
+    if (newValue)
+      topicService.registerGetTopicById(
+        newValue,
+        this.updateTopic,
+        EndpointAuthorisationType.MODERATOR,
+        60 * 60
+      );
+    if (oldValue)
+      topicService.deregisterGetTopicById(oldValue, this.updateTopic);
+  }
+
+  updateTopic(topic: Topic): void {
+    this.sessionId = topic.sessionId;
+    this.registerPublicScreen();
+  }
+
+  publicScreenRegistered = false;
+  registerPublicScreen(): void {
     if (this.sessionId) {
-      sessionService.getPublicScreen(this.sessionId).then((task) => {
-        this.publicTask = task;
-      });
+      if (this.publicScreenRegistered && !this.moderatedQuestionFlow) {
+        sessionService.deregisterGetPublicScreen(
+          this.sessionId,
+          this.updatePublicTask
+        );
+        this.publicTask = null;
+        this.hasPublicSlider = false;
+      } else if (this.moderatedQuestionFlow && !this.publicScreenRegistered) {
+        this.publicScreenRegistered = true;
+        sessionService.registerGetPublicScreen(
+          this.sessionId,
+          this.updatePublicTask,
+          EndpointAuthorisationType.MODERATOR,
+          30
+        );
+      }
+      this.publicScreenRegistered = this.moderatedQuestionFlow;
+    }
+  }
+
+  async reloadTaskSettings(): Promise<void> {
+    //todo
+  }
+
+  hasPublicSlider = false;
+  updatePublicTask(task: Task): void {
+    if (task) {
+      this.publicTask = task;
+      this.hasPublicSlider = this.publicTask.id === this.taskId;
+    } else {
+      this.publicTask = null;
+      this.hasPublicSlider = false;
     }
   }
 
@@ -633,6 +806,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         : { questionType: QuestionType.MULTIPLECHOICE },
       order: order,
       isOwn: false,
+      childCount: 0,
     };
   }
 
@@ -648,106 +822,14 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     };
   }
 
-  async getHierarchies(): Promise<void> {
-    if (this.taskId) {
-      const questions = await hierarchyService.getList(
-        this.taskId,
-        '{parentHierarchyId}',
-        EndpointAuthorisationType.MODERATOR
-      );
-      const result: Question[] = [];
-      let publicQuestion: Question | null = null;
-      for (const index in questions) {
-        const question = questions[index];
-        const questionType: QuestionType =
-          getQuestionTypeFromHierarchy(question);
-        const questionResultStorage: QuestionResultStorage =
-          getQuestionResultStorageFromQuestionType(questionType);
-        if (questionResultStorage === QuestionResultStorage.VOTING) {
-          await hierarchyService
-            .getList(this.taskId, question.id)
-            .then((answers) => {
-              const item: Question = {
-                questionType: questionType,
-                question: question,
-                answers: answers,
-              };
-              result.push(item);
-              if (question.id == this.task?.parameter.activeQuestion) {
-                publicQuestion = item;
-              }
-            });
-        } else {
-          const item: Question = {
-            questionType: questionType,
-            question: question,
-            answers: [],
-          };
-          result.push(item);
-          if (question.id == this.task?.parameter.activeQuestion) {
-            publicQuestion = item;
-          }
-        }
-      }
-      this.questions = result;
-      if (publicQuestion) this.publicQuestion = publicQuestion;
-      await this.getVotes();
-    }
-  }
-
-  async getVotes(): Promise<void> {
-    if (this.formData.question.id) {
-      if (
-        getQuestionResultStorageFromQuestionType(this.formData.questionType) ===
-        QuestionResultStorage.VOTING
-      ) {
-        await votingService
-          .getHierarchyResult(this.formData.question.id)
-          .then((votes) => {
-            this.votes = votes;
-          });
-      } else {
-        await hierarchyService
-          .getHierarchyResult(
-            this.taskId,
-            this.formData.question.id,
-            this.formData.question.parameter?.correctValue
-          )
-          .then((votes) => {
-            this.votes = votes;
-          });
-      }
-    } else {
-      this.votes = [];
-    }
-  }
-
-  async mounted(): Promise<void> {
-    this.startInterval();
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.reloadData, this.intervalTime);
-  }
-
-  reloadData(): void {
-    this.getVotes();
-    taskService.getTaskById(this.taskId).then((task) => {
-      this.task = task;
-      const module = task.modules.find((module) =>
-        moduleNameValid(module.name)
-      );
-      if (module) {
-        this.answerCount = module.parameter.answerCount;
-        this.defaultQuestionTime = module.parameter.defaultQuestionTime;
-      }
-      this.getHierarchies();
-    });
-    this.onSessionIdChanged();
-  }
-
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateTopic);
+    cashService.deregisterAllGet(this.updateVotes);
+    cashService.deregisterAllGet(this.updateAnswers);
+    cashService.deregisterAllGet(this.updateHierarchyResult);
+    cashService.deregisterAllGet(this.updatePublicTask);
+    cashService.deregisterAllGet(this.updateQuestions);
   }
 
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/

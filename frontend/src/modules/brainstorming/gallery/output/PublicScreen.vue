@@ -28,6 +28,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from "@/services/cash-service";
 
 @Options({
   components: {
@@ -42,43 +43,37 @@ export default class PublicScreen extends Vue {
   authHeaderTyp!: EndpointAuthorisationType;
   ideas: Idea[] = [];
   galleryIndex = 0;
-  readonly intervalTime = 10000;
-  interval!: any;
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    this.getIdeas();
+    ideaService.registerGetIdeasForTask(
+      this.taskId,
+      IdeaSortOrder.TIMESTAMP,
+      null,
+      this.updateIdeas,
+      this.authHeaderTyp,
+      10
+    );
   }
 
-  async getIdeas(): Promise<void> {
-    if (this.taskId) {
-      await ideaService
-        .getIdeasForTask(
-          this.taskId,
-          IdeaSortOrder.TIMESTAMP,
-          null,
-          this.authHeaderTyp
-        )
-        .then((ideas) => {
-          ideas = ideas.reverse();
-          if (this.ideas.length == 0) {
-            this.ideas = ideas;
-          } else {
-            const newIdees: Idea[] = ideas.filter(
-              (idea) => !this.ideas.some((old) => old.id == idea.id)
-            );
-            this.ideas.splice(this.galleryIndex + 2, 0, ...newIdees);
-            let deleteIndex = 0;
-            while (deleteIndex > -1) {
-              deleteIndex = this.ideas.findIndex(
-                (old) => !ideas.some((idea) => idea.id == old.id)
-              );
-              if (deleteIndex > -1) {
-                this.ideas.splice(deleteIndex, 1);
-              }
-            }
-          }
-        });
+  updateIdeas(ideas: Idea[]): void {
+    ideas = ideas.reverse();
+    if (this.ideas.length == 0) {
+      this.ideas = ideas;
+    } else {
+      const newIdees: Idea[] = ideas.filter(
+        (idea) => !this.ideas.some((old) => old.id == idea.id)
+      );
+      this.ideas.splice(this.galleryIndex + 2, 0, ...newIdees);
+      let deleteIndex = 0;
+      while (deleteIndex > -1) {
+        deleteIndex = this.ideas.findIndex(
+          (old) => !ideas.some((idea) => idea.id == old.id)
+        );
+        if (deleteIndex > -1) {
+          this.ideas.splice(deleteIndex, 1);
+        }
+      }
     }
   }
 
@@ -86,16 +81,8 @@ export default class PublicScreen extends Vue {
     this.galleryIndex = newIndex;
   }
 
-  async mounted(): Promise<void> {
-    this.startInterval();
-  }
-
-  startInterval(): void {
-    this.interval = setInterval(this.getIdeas, this.intervalTime);
-  }
-
   unmounted(): void {
-    clearInterval(this.interval);
+    cashService.deregisterAllGet(this.updateIdeas);
   }
 }
 </script>
