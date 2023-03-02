@@ -908,9 +908,10 @@ export default class TaskSettings extends Vue {
   }
 
   taskListCash!: cashService.SimplifiedCashEntry<Task[]>;
+  viewCash!: cashService.SimplifiedCashEntry<View[]>;
   @Watch('topicId', { immediate: true })
   onTopicIdChanged(): void {
-    viewService.registerGetList(
+    this.viewCash = viewService.registerGetList(
       this.topicId,
       this.updateViews,
       EndpointAuthorisationType.MODERATOR,
@@ -1136,6 +1137,7 @@ export default class TaskSettings extends Vue {
     this.showDialog = showModal;
 
     if (showModal) {
+      if (this.viewCash) this.viewCash.refreshData();
       this.isEditStep = true;
       this.onTaskIdChanged();
       setTimeout(() => {
