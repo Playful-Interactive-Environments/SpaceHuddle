@@ -390,7 +390,9 @@ export function deregisterGet(
   if (key in dataCash) {
     dataCash[key].removeCallback(callback);
     if (dataCash[key].callbackList.length === 0) {
-      setTimeout(() => delete dataCash[key], 2000);
+      setTimeout(() => {
+        if (dataCash[key].callbackList.length === 0) delete dataCash[key];
+      }, 2000);
     }
   }
 }
@@ -400,9 +402,13 @@ export function deregisterAllGet(
 ): void {
   for (const key of Object.keys(dataCash)) {
     let hasCallback = dataCash[key].removeCallback(callback);
-    while (hasCallback) hasCallback = dataCash[key].removeCallback(callback);
+    while (hasCallback) {
+      hasCallback = dataCash[key].removeCallback(callback);
+    }
     if (dataCash[key].callbackList.length === 0) {
-      setTimeout(() => delete dataCash[key], 2000);
+      setTimeout(() => {
+        if (dataCash[key].callbackList.length === 0) delete dataCash[key];
+      }, 2000);
     }
   }
 }

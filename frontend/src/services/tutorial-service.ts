@@ -67,6 +67,7 @@ export const addTutorialStep = (
   postStep(data).then(() => {
     const tutorialSteps = cashService.getCash(tutorialUrl);
     if (tutorialSteps) tutorialSteps.push(data);
+    else cashService.refreshCash(tutorialUrl);
     eventBus.emit(EventType.CHANGE_TUTORIAL, tutorialSteps);
   });
 };
