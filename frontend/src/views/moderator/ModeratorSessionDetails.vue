@@ -318,7 +318,7 @@ export default class ModeratorSessionDetails extends Vue {
   }
 
   async deleteSession(): Promise<void> {
-    this.unmounted();
+    this.deregisterAllGet();
     setTimeout(() => {
       sessionService.remove(this.sessionId).then((deleted) => {
         if (deleted) this.$router.go(-1);
@@ -341,12 +341,16 @@ export default class ModeratorSessionDetails extends Vue {
     }
   }
 
-  unmounted(): void {
+  deregisterAllGet(): void {
     cashService.deregisterAllGet(this.updateSession);
     cashService.deregisterAllGet(this.updateTasks);
     cashService.deregisterAllGet(this.updateTopics);
     cashService.deregisterAllGet(this.updateRole);
     cashService.deregisterAllGet(this.updatePublicTask);
+  }
+
+  unmounted(): void {
+    this.deregisterAllGet();
   }
 
   disconnect(): void {
