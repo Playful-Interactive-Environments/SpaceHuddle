@@ -1397,7 +1397,7 @@ export default class TaskSettings extends Vue {
         })
         .then(
           (task) => {
-            if (this.inputCash) this.inputCash.refreshData();
+            if (this.inputCash) this.inputCash.refreshData(false);
             saveTask = task;
             this.taskUpdated(task);
             if (this.taskCash) this.taskCash.refreshData();

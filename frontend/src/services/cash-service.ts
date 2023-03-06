@@ -258,13 +258,15 @@ export class CashEntry<TIn = any, TOut = any> {
     return true;
   }
 
-  async refreshData(): Promise<TOut> {
+  async refreshData(informOnlyAboutChanges = true): Promise<TOut> {
     const oldData = JSON.stringify(this.data);
-    if (await this.executeCall()) {
-      if (JSON.stringify(this.data) != oldData) {
-        for (const callback of this.callbackList) {
-          callback.execute(this.data);
-        }
+    const executed = await this.executeCall();
+    if (
+      !informOnlyAboutChanges ||
+      (executed && JSON.stringify(this.data) != oldData)
+    ) {
+      for (const callback of this.callbackList) {
+        callback.execute(this.data);
       }
     }
     return this.data;
