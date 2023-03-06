@@ -246,7 +246,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       this.taskId,
       this.updateCategories,
       EndpointAuthorisationType.MODERATOR,
-      60 * 60
+      20
     );
     this.inputCash = viewService.registerGetInputIdeas(
       this.taskId,
@@ -254,7 +254,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       null,
       this.updateInputIdeas,
       EndpointAuthorisationType.MODERATOR,
-      30
+      20
     );
     this.outputCash = viewService.registerGetInputIdeas(
       this.taskId,
@@ -262,7 +262,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       this.taskId,
       this.updateCategorisedIdeas,
       EndpointAuthorisationType.MODERATOR,
-      30,
+      20,
       'categorised::'
     );
     this.categories = [];

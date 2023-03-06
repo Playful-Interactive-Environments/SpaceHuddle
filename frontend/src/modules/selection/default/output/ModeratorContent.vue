@@ -222,7 +222,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       null,
       this.updateInputIdeas,
       EndpointAuthorisationType.MODERATOR,
-      30
+      20
     );
   }
 
@@ -262,7 +262,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         this.selectionId,
         this.updateSelectedIdeas,
         EndpointAuthorisationType.MODERATOR,
-        10
+        20
       );
   }
 

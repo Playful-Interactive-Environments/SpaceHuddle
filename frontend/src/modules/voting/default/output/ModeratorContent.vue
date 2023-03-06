@@ -44,6 +44,7 @@ import { VoteResult } from '@/types/api/Vote';
 import { EventType } from '@/types/enum/EventType';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
 import * as cashService from '@/services/cash-service';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
@@ -65,7 +66,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   reloadTaskSettings(): void {
     this.voteCashEntry = votingService.registerGetResult(
       this.taskId,
-      this.updateVotes
+      this.updateVotes,
+      EndpointAuthorisationType.MODERATOR,
+      20
     );
   }
 

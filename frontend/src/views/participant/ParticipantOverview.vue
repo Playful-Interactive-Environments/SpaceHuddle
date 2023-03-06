@@ -176,7 +176,7 @@ export default class ParticipantOverview extends Vue {
         topic.id,
         this.updateTasks,
         EndpointAuthorisationType.PARTICIPANT,
-        5 * 60
+        10
       );
     });
     this.topics = topics;

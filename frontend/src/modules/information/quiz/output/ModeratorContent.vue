@@ -393,7 +393,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
             newValue.question.id,
             this.updateVotes,
             EndpointAuthorisationType.MODERATOR,
-            30
+            20
           );
         } else {
           hierarchyService.registerGetList(
@@ -401,7 +401,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
             newValue.question.id,
             this.updateHierarchyResult,
             EndpointAuthorisationType.MODERATOR,
-            30
+            20
           );
         }
       }
