@@ -391,7 +391,7 @@ export function deregisterGet(
     dataCash[key].removeCallback(callback);
     if (dataCash[key].callbackList.length === 0) {
       setTimeout(() => {
-        if (dataCash[key].callbackList.length === 0) delete dataCash[key];
+        if (dataCash[key] && dataCash[key].callbackList.length === 0) delete dataCash[key];
       }, 2000);
     }
   }
@@ -407,7 +407,7 @@ export function deregisterAllGet(
     }
     if (dataCash[key].callbackList.length === 0) {
       setTimeout(() => {
-        if (dataCash[key].callbackList.length === 0) delete dataCash[key];
+        if (dataCash[key] && dataCash[key].callbackList.length === 0) delete dataCash[key];
       }, 2000);
     }
   }
