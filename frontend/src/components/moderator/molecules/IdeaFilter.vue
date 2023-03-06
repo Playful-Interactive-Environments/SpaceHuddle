@@ -308,7 +308,7 @@ export default class IdeaFilter extends Vue {
     this.sortOrderOptions = options.filter(
       (option) => option.ref?.id !== this.taskId
     );
-    if (this.task.parameter.input.length < 2) {
+    if (this.task?.parameter?.input && this.task.parameter.input.length < 2) {
       this.sortOrderOptions = this.sortOrderOptions.filter(
         (option) => option.orderType !== IdeaSortOrder.INPUT.toLowerCase()
       );
