@@ -628,12 +628,16 @@ export default class ModeratorTopicDetails extends Vue {
         if (this.activeTask?.id == task.id) this.activeTask = null;
         taskService.deleteTask(task.id).then((result) => {
           if (result) {
+            if (this.taskCash) this.taskCash.refreshData();
             const index = this.tasks.findIndex((t) => t.id === task.id);
             if (index > -1) {
               this.tasks.splice(index, 1);
             }
             if (activeTask) {
               this.setActiveTab(activeTask.taskType);
+              if (!this.activeTask) {
+                this.$router.replace({ params: { taskId: undefined } });
+              }
             }
           } else if (activeTask?.id == task.id) {
             this.changeTask(activeTask);
