@@ -106,10 +106,10 @@
             group="idea"
             @end="dragDone"
             :style="{
-              'max-height': `calc(var(--app-height) - ${topCategoryColumns}px - 1rem)`,
+              'height': `calc(var(--app-height) - ${topCategoryColumns}px - 1rem)`,
             }"
           >
-            <template v-slot:header>
+            <!--<template v-slot:header>
               <AddItem
                 :text="
                   $t('module.categorisation.default.moderatorContent.dragIdea')
@@ -118,7 +118,7 @@
                 :is-clickable="false"
                 :display-plus="false"
               />
-            </template>
+            </template>-->
             <template v-slot:item="{ element }">
               <IdeaCard
                 :key="element.id"
@@ -646,7 +646,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 }
 
 .group-items {
-  max-height: calc(var(--app-height) / 2);
+  //max-height: calc(var(--app-height) / 2);
   overflow-y: auto;
   scrollbar-color: var(--color-primary) var(--color-gray);
   scrollbar-width: thin;
