@@ -74,7 +74,7 @@ export const refreshGetTaskList = (topicId: string): void => {
 
 export const registerGetDependentTaskList = (
   taskId: string,
-  callback: (result: any) => void,
+  callback: (result: any, taskId: string) => void,
   authHeaderType = EndpointAuthorisationType.MODERATOR,
   maxDelaySeconds = 60 * 5
 ): cashService.SimplifiedCashEntry<Task[]> => {
@@ -83,7 +83,9 @@ export const registerGetDependentTaskList = (
     callback,
     [],
     authHeaderType,
-    maxDelaySeconds
+    maxDelaySeconds,
+    null,
+    [taskId]
   );
 };
 

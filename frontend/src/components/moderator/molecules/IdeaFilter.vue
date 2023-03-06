@@ -114,7 +114,7 @@ import { CollapseIdeas } from '@/components/moderator/organisms/cards/IdeaCard.v
 import { ElMessage } from 'element-plus';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { SessionRole } from '@/types/api/SessionRole';
-import * as cashService from "@/services/cash-service";
+import * as cashService from '@/services/cash-service';
 
 export interface FilterData {
   orderType: string;
@@ -215,50 +215,37 @@ export default class IdeaFilter extends Vue {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     taskService.registerGetTaskById(this.taskId, this.updateTask);
-    if (this.sortOrderTaskId) {
-      taskService.registerGetDependentTaskList(
-        this.sortOrderTaskId,
-        this.updateDependentTasks,
-        EndpointAuthorisationType.MODERATOR,
-        60 * 60
-      );
-    }
   }
 
-  sortOrderTaskId: string | null = null;
-  getSortOrderTaskId(): string | null {
-    let sortOrderTaskId: string | null = null;
+  getSortOrderTaskIds(): string[] {
+    const result: string[] = [];
     if (TaskType[this.task.taskType] === TaskType.BRAINSTORMING) {
-      sortOrderTaskId = this.task.id;
-    } else if (
-      this.task.parameter.input.length > 0 &&
-      this.task.parameter.input[0].view.type.toLowerCase() === ViewType.TASK
-    )
-      sortOrderTaskId = this.task.parameter.input[0].view.id;
-    return sortOrderTaskId;
+      result.push(this.task.id);
+    } else {
+      for (const input of this.task.parameter.input) {
+        if (input.view.type.toLowerCase() === ViewType.TASK)
+          result.push(input.view.id);
+      }
+    }
+    return result;
   }
 
   updateTask(task: Task): void {
     if (!this.isSaving) {
       this.task = task;
       this.sessionId = task.sessionId;
-      const sortOrderTaskId = this.getSortOrderTaskId();
-      if (this.sortOrderTaskId !== sortOrderTaskId) {
-        if (this.sortOrderTaskId) {
-          taskService.deregisterGetDependentTaskList(
-            this.sortOrderTaskId,
-            this.updateDependentTasks
-          );
-        }
-        if (sortOrderTaskId) {
-          this.sortOrderTaskId = sortOrderTaskId;
+      const sortOrderTaskIds = this.getSortOrderTaskIds();
+      cashService.deregisterAllGet(this.updateDependentTasks);
+      this.dependentTaskData = {};
+      if (sortOrderTaskIds.length > 0) {
+        for (const sortOrderTaskId of sortOrderTaskIds) {
           taskService.registerGetDependentTaskList(
             sortOrderTaskId,
             this.updateDependentTasks
           );
-        } else {
-          this.updateDependentTasks([]);
         }
+      } else {
+        this.updateDependentTasks([], this.taskId);
       }
       if (task.parameter && 'syncUserId' in task.parameter) {
         this.syncUserId = task.parameter.syncUserId;
@@ -311,8 +298,13 @@ export default class IdeaFilter extends Vue {
     }
   }
 
-  updateDependentTasks(data: Task[]): void {
-    const options = ideaService.getSortOrderOptions(data);
+  dependentTaskData: { [key: string]: Task[] } = {};
+  updateDependentTasks(data: Task[], taskId: string): void {
+    this.dependentTaskData[taskId] = data;
+    const allData: Task[] = [];
+    for (const input of Object.values(this.dependentTaskData))
+      allData.push(...input);
+    const options = ideaService.getSortOrderOptions(allData);
     this.sortOrderOptions = options.filter(
       (option) => option.ref?.id !== this.taskId
     );
