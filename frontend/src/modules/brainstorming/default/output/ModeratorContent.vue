@@ -181,7 +181,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       null
     );
     this.reloadTabState = reloadTabState;
-    this.cashEntry.refreshData();
+    this.cashEntry.refreshData(false);
   }
 
   async mounted(): Promise<void> {
