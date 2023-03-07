@@ -16,6 +16,9 @@
                 <el-dropdown-item command="clone">
                   {{ $t('moderator.organism.session.overview.clone') }}
                 </el-dropdown-item>
+                <el-dropdown-item command="delete">
+                  {{ $t('moderator.organism.session.overview.delete') }}
+                </el-dropdown-item>
               </template>
             </el-dropdown>
           </div>
@@ -58,6 +61,7 @@ import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import SessionSettings from '@/components/moderator/organisms/settings/SessionSettings.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import { ElMessageBox } from 'element-plus';
+import * as sessionService from "@/services/session-service";
 
 @Options({
   components: {
@@ -83,6 +87,9 @@ export default class SessionCard extends Vue {
       case 'edit':
         this.sessionEditId = this.session.id;
         this.showSettings = true;
+        break;
+      case 'delete':
+        this.deleteSession();
         break;
       default:
         break;
@@ -118,6 +125,14 @@ export default class SessionCard extends Vue {
     } catch {
       // do nothing if the MessageBox is declined
     }
+  }
+
+  async deleteSession(): Promise<void> {
+    setTimeout(() => {
+      sessionService.remove(this.session.id).then((deleted) => {
+        if (deleted) this.$emit('updated');
+      });
+    }, 100);
   }
 }
 </script>

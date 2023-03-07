@@ -249,6 +249,7 @@
           "select": "Go to session",
           "add": "New Session",
           "edit": "Edit Session",
+          "delete": "Delete",
           "clone": "Clone Session",
           "clonePrompt": "Do you really want to clone this session?"
         }

@@ -249,6 +249,7 @@
           "select": "Zur Sitzung",
           "add": "Neue Sitzung",
           "edit": "Sitzung bearbeiten",
+          "delete": "Löschen",
           "clone": "Duplizieren",
           "clonePrompt": "Wollen Sie diese Sitzung wirklich duplizieren?"
         }
