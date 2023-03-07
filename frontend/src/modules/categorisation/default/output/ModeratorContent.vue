@@ -106,7 +106,7 @@
             group="idea"
             @end="dragDone"
             :style="{
-              'height': `calc(var(--app-height) - ${topCategoryColumns}px - 1rem)`,
+              height: `calc(var(--app-height) - ${topCategoryColumns}px - 1rem)`,
             }"
           >
             <!--<template v-slot:header>
@@ -321,14 +321,24 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         const orderGroupName = (this as any).$t(
           'module.categorisation.default.moderatorContent.undefined'
         );
-        switch (this.filter.orderType) {
-          case IdeaSortOrder.TIMESTAMP:
-          case IdeaSortOrder.ALPHABETICAL:
-          case IdeaSortOrder.ORDER:
-            this.orderGroupContentSelection[orderGroupName].ideas.push(idea);
-            break;
-          default:
-            this.orderGroupContentSelection[idea.orderGroup].ideas.push(idea);
+        const inputIdea = this.inputIdeas.find((item) => item.id === idea.id);
+        if (inputIdea && inputIdea.orderGroup === idea.orderGroup) {
+          switch (this.filter.orderType) {
+            case IdeaSortOrder.TIMESTAMP:
+            case IdeaSortOrder.ALPHABETICAL:
+            case IdeaSortOrder.ORDER:
+              this.orderGroupContentSelection[orderGroupName].ideas.push(
+                inputIdea
+              );
+              break;
+            default:
+              if (inputIdea)
+                this.orderGroupContentSelection[
+                  inputIdea.orderGroup
+                ].ideas.push(inputIdea);
+          }
+        } else {
+          this.orderGroupContentCards[idea.orderText].ideas.push(idea);
         }
       });
       this.orderGroupContentCards[this.addCategoryKey].ideas = [];
