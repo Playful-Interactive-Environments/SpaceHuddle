@@ -6,7 +6,12 @@
         native
         :height="`calc(var(--app-height) - ${topContentPosition}px - 1rem)`"
       >
-        <el-collapse v-model="openTabs">
+        <el-collapse
+          v-model="openTabs"
+          :style="{
+            height: `calc(var(--app-height) - ${topContentPosition}px - 1rem)`,
+          }"
+        >
           <el-collapse-item
             v-for="(item, key) in orderGroupContent"
             :key="key"
@@ -28,8 +33,9 @@
                 </span>
               </CollapseTitle>
             </template>
-            <div class="layout__columns">
+            <div class="unselectedDragArea">
               <draggable
+                class="layout__columns unselectedDragArea"
                 :id="key"
                 v-model="item.ideas"
                 draggable=".item"
@@ -91,8 +97,14 @@
               </CollapseTitle>
             </template>
 
-            <div class="layout__columns">
+            <div
+              ref="draggableStart"
+              :style="{
+                'min-height': `calc(var(--app-height) - ${topDraggableStart}px - 2.1rem)`,
+              }"
+            >
               <draggable
+                class="layout__columns"
                 :key="SELECTION_KEY"
                 :id="SELECTION_KEY"
                 v-model="selection"
@@ -100,6 +112,9 @@
                 item-key="id"
                 group="idea"
                 @end="dragDone"
+                :style="{
+                  'min-height': `calc(var(--app-height) - ${topDraggableStart}px - 2.1rem)`,
+                }"
               >
                 <template v-slot:header>
                   <AddItem
@@ -198,11 +213,17 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   filter: FilterData = { ...defaultFilterData };
 
   topContentPosition = 80;
+  topDraggableStart = 100;
 
   loadTopPositions(): void {
     if (this.$refs.data) {
       this.topContentPosition = (
         this.$refs.data as HTMLElement
+      ).getBoundingClientRect().top;
+    }
+    if (this.$refs.draggableStart) {
+      this.topDraggableStart = (
+        this.$refs.draggableStart as HTMLElement
       ).getBoundingClientRect().top;
     }
   }
@@ -407,10 +428,35 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   padding: 14px;
 }
 
+.el-collapse-item::v-deep(.el-collapse-item__content) {
+  padding-bottom: 1rem;
+}
+
 .unselected {
   max-width: 50%;
   min-width: 10rem;
   padding-right: 1rem;
   border-right: 2px var(--color-primary) solid;
+
+  .el-collapse {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .el-collapse-item {
+    flex-grow: 1;
+  }
+
+  .el-collapse-item::v-deep(.el-collapse-item__wrap) {
+    height: calc(100% - 3rem);
+  }
+
+  .el-collapse-item::v-deep(.el-collapse-item__content) {
+    height: 100%;
+  }
+
+  .unselectedDragArea {
+    height: 100%;
+  }
 }
 </style>

@@ -107,7 +107,7 @@ export default class ModeratorNavigationLayout extends Vue {
 
   &__content {
     flex-grow: 1;
-    padding: 1rem 2rem;
+    padding: 1rem 2rem 0 2rem;
   }
 }
 

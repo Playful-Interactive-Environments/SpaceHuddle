@@ -6,7 +6,12 @@
         native
         :height="`calc(var(--app-height) - ${topNoCategoryColumn}px - 1rem)`"
       >
-        <el-collapse v-model="openTabs">
+        <el-collapse
+          v-model="openTabs"
+          :style="{
+            height: `calc(var(--app-height) - ${topNoCategoryColumn}px - 1rem)`,
+          }"
+        >
           <el-collapse-item
             v-for="(item, key) in orderGroupContentSelection"
             :key="key"
@@ -24,8 +29,9 @@
                 </span>
               </CollapseTitle>
             </template>
-            <div class="layout__columns">
+            <div class="layout__columns uncategorizedDragArea">
               <draggable
+                class="uncategorizedDragArea"
                 :id="item.category ? item.category.id : null"
                 v-model="item.ideas"
                 handle=".drag-item"
@@ -109,7 +115,7 @@
               height: `calc(var(--app-height) - ${topCategoryColumns}px - 1rem)`,
             }"
           >
-            <!--<template v-slot:header>
+            <template v-slot:header>
               <AddItem
                 :text="
                   $t('module.categorisation.default.moderatorContent.dragIdea')
@@ -117,8 +123,9 @@
                 :is-column="true"
                 :is-clickable="false"
                 :display-plus="false"
+                v-if="orderGroup.ideas.length === 0"
               />
-            </template>-->
+            </template>
             <template v-slot:item="{ element }">
               <IdeaCard
                 :key="element.id"
@@ -641,6 +648,28 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   min-width: 10rem;
   padding-right: 1rem;
   border-right: 2px var(--color-primary) solid;
+
+  .el-collapse {
+    display: flex;
+    flex-direction: column;
+
+    .el-collapse-item {
+      flex-grow: 1;
+    }
+
+    .el-collapse-item::v-deep(.el-collapse-item__wrap) {
+      height: calc(100% - 3rem);
+    }
+
+    .el-collapse-item::v-deep(.el-collapse-item__content) {
+      padding-bottom: 1rem;
+      height: 100%;
+    }
+  }
+
+  .uncategorizedDragArea {
+    height: 100%;
+  }
 }
 
 .scroll-x {
