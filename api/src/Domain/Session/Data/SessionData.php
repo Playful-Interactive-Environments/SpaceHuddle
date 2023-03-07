@@ -32,6 +32,13 @@ class SessionData
     public ?string $description;
 
     /**
+     * The session subject.
+     * @var string|null
+     * @OA\Property()
+     */
+    public ?string $subject;
+
+    /**
      * The key with which the participants can connect to the session.
      * @var string|null
      * @OA\Property(example="ABCD1234")
@@ -104,6 +111,7 @@ class SessionData
         $this->id = $reader->findString("id");
         $this->title = $reader->findString("title");
         $this->description = $reader->findString("description");
+        $this->subject = $reader->findString("subject");
         $this->connectionKey = $reader->findString("connection_key");
         $this->maxParticipants = $reader->findInt("max_participants");
         $this->expirationDate = $reader->findString("expiration_date");

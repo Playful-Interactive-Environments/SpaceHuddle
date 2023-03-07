@@ -468,6 +468,7 @@ class SessionRepository implements RepositoryInterface
             "id" => $data->id ?? null,
             "title" => $data->title ?? null,
             "description" => $data->description ?? null,
+            "subject" => $data->subject ?? null,
             "connection_key" => $data->connectionKey ?? null,
             "max_participants" => $data->maxParticipants ?? null,
             "expiration_date" => $data->expirationDate ?? null,

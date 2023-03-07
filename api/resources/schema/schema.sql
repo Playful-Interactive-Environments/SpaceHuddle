@@ -183,6 +183,7 @@ CREATE TABLE `session` (
                            `id` char(36) NOT NULL,
                            `title` varchar(255) NOT NULL,
                            `description` text DEFAULT NULL,
+                           `subject` varchar(255) DEFAULT NULL,
                            `connection_key` char(10) NOT NULL,
                            `max_participants` int(11) DEFAULT NULL,
                            `expiration_date` date DEFAULT NULL,

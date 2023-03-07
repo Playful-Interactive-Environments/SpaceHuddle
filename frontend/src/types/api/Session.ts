@@ -10,6 +10,7 @@ export interface Session {
   publicScreenModuleId: string;
   role: UserType;
   title: string;
+  subject: string | null;
   topicCount: number;
   taskCount: number;
   allowAnonymous: boolean;
