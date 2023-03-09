@@ -63,6 +63,7 @@
       v-on:changePublicQuestion="(question) => (activeQuestion = question)"
       v-on:changePublicAnswers="(answers) => (publicAnswerList = answers)"
       v-if="!submitScreen"
+      :showData="!initData"
     >
       <template #answers>
         <el-space
@@ -698,6 +699,7 @@ export default class Participant extends Vue {
     this.questionAnswered = this.getQuestionAnswered();
     if (!this.moderatedQuestionFlow && this.initData) {
       if (this.questionAnswered) this.goToNextQuestion(null, true);
+      else this.initData = false;
     }
   }
 

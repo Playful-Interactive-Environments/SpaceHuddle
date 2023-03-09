@@ -9,7 +9,7 @@
       :key="question.question.id"
     ></el-step>
   </el-steps>
-  <div v-if="showQuestion" class="fill">
+  <div v-if="showQuestion && showData" class="fill">
     <el-space
       direction="vertical"
       class="fill"
@@ -57,7 +57,7 @@
     <QuizResult
       :voteResult="voteResult"
       :change="false"
-      questionnaireType="questionType"
+      :questionnaireType="questionnaireType"
       :questionType="activeQuestionType"
       :update="true"
     />
@@ -67,7 +67,7 @@
       :voteResult="voteResult"
       resultColumn="countParticipant"
       :change="false"
-      questionnaireType="QuestionType.SURVEY"
+      :questionnaireType="QuestionnaireType.SURVEY"
       :questionType="activeQuestionType"
       :update="true"
     />
@@ -78,7 +78,6 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import { Task } from '@/types/api/Task';
 import {
   getQuestionResultStorageFromHierarchy,
@@ -115,7 +114,6 @@ export interface PublicAnswerData {
 
 @Options({
   components: {
-    Vue3ChartJs,
     QuizResult,
   },
   emits: ['changePublicAnswers', 'changePublicQuestion', 'changeQuizState'],
@@ -131,6 +129,7 @@ export default class PublicBase extends Vue {
   readonly activeQuestionPhase!: QuestionPhase;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
+  @Prop({ default: true }) readonly showData!: boolean;
   readonly intervalTime = 1000;
   interval!: any;
   task: Task | null = null;
@@ -142,6 +141,7 @@ export default class PublicBase extends Vue {
 
   questionState: QuestionState = QuestionState.ACTIVE_CREATE_QUESTION;
   statePointer = 0;
+  QuestionnaireType = QuestionnaireType;
   //#endregion properties
 
   //#region get / set

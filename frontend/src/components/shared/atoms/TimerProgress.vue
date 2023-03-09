@@ -1,5 +1,5 @@
 <template>
-  <div v-if="showTime && totalTime">
+  <div v-if="showProgress">
     <el-progress
       :text-inside="true"
       :stroke-width="26"
@@ -40,6 +40,10 @@ export default class TimerProgress extends Vue {
 
   get showTime(): boolean {
     return timerService.isActive(this.entity);
+  }
+
+  get showProgress(): boolean {
+    return this.showTime && !!this.totalTime && this.timeLeft !== null;
   }
 
   timerCash!: cashService.SimplifiedCashEntry<any>;

@@ -8,7 +8,7 @@
       <QuizResult
         :voteResult="votes"
         :update="true"
-        questionnaireType="questionnaireType"
+        :questionnaireType="questionnaireType"
         :questionType="formData.questionType"
         :show-legend="true"
       />
@@ -94,7 +94,7 @@
               prop="question.keywords"
               :rules="[
                 defaultFormRules.ruleRequired,
-                defaultFormRules.ruleToLong(400),
+                defaultFormRules.ruleToLong(255),
               ]"
             >
               <el-input
@@ -141,7 +141,7 @@
           :prop="`answers[${index}].keywords`"
           :rules="[
             defaultFormRules.ruleRequired,
-            defaultFormRules.ruleToLong(400),
+            defaultFormRules.ruleToLong(255),
           ]"
         >
           <div class="media" v-if="index < formData.answers.length">
@@ -261,7 +261,6 @@ import ProcessTimeline from '@/components/moderator/organisms/Timeline/ProcessTi
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import { Hierarchy } from '@/types/api/Hierarchy';
-import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import { VoteResult } from '@/types/api/Vote';
 import * as votingService from '@/services/voting-service';
 import * as cashService from '@/services/cash-service';
@@ -294,7 +293,6 @@ import { Topic } from '@/types/api/Topic';
     IdeaSettings,
     IdeaCard,
     draggable,
-    Vue3ChartJs,
     QuizResult,
   },
 })
