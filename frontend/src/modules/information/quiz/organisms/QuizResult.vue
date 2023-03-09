@@ -39,7 +39,7 @@
       },
       plugins: {
         legend: {
-          display: showLegend,
+          display: showLegend && questionnaireType === QuestionnaireType.QUIZ,
           position: 'top',
           align: 'end',
           labels: {
@@ -81,6 +81,7 @@ export default class QuizResult extends Vue {
   @Prop({ default: true }) readonly showLegend!: true;
 
   QuestionType = QuestionType;
+  QuestionnaireType = QuestionnaireType;
 
   chartData: any = {
     labels: [],
@@ -118,27 +119,21 @@ export default class QuizResult extends Vue {
 
   breakString(str: string, limit: number): string[] | string {
     if (str.length > limit) {
-      const stringArray = [''];
-      let brokenString = '';
+      const stringArray: string[] = [];
       let lineLimit = this.labelLineLimit;
-      for (let i = 0, count = 0; i < str.length && lineLimit > 0; i++) {
-        if ((count >= limit && str[i] === ' ') || count >= limit + 5) {
-          if (str[i] !== ' ') {
-            brokenString += '-';
-          }
-          count = 0;
-          stringArray.push(brokenString);
-          brokenString = '';
-          lineLimit--;
-        } else {
-          count++;
-          brokenString += str[i];
+      for (let i = 0; i < str.length && lineLimit > 0; i += limit) {
+        let brokenString = str.substring(i, i + limit);
+        if (i + limit < str.length && str[i + limit] !== ' ') {
+          brokenString += '-';
         }
+        stringArray.push(brokenString);
+        lineLimit--;
       }
-      if (lineLimit == 0) {
+      if (lineLimit == 0 && this.labelLineLimit * limit < str.length) {
         stringArray[stringArray.length - 1] =
           stringArray[stringArray.length - 1] + '...';
       }
+      if (stringArray.length === 0) stringArray.push('');
       return stringArray;
     } else {
       return str;
@@ -187,7 +182,9 @@ export default class QuizResult extends Vue {
       };
     } else {
       return {
-        labels: this.voteResult.map((vote) => vote.idea.keywords),
+        labels: this.voteResult.map((vote) =>
+          this.breakString(vote.idea.keywords, 34)
+        ),
         datasets: [
           {
             label: labelResult,
