@@ -60,6 +60,7 @@ use App\Action\Session\PublicScreenUpdateAction;
 use App\Action\Session\SessionDeleteAction;
 use App\Action\Session\SessionParticipantReadAction;
 use App\Action\Session\SessionReadInfosAction;
+use App\Action\Session\SessionSubjectReadAction;
 use App\Action\Session\SessionUpdateAction;
 use App\Action\SessionRole\SessionRoleCreateAction;
 use App\Action\SessionRole\SessionRoleDeleteAction;
@@ -176,6 +177,7 @@ return function (App $app) {
     $app->group(
         "/sessions",
         function (RouteCollectorProxy $app) {
+            $app->get("/subjects[/]", SessionSubjectReadAction::class);
             $app->get("[/]", SessionReadAllAction::class);
         }
     )->add(JwtAuthMiddleware::class);

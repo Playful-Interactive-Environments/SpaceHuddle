@@ -81,6 +81,7 @@ p, MODERATOR, /session/, POST
 p, MODERATOR|FACILITATOR, /session/:id/clone/, POST
 p, UNKNOWN|ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /session_infos/, POST
 p, MODERATOR|FACILITATOR, /session/:sessionId/participants/, GET
+p, MODERATOR|FACILITATOR, /sessions/subjects/, GET
 
 p, MODERATOR|FACILITATOR, /session/:sessionId/public_screen/:taskId/, PUT
 p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/public_screen/, GET

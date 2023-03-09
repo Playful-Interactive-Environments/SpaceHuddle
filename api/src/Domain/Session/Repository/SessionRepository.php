@@ -139,6 +139,38 @@ class SessionRepository implements RepositoryInterface
     }
 
     /**
+     * get all used session subjects
+     * @return array list of session subjects
+     * @throws GenericException
+     */
+    public function getSubjects(): array
+    {
+        $authorisation = $this->getAuthorisation();
+        $authorisation_conditions = [
+            "session_permission.user_id" => $authorisation->id,
+            "session_permission.user_type" => $authorisation->type
+        ];
+
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["session.subject"])
+            ->innerJoin("session_permission", "session_permission.session_id = session.id")
+            ->andWhere($authorisation_conditions)
+            ->distinct(["session.subject"]);
+
+        $rows = $query->execute()->fetchAll("assoc");
+        if (is_array($rows) and sizeof($rows) > 0) {
+            $result = [];
+            foreach ($rows as $resultItem) {
+                $reader = new ArrayReader($resultItem);
+                $subject = $reader->findString("subject");
+                array_push($result, $subject);
+            }
+            return $result;
+        }
+        return [];
+    }
+
+    /**
      * Has entity changes
      * @param array $conditions The WHERE conditions to add with AND.
      * @return ModificationData Modification Data
