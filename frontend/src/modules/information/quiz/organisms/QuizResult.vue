@@ -121,15 +121,23 @@ export default class QuizResult extends Vue {
     if (str.length > limit) {
       const stringArray: string[] = [];
       let lineLimit = this.labelLineLimit;
-      for (let i = 0; i < str.length && lineLimit > 0; i += limit) {
-        let brokenString = str.substring(i, i + limit);
-        if (i + limit < str.length && str[i + limit] !== ' ') {
+      let i = 0;
+      while (i <= str.length && lineLimit > 0) {
+        let end = str.indexOf(' ', i + limit);
+        if (end === -1) end = str.length;
+        if (end > i + limit + 10) {
+          end = str.lastIndexOf(' ', i + limit);
+          if (end < i + limit - 10) end = i + limit;
+        }
+        let brokenString = str.substring(i, end);
+        if (end < str.length && ![' ', ',', '.', '?', '!'].includes(str[end])) {
           brokenString += '-';
         }
         stringArray.push(brokenString);
         lineLimit--;
+        i = end;
       }
-      if (lineLimit == 0 && this.labelLineLimit * limit < str.length) {
+      if (lineLimit == 0 && i + limit < str.length) {
         stringArray[stringArray.length - 1] =
           stringArray[stringArray.length - 1] + '...';
       }
