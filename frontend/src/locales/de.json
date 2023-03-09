@@ -149,6 +149,9 @@
         "order": "Sortierung",
         "syncActiveMessage": "Synchronisierung der Filtereinstellungen mit der Publikumsansicht aktiviert",
         "syncDeactivateMessage": "Synchronisierung der Filtereinstellungen mit der Publikumsansicht deaktiviert"
+      },
+      "sessionFilter": {
+        "filterPlaceholder": "Suchen..."
       }
     },
     "organism": {
@@ -470,6 +473,15 @@
       "duplicate": "Duplikat",
       "thumbs_down": "Daumen hoch",
       "thumbs_up": "Daumen runter"
+    },
+    "sessionSortOrder": {
+      "null": "",
+      "chronological": "Chronologisch",
+      "alphabetical": "Alphabetisch",
+      "topics": "Themen",
+      "tasks": "Aufgaben",
+      "moderators": "Moderator*innen",
+      "participants": "Teilnehmer*innen"
     },
     "viewType": {
       "task": "Aufgabe",

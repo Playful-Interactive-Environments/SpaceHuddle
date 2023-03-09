@@ -149,6 +149,9 @@
         "order": "order",
         "syncActiveMessage": "Synchronization of the filter settings with the public screen enabled",
         "syncDeactivateMessage": "Synchronization of the filter settings with the public screen disabled"
+      },
+      "sessionFilter": {
+        "filterPlaceholder": "Search..."
       }
     },
     "organism": {
@@ -470,6 +473,15 @@
       "duplicate": "duplicate",
       "thumbs_down": "thumbs down",
       "thumbs_up": "thumbs up"
+    },
+    "sessionSortOrder": {
+      "null": "",
+      "chronological": "Chronological",
+      "alphabetical": "Alphabetical",
+      "topics": "Topics",
+      "tasks": "Tasks",
+      "moderators": "Moderators",
+      "participants": "Participants"
     },
     "viewType": {
       "task": "task",

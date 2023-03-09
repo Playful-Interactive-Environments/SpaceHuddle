@@ -2,6 +2,7 @@
   <ModeratorNavigationLayout>
     <template v-slot:content>
       <h1>{{ $t('moderator.organism.session.overview.header') }}</h1>
+      <SessionFilter v-model="filter" />
       <div class="columns is-multiline is-9">
         <div class="column">
           <TutorialStep step="add" type="sessionOverview" :order="0">
@@ -12,15 +13,12 @@
             />
           </TutorialStep>
         </div>
-        <div v-for="session in sessions" :key="session.id" class="column">
+        <div v-for="session in filteredSessions" :key="session.id" class="column">
           <SessionCard :session="session" @updated="refreshSessions" />
         </div>
       </div>
       <div class="session-overview__session-container"></div>
-      <SessionSettings
-        v-model:show-modal="showSettings"
-        @sessionUpdated="refreshSessions"
-      />
+      <SessionSettings v-model:show-modal="showSettings" @sessionUpdated="refreshSessions"/>
     </template>
   </ModeratorNavigationLayout>
 </template>
@@ -37,9 +35,16 @@ import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/M
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
+import SessionFilter, {
+  SessionFilterData,
+  defaultFilterData,
+} from '@/components/moderator/molecules/SessionFilter.vue';
+import SessionSortOrder from '@/types/enum/SessionSortOrder';
+import { Watch } from 'vue-property-decorator';
 
 @Options({
   components: {
+    SessionFilter,
     TutorialStep,
     AddItem,
     SessionCard,
@@ -51,9 +56,10 @@ import * as cashService from '@/services/cash-service';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorSessionOverview extends Vue {
   sessions: Session[] = [];
+  filteredSessions: Session[] = [];
   showSettings = false;
+  filter: SessionFilterData = { ...defaultFilterData };
   errors: string[] = [];
-
   sessionCash!: cashService.SimplifiedCashEntry<Session[]>;
   async mounted(): Promise<void> {
     this.sessionCash = sessionService.registerGetList(
@@ -62,15 +68,50 @@ export default class ModeratorSessionOverview extends Vue {
       2 * 60
     );
   }
-
-  updateSessions(sessions: Session[]): void {
-    this.sessions = sessions;
+  @Watch('filter.textFilter', { immediate: true })
+  onTextFilterChanged(): void {
+    this.updateFilteredSessions(this.sessions);
+  }
+  @Watch('filter.orderType', { immediate: true })
+  onOrderTypeChanged(): void {
+    this.updateFilteredSessions(this.sessions);
+  }
+  @Watch('filter.orderAsc', { immediate: true })
+  onOrderAscChanged(): void {
+    this.updateFilteredSessions(this.sessions);
+  }
+  updateSessions(): void {
+    this.sessions = this.sessionCash.data;
+    this.filteredSessions = this.sessions;
+    this.updateFilteredSessions(this.sessions);
+  }
+  updateFilteredSessions(sessions: Session[]): void {
+    const orderType = this.filter.orderType;
+    const dataList = sessionService.getOrderGroups(
+      sessions,
+      this.filter.orderAsc
+    );
+    switch (orderType) {
+      case SessionSortOrder.CHRONOLOGICAL:
+      case SessionSortOrder.ALPHABETICAL:
+      case SessionSortOrder.TOPICS:
+      case SessionSortOrder.TASKS:
+      case SessionSortOrder.MODERATORS:
+      case SessionSortOrder.PARTICIPANTS:
+        this.filteredSessions = sessionService.filterSessions(
+          dataList[orderType.toUpperCase()].sessions,
+          this.filter.textFilter
+        );
+        break;
+      default:
+        console.log('Could not filter the given sessions.');
+        this.filteredSessions = this.sessions;
+    }
   }
 
   refreshSessions(): void {
     this.sessionCash.refreshData();
   }
-
   unmounted(): void {
     cashService.deregisterAllGet(this.updateSessions);
   }

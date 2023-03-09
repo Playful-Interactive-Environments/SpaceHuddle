@@ -6,6 +6,8 @@ export interface Session {
   expirationDate: string;
   id: string;
   maxParticipants: number;
+  userCount: number;
+  participantCount: number;
   description: string;
   publicScreenModuleId: string;
   role: UserType;

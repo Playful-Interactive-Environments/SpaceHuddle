@@ -75,7 +75,6 @@ export default class ModuleCount extends Vue {
   @Prop() session!: Session;
   participants: ParticipantInfo[] = [];
   users: SessionRole[] = [];
-
   unmounted(): void {
     cashService.deregisterAllGet(this.updateParticipantCount);
     cashService.deregisterAllGet(this.updateUserCount);
@@ -99,10 +98,12 @@ export default class ModuleCount extends Vue {
 
   updateParticipantCount(queryResult: ParticipantInfo[]): void {
     this.participants = queryResult;
+    this.session.participantCount = this.participants.length;
   }
 
   updateUserCount(queryResult: SessionRole[]): void {
     this.users = queryResult;
+    this.session.userCount = this.users.length;
   }
 }
 </script>

@@ -10,6 +10,12 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Session, SessionInfo } from '@/types/api/Session';
 import { ParticipantInfo } from '@/types/api/Participant';
 import * as cashService from '@/services/cash-service';
+import {
+  SessionOrderGroup,
+  SessionOrderGroupList,
+  SessionSortOrderOption,
+} from '@/types/api/SessionOrderGroup';
+import SessionSortOrder from '@/types/enum/SessionSortOrder';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -27,8 +33,28 @@ export const registerGetList = (
   );
 };
 
+export const registerGetSubjects = (
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<string[]> => {
+  return cashService.registerSimplifiedGet<string[]>(
+    `/${EndpointType.SESSIONS}/subjects/`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
 export const deregisterGetList = (callback: (result: any) => void): void => {
   cashService.deregisterGet(`/${EndpointType.SESSIONS}/`, callback);
+};
+
+export const deregisterGetSubjects = (
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(`/${EndpointType.SESSIONS}/subjects/`, callback);
 };
 
 export const registerGetById = (
@@ -177,4 +203,118 @@ export const clone = async (
     null,
     authHeaderType
   );
+};
+
+export const getQueryParameter = (orderType: string | null = null): string => {
+  let queryParameter = getSessionListParameter(orderType);
+  if (queryParameter.length > 0) queryParameter = `?${queryParameter}`;
+  return queryParameter;
+};
+
+export const getSessionListParameter = (
+  orderType: string | null = null
+): string => {
+  let queryParameter = '';
+  if (orderType) queryParameter = `order=${orderType}`;
+  return queryParameter;
+};
+
+export const getSessionSortOrderOptions = (): SessionSortOrderOption[] => {
+  return Object.keys(SessionSortOrder).map((orderType) => {
+    return { orderType: orderType.toLowerCase() };
+  });
+};
+
+export const convertToOrderGroups = (
+  sessions: Session[],
+  orderAsc: boolean
+): SessionOrderGroupList => {
+  const orderGroupList = {};
+  for (const orderType in SessionSortOrder) {
+    let reorderedSessions: Session[] = [];
+    sessions.forEach((session) => reorderedSessions.push(session));
+    reorderedSessions.sort((session1, session2) => {
+      switch (orderType) {
+        case 'CHRONOLOGICAL':
+          if (
+            Date.parse(session1.creationDate) <
+            Date.parse(session2.creationDate)
+          ) {
+            return -1;
+          } else if (
+            Date.parse(session1.creationDate) >
+            Date.parse(session2.creationDate)
+          ) {
+            return 1;
+          } else {
+            return 0;
+          }
+        case 'ALPHABETICAL':
+          return session1.title
+            .toLowerCase()
+            .localeCompare(session2.title.toLowerCase());
+        case 'TOPICS':
+          if (session1.topicCount < session2.topicCount) {
+            return -1;
+          } else if (session1.topicCount > session2.topicCount) {
+            return 1;
+          } else {
+            return 0;
+          }
+        case 'TASKS':
+          if (session1.taskCount < session2.taskCount) {
+            return -1;
+          } else if (session1.taskCount > session2.taskCount) {
+            return 1;
+          } else {
+            return 0;
+          }
+        case 'MODERATORS':
+          if (session1.userCount < session2.userCount) {
+            return -1;
+          } else if (session1.userCount > session2.userCount) {
+            return 1;
+          } else {
+            return 0;
+          }
+        case 'PARTICIPANTS':
+          if (session1.participantCount < session2.participantCount) {
+            return -1;
+          } else if (session1.participantCount > session2.participantCount) {
+            return 1;
+          } else {
+            return 0;
+          }
+        default:
+          console.warn('Sort-Order not recognized: ' + orderType);
+          return 0;
+      }
+    });
+    reorderedSessions = orderAsc
+      ? reorderedSessions
+      : reorderedSessions.reverse();
+    orderGroupList[orderType] = new SessionOrderGroup(reorderedSessions);
+  }
+  return orderGroupList;
+};
+
+export const getOrderGroups = (
+  sessions: Session[],
+  orderAsc: boolean
+): SessionOrderGroupList => {
+  return convertToOrderGroups(sessions, orderAsc);
+};
+
+export const filterSessions = (
+  sessionList: Session[],
+  textFilter: string
+): Session[] => {
+  if (textFilter && textFilter.length > 0) {
+    sessionList = sessionList.filter(
+      (session) =>
+        session.title.toLowerCase().includes(textFilter.toLowerCase()) ||
+        session.description.toLowerCase().includes(textFilter.toLowerCase())
+    );
+  }
+  return sessionList;
 };
