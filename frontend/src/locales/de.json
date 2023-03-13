@@ -151,7 +151,8 @@
         "syncDeactivateMessage": "Synchronisierung der Filtereinstellungen mit der Publikumsansicht deaktiviert"
       },
       "sessionFilter": {
-        "filterPlaceholder": "Suchen..."
+        "filterPlaceholder": "Suchen...",
+        "subjectPlaceholder": "Betreff"
       }
     },
     "organism": {
@@ -228,6 +229,8 @@
           "titleExample": "e.g. Marketing-Treffen",
           "description": "Beschreibung",
           "descriptionExample": "z.B. Der Sinn dieses Meetings ist, Ideen für unsere neue App zu finden.",
+          "subject": "Betreff",
+          "subjectExample": "Neu...",
           "expirationDate": "Ablaufdatum",
           "expirationDatePlaceholder": "Wähle einen Tag aus",
           "topics": "Themen",
@@ -251,6 +254,7 @@
           "header": "Deine Sitzungen",
           "select": "Zur Sitzung",
           "add": "Neue Sitzung",
+          "hidden": " versteckt",
           "edit": "Sitzung bearbeiten",
           "delete": "Löschen",
           "clone": "Duplizieren",

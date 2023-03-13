@@ -32,6 +32,11 @@
       </el-header>
       <el-main> </el-main>
       <el-footer>
+        <div class="el-card__content">
+          <span v-if="hasSubject" class="flex-grow subject">{{
+            this.session.subject
+          }}</span>
+        </div>
         <ModuleCount :session="session" />
         <div class="el-card__content">
           <SessionCode :code="session.connectionKey" button-type="primary" />
@@ -48,6 +53,7 @@
     v-model:show-modal="showSettings"
     :session-id="sessionEditId"
     @sessionUpdated="onSessionUpdated"
+    @update:subject="onSubjectUpdated"
   />
 </template>
 
@@ -61,7 +67,7 @@ import SessionCode from '@/components/moderator/molecules/SessionCode.vue';
 import SessionSettings from '@/components/moderator/organisms/settings/SessionSettings.vue';
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import { ElMessageBox } from 'element-plus';
-import * as sessionService from "@/services/session-service";
+import * as sessionService from '@/services/session-service';
 
 @Options({
   components: {
@@ -78,7 +84,11 @@ export default class SessionCard extends Vue {
 
   sessionEditId = '';
   showSettings = false;
-
+  hasSubject = false;
+  mounted(): void {
+    this.hasSubject =
+      this.session.subject != null || this.session.subject != undefined;
+  }
   menuItemSelected(command: string): void {
     switch (command) {
       case 'clone':
@@ -95,10 +105,8 @@ export default class SessionCard extends Vue {
         break;
     }
   }
-
   onSessionUpdated(): void {
     this.showSettings = false;
-
     // If a session has been cloned, navigate to the new session
     if (this.session.id !== this.sessionEditId) {
       this.$router.push(`/session/${this.sessionEditId}`);
@@ -106,7 +114,10 @@ export default class SessionCard extends Vue {
       this.$emit('updated');
     }
   }
-
+  onSubjectUpdated(subjectState: boolean): void {
+    this.hasSubject = subjectState;
+    this.$emit('updated');
+  }
   async cloneSession(): Promise<void> {
     try {
       await ElMessageBox.confirm(
@@ -126,7 +137,6 @@ export default class SessionCard extends Vue {
       // do nothing if the MessageBox is declined
     }
   }
-
   async deleteSession(): Promise<void> {
     setTimeout(() => {
       sessionService.remove(this.session.id).then((deleted) => {
@@ -171,6 +181,16 @@ export default class SessionCard extends Vue {
 
 .flex-grow {
   flex-grow: 1;
+}
+
+.subject {
+  width: auto;
+  justify-content: flex-start;
+  padding: 0.25rem 0.5rem;
+  margin: 0;
+  color: white;
+  background-color: #1d2948;
+  border-radius: 10px;
 }
 
 ModuleCount {

@@ -49,6 +49,35 @@
         />
       </el-form-item>
       <el-form-item
+        prop="subject"
+        :label="$t('moderator.organism.settings.sessionSettings.subject')"
+        :rules="[defaultFormRules.ruleToLong(25)]"
+      >
+        <el-select
+          v-model="formData.subject"
+          allow-create
+          filterable
+          clearable
+          :placeholder="
+            $t('moderator.organism.settings.sessionSettings.subjectExample')
+          "
+        >
+          <template v-slot:prefix>
+            <font-awesome-icon icon="sort" class="el-icon" />
+          </template>
+          <el-option
+            v-for="subject in subjectList"
+            :key="subject"
+            :value="subject"
+            :label="subject"
+          >
+            <span>
+              {{ subject }}
+            </span>
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item
         prop="expirationDate"
         :label="
           $t('moderator.organism.settings.sessionSettings.expirationDate')
@@ -98,7 +127,12 @@ import * as cashService from '@/services/cash-service';
     ValidationForm,
     FromSubmitItem,
   },
-  emits: ['sessionUpdated', 'update:showModal', 'update:sessionId'],
+  emits: [
+    'sessionUpdated',
+    'update:showModal',
+    'update:sessionId',
+    'update:subject',
+  ],
 })
 export default class SessionSettings extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
@@ -106,10 +140,15 @@ export default class SessionSettings extends Vue {
   @Prop({}) sessionId!: string;
 
   today = new Date();
+  subjectList: string[] = [];
+  subjectState = false;
+  sessionCash!: cashService.SimplifiedCashEntry<Session>;
+  subjectCash!: cashService.SimplifiedCashEntry<string[]>;
 
   formData: ValidationData = {
     title: '',
     description: '',
+    subject: '',
     expirationDate: new Date(this.today.setMonth(this.today.getMonth() + 1)),
   };
 
@@ -118,14 +157,17 @@ export default class SessionSettings extends Vue {
   async onShowModalChanged(showModal: boolean): Promise<void> {
     this.showDialog = showModal;
   }
-
-  sessionCash!: cashService.SimplifiedCashEntry<Session>;
   @Watch('sessionId', { immediate: true })
   onSessionIdChanged(id: string): void {
     if (id) {
       this.sessionCash = sessionService.registerGetById(
         this.sessionId,
         this.updateSession,
+        EndpointAuthorisationType.MODERATOR,
+        60 * 60
+      );
+      this.subjectCash = sessionService.registerGetSubjects(
+        this.updateSubjects,
         EndpointAuthorisationType.MODERATOR,
         60 * 60
       );
@@ -137,11 +179,27 @@ export default class SessionSettings extends Vue {
   updateSession(session: Session): void {
     this.formData.title = session.title;
     this.formData.description = session.description;
+    this.subjectCash.refreshData();
+    this.formData.subject = session.subject;
     this.formData.expirationDate = new Date(session.expirationDate);
+  }
+  updateSubjects(subjects: string[]): void {
+    this.subjectList = subjects;
+    this.removeNullEntries(this.subjectList);
+  }
+  removeNullEntries(subjectList: string[]): void {
+    const tempList: string[] = [];
+    subjectList.forEach((subject) => {
+      if (subject != null || subject != undefined) {
+        tempList.push(subject);
+      }
+    });
+    this.subjectList = tempList;
   }
 
   unmounted(): void {
     cashService.deregisterAllGet(this.updateSession);
+    cashService.deregisterAllGet(this.updateSubjects);
   }
 
   handleClose(done: { (): void }): void {
@@ -152,6 +210,7 @@ export default class SessionSettings extends Vue {
   reset(): void {
     this.formData.title = '';
     this.formData.description = '';
+    this.formData.subject = null;
     this.formData.expirationDate = new Date(
       this.today.setMonth(this.today.getMonth() + 1)
     );
@@ -167,15 +226,23 @@ export default class SessionSettings extends Vue {
   async save(): Promise<void> {
     this.isSaving = true;
     if (!this.sessionId) {
+      if (this.formData.subject === '' || this.formData.subject === null || this.formData.subject === undefined) {
+        this.formData.subject = null;
+        this.subjectState = false;
+      } else {
+        this.subjectState = true;
+      }
       await sessionService
         .post({
           title: this.formData.title,
           description: this.formData.description,
+          subject: this.formData.subject,
           expirationDate: this.isoExpirationDate,
         })
         .then(
           (session) => {
             this.$emit('update:showModal', false);
+            this.$emit('update:subject', this.subjectState);
             this.$emit('sessionUpdated');
             this.reset();
             this.$router.push({
@@ -190,17 +257,25 @@ export default class SessionSettings extends Vue {
           }
         );
     } else {
+      if (this.formData.subject === '' || this.formData.subject === null || this.formData.subject === undefined) {
+        this.formData.subject = null;
+        this.subjectState = false;
+      } else {
+        this.subjectState = true;
+      }
       await sessionService
         .put({
           id: this.sessionId,
           title: this.formData.title,
           description: this.formData.description,
+          subject: this.formData.subject,
           expirationDate: this.isoExpirationDate,
         })
         .then(
           () => {
             this.$emit('update:showModal', false);
             this.$emit('update:sessionId', null);
+            this.$emit('update:subject', this.subjectState);
             this.$emit('sessionUpdated');
             if (this.sessionCash) this.sessionCash.refreshData();
           },

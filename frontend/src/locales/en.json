@@ -151,7 +151,8 @@
         "syncDeactivateMessage": "Synchronization of the filter settings with the public screen disabled"
       },
       "sessionFilter": {
-        "filterPlaceholder": "Search..."
+        "filterPlaceholder": "Search...",
+        "subjectPlaceholder": "Subject"
       }
     },
     "organism": {
@@ -228,6 +229,8 @@
           "titleExample": "e.g. Marketing Meeting",
           "description": "Description",
           "descriptionExample": "e.g. The purpose of the meeting is to come up with new ideas our new app.",
+          "subject": "Subject",
+          "subjectExample": "New...",
           "expirationDate": "Expiration Date",
           "expirationDatePlaceholder": "Pick a day",
           "topics": "Topics",
@@ -251,6 +254,7 @@
           "header": "Your Sessions",
           "select": "Go to session",
           "add": "New Session",
+          "hidden": " hidden",
           "edit": "Edit Session",
           "delete": "Delete",
           "clone": "Clone Session",

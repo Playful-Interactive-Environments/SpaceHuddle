@@ -15,6 +15,30 @@
         </el-input>
       </div>
       <div class="level-item">
+        <el-select
+          v-model="modelValue.subjects"
+          :placeholder="
+            $t('moderator.molecule.sessionFilter.subjectPlaceholder')
+          "
+          clearable
+          multiple
+        >
+          <template #prefix>
+            <font-awesome-icon icon="sort" class="el-icon" />
+          </template>
+          <el-option
+            v-for="subject in subjectList"
+            :key="subject"
+            :value="subject"
+            :label="subject"
+          >
+            <span>
+              {{ subject }}
+            </span>
+          </el-option>
+        </el-select>
+      </div>
+      <div class="level-item">
         <el-select v-model="modelValue.orderType">
           <template v-slot:prefix>
             <font-awesome-icon icon="sort" class="el-icon" />
@@ -52,17 +76,21 @@ import { Prop } from 'vue-property-decorator';
 import { DefaultSessionSortOrder } from '@/types/enum/SessionSortOrder';
 import { SessionSortOrderOption } from '@/types/api/SessionOrderGroup';
 import * as sessionService from '@/services/session-service';
+import * as cashService from '@/services/cash-service';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 export interface SessionFilterData {
   orderType: string;
   orderAsc: boolean;
   textFilter: string;
+  subjects: string[] | null;
 }
 
 export const defaultFilterData: SessionFilterData = {
   orderType: DefaultSessionSortOrder,
   orderAsc: true,
   textFilter: '',
+  subjects: null,
 };
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class SessionFilter extends Vue {
@@ -71,12 +99,31 @@ export default class SessionFilter extends Vue {
   })
   modelValue!: SessionFilterData;
   sessionSortOrderOptions: SessionSortOrderOption[] = [];
+  subjectList: string[] = [];
+  subjectCash!: cashService.SimplifiedCashEntry<string[]>;
 
   mounted(): void {
     this.sessionSortOrderOptions = sessionService.getSessionSortOrderOptions();
+    this.subjectCash = sessionService.registerGetSubjects(
+      this.updateSubjects,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
   }
   changeOrderAsc(): void {
     this.modelValue.orderAsc = !this.modelValue.orderAsc;
+  }
+  updateSubjects(subjects: string[]): void {
+    const tempList: string[] = [];
+    subjects.forEach((subject) => {
+      if (subject != null || subject != undefined) {
+        tempList.push(subject);
+      }
+    });
+    this.subjectList = tempList;
+  }
+  unmounted() {
+    cashService.deregisterAllGet(this.updateSubjects);
   }
 }
 </script>

@@ -307,8 +307,20 @@ export const getOrderGroups = (
 
 export const filterSessions = (
   sessionList: Session[],
-  textFilter: string
+  textFilter: string,
+  subjects: string[] | null
 ): Session[] => {
+  if (subjects !== null) {
+    const tempList: Session[] = [];
+    sessionList.forEach((session) =>
+      subjects.forEach((subject) => {
+        if (session.subject == subject) {
+          tempList.push(session);
+        }
+      })
+    );
+    sessionList = tempList;
+  }
   if (textFilter && textFilter.length > 0) {
     sessionList = sessionList.filter(
       (session) =>
