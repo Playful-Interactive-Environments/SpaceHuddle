@@ -22,6 +22,7 @@
           "
           clearable
           multiple
+          size="42"
         >
           <template #prefix>
             <font-awesome-icon icon="sort" class="el-icon" />
