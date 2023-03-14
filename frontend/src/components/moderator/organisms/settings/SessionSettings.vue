@@ -172,6 +172,11 @@ export default class SessionSettings extends Vue {
         60 * 60
       );
     } else {
+      this.subjectCash = sessionService.registerGetSubjects(
+        this.updateSubjects,
+        EndpointAuthorisationType.MODERATOR,
+        60 * 60
+      );
       this.reset();
     }
   }
