@@ -37,6 +37,9 @@ trait ServiceClonerTrait
         array $data
     ): object|null {
         // Clone an entity by its ID and return the new ID
-        return $this->repository->clone($data["id"], $data["userId"], null);
+        $id = $this->repository->clone($data["id"]);
+        $result = (object)json_decode("{\"id\": \"$id\"}");
+        return $result;
+        //return $this->repository->clone($data["id"], $data["userId"], null);
     }
 }

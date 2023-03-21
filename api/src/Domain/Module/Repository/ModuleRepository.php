@@ -106,4 +106,19 @@ class ModuleRepository implements RepositoryInterface
             "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null
         ];
     }
+
+    /**
+     * List of columns to be cloned
+     * @return array<string> The array
+     */
+    protected function cloneColumns(): array
+    {
+        return [
+            "module_name",
+            "order",
+            "state",
+            "sync_public_participant",
+            "parameter"
+        ];
+    }
 }

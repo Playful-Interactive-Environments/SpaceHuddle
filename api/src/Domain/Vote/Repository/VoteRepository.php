@@ -9,10 +9,10 @@ use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Idea\Data\IdeaData;
 use App\Domain\Task\Repository\TaskRepository;
-use App\Domain\Task\Type\TaskState;
 use App\Domain\Task\Type\TaskType;
 use App\Domain\Vote\Data\VoteData;
 use App\Domain\Vote\Data\VoteResultData;
+use App\Domain\Vote\Data\VoteResultDetailData;
 use App\Factory\QueryFactory;
 
 /**
@@ -201,6 +201,42 @@ class VoteRepository implements RepositoryInterface
     }
 
     /**
+     * Read the result details of the voting for the task ID.
+     * @param string $taskId The task ID.
+     * @return array<object> The voting result.
+     */
+    public function getResultDetails(string $taskId): array
+    {
+        $query = $this->queryFactory->newSelect("vote_result_detail");
+        $query->select([
+            "idea.id",
+            "idea.keywords",
+            "idea.description",
+            "idea.image",
+            "idea.link",
+            "idea.order",
+            "idea.parameter",
+            "vote_result_detail.rating",
+            "vote_result_detail.detail_rating",
+            "vote_result_detail.count_participant"
+        ])
+            ->innerJoin("idea", "idea.id = vote_result_detail.idea_id")
+            ->andWhere([
+                "vote_result_detail.task_id" => $taskId
+            ])
+            ->order(["idea.order" => "asc", "rating" => "desc"]);
+
+        $result = $this->fetchAll($query, VoteResultDetailData::class);
+
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
+    }
+
+    /**
      * Read the result of the voting for the task ID.
      * @param string $taskId The task ID.
      * @return array<object> The voting result.
@@ -246,6 +282,51 @@ class VoteRepository implements RepositoryInterface
     }
 
     /**
+     * Read the result details of the voting for the task ID.
+     * @param string $taskId The task ID.
+     * @return array<object> The voting result.
+     */
+    public function getParentResultDetails(string $taskId): array
+    {
+        $subQuery = $this->queryFactory->newSelect("hierarchy_idea")
+            ->select(["parent_idea_id"])
+            ->where(function ($exp, $q) {
+                return $exp->equalFields("hierarchy_idea.parent_idea_id", "idea.id");
+            });
+
+        $query = $this->queryFactory->newSelect("idea");
+        $query->select([
+            "idea.id",
+            "idea.keywords",
+            "idea.description",
+            "idea.image",
+            "idea.link",
+            "idea.order",
+            "idea.parameter",
+            "IFNULL(vote_result_parent_detail.rating, 0) AS rating",
+            "IFNULL(vote_result_parent_detail.detail_rating, 0) AS detail_rating",
+            "IFNULL(vote_result_parent_detail.count_participant, 0) AS count_participant"
+        ])
+            ->leftJoin("vote_result_parent_detail", "idea.id = vote_result_parent_detail.idea_id")
+            ->andWhere([
+                "idea.task_id" => $taskId
+            ])
+            ->where(function ($exp, $q) use ($subQuery) {
+                return $exp->exists($subQuery);
+            })
+            ->order(["idea.order" => "asc", "rating" => "desc"]);
+
+        $result = $this->fetchAll($query, VoteResultDetailData::class);
+
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
+    }
+
+    /**
      * Read the result of the voting for the parent idea ID.
      * @param string $parent_id The parent idea ID.
      * @return array<object> The voting result.
@@ -276,6 +357,46 @@ class VoteRepository implements RepositoryInterface
             ->order(["hierarchy_idea.order" => "asc"]);
 
         $result = $this->fetchAll($query, VoteResultData::class);
+
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
+    }
+
+    /**
+     * Read the result detail of the voting for the parent idea ID.
+     * @param string $parent_id The parent idea ID.
+     * @return array<object> The voting result.
+     */
+    public function getHierarchyResultDetail(string $parent_id): array
+    {
+        $query = $this->queryFactory->newSelect("hierarchy_idea");
+        $query->select([
+            "idea.id",
+            "idea.keywords",
+            "idea.description",
+            "idea.image",
+            "idea.link",
+            "idea.order",
+            "idea.parameter",
+            "IFNULL(vote_result_hierarchy_detail.rating, 0) AS rating",
+            "IFNULL(vote_result_hierarchy_detail.detail_rating, 0) AS detail_rating",
+            "IFNULL(vote_result_hierarchy_detail.count_participant, 0) AS count_participant"
+        ])
+            ->innerJoin("idea", "idea.id = hierarchy_idea.child_idea_id")
+            ->leftJoin("vote_result_hierarchy_detail", [
+                "vote_result_hierarchy_detail.parent_idea_id = hierarchy_idea.parent_idea_id",
+                "vote_result_hierarchy_detail.idea_id = hierarchy_idea.child_idea_id"
+            ])
+            ->andWhere([
+                "hierarchy_idea.parent_idea_id" => $parent_id
+            ])
+            ->order(["hierarchy_idea.order" => "asc"]);
+
+        $result = $this->fetchAll($query, VoteResultDetailData::class);
 
         if (is_array($result)) {
             return $result;

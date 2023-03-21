@@ -12,6 +12,7 @@ use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskType;
 use App\Domain\Topic\Repository\TopicRepository;
 use App\Factory\QueryFactory;
+use Selective\ArrayReader\ArrayReader;
 
 /**
  * Repository.
@@ -301,5 +302,33 @@ class SelectionRepository implements RepositoryInterface
             ->whereInList("idea_id", $ideas)
             ->andWhere(["selection_id" => $selectionId])
             ->execute();
+    }
+
+    /**
+     * Include dependent data.
+     * @param string $oldId Old table primary key
+     * @param string $newId Old table primary key
+     * @return void
+     */
+    protected function cloneDependencies(string $oldId, string $newId): void
+    {
+        $newId = $this->queryFactory->newClone(
+            "selection_idea",
+            ["selection_id" => $oldId],
+            ["idea_id", "order"],
+            "selection_id",
+            $newId
+        );
+    }
+
+    /**
+     * List of columns to be cloned
+     * @return array<string> The array
+     */
+    protected function cloneColumns(): array
+    {
+        return [
+            "name",
+        ];
     }
 }

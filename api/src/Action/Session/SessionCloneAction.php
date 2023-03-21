@@ -8,13 +8,13 @@ use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 
 /**
- * Action for creating a new session.
+ * Action for cloning a session.
  *
  * @OA\Post(
- *   path="/session/{sessionId}/clone",
+ *   path="/session/{id}/clone",
  *   summary="Clones a session.",
  *   tags={"Session"},
- *   @OA\Parameter(in="path", name="sessionId", description="ID of the session to be cloned", required=true),
+ *   @OA\Parameter(in="path", name="id", description="ID of the session to be cloned", required=true),
  *   @OA\Response(response="200", description="Success",
  *     @OA\JsonContent(ref="#/components/schemas/SessionData"),
  *   ),

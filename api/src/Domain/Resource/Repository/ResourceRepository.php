@@ -46,4 +46,17 @@ class ResourceRepository implements RepositoryInterface
             "link" => $data->link ?? null
         ];
     }
+
+    /**
+     * List of columns to be cloned
+     * @return array<string> The array
+     */
+    protected function cloneColumns(): array
+    {
+        return [
+            "title",
+            "image",
+            "link"
+        ];
+    }
 }

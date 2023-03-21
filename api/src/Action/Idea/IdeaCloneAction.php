@@ -1,39 +1,39 @@
 <?php
 
-namespace App\Action\Topic;
+namespace App\Action\Idea;
 
 use App\Action\Base\AuthorisationActionTrait;
-use App\Domain\Topic\Service\TopicCloner;
+use App\Domain\Idea\Service\IdeaCloner;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 
 /**
- * Action for cloning a topic.
+ * Action for cloning an idea.
  *
  * @OA\Post(
- *   path="/topic/{id}/clone",
- *   summary="Clones a topic.",
- *   tags={"Topic"},
- *   @OA\Parameter(in="path", name="id", description="ID of the topic to be cloned", required=true),
+ *   path="/idea/{id}/clone",
+ *   summary="Clones a idea.",
+ *   tags={"Idea"},
+ *   @OA\Parameter(in="path", name="id", description="ID of the idea to be cloned", required=true),
  *   @OA\Response(response="200", description="Success",
- *     @OA\JsonContent(ref="#/components/schemas/TopicData"),
+ *     @OA\JsonContent(ref="#/components/schemas/IdeaData"),
  *   ),
  *   @OA\Response(response="404", description="Not Found"),
  *   security={{"api_key": {}}, {"bearerAuth": {}}}
  * )
  */
-class TopicCloneAction
+class IdeaCloneAction
 {
     use AuthorisationActionTrait;
-    protected TopicCloner $service;
+    protected IdeaCloner $service;
 
     /**
      * The constructor.
      *
      * @param Responder $responder The responder
-     * @param TopicCloner $service The service
+     * @param IdeaCloner $service The service
      */
-    public function __construct(Responder $responder, TopicCloner $service)
+    public function __construct(Responder $responder, IdeaCloner $service)
     {
         $this->setUp($responder);
         $this->service = $service;

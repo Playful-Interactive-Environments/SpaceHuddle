@@ -15,6 +15,7 @@ trait RepositoryTrait
     use InsertTrait, UpdateTrait {
         InsertTrait::formatDatabaseInput insteadof UpdateTrait;
     }
+    use CloneTrait;
     use DeleteTrait;
     use CheckTrait;
     use AuthorisationTrait;

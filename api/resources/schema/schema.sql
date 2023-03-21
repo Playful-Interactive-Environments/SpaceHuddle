@@ -592,6 +592,30 @@ ORDER BY
     sum_detail_rating
 DESC;
 
+CREATE OR REPLACE VIEW vote_result_detail(
+    task_id,
+    idea_id,
+    rating,
+    detail_rating,
+    count_participant
+) AS SELECT
+    vote.task_id,
+    vote.idea_id,
+    vote.rating,
+    vote.detail_rating,
+    COUNT(distinct vote.participant_id) AS count_participant
+ FROM
+     vote
+ GROUP BY
+     vote.idea_id,
+     vote.task_id,
+     vote.rating,
+     vote.detail_rating
+ ORDER BY
+     vote.task_id,
+     count_participant
+DESC;
+
 CREATE OR REPLACE VIEW vote_result_hierarchy(
     task_id,
     parent_idea_id,
@@ -618,6 +642,25 @@ FROM
     vote_result
 INNER JOIN hierarchy_idea ON
     hierarchy_idea.child_idea_id = vote_result.idea_id;
+
+CREATE OR REPLACE VIEW vote_result_hierarchy_detail(
+    task_id,
+    parent_idea_id,
+    idea_id,
+    rating,
+    detail_rating,
+    count_participant
+) AS SELECT
+    vote_result_detail.task_id,
+    hierarchy_idea.parent_idea_id,
+    vote_result_detail.idea_id,
+    vote_result_detail.rating,
+    vote_result_detail.detail_rating,
+    vote_result_detail.count_participant
+FROM
+    vote_result_detail
+INNER JOIN hierarchy_idea ON
+    hierarchy_idea.child_idea_id = vote_result_detail.idea_id;
 
 CREATE OR REPLACE VIEW vote_result_parent(
     task_id,
@@ -649,6 +692,32 @@ GROUP BY
 ORDER BY
     vote.task_id,
     sum_detail_rating
+DESC;
+
+CREATE OR REPLACE VIEW vote_result_parent_detail(
+    task_id,
+    idea_id,
+    rating,
+    detail_rating,
+    count_participant
+) AS SELECT
+    vote.task_id,
+    hierarchy_idea.parent_idea_id,
+    vote.rating,
+    vote.detail_rating,
+    COUNT(distinct vote.participant_id) AS count_participant
+FROM
+    vote
+INNER JOIN hierarchy_idea ON
+    hierarchy_idea.child_idea_id = vote.idea_id
+GROUP BY
+    vote.task_id,
+    hierarchy_idea.parent_idea_id,
+    vote.rating,
+    vote.detail_rating
+ORDER BY
+    vote.task_id,
+    count_participant
 DESC;
 
 CREATE OR REPLACE VIEW selection_view (type, id, task_id, topic_id, name, detail_type, modification_date) AS

@@ -23,6 +23,8 @@ class IdeaRepository implements RepositoryInterface
     use RepositoryTrait, IdeaTableTrait {
         IdeaTableTrait::getById insteadof RepositoryTrait;
         IdeaTableTrait::deleteDependencies insteadof RepositoryTrait;
+        IdeaTableTrait::cloneDependencies insteadof RepositoryTrait;
+        IdeaTableTrait::cloneColumns insteadof RepositoryTrait;
         IdeaTableTrait::formatDatabaseInput insteadof RepositoryTrait;
         IdeaTableTrait::lastModificationByConditions insteadof RepositoryTrait;
     }

@@ -14,6 +14,7 @@ use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Task\Type\TaskType;
 use App\Factory\QueryFactory;
+use Selective\ArrayReader\ArrayReader;
 use function DI\add;
 
 /**
@@ -24,6 +25,8 @@ class CategoryRepository implements RepositoryInterface
     use RepositoryTrait, IdeaTableTrait {
         IdeaTableTrait::getById insteadof RepositoryTrait;
         IdeaTableTrait::deleteDependencies insteadof RepositoryTrait;
+        IdeaTableTrait::cloneDependencies insteadof RepositoryTrait;
+        IdeaTableTrait::cloneColumns insteadof RepositoryTrait;
         IdeaTableTrait::formatDatabaseInput insteadof RepositoryTrait;
         IdeaTableTrait::lastModificationByConditions insteadof RepositoryTrait;
     }

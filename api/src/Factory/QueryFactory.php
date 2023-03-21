@@ -61,9 +61,9 @@ final class QueryFactory
     }
 
     /**
-     * Create an 'update' statement for the given table.
+     * Create an 'insert' statement for the given table.
      *
-     * @param string $table The table to update rows from
+     * @param string $table The table to insert rows from
      * @param array<mixed> $data The values to be updated
      *
      * @return Query The new insert query
@@ -85,5 +85,55 @@ final class QueryFactory
     public function newDelete(string $table): Query
     {
         return $this->newQuery()->delete($table);
+    }
+
+    /**
+     * Clone the given query entry.
+     *
+     * @param string $table The table to insert rows from
+     * @param array $conditions The WHERE conditions to add with AND.
+     * @param string | null $parentIdColumn Name of the parent column if there is a new parent key value
+     * @param string | null $newParentId New parent key value to be inserted
+     * @param array<string> $columns Columns to be cloned
+     * @param bool $createUuid Table has unique id column
+     *
+     * @return string | null newId
+     */
+    public function newClone(
+        string $table,
+        array $conditions = [],
+        array $columns = [],
+        ?string $parentIdColumn = null,
+        ?string $newParentId = null,
+        bool $createUuid = true
+    ): ?string
+    {
+        $specialColumns = [];
+        $specialColumnsValues = [];
+        if ($createUuid) {
+            $id = uuid_create();
+            array_push($specialColumns, "id");
+            array_push($specialColumnsValues, "'$id' as id");
+        }
+        if ($parentIdColumn) {
+            array_push($specialColumns, $parentIdColumn);
+            if ($newParentId) {
+                array_push($specialColumnsValues, "'$newParentId' as $parentIdColumn");
+            } else {
+                array_push($specialColumnsValues, $parentIdColumn);
+            }
+        }
+        $select = $this->newQuery()->from($table)
+            ->select(array_merge($specialColumnsValues, $columns))
+            ->where($conditions);
+        $itemCount = $this->newQuery()->insert(array_merge($specialColumns, $columns))
+            ->into($table)
+            ->values($select)
+            ->execute()
+            ->rowCount();
+
+        if ($itemCount > 0)
+            return $id;
+        return null;
     }
 }

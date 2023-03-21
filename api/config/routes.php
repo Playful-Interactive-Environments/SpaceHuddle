@@ -2,6 +2,7 @@
 
 // Define app routes
 
+use App\Action\Category\CategoryCloneAction;
 use App\Action\Category\CategoryCreateForTaskAction;
 use App\Action\Category\CategoryCreateForTopicAction;
 use App\Action\Category\CategoryDeleteAction;
@@ -12,12 +13,14 @@ use App\Action\Category\CategoryReadAllFromTaskAction;
 use App\Action\Category\CategoryReadAllFromTopicAction;
 use App\Action\Category\CategoryReadSingleAction;
 use App\Action\Category\CategoryUpdateAction;
+use App\Action\Hierarchy\HiearchyCloneAction;
 use App\Action\Hierarchy\HierarchyCreateAction;
 use App\Action\Hierarchy\HierarchyDeleteAction;
 use App\Action\Hierarchy\HierarchyReadAllAction;
 use App\Action\Hierarchy\HierarchyReadSingleAction;
 use App\Action\Hierarchy\HierarchyUpdateAction;
 use App\Action\Home\HomeAction;
+use App\Action\Idea\IdeaCloneAction;
 use App\Action\Idea\IdeaCreateForTopicAction;
 use App\Action\Idea\IdeaDeleteAction;
 use App\Action\Idea\IdeaDeleteImageAction;
@@ -68,6 +71,7 @@ use App\Action\SessionRole\SessionRoleDeleteOwnAction;
 use App\Action\SessionRole\SessionRoleReadAllAction;
 use App\Action\SessionRole\SessionRoleReadSingleAction;
 use App\Action\SessionRole\SessionRoleUpdateAction;
+use App\Action\Task\TaskCloneAction;
 use App\Action\Task\TaskCreateAction;
 use App\Action\Task\TaskDeleteAction;
 use App\Action\Task\TaskReadAllAction;
@@ -101,11 +105,14 @@ use App\Action\View\ViewReadTaskInputAction;
 use App\Action\Vote\VoteCreateAction;
 use App\Action\Vote\VoteDeleteAction;
 use App\Action\Vote\VoteHierarchyReadAllAction;
+use App\Action\Vote\VoteHierarchyResultDetailReadAction;
 use App\Action\Vote\VoteHierarchyResultReadAction;
 use App\Action\Vote\VoteReadAllAction;
 use App\Action\Vote\VoteReadSingleAction;
+use App\Action\Vote\VoteResultDetailReadAction;
 use App\Action\Vote\VoteResultReadAction;
 use App\Action\Vote\VoteParentResultReadAction;
+use App\Action\Vote\VoteParentResultDetailReadAction;
 use App\Action\Vote\VoteUpdateAction;
 use App\Action\Topic\TopicExportAction;
 use App\Middleware\JwtAuthMiddleware;
@@ -225,7 +232,6 @@ return function (App $app) {
         function (RouteCollectorProxy $app) {
             $app->get("/{topicId}/views[/]", ViewReadAllAction::class);
             $app->get("/{topicId}/tasks[/]", TaskReadAllAction::class);
-            $app->post("/{id}/clone[/]", TopicCloneAction::class);
         }
     );
 
@@ -246,6 +252,8 @@ return function (App $app) {
             $app->get("/{topicId}/selections[/]", SelectionReadAllAction::class);
             $app->post("/{topicId}/selection[/]", SelectionCreateAction::class);
 
+            $app->post("/{id}/clone[/]", TopicCloneAction::class);
+
             $app->get("/{id}[/]", TopicReadSingleAction::class);
             $app->put("[/]", TopicUpdateAction::class);
             $app->delete("/{id}[/]", TopicDeleteAction::class);
@@ -260,7 +268,9 @@ return function (App $app) {
             $app->get("/{taskId}/ideas[/]", IdeaReadAllFromTaskAction::class);
             $app->get("/{taskId}/categories[/]", CategoryReadAllFromTaskAction::class);
             $app->get("/{taskId}/hierarchies/{parentHierarchyId}[/]", HierarchyReadAllAction::class);
+            $app->get("/{taskId}/vote_result/detail[/]", VoteResultDetailReadAction::class);
             $app->get("/{taskId}/vote_result[/]", VoteResultReadAction::class);
+            $app->get("/{taskId}/vote_result_parent/detail[/]", VoteParentResultDetailReadAction::class);
             $app->get("/{taskId}/vote_result_parent[/]", VoteParentResultReadAction::class);
             $app->get("/{id}[/]", TaskReadSingleAction::class);
             $app->get("/{taskId}/input[/]", ViewReadTaskInputAction::class);
@@ -289,6 +299,8 @@ return function (App $app) {
             //$app->get("/{taskId}/vote_result[/]", VoteResultReadAction::class);
             //$app->get("/{taskId}/vote_result_parent[/]", VoteParentResultReadAction::class);
             $app->post("/{taskId}/vote[/]", VoteCreateAction::class);
+
+            $app->post("/{id}/clone[/]", TaskCloneAction::class);
 
             //$app->get("/{id}[/]", TaskReadSingleAction::class);
             $app->get("/{id}/dependent[/]", TaskReadDependentAction::class);
@@ -326,6 +338,8 @@ return function (App $app) {
             $app->put("/image[/]", IdeaUpdateImageAction::class);
             $app->delete("/{id}/image[/]", IdeaDeleteImageAction::class);
 
+            $app->post("/{id}/clone[/]", IdeaCloneAction::class);
+
             $app->get("/{id}[/]", IdeaReadSingleAction::class);
             $app->put("[/]", IdeaUpdateAction::class);
             $app->delete("/{id}[/]", IdeaDeleteAction::class);
@@ -339,6 +353,8 @@ return function (App $app) {
             $app->post("/{categoryId}/ideas[/]", CategoryIdeaAddAction::class);
             $app->delete("/{categoryId}/ideas[/]", CategoryIdeaDeleteAction::class);
 
+            $app->post("/{id}/clone[/]", CategoryCloneAction::class);
+
             $app->get("/{id}[/]", CategoryReadSingleAction::class);
             $app->put("[/]", CategoryUpdateAction::class);
             $app->delete("/{id}[/]", CategoryDeleteAction::class);
@@ -348,6 +364,7 @@ return function (App $app) {
     $app->group(
         "/hierarchy",
         function (RouteCollectorProxy $app) {
+            $app->get("/{parentId}/vote_result/detail[/]", VoteHierarchyResultDetailReadAction::class);
             $app->get("/{parentId}/vote_result[/]", VoteHierarchyResultReadAction::class);
         }
     );
@@ -357,6 +374,8 @@ return function (App $app) {
         function (RouteCollectorProxy $app) {
             //$app->get("/{parentId}/vote_result[/]", VoteHierarchyResultReadAction::class);
             $app->get("/{parentId}/votes[/]", VoteHierarchyReadAllAction::class);
+
+            $app->post("/{id}/clone[/]", HiearchyCloneAction::class);
 
             $app->get("/{id}[/]", HierarchyReadSingleAction::class);
             $app->put("[/]", HierarchyUpdateAction::class);

@@ -21,6 +21,8 @@ class HierarchyRepository implements RepositoryInterface
     use RepositoryTrait, IdeaTableTrait {
         IdeaTableTrait::getById insteadof RepositoryTrait;
         IdeaTableTrait::deleteDependencies as private parentDeleteDependencies;
+        IdeaTableTrait::cloneDependencies insteadof RepositoryTrait;
+        IdeaTableTrait::cloneColumns insteadof RepositoryTrait;
         IdeaTableTrait::formatDatabaseInput insteadof RepositoryTrait;
     }
 

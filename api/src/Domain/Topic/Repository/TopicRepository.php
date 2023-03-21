@@ -452,7 +452,7 @@ class TopicRepository implements RepositoryInterface
      * @throws GenericException
      * @throws Exception
      */
-    public function clone(string $id, string $userId, ?string $newParentId): object
+    /*public function clone(string $id, string $userId, ?string $newParentId): object
     {
         $taskRepository = new TaskRepository($this->queryFactory);
         $moduleRepository = new ModuleRepository($this->queryFactory);
@@ -551,18 +551,21 @@ class TopicRepository implements RepositoryInterface
             $newIdeas = [];
             $hierarchiesToCreate = [];
             for ($k = 0; $k < sizeof($ideas); $k++) {
-                $newIdea = [
-                    "taskId" => $newTask->id,
-                    "keywords" => $ideas[$k]->keywords,
-                    "description" => $ideas[$k]->description,
-                    "parameter" => $ideas[$k]->parameter ?? null,
-                    "link" => $ideas[$k]->link,
-                    "order" => $ideas[$k]->order,
-                    "state" => $ideas[$k]->state,
-                    "userId" => $userId,
-                ];
-                $newIdea = $ideaRepository->insert((object)$newIdea);
-                $newIdeas[] = $newIdea;
+                $newIdeaId = $ideaRepository->clone($ideas[$k]->id, $newTask->id);
+
+
+                // $newIdea = [
+                //     "taskId" => $newTask->id,
+                //     "keywords" => $ideas[$k]->keywords,
+                //     "description" => $ideas[$k]->description,
+                //     "parameter" => $ideas[$k]->parameter ?? null,
+                //     "link" => $ideas[$k]->link,
+                //     "order" => $ideas[$k]->order,
+                //     "state" => $ideas[$k]->state,
+                //     "userId" => $userId,
+                // ];
+                // $newIdea = $ideaRepository->insert((object)$newIdea);
+                $newIdeas[] = $newIdeaId;
                 $hierarchies = $hierarchyRepository->get(["hierarchy.category_idea_id" => $ideas[$k]->id]) ?? [];
                 if (!is_array($hierarchies)) $hierarchies = [$hierarchies];
                 foreach ($hierarchies as $hierarchy) {
@@ -573,7 +576,7 @@ class TopicRepository implements RepositoryInterface
                     }
 
                     $hierarchiesToCreate[] = [
-                        "upperId" => $newIdea->id,
+                        "upperId" => $newIdea,
                         "lowerIdx" => $lowerIdx,
                         "order" => $hierarchy->order,
                     ];
@@ -585,7 +588,7 @@ class TopicRepository implements RepositoryInterface
                 $this->queryFactory->newInsert(
                     "hierarchy",
                     [
-                        "sub_idea_id" => $newIdeas[$hierarchy["lowerIdx"]]->id,
+                        "sub_idea_id" => $newIdeas[$hierarchy["lowerIdx"]],
                         "category_idea_id" => $hierarchy["upperId"],
                         "order" => $hierarchy["order"]
                     ]
@@ -612,7 +615,7 @@ class TopicRepository implements RepositoryInterface
         }
 
         return $newTopic;
-    }
+    }*/
 
     /**
      * @param string $id The id to search for
@@ -649,5 +652,96 @@ class TopicRepository implements RepositoryInterface
             ->execute()
             ->fetch("assoc")["maxOrder"];
         return $maxOrder ?? 0;
+    }
+
+    /**
+     * Include dependent data.
+     * @param string $oldId Old table primary key
+     * @param string $newId Old table primary key
+     * @return void
+     */
+    protected function cloneDependencies(string $oldId, string $newId): void
+    {
+        $taskRepository = new TaskRepository($this->queryFactory);
+        $taskRepository->setAuthorisation($this->getAuthorisation());
+
+        $selectionRepository = new SelectionRepository($this->queryFactory);
+        $selectionRepository->setAuthorisation($this->getAuthorisation());
+
+        $rows_selection = $this->queryFactory->newSelect("selection")
+            ->select([
+                "id"
+            ])
+            ->andWhere([
+                "topic_id" => $oldId,
+            ])
+            ->execute()
+            ->fetchAll("assoc");
+        $selectionMapping = [];
+        if (is_array($rows_selection) and sizeof($rows_selection) > 0) {
+            foreach ($rows_selection as $resultItem) {
+                $reader = new ArrayReader($resultItem);
+                $oldSubId = $reader->findString("id");
+                if ($oldSubId) {
+                    $newSubId = $selectionRepository->clone($oldSubId, $newId, false);
+                    $selectionMapping[$oldSubId] = $newSubId;
+                }
+            }
+        }
+
+        $rows_task = $this->queryFactory->newSelect("task")
+            ->select([
+                "id",
+                "parameter"
+            ])
+            ->andWhere([
+                "topic_id" => $oldId,
+            ])
+            ->execute()
+            ->fetchAll("assoc");
+        $taskMapping = [];
+        $taskParameter = [];
+        if (is_array($rows_task) and sizeof($rows_task) > 0) {
+            foreach ($rows_task as $resultItem) {
+                $reader = new ArrayReader($resultItem);
+                $oldTaskId = $reader->findString("id");
+                if ($oldTaskId) {
+                    $newTaskId = $taskRepository->clone($oldTaskId, $newId);
+                    $taskMapping[$oldTaskId] = $newTaskId;
+                    $taskParameter[$newTaskId] = $reader->findString("parameter");
+                }
+            }
+        }
+
+        // Correct all parameters of tasks
+        foreach ($taskParameter as $newTaskId => $parameter) {
+            if (!is_string($parameter) || strlen($parameter) === 0) {
+                continue;
+            }
+            foreach ($taskMapping as $oldTaskId => $replaceTaskId) {
+                $parameter = str_replace($oldTaskId, $replaceTaskId, $parameter);
+            }
+            foreach ($selectionMapping as $oldId => $replaceSelectionId) {
+                $parameter = str_replace($oldId, $replaceSelectionId, $parameter);
+            }
+            $this->queryFactory
+                ->newUpdate("task", ["parameter" => $parameter])
+                ->andWhere(["id" => $newTaskId])
+                ->execute();
+        }
+    }
+
+    /**
+     * List of columns to be cloned
+     * @return array<string> The array
+     */
+    protected function cloneColumns(): array
+    {
+        return [
+            "title",
+            "description",
+            "order",
+            //"active_task_id"
+        ];
     }
 }

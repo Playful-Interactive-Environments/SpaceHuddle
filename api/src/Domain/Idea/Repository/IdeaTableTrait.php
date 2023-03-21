@@ -8,6 +8,8 @@ use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Type\TaskState;
 use App\Domain\Task\Type\TaskType;
 use App\Domain\Idea\Data\ImageData;
+use Selective\ArrayReader\ArrayReader;
+use function DI\string;
 
 trait IdeaTableTrait
 {
@@ -323,6 +325,85 @@ trait IdeaTableTrait
             "participant_id" => $data->participantId ?? null,
             "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null,
             "order" => $data->order ?? 0
+        ];
+    }
+
+    /**
+     * Include dependent data.
+     * @param string $oldId Old table primary key
+     * @param string $newId Old table primary key
+     * @return void
+     */
+    protected function cloneDependencies(
+        string $oldId,
+        string $newId
+    ): void
+    {
+        $newTaskId = null;
+        $newIdeaRow = $this->queryFactory->newSelect("idea")
+            ->select([
+                "task_id"
+            ])
+            ->andWhere([
+                "id" => $newId,
+            ])
+            ->execute()
+            ->fetchAll("assoc");
+        if (is_array($newIdeaRow) and sizeof($newIdeaRow) == 1) {
+            $reader = new ArrayReader($newIdeaRow[0]);
+            $newTaskId = $reader->findString("task_id");
+        }
+
+        $rows = $this->queryFactory->newSelect("hierarchy")
+            ->select([
+            "hierarchy.sub_idea_id",
+            "hierarchy.order"
+            ])
+            ->innerJoin("idea", ["idea.id = hierarchy.sub_idea_id"])
+            ->whereNull("idea.participant_id")
+            ->andWhere([
+                "hierarchy.category_idea_id" => $oldId,
+            ])
+            ->order(["hierarchy.order"])
+            ->execute()
+            ->fetchAll("assoc");
+        if (is_array($rows) and sizeof($rows) > 0) {
+            foreach ($rows as $resultItem) {
+                $reader = new ArrayReader($resultItem);
+                $oldSubId = $reader->findString("sub_idea_id");
+                if ($oldSubId) {
+                    $order = $reader->findInt("order");
+                    $newSubId = $this->clone($oldSubId, $newTaskId);
+
+                    $this->queryFactory->newInsert(
+                        "hierarchy",
+                        [
+                            "category_idea_id" => $newId,
+                            "sub_idea_id" => $newSubId,
+                            "order" => $order
+                        ])
+                        ->execute()
+                        ->rowCount();
+                }
+            }
+        }
+    }
+
+    /**
+     * List of columns to be cloned
+     * @return array<string> The array
+     */
+    protected function cloneColumns(): array
+    {
+        return [
+            "state",
+            "keywords",
+            "description",
+            "image",
+            "image_timestamp",
+            "link",
+            "parameter",
+            "order"
         ];
     }
 }

@@ -10,8 +10,10 @@ use App\Domain\Base\Repository\RepositoryTrait;
 use App\Domain\Module\Repository\ModuleRepository;
 use App\Domain\Participant\Data\ParticipantInfoData;
 use App\Domain\Participant\Repository\ParticipantRepository;
+use App\Domain\Selection\Repository\SelectionRepository;
 use App\Domain\Session\Data\SessionInfo;
 use App\Domain\Task\Data\TaskData;
+use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Topic\Data\TopicData;
 use App\Domain\Topic\Repository\TopicRepository;
 use App\Domain\User\Repository\UserRepository;
@@ -390,47 +392,6 @@ class SessionRepository implements RepositoryInterface
     }
 
     /**
-     * @param string $id The session id to clone
-     * @param string $userId The id of the user
-     * @return object|null The new session
-     * @throws GenericException
-     */
-    public function clone(string $id, string $userId, ?string $newParentId): ?object
-    {
-        $topicRepository = new TopicRepository($this->queryFactory);
-        $topicRepository->setAuthorisation($this->getAuthorisation());
-
-        $session = $this->getById($id);
-
-        if (is_null($session)) {
-            throw new DomainException("Session not found");
-        }
-
-        $newSession = [
-            "title" => $session->title,
-            "description" => $session->description,
-            "maxParticipants" => $session->maxParticipants,
-            "expirationDate" => $session->expirationDate,
-            "userId" => $userId,
-        ];
-        $newSession = $this->insert((object)$newSession);
-
-        if (is_null($newSession) || !isset($newSession->id)) {
-            throw new DomainException("Session not created");
-        }
-
-        $topics = $topicRepository->getAll($id);
-
-        foreach ($topics as $topic) {
-            if ($topic instanceof TopicData && !is_null($topic->id)) {
-                $topicRepository->clone($topic->id, $userId, $newSession->id);
-            }
-        }
-
-        return $newSession;
-    }
-
-    /**
      * Include dependent data.
      * @param string $id Primary key of the linked table entry
      * @param array|object|null $parameter Dependent data to be included.
@@ -627,5 +588,95 @@ class SessionRepository implements RepositoryInterface
         else
             $data->modules = $moduleRepository->getAll($data->id);*/
         $data->modules = $moduleRepository->getAll($data->id);
+    }
+
+    /**
+     * @param string $id The session id to clone
+     * @param string $userId The id of the user
+     * @return object|null The new session
+     * @throws GenericException
+     */
+    /*public function clone(string $id, string $userId, ?string $newParentId): ?object
+    {
+        $topicRepository = new TopicRepository($this->queryFactory);
+        $topicRepository->setAuthorisation($this->getAuthorisation());
+
+        $session = $this->getById($id);
+
+        if (is_null($session)) {
+            throw new DomainException("Session not found");
+        }
+
+        $newSession = [
+            "title" => $session->title,
+            "description" => $session->description,
+            "maxParticipants" => $session->maxParticipants,
+            "expirationDate" => $session->expirationDate,
+            "userId" => $userId,
+        ];
+        $newSession = $this->insert((object)$newSession);
+
+        if (is_null($newSession) || !isset($newSession->id)) {
+            throw new DomainException("Session not created");
+        }
+
+        $topics = $topicRepository->getAll($id);
+
+        foreach ($topics as $topic) {
+            if ($topic instanceof TopicData && !is_null($topic->id)) {
+                $topicRepository->clone($topic->id, $userId, $newSession->id);
+            }
+        }
+
+        return $newSession;
+    }*/
+
+    /**
+     * Include dependent data.
+     * @param string $oldId Old table primary key
+     * @param string $newId Old table primary key
+     * @return void
+     */
+    protected function cloneDependencies(string $oldId, string $newId): void
+    {
+        $topicRepository = new TopicRepository($this->queryFactory);
+        $topicRepository->setAuthorisation($this->getAuthorisation());
+
+        $rows_topic = $this->queryFactory->newSelect("topic")
+            ->select([
+                "id"
+            ])
+            ->andWhere([
+                "session_id" => $oldId,
+            ])
+            ->execute()
+            ->fetchAll("assoc");
+        if (is_array($rows_topic) and sizeof($rows_topic) > 0) {
+            foreach ($rows_topic as $resultItem) {
+                $reader = new ArrayReader($resultItem);
+                $oldSubId = $reader->findString("id");
+                if ($oldSubId) {
+                    $topicRepository->clone($oldSubId, $newId);
+                }
+            }
+        }
+    }
+
+    /**
+     * List of columns to be cloned
+     * @return array<string> The array
+     */
+    protected function cloneColumns(): array
+    {
+        return [
+            "title",
+            "description",
+            "subject",
+            "connection_key",
+            "max_participants",
+            "expiration_date",
+            //"public_screen_module_id",
+            "allow_anonymous"
+        ];
     }
 }

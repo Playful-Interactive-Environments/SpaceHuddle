@@ -15,10 +15,13 @@ use App\Domain\Selection\Repository\SelectionRepository;
 use App\Domain\Session\Type\SessionRoleType;
 use App\Domain\Task\Data\TaskData;
 use App\Domain\Task\Type\TaskState;
+use App\Domain\Topic\Data\TopicData;
 use App\Domain\Topic\Repository\TopicRepository;
 use App\Factory\QueryFactory;
 use Cake\Database\Query;
 use App\Domain\Task\Type\TaskType;
+use PhpOffice\PhpSpreadsheet\Writer\Exception;
+use Selective\ArrayReader\ArrayReader;
 
 /**
  * Repository
@@ -502,5 +505,116 @@ class TaskRepository implements RepositoryInterface
         ];
 
         return $result;
+    }
+
+    /**
+     * Include dependent data.
+     * @param string $oldId Old table primary key
+     * @param string $newId Old table primary key
+     * @return void
+     */
+    protected function cloneDependencies(string $oldId, string $newId): void
+    {
+        $moduleRepository = new ModuleRepository($this->queryFactory);
+        $moduleRepository->setAuthorisation($this->getAuthorisation());
+
+        $rows_module = $this->queryFactory->newSelect("module")
+            ->select([
+                "id"
+            ])
+            ->andWhere([
+                "task_id" => $oldId,
+            ])
+            ->execute()
+            ->fetchAll("assoc");
+        if (is_array($rows_module) and sizeof($rows_module) > 0) {
+            foreach ($rows_module as $resultItem) {
+                $reader = new ArrayReader($resultItem);
+                $oldModuleId = $reader->findString("id");
+                if ($oldModuleId) {
+                    $newModuleId = $moduleRepository->clone($oldModuleId, $newId);
+                }
+            }
+        }
+
+        $ideaRepository = new IdeaRepository($this->queryFactory);
+        $ideaRepository->setAuthorisation($this->getAuthorisation());
+        $ideaMapping = [];
+
+        $rows_ideas = $this->queryFactory->newSelect("idea")
+            ->select([
+                "id"
+            ])
+            ->andWhere([
+                "task_id" => $oldId,
+            ])
+            ->whereNull("participant_id")
+            ->execute()
+            ->fetchAll("assoc");
+        if (is_array($rows_ideas) and sizeof($rows_ideas) > 0) {
+            foreach ($rows_ideas as $resultItem) {
+                $reader = new ArrayReader($resultItem);
+                $oldIdeaId = $reader->findString("id");
+                if ($oldIdeaId) {
+                    $newIdeaId = $ideaRepository->clone($oldIdeaId, $newId, false);
+                    $ideaMapping[$oldIdeaId] = $newIdeaId;
+                }
+            }
+        }
+
+        if (sizeof($ideaMapping) > 0) {
+            $rows_hierarchy = $this->queryFactory->newSelect("hierarchy")
+                ->select([
+                    "hierarchy.category_idea_id",
+                    "hierarchy.sub_idea_id",
+                    "hierarchy.order"
+                ])
+                ->whereInList("hierarchy.category_idea_id", array_keys($ideaMapping))
+                ->execute()
+                ->fetchAll("assoc");
+
+            if (is_array($rows_hierarchy) and sizeof($rows_hierarchy) > 0) {
+                foreach ($rows_hierarchy as $resultItem) {
+                    $reader = new ArrayReader($resultItem);
+                    $oldCategoryId = $reader->findString("category_idea_id");
+                    $oldSubId = $reader->findString("sub_idea_id");
+                    $order = $reader->findString("order");
+                    if (
+                        $oldCategoryId &&
+                        $oldSubId &&
+                        array_key_exists($oldCategoryId, $ideaMapping) &&
+                        array_key_exists($oldSubId, $ideaMapping)
+                    ) {
+                        $this->queryFactory->newInsert(
+                            "hierarchy",
+                            [
+                                "category_idea_id" => $ideaMapping[$oldCategoryId],
+                                "sub_idea_id" => $ideaMapping[$oldSubId],
+                                "order" => $order
+                            ])
+                            ->execute()
+                            ->rowCount();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * List of columns to be cloned
+     * @return array<string> The array
+     */
+    protected function cloneColumns(): array
+    {
+        return [
+            "task_type",
+            "name",
+            "description",
+            "keywords",
+            "parameter",
+            "order",
+            "state",
+            //"active_module_id"
+        ];
     }
 }
