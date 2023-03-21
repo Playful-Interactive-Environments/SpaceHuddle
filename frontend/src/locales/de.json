@@ -161,6 +161,9 @@
           "addOn": "add-on"
         },
         "sessionCard": {
+          "select": "Zur Sitzung",
+          "edit": "Sitzung bearbeiten",
+          "delete": "Löschen",
           "clone": "Duplizieren",
           "clonePrompt": "Wollen Sie diese Sitzung wirklich duplizieren?"
         },
@@ -260,11 +263,8 @@
       "session": {
         "overview": {
           "header": "Deine Sitzungen",
-          "select": "Zur Sitzung",
           "add": "Neue Sitzung",
-          "hidden": " versteckt",
-          "edit": "Sitzung bearbeiten",
-          "delete": "Löschen"
+          "hidden": " versteckt"
         }
       },
       "processTimeline": {

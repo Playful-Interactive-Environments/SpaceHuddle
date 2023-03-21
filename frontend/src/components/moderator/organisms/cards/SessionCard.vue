@@ -11,13 +11,13 @@
               </span>
               <template #dropdown>
                 <el-dropdown-item command="edit">
-                  {{ $t('moderator.organism.session.overview.edit') }}
+                  {{ $t('moderator.organism.cards.sessionCard.edit') }}
                 </el-dropdown-item>
                 <el-dropdown-item command="clone">
-                  {{ $t('moderator.organism.session.overview.clone') }}
+                  {{ $t('moderator.organism.cards.sessionCard.clone') }}
                 </el-dropdown-item>
                 <el-dropdown-item command="delete">
-                  {{ $t('moderator.organism.session.overview.delete') }}
+                  {{ $t('moderator.organism.cards.sessionCard.delete') }}
                 </el-dropdown-item>
               </template>
             </el-dropdown>
@@ -42,7 +42,7 @@
           <SessionCode :code="session.connectionKey" button-type="primary" />
           <router-link :to="`/session/${session.id}`" class="flex-grow">
             <el-button class="fullwidth" type="info">
-              {{ $t('moderator.organism.session.overview.select') }}
+              {{ $t('moderator.organism.cards.sessionCard.select') }}
             </el-button>
           </router-link>
         </div>

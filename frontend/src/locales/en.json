@@ -161,6 +161,9 @@
           "addOn": "add-on"
         },
         "sessionCard": {
+          "select": "Go to session",
+          "edit": "Edit Session",
+          "delete": "Delete",
           "clone": "Clone Session",
           "clonePrompt": "Do you really want to clone this session?"
         },
@@ -260,11 +263,8 @@
       "session": {
         "overview": {
           "header": "Your Sessions",
-          "select": "Go to session",
           "add": "New Session",
-          "hidden": " hidden",
-          "edit": "Edit Session",
-          "delete": "Delete"
+          "hidden": " hidden"
         }
       },
       "processTimeline": {
