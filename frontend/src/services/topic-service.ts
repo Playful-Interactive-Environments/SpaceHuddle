@@ -81,6 +81,12 @@ export const deregisterGetTopicsList = (
   );
 };
 
+export const refreshGetTopicList = (sessionId: string): void => {
+  cashService.refreshCash(
+    `/${EndpointType.SESSION}/${sessionId}/${EndpointType.TOPICS}/`
+  );
+};
+
 export const exportTopic = async (
   topicId: string,
   exportType: string,

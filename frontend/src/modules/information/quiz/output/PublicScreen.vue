@@ -2,8 +2,9 @@
   <PublicBase
     :taskId="taskId"
     :authHeaderTyp="authHeaderTyp"
-    v-on:changePublicQuestion="(question) => (activeQuestion = question)"
-    v-on:changePublicAnswers="(answers) => (publicAnswerList = answers)"
+    v-on:changePublicQuestion="changePublicQuestion"
+    v-on:changePublicAnswers="changePublicAnswers"
+    v-on:changeQuizState="changeQuizState"
   >
     <template #answers>
       <el-space
@@ -39,6 +40,56 @@
           />
         </div>
       </el-space>
+      <el-space
+        direction="vertical"
+        class="fill"
+        v-if="activeQuestionType === QuestionType.ORDER"
+      >
+        <div
+          v-for="(answer, index) in orderAnswers"
+          :key="answer.answer.id"
+          class="answer"
+        >
+          {{ index + 1 }}.
+          {{ answer.answer.keywords }}
+          <img
+            v-if="answer.answer.image"
+            :src="answer.answer.image"
+            class="question-image"
+            alt=""
+          />
+          <img
+            v-if="answer.answer.link && !answer.answer.image"
+            :src="answer.answer.link"
+            class="question-image"
+            alt=""
+          />
+        </div>
+      </el-space>
+      <div class="slider" v-if="activeQuestionType === QuestionType.SLIDER">
+        <p>{{ activeQuestion.parameter.minValue }}</p>
+        <el-slider
+          :min="activeQuestion.parameter.minValue"
+          :max="activeQuestion.parameter.maxValue"
+          :disabled="true"
+          size="large"
+          input-size="large"
+          v-model="answerValue"
+          :marks="marks"
+        />
+        <p>{{ activeQuestion.parameter.maxValue }}</p>
+      </div>
+      <div class="numbers" v-if="activeQuestionType === QuestionType.NUMBER">
+        <div
+          :class="{
+            'numbers-correct':
+              answerValue === activeQuestion.parameter.correctValue &&
+              state === QuestionState.RESULT_ANSWER,
+          }"
+        >
+          <p>{{ answerValue }}</p>
+        </div>
+      </div>
     </template>
   </PublicBase>
 </template>
@@ -55,8 +106,14 @@ import {
   getQuestionTypeFromHierarchy,
   QuestionType,
 } from '@/modules/information/quiz/types/Question';
+import { QuestionState } from '@/modules/information/quiz/types/QuestionState';
 
 @Options({
+  computed: {
+    QuestionState() {
+      return QuestionState;
+    },
+  },
   components: {
     PublicBase,
   },
@@ -72,12 +129,56 @@ export default class PublicScreen extends Vue {
 
   QuestionType = QuestionType;
 
+  orderAnswers: PublicAnswerData[] = [];
+  answerValue = 0;
+
   get isModerator(): boolean {
     return this.authHeaderTyp === EndpointAuthorisationType.MODERATOR;
   }
 
   get activeQuestionType(): QuestionType {
     return getQuestionTypeFromHierarchy(this.activeQuestion);
+  }
+
+  changePublicQuestion(question: Hierarchy | null): void {
+    this.activeQuestion = question;
+  }
+
+  marks = {};
+  changePublicAnswers(answers: PublicAnswerData[]): void {
+    this.publicAnswerList = answers;
+    if (this.activeQuestionType === QuestionType.ORDER) {
+      if (this.orderAnswers.length !== this.publicAnswerList.length) {
+        this.orderAnswers = this.publicAnswerList;
+      }
+      if (this.state !== QuestionState.RESULT_ANSWER) {
+        this.orderAnswers = this.orderAnswers.sort(() => 0.5 - Math.random());
+      } else {
+        this.orderAnswers = this.orderAnswers.sort(
+          (a, b) => (a.answer.order as number) - (b.answer.order as number)
+        );
+      }
+    } else if (
+      this.activeQuestionType === QuestionType.SLIDER ||
+      this.activeQuestionType === QuestionType.NUMBER
+    ) {
+      if (this.activeQuestion) {
+        if (this.state === QuestionState.RESULT_ANSWER) {
+          this.answerValue = this.activeQuestion.parameter.correctValue;
+          this.marks[this.answerValue] = this.answerValue.toString();
+        } else {
+          this.marks = {};
+          const min = this.activeQuestion.parameter.minValue;
+          const max = this.activeQuestion.parameter.maxValue;
+          this.answerValue = Math.round(Math.random() * (max - min) + min);
+        }
+      }
+    }
+  }
+
+  state: QuestionState = QuestionState.ACTIVE_WAIT_FOR_VOTE;
+  changeQuizState(state: QuestionState): void {
+    this.state = state;
   }
 }
 </script>
@@ -127,5 +228,39 @@ export default class PublicScreen extends Vue {
   object-fit: contain;
   background-color: var(--color-primary);
   border-radius: 0.8rem;
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+  width: 40vw;
+  gap: 1.5rem;
+
+  div {
+    flex-grow: 1;
+  }
+
+  p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    font-style: italic;
+  }
+}
+
+.numbers div {
+  width: 10vw;
+  min-height: 5rem;
+  font-size: 1.5rem;
+  background-color: var(--color-darkblue);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.numbers div.numbers-correct {
+  background-color: var(--color-mint);
 }
 </style>

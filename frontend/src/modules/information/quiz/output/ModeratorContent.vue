@@ -63,6 +63,13 @@
               </span>
               <span class="media-right" v-if="formData.question.id">
                 <font-awesome-icon
+                  icon="clone"
+                  class="link"
+                  @click="cloneQuestion"
+                ></font-awesome-icon>
+              </span>
+              <span class="media-right" v-if="formData.question.id">
+                <font-awesome-icon
                   icon="trash"
                   class="link"
                   @click="deleteQuestion"
@@ -172,10 +179,50 @@
             </span>
           </div>
         </el-form-item>
+        <el-form-item v-if="formData.questionType === QuestionType.ORDER">
+          <draggable
+            v-model="formData.answers"
+            tag="ul"
+            :component-data="{
+              name: 'flip-list',
+              type: 'transition',
+            }"
+            v-bind="dragOptions"
+            group="orderAnswers"
+            @start="dragging = true"
+            @end="handleOrderChange"
+            item-key="id"
+          >
+            <template #item="{ element }">
+              <div class="orderDraggable">
+                <h2 class="media-left">{{ element.order + 1 }}</h2>
+                <el-input
+                  v-model="element.keywords"
+                  :placeholder="
+                    $t('module.information.quiz.moderatorContent.answerExample')
+                  "
+                />
+                <ImagePicker
+                  class="answerImage"
+                  v-model:link="element.link"
+                  v-model:image="element.image"
+                />
+                <span
+                  class="icons"
+                  v-if="formData.answers.length > minAnswerCount"
+                  v-on:click="deleteAnswer(element)"
+                >
+                  <font-awesome-icon icon="trash" class="link" />
+                </span>
+              </div>
+            </template>
+          </draggable>
+        </el-form-item>
         <el-form-item
           v-if="
             formData.questionType === QuestionType.MULTIPLECHOICE ||
-            formData.questionType === QuestionType.SINGLECHOICE
+            formData.questionType === QuestionType.SINGLECHOICE ||
+            formData.questionType === QuestionType.ORDER
           "
         >
           <AddItem
@@ -317,6 +364,14 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   QuestionnaireType = QuestionnaireType;
   QuestionType = QuestionType;
 
+  dragging = false;
+  dragOptions = {
+    animation: 200,
+    group: 'description',
+    disabled: false,
+    ghostClass: 'ghost',
+  };
+
   get QuestionTypeList(): QuestionType[] {
     return this.questionnaireType === QuestionnaireType.QUIZ
       ? QuizQuestionType
@@ -363,6 +418,13 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     };
   }
 
+  handleOrderChange(): void {
+    this.dragging = false;
+    this.formData.answers.forEach((answer) => {
+      answer.order = this.formData.answers.indexOf(answer);
+    });
+  }
+
   @Watch('editQuestion', { immediate: true })
   async onEditQuestionChanged(): Promise<void> {
     if (this.editQuestion) this.setFormData(this.editQuestion);
@@ -387,7 +449,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       cashService.deregisterAllGet(this.updateHierarchyResult);
       if (newValue?.question?.id) {
         if (newQuestionResultStorage === QuestionResultStorage.VOTING) {
-          votingService.registerGetHierarchyResult(
+          votingService.registerGetHierarchyResultDetail(
             newValue.question.id,
             this.updateVotes,
             EndpointAuthorisationType.MODERATOR,
@@ -514,6 +576,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     }
     const index = this.formData.answers.indexOf(answer);
     this.formData.answers.splice(index, 1);
+    this.handleOrderChange();
   }
 
   async saveQuestion(): Promise<void> {
@@ -618,9 +681,18 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     }
   }
 
+  cloneQuestion(): void {
+    if (this.formData.question.id) {
+      hierarchyService.clone(this.formData.question.id).then(() => {
+        this.questionCash.refreshData();
+      });
+    }
+  }
+
   questionCash!: cashService.SimplifiedCashEntry<Hierarchy[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    this.task = null;
     taskService.registerGetTaskById(this.taskId, this.updateTask);
     this.questionCash = hierarchyService.registerGetQuestions(
       this.taskId,
@@ -673,6 +745,17 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         (qOld) => qNew.question.id === qOld.question.id
       );
     });
+    const oldQuestions = questions.filter((qNew) => {
+      return this.questions.find(
+        (qOld) => qNew.question.id === qOld.question.id
+      );
+    });
+    for (const oldQuestion of oldQuestions) {
+      const savedQuestion = this.questions.find(
+        (item) => item.question.id === oldQuestion.question.id
+      );
+      if (savedQuestion) oldQuestion.answers = savedQuestion.answers;
+    }
     this.questions = questions;
     newQuestions.forEach(async (question) => {
       hierarchyService.registerGetList(
@@ -911,5 +994,31 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 .answerImage.stack::v-deep(.stack__action) {
   font-size: 1rem;
   gap: 0.3rem;
+}
+
+.orderDraggable {
+  background-color: var(--color-darkblue-light);
+  border-right: 2rem solid var(--color-primary);
+  padding: 0.5rem 1rem;
+  cursor: move;
+  margin: 0.5rem 0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+
+  .answerImage.stack {
+    max-height: unset;
+    position: inherit;
+    margin: 0 0.5rem;
+  }
+}
+
+.orderDraggable h2 {
+  font-weight: bold;
+}
+
+.ghost {
+  background-color: var(--color-darkblue);
+  color: white;
 }
 </style>

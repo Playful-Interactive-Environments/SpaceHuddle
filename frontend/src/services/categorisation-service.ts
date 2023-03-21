@@ -1,6 +1,6 @@
 import {
   apiExecuteDelete,
-  apiExecutePost,
+  apiExecutePost, apiExecutePostHandled,
   apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
@@ -9,6 +9,7 @@ import { Category } from '@/types/api/Category';
 import { Idea } from '@/types/api/Idea';
 import { getIdeaImages } from '@/services/idea-service';
 import * as cashService from '@/services/cash-service';
+import {Topic} from "@/types/api/Topic";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -134,5 +135,17 @@ export const removeIdeasFromCategory = async (
     data,
     authHeaderType,
     false
+  );
+};
+
+export const clone = async (
+  id: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Topic> => {
+  return apiExecutePostHandled<Topic>(
+    `/${EndpointType.CATEGORY}/${id}/clone`,
+    null,
+    null,
+    authHeaderType
   );
 };

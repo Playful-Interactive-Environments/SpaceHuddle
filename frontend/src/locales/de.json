@@ -159,6 +159,14 @@
       "cards": {
         "moduleCard": {
           "addOn": "add-on"
+        },
+        "sessionCard": {
+          "clone": "Duplizieren",
+          "clonePrompt": "Wollen Sie diese Sitzung wirklich duplizieren?"
+        },
+        "topicCard": {
+          "clone": "Duplizieren",
+          "clonePrompt": "Wollen die dieses Thema wirklich duplizieren?"
         }
       },
       "settings": {
@@ -256,15 +264,7 @@
           "add": "Neue Sitzung",
           "hidden": " versteckt",
           "edit": "Sitzung bearbeiten",
-          "delete": "Löschen",
-          "clone": "Duplizieren",
-          "clonePrompt": "Wollen Sie diese Sitzung wirklich duplizieren?"
-        }
-      },
-      "topic": {
-        "overview": {
-          "clone": "Duplizieren",
-          "clonePrompt": "Wollen die dieses Thema wirklich duplizieren?"
+          "delete": "Löschen"
         }
       },
       "processTimeline": {
@@ -368,7 +368,9 @@
       "topicDetails": {
         "addTask": "Aufgabe hinzufügen",
         "participantCount": "Teilnehmer*innen",
-        "topic": "Thema"
+        "topic": "Thema",
+        "clone": "Duplizieren",
+        "clonePrompt": "Wollen die diese Aufgabe wirklich duplizieren?"
       }
     }
   },
@@ -496,9 +498,10 @@
     "questionType": {
       "multiplechoice": "Multiple Choice",
       "singlechoice": "Single Choice",
+      "order": "Sortierung",
       "rating": "Rating",
       "slider": "Slider",
-      "number": "Number",
+      "number": "Zahl",
       "text": "Text",
       "image": "Bild"
     }

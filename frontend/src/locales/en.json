@@ -159,6 +159,14 @@
       "cards": {
         "moduleCard": {
           "addOn": "add-on"
+        },
+        "sessionCard": {
+          "clone": "Clone Session",
+          "clonePrompt": "Do you really want to clone this session?"
+        },
+        "topicCard": {
+          "clone": "Clone Topic",
+          "clonePrompt": "Do you really want to clone this topic?"
         }
       },
       "settings": {
@@ -256,15 +264,7 @@
           "add": "New Session",
           "hidden": " hidden",
           "edit": "Edit Session",
-          "delete": "Delete",
-          "clone": "Clone Session",
-          "clonePrompt": "Do you really want to clone this session?"
-        }
-      },
-      "topic": {
-        "overview": {
-          "clone": "Clone Topic",
-          "clonePrompt": "Do you really want to clone this topic?"
+          "delete": "Delete"
         }
       },
       "processTimeline": {
@@ -368,7 +368,9 @@
       "topicDetails": {
         "addTask": "add task",
         "participantCount": "participants",
-        "topic": "topic"
+        "topic": "topic",
+        "clone": "Clone Task",
+        "clonePrompt": "Do you really want to clone this task?"
       }
     }
   },
@@ -496,6 +498,7 @@
     "questionType": {
       "multiplechoice": "Multiple Choice",
       "singlechoice": "Single Choice",
+      "order": "Order",
       "rating": "Rating",
       "slider": "Slider",
       "number": "Number",

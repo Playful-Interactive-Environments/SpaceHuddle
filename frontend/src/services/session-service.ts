@@ -33,6 +33,14 @@ export const registerGetList = (
   );
 };
 
+export const deregisterGetList = (callback: (result: any) => void): void => {
+  cashService.deregisterGet(`/${EndpointType.SESSIONS}/`, callback);
+};
+
+export const refreshGetSessionList = (): void => {
+  cashService.refreshCash(`/${EndpointType.SESSIONS}/`);
+};
+
 export const registerGetSubjects = (
   callback: (result: any) => void,
   authHeaderType = EndpointAuthorisationType.MODERATOR,
@@ -45,10 +53,6 @@ export const registerGetSubjects = (
     authHeaderType,
     maxDelaySeconds
   );
-};
-
-export const deregisterGetList = (callback: (result: any) => void): void => {
-  cashService.deregisterGet(`/${EndpointType.SESSIONS}/`, callback);
 };
 
 export const deregisterGetSubjects = (

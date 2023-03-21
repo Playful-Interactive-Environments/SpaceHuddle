@@ -154,6 +154,9 @@
                               <el-dropdown-item command="delete">
                                 <font-awesome-icon icon="trash" />
                               </el-dropdown-item>
+                              <el-dropdown-item command="clone">
+                                <font-awesome-icon icon="clone" />
+                              </el-dropdown-item>
                             </el-dropdown-menu>
                           </template>
                         </el-dropdown>
@@ -252,6 +255,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
 import { SessionRole } from '@/types/api/SessionRole';
 import { reactivateTutorial } from '@/services/tutorial-service';
+import {ElMessageBox} from "element-plus";
 
 @Options({
   components: {
@@ -610,7 +614,10 @@ export default class ModeratorTopicDetails extends Vue {
     sessionRoleService.deregisterGetOwn(this.sessionId, this.updateRole);
     setTimeout(() => {
       topicService.deleteTopic(this.topicId).then((deleted) => {
-        if (deleted) this.$router.go(-1);
+        if (deleted) {
+          topicService.refreshGetTopicList(this.sessionId);
+          this.$router.go(-1);
+        }
       });
     }, 100);
   }
@@ -626,8 +633,8 @@ export default class ModeratorTopicDetails extends Vue {
       case 'delete':
         this.pauseReload = true;
         if (this.activeTask?.id == task.id) this.activeTask = null;
-        taskService.deleteTask(task.id).then((result) => {
-          if (result) {
+        taskService.deleteTask(task.id).then((deleted) => {
+          if (deleted) {
             if (this.taskCash) this.taskCash.refreshData();
             const index = this.tasks.findIndex((t) => t.id === task.id);
             if (index > -1) {
@@ -644,6 +651,28 @@ export default class ModeratorTopicDetails extends Vue {
           }
           this.pauseReload = false;
         });
+        break;
+      case 'clone':
+        try {
+          ElMessageBox.confirm(
+            this.$t('moderator.view.topicDetails.clonePrompt'),
+            this.$t('moderator.view.topicDetails.clone'),
+            {
+              boxType: 'confirm',
+              confirmButtonText: this.$t('moderator.view.topicDetails.clone'),
+            }
+          ).then(async () => {
+            const clonedTask = await taskService.clone(task.id);
+            taskService.refreshGetTaskList(this.topicId);
+            this.taskSettingsCategory = getCategoryOfType(
+              TaskType[task.taskType]
+            );
+            this.taskSettingsId = clonedTask.id;
+            this.showTaskSettings = true;
+          });
+        } catch {
+          // do nothing if the MessageBox is declined
+        }
         break;
     }
   }

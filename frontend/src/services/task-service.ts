@@ -1,12 +1,13 @@
 import {
   apiExecuteDelete,
-  apiExecutePost,
+  apiExecutePost, apiExecutePostHandled,
   apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Task, TaskForSaveAction } from '@/types/api/Task';
 import * as cashService from '@/services/cash-service';
+import {Topic} from "@/types/api/Topic";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -116,5 +117,17 @@ export const putTask = async (
     `/${EndpointType.TASK}/`,
     data,
     EndpointAuthorisationType.MODERATOR
+  );
+};
+
+export const clone = async (
+  taskId: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Topic> => {
+  return apiExecutePostHandled<Topic>(
+    `/${EndpointType.TASK}/${taskId}/clone`,
+    null,
+    null,
+    authHeaderType
   );
 };

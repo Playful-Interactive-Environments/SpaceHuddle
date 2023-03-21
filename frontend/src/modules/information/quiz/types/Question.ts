@@ -4,6 +4,7 @@ export enum QuestionType {
   MULTIPLECHOICE = 'multiplechoice',
   SINGLECHOICE = 'singlechoice',
   RATING = 'rating',
+  ORDER = 'order',
   SLIDER = 'slider',
   NUMBER = 'number',
   TEXT = 'text',
@@ -14,6 +15,7 @@ export const SurveyQuestionType: QuestionType[] = [
   QuestionType.MULTIPLECHOICE,
   QuestionType.SINGLECHOICE,
   QuestionType.RATING,
+  QuestionType.ORDER,
   QuestionType.SLIDER,
   QuestionType.NUMBER,
   QuestionType.TEXT,
@@ -21,6 +23,7 @@ export const SurveyQuestionType: QuestionType[] = [
 export const QuizQuestionType: QuestionType[] = [
   QuestionType.MULTIPLECHOICE,
   QuestionType.SINGLECHOICE,
+  QuestionType.ORDER,
   QuestionType.SLIDER,
   QuestionType.NUMBER,
 ];
@@ -58,7 +61,8 @@ export const getQuestionResultStorageFromQuestionType = (
 ): QuestionResultStorage => {
   if (
     questionType === QuestionType.MULTIPLECHOICE ||
-    questionType === QuestionType.SINGLECHOICE
+    questionType === QuestionType.SINGLECHOICE ||
+    questionType === QuestionType.ORDER
   )
     return QuestionResultStorage.VOTING;
   return QuestionResultStorage.CHILD_HIERARCHY;

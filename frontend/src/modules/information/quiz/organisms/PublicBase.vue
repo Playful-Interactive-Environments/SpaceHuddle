@@ -86,7 +86,7 @@ import {
   QuestionResultStorage,
   QuestionType,
 } from '@/modules/information/quiz/types/Question';
-import { VoteResult } from '@/types/api/Vote';
+import {VoteResult, VoteResultDetail} from '@/types/api/Vote';
 import {
   QuestionPhase,
   QuestionState,
@@ -161,7 +161,9 @@ export default class PublicBase extends Vue {
   get showQuestion(): boolean {
     return (
       this.isActive ||
-      (this.questionState === QuestionState.RESULT_ANSWER && this.hasVotes)
+      (this.questionState === QuestionState.RESULT_ANSWER && this.hasVotes) ||
+      (this.questionState === QuestionState.RESULT_ANSWER &&
+        this.moderatedQuestionFlow)
     );
   }
 
@@ -280,7 +282,7 @@ export default class PublicBase extends Vue {
     return false;
   }
 
-  resultCash: cashService.SimplifiedCashEntry<VoteResult[]> | null = null;
+  resultCash: cashService.SimplifiedCashEntry<VoteResultDetail[]> | null = null;
   resultParentCash: cashService.SimplifiedCashEntry<VoteResult[]> | null = null;
   resultHierarchyCash: cashService.SimplifiedCashEntry<Hierarchy[]> | null =
     null;
@@ -313,7 +315,7 @@ export default class PublicBase extends Vue {
         );
       } else {
         if (newQuestionResultStorage === QuestionResultStorage.VOTING) {
-          this.resultCash = votingService.registerGetHierarchyResult(
+          this.resultCash = votingService.registerGetHierarchyResultDetail(
             newValue?.id,
             this.updateVotes,
             this.authHeaderTyp,
@@ -555,9 +557,7 @@ export default class PublicBase extends Vue {
         this.statePointer++;
         if (
           this.statePointer >
-            QuizStateProperty[QuestionState.RESULT_ANSWER].time ||
-          getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
-            QuestionResultStorage.CHILD_HIERARCHY
+          QuizStateProperty[QuestionState.RESULT_ANSWER].time
         ) {
           this.statePointer = 0;
           this.questionState = this.publicQuestion?.question.description

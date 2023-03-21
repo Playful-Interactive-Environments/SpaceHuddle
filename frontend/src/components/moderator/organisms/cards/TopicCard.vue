@@ -103,8 +103,11 @@ export default class TopicCard extends Vue {
   }
 
   async deleteTopic(): Promise<void> {
-    topicService.deleteTopic(this.topic.id).then(() => {
-      this.$emit('topicDeleted', this.topic.id);
+    topicService.deleteTopic(this.topic.id).then((deleted) => {
+      if (deleted) {
+        topicService.refreshGetTopicList(this.sessionId);
+        this.$emit('topicDeleted', this.topic.id);
+      }
     });
   }
 
@@ -126,11 +129,11 @@ export default class TopicCard extends Vue {
   async cloneTopic(): Promise<void> {
     try {
       await ElMessageBox.confirm(
-        this.$t('moderator.organism.topic.overview.clonePrompt'),
-        this.$t('moderator.organism.topic.overview.clone'),
+        this.$t('moderator.organism.cards.topicCard.clonePrompt'),
+        this.$t('moderator.organism.cards.topicCard.clone'),
         {
           boxType: 'confirm',
-          confirmButtonText: this.$t('moderator.organism.topic.overview.clone'),
+          confirmButtonText: this.$t('moderator.organism.cards.topicCard.clone'),
         }
       );
       const clonedTopic = await topicService.clone(this.topic.id);

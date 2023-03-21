@@ -1,6 +1,6 @@
 import {
   apiExecuteDelete,
-  apiExecutePost,
+  apiExecutePost, apiExecutePostHandled,
   apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
@@ -16,6 +16,7 @@ import {
 import * as ideaService from '@/services/idea-service';
 import * as cashService from '@/services/cash-service';
 import { deleteIdeaImage, itemImageChanged } from '@/services/idea-service';
+import {Topic} from "@/types/api/Topic";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -60,6 +61,7 @@ export const postHierarchy = async (
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Hierarchy> => {
   const image = data.image;
+  data = { ...data };
   delete data.image;
   const hierarchy = await apiExecutePost<Hierarchy>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.HIERARCHY}`,
@@ -82,6 +84,7 @@ export const putHierarchy = async (
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<Hierarchy> => {
   const image = data.image !== undefined ? data.image : null;
+  data = { ...data };
   delete data.image;
   const imageChanged = data.id ? itemImageChanged(data.id, image) : false;
   const hierarchy = await apiExecutePut<Hierarchy>(
@@ -100,6 +103,8 @@ export const putHierarchy = async (
     } else {
       await deleteIdeaImage(hierarchy.id, authHeaderType);
     }
+  } else if (image) {
+    hierarchy.image = image;
   }
   return hierarchy;
 };
@@ -240,4 +245,16 @@ export const getParentResult = (
     }
   }
   return votes;
+};
+
+export const clone = async (
+  id: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Topic> => {
+  return apiExecutePostHandled<Topic>(
+    `/${EndpointType.HIERARCHY}/${id}/clone`,
+    null,
+    null,
+    authHeaderType
+  );
 };

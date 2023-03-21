@@ -1,7 +1,7 @@
 import {
   apiExecuteDelete,
   apiExecuteGetHandled,
-  apiExecutePost,
+  apiExecutePost, apiExecutePostHandled,
   apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
@@ -21,6 +21,7 @@ import TaskType from '@/types/enum/TaskType';
 import { Hierarchy } from '@/types/api/Hierarchy';
 import * as cashService from '@/services/cash-service';
 import { Task } from '@/types/api/Task';
+import {Topic} from "@/types/api/Topic";
 const imageDB: IdeaImage[] = [];
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -378,4 +379,16 @@ export const filterIdeas = (
     ideaList = ideaList.filter((item) => stateFilter.includes(item.state));
   }
   return ideaList;
+};
+
+export const clone = async (
+  id: string,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Topic> => {
+  return apiExecutePostHandled<Topic>(
+    `/${EndpointType.IDEA}/${id}/clone`,
+    null,
+    null,
+    authHeaderType
+  );
 };

@@ -121,12 +121,12 @@ export default class SessionCard extends Vue {
   async cloneSession(): Promise<void> {
     try {
       await ElMessageBox.confirm(
-        this.$t('moderator.organism.session.overview.clonePrompt'),
-        this.$t('moderator.organism.session.overview.clone'),
+        this.$t('moderator.organism.cards.sessionCard.clonePrompt'),
+        this.$t('moderator.organism.cards.sessionCard.clone'),
         {
           boxType: 'confirm',
           confirmButtonText: this.$t(
-            'moderator.organism.session.overview.clone'
+            'moderator.organism.cards.sessionCard.clone'
           ),
         }
       );
@@ -140,7 +140,10 @@ export default class SessionCard extends Vue {
   async deleteSession(): Promise<void> {
     setTimeout(() => {
       sessionService.remove(this.session.id).then((deleted) => {
-        if (deleted) this.$emit('updated');
+        if (deleted) {
+          sessionService.refreshGetSessionList();
+          this.$emit('updated');
+        }
       });
     }, 100);
   }

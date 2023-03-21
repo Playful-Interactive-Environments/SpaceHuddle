@@ -15,3 +15,8 @@ export interface VoteResult {
   detailRatingSum: number;
   countParticipant: number;
 }
+
+export interface VoteResultDetail extends VoteResult {
+  rating: number;
+  detailRating: number;
+}

@@ -321,7 +321,10 @@ export default class ModeratorSessionDetails extends Vue {
     this.deregisterAllGet();
     setTimeout(() => {
       sessionService.remove(this.sessionId).then((deleted) => {
-        if (deleted) this.$router.go(-1);
+        if (deleted) {
+          sessionService.refreshGetSessionList();
+          this.$router.go(-1);
+        }
       });
     }, 100);
   }

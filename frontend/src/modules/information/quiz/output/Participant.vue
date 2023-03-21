@@ -110,6 +110,46 @@
             />
           </el-button>
         </el-space>
+        <el-space
+          direction="vertical"
+          class="fill"
+          v-else-if="activeQuestionType === QuestionType.ORDER"
+        >
+          <draggable
+            v-model="orderAnswers"
+            tag="ul"
+            :component-data="{
+              name: 'flip-list',
+              type: 'transition',
+            }"
+            v-bind="dragOptions"
+            group="orderAnswers"
+            @start="dragging = true"
+            @end="handleOrderChange"
+            item-key="answer"
+          >
+            <template #item="{ element }">
+              <div class="media orderDraggable">
+                <h2 class="media-left">
+                  {{ orderAnswers.indexOf(element) + 1 }}
+                </h2>
+                <p class="media-content">{{ element.answer.keywords }}</p>
+                <img
+                  v-if="element.answer.image"
+                  :src="element.answer.image"
+                  class="media-right question-image"
+                  alt=""
+                />
+                <img
+                  v-if="element.answer.link && !element.answer.image"
+                  :src="element.answer.link"
+                  class="media-right question-image"
+                  alt=""
+                />
+              </div>
+            </template>
+          </draggable>
+        </el-space>
         <el-rate
           v-else-if="activeQuestionType === QuestionType.RATING"
           :max="activeQuestion.parameter.maxValue"
@@ -201,6 +241,7 @@ import {
 import { Hierarchy } from '@/types/api/Hierarchy';
 import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 import * as cashService from '@/services/cash-service';
+import draggable from 'vuedraggable';
 
 @Options({
   components: {
@@ -208,6 +249,7 @@ import * as cashService from '@/services/cash-service';
     QuizResult,
     ParticipantModuleDefaultContainer,
     PublicBase,
+    draggable,
   },
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -243,8 +285,25 @@ export default class Participant extends Vue {
 
   QuestionPhase = QuestionPhase;
   QuestionType = QuestionType;
+  orderAnswers: PublicAnswerData[] = [];
+  dragging = false;
+  dragOptions = {
+    animation: 200,
+    group: 'description',
+    disabled: false,
+    ghostClass: 'ghost',
+  };
 
   submitScreen = false;
+
+  handleOrderChange(): void {
+    this.dragging = false;
+    this.publicAnswerList.forEach((answer) => {
+      const position = this.publicAnswerList.indexOf(answer);
+      answer.answer.order = position;
+    });
+    this.changeOrderVotes();
+  }
 
   get activeQuestionRange(): number[] | { [key: number]: string } {
     if (this.activeQuestion) {
@@ -543,6 +602,36 @@ export default class Participant extends Vue {
     this.questionAnswered = this.getQuestionAnswered();
   }
 
+  async changeOrderVotes() {
+    if (this.votes.length <= 0) {
+      this.orderAnswers.forEach((answer, index) => {
+        votingService
+          .postVote(this.taskId, {
+            ideaId: answer.answer.id!,
+            rating: index,
+            detailRating: 1,
+          })
+          .then((vote) => {
+            this.votes.push(vote);
+          });
+      });
+    } else {
+      this.orderAnswers.forEach((answer, index) => {
+        const vote = this.votes.find(
+          (element) => element.ideaId === answer.answer.id
+        );
+        if (!vote) return;
+        votingService.putVote({
+          id: vote.id,
+          ideaId: answer.answer.id!,
+          rating: index,
+          detailRating: 1,
+        });
+      });
+    }
+    this.questionAnswered = this.getQuestionAnswered();
+  }
+
   get moduleName(): string {
     if (this.module) return this.module.name;
     return '';
@@ -602,7 +691,28 @@ export default class Participant extends Vue {
 
   updateVotes(votes: Vote[]): void {
     this.votes = votes;
+    this.loadSavedOrder();
     this.skipAnswerQuestions();
+  }
+
+  loadSavedOrder(): void {
+    if (this.activeQuestionType === QuestionType.ORDER) {
+      if (this.votes.length > 0) {
+        this.orderAnswers = this.publicAnswerList;
+        const sortOrder = this.votes.sort((a, b) => a.rating - b.rating);
+        const sortedVotes: PublicAnswerData[] = [];
+        for (let i = 0; i < sortOrder.length; i++) {
+          const option = this.orderAnswers.find(
+            (option) => option.answer.id === sortOrder[i].ideaId
+          );
+          if (option) sortedVotes.push(option);
+        }
+        this.orderAnswers = sortedVotes;
+      } else {
+        this.orderAnswers = this.publicAnswerList;
+        this.orderAnswers = this.orderAnswers.sort(() => 0.5 - Math.random());
+      }
+    }
   }
 
   storedActiveAnswer!: Hierarchy | undefined;
@@ -659,6 +769,7 @@ export default class Participant extends Vue {
       this.questionnaireType =
         QuestionnaireType[module.parameter.questionType.toUpperCase()];
       this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
+      if (this.moderatedQuestionFlow) this.initData = false;
       if (!this.moderatedQuestionFlow && this.activeQuestionIndex === -1) {
         this.activeQuestionIndex = 0;
       }
@@ -709,6 +820,15 @@ export default class Participant extends Vue {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateVotes);
     cashService.deregisterAllGet(this.updateQuestions);
+  }
+
+  @Watch('publicAnswerList', { immediate: false })
+  async publicAnswerListChanged(): Promise<void> {
+    if (this.activeQuestionType === QuestionType.ORDER) {
+      if (this.orderAnswers.length !== this.publicAnswerList.length) {
+        this.loadSavedOrder();
+      }
+    }
   }
 }
 </script>
@@ -942,5 +1062,32 @@ label {
 
 .el-slider::v-deep(.el-slider__stop) {
   width: 0.1px;
+}
+
+.media + .media {
+  padding-top: 1rem;
+}
+
+.orderDraggable {
+  background-color: #f4f4f4;
+  padding: 1rem;
+  cursor: move;
+  margin: 1rem 0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+
+  img {
+    margin: -1rem;
+  }
+}
+
+.orderDraggable h2 {
+  font-weight: bold;
+}
+
+.ghost {
+  background-color: var(--color-darkblue);
+  color: white;
 }
 </style>

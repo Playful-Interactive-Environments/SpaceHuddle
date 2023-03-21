@@ -57,10 +57,17 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
-import { VoteResult } from '@/types/api/Vote';
+import { VoteResult, VoteResultDetail } from '@/types/api/Vote';
 import { QuestionnaireType } from '@/modules/information/quiz/types/QuestionnaireType';
 import { QuestionType } from '@/modules/information/quiz/types/Question';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
+import Color from 'colorjs.io';
+
+interface ChartLegend {
+  color: string;
+  name: string;
+  condition: (vote: VoteResult) => boolean;
+}
 
 @Options({
   components: {
@@ -91,6 +98,70 @@ export default class QuizResult extends Vue {
 
   get chartHeight(): number {
     return this.voteResult.length * 13;
+  }
+
+  get legend(): ChartLegend[] {
+    if (this.questionnaireType === QuestionnaireType.SURVEY) {
+      const labelResult = (this as any).$t(
+        'module.information.quiz.publicScreen.chartDataLabelResult'
+      );
+      return [
+        {
+          color: '#f3a40a',
+          name: labelResult,
+          condition: () => true,
+        },
+      ];
+    } else {
+      if (this.questionType !== QuestionType.ORDER) {
+        const labelCorrect = (this as any).$t(
+          'module.information.quiz.publicScreen.chartDataLabelCorrect'
+        );
+        const labelIncorrect = (this as any).$t(
+          'module.information.quiz.publicScreen.chartDataLabelIncorrect'
+        );
+        return [
+          {
+            color: '#01cf9e',
+            name: labelCorrect,
+            condition: (vote) => vote.idea.parameter.isCorrect,
+          },
+          {
+            color: '#fe6e5d',
+            name: labelIncorrect,
+            condition: (vote) => !vote.idea.parameter.isCorrect,
+          },
+        ];
+      } else {
+        const color1 = new Color('#01cf9e');
+        const color2 = new Color('#fe6e5d');
+        const min = this.voteResult.sort(
+          (a, b) => (a.idea.order as number) - (b.idea.order as number)
+        )[0].idea.order as number;
+        const max = this.voteResult.sort(
+          (a, b) => (b.idea.order as number) - (a.idea.order as number)
+        )[0].idea.order as number;
+        const legend: ChartLegend[] = [];
+        for (let i = min; i <= max; i++) {
+          const color = (
+            color1.mix(color2, (1 / (max + 1)) * (i + 1), {
+              space: 'lch',
+              outputSpace: 'srgb',
+            }) as any
+          ).coords as number[];
+          let hexColor = '#';
+          color.forEach(
+            (coord) => (hexColor += Math.round(coord * 255).toString(16))
+          );
+          legend.push({
+            color: hexColor,
+            name: (i + 1).toString(),
+            condition: (vote) => (vote as VoteResultDetail).rating === i,
+          });
+        }
+        return legend;
+      }
+    }
   }
 
   @Watch('chartHeight', { immediate: true })
@@ -149,63 +220,37 @@ export default class QuizResult extends Vue {
   }
 
   get resultData(): any {
-    const labelCorrect = (this as any).$t(
-      'module.information.quiz.publicScreen.chartDataLabelCorrect'
-    );
-    const labelIncorrect = (this as any).$t(
-      'module.information.quiz.publicScreen.chartDataLabelIncorrect'
-    );
-    const labelResult = (this as any).$t(
-      'module.information.quiz.publicScreen.chartDataLabelResult'
-    );
-    if (this.questionnaireType === QuestionnaireType.QUIZ) {
+    const ideas = this.voteResult
+      .map((vote) => vote.idea)
+      .filter(
+        (value, index, self) =>
+          self.findIndex((item) => item.id === value.id) === index
+      )
+      .sort((a, b) => (a.order as number) - (b.order as number));
+    const legend = this.legend;
+    const datasets = legend.map((l) => {
       return {
-        labels: this.voteResult.map((vote) =>
-          this.breakString(vote.idea.keywords, 34)
-        ),
-        datasets: [
-          {
-            label: labelCorrect,
-            backgroundColor: '#01cf9e',
-            data: this.voteResult.map((vote) =>
-              vote.idea.parameter.isCorrect ? vote[this.resultColumn] : 0
-            ),
-            borderRadius: 5,
-            borderSkipped: false,
-            yAxisID: 1,
-            color: '#1d2948',
-          },
-          {
-            label: labelIncorrect,
-            backgroundColor: '#fe6e5d',
-            data: this.voteResult.map((vote) =>
-              vote.idea.parameter.isCorrect ? 0 : vote[this.resultColumn]
-            ),
-            borderRadius: 5,
-            borderSkipped: false,
-            yAxisID: 1,
-            color: '#1d2948',
-          },
-        ],
+        label: l.name,
+        backgroundColor: l.color,
+        data: ideas.map((idea) => {
+          const votes = this.voteResult.filter(
+            (item) => item.idea.id === idea.id
+          );
+          for (const vote of votes) {
+            if (l.condition(vote)) return vote[this.resultColumn];
+          }
+          return 0;
+        }),
+        borderRadius: 5,
+        borderSkipped: false,
+        yAxisID: 1,
+        color: '#1d2948',
       };
-    } else {
-      return {
-        labels: this.voteResult.map((vote) =>
-          this.breakString(vote.idea.keywords, 34)
-        ),
-        datasets: [
-          {
-            label: labelResult,
-            backgroundColor: '#f3a40a',
-            data: this.voteResult.map((vote) => vote[this.resultColumn]),
-            borderRadius: 5,
-            borderSkipped: false,
-            yAxisID: 1,
-            color: '#1d2948',
-          },
-        ],
-      };
-    }
+    });
+    return {
+      labels: ideas.map((idea) => this.breakString(idea.keywords, 34)),
+      datasets: datasets,
+    };
   }
 
   checkLabels(): void {
