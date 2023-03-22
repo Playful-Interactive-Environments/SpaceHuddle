@@ -5,7 +5,11 @@
         <div>
           <div class="top-container">
             <p class="el-card__date">{{ formatDate(session.creationDate) }}</p>
-            <el-dropdown class="card__menu" v-on:command="menuItemSelected">
+            <el-dropdown
+              v-if="isModerator"
+              class="card__menu"
+              v-on:command="menuItemSelected"
+            >
               <span class="el-dropdown-link">
                 <font-awesome-icon icon="ellipsis-h" />
               </span>
@@ -58,7 +62,7 @@
 </template>
 
 <script lang="ts">
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
 import { Session } from '@/types/api/Session';
 import { formatDate } from '@/utils/date';
@@ -68,6 +72,10 @@ import SessionSettings from '@/components/moderator/organisms/settings/SessionSe
 import ModuleCount from '@/components/moderator/molecules/ModuleCount.vue';
 import { ElMessageBox } from 'element-plus';
 import * as sessionService from '@/services/session-service';
+import * as sessionRoleService from '@/services/session-role-service';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { SessionRole } from '@/types/api/SessionRole';
+import UserType from '@/types/enum/UserType';
 
 @Options({
   components: {
@@ -85,10 +93,33 @@ export default class SessionCard extends Vue {
   sessionEditId = '';
   showSettings = false;
   hasSubject = false;
+  sessionRole = '';
+
+  get isModerator(): boolean {
+    return this.sessionRole === UserType.MODERATOR;
+  }
+
   mounted(): void {
     this.hasSubject =
       this.session.subject != null || this.session.subject != undefined;
   }
+
+  @Watch('session.id', { immediate: true })
+  onSessionIdChanged(): void {
+    if (this.session) {
+      sessionRoleService.registerGetOwn(
+        this.session.id,
+        this.updateRole,
+        EndpointAuthorisationType.MODERATOR,
+        60 * 60
+      );
+    }
+  }
+
+  updateRole(role: SessionRole): void {
+    this.sessionRole = role.role;
+  }
+
   menuItemSelected(command: string): void {
     switch (command) {
       case 'clone':
@@ -114,10 +145,12 @@ export default class SessionCard extends Vue {
       this.$emit('updated');
     }
   }
+
   onSubjectUpdated(subjectState: boolean): void {
     this.hasSubject = subjectState;
     this.$emit('updated');
   }
+
   async cloneSession(): Promise<void> {
     try {
       await ElMessageBox.confirm(
