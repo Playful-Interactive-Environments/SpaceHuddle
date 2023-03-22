@@ -132,7 +132,7 @@ final class QueryFactory
             ->execute()
             ->rowCount();
 
-        if ($itemCount > 0)
+        if ($itemCount > 0 && $createUuid)
             return $id;
         return null;
     }

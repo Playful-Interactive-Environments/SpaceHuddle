@@ -12,9 +12,10 @@ trait CloneTrait
      * Clone entity row.
      * @param string $oldId Old table primary key
      * @param string | null $newParentId New parent key value to be inserted
+     * @param bool $cloneDependencies If false, ignore cloneDependencies function
      * @return string | null The new created entity id
      */
-    public function clone(string $oldId, ?string $newParentId = null, bool $insertDependencies = true): ?string
+    public function clone(string $oldId, ?string $newParentId = null, bool $cloneDependencies = true): ?string
     {
         $newId = $this->queryFactory->newClone(
             $this->getEntityName(),
@@ -24,7 +25,7 @@ trait CloneTrait
             $newParentId
         );
 
-        if ($insertDependencies && $newId) {
+        if ($cloneDependencies && $newId) {
             $this->cloneDependencies($oldId, $newId);
         }
         return $newId;

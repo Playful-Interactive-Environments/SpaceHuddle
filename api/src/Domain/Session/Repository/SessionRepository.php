@@ -635,19 +635,21 @@ class SessionRepository implements RepositoryInterface
      * Clone entity row.
      * @param string $oldId Old table primary key
      * @param string | null $newParentId New parent key value to be inserted
+     * @param bool $cloneDependencies If false, ignore cloneDependencies function
      * @return string | null The new created entity id
      */
-    public function clone(string $oldId, ?string $newParentId = null, bool $insertDependencies = true): ?string
+    public function clone(string $oldId, ?string $newParentId = null, bool $cloneDependencies = true): ?string
     {
+        $connectionKey = $this->generateNewConnectionKey("connection_key");
         $newId = $this->queryFactory->newClone(
             $this->getEntityName(),
             ["id" => $oldId],
             $this->cloneColumns(),
-            null,
-            null
+            "connection_key",
+            $connectionKey
         );
 
-        if ($insertDependencies && $newId) {
+        if ($cloneDependencies && $newId) {
             $this->cloneDependencies($oldId, $newId);
         }
         return $newId;
@@ -661,6 +663,15 @@ class SessionRepository implements RepositoryInterface
      */
     protected function cloneDependencies(string $oldId, string $newId): void
     {
+        $this->queryFactory->newClone(
+            "session_role",
+            ["session_id" => $oldId],
+            ["user_id", "role"],
+            "session_id",
+            $newId,
+            false
+        );
+
         $topicRepository = new TopicRepository($this->queryFactory);
         $topicRepository->setAuthorisation($this->getAuthorisation());
 
@@ -694,7 +705,6 @@ class SessionRepository implements RepositoryInterface
             "title",
             "description",
             "subject",
-            "connection_key",
             "max_participants",
             "expiration_date",
             //"public_screen_module_id",
