@@ -242,6 +242,9 @@ import { Hierarchy } from '@/types/api/Hierarchy';
 import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 import * as cashService from '@/services/cash-service';
 import draggable from 'vuedraggable';
+import * as taskParticipantService from '@/services/task-participant-service';
+import { TaskParticipantState } from '@/types/api/TaskParticipantState';
+import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
 
 @Options({
   components: {
@@ -262,6 +265,7 @@ export default class Participant extends Vue {
   activeQuestion: Hierarchy | null = null;
   module: Module | null = null;
   task: Task | null = null;
+  state: TaskParticipantState | null = null;
   votes: Vote[] = [];
   EndpointAuthorisationType = EndpointAuthorisationType;
   activeQuestionIndex = -1;
@@ -375,13 +379,7 @@ export default class Participant extends Vue {
   }
 
   get getScoreString(): string {
-    let score = 0;
-    for (let i = 0; i < this.voteResults.length; i++) {
-      if (this.voteResults[i]) {
-        score++;
-      }
-    }
-    return score + '/' + this.questionCount;
+    return this.score + '/' + this.questionCount;
   }
 
   checkScore(): void {
@@ -433,6 +431,13 @@ export default class Participant extends Vue {
           this.activeQuestion?.parameter.correctValue;
       }
     }
+    let score = 0;
+    for (let i = 0; i < this.voteResults.length; i++) {
+      if (this.voteResults[i]) {
+        score++;
+      }
+    }
+    this.score = score;
   }
 
   get getImageSrc(): string {
@@ -467,6 +472,14 @@ export default class Participant extends Vue {
     this.checkScore();
     this.activeQuestionIndex++;
     this.submitScreen = true;
+    if (this.state) {
+      this.state.state = TaskParticipantStatesType.FINISHED;
+      this.state.parameter = {
+        score: this.score,
+        answeredQuestionCount: this.questionCount,
+      };
+      taskParticipantService.put(this.taskId, this.state);
+    }
   }
 
   get hasPreviousQuestion(): boolean {
@@ -742,6 +755,12 @@ export default class Participant extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    taskParticipantService.registerGetList(
+      this.taskId,
+      this.updateState,
+      EndpointAuthorisationType.PARTICIPANT,
+      2 * 60
+    );
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -772,6 +791,17 @@ export default class Participant extends Vue {
       if (this.moderatedQuestionFlow) this.initData = false;
       if (!this.moderatedQuestionFlow && this.activeQuestionIndex === -1) {
         this.activeQuestionIndex = 0;
+      }
+    }
+  }
+
+  updateState(stateList: TaskParticipantState[]): void {
+    if (stateList.length > 0) {
+      this.state = stateList[0];
+      if (this.state.state === TaskParticipantStatesType.FINISHED) {
+        this.questionCount = this.state.parameter.answeredQuestionCount;
+        this.score = this.state.parameter.score;
+        this.submitScreen = true;
       }
     }
   }

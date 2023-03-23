@@ -1,8 +1,7 @@
 <template>
-  <vue3-chart-js
+  <Bar
     id="resultChart"
     ref="chartRef"
-    type="bar"
     :data="chartData"
     :options="{
       animation: {
@@ -38,7 +37,8 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
+import { Bar } from 'vue-chartjs';
+//import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import * as votingService from '@/services/voting-service';
 import { VoteResult } from '@/types/api/Vote';
 import { EventType } from '@/types/enum/EventType';
@@ -48,7 +48,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 @Options({
   components: {
-    Vue3ChartJs,
+    Bar,
   },
 })
 
@@ -100,7 +100,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   async updateChart(): Promise<void> {
     if (this.$refs.chartRef) {
       const chartRef = this.$refs.chartRef as any;
-      chartRef.update();
+      if (chartRef.chart) {
+        chartRef.chart.data = this.chartData;
+        chartRef.chart.update();
+      }
     }
   }
 

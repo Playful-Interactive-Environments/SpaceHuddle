@@ -39,6 +39,7 @@ enum EndpointType {
   VOTE_RESULT = 'vote_result',
   VOTE_RESULT_PARENT = 'vote_result_parent',
   DETAIL = 'detail',
+  PARTICIPANT_STATE = 'participant_state',
 }
 
 export default EndpointType;

@@ -73,12 +73,14 @@ import ModuleComponentType from '@/modules/ModuleComponentType';
 import * as taskService from '@/services/task-service';
 import * as sessionService from '@/services/session-service';
 import * as timerService from '@/services/timer-service';
+import * as taskParticipantService from '@/services/task-participant-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Module } from '@/types/api/Module';
 import { ComponentLoadingState } from '@/types/enum/ComponentLoadingState';
 import ParticipantDefaultContainer from '@/components/participant/organisms/layout/ParticipantDefaultContainer.vue';
 import Timer from '@/components/shared/atoms/Timer.vue';
 import * as cashService from '@/services/cash-service';
+import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 
 @Options({
   components: {
@@ -94,6 +96,7 @@ export default class ParticipantModuleContent extends Vue {
 
   // eslint-disable-next-line no-undef
   task: Task | null = null;
+  state: TaskParticipantState | null = null;
 
   TaskType = TaskType;
   TaskStates = TaskStates;
@@ -202,8 +205,15 @@ export default class ParticipantModuleContent extends Vue {
     return ['default'];
   }
 
+  stateCash!: cashService.SimplifiedCashEntry<TaskParticipantState[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    this.stateCash = taskParticipantService.registerGetList(
+      this.taskId,
+      this.updateState,
+      EndpointAuthorisationType.PARTICIPANT,
+      2 * 60
+    );
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -232,6 +242,17 @@ export default class ParticipantModuleContent extends Vue {
       this.$router.currentRoute.value.name === 'participant-module-content'
     )
       this.$router.go(-1);
+  }
+
+  updateState(stateList: TaskParticipantState[]): void {
+    if (stateList.length > 0) {
+      const state = stateList[0];
+      if (!this.state) {
+        state.count++;
+        taskParticipantService.put(this.taskId, state);
+      }
+      this.state = state;
+    }
   }
 
   updatePublicTask(task: Task): void {

@@ -36,6 +36,9 @@
                     <el-dropdown-item command="delete">
                       <font-awesome-icon icon="trash" />
                     </el-dropdown-item>
+                    <el-dropdown-item command="statistic">
+                      <font-awesome-icon icon="chart-column" />
+                    </el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -66,6 +69,13 @@
       :topic-id="editingTopicId"
       v-on:topicUpdated="reload"
     />
+    <el-dialog v-model="showStatistic" width="calc(var(--app-width) * 0.8)">
+      <template #header>
+        {{ $t('moderator.view.topicDetails.statistic') }}
+        {{ topic.title }}
+      </template>
+      <TopicStatistic :topic-id="topic.id" />
+    </el-dialog>
   </div>
 </template>
 
@@ -77,9 +87,10 @@ import * as topicService from '@/services/topic-service';
 import TopicSettings from '@/components/moderator/organisms/settings/TopicSettings.vue';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 import { ElMessageBox } from 'element-plus';
+import TopicStatistic from '@/components/moderator/organisms/statistics/TopicStatistic.vue';
 
 @Options({
-  components: { TutorialStep, TopicSettings },
+  components: { TopicStatistic, TutorialStep, TopicSettings },
   emits: ['topicDeleted'],
 })
 export default class TopicCard extends Vue {
@@ -88,6 +99,7 @@ export default class TopicCard extends Vue {
   @Prop({ default: true }) readonly canModify!: boolean;
   showSettings = false;
   editingTopicId = '';
+  showStatistic = false;
 
   mounted(): void {
     this.editingTopicId = this.topic.id;
@@ -122,6 +134,9 @@ export default class TopicCard extends Vue {
         break;
       case 'delete':
         this.deleteTopic();
+        break;
+      case 'statistic':
+        this.showStatistic = true;
         break;
     }
   }

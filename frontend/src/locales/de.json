@@ -370,7 +370,8 @@
         "participantCount": "Teilnehmer*innen",
         "topic": "Thema",
         "clone": "Duplizieren",
-        "clonePrompt": "Wollen die diese Aufgabe wirklich duplizieren?"
+        "clonePrompt": "Wollen die diese Aufgabe wirklich duplizieren?",
+        "statistic": "Statistik"
       }
     }
   },

@@ -12,10 +12,10 @@
       :is-editable="false"
     />
   </div>
-  <vue3-chart-js
+  <Bar
     v-else
+    id="chartRef"
     ref="chartRef"
-    type="bar"
     :data="chartData"
     :height="100"
     :options="{
@@ -56,7 +56,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
+import { Bar } from 'vue-chartjs';
 import { VoteResult, VoteResultDetail } from '@/types/api/Vote';
 import { QuestionnaireType } from '@/modules/information/quiz/types/QuestionnaireType';
 import { QuestionType } from '@/modules/information/quiz/types/Question';
@@ -71,7 +71,7 @@ interface ChartLegend {
 
 @Options({
   components: {
-    Vue3ChartJs,
+    Bar,
     IdeaCard,
   },
 })
@@ -299,7 +299,10 @@ export default class QuizResult extends Vue {
   async updateChart(): Promise<void> {
     if (this.$refs.chartRef) {
       const chartRef = this.$refs.chartRef as any;
-      chartRef.update();
+      if (chartRef.chart) {
+        chartRef.chart.data = this.chartData;
+        chartRef.chart.update();
+      }
     }
   }
 }

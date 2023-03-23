@@ -370,7 +370,8 @@
         "participantCount": "participants",
         "topic": "topic",
         "clone": "Clone Task",
-        "clonePrompt": "Do you really want to clone this task?"
+        "clonePrompt": "Do you really want to clone this task?",
+        "statistic": "statistics"
       }
     }
   },

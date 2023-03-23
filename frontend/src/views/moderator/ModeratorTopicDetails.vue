@@ -157,6 +157,9 @@
                               <el-dropdown-item command="clone">
                                 <font-awesome-icon icon="clone" />
                               </el-dropdown-item>
+                              <el-dropdown-item command="statistic">
+                                <font-awesome-icon icon="chart-column" />
+                              </el-dropdown-item>
                             </el-dropdown-menu>
                           </template>
                         </el-dropdown>
@@ -209,6 +212,13 @@
     v-model:showModal="showRoles"
     :sessionId="sessionId"
   />
+  <el-dialog v-model="showStatistic" width="calc(var(--app-width) * 0.8)">
+    <template #header>
+      {{ $t('moderator.view.topicDetails.statistic') }}
+      {{ dialogTask.name }}
+    </template>
+    <TaskStatistic :task-id="dialogTask.id" />
+  </el-dialog>
 </template>
 
 <script lang="ts">
@@ -255,10 +265,12 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
 import { SessionRole } from '@/types/api/SessionRole';
 import { reactivateTutorial } from '@/services/tutorial-service';
-import {ElMessageBox} from "element-plus";
+import { ElMessageBox } from 'element-plus';
+import TaskStatistic from '@/components/moderator/organisms/statistics/TaskStatistic.vue';
 
 @Options({
   components: {
+    TaskStatistic,
     TutorialStep,
     TimerSettings,
     AddItem,
@@ -294,6 +306,7 @@ export default class ModeratorTopicDetails extends Vue {
   reloadTaskIndex = 0;
   componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
   showRoles = false;
+  showStatistic = false;
 
   TaskType = TaskType;
   TaskCategory = TaskCategory;
@@ -622,7 +635,9 @@ export default class ModeratorTopicDetails extends Vue {
     }, 100);
   }
 
+  dialogTask: Task | null = null;
   taskCommand(task: Task, command: string): void {
+    this.dialogTask = task;
     const activeTask = this.activeTask;
     switch (command) {
       case 'edit':
@@ -673,6 +688,9 @@ export default class ModeratorTopicDetails extends Vue {
         } catch {
           // do nothing if the MessageBox is declined
         }
+        break;
+      case 'statistic':
+        this.showStatistic = true;
         break;
     }
   }

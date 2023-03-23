@@ -10,6 +10,24 @@ import VueObserveVisibility from 'vue3-observe-visibility2';
 import ElementPlus from 'element-plus';
 import '@/assets/styles/global.scss';
 import '@/assets/styles/element-plus.scss';
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+} from 'chart.js';
+
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale
+);
 
 import { IconPack, library } from '@fortawesome/fontawesome-svg-core';
 // internal icons

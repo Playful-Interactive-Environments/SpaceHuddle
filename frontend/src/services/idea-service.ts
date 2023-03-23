@@ -1,7 +1,8 @@
 import {
   apiExecuteDelete,
   apiExecuteGetHandled,
-  apiExecutePost, apiExecutePostHandled,
+  apiExecutePost,
+  apiExecutePostHandled,
   apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
