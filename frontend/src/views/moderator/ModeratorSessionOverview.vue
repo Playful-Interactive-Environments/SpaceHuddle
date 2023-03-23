@@ -112,7 +112,9 @@ export default class ModeratorSessionOverview extends Vue {
   updateSessions(): void {
     this.sessions = this.sessionCash.data;
     this.filteredSessions = this.sessions;
-    this.updateFilteredSessions(this.sessions);
+    if (this.sessions) {
+      this.updateFilteredSessions(this.sessions);
+    }
   }
   updateFilteredSessions(sessions: Session[]): void {
     const orderType = this.filter.orderType;
