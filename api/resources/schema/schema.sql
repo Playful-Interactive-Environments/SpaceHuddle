@@ -230,6 +230,51 @@ CREATE TABLE `task` (
 -- --------------------------------------------------------
 
 --
+-- Tabellenstruktur für Tabelle `task_participant_state`
+--
+
+CREATE TABLE `task_participant_state` (
+                                          `id` char(36) NOT NULL,
+                                          `task_id` char(36) NOT NULL,
+                                          `participant_id` char(36) NOT NULL,
+                                          `count` int(11) NOT NULL DEFAULT 1,
+                                          `state` varchar(255) DEFAULT NULL,
+                                          `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+                                          `modification_date` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `task_participant_state_iteration`
+--
+
+CREATE TABLE `task_participant_state_iteration` (
+                                                    `state_id` char(36) NOT NULL,
+                                                    `iteration` int(11) NOT NULL DEFAULT 1,
+                                                    `state` varchar(255) DEFAULT NULL,
+                                                    `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+                                                    `modification_date` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `task_participant_state_iteration_item`
+--
+
+CREATE TABLE `task_participant_state_iteration_item` (
+                                                    `state_id` char(36) NOT NULL,
+                                                    `iteration` int(11) NOT NULL DEFAULT 1,
+                                                    `step` int(11) NOT NULL DEFAULT 1,
+                                                    `idea_id` char(36) NOT NULL,
+                                                    `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+                                                    `modification_date` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Tabellenstruktur für Tabelle `topic`
 --
 
@@ -374,6 +419,29 @@ ALTER TABLE `task`
   ADD KEY `task_ibfk_active_module` (`active_module_id`);
 
 --
+-- Indizes für die Tabelle `task_participant_state`
+--
+ALTER TABLE `task_participant_state`
+    ADD PRIMARY KEY (`id`),
+  ADD KEY `task_participant_state_ibfk_task` (`task_id`),
+  ADD KEY `task_participant_state_ibfk_participant` (`participant_id`);
+
+--
+-- Indizes für die Tabelle `task_participant_state_iteration`
+--
+ALTER TABLE `task_participant_state_iteration`
+    ADD PRIMARY KEY (`state_id`,`iteration`),
+  ADD KEY `task_participant_state_iteration_ibfk_state` (`state_id`);
+
+--
+-- Indizes für die Tabelle `task_participant_state_iteration_item`
+--
+ALTER TABLE `task_participant_state_iteration_item`
+    ADD PRIMARY KEY (`state_id`,`iteration`,`step`),
+  ADD KEY `task_participant_state_iteration_item_ibfk_state` (`state_id`),
+  ADD KEY `task_participant_state_iteration_item_ibfk_idea` (`idea_id`);
+
+--
 -- Indizes für die Tabelle `topic`
 --
 ALTER TABLE `topic`
@@ -477,6 +545,27 @@ ALTER TABLE `session_role`
 ALTER TABLE `task`
     ADD CONSTRAINT `task_ibfk_active_module` FOREIGN KEY (`active_module_id`) REFERENCES `module` (`id`),
   ADD CONSTRAINT `task_ibfk_topic` FOREIGN KEY (`topic_id`) REFERENCES `topic` (`id`);
+
+--
+-- Constraints der Tabelle `task_participant_state`
+--
+ALTER TABLE `task_participant_state`
+    ADD CONSTRAINT `task_participant_state_unique` UNIQUE (`task_id`, `participant_id`),
+    ADD CONSTRAINT `task_participant_state_ibfk_task` FOREIGN KEY (`task_id`) REFERENCES `task` (`id`),
+  ADD CONSTRAINT `task_participant_state_ibfk_participant` FOREIGN KEY (`participant_id`) REFERENCES `participant` (`id`);
+
+--
+-- Constraints der Tabelle `task_participant_state_iteration`
+--
+ALTER TABLE `task_participant_state_iteration`
+    ADD CONSTRAINT `task_participant_state_iteration_ibfk_state` FOREIGN KEY (`state_id`) REFERENCES `task_participant_state` (`id`);
+
+--
+-- Constraints der Tabelle `task_participant_state_iteration_item`
+--
+ALTER TABLE `task_participant_state_iteration_item`
+    ADD CONSTRAINT `task_participant_state_iteration_item_ibfk_state` FOREIGN KEY (`state_id`) REFERENCES `task_participant_state` (`id`),
+  ADD CONSTRAINT `task_participant_state_iteration_item_ibfk_idea` FOREIGN KEY (`idea_id`) REFERENCES `idea` (`id`);
 
 --
 -- Constraints der Tabelle `topic`

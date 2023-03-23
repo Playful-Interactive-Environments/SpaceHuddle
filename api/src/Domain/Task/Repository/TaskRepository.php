@@ -15,6 +15,7 @@ use App\Domain\Selection\Repository\SelectionRepository;
 use App\Domain\Session\Type\SessionRoleType;
 use App\Domain\Task\Data\TaskData;
 use App\Domain\Task\Type\TaskState;
+use App\Domain\TaskParticipantState\Type\TaskParticipantStateType;
 use App\Domain\Topic\Data\TopicData;
 use App\Domain\Topic\Repository\TopicRepository;
 use App\Factory\QueryFactory;
@@ -135,6 +136,15 @@ class TaskRepository implements RepositoryInterface
             ->leftJoin("synchro_task", "synchro_task.id = task.id")
             ->andWhere($conditions)
             ->order($sortConditions);
+
+        if ($authorisation->isParticipant() && !array_key_exists("task.id", $conditions)) {
+            $finished = TaskParticipantStateType::FINISHED;
+            $query->leftJoin("task_participant_state", [
+                "task_participant_state.task_id = task.id",
+                "task_participant_state.participant_id" => $authorisation->id
+            ])
+                ->andWhere(["(task_participant_state.state IS NULL OR task_participant_state.state != '$finished')"]);
+        }
 
         $result = $this->fetchAll($query);
         if (is_array($result)) {
@@ -460,6 +470,10 @@ class TaskRepository implements RepositoryInterface
         }
 
         $this->queryFactory->newDelete("vote")
+            ->andWhere(["task_id" => $id])
+            ->execute();
+
+        $this->queryFactory->newDelete("task_participant_state")
             ->andWhere(["task_id" => $id])
             ->execute();
 

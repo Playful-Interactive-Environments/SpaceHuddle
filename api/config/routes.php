@@ -79,6 +79,9 @@ use App\Action\Task\TaskReadDependentAction;
 use App\Action\Task\TaskReadSingleAction;
 use App\Action\Task\TaskStateUpdateAction;
 use App\Action\Task\TaskUpdateAction;
+use App\Action\TaskParticipantState\TaskParticipantStateReadAllAction;
+use App\Action\TaskParticipantState\TaskParticipantStateReadAllFromTopicAction;
+use App\Action\TaskParticipantState\TaskParticipantStateUpdateAction;
 use App\Action\Topic\TopicCloneAction;
 use App\Action\Topic\TopicCreateAction;
 use App\Action\Topic\TopicDeleteAction;
@@ -252,6 +255,8 @@ return function (App $app) {
             $app->get("/{topicId}/selections[/]", SelectionReadAllAction::class);
             $app->post("/{topicId}/selection[/]", SelectionCreateAction::class);
 
+            $app->get("/{topicId}/participant_state[/]", TaskParticipantStateReadAllFromTopicAction::class);
+
             $app->post("/{id}/clone[/]", TopicCloneAction::class);
 
             $app->get("/{id}[/]", TopicReadSingleAction::class);
@@ -299,6 +304,9 @@ return function (App $app) {
             //$app->get("/{taskId}/vote_result[/]", VoteResultReadAction::class);
             //$app->get("/{taskId}/vote_result_parent[/]", VoteParentResultReadAction::class);
             $app->post("/{taskId}/vote[/]", VoteCreateAction::class);
+
+            $app->get("/{taskId}/participant_state[/]", TaskParticipantStateReadAllAction::class);
+            $app->put("/{taskId}/participant_state[/]", TaskParticipantStateUpdateAction::class);
 
             $app->post("/{id}/clone[/]", TaskCloneAction::class);
 

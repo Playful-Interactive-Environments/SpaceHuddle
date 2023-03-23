@@ -13,6 +13,7 @@ use App\Domain\Participant\Repository\ParticipantRepository;
 use App\Domain\Resource\Repository\ResourceRepository;
 use App\Domain\Selection\Repository\SelectionRepository;
 use App\Domain\SessionRole\Repository\SessionRoleRepository;
+use App\Domain\TaskParticipantState\Repository\TaskParticipantStateRepository;
 use App\Domain\Vote\Repository\VoteRepository;
 use App\Domain\Session\Repository\SessionRepository;
 use App\Domain\Task\Repository\TaskRepository;
@@ -43,7 +44,8 @@ class InfrastructureRepository
         "resource" => ResourceRepository::class,
         "session_role" => SessionRoleRepository::class,
         "user" => UserRepository::class,
-        "participant" => ParticipantRepository::class
+        "participant" => ParticipantRepository::class,
+        "participant_state" => TaskParticipantStateRepository::class
     ];
 
     /**
