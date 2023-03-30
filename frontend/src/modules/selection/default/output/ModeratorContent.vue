@@ -215,22 +215,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   topContentPosition = 80;
   topDraggableStart = 100;
 
-  loadTopPositions(): void {
-    if (this.$refs.data) {
-      this.topContentPosition = (
-        this.$refs.data as HTMLElement
-      ).getBoundingClientRect().top;
-    }
-    if (this.$refs.draggableStart) {
-      this.topDraggableStart = (
-        this.$refs.draggableStart as HTMLElement
-      ).getBoundingClientRect().top;
-    }
-  }
-
   inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
+    this.deregisterAll();
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -245,6 +233,19 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       EndpointAuthorisationType.MODERATOR,
       20
     );
+  }
+
+  loadTopPositions(): void {
+    if (this.$refs.data) {
+      this.topContentPosition = (
+        this.$refs.data as HTMLElement
+      ).getBoundingClientRect().top;
+    }
+    if (this.$refs.draggableStart) {
+      this.topDraggableStart = (
+        this.$refs.draggableStart as HTMLElement
+      ).getBoundingClientRect().top;
+    }
   }
 
   @Watch('task.topicId', { immediate: true })
@@ -384,11 +385,15 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     }, 500);
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateViews);
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateInputIdeas);
     cashService.deregisterAllGet(this.updateSelectedIdeas);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/

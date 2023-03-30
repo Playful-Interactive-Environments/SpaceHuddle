@@ -243,6 +243,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   outputCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   async reloadTaskSettings(): Promise<void> {
+    this.deregisterAll();
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -530,12 +531,16 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     }
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateViews);
     cashService.deregisterAllGet(this.updateInputIdeas);
     cashService.deregisterAllGet(this.updateCategorisedIdeas);
     cashService.deregisterAllGet(this.updateCategories);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   openCategorySettings(): void {

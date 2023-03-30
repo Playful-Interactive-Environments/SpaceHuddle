@@ -75,9 +75,14 @@ export default class ModuleCount extends Vue {
   @Prop() session!: Session;
   participants: ParticipantInfo[] = [];
   users: SessionRole[] = [];
-  unmounted(): void {
+
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateParticipantCount);
     cashService.deregisterAllGet(this.updateUserCount);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   @Watch('session.id', { immediate: true })

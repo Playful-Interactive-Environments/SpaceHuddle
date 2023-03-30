@@ -1,6 +1,7 @@
 import {
   apiExecuteDelete,
-  apiExecutePost, apiExecutePostHandled,
+  apiExecutePost,
+  apiExecutePostHandled,
   apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
@@ -16,7 +17,6 @@ import {
 import * as ideaService from '@/services/idea-service';
 import * as cashService from '@/services/cash-service';
 import { deleteIdeaImage, itemImageChanged } from '@/services/idea-service';
-import {Topic} from "@/types/api/Topic";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -250,8 +250,8 @@ export const getParentResult = (
 export const clone = async (
   id: string,
   authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Topic> => {
-  return apiExecutePostHandled<Topic>(
+): Promise<Hierarchy> => {
+  return apiExecutePostHandled<Hierarchy>(
     `/${EndpointType.HIERARCHY}/${id}/clone`,
     null,
     null,

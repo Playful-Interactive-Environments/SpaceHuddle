@@ -26,15 +26,9 @@ export default class TaskParameter extends Vue implements CustomParameter {
   @Prop({ default: {} }) modelValue!: TaskSettingsData;
   task: Task | null = null;
 
-  @Watch('modelValue', { immediate: true })
-  async onModelValueChanged(): Promise<void> {
-    if (this.modelValue.parameter) {
-      //todo: set default parameter
-    }
-  }
-
   @Watch('taskId', { immediate: true })
   async onTaskIdChanged(): Promise<void> {
+    this.deregisterAll();
     if (this.taskId) {
       taskService.registerGetTaskById(
         this.taskId,
@@ -45,12 +39,23 @@ export default class TaskParameter extends Vue implements CustomParameter {
     }
   }
 
+  @Watch('modelValue', { immediate: true })
+  async onModelValueChanged(): Promise<void> {
+    if (this.modelValue.parameter) {
+      //todo: set default parameter
+    }
+  }
+
   updateTask(task: Task): void {
     this.task = task;
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   async updateParameterForSaving(): Promise<void> {

@@ -149,10 +149,14 @@ export default class ParticipantOverview extends Vue {
     );
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateSession);
     cashService.deregisterAllGet(this.updateTopics);
     cashService.deregisterAllGet(this.updateTasks);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   updateSession(session: Session): void {

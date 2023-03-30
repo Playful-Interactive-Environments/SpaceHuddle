@@ -148,7 +148,9 @@ export default class TopicCard extends Vue {
         this.$t('moderator.organism.cards.topicCard.clone'),
         {
           boxType: 'confirm',
-          confirmButtonText: this.$t('moderator.organism.cards.topicCard.clone'),
+          confirmButtonText: this.$t(
+            'moderator.organism.cards.topicCard.clone'
+          ),
         }
       );
       const clonedTopic = await topicService.clone(this.topic.id);

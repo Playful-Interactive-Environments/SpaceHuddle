@@ -147,8 +147,13 @@ export default class ModeratorSessionOverview extends Vue {
   refreshSessions(): void {
     this.sessionCash.refreshData();
   }
-  unmounted(): void {
+
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateSessions);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

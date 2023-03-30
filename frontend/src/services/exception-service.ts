@@ -2,9 +2,16 @@ import { AxiosError, AxiosResponse } from 'axios';
 import ApiError from '@/types/api/ApiError';
 import app from '@/main';
 import HttpStatusCode from '@/types/enum/HttpStatusCode ';
-import { removeAccessToken, isUser } from '@/services/auth-service';
+import {
+  removeAccessToken,
+  isUser,
+  isParticipant,
+} from '@/services/auth-service';
 import { ElMessage } from 'element-plus';
 import i18n from '../i18n';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { RouteName } from '@/types/enum/RouteName';
+import * as sessionService from '@/services/session-service';
 
 const { t } = i18n.global;
 
@@ -144,6 +151,7 @@ let errorHistory: number[] = [];
 
 export const apiErrorHandling = async (
   error: AxiosError,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
   displayDBErrors = true
 ): Promise<ApiError> => {
   apiErrorLog(error);
@@ -213,9 +221,23 @@ export const apiErrorHandling = async (
     }
 
     if (response.status === HttpStatusCode.FORBIDDEN) {
-      app.config.globalProperties.$router.push({
-        name: isUser() ? 'moderator-session-overview' : 'participant-overview',
-      });
+      const currentRouteName =
+        app.config.globalProperties.$router.currentRoute.value.name;
+      if (currentRouteName !== RouteName.PUBLIC_SCREEN) {
+        const goToModeratorOverview =
+          authHeaderType === EndpointAuthorisationType.MODERATOR
+            ? isUser()
+            : !isParticipant();
+        app.config.globalProperties.$router.push({
+          name: goToModeratorOverview
+            ? RouteName.MODERATOR_SESSION_OVERVIEW
+            : RouteName.PARTICIPANT_OVERVIEW,
+        });
+      } else {
+        const sessionId = app.config.globalProperties.$router.currentRoute.value
+          .params.sessionId as string;
+        sessionService.refreshGetPublicScreen(sessionId);
+      }
     }
   }
   return errorResult;

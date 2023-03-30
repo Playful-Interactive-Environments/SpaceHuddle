@@ -150,6 +150,12 @@ export const deregisterGetPublicScreen = (
   );
 };
 
+export const refreshGetPublicScreen = (sessionId: string): void => {
+  cashService.refreshCash(
+    `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PUBLIC_SCREEN}/`
+  );
+};
+
 export const displayOnPublicScreen = async (
   sessionId: string,
   taskId: string

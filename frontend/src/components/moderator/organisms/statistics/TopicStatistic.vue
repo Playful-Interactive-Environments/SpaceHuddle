@@ -34,14 +34,14 @@
 </template>
 
 <script lang="ts">
-import {Options, Vue} from 'vue-class-component';
-import {Prop, Watch} from 'vue-property-decorator';
+import { Options, Vue } from 'vue-class-component';
+import { Prop, Watch } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as taskParticipantService from '@/services/task-participant-service';
-import {TaskParticipantStateSum} from '@/types/api/TaskParticipantState';
-import {Bar} from 'vue-chartjs';
+import { TaskParticipantStateSum } from '@/types/api/TaskParticipantState';
+import { Bar } from 'vue-chartjs';
 import * as cashService from '@/services/cash-service';
-import TaskType from "@/types/enum/TaskType";
+import TaskType from '@/types/enum/TaskType';
 
 @Options({
   components: {
@@ -80,7 +80,9 @@ export default class TaskStatistic extends Vue {
         data: this.stateList.map((state) => state.count),
         borderRadius: 5,
         borderSkipped: false,
-        backgroundColor: this.stateList.map((state) => this.getTypeColor(state.taskType)),
+        backgroundColor: this.stateList.map((state) =>
+          this.getTypeColor(state.taskType)
+        ),
         color: '#1d2948',
       },
     ];
@@ -92,7 +94,7 @@ export default class TaskStatistic extends Vue {
 
   @Watch('topicId', { immediate: true })
   onTaskIdChanged(): void {
-    cashService.deregisterAllGet(this.updateState);
+    this.deregisterAll();
     taskParticipantService.registerGetListFromTopic(
       this.topicId,
       this.updateState,
@@ -116,8 +118,12 @@ export default class TaskStatistic extends Vue {
     }
   }
 
-  unmounted() {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateState);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

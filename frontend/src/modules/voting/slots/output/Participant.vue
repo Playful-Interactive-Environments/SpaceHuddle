@@ -247,35 +247,11 @@ export default class Participant extends Vue {
     return this.ideas.length === 0 && this.votes.length === 0;
   }
 
-  mounted(): void {
-    if (this.seats.length == 0) {
-      this.initSeats(3);
-    }
-    //Changes Paul Start
-    this.waiting;
-    window.addEventListener('resize', this.heightCheck);
-    //Changes Paul End
-  }
-
-  unmounted(): void {
-    window.removeEventListener('resize', this.heightCheck);
-    cashService.deregisterAllGet(this.updateTask);
-    cashService.deregisterAllGet(this.updateVotes);
-    cashService.deregisterAllGet(this.updateModule);
-    cashService.deregisterAllGet(this.updateInputIdeas);
-  }
-
-  initSeats(count: number): void {
-    this.seats = [];
-    for (let i = 0; i < count; i++) {
-      this.seats.push(null);
-    }
-  }
-
   inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
   votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    this.deregisterAll();
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -296,6 +272,35 @@ export default class Participant extends Vue {
       EndpointAuthorisationType.PARTICIPANT,
       60 * 60
     );
+  }
+
+  mounted(): void {
+    if (this.seats.length == 0) {
+      this.initSeats(3);
+    }
+    //Changes Paul Start
+    this.waiting;
+    window.addEventListener('resize', this.heightCheck);
+    //Changes Paul End
+  }
+
+  deregisterAll(): void {
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateVotes);
+    cashService.deregisterAllGet(this.updateModule);
+    cashService.deregisterAllGet(this.updateInputIdeas);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
+    window.removeEventListener('resize', this.heightCheck);
+  }
+
+  initSeats(count: number): void {
+    this.seats = [];
+    for (let i = 0; i < count; i++) {
+      this.seats.push(null);
+    }
   }
 
   updateTask(task: Task): void {

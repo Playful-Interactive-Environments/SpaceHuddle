@@ -206,6 +206,7 @@ export default class ModeratorSessionDetails extends Vue {
   sessionCashEntry!: cashService.SimplifiedCashEntry<Session>;
   @Watch('sessionId', { immediate: true })
   async onSessionIdChanged(): Promise<void> {
+    this.deregisterAll();
     this.sessionCashEntry = sessionService.registerGetById(
       this.sessionId,
       this.updateSession,
@@ -318,12 +319,14 @@ export default class ModeratorSessionDetails extends Vue {
   }
 
   async deleteSession(): Promise<void> {
-    this.deregisterAllGet();
+    this.deregisterAll();
     setTimeout(() => {
       sessionService.remove(this.sessionId).then((deleted) => {
         if (deleted) {
           sessionService.refreshGetSessionList();
           this.$router.go(-1);
+        } else {
+          this.onSessionIdChanged();
         }
       });
     }, 100);
@@ -344,7 +347,7 @@ export default class ModeratorSessionDetails extends Vue {
     }
   }
 
-  deregisterAllGet(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateSession);
     cashService.deregisterAllGet(this.updateTasks);
     cashService.deregisterAllGet(this.updateTopics);
@@ -353,7 +356,7 @@ export default class ModeratorSessionDetails extends Vue {
   }
 
   unmounted(): void {
-    this.deregisterAllGet();
+    this.deregisterAll();
   }
 
   disconnect(): void {

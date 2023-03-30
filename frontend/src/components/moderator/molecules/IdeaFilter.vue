@@ -168,6 +168,12 @@ export default class IdeaFilter extends Vue {
   IdeaStateKeys = Object.keys(IdeaStates);
   sessionId = '';
 
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    this.deregisterAll();
+    taskService.registerGetTaskById(this.taskId, this.updateTask);
+  }
+
   @Watch('modelValue.collapseIdeas', { immediate: true })
   onCollapseIdeasChanged(): void {
     if (this.task && this.syncToPublicScreen) this.saveParameterChanges();
@@ -176,6 +182,7 @@ export default class IdeaFilter extends Vue {
   @Watch('sessionId', { immediate: true })
   onSessionIdChanged(): void {
     if (this.sessionId) {
+      cashService.deregisterAllGet(this.updateRole);
       sessionRoleService.registerGetOwn(
         this.sessionId,
         this.updateRole,
@@ -206,15 +213,14 @@ export default class IdeaFilter extends Vue {
     this.ownUserId = authService.getUserId();
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateDependentTasks);
     cashService.deregisterAllGet(this.updateRole);
   }
 
-  @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
-    taskService.registerGetTaskById(this.taskId, this.updateTask);
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   getSortOrderTaskIds(): string[] {
@@ -235,7 +241,6 @@ export default class IdeaFilter extends Vue {
       this.task = task;
       this.sessionId = task.sessionId;
       const sortOrderTaskIds = this.getSortOrderTaskIds();
-      cashService.deregisterAllGet(this.updateDependentTasks);
       this.dependentTaskData = {};
       if (sortOrderTaskIds.length > 0) {
         for (const sortOrderTaskId of sortOrderTaskIds) {

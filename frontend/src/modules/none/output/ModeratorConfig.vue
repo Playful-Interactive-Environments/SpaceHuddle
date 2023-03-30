@@ -42,8 +42,12 @@ export default class ModeratorConfig extends Vue {
     this.module = module;
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

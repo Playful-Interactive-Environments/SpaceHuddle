@@ -159,6 +159,7 @@ export default class SessionSettings extends Vue {
   }
   @Watch('sessionId', { immediate: true })
   onSessionIdChanged(id: string): void {
+    this.deregisterAll();
     if (id) {
       this.sessionCash = sessionService.registerGetById(
         this.sessionId,
@@ -202,9 +203,13 @@ export default class SessionSettings extends Vue {
     this.subjectList = tempList;
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateSession);
     cashService.deregisterAllGet(this.updateSubjects);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   handleClose(done: { (): void }): void {
@@ -231,7 +236,11 @@ export default class SessionSettings extends Vue {
   async save(): Promise<void> {
     this.isSaving = true;
     if (!this.sessionId) {
-      if (this.formData.subject === '' || this.formData.subject === null || this.formData.subject === undefined) {
+      if (
+        this.formData.subject === '' ||
+        this.formData.subject === null ||
+        this.formData.subject === undefined
+      ) {
         this.formData.subject = null;
         this.subjectState = false;
       } else {
@@ -262,7 +271,11 @@ export default class SessionSettings extends Vue {
           }
         );
     } else {
-      if (this.formData.subject === '' || this.formData.subject === null || this.formData.subject === undefined) {
+      if (
+        this.formData.subject === '' ||
+        this.formData.subject === null ||
+        this.formData.subject === undefined
+      ) {
         this.formData.subject = null;
         this.subjectState = false;
       } else {

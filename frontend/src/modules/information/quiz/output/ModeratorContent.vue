@@ -6,15 +6,29 @@
 
     <div id="QuizDiv">
       <QuizResult
+        v-if="editQuestion"
         :voteResult="votes"
         :update="true"
         :questionnaireType="questionnaireType"
         :questionType="formData.questionType"
         :show-legend="true"
       />
-      <span id="noQuestionSelectedSpan" v-if="!editQuestion">{{
+      <QuizResult
+        v-else
+        :voteResult="detailVotingResult"
+        resultColumn="countParticipant"
+        :change="false"
+        :questionnaireType="
+          trackingResult.length > 0
+            ? questionnaireType
+            : QuestionnaireType.SURVEY
+        "
+        :questionType="formData.questionType"
+        :update="true"
+      />
+      <!--<span id="noQuestionSelectedSpan" v-if="!editQuestion">{{
         $t('module.information.quiz.moderatorContent.noQuestionSelected')
-      }}</span>
+      }}</span>-->
     </div>
 
     <ProcessTimeline
@@ -22,13 +36,14 @@
       v-model:publicScreen="publicQuestion"
       v-model:activeItem="editQuestion"
       :entityName="TimerEntity.TASK"
-      :canDisablePublicTimeline="!moderatedQuestionFlow"
+      :canDisablePublicTimeline="true"
       :isLinkedToDetails="true"
       :startParticipantOnPublicChange="moderatedQuestionFlow"
       keyPropertyName="id"
       :defaultTimerSeconds="defaultQuestionTime"
       :hasParticipantToggle="moderatedQuestionFlow"
       :hasParticipantOption="hasParticipantOption"
+      :canClickHome="true"
       :contentListIcon="(item) => null"
       :getKey="(item) => item.id"
       :getTitle="(item) => item.keywords"
@@ -41,6 +56,7 @@
       accentColor="var(--color-yellow)"
       @changeOrder="dragDone"
       @changeActiveElement="onEditQuestionChanged"
+      @homeClicked="homeClicked"
     >
     </ProcessTimeline>
     <div>
@@ -330,6 +346,9 @@ import {
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
 import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 import { Topic } from '@/types/api/Topic';
+import * as taskParticipantService from '@/services/task-participant-service';
+import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 
 @Options({
   components: {
@@ -398,15 +417,33 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     return [];
   }
 
+  questionCash!: cashService.SimplifiedCashEntry<Hierarchy[]>;
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    this.deregisterAll();
+    this.task = null;
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateQuestions);
+    cashService.deregisterAllGet(this.updateFinalResult);
+    taskService.registerGetTaskById(this.taskId, this.updateTask);
+    this.questionCash = hierarchyService.registerGetQuestions(
+      this.taskId,
+      this.updateQuestions,
+      EndpointAuthorisationType.MODERATOR,
+      20
+    );
+  }
+
   @Watch('publicQuestion', { immediate: true })
   async onPublicQuestionChanged(): Promise<void> {
-    if (this.publicQuestion && !this.editQuestion)
-      if (this.publicQuestion) {
-        this.editQuestion = this.publicQuestion;
-      }
+    /*if (this.publicQuestion && !this.editQuestion)
+      this.editQuestion = this.publicQuestion;*/
     if (this.task) {
-      this.task.parameter['activeQuestion'] = this.publicQuestion?.question.id;
-      await taskService.putTask(convertToSaveVersion(this.task));
+      const task = this.task;
+      const activeQuestion = this.publicQuestion?.question.id;
+      task.parameter['activeQuestion'] = activeQuestion ? activeQuestion : null;
+      const updateData = { ...convertToSaveVersion(task) };
+      await taskService.putTask(updateData);
     }
   }
 
@@ -427,6 +464,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   @Watch('editQuestion', { immediate: true })
   async onEditQuestionChanged(): Promise<void> {
+    this.votes = [];
     if (this.editQuestion) this.setFormData(this.editQuestion);
   }
 
@@ -445,6 +483,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       newQuestionResultStorage !== oldQuestionResultStorage ||
       newValue?.question?.id !== oldValue?.question?.id
     ) {
+      cashService.deregisterAllGet(this.updateParentVotes);
       cashService.deregisterAllGet(this.updateVotes);
       cashService.deregisterAllGet(this.updateHierarchyResult);
       if (newValue?.question?.id) {
@@ -464,6 +503,13 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
             20
           );
         }
+      } else {
+        votingService.registerGetParentResult(
+          this.taskId,
+          this.updateParentVotes,
+          EndpointAuthorisationType.MODERATOR,
+          20
+        );
       }
     }
   }
@@ -562,6 +608,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   setupEmptyQuestion(): void {
     this.formData = this.getEmptyQuestion();
     this.editQuestion = null;
+  }
+
+  homeClicked(): void {
+    this.setupEmptyQuestion();
   }
 
   addAnswer(): void {
@@ -689,19 +739,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     }
   }
 
-  questionCash!: cashService.SimplifiedCashEntry<Hierarchy[]>;
-  @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
-    this.task = null;
-    taskService.registerGetTaskById(this.taskId, this.updateTask);
-    this.questionCash = hierarchyService.registerGetQuestions(
-      this.taskId,
-      this.updateQuestions,
-      EndpointAuthorisationType.MODERATOR,
-      60
-    );
-  }
-
   initQuestion = false;
   updateTask(task: Task): void {
     const init = !this.task;
@@ -729,10 +766,23 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       this.moderatedQuestionFlow = false;
       this.defaultQuestionTime = null;
     }
+    if (init) {
+      cashService.deregisterAllGet(this.updateFinalResult);
+      if (this.questionnaireType === QuestionnaireType.QUIZ) {
+        taskParticipantService.registerGetIterationStepFinalList(
+          this.taskId,
+          this.updateFinalResult,
+          EndpointAuthorisationType.MODERATOR,
+          20
+        );
+      }
+    }
     this.initPublicQuestion();
   }
 
+  questionHierarchy: Hierarchy[] = [];
   updateQuestions(items: Hierarchy[]): void {
+    this.questionHierarchy = items;
     const questions = hierarchyService.convertToQuestions(items);
     const deletedQuestions = this.questions
       .filter((qOld) => {
@@ -772,6 +822,53 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       else this.editQuestion = this.questions[0];
     }
     this.initQuestion = false;
+  }
+
+  trackingResult: TaskParticipantIterationStep[] = [];
+  updateFinalResult(result: TaskParticipantIterationStep[]): void {
+    this.trackingResult = result;
+  }
+
+  updateParentVotes(votes: VoteResult[]): void {
+    if (!this.formData?.question?.id) {
+      this.votes = hierarchyService.getParentResult(
+        votes,
+        this.questionHierarchy
+      );
+    }
+  }
+
+  get detailVotingResult(): VoteResult[] {
+    if (this.trackingResult.length > 0 && this.questions.length > 0) {
+      const result: VoteResult[] = [];
+      for (const step of this.trackingResult) {
+        const question = this.questions.find(
+          (q) => q.question.id === step.ideaId
+        );
+        if (question) {
+          const idea = { ...question.question };
+          idea.parameter = { ...idea.parameter };
+          idea.parameter.isCorrect =
+            step.state === TaskParticipantIterationStepStatesType.CORRECT;
+          const exists = result.find(
+            (exist) =>
+              exist.idea.id === idea.id &&
+              exist.idea.parameter.isCorrect === idea.parameter.isCorrect
+          );
+          if (exists) exists.countParticipant++;
+          else {
+            result.push({
+              idea: idea,
+              ratingSum: 1,
+              detailRatingSum: 1,
+              countParticipant: 1,
+            });
+          }
+        }
+      }
+      return result;
+    }
+    return this.votes;
   }
 
   initPublicQuestion(): void {
@@ -907,7 +1004,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     };
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateTopic);
     cashService.deregisterAllGet(this.updateVotes);
@@ -915,6 +1012,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     cashService.deregisterAllGet(this.updateHierarchyResult);
     cashService.deregisterAllGet(this.updatePublicTask);
     cashService.deregisterAllGet(this.updateQuestions);
+    cashService.deregisterAllGet(this.updateFinalResult);
+    cashService.deregisterAllGet(this.updateParentVotes);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/

@@ -243,9 +243,13 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
         updateModule(module: Module): void {
           this.module = module;
         }
+      
+        deregisterAll(): void {
+          cashService.deregisterAllGet(this.updateModule);
+        }
 
         unmounted(): void {
-          cashService.deregisterAllGet(this.updateModule);
+          this.deregisterAll();
         }
       }
       </script>
@@ -300,9 +304,13 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
         updateModule(module: Module): void {
           this.module = module;
         }
+      
+        deregisterAll(): void {
+          cashService.deregisterAllGet(this.updateModule);
+        }
 
         unmounted(): void {
-          cashService.deregisterAllGet(this.updateModule);
+          this.deregisterAll();
         }
       }
       </script>
@@ -378,9 +386,13 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
         updateIdeas(ideas: Idea[]): void {
           this.ideas = ideas;
         }
+      
+        deregisterAll(): void {
+          cashService.deregisterAllGet(this.updateIdeas);
+        }
 
         unmounted(): void {
-          cashService.deregisterAllGet(this.updateIdeas);
+          this.deregisterAll();
         }
 
         async save(): Promise<void> {
@@ -504,9 +516,13 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
         updateIdeas(ideas: Idea[]): void {
           this.ideas = ideas;
         }
+      
+        deregisterAll(): void {
+          cashService.deregisterAllGet(this.updateIdeas);
+        }
 
         unmounted(): void {
-          cashService.deregisterAllGet(this.updateIdeas);
+          this.deregisterAll();
         }
       }
       </script>

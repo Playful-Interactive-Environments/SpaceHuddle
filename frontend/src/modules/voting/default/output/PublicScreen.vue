@@ -64,6 +64,7 @@ export default class PublicScreen extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    this.deregisterAll();
     votingService.registerGetResult(
       this.taskId,
       this.updateVotes,
@@ -104,8 +105,12 @@ export default class PublicScreen extends Vue {
     }
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateVotes);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

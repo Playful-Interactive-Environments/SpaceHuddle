@@ -1,8 +1,13 @@
-import { apiExecutePut } from '@/services/api';
+import { apiExecutePost, apiExecutePut } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
-import {TaskParticipantState, TaskParticipantStateSum} from '@/types/api/TaskParticipantState';
+import {
+  TaskParticipantState,
+  TaskParticipantStateSum,
+} from '@/types/api/TaskParticipantState';
+import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
+import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -56,12 +61,181 @@ export const deregisterGetListFromTopic = (
   );
 };
 
-export const put = async (
+export const putParticipantState = async (
   taskId: string,
   data: Partial<TaskParticipantState>
 ): Promise<TaskParticipantState> => {
   return await apiExecutePut<TaskParticipantState>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_STATE}`,
+    data,
+    EndpointAuthorisationType.PARTICIPANT
+  );
+};
+
+export const registerGetIterationList = (
+  taskId: string,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<TaskParticipantIteration[]> => {
+  return cashService.registerSimplifiedGet<TaskParticipantIteration[]>(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const deregisterGetIterationList = (
+  taskId: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}`,
+    callback
+  );
+};
+
+export const registerGetLastIteration = (
+  taskId: string,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<TaskParticipantIteration> => {
+  return cashService.registerSimplifiedGet<TaskParticipantIteration>(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}/${EndpointType.LAST}`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const deregisterGetLastIteration = (
+  taskId: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}/${EndpointType.LAST}`,
+    callback
+  );
+};
+
+export const postParticipantIteration = async (
+  taskId: string,
+  data: Partial<TaskParticipantIteration>
+): Promise<TaskParticipantIteration> => {
+  return await apiExecutePost<TaskParticipantIteration>(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}`,
+    data,
+    EndpointAuthorisationType.PARTICIPANT
+  );
+};
+
+export const putParticipantIteration = async (
+  taskId: string,
+  data: Partial<TaskParticipantIteration>
+): Promise<TaskParticipantIteration> => {
+  return await apiExecutePut<TaskParticipantIteration>(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}`,
+    data,
+    EndpointAuthorisationType.PARTICIPANT
+  );
+};
+
+export const registerGetIterationStepList = (
+  taskId: string,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<TaskParticipantIterationStep[]> => {
+  return cashService.registerSimplifiedGet<TaskParticipantIterationStep[]>(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}/${EndpointType.STEP}`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const deregisterGetIterationStepList = (
+  taskId: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}/${EndpointType.STEP}`,
+    callback
+  );
+};
+
+export const registerGetIterationStepFinalList = (
+  taskId: string,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<TaskParticipantIterationStep[]> => {
+  return cashService.registerSimplifiedGet<TaskParticipantIterationStep[]>(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}/${EndpointType.STEP}/${EndpointType.FINAL}`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const deregisterGetIterationStepFinalList = (
+  taskId: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}/${EndpointType.STEP}/${EndpointType.FINAL}`,
+    callback
+  );
+};
+
+export const registerGetLastIterationStep = (
+  taskId: string,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<TaskParticipantIterationStep> => {
+  return cashService.registerSimplifiedGet<TaskParticipantIterationStep>(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}/${EndpointType.STEP}/${EndpointType.LAST}`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const deregisterGetLastIterationStep = (
+  taskId: string,
+  callback: (result: any) => void
+): void => {
+  cashService.deregisterGet(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}/${EndpointType.STEP}/${EndpointType.LAST}`,
+    callback
+  );
+};
+
+export const postParticipantIterationStep = async (
+  taskId: string,
+  data: Partial<TaskParticipantIterationStep>
+): Promise<TaskParticipantIterationStep> => {
+  return await apiExecutePost<TaskParticipantIterationStep>(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}/${EndpointType.STEP}`,
+    data,
+    EndpointAuthorisationType.PARTICIPANT
+  );
+};
+
+export const putParticipantIterationStep = async (
+  taskId: string,
+  data: Partial<TaskParticipantIterationStep>
+): Promise<TaskParticipantIterationStep> => {
+  return await apiExecutePut<TaskParticipantIterationStep>(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.PARTICIPANT_ITERATION}/${EndpointType.STEP}`,
     data,
     EndpointAuthorisationType.PARTICIPANT
   );

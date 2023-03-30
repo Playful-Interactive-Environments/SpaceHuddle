@@ -82,7 +82,7 @@ import * as timerService from '@/services/timer-service';
 import { QuestionnaireType } from '@/modules/information/quiz/types/QuestionnaireType';
 import { CustomParameter, CustomSync } from '@/types/ui/CustomParameter';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import * as cashService from "@/services/cash-service";
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {},
@@ -172,8 +172,12 @@ export default class ModeratorConfig
     this.module = module;
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   async updateParameterForSaving(): Promise<void> {

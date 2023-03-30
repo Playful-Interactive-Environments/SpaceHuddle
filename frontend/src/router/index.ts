@@ -29,6 +29,7 @@ import app from '@/main';
 import { ElMessage } from 'element-plus';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { useI18n } from 'vue-i18n';
+import { RouteName } from '@/types/enum/RouteName';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -94,7 +95,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/sessions',
-    name: 'moderator-session-overview',
+    name: RouteName.MODERATOR_SESSION_OVERVIEW,
     component: ModeratorSessionOverview,
     meta: {
       requiresAuth: true,
@@ -135,7 +136,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/overview',
-    name: 'participant-overview',
+    name: RouteName.PARTICIPANT_OVERVIEW,
     component: ParticipantOverview,
     meta: {
       requiresAuth: true,
@@ -156,7 +157,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/public-screen/:sessionId/:authHeaderTyp?',
-    name: 'public-screen',
+    name: RouteName.PUBLIC_SCREEN,
     component: PublicScreen,
     meta: {
       requiresAuth: false,

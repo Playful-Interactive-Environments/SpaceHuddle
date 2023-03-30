@@ -12,45 +12,45 @@
       :is-editable="false"
     />
   </div>
-  <Bar
-    v-else
-    id="chartRef"
-    ref="chartRef"
-    :data="chartData"
-    :height="100"
-    :options="{
-      maintainAspectRatio: 'false',
-      responsive: 'false',
-      indexAxis: 'y',
-      animation: {
-        duration: update ? 0 : 2000,
-      },
-      scales: {
-        x: {
-          ticks: {
-            color: '#1d2948',
-            stepSize: 1,
-          },
-          grid: {
-            display: false,
-          },
-          stacked: true,
+  <div v-else class="chartContainer" :style="{ height: `${chartHeight}rem` }">
+    <Bar
+      id="chartRef"
+      ref="chartRef"
+      :data="chartData"
+      :options="{
+        maintainAspectRatio: false,
+        responsive: true,
+        indexAxis: 'y',
+        animation: {
+          duration: update ? 0 : 2000,
         },
-      },
-      plugins: {
-        legend: {
-          display: showLegend && questionnaireType === QuestionnaireType.QUIZ,
-          position: 'top',
-          align: 'end',
-          labels: {
-            boxWidth: 30,
-            boxHeight: 30,
-            color: '#1d2948',
+        scales: {
+          x: {
+            ticks: {
+              color: '#1d2948',
+              stepSize: 1,
+            },
+            grid: {
+              display: false,
+            },
+            stacked: true,
           },
         },
-      },
-    }"
-  />
+        plugins: {
+          legend: {
+            display: showLegend && questionnaireType === QuestionnaireType.QUIZ,
+            position: 'top',
+            align: 'end',
+            labels: {
+              boxWidth: 30,
+              boxHeight: 30,
+              color: '#1d2948',
+            },
+          },
+        },
+      }"
+    />
+  </div>
 </template>
 
 <script lang="ts">
@@ -62,6 +62,8 @@ import { QuestionnaireType } from '@/modules/information/quiz/types/Questionnair
 import { QuestionType } from '@/modules/information/quiz/types/Question';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import Color from 'colorjs.io';
+import { v4 as uuidv4 } from 'uuid';
+import { delay } from '@/utils/wait';
 
 interface ChartLegend {
   color: string;
@@ -97,7 +99,12 @@ export default class QuizResult extends Vue {
   labelLineLimit = 2;
 
   get chartHeight(): number {
-    return this.voteResult.length * 13;
+    const headHeight = 5;
+    const itemHeight = 3;
+    const calcHeight = this.chartData.labels.length * itemHeight + headHeight;
+    const minHeight = headHeight + itemHeight * 2;
+    if (calcHeight < minHeight) return minHeight;
+    return calcHeight;
   }
 
   get legend(): ChartLegend[] {
@@ -162,11 +169,6 @@ export default class QuizResult extends Vue {
         return legend;
       }
     }
-  }
-
-  @Watch('chartHeight', { immediate: true })
-  onChartHeightChanged(): void {
-    this.updateChart();
   }
 
   async mounted(): Promise<void> {
@@ -241,7 +243,12 @@ export default class QuizResult extends Vue {
           }
           return 0;
         }),
-        borderRadius: 5,
+        borderRadius: {
+          topRight: 5,
+          bottomRight: 5,
+          topLeft: 5,
+          bottomLeft: 5,
+        },
         borderSkipped: false,
         yAxisID: 1,
         color: '#1d2948',
@@ -296,16 +303,26 @@ export default class QuizResult extends Vue {
     }
   }
 
+  lastUpdateCall = '';
   async updateChart(): Promise<void> {
-    if (this.$refs.chartRef) {
-      const chartRef = this.$refs.chartRef as any;
-      if (chartRef.chart) {
-        chartRef.chart.data = this.chartData;
-        chartRef.chart.update();
+    const uuid = uuidv4();
+    this.lastUpdateCall = uuid;
+    await delay(100);
+    if (uuid === this.lastUpdateCall) {
+      if (this.$refs.chartRef) {
+        const chartRef = this.$refs.chartRef as any;
+        if (chartRef.chart) {
+          chartRef.chart.data = this.chartData;
+          chartRef.chart.update();
+        }
       }
     }
   }
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.chartContainer {
+  width: 100%;
+}
+</style>

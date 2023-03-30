@@ -8,6 +8,8 @@
     :entityName="TimerEntity.TASK"
     :readonly="readonly"
     :canDisablePublicTimeline="true"
+    :canUseOtherPublicScreenTopic="true"
+    :canClickHome="false"
     :isLinkedToDetails="isLinkedToTask"
     :startParticipantOnPublicChange="false"
     keyPropertyName="id"
@@ -82,6 +84,29 @@ export default class TaskTimeline extends Vue {
     return null;
   }
 
+  cashPublicScreen!: cashService.SimplifiedCashEntry<Task | null>;
+  @Watch('sessionId', { immediate: true })
+  async onSessionIdChanged(): Promise<void> {
+    cashService.deregisterAllGet(this.updatePublicScreen);
+    this.cashPublicScreen = sessionService.registerGetPublicScreen(
+      this.sessionId,
+      this.updatePublicScreen,
+      this.authHeaderTyp,
+      5 * 60
+    );
+  }
+
+  @Watch('topicId', { immediate: true })
+  async onTopicIdChanged(): Promise<void> {
+    cashService.deregisterAllGet(this.updateTasks);
+    taskService.registerGetTaskList(
+      this.topicId,
+      this.updateTasks,
+      this.authHeaderTyp,
+      30 * 60
+    );
+  }
+
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   contentListIcon(item: any): string | undefined {
     const category = this.getTaskCategory(item);
@@ -133,40 +158,6 @@ export default class TaskTimeline extends Vue {
     if (task) this.editTask = task;
   }
 
-  @Watch('topicId', { immediate: true })
-  async onTopicIdChanged(newValue: string, oldValue: string): Promise<void> {
-    if (newValue !== oldValue) {
-      if (oldValue) {
-        taskService.deregisterGetTaskList(oldValue, this.updateTasks);
-      }
-      taskService.registerGetTaskList(
-        this.topicId,
-        this.updateTasks,
-        this.authHeaderTyp,
-        30 * 60
-      );
-    }
-  }
-
-  cashPublicScreen!: cashService.SimplifiedCashEntry<Task | null>;
-  @Watch('sessionId', { immediate: true })
-  async onSessionIdChanged(newValue: string, oldValue: string): Promise<void> {
-    if (newValue !== oldValue) {
-      if (oldValue) {
-        sessionService.deregisterGetPublicScreen(
-          oldValue,
-          this.updatePublicScreen
-        );
-      }
-      this.cashPublicScreen = sessionService.registerGetPublicScreen(
-        this.sessionId,
-        this.updatePublicScreen,
-        this.authHeaderTyp,
-        5 * 60
-      );
-    }
-  }
-
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateTasks(tasks: Task[], topicId: string): void {
     this.tasks = tasks;
@@ -198,9 +189,13 @@ export default class TaskTimeline extends Vue {
     });
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTasks);
     cashService.deregisterAllGet(this.updatePublicScreen);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

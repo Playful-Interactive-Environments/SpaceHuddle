@@ -172,6 +172,7 @@ export default class LinkSettings extends Vue {
   roleCash!: cashService.SimplifiedCashEntry<SessionRole[]>;
   @Watch('sessionId', { immediate: true })
   async onSessionIdChanged(): Promise<void> {
+    this.deregisterAll();
     sessionService.registerGetById(
       this.sessionId,
       this.updateSession,
@@ -196,9 +197,13 @@ export default class LinkSettings extends Vue {
     this.roles = roles.filter((role) => role.username !== this.own);
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateSession);
     cashService.deregisterAllGet(this.updateRole);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
   dataLoaded = false;
 

@@ -175,6 +175,23 @@ export default class PublicScreen extends Vue {
 
   topContentPosition = 250;
 
+  @Watch('sessionId', { immediate: true })
+  async onSessionIdChanged(): Promise<void> {
+    this.deregisterAll();
+    sessionService.registerGetById(
+      this.sessionId,
+      this.updateSession,
+      this.authHeaderTyp,
+      60 * 60
+    );
+    sessionService.registerGetPublicScreen(
+      this.sessionId,
+      this.updatePublicTask,
+      this.authHeaderTyp,
+      5
+    );
+  }
+
   loadTopPositions(): void {
     if (this.$refs.scrollContent) {
       this.topContentPosition = Math.floor(
@@ -240,26 +257,14 @@ export default class PublicScreen extends Vue {
     );
   }
 
-  unmounted(): void {
-    this.task = null;
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateSession);
     cashService.deregisterAllGet(this.updatePublicTask);
   }
 
-  @Watch('sessionId', { immediate: true })
-  async onSessionIdChanged(): Promise<void> {
-    sessionService.registerGetById(
-      this.sessionId,
-      this.updateSession,
-      this.authHeaderTyp,
-      60 * 60
-    );
-    sessionService.registerGetPublicScreen(
-      this.sessionId,
-      this.updatePublicTask,
-      this.authHeaderTyp,
-      10
-    );
+  unmounted(): void {
+    this.deregisterAll();
+    this.task = null;
   }
 
   updateSession(session: Session): void {

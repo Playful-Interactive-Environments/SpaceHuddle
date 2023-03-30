@@ -112,6 +112,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
+    this.deregisterAll();
     this.cashEntry = ideaService.registerGetIdeasForTask(
       this.taskId,
       this.filter.orderType,
@@ -193,8 +194,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     });
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateIdeas);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/

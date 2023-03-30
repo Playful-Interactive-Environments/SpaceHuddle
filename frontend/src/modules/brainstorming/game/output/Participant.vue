@@ -78,6 +78,7 @@ import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import * as ideaService from '@/services/idea-service';
+import * as cashService from '@/services/cash-service';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const o9n = require('o9n');
@@ -126,6 +127,7 @@ export default class Participant extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    this.deregisterAll();
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -480,15 +482,21 @@ export default class Participant extends Vue {
     this.module = module;
   }
 
+  deregisterAll(): void {
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateModule);
+    cashService.deregisterAllGet(this.updateInputIdeas);
+    cashService.deregisterAllGet(this.updateIdeas);
+    cashService.deregisterAllGet(this.updateTaskIdeas);
+  }
+
   async unmounted(): Promise<void> {
     await this.exitFullscreen();
     if (this.noSleep) this.noSleep.disable();
     clearInterval(this.drawingInterval);
     window.removeEventListener('shake', this.isShaking, false);
     this.shakeEvent.stop();
-    taskService.deregisterGetTaskById(this.taskId, this.updateTask);
-    moduleService.deregisterGetModuleById(this.moduleId, this.updateModule);
-    viewService.deregisterGetInputIdeas(this.taskId, this.updateInputIdeas);
+    this.deregisterAll();
   }
 
   allIdeas: Idea[] = [];

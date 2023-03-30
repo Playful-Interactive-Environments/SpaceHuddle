@@ -199,6 +199,26 @@ export default class Participant extends Vue {
   base64ImageUrl: string | null = null;
   EndpointAuthorisationType = EndpointAuthorisationType;
 
+  ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    this.deregisterAll();
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+    this.ideaCash = ideaService.registerGetIdeasForTask(
+      this.taskId,
+      IdeaSortOrder.TIMESTAMP,
+      null,
+      this.updateIdeas,
+      EndpointAuthorisationType.PARTICIPANT,
+      30
+    );
+  }
+
   imageLoaded(): void {
     const scrollIsBottom = this.scrollIsBottom();
     if (scrollIsBottom) this.scrollToBottom();
@@ -299,25 +319,6 @@ export default class Participant extends Vue {
     return window.scrollY === document.body.scrollHeight - window.innerHeight;
   }
 
-  ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
-  @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
-    taskService.registerGetTaskById(
-      this.taskId,
-      this.updateTask,
-      EndpointAuthorisationType.PARTICIPANT,
-      60 * 60
-    );
-    this.ideaCash = ideaService.registerGetIdeasForTask(
-      this.taskId,
-      IdeaSortOrder.TIMESTAMP,
-      null,
-      this.updateIdeas,
-      EndpointAuthorisationType.PARTICIPANT,
-      30
-    );
-  }
-
   updateTask(task: Task): void {
     this.task = task;
   }
@@ -353,11 +354,15 @@ export default class Participant extends Vue {
       this.ideas = this.ideas.filter((idea) => idea.isOwn);
   }
 
-  unmounted(): void {
-    window.removeEventListener('imageLoaded', this.imageLoaded);
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateModule);
     cashService.deregisterAllGet(this.updateIdeas);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
+    window.removeEventListener('imageLoaded', this.imageLoaded);
   }
 }
 </script>

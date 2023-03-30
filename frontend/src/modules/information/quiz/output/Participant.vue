@@ -115,7 +115,32 @@
           class="fill"
           v-else-if="activeQuestionType === QuestionType.ORDER"
         >
+          <div v-if="quizState === QuestionState.RESULT_ANSWER">
+            <div
+              v-for="element in publicAnswerList"
+              :key="element.answer.id"
+              class="media orderDraggable link outline-thick correct"
+            >
+              <h2 class="media-left">
+                {{ publicAnswerList.indexOf(element) + 1 }}
+              </h2>
+              <p class="media-content">{{ element.answer.keywords }}</p>
+              <img
+                v-if="element.answer.image"
+                :src="element.answer.image"
+                class="media-right question-image"
+                alt=""
+              />
+              <img
+                v-if="element.answer.link && !element.answer.image"
+                :src="element.answer.link"
+                class="media-right question-image"
+                alt=""
+              />
+            </div>
+          </div>
           <draggable
+            v-else
             v-model="orderAnswers"
             tag="ul"
             :component-data="{
@@ -129,7 +154,7 @@
             item-key="answer"
           >
             <template #item="{ element }">
-              <div class="media orderDraggable">
+              <div class="media orderDraggable link outline-thick">
                 <h2 class="media-left">
                   {{ orderAnswers.indexOf(element) + 1 }}
                 </h2>
@@ -154,6 +179,7 @@
           v-else-if="activeQuestionType === QuestionType.RATING"
           :max="activeQuestion.parameter.maxValue"
           v-model="activeAnswer.numValue"
+          :disabled="quizState === QuestionState.RESULT_ANSWER"
           v-on:change="onAnswerValueChanged"
         ></el-rate>
         <el-slider
@@ -163,6 +189,7 @@
           v-model="activeAnswer.numValue"
           v-on:change="onAnswerValueChanged"
           :marks="activeQuestionRange"
+          :disabled="quizState === QuestionState.RESULT_ANSWER"
         ></el-slider>
         <el-input-number
           v-else-if="activeQuestionType === QuestionType.NUMBER"
@@ -171,6 +198,7 @@
           :value-on-clear="null"
           v-model="activeAnswer.numValue"
           v-on:change="onAnswerValueChanged"
+          :disabled="quizState === QuestionState.RESULT_ANSWER"
         ></el-input-number>
         <el-input
           v-else-if="activeQuestionType === QuestionType.TEXT"
@@ -178,6 +206,7 @@
           rows="3"
           v-model="activeAnswer.textValue"
           v-on:change="onAnswerValueChanged"
+          :disabled="quizState === QuestionState.RESULT_ANSWER"
         ></el-input>
         <div v-else-if="activeQuestionType === QuestionType.IMAGE">
           <ImagePicker
@@ -195,6 +224,7 @@
             :placeholder="
               $t('module.information.quiz.participant.imageKeywords')
             "
+            :disabled="quizState === QuestionState.RESULT_ANSWER"
           ></el-input>
         </div>
       </template>
@@ -227,7 +257,10 @@ import {
   moduleNameValid,
   QuestionnaireType,
 } from '@/modules/information/quiz/types/QuestionnaireType';
-import { QuestionPhase } from '@/modules/information/quiz/types/QuestionState';
+import {
+  QuestionPhase,
+  QuestionState,
+} from '@/modules/information/quiz/types/QuestionState';
 import * as hierarchyService from '@/services/hierarchy-service';
 import * as ideaService from '@/services/idea-service';
 import QuizResult from '@/modules/information/quiz/organisms/QuizResult.vue';
@@ -245,6 +278,10 @@ import draggable from 'vuedraggable';
 import * as taskParticipantService from '@/services/task-participant-service';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
+import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 
 @Options({
   components: {
@@ -274,6 +311,7 @@ export default class Participant extends Vue {
   moderatedQuestionFlow = true;
   score = 0;
   voteResults: boolean[] = [];
+  savedQuestions: string[] = [];
 
   activeAnswer: {
     numValue: number | null;
@@ -289,6 +327,7 @@ export default class Participant extends Vue {
 
   QuestionPhase = QuestionPhase;
   QuestionType = QuestionType;
+  QuestionState = QuestionState;
   orderAnswers: PublicAnswerData[] = [];
   dragging = false;
   dragOptions = {
@@ -300,13 +339,50 @@ export default class Participant extends Vue {
 
   submitScreen = false;
 
-  handleOrderChange(): void {
+  iteration: TaskParticipantIteration | null = null;
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    this.deregisterAll();
+    taskParticipantService.registerGetList(
+      this.taskId,
+      this.updateState,
+      EndpointAuthorisationType.PARTICIPANT,
+      2 * 60
+    );
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+    hierarchyService.registerGetQuestions(
+      this.taskId,
+      this.updateQuestions,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+    taskParticipantService
+      .postParticipantIteration(this.taskId, {
+        state: TaskParticipantIterationStatesType.IN_PROGRESS,
+        parameter: {},
+      })
+      .then((result) => {
+        this.iteration = result;
+      });
+    taskParticipantService.registerGetIterationStepFinalList(
+      this.taskId,
+      this.updateStoredAnswers,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+  }
+
+  async handleOrderChange(): Promise<void> {
     this.dragging = false;
-    this.publicAnswerList.forEach((answer) => {
-      const position = this.publicAnswerList.indexOf(answer);
-      answer.answer.order = position;
-    });
-    this.changeOrderVotes();
+    /*this.publicAnswerList.forEach((answer) => {
+      answer.answer.order = this.publicAnswerList.indexOf(answer);
+    });*/
+    await this.changeOrderVotes();
   }
 
   get activeQuestionRange(): number[] | { [key: number]: string } {
@@ -382,54 +458,75 @@ export default class Participant extends Vue {
     return this.score + '/' + this.questionCount;
   }
 
-  checkScore(): void {
+  checkScore(): { isCorrect: boolean; answers: any } {
+    let answers: any = null;
     if (
       getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
       QuestionResultStorage.VOTING
     ) {
+      answers = [];
       let voteScore = 0;
       let maxScore = 0;
-      for (let i = 0; i < this.publicAnswerList.length; i++) {
-        for (let j = 0; j < this.votes.length; j++) {
-          if (this.publicAnswerList[i].answer.id == this.votes[j].ideaId) {
-            if (
-              this.votes[j].rating == 1 &&
-              this.publicAnswerList[i].answer.parameter.isCorrect
-            ) {
-              voteScore++;
-            } else if (
-              this.votes[j].rating == 0 &&
-              this.publicAnswerList[i].answer.parameter.isCorrect
-            ) {
-              voteScore--;
-            } else if (
-              this.votes[j].rating == 1 &&
-              !this.publicAnswerList[i].answer.parameter.isCorrect
-            ) {
-              voteScore--;
-            } else if (
-              this.votes[j].rating == 0 &&
-              !this.publicAnswerList[i].answer.parameter.isCorrect
-            ) {
-              voteScore++;
+      if (this.activeQuestionType === QuestionType.ORDER) {
+        maxScore = this.orderAnswers.length;
+        for (let i = 0; i < this.orderAnswers.length; i++) {
+          if (this.orderAnswers[i].answer.order === i) voteScore++;
+          else voteScore--;
+          answers.push(this.orderAnswers[i].answer.id);
+        }
+        this.voteResults[this.activeQuestionIndex] = maxScore === voteScore;
+      } else if (this.publicAnswerList.length > 0) {
+        for (let i = 0; i < this.publicAnswerList.length; i++) {
+          for (let j = 0; j < this.votes.length; j++) {
+            if (this.publicAnswerList[i].answer.id == this.votes[j].ideaId) {
+              if (this.votes[j].rating === 1) {
+                answers.push(this.votes[j].ideaId);
+              }
+              if (
+                this.votes[j].rating == 1 &&
+                this.publicAnswerList[i].answer.parameter.isCorrect
+              ) {
+                voteScore++;
+              } else if (
+                this.votes[j].rating == 0 &&
+                this.publicAnswerList[i].answer.parameter.isCorrect
+              ) {
+                voteScore--;
+              } else if (
+                this.votes[j].rating == 1 &&
+                !this.publicAnswerList[i].answer.parameter.isCorrect
+              ) {
+                voteScore--;
+              } else if (
+                this.votes[j].rating == 0 &&
+                !this.publicAnswerList[i].answer.parameter.isCorrect
+              ) {
+                voteScore++;
+              }
             }
           }
+          if (this.publicAnswerList[i].answer.parameter.isCorrect) {
+            maxScore++;
+          }
         }
-        if (this.publicAnswerList[i].answer.parameter.isCorrect) {
-          maxScore++;
-        }
+        this.voteResults[this.activeQuestionIndex] = maxScore === voteScore;
       }
-      this.voteResults[this.activeQuestionIndex] = maxScore === voteScore;
     } else {
       if (
         this.activeQuestionType === QuestionType.NUMBER ||
         this.activeQuestionType === QuestionType.RATING ||
         this.activeQuestionType === QuestionType.SLIDER
       ) {
+        answers = this.activeAnswer.numValue;
         this.voteResults[this.activeQuestionIndex] =
           this.activeAnswer.numValue ===
           this.activeQuestion?.parameter.correctValue;
-      }
+      } else if (this.activeQuestionType === QuestionType.TEXT)
+        answers = this.activeAnswer.textValue;
+      else if (this.activeQuestionType === QuestionType.IMAGE)
+        answers = this.activeAnswer.image
+          ? this.activeAnswer.image
+          : this.activeAnswer.link;
     }
     let score = 0;
     for (let i = 0; i < this.voteResults.length; i++) {
@@ -438,6 +535,10 @@ export default class Participant extends Vue {
       }
     }
     this.score = score;
+    return {
+      isCorrect: this.voteResults[this.activeQuestionIndex],
+      answers: answers,
+    };
   }
 
   get getImageSrc(): string {
@@ -458,18 +559,77 @@ export default class Participant extends Vue {
     return this.activeQuestionIndex + 1 < this.questionCount;
   }
 
+  trackState(): void {
+    const result = this.checkScore();
+    if (this.iteration) {
+      if (!this.savedQuestions.includes(this.activeQuestionId))
+        this.savedQuestions.push(this.activeQuestionId);
+      if (
+        !this.activeStep ||
+        this.activeStep.ideaId !== this.activeQuestionId ||
+        this.activeStep.iteration !== this.iteration.iteration
+      ) {
+        taskParticipantService
+          .postParticipantIterationStep(this.taskId, {
+            iteration: this.iteration.iteration,
+            ideaId: this.activeQuestionId,
+            state: this.isQuiz
+              ? result.isCorrect
+                ? TaskParticipantIterationStepStatesType.CORRECT
+                : TaskParticipantIterationStepStatesType.WRONG
+              : TaskParticipantIterationStepStatesType.NEUTRAL,
+            parameter: {
+              answer: result.answers,
+            },
+          })
+          .then((step) => (this.activeStep = step));
+      } else {
+        this.activeStep.state = this.isQuiz
+          ? result.isCorrect
+            ? TaskParticipantIterationStepStatesType.CORRECT
+            : TaskParticipantIterationStepStatesType.WRONG
+          : TaskParticipantIterationStepStatesType.NEUTRAL;
+        this.activeStep.parameter = {
+          answer: result.answers,
+        };
+        taskParticipantService.putParticipantIterationStep(
+          this.taskId,
+          this.activeStep
+        );
+      }
+    }
+  }
+
   goToNextQuestion(event: PointerEvent | null, initData = false): void {
     this.initData = initData;
     this.checkScore();
     if (this.submitScreen) {
       this.submitScreen = false;
     }
-    if (this.hasNextQuestion) this.activeQuestionIndex++;
-    else this.goToSubmitScreen();
+    if (this.hasNextQuestion) {
+      if (!this.savedQuestions.includes(this.activeQuestionId))
+        this.savedQuestions.push(this.activeQuestionId);
+      this.activeQuestionIndex++;
+    } else this.goToSubmitScreen();
   }
 
   goToSubmitScreen(): void {
     this.checkScore();
+    if (!this.savedQuestions.includes(this.activeQuestionId))
+      this.savedQuestions.push(this.activeQuestionId);
+    if (this.iteration) {
+      if (this.isQuiz)
+        this.iteration.state =
+          this.score > this.questionCount / 2
+            ? TaskParticipantIterationStatesType.WIN
+            : TaskParticipantIterationStatesType.LOOS;
+      else
+        this.iteration.state = TaskParticipantIterationStatesType.PARTICIPATED;
+      taskParticipantService.putParticipantIteration(
+        this.taskId,
+        this.iteration
+      );
+    }
     this.activeQuestionIndex++;
     this.submitScreen = true;
     if (this.state) {
@@ -478,7 +638,7 @@ export default class Participant extends Vue {
         score: this.score,
         answeredQuestionCount: this.questionCount,
       };
-      taskParticipantService.put(this.taskId, this.state);
+      taskParticipantService.putParticipantState(this.taskId, this.state);
     }
   }
 
@@ -554,7 +714,7 @@ export default class Participant extends Vue {
           this.activeAnswer.image = null;
         }
       } else if (answerValue) {
-        await hierarchyService.postHierarchy(
+        this.storedActiveAnswer = await hierarchyService.postHierarchy(
           this.taskId,
           {
             parentId: this.activeQuestionId,
@@ -565,6 +725,7 @@ export default class Participant extends Vue {
         );
       }
       this.questionAnswered = this.getQuestionAnswered();
+      this.trackState();
     }
   }
 
@@ -613,36 +774,46 @@ export default class Participant extends Vue {
       }
     }
     this.questionAnswered = this.getQuestionAnswered();
+    this.trackState();
   }
 
-  async changeOrderVotes() {
+  async changeOrderVotes(): Promise<void> {
+    const callList: Promise<Vote>[] = [];
     if (this.votes.length <= 0) {
-      this.orderAnswers.forEach((answer, index) => {
-        votingService
-          .postVote(this.taskId, {
-            ideaId: answer.answer.id!,
-            rating: index,
-            detailRating: 1,
-          })
-          .then((vote) => {
-            this.votes.push(vote);
-          });
-      });
-    } else {
-      this.orderAnswers.forEach((answer, index) => {
-        const vote = this.votes.find(
-          (element) => element.ideaId === answer.answer.id
-        );
-        if (!vote) return;
-        votingService.putVote({
-          id: vote.id,
+      for (let index = 0; index < this.orderAnswers.length; index++) {
+        const answer = this.orderAnswers[index];
+        const call = votingService.postVote(this.taskId, {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           ideaId: answer.answer.id!,
           rating: index,
           detailRating: 1,
         });
-      });
+        callList.push(call);
+        call.then((vote) => {
+          this.votes.push(vote);
+        });
+      }
+    } else {
+      for (let index = 0; index < this.orderAnswers.length; index++) {
+        const answer = this.orderAnswers[index];
+        const vote = this.votes.find(
+          (element) => element.ideaId === answer.answer.id
+        );
+        if (!vote) return;
+        callList.push(
+          votingService.putVote({
+            id: vote.id,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            ideaId: answer.answer.id!,
+            rating: index,
+            detailRating: 1,
+          })
+        );
+      }
     }
+    await Promise.all(callList);
     this.questionAnswered = this.getQuestionAnswered();
+    this.trackState();
   }
 
   get moduleName(): string {
@@ -702,28 +873,43 @@ export default class Participant extends Vue {
     }
   }
 
+  get hasVotesForActiveQuestion(): boolean {
+    return (
+      this.votes.length > 0 &&
+      this.publicAnswerList.length > 0 &&
+      !!this.publicAnswerList.find(
+        (answer) => this.votes[0].ideaId === answer.answer.id
+      )
+    );
+  }
+
   updateVotes(votes: Vote[]): void {
     this.votes = votes;
-    this.loadSavedOrder();
+    if (this.hasVotesForActiveQuestion) this.loadSavedOrder();
     this.skipAnswerQuestions();
   }
 
   loadSavedOrder(): void {
-    if (this.activeQuestionType === QuestionType.ORDER) {
-      if (this.votes.length > 0) {
-        this.orderAnswers = this.publicAnswerList;
+    if (
+      this.activeQuestionType === QuestionType.ORDER &&
+      this.publicAnswerList.length > 0
+    ) {
+      const orderAnswers = [...this.publicAnswerList];
+      if (this.hasVotesForActiveQuestion) {
         const sortOrder = this.votes.sort((a, b) => a.rating - b.rating);
         const sortedVotes: PublicAnswerData[] = [];
         for (let i = 0; i < sortOrder.length; i++) {
-          const option = this.orderAnswers.find(
+          const option = orderAnswers.find(
             (option) => option.answer.id === sortOrder[i].ideaId
           );
           if (option) sortedVotes.push(option);
         }
         this.orderAnswers = sortedVotes;
       } else {
-        this.orderAnswers = this.publicAnswerList;
-        this.orderAnswers = this.orderAnswers.sort(() => 0.5 - Math.random());
+        this.orderAnswers = orderAnswers.sort(() => 0.5 - Math.random());
+        this.handleOrderChange().then(
+          () => (this.questionAnswered = this.getQuestionAnswered())
+        );
       }
     }
   }
@@ -753,44 +939,24 @@ export default class Participant extends Vue {
     this.skipAnswerQuestions();
   }
 
-  @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
-    taskParticipantService.registerGetList(
-      this.taskId,
-      this.updateState,
-      EndpointAuthorisationType.PARTICIPANT,
-      2 * 60
-    );
-    taskService.registerGetTaskById(
-      this.taskId,
-      this.updateTask,
-      EndpointAuthorisationType.PARTICIPANT,
-      60 * 60
-    );
-    hierarchyService.registerGetQuestions(
-      this.taskId,
-      this.updateQuestions,
-      EndpointAuthorisationType.PARTICIPANT,
-      60 * 60
-    );
-  }
-
   updateQuestions(questions: Hierarchy[]): void {
     this.questionCount = questions.length;
   }
 
   updateTask(task: Task): void {
     this.task = task;
-    const module = this.task.modules.find((module) =>
-      moduleNameValid(module.name)
-    );
-    if (module) {
-      this.questionnaireType =
-        QuestionnaireType[module.parameter.questionType.toUpperCase()];
-      this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
-      if (this.moderatedQuestionFlow) this.initData = false;
-      if (!this.moderatedQuestionFlow && this.activeQuestionIndex === -1) {
-        this.activeQuestionIndex = 0;
+    if (task && task.modules) {
+      const module = this.task.modules.find((module) =>
+        moduleNameValid(module.name)
+      );
+      if (module) {
+        this.questionnaireType =
+          QuestionnaireType[module.parameter.questionType.toUpperCase()];
+        this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
+        if (this.moderatedQuestionFlow) this.initData = false;
+        if (!this.moderatedQuestionFlow && this.activeQuestionIndex === -1) {
+          this.activeQuestionIndex = 0;
+        }
       }
     }
   }
@@ -806,12 +972,23 @@ export default class Participant extends Vue {
     }
   }
 
-  changeQuizState(): void {
-    //todo
+  activeStep: TaskParticipantIterationStep | null = null;
+  updateStoredAnswers(steps: TaskParticipantIterationStep[]): void {
+    for (let i = 0; i < steps.length; i++) {
+      this.activeStep = steps[i];
+      this.voteResults[i] =
+        steps[i].state === TaskParticipantIterationStepStatesType.CORRECT;
+    }
+  }
+
+  quizState: QuestionState = QuestionState.ACTIVE_WAIT_FOR_VOTE;
+  changeQuizState(state: QuestionState): void {
+    this.quizState = state;
   }
 
   questionAnswered = false;
   getQuestionAnswered(): boolean {
+    //if (this.activeQuestionType === QuestionType.ORDER) return true;
     if (
       getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
       QuestionResultStorage.VOTING
@@ -844,19 +1021,32 @@ export default class Participant extends Vue {
     }
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
     cashService.deregisterAllGet(this.updateAnswers);
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateVotes);
     cashService.deregisterAllGet(this.updateQuestions);
+    cashService.deregisterAllGet(this.updateStoredAnswers);
+    cashService.deregisterAllGet(this.updateState);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   @Watch('publicAnswerList', { immediate: false })
   async publicAnswerListChanged(): Promise<void> {
     if (this.activeQuestionType === QuestionType.ORDER) {
-      if (this.orderAnswers.length !== this.publicAnswerList.length) {
-        this.loadSavedOrder();
+      if (
+        this.orderAnswers.length !== this.publicAnswerList.length ||
+        (this.publicAnswerList.length > 0 &&
+          !this.orderAnswers.find(
+            (answer) => this.publicAnswerList[0].answer.id === answer.answer.id
+          ))
+      ) {
+        if (!this.savedQuestions.includes(this.activeQuestionId))
+          this.loadSavedOrder();
       }
     }
   }
@@ -1021,6 +1211,13 @@ div#loadingScreen > span#loading::v-deep(.path) {
 .el-space::v-deep(.outline-thick):hover {
   background-color: var(--color-darkblue);
   border-color: var(--color-darkblue-light);
+  color: white;
+}
+
+.outline-thick {
+  border-color: var(--el-button-border-color);
+  border-width: 2px;
+  border-style: solid;
 }
 
 .el-space::v-deep(.link) > span {

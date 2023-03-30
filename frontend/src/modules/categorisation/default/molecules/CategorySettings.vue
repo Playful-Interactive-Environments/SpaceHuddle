@@ -153,8 +153,12 @@ export default class CategorySettings extends Vue {
       this.formData.color = category.parameter.color;
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateCategory);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   handleClose(done: { (): void }): void {

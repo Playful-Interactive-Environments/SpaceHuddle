@@ -59,7 +59,7 @@ export const endpoint = (
       return response;
     },
     (error) => {
-      apiErrorHandling(error);
+      apiErrorHandling(error, authHeaderType);
       return Promise.reject(error);
     }
   );

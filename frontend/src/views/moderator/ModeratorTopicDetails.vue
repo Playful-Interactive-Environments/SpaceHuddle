@@ -346,6 +346,43 @@ export default class ModeratorTopicDetails extends Vue {
     return '';
   }
 
+  @Watch('sessionId', { immediate: true })
+  onSessionIdChanged(): void {
+    cashService.deregisterAllGet(this.updateSession);
+    cashService.deregisterAllGet(this.updateRole);
+    sessionService.registerGetById(
+      this.sessionId,
+      this.updateSession,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+    sessionRoleService.registerGetOwn(
+      this.sessionId,
+      this.updateRole,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+  }
+
+  taskCash!: cashService.SimplifiedCashEntry<Task[]>;
+  @Watch('topicId', { immediate: true })
+  onTopicIdChanged(): void {
+    cashService.deregisterAllGet(this.updateTopic);
+    cashService.deregisterAllGet(this.updateTasks);
+    topicService.registerGetTopicById(
+      this.topicId,
+      this.updateTopic,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+    this.taskCash = taskService.registerGetTaskList(
+      this.topicId,
+      this.updateTasks,
+      EndpointAuthorisationType.MODERATOR,
+      30
+    );
+  }
+
   moduleIcon: { [name: string]: { [name: string]: string[] } } = {};
   mounted(): void {
     this.loadTaskTypes();
@@ -398,45 +435,12 @@ export default class ModeratorTopicDetails extends Vue {
     return ['fas', 'circle'];
   }
 
-  @Watch('sessionId', { immediate: true })
-  onSessionIdChanged(): void {
-    sessionService.registerGetById(
-      this.sessionId,
-      this.updateSession,
-      EndpointAuthorisationType.MODERATOR,
-      60 * 60
-    );
-    sessionRoleService.registerGetOwn(
-      this.sessionId,
-      this.updateRole,
-      EndpointAuthorisationType.MODERATOR,
-      60 * 60
-    );
-  }
-
   updateRole(role: SessionRole): void {
     this.sessionRole = role.role;
   }
 
   updateSession(session: Session): void {
     this.session = session;
-  }
-
-  taskCash!: cashService.SimplifiedCashEntry<Task[]>;
-  @Watch('topicId', { immediate: true })
-  onTopicIdChanged(): void {
-    topicService.registerGetTopicById(
-      this.topicId,
-      this.updateTopic,
-      EndpointAuthorisationType.MODERATOR,
-      60 * 60
-    );
-    this.taskCash = taskService.registerGetTaskList(
-      this.topicId,
-      this.updateTasks,
-      EndpointAuthorisationType.MODERATOR,
-      30
-    );
   }
 
   updateTopic(topic: Topic): void {
@@ -622,14 +626,15 @@ export default class ModeratorTopicDetails extends Vue {
   }
 
   deleteTopic(): void {
-    sessionService.deregisterGetById(this.sessionId, this.updateSession);
-    topicService.deregisterGetTopicById(this.topicId, this.updateTopic);
-    sessionRoleService.deregisterGetOwn(this.sessionId, this.updateRole);
+    this.deregisterAll();
     setTimeout(() => {
       topicService.deleteTopic(this.topicId).then((deleted) => {
         if (deleted) {
           topicService.refreshGetTopicList(this.sessionId);
           this.$router.go(-1);
+        } else {
+          this.onSessionIdChanged();
+          this.onTopicIdChanged();
         }
       });
     }, 100);
@@ -695,14 +700,18 @@ export default class ModeratorTopicDetails extends Vue {
     }
   }
 
-  unmounted(): void {
-    this.topic = null;
-    this.tasks = [];
-    this.activeTask = null;
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTopic);
     cashService.deregisterAllGet(this.updateRole);
     cashService.deregisterAllGet(this.updateSession);
     cashService.deregisterAllGet(this.updateTasks);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
+    this.topic = null;
+    this.tasks = [];
+    this.activeTask = null;
   }
 
   download(): void {

@@ -11,7 +11,7 @@ import ParticipantModuleDefaultContainer from '@/components/participant/organism
 import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import * as cashService from "@/services/cash-service";
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -44,8 +44,12 @@ export default class Participant extends Vue {
     this.module = module;
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

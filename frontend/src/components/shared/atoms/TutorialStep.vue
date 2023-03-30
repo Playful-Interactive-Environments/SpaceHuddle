@@ -123,9 +123,13 @@ export default class TutorialStep extends Vue {
     }, 1000);
   }
 
-  unmounted(): void {
-    this.removeFromReservationList();
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTutorial);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
+    this.removeFromReservationList();
   }
 
   removeFromReservationList(): void {

@@ -22,7 +22,6 @@ import TaskType from '@/types/enum/TaskType';
 import { Hierarchy } from '@/types/api/Hierarchy';
 import * as cashService from '@/services/cash-service';
 import { Task } from '@/types/api/Task';
-import {Topic} from "@/types/api/Topic";
 const imageDB: IdeaImage[] = [];
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -385,8 +384,8 @@ export const filterIdeas = (
 export const clone = async (
   id: string,
   authHeaderType = EndpointAuthorisationType.MODERATOR
-): Promise<Topic> => {
-  return apiExecutePostHandled<Topic>(
+): Promise<Idea> => {
+  return apiExecutePostHandled<Idea>(
     `/${EndpointType.IDEA}/${id}/clone`,
     null,
     null,

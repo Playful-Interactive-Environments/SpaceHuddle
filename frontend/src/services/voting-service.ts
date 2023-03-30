@@ -1,4 +1,4 @@
-import {Vote, VoteResult, VoteResultDetail} from '@/types/api/Vote';
+import { Vote, VoteResult, VoteResultDetail } from '@/types/api/Vote';
 import {
   apiExecuteDelete,
   apiExecutePost,
@@ -7,8 +7,6 @@ import {
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
-import {Idea} from "@/types/api/Idea";
-import {getIdeaImages} from "@/services/idea-service";
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 

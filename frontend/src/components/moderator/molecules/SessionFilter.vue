@@ -123,8 +123,13 @@ export default class SessionFilter extends Vue {
     });
     this.subjectList = tempList;
   }
-  unmounted() {
+
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateSubjects);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

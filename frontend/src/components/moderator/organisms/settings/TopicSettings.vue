@@ -101,6 +101,7 @@ export default class TopicSettings extends Vue {
   topicListCash!: cashService.SimplifiedCashEntry<Topic[]>;
   @Watch('sessionId', { immediate: true })
   onSessionIdChanged(): void {
+    cashService.deregisterAllGet(this.updateTopicCount);
     this.topicListCash = topicService.registerGetTopicsList(
       this.sessionId,
       this.updateTopicCount,
@@ -117,6 +118,7 @@ export default class TopicSettings extends Vue {
   topicCash!: cashService.SimplifiedCashEntry<Topic>;
   @Watch('topicId', { immediate: true })
   onTopicIdChanged(id: string): void {
+    cashService.deregisterAllGet(this.updateTopic);
     if (id) {
       this.topicCash = topicService.registerGetTopicById(
         this.topicId,
@@ -197,9 +199,13 @@ export default class TopicSettings extends Vue {
     this.isSaving = false;
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTopic);
     cashService.deregisterAllGet(this.updateTopicCount);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

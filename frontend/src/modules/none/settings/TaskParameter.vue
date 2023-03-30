@@ -24,15 +24,9 @@ export default class TaskParameter extends Vue {
   @Prop({ default: {} }) modelValue!: TaskSettingsData;
   task: Task | null = null;
 
-  @Watch('modelValue', { immediate: true })
-  async onModelValueChanged(): Promise<void> {
-    if (this.modelValue.parameter) {
-      //todo: set default parameter
-    }
-  }
-
   @Watch('taskId', { immediate: true })
   async onTaskIdChanged(): Promise<void> {
+    this.deregisterAll();
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -41,12 +35,23 @@ export default class TaskParameter extends Vue {
     );
   }
 
+  @Watch('modelValue', { immediate: true })
+  async onModelValueChanged(): Promise<void> {
+    if (this.modelValue.parameter) {
+      //todo: set default parameter
+    }
+  }
+
   updateTask(task: Task): void {
     this.task = task;
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

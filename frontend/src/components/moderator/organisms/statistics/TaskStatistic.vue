@@ -77,6 +77,7 @@ export default class TaskStatistic extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    this.deregisterAll();
     cashService.deregisterAllGet(this.updateState);
     taskParticipantService.registerGetList(
       this.taskId,
@@ -101,8 +102,12 @@ export default class TaskStatistic extends Vue {
     }
   }
 
-  unmounted() {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateState);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

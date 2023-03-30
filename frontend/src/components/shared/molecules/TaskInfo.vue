@@ -54,7 +54,7 @@ import { ModuleType } from '@/types/enum/ModuleType';
 import { getModulesForTaskType } from '@/modules';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Task } from '@/types/api/Task';
-import * as cashService from "@/services/cash-service";
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {},
@@ -75,6 +75,7 @@ export default class TaskInfo extends Vue {
 
   @Watch('taskId', { immediate: true })
   async onTaskIdChanged(): Promise<void> {
+    this.deregisterAll();
     if (this.taskId) {
       taskService.registerGetTaskById(
         this.taskId,
@@ -116,8 +117,12 @@ export default class TaskInfo extends Vue {
     return this.mainModule;
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

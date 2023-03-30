@@ -55,6 +55,7 @@ import { ValidationData, ValidationRule } from '@/types/ui/ValidationRule';
 import { Prop } from 'vue-property-decorator';
 import * as sessionService from '@/services/session-service';
 import { SessionInfo } from '@/types/api/Session';
+import { RouteName } from '@/types/enum/RouteName';
 
 @Options({
   components: {
@@ -173,7 +174,7 @@ export default class ParticipantJoin extends Vue {
           participantData.token.accessToken as string
         );
         this.$router.push({
-          name: 'participant-overview',
+          name: RouteName.PARTICIPANT_OVERVIEW,
         });
         return true;
       }

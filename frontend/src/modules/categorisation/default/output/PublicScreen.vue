@@ -101,6 +101,7 @@ export default class PublicScreen extends Vue {
   outputCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    this.deregisterAll();
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -238,12 +239,16 @@ export default class PublicScreen extends Vue {
     this.reloadTabState = false;
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateViews);
     cashService.deregisterAllGet(this.updateCategories);
     cashService.deregisterAllGet(this.updateCategorisedIdeas);
     cashService.deregisterAllGet(this.updateInputIdeas);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

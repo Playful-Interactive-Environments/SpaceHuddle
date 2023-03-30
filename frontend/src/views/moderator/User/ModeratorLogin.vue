@@ -94,6 +94,7 @@ import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 import { ElMessage } from 'element-plus';
 import axios from 'axios';
+import { RouteName } from '@/types/enum/RouteName';
 
 @Options({
   components: {
@@ -120,7 +121,7 @@ export default class ModeratorLogin extends Vue {
         authService.setAccessTokenModerator(result.accessToken);
         authService.setUserData(this.formData.email);
         this.$router.push({
-          name: 'moderator-session-overview',
+          name: RouteName.MODERATOR_SESSION_OVERVIEW,
         });
       }
     } catch (error: unknown) {

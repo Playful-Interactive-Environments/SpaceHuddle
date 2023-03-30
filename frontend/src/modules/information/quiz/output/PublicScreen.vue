@@ -2,6 +2,7 @@
   <PublicBase
     :taskId="taskId"
     :authHeaderTyp="authHeaderTyp"
+    :default-question-state="QuestionState.RESULT_STATISTICS"
     v-on:changePublicQuestion="changePublicQuestion"
     v-on:changePublicAnswers="changePublicAnswers"
     v-on:changeQuizState="changeQuizState"
@@ -49,6 +50,7 @@
           v-for="(answer, index) in orderAnswers"
           :key="answer.answer.id"
           class="answer"
+          :class="{ correct: state === QuestionState.RESULT_ANSWER }"
         >
           {{ index + 1 }}.
           {{ answer.answer.keywords }}
@@ -148,7 +150,13 @@ export default class PublicScreen extends Vue {
   changePublicAnswers(answers: PublicAnswerData[]): void {
     this.publicAnswerList = answers;
     if (this.activeQuestionType === QuestionType.ORDER) {
-      if (this.orderAnswers.length !== this.publicAnswerList.length) {
+      if (
+        this.orderAnswers.length !== this.publicAnswerList.length ||
+        (this.publicAnswerList.length > 0 &&
+          !this.orderAnswers.find(
+            (answer) => this.publicAnswerList[0].answer.id === answer.answer.id
+          ))
+      ) {
         this.orderAnswers = this.publicAnswerList;
       }
       if (this.state !== QuestionState.RESULT_ANSWER) {

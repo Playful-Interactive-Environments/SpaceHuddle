@@ -51,13 +51,17 @@
               <font-awesome-icon :icon="['fac', 'presentation']" />
             </div>
             <TutorialStep
-              v-if="!useOtherPublicScreenTopic"
+              v-if="!canUseOtherPublicScreenTopic || !useOtherPublicScreenTopic"
               step="showNullPublicScreen"
               :type="translationModuleName"
               :order="5"
               placement="bottom"
             >
-              <div class="home">
+              <div
+                class="home"
+                @click="homeClicked"
+                :class="{ homeSelected: !activeItem && canClickHome }"
+              >
                 <font-awesome-icon class="processIcon homeIcon" icon="home" />
               </div>
             </TutorialStep>
@@ -271,6 +275,7 @@ import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
     'changeOrder',
     'update:publicScreen',
     'update:activeItem',
+    'homeClicked',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -283,6 +288,8 @@ export default class ProcessTimeline extends Vue {
   @Prop({ default: TimerEntity.TASK }) entityName!: string;
   @Prop({ default: false }) readonly readonly!: boolean;
   @Prop({ default: true }) readonly canDisablePublicTimeline!: boolean;
+  @Prop({ default: false }) readonly canUseOtherPublicScreenTopic!: boolean;
+  @Prop({ default: false }) readonly canClickHome!: boolean;
   @Prop({ default: true }) readonly isLinkedToDetails!: boolean;
   @Prop({ default: false }) readonly startParticipantOnPublicChange!: boolean;
   @Prop({ default: true }) readonly hasPublicSlider!: boolean;
@@ -428,7 +435,7 @@ export default class ProcessTimeline extends Vue {
     if (active) this.timerContent = item;
     else {
       timerService.setState(item, TaskStates.WAIT);
-      timerService.update(this.entityName, item);
+      timerService.update(this.entityName, item, true);
     }
   }
 
@@ -449,7 +456,7 @@ export default class ProcessTimeline extends Vue {
         : -1;
       if (index > -1) return index;
     }
-    return 0;
+    return -1;
   }
 
   get activePageContentList(): any[] {
@@ -486,6 +493,10 @@ export default class ProcessTimeline extends Vue {
   dragDone(): void {
     this.timelineKey++;
     this.$emit('changeOrder', this.activePageContentList);
+  }
+
+  homeClicked(): void {
+    if (this.canClickHome) this.$emit('homeClicked');
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -536,8 +547,12 @@ export default class ProcessTimeline extends Vue {
       index = this.getDBPublicIndex(index);
       const publicItem = this.activePageContentList[index];
       if (this.publicScreen !== publicItem) {
-        if (this.publicScreen && this.startParticipantOnPublicChange) {
+        if (publicItem && this.startParticipantOnPublicChange) {
           this.timerContent = publicItem;
+        } else if (this.startParticipantOnPublicChange) {
+          const entity = this.getTimerEntity(this.timerContent);
+          entity.state = TaskStates.WAIT;
+          timerService.update(this.entityName, entity, true);
         }
         this.$emit('update:publicScreen', publicItem);
         this.$emit('changePublicScreen', publicItem);
@@ -1008,5 +1023,15 @@ export default class ProcessTimeline extends Vue {
 .darkMode {
   --color-foreground: white;
   --color-background: #313050;
+}
+
+.homeSelected.home {
+  font-size: var(--font-size-xxlarge);
+}
+
+.homeSelected.home svg.homeIcon.processIcon {
+  background-color: var(--color-primary);
+  color: white;
+  border-color: white;
 }
 </style>

@@ -18,7 +18,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import * as cashService from "@/services/cash-service";
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {
@@ -35,6 +35,7 @@ export default class PublicScreen extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    this.deregisterAll();
     ideaService.registerGetIdeasForTask(
       this.taskId,
       IdeaSortOrder.ORDER,
@@ -49,8 +50,12 @@ export default class PublicScreen extends Vue {
     this.ideas = ideas;
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateIdeas);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

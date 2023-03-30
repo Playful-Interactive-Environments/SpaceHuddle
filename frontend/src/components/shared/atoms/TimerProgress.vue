@@ -143,8 +143,12 @@ export default class TimerProgress extends Vue {
     }
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTimer);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
     document.removeEventListener('visibilitychange', this.reloadTimer);
     clearInterval(this.interval);
   }

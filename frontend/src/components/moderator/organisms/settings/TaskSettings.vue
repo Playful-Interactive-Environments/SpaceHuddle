@@ -681,17 +681,31 @@ export default class TaskSettings extends Vue {
   //#endregion Variables
 
   //#region Load / Reset / Leave
-  unmounted(): void {
-    cashService.deregisterAllGet(this.updateTask);
-    cashService.deregisterAllGet(this.updateTaskCount);
-    cashService.deregisterAllGet(this.updateModuleName);
-    cashService.deregisterAllGet(this.updateInput);
+  taskListCash!: cashService.SimplifiedCashEntry<Task[]>;
+  viewCash!: cashService.SimplifiedCashEntry<View[]>;
+  @Watch('topicId', { immediate: true })
+  onTopicIdChanged(): void {
     cashService.deregisterAllGet(this.updateViews);
+    cashService.deregisterAllGet(this.updateTaskCount);
+    this.viewCash = viewService.registerGetList(
+      this.topicId,
+      this.updateViews,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+    this.sortOrderOptions = ideaService.getSortOrderOptions([]);
+    this.taskListCash = taskService.registerGetTaskList(
+      this.topicId,
+      this.updateTaskCount,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
   }
 
   taskCash!: cashService.SimplifiedCashEntry<Task>;
   @Watch('taskId', { immediate: true })
   async onTaskIdChanged(): Promise<void> {
+    cashService.deregisterAllGet(this.updateTask);
     if (this.internalTaskId !== this.taskId) {
       this.loading = true;
       this.internalTaskId = this.taskId;
@@ -711,16 +725,26 @@ export default class TaskSettings extends Vue {
     }
   }
 
+  deregisterAll(): void {
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateTaskCount);
+    cashService.deregisterAllGet(this.updateModuleName);
+    cashService.deregisterAllGet(this.updateInput);
+    cashService.deregisterAllGet(this.updateViews);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
+  }
+
   inputCash: cashService.SimplifiedCashEntry<Idea[]> | null = null;
   @Watch('internalTaskId', { immediate: true })
-  onTaskChanged(newValue: string | null, oldValue: string | null): void {
-    if (oldValue) {
-      this.inputCash = null;
-      viewService.deregisterGetInputIdeas(oldValue, this.updateInput);
-    }
-    if (newValue) {
+  onTaskChanged(): void {
+    this.inputCash = null;
+    cashService.deregisterAllGet(this.updateInput);
+    if (this.internalTaskId) {
       this.inputCash = viewService.registerGetInputIdeas(
-        newValue,
+        this.internalTaskId,
         IdeaSortOrder.TIMESTAMP,
         null,
         this.updateInput,
@@ -905,25 +929,6 @@ export default class TaskSettings extends Vue {
 
   get inputMinCount(): number {
     return this.inputOption === InputOption.YES ? 1 : 0;
-  }
-
-  taskListCash!: cashService.SimplifiedCashEntry<Task[]>;
-  viewCash!: cashService.SimplifiedCashEntry<View[]>;
-  @Watch('topicId', { immediate: true })
-  onTopicIdChanged(): void {
-    this.viewCash = viewService.registerGetList(
-      this.topicId,
-      this.updateViews,
-      EndpointAuthorisationType.MODERATOR,
-      60 * 60
-    );
-    this.sortOrderOptions = ideaService.getSortOrderOptions([]);
-    this.taskListCash = taskService.registerGetTaskList(
-      this.topicId,
-      this.updateTaskCount,
-      EndpointAuthorisationType.MODERATOR,
-      60 * 60
-    );
   }
 
   updateViews(views: View[]): void {

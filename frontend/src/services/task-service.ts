@@ -1,13 +1,14 @@
 import {
   apiExecuteDelete,
-  apiExecutePost, apiExecutePostHandled,
+  apiExecutePost,
+  apiExecutePostHandled,
   apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Task, TaskForSaveAction } from '@/types/api/Task';
 import * as cashService from '@/services/cash-service';
-import {Topic} from "@/types/api/Topic";
+import { Topic } from '@/types/api/Topic';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -113,11 +114,12 @@ export const postTask = async (
 export const putTask = async (
   data: Partial<TaskForSaveAction>
 ): Promise<Task> => {
-  return await apiExecutePut<Task>(
+  const result = await apiExecutePut<Task>(
     `/${EndpointType.TASK}/`,
     data,
     EndpointAuthorisationType.MODERATOR
   );
+  return result;
 };
 
 export const clone = async (

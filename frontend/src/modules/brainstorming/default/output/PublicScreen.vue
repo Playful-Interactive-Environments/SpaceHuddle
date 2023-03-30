@@ -61,6 +61,7 @@ export default class PublicScreen extends Vue {
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    this.deregisterAll();
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -124,9 +125,13 @@ export default class PublicScreen extends Vue {
     return this.ideas;
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateIdeas);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

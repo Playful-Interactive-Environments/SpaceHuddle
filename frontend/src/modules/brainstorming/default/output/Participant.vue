@@ -298,6 +298,20 @@ export default class Participant extends Vue {
   ];
   scalePlanet = false;
 
+  ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    this.deregisterAll();
+    this.ideaCash = ideaService.registerGetIdeasForTask(
+      this.taskId,
+      IdeaSortOrder.TIMESTAMP,
+      null,
+      this.updateIdeas,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+  }
+
   waiting(): boolean {
     const element = document.getElementById('loadingScreen');
     if (element != null && !element.classList.contains('zeroOpacity')) {
@@ -328,19 +342,6 @@ export default class Participant extends Vue {
     this.module = module;
   }
 
-  ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
-  @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
-    this.ideaCash = ideaService.registerGetIdeasForTask(
-      this.taskId,
-      IdeaSortOrder.TIMESTAMP,
-      null,
-      this.updateIdeas,
-      EndpointAuthorisationType.PARTICIPANT,
-      60 * 60
-    );
-  }
-
   updateIdeas(ideas: Idea[]): void {
     this.ideas = ideas.filter((idea) => idea.isOwn).reverse();
   }
@@ -353,9 +354,13 @@ export default class Participant extends Vue {
     this.waiting();
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateModule);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   get keywordsEmpty(): boolean {

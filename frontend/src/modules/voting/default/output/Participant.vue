@@ -146,6 +146,33 @@ export default class Participant extends Vue {
   starOpacity = 0;
   initIdeaNumber = 0;
 
+  inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
+  votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    this.deregisterAll();
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+    this.inputCash = viewService.registerGetInputIdeas(
+      this.taskId,
+      IdeaSortOrder.TIMESTAMP,
+      null,
+      this.updateInputIdeas,
+      EndpointAuthorisationType.PARTICIPANT,
+      30
+    );
+    this.votingCash = votingService.registerGetVotes(
+      this.taskId,
+      this.updateVotes,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
+  }
+
   get moduleName(): string {
     if (this.module) return this.module.name;
     return '';
@@ -186,41 +213,19 @@ export default class Participant extends Vue {
     return this.allIdeas.find((idea) => idea.id === ideaId);
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateVotes);
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateModule);
     cashService.deregisterAllGet(this.updateInputIdeas);
   }
 
-  initConfig(count: number): void {
-    this.maxRate = count;
+  unmounted(): void {
+    this.deregisterAll();
   }
 
-  inputCash!: cashService.SimplifiedCashEntry<Idea[]>;
-  votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
-  @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
-    taskService.registerGetTaskById(
-      this.taskId,
-      this.updateTask,
-      EndpointAuthorisationType.PARTICIPANT,
-      60 * 60
-    );
-    this.inputCash = viewService.registerGetInputIdeas(
-      this.taskId,
-      IdeaSortOrder.TIMESTAMP,
-      null,
-      this.updateInputIdeas,
-      EndpointAuthorisationType.PARTICIPANT,
-      30
-    );
-    this.votingCash = votingService.registerGetVotes(
-      this.taskId,
-      this.updateVotes,
-      EndpointAuthorisationType.PARTICIPANT,
-      60 * 60
-    );
+  initConfig(count: number): void {
+    this.maxRate = count;
   }
 
   updateTask(task: Task): void {

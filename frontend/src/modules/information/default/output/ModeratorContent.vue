@@ -68,13 +68,18 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   };
   showSettings = false;
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateIdeas);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
+    this.deregisterAll();
     this.ideaCash = ideaService.registerGetIdeasForTask(
       this.taskId,
       IdeaSortOrder.ORDER,

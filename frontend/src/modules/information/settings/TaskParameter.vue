@@ -9,7 +9,7 @@ import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import * as cashService from "@/services/cash-service";
+import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {},
@@ -24,15 +24,9 @@ export default class TaskParameter extends Vue {
   @Prop({ default: {} }) modelValue!: any;
   task: Task | null = null;
 
-  @Watch('modelValue', { immediate: true })
-  async onModelValueChanged(): Promise<void> {
-    if (this.modelValue) {
-      //todo: set default parameter
-    }
-  }
-
   @Watch('taskId', { immediate: true })
   async onTaskIdChanged(): Promise<void> {
+    this.deregisterAll();
     if (this.taskId) {
       taskService.registerGetTaskById(
         this.taskId,
@@ -43,12 +37,23 @@ export default class TaskParameter extends Vue {
     }
   }
 
+  @Watch('modelValue', { immediate: true })
+  async onModelValueChanged(): Promise<void> {
+    if (this.modelValue) {
+      //todo: set default parameter
+    }
+  }
+
   updateTask(task: Task): void {
     this.task = task;
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

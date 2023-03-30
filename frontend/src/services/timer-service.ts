@@ -9,15 +9,25 @@ import * as cashService from '@/services/cash-service';
 export const update = async (
   entity: string,
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  data: any
+  data: any,
+  updateOnlyState = false
 ): Promise<any> => {
   if (Object.values(TimerEntity).find((item) => item == entity)) {
-    if (entity == TimerEntity.TASK) data = convertToSaveVersion(data);
-    return await apiExecutePut<any>(
+    if (entity == TimerEntity.TASK) {
+      data = convertToSaveVersion(data);
+      if (updateOnlyState) {
+        data = {
+          id: data.id,
+          state: data.state,
+        };
+      }
+    }
+    const result = await apiExecutePut<any>(
       `/${entity}`,
       data,
       EndpointAuthorisationType.MODERATOR
     );
+    return result;
   }
   return null;
 };

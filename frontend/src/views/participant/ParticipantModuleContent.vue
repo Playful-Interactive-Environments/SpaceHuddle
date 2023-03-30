@@ -40,7 +40,7 @@
           class="timer"
           :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
           :entity="task"
-          v-on:timerEnds="goBack"
+          v-on:timerEnds="goToOverview"
         ></Timer>
       </div>
     </template>
@@ -81,6 +81,7 @@ import ParticipantDefaultContainer from '@/components/participant/organisms/layo
 import Timer from '@/components/shared/atoms/Timer.vue';
 import * as cashService from '@/services/cash-service';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
+import { RouteName } from '@/types/enum/RouteName';
 
 @Options({
   components: {
@@ -108,6 +109,24 @@ export default class ParticipantModuleContent extends Vue {
 
   EndpointAuthorisationType = EndpointAuthorisationType;
 
+  stateCash!: cashService.SimplifiedCashEntry<TaskParticipantState[]>;
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    this.deregisterAll();
+    this.stateCash = taskParticipantService.registerGetList(
+      this.taskId,
+      this.updateState,
+      EndpointAuthorisationType.PARTICIPANT,
+      2 * 60
+    );
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.PARTICIPANT,
+      2 * 60
+    );
+  }
+
   goBack(): void {
     if (
       !this.isSyncedWithPublicScreen &&
@@ -116,10 +135,20 @@ export default class ParticipantModuleContent extends Vue {
       this.$router.go(-1);
   }
 
+  goToOverview(): void {
+    if (
+      !this.isSyncedWithPublicScreen &&
+      this.$router.currentRoute.value.name === 'participant-module-content'
+    )
+      this.$router.push({
+        name: RouteName.PARTICIPANT_OVERVIEW,
+      });
+  }
+
   modules: Module[] = [];
   loadUsedModules(): void {
     this.modules = [];
-    if (this.task) {
+    if (this.task && this.task.modules) {
       this.task.modules.forEach((module) => {
         hasModule(
           ModuleComponentType.PARTICIPANT,
@@ -140,11 +169,16 @@ export default class ParticipantModuleContent extends Vue {
     this.loadDefaultModule();
   }
 
-  unmounted(): void {
-    this.loadDefaultModule();
-    this.task = null;
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updatePublicTask);
+    cashService.deregisterAllGet(this.updateState);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
+    this.loadDefaultModule();
+    this.task = null;
   }
 
   get isSyncedWithPublicScreen(): boolean {
@@ -169,7 +203,7 @@ export default class ParticipantModuleContent extends Vue {
   }
 
   get module(): Module | null {
-    if (this.task) {
+    if (this.task && this.task.modules) {
       const module = this.task.modules.find(
         (module) => module.name == this.moduleName
       );
@@ -196,36 +230,20 @@ export default class ParticipantModuleContent extends Vue {
 
     if (this.task && this.task.modules && this.task.modules.length > 0) {
       const modules: string[] = [];
-      this.task.modules.forEach((module) => {
-        modules.push(module.name);
-      });
+      if (this.task?.modules)
+        this.task.modules.forEach((module) => {
+          modules.push(module.name);
+        });
       return modules;
     }
 
     return ['default'];
   }
 
-  stateCash!: cashService.SimplifiedCashEntry<TaskParticipantState[]>;
-  @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
-    this.stateCash = taskParticipantService.registerGetList(
-      this.taskId,
-      this.updateState,
-      EndpointAuthorisationType.PARTICIPANT,
-      2 * 60
-    );
-    taskService.registerGetTaskById(
-      this.taskId,
-      this.updateTask,
-      EndpointAuthorisationType.PARTICIPANT,
-      2 * 60
-    );
-  }
-
   updateTask(task: Task): void {
     if (!this.task) {
       this.task = task;
-      task.modules.forEach((module) => this.setIcon(module));
+      if (task?.modules) task.modules.forEach((module) => this.setIcon(module));
       this.loadUsedModules();
       this.moduleNameClick(this.moduleNames[0]);
       sessionService.registerGetPublicScreen(
@@ -241,7 +259,9 @@ export default class ParticipantModuleContent extends Vue {
       !timerService.isActive(task) &&
       this.$router.currentRoute.value.name === 'participant-module-content'
     )
-      this.$router.go(-1);
+      this.$router.push({
+        name: RouteName.PARTICIPANT_OVERVIEW,
+      });
   }
 
   updateState(stateList: TaskParticipantState[]): void {
@@ -249,7 +269,7 @@ export default class ParticipantModuleContent extends Vue {
       const state = stateList[0];
       if (!this.state) {
         state.count++;
-        taskParticipantService.put(this.taskId, state);
+        taskParticipantService.putParticipantState(this.taskId, state);
       }
       this.state = state;
     }
@@ -261,7 +281,9 @@ export default class ParticipantModuleContent extends Vue {
       task?.id !== this.taskId &&
       this.$router.currentRoute.value.name === 'participant-module-content'
     )
-      this.$router.go(-1);
+      this.$router.push({
+        name: RouteName.PARTICIPANT_OVERVIEW,
+      });
   }
 
   async setIcon(module: Module): Promise<void> {

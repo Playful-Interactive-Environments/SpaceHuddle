@@ -60,6 +60,7 @@ export default class PublicScreen extends Vue {
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
+    this.deregisterAll();
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -157,11 +158,15 @@ export default class PublicScreen extends Vue {
     this.calcCardGrid();
   }
 
-  unmounted(): void {
-    this.active = false;
-    window.removeEventListener('resize', this.calcCardGrid);
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateIdeas);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
+    this.active = false;
+    window.removeEventListener('resize', this.calcCardGrid);
   }
 }
 </script>

@@ -64,6 +64,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   voteCashEntry!: cashService.SimplifiedCashEntry<VoteResult[]>;
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
+    this.deregisterAll();
     this.voteCashEntry = votingService.registerGetResult(
       this.taskId,
       this.updateVotes,
@@ -116,8 +117,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     });
   }
 
-  unmounted(): void {
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateVotes);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
   }
 }
 </script>

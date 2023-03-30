@@ -64,10 +64,12 @@
   </div>
   <div v-if="showStatistics && !publicQuestion">
     <QuizResult
-      :voteResult="voteResult"
+      :voteResult="detailVotingResult"
       resultColumn="countParticipant"
       :change="false"
-      :questionnaireType="QuestionnaireType.SURVEY"
+      :questionnaireType="
+        trackingResult.length > 0 ? questionnaireType : QuestionnaireType.SURVEY
+      "
       :questionType="activeQuestionType"
       :update="true"
     />
@@ -86,7 +88,7 @@ import {
   QuestionResultStorage,
   QuestionType,
 } from '@/modules/information/quiz/types/Question';
-import {VoteResult, VoteResultDetail} from '@/types/api/Vote';
+import { VoteResult, VoteResultDetail } from '@/types/api/Vote';
 import {
   QuestionPhase,
   QuestionState,
@@ -104,6 +106,9 @@ import {
 } from '@/modules/information/quiz/types/QuestionnaireType';
 import { until } from '@/utils/wait';
 import * as cashService from '@/services/cash-service';
+import * as taskParticipantService from '@/services/task-participant-service';
+import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 
 export interface PublicAnswerData {
   answer: Hierarchy;
@@ -130,6 +135,8 @@ export default class PublicBase extends Vue {
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   @Prop({ default: true }) readonly showData!: boolean;
+  @Prop({ default: QuestionState.ACTIVE_CREATE_QUESTION })
+  readonly defaultQuestionState!: QuestionState;
   readonly intervalTime = 1000;
   interval!: any;
   task: Task | null = null;
@@ -189,7 +196,8 @@ export default class PublicBase extends Vue {
       this.task.parameter &&
       (this.moderatedQuestionFlow || this.usePublicQuestion)
     ) {
-      return this.task.parameter.activeQuestion;
+      const id = this.task.parameter.activeQuestion;
+      if (id) return id;
     } else {
       const activeQuestion = this.activeQuestion;
       if (activeQuestion) return activeQuestion.id;
@@ -243,6 +251,25 @@ export default class PublicBase extends Vue {
     return -1;
   }
   //#endregion get / set
+
+  taskCash!: cashService.SimplifiedCashEntry<Task>;
+  @Watch('taskId', { immediate: true })
+  async onTaskIdChanged(): Promise<void> {
+    this.deregisterAll();
+    this.task = null;
+    this.taskCash = taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      this.authHeaderTyp,
+      5
+    );
+    hierarchyService.registerGetQuestions(
+      this.taskId,
+      this.updateQuestions,
+      this.authHeaderTyp,
+      20
+    );
+  }
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   finishedAnswer(answer: Hierarchy): boolean {
@@ -311,7 +338,7 @@ export default class PublicBase extends Vue {
           this.taskId,
           this.updateParentVotes,
           this.authHeaderTyp,
-          30
+          20
         );
       } else {
         if (newQuestionResultStorage === QuestionResultStorage.VOTING) {
@@ -319,7 +346,7 @@ export default class PublicBase extends Vue {
             newValue?.id,
             this.updateVotes,
             this.authHeaderTyp,
-            30
+            20
           );
         } else {
           this.resultHierarchyCash = hierarchyService.registerGetList(
@@ -327,7 +354,7 @@ export default class PublicBase extends Vue {
             newValue?.id,
             this.updateHierarchyResult,
             this.authHeaderTyp,
-            30
+            20
           );
         }
       }
@@ -353,21 +380,42 @@ export default class PublicBase extends Vue {
     }
   }
 
-  taskCash!: cashService.SimplifiedCashEntry<Task>;
-  @Watch('taskId', { immediate: true })
-  async onTaskIdChanged(): Promise<void> {
-    this.taskCash = taskService.registerGetTaskById(
-      this.taskId,
-      this.updateTask,
-      this.authHeaderTyp,
-      60
-    );
-    hierarchyService.registerGetQuestions(
-      this.taskId,
-      this.updateQuestions,
-      this.authHeaderTyp,
-      60 * 60
-    );
+  trackingResult: TaskParticipantIterationStep[] = [];
+  updateFinalResult(result: TaskParticipantIterationStep[]): void {
+    this.trackingResult = result;
+  }
+
+  get detailVotingResult(): VoteResult[] {
+    if (this.trackingResult.length > 0 && this.questions.length > 0) {
+      const result: VoteResult[] = [];
+      for (const step of this.trackingResult) {
+        const question = this.questions.find(
+          (q) => q.question.id === step.ideaId
+        );
+        if (question) {
+          const idea = { ...question.question };
+          idea.parameter = { ...idea.parameter };
+          idea.parameter.isCorrect =
+            step.state === TaskParticipantIterationStepStatesType.CORRECT;
+          const exists = result.find(
+            (exist) =>
+              exist.idea.id === idea.id &&
+              exist.idea.parameter.isCorrect === idea.parameter.isCorrect
+          );
+          if (exists) exists.countParticipant++;
+          else {
+            result.push({
+              idea: idea,
+              ratingSum: 1,
+              detailRatingSum: 1,
+              countParticipant: 1,
+            });
+          }
+        }
+      }
+      return result;
+    }
+    return this.voteResult;
   }
 
   questionHierarchy: Hierarchy[] = [];
@@ -405,6 +453,7 @@ export default class PublicBase extends Vue {
       if (this.publicQuestion?.question.id) {
         this.deregisterGetAnswers([this.publicQuestion?.question.id]);
       }
+      this.voteResult = [];
       this.publicQuestion = newPublicQuestion;
       if (newPublicQuestion?.question.id) {
         hierarchyService.registerGetList(
@@ -415,7 +464,9 @@ export default class PublicBase extends Vue {
           60
         );
       }
-      this.initQuestionState();
+      setTimeout(() => {
+        this.initQuestionState();
+      }, 5 * 1000);
     }
     this.$emit('changePublicQuestion', this.activeQuestion);
   }
@@ -464,6 +515,17 @@ export default class PublicBase extends Vue {
 
   updateTask(task: Task): void {
     const init = !this.task;
+    if (
+      this.task?.parameter?.activeQuestion !== task?.parameter?.activeQuestion
+    ) {
+      const oldQuizState = this.questionState;
+      this.questionState = this.moderatedQuestionFlow
+        ? QuestionState.ACTIVE_CREATE_QUESTION
+        : this.defaultQuestionState;
+      if (oldQuizState !== this.questionState) {
+        this.$emit('changeQuizState', this.questionState);
+      }
+    }
     this.task = task;
     const module = task.modules.find((module) => moduleNameValid(module.name));
     if (module) {
@@ -473,22 +535,38 @@ export default class PublicBase extends Vue {
       if (this.moderatedQuestionFlow && this.taskCash) {
         this.taskCash.updateCallback(this.updateTask, 1);
       } else {
-        this.taskCash.updateCallback(this.updateTask, 60);
+        this.taskCash.updateCallback(this.updateTask, 5);
       }
     }
-    if (init) this.initQuestionState();
+    if (init) {
+      this.initQuestionState();
+      cashService.deregisterAllGet(this.updateFinalResult);
+      if (this.questionnaireType === QuestionnaireType.QUIZ) {
+        taskParticipantService.registerGetIterationStepFinalList(
+          this.taskId,
+          this.updateFinalResult,
+          this.authHeaderTyp,
+          20
+        );
+      }
+    }
     this.updatePublicQuestion();
   }
 
   private initQuestionState(): void {
+    const oldQuizState = this.questionState;
     if (this.isActive) {
       this.questionState = QuestionState.ACTIVE_CREATE_QUESTION;
     } else {
       this.questionState =
         this.moderatedQuestionFlow &&
-        this.questionState !== QuestionState.RESULT_STATISTICS
+        this.questionState !== QuestionState.RESULT_STATISTICS &&
+        this.activeQuestionId
           ? QuestionState.RESULT_ANSWER
           : QuestionState.RESULT_STATISTICS;
+    }
+    if (oldQuizState !== this.questionState) {
+      this.$emit('changeQuizState', this.questionState);
     }
   }
 
@@ -499,6 +577,7 @@ export default class PublicBase extends Vue {
   }
 
   oldIsActive = false;
+  emitedPublicQuestionId: string | null = null;
   async checkState(staticUpdate = false): Promise<void> {
     const oldQuizState = this.questionState;
     const oldQuestionId = this.activeQuestionId;
@@ -593,18 +672,29 @@ export default class PublicBase extends Vue {
       this.$emit('changePublicQuestion', this.activeQuestion);
     }
 
-    if (this.publicQuestion) {
-      this.$emit(
-        'changePublicAnswers',
-        this.publicAnswers.map((answer) => {
-          return {
-            answer: answer,
-            isHighlightedTemporarily: this.highlightAnswerTemporarily(answer),
-            isHighlighted: this.highlightAnswer(answer),
-            isFinished: this.finishedAnswer(answer),
-          };
-        })
-      );
+    const isVotingQuestion =
+      getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
+      QuestionResultStorage.VOTING;
+    if (
+      this.publicQuestion &&
+      (!isVotingQuestion || this.publicAnswers.length > 0)
+    ) {
+      this.emitedPublicQuestionId = this.publicQuestion.question.id;
+      if (isVotingQuestion) {
+        this.$emit(
+          'changePublicAnswers',
+          this.publicAnswers.map((answer) => {
+            return {
+              answer: answer,
+              isHighlightedTemporarily: this.highlightAnswerTemporarily(answer),
+              isHighlighted: this.highlightAnswer(answer),
+              isFinished: this.finishedAnswer(answer),
+            };
+          })
+        );
+      } else {
+        this.$emit('changePublicAnswers', []);
+      }
     }
   }
 
@@ -616,14 +706,19 @@ export default class PublicBase extends Vue {
     this.interval = setInterval(this.checkState, this.intervalTime);
   }
 
-  unmounted(): void {
-    clearInterval(this.interval);
+  deregisterAll(): void {
     cashService.deregisterAllGet(this.updateVotes);
     cashService.deregisterAllGet(this.updateHierarchyResult);
     cashService.deregisterAllGet(this.updateParentVotes);
+    cashService.deregisterAllGet(this.updateFinalResult);
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateQuestions);
     cashService.deregisterAllGet(this.updateAnswers);
+  }
+
+  unmounted(): void {
+    this.deregisterAll();
+    clearInterval(this.interval);
   }
 }
 </script>
