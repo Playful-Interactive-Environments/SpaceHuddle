@@ -47,7 +47,6 @@ class PermissionService
         $this->repository->setAuthorisation($authorisation);
 
         //Determine url and body parameters and associated entity.
-
         $patternParts = explode("/", str_replace("[/]", "/", $routePattern));
         $patternParts = array_filter($patternParts, fn($value) => !is_null($value) && $value !== '');
 
@@ -65,16 +64,18 @@ class PermissionService
         }
 
         $data = array_merge($bodyData, $urlData);
+        $detailEntity = null;
 
         foreach (array_keys($urlData) as $key) {
             $paramIndex = array_search("{{$key}}", $patternParts);
             if ($paramIndex > 0) {
                 $dataEntity[$key] = $patternParts[$paramIndex-1];
+                if (sizeof($patternParts) >= $paramIndex + 1) $detailEntity = $patternParts[$paramIndex + 1];
             }
         }
 
         //Determines the session role
-        return $this->getRole($authorisation, $data, $dataEntity, $routeMethod == "GET");
+        return $this->getRole($authorisation, $data, $dataEntity, $routeMethod == "GET", $detailEntity);
     }
 
     /**
@@ -83,13 +84,15 @@ class PermissionService
      * @param array<string, string> $parameterValue Request parameters.
      * @param array<string, string> $parameterEntity Associated entities.
      * @param bool $readOnly If true, get authorisation read role. If false, get authorisation role.
+     * @param string|null $detailEntity Detail entity which should be modified.
      * @return string Session role
      */
     protected function getRole(
         AuthorisationData $authorisation,
         array $parameterValue,
         array $parameterEntity,
-        bool $readPermission = false
+        bool $readPermission = false,
+        string | null $detailEntity = null
     ): string {
         $id = null;
         $entity = "user";
@@ -110,11 +113,12 @@ class PermissionService
             $entity = strtolower($authorisation->type);
         }
 
+
         if ($readPermission) {
             return $this->repository->getAuthorisationReadRole($entity, $id) ??
                 SessionRoleType::UNKNOWN;
         }
 
-        return $this->repository->getAuthorisationRole($entity, $id) ?? SessionRoleType::UNKNOWN;
+        return $this->repository->getAuthorisationRole($entity, $id, $detailEntity) ?? SessionRoleType::UNKNOWN;
     }
 }

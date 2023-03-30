@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Action\TaskParticipantState;
+namespace App\Action\TaskParticipantIterationStep;
 
 use App\Action\Base\ActionTrait;
-use App\Domain\SessionRole\Service\SessionRoleUpdater;
-use App\Domain\TaskParticipantState\Service\TaskParticipantStateUpdater;
+use App\Domain\TaskParticipantIterationStep\Service\TaskParticipantIterationStepUpdater;
 use App\Responder\Responder;
 use Fig\Http\Message\StatusCodeInterface;
 
 /**
- * Action for updating a task participant state.
+ * Action for updating a task participant iteration step.
  *
  * @OA\Put(
- *   path="/task/{taskId}/participant_state/",
- *   summary="Update the state of a authorized participant for a task.",
+ *   path="/task/{taskId}/participant_iteration/step/",
+ *   summary="Update the iteration step of a authorized participant for a task.",
  *   tags={"Task"},
  *   @OA\Parameter(in="path", name="taskId", description="ID of the task", required=true),
  *   @OA\RequestBody(
@@ -21,31 +20,30 @@ use Fig\Http\Message\StatusCodeInterface;
  *       mediaType="application/json",
  *       @OA\Schema(
  *         @OA\Property(property="id", type="string"),
- *         @OA\Property(property="count", type="int"),
- *         @OA\Property(property="state", ref="#/components/schemas/TaskParticipantStateType"),
+ *         @OA\Property(property="state", ref="#/components/schemas/TaskParticipantIterationStepStateType"),
  *         @OA\Property(property="parameter", type="object", format="json")
  *       )
  *     )
  *   ),
  *   @OA\Response(response="200", description="Success",
- *     @OA\JsonContent(ref="#/components/schemas/TaskParticipantStateData"),
+ *     @OA\JsonContent(ref="#/components/schemas/TaskParticipantIterationStepData"),
  *   ),
  *   @OA\Response(response="404", description="Not Found"),
  *   security={{"api_key": {}}, {"bearerAuth": {}}}
  * )
  */
-class TaskParticipantStateUpdateAction
+class TaskParticipantIterationStepUpdateAction
 {
     use ActionTrait;
-    protected TaskParticipantStateUpdater $service;
+    protected TaskParticipantIterationStepUpdater $service;
 
     /**
      * The constructor.
      *
      * @param Responder $responder The responder
-     * @param TaskParticipantStateUpdater $service The service
+     * @param TaskParticipantIterationStepUpdater $service The service
      */
-    public function __construct(Responder $responder, TaskParticipantStateUpdater $service)
+    public function __construct(Responder $responder, TaskParticipantIterationStepUpdater $service)
     {
         $this->setUp($responder);
         $this->service = $service;

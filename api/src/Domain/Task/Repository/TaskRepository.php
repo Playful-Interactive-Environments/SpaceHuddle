@@ -53,19 +53,24 @@ class TaskRepository implements RepositoryInterface
      * Checks the access role via which the logged-in user may access the entry with the specified primary key.
      * @param string|null $id Primary key to be checked.
      * @param array $validStates Valid states
+     * @param string|null $detailEntity Detail entity which should be modified
      * @return string|null Role with which the user is authorised to access the entry.
      * @throws GenericException
      */
     private function getAuthorisationRoleForState(
         ?string $id,
-        array $validStates
+        array $validStates,
+        string | null $detailEntity = null
     ): ?string {
         $authorisation = $this->getAuthorisation();
         $query = $this->queryFactory->newSelect($this->getEntityName());
         $query->select(["*"])
             ->andWhere(["id" => $id]);
 
-        if ($authorisation->isParticipant()) {
+        if (
+            $authorisation->isParticipant() &&
+            (is_null($detailEntity) || !in_array($detailEntity, ["participant_state", "participant_iteration"]))
+        ) {
             $query->whereInList("state", $validStates);
         }
 
@@ -75,17 +80,20 @@ class TaskRepository implements RepositoryInterface
     /**
      * Checks the access role via which the logged-in user may access the entry with the specified primary key.
      * @param string|null $id Primary key to be checked.
+     * @param string|null $detailEntity Detail entity which should be modified
      * @return string|null Role with which the user is authorised to access the entry.
      * @throws GenericException
      */
     public function getAuthorisationRole(
-        ?string $id
+        ?string $id,
+        string | null $detailEntity = null
     ): ?string {
         return $this->getAuthorisationRoleForState(
             $id,
             [
                 strtoupper(TaskState::ACTIVE)
-            ]
+            ],
+            $detailEntity
         );
     }
 
@@ -416,6 +424,18 @@ class TaskRepository implements RepositoryInterface
      */
     protected function deleteDependencies(string $id): void
     {
+        $this->queryFactory->newDelete("task_participant_state")
+            ->andWhere(["task_id" => $id])
+            ->execute();
+
+        $this->queryFactory->newDelete("task_participant_iteration_step")
+            ->andWhere(["task_id" => $id])
+            ->execute();
+
+        $this->queryFactory->newDelete("task_participant_iteration")
+            ->andWhere(["task_id" => $id])
+            ->execute();
+
         $query = $this->queryFactory->newSelect("task_input");
         $query->select(["task_id", "input_type"]);
         $query->whereInList("input_type", ["TASK", "VOTE"])
@@ -473,10 +493,6 @@ class TaskRepository implements RepositoryInterface
             ->andWhere(["task_id" => $id])
             ->execute();
 
-        $this->queryFactory->newDelete("task_participant_state")
-            ->andWhere(["task_id" => $id])
-            ->execute();
-
         $this->queryFactory->newUpdate("topic", ["active_task_id" => null])
             ->andWhere(["active_task_id" => $id])
             ->execute();
@@ -513,7 +529,7 @@ class TaskRepository implements RepositoryInterface
             "description" => $data->description ?? null,
             "keywords" => $data->keywords ?? null,
             "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null,
-            "order" => $data->order ?? 0,
+            "order" => $data->order ?? null,
             "state" => $data->state ?? strtoupper(TaskState::WAIT),
             "expiration_time" => $data->expirationTime ?? null
         ];

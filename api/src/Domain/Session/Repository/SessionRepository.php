@@ -52,10 +52,11 @@ class SessionRepository implements RepositoryInterface
     /**
      * Checks the access role via which the logged-in user may access the entry with the specified primary key.
      * @param string|null $id Primary key to be checked.
+     * @param string|null $detailEntity Detail entity which should be modified
      * @return string|null Role with which the user is authorised to access the entry.
      * @throws GenericException
      */
-    public function getAuthorisationRole(?string $id): ?string
+    public function getAuthorisationRole(?string $id, string | null $detailEntity = null): ?string
     {
         $authorisation = $this->getAuthorisation();
         if (!is_null($authorisation->id)) {

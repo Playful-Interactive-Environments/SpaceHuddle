@@ -100,12 +100,21 @@ p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/tasks/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/dependent/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/participant_state/, GET
 p, MODERATOR|FACILITATOR, /topic/:id/participant_state/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/participant_iteration/, GET
+p, PARTICIPANT, /task/:id/participant_iteration/last/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/participant_iteration/step/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/participant_iteration/step/last/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/participant_iteration/step/final/, GET
 p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/, GET
 p, MODERATOR|FACILITATOR, /task/:id/, DELETE
 p, MODERATOR|FACILITATOR, /task/:id/clone/, POST
 p, MODERATOR|FACILITATOR, /topic/:topicId/task/, POST
 p, MODERATOR|FACILITATOR, /task/, PUT
-p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/participant_state/, PUT
+p, PARTICIPANT, /task/:id/participant_state/, PUT
+p, PARTICIPANT, /task/:id/participant_iteration/, PUT
+p, PARTICIPANT, /task/:id/participant_iteration/, POST
+p, PARTICIPANT, /task/:id/participant_iteration/step/, PUT
+p, PARTICIPANT, /task/:id/participant_iteration/step/, POST
 
 p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:sessionId/topics/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /topic/:id/, GET

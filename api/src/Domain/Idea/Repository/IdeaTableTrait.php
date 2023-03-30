@@ -233,6 +233,10 @@ trait IdeaTableTrait
      */
     protected function deleteDependencies(string $id): void
     {
+        $this->queryFactory->newDelete("task_participant_iteration_step")
+            ->andWhere(["idea_id" => $id])
+            ->execute();
+
         $query = $this->queryFactory->newSelect("task_input");
         $query->select(["task_id", "input_type"]);
         $query->whereInList("input_type", ["HIERARCHY"])

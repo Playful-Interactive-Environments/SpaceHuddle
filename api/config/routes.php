@@ -79,6 +79,15 @@ use App\Action\Task\TaskReadDependentAction;
 use App\Action\Task\TaskReadSingleAction;
 use App\Action\Task\TaskStateUpdateAction;
 use App\Action\Task\TaskUpdateAction;
+use App\Action\TaskParticipantIteration\TaskParticipantIterationCreateAction;
+use App\Action\TaskParticipantIteration\TaskParticipantIterationReadAllAction;
+use App\Action\TaskParticipantIteration\TaskParticipantIterationReadLastAction;
+use App\Action\TaskParticipantIteration\TaskParticipantIterationUpdateAction;
+use App\Action\TaskParticipantIterationStep\TaskParticipantIterationStepCreateAction;
+use App\Action\TaskParticipantIterationStep\TaskParticipantIterationStepReadAllAction;
+use App\Action\TaskParticipantIterationStep\TaskParticipantIterationStepReadAllFinalAction;
+use App\Action\TaskParticipantIterationStep\TaskParticipantIterationStepReadLastAction;
+use App\Action\TaskParticipantIterationStep\TaskParticipantIterationStepUpdateAction;
 use App\Action\TaskParticipantState\TaskParticipantStateReadAllAction;
 use App\Action\TaskParticipantState\TaskParticipantStateReadAllFromTopicAction;
 use App\Action\TaskParticipantState\TaskParticipantStateUpdateAction;
@@ -307,6 +316,17 @@ return function (App $app) {
 
             $app->get("/{taskId}/participant_state[/]", TaskParticipantStateReadAllAction::class);
             $app->put("/{taskId}/participant_state[/]", TaskParticipantStateUpdateAction::class);
+
+            $app->get("/{taskId}/participant_iteration/step[/]", TaskParticipantIterationStepReadAllAction::class);
+            $app->get("/{taskId}/participant_iteration/step/last[/]", TaskParticipantIterationStepReadLastAction::class);
+            $app->get("/{taskId}/participant_iteration/step/final[/]", TaskParticipantIterationStepReadAllFinalAction::class);
+            $app->put("/{taskId}/participant_iteration/step[/]", TaskParticipantIterationStepUpdateAction::class);
+            $app->post("/{taskId}/participant_iteration/step[/]", TaskParticipantIterationStepCreateAction::class);
+
+            $app->get("/{taskId}/participant_iteration/last[/]", TaskParticipantIterationReadLastAction::class);
+            $app->get("/{taskId}/participant_iteration[/]", TaskParticipantIterationReadAllAction::class);
+            $app->put("/{taskId}/participant_iteration[/]", TaskParticipantIterationUpdateAction::class);
+            $app->post("/{taskId}/participant_iteration[/]", TaskParticipantIterationCreateAction::class);
 
             $app->post("/{id}/clone[/]", TaskCloneAction::class);
 

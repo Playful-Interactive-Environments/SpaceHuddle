@@ -199,6 +199,18 @@ class ParticipantRepository implements RepositoryInterface
      */
     protected function deleteDependencies(string $id): void
     {
+        $this->queryFactory->newDelete("task_participant_state")
+            ->andWhere(["participant_id" => $id])
+            ->execute();
+
+        $this->queryFactory->newDelete("task_participant_iteration_step")
+            ->andWhere(["participant_id" => $id])
+            ->execute();
+
+        $this->queryFactory->newDelete("task_participant_iteration")
+            ->andWhere(["participant_id" => $id])
+            ->execute();
+
         $this->queryFactory->newUpdate("vote", ["participant_id" => null])
             ->andWhere(["participant_id" => $id])
             ->execute();

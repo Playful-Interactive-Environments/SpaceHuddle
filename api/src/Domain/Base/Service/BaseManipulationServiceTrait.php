@@ -29,6 +29,7 @@ trait BaseManipulationServiceTrait
         array $urlData
     ): array|object|null {
         $this->repository->setAuthorisation($authorisation);
+        $this->repository->setLogger($this->logger);
 
         $data = array_merge($bodyData, $urlData);
 

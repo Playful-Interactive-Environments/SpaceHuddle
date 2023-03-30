@@ -27,6 +27,10 @@ trait BaseUrlServiceTrait
         LoggerFactory $loggerFactory
     ): void {
         $this->transaction = $transaction;
+        $this->logger = $loggerFactory
+            ->addFileHandler("development.log")
+            ->createLogger();
+        //$this->logger->info("test");
         /*$this->logger = $loggerFactory
             ->addFileHandler("service.log")
             ->createLogger();*/
@@ -47,6 +51,7 @@ trait BaseUrlServiceTrait
         array $urlData
     ): array|object|null {
         $this->repository->setAuthorisation($authorisation);
+        $this->repository->setLogger($this->logger);
 
         // validation
         $this->serviceValidation($urlData);

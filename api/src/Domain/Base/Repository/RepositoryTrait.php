@@ -3,6 +3,7 @@
 namespace App\Domain\Base\Repository;
 
 use App\Factory\QueryFactory;
+use Psr\Log\LoggerInterface;
 
 /**
  * Description of the common repository functionality.
@@ -51,5 +52,11 @@ trait RepositoryTrait
             return 1;
         }
         return 0;
+    }
+
+
+    protected LoggerInterface $logger;
+    public function setLogger(LoggerInterface $logger): void  {
+        $this->logger = $logger;
     }
 }
