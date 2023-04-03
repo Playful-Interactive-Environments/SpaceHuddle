@@ -131,6 +131,7 @@ export default class PublicBase extends Vue {
   @Prop({ default: true }) readonly showData!: boolean;
   @Prop({ default: QuestionState.ACTIVE_CREATE_QUESTION })
   readonly defaultQuestionState!: QuestionState;
+  @Prop({ default: false }) readonly showQuestionWinStatistic!: boolean;
   readonly intervalTime = 1000;
   interval!: any;
   task: Task | null = null;
@@ -556,7 +557,10 @@ export default class PublicBase extends Vue {
     if (init) {
       this.initQuestionState();
       cashService.deregisterAllGet(this.updateFinalResult);
-      if (this.questionnaireType === QuestionnaireType.QUIZ) {
+      if (
+        this.questionnaireType === QuestionnaireType.QUIZ &&
+        this.showQuestionWinStatistic
+      ) {
         taskParticipantService.registerGetIterationStepFinalList(
           this.taskId,
           this.updateFinalResult,
