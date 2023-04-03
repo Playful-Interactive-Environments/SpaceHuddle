@@ -201,8 +201,18 @@
           "header": "Co-Autor*innen verwalten",
           "info": "Füge die E-Mail des*der gewünschten Autors*in ein",
           "email": "E-Mail",
+          "role": "Rolle",
           "allowAnonymous": "Jedem Zugriff auf die Publikumsansicht erlauben",
           "publicScreen": "Anonymer Link zur Publikumsansicht"
+        },
+        "participantSettings": {
+          "header": "Teilnehmer verwalten",
+          "info": "diese Teilnehmer haben sich alle zu irgendeinem Zeitpunkt mit der Sitzung verbunden",
+          "avatar": "Avatar",
+          "browserKey": "individueller Verbindungsschlüssel",
+          "ideaCount": "Anzahl der eingereichten Ideen",
+          "voteCount": "Anzahl der abgegebenen Stimmen",
+          "add": "einen neuen Teilnehmer anlegen"
         },
         "taskSettings": {
           "header": "Modul hinzufügen",
@@ -505,6 +515,10 @@
       "number": "Zahl",
       "text": "Text",
       "image": "Bild"
+    },
+    "userType": {
+      "FACILITATOR": "Co-Moderator",
+      "MODERATOR": "Moderator"
     }
   },
   "general": {
@@ -525,6 +539,7 @@
       "connectionCode": "Teilnehmer*innen können der Sitzung über diesen Code beitreten.",
       "shareCode": "Teile den Code indem du eine Einladung an alle Teilnehmer*innen schickst.",
       "coModerator": "Co-Moderator*innen hinzufügen",
+      "participants": "Teilnehmer verwalten",
       "disconnect": "Verbindung zur Sitzung trennen"
     },
     "topicDetails": {

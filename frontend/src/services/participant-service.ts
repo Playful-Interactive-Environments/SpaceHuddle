@@ -1,5 +1,9 @@
 import { Topic } from '@/types/api/Topic';
-import { apiExecuteGetHandled, apiExecutePost } from '@/services/api';
+import {
+  apiExecuteDelete,
+  apiExecuteGetHandled,
+  apiExecutePost,
+} from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Participant } from '@/types/api/Participant';
@@ -45,5 +49,14 @@ export const deregisterGetTopicList = (
   cashService.deregisterGet(
     `/${EndpointType.PARTICIPANT}/${EndpointType.TOPICS}/`,
     callback
+  );
+};
+
+export const remove = async (id: string): Promise<boolean> => {
+  return await apiExecuteDelete<boolean>(
+    `/${EndpointType.PARTICIPANT}/${id}/`,
+    null,
+    EndpointAuthorisationType.MODERATOR,
+    true
   );
 };

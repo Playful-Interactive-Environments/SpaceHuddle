@@ -24,6 +24,13 @@
         prop="username"
         :label="$t('moderator.organism.settings.facilitatorSettings.email')"
       />
+      <el-table-column
+        :label="$t('moderator.organism.settings.facilitatorSettings.role')"
+      >
+        <template #default="scope">
+          {{ $t(`enum.userType.${scope.row.role}`) }}
+        </template>
+      </el-table-column>
       <el-table-column width="120">
         <template #default="scope">
           <span v-on:click="editUser(scope.$index)">
@@ -56,6 +63,18 @@
               $t('moderator.organism.settings.facilitatorSettings.info')
             "
           />
+          <span>
+            <el-select v-model="formData.role">
+              <el-option
+                :value="UserType.FACILITATOR"
+                :label="$t(`enum.userType.${UserType.FACILITATOR}`)"
+              />
+              <el-option
+                :value="UserType.MODERATOR"
+                :label="$t(`enum.userType.${UserType.MODERATOR}`)"
+              />
+            </el-select>
+          </span>
           <span style="margin-right: 0">
             <el-button type="primary" native-type="submit" circle>
               <font-awesome-icon icon="check" style="font-size: 1.5rem" />
@@ -142,10 +161,12 @@ export default class LinkSettings extends Vue {
 
   formData: ValidationData = {
     email: '',
+    role: UserType.FACILITATOR,
     allowAnonymous: false,
   };
 
   showSettings = false;
+  UserType = UserType;
 
   mounted(): void {
     this.own = authService.getUserData() || '';
@@ -160,6 +181,7 @@ export default class LinkSettings extends Vue {
 
   reset(): void {
     this.formData.email = '';
+    this.formData.role = UserType.FACILITATOR;
     this.formData.call = ValidationFormCall.CLEAR_VALIDATE;
   }
 
@@ -179,7 +201,7 @@ export default class LinkSettings extends Vue {
       EndpointAuthorisationType.MODERATOR,
       60 * 60
     );
-    sessionRoleService.registerGetList(
+    this.roleCash = sessionRoleService.registerGetList(
       this.sessionId,
       this.updateRole,
       EndpointAuthorisationType.MODERATOR,
@@ -226,17 +248,32 @@ export default class LinkSettings extends Vue {
       await sessionRoleService
         .post(this.sessionId, {
           username: this.formData.email,
-          role: UserType.FACILITATOR,
+          role: this.formData.role,
         })
         .then(
           (data) => {
             this.roles.push(data);
+            this.roleCash.refreshData();
             this.reset();
           },
           (error) => {
             this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
           }
         );
+    } else {
+      await sessionRoleService
+        .put(this.sessionId, {
+          username: this.formData.email,
+          role: this.formData.role,
+        })
+        .then((data) => {
+          const role = this.roles.find(
+            (role) => role.username === this.formData.email
+          );
+          if (role) role.role = data.role;
+          this.roleCash.refreshData();
+          this.reset();
+        });
     }
   }
 
@@ -245,6 +282,10 @@ export default class LinkSettings extends Vue {
       .remove(this.sessionId, this.roles[index].username)
       .then((result) => {
         if (result) {
+          const index = this.roles.findIndex(
+            (role) => role.username === this.formData.email
+          );
+          if (index > -1) this.roles.splice(index, 1);
           this.roleCash.refreshData();
         }
       });
@@ -252,6 +293,7 @@ export default class LinkSettings extends Vue {
 
   async editUser(index: number): Promise<void> {
     this.formData.email = this.roles[index].username;
+    this.formData.role = this.roles[index].role;
   }
 }
 </script>

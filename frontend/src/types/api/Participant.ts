@@ -29,4 +29,5 @@ export interface ParticipantInfo {
   state: ConnectState;
   avatar: Avatar;
   ideaCount: number;
+  voteCount: number;
 }

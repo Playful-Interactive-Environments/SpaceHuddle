@@ -183,8 +183,8 @@ export const registerGetParticipants = (
   callback: (result: any) => void,
   authHeaderType = EndpointAuthorisationType.MODERATOR,
   maxDelaySeconds = 60 * 5
-): void => {
-  cashService.registerSimplifiedGet<ParticipantInfo[]>(
+): cashService.SimplifiedCashEntry<ParticipantInfo[]> => {
+  return cashService.registerSimplifiedGet<ParticipantInfo[]>(
     `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PARTICIPANTS}/`,
     callback,
     null,

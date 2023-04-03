@@ -39,6 +39,19 @@
               ></font-awesome-icon>
             </span>
           </TutorialStep>
+          <TutorialStep
+            v-if="isModerator"
+            type="sessionDetails"
+            step="participants"
+            :order="10"
+          >
+            <span v-on:click="showParticipants = true">
+              <font-awesome-icon
+                class="awesome-icon"
+                icon="users"
+              ></font-awesome-icon>
+            </span>
+          </TutorialStep>
           <el-dropdown>
             <span class="el-dropdown-link">
               <font-awesome-icon class="awesome-icon" icon="info-circle" />
@@ -116,6 +129,11 @@
         v-model:showModal="showRoles"
         :sessionId="sessionId"
       />
+      <ParticipantSettings
+        v-if="isModerator"
+        v-model:show-modal="showParticipants"
+        :session-id="sessionId"
+      />
     </template>
   </ModeratorNavigationLayout>
 </template>
@@ -150,9 +168,11 @@ import * as cashService from '@/services/cash-service';
 import { Task } from '@/types/api/Task';
 import { SessionRole } from '@/types/api/SessionRole';
 import { reactivateTutorial } from '@/services/tutorial-service';
+import ParticipantSettings from '@/components/moderator/organisms/settings/ParticipantSettings.vue';
 
 @Options({
   components: {
+    ParticipantSettings,
     TutorialStep,
     FacilitatorSettings,
     TopicCard,
@@ -179,6 +199,7 @@ export default class ModeratorSessionDetails extends Vue {
   showTopicSettings = false;
   showSessionSettings = false;
   showRoles = false;
+  showParticipants = false;
   formatDate = formatDate;
   editTopicId = '';
   publicScreenTopic = '';

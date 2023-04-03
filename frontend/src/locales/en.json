@@ -201,8 +201,18 @@
           "header": "manage co authors",
           "info": "insert the email address of a desired co author",
           "email": "email",
+          "role": "role",
           "allowAnonymous": "allow everyone to view public screen",
           "publicScreen": "Anonymous Public Link"
+        },
+        "participantSettings": {
+          "header": "manage participants",
+          "info": "these participants have all connected to the session at some point",
+          "avatar": "avatar",
+          "browserKey": "individual connection key",
+          "ideaCount": "number of ideas submitted",
+          "voteCount": "number of votes submitted",
+          "add": "create a new participant"
         },
         "taskSettings": {
           "header": "Add a Module",
@@ -505,6 +515,10 @@
       "number": "Number",
       "text": "Text",
       "image": "Image"
+    },
+    "userType": {
+      "FACILITATOR": "facilitator",
+      "MODERATOR": "moderator"
     }
   },
   "general": {
@@ -525,6 +539,7 @@
       "connectionCode": "Participants can connect to this session with this code.",
       "shareCode": "Share the code by sending an invitation to all participants.",
       "coModerator": "Add co-moderators",
+      "participants": "Manage participants",
       "disconnect": "Disconnect from session"
     },
     "topicDetails": {
