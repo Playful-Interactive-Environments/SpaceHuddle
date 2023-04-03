@@ -142,12 +142,22 @@ export default class QuizResult extends Vue {
       } else {
         const color1 = new Color('#01cf9e');
         const color2 = new Color('#fe6e5d');
-        const min = this.voteResult.sort(
-          (a, b) => (a.idea.order as number) - (b.idea.order as number)
-        )[0].idea.order as number;
-        const max = this.voteResult.sort(
-          (a, b) => (b.idea.order as number) - (a.idea.order as number)
-        )[0].idea.order as number;
+        const minVote = this.voteResult.sort((a, b) => {
+          if (a.idea && b.idea)
+            return (a.idea.order as number) - (b.idea.order as number);
+          else if (b.idea) return 1;
+          return 0;
+        })[0];
+        const min = minVote ? (minVote.idea.order as number) : 0;
+        const maxVote = this.voteResult.sort((a, b) => {
+          if (a.idea && b.idea)
+            return (b.idea.order as number) - (a.idea.order as number);
+          else if (b.idea) return 0;
+          return 1;
+        })[0];
+        const max = maxVote
+          ? (maxVote.idea.order as number)
+          : this.voteResult.length - 1;
         const legend: ChartLegend[] = [];
         for (let i = min; i <= max; i++) {
           const color = (

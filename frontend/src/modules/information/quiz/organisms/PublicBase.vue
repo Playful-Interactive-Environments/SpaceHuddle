@@ -20,14 +20,8 @@
       "
     >
       <img
-        v-if="publicQuestion.question.image"
-        :src="publicQuestion.question.image"
-        class="question-image"
-        alt=""
-      />
-      <img
-        v-if="publicQuestion.question.link && !publicQuestion.question.image"
-        :src="publicQuestion.question.link"
+        v-if="hasPublicImage"
+        :src="publicImage"
         class="question-image"
         alt=""
       />
@@ -152,6 +146,13 @@ export default class PublicBase extends Vue {
   //#endregion properties
 
   //#region get / set
+  get hasPublicImage(): boolean {
+    return (
+      !!this.publicQuestion?.question.imageTimestamp ||
+      !!this.publicQuestion?.question.link
+    );
+  }
+
   get isActive(): boolean {
     if (this.moderatedQuestionFlow) {
       if (this.task) return timerService.isActive(this.task);
@@ -269,6 +270,20 @@ export default class PublicBase extends Vue {
       this.authHeaderTyp,
       20
     );
+  }
+
+  publicImage: string | null = null;
+  @Watch('publicQuestion.question.image', { immediate: true })
+  @Watch('publicQuestion.question.link', { immediate: true })
+  publicImageChanged(): void {
+    if (this.publicQuestion?.question.imageTimestamp) {
+      until(() => !!this.publicQuestion?.question.image).then(() => {
+        if (this.publicQuestion?.question.image)
+          this.publicImage = this.publicQuestion.question.image;
+      });
+    } else if (this.publicQuestion?.question.link)
+      this.publicImage = this.publicQuestion?.question.link;
+    else this.publicImage = null;
   }
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
