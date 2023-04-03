@@ -121,7 +121,7 @@ export async function apiExecuteGet<T = any>(
   url: string,
   authHeaderType = EndpointAuthorisationType.MODERATOR
 ): Promise<T> {
-  console.warn(url);
+  //console.warn(url);
   const { data: result } = await getApiEndpoint(authHeaderType).get<T>(url);
   return result;
 }
