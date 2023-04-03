@@ -169,11 +169,12 @@ return function (App $app) {
         "/participant",
         function (RouteCollectorProxy $app) {
             $app->post("/connect[/]", ParticipantConnectAction::class);
-            $app->delete("[/]", ParticipantDeleteAction::class);
             $app->get("/tasks[/]", ParticipantReadTaskAction::class);
             $app->get("/topics[/]", ParticipantReadTopicAction::class);
             $app->get("/reconnect/{browserKey}[/]", ParticipantReconnectAction::class);
             $app->put("/state/{state}[/]", ParticipantUpdateAction::class);
+            $app->delete("[/]", ParticipantDeleteAction::class);
+            $app->delete("/{id}[/]", ParticipantDeleteAction::class);
         }
     );
 

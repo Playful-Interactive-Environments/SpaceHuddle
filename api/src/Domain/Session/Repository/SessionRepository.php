@@ -344,13 +344,40 @@ class SessionRepository implements RepositoryInterface
      */
     public function getParticipants(string $sessionId): array
     {
+        $subQueryCountIdeas = $this->queryFactory->newSelect("idea")
+            ->select(["idea.participant_id", "COUNT(idea.id) AS idea_count"])
+            ->innerJoin("participant", "idea.participant_id = participant.id")
+            ->andWhere(["participant.session_id" => $sessionId])
+            ->group(["idea.participant_id"]);
+        $subQueryCountVotes = $this->queryFactory->newSelect("vote")
+            ->select(["vote.participant_id", "COUNT(vote.id) AS vote_count"])
+            ->innerJoin("participant", "vote.participant_id = participant.id")
+            ->andWhere(["participant.session_id" => $sessionId])
+            ->group(["vote.participant_id"]);
+
         $query = $this->queryFactory->newSelect("participant");
-        $query->select(["participant.*", "COUNT(idea.id) AS idea_count"])
-            ->leftJoin("idea", "idea.participant_id = participant.id")
-            ->andWhere([
-                "session_id" => $sessionId,
+        $query->select(["participant.*", "idea_count", "vote_count"])
+            ->join([
+                "idea" => [
+                    "table" => $subQueryCountIdeas,
+                    "type" => "LEFT",
+                    "conditions" => [
+                        "idea.participant_id = participant.id",
+                    ]
+                ]
             ])
-            ->group(["participant.id"]);
+            ->join([
+                "vote" => [
+                    "table" => $subQueryCountVotes,
+                    "type" => "LEFT",
+                    "conditions" => [
+                        "vote.participant_id = participant.id",
+                    ]
+                ]
+            ])
+            ->andWhere([
+                "participant.session_id" => $sessionId,
+            ]);
 
         $result = $this->fetchAll($query, ParticipantInfoData::class);
 

@@ -54,7 +54,8 @@ p, MODERATOR, /user/, DELETE
 p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /participant/connect/, POST
 p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /participant/reconnect/:browserKey/, GET
 p, MODERATOR|PARTICIPANT|INACTIVE, /participant/state/:state/, PUT
-p, MODERATOR|PARTICIPANT|INACTIVE, /participant/, DELETE
+p, MODERATOR, /participant/:id/, DELETE
+p, PARTICIPANT, /participant/, DELETE
 p, PARTICIPANT, /participant/tasks/, GET
 p, PARTICIPANT, /participant/topics/, GET
 
