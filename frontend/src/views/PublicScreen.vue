@@ -64,7 +64,7 @@
         <div ref="scrollContent"></div>
         <el-scrollbar
           native
-          :height="`calc(var(--app-height) - ${topContentPosition}px - 0.1rem)`"
+          :height="`calc(100vh - ${topContentPosition}px - 0.1rem)`"
         >
           <TaskInfo
             v-if="task"
@@ -204,6 +204,12 @@ export default class PublicScreen extends Vue {
     setTimeout(() => {
       this.loadTopPositions();
     }, 500);
+    setTimeout(() => {
+      this.loadTopPositions();
+    }, 2000);
+    setTimeout(() => {
+      this.loadTopPositions();
+    }, 5000);
   }
 
   get joinLink(): string {
