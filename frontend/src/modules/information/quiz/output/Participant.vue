@@ -890,6 +890,30 @@ export default class Participant extends Vue {
   }
 
   loadSavedOrder(): void {
+    const isCorrectOrdered = (orderAnswers: PublicAnswerData[]): boolean => {
+      for (let i = 0; i < orderAnswers.length; i++) {
+        if (orderAnswers[i].answer.order !== i) return false;
+      }
+      return true;
+    };
+
+    const randomSort = (
+      orderAnswers: PublicAnswerData[],
+      shuffleCount = 0
+    ): PublicAnswerData[] => {
+      orderAnswers = orderAnswers.sort(() => 0.5 - Math.random());
+      if (isCorrectOrdered(orderAnswers) && orderAnswers.length > 1) {
+        if (shuffleCount < 10)
+          return randomSort(orderAnswers, shuffleCount + 1);
+        else {
+          const first = orderAnswers[0];
+          orderAnswers[0] = orderAnswers[1];
+          orderAnswers[1] = first;
+        }
+      }
+      return orderAnswers;
+    };
+
     if (
       this.activeQuestionType === QuestionType.ORDER &&
       this.publicAnswerList.length > 0
@@ -906,7 +930,7 @@ export default class Participant extends Vue {
         }
         this.orderAnswers = sortedVotes;
       } else {
-        this.orderAnswers = orderAnswers.sort(() => 0.5 - Math.random());
+        this.orderAnswers = randomSort(orderAnswers);
         this.handleOrderChange().then(
           () => (this.questionAnswered = this.getQuestionAnswered())
         );
