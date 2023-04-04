@@ -16,14 +16,11 @@ use ReflectionClass;
 class AvatarSymbol
 {
     public const ANCHOR = "anchor";
-    public const ANGRY = "angry";
     public const ARCHWAY = "archway";
-    public const ASTERISK = "asterisk";
     public const ATOM = "atom";
     public const BABY = "baby";
     public const BAHAI = "bahai";
     public const BATH = "bath";
-    public const BEER = "beer";
     public const BELL = "bell";
     public const BICYCLE = "bicycle";
     public const BINOCULARS = "binoculars";
@@ -35,6 +32,7 @@ class AvatarSymbol
     public const BROOM = "broom";
     public const BRUSH = "brush";
     public const BUG = "bug";
+    public const BURGER = "burger";
     public const BUS = "bus";
     public const CAMPGROUND = "campground";
     public const CAR = "car";
@@ -48,13 +46,11 @@ class AvatarSymbol
     public const CHURCH = "church";
     public const CIRCLE = "circle";
     public const CLOUD = "cloud";
-    public const COCKTAIL = "cocktail";
-    public const COFFEE = "coffee";
-    public const COG = "cog";
     public const COINS = "coins";
     public const COMPASS = "compass";
     public const COOKIE = "cookie";
     public const COUCH = "couch";
+    public const COW = "cow";
     public const CROW = "crow";
     public const CROWN = "crown";
     public const DICE = "dice";
@@ -69,7 +65,6 @@ class AvatarSymbol
     public const FIRE = "fire";
     public const FISH = "fish";
     public const FLAG = "flag";
-    public const FLUSHED = "flushed";
     public const FROG = "frog";
     public const FUTBOL = "futbol";
     public const GAMEPAD = "gamepad";
@@ -77,20 +72,14 @@ class AvatarSymbol
     public const GHOST = "ghost";
     public const GIFT = "gift";
     public const GLOBE = "globe";
-    public const GRIMACE = "grimace";
-    public const GRIN = "grin";
     public const GUITAR = "guitar";
-    public const HAMBURGER = "hamburger";
     public const HAMMER = "hammer";
     public const HELICOPTER = "helicopter";
-    public const HIKING = "hiking";
     public const HIPPO = "hippo";
-    public const HOME = "home";
     public const HORSE = "horse";
     public const HOTDOG = "hotdog";
+    public const HOUSE = "house";
     public const INDUSTRY = "industry";
-    public const KISS = "kiss";
-    public const LAUGH = "laugh";
     public const LEAF = "leaf";
     public const LEMON = "lemon";
     public const LIGHTBULB = "lightbulb";
@@ -99,26 +88,25 @@ class AvatarSymbol
     public const MOON = "moon";
     public const MOTORCYCLE = "motorcycle";
     public const MOUNTAIN = "mountain";
-    public const MOUSE = "mouse";
     public const OTTER = "otter";
     public const PASTAFARIANISM = "pastafarianism";
     public const PAW = "paw";
     public const PEN = "pen";
     public const PLANE = "plane";
     public const SHIP = "ship";
-    public const SMILE = "smile";
     public const SNOWFLAKE = "snowflake";
     public const SNOWMAN = "snowman";
     public const SPIDER = "spider";
+    public const SHRIMP = "shrimp";
     public const STAR = "star";
     public const SUN = "sun";
     public const TOOTH = "tooth";
     public const TRACTOR = "tractor";
     public const TRAIN = "train";
-    public const TRAM = "tram";
     public const TROPHY = "trophy";
     public const TRUCK = "truck";
     public const UMBRELLA = "umbrella";
+    public const WORM = "worm";
 
     /**
      * Pick a random value of the AvatarSymbol enum.
