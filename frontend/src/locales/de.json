@@ -207,7 +207,7 @@
         },
         "participantSettings": {
           "header": "Teilnehmer verwalten",
-          "info": "diese Teilnehmer haben sich alle zu irgendeinem Zeitpunkt mit der Sitzung verbunden",
+          "info": "Fügen Sie neue Teilnehmer hinzu oder löschen Sie nicht verwendete Teilnehmerschlüssel.",
           "avatar": "Avatar",
           "browserKey": "individueller Verbindungsschlüssel",
           "ideaCount": "Anzahl der eingereichten Ideen",

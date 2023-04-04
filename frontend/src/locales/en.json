@@ -207,7 +207,7 @@
         },
         "participantSettings": {
           "header": "manage participants",
-          "info": "these participants have all connected to the session at some point",
+          "info": "Add new participants or delete unused participant keys.",
           "avatar": "avatar",
           "browserKey": "individual connection key",
           "ideaCount": "number of ideas submitted",
