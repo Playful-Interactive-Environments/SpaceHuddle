@@ -14,55 +14,100 @@
         {{ $t('moderator.organism.settings.participantSettings.info') }}
       </p>
     </template>
-    <el-table
-      v-if="participants && participants.length > 0"
-      :data="participants"
-      style="width: 100%"
-      max-height="250"
-    >
-      <el-table-column
-        :label="$t('moderator.organism.settings.participantSettings.avatar')"
+    <div v-if="!viewDetailsForParticipant">
+      <el-table
+        v-if="participants && participants.length > 0"
+        :data="participants"
+        style="width: 100%"
+        max-height="250"
+        v-on:row-click="participantDetails"
       >
-        <template #default="scope">
-          <font-awesome-icon
-            :icon="scope.row.avatar.symbol"
-            :style="{ color: scope.row.avatar.color }"
-          ></font-awesome-icon>
+        <el-table-column
+          :label="$t('moderator.organism.settings.participantSettings.avatar')"
+          width="80"
+        >
+          <template #default="scope">
+            <font-awesome-icon
+              :icon="scope.row.avatar.symbol"
+              :style="{ color: scope.row.avatar.color }"
+            ></font-awesome-icon>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="browserKey"
+          :label="
+            $t('moderator.organism.settings.participantSettings.browserKey')
+          "
+        />
+        <el-table-column
+          prop="ideaCount"
+          :label="
+            $t('moderator.organism.settings.participantSettings.ideaCount')
+          "
+        />
+        <el-table-column
+          prop="voteCount"
+          :label="
+            $t('moderator.organism.settings.participantSettings.voteCount')
+          "
+        />
+        <el-table-column width="60">
+          <template #default="scope">
+            <span
+              v-on:click="deleteParticipant(scope.$index)"
+              v-if="scope.row.ideaCount === 0 && scope.row.voteCount === 0"
+            >
+              <font-awesome-icon class="icon link" icon="trash" />
+            </span>
+          </template>
+        </el-table-column>
+      </el-table>
+      <br />
+      <br />
+      <el-button
+        type="primary"
+        class="fullwidth"
+        v-on:click="add"
+        :disabled="!dataLoaded"
+      >
+        <template #icon>
+          <font-awesome-icon icon="circle-plus" />
         </template>
-      </el-table-column>
-      <el-table-column
-        prop="browserKey"
-        :label="
-          $t('moderator.organism.settings.participantSettings.browserKey')
-        "
+        {{ $t('moderator.organism.settings.participantSettings.add') }}
+      </el-button>
+    </div>
+    <div v-else>
+      <el-page-header
+        :title="$t('general.back')"
+        @back="viewDetailsForParticipant = null"
       />
-      <el-table-column
-        prop="ideaCount"
-        :label="$t('moderator.organism.settings.participantSettings.ideaCount')"
-      />
-      <el-table-column
-        prop="voteCount"
-        :label="$t('moderator.organism.settings.participantSettings.voteCount')"
-      />
-      <el-table-column width="120">
-        <template #default="scope">
+      <div class="details">
+        <div>
+          <h1>
+            <font-awesome-icon
+              :icon="viewDetailsForParticipant.avatar.symbol"
+              :style="{ color: viewDetailsForParticipant.avatar.color }"
+            ></font-awesome-icon>
+          </h1>
+        </div>
+        <div class="details-right">
           <span
-            v-on:click="deleteParticipant(scope.$index)"
-            v-if="scope.row.ideaCount === 0 && scope.row.voteCount === 0"
+            v-on:click="copyToClipboard(viewDetailsForParticipant.browserKey)"
           >
-            <font-awesome-icon class="icon link" icon="trash" />
+            {{ viewDetailsForParticipant.browserKey }}
           </span>
-        </template>
-      </el-table-column>
-    </el-table>
-    <br />
-    <br />
-    <el-button class="fullwidth" v-on:click="add" :disabled="!dataLoaded">
-      <template #icon>
-        <font-awesome-icon icon="circle-plus" />
-      </template>
-      {{ $t('moderator.organism.settings.participantSettings.add') }}
-    </el-button>
+          <QrcodeVue
+            foreground="#1d2948"
+            background="#f4f4f4"
+            render-as="svg"
+            :value="joinLink"
+            :size="200"
+            level="H"
+            v-on:click="copyToClipboard(joinLink)"
+          />
+        </div>
+      </div>
+    </div>
   </el-dialog>
 </template>
 
@@ -76,8 +121,13 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Session } from '@/types/api/Session';
 import * as cashService from '@/services/cash-service';
 import { ParticipantInfo } from '@/types/api/Participant';
+import QrcodeVue from 'qrcode.vue';
+import { ElMessage } from 'element-plus';
 
 @Options({
+  components: {
+    QrcodeVue,
+  },
   emits: ['update:showModal'],
 })
 
@@ -90,8 +140,36 @@ export default class LinkSettings extends Vue {
 
   session!: Session;
   participants: ParticipantInfo[] = [];
+  viewDetailsForParticipant: ParticipantInfo | null = null;
 
   showSettings = false;
+
+  get joinLink(): string {
+    if (this.viewDetailsForParticipant)
+      return `${window.location.origin}/join/${this.viewDetailsForParticipant.browserKey}`;
+    return `${window.location.origin}/join/`;
+  }
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(
+      () => {
+        ElMessage({
+          message: (this as any).$t('info.copyToClipboard'),
+          type: 'success',
+          center: true,
+          showClose: true,
+        });
+      },
+      () => {
+        ElMessage({
+          message: (this as any).$t('error.gui.copyToClipboard'),
+          type: 'error',
+          center: true,
+          showClose: true,
+        });
+      }
+    );
+  }
 
   handleClose(done: { (): void }): void {
     done();
@@ -155,6 +233,17 @@ export default class LinkSettings extends Vue {
         }
       });
   }
+
+  participantDetails(
+    row: ParticipantInfo,
+    column: any,
+    //eslint-disable-next-line @typescript-eslint/no-unused-vars
+    event: PointerEvent
+  ): void {
+    if (column.label) {
+      this.viewDetailsForParticipant = row;
+    }
+  }
 }
 </script>
 
@@ -181,6 +270,29 @@ export default class LinkSettings extends Vue {
   .el-form-item__content {
     display: flex;
     justify-content: space-between;
+  }
+}
+
+.details {
+  margin: auto;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-evenly;
+
+  h1 {
+    font-size: 10rem;
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.8;
+  }
+
+  .details-right {
+    margin-left: var(--side-padding);
+    font-size: 1.35rem;
+    font-family: monospace;
+    svg {
+      display: flex;
+    }
   }
 }
 </style>
