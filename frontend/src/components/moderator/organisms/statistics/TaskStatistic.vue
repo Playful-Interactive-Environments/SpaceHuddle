@@ -10,7 +10,7 @@
       },
       scales: {
         x: {
-          display: false,
+          display: displayLabels,
           ticks: {
             color: '#1d2948',
           },
@@ -42,6 +42,7 @@ import * as taskParticipantService from '@/services/task-participant-service';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { Bar } from 'vue-chartjs';
 import * as cashService from '@/services/cash-service';
+import { AvatarUnicode } from '@/types/enum/AvatarUnicode';
 
 @Options({
   components: {
@@ -53,11 +54,18 @@ import * as cashService from '@/services/cash-service';
 export default class TaskStatistic extends Vue {
   @Prop() taskId!: string;
   stateList: TaskParticipantState[] = [];
+  displayLabels = false;
 
   chartData: any = {
     labels: [],
     datasets: [],
   };
+
+  mounted(): void {
+    document.fonts.onloadingdone = () => {
+      this.displayLabels = true;
+    };
+  }
 
   get resultData(): any {
     const datasets = [
@@ -70,7 +78,9 @@ export default class TaskStatistic extends Vue {
       },
     ];
     return {
-      labels: this.stateList.map((state) => state.avatar.symbol),
+      labels: this.stateList.map((state) => {
+        return AvatarUnicode[state.avatar.symbol];
+      }),
       datasets: datasets,
     };
   }

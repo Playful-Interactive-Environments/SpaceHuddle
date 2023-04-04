@@ -1,3 +1,4 @@
+import '@/assets/styles/global.scss';
 import { createApp } from 'vue';
 import VueCookies from 'vue3-cookies';
 import i18n from '@/i18n';
@@ -8,7 +9,6 @@ import mitt, { Emitter, EventType } from 'mitt';
 import VueObserveVisibility from 'vue3-observe-visibility2';
 
 import ElementPlus from 'element-plus';
-import '@/assets/styles/global.scss';
 import '@/assets/styles/element-plus.scss';
 import {
   Chart as ChartJS,
@@ -28,6 +28,9 @@ ChartJS.register(
   CategoryScale,
   LinearScale
 );
+
+ChartJS.defaults.font.family =
+  "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif, 'Font Awesome 6 Free Solid'";
 
 import { IconPack, library } from '@fortawesome/fontawesome-svg-core';
 // internal icons
@@ -55,7 +58,7 @@ app.component('font-awesome-icon', FontAwesomeIcon);
 app.use(router);
 app.use(i18n);
 app.use(VueCookies as any, {
-  expireTimes: '30d',
+  expireTimes: '356d',
   secure: true,
   sameSite: 'Strict', // "Lax"
 });

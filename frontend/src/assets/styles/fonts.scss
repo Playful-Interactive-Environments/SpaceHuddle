@@ -31,3 +31,14 @@
     url('~@/assets/fonts/work-sans-bold/work-sans-v9-latin-700.woff')
       format('woff');
 }
+/* Font Awesome 6 Free - Solid */
+@font-face {
+  font-family: 'Font Awesome 6 Free Solid';
+  font-style: normal;
+  font-weight: 700;
+  src: local(''),
+    url('~@/assets/fonts/fontawesome-free/fa-solid-900.woff2')
+      format('woff2'),
+    url('~@/assets/fonts/fontawesome-free/fa-solid-900.ttf')
+      format('ttf');
+}
