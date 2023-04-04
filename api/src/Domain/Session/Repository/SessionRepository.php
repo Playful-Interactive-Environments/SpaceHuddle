@@ -377,7 +377,8 @@ class SessionRepository implements RepositoryInterface
             ])
             ->andWhere([
                 "participant.session_id" => $sessionId,
-            ]);
+            ])
+            ->order(["participant.modification_date" => "DESC"]);
 
         $result = $this->fetchAll($query, ParticipantInfoData::class);
 
