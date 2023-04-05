@@ -554,7 +554,8 @@
       "changeOrder": "change the order of the items by drag and drop along the timeline",
       "selectItem": "click on the item title to display the item details",
       "showNullPublicScreen": "set the public screen slider to this position to display overview on the public screen",
-      "publicScreenForOtherTopic": "The Public Screen is assigned to a different topic. By clicking on this switch, the overview can be activated on the public screen."
+      "publicScreenForOtherTopic": "The Public Screen is assigned to a different topic. By clicking on this switch, the overview can be activated on the public screen.",
+      "showResult": "Show evaluation"
     },
     "taskTimeline": {
       "activatePublicScreen": "activate this switch to display this topic on the public screen",

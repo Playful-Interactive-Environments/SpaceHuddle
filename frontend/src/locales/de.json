@@ -554,7 +554,8 @@
       "changeOrder": "Verändere die Ordnung der Elemente über drag and drop.",
       "selectItem": "Klicke auf den Titel des Elements, um dessen Details anzuzeigen",
       "showNullPublicScreen": "Setze den Regler auf diese Position, um eine Übersicht der Publikumsansicht anzuzeigen",
-      "publicScreenForOtherTopic": "Die Publikumsansicht ist einem anderen Thema zugeteilt. Die Übersicht der Publikumsansicht kann durch diesen Schalter angezeigt werden."
+      "publicScreenForOtherTopic": "Die Publikumsansicht ist einem anderen Thema zugeteilt. Die Übersicht der Publikumsansicht kann durch diesen Schalter angezeigt werden.",
+      "showResult": "Auswertung anzeigen"
     },
     "taskTimeline": {
       "activatePublicScreen": "Aktiviere diesen Schalter um das Thema auf der Publikumsansicht darzustellen",
