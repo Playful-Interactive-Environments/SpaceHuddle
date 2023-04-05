@@ -36,7 +36,7 @@
           class="el-button--submit"
           native-type="submit"
           :disabled="!hasNextQuestion || !questionAnswered"
-          v-if="!moderatedQuestionFlow && hasNextQuestion"
+          v-if="!moderatedQuestionFlow && hasNextQuestion && !submitScreen"
           @click="goToNextQuestion"
         >
           {{ $t('module.information.quiz.participant.next') }}
