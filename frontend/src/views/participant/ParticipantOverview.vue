@@ -16,11 +16,20 @@
             {{ sessionDescription }}
           </span>
         </div>
-        <div class="image">
-          <img
-            src="@/assets/illustrations/planets/brainstorming.png"
-            alt="planet"
-          />
+        <div class="image" v-if="avatar">
+          <el-tooltip
+            :content="$t('participant.view.overview.avatar')"
+            placement="top"
+          >
+            <span class="avatar">
+              <span>
+                <font-awesome-icon
+                  :icon="avatar.symbol"
+                  :style="{ color: avatar.color }"
+                ></font-awesome-icon>
+              </span>
+            </span>
+          </el-tooltip>
         </div>
       </div>
     </template>
@@ -103,6 +112,8 @@ import { Task } from '@/types/api/Task';
 import ParticipantDefaultContainer from '@/components/participant/organisms/layout/ParticipantDefaultContainer.vue';
 import { Session } from '@/types/api/Session';
 import * as cashService from '@/services/cash-service';
+import { Avatar } from '@/types/api/Participant';
+import * as authService from '@/services/auth-service';
 
 @Options({
   components: {
@@ -122,6 +133,7 @@ export default class ParticipantOverview extends Vue {
   sessionId = '';
   openTabs: string[] = [];
   EndpointAuthorisationType = EndpointAuthorisationType;
+  avatar!: Avatar;
 
   getColor(task: Task): string | undefined {
     if (task.taskType) {
@@ -137,6 +149,7 @@ export default class ParticipantOverview extends Vue {
 
   topicCash!: cashService.SimplifiedCashEntry<Topic[]>;
   mounted(): void {
+    this.avatar = authService.getAvatar();
     sessionService.registerGetParticipantSession(
       this.updateSession,
       EndpointAuthorisationType.PARTICIPANT,
@@ -277,7 +290,7 @@ export default class ParticipantOverview extends Vue {
 
     .image {
       min-width: 5rem;
-      max-width: 5rem;
+      max-width: 7rem;
     }
   }
 
@@ -316,5 +329,26 @@ export default class ParticipantOverview extends Vue {
 
 .el-collapse::v-deep(.el-collapse-item__content) {
   padding-bottom: unset;
+}
+
+.avatar {
+  display: block;
+  border-radius: 20rem;
+  border: 3px white solid;
+  width: 4rem;
+  aspect-ratio: 1;
+  padding: 0.2rem;
+  text-align: center;
+  vertical-align: center;
+
+  span {
+    display: block;
+    padding: 0.5rem;
+    font-size: 2rem;
+    width: 100%;
+    height: 100%;
+    border-radius: 20rem;
+    background-color: white;
+  }
 }
 </style>

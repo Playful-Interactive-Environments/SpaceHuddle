@@ -401,7 +401,8 @@
       },
       "overview": {
         "publicScreen": "Publikumsansicht",
-        "disconnect": "Abmelden"
+        "disconnect": "Abmelden",
+        "avatar": "dein Spieleravatar"
       }
     }
   },

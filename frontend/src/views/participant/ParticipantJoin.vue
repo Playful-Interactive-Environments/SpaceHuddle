@@ -170,6 +170,7 @@ export default class ParticipantJoin extends Vue {
         authService.setBrowserKey(
           participantData.participant.browserKey as string
         );
+        authService.setAvatar(participantData.participant.avatar);
         authService.setAccessTokenParticipant(
           participantData.token.accessToken as string
         );

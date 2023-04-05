@@ -401,7 +401,8 @@
       },
       "overview": {
         "publicScreen": "Public View",
-        "disconnect": "Logout"
+        "disconnect": "Logout",
+        "avatar": "your player avatar"
       }
     }
   },

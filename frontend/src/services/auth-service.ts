@@ -1,12 +1,14 @@
 import jwt_decode from 'jwt-decode';
 import app from '@/main';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { Avatar } from '@/types/api/Participant';
 
 const JWT_KEY = 'jwt';
 const JWT_KEY_MODERATOR = 'jwt-moderator';
 const JWT_KEY_PARTICIPANT = 'jwt-participant';
 const BROWSER_KEYS = 'keys';
 const LAST_BROWSER_KEY = 'key';
+const LAST_AVATAR = 'avatar';
 const USER_KEY = 'user';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -125,6 +127,14 @@ export const getBrowserKeys = (): string[] => {
     else keys = [key];
   }
   return keys;
+};
+
+export const setAvatar = (avatar: Avatar): void => {
+  app.config.globalProperties.$cookies.set(LAST_AVATAR, JSON.stringify(avatar));
+};
+
+export const getAvatar = (): Avatar => {
+  return eval(app.config.globalProperties.$cookies.get(LAST_AVATAR));
 };
 
 export const getLastBrowserKey = (): string | null => {
