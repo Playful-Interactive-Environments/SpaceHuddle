@@ -6,7 +6,7 @@
     <div class="sidebar__logo">
       <font-awesome-icon :icon="['fac', 'logoWithName']" class="logo" />
     </div>
-    <span>
+    <span class="sidebar_icons">
       <router-link to="/sessions">
         <font-awesome-icon icon="home" />
       </router-link>
@@ -50,8 +50,7 @@ export default class SidebarHeader extends Vue {
     justify-content: space-between;
     width: 100%;
 
-    span {
-      display: inline-flex;
+    span.sidebar_icons {
       align-items: center;
 
       a {
@@ -60,6 +59,10 @@ export default class SidebarHeader extends Vue {
         margin-left: 0.6rem;
         margin-top: 0;
       }
+    }
+
+    span.sidebar_icons {
+      display: inline-flex;
     }
   }
 
