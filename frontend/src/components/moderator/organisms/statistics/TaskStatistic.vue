@@ -65,6 +65,7 @@ export default class TaskStatistic extends Vue {
     document.fonts.onloadingdone = () => {
       this.displayLabels = true;
     };
+    setTimeout(() => (this.displayLabels = true), 5000);
   }
 
   get resultData(): any {

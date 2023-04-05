@@ -60,7 +60,12 @@
               <div
                 class="home"
                 @click="homeClicked"
-                :class="{ homeSelected: !activeItem && canClickHome }"
+                :class="{
+                  homeSelected:
+                    !activeItem &&
+                    canClickHome &&
+                    activeArea === TimelineArea.left,
+                }"
               >
                 <font-awesome-icon class="processIcon homeIcon" icon="home" />
               </div>
@@ -197,6 +202,48 @@
             </template>
           </draggable>
         </el-steps>
+        <span class="media-right" v-if="canDisableResult">
+          <i class="line"></i>
+          <div
+            class="timelineIcon"
+            :class="{
+              selected:
+                getDBPublicIndex(activeOnPublicScreen) ===
+                activePageContentList.length,
+            }"
+          >
+            <div
+              v-if="hasPublicSlider"
+              class="publicScreenView publicScreenViewDisabled"
+              :class="{
+                hide:
+                  getDBPublicIndex(activeOnPublicScreen) !==
+                  activePageContentList.length,
+              }"
+            >
+              <font-awesome-icon :icon="['fac', 'presentation']" />
+            </div>
+            <TutorialStep
+              step="showResult"
+              :type="translationModuleName"
+              :order="12"
+              placement="bottom"
+            >
+              <div
+                class="home"
+                @click="showResult"
+                :class="{
+                  homeSelected:
+                    !activeItem &&
+                    canDisableResult &&
+                    activeArea === TimelineArea.right,
+                }"
+              >
+                <font-awesome-icon class="processIcon homeIcon" icon="trophy" />
+              </div>
+            </TutorialStep>
+          </div>
+        </span>
       </div>
       <TimerSettings
         v-if="showTimerSettings"
@@ -263,6 +310,12 @@ import { TimerEntity } from '@/types/enum/TimerEntity';
 import TaskStates from '@/types/enum/TaskStates';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
 
+export enum TimelineArea {
+  left = 'left',
+  content = 'content',
+  right = 'right',
+}
+
 @Options({
   components: {
     TutorialStep,
@@ -276,6 +329,7 @@ import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
     'update:publicScreen',
     'update:activeItem',
     'homeClicked',
+    'resultClicked',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -288,6 +342,7 @@ export default class ProcessTimeline extends Vue {
   @Prop({ default: TimerEntity.TASK }) entityName!: string;
   @Prop({ default: false }) readonly readonly!: boolean;
   @Prop({ default: true }) readonly canDisablePublicTimeline!: boolean;
+  @Prop({ default: false }) readonly canDisableResult!: boolean;
   @Prop({ default: false }) readonly canUseOtherPublicScreenTopic!: boolean;
   @Prop({ default: false }) readonly canClickHome!: boolean;
   @Prop({ default: true }) readonly isLinkedToDetails!: boolean;
@@ -336,6 +391,9 @@ export default class ProcessTimeline extends Vue {
   activePage = 1;
   pageSize = 1000;
   pages: any[][] = [];
+  activeArea: TimelineArea = TimelineArea.content;
+  publicArea: TimelineArea = TimelineArea.content;
+  TimelineArea = TimelineArea;
 
   get minPublicSliderCount(): number {
     return 0;
@@ -351,9 +409,10 @@ export default class ProcessTimeline extends Vue {
   }
 
   get sliderSteps(): number {
-    if (this.canDisablePublicTimeline)
-      return this.activePageContentList.length + 1;
-    return this.activePageContentList.length;
+    let count = this.activePageContentList.length;
+    if (this.canDisablePublicTimeline) count++;
+    if (this.canDisableResult) count++;
+    return count;
   }
 
   oldScrollLeft = 0;
@@ -422,6 +481,22 @@ export default class ProcessTimeline extends Vue {
           }
         }
       }
+    }
+  }
+
+  @Watch('publicScreen', { immediate: true })
+  onPublicScreenChanged(): void {
+    if (this.publicScreen) this.publicArea = TimelineArea.content;
+    else if (this.publicArea === TimelineArea.content) {
+      this.publicArea = TimelineArea.left;
+    }
+  }
+
+  @Watch('activeItem', { immediate: true })
+  onActiveItemChanged(): void {
+    if (this.activeItem) this.activeArea = TimelineArea.content;
+    else if (this.activeArea === TimelineArea.content) {
+      this.activeArea = TimelineArea.left;
     }
   }
 
@@ -496,7 +571,17 @@ export default class ProcessTimeline extends Vue {
   }
 
   homeClicked(): void {
-    if (this.canClickHome) this.$emit('homeClicked');
+    if (this.canClickHome) {
+      this.activeArea = TimelineArea.left;
+      this.$emit('homeClicked');
+    }
+  }
+
+  showResult(): void {
+    if (this.canDisableResult) {
+      this.activeArea = TimelineArea.right;
+      this.$emit('resultClicked');
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -538,7 +623,9 @@ export default class ProcessTimeline extends Vue {
       ? this.activePageContentList.findIndex((item) =>
           this.itemIsEquals(item, this.publicScreen)
         )
-      : -1;
+      : this.publicArea === TimelineArea.left
+      ? -1
+      : this.activePageContentList.length;
     return this.getSliderPublicIndex(index);
   }
 
@@ -546,6 +633,10 @@ export default class ProcessTimeline extends Vue {
     if (this.sliderSteps > index) {
       index = this.getDBPublicIndex(index);
       const publicItem = this.activePageContentList[index];
+      if (!publicItem) {
+        if (index === -1) this.publicArea = TimelineArea.left;
+        else this.publicArea = TimelineArea.right;
+      } else this.publicArea = TimelineArea.content;
       if (this.publicScreen !== publicItem) {
         if (publicItem && this.startParticipantOnPublicChange) {
           this.timerContent = publicItem;
@@ -555,7 +646,7 @@ export default class ProcessTimeline extends Vue {
           timerService.update(this.entityName, entity, true);
         }
         this.$emit('update:publicScreen', publicItem);
-        this.$emit('changePublicScreen', publicItem);
+        this.$emit('changePublicScreen', publicItem, this.publicArea);
       }
     }
   }
@@ -944,8 +1035,8 @@ export default class ProcessTimeline extends Vue {
   min-width: calc(var(--slider-steps) * 5rem);
 }
 
-.media-left {
-  margin-right: 0;
+.media-left,
+.media-right {
   width: calc(100% / var(--slider-steps));
   text-align: center;
   align-items: center;
@@ -1011,13 +1102,29 @@ export default class ProcessTimeline extends Vue {
   }
 }
 
+.media-left {
+  margin-right: 0;
+}
+
+.media-right {
+  margin-left: 0;
+}
+
 .line {
   background-color: var(--color-foreground);
   position: absolute;
   height: 2px;
   top: 11px;
+}
+
+.media-left .line {
   left: calc(50% + 1.3rem);
   right: -50%;
+}
+
+.media-right .line {
+  right: calc(50% + 1.3rem);
+  left: -50%;
 }
 
 .darkMode {

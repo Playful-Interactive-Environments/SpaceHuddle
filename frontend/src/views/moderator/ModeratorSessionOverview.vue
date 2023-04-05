@@ -136,7 +136,6 @@ export default class ModeratorSessionOverview extends Vue {
         );
         break;
       default:
-        console.log('Could not filter the given sessions.');
         this.filteredSessions = this.sessions;
     }
   }

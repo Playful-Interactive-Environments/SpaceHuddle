@@ -14,7 +14,7 @@
         :show-legend="true"
       />
       <QuizResult
-        v-else
+        v-else-if="activeArea === TimelineArea.left"
         :voteResult="detailVotingResult"
         resultColumn="countParticipant"
         :change="false"
@@ -26,9 +26,7 @@
         :questionType="formData.questionType"
         :update="true"
       />
-      <!--<span id="noQuestionSelectedSpan" v-if="!editQuestion">{{
-        $t('module.information.quiz.moderatorContent.noQuestionSelected')
-      }}</span>-->
+      <Highscore v-else :tracking-result="trackingResult" />
     </div>
 
     <ProcessTimeline
@@ -44,6 +42,7 @@
       :hasParticipantToggle="moderatedQuestionFlow"
       :hasParticipantOption="hasParticipantOption"
       :canClickHome="true"
+      :canDisableResult="questionnaireType === QuestionnaireType.QUIZ"
       :contentListIcon="(item) => null"
       :getKey="(item) => item.id"
       :getTitle="(item) => item.keywords"
@@ -57,6 +56,8 @@
       @changeOrder="dragDone"
       @changeActiveElement="onEditQuestionChanged"
       @homeClicked="homeClicked"
+      @resultClicked="resultClicked"
+      @changePublicScreen="changePublicScreen"
     >
     </ProcessTimeline>
     <div>
@@ -320,7 +321,9 @@ import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import draggable from 'vuedraggable';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
-import ProcessTimeline from '@/components/moderator/organisms/Timeline/ProcessTimeline.vue';
+import ProcessTimeline, {
+  TimelineArea,
+} from '@/components/moderator/organisms/Timeline/ProcessTimeline.vue';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import { Hierarchy } from '@/types/api/Hierarchy';
@@ -349,9 +352,11 @@ import { Topic } from '@/types/api/Topic';
 import * as taskParticipantService from '@/services/task-participant-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
+import Highscore from '@/modules/information/quiz/organisms/Highscore.vue';
 
 @Options({
   components: {
+    Highscore,
     ImagePicker,
     ValidationForm,
     ProcessTimeline,
@@ -382,6 +387,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   QuestionnaireType = QuestionnaireType;
   QuestionType = QuestionType;
+  activeArea: TimelineArea = TimelineArea.content;
+  publicArea: TimelineArea = TimelineArea.content;
+  TimelineArea = TimelineArea;
 
   dragging = false;
   dragOptions = {
@@ -438,10 +446,17 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   async onPublicQuestionChanged(): Promise<void> {
     /*if (this.publicQuestion && !this.editQuestion)
       this.editQuestion = this.publicQuestion;*/
+  }
+
+  async changePublicScreen(
+    publicQuestion: Question | null,
+    area: TimelineArea
+  ): Promise<void> {
     if (this.task) {
       const task = this.task;
-      const activeQuestion = this.publicQuestion?.question.id;
+      const activeQuestion = publicQuestion?.question.id;
       task.parameter['activeQuestion'] = activeQuestion ? activeQuestion : null;
+      task.parameter['activeArea'] = area;
       const updateData = { ...convertToSaveVersion(task) };
       await taskService.putTask(updateData);
     }
@@ -611,6 +626,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   homeClicked(): void {
+    this.activeArea = TimelineArea.left;
+    this.setupEmptyQuestion();
+  }
+
+  resultClicked(): void {
+    this.activeArea = TimelineArea.right;
     this.setupEmptyQuestion();
   }
 

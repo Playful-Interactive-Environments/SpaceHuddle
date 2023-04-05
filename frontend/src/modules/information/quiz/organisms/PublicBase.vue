@@ -56,17 +56,30 @@
       :update="true"
     />
   </div>
-  <div v-if="showStatistics && !publicQuestion">
+  <div
+    v-else-if="
+      showStatistics && !publicQuestion && activeArea !== TimelineArea.right
+    "
+  >
     <QuizResult
       :voteResult="detailVotingResult"
       resultColumn="countParticipant"
       :change="false"
       :questionnaireType="
-        trackingResult.length > 0 ? questionnaireType : QuestionnaireType.SURVEY
+        trackingResult.length > 0 && showQuestionWinStatistic
+          ? questionnaireType
+          : QuestionnaireType.SURVEY
       "
       :questionType="activeQuestionType"
       :update="true"
     />
+  </div>
+  <div
+    v-else-if="
+      showStatistics && !publicQuestion && activeArea === TimelineArea.right
+    "
+  >
+    <Highscore :tracking-result="trackingResult" />
   </div>
 </template>
 
@@ -103,6 +116,8 @@ import * as cashService from '@/services/cash-service';
 import * as taskParticipantService from '@/services/task-participant-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
+import Highscore from '@/modules/information/quiz/organisms/Highscore.vue';
+import { TimelineArea } from '@/components/moderator/organisms/Timeline/ProcessTimeline.vue';
 
 export interface PublicAnswerData {
   answer: Hierarchy;
@@ -113,6 +128,7 @@ export interface PublicAnswerData {
 
 @Options({
   components: {
+    Highscore,
     QuizResult,
   },
   emits: ['changePublicAnswers', 'changePublicQuestion', 'changeQuizState'],
@@ -144,6 +160,7 @@ export default class PublicBase extends Vue {
   questionState: QuestionState = QuestionState.ACTIVE_CREATE_QUESTION;
   statePointer = 0;
   QuestionnaireType = QuestionnaireType;
+  TimelineArea = TimelineArea;
   //#endregion properties
 
   //#region get / set
@@ -232,6 +249,17 @@ export default class PublicBase extends Vue {
       return this.questions[this.activeQuestionIndex].question;
     }
     return null;
+  }
+
+  get activeArea(): TimelineArea {
+    if (
+      this.task &&
+      this.task.parameter &&
+      (this.moderatedQuestionFlow || this.usePublicQuestion)
+    ) {
+      return this.task.parameter.activeArea;
+    }
+    return TimelineArea.content;
   }
 
   get publicAnswers(): Hierarchy[] {
@@ -402,7 +430,11 @@ export default class PublicBase extends Vue {
   }
 
   get detailVotingResult(): VoteResult[] {
-    if (this.trackingResult.length > 0 && this.questions.length > 0) {
+    if (
+      this.showQuestionWinStatistic &&
+      this.trackingResult.length > 0 &&
+      this.questions.length > 0
+    ) {
       const result: VoteResult[] = [];
       for (const step of this.trackingResult) {
         const question = this.questions.find(
@@ -557,10 +589,7 @@ export default class PublicBase extends Vue {
     if (init) {
       this.initQuestionState();
       cashService.deregisterAllGet(this.updateFinalResult);
-      if (
-        this.questionnaireType === QuestionnaireType.QUIZ &&
-        this.showQuestionWinStatistic
-      ) {
+      if (this.questionnaireType === QuestionnaireType.QUIZ) {
         taskParticipantService.registerGetIterationStepFinalList(
           this.taskId,
           this.updateFinalResult,
