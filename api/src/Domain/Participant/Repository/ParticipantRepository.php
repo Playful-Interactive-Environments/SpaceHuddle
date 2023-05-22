@@ -121,11 +121,15 @@ class ParticipantRepository implements RepositoryInterface
      */
     public function checkSessionKey(string $sessionKey): bool
     {
+        $authorisation = $this->getAuthorisation();
         $query = $this->queryFactory->newSelect("session");
         $query->select(["id"])
             ->andWhere([
                 "connection_key" => $sessionKey
             ]);
+        if (!$authorisation->isUser()) {
+            $query->andWhere(["(max_participants is null OR max_participants > (select count(*) from participant where participant.session_id = session.id))"]);
+        }
         return ($query->execute()->rowCount() > 0);
     }
 
