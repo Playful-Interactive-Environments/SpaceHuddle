@@ -7,6 +7,7 @@
     <template #header>
       <span class="el-dialog__title">
         {{ $t('moderator.organism.settings.participantSettings.header') }}
+        ( {{ participants.length }} )
       </span>
       <br />
       <br />
@@ -75,6 +76,64 @@
         </template>
         {{ $t('moderator.organism.settings.participantSettings.add') }}
       </el-button>
+      <vue3-html2pdf
+        :show-layout="false"
+        :float-layout="true"
+        :enable-download="false"
+        :preview-modal="true"
+        :paginate-elements-by-height="600"
+        :pdf-quality="2"
+        :manual-pagination="false"
+        filename="participants"
+        pdf-format="a4"
+        pdf-orientation="portrait"
+        ref="html2Pdf"
+      >
+        <template v-slot:pdf-content>
+          <div
+            class="pdf"
+            v-for="participant in participants"
+            :key="participant.id"
+          >
+            <p>
+              {{
+                $t(
+                  'moderator.organism.settings.participantSettings.connectionInfo'
+                )
+              }}
+            </p>
+            <h2>{{ session.title }}</h2>
+            <p class="center">{{`${baseJoinLink}${participant.browserKey}`}}</p>
+            <p>{{ session.description }}</p>
+            <div class="details">
+              <div>
+                <h1>
+                  <font-awesome-icon
+                    :icon="participant.avatar.symbol"
+                    :style="{ color: participant.avatar.color }"
+                  ></font-awesome-icon>
+                </h1>
+              </div>
+              <div class="details-right">
+                <span>
+                  {{ participant.browserKey }}
+                </span>
+                <QrcodeVue
+                  foreground="#1d2948"
+                  background="#f4f4f4"
+                  render-as="svg"
+                  :value="`${baseJoinLink}${participant.browserKey}`"
+                  :size="200"
+                  level="H"
+                />
+              </div>
+            </div>
+          </div>
+        </template>
+      </vue3-html2pdf>
+      <el-button type="primary" class="fullwidth" v-on:click="generateReport">
+        {{ $t('moderator.organism.settings.participantSettings.export') }}
+      </el-button>
     </div>
     <div v-else>
       <el-page-header
@@ -123,10 +182,12 @@ import * as cashService from '@/services/cash-service';
 import { ParticipantInfo } from '@/types/api/Participant';
 import QrcodeVue from 'qrcode.vue';
 import { ElMessage } from 'element-plus';
+import Vue3Html2pdf from 'vue3-html2pdf';
 
 @Options({
   components: {
     QrcodeVue,
+    Vue3Html2pdf,
   },
   emits: ['update:showModal'],
 })
@@ -144,10 +205,14 @@ export default class LinkSettings extends Vue {
 
   showSettings = false;
 
+  get baseJoinLink(): string {
+    return `${window.location.origin}/join/`;
+  }
+
   get joinLink(): string {
     if (this.viewDetailsForParticipant)
-      return `${window.location.origin}/join/${this.viewDetailsForParticipant.browserKey}`;
-    return `${window.location.origin}/join/`;
+      return `${this.baseJoinLink}${this.viewDetailsForParticipant.browserKey}`;
+    return this.baseJoinLink;
   }
 
   copyToClipboard(text: string): void {
@@ -244,6 +309,10 @@ export default class LinkSettings extends Vue {
       this.viewDetailsForParticipant = row;
     }
   }
+
+  generateReport(): void {
+    (this.$refs as any).html2Pdf.generatePdf();
+  }
 }
 </script>
 
@@ -293,6 +362,26 @@ export default class LinkSettings extends Vue {
     svg {
       display: flex;
     }
+  }
+}
+
+.pdf {
+  margin: 100px;
+
+  h2 {
+    font-size: 3rem;
+    font-weight: bold;
+    text-align: center;
+    padding-top: 1rem;
+  }
+
+  .center {
+    text-align: center;
+    padding-bottom: 1rem;
+  }
+
+  p {
+    font-size: 1rem;
   }
 }
 </style>

@@ -212,7 +212,9 @@
           "browserKey": "individueller Verbindungsschlüssel",
           "ideaCount": "Anzahl der eingereichten Ideen",
           "voteCount": "Anzahl der abgegebenen Stimmen",
-          "add": "einen neuen Teilnehmer anlegen"
+          "add": "einen neuen Teilnehmer anlegen",
+          "export": "Export Verbindungs-PDF",
+          "connectionInfo": "Du wurdest zu einer interaktiven Aktivität eingeladen worden. Um der Aktivität teilzunehmen, gib bitte deinen individuellen Schlüssels ein."
         },
         "taskSettings": {
           "header": "Modul hinzufügen",
