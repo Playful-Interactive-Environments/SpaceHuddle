@@ -5,6 +5,7 @@
       :class="backgroundClass"
     >
       <el-header
+        v-if="drawNavigation"
         class="participant-header"
         :class="{
           'participant-header__background': !useFullSize && !backgroundClass,
@@ -30,6 +31,7 @@ import { Prop } from 'vue-property-decorator';
 export default class ParticipantDefaultContainer extends Vue {
   @Prop({ default: false }) readonly useFullSize!: boolean;
   @Prop({ default: '' }) readonly backgroundClass!: string;
+  @Prop({ default: true }) readonly drawNavigation!: boolean;
 
   mounted(): void {
     this.scrollToTop(50);

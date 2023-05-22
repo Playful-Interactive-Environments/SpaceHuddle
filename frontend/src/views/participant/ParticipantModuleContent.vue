@@ -3,6 +3,7 @@
     :key="componentLoadIndex"
     :useFullSize="useFullSize"
     :backgroundClass="backgroundClass"
+    :drawNavigation="drawNavigation"
   >
     <template #header>
       <el-page-header
@@ -50,6 +51,7 @@
       :module-id="moduleId"
       v-model:useFullSize="useFullSize"
       v-model:backgroundClass="backgroundClass"
+      v-model:drawNavigation="drawNavigation"
     />
   </ParticipantDefaultContainer>
 </template>
@@ -106,6 +108,7 @@ export default class ParticipantModuleContent extends Vue {
   componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
   useFullSize = false;
   backgroundClass = '';
+  drawNavigation = true;
 
   EndpointAuthorisationType = EndpointAuthorisationType;
 
@@ -299,6 +302,7 @@ export default class ParticipantModuleContent extends Vue {
   moduleNameClick(moduleName: string | null = null): void {
     this.useFullSize = false;
     this.backgroundClass = '';
+    this.drawNavigation = true;
     if (!moduleName) {
       moduleName = this.moduleName;
     }

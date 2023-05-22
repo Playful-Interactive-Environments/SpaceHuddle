@@ -1,0 +1,167 @@
+{
+  "description": {
+    "title": "Cool It",
+    "description": "Ein Spiel über den Treibhauseffekt."
+  },
+  "loading": {
+    "progress_zero": "Ressourcen werden geladen   ",
+    "progress_one": "Ressourcen werden geladen.  ",
+    "progress_two": "Ressourcen werden geladen.. ",
+    "progress_three": "Ressourcen werden geladen..."
+  },
+  "menu": {
+    "molecule_info": {
+      "none": "Wähle ein Molekül aus um dessen Informationen zu sehen.",
+      "not_discovered": "Dieses Molekül wurde noch nicht entdeckt.",
+      "watervapor": {
+        "title": "Wasserdampf",
+        "type": "Treibhausgas",
+        "description": "Wasser in seinem Gaszustand.",
+        "pros": "Weit oben in der Atmosphäre kondensiert Wasserdampf zurück in seine flüssige Form und fällt als Regen zurück auf die Erde. Unser Trinkwasser ist ein Teil von diesem natürlichen Zyklus.",
+        "cons": "Wasserdampf verursacht einen Hitzestau in der Atmosphäre. Wärmere Luft kann mehr Wasserdampf aufnehmen, was dazu führt, dass der Treibhauseffekt stärker wird, je wärmer es auf der Erde ist.",
+        "source": "https://climatekids.nasa.gov/greenhouse-cards/"
+      },
+      "carbondioxide": {
+        "title": "Kohlenstoffdioxid",
+        "type": "Treibhausgas",
+        "description": "Das wichtigste Molekül im Kohlenstoff-Zyklus!",
+        "pros": "Bestehend aus Kohlenstoff und Sauerstoff existiert Kohlenstoffdioxid in unserer natürlichen Atmosphäre und ist daher immer vorhanden. Es wird von Lebewesen aller Art sowie Vulkanen produziert.",
+        "cons": "Kohlenstoffdioxid wird ebenfalls durch die Verwendung von fossilen Brennstoffen wie Kohle oder Öl erzeugt. Es ist das Gas, welches am Meisten zu dem vom Menschen verursachten Treibhauseffekt beisteuert.",
+        "source": "https://climatekids.nasa.gov/greenhouse-cards/"
+      },
+      "methane": {
+        "title": "Methan",
+        "type": "Treibhausgas",
+        "description": "Farblos, geruchlos und stark entflammbar.",
+        "pros": "Bestehend aus Kohlenstoff und Wasserstoff existiert Methan in unserer natürlichen Atmosphäre und entsteht in Sumpfgebieten, auf Reisfeldern oder durch das Züchten von Nutztieren. Das Abtragen von Kohle lässt ebenfalls natürliche Methanreservoirs frei.",
+        "cons": "Methan kann eine Menge an Hitze speichern. Aus allen Treibhausgasen wird Methan als zweit-wichtigstes Gas in dem vom Menschen verursachten Treibhauseffekt angesehen.",
+        "source": "https://climatekids.nasa.gov/greenhouse-cards/"
+      },
+      "nitrousoxide": {
+        "title": "Distickstoffoxid",
+        "type": "Treibhausgas",
+        "description": "Auch bekannt als \"Lachgas\".",
+        "pros": "Distickstoffoxid ist ein natürlicher Bestandteil im Stickstoff-Zyklus der Erde. Bakterien im Boden aber auch Wasser erzeugen dieses Gas.",
+        "cons": "Manche Fabriken, Kraftwerke aber auch Dünger erzeugen dieses Gas ebenfalls. Es ist ein starkes Treibhausgas welches zusätzlich auch der Ozonschicht schadet.",
+        "source": "https://climatekids.nasa.gov/greenhouse-cards/"
+      },
+      "ozone": {
+        "title": "Ozon",
+        "type": "Treibhausgas",
+        "description": "Ein wichtiges Schild vor schädlicher Sonnenstrahlung!",
+        "pros": "Weit oben in der Atmosphäre liegt die Ozonschicht. Sie blockt schädliche Sonnenstrahlung und schützt uns vor dessen negativen Auswirkungen.",
+        "cons": "Weiter am Boden wirkt Ozon jedoch als Treibhausgas und wird üblicherweise durch die Verbrennung von Gasen in Autos oder Fabriken erzeugt.",
+        "source": "https://climatekids.nasa.gov/greenhouse-cards/"
+      },
+      "fluorinatedgases": {
+        "title": "Fluorgase",
+        "type": "Treibhausgas",
+        "description": "Künstlich aber hoch effizient.",
+        "pros": "Fluorgase werden üblicherweise anstelle von Ozon-Schädlichen Gasen eingesetzt und können häufig in Haushaltsgeräten wie zum Beispiel einem Kühlschrank wiedergefunden werden. Manche Industrien bauen auch sehr stark auf diesen Gasen auf.",
+        "cons": "Diese Gase haben kein natürliches Vorkommen und werden künstlich hergestellt. Sie sind unglaublich starke Treibhausgase und können für mehrere tausend Jahre in der Atmosphäre verbleiben.",
+        "source": "https://climatekids.nasa.gov/greenhouse-cards/ , https://www.epa.gov/ghgemissions/overview-greenhouse-gases#f-gases"
+      },
+      "oxygen": {
+        "title": "Sauerstoff",
+        "type": "Atmosphärisches Gas",
+        "description": "Das Element, welches uns am Leben erhält.",
+        "pros": "Während Sauerstoff nicht das häufigste in unserer Atmosphäre ist, ist es dennoch das Wichtigste. Die meisten Lebensformen auf der Erde absorbieren dieses Gas durch das Atmen der Luft, was es zu einem essentiellen Gas macht.",
+        "cons": "Während der Nutzen in der Medizin auch riesig ist, wird Sauerstoff in der Industrie häufig als verbrennungsförderndes Gas verwendet.",
+        "source": "https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/oxygen.html"
+      },
+      "nitrogen": {
+        "title": "Stickstoff",
+        "type": "Atmosphärisches Gas",
+        "description": "Das häufigste Element in unserer Atmosphäre.",
+        "pros": "Als häufigstes Gas in der Erdatmosphäre und dessen stark inerte Natur machen Stickstoff zu einem sehr nützlichen Gas in vielen Anwendungen. Es wird sowohl in seiner Gasform als auch im flüssigen Zustand häufig in der Lebensmittel- oder Chemie-Industrie verwendet.",
+        "cons": "",
+        "source": "https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/nitrogen.html"
+      },
+      "argon": {
+        "title": "Argon",
+        "type": "Atmosphärisches Gas",
+        "description": "Kommt häufiger vor als Helium.",
+        "pros": "Argon ist ein Edelgas und inert, weshalb es auch in vielen Industrien verwendet werden kann. Ein Beispiel wäre der Gasschild eines Lichtbogens beim Lichtbogenschweißen.",
+        "cons": "",
+        "source": "https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/argon.html"
+      },
+      "helium": {
+        "title": "Helium",
+        "type": "Atmosphärisches Gas",
+        "description": "Die kälteste Substanz der Erde.",
+        "pros": "Helium ist ein Edelgas und inert. Dieses Attribut und der besonders niedrige Siedepunkt (-269°C) machen dieses Gas besonders wichtig in der Industrie.",
+        "cons": "Leider hat Helium großen Bedarf, aber geringes Vorkommen. Auf der Erde kann es hauptsächlich von natürlich vorkommenden Quellen bezogen werden.",
+        "source": "https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/helium.html"
+      }
+    },
+    "level_info": {
+      "start": "Start",
+      "ars_electronica": {
+        "title": "Ars Electronica Center",
+        "description": "Das AEC wird gerne auch \"Museum der Zukunft\" genannt und öffnete 1996 das erste Mal seine Türen.",
+        "difficulty": "Leicht",
+        "averageTemperature": "18,1 °C",
+        "climateType": "Vorstadt"
+      },
+      "city_center": {
+        "title": "Innenstadt",
+        "description": "Der Hauptplatz und das Zentrum von Linz.",
+        "difficulty": "Schwer",
+        "averageTemperature": "23,5 °C",
+        "climateType": "Innenstadt"
+      },
+      "railway_station": {
+        "title": "Bahnhof",
+        "description": "Ein Ort welcher viele Gesichter sieht.",
+        "difficulty": "Mittel",
+        "averageTemperature": "20,7 °C",
+        "climateType": "Stadt"
+      }
+    },
+    "settings": {
+      "reset" : {
+        "button": "Zurücksetzen",
+        "question": "Möchtest du deinen Speicherstand wirklich zurücksetzen? Diese Aktion kann nicht rückgängig gemacht werden!",
+        "confirm": "Ja",
+        "abort": "Nein"
+      },
+      "quit": {
+        "button": "Beenden",
+        "question": "Möchtest du das Spiel wirklich beenden?",
+        "confirm": "Ja",
+        "abort": "Nein"
+      }
+    }
+  },
+  "play": {
+    "confirm": "Weiter",
+    "victory": {
+      "oneStar": "Super!",
+      "twoStar": "Großartig!",
+      "threeStar": "Unglaublich!",
+      "randomTriviaLight": {
+        "1": "Dieses Jahr verzeichnete eine leichte Abnahme der durchschnittlichen Temperatur. Angenehme Winde an heißen Tagen sorgen für Wohlbefinden.",
+        "2": "Laut Statistik passierten im Vergleich zu letztem Jahr deutlich weniger Überflutungen.",
+        "3": "Landwirte berichten von deutlich weniger Ungeziefern auf ihren Feldern. Eine bessere und gesündere Ernte wird erwartet."
+      },
+      "randomTriviaMedium": {
+        "1": "Diesen Winter wird deutlich mehr Schneefall erwartet. Wunderbare Nachrichten für alle Ski-Enthusiasten!",
+        "2": "Die aktuelle Liste der bedrohten Tierarten ist aufgrund eines stabileren Klimas kleiner geworden.",
+        "3": "Manche Krankheiten scheinen weniger oft aufzutreten. Eine Verbindung zu dem positiven Wandel des Klimas wird nicht ausgeschlossen."
+      },
+      "randomTriviaHeavy": {
+        "1": "Hitzestaus in großen Städten werden aktiv bekämpft und beseitigt. Der Boden ist KEINE Lava mehr!",
+        "2": "Regelmäßiger Regen und weniger Trockenperioden haben das Ökosystem belebt. Österreich sieht bereits viel grüner aus!",
+        "3": "Nach jahrelangem Anstieg ist die Gletschergrenze dieses Jahr erstmals wieder gesunken. Natürliche Wasserreserven scheinen sich wieder zu stabilisieren."
+      }
+    },
+    "defeat": {
+      "noStar": "Ohje.",
+      "randomTriviaBad": {
+        "1": "Schwere Stürme und Überflutungen werden gegen Ende dieses Sommers erwartet.",
+        "2": "Österreich verzeichnet ab heute offiziell weniger Gletscher als im Vorjahr.",
+        "3": "Ein riesiger Brand breitet sich in den Wäldern der Steiermark aus."
+      }
+    }
+  }
+}
