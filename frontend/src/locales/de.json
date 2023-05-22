@@ -214,7 +214,8 @@
           "voteCount": "Anzahl der abgegebenen Stimmen",
           "add": "einen neuen Teilnehmer anlegen",
           "export": "Export Verbindungs-PDF",
-          "connectionInfo": "Du wurdest zu einer interaktiven Aktivität eingeladen worden. Um der Aktivität teilzunehmen, gib bitte deinen individuellen Schlüssels ein."
+          "connectionInfo": "Du wurdest zu einer interaktiven Aktivität eingeladen worden. Um der Aktivität teilzunehmen, gib bitte deinen individuellen Schlüssels ein.",
+          "everyoneCanJoin": "Jeder, der den öffentlichen Schlüssel besitzt, kann an der Sitzung teilnehmen."
         },
         "taskSettings": {
           "header": "Modul hinzufügen",

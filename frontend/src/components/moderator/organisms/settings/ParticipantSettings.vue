@@ -16,6 +16,8 @@
       </p>
     </template>
     <div v-if="!viewDetailsForParticipant">
+      {{ $t('moderator.organism.settings.participantSettings.everyoneCanJoin') }}
+      <el-switch v-if="session" v-model="everyoneCanJoin"></el-switch>
       <el-table
         v-if="participants && participants.length > 0"
         :data="participants"
@@ -103,7 +105,9 @@
               }}
             </p>
             <h2>{{ session.title }}</h2>
-            <p class="center">{{`${baseJoinLink}${participant.browserKey}`}}</p>
+            <p class="center">
+              {{ `${baseJoinLink}${participant.browserKey}` }}
+            </p>
             <p>{{ session.description }}</p>
             <div class="details">
               <div>
@@ -202,6 +206,7 @@ export default class LinkSettings extends Vue {
   session!: Session;
   participants: ParticipantInfo[] = [];
   viewDetailsForParticipant: ParticipantInfo | null = null;
+  everyoneCanJoin = true;
 
   showSettings = false;
 
@@ -246,11 +251,28 @@ export default class LinkSettings extends Vue {
     this.showSettings = showModal;
   }
 
+  @Watch('everyoneCanJoin', { immediate: true })
+  onEveryoneCanJoinChanged(): void {
+    if (this.session && this.dataLoaded) {
+      const everyoneCanJoinDB = this.session.maxParticipants !== 0;
+      if (everyoneCanJoinDB !== this.everyoneCanJoin) {
+        if (this.everyoneCanJoin) this.session.maxParticipants = null;
+        else this.session.maxParticipants = 0;
+        sessionService.put(this.session).then(() => {
+          if (this.sessionCash) {
+            this.sessionCash.refreshData();
+          }
+        });
+      }
+    }
+  }
+
   participantCash!: cashService.SimplifiedCashEntry<ParticipantInfo[]>;
+  sessionCash!: cashService.SimplifiedCashEntry<Session>;
   @Watch('sessionId', { immediate: true })
   async onSessionIdChanged(): Promise<void> {
     this.deregisterAll();
-    sessionService.registerGetById(
+    this.sessionCash = sessionService.registerGetById(
       this.sessionId,
       this.updateSession,
       EndpointAuthorisationType.MODERATOR,
@@ -265,6 +287,9 @@ export default class LinkSettings extends Vue {
   }
 
   updateSession(session: Session): void {
+    const everyoneCanJoin = session.maxParticipants !== 0;
+    if (this.everyoneCanJoin !== everyoneCanJoin)
+      this.everyoneCanJoin = everyoneCanJoin;
     this.session = session;
     this.dataLoaded = true;
   }
@@ -285,7 +310,7 @@ export default class LinkSettings extends Vue {
 
   async add(): Promise<void> {
     participantService
-      .connect(this.session.connectionKey)
+      .addParticipant(this.session.connectionKey)
       .then(() => this.participantCash.refreshData());
   }
 

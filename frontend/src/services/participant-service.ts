@@ -21,6 +21,18 @@ export const connect = async (
   );
 };
 
+export const addParticipant = async (
+  sessionKey: string
+): Promise<Participant | Partial<Participant>> => {
+  return await apiExecutePost<Participant>(
+    `/${EndpointType.PARTICIPANT_CONNECT}/`,
+    {
+      sessionKey,
+    },
+    EndpointAuthorisationType.MODERATOR
+  );
+};
+
 export const reconnect = async (browserKey: string): Promise<Participant> => {
   return await apiExecuteGetHandled<Participant>(
     `/${EndpointType.PARTICIPANT_RECONNECT}/${browserKey}/`,

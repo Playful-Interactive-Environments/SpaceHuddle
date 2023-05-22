@@ -5,7 +5,7 @@ export interface Session {
   creationDate: string;
   expirationDate: string;
   id: string;
-  maxParticipants: number;
+  maxParticipants: number | null;
   userCount: number;
   participantCount: number;
   description: string;
