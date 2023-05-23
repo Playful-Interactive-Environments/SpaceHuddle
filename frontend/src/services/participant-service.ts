@@ -3,6 +3,7 @@ import {
   apiExecuteDelete,
   apiExecuteGetHandled,
   apiExecutePost,
+  apiExecutePut,
 } from '@/services/api';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
@@ -70,5 +71,13 @@ export const remove = async (id: string): Promise<boolean> => {
     null,
     EndpointAuthorisationType.MODERATOR,
     true
+  );
+};
+
+export const changeParameter = async (parameter: object): Promise<boolean> => {
+  return await apiExecutePut<boolean>(
+    `/${EndpointType.PARTICIPANT}/${EndpointType.PARAMETER}/`,
+    { parameter: parameter },
+    EndpointAuthorisationType.PARTICIPANT
   );
 };

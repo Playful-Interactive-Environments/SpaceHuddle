@@ -44,6 +44,7 @@ enum EndpointType {
   STEP = 'step',
   LAST = 'last',
   FINAL = 'final',
+  PARAMETER = 'parameter',
 }
 
 export default EndpointType;

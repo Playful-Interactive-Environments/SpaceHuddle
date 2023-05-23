@@ -1,12 +1,13 @@
 import '@/assets/styles/global.scss';
 import { createApp } from 'vue';
 import VueCookies from 'vue3-cookies';
-import i18n from '@/i18n';
 import setViewportVariables from '@/vunit';
 import App from './App.vue';
 import router from './router';
 import mitt, { Emitter, EventType } from 'mitt';
 import VueObserveVisibility from 'vue3-observe-visibility2';
+import * as i18n from '@/i18n';
+import * as authService from '@/services/auth-service';
 
 import ElementPlus from 'element-plus';
 import '@/assets/styles/element-plus.scss';
@@ -56,7 +57,6 @@ const eventBus = mitt();
 const app = createApp(App);
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.use(router);
-app.use(i18n);
 app.use(VueCookies as any, {
   expireTimes: '356d',
   secure: true,
@@ -65,6 +65,7 @@ app.use(VueCookies as any, {
 app.config.globalProperties.eventBus = eventBus;
 app.use(ElementPlus);
 app.use(VueObserveVisibility);
+app.use(i18n.customI18n(authService.getLocale()));
 app.mount('#app');
 
 setViewportVariables();

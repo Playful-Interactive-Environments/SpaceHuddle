@@ -217,6 +217,10 @@
           "connectionInfo": "Du wurdest zu einer interaktiven Aktivität eingeladen worden. Um der Aktivität teilzunehmen, gib bitte deinen individuellen Schlüssels ein.",
           "everyoneCanJoin": "Jeder, der den öffentlichen Schlüssel besitzt, kann an der Sitzung teilnehmen."
         },
+        "languageSettings": {
+          "header": "Sprache verwalten",
+          "info": "Spracheinstellungen ändern."
+        },
         "taskSettings": {
           "header": "Modul hinzufügen",
           "info": "In den Modulen spielt sich die gesamte Interaktion ab.",
@@ -523,6 +527,10 @@
     "userType": {
       "FACILITATOR": "Co-Moderator",
       "MODERATOR": "Moderator"
+    },
+    "locale": {
+      "en": "Englisch",
+      "de": "Deutsch"
     }
   },
   "general": {

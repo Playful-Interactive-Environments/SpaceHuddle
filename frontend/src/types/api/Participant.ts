@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+
 export enum ConnectState {
   ACTIVE = 'ACTIVE',
   FAILED = 'Failed',
@@ -14,6 +16,7 @@ export interface Participant {
     browserKey: string;
     state: ConnectState;
     avatar: Avatar;
+    parameter: any;
   };
   token: {
     message: string;

@@ -16,7 +16,9 @@
       </p>
     </template>
     <div v-if="!viewDetailsForParticipant">
-      {{ $t('moderator.organism.settings.participantSettings.everyoneCanJoin') }}
+      {{
+        $t('moderator.organism.settings.participantSettings.everyoneCanJoin')
+      }}
       <el-switch v-if="session" v-model="everyoneCanJoin"></el-switch>
       <el-table
         v-if="participants && participants.length > 0"
@@ -197,7 +199,7 @@ import Vue3Html2pdf from 'vue3-html2pdf';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class LinkSettings extends Vue {
+export default class ParticipantSettings extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
 
   @Prop({ default: false }) showModal!: boolean;

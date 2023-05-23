@@ -174,6 +174,10 @@ export default class ParticipantJoin extends Vue {
         authService.setAccessTokenParticipant(
           participantData.token.accessToken as string
         );
+        if (participantData.participant.parameter.locale) {
+          authService.setLocale(participantData.participant.parameter.locale);
+          this.$i18n.locale = participantData.participant.parameter.locale;
+        }
         this.$router.push({
           name: RouteName.PARTICIPANT_OVERVIEW,
         });

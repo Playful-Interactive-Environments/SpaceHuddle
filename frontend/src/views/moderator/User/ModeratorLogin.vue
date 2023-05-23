@@ -120,6 +120,10 @@ export default class ModeratorLogin extends Vue {
       if (result.accessToken) {
         authService.setAccessTokenModerator(result.accessToken);
         authService.setUserData(this.formData.email);
+        if (result.parameter.locale) {
+          authService.setLocale(result.parameter.locale);
+          this.$i18n.locale = result.parameter.locale;
+        }
         this.$router.push({
           name: RouteName.MODERATOR_SESSION_OVERVIEW,
         });

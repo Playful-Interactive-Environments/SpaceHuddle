@@ -21,7 +21,7 @@
             :content="$t('participant.view.overview.avatar')"
             placement="top"
           >
-            <span class="avatar">
+            <span class="avatar" v-on:click="showLanguageSettings = true">
               <span>
                 <font-awesome-icon
                   :icon="avatar.symbol"
@@ -94,6 +94,7 @@
       </el-button>
     </router-link>
   </ParticipantDefaultContainer>
+  <LanguageSettings v-model:show-modal="showLanguageSettings" />
 </template>
 
 <script lang="ts">
@@ -114,9 +115,11 @@ import { Session } from '@/types/api/Session';
 import * as cashService from '@/services/cash-service';
 import { Avatar } from '@/types/api/Participant';
 import * as authService from '@/services/auth-service';
+import LanguageSettings from '@/components/moderator/organisms/settings/LanguageSettings.vue';
 
 @Options({
   components: {
+    LanguageSettings,
     ParticipantDefaultContainer,
     Timer,
     TaskInfo,
@@ -134,6 +137,7 @@ export default class ParticipantOverview extends Vue {
   openTabs: string[] = [];
   EndpointAuthorisationType = EndpointAuthorisationType;
   avatar!: Avatar;
+  showLanguageSettings = false;
 
   getColor(task: Task): string | undefined {
     if (task.taskType) {

@@ -8,12 +8,9 @@ import {
   isParticipant,
 } from '@/services/auth-service';
 import { ElMessage } from 'element-plus';
-import i18n from '../i18n';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { RouteName } from '@/types/enum/RouteName';
 import * as sessionService from '@/services/session-service';
-
-const { t } = i18n.global;
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -70,6 +67,7 @@ const translateOrGetFallback = (
   fallback: string,
   itemContent?: string[]
 ) => {
+  const t = app.config.globalProperties.$t;
   let translation = t(key) || fallback;
 
   if (translation.length === 0) {
@@ -245,6 +243,7 @@ export const apiErrorHandling = async (
 
 const reportErrors = (errors: string[]): void => {
   console.log('reportErrors', errors);
+  const t = app.config.globalProperties.$t;
   errors.forEach((error) => {
     ElMessage({
       message: t(error),

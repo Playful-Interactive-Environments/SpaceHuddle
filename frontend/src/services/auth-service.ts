@@ -1,7 +1,8 @@
 import jwt_decode from 'jwt-decode';
-import app from '@/main';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Avatar } from '@/types/api/Participant';
+import { useCookies } from 'vue3-cookies';
+const { cookies } = useCookies();
 
 const JWT_KEY = 'jwt';
 const JWT_KEY_MODERATOR = 'jwt-moderator';
@@ -10,6 +11,7 @@ const BROWSER_KEYS = 'keys';
 const LAST_BROWSER_KEY = 'key';
 const LAST_AVATAR = 'avatar';
 const USER_KEY = 'user';
+const LOCALE = 'locale';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -77,50 +79,47 @@ export const getAccessToken = (
     case EndpointAuthorisationType.PARTICIPANT:
       return getAccessTokenParticipant();
   }
-  return app.config.globalProperties.$cookies.get(JWT_KEY);
+  return cookies.get(JWT_KEY);
 };
 
 export const setAccessToken = (jwt: string): void => {
-  app.config.globalProperties.$cookies.set(JWT_KEY, 'Bearer ' + jwt);
+  cookies.set(JWT_KEY, 'Bearer ' + jwt);
 };
 
 export const setAccessTokenModerator = (jwt: string): void => {
-  app.config.globalProperties.$cookies.set(JWT_KEY_MODERATOR, 'Bearer ' + jwt);
+  cookies.set(JWT_KEY_MODERATOR, 'Bearer ' + jwt);
 };
 
 export const getAccessTokenModerator = (): string | null => {
-  return app.config.globalProperties.$cookies.get(JWT_KEY_MODERATOR);
+  return cookies.get(JWT_KEY_MODERATOR);
 };
 
 export const setAccessTokenParticipant = (jwt: string): void => {
-  app.config.globalProperties.$cookies.set(
-    JWT_KEY_PARTICIPANT,
-    'Bearer ' + jwt
-  );
+  cookies.set(JWT_KEY_PARTICIPANT, 'Bearer ' + jwt);
 };
 
 export const getAccessTokenParticipant = (): string | null => {
-  return app.config.globalProperties.$cookies.get(JWT_KEY_PARTICIPANT);
+  return cookies.get(JWT_KEY_PARTICIPANT);
 };
 
 export const removeAccessToken = (): void => {
-  //app.config.globalProperties.$cookies.remove(JWT_KEY_MODERATOR);
-  //app.config.globalProperties.$cookies.remove(JWT_KEY_PARTICIPANT);
+  //cookies.remove(JWT_KEY_MODERATOR);
+  //cookies.remove(JWT_KEY_PARTICIPANT);
 };
 
 export const removeAccessTokenModerator = (): void => {
-  app.config.globalProperties.$cookies.remove(JWT_KEY_MODERATOR);
+  cookies.remove(JWT_KEY_MODERATOR);
 };
 
 export const setBrowserKey = (key: string): void => {
-  app.config.globalProperties.$cookies.set(LAST_BROWSER_KEY, key);
+  cookies.set(LAST_BROWSER_KEY, key);
   const keys = getBrowserKeys();
   if (!keys.includes(key)) keys.push(key);
-  app.config.globalProperties.$cookies.set(BROWSER_KEYS, JSON.stringify(keys));
+  cookies.set(BROWSER_KEYS, JSON.stringify(keys));
 };
 
 export const getBrowserKeys = (): string[] => {
-  let keys = eval(app.config.globalProperties.$cookies.get(BROWSER_KEYS));
+  let keys = eval(cookies.get(BROWSER_KEYS));
   if (!keys || !Array.isArray(keys) || keys.length === 0) {
     const key = getLastBrowserKey();
     if (!key) keys = [];
@@ -130,21 +129,30 @@ export const getBrowserKeys = (): string[] => {
 };
 
 export const setAvatar = (avatar: Avatar): void => {
-  app.config.globalProperties.$cookies.set(LAST_AVATAR, JSON.stringify(avatar));
+  cookies.set(LAST_AVATAR, JSON.stringify(avatar));
 };
 
 export const getAvatar = (): Avatar => {
-  return eval(app.config.globalProperties.$cookies.get(LAST_AVATAR));
+  return eval(cookies.get(LAST_AVATAR));
 };
 
 export const getLastBrowserKey = (): string | null => {
-  return app.config.globalProperties.$cookies.get(LAST_BROWSER_KEY);
+  return cookies.get(LAST_BROWSER_KEY);
 };
 
 export const setUserData = (email: string): void => {
-  app.config.globalProperties.$cookies.set(USER_KEY, email);
+  cookies.set(USER_KEY, email);
 };
 
 export const getUserData = (): string | null => {
-  return app.config.globalProperties.$cookies.get(USER_KEY);
+  return cookies.get(USER_KEY);
+};
+
+export const setLocale = (locale: string): void => {
+  if (cookies) cookies.set(LOCALE, locale);
+};
+
+export const getLocale = (): string | null => {
+  if (cookies) return cookies.get(LOCALE);
+  return null;
 };

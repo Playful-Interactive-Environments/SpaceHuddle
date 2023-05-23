@@ -149,7 +149,7 @@ import * as cashService from '@/services/cash-service';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class LinkSettings extends Vue {
+export default class FacilitatorSettings extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
 
   @Prop({ default: false }) showModal!: boolean;

@@ -41,6 +41,14 @@ export const changePassword = async (
   );
 };
 
+export const changeParameter = async (parameter: object): Promise<boolean> => {
+  return await apiExecutePut<boolean>(
+    `/${EndpointType.USER}/${EndpointType.PARAMETER}/`,
+    { parameter: parameter },
+    EndpointAuthorisationType.MODERATOR
+  );
+};
+
 export const loginUser = async (
   email: string,
   password: string

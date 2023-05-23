@@ -1,4 +1,4 @@
-import { createI18n } from 'vue-i18n';
+import { createI18n, I18n } from 'vue-i18n';
 import de from '@/locales/de.json';
 import en from '@/locales/en.json';
 import { getEnumLocales, getLocales } from '@/modules';
@@ -28,12 +28,22 @@ const locale =
     ? language
     : process.env.VUE_APP_I18N_LOCALE || 'en';
 
-const i18n = createI18n({
-  locale: locale,
-  fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'en',
-  messages,
-  availableLocales,
-  legacy: false,
-});
+export const defaultI18n = (): I18n => {
+  return createI18n({
+    locale: locale,
+    fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'en',
+    messages,
+    availableLocales,
+    legacy: false,
+  });
+};
 
-export default i18n;
+export const customI18n = (language: string | null): I18n => {
+  return createI18n({
+    locale: language ?? locale,
+    fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'en',
+    messages,
+    availableLocales,
+    legacy: false,
+  });
+};
