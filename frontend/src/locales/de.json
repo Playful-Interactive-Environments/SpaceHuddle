@@ -215,6 +215,9 @@
           "add": "einen neuen Teilnehmer anlegen",
           "export": "Export Verbindungs-PDF",
           "connectionInfo": "Du wurdest zu einer interaktiven Aktivität eingeladen worden. Um der Aktivität teilzunehmen, gib bitte deinen individuellen Schlüssels ein.",
+          "connectionSubject": "Deine individuelle Spacehuddle-Einladung",
+          "key": "Teilnahmeschlüssel",
+          "link": "Link",
           "everyoneCanJoin": "Jeder, der den öffentlichen Schlüssel besitzt, kann an der Sitzung teilnehmen."
         },
         "languageSettings": {

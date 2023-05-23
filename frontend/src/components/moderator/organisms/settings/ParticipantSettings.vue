@@ -56,8 +56,14 @@
             $t('moderator.organism.settings.participantSettings.voteCount')
           "
         />
-        <el-table-column width="60">
+        <el-table-column width="120">
           <template #default="scope">
+            <span v-on:click="mailParticipant(scope.$index)">
+              <font-awesome-icon class="icon link" icon="at" />
+            </span>
+            <span v-on:click="copyParticipant(scope.$index)">
+              <font-awesome-icon class="icon link" icon="copy" />
+            </span>
             <span
               v-on:click="deleteParticipant(scope.$index)"
               v-if="scope.row.ideaCount === 0 && scope.row.voteCount === 0"
@@ -314,6 +320,30 @@ export default class ParticipantSettings extends Vue {
     participantService
       .addParticipant(this.session.connectionKey)
       .then(() => this.participantCash.refreshData());
+  }
+
+  async mailParticipant(index: number): Promise<void> {
+    const link = `${this.baseJoinLink}${this.participants[index].browserKey}`;
+    const body = `${this.$t(
+      'moderator.organism.settings.participantSettings.connectionInfo'
+    )}
+
+${this.$t('moderator.organism.settings.participantSettings.key')}: ${
+      this.participants[index].browserKey
+    }
+${this.$t('moderator.organism.settings.participantSettings.link')}: ${link}`;
+
+    window.open(
+      `mailto:?subject=${this.$t(
+        'moderator.organism.settings.participantSettings.connectionSubject'
+      )}&body=${encodeURI(body)}`
+    );
+  }
+
+  async copyParticipant(index: number): Promise<void> {
+    this.copyToClipboard(
+      `${this.baseJoinLink}${this.participants[index].browserKey}`
+    );
   }
 
   async deleteParticipant(index: number): Promise<void> {
