@@ -39,6 +39,13 @@ class TokenData
     public ?int $expiresIn;
 
     /**
+     * Variable json parameters depending on the task type.
+     * @var object|null
+     * @OA\Property(type="object", format="json")
+     */
+    public ?object $parameter;
+
+    /**
      * Creates a new Token.
      * @param array $data Participant data.
      */
@@ -49,5 +56,6 @@ class TokenData
         $this->accessToken = $reader->findString("accessToken");
         $this->tokenType = $reader->findString("tokenType");
         $this->expiresIn = $reader->findInt("expiresIn");
+        $this->parameter = (object)json_decode($reader->findString("parameter"));
     }
 }

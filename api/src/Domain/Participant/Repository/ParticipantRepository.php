@@ -344,6 +344,32 @@ class ParticipantRepository implements RepositoryInterface
     }
 
     /**
+     * Update entity row.
+     * @param object|array $data The entity to change.
+     * @return object|null The result entity.
+     */
+    public function updateParameter(object|array $data): ?object
+    {
+        if (!is_array($data)) {
+            $usedKeys = array_values($this->translateKeys((array)$data));
+            $data = [
+                "id" => $data->id ?? null,
+                "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null
+            ];
+        }
+
+        $id = $data["id"];
+        unset($data["id"]);
+        $data["modification_date"] = date('Y-m-d H:i:s');
+
+        $this->queryFactory->newUpdate($this->getEntityName(), $data)
+            ->andWhere(["id" => $id])
+            ->execute();
+
+        return $this->getById($id);
+    }
+
+    /**
      * Convert to array.
      * @param object $data The entity data
      * @return array<string, mixed> The array
@@ -357,7 +383,8 @@ class ParticipantRepository implements RepositoryInterface
             "state" => $data->state ?? null,
             "color" => $data->color ?? null,
             "symbol" => $data->symbol ?? null,
-            "ip_hash" => $data->ipHash ?? null
+            "ip_hash" => $data->ipHash ?? null,
+            "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null
         ];
     }
 }

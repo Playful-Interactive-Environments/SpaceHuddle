@@ -48,11 +48,13 @@ p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /user/forget-password/, PUT
 p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /user/reset/:email/, PUT
 p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /user/confirm/:token/, PUT
 p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /user/send-confirm/:email/, PUT
+p, MODERATOR, /user/parameter/, PUT
 p, MODERATOR, /user/, PUT
 p, MODERATOR, /user/, DELETE
 
 p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /participant/connect/, POST
 p, UNKNOWN|ANONYMOUS|MODERATOR|PARTICIPANT, /participant/reconnect/:browserKey/, GET
+p, PARTICIPANT, /participant/parameter/, PUT
 p, MODERATOR|PARTICIPANT|INACTIVE, /participant/state/:state/, PUT
 p, MODERATOR, /participant/:id/, DELETE
 p, PARTICIPANT, /participant/, DELETE

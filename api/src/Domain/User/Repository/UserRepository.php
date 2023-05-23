@@ -197,6 +197,32 @@ final class UserRepository implements RepositoryInterface
             ->execute();
     }
 
+    /**
+     * Update entity row.
+     * @param object|array $data The entity to change.
+     * @return object|null The result entity.
+     */
+    public function updateParameter(object|array $data): ?object
+    {
+        if (!is_array($data)) {
+            $usedKeys = array_values($this->translateKeys((array)$data));
+            $data = [
+                "id" => $data->id ?? null,
+                "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null
+            ];
+        }
+
+        $id = $data["id"];
+        unset($data["id"]);
+        $data["modification_date"] = date('Y-m-d H:i:s');
+
+        $this->queryFactory->newUpdate($this->getEntityName(), $data)
+            ->andWhere(["id" => $id])
+            ->execute();
+
+        return $this->getById($id);
+    }
+
 
     /**
      * Convert to array.
@@ -208,7 +234,8 @@ final class UserRepository implements RepositoryInterface
         return [
             "id" => $data->id,
             "username" => $data->username,
-            "password" => $data->password
+            "password" => $data->password,
+            "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null
         ];
     }
 }

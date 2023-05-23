@@ -70,6 +70,7 @@ CREATE TABLE `user` (
                         `password` varchar(255) NOT NULL,
                         `confirmed` TINYINT(1) DEFAULT 0,
                         `creation_date` datetime NOT NULL DEFAULT current_timestamp(),
+                        `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
                         `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -117,6 +118,7 @@ CREATE TABLE `participant` (
                                `color` varchar(255) DEFAULT NULL,
                                `symbol` varchar(255) DEFAULT NULL,
                                `ip_hash` varchar(255) NOT NULL,
+                               `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
                                `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

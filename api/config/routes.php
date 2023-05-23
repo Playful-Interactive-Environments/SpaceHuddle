@@ -44,6 +44,7 @@ use App\Action\Participant\ParticipantReadTaskAction;
 use App\Action\Participant\ParticipantReadTopicAction;
 use App\Action\Participant\ParticipantReconnectAction;
 use App\Action\Participant\ParticipantUpdateAction;
+use App\Action\Participant\ParticipantUpdateParameterAction;
 use App\Action\PreflightAction;
 use App\Action\Resource\ResourceCreateAction;
 use App\Action\Resource\ResourceDeleteAction;
@@ -99,6 +100,7 @@ use App\Action\Topic\TopicReadSingleAction;
 use App\Action\Topic\TopicUpdateAction;
 use App\Action\Tutorial\TutorialCreateAction;
 use App\Action\Tutorial\TutorialReadAllAction;
+use App\Action\User\UserChangeParameterAction;
 use App\Action\User\UserChangePasswordAction;
 use App\Action\User\UserConfirmAction;
 use App\Action\User\UserDeleteAction;
@@ -169,12 +171,7 @@ return function (App $app) {
         "/participant",
         function (RouteCollectorProxy $app) {
             $app->post("/connect[/]", ParticipantConnectAction::class);
-            $app->get("/tasks[/]", ParticipantReadTaskAction::class);
-            $app->get("/topics[/]", ParticipantReadTopicAction::class);
             $app->get("/reconnect/{browserKey}[/]", ParticipantReconnectAction::class);
-            $app->put("/state/{state}[/]", ParticipantUpdateAction::class);
-            $app->delete("[/]", ParticipantDeleteAction::class);
-            $app->delete("/{id}[/]", ParticipantDeleteAction::class);
         }
     );
 
@@ -182,8 +179,21 @@ return function (App $app) {
     $app->group(
         "/user",
         function (RouteCollectorProxy $app) {
+            $app->put("/parameter[/]", UserChangeParameterAction::class);
             $app->put("[/]", UserChangePasswordAction::class);
             $app->delete("[/]", UserDeleteAction::class);
+        }
+    )->add(JwtAuthMiddleware::class);
+
+    $app->group(
+        "/participant",
+        function (RouteCollectorProxy $app) {
+            $app->get("/tasks[/]", ParticipantReadTaskAction::class);
+            $app->get("/topics[/]", ParticipantReadTopicAction::class);
+            $app->put("/parameter/[/]", ParticipantUpdateParameterAction::class);
+            $app->put("/state/{state}[/]", ParticipantUpdateAction::class);
+            $app->delete("[/]", ParticipantDeleteAction::class);
+            $app->delete("/{id}[/]", ParticipantDeleteAction::class);
         }
     )->add(JwtAuthMiddleware::class);
 

@@ -63,7 +63,8 @@ trait ParticipantConnectServiceTrait
             "message" => "Successful connected.",
             "accessToken" => $jwt,
             "tokenType" => "Bearer",
-            "expiresIn" => $this->jwtAuth->getLifetime()
+            "expiresIn" => $this->jwtAuth->getLifetime(),
+            "parameter" => json_encode($participant->parameter)
         ]);
 
         return new ParticipantTokenData($participant, $tokenResult);

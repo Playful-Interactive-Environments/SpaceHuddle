@@ -38,6 +38,13 @@ class ParticipantData
     public ?AvatarData $avatar;
 
     /**
+     * Variable json parameters depending on the task type.
+     * @var object|null
+     * @OA\Property(type="object", format="json")
+     */
+    public ?object $parameter;
+
+    /**
      * Creates a new Participant.
      * @param array $data Participant data.
      */
@@ -47,6 +54,7 @@ class ParticipantData
         $this->id = $reader->findString("id");
         $this->browserKey = $reader->findString("browser_key");
         $this->state = strtoupper($reader->findString("state"));
+        $this->parameter = (object)json_decode($reader->findString("parameter"));
         $this->avatar = new AvatarData($data);
     }
 }

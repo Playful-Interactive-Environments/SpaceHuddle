@@ -25,6 +25,13 @@ final class UserData
     public ?string $username = null;
 
     /**
+     * Variable json parameters depending on the task type.
+     * @var object|null
+     * @OA\Property(type="object", format="json")
+     */
+    public ?object $parameter;
+
+    /**
      * Creates a new User.
      * @param array $data User data.
      */
@@ -33,5 +40,6 @@ final class UserData
         $reader = new ArrayReader($data);
         $this->id = $reader->findString("id");
         $this->username = $reader->findString("username");
+        $this->parameter = (object)json_decode($reader->findString("parameter"));
     }
 }

@@ -52,7 +52,8 @@ final class UserLogin
             "message" => "Successful login.",
             "accessToken" => $jwt,
             "tokenType" => "Bearer",
-            "expiresIn" => $this->jwtAuth->getLifetime()
+            "expiresIn" => $this->jwtAuth->getLifetime(),
+            "parameter" => json_encode($result->parameter)
         ]);
     }
 }
