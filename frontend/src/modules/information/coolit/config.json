@@ -1,6 +1,6 @@
 {
   "icon": "smog",
   "type": "main",
-  "input": "optional",
+  "input": "no",
   "syncPublicParticipant": false
 }

@@ -1,84 +1,53 @@
 <template>
-  <ParticipantModuleDefaultContainer
-    :task-id="taskId"
-    :module="moduleName"
-    style="padding: 1rem 2rem 0"
-  >
-    <CoolIt />
-  </ParticipantModuleDefaultContainer>
+  <div ref="gameContainer">
+    <CoolIt v-if="displayGame" />
+  </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import CoolIt from '@/games/coolit/CoolIt.vue';
-import ParticipantModuleDefaultContainer from '@/components/participant/organisms/layout/ParticipantModuleDefaultContainer.vue';
-import { Prop, Watch } from 'vue-property-decorator';
-import { Module } from '@/types/api/Module';
-import { Task } from '@/types/api/Task';
-import * as taskService from '@/services/task-service';
-import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import * as cashService from '@/services/cash-service';
-import * as moduleService from '@/services/module-service';
+import { Prop } from 'vue-property-decorator';
 
 @Options({
   components: {
-    ParticipantModuleDefaultContainer,
     CoolIt,
   },
+  emits: ['update:useFullSize'],
 })
 export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
   @Prop({ default: false }) readonly useFullSize!: boolean;
   @Prop({ default: '' }) readonly backgroundClass!: string;
+  displayGame = false;
 
-  module: Module | null = null;
-  task: Task | null = null;
-
-  @Watch('taskId', { immediate: true })
-  onTaskIdChanged(): void {
-    cashService.deregisterAllGet(this.updateTask);
-    cashService.deregisterAllGet(this.updateModule);
-    taskService.registerGetTaskById(
-      this.taskId,
-      this.updateTask,
-      EndpointAuthorisationType.PARTICIPANT,
-      60 * 60
-    );
-  }
-
-  @Watch('moduleId', { immediate: true })
-  onModuleIdChanged(): void {
-    if (this.moduleId) {
-      moduleService.registerGetModuleById(
-        this.moduleId,
-        this.updateModule,
-        EndpointAuthorisationType.PARTICIPANT,
-        60 * 60
-      );
-    }
-  }
-
-  get moduleName(): string {
-    if (this.module) return this.module.name;
-    return '';
-  }
-
-  mounted(): void {
-    this.$emit('update:useFullSize', true);
-    this.$emit('update:drawNavigation', false);
-  }
-
-  unmounted(): void {
-    cashService.deregisterAllGet(this.updateTask);
-    cashService.deregisterAllGet(this.updateModule);
-  }
-  updateTask(task: Task): void {
-    this.task = task;
-  }
-
-  updateModule(module: Module): void {
-    this.module = module;
+  async mounted(): Promise<void> {
+    //this.$emit('update:useFullSize', true);
+    //this.$emit('update:drawNavigation', false);
+    setTimeout(() => {
+      const dom = this.$refs.gameContainer as HTMLElement;
+      if (dom) {
+        const targetWidth = dom.parentElement?.offsetWidth;
+        const targetHeight = dom.parentElement?.offsetHeight;
+        this.displayGame = true;
+        if (targetWidth && targetHeight) {
+          (dom as any).style.width = `${targetWidth}px`;
+          (dom as any).style.height = `${targetHeight}px`;
+          /*setTimeout(() => {
+            const canvas = dom.getElementsByTagName('canvas')[0] as HTMLCanvasElement;
+            if (canvas) {
+              (canvas as any).style.width = `${targetWidth}px`;
+              (canvas as any).style.height = `${targetHeight}px`;
+              //canvas.width = targetWidth;
+              //canvas.height = targetHeight;
+            }
+          }, 100);*/
+        }
+      }
+    }, 100);
   }
 }
 </script>
+
+<style lang="scss" scoped></style>
