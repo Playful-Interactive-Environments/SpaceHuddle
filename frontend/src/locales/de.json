@@ -343,6 +343,7 @@
         "header": "Dein Profil",
         "info": "E-Mail Adresse: ",
         "changePassword": "Passwort ändern",
+        "changeLanguage": "Sprache ändern",
         "delete": "Profil löschen",
         "submit": "Abmelden"
       },

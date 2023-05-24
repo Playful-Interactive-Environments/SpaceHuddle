@@ -65,6 +65,7 @@ import * as userService from '@/services/user-service';
 export default class LanguageSettings extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
   @Prop({ default: false }) showModal!: boolean;
+  @Prop({ default: true }) isParticipant!: boolean;
 
   showSettings = false;
 
@@ -106,7 +107,7 @@ export default class LanguageSettings extends Vue {
   async save(): Promise<void> {
     authService.setLocale(this.formData.locale);
     this.$i18n.locale = this.formData.locale;
-    if (authService.isParticipant()) {
+    if (this.isParticipant) {
       await participantService.changeParameter({
         locale: this.formData.locale,
       });

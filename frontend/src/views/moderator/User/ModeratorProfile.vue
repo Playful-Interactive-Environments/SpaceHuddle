@@ -16,6 +16,13 @@
         <el-button
           type="info"
           class="static-width el-button--submit"
+          @click="showLanguageSettings = true"
+        >
+          {{ $t('moderator.view.profile.changeLanguage') }}
+        </el-button>
+        <el-button
+          type="info"
+          class="static-width el-button--submit"
           @click="logout"
         >
           {{ $t('moderator.view.profile.submit') }}
@@ -30,6 +37,7 @@
       </div>
     </template>
   </ModeratorNavigationLayout>
+  <LanguageSettings v-model:show-modal="showLanguageSettings" :isParticipant="false" />
 </template>
 
 <script lang="ts">
@@ -37,14 +45,17 @@ import { Options, Vue } from 'vue-class-component';
 import * as authService from '@/services/auth-service';
 import ModeratorNavigationLayout from '@/components/moderator/organisms/layout/ModeratorNavigationLayout.vue';
 import * as userService from '@/services/user-service';
+import LanguageSettings from '@/components/moderator/organisms/settings/LanguageSettings.vue';
 
 @Options({
   components: {
     ModeratorNavigationLayout,
+    LanguageSettings,
   },
 })
 export default class ModeratorProfile extends Vue {
   email = '';
+  showLanguageSettings = false;
 
   mounted(): void {
     this.email = authService.getUserData() || '';

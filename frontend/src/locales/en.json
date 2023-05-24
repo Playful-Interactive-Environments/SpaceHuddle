@@ -343,6 +343,7 @@
         "header": "Your Profile",
         "info": "Email Address: ",
         "changePassword": "Change Password",
+        "changeLanguage": "Change Language",
         "delete": "Delete Profile",
         "submit": "Logout"
       },

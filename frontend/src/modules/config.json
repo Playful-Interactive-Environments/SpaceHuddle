@@ -55,7 +55,7 @@
        "coolit": {  
            "participant": "output/Participant",  
            "locales": "de,en,",  
-             "icon": "smog",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  
+             "icon": "smog",  "type": "main",  "input": "optional",  "syncPublicParticipant": false,  
            "path": "information/coolit"  
        },  
        "default": {  
