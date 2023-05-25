@@ -33,6 +33,15 @@
              "icon": "bowling-ball",  "type": "addOn",  "input": "optional",  "syncPublicParticipant": false,  
            "path": "brainstorming/game"  
        },  
+       "map": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "de,en,",  
+             "icon": "map-location-dot",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
+           "path": "brainstorming/map"  
+       },  
        "settings": {  
            "parameter": "TaskParameter",  
            "path": "brainstorming/settings"  
@@ -55,7 +64,7 @@
        "coolit": {  
            "participant": "output/Participant",  
            "locales": "de,en,",  
-             "icon": "smog",  "type": "main",  "input": "optional",  "syncPublicParticipant": false,  
+             "icon": "smog",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
            "path": "information/coolit"  
        },  
        "default": {  

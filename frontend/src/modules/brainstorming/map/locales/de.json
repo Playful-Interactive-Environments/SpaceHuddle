@@ -1,0 +1,11 @@
+{
+  "description": {
+    "title": "Pin auf Karte",
+    "description": "verankere deine Ideen auf der Karte"
+  },
+  "participant": {
+  },
+  "moderatorConfig": {
+    "mapSection": "Kartenausschnitt"
+  }
+}

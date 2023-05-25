@@ -136,6 +136,7 @@ export enum CollapseIdeas {
   components: { IdeaSettings },
   emits: [
     'ideaDeleted',
+    'ideaStartEdit',
     'update:isSelected',
     'update:collapseIdeas',
     'update:fadeIn',
@@ -145,6 +146,7 @@ export enum CollapseIdeas {
 export default class IdeaCard extends Vue {
   @Prop() idea!: Idea;
   @Prop({ default: true }) isEditable!: boolean;
+  @Prop({ default: true }) handleEditable!: boolean;
   @Prop({ default: true }) canChangeState!: boolean;
   @Prop({ default: true }) showState!: boolean;
   @Prop({ default: false }) isSelectable!: boolean;
@@ -314,7 +316,8 @@ export default class IdeaCard extends Vue {
   menuItemSelected(command: string): void {
     switch (command) {
       case 'edit':
-        this.showSettings = true;
+        if (this.handleEditable) this.showSettings = true;
+        else this.$emit('ideaStartEdit', this.idea.id);
         break;
       case 'delete':
         this.deleteIdea();

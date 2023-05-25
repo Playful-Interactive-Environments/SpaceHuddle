@@ -185,7 +185,7 @@ export default class IdeaSettings extends Vue {
         });
     } else if (this.taskId) {
       await ideaService
-        .postIdea(this.taskId, this.idea, EndpointAuthorisationType.MODERATOR)
+        .postIdea(this.taskId, this.idea, this.authHeaderTyp)
         .then((queryResult) => {
           this.$emit('updateData', queryResult);
         });

@@ -37,7 +37,10 @@
       </div>
     </template>
   </ModeratorNavigationLayout>
-  <LanguageSettings v-model:show-modal="showLanguageSettings" :isParticipant="false" />
+  <LanguageSettings
+    v-model:show-modal="showLanguageSettings"
+    :isParticipant="false"
+  />
 </template>
 
 <script lang="ts">

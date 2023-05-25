@@ -15,6 +15,7 @@ import { Prop } from 'vue-property-decorator';
   },
   emits: ['update:useFullSize'],
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;

@@ -94,7 +94,10 @@
       </el-button>
     </router-link>
   </ParticipantDefaultContainer>
-  <LanguageSettings v-model:show-modal="showLanguageSettings" :isParticipant="true" />
+  <LanguageSettings
+    v-model:show-modal="showLanguageSettings"
+    :isParticipant="true"
+  />
 </template>
 
 <script lang="ts">

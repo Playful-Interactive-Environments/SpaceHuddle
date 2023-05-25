@@ -1,0 +1,11 @@
+{
+  "description": {
+    "title": "pin on map",
+    "description": "anchor your ideas on the map"
+  },
+  "participant": {
+  },
+  "moderatorConfig": {
+    "mapSection": "map section"
+  }
+}
