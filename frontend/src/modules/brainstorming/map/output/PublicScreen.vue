@@ -1,77 +1,84 @@
 <template>
-  <div class="mapSpace">
-    <mapbox-map
-      v-if="MapboxKey"
-      :accessToken="MapboxKey"
-      @loaded="mapLoaded"
-      :center="mapCenter"
-      :zoom="mapZoom"
-    >
-      <mapbox-marker
-        :lngLat="idea.parameter.position"
-        v-for="idea of ideas"
-        :key="idea.id"
-        v-on:click="editIdea(idea)"
+  <el-container ref="container">
+    <el-aside width="70vw" class="mapSpace">
+      <mapbox-map
+        v-if="MapboxKey && sizeLoaded"
+        :accessToken="MapboxKey"
+        :center="mapCenter"
+        :zoom="mapZoom"
+        @loaded="mapLoaded"
+        v-on:zoomend="changeSection"
+        v-on:dragend="changeSection"
       >
-        <template v-slot:icon>
-          <font-awesome-icon
-            icon="location-dot"
-            class="pin"
-            :style="{ '--pin-color': idea.parameter.color }"
-          />
-          <el-avatar
-            v-if="idea.image"
-            :size="20"
-            :src="idea.image"
-            :alt="idea.keywords"
-            class="pin-image"
-          />
-          <el-avatar
-            v-else-if="idea.link"
-            :size="20"
-            :src="idea.link"
-            :alt="idea.keywords"
-            class="pin-image"
-          />
-        </template>
-      </mapbox-marker>
+        <mapbox-marker
+          :lngLat="idea.parameter.position"
+          v-for="idea of ideas"
+          :key="idea.id"
+          v-on:click="editIdea(idea)"
+        >
+          <template v-slot:icon>
+            <font-awesome-icon
+              icon="location-dot"
+              class="pin"
+              :style="{ '--pin-color': idea.parameter.color }"
+            />
+            <el-avatar
+              v-if="idea.image"
+              :size="20"
+              :src="idea.image"
+              :alt="idea.keywords"
+              class="pin-image"
+            />
+            <el-avatar
+              v-else-if="idea.link"
+              :size="20"
+              :src="idea.link"
+              :alt="idea.keywords"
+              class="pin-image"
+            />
+          </template>
+        </mapbox-marker>
 
-      <mapbox-navigation-control position="bottom-left" />
-    </mapbox-map>
+        <mapbox-navigation-control position="bottom-left" />
+      </mapbox-map>
 
-    <el-radio-group
-      v-model="mapStyle"
-      v-on:change="mapstyleChange"
-      class="overlay"
-    >
-      <el-radio-button
-        v-for="mapType in Object.values(MapStyles)"
-        :key="mapType"
-        :label="mapType"
+      <el-radio-group
+        v-model="mapStyle"
+        v-on:change="mapstyleChange"
+        class="overlay"
       >
-        <img
-          width="50"
-          :src="`/assets/images/mapstyles/${mapType}.png`"
-          alt="mapType"
-        />
-      </el-radio-button>
-    </el-radio-group>
-  </div>
-  <section v-if="ideas.length === 0" class="centered public-screen__error">
-    <p>{{ $t('module.brainstorming.default.publicScreen.noIdeas') }}</p>
-  </section>
-  <div v-else class="public-screen__content">
-    <section class="layout__columns">
-      <IdeaCard
-        v-for="(idea, index) in oldIdeas"
-        :idea="idea"
-        :key="index"
-        :is-editable="false"
-        v-model:collapseIdeas="filter.collapseIdeas"
-        v-model:fadeIn="ideaTransform[idea.id]"
-      />
-    </section>
-  </div>
+        <el-radio-button
+          v-for="mapType in Object.values(MapStyles)"
+          :key="mapType"
+          :label="mapType"
+        >
+          <img
+            width="50"
+            :src="`/assets/images/mapstyles/${mapType}.png`"
+            alt="mapType"
+          />
+        </el-radio-button>
+      </el-radio-group>
+    </el-aside>
+    <el-main>
+      <section v-if="ideas.length === 0" class="centered public-screen__error">
+        <p>{{ $t('module.brainstorming.default.publicScreen.noIdeas') }}</p>
+      </section>
+      <div v-else class="public-screen__content">
+        <section class="layout__columns">
+          <IdeaCard
+            v-for="(idea, index) in visibleIdeas"
+            :idea="idea"
+            :key="index"
+            :is-editable="false"
+            :isSelected="idea.id === selectedIdeaId"
+            v-model:collapseIdeas="filter.collapseIdeas"
+            v-model:fadeIn="ideaTransform[idea.id]"
+          />
+        </section>
+      </div>
+    </el-main>
+  </el-container>
 </template>
 
 <script lang="ts">
@@ -122,6 +129,8 @@ export default class PublicScreen extends Vue {
   ideaTransform: { [id: string]: boolean } = {};
   readonly newTimeSpan = 10000;
   filter: FilterData = { ...defaultFilterData };
+  sizeLoaded = false;
+  visibleIdeas: Idea[] = [];
 
   map: Map | null = null;
   MapStyles = MapStyles;
@@ -206,15 +215,27 @@ export default class PublicScreen extends Vue {
       }
     }
     this.mapCenter = center;
-  }
-
-  get oldIdeas(): Idea[] {
-    return this.ideas;
+    this.changeSection();
   }
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateIdeas);
+  }
+
+  mounted(): void {
+    setTimeout(() => {
+      const dom = (this.$refs.container as any)?.$el as HTMLElement;
+      if (dom) {
+        const targetWidth = dom.parentElement?.offsetWidth;
+        const targetHeight = dom.parentElement?.offsetHeight;
+        if (targetWidth && targetHeight) {
+          (dom as any).style.width = `${targetWidth}px`;
+          (dom as any).style.height = `${targetHeight - 100}px`;
+        }
+        this.sizeLoaded = true;
+      }
+    }, 1000);
   }
 
   unmounted(): void {
@@ -257,6 +278,23 @@ export default class PublicScreen extends Vue {
       this.map.setStyle(`mapbox://styles/mapbox/${this.mapStyle}`);
     }
   }
+
+  changeSection(): void {
+    if (this.map) {
+      const visibleIdeas: Idea[] = [];
+      const bounds = this.map.getBounds();
+      for (const idea of this.ideas) {
+        if (
+          bounds.contains(
+            new LngLat(idea.parameter.position[0], idea.parameter.position[1])
+          )
+        ) {
+          visibleIdeas.push(idea);
+        }
+      }
+      this.visibleIdeas = visibleIdeas;
+    } else this.visibleIdeas = [...this.ideas];
+  }
 }
 </script>
 
@@ -271,9 +309,9 @@ export default class PublicScreen extends Vue {
 }
 
 .mapSpace {
-  height: 20rem;
+  height: 100%;
+  margin-right: 1rem;
   position: relative;
-  margin-bottom: 1rem;
 
   .el-radio-button::v-deep(.el-radio-button__inner) {
     padding: 0;
@@ -300,7 +338,7 @@ export default class PublicScreen extends Vue {
     position: absolute;
     z-index: 100;
     top: 0.5rem;
-    right: 0.5rem;
+    right: 1.5rem;
   }
 
   .pin {
