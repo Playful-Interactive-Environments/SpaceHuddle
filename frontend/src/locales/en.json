@@ -221,7 +221,7 @@
           "everyoneCanJoin": "Anyone with the public key can participate in the session."
         },
         "languageSettings": {
-          "header": "manage language settings",
+          "header": "language settings",
           "info": "Change display language."
         },
         "taskSettings": {

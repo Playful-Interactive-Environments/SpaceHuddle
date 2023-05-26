@@ -1,65 +1,13 @@
 <template>
   <IdeaFilter :taskId="taskId" v-model="filter" @change="reloadIdeas(true)" />
-  <div class="mapSpace">
-    <mapbox-map
-      v-if="MapboxKey"
-      :accessToken="MapboxKey"
-      @loaded="mapLoaded"
-      :center="mapCenter"
-      :zoom="mapZoom"
-    >
-      <mapbox-marker
-        :lngLat="idea.parameter.position"
-        :draggable="true"
-        v-for="idea of ideas"
-        :key="idea.id"
-        v-on:dragend="(marker) => saveIdea(marker, idea)"
-        v-on:click="editIdea(idea)"
-      >
-        <template v-slot:icon>
-          <font-awesome-icon
-            icon="location-dot"
-            class="pin"
-            :style="{ '--pin-color': idea.parameter.color }"
-          />
-          <el-avatar
-            v-if="idea.image"
-            :size="20"
-            :src="idea.image"
-            :alt="idea.keywords"
-            class="pin-image"
-          />
-          <el-avatar
-            v-else-if="idea.link"
-            :size="20"
-            :src="idea.link"
-            :alt="idea.keywords"
-            class="pin-image"
-          />
-        </template>
-      </mapbox-marker>
-
-      <mapbox-navigation-control position="bottom-left" />
-    </mapbox-map>
-
-    <el-radio-group
-      v-model="mapStyle"
-      v-on:change="mapstyleChange"
-      class="overlay"
-    >
-      <el-radio-button
-        v-for="mapType in Object.values(MapStyles)"
-        :key="mapType"
-        :label="mapType"
-      >
-        <img
-          width="50"
-          :src="`/assets/images/mapstyles/${mapType}.png`"
-          alt="mapType"
-        />
-      </el-radio-button>
-    </el-radio-group>
-  </div>
+  <IdeaMap
+    class="mapSpace"
+    :ideas="ideas"
+    v-model:selected-idea="selectedIdea"
+    :calculate-size="false"
+    v-on:ideaPositionChanged="saveIdea"
+  >
+  </IdeaMap>
   <el-collapse v-model="openTabs">
     <el-collapse-item
       v-for="(item, key) in orderGroupContent"
@@ -90,9 +38,10 @@
           <IdeaCard
             :idea="element"
             :isDraggable="true"
-            :isSelected="element.id === selectedIdeaId"
+            :isSelected="element.id === selectedIdea?.id"
             v-model:collapseIdeas="filter.collapseIdeas"
             @ideaDeleted="reloadIdeas()"
+            v-on:click="selectedIdea = element"
           />
         </template>
         <template v-slot:footer>
@@ -112,9 +61,10 @@
           :idea="idea"
           v-for="(idea, index) in item.filteredIdeas"
           :key="index"
-          :isSelected="idea.id === selectedIdeaId"
+          :isSelected="idea.id === selectedIdea?.id"
           v-model:collapseIdeas="filter.collapseIdeas"
           @ideaDeleted="reloadIdeas()"
+          v-on:click="selectedIdea = idea"
         />
         <AddItem
           v-if="item.ideas.length > item.displayCount"
@@ -148,31 +98,16 @@ import IdeaFilter, {
   FilterData,
 } from '@/components/moderator/molecules/IdeaFilter.vue';
 import * as cashService from '@/services/cash-service';
-import {
-  MapboxMap,
-  MapboxMarker,
-  MapboxNavigationControl,
-} from 'vue-mapbox-ts';
-import { Map, LngLat, LngLatBoundsLike, LngLatBounds } from 'mapbox-gl';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-
-export enum MapStyles {
-  OUTDOORS = 'outdoors-v11',
-  SATELLITE = 'satellite-streets-v11',
-  STREETS = 'streets-v11',
-}
+import IdeaMap from '@/modules/brainstorming/map/organisms/IdeaMap.vue';
 
 @Options({
   components: {
-    FontAwesomeIcon,
+    IdeaMap,
     AddItem,
     IdeaCard,
     CollapseTitle,
     draggable,
     IdeaFilter,
-    MapboxMap,
-    MapboxNavigationControl,
-    MapboxMarker,
   },
 })
 
@@ -184,14 +119,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   openTabs: string[] = [];
   filter: FilterData = { ...defaultFilterData };
   cashEntry!: cashService.SimplifiedCashEntry<Idea[]>;
-
-  map: Map | null = null;
-  MapStyles = MapStyles;
-  mapStyle = MapStyles.OUTDOORS;
-  mapZoomDefault = 14;
-  mapCenter: number[] = [0, 0];
-  mapBounds: LngLatBoundsLike | null = null;
-  mapZoom = this.mapZoomDefault;
+  selectedIdea: Idea | null = null;
 
   get orderIsChangeable(): boolean {
     return this.filter.orderType === IdeaSortOrder.ORDER;
@@ -260,35 +188,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       this.reloadTabState
     ).then((tabs) => (this.openTabs = tabs));
     this.reloadTabState = false;
-
-    const center = [0, 0];
-    if (ideas.length > 0) {
-      const min = [...ideas[0].parameter.position];
-      const max = [...ideas[0].parameter.position];
-      for (const idea of ideas) {
-        center[0] += idea.parameter.position[0];
-        center[1] += idea.parameter.position[1];
-
-        if (min[0] > idea.parameter.position[0])
-          min[0] = idea.parameter.position[0];
-        if (min[1] > idea.parameter.position[1])
-          min[1] = idea.parameter.position[1];
-        if (max[0] < idea.parameter.position[0])
-          max[0] = idea.parameter.position[0];
-        if (max[1] < idea.parameter.position[1])
-          max[1] = idea.parameter.position[1];
-      }
-      center[0] /= ideas.length;
-      center[1] /= ideas.length;
-
-      if (ideas.length > 1) {
-        const minLngLat = new LngLat(min[0], min[1]);
-        const maxLngLat = new LngLat(max[0], max[1]);
-        this.mapBounds = new LngLatBounds(minLngLat, maxLngLat);
-        this.fitZoomToBounds();
-      }
-    }
-    this.mapCenter = center;
   }
 
   reloadTabState = true;
@@ -331,56 +230,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.cashEntry.refreshData();
   }
 
-  saveIdea(marker: any, idea: Idea): void {
-    const lngLat = marker.target._lngLat;
-    if (
-      idea.parameter.position[0] !== lngLat.lng ||
-      idea.parameter.position[1] !== lngLat.lat
-    ) {
-      idea.parameter.position = [lngLat.lng, lngLat.lat];
-      ideaService
-        .putIdea(idea, EndpointAuthorisationType.PARTICIPANT)
-        .then(() => {
-          this.refreshIdeas();
-        });
-    }
-  }
-
-  selectedIdeaId = '';
-  editIdea(idea: Idea): void {
-    this.selectedIdeaId = idea.id;
-  }
-
-  /**
-   * map related functions
-   */
-  get MapboxKey(): string {
-    return process.env.VUE_APP_MAPBOX_KEY;
-  }
-
-  fitZoomToBounds(): void {
-    if (this.map && this.mapBounds) {
-      this.map.fitBounds(this.mapBounds);
-      setTimeout(() => {
-        if (this.map) {
-          this.mapZoom = this.map.getZoom() - 2;
-          this.map.setZoom(this.mapZoom);
-          this.map.setCenter(new LngLat(this.mapCenter[0], this.mapCenter[1]));
-        }
-      }, 300);
-    }
-  }
-
-  mapLoaded(map: Map): void {
-    this.map = map;
-    this.fitZoomToBounds();
-    this.mapstyleChange();
-  }
-
-  mapstyleChange(): void {
-    if (this.map) {
-      this.map.setStyle(`mapbox://styles/mapbox/${this.mapStyle}`);
-    }
+  saveIdea(idea: Idea): void {
+    ideaService
+      .putIdea(idea, EndpointAuthorisationType.PARTICIPANT)
+      .then(() => {
+        this.refreshIdeas();
+      });
   }
 }
 </script>
@@ -398,46 +253,5 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
 .mapSpace {
   height: 20rem;
-  position: relative;
-
-  .el-radio-button::v-deep(.el-radio-button__inner) {
-    padding: 0;
-    padding-right: 2px;
-    font-size: unset;
-    border: unset;
-    background-color: unset;
-    box-shadow: unset;
-
-    img {
-      opacity: 0.5;
-    }
-  }
-  .is-active.el-radio-button::v-deep(.el-radio-button__inner) {
-    img {
-      opacity: 1;
-    }
-  }
-
-  .overlay {
-    background-color: white;
-    padding: 0.5rem;
-    border-radius: 1rem;
-    position: absolute;
-    z-index: 100;
-    top: 0.5rem;
-    right: 0.5rem;
-  }
-
-  .pin {
-    --pin-color: var(--color-primary);
-    font-size: var(--font-size-xxxlarge);
-    color: var(--pin-color);
-  }
-
-  .pin-image {
-    position: relative;
-    left: -1.45rem;
-    top: -0.5rem;
-  }
 }
 </style>

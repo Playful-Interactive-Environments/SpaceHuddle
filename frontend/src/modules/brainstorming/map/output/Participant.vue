@@ -23,66 +23,14 @@
       </div>
     </template>
 
-    <div ref="mapSpace">
-      <mapbox-map
-        v-if="MapboxKey && sizeCalculated"
-        :accessToken="MapboxKey"
-        @loaded="mapLoaded"
-        :center="mapCenter"
-        :zoom="mapZoom"
-      >
-        <mapbox-marker
-          :lngLat="idea.parameter.position"
-          :draggable="true"
-          v-for="idea of ideas"
-          :key="idea.id"
-          v-on:dragend="(marker) => saveIdea(marker, idea)"
-          v-on:click="editIdea(idea)"
-        >
-          <template v-slot:icon>
-            <font-awesome-icon
-              icon="location-dot"
-              class="pin"
-              :style="{ '--pin-color': idea.parameter.color }"
-            />
-            <el-avatar
-              v-if="idea.image"
-              :size="20"
-              :src="idea.image"
-              :alt="idea.keywords"
-              class="pin-image"
-            />
-            <el-avatar
-              v-else-if="idea.link"
-              :size="20"
-              :src="idea.link"
-              :alt="idea.keywords"
-              class="pin-image"
-            />
-          </template>
-        </mapbox-marker>
-
-        <mapbox-navigation-control position="bottom-left" />
-      </mapbox-map>
-
-      <el-radio-group
-        v-model="mapStyle"
-        v-on:change="mapstyleChange"
-        class="overlay"
-      >
-        <el-radio-button
-          v-for="mapType in Object.values(MapStyles)"
-          :key="mapType"
-          :label="mapType"
-        >
-          <img
-            width="50"
-            :src="`/assets/images/mapstyles/${mapType}.png`"
-            alt="mapType"
-          />
-        </el-radio-button>
-      </el-radio-group>
-    </div>
+    <IdeaMap
+      v-if="module"
+      :ideas="ideas"
+      v-model:selected-idea="selectedIdea"
+      :parameter="module.parameter"
+      v-on:ideaPositionChanged="saveIdea"
+    >
+    </IdeaMap>
 
     <IdeaSettings
       v-model:show-modal="showIdeaSettings"
@@ -111,29 +59,14 @@ import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import * as cashService from '@/services/cash-service';
-import {
-  MapboxMap,
-  MapboxMarker,
-  MapboxNavigationControl,
-} from 'vue-mapbox-ts';
-import { Map, LngLat, LngLatBoundsLike, LngLatBounds } from 'mapbox-gl';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-
-export enum MapStyles {
-  OUTDOORS = 'outdoors-v11',
-  SATELLITE = 'satellite-streets-v11',
-  STREETS = 'streets-v11',
-}
+import IdeaMap from '@/modules/brainstorming/map/organisms/IdeaMap.vue';
 
 @Options({
   components: {
-    FontAwesomeIcon,
+    IdeaMap,
     IdeaCard,
     IdeaSettings,
     ParticipantModuleDefaultContainer,
-    MapboxMap,
-    MapboxNavigationControl,
-    MapboxMarker,
   },
 })
 
@@ -149,6 +82,7 @@ export default class Participant extends Vue {
   ideas: Idea[] = [];
   showIdeaSettings = false;
   EndpointAuthorisationType = EndpointAuthorisationType;
+  selectedIdea: Idea | null = null;
 
   addIdea: any = {
     keywords: '',
@@ -157,15 +91,6 @@ export default class Participant extends Vue {
     image: null, // the datebase64 url of created image
   };
   settingsIdea = this.addIdea;
-
-  map: Map | null = null;
-  MapStyles = MapStyles;
-  mapStyle = MapStyles.OUTDOORS;
-  mapZoomDefault = 14;
-  mapCenter: number[] = [0, 0];
-  mapBounds: LngLatBoundsLike | null = null;
-  mapZoom = this.mapZoomDefault;
-  sizeCalculated = false;
 
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
@@ -202,6 +127,14 @@ export default class Participant extends Vue {
     this.showIdeaSettings = true;
   }
 
+  @Watch('selectedIdea', { immediate: true })
+  onSelectedIdeaChanged(): void {
+    if (this.selectedIdea) {
+      this.settingsIdea = this.selectedIdea;
+      this.showIdeaSettings = true;
+    }
+  }
+
   editIdea(idea: Idea): void {
     this.settingsIdea = idea;
     this.showIdeaSettings = true;
@@ -222,53 +155,18 @@ export default class Participant extends Vue {
 
   updateIdeas(ideas: Idea[]): void {
     this.ideas = ideas.filter((idea) => idea.isOwn).reverse();
-    const center = [0, 0];
-    if (this.ideas.length > 0) {
-      const min = [...this.ideas[0].parameter.position];
-      const max = [...this.ideas[0].parameter.position];
-      for (const idea of this.ideas) {
-        center[0] += idea.parameter.position[0];
-        center[1] += idea.parameter.position[1];
-
-        if (min[0] > idea.parameter.position[0])
-          min[0] = idea.parameter.position[0];
-        if (min[1] > idea.parameter.position[1])
-          min[1] = idea.parameter.position[1];
-        if (max[0] < idea.parameter.position[0])
-          max[0] = idea.parameter.position[0];
-        if (max[1] < idea.parameter.position[1])
-          max[1] = idea.parameter.position[1];
-      }
-      center[0] /= this.ideas.length;
-      center[1] /= this.ideas.length;
-
-      if (this.ideas.length > 1) {
-        const minLngLat = new LngLat(min[0], min[1]);
-        const maxLngLat = new LngLat(max[0], max[1]);
-        this.mapBounds = new LngLatBounds(minLngLat, maxLngLat);
-        this.fitZoomToBounds();
-      }
-    }
-    this.mapCenter = center;
   }
 
   refreshIdeas(): void {
     this.ideaCash.refreshData();
   }
 
-  saveIdea(marker: any, idea: Idea): void {
-    const lngLat = marker.target._lngLat;
-    if (
-      idea.parameter.position[0] !== lngLat.lng ||
-      idea.parameter.position[1] !== lngLat.lat
-    ) {
-      idea.parameter.position = [lngLat.lng, lngLat.lat];
-      ideaService
-        .putIdea(idea, EndpointAuthorisationType.PARTICIPANT)
-        .then(() => {
-          this.refreshIdeas();
-        });
-    }
+  saveIdea(idea: Idea): void {
+    ideaService
+      .putIdea(idea, EndpointAuthorisationType.PARTICIPANT)
+      .then(() => {
+        this.refreshIdeas();
+      });
   }
 
   @Watch('moduleId', { immediate: true })
@@ -285,12 +183,6 @@ export default class Participant extends Vue {
 
   updateModule(module: Module): void {
     this.module = module;
-    if (this.mapCenter[0] === 0 && this.mapCenter[1] === 0) {
-      this.mapCenter = this.module.parameter.mapCenter;
-    }
-    if (this.mapZoom === this.mapZoomDefault) {
-      this.mapZoom = this.module.parameter.mapZoom;
-    }
   }
 
   deregisterAll(): void {
@@ -299,100 +191,13 @@ export default class Participant extends Vue {
     cashService.deregisterAllGet(this.updateIdeas);
   }
 
-  mounted(): void {
-    setTimeout(() => {
-      const dom = this.$refs.mapSpace as HTMLElement;
-      if (dom) {
-        const targetWidth = dom.parentElement?.offsetWidth;
-        const targetHeight = dom.parentElement?.offsetHeight;
-        this.sizeCalculated = true;
-        if (targetWidth && targetHeight) {
-          (dom as any).style.width = `${targetWidth}px`;
-          (dom as any).style.height = `${targetHeight}px`;
-        }
-      }
-    }, 1000);
-  }
-
   unmounted(): void {
     this.deregisterAll();
-  }
-
-  /**
-   * map related functions
-   */
-  get MapboxKey(): string {
-    return process.env.VUE_APP_MAPBOX_KEY;
-  }
-
-  fitZoomToBounds(): void {
-    if (this.map && this.mapBounds) {
-      this.map.fitBounds(this.mapBounds);
-      setTimeout(() => {
-        if (this.map) {
-          this.mapZoom = this.map.getZoom() - 0.3;
-          this.map.setZoom(this.mapZoom);
-          this.map.setCenter(new LngLat(this.mapCenter[0], this.mapCenter[1]));
-        }
-      }, 300);
-    }
-  }
-
-  mapLoaded(map: Map): void {
-    this.map = map;
-    this.fitZoomToBounds();
-    this.mapstyleChange();
-  }
-
-  mapstyleChange(): void {
-    if (this.map) {
-      this.map.setStyle(`mapbox://styles/mapbox/${this.mapStyle}`);
-    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.el-radio-button::v-deep(.el-radio-button__inner) {
-  padding: 0;
-  padding-right: 2px;
-  font-size: unset;
-  border: unset;
-  background-color: unset;
-  box-shadow: unset;
-
-  img {
-    opacity: 0.5;
-  }
-}
-.is-active.el-radio-button::v-deep(.el-radio-button__inner) {
-  img {
-    opacity: 1;
-  }
-}
-
-.overlay {
-  background-color: white;
-  padding: 0.5rem;
-  border-radius: 1rem;
-  position: absolute;
-  z-index: 100;
-  top: 1.4rem;
-  right: 1.4rem;
-}
-
-.pin {
-  --pin-color: var(--color-primary);
-  font-size: var(--font-size-xxxlarge);
-  color: var(--pin-color);
-}
-
-.pin-image {
-  position: relative;
-  left: -1.45rem;
-  top: -0.5rem;
-}
-
 .button {
   border: unset;
   background-color: unset;
