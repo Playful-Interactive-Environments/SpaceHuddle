@@ -99,6 +99,7 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
 - Axios: backend access `https://axios-http.com/`
 - Chart.js: chart components `https://www.chartjs.org/`
 - Matter-js: physics engine `https://brm.io/matter-js/`
+- Mapbox: map engine `https://docs.mapbox.com/mapbox-gl-js/guides/`
 
 ### Develop your own modules
 
