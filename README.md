@@ -61,7 +61,7 @@ The SpaceHuddle-API is built on the following technologies. Visit the websites t
 ## SpaceHuddle frontend
 
 ### Installation
-1. Adjust the properties in the `frontend/.env` file
+1. Adjust the properties in the `frontend/.env` file or create your own .env.local or .env.production version of the file. Create your individual mapbox key on https://www.mapbox.com/ and set it in .env file.
 2. Download and install Node `https://nodejs.org/en/download/`. Use a Node version that is lower or equal to 19.2.0
 3. Install dependencies with: `npm install`
 

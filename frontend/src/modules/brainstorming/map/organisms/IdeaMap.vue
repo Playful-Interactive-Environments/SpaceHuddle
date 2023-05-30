@@ -32,8 +32,8 @@
               :style="{
                 '--pin-color':
                   idea.id === selectedIdeaId
-                    ? 'var(--color-blue)'
-                    : 'var(--color-primary)',
+                    ? MarkerColorSelected
+                    : MarkerColor,
               }"
             />
           </el-tooltip>
@@ -129,6 +129,33 @@ export default class IdeaMap extends Vue {
   mapBounds: LngLatBoundsLike | null = null;
   mapZoom = this.mapZoomDefault;
   sizeCalculated = false;
+
+  get MarkerColor(): string {
+    switch (this.mapStyle) {
+      case MapStyles.LIGHT:
+      case MapStyles.OUTDOORS:
+      case MapStyles.STREETS:
+        return '#1d2948';
+      case MapStyles.DARK:
+        return '#67c2d0';
+      case MapStyles.SATELLITE:
+        return 'white';
+    }
+    return '#1d2948';
+  }
+
+  get MarkerColorSelected(): string {
+    switch (this.mapStyle) {
+      case MapStyles.OUTDOORS:
+        return '#fe6e5d';
+      case MapStyles.LIGHT:
+      case MapStyles.STREETS:
+      case MapStyles.DARK:
+      case MapStyles.SATELLITE:
+        return '#f3a40a';
+    }
+    return '#f3a40a';
+  }
 
   mounted(): void {
     if (this.calculateSize) {
