@@ -61,10 +61,17 @@
        }  
    },  
    "information": {  
+       "cleanup": {  
+           "participant": "output/Participant",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "de,en,",  
+             "icon": "broom",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": false,  
+           "path": "information/cleanup"  
+       },  
        "coolit": {  
            "participant": "output/Participant",  
            "locales": "de,en,",  
-             "icon": "smog",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
+             "icon": "smog",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": false,  
            "path": "information/coolit"  
        },  
        "default": {  

@@ -1,0 +1,9 @@
+{
+  "description": {
+    "title": "Clean Up",
+    "description": "A climate game about the emission of gases that are harmful to the climate."
+  },
+  "participant": {
+    "speed": "speed"
+  }
+}

@@ -5,6 +5,7 @@
       ref="chartRef"
       :data="chartData"
       :options="{
+        maintainAspectRatio: false,
         animation: {
           duration: 0,
         },
@@ -118,5 +119,6 @@ export default class PublicScreen extends Vue {
 <style lang="scss" scoped>
 .chart {
   max-width: calc(var(--app-height) * 1.2);
+  height: calc(100% - 5rem);
 }
 </style>

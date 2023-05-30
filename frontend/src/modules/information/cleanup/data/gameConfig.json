@@ -1,0 +1,20 @@
+{
+  "particles": {
+    "co2": {
+      "color": "#fe6e5d",
+      "speedFactor": 0.35
+    },
+    "dust": {
+      "color": "#1d2948",
+      "speedFactor": 0.5
+    },
+    "ch4": {
+      "color": "#f3a40a",
+      "speedFactor": 0.2
+    },
+    "microplastic": {
+      "color": "#0192d0",
+      "speedFactor": 0.1
+    }
+  }
+}

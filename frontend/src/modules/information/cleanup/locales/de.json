@@ -1,0 +1,9 @@
+{
+  "description": {
+    "title": "Clean Up",
+    "description": "Ein Klimaspiel über den Ausstoß von klimaschädlichen Gasen."
+  },
+  "participant": {
+    "speed": "Geschwindigkeit"
+  }
+}

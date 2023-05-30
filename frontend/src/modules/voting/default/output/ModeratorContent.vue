@@ -38,7 +38,6 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Bar } from 'vue-chartjs';
-//import Vue3ChartJs from '@j-t-mcc/vue3-chartjs';
 import * as votingService from '@/services/voting-service';
 import { VoteResult } from '@/types/api/Vote';
 import { EventType } from '@/types/enum/EventType';

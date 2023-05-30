@@ -267,9 +267,6 @@ export default class IdeaMap extends Vue {
     }
   }
 
-  /**
-   * map related functions
-   */
   get MapboxKey(): string {
     return process.env.VUE_APP_MAPBOX_KEY;
   }

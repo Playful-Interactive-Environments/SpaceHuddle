@@ -5,6 +5,7 @@
     :data="resultData"
     :height="100"
     :options="{
+      maintainAspectRatio: false,
       animation: {
         duration: 0,
       },

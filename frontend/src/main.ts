@@ -16,18 +16,24 @@ import {
   Title,
   Tooltip,
   Legend,
-  BarElement,
   CategoryScale,
   LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Filler,
 } from 'chart.js';
 
 ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  BarElement,
   CategoryScale,
-  LinearScale
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Filler
 );
 
 ChartJS.defaults.font.family =
