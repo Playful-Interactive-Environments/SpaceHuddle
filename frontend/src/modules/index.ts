@@ -378,11 +378,14 @@ export const getModulesForTaskType = async (
   for (const taskType of taskTypes) {
     const taskTypeName = TaskType[taskType.toUpperCase()];
     for (const moduleName in moduleConfig[taskTypeName]) {
-      modules.push({
-        taskType: taskType,
-        moduleName: moduleName,
-        module: moduleConfig[taskTypeName][moduleName],
-      });
+      const moduleParameter = moduleConfig[taskTypeName][moduleName];
+      if (!Object.hasOwn(moduleParameter, 'usable') || moduleParameter.usable) {
+        modules.push({
+          taskType: taskType,
+          moduleName: moduleName,
+          module: moduleParameter,
+        });
+      }
     }
   }
   return modules
