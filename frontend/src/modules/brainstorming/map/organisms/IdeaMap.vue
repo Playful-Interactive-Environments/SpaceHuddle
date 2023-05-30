@@ -57,26 +57,31 @@
       <mapbox-navigation-control position="bottom-left" />
     </mapbox-map>
 
-    <el-dropdown v-on:command="mapstyleChange($event)">
-      <span class="el-dropdown-link">
-        <font-awesome-icon icon="map" />
-      </span>
-      <template #dropdown>
-        <el-dropdown-menu>
-          <el-dropdown-item
-            v-for="mapType in Object.values(MapStyles)"
-            :key="mapType"
-            :command="mapType"
-          >
-            <img
-              width="50"
-              :src="`/assets/images/mapstyles/${mapType}.png`"
-              alt="mapType"
-            />
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown>
+    <div class="overlay">
+      <el-dropdown v-on:command="mapstyleChange($event)">
+        <div class="el-dropdown-link">
+          <font-awesome-icon icon="map" />
+        </div>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item
+              v-for="mapType in Object.values(MapStyles)"
+              :key="mapType"
+              :command="mapType"
+            >
+              <img
+                width="50"
+                :src="`/assets/images/mapstyles/${mapType}.png`"
+                alt="mapType"
+              />
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <div class="el-dropdown-link" v-on:click="calculateMapBounds">
+        <font-awesome-icon icon="arrows-to-circle" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -350,11 +355,14 @@ export default class IdeaMap extends Vue {
 .mapSpace {
   position: relative;
 
-  .el-dropdown {
+  .overlay {
+    background-color: white;
+    border-radius: 0.5rem;
     position: absolute;
     z-index: 100;
     top: 0.5rem;
     right: 0.5rem;
+    cursor: pointer;
   }
 
   .el-dropdown-link {
