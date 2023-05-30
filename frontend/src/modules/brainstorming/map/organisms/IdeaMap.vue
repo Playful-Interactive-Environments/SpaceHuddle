@@ -218,8 +218,8 @@ export default class IdeaMap extends Vue {
   }
 
   calculateMapBounds(): void {
-    const center = [0, 0];
     if (this.ideas.length > 0) {
+      const center = [0, 0];
       const min = [...this.ideas[0].parameter.position];
       const max = [...this.ideas[0].parameter.position];
       for (const idea of this.ideas) {
@@ -245,9 +245,9 @@ export default class IdeaMap extends Vue {
         this.mapBounds = new LngLatBounds(minLngLat, maxLngLat);
         this.fitZoomToBounds();
       }
+      this.mapCenter = center;
+      this.changeSection();
     }
-    this.mapCenter = center;
-    this.changeSection();
   }
 
   selectedIdeaId = '';
