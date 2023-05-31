@@ -21,7 +21,7 @@
           <el-tooltip placement="top" effect="light" :hide-after="0">
             <template #content>
               <IdeaCard
-                style="max-width: 10vw"
+                style="max-width: 10rem"
                 :idea="idea"
                 :is-editable="false"
               />
@@ -58,6 +58,9 @@
     </mapbox-map>
 
     <div class="overlay">
+      <div class="el-dropdown-link" v-on:click="calculateMapBounds">
+        <font-awesome-icon icon="arrows-to-circle" />
+      </div>
       <el-dropdown v-on:command="mapstyleChange($event)">
         <div class="el-dropdown-link">
           <font-awesome-icon icon="map" />
@@ -78,9 +81,6 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-      <div class="el-dropdown-link" v-on:click="calculateMapBounds">
-        <font-awesome-icon icon="arrows-to-circle" />
-      </div>
     </div>
   </div>
 </template>
@@ -114,7 +114,12 @@ export enum MapStyles {
     MapboxNavigationControl,
     MapboxMarker,
   },
-  emits: ['ideaPositionChanged', 'update:selectedIdea', 'visibleIdeasChanged'],
+  emits: [
+    'ideaPositionChanged',
+    'update:selectedIdea',
+    'visibleIdeasChanged',
+    'selectionColorChanged',
+  ],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -129,10 +134,9 @@ export default class IdeaMap extends Vue {
   map: Map | null = null;
   MapStyles = MapStyles;
   mapStyle = MapStyles.OUTDOORS.toString();
-  mapZoomDefault = 14;
   mapCenter: number[] = [0, 0];
   mapBounds: LngLatBoundsLike | null = null;
-  mapZoom = this.mapZoomDefault;
+  mapZoom = 14;
   sizeCalculated = false;
 
   get MarkerColor(): string {
@@ -179,18 +183,16 @@ export default class IdeaMap extends Vue {
     }
   }
 
-  @Watch('parameter', { immediate: true, deep: true })
+  @Watch('parameter.mapCenter', { immediate: true })
+  @Watch('parameter.mapZoom', { immediate: true })
   onParameterChanged(): void {
-    if (
-      this.parameter.mapCenter &&
-      this.mapCenter[0] === 0 &&
-      this.mapCenter[1] === 0
-    ) {
+    if (this.parameter.mapCenter) {
       this.mapCenter = this.parameter.mapCenter;
     }
-    if (this.parameter.mapZoom && this.mapZoom === this.mapZoomDefault) {
+    if (this.parameter.mapZoom) {
       this.mapZoom = this.parameter.mapZoom;
     }
+    this.fitZoomToBounds();
   }
 
   @Watch('ideas', { immediate: true, deep: true })
@@ -244,10 +246,10 @@ export default class IdeaMap extends Vue {
         const maxLngLat = new LngLat(max[0] + delta, max[1] + delta);
         this.mapBounds = new LngLatBounds(minLngLat, maxLngLat);
         this.fitZoomToBounds();
-      }
-      this.mapCenter = center;
+      } else this.mapBounds = null;
+      //this.mapCenter = center;
       this.changeSection();
-    }
+    } else this.mapBounds = null;
   }
 
   selectedIdeaId = '';
@@ -271,7 +273,7 @@ export default class IdeaMap extends Vue {
     return process.env.VUE_APP_MAPBOX_KEY;
   }
 
-  fitZoomToBounds(): void {
+  fitZoomToBounds(waiteForLoading = true): void {
     if (this.map && this.mapBounds) {
       this.map.fitBounds(this.mapBounds);
       /*setTimeout(() => {
@@ -281,6 +283,15 @@ export default class IdeaMap extends Vue {
           this.map.setCenter(new LngLat(this.mapCenter[0], this.mapCenter[1]));
         }
       }, 300);*/
+    } else if (this.map) {
+      this.map.setZoom(this.mapZoom);
+      this.map.setCenter(new LngLat(this.mapCenter[0], this.mapCenter[1]));
+    }
+
+    if (waiteForLoading) {
+      setTimeout(() => {
+        this.fitZoomToBounds(false);
+      }, 300);
     }
   }
 
@@ -317,6 +328,7 @@ export default class IdeaMap extends Vue {
         }
       }, 500);
     }
+    this.$emit('selectionColorChanged', this.MarkerColorSelected);
   }
 
   changeSection(): void {

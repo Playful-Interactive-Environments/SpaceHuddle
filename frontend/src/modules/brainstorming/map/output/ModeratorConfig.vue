@@ -12,6 +12,7 @@
         v-on:zoomend="changeSection"
         v-on:dragend="changeSection"
       >
+        <mapbox-navigation-control position="bottom-left" />
       </mapbox-map>
     </div>
   </el-form-item>

@@ -4,10 +4,12 @@
       <IdeaMap
         v-if="sizeLoaded"
         :ideas="ideas"
+        :parameter="module?.parameter"
         :can-change-position="false"
         :calculate-size="false"
         v-model:selected-idea="selectedIdea"
         v-on:visibleIdeasChanged="visibleIdeasChanged"
+        v-on:selectionColorChanged="selectionColor = $event"
       >
       </IdeaMap>
     </el-aside>
@@ -23,6 +25,7 @@
             :key="index"
             :is-editable="false"
             :isSelected="idea.id === selectedIdea?.id"
+            :selectionColor="selectionColor"
             v-model:collapseIdeas="filter.collapseIdeas"
             v-model:fadeIn="ideaTransform[idea.id]"
             v-on:click="selectedIdea = idea"
@@ -49,6 +52,7 @@ import {
 import { Task } from '@/types/api/Task';
 import * as cashService from '@/services/cash-service';
 import IdeaMap from '@/modules/brainstorming/map/organisms/IdeaMap.vue';
+import { Module } from '@/types/api/Module';
 
 @Options({
   components: {
@@ -62,6 +66,7 @@ export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
+  module: Module | undefined = undefined;
   ideas: Idea[] = [];
   ideaTransform: { [id: string]: boolean } = {};
   readonly newTimeSpan = 10000;
@@ -69,6 +74,7 @@ export default class PublicScreen extends Vue {
   sizeLoaded = false;
   visibleIdeas: Idea[] = [];
   selectedIdea: Idea | null = null;
+  selectionColor = '#0192d0';
 
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
@@ -96,6 +102,10 @@ export default class PublicScreen extends Vue {
       this.filter.orderType,
       null
     );
+    if (task.modules.length === 1) this.module = task.modules[0];
+    else {
+      this.module = task.modules.find((t) => t.name === 'map');
+    }
   }
 
   updateIdeas(ideas: Idea[]): void {

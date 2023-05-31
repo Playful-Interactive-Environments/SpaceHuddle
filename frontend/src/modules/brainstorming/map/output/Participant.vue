@@ -27,7 +27,7 @@
       v-if="module"
       :ideas="ideas"
       v-model:selected-idea="selectedIdea"
-      :parameter="module.parameter"
+      :parameter="module?.parameter"
       v-on:ideaPositionChanged="saveIdea"
     >
     </IdeaMap>
@@ -36,7 +36,7 @@
       v-model:show-modal="showIdeaSettings"
       :taskId="taskId"
       :idea="settingsIdea"
-      :title="$t('module.information.default.moderatorContent.settingsTitle')"
+      :title="$t('module.brainstorming.map.moderatorContent.settingsTitle')"
       :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
       @updateData="addData"
     />

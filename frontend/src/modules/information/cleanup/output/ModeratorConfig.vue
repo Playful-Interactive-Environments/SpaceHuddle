@@ -12,6 +12,7 @@
         v-on:zoomend="changeSection"
         v-on:dragend="changeSection"
       >
+        <mapbox-navigation-control position="bottom-left" />
       </mapbox-map>
     </div>
   </el-form-item>
@@ -46,11 +47,17 @@ export default class ModeratorConfig extends Vue {
 
   @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {
-    if (this.modelValue && !this.modelValue.mapCenter) {
-      this.modelValue.mapCenter = this.mapCenter;
-    }
-    if (this.modelValue && !this.modelValue.mapZoom) {
-      this.modelValue.mapZoom = this.mapZoom;
+    if (this.modelValue) {
+      if (!this.modelValue.mapCenter) {
+        this.modelValue.mapCenter = this.mapCenter;
+      } else {
+        this.mapCenter = this.modelValue.mapCenter;
+      }
+      if (!this.modelValue.mapZoom) {
+        this.modelValue.mapZoom = this.mapZoom;
+      } else {
+        this.mapZoom = this.modelValue.mapZoom;
+      }
     }
   }
 

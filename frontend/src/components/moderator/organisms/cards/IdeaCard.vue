@@ -14,7 +14,10 @@
       'idea-transform': fadeIn,
     }"
     :body-style="{ padding: '0px' }"
-    :style="{ '--card-height': ideaHeight }"
+    :style="{
+      '--card-height': ideaHeight,
+      '--selection-color': selectionColor,
+    }"
   >
     <img v-if="idea.image" :src="idea.image" class="card__image" alt="" />
     <img
@@ -150,6 +153,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: true }) canChangeState!: boolean;
   @Prop({ default: true }) showState!: boolean;
   @Prop({ default: false }) isSelectable!: boolean;
+  @Prop({ default: '#0192d0' }) selectionColor!: string;
   @Prop({ default: false, reactive: true }) isSelected!: boolean;
   @Prop({ default: false }) isDraggable!: boolean;
   @Prop({ default: false }) cutLongTexts!: boolean;
@@ -354,10 +358,6 @@ export default class IdeaCard extends Vue {
 }
 
 .card {
-  &__selected {
-    background-color: var(--color-blue);
-  }
-
   &__new {
     border-color: var(--el-card-border-color);
   }
@@ -376,6 +376,12 @@ export default class IdeaCard extends Vue {
 
   &__duplicate {
     border-color: var(--el-color-warning);
+  }
+
+  &__selected.el-card::v-deep(.el-card__body) {
+    border-style: solid;
+    border-color: var(--selection-color);
+    border-width: 5px;
   }
 
   &__content {

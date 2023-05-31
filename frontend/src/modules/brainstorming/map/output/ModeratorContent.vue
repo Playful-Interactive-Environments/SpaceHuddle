@@ -4,8 +4,10 @@
     class="mapSpace"
     :ideas="ideas"
     v-model:selected-idea="selectedIdea"
+    :parameter="module?.parameter"
     :calculate-size="false"
     v-on:ideaPositionChanged="saveIdea"
+    v-on:selectionColorChanged="selectionColor = $event"
   >
   </IdeaMap>
   <el-collapse v-model="openTabs">
@@ -39,6 +41,7 @@
             :idea="element"
             :isDraggable="true"
             :isSelected="element.id === selectedIdea?.id"
+            :selectionColor="selectionColor"
             v-model:collapseIdeas="filter.collapseIdeas"
             @ideaDeleted="reloadIdeas()"
             v-on:click="selectedIdea = element"
@@ -62,6 +65,7 @@
           v-for="(idea, index) in item.filteredIdeas"
           :key="index"
           :isSelected="idea.id === selectedIdea?.id"
+          :selectionColor="selectionColor"
           v-model:collapseIdeas="filter.collapseIdeas"
           @ideaDeleted="reloadIdeas()"
           v-on:click="selectedIdea = idea"
@@ -82,7 +86,9 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
+import { Task } from '@/types/api/Task';
 import * as ideaService from '@/services/idea-service';
+import * as taskService from '@/services/task-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
@@ -99,6 +105,7 @@ import IdeaFilter, {
 } from '@/components/moderator/molecules/IdeaFilter.vue';
 import * as cashService from '@/services/cash-service';
 import IdeaMap from '@/modules/brainstorming/map/organisms/IdeaMap.vue';
+import { Module } from '@/types/api/Module';
 
 @Options({
   components: {
@@ -114,12 +121,14 @@ import IdeaMap from '@/modules/brainstorming/map/organisms/IdeaMap.vue';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorContent extends Vue implements IModeratorContent {
   @Prop() readonly taskId!: string;
+  module: Module | undefined = undefined;
   ideas: Idea[] = [];
   orderGroupContent: OrderGroupList = {};
   openTabs: string[] = [];
   filter: FilterData = { ...defaultFilterData };
   cashEntry!: cashService.SimplifiedCashEntry<Idea[]>;
   selectedIdea: Idea | null = null;
+  selectionColor = '#0192d0';
 
   get orderIsChangeable(): boolean {
     return this.filter.orderType === IdeaSortOrder.ORDER;
@@ -136,6 +145,19 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       EndpointAuthorisationType.MODERATOR,
       20
     );
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+  }
+
+  updateTask(task: Task): void {
+    if (task.modules.length === 1) this.module = task.modules[0];
+    else {
+      this.module = task.modules.find((t) => t.name === 'map');
+    }
   }
 
   updateIdeas(ideas: Idea[]): void {
