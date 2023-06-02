@@ -15,8 +15,29 @@
     />
   </div>
   <div class="mapArea">
-    <mapbox-map :access-token="MapboxKey" :center="mapCenter" :zoom="mapZoom">
-    </mapbox-map>
+    <mgl-map :center="mapCenter" :zoom="mapZoom" @map:load="onLoad">
+      <mgl-geo-json-source
+        v-if="routeCalculated"
+        source-id="geojson"
+        :data="routePath"
+      >
+        <mgl-line-layer
+          layer-id="geojson"
+          :layout="routeLayout"
+          :paint="routePaint"
+        />
+      </mgl-geo-json-source>
+      <CustomMapMarker :coordinates="mapStart">
+        <template v-slot:icon>
+          <font-awesome-icon icon="location-crosshairs" class="pin" />
+        </template>
+      </CustomMapMarker>
+      <CustomMapMarker :coordinates="mapEnd">
+        <template v-slot:icon>
+          <font-awesome-icon icon="flag-checkered" class="pin" />
+        </template>
+      </CustomMapMarker>
+    </mgl-map>
     <div class="overlay-top">
       <el-progress type="dashboard" :percentage="moveSpeed" :color="colors">
         <template #default="{ percentage }">
@@ -44,22 +65,35 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import {
-  MapboxMap,
-  MapboxMarker,
-  MapboxNavigationControl,
-} from 'vue-mapbox-ts';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import Joystick from 'vue-joystick-component';
 import { Line } from 'vue-chartjs';
 import * as gameConfig from '@/modules/information/cleanup/data/gameConfig.json';
+import { OSRM } from '@routingjs/osrm';
+import {
+  MglDefaults,
+  MglGeoJsonSource,
+  MglLineLayer,
+  MglMarker,
+  MglNavigationControl,
+  MglMap,
+  MglEvent,
+} from 'vue-maplibre-gl';
+import { LineLayerSpecification } from 'maplibre-gl';
+import { FeatureCollection } from 'geojson';
+import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
+
+MglDefaults.style = `https://api.maptiler.com/maps/streets/style.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
 
 @Options({
   components: {
     FontAwesomeIcon,
-    MapboxMap,
-    MapboxNavigationControl,
-    MapboxMarker,
+    MglGeoJsonSource,
+    MglLineLayer,
+    MglMarker,
+    MglNavigationControl,
+    MglMap,
+    CustomMapMarker,
     Joystick,
     Line,
   },
@@ -69,8 +103,32 @@ import * as gameConfig from '@/modules/information/cleanup/data/gameConfig.json'
 export default class DriveToLocation extends Vue {
   @Prop({ default: {} }) readonly parameter!: any;
   mapZoomDefault = 14;
-  mapCenter: number[] = [0, 0];
+  mapCenter: [number, number] = [0, 0];
+  mapStart: [number, number] = [0, 0];
+  mapEnd: [number, number] = [0, 0];
   mapZoom = this.mapZoomDefault;
+  routeCalculated = false;
+  routePath: FeatureCollection = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: [] as any[],
+        },
+      },
+    ],
+  };
+  routeLayout: LineLayerSpecification['layout'] = {
+    'line-join': 'round',
+    'line-cap': 'round',
+  };
+  routePaint: LineLayerSpecification['paint'] = {
+    'line-color': '#FF0000',
+    'line-width': 8,
+  };
 
   intervalTime = 1000;
   interval = -1;
@@ -98,8 +156,19 @@ export default class DriveToLocation extends Vue {
     datasets: [],
   };
 
-  get MapboxKey(): string {
-    return process.env.VUE_APP_MAPBOX_KEY;
+  onLoad(e: MglEvent): void {
+    const map = e.map;
+    const notNeededLayers = map.getStyle().layers.filter((layer) => {
+      const layerCategory = layer['source-layer'];
+      const layerType = layer['type'];
+      if (layerCategory) {
+        return layerType === 'symbol' && layerCategory !== 'place';
+      }
+      return false;
+    });
+    for (const layer of notNeededLayers) {
+      map.removeLayer(layer.id);
+    }
   }
 
   async updateChart(): Promise<void> {
@@ -145,9 +214,46 @@ export default class DriveToLocation extends Vue {
     ) {
       this.mapCenter = this.parameter.mapCenter;
     }
+    if (
+      this.parameter.mapStart &&
+      this.mapStart[0] === 0 &&
+      this.mapStart[1] === 0
+    ) {
+      this.mapStart = this.parameter.mapStart;
+    }
+    if (this.parameter.mapEnd && this.mapEnd[0] === 0 && this.mapEnd[1] === 0) {
+      this.mapEnd = this.parameter.mapEnd;
+    }
     if (this.parameter.mapZoom && this.mapZoom === this.mapZoomDefault) {
       this.mapZoom = this.parameter.mapZoom;
     }
+
+    (this.routePath.features[0].geometry as any).coordinates = [
+      this.mapStart,
+      this.mapEnd,
+    ];
+
+    const osrm = new OSRM(); // URL defaults to https://routing.openstreetmap.de/routed-bike
+    osrm
+      .directions(
+        [
+          [this.mapStart[1], this.mapStart[0]],
+          [this.mapEnd[1], this.mapEnd[0]],
+        ],
+        'car'
+      )
+      .then((d) => {
+        d.directions.forEach((direction) => {
+          if (direction.feature.geometry) {
+            (this.routePath.features[0].geometry as any).coordinates =
+              direction.feature.geometry.coordinates.map((position) => [
+                position[1],
+                position[0],
+              ]);
+          }
+        });
+        this.routeCalculated = true;
+      });
   }
 
   start(): void {
@@ -217,5 +323,17 @@ export default class DriveToLocation extends Vue {
   height: calc(100% - 10rem);
   width: 100%;
   position: relative;
+}
+
+.pin {
+  --pin-color: var(--color-primary);
+  font-size: var(--font-size-xxxlarge);
+  color: var(--pin-color);
+}
+
+.pin-small {
+  --pin-color: var(--color-primary);
+  font-size: var(--font-size-small);
+  color: var(--pin-color);
 }
 </style>

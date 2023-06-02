@@ -22,7 +22,6 @@
         <font-awesome-icon icon="circle-plus" />
       </div>
     </template>
-
     <IdeaMap
       v-if="module"
       :ideas="ideas"

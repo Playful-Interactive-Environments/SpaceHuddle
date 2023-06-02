@@ -1,21 +1,22 @@
 <template>
   <div ref="mapSpace" class="mapSpace">
-    <mapbox-map
-      v-if="MapboxKey && (sizeCalculated || !calculateSize)"
-      :accessToken="MapboxKey"
+    <mgl-map
+      v-if="showMap"
+      ref="map"
       :center="mapCenter"
       :zoom="mapZoom"
-      v-on:loaded="mapLoaded"
-      v-on:zoomend="changeSection"
-      v-on:dragend="changeSection"
+      language="en"
+      @map:load="onLoad"
     >
-      <mapbox-marker
-        :lngLat="idea.parameter.position"
+      <CustomMapMarker
+        :coordinates="convertCoordinates(idea.parameter.position)"
         :draggable="canChangePosition"
         v-for="idea of ideas"
         :key="idea.id"
         v-on:dragend="(marker) => ideaPositionChanged(marker, idea)"
         v-on:click="ideaSelected(idea)"
+        color="#cc0000"
+        :scale="0.5"
       >
         <template v-slot:icon>
           <el-tooltip placement="top" effect="light" :hide-after="0">
@@ -52,10 +53,9 @@
             class="pin-image"
           />
         </template>
-      </mapbox-marker>
-
-      <mapbox-navigation-control position="bottom-left" />
-    </mapbox-map>
+      </CustomMapMarker>
+      <mgl-navigation-control position="bottom-left" />
+    </mgl-map>
 
     <div class="overlay">
       <div class="el-dropdown-link" v-on:click="calculateMapBounds">
@@ -72,11 +72,7 @@
               :key="mapType"
               :command="mapType"
             >
-              <img
-                width="50"
-                :src="`/assets/images/mapstyles/${mapType}.png`"
-                alt="mapType"
-              />
+              <img width="50" :src="getPreviewUrl(mapType)" alt="mapType" />
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -88,31 +84,35 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import {
-  MapboxMap,
-  MapboxMarker,
-  MapboxNavigationControl,
-} from 'vue-mapbox-ts';
-import { Map, LngLat, LngLatBoundsLike, LngLatBounds } from 'mapbox-gl';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { Idea } from '@/types/api/Idea';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
+import {
+  MglDefaults,
+  MglNavigationControl,
+  MglMap,
+  MglEvent,
+} from 'vue-maplibre-gl';
+import { LngLatLike, LngLatBoundsLike, Map } from 'maplibre-gl';
+import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
 
 export enum MapStyles {
-  OUTDOORS = 'outdoors-v12',
-  SATELLITE = 'satellite-v9',
-  STREETS = 'streets-v12',
-  LIGHT = 'light-v11',
-  DARK = 'dark-v11',
+  STREETS = 'streets-v2',
+  SATELLITE = 'hybrid',
+  BASIC = 'basic-v2',
+  OUTDOORS = 'outdoor-v2',
+  LIGHT = 'dataviz-light',
+  DARK = 'dataviz-dark',
+  WINTER = 'winter-v2',
 }
 
 @Options({
   components: {
+    CustomMapMarker,
     IdeaCard,
     FontAwesomeIcon,
-    MapboxMap,
-    MapboxNavigationControl,
-    MapboxMarker,
+    MglNavigationControl,
+    MglMap,
   },
   emits: [
     'ideaPositionChanged',
@@ -131,19 +131,25 @@ export default class IdeaMap extends Vue {
   @Prop({ default: null }) readonly selectedIdea!: Idea | null;
   visibleIdeas: Idea[] = [];
 
-  map: Map | null = null;
-  MapStyles = MapStyles;
-  mapStyle = MapStyles.OUTDOORS.toString();
-  mapCenter: number[] = [0, 0];
-  mapBounds: LngLatBoundsLike | null = null;
+  mapCenter: [number, number] = [0, 0];
+  mapIdeaCenter: [number, number] = [0, 0];
   mapZoom = 14;
+  mapBounds: LngLatBoundsLike | null = null;
   sizeCalculated = false;
+  map!: Map;
+
+  MapStyles = MapStyles;
+  mapStyle: string = MapStyles.STREETS;
+
+  showMap = true;
 
   get MarkerColor(): string {
     switch (this.mapStyle) {
       case MapStyles.LIGHT:
       case MapStyles.OUTDOORS:
       case MapStyles.STREETS:
+      case MapStyles.BASIC:
+      case MapStyles.WINTER:
         return '#1d2948';
       case MapStyles.DARK:
         return '#67c2d0';
@@ -161,12 +167,50 @@ export default class IdeaMap extends Vue {
       case MapStyles.STREETS:
       case MapStyles.DARK:
       case MapStyles.SATELLITE:
+      case MapStyles.BASIC:
+      case MapStyles.WINTER:
         return '#f3a40a';
     }
     return '#f3a40a';
   }
 
+  getPreviewUrl(key: string): string {
+    switch (key) {
+      case MapStyles.STREETS:
+        key = 'streets-v2';
+        break;
+      case MapStyles.SATELLITE:
+        key = 'hybrid';
+        break;
+      case MapStyles.BASIC:
+        key = 'basic-v2';
+        break;
+      case MapStyles.OUTDOORS:
+        key = 'outdoor';
+        break;
+      case MapStyles.LIGHT:
+        key = 'streets-v2-light';
+        break;
+      case MapStyles.DARK:
+        key = 'streets-v2-dark';
+        break;
+      case MapStyles.WINTER:
+        key = 'winter';
+        break;
+    }
+    return `https://www.maptiler.com/img/cloud/slider/${key}.png`;
+  }
+
+  get StyleUrl(): string {
+    /*switch (this.mapStyle) {
+      case MapStyles.DARK:
+        return '/assets/map/maplibre-gl-styles-main/dark-matter/style-local.json';
+    }*/
+    return `https://api.maptiler.com/maps/${this.mapStyle}/style.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
+  }
+
   mounted(): void {
+    MglDefaults.style = this.StyleUrl;
     if (this.calculateSize) {
       setTimeout(() => {
         const dom = this.$refs.mapSpace as HTMLElement;
@@ -181,6 +225,13 @@ export default class IdeaMap extends Vue {
         }
       }, 500);
     }
+  }
+
+  convertCoordinates(position: [number, number]): LngLatLike {
+    return {
+      lng: position[0],
+      lat: position[1],
+    };
   }
 
   @Watch('parameter.mapCenter', { immediate: true })
@@ -208,10 +259,7 @@ export default class IdeaMap extends Vue {
         this.selectedIdeaId = this.selectedIdea.id;
         if (this.map) {
           this.map.setCenter(
-            new LngLat(
-              this.selectedIdea.parameter.position[0],
-              this.selectedIdea.parameter.position[1]
-            )
+            this.convertCoordinates(this.selectedIdea.parameter)
           );
           this.changeSection();
         }
@@ -221,7 +269,7 @@ export default class IdeaMap extends Vue {
 
   calculateMapBounds(): void {
     if (this.ideas.length > 0) {
-      const center = [0, 0];
+      const center: [number, number] = [0, 0];
       const min = [...this.ideas[0].parameter.position];
       const max = [...this.ideas[0].parameter.position];
       for (const idea of this.ideas) {
@@ -242,12 +290,18 @@ export default class IdeaMap extends Vue {
 
       if (this.ideas.length > 1) {
         const delta = 0.02;
-        const minLngLat = new LngLat(min[0] - delta, min[1] - delta);
-        const maxLngLat = new LngLat(max[0] + delta, max[1] + delta);
-        this.mapBounds = new LngLatBounds(minLngLat, maxLngLat);
+        const minLngLat = this.convertCoordinates([
+          min[0] - delta,
+          min[1] - delta,
+        ]);
+        const maxLngLat = this.convertCoordinates([
+          max[0] + delta,
+          max[1] + delta,
+        ]);
+        this.mapBounds = [minLngLat, maxLngLat];
         this.fitZoomToBounds();
       } else this.mapBounds = null;
-      //this.mapCenter = center;
+      this.mapIdeaCenter = center;
       this.changeSection();
     } else this.mapBounds = null;
   }
@@ -269,23 +323,18 @@ export default class IdeaMap extends Vue {
     }
   }
 
-  get MapboxKey(): string {
-    return process.env.VUE_APP_MAPBOX_KEY;
-  }
-
   fitZoomToBounds(waiteForLoading = true): void {
     if (this.map && this.mapBounds) {
       this.map.fitBounds(this.mapBounds);
-      /*setTimeout(() => {
-        if (this.map) {
-          this.mapZoom = this.map.getZoom();
-          this.map.setZoom(this.mapZoom);
-          this.map.setCenter(new LngLat(this.mapCenter[0], this.mapCenter[1]));
-        }
-      }, 300);*/
     } else if (this.map) {
       this.map.setZoom(this.mapZoom);
-      this.map.setCenter(new LngLat(this.mapCenter[0], this.mapCenter[1]));
+      if (
+        this.ideas.length > 0 &&
+        this.mapIdeaCenter[0] !== 0 &&
+        this.mapIdeaCenter[1] !== 0
+      )
+        this.map.setCenter(this.convertCoordinates(this.mapIdeaCenter));
+      else this.map.setCenter(this.convertCoordinates(this.mapCenter));
     }
 
     if (waiteForLoading) {
@@ -295,15 +344,8 @@ export default class IdeaMap extends Vue {
     }
   }
 
-  mapLoaded(map: Map): void {
-    this.map = map;
-    /*console.log(this.map.getStyle().layers);
-    console.log(
-      this.map
-        .getStyle()
-        .layers.map((layer) => layer['source-layer'])
-        .filter((x, i, a) => a.indexOf(x) === i)
-    );*/
+  onLoad(e: MglEvent): void {
+    this.map = e.map;
     this.fitZoomToBounds();
     this.mapstyleChange(this.mapStyle);
   }
@@ -311,14 +353,14 @@ export default class IdeaMap extends Vue {
   mapstyleChange(command: string): void {
     this.mapStyle = command;
     if (this.map) {
-      this.map.setStyle(`mapbox://styles/mapbox/${this.mapStyle}`);
+      this.map.setStyle(this.StyleUrl);
       setTimeout(() => {
         if (this.map) {
           const notNeededLayers = this.map.getStyle().layers.filter((layer) => {
             const layerCategory = layer['source-layer'];
             const layerType = layer['type'];
             if (layerCategory) {
-              return layerType === 'symbol' && layerCategory !== 'place_label';
+              return layerType === 'symbol' && layerCategory !== 'place';
             }
             return false;
           });
@@ -338,11 +380,7 @@ export default class IdeaMap extends Vue {
       const visibleIdeas: Idea[] = [];
       const bounds = this.map.getBounds();
       for (const idea of this.ideas) {
-        if (
-          bounds.contains(
-            new LngLat(idea.parameter.position[0], idea.parameter.position[1])
-          )
-        ) {
+        if (bounds.contains(this.convertCoordinates(idea.parameter.position))) {
           visibleIdeas.push(idea);
           if (!oldVisibleIdeas.find((old) => old.id === idea.id))
             visibilityAdded = true;
@@ -361,8 +399,13 @@ export default class IdeaMap extends Vue {
 </script>
 
 <style lang="scss" scoped>
+@import '~maplibre-gl/dist/maplibre-gl.css';
+@import '~vue-maplibre-gl/dist/vue-maplibre-gl.css';
+
 .mapSpace {
   position: relative;
+  height: 100%;
+  width: 100%;
 
   .overlay {
     background-color: white;
