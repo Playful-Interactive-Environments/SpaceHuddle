@@ -95,6 +95,7 @@ import {
 } from 'vue-maplibre-gl';
 import { LngLatLike, LngLatBoundsLike, Map } from 'maplibre-gl';
 import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
+import * as turf from '@turf/turf';
 
 export enum MapStyles {
   STREETS = 'streets-v2',
@@ -269,26 +270,19 @@ export default class IdeaMap extends Vue {
 
   calculateMapBounds(): void {
     if (this.ideas.length > 0) {
-      const center: [number, number] = [0, 0];
-      const min = [...this.ideas[0].parameter.position];
-      const max = [...this.ideas[0].parameter.position];
-      for (const idea of this.ideas) {
-        center[0] += idea.parameter.position[0];
-        center[1] += idea.parameter.position[1];
-
-        if (min[0] > idea.parameter.position[0])
-          min[0] = idea.parameter.position[0];
-        if (min[1] > idea.parameter.position[1])
-          min[1] = idea.parameter.position[1];
-        if (max[0] < idea.parameter.position[0])
-          max[0] = idea.parameter.position[0];
-        if (max[1] < idea.parameter.position[1])
-          max[1] = idea.parameter.position[1];
-      }
-      center[0] /= this.ideas.length;
-      center[1] /= this.ideas.length;
+      const points = turf.points(
+        this.ideas.map((idea) => idea.parameter.position)
+      );
+      const center: [number, number] = turf.center(points).geometry
+        .coordinates as [number, number];
 
       if (this.ideas.length > 1) {
+        const bounds = turf.envelope(points).geometry.coordinates[0] as [
+          number,
+          number
+        ][];
+        const min = bounds[0];
+        const max = bounds[2];
         const delta = 0.02;
         const minLngLat = this.convertCoordinates([
           min[0] - delta,

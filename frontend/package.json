@@ -13,10 +13,14 @@
     "@fortawesome/free-regular-svg-icons": "^6.4.0",
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "@fortawesome/vue-fontawesome": "^3.0.3",
+    "@pixi-essentials/gradients": "^1.0.1",
     "@routingjs/osrm": "^0.1.0",
+    "@turf/turf": "^6.5.0",
+    "@types/matter-js": "^0.18.5",
     "axios": "^1.2.1",
     "bulma": "^0.9.4",
     "chart.js": "^4.3.0",
+    "chartjs-plugin-annotation": "^3.0.1",
     "colorjs.io": "^0.4.3",
     "core-js": "^3.8.3",
     "element-plus": "^2.2.26",
@@ -47,6 +51,7 @@
     "vue3-draggable": "^2.0.9",
     "vue3-html2pdf": "^1.1.2",
     "vue3-observe-visibility2": "^0.0.3",
+    "vue3-pixi": "^0.7.4",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {

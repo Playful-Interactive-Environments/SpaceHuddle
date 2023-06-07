@@ -102,6 +102,7 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
 - MapLibre: map engine `https://maplibre.org/`
 - MapTiler: map styles `https://www.maptiler.com/`
 - OSRM: open source routing machine `http://project-osrm.org/`
+- Turf: geospatial analysis `http://turfjs.org/`
 
 ### Develop your own modules
 

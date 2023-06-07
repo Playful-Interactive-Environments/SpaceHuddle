@@ -18,18 +18,33 @@
     <mgl-map :center="mapCenter" :zoom="mapZoom" @map:load="onLoad">
       <mgl-geo-json-source
         v-if="routeCalculated"
-        source-id="geojson"
+        source-id="routePath"
         :data="routePath"
       >
         <mgl-line-layer
-          layer-id="geojson"
+          layer-id="routePath"
           :layout="routeLayout"
           :paint="routePaint"
         />
       </mgl-geo-json-source>
-      <CustomMapMarker :coordinates="mapStart">
+      <mgl-geo-json-source source-id="drivenPath" :data="drivenPath">
+        <mgl-line-layer
+          layer-id="drivenPath"
+          :layout="routeLayout"
+          :paint="drivenPaint"
+        />
+      </mgl-geo-json-source>
+      <CustomMapMarker
+        :coordinates="mapDrivingPoint"
+        :rotation="mapDrivingRotation"
+        rotation-alignment="map"
+      >
         <template v-slot:icon>
-          <font-awesome-icon icon="location-crosshairs" class="pin" />
+          <img
+            src="@/modules/information/cleanup/assets/car.png"
+            alt="car"
+            :width="20"
+          />
         </template>
       </CustomMapMarker>
       <CustomMapMarker :coordinates="mapEnd">
@@ -69,7 +84,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import Joystick from 'vue-joystick-component';
 import { Line } from 'vue-chartjs';
 import * as gameConfig from '@/modules/information/cleanup/data/gameConfig.json';
-import { OSRM } from '@routingjs/osrm';
+import { OsrmCustom as OSRM } from '@/utils/osrm';
 import {
   MglDefaults,
   MglGeoJsonSource,
@@ -82,6 +97,7 @@ import {
 import { LineLayerSpecification } from 'maplibre-gl';
 import { FeatureCollection } from 'geojson';
 import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
+import * as turf from '@turf/turf';
 
 MglDefaults.style = `https://api.maptiler.com/maps/streets/style.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
 
@@ -97,44 +113,41 @@ MglDefaults.style = `https://api.maptiler.com/maps/streets/style.json?key=${proc
     Joystick,
     Line,
   },
-  emits: ['update:useFullSize'],
+  emits: ['update:useFullSize', 'goalReached'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class DriveToLocation extends Vue {
+  @Prop({ default: 'car' }) readonly vehicle!: 'car' | 'bike';
   @Prop({ default: {} }) readonly parameter!: any;
   mapZoomDefault = 14;
   mapCenter: [number, number] = [0, 0];
   mapStart: [number, number] = [0, 0];
   mapEnd: [number, number] = [0, 0];
+  mapWayPoints: [number, number][] = [];
+  mapDrivingPoint: [number, number] = [0, 0];
+  mapDrivingRotation = 0;
   mapZoom = this.mapZoomDefault;
   routeCalculated = false;
-  routePath: FeatureCollection = {
-    type: 'FeatureCollection',
-    features: [
-      {
-        type: 'Feature',
-        properties: {},
-        geometry: {
-          type: 'LineString',
-          coordinates: [] as any[],
-        },
-      },
-    ],
-  };
+  routePath: FeatureCollection = this.getRouteObject([]);
+  drivenPath: FeatureCollection = this.getRouteObject([]);
   routeLayout: LineLayerSpecification['layout'] = {
     'line-join': 'round',
     'line-cap': 'round',
   };
   routePaint: LineLayerSpecification['paint'] = {
+    'line-color': '#0000FF',
+    'line-width': 2,
+  };
+  drivenPaint: LineLayerSpecification['paint'] = {
     'line-color': '#FF0000',
     'line-width': 8,
   };
 
-  intervalTime = 1000;
+  readonly intervalTime = 50;
   interval = -1;
   isMoving = false;
   moveSpeed = 0;
-  moveDirection = [0, 0];
+  moveDirection: [number, number] = [0, 0];
 
   colors = [
     { color: '#01cf9e', percentage: 20 },
@@ -155,6 +168,22 @@ export default class DriveToLocation extends Vue {
     labels: [],
     datasets: [],
   };
+
+  getRouteObject(pathCoordinates: [number, number][]): FeatureCollection {
+    return {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: pathCoordinates,
+          },
+        },
+      ],
+    };
+  }
 
   onLoad(e: MglEvent): void {
     const map = e.map;
@@ -185,7 +214,9 @@ export default class DriveToLocation extends Vue {
     for (const particleName in gameConfig.particles) {
       const particle = gameConfig.particles[particleName];
       const data = {
-        label: particleName,
+        label: this.$t(
+          `module.information.cleanup.enums.particle.${particleName}`
+        ),
         data: [],
         backgroundColor: particle.color,
         borderColor: particle.color,
@@ -227,33 +258,77 @@ export default class DriveToLocation extends Vue {
     if (this.parameter.mapZoom && this.mapZoom === this.mapZoomDefault) {
       this.mapZoom = this.parameter.mapZoom;
     }
+    this.mapDrivingPoint = [...this.mapStart];
 
     (this.routePath.features[0].geometry as any).coordinates = [
       this.mapStart,
       this.mapEnd,
     ];
 
-    const osrm = new OSRM(); // URL defaults to https://routing.openstreetmap.de/routed-bike
-    osrm
-      .directions(
-        [
-          [this.mapStart[1], this.mapStart[0]],
-          [this.mapEnd[1], this.mapEnd[0]],
-        ],
-        'car'
-      )
-      .then((d) => {
-        d.directions.forEach((direction) => {
-          if (direction.feature.geometry) {
-            (this.routePath.features[0].geometry as any).coordinates =
-              direction.feature.geometry.coordinates.map((position) => [
-                position[1],
-                position[0],
-              ]);
-          }
-        });
-        this.routeCalculated = true;
-      });
+    this.calculateRoute(this.mapStart, this.mapEnd).then(() => {
+      const pathPoints = (this.routePath.features[0].geometry as any)
+        .coordinates;
+      this.mapDrivingPoint = pathPoints[0];
+      this.mapDrivingRotation = turf.bearing(
+        turf.point(this.mapDrivingPoint),
+        turf.point(pathPoints[1])
+      );
+      this.routeCalculated = true;
+    });
+  }
+
+  async calculateRoute(
+    start: [number, number],
+    end: [number, number],
+    checkDistance = false
+  ): Promise<boolean> {
+    const osrm = new OSRM('car', {
+      userAgent: '',
+    });
+    const wayPoints = [...this.mapWayPoints.map((p) => [p[1], p[0]])] as [
+      number,
+      number
+    ][];
+    wayPoints.push([start[1], start[0]]);
+    wayPoints.push([end[1], end[0]]);
+    const path = await osrm.directions(wayPoints, 'car');
+    const pathCoordinates: [number, number][] = [];
+    path.directions.forEach((direction) => {
+      if (direction.feature.geometry) {
+        pathCoordinates.push(
+          ...(direction.feature.geometry.coordinates.map((position) => [
+            position[1],
+            position[0],
+          ]) as [number, number][])
+        );
+      }
+    });
+    let setNewPath = true;
+    if (checkDistance) {
+      const line = turf.lineString(pathCoordinates);
+      const pt = turf.point(start);
+      const distance = turf.pointToLineDistance(pt, line);
+      setNewPath = distance < 0.01;
+    }
+    if (setNewPath) {
+      this.routePath = this.getRouteObject(pathCoordinates);
+      this.mapWayPoints.push(start);
+      return true;
+    }
+    return false;
+  }
+
+  async isOnPossibleRoute(
+    point: [number, number]
+  ): Promise<{ distance: number; location: [number, number] }> {
+    const osrm = new OSRM('car', {
+      userAgent: '',
+    });
+    const path = (await osrm.nearest([point[1], point[0]], 'car')).waypoints[0];
+    return {
+      distance: path.distance,
+      location: [path.location[0], path.location[1]],
+    };
   }
 
   start(): void {
@@ -270,25 +345,112 @@ export default class DriveToLocation extends Vue {
   move(event: any): void {
     this.moveSpeed = event.distance;
     this.moveDirection = [event.x, event.y];
+    this.noStreet = false;
   }
 
-  updateTrace(): void {
+  noStreet = false;
+  async updateTrace(): Promise<void> {
+    const speedDistanceFactor = 0.00005;
+    const speedRoadDistanceFactor = 0.00005;
+    const calcAngle = (point: [number, number]): number => {
+      return Math.atan2(point[0], point[1]) * (180 / Math.PI);
+    };
+
     if (this.isMoving) {
+      const destination = turf.destination(
+        turf.point(this.mapDrivingPoint),
+        this.moveSpeed * speedDistanceFactor,
+        calcAngle(this.moveDirection)
+      );
+      const newDrivingPoint: [number, number] = [
+        destination.geometry.coordinates[0],
+        destination.geometry.coordinates[1],
+      ];
+      let isOnRoute = !this.noStreet;
+      const pathPoints = (this.routePath.features[0].geometry as any)
+        .coordinates as [number, number][];
+      if (isOnRoute) {
+        const line = turf.lineString(pathPoints);
+        const pt = turf.point(newDrivingPoint);
+        const distance = turf.pointToLineDistance(pt, line);
+        if (distance < 0.005) {
+          const snapped = turf.nearestPointOnLine(line, pt);
+          newDrivingPoint[0] = snapped.geometry.coordinates[0];
+          newDrivingPoint[1] = snapped.geometry.coordinates[1];
+        } else {
+          const possibleRoadPointTurf = turf.destination(
+            turf.point(this.mapDrivingPoint),
+            this.moveSpeed * speedRoadDistanceFactor,
+            calcAngle(this.moveDirection)
+          );
+          const possibleRoadPoint: [number, number] = [
+            possibleRoadPointTurf.geometry.coordinates[0],
+            possibleRoadPointTurf.geometry.coordinates[1],
+          ];
+          const roadPoint = await this.isOnPossibleRoute(possibleRoadPoint);
+          if (roadPoint.distance < 3) {
+            await this.calculateRoute(possibleRoadPoint, this.mapEnd);
+            const snapped = turf.nearestPointOnLine(line, pt);
+            newDrivingPoint[0] = snapped.geometry.coordinates[0];
+            newDrivingPoint[1] = snapped.geometry.coordinates[1];
+          } else isOnRoute = false;
+        }
+      }
+      this.mapDrivingRotation = turf.bearing(
+        turf.point(this.mapDrivingPoint),
+        newDrivingPoint
+      );
+      if (isOnRoute) {
+        const coordinates = (this.drivenPath.features[0].geometry as any)
+          .coordinates;
+        coordinates.push(newDrivingPoint);
+        this.drivenPath = this.getRouteObject(coordinates);
+        this.mapDrivingPoint = newDrivingPoint;
+        const goalDistance = turf.distance(
+          turf.point(this.mapDrivingPoint),
+          turf.point(pathPoints[pathPoints.length - 1])
+        );
+        if (goalDistance < 0.001)
+          this.$emit('goalReached', this.getTrackingData());
+      } else {
+        this.noStreet = true;
+      }
       for (const particleName in gameConfig.particles) {
+        const label = this.$t(
+          `module.information.cleanup.enums.particle.${particleName}`
+        );
         const particle = gameConfig.particles[particleName];
         const dataset = this.chartData.datasets.find(
-          (ds) => ds.label === particleName
+          (ds) => ds.label === label
         );
         if (dataset) {
-          dataset.data = [
-            ...dataset.data,
-            this.moveSpeed * particle.speedFactor,
-          ];
+          const speedFunction = new Function(
+            'speed',
+            `return ${particle.speedFunction[this.vehicle]}`
+          );
+          dataset.data = [...dataset.data, speedFunction(this.moveSpeed)];
         }
       }
       this.chartData.labels.push(Math.round(this.moveSpeed).toString());
       this.updateChart();
     }
+  }
+
+  getTrackingData(): number[] {
+    return this.chartData.labels.map((label) => parseInt(label));
+    /*const result: { [key: string]: number[] } = {
+      speed: this.chartData.labels.map((label) => parseInt(label)),
+    };
+    for (const particleName in gameConfig.particles) {
+      const label = this.$t(
+        `module.information.cleanup.enums.particle.${particleName}`
+      );
+      const dataset = this.chartData.datasets.find((ds) => ds.label === label);
+      if (dataset) {
+        result[particleName] = [...dataset.data];
+      }
+    }
+    return result;*/
   }
 }
 </script>

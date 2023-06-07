@@ -114,6 +114,13 @@ export default class CustomMapMarker extends Vue {
     }
   }
 
+  @Watch('rotation', { immediate: true })
+  onRotationChanged(): void {
+    if (this.marker) {
+      this.marker.setRotation(this.rotation);
+    }
+  }
+
   unmounted(): void {
     if (this.marker) {
       this.marker.remove.bind(this.marker);
