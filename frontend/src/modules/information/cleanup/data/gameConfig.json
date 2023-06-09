@@ -2,19 +2,35 @@
   "particles": {
     "co2": {
       "color": "#fe6e5d",
-      "speedFactor": 0.35
+      "speedFactor": 0.35,
+      "speedFunction": {
+        "car": "0.35 * speed",
+        "bike": "0.001 * speed"
+      }
     },
     "dust": {
       "color": "#1d2948",
-      "speedFactor": 0.5
+      "speedFactor": 0.5,
+      "speedFunction": {
+        "car": "0.5 * speed",
+        "bike": "0.001 * speed"
+      }
     },
     "ch4": {
       "color": "#f3a40a",
-      "speedFactor": 0.2
+      "speedFactor": 0.2,
+      "speedFunction": {
+        "car": "0.2 * speed",
+        "bike": "0.001 * speed"
+      }
     },
     "microplastic": {
       "color": "#0192d0",
-      "speedFactor": 0.1
+      "speedFactor": 0.1,
+      "speedFunction": {
+        "car": "0.1 * speed",
+        "bike": "0.01 * speed"
+      }
     }
   }
 }

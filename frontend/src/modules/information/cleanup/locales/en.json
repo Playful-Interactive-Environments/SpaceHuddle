@@ -5,5 +5,13 @@
   },
   "participant": {
     "speed": "speed"
+  },
+  "enums": {
+    "particle": {
+      "co2": "co2",
+      "dust": "dust",
+      "ch4": "ch4",
+      "microplastic": "microplastic"
+    }
   }
 }

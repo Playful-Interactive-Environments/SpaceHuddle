@@ -1,5 +1,5 @@
-import {OSRM, OSRMRouteResponse} from '@routingjs/osrm';
-import {Client, Direction, Directions, RoutingJSAPIError} from '@routingjs/core';
+import { OSRM } from '@routingjs/osrm';
+import { Client, RoutingJSAPIError } from '@routingjs/core';
 import options from '@routingjs/core/dist/es/options';
 import axios from 'axios';
 import axiosRetry, { isNetworkOrIdempotentRequestError } from 'axios-retry';
@@ -13,7 +13,9 @@ const handleOSRMError = (error) => {
     errorCode:
       (_c = error.response) === null || _c === void 0 ? void 0 : _c.data.code,
     errorMessage:
-      (_d = error.response) === null || _d === void 0 ? void 0 : _d.data.message,
+      (_d = error.response) === null || _d === void 0
+        ? void 0
+        : _d.data.message,
   };
   throw new RoutingJSAPIError(error.message, props);
 };
