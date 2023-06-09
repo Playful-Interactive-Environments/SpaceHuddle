@@ -1,5 +1,10 @@
-<template compiler="pixi.js">
-  <container @render="containerLoad" :x="position[0]" :y="position[1]">
+<template>
+  <container
+    @render="containerLoad"
+    :x="position[0]"
+    :y="position[1]"
+    :gameObject="123"
+  >
     <slot></slot>
   </container>
 </template>
@@ -9,18 +14,20 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import * as Matter from 'matter-js/build/matter';
 import * as PIXI from 'pixi.js';
+import { EventType } from '@/types/enum/EventType';
+import { CollisionHandler } from '@/components/shared/atoms/game/CollisionHandler';
+import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 
 @Options({
   components: {},
-  emits: ['update:x', 'update:y', 'destroyObject'],
+  emits: ['update:x', 'update:y', 'update:id', 'destroyObject'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class GameObject extends Vue {
+  @Prop({ default: 100 }) renderDelay!: number;
   @Prop({ default: 0 }) id!: number;
   @Prop({ default: 0 }) x!: number;
   @Prop({ default: 0 }) y!: number;
-  @Prop() readonly engine!: typeof Matter.Engine;
-  @Prop() readonly detector!: typeof Matter.Detector;
   @Prop({ default: 'rect' }) readonly type!: 'rect' | 'circle';
   @Prop({ default: {} }) readonly options!: {
     [key: string]: string | number | boolean;
@@ -32,18 +39,29 @@ export default class GameObject extends Vue {
   readonly collisionsFilter!:
     | ((collision: Matter.Collision) => boolean)
     | undefined;
+  @Prop() readonly collisionHandler!: CollisionHandler;
   body!: typeof Matter.Body;
-  readonly intervalTime = 50;
-  interval = -1;
   position: [number, number] = [0, 0];
   container!: PIXI.Container;
+  gameContainer!: GameContainer;
 
-  mounted(): void {
-    //
+  async mounted(): Promise<void> {
+    const container = document.getElementById('gameContainer');
+    if (container) {
+      const registerGameObject = new CustomEvent(
+        EventType.REGISTER_GAME_OBJECT,
+        {
+          detail: {
+            data: this,
+          },
+        }
+      );
+      container.dispatchEvent(registerGameObject);
+    }
   }
 
   unmounted(): void {
-    this.cleanup();
+    this.kill();
   }
 
   containerLoad(container: PIXI.Container): void {
@@ -67,12 +85,7 @@ export default class GameObject extends Vue {
           );
           break;
       }
-
-      if (!this.isStatic) {
-        clearInterval(this.interval);
-        this.interval = setInterval(this.syncronize, this.intervalTime);
-      }
-    }, 100);
+    }, this.renderDelay);
   }
 
   addRect(x: number, y: number, width: number, height: number): void {
@@ -84,6 +97,7 @@ export default class GameObject extends Vue {
       height,
       this.options
     );
+    this.$emit('update:id', this.body.id);
     this.addBodyToEngine();
     this.addBodyToDetector();
   }
@@ -96,19 +110,20 @@ export default class GameObject extends Vue {
       width > height ? width / 2 : height / 2,
       this.options
     );
+    this.$emit('update:id', this.body.id);
     this.addBodyToEngine();
     this.addBodyToDetector();
   }
 
   addBodyToEngine(): void {
-    if (this.engine && this.body) {
-      Matter.Composite.add(this.engine.world, this.body);
+    if (this.gameContainer && this.body) {
+      Matter.Composite.add(this.gameContainer.engine.world, this.body);
     }
   }
 
   addBodyToDetector(): void {
-    if (this.detector && this.body) {
-      this.detector.bodies.push(this.body);
+    if (this.gameContainer && this.body) {
+      this.gameContainer.detector.bodies.push(this.body);
     }
   }
 
@@ -118,56 +133,59 @@ export default class GameObject extends Vue {
     this.position = [this.x, this.y];
   }
 
-  @Watch('engine', { immediate: true })
+  @Watch('gameContainer', { immediate: true })
   onEngineChanged(): void {
     this.addBodyToEngine();
-  }
-
-  @Watch('detector', { immediate: true })
-  onDetectorChanged(): void {
     this.addBodyToDetector();
   }
 
   syncronize(): void {
     if (
-      this.engine &&
-      this.detector &&
+      !this.isStatic &&
       this.body &&
       (this.body.position.x !== this.position[0] ||
         this.body.position.y !== this.position[1])
     ) {
+      if (this.gameContainer) {
+        let outside = false;
+        let x = this.body.position.x;
+        if (
+          this.body.position.x > this.gameContainer.gameWidth ||
+          this.body.position.x < 0
+        ) {
+          x = this.gameContainer.gameWidth / 2;
+          outside = true;
+        }
+        let y = this.body.position.y;
+        if (this.body.position.y > this.gameContainer.gameHeight) {
+          y = this.gameContainer.gameHeight / 2;
+          outside = true;
+        }
+        if (outside) Matter.Body.setPosition(this.body, { x: x, y: y });
+      }
       this.position[0] = this.body.position.x;
       this.position[1] = this.body.position.y;
       this.$emit('update:x', this.body.position.x);
       this.$emit('update:y', this.body.position.y);
-      const collisions = Matter.Detector.collisions(this.detector);
-      if (collisions.length > 0) {
-        const rightAnswer = this.collisionsFilter
-          ? collisions.find((collision) => {
-              if (
-                collision.bodyA.id !== this.body.id &&
-                collision.bodyB.id !== this.body.id
-              )
-                return false;
-              if (this.collisionsFilter)
-                return this.collisionsFilter(collision);
-              return true;
-            })
-          : collisions;
-        if (rightAnswer) {
-          clearInterval(this.interval);
-          this.$emit('destroyObject', this);
-          //this.cleanup();
-        }
-      }
     }
   }
 
-  cleanup(): void {
-    clearInterval(this.interval);
-    Matter.Composite.remove(this.engine.world, this.body);
-    const index = this.detector.bodies.findIndex((body) => body === this.body);
-    if (index > -1) this.detector.bodies.splice(index, 1);
+  notifyDestroy(): void {
+    this.$emit('destroyObject', this);
+    //this.kill();
+  }
+
+  kill(): void {
+    if (this.gameContainer) {
+      this.gameContainer.deregisterGameObject(this);
+      const body = this.body;
+      this.body = null;
+      Matter.Composite.remove(this.gameContainer.engine.world, body);
+      const index = this.gameContainer.detector.bodies.findIndex(
+        (b) => b === body
+      );
+      if (index > -1) this.gameContainer.detector.bodies.splice(index, 1);
+    }
     setTimeout(() => {
       const parent = this.container.parent;
       if (parent) {
@@ -175,6 +193,12 @@ export default class GameObject extends Vue {
       }
       this.container.destroy({ children: true });
     }, 100);
+  }
+
+  handleCollision(): void {
+    if (this.collisionHandler) {
+      this.collisionHandler.handleCollision(this);
+    }
   }
 }
 </script>
