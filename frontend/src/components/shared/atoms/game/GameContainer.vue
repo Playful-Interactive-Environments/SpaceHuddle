@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import * as Matter from 'matter-js/build/matter';
 import { Application } from 'vue3-pixi';
 import { EventType } from '@/types/enum/EventType';
@@ -38,6 +38,8 @@ import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 export default class GameContainer extends Vue {
   @Prop({ default: true }) readonly hasMouseInput!: boolean;
   @Prop({ default: true }) readonly detectCollision!: boolean;
+  @Prop({ default: true }) readonly useGravity!: boolean;
+  @Prop({ default: true }) readonly useBorders!: boolean;
   @Prop({ default: undefined }) readonly width!: number | undefined;
   @Prop({ default: undefined }) readonly height!: number | undefined;
   @Prop({
@@ -94,7 +96,7 @@ export default class GameContainer extends Vue {
     setTimeout(() => {
       const pixi = this.$refs.pixi as typeof Application;
       this.$emit('initRenderer', pixi.app.renderer);
-    }, 1000);
+    }, 100);
   }
 
   registerGameObject(e: any): void {
@@ -313,11 +315,13 @@ export default class GameContainer extends Vue {
   setupMatter(): void {
     this.engine = Matter.Engine.create();
     this.$emit('initEngine', this.engine);
-    this.engine.gravity = {
-      x: 0,
-      y: 1,
-      scale: 0.0005,
-    };
+    if (this.useGravity) {
+      this.engine.gravity = {
+        x: 0,
+        y: 1,
+        scale: 0.0005,
+      };
+    }
     this.runner = Matter.Runner.create();
     this.detector = Matter.Detector.create({ bodies: [] });
     this.$emit('initDetector', this.detector);
@@ -349,6 +353,23 @@ export default class GameContainer extends Vue {
   syncRenderView(): void {
     for (const gameObject of this.gameObjects) {
       gameObject.syncronize();
+    }
+  }
+
+  @Watch('useBorders', { immediate: true })
+  onUseBordersChanged(): void {
+    if (this.borders) {
+      if (!this.useBorders) {
+        Matter.Composite.remove(this.engine.world, this.borders.bottom);
+        Matter.Composite.remove(this.engine.world, this.borders.top);
+        Matter.Composite.remove(this.engine.world, this.borders.right);
+        Matter.Composite.remove(this.engine.world, this.borders.left);
+      } else if (!this.engine.world.bodies.includes(this.borders.bottom)) {
+        Matter.Composite.add(this.engine.world, this.borders.bottom);
+        Matter.Composite.add(this.engine.world, this.borders.top);
+        Matter.Composite.add(this.engine.world, this.borders.right);
+        Matter.Composite.add(this.engine.world, this.borders.left);
+      }
     }
   }
 }

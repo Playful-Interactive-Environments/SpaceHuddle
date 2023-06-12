@@ -35,6 +35,7 @@
       :collisionsFilter="(collision: Matter.Collision) => {
             return collision.bodyA.isStatic !== collision.bodyB.isStatic;
           }"
+      :useBorders="!isFull"
       @initRenderer="initRenderer"
     >
       <template v-slot:default>
@@ -53,6 +54,7 @@
               },
             }"
             :render-delay="1000"
+            @sizeChanged="containerSizeChanged"
           >
             <sprite
               :width="containerWidth"
@@ -80,6 +82,47 @@
               </text>
             </sprite>
           </GameObject>
+          <Graphics
+            v-if="renderer"
+            :x="0"
+            :y="particleBorder"
+            :color="statusColor"
+            @render="drawStatusBackground"
+          ></Graphics>
+          <container
+            v-if="outsideCount > 0"
+            :x="gameWidth - containerWidth / 2"
+            :y="particleBorder"
+          >
+            <Graphics
+              :radius="containerWidth / 3"
+              color="#ffffff"
+              @render="drawCircle"
+            >
+              <sprite
+                texture="/assets/games/cleanup/explosion.svg"
+                tint="#fe6e5d"
+                :x="-containerWidth / 6"
+                :y="-containerWidth / 6"
+                :width="containerWidth / 3"
+                :height="containerWidth / 4"
+              >
+              </sprite>
+            </Graphics>
+            <text
+              :style="{
+                fill: '#fe6e5d',
+                fontSize: 16,
+                fontWeight: 'bold',
+                textAlign: 'center',
+              }"
+              :anchor="0.5"
+              :x="0"
+              :y="containerWidth / 6"
+            >
+              {{ outsideCount }}
+            </text>
+          </container>
           <GameObject
             v-for="particle in cleanupParticles"
             :key="particle.uuid"
@@ -100,6 +143,7 @@
             }"
             :collision-handler="particleCollisionHandler"
             @destroyObject="destroyParticle"
+            @outsideDrawingSpace="outsideDrawingSpace"
           >
             <Graphics
               :radius="particleRadius"
@@ -135,6 +179,8 @@ import { ParticleCollisionHandler } from '@/modules/information/cleanup/types/Pa
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { v4 as uuidv4 } from 'uuid';
 import { center } from '@turf/turf';
+import { delay } from '@/utils/wait';
+import Color from 'colorjs.io';
 Chart.register(annotationPlugin);
 
 interface DrawingParticle {
@@ -191,6 +237,8 @@ export default class CleanUpParticles extends Vue {
   particleCollisionHandler = new ParticleCollisionHandler();
   particleState: { [key: string]: ParticleState } = {};
   renderer!: PIXI.Renderer;
+  maxParticleCount = 10;
+  outsideCount = 0;
 
   get containerSpace(): number {
     return this.gameWidth / Object.keys(gameConfig.particles).length;
@@ -198,6 +246,32 @@ export default class CleanUpParticles extends Vue {
 
   get containerWidth(): number {
     return this.containerSpace - this.padding * 2;
+  }
+
+  get containerHeight(): number {
+    return this.containerSize[1];
+  }
+
+  get particleBorder(): number {
+    return this.containerHeight + 50;
+  }
+
+  get statusColor(): string {
+    const color1 = new Color('#01cf9e');
+    const color2 = new Color('#fe6e5d');
+    const color = color1.mix(
+      color2,
+      (1 / (this.maxParticleCount + 1)) * (this.cleanupParticles.length + 1),
+      {
+        space: 'lch',
+        outputSpace: 'srgb',
+      }
+    );
+    return color.toString();
+  }
+
+  get isFull(): boolean {
+    return this.maxParticleCount <= this.cleanupParticles.length;
   }
 
   getParticleDisplayName(particleName: string): string {
@@ -222,7 +296,7 @@ export default class CleanUpParticles extends Vue {
         { color: '#ffffff00', offset: 1 },
       ],
     });
-    const matrix: PIXI.Matrix = new PIXI.Matrix(1, 0, 0, 1, 0, 0);
+    const matrix: PIXI.Matrix = new PIXI.Matrix();
     matrix.translate(-radius, -radius);
     circle.beginTextureFill({
       texture: renderTexture,
@@ -233,6 +307,35 @@ export default class CleanUpParticles extends Vue {
     circle.drawCircle(0, 0, (circle as any).radius);
     circle.endFill();
     circle.interactive = true;
+  }
+
+  drawStatusBackground(background: PIXI.Graphics): void {
+    const width = this.gameWidth;
+    const height = this.gameHeight - this.particleBorder;
+    const renderTexture = PIXI.RenderTexture.create({
+      width: width,
+      height: height,
+    });
+    GradientFactory.createLinearGradient(this.renderer, renderTexture, {
+      x0: 0,
+      y0: 0,
+      x1: 0,
+      y1: height,
+      colorStops: [
+        { color: '#ffffff00', offset: 0 },
+        { color: '#ffffffff', offset: 1 },
+      ],
+    });
+    background.beginFill(this.renderer.background.color);
+    background.drawRect(0, 0, width, height);
+    background.endFill();
+    background.beginTextureFill({
+      texture: renderTexture,
+      color: this.statusColor,
+      alpha: 1,
+    });
+    background.drawRect(0, 0, width, height);
+    background.endFill();
   }
 
   async updateChart(): Promise<void> {
@@ -254,7 +357,7 @@ export default class CleanUpParticles extends Vue {
     }
     setTimeout(() => {
       this.loadActiveParticle();
-    }, 1000);
+    }, 1500);
     this.interval = setInterval(this.updatedLoop, this.intervalTime);
   }
 
@@ -265,13 +368,20 @@ export default class CleanUpParticles extends Vue {
   updatedLoop(): void {
     this.activeValue++;
     this.loadActiveParticle();
+    if (this.activeValue > this.trackingData.length)
+      clearInterval(this.interval);
   }
 
   initRenderer(renderer: PIXI.Renderer): void {
     this.renderer = renderer;
   }
 
-  loadActiveParticle(): void {
+  containerSize: [number, number] = [this.containerWidth, this.containerWidth];
+  containerSizeChanged(size: [number, number]): void {
+    this.containerSize = size;
+  }
+
+  async loadActiveParticle(): Promise<void> {
     for (const index in this.chartData.datasets) {
       const dataset = this.chartData.datasets[index];
       if (this.activeValue < dataset.data.length) {
@@ -287,10 +397,14 @@ export default class CleanUpParticles extends Vue {
             position: [
               Math.random() * (this.gameWidth - this.particleRadius * 2) +
                 this.particleRadius,
-              this.gameHeight - 200 - this.particleRadius,
+              this.particleBorder + this.particleRadius,
             ],
           };
           this.cleanupParticles.push(particle);
+          /*if (this.cleanupParticles.length > this.maxParticleCount) {
+
+          }*/
+          await delay(500);
         }
       }
     }
@@ -301,6 +415,13 @@ export default class CleanUpParticles extends Vue {
     const index = this.cleanupParticles.findIndex((p) => p.id === id);
     if (index > -1) this.cleanupParticles.splice(index, 1);
     this.particleState[particle.options.label as string].collectedCount++;
+  }
+
+  outsideDrawingSpace(particle: GameObject): void {
+    const id = particle.id;
+    const index = this.cleanupParticles.findIndex((p) => p.id === id);
+    if (index > -1) this.cleanupParticles.splice(index, 1);
+    this.outsideCount++;
   }
 
   @Watch('trackingData', { immediate: true })

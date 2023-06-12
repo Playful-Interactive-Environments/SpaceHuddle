@@ -20,7 +20,14 @@ import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 
 @Options({
   components: {},
-  emits: ['update:x', 'update:y', 'update:id', 'destroyObject'],
+  emits: [
+    'update:x',
+    'update:y',
+    'update:id',
+    'destroyObject',
+    'outsideDrawingSpace',
+    'sizeChanged',
+  ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class GameObject extends Vue {
@@ -67,6 +74,7 @@ export default class GameObject extends Vue {
   containerLoad(container: PIXI.Container): void {
     this.container = container;
     setTimeout(() => {
+      this.$emit('sizeChanged', [container.width, container.height]);
       switch (this.type) {
         case 'rect':
           this.addRect(
@@ -147,7 +155,15 @@ export default class GameObject extends Vue {
         this.body.position.y !== this.position[1])
     ) {
       if (this.gameContainer) {
-        let outside = false;
+        if (
+          this.body.position.x > this.gameContainer.gameWidth ||
+          this.body.position.x < 0 ||
+          this.body.position.y > this.gameContainer.gameHeight ||
+          this.body.position.y < 0
+        ) {
+          this.$emit('outsideDrawingSpace', this);
+        }
+        /*let outside = false;
         let x = this.body.position.x;
         if (
           this.body.position.x > this.gameContainer.gameWidth ||
@@ -161,7 +177,7 @@ export default class GameObject extends Vue {
           y = this.gameContainer.gameHeight / 2;
           outside = true;
         }
-        if (outside) Matter.Body.setPosition(this.body, { x: x, y: y });
+        if (outside) Matter.Body.setPosition(this.body, { x: x, y: y });*/
       }
       this.position[0] = this.body.position.x;
       this.position[1] = this.body.position.y;
