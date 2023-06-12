@@ -237,7 +237,7 @@ export default class CleanUpParticles extends Vue {
   particleCollisionHandler = new ParticleCollisionHandler();
   particleState: { [key: string]: ParticleState } = {};
   renderer!: PIXI.Renderer;
-  maxParticleCount = 10;
+  maxParticleCount = 50;
   outsideCount = 0;
 
   get containerSpace(): number {
@@ -332,7 +332,7 @@ export default class CleanUpParticles extends Vue {
     background.beginTextureFill({
       texture: renderTexture,
       color: this.statusColor,
-      alpha: 1,
+      alpha: 0.3,
     });
     background.drawRect(0, 0, width, height);
     background.endFill();
