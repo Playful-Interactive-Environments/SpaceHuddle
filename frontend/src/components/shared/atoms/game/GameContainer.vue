@@ -26,7 +26,13 @@ import GameObject from '@/components/shared/atoms/game/GameObject.vue';
   components: {
     Application,
   },
-  emits: ['initEngine', 'initDetector', 'update:width', 'update:height'],
+  emits: [
+    'initEngine',
+    'initDetector',
+    'initRenderer',
+    'update:width',
+    'update:height',
+  ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class GameContainer extends Vue {
@@ -84,6 +90,11 @@ export default class GameContainer extends Vue {
       );
     }
     this.intervalSync = setInterval(this.syncRenderView, this.intervalTimeSync);
+
+    setTimeout(() => {
+      const pixi = this.$refs.pixi as typeof Application;
+      this.$emit('initRenderer', pixi.app.renderer);
+    }, 1000);
   }
 
   registerGameObject(e: any): void {

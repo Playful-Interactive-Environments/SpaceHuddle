@@ -35,6 +35,7 @@
       :collisionsFilter="(collision: Matter.Collision) => {
             return collision.bodyA.isStatic !== collision.bodyB.isStatic;
           }"
+      @initRenderer="initRenderer"
     >
       <template v-slot:default>
         <container v-if="gameWidth">
@@ -130,11 +131,11 @@ import { GradientFactory } from '@pixi-essentials/gradients';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import { Chart } from 'chart.js';
-import { ParticleCollisionHandler } from '@/modules/information/cleanup/atoms/ParticleCollisionHandler';
+import { ParticleCollisionHandler } from '@/modules/information/cleanup/types/ParticleCollisionHandler';
 import annotationPlugin from 'chartjs-plugin-annotation';
-Chart.register(annotationPlugin);
 import { v4 as uuidv4 } from 'uuid';
 import { center } from '@turf/turf';
+Chart.register(annotationPlugin);
 
 interface DrawingParticle {
   uuid: string;
@@ -189,6 +190,7 @@ export default class CleanUpParticles extends Vue {
   particleRadius = 20;
   particleCollisionHandler = new ParticleCollisionHandler();
   particleState: { [key: string]: ParticleState } = {};
+  renderer!: PIXI.Renderer;
 
   get containerSpace(): number {
     return this.gameWidth / Object.keys(gameConfig.particles).length;
@@ -202,15 +204,35 @@ export default class CleanUpParticles extends Vue {
     return this.$t(`module.information.cleanup.enums.particle.${particleName}`);
   }
 
-  circle!: PIXI.Graphics;
   drawCircle(circle: PIXI.Graphics): void {
-    //GradientFactory.createRadialGradient()
-    circle.beginFill((circle as any).color, 0.9);
+    const radius = (circle as any).radius;
+    const renderTexture = PIXI.RenderTexture.create({
+      width: radius * 2,
+      height: radius * 2,
+    });
+    GradientFactory.createRadialGradient(this.renderer, renderTexture, {
+      x0: radius,
+      y0: radius,
+      r0: 0,
+      x1: radius,
+      y1: radius,
+      r1: radius,
+      colorStops: [
+        { color: '#ffffffff', offset: 0.5 },
+        { color: '#ffffff00', offset: 1 },
+      ],
+    });
+    const matrix: PIXI.Matrix = new PIXI.Matrix(1, 0, 0, 1, 0, 0);
+    matrix.translate(-radius, -radius);
+    circle.beginTextureFill({
+      texture: renderTexture,
+      color: (circle as any).color,
+      alpha: 0.9,
+      matrix: matrix,
+    });
     circle.drawCircle(0, 0, (circle as any).radius);
     circle.endFill();
     circle.interactive = true;
-    (circle as any).dragging = false;
-    this.circle = circle;
   }
 
   async updateChart(): Promise<void> {
@@ -243,6 +265,10 @@ export default class CleanUpParticles extends Vue {
   updatedLoop(): void {
     this.activeValue++;
     this.loadActiveParticle();
+  }
+
+  initRenderer(renderer: PIXI.Renderer): void {
+    this.renderer = renderer;
   }
 
   loadActiveParticle(): void {

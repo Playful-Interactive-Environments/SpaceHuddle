@@ -15,7 +15,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import * as Matter from 'matter-js/build/matter';
 import * as PIXI from 'pixi.js';
 import { EventType } from '@/types/enum/EventType';
-import { CollisionHandler } from '@/components/shared/atoms/game/CollisionHandler';
+import { CollisionHandler } from '@/types/game/CollisionHandler';
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 
 @Options({
