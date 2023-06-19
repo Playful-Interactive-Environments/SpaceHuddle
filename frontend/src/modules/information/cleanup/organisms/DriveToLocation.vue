@@ -63,9 +63,13 @@
       </CustomMapMarker>
     </mgl-map>
     <div class="overlay-top-left">
-      <el-progress type="dashboard" :percentage="moveSpeed" :color="colors">
-        <template #default="{ percentage }">
-          <div>{{ percentage }}</div>
+      <el-progress
+        type="dashboard"
+        :percentage="(moveSpeed / vehicleParameter.speed) * 100"
+        :color="colors"
+      >
+        <template #default>
+          <div>{{ moveSpeed }} km/h</div>
           <div>
             {{ $t('module.information.cleanup.participant.speed') }}
           </div>
@@ -200,11 +204,22 @@ export default class DriveToLocation extends Vue {
   moveSpeed = 0;
   moveDirection: [number, number] = [0, 0];
 
-  colors = [
-    { color: '#01cf9e', percentage: 20 },
-    { color: '#f3a40a', percentage: 50 },
-    { color: '#fe6e5d', percentage: 100 },
-  ];
+  get colors(): { color: string; percentage: number }[] {
+    return [
+      {
+        color: '#01cf9e',
+        percentage: (20 / this.vehicleParameter.speed) * 100,
+      },
+      {
+        color: '#f3a40a',
+        percentage: (50 / this.vehicleParameter.speed) * 100,
+      },
+      {
+        color: '#fe6e5d',
+        percentage: (100 / this.vehicleParameter.speed) * 100,
+      },
+    ];
+  }
 
   chartData: ChartData = {
     labels: [],
