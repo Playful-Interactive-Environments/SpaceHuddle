@@ -41,7 +41,7 @@
       >
         <template v-slot:icon>
           <img
-            src="@/modules/information/cleanup/assets/car.png"
+            :src="`/assets/games/cleanup/vehicle/${vehicleParameter.imageTop}`"
             alt="car"
             :width="20"
           />
@@ -52,8 +52,17 @@
           <font-awesome-icon icon="flag-checkered" class="pin" />
         </template>
       </CustomMapMarker>
+      <CustomMapMarker
+        v-for="busStop of busStopList"
+        :key="busStop.id"
+        :coordinates="busStop.coordinates"
+      >
+        <template v-slot:icon>
+          <font-awesome-icon icon="bus" class="info-icon" />
+        </template>
+      </CustomMapMarker>
     </mgl-map>
-    <div class="overlay-top">
+    <div class="overlay-top-left">
       <el-progress type="dashboard" :percentage="moveSpeed" :color="colors">
         <template #default="{ percentage }">
           <div>{{ percentage }}</div>
@@ -63,11 +72,17 @@
         </template>
       </el-progress>
     </div>
+    <div v-if="vehicle === 'bus'" class="overlay-top-right">
+      <font-awesome-icon icon="users" />
+      {{ personCount }} / {{ vehicleParameter.persons }}
+    </div>
     <div class="overlay-bottom">
       <Joystick
         :style="{
           margin: '50px',
         }"
+        :size="150"
+        :stick-size="50"
         @move="move($event)"
         @start="start"
         @stop="stop"
@@ -97,9 +112,37 @@ import {
 import { LineLayerSpecification } from 'maplibre-gl';
 import { FeatureCollection } from 'geojson';
 import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
+import * as formulas from '@/modules/information/cleanup/utils/formulas';
+import * as configCalculation from '@/modules/information/cleanup/utils/configCalculation';
 import * as turf from '@turf/turf';
 
 MglDefaults.style = `https://api.maptiler.com/maps/streets/style.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+interface BusStop {
+  coordinates: [number, number];
+  name: string;
+  id: number;
+  persons: number;
+}
+
+export interface TrackingData {
+  speed: number;
+  combustion: number;
+  persons: number;
+}
+
+export interface ChartData {
+  labels: string[];
+  datasets: {
+    name: string;
+    label: string;
+    backgroundColor: string;
+    borderColor: string;
+    data: number[];
+    fill: any;
+  }[];
+}
 
 @Options({
   components: {
@@ -115,9 +158,14 @@ MglDefaults.style = `https://api.maptiler.com/maps/streets/style.json?key=${proc
   },
   emits: ['update:useFullSize', 'goalReached'],
 })
-/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class DriveToLocation extends Vue {
-  @Prop({ default: 'car' }) readonly vehicle!: 'car' | 'bike';
+  @Prop({ default: 'car' }) readonly vehicle!:
+    | 'car'
+    | 'bike'
+    | 'motorcycle'
+    | 'scooter'
+    | 'bus';
+  @Prop({ default: 'sport' }) readonly vehicleType!: string;
   @Prop({ default: {} }) readonly parameter!: any;
   mapZoomDefault = 14;
   mapCenter: [number, number] = [0, 0];
@@ -142,6 +190,9 @@ export default class DriveToLocation extends Vue {
     'line-color': '#FF0000',
     'line-width': 8,
   };
+  busStopList: BusStop[] = [];
+  personCount = 1;
+  trackingData: TrackingData[] = [];
 
   readonly intervalTime = 50;
   interval = -1;
@@ -155,19 +206,17 @@ export default class DriveToLocation extends Vue {
     { color: '#fe6e5d', percentage: 100 },
   ];
 
-  chartData: {
-    labels: string[];
-    datasets: {
-      label: string;
-      backgroundColor: string;
-      borderColor: string;
-      data: number[];
-      fill: any;
-    }[];
-  } = {
+  chartData: ChartData = {
     labels: [],
     datasets: [],
   };
+
+  get vehicleParameter(): any {
+    return configCalculation.getVehicleParameter(
+      this.vehicle,
+      this.vehicleType
+    );
+  }
 
   getRouteObject(pathCoordinates: [number, number][]): FeatureCollection {
     return {
@@ -195,8 +244,37 @@ export default class DriveToLocation extends Vue {
       }
       return false;
     });
-    for (const layer of notNeededLayers) {
-      map.removeLayer(layer.id);
+    if (this.vehicle === 'bus') {
+      const busLayerName = 'poi_z14';
+      setTimeout(() => {
+        const canvas = map.getCanvas();
+        const features = map.queryRenderedFeatures(
+          [
+            [0, 0],
+            [canvas.width, canvas.height],
+          ],
+          { layers: [busLayerName] }
+        );
+        this.busStopList = features
+          .filter((f) => f.properties.class === 'bus')
+          .map((f) => {
+            return {
+              coordinates: (f.geometry as any).coordinates,
+              name: f.properties.name,
+              id: f.id,
+              persons: Math.ceil(Math.random() * 10),
+            } as BusStop;
+          });
+        map.removeLayer(busLayerName);
+      }, 100);
+
+      for (const layer of notNeededLayers) {
+        if (layer.id !== busLayerName) map.removeLayer(layer.id);
+      }
+    } else {
+      for (const layer of notNeededLayers) {
+        map.removeLayer(layer.id);
+      }
     }
   }
 
@@ -211,9 +289,13 @@ export default class DriveToLocation extends Vue {
   }
 
   async mounted(): Promise<void> {
+    if (this.vehicle === 'bus') {
+      this.personCount = Math.ceil(Math.random() * 5 + 1);
+    }
     for (const particleName in gameConfig.particles) {
       const particle = gameConfig.particles[particleName];
       const data = {
+        name: particleName,
         label: this.$t(
           `module.information.cleanup.enums.particle.${particleName}`
         ),
@@ -331,7 +413,8 @@ export default class DriveToLocation extends Vue {
     };
   }
 
-  start(): void {
+  start(event: any): void {
+    this.move(event);
     this.isMoving = true;
     this.interval = setInterval(this.updateTrace, this.intervalTime);
   }
@@ -340,10 +423,26 @@ export default class DriveToLocation extends Vue {
     clearInterval(this.interval);
     this.isMoving = false;
     this.moveSpeed = 0;
+
+    if (this.vehicle === 'bus') {
+      for (const busStop of this.busStopList) {
+        const distance = turf.distance(
+          turf.point(this.mapDrivingPoint),
+          turf.point(busStop.coordinates)
+        );
+        if (distance < 0.01) {
+          let addCount = busStop.persons;
+          if (addCount > this.vehicleParameter.persons - this.personCount)
+            addCount = this.vehicleParameter.persons - this.personCount;
+          this.personCount += addCount;
+          busStop.persons -= addCount;
+        }
+      }
+    }
   }
 
   move(event: any): void {
-    this.moveSpeed = event.distance;
+    this.moveSpeed = (event.distance / 100.0) * this.vehicleParameter.speed;
     this.moveDirection = [event.x, event.y];
     this.noStreet = false;
   }
@@ -356,7 +455,7 @@ export default class DriveToLocation extends Vue {
       return Math.atan2(point[0], point[1]) * (180 / Math.PI);
     };
 
-    if (this.isMoving) {
+    if (this.isMoving && this.moveSpeed) {
       const destination = turf.destination(
         turf.point(this.mapDrivingPoint),
         this.moveSpeed * speedDistanceFactor,
@@ -400,6 +499,10 @@ export default class DriveToLocation extends Vue {
         turf.point(this.mapDrivingPoint),
         newDrivingPoint
       );
+      const distance = turf.distance(
+        turf.point(this.mapDrivingPoint),
+        turf.point(newDrivingPoint)
+      );
       if (isOnRoute) {
         const coordinates = (this.drivenPath.features[0].geometry as any)
           .coordinates;
@@ -410,12 +513,11 @@ export default class DriveToLocation extends Vue {
           turf.point(this.mapDrivingPoint),
           turf.point(pathPoints[pathPoints.length - 1])
         );
-        if (goalDistance < 0.001)
-          this.$emit('goalReached', this.getTrackingData());
+        if (goalDistance < 0.001) this.$emit('goalReached', this.trackingData);
       } else {
         this.noStreet = true;
       }
-      for (const particleName in gameConfig.particles) {
+      /*for (const particleName in gameConfig.particles) {
         const label = this.$t(
           `module.information.cleanup.enums.particle.${particleName}`
         );
@@ -426,37 +528,69 @@ export default class DriveToLocation extends Vue {
         if (dataset) {
           const speedFunction = new Function(
             'speed',
-            `return ${particle.speedFunction[this.vehicle]}`
+            `return ${particle.speedFunction[this.vehicle][this.vehicleType]}`
           );
-          dataset.data = [...dataset.data, speedFunction(this.moveSpeed)];
+          dataset.data = [
+            ...dataset.data,
+            speedFunction(this.moveSpeed) / this.personCount,
+          ];
         }
       }
-      this.chartData.labels.push(Math.round(this.moveSpeed).toString());
+      this.chartData.labels.push(Math.round(this.moveSpeed).toString());*/
+      const vehicleParameter = this.vehicleParameter;
+      let combustion = 0;
+      combustion = formulas.acceleration(
+        this.moveSpeed,
+        distance,
+        vehicleParameter
+      );
+      const trackingData: TrackingData = {
+        speed: this.moveSpeed,
+        persons: this.personCount,
+        combustion: combustion,
+      };
+      this.trackingData.push(trackingData);
+      configCalculation.addValueToStatistics(
+        trackingData,
+        this.vehicleParameter,
+        this.chartData
+      );
+      //this.addValueToStatistics(trackingData);
       this.updateChart();
     }
   }
 
-  getTrackingData(): number[] {
-    return this.chartData.labels.map((label) => parseInt(label));
-    /*const result: { [key: string]: number[] } = {
-      speed: this.chartData.labels.map((label) => parseInt(label)),
-    };
+  addValueToStatistics(trackingData: TrackingData): void {
+    const vehicleParameter = this.vehicleParameter;
     for (const particleName in gameConfig.particles) {
-      const label = this.$t(
-        `module.information.cleanup.enums.particle.${particleName}`
+      const dataset = this.chartData.datasets.find(
+        (ds) => ds.name === particleName
       );
-      const dataset = this.chartData.datasets.find((ds) => ds.label === label);
       if (dataset) {
-        result[particleName] = [...dataset.data];
+        const perUnit = configCalculation.fuelUnits(vehicleParameter.fuel);
+        dataset.data = [
+          ...dataset.data,
+          (trackingData.combustion * perUnit[particleName]) / this.personCount,
+        ];
+        /*
+        const particle = gameConfig.particles[particleName];
+        const speedFunction = new Function(
+          'speed',
+          `return ${particle.speedFunction[this.vehicle][this.vehicleType]}`
+        );
+        dataset.data = [
+          ...dataset.data,
+          speedFunction(trackingData.speed) / this.personCount,
+        ];*/
       }
     }
-    return result;*/
+    this.chartData.labels.push(Math.round(trackingData.speed).toString());
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.overlay-top {
+.overlay-top-left {
   position: absolute;
   z-index: 100;
   top: 0.5rem;
@@ -468,6 +602,14 @@ export default class DriveToLocation extends Vue {
     padding: 0.1rem;
     --el-text-color-regular: white;
   }
+}
+.overlay-top-right {
+  position: absolute;
+  z-index: 100;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: var(--font-size-xxxlarge);
+  color: var(--pin-color);
 }
 .overlay-bottom {
   position: absolute;
@@ -494,6 +636,15 @@ export default class DriveToLocation extends Vue {
 }
 
 .pin-small {
+  --pin-color: var(--color-primary);
+  font-size: var(--font-size-small);
+  color: var(--pin-color);
+}
+
+.info-icon {
+  background-color: #ffffffcc;
+  border-radius: 0.1rem;
+  padding: 0.2rem;
   --pin-color: var(--color-primary);
   font-size: var(--font-size-small);
   color: var(--pin-color);

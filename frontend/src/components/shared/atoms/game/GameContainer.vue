@@ -5,7 +5,8 @@
       :width="gameWidth"
       :height="gameHeight"
       v-if="ready"
-      backgroundColor="#f4f4f4"
+      :backgroundColor="backgroundColor"
+      :transparent="transparent"
     >
       <container>
         <slot :itemProps="{ engine: engine, detector: detector }"></slot>
@@ -39,9 +40,12 @@ export default class GameContainer extends Vue {
   @Prop({ default: true }) readonly hasMouseInput!: boolean;
   @Prop({ default: true }) readonly detectCollision!: boolean;
   @Prop({ default: true }) readonly useGravity!: boolean;
+  @Prop({ default: false }) readonly useWind!: boolean;
   @Prop({ default: true }) readonly useBorders!: boolean;
   @Prop({ default: undefined }) readonly width!: number | undefined;
   @Prop({ default: undefined }) readonly height!: number | undefined;
+  @Prop({ default: '#f4f4f4' }) readonly backgroundColor!: string;
+  @Prop({ default: false }) readonly transparent!: boolean;
   @Prop({
     default: undefined,
   })
@@ -62,6 +66,8 @@ export default class GameContainer extends Vue {
 
   gameObjects: GameObject[] = [];
 
+  readonly intervalTimeWind = 50;
+  intervalWind = -1;
   readonly intervalTimeCollision = 500;
   intervalCollision = -1;
   readonly intervalTimeSync = 100;
@@ -91,10 +97,15 @@ export default class GameContainer extends Vue {
         this.intervalTimeCollision
       );
     }
+
+    if (this.useWind) {
+      this.intervalWind = setInterval(this.addWind, this.intervalTimeWind);
+    }
     this.intervalSync = setInterval(this.syncRenderView, this.intervalTimeSync);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const pixi = this.$refs.pixi as typeof Application;
+      pixi.app.transparent = this.transparent;
       this.$emit('initRenderer', pixi.app.renderer);
     }, 100);
   }
@@ -103,6 +114,34 @@ export default class GameContainer extends Vue {
     const gameObject = e.detail.data as GameObject;
     this.gameObjects.push(gameObject);
     gameObject.gameContainer = this;
+  }
+
+  addWind(): void {
+    const calcForce = (): number => {
+      const forceMagnitude = 0.05; // (0.05 * body.mass) * timeScale;
+      return (
+        (forceMagnitude + Matter.Common.random() * forceMagnitude) *
+        Matter.Common.choose([1, -1])
+      );
+    };
+
+    for (const gameObject of this.gameObjects) {
+      if (gameObject.body) {
+        Matter.Body.setVelocity(gameObject.body, {
+          x: gameObject.body.velocity.x + calcForce(),
+          y: gameObject.body.velocity.y + calcForce(),
+        });
+
+        /*Matter.Body.applyForce(gameObject.body, gameObject.body.position, {
+          x:
+            (forceMagnitude + Matter.Common.random() * forceMagnitude) *
+            Matter.Common.choose([1, -1]),
+          y:
+            (forceMagnitude + Matter.Common.random() * forceMagnitude) *
+            Matter.Common.choose([1, -1]),
+        });*/
+      }
+    }
   }
 
   deregisterGameObject(gameObject: GameObject): void {
@@ -148,7 +187,8 @@ export default class GameContainer extends Vue {
         this.registerGameObject
       );
     }
-    clearInterval(this.intervalTimeCollision);
+    clearInterval(this.intervalCollision);
+    clearInterval(this.intervalWind);
     clearInterval(this.intervalSync);
   }
 
@@ -203,30 +243,32 @@ export default class GameContainer extends Vue {
       } = undefined;
   readonly boundsThickness = 100;
   setupBound(): void {
+    const gameWidth = this.gameWidth ? this.gameWidth : 100;
+    const gameHeight = this.gameHeight ? this.gameHeight : 100;
     const bounds = {
       bottom: {
-        x: this.gameWidth / 2,
-        y: this.gameHeight + this.boundsThickness / 2,
-        width: this.gameWidth,
+        x: gameWidth / 2,
+        y: gameHeight + this.boundsThickness / 2,
+        width: gameWidth,
         height: this.boundsThickness,
       },
       top: {
-        x: this.gameWidth / 2,
+        x: gameWidth / 2,
         y: -this.boundsThickness / 2,
-        width: this.gameWidth,
+        width: gameWidth,
         height: this.boundsThickness,
       },
       left: {
         x: -this.boundsThickness / 2,
-        y: this.gameHeight / 2,
+        y: gameHeight / 2,
         width: this.boundsThickness,
-        height: this.gameHeight,
+        height: gameHeight,
       },
       right: {
-        x: this.gameWidth + this.boundsThickness / 2,
-        y: this.gameHeight / 2,
+        x: gameWidth + this.boundsThickness / 2,
+        y: gameHeight / 2,
         width: this.boundsThickness,
-        height: this.gameHeight,
+        height: gameHeight,
       },
     };
     if (this.engine && !this.borders) {
@@ -267,24 +309,16 @@ export default class GameContainer extends Vue {
         bottom: bottom,
         left: left,
         right: right,
-        width: this.gameWidth,
-        height: this.gameHeight,
+        width: gameWidth,
+        height: gameHeight,
       };
     } else if (this.borders) {
-      Matter.Body.scale(
-        this.borders.bottom,
-        this.gameWidth / this.borders.width,
-        1
-      );
+      Matter.Body.scale(this.borders.bottom, gameWidth / this.borders.width, 1);
       Matter.Body.setPosition(this.borders.bottom, {
         x: bounds.bottom.x,
         y: bounds.bottom.y,
       });
-      Matter.Body.scale(
-        this.borders.top,
-        this.gameWidth / this.borders.width,
-        1
-      );
+      Matter.Body.scale(this.borders.top, gameWidth / this.borders.width, 1);
       Matter.Body.setPosition(this.borders.top, {
         x: bounds.top.x,
         y: bounds.top.y,
@@ -292,23 +326,19 @@ export default class GameContainer extends Vue {
       Matter.Body.scale(
         this.borders.right,
         1,
-        this.gameHeight / this.borders.height
+        gameHeight / this.borders.height
       );
       Matter.Body.setPosition(this.borders.right, {
         x: bounds.right.x,
         y: bounds.right.y,
       });
-      Matter.Body.scale(
-        this.borders.left,
-        1,
-        this.gameHeight / this.borders.height
-      );
+      Matter.Body.scale(this.borders.left, 1, gameHeight / this.borders.height);
       Matter.Body.setPosition(this.borders.left, {
         x: bounds.left.x,
         y: bounds.left.y,
       });
-      this.borders.width = this.gameWidth;
-      this.borders.height = this.gameHeight;
+      this.borders.width = gameWidth;
+      this.borders.height = gameHeight;
     }
   }
 
@@ -320,6 +350,12 @@ export default class GameContainer extends Vue {
         x: 0,
         y: 1,
         scale: 0.0005,
+      };
+    } else {
+      this.engine.gravity = {
+        x: 0,
+        y: 1,
+        scale: 0,
       };
     }
     this.runner = Matter.Runner.create();

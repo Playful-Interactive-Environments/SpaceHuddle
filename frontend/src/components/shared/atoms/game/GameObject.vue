@@ -40,12 +40,6 @@ export default class GameObject extends Vue {
     [key: string]: string | number | boolean;
   };
   @Prop({ default: false }) readonly isStatic!: boolean;
-  @Prop({
-    default: undefined,
-  })
-  readonly collisionsFilter!:
-    | ((collision: Matter.Collision) => boolean)
-    | undefined;
   @Prop() readonly collisionHandler!: CollisionHandler;
   body!: typeof Matter.Body;
   position: [number, number] = [0, 0];
@@ -113,8 +107,8 @@ export default class GameObject extends Vue {
   addCircle(x: number, y: number, width: number, height: number): void {
     this.options.isStatic = this.isStatic;
     this.body = Matter.Bodies.circle(
-      x + width / 2,
-      y + height / 2,
+      x,
+      y,
       width > height ? width / 2 : height / 2,
       this.options
     );
@@ -196,7 +190,11 @@ export default class GameObject extends Vue {
       this.gameContainer.deregisterGameObject(this);
       const body = this.body;
       this.body = null;
-      Matter.Composite.remove(this.gameContainer.engine.world, body);
+      try {
+        Matter.Composite.remove(this.gameContainer.engine.world, body);
+      } catch (e) {
+        //
+      }
       const index = this.gameContainer.detector.bodies.findIndex(
         (b) => b === body
       );

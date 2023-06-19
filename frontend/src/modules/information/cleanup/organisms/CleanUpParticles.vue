@@ -27,6 +27,9 @@
         },
       }"
     />
+    <div class="overlay" v-if="activeValue > trackingData.length">
+      {{ trackingData.length + countdownTime - activeValue + 1 }}
+    </div>
   </div>
   <div class="gameArea">
     <GameContainer
@@ -40,6 +43,11 @@
     >
       <template v-slot:default>
         <container v-if="gameWidth">
+          <sprite
+            texture="/assets/games/cleanup/road02.png"
+            :width="gameWidth"
+            :height="gameHeight"
+          ></sprite>
           <GameObject
             v-for="(particle, index) in Object.keys(gameConfig.particles)"
             :key="particle"
@@ -47,6 +55,7 @@
             :x="index * containerSpace + padding"
             :isStatic="true"
             :options="{
+              name: particle,
               label: getParticleDisplayName(particle),
               collisionFilter: {
                 group: index + 1,
@@ -74,11 +83,9 @@
               >
                 {{ getParticleDisplayName(particle) }}
                 \n
-                {{
-                  particleState[getParticleDisplayName(particle)].collectedCount
-                }}
+                {{ particleState[particle].collectedCount }}
                 /
-                {{ particleState[getParticleDisplayName(particle)].totalCount }}
+                {{ particleState[particle].totalCount }}
               </text>
             </sprite>
           </GameObject>
@@ -131,15 +138,13 @@
             v-model:x="particle.position[0]"
             v-model:y="particle.position[1]"
             :options="{
+              name: particle.name,
               label: particle.label,
               collisionFilter: {
                 group: particle.group,
                 category: 0x0001,
                 mask: 0x0001,
               },
-            }"
-            :collisionsFilter="(collision: Matter.Collision) => {
-              return collision.bodyA.isStatic !== collision.bodyB.isStatic;
             }"
             :collision-handler="particleCollisionHandler"
             @destroyObject="destroyParticle"
@@ -150,12 +155,22 @@
               :color="particle.color"
               @render="drawCircle"
             >
-              <text
+              <!--<text
                 :style="{ fill: '#ffffff', fontSize: 16, fontWeight: 'bold' }"
                 :anchor="0.5"
               >
                 {{ particle.id }}
-              </text>
+              </text>-->
+              <sprite
+                :texture="spritesheet.textures[particle.name]"
+                :anchor="0.5"
+                :tint="particle.color"
+                :width="particleRadius * 1.5"
+                :height="
+                  getParticleAspect(particle.name) * particleRadius * 1.5
+                "
+              >
+              </sprite>
             </Graphics>
           </GameObject>
         </container>
@@ -171,7 +186,6 @@ import { Line } from 'vue-chartjs';
 import * as gameConfig from '@/modules/information/cleanup/data/gameConfig.json';
 import { Application as Pixi } from 'vue3-pixi';
 import * as PIXI from 'pixi.js';
-import { GradientFactory } from '@pixi-essentials/gradients';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import { Chart } from 'chart.js';
@@ -181,18 +195,22 @@ import { v4 as uuidv4 } from 'uuid';
 import { center } from '@turf/turf';
 import { delay } from '@/utils/wait';
 import Color from 'colorjs.io';
+import { TrackingData } from '@/modules/information/cleanup/organisms/DriveToLocation.vue';
+import * as configCalculation from '@/modules/information/cleanup/utils/configCalculation';
+import * as pixiUtil from '@/utils/pixi';
 Chart.register(annotationPlugin);
 
 interface DrawingParticle {
   uuid: string;
   id: number;
+  name: string;
   label: string;
   group: number;
   color: string;
   position: [number, number];
 }
 
-interface ParticleState {
+export interface ParticleState {
   totalCount: number;
   collectedCount: number;
 }
@@ -205,16 +223,23 @@ interface ParticleState {
     Line,
     Pixi,
   },
-  emits: [],
+  emits: ['finished'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class CleanUpParticles extends Vue {
-  @Prop({ default: 'car' }) readonly vehicle!: 'car' | 'bike';
+  @Prop({ default: 'car' }) readonly vehicle!:
+    | 'car'
+    | 'bike'
+    | 'motorcycle'
+    | 'scooter'
+    | 'bus';
+  @Prop({ default: 'sport' }) readonly vehicleType!: string;
   @Prop({ default: [] })
-  readonly trackingData!: number[];
+  readonly trackingData!: TrackingData[];
   chartData: {
     labels: string[];
     datasets: {
+      name: string;
       label: string;
       backgroundColor: string;
       borderColor: string;
@@ -229,16 +254,21 @@ export default class CleanUpParticles extends Vue {
   gameWidth = 0;
   gameHeight = 0;
   padding = 10;
-  readonly intervalTime = 10000;
+  readonly particleDivisionFactor = 1;
+  readonly intervalTime = 1000;
   interval = -1;
   activeValue = 0;
   cleanupParticles: DrawingParticle[] = [];
-  particleRadius = 20;
+  particleRadius = 40;
   particleCollisionHandler = new ParticleCollisionHandler();
   particleState: { [key: string]: ParticleState } = {};
   renderer!: PIXI.Renderer;
   maxParticleCount = 50;
   outsideCount = 0;
+  spritesheet!: PIXI.Spritesheet;
+  countdownTime = 5;
+
+  particleQueue: { [key: string]: number } = {};
 
   get containerSpace(): number {
     return this.gameWidth / Object.keys(gameConfig.particles).length;
@@ -274,45 +304,45 @@ export default class CleanUpParticles extends Vue {
     return this.maxParticleCount <= this.cleanupParticles.length;
   }
 
+  get vehicleParameter(): any {
+    return configCalculation.getVehicleParameter(
+      this.vehicle,
+      this.vehicleType
+    );
+  }
+
   getParticleDisplayName(particleName: string): string {
     return this.$t(`module.information.cleanup.enums.particle.${particleName}`);
   }
 
+  getParticleAspect(particleName: string): number {
+    if (
+      this.spritesheet?.data?.frames &&
+      particleName in this.spritesheet.data.frames
+    ) {
+      const h = this.spritesheet.data.frames[particleName].sourceSize?.h;
+      const w = this.spritesheet.data.frames[particleName].sourceSize?.w;
+      if (h && w) return h / w;
+    }
+    return 1;
+  }
+
   drawCircle(circle: PIXI.Graphics): void {
-    const radius = (circle as any).radius;
-    const renderTexture = PIXI.RenderTexture.create({
-      width: radius * 2,
-      height: radius * 2,
-    });
-    GradientFactory.createRadialGradient(this.renderer, renderTexture, {
-      x0: radius,
-      y0: radius,
-      r0: 0,
-      x1: radius,
-      y1: radius,
-      r1: radius,
-      colorStops: [
-        { color: '#ffffffff', offset: 0.5 },
-        { color: '#ffffff00', offset: 1 },
-      ],
-    });
-    const matrix: PIXI.Matrix = new PIXI.Matrix();
-    matrix.translate(-radius, -radius);
-    circle.beginTextureFill({
-      texture: renderTexture,
-      color: (circle as any).color,
-      alpha: 0.9,
-      matrix: matrix,
-    });
-    circle.drawCircle(0, 0, (circle as any).radius);
-    circle.endFill();
-    circle.interactive = true;
+    pixiUtil.drawCircleWithGradient(circle, this.renderer);
   }
 
   drawStatusBackground(background: PIXI.Graphics): void {
     const width = this.gameWidth;
     const height = this.gameHeight - this.particleBorder;
-    const renderTexture = PIXI.RenderTexture.create({
+    pixiUtil.drawRectWithGradient(
+      background,
+      this.renderer,
+      width,
+      height,
+      this.statusColor
+    );
+
+    /*const renderTexture = PIXI.RenderTexture.create({
       width: width,
       height: height,
     });
@@ -326,16 +356,14 @@ export default class CleanUpParticles extends Vue {
         { color: '#ffffffff', offset: 1 },
       ],
     });
-    background.beginFill(this.renderer.background.color);
-    background.drawRect(0, 0, width, height);
-    background.endFill();
+    background.clear();
     background.beginTextureFill({
       texture: renderTexture,
       color: this.statusColor,
-      alpha: 0.3,
+      alpha: 0.9,
     });
     background.drawRect(0, 0, width, height);
-    background.endFill();
+    background.endFill();*/
   }
 
   async updateChart(): Promise<void> {
@@ -350,7 +378,7 @@ export default class CleanUpParticles extends Vue {
 
   mounted(): void {
     for (const particleName in gameConfig.particles) {
-      this.particleState[this.getParticleDisplayName(particleName)] = {
+      this.particleState[particleName] = {
         totalCount: 0,
         collectedCount: 0,
       };
@@ -358,6 +386,9 @@ export default class CleanUpParticles extends Vue {
     setTimeout(() => {
       this.loadActiveParticle();
     }, 1500);
+    PIXI.Assets.load('/assets/games/cleanup/molecules.json').then(
+      (sheet) => (this.spritesheet = sheet)
+    );
     this.interval = setInterval(this.updatedLoop, this.intervalTime);
   }
 
@@ -367,9 +398,28 @@ export default class CleanUpParticles extends Vue {
 
   updatedLoop(): void {
     this.activeValue++;
-    this.loadActiveParticle();
-    if (this.activeValue > this.trackingData.length)
+    if (this.activeValue <= this.trackingData.length) {
+      this.loadActiveParticle();
+    }
+    if (
+      this.activeValue > this.trackingData.length + this.countdownTime ||
+      (this.activeValue > this.trackingData.length &&
+        this.cleanupParticles.length === 0)
+    ) {
+      this.$emit('finished', this.particleState);
       clearInterval(this.interval);
+    }
+  }
+
+  @Watch('cleanupParticles.length', { immediate: true })
+  onCleanupParticleCountChanged(): void {
+    if (
+      this.activeValue > this.trackingData.length &&
+      this.cleanupParticles.length === 0
+    ) {
+      this.$emit('finished', this.particleState);
+      clearInterval(this.interval);
+    }
   }
 
   initRenderer(renderer: PIXI.Renderer): void {
@@ -384,13 +434,19 @@ export default class CleanUpParticles extends Vue {
   async loadActiveParticle(): Promise<void> {
     for (const index in this.chartData.datasets) {
       const dataset = this.chartData.datasets[index];
+      const particleName = dataset.name;
       if (this.activeValue < dataset.data.length) {
-        const value = dataset.data[this.activeValue] / 10;
-        this.particleState[dataset.label].totalCount += Math.ceil(value);
-        for (let i = 0; i < value; i++) {
+        const value =
+          dataset.data[this.activeValue] / this.particleDivisionFactor;
+        this.particleQueue[particleName] += value;
+        const emissionCount = Math.floor(this.particleQueue[particleName]);
+        this.particleState[particleName].totalCount += emissionCount;
+        this.particleQueue[particleName] -= emissionCount;
+        for (let i = 0; i < emissionCount; i++) {
           const particle: DrawingParticle = {
             uuid: uuidv4(),
             id: 0,
+            name: dataset.name,
             label: dataset.label,
             group: parseInt(index) + 1,
             color: dataset.backgroundColor,
@@ -401,9 +457,6 @@ export default class CleanUpParticles extends Vue {
             ],
           };
           this.cleanupParticles.push(particle);
-          /*if (this.cleanupParticles.length > this.maxParticleCount) {
-
-          }*/
           await delay(500);
         }
       }
@@ -414,7 +467,7 @@ export default class CleanUpParticles extends Vue {
     const id = particle.id;
     const index = this.cleanupParticles.findIndex((p) => p.id === id);
     if (index > -1) this.cleanupParticles.splice(index, 1);
-    this.particleState[particle.options.label as string].collectedCount++;
+    this.particleState[particle.options.name as string].collectedCount++;
   }
 
   outsideDrawingSpace(particle: GameObject): void {
@@ -427,18 +480,26 @@ export default class CleanUpParticles extends Vue {
   @Watch('trackingData', { immediate: true })
   onTrackingDataChanged(): void {
     if (this.trackingData) {
-      this.chartData.labels = this.trackingData.map((speed) =>
-        speed.toString()
+      this.chartData.labels = this.trackingData.map((data) =>
+        Math.round(data.speed).toString()
       );
       for (const particleName in gameConfig.particles) {
         const particle = gameConfig.particles[particleName];
-        const speedFunction = new Function(
+        /*const speedFunction = new Function(
           'speed',
-          `return ${particle.speedFunction[this.vehicle]}`
-        );
+          `return ${particle.speedFunction[this.vehicle][this.vehicleType]}`
+        );*/
         const data = {
+          name: particleName,
           label: this.getParticleDisplayName(particleName),
-          data: this.trackingData.map((speed) => speedFunction(speed)),
+          data: this.trackingData.map(
+            (data) =>
+              configCalculation.statisticsValue(
+                particleName,
+                data,
+                this.vehicleParameter
+              ) // speedFunction(data.speed) / data.persons
+          ),
           backgroundColor: particle.color,
           borderColor: particle.color,
           fill: {
@@ -447,6 +508,7 @@ export default class CleanUpParticles extends Vue {
           },
         };
         this.chartData.datasets.push(data);
+        this.particleQueue[particleName] = 0;
       }
       setTimeout(() => {
         this.updateChart();
@@ -458,8 +520,20 @@ export default class CleanUpParticles extends Vue {
 
 <style scoped lang="scss">
 .chartArea {
+  position: relative;
   height: 10rem;
   width: 100%;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  height: 10rem;
+  width: 100%;
+  background-color: #ffffff99;
+  font-size: var(--font-size-xxxxlarge);
+  text-align: center;
+  vertical-align: center;
 }
 
 .gameArea {

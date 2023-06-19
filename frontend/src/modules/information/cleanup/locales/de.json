@@ -4,14 +4,79 @@
     "description": "Ein Klimaspiel über den Ausstoß von klimaschädlichen Gasen."
   },
   "participant": {
-    "speed": "Geschwindigkeit"
+    "speed": "Geschwindigkeit",
+    "electricity": "Stromanteil",
+    "vehicle-parameter": {
+      "fuel": "Treibstoff",
+      "mpg": "Verbrauch",
+      "power": "Leistung",
+      "speed": "Geschwindigkeit",
+      "acceleration": "Beschleunigung",
+      "persons": "Personen"
+    },
+    "result": {
+      "carbonDioxideExplanation": "CO2 macht mit nur etwa 0,038 Prozent einen geringen Teil der Luft aus. Es hat aber in seiner Funktion als Treibhausgas eine entscheidende Rolle für unser Klima: CO2 absorbiert einen Teil der von der Erde in das Weltall abgegebenen Wärme und strahlt diese zurück auf die Erde. Durch diesen natürlichen Treibhauseffekt entsteht auf der Erde das uns bekannte gemäßigte Klima, welches Flora und Fauna gedeihen lässt. ",
+      "dustExplanation": "Feinstaub kann beim Menschen in die Nasenhöhle, in die Lunge und sogar in den Blutkreislauf eindringen. Je nach Größe und  Eindringtiefe der Teilchen sind die gesundheitlichen Wirkungen von Feinstaub verschieden.",
+      "methaneExplanation": "Methan ist rund 80-mal klimaschädlicher als CO2. Methan-Emissionen haben bereits mit 0,5 Grad zur Erderwärmung beigetragen laut Weltklimarat. In der EU fällt viel Methan vor allem in der Lieferkette von Erdgas an, welches zum Großteil aus Methan besteht.",
+      "microplasticExplanation": "Mikroplastik sind sehr kleine Kunststoffteile, die die Umwelt verschmutzen. Bei Mikroplastik handelt es sich nicht um eine bestimmte Art von Kunststoff, sondern um jede Art von Kunststofffragmenten, die weniger als fünf Millimeter lang sind.",
+      "veryGood": "Gratulation du bist ja schon einrichtiger Profi beim aufräumen deiner Emissionen.",
+      "good": "Das war schon richtig gut. Versuch durch geschicktes Fahrverhalten dir nächstesmal noch mehr Luft beim aufräumen zu lassen, dann schaffst du auch noch die letzten Prozent",
+      "notBad": "Das war gar nicht schlecht, aber da geht noch mehr. Versuch durch geschicktes Fahrverhalten dir nächstesmal noch mehr Luft beim aufräumen zu lassen, dann schaffst du nächstesmal sicher mehr",
+      "improvable": "Das geht besser. Versuch durch geschicktes Fahrverhalten dir nächstesmal noch mehr Luft beim aufräumen zu lassen, dann schaffst du nächstesmal sicher mehr"
+    },
+    "select": "auswählen",
+    "play": "Start"
   },
   "enums": {
     "particle": {
-      "co2": "CO2",
+      "carbonDioxide": "CO2",
       "dust": "Feinstaub",
-      "ch4": "CH4",
+      "methane": "CH4",
       "microplastic": "Microplastik"
+    },
+    "electricity": {
+      "water": "Wasserkraft",
+      "wind": "Windenergie",
+      "biomass": "Biomasse",
+      "sun": "Photovoltaik",
+      "green": "Sonstige Ökoenergie",
+      "gas": "Erdgas",
+      "others": "Sonstige"
+    },
+    "vehicles": {
+      "car": {
+        "sport": "Sportwagen",
+        "suv": "SUV",
+        "compact": "Kleinwagen",
+        "e-car": "E-Auto"
+      },
+      "bike": {
+        "e-bike": "E Bike",
+        "city": "Citybike"
+      },
+      "motorcycle": {
+        "moped": "Moped"
+      },
+      "scooter":  {
+        "e-scooter": "E-Scooter"
+      },
+      "bus": {
+        "bus": "Bus"
+      }
+    },
+    "fuel": {
+      "diesel": "Diesel",
+      "gasoline": "Benzin",
+      "gas": "Erdgas",
+      "electricity": "Strom",
+      "none": "keinen"
+    },
+    "units": {
+      "ps": "PS",
+      "km/h": "km/h",
+      "liters": "Liter",
+      "seconds": "sek.",
+      "kw": "KW"
     }
   }
 }

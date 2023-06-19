@@ -4,14 +4,79 @@
     "description": "A climate game about the emission of gases that are harmful to the climate."
   },
   "participant": {
-    "speed": "speed"
+    "speed": "speed",
+    "electricity": "electricity ratio",
+    "vehicle-parameter": {
+      "fuel": "fuel",
+      "mpg": "miles per gallon",
+      "power": "power",
+      "speed": "speed",
+      "acceleration": "acceleration",
+      "persons": "persons"
+    },
+    "result": {
+      "carbonDioxideExplanation": "At only about 0.038 percent, CO2 makes up a small part of the air. However, in its function as a greenhouse gas, it plays a decisive role in our climate: CO2 absorbs part of the heat emitted by the earth into space and radiates it back to the earth. This natural greenhouse effect creates the temperate climate we know on Earth, which allows flora and fauna to thrive.",
+      "dustExplanation": "In humans, fine dust can penetrate the nasal cavity, the lungs and even the bloodstream. Depending on the size and penetration depth of the particles, the health effects of particulate matter vary.",
+      "methaneExplanation": "Methane is around 80 times more harmful to the climate than CO2. Methane emissions have already contributed 0.5 degrees to global warming according to the Intergovernmental Panel on Climate Change. In the EU, a lot of methane is produced primarily in the supply chain of natural gas, which consists largely of methane.",
+      "microplasticExplanation": "Microplastics are very small pieces of plastic that pollutes the environment. Microplastics are not a specific kind of plastic, but rather any type of plastic fragment that is less than five millimeters in length.",
+      "veryGood": "Congratulations, you're already a real pro at cleaning up your emissions.",
+      "good": "That was already really good. Next time, try to leave yourself even more room for maneuver by clever driving behavior, then you'll manage the last percent as well.",
+      "notBad": "That wasn't bad at all, but there's still more to do. Try to leave more space for cleaning up next time by clever driving behavior, then you will surely manage more next time.",
+      "improvable": "You can do better. Try to leave yourself even more air next time when cleaning up by clever driving behavior, then you will surely manage more next time."
+    },
+    "select": "select",
+    "play": "play"
   },
   "enums": {
     "particle": {
-      "co2": "co2",
+      "carbonDioxide": "co2",
       "dust": "dust",
-      "ch4": "ch4",
+      "methane": "ch4",
       "microplastic": "microplastic"
+    },
+    "electricity": {
+      "water": "hydroelectric power",
+      "wind": "wind energy",
+      "biomass": "Biomass",
+      "sun": "photovoltaics",
+      "green": "other green energy",
+      "gas": "natural gas",
+      "others": "others"
+    },
+    "vehicles": {
+      "car": {
+        "sport": "sports car",
+        "suv": "SUV",
+        "compact": "compact car",
+        "e-car": "E-car"
+      },
+      "bike": {
+        "e-bike": "E Bike",
+        "city": "city bike"
+      },
+      "motorcycle": {
+        "moped": "moped"
+      },
+      "scooter":  {
+        "e-scooter": "e-scooter"
+      },
+      "bus": {
+        "bus": "bus"
+      }
+    },
+    "fuel": {
+      "diesel": "diesel",
+      "gasoline": "gasoline",
+      "gas": "natural gas",
+      "electricity": "electricity",
+      "none": "none"
+    },
+    "units": {
+      "ps": "ps",
+      "km/h": "km/h",
+      "liters": "liters",
+      "seconds": "sec.",
+      "kw": "kw"
     }
   }
 }

@@ -1,15 +1,23 @@
 <template>
   <div ref="gameContainer" class="mapSpace">
+    <select-challenge v-if="gameState === GameStep.Select" @play="startGame" />
     <drive-to-location
       v-if="gameState === GameStep.Drive && sizeCalculated && module"
       :parameter="module.parameter"
       :vehicle="vehicle"
+      :vehicle-type="vehicleType"
       v-on:goalReached="goalReached"
     />
     <clean-up-particles
       v-if="gameState === GameStep.CleanUp"
       :vehicle="vehicle"
+      :vehicle-type="vehicleType"
       :trackingData="trackingData"
+      @finished="cleanupFinished"
+    />
+    <show-result
+      v-if="gameState === GameStep.Result"
+      :particle-state="particleState"
     />
   </div>
 </template>
@@ -17,12 +25,18 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import DriveToLocation from '@/modules/information/cleanup/organisms/DriveToLocation.vue';
+import DriveToLocation, {
+  TrackingData,
+} from '@/modules/information/cleanup/organisms/DriveToLocation.vue';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
 import * as cashService from '@/services/cash-service';
-import CleanUpParticles from '@/modules/information/cleanup/organisms/CleanUpParticles.vue';
+import CleanUpParticles, {
+  ParticleState,
+} from '@/modules/information/cleanup/organisms/CleanUpParticles.vue';
+import SelectChallenge from '@/modules/information/cleanup/organisms/SelectChallenge.vue';
+import ShowResult from '@/modules/information/cleanup/organisms/ShowResult.vue';
 
 enum GameStep {
   Select,
@@ -35,6 +49,8 @@ enum GameStep {
   components: {
     CleanUpParticles,
     DriveToLocation,
+    SelectChallenge,
+    ShowResult,
   },
   emits: ['update:useFullSize'],
 })
@@ -47,9 +63,23 @@ export default class Participant extends Vue {
   sizeCalculated = false;
   module: Module | null = null;
   vehicle = 'car';
+  vehicleType = 'sport';
+  particleState: { [key: string]: ParticleState } = {
+    carbonDioxide: { totalCount: 18, collectedCount: 15 },
+    dust: { totalCount: 10, collectedCount: 9 },
+    methane: { totalCount: 12, collectedCount: 9 },
+    microplastic: { totalCount: 5, collectedCount: 1 },
+  };
 
-  trackingData: number[] = [20, 40, 100, 100, 50, 30];
-  gameState = GameStep.CleanUp;
+  trackingData: TrackingData[] = [
+    { speed: 20, persons: 1, combustion: 0.0005 },
+    { speed: 40, persons: 1, combustion: 0.001 },
+    { speed: 100, persons: 1, combustion: 0.002 },
+    { speed: 100, persons: 1, combustion: 0.002 },
+    { speed: 50, persons: 1, combustion: 0.001 },
+    { speed: 30, persons: 1, combustion: 0.0005 },
+  ];
+  gameState = GameStep.Select;
   GameStep = GameStep;
 
   mounted(): void {
@@ -91,9 +121,20 @@ export default class Participant extends Vue {
     this.module = module;
   }
 
+  startGame(vehicle: any): void {
+    this.vehicle = vehicle.category;
+    this.vehicleType = vehicle.type;
+    this.gameState = GameStep.Drive;
+  }
+
   goalReached(trackingData): void {
     this.trackingData = trackingData;
     this.gameState = GameStep.CleanUp;
+  }
+
+  cleanupFinished(particleState: { [key: string]: ParticleState }): void {
+    this.particleState = particleState;
+    this.gameState = GameStep.Result;
   }
 }
 </script>
