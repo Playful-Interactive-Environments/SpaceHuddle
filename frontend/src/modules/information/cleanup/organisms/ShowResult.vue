@@ -15,9 +15,9 @@
           v-if="
             activeTabName &&
             particleVisualisation[activeTabName] &&
-            ready &&
-            gameWidth &&
-            renderer
+            particleReady &&
+            rendererReady &&
+            gameWidth
           "
         >
           <sprite
@@ -36,16 +36,18 @@
           >
             <Graphics
               :radius="particleRadius"
-              :color="getParticleColor(activeTabName, index)"
+              :color="getParticleColor(activeTabName, index - 1)"
               @render="drawCircle"
             >
               <sprite
-                :texture="getParticleTexture(activeTabName, index)"
+                :texture="getParticleTexture(activeTabName, index - 1)"
                 :anchor="0.5"
-                :tint="getParticleColor(activeTabName, index)"
+                :tint="getParticleColor(activeTabName, index - 1)"
                 :width="particleRadius * 1.5"
                 :height="
-                  getParticleAspect(activeTabName, index) * particleRadius * 1.5
+                  getParticleAspect(activeTabName, index - 1) *
+                  particleRadius *
+                  1.5
                 "
               >
               </sprite>
@@ -122,6 +124,8 @@ import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import * as PIXI from 'pixi.js';
 import * as pixiUtil from '@/utils/pixi';
 
+const resultTabName = 'result';
+
 @Options({
   components: { GameObject, GameContainer },
   emits: [],
@@ -147,8 +151,9 @@ export default class ShowResult extends Vue {
   gameConfig = gameConfig;
   renderer!: PIXI.Renderer;
   particleRadius = 30;
-  ready = false;
-  activeTabName = 'result';
+  particleReady = false;
+  rendererReady = false;
+  activeTabName = resultTabName;
   spritesheet!: PIXI.Spritesheet;
 
   get particleStateSum(): ParticleState {
@@ -198,7 +203,7 @@ export default class ShowResult extends Vue {
     if (index > 0) {
       this.activeTabName = Object.keys(this.particleState)[index - 1];
     } else {
-      this.activeTabName = 'result';
+      this.activeTabName = resultTabName;
     }
   }
 
@@ -306,10 +311,17 @@ export default class ShowResult extends Vue {
 
   initRenderer(renderer: PIXI.Renderer): void {
     this.renderer = renderer;
+    this.rendererReady = true;
   }
 
   mounted(): void {
     this.gameHeight = this.$el.parentElement.offsetHeight;
+    if (this.gameWidth) {
+      this.particleVisualisation[resultTabName] = [];
+      for (const particleName of Object.keys(this.particleState)) {
+        this.particleVisualisation[particleName] = [];
+      }
+    }
     PIXI.Assets.load('/assets/games/cleanup/molecules.json').then(
       (sheet) => (this.spritesheet = sheet)
     );
@@ -318,7 +330,7 @@ export default class ShowResult extends Vue {
   @Watch('gameWidth', { immediate: true })
   onSizeChanged(): void {
     if (this.gameWidth) {
-      this.particleVisualisation['result'] = [];
+      this.particleVisualisation[resultTabName] = [];
       for (const particleName of Object.keys(this.particleState)) {
         const collectedCount = this.particleState[particleName].collectedCount;
         const remainingCount =
@@ -331,13 +343,13 @@ export default class ShowResult extends Vue {
           });
         }
         for (let i = 0; i < collectedCount; i++) {
-          this.particleVisualisation['result'].push({
+          this.particleVisualisation[resultTabName].push({
             coordinates: this.getRandomPosition(),
             type: particleName,
           });
         }
       }
-      this.ready = true;
+      this.particleReady = true;
     }
   }
 }
