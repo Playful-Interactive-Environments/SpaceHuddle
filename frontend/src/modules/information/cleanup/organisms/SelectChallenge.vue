@@ -1,6 +1,11 @@
 <template>
   <div class="chartArea">
-    <el-carousel height="12rem" :interval="30000">
+    <el-carousel
+      height="12rem"
+      :interval="30000"
+      trigger="click"
+      indicator-position="outside"
+    >
       <el-carousel-item>
         <Doughnut
           ref="chartElectricityMixRef"

@@ -1,22 +1,86 @@
 <template>
   <div ref="gameContainer" class="mapSpace">
-    <select-challenge v-if="gameState === GameStep.Select" @play="startGame" />
+    <!--<module-info
+      v-if="gameStep === GameStep.Select && gameState === GameState.Info"
+      :module-info-entry-data-list="[
+        {
+          imageUrl: '/assets/games/cleanup/tutorial/traffic.jpg',
+          title: 'traffic',
+          text: $t('module.information.cleanup.participant.tutorial.traffic'),
+        },
+        {
+          imageUrl: '/assets/games/cleanup/tutorial/vehicleType.jpg',
+          title: 'vehicleType',
+          text: $t('module.information.cleanup.participant.tutorial.vehicleType'),
+        },
+        {
+          imageUrl: '/assets/games/cleanup/tutorial/emissionStats.jpg',
+          title: 'emissionStats',
+          text: $t('module.information.cleanup.participant.tutorial.emissionStats'),
+        },
+        {
+          imageUrl: '/assets/games/cleanup/tutorial/emissionStatsVariable.jpg',
+          title: 'emissionStatsVariable',
+          text: $t('module.information.cleanup.participant.tutorial.emissionStatsVariable'),
+        },
+      ]"
+      @infoRead="gameState = GameState.Game"
+    />-->
+    <module-info
+      v-if="gameStep === GameStep.Select && gameState === GameState.Info"
+      translation-path="module.information.cleanup.participant.tutorial"
+      image-directory="/assets/games/cleanup/tutorial"
+      :module-info-entry-data-list="[
+        'traffic',
+        'vehicleType',
+        'emissionStats',
+        'emissionStatsVariable',
+      ]"
+      @infoRead="gameState = GameState.Game"
+    />
+    <select-challenge
+      v-if="gameStep === GameStep.Select && gameState === GameState.Game"
+      @play="startGame"
+    />
+    <module-info
+      v-if="gameStep === GameStep.Drive && gameState === GameState.Info"
+      translation-path="module.information.cleanup.participant.tutorial"
+      image-directory="/assets/games/cleanup/tutorial"
+      :module-info-entry-data-list="
+        vehicle === 'bus' ? ['speed', 'personCount', 'addPersons'] : ['speed']
+      "
+      @infoRead="gameState = GameState.Game"
+    />
     <drive-to-location
-      v-if="gameState === GameStep.Drive && sizeCalculated && module"
+      v-if="gameStep === GameStep.Drive && sizeCalculated && module"
       :parameter="module.parameter"
       :vehicle="vehicle"
       :vehicle-type="vehicleType"
       v-on:goalReached="goalReached"
     />
+    <module-info
+      v-if="gameStep === GameStep.CleanUp && gameState === GameState.Info"
+      translation-path="module.information.cleanup.participant.tutorial"
+      image-directory="/assets/games/cleanup/tutorial"
+      :module-info-entry-data-list="['cleanUp', 'maxCount', 'particleTypes']"
+      @infoRead="gameState = GameState.Game"
+    />
     <clean-up-particles
-      v-if="gameState === GameStep.CleanUp"
+      v-if="gameStep === GameStep.CleanUp && gameState === GameState.Game"
       :vehicle="vehicle"
       :vehicle-type="vehicleType"
       :trackingData="trackingData"
       @finished="cleanupFinished"
     />
+    <module-info
+      v-if="gameStep === GameStep.Result && gameState === GameState.Info"
+      translation-path="module.information.cleanup.participant.tutorial"
+      image-directory="/assets/games/cleanup/tutorial"
+      :module-info-entry-data-list="['improveSpeed', 'improveElectricity']"
+      @infoRead="gameState = GameState.Game"
+    />
     <show-result
-      v-if="gameState === GameStep.Result"
+      v-if="gameStep === GameStep.Result && gameState === GameState.Game"
       :particle-state="particleState"
     />
   </div>
@@ -37,6 +101,7 @@ import CleanUpParticles, {
 } from '@/modules/information/cleanup/organisms/CleanUpParticles.vue';
 import SelectChallenge from '@/modules/information/cleanup/organisms/SelectChallenge.vue';
 import ShowResult from '@/modules/information/cleanup/organisms/ShowResult.vue';
+import ModuleInfo from '@/components/participant/molecules/ModuleInfo.vue';
 
 enum GameStep {
   Select,
@@ -45,8 +110,14 @@ enum GameStep {
   Result,
 }
 
+enum GameState {
+  Info,
+  Game,
+}
+
 @Options({
   components: {
+    ModuleInfo,
     CleanUpParticles,
     DriveToLocation,
     SelectChallenge,
@@ -79,8 +150,10 @@ export default class Participant extends Vue {
     { speed: 50, persons: 1, combustion: 0.001 },
     { speed: 30, persons: 1, combustion: 0.0005 },
   ];
-  gameState = GameStep.Select;
+  gameStep = GameStep.Select;
   GameStep = GameStep;
+  gameState = GameState.Info;
+  GameState = GameState;
 
   mounted(): void {
     setTimeout(() => {
@@ -124,17 +197,20 @@ export default class Participant extends Vue {
   startGame(vehicle: any): void {
     this.vehicle = vehicle.category;
     this.vehicleType = vehicle.type;
-    this.gameState = GameStep.Drive;
+    this.gameStep = GameStep.Drive;
+    this.gameState = GameState.Info;
   }
 
   goalReached(trackingData): void {
     this.trackingData = trackingData;
-    this.gameState = GameStep.CleanUp;
+    this.gameStep = GameStep.CleanUp;
+    this.gameState = GameState.Info;
   }
 
   cleanupFinished(particleState: { [key: string]: ParticleState }): void {
     this.particleState = particleState;
-    this.gameState = GameStep.Result;
+    this.gameStep = GameStep.Result;
+    this.gameState = GameState.Info;
   }
 }
 </script>

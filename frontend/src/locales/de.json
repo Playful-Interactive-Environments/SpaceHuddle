@@ -397,6 +397,11 @@
     }
   },
   "participant": {
+    "molecules": {
+      "moduleInfo": {
+        "next": "next"
+      }
+    },
     "organism": {
       "modelDefaultContainer": {
         "timeLeft": "Zeit"

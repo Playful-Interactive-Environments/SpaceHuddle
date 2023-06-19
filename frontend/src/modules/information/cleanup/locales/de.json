@@ -25,7 +25,21 @@
       "improvable": "Das geht besser. Versuch durch geschicktes Fahrverhalten dir nächstesmal noch mehr Luft beim aufräumen zu lassen, dann schaffst du nächstesmal sicher mehr"
     },
     "select": "auswählen",
-    "play": "Start"
+    "play": "Start",
+    "tutorial": {
+      "traffic": "Der Verkehr ist für 30% der Treibhausgasemissionen verantwortlich.",
+      "vehicleType": "Versuch herauszufinden, welche Auswirkungen verschiedene Fahrzeugtypen haben.",
+      "emissionStats": "Die Statistik oben zeigt, wie viel Treibhausgase in einer kWh Kraftstoff stecken.",
+      "emissionStatsVariable": "Während dies für Kraftstoffe wie Diesel und Benzin konstant ist, hängen die Werte für Strom vom Strommix ab.",
+      "speed": "Neben der Wahl des Fahrzeugs spielt auch das Fahrverhalten eine entscheidende Rolle. Je schneller du fährst, desto mehr Kraftstoff benötigst du.",
+      "personCount": "Aber auch die Anzahl der Passagiere macht einen Unterschied. Je voller das Fahrzeug, desto mehr Personen teilen sich die Emissionen.",
+      "addPersons": "Bleib an Bushaltestellen stehen, um Leute einsteigen zu lassen.",
+      "cleanUp": "Versuche nun, die von dir verursachten Emissionen zu beseitigen, indem du sie in die richtige Tonne wirfst.",
+      "maxCount": "Aber pass auf! Wenn es zu viele freie Emissionen gibt, verflüchtigen sie sich und gelangen in die Umwelt.",
+      "improveSpeed": "Versuche, dir beim nächsten Mal beim Aufräumen durch geschicktes Fahrverhalten mehr Luft zu lassen.",
+      "improveElectricity": "Oder beeinflusse den Strommix durch entsprechende Maßnahmen in der Maßnahmenkarte",
+      "particleTypes": "Neben Treibhausgasen werden auch Mikroplastik durch Reifenabrieb und Feinstaub freigesetzt."
+    }
   },
   "enums": {
     "particle": {

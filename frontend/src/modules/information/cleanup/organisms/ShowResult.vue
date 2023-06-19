@@ -60,6 +60,7 @@
     <el-carousel
       :height="`${gameHeight}px`"
       :interval="30000"
+      trigger="click"
       @change="carouselChanged"
     >
       <el-carousel-item class="infoGraphic successState">
