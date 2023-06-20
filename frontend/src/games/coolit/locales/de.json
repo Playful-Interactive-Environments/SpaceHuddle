@@ -134,6 +134,8 @@
     }
   },
   "play": {
+    "info": "Schiebe die Moleküle in der Atmosphäre aus dem Weg der Wärmestrahlung!",
+    "start": "LOS!",
     "confirm": "Weiter",
     "victory": {
       "oneStar": "Super!",

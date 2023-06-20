@@ -1,27 +1,35 @@
-import { Stage, level, game, event, Sprite, pool } from 'melonjs';
+import { Stage, level, game, event, Sprite } from 'melonjs';
 import Matter from 'matter-js';
 import { GameData, collisionGroups } from '@/games/coolit/src/resources.js';
 import Molecule from '@/games/coolit/src/entities/molecule.js';
 import LightRay from '@/games/coolit/src/entities/lightRay.js';
 import RectPHYS from '@/games/coolit/src/entities/rectPhys.js';
+import EmissionEvent from '@/games/coolit/src/entities/emissionEvent.js';
 
-/**
+/* TODO
  * Useful resource for restricting physics-movement on mouse interactions. Relevant for a fix regarding the ability to
  * force-drag objects through one another or outside the meant game-space. Implementation-Attempt will be made once
- * the game is more complete.
+ * the game is more complete, since this will take up a lot of time.
  *
  * https://stackoverflow.com/questions/59321773/prevent-force-dragging-bodies-through-other-bodies-with-matterjs
  */
 
+/**
+ * The meat of the game. Everything that should happen once a level has been started will pass through this stage at least once.
+ * Sets up crucial event handlers and manages the game state.
+ *
+ * @extends Stage
+ * @see Stage
+ */
 export default class Play extends Stage {
   saveData;
 
-  imageSettings;
   spawnInterval;
   countdown;
   time;
   hasGameStarted;
   moveBack;
+  eventCooldown;
   scrollSpeed;
   allRaysSpawned;
   moleculesHit;
@@ -57,13 +65,25 @@ export default class Play extends Stage {
     });
   }
 
-  // Matter.js Setup (Physics). Basic physics engine initialization and enabling of mouse interactions.
+  /**
+   * Part of the main stage setup. Physics initialization once the stage has fully loaded. Creates a Matter.js physics
+   * world and sets necessary physics parameters in the engine.
+   *
+   * @see Matter.Engine
+   * @see Matter.Runner
+   */
   matterSetup() {
     GameData.physics.engine = Matter.Engine.create();
     GameData.physics.engine.gravity.scale = GameData.physics.gravityScale;
-    this.addMatterControls();
     Matter.Runner.run(Matter.Runner.create(), GameData.physics.engine);
   }
+  /**
+   * Part of the main stage setup. Controls setup. Some physics-enabled objects need to be moved by pointer-events. This
+   * setup handles that problem.
+   *
+   * @see Matter.Mouse
+   * @see Matter.MouseConstraint
+   */
   addMatterControls() {
     const mouse = Matter.Mouse.create(game.renderer.getCanvas());
     const mouseConstraint = Matter.MouseConstraint.create(
@@ -81,34 +101,20 @@ export default class Play extends Stage {
     Matter.Composite.add(GameData.physics.engine.world, mouseConstraint);
   }
 
-  // Adding the game content to the scene. Borders, Interactables, Background, etc.
+  /**
+   * Adds borders to the viewport to restrict physics-enabled bodies to accidentally move out of bounds.
+   *
+   * @see RectPHYS
+   */
   addBorders() {
-    const bodySettings = {
-      isStatic: true,
-      collisionFilter: {
-        category: collisionGroups.WORLD_BORDER,
-        mask:
-          collisionGroups.CONTROLLABLE |
-          collisionGroups.NON_CONTROLLABLE |
-          collisionGroups.LIGHT_RAY |
-          collisionGroups.HEAT_RAY,
-      },
-    };
-
     // Top
     const borderTop = new RectPHYS(
       game.viewport.width / 2,
       -75 + 5,
-      this.imageSettings,
+      GameData.game.imagePresets.spritesheetSettings,
       GameData.game.imageIds.spritesheet.empty,
       GameData.physics.engine.world,
-      {
-        isStatic: true,
-        collisionFilter: {
-          category: collisionGroups.WORLD_BORDER,
-          mask: collisionGroups.CONTROLLABLE | collisionGroups.NON_CONTROLLABLE,
-        },
-      }
+      GameData.physics.bodySettings.worldBorder
     );
     borderTop.setScale(5, 1);
     borderTop.floating = true;
@@ -116,12 +122,14 @@ export default class Play extends Stage {
 
     // Right
     const borderRight = new RectPHYS(
-      game.viewport.width + this.imageSettings.framewidth / 2 - 5,
+      game.viewport.width +
+        GameData.game.imagePresets.spritesheetSettings.framewidth / 2 -
+        5,
       game.viewport.height / 2,
-      this.imageSettings,
+      GameData.game.imagePresets.spritesheetSettings,
       GameData.game.imageIds.spritesheet.empty,
       GameData.physics.engine.world,
-      bodySettings
+      GameData.physics.bodySettings.worldBorder
     );
     borderRight.setScale(1, 8);
     borderRight.floating = true;
@@ -131,16 +139,10 @@ export default class Play extends Stage {
     const borderBottomMolecules = new RectPHYS(
       game.viewport.width / 2,
       game.viewport.height,
-      this.imageSettings,
+      GameData.game.imagePresets.spritesheetSettings,
       GameData.game.imageIds.spritesheet.empty,
       GameData.physics.engine.world,
-      {
-        isStatic: true,
-        collisionFilter: {
-          category: collisionGroups.WORLD,
-          mask: collisionGroups.CONTROLLABLE | collisionGroups.NON_CONTROLLABLE,
-        },
-      }
+      GameData.physics.bodySettings.world
     );
     borderBottomMolecules.setScale(5, 5.75);
     borderBottomMolecules.setOpacity(0.15);
@@ -150,11 +152,13 @@ export default class Play extends Stage {
     // Bottom
     const borderBottom = new RectPHYS(
       game.viewport.width / 2,
-      game.viewport.height + this.imageSettings.frameheight / 2 - 5,
-      this.imageSettings,
+      game.viewport.height +
+        GameData.game.imagePresets.spritesheetSettings.frameheight / 2 -
+        5,
+      GameData.game.imagePresets.spritesheetSettings,
       GameData.game.imageIds.spritesheet.empty,
       GameData.physics.engine.world,
-      bodySettings
+      GameData.physics.bodySettings.worldBorder
     );
     borderBottom.setScale(5, 1);
     borderBottom.floating = true;
@@ -162,37 +166,30 @@ export default class Play extends Stage {
 
     // Left
     const borderLeft = new RectPHYS(
-      -(this.imageSettings.framewidth / 2) + 5,
+      -(GameData.game.imagePresets.spritesheetSettings.framewidth / 2) + 5,
       game.viewport.height / 2,
-      this.imageSettings,
+      GameData.game.imagePresets.spritesheetSettings,
       GameData.game.imageIds.spritesheet.empty,
       GameData.physics.engine.world,
-      bodySettings
+      GameData.physics.bodySettings.worldBorder
     );
     borderLeft.setScale(1, 8);
     borderLeft.floating = true;
     game.world.addChild(borderLeft, GameData.zOrder.background + 5);
   }
-  addMatterControllables(levelID, matterWorld) {
-    const bodySettings = {
-      restitution: 1,
-      collisionFilter: {
-        category: collisionGroups.CONTROLLABLE,
-        mask:
-          collisionGroups.CONTROLLABLE |
-          collisionGroups.NON_CONTROLLABLE |
-          collisionGroups.WORLD |
-          collisionGroups.WORLD_BORDER |
-          collisionGroups.LIGHT_RAY,
-      },
-    };
-
+  /**
+   * Adds the controllable molecules to the scene. These are game loop critical objects.
+   *
+   * @param levelID {string} The level ID of the currently loaded level. Is required to load the correct set of molecules.
+   *
+   * @see Molecule
+   */
+  addMatterControllables(levelID) {
     const moleculeSet = GameData.game.levels[levelID].molecules;
 
-    moleculeSet.forEach((molecule) => {
-      switch (molecule) {
+    moleculeSet.forEach((moleculeID) => {
+      switch (moleculeID) {
         case 'watervapor':
-          // White
           for (
             let i = 0;
             i <
@@ -201,22 +198,16 @@ export default class Play extends Stage {
               2;
             i++
           ) {
-            const molecule = new Molecule(
-              game.viewport.width * Math.random(),
-              (game.viewport.height / 2) * Math.random(),
-              this.imageSettings,
-              GameData.game.imageIds.spritesheet.watervapor,
-              matterWorld,
-              bodySettings,
-              'watervapor'
+            game.world.addChild(
+              this.createMolecule(
+                moleculeID,
+                GameData.physics.bodySettings.controllable
+              ),
+              GameData.zOrder.usables
             );
-            molecule.setScale(0.25);
-            GameData.physics.controllableMolecules.push(molecule);
-            game.world.addChild(molecule, GameData.zOrder.usables);
           }
           break;
         case 'nitrousoxide':
-          // Red
           for (
             let i = 0;
             i <
@@ -225,22 +216,16 @@ export default class Play extends Stage {
               1;
             i++
           ) {
-            const molecule = new Molecule(
-              game.viewport.width * Math.random(),
-              (game.viewport.height / 2) * Math.random(),
-              this.imageSettings,
-              GameData.game.imageIds.spritesheet.nitrousoxide,
-              matterWorld,
-              bodySettings,
-              'nitrousoxide'
+            game.world.addChild(
+              this.createMolecule(
+                moleculeID,
+                GameData.physics.bodySettings.controllable
+              ),
+              GameData.zOrder.usables
             );
-            molecule.setScale(0.5);
-            GameData.physics.controllableMolecules.push(molecule);
-            game.world.addChild(molecule, GameData.zOrder.usables);
           }
           break;
         case 'carbondioxide':
-          // Black
           for (
             let i = 0;
             i <
@@ -249,22 +234,16 @@ export default class Play extends Stage {
               2;
             i++
           ) {
-            const molecule = new Molecule(
-              game.viewport.width * Math.random(),
-              (game.viewport.height / 2) * Math.random(),
-              this.imageSettings,
-              GameData.game.imageIds.spritesheet.carbondioxide,
-              matterWorld,
-              bodySettings,
-              'carbondioxide'
+            game.world.addChild(
+              this.createMolecule(
+                moleculeID,
+                GameData.physics.bodySettings.controllable
+              ),
+              GameData.zOrder.usables
             );
-            molecule.setScale(0.33);
-            GameData.physics.controllableMolecules.push(molecule);
-            game.world.addChild(molecule, GameData.zOrder.usables);
           }
           break;
         case 'ozone':
-          // Blue
           for (
             let i = 0;
             i <
@@ -273,18 +252,13 @@ export default class Play extends Stage {
               1;
             i++
           ) {
-            const molecule = new Molecule(
-              game.viewport.width * Math.random(),
-              (game.viewport.height / 2) * Math.random(),
-              this.imageSettings,
-              GameData.game.imageIds.spritesheet.ozone,
-              matterWorld,
-              bodySettings,
-              'ozone'
+            game.world.addChild(
+              this.createMolecule(
+                moleculeID,
+                GameData.physics.bodySettings.controllable
+              ),
+              GameData.zOrder.usables
             );
-            molecule.setScale(0.33);
-            GameData.physics.controllableMolecules.push(molecule);
-            game.world.addChild(molecule, GameData.zOrder.usables);
           }
           break;
         case 'methane':
@@ -297,18 +271,13 @@ export default class Play extends Stage {
               1.5;
             i++
           ) {
-            const molecule = new Molecule(
-              game.viewport.width * Math.random(),
-              (game.viewport.height / 2) * Math.random(),
-              this.imageSettings,
-              GameData.game.imageIds.spritesheet.methane,
-              matterWorld,
-              bodySettings,
-              'methane'
+            game.world.addChild(
+              this.createMolecule(
+                moleculeID,
+                GameData.physics.bodySettings.controllable
+              ),
+              GameData.zOrder.usables
             );
-            molecule.setScale(0.25);
-            GameData.physics.controllableMolecules.push(molecule);
-            game.world.addChild(molecule, GameData.zOrder.usables);
           }
           break;
         case 'fluorinatedgases':
@@ -321,66 +290,59 @@ export default class Play extends Stage {
               1;
             i++
           ) {
-            const molecule = new Molecule(
-              game.viewport.width * Math.random(),
-              (game.viewport.height / 2) * Math.random(),
-              this.imageSettings,
-              GameData.game.imageIds.spritesheet.fluorinatedgases,
-              matterWorld,
-              bodySettings,
-              'fluorinatedgases'
+            game.world.addChild(
+              this.createMolecule(
+                moleculeID,
+                GameData.physics.bodySettings.controllable
+              ),
+              GameData.zOrder.usables
             );
-            molecule.setScale(0.5);
-            GameData.physics.controllableMolecules.push(molecule);
-            game.world.addChild(molecule, GameData.zOrder.usables);
           }
           break;
       }
     });
   }
-  addMatterNonControllables(amount, matterWorld) {
-    const bodySettings = {
-      restitution: 1,
-      collisionFilter: {
-        category: collisionGroups.NON_CONTROLLABLE,
-        mask:
-          collisionGroups.NON_CONTROLLABLE |
-          collisionGroups.CONTROLLABLE |
-          collisionGroups.WORLD |
-          collisionGroups.WORLD_BORDER,
-      },
-    };
-
+  /**
+   * Adds some non-controllable molecules to the scene which obstruct movement of controllable molecules and cause
+   * occasional chaos in the atmosphere.
+   *
+   * @param amount {number} The amount of non-controllables to spawn.
+   *
+   * @see Molecule
+   */
+  addMatterNonControllables(amount) {
     for (let i = 0; i < amount; i += 1) {
-      const molecule = new Molecule(
-        game.viewport.width * Math.random(),
-        (game.viewport.height / 2) * Math.random(),
-        this.imageSettings,
-        GameData.game.imageIds.spritesheet.other,
-        matterWorld,
-        bodySettings,
-        'other'
+      const molecule = this.createMolecule(
+        'oxygen',
+        GameData.physics.bodySettings.noncontrollable
       );
-      molecule.setScale(0.2);
-      molecule.setOpacity(0.33);
-      game.world.addChild(molecule, GameData.zOrder.background + 1);
+      molecule.setOpacity(0.25);
+      game.world.addChild(molecule, GameData.zOrder.usables);
     }
   }
+  /**
+   * Adds a static background which moves with the viewport and always stays the same, i.e. the sky.
+   */
   addBackground() {
     // Sky
     const sky = new Sprite(
       game.viewport.width / 2,
       game.viewport.height / 2,
-      this.imageSettings
+      GameData.game.imagePresets.spritesheetSettings
     );
     sky.scale(5, 9);
     sky.floating = true;
-    sky.addAnimation('image', [GameData.game.imageIds.spritesheet.sky]);
+    sky.addAnimation('image', [GameData.game.imageIds.spritesheet.levelSky]);
     sky.setCurrentAnimation('image');
     game.world.addChild(sky, GameData.zOrder.background);
   }
 
-  // Callbacks to start, end and reset the game state.
+  /**
+   * Callback once the countdown has finished and the game should start. Requires the level ID to apply current difficulty
+   * settings.
+   *
+   * @param levelID {string} The level ID of the currently loaded level. Is required to load the correct difficulty.
+   */
   startGame(levelID) {
     let amountSpawned = 0;
     this.spawnInterval = setInterval(() => {
@@ -393,30 +355,16 @@ export default class Play extends Stage {
         const lightray = new LightRay(
           (game.viewport.width - 200) * Math.random() + 100,
           45,
-          this.imageSettings,
-          GameData.game.imageIds.spritesheet.fluorinatedgases,
+          GameData.game.imagePresets.spritesheetSettings,
+          GameData.game.imageIds.spritesheet.molecule,
           GameData.physics.engine,
-          {
-            restitution: 1,
-            friction: 0,
-            airFriction: 0,
-            staticFriction: 0,
-            mass: 0,
-            velocity: new Matter.Vector.create(0, 1),
-            collisionFilter: {
-              category: collisionGroups.LIGHT_RAY,
-              mask:
-                collisionGroups.WORLD_BORDER |
-                collisionGroups.WORLD |
-                collisionGroups.ADSORBING |
-                collisionGroups.ABSORBING,
-            },
-          },
+          GameData.physics.bodySettings.lightray,
           GameData.physics.reactiveSurfaces,
           GameData.physics.controllableMolecules
         );
         lightray.setOpacity(0.5);
         lightray.setScale(0.15);
+        lightray.tint.parseCSS(GameData.general.colors.light);
         this.lightrays.push(lightray);
         game.world.addChild(lightray, GameData.zOrder.background + 11);
         event.emit('lightraySpawned', lightray);
@@ -426,6 +374,12 @@ export default class Play extends Stage {
       }
     }, 2500);
   }
+  /**
+   * Callback once the game has concluded, i.e. either a victory or defeat was achieved. Requires the level ID to
+   * correctly handle saving mechanisms.
+   *
+   * @param levelID {string} The level ID of the currently loaded level. Is required to correctly handle saving mechanisms.
+   */
   endGame(levelID) {
     if (this.spawnInterval) {
       clearInterval(this.spawnInterval);
@@ -440,28 +394,58 @@ export default class Play extends Stage {
       GameData.instances.playUI.showSummary(true, levelID);
     }
   }
+  /**
+   * Part of the main stage setup. Resets the game state and all its important values.
+   */
   resetVariables() {
     this.saveData = GameData.instances.saveManager.getSaveData();
 
-    this.imageSettings = {
-      image: 'spritesheet',
-      framewidth: 256,
-      frameheight: 256,
-    };
-    this.countdown = 3;
+    this.countdown = 5;
     this.spawnInterval = null;
     this.time = 0;
     this.hasGameStarted = false;
     this.moveBack = false;
+    this.eventCooldown = 10000;
     this.scrollSpeed = 2;
     this.allRaysSpawned = false;
     this.moleculesHit = 0;
 
     this.lightrays = [];
+
     GameData.physics.engine = null;
     GameData.physics.reactiveSurfaces = [];
     GameData.physics.controllableMolecules = [];
     GameData.physics.moleculeSinks = [];
+  }
+
+  /**
+   * Creates a molecule with unique settings depending on the given molecule ID.
+   *
+   * @param moleculeID {string} The type of molecule to create.
+   * @param bodySettings {Object} The desired physics-body settings according to MatterJS' Body-Setup.
+   * @returns {Molecule} A Molecule object.
+   * @see Molecule
+   */
+  createMolecule(moleculeID, bodySettings) {
+    const molecule = new Molecule(
+      game.viewport.width * Math.random(),
+      (game.viewport.height / 2) * Math.random(),
+      GameData.game.imagePresets.spritesheetSettings,
+      GameData.game.imageIds.spritesheet.molecule,
+      GameData.physics.engine.world,
+      bodySettings,
+      moleculeID
+    );
+
+    if (moleculeID === 'other') {
+      molecule.setOpacity(0.33);
+    }
+
+    molecule.setScale(GameData.game.molecules[moleculeID].maxScale);
+    molecule.tint.parseCSS(GameData.game.molecules[moleculeID].tint);
+    GameData.physics.controllableMolecules.push(molecule);
+
+    return molecule;
   }
 
   // Called upon switching to this stage (or whenever reset() is called). Initialization should happen here.
@@ -470,16 +454,16 @@ export default class Play extends Stage {
 
     this.matterSetup();
 
-    level.load('sidescrollerTEST');
-
     this.addBorders();
+    level.load('sidescrollerTEST');
     this.addBackground();
+
     this.addMatterNonControllables(
       GameData.game.difficulty[GameData.game.levels[args[1]].difficulty]
-        .noncontrollables,
-      GameData.physics.engine.world
+        .noncontrollables
     );
-    this.addMatterControllables(args[1], GameData.physics.engine.world);
+    this.addMatterControllables(args[1]);
+    event.emit('updateDetectors');
 
     // Add the UI
     GameData.instances.playUI.minScale =
@@ -492,8 +476,6 @@ export default class Play extends Stage {
       ].startTempScale;
     GameData.instances.playUI.addElements(args[1]);
 
-    event.emit('updateDetectors');
-
     // Add important game events here.
     event.once('start', () => {
       this.startGame(args[1]);
@@ -505,14 +487,20 @@ export default class Play extends Stage {
   // Called once every frame. Returns true if the object is dirty (needs to be rendered after the update), false otherwise.
   update(dt) {
     super.update(dt);
+
     if (!this.hasGameStarted) {
+      event.emit('countdownStart', this.countdown);
       this.time += dt;
       if (this.time >= 1000 && this.countdown > 0) {
         this.countdown--;
+        event.emit('countdownUpdate', this.countdown);
         this.time = 0;
       }
       if (this.time >= 1000 && this.countdown === 0) {
+        event.emit('countdownUpdate', this.countdown);
         this.hasGameStarted = true;
+        this.addMatterControls();
+        this.time = 0;
       }
     } else {
       event.emit('start');
@@ -526,6 +514,12 @@ export default class Play extends Stage {
         if (game.viewport.pos.x >= 3840 - GameData.general.targetResX) {
           this.moveBack = true;
         }
+      }
+
+      this.time += dt;
+      if (this.time >= this.eventCooldown) {
+        new EmissionEvent('carbondioxide', this.moveBack);
+        this.time = 0;
       }
     }
     return true;

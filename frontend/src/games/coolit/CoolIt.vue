@@ -11,7 +11,7 @@ advantage of using said pre-loader.
 -->
 <script lang="js">
 import { Vue } from 'vue-class-component';
-import { device, game, loader, pool, state, video, event } from 'melonjs';
+import { device, game, loader, pool, state, video, event, boot } from 'melonjs';
 import Matter from 'matter-js';
 import { resources, GameData } from '@/games/coolit/src/resources.js';
 import de from '@/games/coolit/locales/de.json';
@@ -22,24 +22,21 @@ import Menu from '@/games/coolit/src/stages/menu.js';
 import Play from '@/games/coolit/src/stages/play.js';
 import MenuUI from '@/games/coolit/src/ui/menuUI.js';
 import PlayUI from '@/games/coolit/src/ui/playUI.js';
-import {
-    Pavement,
-    Skyscraper,
-    SkyscraperGreenRoof,
-    StorefrontBright,
-    StorefrontDark,
-    BuildingRed,
-    BuildingBlue,
-    BuildingBeige,
-    BuildingApartments,
-    CarVan,
-    CarSedan,
-    CO2Sink
-} from '@/games/coolit/src/entities/rectPhys.js';
+import { MoleculeSink, ColliderRect } from '@/games/coolit/src/entities/matterRect.js';
 
+/**
+ * The Vue3-Module for the game 'Cool It'. Add this module wherever needed in your app.
+ * This class boots the melonJS Engine upon successful mounting of the module and initializes the game.
+ *
+ * @extends Vue
+ * @see Vue
+ */
 export default class CoolIt extends Vue {
-  // Initialize the game as soon as this component is mounted in the app.
+  // TODO: Manual engine and game boots/re-starts work as described in README.md.
+  // TODO: melonJS does not provide this built-in, but they are working on it: see https://github.com/melonjs/melonJS/issues/1091
+
   mounted() {
+    boot();
     device.onReady(() => {
       this.initGame();
       event.on('closeGame', () => {
@@ -49,13 +46,21 @@ export default class CoolIt extends Vue {
     });
   }
 
-  // Unload everything once this component is removed from the app.
   unmounted() {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     event.off('closeGame', () => {});
   }
 
-  // Initialize the game and switch to the main menu.
+  /**
+   * Initializes the game to function properly.
+   * Main tasks:
+   *    Set basic variables.
+   *    Initialize the canvas renderer.
+   *    Set up the game stages.
+   *    Load the necessary game resources.
+   *    Register the necessary objects with the ObjectPool.
+   *    Launch the game by changing to a game state.
+   */
   initGame() {
     // Initial Locale Setup
     if (navigator.language === 'de-DE') {
@@ -79,9 +84,10 @@ export default class CoolIt extends Vue {
 
     // Very weird stack of events that actually fixes the scaling issue on Chrome for Android.
     // Calling the event once does nothing. Calling it twice only scales the canvas a little bit.
-    // Calling it 4-5 times ensured the right size on the test device.
-      // TODO If possible: Find a better solution than this...
-      // TODO Tried but failed: setTimeout() does not solve this issue.
+    // Calling it 4-5 times ensured the right size on the test devices.
+    // Does not interfere with other browsers/devices.
+    // TODO If possible: Find a better solution than this...
+    // TODO Tried but failed: setTimeout() does not solve this issue.
     event.emit(event.WINDOW_ONRESIZE);
     event.emit(event.WINDOW_ONRESIZE);
     event.emit(event.WINDOW_ONRESIZE);
@@ -109,18 +115,8 @@ export default class CoolIt extends Vue {
       game.world.addChild(GameData.instances.playUI, GameData.zOrder.ui);
 
       // Register all objects to be pooled. Specifically: All special objects to be instantiated in levels (e.g. physics objects on the object layer)
-      pool.register('pavement', Pavement);
-      pool.register('skyscraper', Skyscraper);
-      pool.register('skyscrapergreenroof', SkyscraperGreenRoof);
-      pool.register('storefrontbright', StorefrontBright);
-      pool.register('storefrontdark', StorefrontDark);
-      pool.register('buildingred', BuildingRed);
-      pool.register('buildingblue', BuildingBlue);
-      pool.register('buildingbeige', BuildingBeige);
-      pool.register('buildingapartments', BuildingApartments);
-      pool.register('carvan', CarVan);
-      pool.register('carsedan', CarSedan);
-      pool.register('co2sink', CO2Sink);
+      pool.register('rectCollider', ColliderRect);
+      pool.register('moleculeSink', MoleculeSink);
 
       // Change to the Menu
       state.change(state.MENU, false);

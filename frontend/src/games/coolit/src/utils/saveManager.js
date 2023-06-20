@@ -1,7 +1,14 @@
-// A default save key to be able to look up the save inside the browser's local storage.
+/**
+ * The save-key to use for the entry in the local storage.
+ *
+ * @type {string}
+ */
 export const DefaultSaveKey = 'saveData_coolIt';
 
-// A default template for the game save data with no progress.
+/**
+ * A default template for this game's save structure. Represents the game-state of a player who has never interacted
+ * with the game before.
+ */
 export const DefaultSaveData = {
   totalStars: 0,
   chosenLocale: null,
@@ -18,11 +25,6 @@ export const DefaultSaveData = {
       unlocked: false,
       stars: 0,
     },
-  },
-  upgrades: {
-    green_roofs: false,
-    improved_filters: false,
-    exhaust_usage: false,
   },
   molecules: {
     watervapor: {
@@ -68,20 +70,31 @@ export const DefaultSaveData = {
   },
 };
 
-// A save manager which handles reading and writing to the browser's local storage.
+/**
+ * Handles all things save-data for the game 'Cool It'. Checks for existing save-data inside the local storage upon
+ * initialization and creates a default save-data according to the default template if none was found.
+ *
+ * IMPORTANT: Needs access to the browser's local storage in order to function without issues.
+ */
 export default class SaveManager {
   saveKey = DefaultSaveKey;
   saveData;
 
   constructor() {
     if (!localStorage.getItem(this.saveKey)) {
-      this.saveData = DefaultSaveData;
+      this.saveData = JSON.parse(JSON.stringify(DefaultSaveData));
       this.save(this.saveData);
     } else {
       this.saveData = JSON.parse(localStorage.getItem(this.saveKey));
     }
   }
 
+  /**
+   * Save the given save-data to the local storage, using the default key specified.
+   *
+   * @param saveData {Object} The save-data to be written to the local storage.
+   * @returns {boolean} Returns true if successful, false otherwise (including the error that occurred, if any at all).
+   */
   save(saveData) {
     if (this.saveKey !== null) {
       try {
@@ -97,11 +110,19 @@ export default class SaveManager {
     }
   }
 
+  /**
+   * Resets the current save-data to the default template, allowing for a complete re-start of the game with no progress
+   * whatsoever.
+   */
   resetSave() {
-    this.saveData = DefaultSaveData;
+    this.saveData = JSON.parse(JSON.stringify(DefaultSaveData));
     this.save(this.saveData);
   }
 
+  /**
+   * @returns {Object} The current save-data object which is held by the corresponding class attribute. Does not
+   * access the local storage.
+   */
   getSaveData() {
     return this.saveData;
   }

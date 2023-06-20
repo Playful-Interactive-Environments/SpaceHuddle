@@ -65,20 +65,96 @@ The SpaceHuddle-API is built on the following technologies. Visit the websites t
 2. Download and install Node `https://nodejs.org/en/download/`. Use a Node version that is lower or equal to 19.2.0
 3. Install dependencies with: `npm install`
 
-#### Compiles and hot-reloads for development
+### SpaceHuddle games
+
+The SpaceHuddle games are built using the javascript game framework `melonJS`, with physics handling done in `Matter.js`.
+While the combination of these two frameworks can achieve amazing things, there are some notable caveats. The most
+important one is regarding launching the game more than once. The issue itself and a workaround can be found in 'The Issue'.
+
+##### Versions
+
+- melonJS: `15.1.6`
+- Matter.js: `0.19.0`
+
+#### The Issue
+
+As of the currently stated version, `melonJS` is a framework which by default starts and initializes only once, as soon as possible.
+Once the engine is initialized, a single game instance has been created and the game is playable vía WebGL/Canvas directly
+in your browser. Refreshing (F5) or leaving and re-entering the page re-starts the game without any issue since the entire page
+has to be requested from the server.
+
+In asynchronous environments, however, the active game instance will not be destroyed upon leaving the game and every subsequent
+call for `melonJS` still uses the old and already redundant information for initialization, skipping a lot of important steps
+while doing so and thus rendering the game unplayable.
+
+#### The Workaround
+
+Unfortunately, this workaround is a bit more involved since it requires editing of the `melonjs` module which npm delivered upon calling `npm install`,
+however, it saves you and your users a lot of time. The following steps ensure proper subsequent re-initializations:
+1. Head to `frontend\node_modules\melonjs\dist`. Inside the `types` folder you will find `index.d.ts` - open it in 
+         an editor which allows you to modify and save type definitions (e.g. NotePad++).
+2. Look for `export const game: Application;` and change it to `export let game: any;`. Adding this as a new line and
+   commenting the former statement works as well. Save the file. This change keeps the global `game` instance but allows subsequent
+   re-initializations.
+3. Open `melonjs.module.js`. It is a big file so it might take a while to finish loading. Look for `let skipAutoInit = false;`
+   (at or around line 38258). Change its value to `true`.
+4. Just below you will find `const game = new Application(...);`. Change this to `let game = null`;
+5. Below this statement the function `boot()` can be found. Inside the initial if-Statement, remove the return statement and substitute it with the
+   following lines of code (you may omit the comments):
+   ```
+   // These lines successfully re-initialize the entire engine. No errors have been noticed in subsequent engine start-ups.
+   // IMPORTANT: The ORDER of these calls is crucial!
+         
+   initialized = false;
+
+   // Reset the Object Pool and Event Emitter.
+   pool = new ObjectPool();
+   eventEmitter = new EventEmitter();
+
+   // Clear the renderer to allow re-init from a clean slate.
+   renderer = null;
+
+   // Clear all registered event handlers.
+   eventHandlers = new Map();
+
+   // Reset the status of registered pointer events.
+   pointerInitialized = false;
+   normalizedEvents = [];
+   pointerEventTarget = null;
+   pointer = new Pointer(0, 0, 1, 1);
+
+   // Resetting camera/viewport configuration.
+   targetV = new Vector2d();
+   default_camera = undefined;
+
+   // Reset some counters and lists relevant for game management and overview.
+   globalFloatingCounter = 0;
+
+   levels = {};
+   levelIdx = [];
+   currentLevelIdx = 0;
+
+   resourceCount = 0;
+   loadCount = 0;
+   timerId = 0;
+   ```
+6. Add `game = new Application(0, 0, {legacy:true});` after the if-Statement (before `console.log(...);`).
+7. Save the module. Stop the Dev-Environment if it is running. Re-Execute `npm run serve`.
+
+### Compiles and hot-reloads for development
 You can use either `npm start` or `npm run serve`.
 
-#### Compiles and minifies for production
+### Compiles and minifies for production
 ```
 npm run build
 ```
 
-#### Run your unit tests
+### Run your unit tests
 ```
 npm run test:unit
 ```
 
-#### Lints and fixes files
+### Lints and fixes files
 ```
 npm run lint
 ```

@@ -1,7 +1,27 @@
-import { game, event, Sprite, ParticleEmitter } from 'melonjs';
+import { Sprite } from 'melonjs';
 import Matter from 'matter-js';
-import { collisionGroups, GameData } from '@/games/coolit/src/resources';
 
+/**
+ * A physics-enabled object which combines the sprite visualisation from melonJS and physics capabilities from Matter.js.
+ * Assumes the basic shape of a rectangle of any size and is thus fit for most assets/sprites in this game.
+ *
+ * NOT suitable for the Tiled Map Editor. See MatterRect if physics are needed from a level design perspective!
+ *
+ * If the optional parameters are omitted, the physics capabilities will have to be set up manually at a later stage
+ * with the corresponding methods!
+ *
+ * @param x {number} The desired position on the x-Axis.
+ * @param y {number} The desired position on the y-Axis.
+ * @param settings {Object} The desired image-settings according to melonJS' Sprite-Setup.
+ * @param imageID {number} OPTIONAL (Default: undefined). The desired sprite-ID from the spritesheet specified in the settings.
+ * @param world {Matter.Composite} OPTIONAL (Default: undefined). The Matter.js physics world.
+ * @param bodySettings {Object} OPTIONAL (Default: undefined). The desired physics-body settings according to MatterJS' Body-Setup.
+ *
+ * @extends Sprite
+ * @see Sprite
+ * @see MatterRect
+ * @see Matter.Composite
+ */
 export default class RectPHYS extends Sprite {
   matterBody;
   matterWorld;
@@ -33,6 +53,15 @@ export default class RectPHYS extends Sprite {
     }
   }
 
+  /**
+   * Creates a physics body for this object and adds it to the physics world. If no body-settings have been supplied
+   * beforehand, the body will be set up with Matter.js default settings.
+   *
+   * @param offsetX {number} OPTIONAL (Default: 0). An offset on the x-Axis for the synchronisation of the physics body
+   * and sprite renderable.
+   * @param offsetY {number} OPTIONAL (Default: 0). An offset on the y-Axis for the synchronisation of the physics body
+   * and sprite renderable.
+   */
   createPhysicsBody(offsetX = 0, offsetY = 0) {
     this.offsetX = offsetX;
     this.offsetY = offsetY;
@@ -55,23 +84,52 @@ export default class RectPHYS extends Sprite {
     Matter.Composite.add(this.matterWorld, this.matterBody);
   }
 
+  /**
+   * Sets the sprite image for this object.
+   *
+   * @param imageID {number} The desired sprite-ID from the spritesheet specified in the settings.
+   */
   setImage(imageID) {
     this.addAnimation(imageID.toString(), [imageID]);
     this.setCurrentAnimation(imageID.toString());
   }
 
+  /**
+   * Sets the active physics world for this object.
+   *
+   * @param world {Matter.Composite} The Matter.js physics world.
+   *
+   * @see Matter.Composite
+   */
   setPhysicsWorld(world) {
     this.matterWorld = world;
   }
 
+  /**
+   * Sets the physics body settings for this object.
+   *
+   * @param settings {Object} The desired physics-body settings according to MatterJS' Body-Setup.
+   */
   setBodySettings(settings) {
     this.bodySettings = settings;
   }
 
+  /**
+   * Scale this object with the same factor on both axes.
+   *
+   * @param scale {number} The desired scale factor for this object.
+   */
   setScaleUniform(scale) {
     Matter.Body.scale(this.matterBody, scale, scale);
     this.scale(scale, scale);
   }
+
+  /**
+   * Scale this object with individual scale factors for each axis.
+   *
+   * @param scaleX {number} The desired scale factor for the x-Axis.
+   * @param scaleY {number} The desired scale factor for the y-Axis.
+   */
   setScale(scaleX, scaleY) {
     Matter.Body.scale(this.matterBody, scaleX, scaleY);
     this.scale(scaleX, scaleY);
@@ -87,502 +145,5 @@ export default class RectPHYS extends Sprite {
       )
     );
     return true;
-  }
-}
-
-export class Pavement extends RectPHYS {
-  constructor(x, y, settings) {
-    super(x, y, settings);
-    this.init();
-  }
-
-  init() {
-    this.setImage(GameData.game.imageIds.spritesheet.pavement);
-    this.setPhysicsWorld(GameData.physics.engine.world);
-    const bodySettings = {
-      isStatic: true,
-      collisionFilter: {
-        category: collisionGroups.ABSORBING,
-        mask: collisionGroups.LIGHT_RAY,
-      },
-    };
-    this.setBodySettings(bodySettings);
-    this.createPhysicsBody(0.5, 0.5);
-    GameData.physics.reactiveSurfaces.push(this);
-  }
-
-  update(dt) {
-    super.update(dt);
-    Matter.Body.setPosition(
-      this.matterBody,
-      new Matter.Vector.create(
-        this.pos.x + this.offsetX * this.width - game.viewport.pos.x,
-        this.matterBody.position.y
-      )
-    );
-    return true;
-  }
-}
-
-export class Skyscraper extends RectPHYS {
-  constructor(x, y, settings) {
-    super(x, y, settings);
-    this.init();
-  }
-
-  init() {
-    this.setImage(GameData.game.imageIds.spritesheet.skyscraperblank);
-    this.setPhysicsWorld(GameData.physics.engine.world);
-    const bodySettings = {
-      isStatic: true,
-      collisionFilter: {
-        category: collisionGroups.ADSORBING,
-        mask: collisionGroups.LIGHT_RAY,
-      },
-    };
-    this.setBodySettings(bodySettings);
-    this.createPhysicsBody(0.5, 0.5);
-    GameData.physics.reactiveSurfaces.push(this);
-  }
-
-  update(dt) {
-    super.update(dt);
-    Matter.Body.setPosition(
-      this.matterBody,
-      new Matter.Vector.create(
-        this.pos.x + this.offsetX * this.width - game.viewport.pos.x,
-        this.matterBody.position.y
-      )
-    );
-    return true;
-  }
-}
-
-export class SkyscraperGreenRoof extends RectPHYS {
-  constructor(x, y, settings) {
-    super(x, y, settings);
-    this.init();
-  }
-
-  init() {
-    this.setImage(GameData.game.imageIds.spritesheet.skyscrapergreenroof);
-    this.setPhysicsWorld(GameData.physics.engine.world);
-    const bodySettings = {
-      isStatic: true,
-      collisionFilter: {
-        category: collisionGroups.ADSORBING,
-        mask: collisionGroups.LIGHT_RAY,
-      },
-    };
-    this.setBodySettings(bodySettings);
-    this.createPhysicsBody(0.5, 0.5);
-    GameData.physics.reactiveSurfaces.push(this);
-  }
-
-  update(dt) {
-    super.update(dt);
-    Matter.Body.setPosition(
-      this.matterBody,
-      new Matter.Vector.create(
-        this.pos.x + this.offsetX * this.width - game.viewport.pos.x,
-        this.matterBody.position.y
-      )
-    );
-    return true;
-  }
-}
-
-export class StorefrontBright extends RectPHYS {
-  constructor(x, y, settings) {
-    super(x, y, settings);
-    this.init();
-  }
-
-  init() {
-    this.setImage(GameData.game.imageIds.spritesheet.housewindowfront);
-    this.setPhysicsWorld(GameData.physics.engine.world);
-    const bodySettings = {
-      isStatic: true,
-      collisionFilter: {
-        category: collisionGroups.ADSORBING,
-        mask: collisionGroups.LIGHT_RAY,
-      },
-    };
-    this.setBodySettings(bodySettings);
-    this.createPhysicsBody(0.5, 0.5);
-    GameData.physics.reactiveSurfaces.push(this);
-  }
-
-  update(dt) {
-    super.update(dt);
-    Matter.Body.setPosition(
-      this.matterBody,
-      new Matter.Vector.create(
-        this.pos.x + this.offsetX * this.width - game.viewport.pos.x,
-        this.matterBody.position.y
-      )
-    );
-    return true;
-  }
-}
-
-export class StorefrontDark extends RectPHYS {
-  constructor(x, y, settings) {
-    super(x, y, settings);
-    this.init();
-  }
-
-  init() {
-    this.setImage(GameData.game.imageIds.spritesheet.housestorefront);
-    this.setPhysicsWorld(GameData.physics.engine.world);
-    const bodySettings = {
-      isStatic: true,
-      collisionFilter: {
-        category: collisionGroups.ABSORBING,
-        mask: collisionGroups.LIGHT_RAY,
-      },
-    };
-    this.setBodySettings(bodySettings);
-    this.createPhysicsBody(0.5, 0.5);
-    GameData.physics.reactiveSurfaces.push(this);
-  }
-
-  update(dt) {
-    super.update(dt);
-    Matter.Body.setPosition(
-      this.matterBody,
-      new Matter.Vector.create(
-        this.pos.x + this.offsetX * this.width - game.viewport.pos.x,
-        this.matterBody.position.y
-      )
-    );
-    return true;
-  }
-}
-
-export class BuildingRed extends RectPHYS {
-  constructor(x, y, settings) {
-    super(x, y, settings);
-    this.init();
-  }
-
-  init() {
-    this.setImage(GameData.game.imageIds.spritesheet.housered);
-    this.setPhysicsWorld(GameData.physics.engine.world);
-    const bodySettings = {
-      isStatic: true,
-      collisionFilter: {
-        category: collisionGroups.ABSORBING,
-        mask: collisionGroups.LIGHT_RAY,
-      },
-    };
-    this.setBodySettings(bodySettings);
-    this.createPhysicsBody(0.5, 0.5);
-    GameData.physics.reactiveSurfaces.push(this);
-  }
-
-  update(dt) {
-    super.update(dt);
-    Matter.Body.setPosition(
-      this.matterBody,
-      new Matter.Vector.create(
-        this.pos.x + this.offsetX * this.width - game.viewport.pos.x,
-        this.matterBody.position.y
-      )
-    );
-    return true;
-  }
-}
-
-export class BuildingBlue extends RectPHYS {
-  constructor(x, y, settings) {
-    super(x, y, settings);
-    this.init();
-  }
-
-  init() {
-    this.setImage(GameData.game.imageIds.spritesheet.housedark);
-    this.setPhysicsWorld(GameData.physics.engine.world);
-    const bodySettings = {
-      isStatic: true,
-      collisionFilter: {
-        category: collisionGroups.ABSORBING,
-        mask: collisionGroups.LIGHT_RAY,
-      },
-    };
-    this.setBodySettings(bodySettings);
-    this.createPhysicsBody(0.5, 0.5);
-    GameData.physics.reactiveSurfaces.push(this);
-  }
-
-  update(dt) {
-    super.update(dt);
-    Matter.Body.setPosition(
-      this.matterBody,
-      new Matter.Vector.create(
-        this.pos.x + this.offsetX * this.width - game.viewport.pos.x,
-        this.matterBody.position.y
-      )
-    );
-    return true;
-  }
-}
-
-export class BuildingBeige extends RectPHYS {
-  constructor(x, y, settings) {
-    super(x, y, settings);
-    this.init();
-  }
-
-  init() {
-    this.setImage(GameData.game.imageIds.spritesheet.housebeige);
-    this.setPhysicsWorld(GameData.physics.engine.world);
-    const bodySettings = {
-      isStatic: true,
-      collisionFilter: {
-        category: collisionGroups.ADSORBING,
-        mask: collisionGroups.LIGHT_RAY,
-      },
-    };
-    this.setBodySettings(bodySettings);
-    this.createPhysicsBody(0.5, 0.5);
-    GameData.physics.reactiveSurfaces.push(this);
-  }
-
-  update(dt) {
-    super.update(dt);
-    Matter.Body.setPosition(
-      this.matterBody,
-      new Matter.Vector.create(
-        this.pos.x + this.offsetX * this.width - game.viewport.pos.x,
-        this.matterBody.position.y
-      )
-    );
-    return true;
-  }
-}
-
-export class BuildingApartments extends RectPHYS {
-  constructor(x, y, settings) {
-    super(x, y, settings);
-    this.init();
-  }
-
-  init() {
-    this.setImage(GameData.game.imageIds.spritesheet.housebalconies);
-    this.setPhysicsWorld(GameData.physics.engine.world);
-    const bodySettings = {
-      isStatic: true,
-      collisionFilter: {
-        category: collisionGroups.ABSORBING,
-        mask: collisionGroups.LIGHT_RAY,
-      },
-    };
-    this.setBodySettings(bodySettings);
-    this.createPhysicsBody(0.5, 0.5);
-    GameData.physics.reactiveSurfaces.push(this);
-  }
-
-  update(dt) {
-    super.update(dt);
-    Matter.Body.setPosition(
-      this.matterBody,
-      new Matter.Vector.create(
-        this.pos.x + this.offsetX * this.width - game.viewport.pos.x,
-        this.matterBody.position.y
-      )
-    );
-    return true;
-  }
-}
-
-export class CarVan extends RectPHYS {
-  constructor(x, y, settings) {
-    super(x, y, settings);
-    this.init();
-  }
-
-  init() {
-    this.setImage(GameData.game.imageIds.spritesheet.carvan);
-    this.setPhysicsWorld(GameData.physics.engine.world);
-    const bodySettings = {
-      isStatic: true,
-      collisionFilter: {
-        category: collisionGroups.ADSORBING,
-        mask: collisionGroups.LIGHT_RAY,
-      },
-    };
-    this.setBodySettings(bodySettings);
-    this.createPhysicsBody(0.5, 0.5);
-    GameData.physics.reactiveSurfaces.push(this);
-  }
-
-  update(dt) {
-    super.update(dt);
-    Matter.Body.setPosition(
-      this.matterBody,
-      new Matter.Vector.create(
-        this.pos.x + this.offsetX * this.width - game.viewport.pos.x,
-        this.matterBody.position.y
-      )
-    );
-    return true;
-  }
-}
-
-export class CarSedan extends RectPHYS {
-  constructor(x, y, settings) {
-    super(x, y, settings);
-    this.init();
-  }
-
-  init() {
-    this.setImage(GameData.game.imageIds.spritesheet.carsedan);
-    this.setPhysicsWorld(GameData.physics.engine.world);
-    const bodySettings = {
-      isStatic: true,
-      collisionFilter: {
-        category: collisionGroups.ABSORBING,
-        mask: collisionGroups.LIGHT_RAY,
-      },
-    };
-    this.setBodySettings(bodySettings);
-    this.createPhysicsBody(0.5, 0.5);
-    GameData.physics.reactiveSurfaces.push(this);
-  }
-
-  update(dt) {
-    super.update(dt);
-    Matter.Body.setPosition(
-      this.matterBody,
-      new Matter.Vector.create(
-        this.pos.x + this.offsetX * this.width - game.viewport.pos.x,
-        this.matterBody.position.y
-      )
-    );
-    return true;
-  }
-}
-
-export class CO2Sink extends RectPHYS {
-  moleculeType = 'carbondioxide';
-  detector = this.createDetector();
-  hasEnteredViewport = false;
-  emitter = new ParticleEmitter(this.centerX, this.centerY, {
-    width: this.width / 2,
-    height: this.height / 2,
-    tint: '#8F0',
-    angle: Math.PI / 2,
-    angleVariation: Math.PI * 2,
-    minRotation: 0,
-    maxRotation: Math.PI,
-    totalParticles: 16,
-    maxLife: 20,
-    speed: 0.00001,
-  });
-
-  constructor(x, y, settings) {
-    super(x, y, settings);
-    this.init();
-    event.on('updateDetectors', () => {
-      this.detector = this.createDetector();
-    });
-  }
-
-  init() {
-    this.setImage(GameData.game.imageIds.spritesheet.co2sink);
-    this.setPhysicsWorld(GameData.physics.engine.world);
-    const bodySettings = {
-      isStatic: true,
-      collisionFilter: {
-        category: collisionGroups.ABSORBING | collisionGroups.SINK,
-        mask: collisionGroups.CONTROLLABLE | collisionGroups.LIGHT_RAY,
-      },
-    };
-    this.setBodySettings(bodySettings);
-    this.createPhysicsBody(0.5, 0.5);
-    GameData.physics.reactiveSurfaces.push(this);
-    GameData.physics.moleculeSinks.push(this);
-    game.world.addChild(this.emitter, GameData.zOrder.background + 5);
-  }
-
-  createDetector() {
-    const detectorBodies = [];
-
-    GameData.physics.controllableMolecules.forEach((molecule) => {
-      if (molecule.moleculeType === this.moleculeType) {
-        detectorBodies.push(molecule.matterBody);
-      }
-    });
-    GameData.physics.moleculeSinks.forEach((sink) => {
-      if (sink.moleculeType === this.moleculeType) {
-        detectorBodies.push(sink.matterBody);
-      }
-    });
-
-    return Matter.Detector.create({ bodies: detectorBodies });
-  }
-
-  checkForMoleculeCollision() {
-    const currentCols = Matter.Detector.collisions(this.detector);
-
-    if (currentCols) {
-      currentCols.forEach((collision) => {
-        if (
-          (collision.bodyA.collisionFilter.category &
-            collisionGroups.CONTROLLABLE &&
-            collision.bodyB.collisionFilter.category & collisionGroups.SINK) ||
-          (collision.bodyA.collisionFilter.category & collisionGroups.SINK &&
-            collision.bodyB.collisionFilter.category &
-              collisionGroups.CONTROLLABLE)
-        ) {
-          const molecule =
-            collision.bodyA.collisionFilter.category &
-            collisionGroups.CONTROLLABLE
-              ? collision.bodyA
-              : collision.bodyB;
-          if (molecule) {
-            event.emit('destroyMolecule', molecule);
-            Matter.Composite.remove(GameData.physics.engine.world, molecule);
-          }
-        }
-      });
-    }
-  }
-
-  update(dt) {
-    super.update(dt);
-
-    Matter.Body.setPosition(
-      this.matterBody,
-      new Matter.Vector.create(
-        this.pos.x + this.offsetX * this.width - game.viewport.pos.x,
-        this.matterBody.position.y
-      )
-    );
-
-    if (!this.hasEnteredViewport && this.inViewport) {
-      event.emit('allowDestruction', this.moleculeType);
-      this.emitter.streamParticles();
-      this.hasEnteredViewport = true;
-    }
-    if (this.hasEnteredViewport && !this.inViewport) {
-      event.emit('restrictDestruction', this.moleculeType);
-      this.emitter.stopStream();
-      this.hasEnteredViewport = false;
-    }
-
-    if (this.hasEnteredViewport) {
-      this.checkForMoleculeCollision();
-    }
-
-    return true;
-  }
-
-  onDestroyEvent() {
-    super.onDestroyEvent();
-    this.emitter.stopStream();
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    event.off('updateDetectors', () => {});
   }
 }

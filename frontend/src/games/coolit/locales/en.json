@@ -134,6 +134,8 @@
     }
   },
   "play": {
+    "info": "Move the molecules in the atmosphere to allow the heat to escape again!",
+    "start": "GO!",
     "confirm": "Continue",
     "victory": {
       "oneStar": "Nice!",

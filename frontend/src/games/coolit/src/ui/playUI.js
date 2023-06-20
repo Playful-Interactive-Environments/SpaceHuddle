@@ -1,23 +1,19 @@
-import {
-  Container,
-  game,
-  state,
-  event,
-  Sprite,
-  BitmapText,
-  Vector2d,
-} from 'melonjs';
+import { Container, game, state, event, Sprite } from 'melonjs';
 import { GameData } from '@/games/coolit/src/resources.js';
+import { utils } from '@/games/coolit/src/utils/utils.js';
 import Button from '@/games/coolit/src/entities/button.js';
 
+/**
+ * A class handling everything necessary to allow UI interactions in-game. Should be initialized once and saved
+ * as an instance available throughout the entire game.
+ *
+ * @extends Container
+ * @see Container
+ */
 export default class PlayUI extends Container {
   // Current game status.
   saveData;
   levelID;
-
-  // Base image settings.
-  imageSettings;
-  imageSettingsAPLeftMid;
 
   // UI Content
   finalText;
@@ -30,6 +26,9 @@ export default class PlayUI extends Container {
   hasNotIncreased;
   hasExceededThreshold;
   hasReachedMax;
+
+  countdownInfo;
+  countdownStatus;
 
   // Temperature Gauge / Heat Bar stat trackers.
   heatBar;
@@ -44,6 +43,7 @@ export default class PlayUI extends Container {
   starRatingInt;
 
   // Arrays which hold the different UI elements for general manipulation such as activating/deactivating buttons.
+  countdownElements;
   summaryButtons;
   summaryElements;
   thermElements;
@@ -52,19 +52,6 @@ export default class PlayUI extends Container {
     super();
     this.floating = true;
     this.isPersistent = true;
-
-    // Initialize attributes which are always the same, even across levels.
-    this.imageSettings = {
-      image: 'spritesheet',
-      framewidth: 256,
-      frameheight: 256,
-    };
-    this.imageSettingsAPLeftMid = {
-      image: 'spritesheet',
-      framewidth: 256,
-      frameheight: 256,
-      anchorPoint: new Vector2d(0, 0.5),
-    };
     this.baseHeatIncrement = 1 / 5;
 
     // Set up event listeners.
@@ -96,7 +83,11 @@ export default class PlayUI extends Container {
     });
   }
 
-  // Adds all UI elements of this container.
+  /**
+   * Add all necessary elements to this UI container and show only the necessary ones (all others are hidden until needed).
+   *
+   * @param levelID {string} The level ID of the currently loaded level.
+   */
   addElements(levelID) {
     this.saveData = GameData.instances.saveManager.getSaveData();
     this.levelID = levelID;
@@ -109,6 +100,9 @@ export default class PlayUI extends Container {
     this.hasExceededThreshold = false;
     this.hasReachedMax = false;
 
+    this.countdownInfo = null;
+    this.countdownStatus = null;
+
     this.heatBar = null;
     this.heatBarOpacity = 0.5;
     this.isIncreasing = false;
@@ -117,30 +111,52 @@ export default class PlayUI extends Container {
     this.heatDrainInt = null;
     this.starRatingInt = null;
 
+    this.countdownElements = [];
     this.thermElements = [];
     this.summaryButtons = [];
     this.summaryElements = [];
 
+    this.addCountdown();
+    this.hideCountdown();
     this.addHeatBar();
     this.fadeOutHeatBar();
     this.addSummary();
     this.hideSummary();
 
-    event.once('start', () => this.heatManagement());
-    event.once('end', () => {
-      if (this.fadeoutInt) {
-        clearInterval(this.fadeoutInt);
-        this.fadeoutInt = null;
-      }
-      if (this.heatDrainInt) {
-        clearInterval(this.heatDrainInt);
-        this.heatDrainInt = null;
-      }
+    event.once('countdownStart', (initialTime) => {
+      this.countdownStatus.setText(initialTime.toString());
+      this.pulse(this.countdownStatus);
+      this.showCountdown();
+      event.on('countdownUpdate', (timeLeft) => {
+        if (timeLeft <= 0) {
+          this.countdownStatus.setText(timeLeft.toString());
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          event.off('countdownUpdate', () => {});
+          this.countdownInfo.setText('');
+          this.countdownStatus.setText(GameData.general.locale.play.start);
+          this.pulse(this.countdownStatus, () => {
+            this.countdownStatus.setText('');
+            this.hideCountdown();
+          });
+        } else {
+          this.countdownStatus.setText(timeLeft.toString());
+          this.pulse(this.countdownStatus);
+        }
+      });
     });
+    event.once('start', () => this.heatManagement());
+    event.once('end', () => this.clearIntervals());
   }
 
-  // Removes all UI Elements of this container.
+  /**
+   * Remove all elements from this UI container and reset the containing lists.
+   */
   removeElements() {
+    this.countdownElements.forEach((element) => {
+      this.removeChild(element);
+    });
+    this.countdownElements = [];
+
     this.thermElements.forEach((element) => {
       this.removeChild(element);
     });
@@ -157,24 +173,123 @@ export default class PlayUI extends Container {
     this.summaryElements = [];
   }
 
-  // Heat Bar + (Temporary) Status
+  /**
+   * Create and add the game countdown.
+   */
+  addCountdown() {
+    // Background Fadeout.
+    this.countdownElements.push(
+      this.addChild(this.createCountdownFadeout(), GameData.zOrder.ui)
+    );
+
+    // Info Text-Area.
+    this.countdownInfo = this.addChild(
+      utils.ui.createTextArea(
+        game.viewport.width / 2,
+        game.viewport.height / 4,
+        GameData.game.fonts.bold,
+        0.75
+      ),
+      GameData.zOrder.ui + 1
+    );
+
+    // Status Text-Area
+    this.countdownStatus = this.addChild(
+      utils.ui.createTextArea(
+        game.viewport.width / 2,
+        game.viewport.height / 2,
+        GameData.game.fonts.bold,
+        3
+      ),
+      GameData.zOrder.ui + 1
+    );
+    this.countdownStatus.textBaseline = 'middle';
+  }
+
+  /**
+   * Show the game countdown.
+   */
+  showCountdown() {
+    this.countdownInfo.setText(GameData.general.locale.play.info);
+    this.countdownElements.forEach((element) => {
+      element.setOpacity(1);
+    });
+  }
+
+  /**
+   * Hide the game countdown.
+   */
+  hideCountdown() {
+    this.countdownElements.forEach((element) => {
+      element.setOpacity(0);
+    });
+  }
+
+  /**
+   * Creates and adds a heat-bar background and subdivides it into regions, also adding some temperature labels to
+   * those regions.
+   */
   addHeatBar() {
     // BG
-    const neutralBackground = new Sprite(0, 0, this.imageSettingsAPLeftMid);
+    const neutralBackground = new Sprite(
+      0,
+      0,
+      GameData.game.imagePresets.spritesheetSettings
+    );
+    neutralBackground.anchorPoint.x = 0;
+    neutralBackground.anchorPoint.y = 0.5;
     neutralBackground.addAnimation('neutral', [
       GameData.game.imageIds.spritesheet.neutral,
     ]);
     neutralBackground.setCurrentAnimation('neutral');
     neutralBackground.scale(
-      GameData.general.targetResX / this.imageSettingsAPLeftMid.framewidth,
-      1
+      GameData.general.targetResX /
+        GameData.game.imagePresets.spritesheetSettings.framewidth,
+      2
     );
     this.thermElements.push(
       this.addChild(neutralBackground, GameData.zOrder.ui)
     );
 
+    const degrees = [20, 25, 30];
+    // Note: Heatbar is 1024px wide. 5°C = 256px when the span is 20°C. Outer bars have been omitted.
+    for (let i = 0; i <= 2; i++) {
+      const posX = 256 + i * 256;
+      const bar = new Sprite(
+        posX + 14,
+        0,
+        GameData.game.imagePresets.spritesheetSettings
+      );
+      bar.addAnimation('image', [GameData.game.imageIds.spritesheet.neutral]);
+      bar.setCurrentAnimation('image');
+      bar.rotate(utils.math.degToRad(90));
+      bar.scale(0.5, 0.1);
+      bar.tint.parseCSS(GameData.general.colors.white);
+      bar.floating = true;
+      this.thermElements.push(this.addChild(bar, GameData.zOrder.ui + 2));
+
+      const temp = utils.ui.createTextArea(
+        posX + 14,
+        60,
+        GameData.game.fonts.bold,
+        0.5,
+        'center',
+        775,
+        degrees[i] + '°C'
+      );
+      temp.fillStyle.parseCSS(GameData.general.colors.white);
+      this.thermElements.push(this.addChild(temp, GameData.zOrder.ui + 2));
+    }
+
     this.addHeatBarStatus();
   }
+
+  /**
+   * Creates and adds a red heat-bar on top of the heat-bar background which indicates the current heat status of the
+   * environment in-game.
+   *
+   * @param flashing {boolean} True if the heat-bar should flash for a short amount of time to indicate a change in value.
+   */
   addHeatBarStatus(flashing = false) {
     if (this.heatBar) {
       this.removeChild(this.heatBar);
@@ -184,18 +299,28 @@ export default class PlayUI extends Container {
       this.heatBar = null;
     }
 
-    this.heatBar = new Sprite(14, 0, this.imageSettingsAPLeftMid);
+    this.heatBar = new Sprite(
+      14,
+      0,
+      GameData.game.imagePresets.spritesheetSettings
+    );
+    this.heatBar.anchorPoint.x = 0;
+    this.heatBar.anchorPoint.y = 0.5;
     this.heatBar.setOpacity(this.heatBarOpacity);
     this.heatBar.addAnimation('heat', [
       GameData.game.imageIds.spritesheet.abort,
     ]);
     this.heatBar.setCurrentAnimation('heat');
-    this.heatBar.scale(4 * this.currentHeatScaleFactor, 0.75);
+    this.heatBar.scale(4 * this.currentHeatScaleFactor, 1);
     this.thermElements.push(
       this.addChild(this.heatBar, GameData.zOrder.ui + 1)
     );
     this.fadeOutHeatBar(flashing);
   }
+
+  /**
+   * Creates an interval subtracting a certain value from the heat-bar.
+   */
   heatManagement() {
     this.heatDrainInt = setInterval(() => {
       if (!this.isIncreasing) {
@@ -209,6 +334,12 @@ export default class PlayUI extends Container {
       }
     }, 1000);
   }
+
+  /**
+   * Method to slowly fade the heat-bar to a lower opacity value.
+   *
+   * @param flashing {boolean} True if the heat-bar should flash for a short amount of time to indicate a change in value.
+   */
   fadeOutHeatBar(flashing = false) {
     if (this.fadeoutInt) {
       clearInterval(this.fadeoutInt);
@@ -235,28 +366,52 @@ export default class PlayUI extends Container {
     }
   }
 
-  // Game summary and callbacks. Content depends on if the game was a victory or defeat.
+  /**
+   * Creates and adds an empty game summary preset which will be filled with content once the game has reached its end
+   * either by victory or defeat.
+   */
   addSummary() {
     // Backdrop + Dialog image
-    this.summaryElements.push(this.createDialogBackdrop());
+    this.summaryElements.push(
+      this.addChild(
+        utils.ui.createDialogBackground('medium'),
+        GameData.zOrder.ui + 3
+      )
+    );
 
     // TextArea (victory or defeat message)
-    this.finalText = this.createTextArea(
+    this.finalText = utils.ui.createTextArea(
       game.viewport.width / 2,
-      game.viewport.height * 0.4
+      game.viewport.height * 0.4,
+      GameData.game.fonts.bold,
+      0.5,
+      'center',
+      600
     );
-    this.summaryElements.push(this.finalText);
+    this.summaryElements.push(
+      this.addChild(this.finalText, GameData.zOrder.ui + 5)
+    );
 
     // TextArea (random trivia)
-    this.finalTrivia = this.createTextArea(
+    this.finalTrivia = utils.ui.createTextArea(
       game.viewport.width / 2,
-      game.viewport.height / 2
+      game.viewport.height / 2,
+      GameData.game.fonts.bold,
+      0.5,
+      'center',
+      600
     );
-    this.summaryElements.push(this.finalTrivia);
+    this.summaryElements.push(
+      this.addChild(this.finalTrivia, GameData.zOrder.ui + 5)
+    );
 
     // Stars
     this.starRating = this.addChild(
-      new Sprite(game.viewport.width / 2, 600, this.imageSettings),
+      new Sprite(
+        game.viewport.width / 2,
+        600,
+        GameData.game.imagePresets.spritesheetSettings
+      ),
       GameData.zOrder.ui + 4
     ).scale(2);
     this.starRating.addAnimation('noneofthree', [
@@ -275,12 +430,17 @@ export default class PlayUI extends Container {
     this.summaryElements.push(this.starRating);
 
     // TextArea (Confirm)
-    this.confirmText = this.createTextArea(
+    this.confirmText = utils.ui.createTextArea(
       game.viewport.width / 2,
       game.viewport.height * 0.67,
-      1
+      GameData.game.fonts.bold,
+      1,
+      'center',
+      600
     );
-    this.summaryElements.push(this.confirmText);
+    this.summaryElements.push(
+      this.addChild(this.confirmText, GameData.zOrder.ui + 5)
+    );
 
     // Confirm-Button
     this.summaryButtons.push(
@@ -294,7 +454,16 @@ export default class PlayUI extends Container {
       })
     );
   }
+
+  /**
+   * Once victory or defeat is achieved the summary is shown. A simple animation shows the star progress and some trivia
+   * gives information about the change in climate. If the user achieved a better result than before the game saves the
+   * new status to the current save data.
+   *
+   * @param isVictory {boolean} True if the game was a victory, False otherwise.
+   */
   showSummary(isVictory) {
+    this.clearIntervals();
     this.summaryButtons.forEach((button) => {
       button.isClickable = true;
       button.setOpacity(0.75);
@@ -430,6 +599,10 @@ export default class PlayUI extends Container {
       );
     }
   }
+
+  /**
+   * Hides the game summary.
+   */
   hideSummary() {
     this.summaryButtons.forEach((button) => {
       button.isClickable = false;
@@ -440,53 +613,96 @@ export default class PlayUI extends Container {
     });
   }
 
-  // A function which creates the dialog window including a fadeout.
-  createDialogBackdrop() {
-    const backdrop = new Sprite(
+  /**
+   * Clears all created intervals if called. Useful to handle early user intervention (i.e. instantly going back to the
+   * menu before watching the animation, etc.)
+   */
+  clearIntervals() {
+    if (this.fadeoutInt) {
+      clearInterval(this.fadeoutInt);
+      this.fadeoutInt = null;
+    }
+    if (this.heatDrainInt) {
+      clearInterval(this.heatDrainInt);
+      this.heatDrainInt = null;
+    }
+  }
+
+  /**
+   * Utility method which allows a Renderable object to pulse once. Scales the object by 50% and gradually reverts the
+   * scale back to the original. Achieved by directly modifying the transformation matrix of the Renderable.
+   *
+   * @param renderable {Renderable} The melonJS Renderable object to pulse.
+   * @param callback {function} OPTIONAL (Default: undefined) A callback which is triggered once the pulse is complete.
+   *
+   * @see Renderable
+   */
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  pulse(renderable, callback = undefined) {
+    const pulseIncrement = 1 / 60;
+
+    renderable.currentTransform.val[0] = 1.5;
+    renderable.currentTransform.val[4] = 1.5;
+
+    const pulseInterval = setInterval(() => {
+      if (renderable.currentTransform.val[0] >= 1) {
+        renderable.currentTransform.val[0] -= pulseIncrement;
+        renderable.currentTransform.val[4] -= pulseIncrement;
+      } else {
+        renderable.currentTransform.val[0] = 1;
+        renderable.currentTransform.val[4] = 1;
+        clearInterval(pulseInterval);
+      }
+    }, pulseIncrement);
+
+    if (callback !== undefined) {
+      callback();
+    }
+  }
+
+  /**
+   * Creates and adds a fadeout to make the countdown more visible.
+   *
+   * @returns {Sprite} Returns a melonJS Sprite for method chaining.
+   */
+  createCountdownFadeout() {
+    const bgFade = new Sprite(
       game.viewport.width / 2,
       game.viewport.height / 2,
-      {
-        image: 'dialogboxes',
-        framewidth: 1080,
-        frameheight: 1920,
-      }
+      GameData.game.imagePresets.uiSettings
     );
-    backdrop.addAnimation('image', [GameData.game.imageIds.dialogboxes.medium]);
-    backdrop.setCurrentAnimation('image');
+    bgFade.addAnimation('image', [3]);
+    bgFade.setCurrentAnimation('image');
 
-    return this.addChild(backdrop, GameData.zOrder.ui + 3);
+    return bgFade;
   }
-  // A function which creates a 'Confirm' button for dialog windows.
+
+  /**
+   * Creates and adds a confirm-button.
+   *
+   * @param callback {function} The function to be called once the button is clicked.
+   * @returns {Button} Returns a Button object for method chaining.
+   *
+   * @see {Button}
+   */
   createConfirmButton(callback) {
     return this.addChild(
       new Button(
         game.viewport.width / 2,
         game.viewport.height * 0.7,
-        this.imageSettings,
+        GameData.zOrder.ui + 4,
+        GameData.game.imagePresets.spritesheetSettings,
         GameData.game.imageIds.spritesheet.confirm,
         callback
       ).scale(1.5),
       GameData.zOrder.ui + 4
     );
   }
-  // A function which creates a textarea. Users can not interact with it.
-  createTextArea(x, y, size = 0.5, text = '') {
-    return this.addChild(
-      new BitmapText(x, y, {
-        font: 'WorkSans-Bold',
-        size: size,
-        lineHeight: 1.4,
-        textAlign: 'center',
-        text: text,
-        wordWrapWidth: 600,
-      }),
-      GameData.zOrder.ui + 5
-    );
-  }
 
   // Clear event listeners here.
   onDestroyEvent() {
     super.onDestroyEvent();
+    this.clearIntervals();
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     event.off('increaseHeat', () => {});
   }

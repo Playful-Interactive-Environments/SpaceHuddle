@@ -1,9 +1,17 @@
 import { Container, game, state, event, Sprite, BitmapText } from 'melonjs';
 import { GameData } from '@/games/coolit/src/resources.js';
+import { utils } from '@/games/coolit/src/utils/utils.js';
 import de from '@/games/coolit/locales/de.json';
 import en from '@/games/coolit/locales/en.json';
 import Button from '@/games/coolit/src/entities/button.js';
 
+/**
+ * A class handling everything necessary to allow UI interactions in the main menu. Should be initialized once and saved
+ * as an instance available throughout the entire game.
+ *
+ * @extends Container
+ * @see Container
+ */
 export default class MenuUI extends Container {
   saveData;
 
@@ -33,7 +41,6 @@ export default class MenuUI extends Container {
   moleculeSets;
   playButton;
   totalStarCount;
-  imageSettings;
   moleculeInfo;
   newMoleculeUnlocked;
 
@@ -53,11 +60,6 @@ export default class MenuUI extends Container {
     this.isPersistent = true;
 
     this.saveData = GameData.instances.saveManager.getSaveData();
-    this.imageSettings = {
-      image: 'spritesheet',
-      framewidth: 256,
-      frameheight: 256,
-    };
     this.moleculeSets = {};
     this.newMoleculeUnlocked = false;
 
@@ -75,7 +77,9 @@ export default class MenuUI extends Container {
     });
   }
 
-  // Adds all UI Elements of this container.
+  /**
+   * Add all necessary elements to this UI container and show only the necessary ones (all others are hidden until needed).
+   */
   addElements() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Object.entries(this.saveData.molecules).forEach(([key, value]) => {
@@ -83,22 +87,24 @@ export default class MenuUI extends Container {
         this.newMoleculeUnlocked = true;
       }
     });
-    this.addMoleculeInfoButton();
-    this.addSettingsButton();
-    this.addLevelPins();
-    this.addTotalStarCount();
+    this.addMoleculeInfoButton(GameData.zOrder.ui);
+    this.addSettingsButton(GameData.zOrder.ui);
+    this.addLevelPins(GameData.zOrder.ui);
+    this.addTotalStarCount(GameData.zOrder.ui);
 
-    this.addMoleculeInfo();
+    this.addMoleculeInfo(GameData.zOrder.ui + 5);
     this.hideMoleculeInfo(false);
 
-    this.addSettings();
+    this.addSettings(GameData.zOrder.ui + 5);
     this.hideSettings(false);
 
-    this.addLevelInfo();
+    this.addLevelInfo(GameData.zOrder.ui + 5);
     this.hideLevelInfo(false);
   }
 
-  // Removes all UI Elements of this container.
+  /**
+   * Remove all elements from this UI container and reset the containing lists.
+   */
   removeElements() {
     this.basicMenuButtons.forEach((button) => {
       this.removeChild(button);
@@ -151,176 +157,158 @@ export default class MenuUI extends Container {
     this.settingsElements = [];
   }
 
-  // Molecule Info Button + Callbacks.
-  addMoleculeInfoButton() {
+  /**
+   * Creates and adds a basic menu button. Upon clicking on it, it shows all necessary information and some trivia about the
+   * molecules which appear in-game.
+   *
+   * @param zOrder {number} The desired z-Order of this element.
+   */
+  addMoleculeInfoButton(zOrder) {
     this.moleculeInfo = new Button(
       game.viewport.width - 100,
       game.viewport.height - 100,
-      this.imageSettings,
-      GameData.game.imageIds.spritesheet.moleculeinfo,
+      zOrder,
+      GameData.game.imagePresets.spritesheetSettings,
+      GameData.game.imageIds.spritesheet.moleculeInfo,
       () => {
-        if (this.newMoleculeUnlocked) {
-          this.newMoleculeUnlocked = false;
-        }
         this.showMoleculeInfo();
-      },
-      GameData.game.imageIds.spritesheet.moleculeInfoExcl
-    ).scale(0.5);
+      }
+    ).setScale(0.5);
+
     if (this.newMoleculeUnlocked) {
-      this.moleculeInfo.showExclamationMark();
+      this.moleculeInfo.isImportant = true;
     }
-    this.basicMenuButtons.push(
-      this.addChild(this.moleculeInfo, GameData.zOrder.ui)
-    );
+
+    this.basicMenuButtons.push(this.addChild(this.moleculeInfo, zOrder));
   }
-  addMoleculeInfo() {
+
+  /**
+   * Creates and adds the molecule info which should be shown upon clicking on the molecule info button. Content
+   * is loaded according to the currently stored save data.
+   *
+   * @param zOrder {number} The desired z-Order of these elements.
+   */
+  addMoleculeInfo(zOrder) {
     // Backdrop + Dialog image
     this.moleculeInfoElements.push(
-      this.createDialogBackdrop('large', GameData.zOrder.ui + 1)
+      this.addChild(utils.ui.createDialogBackground('large'), zOrder)
     );
 
     // Close-Button
     this.moleculeInfoButtons.push(
-      this.createDialogCloseButton(
-        'large',
-        () => {
-          GameData.instances.saveManager.save(this.saveData);
-          this.hideMoleculeInfo();
-        },
-        GameData.zOrder.ui + 2
+      this.addChild(
+        utils.ui.createDialogCloseButton(
+          'large',
+          () => {
+            GameData.instances.saveManager.save(this.saveData);
+            this.hideMoleculeInfo();
+          },
+          zOrder + 1
+        ),
+        zOrder + 1
       )
     );
 
     // Image
-    this.moleculeImage = new Sprite(540, 400, this.imageSettings);
+    this.moleculeImage = new Sprite(
+      540,
+      400,
+      GameData.game.imagePresets.spritesheetSettings
+    );
 
     // TODO Assets/Indices to-be-replaced with actual molecule structure sprites/animations and not bubble placeholders.
     this.moleculeImage.addAnimation('empty', [
       GameData.game.imageIds.spritesheet.empty,
     ]);
-    this.moleculeImage.addAnimation('watervapor', [
-      GameData.game.imageIds.spritesheet.watervapor,
-    ]);
-    this.moleculeImage.addAnimation('carbondioxide', [
-      GameData.game.imageIds.spritesheet.carbondioxide,
-    ]);
-    this.moleculeImage.addAnimation('methane', [
-      GameData.game.imageIds.spritesheet.methane,
-    ]);
-    this.moleculeImage.addAnimation('nitrousoxide', [
-      GameData.game.imageIds.spritesheet.nitrousoxide,
-    ]);
-    this.moleculeImage.addAnimation('ozone', [
-      GameData.game.imageIds.spritesheet.ozone,
-    ]);
-    this.moleculeImage.addAnimation('fluorinatedgases', [
-      GameData.game.imageIds.spritesheet.fluorinatedgases,
-    ]);
-    this.moleculeImage.addAnimation('oxygen', [
-      GameData.game.imageIds.spritesheet.other,
-    ]);
-    this.moleculeImage.addAnimation('nitrogen', [
-      GameData.game.imageIds.spritesheet.other,
-    ]);
-    this.moleculeImage.addAnimation('argon', [
-      GameData.game.imageIds.spritesheet.other,
-    ]);
-    this.moleculeImage.addAnimation('helium', [
-      GameData.game.imageIds.spritesheet.other,
+    this.moleculeImage.addAnimation('molecule', [
+      GameData.game.imageIds.spritesheet.molecule,
     ]);
 
     this.moleculeImage.setCurrentAnimation('empty');
     this.moleculeInfoElements.push(
-      this.addChild(this.moleculeImage, GameData.zOrder.ui + 2)
+      this.addChild(this.moleculeImage, zOrder + 1)
     );
 
     // TextArea (Title)
-    this.moleculeTitle = this.createTextAreaBold(
-      540,
-      625,
-      GameData.zOrder.ui + 2,
-      0.75
+    this.moleculeTitle = this.addChild(
+      utils.ui.createTextArea(540, 625, GameData.game.fonts.bold, 0.75),
+      zOrder + 1
     );
     this.moleculeTitle.setText('');
     this.moleculeInfoElements.push(this.moleculeTitle);
 
     // TextArea (Type)
-    this.moleculeType = this.createTextAreaRegular(
-      540,
-      680,
-      GameData.zOrder.ui + 2,
-      0.33
+    this.moleculeType = this.addChild(
+      utils.ui.createTextArea(540, 680, GameData.game.fonts.regular, 0.33),
+      zOrder + 1
     );
     this.moleculeType.setText('');
     this.moleculeInfoElements.push(this.moleculeType);
 
     // TextArea (Description)
-    this.moleculeDesc = this.createTextAreaSemiBold(
-      540,
-      750,
-      GameData.zOrder.ui + 2,
-      0.45
+    this.moleculeDesc = this.addChild(
+      utils.ui.createTextArea(540, 750, GameData.game.fonts.semibold, 0.45),
+      zOrder + 1
     );
     this.moleculeDesc.setText('');
     this.moleculeInfoElements.push(this.moleculeDesc);
 
     // TextArea (Pros)
-    this.moleculePros = this.createTextAreaRegular(
-      540,
-      825,
-      GameData.zOrder.ui + 2
+    this.moleculePros = this.addChild(
+      utils.ui.createTextArea(540, 825, GameData.game.fonts.regular),
+      zOrder + 1
     );
     this.moleculePros.setText('');
     this.moleculeInfoElements.push(this.moleculePros);
 
     // TextArea (Cons)
-    this.moleculeCons = this.createTextAreaRegular(
-      540,
-      1100,
-      GameData.zOrder.ui + 2
+    this.moleculeCons = this.addChild(
+      utils.ui.createTextArea(540, 1100, GameData.game.fonts.regular),
+      zOrder + 1
     );
     this.moleculeCons.setText('');
     this.moleculeInfoElements.push(this.moleculeCons);
 
     // TextArea (Source)
-    this.moleculeSource = this.createTextAreaRegular(
-      540,
-      1325,
-      GameData.zOrder.ui + 2,
-      0.25
+    this.moleculeSource = this.addChild(
+      utils.ui.createTextArea(540, 1325, GameData.game.fonts.regular, 0.25),
+      zOrder + 1
     );
     this.moleculeSource.setText('');
     this.moleculeInfoElements.push(this.moleculeSource);
 
-    // Molecule Buttons (all available/colored and non-available/silhouette molecules)
     let posX = game.viewport.width * 0.22;
     let posY = game.viewport.height * 0.75;
     let rowCount = 0;
-    Object.entries(this.saveData.molecules).forEach(([key, value]) => {
-      // TODO: Once every molecule has its own sprite this won't be needed anymore.
-      // TODO: If molecules are one sprite with different tints then it could be expanded to a switch statement.
-      let imageID = key;
-      if (
-        key === 'oxygen' ||
-        key === 'nitrogen' ||
-        key === 'argon' ||
-        key === 'helium'
-      ) {
-        imageID = 'other';
-      }
 
+    // Molecule Buttons (all available/colored molecules)
+    Object.entries(this.saveData.molecules).forEach(([key, value]) => {
       if (value.unlocked) {
         const button = new Button(
           posX,
           posY,
-          this.imageSettings,
-          GameData.game.imageIds.spritesheet[imageID],
+          zOrder + 1,
+          GameData.game.imagePresets.spritesheetSettings,
+          GameData.game.imageIds.spritesheet.molecule,
           () => {
-            if (this.saveData.molecules[key].justUnlocked) {
-              this.saveData.molecules[key].justUnlocked = false;
+            if (value.justUnlocked) {
+              value.justUnlocked = false;
+              button.isImportant = false;
+              let counter = 0;
+              Object.entries(this.saveData.molecules).forEach(
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                ([key, value]) => {
+                  if (value.justUnlocked === true) {
+                    counter++;
+                  }
+                }
+              );
+              if (counter === 0) {
+                this.moleculeInfo.isImportant = false;
+              }
             }
-            this.moleculeImage.setCurrentAnimation(key);
-            this.moleculeImage.tint.setColor(255, 255, 255);
+            this.moleculeImage.setCurrentAnimation('molecule');
+            this.moleculeImage.tint.parseCSS(GameData.game.molecules[key].tint);
             this.moleculeTitle.setText(
               GameData.general.locale.menu.molecule_info[key].title
             );
@@ -339,15 +327,11 @@ export default class MenuUI extends Container {
             this.moleculeSource.setText(
               GameData.general.locale.menu.molecule_info[key].source
             );
-          },
-          GameData.game.imageIds.spritesheet[imageID + 'Excl']
-        ).scale(0.5);
-        if (this.saveData.molecules[key].justUnlocked) {
-          button.showExclamationMark();
-        }
-        this.moleculeInfoButtons.push(
-          this.addChild(button, GameData.zOrder.ui + 2)
-        );
+          }
+        ).setScale(0.5);
+        button.name = key;
+        button.tint.parseCSS(GameData.game.molecules[key].tint);
+        this.moleculeInfoButtons.push(this.addChild(button, zOrder + 1));
         rowCount++;
 
         if (rowCount >= 5) {
@@ -359,25 +343,18 @@ export default class MenuUI extends Container {
         }
       }
     });
+    // Molecule Buttons (all non-available/silhouette molecules)
     Object.entries(this.saveData.molecules).forEach(([key, value]) => {
-      let imageID = key;
-      if (
-        key === 'oxygen' ||
-        key === 'nitrogen' ||
-        key === 'argon' ||
-        key === 'helium'
-      ) {
-        imageID = 'other';
-      }
-
       if (!value.unlocked) {
         const button = new Button(
           posX,
           posY,
-          this.imageSettings,
-          GameData.game.imageIds.spritesheet[imageID],
+          zOrder + 1,
+          GameData.game.imagePresets.spritesheetSettings,
+          GameData.game.imageIds.spritesheet.molecule,
           () => {
-            this.moleculeImage.setCurrentAnimation(key);
+            this.moleculeImage.setCurrentAnimation('molecule');
+            this.moleculeImage.tint.parseCSS(GameData.game.molecules[key].tint);
             this.moleculeImage.tint.setColor(0, 0, 0);
             this.moleculeTitle.setText('');
             this.moleculeType.setText('');
@@ -388,12 +365,10 @@ export default class MenuUI extends Container {
             this.moleculeCons.setText('');
             this.moleculeSource.setText('');
           }
-        ).scale(0.5);
+        ).setScale(0.5);
+        button.name = key;
         button.tint.setColor(0, 0, 0);
-        button.isClickable = false;
-        this.moleculeInfoButtons.push(
-          this.addChild(button, GameData.zOrder.ui + 2)
-        );
+        this.moleculeInfoButtons.push(this.addChild(button, zOrder + 1));
         rowCount++;
 
         if (rowCount >= 5) {
@@ -406,12 +381,21 @@ export default class MenuUI extends Container {
       }
     });
   }
+
+  /**
+   * Shows the molecule info elements.
+   */
   showMoleculeInfo() {
     // Disable other buttons in background
     this.toggleBasicMenuButtons();
     this.moleculeInfoButtons.forEach((button) => {
       button.isClickable = true;
       button.setOpacity(0.75);
+      if (button.name !== '') {
+        if (this.saveData.molecules[button.name].justUnlocked) {
+          button.isImportant = true;
+        }
+      }
     });
     this.moleculeInfoElements.forEach((element) => {
       element.setOpacity(1);
@@ -420,12 +404,21 @@ export default class MenuUI extends Container {
       }
     });
   }
+
+  /**
+   * Hides the molecule info elements.
+   *
+   * @param toggleButtons {boolean} OPTIONAL (Default: true). True if the basic menu buttons (settings, molecule info, level pins) should be
+   * re-enabled again, false otherwise. Assumes showMoleculeInfo() has been called before (which deactivates these buttons).
+   *
+   * @see showMoleculeInfo
+   */
   hideMoleculeInfo(toggleButtons = true) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Object.entries(this.saveData.molecules).forEach(([key, value]) => {
       if (value.justUnlocked) {
         this.newMoleculeUnlocked = true;
-        this.moleculeInfo.showExclamationMark();
+        this.moleculeInfo.isImportant = true;
       }
     });
 
@@ -435,6 +428,7 @@ export default class MenuUI extends Container {
     }
     this.moleculeInfoButtons.forEach((button) => {
       button.isClickable = false;
+      button.isImportant = false;
       button.setOpacity(0);
     });
     this.moleculeInfoElements.forEach((element) => {
@@ -450,44 +444,67 @@ export default class MenuUI extends Container {
     this.moleculeImage.setCurrentAnimation('empty');
   }
 
-  // Close Button + Callbacks.
-  addSettingsButton() {
+  /**
+   * Creates and adds a basic menu button. Upon clicking on it, it shows all available settings for the game
+   * (i.e. a save reset, the quit-button, etc.). Buttons within this settings view usually open a dialog window to
+   * confirm your choice.
+   *
+   * @param zOrder {number} The desired z-Order of this element.
+   */
+  addSettingsButton(zOrder) {
     const settingsButton = this.addChild(
       new Button(
         100,
         game.viewport.height - 100,
-        this.imageSettings,
+        zOrder,
+        GameData.game.imagePresets.spritesheetSettings,
         GameData.game.imageIds.spritesheet.settings,
         () => {
           this.showSettings();
         }
       ).scale(0.5),
-      GameData.zOrder.ui
+      zOrder
     );
     this.basicMenuButtons.push(settingsButton);
   }
-  addSettings() {
+
+  /**
+   * Creates and adds the settings view with all the necessary sub-functions and available options. Currently includes:
+   *
+   * A save-data reset button.
+   *
+   * A quit button.
+   *
+   * A switch between DE and EN localization.
+   *
+   * @param zOrder {number} The desired z-Order of these elements.
+   */
+  addSettings(zOrder) {
     // Backdrop + Dialog image
     this.settingsElements.push(
-      this.createDialogBackdrop('small', GameData.zOrder.ui + 1)
+      this.addChild(utils.ui.createDialogBackground('small'), zOrder)
     );
 
     // Dialog Close Button
     this.settingsButtons.push(
-      this.createDialogCloseButton(
-        'small',
-        () => this.hideSettings(),
-        GameData.zOrder.ui + 2
+      this.addChild(
+        utils.ui.createDialogCloseButton(
+          'small',
+          () => this.hideSettings(),
+          zOrder + 1
+        ),
+        zOrder + 1
       )
     );
 
-    // Reset the save-game to its default values after user-confirmation.
+    // Reset save-game button and mechanic.
     this.settingsButtons.push(
       this.addChild(
         new Button(
           game.viewport.width / 2,
           game.viewport.height * 0.35,
-          this.imageSettings,
+          zOrder + 1,
+          GameData.game.imagePresets.spritesheetSettings,
           GameData.game.imageIds.spritesheet.neutral,
           () => {
             this.showConfirmDialog(
@@ -505,27 +522,32 @@ export default class MenuUI extends Container {
             );
           }
         ).scale(1.5, 1),
-        GameData.zOrder.ui + 2
+        zOrder + 1
       )
     );
 
     // Text for Reset Button
-    this.resetButtonText = this.createTextAreaBold(
-      game.viewport.width / 2,
-      game.viewport.height * 0.35 - 40,
-      GameData.zOrder.ui + 3,
-      0.75
+    this.resetButtonText = this.addChild(
+      utils.ui.createTextArea(
+        game.viewport.width / 2,
+        game.viewport.height * 0.35 - 40,
+        GameData.game.fonts.bold,
+        0.75
+      ),
+      zOrder + 2
     );
     this.settingsElements.push(this.resetButtonText);
 
     // Quit the game and return to module selection.
     // TODO: It would be wise to disable/remove this button in case the game is hosted outside of spaceHuddle (Standalone)!
+    // TODO: Does not cause any errors but users might get confused if the button doesn't do anything.
     this.settingsButtons.push(
       this.addChild(
         new Button(
           game.viewport.width / 2,
           game.viewport.height * 0.5,
-          this.imageSettings,
+          zOrder + 1,
+          GameData.game.imagePresets.spritesheetSettings,
           GameData.game.imageIds.spritesheet.abort,
           () => {
             this.showConfirmDialog(
@@ -537,72 +559,90 @@ export default class MenuUI extends Container {
               }
             );
           }
-        ).scale(1.5, 1),
-        GameData.zOrder.ui + 2
+        ).setScale(1.5, 1),
+        zOrder + 1
       )
     );
 
     // Text for Quit Button
-    this.quitButtonText = this.createTextAreaBold(
-      game.viewport.width / 2,
-      game.viewport.height * 0.5 - 40,
-      GameData.zOrder.ui + 3,
-      0.75
+    this.quitButtonText = this.addChild(
+      utils.ui.createTextArea(
+        game.viewport.width / 2,
+        game.viewport.height * 0.5 - 40,
+        GameData.game.fonts.bold,
+        0.75
+      ),
+      zOrder + 2
     );
     this.settingsElements.push(this.quitButtonText);
 
     // Language of the game. Defaults to browser language. Once the user interacts with it, it is saved to ensure consistency across sessions.
     let imageID;
     if (GameData.general.locale === de) {
-      imageID = GameData.game.imageIds.spritesheet.toggleleft;
+      imageID = GameData.game.imageIds.spritesheet.toggleRight;
     } else {
-      imageID = GameData.game.imageIds.spritesheet.toggleright;
+      imageID = GameData.game.imageIds.spritesheet.toggleLeft;
     }
     const localeToggle = new Button(
       game.viewport.width / 2,
       game.viewport.height / 2 + 250,
-      this.imageSettings,
+      zOrder + 1,
+      GameData.game.imagePresets.spritesheetSettings,
       imageID,
       () => {
         if (GameData.general.locale === de) {
           GameData.general.locale = en;
           this.saveData.chosenLocale = en;
-          localeToggle.setImage(GameData.game.imageIds.spritesheet.toggleright);
+          localeToggle.setImage(GameData.game.imageIds.spritesheet.toggleLeft);
+          this.hideSettings();
+          this.showSettings();
         } else {
           GameData.general.locale = de;
           this.saveData.chosenLocale = de;
-          localeToggle.setImage(GameData.game.imageIds.spritesheet.toggleleft);
+          localeToggle.setImage(GameData.game.imageIds.spritesheet.toggleRight);
+          this.hideSettings();
+          this.showSettings();
         }
       }
     );
-    this.settingsButtons.push(
-      this.addChild(localeToggle, GameData.zOrder.ui + 2)
-    );
+    this.settingsButtons.push(this.addChild(localeToggle, zOrder + 1));
 
     // 'DE'-Text
     this.settingsElements.push(
-      this.createTextAreaBold(
-        game.viewport.width / 2 + 200,
-        game.viewport.height / 2 + 250 - 40,
-        GameData.zOrder.ui + 2,
-        1,
-        'center',
-        'DE'
+      this.addChild(
+        utils.ui.createTextArea(
+          game.viewport.width / 2 + 200,
+          game.viewport.height / 2 + 250 - 40,
+          GameData.game.fonts.bold,
+          1,
+          'center',
+          775,
+          'DE'
+        ),
+        zOrder + 1
       )
     );
 
     // 'EN'-Text
     this.settingsElements.push(
-      this.createTextAreaBold(
-        game.viewport.width / 2 - 200,
-        game.viewport.height / 2 + 250 - 40,
-        GameData.zOrder.ui + 2,
-        1,
-        'center',
-        'EN'
+      this.addChild(
+        utils.ui.createTextArea(
+          game.viewport.width / 2 - 200,
+          game.viewport.height / 2 + 250 - 40,
+          GameData.game.fonts.bold,
+          1,
+          'center',
+          775,
+          'EN'
+        ),
+        zOrder + 1
       )
     );
   }
+
+  /**
+   * Shows the settings view.
+   */
   showSettings() {
     // Disable other buttons in background
     this.toggleBasicMenuButtons();
@@ -620,6 +660,15 @@ export default class MenuUI extends Container {
       element.setOpacity(1);
     });
   }
+
+  /**
+   * Hides the settings view.
+   *
+   * @param toggleButtons {boolean} OPTIONAL (Default: true). True if the basic menu buttons (settings, molecule info, level pins) should be
+   * re-enabled again, false otherwise. Assumes showSettings() has been called before (which deactivates these buttons).
+   *
+   * @see showSettings
+   */
   hideSettings(toggleButtons = true) {
     // Disable other buttons in background
     if (toggleButtons) {
@@ -634,8 +683,14 @@ export default class MenuUI extends Container {
     });
   }
 
-  // Level Pin Buttons + Callbacks. These Buttons and their links depend on the current save data in the SaveManager.
-  addLevelPins() {
+  /**
+   * Creates and adds basic menu buttons depending on the amount of levels available to the player. Upon clicking one of
+   * them, it shows the necessary information for the level which has been selected, ranging from a verbal description to
+   * more detailed statistics about the current state of the climate and occurring molecules within the level.
+   *
+   * @param zOrder {number} The desired z-Order of these elements.
+   */
+  addLevelPins(zOrder) {
     Object.entries(this.saveData.levels).forEach(([key, value]) => {
       if (value.unlocked) {
         const levelPin = this.addChild(
@@ -644,123 +699,150 @@ export default class MenuUI extends Container {
               GameData.game.levels[key].position.factorX,
             GameData.general.targetResY *
               GameData.game.levels[key].position.factorY,
-            this.imageSettings,
-            value.stars + GameData.game.imageIds.spritesheet.pinnone,
+            zOrder,
+            GameData.game.imagePresets.spritesheetSettings,
+            value.stars + GameData.game.imageIds.spritesheet.pinNone,
             () => {
               this.showLevelInfo(key);
             }
           ).scale(0.5),
-          GameData.zOrder.ui
+          zOrder
         );
         this.basicMenuButtons.push(levelPin);
       }
     });
   }
-  addLevelInfo() {
+
+  /**
+   * Creates and adds the level information for each available level. Content is created by taking the current save data
+   * into account (i.e. current star rating, etc.).
+   *
+   * @param zOrder {number} The desired z-Order of these elements.
+   */
+  addLevelInfo(zOrder) {
     // Backdrop + Dialog image
     this.levelInfoElements.push(
-      this.createDialogBackdrop('large', GameData.zOrder.ui + 1)
+      this.addChild(utils.ui.createDialogBackground('large'), zOrder)
     );
 
     // Close-Button
     this.levelInfoButtons.push(
-      this.createDialogCloseButton(
-        'large',
-        () => this.hideLevelInfo(),
-        GameData.zOrder.ui + 2
+      this.addChild(
+        utils.ui.createDialogCloseButton(
+          'large',
+          () => this.hideLevelInfo(),
+          zOrder + 1
+        ),
+        zOrder + 1
       )
     );
 
     // TextArea (Title)
-    this.levelTitle = this.createTextAreaBold(
-      540,
-      700,
-      GameData.zOrder.ui + 2,
-      0.75
+    this.levelTitle = this.addChild(
+      utils.ui.createTextArea(540, 700, GameData.game.fonts.bold, 0.75),
+      zOrder + 1
     );
     this.levelInfoElements.push(this.levelTitle);
 
     // TextArea (Description)
-    this.levelDesc = this.createTextAreaRegular(
-      540,
-      775,
-      GameData.zOrder.ui + 2,
-      0.45
+    this.levelDesc = this.addChild(
+      utils.ui.createTextArea(540, 775, GameData.game.fonts.regular, 0.45),
+      zOrder + 1
     );
     this.levelInfoElements.push(this.levelDesc);
 
     // Icon (Difficulty)
-    const iconDifficulty = new Sprite(210, 1025, this.imageSettings);
+    const iconDifficulty = new Sprite(
+      210,
+      1025,
+      GameData.game.imagePresets.spritesheetSettings
+    );
     iconDifficulty.addAnimation('image', [
-      GameData.game.imageIds.spritesheet.icondifficulty,
+      GameData.game.imageIds.spritesheet.iconDifficulty,
     ]);
     iconDifficulty.setCurrentAnimation('image');
     iconDifficulty.scale(0.25);
-    this.levelInfoElements.push(
-      this.addChild(iconDifficulty, GameData.zOrder.ui + 2)
-    );
+    this.levelInfoElements.push(this.addChild(iconDifficulty, zOrder + 1));
+
     // TextArea (Difficulty)
-    this.levelDifficulty = this.createTextAreaSemiBold(
-      265,
-      1000,
-      GameData.zOrder.ui + 2,
-      0.5,
-      'left'
+    this.levelDifficulty = this.addChild(
+      utils.ui.createTextArea(
+        265,
+        1000,
+        GameData.game.fonts.semibold,
+        0.5,
+        'left'
+      ),
+      zOrder + 1
     );
     this.levelInfoElements.push(this.levelDifficulty);
 
     // Icon (Temp)
-    const iconTemp = new Sprite(610, 1025, this.imageSettings);
+    const iconTemp = new Sprite(
+      610,
+      1025,
+      GameData.game.imagePresets.spritesheetSettings
+    );
     iconTemp.addAnimation('image', [
-      GameData.game.imageIds.spritesheet.icontemperature,
+      GameData.game.imageIds.spritesheet.iconTemperature,
     ]);
     iconTemp.setCurrentAnimation('image');
     iconTemp.scale(0.25);
-    this.levelInfoElements.push(
-      this.addChild(iconTemp, GameData.zOrder.ui + 2)
-    );
+    this.levelInfoElements.push(this.addChild(iconTemp, zOrder + 1));
+
     // TextArea (Average Temp.)
-    this.levelTemperature = this.createTextAreaSemiBold(
-      665,
-      1000,
-      GameData.zOrder.ui + 2,
-      0.5,
-      'left'
+    this.levelTemperature = this.addChild(
+      utils.ui.createTextArea(
+        665,
+        1000,
+        GameData.game.fonts.semibold,
+        0.5,
+        'left'
+      ),
+      zOrder + 1
     );
     this.levelInfoElements.push(this.levelTemperature);
 
     // Icon (Type)
-    const iconType = new Sprite(210, 1125, this.imageSettings);
+    const iconType = new Sprite(
+      210,
+      1125,
+      GameData.game.imagePresets.spritesheetSettings
+    );
     iconType.addAnimation('image', [
-      GameData.game.imageIds.spritesheet.iconclimatetype,
+      GameData.game.imageIds.spritesheet.iconClimateType,
     ]);
     iconType.setCurrentAnimation('image');
     iconType.scale(0.25);
-    this.levelInfoElements.push(
-      this.addChild(iconType, GameData.zOrder.ui + 2)
-    );
+    this.levelInfoElements.push(this.addChild(iconType, zOrder + 1));
+
     // TextArea (Climate Type)
-    this.levelType = this.createTextAreaSemiBold(
-      265,
-      1100,
-      GameData.zOrder.ui + 2,
-      0.5,
-      'left'
+    this.levelType = this.addChild(
+      utils.ui.createTextArea(
+        265,
+        1100,
+        GameData.game.fonts.semibold,
+        0.5,
+        'left'
+      ),
+      zOrder + 1
     );
     this.levelInfoElements.push(this.levelType);
 
     // Icon (Molecules)
-    const iconMolecule = new Sprite(610, 1125, this.imageSettings);
+    const iconMolecule = new Sprite(
+      610,
+      1125,
+      GameData.game.imagePresets.spritesheetSettings
+    );
     iconMolecule.addAnimation('image', [
-      GameData.game.imageIds.spritesheet.iconmolecules,
+      GameData.game.imageIds.spritesheet.iconMolecules,
     ]);
     iconMolecule.setCurrentAnimation('image');
     iconMolecule.scale(0.25);
-    this.levelInfoElements.push(
-      this.addChild(iconMolecule, GameData.zOrder.ui + 2)
-    );
+    this.levelInfoElements.push(this.addChild(iconMolecule, zOrder + 1));
     Object.entries(GameData.game.levels).forEach(([key, value]) => {
-      this.createMoleculeSet(key, value.molecules, GameData.zOrder.ui + 2);
+      this.createMoleculeSet(key, value.molecules, zOrder + 1);
     });
     this.levelInfoElements.push(this.moleculeSets);
 
@@ -769,60 +851,76 @@ export default class MenuUI extends Container {
       new Button(
         540,
         1600,
-        this.imageSettings,
+        zOrder + 1,
+        GameData.game.imagePresets.spritesheetSettings,
         GameData.game.imageIds.spritesheet.confirm,
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         () => {}
       ).scale(1.33),
-      GameData.zOrder.ui + 2
+      zOrder + 1
     );
     this.levelInfoButtons.push(this.playButton);
 
     // Start-Text
-    const textStart = this.createTextAreaSemiBold(
-      540,
-      1550,
-      GameData.zOrder.ui + 3,
-      1
+    const textStart = this.addChild(
+      utils.ui.createTextArea(540, 1550, GameData.game.fonts.semibold, 1),
+      zOrder + 2
     );
     textStart.setText(GameData.general.locale.menu.level_info.start);
     this.levelInfoElements.push(textStart);
   }
-  addTotalStarCount() {
+
+  /**
+   * Creates and adds the basic menu element showing the current total star count achieved. This element is non-interactable
+   * and only informative.
+   *
+   * @param zOrder {number} The desired z-Order of this element.
+   */
+  addTotalStarCount(zOrder) {
     const starCountBG = new Sprite(
       game.viewport.width - 128 - 50,
       100,
-      this.imageSettings
+      GameData.game.imagePresets.spritesheetSettings
     );
     starCountBG.addAnimation('image', [
       GameData.game.imageIds.spritesheet.neutral,
     ]);
     starCountBG.setCurrentAnimation('image');
     starCountBG.scale(0.75);
-    this.basicMenuElements.push(this.addChild(starCountBG, GameData.zOrder.ui));
+    this.basicMenuElements.push(this.addChild(starCountBG, zOrder));
 
     const star = new Sprite(
       game.viewport.width - 128 - 100,
       95,
-      this.imageSettings
+      GameData.game.imagePresets.spritesheetSettings
     );
-    star.addAnimation('image', [GameData.game.imageIds.spritesheet.singlestar]);
+    star.addAnimation('image', [GameData.game.imageIds.spritesheet.singleStar]);
     star.setCurrentAnimation('image');
     star.scale(0.2);
-    this.basicMenuElements.push(this.addChild(star, GameData.zOrder.ui + 1));
+    this.basicMenuElements.push(this.addChild(star, zOrder + 1));
 
-    this.totalStarCount = this.createTextAreaBold(
-      game.viewport.width - 150,
-      75,
-      GameData.zOrder.ui + 1,
-      0.5,
-      'center',
-      this.saveData.totalStars.toString() +
-        ' / ' +
-        (Object.entries(this.saveData.levels).length * 3).toString()
+    this.totalStarCount = this.addChild(
+      utils.ui.createTextArea(
+        game.viewport.width - 150,
+        75,
+        GameData.game.fonts.bold,
+        0.5,
+        'center',
+        775,
+        this.saveData.totalStars.toString() +
+          ' / ' +
+          (Object.entries(this.saveData.levels).length * 3).toString()
+      ),
+      zOrder + 1
     );
     this.basicMenuElements.push(this.totalStarCount);
   }
+
+  /**
+   * Shows level information depending on the level selected.
+   *
+   * @param levelID {string} The level ID to allow showing the correct information about the selected level.
+   */
   showLevelInfo(levelID) {
     // Disable other buttons in background
     this.toggleBasicMenuButtons();
@@ -874,6 +972,15 @@ export default class MenuUI extends Container {
       }
     });
   }
+
+  /**
+   * Hides the level information.
+   *
+   * @param toggleButtons {boolean} OPTIONAL (Default: true). True if the basic menu buttons (settings, molecule info, level pins) should be
+   * re-enabled again, false otherwise. Assumes showLevelInfo() has been called before (which deactivates these buttons).
+   *
+   * @see showLevelInfo
+   */
   hideLevelInfo(toggleButtons = true) {
     // Disable other buttons in background
     if (toggleButtons) {
@@ -915,54 +1022,89 @@ export default class MenuUI extends Container {
     });
   }
 
-  // A toggle to enable/disable all basic (non-popup/non-dialog) menu buttons.
+  /**
+   * Toggles the basic menu buttons to a deactivated or activated state to avoid accidentally clicking them once a
+   * sub-menu has opened.
+   */
   toggleBasicMenuButtons() {
     this.basicMenuButtons.forEach((button) => {
       button.isClickable = !button.isClickable;
     });
   }
+
+  /**
+   * Creates, adds and shows a confirmation dialog with a confirm- and abort-button. Use this dialog to double-check if a user really
+   * wants to perform a certain action, i.e. quit the game or reset the save data.
+   *
+   * @param question {string} The question the dialog should ask.
+   * @param confirm {string} The text on the confirm button.
+   * @param abort {string} The text on the abort button.
+   * @param action {function} The action to be taken once the confirm button has been hit.
+   */
   showConfirmDialog(question, confirm, abort, action) {
-    this.dialogBackdrop = this.createDialogBackdrop(
-      'small',
+    this.dialogBackdrop = this.addChild(
+      utils.ui.createDialogBackground('small'),
       GameData.zOrder.ui + 22
     );
-    this.dialogQuestion = this.createTextAreaSemiBold(
-      game.viewport.width / 2,
-      game.viewport.height * 0.45,
-      GameData.zOrder.ui + 23,
-      0.5,
-      'center',
-      question
-    );
-    this.confirmButton = this.createDialogConfirmButton(
-      'small',
-      action,
+    this.dialogQuestion = this.addChild(
+      utils.ui.createTextArea(
+        game.viewport.width / 2,
+        game.viewport.height * 0.45,
+        GameData.game.fonts.semibold,
+        0.5,
+        'center',
+        775,
+        question
+      ),
       GameData.zOrder.ui + 23
     );
-    this.confirmText = this.createTextAreaBold(
-      this.confirmButton.pos.x,
-      this.confirmButton.pos.y - 40,
-      GameData.zOrder.ui + 24,
-      0.5,
-      'center',
-      confirm
-    );
-    this.abortButton = this.createDialogAbortButton(
-      'small',
-      () => {
-        this.hideConfirmDialog();
-      },
+    this.confirmButton = this.addChild(
+      utils.ui.createDialogConfirmButton(
+        'small',
+        action,
+        GameData.zOrder.ui + 23
+      ),
       GameData.zOrder.ui + 23
     );
-    this.abortText = this.createTextAreaBold(
-      this.abortButton.pos.x,
-      this.abortButton.pos.y - 40,
-      GameData.zOrder.ui + 24,
-      0.5,
-      'center',
-      abort
+    this.confirmText = this.addChild(
+      utils.ui.createTextArea(
+        this.confirmButton.pos.x,
+        this.confirmButton.pos.y - 40,
+        GameData.game.fonts.bold,
+        0.5,
+        'center',
+        775,
+        confirm
+      ),
+      GameData.zOrder.ui + 24
+    );
+    this.abortButton = this.addChild(
+      utils.ui.createDialogAbortButton(
+        'small',
+        () => {
+          this.hideConfirmDialog();
+        },
+        GameData.zOrder.ui + 23
+      ),
+      GameData.zOrder.ui + 23
+    );
+    this.abortText = this.addChild(
+      utils.ui.createTextArea(
+        this.abortButton.pos.x,
+        this.abortButton.pos.y - 40,
+        GameData.game.fonts.bold,
+        0.5,
+        'center',
+        775,
+        abort
+      ),
+      GameData.zOrder.ui + 24
     );
   }
+
+  /**
+   * Hides the confirm dialog.
+   */
   hideConfirmDialog() {
     this.removeChild(this.dialogBackdrop);
     this.dialogBackdrop = null;
@@ -978,112 +1120,17 @@ export default class MenuUI extends Container {
     this.abortButton = null;
   }
 
-  // A function which creates the dialog window including a fadeout.
-  createDialogBackdrop(size, zOrder) {
-    const backdrop = new Sprite(
-      game.viewport.width / 2,
-      game.viewport.height / 2,
-      {
-        image: 'dialogboxes',
-        framewidth: 1080,
-        frameheight: 1920,
-      }
-    );
-    backdrop.addAnimation('small', [GameData.game.imageIds.dialogboxes.small]);
-    backdrop.addAnimation('medium', [
-      GameData.game.imageIds.dialogboxes.medium,
-    ]);
-    backdrop.addAnimation('large', [GameData.game.imageIds.dialogboxes.large]);
-
-    switch (size) {
-      case 'small':
-        backdrop.setCurrentAnimation('small');
-        break;
-      case 'medium':
-        backdrop.setCurrentAnimation('medium');
-        break;
-      case 'large':
-        backdrop.setCurrentAnimation('large');
-        break;
-      default:
-        backdrop.setCurrentAnimation('small');
-        break;
-    }
-
-    return this.addChild(backdrop, zOrder);
-  }
-  // A function which creates a close button for dialog windows.
-  createDialogCloseButton(size, callback, zOrder) {
-    const closeButton = new Button(
-      925,
-      235,
-      this.imageSettings,
-      GameData.game.imageIds.spritesheet.cross,
-      callback
-    ).scale(0.33);
-
-    switch (size) {
-      case 'small':
-        closeButton.pos.y = 657;
-        return this.addChild(closeButton, zOrder);
-      case 'medium':
-        closeButton.pos.y = 446;
-        return this.addChild(closeButton, zOrder);
-      case 'large':
-        return this.addChild(closeButton, zOrder);
-      default:
-        return this.addChild(closeButton, zOrder);
-    }
-  }
-  // A function which creates a confirm button for dialog windows.
-  createDialogConfirmButton(size, callback, zOrder) {
-    const confirmButton = new Button(
-      325,
-      1622,
-      this.imageSettings,
-      GameData.game.imageIds.spritesheet.confirm,
-      callback
-    ).scale(1.33);
-
-    switch (size) {
-      case 'small':
-        confirmButton.pos.y = 1200;
-        return this.addChild(confirmButton, zOrder);
-      case 'medium':
-        confirmButton.pos.y = 1411;
-        return this.addChild(confirmButton, zOrder);
-      case 'large':
-        return this.addChild(confirmButton, zOrder);
-      default:
-        return this.addChild(confirmButton, zOrder);
-    }
-  }
-  // A function which create an abort button for dialog windows.
-  createDialogAbortButton(size, callback, zOrder) {
-    const abortButton = new Button(
-      750,
-      1622,
-      this.imageSettings,
-      GameData.game.imageIds.spritesheet.abort,
-      callback
-    ).scale(1.33);
-
-    switch (size) {
-      case 'small':
-        abortButton.pos.y = 1200;
-        return this.addChild(abortButton, zOrder);
-      case 'medium':
-        abortButton.pos.y = 1411;
-        return this.addChild(abortButton, zOrder);
-      case 'large':
-        return this.addChild(abortButton, zOrder);
-      default:
-        return this.addChild(abortButton, zOrder);
-    }
-  }
-  // Creates the relevant molecule set for the given level ID.
-  createMoleculeSet(key, moleculeIDs, zOrder) {
-    this.moleculeSets[key] = [];
+  /**
+   * Creates a molecule set depending on the defined (level-specific) molecules in resources.js.
+   * A molecule set is a group of molecule-types which can appear in a level.
+   * This method creates sprites in such a way that the individual molecules of the given level appear from left to right, one after another.
+   *
+   * @param levelID {string} The molecule set from this level. Needs to be a level name as defined in either the save-manager or resources.js.
+   * @param moleculeIDs {string[]} An array holing all possible molecule types which can apper in the given level.
+   * @param zOrder {number} The desired z-Order of the created objects.
+   */
+  createMoleculeSet(levelID, moleculeIDs, zOrder) {
+    this.moleculeSets[levelID] = [];
 
     const increment = 65;
     let moleculeCount = 0;
@@ -1092,77 +1139,17 @@ export default class MenuUI extends Container {
       const sprite = new Sprite(
         690 + increment * moleculeCount,
         1125,
-        this.imageSettings
+        GameData.game.imagePresets.spritesheetSettings
       );
       sprite.addAnimation('image', [
-        GameData.game.imageIds.spritesheet[moleculeID],
+        GameData.game.imageIds.spritesheet.molecule,
       ]);
       sprite.setCurrentAnimation('image');
+      sprite.tint.parseCSS(GameData.game.molecules[moleculeID].tint);
       sprite.scale(0.2);
-      this.moleculeSets[key].push(this.addChild(sprite, zOrder));
+      this.moleculeSets[levelID].push(this.addChild(sprite, zOrder + 1));
       moleculeCount++;
     });
-  }
-  // Functions which create a textarea. Users can not interact with it.
-  createTextAreaRegular(
-    x,
-    y,
-    zOrder,
-    size = 0.5,
-    alignment = 'center',
-    text = ''
-  ) {
-    return this.addChild(
-      new BitmapText(x, y, {
-        font: 'WorkSans-Regular',
-        size: size,
-        lineHeight: 1.4,
-        textAlign: alignment,
-        text: text,
-        wordWrapWidth: 775,
-      }),
-      zOrder
-    );
-  }
-  createTextAreaSemiBold(
-    x,
-    y,
-    zOrder,
-    size = 0.5,
-    alignment = 'center',
-    text = ''
-  ) {
-    return this.addChild(
-      new BitmapText(x, y, {
-        font: 'WorkSans-SemiBold',
-        size: size,
-        lineHeight: 1.4,
-        textAlign: alignment,
-        text: text,
-        wordWrapWidth: 775,
-      }),
-      zOrder
-    );
-  }
-  createTextAreaBold(
-    x,
-    y,
-    zOrder,
-    size = 0.5,
-    alignment = 'center',
-    text = ''
-  ) {
-    return this.addChild(
-      new BitmapText(x, y, {
-        font: 'WorkSans-Bold',
-        size: size,
-        lineHeight: 1.4,
-        textAlign: alignment,
-        text: text,
-        wordWrapWidth: 775,
-      }),
-      zOrder
-    );
   }
 
   onDestroyEvent() {

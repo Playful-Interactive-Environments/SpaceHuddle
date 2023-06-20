@@ -1,7 +1,13 @@
 import { Stage, Sprite, game, loader } from 'melonjs';
 
-// Custom loading screen for "Cool It".
-// TODO: Currently only a placeholder for demonstration purposes.
+/**
+ * The custom loading screen for 'Cool It'.
+ * Loads some assets needed for this stage only - un-load them again once pre-loading is done to save memory!
+ *
+ * @extends Stage
+ * @see Stage
+ * @see loader
+ */
 export default class Loading extends Stage {
   spinnerRed;
   spinnerYellow;
