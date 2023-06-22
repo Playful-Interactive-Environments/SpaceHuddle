@@ -106,6 +106,7 @@ export class OsrmCustom extends OSRM {
       axiosOpts,
     } = clientArgs || {};
     this.apiKey = apiKey; // TODO: add to requests
+    //const defaultURL = 'http://router.project-osrm.org';;
     const defaultURL = `https://routing.openstreetmap.de/routed-${profile}`;
     this.client =
       new CustomClient(
@@ -122,6 +123,7 @@ export class OsrmCustom extends OSRM {
   async nearest(
     locations,
     profile = 'driving',
+    number = 1,
     directionsOpts = {},
     dryRun = false
   ): Promise<any> {
@@ -129,11 +131,11 @@ export class OsrmCustom extends OSRM {
     const params = OSRM.getDirectionParams(directionsOpts);
     return this.client
       .request({
-        endpoint: `/nearest/v1/${profile}/${coords}`,
+        endpoint: `/nearest/v1/${profile}/${coords}?number=${number}`,
         getParams: params,
         dryRun,
       })
-      .then((res) => {
+      .then((res: any) => {
         return res;
       })
       .catch(handleOSRMError);

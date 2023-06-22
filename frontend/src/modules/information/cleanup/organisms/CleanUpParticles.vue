@@ -67,19 +67,20 @@
           >
             <sprite
               :width="containerWidth"
+              :height="containerHeight"
               texture="/assets/games/cleanup/dumpster.svg"
               :tint="gameConfig.particles[particle].color"
             >
               <text
                 :style="{
                   fill: '#ffffff',
-                  fontSize: 16,
+                  fontSize: 24,
                   fontWeight: 'bold',
                   textAlign: 'center',
                 }"
                 :anchor="0.5"
                 :x="containerWidth / 2"
-                :y="containerWidth / 2"
+                :y="(containerHeight / 3) * 2"
               >
                 {{ getParticleDisplayName(particle) }}
                 \n
@@ -259,7 +260,6 @@ export default class CleanUpParticles extends Vue {
   interval = -1;
   activeValue = 0;
   cleanupParticles: DrawingParticle[] = [];
-  particleRadius = 40;
   particleCollisionHandler = new ParticleCollisionHandler();
   particleState: { [key: string]: ParticleState } = {};
   renderer!: PIXI.Renderer;
@@ -267,6 +267,7 @@ export default class CleanUpParticles extends Vue {
   outsideCount = 0;
   spritesheet!: PIXI.Spritesheet;
   countdownTime = 5;
+  containerAspectRation = 1.3;
 
   particleQueue: { [key: string]: number } = {};
 
@@ -279,7 +280,7 @@ export default class CleanUpParticles extends Vue {
   }
 
   get containerHeight(): number {
-    return this.containerSize[1];
+    return this.containerWidth / this.containerAspectRation; // this.containerSize[1];
   }
 
   get particleBorder(): number {
@@ -309,6 +310,20 @@ export default class CleanUpParticles extends Vue {
       this.vehicle,
       this.vehicleType
     );
+  }
+
+  get particleArea(): number {
+    return this.gameWidth * (this.gameHeight - this.particleBorder);
+  }
+
+  get particleRadius(): number {
+    const minSize = 10;
+    const maxSize = 40;
+    const circleArea = this.particleArea / (this.maxParticleCount * 2);
+    const size = Math.sqrt(circleArea / Math.PI);
+    if (size > maxSize) return maxSize;
+    if (size < minSize) return minSize;
+    return size;
   }
 
   getParticleDisplayName(particleName: string): string {
@@ -341,29 +356,6 @@ export default class CleanUpParticles extends Vue {
       height,
       this.statusColor
     );
-
-    /*const renderTexture = PIXI.RenderTexture.create({
-      width: width,
-      height: height,
-    });
-    GradientFactory.createLinearGradient(this.renderer, renderTexture, {
-      x0: 0,
-      y0: 0,
-      x1: 0,
-      y1: height,
-      colorStops: [
-        { color: '#ffffff00', offset: 0 },
-        { color: '#ffffffff', offset: 1 },
-      ],
-    });
-    background.clear();
-    background.beginTextureFill({
-      texture: renderTexture,
-      color: this.statusColor,
-      alpha: 0.9,
-    });
-    background.drawRect(0, 0, width, height);
-    background.endFill();*/
   }
 
   async updateChart(): Promise<void> {
@@ -457,7 +449,7 @@ export default class CleanUpParticles extends Vue {
             ],
           };
           this.cleanupParticles.push(particle);
-          await delay(500);
+          await delay(Math.floor(this.intervalTime / emissionCount) - 1);
         }
       }
     }

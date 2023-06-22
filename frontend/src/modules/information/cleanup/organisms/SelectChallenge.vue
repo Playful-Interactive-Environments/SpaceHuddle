@@ -113,18 +113,6 @@
     </el-button>
   </el-space>
   <div>
-    <img
-      class="vehicle-image"
-      :src="`/assets/games/cleanup/vehicle/${selectedVehicleParameter.image}`"
-      :alt="selectedVehicleParameter.name"
-    />
-  </div>
-  <div class="play">
-    <el-button type="primary" @click="play">
-      {{ $t('module.information.cleanup.participant.play') }}
-    </el-button>
-  </div>
-  <el-dialog v-model="showVehicleSelection">
     <el-carousel :autoplay="false" arrow="always" height="30rem">
       <el-carousel-item
         v-for="vehicle of gameConfig.vehicles[activeVehicleType].types"
@@ -215,7 +203,7 @@
         </el-card>
       </el-carousel-item>
     </el-carousel>
-  </el-dialog>
+  </div>
 </template>
 
 <script lang="ts">
@@ -257,7 +245,6 @@ export default class SelectChallenge extends Vue {
     datasets: [],
   };
   activeVehicleType = 'car';
-  showVehicleSelection = false;
   gameConfig = gameConfig;
   selectedVehicle = {
     category: 'car',
@@ -376,16 +363,11 @@ export default class SelectChallenge extends Vue {
 
   vehicleTypeClicked(vehicle: string): void {
     this.activeVehicleType = vehicle;
-    this.showVehicleSelection = true;
   }
 
   selectVehicle(category: string, type: string): void {
     this.selectedVehicle.category = category;
     this.selectedVehicle.type = type;
-    this.showVehicleSelection = false;
-  }
-
-  play(): void {
     this.$emit('play', this.selectedVehicle);
   }
 }

@@ -32,7 +32,7 @@ const MARKER_OPTION_KEYS: Array<keyof MarkerOptions> = [
 ];
 
 @Options({
-  emits: ['dragend', 'click'],
+  emits: ['dragend', 'click', 'update:pixelPos'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -47,7 +47,9 @@ export default class CustomMapMarker extends Vue {
   @Prop() readonly pitchAlignment!: 'map' | 'viewport' | 'auto';
   @Prop() readonly scale!: number;
   @Prop() readonly draggable!: boolean;
-  marker!: Marker;
+  @Prop() readonly pixelPos!: [number, number];
+  @Prop({ default: false }) readonly hide!: boolean;
+  marker: Marker | undefined = undefined;
   map!: ShallowRef<Map | null>;
 
   mounted(): void {
@@ -83,13 +85,23 @@ export default class CustomMapMarker extends Vue {
     marker
       .getElement()
       .addEventListener('click', (event) => this.$emit('click', event));
+    this.removeMarker();
     this.marker = marker;
+  }
+
+  removeMarker(): void {
+    if (this.marker) {
+      //this.marker.remove.bind(this.marker);
+      this.marker.remove();
+      this.marker = undefined;
+    }
   }
 
   @Watch('coordinates', { immediate: true })
   onCoordinatesChanged(): void {
     if (this.marker) {
       this.marker.setLngLat(this.coordinates);
+      this.$emit('update:pixelPos', [this.marker._pos.x, this.marker._pos.y]);
     }
   }
 
@@ -121,12 +133,48 @@ export default class CustomMapMarker extends Vue {
     }
   }
 
-  unmounted(): void {
+  @Watch('hide', { immediate: true })
+  onHideChanged(): void {
     if (this.marker) {
-      this.marker.remove.bind(this.marker);
+      if (this.hide) this.marker.getElement().style['display'] = 'none';
+      else this.marker.getElement().style['display'] = 'block';
     }
+  }
+
+  unmounted(): void {
+    this.removeMarker();
   }
 }
 </script>
+
+<style lang="scss">
+.maplibregl-marker-anchor-top {
+  transform-origin: center top;
+}
+.maplibregl-marker-anchor-top-left {
+  transform-origin: left top;
+}
+.maplibregl-marker-anchor-top-right {
+  transform-origin: right top;
+}
+.maplibregl-marker-anchor-bottom {
+  transform-origin: center bottom;
+}
+.maplibregl-marker-anchor-bottom-left {
+  transform-origin: left bottom;
+}
+.maplibregl-marker-anchor-bottom-right {
+  transform-origin: right bottom;
+}
+.maplibregl-marker-anchor-left {
+  transform-origin: left center;
+}
+.maplibregl-marker-anchor-right {
+  transform-origin: right center;
+}
+.maplibregl-marker-anchor-center {
+  transform-origin: center center;
+}
+</style>
 
 <style scoped lang="scss"></style>
