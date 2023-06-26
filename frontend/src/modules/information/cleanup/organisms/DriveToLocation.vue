@@ -150,8 +150,9 @@ interface BusStop {
 
 export interface TrackingData {
   speed: number;
-  combustion: number;
+  consumption: number;
   persons: number;
+  distance: number;
 }
 
 export interface ChartData {
@@ -300,6 +301,7 @@ export default class DriveToLocation extends Vue {
   onLoad(e: MglEvent): void {
     const map = e.map;
     this.map = map;
+    map.setMinZoom(this.mapZoomDefault);
     //map.scrollZoom.disable();
     const notNeededLayers = map.getStyle().layers.filter((layer) => {
       const layerCategory = layer['source-layer'];
@@ -715,8 +717,7 @@ export default class DriveToLocation extends Vue {
       return;
     }
     const vehicleParameter = this.vehicleParameter;
-    let combustion = 0;
-    combustion = formulas.acceleration(
+    const consumption = formulas.consumption(
       this.moveSpeed,
       distance,
       vehicleParameter
@@ -724,7 +725,8 @@ export default class DriveToLocation extends Vue {
     const trackingData: TrackingData = {
       speed: this.moveSpeed,
       persons: this.personCount,
-      combustion: combustion,
+      consumption: consumption,
+      distance: distance,
     };
     this.trackingData.push(trackingData);
     configCalculation.addValueToStatistics(

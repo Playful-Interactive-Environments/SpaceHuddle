@@ -22,6 +22,7 @@ export interface VehicleParameter {
   acceleration: number | undefined;
   persons: number | undefined;
   efficiency: number | undefined;
+  efficiencyV1: number | undefined;
   flowResistance: number;
   profileArea: number;
   weight: number;
@@ -66,6 +67,7 @@ export const electricityUnits = (): any => {
     microplastic: perUnit.microplastic,
     kwh: 1,
     kg: 1,
+    efficiency: gameConfig.fuel.electricity.perUnit.efficiency,
   };
 };
 
@@ -79,10 +81,22 @@ export const statisticsValue = (
   trackingData: TrackingData,
   vehicleParameter: any
 ): number => {
+  const particle = gameConfig.particles[particleName];
+  const calculation = new Function(
+    'trackingData',
+    'parameter',
+    'fuelValue',
+    `return ${particle.calculation}`
+  );
+
   const perUnit = fuelUnits(vehicleParameter.fuel);
   return (
-    (trackingData.combustion * perUnit[particleName]) / trackingData.persons
+    calculation(trackingData, vehicleParameter, perUnit[particleName]) /
+    trackingData.persons
   );
+  /*return (
+    (trackingData.consumption * perUnit[particleName]) / trackingData.persons
+  );*/
 };
 
 export const addValueToStatistics = (

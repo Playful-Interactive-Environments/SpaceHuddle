@@ -143,12 +143,12 @@ export default class Participant extends Vue {
   };
 
   trackingData: TrackingData[] = [
-    { speed: 20, persons: 1, combustion: 0.0005 },
-    { speed: 40, persons: 1, combustion: 0.001 },
-    { speed: 100, persons: 1, combustion: 0.002 },
-    { speed: 100, persons: 1, combustion: 0.002 },
-    { speed: 50, persons: 1, combustion: 0.001 },
-    { speed: 30, persons: 1, combustion: 0.0005 },
+    { speed: 20, persons: 1, consumption: 0.0005, distance: 0.001 },
+    { speed: 40, persons: 1, consumption: 0.001, distance: 0.002 },
+    { speed: 100, persons: 1, consumption: 0.002, distance: 0.004 },
+    { speed: 100, persons: 1, consumption: 0.002, distance: 0.004 },
+    { speed: 50, persons: 1, consumption: 0.001, distance: 0.002 },
+    { speed: 30, persons: 1, consumption: 0.0005, distance: 0.001 },
   ];
   gameStep = GameStep.Select;
   GameStep = GameStep;

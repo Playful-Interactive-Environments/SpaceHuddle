@@ -283,13 +283,16 @@ export default class SelectChallenge extends Vue {
       data: [],
     });
     for (const fuelSource of Object.keys(gameConfig.fuel)) {
-      this.chartDataFuel.labels.push(
-        this.$t(`module.information.cleanup.enums.fuel.${fuelSource}`)
-      );
-      this.chartDataFuel.datasets[0].data.push(
-        gameConfig.fuel[fuelSource].perUnit['carbonDioxideEquivalent'] /
-          gameConfig.fuel[fuelSource].perUnit.kwh
-      );
+      if ('carbonDioxideEquivalent' in gameConfig.fuel[fuelSource].perUnit) {
+        this.chartDataFuel.labels.push(
+          this.$t(`module.information.cleanup.enums.fuel.${fuelSource}`)
+        );
+        this.chartDataFuel.datasets[0].data.push(
+          (gameConfig.fuel[fuelSource].perUnit['carbonDioxideEquivalent'] /
+            gameConfig.fuel[fuelSource].perUnit.kwh) *
+            (1 / gameConfig.fuel[fuelSource].perUnit.efficiency)
+        );
+      }
     }
     this.chartDataFuel.labels.push(
       this.$t('module.information.cleanup.enums.fuel.electricity')
@@ -327,7 +330,8 @@ export default class SelectChallenge extends Vue {
         gameConfig.electricity[energySource].perUnit[
           'carbonDioxideEquivalent'
         ] *
-          (gameConfig.electricity[energySource].value / 100)
+          (gameConfig.electricity[energySource].value / 100) *
+          (1 / gameConfig.fuel.electricity.perUnit.efficiency)
       );
       this.chartDataFuel.datasets.push(ds);
     }

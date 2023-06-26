@@ -2,6 +2,7 @@
   "particles": {
     "carbonDioxide": {
       "color": "#fe6e5d",
+      "calculation": "trackingData.consumption * fuelValue",
       "speedFunction": {
         "car": {
           "sport": "0.35 * speed",
@@ -26,6 +27,7 @@
     },
     "dust": {
       "color": "#1d2948",
+      "calculation": "trackingData.consumption * fuelValue",
       "speedFunction": {
         "car": {
           "sport": "0.5 * speed",
@@ -50,6 +52,7 @@
     },
     "methane": {
       "color": "#f3a40a",
+      "calculation": "trackingData.consumption * fuelValue",
       "speedFunction": {
         "car": {
           "sport": "0.2 * speed",
@@ -74,6 +77,7 @@
     },
     "microplastic": {
       "color": "#0192d0",
+      "calculation": "trackingData.distance * parameter.tireAbrasion * 100",
       "speedFunction": {
         "car": {
           "sport": "0.3 * speed",
@@ -111,12 +115,14 @@
           "speed": 300,
           "mpg": 50,
           "acceleration": 2,
-          "efficiency": 38,
-          "flowResistance": 0.3,
-          "profileArea": 1.2,
+          "efficiencyV1": 38,
+          "flowResistance": 0.28,
+          "profileArea": 1.5,
           "weight": 800,
           "weightTire": 10,
-          "rollingResistanceCoefficient": 0.015
+          "rollingResistanceCoefficient": 0.015,
+          "tireAbrasion": 0.18,
+          "efficiency": 0.3
         },
         {
           "name": "suv",
@@ -127,12 +133,14 @@
           "speed": 250,
           "mpg": 70,
           "acceleration": 3,
-          "efficiency": 38,
-          "flowResistance": 0.6,
-          "profileArea": 2.1,
+          "efficiencyV1": 38,
+          "flowResistance": 0.5,
+          "profileArea": 2.3,
           "weight": 1400,
           "weightTire": 10,
-          "rollingResistanceCoefficient": 0.015
+          "rollingResistanceCoefficient": 0.015,
+          "tireAbrasion": 0.16,
+          "efficiency": 0.3
         },
         {
           "name": "compact",
@@ -143,12 +151,14 @@
           "speed": 150,
           "mpg": 30,
           "acceleration": 5,
-          "efficiency": 38,
-          "flowResistance": 0.5,
-          "profileArea": 1.0,
+          "efficiencyV1": 38,
+          "flowResistance": 0.3,
+          "profileArea": 1.6,
           "weight": 600,
           "weightTire": 10,
-          "rollingResistanceCoefficient": 0.015
+          "rollingResistanceCoefficient": 0.015,
+          "tireAbrasion": 0.1,
+          "efficiency": 0.25
         },
         {
           "name": "e-car",
@@ -159,12 +169,14 @@
           "speed": 150,
           "mpg": 5,
           "acceleration": 3,
-          "efficiency": 38,
-          "flowResistance": 0.5,
+          "efficiencyV1": 38,
+          "flowResistance": 0.25,
           "profileArea": 1.6,
           "weight": 900,
           "weightTire": 10,
-          "rollingResistanceCoefficient": 0.015
+          "rollingResistanceCoefficient": 0.015,
+          "tireAbrasion": 0.12,
+          "efficiency": 0.99
         }
       ]
     },
@@ -178,12 +190,14 @@
           "imageTop": "bike-top.png",
           "fuel": "electricity",
           "speed": 50,
-          "efficiency": 38,
-          "flowResistance": 0.2,
-          "profileArea": 0.1,
+          "efficiencyV1": 38,
+          "flowResistance": 0.8,
+          "profileArea": 0.6,
           "weight": 25,
           "weightTire": 1,
-          "rollingResistanceCoefficient": 0.01
+          "rollingResistanceCoefficient": 0.01,
+          "tireAbrasion": 0.006,
+          "efficiency": 0.99
         },
         {
           "name": "city",
@@ -191,11 +205,14 @@
           "imageTop": "bike-top.png",
           "fuel": "none",
           "speed": 40,
-          "flowResistance": 0.2,
-          "profileArea": 0.1,
+          "efficiencyV1": 38,
+          "flowResistance": 0.8,
+          "profileArea": 0.6,
           "weight": 17,
           "weightTire": 1,
-          "rollingResistanceCoefficient": 0.01
+          "rollingResistanceCoefficient": 0.01,
+          "tireAbrasion": 0.006,
+          "efficiency": 0.99
         },
         {
           "name": "racing",
@@ -203,11 +220,14 @@
           "imageTop": "bike-top.png",
           "fuel": "none",
           "speed": 40,
-          "flowResistance": 0.2,
-          "profileArea": 0.1,
+          "efficiencyV1": 38,
+          "flowResistance": 0.5,
+          "profileArea": 0.5,
           "weight": 9,
           "weightTire": 1,
-          "rollingResistanceCoefficient": 0.002
+          "rollingResistanceCoefficient": 0.002,
+          "tireAbrasion": 0.006,
+          "efficiency": 0.99
         }
       ]
     },
@@ -224,12 +244,14 @@
           "speed": 60,
           "mpg": 10,
           "acceleration": 5,
-          "efficiency": 38,
-          "flowResistance": 0.2,
-          "profileArea": 0.1,
+          "efficiencyV1": 38,
+          "flowResistance": 0.8,
+          "profileArea": 0.7,
           "weight": 100,
           "weightTire": 5,
-          "rollingResistanceCoefficient": 0.015
+          "rollingResistanceCoefficient": 0.015,
+          "tireAbrasion": 0.018,
+          "efficiency": 0.25
         }
       ]
     },
@@ -244,12 +266,14 @@
           "imageTop": "scooter-top.png",
           "fuel": "electricity",
           "speed": 30,
-          "efficiency": 50,
-          "flowResistance": 0.2,
-          "profileArea": 0.1,
+          "efficiencyV1": 50,
+          "flowResistance": 0.9,
+          "profileArea": 0.8,
           "weight": 15,
           "weightTire": 1,
-          "rollingResistanceCoefficient": 0.01
+          "rollingResistanceCoefficient": 0.01,
+          "tireAbrasion": 0.006,
+          "efficiency": 0.99
         }
       ]
     },
@@ -267,12 +291,14 @@
           "mpg": 250,
           "acceleration": 5,
           "persons": 30,
-          "efficiency": 38,
+          "efficiencyV1": 38,
           "flowResistance": 1,
           "profileArea": 3.1,
           "weight": 8000,
           "weightTire": 10,
-          "rollingResistanceCoefficient": 0.01
+          "rollingResistanceCoefficient": 0.01,
+          "tireAbrasion": 0.16,
+          "efficiency": 0.3
         }
       ]
     }
@@ -294,9 +320,9 @@
       "perUnit": {
         "carbonDioxideEquivalent": 86,
         "carbonDioxide": 66,
-        "methane": 10,
+        "methane": 14,
         "dust": 6,
-        "microplastic": 4
+        "microplastic": 0
       },
       "color": "#0192d0"
     },
@@ -315,10 +341,10 @@
       "value": 1.12,
       "perUnit": {
         "carbonDioxideEquivalent": 143,
-        "carbonDioxide": 73,
+        "carbonDioxide": 113,
         "methane": 20,
         "dust": 10,
-        "microplastic": 40
+        "microplastic": 0
       },
       "color": "#f3a40a"
     },
@@ -326,10 +352,10 @@
       "value": 0.31,
       "perUnit": {
         "carbonDioxideEquivalent": 38,
-        "carbonDioxide": 30,
+        "carbonDioxide": 31,
         "methane": 5,
         "dust": 2,
-        "microplastic": 1
+        "microplastic": 0
       },
       "color": "#01cf9e"
     },
@@ -337,10 +363,10 @@
       "value": 73.07,
       "perUnit": {
         "carbonDioxideEquivalent": 447,
-        "carbonDioxide": 300,
+        "carbonDioxide": 307,
         "methane": 100,
         "dust": 40,
-        "microplastic": 7
+        "microplastic": 0
       },
       "color": "#871a70"
     },
@@ -348,10 +374,10 @@
       "value": 2.41,
       "perUnit": {
         "carbonDioxideEquivalent": 798,
-        "carbonDioxide": 518,
+        "carbonDioxide": 548,
         "methane": 200,
         "dust": 50,
-        "microplastic": 30
+        "microplastic": 0
       },
       "color": "#fe6e5d"
     }
@@ -360,37 +386,45 @@
     "diesel": {
       "perUnit": {
         "carbonDioxideEquivalent": 2650,
-        "carbonDioxide": 2000,
+        "carbonDioxide": 2050,
         "methane": 500,
         "dust": 100,
-        "microplastic": 50,
+        "microplastic": 0,
         "kwh": 9.9,
         "weight": 830,
-        "calorific": 45.4
+        "calorific": 45.4,
+        "efficiency": 0.3
       }
     },
     "gasoline": {
       "perUnit": {
         "carbonDioxideEquivalent": 2320,
-        "carbonDioxide": 1720,
+        "carbonDioxide": 1770,
         "methane": 450,
         "dust": 100,
-        "microplastic": 50,
+        "microplastic": 0,
         "kwh": 8.6,
         "weight": 740,
-        "calorific": 42.7
+        "calorific": 42.7,
+        "efficiency": 0.25
       }
     },
     "gas": {
       "perUnit": {
         "carbonDioxideEquivalent": 1630,
-        "carbonDioxide": 1000,
+        "carbonDioxide": 1050,
         "methane": 300,
         "dust": 280,
-        "microplastic": 50,
+        "microplastic": 0,
         "kwh": 13.3,
         "weight": 0.8,
-        "calorific": 50
+        "calorific": 50,
+        "efficiency": 0.3
+      }
+    },
+    "electricity": {
+      "perUnit": {
+        "efficiency": 0.99
       }
     }
   }

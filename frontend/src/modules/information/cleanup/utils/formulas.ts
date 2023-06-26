@@ -1,10 +1,31 @@
 import * as config from '@/modules/information/cleanup/utils/configCalculation';
 
 const airtight = 1.225;
-const g = 9.1;
+const g = 9.81;
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export const acceleration = (
+export const consumption = (
+  speed: number,
+  distance: number,
+  vehicle: config.VehicleParameter
+): number => {
+  const fuel = config.fuelUnits(vehicle.fuel);
+  const vehicleEfficiency = vehicle.efficiency
+    ? vehicle.efficiency
+    : fuel.efficiency;
+  const airResistance =
+    (1 / 2) *
+    vehicle.flowResistance *
+    airtight *
+    (vehicle.profileArea / 1000) *
+    Math.pow(speed, 2);
+  const rollingResistance =
+    vehicle.rollingResistanceCoefficient * (vehicle.weight * g);
+  const power = ((airResistance + rollingResistance) * speed) / 1000;
+  const fuelVolume = (power / fuel.kwh) * (1 / vehicleEfficiency);
+  return (fuelVolume / 100) * distance;
+};
+export const accelerationV1 = (
   speed: number,
   distance: number,
   vehicle: config.VehicleParameter
@@ -15,8 +36,8 @@ export const acceleration = (
     vehicle.flowResistance *
     (vehicle.profileArea / 1000) *
     Math.pow(speed, 2);
-  const efficiencyCoefficient = vehicle.efficiency
-    ? vehicle.efficiency / 1000
+  const efficiencyCoefficient = vehicle.efficiencyV1
+    ? vehicle.efficiencyV1 / 1000
     : 1;
   const rollingResistance =
     vehicle.rollingResistanceCoefficient * (vehicle.weightTire * g) * 4;
