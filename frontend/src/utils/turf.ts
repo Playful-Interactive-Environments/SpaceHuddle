@@ -121,6 +121,25 @@ export function isPointCloseToRoute(
   return getDistanceToRoute(routePath, point) < searchDelta;
 }
 
+export function isCornerPointOnSegment(
+  routePath: FeatureCollection,
+  currentPoint: [number, number],
+  targetPoint: [number, number],
+  angleDelta = 10,
+  maxSegment = 5
+): { location: [number, number]; value: boolean } {
+  const subRoute = getSubRoute(routePath, currentPoint, targetPoint) as any;
+  const subCoordinates = subRoute.geometry.coordinates as [number, number][];
+  if (subCoordinates.length < maxSegment + 1) {
+    for (let i = subCoordinates.length - 2; i > 0; i--) {
+      const routePoint = subCoordinates[i];
+      const angle = getAngleDeviation(currentPoint, targetPoint, routePoint);
+      if (angle < angleDelta) return { location: routePoint, value: true };
+    }
+  }
+  return { location: targetPoint, value: false };
+}
+
 export function moveAlongPath(
   routePath: FeatureCollection,
   actualPoint: [number, number],
@@ -153,6 +172,20 @@ export function getAngleDeviation(
   const angleToFreePoint = getRotation(actualPoint, point1);
   const angleToLinePoint = getRotation(actualPoint, point2);
   return Math.abs(angleToFreePoint - angleToLinePoint);
+}
+
+export function getPathDeviation(
+  path1: [[number, number], [number, number]],
+  path2: [[number, number], [number, number]]
+): number {
+  const anglePath1 = getRotation(path1[0], path1[1]);
+  const anglePath2 = getRotation(path2[0], path2[1]);
+  const delta = Math.abs(anglePath1 - anglePath2);
+  if (delta > 180) {
+    const anglePath2 = getRotation(path2[1], path2[0]);
+    return Math.abs(anglePath1 - anglePath2);
+  }
+  return delta;
 }
 
 export function isOnStart(

@@ -3,6 +3,14 @@ import { Client, RoutingJSAPIError } from '@routingjs/core';
 import options from '@routingjs/core/dist/es/options';
 import axios from 'axios';
 import axiosRetry, { isNetworkOrIdempotentRequestError } from 'axios-retry';
+
+export interface OSRMWayPoint {
+  hint?: string;
+  distance?: number;
+  name: string;
+  location: number[];
+}
+
 const handleOSRMError = (error) => {
   let _a, _b, _c, _d;
   const props = {
