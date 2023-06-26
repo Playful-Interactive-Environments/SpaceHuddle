@@ -97,18 +97,67 @@
       {{ personCount }} / {{ vehicleParameter.persons }}
     </div>
     <div class="overlay-bottom">
-      <Joystick
-        :style="{
-          margin: '50px',
-        }"
-        :size="150"
-        :stick-size="50"
-        @move="move($event)"
-        @start="start"
-        @stop="stop"
-        stickColor="white"
+      <el-slider v-model="maxSpeed" :max="vehicleParameter.speed" />
+      <div>
+        <Joystick
+          :size="150"
+          :stick-size="50"
+          @move="move($event)"
+          @start="start"
+          @stop="stop"
+          stickColor="white"
+        />
+      </div>
+    </div>
+  </div>
+  <div ref="controlArea" class="controlArea level">
+    <div class="level-item">
+      <el-slider
+        v-model="speed"
+        vertical
+        height="8rem"
+        :max="vehicleParameter.speed"
       />
     </div>
+    <div class="level-item">
+      <el-progress
+        type="dashboard"
+        :percentage="(moveSpeed / vehicleParameter.speed) * 100"
+        :color="colors"
+      >
+        <template #default>
+          <div>{{ moveSpeed }} km/h</div>
+          <div>
+            {{ $t('module.information.cleanup.participant.speed') }}
+          </div>
+        </template>
+      </el-progress>
+    </div>
+    <div class="level-item">
+      <round-slider
+        v-model="direction"
+        max="360"
+        start-angle="90"
+        end-angle="+360"
+        line-cap="round"
+        radius="70"
+      />
+    </div>
+    <!--<Application
+      ref="pixi"
+      :width="gameWidth"
+      :height="controlHeight"
+      v-if="ready"
+      backgroundColor="#f4f4f4"
+    >
+      <container backgroundColor="red">
+        <sprite
+          texture="/assets/games/cleanup/steering-wheel.png"
+          :width="controlHeight"
+          :height="controlHeight"
+        ></sprite>
+      </container>
+    </Application>-->
   </div>
 </template>
 
@@ -136,6 +185,8 @@ import * as formulas from '@/modules/information/cleanup/utils/formulas';
 import * as configCalculation from '@/modules/information/cleanup/utils/configCalculation';
 import * as turf from '@turf/turf';
 import * as turfUtils from '@/utils/turf';
+import { Application } from 'vue3-pixi';
+import RoundSlider from 'vue-three-round-slider/src';
 //import * as tiles from `https://api.maptiler.com/tiles/v3/tiles.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
 
 MglDefaults.style = `https://api.maptiler.com/maps/streets/style.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
@@ -180,6 +231,8 @@ const minToleratedAngleDeviation = 22.5;
     CustomMapMarker,
     Joystick,
     Line,
+    Application,
+    RoundSlider,
   },
   emits: ['update:useFullSize', 'goalReached'],
 })
@@ -239,15 +292,23 @@ export default class DriveToLocation extends Vue {
   animationIndex = 0;
   animationPoints: [number, number][] = [];
   map!: Map;
+  ready = false;
+  gameWidth = 0;
+  controlHeight = 0;
+
+  direction = 0;
+  speed = 0;
+  maxSpeed = 0;
 
   isMoving = false;
   moveSpeed = 0;
   moveDirection: [number, number] = [0, 0];
+  moveAngle = 0;
   checkRoutePoint: [number, number] = [0, 0];
 
   readonly intervalCalculationTime = 100;
   intervalCalculation = -1;
-  readonly intervalAnimationTime = 50;
+  readonly intervalAnimationTime = 30;
   intervalAnimation = -1;
   readonly busStopIntervalTime = 10000;
   busStopInterval = -1;
@@ -412,6 +473,11 @@ export default class DriveToLocation extends Vue {
   }
 
   async mounted(): Promise<void> {
+    this.gameWidth = this.$el.parentElement.offsetWidth;
+    this.controlHeight = (this.$refs.controlArea as HTMLElement).offsetHeight;
+    this.ready = true;
+    this.maxSpeed = this.vehicleParameter.speed;
+
     this.intervalAnimation = setInterval(
       this.animateVehicle,
       this.intervalAnimationTime
@@ -658,9 +724,47 @@ export default class DriveToLocation extends Vue {
   }
 
   move(event: any): void {
-    this.moveSpeed = (event.distance / 100.0) * this.vehicleParameter.speed;
+    const calcAngle = (point: [number, number]): number => {
+      return Math.atan2(point[0], point[1]) * (180 / Math.PI);
+    };
+
+    this.moveSpeed = (event.distance / 100.0) * this.maxSpeed;
+    this.moveAngle = calcAngle([event.x, event.y]);
     this.moveDirection = [event.x, event.y];
     this.noStreet = false;
+  }
+
+  @Watch('direction', { immediate: true })
+  onDirectionChanged(): void {
+    this.moveAngle = this.direction;
+    this.noStreet = false;
+    this.mapDrivingRotation = this.moveAngle;
+  }
+
+  @Watch('mapDrivingRotation', { immediate: true })
+  onMapDrivingRotationChanged(): void {
+    let direction = this.mapDrivingRotation;
+    if (this.mapDrivingRotation < 0) direction = this.mapDrivingRotation + 360;
+    if (direction !== this.direction) this.direction = direction;
+  }
+
+  @Watch('speed', { immediate: true })
+  onSpeedChanged(): void {
+    if (this.moveSpeed === 0 && this.speed > 0) {
+      this.isMoving = true;
+      this.intervalCalculation = setInterval(
+        this.updateTrace,
+        this.intervalCalculationTime
+      );
+    } else if (this.moveSpeed > 0 && this.speed === 0) {
+      this.stop();
+    }
+    this.moveSpeed = this.speed;
+  }
+
+  @Watch('moveSpeed', { immediate: true })
+  onMoveSpeedChanged(): void {
+    if (this.speed !== this.moveSpeed) this.speed = this.moveSpeed;
   }
 
   getRoute(): turf.Feature<turf.LineString> | turf.LineString {
@@ -677,10 +781,10 @@ export default class DriveToLocation extends Vue {
   }
 
   getNewDrivingPoint(distance: number): [number, number] {
-    return turfUtils.getDestination(
+    return turfUtils.getDestinationFromAngle(
       this.mapDrivingPoint,
       distance,
-      this.moveDirection
+      this.moveAngle
     );
   }
 
@@ -924,6 +1028,7 @@ export default class DriveToLocation extends Vue {
   z-index: 100;
   bottom: 0.5rem;
   right: 0.5rem;
+  padding: 2rem;
 }
 
 .chartArea {
@@ -932,9 +1037,14 @@ export default class DriveToLocation extends Vue {
 }
 
 .mapArea {
-  height: calc(100% - 10rem);
+  height: calc(100% - 10rem - 10rem);
   width: 100%;
   position: relative;
+}
+
+.controlArea {
+  height: 10rem;
+  width: 100%;
 }
 
 .pin {
@@ -965,5 +1075,9 @@ export default class DriveToLocation extends Vue {
 
 .divingVehicle {
   border: var(--color-red) solid 2px;
+}
+
+.rs-control {
+  display: inline-block;
 }
 </style>

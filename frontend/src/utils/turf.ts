@@ -96,6 +96,18 @@ export function getDestination(
   ];
 }
 
+export function getDestinationFromAngle(
+  startPoint: [number, number],
+  distance: number,
+  angle: number
+): [number, number] {
+  const destination = turf.destination(turf.point(startPoint), distance, angle);
+  return [
+    destination.geometry.coordinates[0],
+    destination.geometry.coordinates[1],
+  ];
+}
+
 export function getDistanceToRoute(
   routePath: FeatureCollection,
   point: [number, number]

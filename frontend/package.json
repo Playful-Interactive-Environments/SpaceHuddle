@@ -47,6 +47,7 @@
     "vue-markdown-render": "^2.0.1",
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^4.0.3",
+    "vue-three-round-slider": "^1.2.7",
     "vue3-cookies": "^1.0.6",
     "vue3-draggable": "^2.0.9",
     "vue3-html2pdf": "^1.1.2",
