@@ -29,6 +29,9 @@ export interface VehicleParameter {
   weightTire: number;
   rollingResistanceCoefficient: number;
   tires: number;
+  treadwear: number;
+  tireDiameter: number;
+  tireWidth: number;
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/

@@ -102,6 +102,8 @@ import CleanUpParticles, {
 import SelectChallenge from '@/modules/information/cleanup/organisms/SelectChallenge.vue';
 import ShowResult from '@/modules/information/cleanup/organisms/ShowResult.vue';
 import ModuleInfo from '@/components/participant/molecules/ModuleInfo.vue';
+import * as formulas from '@/modules/information/cleanup/utils/formulas';
+import * as configCalculation from '@/modules/information/cleanup/utils/configCalculation';
 
 enum GameStep {
   Select,
@@ -142,20 +144,43 @@ export default class Participant extends Vue {
     microplastic: { totalCount: 5, collectedCount: 1 },
   };
 
-  trackingData: TrackingData[] = [
-    { speed: 20, persons: 1, consumption: 0.0005, distance: 0.001 },
-    { speed: 40, persons: 1, consumption: 0.001, distance: 0.002 },
-    { speed: 100, persons: 1, consumption: 0.002, distance: 0.004 },
-    { speed: 100, persons: 1, consumption: 0.002, distance: 0.004 },
-    { speed: 50, persons: 1, consumption: 0.001, distance: 0.002 },
-    { speed: 30, persons: 1, consumption: 0.0005, distance: 0.001 },
-  ];
+  trackingData: TrackingData[] = [];
   gameStep = GameStep.Select;
   GameStep = GameStep;
   gameState = GameState.Info;
   GameState = GameState;
 
   mounted(): void {
+    const testData = [
+      { speed: 20, persons: 1, distance: 0.001 },
+      { speed: 40, persons: 1, distance: 0.002 },
+      { speed: 100, persons: 1, distance: 0.004 },
+      { speed: 100, persons: 1, distance: 0.004 },
+      { speed: 50, persons: 1, distance: 0.002 },
+      { speed: 30, persons: 1, distance: 0.001 },
+    ];
+    const vehicleParameter = configCalculation.getVehicleParameter(
+      this.vehicle,
+      this.vehicleType
+    );
+    for (const test of testData) {
+      this.trackingData.push({
+        speed: test.speed,
+        distance: test.distance,
+        persons: test.persons,
+        consumption: formulas.consumption(
+          test.speed,
+          test.distance,
+          vehicleParameter
+        ),
+        tireWareRate: formulas.tireWareRate(
+          test.speed,
+          test.distance,
+          vehicleParameter
+        ),
+      });
+    }
+
     setTimeout(() => {
       const dom = this.$refs.gameContainer as HTMLElement;
       if (dom) {

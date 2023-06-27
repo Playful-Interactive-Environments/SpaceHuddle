@@ -204,6 +204,7 @@ export interface TrackingData {
   consumption: number;
   persons: number;
   distance: number;
+  tireWareRate: number;
 }
 
 export interface ChartData {
@@ -831,6 +832,11 @@ export default class DriveToLocation extends Vue {
       persons: this.personCount,
       consumption: consumption,
       distance: distance,
+      tireWareRate: formulas.tireWareRate(
+        this.moveSpeed,
+        distance,
+        vehicleParameter
+      ),
     };
     this.trackingData.push(trackingData);
     configCalculation.addValueToStatistics(

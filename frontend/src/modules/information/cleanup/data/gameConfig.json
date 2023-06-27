@@ -3,102 +3,22 @@
     "carbonDioxide": {
       "color": "#fe6e5d",
       "calculation": "trackingData.consumption * fuelValue",
-      "speedFunction": {
-        "car": {
-          "sport": "0.35 * speed",
-          "suv": "0.35 * speed",
-          "compact": "0.35 * speed",
-          "e-car": "0.05 * speed"
-        },
-        "bike": {
-          "e-bike": "0.001 * speed",
-          "city": "0.01 * speed"
-        },
-        "motorcycle": {
-          "moped": "0.1 * speed"
-        },
-        "scooter": {
-          "e-scooter": "0.01 * speed"
-        },
-        "bus": {
-          "bus": "0.4 * speed"
-        }
-      }
+      "tireProportion": 0
     },
     "dust": {
       "color": "#1d2948",
-      "calculation": "trackingData.consumption * fuelValue",
-      "speedFunction": {
-        "car": {
-          "sport": "0.5 * speed",
-          "suv": "0.5 * speed",
-          "compact": "0.5 * speed",
-          "e-car": "0.05 * speed"
-        },
-        "bike": {
-          "e-bike": "0.001 * speed",
-          "city": "0.01 * speed"
-        },
-        "motorcycle": {
-          "moped": "0.1 * speed"
-        },
-        "scooter": {
-          "e-scooter": "0.01 * speed"
-        },
-        "bus": {
-          "bus": "0.4 * speed"
-        }
-      }
+      "calculation": "trackingData.consumption * fuelValue + trackingData.tireWareRate * 5",
+      "tireProportion": 5
     },
     "methane": {
       "color": "#f3a40a",
       "calculation": "trackingData.consumption * fuelValue",
-      "speedFunction": {
-        "car": {
-          "sport": "0.2 * speed",
-          "suv": "0.2 * speed",
-          "compact": "0.2 * speed",
-          "e-car": "0.05 * speed"
-        },
-        "bike": {
-          "e-bike": "0.001 * speed",
-          "city": "0.01 * speed"
-        },
-        "motorcycle": {
-          "moped": "0.1 * speed"
-        },
-        "scooter": {
-          "e-scooter": "0.01 * speed"
-        },
-        "bus": {
-          "bus": "0.4 * speed"
-        }
-      }
+      "tireProportion": 0
     },
     "microplastic": {
       "color": "#0192d0",
-      "calculation": "trackingData.distance * parameter.tireAbrasion * 100",
-      "speedFunction": {
-        "car": {
-          "sport": "0.3 * speed",
-          "suv": "0.3 * speed",
-          "compact": "0.3 * speed",
-          "e-car": "0.3 * speed"
-        },
-        "bike": {
-          "e-bike": "0.1 * speed",
-          "city": "0.1 * speed"
-        },
-        "motorcycle": {
-          "moped": "0.2 * speed"
-        },
-        "scooter": {
-          "e-scooter": "0.05 * speed"
-        },
-        "bus": {
-          "bus": "0.3 * speed"
-        }
-      }
+      "calculation": "trackingData.tireWareRate * 10",
+      "tireProportion": 10
     }
   },
   "vehicles": {
@@ -122,7 +42,10 @@
           "weightTire": 10,
           "rollingResistanceCoefficient": 0.015,
           "tireAbrasion": 0.18,
-          "efficiency": 0.3
+          "efficiency": 0.3,
+          "treadwear": 200,
+          "tireDiameter": 0.5,
+          "tireWidth": 0.2
         },
         {
           "name": "suv",
@@ -140,7 +63,10 @@
           "weightTire": 10,
           "rollingResistanceCoefficient": 0.015,
           "tireAbrasion": 0.16,
-          "efficiency": 0.3
+          "efficiency": 0.3,
+          "treadwear": 200,
+          "tireDiameter": 0.5,
+          "tireWidth": 0.2
         },
         {
           "name": "compact",
@@ -158,7 +84,10 @@
           "weightTire": 10,
           "rollingResistanceCoefficient": 0.015,
           "tireAbrasion": 0.1,
-          "efficiency": 0.25
+          "efficiency": 0.25,
+          "treadwear": 200,
+          "tireDiameter": 0.5,
+          "tireWidth": 0.2
         },
         {
           "name": "e-car",
@@ -176,7 +105,10 @@
           "weightTire": 10,
           "rollingResistanceCoefficient": 0.015,
           "tireAbrasion": 0.12,
-          "efficiency": 0.99
+          "efficiency": 0.99,
+          "treadwear": 200,
+          "tireDiameter": 0.5,
+          "tireWidth": 0.2
         }
       ]
     },
@@ -197,7 +129,10 @@
           "weightTire": 1,
           "rollingResistanceCoefficient": 0.01,
           "tireAbrasion": 0.006,
-          "efficiency": 0.99
+          "efficiency": 0.99,
+          "treadwear": 200,
+          "tireDiameter": 0.8,
+          "tireWidth": 0.05
         },
         {
           "name": "city",
@@ -212,7 +147,10 @@
           "weightTire": 1,
           "rollingResistanceCoefficient": 0.01,
           "tireAbrasion": 0.006,
-          "efficiency": 0.99
+          "efficiency": 0.99,
+          "treadwear": 200,
+          "tireDiameter": 0.8,
+          "tireWidth": 0.05
         },
         {
           "name": "racing",
@@ -227,7 +165,10 @@
           "weightTire": 1,
           "rollingResistanceCoefficient": 0.002,
           "tireAbrasion": 0.006,
-          "efficiency": 0.99
+          "efficiency": 0.99,
+          "treadwear": 200,
+          "tireDiameter": 0.8,
+          "tireWidth": 0.05
         }
       ]
     },
@@ -251,7 +192,10 @@
           "weightTire": 5,
           "rollingResistanceCoefficient": 0.015,
           "tireAbrasion": 0.018,
-          "efficiency": 0.25
+          "efficiency": 0.25,
+          "treadwear": 200,
+          "tireDiameter": 0.6,
+          "tireWidth": 0.1
         }
       ]
     },
@@ -273,7 +217,10 @@
           "weightTire": 1,
           "rollingResistanceCoefficient": 0.01,
           "tireAbrasion": 0.006,
-          "efficiency": 0.99
+          "efficiency": 0.99,
+          "treadwear": 200,
+          "tireDiameter": 0.2,
+          "tireWidth": 0.05
         }
       ]
     },
@@ -298,7 +245,10 @@
           "weightTire": 10,
           "rollingResistanceCoefficient": 0.01,
           "tireAbrasion": 0.16,
-          "efficiency": 0.3
+          "efficiency": 0.3,
+          "treadwear": 200,
+          "tireDiameter": 0.7,
+          "tireWidth": 0.3
         }
       ]
     }
