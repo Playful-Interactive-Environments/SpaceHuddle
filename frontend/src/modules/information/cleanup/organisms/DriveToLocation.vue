@@ -940,8 +940,19 @@ export default class DriveToLocation extends Vue {
           pointOnLine
         );
         if (angleDeviation < minToleratedAngleDeviation) {
+          //console.log('pointOnLine');
           newDrivingPoint = pointOnLine;
+          /*const corner = turfUtils.isCornerBetweenPoints(
+            this.routePath,
+            this.mapDrivingPoint,
+            newDrivingPoint
+          );
+          if (corner.value) {
+            this.corner = corner.location;
+            newDrivingPoint = corner.location;
+          }*/
         } else {
+          //console.log('closed point');
           let recalculateRoute = true;
           const corner = turfUtils.isCornerPointOnSegment(
             this.routePath,

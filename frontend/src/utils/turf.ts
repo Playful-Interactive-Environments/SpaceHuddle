@@ -145,8 +145,40 @@ export function isCornerPointOnSegment(
   if (subCoordinates.length < maxSegment + 1) {
     for (let i = subCoordinates.length - 2; i > 0; i--) {
       const routePoint = subCoordinates[i];
-      const angle = getAngleDeviation(currentPoint, targetPoint, routePoint);
-      if (angle < angleDelta) return { location: routePoint, value: true };
+      if (
+        turf.distance(currentPoint, routePoint) > 0 &&
+        turf.distance(targetPoint, routePoint) > 0
+      ) {
+        const angle = getAngleDeviation(currentPoint, targetPoint, routePoint);
+        if (angle < angleDelta) return { location: routePoint, value: true };
+      }
+    }
+  }
+  return { location: targetPoint, value: false };
+}
+
+export function isCornerBetweenPoints(
+  routePath: FeatureCollection,
+  currentPoint: [number, number],
+  targetPoint: [number, number],
+  angleDelta = 135,
+  maxSegment = 5
+): { location: [number, number]; value: boolean } {
+  const subRoute = getSubRoute(routePath, currentPoint, targetPoint) as any;
+  const subCoordinates = subRoute.geometry.coordinates as [number, number][];
+  if (subCoordinates.length < maxSegment + 1) {
+    for (let i = subCoordinates.length - 2; i > 0; i--) {
+      const routePoint = subCoordinates[i];
+      if (
+        turf.distance(currentPoint, routePoint) > 0 &&
+        turf.distance(targetPoint, routePoint) > 0
+      ) {
+        const angle = getAngleDeviation(routePoint, currentPoint, targetPoint);
+        if (angle < angleDelta) {
+          return { location: routePoint, value: true };
+          console.log('isCornerBetweenPoints', angle);
+        }
+      }
     }
   }
   return { location: targetPoint, value: false };
@@ -177,13 +209,13 @@ export function getRotation(
 }
 
 export function getAngleDeviation(
-  actualPoint: [number, number],
+  center: [number, number],
   point1: [number, number],
   point2: [number, number]
 ): number {
-  const angleToFreePoint = getRotation(actualPoint, point1);
-  const angleToLinePoint = getRotation(actualPoint, point2);
-  return Math.abs(angleToFreePoint - angleToLinePoint);
+  const angleToPoint1 = getRotation(center, point1);
+  const angleToPoint2 = getRotation(center, point2);
+  return Math.abs(angleToPoint1 - angleToPoint2);
 }
 
 export function getPathDeviation(
