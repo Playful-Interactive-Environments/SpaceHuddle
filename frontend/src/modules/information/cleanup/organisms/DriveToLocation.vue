@@ -536,8 +536,18 @@ export default class DriveToLocation extends Vue {
     ) {
       this.mapStart = this.parameter.mapStart;
     }
-    if (this.parameter.mapEnd && this.mapEnd[0] === 0 && this.mapEnd[1] === 0) {
+    /*if (this.parameter.mapEnd && this.mapEnd[0] === 0 && this.mapEnd[1] === 0) {
       this.mapEnd = this.parameter.mapEnd;
+    }*/
+    if (this.mapEnd[0] === 0 && this.mapEnd[1] === 0) {
+      const distanceX = 0.02;
+      const distanceY = 0.02;
+      this.mapEnd = turf.randomPosition([
+        this.mapStart[0] - distanceX,
+        this.mapStart[1] - distanceY,
+        this.mapStart[0] + distanceX,
+        this.mapStart[1] + distanceY,
+      ]) as [number, number];
     }
     this.setMapDrivingPoint([...this.mapStart], true);
 

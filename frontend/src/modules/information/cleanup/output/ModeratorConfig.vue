@@ -20,15 +20,6 @@
             <font-awesome-icon icon="location-crosshairs" class="pin" />
           </template>
         </CustomMapMarker>
-        <CustomMapMarker
-          :coordinates="mapEnd"
-          :draggable="true"
-          v-on:dragend="endPositionChanged"
-        >
-          <template v-slot:icon>
-            <font-awesome-icon icon="flag-checkered" class="pin" />
-          </template>
-        </CustomMapMarker>
 
         <mgl-navigation-control position="bottom-left" />
       </mgl-map>
@@ -67,7 +58,6 @@ export default class ModeratorConfig extends Vue {
 
   mapCenter = [14.511986682000128, 48.36875256196966];
   mapStart = [14.511986682000128, 48.36875256196966];
-  mapEnd = [14.511986682000128, 48.36875256196966];
   mapZoom = 5;
 
   @Watch('modelValue', { immediate: true })
@@ -88,11 +78,6 @@ export default class ModeratorConfig extends Vue {
       } else {
         this.mapStart = [...this.modelValue.mapStart];
       }
-      if (!this.modelValue.mapEnd) {
-        this.modelValue.mapEnd = [...this.mapEnd];
-      } else {
-        this.mapEnd = [...this.modelValue.mapEnd];
-      }
     }
   }
 
@@ -108,13 +93,6 @@ export default class ModeratorConfig extends Vue {
         this.mapStart = [...this.mapCenter];
         this.modelValue.mapStart = [...this.mapCenter];
       }
-      if (
-        this.modelValue.mapCenter[0] === this.modelValue.mapEnd[0] &&
-        this.modelValue.mapCenter[1] === this.modelValue.mapEnd[1]
-      ) {
-        this.mapEnd = [...this.mapCenter];
-        this.modelValue.mapEnd = [...this.mapCenter];
-      }
       this.modelValue.mapCenter = [...this.mapCenter];
       this.modelValue.mapZoom = this.mapZoom;
     }
@@ -123,11 +101,6 @@ export default class ModeratorConfig extends Vue {
   startPositionChanged(marker: any): void {
     const lngLat = marker.target._lngLat;
     this.modelValue.mapStart = [lngLat.lng, lngLat.lat];
-  }
-
-  endPositionChanged(marker: any): void {
-    const lngLat = marker.target._lngLat;
-    this.modelValue.mapEnd = [lngLat.lng, lngLat.lat];
   }
 }
 </script>
