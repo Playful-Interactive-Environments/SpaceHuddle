@@ -1,7 +1,12 @@
 <template>
-  test
   <el-form-item
-    :label="$t('module.brainstorming.map.moderatorConfig.mapSection')"
+    :label="$t('module.information.cleanup.moderatorConfig.replayable')"
+    :prop="`${rulePropPath}.replayable`"
+  >
+    <el-switch class="level-item" v-model="modelValue.replayable" />
+  </el-form-item>
+  <el-form-item
+    :label="$t('module.information.cleanup.moderatorConfig.mapSection')"
     :prop="`${rulePropPath}.mapSection`"
   >
     <div style="height: 200px">
@@ -77,6 +82,9 @@ export default class ModeratorConfig extends Vue {
         this.modelValue.mapStart = [...this.mapStart];
       } else {
         this.mapStart = [...this.modelValue.mapStart];
+      }
+      if (!('replayable' in this.modelValue)) {
+        this.modelValue.replayable = true;
       }
     }
   }

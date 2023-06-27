@@ -3,6 +3,10 @@
     "title": "Clean Up",
     "description": "A climate game about the emission of gases that are harmful to the climate."
   },
+  "moderatorConfig": {
+    "mapSection": "map section",
+    "replayable": "replayable"
+  },
   "participant": {
     "speed": "speed",
     "electricity": "electricity ratio",

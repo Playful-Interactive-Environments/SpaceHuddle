@@ -150,6 +150,7 @@
             :collision-handler="particleCollisionHandler"
             @destroyObject="destroyParticle"
             @outsideDrawingSpace="outsideDrawingSpace"
+            @collision="updateTracking"
           >
             <Graphics
               :radius="particleRadius"
@@ -199,6 +200,8 @@ import Color from 'colorjs.io';
 import { TrackingData } from '@/modules/information/cleanup/organisms/DriveToLocation.vue';
 import * as configCalculation from '@/modules/information/cleanup/utils/configCalculation';
 import * as pixiUtil from '@/utils/pixi';
+import { TaskParticipantState } from '@/types/api/TaskParticipantState';
+import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
 Chart.register(annotationPlugin);
 
 interface DrawingParticle {
@@ -224,10 +227,12 @@ export interface ParticleState {
     Line,
     Pixi,
   },
-  emits: ['finished'],
+  emits: ['finished', 'update:trackingState', 'update:trackingIteration'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class CleanUpParticles extends Vue {
+  @Prop() readonly trackingState!: TaskParticipantState;
+  @Prop() readonly trackingIteration!: TaskParticipantIteration;
   @Prop({ default: 'car' }) readonly vehicle!:
     | 'car'
     | 'bike'
@@ -368,7 +373,15 @@ export default class CleanUpParticles extends Vue {
     }
   }
 
+  initTrackingData(): void {
+    if (this.trackingIteration && !this.trackingIteration.parameter.cleanUp) {
+      this.trackingIteration.parameter.cleanUp = {};
+      this.$emit('update:trackingIteration', this.trackingIteration);
+    }
+  }
+
   mounted(): void {
+    this.initTrackingData();
     for (const particleName in gameConfig.particles) {
       this.particleState[particleName] = {
         totalCount: 0,
@@ -452,6 +465,21 @@ export default class CleanUpParticles extends Vue {
           await delay(Math.floor(this.intervalTime / emissionCount) - 1);
         }
       }
+    }
+    this.updateTracking();
+  }
+
+  updateTracking(): void {
+    this.initTrackingData();
+    if (this.trackingIteration) {
+      this.trackingIteration.parameter.cleanUp.particleState =
+        this.particleState;
+      this.trackingIteration.parameter.cleanUp.totalTime =
+        this.chartData.datasets[0].data.length;
+      this.trackingIteration.parameter.cleanUp.remaindingTime =
+        this.chartData.datasets[0].data.length - this.activeValue;
+      this.trackingIteration.parameter.cleanUp.workingTime = this.activeValue;
+      this.$emit('update:trackingIteration', this.trackingIteration);
     }
   }
 

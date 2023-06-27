@@ -244,14 +244,17 @@ export function isOnStart(
   return goalDistance < 0.001;
 }
 
+export function distanceToGoal(
+  routePath: FeatureCollection,
+  activePoint: [number, number]
+): number {
+  const endPoint = getRouteEndPoint(routePath);
+  return turf.distance(turf.point(activePoint), turf.point(endPoint));
+}
+
 export function goalReached(
   routePath: FeatureCollection,
   activePoint: [number, number]
 ): boolean {
-  const endPoint = getRouteEndPoint(routePath);
-  const goalDistance = turf.distance(
-    turf.point(activePoint),
-    turf.point(endPoint)
-  );
-  return goalDistance < 0.001;
+  return distanceToGoal(routePath, activePoint) < 0.001;
 }

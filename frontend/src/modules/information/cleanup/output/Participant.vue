@@ -1,87 +1,41 @@
 <template>
   <div ref="gameContainer" class="mapSpace">
-    <!--<module-info
-      v-if="gameStep === GameStep.Select && gameState === GameState.Info"
-      :module-info-entry-data-list="[
-        {
-          imageUrl: '/assets/games/cleanup/tutorial/traffic.jpg',
-          title: 'traffic',
-          text: $t('module.information.cleanup.participant.tutorial.traffic'),
-        },
-        {
-          imageUrl: '/assets/games/cleanup/tutorial/vehicleType.jpg',
-          title: 'vehicleType',
-          text: $t('module.information.cleanup.participant.tutorial.vehicleType'),
-        },
-        {
-          imageUrl: '/assets/games/cleanup/tutorial/emissionStats.jpg',
-          title: 'emissionStats',
-          text: $t('module.information.cleanup.participant.tutorial.emissionStats'),
-        },
-        {
-          imageUrl: '/assets/games/cleanup/tutorial/emissionStatsVariable.jpg',
-          title: 'emissionStatsVariable',
-          text: $t('module.information.cleanup.participant.tutorial.emissionStatsVariable'),
-        },
-      ]"
-      @infoRead="gameState = GameState.Game"
-    />-->
     <module-info
-      v-if="gameStep === GameStep.Select && gameState === GameState.Info"
+      v-if="gameState === GameState.Info"
       translation-path="module.information.cleanup.participant.tutorial"
       image-directory="/assets/games/cleanup/tutorial"
-      :module-info-entry-data-list="[
-        'traffic',
-        'vehicleType',
-        'emissionStats',
-        'emissionStatsVariable',
-      ]"
+      :module-info-entry-data-list="tutorialList"
       @infoRead="gameState = GameState.Game"
     />
     <select-challenge
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
+      v-model:tracking-state="state"
+      v-model:tracking-iteration="iteration"
       @play="startGame"
-    />
-    <module-info
-      v-if="gameStep === GameStep.Drive && gameState === GameState.Info"
-      translation-path="module.information.cleanup.participant.tutorial"
-      image-directory="/assets/games/cleanup/tutorial"
-      :module-info-entry-data-list="
-        vehicle === 'bus' ? ['speed', 'personCount', 'addPersons'] : ['speed']
-      "
-      @infoRead="gameState = GameState.Game"
     />
     <drive-to-location
       v-if="gameStep === GameStep.Drive && sizeCalculated && module"
       :parameter="module.parameter"
       :vehicle="vehicle"
       :vehicle-type="vehicleType"
+      v-model:tracking-state="state"
+      v-model:tracking-iteration="iteration"
       v-on:goalReached="goalReached"
-    />
-    <module-info
-      v-if="gameStep === GameStep.CleanUp && gameState === GameState.Info"
-      translation-path="module.information.cleanup.participant.tutorial"
-      image-directory="/assets/games/cleanup/tutorial"
-      :module-info-entry-data-list="['cleanUp', 'maxCount', 'particleTypes']"
-      @infoRead="gameState = GameState.Game"
     />
     <clean-up-particles
       v-if="gameStep === GameStep.CleanUp && gameState === GameState.Game"
       :vehicle="vehicle"
       :vehicle-type="vehicleType"
       :trackingData="trackingData"
+      v-model:tracking-state="state"
+      v-model:tracking-iteration="iteration"
       @finished="cleanupFinished"
-    />
-    <module-info
-      v-if="gameStep === GameStep.Result && gameState === GameState.Info"
-      translation-path="module.information.cleanup.participant.tutorial"
-      image-directory="/assets/games/cleanup/tutorial"
-      :module-info-entry-data-list="['improveSpeed', 'improveElectricity']"
-      @infoRead="gameState = GameState.Game"
     />
     <show-result
       v-if="gameStep === GameStep.Result && gameState === GameState.Game"
       :particle-state="particleState"
+      v-model:tracking-state="state"
+      v-model:tracking-iteration="iteration"
     />
   </div>
 </template>
@@ -104,12 +58,18 @@ import ShowResult from '@/modules/information/cleanup/organisms/ShowResult.vue';
 import ModuleInfo from '@/components/participant/molecules/ModuleInfo.vue';
 import * as formulas from '@/modules/information/cleanup/utils/formulas';
 import * as configCalculation from '@/modules/information/cleanup/utils/configCalculation';
+import * as taskParticipantService from '@/services/task-participant-service';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
+import { TaskParticipantState } from '@/types/api/TaskParticipantState';
+import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
+import { delay } from '@/utils/wait';
 
 enum GameStep {
-  Select,
-  Drive,
-  CleanUp,
-  Result,
+  Select = 'select',
+  Drive = 'drive',
+  CleanUp = 'clean up',
+  Result = 'result',
 }
 
 enum GameState {
@@ -149,6 +109,30 @@ export default class Participant extends Vue {
   GameStep = GameStep;
   gameState = GameState.Info;
   GameState = GameState;
+
+  iteration: TaskParticipantIteration | null = null;
+  state: TaskParticipantState | null = null;
+
+  get tutorialList(): string[] {
+    switch (this.gameStep) {
+      case GameStep.Select:
+        return [
+          'traffic',
+          'vehicleType',
+          'emissionStats',
+          'emissionStatsVariable',
+        ];
+      case GameStep.Drive:
+        if (this.vehicle === 'bus')
+          return ['speed', 'personCount', 'addPersons'];
+        return ['speed'];
+      case GameStep.CleanUp:
+        return ['cleanUp', 'maxCount', 'particleTypes'];
+      case GameStep.Result:
+        return ['improveSpeed', 'improveElectricity'];
+    }
+    return [];
+  }
 
   mounted(): void {
     const testData = [
@@ -203,6 +187,35 @@ export default class Participant extends Vue {
     this.deregisterAll();
   }
 
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    if (this.taskId) {
+      this.deregisterAll();
+      taskParticipantService.registerGetList(
+        this.taskId,
+        this.updateState,
+        EndpointAuthorisationType.PARTICIPANT,
+        2 * 60
+      );
+      taskParticipantService
+        .postParticipantIteration(this.taskId, {
+          state: TaskParticipantIterationStatesType.IN_PROGRESS,
+          parameter: {
+            gameStep: GameStep.Select,
+            vehicle: {
+              category: this.vehicle,
+              type: this.vehicleType,
+            },
+            trackingData: [],
+            particleState: {},
+          },
+        })
+        .then((result) => {
+          this.iteration = result;
+        });
+    }
+  }
+
   @Watch('moduleId', { immediate: true })
   onModuleIdChanged(): void {
     if (this.moduleId) {
@@ -224,18 +237,73 @@ export default class Participant extends Vue {
     this.vehicleType = vehicle.type;
     this.gameStep = GameStep.Drive;
     this.gameState = GameState.Info;
+
+    if (this.iteration) {
+      this.iteration.parameter.gameStep = GameStep.Drive;
+      this.iteration.parameter.vehicle = vehicle;
+    }
   }
 
   goalReached(trackingData): void {
     this.trackingData = trackingData;
     this.gameStep = GameStep.CleanUp;
     this.gameState = GameState.Info;
+
+    if (this.iteration) {
+      this.iteration.parameter.gameStep = GameStep.CleanUp;
+      this.iteration.parameter.trackingData = trackingData;
+    }
   }
 
   cleanupFinished(particleState: { [key: string]: ParticleState }): void {
     this.particleState = particleState;
     this.gameStep = GameStep.Result;
     this.gameState = GameState.Info;
+
+    if (this.iteration) {
+      this.iteration.parameter.gameStep = GameStep.Result;
+      this.iteration.parameter.particleState = particleState;
+    }
+    if (
+      this.state &&
+      this.module &&
+      'replayabel' in this.module.parameter &&
+      !this.module.parameter.replayabel
+    ) {
+      this.state.state = TaskParticipantStatesType.FINISHED;
+    }
+  }
+
+  updateState(stateList: TaskParticipantState[]): void {
+    if (stateList.length > 0) {
+      this.state = stateList[0];
+      if (this.state.state === TaskParticipantStatesType.FINISHED) {
+        //
+      }
+    }
+  }
+
+  @Watch('state', { immediate: true, deep: true })
+  onStateChanged(): void {
+    if (this.state) {
+      taskParticipantService.putParticipantState(this.taskId, this.state);
+    }
+  }
+
+  isSavingIterationData = false;
+  @Watch('iteration', { immediate: true, deep: true })
+  async onIterationChanged(): Promise<void> {
+    if (!this.isSavingIterationData) {
+      this.isSavingIterationData = true;
+      await delay(100);
+      if (this.iteration) {
+        await taskParticipantService.putParticipantIteration(
+          this.taskId,
+          this.iteration
+        );
+      }
+      this.isSavingIterationData = false;
+    }
   }
 }
 </script>

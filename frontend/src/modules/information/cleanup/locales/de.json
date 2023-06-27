@@ -3,6 +3,10 @@
     "title": "Clean Up",
     "description": "Ein Klimaspiel über den Ausstoß von klimaschädlichen Gasen."
   },
+  "moderatorConfig": {
+    "mapSection": "Kartenabschnitt",
+    "replayable": "mehrfach spielbar"
+  },
   "participant": {
     "speed": "Geschwindigkeit",
     "electricity": "Stromanteil",

@@ -124,15 +124,20 @@ import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import * as PIXI from 'pixi.js';
 import * as pixiUtil from '@/utils/pixi';
+import { TaskParticipantState } from '@/types/api/TaskParticipantState';
+import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 
 const resultTabName = 'result';
 
 @Options({
   components: { GameObject, GameContainer },
-  emits: [],
+  emits: ['update:trackingState', 'update:trackingIteration'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ShowResult extends Vue {
+  @Prop() readonly trackingState!: TaskParticipantState;
+  @Prop() readonly trackingIteration!: TaskParticipantIteration;
   @Prop({
     default: {
       carbonDioxide: { collectedCount: 0, totalCount: 0 },
@@ -326,6 +331,23 @@ export default class ShowResult extends Vue {
     PIXI.Assets.load('/assets/games/cleanup/molecules.json').then(
       (sheet) => (this.spritesheet = sheet)
     );
+
+    if (this.trackingState) {
+      //this.trackingState.state = TaskParticipantStatesType.FINISHED;
+      this.trackingState.parameter = {
+        rate: this.successRate,
+      };
+      this.$emit('update:trackingState', this.trackingState);
+    }
+
+    if (this.trackingIteration) {
+      this.trackingIteration.state =
+        this.successRate >= 2
+          ? TaskParticipantIterationStatesType.WIN
+          : TaskParticipantIterationStatesType.LOOS;
+      this.trackingIteration.parameter.rate = this.successRate;
+      this.$emit('update:trackingIteration', this.trackingIteration);
+    }
   }
 
   @Watch('gameWidth', { immediate: true })

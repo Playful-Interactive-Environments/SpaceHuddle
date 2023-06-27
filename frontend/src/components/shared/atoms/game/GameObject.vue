@@ -27,6 +27,7 @@ import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
     'destroyObject',
     'outsideDrawingSpace',
     'sizeChanged',
+    'collision',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -213,6 +214,8 @@ export default class GameObject extends Vue {
     if (this.collisionHandler) {
       this.collisionHandler.handleCollision(this);
     }
+
+    this.$emit('collision', this);
   }
 }
 </script>

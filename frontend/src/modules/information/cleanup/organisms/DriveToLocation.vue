@@ -71,12 +71,12 @@
         :key="index"
         :coordinates="searchPoint"
         :color="searchPointColors[index]"
-      ></mgl-marker>-->
+      ></mgl-marker>
       <CustomMapMarker :coordinates="corner">
         <template v-slot:icon>
           <font-awesome-icon icon="up-down-left-right" />
         </template>
-      </CustomMapMarker>
+      </CustomMapMarker>-->
     </mgl-map>
     <div class="overlay-top-left">
       <el-progress
@@ -187,6 +187,8 @@ import * as turf from '@turf/turf';
 import * as turfUtils from '@/utils/turf';
 import { Application } from 'vue3-pixi';
 import RoundSlider from 'vue-three-round-slider/src';
+import { TaskParticipantState } from '@/types/api/TaskParticipantState';
+import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
 //import * as tiles from `https://api.maptiler.com/tiles/v3/tiles.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
 
 MglDefaults.style = `https://api.maptiler.com/maps/streets/style.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
@@ -235,9 +237,16 @@ const minToleratedAngleDeviation = 22.5;
     Application,
     RoundSlider,
   },
-  emits: ['update:useFullSize', 'goalReached'],
+  emits: [
+    'update:useFullSize',
+    'goalReached',
+    'update:trackingState',
+    'update:trackingIteration',
+  ],
 })
 export default class DriveToLocation extends Vue {
+  @Prop() readonly trackingState!: TaskParticipantState;
+  @Prop() readonly trackingIteration!: TaskParticipantIteration;
   @Prop({ default: 'car' }) readonly vehicle!:
     | 'car'
     | 'bike'
@@ -473,7 +482,17 @@ export default class DriveToLocation extends Vue {
     }
   }
 
+  initTrackingData(): void {
+    if (this.trackingIteration && !this.trackingIteration.parameter.drive) {
+      this.trackingIteration.parameter.drive = {
+        stops: 0,
+      };
+      this.$emit('update:trackingIteration', this.trackingIteration);
+    }
+  }
+
   async mounted(): Promise<void> {
+    this.initTrackingData();
     this.gameWidth = this.$el.parentElement.offsetWidth;
     this.controlHeight = (this.$refs.controlArea as HTMLElement).offsetHeight;
     this.ready = true;
@@ -565,6 +584,15 @@ export default class DriveToLocation extends Vue {
         turf.point(pathPoints[1])
       );
       this.routeCalculated = true;
+
+      this.initTrackingData();
+      if (this.trackingIteration) {
+        this.trackingIteration.parameter.drive.routePath = this.routePath;
+        this.trackingIteration.parameter.drive.routePathLenght = turf.length(
+          this.routePath
+        );
+        this.$emit('update:trackingIteration', this.trackingIteration);
+      }
     });
   }
 
@@ -731,6 +759,12 @@ export default class DriveToLocation extends Vue {
           busStop.persons -= addCount;
         }
       }
+    }
+
+    this.initTrackingData();
+    if (this.trackingIteration) {
+      this.trackingIteration.parameter.drive.stops++;
+      this.$emit('update:trackingIteration', this.trackingIteration);
     }
   }
 
@@ -1013,6 +1047,18 @@ export default class DriveToLocation extends Vue {
       this.addDrivingDataToChart(newDrivingPoint);
       if (isOnRoute) {
         this.updateDrivingPoint(newDrivingPoint);
+      }
+
+      this.initTrackingData();
+      if (this.trackingIteration) {
+        this.trackingIteration.parameter.drive.trackingData = this.trackingData;
+        this.trackingIteration.parameter.drive.distanceToGoal =
+          turfUtils.distanceToGoal(this.routePath, this.mapDrivingPoint);
+        this.trackingIteration.parameter.drive.drivenPathLength = turf.length(
+          this.drivenPath
+        );
+        this.trackingIteration.parameter.drive.drivenPath = this.drivenPath;
+        this.$emit('update:trackingIteration', this.trackingIteration);
       }
     }
     this.updateTraceIsRunning = false;
