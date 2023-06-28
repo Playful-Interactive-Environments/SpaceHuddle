@@ -12,7 +12,7 @@
     <el-carousel-item v-for="keyword of moduleInfoEntryDataList" :key="keyword">
       <img
         :style="{ height: `${(gameHeight / 3) * 2}px` }"
-        :src="`${imageDirectory}\\${keyword}.jpg`"
+        :src="`${imageDirectory}\\${keyword}.${fileExtension}`"
         :alt="keyword"
       />
       <div>
@@ -47,6 +47,7 @@ export default class ModuleInfo extends Vue {
   readonly moduleInfoEntryDataList!: string[];
   @Prop({ default: '' }) readonly translationPath!: string;
   @Prop({ default: '' }) readonly imageDirectory!: string;
+  @Prop({ default: 'jpg' }) readonly fileExtension!: string;
   gameHeight = 0;
 
   mounted(): void {
