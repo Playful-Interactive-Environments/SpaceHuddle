@@ -42,12 +42,25 @@
         anchor="top"
       >
         <template v-slot:icon>
-          <img
-            class="divingVehicle"
-            :src="`/assets/games/cleanup/vehicle/${vehicleParameter.imageTop}`"
-            alt="car"
-            :width="20"
-          />
+          <div
+            class="personContainer"
+            :style="{ '--persons': boardingPersons }"
+          >
+            <img
+              class="divingVehicle"
+              :src="`/assets/games/cleanup/vehicle/${vehicleParameter.imageTop}`"
+              alt="car"
+              :width="20"
+            />
+            <font-awesome-icon
+              v-if="boardingPersons > 0"
+              icon="user"
+              class="person"
+            />
+            <div class="addCount" v-if="boardingPersons > 0">
+              +{{ boardingPersons }}
+            </div>
+          </div>
         </template>
       </CustomMapMarker>
       <CustomMapMarker anchor="bottom-left" :coordinates="mapEnd">
@@ -316,6 +329,8 @@ export default class DriveToLocation extends Vue {
   moveAngle = 0;
   checkRoutePoint: [number, number] = [0, 0];
 
+  boardingPersons = 0;
+
   readonly intervalCalculationTime = 100;
   intervalCalculation = -1;
   readonly intervalAnimationTime = 30;
@@ -372,7 +387,6 @@ export default class DriveToLocation extends Vue {
   onLoad(e: MglEvent): void {
     const map = e.map;
     this.map = map;
-    map.setMinZoom(this.mapZoomDefault);
     //map.scrollZoom.disable();
     const notNeededLayers = map.getStyle().layers.filter((layer) => {
       const layerCategory = layer['source-layer'];
@@ -409,6 +423,7 @@ export default class DriveToLocation extends Vue {
           ['==', '$type', 'Point'],
           ['==', 'class', 'bus'],
         ];
+        map.setMinZoom(busLayer.minzoom);
         busLayer.minzoom = 0;
         busLayer['source-layer'] = 'poi';
         map.addLayer(busLayer);
@@ -732,6 +747,7 @@ export default class DriveToLocation extends Vue {
   }
 
   start(event: any): void {
+    this.boardingPersons = 0;
     this.move(event);
     this.isMoving = true;
     this.intervalCalculation = setInterval(
@@ -755,6 +771,7 @@ export default class DriveToLocation extends Vue {
           let addCount = busStop.persons;
           if (addCount > this.vehicleParameter.persons - this.personCount)
             addCount = this.vehicleParameter.persons - this.personCount;
+          this.boardingPersons = addCount;
           this.personCount += addCount;
           busStop.persons -= addCount;
         }
@@ -1152,5 +1169,72 @@ export default class DriveToLocation extends Vue {
 
 .rs-control {
   display: inline-block;
+}
+
+@keyframes boarding {
+  0% {
+    font-size: 0;
+    right: -100%;
+    top: 50%;
+  }
+  10% {
+    font-size: var(--font-size-default);
+    right: -100%;
+    top: 50%;
+  }
+  90% {
+    font-size: var(--font-size-default);
+    right: -20%;
+    top: 0;
+  }
+  100% {
+    font-size: 0;
+  }
+}
+
+.personContainer {
+  --persons: 1;
+  position: relative;
+  text-align: center;
+
+  .person {
+    transform-origin: -50% -50%;
+    text-align: center;
+    position: absolute;
+    animation-name: boarding;
+    animation-duration: 0.5s;
+    animation-iteration-count: var(--persons);
+    font-size: 0;
+    right: -20%;
+    top: 0;
+  }
+}
+
+.addCount {
+  @keyframes move {
+    0% {
+      font-size: 0;
+      right: -100%;
+      top: 50%;
+    }
+    10% {
+      font-size: var(--font-size-xxlarge);
+      right: -100%;
+      top: 50%;
+    }
+    90% {
+      font-size: var(--font-size-xxlarge);
+      right: -200%;
+      top: -100%;
+    }
+    100% {
+      font-size: 0;
+    }
+  }
+
+  position: absolute;
+  animation-name: move;
+  animation-duration: 2s;
+  font-size: 0;
 }
 </style>
