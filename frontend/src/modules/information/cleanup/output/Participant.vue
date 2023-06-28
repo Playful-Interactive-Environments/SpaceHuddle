@@ -6,6 +6,7 @@
       image-directory="/assets/games/cleanup/tutorial"
       :module-info-entry-data-list="tutorialList"
       @infoRead="gameState = GameState.Game"
+      :info-type="gameStep"
     />
     <select-challenge
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
