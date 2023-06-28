@@ -31,11 +31,12 @@
 </template>
 
 <script lang="ts">
-import { Vue, Options } from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { Tutorial } from '@/types/api/Tutorial';
 import * as tutorialService from '@/services/tutorial-service';
 import * as cashService from '@/services/cash-service';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 export interface ModuleInfoEntryData {
   imageUrl: string;
@@ -64,9 +65,19 @@ export default class ModuleInfo extends Vue {
     );
   }
 
+  get indexDelta(): number {
+    return (
+      this.moduleInfoEntryDataList.length -
+      this.openModuleInfoEntryDataList.length
+    );
+  }
+
   mounted(): void {
     this.gameHeight = this.$el.parentElement.offsetHeight;
-    tutorialService.registerGetList(this.updateTutorial);
+    tutorialService.registerGetList(
+      this.updateTutorial,
+      EndpointAuthorisationType.PARTICIPANT
+    );
   }
 
   deregisterAll(): void {
@@ -79,6 +90,7 @@ export default class ModuleInfo extends Vue {
 
   updateTutorial(steps: Tutorial[]): void {
     this.tutorialSteps = steps;
+    this.activeTabIndex = this.indexDelta;
     if (this.openModuleInfoEntryDataList.length === 0) {
       this.$emit('infoRead');
     }
@@ -92,7 +104,7 @@ export default class ModuleInfo extends Vue {
 
   activeTabIndex = 0;
   carouselChanged(index: number): void {
-    this.activeTabIndex = index;
+    this.activeTabIndex = this.indexDelta + index;
   }
 
   next(): void {
@@ -112,7 +124,12 @@ export default class ModuleInfo extends Vue {
         type: this.infoType,
         order: this.activeTabIndex,
       };
-      tutorialService.addTutorialStep(tutorialItem, this.eventBus);
+      console.log(tutorialItem);
+      tutorialService.addTutorialStep(
+        tutorialItem,
+        EndpointAuthorisationType.PARTICIPANT,
+        this.eventBus
+      );
     }
   }
 }

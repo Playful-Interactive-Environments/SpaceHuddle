@@ -40,8 +40,15 @@ export const deregisterGetList = (
   cashService.deregisterGet(tutorialUrl, callback);
 };
 
-export const postStep = async (data: Tutorial): Promise<Tutorial> => {
-  return await apiExecutePost<Tutorial>(`/tutorial_step/`, data);
+export const postStep = async (
+  data: Tutorial,
+  authHeaderType = EndpointAuthorisationType.MODERATOR
+): Promise<Tutorial> => {
+  return await apiExecutePost<Tutorial>(
+    `/tutorial_step/`,
+    data,
+    authHeaderType
+  );
 };
 
 export const reactivateTutorial = async (
@@ -62,9 +69,10 @@ export const reactivateTutorial = async (
 
 export const addTutorialStep = (
   data: Tutorial,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
   eventBus: Emitter<Record<EventType, unknown>>
 ): void => {
-  postStep(data).then(() => {
+  postStep(data, authHeaderType).then(() => {
     const tutorialSteps = cashService.getCash(tutorialUrl);
     if (tutorialSteps) tutorialSteps.push(data);
     else cashService.refreshCash(tutorialUrl);

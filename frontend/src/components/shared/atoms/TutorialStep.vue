@@ -31,6 +31,7 @@ import { EventType } from '@/types/enum/EventType';
 import { v4 as uuidv4 } from 'uuid';
 import * as tutorialService from '@/services/tutorial-service';
 import * as cashService from '@/services/cash-service';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 
 const reservedTutorialSteps: {
   [key: string]: {
@@ -228,7 +229,11 @@ export default class TutorialStep extends Vue {
   stepDone(): void {
     const item = this.tutorialItem;
     if (!this.getIncludeStep()) {
-      tutorialService.addTutorialStep(item, this.eventBus);
+      tutorialService.addTutorialStep(
+        item,
+        EndpointAuthorisationType.MODERATOR,
+        this.eventBus
+      );
     }
   }
 }
