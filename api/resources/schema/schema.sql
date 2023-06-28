@@ -315,15 +315,27 @@ CREATE TABLE `vote` (
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `vote`
+-- Tabellenstruktur für Tabelle `tutorial`
 --
 
 CREATE TABLE `tutorial` (
-    `user_id` CHAR(36) NOT NULL,
-    `step` VARCHAR(255) NOT NULL,
-    `type` VARCHAR(255) NOT NULL,
-    `order` int(11) NOT NULL DEFAULT 0,
-    `modification_date` datetime NOT NULL DEFAULT current_timestamp()
+                            `user_id` CHAR(36) NOT NULL,
+                            `step` VARCHAR(255) NOT NULL,
+                            `type` VARCHAR(255) NOT NULL,
+                            `order` int(11) NOT NULL DEFAULT 0,
+                            `modification_date` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Tabellenstruktur für Tabelle `tutorial_participant`
+--
+
+CREATE TABLE `tutorial_participant` (
+                            `participant_id` CHAR(36) NOT NULL,
+                            `step` VARCHAR(255) NOT NULL,
+                            `type` VARCHAR(255) NOT NULL,
+                            `order` int(11) NOT NULL DEFAULT 0,
+                            `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -473,6 +485,11 @@ ALTER TABLE `vote`
 ALTER TABLE `tutorial` ADD PRIMARY KEY(`user_id`, `step`, `type`);
 
 --
+-- Indizes für die Tabelle `tutorial_participant`
+--
+ALTER TABLE `tutorial_participant` ADD PRIMARY KEY(`participant_id`, `step`, `type`);
+
+--
 -- Constraints der exportierten Tabellen
 --
 
@@ -600,6 +617,12 @@ ALTER TABLE `vote`
 --
 ALTER TABLE `tutorial`
     ADD CONSTRAINT `tutorial_ibfk_user` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`);
+
+--
+-- Constraints der Tabelle `tutorial_participant`
+--
+ALTER TABLE `tutorial_participant`
+    ADD CONSTRAINT `tutorial_ibfk_participant` FOREIGN KEY (`participant_id`) REFERENCES `participant`(`id`);
 
 -- --------------------------------------------------------
 

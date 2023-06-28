@@ -52,6 +52,14 @@ class TutorialRepository implements RepositoryInterface
                 ->order($sortConditions);
 
             return $this->fetchAll($query);
+        } elseif ($authorisation->isParticipant()) {
+            $query = $this->queryFactory->newSelect("tutorial_participant");
+            $query->select(["*"])
+                ->andWhere(["participant_id" => $authorisation->id])
+                ->andWhere($conditions)
+                ->order($sortConditions);
+
+            return $this->fetchAll($query);
         }
         return [];
     }
@@ -82,20 +90,25 @@ class TutorialRepository implements RepositoryInterface
     public function insert(object $data, bool $insertDependencies = true): ?object
     {
         $authorisation = $this->getAuthorisation();
-        if ($authorisation->isUser()) {
+        if ($authorisation->isLoggedIn()) {
             $condition = [
                 "step" => $data->step,
                 "type" => $data->type
             ];
             $result = $this->get($condition);
             if (is_null($result)) {
-                $data->userId = $authorisation->id;
                 $usedKeys = array_values($this->translateKeys((array)$data));
                 $row = $this->formatDatabaseInput($data);
                 $row = $this->unsetUnused($row, $usedKeys);
-                $this->queryFactory
-                    ->newInsert($this->getEntityName(), $row)
-                    ->execute();
+                if ($authorisation->isUser()) {
+                    $this->queryFactory
+                        ->newInsert($this->getEntityName(), $row)
+                        ->execute();
+                } else {
+                    $this->queryFactory
+                        ->newInsert("tutorial_participant", $row)
+                        ->execute();
+                }
 
                 return $this->get($condition);
             }
@@ -110,13 +123,21 @@ class TutorialRepository implements RepositoryInterface
      */
     protected function formatDatabaseInput(object $data): array
     {
-        $result = [
-            "user_id" => $data->userId ?? null,
-            "step" => $data->step ?? null,
-            "type" => $data->type ?? null,
-            "order" => $data->order ?? 0
-        ];
-
-        return $result;
+        $authorisation = $this->getAuthorisation();
+        if ($authorisation->isUser()) {
+            return [
+                "user_id" => $authorisation->id ?? null,
+                "step" => $data->step ?? null,
+                "type" => $data->type ?? null,
+                "order" => $data->order ?? 0
+            ];
+        } else {
+            return [
+                "participant_id" => $authorisation->id ?? null,
+                "step" => $data->step ?? null,
+                "type" => $data->type ?? null,
+                "order" => $data->order ?? 0
+            ];
+        }
     }
 }
