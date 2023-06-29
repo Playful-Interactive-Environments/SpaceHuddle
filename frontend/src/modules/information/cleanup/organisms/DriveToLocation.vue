@@ -123,7 +123,7 @@
       </div>
     </div>
   </div>
-  <div ref="controlArea" class="controlArea level">
+  <!--<div ref="controlArea" class="controlArea level">
     <div class="level-item">
       <el-slider
         v-model="speed"
@@ -156,22 +156,22 @@
         radius="70"
       />
     </div>
-    <!--<Application
-      ref="pixi"
-      :width="gameWidth"
-      :height="controlHeight"
-      v-if="ready"
-      backgroundColor="#f4f4f4"
-    >
-      <container backgroundColor="red">
-        <sprite
-          texture="/assets/games/cleanup/steering-wheel.png"
-          :width="controlHeight"
-          :height="controlHeight"
-        ></sprite>
-      </container>
-    </Application>-->
-  </div>
+  </div>-->
+  <!--<Application
+    ref="pixi"
+    :width="gameWidth"
+    :height="controlHeight"
+    v-if="ready"
+    backgroundColor="#f4f4f4"
+  >
+    <container backgroundColor="red">
+      <sprite
+        texture="/assets/games/cleanup/steering-wheel.png"
+        :width="controlHeight"
+        :height="controlHeight"
+      ></sprite>
+    </container>
+  </Application>-->
 </template>
 
 <script lang="ts">
@@ -387,7 +387,6 @@ export default class DriveToLocation extends Vue {
   onLoad(e: MglEvent): void {
     const map = e.map;
     this.map = map;
-    //map.scrollZoom.disable();
     const notNeededLayers = map.getStyle().layers.filter((layer) => {
       const layerCategory = layer['source-layer'];
       const layerType = layer['type'];
@@ -509,7 +508,8 @@ export default class DriveToLocation extends Vue {
   async mounted(): Promise<void> {
     this.initTrackingData();
     this.gameWidth = this.$el.parentElement.offsetWidth;
-    this.controlHeight = (this.$refs.controlArea as HTMLElement).offsetHeight;
+    if (this.$refs.controlArea)
+      this.controlHeight = (this.$refs.controlArea as HTMLElement).offsetHeight;
     this.ready = true;
     this.maxSpeed = this.vehicleParameter.speed;
 
@@ -1127,7 +1127,8 @@ export default class DriveToLocation extends Vue {
 }
 
 .mapArea {
-  height: calc(100% - 10rem - 10rem);
+  //height: calc(100% - 10rem - 10rem);
+  height: calc(100% - 10rem);
   width: 100%;
   position: relative;
 }
