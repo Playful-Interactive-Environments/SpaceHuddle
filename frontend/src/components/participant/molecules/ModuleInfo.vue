@@ -14,7 +14,7 @@
       :key="keyword"
     >
       <img
-        :style="{ height: `${(gameHeight / 3) * 2}px` }"
+        class="info-image"
         :src="`${imageDirectory}\\${keyword}.${fileExtension}`"
         :alt="keyword"
       />
@@ -145,6 +145,8 @@ export default class ModuleInfo extends Vue {
 }
 
 img {
+  max-height: 60%;
+  height: 60%;
   width: 100%;
   object-fit: contain;
 }
