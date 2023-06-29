@@ -1,0 +1,44 @@
+{
+  "hazards": {
+    "cigarette": {
+      "icon": "smoking",
+      "type": [
+        {
+          "name": "cigarette",
+          "image": "cigarette.svg",
+          "severity": 3
+        }
+      ]
+    },
+    "bottleWhite": {
+      "icon": "wine-bottle",
+      "type": [
+        {
+          "name": "water",
+          "image": "bottleWhite.svg",
+          "severity": 2
+        }
+      ]
+    },
+    "bottleWine": {
+      "icon": "wine-bottle",
+      "type": [
+        {
+          "name": "wine",
+          "image": "bottleGreen.svg",
+          "severity": 1
+        }
+      ]
+    },
+    "bottleBeer": {
+      "icon": "wine-bottle",
+      "type": [
+        {
+          "name": "beer",
+          "image": "bottleBrown.svg",
+          "severity": 1
+        }
+      ]
+    }
+  }
+}

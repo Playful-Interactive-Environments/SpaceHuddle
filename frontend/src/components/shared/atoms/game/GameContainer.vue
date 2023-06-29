@@ -7,6 +7,7 @@
       v-if="ready"
       :backgroundColor="backgroundColor"
       :transparent="transparent"
+      @click="$emit('click', mouseConstraint)"
     >
       <container>
         <slot :itemProps="{ engine: engine, detector: detector }"></slot>
@@ -33,6 +34,7 @@ import GameObject from '@/components/shared/atoms/game/GameObject.vue';
     'initRenderer',
     'update:width',
     'update:height',
+    'click',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/

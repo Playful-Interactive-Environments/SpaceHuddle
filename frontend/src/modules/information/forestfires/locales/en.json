@@ -1,0 +1,29 @@
+{
+  "description": {
+    "title": "Fire Hazards",
+    "description": "Find and collect possible fire hazards to prevent a forest fire!"
+  },
+  "participant": {
+    "placeables": {
+      "cigarette": {
+        "name": "Cigarette",
+        "description": "Cigarettes which haven't been extinguished properly are one of the most severe fire hazards out there. They get thrown out of cars or get left behind by hikers on their way to the top."
+      },
+      "bottle":{
+        "name": "Glass Bottle",
+        "description": "Glass bottles may act like strong lenses under the right circumstances. They focus incoming light to a single spot, potentially causing a fire."
+      }
+    },
+    "place": "Place",
+    "play": "Start",
+    "tutorial": {
+      "click": "Click on any spot in the woods to get a list of placeable objects.",
+      "place": "Choose one of those objects to place it in the forest.",
+      "remove": "Want to get rid of an object? Select it and click the X to remove it.",
+      "play": "Change to Play-Mode to play your created level.",
+      "info": "This forest is not as harmless as it might seem!",
+      "hazards": "Scattered throughout these woods are dangerous fire hazards.",
+      "collect": "Collect them by clicking on them and prevent a massive fire before it is too late!"
+    }
+  }
+}
