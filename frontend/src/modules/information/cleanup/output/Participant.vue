@@ -16,7 +16,12 @@
       @play="startGame"
     />
     <drive-to-location
-      v-if="gameStep === GameStep.Drive && sizeCalculated && module"
+      v-if="
+        gameStep === GameStep.Drive &&
+        sizeCalculated &&
+        module &&
+        gameState === GameState.Game
+      "
       :parameter="module.parameter"
       :vehicle="vehicle"
       :vehicle-type="vehicleType"
