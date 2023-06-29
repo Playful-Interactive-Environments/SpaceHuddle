@@ -98,7 +98,7 @@
         :color="colors"
       >
         <template #default>
-          <div>{{ moveSpeed }} km/h</div>
+          <div>{{ Math.round(moveSpeed) }} km/h</div>
           <div>
             {{ $t('module.information.cleanup.participant.speed') }}
           </div>
