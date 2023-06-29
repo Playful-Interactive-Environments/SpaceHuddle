@@ -1,12 +1,13 @@
 <template>
   <div ref="gameContainer" class="mapSpace">
     <module-info
-      v-if="gameState === GameState.Info"
+      v-if="gameState === GameState.Info && module"
       translation-path="module.information.cleanup.participant.tutorial"
       image-directory="/assets/games/cleanup/tutorial"
       :module-info-entry-data-list="tutorialList"
       @infoRead="gameState = GameState.Game"
       :info-type="gameStep"
+      :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
     />
     <select-challenge
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"

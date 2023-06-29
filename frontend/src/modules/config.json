@@ -65,7 +65,7 @@
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
-             "icon": "broom",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": false,  
+             "icon": "broom",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  
            "path": "information/cleanup"  
        },  
        "coolit": {  
@@ -82,6 +82,12 @@
              "icon": "info",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
            "path": "information/default"  
        },  
+       "forestfires": {  
+           "participant": "output/Participant",  
+           "locales": "de,en,",  
+             "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  
+           "path": "information/forestfires"  
+       },  
        "quiz": {  
            "publicScreen": "output/PublicScreen",  
            "participant": "output/Participant",  
@@ -93,7 +99,7 @@
        },  
        "survey": {  
            "moderatorConfig": "output/ModeratorConfig",  
-           "locales": "en,",  
+           "locales": "de,en,",  
              "icon": "questions",  "iconPrefix": "fac",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "fallback": "quiz",  
            "path": "information/survey"  
        },  

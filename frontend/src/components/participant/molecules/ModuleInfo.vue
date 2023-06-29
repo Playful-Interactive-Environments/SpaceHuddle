@@ -56,6 +56,7 @@ export default class ModuleInfo extends Vue {
   @Prop({ default: '' }) readonly imageDirectory!: string;
   @Prop({ default: 'jpg' }) readonly fileExtension!: string;
   @Prop({ default: 'moduleInfo' }) readonly infoType!: string;
+  @Prop({ default: true }) readonly showTutorialOnlyOnce!: boolean;
   gameHeight = 0;
   tutorialSteps: Tutorial[] = [];
 
@@ -97,9 +98,13 @@ export default class ModuleInfo extends Vue {
   }
 
   getIncludeStep(stepName: string): boolean {
-    return !!this.tutorialSteps.find(
-      (tutorial) => tutorial.step == stepName && tutorial.type == this.infoType
-    );
+    if (this.showTutorialOnlyOnce) {
+      return !!this.tutorialSteps.find(
+        (tutorial) =>
+          tutorial.step == stepName && tutorial.type == this.infoType
+      );
+    }
+    return false;
   }
 
   activeTabIndex = 0;
@@ -124,7 +129,6 @@ export default class ModuleInfo extends Vue {
         type: this.infoType,
         order: this.activeTabIndex,
       };
-      console.log(tutorialItem);
       tutorialService.addTutorialStep(
         tutorialItem,
         EndpointAuthorisationType.PARTICIPANT,

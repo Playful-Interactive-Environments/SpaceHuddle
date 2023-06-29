@@ -5,7 +5,7 @@
   },
   "participant": {
     "newIdeaInfo": "submit new idea",
-    "addKeywords": "Thank you for your idea. Please add same keywords to this idea.",
+    "addKeywords": "Thank you for your idea. Please add some keywords to this idea.",
     "addDescription": "Thank you for your idea. Please add a description to this idea."
   },
   "moderatorConfig": {

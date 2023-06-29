@@ -22,11 +22,9 @@ export interface VehicleParameter {
   acceleration: number | undefined;
   persons: number | undefined;
   efficiency: number | undefined;
-  efficiencyV1: number | undefined;
   flowResistance: number;
   profileArea: number;
   weight: number;
-  weightTire: number;
   rollingResistanceCoefficient: number;
   tires: number;
   treadwear: number;

@@ -6,6 +6,14 @@
     <el-switch class="level-item" v-model="modelValue.replayable" />
   </el-form-item>
   <el-form-item
+    :label="
+      $t('module.information.cleanup.moderatorConfig.showTutorialOnlyOnce')
+    "
+    :prop="`${rulePropPath}.showTutorialOnlyOnce`"
+  >
+    <el-switch class="level-item" v-model="modelValue.showTutorialOnlyOnce" />
+  </el-form-item>
+  <el-form-item
     :label="$t('module.information.cleanup.moderatorConfig.mapSection')"
     :prop="`${rulePropPath}.mapSection`"
   >
@@ -85,6 +93,9 @@ export default class ModeratorConfig extends Vue {
       }
       if (!('replayable' in this.modelValue)) {
         this.modelValue.replayable = true;
+      }
+      if (!('showTutorialOnlyOnce' in this.modelValue)) {
+        this.modelValue.showTutorialOnlyOnce = true;
       }
     }
   }

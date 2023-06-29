@@ -5,7 +5,8 @@
   },
   "moderatorConfig": {
     "mapSection": "map section",
-    "replayable": "replayable"
+    "replayable": "replayable",
+    "showTutorialOnlyOnce": "show tutorial only once"
   },
   "participant": {
     "speed": "speed",
