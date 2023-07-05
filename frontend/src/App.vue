@@ -9,5 +9,11 @@ import { Vue, Options } from 'vue-class-component';
 @Options({
   components: {},
 })
-export default class App extends Vue {}
+export default class App extends Vue {
+  mounted(): void {
+    const htmlElement = document.documentElement;
+    localStorage.setItem('theme', process.env.VUE_APP_THEME);
+    htmlElement.setAttribute('theme', process.env.VUE_APP_THEME);
+  }
+}
 </script>
