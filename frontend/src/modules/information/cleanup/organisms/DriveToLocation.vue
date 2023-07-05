@@ -96,6 +96,8 @@
             @move="move($event)"
             @start="start"
             @stop="stop"
+            @mousedown="disableMapPan"
+            v-on:touchstart="disableMapPan"
             stickColor="white"
             base-color="rgba(0, 0, 0, 0.1)"
           />
@@ -594,12 +596,17 @@ export default class DriveToLocation extends Vue {
     setTimeout(() => {
       this.updateChart();
     }, 1000);
+
+    window.addEventListener('mouseup', this.enableMapPan);
+    window.addEventListener('touchend', this.enableMapPan);
   }
 
   unmounted(): void {
     clearInterval(this.intervalCalculation);
     clearInterval(this.intervalAnimation);
     clearInterval(this.busStopInterval);
+    window.removeEventListener('mouseup', this.enableMapPan);
+    window.removeEventListener('touchend', this.enableMapPan);
   }
 
   @Watch('parameter', { immediate: true, deep: true })
@@ -815,11 +822,7 @@ export default class DriveToLocation extends Vue {
   }
 
   start(event: any): void {
-    if (this.map) {
-      this.map.scrollZoom.disable();
-      this.map.dragPan.disable();
-      this.map.dragRotate.disable();
-    }
+    this.disableMapPan();
     this.boardingPersons = 0;
     this.move(event);
     this.isMoving = true;
@@ -829,12 +832,24 @@ export default class DriveToLocation extends Vue {
     );
   }
 
-  stop(): void {
+  disableMapPan(): void {
+    if (this.map) {
+      this.map.scrollZoom.disable();
+      this.map.dragPan.disable();
+      this.map.dragRotate.disable();
+    }
+  }
+
+  enableMapPan(): void {
     if (this.map) {
       this.map.scrollZoom.enable();
       this.map.dragPan.enable();
       this.map.dragRotate.enable();
     }
+  }
+
+  stop(): void {
+    this.enableMapPan();
     clearInterval(this.intervalCalculation);
     this.isMoving = false;
     this.moveSpeed = 0;
