@@ -156,7 +156,7 @@
     </div>
     <div class="overlay-bottom">
       <el-slider v-model="maxSpeed" :max="vehicleParameter.speed" />
-      <div>
+      <!--<div>
         <Joystick
           :size="150"
           :stick-size="50"
@@ -165,7 +165,7 @@
           @stop="stop"
           stickColor="white"
         />
-      </div>
+      </div>-->
     </div>
   </div>
   <!--<div ref="controlArea" class="controlArea level">
@@ -1245,6 +1245,7 @@ export default class DriveToLocation extends Vue {
   z-index: 100;
   bottom: 0.5rem;
   right: 0.5rem;
+  left: 0.5rem;
   padding: 2rem;
 }
 

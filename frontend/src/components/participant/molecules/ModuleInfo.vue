@@ -21,13 +21,13 @@
       <div>
         {{ $t(`${translationPath}.${keyword}`) }}
       </div>
-      <div>
-        <el-button type="primary" @click="next">
-          {{ $t('participant.molecules.moduleInfo.next') }}
-        </el-button>
-      </div>
     </el-carousel-item>
   </el-carousel>
+  <div class="next">
+    <el-button type="primary" @click="next">
+      {{ $t('participant.molecules.moduleInfo.next') }}
+    </el-button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -145,9 +145,15 @@ export default class ModuleInfo extends Vue {
 }
 
 img {
-  max-height: 60%;
-  height: 60%;
+  max-height: 50%;
+  height: 50%;
   width: 100%;
   object-fit: contain;
+}
+
+.next {
+  padding: 2rem;
+  position: fixed;
+  bottom: 0;
 }
 </style>
