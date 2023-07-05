@@ -22,6 +22,18 @@
                 borderColor: 'rgb(255, 99, 132)',
                 borderWidth: 2,
               },
+              box1: {
+                type: 'box',
+                xMin: 0,
+                xMax: trackingData.length,
+                yMin: maxCleanupThreshold,
+                yMax:
+                  maxChartValue > maxCleanupThreshold
+                    ? maxChartValue + 1
+                    : maxCleanupThreshold,
+                backgroundColor: 'rgba(255, 99, 132, 0.25)',
+                borderColor: 'rgb(255, 99, 132)',
+              },
             },
           },
         },
@@ -202,6 +214,7 @@ import * as configCalculation from '@/modules/information/cleanup/utils/configCa
 import * as pixiUtil from '@/utils/pixi';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
+import * as constants from '@/modules/information/cleanup/utils/consts';
 Chart.register(annotationPlugin);
 
 interface DrawingParticle {
@@ -261,7 +274,7 @@ export default class CleanUpParticles extends Vue {
   gameHeight = 0;
   padding = 10;
   readonly particleDivisionFactor = 1;
-  readonly intervalTime = 1000;
+  readonly intervalTime = 5000;
   interval = -1;
   activeValue = 0;
   cleanupParticles: DrawingParticle[] = [];
@@ -273,6 +286,8 @@ export default class CleanUpParticles extends Vue {
   spritesheet!: PIXI.Spritesheet;
   countdownTime = 5;
   containerAspectRation = 1.3;
+
+  readonly maxCleanupThreshold = constants.maxCleanupThreshold;
 
   particleQueue: { [key: string]: number } = {};
 
@@ -431,12 +446,16 @@ export default class CleanUpParticles extends Vue {
     this.renderer = renderer;
   }
 
-  containerSize: [number, number] = [this.containerWidth, this.containerWidth];
+  containerSize: [number, number] = [
+    this.containerWidth,
+    this.containerWidth / this.containerAspectRation,
+  ];
   containerSizeChanged(size: [number, number]): void {
     this.containerSize = size;
   }
 
   async loadActiveParticle(): Promise<void> {
+    let activeParticleEmitCount = 0;
     for (const index in this.chartData.datasets) {
       const dataset = this.chartData.datasets[index];
       const particleName = dataset.name;
@@ -447,7 +466,19 @@ export default class CleanUpParticles extends Vue {
         const emissionCount = Math.floor(this.particleQueue[particleName]);
         this.particleState[particleName].totalCount += emissionCount;
         this.particleQueue[particleName] -= emissionCount;
-        for (let i = 0; i < emissionCount; i++) {
+        const maxEmitCount =
+          this.maxCleanupThreshold / this.particleDivisionFactor;
+        let emitCount = emissionCount;
+        if (activeParticleEmitCount + emissionCount > maxEmitCount) {
+          if (activeParticleEmitCount < maxEmitCount)
+            emitCount = maxEmitCount - activeParticleEmitCount;
+          else emitCount = 0;
+        }
+        activeParticleEmitCount += emissionCount;
+        if (emitCount < emissionCount) {
+          this.outsideCount += emissionCount - emitCount;
+        }
+        for (let i = 0; i < emitCount; i++) {
           const particle: DrawingParticle = {
             uuid: uuidv4(),
             id: 0,
@@ -462,7 +493,7 @@ export default class CleanUpParticles extends Vue {
             ],
           };
           this.cleanupParticles.push(particle);
-          await delay(Math.floor(this.intervalTime / emissionCount) - 1);
+          await delay(Math.floor(this.intervalTime / emitCount) - 1);
         }
       }
     }
@@ -497,29 +528,34 @@ export default class CleanUpParticles extends Vue {
     this.outsideCount++;
   }
 
+  maxChartValue = 0;
   @Watch('trackingData', { immediate: true })
   onTrackingDataChanged(): void {
     if (this.trackingData) {
       this.chartData.labels = this.trackingData.map((data) =>
         Math.round(data.speed).toString()
       );
+      let totalValue = 0;
       for (const particleName in gameConfig.particles) {
         const particle = gameConfig.particles[particleName];
         /*const speedFunction = new Function(
           'speed',
           `return ${particle.speedFunction[this.vehicle][this.vehicleType]}`
         );*/
+        let maxParticleValue = 0;
         const data = {
           name: particleName,
           label: this.getParticleDisplayName(particleName),
-          data: this.trackingData.map(
-            (data) =>
-              configCalculation.statisticsValue(
-                particleName,
-                data,
-                this.vehicleParameter
-              ) // speedFunction(data.speed) / data.persons
-          ),
+          data: this.trackingData.map((data) => {
+            const particleValue = configCalculation.statisticsValue(
+              particleName,
+              data,
+              this.vehicleParameter
+            ); // speedFunction(data.speed) / data.persons
+            if (maxParticleValue < particleValue)
+              maxParticleValue = particleValue;
+            return particleValue;
+          }),
           backgroundColor: particle.color,
           borderColor: particle.color,
           fill: {
@@ -529,7 +565,10 @@ export default class CleanUpParticles extends Vue {
         };
         this.chartData.datasets.push(data);
         this.particleQueue[particleName] = 0;
+        totalValue += maxParticleValue;
       }
+      totalValue += 1;
+      if (this.maxChartValue < totalValue) this.maxChartValue = totalValue;
       setTimeout(() => {
         this.updateChart();
       }, 1000);

@@ -156,11 +156,11 @@ export default class ShowResult extends Vue {
   gameWidth = 0;
   gameConfig = gameConfig;
   renderer!: PIXI.Renderer;
-  particleRadius = 30;
   particleReady = false;
   rendererReady = false;
   activeTabName = resultTabName;
   spritesheet!: PIXI.Spritesheet;
+  maxParticleCount = 100;
 
   get particleStateSum(): ParticleState {
     let totalCount = 0;
@@ -203,6 +203,20 @@ export default class ShowResult extends Vue {
       return 1;
     }
     return 0;
+  }
+
+  get particleArea(): number {
+    return this.gameWidth * this.gameHeight;
+  }
+
+  get particleRadius(): number {
+    const minSize = 10;
+    const maxSize = 40;
+    const circleArea = this.particleArea / (this.maxParticleCount * 2);
+    const size = Math.sqrt(circleArea / Math.PI);
+    if (size > maxSize) return maxSize;
+    if (size < minSize) return minSize;
+    return size;
   }
 
   carouselChanged(index: number): void {
@@ -360,16 +374,26 @@ export default class ShowResult extends Vue {
           this.particleState[particleName].totalCount - collectedCount;
         this.particleVisualisation[particleName] = [];
         for (let i = 0; i < remainingCount; i++) {
-          this.particleVisualisation[particleName].push({
-            coordinates: this.getRandomPosition(),
-            type: particleName,
-          });
+          if (
+            this.particleVisualisation[particleName].length <
+            this.maxParticleCount
+          ) {
+            this.particleVisualisation[particleName].push({
+              coordinates: this.getRandomPosition(),
+              type: particleName,
+            });
+          }
         }
         for (let i = 0; i < collectedCount; i++) {
-          this.particleVisualisation[resultTabName].push({
-            coordinates: this.getRandomPosition(),
-            type: particleName,
-          });
+          if (
+            this.particleVisualisation[resultTabName].length <
+            this.maxParticleCount
+          ) {
+            this.particleVisualisation[resultTabName].push({
+              coordinates: this.getRandomPosition(),
+              type: particleName,
+            });
+          }
         }
       }
       this.particleReady = true;
@@ -415,5 +439,15 @@ h1 {
 .gameArea {
   height: 100%;
   width: 100%;
+}
+
+.el-rate::v-deep(.el-icon) {
+  height: 5em;
+  width: 5em;
+
+  svg {
+    height: 5em;
+    width: 5em;
+  }
 }
 </style>

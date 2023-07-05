@@ -104,15 +104,20 @@ export const addValueToStatistics = (
   trackingData: TrackingData,
   vehicleParameter: any,
   chartData: ChartData
-): void => {
+): number => {
+  let totalValue = 0;
   for (const particleName in gameConfig.particles) {
     const dataset = chartData.datasets.find((ds) => ds.name === particleName);
     if (dataset) {
-      dataset.data = [
-        ...dataset.data,
-        statisticsValue(particleName, trackingData, vehicleParameter),
-      ];
+      const particleValue = statisticsValue(
+        particleName,
+        trackingData,
+        vehicleParameter
+      );
+      dataset.data = [...dataset.data, particleValue];
+      totalValue += particleValue;
     }
   }
   chartData.labels.push(Math.round(trackingData.speed).toString());
+  return totalValue;
 };

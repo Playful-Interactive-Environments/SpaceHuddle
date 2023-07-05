@@ -11,6 +11,31 @@
             stacked: true,
           },
         },
+        plugins: {
+          annotation: {
+            annotations: {
+              line1: {
+                type: 'line',
+                yMin: maxCleanupThreshold,
+                yMax: maxCleanupThreshold,
+                borderColor: 'rgb(255, 99, 132)',
+                borderWidth: 2,
+              },
+              box1: {
+                type: 'box',
+                xMin: 0,
+                xMax: trackingData.length,
+                yMin: maxCleanupThreshold,
+                yMax:
+                  maxChartValue > maxCleanupThreshold
+                    ? maxChartValue + 1
+                    : maxCleanupThreshold,
+                backgroundColor: 'rgba(255, 99, 132, 0.25)',
+                borderColor: 'rgb(255, 99, 132)',
+              },
+            },
+          },
+        },
       }"
     />
   </div>
@@ -80,7 +105,7 @@
         </template>
       </CustomMapMarker>
       <!--<mgl-marker
-        v-for="(searchPoint, index) in searchPoints.reverse()"
+        v-for="(searchPoint, index) in [...searchPoints].reverse()"
         :key="index"
         :coordinates="searchPoint"
         :color="searchPointColors[index]"
@@ -89,7 +114,14 @@
         <template v-slot:icon>
           <font-awesome-icon icon="up-down-left-right" />
         </template>
-      </CustomMapMarker>-->
+      </CustomMapMarker>
+      <mgl-marker
+        v-for="(searchPoint, index) in testPoints"
+        :key="index"
+        :coordinates="searchPoint"
+        :color="searchPointColors[index]"
+        :scale="1 - index / (testPoints.length * 2)"
+      ></mgl-marker>-->
     </mgl-map>
     <div class="overlay-top-left">
       <el-progress
@@ -202,9 +234,11 @@ import { Application } from 'vue3-pixi';
 import RoundSlider from 'vue-three-round-slider/src';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
+import * as constants from '@/modules/information/cleanup/utils/consts';
 //import * as tiles from `https://api.maptiler.com/tiles/v3/tiles.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
 
 MglDefaults.style = `https://api.maptiler.com/maps/streets/style.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
+//MglDefaults.style = 'http://localhost/tileserver-php/osm-2020-02-10-v3/';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 interface BusStop {
@@ -313,7 +347,7 @@ export default class DriveToLocation extends Vue {
   personCount = 1;
   trackingData: TrackingData[] = [];
   animationIndex = 0;
-  animationPoints: [number, number][] = [];
+  animationPoints: [number, number][][] = [];
   map!: Map;
   ready = false;
   gameWidth = 0;
@@ -330,6 +364,8 @@ export default class DriveToLocation extends Vue {
   checkRoutePoint: [number, number] = [0, 0];
 
   boardingPersons = 0;
+
+  readonly maxCleanupThreshold = constants.maxCleanupThreshold;
 
   readonly intervalCalculationTime = 100;
   intervalCalculation = -1;
@@ -480,7 +516,6 @@ export default class DriveToLocation extends Vue {
         { layers: this.streetLayers }
       );
       const roadList = features.filter((f) => f.properties.subclass === 'path');
-      console.log(roadList);
       return roadList.length > 0;
     }
     return false;
@@ -570,9 +605,6 @@ export default class DriveToLocation extends Vue {
     ) {
       this.mapStart = this.parameter.mapStart;
     }
-    /*if (this.parameter.mapEnd && this.mapEnd[0] === 0 && this.mapEnd[1] === 0) {
-      this.mapEnd = this.parameter.mapEnd;
-    }*/
     if (this.mapEnd[0] === 0 && this.mapEnd[1] === 0) {
       const distanceX = 0.02;
       const distanceY = 0.02;
@@ -590,7 +622,13 @@ export default class DriveToLocation extends Vue {
       this.mapEnd,
     ];
 
-    this.calculateRoute(this.mapStart, this.mapEnd).then(() => {
+    const intermediateGoals: [number, number][] = [];
+    this.calculateRoute(
+      this.mapStart,
+      this.mapEnd,
+      false,
+      intermediateGoals
+    ).then(() => {
       const pathPoints = (this.routePath.features[0].geometry as any)
         .coordinates;
       this.setMapDrivingPoint(pathPoints[0], true);
@@ -623,7 +661,8 @@ export default class DriveToLocation extends Vue {
   async calculateRoute(
     start: [number, number],
     end: [number, number],
-    checkDistance = false
+    checkDistance = false,
+    intermediateGoals: [number, number][] = []
   ): Promise<boolean> {
     const osrm = new OSRM(this.osrmProfile, {
       userAgent: '',
@@ -636,6 +675,9 @@ export default class DriveToLocation extends Vue {
       wayPoints.push([last[1], last[0]]);
     }
     wayPoints.push([start[1], start[0]]);
+    wayPoints.push(
+      ...intermediateGoals.map((p) => [p[1], p[0]] as [number, number])
+    );
     wayPoints.push([end[1], end[0]]);
     const path = await osrm.directions(wayPoints, this.osrmProfile);
     const pathCoordinates: [number, number][] = [];
@@ -682,21 +724,32 @@ export default class DriveToLocation extends Vue {
     location: [number, number];
     delta: number;
     pathDelta: number;
+    isOnRoutePath: boolean;
   }> {
     const getPoint = (path: OSRMWayPoint): [number, number] => {
       return [path.location[0], path.location[1]];
     };
     //eslint-disable-next-line @typescript-eslint/no-unused-vars
     const checkWay = (waypoints: OSRMWayPoint[], name: string): void => {
-      if (waypoints.length > 1) {
+      let minDelta = pathDelta;
+      let minPoint = waypoints[0];
+      for (let i = 1; i < waypoints.length; i++) {
         const waypointDelta = turfUtils.getPathDeviation(
           [this.mapDrivingPoint, point],
-          [getPoint(waypoints[0]), getPoint(waypoints[1])]
+          [getPoint(waypoints[i - 1]), getPoint(waypoints[i])]
         );
         if (waypointDelta < pathDelta) {
-          pathDelta = waypointDelta;
-          path = waypoints[0];
+          minDelta = waypointDelta;
         }
+        if (
+          (minPoint.distance as number) > (waypoints[i - 1].distance as number)
+        ) {
+          minPoint = waypoints[i - 1];
+        }
+      }
+      if (minDelta < pathDelta) {
+        pathDelta = minDelta;
+        path = minPoint;
       }
     };
     const osrm = new OSRM(this.osrmProfile, {
@@ -733,16 +786,18 @@ export default class DriveToLocation extends Vue {
         }
       }
     }
+    const location = getPoint(path);
     const delta = turfUtils.getAngleDeviation(
       this.mapDrivingPoint,
       point,
-      getPoint(path)
+      location
     );
     return {
       distance: path.distance,
-      location: getPoint(path),
+      location: location,
       delta: delta,
       pathDelta: pathDelta,
+      isOnRoutePath: turfUtils.isPointOnPath(this.routePath, location),
     };
   }
 
@@ -850,6 +905,65 @@ export default class DriveToLocation extends Vue {
     );
   }
 
+  testPoints: [number, number][] = [];
+  isDrivingAngleInsideNextSegment(
+    distance: number,
+    airlinePoint: [number, number]
+  ): {
+    value: boolean;
+    endPoint: [number, number];
+    corner: [number, number] | null;
+    subPath: [number, number][];
+  } {
+    const minMax = turfUtils.getMinMaxAngleForPathDistanceSegment(
+      this.routePath,
+      this.mapDrivingPoint,
+      airlinePoint,
+      distance,
+      minToleratedAngleDeviation
+    );
+    /*this.testPoints = [
+      ...minMax.subPath,
+      airlinePoint,
+      ...minMax.checkPoints,
+      [...this.mapDrivingPoint],
+    ];
+    console.log(minMax, this.moveAngle);*/
+    if (this.moveAngle >= minMax.min && this.moveAngle <= minMax.max)
+      return {
+        value: true,
+        endPoint: minMax.endPoint,
+        corner: minMax.corner,
+        subPath: minMax.subPath,
+      };
+    if (
+      this.moveAngle - 360 >= minMax.min &&
+      this.moveAngle - 360 <= minMax.max
+    )
+      return {
+        value: true,
+        endPoint: minMax.endPoint,
+        corner: minMax.corner,
+        subPath: minMax.subPath,
+      };
+    if (
+      this.moveAngle + 360 >= minMax.min &&
+      this.moveAngle + 360 <= minMax.max
+    )
+      return {
+        value: true,
+        endPoint: minMax.endPoint,
+        corner: minMax.corner,
+        subPath: minMax.subPath,
+      };
+    return {
+      value: false,
+      endPoint: minMax.endPoint,
+      corner: minMax.corner,
+      subPath: minMax.subPath,
+    };
+  }
+
   goalReached(): boolean {
     return turfUtils.goalReached(this.routePath, this.mapDrivingPoint);
   }
@@ -862,8 +976,9 @@ export default class DriveToLocation extends Vue {
     const roadPoint = await this.isOnPossibleRoute(possibleRoadPoint);
 
     if (
+      !roadPoint.isOnRoutePath &&
       roadPoint.pathDelta < minToleratedAngleDeviation &&
-      roadPoint.distance < 3 &&
+      roadPoint.distance < 10 &&
       roadPoint.delta < minToleratedAngleDeviation
     ) {
       await this.calculateRoute(possibleRoadPoint, this.mapEnd);
@@ -874,6 +989,7 @@ export default class DriveToLocation extends Vue {
     }
   }
 
+  maxChartValue = 0;
   addDrivingDataToChart(newDrivingPoint: [number, number]): void {
     const distance = turf.distance(
       turf.point(this.mapDrivingPoint),
@@ -900,16 +1016,20 @@ export default class DriveToLocation extends Vue {
       ),
     };
     this.trackingData.push(trackingData);
-    configCalculation.addValueToStatistics(
+    const totalValue = configCalculation.addValueToStatistics(
       trackingData,
       this.vehicleParameter,
       this.chartData
     );
+    if (this.maxChartValue < totalValue) this.maxChartValue = totalValue;
     this.updateChart();
   }
 
-  updateDrivingPoint(newDrivingPoint: [number, number]): void {
-    this.addAnimationSteps(newDrivingPoint);
+  updateDrivingPoint(
+    newDrivingPoint: [number, number],
+    subPath: [number, number][]
+  ): void {
+    this.addAnimationSteps(newDrivingPoint, subPath);
     this.setMapDrivingPoint(newDrivingPoint);
     if (this.goalReached()) {
       this.$emit('goalReached', this.trackingData);
@@ -918,10 +1038,10 @@ export default class DriveToLocation extends Vue {
     }
   }
 
-  updateDrivingPath(newDrivingPoint: [number, number]): void {
+  updateDrivingPath(path: [number, number][]): void {
     const coordinates = (this.drivenPath.features[0].geometry as any)
       .coordinates;
-    coordinates.push(newDrivingPoint);
+    coordinates.push(...path);
     this.drivenPath = this.getRouteObject(coordinates);
   }
 
@@ -935,44 +1055,41 @@ export default class DriveToLocation extends Vue {
     return this.animationPoints.length - this.animationIndex;
   }
 
-  addAnimationSteps(newDrivingPoint: [number, number]): void {
+  addAnimationSteps(
+    newDrivingPoint: [number, number],
+    subCoordinates: [number, number][]
+  ): void {
     const speedDrivingDistance = this.getDrivingDistance();
     const intermediateSteps = this.animationIntermediateSteps;
-    let subRoute = turfUtils.getSubRoute(
-      this.routePath,
-      this.mapDrivingPoint,
-      newDrivingPoint
-    );
-    let distance = turf.length(subRoute as any);
-    if (distance > speedDrivingDistance) {
-      subRoute = turf.lineString([this.mapDrivingPoint, newDrivingPoint]);
+    if (subCoordinates.length < 2) {
+      this.animationPoints.push([newDrivingPoint]);
+      return;
+    }
+    let distance = turf.length(turf.lineString(subCoordinates));
+    if (distance === 0) return;
+    const distanceBuffer = 0.005;
+    if (distance > speedDrivingDistance + distanceBuffer) {
+      subCoordinates = [this.mapDrivingPoint, newDrivingPoint];
       distance = turf.distance(
         turf.point(this.mapDrivingPoint),
         turf.point(newDrivingPoint)
       );
-    } else if (
-      (subRoute as any).geometry.coordinates[0][0] === newDrivingPoint[0] &&
-      (subRoute as any).geometry.coordinates[0][1] === newDrivingPoint[1]
-    ) {
-      (subRoute as any).geometry.coordinates = (
-        subRoute as any
-      ).geometry.coordinates.reverse();
     }
     for (let i = 0; i < intermediateSteps; i++) {
-      const point = turf.along(
-        subRoute,
+      const animationSegment = turf.lineSliceAlong(
+        turf.lineString(subCoordinates),
+        (distance / intermediateSteps) * i,
         (distance / intermediateSteps) * (i + 1)
       );
-      this.animationPoints.push([
-        point.geometry.coordinates[0],
-        point.geometry.coordinates[1],
-      ]);
+      this.animationPoints.push(
+        animationSegment.geometry.coordinates.map((p) => [p[0], p[1]])
+      );
     }
   }
 
   noStreet = false;
   updateTraceIsRunning = false;
-  pauseIntervalBeforeRecalculate = 3;
+  pauseIntervalBeforeRecalculate = 15;
   pauseCount = 0;
   corner: [number, number] = [0, 0];
   async updateTrace(): Promise<void> {
@@ -989,33 +1106,25 @@ export default class DriveToLocation extends Vue {
         newDrivingPoint
       );
       let isOnRoute = !this.noStreet;
+      let subPath: [number, number][] = [];
       if (isOnRoute) {
-        const pointOnLine = turfUtils.moveAlongPath(
-          this.routePath,
-          this.mapDrivingPoint,
-          speedDrivingDistance
+        const insideSegment = this.isDrivingAngleInsideNextSegment(
+          speedDrivingDistance,
+          newDrivingPoint
         );
-        const angleDeviation = turfUtils.getAngleDeviation(
-          this.mapDrivingPoint,
-          newDrivingPoint,
-          pointOnLine
-        );
-        if (angleDeviation < minToleratedAngleDeviation) {
-          //console.log('pointOnLine');
-          newDrivingPoint = pointOnLine;
-          /*const corner = turfUtils.isCornerBetweenPoints(
-            this.routePath,
-            this.mapDrivingPoint,
-            newDrivingPoint
-          );
-          if (corner.value) {
-            this.corner = corner.location;
-            newDrivingPoint = corner.location;
-          }*/
+        subPath = insideSegment.subPath;
+        if (insideSegment.value) {
+          newDrivingPoint = insideSegment.endPoint;
+          if (insideSegment.corner) this.corner = insideSegment.corner;
+          this.pauseCount = 0;
         } else {
-          //console.log('closed point');
-          let recalculateRoute = true;
-          const corner = turfUtils.isCornerPointOnSegment(
+          /*if (this.goalReached()) {
+            this.$emit('goalReached', this.trackingData);
+            clearInterval(this.intervalCalculation);
+            clearInterval(this.busStopInterval);
+          }*/
+          const recalculateRoute = true;
+          /*const corner = turfUtils.isCornerPointOnSegment(
             this.routePath,
             this.mapDrivingPoint,
             newDrivingPoint,
@@ -1041,7 +1150,7 @@ export default class DriveToLocation extends Vue {
               newDrivingPoint = snapped;
               recalculateRoute = false;
             }
-          }
+          }*/
 
           if (recalculateRoute) {
             if (
@@ -1049,21 +1158,25 @@ export default class DriveToLocation extends Vue {
               this.pauseCount >= this.pauseIntervalBeforeRecalculate
             ) {
               const point = await this.recalculateRoute(newDrivingPoint);
-              if (point) newDrivingPoint = point;
-              else isOnRoute = false;
+              if (point) {
+                this.pauseCount = 0;
+                this.noStreet = false;
+              }
+              isOnRoute = false;
             } else {
               newDrivingPoint = this.mapDrivingPoint;
               isOnRoute = false;
               if (this.openAnimationSteps === 0) this.pauseCount++;
             }
           } else {
+            isOnRoute = false;
             this.pauseCount = 0;
           }
         }
       }
       this.addDrivingDataToChart(newDrivingPoint);
       if (isOnRoute) {
-        this.updateDrivingPoint(newDrivingPoint);
+        this.updateDrivingPoint(newDrivingPoint, subPath);
       }
 
       this.initTrackingData();
@@ -1083,8 +1196,9 @@ export default class DriveToLocation extends Vue {
 
   animateVehicle(): void {
     if (this.animationIndex < this.animationPoints.length) {
-      this.mapVehiclePoint = this.animationPoints[this.animationIndex];
-      this.updateDrivingPath(this.mapVehiclePoint);
+      const segmentPath = this.animationPoints[this.animationIndex];
+      this.mapVehiclePoint = segmentPath[segmentPath.length - 1];
+      this.updateDrivingPath(segmentPath);
       this.animationIndex++;
     }
   }

@@ -131,8 +131,8 @@ export default class Participant extends Vue {
         ];
       case GameStep.Drive:
         if (this.vehicle === 'bus')
-          return ['speed', 'personCount', 'addPersons'];
-        return ['speed'];
+          return ['speed', 'threshold', 'personCount', 'addPersons'];
+        return ['speed', 'threshold'];
       case GameStep.CleanUp:
         return ['cleanUp', 'maxCount', 'particleTypes'];
       case GameStep.Result:
@@ -146,6 +146,14 @@ export default class Participant extends Vue {
       { speed: 20, persons: 1, distance: 0.001 },
       { speed: 40, persons: 1, distance: 0.002 },
       { speed: 100, persons: 1, distance: 0.004 },
+      { speed: 300, persons: 1, distance: 0.012 },
+      { speed: 300, persons: 1, distance: 0.012 },
+      { speed: 300, persons: 1, distance: 0.012 },
+      { speed: 300, persons: 1, distance: 0.012 },
+      { speed: 300, persons: 1, distance: 0.012 },
+      { speed: 300, persons: 1, distance: 0.012 },
+      { speed: 300, persons: 1, distance: 0.012 },
+      { speed: 300, persons: 1, distance: 0.012 },
       { speed: 100, persons: 1, distance: 0.004 },
       { speed: 50, persons: 1, distance: 0.002 },
       { speed: 30, persons: 1, distance: 0.001 },

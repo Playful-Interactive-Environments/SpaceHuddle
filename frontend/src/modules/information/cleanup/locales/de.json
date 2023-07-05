@@ -37,6 +37,7 @@
       "emissionStats": "Die Statistik oben zeigt, wie viel Treibhausgase in einer kWh Kraftstoff stecken.",
       "emissionStatsVariable": "Während dies für Kraftstoffe wie Diesel und Benzin konstant ist, hängen die Werte für Strom vom Strommix ab.",
       "speed": "Neben der Wahl des Fahrzeugs spielt auch das Fahrverhalten eine entscheidende Rolle. Je schneller du fährst, desto mehr Kraftstoff benötigst du.",
+      "threshold": "In der Statistik oberhalb der Karte kannst du sehen, wie viele Emissionen freigesetzt werden. Alle Emissionen im rot markierten Bereich gehen direkt in die Umwelt. Für alle darunter hast du die Chance, sie im nächsten Schritt zu bereinigen.",
       "personCount": "Aber auch die Anzahl der Passagiere macht einen Unterschied. Je voller das Fahrzeug, desto mehr Personen teilen sich die Emissionen.",
       "addPersons": "Bleib an Bushaltestellen stehen, um Leute einsteigen zu lassen.",
       "cleanUp": "Versuche nun, die von dir verursachten Emissionen zu beseitigen, indem du sie in die richtige Tonne wirfst.",
