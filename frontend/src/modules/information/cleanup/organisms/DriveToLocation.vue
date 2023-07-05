@@ -815,6 +815,11 @@ export default class DriveToLocation extends Vue {
   }
 
   start(event: any): void {
+    if (this.map) {
+      this.map.scrollZoom.disable();
+      this.map.dragPan.disable();
+      this.map.dragRotate.disable();
+    }
     this.boardingPersons = 0;
     this.move(event);
     this.isMoving = true;
@@ -825,6 +830,11 @@ export default class DriveToLocation extends Vue {
   }
 
   stop(): void {
+    if (this.map) {
+      this.map.scrollZoom.enable();
+      this.map.dragPan.enable();
+      this.map.dragRotate.enable();
+    }
     clearInterval(this.intervalCalculation);
     this.isMoving = false;
     this.moveSpeed = 0;
