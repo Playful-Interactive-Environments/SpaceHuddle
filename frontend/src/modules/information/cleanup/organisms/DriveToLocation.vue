@@ -88,6 +88,19 @@
           </div>
         </template>
       </CustomMapMarker>
+      <CustomMapMarker :coordinates="mapVehiclePoint" anchor="center">
+        <template v-slot:icon>
+          <Joystick
+            :size="150"
+            :stick-size="15"
+            @move="move($event)"
+            @start="start"
+            @stop="stop"
+            stickColor="white"
+            base-color="rgba(0, 0, 0, 0.1)"
+          />
+        </template>
+      </CustomMapMarker>
       <CustomMapMarker anchor="bottom-left" :coordinates="mapEnd">
         <template v-slot:icon>
           <font-awesome-icon icon="flag-checkered" class="pin" />
@@ -1351,5 +1364,15 @@ export default class DriveToLocation extends Vue {
   animation-name: move;
   animation-duration: 2s;
   font-size: 0;
+}
+
+.mgl-container::v-deep(.joystick) {
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-primary);
+
+  .joystick::v-deep(.joystick__stick) {
+    background: white;
+    border: 1px solid var(--color-primary);
+  }
 }
 </style>
