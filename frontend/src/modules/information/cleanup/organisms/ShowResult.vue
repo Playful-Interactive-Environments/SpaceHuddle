@@ -424,8 +424,8 @@ h1 {
 }
 
 .result {
-  padding: 10rem;
-  font-size: 5rem;
+  padding-top: 5rem;
+  font-size: 3rem;
   font-width: var(--font-weight-bold);
   text-align: center;
 }

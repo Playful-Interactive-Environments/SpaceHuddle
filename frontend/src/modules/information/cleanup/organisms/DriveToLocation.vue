@@ -26,10 +26,7 @@
                 xMin: 0,
                 xMax: trackingData.length,
                 yMin: maxCleanupThreshold,
-                yMax:
-                  maxChartValue > maxCleanupThreshold
-                    ? maxChartValue + 1
-                    : maxCleanupThreshold,
+                yMax: calcChartHeight(maxChartValue),
                 backgroundColor: 'rgba(255, 99, 132, 0.25)',
                 borderColor: 'rgb(255, 99, 132)',
               },
@@ -425,6 +422,7 @@ export default class DriveToLocation extends Vue {
   boardingPersons = 0;
 
   readonly maxCleanupThreshold = constants.maxCleanupThreshold;
+  readonly calcChartHeight = constants.calcChartHeight;
 
   readonly intervalCalculationTime = 100;
   intervalCalculation = -1;

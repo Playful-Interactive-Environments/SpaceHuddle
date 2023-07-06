@@ -27,10 +27,7 @@
                 xMin: 0,
                 xMax: trackingData.length,
                 yMin: maxCleanupThreshold,
-                yMax:
-                  maxChartValue > maxCleanupThreshold
-                    ? maxChartValue + 1
-                    : maxCleanupThreshold,
+                yMax: calcChartHeight(maxChartValue),
                 backgroundColor: 'rgba(255, 99, 132, 0.25)',
                 borderColor: 'rgb(255, 99, 132)',
               },
@@ -44,6 +41,25 @@
     </div>
   </div>
   <div class="gameArea">
+    <table
+      class="container-info"
+      :style="{ '--container-font-size': convertFontSizeToScreenSize(24) }"
+    >
+      <tr>
+        <td
+          v-for="particle in Object.keys(gameConfig.particles)"
+          :key="particle"
+        >
+          {{ getParticleDisplayName(particle) }}
+          <br />
+          <div v-if="particleState[particle]">
+            {{ particleState[particle].collectedCount }}
+            /
+            {{ particleState[particle].totalCount }}
+          </div>
+        </td>
+      </tr>
+    </table>
     <GameContainer
       v-model:width="gameWidth"
       v-model:height="gameHeight"
@@ -63,8 +79,8 @@
           <GameObject
             v-for="(particle, index) in Object.keys(gameConfig.particles)"
             :key="particle"
-            type="rect"
             :x="index * containerSpace + padding"
+            type="rect"
             :isStatic="true"
             :options="{
               name: particle,
@@ -83,23 +99,6 @@
               texture="/assets/games/cleanup/dumpster.svg"
               :tint="gameConfig.particles[particle].color"
             >
-              <text
-                :style="{
-                  fill: '#ffffff',
-                  fontSize: 24,
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                }"
-                :anchor="0.5"
-                :x="containerWidth / 2"
-                :y="(containerHeight / 3) * 2"
-              >
-                {{ getParticleDisplayName(particle) }}
-                \n
-                {{ particleState[particle].collectedCount }}
-                /
-                {{ particleState[particle].totalCount }}
-              </text>
             </sprite>
           </GameObject>
           <Graphics
@@ -288,6 +287,7 @@ export default class CleanUpParticles extends Vue {
   containerAspectRation = 1.3;
 
   readonly maxCleanupThreshold = constants.maxCleanupThreshold;
+  readonly calcChartHeight = constants.calcChartHeight;
 
   particleQueue: { [key: string]: number } = {};
 
@@ -360,6 +360,10 @@ export default class CleanUpParticles extends Vue {
       if (h && w) return h / w;
     }
     return 1;
+  }
+
+  convertFontSizeToScreenSize(fontSize: number): string {
+    return constants.convertFontSizeToScreenSize(fontSize, this.gameWidth);
   }
 
   drawCircle(circle: PIXI.Graphics): void {
@@ -598,9 +602,26 @@ export default class CleanUpParticles extends Vue {
 .gameArea {
   height: calc(100% - 10rem);
   width: 100%;
+  position: relative;
 }
 
 .custom-renderer-wrapper {
   height: 100%;
+}
+
+.container-info {
+  pointer-events: none;
+  position: absolute;
+  z-index: 100;
+  width: 100%;
+  color: white;
+  font-weight: bold;
+  font-size: var(--container-font-size);
+  text-align: center;
+
+  td {
+    padding-top: calc(var(--container-font-size) * 2);
+    width: 25%;
+  }
 }
 </style>
