@@ -80,8 +80,8 @@ enum GameStep {
 }
 
 enum GameState {
-  Info,
-  Game,
+  Info = 'info',
+  Game = 'game',
 }
 
 @Options({

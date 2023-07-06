@@ -351,15 +351,7 @@ export default class CleanUpParticles extends Vue {
   }
 
   getParticleAspect(particleName: string): number {
-    if (
-      this.spritesheet?.data?.frames &&
-      particleName in this.spritesheet.data.frames
-    ) {
-      const h = this.spritesheet.data.frames[particleName].sourceSize?.h;
-      const w = this.spritesheet.data.frames[particleName].sourceSize?.w;
-      if (h && w) return h / w;
-    }
-    return 1;
+    return pixiUtil.getSpriteAspect(this.spritesheet, particleName);
   }
 
   convertFontSizeToScreenSize(fontSize: number): string {
