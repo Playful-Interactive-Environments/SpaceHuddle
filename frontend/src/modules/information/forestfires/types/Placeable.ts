@@ -2,9 +2,7 @@ export default interface Placeable {
   uuid: string;
   id: number;
   name: string;
-  size: number;
+  width: number;
   group: number;
   position: [number, number];
 }
-
-export const PlaceableList: Placeable[] = [];

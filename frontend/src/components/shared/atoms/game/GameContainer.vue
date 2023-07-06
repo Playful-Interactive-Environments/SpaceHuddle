@@ -7,7 +7,7 @@
       v-if="ready"
       :backgroundColor="backgroundColor"
       :transparent="transparent"
-      @click="$emit('click', mouseConstraint)"
+      @pointerdown="$emit('click', mouseConstraint)"
     >
       <container>
         <slot :itemProps="{ engine: engine, detector: detector }"></slot>

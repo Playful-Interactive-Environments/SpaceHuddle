@@ -84,6 +84,7 @@
        },  
        "forestfires": {  
            "participant": "output/Participant",  
+           "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
              "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  
            "path": "information/forestfires"  

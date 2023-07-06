@@ -56,6 +56,13 @@ export const isParticipant = (): boolean => {
   );
 };
 
+export const getParticipantId = (): string => {
+  return getAuthorisationProperty(
+    'participantId',
+    EndpointAuthorisationType.PARTICIPANT
+  ) as string;
+};
+
 export const isUser = (): boolean => {
   return authorisationHasProperty(
     'userId',

@@ -92,3 +92,22 @@ export function drawRectWithGradient(
   rect.drawRect(0, 0, width, height);
   rect.endFill();
 }
+
+export function getSpriteAspect(
+  spritesheet: PIXI.Spritesheet,
+  spriteName: string
+): number {
+  if (spritesheet?.data?.frames && spriteName in spritesheet.data.frames) {
+    const h = spritesheet.data.frames[spriteName].sourceSize?.h;
+    const w = spritesheet.data.frames[spriteName].sourceSize?.w;
+    if (h && w) return h / w;
+  }
+  return 1;
+}
+
+export function getSpriteNames(spritesheet: PIXI.Spritesheet): string[] {
+  if (spritesheet?.data?.frames) {
+    return Object.keys(spritesheet.data.frames);
+  }
+  return [];
+}

@@ -2,31 +2,24 @@
   <div ref="gameContainer" class="mapSpace">
     <!-- Tutorial/Info for Edit-Mode -->
     <module-info
-      v-if="gameState === GameState.INFO"
+      v-if="gameState === GameState.Info && module"
       translation-path="module.information.forestfires.participant.tutorial"
       image-directory="/assets/games/forestfires/tutorial"
       :module-info-entry-data-list="tutorialList"
       file-extension="svg"
-      @infoRead="gameState = GameState.GAME"
+      @infoRead="gameState = GameState.Game"
+      :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
     />
     <!-- Edit-Mode -->
-    <forest-fire-edit
-      v-if="gameStep === GameStep.EDIT && gameState === GameState.GAME"
+    <PlacementState
+      v-if="gameStep === GameStep.Build && gameState === GameState.Game"
+      :taskId="taskId"
       @editFinished="editFinished"
     />
-
-    <!-- Tutorial/Info for Play-Mode -->
-    <module-info
-      v-if="gameStep === gameStep.PLAY && gameState === GameState.INFO"
-      translation-path="module.information.forestfires.participant.tutorial"
-      image-directory="/assets/games/forestfires/tutorial"
-      :module-info-entry-data-list="tutorialList"
-      file-extension="svg"
-      @infoRead="gameState = GameState.GAME"
-    />
     <!-- Play-Mode -->
-    <forest-fire-play
-      v-if="gameStep === GameStep.PLAY && gameState === GameState.GAME"
+    <PLayState
+      v-if="gameStep === GameStep.Play && gameState === GameState.Game"
+      :taskId="taskId"
       @playFinished="playFinished"
     />
   </div>
@@ -44,25 +37,25 @@ import { Module } from '@/types/api/Module';
 import * as cashService from '@/services/cash-service';
 
 // Custom Modules
-import ForestFireEdit from '@/modules/information/forestfires/organisms/ForestFiresEDIT.vue';
-import ForestFirePlay from '@/modules/information/forestfires/organisms/ForestFiresPLAY.vue';
+import PlacementState from '@/modules/information/forestfires/organisms/PlacementState.vue';
+import PLayState from '@/modules/information/forestfires/organisms/PlayState.vue';
 import ModuleInfo from '@/components/participant/molecules/ModuleInfo.vue';
 
 enum GameStep {
-  EDIT = 'edit',
-  PLAY = 'play',
+  Build = 'build',
+  Play = 'play',
 }
 
 enum GameState {
-  INFO,
-  GAME,
+  Info = 'info',
+  Game = 'game',
 }
 
 @Options({
   components: {
     ModuleInfo,
-    ForestFireEdit,
-    ForestFirePlay,
+    PlacementState,
+    PLayState,
   },
   emits: ['update:useFullSize'],
 })
@@ -79,9 +72,9 @@ export default class Participant extends Vue {
   sizeCalculated = false;
 
   // The general state of the game (tutorial, playing, ...) and smaller steps (edit-mode, play-mode, ...) within those states.
-  gameStep = GameStep.EDIT;
+  gameStep = GameStep.Build;
   GameStep = GameStep;
-  gameState = GameState.INFO;
+  gameState = GameState.Info;
   GameState = GameState;
 
   // Vue Callbacks for mounting and unmounting / loading and unloading.
@@ -122,9 +115,9 @@ export default class Participant extends Vue {
   // Get the filenames for the tutorial images. Should all have the same file extension!
   get tutorialList(): string[] {
     switch (this.gameStep) {
-      case GameStep.EDIT:
+      case GameStep.Build:
         return ['click', 'place', 'play', 'remove'];
-      case GameStep.PLAY:
+      case GameStep.Play:
         return ['collect', 'hazards', 'info'];
     }
     return [];
@@ -132,12 +125,13 @@ export default class Participant extends Vue {
 
   // Callbacks when stages are finished.
   editFinished(): void {
-    this.gameStep = GameStep.PLAY;
-    this.gameState = GameState.INFO;
+    this.gameStep = GameStep.Play;
+    this.gameState = GameState.Info;
   }
+
   playFinished(): void {
-    this.gameStep = GameStep.EDIT;
-    this.gameState = GameState.INFO;
+    this.gameStep = GameStep.Build;
+    this.gameState = GameState.Info;
   }
 }
 </script>

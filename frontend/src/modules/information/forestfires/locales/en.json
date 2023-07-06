@@ -14,6 +14,7 @@
         "description": "Glass bottles may act like strong lenses under the right circumstances. They focus incoming light to a single spot, potentially causing a fire."
       }
     },
+    "everythingPlaced": "everything placed",
     "place": "Place",
     "play": "Start",
     "tutorial": {
@@ -24,6 +25,9 @@
       "info": "This forest is not as harmless as it might seem!",
       "hazards": "Scattered throughout these woods are dangerous fire hazards.",
       "collect": "Collect them by clicking on them and prevent a massive fire before it is too late!"
+    },
+    "settings": {
+      "levelName": "level name"
     }
   }
 }
