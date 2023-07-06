@@ -10,6 +10,9 @@
   },
   "participant": {
     "speed": "Geschwindigkeit",
+    "maxSpeed": "max",
+    "combined": "kombiniert",
+    "separate": "separat",
     "electricity": "Stromanteil",
     "vehicle-parameter": {
       "fuel": "Treibstoff",

@@ -91,6 +91,7 @@
       <CustomMapMarker :coordinates="mapVehiclePoint" anchor="center">
         <template v-slot:icon>
           <Joystick
+            v-if="combinedJoystick"
             :size="150"
             :stick-size="15"
             @move="move($event)"
@@ -99,7 +100,7 @@
             @mousedown="disableMapPan"
             v-on:touchstart="disableMapPan"
             stickColor="white"
-            base-color="rgba(0, 0, 0, 0.1)"
+            :base-color="getSpeedColor(moveSpeed, 0.3)"
           />
         </template>
       </CustomMapMarker>
@@ -139,16 +140,35 @@
       ></mgl-marker>-->
     </mgl-map>
     <div class="overlay-top-left">
+      <round-slider
+        v-model="maxSpeed"
+        :max="vehicleParameter.speed"
+        circleShape="full"
+        start-angle="315"
+        end-angle="+270"
+        line-cap="round"
+        radius="80"
+        width="10"
+        handleShape="dot"
+        :show-tooltip="false"
+        pathColor="rgba(0, 0, 0, 0.5)"
+        :rangeColor="getSpeedColor(maxSpeed)"
+        handle-size="20"
+      />
       <el-progress
         type="dashboard"
-        :percentage="(moveSpeed / vehicleParameter.speed) * 100"
-        :color="colors"
+        :percentage="convertSpeedToColorPercentage(moveSpeed)"
+        :color="getSpeedColor(moveSpeed)"
       >
         <template #default>
           <div>{{ Math.round(moveSpeed) }} km/h</div>
           <div>
-            {{ $t('module.information.cleanup.participant.speed') }}
+            {{ $t('module.information.cleanup.participant.maxSpeed') }}
+            {{ Math.round(maxSpeed) }} km/h
           </div>
+          <!--<div>
+            {{ $t('module.information.cleanup.participant.speed') }}
+          </div>-->
         </template>
       </el-progress>
     </div>
@@ -156,18 +176,35 @@
       <font-awesome-icon icon="users" />
       {{ personCount }} / {{ vehicleParameter.persons }}
     </div>
-    <div class="overlay-bottom">
+    <!--<div class="overlay-bottom">
       <el-slider v-model="maxSpeed" :max="vehicleParameter.speed" />
-      <!--<div>
+    </div>-->
+    <div class="overlay-bottom-right">
+      <div>
         <Joystick
+          v-if="!combinedJoystick"
           :size="150"
           :stick-size="50"
           @move="move($event)"
           @start="start"
           @stop="stop"
           stickColor="white"
+          :base-color="getSpeedColor(moveSpeed, 0.3)"
         />
-      </div>-->
+      </div>
+    </div>
+    <div class="overlay-bottom-left">
+      <el-switch
+        v-model="combinedJoystick"
+        class="ml-2"
+        inline-prompt
+        style="
+          --el-switch-on-color: var(--color-mint);
+          --el-switch-off-color: var(--color-red);
+        "
+        :active-text="$t('module.information.cleanup.participant.combined')"
+        :inactive-text="$t('module.information.cleanup.participant.separate')"
+      />
     </div>
   </div>
   <!--<div ref="controlArea" class="controlArea level">
@@ -250,6 +287,7 @@ import RoundSlider from 'vue-three-round-slider/src';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
 import * as constants from '@/modules/information/cleanup/utils/consts';
+import Color from 'colorjs.io';
 //import * as tiles from `https://api.maptiler.com/tiles/v3/tiles.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
 
 MglDefaults.style = `https://api.maptiler.com/maps/streets/style.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
@@ -281,6 +319,11 @@ export interface ChartData {
     data: number[];
     fill: any;
   }[];
+}
+
+interface ColorProp {
+  color: string;
+  percentage: number;
 }
 
 const minToleratedAngleDeviation = 22.5;
@@ -371,6 +414,7 @@ export default class DriveToLocation extends Vue {
   direction = 0;
   speed = 0;
   maxSpeed = 0;
+  combinedJoystick = true;
 
   isMoving = false;
   moveSpeed = 0;
@@ -389,21 +433,64 @@ export default class DriveToLocation extends Vue {
   readonly busStopIntervalTime = 10000;
   busStopInterval = -1;
 
-  get colors(): { color: string; percentage: number }[] {
+  convertSpeedToColorPercentage(speed: number): number {
+    return (speed / this.vehicleParameter.speed) * 100;
+  }
+
+  get colors(): ColorProp[] {
     return [
       {
         color: '#01cf9e',
-        percentage: (20 / this.vehicleParameter.speed) * 100,
+        percentage: this.convertSpeedToColorPercentage(20),
       },
       {
         color: '#f3a40a',
-        percentage: (50 / this.vehicleParameter.speed) * 100,
+        percentage: this.convertSpeedToColorPercentage(50),
       },
       {
         color: '#fe6e5d',
-        percentage: (100 / this.vehicleParameter.speed) * 100,
+        percentage: this.convertSpeedToColorPercentage(100),
       },
     ];
+  }
+
+  getSpeedColor(speed: number, transparent = 1): string {
+    const convertColor = (colorProp: ColorProp): Color => {
+      return new Color(colorProp.color);
+    };
+    const percentage = this.convertSpeedToColorPercentage(speed);
+    const colorPropList = this.colors;
+    const colorMixList: [ColorProp, ColorProp] = [
+      colorPropList[0],
+      colorPropList[colorPropList.length - 1],
+    ];
+    for (const colorProp of colorPropList) {
+      if (colorProp.percentage >= percentage) {
+        colorMixList[1] = colorProp;
+        break;
+      }
+      if (colorProp.percentage <= percentage) {
+        colorMixList[0] = colorProp;
+      }
+    }
+    let resultColor = new Color(colorMixList[0].color);
+    if (colorMixList[0].percentage >= percentage)
+      resultColor = new Color(colorMixList[0].color);
+    else if (colorMixList[1].percentage <= percentage)
+      resultColor = new Color(colorMixList[1].color);
+    else {
+      const range = colorMixList[1].percentage - colorMixList[0].percentage;
+      if (range === 0) resultColor = new Color(colorMixList[0].color);
+      else {
+        resultColor = convertColor(colorMixList[0]).mix(
+          convertColor(colorMixList[1]),
+          (percentage - colorMixList[0].percentage) * (1 / range),
+          { space: 'lch', outputSpace: 'srgb' }
+        ) as any;
+      }
+    }
+    resultColor.alpha = transparent;
+    return resultColor.toString();
   }
 
   chartData: ChartData = {
@@ -879,6 +966,7 @@ export default class DriveToLocation extends Vue {
   }
 
   move(event: any): void {
+    if (event.distance === undefined) return;
     const calcAngle = (point: [number, number]): number => {
       return Math.atan2(point[0], point[1]) * (180 / Math.PI);
     };
@@ -1251,6 +1339,9 @@ export default class DriveToLocation extends Vue {
   left: 0.5rem;
 
   .el-progress {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
     background: rgba(0, 0, 0, 0.5);
     border-radius: 50%;
     padding: 0.1rem;
@@ -1270,6 +1361,22 @@ export default class DriveToLocation extends Vue {
   z-index: 100;
   bottom: 0.5rem;
   right: 0.5rem;
+  left: 0.5rem;
+  padding: 2rem;
+}
+
+.overlay-bottom-right {
+  position: absolute;
+  z-index: 100;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  padding: 2rem;
+}
+
+.overlay-bottom-left {
+  position: absolute;
+  z-index: 100;
+  bottom: 0.5rem;
   left: 0.5rem;
   padding: 2rem;
 }
