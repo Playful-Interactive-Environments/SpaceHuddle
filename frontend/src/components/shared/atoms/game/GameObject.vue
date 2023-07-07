@@ -17,6 +17,7 @@ import * as PIXI from 'pixi.js';
 import { EventType } from '@/types/enum/EventType';
 import { CollisionHandler } from '@/types/game/CollisionHandler';
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
+import { ObjectSpace } from '@/types/enum/ObjectSpace';
 
 @Options({
   components: {},
@@ -36,6 +37,7 @@ export default class GameObject extends Vue {
   @Prop({ default: 0 }) id!: number;
   @Prop({ default: 0 }) x!: number;
   @Prop({ default: 0 }) y!: number;
+  @Prop({ default: ObjectSpace.Absolute }) objectSpace!: ObjectSpace;
   @Prop({ default: 'rect' }) readonly type!: 'rect' | 'circle';
   @Prop({ default: {} }) readonly options!: {
     [key: string]: string | number | boolean;
@@ -130,14 +132,26 @@ export default class GameObject extends Vue {
     }
   }
 
+  initPosition(): void {
+    if (this.objectSpace === ObjectSpace.Relative && this.gameContainer)
+      this.position = [
+        (this.x / 100) * this.gameContainer.gameWidth,
+        (this.y / 100) * this.gameContainer.gameHeight,
+      ];
+    else this.position = [this.x, this.y];
+  }
+
   @Watch('x', { immediate: true })
   @Watch('y', { immediate: true })
   onModelValueChanged(): void {
-    this.position = [this.x, this.y];
+    this.initPosition();
   }
 
   @Watch('gameContainer', { immediate: true })
   onEngineChanged(): void {
+    setTimeout(() => {
+      this.initPosition();
+    }, 100);
     this.addBodyToEngine();
     this.addBodyToDetector();
   }

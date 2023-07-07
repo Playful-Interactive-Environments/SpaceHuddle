@@ -3,22 +3,22 @@
     "cigarette": {
       "severity": 3,
       "maxCount": 2,
-      "width": 16
+      "width": 3
     },
     "bottleWhite": {
       "severity": 2,
       "maxCount": 1,
-      "width": 16
+      "width": 3
     },
     "bottleWine": {
       "severity": 1,
       "maxCount": 1,
-      "width": 16
+      "width": 3
     },
     "bottleBeer": {
       "severity": 1,
       "maxCount": 1,
-      "width": 16
+      "width": 3
     }
   }
 }

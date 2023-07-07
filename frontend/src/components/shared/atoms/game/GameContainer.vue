@@ -23,6 +23,7 @@ import * as Matter from 'matter-js/build/matter';
 import { Application } from 'vue3-pixi';
 import { EventType } from '@/types/enum/EventType';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
+import { CustomObject } from '@/types/game/CustomObject';
 
 @Options({
   components: {
@@ -81,6 +82,10 @@ export default class GameContainer extends Vue {
       EventType.REGISTER_GAME_OBJECT,
       this.registerGameObject
     );
+    gameContainer.addEventListener(
+      EventType.REGISTER_CUSTOM_OBJECT,
+      this.registerCustomObject
+    );
 
     this.setupMatter();
     (this.resizeObserver as any).cleanUp = this;
@@ -115,6 +120,11 @@ export default class GameContainer extends Vue {
   registerGameObject(e: any): void {
     const gameObject = e.detail.data as GameObject;
     this.gameObjects.push(gameObject);
+    gameObject.gameContainer = this;
+  }
+
+  registerCustomObject(e: any): void {
+    const gameObject = e.detail.data as CustomObject;
     gameObject.gameContainer = this;
   }
 
@@ -187,6 +197,10 @@ export default class GameContainer extends Vue {
       gameContainer.removeEventListener(
         EventType.REGISTER_GAME_OBJECT,
         this.registerGameObject
+      );
+      gameContainer.removeEventListener(
+        EventType.REGISTER_CUSTOM_OBJECT,
+        this.registerCustomObject
       );
     }
     clearInterval(this.intervalCollision);

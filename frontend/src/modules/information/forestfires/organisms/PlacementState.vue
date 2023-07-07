@@ -19,8 +19,9 @@
             :key="hazard.uuid"
             :id="hazard.id"
             type="rect"
-            :x="(hazard.position[0] / 100) * gameWidth"
-            :y="(hazard.position[1] / 100) * gameHeight"
+            :object-space="ObjectSpace.Relative"
+            :x="hazard.position[0]"
+            :y="hazard.position[1]"
             :options="{
               name: hazard.name,
               collisionFilter: {
@@ -31,13 +32,14 @@
             }"
             :is-static="true"
           >
-            <sprite
+            <CustomSprite
               :texture="hazardSpritesheet.textures[hazard.name]"
               :anchor="0.5"
-              :width="hazard.width * 1.5"
-              :height="getHazardAspect(hazard.name) * hazard.width * 1.5"
+              :width="hazard.width"
+              :aspect-ration="getHazardAspect(hazard.name)"
+              :object-space="ObjectSpace.Relative"
             >
-            </sprite>
+            </CustomSprite>
           </GameObject>
         </container>
       </template>
@@ -76,6 +78,8 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import LevelSettings from '@/modules/information/forestfires/organisms/LevelSettings.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ElMessage } from 'element-plus';
+import { ObjectSpace } from '@/types/enum/ObjectSpace';
+import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 
 // The current state of the edit mode
 export interface PlacementState {
@@ -84,7 +88,13 @@ export interface PlacementState {
 }
 
 @Options({
+  computed: {
+    ObjectSpace() {
+      return ObjectSpace;
+    },
+  },
   components: {
+    CustomSprite,
     FontAwesomeIcon,
     LevelSettings,
     GameObject,
