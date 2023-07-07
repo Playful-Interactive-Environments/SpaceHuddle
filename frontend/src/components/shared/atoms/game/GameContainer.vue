@@ -7,7 +7,8 @@
       v-if="ready"
       :backgroundColor="backgroundColor"
       :transparent="transparent"
-      @pointerdown="$emit('click', mouseConstraint)"
+      @pointerdown="gameContainerClicked"
+      @pointerup="gameContainerReleased"
     >
       <container>
         <slot :itemProps="{ engine: engine, detector: detector }"></slot>
@@ -36,6 +37,7 @@ import { CustomObject } from '@/types/game/CustomObject';
     'update:width',
     'update:height',
     'click',
+    'update:selectedObject',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -45,10 +47,12 @@ export default class GameContainer extends Vue {
   @Prop({ default: true }) readonly useGravity!: boolean;
   @Prop({ default: false }) readonly useWind!: boolean;
   @Prop({ default: true }) readonly useBorders!: boolean;
+  @Prop({ default: false }) readonly activatedObjectOnRegister!: boolean;
   @Prop({ default: undefined }) readonly width!: number | undefined;
   @Prop({ default: undefined }) readonly height!: number | undefined;
   @Prop({ default: '#f4f4f4' }) readonly backgroundColor!: string;
   @Prop({ default: false }) readonly transparent!: boolean;
+  @Prop({ default: null }) readonly selectedObject!: GameObject | null;
   @Prop({
     default: undefined,
   })
@@ -68,6 +72,7 @@ export default class GameContainer extends Vue {
   resizeObserver = new ResizeObserver(this.sizeChanged);
 
   gameObjects: GameObject[] = [];
+  activeObject: GameObject | null = null;
 
   readonly intervalTimeWind = 50;
   intervalWind = -1;
@@ -88,10 +93,10 @@ export default class GameContainer extends Vue {
     );
 
     this.setupMatter();
-    (this.resizeObserver as any).cleanUp = this;
+    (this.resizeObserver as any).gameContainer = this;
     this.resizeObserver.observe(this.$el.parentElement);
     if (this.hasMouseInput) {
-      (this.hierarchyObserver as any).cleanUp = this;
+      (this.hierarchyObserver as any).gameContainer = this;
       this.hierarchyObserver.observe(this.$refs.gameContainer as HTMLElement, {
         childList: true,
         subtree: false,
@@ -121,6 +126,11 @@ export default class GameContainer extends Vue {
     const gameObject = e.detail.data as GameObject;
     this.gameObjects.push(gameObject);
     gameObject.gameContainer = this;
+    if (this.activatedObjectOnRegister) {
+      this.$emit('update:selectedObject', gameObject);
+      if (this.isMouseDown) this.activeObject = gameObject;
+      else gameObject.gameObjectReleased();
+    }
   }
 
   registerCustomObject(e: any): void {
@@ -167,14 +177,14 @@ export default class GameContainer extends Vue {
     mutationList: MutationRecord[],
     observer: MutationObserver
   ): void {
-    const cleanUp = (observer as any).cleanUp as GameContainer;
+    const gameContainer = (observer as any).gameContainer as GameContainer;
     for (const mutation of mutationList) {
       if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
         const canvas = Array.from(mutation.addedNodes).find(
           (node) => node.nodeName.toLowerCase() === 'canvas'
         ) as HTMLCanvasElement | undefined;
         if (canvas) {
-          cleanUp.setupMouseConstraint(canvas);
+          gameContainer.setupMouseConstraint(canvas);
           return;
         }
       }
@@ -185,8 +195,8 @@ export default class GameContainer extends Vue {
     mutationList: ResizeObserverEntry[],
     observer: ResizeObserver
   ): void {
-    const cleanUp = (observer as any).cleanUp as GameContainer;
-    cleanUp.setupPixiSpace();
+    const gameContainer = (observer as any).gameContainer as GameContainer;
+    gameContainer.setupPixiSpace();
   }
 
   unmounted(): void {
@@ -244,6 +254,24 @@ export default class GameContainer extends Vue {
         },
       });
       Matter.Composite.add(this.engine.world, this.mouseConstraint);
+    }
+  }
+
+  readonly minClickTimeDelta = 10;
+  isMouseDown = false;
+  gameContainerClicked(): void {
+    this.isMouseDown = true;
+    setTimeout(() => {
+      if (!this.activeObject) {
+        this.$emit('click', this.mouseConstraint);
+      }
+    }, this.minClickTimeDelta);
+  }
+
+  gameContainerReleased(): void {
+    this.isMouseDown = false;
+    if (this.activeObject) {
+      this.activeObject.gameObjectReleased();
     }
   }
 

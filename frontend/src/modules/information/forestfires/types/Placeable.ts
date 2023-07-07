@@ -3,6 +3,7 @@ export default interface Placeable {
   id: number;
   name: string;
   width: number;
-  group: number;
+  shape: 'rect' | 'circle';
   position: [number, number];
+  rotation: number;
 }

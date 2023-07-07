@@ -18,20 +18,22 @@
             v-for="hazard in placedHazards"
             :key="hazard.uuid"
             v-model:id="hazard.id"
-            type="rect"
+            :type="hazard.shape"
             :object-space="ObjectSpace.Relative"
             :x="hazard.position[0]"
             :y="hazard.position[1]"
+            :rotation="hazard.rotation"
             :options="{
               name: hazard.name,
               collisionFilter: {
-                group: hazard.group,
+                group: 'hazard',
                 category: 0x0001,
                 mask: 0x0001,
               },
             }"
             :is-static="true"
-            @pointerdown="destroyPlaceable(hazard)"
+            :source="hazard"
+            @click="destroyPlaceable(hazard)"
           >
             <CustomSprite
               :texture="hazardSpritesheet.textures[hazard.name]"
@@ -65,6 +67,7 @@ import { Idea } from '@/types/api/Idea';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as authService from '@/services/auth-service';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
+import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 
 @Options({
   computed: {
@@ -75,6 +78,7 @@ import { ObjectSpace } from '@/types/enum/ObjectSpace';
   components: {
     GameObject,
     GameContainer,
+    CustomSprite,
     Line,
     Pixi,
   },

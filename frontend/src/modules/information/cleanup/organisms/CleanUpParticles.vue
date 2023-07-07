@@ -79,7 +79,8 @@
           <GameObject
             v-for="(particle, index) in Object.keys(gameConfig.particles)"
             :key="particle"
-            :x="index * containerSpace + padding"
+            :x="index * containerSpace + padding + containerSpace / 2"
+            :y="containerHeight / 2"
             type="rect"
             :isStatic="true"
             :options="{
@@ -94,6 +95,7 @@
             @sizeChanged="containerSizeChanged"
           >
             <sprite
+              :anchor="0.5"
               :width="containerWidth"
               :height="containerHeight"
               texture="/assets/games/cleanup/dumpster.svg"
@@ -168,12 +170,6 @@
               :color="particle.color"
               @render="drawCircle"
             >
-              <!--<text
-                :style="{ fill: '#ffffff', fontSize: 16, fontWeight: 'bold' }"
-                :anchor="0.5"
-              >
-                {{ particle.id }}
-              </text>-->
               <sprite
                 :texture="spritesheet.textures[particle.name]"
                 :anchor="0.5"

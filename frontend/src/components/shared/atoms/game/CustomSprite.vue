@@ -8,6 +8,7 @@
     :x="displayX"
     :y="displayY"
   >
+    <slot></slot>
   </sprite>
 </template>
 
@@ -37,7 +38,7 @@ export default class CustomSprite extends Vue implements CustomObject {
   @Prop() texture!: string | PIXI.Texture;
   gameContainer!: GameContainer;
 
-  readonly defaultSize = 10;
+  readonly defaultSize = 50;
   displayWidth = this.defaultSize;
   displayHeight = this.defaultSize;
   displayX = 0;
@@ -46,7 +47,8 @@ export default class CustomSprite extends Vue implements CustomObject {
   calcDisplayWidth(): number {
     let value = this.defaultSize;
     if (this.width) value = this.width;
-    else if (this.height) value = this.height / this.aspectRation;
+    else if (this.height && this.aspectRation)
+      value = this.height / this.aspectRation;
 
     if (this.objectSpace === ObjectSpace.Relative && this.gameContainer) {
       return (value / 100) * this.gameContainer.gameWidth;
@@ -57,7 +59,8 @@ export default class CustomSprite extends Vue implements CustomObject {
   calcDisplayHeight(): number {
     let value = this.defaultSize;
     if (this.height) value = this.height;
-    else if (this.width) value = this.width * this.aspectRation;
+    else if (this.width && this.aspectRation)
+      value = this.width * this.aspectRation;
 
     if (this.objectSpace == ObjectSpace.Relative && this.gameContainer) {
       return (value / 100) * this.gameContainer.gameWidth;

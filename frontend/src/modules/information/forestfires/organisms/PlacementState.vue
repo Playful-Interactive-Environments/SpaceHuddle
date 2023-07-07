@@ -5,7 +5,9 @@
       v-model:height="gameHeight"
       :detect-collision="false"
       :use-gravity="false"
+      :use-borders="false"
       @click="placeHazard"
+      v-model:selectedObject="selectedObject"
     >
       <template v-slot:default>
         <container v-if="gameWidth">
@@ -17,20 +19,22 @@
           <GameObject
             v-for="hazard in placedHazards"
             :key="hazard.uuid"
-            :id="hazard.id"
-            type="rect"
+            v-model:id="hazard.id"
+            :type="hazard.shape"
             :object-space="ObjectSpace.Relative"
-            :x="hazard.position[0]"
-            :y="hazard.position[1]"
+            v-model:x="hazard.position[0]"
+            v-model:y="hazard.position[1]"
+            v-model:rotation="hazard.rotation"
             :options="{
               name: hazard.name,
               collisionFilter: {
-                group: hazard.group,
+                group: 'hazard',
                 category: 0x0001,
                 mask: 0x0001,
               },
             }"
-            :is-static="true"
+            :source="hazard"
+            :use-physic="false"
           >
             <CustomSprite
               :texture="hazardSpritesheet.textures[hazard.name]"
@@ -52,6 +56,26 @@
       <div>
         <font-awesome-icon icon="save" />
       </div>
+    </div>
+    <div
+      v-if="selectedObject"
+      class="overlay-selected-item"
+      :style="{
+        '--x': `${selectedObject.position[0]}px`,
+        '--y': `${selectedObject.position[1]}px`,
+      }"
+    >
+      <round-slider
+        v-model="selectedObject.source.rotation"
+        max="360"
+        start-angle="90"
+        end-angle="+360"
+        line-cap="round"
+        radius="70"
+        width="10"
+        handleShape="dot"
+        :show-tooltip="false"
+      />
     </div>
   </div>
   <LevelSettings
@@ -80,6 +104,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ElMessage } from 'element-plus';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
+import RoundSlider from 'vue-three-round-slider/src';
 
 // The current state of the edit mode
 export interface PlacementState {
@@ -101,6 +126,7 @@ export interface PlacementState {
     GameContainer,
     Line,
     Pixi,
+    RoundSlider,
   },
   emits: ['editFinished'],
 })
@@ -116,6 +142,7 @@ export default class ForestFireEdit extends Vue {
   placementState: { [key: string]: PlacementState } = {};
   hazardSpritesheet!: PIXI.Spritesheet;
   showLevelSettings = false;
+  selectedObject: GameObject | null = null;
 
   mounted(): void {
     PIXI.Assets.load('/assets/games/forestfires/hazard.json').then(
@@ -136,8 +163,9 @@ export default class ForestFireEdit extends Vue {
           id: 0,
           name: hazardName,
           width: hazardParameter.width,
-          group: i + 1,
+          shape: hazardParameter.shape,
           position: [0, 0],
+          rotation: 0,
         };
         this.availableHazards.push(placeable);
       }
@@ -197,6 +225,8 @@ export default class ForestFireEdit extends Vue {
 
 <style scoped lang="scss">
 .gameArea {
+  --x: 0;
+  --y: 0;
   position: relative;
   height: calc(100%);
   width: 100%;
@@ -213,5 +243,14 @@ export default class ForestFireEdit extends Vue {
   right: 1rem;
   font-size: var(--font-size-xxxxlarge);
   color: white;
+}
+
+.overlay-selected-item {
+  z-index: 100;
+  position: absolute;
+  //top: var(--x);
+  //left: var(--y);
+  top: 1rem;
+  left: 1rem;
 }
 </style>
