@@ -114,8 +114,9 @@ export class OsrmCustom extends OSRM {
       axiosOpts,
     } = clientArgs || {};
     this.apiKey = apiKey; // TODO: add to requests
-    //const defaultURL = 'http://router.project-osrm.org';;
+    //const defaultURL = 'http://router.project-osrm.org';
     const defaultURL = `https://routing.openstreetmap.de/routed-${profile}`;
+    //const defaultURL = `https://routing.openstreetmap.de/routed-bike`;
     this.client =
       new CustomClient(
         baseUrl || defaultURL,

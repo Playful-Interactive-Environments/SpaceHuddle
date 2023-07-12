@@ -72,7 +72,7 @@
               class="divingVehicle"
               :src="`/assets/games/cleanup/vehicle/${vehicleParameter.imageTop}`"
               alt="car"
-              :width="20"
+              :width="30"
             />
             <font-awesome-icon
               v-if="boardingPersons > 0"
@@ -1213,7 +1213,7 @@ export default class DriveToLocation extends Vue {
 
   noStreet = false;
   updateTraceIsRunning = false;
-  pauseIntervalBeforeRecalculate = 15;
+  pauseIntervalBeforeRecalculate = 8;
   pauseCount = 0;
   corner: [number, number] = [0, 0];
   async updateTrace(): Promise<void> {
