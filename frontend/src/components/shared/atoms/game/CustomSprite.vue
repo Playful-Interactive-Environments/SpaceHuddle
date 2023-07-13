@@ -48,7 +48,7 @@ export default class CustomSprite extends Vue implements CustomObject {
     let value = this.defaultSize;
     if (this.width) value = this.width;
     else if (this.height && this.aspectRation)
-      value = this.height / this.aspectRation;
+      value = this.height * this.aspectRation;
 
     if (this.objectSpace === ObjectSpace.Relative && this.gameContainer) {
       return (value / 100) * this.gameContainer.gameWidth;
@@ -60,7 +60,7 @@ export default class CustomSprite extends Vue implements CustomObject {
     let value = this.defaultSize;
     if (this.height) value = this.height;
     else if (this.width && this.aspectRation)
-      value = this.width * this.aspectRation;
+      value = this.width / this.aspectRation;
 
     if (this.objectSpace == ObjectSpace.Relative && this.gameContainer) {
       return (value / 100) * this.gameContainer.gameWidth;

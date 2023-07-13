@@ -323,7 +323,7 @@ export default class GameContainer extends Vue {
         bounds.bottom.height,
         { isStatic: true, isHidden: true }
       );
-      Matter.Composite.add(this.engine.world, bottom);
+      if (this.useBorders) Matter.Composite.add(this.engine.world, bottom);
       const top = Matter.Bodies.rectangle(
         bounds.top.x,
         bounds.top.y,
@@ -331,7 +331,7 @@ export default class GameContainer extends Vue {
         bounds.top.height,
         { isStatic: true, isHidden: true }
       );
-      Matter.Composite.add(this.engine.world, top);
+      if (this.useBorders) Matter.Composite.add(this.engine.world, top);
       const right = Matter.Bodies.rectangle(
         bounds.right.x,
         bounds.right.y,
@@ -339,7 +339,7 @@ export default class GameContainer extends Vue {
         bounds.right.height,
         { isStatic: true, isHidden: true }
       );
-      Matter.Composite.add(this.engine.world, right);
+      if (this.useBorders) Matter.Composite.add(this.engine.world, right);
       const left = Matter.Bodies.rectangle(
         bounds.left.x,
         bounds.left.y,
@@ -347,7 +347,7 @@ export default class GameContainer extends Vue {
         bounds.left.height,
         { isStatic: true, isHidden: true }
       );
-      Matter.Composite.add(this.engine.world, left);
+      if (this.useBorders) Matter.Composite.add(this.engine.world, left);
       this.borders = {
         top: top,
         bottom: bottom,

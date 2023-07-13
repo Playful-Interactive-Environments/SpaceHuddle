@@ -6,7 +6,8 @@
       :detect-collision="false"
       :use-gravity="false"
       :use-borders="false"
-      @click="placeHazard"
+      :activatedObjectOnRegister="true"
+      @click="placeObject"
       v-model:selectedObject="selectedObject"
     >
       <template v-slot:default>
@@ -17,43 +18,53 @@
             :height="gameHeight"
           ></sprite>
           <GameObject
-            v-for="hazard in placedHazards"
-            :key="hazard.uuid"
-            v-model:id="hazard.id"
-            :type="hazard.shape"
+            v-for="placeable in renderList"
+            :key="placeable.uuid"
+            v-model:id="placeable.id"
+            :type="placeable.shape"
             :object-space="ObjectSpace.Relative"
-            v-model:x="hazard.position[0]"
-            v-model:y="hazard.position[1]"
-            v-model:rotation="hazard.rotation"
+            v-model:x="placeable.position[0]"
+            v-model:y="placeable.position[1]"
+            v-model:rotation="placeable.rotation"
+            v-model:scale="placeable.scale"
             :options="{
-              name: hazard.name,
+              name: placeable.name,
               collisionFilter: {
-                group: 'hazard',
-                category: 0x0001,
-                mask: 0x0001,
+                group: -1,
               },
             }"
-            :source="hazard"
+            :source="placeable"
             :use-physic="false"
           >
             <CustomSprite
-              :texture="hazardSpritesheet.textures[hazard.name]"
+              :texture="placeable.texture"
               :anchor="0.5"
-              :width="hazard.width"
-              :aspect-ration="getHazardAspect(hazard.name)"
+              :width="placeable.width"
+              :aspect-ration="getObjectAspect(placeable.type, placeable.name)"
               :object-space="ObjectSpace.Relative"
+              :tint="
+                selectedObject && selectedObject.id === placeable.id
+                  ? '#ff0000'
+                  : '#ffffff'
+              "
             >
             </CustomSprite>
           </GameObject>
+          <!--<Graphics
+            @render="drawSelectedBorder"
+            :x="selectionMaskX"
+            :y="selectionMaskY"
+            :rotation="selectionMaskRotation"
+            :scale="selectionMaskScale"
+          ></Graphics>-->
         </container>
       </template>
     </GameContainer>
-    <div
-      class="overlay-top"
-      v-if="availableHazards.length === 0"
-      @click="showLevelSettings = true"
-    >
-      <div>
+    <div class="overlay-top">
+      <div @click="showToolbox = true">
+        <font-awesome-icon icon="screwdriver-wrench" />
+      </div>
+      <div v-if="placedObjects.length > 5" @click="showLevelSettings = true">
         <font-awesome-icon icon="save" />
       </div>
     </div>
@@ -76,8 +87,54 @@
         handleShape="dot"
         :show-tooltip="false"
       />
+      <round-slider
+        class="sliderInside"
+        v-model="selectedObject.source.scale"
+        min="0"
+        max="2"
+        step="0.01"
+        start-angle="90"
+        end-angle="+360"
+        line-cap="round"
+        radius="40"
+        width="10"
+        handleShape="dot"
+        :show-tooltip="false"
+      />
+      <div class="deleteObject" @click="deleteSelectedObject">
+        <font-awesome-icon icon="trash" />
+      </div>
     </div>
   </div>
+  <el-drawer
+    v-model="showToolbox"
+    :title="
+      $t('module.information.forestfires.participant.itemSelection.selectItem')
+    "
+    :with-header="true"
+  >
+    <el-space wrap>
+      <el-button
+        v-for="objectType of Object.keys(gameConfig)"
+        :key="objectType"
+        type="primary"
+        size="large"
+        @click="objectTypeClicked(objectType)"
+        :class="{ active: objectType === activeObjectType }"
+      >
+        <font-awesome-icon :icon="gameConfig[objectType].settings.icon" />
+      </el-button>
+    </el-space>
+    <el-space wrap>
+      <SpriteCanvas
+        v-for="objectName of ObjectsForActiveType"
+        :key="objectName"
+        :texture="getTexture(objectName)"
+        :aspect-ration="getObjectAspect(activeObjectType, objectName)"
+        @click="objectNameClicked(objectName)"
+      />
+    </el-space>
+  </el-drawer>
   <LevelSettings
     v-model:show-modal="showLevelSettings"
     @saveLevel="saveLevel"
@@ -105,6 +162,7 @@ import { ElMessage } from 'element-plus';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import RoundSlider from 'vue-three-round-slider/src';
+import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 
 // The current state of the edit mode
 export interface PlacementState {
@@ -119,6 +177,7 @@ export interface PlacementState {
     },
   },
   components: {
+    SpriteCanvas,
     CustomSprite,
     FontAwesomeIcon,
     LevelSettings,
@@ -134,57 +193,111 @@ export interface PlacementState {
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ForestFireEdit extends Vue {
   @Prop() readonly taskId!: string;
+  gameConfig = gameConfig;
+  activeObjectType = 'hazards';
+  activeObjectName = 'cigarette';
+  showToolbox = false;
   gameWidth = 0;
   gameHeight = 0;
 
-  availableHazards: Placeable[] = [];
-  placedHazards: Placeable[] = [];
+  placedObjects: Placeable[] = [];
   placementState: { [key: string]: PlacementState } = {};
   hazardSpritesheet!: PIXI.Spritesheet;
+  obstacleSpritesheet!: PIXI.Spritesheet;
   showLevelSettings = false;
   selectedObject: GameObject | null = null;
+
+  get ObjectsForActiveType(): string[] {
+    const list = Object.keys(gameConfig[this.activeObjectType]);
+    return list.filter((name) => name !== 'settings');
+  }
+
+  getTexture(objectName: string): PIXI.Texture | string {
+    if (this.activeObjectType === 'hazards' && this.hazardSpritesheet)
+      return this.hazardSpritesheet.textures[objectName];
+    if (this.activeObjectType === 'obstacles' && this.obstacleSpritesheet)
+      return this.obstacleSpritesheet.textures[objectName];
+    return '/assets/games/forestfires/hazard.json';
+  }
+
+  selectionMaskGraphic: PIXI.Graphics | null = null;
+  drawSelectedBorder(graphics: PIXI.Graphics): void {
+    this.selectionMaskGraphic = graphics;
+    this.updateSelectionMask();
+  }
+
+  get selectionMaskX(): number {
+    if (this.selectedObject) return this.selectedObject.displayX;
+    return 0;
+  }
+
+  get selectionMaskY(): number {
+    if (this.selectedObject) return this.selectedObject.displayY;
+    return 0;
+  }
+
+  get selectionMaskRotation(): number {
+    if (this.selectedObject) return this.selectedObject.rotationValue;
+    return 0;
+  }
+
+  get selectionMaskScale(): number {
+    if (this.selectedObject) return this.selectedObject.scale;
+    return 0;
+  }
+
+  updateSelectionMask(): void {
+    if (this.selectedObject && this.selectionMaskGraphic) {
+      const width = this.selectedObject.displayWidth;
+      const height = this.selectedObject.displayHeight;
+
+      if (this.selectedObject.type === 'rect') {
+        this.selectionMaskGraphic.clear();
+        this.selectionMaskGraphic.lineStyle(2, '#ff0000');
+        this.selectionMaskGraphic.drawRect(
+          -width / 2,
+          -height / 2,
+          width,
+          height
+        );
+      } else {
+        this.selectionMaskGraphic.clear();
+        this.selectionMaskGraphic.lineStyle(2, '#ff0000');
+        this.selectionMaskGraphic.drawCircle(
+          0,
+          0,
+          (width > height ? width : height) / 2
+        );
+      }
+    } else if (this.selectionMaskGraphic) this.selectionMaskGraphic.clear();
+  }
 
   mounted(): void {
     PIXI.Assets.load('/assets/games/forestfires/hazard.json').then(
       (sheet) => (this.hazardSpritesheet = sheet)
     );
+    PIXI.Assets.load('/assets/games/forestfires/obstacle.json').then(
+      (sheet) => (this.obstacleSpritesheet = sheet)
+    );
 
     // Set up hazard state counters
-    for (const hazardName in gameConfig.hazards) {
-      const hazardParameter = gameConfig.hazards[hazardName];
-      this.placementState[hazardName] = {
-        maxCount: hazardParameter.maxCount,
-        currentCount: 0,
-      };
-
-      for (let i = 0; i < hazardParameter.maxCount; i++) {
-        const placeable: Placeable = {
-          uuid: uuidv4(),
-          id: 0,
-          name: hazardName,
-          width: hazardParameter.width,
-          shape: hazardParameter.shape,
-          position: [0, 0],
-          rotation: 0,
-        };
-        this.availableHazards.push(placeable);
+    for (const typeName in gameConfig) {
+      for (const objectName in gameConfig[typeName]) {
+        if (objectName !== 'settings') {
+          const hazardParameter = gameConfig[typeName][objectName];
+          this.placementState[objectName] = {
+            maxCount: hazardParameter.maxCount,
+            currentCount: 0,
+          };
+        }
       }
     }
-
-    this.availableHazards = this.availableHazards.sort(
-      () => Math.random() - 0.5
-    );
   }
 
-  getHazardAspect(hazardName: string): number {
-    return pixiUtil.getSpriteAspect(this.hazardSpritesheet, hazardName);
-  }
-
-  @Watch('availableHazards.length', { immediate: false })
-  onPlaceablesCountChanged(): void {
-    if (this.availableHazards.length === 0) {
-      this.showLevelSettings = true;
-    }
+  getObjectAspect(objectType: string, objectName: string): number {
+    if (objectType === 'hazards')
+      return pixiUtil.getSpriteAspect(this.hazardSpritesheet, objectName);
+    return pixiUtil.getSpriteAspect(this.obstacleSpritesheet, objectName);
   }
 
   saveLevel(name: string) {
@@ -192,33 +305,92 @@ export default class ForestFireEdit extends Vue {
       this.taskId,
       {
         keywords: name,
-        parameter: this.placedHazards,
+        parameter: this.placedObjects.map((obj) => {
+          return {
+            type: obj.type,
+            name: obj.name,
+            position: obj.position,
+            rotation: obj.rotation,
+            scale: obj.scale,
+          };
+        }),
       },
       EndpointAuthorisationType.PARTICIPANT
     );
     this.$emit('editFinished');
   }
 
-  placeHazard(event: MouseConstraint): void {
+  placeObject(event: MouseConstraint): void {
     setTimeout(() => {
-      const currentHazard = this.availableHazards.pop();
-      if (currentHazard) {
-        currentHazard.position = [
-          (event.mouse.position.x / this.gameWidth) * 100,
-          (event.mouse.position.y / this.gameHeight) * 100,
-        ];
-        this.placedHazards.push(currentHazard);
-      } else {
+      const configParameter =
+        gameConfig[this.activeObjectType][this.activeObjectName];
+      if (
+        this.placementState[this.activeObjectName].currentCount ===
+        this.placementState[this.activeObjectName].maxCount
+      ) {
         ElMessage({
           message: this.$t(
-            'module.information.forestfires.participant.everythingPlaced'
+            'module.information.forestfires.participant.maxCountPlaced'
           ),
           type: 'error',
           center: true,
           showClose: true,
         });
+        return;
       }
+      this.placementState[this.activeObjectName].currentCount++;
+      const placeable: Placeable = {
+        uuid: uuidv4(),
+        id: 0,
+        type: this.activeObjectType,
+        name: this.activeObjectName,
+        texture: this.getTexture(this.activeObjectName),
+        width: configParameter.width,
+        shape: configParameter.shape,
+        position: [
+          (event.mouse.position.x / this.gameWidth) * 100,
+          (event.mouse.position.y / this.gameHeight) * 100,
+        ],
+        rotation: 0,
+        scale: 1,
+      };
+      this.placedObjects.push(placeable);
     }, 100);
+  }
+
+  @Watch('selectedObject', { immediate: true })
+  onSelectedObjectChanged(): void {
+    if (this.selectedObject) this.updateSelectionMask();
+  }
+
+  deleteSelectedObject(): void {
+    const selected = this.selectedObject?.source;
+    const index = this.placedObjects.indexOf(selected);
+    if (selected && index >= 0) {
+      this.selectionMaskGraphic = null;
+      this.selectedObject = null;
+      this.placementState[selected.name].currentCount--;
+      this.placedObjects.splice(index, 1);
+    }
+  }
+
+  objectTypeClicked(objectType: string): void {
+    this.activeObjectType = objectType;
+  }
+
+  objectNameClicked(objectName: string): void {
+    this.showToolbox = false;
+    this.activeObjectName = objectName;
+  }
+
+  get renderList(): Placeable[] {
+    const getSortNumber = (placeable: Placeable): number => {
+      if (placeable.type === 'hazards') return 0;
+      return 10;
+    };
+    return this.placedObjects.sort(
+      (a, b) => getSortNumber(a) - getSortNumber(b)
+    );
   }
 }
 </script>
@@ -241,7 +413,7 @@ export default class ForestFireEdit extends Vue {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  font-size: var(--font-size-xxxxlarge);
+  font-size: var(--font-size-xxxlarge);
   color: white;
 }
 
@@ -252,5 +424,22 @@ export default class ForestFireEdit extends Vue {
   //left: var(--y);
   top: 1rem;
   left: 1rem;
+  text-align: center;
+
+  .sliderInside {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+  }
+
+  .deleteObject {
+    z-index: 200;
+    width: 1rem;
+    height: 1rem;
+    text-align: center;
+    position: absolute;
+    top: calc(70px - 0.5rem);
+    left: calc(70px - 0.5rem);
+  }
 }
 </style>

@@ -1,28 +1,63 @@
 {
   "hazards": {
+    "settings": {
+      "icon": "fire"
+    },
     "cigarette": {
       "severity": 3,
-      "maxCount": 2,
+      "maxCount": 10,
       "width": 3,
       "shape": "rect"
     },
+    "campfire": {
+      "severity": 1,
+      "maxCount": 1,
+      "width": 20,
+      "shape": "circle"
+    },
     "bottleWhite": {
       "severity": 2,
-      "maxCount": 1,
+      "maxCount": 5,
       "width": 3,
       "shape": "rect"
     },
     "bottleWine": {
       "severity": 1,
-      "maxCount": 1,
+      "maxCount": 5,
       "width": 3,
       "shape": "rect"
     },
     "bottleBeer": {
       "severity": 1,
-      "maxCount": 1,
+      "maxCount": 5,
       "width": 3,
       "shape": "rect"
+    }
+  },
+  "obstacles": {
+    "settings": {
+      "icon": "tree"
+    },
+    "bush": {
+      "maxCount": 30,
+      "width": 30,
+      "shape": "circle"
+    },
+    "tree": {
+      "maxCount": 10,
+      "width": 50,
+      "shape": "circle"
+    },
+    "wood": {
+      "maxCount": 5,
+      "width": 15,
+      "shape": "rect"
+    },
+    "stone": {
+      "maxCount": 20,
+      "width": 10,
+      "shape": "circle"
+
     }
   }
 }

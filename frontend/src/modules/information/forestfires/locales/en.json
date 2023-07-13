@@ -15,6 +15,7 @@
       }
     },
     "everythingPlaced": "everything placed",
+    "maxCountPlaced": "max objects of type placed",
     "place": "Place",
     "play": "Start",
     "tutorial": {
@@ -28,6 +29,9 @@
     },
     "settings": {
       "levelName": "level name"
+    },
+    "itemSelection": {
+      "selectItem": "select placing item"
     }
   }
 }

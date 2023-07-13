@@ -176,7 +176,7 @@
                 :tint="particle.color"
                 :width="particleRadius * 1.5"
                 :height="
-                  getParticleAspect(particle.name) * particleRadius * 1.5
+                  (particleRadius * 1.5) / getParticleAspect(particle.name)
                 "
               >
               </sprite>

@@ -4,7 +4,7 @@
     :x="position[0]"
     :y="position[1]"
     :rotation="rotationValue"
-    :gameObject="123"
+    :scale="scale"
     @pointerdown="gameObjectClicked"
   >
     <slot></slot>
@@ -44,6 +44,7 @@ export default class GameObject extends Vue {
   @Prop({ default: 0 }) x!: number;
   @Prop({ default: 0 }) y!: number;
   @Prop({ default: 0 }) rotation!: number;
+  @Prop({ default: 1 }) scale!: number;
   //@Prop({ default: 0.5 }) anchor!: number;
   @Prop({ default: ObjectSpace.Absolute }) objectSpace!: ObjectSpace;
   @Prop({ default: 'rect' }) readonly type!: 'rect' | 'circle';
@@ -59,6 +60,11 @@ export default class GameObject extends Vue {
   rotationValue = 0;
   container!: PIXI.Container;
   gameContainer!: GameContainer;
+  readonly defaultSize = 50;
+  displayWidth = this.defaultSize;
+  displayHeight = this.defaultSize;
+  displayX = 0;
+  displayY = 0;
 
   async mounted(): Promise<void> {
     const container = document.getElementById('gameContainer');
@@ -114,6 +120,10 @@ export default class GameObject extends Vue {
     this.container = container;
     setTimeout(() => {
       this.$emit('sizeChanged', [container.width, container.height]);
+      this.displayWidth = container.width;
+      this.displayHeight = container.height;
+      this.displayX = container.x;
+      this.displayY = container.y;
       switch (this.type) {
         case 'rect':
           this.addRect(

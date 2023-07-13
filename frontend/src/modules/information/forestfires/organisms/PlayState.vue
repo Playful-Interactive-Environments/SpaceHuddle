@@ -15,31 +15,30 @@
             :height="gameHeight"
           ></sprite>
           <GameObject
-            v-for="hazard in placedHazards"
-            :key="hazard.uuid"
-            v-model:id="hazard.id"
-            :type="hazard.shape"
+            v-for="placeable in placedObjects"
+            :key="placeable.uuid"
+            v-model:id="placeable.id"
+            :type="placeable.shape"
             :object-space="ObjectSpace.Relative"
-            :x="hazard.position[0]"
-            :y="hazard.position[1]"
-            :rotation="hazard.rotation"
+            :x="placeable.position[0]"
+            :y="placeable.position[1]"
+            :rotation="placeable.rotation"
+            :scale="placeable.scale"
             :options="{
-              name: hazard.name,
+              name: placeable.name,
               collisionFilter: {
-                group: 'hazard',
-                category: 0x0001,
-                mask: 0x0001,
+                group: -1,
               },
             }"
             :is-static="true"
-            :source="hazard"
-            @click="destroyPlaceable(hazard)"
+            :source="placeable"
+            @click="destroyPlaceable(placeable)"
           >
             <CustomSprite
-              :texture="hazardSpritesheet.textures[hazard.name]"
+              :texture="placeable.texture"
               :anchor="0.5"
-              :width="hazard.width"
-              :aspect-ration="getHazardAspect(hazard.name)"
+              :width="placeable.width"
+              :aspect-ration="getObjectAspect(placeable.type, placeable.name)"
               :object-space="ObjectSpace.Relative"
             >
             </CustomSprite>
@@ -68,6 +67,8 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as authService from '@/services/auth-service';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
+import { v4 as uuidv4 } from 'uuid';
+import gameConfig from '@/modules/information/forestfires/data/gameConfig.json';
 
 @Options({
   computed: {
@@ -92,8 +93,9 @@ export default class PlayState extends Vue {
   gameWidth = 0;
   gameHeight = 0;
 
-  placedHazards: Placeable[] = [];
+  placedObjects: Placeable[] = [];
   hazardSpritesheet!: PIXI.Spritesheet;
+  obstacleSpritesheet!: PIXI.Spritesheet;
   totalCount = 0;
   collectedCount = 0;
 
@@ -101,10 +103,27 @@ export default class PlayState extends Vue {
     PIXI.Assets.load('/assets/games/forestfires/hazard.json').then(
       (sheet) => (this.hazardSpritesheet = sheet)
     );
+    PIXI.Assets.load('/assets/games/forestfires/obstacle.json').then(
+      (sheet) => (this.obstacleSpritesheet = sheet)
+    );
   }
 
   unmounted(): void {
     cashService.deregisterAllGet(this.updateIdeas);
+  }
+
+  getTexture(objectType: string, objectName: string): PIXI.Texture | string {
+    if (objectType === 'hazards' && this.hazardSpritesheet)
+      return this.hazardSpritesheet.textures[objectName];
+    if (objectType === 'obstacles' && this.obstacleSpritesheet)
+      return this.obstacleSpritesheet.textures[objectName];
+    return '/assets/games/forestfires/hazard.json';
+  }
+
+  getObjectAspect(objectType: string, objectName: string): number {
+    if (objectType === 'hazards')
+      return pixiUtil.getSpriteAspect(this.hazardSpritesheet, objectName);
+    return pixiUtil.getSpriteAspect(this.obstacleSpritesheet, objectName);
   }
 
   getHazardAspect(hazardName: string): number {
@@ -125,34 +144,49 @@ export default class PlayState extends Vue {
   }
 
   updateIdeas(ideas: Idea[]): void {
-    if (this.placedHazards.length === 0) {
-      let hazards: { [key: number]: Placeable } = {};
+    if (this.placedObjects.length === 0) {
+      let placeables: { [key: number]: Placeable } = {};
       const levelsFromOthers = ideas
         .filter((idea) => idea.participantId !== authService.getParticipantId())
         .sort(() => Math.random() - 0.5);
       if (levelsFromOthers.length > 0) {
-        hazards = levelsFromOthers[0].parameter as Placeable[];
+        placeables = levelsFromOthers[0].parameter as Placeable[];
       } else if (ideas.length > 0) {
         ideas = ideas.sort(() => Math.random() - 0.5);
-        hazards = ideas[0].parameter as Placeable[];
+        placeables = ideas[0].parameter as Placeable[];
       }
-      for (const value of Object.values(hazards))
-        this.placedHazards.push(value);
-      this.totalCount = this.placedHazards.length;
+      for (const value of Object.values(placeables)) {
+        if (!value.type) value.type = 'hazards';
+        const configParameter = gameConfig[value.type][value.name];
+        const placeable: Placeable = {
+          uuid: uuidv4(),
+          id: 0,
+          type: value.type,
+          name: value.name,
+          texture: this.getTexture(value.type, value.name),
+          width: configParameter.width,
+          shape: configParameter.shape,
+          position: value.position,
+          rotation: value.rotation,
+          scale: value.scale,
+        };
+        this.placedObjects.push(placeable);
+      }
+      this.totalCount = this.placedObjects.length;
     }
   }
 
   @Watch('placedHazards.length', { immediate: false })
   onPlaceablesCountChanged(): void {
-    if (this.placedHazards.length === 0) {
+    if (this.placedObjects.length === 0) {
       this.$emit('playFinished');
     }
   }
 
   destroyPlaceable(placeable: Placeable): void {
     const id = placeable.id;
-    const index = this.placedHazards.findIndex((p) => p.id === id);
-    if (index > -1) this.placedHazards.splice(index, 1);
+    const index = this.placedObjects.findIndex((p) => p.id === id);
+    if (index > -1) this.placedObjects.splice(index, 1);
     this.collectedCount++;
   }
 

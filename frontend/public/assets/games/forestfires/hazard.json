@@ -1,19 +1,24 @@
 {
 "frames": {
 	"bottleBeer": {
-		"frame": {"x":373, "y":257, "w":69, "h":256},
+		"frame": {"x":373, "y":0, "w":69, "h":256},
 		"spriteSourceSize": {"x":2,"y":0,"w":74,"h":256},
 		"sourceSize": {"w":74,"h":256}
 	},
 	"bottleWhite": {
-		"frame": {"x":373, "y":0, "w":94, "h":256},
+		"frame": {"x":310, "y":266, "w":94, "h":256},
 		"spriteSourceSize": {"x":3,"y":0,"w":100,"h":256},
 		"sourceSize": {"w":100,"h":256}
 	},
 	"bottleWine": {
-		"frame": {"x":443, "y":257, "w":60, "h":256},
+		"frame": {"x":405, "y":257, "w":60, "h":256},
 		"spriteSourceSize": {"x":2,"y":0,"w":64,"h":256},
 		"sourceSize": {"w":64,"h":256}
+	},
+	"campfire": {
+		"frame": {"x":0, "y":266, "w":309, "h":268},
+		"spriteSourceSize": {"x":29,"y":49,"w":360,"h":375},
+		"sourceSize": {"w":360,"h":375}
 	},
 	"cigarette": {
 		"frame": {"x":0, "y":0, "w":372, "h":265},
@@ -24,7 +29,7 @@
 },
 "meta": {
 	"image": "hazard.png",
-	"size": {"w": 504, "h": 514},
+	"size": {"w": 466, "h": 535},
 	"scale": "1"
 }
 }

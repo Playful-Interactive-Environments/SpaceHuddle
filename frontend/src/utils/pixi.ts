@@ -100,7 +100,7 @@ export function getSpriteAspect(
   if (spritesheet?.data?.frames && spriteName in spritesheet.data.frames) {
     const h = spritesheet.data.frames[spriteName].sourceSize?.h;
     const w = spritesheet.data.frames[spriteName].sourceSize?.w;
-    if (h && w) return h / w;
+    if (h && w) return w / h;
   }
   return 1;
 }

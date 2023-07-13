@@ -63,13 +63,4 @@ export function setMapStyleLight(): void {
 
 export function setMapStyleTerrain(): void {
   MglDefaults.style = updatePath({ ...mapStyleTerrain });
-
-  /*const style = { ...mapStyleTerrain };
-
-  style.glyphs = `${window.location.origin}${style.glyphs}`;
-  style.sources.openmaptiles.url = process.env.VUE_APP_TILE_SERVER;
-  style.payload.blob.rawBlob.glyphs = `${window.location.origin}${style.payload.blob.rawBlob.glyphs}`;
-  style.payload.blob.rawBlob.sources.openmaptiles.url =
-    process.env.VUE_APP_TILE_SERVER;
-  MglDefaults.style = style;*/
 }
