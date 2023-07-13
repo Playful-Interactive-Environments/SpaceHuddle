@@ -264,7 +264,6 @@ import { Line } from 'vue-chartjs';
 import * as gameConfig from '@/modules/information/cleanup/data/gameConfig.json';
 import { OsrmCustom as OSRM, OSRMWayPoint } from '@/utils/osrm';
 import {
-  MglDefaults,
   MglGeoJsonSource,
   MglLineLayer,
   MglMarker,
@@ -285,10 +284,9 @@ import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
 import * as constants from '@/modules/information/cleanup/utils/consts';
 import Color from 'colorjs.io';
-//import * as tiles from `https://api.maptiler.com/tiles/v3/tiles.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
+import * as mapStyle from '@/utils/mapStyle';
 
-MglDefaults.style = `https://api.maptiler.com/maps/streets/style.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
-//MglDefaults.style = 'http://localhost/tileserver-php/osm-2020-02-10-v3/';
+mapStyle.setMapStyleStreets();
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 interface BusStop {
@@ -543,7 +541,9 @@ export default class DriveToLocation extends Vue {
       .map((layer) => layer.id)
       .filter((value, index, array) => array.indexOf(value) === index);
     if (this.vehicle === 'bus') {
-      const layer = notNeededLayers.find((layer) => layer.id === 'poi_z14');
+      const layer = notNeededLayers.find(
+        (layer) => layer.id === 'poi-level-1' || layer.id === 'poi_z14'
+      );
       const busLayerName = 'bus';
       if (layer) {
         const busLayer = Object.assign({}, layer);

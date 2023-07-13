@@ -68,7 +68,7 @@
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item
-              v-for="mapType in Object.values(MapStyles)"
+              v-for="mapType in Object.values(MapStyleType)"
               :key="mapType"
               :command="mapType"
             >
@@ -87,17 +87,13 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { Idea } from '@/types/api/Idea';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import {
-  MglDefaults,
-  MglNavigationControl,
-  MglMap,
-  MglEvent,
-} from 'vue-maplibre-gl';
+import { MglNavigationControl, MglMap, MglEvent } from 'vue-maplibre-gl';
 import { LngLatLike, LngLatBoundsLike, Map } from 'maplibre-gl';
 import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
 import * as turf from '@turf/turf';
+import * as mapStyle from '@/utils/mapStyle';
 
-export enum MapStyles {
+/*export enum MapStyles {
   STREETS = 'streets-v2',
   SATELLITE = 'hybrid',
   BASIC = 'basic-v2',
@@ -105,7 +101,7 @@ export enum MapStyles {
   LIGHT = 'dataviz-light',
   DARK = 'dataviz-dark',
   WINTER = 'winter-v2',
-}
+}*/
 
 @Options({
   components: {
@@ -139,37 +135,32 @@ export default class IdeaMap extends Vue {
   sizeCalculated = false;
   map!: Map;
 
-  MapStyles = MapStyles;
-  mapStyle: string = MapStyles.STREETS;
+  MapStyleType = mapStyle.MapStyleType;
+  mapStyle: mapStyle.MapStyleType = mapStyle.MapStyleType.Streets;
 
   showMap = true;
 
   get MarkerColor(): string {
     switch (this.mapStyle) {
-      case MapStyles.LIGHT:
-      case MapStyles.OUTDOORS:
-      case MapStyles.STREETS:
-      case MapStyles.BASIC:
-      case MapStyles.WINTER:
+      case mapStyle.MapStyleType.Light:
+      case mapStyle.MapStyleType.Terrain:
+      case mapStyle.MapStyleType.Streets:
+      case mapStyle.MapStyleType.Basic:
         return '#1d2948';
-      case MapStyles.DARK:
+      case mapStyle.MapStyleType.Dark:
         return '#67c2d0';
-      case MapStyles.SATELLITE:
-        return 'white';
     }
     return '#1d2948';
   }
 
   get MarkerColorSelected(): string {
     switch (this.mapStyle) {
-      case MapStyles.OUTDOORS:
+      case mapStyle.MapStyleType.Terrain:
         return '#fe6e5d';
-      case MapStyles.LIGHT:
-      case MapStyles.STREETS:
-      case MapStyles.DARK:
-      case MapStyles.SATELLITE:
-      case MapStyles.BASIC:
-      case MapStyles.WINTER:
+      case mapStyle.MapStyleType.Light:
+      case mapStyle.MapStyleType.Streets:
+      case mapStyle.MapStyleType.Dark:
+      case mapStyle.MapStyleType.Basic:
         return '#f3a40a';
     }
     return '#f3a40a';
@@ -177,41 +168,27 @@ export default class IdeaMap extends Vue {
 
   getPreviewUrl(key: string): string {
     switch (key) {
-      case MapStyles.STREETS:
+      case mapStyle.MapStyleType.Streets:
         key = 'streets-v2';
         break;
-      case MapStyles.SATELLITE:
-        key = 'hybrid';
-        break;
-      case MapStyles.BASIC:
+      case mapStyle.MapStyleType.Basic:
         key = 'basic-v2';
         break;
-      case MapStyles.OUTDOORS:
+      case mapStyle.MapStyleType.Terrain:
         key = 'outdoor';
         break;
-      case MapStyles.LIGHT:
+      case mapStyle.MapStyleType.Light:
         key = 'streets-v2-light';
         break;
-      case MapStyles.DARK:
+      case mapStyle.MapStyleType.Dark:
         key = 'streets-v2-dark';
-        break;
-      case MapStyles.WINTER:
-        key = 'winter';
         break;
     }
     return `https://www.maptiler.com/img/cloud/slider/${key}.png`;
   }
 
-  get StyleUrl(): string {
-    /*switch (this.mapStyle) {
-      case MapStyles.DARK:
-        return '/assets/map/maplibre-gl-styles-main/dark-matter/style-local.json';
-    }*/
-    return `https://api.maptiler.com/maps/${this.mapStyle}/style.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
-  }
-
   mounted(): void {
-    MglDefaults.style = this.StyleUrl;
+    mapStyle.setMapStyle(this.mapStyle);
     if (this.calculateSize) {
       setTimeout(() => {
         const dom = this.$refs.mapSpace as HTMLElement;
@@ -345,9 +322,9 @@ export default class IdeaMap extends Vue {
   }
 
   mapstyleChange(command: string): void {
-    this.mapStyle = command;
+    this.mapStyle = command as mapStyle.MapStyleType;
     if (this.map) {
-      this.map.setStyle(this.StyleUrl);
+      this.map.setStyle(mapStyle.getMapStyle(this.mapStyle));
       setTimeout(() => {
         if (this.map) {
           const notNeededLayers = this.map.getStyle().layers.filter((layer) => {

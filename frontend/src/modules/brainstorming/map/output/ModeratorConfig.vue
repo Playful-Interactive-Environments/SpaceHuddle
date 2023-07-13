@@ -20,9 +20,10 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
-import { MglDefaults, MglNavigationControl, MglMap } from 'vue-maplibre-gl';
+import { MglNavigationControl, MglMap } from 'vue-maplibre-gl';
+import * as mapStyle from '@/utils/mapStyle';
 
-MglDefaults.style = `https://api.maptiler.com/maps/streets/style.json?key=${process.env.VUE_APP_MAPTILER_KEY}`;
+mapStyle.setMapStyleStreets();
 
 @Options({
   components: {
