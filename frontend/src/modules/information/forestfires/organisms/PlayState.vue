@@ -5,16 +5,14 @@
       v-model:height="gameHeight"
       :detect-collision="false"
       :use-gravity="false"
+      background-texture="/assets/games/forestfires/background/forest.jpg"
+      :background-position="BackgroundPosition.Cover"
+      :background-movement="BackgroundMovement.Pan"
       @initRenderer="initRenderer"
       @gameObjectClick="gameObjectClick"
     >
       <template v-slot:default>
         <container v-if="gameWidth">
-          <sprite
-            texture="/assets/games/forestfires/background/forest.jpg"
-            :width="3 * gameHeight"
-            :height="gameHeight"
-          ></sprite>
           <GameObject
             v-for="placeable in placedObjects"
             :key="placeable.uuid"
@@ -46,6 +44,7 @@
           </GameObject>
           <GameObject
             v-if="gameWidth > 0"
+            :moveWithBackground="false"
             v-model:x="searchPosition[0]"
             v-model:y="searchPosition[1]"
             type="circle"
@@ -76,23 +75,31 @@ import { Line } from 'vue-chartjs';
 import * as PIXI from 'pixi.js';
 import { Prop, Watch } from 'vue-property-decorator';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
-import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
+import GameContainer, {
+  BackgroundPosition,
+  BackgroundMovement,
+} from '@/components/shared/atoms/game/GameContainer.vue';
 import Placeable from '@/modules/information/forestfires/types/Placeable';
 import * as pixiUtil from '@/utils/pixi';
-import * as ideaService from '@/services/idea-service';
 import * as cashService from '@/services/cash-service';
 import { Idea } from '@/types/api/Idea';
-import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as authService from '@/services/auth-service';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import { v4 as uuidv4 } from 'uuid';
 import gameConfig from '@/modules/information/forestfires/data/gameConfig.json';
+import { delay } from '@/utils/wait';
 
 @Options({
   computed: {
     ObjectSpace() {
       return ObjectSpace;
+    },
+    BackgroundPosition() {
+      return BackgroundPosition;
+    },
+    BackgroundMovement() {
+      return BackgroundMovement;
     },
   },
   components: {
@@ -107,6 +114,7 @@ import gameConfig from '@/modules/information/forestfires/data/gameConfig.json';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PlayState extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: [] }) readonly levelData!: Placeable[];
   renderer!: PIXI.Renderer;
   gameWidth = 0;
   gameHeight = 0;
@@ -177,6 +185,30 @@ export default class PlayState extends Vue {
     this.searchPosition = [this.gameWidth / 2, this.gameHeight / 2];
   }
 
+  @Watch('levelData', { immediate: true })
+  async onLevelDataChanged(): Promise<void> {
+    await delay(200);
+    for (const value of Object.values(this.levelData)) {
+      if (!value.type) value.type = 'hazards';
+      const configParameter = gameConfig[value.type][value.name];
+      const placeable: Placeable = {
+        uuid: uuidv4(),
+        id: 0,
+        type: value.type,
+        name: value.name,
+        texture: this.getTexture(value.type, value.name),
+        width: configParameter.width,
+        shape: configParameter.shape,
+        position: value.position,
+        rotation: value.rotation,
+        scale: value.scale,
+      };
+      this.placedObjects.push(placeable);
+    }
+    console.log(this.placedObjects);
+    this.totalCount = this.collectableObjects.length;
+  }
+
   getSpriteSheetForType(objectType: string): PIXI.Spritesheet {
     if (objectType === 'hazards' && this.hazardSpritesheet)
       return this.hazardSpritesheet;
@@ -198,7 +230,7 @@ export default class PlayState extends Vue {
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
-    if (this.taskId) {
+    /*if (this.taskId) {
       ideaService.registerGetIdeasForTask(
         this.taskId,
         null,
@@ -206,7 +238,7 @@ export default class PlayState extends Vue {
         this.updateIdeas,
         EndpointAuthorisationType.PARTICIPANT
       );
-    }
+    }*/
   }
 
   updateIdeas(ideas: Idea[]): void {

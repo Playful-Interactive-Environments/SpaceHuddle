@@ -3,6 +3,8 @@
     <GameContainer
       v-model:width="gameWidth"
       v-model:height="gameHeight"
+      background-texture="/assets/games/forestfires/background/forest.jpg"
+      :background-movement="BackgroundMovement.Pan"
       :detect-collision="false"
       :use-gravity="false"
       :use-borders="false"
@@ -12,11 +14,6 @@
     >
       <template v-slot:default>
         <container v-if="gameWidth">
-          <sprite
-            texture="/assets/games/forestfires/background/forest.jpg"
-            :width="3 * gameHeight"
-            :height="gameHeight"
-          ></sprite>
           <GameObject
             v-for="placeable in renderList"
             :key="placeable.uuid"
@@ -147,7 +144,9 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { Line } from 'vue-chartjs';
 import * as PIXI from 'pixi.js';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
-import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
+import GameContainer, {
+  BackgroundMovement,
+} from '@/components/shared/atoms/game/GameContainer.vue';
 import gameConfig from '@/modules/information/forestfires/data/gameConfig.json';
 import Placeable from '@/modules/information/forestfires/types/Placeable';
 import { v4 as uuidv4 } from 'uuid';
@@ -173,6 +172,9 @@ export interface PlacementState {
   computed: {
     ObjectSpace() {
       return ObjectSpace;
+    },
+    BackgroundMovement() {
+      return BackgroundMovement;
     },
   },
   components: {

@@ -10,6 +10,20 @@
       @infoRead="gameState = GameState.Game"
       :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
     />
+    <div v-if="gameStep === GameStep.Select && gameState === GameState.Game">
+      <div class="link new" @click="levelSelected(null)">
+        {{ $t('module.information.forestfires.participant.newLevel') }}
+      </div>
+      <div
+        class="link"
+        :class="{ own: isOwnLevel(idea) }"
+        v-for="idea of ideas"
+        :key="idea.id"
+        @click="levelSelected(idea)"
+      >
+        {{ idea.keywords }}
+      </div>
+    </div>
     <!-- Edit-Mode -->
     <PlacementState
       v-if="gameStep === GameStep.Build && gameState === GameState.Game"
@@ -17,9 +31,10 @@
       @editFinished="editFinished"
     />
     <!-- Play-Mode -->
-    <PLayState
+    <PlayState
       v-if="gameStep === GameStep.Play && gameState === GameState.Game"
       :taskId="taskId"
+      :level-data="selectedLevel"
       @playFinished="playFinished"
     />
   </div>
@@ -38,10 +53,15 @@ import * as cashService from '@/services/cash-service';
 
 // Custom Modules
 import PlacementState from '@/modules/information/forestfires/organisms/PlacementState.vue';
-import PLayState from '@/modules/information/forestfires/organisms/PlayState.vue';
+import PlayState from '@/modules/information/forestfires/organisms/PlayState.vue';
 import ModuleInfo from '@/components/participant/molecules/ModuleInfo.vue';
+import * as ideaService from '@/services/idea-service';
+import { Idea } from '@/types/api/Idea';
+import Placeable from '@/modules/information/forestfires/types/Placeable';
+import * as authService from '@/services/auth-service';
 
 enum GameStep {
+  Select = 'select',
   Build = 'build',
   Play = 'play',
 }
@@ -55,7 +75,7 @@ enum GameState {
   components: {
     ModuleInfo,
     PlacementState,
-    PLayState,
+    PlayState,
   },
   emits: ['update:useFullSize'],
 })
@@ -67,12 +87,14 @@ export default class Participant extends Vue {
   @Prop({ default: false }) readonly useFullSize!: boolean;
   @Prop({ default: '' }) readonly backgroundClass!: string;
   module: Module | null = null;
+  ideas: Idea[] = [];
+  selectedLevel: Placeable[] = [];
 
   // Flag which indicates if the window size has finished calculating.
   sizeCalculated = false;
 
   // The general state of the game (tutorial, playing, ...) and smaller steps (edit-mode, play-mode, ...) within those states.
-  gameStep = GameStep.Build;
+  gameStep = GameStep.Select;
   GameStep = GameStep;
   gameState = GameState.Info;
   GameState = GameState;
@@ -92,8 +114,25 @@ export default class Participant extends Vue {
       }
     }, 500);
   }
+
   unmounted(): void {
     cashService.deregisterAllGet(this.updateModule);
+    cashService.deregisterAllGet(this.updateIdeas);
+  }
+
+  isOwnLevel(level: Idea): boolean {
+    return level.participantId === authService.getParticipantId();
+  }
+
+  levelSelected(level: Idea | null) {
+    this.gameState = GameState.Info;
+    if (!level) {
+      this.gameStep = GameStep.Build;
+      this.selectedLevel = [];
+    } else {
+      this.gameStep = GameStep.Play;
+      this.selectedLevel = level.parameter as Placeable[];
+    }
   }
 
   // Watch and update the current module in case any changes happen.
@@ -108,6 +147,25 @@ export default class Participant extends Vue {
       );
     }
   }
+
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    if (this.taskId) {
+      ideaService.registerGetIdeasForTask(
+        this.taskId,
+        null,
+        null,
+        this.updateIdeas,
+        EndpointAuthorisationType.PARTICIPANT,
+        3
+      );
+    }
+  }
+
+  updateIdeas(ideas: Idea[]): void {
+    this.ideas = ideas;
+  }
+
   updateModule(module: Module): void {
     this.module = module;
   }
@@ -125,12 +183,12 @@ export default class Participant extends Vue {
 
   // Callbacks when stages are finished.
   editFinished(): void {
-    this.gameStep = GameStep.Play;
+    this.gameStep = GameStep.Select;
     this.gameState = GameState.Info;
   }
 
   playFinished(): void {
-    this.gameStep = GameStep.Build;
+    this.gameStep = GameStep.Select;
     this.gameState = GameState.Info;
   }
 }
@@ -139,5 +197,21 @@ export default class Participant extends Vue {
 <style lang="scss" scoped>
 .mapSpace {
   position: relative;
+}
+
+.link {
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: var(--border-radius);
+  margin: 1rem;
+  padding: 1rem;
+}
+
+.new {
+  background-color: var(--color-darkblue-light);
+}
+
+.own {
+  background-color: var(--color-yellow);
 }
 </style>

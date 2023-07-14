@@ -63,6 +63,7 @@
     <GameContainer
       v-model:width="gameWidth"
       v-model:height="gameHeight"
+      background-texture="/assets/games/cleanup/road02.png"
       :collisionsFilter="(collision: Matter.Collision) => {
             return collision.bodyA.isStatic !== collision.bodyB.isStatic;
           }"
@@ -71,11 +72,6 @@
     >
       <template v-slot:default>
         <container v-if="gameWidth">
-          <sprite
-            texture="/assets/games/cleanup/road02.png"
-            :width="gameWidth"
-            :height="gameHeight"
-          ></sprite>
           <GameObject
             v-for="(particle, index) in Object.keys(gameConfig.particles)"
             :key="particle"

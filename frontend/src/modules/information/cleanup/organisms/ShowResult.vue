@@ -6,6 +6,9 @@
       :has-mouse-input="false"
       :use-gravity="false"
       :use-wind="true"
+      :background-texture="`/assets/games/cleanup/${getParticleBackground(
+        activeTabName
+      )}`"
       v-model:width="gameWidth"
       v-model:height="gameHeight"
       @initRenderer="initRenderer"
@@ -20,13 +23,6 @@
             gameWidth
           "
         >
-          <sprite
-            :texture="`/assets/games/cleanup/${getParticleBackground(
-              activeTabName
-            )}`"
-            :width="gameWidth"
-            :height="gameHeight"
-          ></sprite>
           <GameObject
             v-for="index of particleVisualisation[activeTabName].length"
             :key="`${activeTabName}.${index}`"
@@ -272,7 +268,8 @@ export default class ShowResult extends Vue {
   getParticleTexture(tabName: string, index: number): PIXI.Texture | null {
     if (
       this.particleVisualisation[tabName] &&
-      this.particleVisualisation[tabName].length > index
+      this.particleVisualisation[tabName].length > index &&
+      this.spritesheet
     ) {
       const particleName = this.particleVisualisation[tabName][index].type;
       return this.spritesheet.textures[particleName];

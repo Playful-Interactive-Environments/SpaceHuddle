@@ -11,6 +11,7 @@ export function drawCircleWithGradient(
     width: radius * 2,
     height: radius * 2,
   });
+  if (!(renderer.renderTexture as any).renderer) return;
   GradientFactory.createRadialGradient(renderer, renderTexture, {
     x0: radius,
     y0: radius,
@@ -73,6 +74,7 @@ export function drawRectWithGradient(
       x0 = width;
       break;
   }
+  if (!(renderer.renderTexture as any).renderer) return;
   GradientFactory.createLinearGradient(renderer, renderTexture, {
     x0: x0,
     y0: y0,

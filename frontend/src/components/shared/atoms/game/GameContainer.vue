@@ -1,5 +1,13 @@
 <template>
-  <div ref="gameContainer" id="gameContainer">
+  <div
+    ref="gameContainer"
+    id="gameContainer"
+    class="gameContainer"
+    :style="{
+      '--game-width': `${gameWidth}px`,
+      '--game-height': `${gameHeight}px`,
+    }"
+  >
     <Application
       ref="pixi"
       :width="gameWidth"
@@ -11,9 +19,74 @@
       @pointerup="gameContainerReleased"
     >
       <container>
+        <sprite
+          v-if="backgroundTexture"
+          :texture="backgroundTexture"
+          :anchor="0.5"
+          :width="backgroundTextureSize[0]"
+          :height="backgroundTextureSize[1]"
+          :x="backgroundTexturePosition[0]"
+          :y="backgroundTexturePosition[1]"
+        ></sprite>
         <slot :itemProps="{ engine: engine, detector: detector }"></slot>
       </container>
     </Application>
+    <div
+      class="navigation-overlay overlay-right"
+      v-if="
+        backgroundMovement === BackgroundMovement.Pan &&
+        backgroundPositionOffsetMax[0] > backgroundPositionOffset[0]
+      "
+    >
+      <font-awesome-icon
+        icon="circle-chevron-right"
+        @mousedown="beginPan([-1, 0])"
+        @mouseup="endPan"
+        @mouseout="endPan"
+      />
+    </div>
+    <div
+      class="navigation-overlay overlay-left"
+      v-if="
+        backgroundMovement === BackgroundMovement.Pan &&
+        backgroundPositionOffsetMin[0] < backgroundPositionOffset[0]
+      "
+    >
+      <font-awesome-icon
+        icon="circle-chevron-left"
+        @mousedown="beginPan([1, 0])"
+        @mouseup="endPan"
+        @mouseout="endPan"
+      />
+    </div>
+    <div
+      class="navigation-overlay overlay-up"
+      v-if="
+        backgroundMovement === BackgroundMovement.Pan &&
+        backgroundPositionOffsetMin[1] < backgroundPositionOffset[1]
+      "
+    >
+      <font-awesome-icon
+        icon="circle-chevron-up"
+        @mousedown="beginPan([0, 1])"
+        @mouseup="endPan"
+        @mouseout="endPan"
+      />
+    </div>
+    <div
+      class="navigation-overlay overlay-down"
+      v-if="
+        backgroundMovement === BackgroundMovement.Pan &&
+        backgroundPositionOffsetMax[1] > backgroundPositionOffset[1]
+      "
+    >
+      <font-awesome-icon
+        icon="circle-chevron-down"
+        @mousedown="beginPan([0, -1])"
+        @mouseup="endPan"
+        @mouseout="endPan"
+      />
+    </div>
   </div>
 </template>
 
@@ -25,9 +98,30 @@ import { Application } from 'vue3-pixi';
 import { EventType } from '@/types/enum/EventType';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import { CustomObject } from '@/types/game/CustomObject';
+import * as PIXI from 'pixi.js';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+
+export enum BackgroundPosition {
+  Stretch = 'stretch',
+  Contain = 'contain',
+  Cover = 'cover',
+  None = 'none',
+}
+
+export enum BackgroundMovement {
+  None = 'none',
+  Pan = 'pan',
+  //Auto = 'auto',
+}
 
 @Options({
+  computed: {
+    BackgroundMovement() {
+      return BackgroundMovement;
+    },
+  },
   components: {
+    FontAwesomeIcon,
     Application,
   },
   emits: [
@@ -39,6 +133,7 @@ import { CustomObject } from '@/types/game/CustomObject';
     'click',
     'gameObjectClick',
     'update:selectedObject',
+    'update:offset',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -51,7 +146,13 @@ export default class GameContainer extends Vue {
   @Prop({ default: false }) readonly activatedObjectOnRegister!: boolean;
   @Prop({ default: undefined }) readonly width!: number | undefined;
   @Prop({ default: undefined }) readonly height!: number | undefined;
+  @Prop({ default: [0, 0] }) readonly offset!: [number, number];
   @Prop({ default: '#f4f4f4' }) readonly backgroundColor!: string;
+  @Prop({ default: null }) readonly backgroundTexture!: string | null;
+  @Prop({ default: BackgroundPosition.Cover })
+  readonly backgroundPosition!: BackgroundPosition;
+  @Prop({ default: BackgroundMovement.None })
+  readonly backgroundMovement!: BackgroundMovement;
   @Prop({ default: false }) readonly transparent!: boolean;
   @Prop({ default: null }) readonly selectedObject!: GameObject | null;
   @Prop({
@@ -63,6 +164,7 @@ export default class GameContainer extends Vue {
   ready = false;
   gameWidth = 0;
   gameHeight = 0;
+  backgroundSprite: PIXI.Texture | null = null;
 
   canvasPosition: [number, number] = [0, 0];
   engine!: typeof Matter.Engine;
@@ -81,6 +183,80 @@ export default class GameContainer extends Vue {
   intervalCollision = -1;
   readonly intervalTimeSync = 100;
   intervalSync = -1;
+  readonly intervalTimePan = 50;
+  intervalPan = -1;
+
+  backgroundPositionOffset: [number, number] = [0, 0];
+  backgroundPositionOffsetMin: [number, number] = [0, 0];
+  backgroundPositionOffsetMax: [number, number] = [0, 0];
+  backgroundTextureSize: [number, number] = [100, 100];
+  calculateBackgroundSize(): void {
+    if (this.backgroundSprite) {
+      const textureWidth = this.backgroundSprite.baseTexture.width;
+      const textureHeight = this.backgroundSprite.baseTexture.height;
+      const scaleFactorWidth = textureWidth / this.gameWidth;
+      const scaleFactorHeight = textureHeight / this.gameHeight;
+      switch (this.backgroundPosition) {
+        case BackgroundPosition.None:
+          this.backgroundTextureSize = [textureWidth, textureHeight];
+          break;
+        case BackgroundPosition.Stretch:
+          this.backgroundTextureSize = [this.gameWidth, this.gameHeight];
+          break;
+        case BackgroundPosition.Contain:
+          if (scaleFactorWidth > scaleFactorHeight)
+            this.backgroundTextureSize = [
+              this.gameWidth,
+              textureHeight / scaleFactorWidth,
+            ];
+          else
+            this.backgroundTextureSize = [
+              textureWidth / scaleFactorHeight,
+              this.gameHeight,
+            ];
+          break;
+        case BackgroundPosition.Cover:
+          if (scaleFactorWidth > scaleFactorHeight) {
+            this.backgroundTextureSize = [
+              textureWidth / scaleFactorHeight,
+              this.gameHeight,
+            ];
+          } else
+            this.backgroundTextureSize = [
+              this.gameWidth,
+              textureHeight / scaleFactorWidth,
+            ];
+          break;
+      }
+    } else this.backgroundTextureSize = [this.gameWidth, this.gameHeight];
+    this.backgroundPositionOffset = [this.gameWidth / 2, this.gameHeight / 2];
+    this.backgroundPositionOffsetMin = [...this.backgroundPositionOffset];
+    this.backgroundPositionOffsetMax = [...this.backgroundPositionOffset];
+    const deltaX = this.backgroundTextureSize[0] - this.gameWidth;
+    const deltaY = this.backgroundTextureSize[1] - this.gameHeight;
+    if (deltaX > 0) {
+      this.backgroundPositionOffsetMin[0] -= deltaX / 2;
+      this.backgroundPositionOffsetMax[0] += deltaX / 2;
+    }
+    if (deltaY > 0) {
+      this.backgroundPositionOffsetMin[1] -= deltaY / 2;
+      this.backgroundPositionOffsetMax[1] += deltaY / 2;
+    }
+  }
+
+  get backgroundTexturePosition(): [number, number] {
+    return this.backgroundPositionOffset;
+  }
+
+  @Watch('backgroundTexture', { immediate: true })
+  onBackgroundTextureChanged(): void {
+    if (this.backgroundTexture) {
+      PIXI.Assets.load(this.backgroundTexture).then((sprite) => {
+        this.backgroundSprite = sprite;
+        this.calculateBackgroundSize();
+      });
+    }
+  }
 
   async mounted(): Promise<void> {
     const gameContainer = this.$refs.gameContainer as HTMLElement;
@@ -127,6 +303,10 @@ export default class GameContainer extends Vue {
 
   registerGameObject(e: any): void {
     const gameObject = e.detail.data as GameObject;
+    const offset: [number, number] = this.gameObjectOffset;
+    if (gameObject.moveWithBackground) {
+      gameObject.initOffset(offset);
+    }
     this.gameObjects.push(gameObject);
     gameObject.gameContainer = this;
     if (this.activatedObjectOnRegister) {
@@ -219,6 +399,7 @@ export default class GameContainer extends Vue {
     clearInterval(this.intervalCollision);
     clearInterval(this.intervalWind);
     clearInterval(this.intervalSync);
+    clearInterval(this.intervalPan);
   }
 
   setupPixiSpace(): void {
@@ -241,6 +422,7 @@ export default class GameContainer extends Vue {
         const bounds = dom.getBoundingClientRect();
         this.canvasPosition = [bounds.left, bounds.top];
         this.setupBound();
+        this.calculateBackgroundSize();
         this.ready = true;
       }
     }
@@ -465,7 +647,71 @@ export default class GameContainer extends Vue {
       }
     }
   }
+
+  panVector: [number, number] = [0, 0];
+  beginPan(vector: [number, number]): void {
+    this.panVector = vector;
+    clearInterval(this.intervalPan);
+    this.intervalPan = setInterval(this.pan, this.intervalTimePan);
+  }
+
+  endPan(): void {
+    this.panVector = [0, 0];
+    clearInterval(this.intervalPan);
+  }
+
+  pan(): void {
+    const x = this.backgroundPositionOffset[0] + this.panVector[0];
+    const y = this.backgroundPositionOffset[1] + this.panVector[1];
+    if (
+      x < this.backgroundPositionOffsetMin[0] ||
+      x > this.backgroundPositionOffsetMax[0] ||
+      y < this.backgroundPositionOffsetMin[1] ||
+      y > this.backgroundPositionOffsetMax[1]
+    )
+      this.endPan();
+    else {
+      this.backgroundPositionOffset = [x, y];
+      const offset: [number, number] = this.gameObjectOffset;
+      for (const gameObj of this.gameObjects) {
+        if (gameObj.moveWithBackground) gameObj.updateOffset(offset);
+      }
+      this.$emit('update:offset', offset);
+    }
+  }
+
+  get gameObjectOffset(): [number, number] {
+    return [
+      this.backgroundPositionOffset[0] - this.gameWidth / 2,
+      this.backgroundPositionOffset[1] - this.gameHeight / 2,
+    ] as [number, number];
+  }
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.gameContainer {
+  position: relative;
+}
+
+.navigation-overlay {
+  position: absolute;
+  z-index: 100;
+}
+.overlay-right {
+  right: 1rem;
+  top: calc(var(--game-height) / 2);
+}
+.overlay-left {
+  left: 1rem;
+  top: calc(var(--game-height) / 2);
+}
+.overlay-up {
+  top: 1rem;
+  left: calc(var(--game-width) / 2);
+}
+.overlay-down {
+  bottom: 1rem;
+  left: calc(var(--game-width) / 2);
+}
+</style>

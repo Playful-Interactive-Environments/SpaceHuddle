@@ -1,8 +1,8 @@
 <template>
   <container
     @render="containerLoad"
-    :x="position[0]"
-    :y="position[1]"
+    :x="position[0] + offset[0]"
+    :y="position[1] + offset[1]"
     :rotation="rotationValue"
     :scale="scale"
     @pointerdown="gameObjectClicked"
@@ -55,6 +55,7 @@ export default class GameObject extends Vue {
   @Prop() readonly collisionHandler!: CollisionHandler;
   @Prop() readonly source!: any;
   @Prop({ default: true }) usePhysic!: boolean;
+  @Prop({ default: true }) moveWithBackground!: boolean;
   body!: typeof Matter.Body;
   position: [number, number] = [0, 0];
   rotationValue = 0;
@@ -65,6 +66,7 @@ export default class GameObject extends Vue {
   displayHeight = this.defaultSize;
   displayX = 0;
   displayY = 0;
+  offset: [number, number] = [0, 0];
 
   async mounted(): Promise<void> {
     const container = document.getElementById('gameContainer');
@@ -84,6 +86,22 @@ export default class GameObject extends Vue {
   unmounted(): void {
     this.kill();
     this.gameObjectReleased();
+  }
+
+  initOffset(offset: [number, number]): void {
+    this.offset = offset;
+    this.position[0] -= offset[0];
+    this.position[1] -= offset[1];
+  }
+
+  updateOffset(offset: [number, number]): void {
+    this.offset = offset;
+    if (this.body) {
+      Matter.Body.setPosition(this.body, {
+        x: this.position[0] + this.offset[0],
+        y: this.position[1] + this.offset[1],
+      });
+    }
   }
 
   clickTime = 0;
@@ -173,20 +191,6 @@ export default class GameObject extends Vue {
     this.addBodyToDetector();
   }
 
-  convertBodyPositionToScreenPosition(): [number, number] {
-    /*if (this.type === 'rect') {
-      const size = [
-        this.body.bounds.max.x - this.body.bounds.min.x,
-        this.body.bounds.max.y - this.body.bounds.min.y,
-      ];
-      return [
-        this.body.position.x - size[0] / 2,
-        this.body.position.y - size[1] / 2,
-      ];
-    }*/
-    return [this.body.position.x, this.body.position.y];
-  }
-
   addBodyToEngine(): void {
     if (this.gameContainer && this.body) {
       Matter.Composite.add(this.gameContainer.engine.world, this.body);
@@ -202,25 +206,32 @@ export default class GameObject extends Vue {
   initPosition(): void {
     if (this.objectSpace === ObjectSpace.Relative && this.gameContainer)
       this.position = [
-        (this.x / 100) * this.gameContainer.gameWidth,
-        (this.y / 100) * this.gameContainer.gameHeight,
+        (this.x / 100) * this.gameContainer.gameWidth - this.offset[0],
+        (this.y / 100) * this.gameContainer.gameHeight - this.offset[1],
       ];
-    else this.position = [this.x, this.y];
+    else this.position = [this.x - this.offset[0], this.y - this.offset[1]];
   }
 
   convertPositionToInputFormat(): [number, number] {
     if (this.objectSpace === ObjectSpace.Relative && this.gameContainer)
       return [
-        (this.position[0] / this.gameContainer.gameWidth) * 100,
-        (this.position[1] / this.gameContainer.gameHeight) * 100,
+        ((this.position[0] + this.offset[0]) / this.gameContainer.gameWidth) *
+          100,
+        ((this.position[1] + this.offset[1]) / this.gameContainer.gameHeight) *
+          100,
       ];
-    return this.position;
+    return [
+      this.position[0] + this.offset[0],
+      this.position[1] + this.offset[1],
+    ];
   }
 
   @Watch('x', { immediate: true })
   @Watch('y', { immediate: true })
   onModelValueChanged(): void {
-    this.initPosition();
+    const inputPosition = this.convertPositionToInputFormat();
+    if (inputPosition[0] !== this.x || inputPosition[1] !== this.y)
+      this.initPosition();
   }
 
   @Watch('rotation', { immediate: true })
@@ -246,15 +257,17 @@ export default class GameObject extends Vue {
     if (
       !this.isStatic &&
       this.body &&
-      (this.body.position.x !== this.position[0] ||
-        this.body.position.y !== this.position[1])
+      (this.body.position.x - this.offset[0] !== this.position[0] ||
+        this.body.position.y - this.offset[1] !== this.position[1])
     ) {
       if (this.gameContainer) {
         if (
-          this.body.position.x > this.gameContainer.gameWidth ||
-          this.body.position.x < 0 ||
-          this.body.position.y > this.gameContainer.gameHeight ||
-          this.body.position.y < 0
+          this.body.position.x - this.offset[0] >
+            this.gameContainer.gameWidth ||
+          this.body.position.x - this.offset[0] < 0 ||
+          this.body.position.y - this.offset[1] >
+            this.gameContainer.gameHeight ||
+          this.body.position.y - this.offset[1] < 0
         ) {
           this.$emit('outsideDrawingSpace', this);
         }
@@ -274,7 +287,10 @@ export default class GameObject extends Vue {
         }
         if (outside) Matter.Body.setPosition(this.body, { x: x, y: y });*/
       }
-      this.position = this.convertBodyPositionToScreenPosition();
+      this.position = [
+        this.body.position.x - this.offset[0],
+        this.body.position.y - this.offset[1],
+      ];
       this.rotationValue = this.body.angle;
       this.$emit('update:rotation', turf.radiansToDegrees(this.rotationValue));
       const inputPosition = this.convertPositionToInputFormat();
