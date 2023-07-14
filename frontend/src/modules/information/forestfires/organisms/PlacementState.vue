@@ -145,7 +145,6 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Line } from 'vue-chartjs';
-import { Application as Pixi } from 'vue3-pixi';
 import * as PIXI from 'pixi.js';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
@@ -184,7 +183,6 @@ export interface PlacementState {
     GameObject,
     GameContainer,
     Line,
-    Pixi,
     RoundSlider,
   },
   emits: ['editFinished'],

@@ -33,6 +33,7 @@
             }"
             :is-static="true"
             :source="placeable"
+            :mask="getSearchMask(placeable)"
           >
             <CustomSprite
               :texture="placeable.texture"
@@ -43,6 +44,25 @@
             >
             </CustomSprite>
           </GameObject>
+          <GameObject
+            v-if="gameWidth > 0"
+            v-model:x="searchPosition[0]"
+            v-model:y="searchPosition[1]"
+            type="circle"
+            :options="{
+              name: 'searchObject',
+              collisionFilter: {
+                group: -1,
+              },
+            }"
+          >
+            <Graphics @render="drawSearchObject" />
+          </GameObject>
+          <Graphics
+            v-if="noneCollectableObjects.length > 0"
+            ref="searchMask"
+            @render="drawSearchMask"
+          />
         </container>
       </template>
     </GameContainer>
@@ -53,7 +73,6 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Line } from 'vue-chartjs';
-import { Application as Pixi } from 'vue3-pixi';
 import * as PIXI from 'pixi.js';
 import { Prop, Watch } from 'vue-property-decorator';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
@@ -81,7 +100,6 @@ import gameConfig from '@/modules/information/forestfires/data/gameConfig.json';
     GameContainer,
     CustomSprite,
     Line,
-    Pixi,
   },
   emits: ['playFinished'],
 })
@@ -98,6 +116,7 @@ export default class PlayState extends Vue {
   obstacleSpritesheet!: PIXI.Spritesheet;
   totalCount = 0;
   collectedCount = 0;
+  searchPosition: [number, number] = [0, 0];
 
   mounted(): void {
     PIXI.Assets.load('/assets/games/forestfires/hazard.json').then(
@@ -110,6 +129,52 @@ export default class PlayState extends Vue {
 
   unmounted(): void {
     cashService.deregisterAllGet(this.updateIdeas);
+  }
+
+  getSearchMask(placeable: Placeable): any {
+    const config = gameConfig[placeable.type].settings;
+    if (!config.collectable) {
+      return this.$refs.searchMask;
+    }
+    return null;
+  }
+
+  drawSearchObject(graphics: PIXI.Graphics): void {
+    graphics.clear();
+    graphics.lineStyle(10, '#ff0000');
+    graphics.drawCircle(0, 0, this.gameWidth / 10);
+  }
+
+  searchGraphics!: PIXI.Graphics;
+  drawSearchMask(graphics: PIXI.Graphics): void {
+    this.searchGraphics = graphics;
+    this.updatedSearchMask();
+  }
+
+  updatedSearchMask(): void {
+    if (this.searchGraphics) {
+      this.searchGraphics.clear();
+      this.searchGraphics.beginFill('#ffffff');
+      this.searchGraphics.drawRect(0, 0, this.gameWidth, this.gameHeight);
+      this.searchGraphics.beginHole();
+      this.searchGraphics.drawCircle(
+        this.searchPosition[0],
+        this.searchPosition[1],
+        this.gameWidth / 10
+      );
+      this.searchGraphics.endHole();
+      this.searchGraphics.endFill();
+    }
+  }
+
+  @Watch('searchPosition', { immediate: true, deep: true })
+  onSearchPositionChanged(): void {
+    this.updatedSearchMask();
+  }
+
+  @Watch('gameWidth', { immediate: true })
+  onGameWidthSet(): void {
+    this.searchPosition = [this.gameWidth / 2, this.gameHeight / 2];
   }
 
   getSpriteSheetForType(objectType: string): PIXI.Spritesheet {
@@ -183,6 +248,12 @@ export default class PlayState extends Vue {
     );
   }
 
+  get noneCollectableObjects(): Placeable[] {
+    return this.placedObjects.filter(
+      (obj) => !gameConfig[obj.type].settings.collectable
+    );
+  }
+
   @Watch('placedObjects.length', { immediate: false })
   onPlaceablesCountChanged(): void {
     if (this.collectableObjects.length === 0) {
@@ -202,7 +273,7 @@ export default class PlayState extends Vue {
 
   gameObjectClick(objectList: GameObject[]): void {
     for (const obj of objectList) {
-      this.destroyPlaceable(obj.source);
+      if (obj.source) this.destroyPlaceable(obj.source);
     }
   }
 
