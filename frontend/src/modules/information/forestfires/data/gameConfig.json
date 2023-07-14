@@ -1,7 +1,9 @@
 {
   "hazards": {
     "settings": {
-      "icon": "fire"
+      "icon": "fire",
+      "order": 1,
+      "collectable": true
     },
     "cigarette": {
       "severity": 3,
@@ -36,7 +38,9 @@
   },
   "obstacles": {
     "settings": {
-      "icon": "tree"
+      "icon": "tree",
+      "order": 100,
+      "collectable": false
     },
     "bush": {
       "maxCount": 30,

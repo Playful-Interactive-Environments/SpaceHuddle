@@ -37,6 +37,7 @@ import { CustomObject } from '@/types/game/CustomObject';
     'update:width',
     'update:height',
     'click',
+    'gameObjectClick',
     'update:selectedObject',
   ],
 })
@@ -117,8 +118,10 @@ export default class GameContainer extends Vue {
 
     setTimeout(async () => {
       const pixi = this.$refs.pixi as typeof Application;
-      pixi.app.transparent = this.transparent;
-      this.$emit('initRenderer', pixi.app.renderer);
+      if (pixi) {
+        pixi.app.transparent = this.transparent;
+        this.$emit('initRenderer', pixi.app.renderer);
+      }
     }, 100);
   }
 
@@ -260,6 +263,16 @@ export default class GameContainer extends Vue {
   readonly minClickTimeDelta = 10;
   isMouseDown = false;
   gameContainerClicked(): void {
+    const clickedBodies = Matter.Query.point(
+      this.gameObjects.map((gameObj) => gameObj.body),
+      this.mouseConstraint.mouse.position
+    );
+    if (clickedBodies.length > 0) {
+      const clickedGameObjects = clickedBodies.map((body) => {
+        return this.gameObjects.find((obj) => obj.body.id === body.id);
+      });
+      this.$emit('gameObjectClick', clickedGameObjects);
+    }
     this.isMouseDown = true;
     setTimeout(() => {
       if (!this.activeObject) {

@@ -212,11 +212,17 @@ export default class ForestFireEdit extends Vue {
     return list.filter((name) => name !== 'settings');
   }
 
+  getSpriteSheetForType(objectType: string): PIXI.Spritesheet {
+    if (objectType === 'hazards' && this.hazardSpritesheet)
+      return this.hazardSpritesheet;
+    if (objectType === 'obstacles' && this.obstacleSpritesheet)
+      return this.obstacleSpritesheet;
+    return this.hazardSpritesheet;
+  }
+
   getTexture(objectName: string): PIXI.Texture | string {
-    if (this.activeObjectType === 'hazards' && this.hazardSpritesheet)
-      return this.hazardSpritesheet.textures[objectName];
-    if (this.activeObjectType === 'obstacles' && this.obstacleSpritesheet)
-      return this.obstacleSpritesheet.textures[objectName];
+    const spriteSheet = this.getSpriteSheetForType(this.activeObjectType);
+    if (spriteSheet) return spriteSheet.textures[objectName];
     return '/assets/games/forestfires/hazard.json';
   }
 
@@ -295,9 +301,8 @@ export default class ForestFireEdit extends Vue {
   }
 
   getObjectAspect(objectType: string, objectName: string): number {
-    if (objectType === 'hazards')
-      return pixiUtil.getSpriteAspect(this.hazardSpritesheet, objectName);
-    return pixiUtil.getSpriteAspect(this.obstacleSpritesheet, objectName);
+    const spriteSheet = this.getSpriteSheetForType(objectType);
+    return pixiUtil.getSpriteAspect(spriteSheet, objectName);
   }
 
   saveLevel(name: string) {
@@ -305,7 +310,7 @@ export default class ForestFireEdit extends Vue {
       this.taskId,
       {
         keywords: name,
-        parameter: this.placedObjects.map((obj) => {
+        parameter: this.renderList.map((obj) => {
           return {
             type: obj.type,
             name: obj.name,
@@ -385,8 +390,7 @@ export default class ForestFireEdit extends Vue {
 
   get renderList(): Placeable[] {
     const getSortNumber = (placeable: Placeable): number => {
-      if (placeable.type === 'hazards') return 0;
-      return 10;
+      return gameConfig[placeable.type].settings.order;
     };
     return this.placedObjects.sort(
       (a, b) => getSortNumber(a) - getSortNumber(b)

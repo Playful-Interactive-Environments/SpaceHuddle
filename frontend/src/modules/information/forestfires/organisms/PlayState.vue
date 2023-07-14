@@ -6,6 +6,7 @@
       :detect-collision="false"
       :use-gravity="false"
       @initRenderer="initRenderer"
+      @gameObjectClick="gameObjectClick"
     >
       <template v-slot:default>
         <container v-if="gameWidth">
@@ -32,7 +33,6 @@
             }"
             :is-static="true"
             :source="placeable"
-            @click="destroyPlaceable(placeable)"
           >
             <CustomSprite
               :texture="placeable.texture"
@@ -112,22 +112,23 @@ export default class PlayState extends Vue {
     cashService.deregisterAllGet(this.updateIdeas);
   }
 
-  getTexture(objectType: string, objectName: string): PIXI.Texture | string {
+  getSpriteSheetForType(objectType: string): PIXI.Spritesheet {
     if (objectType === 'hazards' && this.hazardSpritesheet)
-      return this.hazardSpritesheet.textures[objectName];
+      return this.hazardSpritesheet;
     if (objectType === 'obstacles' && this.obstacleSpritesheet)
-      return this.obstacleSpritesheet.textures[objectName];
+      return this.obstacleSpritesheet;
+    return this.hazardSpritesheet;
+  }
+
+  getTexture(objectType: string, objectName: string): PIXI.Texture | string {
+    const spriteSheet = this.getSpriteSheetForType(objectType);
+    if (spriteSheet) return spriteSheet.textures[objectName];
     return '/assets/games/forestfires/hazard.json';
   }
 
   getObjectAspect(objectType: string, objectName: string): number {
-    if (objectType === 'hazards')
-      return pixiUtil.getSpriteAspect(this.hazardSpritesheet, objectName);
-    return pixiUtil.getSpriteAspect(this.obstacleSpritesheet, objectName);
-  }
-
-  getHazardAspect(hazardName: string): number {
-    return pixiUtil.getSpriteAspect(this.hazardSpritesheet, hazardName);
+    const spriteSheet = this.getSpriteSheetForType(objectType);
+    return pixiUtil.getSpriteAspect(spriteSheet, objectName);
   }
 
   @Watch('taskId', { immediate: true })
@@ -172,22 +173,37 @@ export default class PlayState extends Vue {
         };
         this.placedObjects.push(placeable);
       }
-      this.totalCount = this.placedObjects.length;
+      this.totalCount = this.collectableObjects.length;
     }
   }
 
-  @Watch('placedHazards.length', { immediate: false })
+  get collectableObjects(): Placeable[] {
+    return this.placedObjects.filter(
+      (obj) => gameConfig[obj.type].settings.collectable
+    );
+  }
+
+  @Watch('placedObjects.length', { immediate: false })
   onPlaceablesCountChanged(): void {
-    if (this.placedObjects.length === 0) {
+    if (this.collectableObjects.length === 0) {
       this.$emit('playFinished');
     }
   }
 
   destroyPlaceable(placeable: Placeable): void {
-    const id = placeable.id;
-    const index = this.placedObjects.findIndex((p) => p.id === id);
-    if (index > -1) this.placedObjects.splice(index, 1);
-    this.collectedCount++;
+    const config = gameConfig[placeable.type].settings;
+    if (config.collectable) {
+      const id = placeable.id;
+      const index = this.placedObjects.findIndex((p) => p.id === id);
+      if (index > -1) this.placedObjects.splice(index, 1);
+      this.collectedCount++;
+    }
+  }
+
+  gameObjectClick(objectList: GameObject[]): void {
+    for (const obj of objectList) {
+      this.destroyPlaceable(obj.source);
+    }
   }
 
   initRenderer(renderer: PIXI.Renderer): void {
