@@ -3,7 +3,7 @@
     <GameContainer
       v-model:width="gameWidth"
       v-model:height="gameHeight"
-      background-texture="/assets/games/forestfires/background/forest.jpg"
+      :background-texture="gameConfig.settings.background"
       :background-movement="BackgroundMovement.Pan"
       :detect-collision="false"
       :use-gravity="false"
@@ -112,7 +112,7 @@
   >
     <el-space wrap>
       <el-button
-        v-for="objectType of Object.keys(gameConfig)"
+        v-for="objectType of gameConfigTypes"
         :key="objectType"
         type="primary"
         size="large"
@@ -128,6 +128,7 @@
         :key="objectName"
         :texture="getTexture(objectName)"
         :aspect-ration="getObjectAspect(activeObjectType, objectName)"
+        :class="{ selected: activeObjectName === objectName }"
         @click="objectNameClicked(objectName)"
       />
     </el-space>
@@ -147,7 +148,6 @@ import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer, {
   BackgroundMovement,
 } from '@/components/shared/atoms/game/GameContainer.vue';
-import gameConfig from '@/modules/information/forestfires/data/gameConfig.json';
 import Placeable from '@/modules/information/forestfires/types/Placeable';
 import { v4 as uuidv4 } from 'uuid';
 import * as pixiUtil from '@/utils/pixi';
@@ -192,37 +192,32 @@ export interface PlacementState {
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ForestFireEdit extends Vue {
   @Prop() readonly taskId!: string;
-  gameConfig = gameConfig;
-  activeObjectType = 'hazards';
-  activeObjectName = 'cigarette';
+  @Prop({ default: {} }) readonly gameConfig!: any;
+  activeObjectType = '';
+  activeObjectName = '';
   showToolbox = false;
   gameWidth = 0;
   gameHeight = 0;
 
   placedObjects: Placeable[] = [];
   placementState: { [key: string]: PlacementState } = {};
-  hazardSpritesheet!: PIXI.Spritesheet;
-  obstacleSpritesheet!: PIXI.Spritesheet;
+  stylesheets: { [key: string]: PIXI.Spritesheet } = {};
   showLevelSettings = false;
   selectedObject: GameObject | null = null;
 
   get ObjectsForActiveType(): string[] {
-    const list = Object.keys(gameConfig[this.activeObjectType]);
+    const list = Object.keys(this.gameConfig[this.activeObjectType]);
     return list.filter((name) => name !== 'settings');
   }
 
   getSpriteSheetForType(objectType: string): PIXI.Spritesheet {
-    if (objectType === 'hazards' && this.hazardSpritesheet)
-      return this.hazardSpritesheet;
-    if (objectType === 'obstacles' && this.obstacleSpritesheet)
-      return this.obstacleSpritesheet;
-    return this.hazardSpritesheet;
+    return this.stylesheets[objectType];
   }
 
   getTexture(objectName: string): PIXI.Texture | string {
     const spriteSheet = this.getSpriteSheetForType(this.activeObjectType);
     if (spriteSheet) return spriteSheet.textures[objectName];
-    return '/assets/games/forestfires/hazard.json';
+    return '';
   }
 
   selectionMaskGraphic: PIXI.Graphics | null = null;
@@ -277,19 +272,23 @@ export default class ForestFireEdit extends Vue {
     } else if (this.selectionMaskGraphic) this.selectionMaskGraphic.clear();
   }
 
-  mounted(): void {
-    PIXI.Assets.load('/assets/games/forestfires/hazard.json').then(
-      (sheet) => (this.hazardSpritesheet = sheet)
+  get gameConfigTypes(): string[] {
+    return Object.keys(this.gameConfig).filter(
+      (config) => config !== 'settings'
     );
-    PIXI.Assets.load('/assets/games/forestfires/obstacle.json').then(
-      (sheet) => (this.obstacleSpritesheet = sheet)
-    );
+  }
 
-    // Set up hazard state counters
-    for (const typeName in gameConfig) {
-      for (const objectName in gameConfig[typeName]) {
+  mounted(): void {
+    this.activeObjectType = this.gameConfig.settings.defaultType;
+    this.activeObjectName = this.gameConfig.settings.defaultName;
+    for (const typeName of this.gameConfigTypes) {
+      const settings = this.gameConfig[typeName].settings;
+      PIXI.Assets.load(settings.spritesheet).then(
+        (sheet) => (this.stylesheets[typeName] = sheet)
+      );
+      for (const objectName in this.gameConfig[typeName]) {
         if (objectName !== 'settings') {
-          const hazardParameter = gameConfig[typeName][objectName];
+          const hazardParameter = this.gameConfig[typeName][objectName];
           this.placementState[objectName] = {
             maxCount: hazardParameter.maxCount,
             currentCount: 0,
@@ -327,7 +326,7 @@ export default class ForestFireEdit extends Vue {
   placeObject(event: any): void {
     setTimeout(() => {
       const configParameter =
-        gameConfig[this.activeObjectType][this.activeObjectName];
+        this.gameConfig[this.activeObjectType][this.activeObjectName];
       if (
         this.placementState[this.activeObjectName].currentCount ===
         this.placementState[this.activeObjectName].maxCount
@@ -389,7 +388,7 @@ export default class ForestFireEdit extends Vue {
 
   get renderList(): Placeable[] {
     const getSortNumber = (placeable: Placeable): number => {
-      return gameConfig[placeable.type].settings.order;
+      return this.gameConfig[placeable.type].settings.order;
     };
     return this.placedObjects.sort(
       (a, b) => getSortNumber(a) - getSortNumber(b)
@@ -444,5 +443,10 @@ export default class ForestFireEdit extends Vue {
     top: calc(70px - 0.5rem);
     left: calc(70px - 0.5rem);
   }
+}
+
+.selected {
+  border: red 2px solid;
+  border-radius: var(--border-radius);
 }
 </style>

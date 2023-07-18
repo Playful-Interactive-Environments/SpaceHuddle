@@ -28,6 +28,7 @@
     <PlacementState
       v-if="gameStep === GameStep.Build && gameState === GameState.Game"
       :taskId="taskId"
+      :gameConfig="gameConfig"
       @editFinished="editFinished"
     />
     <!-- Play-Mode -->
@@ -35,6 +36,7 @@
       v-if="gameStep === GameStep.Play && gameState === GameState.Game"
       :taskId="taskId"
       :level-data="selectedLevel"
+      :gameConfig="gameConfig"
       @playFinished="playFinished"
     />
   </div>
@@ -59,6 +61,7 @@ import * as ideaService from '@/services/idea-service';
 import { Idea } from '@/types/api/Idea';
 import Placeable from '@/modules/information/forestfires/types/Placeable';
 import * as authService from '@/services/auth-service';
+import gameConfig from '@/modules/information/forestfires/data/gameConfig.json';
 
 enum GameStep {
   Select = 'select',
@@ -72,6 +75,11 @@ enum GameState {
 }
 
 @Options({
+  computed: {
+    gameConfig() {
+      return gameConfig;
+    },
+  },
   components: {
     ModuleInfo,
     PlacementState,

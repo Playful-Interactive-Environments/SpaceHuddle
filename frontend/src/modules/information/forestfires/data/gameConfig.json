@@ -1,9 +1,15 @@
 {
+  "settings": {
+    "background": "/assets/games/forestfires/background/forest.jpg",
+    "defaultType": "hazards",
+    "defaultName": "cigarette"
+  },
   "hazards": {
     "settings": {
       "icon": "fire",
-      "order": 1,
-      "collectable": true
+      "order": 10,
+      "collectable": true,
+      "spritesheet": "/assets/games/forestfires/hazard.json"
     },
     "cigarette": {
       "severity": 3,
@@ -36,11 +42,50 @@
       "shape": "rect"
     }
   },
+  "red_herring": {
+    "settings": {
+      "icon": "masks-theater",
+      "order": 1,
+      "collectable": false,
+      "spritesheet": "/assets/games/forestfires/red_herring.json"
+    },
+    "turtle": {
+      "severity": 1,
+      "maxCount": 5,
+      "width": 3,
+      "shape": "rect"
+    },
+    "ladybug": {
+      "severity": 1,
+      "maxCount": 5,
+      "width": 0.5,
+      "shape": "rect"
+    },
+    "bug": {
+      "severity": 1,
+      "maxCount": 5,
+      "width": 0.5,
+      "shape": "rect"
+    },
+    "dragonfly": {
+      "severity": 1,
+      "maxCount": 5,
+      "width": 0.5,
+      "shape": "rect"
+    },
+    "earthworm": {
+      "severity": 1,
+      "maxCount": 5,
+      "width": 1,
+      "shape": "rect"
+    }
+  },
   "obstacles": {
     "settings": {
       "icon": "tree",
       "order": 100,
-      "collectable": false
+      "collectable": false,
+      "spritesheet": "/assets/games/forestfires/obstacle.json"
     },
     "bush": {
       "maxCount": 30,
