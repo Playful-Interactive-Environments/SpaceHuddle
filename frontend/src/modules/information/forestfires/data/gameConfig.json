@@ -8,31 +8,31 @@
     "cigarette": {
       "severity": 3,
       "maxCount": 10,
-      "width": 3,
+      "width": 1,
       "shape": "rect"
     },
     "campfire": {
       "severity": 1,
       "maxCount": 1,
-      "width": 20,
+      "width": 7,
       "shape": "circle"
     },
     "bottleWhite": {
       "severity": 2,
       "maxCount": 5,
-      "width": 3,
+      "width": 1,
       "shape": "rect"
     },
     "bottleWine": {
       "severity": 1,
       "maxCount": 5,
-      "width": 3,
+      "width": 1,
       "shape": "rect"
     },
     "bottleBeer": {
       "severity": 1,
       "maxCount": 5,
-      "width": 3,
+      "width": 1,
       "shape": "rect"
     }
   },
@@ -44,22 +44,22 @@
     },
     "bush": {
       "maxCount": 30,
-      "width": 30,
+      "width": 10,
       "shape": "circle"
     },
     "tree": {
       "maxCount": 10,
-      "width": 50,
+      "width": 17,
       "shape": "circle"
     },
     "wood": {
       "maxCount": 5,
-      "width": 15,
+      "width": 5,
       "shape": "rect"
     },
     "stone": {
       "maxCount": 20,
-      "width": 10,
+      "width": 3,
       "shape": "circle"
 
     }

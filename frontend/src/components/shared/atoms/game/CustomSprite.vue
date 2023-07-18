@@ -50,8 +50,17 @@ export default class CustomSprite extends Vue implements CustomObject {
     else if (this.height && this.aspectRation)
       value = this.height * this.aspectRation;
 
-    if (this.objectSpace === ObjectSpace.Relative && this.gameContainer) {
+    if (
+      this.objectSpace === ObjectSpace.RelativeToScreen &&
+      this.gameContainer
+    ) {
       return (value / 100) * this.gameContainer.gameWidth;
+    }
+    if (
+      this.objectSpace === ObjectSpace.RelativeToBackground &&
+      this.gameContainer
+    ) {
+      return (value / 100) * this.gameContainer.backgroundTextureSize[0];
     }
     return value;
   }
@@ -62,22 +71,49 @@ export default class CustomSprite extends Vue implements CustomObject {
     else if (this.width && this.aspectRation)
       value = this.width / this.aspectRation;
 
-    if (this.objectSpace == ObjectSpace.Relative && this.gameContainer) {
+    if (
+      this.objectSpace == ObjectSpace.RelativeToScreen &&
+      this.gameContainer
+    ) {
       return (value / 100) * this.gameContainer.gameWidth;
+    }
+    if (
+      this.objectSpace == ObjectSpace.RelativeToBackground &&
+      this.gameContainer
+    ) {
+      return (value / 100) * this.gameContainer.backgroundTextureSize[0];
     }
     return value;
   }
 
   calcDisplayX(): number {
-    if (this.objectSpace == ObjectSpace.Relative && this.gameContainer) {
+    if (
+      this.objectSpace == ObjectSpace.RelativeToScreen &&
+      this.gameContainer
+    ) {
       return (this.x / 100) * this.gameContainer.gameWidth;
+    }
+    if (
+      this.objectSpace == ObjectSpace.RelativeToBackground &&
+      this.gameContainer
+    ) {
+      return (this.x / 100) * this.gameContainer.backgroundTextureSize[0];
     }
     return this.x;
   }
 
   calcDisplayY(): number {
-    if (this.objectSpace === ObjectSpace.Relative && this.gameContainer) {
+    if (
+      this.objectSpace === ObjectSpace.RelativeToScreen &&
+      this.gameContainer
+    ) {
       return (this.y / 100) * this.gameContainer.gameWidth;
+    }
+    if (
+      this.objectSpace === ObjectSpace.RelativeToBackground &&
+      this.gameContainer
+    ) {
+      return (this.y / 100) * this.gameContainer.backgroundTextureSize[0];
     }
     return this.y;
   }

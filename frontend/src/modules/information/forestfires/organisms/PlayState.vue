@@ -18,7 +18,7 @@
             :key="placeable.uuid"
             v-model:id="placeable.id"
             :type="placeable.shape"
-            :object-space="ObjectSpace.Relative"
+            :object-space="ObjectSpace.RelativeToBackground"
             :x="placeable.position[0]"
             :y="placeable.position[1]"
             :rotation="placeable.rotation"
@@ -38,7 +38,7 @@
               :anchor="0.5"
               :width="placeable.width"
               :aspect-ration="getObjectAspect(placeable.type, placeable.name)"
-              :object-space="ObjectSpace.Relative"
+              :object-space="ObjectSpace.RelativeToBackground"
             >
             </CustomSprite>
           </GameObject>
@@ -205,7 +205,6 @@ export default class PlayState extends Vue {
       };
       this.placedObjects.push(placeable);
     }
-    console.log(this.placedObjects);
     this.totalCount = this.collectableObjects.length;
   }
 

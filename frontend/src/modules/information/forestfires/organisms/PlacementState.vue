@@ -19,7 +19,7 @@
             :key="placeable.uuid"
             v-model:id="placeable.id"
             :type="placeable.shape"
-            :object-space="ObjectSpace.Relative"
+            :object-space="ObjectSpace.RelativeToBackground"
             v-model:x="placeable.position[0]"
             v-model:y="placeable.position[1]"
             v-model:rotation="placeable.rotation"
@@ -38,7 +38,7 @@
               :anchor="0.5"
               :width="placeable.width"
               :aspect-ration="getObjectAspect(placeable.type, placeable.name)"
-              :object-space="ObjectSpace.Relative"
+              :object-space="ObjectSpace.RelativeToBackground"
               :tint="
                 selectedObject && selectedObject.id === placeable.id
                   ? '#ff0000'
@@ -87,8 +87,8 @@
       <round-slider
         class="sliderInside"
         v-model="selectedObject.source.scale"
-        min="0"
-        max="2"
+        min="0.3"
+        max="1.7"
         step="0.01"
         start-angle="90"
         end-angle="+360"
@@ -150,7 +150,6 @@ import GameContainer, {
 import gameConfig from '@/modules/information/forestfires/data/gameConfig.json';
 import Placeable from '@/modules/information/forestfires/types/Placeable';
 import { v4 as uuidv4 } from 'uuid';
-import { MouseConstraint } from 'matter-js';
 import * as pixiUtil from '@/utils/pixi';
 import * as ideaService from '@/services/idea-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
@@ -325,7 +324,7 @@ export default class ForestFireEdit extends Vue {
     this.$emit('editFinished');
   }
 
-  placeObject(event: MouseConstraint): void {
+  placeObject(event: any): void {
     setTimeout(() => {
       const configParameter =
         gameConfig[this.activeObjectType][this.activeObjectName];
@@ -353,8 +352,8 @@ export default class ForestFireEdit extends Vue {
         width: configParameter.width,
         shape: configParameter.shape,
         position: [
-          (event.mouse.position.x / this.gameWidth) * 100,
-          (event.mouse.position.y / this.gameHeight) * 100,
+          event.relativeMousePositionToBackground.x,
+          event.relativeMousePositionToBackground.y,
         ],
         rotation: 0,
         scale: 1,

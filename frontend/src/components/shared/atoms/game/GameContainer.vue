@@ -100,6 +100,7 @@ import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import { CustomObject } from '@/types/game/CustomObject';
 import * as PIXI from 'pixi.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { ObjectSpace } from '@/types/enum/ObjectSpace';
 
 export enum BackgroundPosition {
   Stretch = 'stretch',
@@ -303,9 +304,11 @@ export default class GameContainer extends Vue {
 
   registerGameObject(e: any): void {
     const gameObject = e.detail.data as GameObject;
-    const offset: [number, number] = this.gameObjectOffset;
     if (gameObject.moveWithBackground) {
-      gameObject.initOffset(offset);
+      if (gameObject.objectSpace === ObjectSpace.RelativeToBackground)
+        gameObject.initOffset(this.gameObjectOffsetRelativeToBackground);
+      else if (gameObject.objectSpace === ObjectSpace.RelativeToScreen)
+        gameObject.initOffset(this.gameObjectOffsetRelativeToScreen);
     }
     this.gameObjects.push(gameObject);
     gameObject.gameContainer = this;
@@ -458,7 +461,32 @@ export default class GameContainer extends Vue {
     this.isMouseDown = true;
     setTimeout(() => {
       if (!this.activeObject) {
-        this.$emit('click', this.mouseConstraint);
+        const mousePosition = this.mouseConstraint.mouse.position;
+        const relativeMousePositionToScreen = {
+          x:
+            ((mousePosition.x + this.gameObjectOffsetRelativeToScreen[0]) /
+              this.gameWidth) *
+            100,
+          y:
+            ((mousePosition.y + this.gameObjectOffsetRelativeToScreen[1]) /
+              this.gameHeight) *
+            100,
+        };
+        const relativeMousePositionToBackground = {
+          x:
+            ((mousePosition.x + this.gameObjectOffsetRelativeToBackground[0]) /
+              this.backgroundTextureSize[0]) *
+            100,
+          y:
+            ((mousePosition.y + this.gameObjectOffsetRelativeToBackground[1]) /
+              this.backgroundTextureSize[1]) *
+            100,
+        };
+        this.$emit('click', {
+          mousePosition: mousePosition,
+          relativeMousePositionToScreen: relativeMousePositionToScreen,
+          relativeMousePositionToBackground: relativeMousePositionToBackground,
+        });
       }
     }, this.minClickTimeDelta);
   }
@@ -650,7 +678,7 @@ export default class GameContainer extends Vue {
 
   panVector: [number, number] = [0, 0];
   beginPan(vector: [number, number]): void {
-    this.panVector = vector;
+    this.panVector = [vector[0] * 5, vector[1] * 5];
     clearInterval(this.intervalPan);
     this.intervalPan = setInterval(this.pan, this.intervalTimePan);
   }
@@ -672,19 +700,38 @@ export default class GameContainer extends Vue {
       this.endPan();
     else {
       this.backgroundPositionOffset = [x, y];
-      const offset: [number, number] = this.gameObjectOffset;
       for (const gameObj of this.gameObjects) {
-        if (gameObj.moveWithBackground) gameObj.updateOffset(offset);
+        if (
+          gameObj.moveWithBackground &&
+          gameObj.objectSpace === ObjectSpace.RelativeToBackground
+        )
+          gameObj.updateOffset(this.gameObjectOffsetRelativeToBackground);
+        else if (
+          gameObj.moveWithBackground &&
+          gameObj.objectSpace === ObjectSpace.RelativeToScreen
+        )
+          gameObj.updateOffset(this.gameObjectOffsetRelativeToScreen);
       }
-      this.$emit('update:offset', offset);
+      this.$emit('update:offset', this.gameObjectOffsetRelativeToBackground);
     }
   }
 
-  get gameObjectOffset(): [number, number] {
+  get gameObjectOffsetRelativeToBackground(): [number, number] {
     return [
+      this.backgroundTextureSize[0] / 2 - this.backgroundPositionOffset[0],
+      this.backgroundTextureSize[1] / 2 - this.backgroundPositionOffset[1],
+    ] as [number, number];
+  }
+
+  get gameObjectOffsetRelativeToScreen(): [number, number] {
+    return [
+      this.gameWidth / 2 - this.backgroundPositionOffset[0],
+      this.gameHeight / 2 - this.backgroundPositionOffset[1],
+    ] as [number, number];
+    /*return [
       this.backgroundPositionOffset[0] - this.gameWidth / 2,
       this.backgroundPositionOffset[1] - this.gameHeight / 2,
-    ] as [number, number];
+    ] as [number, number];*/
   }
 }
 </script>

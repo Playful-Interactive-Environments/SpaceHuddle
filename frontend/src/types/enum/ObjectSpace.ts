@@ -1,4 +1,5 @@
 export enum ObjectSpace {
   Absolute = 'absolute',
-  Relative = 'relative',
+  RelativeToScreen = 'relative-to-screen',
+  RelativeToBackground = 'relative-to-background',
 }
