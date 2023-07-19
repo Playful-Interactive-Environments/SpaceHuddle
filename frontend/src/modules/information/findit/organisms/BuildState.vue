@@ -148,12 +148,12 @@ import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer, {
   BackgroundMovement,
 } from '@/components/shared/atoms/game/GameContainer.vue';
-import Placeable from '@/modules/information/forestfires/types/Placeable';
+import Placeable from '@/modules/information/findit/types/Placeable';
 import { v4 as uuidv4 } from 'uuid';
 import * as pixiUtil from '@/utils/pixi';
 import * as ideaService from '@/services/idea-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import LevelSettings from '@/modules/information/forestfires/organisms/LevelSettings.vue';
+import LevelSettings from '@/modules/information/findit/organisms/LevelSettings.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ElMessage } from 'element-plus';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
@@ -162,7 +162,7 @@ import RoundSlider from 'vue-three-round-slider/src';
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 
 // The current state of the edit mode
-export interface PlacementState {
+export interface BuildState {
   maxCount: number;
   currentCount: number;
 }
@@ -200,7 +200,7 @@ export default class ForestFireEdit extends Vue {
   gameHeight = 0;
 
   placedObjects: Placeable[] = [];
-  placementState: { [key: string]: PlacementState } = {};
+  placementState: { [key: string]: BuildState } = {};
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
   showLevelSettings = false;
   selectedObject: GameObject | null = null;
@@ -298,6 +298,13 @@ export default class ForestFireEdit extends Vue {
     }
   }
 
+  unmounted(): void {
+    for (const typeName of this.gameConfigTypes) {
+      const settings = this.gameConfig[typeName].settings;
+      PIXI.Assets.unload(settings.spritesheet);
+    }
+  }
+
   getObjectAspect(objectType: string, objectName: string): number {
     const spriteSheet = this.getSpriteSheetForType(objectType);
     return pixiUtil.getSpriteAspect(spriteSheet, objectName);
@@ -333,7 +340,7 @@ export default class ForestFireEdit extends Vue {
       ) {
         ElMessage({
           message: this.$t(
-            'module.information.forestfires.participant.maxCountPlaced'
+            'module.information.findit.participant.maxCountPlaced'
           ),
           type: 'error',
           center: true,

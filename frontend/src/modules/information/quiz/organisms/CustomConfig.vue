@@ -90,7 +90,7 @@ import * as cashService from '@/services/cash-service';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModeratorConfig
+export default class CustomConfig
   extends Vue
   implements CustomParameter, CustomSync
 {

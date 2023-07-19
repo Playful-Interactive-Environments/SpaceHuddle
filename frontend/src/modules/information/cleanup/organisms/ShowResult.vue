@@ -361,6 +361,10 @@ export default class ShowResult extends Vue {
     }
   }
 
+  unmounted(): void {
+    PIXI.Assets.unload('/assets/games/cleanup/molecules.json');
+  }
+
   @Watch('gameWidth', { immediate: true })
   onSizeChanged(): void {
     if (this.gameWidth) {

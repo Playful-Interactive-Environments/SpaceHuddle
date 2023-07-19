@@ -20,8 +20,8 @@
     >
       <container>
         <sprite
-          v-if="backgroundTexture"
-          :texture="backgroundTexture"
+          v-if="backgroundSprite"
+          :texture="backgroundSprite"
           :anchor="0.5"
           :width="backgroundTextureSize[0]"
           :height="backgroundTextureSize[1]"
@@ -252,10 +252,15 @@ export default class GameContainer extends Vue {
   @Watch('backgroundTexture', { immediate: true })
   onBackgroundTextureChanged(): void {
     if (this.backgroundTexture) {
-      PIXI.Assets.load(this.backgroundTexture).then((sprite) => {
-        this.backgroundSprite = sprite;
+      if (PIXI.Cache.has(this.backgroundTexture)) {
+        this.backgroundSprite = PIXI.Assets.get(this.backgroundTexture);
         this.calculateBackgroundSize();
-      });
+      } else {
+        PIXI.Assets.load(this.backgroundTexture).then((sprite) => {
+          this.backgroundSprite = sprite;
+          this.calculateBackgroundSize();
+        });
+      }
     }
   }
 
@@ -403,6 +408,9 @@ export default class GameContainer extends Vue {
     clearInterval(this.intervalWind);
     clearInterval(this.intervalSync);
     clearInterval(this.intervalPan);
+    if (this.backgroundTexture) {
+      PIXI.Assets.unload(this.backgroundTexture);
+    }
   }
 
   setupPixiSpace(): void {

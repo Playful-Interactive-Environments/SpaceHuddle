@@ -1,32 +1,46 @@
 <template>
-  <el-carousel
-    ref="carousel"
-    v-if="gameHeight"
-    :autoplay="false"
-    arrow="always"
-    :height="`${gameHeight}px`"
-    trigger="click"
-    :loop="false"
-    @change="carouselChanged"
-  >
-    <el-carousel-item
-      v-for="keyword of openModuleInfoEntryDataList"
-      :key="keyword"
+  <div class="infoArea">
+    <SpriteCanvas
+      v-if="
+        openModuleInfoEntryDataList.length > 0 &&
+        openModuleInfoEntryDataList[activeTabIndex] &&
+        !isDefaultImage(openModuleInfoEntryDataList[activeTabIndex].texture)
+      "
+      class="pixiCanvas info-image"
+      :width="gameWidth"
+      :height="gameHeight / 2"
+      :texture="openModuleInfoEntryDataList[activeTabIndex].texture"
+    />
+    <el-carousel
+      ref="carousel"
+      v-if="gameHeight"
+      :autoplay="false"
+      arrow="always"
+      :height="`${gameHeight}px`"
+      trigger="click"
+      :loop="false"
+      @change="carouselChanged"
     >
-      <img
-        class="info-image"
-        :src="`${imageDirectory}\\${keyword}.${fileExtension}`"
-        :alt="keyword"
-      />
-      <div>
-        {{ $t(`${translationPath}.${keyword}`) }}
-      </div>
-    </el-carousel-item>
-  </el-carousel>
-  <div class="next">
-    <el-button type="primary" @click="next">
-      {{ $t('participant.molecules.moduleInfo.next') }}
-    </el-button>
+      <el-carousel-item
+        v-for="entry of openModuleInfoEntryDataList"
+        :key="entry.key"
+      >
+        <img
+          v-if="isDefaultImage(entry.texture)"
+          class="info-image"
+          :src="entry.texture"
+          :alt="entry.key"
+        />
+        <div class="info-text">
+          {{ $t(`${translationPath}.${entry.key}`) }}
+        </div>
+      </el-carousel-item>
+    </el-carousel>
+    <div class="next">
+      <el-button type="primary" @click="next">
+        {{ $t('participant.molecules.moduleInfo.next') }}
+      </el-button>
+    </div>
   </div>
 </template>
 
@@ -37,33 +51,51 @@ import { Tutorial } from '@/types/api/Tutorial';
 import * as tutorialService from '@/services/tutorial-service';
 import * as cashService from '@/services/cash-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
+import * as PIXI from 'pixi.js';
 
 export interface ModuleInfoEntryData {
-  imageUrl: string;
-  title: string;
-  text: string;
+  key: string;
+  texture: string | PIXI.Texture | PIXI.Texture[] | string[];
 }
 
 @Options({
-  components: {},
+  components: { SpriteCanvas },
   emits: ['infoRead'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModuleInfo extends Vue {
   @Prop({ default: [] })
-  readonly moduleInfoEntryDataList!: string[];
+  readonly moduleInfoEntryDataList!: (string | ModuleInfoEntryData)[];
   @Prop({ default: '' }) readonly translationPath!: string;
   @Prop({ default: '' }) readonly imageDirectory!: string;
   @Prop({ default: 'jpg' }) readonly fileExtension!: string;
   @Prop({ default: 'moduleInfo' }) readonly infoType!: string;
   @Prop({ default: true }) readonly showTutorialOnlyOnce!: boolean;
+  gameWidth = 0;
   gameHeight = 0;
   tutorialSteps: Tutorial[] = [];
 
-  get openModuleInfoEntryDataList(): string[] {
-    return this.moduleInfoEntryDataList.filter(
-      (entry) => !this.getIncludeStep(entry)
-    );
+  get openModuleInfoEntryDataList(): ModuleInfoEntryData[] {
+    return this.moduleInfoEntryDataList
+      .map((entry) => {
+        if (typeof entry === 'string')
+          return {
+            key: entry,
+            texture: `${this.imageDirectory}/${entry}.${this.fileExtension}`,
+          };
+        else if (
+          typeof entry.texture === 'string' &&
+          !entry.texture.includes('\\')
+        ) {
+          return {
+            key: entry.key,
+            texture: `${this.imageDirectory}/${entry.texture}`,
+          };
+        }
+        return entry;
+      })
+      .filter((entry) => !this.getIncludeStep(entry.key));
   }
 
   get indexDelta(): number {
@@ -74,11 +106,19 @@ export default class ModuleInfo extends Vue {
   }
 
   mounted(): void {
+    this.gameWidth = this.$el.parentElement.offsetWidth;
     this.gameHeight = this.$el.parentElement.offsetHeight;
     tutorialService.registerGetList(
       this.updateTutorial,
       EndpointAuthorisationType.PARTICIPANT
     );
+  }
+
+  isDefaultImage(
+    texture: string | PIXI.Texture | PIXI.Texture[] | string[]
+  ): boolean {
+    if (typeof texture === 'string') return !texture.endsWith('.json');
+    return false;
   }
 
   deregisterAll(): void {
@@ -122,10 +162,10 @@ export default class ModuleInfo extends Vue {
   }
 
   storeInfoStepRead(): void {
-    const stepName = this.moduleInfoEntryDataList[this.activeTabIndex];
-    if (!this.getIncludeStep(stepName)) {
+    const stepName = this.openModuleInfoEntryDataList[this.activeTabIndex];
+    if (!this.getIncludeStep(stepName.key)) {
       const tutorialItem: Tutorial = {
-        step: stepName,
+        step: stepName.key,
         type: this.infoType,
         order: this.activeTabIndex,
       };
@@ -140,6 +180,18 @@ export default class ModuleInfo extends Vue {
 </script>
 
 <style scoped lang="scss">
+.infoArea {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.pixiCanvas {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
 .el-carousel__item div {
   padding: 2rem;
 }
@@ -155,5 +207,15 @@ img {
   padding: 2rem;
   position: fixed;
   bottom: 0;
+}
+
+.info-image {
+  max-height: 50vh;
+  height: 50vh;
+}
+
+.info-text {
+  position: absolute;
+  top: calc(50vh + 1rem);
 }
 </style>

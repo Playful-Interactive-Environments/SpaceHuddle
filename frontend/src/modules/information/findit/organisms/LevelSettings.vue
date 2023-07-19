@@ -7,9 +7,7 @@
   >
     <el-dialog
       v-model="showSettings"
-      :title="
-        $t('module.information.forestfires.participant.settings.levelName')
-      "
+      :title="$t('module.information.findit.participant.settings.levelName')"
       :before-close="handleClose"
       width="calc(var(--app-width) * 0.8)"
     >

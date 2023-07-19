@@ -107,6 +107,15 @@ export function getSpriteAspect(
   return 1;
 }
 
+export function getTextureAspect(texture: PIXI.Texture | null): number {
+  if (texture) {
+    const h = texture.orig.height;
+    const w = texture.orig.width;
+    if (h && w) return w / h;
+  }
+  return 1;
+}
+
 export function getSpriteNames(spritesheet: PIXI.Spritesheet): string[] {
   if (spritesheet?.data?.frames) {
     return Object.keys(spritesheet.data.frames);

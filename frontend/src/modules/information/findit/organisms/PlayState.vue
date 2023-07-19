@@ -79,12 +79,12 @@ import GameContainer, {
   BackgroundPosition,
   BackgroundMovement,
 } from '@/components/shared/atoms/game/GameContainer.vue';
-import Placeable from '@/modules/information/forestfires/types/Placeable';
+import Placeable from '@/modules/information/findit/types/Placeable';
 import * as pixiUtil from '@/utils/pixi';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import { v4 as uuidv4 } from 'uuid';
-import { delay } from '@/utils/wait';
+import { until } from '@/utils/wait';
 
 @Options({
   computed: {
@@ -130,6 +130,13 @@ export default class PlayState extends Vue {
           (sheet) => (this.stylesheets[typeName] = sheet)
         );
       }
+    }
+  }
+
+  unmounted(): void {
+    for (const typeName in this.gameConfig) {
+      const settings = this.gameConfig[typeName].settings;
+      if (settings) PIXI.Assets.unload(settings.spritesheet);
     }
   }
 
@@ -181,10 +188,10 @@ export default class PlayState extends Vue {
 
   @Watch('levelData', { immediate: true })
   async onLevelDataChanged(): Promise<void> {
-    await delay(200);
     for (const value of Object.values(this.levelData)) {
       if (!value.type) value.type = this.gameConfig.settings.defaultType;
       const configParameter = this.gameConfig[value.type][value.name];
+      await until(() => this.hasTexture(value.type, value.name));
       const placeable: Placeable = {
         uuid: uuidv4(),
         id: 0,
@@ -210,6 +217,11 @@ export default class PlayState extends Vue {
     const spriteSheet = this.getSpriteSheetForType(objectType);
     if (spriteSheet) return spriteSheet.textures[objectName];
     return '';
+  }
+
+  hasTexture(objectType: string, objectName: string): boolean {
+    const spriteSheet = this.getSpriteSheetForType(objectType);
+    return spriteSheet && objectName in spriteSheet.textures;
   }
 
   getObjectAspect(objectType: string, objectName: string): number {

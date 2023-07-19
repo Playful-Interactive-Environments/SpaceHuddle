@@ -400,6 +400,7 @@ export default class CleanUpParticles extends Vue {
 
   unmounted(): void {
     clearInterval(this.interval);
+    PIXI.Assets.unload('/assets/games/cleanup/molecules.json');
   }
 
   updatedLoop(): void {
