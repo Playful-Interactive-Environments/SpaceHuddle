@@ -103,12 +103,11 @@
       </div>
     </div>
   </div>
-  <el-drawer
+  <DrawerBottomOverlay
     v-model="showToolbox"
     :title="
       $t('module.information.forestfires.participant.itemSelection.selectItem')
     "
-    :with-header="true"
   >
     <el-space wrap>
       <el-button
@@ -129,10 +128,10 @@
         :texture="getTexture(objectName)"
         :aspect-ration="getObjectAspect(activeObjectType, objectName)"
         :class="{ selected: activeObjectName === objectName }"
-        @click="objectNameClicked(objectName)"
+        @pointerup="objectNameClicked(objectName)"
       />
     </el-space>
-  </el-drawer>
+  </DrawerBottomOverlay>
   <LevelSettings
     v-model:show-modal="showLevelSettings"
     @saveLevel="saveLevel"
@@ -160,6 +159,7 @@ import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import RoundSlider from 'vue-three-round-slider/src';
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
+import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
 
 // The current state of the edit mode
 export interface BuildState {
@@ -185,6 +185,7 @@ export interface BuildState {
     GameContainer,
     Line,
     RoundSlider,
+    DrawerBottomOverlay,
   },
   emits: ['editFinished'],
 })
@@ -206,8 +207,11 @@ export default class ForestFireEdit extends Vue {
   selectedObject: GameObject | null = null;
 
   get ObjectsForActiveType(): string[] {
-    const list = Object.keys(this.gameConfig[this.activeObjectType]);
-    return list.filter((name) => name !== 'settings');
+    if (this.activeObjectType) {
+      const list = Object.keys(this.gameConfig[this.activeObjectType]);
+      return list.filter((name) => name !== 'settings');
+    }
+    return [];
   }
 
   getSpriteSheetForType(objectType: string): PIXI.Spritesheet {
@@ -215,8 +219,10 @@ export default class ForestFireEdit extends Vue {
   }
 
   getTexture(objectName: string): PIXI.Texture | string {
-    const spriteSheet = this.getSpriteSheetForType(this.activeObjectType);
-    if (spriteSheet) return spriteSheet.textures[objectName];
+    if (this.activeObjectType) {
+      const spriteSheet = this.getSpriteSheetForType(this.activeObjectType);
+      if (spriteSheet) return spriteSheet.textures[objectName];
+    }
     return '';
   }
 
@@ -283,9 +289,13 @@ export default class ForestFireEdit extends Vue {
     this.activeObjectName = this.gameConfig.settings.defaultName;
     for (const typeName of this.gameConfigTypes) {
       const settings = this.gameConfig[typeName].settings;
-      PIXI.Assets.load(settings.spritesheet).then(
-        (sheet) => (this.stylesheets[typeName] = sheet)
-      );
+      setTimeout(() => {
+        if (settings && settings.spritesheet) {
+          PIXI.Assets.load(settings.spritesheet).then((sheet) => {
+            this.stylesheets[typeName] = sheet;
+          });
+        }
+      }, 100);
       for (const objectName in this.gameConfig[typeName]) {
         if (objectName !== 'settings') {
           const hazardParameter = this.gameConfig[typeName][objectName];
@@ -332,39 +342,41 @@ export default class ForestFireEdit extends Vue {
 
   placeObject(event: any): void {
     setTimeout(() => {
-      const configParameter =
-        this.gameConfig[this.activeObjectType][this.activeObjectName];
-      if (
-        this.placementState[this.activeObjectName].currentCount ===
-        this.placementState[this.activeObjectName].maxCount
-      ) {
-        ElMessage({
-          message: this.$t(
-            'module.information.findit.participant.maxCountPlaced'
-          ),
-          type: 'error',
-          center: true,
-          showClose: true,
-        });
-        return;
+      if (this.activeObjectType) {
+        const configParameter =
+          this.gameConfig[this.activeObjectType][this.activeObjectName];
+        if (
+          this.placementState[this.activeObjectName].currentCount ===
+          this.placementState[this.activeObjectName].maxCount
+        ) {
+          ElMessage({
+            message: this.$t(
+              'module.information.findit.participant.maxCountPlaced'
+            ),
+            type: 'error',
+            center: true,
+            showClose: true,
+          });
+          return;
+        }
+        this.placementState[this.activeObjectName].currentCount++;
+        const placeable: Placeable = {
+          uuid: uuidv4(),
+          id: 0,
+          type: this.activeObjectType,
+          name: this.activeObjectName,
+          texture: this.getTexture(this.activeObjectName),
+          width: configParameter.width,
+          shape: configParameter.shape,
+          position: [
+            event.relativeMousePositionToBackground.x,
+            event.relativeMousePositionToBackground.y,
+          ],
+          rotation: 0,
+          scale: 1,
+        };
+        this.placedObjects.push(placeable);
       }
-      this.placementState[this.activeObjectName].currentCount++;
-      const placeable: Placeable = {
-        uuid: uuidv4(),
-        id: 0,
-        type: this.activeObjectType,
-        name: this.activeObjectName,
-        texture: this.getTexture(this.activeObjectName),
-        width: configParameter.width,
-        shape: configParameter.shape,
-        position: [
-          event.relativeMousePositionToBackground.x,
-          event.relativeMousePositionToBackground.y,
-        ],
-        rotation: 0,
-        scale: 1,
-      };
-      this.placedObjects.push(placeable);
     }, 100);
   }
 
@@ -455,5 +467,17 @@ export default class ForestFireEdit extends Vue {
 .selected {
   border: red 2px solid;
   border-radius: var(--border-radius);
+}
+
+.el-space {
+  display: flex;
+}
+
+.el-space + .el-space {
+  padding-top: 1rem;
+}
+
+.active {
+  background-color: var(--color-yellow);
 }
 </style>
