@@ -52,6 +52,7 @@ export default class GameObject extends Vue {
     [key: string]: string | number | boolean;
   };
   @Prop({ default: false }) readonly isStatic!: boolean;
+  @Prop({ default: true }) readonly clickable!: boolean;
   @Prop() readonly collisionHandler!: CollisionHandler;
   @Prop() readonly source!: any;
   @Prop({ default: true }) usePhysic!: boolean;
@@ -169,8 +170,10 @@ export default class GameObject extends Vue {
     this.options.isStatic = this.isStatic;
     this.body = Matter.Bodies.rectangle(x, y, width, height, this.options);
     this.$emit('update:id', this.body.id);
-    this.addBodyToEngine();
-    this.addBodyToDetector();
+    if (this.clickable) {
+      this.addBodyToEngine();
+      this.addBodyToDetector();
+    }
   }
 
   addCircle(x: number, y: number, width: number, height: number): void {
@@ -182,8 +185,10 @@ export default class GameObject extends Vue {
       this.options
     );
     this.$emit('update:id', this.body.id);
-    this.addBodyToEngine();
-    this.addBodyToDetector();
+    if (this.clickable) {
+      this.addBodyToEngine();
+      this.addBodyToDetector();
+    }
   }
 
   addBodyToEngine(): void {

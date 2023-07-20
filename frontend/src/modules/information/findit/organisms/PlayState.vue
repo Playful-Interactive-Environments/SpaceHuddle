@@ -30,6 +30,7 @@
               },
             }"
             :is-static="true"
+            :clickable="getCollectable(placeable)"
             :source="placeable"
             :mask="getSearchMask(placeable)"
           >
@@ -67,7 +68,10 @@
     </GameContainer>
     <div class="overlay-bottom">{{ collectedCount }} / {{ totalCount }}</div>
     <DrawerBottomOverlay
-      v-if="collectedPlaceableConfig"
+      v-if="
+        collectedPlaceableConfig &&
+        hasTexture(collectedPlaceable.type, collectedPlaceable.name)
+      "
       v-model="showToolbox"
       :title="
         $t(
@@ -270,13 +274,18 @@ export default class PlayState extends Vue {
 
   getTexture(objectType: string, objectName: string): PIXI.Texture | string {
     const spriteSheet = this.getSpriteSheetForType(objectType);
-    if (spriteSheet) return spriteSheet.textures[objectName];
+    if (spriteSheet && spriteSheet.textures)
+      return spriteSheet.textures[objectName];
     return '';
   }
 
   hasTexture(objectType: string, objectName: string): boolean {
     const spriteSheet = this.getSpriteSheetForType(objectType);
-    return spriteSheet && objectName in spriteSheet.textures;
+    return (
+      !!spriteSheet &&
+      !!spriteSheet.textures &&
+      objectName in spriteSheet.textures
+    );
   }
 
   getObjectAspect(objectType: string, objectName: string): number {
@@ -298,7 +307,7 @@ export default class PlayState extends Vue {
 
   @Watch('placedObjects.length', { immediate: false })
   onPlaceablesCountChanged(): void {
-    if (this.collectableObjects.length === 0) {
+    if (this.totalCount > 0 && this.collectableObjects.length === 0) {
       this.$emit('playFinished');
     }
   }
@@ -317,6 +326,11 @@ export default class PlayState extends Vue {
       ];
     }
     return null;
+  }
+
+  getCollectable(placeable: Placeable): boolean {
+    const config = this.gameConfig[placeable.type].settings;
+    return config.collectable;
   }
 
   destroyPlaceable(placeable: Placeable): void {

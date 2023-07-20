@@ -82,11 +82,18 @@
              "icon": "info",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
            "path": "information/default"  
        },  
+       "findit": {  
+           "participant": "output/Participant",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "de,en,",  
+             "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": false,  
+           "path": "information/findit"  
+       },  
        "forestfires": {  
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
-             "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  
+             "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  "fallback": "findit",  
            "path": "information/forestfires"  
        },  
        "quiz": {  

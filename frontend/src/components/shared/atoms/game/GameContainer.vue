@@ -35,7 +35,7 @@
       class="navigation-overlay overlay-right"
       v-if="
         backgroundMovement === BackgroundMovement.Pan &&
-        backgroundPositionOffsetMax[0] > backgroundPositionOffset[0]
+        backgroundPositionOffsetMin[0] < backgroundPositionOffset[0]
       "
     >
       <font-awesome-icon
@@ -51,7 +51,7 @@
       class="navigation-overlay overlay-left"
       v-if="
         backgroundMovement === BackgroundMovement.Pan &&
-        backgroundPositionOffsetMin[0] < backgroundPositionOffset[0]
+        backgroundPositionOffsetMax[0] > backgroundPositionOffset[0]
       "
     >
       <font-awesome-icon
@@ -67,7 +67,7 @@
       class="navigation-overlay overlay-up"
       v-if="
         backgroundMovement === BackgroundMovement.Pan &&
-        backgroundPositionOffsetMin[1] < backgroundPositionOffset[1]
+        backgroundPositionOffsetMax[1] > backgroundPositionOffset[1]
       "
     >
       <font-awesome-icon
@@ -83,7 +83,7 @@
       class="navigation-overlay overlay-down"
       v-if="
         backgroundMovement === BackgroundMovement.Pan &&
-        backgroundPositionOffsetMax[1] > backgroundPositionOffset[1]
+        backgroundPositionOffsetMin[1] < backgroundPositionOffset[1]
       "
     >
       <font-awesome-icon
@@ -463,12 +463,13 @@ export default class GameContainer extends Vue {
 
   readonly minClickTimeDelta = 10;
   isMouseDown = false;
-  gameContainerClicked(): void {
+  gameContainerClicked(event: any): void {
+    const point = { x: event.layerX, y: event.layerY }; //this.mouseConstraint.mouse.position;
     const clickedBodies = Matter.Query.point(
       this.gameObjects
         .filter((gameObj) => gameObj.body)
         .map((gameObj) => gameObj.body),
-      this.mouseConstraint.mouse.position
+      point
     );
     if (clickedBodies.length > 0) {
       const clickedGameObjects = clickedBodies.map((body) => {
