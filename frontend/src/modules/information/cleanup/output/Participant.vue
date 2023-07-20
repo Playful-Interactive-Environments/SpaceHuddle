@@ -6,7 +6,7 @@
       image-directory="/assets/games/cleanup/tutorial"
       :module-info-entry-data-list="tutorialList"
       @infoRead="gameState = GameState.Game"
-      :info-type="gameStep"
+      :info-type="`clean-up-${gameStep}`"
       :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
     />
     <select-challenge
@@ -75,7 +75,7 @@ import { delay } from '@/utils/wait';
 enum GameStep {
   Select = 'select',
   Drive = 'drive',
-  CleanUp = 'clean up',
+  CleanUp = 'clean-up',
   Result = 'result',
 }
 

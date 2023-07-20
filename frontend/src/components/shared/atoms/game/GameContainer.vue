@@ -20,7 +20,7 @@
     >
       <container>
         <sprite
-          v-if="backgroundSprite"
+          v-if="backgroundSprite && backgroundSprite.valid"
           :texture="backgroundSprite"
           :anchor="0.5"
           :width="backgroundTextureSize[0]"
@@ -192,9 +192,9 @@ export default class GameContainer extends Vue {
   backgroundPositionOffsetMax: [number, number] = [0, 0];
   backgroundTextureSize: [number, number] = [100, 100];
   calculateBackgroundSize(): void {
-    if (this.backgroundSprite) {
-      const textureWidth = this.backgroundSprite.baseTexture.width;
-      const textureHeight = this.backgroundSprite.baseTexture.height;
+    if (this.backgroundSprite && this.backgroundSprite.orig) {
+      const textureWidth = this.backgroundSprite.orig.width;
+      const textureHeight = this.backgroundSprite.orig.height;
       const scaleFactorWidth = textureWidth / this.gameWidth;
       const scaleFactorHeight = textureHeight / this.gameHeight;
       switch (this.backgroundPosition) {
@@ -251,15 +251,24 @@ export default class GameContainer extends Vue {
 
   @Watch('backgroundTexture', { immediate: true })
   onBackgroundTextureChanged(): void {
-    if (this.backgroundTexture) {
-      if (PIXI.Cache.has(this.backgroundTexture)) {
-        this.backgroundSprite = PIXI.Assets.get(this.backgroundTexture);
-        this.calculateBackgroundSize();
-      } else {
+    const loadTexture = (): void => {
+      if (this.backgroundTexture) {
         PIXI.Assets.load(this.backgroundTexture).then((sprite) => {
           this.backgroundSprite = sprite;
           this.calculateBackgroundSize();
         });
+      }
+    };
+
+    if (this.backgroundTexture) {
+      if (PIXI.Cache.has(this.backgroundTexture)) {
+        this.backgroundSprite = PIXI.Assets.get(this.backgroundTexture);
+        setTimeout(() => {
+          if (this.backgroundSprite?.valid) this.calculateBackgroundSize();
+          else loadTexture();
+        }, 100);
+      } else {
+        loadTexture();
       }
     }
   }
@@ -344,15 +353,6 @@ export default class GameContainer extends Vue {
           x: gameObject.body.velocity.x + calcForce(),
           y: gameObject.body.velocity.y + calcForce(),
         });
-
-        /*Matter.Body.applyForce(gameObject.body, gameObject.body.position, {
-          x:
-            (forceMagnitude + Matter.Common.random() * forceMagnitude) *
-            Matter.Common.choose([1, -1]),
-          y:
-            (forceMagnitude + Matter.Common.random() * forceMagnitude) *
-            Matter.Common.choose([1, -1]),
-        });*/
       }
     }
   }
@@ -408,7 +408,7 @@ export default class GameContainer extends Vue {
     clearInterval(this.intervalWind);
     clearInterval(this.intervalSync);
     clearInterval(this.intervalPan);
-    if (this.backgroundTexture) {
+    if (this.backgroundTexture && PIXI.Cache.has(this.backgroundTexture)) {
       PIXI.Assets.unload(this.backgroundTexture);
     }
   }

@@ -5,6 +5,7 @@
       translation-path="module.information.findit.participant.tutorial"
       image-directory="/assets/games/forestfires/tutorial"
       :module-info-entry-data-list="tutorialList"
+      :info-type="`find-it-${gameStep}`"
       @infoRead="gameState = GameState.Game"
       :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
     />

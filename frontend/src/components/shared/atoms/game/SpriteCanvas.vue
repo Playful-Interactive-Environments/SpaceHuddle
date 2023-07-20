@@ -5,9 +5,9 @@
     :height="height"
     :backgroundColor="backgroundColor"
   >
-    <container>
+    <container v-if="texture">
       <sprite
-        v-if="!isAnimation"
+        v-if="!isAnimation && !Array.isArray(texture)"
         :texture="texture"
         :width="objectWidth"
         :height="objectHeight"
