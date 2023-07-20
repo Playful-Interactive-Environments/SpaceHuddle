@@ -61,12 +61,18 @@ export default class GameObject extends Vue {
   rotationValue = 0;
   container!: PIXI.Container;
   gameContainer!: GameContainer;
+  offset: [number, number] = [0, 0];
   readonly defaultSize = 50;
   displayWidth = this.defaultSize;
   displayHeight = this.defaultSize;
-  displayX = 0;
-  displayY = 0;
-  offset: [number, number] = [0, 0];
+
+  get displayX(): number {
+    return this.position[0] - this.offset[0];
+  }
+
+  get displayY(): number {
+    return this.position[1] - this.offset[1];
+  }
 
   async mounted(): Promise<void> {
     const container = document.getElementById('gameContainer');
@@ -138,8 +144,6 @@ export default class GameObject extends Vue {
       this.$emit('sizeChanged', [container.width, container.height]);
       this.displayWidth = container.width;
       this.displayHeight = container.height;
-      this.displayX = container.x;
-      this.displayY = container.y;
       switch (this.type) {
         case 'rect':
           this.addRect(
@@ -246,6 +250,13 @@ export default class GameObject extends Vue {
     this.rotationValue = turf.degreesToRadians(this.rotation);
     if (this.body) {
       Matter.Body.setAngle(this.body, this.rotationValue);
+    }
+  }
+
+  @Watch('scale', { immediate: true })
+  onScaleChanged(): void {
+    if (this.body) {
+      Matter.Body.scale(this.body, this.scale, this.scale);
     }
   }
 

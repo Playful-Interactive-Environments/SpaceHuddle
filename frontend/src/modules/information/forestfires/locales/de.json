@@ -5,34 +5,30 @@
   },
   "participant": {
     "placeables": {
-      "cigarette": {
-        "name": "Zigarette",
-        "description": "Nicht ordentlich ausgedämpfte Zigaretten sind einer der größten Waldbrandverursacher. Häufig werden sie aus fahrenden Autos geworfen oder auf Wanderwegen zurückgelassen."
+      "hazards": {
+        "cigarette": {
+          "name": "Zigarette",
+          "description": "Nicht ordentlich ausgedämpfte Zigaretten sind einer der größten Waldbrandverursacher. Häufig werden sie aus fahrenden Autos geworfen oder auf Wanderwegen zurückgelassen."
+        },
+        "campfire": {
+          "name": "Lagerfeuer",
+          "description": "Lagerfeuer können vom Wind neu angefacht werden und so einen Waldbrand auslösen."
+        },
+        "bottle": {
+          "name": "Glasflasche",
+          "description": "Zurückgelassene Glasflaschen aller Art wirken unter den richtigen Umständen wie eine Linse und fokussieren das Licht. Am Brennpunkt kann leicht ein Feuer entstehen!"
+        }
       },
-      "bottle": {
-        "name": "Glasflasche",
-        "description": "Zurückgelassene Glasflaschen aller Art wirken unter den richtigen Umständen wie eine Linse und fokussieren das Licht. Am Brennpunkt kann leicht ein Feuer entstehen!"
+      "red_herring": {
+        "turtle": {
+          "name": "Schildkröte",
+          "description": "Schildkröten kommen in unserer Gegend nicht natürlich vor. Im Wald ausgesetzt, sind sie schutzlos."
+        },
+        "bug": {
+          "name": "Käfer",
+          "description": "Käfer sind Teil des natürlichen Ökosystems, bilden die Grundlage der Nahrungskette für andere Tiere und lockern den Boden. Ihr Überleben ist daher wichtig für das Überleben des Waldes und anderer Tiere."
+        }
       }
-    },
-    "place": "Platzieren",
-    "play": "Start",
-    "newLevel": "neues Level erstellen",
-    "everythingPlaced": "Alles platziert",
-    "maxCountPlaced": "Maximale Anzahl des Objekttyps platziert",
-    "tutorial": {
-      "click": "Klicke auf einen beliebigen Platz im Wald um eine Auswahl an Objekten zu bekommen.",
-      "place": "Wähle eines der Objekte aus um es an dem ausgewählten Ort zu platzieren.",
-      "remove": "Willst du ein Objekt wieder löschen? Wähle es aus und klicke auf das X um es zu entfernen.",
-      "play": "Wechsle auf den Spiel-Modus um dein erstelltes Level zu spielen.",
-      "info": "Dieser Wald ist nicht so harmlos wie er zu Beginn scheinen mag!",
-      "hazards": "An manchen Orten verstecken sich gefährliche Objekte, welche früher oder später einen Großflächenbrand verursachen können.",
-      "collect": "Sammle diese Objekte mit einem Klick ein und rette den Wald!"
-    },
-    "settings": {
-      "levelName": "Levelname"
-    },
-    "itemSelection": {
-      "selectItem": "Zu platzierendes Objekt auswählen"
     }
   }
 }

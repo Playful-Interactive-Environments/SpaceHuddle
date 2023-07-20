@@ -5,34 +5,30 @@
   },
   "participant": {
     "placeables": {
-      "cigarette": {
-        "name": "Cigarette",
-        "description": "Cigarettes which haven't been extinguished properly are one of the most severe fire hazards out there. They get thrown out of cars or get left behind by hikers on their way to the top."
+      "hazards": {
+        "cigarette": {
+          "name": "Cigarette",
+          "description": "Cigarettes which haven't been extinguished properly are one of the most severe fire hazards out there. They get thrown out of cars or get left behind by hikers on their way to the top."
+        },
+        "campfire": {
+          "name": "Campfire",
+          "description": "Campfires can be rekindled by the wind, causing a forest fire."
+        },
+        "bottle":{
+          "name": "Glass Bottle",
+          "description": "Glass bottles may act like strong lenses under the right circumstances. They focus incoming light to a single spot, potentially causing a fire."
+        }
       },
-      "bottle":{
-        "name": "Glass Bottle",
-        "description": "Glass bottles may act like strong lenses under the right circumstances. They focus incoming light to a single spot, potentially causing a fire."
+      "red_herring": {
+        "turtle": {
+          "name": "Turtles",
+          "description": "Turtles do not occur naturally in our area. Exposed in the forest, they are defenseless."
+        },
+        "bug": {
+          "name": "Bugs",
+          "description": "Beetles are part of the natural ecosystem, form the basis of the food chain for other animals and loosen the soil. Their survival is therefore important for the survival of the forest and other animals."
+        }
       }
-    },
-    "everythingPlaced": "everything placed",
-    "maxCountPlaced": "max objects of type placed",
-    "newLevel": "create new level",
-    "place": "Place",
-    "play": "Start",
-    "tutorial": {
-      "click": "Click on any spot in the woods to get a list of placeable objects.",
-      "place": "Choose one of those objects to place it in the forest.",
-      "remove": "Want to get rid of an object? Select it and click the X to remove it.",
-      "play": "Change to Play-Mode to play your created level.",
-      "info": "This forest is not as harmless as it might seem!",
-      "hazards": "Scattered throughout these woods are dangerous fire hazards.",
-      "collect": "Collect them by clicking on them and prevent a massive fire before it is too late!"
-    },
-    "settings": {
-      "levelName": "level name"
-    },
-    "itemSelection": {
-      "selectItem": "select placing item"
     }
   }
 }

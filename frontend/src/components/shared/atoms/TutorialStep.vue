@@ -78,6 +78,7 @@ export default class TutorialStep extends Vue {
   mounted(): void {
     tutorialService.registerGetList(this.updateTutorial);
 
+    this.eventBus.off(EventType.CHANGE_TUTORIAL);
     this.eventBus.on(EventType.CHANGE_TUTORIAL, async () => {
       this.reloadCount++;
     });

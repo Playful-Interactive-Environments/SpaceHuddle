@@ -157,16 +157,16 @@ export default class Participant extends Vue {
             key: 'rotate',
             texture: this.spritesheet.animations['rotate'],
           },
-          {
-            key: 'remove',
-            texture: 'delete.jpg',
-          },
         ];
       case GameStep.Play:
         return [
           { key: 'info', texture: 'info.jpg' },
           { key: 'hazards', texture: 'select.jpg' },
           { key: 'collect', texture: 'collect.jpg' },
+          {
+            key: 'magnifier',
+            texture: 'magnifier.jpg',
+          },
         ];
     }
     return [];

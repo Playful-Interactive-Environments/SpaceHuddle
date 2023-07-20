@@ -66,12 +66,36 @@
       </template>
     </GameContainer>
     <div class="overlay-bottom">{{ collectedCount }} / {{ totalCount }}</div>
+    <DrawerBottomOverlay
+      v-if="collectedPlaceableConfig"
+      v-model="showToolbox"
+      :title="
+        $t(
+          `${collectedPlaceableConfigSettings.explanationText}.${collectedPlaceable.type}.${collectedPlaceableConfig.explanationKey}.name`
+        )
+      "
+    >
+      <SpriteCanvas
+        :texture="getTexture(collectedPlaceable.type, collectedPlaceable.name)"
+        :aspect-ration="
+          getObjectAspect(collectedPlaceable.type, collectedPlaceable.name)
+        "
+        :width="gameWidth - 50"
+        :height="(gameHeight / 10) * 4"
+      />
+      <div>
+        {{
+          $t(
+            `${collectedPlaceableConfigSettings.explanationText}.${collectedPlaceable.type}.${collectedPlaceableConfig.explanationKey}.description`
+          )
+        }}
+      </div>
+    </DrawerBottomOverlay>
   </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Line } from 'vue-chartjs';
 import * as PIXI from 'pixi.js';
 import { Prop, Watch } from 'vue-property-decorator';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
@@ -85,6 +109,15 @@ import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import { v4 as uuidv4 } from 'uuid';
 import { until } from '@/utils/wait';
+import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
+import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
+import * as tutorialService from '@/services/tutorial-service';
+import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { Tutorial } from '@/types/api/Tutorial';
+import * as cashService from '@/services/cash-service';
+import { EventType } from '@/types/enum/EventType';
+
+const tutorialType = 'find-it-object';
 
 @Options({
   computed: {
@@ -102,7 +135,8 @@ import { until } from '@/utils/wait';
     GameObject,
     GameContainer,
     CustomSprite,
-    Line,
+    DrawerBottomOverlay,
+    SpriteCanvas,
   },
   emits: ['playFinished'],
 })
@@ -115,6 +149,9 @@ export default class PlayState extends Vue {
   renderer!: PIXI.Renderer;
   gameWidth = 0;
   gameHeight = 0;
+  showToolbox = false;
+  tutorialSteps: Tutorial[] = [];
+  collectedPlaceable: Placeable | null = null;
 
   placedObjects: Placeable[] = [];
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
@@ -131,9 +168,27 @@ export default class PlayState extends Vue {
         );
       }
     }
+    tutorialService.registerGetList(
+      this.updateTutorial,
+      EndpointAuthorisationType.PARTICIPANT
+    );
+
+    this.eventBus.off(EventType.CHANGE_TUTORIAL);
+    this.eventBus.on(EventType.CHANGE_TUTORIAL, async (steps) => {
+      this.updateTutorial(steps as Tutorial[]);
+    });
+  }
+
+  updateTutorial(steps: Tutorial[]): void {
+    this.tutorialSteps = steps.filter((step) => step.type === tutorialType);
+  }
+
+  deregisterAll(): void {
+    cashService.deregisterAllGet(this.updateTutorial);
   }
 
   unmounted(): void {
+    this.deregisterAll();
     for (const typeName in this.gameConfig) {
       const settings = this.gameConfig[typeName].settings;
       if (settings) PIXI.Assets.unload(settings.spritesheet);
@@ -248,13 +303,44 @@ export default class PlayState extends Vue {
     }
   }
 
+  get collectedPlaceableConfigSettings(): any {
+    if (this.collectedPlaceable) {
+      return this.gameConfig[this.collectedPlaceable.type].settings;
+    }
+    return null;
+  }
+
+  get collectedPlaceableConfig(): any {
+    if (this.collectedPlaceable) {
+      return this.gameConfig[this.collectedPlaceable.type][
+        this.collectedPlaceable.name
+      ];
+    }
+    return null;
+  }
+
   destroyPlaceable(placeable: Placeable): void {
     const config = this.gameConfig[placeable.type].settings;
     if (config.collectable) {
+      if (config.explanationText) this.collectedPlaceable = placeable;
       const id = placeable.id;
       const index = this.placedObjects.findIndex((p) => p.id === id);
       if (index > -1) this.placedObjects.splice(index, 1);
       this.collectedCount++;
+      const tutorialStepName = `${placeable.type}-${placeable.name}`;
+      if (!this.tutorialSteps.find((item) => item.step === tutorialStepName)) {
+        this.showToolbox = true;
+        const tutorialItem: Tutorial = {
+          step: tutorialStepName,
+          type: tutorialType,
+          order: 0,
+        };
+        tutorialService.addTutorialStep(
+          tutorialItem,
+          EndpointAuthorisationType.PARTICIPANT,
+          this.eventBus
+        );
+      }
     }
   }
 

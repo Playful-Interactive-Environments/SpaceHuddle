@@ -9,16 +9,6 @@
     "showTutorialOnlyOnce": "show tutorial only once"
   },
   "participant": {
-    "placeables": {
-      "cigarette": {
-        "name": "Cigarette",
-        "description": "Cigarettes which haven't been extinguished properly are one of the most severe fire hazards out there. They get thrown out of cars or get left behind by hikers on their way to the top."
-      },
-      "bottle":{
-        "name": "Glass Bottle",
-        "description": "Glass bottles may act like strong lenses under the right circumstances. They focus incoming light to a single spot, potentially causing a fire."
-      }
-    },
     "everythingPlaced": "everything placed",
     "maxCountPlaced": "max objects of type placed",
     "newLevel": "create new level",
@@ -28,11 +18,11 @@
       "click": "Click on any spot in the scene to get a list of placeable objects.",
       "place": "Choose one of those objects to place it.",
       "move": "Move the object by drag and drop",
-      "rotate": "Rotate and scale the object by using thr round slide",
-      "remove": "Want to get rid of an object? Select it and click the X to remove it.",
+      "rotate": "Rotate, scale and delete the selected object by using the toolbar button",
       "info": "This scene is not as harmless as it might seem!",
       "hazards": "Scattered throughout these scene are dangerous hazards.",
-      "collect": "Collect them by clicking on them and prevent a massive disaster before it is too late!"
+      "collect": "Collect them by clicking on them and prevent a massive disaster before it is too late!",
+      "magnifier": "Use the magnifying glass to look behind the objects."
     },
     "settings": {
       "levelName": "level name"

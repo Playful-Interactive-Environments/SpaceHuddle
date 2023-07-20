@@ -57,56 +57,55 @@
         </container>
       </template>
     </GameContainer>
-    <div class="overlay-top">
+    <!--<div class="overlay-top">
       <div @click="showToolbox = true">
         <font-awesome-icon icon="screwdriver-wrench" />
       </div>
       <div v-if="placedObjects.length > 5" @click="showLevelSettings = true">
         <font-awesome-icon icon="save" />
       </div>
-    </div>
+    </div>-->
     <div
       v-if="selectedObject"
       class="overlay-selected-item"
       :style="{
-        '--x': `${selectedObject.position[0]}px`,
-        '--y': `${selectedObject.position[1]}px`,
+        '--x': `${selectedObject.displayX}px`,
+        '--y': `${selectedObject.displayY}px`,
+        '--width': `${selectedObject.displayWidth}px`,
+        '--height': `${selectedObject.displayHeight}px`,
       }"
     >
-      <round-slider
-        v-model="selectedObject.source.rotation"
-        max="360"
-        start-angle="90"
-        end-angle="+360"
-        line-cap="round"
-        radius="70"
-        width="10"
-        handleShape="dot"
-        :show-tooltip="false"
-      />
-      <round-slider
-        class="sliderInside"
-        v-model="selectedObject.source.scale"
-        min="0.3"
-        max="1.7"
-        step="0.01"
-        start-angle="90"
-        end-angle="+360"
-        line-cap="round"
-        radius="40"
-        width="10"
-        handleShape="dot"
-        :show-tooltip="false"
-      />
-      <div class="deleteObject" @click="deleteSelectedObject">
+      <div @click="showOptions = !showOptions">...</div>
+      <div v-if="showOptions" @click="scaleSelectedObject(-0.2)">
+        <font-awesome-icon icon="square-minus" />
+      </div>
+      <div v-if="showOptions" @click="scaleSelectedObject(0.2)">
+        <font-awesome-icon icon="square-plus" />
+      </div>
+      <div v-if="showOptions" @click="rotateSelectedObject(-10)">
+        <font-awesome-icon icon="rotate-left" />
+      </div>
+      <div v-if="showOptions" @click="rotateSelectedObject(10)">
+        <font-awesome-icon icon="rotate-right" />
+      </div>
+      <!--<div v-if="showOptions" @click="showToolbox = true">
+        <font-awesome-icon icon="screwdriver-wrench" />
+      </div>-->
+      <div v-if="showOptions" @click="deleteSelectedObject">
         <font-awesome-icon icon="trash" />
+      </div>
+      <div
+        v-if="showOptions && placedObjects.length > 5"
+        @click="showLevelSettings = true"
+      >
+        <font-awesome-icon icon="save" />
       </div>
     </div>
   </div>
   <DrawerBottomOverlay
     v-model="showToolbox"
     :title="
-      $t('module.information.forestfires.participant.itemSelection.selectItem')
+      $t('module.information.findit.participant.itemSelection.selectItem')
     "
   >
     <el-space wrap>
@@ -141,7 +140,6 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import { Line } from 'vue-chartjs';
 import * as PIXI from 'pixi.js';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer, {
@@ -157,7 +155,6 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ElMessage } from 'element-plus';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
-import RoundSlider from 'vue-three-round-slider/src';
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
 
@@ -183,8 +180,6 @@ export interface BuildState {
     LevelSettings,
     GameObject,
     GameContainer,
-    Line,
-    RoundSlider,
     DrawerBottomOverlay,
   },
   emits: ['editFinished'],
@@ -199,6 +194,7 @@ export default class ForestFireEdit extends Vue {
   showToolbox = false;
   gameWidth = 0;
   gameHeight = 0;
+  showOptions = false;
 
   placedObjects: Placeable[] = [];
   placementState: { [key: string]: BuildState } = {};
@@ -340,7 +336,16 @@ export default class ForestFireEdit extends Vue {
     this.$emit('editFinished');
   }
 
+  clickPosition: [number, number] = [0, 0];
   placeObject(event: any): void {
+    this.clickPosition = [
+      event.relativeMousePositionToBackground.x,
+      event.relativeMousePositionToBackground.y,
+    ];
+    this.showToolbox = true;
+  }
+
+  createObject(position: [number, number]): void {
     setTimeout(() => {
       if (this.activeObjectType) {
         const configParameter =
@@ -368,10 +373,7 @@ export default class ForestFireEdit extends Vue {
           texture: this.getTexture(this.activeObjectName),
           width: configParameter.width,
           shape: configParameter.shape,
-          position: [
-            event.relativeMousePositionToBackground.x,
-            event.relativeMousePositionToBackground.y,
-          ],
+          position: position,
           rotation: 0,
           scale: 1,
         };
@@ -396,6 +398,23 @@ export default class ForestFireEdit extends Vue {
     }
   }
 
+  rotateSelectedObject(angle: number): void {
+    if (this.selectedObject) {
+      let newValue = this.selectedObject.source.rotation + angle;
+      if (newValue < 0) newValue += 360;
+      if (newValue > 360) newValue -= 360;
+      this.selectedObject.source.rotation = newValue;
+    }
+  }
+
+  scaleSelectedObject(value: number): void {
+    if (this.selectedObject) {
+      const newValue = this.selectedObject.source.scale + value;
+      if (newValue > 0.5 && newValue <= 3)
+        this.selectedObject.source.scale = newValue;
+    }
+  }
+
   objectTypeClicked(objectType: string): void {
     this.activeObjectType = objectType;
   }
@@ -403,6 +422,7 @@ export default class ForestFireEdit extends Vue {
   objectNameClicked(objectName: string): void {
     this.showToolbox = false;
     this.activeObjectName = objectName;
+    this.createObject(this.clickPosition);
   }
 
   get renderList(): Placeable[] {
@@ -441,11 +461,14 @@ export default class ForestFireEdit extends Vue {
 .overlay-selected-item {
   z-index: 100;
   position: absolute;
-  //top: var(--x);
-  //left: var(--y);
+  //top: calc(var(--y) - var(--height) / 2);
+  //left: calc(var(--x) + var(--width));
   top: 1rem;
   left: 1rem;
   text-align: center;
+  background-color: var(--color-primary);
+  border-radius: 5px;
+  color: white;
 
   .sliderInside {
     position: absolute;
@@ -461,6 +484,10 @@ export default class ForestFireEdit extends Vue {
     position: absolute;
     top: calc(70px - 0.5rem);
     left: calc(70px - 0.5rem);
+  }
+
+  div {
+    padding: 0.5rem;
   }
 }
 

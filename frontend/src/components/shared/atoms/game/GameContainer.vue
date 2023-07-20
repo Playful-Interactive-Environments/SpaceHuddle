@@ -43,6 +43,8 @@
         @mousedown="beginPan([-1, 0])"
         @mouseup="endPan"
         @mouseout="endPan"
+        @touchstart="beginPan([-1, 0])"
+        @touchend="endPan"
       />
     </div>
     <div
@@ -57,6 +59,8 @@
         @mousedown="beginPan([1, 0])"
         @mouseup="endPan"
         @mouseout="endPan"
+        @touchstart="beginPan([1, 0])"
+        @touchend="endPan"
       />
     </div>
     <div
@@ -71,6 +75,8 @@
         @mousedown="beginPan([0, 1])"
         @mouseup="endPan"
         @mouseout="endPan"
+        @touchstart="beginPan([0, 1])"
+        @touchend="endPan"
       />
     </div>
     <div
@@ -85,6 +91,8 @@
         @mousedown="beginPan([0, -1])"
         @mouseup="endPan"
         @mouseout="endPan"
+        @touchstart="beginPan([0, -1])"
+        @touchend="endPan"
       />
     </div>
   </div>
@@ -457,7 +465,9 @@ export default class GameContainer extends Vue {
   isMouseDown = false;
   gameContainerClicked(): void {
     const clickedBodies = Matter.Query.point(
-      this.gameObjects.map((gameObj) => gameObj.body),
+      this.gameObjects
+        .filter((gameObj) => gameObj.body)
+        .map((gameObj) => gameObj.body),
       this.mouseConstraint.mouse.position
     );
     if (clickedBodies.length > 0) {

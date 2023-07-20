@@ -9,37 +9,43 @@
       "icon": "fire",
       "order": 10,
       "collectable": true,
-      "spritesheet": "/assets/games/forestfires/hazard.json"
+      "spritesheet": "/assets/games/forestfires/hazard.json",
+      "explanationText": "module.information.forestfires.participant.placeables"
     },
     "cigarette": {
       "severity": 3,
       "maxCount": 10,
       "width": 1,
-      "shape": "rect"
+      "shape": "rect",
+      "explanationKey": "cigarette"
     },
     "campfire": {
       "severity": 1,
       "maxCount": 1,
       "width": 7,
-      "shape": "circle"
+      "shape": "circle",
+      "explanationKey": "campfire"
     },
     "bottleWhite": {
       "severity": 2,
       "maxCount": 5,
       "width": 1,
-      "shape": "rect"
+      "shape": "rect",
+      "explanationKey": "bottle"
     },
     "bottleWine": {
       "severity": 1,
       "maxCount": 5,
       "width": 1,
-      "shape": "rect"
+      "shape": "rect",
+      "explanationKey": "bottle"
     },
     "bottleBeer": {
       "severity": 1,
       "maxCount": 5,
       "width": 1,
-      "shape": "rect"
+      "shape": "rect",
+      "explanationKey": "bottle"
     }
   },
   "red_herring": {
@@ -47,37 +53,43 @@
       "icon": "masks-theater",
       "order": 1,
       "collectable": false,
-      "spritesheet": "/assets/games/forestfires/red_herring.json"
+      "spritesheet": "/assets/games/forestfires/red_herring.json",
+      "explanationText": "module.information.forestfires.participant.placeables"
     },
     "turtle": {
       "severity": 1,
       "maxCount": 5,
       "width": 3,
-      "shape": "rect"
+      "shape": "rect",
+      "explanationKey": "turtle"
     },
     "ladybug": {
       "severity": 1,
       "maxCount": 5,
       "width": 0.5,
-      "shape": "rect"
+      "shape": "rect",
+      "explanationKey": "bug"
     },
     "bug": {
       "severity": 1,
       "maxCount": 5,
       "width": 0.5,
-      "shape": "rect"
+      "shape": "rect",
+      "explanationKey": "bug"
     },
     "dragonfly": {
       "severity": 1,
       "maxCount": 5,
       "width": 0.5,
-      "shape": "rect"
+      "shape": "rect",
+      "explanationKey": "bug"
     },
     "earthworm": {
       "severity": 1,
       "maxCount": 5,
       "width": 1,
-      "shape": "rect"
+      "shape": "rect",
+      "explanationKey": "bug"
     }
   },
   "obstacles": {
