@@ -72,7 +72,7 @@ export default class ResetPassword extends Vue {
 
 <style lang="scss" scoped>
 .confirm {
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
 
   h1 {
     margin-top: 0;

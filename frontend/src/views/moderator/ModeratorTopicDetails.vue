@@ -779,7 +779,7 @@ export default class ModeratorTopicDetails extends Vue {
 .el-collapse::v-deep(.el-collapse-item) {
   border-radius: var(--border-radius-xs);
   margin-top: 0.5rem;
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
 }
 
 .el-collapse::v-deep(.el-collapse-item__header) {

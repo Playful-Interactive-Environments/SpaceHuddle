@@ -141,7 +141,7 @@ export default class SessionFilter extends Vue {
 }
 
 .link {
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
   z-index: 10;
   padding: 0 0.5rem;
 }

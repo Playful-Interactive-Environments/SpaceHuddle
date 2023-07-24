@@ -19,8 +19,7 @@
     </section>
     <section class="home__img">
       <img
-        src="@/assets/illustrations/telescope_round.png"
-        alt="telescope-illustration"
+        alt="Illustration"
       />
     </section>
   </div>
@@ -91,6 +90,10 @@ export default class Home extends Vue {}
     @include md {
       max-width: calc(var(--app-width) / 2);
     }
+  }
+
+  &__img > img {
+    content: var(--home-image);
   }
 
   @include md {

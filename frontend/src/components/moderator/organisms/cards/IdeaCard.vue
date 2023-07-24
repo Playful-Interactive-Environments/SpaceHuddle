@@ -398,7 +398,7 @@ export default class IdeaCard extends Vue {
 }
 
 .state {
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
   border-radius: 50%;
   aspect-ratio: 1;
   height: 1.5rem;

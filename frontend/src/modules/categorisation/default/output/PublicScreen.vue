@@ -283,11 +283,11 @@ export default class PublicScreen extends Vue {
 }
 
 .sticky-header {
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
 }
 
 .sticky-header::v-deep(.column) {
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
   .el-card,
   .item {
     height: 100%;

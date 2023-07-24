@@ -54,7 +54,7 @@ export default class DrawerBottomOverlay extends Vue {
   bottom: 0;
   z-index: 100;
   border-radius: var(--corner-radius) var(--corner-radius) 0 0;
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
 }
 
 .scroll {

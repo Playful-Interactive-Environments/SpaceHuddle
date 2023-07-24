@@ -12,7 +12,7 @@ $color-evaluating: #fe6e5d;
 $color-evaluating-light: #ff8273;
 $color-dark-contrast: #263527;
 $color-dark-contrast-light: #737d97;
-$color-background-gray: #f4f4f4;
+$color-background: #f4f4f4;
 $color-background-blue: #f0f6f6;
 $color-gray: #e4e4e4;
 $color-gray-dark: #666666;
@@ -35,6 +35,7 @@ $sidebar-width: calc(var(--app-width) / 4);
 $sidebar-min-width: 300px;
 $header-height: 90px;
 $participant-background-image: url('~@/assets/illustrations/background.png');
+$home-image: url('~@/assets/illustrations/telescope_round.png');
 
 :root {
   --color-purple-dark: #{$color-purple-dark};
@@ -51,7 +52,7 @@ $participant-background-image: url('~@/assets/illustrations/background.png');
   --color-evaluating-light: #{$color-evaluating-light};
   --color-dark-contrast: #{$color-dark-contrast};
   --color-dark-contrast-light: #{$color-dark-contrast-light};
-  --color-background-gray: #{$color-background-gray};
+  --color-background: #{$color-background};
   --color-background-blue: #{$color-background-blue};
   --color-gray: #{$color-gray};
   --color-gray-dark: #{$color-gray-dark};
@@ -78,6 +79,7 @@ $participant-background-image: url('~@/assets/illustrations/background.png');
   --header-height: #{$header-height};
   --corner-radius: 1.5rem;
   --participant-background-image: #{$participant-background-image};
+  --home-image: #{$home-image};
 }
 
 @import '../themes/default.scss';

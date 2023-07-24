@@ -2,25 +2,25 @@
   $color-purple: #d355b5;
   $color-purple-light: #e086cb;
   $color-purple-dark: #871a70;
-  $color-structuring: #dcc8c4;
-  $color-structuring-light: #e8e0df;
-  $color-structuring-dark: #867e7d;
+  $color-structuring: #e7a320;
+  $color-structuring-light: #e2d08c;
+  $color-structuring-dark: #000000;
   $color-brainstorming: #7bc168;
   $color-brainstorming-light: #add3a4;
   $color-brainstorming-dark: #507148;
   $color-informing: #63c3cb;
   $color-informing-light: #a0d4d9;
   $color-informing-dark: #467276;
-  $color-evaluating: #533b32;
-  $color-evaluating-light: #72625c;
-  $color-evaluating-dark: #3d2e29;
+  $color-evaluating: #ee3d63;
+  $color-evaluating-light: #e79ca9;
+  $color-evaluating-dark: #ae6278;
   $color-dark-contrast: #1a313c;
   $color-darkblue-light: #74909d;
   $color-darkblue-dark: #152026;
   $color-dark-contrast: #263527;
   $color-dark-contrast-light: #757d76;
   $color-dark-contrast-dark: #19201a;
-  $color-background-gray: #f4f4f4;
+  $color-background: #ede7e3;
   $color-background-blue: #f0f6f6;
   $color-gray: #e4e4e4;
   $color-gray-dark: #666666;
@@ -42,8 +42,8 @@
   $sidebar-width: calc(var(--app-width) / 4);
   $sidebar-min-width: 300px;
   $header-height: 90px;
-  $participant-background-image: url('~@/assets/illustrations/backgroundEcopolis.png');
-
+  $participant-background-image: url('~@/assets/illustrations/Ecopolis/backgroundEcopolis.png');
+  $home-image: url('~@/assets/illustrations/Ecopolis/Ecopolis_Color.png');
 
   --color-purple: #{$color-purple};
   --color-purple-dark: #{$color-purple-dark};
@@ -66,7 +66,7 @@
   --color-dark-contrast: #{$color-dark-contrast};
   --color-dark-contrast-light: #{$color-dark-contrast-light};
   --color-dark-contrast-dark: #{$color-dark-contrast-dark};
-  --color-background-gray: #{$color-background-gray};
+  --color-background: #{$color-background};
   --color-background-blue: #{$color-background-blue};
   --color-gray: #{$color-gray};
   --color-gray-dark: #{$color-gray-dark};
@@ -93,4 +93,5 @@
   --header-height: #{$header-height};
   --corner-radius: 1.5rem;
   --participant-background-image: #{$participant-background-image};
+  --home-image: #{$home-image};
 }

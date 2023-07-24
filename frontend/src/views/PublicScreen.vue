@@ -348,7 +348,7 @@ h3 {
 }
 
 .public-screen {
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
   background-size: contain;
   min-height: var(--app-height);
   --corner-radius: 5rem;
@@ -357,7 +357,7 @@ h3 {
   &__header {
     position: sticky;
     top: 0;
-    background-color: var(--color-background-gray);
+    background-color: var(--color-background);
     padding: 1rem var(--side-padding);
     z-index: 1000;
 
@@ -514,7 +514,7 @@ h3 {
 }
 
 .no-public-screen {
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
   min-height: var(--app-height);
   --side-padding: 5rem;
 

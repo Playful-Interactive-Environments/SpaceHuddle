@@ -390,7 +390,7 @@ export default class ModeratorSessionDetails extends Vue {
 
 <style lang="scss" scoped>
 .detail {
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
   min-height: var(--app-height);
 
   &__content {

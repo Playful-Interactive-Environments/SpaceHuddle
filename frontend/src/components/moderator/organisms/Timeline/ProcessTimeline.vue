@@ -1015,7 +1015,7 @@ export default class ProcessTimeline extends Vue {
 
 .process-timeline-container {
   --color-foreground: var(--color-primary);
-  --color-background: var(--color-background-gray);
+  --color-background: var(--color-background);
   overflow-x: auto;
   overflow-y: visible;
   scrollbar-color: var(--color-foreground) var(--color-gray);

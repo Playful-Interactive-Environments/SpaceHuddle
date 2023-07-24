@@ -102,7 +102,7 @@ export default class ModeratorNavigationLayout extends Vue {
 
 <style lang="scss" scoped>
 .main-layout {
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
   min-height: var(--app-height);
 
   &__content {

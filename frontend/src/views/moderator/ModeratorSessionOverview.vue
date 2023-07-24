@@ -166,7 +166,7 @@ export default class ModeratorSessionOverview extends Vue {
 }
 
 .session-overview {
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
 
   &__session-container {
     width: 100%;

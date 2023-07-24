@@ -122,7 +122,7 @@ $--font-size: (
 
 .el-dialog {
         margin: var(--el-dialog-margin-top, 15vh) auto 0;
-        background-color: var(--color-background-gray);
+        background-color: var(--color-background);
         --el-dialog-padding-primary: #{$dialog-padding};
         max-width: 60rem;
         min-width: fit-content;
@@ -389,7 +389,7 @@ $--font-size: (
 }
 
 .el-input {
-        --el-input-background-color: #{$color-background-gray};
+        --el-input-background-color: #{$color-background};
         --el-input-icon-color: var(--color-primary);
         line-height: 40px;
 
@@ -543,7 +543,7 @@ $--font-size: (
 }
 
 .el-drawer {
-        --el-drawer-background-color: var(--color-background-gray);
+        --el-drawer-background-color: var(--color-background);
         overflow: auto;
         background-color: var(--el-drawer-background-color);
 

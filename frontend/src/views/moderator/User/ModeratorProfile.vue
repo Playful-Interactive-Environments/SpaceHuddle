@@ -80,7 +80,7 @@ export default class ModeratorProfile extends Vue {
 
 <style lang="scss" scoped>
 .profile {
-  background-color: var(--color-background-gray);
+  background-color: var(--color-background);
 
   h1 {
     margin-top: 0;
