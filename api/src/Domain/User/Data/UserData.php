@@ -40,6 +40,6 @@ final class UserData
         $reader = new ArrayReader($data);
         $this->id = $reader->findString("id");
         $this->username = $reader->findString("username");
-        $this->parameter = (object)json_decode($reader->findString("parameter"));
+        $this->parameter = (object)json_decode((string)$reader->findString("parameter"));
     }
 }

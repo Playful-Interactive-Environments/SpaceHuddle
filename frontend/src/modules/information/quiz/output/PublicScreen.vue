@@ -194,8 +194,8 @@ export default class PublicScreen extends Vue {
 <style lang="scss" scoped>
 .answer {
   --el-button-text-color: var(--el-color-white);
-  --el-button-bg-color: var(--color-darkblue);
-  --el-button-border-color: var(--color-darkblue-light);
+  --el-button-bg-color: var(--color-dark-contrast);
+  --el-button-border-color: var(--color-dark-contrast-light);
 
   border: 3px solid var(--color-primary);
   border-radius: var(--border-radius);
@@ -220,15 +220,15 @@ export default class PublicScreen extends Vue {
 .plain {
   --el-button-text-color: var(--el-color-primary);
   --el-button-bg-color: var(--el-color-primary-light-9);
-  --el-button-border-color: var(--color-darkblue-light);
+  --el-button-border-color: var(--color-dark-contrast-light);
 }
 
 .correct {
-  --el-button-border-color: var(--color-mint);
+  --el-button-border-color: var(--color-brainstorming);
 }
 
 .wrong {
-  --el-button-border-color: var(--color-red);
+  --el-button-border-color: var(--color-evaluating);
 }
 
 .question-image {
@@ -259,7 +259,7 @@ export default class PublicScreen extends Vue {
   width: 10vw;
   min-height: 5rem;
   font-size: 1.5rem;
-  background-color: var(--color-darkblue);
+  background-color: var(--color-dark-contrast);
   color: white;
   display: flex;
   justify-content: center;
@@ -269,6 +269,6 @@ export default class PublicScreen extends Vue {
 }
 
 .numbers div.numbers-correct {
-  background-color: var(--color-mint);
+  background-color: var(--color-brainstorming);
 }
 </style>

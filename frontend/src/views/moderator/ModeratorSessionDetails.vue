@@ -405,11 +405,11 @@ export default class ModeratorSessionDetails extends Vue {
 }
 
 .expired {
-  color: var(--color-red);
+  color: var(--color-evaluating);
 }
 
 .awesome-icon {
-  color: var(--color-darkblue-light);
+  color: var(--color-dark-contrast-light);
   margin-left: 0.5em;
 
   &:hover {

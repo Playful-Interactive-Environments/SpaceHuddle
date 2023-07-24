@@ -1145,7 +1145,7 @@ div#loadingScreen {
   margin-left: auto;
   margin-right: auto;
 
-  background-color: var(--color-darkblue);
+  background-color: var(--color-dark-contrast);
 
   display: flex;
   justify-items: center;
@@ -1229,12 +1229,12 @@ div#loadingScreen > span#loading::v-deep(.path) {
   margin-right: auto;
 
   border-radius: 20px;
-  border: 10px solid var(--color-darkblue-light);
+  border: 10px solid var(--color-dark-contrast-light);
 }
 
 .el-space::v-deep(.outline-thick):hover {
-  background-color: var(--color-darkblue);
-  border-color: var(--color-darkblue-light);
+  background-color: var(--color-dark-contrast);
+  border-color: var(--color-dark-contrast-light);
   color: white;
 }
 
@@ -1262,11 +1262,11 @@ div#loadingScreen > span#loading::v-deep(.path) {
 }
 
 .el-space::v-deep(.fa-circle-check) > path {
-  fill: var(--color-yellow);
+  fill: var(--color-informing);
 }
 
 .el-space::v-deep(.fa-circle) > path {
-  fill: var(--color-darkblue-light);
+  fill: var(--color-dark-contrast-light);
 }
 
 #submitScreen {
@@ -1338,7 +1338,7 @@ label {
 }
 
 .ghost {
-  background-color: var(--color-darkblue);
+  background-color: var(--color-dark-contrast);
   color: white;
 }
 </style>

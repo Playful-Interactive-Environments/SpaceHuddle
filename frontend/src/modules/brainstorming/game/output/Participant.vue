@@ -532,7 +532,7 @@ export default class Participant extends Vue {
 
 <style lang="scss">
 .star-background {
-  background: var(--color-darkblue);
+  background: var(--color-dark-contrast);
   background-image: url('~@/assets/illustrations/background.png');
   background-attachment: fixed;
   background-repeat: no-repeat;

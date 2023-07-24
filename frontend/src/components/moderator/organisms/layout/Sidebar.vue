@@ -96,7 +96,7 @@ export default class Sidebar extends Vue {
 
 <style lang="scss" scoped>
 .sidebar {
-  background-color: var(--color-darkblue);
+  background-color: var(--color-dark-contrast);
   position: fixed;
   z-index: 100;
   left: 0;
@@ -118,7 +118,7 @@ export default class Sidebar extends Vue {
     width: var(--sidebar-width);
     min-width: var(--sidebar-min-width);
     padding: 0.5rem 1.5rem 1rem;
-    background-color: var(--color-darkblue);
+    background-color: var(--color-dark-contrast);
   }
 
   &__page-header {
@@ -130,7 +130,7 @@ export default class Sidebar extends Vue {
   }
 
   &__bottom {
-    background-color: var(--color-darkblue);
+    background-color: var(--color-dark-contrast);
   }
 
   &__logo {
@@ -140,7 +140,7 @@ export default class Sidebar extends Vue {
   &__management {
     display: flex;
     justify-content: space-between;
-    color: var(--color-darkblue-light);
+    color: var(--color-dark-contrast-light);
     margin-bottom: 0.5rem;
     text-transform: uppercase;
   }
@@ -186,7 +186,7 @@ export default class Sidebar extends Vue {
 }
 
 .el-page-header {
-  --el-border-color-base: var(--color-darkblue-light);
+  --el-border-color-base: var(--color-dark-contrast-light);
   line-height: unset;
   display: inline-block;
 }
@@ -205,7 +205,7 @@ export default class Sidebar extends Vue {
 }
 
 .el-divider--horizontal {
-  --el-border-color-base: var(--color-darkblue-light);
+  --el-border-color-base: var(--color-dark-contrast-light);
   border-radius: 1rem;
   margin: 0.3rem 0;
   border-top: 3px var(--el-border-color-base) var(--el-border-style);

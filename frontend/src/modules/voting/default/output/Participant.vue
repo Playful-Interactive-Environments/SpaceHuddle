@@ -386,7 +386,7 @@ div#loadingScreen {
   margin-left: auto;
   margin-right: auto;
 
-  background-color: var(--color-darkblue);
+  background-color: var(--color-dark-contrast);
 
   display: flex;
   justify-items: center;
@@ -507,8 +507,8 @@ div#loadingScreen > span#loading::v-deep(.path) {
 
 .IdeaCard {
   width: 100%;
-  background-color: var(--color-darkblue);
-  border: 3px solid var(--color-darkblue-light);
+  background-color: var(--color-dark-contrast);
+  border: 3px solid var(--color-dark-contrast-light);
   padding: 3%;
 }
 
@@ -559,6 +559,6 @@ div#loadingScreen > span#loading::v-deep(.path) {
 }
 
 .el-rate.ratingStars::v-deep(path) {
-  color: var(--color-red);
+  color: var(--color-evaluating);
 }
 </style>

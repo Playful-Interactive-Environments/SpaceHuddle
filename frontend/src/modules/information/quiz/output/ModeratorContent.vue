@@ -1121,7 +1121,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 }
 
 .orderDraggable {
-  background-color: var(--color-darkblue-light);
+  background-color: var(--color-dark-contrast-light);
   border-right: 2rem solid var(--color-primary);
   padding: 0.5rem 1rem;
   cursor: move;
@@ -1142,7 +1142,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 }
 
 .ghost {
-  background-color: var(--color-darkblue);
+  background-color: var(--color-dark-contrast);
   color: white;
 }
 </style>

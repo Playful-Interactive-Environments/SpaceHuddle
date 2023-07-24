@@ -400,8 +400,8 @@ export default class Participant extends Vue {
   }
 
   span.media-right {
-    background-color: var(--color-mint-light);
-    border: 3px solid var(--color-mint-light);
+    background-color: var(--color-brainstorming-light);
+    border: 3px solid var(--color-brainstorming-light);
     border-radius: 1rem 1rem 0 1rem;
     padding: 0.5rem;
 
@@ -419,7 +419,7 @@ export default class Participant extends Vue {
 
   img.media-right {
     //background-color: var(--color-mint-light);
-    border: 3px solid var(--color-mint-light);
+    border: 3px solid var(--color-brainstorming-light);
     border-radius: 1rem 1rem 0 1rem;
   }
 
@@ -432,13 +432,13 @@ export default class Participant extends Vue {
   }
 
   &-left {
-    background-color: var(--color-yellow-light);
+    background-color: var(--color-informing-light);
     //border: 3px solid var(--color-yellow-light);
     border-radius: 1rem 1rem 1rem 0;
     padding: 1rem;
 
     &-error {
-      background-color: var(--color-red-light);
+      background-color: var(--color-evaluating-light);
     }
   }
 }

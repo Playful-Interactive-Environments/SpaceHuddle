@@ -1423,7 +1423,7 @@ export default class DriveToLocation extends Vue {
 }
 
 .divingVehicle {
-  border: var(--color-red) solid 2px;
+  border: var(--color-evaluating) solid 2px;
 }
 
 .rs-control {

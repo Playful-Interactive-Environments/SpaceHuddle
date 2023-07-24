@@ -157,7 +157,7 @@ export default class ModeratorLogin extends Vue {
 
   &__bg-section {
     color: #fff;
-    background-color: var(--color-darkblue);
+    background-color: var(--color-dark-contrast);
     background-image: url('~@/assets/illustrations/bg_without_telescope.png');
     background-position: center;
     background-size: cover;

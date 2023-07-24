@@ -132,7 +132,7 @@ export default class ModuleCount extends Vue {
   }
 
   &__count {
-    background-color: var(--color-mint);
+    background-color: var(--color-brainstorming);
     color: white;
     padding: 0.1rem 0.7rem;
     letter-spacing: 0;

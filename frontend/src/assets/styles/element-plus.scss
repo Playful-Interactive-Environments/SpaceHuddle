@@ -74,8 +74,8 @@ $--font-size: (
 @import "~element-plus/theme-chalk/src/index";
 
 :root {
-        --color-primary: #{$color-darkblue};
-        --color-warning: #{$color-yellow};
+        --color-primary: #{$color-dark-contrast};
+        --color-warning: #{$color-informing};
 
         --el-color-warning: var(--color-warning);
         --el-color-primary: var(--color-primary);
@@ -248,23 +248,23 @@ $--font-size: (
                 --el-button-active-font-color: white;
 
                 --el-button-text-color: var(--el-color-white);
-                --el-button-bg-color: var(--color-mint);
+                --el-button-bg-color: var(--color-brainstorming);
                 --el-button-border-color: var(--el-color-white);
                 --el-button-hover-text-color: var(--el-color-white);
-                --el-button-hover-bg-color: var(--color-mint);
-                --el-button-hover-border-color: var(--color-mint);
-                --el-button-active-bg-color: var(--color-mint);
+                --el-button-hover-bg-color: var(--color-brainstorming);
+                --el-button-hover-border-color: var(--color-brainstorming);
+                --el-button-active-bg-color: var(--color-brainstorming);
                 --el-button-active-border-color: var(---color-mint);
                 --el-button-disabled-text-color: var(--el-color-white);
-                --el-button-disabled-bg-color: var(--color-mint);
-                --el-button-disabled-border-color: var(--color-mint);
+                --el-button-disabled-bg-color: var(--color-brainstorming);
+                --el-button-disabled-border-color: var(--color-brainstorming);
 
-                background-color: var(--color-mint);
+                background-color: var(--color-brainstorming);
                 background: linear-gradient(
                                 90deg,
-                                var(--color-mint) 2%,
-                                var(--color-mint-dark) 50%,
-                                var(--color-mint) 98%
+                                var(--color-brainstorming) 2%,
+                                var(--color-brainstorming-dark) 50%,
+                                var(--color-brainstorming) 98%
                 );
                 background-size: 200% 100%;
                 background-position: 100%;
@@ -285,56 +285,56 @@ $--font-size: (
 
         &--primary {
                 --el-button-text-color: var(--el-color-white);
-                --el-button-bg-color: var(--color-darkblue);
-                --el-button-border-color: var(--color-darkblue-light);
+                --el-button-bg-color: var(--color-dark-contrast);
+                --el-button-border-color: var(--color-dark-contrast-light);
                 --el-button-hover-text-color: var(--el-color-white);
-                --el-button-hover-bg-color: var(--color-darkblue-light);
-                --el-button-hover-border-color: var(--color-darkblue-light);
+                --el-button-hover-bg-color: var(--color-dark-contrast-light);
+                --el-button-hover-border-color: var(--color-dark-contrast-light);
                 --el-button-active-bg-color: var(--color-darkblue-dark);
                 --el-button-active-border-color: var(--color-darkblue-dark);
                 --el-button-disabled-text-color: var(--el-color-white);
-                --el-button-disabled-bg-color: var(--color-darkblue-light);
-                --el-button-disabled-border-color: var(--color-darkblue-light);
+                --el-button-disabled-bg-color: var(--color-dark-contrast-light);
+                --el-button-disabled-border-color: var(--color-dark-contrast-light);
 
                 &.is-plain {
-                        --el-button-border-color: var(--color-darkblue-light);
+                        --el-button-border-color: var(--color-dark-contrast-light);
                 }
 
                 &.correct {
-                        --el-button-border-color: var(--color-mint);
+                        --el-button-border-color: var(--color-brainstorming);
                 }
 
                 &.wrong {
-                        --el-button-border-color: var(--color-red);
+                        --el-button-border-color: var(--color-evaluating);
                 }
         }
 
         &--info {
                 --el-button-text-color: var(--el-color-white);
-                --el-button-bg-color: var(--color-mint);
+                --el-button-bg-color: var(--color-brainstorming);
                 --el-button-border-color: var(--el-color-white);
                 --el-button-hover-text-color: var(--el-color-white);
-                --el-button-hover-bg-color: var(--color-mint-light);
-                --el-button-hover-border-color: var(--color-mint-light);
-                --el-button-active-bg-color: var(--color-mint-dark);
-                --el-button-active-border-color: var(--color-mint-dark);
+                --el-button-hover-bg-color: var(--color-brainstorming-light);
+                --el-button-hover-border-color: var(--color-brainstorming-light);
+                --el-button-active-bg-color: var(--color-brainstorming-dark);
+                --el-button-active-border-color: var(--color-brainstorming-dark);
                 --el-button-disabled-text-color: var(--el-color-white);
-                --el-button-disabled-bg-color: var(--color-mint-light);
-                --el-button-disabled-border-color: var(--color-mint-light);
+                --el-button-disabled-bg-color: var(--color-brainstorming-light);
+                --el-button-disabled-border-color: var(--color-brainstorming-light);
         }
 
         &--warning {
                 --el-button-text-color: var(--el-color-white);
-                --el-button-bg-color: var(--color-red);
+                --el-button-bg-color: var(--color-evaluating);
                 --el-button-border-color: var(--el-color-white);
                 --el-button-hover-text-color: var(--el-color-white);
-                --el-button-hover-bg-color: var(--color-red-light);
-                --el-button-hover-border-color: var(--color-red-light);
+                --el-button-hover-bg-color: var(--color-evaluating-light);
+                --el-button-hover-border-color: var(--color-evaluating-light);
                 --el-button-active-bg-color: var(--color-red-dark);
                 --el-button-active-border-color: var(--color-red-dark);
                 --el-button-disabled-text-color: var(--el-color-white);
-                --el-button-disabled-bg-color: var(--color-red-light);
-                --el-button-disabled-border-color: var(--color-red-light);
+                --el-button-disabled-bg-color: var(--color-evaluating-light);
+                --el-button-disabled-border-color: var(--color-evaluating-light);
         }
 
         &.stretch > span {
@@ -377,15 +377,15 @@ $--font-size: (
 }
 
 .is-plain {
-        --el-button-border-color: var(--color-darkblue-light);
+        --el-button-border-color: var(--color-dark-contrast-light);
 }
 
 .correct {
-        --el-button-border-color: var(--color-mint);
+        --el-button-border-color: var(--color-brainstorming);
 }
 
 .wrong {
-        --el-button-border-color: var(--color-red);
+        --el-button-border-color: var(--color-evaluating);
 }
 
 .el-input {
@@ -498,7 +498,7 @@ $--font-size: (
         background-color: unset;
         border-style: dashed;
         border-width: 2px;
-        color: var(--color-darkblue-light);
+        color: var(--color-dark-contrast-light);
         cursor: pointer;
         gap: 0.5rem;
 
@@ -763,10 +763,10 @@ $--font-size: (
 
 .el-popper.is-dark {
         color: white;
-        background: var(--color-mint-dark);
+        background: var(--color-brainstorming-dark);
 
         .el-popper__arrow::before {
-                background: var(--color-mint-dark);
+                background: var(--color-brainstorming-dark);
         }
 }
 

@@ -33,13 +33,13 @@ p {
 
 a {
   text-decoration: none;
-  color: var(--color-darkblue);
+  color: var(--color-dark-contrast);
 
   &:visited,
   &:focus,
   &:hover,
   &:active {
-    color: var(--color-darkblue);
+    color: var(--color-dark-contrast);
   }
 }
 
@@ -52,13 +52,13 @@ body {
   font-family: var(--font-family);
   font-weight: var(--font-weight-default);
   line-height: 1.3;
-  color: var(--color-darkblue);
+  color: var(--color-dark-contrast);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .heading {
-  color: var(--color-darkblue);
+  color: var(--color-dark-contrast);
   font-weight: var(--font-weight-semibold);
   margin: 0 0 0.5rem;
 
@@ -180,7 +180,7 @@ form {
 }
 
 .logo {
-  color: var(--color-mint);
+  color: var(--color-brainstorming);
 }
 
 .hide {

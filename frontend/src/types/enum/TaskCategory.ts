@@ -17,22 +17,22 @@ export interface TaskCategoryType {
 const TaskCategory: { [name: string]: TaskCategoryType } = {
   informing: {
     icon: 'info',
-    color: 'var(--color-yellow)',
+    color: 'var(--color-informing)',
     taskTypes: [TaskType.INFORMATION],
   },
   brainstorming: {
     icon: 'brain',
-    color: 'var(--color-mint)',
+    color: 'var(--color-brainstorming)',
     taskTypes: [TaskType.BRAINSTORMING],
   },
   structuring: {
     icon: 'object-group',
-    color: 'var(--color-blue)',
+    color: 'var(--color-structuring)',
     taskTypes: [TaskType.SELECTION, TaskType.CATEGORISATION],
   },
   evaluating: {
     icon: 'star',
-    color: 'var(--color-red)',
+    color: 'var(--color-evaluating)',
     taskTypes: [TaskType.VOTING],
   },
 };

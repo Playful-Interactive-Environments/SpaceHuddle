@@ -174,7 +174,7 @@ export default class ImagePicker extends Vue {
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
-  color: var(--color-darkblue-light);
+  color: var(--color-dark-contrast-light);
 }
 
 .edit {

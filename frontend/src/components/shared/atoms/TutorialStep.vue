@@ -246,7 +246,7 @@ export default class TutorialStep extends Vue {
 }
 
 .check {
-  color: var(--color-mint);
+  color: var(--color-brainstorming);
   width: 100%;
   display: inline-flex;
   justify-content: right;

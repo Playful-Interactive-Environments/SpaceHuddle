@@ -57,7 +57,7 @@
               class="idea"
               :class="{ ideaBig: seats.length <= 3 && enoughHeight }"
             >
-              <span style="color: var(--color-red)">{{
+              <span style="color: var(--color-evaluating)">{{
                 $t('module.voting.slots.participant.replace')
               }}</span>
               "{{ idea.keywords }}"
@@ -529,7 +529,7 @@ div#loadingScreen {
   margin-left: auto;
   margin-right: auto;
 
-  background-color: var(--color-darkblue);
+  background-color: var(--color-dark-contrast);
   z-index: 100;
 
   display: flex;
@@ -1165,7 +1165,7 @@ span#endOfIdeas {
 
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.25);
   border: 3px solid white;
-  background-color: var(--color-darkblue);
+  background-color: var(--color-dark-contrast);
 
   border-radius: 10px;
 }
@@ -1206,7 +1206,7 @@ span#endOfIdeas > span {
   padding: 2%;
 
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.25);
-  border: 3px solid var(--color-darkblue);
+  border: 3px solid var(--color-dark-contrast);
 
   /* Hide scrollbar for IE, Edge and Firefox */
   -ms-overflow-style: none; /* IE and Edge */
@@ -1332,7 +1332,7 @@ div#ideaAndSkipOverlay .ideaCard {
   margin-top: 0;
 
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.25);
-  border: 3px solid var(--color-darkblue);
+  border: 3px solid var(--color-dark-contrast);
 }
 #ideaAndSkipOverlay::v-deep(.card__image) {
   border-radius: 20px;

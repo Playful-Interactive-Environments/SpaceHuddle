@@ -362,7 +362,7 @@ h3 {
     z-index: 1000;
 
     &.star-header {
-      background: var(--color-darkblue);
+      background: var(--color-dark-contrast);
       background-image: url('~@/assets/illustrations/sky.png');
       background-size: contain;
       mask-image: radial-gradient(

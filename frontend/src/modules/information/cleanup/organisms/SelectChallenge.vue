@@ -399,7 +399,7 @@ export default class SelectChallenge extends Vue {
   padding: 1rem;
 
   .el-button.active {
-    --el-button-bg-color: var(--color-blue);
+    --el-button-bg-color: var(--color-structuring);
   }
 }
 

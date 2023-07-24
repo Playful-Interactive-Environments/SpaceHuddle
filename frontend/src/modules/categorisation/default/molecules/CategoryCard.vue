@@ -283,7 +283,7 @@ export default class CategoryCard extends Vue {
   color: white;
 
   &__undefined {
-    color: var(--color-darkblue);
+    color: var(--color-dark-contrast);
   }
 }
 

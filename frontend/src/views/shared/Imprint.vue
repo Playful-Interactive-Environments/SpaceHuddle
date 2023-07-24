@@ -67,7 +67,7 @@ export default class Imprint extends Vue {
   flex-direction: column;
   justify-content: center;
   gap: 1rem;
-  color: var(--color-darkblue);
+  color: var(--color-dark-contrast);
 
   h1 {
     font-size: var(--font-size-xxxlarge);

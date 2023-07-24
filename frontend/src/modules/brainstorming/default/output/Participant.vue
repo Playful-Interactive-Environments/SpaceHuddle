@@ -497,7 +497,7 @@ export default class Participant extends Vue {
   right: calc(1rem + var(--el-badge-size) / 2);
   top: calc(1rem + var(--el-badge-size) / 2);
   background-color: white;
-  color: var(--color-mint-dark);
+  color: var(--color-brainstorming-dark);
   font-weight: var(--font-weight-bold);
   font-size: 1rem;
 }
@@ -533,7 +533,7 @@ div#loadingScreen {
   margin-left: auto;
   margin-right: auto;
 
-  background-color: var(--color-darkblue);
+  background-color: var(--color-dark-contrast);
   z-index: 100;
 
   display: flex;
@@ -1090,13 +1090,13 @@ button#editText.redWindow {
   right: 0;
   top: -18px;
   padding: 0.5% 2%;
-  background-color: var(--color-mint);
+  background-color: var(--color-brainstorming);
   border-radius: 20px;
   color: white;
 }
 
 .info.error {
-  background-color: var(--color-red);
+  background-color: var(--color-evaluating);
 }
 
 .el-form-item::v-deep(.el-form-item__error) {
@@ -1105,7 +1105,7 @@ button#editText.redWindow {
   left: 0;
 
   padding: 1% 4%;
-  background-color: var(--color-red);
+  background-color: var(--color-evaluating);
   border-radius: 20px;
   color: white;
 }

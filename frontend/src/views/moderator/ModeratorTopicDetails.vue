@@ -750,7 +750,7 @@ export default class ModeratorTopicDetails extends Vue {
 .is-disabled {
   .taskType {
     //color: var(--el-text-color-placeholder);
-    color: var(--color-darkblue);
+    color: var(--color-darkblue-dark);
   }
   img {
     -webkit-filter: grayscale(1); /* Webkit */
@@ -886,7 +886,7 @@ p {
 }
 
 .awesome-icon {
-  color: var(--color-darkblue-light);
+  color: var(--color-dark-contrast-light);
   margin-left: 0.5em;
 
   &:hover {
@@ -918,7 +918,7 @@ p {
   }
 
   &__count {
-    background-color: var(--color-mint);
+    background-color: var(--color-brainstorming);
     color: white;
     padding: 0.1rem 0.7rem;
     letter-spacing: 0;

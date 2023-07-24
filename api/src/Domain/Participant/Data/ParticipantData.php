@@ -53,8 +53,8 @@ class ParticipantData
         $reader = new ArrayReader($data);
         $this->id = $reader->findString("id");
         $this->browserKey = $reader->findString("browser_key");
-        $this->state = strtoupper($reader->findString("state"));
-        $this->parameter = (object)json_decode($reader->findString("parameter"));
+        $this->state = strtoupper((string)$reader->findString("state"));
+        $this->parameter = (object)json_decode((string)$reader->findString("parameter"));
         $this->avatar = new AvatarData($data);
     }
 }

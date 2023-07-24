@@ -65,7 +65,7 @@
   padding: 0.5rem 1rem;
   margin-bottom: 1rem;
   border-radius: var(--border-radius);
-  background-color: var(--color-darkblue);
+  background-color: var(--color-dark-contrast);
   width: 100%;
   display: table;
 
@@ -99,7 +99,7 @@
   }
 
   &__menu {
-    color: var(--color-darkblue-light);
+    color: var(--color-dark-contrast-light);
     cursor: pointer;
   }
 

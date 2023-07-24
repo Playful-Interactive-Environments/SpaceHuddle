@@ -83,6 +83,6 @@ export default class Menubar extends Vue {
 }
 
 .logo {
-  color: var(--color-mint);
+  color: var(--color-brainstorming);
 }
 </style>

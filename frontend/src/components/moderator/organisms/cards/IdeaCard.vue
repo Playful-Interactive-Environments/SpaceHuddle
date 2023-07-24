@@ -363,7 +363,7 @@ export default class IdeaCard extends Vue {
   }
 
   &__handled {
-    border-color: var(--color-blue);
+    border-color: var(--color-structuring);
   }
 
   &__thumbs_down {
@@ -371,7 +371,7 @@ export default class IdeaCard extends Vue {
   }
 
   &__thumbs_up {
-    border-color: var(--color-mint);
+    border-color: var(--color-brainstorming);
   }
 
   &__duplicate {
@@ -385,7 +385,7 @@ export default class IdeaCard extends Vue {
   }
 
   &__content {
-    color: var(--color-darkblue-light);
+    color: var(--color-dark-contrast-light);
   }
 
   &__text {
@@ -416,7 +416,7 @@ export default class IdeaCard extends Vue {
 
 .idea-count {
   font-weight: var(--font-weight-bold);
-  color: var(--color-mint);
+  color: var(--color-brainstorming);
 }
 
 .el-card.idea-transform {
