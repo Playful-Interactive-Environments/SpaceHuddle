@@ -272,6 +272,13 @@ export class CashEntry<TIn = any, TOut = any> {
     return this.data;
   }
 
+  async refreshCallback(): Promise<TOut> {
+    for (const callback of this.callbackList) {
+      callback.execute(this.data);
+    }
+    return this.data;
+  }
+
   update(): void {
     if (this.callbackList.length > 0) {
       const oldData = JSON.stringify(this.data);
@@ -421,6 +428,13 @@ export function refreshCash(url: string): void {
   const key = url.split('?')[0];
   if (key in dataCash) {
     dataCash[key].refreshData();
+  }
+}
+
+export function refreshCallback(url: string): void {
+  const key = url.split('?')[0];
+  if (key in dataCash) {
+    dataCash[key].refreshCallback();
   }
 }
 

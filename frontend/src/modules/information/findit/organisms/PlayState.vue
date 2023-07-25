@@ -119,7 +119,6 @@ import * as tutorialService from '@/services/tutorial-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
-import { EventType } from '@/types/enum/EventType';
 
 const tutorialType = 'find-it-object';
 
@@ -177,10 +176,10 @@ export default class PlayState extends Vue {
       EndpointAuthorisationType.PARTICIPANT
     );
 
-    this.eventBus.off(EventType.CHANGE_TUTORIAL);
+    /*this.eventBus.off(EventType.CHANGE_TUTORIAL);
     this.eventBus.on(EventType.CHANGE_TUTORIAL, async (steps) => {
       this.updateTutorial(steps as Tutorial[]);
-    });
+    });*/
   }
 
   updateTutorial(steps: Tutorial[]): void {

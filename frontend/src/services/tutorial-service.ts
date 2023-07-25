@@ -64,18 +64,21 @@ export const reactivateTutorial = async (
       index = tutorialSteps.findIndex((step) => step.type === type);
     }
     eventBus.emit(EventType.CHANGE_TUTORIAL, tutorialSteps);
+    cashService.refreshCallback(tutorialUrl);
   } else cashService.refreshCash(tutorialUrl);
 };
 
-export const addTutorialStep = (
+export const addTutorialStep = async (
   data: Tutorial,
   authHeaderType = EndpointAuthorisationType.MODERATOR,
   eventBus: Emitter<Record<EventType, unknown>>
-): void => {
-  postStep(data, authHeaderType).then(() => {
-    const tutorialSteps = cashService.getCash(tutorialUrl);
-    if (tutorialSteps) tutorialSteps.push(data);
-    else cashService.refreshCash(tutorialUrl);
-    eventBus.emit(EventType.CHANGE_TUTORIAL, tutorialSteps);
-  });
+): Promise<Tutorial[]> => {
+  await postStep(data, authHeaderType);
+  const tutorialSteps = cashService.getCash(tutorialUrl) as Tutorial[];
+  if (tutorialSteps) {
+    tutorialSteps.push(data);
+    cashService.refreshCallback(tutorialUrl);
+  } else cashService.refreshCash(tutorialUrl);
+  eventBus.emit(EventType.CHANGE_TUTORIAL, tutorialSteps);
+  return tutorialSteps;
 };

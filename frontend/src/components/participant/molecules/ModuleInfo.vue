@@ -2,14 +2,14 @@
   <div class="infoArea">
     <SpriteCanvas
       v-if="
-        openModuleInfoEntryDataList.length > 0 &&
-        openModuleInfoEntryDataList[activeTabIndex] &&
-        !isDefaultImage(openModuleInfoEntryDataList[activeTabIndex].texture)
+        mappedModuleInfoEntryDataList.length > 0 &&
+        mappedModuleInfoEntryDataList[activeTabIndex] &&
+        !isDefaultImage(mappedModuleInfoEntryDataList[activeTabIndex].texture)
       "
       class="pixiCanvas info-image"
       :width="gameWidth"
       :height="gameHeight / 2"
-      :texture="openModuleInfoEntryDataList[activeTabIndex].texture"
+      :texture="mappedModuleInfoEntryDataList[activeTabIndex].texture"
     />
     <el-carousel
       ref="carousel"
@@ -75,27 +75,32 @@ export default class ModuleInfo extends Vue {
   gameWidth = 0;
   gameHeight = 0;
   tutorialSteps: Tutorial[] = [];
+  activeTabIndex = 0;
 
   get openModuleInfoEntryDataList(): ModuleInfoEntryData[] {
-    return this.moduleInfoEntryDataList
-      .map((entry) => {
-        if (typeof entry === 'string')
-          return {
-            key: entry,
-            texture: `${this.imageDirectory}/${entry}.${this.fileExtension}`,
-          };
-        else if (
-          typeof entry.texture === 'string' &&
-          !entry.texture.includes('\\')
-        ) {
-          return {
-            key: entry.key,
-            texture: `${this.imageDirectory}/${entry.texture}`,
-          };
-        }
-        return entry;
-      })
-      .filter((entry) => !this.getIncludeStep(entry.key));
+    return this.mappedModuleInfoEntryDataList.filter(
+      (entry) => !this.getIncludeStep(entry.key)
+    );
+  }
+
+  get mappedModuleInfoEntryDataList(): ModuleInfoEntryData[] {
+    return this.moduleInfoEntryDataList.map((entry) => {
+      if (typeof entry === 'string')
+        return {
+          key: entry,
+          texture: `${this.imageDirectory}/${entry}.${this.fileExtension}`,
+        };
+      else if (
+        typeof entry.texture === 'string' &&
+        !entry.texture.includes('\\')
+      ) {
+        return {
+          key: entry.key,
+          texture: `${this.imageDirectory}/${entry.texture}`,
+        };
+      }
+      return entry;
+    });
   }
 
   get indexDelta(): number {
@@ -129,12 +134,14 @@ export default class ModuleInfo extends Vue {
     this.deregisterAll();
   }
 
+  initTutorialDone = false;
   updateTutorial(steps: Tutorial[]): void {
     this.tutorialSteps = steps;
-    this.activeTabIndex = this.indexDelta;
+    if (!this.initTutorialDone) this.activeTabIndex = this.indexDelta;
     if (this.openModuleInfoEntryDataList.length === 0) {
       this.$emit('infoRead');
     }
+    this.initTutorialDone = true;
   }
 
   getIncludeStep(stepName: string): boolean {
@@ -147,14 +154,31 @@ export default class ModuleInfo extends Vue {
     return false;
   }
 
-  activeTabIndex = 0;
+  minCarouselClickDelay = 500;
+  carouselEvent = {
+    lastChanged: 0,
+    lastValue: 0,
+  };
   carouselChanged(index: number): void {
-    this.activeTabIndex = this.indexDelta + index;
+    if (
+      this.carouselEvent.lastChanged + this.minCarouselClickDelay <
+      Date.now()
+    ) {
+      if (this.activeTabIndex < this.indexDelta + index)
+        this.storeInfoStepRead();
+      this.activeTabIndex = this.indexDelta + index;
+      this.carouselEvent = {
+        lastChanged: Date.now(),
+        lastValue: index,
+      };
+    } else {
+      (this.$refs.carousel as any).setActiveItem(this.carouselEvent.lastValue);
+    }
   }
 
   next(): void {
-    this.storeInfoStepRead();
     if (this.activeTabIndex + 1 === this.moduleInfoEntryDataList.length) {
+      this.storeInfoStepRead();
       this.$emit('infoRead');
     } else {
       (this.$refs.carousel as any).next();
@@ -162,7 +186,7 @@ export default class ModuleInfo extends Vue {
   }
 
   storeInfoStepRead(): void {
-    const stepName = this.openModuleInfoEntryDataList[this.activeTabIndex];
+    const stepName = this.mappedModuleInfoEntryDataList[this.activeTabIndex];
     if (!this.getIncludeStep(stepName.key)) {
       const tutorialItem: Tutorial = {
         step: stepName.key,
