@@ -21,9 +21,9 @@
   $color-dark-contrast-light: #757d76;
   $color-dark-contrast-dark: #19201a;
   $color-background: #ede7e3;
-  $color-background-blue: #f0f6f6;
-  $color-gray: #e4e4e4;
-  $color-gray-dark: #666666;
+  $color-background-blue: #cfe2e5;
+  $color-gray: #b9b0aa;
+  $color-gray-dark: #72625c;
   $color-gray-inactive: #999999;
   $font-family: 'Work Sans';
   $font-weight-default: 400;
@@ -44,6 +44,7 @@
   $header-height: 90px;
   $participant-background-image: url('~@/assets/illustrations/Ecopolis/backgroundEcopolis.png');
   $home-image: url('~@/assets/illustrations/Ecopolis/Ecopolis_Color.png');
+  $home-background: url('~@/assets/illustrations/Ecopolis/EcopolisHomeBG.png');
 
   --color-purple: #{$color-purple};
   --color-purple-dark: #{$color-purple-dark};
@@ -94,4 +95,5 @@
   --corner-radius: 1.5rem;
   --participant-background-image: #{$participant-background-image};
   --home-image: #{$home-image};
+  --home-background: #{$home-background};
 }

@@ -67,7 +67,8 @@ export default class ParticipantDefaultContainer extends Vue {
   &__background {
     background: var(--color-dark-contrast);
     background-image: var(--participant-background-image);
-    background-size: contain;
+    //background-size: contain;
+    //background-repeat: no-repeat;
     mask-image: radial-gradient(
         circle farthest-corner at 100% 100%,
         transparent 69%,

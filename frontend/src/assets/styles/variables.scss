@@ -36,6 +36,7 @@ $sidebar-min-width: 300px;
 $header-height: 90px;
 $participant-background-image: url('~@/assets/illustrations/background.png');
 $home-image: url('~@/assets/illustrations/telescope_round.png');
+$home-background: none;
 
 :root {
   --color-purple-dark: #{$color-purple-dark};
@@ -80,6 +81,7 @@ $home-image: url('~@/assets/illustrations/telescope_round.png');
   --corner-radius: 1.5rem;
   --participant-background-image: #{$participant-background-image};
   --home-image: #{$home-image};
+  --home-background: #{$home-background};
 }
 
 @import '../themes/default.scss';
