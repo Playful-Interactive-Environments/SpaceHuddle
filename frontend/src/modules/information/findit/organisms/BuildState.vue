@@ -41,10 +41,10 @@
               :width="placeable.width"
               :aspect-ration="getObjectAspect(placeable.type, placeable.name)"
               :object-space="ObjectSpace.RelativeToBackground"
-              :tint="
+              :outline="
                 selectedObject && selectedObject.id === placeable.id
-                  ? '#ff0000'
-                  : '#ffffff'
+                  ? 0xff0000
+                  : null
               "
             >
             </CustomSprite>
