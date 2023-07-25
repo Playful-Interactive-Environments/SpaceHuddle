@@ -340,7 +340,7 @@ export default class PlayState extends Vue {
       const index = this.placedObjects.findIndex((p) => p.id === id);
       if (index > -1) this.placedObjects.splice(index, 1);
       this.collectedCount++;
-      const tutorialStepName = `${placeable.type}-${placeable.name}`;
+      const tutorialStepName = `${placeable.type}-${this.collectedPlaceableConfig.explanationKey}`;
       if (!this.tutorialSteps.find((item) => item.step === tutorialStepName)) {
         this.showToolbox = true;
         const tutorialItem: Tutorial = {

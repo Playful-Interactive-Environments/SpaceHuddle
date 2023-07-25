@@ -11,6 +11,7 @@
         :texture="texture"
         :width="objectWidth"
         :height="objectHeight"
+        :tint="tint"
         :anchor="0.5"
         :x="width / 2"
         :y="height / 2"
@@ -22,6 +23,7 @@
         :width="objectWidth"
         :height="objectHeight"
         :anchor="0.5"
+        :tint="tint"
         :x="width / 2"
         :y="height / 2"
         @render="renderAnimation"
@@ -48,6 +50,7 @@ export default class SpriteCanvas extends Vue {
   @Prop({ default: 100 }) readonly height!: number;
   @Prop({ default: 1 }) readonly aspectRation!: number;
   @Prop({ default: '#f4f4f4' }) readonly backgroundColor!: string;
+  @Prop({ default: '#ffffff' }) tint!: string;
   @Prop() texture!: string | PIXI.Texture | PIXI.Texture[] | string[];
   @Prop({ default: 0.1 }) animationSpeed!: number;
   spritesheet!: PIXI.Spritesheet;
