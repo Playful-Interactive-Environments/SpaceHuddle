@@ -14,8 +14,13 @@
     <div class="text">
       {{ $t(`tutorial.${type}.${step}`) }}
     </div>
-    <div class="link check" v-on:click="stepDone">
-      <font-awesome-icon icon="check"></font-awesome-icon>
+    <div class="link check">
+      <span v-on:click="stepDone">
+        <font-awesome-icon icon="check"></font-awesome-icon>
+      </span>
+      <span v-on:click="skipAll">
+        <font-awesome-icon icon="stop"></font-awesome-icon>
+      </span>
     </div>
     <template #reference>
       <slot></slot>
@@ -78,10 +83,13 @@ export default class TutorialStep extends Vue {
   mounted(): void {
     tutorialService.registerGetList(this.updateTutorial);
 
-    this.eventBus.off(EventType.CHANGE_TUTORIAL);
-    this.eventBus.on(EventType.CHANGE_TUTORIAL, async () => {
+    /*this.eventBus.off(EventType.CHANGE_TUTORIAL);
+    this.eventBus.on(EventType.CHANGE_TUTORIAL, async (steps) => {
+      this.updateTutorial(steps as Tutorial[]);
       this.reloadCount++;
-    });
+    });*/
+
+    this.eventBus.on(EventType.SKIP_TUTORIAL, this.handleEventSkip);
 
     const visibilityObserver = this.$refs.visibilityObserver as any;
     const domContent = visibilityObserver.nextSibling.nextSibling;
@@ -92,8 +100,16 @@ export default class TutorialStep extends Vue {
   }
 
   updateTutorial(steps: Tutorial[]): void {
-    this.tutorialSteps = steps;
+    const reloadShowSteps = this.tutorialSteps.length !== steps.length;
+    this.tutorialSteps = [...steps];
     this.dbLoaded = true;
+    if (reloadShowSteps) this.reloadCount++;
+  }
+
+  async handleEventSkip(type: any): Promise<void> {
+    if (this.type === type) {
+      this.stepDone();
+    }
   }
 
   visibilityChanged(
@@ -132,6 +148,7 @@ export default class TutorialStep extends Vue {
   unmounted(): void {
     this.deregisterAll();
     this.removeFromReservationList();
+    this.eventBus.off(EventType.SKIP_TUTORIAL, this.handleEventSkip);
   }
 
   removeFromReservationList(): void {
@@ -237,6 +254,10 @@ export default class TutorialStep extends Vue {
       );
     }
   }
+
+  skipAll(): void {
+    this.eventBus.emit(EventType.SKIP_TUTORIAL, this.type);
+  }
 }
 </script>
 
@@ -250,6 +271,10 @@ export default class TutorialStep extends Vue {
   width: 100%;
   display: inline-flex;
   justify-content: right;
+
+  span {
+    padding-left: 1rem;
+  }
 }
 
 .visibilityObserver {

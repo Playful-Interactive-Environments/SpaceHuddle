@@ -121,14 +121,30 @@
       </el-button>
     </el-space>
     <el-space wrap>
-      <SpriteCanvas
-        v-for="objectName of ObjectsForActiveType"
-        :key="objectName"
-        :texture="getTexture(objectName)"
-        :aspect-ration="getObjectAspect(activeObjectType, objectName)"
-        :class="{ selected: activeObjectName === objectName }"
-        @pointerup="objectNameClicked(objectName)"
-      />
+      <div v-for="objectName of ObjectsForActiveType" :key="objectName">
+        <SpriteCanvas
+          :texture="getTexture(objectName)"
+          :aspect-ration="getObjectAspect(activeObjectType, objectName)"
+          class="placeable"
+          :class="{ selected: activeObjectName === objectName }"
+          :tint="
+            placementState[objectName].currentCount <
+            placementState[objectName].maxCount
+              ? '#ffffff'
+              : '#999999'
+          "
+          :background-color="
+            placementState[objectName].currentCount <
+            placementState[objectName].maxCount
+              ? '#f4f4f4'
+              : '#999999'
+          "
+          @pointerdown="objectNameClicked(objectName)"
+        />
+        <br />
+        {{ placementState[objectName].currentCount }} /
+        {{ placementState[objectName].maxCount }}
+      </div>
     </el-space>
   </DrawerBottomOverlay>
   <LevelSettings
@@ -220,6 +236,14 @@ export default class ForestFireEdit extends Vue {
       if (spriteSheet) return spriteSheet.textures[objectName];
     }
     return '';
+  }
+
+  getValues(objectName: string): { count: number; max: number } {
+    const config = this.gameConfig[this.activeObjectType][objectName];
+    return {
+      count: 0,
+      max: config.maxCount,
+    };
   }
 
   selectionMaskGraphic: PIXI.Graphics | null = null;
@@ -491,8 +515,12 @@ export default class ForestFireEdit extends Vue {
   }
 }
 
+.placeable {
+  border-radius: var(--border-radius);
+}
+
 .selected {
-  border: red 2px solid;
+  //border: red 2px solid;
   border-radius: var(--border-radius);
 }
 

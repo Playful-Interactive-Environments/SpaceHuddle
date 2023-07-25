@@ -119,7 +119,6 @@ import * as tutorialService from '@/services/tutorial-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
-import { EventType } from '@/types/enum/EventType';
 
 const tutorialType = 'find-it-object';
 
@@ -177,10 +176,10 @@ export default class PlayState extends Vue {
       EndpointAuthorisationType.PARTICIPANT
     );
 
-    this.eventBus.off(EventType.CHANGE_TUTORIAL);
+    /*this.eventBus.off(EventType.CHANGE_TUTORIAL);
     this.eventBus.on(EventType.CHANGE_TUTORIAL, async (steps) => {
       this.updateTutorial(steps as Tutorial[]);
-    });
+    });*/
   }
 
   updateTutorial(steps: Tutorial[]): void {
@@ -341,7 +340,7 @@ export default class PlayState extends Vue {
       const index = this.placedObjects.findIndex((p) => p.id === id);
       if (index > -1) this.placedObjects.splice(index, 1);
       this.collectedCount++;
-      const tutorialStepName = `${placeable.type}-${placeable.name}`;
+      const tutorialStepName = `${placeable.type}-${this.collectedPlaceableConfig.explanationKey}`;
       if (!this.tutorialSteps.find((item) => item.step === tutorialStepName)) {
         this.showToolbox = true;
         const tutorialItem: Tutorial = {
