@@ -18,6 +18,8 @@
             :key="placeable.uuid"
             v-model:id="placeable.id"
             :type="placeable.shape"
+            :collider-delta="20"
+            :show-bounds="false"
             :object-space="ObjectSpace.RelativeToBackground"
             :x="placeable.position[0]"
             :y="placeable.position[1]"

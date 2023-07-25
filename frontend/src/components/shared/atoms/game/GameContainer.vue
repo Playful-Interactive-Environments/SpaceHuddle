@@ -475,7 +475,12 @@ export default class GameContainer extends Vue {
       const clickedGameObjects = clickedBodies.map((body) => {
         return this.gameObjects.find((obj) => obj.body.id === body.id);
       });
+      for (const obj of clickedGameObjects) {
+        obj.gameObjectClicked();
+      }
       this.$emit('gameObjectClick', clickedGameObjects);
+    } else {
+      this.$emit('update:selectedObject', null);
     }
     this.isMouseDown = true;
     setTimeout(() => {
