@@ -1,5 +1,6 @@
 <template>
   <sprite
+    ref="customSprite"
     :texture="texture"
     :anchor="anchor"
     :width="displayWidth"
@@ -20,6 +21,7 @@ import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import * as PIXI from 'pixi.js';
 import { CustomObject } from '@/types/game/CustomObject';
 import { EventType } from '@/types/enum/EventType';
+import { OutlineFilter } from '@pixi/filter-outline';
 
 @Options({
   components: {},
@@ -35,6 +37,7 @@ export default class CustomSprite extends Vue implements CustomObject {
   @Prop({ default: 1 }) aspectRation!: number;
   @Prop({ default: 0 }) anchor!: number;
   @Prop({ default: '#ffffff' }) tint!: string;
+  @Prop({ default: null }) outline!: number | null;
   @Prop() texture!: string | PIXI.Texture;
   gameContainer!: GameContainer;
 
@@ -130,6 +133,16 @@ export default class CustomSprite extends Vue implements CustomObject {
         }
       );
       container.dispatchEvent(registerCustomObject);
+    }
+  }
+
+  @Watch('outline', { immediate: true })
+  onOutlineChanged(): void {
+    const customSprite = this.$refs.customSprite as any;
+    if (customSprite) {
+      if (this.outline)
+        customSprite.filters = [new OutlineFilter(2, this.outline)];
+      else customSprite.filters = [];
     }
   }
 

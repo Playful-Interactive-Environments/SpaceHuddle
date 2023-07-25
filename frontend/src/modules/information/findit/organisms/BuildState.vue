@@ -19,6 +19,8 @@
             :key="placeable.uuid"
             v-model:id="placeable.id"
             :type="placeable.shape"
+            :collider-delta="20"
+            :show-bounds="false"
             :object-space="ObjectSpace.RelativeToBackground"
             v-model:x="placeable.position[0]"
             v-model:y="placeable.position[1]"
@@ -39,10 +41,10 @@
               :width="placeable.width"
               :aspect-ration="getObjectAspect(placeable.type, placeable.name)"
               :object-space="ObjectSpace.RelativeToBackground"
-              :tint="
+              :outline="
                 selectedObject && selectedObject.id === placeable.id
-                  ? '#ff0000'
-                  : '#ffffff'
+                  ? 0xff0000
+                  : null
               "
             >
             </CustomSprite>

@@ -3,7 +3,7 @@
     <div class="overlay" @click="interact">
       <div class="media">
         <div class="media-content">{{ title }}</div>
-        <div class="media-right" @click="hide">
+        <div class="media-right close" @click="hide">
           <font-awesome-icon icon="xmark" />
         </div>
       </div>
@@ -54,6 +54,13 @@ export default class DrawerBottomOverlay extends Vue {
   bottom: 0;
   z-index: 100;
   border-radius: var(--corner-radius) var(--corner-radius) 0 0;
+
+  .close {
+    position: relative;
+    top: -1rem;
+    right: -1rem;
+    padding: 1rem;
+  }
   background-color: var(--color-background);
 }
 

@@ -5,9 +5,16 @@
     :y="position[1] - offset[1]"
     :rotation="rotationValue"
     :scale="scale"
-    @pointerdown="gameObjectClicked"
   >
     <slot></slot>
+    <Graphics
+      v-if="body && showBounds"
+      @render="drawBorder"
+      :x="0"
+      :y="0"
+      :width="clickWidth"
+      :height="clickHeight"
+    ></Graphics>
   </container>
 </template>
 
@@ -48,6 +55,8 @@ export default class GameObject extends Vue {
   //@Prop({ default: 0.5 }) anchor!: number;
   @Prop({ default: ObjectSpace.Absolute }) objectSpace!: ObjectSpace;
   @Prop({ default: 'rect' }) readonly type!: 'rect' | 'circle';
+  @Prop({ default: 0 }) readonly colliderDelta!: number;
+  @Prop({ default: false }) readonly showBounds!: boolean;
   @Prop({ default: {} }) readonly options!: {
     [key: string]: string | number | boolean;
   };
@@ -168,7 +177,17 @@ export default class GameObject extends Vue {
 
   addRect(x: number, y: number, width: number, height: number): void {
     this.options.isStatic = this.isStatic;
-    this.body = Matter.Bodies.rectangle(x, y, width, height, this.options);
+    const colliderWidth = width + this.colliderDelta * 2;
+    const colliderHeight = height + this.colliderDelta * 2;
+    this.body = Matter.Bodies.rectangle(
+      x,
+      y,
+      colliderWidth,
+      colliderHeight,
+      this.options
+    );
+    this.onRotationChanged();
+    this.onScaleChanged();
     this.$emit('update:id', this.body.id);
     if (this.clickable) {
       this.addBodyToEngine();
@@ -181,9 +200,11 @@ export default class GameObject extends Vue {
     this.body = Matter.Bodies.circle(
       x,
       y,
-      width > height ? width / 2 : height / 2,
+      (width > height ? width / 2 : height / 2) + this.colliderDelta,
       this.options
     );
+    this.onRotationChanged();
+    this.onScaleChanged();
     this.$emit('update:id', this.body.id);
     if (this.clickable) {
       this.addBodyToEngine();
@@ -340,6 +361,39 @@ export default class GameObject extends Vue {
     }
 
     this.$emit('collision', this);
+  }
+
+  get clickWidth(): number {
+    if (this.container) return this.container.width + this.colliderDelta * 2;
+    //if (this.body) return this.body.bounds.max.x - this.body.bounds.min.x;
+    return this.displayWidth;
+  }
+
+  get clickHeight(): number {
+    if (this.container) return this.container.height + this.colliderDelta * 2;
+    //if (this.body) return this.body.bounds.max.y - this.body.bounds.min.y;
+    return this.displayHeight;
+  }
+
+  drawBorder(graphics: PIXI.Graphics): void {
+    if (graphics && this.body) {
+      const width = this.clickWidth;
+      const height = this.clickHeight;
+
+      if (this.type === 'rect') {
+        graphics.clear();
+        graphics.lineStyle(2, '#ff0000');
+        graphics.drawRect(-width / 2, -height / 2, width, height);
+      } else {
+        graphics.clear();
+        graphics.lineStyle(2, '#ff0000');
+        graphics.drawCircle(
+          graphics.x,
+          graphics.y,
+          (width > height ? width : height) / 2
+        );
+      }
+    }
   }
 }
 </script>
