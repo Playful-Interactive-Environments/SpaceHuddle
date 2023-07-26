@@ -4,7 +4,7 @@
       <font-awesome-icon :icon="displaySettings ? 'xmark' : 'bars'" />
     </span>
     <div class="sidebar__logo">
-      <font-awesome-icon :icon="['fac', 'logoWithName']" class="logo" />
+      <font-awesome-icon :icon="getIconName()" class="logo" />
     </div>
     <span class="sidebar_icons">
       <router-link to="/sessions">
@@ -39,6 +39,12 @@ export default class SidebarHeader extends Vue {
   @Watch('sidebarVisible', { immediate: true })
   onSidebarVisibleChanged(): void {
     this.displaySettings = this.sidebarVisible;
+  }
+
+  getIconName(): string[] {
+    return process.env.VUE_APP_THEME == 'ecopolis'
+        ? ['fac', 'EcopolisLogoWithName']
+        : ['fac', 'logoWithName'];
   }
 }
 </script>

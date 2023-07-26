@@ -1,7 +1,7 @@
 <template>
   <header class="media">
     <font-awesome-icon
-      :icon="['fac', 'logoWithName']"
+      :icon="getIconName()"
       class="media-left logo"
     />
     <span class="media-content">
@@ -12,11 +12,19 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 @Options({
-  components: {},
+  components: {FontAwesomeIcon},
 })
-export default class PublicHeader extends Vue {}
+
+export default class PublicHeader extends Vue {
+  getIconName(): string[] {
+    return process.env.VUE_APP_THEME == 'ecopolis'
+      ? ['fac', 'EcopolisLogoWithName']
+      : ['fac', 'logoWithName'];
+  }
+}
 </script>
 
 <style lang="scss" scoped>

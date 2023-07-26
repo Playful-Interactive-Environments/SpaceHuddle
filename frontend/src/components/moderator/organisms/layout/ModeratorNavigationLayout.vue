@@ -13,7 +13,7 @@
             <span class="level-left">
               <font-awesome-icon
                 v-if="!hasSidebar"
-                :icon="['fac', 'logoWithName']"
+                :icon="getIconName()"
                 class="logo"
               />
               <el-page-header
@@ -96,6 +96,12 @@ export default class ModeratorNavigationLayout extends Vue {
 
   get hasSidebar(): boolean {
     return !!this.$slots.sidebar;
+  }
+
+  getIconName(): string[] {
+    return process.env.VUE_APP_THEME == 'ecopolis'
+        ? ['fac', 'EcopolisLogoWithName']
+        : ['fac', 'logoWithName'];
   }
 }
 </script>

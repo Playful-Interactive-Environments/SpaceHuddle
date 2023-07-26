@@ -1,6 +1,6 @@
 <template>
   <div class="menubar">
-    <font-awesome-icon :icon="['fac', 'logoWithName']" class="logo" />
+    <font-awesome-icon :icon="getIconName()" class="logo" />
     <!--<el-dropdown v-on:command="menuItemSelected($event)">
       <span class="el-dropdown-link">
         <font-awesome-icon icon="bars" />
@@ -38,6 +38,12 @@ export default class Menubar extends Vue {
       EndpointAuthorisationType.PARTICIPANT,
       60 * 60
     );
+  }
+
+  getIconName(): string[] {
+    return process.env.VUE_APP_THEME == 'ecopolis'
+        ? ['fac', 'EcopolisLogoWithName']
+        : ['fac', 'logoWithName'];
   }
 
   updateSession(session: Session): void {
