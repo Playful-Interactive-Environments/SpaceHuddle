@@ -11,4 +11,6 @@ export default interface Placeable {
   position: [number, number];
   rotation: number;
   scale: number;
+  escalationSteps: number[];
+  escalationStepIndex: number;
 }

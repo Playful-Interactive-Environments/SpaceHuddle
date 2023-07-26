@@ -402,6 +402,8 @@ export default class ForestFireEdit extends Vue {
           position: position,
           rotation: 0,
           scale: 1,
+          escalationSteps: [],
+          escalationStepIndex: 0,
         };
         this.placedObjects.push(placeable);
       }

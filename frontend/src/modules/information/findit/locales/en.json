@@ -11,6 +11,7 @@
   "participant": {
     "everythingPlaced": "everything placed",
     "maxCountPlaced": "max objects of type placed",
+    "lost": "You have unfortunately not found a dangerous object for too long, which has now caused a damage. You have lost, please try again.",
     "newLevel": "create new level",
     "place": "Place",
     "play": "Start",
