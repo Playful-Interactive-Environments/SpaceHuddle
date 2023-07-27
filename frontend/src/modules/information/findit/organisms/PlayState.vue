@@ -50,9 +50,9 @@
               :object-space="ObjectSpace.RelativeToBackground"
             >
             </CustomSprite>
-            <particle-container
+            <custom-particle-container
               v-if="placeable.escalationStepIndex > 0"
-              @render="renderEscalation($event, placeable)"
+              :config="getConfigForPlaceable(placeable)"
             />
           </GameObject>
           <GameObject
@@ -134,6 +134,7 @@ import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
 import { ElMessage } from 'element-plus';
 import * as escalationConfig from '@/modules/information/findit/data/escalation.json';
+import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
 
 const tutorialType = 'find-it-object';
 
@@ -150,6 +151,7 @@ const tutorialType = 'find-it-object';
     },
   },
   components: {
+    CustomParticleContainer,
     GameObject,
     GameContainer,
     CustomSprite,
@@ -221,10 +223,6 @@ export default class PlayState extends Vue {
       const settings = this.gameConfig[typeName].settings;
       if (settings) PIXI.Assets.unload(settings.spritesheet);
     }
-    for (const emitter of this.emitterList) {
-      this.destroyEmitter(emitter.emitter);
-    }
-    this.emitterList = [];
   }
 
   getSearchMask(placeable: Placeable): any {
@@ -393,7 +391,6 @@ export default class PlayState extends Vue {
           this.eventBus
         );
       }
-      this.removeEmitter(placeable);
     }
   }
 
@@ -420,70 +417,15 @@ export default class PlayState extends Vue {
     }
   }
 
-  destroyEmitter(emitter: PIXIParticles.Emitter): void {
-    emitter.autoUpdate = false;
-    emitter.emit = false;
-    setTimeout(() => {
-      emitter.destroy();
-    }, 1000);
-  }
-
-  removeEmitter(placeable: Placeable): void {
-    const index = this.emitterList.findIndex(
-      (item) => item.placeable.id === placeable.id
-    );
-    if (index >= 0) {
-      const emitter = this.emitterList[index];
-      this.emitterList.splice(index, 1);
-      this.destroyEmitter(emitter.emitter);
-    }
-  }
-
-  emitterIsLoaded(placeable: Placeable): boolean {
-    const emitter = this.emitterList.find(
-      (item) => item.placeable.id === placeable.id
-    );
-    if (emitter) {
-      return emitter.escalationStepIndex === placeable.escalationStepIndex;
-    }
-    return false;
-  }
-
-  emitterList: {
-    emitter: PIXIParticles.Emitter;
-    placeable: Placeable;
-    escalationStepIndex: number;
-  }[] = [];
-  async renderEscalation(
-    container: PIXI.ParticleContainer,
+  getConfigForPlaceable(
     placeable: Placeable
-  ): Promise<void> {
-    if (this.emitterIsLoaded(placeable)) return;
-    this.removeEmitter(placeable);
+  ): PIXIParticles.EmitterConfigV3 | null {
     const typeConfig = this.gameConfig[placeable.type].settings;
     let shapeIndex = placeable.escalationStepIndex - 1;
+    if (shapeIndex < 0) return null;
     if (shapeIndex >= typeConfig.escalationShape.length)
       shapeIndex = typeConfig.escalationShape.length - 1;
-    const emitterConfig =
-      escalationConfig[typeConfig.escalationShape[shapeIndex]];
-    const textureConfig = emitterConfig.behaviors.find(
-      (item) => item.type === 'textureRandom'
-    );
-    if (textureConfig) {
-      for (let i = 0; i < textureConfig.config.textures.length; i++) {
-        const url = textureConfig.config.textures[i];
-        if (typeof url === 'string') {
-          textureConfig.config.textures[i] = await PIXI.Assets.load(url);
-        }
-      }
-    }
-    const emitter = new PIXIParticles.Emitter(container, { ...emitterConfig });
-    emitter.autoUpdate = true;
-    this.emitterList.push({
-      emitter: emitter,
-      placeable: placeable,
-      escalationStepIndex: placeable.escalationStepIndex,
-    });
+    return escalationConfig[typeConfig.escalationShape[shapeIndex]];
   }
 }
 </script>
