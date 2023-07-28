@@ -280,11 +280,10 @@ import * as turf from '@turf/turf';
 import * as turfUtils from '@/utils/turf';
 import { Application } from 'vue3-pixi';
 import RoundSlider from 'vue-three-round-slider/src';
-import { TaskParticipantState } from '@/types/api/TaskParticipantState';
-import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
 import * as constants from '@/modules/information/cleanup/utils/consts';
 import Color from 'colorjs.io';
 import * as mapStyle from '@/utils/mapStyle';
+import { TrackingManager } from '@/types/tracking/TrackingManager';
 
 mapStyle.setMapStyleStreets();
 
@@ -337,16 +336,10 @@ const minToleratedAngleDeviation = 22.5;
     Application,
     RoundSlider,
   },
-  emits: [
-    'update:useFullSize',
-    'goalReached',
-    'update:trackingState',
-    'update:trackingIteration',
-  ],
+  emits: ['update:useFullSize', 'goalReached'],
 })
 export default class DriveToLocation extends Vue {
-  @Prop() readonly trackingState!: TaskParticipantState;
-  @Prop() readonly trackingIteration!: TaskParticipantIteration;
+  @Prop() readonly trackingManager!: TrackingManager;
   @Prop({ default: 'car' }) readonly vehicle!:
     | 'car'
     | 'bike'
@@ -632,11 +625,12 @@ export default class DriveToLocation extends Vue {
   }
 
   initTrackingData(): void {
-    if (this.trackingIteration && !this.trackingIteration.parameter.drive) {
-      this.trackingIteration.parameter.drive = {
-        stops: 0,
-      };
-      this.$emit('update:trackingIteration', this.trackingIteration);
+    if (
+      this.trackingManager &&
+      this.trackingManager.iteration &&
+      !this.trackingManager.iteration.parameter.drive
+    ) {
+      this.trackingManager.saveIteration({ drive: { stops: 0 } });
     }
   }
 
@@ -744,12 +738,12 @@ export default class DriveToLocation extends Vue {
       this.routeCalculated = true;
 
       this.initTrackingData();
-      if (this.trackingIteration) {
-        this.trackingIteration.parameter.drive.routePath = this.routePath;
-        this.trackingIteration.parameter.drive.routePathLenght = turf.length(
-          this.routePath
-        );
-        this.$emit('update:trackingIteration', this.trackingIteration);
+      if (this.trackingManager && this.trackingManager.iteration) {
+        this.trackingManager.iteration.parameter.drive.routePath =
+          this.routePath;
+        this.trackingManager.iteration.parameter.drive.routePathLenght =
+          turf.length(this.routePath);
+        this.trackingManager.saveIteration();
       }
     });
   }
@@ -957,9 +951,9 @@ export default class DriveToLocation extends Vue {
     }
 
     this.initTrackingData();
-    if (this.trackingIteration) {
-      this.trackingIteration.parameter.drive.stops++;
-      this.$emit('update:trackingIteration', this.trackingIteration);
+    if (this.trackingManager && this.trackingManager.iteration) {
+      this.trackingManager.iteration.parameter.drive.stops++;
+      this.trackingManager.saveIteration();
     }
   }
 
@@ -1304,15 +1298,16 @@ export default class DriveToLocation extends Vue {
       }
 
       this.initTrackingData();
-      if (this.trackingIteration) {
-        this.trackingIteration.parameter.drive.trackingData = this.trackingData;
-        this.trackingIteration.parameter.drive.distanceToGoal =
+      if (this.trackingManager && this.trackingManager.iteration) {
+        this.trackingManager.iteration.parameter.drive.trackingData =
+          this.trackingData;
+        this.trackingManager.iteration.parameter.drive.distanceToGoal =
           turfUtils.distanceToGoal(this.routePath, this.mapDrivingPoint);
-        this.trackingIteration.parameter.drive.drivenPathLength = turf.length(
-          this.drivenPath
-        );
-        this.trackingIteration.parameter.drive.drivenPath = this.drivenPath;
-        this.$emit('update:trackingIteration', this.trackingIteration);
+        this.trackingManager.iteration.parameter.drive.drivenPathLength =
+          turf.length(this.drivenPath);
+        this.trackingManager.iteration.parameter.drive.drivenPath =
+          this.drivenPath;
+        this.trackingManager.saveIteration();
       }
     }
     this.updateTraceIsRunning = false;

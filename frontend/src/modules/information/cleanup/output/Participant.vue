@@ -11,8 +11,7 @@
     />
     <select-challenge
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
-      v-model:tracking-state="state"
-      v-model:tracking-iteration="iteration"
+      :tracking-manager="trackingManager"
       @play="startGame"
     />
     <drive-to-location
@@ -25,8 +24,7 @@
       :parameter="module.parameter"
       :vehicle="vehicle"
       :vehicle-type="vehicleType"
-      v-model:tracking-state="state"
-      v-model:tracking-iteration="iteration"
+      :tracking-manager="trackingManager"
       v-on:goalReached="goalReached"
     />
     <clean-up-particles
@@ -34,15 +32,13 @@
       :vehicle="vehicle"
       :vehicle-type="vehicleType"
       :trackingData="trackingData"
-      v-model:tracking-state="state"
-      v-model:tracking-iteration="iteration"
+      :tracking-manager="trackingManager"
       @finished="cleanupFinished"
     />
     <show-result
       v-if="gameStep === GameStep.Result && gameState === GameState.Game"
       :particle-state="particleState"
-      v-model:tracking-state="state"
-      v-model:tracking-iteration="iteration"
+      :tracking-manager="trackingManager"
     />
   </div>
 </template>
@@ -65,7 +61,6 @@ import ShowResult from '@/modules/information/cleanup/organisms/ShowResult.vue';
 import ModuleInfo from '@/components/participant/molecules/ModuleInfo.vue';
 import * as formulas from '@/modules/information/cleanup/utils/formulas';
 import * as configCalculation from '@/modules/information/cleanup/utils/configCalculation';
-import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 
 enum GameStep {
@@ -202,16 +197,14 @@ export default class Participant extends Vue {
   onTaskIdChanged(): void {
     if (this.taskId) {
       this.trackingManager = new TrackingManager(this.taskId, {
-        state: TaskParticipantIterationStatesType.IN_PROGRESS,
-        parameter: {
-          gameStep: GameStep.Select,
-          vehicle: {
-            category: this.vehicle,
-            type: this.vehicleType,
-          },
-          trackingData: [],
-          particleState: {},
+        gameStep: GameStep.Select,
+        vehicle: {
+          category: this.vehicle,
+          type: this.vehicleType,
         },
+        trackingData: [],
+        particleState: {},
+        rate: 0,
       });
     }
   }

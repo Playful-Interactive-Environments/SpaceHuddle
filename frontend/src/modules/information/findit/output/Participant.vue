@@ -246,6 +246,14 @@ export default class Participant extends Vue {
       });
       this.trackingManager.setFinishedState(this.module);
     }
+
+    if (
+      this.trackingManager &&
+      this.trackingManager.state &&
+      this.trackingManager.state.parameter.rate < result.stars
+    ) {
+      this.trackingManager.saveState({ rate: result.stars });
+    }
   }
 }
 </script>

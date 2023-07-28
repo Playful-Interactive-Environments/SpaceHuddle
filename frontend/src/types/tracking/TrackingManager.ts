@@ -21,7 +21,7 @@ export class TrackingManager {
     this.deregisterAll();
     taskParticipantService.registerGetList(
       this.taskId,
-      this._updateState,
+      (result: any) => this._updateState(result),
       EndpointAuthorisationType.PARTICIPANT,
       2 * 60
     );
@@ -36,7 +36,7 @@ export class TrackingManager {
   }
 
   deregisterAll(): void {
-    cashService.deregisterAllGet(this._updateState);
+    cashService.deregisterAllGet((result: any) => this._updateState(result));
   }
 
   _updateState(stateList: TaskParticipantState[]): void {
