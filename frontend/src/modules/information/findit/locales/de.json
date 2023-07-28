@@ -31,5 +31,12 @@
     "itemSelection": {
       "selectItem": "Zu platzierendes Objekt auswählen"
     }
+  },
+  "statistic": {
+    "levels": "Wie oft wurde welcher Level gespielt?",
+    "rating": "Wie oft wurden wie viele Punkte erzielt?",
+    "play": "Wie oft hat welcher Benutzer einen Level gespielt?",
+    "build": "Wie oft hat welcher Benutzer einen Level erstellt?",
+    "time": "Wie viele Sekunden hat es gedauert, das Level zu beenden?"
   }
 }

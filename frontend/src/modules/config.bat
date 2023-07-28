@@ -29,6 +29,9 @@ for /d %%d in (*.*) do (
                 if exist !modulePath!output\ModeratorConfig.vue (
                     echo            "moderatorConfig": "output/ModeratorConfig",  >> .\..\config.json
                 )
+                if exist !modulePath!output\ModuleStatistic.vue (
+                    echo            "moduleStatistic": "output/ModuleStatistic",  >> .\..\config.json
+                )
 
                 if exist !modulePath!locales (
                     cd !modulePath!locales

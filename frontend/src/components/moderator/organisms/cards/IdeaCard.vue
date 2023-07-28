@@ -83,6 +83,7 @@
                     </template>
                   </el-dropdown>
                 </el-dropdown-item>
+                <slot name="dropdown"></slot>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -143,6 +144,7 @@ export enum CollapseIdeas {
     'update:isSelected',
     'update:collapseIdeas',
     'update:fadeIn',
+    'customCommand',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -338,6 +340,8 @@ export default class IdeaCard extends Vue {
           .putIdea(this.idea, this.authHeaderTyp, false)
           .then((idea) => (this.idea.state = idea.state));
         break;
+      default:
+        this.$emit('customCommand', command);
     }
   }
 

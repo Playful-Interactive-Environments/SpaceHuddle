@@ -5,7 +5,7 @@
     :data="resultData"
     :height="100"
     :options="{
-      maintainAspectRatio: false,
+      maintainAspectRatio: true,
       animation: {
         duration: 0,
       },
@@ -56,11 +56,6 @@ export default class TaskStatistic extends Vue {
   @Prop() taskId!: string;
   stateList: TaskParticipantState[] = [];
   displayLabels = false;
-
-  chartData: any = {
-    labels: [],
-    datasets: [],
-  };
 
   mounted(): void {
     document.fonts.onloadingdone = () => {

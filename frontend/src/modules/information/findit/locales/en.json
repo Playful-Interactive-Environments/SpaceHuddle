@@ -31,5 +31,12 @@
     "itemSelection": {
       "selectItem": "select placing item"
     }
+  },
+  "statistic": {
+    "level": "How many times was which level played?",
+    "rating": "How many times how many points were scored?",
+    "play": "How often has which user played a level?",
+    "build": "How often has which user created a level?",
+    "time": "How many seconds did it take to finish the level?"
   }
 }

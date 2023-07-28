@@ -99,7 +99,7 @@ export default class SelectState extends Vue {
             (item) =>
               item.ideaId === ideaId && item.parameter.step === GameStep.Play
           )
-          .sort((a, b) => a.parameter.stars - b.parameter.stars)[0]
+          .sort((a, b) => b.parameter.stars - a.parameter.stars)[0]
     );
     this.calculateResult();
   }

@@ -212,12 +212,17 @@
     v-model:showModal="showRoles"
     :sessionId="sessionId"
   />
-  <el-dialog v-model="showStatistic" width="calc(var(--app-width) * 0.8)">
+  <el-dialog
+    v-model="showStatistic"
+    width="calc(var(--app-width) * 0.8)"
+    :key="statisticComponentLoadIndex"
+  >
     <template #header>
       {{ $t('moderator.view.topicDetails.statistic') }}
       {{ dialogTask.name }}
     </template>
     <TaskStatistic :task-id="dialogTask.id" />
+    <ModuleStatisticComponent :task-id="dialogTask.id" />
   </el-dialog>
 </template>
 
@@ -284,6 +289,7 @@ import TaskStatistic from '@/components/moderator/organisms/statistics/TaskStati
     SessionCode,
     FacilitatorSettings,
     ModuleContentComponent: getEmptyComponent(),
+    ModuleStatisticComponent: getEmptyComponent(),
   },
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -307,6 +313,7 @@ export default class ModeratorTopicDetails extends Vue {
   componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
   showRoles = false;
   showStatistic = false;
+  statisticComponentLoadIndex = 0;
 
   TaskType = TaskType;
   TaskCategory = TaskCategory;
@@ -643,6 +650,7 @@ export default class ModeratorTopicDetails extends Vue {
   dialogTask: Task | null = null;
   taskCommand(task: Task, command: string): void {
     this.dialogTask = task;
+    this.statisticComponentLoadIndex++;
     const activeTask = this.activeTask;
     switch (command) {
       case 'edit':
@@ -696,6 +704,16 @@ export default class ModeratorTopicDetails extends Vue {
         break;
       case 'statistic':
         this.showStatistic = true;
+        getAsyncModule(
+          ModuleComponentType.MODULE_STATISTIC,
+          TaskType[task.taskType],
+          task.modules[0].name
+        ).then((component) => {
+          if (this.$options.components) {
+            this.$options.components['ModuleStatisticComponent'] = component;
+            this.statisticComponentLoadIndex++;
+          }
+        });
         break;
     }
   }

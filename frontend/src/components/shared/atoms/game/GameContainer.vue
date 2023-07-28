@@ -758,6 +758,7 @@ export default class GameContainer extends Vue {
 }
 
 .navigation-overlay {
+  font-size: var(--font-size-xxxlarge);
   position: absolute;
   z-index: 100;
 }
