@@ -65,12 +65,8 @@ import ShowResult from '@/modules/information/cleanup/organisms/ShowResult.vue';
 import ModuleInfo from '@/components/participant/molecules/ModuleInfo.vue';
 import * as formulas from '@/modules/information/cleanup/utils/formulas';
 import * as configCalculation from '@/modules/information/cleanup/utils/configCalculation';
-import * as taskParticipantService from '@/services/task-participant-service';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
-import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
-import { TaskParticipantState } from '@/types/api/TaskParticipantState';
-import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
-import { delay } from '@/utils/wait';
+import { TrackingManager } from '@/types/tracking/TrackingManager';
 
 enum GameStep {
   Select = 'select',
@@ -117,8 +113,7 @@ export default class Participant extends Vue {
   gameState = GameState.Info;
   GameState = GameState;
 
-  iteration: TaskParticipantIteration | null = null;
-  state: TaskParticipantState | null = null;
+  trackingManager!: TrackingManager;
 
   get tutorialList(): string[] {
     switch (this.gameStep) {
@@ -196,6 +191,7 @@ export default class Participant extends Vue {
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
+    if (this.trackingManager) this.trackingManager.deregisterAll();
   }
 
   unmounted(): void {
@@ -205,29 +201,18 @@ export default class Participant extends Vue {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     if (this.taskId) {
-      this.deregisterAll();
-      taskParticipantService.registerGetList(
-        this.taskId,
-        this.updateState,
-        EndpointAuthorisationType.PARTICIPANT,
-        2 * 60
-      );
-      taskParticipantService
-        .postParticipantIteration(this.taskId, {
-          state: TaskParticipantIterationStatesType.IN_PROGRESS,
-          parameter: {
-            gameStep: GameStep.Select,
-            vehicle: {
-              category: this.vehicle,
-              type: this.vehicleType,
-            },
-            trackingData: [],
-            particleState: {},
+      this.trackingManager = new TrackingManager(this.taskId, {
+        state: TaskParticipantIterationStatesType.IN_PROGRESS,
+        parameter: {
+          gameStep: GameStep.Select,
+          vehicle: {
+            category: this.vehicle,
+            type: this.vehicleType,
           },
-        })
-        .then((result) => {
-          this.iteration = result;
-        });
+          trackingData: [],
+          particleState: {},
+        },
+      });
     }
   }
 
@@ -253,9 +238,11 @@ export default class Participant extends Vue {
     this.gameStep = GameStep.Drive;
     this.gameState = GameState.Info;
 
-    if (this.iteration) {
-      this.iteration.parameter.gameStep = GameStep.Drive;
-      this.iteration.parameter.vehicle = vehicle;
+    if (this.trackingManager) {
+      this.trackingManager.saveIteration({
+        gameStep: GameStep.Drive,
+        vehicle: vehicle,
+      });
     }
   }
 
@@ -264,9 +251,11 @@ export default class Participant extends Vue {
     this.gameStep = GameStep.CleanUp;
     this.gameState = GameState.Info;
 
-    if (this.iteration) {
-      this.iteration.parameter.gameStep = GameStep.CleanUp;
-      this.iteration.parameter.trackingData = trackingData;
+    if (this.trackingManager) {
+      this.trackingManager.saveIteration({
+        gameStep: GameStep.CleanUp,
+        trackingData: trackingData,
+      });
     }
   }
 
@@ -275,49 +264,12 @@ export default class Participant extends Vue {
     this.gameStep = GameStep.Result;
     this.gameState = GameState.Info;
 
-    if (this.iteration) {
-      this.iteration.parameter.gameStep = GameStep.Result;
-      this.iteration.parameter.particleState = particleState;
-    }
-    if (
-      this.state &&
-      this.module &&
-      'replayabel' in this.module.parameter &&
-      !this.module.parameter.replayabel
-    ) {
-      this.state.state = TaskParticipantStatesType.FINISHED;
-    }
-  }
-
-  updateState(stateList: TaskParticipantState[]): void {
-    if (stateList.length > 0) {
-      this.state = stateList[0];
-      if (this.state.state === TaskParticipantStatesType.FINISHED) {
-        //
-      }
-    }
-  }
-
-  @Watch('state', { immediate: true, deep: true })
-  onStateChanged(): void {
-    if (this.state) {
-      taskParticipantService.putParticipantState(this.taskId, this.state);
-    }
-  }
-
-  isSavingIterationData = false;
-  @Watch('iteration', { immediate: true, deep: true })
-  async onIterationChanged(): Promise<void> {
-    if (!this.isSavingIterationData) {
-      this.isSavingIterationData = true;
-      await delay(100);
-      if (this.iteration) {
-        await taskParticipantService.putParticipantIteration(
-          this.taskId,
-          this.iteration
-        );
-      }
-      this.isSavingIterationData = false;
+    if (this.trackingManager) {
+      this.trackingManager.saveIteration({
+        gameStep: GameStep.Result,
+        particleState: particleState,
+      });
+      this.trackingManager.setFinishedState(this.module);
     }
   }
 }

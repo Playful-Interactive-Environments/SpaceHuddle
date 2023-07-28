@@ -138,6 +138,13 @@ import CustomParticleContainer from '@/components/shared/atoms/game/CustomPartic
 
 const tutorialType = 'find-it-object';
 
+export interface PlayStateResult {
+  stars: number;
+  time: number;
+  collected: number;
+  total: number;
+}
+
 @Options({
   computed: {
     ObjectSpace() {
@@ -178,6 +185,16 @@ export default class PlayState extends Vue {
   totalCount = 0;
   collectedCount = 0;
   searchPosition: [number, number] = [0, 0];
+  startTime = Date.now();
+
+  get playStateResult(): PlayStateResult {
+    return {
+      stars: (this.collectedCount / this.totalCount) * 3,
+      time: Date.now() - this.startTime,
+      collected: this.collectedCount,
+      total: this.totalCount,
+    };
+  }
 
   get escalationLevelObject(): Placeable[][] {
     const itemList = this.noneCollectableObjects;
@@ -344,7 +361,7 @@ export default class PlayState extends Vue {
   @Watch('placedObjects.length', { immediate: false })
   onPlaceablesCountChanged(): void {
     if (this.totalCount > 0 && this.collectableObjects.length === 0) {
-      this.$emit('playFinished');
+      this.$emit('playFinished', this.playStateResult);
     }
   }
 
@@ -412,7 +429,7 @@ export default class PlayState extends Vue {
         type: 'error',
         center: true,
         showClose: true,
-        onClose: () => this.$emit('playFinished'),
+        onClose: () => this.$emit('playFinished', this.playStateResult),
       });
     }
   }

@@ -4,13 +4,21 @@
       {{ $t('module.information.findit.participant.newLevel') }}
     </div>
     <div
-      class="link"
+      class="link media"
       :class="{ own: isOwnLevel(idea) }"
       v-for="idea of ideas"
       :key="idea.id"
       @click="levelSelected(idea)"
     >
-      {{ idea.keywords }}
+      <div class="media-content">{{ idea.keywords }}</div>
+      <div class="media-right">
+        <el-rate
+          v-model="mapping[idea.id]"
+          size="large"
+          :max="3"
+          :disabled="true"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -24,6 +32,9 @@ import * as cashService from '@/services/cash-service';
 import * as authService from '@/services/auth-service';
 import * as ideaService from '@/services/idea-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as taskParticipantService from '@/services/task-participant-service';
+import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
+import { GameStep } from '@/modules/information/findit/output/Participant.vue';
 
 @Options({
   components: {},
@@ -33,9 +44,20 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 export default class SelectState extends Vue {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];
+  result: TaskParticipantIterationStep[] = [];
+  mapping: { [key: string]: number } = {};
 
   unmounted(): void {
     cashService.deregisterAllGet(this.updateIdeas);
+    cashService.deregisterAllGet(this.updateIterationSteps);
+  }
+
+  getStarsForIdea(ideaId: string): number {
+    if (this.result) {
+      const resultItem = this.result.find((item) => item.ideaId === ideaId);
+      if (resultItem) return resultItem.parameter.stars;
+    }
+    return 0;
   }
 
   @Watch('taskId', { immediate: true })
@@ -49,11 +71,47 @@ export default class SelectState extends Vue {
         EndpointAuthorisationType.PARTICIPANT,
         3
       );
+      taskParticipantService.registerGetIterationStepList(
+        this.taskId,
+        this.updateIterationSteps,
+        EndpointAuthorisationType.PARTICIPANT,
+        2 * 60
+      );
     }
   }
 
   updateIdeas(ideas: Idea[]): void {
     this.ideas = ideas;
+    this.calculateResult();
+  }
+
+  updateIterationSteps(steps: TaskParticipantIterationStep[]): void {
+    const ideaList = steps
+      .map((item) => item.ideaId)
+      .filter(
+        (value, index, self) =>
+          self.findIndex((item) => item === value) === index
+      );
+    this.result = ideaList.map(
+      (ideaId) =>
+        steps
+          .filter(
+            (item) =>
+              item.ideaId === ideaId && item.parameter.step === GameStep.Play
+          )
+          .sort((a, b) => a.parameter.stars - b.parameter.stars)[0]
+    );
+    this.calculateResult();
+  }
+
+  calculateResult(): void {
+    if (this.ideas && this.result) {
+      const mapping: { [key: string]: number } = {};
+      for (const idea of this.ideas) {
+        mapping[idea.id] = this.getStarsForIdea(idea.id);
+      }
+      this.mapping = mapping;
+    }
   }
 
   isOwnLevel(level: Idea): boolean {
@@ -62,9 +120,9 @@ export default class SelectState extends Vue {
 
   levelSelected(level: Idea | null) {
     if (!level) {
-      this.$emit('selectionDone', []);
+      this.$emit('selectionDone', [], null);
     } else {
-      this.$emit('selectionDone', level.parameter as Placeable[]);
+      this.$emit('selectionDone', level.parameter as Placeable[], level.id);
     }
   }
 }
@@ -85,5 +143,10 @@ export default class SelectState extends Vue {
 
 .own {
   background-color: var(--color-yellow);
+}
+
+.el-rate {
+  --el-rate-fill-color: white;
+  --el-rate-disabled-void-color: var(--color-gray-inactive);
 }
 </style>

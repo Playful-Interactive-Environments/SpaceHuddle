@@ -37,16 +37,22 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
 import * as cashService from '@/services/cash-service';
-import BuildState from '@/modules/information/findit/organisms/BuildState.vue';
-import PlayState from '@/modules/information/findit/organisms/PlayState.vue';
+import BuildState, {
+  BuildStateResult,
+} from '@/modules/information/findit/organisms/BuildState.vue';
+import PlayState, {
+  PlayStateResult,
+} from '@/modules/information/findit/organisms/PlayState.vue';
 import SelectState from '@/modules/information/findit/organisms/SelectState.vue';
 import ModuleInfo, {
   ModuleInfoEntryData,
 } from '@/components/participant/molecules/ModuleInfo.vue';
 import Placeable from '@/modules/information/findit/types/Placeable';
 import * as PIXI from 'pixi.js';
+import { TrackingManager } from '@/types/tracking/TrackingManager';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 
-enum GameStep {
+export enum GameStep {
   Select = 'select',
   Build = 'build',
   Play = 'play',
@@ -76,6 +82,7 @@ export default class Participant extends Vue {
   @Prop({ default: {} }) readonly gameConfig!: any;
   module: Module | null = null;
   selectedLevel: Placeable[] = [];
+  selectedLevelId: string | null = null;
   spritesheet!: PIXI.Spritesheet;
 
   // Flag which indicates if the window size has finished calculating.
@@ -86,6 +93,8 @@ export default class Participant extends Vue {
   GameStep = GameStep;
   gameState = GameState.Info;
   GameState = GameState;
+
+  trackingManager!: TrackingManager;
 
   // Vue Callbacks for mounting and unmounting / loading and unloading.
   mounted(): void {
@@ -109,14 +118,27 @@ export default class Participant extends Vue {
   }
 
   unmounted(): void {
-    cashService.deregisterAllGet(this.updateModule);
+    this.deregisterAll();
     PIXI.Assets.unload('/assets/games/forestfires/tutorial/animations.json');
   }
 
-  levelSelected(level: Placeable[]) {
+  deregisterAll(): void {
+    cashService.deregisterAllGet(this.updateModule);
+    if (this.trackingManager) this.trackingManager.deregisterAll();
+  }
+
+  levelSelected(level: Placeable[], levelId: string | null) {
     this.selectedLevel = level;
+    this.selectedLevelId = levelId;
     this.gameState = GameState.Info;
     this.gameStep = level.length === 0 ? GameStep.Build : GameStep.Play;
+
+    if (this.trackingManager) {
+      this.trackingManager.saveIteration({
+        gameStep: this.gameStep,
+        levelId: levelId,
+      });
+    }
   }
 
   // Watch and update the current module in case any changes happen.
@@ -134,6 +156,13 @@ export default class Participant extends Vue {
 
   updateModule(module: Module): void {
     this.module = module;
+  }
+
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    if (this.taskId) {
+      this.trackingManager = new TrackingManager(this.taskId, {});
+    }
   }
 
   // Get the filenames for the tutorial images. Should all have the same file extension!
@@ -173,14 +202,50 @@ export default class Participant extends Vue {
   }
 
   // Callbacks when stages are finished.
-  editFinished(): void {
+  editFinished(newLevelId: string | null, result: BuildStateResult): void {
     this.gameStep = GameStep.Select;
     this.gameState = GameState.Info;
+
+    if (this.trackingManager && newLevelId) {
+      (result as any).step = GameStep.Build;
+      this.trackingManager.createInstanceStep(
+        newLevelId,
+        TaskParticipantIterationStepStatesType.NEUTRAL,
+        result
+      );
+    }
+
+    if (this.trackingManager) {
+      this.trackingManager.saveIteration({
+        gameStep: this.gameStep,
+        levelId: null,
+      });
+    }
   }
 
-  playFinished(): void {
+  playFinished(result: PlayStateResult): void {
     this.gameStep = GameStep.Select;
     this.gameState = GameState.Info;
+
+    if (this.trackingManager && this.selectedLevelId) {
+      (result as any).step = GameStep.Play;
+      this.trackingManager.createInstanceStep(
+        this.selectedLevelId,
+        result.collected === result.total
+          ? TaskParticipantIterationStepStatesType.CORRECT
+          : TaskParticipantIterationStepStatesType.WRONG,
+        result
+      );
+    }
+    this.selectedLevelId = null;
+
+    if (this.trackingManager) {
+      this.trackingManager.saveIteration({
+        gameStep: this.gameStep,
+        levelId: null,
+      });
+      this.trackingManager.setFinishedState(this.module);
+    }
   }
 }
 </script>
