@@ -54,7 +54,10 @@ export default class SelectState extends Vue {
 
   getStarsForIdea(ideaId: string): number {
     if (this.result) {
-      const resultItem = this.result.find((item) => item.ideaId === ideaId);
+      console.log(this.result);
+      const resultItem = this.result.find(
+        (item) => item && item.ideaId === ideaId
+      );
       if (resultItem) return resultItem.parameter.stars;
     }
     return 0;
@@ -92,15 +95,15 @@ export default class SelectState extends Vue {
         (value, index, self) =>
           self.findIndex((item) => item === value) === index
       );
-    this.result = ideaList.map(
-      (ideaId) =>
-        steps
-          .filter(
-            (item) =>
-              item.ideaId === ideaId && item.parameter.step === GameStep.Play
-          )
-          .sort((a, b) => b.parameter.stars - a.parameter.stars)[0]
-    );
+    for (const ideaId of ideaList) {
+      const played = steps
+        .filter(
+          (item) =>
+            item.ideaId === ideaId && item.parameter.step === GameStep.Play
+        )
+        .sort((a, b) => b.parameter.stars - a.parameter.stars);
+      if (played.length > 0) this.result.push(played[0]);
+    }
     this.calculateResult();
   }
 
