@@ -120,20 +120,18 @@ import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import * as PIXI from 'pixi.js';
 import * as pixiUtil from '@/utils/pixi';
-import { TaskParticipantState } from '@/types/api/TaskParticipantState';
-import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import { TrackingManager } from '@/types/tracking/TrackingManager';
 
 const resultTabName = 'result';
 
 @Options({
   components: { GameObject, GameContainer },
-  emits: ['update:trackingState', 'update:trackingIteration'],
+  emits: [],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ShowResult extends Vue {
-  @Prop() readonly trackingState!: TaskParticipantState;
-  @Prop() readonly trackingIteration!: TaskParticipantIteration;
+  @Prop() readonly trackingManager!: TrackingManager;
   @Prop({
     default: {
       carbonDioxide: { collectedCount: 0, totalCount: 0 },
@@ -343,21 +341,23 @@ export default class ShowResult extends Vue {
       (sheet) => (this.spritesheet = sheet)
     );
 
-    if (this.trackingState) {
-      //this.trackingState.state = TaskParticipantStatesType.FINISHED;
-      this.trackingState.parameter = {
-        rate: this.successRate,
-      };
-      this.$emit('update:trackingState', this.trackingState);
+    if (
+      this.trackingManager &&
+      this.trackingManager.state &&
+      this.trackingManager.state.parameter.rate < this.successRate
+    ) {
+      this.trackingManager.saveState({ rate: this.successRate });
     }
 
-    if (this.trackingIteration) {
-      this.trackingIteration.state =
+    if (this.trackingManager && this.trackingManager.iteration) {
+      this.trackingManager.saveIteration(
+        {
+          rate: this.successRate,
+        },
         this.successRate >= 2
           ? TaskParticipantIterationStatesType.WIN
-          : TaskParticipantIterationStatesType.LOOS;
-      this.trackingIteration.parameter.rate = this.successRate;
-      this.$emit('update:trackingIteration', this.trackingIteration);
+          : TaskParticipantIterationStatesType.LOOS
+      );
     }
   }
 

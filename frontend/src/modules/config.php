@@ -47,6 +47,8 @@ function createDetailConfig($path) {
             $detailConfig['moderatorConfig'] = "output/ModeratorConfig";
         if (in_array("Participant.vue", $organisms))
             $detailConfig['participant'] = "output/Participant";
+        if (in_array("ModuleStatistic.vue", $organisms))
+            $detailConfig['moduleStatistic'] = "output/ModuleStatistic";
     }
 
     $settingFiles = scandir($path);

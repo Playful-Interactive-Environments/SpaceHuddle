@@ -7,6 +7,9 @@
       '--game-width': `${gameWidth}px`,
       '--game-height': `${gameHeight}px`,
     }"
+    @mouseup="endPan"
+    @mouseout="endPan"
+    @touchend="endPan"
   >
     <Application
       ref="pixi"
@@ -41,10 +44,7 @@
       <font-awesome-icon
         icon="circle-chevron-right"
         @mousedown="beginPan([-1, 0])"
-        @mouseup="endPan"
-        @mouseout="endPan"
         @touchstart="beginPan([-1, 0])"
-        @touchend="endPan"
       />
     </div>
     <div
@@ -57,10 +57,7 @@
       <font-awesome-icon
         icon="circle-chevron-left"
         @mousedown="beginPan([1, 0])"
-        @mouseup="endPan"
-        @mouseout="endPan"
         @touchstart="beginPan([1, 0])"
-        @touchend="endPan"
       />
     </div>
     <div
@@ -73,10 +70,7 @@
       <font-awesome-icon
         icon="circle-chevron-up"
         @mousedown="beginPan([0, 1])"
-        @mouseup="endPan"
-        @mouseout="endPan"
         @touchstart="beginPan([0, 1])"
-        @touchend="endPan"
       />
     </div>
     <div
@@ -89,10 +83,7 @@
       <font-awesome-icon
         icon="circle-chevron-down"
         @mousedown="beginPan([0, -1])"
-        @mouseup="endPan"
-        @mouseout="endPan"
         @touchstart="beginPan([0, -1])"
-        @touchend="endPan"
       />
     </div>
   </div>
@@ -679,6 +670,7 @@ export default class GameContainer extends Vue {
 
   syncRenderView(): void {
     for (const gameObject of this.gameObjects) {
+      gameObject.checkTrigger();
       gameObject.syncronize();
     }
   }
@@ -766,6 +758,7 @@ export default class GameContainer extends Vue {
 }
 
 .navigation-overlay {
+  font-size: var(--font-size-xxxlarge);
   position: absolute;
   z-index: 100;
 }

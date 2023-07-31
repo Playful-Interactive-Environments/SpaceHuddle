@@ -182,6 +182,12 @@ export interface BuildState {
   currentCount: number;
 }
 
+export interface BuildStateResult {
+  time: number;
+  total: number;
+  categoryCount: { [key: string]: number };
+}
+
 @Options({
   computed: {
     ObjectSpace() {
@@ -219,6 +225,21 @@ export default class ForestFireEdit extends Vue {
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
   showLevelSettings = false;
   selectedObject: GameObject | null = null;
+  startTime = Date.now();
+
+  get buildResult(): BuildStateResult {
+    const categoryCount: { [key: string]: number } = {};
+    for (const categoryName of Object.keys(this.gameConfig)) {
+      categoryCount[categoryName] = this.placedObjects.filter(
+        (item) => item.type === categoryName
+      ).length;
+    }
+    return {
+      time: Date.now() - this.startTime,
+      total: this.placedObjects.length,
+      categoryCount: categoryCount,
+    };
+  }
 
   get ObjectsForActiveType(): string[] {
     if (this.activeObjectType) {
@@ -342,8 +363,8 @@ export default class ForestFireEdit extends Vue {
     return pixiUtil.getSpriteAspect(spriteSheet, objectName);
   }
 
-  saveLevel(name: string) {
-    ideaService.postIdea(
+  async saveLevel(name: string): Promise<void> {
+    const idea = await ideaService.postIdea(
       this.taskId,
       {
         keywords: name,
@@ -359,7 +380,7 @@ export default class ForestFireEdit extends Vue {
       },
       EndpointAuthorisationType.PARTICIPANT
     );
-    this.$emit('editFinished');
+    this.$emit('editFinished', idea.id, this.buildResult);
   }
 
   clickPosition: [number, number] = [0, 0];
@@ -402,6 +423,8 @@ export default class ForestFireEdit extends Vue {
           position: position,
           rotation: 0,
           scale: 1,
+          escalationSteps: [],
+          escalationStepIndex: 0,
         };
         this.placedObjects.push(placeable);
       }

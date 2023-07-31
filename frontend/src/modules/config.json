@@ -84,7 +84,9 @@
        },  
        "findit": {  
            "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
+           "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
              "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": false,  
            "path": "information/findit"  
@@ -121,6 +123,7 @@
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
+           "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
              "icon": "times",  "iconPrefix": "fas",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
            "path": "none",  

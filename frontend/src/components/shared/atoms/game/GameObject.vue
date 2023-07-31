@@ -42,6 +42,7 @@ import * as turf from '@turf/turf';
     'sizeChanged',
     'collision',
     'click',
+    'handleTrigger',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -66,6 +67,7 @@ export default class GameObject extends Vue {
   @Prop() readonly source!: any;
   @Prop({ default: true }) usePhysic!: boolean;
   @Prop({ default: true }) moveWithBackground!: boolean;
+  @Prop({ default: null }) triggerDelay!: number | null;
   body!: typeof Matter.Body;
   position: [number, number] = [0, 0];
   rotationValue = 0;
@@ -75,6 +77,7 @@ export default class GameObject extends Vue {
   readonly defaultSize = 50;
   displayWidth = this.defaultSize;
   displayHeight = this.defaultSize;
+  triggerStartTime: number | null = null;
 
   get displayX(): number {
     return this.position[0] - this.offset[0];
@@ -394,6 +397,25 @@ export default class GameObject extends Vue {
         );
       }
     }
+  }
+
+  @Watch('triggerDelay', { immediate: true })
+  startTriggerListener(): void {
+    if (this.triggerDelay) this.triggerStartTime = Date.now();
+    else this.triggerStartTime = null;
+  }
+
+  checkTrigger(): boolean {
+    if (
+      this.triggerDelay &&
+      this.triggerStartTime &&
+      this.triggerStartTime + this.triggerDelay * 1000 < Date.now()
+    ) {
+      this.startTriggerListener();
+      this.$emit('handleTrigger', this);
+      return true;
+    }
+    return false;
   }
 }
 </script>

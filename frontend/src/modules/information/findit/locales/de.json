@@ -14,6 +14,7 @@
     "newLevel": "neues Level erstellen",
     "everythingPlaced": "Alles platziert",
     "maxCountPlaced": "Maximale Anzahl des Objekttyps platziert",
+    "lost": "Du hast leider zu lange ein gefährliches Objekt nicht gefunden, das nun einen Schaden verursacht hat. Du hast verloren, bitte versuche es noch einmal.",
     "tutorial": {
       "click": "Klicke auf einen beliebigen Platz in der Szene um eine Auswahl an Objekten zu bekommen.",
       "place": "Wähle eines der Objekte aus um es an dem ausgewählten Ort zu platzieren.",
@@ -30,5 +31,12 @@
     "itemSelection": {
       "selectItem": "Zu platzierendes Objekt auswählen"
     }
+  },
+  "statistic": {
+    "levels": "Wie oft wurde welcher Level gespielt?",
+    "rating": "Wie oft wurden wie viele Punkte erzielt?",
+    "play": "Wie oft hat welcher Benutzer einen Level gespielt?",
+    "build": "Wie oft hat welcher Benutzer einen Level erstellt?",
+    "time": "Wie viele Sekunden hat es gedauert, das Level zu beenden?"
   }
 }

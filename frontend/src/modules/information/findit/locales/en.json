@@ -11,6 +11,7 @@
   "participant": {
     "everythingPlaced": "everything placed",
     "maxCountPlaced": "max objects of type placed",
+    "lost": "You have unfortunately not found a dangerous object for too long, which has now caused a damage. You have lost, please try again.",
     "newLevel": "create new level",
     "place": "Place",
     "play": "Start",
@@ -30,5 +31,12 @@
     "itemSelection": {
       "selectItem": "select placing item"
     }
+  },
+  "statistic": {
+    "level": "How many times was which level played?",
+    "rating": "How many times how many points were scored?",
+    "play": "How often has which user played a level?",
+    "build": "How often has which user created a level?",
+    "time": "How many seconds did it take to finish the level?"
   }
 }

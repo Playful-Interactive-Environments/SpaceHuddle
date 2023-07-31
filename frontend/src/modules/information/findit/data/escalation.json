@@ -1,0 +1,379 @@
+{
+    "smoke": {
+        "spriteSheet": "/assets/games/forestfires/escalation/smoke.json",
+        "lifetime": {
+            "min": 15,
+            "max": 25
+        },
+        "frequency": 0.008,
+        "emitterLifetime": 0,
+        "maxParticles": 2000,
+        "addAtBack": false,
+        "pos": {
+            "x": 0,
+            "y": 0
+        },
+        "spawnChance": 0.3,
+        "behaviors": [
+            {
+                "type": "alpha",
+                "config": {
+                    "alpha": {
+                        "list": [
+                            {
+                                "value": 0,
+                                "time": 0
+                            },
+                            {
+                                "value": 0.05,
+                                "time": 0.03
+                            },
+                            {
+                                "value": 0.1,
+                                "time": 0.3
+                            },
+                            {
+                                "value": 0.05,
+                                "time": 0.5
+                            },
+                            {
+                                "value": 0,
+                                "time": 1
+                            }
+                        ],
+                        "isStepped": false
+                    }
+                }
+            },
+            {
+                "type": "moveSpeed",
+                "config": {
+                    "speed": {
+                        "list": [
+                            {
+                                "value": 10,
+                                "time": 0
+                            },
+                            {
+                                "value": 20,
+                                "time": 0.7
+                            },
+                            {
+                                "value": 30,
+                                "time": 1
+                            }
+                        ],
+                        "isStepped": true
+                    },
+                    "minMult": 1
+                }
+            },
+            {
+                "type": "scale",
+                "config": {
+                    "scale": {
+                        "list": [
+                            {
+                                "value": 0.01,
+                                "time": 0
+                            },
+                            {
+                                "value": 0.45,
+                                "time": 1
+                            }
+                        ],
+                        "isStepped": false
+                    },
+                    "minMult": 1
+                }
+            },
+            {
+                "type": "color",
+                "config": {
+                    "color": {
+                        "list": [
+                            {
+                                "value": "666666",
+                                "time": 0
+                            },
+                            {
+                                "value": "dddddd",
+                                "time": 1
+                            }
+                        ],
+                        "isStepped": false
+                    }
+                }
+            },
+            {
+                "type": "rotation",
+                "config": {
+                    "accel": 20,
+                    "minSpeed": 20,
+                    "maxSpeed": 150,
+                    "minStart": 0,
+                    "maxStart": 360
+                }
+            },
+            {
+                "type": "animatedSingle",
+                "config": {
+                    "anim": {
+                        "framerate": -1,
+                        "textures": [
+                            {
+                                "texture": "smoke01.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke02.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke03.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke04.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke05.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke06.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke07.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke08.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke09.png",
+                                "count": 3
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "type": "spawnShape",
+                "config": {
+                    "type": "torus",
+                    "data": {
+                        "x": 0,
+                        "y": 0,
+                        "radius": 10,
+                        "innerRadius": 0,
+                        "affectRotation": false
+                    }
+                }
+            },
+            {
+                "type": "blendMode",
+                "config": {
+                    "blendMode": "screen"
+                }
+            }
+        ]
+    },
+    "fire": {
+        "spriteSheet": "/assets/games/forestfires/escalation/smoke.json",
+        "lifetime": {
+            "min": 2,
+            "max": 2.8
+        },
+        "frequency": 0.005,
+        "emitterLifetime": 0,
+        "maxParticles": 1000,
+        "addAtBack": false,
+        "pos": {
+            "x": 0,
+            "y": 0
+        },
+        "behaviors": [
+            {
+                "type": "alpha",
+                "config": {
+                    "alpha": {
+                        "list": [
+                            {
+                                "value": 0.0,
+                                "time": 0
+                            },
+                            {
+                                "value": 0.3,
+                                "time": 0.1
+                            },
+                            {
+                                "value": 0,
+                                "time": 0.6
+                            },
+                            {
+                                "value": 0,
+                                "time": 0.7
+                            },
+                            {
+                                "value": 0.1,
+                                "time": 0.71
+                            },
+                            {
+                                "value": 0,
+                                "time": 1
+                            }
+                        ],
+                        "isStepped": false
+                    }
+                }
+            },
+            {
+                "type": "moveSpeed",
+                "config": {
+                    "speed": {
+                        "list": [
+                            {
+                                "value": 50,
+                                "time": 0
+                            },
+                            {
+                                "value": 45,
+                                "time": 0.7
+                            },
+                            {
+                                "value": 45,
+                                "time": 1
+                            }
+                        ],
+                        "isStepped": true
+                    },
+                    "minMult": 1
+                }
+            },
+            {
+                "type": "scale",
+                "config": {
+                    "scale": {
+                        "list": [
+                            {
+                                "value": 0.05,
+                                "time": 0
+                            },
+                            {
+                                "value": 0.25,
+                                "time": 1
+                            }
+                        ],
+                        "isStepped": false
+                    },
+                    "minMult": 1
+                }
+            },
+            {
+                "type": "color",
+                "config": {
+                    "color": {
+                        "list": [
+                            {
+                                "value": "fff191",
+                                "time": 0
+                            },
+                            {
+                                "value": "ff622c",
+                                "time": 0.6
+                            },
+                            {
+                                "value": "444444",
+                                "time": 0.7
+                            },
+                            {
+                                "value": "cccccc",
+                                "time": 1
+                            }
+                        ],
+                        "isStepped": false
+                    }
+                }
+            },
+            {
+                "type": "rotation",
+                "config": {
+                    "accel": 0,
+                    "minSpeed": 10,
+                    "maxSpeed": 50,
+                    "minStart": 0,
+                    "maxStart": 360
+                }
+            },
+            {
+                "type": "animatedSingle",
+                "config": {
+                    "anim": {
+                        "framerate": -1,
+                        "textures": [
+                            {
+                                "texture": "smoke01.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke02.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke03.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke04.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke05.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke06.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke07.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke08.png",
+                                "count": 3
+                            },
+                            {
+                                "texture": "smoke09.png",
+                                "count": 3
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "type": "spawnShape",
+                "config": {
+                    "type": "torus",
+                    "data": {
+                        "x": 0,
+                        "y": 0,
+                        "radius": 10,
+                        "innerRadius": 0,
+                        "affectRotation": false
+                    }
+                }
+            },
+            {
+                "type": "blendMode",
+                "config": {
+                    "blendMode": "hard_light"
+                }
+            }
+        ]
+    }
+}

@@ -212,9 +212,8 @@ import { Doughnut, Bar } from 'vue-chartjs';
 import * as gameConfig from '@/modules/information/cleanup/data/gameConfig.json';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import * as configCalculation from '@/modules/information/cleanup/utils/configCalculation';
-import { TaskParticipantState } from '@/types/api/TaskParticipantState';
-import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
 import { Prop } from 'vue-property-decorator';
+import { TrackingManager } from '@/types/tracking/TrackingManager';
 
 export interface ChartData {
   labels: string[];
@@ -231,12 +230,11 @@ export interface ChartData {
     Doughnut,
     Bar,
   },
-  emits: ['play', 'update:trackingState', 'update:trackingIteration'],
+  emits: ['play'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class SelectChallenge extends Vue {
-  @Prop() readonly trackingState!: TaskParticipantState;
-  @Prop() readonly trackingIteration!: TaskParticipantIteration;
+  @Prop() readonly trackingManager!: TrackingManager;
   chartDataElectricityMix: ChartData = {
     labels: [],
     datasets: [],

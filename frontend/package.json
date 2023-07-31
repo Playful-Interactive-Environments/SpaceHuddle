@@ -15,6 +15,7 @@
     "@fortawesome/vue-fontawesome": "^3.0.3",
     "@pixi-essentials/gradients": "^1.0.1",
     "@pixi/filter-outline": "^5.2.0",
+    "@pixi/particle-emitter": "^5.0.8",
     "@routingjs/osrm": "^0.1.0",
     "@turf/turf": "^6.5.0",
     "@types/matter-js": "^0.18.5",

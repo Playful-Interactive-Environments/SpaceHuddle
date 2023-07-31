@@ -35,6 +35,12 @@
             :clickable="getCollectable(placeable)"
             :source="placeable"
             :mask="getSearchMask(placeable)"
+            :trigger-delay="
+              placeable.escalationSteps.length > placeable.escalationStepIndex
+                ? placeable.escalationSteps[placeable.escalationStepIndex]
+                : null
+            "
+            @handleTrigger="handleEscalation(placeable)"
           >
             <CustomSprite
               :texture="placeable.texture"
@@ -44,6 +50,10 @@
               :object-space="ObjectSpace.RelativeToBackground"
             >
             </CustomSprite>
+            <custom-particle-container
+              v-if="placeable.escalationStepIndex > 0"
+              :config="getConfigForPlaceable(placeable)"
+            />
           </GameObject>
           <GameObject
             v-if="gameWidth > 0"
@@ -103,6 +113,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import * as PIXI from 'pixi.js';
+import * as PIXIParticles from '@pixi/particle-emitter';
 import { Prop, Watch } from 'vue-property-decorator';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer, {
@@ -121,8 +132,18 @@ import * as tutorialService from '@/services/tutorial-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
+import { ElMessage } from 'element-plus';
+import * as escalationConfig from '@/modules/information/findit/data/escalation.json';
+import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
 
 const tutorialType = 'find-it-object';
+
+export interface PlayStateResult {
+  stars: number;
+  time: number;
+  collected: number;
+  total: number;
+}
 
 @Options({
   computed: {
@@ -137,6 +158,7 @@ const tutorialType = 'find-it-object';
     },
   },
   components: {
+    CustomParticleContainer,
     GameObject,
     GameContainer,
     CustomSprite,
@@ -163,6 +185,26 @@ export default class PlayState extends Vue {
   totalCount = 0;
   collectedCount = 0;
   searchPosition: [number, number] = [0, 0];
+  startTime = Date.now();
+
+  get playStateResult(): PlayStateResult {
+    return {
+      stars: (this.collectedCount / this.totalCount) * 3,
+      time: Date.now() - this.startTime,
+      collected: this.collectedCount,
+      total: this.totalCount,
+    };
+  }
+
+  get escalationLevelObject(): Placeable[][] {
+    const itemList = this.noneCollectableObjects;
+    const levelEscalationList = itemList
+      .map((item) => item.escalationStepIndex)
+      .filter((value, index, array) => array.indexOf(value) === index);
+    return levelEscalationList.map((level) =>
+      itemList.filter((item) => item.escalationStepIndex === level)
+    );
+  }
 
   mounted(): void {
     for (const typeName in this.gameConfig) {
@@ -252,6 +294,14 @@ export default class PlayState extends Vue {
       if (!value.type) value.type = this.gameConfig.settings.defaultType;
       const configParameter = this.gameConfig[value.type][value.name];
       await until(() => this.hasTexture(value.type, value.name));
+      const escalationSteps: number[] = [];
+      if (configParameter.escalationLevels) {
+        escalationSteps.push(
+          ...configParameter.escalationLevels.map(
+            (level) => Math.random() * (level.max - level.min) + level.min
+          )
+        );
+      }
       const placeable: Placeable = {
         uuid: uuidv4(),
         id: 0,
@@ -263,6 +313,8 @@ export default class PlayState extends Vue {
         position: value.position,
         rotation: value.rotation,
         scale: value.scale,
+        escalationSteps: escalationSteps,
+        escalationStepIndex: 0,
       };
       this.placedObjects.push(placeable);
     }
@@ -309,7 +361,7 @@ export default class PlayState extends Vue {
   @Watch('placedObjects.length', { immediate: false })
   onPlaceablesCountChanged(): void {
     if (this.totalCount > 0 && this.collectableObjects.length === 0) {
-      this.$emit('playFinished');
+      this.$emit('playFinished', this.playStateResult);
     }
   }
 
@@ -367,6 +419,30 @@ export default class PlayState extends Vue {
 
   initRenderer(renderer: PIXI.Renderer): void {
     this.renderer = renderer;
+  }
+
+  handleEscalation(placeable: Placeable): void {
+    placeable.escalationStepIndex++;
+    if (placeable.escalationStepIndex >= placeable.escalationSteps.length) {
+      ElMessage({
+        message: this.$t('module.information.findit.participant.lost'),
+        type: 'error',
+        center: true,
+        showClose: true,
+        onClose: () => this.$emit('playFinished', this.playStateResult),
+      });
+    }
+  }
+
+  getConfigForPlaceable(
+    placeable: Placeable
+  ): PIXIParticles.EmitterConfigV3 | null {
+    const typeConfig = this.gameConfig[placeable.type].settings;
+    let shapeIndex = placeable.escalationStepIndex - 1;
+    if (shapeIndex < 0) return null;
+    if (shapeIndex >= typeConfig.escalationShape.length)
+      shapeIndex = typeConfig.escalationShape.length - 1;
+    return escalationConfig[typeConfig.escalationShape[shapeIndex]];
   }
 }
 </script>
