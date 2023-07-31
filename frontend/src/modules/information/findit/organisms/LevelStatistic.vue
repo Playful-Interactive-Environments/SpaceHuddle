@@ -3,7 +3,7 @@
     v-for="(chartData, index) in barChartDataList"
     :key="index"
     :data="chartData.data"
-    :height="100"
+    :height="80"
     :options="{
       maintainAspectRatio: true,
       animation: {
@@ -95,14 +95,14 @@ export default class ModuleStatistic extends Vue {
           null,
           null,
           this.updateIdeas,
-          EndpointAuthorisationType.PARTICIPANT,
+          EndpointAuthorisationType.MODERATOR,
           2 * 60
         );
       }
       taskParticipantService.registerGetIterationStepList(
         this.taskId,
         this.updateIterationSteps,
-        EndpointAuthorisationType.PARTICIPANT,
+        EndpointAuthorisationType.MODERATOR,
         2 * 60
       );
     }
