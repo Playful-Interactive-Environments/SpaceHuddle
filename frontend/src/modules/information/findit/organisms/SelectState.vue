@@ -54,7 +54,6 @@ export default class SelectState extends Vue {
 
   getStarsForIdea(ideaId: string): number {
     if (this.result) {
-      console.log(this.result);
       const resultItem = this.result.find(
         (item) => item && item.ideaId === ideaId
       );
