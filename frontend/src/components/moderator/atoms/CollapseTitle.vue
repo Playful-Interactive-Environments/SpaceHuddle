@@ -27,7 +27,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import { Avatar } from '@/types/api/Participant';
+import { Avatar, convertAvatarToString } from '@/types/api/Participant';
 
 @Options({
   components: {},
@@ -40,7 +40,7 @@ export default class CollapseTitle extends Vue {
   get displayAvatar(): boolean {
     if (this.avatar) {
       const avatarDisplayText = this.avatar
-        .map((avatar) => `${avatar.symbol}${avatar.color}`)
+        .map((avatar) => convertAvatarToString(avatar))
         .join(' ');
       return this.text == avatarDisplayText;
     }

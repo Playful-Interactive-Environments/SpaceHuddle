@@ -1,9 +1,6 @@
 <template>
   <header class="media">
-    <font-awesome-icon
-      :icon="getIconName()"
-      class="media-left logo"
-    />
+    <font-awesome-icon :icon="getIconName()" class="media-left logo" />
     <span class="media-content">
       <slot></slot>
     </span>
@@ -12,12 +9,11 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 @Options({
-  components: {FontAwesomeIcon},
+  components: { FontAwesomeIcon },
 })
-
 export default class PublicHeader extends Vue {
   getIconName(): string[] {
     return process.env.VUE_APP_THEME == 'ecopolis'

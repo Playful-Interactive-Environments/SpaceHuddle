@@ -47,7 +47,7 @@ import SelectState from '@/modules/information/findit/organisms/SelectState.vue'
 import ModuleInfo, {
   ModuleInfoEntryData,
 } from '@/components/participant/molecules/ModuleInfo.vue';
-import Placeable from '@/modules/information/findit/types/Placeable';
+import * as placeable from '@/modules/information/findit/types/Placeable';
 import * as PIXI from 'pixi.js';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
@@ -81,7 +81,7 @@ export default class Participant extends Vue {
   @Prop({ default: '' }) readonly backgroundClass!: string;
   @Prop({ default: {} }) readonly gameConfig!: any;
   module: Module | null = null;
-  selectedLevel: Placeable[] = [];
+  selectedLevel: placeable.PlaceableBase[] = [];
   selectedLevelId: string | null = null;
   spritesheet!: PIXI.Spritesheet;
 
@@ -127,7 +127,7 @@ export default class Participant extends Vue {
     if (this.trackingManager) this.trackingManager.deregisterAll();
   }
 
-  levelSelected(level: Placeable[], levelId: string | null) {
+  levelSelected(level: placeable.PlaceableBase[], levelId: string | null) {
     this.selectedLevel = level;
     this.selectedLevelId = levelId;
     this.gameState = GameState.Info;

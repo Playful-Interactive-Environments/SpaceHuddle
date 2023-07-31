@@ -100,8 +100,8 @@ export default class ModeratorNavigationLayout extends Vue {
 
   getIconName(): string[] {
     return process.env.VUE_APP_THEME == 'ecopolis'
-        ? ['fac', 'EcopolisLogoWithName']
-        : ['fac', 'logoWithName'];
+      ? ['fac', 'EcopolisLogoWithName']
+      : ['fac', 'logoWithName'];
   }
 }
 </script>

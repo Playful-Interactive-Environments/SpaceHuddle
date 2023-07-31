@@ -521,7 +521,9 @@ export default class ModeratorTopicDetails extends Vue {
     )
       return true;
     return !!this.tasks.find(
-      (task) => TaskType[task.taskType] === TaskType.BRAINSTORMING
+      (task) =>
+        TaskType[task.taskType] === TaskType.BRAINSTORMING ||
+        TaskType[task.taskType] === TaskType.INFORMATION
     );
   }
 
@@ -768,7 +770,7 @@ export default class ModeratorTopicDetails extends Vue {
 .is-disabled {
   .taskType {
     //color: var(--el-text-color-placeholder);
-    color: var(--color-darkblue-dark);
+    color: var(--color-dark-contrast-dark);
   }
   img {
     -webkit-filter: grayscale(1); /* Webkit */

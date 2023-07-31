@@ -120,11 +120,10 @@ import GameContainer, {
   BackgroundPosition,
   BackgroundMovement,
 } from '@/components/shared/atoms/game/GameContainer.vue';
-import Placeable from '@/modules/information/findit/types/Placeable';
+import * as placeable from '@/modules/information/findit/types/Placeable';
 import * as pixiUtil from '@/utils/pixi';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
-import { v4 as uuidv4 } from 'uuid';
 import { until } from '@/utils/wait';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
@@ -143,6 +142,7 @@ export interface PlayStateResult {
   time: number;
   collected: number;
   total: number;
+  itemList: placeable.PlaceableBase[];
 }
 
 @Options({
@@ -171,16 +171,17 @@ export interface PlayStateResult {
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PlayState extends Vue {
   @Prop() readonly taskId!: string;
-  @Prop({ default: [] }) readonly levelData!: Placeable[];
+  @Prop({ default: [] }) readonly levelData!: placeable.PlaceableBase[];
   @Prop({ default: {} }) readonly gameConfig!: any;
   renderer!: PIXI.Renderer;
   gameWidth = 0;
   gameHeight = 0;
   showToolbox = false;
   tutorialSteps: Tutorial[] = [];
-  collectedPlaceable: Placeable | null = null;
+  collectedPlaceable: placeable.Placeable | null = null;
 
-  placedObjects: Placeable[] = [];
+  placedObjects: placeable.Placeable[] = [];
+  collectedObjects: placeable.PlaceableBase[] = [];
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
   totalCount = 0;
   collectedCount = 0;
@@ -189,14 +190,15 @@ export default class PlayState extends Vue {
 
   get playStateResult(): PlayStateResult {
     return {
-      stars: (this.collectedCount / this.totalCount) * 3,
+      stars: Math.floor((this.collectedCount / this.totalCount) * 3),
       time: Date.now() - this.startTime,
       collected: this.collectedCount,
       total: this.totalCount,
+      itemList: this.collectedObjects,
     };
   }
 
-  get escalationLevelObject(): Placeable[][] {
+  get escalationLevelObject(): placeable.Placeable[][] {
     const itemList = this.noneCollectableObjects;
     const levelEscalationList = itemList
       .map((item) => item.escalationStepIndex)
@@ -242,7 +244,7 @@ export default class PlayState extends Vue {
     }
   }
 
-  getSearchMask(placeable: Placeable): any {
+  getSearchMask(placeable: placeable.Placeable): any {
     const config = this.gameConfig[placeable.type].settings;
     if (!config.collectable) {
       return this.$refs.searchMask;
@@ -292,31 +294,14 @@ export default class PlayState extends Vue {
   async onLevelDataChanged(): Promise<void> {
     for (const value of Object.values(this.levelData)) {
       if (!value.type) value.type = this.gameConfig.settings.defaultType;
-      const configParameter = this.gameConfig[value.type][value.name];
       await until(() => this.hasTexture(value.type, value.name));
-      const escalationSteps: number[] = [];
-      if (configParameter.escalationLevels) {
-        escalationSteps.push(
-          ...configParameter.escalationLevels.map(
-            (level) => Math.random() * (level.max - level.min) + level.min
-          )
-        );
-      }
-      const placeable: Placeable = {
-        uuid: uuidv4(),
-        id: 0,
-        type: value.type,
-        name: value.name,
-        texture: this.getTexture(value.type, value.name),
-        width: configParameter.width,
-        shape: configParameter.shape,
-        position: value.position,
-        rotation: value.rotation,
-        scale: value.scale,
-        escalationSteps: escalationSteps,
-        escalationStepIndex: 0,
-      };
-      this.placedObjects.push(placeable);
+      this.placedObjects.push(
+        placeable.convertToDetailData(
+          value,
+          this.gameConfig,
+          this.getTexture(value.type, value.name)
+        )
+      );
     }
     this.totalCount = this.collectableObjects.length;
   }
@@ -346,13 +331,13 @@ export default class PlayState extends Vue {
     return pixiUtil.getSpriteAspect(spriteSheet, objectName);
   }
 
-  get collectableObjects(): Placeable[] {
+  get collectableObjects(): placeable.Placeable[] {
     return this.placedObjects.filter(
       (obj) => this.gameConfig[obj.type].settings.collectable
     );
   }
 
-  get noneCollectableObjects(): Placeable[] {
+  get noneCollectableObjects(): placeable.Placeable[] {
     return this.placedObjects.filter(
       (obj) => !this.gameConfig[obj.type].settings.collectable
     );
@@ -381,20 +366,23 @@ export default class PlayState extends Vue {
     return null;
   }
 
-  getCollectable(placeable: Placeable): boolean {
+  getCollectable(placeable: placeable.Placeable): boolean {
     const config = this.gameConfig[placeable.type].settings;
     return config.collectable;
   }
 
-  destroyPlaceable(placeable: Placeable): void {
-    const config = this.gameConfig[placeable.type].settings;
+  destroyPlaceable(value: placeable.Placeable): void {
+    const config = this.gameConfig[value.type].settings;
     if (config.collectable) {
-      if (config.explanationText) this.collectedPlaceable = placeable;
-      const id = placeable.id;
+      if (config.explanationText) this.collectedPlaceable = value;
+      const id = value.id;
       const index = this.placedObjects.findIndex((p) => p.id === id);
-      if (index > -1) this.placedObjects.splice(index, 1);
+      if (index > -1) {
+        this.collectedObjects.push(placeable.convertToBase(value));
+        this.placedObjects.splice(index, 1);
+      }
       this.collectedCount++;
-      const tutorialStepName = `${placeable.type}-${this.collectedPlaceableConfig.explanationKey}`;
+      const tutorialStepName = `${value.type}-${this.collectedPlaceableConfig.explanationKey}`;
       if (!this.tutorialSteps.find((item) => item.step === tutorialStepName)) {
         this.showToolbox = true;
         const tutorialItem: Tutorial = {
@@ -421,7 +409,7 @@ export default class PlayState extends Vue {
     this.renderer = renderer;
   }
 
-  handleEscalation(placeable: Placeable): void {
+  handleEscalation(placeable: placeable.Placeable): void {
     placeable.escalationStepIndex++;
     if (placeable.escalationStepIndex >= placeable.escalationSteps.length) {
       ElMessage({
@@ -435,7 +423,7 @@ export default class PlayState extends Vue {
   }
 
   getConfigForPlaceable(
-    placeable: Placeable
+    placeable: placeable.Placeable
   ): PIXIParticles.EmitterConfigV3 | null {
     const typeConfig = this.gameConfig[placeable.type].settings;
     let shapeIndex = placeable.escalationStepIndex - 1;

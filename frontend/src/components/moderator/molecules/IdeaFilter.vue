@@ -403,7 +403,7 @@ export default class IdeaFilter extends Vue {
 }
 
 .disabled {
-  color: var(--color-purple);
+  color: var(--color-highlight);
 }
 
 .el-select,

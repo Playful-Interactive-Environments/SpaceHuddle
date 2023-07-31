@@ -26,26 +26,26 @@
 $dialog-padding: 30px;
 
 /* theme color */
-/*$--color-primary: #1d2948!default;
+/*$--color-primary: #{$color-dark-contrast}!default;
 
 $--colors: (
         "primary": (
-                "base": #1d2948,
+                "base": #{$color-dark-contrast},
         ),
         "success": (
-                "base": #01cf9e,
+                "base": #{$color-brainstorming},
         ),
         "warning": (
-                "base": #f3a40a,
+                "base": #{$color-informing},
         ),
         "danger": (
-                "base": #d355b5,
+                "base": #{$color-highlight},
         ),
         "error": (
-                "base": #fe6e5d,
+                "base": #{$color-evaluating},
         ),
         "info": (
-                "base": #1d2948,
+                "base": #{$color-structuring},
         ),
 );*/
 
@@ -137,6 +137,7 @@ $--font-size: (
                 padding: 10px var(--el-dialog-padding-primary);
                 max-height: calc(100vh - var(--el-dialog-margin-top) - 5rem);
                 overflow: auto;
+                max-width: 95vw;
         }
         &__footer {
                 .el-form-item--default {
@@ -254,7 +255,7 @@ $--font-size: (
                 --el-button-hover-bg-color: var(--color-brainstorming);
                 --el-button-hover-border-color: var(--color-brainstorming);
                 --el-button-active-bg-color: var(--color-brainstorming);
-                --el-button-active-border-color: var(---color-mint);
+                --el-button-active-border-color: var(---color-brainstorming);
                 --el-button-disabled-text-color: var(--el-color-white);
                 --el-button-disabled-bg-color: var(--color-brainstorming);
                 --el-button-disabled-border-color: var(--color-brainstorming);
@@ -290,8 +291,8 @@ $--font-size: (
                 --el-button-hover-text-color: var(--el-color-white);
                 --el-button-hover-bg-color: var(--color-dark-contrast-light);
                 --el-button-hover-border-color: var(--color-dark-contrast-light);
-                --el-button-active-bg-color: var(--color-darkblue-dark);
-                --el-button-active-border-color: var(--color-darkblue-dark);
+                --el-button-active-bg-color: var(--color-dark-contrast-dark);
+                --el-button-active-border-color: var(--color-dark-contrast-dark);
                 --el-button-disabled-text-color: var(--el-color-white);
                 --el-button-disabled-bg-color: var(--color-dark-contrast-light);
                 --el-button-disabled-border-color: var(--color-dark-contrast-light);
@@ -330,8 +331,8 @@ $--font-size: (
                 --el-button-hover-text-color: var(--el-color-white);
                 --el-button-hover-bg-color: var(--color-evaluating-light);
                 --el-button-hover-border-color: var(--color-evaluating-light);
-                --el-button-active-bg-color: var(--color-red-dark);
-                --el-button-active-border-color: var(--color-red-dark);
+                --el-button-active-bg-color: var(--color-evaluation-dark);
+                --el-button-active-border-color: var(--color-evaluation-dark);
                 --el-button-disabled-text-color: var(--el-color-white);
                 --el-button-disabled-bg-color: var(--color-evaluating-light);
                 --el-button-disabled-border-color: var(--color-evaluating-light);
@@ -786,7 +787,7 @@ $--font-size: (
         }
 
         li.active {
-                color: var(--color-purple);
+                color: var(--color-highlight);
                 font-weight: var(--font-weight-bold);
         }
 }

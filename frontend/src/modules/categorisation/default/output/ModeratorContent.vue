@@ -730,8 +730,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 }
 
 .showMore {
-  color: var(--color-purple-dark);
-  border-color: var(--color-purple-dark);
+  color: var(--color-highlight-dark);
+  border-color: var(--color-highlight-dark);
   cursor: pointer;
 }
 

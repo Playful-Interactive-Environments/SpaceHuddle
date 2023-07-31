@@ -163,7 +163,7 @@ import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer, {
   BackgroundMovement,
 } from '@/components/shared/atoms/game/GameContainer.vue';
-import Placeable from '@/modules/information/findit/types/Placeable';
+import * as placeable from '@/modules/information/findit/types/Placeable';
 import { v4 as uuidv4 } from 'uuid';
 import * as pixiUtil from '@/utils/pixi';
 import * as ideaService from '@/services/idea-service';
@@ -186,6 +186,7 @@ export interface BuildStateResult {
   time: number;
   total: number;
   categoryCount: { [key: string]: number };
+  itemList: placeable.PlaceableBase[];
 }
 
 @Options({
@@ -220,7 +221,7 @@ export default class ForestFireEdit extends Vue {
   gameHeight = 0;
   showOptions = false;
 
-  placedObjects: Placeable[] = [];
+  placedObjects: placeable.Placeable[] = [];
   placementState: { [key: string]: BuildState } = {};
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
   showLevelSettings = false;
@@ -238,6 +239,7 @@ export default class ForestFireEdit extends Vue {
       time: Date.now() - this.startTime,
       total: this.placedObjects.length,
       categoryCount: categoryCount,
+      itemList: this.placedObjects.map((item) => placeable.convertToBase(item)),
     };
   }
 
@@ -369,13 +371,7 @@ export default class ForestFireEdit extends Vue {
       {
         keywords: name,
         parameter: this.renderList.map((obj) => {
-          return {
-            type: obj.type,
-            name: obj.name,
-            position: obj.position,
-            rotation: obj.rotation,
-            scale: obj.scale,
-          };
+          return placeable.convertToBase(obj);
         }),
       },
       EndpointAuthorisationType.PARTICIPANT
@@ -412,7 +408,7 @@ export default class ForestFireEdit extends Vue {
           return;
         }
         this.placementState[this.activeObjectName].currentCount++;
-        const placeable: Placeable = {
+        const placeable: placeable.Placeable = {
           uuid: uuidv4(),
           id: 0,
           type: this.activeObjectType,
@@ -474,8 +470,8 @@ export default class ForestFireEdit extends Vue {
     this.createObject(this.clickPosition);
   }
 
-  get renderList(): Placeable[] {
-    const getSortNumber = (placeable: Placeable): number => {
+  get renderList(): placeable.Placeable[] {
+    const getSortNumber = (placeable: placeable.Placeable): number => {
       return this.gameConfig[placeable.type].settings.order;
     };
     return this.placedObjects.sort(
@@ -558,6 +554,6 @@ export default class ForestFireEdit extends Vue {
 }
 
 .active {
-  background-color: var(--color-yellow);
+  background-color: var(--color-informing);
 }
 </style>

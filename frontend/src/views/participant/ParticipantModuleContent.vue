@@ -33,7 +33,7 @@
           </template>
         </el-tab-pane>
       </el-tabs>
-      <div class="right" v-if="task">
+      <div class="right" v-if="task && timeLeft">
         <div class="uppercase">
           {{ $t('participant.organism.modelDefaultContainer.timeLeft') }}
         </div>
@@ -243,9 +243,11 @@ export default class ParticipantModuleContent extends Vue {
     return ['default'];
   }
 
+  timeLeft: number | null = 0;
   updateTask(task: Task): void {
     if (!this.task) {
       this.task = task;
+      if (task) this.timeLeft = timerService.getRemainingTime(task);
       if (task?.modules) task.modules.forEach((module) => this.setIcon(module));
       this.loadUsedModules();
       this.moduleNameClick(this.moduleNames[0]);

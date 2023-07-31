@@ -52,7 +52,7 @@
       "
       :displayItem="(item) => item.question"
       :hasPublicSlider="hasPublicSlider || !moderatedQuestionFlow"
-      accentColor="var(--color-yellow)"
+      accentColor="var(--color-informing)"
       @changeOrder="dragDone"
       @changeActiveElement="onEditQuestionChanged"
       @homeClicked="homeClicked"

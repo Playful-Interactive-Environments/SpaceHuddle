@@ -196,8 +196,8 @@
         class="ml-2"
         inline-prompt
         style="
-          --el-switch-on-color: var(--color-mint);
-          --el-switch-off-color: var(--color-red);
+          --el-switch-on-color: var(--color-brainstorming);
+          --el-switch-off-color: var(--color-evaluation);
         "
         :active-text="$t('module.information.cleanup.participant.combined')"
         :inactive-text="$t('module.information.cleanup.participant.separate')"
@@ -1399,7 +1399,7 @@ export default class DriveToLocation extends Vue {
 
 .noEntry {
   font-size: var(--font-size-xlarge);
-  color: var(--color-red);
+  color: var(--color-evaluation);
 }
 
 .pin-small {

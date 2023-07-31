@@ -201,7 +201,7 @@ export default class CategoryCard extends Vue {
 
   get categoryColor(): string {
     if (this.category) return this.category.parameter.color;
-    return 'var(--color-darkblue)';
+    return 'var(--color-dark-contrast)';
   }
 
   showDetails(): void {

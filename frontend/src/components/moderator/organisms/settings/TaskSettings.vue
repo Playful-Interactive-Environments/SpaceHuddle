@@ -1562,9 +1562,9 @@ export default class TaskSettings extends Vue {
 }
 
 .showMore {
-  color: var(--color-purple-dark);
-  border-color: var(--color-purple-dark);
-  //background-color: var(--color-purple-light);
+  color: var(--color-highlight-dark);
+  border-color: var(--color-highlight-dark);
+  //background-color: var(--color-highlight-light);
   cursor: pointer;
   height: unset;
   //height: 100%;

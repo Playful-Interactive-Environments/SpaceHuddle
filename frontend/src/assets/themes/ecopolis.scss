@@ -1,7 +1,7 @@
 [theme='ecopolis'] {
-  $color-purple: #d355b5;
-  $color-purple-light: #e086cb;
-  $color-purple-dark: #945d89;
+  $color-highlight: #d355b5;
+  $color-highlight-light: #e086cb;
+  $color-highlight-dark: #945d89;
   $color-structuring: #e7a320;
   $color-structuring-light: #e2d08c;
   $color-structuring-dark: #000000;
@@ -46,9 +46,9 @@
   $home-image: url('~@/assets/illustrations/Ecopolis/Ecopolis_Color.png');
   $home-background: url('~@/assets/illustrations/Ecopolis/EcopolisHomeBG.png');
 
-  --color-purple: #{$color-purple};
-  --color-purple-dark: #{$color-purple-dark};
-  --color-purple-light: #{$color-purple-light};
+  --color-highlight: #{$color-highlight};
+  --color-highlight-dark: #{$color-highlight-dark};
+  --color-highlight-light: #{$color-highlight-light};
   --color-structuring: #{$color-structuring};
   --color-structuring-light: #{$color-structuring-light};
   --color-structuring-dark: #{$color-structuring-dark};

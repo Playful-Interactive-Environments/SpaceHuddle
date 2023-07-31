@@ -10,6 +10,10 @@ export interface Avatar {
   symbol: string;
 }
 
+export function convertAvatarToString(avatar: Avatar): string {
+  return `${avatar.symbol}${avatar.color}`;
+}
+
 export interface Participant {
   participant: {
     id: string;

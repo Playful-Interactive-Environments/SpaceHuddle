@@ -27,7 +27,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
-import Placeable from '@/modules/information/findit/types/Placeable';
+import * as placeable from '@/modules/information/findit/types/Placeable';
 import * as cashService from '@/services/cash-service';
 import * as authService from '@/services/auth-service';
 import * as ideaService from '@/services/idea-service';
@@ -122,7 +122,11 @@ export default class SelectState extends Vue {
     if (!level) {
       this.$emit('selectionDone', [], null);
     } else {
-      this.$emit('selectionDone', level.parameter as Placeable[], level.id);
+      this.$emit(
+        'selectionDone',
+        level.parameter as placeable.PlaceableBase[],
+        level.id
+      );
     }
   }
 }
@@ -138,11 +142,11 @@ export default class SelectState extends Vue {
 }
 
 .new {
-  background-color: var(--color-darkblue-light);
+  background-color: var(--color-dark-contrast-light);
 }
 
 .own {
-  background-color: var(--color-yellow);
+  background-color: var(--color-informing);
 }
 
 .el-rate {

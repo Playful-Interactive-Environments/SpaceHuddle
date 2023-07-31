@@ -5,7 +5,7 @@ export const setModuleStyles = (
   type: TaskType,
   ref: HTMLElement | null = null
 ): void => {
-  const defaultColor = 'var(--color-mint)';
+  const defaultColor = 'var(--color-brainstorming)';
   let color: string | undefined = defaultColor;
   if (type) color = getColorOfType(type);
   if (!color) color = defaultColor;

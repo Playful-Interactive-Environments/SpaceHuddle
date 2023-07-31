@@ -386,7 +386,7 @@ export default class Participant extends Vue {
     max-width: 22rem;
     overflow: hidden;
     //max-width: calc(var(--app-width) / 4);
-    //border: 3px solid var(--color-mint-light);
+    //border: 3px solid var(--color-brainstorming-light);
 
     .el-card {
       border: unset;
@@ -418,7 +418,7 @@ export default class Participant extends Vue {
   }
 
   img.media-right {
-    //background-color: var(--color-mint-light);
+    //background-color: var(--color-brainstorming-light);
     border: 3px solid var(--color-brainstorming-light);
     border-radius: 1rem 1rem 0 1rem;
   }
@@ -433,7 +433,7 @@ export default class Participant extends Vue {
 
   &-left {
     background-color: var(--color-informing-light);
-    //border: 3px solid var(--color-yellow-light);
+    //border: 3px solid var(--color-informing-light);
     border-radius: 1rem 1rem 1rem 0;
     padding: 1rem;
 

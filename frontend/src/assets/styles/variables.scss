@@ -1,6 +1,6 @@
-$color-purple-dark: #871a70;
-$color-purple: #d355b5;
-$color-purple-light: #e086cb;
+$color-highlight-dark: #871a70;
+$color-highlight: #d355b5;
+$color-highlight-light: #e086cb;
 $color-structuring: #0192d0;
 $color-structuring-light: #67c2d0;
 $color-brainstorming-dark: #3f5d6f;
@@ -10,7 +10,7 @@ $color-informing: #f3a40a;
 $color-informing-light: #f3cf71;
 $color-evaluating: #fe6e5d;
 $color-evaluating-light: #ff8273;
-$color-dark-contrast: #263527;
+$color-dark-contrast: #1d2948;
 $color-dark-contrast-light: #737d97;
 $color-background: #f4f4f4;
 $color-background-blue: #f0f6f6;
@@ -39,9 +39,9 @@ $home-image: url('~@/assets/illustrations/telescope_round.png');
 $home-background: none;
 
 :root {
-  --color-purple-dark: #{$color-purple-dark};
-  --color-purple: #{$color-purple};
-  --color-purple-light: #{$color-purple-light};
+  --color-highlight-dark: #{$color-highlight-dark};
+  --color-highlight: #{$color-highlight};
+  --color-highlight-light: #{$color-highlight-light};
   --color-structuring: #{$color-structuring};
   --color-structuring-light: #{$color-structuring-light};
   --color-brainstorming-dark: #{$color-brainstorming-dark};

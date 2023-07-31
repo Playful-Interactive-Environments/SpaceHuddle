@@ -3,7 +3,9 @@
     <PublicHeader />
     <div class="home full-height-header">
       <section class="home__content">
-        <h1 class="heading heading--big">{{ $t('shared.view.home.header') }}</h1>
+        <h1 class="heading heading--big">
+          {{ $t('shared.view.home.header') }}
+        </h1>
         <p class="home__text">
           {{ $t('shared.view.home.info') }}
         </p>
@@ -19,9 +21,7 @@
         </router-link>
       </section>
       <section class="home__img">
-        <img
-          alt="Illustration"
-        />
+        <img alt="Illustration" />
       </section>
     </div>
     <footer>

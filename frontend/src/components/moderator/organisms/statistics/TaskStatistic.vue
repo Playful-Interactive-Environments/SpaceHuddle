@@ -13,7 +13,7 @@
         x: {
           display: displayLabels,
           ticks: {
-            color: '#1d2948',
+            color: labelColors,
           },
           grid: {
             display: false,
@@ -56,6 +56,7 @@ export default class TaskStatistic extends Vue {
   @Prop() taskId!: string;
   stateList: TaskParticipantState[] = [];
   displayLabels = false;
+  labelColors: string[] = [];
 
   mounted(): void {
     document.fonts.onloadingdone = () => {
@@ -96,6 +97,7 @@ export default class TaskStatistic extends Vue {
 
   updateState(stateList: TaskParticipantState[]): void {
     this.stateList = stateList;
+    this.labelColors = this.stateList.map((state) => state.avatar.color);
     this.updateChart();
   }
 
