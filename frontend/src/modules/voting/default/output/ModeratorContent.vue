@@ -10,7 +10,7 @@
       scales: {
         x: {
           ticks: {
-            color: '#1d2948',
+            color: contrastColor,
           },
           grid: {
             display: false,
@@ -18,7 +18,7 @@
         },
         y: {
           ticks: {
-            color: '#1d2948',
+            color: contrastColor,
             stepSize: 1,
           },
         },
@@ -26,7 +26,7 @@
       plugins: {
         legend: {
           labels: {
-            color: '#1d2948',
+            color: contrastColor,
           },
         },
       },
@@ -44,6 +44,7 @@ import { EventType } from '@/types/enum/EventType';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
 import * as cashService from '@/services/cash-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as themeColors from '@/utils/themeColors';
 
 @Options({
   components: {
@@ -59,6 +60,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     labels: [],
     datasets: [],
   };
+
+  get contrastColor(): string {
+    return themeColors.getContrastColor();
+  }
 
   voteCashEntry!: cashService.SimplifiedCashEntry<VoteResult[]>;
   @Watch('taskId', { immediate: true })
@@ -90,7 +95,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
           label: (this as any).$t(
             'module.voting.default.publicScreen.chartDataLabel'
           ),
-          backgroundColor: '#fe6e5d',
+          backgroundColor: themeColors.getEvaluatingColor(),
           data: this.votes.map((vote) => vote.detailRatingSum),
         },
       ],

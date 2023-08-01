@@ -1320,7 +1320,7 @@ label {
 }
 
 .orderDraggable {
-  background-color: #f4f4f4;
+  background-color: var(--color-background);
   padding: 1rem;
   cursor: move;
   margin: 1rem 0;

@@ -109,6 +109,7 @@ import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import 'vue-advanced-cropper/dist/theme.classic.css';
 import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
+import * as themeColors from '@/utils/themeColors';
 
 @Options({
   components: { VueDrawingCanvas, Cropper, ImageUploader },
@@ -122,7 +123,7 @@ export default class DrawingUpload extends Vue {
 
   showSettings = false;
   uploadData: string | null = null;
-  color = '#1d2948';
+  color = themeColors.getContrastColor();
   eraser = false;
   lineWidth = 1;
   crop = false;
@@ -192,7 +193,7 @@ export default class DrawingUpload extends Vue {
   reset(): void {
     this.crop = false;
     this.setPen();
-    this.color = '#1d2948';
+    this.color = themeColors.getContrastColor();
     (this.$refs.VueCanvasDrawing as any)?.reset();
     this.uploadData = null;
   }

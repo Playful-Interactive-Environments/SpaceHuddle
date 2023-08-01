@@ -225,7 +225,7 @@ export default class SessionCard extends Vue {
   padding: 0.25rem 0.5rem;
   margin: 0;
   color: white;
-  background-color: #1d2948;
+  background-color: var(--color-dark-contrast);
   border-radius: 10px;
 }
 

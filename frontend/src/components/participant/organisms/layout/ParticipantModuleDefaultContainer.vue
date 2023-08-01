@@ -73,7 +73,7 @@ export default class ParticipantModuleDefaultContainer extends Vue {
 
 .module-content {
   background-color: white;
-  color: #1d2948;
+  color: var(--color-dark-contrast);
   flex-grow: 1;
   justify-content: space-between;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);

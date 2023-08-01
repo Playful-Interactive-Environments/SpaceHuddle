@@ -1,27 +1,27 @@
 /* theme color */
+@use '../themes/variables' as *;
 @forward "~element-plus/theme-chalk/src/common/var.scss" with (
   $colors: (
         "primary": (
-                "base": #1d2948,
+                "base": $color-dark-contrast,
         ),
         "success": (
-                "base": #01cf9e,
+                "base": $color-brainstorming,
         ),
         "warning": (
-                "base": #f3a40a,
+                "base": $color-informing,
         ),
         "danger": (
-                "base": #d355b5,
+                "base": $color-highlight,
         ),
         "error": (
-                "base": #fe6e5d,
+                "base": $color-evaluating,
         ),
         "info": (
-                "base": #1d2948,
+                "base": $color-dark-contrast,
         ),
   )
 );
-@import 'variables.scss';
 
 $dialog-padding: 30px;
 
@@ -74,8 +74,8 @@ $--font-size: (
 @import "~element-plus/theme-chalk/src/index";
 
 :root {
-        --color-primary: #{$color-dark-contrast};
-        --color-warning: #{$color-informing};
+        --color-primary: var(--color-dark-contrast);
+        --color-warning: var(--color-informing);
 
         --el-color-warning: var(--color-warning);
         --el-color-primary: var(--color-primary);
@@ -390,7 +390,7 @@ $--font-size: (
 }
 
 .el-input {
-        --el-input-background-color: #{$color-background};
+        --el-input-background-color: var(--color-background);
         --el-input-icon-color: var(--color-primary);
         line-height: 40px;
 

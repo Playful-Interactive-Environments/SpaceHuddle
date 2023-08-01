@@ -27,7 +27,7 @@
         scales: {
           x: {
             ticks: {
-              color: '#1d2948',
+              color: contrastColor,
               stepSize: 1,
             },
             grid: {
@@ -44,7 +44,7 @@
             labels: {
               boxWidth: 30,
               boxHeight: 30,
-              color: '#1d2948',
+              color: contrastColor,
             },
           },
         },
@@ -64,6 +64,7 @@ import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import Color from 'colorjs.io';
 import { v4 as uuidv4 } from 'uuid';
 import { delay } from '@/utils/wait';
+import * as themeColors from '@/utils/themeColors';
 
 interface ChartLegend {
   color: string;
@@ -98,6 +99,10 @@ export default class QuizResult extends Vue {
   };
   labelLineLimit = 2;
 
+  get contrastColor(): string {
+    return themeColors.getContrastColor();
+  }
+
   get chartHeight(): number {
     const headHeight = 5;
     const itemHeight = 3;
@@ -114,7 +119,7 @@ export default class QuizResult extends Vue {
       );
       return [
         {
-          color: '#f3a40a',
+          color: themeColors.getInformingColor(),
           name: labelResult,
           condition: () => true,
         },
@@ -129,19 +134,19 @@ export default class QuizResult extends Vue {
         );
         return [
           {
-            color: '#01cf9e',
+            color: themeColors.getBrainstormingColor(),
             name: labelCorrect,
             condition: (vote) => vote.idea.parameter.isCorrect,
           },
           {
-            color: '#fe6e5d',
+            color: themeColors.getEvaluatingColor(),
             name: labelIncorrect,
             condition: (vote) => !vote.idea.parameter.isCorrect,
           },
         ];
       } else {
-        const color1 = new Color('#01cf9e');
-        const color2 = new Color('#fe6e5d');
+        const color1 = new Color(themeColors.getBrainstormingColor());
+        const color2 = new Color(themeColors.getEvaluatingColor());
         const minVote = this.voteResult.sort((a, b) => {
           if (a.idea && b.idea)
             return (a.idea.order as number) - (b.idea.order as number);
@@ -261,7 +266,7 @@ export default class QuizResult extends Vue {
         },
         borderSkipped: false,
         yAxisID: 1,
-        color: '#1d2948',
+        color: themeColors.getContrastColor(),
       };
     });
     return {

@@ -133,13 +133,13 @@
             placementState[objectName].currentCount <
             placementState[objectName].maxCount
               ? '#ffffff'
-              : '#999999'
+              : inactiveColor
           "
           :background-color="
             placementState[objectName].currentCount <
             placementState[objectName].maxCount
-              ? '#f4f4f4'
-              : '#999999'
+              ? backgroundColor
+              : inactiveColor
           "
           @pointerdown="objectNameClicked(objectName)"
         />
@@ -175,6 +175,7 @@ import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
+import * as themeColors from '@/utils/themeColors';
 
 // The current state of the edit mode
 export interface BuildState {
@@ -227,6 +228,14 @@ export default class ForestFireEdit extends Vue {
   showLevelSettings = false;
   selectedObject: GameObject | null = null;
   startTime = Date.now();
+
+  get inactiveColor(): string {
+    return themeColors.getInactiveColor();
+  }
+
+  get backgroundColor(): string {
+    return themeColors.getBackgroundColor();
+  }
 
   get buildResult(): BuildStateResult {
     const categoryCount: { [key: string]: number } = {};

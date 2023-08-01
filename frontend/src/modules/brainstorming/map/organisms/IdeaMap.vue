@@ -92,6 +92,7 @@ import { LngLatLike, LngLatBoundsLike, Map } from 'maplibre-gl';
 import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
 import * as turf from '@turf/turf';
 import * as mapStyle from '@/utils/mapStyle';
+import * as themeColors from '@/utils/themeColors';
 
 /*export enum MapStyles {
   STREETS = 'streets-v2',
@@ -146,24 +147,24 @@ export default class IdeaMap extends Vue {
       case mapStyle.MapStyleType.Terrain:
       case mapStyle.MapStyleType.Streets:
       case mapStyle.MapStyleType.Basic:
-        return '#1d2948';
+        return themeColors.getContrastColor();
       case mapStyle.MapStyleType.Dark:
-        return '#67c2d0';
+        return themeColors.getStructuringColor();
     }
-    return '#1d2948';
+    return themeColors.getContrastColor();
   }
 
   get MarkerColorSelected(): string {
     switch (this.mapStyle) {
       case mapStyle.MapStyleType.Terrain:
-        return '#fe6e5d';
+        return themeColors.getEvaluatingColor();
       case mapStyle.MapStyleType.Light:
       case mapStyle.MapStyleType.Streets:
       case mapStyle.MapStyleType.Dark:
       case mapStyle.MapStyleType.Basic:
-        return '#f3a40a';
+        return themeColors.getInformingColor();
     }
-    return '#f3a40a';
+    return themeColors.getInformingColor();
   }
 
   getPreviewUrl(key: string): string {

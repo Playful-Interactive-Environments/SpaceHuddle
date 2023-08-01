@@ -15,7 +15,7 @@
           y: {
             display: displayLabels,
             ticks: {
-              color: '#1d2948',
+              color: contrastColor,
               stepSize: 1,
             },
             grid: {
@@ -45,6 +45,7 @@ import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipant
 
 import { Avatar } from '@/types/api/Participant';
 import { AvatarUnicode } from '@/types/enum/AvatarUnicode';
+import * as themeColors from '@/utils/themeColors';
 
 interface AvatarResult {
   avatar: Avatar;
@@ -69,6 +70,10 @@ export default class QuizResult extends Vue {
   };
   labelLineLimit = 2;
   displayLabels = false;
+
+  get contrastColor(): string {
+    return themeColors.getContrastColor();
+  }
 
   get chartHeight(): number {
     const headHeight = 5;
@@ -130,7 +135,7 @@ export default class QuizResult extends Vue {
         borderRadius: 5,
         borderSkipped: false,
         backgroundColor: result.map((item) => item.avatar.color),
-        color: '#1d2948',
+        color: themeColors.getContrastColor(),
       },
     ];
     return {

@@ -22,7 +22,7 @@
         },
         y: {
           ticks: {
-            color: '#1d2948',
+            color: contrastColor,
             stepSize: 1,
           },
           stacked: true,
@@ -59,6 +59,7 @@ import randomColor from 'randomcolor';
 import Color from 'colorjs.io';
 import DeltaE from 'delta-e';
 import * as placeable from '@/modules/information/findit/types/Placeable';
+import * as themeColors from '@/utils/themeColors';
 
 @Options({
   components: { Bar },
@@ -78,6 +79,10 @@ export default class ModuleStatistic extends Vue {
   }[] = [];
   displayLabels = false;
   replayColors: string[] = [];
+
+  get contrastColor(): string {
+    return themeColors.getContrastColor();
+  }
 
   mounted(): void {
     document.fonts.onloadingdone = () => {
@@ -197,7 +202,7 @@ export default class ModuleStatistic extends Vue {
           borderSkipped: false,
           label: (i + 1).toString(),
           backgroundColor: this.replayColors[i],
-          color: '#1d2948',
+          color: themeColors.getContrastColor(),
         };
         for (const idea of this.ideas) {
           if (i === 0) labels.push(idea.keywords);
@@ -218,7 +223,7 @@ export default class ModuleStatistic extends Vue {
           labels: labels,
           datasets: datasets,
         },
-        labelColors: '#1d2948',
+        labelColors: themeColors.getContrastColor(),
       });
     }
   }
@@ -252,7 +257,7 @@ export default class ModuleStatistic extends Vue {
           },
           data: [] as number[],
           borderSkipped: false,
-          color: '#1d2948',
+          color: themeColors.getContrastColor(),
         };
         for (let stars = 0; stars <= 3; stars++) {
           dataset.data.push(
@@ -273,7 +278,7 @@ export default class ModuleStatistic extends Vue {
           labels: labels,
           datasets: datasets,
         },
-        labelColors: '#1d2948',
+        labelColors: themeColors.getContrastColor(),
       });
     }
   }
@@ -302,7 +307,7 @@ export default class ModuleStatistic extends Vue {
           },
           borderSkipped: false,
           backgroundColor: this.replayColors[i],
-          color: '#1d2948',
+          color: themeColors.getContrastColor(),
         };
         const participants = this.steps
           .map((item) => item.avatar)
@@ -369,7 +374,7 @@ export default class ModuleStatistic extends Vue {
             topLeft: 5,
             bottomLeft: 5,
           },
-          color: '#1d2948',
+          color: themeColors.getContrastColor(),
         };
         for (const time of labels) {
           dataset.data.push(
@@ -390,7 +395,7 @@ export default class ModuleStatistic extends Vue {
           labels: labels,
           datasets: datasets,
         },
-        labelColors: '#1d2948',
+        labelColors: themeColors.getContrastColor(),
       });
     }
   }
@@ -433,7 +438,7 @@ export default class ModuleStatistic extends Vue {
           },
           data: [] as number[],
           borderSkipped: false,
-          color: '#1d2948',
+          color: themeColors.getContrastColor(),
         };
         for (const label of labels) {
           dataset.data.push(
@@ -450,7 +455,7 @@ export default class ModuleStatistic extends Vue {
           labels: labels,
           datasets: datasets,
         },
-        labelColors: '#1d2948',
+        labelColors: themeColors.getContrastColor(),
       });
     }
   }

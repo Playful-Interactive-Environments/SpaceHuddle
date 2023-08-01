@@ -12,7 +12,7 @@
       scales: {
         x: {
           ticks: {
-            color: '#1d2948',
+            color: contrastColor,
           },
           grid: {
             display: false,
@@ -20,7 +20,7 @@
         },
         y: {
           ticks: {
-            color: '#1d2948',
+            color: contrastColor,
             stepSize: 1,
           },
         },
@@ -43,6 +43,7 @@ import { TaskParticipantStateSum } from '@/types/api/TaskParticipantState';
 import { Bar } from 'vue-chartjs';
 import * as cashService from '@/services/cash-service';
 import TaskType from '@/types/enum/TaskType';
+import * as themeColors from '@/utils/themeColors';
 
 @Options({
   components: {
@@ -60,19 +61,23 @@ export default class TaskStatistic extends Vue {
     datasets: [],
   };
 
+  get contrastColor(): string {
+    return themeColors.getContrastColor();
+  }
+
   getTypeColor(taskType: TaskType): string {
     switch (TaskType[taskType]) {
       case TaskType.VOTING:
-        return '#fe6e5d';
+        return themeColors.getEvaluatingColor();
       case TaskType.BRAINSTORMING:
-        return '#01cf9e';
+        return themeColors.getBrainstormingColor();
       case TaskType.INFORMATION:
-        return '#f3a40a';
+        return themeColors.getInformingColor();
       case TaskType.CATEGORISATION:
       case TaskType.SELECTION:
-        return '#0192d0';
+        return themeColors.getStructuringColor();
     }
-    return '#999999';
+    return themeColors.getInactiveColor();
   }
 
   get resultData(): any {
@@ -84,7 +89,7 @@ export default class TaskStatistic extends Vue {
         backgroundColor: this.stateList.map((state) =>
           this.getTypeColor(state.taskType)
         ),
-        color: '#1d2948',
+        color: themeColors.getContrastColor(),
       },
     ];
     return {

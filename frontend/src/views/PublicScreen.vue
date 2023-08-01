@@ -19,8 +19,8 @@
         <div class="media-right">
           {{ session.connectionKey }}
           <QrcodeVue
-            foreground="#1d2948"
-            background="#f4f4f4"
+            :foreground="contrastColor"
+            :background="backgroundColor"
             render-as="svg"
             :value="joinLink"
             :size="200"
@@ -147,6 +147,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import QrcodeVue from 'qrcode.vue';
 import TimerProgress from '@/components/shared/atoms/TimerProgress.vue';
 import * as cashService from '@/services/cash-service';
+import * as themeColors from '@/utils/themeColors';
 
 @Options({
   components: {
@@ -174,6 +175,14 @@ export default class PublicScreen extends Vue {
   TaskStates = TaskStates;
 
   topContentPosition = 250;
+
+  get contrastColor(): string {
+    return themeColors.getContrastColor();
+  }
+
+  get backgroundColor(): string {
+    return themeColors.getBackgroundColor();
+  }
 
   @Watch('sessionId', { immediate: true })
   async onSessionIdChanged(): Promise<void> {

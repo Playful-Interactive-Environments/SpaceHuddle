@@ -19,7 +19,7 @@
                 mode: 'vertical',
                 xMin: activeValue,
                 xMax: activeValue,
-                borderColor: 'rgb(255, 99, 132)',
+                borderColor: highlightColor,
                 borderWidth: 2,
               },
               box1: {
@@ -28,8 +28,8 @@
                 xMax: trackingData.length,
                 yMin: maxCleanupThreshold,
                 yMax: calcChartHeight(maxChartValue),
-                backgroundColor: 'rgba(255, 99, 132, 0.25)',
-                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: highlightColorTransparent,
+                borderColor: highlightColor,
               },
             },
           },
@@ -118,7 +118,7 @@
             >
               <sprite
                 texture="/assets/games/cleanup/explosion.svg"
-                tint="#fe6e5d"
+                :tint="evaluatingColor"
                 :x="-containerWidth / 6"
                 :y="-containerWidth / 6"
                 :width="containerWidth / 3"
@@ -128,7 +128,7 @@
             </Graphics>
             <text
               :style="{
-                fill: '#fe6e5d',
+                fill: evaluatingColor,
                 fontSize: 16,
                 fontWeight: 'bold',
                 textAlign: 'center',
@@ -204,6 +204,7 @@ import * as configCalculation from '@/modules/information/cleanup/utils/configCa
 import * as pixiUtil from '@/utils/pixi';
 import * as constants from '@/modules/information/cleanup/utils/consts';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
+import * as themeColors from '@/utils/themeColors';
 Chart.register(annotationPlugin);
 
 interface DrawingParticle {
@@ -279,6 +280,18 @@ export default class CleanUpParticles extends Vue {
 
   particleQueue: { [key: string]: number } = {};
 
+  get evaluatingColor(): string {
+    return themeColors.getEvaluatingColor();
+  }
+
+  get highlightColorTransparent(): string {
+    return themeColors.convertToRGBA(themeColors.getHighlightColor(), 0.25);
+  }
+
+  get highlightColor(): string {
+    return themeColors.convertToRGBA(themeColors.getHighlightColor());
+  }
+
   get containerSpace(): number {
     return this.gameWidth / Object.keys(gameConfig.particles).length;
   }
@@ -296,8 +309,8 @@ export default class CleanUpParticles extends Vue {
   }
 
   get statusColor(): string {
-    const color1 = new Color('#01cf9e');
-    const color2 = new Color('#fe6e5d');
+    const color1 = new Color(themeColors.getBrainstormingColor());
+    const color2 = new Color(themeColors.getEvaluatingColor());
     const color = color1.mix(
       color2,
       (1 / (this.maxParticleCount + 1)) * (this.cleanupParticles.length + 1),

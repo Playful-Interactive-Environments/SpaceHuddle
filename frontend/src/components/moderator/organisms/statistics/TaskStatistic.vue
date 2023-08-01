@@ -21,7 +21,7 @@
         },
         y: {
           ticks: {
-            color: '#1d2948',
+            color: contrastColor,
             stepSize: 1,
           },
         },
@@ -44,6 +44,7 @@ import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { Bar } from 'vue-chartjs';
 import * as cashService from '@/services/cash-service';
 import { AvatarUnicode } from '@/types/enum/AvatarUnicode';
+import * as themeColors from '@/utils/themeColors';
 
 @Options({
   components: {
@@ -57,6 +58,10 @@ export default class TaskStatistic extends Vue {
   stateList: TaskParticipantState[] = [];
   displayLabels = false;
   labelColors: string[] = [];
+
+  get contrastColor(): string {
+    return themeColors.getContrastColor();
+  }
 
   mounted(): void {
     document.fonts.onloadingdone = () => {
@@ -72,7 +77,7 @@ export default class TaskStatistic extends Vue {
         borderRadius: 5,
         borderSkipped: false,
         backgroundColor: this.stateList.map((state) => state.avatar.color),
-        color: '#1d2948',
+        color: themeColors.getContrastColor(),
       },
     ];
     return {

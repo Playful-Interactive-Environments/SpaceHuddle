@@ -131,8 +131,8 @@
                   {{ participant.browserKey }}
                 </span>
                 <QrcodeVue
-                  foreground="#1d2948"
-                  background="#f4f4f4"
+                  :foreground="contrastColor"
+                  background="white"
                   render-as="svg"
                   :value="`${baseJoinLink}${participant.browserKey}`"
                   :size="200"
@@ -168,8 +168,8 @@
             {{ viewDetailsForParticipant.browserKey }}
           </span>
           <QrcodeVue
-            foreground="#1d2948"
-            background="#f4f4f4"
+            :foreground="contrastColor"
+            :background="backgroundColor"
             render-as="svg"
             :value="joinLink"
             :size="200"
@@ -195,6 +195,7 @@ import { ParticipantInfo } from '@/types/api/Participant';
 import QrcodeVue from 'qrcode.vue';
 import { ElMessage } from 'element-plus';
 import Vue3Html2pdf from 'vue3-html2pdf';
+import * as themeColors from '@/utils/themeColors';
 
 @Options({
   components: {
@@ -217,6 +218,14 @@ export default class ParticipantSettings extends Vue {
   everyoneCanJoin = true;
 
   showSettings = false;
+
+  get contrastColor(): string {
+    return themeColors.getContrastColor();
+  }
+
+  get backgroundColor(): string {
+    return themeColors.getBackgroundColor();
+  }
 
   get baseJoinLink(): string {
     return `${window.location.origin}/join/`;

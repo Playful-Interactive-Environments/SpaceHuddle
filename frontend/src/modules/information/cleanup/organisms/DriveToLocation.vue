@@ -18,7 +18,7 @@
                 type: 'line',
                 yMin: maxCleanupThreshold,
                 yMax: maxCleanupThreshold,
-                borderColor: 'rgb(255, 99, 132)',
+                borderColor: highlightColor,
                 borderWidth: 2,
               },
               box1: {
@@ -27,8 +27,8 @@
                 xMax: trackingData.length,
                 yMin: maxCleanupThreshold,
                 yMax: calcChartHeight(maxChartValue),
-                backgroundColor: 'rgba(255, 99, 132, 0.25)',
-                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: highlightColorTransparent,
+                borderColor: highlightColor,
               },
             },
           },
@@ -243,7 +243,7 @@
     :width="gameWidth"
     :height="controlHeight"
     v-if="ready"
-    backgroundColor="#f4f4f4"
+    :backgroundColor="backgroundColor"
   >
     <container backgroundColor="red">
       <sprite
@@ -284,6 +284,7 @@ import * as constants from '@/modules/information/cleanup/utils/consts';
 import Color from 'colorjs.io';
 import * as mapStyle from '@/utils/mapStyle';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
+import * as themeColors from '@/utils/themeColors';
 
 mapStyle.setMapStyleStreets();
 
@@ -426,18 +427,30 @@ export default class DriveToLocation extends Vue {
     return (speed / this.vehicleParameter.speed) * 100;
   }
 
+  get highlightColorTransparent(): string {
+    return themeColors.convertToRGBA(themeColors.getHighlightColor(), 0.25);
+  }
+
+  get highlightColor(): string {
+    return themeColors.convertToRGBA(themeColors.getHighlightColor());
+  }
+
+  get backgroundColor(): string {
+    return themeColors.getBackgroundColor();
+  }
+
   get colors(): ColorProp[] {
     return [
       {
-        color: '#01cf9e',
+        color: themeColors.getBrainstormingColor(),
         percentage: this.convertSpeedToColorPercentage(20),
       },
       {
-        color: '#f3a40a',
+        color: themeColors.getInformingColor(),
         percentage: this.convertSpeedToColorPercentage(50),
       },
       {
-        color: '#fe6e5d',
+        color: themeColors.getEvaluatingColor(),
         percentage: this.convertSpeedToColorPercentage(100),
       },
     ];

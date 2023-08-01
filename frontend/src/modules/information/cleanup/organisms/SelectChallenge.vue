@@ -389,7 +389,7 @@ export default class SelectChallenge extends Vue {
   background-image: url('~@/modules/information/cleanup/assets/energy.jpg');
   background-size: cover; //contain;
   background-repeat: no-repeat;
-  background-color: #1d2948;
+  background-color: var(--color-dark-contrast);
   background-blend-mode: overlay;
 }
 

@@ -95,6 +95,7 @@ import { Idea } from '@/types/api/Idea';
 import { Category } from '@/types/api/Category';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
+import * as themeColors from '@/utils/themeColors';
 
 @Options({
   components: {
@@ -114,7 +115,7 @@ export default class CategorySettings extends Vue {
   @Prop({ default: 0 }) order!: number;
   @Prop({ default: [] }) addIdeas!: Idea[];
 
-  defaultColor = '#1d2948';
+  defaultColor = themeColors.getContrastColor();
   formData: ValidationData = {
     title: '',
     description: '',

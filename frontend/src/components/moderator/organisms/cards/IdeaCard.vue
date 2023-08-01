@@ -129,6 +129,7 @@ import { Idea } from '@/types/api/Idea';
 import IdeaStates from '@/types/enum/IdeaStates';
 import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as themeColors from '@/utils/themeColors';
 
 export enum CollapseIdeas {
   collapseAll = 'collapseAll',
@@ -265,17 +266,17 @@ export default class IdeaCard extends Vue {
   get stateColor(): string {
     switch (IdeaStates[this.idea.state]) {
       case IdeaStates.NEW:
-        return '#999999';
+        return themeColors.getInactiveColor();
       case IdeaStates.THUMBS_DOWN:
-        return '#fe6e5d';
+        return themeColors.getEvaluatingColor();
       case IdeaStates.THUMBS_UP:
-        return '#01cf9e';
+        return themeColors.getBrainstormingColor();
       case IdeaStates.DUPLICATE:
-        return '#f3a40a';
+        return themeColors.getInformingColor();
       case IdeaStates.HANDLED:
-        return '#0192d0';
+        return themeColors.getStructuringColor();
     }
-    return '#999999';
+    return themeColors.getInactiveColor();
   }
 
   get isNew(): boolean {

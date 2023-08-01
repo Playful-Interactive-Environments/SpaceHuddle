@@ -12,7 +12,7 @@
         scales: {
           x: {
             ticks: {
-              color: '#1d2948',
+              color: contrastColor,
             },
             grid: {
               display: false,
@@ -20,7 +20,7 @@
           },
           y: {
             ticks: {
-              color: '#1d2948',
+              color: contrastColor,
               stepSize: 1,
             },
           },
@@ -28,7 +28,7 @@
         plugins: {
           legend: {
             labels: {
-              color: '#1d2948',
+              color: contrastColor,
             },
           },
         },
@@ -45,6 +45,7 @@ import * as votingService from '@/services/voting-service';
 import { VoteResult } from '@/types/api/Vote';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
+import * as themeColors from '@/utils/themeColors';
 
 @Options({
   components: {
@@ -62,6 +63,10 @@ export default class PublicScreen extends Vue {
     labels: [],
     datasets: [],
   };
+
+  get contrastColor(): string {
+    return themeColors.getContrastColor();
+  }
 
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -89,7 +94,7 @@ export default class PublicScreen extends Vue {
           label: (this as any).$t(
             'module.voting.default.publicScreen.chartDataLabel'
           ),
-          backgroundColor: '#fe6e5d',
+          backgroundColor: themeColors.getEvaluatingColor(),
           data: this.votes.map((vote) => vote.detailRatingSum),
         },
       ],

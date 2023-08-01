@@ -1129,7 +1129,7 @@ export default class ProcessTimeline extends Vue {
 
 .darkMode {
   --color-foreground: white;
-  --color-background: #313050;
+  --color-background: var(--color-dark-contrast);
 }
 
 .homeSelected.home {
