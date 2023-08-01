@@ -41,6 +41,10 @@
     "item": {
       "play": "How often was which item found?",
       "build": "How often was which item hidden?"
+    },
+    "itemCount": {
+      "play": "How many items were found?",
+      "build": "How many items were hidden?"
     }
   }
 }

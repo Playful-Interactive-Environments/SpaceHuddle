@@ -176,6 +176,8 @@ export default class ModuleStatistic extends Vue {
     if (this.ideaId) this.calculateTimeChart();
     this.calculateItemChart(GameStep.Play);
     this.calculateItemChart(GameStep.Build);
+    this.calculateItemCountChart(GameStep.Play);
+    if (!this.ideaId) this.calculateItemCountChart(GameStep.Build);
   }
 
   calculateLevelChart(): void {
@@ -187,7 +189,8 @@ export default class ModuleStatistic extends Vue {
         this.steps.find(
           (item) =>
             item.parameter.step === GameStep.Play &&
-            item.parameter.replayCount === i
+            item.parameter.replayCount === i &&
+            (!this.ideaId || item.ideaId === this.ideaId)
         );
         i++
       ) {
@@ -242,7 +245,8 @@ export default class ModuleStatistic extends Vue {
         this.steps.find(
           (item) =>
             item.parameter.step === GameStep.Play &&
-            item.parameter.replayCount === i
+            item.parameter.replayCount === i &&
+            (!this.ideaId || item.ideaId === this.ideaId)
         );
         i++
       ) {
@@ -292,7 +296,9 @@ export default class ModuleStatistic extends Vue {
         let i = 0;
         this.steps.find(
           (item) =>
-            item.parameter.step === gameStep && item.parameter.replayCount === i
+            item.parameter.step === gameStep &&
+            item.parameter.replayCount === i &&
+            (!this.ideaId || item.ideaId === this.ideaId)
         );
         i++
       ) {
@@ -350,6 +356,11 @@ export default class ModuleStatistic extends Vue {
   calculateTimeChart(): void {
     if (this.steps) {
       const labels = this.steps
+        .filter(
+          (item) =>
+            item.parameter.step === GameStep.Play &&
+            (!this.ideaId || item.ideaId === this.ideaId)
+        )
         .map((item) => Math.round(item.parameter.time / 1000))
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort((a, b) => a - b);
@@ -359,7 +370,8 @@ export default class ModuleStatistic extends Vue {
         this.steps.find(
           (item) =>
             item.parameter.step === GameStep.Play &&
-            item.parameter.replayCount === i
+            item.parameter.replayCount === i &&
+            (!this.ideaId || item.ideaId === this.ideaId)
         );
         i++
       ) {
@@ -451,6 +463,70 @@ export default class ModuleStatistic extends Vue {
       }
       this.barChartDataList.push({
         title: this.$t(`module.information.findit.statistic.item.${gameStep}`),
+        data: {
+          labels: labels,
+          datasets: datasets,
+        },
+        labelColors: themeColors.getContrastColor(),
+      });
+    }
+  }
+
+  calculateItemCountChart(gameStep: GameStep): void {
+    if (this.steps) {
+      const labels = this.steps
+        .filter(
+          (item) =>
+            item.parameter.step === gameStep &&
+            item.parameter.itemList &&
+            (!this.ideaId || item.ideaId === this.ideaId)
+        )
+        .map((item) => item.parameter.itemList.length)
+        .filter((value, index, array) => array.indexOf(value) === index)
+        .sort((a, b) => a - b);
+      const datasets: ChartDataset[] = [];
+      for (
+        let i = 0;
+        this.steps.find(
+          (item) =>
+            item.parameter.itemList &&
+            item.parameter.step === gameStep &&
+            item.parameter.replayCount === i &&
+            (!this.ideaId || item.ideaId === this.ideaId)
+        );
+        i++
+      ) {
+        const dataset = {
+          data: [] as number[],
+          borderSkipped: false,
+          label: (i + 1).toString(),
+          backgroundColor: this.replayColors[i],
+          borderRadius: {
+            topRight: 5,
+            bottomRight: 5,
+            topLeft: 5,
+            bottomLeft: 5,
+          },
+          color: themeColors.getContrastColor(),
+        };
+        for (const count of labels) {
+          dataset.data.push(
+            this.steps.filter(
+              (item) =>
+                item.parameter.itemList &&
+                item.parameter.itemList.length === count &&
+                (!this.ideaId || item.ideaId === this.ideaId) &&
+                item.parameter.step === gameStep &&
+                item.parameter.replayCount === i
+            ).length
+          );
+        }
+        datasets.push(dataset as ChartDataset);
+      }
+      this.barChartDataList.push({
+        title: this.$t(
+          `module.information.findit.statistic.itemCount.${gameStep}`
+        ),
         data: {
           labels: labels,
           datasets: datasets,

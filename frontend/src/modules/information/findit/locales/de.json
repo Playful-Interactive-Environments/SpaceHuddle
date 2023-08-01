@@ -41,6 +41,10 @@
     "item": {
       "play": "Wie oft wurde welches Element gefunden?",
       "build": "Wie oft wurde welcher Gegenstand versteckt?"
+    },
+    "itemCount": {
+      "play": "Wie viele Gegenstände wurden gefunden?",
+      "build": "Wie viele Gegenstände wurden versteckt?"
     }
   }
 }
