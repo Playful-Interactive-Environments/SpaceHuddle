@@ -18,7 +18,7 @@
                 "base": $color-evaluating,
         ),
         "info": (
-                "base": $color-dark-contrast,
+                "base": $color-structuring,
         ),
   )
 );
@@ -26,26 +26,26 @@
 $dialog-padding: 30px;
 
 /* theme color */
-/*$--color-primary: #{$color-dark-contrast}!default;
+/*$--color-primary: $color-dark-contrast!default;
 
 $--colors: (
         "primary": (
-                "base": #{$color-dark-contrast},
+                "base": $color-dark-contrast,
         ),
         "success": (
-                "base": #{$color-brainstorming},
+                "base": $color-brainstorming,
         ),
         "warning": (
-                "base": #{$color-informing},
+                "base": $color-informing,
         ),
         "danger": (
-                "base": #{$color-highlight},
+                "base": $color-highlight,
         ),
         "error": (
-                "base": #{$color-evaluating},
+                "base": $color-evaluating,
         ),
         "info": (
-                "base": #{$color-structuring},
+                "base": $color-structuring,
         ),
 );*/
 
