@@ -61,13 +61,6 @@
        }  
    },  
    "information": {  
-       "cleanup": {  
-           "participant": "output/Participant",  
-           "moderatorConfig": "output/ModeratorConfig",  
-           "locales": "de,en,",  
-             "icon": "broom",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  
-           "path": "information/cleanup"  
-       },  
        "coolit": {  
            "participant": "output/Participant",  
            "locales": "de,en,",  
@@ -97,6 +90,13 @@
            "locales": "de,en,",  
              "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  "fallback": "findit",  
            "path": "information/forestfires"  
+       },  
+       "moveit": {  
+           "participant": "output/Participant",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "de,en,",  
+             "icon": "route",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  
+           "path": "information/moveit"  
        },  
        "quiz": {  
            "publicScreen": "output/PublicScreen",  

@@ -6,7 +6,7 @@
       :has-mouse-input="false"
       :use-gravity="false"
       :use-wind="true"
-      :background-texture="`/assets/games/cleanup/${getParticleBackground(
+      :background-texture="`/assets/games/moveit/${getParticleBackground(
         activeTabName
       )}`"
       v-model:width="gameWidth"
@@ -71,7 +71,7 @@
         <div>
           {{
             $t(
-              `module.information.cleanup.participant.result.${successStatusText}`
+              `module.information.moveit.participant.result.${successStatusText}`
             )
           }}
         </div>
@@ -87,14 +87,12 @@
         :key="particleSource"
       >
         <h1>
-          {{
-            $t(`module.information.cleanup.enums.particle.${particleSource}`)
-          }}
+          {{ $t(`module.information.moveit.enums.particle.${particleSource}`) }}
         </h1>
         <div>
           {{
             $t(
-              `module.information.cleanup.participant.result.${particleSource}Explanation`
+              `module.information.moveit.participant.result.${particleSource}Explanation`
             )
           }}
         </div>
@@ -114,8 +112,8 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import { ParticleState } from '@/modules/information/cleanup/organisms/CleanUpParticles.vue';
-import * as gameConfig from '@/modules/information/cleanup/data/gameConfig.json';
+import { ParticleState } from '@/modules/information/moveit/organisms/CleanUpParticles.vue';
+import * as gameConfig from '@/modules/information/moveit/data/gameConfig.json';
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import * as PIXI from 'pixi.js';
@@ -337,7 +335,7 @@ export default class ShowResult extends Vue {
         this.particleVisualisation[particleName] = [];
       }
     }
-    PIXI.Assets.load('/assets/games/cleanup/molecules.json').then(
+    PIXI.Assets.load('/assets/games/moveit/molecules.json').then(
       (sheet) => (this.spritesheet = sheet)
     );
 
@@ -362,7 +360,7 @@ export default class ShowResult extends Vue {
   }
 
   unmounted(): void {
-    PIXI.Assets.unload('/assets/games/cleanup/molecules.json');
+    PIXI.Assets.unload('/assets/games/moveit/molecules.json');
   }
 
   @Watch('gameWidth', { immediate: true })
@@ -421,7 +419,7 @@ h1 {
 
 .successState {
   background-image: linear-gradient(#ffffffee, #ffffff00),
-    url('~@/modules/information/cleanup/assets/net.png');
+    url('~@/modules/information/moveit/assets/net.png');
 }
 
 .result {

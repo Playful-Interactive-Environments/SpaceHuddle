@@ -78,6 +78,7 @@ export default class GameObject extends Vue {
   displayWidth = this.defaultSize;
   displayHeight = this.defaultSize;
   triggerStartTime: number | null = null;
+  destroyed = false;
 
   get displayX(): number {
     return this.position[0] - this.offset[0];
@@ -300,6 +301,7 @@ export default class GameObject extends Vue {
 
   syncronize(): void {
     if (
+      !this.destroyed &&
       !this.isStatic &&
       this.body &&
       (this.body.position.x + this.offset[0] !== this.position[0] ||
@@ -330,11 +332,13 @@ export default class GameObject extends Vue {
   }
 
   notifyDestroy(): void {
+    this.destroyed = true;
     this.$emit('destroyObject', this);
     //this.kill();
   }
 
   kill(): void {
+    this.destroyed = true;
     if (this.gameContainer) {
       this.gameContainer.deregisterGameObject(this);
       const body = this.body;

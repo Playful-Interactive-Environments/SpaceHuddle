@@ -63,7 +63,7 @@
     <GameContainer
       v-model:width="gameWidth"
       v-model:height="gameHeight"
-      background-texture="/assets/games/cleanup/road02.png"
+      background-texture="/assets/games/moveit/road02.png"
       :collisionsFilter="(collision: Matter.Collision) => {
             return collision.bodyA.isStatic !== collision.bodyB.isStatic;
           }"
@@ -94,7 +94,7 @@
               :anchor="0.5"
               :width="containerWidth"
               :height="containerHeight"
-              texture="/assets/games/cleanup/dumpster.svg"
+              texture="/assets/games/moveit/dumpster.svg"
               :tint="gameConfig.particles[particle].color"
             >
             </sprite>
@@ -107,7 +107,7 @@
             @render="drawStatusBackground"
           ></Graphics>
           <container
-            v-if="outsideCount > 0"
+            v-if="outsideCount > 0 && evaluatingColor"
             :x="gameWidth - containerWidth / 2"
             :y="particleBorder"
           >
@@ -117,7 +117,7 @@
               @render="drawCircle"
             >
               <sprite
-                texture="/assets/games/cleanup/explosion.svg"
+                texture="/assets/games/moveit/explosion.svg"
                 :tint="evaluatingColor"
                 :x="-containerWidth / 6"
                 :y="-containerWidth / 6"
@@ -128,7 +128,7 @@
             </Graphics>
             <text
               :style="{
-                fill: evaluatingColor,
+                fill: '#c55e44',
                 fontSize: 16,
                 fontWeight: 'bold',
                 textAlign: 'center',
@@ -136,6 +136,7 @@
               :anchor="0.5"
               :x="0"
               :y="containerWidth / 6"
+              @added="textAdded"
             >
               {{ outsideCount }}
             </text>
@@ -188,25 +189,26 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Line } from 'vue-chartjs';
-import * as gameConfig from '@/modules/information/cleanup/data/gameConfig.json';
+import * as gameConfig from '@/modules/information/moveit/data/gameConfig.json';
 import * as PIXI from 'pixi.js';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import { Chart } from 'chart.js';
-import { ParticleCollisionHandler } from '@/modules/information/cleanup/types/ParticleCollisionHandler';
+import { ParticleCollisionHandler } from '@/modules/information/moveit/types/ParticleCollisionHandler';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { v4 as uuidv4 } from 'uuid';
 import { center } from '@turf/turf';
 import { delay } from '@/utils/wait';
 import Color from 'colorjs.io';
-import { TrackingData } from '@/modules/information/cleanup/organisms/DriveToLocation.vue';
-import * as configCalculation from '@/modules/information/cleanup/utils/configCalculation';
+import { TrackingData } from '@/modules/information/moveit/organisms/DriveToLocation.vue';
+import * as configCalculation from '@/modules/information/moveit/utils/configCalculation';
 import * as pixiUtil from '@/utils/pixi';
-import * as constants from '@/modules/information/cleanup/utils/consts';
+import * as constants from '@/modules/information/moveit/utils/consts';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as themeColors from '@/utils/themeColors';
 Chart.register(annotationPlugin);
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 interface DrawingParticle {
   uuid: string;
   id: number;
@@ -215,6 +217,15 @@ interface DrawingParticle {
   group: number;
   color: string;
   position: [number, number];
+}
+
+interface DatasetData {
+  name: string;
+  label: string;
+  backgroundColor: string;
+  borderColor: string;
+  data: number[];
+  fill: any;
 }
 
 export interface ParticleState {
@@ -231,7 +242,6 @@ export interface ParticleState {
   },
   emits: ['finished'],
 })
-/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class CleanUpParticles extends Vue {
   @Prop() readonly trackingManager!: TrackingManager;
   @Prop({ default: 'car' }) readonly vehicle!:
@@ -245,14 +255,7 @@ export default class CleanUpParticles extends Vue {
   readonly trackingData!: TrackingData[];
   chartData: {
     labels: string[];
-    datasets: {
-      name: string;
-      label: string;
-      backgroundColor: string;
-      borderColor: string;
-      data: number[];
-      fill: any;
-    }[];
+    datasets: DatasetData[];
   } = {
     labels: [],
     datasets: [],
@@ -290,6 +293,17 @@ export default class CleanUpParticles extends Vue {
 
   get highlightColor(): string {
     return themeColors.convertToRGBA(themeColors.getHighlightColor());
+  }
+
+  get textStyle(): PIXI.ITextStyle {
+    const style = {
+      fill: this.evaluatingColor,
+      fontSize: 16,
+      fontWeight: 'bold',
+      textAlign: 'center',
+    } as any;
+    console.log(style); //this.evaluatingColor,
+    return style;
   }
 
   get containerSpace(): number {
@@ -348,7 +362,7 @@ export default class CleanUpParticles extends Vue {
   }
 
   getParticleDisplayName(particleName: string): string {
-    return this.$t(`module.information.cleanup.enums.particle.${particleName}`);
+    return this.$t(`module.information.moveit.enums.particle.${particleName}`);
   }
 
   getParticleAspect(particleName: string): number {
@@ -373,6 +387,14 @@ export default class CleanUpParticles extends Vue {
       height,
       this.statusColor
     );
+  }
+
+  textAdded(container: PIXI.Container): void {
+    for (const child of container.children) {
+      if (child instanceof PIXI.Text) {
+        child.style.fill = this.evaluatingColor;
+      }
+    }
   }
 
   async updateChart(): Promise<void> {
@@ -406,7 +428,7 @@ export default class CleanUpParticles extends Vue {
     setTimeout(() => {
       this.loadActiveParticle();
     }, 1500);
-    PIXI.Assets.load('/assets/games/cleanup/molecules.json').then(
+    PIXI.Assets.load('/assets/games/moveit/molecules.json').then(
       (sheet) => (this.spritesheet = sheet)
     );
     this.interval = setInterval(this.updatedLoop, this.intervalTime);
@@ -414,7 +436,7 @@ export default class CleanUpParticles extends Vue {
 
   unmounted(): void {
     clearInterval(this.interval);
-    PIXI.Assets.unload('/assets/games/cleanup/molecules.json');
+    PIXI.Assets.unload('/assets/games/moveit/molecules.json');
   }
 
   updatedLoop(): void {
@@ -455,7 +477,33 @@ export default class CleanUpParticles extends Vue {
     this.containerSize = size;
   }
 
-  async loadActiveParticle(): Promise<void> {
+  now = Date.now();
+  loadActiveParticle(): void {
+    const emitParticles = async (
+      emitCount: number,
+      dataset: DatasetData,
+      index: number
+    ): Promise<void> => {
+      for (let i = 0; i < emitCount; i++) {
+        const particle: DrawingParticle = {
+          uuid: uuidv4(),
+          id: 0,
+          name: dataset.name,
+          label: dataset.label,
+          group: index + 1,
+          color: dataset.backgroundColor,
+          position: [
+            Math.random() * (this.gameWidth - this.particleRadius * 2) +
+              this.particleRadius,
+            this.particleBorder + this.particleRadius,
+          ],
+        };
+        this.cleanupParticles.push(particle);
+        await delay(Math.floor(this.intervalTime / emitCount) - 1);
+      }
+    };
+
+    this.now = Date.now();
     let activeParticleEmitCount = 0;
     for (const index in this.chartData.datasets) {
       const dataset = this.chartData.datasets[index];
@@ -479,23 +527,8 @@ export default class CleanUpParticles extends Vue {
         if (emitCount < emissionCount) {
           this.outsideCount += emissionCount - emitCount;
         }
-        for (let i = 0; i < emitCount; i++) {
-          const particle: DrawingParticle = {
-            uuid: uuidv4(),
-            id: 0,
-            name: dataset.name,
-            label: dataset.label,
-            group: parseInt(index) + 1,
-            color: dataset.backgroundColor,
-            position: [
-              Math.random() * (this.gameWidth - this.particleRadius * 2) +
-                this.particleRadius,
-              this.particleBorder + this.particleRadius,
-            ],
-          };
-          this.cleanupParticles.push(particle);
-          await delay(Math.floor(this.intervalTime / emitCount) - 1);
-        }
+
+        emitParticles(emitCount, dataset, parseInt(index));
       }
     }
     this.updateTracking();

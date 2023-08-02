@@ -1,4 +1,4 @@
-import * as config from '@/modules/information/cleanup/utils/configCalculation';
+import * as config from '@/modules/information/moveit/utils/configCalculation';
 
 const airtight = 1.225;
 const g = 9.81;

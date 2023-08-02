@@ -1,20 +1,20 @@
 <template>
   <el-form-item
-    :label="$t('module.information.cleanup.moderatorConfig.replayable')"
+    :label="$t('module.information.moveit.moderatorConfig.replayable')"
     :prop="`${rulePropPath}.replayable`"
   >
     <el-switch class="level-item" v-model="modelValue.replayable" />
   </el-form-item>
   <el-form-item
     :label="
-      $t('module.information.cleanup.moderatorConfig.showTutorialOnlyOnce')
+      $t('module.information.moveit.moderatorConfig.showTutorialOnlyOnce')
     "
     :prop="`${rulePropPath}.showTutorialOnlyOnce`"
   >
     <el-switch class="level-item" v-model="modelValue.showTutorialOnlyOnce" />
   </el-form-item>
   <el-form-item
-    :label="$t('module.information.cleanup.moderatorConfig.mapSection')"
+    :label="$t('module.information.moveit.moderatorConfig.mapSection')"
     :prop="`${rulePropPath}.mapSection`"
   >
     <div style="height: 200px">

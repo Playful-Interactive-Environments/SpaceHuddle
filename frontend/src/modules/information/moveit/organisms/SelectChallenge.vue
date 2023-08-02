@@ -124,7 +124,7 @@
               <span>
                 {{
                   $t(
-                    `module.information.cleanup.enums.vehicles.${activeVehicleType}.${vehicle.name}`
+                    `module.information.moveit.enums.vehicles.${activeVehicleType}.${vehicle.name}`
                   )
                 }}
               </span>
@@ -132,62 +132,60 @@
           </template>
           <img
             class="vehicle-image"
-            :src="`/assets/games/cleanup/vehicle/${vehicle.image}`"
+            :src="`/assets/games/moveit/vehicle/${vehicle.image}`"
             :alt="vehicle.name"
           />
           <div v-if="vehicle.fuel">
             {{
               $t(
-                'module.information.cleanup.participant.vehicle-parameter.fuel'
+                'module.information.moveit.participant.vehicle-parameter.fuel'
               )
             }}:
-            {{ $t(`module.information.cleanup.enums.fuel.${vehicle.fuel}`) }}
+            {{ $t(`module.information.moveit.enums.fuel.${vehicle.fuel}`) }}
           </div>
           <div v-if="vehicle.mpg">
             {{
-              $t(
-                'module.information.cleanup.participant.vehicle-parameter.mpg'
-              )
+              $t('module.information.moveit.participant.vehicle-parameter.mpg')
             }}:
             {{ vehicle.mpg }}
             <span v-if="vehicle.fuel === 'electricity'">
-              {{ $t('module.information.cleanup.enums.units.kw') }}
+              {{ $t('module.information.moveit.enums.units.kw') }}
             </span>
             <span v-else>
-              {{ $t('module.information.cleanup.enums.units.liters') }}
+              {{ $t('module.information.moveit.enums.units.liters') }}
             </span>
           </div>
           <div v-if="vehicle.power">
             {{
               $t(
-                'module.information.cleanup.participant.vehicle-parameter.power'
+                'module.information.moveit.participant.vehicle-parameter.power'
               )
             }}:
             {{ vehicle.power }}
-            {{ $t('module.information.cleanup.enums.units.ps') }}
+            {{ $t('module.information.moveit.enums.units.ps') }}
           </div>
           <div v-if="vehicle.speed">
             {{
               $t(
-                'module.information.cleanup.participant.vehicle-parameter.speed'
+                'module.information.moveit.participant.vehicle-parameter.speed'
               )
             }}:
             {{ vehicle.speed }}
-            {{ $t('module.information.cleanup.enums.units.km/h') }}
+            {{ $t('module.information.moveit.enums.units.km/h') }}
           </div>
           <div v-if="vehicle.acceleration">
             {{
               $t(
-                'module.information.cleanup.participant.vehicle-parameter.acceleration'
+                'module.information.moveit.participant.vehicle-parameter.acceleration'
               )
             }}:
             {{ vehicle.acceleration }}
-            {{ $t('module.information.cleanup.enums.units.seconds') }}
+            {{ $t('module.information.moveit.enums.units.seconds') }}
           </div>
           <div v-if="vehicle.persons">
             {{
               $t(
-                'module.information.cleanup.participant.vehicle-parameter.persons'
+                'module.information.moveit.participant.vehicle-parameter.persons'
               )
             }}:
             {{ vehicle.persons }}
@@ -197,7 +195,7 @@
               type="primary"
               @click="selectVehicle(activeVehicleType, vehicle.name)"
             >
-              {{ $t('module.information.cleanup.participant.select') }}
+              {{ $t('module.information.moveit.participant.select') }}
             </el-button>
           </div>
         </el-card>
@@ -209,9 +207,9 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Doughnut, Bar } from 'vue-chartjs';
-import * as gameConfig from '@/modules/information/cleanup/data/gameConfig.json';
+import * as gameConfig from '@/modules/information/moveit/data/gameConfig.json';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import * as configCalculation from '@/modules/information/cleanup/utils/configCalculation';
+import * as configCalculation from '@/modules/information/moveit/utils/configCalculation';
 import { Prop } from 'vue-property-decorator';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 
@@ -263,13 +261,13 @@ export default class SelectChallenge extends Vue {
 
   mounted(): void {
     this.chartDataElectricityMix.datasets.push({
-      label: this.$t('module.information.cleanup.participant.electricity'),
+      label: this.$t('module.information.moveit.participant.electricity'),
       backgroundColor: [],
       data: [],
     });
     for (const energySource of Object.keys(gameConfig.electricity)) {
       this.chartDataElectricityMix.labels.push(
-        this.$t(`module.information.cleanup.enums.electricity.${energySource}`)
+        this.$t(`module.information.moveit.enums.electricity.${energySource}`)
       );
       this.chartDataElectricityMix.datasets[0].data.push(
         gameConfig.electricity[energySource].value
@@ -281,14 +279,14 @@ export default class SelectChallenge extends Vue {
     this.chartDataFuel.datasets.push({
       backgroundColor: '#ffffff',
       label: this.$t(
-        'module.information.cleanup.participant.vehicle-parameter.fuel'
+        'module.information.moveit.participant.vehicle-parameter.fuel'
       ),
       data: [],
     });
     for (const fuelSource of Object.keys(gameConfig.fuel)) {
       if ('carbonDioxideEquivalent' in gameConfig.fuel[fuelSource].perUnit) {
         this.chartDataFuel.labels.push(
-          this.$t(`module.information.cleanup.enums.fuel.${fuelSource}`)
+          this.$t(`module.information.moveit.enums.fuel.${fuelSource}`)
         );
         this.chartDataFuel.datasets[0].data.push(
           (gameConfig.fuel[fuelSource].perUnit['carbonDioxideEquivalent'] /
@@ -298,12 +296,12 @@ export default class SelectChallenge extends Vue {
       }
     }
     this.chartDataFuel.labels.push(
-      this.$t('module.information.cleanup.enums.fuel.electricity')
+      this.$t('module.information.moveit.enums.fuel.electricity')
     );
     for (const particleSource of Object.keys(gameConfig.particles)) {
       const dsElectricity = {
         label: this.$t(
-          `module.information.cleanup.enums.particle.${particleSource}`
+          `module.information.moveit.enums.particle.${particleSource}`
         ),
         backgroundColor: gameConfig.particles[particleSource].color,
         data: [] as number[],
@@ -318,11 +316,11 @@ export default class SelectChallenge extends Vue {
     }
     for (const energySource of Object.keys(gameConfig.electricity)) {
       this.chartDataElectricity.labels.push(
-        this.$t(`module.information.cleanup.enums.electricity.${energySource}`)
+        this.$t(`module.information.moveit.enums.electricity.${energySource}`)
       );
       const ds = {
         label: this.$t(
-          `module.information.cleanup.enums.electricity.${energySource}`
+          `module.information.moveit.enums.electricity.${energySource}`
         ),
         backgroundColor: gameConfig.electricity[energySource].color,
         data: [] as number[],
@@ -386,7 +384,7 @@ export default class SelectChallenge extends Vue {
   height: 15rem;
   width: 100%;
 
-  background-image: url('~@/modules/information/cleanup/assets/energy.jpg');
+  background-image: url('~@/modules/information/moveit/assets/energy.jpg');
   background-size: cover; //contain;
   background-repeat: no-repeat;
   background-color: var(--color-dark-contrast);

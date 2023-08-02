@@ -1,8 +1,8 @@
-import * as gameConfig from '@/modules/information/cleanup/data/gameConfig.json';
+import * as gameConfig from '@/modules/information/moveit/data/gameConfig.json';
 import {
   TrackingData,
   ChartData,
-} from '@/modules/information/cleanup/organisms/DriveToLocation.vue';
+} from '@/modules/information/moveit/organisms/DriveToLocation.vue';
 
 export enum FuelType {
   electricity = 'electricity',

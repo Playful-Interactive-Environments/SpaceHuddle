@@ -2,8 +2,8 @@
   <div ref="gameContainer" class="mapSpace">
     <module-info
       v-if="gameState === GameState.Info && module"
-      translation-path="module.information.cleanup.participant.tutorial"
-      image-directory="/assets/games/cleanup/tutorial"
+      translation-path="module.information.moveit.participant.tutorial"
+      image-directory="/assets/games/moveit/tutorial"
       :module-info-entry-data-list="tutorialList"
       @infoRead="gameState = GameState.Game"
       :info-type="`clean-up-${gameStep}`"
@@ -48,19 +48,19 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import DriveToLocation, {
   TrackingData,
-} from '@/modules/information/cleanup/organisms/DriveToLocation.vue';
+} from '@/modules/information/moveit/organisms/DriveToLocation.vue';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
 import * as cashService from '@/services/cash-service';
 import CleanUpParticles, {
   ParticleState,
-} from '@/modules/information/cleanup/organisms/CleanUpParticles.vue';
-import SelectChallenge from '@/modules/information/cleanup/organisms/SelectChallenge.vue';
-import ShowResult from '@/modules/information/cleanup/organisms/ShowResult.vue';
+} from '@/modules/information/moveit/organisms/CleanUpParticles.vue';
+import SelectChallenge from '@/modules/information/moveit/organisms/SelectChallenge.vue';
+import ShowResult from '@/modules/information/moveit/organisms/ShowResult.vue';
 import ModuleInfo from '@/components/participant/molecules/ModuleInfo.vue';
-import * as formulas from '@/modules/information/cleanup/utils/formulas';
-import * as configCalculation from '@/modules/information/cleanup/utils/configCalculation';
+import * as formulas from '@/modules/information/moveit/utils/formulas';
+import * as configCalculation from '@/modules/information/moveit/utils/configCalculation';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 
 enum GameStep {

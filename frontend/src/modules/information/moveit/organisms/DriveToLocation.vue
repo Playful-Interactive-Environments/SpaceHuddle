@@ -70,7 +70,7 @@
           >
             <img
               class="divingVehicle"
-              :src="`/assets/games/cleanup/vehicle/${vehicleParameter.imageTop}`"
+              :src="`/assets/games/moveit/vehicle/${vehicleParameter.imageTop}`"
               alt="car"
               :width="30"
             />
@@ -160,11 +160,11 @@
         <template #default>
           <div>{{ Math.round(moveSpeed) }} km/h</div>
           <div>
-            {{ $t('module.information.cleanup.participant.maxSpeed') }}
+            {{ $t('module.information.moveit.participant.maxSpeed') }}
             {{ Math.round(maxSpeed) }} km/h
           </div>
           <!--<div>
-            {{ $t('module.information.cleanup.participant.speed') }}
+            {{ $t('module.information.moveit.participant.speed') }}
           </div>-->
         </template>
       </el-progress>
@@ -199,8 +199,8 @@
           --el-switch-on-color: var(--color-brainstorming);
           --el-switch-off-color: var(--color-evaluation);
         "
-        :active-text="$t('module.information.cleanup.participant.combined')"
-        :inactive-text="$t('module.information.cleanup.participant.separate')"
+        :active-text="$t('module.information.moveit.participant.combined')"
+        :inactive-text="$t('module.information.moveit.participant.separate')"
       />
     </div>
   </div>
@@ -222,7 +222,7 @@
         <template #default>
           <div>{{ moveSpeed }} km/h</div>
           <div>
-            {{ $t('module.information.cleanup.participant.speed') }}
+            {{ $t('module.information.moveit.participant.speed') }}
           </div>
         </template>
       </el-progress>
@@ -247,7 +247,7 @@
   >
     <container backgroundColor="red">
       <sprite
-        texture="/assets/games/cleanup/steering-wheel.png"
+        texture="/assets/games/moveit/steering-wheel.png"
         :width="controlHeight"
         :height="controlHeight"
       ></sprite>
@@ -261,7 +261,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import Joystick from 'vue-joystick-component';
 import { Line } from 'vue-chartjs';
-import * as gameConfig from '@/modules/information/cleanup/data/gameConfig.json';
+import * as gameConfig from '@/modules/information/moveit/data/gameConfig.json';
 import { OsrmCustom as OSRM, OSRMWayPoint } from '@/utils/osrm';
 import {
   MglGeoJsonSource,
@@ -274,13 +274,13 @@ import {
 import { LineLayerSpecification, Map } from 'maplibre-gl';
 import { FeatureCollection } from 'geojson';
 import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
-import * as formulas from '@/modules/information/cleanup/utils/formulas';
-import * as configCalculation from '@/modules/information/cleanup/utils/configCalculation';
+import * as formulas from '@/modules/information/moveit/utils/formulas';
+import * as configCalculation from '@/modules/information/moveit/utils/configCalculation';
 import * as turf from '@turf/turf';
 import * as turfUtils from '@/utils/turf';
 import { Application } from 'vue3-pixi';
 import RoundSlider from 'vue-three-round-slider/src';
-import * as constants from '@/modules/information/cleanup/utils/consts';
+import * as constants from '@/modules/information/moveit/utils/consts';
 import Color from 'colorjs.io';
 import * as mapStyle from '@/utils/mapStyle';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
@@ -673,7 +673,7 @@ export default class DriveToLocation extends Vue {
       const data = {
         name: particleName,
         label: this.$t(
-          `module.information.cleanup.enums.particle.${particleName}`
+          `module.information.moveit.enums.particle.${particleName}`
         ),
         data: [],
         backgroundColor: particle.color,
