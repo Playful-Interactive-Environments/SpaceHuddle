@@ -53,6 +53,7 @@ export default class Home extends Vue {}
   position: fixed;
   background-image: var(--home-background);
   background-size: cover;
+  overflow: auto;
 }
 
 .logo-header {
