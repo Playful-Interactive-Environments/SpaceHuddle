@@ -101,5 +101,18 @@
       "seconds": "sek.",
       "kw": "KW"
     }
+  },
+  "statistic": {
+    "rating": "Wie oft wurden wie viele Punkte erzielt?",
+    "vehicleCategory": "Welche Fahrzeugtypen wurden wie oft in welchem Durchlauf eingesetzt?",
+    "vehicleType": "Welche Fahrzeugkategorien wurden wie oft in welchem Durchlauf eingesetzt?",
+    "stops": "Wie oft hat der Fahrer während der Fahrt angehalten?",
+    "persons": "Wie viele Personen befanden sich im Bus?",
+    "maxSpeed": "Was war die Höchstgeschwindigkeit?",
+    "averageSpeed": "Wie hoch war die Durchschnittsgeschwindigkeit?",
+    "playTime": "Wie lange wurde gespielt?",
+    "selectTime": "Wie lange wurde ausgewählt?",
+    "driveTime": "Wie lange wurde gefahren?",
+    "cleanupTime": "Wie lange wurde aufgeräumt?"
   }
 }

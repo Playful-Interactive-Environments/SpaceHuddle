@@ -8,6 +8,7 @@ import {
 } from '@/types/api/TaskParticipantState';
 import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
+import { convertAvatarToString } from '@/types/api/Participant';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -157,6 +158,26 @@ export const registerGetIterationStepList = (
     authHeaderType,
     maxDelaySeconds
   );
+};
+
+export const addReplayCountToSteps = (
+  data: TaskParticipantIterationStep[],
+  parameterKey: (parameter: any) => boolean
+): number => {
+  const participantLevelCount: { [key: string]: number } = {};
+  let maxReplays = 0;
+  for (const item of data) {
+    const avatarLevel = `${convertAvatarToString(item.avatar)}-${
+      item.ideaId
+    }-${parameterKey(item.parameter)}`;
+    if (!(avatarLevel in participantLevelCount))
+      participantLevelCount[avatarLevel] = 0;
+    else participantLevelCount[avatarLevel]++;
+    item.parameter.replayCount = participantLevelCount[avatarLevel];
+    if (maxReplays < item.parameter.replayCount)
+      maxReplays = item.parameter.replayCount;
+  }
+  return maxReplays;
 };
 
 export const deregisterGetIterationStepList = (

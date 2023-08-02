@@ -94,6 +94,7 @@
        "moveit": {  
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
+           "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
              "icon": "route",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  
            "path": "information/moveit"  

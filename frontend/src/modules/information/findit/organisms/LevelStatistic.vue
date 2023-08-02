@@ -49,24 +49,22 @@ import * as cashService from '@/services/cash-service';
 import { Bar } from 'vue-chartjs';
 import * as taskParticipantService from '@/services/task-participant-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
-import type { ChartData, ChartDataset } from 'chart.js';
+import type { ChartData } from 'chart.js';
 import * as ideaService from '@/services/idea-service';
 import { Idea } from '@/types/api/Idea';
 import { AvatarUnicode } from '@/types/enum/AvatarUnicode';
 import { GameStep } from '@/modules/information/findit/output/Participant.vue';
-import { convertAvatarToString } from '@/types/api/Participant';
-import randomColor from 'randomcolor';
-import Color from 'colorjs.io';
-import DeltaE from 'delta-e';
 import * as placeable from '@/modules/information/findit/types/Placeable';
 import * as themeColors from '@/utils/themeColors';
+import { getRandomColorList } from '@/utils/colors';
+import { calculateChartPerIteration } from '@/utils/statistic';
 
 @Options({
   components: { Bar },
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ModuleStatistic extends Vue {
+export default class LevelStatistic extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: null }) readonly ideaId!: string | null;
   steps: TaskParticipantIterationStep[] = [];
@@ -118,52 +116,17 @@ export default class ModuleStatistic extends Vue {
     this.calculateCharts();
   }
 
-  getRandomColorList(count: number): string[] {
-    const uniqueColors: { L: number; A: number; B: number }[] = [];
-    const returnColors: string[] = [];
-    for (let i = 0; i < count; i++) {
-      let tryCount = 0;
-      while (i === returnColors.length) {
-        tryCount++;
-        const colorHex = randomColor({ luminosity: 'dark' });
-        const colorLab = new Color(colorHex).to('lab') as any;
-        const color = { L: colorLab.l, A: colorLab.a, B: colorLab.b };
-        let isUnique = true;
-        for (const uniqueColor of uniqueColors) {
-          isUnique = DeltaE.getDeltaE00(uniqueColor, color) > 35;
-          if (!isUnique) break;
-        }
-        if (isUnique || tryCount > 50) {
-          uniqueColors.push(color);
-          returnColors.push(colorHex);
-        }
-      }
-    }
-    return returnColors;
-  }
-
   updateIterationSteps(steps: TaskParticipantIterationStep[]): void {
     this.steps = steps;
-    const participantLevelCount: { [key: string]: number } = {};
-    let maxReplays = 0;
-    for (const step of steps) {
-      if (step.parameter.step === GameStep.Play) {
-        const avatarLevel = `${convertAvatarToString(step.avatar)}-${
-          step.ideaId
-        }`;
-        if (!(avatarLevel in participantLevelCount))
-          participantLevelCount[avatarLevel] = 0;
-        else participantLevelCount[avatarLevel]++;
-        step.parameter.replayCount = participantLevelCount[avatarLevel];
-      } else step.parameter.replayCount = 0;
-      if (maxReplays < step.parameter.replayCount)
-        maxReplays = step.parameter.replayCount;
-    }
+    const maxReplays = taskParticipantService.addReplayCountToSteps(
+      this.steps,
+      (param) => param.step
+    );
     /*this.replayColors.push(
       ...randomColor({ luminosity: 'dark', count: maxReplays })
     );*/
 
-    this.replayColors.push(...this.getRandomColorList(maxReplays));
+    this.replayColors.push(...getRandomColorList(maxReplays + 1));
     this.calculateCharts();
   }
 
@@ -181,45 +144,17 @@ export default class ModuleStatistic extends Vue {
   }
 
   calculateLevelChart(): void {
-    if (this.ideas && this.steps) {
-      const labels: string[] = [];
-      const datasets: ChartDataset[] = [];
-      for (
-        let i = 0;
-        this.steps.find(
-          (item) =>
-            item.parameter.step === GameStep.Play &&
-            item.parameter.replayCount === i &&
-            (!this.ideaId || item.ideaId === this.ideaId)
-        );
-        i++
-      ) {
-        const dataset = {
-          data: [] as number[],
-          borderRadius: {
-            topRight: 5,
-            bottomRight: 5,
-            topLeft: 5,
-            bottomLeft: 5,
-          },
-          borderSkipped: false,
-          label: (i + 1).toString(),
-          backgroundColor: this.replayColors[i],
-          color: themeColors.getContrastColor(),
-        };
-        for (const idea of this.ideas) {
-          if (i === 0) labels.push(idea.keywords);
-          dataset.data.push(
-            this.steps.filter(
-              (item) =>
-                item.ideaId === idea.id &&
-                item.parameter.step === GameStep.Play &&
-                item.parameter.replayCount === i
-            ).length
-          );
-        }
-        datasets.push(dataset as ChartDataset);
-      }
+    if (!this.ideaId && this.ideas && this.steps) {
+      const filter = (item) => item.parameter.step === GameStep.Play;
+      const labels: string[] = this.ideas.map((idea) => idea.keywords);
+      const datasets = calculateChartPerIteration(
+        this.steps,
+        this.ideas,
+        this.replayColors,
+        (item) => item.parameter.replayCount,
+        (item, idea) => item.ideaId === idea.id,
+        filter
+      );
       this.barChartDataList.push({
         title: this.$t('module.information.findit.statistic.level'),
         data: {
@@ -233,49 +168,23 @@ export default class ModuleStatistic extends Vue {
 
   calculateStarsChart(): void {
     if (this.steps) {
+      const filter = (item) =>
+        item.parameter.step === GameStep.Play &&
+        (!this.ideaId || item.ideaId === this.ideaId);
       const labels: string[] = [
         '-',
         '\uf005',
         '\uf005\uf005',
         '\uf005\uf005\uf005',
       ];
-      const datasets: ChartDataset[] = [];
-      for (
-        let i = 0;
-        this.steps.find(
-          (item) =>
-            item.parameter.step === GameStep.Play &&
-            item.parameter.replayCount === i &&
-            (!this.ideaId || item.ideaId === this.ideaId)
-        );
-        i++
-      ) {
-        const dataset = {
-          label: (i + 1).toString(),
-          backgroundColor: this.replayColors[i],
-          borderRadius: {
-            topRight: 5,
-            bottomRight: 5,
-            topLeft: 5,
-            bottomLeft: 5,
-          },
-          data: [] as number[],
-          borderSkipped: false,
-          color: themeColors.getContrastColor(),
-        };
-        for (let stars = 0; stars <= 3; stars++) {
-          dataset.data.push(
-            this.steps.filter(
-              (item) =>
-                item.parameter.stars === stars &&
-                (!this.ideaId || item.ideaId === this.ideaId) &&
-                item.parameter.step === GameStep.Play &&
-                item.parameter.replayCount === i
-            ).length
-          );
-        }
-        datasets.push(dataset as ChartDataset);
-      }
+      const datasets = calculateChartPerIteration(
+        this.steps,
+        [...Array(3).keys()],
+        this.replayColors,
+        (item) => item.parameter.replayCount,
+        (item, stars) => item.parameter.stars === stars,
+        filter
+      );
       this.barChartDataList.push({
         title: this.$t('module.information.findit.statistic.rating'),
         data: {
@@ -289,59 +198,35 @@ export default class ModuleStatistic extends Vue {
 
   calculateAvatarChart(gameStep: GameStep): void {
     if (this.steps) {
-      const labels: string[] = [];
-      const labelColors: string[] = [];
-      const datasets: ChartDataset[] = [];
-      for (
-        let i = 0;
-        this.steps.find(
-          (item) =>
-            item.parameter.step === gameStep &&
-            item.parameter.replayCount === i &&
-            (!this.ideaId || item.ideaId === this.ideaId)
-        );
-        i++
-      ) {
-        const dataset = {
-          label: (i + 1).toString(),
-          data: [] as number[],
-          borderRadius: {
-            topRight: 5,
-            bottomRight: 5,
-            topLeft: 5,
-            bottomLeft: 5,
-          },
-          borderSkipped: false,
-          backgroundColor: this.replayColors[i],
-          color: themeColors.getContrastColor(),
-        };
-        const participants = this.steps
-          .map((item) => item.avatar)
-          .filter(
-            (value, index, array) =>
-              array.findIndex(
-                (item) =>
-                  item.color === value.color && item.symbol === value.symbol
-              ) === index
-          );
-        for (const participant of participants) {
-          if (i === 0) {
-            labels.push(AvatarUnicode[participant.symbol]);
-            labelColors.push(participant.color);
-          }
-          dataset.data.push(
-            this.steps.filter(
+      const filter = (item) =>
+        item.parameter.step === gameStep &&
+        (!this.ideaId || item.ideaId === this.ideaId);
+      const participants = this.steps
+        .filter((item) => filter(item))
+        .map((item) => item.avatar)
+        .filter(
+          (value, index, array) =>
+            array.findIndex(
               (item) =>
-                item.avatar.color === participant.color &&
-                item.avatar.symbol === participant.symbol &&
-                (!this.ideaId || item.ideaId === this.ideaId) &&
-                item.parameter.step === gameStep &&
-                item.parameter.replayCount === i
-            ).length
-          );
-        }
-        datasets.push(dataset as ChartDataset);
-      }
+                item.color === value.color && item.symbol === value.symbol
+            ) === index
+        );
+      const labels: string[] = participants.map(
+        (participant) => AvatarUnicode[participant.symbol]
+      );
+      const labelColors: string[] = participants.map(
+        (participant) => participant.color
+      );
+      const datasets = calculateChartPerIteration(
+        this.steps,
+        participants,
+        this.replayColors,
+        (item) => item.parameter.replayCount,
+        (item, participant) =>
+          item.avatar.color === participant.color &&
+          item.avatar.symbol === participant.symbol,
+        filter
+      );
       this.barChartDataList.push({
         title: this.$t(`module.information.findit.statistic.${gameStep}`),
         data: {
@@ -355,52 +240,22 @@ export default class ModuleStatistic extends Vue {
 
   calculateTimeChart(): void {
     if (this.steps) {
+      const filter = (item) =>
+        item.parameter.step === GameStep.Play &&
+        (!this.ideaId || item.ideaId === this.ideaId);
       const labels = this.steps
-        .filter(
-          (item) =>
-            item.parameter.step === GameStep.Play &&
-            (!this.ideaId || item.ideaId === this.ideaId)
-        )
+        .filter((item) => filter(item))
         .map((item) => Math.round(item.parameter.time / 1000))
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort((a, b) => a - b);
-      const datasets: ChartDataset[] = [];
-      for (
-        let i = 0;
-        this.steps.find(
-          (item) =>
-            item.parameter.step === GameStep.Play &&
-            item.parameter.replayCount === i &&
-            (!this.ideaId || item.ideaId === this.ideaId)
-        );
-        i++
-      ) {
-        const dataset = {
-          data: [] as number[],
-          borderSkipped: false,
-          label: (i + 1).toString(),
-          backgroundColor: this.replayColors[i],
-          borderRadius: {
-            topRight: 5,
-            bottomRight: 5,
-            topLeft: 5,
-            bottomLeft: 5,
-          },
-          color: themeColors.getContrastColor(),
-        };
-        for (const time of labels) {
-          dataset.data.push(
-            this.steps.filter(
-              (item) =>
-                Math.round(item.parameter.time / 1000) === time &&
-                (!this.ideaId || item.ideaId === this.ideaId) &&
-                item.parameter.step === GameStep.Play &&
-                item.parameter.replayCount === i
-            ).length
-          );
-        }
-        datasets.push(dataset as ChartDataset);
-      }
+      const datasets = calculateChartPerIteration(
+        this.steps,
+        labels,
+        this.replayColors,
+        (item) => item.parameter.replayCount,
+        (item, time) => Math.round(item.parameter.time / 1000) === time,
+        filter
+      );
       this.barChartDataList.push({
         title: this.$t('module.information.findit.statistic.time'),
         data: {
@@ -434,10 +289,17 @@ export default class ModuleStatistic extends Vue {
         .map((item) => item.item.name)
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort();
-      const colors = this.getRandomColorList(
-        Math.max(...itemList.map((item) => item.index))
+      const colors = getRandomColorList(
+        Math.max(...itemList.map((item) => item.index + 1))
       );
-      const datasets: ChartDataset[] = [];
+      const datasets = calculateChartPerIteration(
+        itemList,
+        labels,
+        colors,
+        (item) => item.index,
+        (item, label) => item.item.name === label
+      );
+      /*const datasets: ChartDataset[] = [];
       for (let i = 0; itemList.find((item) => item.index === i); i++) {
         const dataset = {
           label: (i + 1).toString(),
@@ -460,7 +322,7 @@ export default class ModuleStatistic extends Vue {
           );
         }
         datasets.push(dataset as ChartDataset);
-      }
+      }*/
       this.barChartDataList.push({
         title: this.$t(`module.information.findit.statistic.item.${gameStep}`),
         data: {
@@ -474,55 +336,23 @@ export default class ModuleStatistic extends Vue {
 
   calculateItemCountChart(gameStep: GameStep): void {
     if (this.steps) {
+      const filter = (item) =>
+        item.parameter.step === gameStep &&
+        item.parameter.itemList &&
+        (!this.ideaId || item.ideaId === this.ideaId);
       const labels = this.steps
-        .filter(
-          (item) =>
-            item.parameter.step === gameStep &&
-            item.parameter.itemList &&
-            (!this.ideaId || item.ideaId === this.ideaId)
-        )
+        .filter((item) => filter(item))
         .map((item) => item.parameter.itemList.length)
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort((a, b) => a - b);
-      const datasets: ChartDataset[] = [];
-      for (
-        let i = 0;
-        this.steps.find(
-          (item) =>
-            item.parameter.itemList &&
-            item.parameter.step === gameStep &&
-            item.parameter.replayCount === i &&
-            (!this.ideaId || item.ideaId === this.ideaId)
-        );
-        i++
-      ) {
-        const dataset = {
-          data: [] as number[],
-          borderSkipped: false,
-          label: (i + 1).toString(),
-          backgroundColor: this.replayColors[i],
-          borderRadius: {
-            topRight: 5,
-            bottomRight: 5,
-            topLeft: 5,
-            bottomLeft: 5,
-          },
-          color: themeColors.getContrastColor(),
-        };
-        for (const count of labels) {
-          dataset.data.push(
-            this.steps.filter(
-              (item) =>
-                item.parameter.itemList &&
-                item.parameter.itemList.length === count &&
-                (!this.ideaId || item.ideaId === this.ideaId) &&
-                item.parameter.step === gameStep &&
-                item.parameter.replayCount === i
-            ).length
-          );
-        }
-        datasets.push(dataset as ChartDataset);
-      }
+      const datasets = calculateChartPerIteration(
+        this.steps,
+        labels,
+        this.replayColors,
+        (item) => item.parameter.replayCount,
+        (item, count) => item.parameter.itemList.length === count,
+        filter
+      );
       this.barChartDataList.push({
         title: this.$t(
           `module.information.findit.statistic.itemCount.${gameStep}`

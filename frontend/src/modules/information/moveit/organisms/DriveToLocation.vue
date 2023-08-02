@@ -643,12 +643,13 @@ export default class DriveToLocation extends Vue {
       this.trackingManager.iteration &&
       !this.trackingManager.iteration.parameter.drive
     ) {
-      this.trackingManager.saveIteration({ drive: { stops: 0 } });
+      this.trackingManager.saveIteration({
+        drive: { stops: 0, persons: this.personCount },
+      });
     }
   }
 
   async mounted(): Promise<void> {
-    this.initTrackingData();
     this.gameWidth = this.$el.parentElement.offsetWidth;
     if (this.$refs.controlArea)
       this.controlHeight = (this.$refs.controlArea as HTMLElement).offsetHeight;
@@ -668,6 +669,7 @@ export default class DriveToLocation extends Vue {
         this.busStopIntervalTime
       );
     }
+    this.initTrackingData();
     for (const particleName in gameConfig.particles) {
       const particle = gameConfig.particles[particleName];
       const data = {
@@ -965,6 +967,7 @@ export default class DriveToLocation extends Vue {
 
     this.initTrackingData();
     if (this.trackingManager && this.trackingManager.iteration) {
+      this.trackingManager.iteration.parameter.drive.persons = this.personCount;
       this.trackingManager.iteration.parameter.drive.stops++;
       this.trackingManager.saveIteration();
     }

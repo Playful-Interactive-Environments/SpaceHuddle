@@ -101,5 +101,18 @@
       "seconds": "sec.",
       "kw": "kw"
     }
+  },
+  "statistic": {
+    "rating": "How many times how many points were scored?",
+    "vehicleCategory": "Which vehicle category were used how often in which run?",
+    "vehicleType": "Which vehicle types were used how often in which run?",
+    "stops": "How many times did the driver stop while driving?",
+    "persons": "How many people were on the bus?",
+    "maxSpeed": "What was the max speed?",
+    "averageSpeed": "What was the average speed?",
+    "playTime": "How long was played?",
+    "selectTime": "How long was selected?",
+    "driveTime": "How long was driven?",
+    "cleanupTime": "How long was cleaned up?"
   }
 }

@@ -101,6 +101,8 @@ export default class Participant extends Vue {
     methane: { totalCount: 12, collectedCount: 9 },
     microplastic: { totalCount: 5, collectedCount: 1 },
   };
+  startTime = Date.now();
+  stepTime = Date.now();
 
   trackingData: TrackingData[] = [];
   gameStep = GameStep.Select;
@@ -235,8 +237,11 @@ export default class Participant extends Vue {
       this.trackingManager.saveIteration({
         gameStep: GameStep.Drive,
         vehicle: vehicle,
+        selectTime: Date.now() - this.stepTime,
+        playTime: Date.now() - this.startTime,
       });
     }
+    this.stepTime = Date.now();
   }
 
   goalReached(trackingData): void {
@@ -248,8 +253,11 @@ export default class Participant extends Vue {
       this.trackingManager.saveIteration({
         gameStep: GameStep.CleanUp,
         trackingData: trackingData,
+        driveTime: Date.now() - this.stepTime,
+        playTime: Date.now() - this.startTime,
       });
     }
+    this.stepTime = Date.now();
   }
 
   cleanupFinished(particleState: { [key: string]: ParticleState }): void {
@@ -261,9 +269,12 @@ export default class Participant extends Vue {
       this.trackingManager.saveIteration({
         gameStep: GameStep.Result,
         particleState: particleState,
+        cleanupTime: Date.now() - this.stepTime,
+        playTime: Date.now() - this.startTime,
       });
       this.trackingManager.setFinishedState(this.module);
     }
+    this.stepTime = Date.now();
   }
 }
 </script>
