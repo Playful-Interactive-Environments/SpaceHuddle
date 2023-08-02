@@ -3,6 +3,7 @@ import {
   TrackingData,
   ChartData,
 } from '@/modules/information/moveit/organisms/DriveToLocation.vue';
+import * as constants from '@/modules/information/moveit/utils/consts';
 
 export enum FuelType {
   electricity = 'electricity',
@@ -93,7 +94,7 @@ export const statisticsValue = (
   const perUnit = fuelUnits(vehicleParameter.fuel);
   return (
     calculation(trackingData, vehicleParameter, perUnit[particleName]) /
-    trackingData.persons
+    (constants.playableReducingFactor * trackingData.persons)
   );
   /*return (
     (trackingData.consumption * perUnit[particleName]) / trackingData.persons

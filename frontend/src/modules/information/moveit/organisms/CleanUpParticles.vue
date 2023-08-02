@@ -265,7 +265,7 @@ export default class CleanUpParticles extends Vue {
   gameHeight = 0;
   padding = 10;
   readonly particleDivisionFactor = 1;
-  readonly intervalTime = 5000;
+  readonly intervalTime = 500;
   interval = -1;
   activeValue = 0;
   cleanupParticles: DrawingParticle[] = [];
@@ -281,7 +281,8 @@ export default class CleanUpParticles extends Vue {
   readonly maxCleanupThreshold = constants.maxCleanupThreshold;
   readonly calcChartHeight = constants.calcChartHeight;
 
-  particleQueue: { [key: string]: number } = {};
+  particleQueueEmit: { [key: string]: number } = {};
+  particleQueueEmission: { [key: string]: number } = {};
 
   get evaluatingColor(): string {
     return themeColors.getEvaluatingColor();
@@ -293,17 +294,6 @@ export default class CleanUpParticles extends Vue {
 
   get highlightColor(): string {
     return themeColors.convertToRGBA(themeColors.getHighlightColor());
-  }
-
-  get textStyle(): PIXI.ITextStyle {
-    const style = {
-      fill: this.evaluatingColor,
-      fontSize: 16,
-      fontWeight: 'bold',
-      textAlign: 'center',
-    } as any;
-    console.log(style); //this.evaluatingColor,
-    return style;
   }
 
   get containerSpace(): number {
@@ -504,26 +494,32 @@ export default class CleanUpParticles extends Vue {
     };
 
     this.now = Date.now();
-    let activeParticleEmitCount = 0;
+    let allParticleSum = 0;
     for (const index in this.chartData.datasets) {
       const dataset = this.chartData.datasets[index];
       const particleName = dataset.name;
       if (this.activeValue < dataset.data.length) {
-        const value =
+        this.particleQueueEmission[particleName] +=
           dataset.data[this.activeValue] / this.particleDivisionFactor;
-        this.particleQueue[particleName] += value;
-        const emissionCount = Math.floor(this.particleQueue[particleName]);
+        const newSum = allParticleSum + dataset.data[this.activeValue];
+        if (newSum > this.maxCleanupThreshold) {
+          if (allParticleSum < this.maxCleanupThreshold) {
+            const outsideDelta = newSum - this.maxCleanupThreshold;
+            this.particleQueueEmit[particleName] +=
+              (dataset.data[this.activeValue] - outsideDelta) /
+              this.particleDivisionFactor;
+          }
+        } else
+          this.particleQueueEmit[particleName] +=
+            dataset.data[this.activeValue] / this.particleDivisionFactor;
+        allParticleSum = newSum;
+        const emissionCount = Math.floor(
+          this.particleQueueEmission[particleName]
+        );
         this.particleState[particleName].totalCount += emissionCount;
-        this.particleQueue[particleName] -= emissionCount;
-        const maxEmitCount =
-          this.maxCleanupThreshold / this.particleDivisionFactor;
-        let emitCount = emissionCount;
-        if (activeParticleEmitCount + emissionCount > maxEmitCount) {
-          if (activeParticleEmitCount < maxEmitCount)
-            emitCount = maxEmitCount - activeParticleEmitCount;
-          else emitCount = 0;
-        }
-        activeParticleEmitCount += emissionCount;
+        this.particleQueueEmission[particleName] -= emissionCount;
+        const emitCount = Math.floor(this.particleQueueEmit[particleName]);
+        this.particleQueueEmit[particleName] -= emitCount;
         if (emitCount < emissionCount) {
           this.outsideCount += emissionCount - emitCount;
         }
@@ -599,7 +595,8 @@ export default class CleanUpParticles extends Vue {
           },
         };
         this.chartData.datasets.push(data);
-        this.particleQueue[particleName] = 0;
+        this.particleQueueEmit[particleName] = 0;
+        this.particleQueueEmission[particleName] = 0;
         totalValue += maxParticleValue;
       }
       totalValue += 1;
