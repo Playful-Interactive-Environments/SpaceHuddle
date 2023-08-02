@@ -1,0 +1,12 @@
+{
+  "shared": {
+    "view": {
+      "home": {
+        "header": "Ecopolis Spielplatz",
+        "info": "Establishing Climate-related Opinion-voicing and Political Participation via Online Learning and Interactive Scenarios",
+        "login": "Spiele verwalten",
+        "join": "Spielen"
+      }
+    }
+  }
+}

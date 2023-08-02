@@ -2,6 +2,7 @@ import { createI18n, I18n } from 'vue-i18n';
 import de from '@/locales/de.json';
 import en from '@/locales/en.json';
 import { getEnumLocales, getLocales } from '@/modules';
+import _ from 'lodash';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -12,6 +13,11 @@ const addModuleLocales = async (locale = 'en', dict: any): Promise<any> => {
     if (!('module' in dict)) dict.module = {};
     dict.module.general = generalLocales;
   }
+  await import(
+    `@/locales/themes/${process.env.VUE_APP_THEME}/${locale}.json`
+  ).then((value) => {
+    dict = _.merge(dict, value);
+  });
   return dict;
 };
 

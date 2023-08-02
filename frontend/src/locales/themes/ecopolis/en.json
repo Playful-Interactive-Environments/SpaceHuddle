@@ -1,0 +1,12 @@
+{
+  "shared": {
+    "view": {
+      "home": {
+        "header": "Ecopolis Playground",
+        "info": "Establishing Climate-related Opinion-voicing and Political Participation via Online Learning and Interactive Scenarios",
+        "login": "Manage Games",
+        "join": "Play"
+      }
+    }
+  }
+}
