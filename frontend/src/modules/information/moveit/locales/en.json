@@ -113,6 +113,30 @@
     "playTime": "How long was played?",
     "selectTime": "How long was selected?",
     "driveTime": "How long was driven?",
-    "cleanupTime": "How long was cleaned up?"
+    "cleanupTime": "How long was cleaned up?",
+    "particleState": {
+      "totalCount": {
+        "average": "How many particles were emitted on average?",
+        "min": "What was the minimum number of particles emitted?",
+        "max": "What was the maximum number of particles emitted?"
+      },
+      "collectedCount": {
+        "average": "How many particles were collected on average?",
+        "min": "What was the minimum number of particles collected?",
+        "max": "What was the maximum number of particles collected?"
+      }
+    },
+    "line": {
+      "speed": {
+        "average": "What was the average driving behavior per vehicle type?",
+        "min": "What was the best driving behavior per vehicle type?",
+        "max": "What was the worst driving behavior per vehicle type?"
+      },
+      "persons": {
+        "average": "What was the average person count per vehicle type?",
+        "max": "What was the best person count per vehicle type?",
+        "min": "What was the worst person count per vehicle type?"
+      }
+    }
   }
 }

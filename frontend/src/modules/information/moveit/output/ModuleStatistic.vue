@@ -18,14 +18,52 @@
           grid: {
             display: false,
           },
-          stacked: true,
+          stacked: chartData.stacked,
         },
         y: {
           ticks: {
             color: contrastColor,
             stepSize: 1,
           },
-          stacked: true,
+          stacked: chartData.stacked,
+        },
+      },
+      plugins: {
+        legend: {
+          display: chartData.data.datasets.length > 1,
+        },
+        title: {
+          display: true,
+          text: chartData.title,
+        },
+      },
+    }"
+  />
+  <Line
+    v-for="(chartData, index) in lineChartDataList"
+    :key="index"
+    :data="chartData.data"
+    :height="80"
+    :options="{
+      maintainAspectRatio: true,
+      animation: {
+        duration: 0,
+      },
+      scales: {
+        x: {
+          display: displayLabels,
+          ticks: {
+            color: chartData.labelColors,
+          },
+          grid: {
+            display: false,
+          },
+        },
+        y: {
+          ticks: {
+            color: contrastColor,
+            stepSize: 1,
+          },
         },
       },
       plugins: {
@@ -46,16 +84,29 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
-import { Bar } from 'vue-chartjs';
+import { Bar, Line } from 'vue-chartjs';
 import * as taskParticipantService from '@/services/task-participant-service';
 import type { ChartData } from 'chart.js';
 import * as themeColors from '@/utils/themeColors';
 import { getRandomColorList } from '@/utils/colors';
 import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
-import { calculateChartPerIteration } from '@/utils/statistic';
+import {
+  calculateChartPerIteration,
+  calculateChartPerParameter,
+  mapArrayToConstantSize,
+} from '@/utils/statistic';
+import * as gameConfig from '@/modules/information/moveit/data/gameConfig.json';
+
+enum CalculationType {
+  Count = 'count',
+  Sum = 'sum',
+  Average = 'average',
+  Min = 'min',
+  Max = 'max',
+}
 
 @Options({
-  components: { Bar },
+  components: { Bar, Line },
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -67,9 +118,16 @@ export default class ModuleStatistic extends Vue {
     title: string;
     data: ChartData;
     labelColors: string[] | string;
+    stacked: boolean;
+  }[] = [];
+  lineChartDataList: {
+    title: string;
+    data: ChartData;
+    labelColors: string[] | string;
   }[] = [];
   displayLabels = false;
   replayColors: string[] = [];
+  colorList: string[] = getRandomColorList(20);
 
   get contrastColor(): string {
     return themeColors.getContrastColor();
@@ -104,8 +162,44 @@ export default class ModuleStatistic extends Vue {
     }
   }
 
+  getVehicleList(filter: ((item) => boolean) | null = null): any[] {
+    const subset = filter ? this.iterations.filter(filter) : this.iterations;
+    return subset
+      .map((item) => item.parameter.vehicle)
+      .filter(
+        (value, index, array) =>
+          array.findIndex(
+            (item) =>
+              item.category === value.category && item.type === value.type
+          ) === index
+      )
+      .sort((a, b) => {
+        const x = `${a.category} - ${a.type}`;
+        const y = `${b.category} - ${b.type}`;
+        if (x < y) return -1;
+        if (x > y) return 1;
+        return 0;
+      });
+  }
+
+  getCalculationForType(calculationType: CalculationType): (list) => number {
+    let calculation = (list) => list.length;
+    if (calculationType === CalculationType.Max)
+      calculation = (list) => Math.max(...list);
+    if (calculationType === CalculationType.Min)
+      calculation = (list) => Math.min(...list);
+    if (calculationType === CalculationType.Average)
+      calculation = (list) =>
+        list.reduce((prev, curr) => prev + curr, 0) / list.length;
+    if (calculationType === CalculationType.Sum)
+      calculation = (list) => list.reduce((prev, curr) => prev + curr, 0);
+
+    return calculation;
+  }
+
   calculateCharts(): void {
     this.barChartDataList = [];
+    this.lineChartDataList = [];
     this.calculateStarsChart();
     this.calculateVehicleCategoryChart();
     this.calculateVehicleTypeChart();
@@ -117,6 +211,18 @@ export default class ModuleStatistic extends Vue {
     this.calculateTimeChart('selectTime');
     this.calculateTimeChart('driveTime');
     this.calculateTimeChart('cleanupTime');
+    this.calculateParticleChart('totalCount', CalculationType.Average);
+    this.calculateParticleChart('totalCount', CalculationType.Min);
+    this.calculateParticleChart('totalCount', CalculationType.Max);
+    this.calculateParticleChart('collectedCount', CalculationType.Average);
+    this.calculateParticleChart('collectedCount', CalculationType.Min);
+    this.calculateParticleChart('collectedCount', CalculationType.Max);
+    this.calculateLineChart(CalculationType.Average, 'speed');
+    this.calculateLineChart(CalculationType.Min, 'speed');
+    this.calculateLineChart(CalculationType.Max, 'speed');
+    this.calculateLineChart(CalculationType.Average, 'persons');
+    this.calculateLineChart(CalculationType.Min, 'persons');
+    this.calculateLineChart(CalculationType.Max, 'persons');
   }
 
   calculateStarsChart(): void {
@@ -141,6 +247,7 @@ export default class ModuleStatistic extends Vue {
           datasets: datasets,
         },
         labelColors: themeColors.getContrastColor(),
+        stacked: true,
       });
     }
   }
@@ -165,28 +272,14 @@ export default class ModuleStatistic extends Vue {
           datasets: datasets,
         },
         labelColors: themeColors.getContrastColor(),
+        stacked: true,
       });
     }
   }
 
   calculateVehicleTypeChart(): void {
     if (this.iterations) {
-      const vehicleList = this.iterations
-        .map((item) => item.parameter.vehicle)
-        .filter(
-          (value, index, array) =>
-            array.findIndex(
-              (item) =>
-                item.category === value.category && item.type === value.type
-            ) === index
-        )
-        .sort((a, b) => {
-          const x = `${a.category} - ${a.type}`;
-          const y = `${b.category} - ${b.type}`;
-          if (x < y) return -1;
-          if (x > y) return 1;
-          return 0;
-        });
+      const vehicleList = this.getVehicleList();
       const labels: string[] = vehicleList.map(
         (item) => `${item.category} - ${item.type}`
       );
@@ -206,6 +299,7 @@ export default class ModuleStatistic extends Vue {
           datasets: datasets,
         },
         labelColors: themeColors.getContrastColor(),
+        stacked: true,
       });
     }
   }
@@ -233,6 +327,7 @@ export default class ModuleStatistic extends Vue {
           datasets: datasets,
         },
         labelColors: themeColors.getContrastColor(),
+        stacked: true,
       });
     }
   }
@@ -276,6 +371,7 @@ export default class ModuleStatistic extends Vue {
           datasets: datasets,
         },
         labelColors: themeColors.getContrastColor(),
+        stacked: true,
       });
     }
   }
@@ -318,6 +414,7 @@ export default class ModuleStatistic extends Vue {
           datasets: datasets,
         },
         labelColors: themeColors.getContrastColor(),
+        stacked: true,
       });
     }
   }
@@ -363,6 +460,7 @@ export default class ModuleStatistic extends Vue {
           datasets: datasets,
         },
         labelColors: themeColors.getContrastColor(),
+        stacked: true,
       });
     }
   }
@@ -385,6 +483,97 @@ export default class ModuleStatistic extends Vue {
       );
       this.barChartDataList.push({
         title: this.$t(`module.information.moveit.statistic.${timeType}`),
+        data: {
+          labels: labels,
+          datasets: datasets,
+        },
+        labelColors: themeColors.getContrastColor(),
+        stacked: true,
+      });
+    }
+  }
+
+  calculateParticleChart(
+    value: string,
+    calculationType: CalculationType
+  ): void {
+    if (this.iterations) {
+      const mapToValue = (list, label) =>
+        list
+          .filter((item) => item.parameter.particleState[label])
+          .map((item) => item.parameter.particleState[label][value]);
+      const filter = (item) =>
+        item.parameter.particleState &&
+        Object.keys(item.parameter.particleState).length > 0;
+      const vehicleList = this.getVehicleList(filter);
+      const labels: string[] = Object.keys(gameConfig.particles);
+      const datasets = calculateChartPerParameter(
+        this.iterations,
+        vehicleList,
+        labels,
+        this.colorList,
+        (item, parameter) =>
+          item.parameter.vehicle.category === parameter.category &&
+          item.parameter.vehicle.type === parameter.type,
+        null,
+        filter,
+        (list, label) =>
+          this.getCalculationForType(calculationType)(mapToValue(list, label)),
+        (vehicle) => `${vehicle.category} - ${vehicle.type}`
+      );
+      this.barChartDataList.push({
+        title: this.$t(
+          `module.information.moveit.statistic.particleState.${value}.${calculationType}`
+        ),
+        data: {
+          labels: labels,
+          datasets: datasets,
+        },
+        labelColors: themeColors.getContrastColor(),
+        stacked: false,
+      });
+    }
+  }
+
+  calculateLineChart(
+    calculationType: CalculationType,
+    parameterName: string
+  ): void {
+    if (this.iterations) {
+      const mappingLength = 100;
+      const mapToValue = (list, label) =>
+        list
+          .filter((item) => item.parameter.trackingData)
+          .map((item) => {
+            return mapArrayToConstantSize(
+              item.parameter.trackingData,
+              (item) => item[parameterName],
+              label,
+              mappingLength
+            );
+          });
+      const filter = (item) =>
+        item.parameter.trackingData && item.parameter.trackingData.length > 0;
+      const vehicleList = this.getVehicleList(filter);
+      const labels: number[] = [...Array(mappingLength).keys()];
+      const datasets = calculateChartPerParameter(
+        this.iterations,
+        vehicleList,
+        labels,
+        this.colorList,
+        (item, parameter) =>
+          item.parameter.vehicle.category === parameter.category &&
+          item.parameter.vehicle.type === parameter.type,
+        null,
+        filter,
+        (list, label) =>
+          this.getCalculationForType(calculationType)(mapToValue(list, label)),
+        (vehicle) => `${vehicle.category} - ${vehicle.type}`
+      );
+      this.lineChartDataList.push({
+        title: this.$t(
+          `module.information.moveit.statistic.line.${parameterName}.${calculationType}`
+        ),
         data: {
           labels: labels,
           datasets: datasets,

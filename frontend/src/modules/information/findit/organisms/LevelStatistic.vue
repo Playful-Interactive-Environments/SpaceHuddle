@@ -77,6 +77,7 @@ export default class LevelStatistic extends Vue {
   }[] = [];
   displayLabels = false;
   replayColors: string[] = [];
+  colorList: string[] = getRandomColorList(20);
 
   get contrastColor(): string {
     return themeColors.getContrastColor();
@@ -289,9 +290,11 @@ export default class LevelStatistic extends Vue {
         .map((item) => item.item.name)
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort();
-      const colors = getRandomColorList(
-        Math.max(...itemList.map((item) => item.index + 1))
-      );
+      const colorCount = Math.max(...itemList.map((item) => item.index + 1));
+      const colors =
+        this.colorList.length > colorCount
+          ? this.colorList
+          : getRandomColorList(colorCount);
       const datasets = calculateChartPerIteration(
         itemList,
         labels,
@@ -299,30 +302,6 @@ export default class LevelStatistic extends Vue {
         (item) => item.index,
         (item, label) => item.item.name === label
       );
-      /*const datasets: ChartDataset[] = [];
-      for (let i = 0; itemList.find((item) => item.index === i); i++) {
-        const dataset = {
-          label: (i + 1).toString(),
-          backgroundColor: colors[i],
-          borderRadius: {
-            topRight: 5,
-            bottomRight: 5,
-            topLeft: 5,
-            bottomLeft: 5,
-          },
-          data: [] as number[],
-          borderSkipped: false,
-          color: themeColors.getContrastColor(),
-        };
-        for (const label of labels) {
-          dataset.data.push(
-            itemList.filter(
-              (item) => item.item.name === label && item.index === i
-            ).length
-          );
-        }
-        datasets.push(dataset as ChartDataset);
-      }*/
       this.barChartDataList.push({
         title: this.$t(`module.information.findit.statistic.item.${gameStep}`),
         data: {
