@@ -65,10 +65,10 @@
     </section>
     <section class="login__bg-section full-height flex-column centered">
       <div class="centered">
-        <h2 class="heading heading--medium heading--white">
+        <h2 class="heading heading--medium heading--white" :class="textColorClass()">
           {{ $t('moderator.view.login.register.header') }}
         </h2>
-        <p class="login__text">
+        <p class="login__text" :class="textColorClass()">
           {{ $t('moderator.view.login.register.info') }}
         </p>
         <router-link to="register">
@@ -110,6 +110,12 @@ export default class ModeratorLogin extends Vue {
     email: '',
     password: '',
   };
+
+  theme = process.env.VUE_APP_THEME;
+
+  textColorClass(): string {
+    return this.theme == 'ecopolis' ? 'dark' : 'white';
+  }
 
   async save(): Promise<void> {
     try {
@@ -158,7 +164,7 @@ export default class ModeratorLogin extends Vue {
   &__bg-section {
     color: #fff;
     background-color: var(--color-dark-contrast);
-    background-image: url('~@/assets/illustrations/bg_without_telescope.png');
+    background-image: var(--login-image);
     background-position: center;
     background-size: cover;
   }
@@ -205,5 +211,13 @@ export default class ModeratorLogin extends Vue {
       max-width: 520px;
     }
   }
+}
+
+.white {
+  color: #fff;
+}
+
+.dark {
+  color: var(--color-dark-contrast);
 }
 </style>

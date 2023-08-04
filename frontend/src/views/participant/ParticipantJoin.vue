@@ -4,10 +4,10 @@
       class="participant-container join full-height centered-horizontal flex-column"
     >
       <main>
-        <h1 class="heading heading--big heading--white">
+        <h1 class="heading heading--big heading--white" :class="textColorClass()">
           {{ $t('participant.view.join.header') }}
         </h1>
-        <p class="join__text">
+        <p class="join__text" :class="textColorClass()">
           {{ $t('participant.view.join.info') }}
         </p>
         <ValidationForm
@@ -25,7 +25,7 @@
               >
               </el-option>
             </el-select>
-            <p class="join__info">
+            <p class="join__info" :class="textColorClass()">
               {{ $t('participant.view.join.browserKeyInfo') }}
             </p>
           </el-form-item>
@@ -66,6 +66,11 @@ export default class ParticipantJoin extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
   @Prop({ default: '' }) readonly connectionKey!: string;
   recentlyUsedKeys: SessionInfo[] = [];
+  theme = process.env.VUE_APP_THEME;
+
+  textColorClass(): string {
+    return this.theme == 'ecopolis' ? 'dark' : 'white';
+  }
 
   formData: ValidationData = {
     connectionKey: '',
@@ -195,7 +200,7 @@ export default class ParticipantJoin extends Vue {
   padding-top: calc(var(--app-height) * 0.08);
   color: #fff;
   background: var(--color-dark-contrast);
-  background-image: url('~@/assets/illustrations/telescope.png');
+  background-image: var(--login-image);
   background-position: center;
   background-size: cover;
 
@@ -209,6 +214,14 @@ export default class ParticipantJoin extends Vue {
     line-height: 1rem;
     padding-top: 1rem;
   }
+}
+
+.white {
+  color: #fff;
+}
+
+.dark {
+  color: var(--color-dark-contrast);
 }
 
 .el-select {
