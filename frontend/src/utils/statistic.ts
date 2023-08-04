@@ -58,7 +58,7 @@ export function calculateChartPerParameter(
   containsToParameter: (item: any, parameter: any) => boolean,
   containsToLoop: ((item: any, label: any) => boolean) | null = null,
   containsToChart: ((item: any) => boolean) | null = null,
-  calculation: (list: any[], loopItem: any) => number = (list) => list.length,
+  calculation: (list: any[], loopItem: any, parameter: any) => number = (list) => list.length,
   parameterToString: (parameter: any) => string = (parameter) =>
     parameter.toString()
 ): ChartDataset[] {
@@ -89,7 +89,7 @@ export function calculateChartPerParameter(
       const loopSet = containsToLoop
         ? subset.filter((item) => containsToLoop(item, loopItem))
         : subset;
-      dataset.data.push(calculation(loopSet, loopItem));
+      dataset.data.push(calculation(loopSet, loopItem, parameter));
     }
     datasets.push(dataset as ChartDataset);
   }

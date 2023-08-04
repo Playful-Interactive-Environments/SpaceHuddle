@@ -205,8 +205,8 @@ export default class ModuleStatistic extends Vue {
     this.calculateVehicleTypeChart();
     this.calculateStopsChart();
     this.calculatePersonsChart();
-    this.calculateMaxSpeedChart();
-    this.calculateAverageSpeedChart();
+    this.calculateSpeedChart('max');
+    this.calculateSpeedChart('average');
     this.calculateTimeChart('playTime');
     this.calculateTimeChart('selectTime');
     this.calculateTimeChart('driveTime');
@@ -220,9 +220,7 @@ export default class ModuleStatistic extends Vue {
     this.calculateLineChart(CalculationType.Average, 'speed');
     this.calculateLineChart(CalculationType.Min, 'speed');
     this.calculateLineChart(CalculationType.Max, 'speed');
-    this.calculateLineChart(CalculationType.Average, 'persons');
-    this.calculateLineChart(CalculationType.Min, 'persons');
-    this.calculateLineChart(CalculationType.Max, 'persons');
+    this.calculateLineChartByCalculationType('persons');
   }
 
   calculateStarsChart(): void {
@@ -233,12 +231,19 @@ export default class ModuleStatistic extends Vue {
         '\uf005\uf005',
         '\uf005\uf005\uf005',
       ];
-      const datasets = calculateChartPerIteration(
+      const vehicleList = this.getVehicleList(null);
+      const datasets = calculateChartPerParameter(
         this.iterations,
+        vehicleList,
         [...Array(3).keys()],
-        this.replayColors,
-        (item) => item.iteration - 1,
-        (item, stars) => item.parameter.rate === stars
+        this.colorList,
+        (item, parameter) =>
+          item.parameter.vehicle.category === parameter.category &&
+          item.parameter.vehicle.type === parameter.type,
+        (item, stars) => item.parameter.rate === stars,
+        null,
+        (list) => list.length,
+        (vehicle) => `${vehicle.category} - ${vehicle.type}`
       );
       this.barChartDataList.push({
         title: this.$t('module.information.moveit.statistic.rating'),
@@ -312,13 +317,19 @@ export default class ModuleStatistic extends Vue {
         .map((item) => item.parameter.drive.stops)
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort((a, b) => a - b);
-      const datasets = calculateChartPerIteration(
+      const vehicleList = this.getVehicleList(filter);
+      const datasets = calculateChartPerParameter(
         this.iterations,
+        vehicleList,
         labels,
-        this.replayColors,
-        (item) => item.iteration - 1,
+        this.colorList,
+        (item, parameter) =>
+          item.parameter.vehicle.category === parameter.category &&
+          item.parameter.vehicle.type === parameter.type,
         (item, stops) => item.parameter.drive.stops === stops,
-        filter
+        filter,
+        (list) => list.length,
+        (vehicle) => `${vehicle.category} - ${vehicle.type}`
       );
       this.barChartDataList.push({
         title: this.$t('module.information.moveit.statistic.stops'),
@@ -376,85 +387,57 @@ export default class ModuleStatistic extends Vue {
     }
   }
 
-  calculateMaxSpeedChart(): void {
+  calculateSpeedChart(type: string): void {
     if (this.iterations) {
       for (const iteration of this.iterations) {
         if (
           iteration.parameter.drive &&
           iteration.parameter.drive.trackingData
         ) {
-          const speedList = iteration.parameter.drive.trackingData
-            .map((item) => item.speed)
-            .sort((a, b) => b - a);
-          if (speedList.length > 0) {
-            iteration.parameter.drive.maxSpeed =
-              Math.round(speedList[0] / 10) * 10;
+          if (type === 'max') {
+            const speedList = iteration.parameter.drive.trackingData
+              .map((item) => item.speed)
+              .sort((a, b) => b - a);
+            if (speedList.length > 0) {
+              iteration.parameter.drive.calcSpeed =
+                Math.round(speedList[0] / 10) * 10;
+            }
+          } else if (type === 'average') {
+            const speedList = iteration.parameter.drive.trackingData.map(
+              (item) => item.speed
+            );
+            if (speedList.length > 0) {
+              const speed =
+                speedList.reduce((prev, curr) => prev + curr, 0) /
+                speedList.length;
+              iteration.parameter.drive.calcSpeed = Math.round(speed / 10) * 10;
+            }
           }
         }
       }
       const filter = (item) =>
-        item.parameter.drive && item.parameter.drive.maxSpeed;
+        item.parameter.drive && item.parameter.drive.calcSpeed;
       const labels: string[] = this.iterations
         .filter((item) => filter(item))
-        .map((item) => item.parameter.drive.maxSpeed)
+        .map((item) => item.parameter.drive.calcSpeed)
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort((a, b) => a - b);
-      const datasets = calculateChartPerIteration(
+      const vehicleList = this.getVehicleList(filter);
+      const datasets = calculateChartPerParameter(
         this.iterations,
+        vehicleList,
         labels,
-        this.replayColors,
-        (item) => item.iteration - 1,
-        (item, maxSpeed) => item.parameter.drive.maxSpeed === maxSpeed,
-        filter
+        this.colorList,
+        (item, parameter) =>
+          item.parameter.vehicle.category === parameter.category &&
+          item.parameter.vehicle.type === parameter.type,
+        (item, calcSpeed) => item.parameter.drive.calcSpeed === calcSpeed,
+        filter,
+        (list) => list.length,
+        (vehicle) => `${vehicle.category} - ${vehicle.type}`
       );
       this.barChartDataList.push({
-        title: this.$t('module.information.moveit.statistic.maxSpeed'),
-        data: {
-          labels: labels,
-          datasets: datasets,
-        },
-        labelColors: themeColors.getContrastColor(),
-        stacked: true,
-      });
-    }
-  }
-
-  calculateAverageSpeedChart(): void {
-    if (this.iterations) {
-      for (const iteration of this.iterations) {
-        if (
-          iteration.parameter.drive &&
-          iteration.parameter.drive.trackingData
-        ) {
-          const speedList = iteration.parameter.drive.trackingData.map(
-            (item) => item.speed
-          );
-          if (speedList.length > 0) {
-            const speed =
-              speedList.reduce((prev, curr) => prev + curr, 0) /
-              speedList.length;
-            iteration.parameter.drive.averageSpeed =
-              Math.round(speed / 10) * 10;
-          }
-        }
-      }
-      const filter = (item) =>
-        item.parameter.drive && item.parameter.drive.averageSpeed;
-      const labels: string[] = this.iterations
-        .filter((item) => filter(item))
-        .map((item) => item.parameter.drive.averageSpeed)
-        .filter((value, index, array) => array.indexOf(value) === index)
-        .sort((a, b) => a - b);
-      const datasets = calculateChartPerIteration(
-        this.iterations,
-        labels,
-        this.replayColors,
-        (item) => item.iteration - 1,
-        (item, maxSpeed) => item.parameter.drive.averageSpeed === maxSpeed,
-        filter
-      );
-      this.barChartDataList.push({
-        title: this.$t('module.information.moveit.statistic.averageSpeed'),
+        title: this.$t(`module.information.moveit.statistic.speed.${type}`),
         data: {
           labels: labels,
           datasets: datasets,
@@ -473,13 +456,19 @@ export default class ModuleStatistic extends Vue {
         .map((item) => Math.round(item.parameter[timeType] / 1000))
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort((a, b) => a - b);
-      const datasets = calculateChartPerIteration(
+      const vehicleList = this.getVehicleList(filter);
+      const datasets = calculateChartPerParameter(
         this.iterations,
+        vehicleList,
         labels,
-        this.replayColors,
-        (item) => item.iteration - 1,
+        this.colorList,
+        (item, parameter) =>
+          item.parameter.vehicle.category === parameter.category &&
+          item.parameter.vehicle.type === parameter.type,
         (item, time) => Math.round(item.parameter[timeType] / 1000) === time,
-        filter
+        filter,
+        (list) => list.length,
+        (vehicle) => `${vehicle.category} - ${vehicle.type}`
       );
       this.barChartDataList.push({
         title: this.$t(`module.information.moveit.statistic.${timeType}`),
@@ -573,6 +562,54 @@ export default class ModuleStatistic extends Vue {
       this.lineChartDataList.push({
         title: this.$t(
           `module.information.moveit.statistic.line.${parameterName}.${calculationType}`
+        ),
+        data: {
+          labels: labels,
+          datasets: datasets,
+        },
+        labelColors: themeColors.getContrastColor(),
+      });
+    }
+  }
+
+  calculateLineChartByCalculationType(parameterName: string): void {
+    if (this.iterations) {
+      const mappingLength = 100;
+      const mapToValue = (list, label) =>
+        list
+          .filter((item) => item.parameter.trackingData)
+          .map((item) => {
+            return mapArrayToConstantSize(
+              item.parameter.trackingData,
+              (item) => item[parameterName],
+              label,
+              mappingLength
+            );
+          });
+      const filter = (item) =>
+        item.parameter.trackingData &&
+        item.parameter.trackingData.length > 0 &&
+        item.parameter.vehicle.category === 'bus';
+      const compareList = [
+        CalculationType.Average,
+        CalculationType.Min,
+        CalculationType.Max,
+      ];
+      const labels: number[] = [...Array(mappingLength).keys()];
+      const datasets = calculateChartPerParameter(
+        this.iterations,
+        compareList,
+        labels,
+        this.colorList,
+        () => true,
+        null,
+        filter,
+        (list, label, parameter) =>
+          this.getCalculationForType(parameter)(mapToValue(list, label))
+      );
+      this.lineChartDataList.push({
+        title: this.$t(
+          `module.information.moveit.statistic.line.${parameterName}.mix`
         ),
         data: {
           labels: labels,

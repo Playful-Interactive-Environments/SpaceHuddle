@@ -108,8 +108,10 @@
     "vehicleType": "Which vehicle types were used how often in which run?",
     "stops": "How many times did the driver stop while driving?",
     "persons": "How many people were on the bus?",
-    "maxSpeed": "What was the max speed?",
-    "averageSpeed": "What was the average speed?",
+    "speed": {
+      "max": "What was the max speed?",
+      "average": "What was the average speed?"
+    },
     "playTime": "How long was played?",
     "selectTime": "How long was selected?",
     "driveTime": "How long was driven?",
@@ -133,9 +135,7 @@
         "max": "What was the worst driving behavior per vehicle type?"
       },
       "persons": {
-        "average": "What was the average person count per vehicle type?",
-        "max": "What was the best person count per vehicle type?",
-        "min": "What was the worst person count per vehicle type?"
+        "mix": "What was the bus person count?"
       }
     }
   }

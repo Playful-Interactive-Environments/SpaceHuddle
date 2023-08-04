@@ -108,8 +108,10 @@
     "vehicleType": "Welche Fahrzeugkategorien wurden wie oft in welchem Durchlauf eingesetzt?",
     "stops": "Wie oft hat der Fahrer während der Fahrt angehalten?",
     "persons": "Wie viele Personen befanden sich im Bus?",
-    "maxSpeed": "Was war die Höchstgeschwindigkeit?",
-    "averageSpeed": "Wie hoch war die Durchschnittsgeschwindigkeit?",
+    "speed": {
+      "max": "Was war die Höchstgeschwindigkeit?",
+      "average": "Wie hoch war die Durchschnittsgeschwindigkeit?"
+    },
     "playTime": "Wie lange wurde gespielt?",
     "selectTime": "Wie lange wurde ausgewählt?",
     "driveTime": "Wie lange wurde gefahren?",
@@ -133,9 +135,7 @@
         "max": "Welches war das schlechteste Fahrverhalten pro Fahrzeugtyp?"
       },
       "persons": {
-        "average": "Wie war die durchschnittliche Personenanzahl pro Fahrzeugtyp?",
-        "max": "Welches war die beste Personenanzahl pro Fahrzeugtyp?",
-        "min": "Welches war die schlechteste Personenanzahl pro Fahrzeugtyp?"
+        "mix": "Wie war die Buspersonenanzahl?"
       }
     }
   }
