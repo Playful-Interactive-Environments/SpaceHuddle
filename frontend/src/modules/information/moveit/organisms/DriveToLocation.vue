@@ -709,6 +709,7 @@ export default class DriveToLocation extends Vue {
           this.routePath;
         this.trackingManager.iteration.parameter.drive.routePathLenght =
           turf.length(this.routePath);
+        this.trackingManager.iteration.parameter.drive.pathCalculationCount = 1;
         this.trackingManager.saveIteration();
       }
     });
@@ -1246,6 +1247,15 @@ export default class DriveToLocation extends Vue {
               if (point) {
                 this.pauseCount = 0;
                 this.noStreet = false;
+                if (
+                  this.trackingManager &&
+                  this.trackingManager.iteration &&
+                  this.trackingManager.iteration.parameter.drive &&
+                  this.trackingManager.iteration.parameter.drive
+                    .pathCalculationCount
+                )
+                  this.trackingManager.iteration.parameter.drive
+                    .pathCalculationCount++;
               }
               isOnRoute = false;
             } else {

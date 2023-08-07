@@ -196,7 +196,8 @@ export default class ModuleStatistic extends Vue {
     this.calculateStarsChart();
     this.calculateVehicleCategoryChart();
     this.calculateVehicleTypeChart();
-    this.calculateStopsChart();
+    this.calculateDrivingParameterChart('stops');
+    this.calculateDrivingParameterChart('pathCalculationCount');
     this.calculatePersonsChart();
     this.calculateSpeedChart('max');
     this.calculateSpeedChart('average');
@@ -302,12 +303,12 @@ export default class ModuleStatistic extends Vue {
     }
   }
 
-  calculateStopsChart(): void {
+  calculateDrivingParameterChart(parameterName: string): void {
     if (this.iterations) {
       const filter = (item) => item.parameter.drive;
       const labels: string[] = this.iterations
         .filter((item) => filter(item))
-        .map((item) => item.parameter.drive.stops)
+        .map((item) => item.parameter.drive[parameterName])
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort((a, b) => a - b);
       const vehicleList = this.getVehicleList(filter);
@@ -319,13 +320,14 @@ export default class ModuleStatistic extends Vue {
         (item, parameter) =>
           item.parameter.vehicle.category === parameter.category &&
           item.parameter.vehicle.type === parameter.type,
-        (item, stops) => item.parameter.drive.stops === stops,
+        (item, parameterValue) =>
+          item.parameter.drive[parameterName] === parameterValue,
         filter,
         (list) => list.length,
         (vehicle) => `${vehicle.category} - ${vehicle.type}`
       );
       this.barChartDataList.push({
-        title: this.$t('module.information.moveit.statistic.stops'),
+        title: this.$t(`module.information.moveit.statistic.${parameterName}`),
         data: {
           labels: labels,
           datasets: datasets,
