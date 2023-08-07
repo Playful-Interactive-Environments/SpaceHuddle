@@ -161,7 +161,10 @@ export default class ShowResult extends Vue {
       totalCount += this.particleState[particleName].totalCount;
       collectedCount += this.particleState[particleName].collectedCount;
     }
-    return { collectedCount: collectedCount, totalCount: totalCount };
+    return {
+      collectedCount: collectedCount,
+      totalCount: totalCount,
+    };
   }
 
   get successStatus(): number {

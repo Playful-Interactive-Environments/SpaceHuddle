@@ -94,16 +94,9 @@ import {
   calculateChartPerIteration,
   calculateChartPerParameter,
   mapArrayToConstantSize,
+  CalculationType,
 } from '@/utils/statistic';
 import * as gameConfig from '@/modules/information/moveit/data/gameConfig.json';
-
-enum CalculationType {
-  Count = 'count',
-  Sum = 'sum',
-  Average = 'average',
-  Min = 'min',
-  Max = 'max',
-}
 
 @Options({
   components: { Bar, Line },
