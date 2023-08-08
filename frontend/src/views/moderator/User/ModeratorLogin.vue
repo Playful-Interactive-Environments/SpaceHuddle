@@ -65,7 +65,10 @@
     </section>
     <section class="login__bg-section full-height flex-column centered">
       <div class="centered">
-        <h2 class="heading heading--medium heading--white" :class="textColorClass()">
+        <h2
+          class="heading heading--medium heading--white"
+          :class="textColorClass()"
+        >
           {{ $t('moderator.view.login.register.header') }}
         </h2>
         <p class="login__text" :class="textColorClass()">

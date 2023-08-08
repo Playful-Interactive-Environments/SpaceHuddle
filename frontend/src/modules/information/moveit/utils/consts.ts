@@ -1,5 +1,6 @@
-export const maxCleanupThreshold = 0.5;
-export const playableReducingFactor = 2;
+export const maxCleanupThreshold = 3;
+export const playableReducingFactor = 1;
+export const cleanupTime = 60;
 
 export const calcChartHeight = (maxChartValue: number): number => {
   const height =

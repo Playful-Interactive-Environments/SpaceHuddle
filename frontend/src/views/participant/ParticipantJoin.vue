@@ -4,7 +4,10 @@
       class="participant-container join full-height centered-horizontal flex-column"
     >
       <main>
-        <h1 class="heading heading--big heading--white" :class="textColorClass()">
+        <h1
+          class="heading heading--big heading--white"
+          :class="textColorClass()"
+        >
           {{ $t('participant.view.join.header') }}
         </h1>
         <p class="join__text" :class="textColorClass()">

@@ -1,6 +1,14 @@
 import { ChartDataset } from 'chart.js';
 import * as themeColors from '@/utils/themeColors';
 
+export enum CalculationType {
+  Count = 'count',
+  Sum = 'sum',
+  Average = 'average',
+  Min = 'min',
+  Max = 'max',
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export function calculateChartPerIteration(
   dataList: any[],
@@ -58,7 +66,9 @@ export function calculateChartPerParameter(
   containsToParameter: (item: any, parameter: any) => boolean,
   containsToLoop: ((item: any, label: any) => boolean) | null = null,
   containsToChart: ((item: any) => boolean) | null = null,
-  calculation: (list: any[], loopItem: any, parameter: any) => number = (list) => list.length,
+  calculation: (list: any[], loopItem: any, parameter: any) => number = (
+    list
+  ) => list.length,
   parameterToString: (parameter: any) => string = (parameter) =>
     parameter.toString()
 ): ChartDataset[] {
@@ -100,29 +110,42 @@ export function mapArrayToConstantSize(
   list: any[],
   getValue: (item: any) => number,
   index: number,
-  mappingLength = 100
+  mappingLength = 100,
+  calculationType = CalculationType.Average
 ): number {
+  const roundingDelta = 0.001;
   const count = list.length;
   const ratio = count / mappingLength;
-  const mapIndex = ratio * index;
-  const mapIndexPrevious = Math.floor(mapIndex);
-  const mapIndexNext = Math.ceil(ratio * (index + 1) - 0.01) - 1;
-  const mapCount = mapIndexNext - mapIndexPrevious + 1;
-  let average = 0;
-  const quote = mapIndex - mapIndexPrevious;
-  const quotePrevious = 1 - quote;
-  const quoteNext = quote;
+  const mapIndexStart = ratio * index;
+  const mapIndexEnd = ratio * (index + 1);
+  const mapIndexPrevious = Math.floor(mapIndexStart + roundingDelta);
+  const mapIndexNext = Math.ceil(mapIndexEnd - roundingDelta) - 1;
+  let result = calculationType === CalculationType.Min ? 1000 : 0;
+  const partQuote = 1 / ratio;
   for (let i = mapIndexPrevious; i <= mapIndexNext; i++) {
     const value = getValue(list[i]);
-    let partQuote = 1 / mapCount;
-    if (mapCount > 1) {
-      if (i === mapIndexPrevious) partQuote = partQuote * 2 * quotePrevious;
-      else if (i === mapIndexNext) partQuote = partQuote * 2 * quoteNext;
-    }
-    average += value * partQuote;
+    let partFactor = 1;
+    if (i === mapIndexPrevious && i !== mapIndexNext)
+      partFactor = Math.ceil(mapIndexStart + roundingDelta) - mapIndexStart;
+    else if (i === mapIndexNext && i !== mapIndexPrevious)
+      partFactor = mapIndexEnd - Math.floor(mapIndexEnd - roundingDelta);
+    else if (i === mapIndexPrevious && i === mapIndexNext)
+      partFactor = mapIndexEnd - mapIndexStart;
+    if (calculationType === CalculationType.Average)
+      result += value * partQuote * partFactor;
+    else if (calculationType === CalculationType.Sum)
+      result += value * partFactor;
+    else if (calculationType === CalculationType.Count) result += partFactor;
+    else if (
+      calculationType === CalculationType.Min &&
+      result > value * partFactor
+    )
+      result = value * partFactor;
+    else if (
+      calculationType === CalculationType.Max &&
+      result < value * partFactor
+    )
+      result = value * partFactor;
   }
-  return average;
-  /*const valuePrevious = getValue(list[mapIndexPrevious]);
-  const valueNext = getValue(list[mapIndexNext]);
-  return valuePrevious * quotePrevious + valueNext * quoteNext;*/
+  return result;
 }

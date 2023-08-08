@@ -107,6 +107,7 @@
     "vehicleCategory": "Welche Fahrzeugtypen wurden wie oft in welchem Durchlauf eingesetzt?",
     "vehicleType": "Welche Fahrzeugkategorien wurden wie oft in welchem Durchlauf eingesetzt?",
     "stops": "Wie oft hat der Fahrer während der Fahrt angehalten?",
+    "pathCalculationCount": "Wie oft hat der Fahrer die Route neu berechnen lassen?",
     "persons": "Wie viele Personen befanden sich im Bus?",
     "speed": {
       "max": "Was war die Höchstgeschwindigkeit?",

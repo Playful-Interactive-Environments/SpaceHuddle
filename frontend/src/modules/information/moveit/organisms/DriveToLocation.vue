@@ -1,6 +1,6 @@
 <template>
   <div class="chartArea">
-    <Line
+    <!--<Line
       ref="chartRef"
       :data="chartData"
       :options="{
@@ -31,6 +31,19 @@
                 borderColor: highlightColor,
               },
             },
+          },
+        },
+      }"
+    />-->
+    <Line
+      ref="chartRef"
+      :data="chartData"
+      :options="{
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            stacked: true,
           },
         },
       }"
@@ -117,24 +130,6 @@
           <font-awesome-icon :icon="['fac', 'noEntry']" class="noEntry" />
         </template>
       </CustomMapMarker>
-      <!--<mgl-marker
-        v-for="(searchPoint, index) in [...searchPoints].reverse()"
-        :key="index"
-        :coordinates="searchPoint"
-        :color="searchPointColors[index]"
-      ></mgl-marker>
-      <CustomMapMarker :coordinates="corner">
-        <template v-slot:icon>
-          <font-awesome-icon icon="up-down-left-right" />
-        </template>
-      </CustomMapMarker>
-      <mgl-marker
-        v-for="(searchPoint, index) in testPoints"
-        :key="index"
-        :coordinates="searchPoint"
-        :color="searchPointColors[index]"
-        :scale="1 - index / (testPoints.length * 2)"
-      ></mgl-marker>-->
     </mgl-map>
     <div class="overlay-top-left">
       <round-slider
@@ -163,9 +158,6 @@
             {{ $t('module.information.moveit.participant.maxSpeed') }}
             {{ Math.round(maxSpeed) }} km/h
           </div>
-          <!--<div>
-            {{ $t('module.information.moveit.participant.speed') }}
-          </div>-->
         </template>
       </el-progress>
     </div>
@@ -173,9 +165,6 @@
       <font-awesome-icon icon="users" />
       {{ personCount }} / {{ vehicleParameter.persons }}
     </div>
-    <!--<div class="overlay-bottom">
-      <el-slider v-model="maxSpeed" :max="vehicleParameter.speed" />
-    </div>-->
     <div class="overlay-bottom-right">
       <div>
         <Joystick
@@ -204,55 +193,6 @@
       />
     </div>
   </div>
-  <!--<div ref="controlArea" class="controlArea level">
-    <div class="level-item">
-      <el-slider
-        v-model="speed"
-        vertical
-        height="8rem"
-        :max="vehicleParameter.speed"
-      />
-    </div>
-    <div class="level-item">
-      <el-progress
-        type="dashboard"
-        :percentage="(moveSpeed / vehicleParameter.speed) * 100"
-        :color="colors"
-      >
-        <template #default>
-          <div>{{ moveSpeed }} km/h</div>
-          <div>
-            {{ $t('module.information.moveit.participant.speed') }}
-          </div>
-        </template>
-      </el-progress>
-    </div>
-    <div class="level-item">
-      <round-slider
-        v-model="direction"
-        max="360"
-        start-angle="90"
-        end-angle="+360"
-        line-cap="round"
-        radius="70"
-      />
-    </div>
-  </div>-->
-  <!--<Application
-    ref="pixi"
-    :width="gameWidth"
-    :height="controlHeight"
-    v-if="ready"
-    :backgroundColor="backgroundColor"
-  >
-    <container backgroundColor="red">
-      <sprite
-        texture="/assets/games/moveit/steering-wheel.png"
-        :width="controlHeight"
-        :height="controlHeight"
-      ></sprite>
-    </container>
-  </Application>-->
 </template>
 
 <script lang="ts">
@@ -358,6 +298,7 @@ export default class DriveToLocation extends Vue {
   mapVehiclePoint: [number, number] = [0, 0];
   mapDrivingRotation = 0;
   mapZoom = this.mapZoomDefault;
+  readonly maxDrivingDistance = 2;
   routeCalculated = false;
   routePath: FeatureCollection = this.getRouteObject([]);
   drivenPath: FeatureCollection = this.getRouteObject([]);
@@ -720,14 +661,15 @@ export default class DriveToLocation extends Vue {
       this.mapStart = this.parameter.mapStart;
     }
     if (this.mapEnd[0] === 0 && this.mapEnd[1] === 0) {
-      const distanceX = 0.02;
-      const distanceY = 0.02;
-      this.mapEnd = turf.randomPosition([
-        this.mapStart[0] - distanceX,
-        this.mapStart[1] - distanceY,
-        this.mapStart[0] + distanceX,
-        this.mapStart[1] + distanceY,
-      ]) as [number, number];
+      const destination = turf.destination(
+        this.mapStart,
+        this.maxDrivingDistance,
+        Math.random() * 360 - 180
+      );
+      this.mapEnd = [
+        destination.geometry.coordinates[0],
+        destination.geometry.coordinates[1],
+      ];
     }
     this.setMapDrivingPoint([...this.mapStart], true);
 
@@ -743,8 +685,17 @@ export default class DriveToLocation extends Vue {
       false,
       intermediateGoals
     ).then(() => {
-      const pathPoints = (this.routePath.features[0].geometry as any)
-        .coordinates;
+      let pathPoints = (this.routePath.features[0].geometry as any)
+        .coordinates as [number, number][];
+      const line = turf.lineString(pathPoints);
+      const destination = turf.along(line, this.maxDrivingDistance);
+      this.mapEnd = [
+        destination.geometry.coordinates[0],
+        destination.geometry.coordinates[1],
+      ];
+      pathPoints = turf.lineSliceAlong(line, 0, this.maxDrivingDistance)
+        .geometry.coordinates as [number, number][];
+      this.routePath = this.getRouteObject(pathPoints);
       this.setMapDrivingPoint(pathPoints[0], true);
       this.mapDrivingRotation = turf.bearing(
         turf.point(this.mapDrivingPoint),
@@ -758,6 +709,7 @@ export default class DriveToLocation extends Vue {
           this.routePath;
         this.trackingManager.iteration.parameter.drive.routePathLenght =
           turf.length(this.routePath);
+        this.trackingManager.iteration.parameter.drive.pathCalculationCount = 1;
         this.trackingManager.saveIteration();
       }
     });
@@ -924,6 +876,7 @@ export default class DriveToLocation extends Vue {
       this.updateTrace,
       this.intervalCalculationTime
     );
+    this.noStreet = false;
   }
 
   disableMapPan(): void {
@@ -1133,15 +1086,14 @@ export default class DriveToLocation extends Vue {
       return;
     }
     const vehicleParameter = this.vehicleParameter;
-    const consumption = formulas.consumption(
-      this.moveSpeed,
-      distance,
-      vehicleParameter
-    );
     const trackingData: TrackingData = {
       speed: this.moveSpeed,
       persons: this.personCount,
-      consumption: consumption,
+      consumption: formulas.consumption(
+        this.moveSpeed,
+        distance,
+        vehicleParameter
+      ),
       distance: distance,
       tireWareRate: formulas.tireWareRate(
         this.moveSpeed,
@@ -1295,6 +1247,15 @@ export default class DriveToLocation extends Vue {
               if (point) {
                 this.pauseCount = 0;
                 this.noStreet = false;
+                if (
+                  this.trackingManager &&
+                  this.trackingManager.iteration &&
+                  this.trackingManager.iteration.parameter.drive &&
+                  this.trackingManager.iteration.parameter.drive
+                    .pathCalculationCount
+                )
+                  this.trackingManager.iteration.parameter.drive
+                    .pathCalculationCount++;
               }
               isOnRoute = false;
             } else {
@@ -1416,6 +1377,7 @@ export default class DriveToLocation extends Vue {
 .noEntry {
   font-size: var(--font-size-xlarge);
   color: var(--color-evaluation);
+  pointer-events: none;
 }
 
 .pin-small {

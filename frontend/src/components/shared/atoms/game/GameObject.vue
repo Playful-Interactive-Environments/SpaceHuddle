@@ -43,6 +43,7 @@ import * as turf from '@turf/turf';
     'collision',
     'click',
     'handleTrigger',
+    'update:highlighted',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -59,7 +60,7 @@ export default class GameObject extends Vue {
   @Prop({ default: 0 }) readonly colliderDelta!: number;
   @Prop({ default: false }) readonly showBounds!: boolean;
   @Prop({ default: {} }) readonly options!: {
-    [key: string]: string | number | boolean;
+    [key: string]: string | number | boolean | object;
   };
   @Prop({ default: false }) readonly isStatic!: boolean;
   @Prop({ default: true }) readonly clickable!: boolean;
@@ -68,6 +69,7 @@ export default class GameObject extends Vue {
   @Prop({ default: true }) usePhysic!: boolean;
   @Prop({ default: true }) moveWithBackground!: boolean;
   @Prop({ default: null }) triggerDelay!: number | null;
+  @Prop({ default: false }) highlighted!: boolean;
   body!: typeof Matter.Body;
   position: [number, number] = [0, 0];
   rotationValue = 0;
@@ -132,6 +134,7 @@ export default class GameObject extends Vue {
       this.clickTime = Date.now();
       this.gameContainer.$emit('update:selectedObject', this);
       this.gameContainer.activeObject = this;
+      this.$emit('update:highlighted', true);
     }
   }
 
@@ -149,6 +152,7 @@ export default class GameObject extends Vue {
         this.gameContainer.minClickTimeDelta + 10 - clickTimeDelta;
       if (releaseDelay > 0) await delay(releaseDelay);
       this.gameContainer.activeObject = null;
+      this.$emit('update:highlighted', false);
     }
   }
 

@@ -1,4 +1,42 @@
 <template>
+  <div class="releaseArea">
+    <table
+      class="container-info"
+      :style="{ '--container-font-size': convertFontSizeToScreenSize(24) }"
+    >
+      <tr>
+        <td
+          v-for="particle in Object.keys(gameConfig.particles)"
+          :key="particle"
+          class="animationContainer"
+        >
+          {{ getParticleDisplayName(particle) }}
+          <br />
+          <div v-if="particleState[particle]">
+            {{ particleState[particle].outsideCount }}
+            /
+            {{ particleState[particle].totalCount }}
+          </div>
+          <div
+            class="addCountOutside"
+            v-if="
+              particleState[particle] && particleState[particle].outsideCountAdd
+            "
+          >
+            +{{ particleState[particle].outsideCountAdd }}
+          </div>
+          <div
+            class="addCountInside"
+            v-if="
+              particleState[particle] && particleState[particle].insideCountAdd
+            "
+          >
+            +{{ particleState[particle].insideCountAdd }}
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
   <div class="chartArea">
     <Line
       ref="chartRef"
@@ -25,7 +63,7 @@
               box1: {
                 type: 'box',
                 xMin: 0,
-                xMax: trackingData.length,
+                xMax: normalizedTrackingData.length,
                 yMin: maxCleanupThreshold,
                 yMax: calcChartHeight(maxChartValue),
                 backgroundColor: highlightColorTransparent,
@@ -36,8 +74,8 @@
         },
       }"
     />
-    <div class="overlay" v-if="activeValue > trackingData.length">
-      {{ trackingData.length + countdownTime - activeValue + 1 }}
+    <div class="overlay" v-if="activeValue > normalizedTrackingData.length">
+      {{ normalizedTrackingData.length + countdownTime - activeValue + 1 }}
     </div>
   </div>
   <div class="gameArea">
@@ -68,6 +106,7 @@
             return collision.bodyA.isStatic !== collision.bodyB.isStatic;
           }"
       :useBorders="!isFull"
+      :combined-active-collision-to-chain="true"
       @initRenderer="initRenderer"
     >
       <template v-slot:default>
@@ -106,41 +145,6 @@
             :color="statusColor"
             @render="drawStatusBackground"
           ></Graphics>
-          <container
-            v-if="outsideCount > 0 && evaluatingColor"
-            :x="gameWidth - containerWidth / 2"
-            :y="particleBorder"
-          >
-            <Graphics
-              :radius="containerWidth / 3"
-              color="#ffffff"
-              @render="drawCircle"
-            >
-              <sprite
-                texture="/assets/games/moveit/explosion.svg"
-                :tint="evaluatingColor"
-                :x="-containerWidth / 6"
-                :y="-containerWidth / 6"
-                :width="containerWidth / 3"
-                :height="containerWidth / 4"
-              >
-              </sprite>
-            </Graphics>
-            <text
-              :style="{
-                fill: '#c55e44',
-                fontSize: 16,
-                fontWeight: 'bold',
-                textAlign: 'center',
-              }"
-              :anchor="0.5"
-              :x="0"
-              :y="containerWidth / 6"
-              @added="textAdded"
-            >
-              {{ outsideCount }}
-            </text>
-          </container>
           <GameObject
             v-for="particle in cleanupParticles"
             :key="particle.uuid"
@@ -158,6 +162,7 @@
               },
             }"
             :collision-handler="particleCollisionHandler"
+            v-model:highlighted="particle.highlighted"
             @destroyObject="destroyParticle"
             @outsideDrawingSpace="outsideDrawingSpace"
             @collision="updateTracking"
@@ -167,7 +172,7 @@
               :color="particle.color"
               @render="drawCircle"
             >
-              <sprite
+              <CustomSprite
                 :texture="spritesheet.textures[particle.name]"
                 :anchor="0.5"
                 :tint="particle.color"
@@ -175,8 +180,8 @@
                 :height="
                   (particleRadius * 1.5) / getParticleAspect(particle.name)
                 "
-              >
-              </sprite>
+                :outline="particle.highlighted ? 'red' : null"
+              />
             </Graphics>
           </GameObject>
         </container>
@@ -206,6 +211,9 @@ import * as pixiUtil from '@/utils/pixi';
 import * as constants from '@/modules/information/moveit/utils/consts';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as themeColors from '@/utils/themeColors';
+import { CalculationType, mapArrayToConstantSize } from '@/utils/statistic';
+import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
+
 Chart.register(annotationPlugin);
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -217,6 +225,7 @@ interface DrawingParticle {
   group: number;
   color: string;
   position: [number, number];
+  highlighted: boolean;
 }
 
 interface DatasetData {
@@ -233,11 +242,18 @@ export interface ParticleState {
   collectedCount: number;
 }
 
+interface ParticleStateExtended extends ParticleState {
+  outsideCount: number;
+  outsideCountAdd: number;
+  insideCountAdd: number;
+}
+
 @Options({
   methods: { center },
   components: {
     GameObject,
     GameContainer,
+    CustomSprite,
     Line,
   },
   emits: ['finished'],
@@ -253,6 +269,7 @@ export default class CleanUpParticles extends Vue {
   @Prop({ default: 'sport' }) readonly vehicleType!: string;
   @Prop({ default: [] })
   readonly trackingData!: TrackingData[];
+  normalizedTrackingData: TrackingData[] = [];
   chartData: {
     labels: string[];
     datasets: DatasetData[];
@@ -265,15 +282,14 @@ export default class CleanUpParticles extends Vue {
   gameHeight = 0;
   padding = 10;
   readonly particleDivisionFactor = 1;
-  readonly intervalTime = 500;
+  readonly playTime = constants.cleanupTime * 1000;
   interval = -1;
   activeValue = 0;
   cleanupParticles: DrawingParticle[] = [];
   particleCollisionHandler = new ParticleCollisionHandler();
-  particleState: { [key: string]: ParticleState } = {};
+  particleState: { [key: string]: ParticleStateExtended } = {};
   renderer!: PIXI.Renderer;
   maxParticleCount = 50;
-  outsideCount = 0;
   spritesheet!: PIXI.Spritesheet;
   countdownTime = 5;
   containerAspectRation = 1.3;
@@ -283,6 +299,10 @@ export default class CleanUpParticles extends Vue {
 
   particleQueueEmit: { [key: string]: number } = {};
   particleQueueEmission: { [key: string]: number } = {};
+
+  get intervalTime(): number {
+    return this.playTime / this.normalizedTrackingData.length;
+  }
 
   get evaluatingColor(): string {
     return themeColors.getEvaluatingColor();
@@ -413,6 +433,9 @@ export default class CleanUpParticles extends Vue {
       this.particleState[particleName] = {
         totalCount: 0,
         collectedCount: 0,
+        outsideCount: 0,
+        outsideCountAdd: 0,
+        insideCountAdd: 0,
       };
     }
     setTimeout(() => {
@@ -431,12 +454,13 @@ export default class CleanUpParticles extends Vue {
 
   updatedLoop(): void {
     this.activeValue++;
-    if (this.activeValue <= this.trackingData.length) {
+    if (this.activeValue <= this.normalizedTrackingData.length) {
       this.loadActiveParticle();
     }
     if (
-      this.activeValue > this.trackingData.length + this.countdownTime ||
-      (this.activeValue > this.trackingData.length &&
+      this.activeValue >
+        this.normalizedTrackingData.length + this.countdownTime ||
+      (this.activeValue > this.normalizedTrackingData.length &&
         this.cleanupParticles.length === 0)
     ) {
       this.$emit('finished', this.particleState);
@@ -447,7 +471,7 @@ export default class CleanUpParticles extends Vue {
   @Watch('cleanupParticles.length', { immediate: true })
   onCleanupParticleCountChanged(): void {
     if (
-      this.activeValue > this.trackingData.length &&
+      this.activeValue > this.normalizedTrackingData.length &&
       this.cleanupParticles.length === 0
     ) {
       this.$emit('finished', this.particleState);
@@ -487,6 +511,7 @@ export default class CleanUpParticles extends Vue {
               this.particleRadius,
             this.particleBorder + this.particleRadius,
           ],
+          highlighted: false,
         };
         this.cleanupParticles.push(particle);
         await delay(Math.floor(this.intervalTime / emitCount) - 1);
@@ -521,7 +546,20 @@ export default class CleanUpParticles extends Vue {
         const emitCount = Math.floor(this.particleQueueEmit[particleName]);
         this.particleQueueEmit[particleName] -= emitCount;
         if (emitCount < emissionCount) {
-          this.outsideCount += emissionCount - emitCount;
+          this.particleState[particleName].outsideCountAdd =
+            emissionCount - emitCount;
+          this.particleState[particleName].outsideCount +=
+            emissionCount - emitCount;
+
+          setTimeout(() => {
+            this.particleState[particleName].outsideCountAdd = 0;
+          }, 900);
+        }
+        if (emitCount > 0) {
+          this.particleState[particleName].insideCountAdd += emitCount;
+          setTimeout(() => {
+            this.particleState[particleName].insideCountAdd = 0;
+          }, 900);
         }
 
         emitParticles(emitCount, dataset, parseInt(index));
@@ -556,14 +594,54 @@ export default class CleanUpParticles extends Vue {
     const id = particle.id;
     const index = this.cleanupParticles.findIndex((p) => p.id === id);
     if (index > -1) this.cleanupParticles.splice(index, 1);
-    this.outsideCount++;
+    this.particleState[particle.options.name as string].outsideCount++;
   }
 
   maxChartValue = 0;
   @Watch('trackingData', { immediate: true })
   onTrackingDataChanged(): void {
     if (this.trackingData) {
-      this.chartData.labels = this.trackingData.map((data) =>
+      const normalizedTrackingData: TrackingData[] = [];
+      const mappingLength = constants.cleanupTime;
+      for (let i = 0; i < mappingLength; i++) {
+        normalizedTrackingData[i] = {
+          speed: mapArrayToConstantSize(
+            this.trackingData,
+            (item) => item.speed,
+            i,
+            mappingLength
+          ),
+          persons: mapArrayToConstantSize(
+            this.trackingData,
+            (item) => item.persons,
+            i,
+            mappingLength
+          ),
+          distance: mapArrayToConstantSize(
+            this.trackingData,
+            (item) => item.distance,
+            i,
+            mappingLength,
+            CalculationType.Sum
+          ),
+          tireWareRate: mapArrayToConstantSize(
+            this.trackingData,
+            (item) => item.tireWareRate,
+            i,
+            mappingLength,
+            CalculationType.Sum
+          ),
+          consumption: mapArrayToConstantSize(
+            this.trackingData,
+            (item) => item.consumption,
+            i,
+            mappingLength,
+            CalculationType.Sum
+          ),
+        };
+      }
+      this.normalizedTrackingData = normalizedTrackingData;
+      this.chartData.labels = this.normalizedTrackingData.map((data) =>
         Math.round(data.speed).toString()
       );
       let totalValue = 0;
@@ -577,7 +655,7 @@ export default class CleanUpParticles extends Vue {
         const data = {
           name: particleName,
           label: this.getParticleDisplayName(particleName),
-          data: this.trackingData.map((data) => {
+          data: this.normalizedTrackingData.map((data) => {
             const particleValue = configCalculation.statisticsValue(
               particleName,
               data,
@@ -616,6 +694,32 @@ export default class CleanUpParticles extends Vue {
   width: 100%;
 }
 
+.container-info {
+  pointer-events: none;
+  width: 100%;
+  color: var(--color-primary);
+  font-weight: bold;
+  font-size: var(--container-font-size);
+  text-align: center;
+
+  td {
+    width: 25%;
+  }
+}
+
+.releaseArea {
+  height: 4rem;
+  background-image: url('../assets/sky.jpg');
+
+  .container-info {
+    position: relative;
+
+    td {
+      position: relative;
+    }
+  }
+}
+
 .overlay {
   position: absolute;
   top: 0;
@@ -628,28 +732,86 @@ export default class CleanUpParticles extends Vue {
 }
 
 .gameArea {
-  height: calc(100% - 10rem);
+  height: calc(100% - 14rem);
   width: 100%;
   position: relative;
+
+  .container-info {
+    position: absolute;
+    z-index: 100;
+    color: white;
+
+    td {
+      padding-top: calc(var(--container-font-size) * 2);
+    }
+  }
 }
 
 .custom-renderer-wrapper {
   height: 100%;
 }
 
-.container-info {
-  pointer-events: none;
-  position: absolute;
-  z-index: 100;
-  width: 100%;
-  color: white;
+.animationContainer {
+  --persons: 1;
+  position: relative;
   font-weight: bold;
   font-size: var(--container-font-size);
   text-align: center;
+}
 
-  td {
-    padding-top: calc(var(--container-font-size) * 2);
-    width: 25%;
+.addCountOutside {
+  @keyframes move-outside {
+    0% {
+      font-size: 0;
+      bottom: -100%;
+    }
+    10% {
+      font-size: var(--container-font-size);
+      bottom: -100%;
+    }
+    90% {
+      font-size: var(--container-font-size);
+      bottom: 50%;
+    }
+    100% {
+      font-size: 0;
+      bottom: 50%;
+    }
   }
+
+  position: absolute;
+  animation-name: move-outside;
+  animation-duration: 0.9s;
+  width: 100%;
+  font-size: 0;
+  color: var(--color-highlight);
+}
+
+.addCountInside {
+  @keyframes move-inside {
+    0% {
+      font-size: 0;
+      bottom: -150%;
+    }
+    10% {
+      font-size: var(--container-font-size);
+      bottom: -150%;
+    }
+    90% {
+      font-size: var(--container-font-size);
+      bottom: -300%;
+    }
+    100% {
+      font-size: 0;
+      bottom: -300%;
+    }
+  }
+
+  position: absolute;
+  animation-name: move-inside;
+  animation-duration: 0.9s;
+  width: 100%;
+  font-size: 0;
+  color: var(--color-primary);
 }
 </style>
