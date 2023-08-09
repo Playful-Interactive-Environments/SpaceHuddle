@@ -40,22 +40,45 @@
           <IdeaCard
             :idea="element"
             :isDraggable="true"
+            :handleEditable="false"
             :isSelected="element.id === selectedIdea?.id"
             :selectionColor="selectionColor"
             v-model:collapseIdeas="filter.collapseIdeas"
             @ideaDeleted="reloadIdeas()"
+            @ideaStartEdit="editIdea(element)"
             v-on:click="selectedIdea = element"
-          />
+          >
+            <div class="columns is-mobile">
+              <div
+                class="column"
+                v-for="parameter of Object.keys(gameConfig.parameter)"
+                :key="parameter"
+                :style="{
+                  color: gameConfig.parameter[parameter].color,
+                }"
+              >
+                <font-awesome-icon
+                  :icon="gameConfig.parameter[parameter].icon"
+                />
+                {{ element.parameter[parameter] }}
+              </div>
+            </div>
+          </IdeaCard>
         </template>
         <template v-slot:footer>
           <AddItem
             v-if="item.ideas.length > item.displayCount"
             :text="
-              $t('module.brainstorming.default.moderatorContent.displayAll')
+              $t('module.information.missionmap.moderatorContent.displayAll')
             "
             :isColumn="false"
             @addNew="item.displayCount = 1000"
             class="showMore"
+          />
+          <AddItem
+            :text="$t('module.information.missionmap.moderatorContent.add')"
+            :is-column="true"
+            @addNew="editNewImage"
           />
         </template>
       </draggable>
@@ -65,21 +88,69 @@
           v-for="(idea, index) in item.filteredIdeas"
           :key="index"
           :isSelected="idea.id === selectedIdea?.id"
+          :handleEditable="false"
           :selectionColor="selectionColor"
           v-model:collapseIdeas="filter.collapseIdeas"
           @ideaDeleted="reloadIdeas()"
+          @ideaStartEdit="editIdea(idea)"
           v-on:click="selectedIdea = idea"
-        />
+        >
+          <div class="columns is-mobile">
+            <div
+              class="column"
+              v-for="parameter of Object.keys(gameConfig.parameter)"
+              :key="parameter"
+              :style="{
+                color: gameConfig.parameter[parameter].color,
+              }"
+            >
+              <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
+              {{ idea.parameter[parameter] }}
+            </div>
+          </div>
+        </IdeaCard>
         <AddItem
           v-if="item.ideas.length > item.displayCount"
-          :text="$t('module.brainstorming.default.moderatorContent.displayAll')"
+          :text="
+            $t('module.information.missionmap.moderatorContent.displayAll')
+          "
           :isColumn="false"
           @addNew="item.displayCount = 1000"
           class="showMore"
         />
+        <AddItem
+          :text="$t('module.information.missionmap.moderatorContent.add')"
+          :is-column="true"
+          @addNew="editNewImage"
+        />
       </div>
     </el-collapse-item>
   </el-collapse>
+  <IdeaSettings
+    v-model:show-modal="showSettings"
+    :taskId="taskId"
+    :idea="settingsIdea"
+    @updateData="addData"
+  >
+    <el-form-item
+      v-for="parameter of Object.keys(gameConfig.parameter)"
+      :key="parameter"
+      :label="$t(`module.information.missionmap.gameConfig.${parameter}`)"
+      :prop="`parameter.${parameter}`"
+      :style="{ '--parameter-color': gameConfig.parameter[parameter].color }"
+    >
+      <template #label>
+        {{ $t(`module.information.missionmap.gameConfig.${parameter}`) }}
+        <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
+      </template>
+      <el-slider
+        v-model="settingsIdea.parameter[parameter]"
+        :min="-5"
+        :max="5"
+        show-stops
+      />
+    </el-form-item>
+  </IdeaSettings>
 </template>
 
 <script lang="ts">
@@ -106,15 +177,25 @@ import IdeaFilter, {
 import * as cashService from '@/services/cash-service';
 import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 import { Module } from '@/types/api/Module';
+import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
+import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 @Options({
+  computed: {
+    gameConfig() {
+      return gameConfig;
+    },
+  },
   components: {
+    FontAwesomeIcon,
     IdeaMap,
     AddItem,
     IdeaCard,
     CollapseTitle,
     draggable,
     IdeaFilter,
+    IdeaSettings,
   },
 })
 
@@ -129,6 +210,14 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   cashEntry!: cashService.SimplifiedCashEntry<Idea[]>;
   selectedIdea: Idea | null = null;
   selectionColor = '#0192d0';
+  addIdea: any = {
+    keywords: '',
+    description: '',
+    link: null,
+    image: null, // the datebase64 url of created image
+  };
+  settingsIdea = this.addIdea;
+  showSettings = false;
 
   get orderIsChangeable(): boolean {
     return this.filter.orderType === IdeaSortOrder.ORDER;
@@ -158,6 +247,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     else {
       this.module = task.modules.find((t) => t.name === 'map');
     }
+    this.resetAddIdea();
   }
 
   updateIdeas(ideas: Idea[]): void {
@@ -257,6 +347,44 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       this.refreshIdeas();
     });
   }
+
+  @Watch('showSettings', { immediate: true })
+  onShowSettingsChanged(): void {
+    if (this.showSettings) {
+      this.addIdea.order = this.ideas.length;
+    }
+  }
+
+  addData(newIdea: Idea): void {
+    if (!this.settingsIdea.id) {
+      this.ideas.push(newIdea);
+    }
+    this.resetAddIdea();
+  }
+
+  resetAddIdea(): void {
+    this.settingsIdea = this.addIdea;
+    this.addIdea.keywords = '';
+    this.addIdea.description = '';
+    this.addIdea.image = null;
+    this.addIdea.link = null;
+    this.addIdea.order = this.ideas.length;
+    if (this.module && this.module.parameter.mapCenter) {
+      this.addIdea.parameter = {
+        position: this.module.parameter.mapCenter,
+      };
+    }
+  }
+
+  editNewImage(): void {
+    this.resetAddIdea();
+    this.showSettings = true;
+  }
+
+  editIdea(idea: Idea): void {
+    this.settingsIdea = idea;
+    this.showSettings = true;
+  }
 }
 </script>
 
@@ -273,5 +401,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
 .mapSpace {
   height: 20rem;
+}
+
+.el-form-item::v-deep(.el-form-item__label) {
+  color: var(--parameter-color);
 }
 </style>

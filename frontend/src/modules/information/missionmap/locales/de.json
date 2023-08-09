@@ -1,0 +1,25 @@
+{
+  "description": {
+    "title": "Mission Map",
+    "description": "verankere deine Ideen auf der Karte"
+  },
+  "participant": {
+  },
+  "moderatorConfig": {
+    "mapSection": "Kartenausschnitt",
+    "effectElectricity": "Beeinflusst den Strommix"
+  },
+  "moderatorContent": {
+    "settingsTitle": "Ideeneinstellungen",
+    "displayAll": "Alle Anzeigen",
+    "add": "Info hinzufügen"
+  },
+  "publicScreen": {
+    "noIdeas": "Noch keine Ideen - Bleib dran."
+  },
+  "gameConfig": {
+    "eco": "Umwelt",
+    "social": "Soziales",
+    "business": "Wirtschaft"
+  }
+}

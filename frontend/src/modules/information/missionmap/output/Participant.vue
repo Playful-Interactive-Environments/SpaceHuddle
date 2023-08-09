@@ -3,42 +3,47 @@
     <template #footer>
       <el-scrollbar height="15rem">
         <IdeaCard
-          v-for="idea of ideas"
+          v-for="idea of visibleIdeas"
           :key="idea.id"
           class="ideaCard"
           :idea="idea"
-          :is-selectable="false"
-          :is-editable="true"
+          :is-selectable="true"
+          :isSelected="idea.id === selectedIdea?.id"
+          :selectionColor="selectionColor"
+          :is-editable="false"
           :show-state="false"
           :canChangeState="false"
           :handleEditable="false"
           :portrait="false"
           :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
-          @ideaDeleted="refreshIdeas"
-          @ideaStartEdit="editIdea(idea)"
-        />
+          v-on:click="ideaClicked(idea)"
+        >
+          <div class="columns is-mobile">
+            <div
+              class="column"
+              v-for="parameter of Object.keys(gameConfig.parameter)"
+              :key="parameter"
+              :style="{
+                color: gameConfig.parameter[parameter].color,
+                display: idea.parameter[parameter] > 0 ? 'block' : 'none',
+              }"
+            >
+              <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
+            </div>
+          </div>
+        </IdeaCard>
       </el-scrollbar>
-      <div v-on:click="editNewImage" class="button">
-        <font-awesome-icon icon="circle-plus" />
-      </div>
     </template>
     <IdeaMap
       v-if="module"
       :ideas="ideas"
       v-model:selected-idea="selectedIdea"
       :parameter="module?.parameter"
-      v-on:ideaPositionChanged="saveIdea"
+      :canChangePosition="false"
+      v-on:visibleIdeasChanged="visibleIdeasChanged"
+      v-on:selectionColorChanged="selectionColor = $event"
     >
     </IdeaMap>
-
-    <IdeaSettings
-      v-model:show-modal="showIdeaSettings"
-      :taskId="taskId"
-      :idea="settingsIdea"
-      :title="$t('module.brainstorming.map.moderatorContent.settingsTitle')"
-      :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
-      @updateData="addData"
-    />
   </ParticipantModuleDefaultContainer>
 </template>
 
@@ -59,8 +64,14 @@ import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import * as cashService from '@/services/cash-service';
 import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
+import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
 
 @Options({
+  computed: {
+    gameConfig() {
+      return gameConfig;
+    },
+  },
   components: {
     IdeaMap,
     IdeaCard,
@@ -79,17 +90,10 @@ export default class Participant extends Vue {
   module: Module | null = null;
   task: Task | null = null;
   ideas: Idea[] = [];
-  showIdeaSettings = false;
   EndpointAuthorisationType = EndpointAuthorisationType;
   selectedIdea: Idea | null = null;
-
-  addIdea: any = {
-    keywords: '',
-    description: '',
-    link: null,
-    image: null, // the datebase64 url of created image
-  };
-  settingsIdea = this.addIdea;
+  selectionColor = '#0192d0';
+  visibleIdeas: Idea[] = [];
 
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
@@ -111,36 +115,9 @@ export default class Participant extends Vue {
     );
   }
 
-  editNewImage(): void {
-    this.settingsIdea = this.addIdea;
-    this.addIdea.keywords = '';
-    this.addIdea.description = '';
-    this.addIdea.image = null;
-    this.addIdea.link = null;
-    this.addIdea.order = this.ideas.length;
-    if (this.module && this.module.parameter.mapCenter) {
-      this.addIdea.parameter = {
-        position: this.module.parameter.mapCenter,
-      };
-    }
-    this.showIdeaSettings = true;
-  }
-
   @Watch('selectedIdea', { immediate: true })
   onSelectedIdeaChanged(): void {
-    if (this.selectedIdea) {
-      this.settingsIdea = this.selectedIdea;
-      this.showIdeaSettings = true;
-    }
-  }
-
-  editIdea(idea: Idea): void {
-    this.settingsIdea = idea;
-    this.showIdeaSettings = true;
-  }
-
-  addData(newIdea: Idea): void {
-    if (!this.settingsIdea.id) this.ideas.push(newIdea);
+    if (this.selectedIdea) location.hash = `#${this.selectedIdea.id}`;
   }
 
   get moduleName(): string {
@@ -153,7 +130,7 @@ export default class Participant extends Vue {
   }
 
   updateIdeas(ideas: Idea[]): void {
-    this.ideas = ideas.filter((idea) => idea.isOwn).reverse();
+    this.ideas = ideas;
   }
 
   refreshIdeas(): void {
@@ -192,6 +169,14 @@ export default class Participant extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
+  }
+
+  visibleIdeasChanged(ideas: Idea[]): void {
+    this.visibleIdeas = ideas;
+  }
+
+  ideaClicked(idea: Idea): void {
+    this.selectedIdea = idea;
   }
 }
 </script>

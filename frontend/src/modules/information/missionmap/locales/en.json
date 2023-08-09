@@ -1,0 +1,25 @@
+{
+  "description": {
+    "title": "mission map",
+    "description": "anchor your ideas on the map"
+  },
+  "participant": {
+  },
+  "moderatorConfig": {
+    "mapSection": "map section",
+    "effectElectricity": "effect electricity"
+  },
+  "moderatorContent": {
+    "settingsTitle": "idea settings",
+    "displayAll": "display all",
+    "add": "add content"
+  },
+  "publicScreen": {
+    "noIdeas": "No ideas yet - stay tuned."
+  },
+  "gameConfig": {
+    "eco": "environment",
+    "social": "social",
+    "business": "business"
+  }
+}

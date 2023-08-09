@@ -76,6 +76,7 @@
           v-model:image="formData.image"
         />
       </el-form-item>
+      <slot></slot>
       <template #footer>
         <FromSubmitItem
           :form-state-message="formData.stateMessage"

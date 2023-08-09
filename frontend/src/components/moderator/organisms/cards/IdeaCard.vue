@@ -1,5 +1,6 @@
 <template>
   <el-card
+    :id="idea.id"
     ref="ideaCard"
     shadow="never"
     v-on:click="changeSelection"
@@ -90,6 +91,7 @@
           </el-dropdown>
         </span>
       </div>
+      <slot></slot>
       <div
         ref="description"
         v-if="hasKeywords && idea.description"

@@ -19,10 +19,10 @@
   >
     <div style="height: 200px">
       <mgl-map
-        v-model:center="mapCenter"
-        v-model:zoom="mapZoom"
-        v-on:map:zoomend="changeSection"
-        v-on:map:dragend="changeSection"
+        :center="mapCenter"
+        :zoom="mapZoom"
+        @map:zoomend="changeSection"
+        @map:dragend="changeSection"
       >
         <CustomMapMarker
           :coordinates="mapStart"

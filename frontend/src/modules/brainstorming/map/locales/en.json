@@ -9,6 +9,10 @@
     "mapSection": "map section"
   },
   "moderatorContent": {
-    "settingsTitle": "idea settings"
+    "settingsTitle": "idea settings",
+    "displayAll": "display all"
+  },
+  "publicScreen": {
+    "noIdeas": "No ideas yet - stay tuned."
   }
 }

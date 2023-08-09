@@ -9,6 +9,10 @@
     "mapSection": "Kartenausschnitt"
   },
   "moderatorContent": {
-    "settingsTitle": "Ideeneinstellungen"
+    "settingsTitle": "Ideeneinstellungen",
+    "displayAll": "Alle Anzeigen"
+  },
+  "publicScreen": {
+    "noIdeas": "Noch keine Ideen - Bleib dran."
   }
 }

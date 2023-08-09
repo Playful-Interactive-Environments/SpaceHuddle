@@ -1,6 +1,6 @@
 <template>
   <el-form-item
-    :label="$t('module.brainstorming.map.moderatorConfig.mapSection')"
+    :label="$t('module.information.missionmap.moderatorConfig.mapSection')"
     :prop="`${rulePropPath}.mapSection`"
   >
     <div style="height: 200px">
@@ -14,6 +14,33 @@
       </mgl-map>
     </div>
   </el-form-item>
+  <el-form-item
+    v-for="parameter of Object.keys(gameConfig.parameter)"
+    :key="parameter"
+    :label="$t(`module.information.missionmap.gameConfig.${parameter}`)"
+    :prop="`${rulePropPath}.${parameter}`"
+    :style="{ '--parameter-color': gameConfig.parameter[parameter].color }"
+  >
+    <template #label>
+      {{ $t(`module.information.missionmap.gameConfig.${parameter}`) }}
+      <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
+    </template>
+    <el-slider
+      v-if="modelValue"
+      v-model="modelValue[parameter]"
+      :min="-10"
+      :max="10"
+      show-stops
+    />
+  </el-form-item>
+  <el-form-item
+    :label="
+      $t('module.information.missionmap.moderatorConfig.effectElectricity')
+    "
+    :prop="`${rulePropPath}.moderatedQuestionFlow`"
+  >
+    <el-switch class="level-item" v-model="modelValue.effectElectricity" />
+  </el-form-item>
 </template>
 
 <script lang="ts">
@@ -22,13 +49,21 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import { MglNavigationControl, MglMap } from 'vue-maplibre-gl';
 import * as mapStyle from '@/utils/mapStyle';
+import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 mapStyle.setMapStyleStreets();
 
 @Options({
+  computed: {
+    gameConfig() {
+      return gameConfig;
+    },
+  },
   components: {
     MglNavigationControl,
     MglMap,
+    FontAwesomeIcon,
   },
 })
 
@@ -48,6 +83,14 @@ export default class ModeratorConfig extends Vue {
   @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {
     if (this.modelValue) {
+      for (const parameter of Object.keys(gameConfig.parameter)) {
+        if (!(parameter in this.modelValue)) {
+          this.modelValue[parameter] = 0;
+        }
+      }
+      if (!('effectElectricity' in this.modelValue)) {
+        this.modelValue.effectElectricity = false;
+      }
       if (!this.modelValue.mapCenter) {
         this.modelValue.mapCenter = this.mapCenter;
       } else {
@@ -72,3 +115,9 @@ export default class ModeratorConfig extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.el-form-item::v-deep(.el-form-item__label) {
+  color: var(--parameter-color);
+}
+</style>

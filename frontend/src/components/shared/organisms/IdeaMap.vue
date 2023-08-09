@@ -7,6 +7,9 @@
       :zoom="mapZoom"
       language="en"
       @map:load="onLoad"
+      @map:zoomend="changeSection"
+      @map:rotateend="changeSection"
+      @map:dragend="changeSection"
     >
       <CustomMapMarker
         :coordinates="convertCoordinates(idea.parameter.position)"
@@ -93,6 +96,7 @@ import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
 import * as turf from '@turf/turf';
 import * as mapStyle from '@/utils/mapStyle';
 import * as themeColors from '@/utils/themeColors';
+import { until } from '@/utils/wait';
 
 /*export enum MapStyles {
   STREETS = 'streets-v2',
@@ -131,7 +135,7 @@ export default class IdeaMap extends Vue {
 
   mapCenter: [number, number] = [0, 0];
   mapIdeaCenter: [number, number] = [0, 0];
-  mapZoom = 14;
+  mapZoom = 13;
   mapBounds: LngLatBoundsLike | null = null;
   sizeCalculated = false;
   map!: Map;
@@ -140,6 +144,7 @@ export default class IdeaMap extends Vue {
   mapStyle: mapStyle.MapStyleType = mapStyle.MapStyleType.Streets;
 
   showMap = true;
+  detailZoomReady = false;
 
   get MarkerColor(): string {
     switch (this.mapStyle) {
@@ -215,10 +220,11 @@ export default class IdeaMap extends Vue {
 
   @Watch('parameter.mapCenter', { immediate: true })
   @Watch('parameter.mapZoom', { immediate: true })
-  onParameterChanged(): void {
+  async onParameterChanged(): Promise<void> {
     if (this.parameter.mapCenter) {
       this.mapCenter = this.parameter.mapCenter;
     }
+    await until(() => this.detailZoomReady);
     if (this.parameter.mapZoom) {
       this.mapZoom = this.parameter.mapZoom;
     }
@@ -238,7 +244,7 @@ export default class IdeaMap extends Vue {
         this.selectedIdeaId = this.selectedIdea.id;
         if (this.map) {
           this.map.setCenter(
-            this.convertCoordinates(this.selectedIdea.parameter)
+            this.convertCoordinates(this.selectedIdea.parameter.position)
           );
           this.changeSection();
         }
@@ -297,7 +303,11 @@ export default class IdeaMap extends Vue {
 
   fitZoomToBounds(waiteForLoading = true): void {
     if (this.map && this.mapBounds) {
-      this.map.fitBounds(this.mapBounds);
+      this.map.fitBounds(this.mapBounds, {
+        duration: 0,
+        animate: false,
+        essential: true,
+      });
     } else if (this.map) {
       this.map.setZoom(this.mapZoom);
       if (
@@ -320,6 +330,7 @@ export default class IdeaMap extends Vue {
     this.map = e.map;
     this.fitZoomToBounds();
     this.mapstyleChange(this.mapStyle);
+    setTimeout(() => (this.detailZoomReady = true), 500);
   }
 
   mapstyleChange(command: string): void {

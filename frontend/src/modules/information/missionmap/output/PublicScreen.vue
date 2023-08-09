@@ -15,7 +15,7 @@
     </el-aside>
     <el-main>
       <section v-if="ideas.length === 0" class="centered public-screen__error">
-        <p>{{ $t('module.brainstorming.map.publicScreen.noIdeas') }}</p>
+        <p>{{ $t('module.information.missionmap.publicScreen.noIdeas') }}</p>
       </section>
       <div v-else class="public-screen__content">
         <section class="layout__columns">
@@ -29,7 +29,23 @@
             v-model:collapseIdeas="filter.collapseIdeas"
             v-model:fadeIn="ideaTransform[idea.id]"
             v-on:click="selectedIdea = idea"
-          />
+          >
+            <div class="columns is-mobile">
+              <div
+                class="column"
+                v-for="parameter of Object.keys(gameConfig.parameter)"
+                :key="parameter"
+                :style="{
+                  color: gameConfig.parameter[parameter].color,
+                }"
+              >
+                <font-awesome-icon
+                  :icon="gameConfig.parameter[parameter].icon"
+                />
+                {{ idea.parameter[parameter] }}
+              </div>
+            </div>
+          </IdeaCard>
         </section>
       </div>
     </el-main>
@@ -53,8 +69,14 @@ import { Task } from '@/types/api/Task';
 import * as cashService from '@/services/cash-service';
 import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 import { Module } from '@/types/api/Module';
+import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
 
 @Options({
+  computed: {
+    gameConfig() {
+      return gameConfig;
+    },
+  },
   components: {
     IdeaMap,
     IdeaCard,

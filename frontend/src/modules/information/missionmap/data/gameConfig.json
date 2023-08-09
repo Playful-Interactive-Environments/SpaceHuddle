@@ -1,0 +1,16 @@
+{
+  "parameter": {
+    "eco": {
+      "color": "#7bc168",
+      "icon": "leaf"
+    },
+    "social": {
+      "color": "#63c3cb",
+      "icon": "heart"
+    },
+    "business": {
+      "color": "#c55e44",
+      "icon": "sack-dollar"
+    }
+  }
+}
