@@ -1,23 +1,23 @@
 <template>
   <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
     <template #footer>
-      <el-carousel height="15rem" type="card">
-        <el-carousel-item v-for="idea of ideas" :key="idea.id">
-          <IdeaCard
-            class="ideaCard"
-            :idea="idea"
-            :is-selectable="false"
-            :is-editable="true"
-            :show-state="false"
-            :canChangeState="false"
-            :handleEditable="false"
-            :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
-            @ideaDeleted="refreshIdeas"
-            @ideaStartEdit="editIdea(idea)"
-          >
-          </IdeaCard>
-        </el-carousel-item>
-      </el-carousel>
+      <el-scrollbar height="15rem">
+        <IdeaCard
+          v-for="idea of ideas"
+          :key="idea.id"
+          class="ideaCard"
+          :idea="idea"
+          :is-selectable="false"
+          :is-editable="true"
+          :show-state="false"
+          :canChangeState="false"
+          :handleEditable="false"
+          :portrait="false"
+          :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
+          @ideaDeleted="refreshIdeas"
+          @ideaStartEdit="editIdea(idea)"
+        />
+      </el-scrollbar>
       <div v-on:click="editNewImage" class="button">
         <font-awesome-icon icon="circle-plus" />
       </div>
@@ -209,7 +209,7 @@ export default class Participant extends Vue {
 }
 
 .ideaCard {
-  max-width: 12rem;
-  margin: auto;
+  //max-width: 12rem;
+  //margin: auto;
 }
 </style>

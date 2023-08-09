@@ -4,6 +4,7 @@
     shadow="never"
     v-on:click="changeSelection"
     :class="{
+      landscape: !portrait,
       card__selected: isSelected,
       card__new: isNew,
       card__handled: isHandled,
@@ -163,6 +164,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: false }) fadeIn!: boolean;
   @Prop({ default: false }) ignoreLimitedDescriptionLength!: boolean;
   @Prop({ default: CollapseIdeas.custom }) collapseIdeas!: CollapseIdeas;
+  @Prop({ default: true }) portrait!: boolean;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
   showSettings = false;
@@ -363,29 +365,38 @@ export default class IdeaCard extends Vue {
 }
 
 .card {
+  --card-color: var(--el-card-border-color);
+  border-color: var(--card-color);
+
   &__new {
-    border-color: var(--el-card-border-color);
+    --card-color: var(--el-card-border-color);
+    border-color: var(--card-color);
   }
 
   &__handled {
-    border-color: var(--color-structuring);
+    --card-color: var(--color-structuring);
+    border-color: var(--card-color);
   }
 
   &__thumbs_down {
-    border-color: var(--el-color-error);
+    --card-color: var(--el-color-error);
+    border-color: var(--card-color);
   }
 
   &__thumbs_up {
-    border-color: var(--color-brainstorming);
+    --card-color: var(--color-brainstorming);
+    border-color: var(--card-color);
   }
 
   &__duplicate {
-    border-color: var(--el-color-warning);
+    --card-color: var(--el-color-warning);
+    border-color: var(--card-color);
   }
 
   &__selected.el-card::v-deep(.el-card__body) {
     border-style: solid;
-    border-color: var(--selection-color);
+    --card-color: var(--selection-color);
+    border-color: var(--card-color);
     border-width: 5px;
   }
 
@@ -399,6 +410,25 @@ export default class IdeaCard extends Vue {
 
   &__title {
     align-items: center;
+  }
+}
+
+.landscape {
+  max-width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.landscape::v-deep(.el-card__body) {
+  display: flex;
+
+  .card__image {
+    width: 40%;
+    object-fit: contain;
+    background-color: var(--card-color);
+  }
+
+  .card__text {
+    width: 60%;
   }
 }
 
