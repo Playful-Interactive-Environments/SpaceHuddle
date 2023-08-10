@@ -91,6 +91,15 @@
              "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  "fallback": "findit",  
            "path": "information/forestfires"  
        },  
+       "missionmap": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "de,en,",  
+             "icon": "map-location",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
+           "path": "information/missionmap"  
+       },  
        "moveit": {  
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  

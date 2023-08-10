@@ -52,6 +52,21 @@ export const registerGetListFromTopic = (
   );
 };
 
+export const registerGetListFromSession = (
+  sessionId: string,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<TaskParticipantState[]> => {
+  return cashService.registerSimplifiedGet<TaskParticipantState[]>(
+    `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PARTICIPANT_STATE}`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
 export const deregisterGetListFromTopic = (
   topicId: string,
   callback: (result: any) => void

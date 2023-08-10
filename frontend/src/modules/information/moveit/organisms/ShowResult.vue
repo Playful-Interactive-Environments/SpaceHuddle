@@ -351,14 +351,17 @@ export default class ShowResult extends Vue {
     }
 
     if (this.trackingManager && this.trackingManager.iteration) {
-      this.trackingManager.saveIteration(
-        {
-          rate: this.successRate,
-        },
-        this.successRate >= 2
-          ? TaskParticipantIterationStatesType.WIN
-          : TaskParticipantIterationStatesType.LOOS
-      );
+      this.trackingManager
+        .saveIteration(
+          {
+            rate: this.successRate,
+          },
+          this.successRate >= 2
+            ? TaskParticipantIterationStatesType.WIN
+            : TaskParticipantIterationStatesType.LOOS,
+          this.successRate
+        )
+        .then(() => this.trackingManager.saveStatePointsFromIterations());
     }
   }
 

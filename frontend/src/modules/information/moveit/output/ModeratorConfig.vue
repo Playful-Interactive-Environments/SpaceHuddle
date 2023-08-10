@@ -71,8 +71,8 @@ export default class ModeratorConfig extends Vue {
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
 
-  mapCenter = [...defaultCenter] as [number, number];
-  mapStart = [...defaultCenter] as [number, number];
+  mapCenter = [...defaultCenter];
+  mapStart = [...defaultCenter];
   mapZoom = 5;
 
   @Watch('modelValue', { immediate: true })

@@ -15,6 +15,9 @@
           >
             {{ sessionDescription }}
           </span>
+          <div v-if="points">
+            <font-awesome-icon icon="coins" /> {{ points }}
+          </div>
         </div>
         <div class="image" v-if="avatar">
           <el-tooltip
@@ -102,6 +105,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import { Watch } from 'vue-property-decorator';
 import MenuBar from '@/components/participant/molecules/Menubar.vue';
 import TaskType from '@/types/enum/TaskType';
 import * as taskService from '@/services/task-service';
@@ -119,9 +123,13 @@ import * as cashService from '@/services/cash-service';
 import { Avatar } from '@/types/api/Participant';
 import * as authService from '@/services/auth-service';
 import LanguageSettings from '@/components/moderator/organisms/settings/LanguageSettings.vue';
+import * as taskParticipantService from '@/services/task-participant-service';
+import { TaskParticipantState } from '@/types/api/TaskParticipantState';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 @Options({
   components: {
+    FontAwesomeIcon,
     LanguageSettings,
     ParticipantDefaultContainer,
     Timer,
@@ -141,6 +149,7 @@ export default class ParticipantOverview extends Vue {
   EndpointAuthorisationType = EndpointAuthorisationType;
   avatar!: Avatar;
   showLanguageSettings = false;
+  points = 0;
 
   getColor(task: Task): string | undefined {
     if (task.taskType) {
@@ -173,6 +182,7 @@ export default class ParticipantOverview extends Vue {
     cashService.deregisterAllGet(this.updateSession);
     cashService.deregisterAllGet(this.updateTopics);
     cashService.deregisterAllGet(this.updateTasks);
+    cashService.deregisterAllGet(this.updateStates);
   }
 
   unmounted(): void {
@@ -205,6 +215,31 @@ export default class ParticipantOverview extends Vue {
     });
     this.topics = topics;
     this.openTabs = this.topics.map((topic) => topic.id);
+  }
+
+  @Watch('sessionId', { immediate: true })
+  onSessionIdChanged(): void {
+    cashService.deregisterAllGet(this.updateStates);
+    if (this.sessionId) {
+      taskParticipantService.registerGetListFromSession(
+        this.sessionId,
+        this.updateStates,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
+    }
+  }
+
+  updateStates(items: TaskParticipantState[]): void {
+    let points = 0;
+    for (const item of items) {
+      if (item.parameter.gameplayResult) {
+        const gameplayResult = item.parameter.gameplayResult;
+        points += gameplayResult.points;
+        if (gameplayResult.pointsSpent) points -= gameplayResult.pointsSpent;
+      }
+    }
+    this.points = points;
   }
 
   refreshTopics(): void {

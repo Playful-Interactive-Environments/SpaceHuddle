@@ -9,13 +9,33 @@ import * as cashService from '@/services/cash-service';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import { Module } from '@/types/api/Module';
 
+export interface GameplayResult {
+  stars: number;
+  points: number;
+  playCount: number;
+}
+
+export interface GameplayAndSpentResult extends GameplayResult {
+  pointsSpent: number;
+}
+
+export interface GameplayHierarchyItem {
+  parameter: { gameplayResult: GameplayResult | GameplayAndSpentResult };
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export class TrackingManager {
   taskId: string;
   iteration: TaskParticipantIteration | null = null;
   iterationStep: TaskParticipantIterationStep | null = null;
+  iterationList: TaskParticipantIteration[] = [];
+  iterationStepList: TaskParticipantIterationStep[] = [];
   state: TaskParticipantState | null = null;
+  readonly pointsPerStar = 100;
+  readonly maxPoints = 1000;
 
+  iterationsCash!: cashService.SimplifiedCashEntry<TaskParticipantIteration[]>;
+  stepsCash!: cashService.SimplifiedCashEntry<TaskParticipantIterationStep[]>;
   constructor(taskId: string, initInstanceContent: any) {
     this.taskId = taskId;
     this.deregisterAll();
@@ -32,11 +52,27 @@ export class TrackingManager {
       })
       .then((result) => {
         this.iteration = result;
+        this.iterationsCash = taskParticipantService.registerGetIterationList(
+          this.taskId,
+          (result: any) => this._updateIterations(result),
+          EndpointAuthorisationType.PARTICIPANT,
+          2 * 60
+        );
+        this.stepsCash = taskParticipantService.registerGetIterationStepList(
+          this.taskId,
+          (result: any) => this._updateSteps(result),
+          EndpointAuthorisationType.PARTICIPANT,
+          2 * 60
+        );
       });
   }
 
   deregisterAll(): void {
     cashService.deregisterAllGet((result: any) => this._updateState(result));
+    cashService.deregisterAllGet((result: any) =>
+      this._updateIterations(result)
+    );
+    cashService.deregisterAllGet((result: any) => this._updateSteps(result));
   }
 
   _updateState(stateList: TaskParticipantState[]): void {
@@ -46,6 +82,63 @@ export class TrackingManager {
         //
       }
     }
+  }
+
+  _updateIterations(iterationList: TaskParticipantIteration[]): void {
+    this.iterationList = iterationList;
+  }
+
+  _updateSteps(stepList: TaskParticipantIterationStep[]): void {
+    if (this.iteration) {
+      this.iterationStepList = stepList.filter(
+        (item) => item.iteration === this.iteration?.iteration
+      );
+    }
+  }
+
+  getGameplayResult(
+    stars: number,
+    playCount = 1,
+    limitToMaxPoints = false,
+    pointsSpent: number | null = null
+  ): GameplayResult | GameplayAndSpentResult {
+    const points = stars * this.pointsPerStar;
+    const result = {
+      stars: stars,
+      points:
+        limitToMaxPoints && points > this.maxPoints ? this.maxPoints : points,
+      playCount: playCount,
+    };
+    if (pointsSpent !== null)
+      (result as GameplayAndSpentResult).pointsSpent = pointsSpent;
+    return result;
+  }
+
+  getGameplayResultFromChild(
+    list: GameplayHierarchyItem[],
+    limitToMaxPoints = false
+  ): GameplayResult | GameplayAndSpentResult {
+    let stars = 0;
+    let playCount = 0;
+    let pointsSpent = 0;
+    let hasSpentPoints = false;
+    for (const item of list) {
+      if (item.parameter.gameplayResult) {
+        stars += item.parameter.gameplayResult.stars;
+        const parameterPlayCount = item.parameter.gameplayResult.playCount;
+        playCount += parameterPlayCount ? parameterPlayCount : 1;
+        const parameterPointsSpent = (item.parameter.gameplayResult as any)
+          .pointsSpent;
+        if (parameterPointsSpent !== undefined) hasSpentPoints = true;
+        pointsSpent += parameterPointsSpent ? parameterPointsSpent : 0;
+      }
+    }
+    return this.getGameplayResult(
+      stars,
+      playCount,
+      limitToMaxPoints,
+      hasSpentPoints ? pointsSpent : null
+    );
   }
 
   setFinishedState(module: Module | null): void {
@@ -74,11 +167,24 @@ export class TrackingManager {
     }
   }
 
+  saveStatePointsFromIterations(): void {
+    if (this.state) {
+      this.state.parameter.gameplayResult = this.getGameplayResultFromChild(
+        this.iterationList,
+        true
+      );
+      taskParticipantService.putParticipantState(this.taskId, this.state);
+    }
+  }
+
   async saveIteration(
     contentChanges: any | null = null,
-    changedState: TaskParticipantIterationStatesType | null = null
+    changedState: TaskParticipantIterationStatesType | null = null,
+    stars: number | null = null
   ): Promise<void> {
     if (this.iteration) {
+      if (stars !== null)
+        this.iteration.parameter.gameplayResult = this.getGameplayResult(stars);
       if (changedState) this.iteration.state = changedState;
       if (contentChanges) {
         for (const key of Object.keys(contentChanges)) {
@@ -89,32 +195,86 @@ export class TrackingManager {
         this.taskId,
         this.iteration
       );
+      await this.iterationsCash.refreshData();
     }
   }
 
-  createInstanceStep(
+  async saveIterationPoints(stars: number): Promise<void> {
+    if (this.iteration) {
+      this.iteration.parameter.gameplayResult = this.getGameplayResult(
+        stars,
+        1
+      );
+      await taskParticipantService.putParticipantIteration(
+        this.taskId,
+        this.iteration
+      );
+      await this.iterationsCash.refreshData();
+    }
+  }
+
+  async saveIterationPointsSpent(points: number): Promise<void> {
+    if (this.iteration) {
+      if (this.iteration.parameter.gameplayResult)
+        this.iteration.parameter.gameplayResult.pointsSpent += points;
+      else
+        this.iteration.parameter.gameplayResult = this.getGameplayResult(
+          0,
+          1,
+          false,
+          points
+        );
+      await taskParticipantService.putParticipantIteration(
+        this.taskId,
+        this.iteration
+      );
+      await this.iterationsCash.refreshData();
+    }
+  }
+
+  async saveIterationPointsFromSteps(): Promise<void> {
+    if (this.iteration) {
+      this.iteration.parameter.gameplayResult = this.getGameplayResultFromChild(
+        this.iterationStepList
+      );
+      await taskParticipantService.putParticipantIteration(
+        this.taskId,
+        this.iteration
+      );
+      await this.iterationsCash.refreshData();
+    }
+  }
+
+  async createInstanceStep(
     ideaId: string,
     state: TaskParticipantIterationStepStatesType,
-    initContent: any
-  ) {
+    initContent: any,
+    stars: number | null = null,
+    pointsSpent: number | null = null
+  ): Promise<void> {
     if (this.iteration) {
-      taskParticipantService
-        .postParticipantIterationStep(this.taskId, {
+      if (stars !== null || pointsSpent !== null)
+        initContent.gameplayResult = this.getGameplayResult(
+          stars !== null ? stars : 0,
+          1,
+          false,
+          pointsSpent
+        );
+      this.iterationStep =
+        await taskParticipantService.postParticipantIterationStep(this.taskId, {
           iteration: this.iteration?.iteration,
           ideaId: ideaId,
           state: state,
           parameter: initContent,
-        })
-        .then((result) => {
-          this.iterationStep = result;
         });
+      await this.stepsCash.refreshData();
     }
   }
 
-  async saveIterationStep(
+  saveIterationStep(
     contentChanges: any | null = null,
     changedState: TaskParticipantIterationStepStatesType | null = null
-  ): Promise<void> {
+  ): void {
     if (this.iterationStep) {
       if (changedState) this.iterationStep.state = changedState;
       if (contentChanges) {
@@ -122,10 +282,42 @@ export class TrackingManager {
           this.iterationStep.parameter[key] = contentChanges[key];
         }
       }
-      await taskParticipantService.putParticipantIterationStep(
-        this.taskId,
-        this.iterationStep
-      );
+      taskParticipantService
+        .putParticipantIterationStep(this.taskId, this.iterationStep)
+        .then(() => {
+          this.stepsCash.refreshData();
+        });
+    }
+  }
+
+  saveIterationStepPoints(stars: number): void {
+    if (this.iterationStep) {
+      this.iterationStep.parameter.gameplayResult =
+        this.getGameplayResult(stars);
+      taskParticipantService
+        .putParticipantIterationStep(this.taskId, this.iterationStep)
+        .then(() => {
+          this.stepsCash.refreshData();
+        });
+    }
+  }
+
+  saveIterationStepPointsSpent(points: number): void {
+    if (this.iterationStep) {
+      if (this.iterationStep.parameter.gameplayResult)
+        this.iterationStep.parameter.gameplayResult.pointsSpent += points;
+      else
+        this.iterationStep.parameter.gameplayResult = this.getGameplayResult(
+          0,
+          1,
+          false,
+          points
+        );
+      taskParticipantService
+        .putParticipantIterationStep(this.taskId, this.iterationStep)
+        .then(() => {
+          this.stepsCash.refreshData();
+        });
     }
   }
 }
