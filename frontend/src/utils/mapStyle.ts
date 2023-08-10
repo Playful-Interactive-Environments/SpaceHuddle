@@ -6,8 +6,10 @@ import * as mapStyleTerrain from '@/assets/map-style/terrain.json';
 import * as mapStyleStreets from '@/assets/map-style/streets.json';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-function updatePath(style: any): any {
+function updatePath(style: any, name: MapStyleType | null = null): any {
   style.glyphs = `${window.location.origin}/assets/fonts/{fontstack}/{range}.pbf`;
+  if (name)
+    style.sprite = `${window.location.origin}/assets/map-style/${name}/sprite`;
   let tileServer = process.env.VUE_APP_TILE_SERVER;
   if (tileServer.includes('{key}')) {
     tileServer = tileServer.replace('{key}', process.env.VUE_APP_MAPTILER_KEY);
@@ -27,17 +29,17 @@ export enum MapStyleType {
 export function getMapStyle(name: MapStyleType): string {
   switch (name) {
     case MapStyleType.Basic:
-      return updatePath({ ...mapStyleBasic });
+      return updatePath({ ...mapStyleBasic }, name);
     case MapStyleType.Streets:
-      return updatePath({ ...mapStyleStreets });
+      return updatePath({ ...mapStyleStreets }, name);
     case MapStyleType.Dark:
-      return updatePath({ ...mapStyleDark });
+      return updatePath({ ...mapStyleDark }, name);
     case MapStyleType.Light:
-      return updatePath({ ...mapStyleLight });
+      return updatePath({ ...mapStyleLight }, name);
     case MapStyleType.Terrain:
-      return updatePath({ ...mapStyleTerrain });
+      return updatePath({ ...mapStyleTerrain }, name);
     default:
-      return updatePath({ ...mapStyleBasic });
+      return updatePath({ ...mapStyleBasic }, name);
   }
 }
 
@@ -46,21 +48,21 @@ export function setMapStyle(name: MapStyleType): void {
 }
 
 export function setMapStyleBasic(): void {
-  MglDefaults.style = updatePath({ ...mapStyleBasic });
+  MglDefaults.style = updatePath({ ...mapStyleBasic }, MapStyleType.Basic);
 }
 
 export function setMapStyleStreets(): void {
-  MglDefaults.style = updatePath({ ...mapStyleStreets });
+  MglDefaults.style = updatePath({ ...mapStyleStreets }, MapStyleType.Streets);
 }
 
 export function setMapStyleDark(): void {
-  MglDefaults.style = updatePath({ ...mapStyleDark });
+  MglDefaults.style = updatePath({ ...mapStyleDark }, MapStyleType.Dark);
 }
 
 export function setMapStyleLight(): void {
-  MglDefaults.style = updatePath({ ...mapStyleLight });
+  MglDefaults.style = updatePath({ ...mapStyleLight }, MapStyleType.Light);
 }
 
 export function setMapStyleTerrain(): void {
-  MglDefaults.style = updatePath({ ...mapStyleTerrain });
+  MglDefaults.style = updatePath({ ...mapStyleTerrain }, MapStyleType.Terrain);
 }

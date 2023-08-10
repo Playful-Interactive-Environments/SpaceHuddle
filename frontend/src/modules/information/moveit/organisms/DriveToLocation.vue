@@ -489,7 +489,10 @@ export default class DriveToLocation extends Vue {
       .filter((value, index, array) => array.indexOf(value) === index);
     if (this.vehicle === 'bus') {
       const layer = notNeededLayers.find(
-        (layer) => layer.id === 'poi-level-1' || layer.id === 'poi_z14'
+        (layer) =>
+          layer.id === 'poi-level-1' ||
+          layer.id === 'poi-level-bus' ||
+          layer.id === 'poi_z14'
       );
       const busLayerName = 'bus';
       if (layer) {

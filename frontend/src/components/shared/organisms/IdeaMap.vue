@@ -96,7 +96,6 @@ import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
 import * as turf from '@turf/turf';
 import * as mapStyle from '@/utils/mapStyle';
 import * as themeColors from '@/utils/themeColors';
-import { until } from '@/utils/wait';
 
 /*export enum MapStyles {
   STREETS = 'streets-v2',
@@ -135,7 +134,7 @@ export default class IdeaMap extends Vue {
 
   mapCenter: [number, number] = [0, 0];
   mapIdeaCenter: [number, number] = [0, 0];
-  mapZoom = 13;
+  mapZoom = 14;
   mapBounds: LngLatBoundsLike | null = null;
   sizeCalculated = false;
   map!: Map;
@@ -144,7 +143,6 @@ export default class IdeaMap extends Vue {
   mapStyle: mapStyle.MapStyleType = mapStyle.MapStyleType.Streets;
 
   showMap = true;
-  detailZoomReady = false;
 
   get MarkerColor(): string {
     switch (this.mapStyle) {
@@ -224,7 +222,6 @@ export default class IdeaMap extends Vue {
     if (this.parameter.mapCenter) {
       this.mapCenter = this.parameter.mapCenter;
     }
-    await until(() => this.detailZoomReady);
     if (this.parameter.mapZoom) {
       this.mapZoom = this.parameter.mapZoom;
     }
@@ -330,13 +327,14 @@ export default class IdeaMap extends Vue {
     this.map = e.map;
     this.fitZoomToBounds();
     this.mapstyleChange(this.mapStyle);
-    setTimeout(() => (this.detailZoomReady = true), 500);
   }
 
   mapstyleChange(command: string): void {
     this.mapStyle = command as mapStyle.MapStyleType;
     if (this.map) {
-      this.map.setStyle(mapStyle.getMapStyle(this.mapStyle));
+      this.map.setStyle(mapStyle.getMapStyle(this.mapStyle), {
+        diff: false,
+      });
       setTimeout(() => {
         if (this.map) {
           const notNeededLayers = this.map.getStyle().layers.filter((layer) => {

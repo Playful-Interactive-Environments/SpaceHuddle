@@ -242,33 +242,6 @@
 						}
 					},
 					{
-						"id": "water_name",
-						"type": "symbol",
-						"source": "openmaptiles",
-						"source-layer": "water_name",
-						"filter": [
-							"==",
-							"$type",
-							"LineString"
-						],
-						"layout": {
-							"symbol-placement": "line",
-							"symbol-spacing": 500,
-							"text-field": "{name:latin}\\n{name:nonlatin}",
-							"text-font": [
-								"Noto Sans Italic"
-							],
-							"text-rotation-alignment": "map",
-							"text-size": 12
-						},
-						"paint": {
-							"text-color": "rgb(157,169,177)",
-							"text-halo-blur": 1,
-							"text-halo-color": "rgb(242,243,240)",
-							"text-halo-width": 1
-						}
-					},
-					{
 						"id": "building",
 						"type": "fill",
 						"source": "openmaptiles",
@@ -1417,96 +1390,6 @@
 									]
 								]
 							}
-						}
-					},
-					{
-						"id": "highway_name_other",
-						"type": "symbol",
-						"metadata": {
-							"mapbox:group": "b6371a3f2f5a9932464fa3867530a2e5"
-						},
-						"source": "openmaptiles",
-						"source-layer": "transportation_name",
-						"filter": [
-							"all",
-							[
-								"!=",
-								"class",
-								"motorway"
-							],
-							[
-								"==",
-								"$type",
-								"LineString"
-							]
-						],
-						"layout": {
-							"symbol-placement": "line",
-							"symbol-spacing": 350,
-							"text-field": "{name:latin} {name:nonlatin}",
-							"text-font": [
-								"Noto Sans Regular"
-							],
-							"text-max-angle": 30,
-							"text-pitch-alignment": "viewport",
-							"text-rotation-alignment": "map",
-							"text-size": 10,
-							"text-transform": "uppercase",
-							"visibility": "visible"
-						},
-						"paint": {
-							"text-color": "#bbb",
-							"text-halo-blur": 1,
-							"text-halo-color": "#fff",
-							"text-halo-width": 2,
-							"text-translate": [
-								0,
-								0
-							]
-						}
-					},
-					{
-						"id": "highway_name_motorway",
-						"type": "symbol",
-						"metadata": {
-							"mapbox:group": "b6371a3f2f5a9932464fa3867530a2e5"
-						},
-						"source": "openmaptiles",
-						"source-layer": "transportation_name",
-						"filter": [
-							"all",
-							[
-								"==",
-								"$type",
-								"LineString"
-							],
-							[
-								"==",
-								"class",
-								"motorway"
-							]
-						],
-						"layout": {
-							"symbol-placement": "line",
-							"symbol-spacing": 350,
-							"text-field": "{ref}",
-							"text-font": [
-								"Noto Sans Regular"
-							],
-							"text-pitch-alignment": "viewport",
-							"text-rotation-alignment": "viewport",
-							"text-size": 10,
-							"visibility": "visible"
-						},
-						"paint": {
-							"text-color": "rgb(117, 129, 145)",
-							"text-halo-blur": 1,
-							"text-halo-color": "hsl(0, 0%, 100%)",
-							"text-halo-width": 1,
-							"text-translate": [
-								0,
-								2
-							]
 						}
 					},
 					{
