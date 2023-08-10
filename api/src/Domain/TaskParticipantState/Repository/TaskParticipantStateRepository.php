@@ -129,6 +129,35 @@ class TaskParticipantStateRepository implements RepositoryInterface
     }
 
     /**
+     * Get list of entities for the session ID.
+     * @param string $sessionId The session ID.
+     * @return array<object> The result entity list.
+     * @throws GenericException
+     */
+    public function getAllFromSession(string $sessionId): array
+    {
+        $conditions = ["topic.session_id" => $sessionId];
+        $authorisation = $this->getAuthorisation();
+        if ($authorisation->isParticipant()) {
+            $conditions["participant_id"] = $authorisation->id;
+        }
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["task_participant_state.*", "participant.symbol", "participant.color"])
+            ->innerJoin("participant", "task_participant_state.participant_id = participant.id")
+            ->innerJoin("task", "task_participant_state.task_id = task.id")
+            ->innerJoin("topic", "task.topic_id = topic.id")
+            ->andWhere($conditions);
+
+        $result = $this->fetchAll($query);
+        if (is_array($result)) {
+            return $result;
+        } elseif (isset($result)) {
+            return [$result];
+        }
+        return [];
+    }
+
+    /**
      * Convert to array.
      * @param object $data The entity data
      * @return array<string, mixed> The array

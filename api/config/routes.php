@@ -90,6 +90,7 @@ use App\Action\TaskParticipantIterationStep\TaskParticipantIterationStepReadAllF
 use App\Action\TaskParticipantIterationStep\TaskParticipantIterationStepReadLastAction;
 use App\Action\TaskParticipantIterationStep\TaskParticipantIterationStepUpdateAction;
 use App\Action\TaskParticipantState\TaskParticipantStateReadAllAction;
+use App\Action\TaskParticipantState\TaskParticipantStateReadAllFromSessionAction;
 use App\Action\TaskParticipantState\TaskParticipantStateReadAllFromTopicAction;
 use App\Action\TaskParticipantState\TaskParticipantStateUpdateAction;
 use App\Action\Topic\TopicCloneAction;
@@ -231,6 +232,8 @@ return function (App $app) {
 
             $app->post("/{sessionId}/resource[/]", ResourceCreateAction::class);
             $app->get("/{sessionId}/resources[/]", ResourceReadAllAction::class);
+
+            $app->get("/{sessionId}/participant_state[/]", TaskParticipantStateReadAllFromSessionAction::class);
 
             $app->post("/{id}/clone[/]", SessionCloneAction::class);
 

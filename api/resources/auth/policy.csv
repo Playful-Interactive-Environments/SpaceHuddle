@@ -103,6 +103,7 @@ p, ANONYMOUS|MODERATOR|FACILITATOR|PARTICIPANT, /topic/:topicId/tasks/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/dependent/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/participant_state/, GET
 p, MODERATOR|FACILITATOR, /topic/:id/participant_state/, GET
+p, MODERATOR|FACILITATOR|PARTICIPANT, /session/:id/participant_state/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/participant_iteration/, GET
 p, PARTICIPANT, /task/:id/participant_iteration/last/, GET
 p, MODERATOR|FACILITATOR|PARTICIPANT, /task/:id/participant_iteration/step/, GET

@@ -6,9 +6,9 @@ use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Service\ServiceReaderTrait;
 
 /**
- * Service to read all participant states for one topic
+ * Service to read all participant states for one session
  */
-class TaskParticipantStateFromTopicReader
+class TaskParticipantStateFromSessionReader
 {
     use ServiceReaderTrait;
     use TaskParticipantStateTrait;
@@ -24,9 +24,9 @@ class TaskParticipantStateFromTopicReader
     protected function serviceExecution(
         array $data
     ): array|object|null {
-        if (array_key_exists("topicId", $data)) {
-            $topicId = $data["topicId"];
-            return $this->repository->getAllFromTopic($topicId);
+        if (array_key_exists("sessionId", $data)) {
+            $sessionId = $data["sessionId"];
+            return $this->repository->getAllFromSession($sessionId);
         }
         return null;
     }
