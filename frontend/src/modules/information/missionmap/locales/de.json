@@ -12,7 +12,8 @@
   "moderatorContent": {
     "settingsTitle": "Ideeneinstellungen",
     "displayAll": "Alle Anzeigen",
-    "add": "Info hinzufügen"
+    "add": "Info hinzufügen",
+    "points": "Benötigte Summe an Punkten"
   },
   "publicScreen": {
     "noIdeas": "Noch keine Ideen - Bleib dran."

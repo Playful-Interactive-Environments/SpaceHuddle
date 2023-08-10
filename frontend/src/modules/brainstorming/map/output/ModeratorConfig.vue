@@ -22,6 +22,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
 import { MglNavigationControl, MglMap } from 'vue-maplibre-gl';
 import * as mapStyle from '@/utils/mapStyle';
+import { defaultCenter } from '@/utils/map';
 
 mapStyle.setMapStyleStreets();
 
@@ -42,7 +43,7 @@ export default class ModeratorConfig extends Vue {
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
 
-  mapCenter = [14.511986682000128, 48.36875256196966];
+  mapCenter = [...defaultCenter] as [number, number];
   mapZoom = 5;
 
   @Watch('modelValue', { immediate: true })

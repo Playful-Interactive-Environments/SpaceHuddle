@@ -18,6 +18,10 @@
           :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
           v-on:click="ideaClicked(idea)"
         >
+          <div>
+            <font-awesome-icon icon="coins" />
+            {{ idea.parameter.points }}
+          </div>
           <div class="columns is-mobile">
             <div
               class="column"
@@ -25,7 +29,10 @@
               :key="parameter"
               :style="{
                 color: gameConfig.parameter[parameter].color,
-                display: idea.parameter[parameter] > 0 ? 'block' : 'none',
+                display:
+                  idea.parameter.influenceAreas[parameter] > 0
+                    ? 'block'
+                    : 'none',
               }"
             >
               <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />

@@ -166,7 +166,8 @@
         "dust": 2,
         "microplastic": 0
       },
-      "color": "#1d2948"
+      "color": "#1d2948",
+      "icon": "water"
     },
     "wind": {
       "value": 2.69,
@@ -177,7 +178,8 @@
         "dust": 6,
         "microplastic": 0
       },
-      "color": "#0192d0"
+      "color": "#0192d0",
+      "icon": "wind"
     },
     "biomass": {
       "value": 10.71,
@@ -188,7 +190,8 @@
         "dust": 20,
         "microplastic": 0
       },
-      "color": "#e086cb"
+      "color": "#e086cb",
+      "icon": "leaf"
     },
     "sun": {
       "value": 1.12,
@@ -199,7 +202,8 @@
         "dust": 10,
         "microplastic": 0
       },
-      "color": "#f3a40a"
+      "color": "#f3a40a",
+      "icon": "sun"
     },
     "green": {
       "value": 0.31,
@@ -210,7 +214,8 @@
         "dust": 2,
         "microplastic": 0
       },
-      "color": "#01cf9e"
+      "color": "#01cf9e",
+      "icon": "leaf"
     },
     "gas": {
       "value": 73.07,
@@ -221,7 +226,8 @@
         "dust": 40,
         "microplastic": 0
       },
-      "color": "#871a70"
+      "color": "#871a70",
+      "icon": "gas-pump"
     },
     "others": {
       "value": 2.41,
@@ -232,7 +238,8 @@
         "dust": 50,
         "microplastic": 0
       },
-      "color": "#fe6e5d"
+      "color": "#fe6e5d",
+      "icon": "bolt"
     }
   },
   "fuel": {

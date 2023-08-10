@@ -48,6 +48,10 @@
             @ideaStartEdit="editIdea(element)"
             v-on:click="selectedIdea = element"
           >
+            <div>
+              <font-awesome-icon icon="coins" />
+              {{ element.parameter.points }}
+            </div>
             <div class="columns is-mobile">
               <div
                 class="column"
@@ -60,7 +64,7 @@
                 <font-awesome-icon
                   :icon="gameConfig.parameter[parameter].icon"
                 />
-                {{ element.parameter[parameter] }}
+                {{ element.parameter.influenceAreas[parameter] }}
               </div>
             </div>
           </IdeaCard>
@@ -95,6 +99,10 @@
           @ideaStartEdit="editIdea(idea)"
           v-on:click="selectedIdea = idea"
         >
+          <div>
+            <font-awesome-icon icon="coins" />
+            {{ idea.parameter.points }}
+          </div>
           <div class="columns is-mobile">
             <div
               class="column"
@@ -105,7 +113,7 @@
               }"
             >
               <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
-              {{ idea.parameter[parameter] }}
+              {{ idea.parameter.influenceAreas[parameter] }}
             </div>
           </div>
         </IdeaCard>
@@ -133,10 +141,21 @@
     @updateData="addData"
   >
     <el-form-item
+      :label="$t('module.information.missionmap.moderatorContent.points')"
+      :prop="`parameter.points`"
+    >
+      <el-slider
+        v-model="settingsIdea.parameter.points"
+        :min="500"
+        :max="10000"
+        :step="500"
+      />
+    </el-form-item>
+    <el-form-item
       v-for="parameter of Object.keys(gameConfig.parameter)"
       :key="parameter"
       :label="$t(`module.information.missionmap.gameConfig.${parameter}`)"
-      :prop="`parameter.${parameter}`"
+      :prop="`parameter.influenceAreas.${parameter}`"
       :style="{ '--parameter-color': gameConfig.parameter[parameter].color }"
     >
       <template #label>
@@ -144,10 +163,28 @@
         <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
       </template>
       <el-slider
-        v-model="settingsIdea.parameter[parameter]"
+        v-model="settingsIdea.parameter.influenceAreas[parameter]"
         :min="-5"
         :max="5"
-        show-stops
+      />
+    </el-form-item>
+    <el-form-item
+      v-for="parameter of Object.keys(additionalParameter)"
+      :key="parameter"
+      :label="$t(`module.information.moveit.enums.electricity.${parameter}`)"
+      :prop="`parameter.electricity.${parameter}`"
+      :style="{
+        '--parameter-color': additionalParameter[parameter].color,
+      }"
+    >
+      <template #label>
+        {{ $t(`module.information.moveit.enums.electricity.${parameter}`) }}
+        <font-awesome-icon :icon="additionalParameter[parameter].icon" />
+      </template>
+      <el-slider
+        v-model="settingsIdea.parameter.electricity[parameter]"
+        :min="-10"
+        :max="10"
       />
     </el-form-item>
   </IdeaSettings>
@@ -179,12 +216,18 @@ import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 import { Module } from '@/types/api/Module';
 import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
 import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
+import gameConfigMoveIt from '@/modules/information/moveit/data/gameConfig.json';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { defaultCenter } from '@/utils/map';
+import { until } from '@/utils/wait';
 
 @Options({
   computed: {
     gameConfig() {
       return gameConfig;
+    },
+    gameConfigMoveIt() {
+      return gameConfigMoveIt;
     },
   },
   components: {
@@ -223,6 +266,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     return this.filter.orderType === IdeaSortOrder.ORDER;
   }
 
+  get additionalParameter(): any {
+    if (this.module && this.module.parameter.effectElectricity)
+      return gameConfigMoveIt.electricity;
+    return {};
+  }
+
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
     this.deregisterAll();
@@ -251,6 +300,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   updateIdeas(ideas: Idea[]): void {
+    for (const idea of ideas) {
+      this.setEmptyParameterIfNotExists(idea);
+    }
     const orderType = this.filter.orderType;
     const dataList = ideaService.getOrderGroups(
       ideas,
@@ -362,6 +414,35 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.resetAddIdea();
   }
 
+  async setEmptyParameterIfNotExists(idea: Idea): Promise<void> {
+    if (!idea.parameter) idea.parameter = {};
+    if (!idea.parameter.points) {
+      idea.parameter.points = 500;
+    }
+    if (!idea.parameter.influenceAreas) {
+      idea.parameter.influenceAreas = {};
+      for (const parameter of Object.keys(gameConfig.parameter)) {
+        idea.parameter.influenceAreas[parameter] = 0;
+      }
+    }
+    await until(() => !!this.module);
+    if (!idea.parameter.position) {
+      if (this.module && this.module.parameter.mapCenter) {
+        idea.parameter.position = this.module.parameter.mapCenter;
+      } else idea.parameter.position = [...defaultCenter] as [number, number];
+    }
+    if (
+      this.module &&
+      this.module.parameter.effectElectricity &&
+      !idea.parameter.electricity
+    ) {
+      idea.parameter.electricity = {};
+      for (const parameter of Object.keys(gameConfigMoveIt.electricity)) {
+        idea.parameter.electricity[parameter] = 0;
+      }
+    }
+  }
+
   resetAddIdea(): void {
     this.settingsIdea = this.addIdea;
     this.addIdea.keywords = '';
@@ -369,11 +450,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.addIdea.image = null;
     this.addIdea.link = null;
     this.addIdea.order = this.ideas.length;
-    if (this.module && this.module.parameter.mapCenter) {
-      this.addIdea.parameter = {
-        position: this.module.parameter.mapCenter,
-      };
-    }
+    this.setEmptyParameterIfNotExists(this.addIdea);
   }
 
   editNewImage(): void {

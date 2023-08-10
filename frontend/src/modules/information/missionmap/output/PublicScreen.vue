@@ -30,6 +30,10 @@
             v-model:fadeIn="ideaTransform[idea.id]"
             v-on:click="selectedIdea = idea"
           >
+            <div>
+              <font-awesome-icon icon="coins" />
+              {{ idea.parameter.points }}
+            </div>
             <div class="columns is-mobile">
               <div
                 class="column"
@@ -42,7 +46,7 @@
                 <font-awesome-icon
                   :icon="gameConfig.parameter[parameter].icon"
                 />
-                {{ idea.parameter[parameter] }}
+                {{ idea.parameter.influenceAreas[parameter] }}
               </div>
             </div>
           </IdeaCard>

@@ -12,7 +12,8 @@
   "moderatorContent": {
     "settingsTitle": "idea settings",
     "displayAll": "display all",
-    "add": "add content"
+    "add": "add content",
+    "points": "required sum of points"
   },
   "publicScreen": {
     "noIdeas": "No ideas yet - stay tuned."
