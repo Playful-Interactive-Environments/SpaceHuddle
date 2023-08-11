@@ -39,6 +39,13 @@ class VoteData
     public ?float $detailRating;
 
     /**
+     * Variable json parameters depending on the task type.
+     * @var object|null
+     * @OA\Property(type="object", format="json")
+     */
+    public ?object $parameter;
+
+    /**
      * Time of idea storage.
      * @var string|null
      * @OA\Property(format="date")
@@ -56,6 +63,7 @@ class VoteData
         $this->ideaId = $reader->findString("idea_id");
         $this->rating = $reader->findInt("rating");
         $this->detailRating = $reader->findFloat("detail_rating");
+        $this->parameter = (object)json_decode($reader->findString("parameter") ?? "{}");
         $this->timestamp = $reader->findString("timestamp");
     }
 }

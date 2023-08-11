@@ -542,7 +542,8 @@ class VoteRepository implements RepositoryInterface
             "participant_id" => $data->participantId ?? null,
             "idea_id" => $data->ideaId ?? null,
             "rating" => $data->rating ?? null,
-            "detail_rating" => $data->detailRating ?? null
+            "detail_rating" => $data->detailRating ?? null,
+            "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null
         ];
     }
 }

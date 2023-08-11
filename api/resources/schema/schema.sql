@@ -308,6 +308,7 @@ CREATE TABLE `vote` (
                         `idea_id` char(36) NOT NULL,
                         `rating` int(11) NOT NULL,
                         `detail_rating` float DEFAULT NULL,
+                        `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
                         `timestamp` datetime NOT NULL DEFAULT current_timestamp(),
                         `modification_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
