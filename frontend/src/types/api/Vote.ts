@@ -1,11 +1,13 @@
 import { Idea } from '@/types/api/Idea';
 import { Hierarchy } from '@/types/api/Hierarchy';
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export interface Vote {
   id: string;
   ideaId: string;
   rating: number;
   detailRating: number;
+  parameter: any;
   timestamp: string;
 }
 

@@ -4,10 +4,18 @@
     "description": "verankere deine Ideen auf der Karte"
   },
   "participant": {
+    "points": "Punkte",
+    "rate": "Rate",
+    "explanation": "Begründung",
+    "save": "speichern"
   },
   "moderatorConfig": {
     "mapSection": "Kartenausschnitt",
-    "effectElectricity": "Beeinflusst den Strommix"
+    "effectElectricity": "Beeinflusst den Strommix",
+    "minParticipants": "mindestens erforderliche Teilnehmer",
+    "minPoints": "erforderliche Mindestpunktzahl pro Teilnehmer",
+    "maxPoints": "maximal zu vergebende Punkte pro Teilnehmer",
+    "explanation": "für den Teilnehmer auswählbare Erklärungen"
   },
   "moderatorContent": {
     "settingsTitle": "Ideeneinstellungen",

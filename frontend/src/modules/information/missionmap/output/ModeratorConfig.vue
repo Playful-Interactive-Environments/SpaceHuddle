@@ -37,9 +37,49 @@
     :label="
       $t('module.information.missionmap.moderatorConfig.effectElectricity')
     "
-    :prop="`${rulePropPath}.moderatedQuestionFlow`"
+    :prop="`${rulePropPath}.effectElectricity`"
   >
     <el-switch class="level-item" v-model="modelValue.effectElectricity" />
+  </el-form-item>
+  <el-form-item
+    :label="$t('module.information.missionmap.moderatorConfig.minParticipants')"
+    :prop="`${rulePropPath}.minParticipants`"
+  >
+    <el-input-number v-model="modelValue.minParticipants" :min="1" :max="100" />
+  </el-form-item>
+  <el-form-item
+    :label="$t('module.information.missionmap.moderatorConfig.minPoints')"
+    :prop="`${rulePropPath}.minPoints`"
+  >
+    <el-input-number
+      v-model="modelValue.minPoints"
+      :min="100"
+      :max="modelValue.maxPoints"
+    />
+  </el-form-item>
+  <el-form-item
+    :label="$t('module.information.missionmap.moderatorConfig.maxPoints')"
+    :prop="`${rulePropPath}.maxPoints`"
+  >
+    <el-input-number
+      v-model="modelValue.maxPoints"
+      :min="modelValue.minPoints"
+      :max="10000"
+    />
+  </el-form-item>
+  <el-form-item
+    :label="$t('module.information.missionmap.moderatorConfig.explanation')"
+    :prop="`${rulePropPath}.explanationList`"
+  >
+    <el-input
+      v-for="(explanation, index) of modelValue.explanationList"
+      :key="index"
+      v-model="modelValue.explanationList[index]"
+    >
+      <template #prepend>
+        <span style="width: 1.5rem">{{ index + 1 }}.</span>
+      </template>
+    </el-input>
   </el-form-item>
 </template>
 
@@ -91,6 +131,18 @@ export default class ModeratorConfig extends Vue {
       }
       if (!('effectElectricity' in this.modelValue)) {
         this.modelValue.effectElectricity = false;
+      }
+      if (!('minParticipants' in this.modelValue)) {
+        this.modelValue.minParticipants = 3;
+      }
+      if (!('minPoints' in this.modelValue)) {
+        this.modelValue.minPoints = 100;
+      }
+      if (!('maxPoints' in this.modelValue)) {
+        this.modelValue.maxPoints = 1000;
+      }
+      if (!('explanationList' in this.modelValue)) {
+        this.modelValue.explanationList = ['', '', ''];
       }
       if (!this.modelValue.mapCenter) {
         this.modelValue.mapCenter = this.mapCenter;

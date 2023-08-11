@@ -187,6 +187,52 @@
         :max="10"
       />
     </el-form-item>
+    <el-form-item
+      :label="
+        $t('module.information.missionmap.moderatorConfig.minParticipants')
+      "
+      :prop="`parameter.minParticipants`"
+    >
+      <el-input-number
+        v-model="settingsIdea.parameter.minParticipants"
+        :min="1"
+        :max="100"
+      />
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.information.missionmap.moderatorConfig.minPoints')"
+      :prop="`parameter.minPoints`"
+    >
+      <el-input-number
+        v-model="settingsIdea.parameter.minPoints"
+        :min="100"
+        :max="settingsIdea.parameter.maxPoints"
+      />
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.information.missionmap.moderatorConfig.maxPoints')"
+      :prop="`parameter.maxPoints`"
+    >
+      <el-input-number
+        v-model="settingsIdea.parameter.maxPoints"
+        :min="settingsIdea.parameter.minPoints"
+        :max="10000"
+      />
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.information.missionmap.moderatorConfig.explanation')"
+      :prop="`parameter.explanationList`"
+    >
+      <el-input
+        v-for="(explanation, index) of settingsIdea.parameter.explanationList"
+        :key="index"
+        v-model="settingsIdea.parameter.explanationList[index]"
+      >
+        <template #prepend>
+          <span style="width: 1.5rem">{{ index + 1 }}.</span>
+        </template>
+      </el-input>
+    </el-form-item>
   </IdeaSettings>
 </template>
 
@@ -441,6 +487,28 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         idea.parameter.electricity[parameter] = 0;
       }
     }
+    if (!idea.parameter.minParticipants) {
+      if (this.module && this.module.parameter.minParticipants) {
+        idea.parameter.minParticipants = this.module.parameter.minParticipants;
+      } else idea.parameter.minParticipants = 3;
+    }
+    if (!idea.parameter.minPoints) {
+      if (this.module && this.module.parameter.minPoints) {
+        idea.parameter.minPoints = this.module.parameter.minPoints;
+      } else idea.parameter.minPoints = 100;
+    }
+    if (!idea.parameter.maxPoints) {
+      if (this.module && this.module.parameter.maxPoints) {
+        idea.parameter.maxPoints = this.module.parameter.maxPoints;
+      } else idea.parameter.maxPoints = 1000;
+    }
+    if (!idea.parameter.explanationList) {
+      if (this.module && this.module.parameter.explanationList) {
+        idea.parameter.explanationList = [
+          ...this.module.parameter.explanationList,
+        ];
+      } else idea.parameter.explanationList = ['', '', ''];
+    }
   }
 
   resetAddIdea(): void {
@@ -450,6 +518,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.addIdea.image = null;
     this.addIdea.link = null;
     this.addIdea.order = this.ideas.length;
+    this.addIdea.parameter = {};
     this.setEmptyParameterIfNotExists(this.addIdea);
   }
 

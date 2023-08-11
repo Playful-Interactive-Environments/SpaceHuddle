@@ -126,6 +126,7 @@ import LanguageSettings from '@/components/moderator/organisms/settings/Language
 import * as taskParticipantService from '@/services/task-participant-service';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import {registerGetPoints} from "@/services/task-participant-service";
 
 @Options({
   components: {
@@ -221,7 +222,7 @@ export default class ParticipantOverview extends Vue {
   onSessionIdChanged(): void {
     cashService.deregisterAllGet(this.updateStates);
     if (this.sessionId) {
-      taskParticipantService.registerGetListFromSession(
+      taskParticipantService.registerGetPoints(
         this.sessionId,
         this.updateStates,
         EndpointAuthorisationType.PARTICIPANT,
@@ -230,15 +231,7 @@ export default class ParticipantOverview extends Vue {
     }
   }
 
-  updateStates(items: TaskParticipantState[]): void {
-    let points = 0;
-    for (const item of items) {
-      if (item.parameter.gameplayResult) {
-        const gameplayResult = item.parameter.gameplayResult;
-        points += gameplayResult.points;
-        if (gameplayResult.pointsSpent) points -= gameplayResult.pointsSpent;
-      }
-    }
+  updateStates(points: number): void {
     this.points = points;
   }
 

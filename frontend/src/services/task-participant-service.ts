@@ -67,6 +67,32 @@ export const registerGetListFromSession = (
   );
 };
 
+export const registerGetPoints = (
+  sessionId: string,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<TaskParticipantState[]> => {
+  return cashService.registerSimplifiedGet<TaskParticipantState[]>(
+    `/${EndpointType.SESSION}/${sessionId}/${EndpointType.PARTICIPANT_STATE}`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds,
+    async (items: TaskParticipantState[]) => {
+      let points = 0;
+      for (const item of items) {
+        if (item.parameter.gameplayResult) {
+          const gameplayResult = item.parameter.gameplayResult;
+          points += gameplayResult.points;
+          if (gameplayResult.pointsSpent) points -= gameplayResult.pointsSpent;
+        }
+      }
+      return points;
+    }
+  );
+};
+
 export const deregisterGetListFromTopic = (
   topicId: string,
   callback: (result: any) => void

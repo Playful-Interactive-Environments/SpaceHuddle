@@ -4,10 +4,18 @@
     "description": "anchor your ideas on the map"
   },
   "participant": {
+    "points": "points",
+    "rate": "rate",
+    "explanation": "explanation",
+    "save": "save"
   },
   "moderatorConfig": {
     "mapSection": "map section",
-    "effectElectricity": "effect electricity"
+    "effectElectricity": "effect electricity",
+    "minParticipants": "minimum required participants",
+    "minPoints": "minimum required points per participant",
+    "maxPoints": "maximum points to be spent per participant",
+    "explanation": "explanations selectable for the participant"
   },
   "moderatorContent": {
     "settingsTitle": "idea settings",

@@ -339,7 +339,7 @@ export function registerSimplifiedGet<T = any>(
   empty: T | any = {},
   authHeaderType = EndpointAuthorisationType.MODERATOR,
   maxDelaySeconds = 60 * 5,
-  dataPreparation: ((data: T) => Promise<T>) | null = null,
+  dataPreparation: ((data: T) => Promise<T> | Promise<any>) | null = null,
   args: any[] | null = null,
   customKeyPrefix = ''
 ): SimplifiedCashEntry<T> {
