@@ -7,7 +7,10 @@
     "points": "points",
     "rate": "rate",
     "explanation": "explanation",
-    "save": "save"
+    "save": "save",
+    "spentHeader": "spend additional points on measure",
+    "spent": "spent",
+    "cancel": "cancel"
   },
   "moderatorConfig": {
     "mapSection": "map section",
@@ -21,7 +24,8 @@
     "settingsTitle": "idea settings",
     "displayAll": "display all",
     "add": "add content",
-    "points": "required sum of points"
+    "points": "required sum of points",
+    "share": "share"
   },
   "publicScreen": {
     "noIdeas": "No ideas yet - stay tuned."

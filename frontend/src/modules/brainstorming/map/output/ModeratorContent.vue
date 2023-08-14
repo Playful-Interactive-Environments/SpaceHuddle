@@ -3,6 +3,7 @@
   <IdeaMap
     class="mapSpace"
     :ideas="ideas"
+    :canChangePosition="() => true"
     v-model:selected-idea="selectedIdea"
     :parameter="module?.parameter"
     :calculate-size="false"

@@ -208,18 +208,14 @@ export default class Participant extends Vue {
 
     if (this.trackingManager && newLevelId) {
       (result as any).step = GameStep.Build;
-      this.trackingManager
-        .createInstanceStep(
-          newLevelId,
-          TaskParticipantIterationStepStatesType.NEUTRAL,
-          result,
-          1
-        )
-        .then(() => {
-          this.trackingManager
-            .saveIterationPointsFromSteps()
-            .then(() => this.trackingManager.saveStatePointsFromIterations());
-        });
+      this.trackingManager.createInstanceStep(
+        newLevelId,
+        TaskParticipantIterationStepStatesType.NEUTRAL,
+        result,
+        1,
+        null,
+        true
+      );
     }
 
     if (this.trackingManager) {
@@ -236,20 +232,16 @@ export default class Participant extends Vue {
 
     if (this.trackingManager && this.selectedLevelId) {
       (result as any).step = GameStep.Play;
-      this.trackingManager
-        .createInstanceStep(
-          this.selectedLevelId,
-          result.collected === result.total
-            ? TaskParticipantIterationStepStatesType.CORRECT
-            : TaskParticipantIterationStepStatesType.WRONG,
-          result,
-          result.stars
-        )
-        .then(() => {
-          this.trackingManager
-            .saveIterationPointsFromSteps()
-            .then(() => this.trackingManager.saveStatePointsFromIterations());
-        });
+      this.trackingManager.createInstanceStep(
+        this.selectedLevelId,
+        result.collected === result.total
+          ? TaskParticipantIterationStepStatesType.CORRECT
+          : TaskParticipantIterationStepStatesType.WRONG,
+        result,
+        result.stars,
+        null,
+        true
+      );
     }
     this.selectedLevelId = null;
 

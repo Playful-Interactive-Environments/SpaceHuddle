@@ -1,33 +1,39 @@
 import Color from 'colorjs.io';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export function getHighlightColor(): string {
-  return getComputedStyle(document.body).getPropertyValue('--color-highlight');
-}
-
-export function getStructuringColor(): string {
+export function getHighlightColor(variation = ''): string {
   return getComputedStyle(document.body).getPropertyValue(
-    '--color-structuring'
+    `--color-highlight${variation}`
   );
 }
 
-export function getBrainstormingColor(): string {
+export function getStructuringColor(variation = ''): string {
   return getComputedStyle(document.body).getPropertyValue(
-    '--color-brainstorming'
+    `--color-structuring${variation}`
   );
 }
 
-export function getInformingColor(): string {
-  return getComputedStyle(document.body).getPropertyValue('--color-informing');
-}
-
-export function getEvaluatingColor(): string {
-  return getComputedStyle(document.body).getPropertyValue('--color-evaluating');
-}
-
-export function getContrastColor(): string {
+export function getBrainstormingColor(variation = ''): string {
   return getComputedStyle(document.body).getPropertyValue(
-    '--color-dark-contrast'
+    `--color-brainstorming${variation}`
+  );
+}
+
+export function getInformingColor(variation = ''): string {
+  return getComputedStyle(document.body).getPropertyValue(
+    `--color-informing${variation}`
+  );
+}
+
+export function getEvaluatingColor(variation = ''): string {
+  return getComputedStyle(document.body).getPropertyValue(
+    `--color-evaluating${variation}`
+  );
+}
+
+export function getContrastColor(variation = ''): string {
+  return getComputedStyle(document.body).getPropertyValue(
+    `--color-dark-contrast${variation}`
   );
 }
 

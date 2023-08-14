@@ -7,7 +7,10 @@
     "points": "Punkte",
     "rate": "Rate",
     "explanation": "Begründung",
-    "save": "speichern"
+    "save": "speichern",
+    "spentHeader": "weitere Punkte für die Maßnahme ausgeben",
+    "spent": "ausgeben",
+    "cancel": "abbrechen"
   },
   "moderatorConfig": {
     "mapSection": "Kartenausschnitt",
@@ -21,7 +24,8 @@
     "settingsTitle": "Ideeneinstellungen",
     "displayAll": "Alle Anzeigen",
     "add": "Info hinzufügen",
-    "points": "Benötigte Summe an Punkten"
+    "points": "Benötigte Summe an Punkten",
+    "share": "teilen"
   },
   "publicScreen": {
     "noIdeas": "Noch keine Ideen - Bleib dran."

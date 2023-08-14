@@ -13,7 +13,7 @@
     >
       <CustomMapMarker
         :coordinates="convertCoordinates(idea.parameter.position)"
-        :draggable="canChangePosition"
+        :draggable="canChangePosition(idea)"
         v-for="idea of ideas"
         :key="idea.id"
         v-on:dragend="(marker) => ideaPositionChanged(marker, idea)"
@@ -90,7 +90,12 @@ import { Prop, Watch } from 'vue-property-decorator';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { Idea } from '@/types/api/Idea';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
-import { MglNavigationControl, MglMap, MglEvent } from 'vue-maplibre-gl';
+import {
+  MglNavigationControl,
+  MglMap,
+  MglEvent,
+  MglMarker,
+} from 'vue-maplibre-gl';
 import { LngLatLike, LngLatBoundsLike, Map } from 'maplibre-gl';
 import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
 import * as turf from '@turf/turf';
@@ -109,6 +114,7 @@ import * as themeColors from '@/utils/themeColors';
 
 @Options({
   components: {
+    MglMarker,
     CustomMapMarker,
     IdeaCard,
     FontAwesomeIcon,
@@ -127,7 +133,9 @@ import * as themeColors from '@/utils/themeColors';
 export default class IdeaMap extends Vue {
   @Prop({ default: [] }) readonly ideas!: Idea[];
   @Prop({ default: {} }) readonly parameter!: any;
-  @Prop({ default: true }) readonly canChangePosition!: boolean;
+  @Prop({ default: () => true }) readonly canChangePosition!: (
+    idea: Idea
+  ) => boolean;
   @Prop({ default: true }) readonly calculateSize!: boolean;
   @Prop({ default: null }) readonly selectedIdea!: Idea | null;
   visibleIdeas: Idea[] = [];
@@ -232,6 +240,12 @@ export default class IdeaMap extends Vue {
   @Watch('ideas.length', { immediate: true })
   onIdeasChanged(): void {
     this.calculateMapBounds();
+  }
+
+  @Watch('ideas.length', { immediate: true })
+  onIdeasLengthChanged(): void {
+    this.showMap = false;
+    setTimeout(() => (this.showMap = true), 100);
   }
 
   @Watch('selectedIdea', { immediate: true })

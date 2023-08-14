@@ -4,6 +4,7 @@
     ref="ideaCard"
     shadow="never"
     v-on:click="changeSelection"
+    class="card"
     :class="{
       landscape: !portrait,
       card__selected: isSelected,
@@ -19,6 +20,7 @@
     :style="{
       '--card-height': ideaHeight,
       '--selection-color': selectionColor,
+      '--background-color': backgroundColor,
     }"
   >
     <img v-if="idea.image" :src="idea.image" class="card__image" alt="" />
@@ -160,6 +162,7 @@ export default class IdeaCard extends Vue {
   @Prop({ default: true }) showState!: boolean;
   @Prop({ default: false }) isSelectable!: boolean;
   @Prop({ default: '#0192d0' }) selectionColor!: string;
+  @Prop({ default: '#ffffff' }) backgroundColor!: string;
   @Prop({ default: false, reactive: true }) isSelected!: boolean;
   @Prop({ default: false }) isDraggable!: boolean;
   @Prop({ default: false }) cutLongTexts!: boolean;
@@ -369,6 +372,7 @@ export default class IdeaCard extends Vue {
 .card {
   --card-color: var(--el-card-border-color);
   border-color: var(--card-color);
+  background-color: var(--background-color);
 
   &__new {
     --card-color: var(--el-card-border-color);

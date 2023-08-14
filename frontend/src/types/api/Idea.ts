@@ -17,7 +17,7 @@ export interface Idea {
   avatar: Avatar[];
   category: { id: string; name: string; parameter: any };
   parameter: any;
-  participantId: string;
+  participantId: string | null;
   isOwn: boolean;
   count: number;
 }

@@ -3,6 +3,7 @@
   <IdeaMap
     class="mapSpace"
     :ideas="ideas"
+    :canChangePosition="() => true"
     v-model:selected-idea="selectedIdea"
     :parameter="module?.parameter"
     :calculate-size="false"
@@ -50,6 +51,7 @@
           >
             <div>
               <font-awesome-icon icon="coins" />
+              {{ getPointsForIdea(element.id) }} /
               {{ element.parameter.points }}
             </div>
             <div class="columns is-mobile">
@@ -101,7 +103,7 @@
         >
           <div>
             <font-awesome-icon icon="coins" />
-            {{ idea.parameter.points }}
+            {{ getPointsForIdea(idea.id) }} / {{ idea.parameter.points }}
           </div>
           <div class="columns is-mobile">
             <div
@@ -233,6 +235,12 @@
         </template>
       </el-input>
     </el-form-item>
+    <el-form-item
+      :label="$t('module.information.missionmap.moderatorContent.share')"
+      :prop="`parameter.shareData`"
+    >
+      <el-switch v-model="settingsIdea.parameter.shareData" />
+    </el-form-item>
   </IdeaSettings>
 </template>
 
@@ -243,6 +251,8 @@ import { Idea } from '@/types/api/Idea';
 import { Task } from '@/types/api/Task';
 import * as ideaService from '@/services/idea-service';
 import * as taskService from '@/services/task-service';
+import * as votingService from '@/services/voting-service';
+import * as cashService from '@/services/cash-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
@@ -257,15 +267,14 @@ import IdeaFilter, {
   defaultFilterData,
   FilterData,
 } from '@/components/moderator/molecules/IdeaFilter.vue';
-import * as cashService from '@/services/cash-service';
 import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 import { Module } from '@/types/api/Module';
 import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
 import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
 import gameConfigMoveIt from '@/modules/information/moveit/data/gameConfig.json';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { defaultCenter } from '@/utils/map';
-import { until } from '@/utils/wait';
+import { Vote } from '@/types/api/Vote';
+import { setEmptyParameterIfNotExists } from '@/modules/information/missionmap/utils/parameter';
 
 @Options({
   computed: {
@@ -293,6 +302,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   @Prop() readonly taskId!: string;
   module: Module | undefined = undefined;
   ideas: Idea[] = [];
+  votes: Vote[] = [];
   orderGroupContent: OrderGroupList = {};
   openTabs: string[] = [];
   filter: FilterData = { ...defaultFilterData };
@@ -307,6 +317,15 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   };
   settingsIdea = this.addIdea;
   showSettings = false;
+
+  getPointsForIdea(ideaId: string): number {
+    const ideaVotes = this.votes.filter((vote) => vote.ideaId === ideaId);
+    let points = 0;
+    for (const vote of ideaVotes) {
+      points += vote.parameter.points;
+    }
+    return points;
+  }
 
   get orderIsChangeable(): boolean {
     return this.filter.orderType === IdeaSortOrder.ORDER;
@@ -335,6 +354,16 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       EndpointAuthorisationType.MODERATOR,
       60 * 60
     );
+    votingService.registerGetVotes(
+      this.taskId,
+      this.updateVotes,
+      EndpointAuthorisationType.MODERATOR,
+      20
+    );
+  }
+
+  updateVotes(votes: Vote[]): void {
+    this.votes = votes;
   }
 
   updateTask(task: Task): void {
@@ -347,7 +376,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   updateIdeas(ideas: Idea[]): void {
     for (const idea of ideas) {
-      this.setEmptyParameterIfNotExists(idea);
+      setEmptyParameterIfNotExists(idea, () => this.module);
     }
     const orderType = this.filter.orderType;
     const dataList = ideaService.getOrderGroups(
@@ -421,6 +450,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateIdeas);
+    cashService.deregisterAllGet(this.updateTask);
+    cashService.deregisterAllGet(this.updateVotes);
   }
 
   unmounted(): void {
@@ -460,57 +491,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.resetAddIdea();
   }
 
-  async setEmptyParameterIfNotExists(idea: Idea): Promise<void> {
-    if (!idea.parameter) idea.parameter = {};
-    if (!idea.parameter.points) {
-      idea.parameter.points = 500;
-    }
-    if (!idea.parameter.influenceAreas) {
-      idea.parameter.influenceAreas = {};
-      for (const parameter of Object.keys(gameConfig.parameter)) {
-        idea.parameter.influenceAreas[parameter] = 0;
-      }
-    }
-    await until(() => !!this.module);
-    if (!idea.parameter.position) {
-      if (this.module && this.module.parameter.mapCenter) {
-        idea.parameter.position = this.module.parameter.mapCenter;
-      } else idea.parameter.position = [...defaultCenter] as [number, number];
-    }
-    if (
-      this.module &&
-      this.module.parameter.effectElectricity &&
-      !idea.parameter.electricity
-    ) {
-      idea.parameter.electricity = {};
-      for (const parameter of Object.keys(gameConfigMoveIt.electricity)) {
-        idea.parameter.electricity[parameter] = 0;
-      }
-    }
-    if (!idea.parameter.minParticipants) {
-      if (this.module && this.module.parameter.minParticipants) {
-        idea.parameter.minParticipants = this.module.parameter.minParticipants;
-      } else idea.parameter.minParticipants = 3;
-    }
-    if (!idea.parameter.minPoints) {
-      if (this.module && this.module.parameter.minPoints) {
-        idea.parameter.minPoints = this.module.parameter.minPoints;
-      } else idea.parameter.minPoints = 100;
-    }
-    if (!idea.parameter.maxPoints) {
-      if (this.module && this.module.parameter.maxPoints) {
-        idea.parameter.maxPoints = this.module.parameter.maxPoints;
-      } else idea.parameter.maxPoints = 1000;
-    }
-    if (!idea.parameter.explanationList) {
-      if (this.module && this.module.parameter.explanationList) {
-        idea.parameter.explanationList = [
-          ...this.module.parameter.explanationList,
-        ];
-      } else idea.parameter.explanationList = ['', '', ''];
-    }
-  }
-
   resetAddIdea(): void {
     this.settingsIdea = this.addIdea;
     this.addIdea.keywords = '';
@@ -519,7 +499,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.addIdea.link = null;
     this.addIdea.order = this.ideas.length;
     this.addIdea.parameter = {};
-    this.setEmptyParameterIfNotExists(this.addIdea);
+    setEmptyParameterIfNotExists(this.addIdea, () => this.module);
   }
 
   editNewImage(): void {

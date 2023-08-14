@@ -44,6 +44,12 @@
           v-on:timerEnds="goToOverview"
         ></Timer>
       </div>
+      <div class="right" v-if="points">
+        <div class="uppercase">
+          <font-awesome-icon icon="coins" />
+        </div>
+        {{ points }}
+      </div>
     </template>
     <ParticipantModuleComponent
       v-if="task"
@@ -109,6 +115,7 @@ export default class ParticipantModuleContent extends Vue {
   useFullSize = false;
   backgroundClass = '';
   drawNavigation = true;
+  points = 0;
 
   EndpointAuthorisationType = EndpointAuthorisationType;
 
@@ -176,6 +183,7 @@ export default class ParticipantModuleContent extends Vue {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updatePublicTask);
     cashService.deregisterAllGet(this.updateState);
+    cashService.deregisterAllGet(this.updatePoints);
   }
 
   unmounted(): void {
@@ -267,6 +275,16 @@ export default class ParticipantModuleContent extends Vue {
       this.$router.push({
         name: RouteName.PARTICIPANT_OVERVIEW,
       });
+
+    cashService.deregisterAllGet(this.updatePoints);
+    if (this.task.sessionId) {
+      taskParticipantService.registerGetPoints(
+        this.task.sessionId,
+        this.updatePoints,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
+    }
   }
 
   updateState(stateList: TaskParticipantState[]): void {
@@ -278,6 +296,10 @@ export default class ParticipantModuleContent extends Vue {
       }
       this.state = state;
     }
+  }
+
+  updatePoints(points: number): void {
+    this.points = points;
   }
 
   updatePublicTask(task: Task): void {

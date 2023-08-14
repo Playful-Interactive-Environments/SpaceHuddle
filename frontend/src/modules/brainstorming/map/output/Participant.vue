@@ -25,6 +25,7 @@
     <IdeaMap
       v-if="module"
       :ideas="ideas"
+      :canChangePosition="() => true"
       v-model:selected-idea="selectedIdea"
       :parameter="module?.parameter"
       v-on:ideaPositionChanged="saveIdea"

@@ -5,7 +5,7 @@
         v-if="sizeLoaded"
         :ideas="ideas"
         :parameter="module?.parameter"
-        :can-change-position="false"
+        :canChangePosition="() => false"
         :calculate-size="false"
         v-model:selected-idea="selectedIdea"
         v-on:visibleIdeasChanged="visibleIdeasChanged"
@@ -53,6 +53,7 @@ import { Task } from '@/types/api/Task';
 import * as cashService from '@/services/cash-service';
 import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 import { Module } from '@/types/api/Module';
+import { setHash } from '@/utils/url';
 
 @Options({
   components: {
@@ -98,7 +99,7 @@ export default class PublicScreen extends Vue {
 
   @Watch('selectedIdea', { immediate: true })
   onSelectedIdeaChanged(): void {
-    if (this.selectedIdea) location.hash = `#${this.selectedIdea.id}`;
+    if (this.selectedIdea) setHash(this.selectedIdea.id);
   }
 
   updateTask(task: Task): void {

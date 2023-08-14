@@ -1,4 +1,5 @@
 import * as taskParticipantService from '@/services/task-participant-service';
+import * as taskService from '@/services/task-service';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
@@ -8,6 +9,8 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import { Module } from '@/types/api/Module';
+import EndpointType from '@/types/enum/EndpointType';
+import { Task } from '@/types/api/Task';
 
 export interface GameplayResult {
   stars: number;
@@ -26,6 +29,7 @@ export interface GameplayHierarchyItem {
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export class TrackingManager {
   taskId: string;
+  task!: Task;
   iteration: TaskParticipantIteration | null = null;
   iterationStep: TaskParticipantIterationStep | null = null;
   iterationList: TaskParticipantIteration[] = [];
@@ -65,6 +69,12 @@ export class TrackingManager {
           2 * 60
         );
       });
+    taskService.registerGetTaskById(
+      this.taskId,
+      (result: any) => this._updateTask(result),
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
   }
 
   deregisterAll(): void {
@@ -73,6 +83,7 @@ export class TrackingManager {
       this._updateIterations(result)
     );
     cashService.deregisterAllGet((result: any) => this._updateSteps(result));
+    cashService.deregisterAllGet((result: any) => this._updateTask(result));
   }
 
   _updateState(stateList: TaskParticipantState[]): void {
@@ -94,6 +105,10 @@ export class TrackingManager {
         (item) => item.iteration === this.iteration?.iteration
       );
     }
+  }
+
+  _updateTask(task: Task): void {
+    this.task = task;
   }
 
   getGameplayResult(
@@ -173,14 +188,23 @@ export class TrackingManager {
         this.iterationList,
         true
       );
-      taskParticipantService.putParticipantState(this.taskId, this.state);
+      taskParticipantService
+        .putParticipantState(this.taskId, this.state)
+        .then(() => {
+          if (this.task) {
+            cashService.refreshCash(
+              `/${EndpointType.SESSION}/${this.task.sessionId}/${EndpointType.PARTICIPANT_STATE}`
+            );
+          }
+        });
     }
   }
 
   async saveIteration(
     contentChanges: any | null = null,
     changedState: TaskParticipantIterationStatesType | null = null,
-    stars: number | null = null
+    stars: number | null = null,
+    updateStateSum = false
   ): Promise<void> {
     if (this.iteration) {
       if (stars !== null)
@@ -196,6 +220,9 @@ export class TrackingManager {
         this.iteration
       );
       await this.iterationsCash.refreshData();
+      if (updateStateSum) {
+        await this.saveStatePointsFromIterations();
+      }
     }
   }
 
@@ -250,7 +277,8 @@ export class TrackingManager {
     state: TaskParticipantIterationStepStatesType,
     initContent: any,
     stars: number | null = null,
-    pointsSpent: number | null = null
+    pointsSpent: number | null = null,
+    updateInstanceSum = false
   ): Promise<void> {
     if (this.iteration) {
       if (stars !== null || pointsSpent !== null)
@@ -268,6 +296,10 @@ export class TrackingManager {
           parameter: initContent,
         });
       await this.stepsCash.refreshData();
+      if (updateInstanceSum) {
+        await this.saveIterationPointsFromSteps();
+        await this.saveStatePointsFromIterations();
+      }
     }
   }
 

@@ -11,6 +11,17 @@
         class="infoSection"
       />
     </el-header>
+    <el-header v-else-if="$slots.headerOverlay" class="slotsHeaderOverlay">
+      <TaskInfo
+        :taskId="taskId"
+        :modules="[module]"
+        :is-participant="true"
+        :shortenDescription="false"
+        :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+        class="infoSectionOverlay"
+      />
+      <slot name="headerOverlay"></slot>
+    </el-header>
     <el-header v-else>
       <TaskInfo
         :taskId="taskId"
@@ -63,6 +74,18 @@ export default class ParticipantModuleDefaultContainer extends Vue {
   border-radius: 30px 30px 0 0;
   background-color: white;
   padding: 1rem 2rem;
+}
+
+.slotsHeaderOverlay {
+  position: relative;
+  max-width: inherit;
+  left: 0;
+  right: 0;
+  z-index: 0;
+}
+
+.infoSectionOverlay {
+  max-width: inherit;
 }
 
 .right {
