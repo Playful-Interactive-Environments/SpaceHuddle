@@ -30,6 +30,12 @@
   "publicScreen": {
     "noIdeas": "Noch keine Ideen - Bleib dran."
   },
+  "statistic": {
+    "rating": "Bewertung pro Idee",
+    "order": "Reihenfolge pro Idee",
+    "points": "ausgegebene Punkte pro Idee",
+    "explanation": "Erklärung pro Idee"
+  },
   "gameConfig": {
     "eco": "Umwelt",
     "social": "Soziales",

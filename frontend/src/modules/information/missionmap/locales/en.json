@@ -33,7 +33,8 @@
   "statistic": {
     "rating": "rating per idea",
     "order": "order per idea",
-    "points": "spent points per idea"
+    "points": "spent points per idea",
+    "explanation": "explanation per idea"
   },
   "gameConfig": {
     "eco": "environment",

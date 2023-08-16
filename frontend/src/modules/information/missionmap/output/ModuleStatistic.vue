@@ -207,6 +207,7 @@ export default class ModuleStatistic extends Vue {
     this.calculateRatingChart();
     this.calculateOrderChart();
     this.calculatePointChart();
+    this.calculateExplanationChart();
   }
 
   calculateRatingChart(): void {
@@ -321,6 +322,42 @@ export default class ModuleStatistic extends Vue {
       labelColors: themeColors.getContrastColor(),
       stacked: true,
       annotations: annotations,
+    });
+  }
+
+  calculateExplanationChart(): void {
+    const filter = (item) => item.parameter.explanation;
+    const parameter = this.votes
+      .filter(filter)
+      .map((item) => item.parameter.explanation)
+      .filter(
+        (value, index, array) =>
+          array.findIndex((item) => item === value) === index
+      )
+      .sort((a, b) => {
+        if (a < b) return -1;
+        if (a > b) return 1;
+        return 0;
+      });
+    const labels: string[] = this.ideas.map((idea) => idea.keywords);
+    const datasets = calculateChartPerParameter(
+      this.votes,
+      parameter,
+      this.ideas,
+      this.colorList,
+      (item, parameter) => item.parameter.explanation === parameter,
+      (item, idea) => item.ideaId === idea.id,
+      filter
+    );
+    this.barChartDataList.push({
+      title: this.$t('module.information.missionmap.statistic.explanation'),
+      data: {
+        labels: labels,
+        datasets: datasets,
+      },
+      labelColors: themeColors.getContrastColor(),
+      stacked: true,
+      annotations: {},
     });
   }
 }
