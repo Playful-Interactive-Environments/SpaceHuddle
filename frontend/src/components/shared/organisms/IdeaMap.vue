@@ -356,7 +356,7 @@ export default class IdeaMap extends Vue {
         diff: false,
       });
       setTimeout(() => {
-        if (this.map) {
+        if (this.map && this.map.getStyle()) {
           const notNeededLayers = this.map.getStyle().layers.filter((layer) => {
             const layerCategory = layer['source-layer'];
             const layerType = layer['type'];
