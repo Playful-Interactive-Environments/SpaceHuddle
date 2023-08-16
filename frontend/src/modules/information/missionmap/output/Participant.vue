@@ -280,11 +280,12 @@ export default class Participant extends Vue {
   settingsIdea = this.addIdea;
 
   get maxSpentPoints(): number {
-    if (
-      this.selectedIdea &&
-      this.selectedIdea.parameter.maxPoints < this.points
-    )
-      return this.selectedIdea.parameter.maxPoints;
+    if (this.selectedIdea) {
+      const maxPoints =
+        this.selectedIdea.parameter.maxPoints -
+        this.selectedVote.previousSpendPoints;
+      if (maxPoints < this.points) return maxPoints;
+    }
     return this.points;
   }
 

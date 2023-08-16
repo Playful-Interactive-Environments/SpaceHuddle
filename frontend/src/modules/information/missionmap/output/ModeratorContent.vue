@@ -220,7 +220,7 @@
       <el-input-number
         v-model="settingsIdea.parameter.maxPoints"
         :min="settingsIdea.parameter.minPoints"
-        :max="10000"
+        :max="settingsIdea.parameter.points"
       />
     </el-form-item>
     <el-form-item
