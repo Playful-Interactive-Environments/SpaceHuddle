@@ -69,6 +69,7 @@
       v-model:selected-idea="selectedIdea"
       :parameter="module?.parameter"
       :canChangePosition="(idea) => idea.isOwn"
+      :highlightCondition="(idea) => idea.isOwn"
       v-on:visibleIdeasChanged="visibleIdeasChanged"
       v-on:selectionColorChanged="selectionColor = $event"
       v-on:ideaPositionChanged="saveIdea"

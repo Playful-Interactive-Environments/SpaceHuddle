@@ -20,7 +20,6 @@
         v-on:click="ideaSelected(idea)"
         color="#cc0000"
         :scale="0.5"
-        :class="{ isOwn: idea.isOwn }"
       >
         <template v-slot:icon>
           <el-tooltip placement="top" effect="light" :hide-after="0">
@@ -34,7 +33,9 @@
             <font-awesome-icon
               icon="location-dot"
               class="pin"
-              :class="{ isOwn: idea.isOwn }"
+              :class="{
+                highlight: highlightCondition && highlightCondition(idea),
+              }"
               :style="{
                 '--pin-color':
                   idea.id === selectedIdeaId
@@ -140,6 +141,9 @@ export default class IdeaMap extends Vue {
   ) => boolean;
   @Prop({ default: true }) readonly calculateSize!: boolean;
   @Prop({ default: null }) readonly selectedIdea!: Idea | null;
+  @Prop({ default: () => false }) readonly highlightCondition!: (
+    idea: Idea
+  ) => boolean;
   visibleIdeas: Idea[] = [];
 
   mapCenter: [number, number] = [0, 0];
@@ -433,7 +437,7 @@ export default class IdeaMap extends Vue {
   }
 }
 
-.isOwn::v-deep(path) {
+.highlight::v-deep(path) {
   stroke: var(--color-informing-light);
   stroke-width: 5rem;
   stroke-linecap: round;

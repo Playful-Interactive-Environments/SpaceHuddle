@@ -142,6 +142,7 @@ export default class PublicScreen extends Vue {
 
   updateIdeas(ideas: Idea[]): void {
     const currentDate = new Date();
+    ideas = ideas.filter((idea) => idea.parameter.shareData);
     ideas = this.filter.orderAsc ? ideas : ideas.reverse();
     ideas = ideaService.filterIdeas(
       ideas,

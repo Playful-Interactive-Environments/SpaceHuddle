@@ -4,6 +4,7 @@
     class="mapSpace"
     :ideas="ideas"
     :canChangePosition="() => true"
+    :highlightCondition="(idea) => !idea.parameter.shareData"
     v-model:selected-idea="selectedIdea"
     :parameter="module?.parameter"
     :calculate-size="false"
@@ -44,6 +45,7 @@
             :handleEditable="false"
             :isSelected="element.id === selectedIdea?.id"
             :selectionColor="selectionColor"
+            :background-color="getIdeaColor(element)"
             v-model:collapseIdeas="filter.collapseIdeas"
             @ideaDeleted="reloadIdeas()"
             @ideaStartEdit="editIdea(element)"
@@ -96,6 +98,7 @@
           :isSelected="idea.id === selectedIdea?.id"
           :handleEditable="false"
           :selectionColor="selectionColor"
+          :background-color="getIdeaColor(idea)"
           v-model:collapseIdeas="filter.collapseIdeas"
           @ideaDeleted="reloadIdeas()"
           @ideaStartEdit="editIdea(idea)"
@@ -277,6 +280,7 @@ import gameConfigMoveIt from '@/modules/information/moveit/data/gameConfig.json'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { Vote } from '@/types/api/Vote';
 import { setEmptyParameterIfNotExists } from '@/modules/information/missionmap/utils/parameter';
+import * as themeColors from '@/utils/themeColors';
 
 @Options({
   computed: {
@@ -321,6 +325,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   };
   settingsIdea = this.addIdea;
   showSettings = false;
+
+  getIdeaColor(idea: Idea): string {
+    if (!idea.parameter.shareData)
+      return themeColors.getInformingColor('-light');
+    return '#ffffff';
+  }
 
   getPointsForIdea(ideaId: string): number {
     const ideaVotes = this.votes.filter((vote) => vote.ideaId === ideaId);
