@@ -165,6 +165,7 @@
         <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
       </template>
       <el-slider
+        v-if="settingsIdea.parameter.influenceAreas"
         v-model="settingsIdea.parameter.influenceAreas[parameter]"
         :min="-5"
         :max="5"
@@ -184,6 +185,7 @@
         <font-awesome-icon :icon="additionalParameter[parameter].icon" />
       </template>
       <el-slider
+        v-if="settingsIdea.parameter.electricity"
         v-model="settingsIdea.parameter.electricity[parameter]"
         :min="-10"
         :max="10"
@@ -314,6 +316,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     description: '',
     link: null,
     image: null, // the datebase64 url of created image
+    order: 0,
+    parameter: {},
   };
   settingsIdea = this.addIdea;
   showSettings = false;
