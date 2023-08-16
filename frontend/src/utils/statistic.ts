@@ -58,6 +58,23 @@ export function calculateChartPerIteration(
   return datasets;
 }
 
+export function getCalculationForType(
+  calculationType: CalculationType
+): (list) => number {
+  let calculation = (list) => list.length;
+  if (calculationType === CalculationType.Max)
+    calculation = (list) => Math.max(...list);
+  if (calculationType === CalculationType.Min)
+    calculation = (list) => Math.min(...list);
+  if (calculationType === CalculationType.Average)
+    calculation = (list) =>
+      list.reduce((prev, curr) => prev + curr, 0) / list.length;
+  if (calculationType === CalculationType.Sum)
+    calculation = (list) => list.reduce((prev, curr) => prev + curr, 0);
+
+  return calculation;
+}
+
 export function calculateChartPerParameter(
   dataList: any[],
   parameterList: any[],

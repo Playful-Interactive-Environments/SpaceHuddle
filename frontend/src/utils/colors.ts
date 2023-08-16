@@ -27,3 +27,15 @@ export function getRandomColorList(count: number): string[] {
   }
   return returnColors;
 }
+
+export function getRainbowColorList(count: number): string[] {
+  if (count <= 0) return [];
+  const returnColors: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const color = new Color(Color.spaces.hwb, [(360 / count) * i, 10, 0]).to(
+      'sRGB'
+    );
+    returnColors.push(color.toString({ format: 'hex' }));
+  }
+  return returnColors;
+}

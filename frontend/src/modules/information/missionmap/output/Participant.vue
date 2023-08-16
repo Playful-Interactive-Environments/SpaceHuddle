@@ -176,7 +176,14 @@
             :isDraggable="true"
             :portrait="false"
             :is-editable="false"
-          ></IdeaCard>
+          >
+            <el-rate
+              v-if="getVoteForIdea(element.id)"
+              v-model="getVoteForIdea(element.id).rating"
+              disabled
+              :max="3"
+            ></el-rate>
+          </IdeaCard>
         </template>
       </draggable>
     </div>
@@ -396,7 +403,9 @@ export default class Participant extends Vue {
 
   updateIdeas(ideas: Idea[]): void {
     this.ideas = ideas.filter((idea) => idea.parameter.shareData || idea.isOwn);
-    this.orderedIdeas = [...this.ideas];
+    this.orderedIdeas = [
+      ...this.ideas.filter((idea) => idea.parameter.shareData),
+    ];
     this.sortIdeasByVote();
   }
 
@@ -417,7 +426,9 @@ export default class Participant extends Vue {
         })
         .sort((a, b) => a.order - b.order)
         .map((item) => item.idea);
-      this.orderedIdeas = [...this.ideas];
+      this.orderedIdeas = [
+        ...this.ideas.filter((idea) => idea.parameter.shareData),
+      ];
     }
   }
 
@@ -523,9 +534,12 @@ export default class Participant extends Vue {
   sortVisibleIdeas(): void {
     this.visibleIdeas = this.visibleIdeas
       .map((idea) => {
+        const index = this.orderedIdeas.findIndex(
+          (item) => item.id === idea.id
+        );
         return {
           idea: idea,
-          index: this.orderedIdeas.findIndex((item) => item.id === idea.id),
+          index: index !== -1 ? index : 10000,
         };
       })
       .sort((a, b) => a.index - b.index)

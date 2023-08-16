@@ -30,6 +30,11 @@
   "publicScreen": {
     "noIdeas": "No ideas yet - stay tuned."
   },
+  "statistic": {
+    "rating": "rating per idea",
+    "order": "order per idea",
+    "points": "spent points per idea"
+  },
   "gameConfig": {
     "eco": "environment",
     "social": "social",

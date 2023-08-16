@@ -94,6 +94,7 @@ import {
   calculateChartPerIteration,
   calculateChartPerParameter,
   mapArrayToConstantSize,
+  getCalculationForType,
   CalculationType,
 } from '@/utils/statistic';
 import * as gameConfig from '@/modules/information/moveit/data/gameConfig.json';
@@ -173,21 +174,6 @@ export default class ModuleStatistic extends Vue {
         if (x > y) return 1;
         return 0;
       });
-  }
-
-  getCalculationForType(calculationType: CalculationType): (list) => number {
-    let calculation = (list) => list.length;
-    if (calculationType === CalculationType.Max)
-      calculation = (list) => Math.max(...list);
-    if (calculationType === CalculationType.Min)
-      calculation = (list) => Math.min(...list);
-    if (calculationType === CalculationType.Average)
-      calculation = (list) =>
-        list.reduce((prev, curr) => prev + curr, 0) / list.length;
-    if (calculationType === CalculationType.Sum)
-      calculation = (list) => list.reduce((prev, curr) => prev + curr, 0);
-
-    return calculation;
   }
 
   calculateCharts(): void {
@@ -502,7 +488,7 @@ export default class ModuleStatistic extends Vue {
         null,
         filter,
         (list, label) =>
-          this.getCalculationForType(calculationType)(mapToValue(list, label)),
+          getCalculationForType(calculationType)(mapToValue(list, label)),
         (vehicle) => `${vehicle.category} - ${vehicle.type}`
       );
       this.barChartDataList.push({
@@ -551,7 +537,7 @@ export default class ModuleStatistic extends Vue {
         null,
         filter,
         (list, label) =>
-          this.getCalculationForType(calculationType)(mapToValue(list, label)),
+          getCalculationForType(calculationType)(mapToValue(list, label)),
         (vehicle) => `${vehicle.category} - ${vehicle.type}`
       );
       this.lineChartDataList.push({
@@ -600,7 +586,7 @@ export default class ModuleStatistic extends Vue {
         null,
         filter,
         (list, label, parameter) =>
-          this.getCalculationForType(parameter)(mapToValue(list, label))
+          getCalculationForType(parameter)(mapToValue(list, label))
       );
       this.lineChartDataList.push({
         title: this.$t(
