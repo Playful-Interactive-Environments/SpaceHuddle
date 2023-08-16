@@ -77,7 +77,10 @@ export default class CustomMapMarker extends Vue {
         (obj as any)[opt] = (this.$props as any)[opt];
         return obj;
       }, {});
-    if (element) opts.element = element;
+    if (element) {
+      opts.element = element.cloneNode(true) as HTMLElement;
+      element.style.display = 'none';
+    }
     const marker = new Marker(opts);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     marker.setLngLat(this.coordinates).addTo(this.map.value!);
