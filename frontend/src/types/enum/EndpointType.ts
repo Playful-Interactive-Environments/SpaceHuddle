@@ -38,6 +38,7 @@ enum EndpointType {
   VOTES = 'votes',
   VOTE_RESULT = 'vote_result',
   VOTE_RESULT_PARENT = 'vote_result_parent',
+  VOTE_RESULT_PARAMETER = 'vote_result_parameter',
   DETAIL = 'detail',
   PARTICIPANT_STATE = 'participant_state',
   PARTICIPANT_ITERATION = 'participant_iteration',

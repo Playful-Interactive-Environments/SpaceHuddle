@@ -22,3 +22,10 @@ export interface VoteResultDetail extends VoteResult {
   rating: number;
   detailRating: number;
 }
+
+export interface VoteParameterResult {
+  ideaId: string;
+  sum: number;
+  avg: number;
+  count: number;
+}

@@ -106,7 +106,7 @@
         </template>
         <el-button
           type="primary"
-          :disabled="this.points < selectedIdea?.parameter.minPoints"
+          :disabled="points < minSpentPoints || maxSpentPoints < minSpentPoints"
           @click="showSpentPoints = true"
         >
           {{ selectedVote.points }}
@@ -159,12 +159,13 @@
       </el-button>
     </template>
     <el-slider
+      v-if="minSpentPoints <= maxSpentPoints"
       v-model="selectedVote.spentPoints"
-      :min="selectedIdea?.parameter.minPoints"
+      :min="minSpentPoints"
       :max="maxSpentPoints"
       :step="100"
       :marks="spentMarks"
-      :disabled="selectedIdea?.parameter.minPoints === maxSpentPoints"
+      :disabled="minSpentPoints === maxSpentPoints"
     />
   </el-dialog>
   <el-dialog v-model="showSort">
@@ -217,7 +218,7 @@ import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
 import * as cashService from '@/services/cash-service';
 import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
-import { Vote } from '@/types/api/Vote';
+import { Vote, VoteParameterResult } from '@/types/api/Vote';
 import * as votingService from '@/services/voting-service';
 import * as taskParticipantService from '@/services/task-participant-service';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
@@ -261,6 +262,7 @@ export default class Participant extends Vue {
   selectionColor = '#0192d0';
   visibleIdeas: Idea[] = [];
   votes: Vote[] = [];
+  voteResults: VoteParameterResult[] = [];
   sessionId!: string;
   points = 0;
   showDetails = false;
@@ -287,11 +289,34 @@ export default class Participant extends Vue {
   };
   settingsIdea = this.addIdea;
 
+  get minSpentPoints(): number {
+    const absoluteMinimum = 100;
+    if (this.selectedIdea) {
+      return this.selectedVote.previousSpendPoints
+        ? absoluteMinimum
+        : this.selectedIdea.parameter.minPoints;
+    }
+    return absoluteMinimum;
+  }
+
   get maxSpentPoints(): number {
     if (this.selectedIdea) {
-      const maxPoints =
+      let maxPoints =
         this.selectedIdea.parameter.maxPoints -
         this.selectedVote.previousSpendPoints;
+      const ideaId = this.selectedIdea.id;
+      const result = this.voteResults.find((item) => item.ideaId === ideaId);
+      if (result) {
+        const maxOpenPoints = this.selectedIdea.parameter.points - result.sum;
+        if (maxPoints > maxOpenPoints) maxPoints = maxOpenPoints;
+        if (this.selectedIdea.parameter.minParticipants > result.count) {
+          let openParticipants =
+            this.selectedIdea.parameter.minParticipants - result.count;
+          if (this.selectedVote.previousSpendPoints === 0)
+            openParticipants -= 1;
+          maxPoints -= this.selectedIdea.parameter.minPoints * openParticipants;
+        }
+      }
       if (maxPoints < this.points) return maxPoints;
     }
     return this.points;
@@ -299,11 +324,7 @@ export default class Participant extends Vue {
 
   get spentMarks(): { [key: number]: string } {
     const marks: { [key: number]: string } = {};
-    for (
-      let i = this.selectedIdea?.parameter.minPoints;
-      i <= this.maxSpentPoints;
-      i += 100
-    ) {
+    for (let i = this.minSpentPoints; i <= this.maxSpentPoints; i += 100) {
       marks[i] = i.toString();
     }
     return marks;
@@ -315,6 +336,7 @@ export default class Participant extends Vue {
   }
 
   votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
+  votingParameterCash!: cashService.SimplifiedCashEntry<VoteParameterResult[]>;
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -342,24 +364,20 @@ export default class Participant extends Vue {
       EndpointAuthorisationType.PARTICIPANT,
       60 * 60
     );
+    this.votingParameterCash = votingService.registerGetParameterResult(
+      this.taskId,
+      'points',
+      this.updateVoteResult,
+      EndpointAuthorisationType.PARTICIPANT,
+      60 * 60
+    );
   }
 
   @Watch('selectedIdea', { immediate: true })
   onSelectedIdeaChanged(): void {
     if (this.selectedIdea) {
       setHash(this.selectedIdea.id);
-      const vote = this.getVoteForIdea(this.selectedIdea.id);
-      if (vote) {
-        this.selectedVote = {
-          rate: vote.rating,
-          order: vote.detailRating,
-          points: 0,
-          explanation: vote.parameter.explanation,
-          explanationIndex: vote.parameter.explanationIndex,
-          previousSpendPoints: vote.parameter.points,
-          spentPoints: 0,
-        };
-      } else this.reset();
+      this.loadSelectedVote();
     }
   }
 
@@ -412,6 +430,10 @@ export default class Participant extends Vue {
   updateVotes(votes: Vote[]): void {
     this.votes = votes;
     this.sortIdeasByVote();
+  }
+
+  updateVoteResult(votes: VoteParameterResult[]): void {
+    this.voteResults = votes;
   }
 
   sortIdeasByVote(): void {
@@ -476,8 +498,10 @@ export default class Participant extends Vue {
               explanationIndex: this.selectedVote.explanationIndex,
             },
           })
-          .then((vote) => {
+          .then(async (vote) => {
             this.votes.push(vote);
+            await this.votingParameterCash.refreshData();
+            this.loadSelectedVote();
             trackVote(vote);
           });
       } else {
@@ -489,8 +513,10 @@ export default class Participant extends Vue {
           explanation: this.selectedVote.explanation,
           explanationIndex: this.selectedVote.explanationIndex,
         };
-        votingService.putVote(vote).then(() => {
-          this.votingCash.refreshData();
+        votingService.putVote(vote).then(async () => {
+          await this.votingCash.refreshData();
+          await this.votingParameterCash.refreshData();
+          this.loadSelectedVote();
           trackVote(vote);
         });
       }
@@ -560,6 +586,23 @@ export default class Participant extends Vue {
       previousSpendPoints: 0,
       spentPoints: 0,
     };
+  }
+
+  loadSelectedVote(): void {
+    if (this.selectedIdea) {
+      const vote = this.getVoteForIdea(this.selectedIdea.id);
+      if (vote) {
+        this.selectedVote = {
+          rate: vote.rating,
+          order: vote.detailRating,
+          points: 0,
+          explanation: vote.parameter.explanation,
+          explanationIndex: vote.parameter.explanationIndex,
+          previousSpendPoints: vote.parameter.points,
+          spentPoints: 0,
+        };
+      } else this.reset();
+    }
   }
 
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/

@@ -1,4 +1,9 @@
-import { Vote, VoteResult, VoteResultDetail } from '@/types/api/Vote';
+import {
+  Vote,
+  VoteParameterResult,
+  VoteResult,
+  VoteResultDetail,
+} from '@/types/api/Vote';
 import {
   apiExecuteDelete,
   apiExecutePost,
@@ -75,6 +80,22 @@ export const registerGetResult = (
 ): cashService.SimplifiedCashEntry<VoteResult[]> => {
   return cashService.registerSimplifiedGet<VoteResult[]>(
     `/${EndpointType.TASK}/${taskId}/${EndpointType.VOTE_RESULT}`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds
+  );
+};
+
+export const registerGetParameterResult = (
+  taskId: string,
+  parameter: string,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<VoteParameterResult[]> => {
+  return cashService.registerSimplifiedGet<VoteParameterResult[]>(
+    `/${EndpointType.TASK}/${taskId}/${EndpointType.VOTE_RESULT_PARAMETER}/${parameter}`,
     callback,
     [],
     authHeaderType,
