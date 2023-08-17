@@ -125,6 +125,7 @@ use App\Action\Vote\VoteHierarchyResultReadAction;
 use App\Action\Vote\VoteReadAllAction;
 use App\Action\Vote\VoteReadSingleAction;
 use App\Action\Vote\VoteResultDetailReadAction;
+use App\Action\Vote\VoteResultParameterReadAction;
 use App\Action\Vote\VoteResultReadAction;
 use App\Action\Vote\VoteParentResultReadAction;
 use App\Action\Vote\VoteParentResultDetailReadAction;
@@ -298,6 +299,7 @@ return function (App $app) {
             $app->get("/{taskId}/hierarchies/{parentHierarchyId}[/]", HierarchyReadAllAction::class);
             $app->get("/{taskId}/vote_result/detail[/]", VoteResultDetailReadAction::class);
             $app->get("/{taskId}/vote_result[/]", VoteResultReadAction::class);
+            $app->get("/{taskId}/vote_result_parameter/{parameter}[/]", VoteResultParameterReadAction::class);
             $app->get("/{taskId}/vote_result_parent/detail[/]", VoteParentResultDetailReadAction::class);
             $app->get("/{taskId}/vote_result_parent[/]", VoteParentResultReadAction::class);
             $app->get("/{id}[/]", TaskReadSingleAction::class);

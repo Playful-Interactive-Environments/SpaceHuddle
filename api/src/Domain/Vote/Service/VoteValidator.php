@@ -112,6 +112,23 @@ class VoteValidator
      *
      * @return void
      */
+    public function validateParameter(array $data): void
+    {
+        $this->validateEntity(
+            $data,
+            $this->validationFactory->createValidator()
+                ->notEmptyString("parameter", "Empty: This field cannot be left empty")
+                ->requirePresence("parameter", message: "Required: This field is required")
+        );
+    }
+
+    /**
+     * Validate read.
+     *
+     * @param array<string, mixed> $data The data
+     *
+     * @return void
+     */
     public function validateHierarchyRead(array $data): void
     {
         $this->validateEntity(

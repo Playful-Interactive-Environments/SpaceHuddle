@@ -14,6 +14,7 @@ use App\Domain\Vote\Data\VoteData;
 use App\Domain\Vote\Data\VoteResultData;
 use App\Domain\Vote\Data\VoteResultDetailData;
 use App\Factory\QueryFactory;
+use Selective\ArrayReader\ArrayReader;
 
 /**
  * Repository.
@@ -151,6 +152,48 @@ class VoteRepository implements RepositoryInterface
             ->order($sortConditions);
 
         return $this->fetchAll($query);
+    }
+
+    /**
+     * Get result for as specific parameter.
+     * @param string $taskId The task ID.
+     * @return array<object> The voting result.
+     * @throws GenericException
+     */
+    public function getParameterResult(string $taskId, string $parameterName): array
+    {
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        $query->select(["idea_id", "parameter"])
+            ->andWhere([
+                "task_id" => $taskId
+            ]);
+
+        $rows = $query->execute()->fetchAll("assoc");
+        $sum = [];
+        if (is_array($rows) and sizeof($rows) > 0) {
+            foreach ($rows as $resultItem) {
+                $reader = new ArrayReader($resultItem);
+                $idea_id = $reader->findString("idea_id");
+                if (!array_key_exists($idea_id, $sum)) $sum[$idea_id] = [
+                    "sum" => 0,
+                    "count" => 0
+                ];
+                $parameter = (object)json_decode($reader->findString("parameter") ?? "{}");
+                if (property_exists($parameter, $parameterName) && $parameter->$parameterName > 0) {
+                    $sum[$idea_id]["sum"] += $parameter->$parameterName;
+                    $sum[$idea_id]["count"] += 1;
+                }
+            }
+        }
+        $result = [];
+        foreach($sum as $idea_id => $item) {
+            $item["ideaId"] = $idea_id;
+            $item["avg"] = 0;
+            if ($item["count"] > 0)
+                $item["avg"] = $item["sum"]  / $item["count"];
+            array_push($result, $item);
+        }
+        return $result;
     }
 
     /**
