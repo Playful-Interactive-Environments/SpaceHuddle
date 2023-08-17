@@ -210,6 +210,7 @@ export default class ModuleStatistic extends Vue {
     this.calculatePointSpentChart();
     this.calculateExplanationChart();
     this.calculatePointCollectChart();
+    this.calculateOwnIdeasChart();
   }
 
   calculateRatingChart(): void {
@@ -405,6 +406,39 @@ export default class ModuleStatistic extends Vue {
       stacked: true,
       annotations: {},
       stepSize: 50,
+    });
+  }
+
+  calculateOwnIdeasChart(): void {
+    const filter = (item) => item.parameter.participantIdea;
+    const avatarList = this.getAvatarList();
+    const labels: string[] = avatarList.map(
+      (participant) => AvatarUnicode[participant.symbol]
+    );
+    const labelColors: string[] = avatarList.map(
+      (participant) => participant.color
+    );
+    const datasets = calculateChartPerParameter(
+      this.steps,
+      [''],
+      avatarList,
+      this.replayColors,
+      () => true,
+      (item, avatar) =>
+        item.avatar.color === avatar.color &&
+        item.avatar.symbol === avatar.symbol,
+      filter
+    );
+    this.barChartDataList.push({
+      title: this.$t('module.information.missionmap.statistic.ownIdeas'),
+      data: {
+        labels: labels,
+        datasets: datasets,
+      },
+      labelColors: labelColors,
+      stacked: true,
+      annotations: {},
+      stepSize: 1,
     });
   }
 }

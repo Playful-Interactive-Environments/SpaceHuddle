@@ -35,7 +35,8 @@
     "order": "order per idea",
     "pointsSpent": "spent points per idea",
     "pointsCollected": "collected points per idea",
-    "explanation": "explanation per idea"
+    "explanation": "explanation per idea",
+    "ownIdeas": "onw ideas"
   },
   "gameConfig": {
     "eco": "environment",

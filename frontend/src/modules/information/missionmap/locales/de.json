@@ -35,7 +35,8 @@
     "order": "Reihenfolge pro Idee",
     "pointsSpent": "ausgegebene Punkte pro Idee",
     "pointsCollected": "gesammelte Punkte pro Idee",
-    "explanation": "Erklärung pro Idee"
+    "explanation": "Erklärung pro Idee",
+    "ownIdeas": "eigene Ideen"
   },
   "gameConfig": {
     "eco": "Umwelt",
