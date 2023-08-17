@@ -8,7 +8,10 @@
         <div class="column" @click="editNewImage">
           <font-awesome-icon icon="circle-plus" />
         </div>
-        <div class="column" @click="finshed">
+        <div class="column" @click="showProgress = true">
+          <font-awesome-icon icon="bars-progress" />
+        </div>
+        <div class="column" @click="finished">
           <font-awesome-icon icon="file-circle-check" />
         </div>
       </div>
@@ -189,6 +192,40 @@
       </draggable>
     </div>
   </el-dialog>
+  <el-dialog v-model="showProgress">
+    <el-tabs v-model="activeTab">
+      <el-tab-pane
+        v-for="tabName of ['general', 'own', 'ownFuture']"
+        :key="tabName"
+        :label="tabName"
+        :name="tabName"
+      >
+        <el-form label-position="top" :status-icon="true">
+          <el-form-item
+            v-for="parameter of Object.keys(gameConfig.parameter)"
+            :key="parameter"
+            :label="$t(`module.information.missionmap.gameConfig.${parameter}`)"
+            :prop="`parameter.influenceAreas.${parameter}`"
+            :style="{
+              '--parameter-color': gameConfig.parameter[parameter].color,
+              '--state-color': getStateColor(progress[parameter][tabName]),
+            }"
+          >
+            <template #label>
+              {{ $t(`module.information.missionmap.gameConfig.${parameter}`) }}
+              <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
+            </template>
+            <el-slider
+              v-model="progress[parameter][tabName]"
+              :min="-5"
+              :max="5"
+              disabled
+            />
+          </el-form-item>
+        </el-form>
+      </el-tab-pane>
+    </el-tabs>
+  </el-dialog>
 
   <IdeaSettings
     v-model:show-modal="showIdeaSettings"
@@ -230,6 +267,13 @@ import { setHash } from '@/utils/url';
 import * as themeColors from '@/utils/themeColors';
 import { setEmptyParameterIfNotExists } from '@/modules/information/missionmap/utils/parameter';
 
+interface ProgressValues {
+  origin: number;
+  general: number;
+  own: number;
+  ownFuture: number;
+}
+
 @Options({
   computed: {
     gameConfig() {
@@ -268,6 +312,7 @@ export default class Participant extends Vue {
   showDetails = false;
   showSpentPoints = false;
   showSort = false;
+  showProgress = false;
   selectedVote = {
     rate: 0,
     order: 0,
@@ -279,6 +324,7 @@ export default class Participant extends Vue {
   };
   trackingManager!: TrackingManager;
   orderedIdeas: Idea[] = [];
+  activeTab = 'general';
 
   showIdeaSettings = false;
   addIdea: any = {
@@ -330,9 +376,52 @@ export default class Participant extends Vue {
     return marks;
   }
 
+  get progress(): { [key: string]: ProgressValues } {
+    const result: { [key: string]: ProgressValues } = {};
+    if (this.module) {
+      for (const parameterName in gameConfig.parameter) {
+        const origin = this.module.parameter[parameterName];
+        result[parameterName] = {
+          origin: origin,
+          general: origin,
+          own: origin,
+          ownFuture: origin,
+        };
+        for (const idea of this.ideas) {
+          const influence = idea.parameter.influenceAreas[parameterName];
+          const vote = this.voteResults.find((vote) => vote.ideaId === idea.id);
+          const ownVote = this.votes.find((vote) => vote.ideaId === idea.id);
+          if (vote) {
+            if (vote.sum >= idea.parameter.points) {
+              result[parameterName].general += influence;
+              if (ownVote) {
+                result[parameterName].own +=
+                  influence * (ownVote.parameter.points / vote.sum);
+                result[parameterName].ownFuture +=
+                  influence * (ownVote.parameter.points / vote.sum);
+              }
+            } else {
+              if (ownVote && vote.sum > 0) {
+                result[parameterName].ownFuture +=
+                  influence * (ownVote.parameter.points / vote.sum);
+              }
+            }
+          }
+        }
+      }
+    }
+    return result;
+  }
+
   getIdeaColor(idea: Idea): string {
     if (idea.isOwn) return themeColors.getInformingColor('-light');
     return '#ffffff';
+  }
+
+  getStateColor(state: number): string {
+    if (state < 0) return themeColors.getEvaluatingColor();
+    if (state < 3) return themeColors.getInformingColor();
+    return themeColors.getBrainstormingColor();
   }
 
   votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
@@ -685,6 +774,10 @@ export default class Participant extends Vue {
         this.refreshIdeas();
       });
   }
+
+  finished(): void {
+    //
+  }
 }
 </script>
 
@@ -717,5 +810,18 @@ export default class Participant extends Vue {
   position: absolute;
   top: 2rem;
   right: 0;
+}
+
+.el-form-item .el-slider {
+  --el-slider-runway-bg-color: color-mix(
+    in srgb,
+    var(--state-color) 30%,
+    transparent
+  );
+  --el-slider-disabled-color: var(--state-color);
+}
+
+.el-form-item::v-deep(.el-form-item__label) {
+  color: var(--parameter-color);
 }
 </style>
