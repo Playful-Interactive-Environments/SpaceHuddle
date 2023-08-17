@@ -33,7 +33,8 @@
   "statistic": {
     "rating": "Bewertung pro Idee",
     "order": "Reihenfolge pro Idee",
-    "points": "ausgegebene Punkte pro Idee",
+    "pointsSpent": "ausgegebene Punkte pro Idee",
+    "pointsCollected": "gesammelte Punkte pro Idee",
     "explanation": "Erklärung pro Idee"
   },
   "gameConfig": {

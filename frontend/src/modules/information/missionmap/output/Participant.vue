@@ -455,8 +455,8 @@ export default class Participant extends Vue {
   }
 
   async saveVoting(): Promise<void> {
-    const trackVote = (vote: Vote): void => {
-      this.trackingManager.createInstanceStep(
+    const trackVote = (vote: Vote, points: number): void => {
+      this.trackingManager.createInstanceStepPoints(
         vote.ideaId,
         TaskParticipantIterationStepStatesType.NEUTRAL,
         {
@@ -466,7 +466,7 @@ export default class Participant extends Vue {
           explanation: this.selectedVote.explanation,
           explanationIndex: this.selectedVote.explanationIndex,
         },
-        null,
+        points,
         this.selectedVote.points,
         true
       );
@@ -484,7 +484,10 @@ export default class Participant extends Vue {
         this.selectedVote.explanationIndex =
           this.selectedIdea.parameter.explanationList.length;
       const vote = this.getVoteForIdea(this.selectedIdea.id);
+      let points = 0;
       if (!vote) {
+        if (this.selectedVote.rate) points += 10;
+        if (this.selectedVote.explanation) points += 10;
         votingService
           .postVote(this.taskId, {
             ideaId: this.selectedIdea.id,
@@ -502,9 +505,12 @@ export default class Participant extends Vue {
             this.votes.push(vote);
             await this.votingParameterCash.refreshData();
             this.loadSelectedVote();
-            trackVote(vote);
+            trackVote(vote, points);
           });
       } else {
+        if (this.selectedVote.rate && !vote.rating) points += 10;
+        if (this.selectedVote.explanation && !vote.parameter.explanation)
+          points += 10;
         vote.rating = this.selectedVote.rate;
         vote.detailRating = this.selectedVote.order;
         vote.parameter = {
@@ -517,7 +523,7 @@ export default class Participant extends Vue {
           await this.votingCash.refreshData();
           await this.votingParameterCash.refreshData();
           this.loadSelectedVote();
-          trackVote(vote);
+          trackVote(vote, points);
         });
       }
     }
@@ -653,7 +659,19 @@ export default class Participant extends Vue {
   }
 
   addData(newIdea: Idea): void {
-    if (!this.settingsIdea.id) this.ideas.push(newIdea);
+    if (!this.settingsIdea.id) {
+      this.ideas.push(newIdea);
+      this.trackingManager.createInstanceStepPoints(
+        newIdea.id,
+        TaskParticipantIterationStepStatesType.NEUTRAL,
+        {
+          participantIdea: true,
+        },
+        50,
+        null,
+        true
+      );
+    }
   }
 
   refreshIdeas(): void {

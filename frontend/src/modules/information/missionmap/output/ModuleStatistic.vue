@@ -23,7 +23,7 @@
         y: {
           ticks: {
             color: contrastColor,
-            stepSize: 1,
+            stepSize: chartData.stepSize,
           },
           stacked: chartData.stacked,
         },
@@ -86,6 +86,7 @@ export default class ModuleStatistic extends Vue {
     labelColors: string[] | string;
     stacked: boolean;
     annotations: { [key: string]: any };
+    stepSize: number;
   }[] = [];
   displayLabels = false;
   replayColors: string[] = [];
@@ -206,8 +207,9 @@ export default class ModuleStatistic extends Vue {
     this.barChartDataList = [];
     this.calculateRatingChart();
     this.calculateOrderChart();
-    this.calculatePointChart();
+    this.calculatePointSpentChart();
     this.calculateExplanationChart();
+    this.calculatePointCollectChart();
   }
 
   calculateRatingChart(): void {
@@ -239,6 +241,7 @@ export default class ModuleStatistic extends Vue {
       labelColors: themeColors.getContrastColor(),
       stacked: false,
       annotations: {},
+      stepSize: 1,
     });
   }
 
@@ -271,10 +274,11 @@ export default class ModuleStatistic extends Vue {
       labelColors: themeColors.getContrastColor(),
       stacked: true,
       annotations: {},
+      stepSize: 1,
     });
   }
 
-  calculatePointChart(): void {
+  calculatePointSpentChart(): void {
     const avatarList = this.getAvatarList();
     const labels: string[] = this.ideas.map((idea) => idea.keywords);
     const mapToValue = (list) => list.map((item) => item.parameter.points);
@@ -294,17 +298,23 @@ export default class ModuleStatistic extends Vue {
     const annotations: { [key: string]: any } = {};
     for (let i = 0; i < this.ideas.length; i++) {
       const idea = this.ideas[i];
+      const votePoints = this.votes
+        .filter((vote) => vote.ideaId === idea.id)
+        .map((vote) => vote.parameter.points)
+        .reduce((a, b) => a + b, 0);
+      let annotationColor = themeColors.getHighlightColor();
+      if (votePoints >= idea.parameter.points)
+        annotationColor = themeColors.getBrainstormingColor();
+      if (votePoints >= (idea.parameter.points / 3) * 2)
+        annotationColor = themeColors.getInformingColor();
       annotations[idea.id] = {
         type: 'box',
         xMin: i - 0.4,
         xMax: i + 0.4,
         yMin: 0,
         yMax: idea.parameter.points,
-        backgroundColor: themeColors.convertToRGBA(
-          themeColors.getHighlightColor(),
-          0.25
-        ),
-        borderColor: themeColors.convertToRGBA(themeColors.getHighlightColor()),
+        backgroundColor: themeColors.convertToRGBA(annotationColor, 0.25),
+        borderColor: themeColors.convertToRGBA(annotationColor),
         label: {
           content: idea.parameter.points,
           display: true,
@@ -314,7 +324,7 @@ export default class ModuleStatistic extends Vue {
       };
     }
     this.barChartDataList.push({
-      title: this.$t('module.information.missionmap.statistic.points'),
+      title: this.$t('module.information.missionmap.statistic.pointsSpent'),
       data: {
         labels: labels,
         datasets: datasets,
@@ -322,6 +332,7 @@ export default class ModuleStatistic extends Vue {
       labelColors: themeColors.getContrastColor(),
       stacked: true,
       annotations: annotations,
+      stepSize: 500,
     });
   }
 
@@ -358,6 +369,42 @@ export default class ModuleStatistic extends Vue {
       labelColors: themeColors.getContrastColor(),
       stacked: true,
       annotations: {},
+      stepSize: 1,
+    });
+  }
+
+  calculatePointCollectChart(): void {
+    const avatarList = this.getAvatarList();
+    const labels: string[] = avatarList.map(
+      (participant) => AvatarUnicode[participant.symbol]
+    );
+    const labelColors: string[] = avatarList.map(
+      (participant) => participant.color
+    );
+    const mapToValue = (list) =>
+      list.map((item) => item.parameter.gameplayResult.points);
+    const datasets = calculateChartPerParameter(
+      this.steps,
+      [''],
+      avatarList,
+      this.replayColors,
+      () => true,
+      (item, avatar) =>
+        item.avatar.color === avatar.color &&
+        item.avatar.symbol === avatar.symbol,
+      null,
+      (list) => getCalculationForType(CalculationType.Sum)(mapToValue(list))
+    );
+    this.barChartDataList.push({
+      title: this.$t('module.information.missionmap.statistic.pointsCollected'),
+      data: {
+        labels: labels,
+        datasets: datasets,
+      },
+      labelColors: labelColors,
+      stacked: true,
+      annotations: {},
+      stepSize: 50,
     });
   }
 }

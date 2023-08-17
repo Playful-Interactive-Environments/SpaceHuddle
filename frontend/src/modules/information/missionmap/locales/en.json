@@ -33,7 +33,8 @@
   "statistic": {
     "rating": "rating per idea",
     "order": "order per idea",
-    "points": "spent points per idea",
+    "pointsSpent": "spent points per idea",
+    "pointsCollected": "collected points per idea",
     "explanation": "explanation per idea"
   },
   "gameConfig": {

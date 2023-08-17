@@ -113,11 +113,12 @@ export class TrackingManager {
 
   getGameplayResult(
     stars: number,
+    playPoints: number | null = null,
     playCount = 1,
     limitToMaxPoints = false,
     pointsSpent: number | null = null
   ): GameplayResult | GameplayAndSpentResult {
-    const points = stars * this.pointsPerStar;
+    const points = playPoints ? playPoints : stars * this.pointsPerStar;
     const result = {
       stars: stars,
       points:
@@ -134,12 +135,14 @@ export class TrackingManager {
     limitToMaxPoints = false
   ): GameplayResult | GameplayAndSpentResult {
     let stars = 0;
+    let points = 0;
     let playCount = 0;
     let pointsSpent = 0;
     let hasSpentPoints = false;
     for (const item of list) {
       if (item.parameter.gameplayResult) {
         stars += item.parameter.gameplayResult.stars;
+        points += item.parameter.gameplayResult.points;
         const parameterPlayCount = item.parameter.gameplayResult.playCount;
         playCount += parameterPlayCount ? parameterPlayCount : 1;
         const parameterPointsSpent = (item.parameter.gameplayResult as any)
@@ -150,6 +153,7 @@ export class TrackingManager {
     }
     return this.getGameplayResult(
       stars,
+      points,
       playCount,
       limitToMaxPoints,
       hasSpentPoints ? pointsSpent : null
@@ -228,10 +232,7 @@ export class TrackingManager {
 
   async saveIterationPoints(stars: number): Promise<void> {
     if (this.iteration) {
-      this.iteration.parameter.gameplayResult = this.getGameplayResult(
-        stars,
-        1
-      );
+      this.iteration.parameter.gameplayResult = this.getGameplayResult(stars);
       await taskParticipantService.putParticipantIteration(
         this.taskId,
         this.iteration
@@ -247,6 +248,7 @@ export class TrackingManager {
       else
         this.iteration.parameter.gameplayResult = this.getGameplayResult(
           0,
+          null,
           1,
           false,
           points
@@ -284,6 +286,39 @@ export class TrackingManager {
       if (stars !== null || pointsSpent !== null)
         initContent.gameplayResult = this.getGameplayResult(
           stars !== null ? stars : 0,
+          null,
+          1,
+          false,
+          pointsSpent
+        );
+      this.iterationStep =
+        await taskParticipantService.postParticipantIterationStep(this.taskId, {
+          iteration: this.iteration?.iteration,
+          ideaId: ideaId,
+          state: state,
+          parameter: initContent,
+        });
+      await this.stepsCash.refreshData();
+      if (updateInstanceSum) {
+        await this.saveIterationPointsFromSteps();
+        await this.saveStatePointsFromIterations();
+      }
+    }
+  }
+
+  async createInstanceStepPoints(
+    ideaId: string,
+    state: TaskParticipantIterationStepStatesType,
+    initContent: any,
+    points: number | null = null,
+    pointsSpent: number | null = null,
+    updateInstanceSum = false
+  ): Promise<void> {
+    if (this.iteration) {
+      if (points !== null || pointsSpent !== null)
+        initContent.gameplayResult = this.getGameplayResult(
+          0,
+          points !== null ? points : 0,
           1,
           false,
           pointsSpent
@@ -341,6 +376,7 @@ export class TrackingManager {
       else
         this.iterationStep.parameter.gameplayResult = this.getGameplayResult(
           0,
+          null,
           1,
           false,
           points
