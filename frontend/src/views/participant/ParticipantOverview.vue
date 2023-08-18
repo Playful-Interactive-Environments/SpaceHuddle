@@ -124,9 +124,7 @@ import { Avatar } from '@/types/api/Participant';
 import * as authService from '@/services/auth-service';
 import LanguageSettings from '@/components/moderator/organisms/settings/LanguageSettings.vue';
 import * as taskParticipantService from '@/services/task-participant-service';
-import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import {registerGetPoints} from "@/services/task-participant-service";
 
 @Options({
   components: {

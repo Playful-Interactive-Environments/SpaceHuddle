@@ -303,11 +303,11 @@ export default class ModuleStatistic extends Vue {
         .filter((vote) => vote.ideaId === idea.id)
         .map((vote) => vote.parameter.points)
         .reduce((a, b) => a + b, 0);
-      let annotationColor = themeColors.getHighlightColor();
+      let annotationColor = themeColors.getRedColor();
       if (votePoints >= idea.parameter.points)
-        annotationColor = themeColors.getBrainstormingColor();
+        annotationColor = themeColors.getGreenColor();
       if (votePoints >= (idea.parameter.points / 3) * 2)
-        annotationColor = themeColors.getInformingColor();
+        annotationColor = themeColors.getYellowColor();
       annotations[idea.id] = {
         type: 'box',
         xMin: i - 0.4,

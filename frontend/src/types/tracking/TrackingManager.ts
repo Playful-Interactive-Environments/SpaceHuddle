@@ -34,6 +34,7 @@ export class TrackingManager {
   iterationStep: TaskParticipantIterationStep | null = null;
   iterationList: TaskParticipantIteration[] = [];
   iterationStepList: TaskParticipantIterationStep[] = [];
+  stepList: TaskParticipantIterationStep[] = [];
   state: TaskParticipantState | null = null;
   readonly pointsPerStar = 100;
   readonly maxPoints = 1000;
@@ -101,6 +102,7 @@ export class TrackingManager {
 
   _updateSteps(stepList: TaskParticipantIterationStep[]): void {
     if (this.iteration) {
+      this.stepList = stepList;
       this.iterationStepList = stepList.filter(
         (item) => item.iteration === this.iteration?.iteration
       );
@@ -167,6 +169,12 @@ export class TrackingManager {
       'replayabel' in module.parameter &&
       !module.parameter.replayabel
     ) {
+      this.setManualFinishedState();
+    }
+  }
+
+  setManualFinishedState(): void {
+    if (this.state) {
       this.saveState({}, TaskParticipantStatesType.FINISHED);
     }
   }

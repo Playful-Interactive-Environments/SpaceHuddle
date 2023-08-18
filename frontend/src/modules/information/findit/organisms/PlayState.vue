@@ -98,6 +98,7 @@
         "
         :width="gameWidth - 50"
         :height="(gameHeight / 10) * 4"
+        :background-color="backgroundColor"
       />
       <div>
         {{
@@ -134,6 +135,7 @@ import * as cashService from '@/services/cash-service';
 import { ElMessage } from 'element-plus';
 import * as escalationConfig from '@/modules/information/findit/data/escalation.json';
 import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
+import * as themeColors from '@/utils/themeColors';
 
 const tutorialType = 'find-it-object';
 
@@ -206,6 +208,10 @@ export default class PlayState extends Vue {
     return levelEscalationList.map((level) =>
       itemList.filter((item) => item.escalationStepIndex === level)
     );
+  }
+
+  get backgroundColor(): string {
+    return themeColors.getBackgroundColor();
   }
 
   mounted(): void {

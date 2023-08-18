@@ -10,7 +10,13 @@
     "save": "save",
     "spentHeader": "spend additional points on measure",
     "spent": "spent",
-    "cancel": "cancel"
+    "cancel": "cancel",
+    "finished": {
+      "header": "finish task",
+      "text": "Do you want to finish this task to move on to the next one?",
+      "yes": "yes",
+      "no": "no"
+    }
   },
   "moderatorConfig": {
     "mapSection": "map section",
@@ -42,5 +48,19 @@
     "eco": "environment",
     "social": "social",
     "business": "business"
+  },
+  "enum": {
+    "progress": {
+      "origin": "initial",
+      "general": "joint",
+      "own": "own part",
+      "ownFuture": "own path"
+    },
+    "progressLong": {
+      "origin": "initial situation",
+      "general": "joint progression",
+      "own": "own part in the joint progress",
+      "ownFuture": "own path"
+    }
   }
 }

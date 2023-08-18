@@ -197,7 +197,7 @@
       <el-tab-pane
         v-for="tabName of ['general', 'own', 'ownFuture']"
         :key="tabName"
-        :label="tabName"
+        :label="$t(`module.information.missionmap.enum.progress.${tabName}`)"
         :name="tabName"
       >
         <el-form label-position="top" :status-icon="true">
@@ -266,6 +266,7 @@ import draggable from 'vuedraggable';
 import { setHash } from '@/utils/url';
 import * as themeColors from '@/utils/themeColors';
 import { setEmptyParameterIfNotExists } from '@/modules/information/missionmap/utils/parameter';
+import { ElMessageBox } from 'element-plus';
 
 interface ProgressValues {
   origin: number;
@@ -419,9 +420,9 @@ export default class Participant extends Vue {
   }
 
   getStateColor(state: number): string {
-    if (state < 0) return themeColors.getEvaluatingColor();
-    if (state < 3) return themeColors.getInformingColor();
-    return themeColors.getBrainstormingColor();
+    if (state < 0) return themeColors.getRedColor();
+    if (state < 2) return themeColors.getYellowColor();
+    return themeColors.getGreenColor();
   }
 
   votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
@@ -562,21 +563,25 @@ export default class Participant extends Vue {
     };
 
     if (this.selectedIdea) {
+      const ownExplanationIndex =
+        this.selectedIdea.parameter.explanationList.length;
       if (
-        this.selectedVote.explanationIndex <
-          this.selectedIdea.parameter.explanationList.length &&
+        this.selectedVote.explanationIndex < ownExplanationIndex &&
         this.selectedVote.explanation !==
           this.selectedIdea.parameter.explanationList[
             this.selectedVote.explanationIndex
           ]
       )
-        this.selectedVote.explanationIndex =
-          this.selectedIdea.parameter.explanationList.length;
+        this.selectedVote.explanationIndex = ownExplanationIndex;
       const vote = this.getVoteForIdea(this.selectedIdea.id);
       let points = 0;
       if (!vote) {
         if (this.selectedVote.rate) points += 10;
-        if (this.selectedVote.explanation) points += 10;
+        if (this.selectedVote.explanation) {
+          points += 10;
+          if (this.selectedVote.explanationIndex === ownExplanationIndex)
+            points += 10;
+        }
         votingService
           .postVote(this.taskId, {
             ideaId: this.selectedIdea.id,
@@ -591,15 +596,33 @@ export default class Participant extends Vue {
             },
           })
           .then(async (vote) => {
+            trackVote(vote, points);
             this.votes.push(vote);
             await this.votingParameterCash.refreshData();
             this.loadSelectedVote();
-            trackVote(vote, points);
           });
       } else {
         if (this.selectedVote.rate && !vote.rating) points += 10;
-        if (this.selectedVote.explanation && !vote.parameter.explanation)
+        const stepsWithExplanation = this.trackingManager.stepList.filter(
+          (step) => step.ideaId === vote.ideaId && step.parameter.explanation
+        );
+        const stepsWithOwnExplanation = stepsWithExplanation.filter(
+          (step) => step.parameter.explanationIndex === ownExplanationIndex
+        );
+        if (
+          this.selectedVote.explanation &&
+          stepsWithExplanation.length === 0
+        ) {
           points += 10;
+          if (this.selectedVote.explanationIndex === ownExplanationIndex)
+            points += 10;
+        } else if (
+          this.selectedVote.explanation &&
+          this.selectedVote.explanationIndex === ownExplanationIndex &&
+          stepsWithOwnExplanation.length === 0
+        ) {
+          points += 10;
+        }
         vote.rating = this.selectedVote.rate;
         vote.detailRating = this.selectedVote.order;
         vote.parameter = {
@@ -609,10 +632,10 @@ export default class Participant extends Vue {
           explanationIndex: this.selectedVote.explanationIndex,
         };
         votingService.putVote(vote).then(async () => {
+          trackVote(vote, points);
           await this.votingCash.refreshData();
           await this.votingParameterCash.refreshData();
           this.loadSelectedVote();
-          trackVote(vote, points);
         });
       }
     }
@@ -776,7 +799,30 @@ export default class Participant extends Vue {
   }
 
   finished(): void {
-    //
+    ElMessageBox.confirm(
+      (this as any).$t(
+        'module.information.missionmap.participant.finished.text'
+      ),
+      (this as any).$t(
+        'module.information.missionmap.participant.finished.header'
+      ),
+      {
+        confirmButtonText: (this as any).$t(
+          'module.information.missionmap.participant.finished.yes'
+        ),
+        cancelButtonText: (this as any).$t(
+          'module.information.missionmap.participant.finished.no'
+        ),
+        type: 'warning',
+      }
+    )
+      .then(() => {
+        this.trackingManager.setManualFinishedState();
+        this.$router.back();
+      })
+      .catch(() => {
+        //
+      });
   }
 }
 </script>

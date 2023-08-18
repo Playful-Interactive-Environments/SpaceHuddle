@@ -10,7 +10,13 @@
     "save": "speichern",
     "spentHeader": "weitere Punkte für die Maßnahme ausgeben",
     "spent": "ausgeben",
-    "cancel": "abbrechen"
+    "cancel": "abbrechen",
+    "finished": {
+      "header": "Aufgabe abschließen",
+      "text": "Möchten Sie diese Aufgabe beenden, um zur nächsten überzugehen?",
+      "yes": "ja",
+      "no": "nein"
+    }
   },
   "moderatorConfig": {
     "mapSection": "Kartenausschnitt",
@@ -42,5 +48,19 @@
     "eco": "Umwelt",
     "social": "Soziales",
     "business": "Wirtschaft"
+  },
+  "enum": {
+    "progress": {
+      "origin": "Ausgangssituation",
+      "general": "gemeinsam",
+      "own": "eigener Anteil",
+      "ownFuture": "eigener Weg"
+    },
+    "progressLong": {
+      "origin": "Ausgangssituation",
+      "general": "gemeinsamer Fortschritte",
+      "own": "eigener Anteil am gemeinsamen Fortschritt",
+      "ownFuture": "eigener Weg"
+    }
   }
 }

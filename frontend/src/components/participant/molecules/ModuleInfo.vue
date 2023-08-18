@@ -10,6 +10,7 @@
       :width="gameWidth"
       :height="gameHeight / 2"
       :texture="mappedModuleInfoEntryDataList[activeTabIndex].texture"
+      :background-color="backgroundColor"
     />
     <el-carousel
       ref="carousel"
@@ -53,6 +54,7 @@ import * as cashService from '@/services/cash-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import * as PIXI from 'pixi.js';
+import * as themeColors from '@/utils/themeColors';
 
 export interface ModuleInfoEntryData {
   key: string;
@@ -108,6 +110,10 @@ export default class ModuleInfo extends Vue {
       this.moduleInfoEntryDataList.length -
       this.openModuleInfoEntryDataList.length
     );
+  }
+
+  get backgroundColor(): string {
+    return themeColors.getBackgroundColor();
   }
 
   mounted(): void {

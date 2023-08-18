@@ -43,6 +43,18 @@ export function getInactiveColor(): string {
   );
 }
 
+export function getGreenColor(): string {
+  return getComputedStyle(document.body).getPropertyValue('--color-green');
+}
+
+export function getYellowColor(): string {
+  return getComputedStyle(document.body).getPropertyValue('--color-yellow');
+}
+
+export function getRedColor(): string {
+  return getComputedStyle(document.body).getPropertyValue('--color-red');
+}
+
 export function getBackgroundColor(): string {
   return getComputedStyle(document.body).getPropertyValue('--color-background');
 }

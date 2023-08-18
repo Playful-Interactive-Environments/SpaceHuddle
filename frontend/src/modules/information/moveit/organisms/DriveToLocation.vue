@@ -383,15 +383,15 @@ export default class DriveToLocation extends Vue {
   get colors(): ColorProp[] {
     return [
       {
-        color: themeColors.getBrainstormingColor(),
+        color: themeColors.getGreenColor(),
         percentage: this.convertSpeedToColorPercentage(20),
       },
       {
-        color: themeColors.getInformingColor(),
+        color: themeColors.getYellowColor(),
         percentage: this.convertSpeedToColorPercentage(50),
       },
       {
-        color: themeColors.getEvaluatingColor(),
+        color: themeColors.getRedColor(),
         percentage: this.convertSpeedToColorPercentage(100),
       },
     ];
