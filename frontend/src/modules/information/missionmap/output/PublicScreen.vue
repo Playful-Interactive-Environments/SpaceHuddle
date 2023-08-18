@@ -1,58 +1,104 @@
 <template>
   <el-container ref="container">
-    <el-aside width="70vw" class="mapSpace">
-      <IdeaMap
-        v-if="sizeLoaded"
-        :ideas="ideas"
-        :parameter="module?.parameter"
-        :canChangePosition="() => false"
-        :calculate-size="false"
-        v-model:selected-idea="selectedIdea"
-        v-on:visibleIdeasChanged="visibleIdeasChanged"
-        v-on:selectionColorChanged="selectionColor = $event"
-      >
-      </IdeaMap>
-    </el-aside>
-    <el-main>
-      <section v-if="ideas.length === 0" class="centered public-screen__error">
-        <p>{{ $t('module.information.missionmap.publicScreen.noIdeas') }}</p>
-      </section>
-      <div v-else class="public-screen__content">
-        <section class="layout__columns">
-          <IdeaCard
-            v-for="(idea, index) in visibleIdeas"
-            :idea="idea"
-            :key="index"
-            :is-editable="false"
-            :isSelected="idea.id === selectedIdea?.id"
-            :selectionColor="selectionColor"
-            v-model:collapseIdeas="filter.collapseIdeas"
-            v-model:fadeIn="ideaTransform[idea.id]"
-            v-on:click="selectedIdea = idea"
-          >
-            <div>
-              <font-awesome-icon icon="coins" />
-              {{ idea.parameter.points }}
-            </div>
-            <div class="columns is-mobile">
-              <div
-                class="column"
-                v-for="parameter of Object.keys(gameConfig.parameter)"
-                :key="parameter"
-                :style="{
-                  color: gameConfig.parameter[parameter].color,
-                }"
-              >
+    <el-header>
+      <el-tabs v-model="activeTab" v-if="showProgress">
+        <el-tab-pane
+          v-for="tabName of ['origin', 'general']"
+          :key="tabName"
+          :label="$t(`module.information.missionmap.enum.progress.${tabName}`)"
+          :name="tabName"
+        >
+          <el-form label-position="top" :status-icon="true">
+            <el-form-item
+              v-for="parameter of Object.keys(gameConfig.parameter)"
+              :key="parameter"
+              :label="
+                $t(`module.information.missionmap.gameConfig.${parameter}`)
+              "
+              :prop="`parameter.influenceAreas.${parameter}`"
+              :style="{
+                '--parameter-color': gameConfig.parameter[parameter].color,
+                '--state-color': getStateColor(progress[parameter][tabName]),
+              }"
+            >
+              <template #label>
+                {{
+                  $t(`module.information.missionmap.gameConfig.${parameter}`)
+                }}
                 <font-awesome-icon
                   :icon="gameConfig.parameter[parameter].icon"
                 />
-                {{ idea.parameter.influenceAreas[parameter] }}
-              </div>
-            </div>
-          </IdeaCard>
+              </template>
+              <el-slider
+                v-model="progress[parameter][tabName]"
+                :min="-5"
+                :max="5"
+                disabled
+              />
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+      </el-tabs>
+    </el-header>
+    <el-container>
+      <el-aside width="70vw" class="mapSpace">
+        <IdeaMap
+          v-if="sizeLoaded"
+          :ideas="ideas"
+          :parameter="module?.parameter"
+          :canChangePosition="() => false"
+          :calculate-size="false"
+          v-model:selected-idea="selectedIdea"
+          v-on:visibleIdeasChanged="visibleIdeasChanged"
+          v-on:selectionColorChanged="selectionColor = $event"
+        >
+        </IdeaMap>
+      </el-aside>
+      <el-main>
+        <section
+          v-if="ideas.length === 0"
+          class="centered public-screen__error"
+        >
+          <p>{{ $t('module.information.missionmap.publicScreen.noIdeas') }}</p>
         </section>
-      </div>
-    </el-main>
+        <div v-else class="public-screen__content">
+          <section class="layout__columns">
+            <IdeaCard
+              v-for="(idea, index) in visibleIdeas"
+              :idea="idea"
+              :key="index"
+              :is-editable="false"
+              :isSelected="idea.id === selectedIdea?.id"
+              :selectionColor="selectionColor"
+              :background-color="getIdeaColor(idea)"
+              v-model:collapseIdeas="filter.collapseIdeas"
+              v-model:fadeIn="ideaTransform[idea.id]"
+              v-on:click="selectedIdea = idea"
+            >
+              <div>
+                <font-awesome-icon icon="coins" />
+                {{ idea.parameter.points }}
+              </div>
+              <div class="columns is-mobile">
+                <div
+                  class="column"
+                  v-for="parameter of Object.keys(gameConfig.parameter)"
+                  :key="parameter"
+                  :style="{
+                    color: gameConfig.parameter[parameter].color,
+                  }"
+                >
+                  <font-awesome-icon
+                    :icon="gameConfig.parameter[parameter].icon"
+                  />
+                  {{ idea.parameter.influenceAreas[parameter] }}
+                </div>
+              </div>
+            </IdeaCard>
+          </section>
+        </div>
+      </el-main>
+    </el-container>
   </el-container>
 </template>
 
@@ -75,6 +121,14 @@ import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 import { Module } from '@/types/api/Module';
 import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
 import { setHash } from '@/utils/url';
+import * as themeColors from '@/utils/themeColors';
+import * as votingService from '@/services/voting-service';
+import { VoteParameterResult } from '@/types/api/Vote';
+
+interface ProgressValues {
+  origin: number;
+  general: number;
+}
 
 @Options({
   computed: {
@@ -100,10 +154,49 @@ export default class PublicScreen extends Vue {
   filter: FilterData = { ...defaultFilterData };
   sizeLoaded = false;
   visibleIdeas: Idea[] = [];
+  voteResults: VoteParameterResult[] = [];
   selectedIdea: Idea | null = null;
+  decidedIdeas: Idea[] = [];
   selectionColor = '#0192d0';
+  activeTab = 'general';
+  showProgress = false;
+
+  get progress(): { [key: string]: ProgressValues } {
+    const result: { [key: string]: ProgressValues } = {};
+    if (this.module) {
+      for (const parameterName in gameConfig.parameter) {
+        const origin = this.module.parameter[parameterName];
+        result[parameterName] = {
+          origin: origin,
+          general: origin,
+        };
+        for (const idea of this.decidedIdeas) {
+          const influence = idea.parameter.influenceAreas[parameterName];
+          result[parameterName].general += influence;
+        }
+      }
+    }
+    return result;
+  }
+
+  getStateColor(state: number): string {
+    if (state < 0) return themeColors.getRedColor();
+    if (state < 2) return themeColors.getYellowColor();
+    return themeColors.getGreenColor();
+  }
+
+  getIdeaColor(idea: Idea): string {
+    if (this.isDecided(idea.id))
+      return themeColors.getBrainstormingColor('-light');
+    return '#ffffff';
+  }
+
+  isDecided(ideaId: string): boolean {
+    return !!this.decidedIdeas.find((idea) => idea.id === ideaId);
+  }
 
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
+  votingParameterCash!: cashService.SimplifiedCashEntry<VoteParameterResult[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
@@ -120,6 +213,13 @@ export default class PublicScreen extends Vue {
       this.updateIdeas,
       this.authHeaderTyp,
       20
+    );
+    this.votingParameterCash = votingService.registerGetParameterResult(
+      this.taskId,
+      'points',
+      this.updateVoteResult,
+      EndpointAuthorisationType.PARTICIPANT,
+      60
     );
   }
 
@@ -138,6 +238,7 @@ export default class PublicScreen extends Vue {
     else {
       this.module = task.modules.find((t) => t.name === 'map');
     }
+    if (this.module) this.showProgress = true;
   }
 
   updateIdeas(ideas: Idea[]): void {
@@ -159,6 +260,26 @@ export default class PublicScreen extends Vue {
         return { [idea.id]: timeSpan <= this.newTimeSpan };
       })
     );
+    this.calculateDecidedIdeas();
+  }
+
+  updateVoteResult(votes: VoteParameterResult[]): void {
+    this.voteResults = votes;
+    this.calculateDecidedIdeas();
+  }
+
+  calculateDecidedIdeas(): void {
+    if (this.voteResults.length > 0) {
+      this.decidedIdeas = [];
+      for (const idea of this.ideas) {
+        const vote = this.voteResults.find((vote) => vote.ideaId === idea.id);
+        if (vote) {
+          if (vote.sum >= idea.parameter.points) {
+            this.decidedIdeas.push(idea);
+          }
+        }
+      }
+    }
   }
 
   deregisterAll(): void {
@@ -204,5 +325,23 @@ export default class PublicScreen extends Vue {
 .mapSpace {
   height: 100%;
   margin-right: 1rem;
+}
+
+.el-form-item::v-deep(.el-form-item__label) {
+  color: var(--parameter-color);
+}
+
+.el-form-item .el-slider {
+  --el-slider-runway-bg-color: color-mix(
+    in srgb,
+    var(--state-color) 30%,
+    transparent
+  );
+  --el-slider-disabled-color: var(--state-color);
+}
+
+.el-tabs::v-deep(.el-tabs__nav-next),
+.el-tabs::v-deep(.el-tabs__nav-prev) {
+  line-height: unset;
 }
 </style>

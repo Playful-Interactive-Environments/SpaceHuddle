@@ -1,5 +1,37 @@
 <template>
   <IdeaFilter :taskId="taskId" v-model="filter" @change="reloadIdeas(true)" />
+  <el-tabs v-model="activeTab" v-if="module">
+    <el-tab-pane
+      v-for="tabName of ['origin', 'general']"
+      :key="tabName"
+      :label="$t(`module.information.missionmap.enum.progress.${tabName}`)"
+      :name="tabName"
+    >
+      <el-form label-position="top" :status-icon="true">
+        <el-form-item
+          v-for="parameter of Object.keys(gameConfig.parameter)"
+          :key="parameter"
+          :label="$t(`module.information.missionmap.gameConfig.${parameter}`)"
+          :prop="`parameter.influenceAreas.${parameter}`"
+          :style="{
+            '--parameter-color': gameConfig.parameter[parameter].color,
+            '--state-color': getStateColor(progress[parameter][tabName]),
+          }"
+        >
+          <template #label>
+            {{ $t(`module.information.missionmap.gameConfig.${parameter}`) }}
+            <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
+          </template>
+          <el-slider
+            v-model="progress[parameter][tabName]"
+            :min="-5"
+            :max="5"
+            disabled
+          />
+        </el-form-item>
+      </el-form>
+    </el-tab-pane>
+  </el-tabs>
   <IdeaMap
     class="mapSpace"
     :ideas="ideas"
@@ -282,6 +314,11 @@ import { Vote } from '@/types/api/Vote';
 import { setEmptyParameterIfNotExists } from '@/modules/information/missionmap/utils/parameter';
 import * as themeColors from '@/utils/themeColors';
 
+interface ProgressValues {
+  origin: number;
+  general: number;
+}
+
 @Options({
   computed: {
     gameConfig() {
@@ -309,6 +346,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   module: Module | undefined = undefined;
   ideas: Idea[] = [];
   votes: Vote[] = [];
+  decidedIdeas: Idea[] = [];
   orderGroupContent: OrderGroupList = {};
   openTabs: string[] = [];
   filter: FilterData = { ...defaultFilterData };
@@ -325,10 +363,13 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   };
   settingsIdea = this.addIdea;
   showSettings = false;
+  activeTab = 'general';
 
   getIdeaColor(idea: Idea): string {
     if (!idea.parameter.shareData)
       return themeColors.getInformingColor('-light');
+    if (this.isDecided(idea.id))
+      return themeColors.getBrainstormingColor('-light');
     return '#ffffff';
   }
 
@@ -341,6 +382,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     return points;
   }
 
+  getStateColor(state: number): string {
+    if (state < 0) return themeColors.getRedColor();
+    if (state < 2) return themeColors.getYellowColor();
+    return themeColors.getGreenColor();
+  }
+
   get orderIsChangeable(): boolean {
     return this.filter.orderType === IdeaSortOrder.ORDER;
   }
@@ -349,6 +396,28 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     if (this.module && this.module.parameter.effectElectricity)
       return gameConfigMoveIt.electricity;
     return {};
+  }
+
+  get progress(): { [key: string]: ProgressValues } {
+    const result: { [key: string]: ProgressValues } = {};
+    if (this.module) {
+      for (const parameterName in gameConfig.parameter) {
+        const origin = this.module.parameter[parameterName];
+        result[parameterName] = {
+          origin: origin,
+          general: origin,
+        };
+        for (const idea of this.decidedIdeas) {
+          const influence = idea.parameter.influenceAreas[parameterName];
+          result[parameterName].general += influence;
+        }
+      }
+    }
+    return result;
+  }
+
+  isDecided(ideaId: string): boolean {
+    return !!this.decidedIdeas.find((idea) => idea.id === ideaId);
   }
 
   @Watch('taskId', { immediate: true })
@@ -378,6 +447,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   updateVotes(votes: Vote[]): void {
     this.votes = votes;
+    this.calculateDecidedIdeas();
   }
 
   updateTask(task: Task): void {
@@ -441,6 +511,23 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       this.reloadTabState
     ).then((tabs) => (this.openTabs = tabs));
     this.reloadTabState = false;
+    this.calculateDecidedIdeas();
+  }
+
+  calculateDecidedIdeas(): void {
+    if (this.votes.length > 0) {
+      this.decidedIdeas = [];
+      for (const idea of this.ideas) {
+        const votes = this.votes.filter((vote) => vote.ideaId === idea.id);
+        let sum = 0;
+        for (const vote of votes) {
+          sum += vote.parameter.points;
+        }
+        if (sum >= idea.parameter.points) {
+          this.decidedIdeas.push(idea);
+        }
+      }
+    }
   }
 
   reloadTabState = true;
@@ -545,5 +632,19 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
 .el-form-item::v-deep(.el-form-item__label) {
   color: var(--parameter-color);
+}
+
+.el-form-item .el-slider {
+  --el-slider-runway-bg-color: color-mix(
+    in srgb,
+    var(--state-color) 30%,
+    transparent
+  );
+  --el-slider-disabled-color: var(--state-color);
+}
+
+.el-tabs::v-deep(.el-tabs__nav-next),
+.el-tabs::v-deep(.el-tabs__nav-prev) {
+  line-height: unset;
 }
 </style>

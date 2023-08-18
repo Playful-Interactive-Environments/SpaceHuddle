@@ -195,7 +195,7 @@
   <el-dialog v-model="showProgress">
     <el-tabs v-model="activeTab">
       <el-tab-pane
-        v-for="tabName of ['general', 'own', 'ownFuture']"
+        v-for="tabName of ['origin', 'general', 'own', 'ownFuture']"
         :key="tabName"
         :label="$t(`module.information.missionmap.enum.progress.${tabName}`)"
         :name="tabName"
@@ -308,6 +308,7 @@ export default class Participant extends Vue {
   visibleIdeas: Idea[] = [];
   votes: Vote[] = [];
   voteResults: VoteParameterResult[] = [];
+  decidedIdeas: Idea[] = [];
   sessionId!: string;
   points = 0;
   showDetails = false;
@@ -414,8 +415,14 @@ export default class Participant extends Vue {
     return result;
   }
 
+  isDecided(ideaId: string): boolean {
+    return !!this.decidedIdeas.find((idea) => idea.id === ideaId);
+  }
+
   getIdeaColor(idea: Idea): string {
     if (idea.isOwn) return themeColors.getInformingColor('-light');
+    if (this.isDecided(idea.id))
+      return themeColors.getBrainstormingColor('-light');
     return '#ffffff';
   }
 
@@ -515,6 +522,7 @@ export default class Participant extends Vue {
       ...this.ideas.filter((idea) => idea.parameter.shareData),
     ];
     this.sortIdeasByVote();
+    this.calculateDecidedIdeas();
   }
 
   updateVotes(votes: Vote[]): void {
@@ -524,6 +532,21 @@ export default class Participant extends Vue {
 
   updateVoteResult(votes: VoteParameterResult[]): void {
     this.voteResults = votes;
+    this.calculateDecidedIdeas();
+  }
+
+  calculateDecidedIdeas(): void {
+    if (this.voteResults.length > 0) {
+      this.decidedIdeas = [];
+      for (const idea of this.ideas) {
+        const vote = this.voteResults.find((vote) => vote.ideaId === idea.id);
+        if (vote) {
+          if (vote.sum >= idea.parameter.points) {
+            this.decidedIdeas.push(idea);
+          }
+        }
+      }
+    }
   }
 
   sortIdeasByVote(): void {
@@ -869,5 +892,10 @@ export default class Participant extends Vue {
 
 .el-form-item::v-deep(.el-form-item__label) {
   color: var(--parameter-color);
+}
+
+.el-tabs::v-deep(.el-tabs__nav-next),
+.el-tabs::v-deep(.el-tabs__nav-prev) {
+  line-height: unset;
 }
 </style>
