@@ -42,6 +42,44 @@
       },
     }"
   />
+  <Line
+    v-for="(chartData, index) in lineChartDataList"
+    :key="index"
+    :data="chartData.data"
+    :height="80"
+    :options="{
+      maintainAspectRatio: true,
+      animation: {
+        duration: 0,
+      },
+      scales: {
+        x: {
+          display: displayLabels,
+          ticks: {
+            color: chartData.labelColors,
+          },
+          grid: {
+            display: false,
+          },
+        },
+        y: {
+          ticks: {
+            color: contrastColor,
+            stepSize: 1,
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: chartData.data.datasets.length > 1,
+        },
+        title: {
+          display: true,
+          text: chartData.title,
+        },
+      },
+    }"
+  />
 </template>
 
 <script lang="ts">
@@ -49,10 +87,11 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
-import { Bar } from 'vue-chartjs';
+import { Bar, Line } from 'vue-chartjs';
 import * as taskParticipantService from '@/services/task-participant-service';
 import * as ideaService from '@/services/idea-service';
 import * as votingService from '@/services/voting-service';
+import * as taskService from '@/services/task-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import type { ChartData } from 'chart.js';
 import { Chart } from 'chart.js';
@@ -67,19 +106,24 @@ import {
 import { Vote } from '@/types/api/Vote';
 import { AvatarUnicode } from '@/types/enum/AvatarUnicode';
 import annotationPlugin from 'chartjs-plugin-annotation';
+import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
+import { Task } from '@/types/api/Task';
+import { Module } from '@/types/api/Module';
 
 Chart.register(annotationPlugin);
 
 @Options({
-  components: { Bar },
+  components: { Bar, Line },
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModuleStatistic extends Vue {
   @Prop() readonly taskId!: string;
+  module!: Module;
   steps: TaskParticipantIterationStep[] = [];
   ideas: Idea[] = [];
   votes: Vote[] = [];
+  decidedIdeas: Idea[] = [];
   barChartDataList: {
     title: string;
     data: ChartData;
@@ -87,6 +131,11 @@ export default class ModuleStatistic extends Vue {
     stacked: boolean;
     annotations: { [key: string]: any };
     stepSize: number;
+  }[] = [];
+  lineChartDataList: {
+    title: string;
+    data: ChartData;
+    labelColors: string[] | string;
   }[] = [];
   displayLabels = false;
   replayColors: string[] = [];
@@ -115,6 +164,7 @@ export default class ModuleStatistic extends Vue {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     if (this.taskId) {
+      taskService.registerGetTaskById(this.taskId, this.updateTask);
       ideaService.registerGetIdeasForTask(
         this.taskId,
         null,
@@ -138,8 +188,14 @@ export default class ModuleStatistic extends Vue {
     }
   }
 
+  updateTask(task: Task): void {
+    const module = task.modules.find((module) => module.name === 'missionmap');
+    if (module) this.module = module;
+  }
+
   updateIdeas(ideas: Idea[]): void {
     this.ideas = ideas.filter((idea) => idea.parameter.shareData);
+    this.calculateDecidedIdeas();
     this.sortIdeasByVote();
     this.calculateCharts();
   }
@@ -157,8 +213,31 @@ export default class ModuleStatistic extends Vue {
 
   updateVotes(votes: Vote[]): void {
     this.votes = votes;
+    this.calculateDecidedIdeas();
     this.sortIdeasByVote();
     this.calculateCharts();
+  }
+
+  calculateDecidedIdeas(): void {
+    if (this.votes.length > 0) {
+      const decidedIdeas: { idea: Idea; timestamp: number }[] = [];
+      for (const idea of this.ideas) {
+        const votes = this.votes.filter((vote) => vote.ideaId === idea.id);
+        let sum = 0;
+        let lastVote = 0;
+        for (const vote of votes) {
+          const timestamp = new Date(vote.timestamp).getTime();
+          sum += vote.parameter.points;
+          if (lastVote < timestamp) lastVote = timestamp;
+        }
+        if (sum >= idea.parameter.points) {
+          decidedIdeas.push({ idea: idea, timestamp: lastVote });
+        }
+      }
+      this.decidedIdeas = decidedIdeas
+        .sort((a, b) => a.timestamp - b.timestamp)
+        .map((item) => item.idea);
+    }
   }
 
   sortIdeasByVote(): void {
@@ -205,12 +284,14 @@ export default class ModuleStatistic extends Vue {
 
   calculateCharts(): void {
     this.barChartDataList = [];
+    this.lineChartDataList = [];
     this.calculateRatingChart();
     this.calculateOrderChart();
     this.calculatePointSpentChart();
     this.calculateExplanationChart();
     this.calculatePointCollectChart();
     this.calculateOwnIdeasChart();
+    this.calculateLineChartByProgression();
   }
 
   calculateRatingChart(): void {
@@ -439,6 +520,47 @@ export default class ModuleStatistic extends Vue {
       stacked: true,
       annotations: {},
       stepSize: 1,
+    });
+  }
+
+  calculateLineChartByProgression(): void {
+    const mapToValue = (list, parameter) =>
+      list.map((item) =>
+        item.idea ? item.idea.parameter.influenceAreas[parameter] : 0
+      );
+    const ideaProgress: { index: number; idea: Idea | null }[] = [
+      { index: -1, idea: null },
+    ];
+    for (let i = 0; i < this.decidedIdeas.length; i++) {
+      ideaProgress.push({ index: i, idea: this.decidedIdeas[i] });
+    }
+    const labels = ideaProgress.map((item) =>
+      item.idea
+        ? item.idea.keywords
+        : this.$t('module.information.missionmap.enum.progress.origin')
+    );
+    const datasets = calculateChartPerParameter(
+      ideaProgress,
+      Object.keys(gameConfig.parameter),
+      ideaProgress,
+      Object.values(gameConfig.parameter).map((item) => item.color),
+      () => true,
+      (item, progress) => item.index <= progress.index,
+      null,
+      (list, loopItem, parameter) => {
+        const sum = getCalculationForType(CalculationType.Sum)(
+          mapToValue(list, parameter)
+        );
+        return this.module.parameter[parameter] + sum;
+      }
+    );
+    this.lineChartDataList.push({
+      title: this.$t('module.information.missionmap.statistic.progress'),
+      data: {
+        labels: labels,
+        datasets: datasets,
+      },
+      labelColors: themeColors.getContrastColor(),
     });
   }
 }

@@ -40,9 +40,10 @@
     "rating": "Bewertung pro Idee",
     "order": "Reihenfolge pro Idee",
     "pointsSpent": "ausgegebene Punkte pro Idee",
-    "pointsCollected": "gesammelte Punkte pro Idee",
+    "pointsCollected": "gesammelte Punkte pro User",
     "explanation": "Erklärung pro Idee",
-    "ownIdeas": "eigene Ideen"
+    "ownIdeas": "eigene Ideen",
+    "progress": "Entwicklung"
   },
   "gameConfig": {
     "eco": "Umwelt",

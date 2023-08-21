@@ -40,9 +40,10 @@
     "rating": "rating per idea",
     "order": "order per idea",
     "pointsSpent": "spent points per idea",
-    "pointsCollected": "collected points per idea",
+    "pointsCollected": "collected points per user",
     "explanation": "explanation per idea",
-    "ownIdeas": "onw ideas"
+    "ownIdeas": "onw ideas",
+    "progress": "progress"
   },
   "gameConfig": {
     "eco": "environment",
