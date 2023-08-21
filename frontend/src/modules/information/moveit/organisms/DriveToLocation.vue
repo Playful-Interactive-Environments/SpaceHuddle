@@ -98,7 +98,11 @@
           </div>
         </template>
       </CustomMapMarker>
-      <CustomMapMarker :coordinates="mapVehiclePoint" anchor="center">
+      <CustomMapMarker
+        :coordinates="mapVehiclePoint"
+        anchor="center"
+        :clone="false"
+      >
         <template v-slot:icon>
           <Joystick
             v-if="combinedJoystick"

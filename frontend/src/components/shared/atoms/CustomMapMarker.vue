@@ -49,8 +49,11 @@ export default class CustomMapMarker extends Vue {
   @Prop() readonly draggable!: boolean;
   @Prop() readonly pixelPos!: [number, number];
   @Prop({ default: false }) readonly hide!: boolean;
+  @Prop({ default: true }) readonly clone!: boolean;
   marker: Marker | undefined = undefined;
   map!: ShallowRef<Map | null>;
+  observer = new MutationObserver(this.domChanged);
+  elementDisplay = 'block';
 
   mounted(): void {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -78,8 +81,22 @@ export default class CustomMapMarker extends Vue {
         return obj;
       }, {});
     if (element) {
-      opts.element = element.cloneNode(true) as HTMLElement;
-      element.style.display = 'none';
+      if (this.clone) {
+        this.elementDisplay = element.style.display;
+        opts.element = element.cloneNode(true) as HTMLElement;
+        element.style.display = 'none';
+        (this.observer as any).customMapMarker = this;
+        this.observer.observe(element, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeOldValue: true,
+          characterData: true,
+          characterDataOldValue: true,
+        });
+      } else {
+        opts.element = element;
+      }
     }
     const marker = new Marker(opts);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -90,6 +107,21 @@ export default class CustomMapMarker extends Vue {
       .addEventListener('click', (event) => this.$emit('click', event));
     this.removeMarker();
     this.marker = marker;
+  }
+
+  domChanged(mutationList: MutationRecord[], observer: MutationObserver): void {
+    const customMapMarker = (observer as any).customMapMarker;
+    if (customMapMarker.marker) {
+      const element = (customMapMarker.$refs.icon as HTMLElement).cloneNode(
+        true
+      ) as HTMLElement;
+      element.style.display = this.elementDisplay;
+      const children: Node[] = [];
+      for (const child of element.childNodes) {
+        children.push(child);
+      }
+      customMapMarker.marker.getElement().replaceChildren(...children);
+    }
   }
 
   removeMarker(): void {
@@ -146,6 +178,7 @@ export default class CustomMapMarker extends Vue {
 
   unmounted(): void {
     this.removeMarker();
+    this.observer.disconnect();
   }
 }
 </script>
