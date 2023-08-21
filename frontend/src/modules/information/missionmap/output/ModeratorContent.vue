@@ -149,6 +149,7 @@
     :taskId="taskId"
     :idea="settingsIdea"
     @updateData="addData"
+    ref="ideaSettings"
   >
     <el-form-item
       :label="$t('module.information.missionmap.moderatorContent.points')"
@@ -187,16 +188,17 @@
       :style="{
         '--parameter-color': additionalParameter[parameter].color,
       }"
+      :rules="[{ validator: validateElectricity }]"
     >
       <template #label>
         {{ $t(`module.information.moveit.enums.electricity.${parameter}`) }}
         <font-awesome-icon :icon="additionalParameter[parameter].icon" />
       </template>
-      <el-slider
+      <el-input-number
         v-if="settingsIdea.parameter.electricity"
         v-model="settingsIdea.parameter.electricity[parameter]"
-        :min="-10"
-        :max="10"
+        :min="-100"
+        :max="100"
       />
     </el-form-item>
     <el-form-item
@@ -287,6 +289,8 @@ import { Vote } from '@/types/api/Vote';
 import { setEmptyParameterIfNotExists } from '@/modules/information/missionmap/utils/parameter';
 import * as themeColors from '@/utils/themeColors';
 import MissionProgress from '@/modules/information/missionmap/organisms/MissionProgress.vue';
+import { ValidationRules } from '@/types/ui/ValidationRule';
+import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 
 interface ProgressValues {
   origin: number;
@@ -386,6 +390,38 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   isDecided(ideaId: string): boolean {
     return !!this.decidedIdeas.find((idea) => idea.id === ideaId);
+  }
+
+  validateElectricity(
+    rule: ValidationRules,
+    value: string,
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    callback: any
+  ): boolean {
+    const parameterList = Object.keys(this.additionalParameter);
+    if (parameterList.length === 0) {
+      callback();
+      return true;
+    }
+    let sum = 0;
+    for (const parameterName of parameterList) {
+      const parameterValue =
+        this.settingsIdea.parameter.electricity[parameterName];
+      sum += parameterValue;
+    }
+    const form = (this.$refs.ideaSettings as IdeaSettings).$refs
+      .dataForm as ValidationForm;
+    form.clearValidate();
+    if (sum === 0) {
+      callback();
+      return true;
+    } else {
+      const errorText = (this as any).$t(
+        'module.information.missionmap.moderatorContent.electricityValidationErrors'
+      );
+      callback(new Error(`${errorText} ${sum}`));
+      return false;
+    }
   }
 
   @Watch('taskId', { immediate: true })

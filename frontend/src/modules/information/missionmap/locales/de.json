@@ -31,7 +31,8 @@
     "displayAll": "Alle Anzeigen",
     "add": "Info hinzufügen",
     "points": "Benötigte Summe an Punkten",
-    "share": "teilen"
+    "share": "teilen",
+    "electricityValidationErrors": "Stromsumme muss 0 sein, bitte die Werte so anpassen, dass die Summe wieder 0 ist anstelle von "
   },
   "publicScreen": {
     "noIdeas": "Noch keine Ideen - Bleib dran."

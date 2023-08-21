@@ -4,6 +4,7 @@
     :use-default-submit="false"
     v-on:submitDataValid="save"
     v-on:reset="reset"
+    ref="dataForm"
   >
     <el-dialog
       v-model="showSettings"
