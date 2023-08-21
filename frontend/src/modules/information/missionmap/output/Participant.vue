@@ -193,38 +193,11 @@
     </div>
   </el-dialog>
   <el-dialog v-model="showProgress">
-    <el-tabs v-model="activeTab">
-      <el-tab-pane
-        v-for="tabName of ['origin', 'general', 'own', 'ownFuture']"
-        :key="tabName"
-        :label="$t(`module.information.missionmap.enum.progress.${tabName}`)"
-        :name="tabName"
-      >
-        <el-form label-position="top" :status-icon="true">
-          <el-form-item
-            v-for="parameter of Object.keys(gameConfig.parameter)"
-            :key="parameter"
-            :label="$t(`module.information.missionmap.gameConfig.${parameter}`)"
-            :prop="`parameter.influenceAreas.${parameter}`"
-            :style="{
-              '--parameter-color': gameConfig.parameter[parameter].color,
-              '--state-color': getStateColor(progress[parameter][tabName]),
-            }"
-          >
-            <template #label>
-              {{ $t(`module.information.missionmap.gameConfig.${parameter}`) }}
-              <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
-            </template>
-            <el-slider
-              v-model="progress[parameter][tabName]"
-              :min="-5"
-              :max="5"
-              disabled
-            />
-          </el-form-item>
-        </el-form>
-      </el-tab-pane>
-    </el-tabs>
+    <MissionProgress
+      v-if="module"
+      :progress="progress"
+      :progress-tabs="['origin', 'general', 'own', 'ownFuture']"
+    />
   </el-dialog>
 
   <IdeaSettings
@@ -267,6 +240,7 @@ import { setHash } from '@/utils/url';
 import * as themeColors from '@/utils/themeColors';
 import { setEmptyParameterIfNotExists } from '@/modules/information/missionmap/utils/parameter';
 import { ElMessageBox } from 'element-plus';
+import MissionProgress from '@/modules/information/missionmap/organisms/MissionProgress.vue';
 
 interface ProgressValues {
   origin: number;
@@ -282,6 +256,7 @@ interface ProgressValues {
     },
   },
   components: {
+    MissionProgress,
     FontAwesomeIcon,
     ValidationForm,
     IdeaMap,
@@ -326,7 +301,6 @@ export default class Participant extends Vue {
   };
   trackingManager!: TrackingManager;
   orderedIdeas: Idea[] = [];
-  activeTab = 'general';
 
   showIdeaSettings = false;
   addIdea: any = {
@@ -354,16 +328,20 @@ export default class Participant extends Vue {
         this.selectedVote.previousSpendPoints;
       const ideaId = this.selectedIdea.id;
       const result = this.voteResults.find((item) => item.ideaId === ideaId);
-      if (result) {
-        const maxOpenPoints = this.selectedIdea.parameter.points - result.sum;
-        if (maxPoints > maxOpenPoints) maxPoints = maxOpenPoints;
-        if (this.selectedIdea.parameter.minParticipants > result.count) {
-          let openParticipants =
-            this.selectedIdea.parameter.minParticipants - result.count;
-          if (this.selectedVote.previousSpendPoints === 0)
-            openParticipants -= 1;
-          maxPoints -= this.selectedIdea.parameter.minPoints * openParticipants;
-        }
+      const values = {
+        sum: result ? result.sum : 0,
+        count: result ? result.count : 0,
+      };
+      const maxOpenPoints = this.selectedIdea.parameter.points - values.sum;
+      if (maxPoints > maxOpenPoints) maxPoints = maxOpenPoints;
+      if (this.selectedIdea.parameter.minParticipants > values.count) {
+        let openParticipants =
+          this.selectedIdea.parameter.minParticipants - values.count;
+        if (this.selectedVote.previousSpendPoints === 0) openParticipants -= 1;
+        const maxTotalSpentPoints =
+          maxOpenPoints -
+          this.selectedIdea.parameter.minPoints * openParticipants;
+        if (maxPoints > maxTotalSpentPoints) maxPoints = maxTotalSpentPoints;
       }
       if (maxPoints < this.points) return maxPoints;
     }
@@ -424,12 +402,6 @@ export default class Participant extends Vue {
     if (this.isDecided(idea.id))
       return themeColors.getBrainstormingColor('-light');
     return '#ffffff';
-  }
-
-  getStateColor(state: number): string {
-    if (state < 0) return themeColors.getRedColor();
-    if (state < 2) return themeColors.getYellowColor();
-    return themeColors.getGreenColor();
   }
 
   votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
@@ -879,23 +851,5 @@ export default class Participant extends Vue {
   position: absolute;
   top: 2rem;
   right: 0;
-}
-
-.el-form-item .el-slider {
-  --el-slider-runway-bg-color: color-mix(
-    in srgb,
-    var(--state-color) 30%,
-    transparent
-  );
-  --el-slider-disabled-color: var(--state-color);
-}
-
-.el-form-item::v-deep(.el-form-item__label) {
-  color: var(--parameter-color);
-}
-
-.el-tabs::v-deep(.el-tabs__nav-next),
-.el-tabs::v-deep(.el-tabs__nav-prev) {
-  line-height: unset;
 }
 </style>
