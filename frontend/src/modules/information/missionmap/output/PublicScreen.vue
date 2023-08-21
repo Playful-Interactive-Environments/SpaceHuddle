@@ -1,44 +1,11 @@
 <template>
   <el-container ref="container">
     <el-header>
-      <el-tabs v-model="activeTab" v-if="showProgress">
-        <el-tab-pane
-          v-for="tabName of ['origin', 'general']"
-          :key="tabName"
-          :label="$t(`module.information.missionmap.enum.progress.${tabName}`)"
-          :name="tabName"
-        >
-          <el-form label-position="top" :status-icon="true">
-            <el-form-item
-              v-for="parameter of Object.keys(gameConfig.parameter)"
-              :key="parameter"
-              :label="
-                $t(`module.information.missionmap.gameConfig.${parameter}`)
-              "
-              :prop="`parameter.influenceAreas.${parameter}`"
-              :style="{
-                '--parameter-color': gameConfig.parameter[parameter].color,
-                '--state-color': getStateColor(progress[parameter][tabName]),
-              }"
-            >
-              <template #label>
-                {{
-                  $t(`module.information.missionmap.gameConfig.${parameter}`)
-                }}
-                <font-awesome-icon
-                  :icon="gameConfig.parameter[parameter].icon"
-                />
-              </template>
-              <el-slider
-                v-model="progress[parameter][tabName]"
-                :min="-5"
-                :max="5"
-                disabled
-              />
-            </el-form-item>
-          </el-form>
-        </el-tab-pane>
-      </el-tabs>
+      <MissionProgress
+        v-if="showProgress"
+        :progress="progress"
+        :progress-tabs="['origin', 'general']"
+      />
     </el-header>
     <el-container>
       <el-aside width="70vw" class="mapSpace">
@@ -124,6 +91,7 @@ import { setHash } from '@/utils/url';
 import * as themeColors from '@/utils/themeColors';
 import * as votingService from '@/services/voting-service';
 import { VoteParameterResult } from '@/types/api/Vote';
+import MissionProgress from '@/modules/information/missionmap/organisms/MissionProgress.vue';
 
 interface ProgressValues {
   origin: number;
@@ -139,6 +107,7 @@ interface ProgressValues {
   components: {
     IdeaMap,
     IdeaCard,
+    MissionProgress,
   },
 })
 
@@ -158,7 +127,6 @@ export default class PublicScreen extends Vue {
   selectedIdea: Idea | null = null;
   decidedIdeas: Idea[] = [];
   selectionColor = '#0192d0';
-  activeTab = 'general';
   showProgress = false;
 
   get progress(): { [key: string]: ProgressValues } {
@@ -177,12 +145,6 @@ export default class PublicScreen extends Vue {
       }
     }
     return result;
-  }
-
-  getStateColor(state: number): string {
-    if (state < 0) return themeColors.getRedColor();
-    if (state < 2) return themeColors.getYellowColor();
-    return themeColors.getGreenColor();
   }
 
   getIdeaColor(idea: Idea): string {
@@ -325,23 +287,5 @@ export default class PublicScreen extends Vue {
 .mapSpace {
   height: 100%;
   margin-right: 1rem;
-}
-
-.el-form-item::v-deep(.el-form-item__label) {
-  color: var(--parameter-color);
-}
-
-.el-form-item .el-slider {
-  --el-slider-runway-bg-color: color-mix(
-    in srgb,
-    var(--state-color) 30%,
-    transparent
-  );
-  --el-slider-disabled-color: var(--state-color);
-}
-
-.el-tabs::v-deep(.el-tabs__nav-next),
-.el-tabs::v-deep(.el-tabs__nav-prev) {
-  line-height: unset;
 }
 </style>
