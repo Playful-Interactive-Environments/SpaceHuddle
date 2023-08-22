@@ -46,6 +46,18 @@ class ViewData
     public ?string $name;
 
     /**
+     * name of the view.
+     * @var array<string>
+     * @OA\Property(
+     *       type="array",
+     *       @OA\Items(
+     *         type="string"
+     *       )
+     *     )
+     */
+    public array $modules;
+
+    /**
      * Creates a new view.
      * @param array $data View data.
      */
@@ -57,5 +69,6 @@ class ViewData
         $this->id = $reader->findString("id");
         $this->taskId = $reader->findString("task_id");
         $this->name = $reader->findString("name");
+        $this->modules = preg_split("/,/", (string)$reader->findString("modules"));
     }
 }

@@ -846,7 +846,7 @@ ORDER BY
     count_participant
 DESC;
 
-CREATE OR REPLACE VIEW selection_view (type, id, task_id, topic_id, name, detail_type, modification_date) AS
+CREATE OR REPLACE VIEW selection_view (type, id, task_id, topic_id, name, detail_type, modules, modification_date) AS
 SELECT
     'SELECTION' COLLATE utf8mb4_unicode_ci AS type,
     selection.id,
@@ -854,6 +854,7 @@ SELECT
     selection.topic_id,
     selection.name,
     '' COLLATE utf8mb4_unicode_ci AS detail_type,
+    '' COLLATE utf8mb4_unicode_ci AS modules,
     selection.modification_date
 FROM
     selection
@@ -869,6 +870,10 @@ SELECT
     topic_id,
     name,
     task_type COLLATE utf8mb4_unicode_ci AS detail_type,
+    ( SELECT GROUP_CONCAT(module.module_name)
+      FROM module
+      WHERE module.task_id = task.id
+    ) AS modules,
     modification_date
 FROM
     task
@@ -882,6 +887,7 @@ SELECT
     topic_id,
     name,
     '' COLLATE utf8mb4_unicode_ci AS detail_type,
+    '' COLLATE utf8mb4_unicode_ci AS modules,
     modification_date
 FROM
     task
@@ -895,6 +901,7 @@ SELECT
     task.topic_id,
     idea.keywords AS name,
     task.task_type COLLATE utf8mb4_unicode_ci AS detail_type,
+    '' COLLATE utf8mb4_unicode_ci AS modules,
     idea.modification_date
 FROM
     idea
