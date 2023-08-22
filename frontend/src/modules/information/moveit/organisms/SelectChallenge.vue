@@ -130,21 +130,18 @@
               </span>
             </div>
           </template>
-
-          <!--          spritesheet functionality:-->
-
-          <!--          <div class="spritesheet-container">
+          <div class="spritesheet-container">
             <img
               class="vehicle-spritesheet"
               :src="`/assets/games/moveit/vehicle/spritesheets/${vehicle.image}`"
               :alt="vehicle.name"
             />
-          </div>-->
-          <img
+          </div>
+          <!--          <img
             class="vehicle-image"
             :src="`/assets/games/moveit/vehicle/${vehicle.image}`"
             :alt="vehicle.name"
-          />
+          />-->
           <div v-if="vehicle.fuel">
             {{
               $t(
@@ -421,13 +418,13 @@ export default class SelectChallenge extends Vue {
   }
 }
 
-.vehicle-image {
+/*.vehicle-image {
   height: 10rem;
-}
+}*/
 
 /*spritesheet functionality:*/
 
-/*.spritesheet-container {
+.spritesheet-container {
   height: 10rem;
   width: 30.7rem;
   overflow: hidden;
@@ -454,7 +451,7 @@ export default class SelectChallenge extends Vue {
   75% {
     object-position: -30.7rem -10rem;
   }
-}*/
+}
 
 .el-carousel::v-deep(.el-carousel__button) {
   background-color: var(--color-primary);
