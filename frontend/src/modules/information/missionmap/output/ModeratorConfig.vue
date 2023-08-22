@@ -101,6 +101,20 @@
       </template>
     </el-input>
   </el-form-item>
+  <el-form-item
+    :label="$t('module.information.missionmap.moderatorConfig.theme')"
+    :prop="`${rulePropPath}.theme`"
+  >
+    <el-select v-model="modelValue.theme">
+      <el-option value="">-</el-option>
+      <el-option value="preparation">
+        {{ $t('module.information.missionmap.moderatorConfig.preparation') }}
+      </el-option>
+      <el-option value="meeting">
+        {{ $t('module.information.missionmap.moderatorConfig.meeting') }}
+      </el-option>
+    </el-select>
+  </el-form-item>
 </template>
 
 <script lang="ts">
@@ -156,6 +170,9 @@ export default class ModeratorConfig extends Vue {
         if (!(parameter in this.modelValue)) {
           this.modelValue[parameter] = 0;
         }
+      }
+      if (!('theme' in this.modelValue)) {
+        this.modelValue.theme = '';
       }
       if (!('insertInitProgressionFromInput' in this.modelValue)) {
         this.modelValue.insertInitProgressionFromInput = true;

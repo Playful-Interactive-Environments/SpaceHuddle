@@ -1,5 +1,9 @@
 <template>
-  <ParticipantModuleDefaultContainer :task-id="taskId" :module="moduleName">
+  <ParticipantModuleDefaultContainer
+    :task-id="taskId"
+    :module="moduleName"
+    :module-theme="theme"
+  >
     <template #headerOverlay>
       <div class="header-overlay-right columns is-mobile">
         <div class="column" @click="showSort = true">
@@ -309,6 +313,7 @@ export default class Participant extends Vue {
   };
   trackingManager!: TrackingManager;
   orderedIdeas: Idea[] = [];
+  theme = '';
 
   showIdeaSettings = false;
   addIdea: any = {
@@ -652,6 +657,7 @@ export default class Participant extends Vue {
 
   updateModule(module: Module): void {
     this.module = module;
+    if (module.parameter.theme) this.theme = module.parameter.theme;
   }
 
   deregisterAll(): void {
@@ -852,5 +858,20 @@ export default class Participant extends Vue {
   position: absolute;
   top: 2rem;
   right: 0;
+}
+
+.module-content::v-deep(.fixed) {
+  background-color: unset;
+}
+
+[module-theme='preparation'] {
+  background-image: url('@/modules/information/missionmap/assets/preparation.jpg');
+  background-size: contain;
+}
+
+[module-theme='meeting'] {
+  background-image: url('@/modules/information/missionmap/assets/meeting.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 </style>

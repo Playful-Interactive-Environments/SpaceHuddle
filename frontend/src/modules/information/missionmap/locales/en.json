@@ -26,7 +26,10 @@
     "maxPoints": "maximum points to be spent per participant",
     "explanation": "explanations selectable for the participant",
     "maxRatingStars": "max rating stars",
-    "insertInitProgressionFromInput": "insert starting progression from input"
+    "insertInitProgressionFromInput": "insert starting progression from input",
+    "theme": "theme",
+    "preparation": "preparation",
+    "meeting": "council meeting"
   },
   "moderatorContent": {
     "settingsTitle": "idea settings",

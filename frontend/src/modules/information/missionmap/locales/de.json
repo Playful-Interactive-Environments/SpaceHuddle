@@ -26,7 +26,10 @@
     "maxPoints": "maximal zu vergebende Punkte pro Teilnehmer",
     "explanation": "für den Teilnehmer auswählbare Erklärungen",
     "maxRatingStars": "maximale Bewertungssterne",
-    "insertInitProgressionFromInput": "Startprogression von der Eingabe einfügen"
+    "insertInitProgressionFromInput": "Startprogression von der Eingabe einfügen",
+    "theme": "Thema",
+    "preparation": "Vorbereitung",
+    "meeting": "Sitzung"
   },
   "moderatorContent": {
     "settingsTitle": "Ideeneinstellungen",
