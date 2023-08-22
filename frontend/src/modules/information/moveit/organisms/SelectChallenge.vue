@@ -425,10 +425,10 @@ export default class SelectChallenge extends Vue {
 /*spritesheet functionality:*/
 
 .spritesheet-container {
-  height: 10rem;
-  width: 30.7rem;
+  height: 7rem;
+  aspect-ratio: 3.07 / 1;
   overflow: hidden;
-  margin: auto;
+  margin: auto auto 1rem;
 }
 
 .vehicle-spritesheet {
@@ -440,16 +440,16 @@ export default class SelectChallenge extends Vue {
 
 @keyframes spritesheet-animation {
   0% {
-    object-position: 0 0;
+    object-position: left top;
   }
   25% {
-    object-position: -30.7rem 0;
+    object-position: right top;
   }
   50% {
-    object-position: 0 -10rem;
+    object-position: left -7rem;
   }
   75% {
-    object-position: -30.7rem -10rem;
+    object-position: right -7rem;
   }
 }
 
