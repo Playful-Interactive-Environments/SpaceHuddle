@@ -18,6 +18,13 @@ class ModuleData
     public ?string $id;
 
     /**
+     * The task id.
+     * @var string|null
+     * @OA\Property(example="uuid")
+     */
+    public ?string $taskId;
+
+    /**
      * The name of the module.
      * @var string|null
      * @OA\Property()
@@ -60,6 +67,7 @@ class ModuleData
     {
         $reader = new ArrayReader($data);
         $this->id = $reader->findString("id");
+        $this->taskId = $reader->findString("task_id");
         $this->name = $reader->findString("module_name");
         $this->order = $reader->findInt("order");
         $this->state = strtoupper($reader->findString("state") ?? "");
