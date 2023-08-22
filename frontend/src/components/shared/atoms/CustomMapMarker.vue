@@ -49,7 +49,7 @@ export default class CustomMapMarker extends Vue {
   @Prop() readonly draggable!: boolean;
   @Prop() readonly pixelPos!: [number, number];
   @Prop({ default: false }) readonly hide!: boolean;
-  @Prop({ default: true }) readonly clone!: boolean;
+  @Prop({ default: false }) readonly clone!: boolean;
   marker: Marker | undefined = undefined;
   map!: ShallowRef<Map | null>;
   observer = new MutationObserver(this.domChanged);

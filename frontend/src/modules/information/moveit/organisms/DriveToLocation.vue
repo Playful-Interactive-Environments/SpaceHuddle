@@ -101,7 +101,6 @@
       <CustomMapMarker
         :coordinates="mapVehiclePoint"
         anchor="center"
-        :clone="false"
       >
         <template v-slot:icon>
           <Joystick
