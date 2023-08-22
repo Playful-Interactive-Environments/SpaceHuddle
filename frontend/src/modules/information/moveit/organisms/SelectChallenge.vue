@@ -130,6 +130,16 @@
               </span>
             </div>
           </template>
+
+          <!--          spritesheet functionality:-->
+
+          <!--          <div class="spritesheet-container">
+            <img
+              class="vehicle-spritesheet"
+              :src="`/assets/games/moveit/vehicle/spritesheets/${vehicle.image}`"
+              :alt="vehicle.name"
+            />
+          </div>-->
           <img
             class="vehicle-image"
             :src="`/assets/games/moveit/vehicle/${vehicle.image}`"
@@ -414,6 +424,37 @@ export default class SelectChallenge extends Vue {
 .vehicle-image {
   height: 10rem;
 }
+
+/*spritesheet functionality:*/
+
+/*.spritesheet-container {
+  height: 10rem;
+  width: 30.7rem;
+  overflow: hidden;
+  margin: auto;
+}
+
+.vehicle-spritesheet {
+  height: 200%;
+  width: 200%;
+  object-position: 0 0;
+  animation: spritesheet-animation 2s steps(1) infinite;
+}
+
+@keyframes spritesheet-animation {
+  0% {
+    object-position: 0 0;
+  }
+  25% {
+    object-position: -30.7rem 0;
+  }
+  50% {
+    object-position: 0 -10rem;
+  }
+  75% {
+    object-position: -30.7rem -10rem;
+  }
+}*/
 
 .el-carousel::v-deep(.el-carousel__button) {
   background-color: var(--color-primary);
