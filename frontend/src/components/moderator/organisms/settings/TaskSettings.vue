@@ -298,7 +298,7 @@
               </tbody>
             </table>
             <TutorialStep
-              v-if="possibleViews.length > 1 && formData.input.length < 20"
+              v-if="possibleViews.length > minAddModuleLength && formData.input.length < maxInputs"
               step="inputAdd"
               type="taskSettings"
               :order="5"
@@ -612,6 +612,12 @@ interface FormDataDefinition {
   call: string;
 }
 
+interface InputFilter {
+  types: string[];
+  detailTypes: string[];
+  modules: string[];
+}
+
 enum InputOption {
   YES = 'yes',
   NO = 'no',
@@ -665,6 +671,12 @@ export default class TaskSettings extends Vue {
   openTabs: string[] = [];
   task: Task | null = null;
   inputOption: InputOption = InputOption.NO;
+  inputFilter: InputFilter = {
+    types: [],
+    detailTypes: [],
+    modules: [],
+  };
+  maxInputs = 20;
   inputOptionViews: View[] = [];
   sortOrderOptions: SortOrderOption[] = [];
   moduleScrollbar: { sizeWidth: string } = { sizeWidth: '' };
@@ -845,6 +857,11 @@ export default class TaskSettings extends Vue {
   //#endregion Tutorial
 
   //#region Input
+  get minAddModuleLength(): number {
+    if (this.inputOption == InputOption.OPTIONAL) return 0;
+    return 1;
+  }
+
   getEmptyInput(): InputData {
     return new InputData(
       this.possibleViews.length > 0
@@ -857,11 +874,23 @@ export default class TaskSettings extends Vue {
   }
 
   get possibleViews(): View[] {
+    const filterOptions = this.inputOptionViews.filter(
+      (view) =>
+        (this.inputFilter.types.length === 0 ||
+          this.inputFilter.types.includes(view.type.toLowerCase())) &&
+        (this.inputFilter.detailTypes.length === 0 ||
+          (view.detailType &&
+            this.inputFilter.detailTypes.includes(
+              view.detailType.toLowerCase()
+            ))) &&
+        (this.inputFilter.modules.length === 0 ||
+          this.inputFilter.modules.find((item) => view.modules.includes(item)))
+    );
     if (this.internalTaskId)
-      return this.inputOptionViews.filter(
+      return filterOptions.filter(
         (view) => view.taskId !== this.internalTaskId
       );
-    return this.inputOptionViews;
+    return filterOptions;
   }
 
   addInput(): void {
@@ -886,6 +915,12 @@ export default class TaskSettings extends Vue {
 
   async updateInputOption(): Promise<void> {
     let input = InputOption.NO;
+    let maxInputs = 20;
+    const inputFilter: InputFilter = {
+      types: [],
+      detailTypes: [],
+      modules: [],
+    };
     for (const module of this.possibleModuleTaskList) {
       if (module.active) {
         await getModuleConfig(
@@ -902,9 +937,47 @@ export default class TaskSettings extends Vue {
               break;
           }
         });
+        await getModuleConfig(
+          'inputFilterTypes',
+          TaskType[module.taskType.toUpperCase()],
+          module.moduleName
+        ).then((result) => {
+          if (result) {
+            inputFilter.types = JSON.parse(result);
+          }
+        });
+        await getModuleConfig(
+          'inputFilterCategories',
+          TaskType[module.taskType.toUpperCase()],
+          module.moduleName
+        ).then((result) => {
+          if (result) {
+            inputFilter.detailTypes = JSON.parse(result);
+          }
+        });
+        await getModuleConfig(
+          'inputFilterModules',
+          TaskType[module.taskType.toUpperCase()],
+          module.moduleName
+        ).then((result) => {
+          if (result) {
+            inputFilter.modules = JSON.parse(result);
+          }
+        });
+        await getModuleConfig(
+          'maxInputs',
+          TaskType[module.taskType.toUpperCase()],
+          module.moduleName
+        ).then((result) => {
+          if (result) {
+            maxInputs = result;
+          }
+        });
       }
     }
     this.inputOption = input;
+    this.inputFilter = inputFilter;
+    this.maxInputs = maxInputs;
     this.setDefaultInput();
   }
 
@@ -924,7 +997,7 @@ export default class TaskSettings extends Vue {
   }
 
   get showInput(): boolean {
-    return this.inputOption !== InputOption.NO;
+    return this.inputOption !== InputOption.NO && this.possibleViews.length > 0;
   }
 
   get inputMinCount(): number {
