@@ -277,7 +277,7 @@ export default class SelectChallenge extends Vue {
         this.$t(`module.information.moveit.enums.electricity.${energySource}`)
       );
       this.chartDataElectricityMix.datasets[0].data.push(
-        gameConfig.electricity[energySource].value
+        configCalculation.getElectricityValue(energySource)
       );
       (
         this.chartDataElectricityMix.datasets[0].backgroundColor as string[]
@@ -338,7 +338,7 @@ export default class SelectChallenge extends Vue {
         gameConfig.electricity[energySource].perUnit[
           'carbonDioxideEquivalent'
         ] *
-          (gameConfig.electricity[energySource].value / 100) *
+          (configCalculation.getElectricityValue(energySource) / 100) *
           (1 / gameConfig.fuel.electricity.perUnit.efficiency)
       );
       this.chartDataFuel.datasets.push(ds);

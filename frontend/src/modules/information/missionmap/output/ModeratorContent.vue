@@ -3,7 +3,7 @@
   <MissionProgress
     v-if="module"
     :progress="progress"
-    :progress-tabs="['origin', 'general']"
+    :progress-tabs="['origin', 'progress']"
   />
   <IdeaMap
     class="mapSpace"
@@ -291,11 +291,8 @@ import * as themeColors from '@/utils/themeColors';
 import MissionProgress from '@/modules/information/missionmap/organisms/MissionProgress.vue';
 import { ValidationRules } from '@/types/ui/ValidationRule';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
-
-interface ProgressValues {
-  origin: number;
-  general: number;
-}
+import * as progress from '@/modules/information/missionmap/utils/progress';
+import { MissionInputData } from '@/modules/information/missionmap/types/MissionInputData';
 
 @Options({
   computed: {
@@ -342,6 +339,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   };
   settingsIdea = this.addIdea;
   showSettings = false;
+  missionInput!: MissionInputData;
 
   getIdeaColor(idea: Idea): string {
     if (!idea.parameter.shareData)
@@ -370,22 +368,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     return {};
   }
 
-  get progress(): { [key: string]: ProgressValues } {
-    const result: { [key: string]: ProgressValues } = {};
-    if (this.module) {
-      for (const parameterName in gameConfig.parameter) {
-        const origin = this.module.parameter[parameterName];
-        result[parameterName] = {
-          origin: origin,
-          general: origin,
-        };
-        for (const idea of this.decidedIdeas) {
-          const influence = idea.parameter.influenceAreas[parameterName];
-          result[parameterName].general += influence;
-        }
-      }
-    }
-    return result;
+  get progress(): { [key: string]: progress.ProgressValues } {
+    return progress.getProgress(this.decidedIdeas, this.module);
   }
 
   isDecided(ideaId: string): boolean {
@@ -427,6 +411,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   @Watch('taskId', { immediate: true })
   reloadTaskSettings(): void {
     this.deregisterAll();
+    /*if (this.taskId) {
+      this.missionInput = new MissionInputData(this.taskId);
+    }*/
     this.cashEntry = ideaService.registerGetIdeasForTask(
       this.taskId,
       this.filter.orderType,
@@ -457,7 +444,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   updateTask(task: Task): void {
     if (task.modules.length === 1) this.module = task.modules[0];
     else {
-      this.module = task.modules.find((t) => t.name === 'map');
+      this.module = task.modules.find((t) => t.name === 'missionmap');
     }
     this.resetAddIdea();
   }
@@ -519,19 +506,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   calculateDecidedIdeas(): void {
-    if (this.votes.length > 0) {
-      this.decidedIdeas = [];
-      for (const idea of this.ideas) {
-        const votes = this.votes.filter((vote) => vote.ideaId === idea.id);
-        let sum = 0;
-        for (const vote of votes) {
-          sum += vote.parameter.points;
-        }
-        if (sum >= idea.parameter.points) {
-          this.decidedIdeas.push(idea);
-        }
-      }
-    }
+    this.decidedIdeas = progress.calculateDecidedIdeasFromVotes(
+      this.votes,
+      this.ideas
+    );
   }
 
   reloadTabState = true;
@@ -557,6 +535,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateVotes);
+    if (this.missionInput) this.missionInput.deregisterAll();
   }
 
   unmounted(): void {

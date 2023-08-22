@@ -109,6 +109,7 @@ import annotationPlugin from 'chartjs-plugin-annotation';
 import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
 import { Task } from '@/types/api/Task';
 import { Module } from '@/types/api/Module';
+import * as progress from '@/modules/information/missionmap/utils/progress';
 
 Chart.register(annotationPlugin);
 
@@ -219,25 +220,10 @@ export default class ModuleStatistic extends Vue {
   }
 
   calculateDecidedIdeas(): void {
-    if (this.votes.length > 0) {
-      const decidedIdeas: { idea: Idea; timestamp: number }[] = [];
-      for (const idea of this.ideas) {
-        const votes = this.votes.filter((vote) => vote.ideaId === idea.id);
-        let sum = 0;
-        let lastVote = 0;
-        for (const vote of votes) {
-          const timestamp = new Date(vote.timestamp).getTime();
-          sum += vote.parameter.points;
-          if (lastVote < timestamp) lastVote = timestamp;
-        }
-        if (sum >= idea.parameter.points) {
-          decidedIdeas.push({ idea: idea, timestamp: lastVote });
-        }
-      }
-      this.decidedIdeas = decidedIdeas
-        .sort((a, b) => a.timestamp - b.timestamp)
-        .map((item) => item.idea);
-    }
+    this.decidedIdeas = progress.calculateDecidedIdeasFromVotesSorted(
+      this.votes,
+      this.ideas
+    );
   }
 
   sortIdeasByVote(): void {

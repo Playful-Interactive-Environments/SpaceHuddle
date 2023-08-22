@@ -15,7 +15,21 @@
     </div>
   </el-form-item>
   <el-form-item
-    v-for="parameter of Object.keys(gameConfig.parameter)"
+    v-if="hasInput"
+    :label="
+      $t(
+        'module.information.missionmap.moderatorConfig.insertInitProgressionFromInput'
+      )
+    "
+    :prop="`${rulePropPath}.insertInitProgressionFromInput`"
+  >
+    <el-switch
+      class="level-item"
+      v-model="modelValue.insertInitProgressionFromInput"
+    />
+  </el-form-item>
+  <el-form-item
+    v-for="parameter of ManuelInitParameter"
     :key="parameter"
     :label="$t(`module.information.missionmap.gameConfig.${parameter}`)"
     :prop="`${rulePropPath}.${parameter}`"
@@ -92,8 +106,8 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import { ValidationRuleDefinition, defaultFormRules } from '@/utils/formRules';
-import { MglNavigationControl, MglMap } from 'vue-maplibre-gl';
+import { defaultFormRules, ValidationRuleDefinition } from '@/utils/formRules';
+import { MglMap, MglNavigationControl } from 'vue-maplibre-gl';
 import * as mapStyle from '@/utils/mapStyle';
 import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -123,9 +137,17 @@ export default class ModeratorConfig extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
+  @Prop({ default: {} }) formData!: any;
 
   mapCenter = [...defaultCenter] as [number, number];
   mapZoom = 5;
+  hasInput = false;
+
+  get ManuelInitParameter(): string[] {
+    if (this.hasInput && this.modelValue.insertInitProgressionFromInput)
+      return [];
+    return Object.keys(gameConfig.parameter);
+  }
 
   @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {
@@ -134,6 +156,9 @@ export default class ModeratorConfig extends Vue {
         if (!(parameter in this.modelValue)) {
           this.modelValue[parameter] = 0;
         }
+      }
+      if (!('insertInitProgressionFromInput' in this.modelValue)) {
+        this.modelValue.insertInitProgressionFromInput = true;
       }
       if (!('effectElectricity' in this.modelValue)) {
         this.modelValue.effectElectricity = false;
@@ -164,6 +189,11 @@ export default class ModeratorConfig extends Vue {
         this.mapZoom = this.modelValue.mapZoom;
       }
     }
+  }
+
+  @Watch('formData.input.length', { immediate: true })
+  onInputChanged(): void {
+    this.hasInput = this.formData.input.length > 0;
   }
 
   changeSection(event: any): void {

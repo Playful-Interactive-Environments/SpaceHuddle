@@ -57,9 +57,10 @@ export const electricityUnits = (): any => {
   };
   for (const energySource of Object.keys(gameConfig.electricity)) {
     const energy = gameConfig.electricity[energySource];
+    const energyValue = getElectricityValue(energySource);
     for (const particleSource of Object.keys(gameConfig.particles)) {
       perUnit[particleSource] +=
-        (energy.perUnit[particleSource] * energy.value) / 100;
+        (energy.perUnit[particleSource] * energyValue) / 100;
     }
   }
   return {
@@ -71,6 +72,12 @@ export const electricityUnits = (): any => {
     kg: 1,
     efficiency: gameConfig.fuel.electricity.perUnit.efficiency,
   };
+};
+
+export const getElectricityValue = (energySource: string): number => {
+  return globalThis.electricityProgress
+    ? globalThis.electricityProgress[energySource].progress
+    : gameConfig.electricity[energySource].value;
 };
 
 export const fuelUnits = (fuel: FuelType): any => {

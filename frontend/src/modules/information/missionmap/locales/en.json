@@ -25,7 +25,8 @@
     "minPoints": "minimum required points per participant",
     "maxPoints": "maximum points to be spent per participant",
     "explanation": "explanations selectable for the participant",
-    "maxRatingStars": "max rating stars"
+    "maxRatingStars": "max rating stars",
+    "insertInitProgressionFromInput": "insert starting progression from input"
   },
   "moderatorContent": {
     "settingsTitle": "idea settings",
@@ -55,6 +56,7 @@
   "enum": {
     "progress": {
       "origin": "initial",
+      "progress": "result",
       "general": "joint",
       "own": "own part",
       "ownFuture": "own path"

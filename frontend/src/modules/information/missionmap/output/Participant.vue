@@ -248,6 +248,7 @@ import * as themeColors from '@/utils/themeColors';
 import { setEmptyParameterIfNotExists } from '@/modules/information/missionmap/utils/parameter';
 import { ElMessageBox } from 'element-plus';
 import MissionProgress from '@/modules/information/missionmap/organisms/MissionProgress.vue';
+import * as progress from '@/modules/information/missionmap/utils/progress';
 
 interface ProgressValues {
   origin: number;
@@ -515,17 +516,10 @@ export default class Participant extends Vue {
   }
 
   calculateDecidedIdeas(): void {
-    if (this.voteResults.length > 0) {
-      this.decidedIdeas = [];
-      for (const idea of this.ideas) {
-        const vote = this.voteResults.find((vote) => vote.ideaId === idea.id);
-        if (vote) {
-          if (vote.sum >= idea.parameter.points) {
-            this.decidedIdeas.push(idea);
-          }
-        }
-      }
-    }
+    this.decidedIdeas = progress.calculateDecidedIdeasFromResult(
+      this.voteResults,
+      this.ideas
+    );
   }
 
   sortIdeasByVote(): void {

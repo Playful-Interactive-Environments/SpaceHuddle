@@ -62,6 +62,9 @@ import ModuleInfo from '@/components/participant/molecules/ModuleInfo.vue';
 import * as formulas from '@/modules/information/moveit/utils/formulas';
 import * as configCalculation from '@/modules/information/moveit/utils/configCalculation';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
+import { MissionProgress } from '@/modules/information/missionmap/types/MissionProgress';
+import * as taskService from '@/services/task-service';
+import { Task } from '@/types/api/Task';
 
 enum GameStep {
   Select = 'select',
@@ -103,6 +106,7 @@ export default class Participant extends Vue {
   };
   startTime = Date.now();
   stepTime = Date.now();
+  inputTaskId = '';
 
   trackingData: TrackingData[] = [];
   gameStep = GameStep.Select;
@@ -111,6 +115,7 @@ export default class Participant extends Vue {
   GameState = GameState;
 
   trackingManager!: TrackingManager;
+  missionProgress!: MissionProgress;
 
   get tutorialList(): string[] {
     switch (this.gameStep) {
@@ -188,7 +193,9 @@ export default class Participant extends Vue {
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
+    cashService.deregisterAllGet(this.updateTask);
     if (this.trackingManager) this.trackingManager.deregisterAll();
+    if (this.missionProgress) this.missionProgress.deregisterAll();
   }
 
   unmounted(): void {
@@ -208,6 +215,30 @@ export default class Participant extends Vue {
         particleState: {},
         rate: 0,
       });
+      taskService.registerGetTaskById(
+        this.taskId,
+        this.updateTask,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
+    }
+  }
+
+  updateTask(task: Task): void {
+    if (task.parameter.input.length > 0)
+      this.inputTaskId = task.parameter.input[0].view.id;
+  }
+
+  @Watch('inputTaskId', { immediate: true })
+  onInputTaskIdChanged(): void {
+    if (this.inputTaskId) {
+      if (this.missionProgress) this.missionProgress.deregisterAll();
+      this.missionProgress = new MissionProgress(
+        this.inputTaskId,
+        null,
+        EndpointAuthorisationType.PARTICIPANT,
+        true
+      );
     }
   }
 

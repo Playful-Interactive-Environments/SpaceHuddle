@@ -4,7 +4,7 @@
       <MissionProgress
         v-if="showProgress"
         :progress="progress"
-        :progress-tabs="['origin', 'general']"
+        :progress-tabs="['origin', 'progress']"
       />
     </el-header>
     <el-container>
@@ -39,7 +39,6 @@
               :selectionColor="selectionColor"
               :background-color="getIdeaColor(idea)"
               v-model:collapseIdeas="filter.collapseIdeas"
-              v-model:fadeIn="ideaTransform[idea.id]"
               v-on:click="selectedIdea = idea"
             >
               <div>
@@ -92,11 +91,7 @@ import * as themeColors from '@/utils/themeColors';
 import * as votingService from '@/services/voting-service';
 import { VoteParameterResult } from '@/types/api/Vote';
 import MissionProgress from '@/modules/information/missionmap/organisms/MissionProgress.vue';
-
-interface ProgressValues {
-  origin: number;
-  general: number;
-}
+import * as progress from '@/modules/information/missionmap/utils/progress';
 
 @Options({
   computed: {
@@ -118,7 +113,6 @@ export default class PublicScreen extends Vue {
   authHeaderTyp!: EndpointAuthorisationType;
   module: Module | undefined = undefined;
   ideas: Idea[] = [];
-  ideaTransform: { [id: string]: boolean } = {};
   readonly newTimeSpan = 10000;
   filter: FilterData = { ...defaultFilterData };
   sizeLoaded = false;
@@ -129,22 +123,8 @@ export default class PublicScreen extends Vue {
   selectionColor = '#0192d0';
   showProgress = false;
 
-  get progress(): { [key: string]: ProgressValues } {
-    const result: { [key: string]: ProgressValues } = {};
-    if (this.module) {
-      for (const parameterName in gameConfig.parameter) {
-        const origin = this.module.parameter[parameterName];
-        result[parameterName] = {
-          origin: origin,
-          general: origin,
-        };
-        for (const idea of this.decidedIdeas) {
-          const influence = idea.parameter.influenceAreas[parameterName];
-          result[parameterName].general += influence;
-        }
-      }
-    }
-    return result;
+  get progress(): { [key: string]: progress.ProgressValues } {
+    return progress.getProgress(this.decidedIdeas, this.module);
   }
 
   getIdeaColor(idea: Idea): string {
@@ -158,7 +138,6 @@ export default class PublicScreen extends Vue {
   }
 
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
-  votingParameterCash!: cashService.SimplifiedCashEntry<VoteParameterResult[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
@@ -176,7 +155,7 @@ export default class PublicScreen extends Vue {
       this.authHeaderTyp,
       20
     );
-    this.votingParameterCash = votingService.registerGetParameterResult(
+    votingService.registerGetParameterResult(
       this.taskId,
       'points',
       this.updateVoteResult,
@@ -198,13 +177,12 @@ export default class PublicScreen extends Vue {
     );
     if (task.modules.length === 1) this.module = task.modules[0];
     else {
-      this.module = task.modules.find((t) => t.name === 'map');
+      this.module = task.modules.find((t) => t.name === 'missionmap');
     }
     if (this.module) this.showProgress = true;
   }
 
   updateIdeas(ideas: Idea[]): void {
-    const currentDate = new Date();
     ideas = ideas.filter((idea) => idea.parameter.shareData);
     ideas = this.filter.orderAsc ? ideas : ideas.reverse();
     ideas = ideaService.filterIdeas(
@@ -213,15 +191,6 @@ export default class PublicScreen extends Vue {
       this.filter.textFilter
     );
     this.ideas = ideas;
-
-    this.ideaTransform = Object.assign(
-      {},
-      ...this.ideas.map((idea) => {
-        const timeSpan =
-          currentDate.getTime() - new Date(idea.timestamp).getTime();
-        return { [idea.id]: timeSpan <= this.newTimeSpan };
-      })
-    );
     this.calculateDecidedIdeas();
   }
 
@@ -231,22 +200,16 @@ export default class PublicScreen extends Vue {
   }
 
   calculateDecidedIdeas(): void {
-    if (this.voteResults.length > 0) {
-      this.decidedIdeas = [];
-      for (const idea of this.ideas) {
-        const vote = this.voteResults.find((vote) => vote.ideaId === idea.id);
-        if (vote) {
-          if (vote.sum >= idea.parameter.points) {
-            this.decidedIdeas.push(idea);
-          }
-        }
-      }
-    }
+    this.decidedIdeas = progress.calculateDecidedIdeasFromResult(
+      this.voteResults,
+      this.ideas
+    );
   }
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateIdeas);
+    cashService.deregisterAllGet(this.updateVoteResult);
   }
 
   mounted(): void {

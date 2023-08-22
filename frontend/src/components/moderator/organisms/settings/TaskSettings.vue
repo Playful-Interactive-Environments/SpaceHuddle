@@ -413,6 +413,7 @@
                 :ref="component.value.componentName"
                 v-model="component.value.parameter"
                 :module-id="component.value.moduleId"
+                :formData="formData"
                 :is="component.value.componentName"
                 :key="component.value.componentName"
                 :rulePropPath="`moduleParameterComponents[${component.index}].parameter`"
@@ -549,7 +550,7 @@ interface ModuleComponentDefinition {
   parameter: any;
 }
 
-class InputData {
+export class InputData {
   view = '';
   maxCount: number | null = null;
   filter: string[] = [];

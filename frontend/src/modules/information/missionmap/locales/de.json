@@ -25,7 +25,8 @@
     "minPoints": "erforderliche Mindestpunktzahl pro Teilnehmer",
     "maxPoints": "maximal zu vergebende Punkte pro Teilnehmer",
     "explanation": "für den Teilnehmer auswählbare Erklärungen",
-    "maxRatingStars": "maximale Bewertungssterne"
+    "maxRatingStars": "maximale Bewertungssterne",
+    "insertInitProgressionFromInput": "Startprogression von der Eingabe einfügen"
   },
   "moderatorContent": {
     "settingsTitle": "Ideeneinstellungen",
@@ -55,6 +56,7 @@
   "enum": {
     "progress": {
       "origin": "Ausgangssituation",
+      "progress": "Ergebniss",
       "general": "gemeinsam",
       "own": "eigener Anteil",
       "ownFuture": "eigener Weg"

@@ -1,7 +1,7 @@
 {
   "icon": "map-location",
   "type": "main",
-  "input": "optional",
+  "input": "no",
   "inputFilterTypes": "[\"task\"]",
   "inputFilterCategories": "[\"information\"]",
   "inputFilterModules": "[\"missionmap\"]",

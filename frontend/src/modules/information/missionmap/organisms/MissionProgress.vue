@@ -60,7 +60,7 @@ interface ProgressValues {
 export default class MissionProgress extends Vue {
   @Prop() readonly progress!: { [key: string]: ProgressValues };
   @Prop({ default: [] }) readonly progressTabs!: string[];
-  activeTab = 'general';
+  activeTab = '';
 
   getStateColor(state: number): string {
     if (state < 0) return themeColors.getRedColor();
@@ -69,7 +69,7 @@ export default class MissionProgress extends Vue {
   }
 
   async mounted(): Promise<void> {
-    //
+    this.activeTab = this.progressTabs[0];
   }
 
   deregisterAll(): void {
