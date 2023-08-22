@@ -24,7 +24,8 @@
     "minParticipants": "mindestens erforderliche Teilnehmer",
     "minPoints": "erforderliche Mindestpunktzahl pro Teilnehmer",
     "maxPoints": "maximal zu vergebende Punkte pro Teilnehmer",
-    "explanation": "für den Teilnehmer auswählbare Erklärungen"
+    "explanation": "für den Teilnehmer auswählbare Erklärungen",
+    "maxRatingStars": "maximale Bewertungssterne"
   },
   "moderatorContent": {
     "settingsTitle": "Ideeneinstellungen",

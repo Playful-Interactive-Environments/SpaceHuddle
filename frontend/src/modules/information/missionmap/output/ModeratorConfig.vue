@@ -42,6 +42,12 @@
     <el-switch class="level-item" v-model="modelValue.effectElectricity" />
   </el-form-item>
   <el-form-item
+    :label="$t('module.information.missionmap.moderatorConfig.maxRatingStars')"
+    :prop="`${rulePropPath}.maxRatingStars`"
+  >
+    <el-input-number v-model="modelValue.maxRatingStars" :min="3" :max="10" />
+  </el-form-item>
+  <el-form-item
     :label="$t('module.information.missionmap.moderatorConfig.minParticipants')"
     :prop="`${rulePropPath}.minParticipants`"
   >
@@ -131,6 +137,9 @@ export default class ModeratorConfig extends Vue {
       }
       if (!('effectElectricity' in this.modelValue)) {
         this.modelValue.effectElectricity = false;
+      }
+      if (!('maxRatingStars' in this.modelValue)) {
+        this.modelValue.maxRatingStars = 3;
       }
       if (!('minParticipants' in this.modelValue)) {
         this.modelValue.minParticipants = 3;

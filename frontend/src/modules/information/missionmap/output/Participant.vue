@@ -96,7 +96,14 @@
         :label="$t('module.information.missionmap.participant.rate')"
         prop="points"
       >
-        <el-rate v-model="selectedVote.rate" :max="3"></el-rate>
+        <el-rate
+          v-model="selectedVote.rate"
+          :max="
+            module.parameter.maxRatingStars
+              ? module.parameter.maxRatingStars
+              : 3
+          "
+        ></el-rate>
       </el-form-item>
       <el-form-item
         :label="$t('module.information.missionmap.participant.points')"

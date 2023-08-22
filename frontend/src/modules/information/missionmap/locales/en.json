@@ -24,7 +24,8 @@
     "minParticipants": "minimum required participants",
     "minPoints": "minimum required points per participant",
     "maxPoints": "maximum points to be spent per participant",
-    "explanation": "explanations selectable for the participant"
+    "explanation": "explanations selectable for the participant",
+    "maxRatingStars": "max rating stars"
   },
   "moderatorContent": {
     "settingsTitle": "idea settings",

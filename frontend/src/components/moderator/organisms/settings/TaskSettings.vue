@@ -298,7 +298,10 @@
               </tbody>
             </table>
             <TutorialStep
-              v-if="possibleViews.length > minAddModuleLength && formData.input.length < maxInputs"
+              v-if="
+                possibleViews.length > minAddModuleLength &&
+                formData.input.length < maxInputs
+              "
               step="inputAdd"
               type="taskSettings"
               :order="5"
