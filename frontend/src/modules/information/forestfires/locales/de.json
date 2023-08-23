@@ -13,10 +13,6 @@
         "campfire": {
           "name": "Lagerfeuer",
           "description": "Lagerfeuer können vom Wind neu angefacht werden und so einen Waldbrand auslösen."
-        },
-        "bottle": {
-          "name": "Glasflasche",
-          "description": "Zurückgelassene Glasflaschen aller Art wirken unter den richtigen Umständen wie eine Linse und fokussieren das Licht. Am Brennpunkt kann leicht ein Feuer entstehen!"
         }
       },
       "red_herring": {
@@ -27,6 +23,10 @@
         "bug": {
           "name": "Käfer",
           "description": "Käfer sind Teil des natürlichen Ökosystems, bilden die Grundlage der Nahrungskette für andere Tiere und lockern den Boden. Ihr Überleben ist daher wichtig für das Überleben des Waldes und anderer Tiere."
+        },
+        "bottle": {
+          "name": "Glasflasche",
+          "description": "Zurückgelassene Glasflaschen aller Art wirken unter den richtigen Umständen wie eine Linse und fokussieren das Licht. Am Brennpunkt kann leicht ein Feuer entstehen!"
         }
       }
     }

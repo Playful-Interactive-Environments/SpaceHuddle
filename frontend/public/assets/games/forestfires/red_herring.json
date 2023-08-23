@@ -1,5 +1,20 @@
 {
 "frames": {
+	"bottleBeer": {
+		"frame": {"x":533, "y":1328, "w":69, "h":256},
+		"spriteSourceSize": {"x":2,"y":0,"w":74,"h":256},
+		"sourceSize": {"w":74,"h":256}
+	},
+	"bottleWhite": {
+		"frame": {"x":438, "y":1328, "w":94, "h":256},
+		"spriteSourceSize": {"x":3,"y":0,"w":100,"h":256},
+		"sourceSize": {"w":100,"h":256}
+	},
+	"bottleWine": {
+		"frame": {"x":603, "y":1328, "w":60, "h":256},
+		"spriteSourceSize": {"x":2,"y":0,"w":64,"h":256},
+		"sourceSize": {"w":64,"h":256}
+	},
 	"bug": {
 		"frame": {"x":1097, "y":787, "w":593, "h":750},
 		"spriteSourceSize": {"x":8,"y":13,"w":608,"h":776},
@@ -29,7 +44,7 @@
 },
 "meta": {
 	"image": "red_herring.png",
-	"size": {"w": 1691, "h": 1538},
+	"size": {"w": 1691, "h": 1585},
 	"scale": "1"
 }
 }

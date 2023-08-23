@@ -300,14 +300,16 @@ export default class PlayState extends Vue {
   async onLevelDataChanged(): Promise<void> {
     for (const value of Object.values(this.levelData)) {
       if (!value.type) value.type = this.gameConfig.settings.defaultType;
-      await until(() => this.hasTexture(value.type, value.name));
-      this.placedObjects.push(
-        placeable.convertToDetailData(
-          value,
-          this.gameConfig,
-          this.getTexture(value.type, value.name)
-        )
-      );
+      await until(() => this.spriteSheetLoaded(value.type));
+      if (this.hasTexture(value.type, value.name)) {
+        this.placedObjects.push(
+          placeable.convertToDetailData(
+            value,
+            this.gameConfig,
+            this.getTexture(value.type, value.name)
+          )
+        );
+      }
     }
     this.totalCount = this.collectableObjects.length;
   }
@@ -321,6 +323,11 @@ export default class PlayState extends Vue {
     if (spriteSheet && spriteSheet.textures)
       return spriteSheet.textures[objectName];
     return '';
+  }
+
+  spriteSheetLoaded(objectType: string): boolean {
+    const spriteSheet = this.getSpriteSheetForType(objectType);
+    return !!spriteSheet && !!spriteSheet.textures;
   }
 
   hasTexture(objectType: string, objectName: string): boolean {

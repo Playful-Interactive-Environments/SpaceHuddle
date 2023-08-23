@@ -96,6 +96,7 @@
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
+           "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
              "icon": "map-location",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
            "path": "information/missionmap"  

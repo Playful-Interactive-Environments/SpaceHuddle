@@ -35,6 +35,15 @@
       "width": 7,
       "shape": "circle",
       "explanationKey": "campfire"
+    }
+  },
+  "red_herring": {
+    "settings": {
+      "icon": "masks-theater",
+      "order": 1,
+      "collectable": false,
+      "spritesheet": "/assets/games/forestfires/red_herring.json",
+      "explanationText": "module.information.forestfires.participant.placeables"
     },
     "bottleWhite": {
       "escalationLevels": [
@@ -68,15 +77,6 @@
       "width": 1,
       "shape": "rect",
       "explanationKey": "bottle"
-    }
-  },
-  "red_herring": {
-    "settings": {
-      "icon": "masks-theater",
-      "order": 1,
-      "collectable": false,
-      "spritesheet": "/assets/games/forestfires/red_herring.json",
-      "explanationText": "module.information.forestfires.participant.placeables"
     },
     "turtle": {
       "severity": 1,

@@ -13,10 +13,6 @@
         "campfire": {
           "name": "Campfire",
           "description": "Campfires can be rekindled by the wind, causing a forest fire."
-        },
-        "bottle":{
-          "name": "Glass Bottle",
-          "description": "Glass bottles may act like strong lenses under the right circumstances. They focus incoming light to a single spot, potentially causing a fire."
         }
       },
       "red_herring": {
@@ -27,6 +23,10 @@
         "bug": {
           "name": "Bugs",
           "description": "Beetles are part of the natural ecosystem, form the basis of the food chain for other animals and loosen the soil. Their survival is therefore important for the survival of the forest and other animals."
+        },
+        "bottle":{
+          "name": "Glass Bottle",
+          "description": "Glass bottles may act like strong lenses under the right circumstances. They focus incoming light to a single spot, potentially causing a fire."
         }
       }
     }
