@@ -94,6 +94,7 @@ export default class SelectState extends Vue {
         (value, index, self) =>
           self.findIndex((item) => item === value) === index
       );
+    this.result = [];
     for (const ideaId of ideaList) {
       const played = steps
         .filter(
