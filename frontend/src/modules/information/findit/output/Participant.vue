@@ -3,7 +3,7 @@
     <module-info
       v-if="gameState === GameState.Info && module"
       translation-path="module.information.findit.participant.tutorial"
-      image-directory="/assets/games/forestfires/tutorial"
+      image-directory="/assets/games/findit/tutorial"
       :module-info-entry-data-list="tutorialList"
       :info-type="`find-it-${gameStep}`"
       @infoRead="gameState = GameState.Game"
@@ -12,19 +12,21 @@
     <SelectState
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
       :task-id="taskId"
+      :game-config="totalGameConfig"
       @selectionDone="levelSelected"
     />
     <BuildState
       v-if="gameStep === GameStep.Build && gameState === GameState.Game"
       :taskId="taskId"
-      :gameConfig="gameConfig"
+      :gameConfig="totalGameConfig[selectedLevelType]"
+      :level-type="selectedLevelType"
       @editFinished="editFinished"
     />
     <PlayState
       v-if="gameStep === GameStep.Play && gameState === GameState.Game"
       :taskId="taskId"
       :level-data="selectedLevel"
-      :gameConfig="gameConfig"
+      :gameConfig="totalGameConfig[selectedLevelType]"
       @playFinished="playFinished"
     />
   </div>
@@ -51,6 +53,7 @@ import * as placeable from '@/modules/information/findit/types/Placeable';
 import * as PIXI from 'pixi.js';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
+import totalGameConfig from '@/modules/information/findit/data/gameConfig.json';
 
 export enum GameStep {
   Select = 'select',
@@ -79,10 +82,10 @@ export default class Participant extends Vue {
   @Prop() readonly moduleId!: string;
   @Prop({ default: false }) readonly useFullSize!: boolean;
   @Prop({ default: '' }) readonly backgroundClass!: string;
-  @Prop({ default: {} }) readonly gameConfig!: any;
   module: Module | null = null;
   selectedLevel: placeable.PlaceableBase[] = [];
   selectedLevelId: string | null = null;
+  selectedLevelType: string | null = null;
   spritesheet!: PIXI.Spritesheet;
 
   // Flag which indicates if the window size has finished calculating.
@@ -93,12 +96,13 @@ export default class Participant extends Vue {
   GameStep = GameStep;
   gameState = GameState.Info;
   GameState = GameState;
+  totalGameConfig = totalGameConfig;
 
   trackingManager!: TrackingManager;
 
   // Vue Callbacks for mounting and unmounting / loading and unloading.
   mounted(): void {
-    PIXI.Assets.load('/assets/games/forestfires/tutorial/animations.json').then(
+    PIXI.Assets.load('/assets/games/findit/tutorial/animations.json').then(
       (sheet) => {
         this.spritesheet = sheet;
       }
@@ -119,7 +123,7 @@ export default class Participant extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
-    PIXI.Assets.unload('/assets/games/forestfires/tutorial/animations.json');
+    PIXI.Assets.unload('/assets/games/findit/tutorial/animations.json');
   }
 
   deregisterAll(): void {
@@ -127,7 +131,12 @@ export default class Participant extends Vue {
     if (this.trackingManager) this.trackingManager.deregisterAll();
   }
 
-  levelSelected(level: placeable.PlaceableBase[], levelId: string | null) {
+  levelSelected(
+    levelType: string,
+    level: placeable.PlaceableBase[],
+    levelId: string | null
+  ) {
+    this.selectedLevelType = levelType;
     this.selectedLevel = level;
     this.selectedLevelId = levelId;
     this.gameState = GameState.Info;

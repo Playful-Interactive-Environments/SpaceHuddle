@@ -115,6 +115,5 @@ export function getElectricityProgress(
       }
     }
   }
-  console.log(result, decidedIdeas);
   return result;
 }

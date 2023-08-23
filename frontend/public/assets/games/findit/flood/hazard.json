@@ -1,0 +1,40 @@
+{
+"frames": {
+	"bottleBeer": {
+		"frame": {"x":577, "y":0, "w":69, "h":256},
+		"spriteSourceSize": {"x":2,"y":0,"w":74,"h":256},
+		"sourceSize": {"w":74,"h":256}
+	},
+	"bottleWhite": {
+		"frame": {"x":482, "y":0, "w":94, "h":256},
+		"spriteSourceSize": {"x":3,"y":0,"w":100,"h":256},
+		"sourceSize": {"w":100,"h":256}
+	},
+	"bottleWine": {
+		"frame": {"x":595, "y":257, "w":60, "h":256},
+		"spriteSourceSize": {"x":2,"y":0,"w":64,"h":256},
+		"sourceSize": {"w":64,"h":256}
+	},
+	"fish": {
+		"frame": {"x":404, "y":383, "w":190, "h":177},
+		"spriteSourceSize": {"x":34,"y":28,"w":256,"h":232},
+		"sourceSize": {"w":256,"h":232}
+	},
+	"man": {
+		"frame": {"x":0, "y":0, "w":481, "h":382},
+		"spriteSourceSize": {"x":16,"y":64,"w":512,"h":512},
+		"sourceSize": {"w":512,"h":512}
+	},
+	"woman": {
+		"frame": {"x":0, "y":383, "w":403, "h":329},
+		"spriteSourceSize": {"x":55,"y":91,"w":512,"h":512},
+		"sourceSize": {"w":512,"h":512}
+	}
+
+},
+"meta": {
+	"image": "hazard.png",
+	"size": {"w": 656, "h": 713},
+	"scale": "1"
+}
+}

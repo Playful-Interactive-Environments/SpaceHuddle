@@ -214,6 +214,7 @@ export interface BuildStateResult {
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ForestFireEdit extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop() readonly levelType!: string;
   @Prop({ default: {} }) readonly gameConfig!: any;
   activeObjectType = '';
   activeObjectName = '';
@@ -379,9 +380,12 @@ export default class ForestFireEdit extends Vue {
       this.taskId,
       {
         keywords: name,
-        parameter: this.renderList.map((obj) => {
-          return placeable.convertToBase(obj);
-        }),
+        parameter: {
+          type: this.levelType,
+          items: this.renderList.map((obj) => {
+            return placeable.convertToBase(obj);
+          }),
+        },
       },
       EndpointAuthorisationType.PARTICIPANT
     );

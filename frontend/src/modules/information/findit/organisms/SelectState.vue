@@ -1,15 +1,42 @@
 <template>
   <div>
-    <div class="link new" @click="levelSelected(null)">
-      {{ $t('module.information.findit.participant.newLevel') }}
+    <div class="link new">
+      <el-dropdown
+        v-on:command="levelSelected(null, $event)"
+        size="large"
+        popper-class="select-new-level-type"
+      >
+        <span class="link-text">
+          {{ $t('module.information.findit.participant.newLevel') }}
+        </span>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item
+              v-for="configType of Object.keys(gameConfig)"
+              :key="configType"
+              :command="configType"
+            >
+              {{
+                $t(
+                  `module.information.findit.participant.placeables.${configType}.name`
+                )
+              }}
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
     </div>
     <div
       class="link media"
       :class="{ own: isOwnLevel(idea) }"
       v-for="idea of ideas"
       :key="idea.id"
+      :style="{ '--level-type-color': getSettingsForLevel(idea).color }"
       @click="levelSelected(idea)"
     >
+      <div class="media-left">
+        <font-awesome-icon :icon="getSettingsForLevel(idea).icon" />
+      </div>
       <div class="media-content">{{ idea.keywords }}</div>
       <div class="media-right">
         <el-rate
@@ -35,17 +62,31 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as taskParticipantService from '@/services/task-participant-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import { GameStep } from '@/modules/information/findit/output/Participant.vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 @Options({
-  components: {},
+  components: { FontAwesomeIcon },
   emits: ['selectionDone'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class SelectState extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: {} }) readonly gameConfig!: any;
   ideas: Idea[] = [];
   result: TaskParticipantIterationStep[] = [];
   mapping: { [key: string]: number } = {};
+
+  get defaultLevelType(): string {
+    return Object.keys(this.gameConfig)[0];
+  }
+
+  getLevelTypeForLevel(level: Idea): string {
+    return level.parameter.type ? level.parameter.type : this.defaultLevelType;
+  }
+
+  getSettingsForLevel(level: Idea): any {
+    return this.gameConfig[this.getLevelTypeForLevel(level)].settings;
+  }
 
   unmounted(): void {
     cashService.deregisterAllGet(this.updateIdeas);
@@ -121,19 +162,30 @@ export default class SelectState extends Vue {
     return level.participantId === authService.getParticipantId();
   }
 
-  levelSelected(level: Idea | null) {
+  levelSelected(level: Idea | null, levelType: string | null = null) {
     if (!level) {
-      this.$emit('selectionDone', [], null);
+      this.$emit('selectionDone', levelType, [], null);
     } else {
+      const items = level.parameter.items
+        ? level.parameter.items
+        : level.parameter;
+      const levelType = this.getLevelTypeForLevel(level);
       this.$emit(
         'selectionDone',
-        level.parameter as placeable.PlaceableBase[],
+        levelType,
+        items as placeable.PlaceableBase[],
         level.id
       );
     }
   }
 }
 </script>
+
+<style lang="scss">
+.select-new-level-type {
+  width: 90%;
+}
+</style>
 
 <style lang="scss" scoped>
 .link {
@@ -155,5 +207,29 @@ export default class SelectState extends Vue {
 .el-rate {
   --el-rate-fill-color: white;
   --el-rate-disabled-void-color: var(--color-gray-inactive);
+}
+
+.el-dropdown {
+  width: 100%;
+  color: white;
+
+  .link-text {
+    width: 100%;
+  }
+}
+
+.el-dropdown-menu {
+  width: 100%;
+}
+
+.media-left {
+  font-size: 2rem;
+  background-color: white;
+  color: var(--level-type-color);
+  margin: -0.8rem;
+  margin-right: 1rem;
+  padding: 0.8rem;
+  border-radius: calc(var(--border-radius) - 0.2rem) 0 0
+    calc(var(--border-radius) - 0.2rem);
 }
 </style>

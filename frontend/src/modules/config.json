@@ -81,15 +81,8 @@
            "moderatorConfig": "output/ModeratorConfig",  
            "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
-             "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": false,  
+             "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  
            "path": "information/findit"  
-       },  
-       "forestfires": {  
-           "participant": "output/Participant",  
-           "moderatorConfig": "output/ModeratorConfig",  
-           "locales": "de,en,",  
-             "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  "fallback": "findit",  
-           "path": "information/forestfires"  
        },  
        "missionmap": {  
            "publicScreen": "output/PublicScreen",  
@@ -98,7 +91,7 @@
            "moderatorConfig": "output/ModeratorConfig",  
            "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
-             "icon": "map-location",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
+             "icon": "map-location",  "type": "main",  "input": "no",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"information\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  
            "path": "information/missionmap"  
        },  
        "moveit": {  
@@ -106,7 +99,7 @@
            "moderatorConfig": "output/ModeratorConfig",  
            "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
-             "icon": "route",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  
+             "icon": "route",  "type": "main",  "input": "optional",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"information\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  "usable": true,  
            "path": "information/moveit"  
        },  
        "quiz": {  

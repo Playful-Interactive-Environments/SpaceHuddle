@@ -1,0 +1,50 @@
+{
+"frames": {
+	"bottleBeer": {
+		"frame": {"x":533, "y":1328, "w":69, "h":256},
+		"spriteSourceSize": {"x":2,"y":0,"w":74,"h":256},
+		"sourceSize": {"w":74,"h":256}
+	},
+	"bottleWhite": {
+		"frame": {"x":438, "y":1328, "w":94, "h":256},
+		"spriteSourceSize": {"x":3,"y":0,"w":100,"h":256},
+		"sourceSize": {"w":100,"h":256}
+	},
+	"bottleWine": {
+		"frame": {"x":603, "y":1328, "w":60, "h":256},
+		"spriteSourceSize": {"x":2,"y":0,"w":64,"h":256},
+		"sourceSize": {"w":64,"h":256}
+	},
+	"bug": {
+		"frame": {"x":1097, "y":787, "w":593, "h":750},
+		"spriteSourceSize": {"x":8,"y":13,"w":608,"h":776},
+		"sourceSize": {"w":608,"h":776}
+	},
+	"dragonfly": {
+		"frame": {"x":0, "y":0, "w":1121, "h":786},
+		"spriteSourceSize": {"x":13,"y":18,"w":1146,"h":820},
+		"sourceSize": {"w":1146,"h":820}
+	},
+	"earthworm": {
+		"frame": {"x":0, "y":787, "w":1096, "h":232},
+		"spriteSourceSize": {"x":7,"y":8,"w":1110,"h":248},
+		"sourceSize": {"w":1110,"h":248}
+	},
+	"ladybug": {
+		"frame": {"x":0, "y":1020, "w":437, "h":477},
+		"spriteSourceSize": {"x":38,"y":18,"w":512,"h":512},
+		"sourceSize": {"w":512,"h":512}
+	},
+	"turtle": {
+		"frame": {"x":438, "y":1020, "w":311, "h":307},
+		"spriteSourceSize": {"x":8,"y":12,"w":327,"h":329},
+		"sourceSize": {"w":327,"h":329}
+	}
+
+},
+"meta": {
+	"image": "red_herring.png",
+	"size": {"w": 1691, "h": 1585},
+	"scale": "1"
+}
+}

@@ -1,7 +1,7 @@
 {
   "description": {
-    "title": "Feuerquellen",
-    "description": "Finde und sammle mögliche Feuerquellen um einen Waldbrand zu verhindern!"
+    "title": "Find It",
+    "description": "Finde und sammle mögliche Gefahren, um Umweltschäden zu verhindern!"
   },
   "moderatorConfig": {
     "mapSection": "Kartenabschnitt",
@@ -30,6 +30,66 @@
     },
     "itemSelection": {
       "selectItem": "Zu platzierendes Objekt auswählen"
+    },
+    "placeables": {
+      "fire": {
+        "name": "Feuer",
+        "hazards": {
+          "cigarette": {
+            "name": "Zigarette",
+            "description": "Nicht ordentlich ausgedämpfte Zigaretten sind einer der größten Waldbrandverursacher. Häufig werden sie aus fahrenden Autos geworfen oder auf Wanderwegen zurückgelassen."
+          },
+          "campfire": {
+            "name": "Lagerfeuer",
+            "description": "Lagerfeuer können vom Wind neu angefacht werden und so einen Waldbrand auslösen."
+          }
+        },
+        "red_herring": {
+          "turtle": {
+            "name": "Schildkröte",
+            "description": "Schildkröten kommen in unserer Gegend nicht natürlich vor. Im Wald ausgesetzt, sind sie schutzlos."
+          },
+          "bug": {
+            "name": "Käfer",
+            "description": "Käfer sind Teil des natürlichen Ökosystems, bilden die Grundlage der Nahrungskette für andere Tiere und lockern den Boden. Ihr Überleben ist daher wichtig für das Überleben des Waldes und anderer Tiere."
+          },
+          "bottle": {
+            "name": "Glasflasche",
+            "description": "Es ist ein Mythos, dass zurückgelassene Glasflaschen aller Art unter den richtigen Umständen wie eine Linse wirken und das Licht fokussieren. Am Brennpunkt kann kein ein Feuer entstehen! Allerdings gehört Müll nicht in den Wald, da sich Tier verletzen können"
+          }
+        }
+      },
+      "flood": {
+        "name": "Überschwemmung",
+        "hazards": {
+          "gish": {
+            "name": "Fisch",
+            "description": "Fische können nach der Flut gestrandet sein und müssen gerettet werden."
+          },
+          "person": {
+            "name": "Menschen",
+            "description": "Menschen können ertrinken."
+          },
+          "garbage": {
+            "name": "Müll",
+            "description": "Müll kann von der Flut weggetragen werden und muss später wieder eingesammelt werden."
+          }
+        },
+        "red_herring": {
+          "turtle": {
+            "name": "Schildkröte",
+            "description": "Schildkröten kommen in unserer Gegend nicht natürlich vor. Im Wald ausgesetzt, sind sie schutzlos."
+          },
+          "bug": {
+            "name": "Käfer",
+            "description": "Käfer sind Teil des natürlichen Ökosystems, bilden die Grundlage der Nahrungskette für andere Tiere und lockern den Boden. Ihr Überleben ist daher wichtig für das Überleben des Waldes und anderer Tiere."
+          },
+          "bottle": {
+            "name": "Glasflasche",
+            "description": "Es ist ein Mythos, dass zurückgelassene Glasflaschen aller Art unter den richtigen Umständen wie eine Linse wirken und das Licht fokussieren. Am Brennpunkt kann kein ein Feuer entstehen! Allerdings gehört Müll nicht in den Wald, da sich Tier verletzen können"
+          }
+        }
+      }
     }
   },
   "statistic": {

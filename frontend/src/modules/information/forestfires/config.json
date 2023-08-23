@@ -1,8 +1,0 @@
-{
-  "icon": "fire",
-  "type": "main",
-  "input": "no",
-  "syncPublicParticipant": false,
-  "usable": true,
-  "fallback": "findit"
-}
