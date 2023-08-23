@@ -113,18 +113,22 @@ export class TrackingManager {
     this.task = task;
   }
 
+  _getStarPoints(stars: number): number {
+    return stars * this.pointsPerStar;
+  }
+
   getGameplayResult(
     stars: number,
     playPoints: number | null = null,
     playCount = 1,
-    limitToMaxPoints = false,
+    maxPoints: number | null = null,
     pointsSpent: number | null = null
   ): GameplayResult | GameplayAndSpentResult {
-    const points = playPoints ? playPoints : stars * this.pointsPerStar;
+    const points =
+      playPoints !== null ? playPoints : this._getStarPoints(stars);
     const result = {
       stars: stars,
-      points:
-        limitToMaxPoints && points > this.maxPoints ? this.maxPoints : points,
+      points: maxPoints !== null && points > maxPoints ? maxPoints : points,
       playCount: playCount,
     };
     if (pointsSpent !== null)
@@ -157,7 +161,7 @@ export class TrackingManager {
       stars,
       points,
       playCount,
-      limitToMaxPoints,
+      limitToMaxPoints ? this.maxPoints : null,
       hasSpentPoints ? pointsSpent : null
     );
   }
@@ -258,7 +262,7 @@ export class TrackingManager {
           0,
           null,
           1,
-          false,
+          null,
           points
         );
       await taskParticipantService.putParticipantIteration(
@@ -288,17 +292,33 @@ export class TrackingManager {
     initContent: any,
     stars: number | null = null,
     pointsSpent: number | null = null,
-    updateInstanceSum = false
+    updateInstanceSum = false,
+    starLimitRule:
+      | ((step: TaskParticipantIterationStep) => boolean)
+      | null = null
   ): Promise<void> {
     if (this.iteration) {
-      if (stars !== null || pointsSpent !== null)
+      if (stars !== null || pointsSpent !== null) {
+        let starPoints = stars ? this._getStarPoints(stars) : 0;
+        if (starLimitRule) {
+          const previousIdeaPointsList = this.stepList.filter(
+            (item) => item.ideaId === ideaId && starLimitRule(item)
+          );
+          const previousIdeaPoints = previousIdeaPointsList.reduce(
+            (sum, item) => sum + item.parameter.gameplayResult.points,
+            0
+          );
+          starPoints -= previousIdeaPoints;
+          if (starPoints < 0) starPoints = 0;
+        }
         initContent.gameplayResult = this.getGameplayResult(
           stars !== null ? stars : 0,
-          null,
+          starPoints,
           1,
-          false,
+          null,
           pointsSpent
         );
+      }
       this.iterationStep =
         await taskParticipantService.postParticipantIterationStep(this.taskId, {
           iteration: this.iteration?.iteration,
@@ -328,7 +348,7 @@ export class TrackingManager {
           0,
           points !== null ? points : 0,
           1,
-          false,
+          null,
           pointsSpent
         );
       this.iterationStep =
@@ -386,7 +406,7 @@ export class TrackingManager {
           0,
           null,
           1,
-          false,
+          null,
           points
         );
       taskParticipantService

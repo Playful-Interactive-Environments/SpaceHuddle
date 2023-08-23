@@ -240,7 +240,8 @@ export default class Participant extends Vue {
         result,
         result.stars,
         null,
-        true
+        true,
+        (item) => item.parameter.step === GameStep.Play
       );
     }
     this.selectedLevelId = null;
