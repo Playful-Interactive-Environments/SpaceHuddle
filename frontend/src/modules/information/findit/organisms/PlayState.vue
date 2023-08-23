@@ -81,20 +81,20 @@
     <div class="overlay-bottom">{{ collectedCount }} / {{ totalCount }}</div>
     <DrawerBottomOverlay
       v-if="
-        collectedPlaceableConfig &&
-        hasTexture(collectedPlaceable.type, collectedPlaceable.name)
+        clickedPlaceableConfig &&
+        hasTexture(clickedPlaceable.type, clickedPlaceable.name)
       "
       v-model="showToolbox"
       :title="
         $t(
-          `${collectedPlaceableConfigSettings.explanationText}.${collectedPlaceable.type}.${collectedPlaceableConfig.explanationKey}.name`
+          `${clickedPlaceableConfigSettings.explanationText}.${clickedPlaceable.type}.${clickedPlaceableConfig.explanationKey}.name`
         )
       "
     >
       <SpriteCanvas
-        :texture="getTexture(collectedPlaceable.type, collectedPlaceable.name)"
+        :texture="getTexture(clickedPlaceable.type, clickedPlaceable.name)"
         :aspect-ration="
-          getObjectAspect(collectedPlaceable.type, collectedPlaceable.name)
+          getObjectAspect(clickedPlaceable.type, clickedPlaceable.name)
         "
         :width="gameWidth - 50"
         :height="(gameHeight / 10) * 4"
@@ -103,7 +103,7 @@
       <div>
         {{
           $t(
-            `${collectedPlaceableConfigSettings.explanationText}.${collectedPlaceable.type}.${collectedPlaceableConfig.explanationKey}.description`
+            `${clickedPlaceableConfigSettings.explanationText}.${clickedPlaceable.type}.${clickedPlaceableConfig.explanationKey}.description`
           )
         }}
       </div>
@@ -180,7 +180,7 @@ export default class PlayState extends Vue {
   gameHeight = 0;
   showToolbox = false;
   tutorialSteps: Tutorial[] = [];
-  collectedPlaceable: placeable.Placeable | null = null;
+  clickedPlaceable: placeable.Placeable | null = null;
 
   placedObjects: placeable.Placeable[] = [];
   collectedObjects: placeable.PlaceableBase[] = [];
@@ -363,17 +363,17 @@ export default class PlayState extends Vue {
     }
   }
 
-  get collectedPlaceableConfigSettings(): any {
-    if (this.collectedPlaceable) {
-      return this.gameConfig[this.collectedPlaceable.type].settings;
+  get clickedPlaceableConfigSettings(): any {
+    if (this.clickedPlaceable) {
+      return this.gameConfig[this.clickedPlaceable.type].settings;
     }
     return null;
   }
 
-  get collectedPlaceableConfig(): any {
-    if (this.collectedPlaceable) {
-      return this.gameConfig[this.collectedPlaceable.type][
-        this.collectedPlaceable.name
+  get clickedPlaceableConfig(): any {
+    if (this.clickedPlaceable) {
+      return this.gameConfig[this.clickedPlaceable.type][
+        this.clickedPlaceable.name
       ];
     }
     return null;
@@ -386,8 +386,8 @@ export default class PlayState extends Vue {
 
   destroyPlaceable(value: placeable.Placeable): void {
     const config = this.gameConfig[value.type].settings;
+    if (config.explanationText) this.clickedPlaceable = value;
     if (config.collectable) {
-      if (config.explanationText) this.collectedPlaceable = value;
       const id = value.id;
       const index = this.placedObjects.findIndex((p) => p.id === id);
       if (index > -1) {
@@ -395,7 +395,10 @@ export default class PlayState extends Vue {
         this.placedObjects.splice(index, 1);
       }
       this.collectedCount++;
-      const tutorialStepName = `${value.type}-${this.collectedPlaceableConfig.explanationKey}`;
+    }
+    const placeableConfig = this.gameConfig[value.type][value.name];
+    if (placeableConfig.explanationKey) {
+      const tutorialStepName = `${value.type}-${placeableConfig.explanationKey}`;
       if (!this.tutorialSteps.find((item) => item.step === tutorialStepName)) {
         this.showToolbox = true;
         const tutorialItem: Tutorial = {
