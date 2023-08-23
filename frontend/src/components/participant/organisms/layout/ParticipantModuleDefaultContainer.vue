@@ -1,6 +1,6 @@
 <template>
   <el-container class="module-content">
-    <el-header v-if="$slots.header" class="slotsHeader">
+    <el-header v-if="$slots.header" class="slotsHeader moduleHeader">
       <slot name="header"></slot>
       <TaskInfo
         :taskId="taskId"
@@ -11,7 +11,10 @@
         class="infoSection"
       />
     </el-header>
-    <el-header v-else-if="$slots.headerOverlay" class="slotsHeaderOverlay">
+    <el-header
+      v-else-if="$slots.headerOverlay"
+      class="slotsHeaderOverlay moduleHeader"
+    >
       <TaskInfo
         :taskId="taskId"
         :modules="[module]"
@@ -22,7 +25,7 @@
       />
       <slot name="headerOverlay"></slot>
     </el-header>
-    <el-header v-else>
+    <el-header v-else class="moduleHeader">
       <TaskInfo
         :taskId="taskId"
         :modules="[module]"
@@ -31,7 +34,21 @@
         :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
       />
     </el-header>
-    <el-main class="el-main__overflow">
+    <el-main
+      class="el-main__overflow participant-content"
+      v-if="useScrollContent"
+    >
+      <div ref="scrollContent">
+        <el-scrollbar
+          v-if="scrollSizeCalculated"
+          :height="`${scrollHeight}px`"
+          :style="{ '--scroll-height': `${scrollHeight}px` }"
+        >
+          <slot />
+        </el-scrollbar>
+      </div>
+    </el-main>
+    <el-main class="el-main__overflow participant-content" v-else>
       <slot />
     </el-main>
     <el-footer v-if="!!$slots.footer" class="fixed">
@@ -54,8 +71,27 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 export default class ParticipantModuleDefaultContainer extends Vue {
   @Prop({ required: true }) taskId!: string;
   @Prop({ default: 'default' }) module!: string;
+  @Prop({ default: false }) useScrollContent!: boolean;
+  @Prop({ default: 0 }) scrollOverlay!: number;
 
   EndpointAuthorisationType = EndpointAuthorisationType;
+  scrollHeight = 100;
+  scrollSizeCalculated = false;
+
+  mounted(): void {
+    if (this.useScrollContent) {
+      setTimeout(() => {
+        const dom = this.$refs.scrollContent as HTMLElement;
+        if (dom) {
+          const mainElement = dom.parentElement;
+          if (mainElement) {
+            this.scrollHeight = mainElement.offsetHeight + this.scrollOverlay;
+            this.scrollSizeCalculated = true;
+          }
+        }
+      }, 2000);
+    }
+  }
 }
 </script>
 

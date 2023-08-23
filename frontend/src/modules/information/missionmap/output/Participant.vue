@@ -3,6 +3,7 @@
     :task-id="taskId"
     :module="moduleName"
     :module-theme="theme"
+    :use-scroll-content="true"
   >
     <template #headerOverlay>
       <div class="header-overlay-right columns is-mobile">
@@ -21,67 +22,66 @@
       </div>
     </template>
     <template #footer>
-      <el-scrollbar height="15rem">
-        <IdeaCard
-          v-for="idea of visibleIdeas"
-          :key="idea.id"
-          class="ideaCard"
-          :idea="idea"
-          :is-selectable="true"
-          :isSelected="idea.id === selectedIdea?.id"
-          :selectionColor="selectionColor"
-          :is-editable="idea.isOwn"
-          :show-state="false"
-          :canChangeState="false"
-          :handleEditable="false"
-          :portrait="false"
-          :background-color="getIdeaColor(idea)"
-          :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
-          v-on:click="ideaClicked(idea)"
-          @ideaDeleted="refreshIdeas"
-          @ideaStartEdit="editIdea(idea)"
+      <div>
+        <IdeaMap
+          style="height: 30vh"
+          v-if="module"
+          :ideas="ideas"
+          v-model:selected-idea="selectedIdea"
+          :parameter="module?.parameter"
+          :canChangePosition="(idea) => idea.isOwn"
+          :highlightCondition="(idea) => idea.isOwn"
+          v-on:visibleIdeasChanged="visibleIdeasChanged"
+          v-on:selectionColorChanged="selectionColor = $event"
+          v-on:ideaPositionChanged="saveIdea"
         >
-          <div class="columns is-mobile" v-if="idea.parameter.shareData">
-            <div class="column">
-              <font-awesome-icon icon="coins" />
-              {{ idea.parameter.points }}
-            </div>
-            <div class="column" @click="() => (showDetails = true)">
-              <font-awesome-icon icon="person-booth" />
-              {{ getVoteForIdea(idea.id)?.parameter.points }}
-            </div>
-          </div>
-          <div class="columns is-mobile">
-            <div
-              class="column"
-              v-for="parameter of Object.keys(gameConfig.parameter)"
-              :key="parameter"
-              :style="{
-                color: gameConfig.parameter[parameter].color,
-                display:
-                  idea.parameter.influenceAreas[parameter] > 0
-                    ? 'block'
-                    : 'none',
-              }"
-            >
-              <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
-            </div>
-          </div>
-        </IdeaCard>
-      </el-scrollbar>
+        </IdeaMap>
+      </div>
     </template>
-    <IdeaMap
-      v-if="module"
-      :ideas="ideas"
-      v-model:selected-idea="selectedIdea"
-      :parameter="module?.parameter"
-      :canChangePosition="(idea) => idea.isOwn"
-      :highlightCondition="(idea) => idea.isOwn"
-      v-on:visibleIdeasChanged="visibleIdeasChanged"
-      v-on:selectionColorChanged="selectionColor = $event"
-      v-on:ideaPositionChanged="saveIdea"
+    <IdeaCard
+      v-for="idea of visibleIdeas"
+      :key="idea.id"
+      class="ideaCard"
+      :idea="idea"
+      :is-selectable="true"
+      :isSelected="idea.id === selectedIdea?.id"
+      :selectionColor="selectionColor"
+      :is-editable="idea.isOwn"
+      :show-state="false"
+      :canChangeState="false"
+      :handleEditable="false"
+      :portrait="false"
+      :background-color="getIdeaColor(idea)"
+      :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
+      v-on:click="ideaClicked(idea)"
+      @ideaDeleted="refreshIdeas"
+      @ideaStartEdit="editIdea(idea)"
     >
-    </IdeaMap>
+      <div class="columns is-mobile" v-if="idea.parameter.shareData">
+        <div class="column">
+          <font-awesome-icon icon="coins" />
+          {{ idea.parameter.points }}
+        </div>
+        <div class="column" @click="() => (showDetails = true)">
+          <font-awesome-icon icon="person-booth" />
+          {{ getVoteForIdea(idea.id)?.parameter.points }}
+        </div>
+      </div>
+      <div class="columns is-mobile">
+        <div
+          class="column"
+          v-for="parameter of Object.keys(gameConfig.parameter)"
+          :key="parameter"
+          :style="{
+            color: gameConfig.parameter[parameter].color,
+            display:
+              idea.parameter.influenceAreas[parameter] > 0 ? 'block' : 'none',
+          }"
+        >
+          <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
+        </div>
+      </div>
+    </IdeaCard>
   </ParticipantModuleDefaultContainer>
   <ValidationForm
     :form-data="selectedVote"
@@ -869,9 +869,56 @@ export default class Participant extends Vue {
   background-size: contain;
 }
 
+[module-theme='preparation'].module-content::v-deep(.media) {
+  --module-color: var(--color-dark-contrast);
+}
+
 [module-theme='meeting'] {
-  background-image: url('@/modules/information/missionmap/assets/meeting.jpg');
+  background-image: url('@/modules/information/missionmap/assets/stage.png');
   background-repeat: no-repeat;
   background-size: cover;
+
+  .el-card {
+    border-radius: var(--border-radius) var(--border-radius) 0
+      var(--border-radius);
+    background-color: color-mix(
+      in srgb,
+      var(--background-color) 60%,
+      transparent
+    );
+  }
+
+  .el-card::v-deep(.card__image) {
+    background-color: color-mix(in srgb, var(--card-color) 30%, transparent);
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+  }
+
+  .el-card::v-deep(.el-card__body) {
+    border-radius: var(--border-radius) var(--border-radius) 0
+      var(--border-radius);
+  }
+}
+
+[module-theme='meeting'].module-content::v-deep(.fixed) {
+  background-image: url('@/modules/information/missionmap/assets/lectern.png');
+  background-repeat: no-repeat;
+  background-size: 100% 100%; // contain;
+  background-position: bottom;
+  //padding-top: 5rem;
+  margin-left: -2rem;
+  padding: 5rem 1rem 1rem 1rem;
+  width: calc(100% + 4rem);
+}
+
+[module-theme='meeting'].module-content::v-deep(.fixed) {
+  z-index: 0;
+}
+
+[module-theme='meeting'].module-content::v-deep(.participant-content) {
+  z-index: 100;
+}
+
+[module-theme='meeting'].module-content::v-deep(.mapSpace) {
+  border: var(--color-dark-contrast) solid 0.5rem;
 }
 </style>
