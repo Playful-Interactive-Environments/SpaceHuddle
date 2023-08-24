@@ -4,6 +4,7 @@ import {
   ChartData,
 } from '@/modules/information/moveit/organisms/DriveToLocation.vue';
 import * as constants from '@/modules/information/moveit/utils/consts';
+import * as vehicleCalculation from '@/modules/information/moveit/types/Vehicle';
 
 export enum FuelType {
   electricity = 'electricity',
@@ -35,12 +36,11 @@ export interface VehicleParameter {
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export const getVehicleParameter = (
-  vehicleCategory: string,
-  vehicleType: string
+  vehicle: vehicleCalculation.Vehicle
 ): VehicleParameter => {
-  const types = gameConfig.vehicles[vehicleCategory].types;
-  const param = types.find((t) => t.name === vehicleType);
-  param.tires = gameConfig.vehicles[vehicleCategory].tires;
+  const types = gameConfig.vehicles[vehicle.category].types;
+  const param = types.find((t) => t.name === vehicle.type);
+  param.tires = gameConfig.vehicles[vehicle.category].tires;
   return param;
 };
 

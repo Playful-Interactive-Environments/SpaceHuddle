@@ -180,7 +180,7 @@ export default class LevelStatistic extends Vue {
       ];
       const datasets = calculateChartPerIteration(
         this.steps,
-        [...Array(3).keys()],
+        [...Array(4).keys()],
         this.replayColors,
         (item) => item.parameter.replayCount,
         (item, stars) => item.parameter.stars === stars,

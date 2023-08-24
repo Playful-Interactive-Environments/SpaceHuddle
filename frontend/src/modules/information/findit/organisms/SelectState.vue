@@ -39,12 +39,18 @@
       </div>
       <div class="media-content">{{ idea.keywords }}</div>
       <div class="media-right">
-        <el-rate
-          v-model="mapping[idea.id]"
-          size="large"
-          :max="3"
-          :disabled="true"
-        />
+        <div>
+          <el-rate
+            v-model="mapping[idea.id]"
+            size="large"
+            :max="3"
+            :disabled="true"
+          />
+        </div>
+        <div>
+          <font-awesome-icon icon="coins" />
+          {{ getPointsForLevel(idea.id) }} / {{ maxLevelPoints }}
+        </div>
       </div>
     </div>
   </div>
@@ -63,6 +69,7 @@ import * as taskParticipantService from '@/services/task-participant-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import { GameStep } from '@/modules/information/findit/output/Participant.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { TrackingManager } from '@/types/tracking/TrackingManager';
 
 @Options({
   components: { FontAwesomeIcon },
@@ -72,9 +79,14 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 export default class SelectState extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: {} }) readonly gameConfig!: any;
+  @Prop() readonly trackingManager!: TrackingManager;
   ideas: Idea[] = [];
   result: TaskParticipantIterationStep[] = [];
   mapping: { [key: string]: number } = {};
+
+  get maxLevelPoints(): number {
+    return this.trackingManager.getStarPoints(3);
+  }
 
   get defaultLevelType(): string {
     return Object.keys(this.gameConfig)[0];
@@ -86,6 +98,10 @@ export default class SelectState extends Vue {
 
   getSettingsForLevel(level: Idea): any {
     return this.gameConfig[this.getLevelTypeForLevel(level)].settings;
+  }
+
+  getPointsForLevel(ideaId: string): number {
+    return this.trackingManager.getStarPoints(this.mapping[ideaId]);
   }
 
   unmounted(): void {
@@ -231,5 +247,18 @@ export default class SelectState extends Vue {
   padding: 0.8rem;
   border-radius: calc(var(--border-radius) - 0.2rem) 0 0
     calc(var(--border-radius) - 0.2rem);
+  width: 3.5rem;
+}
+
+.el-rate--large {
+  height: unset;
+}
+
+.media {
+  align-items: unset;
+}
+
+.media-right {
+  font-size: var(--font-size-small);
 }
 </style>

@@ -1,5 +1,13 @@
 <template>
   <div>
+    <BuildState
+      v-if="selectedLevel"
+      :level="selectedLevel"
+      v-model:level-type="selectedLevelType"
+      :task-id="taskId"
+      :auth-header-typ="EndpointAuthorisationType.MODERATOR"
+      height="30rem"
+    ></BuildState>
     <draggable
       v-model="ideas"
       id="ideas"
@@ -13,9 +21,18 @@
           :isDraggable="true"
           :canChangeState="false"
           :showState="false"
+          :portrait="false"
+          :is-selected="selectedLevel && selectedLevel.id === element.id"
           @ideaDeleted="refreshIdeas()"
           @customCommand="dropdownCommand($event, element)"
+          :style="{ '--level-type-color': getSettingsForLevel(element).color }"
+          @click="selectedLevel = element"
         >
+          <template #icon>
+            <div class="level-icon">
+              <font-awesome-icon :icon="getSettingsForLevel(element).icon" />
+            </div>
+          </template>
           <template #dropdown>
             <el-dropdown-item command="statistic">
               <font-awesome-icon icon="chart-column" />
@@ -51,9 +68,12 @@ import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import { IModeratorContent } from '@/types/ui/IModeratorContent';
 import * as cashService from '@/services/cash-service';
 import LevelStatistic from '@/modules/information/findit/organisms/LevelStatistic.vue';
+import gameConfig from '@/modules/information/findit/data/gameConfig.json';
+import BuildState from '@/modules/information/findit/organisms/BuildState.vue';
 
 @Options({
   components: {
+    BuildState,
     LevelStatistic,
     AddItem,
     IdeaSettings,
@@ -66,6 +86,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];
   activeStatisticIdeaId: string | null = null;
+  selectedLevel: Idea | null = null;
+  selectedLevelType = '';
+  EndpointAuthorisationType = EndpointAuthorisationType;
 
   get showStatistic(): boolean {
     return !!this.activeStatisticIdeaId;
@@ -73,6 +96,18 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   set showStatistic(value: boolean) {
     if (!value) this.activeStatisticIdeaId = null;
+  }
+
+  get defaultLevelType(): string {
+    return Object.keys(gameConfig)[0];
+  }
+
+  getLevelTypeForLevel(level: Idea): string {
+    return level.parameter.type ? level.parameter.type : this.defaultLevelType;
+  }
+
+  getSettingsForLevel(level: Idea): any {
+    return gameConfig[this.getLevelTypeForLevel(level)].settings;
   }
 
   deregisterAll(): void {
@@ -123,4 +158,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.level-icon {
+  font-size: 2rem;
+  margin: 0.8rem;
+  color: var(--level-type-color);
+}
+</style>

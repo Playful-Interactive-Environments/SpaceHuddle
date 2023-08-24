@@ -213,6 +213,7 @@ import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as themeColors from '@/utils/themeColors';
 import { CalculationType, mapArrayToConstantSize } from '@/utils/statistic';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
+import * as vehicleCalculation from '@/modules/information/moveit/types/Vehicle';
 
 Chart.register(annotationPlugin);
 
@@ -260,13 +261,8 @@ interface ParticleStateExtended extends ParticleState {
 })
 export default class CleanUpParticles extends Vue {
   @Prop() readonly trackingManager!: TrackingManager;
-  @Prop({ default: 'car' }) readonly vehicle!:
-    | 'car'
-    | 'bike'
-    | 'motorcycle'
-    | 'scooter'
-    | 'bus';
-  @Prop({ default: 'sport' }) readonly vehicleType!: string;
+  @Prop({ default: { category: 'car', type: 'sport' } })
+  readonly vehicle!: vehicleCalculation.Vehicle;
   @Prop({ default: [] })
   readonly trackingData!: TrackingData[];
   normalizedTrackingData: TrackingData[] = [];
@@ -351,10 +347,7 @@ export default class CleanUpParticles extends Vue {
   }
 
   get vehicleParameter(): any {
-    return configCalculation.getVehicleParameter(
-      this.vehicle,
-      this.vehicleType
-    );
+    return configCalculation.getVehicleParameter(this.vehicle);
   }
 
   get particleArea(): number {
@@ -420,10 +413,10 @@ export default class CleanUpParticles extends Vue {
   initTrackingData(): void {
     if (
       this.trackingManager &&
-      this.trackingManager.iteration &&
-      !this.trackingManager.iteration.parameter.cleanUp
+      this.trackingManager.iterationStep &&
+      !this.trackingManager.iterationStep.parameter.cleanUp
     ) {
-      this.trackingManager.saveIteration({ cleanUp: {} });
+      this.trackingManager.saveIterationStep({ cleanUp: {} });
     }
   }
 
@@ -570,16 +563,16 @@ export default class CleanUpParticles extends Vue {
 
   updateTracking(): void {
     this.initTrackingData();
-    if (this.trackingManager && this.trackingManager.iteration) {
-      this.trackingManager.iteration.parameter.cleanUp.particleState =
+    if (this.trackingManager && this.trackingManager.iterationStep) {
+      this.trackingManager.iterationStep.parameter.cleanUp.particleState =
         this.particleState;
-      this.trackingManager.iteration.parameter.cleanUp.totalTime =
+      this.trackingManager.iterationStep.parameter.cleanUp.totalTime =
         this.chartData.datasets[0].data.length;
-      this.trackingManager.iteration.parameter.cleanUp.remaindingTime =
+      this.trackingManager.iterationStep.parameter.cleanUp.remaindingTime =
         this.chartData.datasets[0].data.length - this.activeValue;
-      this.trackingManager.iteration.parameter.cleanUp.workingTime =
+      this.trackingManager.iterationStep.parameter.cleanUp.workingTime =
         this.activeValue;
-      this.trackingManager.saveIteration();
+      this.trackingManager.saveIterationStep();
     }
   }
 
@@ -649,7 +642,7 @@ export default class CleanUpParticles extends Vue {
         const particle = gameConfig.particles[particleName];
         /*const speedFunction = new Function(
           'speed',
-          `return ${particle.speedFunction[this.vehicle][this.vehicleType]}`
+          `return ${particle.speedFunction[this.vehicle.category][this.vehicle.type]}`
         );*/
         let maxParticleValue = 0;
         const data = {

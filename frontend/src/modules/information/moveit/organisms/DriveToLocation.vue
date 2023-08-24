@@ -161,7 +161,7 @@
         </template>
       </el-progress>
     </div>
-    <div v-if="vehicle === 'bus'" class="overlay-top-right">
+    <div v-if="vehicle.category === 'bus'" class="overlay-top-right">
       <font-awesome-icon icon="users" />
       {{ personCount }} / {{ vehicleParameter.persons }}
     </div>
@@ -225,6 +225,7 @@ import Color from 'colorjs.io';
 import * as mapStyle from '@/utils/mapStyle';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as themeColors from '@/utils/themeColors';
+import * as vehicleCalculation from '@/modules/information/moveit/types/Vehicle';
 
 mapStyle.setMapStyleStreets();
 
@@ -281,13 +282,8 @@ const minToleratedAngleDeviation = 22.5;
 })
 export default class DriveToLocation extends Vue {
   @Prop() readonly trackingManager!: TrackingManager;
-  @Prop({ default: 'car' }) readonly vehicle!:
-    | 'car'
-    | 'bike'
-    | 'motorcycle'
-    | 'scooter'
-    | 'bus';
-  @Prop({ default: 'sport' }) readonly vehicleType!: string;
+  @Prop({ default: { category: 'car', type: 'sport' } })
+  readonly vehicle!: vehicleCalculation.Vehicle;
   @Prop({ default: {} }) readonly parameter!: any;
   osrmProfile = 'car';
   mapZoomDefault = 15;
@@ -442,10 +438,7 @@ export default class DriveToLocation extends Vue {
   };
 
   get vehicleParameter(): any {
-    return configCalculation.getVehicleParameter(
-      this.vehicle,
-      this.vehicleType
-    );
+    return configCalculation.getVehicleParameter(this.vehicle);
   }
 
   getRouteObject(pathCoordinates: [number, number][]): FeatureCollection {
@@ -487,7 +480,7 @@ export default class DriveToLocation extends Vue {
       })
       .map((layer) => layer.id)
       .filter((value, index, array) => array.indexOf(value) === index);
-    if (this.vehicle === 'bus') {
+    if (this.vehicle.category === 'bus') {
       const layer = notNeededLayers.find(
         (layer) =>
           layer.id === 'poi-level-1' ||
@@ -584,10 +577,10 @@ export default class DriveToLocation extends Vue {
   initTrackingData(): void {
     if (
       this.trackingManager &&
-      this.trackingManager.iteration &&
-      !this.trackingManager.iteration.parameter.drive
+      this.trackingManager.iterationStep &&
+      !this.trackingManager.iterationStep.parameter.drive
     ) {
-      this.trackingManager.saveIteration({
+      this.trackingManager.saveIterationStep({
         drive: { stops: 0, persons: this.personCount },
       });
     }
@@ -604,7 +597,7 @@ export default class DriveToLocation extends Vue {
       this.animateVehicle,
       this.intervalAnimationTime
     );
-    if (this.vehicle === 'bus') {
+    if (this.vehicle.category === 'bus') {
       this.personCount = Math.ceil(
         Math.random() * (this.vehicleParameter.persons / 3) + 1
       );
@@ -707,13 +700,13 @@ export default class DriveToLocation extends Vue {
       this.routeCalculated = true;
 
       this.initTrackingData();
-      if (this.trackingManager && this.trackingManager.iteration) {
-        this.trackingManager.iteration.parameter.drive.routePath =
+      if (this.trackingManager && this.trackingManager.iterationStep) {
+        this.trackingManager.iterationStep.parameter.drive.routePath =
           this.routePath;
-        this.trackingManager.iteration.parameter.drive.routePathLenght =
+        this.trackingManager.iterationStep.parameter.drive.routePathLenght =
           turf.length(this.routePath);
-        this.trackingManager.iteration.parameter.drive.pathCalculationCount = 1;
-        this.trackingManager.saveIteration();
+        this.trackingManager.iterationStep.parameter.drive.pathCalculationCount = 1;
+        this.trackingManager.saveIterationStep();
       }
     });
   }
@@ -904,7 +897,7 @@ export default class DriveToLocation extends Vue {
     this.isMoving = false;
     this.moveSpeed = 0;
 
-    if (this.vehicle === 'bus') {
+    if (this.vehicle.category === 'bus') {
       for (const busStop of this.busStopList) {
         const distance = turf.distance(
           turf.point(this.mapDrivingPoint),
@@ -922,10 +915,11 @@ export default class DriveToLocation extends Vue {
     }
 
     this.initTrackingData();
-    if (this.trackingManager && this.trackingManager.iteration) {
-      this.trackingManager.iteration.parameter.drive.persons = this.personCount;
-      this.trackingManager.iteration.parameter.drive.stops++;
-      this.trackingManager.saveIteration();
+    if (this.trackingManager && this.trackingManager.iterationStep) {
+      this.trackingManager.iterationStep.parameter.drive.persons =
+        this.personCount;
+      this.trackingManager.iterationStep.parameter.drive.stops++;
+      this.trackingManager.saveIterationStep();
     }
   }
 
@@ -1252,12 +1246,12 @@ export default class DriveToLocation extends Vue {
                 this.noStreet = false;
                 if (
                   this.trackingManager &&
-                  this.trackingManager.iteration &&
-                  this.trackingManager.iteration.parameter.drive &&
-                  this.trackingManager.iteration.parameter.drive
+                  this.trackingManager.iterationStep &&
+                  this.trackingManager.iterationStep.parameter.drive &&
+                  this.trackingManager.iterationStep.parameter.drive
                     .pathCalculationCount
                 )
-                  this.trackingManager.iteration.parameter.drive
+                  this.trackingManager.iterationStep.parameter.drive
                     .pathCalculationCount++;
               }
               isOnRoute = false;
@@ -1278,16 +1272,16 @@ export default class DriveToLocation extends Vue {
       }
 
       this.initTrackingData();
-      if (this.trackingManager && this.trackingManager.iteration) {
-        this.trackingManager.iteration.parameter.drive.trackingData =
+      if (this.trackingManager && this.trackingManager.iterationStep) {
+        this.trackingManager.iterationStep.parameter.drive.trackingData =
           this.trackingData;
-        this.trackingManager.iteration.parameter.drive.distanceToGoal =
+        this.trackingManager.iterationStep.parameter.drive.distanceToGoal =
           turfUtils.distanceToGoal(this.routePath, this.mapDrivingPoint);
-        this.trackingManager.iteration.parameter.drive.drivenPathLength =
+        this.trackingManager.iterationStep.parameter.drive.drivenPathLength =
           turf.length(this.drivenPath);
-        this.trackingManager.iteration.parameter.drive.drivenPath =
+        this.trackingManager.iterationStep.parameter.drive.drivenPath =
           this.drivenPath;
-        this.trackingManager.saveIteration();
+        this.trackingManager.saveIterationStep();
       }
     }
     this.updateTraceIsRunning = false;

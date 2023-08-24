@@ -545,7 +545,8 @@
   "general": {
     "back": "BACK",
     "publicScreen": "Public Screen",
-    "moduleActive": "Active"
+    "moduleActive": "Active",
+    "noPublicView": "unfortunately there is no public view for this module"
   },
   "tutorial": {
     "reactivate": "Reactivate Tutorial",

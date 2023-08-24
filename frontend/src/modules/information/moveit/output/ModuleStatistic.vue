@@ -89,7 +89,7 @@ import * as taskParticipantService from '@/services/task-participant-service';
 import type { ChartData } from 'chart.js';
 import * as themeColors from '@/utils/themeColors';
 import { getRandomColorList } from '@/utils/colors';
-import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
+import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import {
   calculateChartPerIteration,
   calculateChartPerParameter,
@@ -98,6 +98,7 @@ import {
   CalculationType,
 } from '@/utils/statistic';
 import * as gameConfig from '@/modules/information/moveit/data/gameConfig.json';
+import * as vehicleCalculation from '@/modules/information/moveit/types/Vehicle';
 
 @Options({
   components: { Bar, Line },
@@ -106,7 +107,7 @@ import * as gameConfig from '@/modules/information/moveit/data/gameConfig.json';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModuleStatistic extends Vue {
   @Prop() readonly taskId!: string;
-  iterations: TaskParticipantIteration[] = [];
+  steps: TaskParticipantIterationStep[] = [];
 
   barChartDataList: {
     title: string;
@@ -137,43 +138,39 @@ export default class ModuleStatistic extends Vue {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     if (this.taskId) {
-      taskParticipantService.registerGetIterationList(
+      taskParticipantService.registerGetIterationStepList(
         this.taskId,
-        this.updateIterations,
+        this.updateIterationSteps,
         EndpointAuthorisationType.MODERATOR,
         2 * 60
       );
     }
   }
 
-  updateIterations(iterations: TaskParticipantIteration[]): void {
-    this.iterations = iterations;
-    if (iterations.length > 0) {
-      const maxReplays = iterations.sort((a, b) => b.iteration - a.iteration)[0]
+  updateIterationSteps(steps: TaskParticipantIterationStep[]): void {
+    this.steps = steps;
+    if (steps.length > 0) {
+      //todo iteration + step
+      const maxReplays = steps.sort((a, b) => b.iteration - a.iteration)[0]
         .iteration;
       this.replayColors.push(...getRandomColorList(maxReplays));
       this.calculateCharts();
     }
   }
 
-  getVehicleList(filter: ((item) => boolean) | null = null): any[] {
-    const subset = filter ? this.iterations.filter(filter) : this.iterations;
+  getVehicleList(
+    filter: ((item) => boolean) | null = null
+  ): vehicleCalculation.Vehicle[] {
+    const subset = filter ? this.steps.filter(filter) : this.steps;
     return subset
       .map((item) => item.parameter.vehicle)
       .filter(
         (value, index, array) =>
-          array.findIndex(
-            (item) =>
-              item.category === value.category && item.type === value.type
+          array.findIndex((item) =>
+            vehicleCalculation.isSameVehicle(item, value)
           ) === index
       )
-      .sort((a, b) => {
-        const x = `${a.category} - ${a.type}`;
-        const y = `${b.category} - ${b.type}`;
-        if (x < y) return -1;
-        if (x > y) return 1;
-        return 0;
-      });
+      .sort((a, b) => vehicleCalculation.vehicleCompare(a, b));
   }
 
   calculateCharts(): void {
@@ -204,7 +201,7 @@ export default class ModuleStatistic extends Vue {
   }
 
   calculateStarsChart(): void {
-    if (this.iterations) {
+    if (this.steps) {
       const labels: string[] = [
         '-',
         '\uf005',
@@ -213,17 +210,16 @@ export default class ModuleStatistic extends Vue {
       ];
       const vehicleList = this.getVehicleList(null);
       const datasets = calculateChartPerParameter(
-        this.iterations,
+        this.steps,
         vehicleList,
-        [...Array(3).keys()],
+        [...Array(4).keys()],
         this.colorList,
         (item, parameter) =>
-          item.parameter.vehicle.category === parameter.category &&
-          item.parameter.vehicle.type === parameter.type,
+          vehicleCalculation.isSameVehicle(item.parameter.vehicle, parameter),
         (item, stars) => item.parameter.rate === stars,
         null,
         (list) => list.length,
-        (vehicle) => `${vehicle.category} - ${vehicle.type}`
+        (vehicle) => vehicleCalculation.vehicleToString(vehicle)
       );
       this.barChartDataList.push({
         title: this.$t('module.information.moveit.statistic.rating'),
@@ -238,13 +234,13 @@ export default class ModuleStatistic extends Vue {
   }
 
   calculateVehicleCategoryChart(): void {
-    if (this.iterations) {
-      const labels: string[] = this.iterations
+    if (this.steps) {
+      const labels: string[] = this.steps
         .map((item) => item.parameter.vehicle.category)
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort();
       const datasets = calculateChartPerIteration(
-        this.iterations,
+        this.steps,
         labels,
         this.replayColors,
         (item) => item.iteration - 1,
@@ -263,19 +259,18 @@ export default class ModuleStatistic extends Vue {
   }
 
   calculateVehicleTypeChart(): void {
-    if (this.iterations) {
+    if (this.steps) {
       const vehicleList = this.getVehicleList();
-      const labels: string[] = vehicleList.map(
-        (item) => `${item.category} - ${item.type}`
+      const labels: string[] = vehicleList.map((item) =>
+        vehicleCalculation.vehicleToString(item)
       );
       const datasets = calculateChartPerIteration(
-        this.iterations,
+        this.steps,
         vehicleList,
         this.replayColors,
         (item) => item.iteration - 1,
         (item, vehicle) =>
-          item.parameter.vehicle.category === vehicle.category &&
-          item.parameter.vehicle.type === vehicle.type
+          vehicleCalculation.isSameVehicle(item.parameter.vehicle, vehicle)
       );
       this.barChartDataList.push({
         title: this.$t('module.information.moveit.statistic.vehicleType'),
@@ -290,27 +285,26 @@ export default class ModuleStatistic extends Vue {
   }
 
   calculateDrivingParameterChart(parameterName: string): void {
-    if (this.iterations) {
+    if (this.steps) {
       const filter = (item) => item.parameter.drive;
-      const labels: string[] = this.iterations
+      const labels: string[] = this.steps
         .filter((item) => filter(item))
         .map((item) => item.parameter.drive[parameterName])
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort((a, b) => a - b);
       const vehicleList = this.getVehicleList(filter);
       const datasets = calculateChartPerParameter(
-        this.iterations,
+        this.steps,
         vehicleList,
         labels,
         this.colorList,
         (item, parameter) =>
-          item.parameter.vehicle.category === parameter.category &&
-          item.parameter.vehicle.type === parameter.type,
+          vehicleCalculation.isSameVehicle(item.parameter.vehicle, parameter),
         (item, parameterValue) =>
           item.parameter.drive[parameterName] === parameterValue,
         filter,
         (list) => list.length,
-        (vehicle) => `${vehicle.category} - ${vehicle.type}`
+        (vehicle) => vehicleCalculation.vehicleToString(vehicle)
       );
       this.barChartDataList.push({
         title: this.$t(`module.information.moveit.statistic.${parameterName}`),
@@ -325,8 +319,8 @@ export default class ModuleStatistic extends Vue {
   }
 
   calculatePersonsChart(): void {
-    if (this.iterations) {
-      for (const iteration of this.iterations) {
+    if (this.steps) {
+      for (const iteration of this.steps) {
         if (
           iteration.parameter.drive &&
           iteration.parameter.drive.trackingData &&
@@ -343,13 +337,13 @@ export default class ModuleStatistic extends Vue {
         item.parameter.drive &&
         item.parameter.vehicle.category === 'bus' &&
         item.parameter.drive.persons;
-      const labels: string[] = this.iterations
+      const labels: string[] = this.steps
         .filter((item) => filter(item))
         .map((item) => item.parameter.drive.persons)
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort((a, b) => a - b);
       const datasets = calculateChartPerIteration(
-        this.iterations,
+        this.steps,
         labels,
         this.replayColors,
         (item) => item.iteration - 1,
@@ -369,8 +363,8 @@ export default class ModuleStatistic extends Vue {
   }
 
   calculateSpeedChart(type: string): void {
-    if (this.iterations) {
-      for (const iteration of this.iterations) {
+    if (this.steps) {
+      for (const iteration of this.steps) {
         if (
           iteration.parameter.drive &&
           iteration.parameter.drive.trackingData
@@ -398,24 +392,23 @@ export default class ModuleStatistic extends Vue {
       }
       const filter = (item) =>
         item.parameter.drive && item.parameter.drive.calcSpeed;
-      const labels: string[] = this.iterations
+      const labels: string[] = this.steps
         .filter((item) => filter(item))
         .map((item) => item.parameter.drive.calcSpeed)
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort((a, b) => a - b);
       const vehicleList = this.getVehicleList(filter);
       const datasets = calculateChartPerParameter(
-        this.iterations,
+        this.steps,
         vehicleList,
         labels,
         this.colorList,
         (item, parameter) =>
-          item.parameter.vehicle.category === parameter.category &&
-          item.parameter.vehicle.type === parameter.type,
+          vehicleCalculation.isSameVehicle(item.parameter.vehicle, parameter),
         (item, calcSpeed) => item.parameter.drive.calcSpeed === calcSpeed,
         filter,
         (list) => list.length,
-        (vehicle) => `${vehicle.category} - ${vehicle.type}`
+        (vehicle) => vehicleCalculation.vehicleToString(vehicle)
       );
       this.barChartDataList.push({
         title: this.$t(`module.information.moveit.statistic.speed.${type}`),
@@ -430,26 +423,25 @@ export default class ModuleStatistic extends Vue {
   }
 
   calculateTimeChart(timeType: string): void {
-    if (this.iterations) {
+    if (this.steps) {
       const filter = (item) => item.parameter[timeType];
-      const labels: number[] = this.iterations
+      const labels: number[] = this.steps
         .filter((item) => filter(item))
         .map((item) => Math.round(item.parameter[timeType] / 1000))
         .filter((value, index, array) => array.indexOf(value) === index)
         .sort((a, b) => a - b);
       const vehicleList = this.getVehicleList(filter);
       const datasets = calculateChartPerParameter(
-        this.iterations,
+        this.steps,
         vehicleList,
         labels,
         this.colorList,
         (item, parameter) =>
-          item.parameter.vehicle.category === parameter.category &&
-          item.parameter.vehicle.type === parameter.type,
+          vehicleCalculation.isSameVehicle(item.parameter.vehicle, parameter),
         (item, time) => Math.round(item.parameter[timeType] / 1000) === time,
         filter,
         (list) => list.length,
-        (vehicle) => `${vehicle.category} - ${vehicle.type}`
+        (vehicle) => vehicleCalculation.vehicleToString(vehicle)
       );
       this.barChartDataList.push({
         title: this.$t(`module.information.moveit.statistic.${timeType}`),
@@ -467,7 +459,7 @@ export default class ModuleStatistic extends Vue {
     value: string,
     calculationType: CalculationType
   ): void {
-    if (this.iterations) {
+    if (this.steps) {
       const mapToValue = (list, label) =>
         list
           .filter((item) => item.parameter.particleState[label])
@@ -478,18 +470,17 @@ export default class ModuleStatistic extends Vue {
       const vehicleList = this.getVehicleList(filter);
       const labels: string[] = Object.keys(gameConfig.particles);
       const datasets = calculateChartPerParameter(
-        this.iterations,
+        this.steps,
         vehicleList,
         labels,
         this.colorList,
         (item, parameter) =>
-          item.parameter.vehicle.category === parameter.category &&
-          item.parameter.vehicle.type === parameter.type,
+          vehicleCalculation.isSameVehicle(item.parameter.vehicle, parameter),
         null,
         filter,
         (list, label) =>
           getCalculationForType(calculationType)(mapToValue(list, label)),
-        (vehicle) => `${vehicle.category} - ${vehicle.type}`
+        (vehicle) => vehicleCalculation.vehicleToString(vehicle)
       );
       this.barChartDataList.push({
         title: this.$t(
@@ -509,7 +500,7 @@ export default class ModuleStatistic extends Vue {
     calculationType: CalculationType,
     parameterName: string
   ): void {
-    if (this.iterations) {
+    if (this.steps) {
       const mappingLength = 100;
       const mapToValue = (list, label) =>
         list
@@ -527,18 +518,17 @@ export default class ModuleStatistic extends Vue {
       const vehicleList = this.getVehicleList(filter);
       const labels: number[] = [...Array(mappingLength).keys()];
       const datasets = calculateChartPerParameter(
-        this.iterations,
+        this.steps,
         vehicleList,
         labels,
         this.colorList,
         (item, parameter) =>
-          item.parameter.vehicle.category === parameter.category &&
-          item.parameter.vehicle.type === parameter.type,
+          vehicleCalculation.isSameVehicle(item.parameter.vehicle, parameter),
         null,
         filter,
         (list, label) =>
           getCalculationForType(calculationType)(mapToValue(list, label)),
-        (vehicle) => `${vehicle.category} - ${vehicle.type}`
+        (vehicle) => vehicleCalculation.vehicleToString(vehicle)
       );
       this.lineChartDataList.push({
         title: this.$t(
@@ -554,7 +544,7 @@ export default class ModuleStatistic extends Vue {
   }
 
   calculateLineChartByCalculationType(parameterName: string): void {
-    if (this.iterations) {
+    if (this.steps) {
       const mappingLength = 100;
       const mapToValue = (list, label) =>
         list
@@ -578,7 +568,7 @@ export default class ModuleStatistic extends Vue {
       ];
       const labels: number[] = [...Array(mappingLength).keys()];
       const datasets = calculateChartPerParameter(
-        this.iterations,
+        this.steps,
         compareList,
         labels,
         this.colorList,
@@ -602,7 +592,7 @@ export default class ModuleStatistic extends Vue {
   }
 
   deregisterAll(): void {
-    cashService.deregisterAllGet(this.updateIterations);
+    cashService.deregisterAllGet(this.updateIterationSteps);
   }
 
   unmounted(): void {

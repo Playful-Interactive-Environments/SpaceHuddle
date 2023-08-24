@@ -23,14 +23,12 @@
       "
       :parameter="module.parameter"
       :vehicle="vehicle"
-      :vehicle-type="vehicleType"
       :tracking-manager="trackingManager"
       v-on:goalReached="goalReached"
     />
     <clean-up-particles
       v-if="gameStep === GameStep.CleanUp && gameState === GameState.Game"
       :vehicle="vehicle"
-      :vehicle-type="vehicleType"
       :trackingData="trackingData"
       :tracking-manager="trackingManager"
       @finished="cleanupFinished"
@@ -65,6 +63,9 @@ import { TrackingManager } from '@/types/tracking/TrackingManager';
 import { MissionProgress } from '@/modules/information/missionmap/types/MissionProgress';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import * as vehicleCalculation from '@/modules/information/moveit/types/Vehicle';
 
 enum GameStep {
   Select = 'select',
@@ -96,8 +97,7 @@ export default class Participant extends Vue {
   @Prop({ default: '' }) readonly backgroundClass!: string;
   sizeCalculated = false;
   module: Module | null = null;
-  vehicle = 'car';
-  vehicleType = 'sport';
+  vehicle: vehicleCalculation.Vehicle = { category: 'car', type: 'sport' };
   particleState: { [key: string]: ParticleState } = {
     carbonDioxide: { totalCount: 18, collectedCount: 15 },
     dust: { totalCount: 10, collectedCount: 9 },
@@ -127,7 +127,7 @@ export default class Participant extends Vue {
           'emissionStatsVariable',
         ];
       case GameStep.Drive:
-        if (this.vehicle === 'bus')
+        if (this.vehicle.category === 'bus')
           return ['speed', 'threshold', 'personCount', 'addPersons'];
         return ['speed', 'threshold'];
       case GameStep.CleanUp:
@@ -156,8 +156,7 @@ export default class Participant extends Vue {
       { speed: 30, persons: 1, distance: 0.01 },
     ];
     const vehicleParameter = configCalculation.getVehicleParameter(
-      this.vehicle,
-      this.vehicleType
+      this.vehicle
     );
     for (const test of testData) {
       this.trackingData.push({
@@ -207,10 +206,7 @@ export default class Participant extends Vue {
     if (this.taskId) {
       this.trackingManager = new TrackingManager(this.taskId, {
         gameStep: GameStep.Select,
-        vehicle: {
-          category: this.vehicle,
-          type: this.vehicleType,
-        },
+        vehicle: this.vehicle,
         trackingData: [],
         particleState: {},
         rate: 0,
@@ -258,18 +254,42 @@ export default class Participant extends Vue {
     this.module = module;
   }
 
-  startGame(vehicle: any): void {
-    this.vehicle = vehicle.category;
-    this.vehicleType = vehicle.type;
+  newRun(): void {
+    if (this.trackingManager) {
+      this.trackingManager.saveIteration(
+        {
+          gameStep: GameStep.Select,
+          vehicle: this.vehicle,
+          trackingData: [],
+          particleState: {},
+          rate: 0,
+        },
+        TaskParticipantIterationStatesType.IN_PROGRESS
+      );
+    }
+  }
+
+  startGame(vehicle: vehicleCalculation.Vehicle): void {
+    this.vehicle = vehicle;
     this.gameStep = GameStep.Drive;
     this.gameState = GameState.Info;
 
     if (this.trackingManager) {
+      this.trackingManager.createInstanceStep(
+        null,
+        TaskParticipantIterationStepStatesType.NEUTRAL,
+        {
+          vehicle: vehicle,
+          selectTime: Date.now() - this.stepTime,
+          playTime: Date.now() - this.startTime,
+          trackingData: [],
+          particleState: {},
+          rate: 0,
+        }
+      );
       this.trackingManager.saveIteration({
         gameStep: GameStep.Drive,
         vehicle: vehicle,
-        selectTime: Date.now() - this.stepTime,
-        playTime: Date.now() - this.startTime,
       });
     }
     this.stepTime = Date.now();
@@ -281,11 +301,14 @@ export default class Participant extends Vue {
     this.gameState = GameState.Info;
 
     if (this.trackingManager) {
-      this.trackingManager.saveIteration({
-        gameStep: GameStep.CleanUp,
+      this.trackingManager.saveIterationStep({
         trackingData: trackingData,
         driveTime: Date.now() - this.stepTime,
         playTime: Date.now() - this.startTime,
+      });
+      this.trackingManager.saveIteration({
+        gameStep: GameStep.CleanUp,
+        trackingData: trackingData,
       });
     }
     this.stepTime = Date.now();
@@ -297,11 +320,14 @@ export default class Participant extends Vue {
     this.gameState = GameState.Info;
 
     if (this.trackingManager) {
-      this.trackingManager.saveIteration({
-        gameStep: GameStep.Result,
+      this.trackingManager.saveIterationStep({
         particleState: particleState,
         cleanupTime: Date.now() - this.stepTime,
         playTime: Date.now() - this.startTime,
+      });
+      this.trackingManager.saveIteration({
+        gameStep: GameStep.Result,
+        particleState: particleState,
       });
       this.trackingManager.setFinishedState(this.module);
     }

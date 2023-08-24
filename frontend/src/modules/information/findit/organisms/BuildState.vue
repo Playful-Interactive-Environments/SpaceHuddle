@@ -1,9 +1,9 @@
 <template>
-  <div class="gameArea">
+  <div class="gameArea" v-if="levelType" :style="{ height: height }">
     <GameContainer
       v-model:width="gameWidth"
       v-model:height="gameHeight"
-      :background-texture="gameConfig.settings.background"
+      :background-texture="gameConfig[levelType].settings.background"
       :background-movement="BackgroundMovement.Pan"
       :detect-collision="false"
       :use-gravity="false"
@@ -67,44 +67,54 @@
         <font-awesome-icon icon="save" />
       </div>
     </div>-->
-    <div
-      v-if="selectedObject"
-      class="overlay-selected-item"
-      :style="{
-        '--x': `${selectedObject.displayX}px`,
-        '--y': `${selectedObject.displayY}px`,
-        '--width': `${selectedObject.displayWidth}px`,
-        '--height': `${selectedObject.displayHeight}px`,
-      }"
-    >
+    <div class="overlay-selected-item">
       <div @click="showOptions = !showOptions">...</div>
-      <div v-if="showOptions" @click="scaleSelectedObject(-0.2)">
+      <div
+        v-if="selectedObject && showOptions"
+        @click="scaleSelectedObject(-0.2)"
+      >
         <font-awesome-icon icon="square-minus" />
       </div>
-      <div v-if="showOptions" @click="scaleSelectedObject(0.2)">
+      <div
+        v-if="selectedObject && showOptions"
+        @click="scaleSelectedObject(0.2)"
+      >
         <font-awesome-icon icon="square-plus" />
       </div>
-      <div v-if="showOptions" @click="rotateSelectedObject(-10)">
+      <div
+        v-if="selectedObject && showOptions"
+        @click="rotateSelectedObject(-10)"
+      >
         <font-awesome-icon icon="rotate-left" />
       </div>
-      <div v-if="showOptions" @click="rotateSelectedObject(10)">
+      <div
+        v-if="selectedObject && showOptions"
+        @click="rotateSelectedObject(10)"
+      >
         <font-awesome-icon icon="rotate-right" />
       </div>
-      <!--<div v-if="showOptions" @click="showToolbox = true">
+      <!--<div v-if="selectedObject && showOptions" @click="showToolbox = true">
         <font-awesome-icon icon="screwdriver-wrench" />
       </div>-->
-      <div v-if="showOptions" @click="deleteSelectedObject">
+      <div v-if="selectedObject && showOptions" @click="deleteSelectedObject">
         <font-awesome-icon icon="trash" />
       </div>
       <div
-        v-if="showOptions && placedObjects.length > 5"
+        v-if="!level && showOptions && placedObjects.length > 5"
         @click="showLevelSettings = true"
+      >
+        <font-awesome-icon icon="save" />
+      </div>
+      <div
+        v-else-if="level && showOptions && placedObjects.length > 5"
+        @click="saveLevel"
       >
         <font-awesome-icon icon="save" />
       </div>
     </div>
   </div>
   <DrawerBottomOverlay
+    v-if="levelType"
     v-model="showToolbox"
     :title="
       $t('module.information.findit.participant.itemSelection.selectItem')
@@ -119,13 +129,15 @@
         @click="objectTypeClicked(objectType)"
         :class="{ active: objectType === activeObjectType }"
       >
-        <font-awesome-icon :icon="gameConfig[objectType].settings.icon" />
+        <font-awesome-icon
+          :icon="gameConfig[levelType][objectType].settings.icon"
+        />
       </el-button>
     </el-space>
     <el-space wrap>
       <div v-for="objectName of ObjectsForActiveType" :key="objectName">
         <SpriteCanvas
-          :texture="getTexture(objectName)"
+          :texture="getActiveTexture(objectName)"
           :aspect-ration="getObjectAspect(activeObjectType, objectName)"
           class="placeable"
           :class="{ selected: activeObjectName === objectName }"
@@ -176,6 +188,9 @@ import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
 import * as themeColors from '@/utils/themeColors';
+import { Idea } from '@/types/api/Idea';
+import gameConfig from '@/modules/information/findit/data/gameConfig.json';
+import { until } from '@/utils/wait';
 
 // The current state of the edit mode
 export interface BuildState {
@@ -208,14 +223,17 @@ export interface BuildStateResult {
     GameContainer,
     DrawerBottomOverlay,
   },
-  emits: ['editFinished'],
+  emits: ['editFinished', 'update:levelType'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ForestFireEdit extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly levelType!: string;
-  @Prop({ default: {} }) readonly gameConfig!: any;
+  @Prop({ default: EndpointAuthorisationType.PARTICIPANT })
+  authHeaderTyp!: EndpointAuthorisationType;
+  @Prop({ default: null }) readonly level!: Idea | null;
+  @Prop({ default: '100%' }) readonly height!: string;
   activeObjectType = '';
   activeObjectName = '';
   showToolbox = false;
@@ -229,6 +247,7 @@ export default class ForestFireEdit extends Vue {
   showLevelSettings = false;
   selectedObject: GameObject | null = null;
   startTime = Date.now();
+  gameConfig = gameConfig;
 
   get inactiveColor(): string {
     return themeColors.getInactiveColor();
@@ -240,7 +259,7 @@ export default class ForestFireEdit extends Vue {
 
   get buildResult(): BuildStateResult {
     const categoryCount: { [key: string]: number } = {};
-    for (const categoryName of Object.keys(this.gameConfig)) {
+    for (const categoryName of Object.keys(gameConfig[this.levelType])) {
       categoryCount[categoryName] = this.placedObjects.filter(
         (item) => item.type === categoryName
       ).length;
@@ -255,7 +274,9 @@ export default class ForestFireEdit extends Vue {
 
   get ObjectsForActiveType(): string[] {
     if (this.activeObjectType) {
-      const list = Object.keys(this.gameConfig[this.activeObjectType]);
+      const list = Object.keys(
+        gameConfig[this.levelType][this.activeObjectType]
+      );
       return list.filter((name) => name !== 'settings');
     }
     return [];
@@ -265,7 +286,7 @@ export default class ForestFireEdit extends Vue {
     return this.stylesheets[objectType];
   }
 
-  getTexture(objectName: string): PIXI.Texture | string {
+  getActiveTexture(objectName: string): PIXI.Texture | string {
     if (this.activeObjectType) {
       const spriteSheet = this.getSpriteSheetForType(this.activeObjectType);
       if (spriteSheet) return spriteSheet.textures[objectName];
@@ -273,8 +294,30 @@ export default class ForestFireEdit extends Vue {
     return '';
   }
 
+  getTexture(objectType: string, objectName: string): PIXI.Texture | string {
+    const spriteSheet = this.getSpriteSheetForType(objectType);
+    if (spriteSheet && spriteSheet.textures)
+      return spriteSheet.textures[objectName];
+    return '';
+  }
+
+  spriteSheetLoaded(objectType: string): boolean {
+    const spriteSheet = this.getSpriteSheetForType(objectType);
+    return !!spriteSheet && !!spriteSheet.textures;
+  }
+
+  hasTexture(objectType: string, objectName: string): boolean {
+    const spriteSheet = this.getSpriteSheetForType(objectType);
+    return (
+      !!spriteSheet &&
+      !!spriteSheet.textures &&
+      objectName in spriteSheet.textures
+    );
+  }
+
   getValues(objectName: string): { count: number; max: number } {
-    const config = this.gameConfig[this.activeObjectType][objectName];
+    const config =
+      gameConfig[this.levelType][this.activeObjectType][objectName];
     return {
       count: 0,
       max: config.maxCount,
@@ -334,39 +377,100 @@ export default class ForestFireEdit extends Vue {
   }
 
   get gameConfigTypes(): string[] {
-    return Object.keys(this.gameConfig).filter(
+    return Object.keys(gameConfig[this.levelType]).filter(
       (config) => config !== 'settings'
     );
   }
 
-  mounted(): void {
-    this.activeObjectType = this.gameConfig.settings.defaultType;
-    this.activeObjectName = this.gameConfig.settings.defaultName;
+  get defaultLevelType(): string {
+    return Object.keys(gameConfig)[0];
+  }
+
+  unmounted(): void {
     for (const typeName of this.gameConfigTypes) {
-      const settings = this.gameConfig[typeName].settings;
-      setTimeout(() => {
-        if (settings && settings.spritesheet) {
-          PIXI.Assets.load(settings.spritesheet).then((sheet) => {
-            this.stylesheets[typeName] = sheet;
-          });
-        }
-      }, 100);
-      for (const objectName in this.gameConfig[typeName]) {
-        if (objectName !== 'settings') {
-          const hazardParameter = this.gameConfig[typeName][objectName];
-          this.placementState[objectName] = {
-            maxCount: hazardParameter.maxCount,
-            currentCount: 0,
-          };
+      const settings = gameConfig[this.levelType][typeName].settings;
+      PIXI.Assets.unload(settings.spritesheet);
+    }
+  }
+
+  @Watch('levelType', { immediate: true })
+  onLevelTypeChanged(): void {
+    if (this.levelType) {
+      this.activeObjectType = gameConfig[this.levelType].settings.defaultType;
+      this.activeObjectName = gameConfig[this.levelType].settings.defaultName;
+      for (const typeName of this.gameConfigTypes) {
+        const settings = gameConfig[this.levelType][typeName].settings;
+        setTimeout(() => {
+          if (
+            settings &&
+            settings.spritesheet &&
+            this.previousLevelType !== this.levelType
+          ) {
+            PIXI.Assets.load(settings.spritesheet).then((sheet) => {
+              this.stylesheets[typeName] = sheet;
+            });
+          }
+        }, 100);
+        for (const objectName in gameConfig[this.levelType][typeName]) {
+          if (objectName !== 'settings') {
+            const hazardParameter =
+              gameConfig[this.levelType][typeName][objectName];
+            this.placementState[objectName] = {
+              maxCount: hazardParameter.maxCount,
+              currentCount: 0,
+            };
+          }
         }
       }
     }
   }
 
-  unmounted(): void {
-    for (const typeName of this.gameConfigTypes) {
-      const settings = this.gameConfig[typeName].settings;
-      PIXI.Assets.unload(settings.spritesheet);
+  previousLevelType = '';
+  @Watch('level', { immediate: true })
+  async onLevelIdChanged(): Promise<void> {
+    if (this.level) {
+      this.placedObjects = [];
+      const levelType = this.level.parameter.type
+        ? this.level.parameter.type
+        : this.defaultLevelType;
+      if (this.previousLevelType && this.previousLevelType !== levelType) {
+        const gameConfigTypes = Object.keys(gameConfig[levelType]).filter(
+          (config) => config !== 'settings'
+        );
+        for (const typeName of gameConfigTypes) {
+          const previousSettings =
+            gameConfig[this.previousLevelType][typeName].settings;
+          if (
+            previousSettings &&
+            previousSettings.spritesheet &&
+            this.stylesheets[typeName] &&
+            PIXI.Cache.has(previousSettings.spritesheet)
+          ) {
+            PIXI.Assets.unload(previousSettings.spritesheet);
+            delete this.stylesheets[typeName];
+          }
+        }
+      }
+      this.$emit('update:levelType', levelType);
+      const items = this.level.parameter.items
+        ? (this.level.parameter.items as placeable.PlaceableBase[])
+        : (Object.values(this.level.parameter) as placeable.PlaceableBase[]);
+      const spriteSheetTypes = items
+        .map((item) => item.type)
+        .filter((value, index, array) => array.indexOf(value) === index);
+      for (const spriteSheetType of spriteSheetTypes) {
+        await until(() => this.spriteSheetLoaded(spriteSheetType));
+      }
+      this.placedObjects = items
+        .filter((item) => this.hasTexture(item.type, item.name))
+        .map((item) =>
+          placeable.convertToDetailData(
+            item,
+            gameConfig[levelType],
+            this.getTexture(item.type, item.name)
+          )
+        );
+      this.previousLevelType = levelType;
     }
   }
 
@@ -376,20 +480,31 @@ export default class ForestFireEdit extends Vue {
   }
 
   async saveLevel(name: string): Promise<void> {
-    const idea = await ideaService.postIdea(
-      this.taskId,
-      {
-        keywords: name,
-        parameter: {
-          type: this.levelType,
-          items: this.renderList.map((obj) => {
-            return placeable.convertToBase(obj);
-          }),
+    if (!this.level) {
+      const idea = await ideaService.postIdea(
+        this.taskId,
+        {
+          keywords: name,
+          parameter: {
+            type: this.levelType,
+            items: this.renderList.map((obj) => {
+              return placeable.convertToBase(obj);
+            }),
+          },
         },
-      },
-      EndpointAuthorisationType.PARTICIPANT
-    );
-    this.$emit('editFinished', idea.id, this.buildResult);
+        this.authHeaderTyp
+      );
+      this.$emit('editFinished', idea.id, this.buildResult);
+    } else {
+      this.level.parameter = {
+        type: this.levelType,
+        items: this.renderList.map((obj) => {
+          return placeable.convertToBase(obj);
+        }),
+      };
+      const idea = await ideaService.putIdea(this.level, this.authHeaderTyp);
+      this.$emit('editFinished', idea.id, this.buildResult);
+    }
   }
 
   clickPosition: [number, number] = [0, 0];
@@ -405,7 +520,9 @@ export default class ForestFireEdit extends Vue {
     setTimeout(() => {
       if (this.activeObjectType) {
         const configParameter =
-          this.gameConfig[this.activeObjectType][this.activeObjectName];
+          gameConfig[this.levelType][this.activeObjectType][
+            this.activeObjectName
+          ];
         if (
           this.placementState[this.activeObjectName].currentCount ===
           this.placementState[this.activeObjectName].maxCount
@@ -426,7 +543,7 @@ export default class ForestFireEdit extends Vue {
           id: 0,
           type: this.activeObjectType,
           name: this.activeObjectName,
-          texture: this.getTexture(this.activeObjectName),
+          texture: this.getActiveTexture(this.activeObjectName),
           width: configParameter.width,
           shape: configParameter.shape,
           position: position,
@@ -485,7 +602,7 @@ export default class ForestFireEdit extends Vue {
 
   get renderList(): placeable.Placeable[] {
     const getSortNumber = (placeable: placeable.Placeable): number => {
-      return this.gameConfig[placeable.type].settings.order;
+      return gameConfig[this.levelType][placeable.type].settings.order;
     };
     return this.placedObjects.sort(
       (a, b) => getSortNumber(a) - getSortNumber(b)
@@ -496,8 +613,6 @@ export default class ForestFireEdit extends Vue {
 
 <style scoped lang="scss">
 .gameArea {
-  --x: 0;
-  --y: 0;
   position: relative;
   height: calc(100%);
   width: 100%;
@@ -519,8 +634,6 @@ export default class ForestFireEdit extends Vue {
 .overlay-selected-item {
   z-index: 100;
   position: absolute;
-  //top: calc(var(--y) - var(--height) / 2);
-  //left: calc(var(--x) + var(--width));
   top: 1rem;
   left: 1rem;
   text-align: center;

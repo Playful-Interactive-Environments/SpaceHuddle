@@ -113,7 +113,7 @@ export class TrackingManager {
     this.task = task;
   }
 
-  _getStarPoints(stars: number): number {
+  getStarPoints(stars: number): number {
     return stars * this.pointsPerStar;
   }
 
@@ -125,7 +125,7 @@ export class TrackingManager {
     pointsSpent: number | null = null
   ): GameplayResult | GameplayAndSpentResult {
     const points =
-      playPoints !== null ? playPoints : this._getStarPoints(stars);
+      playPoints !== null ? playPoints : this.getStarPoints(stars);
     const result = {
       stars: stars,
       points: maxPoints !== null && points > maxPoints ? maxPoints : points,
@@ -286,8 +286,36 @@ export class TrackingManager {
     }
   }
 
+  _getLimitedStarPoints(
+    ideaId: string | null,
+    stars: number | null = null,
+    starLimitRule:
+      | ((step: TaskParticipantIterationStep) => boolean)
+      | null = null
+  ): number {
+    if (stars !== null) {
+      let starPoints = stars ? this.getStarPoints(stars) : 0;
+      if (starLimitRule) {
+        const previousIdeaPointsList = this.stepList.filter(
+          (item) =>
+            item.ideaId === ideaId &&
+            item.parameter.gameplayResult &&
+            starLimitRule(item)
+        );
+        const previousIdeaPoints = previousIdeaPointsList.reduce(
+          (sum, item) => sum + item.parameter.gameplayResult.points,
+          0
+        );
+        starPoints -= previousIdeaPoints;
+        if (starPoints < 0) starPoints = 0;
+      }
+      return starPoints;
+    }
+    return 0;
+  }
+
   async createInstanceStep(
-    ideaId: string,
+    ideaId: string | null,
     state: TaskParticipantIterationStepStatesType,
     initContent: any,
     stars: number | null = null,
@@ -299,21 +327,9 @@ export class TrackingManager {
   ): Promise<void> {
     if (this.iteration) {
       if (stars !== null || pointsSpent !== null) {
-        let starPoints = stars ? this._getStarPoints(stars) : 0;
-        if (starLimitRule) {
-          const previousIdeaPointsList = this.stepList.filter(
-            (item) => item.ideaId === ideaId && starLimitRule(item)
-          );
-          const previousIdeaPoints = previousIdeaPointsList.reduce(
-            (sum, item) => sum + item.parameter.gameplayResult.points,
-            0
-          );
-          starPoints -= previousIdeaPoints;
-          if (starPoints < 0) starPoints = 0;
-        }
         initContent.gameplayResult = this.getGameplayResult(
           stars !== null ? stars : 0,
-          starPoints,
+          this._getLimitedStarPoints(ideaId, stars, starLimitRule),
           1,
           null,
           pointsSpent
@@ -327,7 +343,7 @@ export class TrackingManager {
           parameter: initContent,
         });
       await this.stepsCash.refreshData();
-      if (updateInstanceSum) {
+      if (updateInstanceSum && this.iterationStep.parameter.gameplayResult) {
         await this.saveIterationPointsFromSteps();
         await this.saveStatePointsFromIterations();
       }
@@ -335,7 +351,7 @@ export class TrackingManager {
   }
 
   async createInstanceStepPoints(
-    ideaId: string,
+    ideaId: string | null,
     state: TaskParticipantIterationStepStatesType,
     initContent: any,
     points: number | null = null,
@@ -359,36 +375,65 @@ export class TrackingManager {
           parameter: initContent,
         });
       await this.stepsCash.refreshData();
-      if (updateInstanceSum) {
+      if (updateInstanceSum && this.iterationStep.parameter.gameplayResult) {
         await this.saveIterationPointsFromSteps();
         await this.saveStatePointsFromIterations();
       }
     }
   }
 
-  saveIterationStep(
+  async saveIterationStep(
     contentChanges: any | null = null,
-    changedState: TaskParticipantIterationStepStatesType | null = null
-  ): void {
+    changedState: TaskParticipantIterationStepStatesType | null = null,
+    stars: number | null = null,
+    updateInstanceSum = false,
+    starLimitRule:
+      | ((step: TaskParticipantIterationStep) => boolean)
+      | null = null
+  ): Promise<void> {
     if (this.iterationStep) {
+      if (stars !== null)
+        this.iterationStep.parameter.gameplayResult = this.getGameplayResult(
+          stars,
+          this._getLimitedStarPoints(
+            this.iterationStep.ideaId,
+            stars,
+            starLimitRule
+          )
+        );
       if (changedState) this.iterationStep.state = changedState;
       if (contentChanges) {
         for (const key of Object.keys(contentChanges)) {
           this.iterationStep.parameter[key] = contentChanges[key];
         }
       }
-      taskParticipantService
-        .putParticipantIterationStep(this.taskId, this.iterationStep)
-        .then(() => {
-          this.stepsCash.refreshData();
-        });
+      await taskParticipantService.putParticipantIterationStep(
+        this.taskId,
+        this.iterationStep
+      );
+      await this.stepsCash.refreshData();
+      if (updateInstanceSum && this.iterationStep.parameter.gameplayResult) {
+        await this.saveIterationPointsFromSteps();
+        await this.saveStatePointsFromIterations();
+      }
     }
   }
 
-  saveIterationStepPoints(stars: number): void {
+  saveIterationStepPoints(
+    stars: number,
+    starLimitRule:
+      | ((step: TaskParticipantIterationStep) => boolean)
+      | null = null
+  ): void {
     if (this.iterationStep) {
-      this.iterationStep.parameter.gameplayResult =
-        this.getGameplayResult(stars);
+      this.iterationStep.parameter.gameplayResult = this.getGameplayResult(
+        stars,
+        this._getLimitedStarPoints(
+          this.iterationStep.ideaId,
+          stars,
+          starLimitRule
+        )
+      );
       taskParticipantService
         .putParticipantIterationStep(this.taskId, this.iterationStep)
         .then(() => {

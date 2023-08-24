@@ -273,7 +273,7 @@ CREATE TABLE `task_participant_iteration_step` (
                                                    `participant_id` char(36) NOT NULL,
                                                    `iteration` int(11) NOT NULL DEFAULT 1,
                                                    `step` int(11) NOT NULL DEFAULT 1,
-                                                   `idea_id` char(36) NOT NULL,
+                                                   `idea_id` char(36) NULL DEFAULT NULL,
                                                    `state` varchar(255) DEFAULT NULL,
                                                    `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
                                                    `modification_date` datetime NOT NULL DEFAULT current_timestamp()

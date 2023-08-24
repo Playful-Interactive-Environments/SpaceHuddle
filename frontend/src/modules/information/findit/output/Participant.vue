@@ -13,12 +13,12 @@
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
       :task-id="taskId"
       :game-config="totalGameConfig"
+      :tracking-manager="trackingManager"
       @selectionDone="levelSelected"
     />
     <BuildState
       v-if="gameStep === GameStep.Build && gameState === GameState.Game"
       :taskId="taskId"
-      :gameConfig="totalGameConfig[selectedLevelType]"
       :level-type="selectedLevelType"
       @editFinished="editFinished"
     />

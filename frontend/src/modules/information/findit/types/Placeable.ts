@@ -37,6 +37,22 @@ export function convertToDetailData(
 ): Placeable {
   if (!value.type) value.type = gameConfig.settings.defaultType;
   const configParameter = gameConfig[value.type][value.name];
+  if (!configParameter) {
+    return {
+      uuid: uuidv4(),
+      id: 0,
+      type: value.type,
+      name: value.name,
+      texture: texture,
+      width: 1,
+      shape: 'rect',
+      position: value.position,
+      rotation: value.rotation,
+      scale: value.scale,
+      escalationSteps: [],
+      escalationStepIndex: 0,
+    };
+  }
   const escalationSteps: number[] = [];
   if (configParameter.escalationLevels) {
     escalationSteps.push(

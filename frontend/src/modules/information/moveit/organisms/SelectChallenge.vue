@@ -120,14 +120,24 @@
       >
         <el-card class="vehicle-card">
           <template #header>
-            <div class="card-header">
-              <span>
+            <div class="card-header media is-mobile">
+              <div class="media-content">
                 {{
                   $t(
                     `module.information.moveit.enums.vehicles.${activeVehicleType}.${vehicle.name}`
                   )
                 }}
-              </span>
+              </div>
+              <div class="media-right">
+                <font-awesome-icon icon="coins" />
+                {{
+                  getPointsForVehicle({
+                    category: activeVehicleType,
+                    type: vehicle.name,
+                  })
+                }}
+                / {{ maxVehiclePoints }}
+              </div>
             </div>
           </template>
           <div class="spritesheet-container">
@@ -142,6 +152,18 @@
             :src="`/assets/games/moveit/vehicle/${vehicle.image}`"
             :alt="vehicle.name"
           />-->
+          <div>
+            <el-rate
+              :max="3"
+              :model-value="
+                getStarsForVehicle({
+                  category: activeVehicleType,
+                  type: vehicle.name,
+                })
+              "
+              disabled
+            />
+          </div>
           <div v-if="vehicle.fuel">
             {{
               $t(
@@ -219,6 +241,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import * as configCalculation from '@/modules/information/moveit/utils/configCalculation';
 import { Prop } from 'vue-property-decorator';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
+import * as vehicleCalculation from '@/modules/information/moveit/types/Vehicle';
 
 export interface ChartData {
   labels: string[];
@@ -254,16 +277,32 @@ export default class SelectChallenge extends Vue {
   };
   activeVehicleType = 'car';
   gameConfig = gameConfig;
-  selectedVehicle = {
+  selectedVehicle: vehicleCalculation.Vehicle = {
     category: 'car',
     type: 'sport',
   };
 
   get selectedVehicleParameter(): any {
-    return configCalculation.getVehicleParameter(
-      this.selectedVehicle.category,
-      this.selectedVehicle.type
+    return configCalculation.getVehicleParameter(this.selectedVehicle);
+  }
+
+  get maxVehiclePoints(): number {
+    return this.trackingManager.getStarPoints(3);
+  }
+
+  getStarsForVehicle(vehicle: vehicleCalculation.Vehicle): number {
+    const vehicleSteps = this.trackingManager.stepList.filter((item) =>
+      vehicleCalculation.isSameVehicle(item.parameter.vehicle, vehicle)
     );
+    if (vehicleSteps.length > 0) {
+      return vehicleSteps.sort((a, b) => b.parameter.rate - a.parameter.rate)[0]
+        .parameter.rate;
+    }
+    return 0;
+  }
+
+  getPointsForVehicle(vehicle: vehicleCalculation.Vehicle): number {
+    return this.trackingManager.getStarPoints(this.getStarsForVehicle(vehicle));
   }
 
   mounted(): void {
@@ -413,9 +452,13 @@ export default class SelectChallenge extends Vue {
   .card-header {
     font-weight: var(--font-weight-bold);
     font-size: var(--font-size-large);
-    text-align: center;
-    display: block;
+    //text-align: center;
+    //display: block;
   }
+}
+
+.media-right {
+  padding-right: 0.5rem;
 }
 
 /*.vehicle-image {
@@ -425,10 +468,11 @@ export default class SelectChallenge extends Vue {
 /*spritesheet functionality:*/
 
 .spritesheet-container {
-  height: 7rem;
+  height: 6rem;
   aspect-ratio: 3.07 / 1;
   overflow: hidden;
   margin: auto auto 1rem;
+  max-width: 100%;
 }
 
 .vehicle-spritesheet {
@@ -446,10 +490,10 @@ export default class SelectChallenge extends Vue {
     object-position: right top;
   }
   50% {
-    object-position: left -7rem;
+    object-position: left -6rem;
   }
   75% {
-    object-position: right -7rem;
+    object-position: right -6rem;
   }
 }
 

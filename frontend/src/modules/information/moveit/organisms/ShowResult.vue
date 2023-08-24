@@ -120,6 +120,8 @@ import * as PIXI from 'pixi.js';
 import * as pixiUtil from '@/utils/pixi';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
+import * as vehicleCalculation from '@/modules/information/moveit/types/Vehicle';
 
 const resultTabName = 'result';
 
@@ -330,7 +332,7 @@ export default class ShowResult extends Vue {
     this.rendererReady = true;
   }
 
-  mounted(): void {
+  async mounted(): Promise<void> {
     this.gameHeight = this.$el.parentElement.offsetHeight;
     if (this.gameWidth) {
       this.particleVisualisation[resultTabName] = [];
@@ -351,15 +353,29 @@ export default class ShowResult extends Vue {
     }
 
     if (this.trackingManager && this.trackingManager.iteration) {
-      this.trackingManager.saveIteration(
+      await this.trackingManager.saveIteration(
         {
           rate: this.successRate,
         },
         this.successRate >= 2
           ? TaskParticipantIterationStatesType.WIN
-          : TaskParticipantIterationStatesType.LOOS,
+          : TaskParticipantIterationStatesType.LOOS
+      );
+    }
+
+    if (this.trackingManager && this.trackingManager.iterationStep) {
+      const vehicle = this.trackingManager.iterationStep.parameter.vehicle;
+      await this.trackingManager.saveIterationStep(
+        {
+          rate: this.successRate,
+        },
+        this.successRate === 3
+          ? TaskParticipantIterationStepStatesType.CORRECT
+          : TaskParticipantIterationStepStatesType.WRONG,
         this.successRate,
-        true
+        true,
+        (item) =>
+          vehicleCalculation.isSameVehicle(item.parameter.vehicle, vehicle)
       );
     }
   }

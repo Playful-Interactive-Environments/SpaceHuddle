@@ -7,7 +7,7 @@ export interface TaskParticipantIterationStep {
   id: string;
   iteration: number;
   step: number;
-  ideaId: string;
+  ideaId: string | null;
   state: TaskParticipantIterationStepStatesType;
   parameter: any;
   avatar: Avatar;

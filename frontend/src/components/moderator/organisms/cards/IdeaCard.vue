@@ -25,11 +25,14 @@
   >
     <img v-if="idea.image" :src="idea.image" class="card__image" alt="" />
     <img
-      v-if="idea.link && !idea.image"
+      v-else-if="idea.link && !idea.image"
       :src="idea.link"
       class="card__image"
       alt=""
     />
+    <div v-else class="card__image">
+      <slot name="icon"></slot>
+    </div>
     <div class="card__text">
       <div class="card__title">
         <span
@@ -428,13 +431,13 @@ export default class IdeaCard extends Vue {
   display: flex;
 
   .card__image {
-    width: 40%;
+    width: 30%;
     object-fit: contain;
     background-color: var(--card-color);
   }
 
   .card__text {
-    width: 60%;
+    width: 70%;
   }
 }
 
