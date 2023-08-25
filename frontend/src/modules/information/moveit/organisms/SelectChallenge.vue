@@ -275,7 +275,7 @@ export default class SelectChallenge extends Vue {
     labels: [],
     datasets: [],
   };
-  activeVehicleType = 'car';
+  activeVehicleType: 'motorcycle' | 'bus' | 'car' | 'scooter' | 'bike' = 'car';
   gameConfig = gameConfig;
   selectedVehicle: vehicleCalculation.Vehicle = {
     category: 'car',
@@ -412,11 +412,16 @@ export default class SelectChallenge extends Vue {
     }
   }
 
-  vehicleTypeClicked(vehicle: string): void {
+  vehicleTypeClicked(
+    vehicle: 'motorcycle' | 'bus' | 'car' | 'scooter' | 'bike'
+  ): void {
     this.activeVehicleType = vehicle;
   }
 
-  selectVehicle(category: string, type: string): void {
+  selectVehicle(
+    category: 'motorcycle' | 'bus' | 'car' | 'scooter' | 'bike',
+    type: string
+  ): void {
     this.selectedVehicle.category = category;
     this.selectedVehicle.type = type;
     this.$emit('play', this.selectedVehicle);
