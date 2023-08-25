@@ -8,10 +8,19 @@
     "replayable": "replayable",
     "showTutorialOnlyOnce": "show tutorial only once"
   },
+  "moderatorContent": {
+    "tabs": {
+      "play": "play",
+      "edit": "edit"
+    },
+    "add": "add level",
+    "levelType": "level type"
+  },
   "participant": {
     "everythingPlaced": "everything placed",
     "maxCountPlaced": "max objects of type placed",
     "lost": "You have unfortunately not found a dangerous object for too long, which has now caused a damage. You have lost, please try again.",
+    "win": "congratulations you have won",
     "newLevel": "create new level",
     "place": "Place",
     "play": "Start",

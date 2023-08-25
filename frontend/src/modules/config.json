@@ -76,6 +76,7 @@
            "path": "information/default"  
        },  
        "findit": {  
+           "publicScreen": "output/PublicScreen",  
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
@@ -95,7 +96,9 @@
            "path": "information/missionmap"  
        },  
        "moveit": {  
+           "publicScreen": "output/PublicScreen",  
            "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
            "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  

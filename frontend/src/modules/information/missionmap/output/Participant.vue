@@ -215,7 +215,7 @@
     v-model:show-modal="showIdeaSettings"
     :taskId="taskId"
     :idea="settingsIdea"
-    :title="$t('module.brainstorming.map.moderatorContent.settingsTitle')"
+    :title="$t('module.information.missionmap.moderatorContent.settingsTitle')"
     :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
     @updateData="addData"
   />

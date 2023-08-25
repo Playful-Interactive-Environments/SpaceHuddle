@@ -1,5 +1,10 @@
 <template>
-  <div class="gameArea" v-if="levelType" :style="{ height: height }">
+  <div
+    class="gameArea"
+    v-if="levelType"
+    :style="{ height: height }"
+    v-loading="isSaving"
+  >
     <GameContainer
       v-model:width="gameWidth"
       v-model:height="gameHeight"
@@ -111,56 +116,66 @@
       >
         <font-awesome-icon icon="save" />
       </div>
-    </div>
-  </div>
-  <DrawerBottomOverlay
-    v-if="levelType"
-    v-model="showToolbox"
-    :title="
-      $t('module.information.findit.participant.itemSelection.selectItem')
-    "
-  >
-    <el-space wrap>
-      <el-button
-        v-for="objectType of gameConfigTypes"
-        :key="objectType"
-        type="primary"
-        size="large"
-        @click="objectTypeClicked(objectType)"
-        :class="{ active: objectType === activeObjectType }"
+      <div
+        v-if="
+          level &&
+          showOptions &&
+          authHeaderTyp === EndpointAuthorisationType.MODERATOR
+        "
+        @click="approveLevel"
       >
-        <font-awesome-icon
-          :icon="gameConfig[levelType][objectType].settings.icon"
-        />
-      </el-button>
-    </el-space>
-    <el-space wrap>
-      <div v-for="objectName of ObjectsForActiveType" :key="objectName">
-        <SpriteCanvas
-          :texture="getActiveTexture(objectName)"
-          :aspect-ration="getObjectAspect(activeObjectType, objectName)"
-          class="placeable"
-          :class="{ selected: activeObjectName === objectName }"
-          :tint="
-            placementState[objectName].currentCount <
-            placementState[objectName].maxCount
-              ? '#ffffff'
-              : inactiveColor
-          "
-          :background-color="
-            placementState[objectName].currentCount <
-            placementState[objectName].maxCount
-              ? backgroundColor
-              : inactiveColor
-          "
-          @pointerdown="objectNameClicked(objectName)"
-        />
-        <br />
-        {{ placementState[objectName].currentCount }} /
-        {{ placementState[objectName].maxCount }}
+        <font-awesome-icon icon="thumbs-up" />
       </div>
-    </el-space>
-  </DrawerBottomOverlay>
+    </div>
+    <DrawerBottomOverlay
+      v-if="levelType"
+      v-model="showToolbox"
+      :title="
+        $t('module.information.findit.participant.itemSelection.selectItem')
+      "
+    >
+      <el-space wrap>
+        <el-button
+          v-for="objectType of gameConfigTypes"
+          :key="objectType"
+          type="primary"
+          size="large"
+          @click="objectTypeClicked(objectType)"
+          :class="{ active: objectType === activeObjectType }"
+        >
+          <font-awesome-icon
+            :icon="gameConfig[levelType][objectType].settings.icon"
+          />
+        </el-button>
+      </el-space>
+      <el-space wrap>
+        <div v-for="objectName of ObjectsForActiveType" :key="objectName">
+          <SpriteCanvas
+            :texture="getActiveTexture(objectName)"
+            :aspect-ration="getObjectAspect(activeObjectType, objectName)"
+            class="placeable"
+            :class="{ selected: activeObjectName === objectName }"
+            :tint="
+              placementState[objectName].currentCount <
+              placementState[objectName].maxCount
+                ? '#ffffff'
+                : inactiveColor
+            "
+            :background-color="
+              placementState[objectName].currentCount <
+              placementState[objectName].maxCount
+                ? backgroundColor
+                : inactiveColor
+            "
+            @pointerdown="objectNameClicked(objectName)"
+          />
+          <br />
+          {{ placementState[objectName].currentCount }} /
+          {{ placementState[objectName].maxCount }}
+        </div>
+      </el-space>
+    </DrawerBottomOverlay>
+  </div>
   <LevelSettings
     v-model:show-modal="showLevelSettings"
     @saveLevel="saveLevel"
@@ -191,6 +206,8 @@ import * as themeColors from '@/utils/themeColors';
 import { Idea } from '@/types/api/Idea';
 import gameConfig from '@/modules/information/findit/data/gameConfig.json';
 import { until } from '@/utils/wait';
+import * as configParameter from '@/modules/information/findit/utils/configParameter';
+import { LevelWorkflowType } from '@/modules/information/findit/types/LevelWorkflowType';
 
 // The current state of the edit mode
 export interface BuildState {
@@ -223,7 +240,7 @@ export interface BuildStateResult {
     GameContainer,
     DrawerBottomOverlay,
   },
-  emits: ['editFinished', 'update:levelType'],
+  emits: ['editFinished', 'update:levelType', 'approved'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -248,6 +265,9 @@ export default class ForestFireEdit extends Vue {
   selectedObject: GameObject | null = null;
   startTime = Date.now();
   gameConfig = gameConfig;
+  isSaving = false;
+
+  EndpointAuthorisationType = EndpointAuthorisationType;
 
   get inactiveColor(): string {
     return themeColors.getInactiveColor();
@@ -377,13 +397,7 @@ export default class ForestFireEdit extends Vue {
   }
 
   get gameConfigTypes(): string[] {
-    return Object.keys(gameConfig[this.levelType]).filter(
-      (config) => config !== 'settings'
-    );
-  }
-
-  get defaultLevelType(): string {
-    return Object.keys(gameConfig)[0];
+    return configParameter.getGameConfigTypes(this.levelType);
   }
 
   unmounted(): void {
@@ -401,11 +415,7 @@ export default class ForestFireEdit extends Vue {
       for (const typeName of this.gameConfigTypes) {
         const settings = gameConfig[this.levelType][typeName].settings;
         setTimeout(() => {
-          if (
-            settings &&
-            settings.spritesheet &&
-            this.previousLevelType !== this.levelType
-          ) {
+          if (settings && settings.spritesheet && !this.stylesheets[typeName]) {
             PIXI.Assets.load(settings.spritesheet).then((sheet) => {
               this.stylesheets[typeName] = sheet;
             });
@@ -427,12 +437,13 @@ export default class ForestFireEdit extends Vue {
 
   previousLevelType = '';
   @Watch('level', { immediate: true })
-  async onLevelIdChanged(): Promise<void> {
+  async onLevelChanged(): Promise<void> {
+    this.showToolbox = false;
     if (this.level) {
       this.placedObjects = [];
       const levelType = this.level.parameter.type
         ? this.level.parameter.type
-        : this.defaultLevelType;
+        : configParameter.getDefaultLevelType();
       if (this.previousLevelType && this.previousLevelType !== levelType) {
         const gameConfigTypes = Object.keys(gameConfig[levelType]).filter(
           (config) => config !== 'settings'
@@ -452,9 +463,7 @@ export default class ForestFireEdit extends Vue {
         }
       }
       this.$emit('update:levelType', levelType);
-      const items = this.level.parameter.items
-        ? (this.level.parameter.items as placeable.PlaceableBase[])
-        : (Object.values(this.level.parameter) as placeable.PlaceableBase[]);
+      const items = configParameter.getItemsForLevel(this.level);
       const spriteSheetTypes = items
         .map((item) => item.type)
         .filter((value, index, array) => array.indexOf(value) === index);
@@ -480,12 +489,14 @@ export default class ForestFireEdit extends Vue {
   }
 
   async saveLevel(name: string): Promise<void> {
+    this.isSaving = true;
     if (!this.level) {
       const idea = await ideaService.postIdea(
         this.taskId,
         {
           keywords: name,
           parameter: {
+            state: LevelWorkflowType.created,
             type: this.levelType,
             items: this.renderList.map((obj) => {
               return placeable.convertToBase(obj);
@@ -497,6 +508,9 @@ export default class ForestFireEdit extends Vue {
       this.$emit('editFinished', idea.id, this.buildResult);
     } else {
       this.level.parameter = {
+        state: this.level.parameter.state
+          ? this.level.parameter.state
+          : LevelWorkflowType.created,
         type: this.levelType,
         items: this.renderList.map((obj) => {
           return placeable.convertToBase(obj);
@@ -504,6 +518,23 @@ export default class ForestFireEdit extends Vue {
       };
       const idea = await ideaService.putIdea(this.level, this.authHeaderTyp);
       this.$emit('editFinished', idea.id, this.buildResult);
+    }
+    this.isSaving = false;
+  }
+
+  approveLevel(): void {
+    if (this.level) {
+      this.isSaving = true;
+      this.level.parameter = {
+        state: LevelWorkflowType.approved,
+        type: this.levelType,
+        items: this.renderList.map((obj) => {
+          return placeable.convertToBase(obj);
+        }),
+      };
+      ideaService.putIdea(this.level, this.authHeaderTyp);
+      this.$emit('approved');
+      this.isSaving = false;
     }
   }
 

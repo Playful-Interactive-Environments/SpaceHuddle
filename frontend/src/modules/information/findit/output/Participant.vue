@@ -25,8 +25,7 @@
     <PlayState
       v-if="gameStep === GameStep.Play && gameState === GameState.Game"
       :taskId="taskId"
-      :level-data="selectedLevel"
-      :gameConfig="totalGameConfig[selectedLevelType]"
+      :level="selectedLevel"
       @playFinished="playFinished"
     />
   </div>
@@ -49,11 +48,11 @@ import SelectState from '@/modules/information/findit/organisms/SelectState.vue'
 import ModuleInfo, {
   ModuleInfoEntryData,
 } from '@/components/participant/molecules/ModuleInfo.vue';
-import * as placeable from '@/modules/information/findit/types/Placeable';
 import * as PIXI from 'pixi.js';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import totalGameConfig from '@/modules/information/findit/data/gameConfig.json';
+import { Idea } from '@/types/api/Idea';
 
 export enum GameStep {
   Select = 'select',
@@ -83,8 +82,7 @@ export default class Participant extends Vue {
   @Prop({ default: false }) readonly useFullSize!: boolean;
   @Prop({ default: '' }) readonly backgroundClass!: string;
   module: Module | null = null;
-  selectedLevel: placeable.PlaceableBase[] = [];
-  selectedLevelId: string | null = null;
+  selectedLevel: Idea | null = null;
   selectedLevelType: string | null = null;
   spritesheet!: PIXI.Spritesheet;
 
@@ -131,21 +129,16 @@ export default class Participant extends Vue {
     if (this.trackingManager) this.trackingManager.deregisterAll();
   }
 
-  levelSelected(
-    levelType: string,
-    level: placeable.PlaceableBase[],
-    levelId: string | null
-  ) {
+  levelSelected(levelType: string, level: Idea | null) {
     this.selectedLevelType = levelType;
     this.selectedLevel = level;
-    this.selectedLevelId = levelId;
     this.gameState = GameState.Info;
-    this.gameStep = level.length === 0 ? GameStep.Build : GameStep.Play;
+    this.gameStep = !level ? GameStep.Build : GameStep.Play;
 
     if (this.trackingManager) {
       this.trackingManager.saveIteration({
         gameStep: this.gameStep,
-        levelId: levelId,
+        levelId: level?.id,
       });
     }
   }
@@ -239,10 +232,10 @@ export default class Participant extends Vue {
     this.gameStep = GameStep.Select;
     this.gameState = GameState.Info;
 
-    if (this.trackingManager && this.selectedLevelId) {
+    if (this.trackingManager && this.selectedLevel) {
       (result as any).step = GameStep.Play;
       this.trackingManager.createInstanceStep(
-        this.selectedLevelId,
+        this.selectedLevel.id,
         result.collected === result.total
           ? TaskParticipantIterationStepStatesType.CORRECT
           : TaskParticipantIterationStepStatesType.WRONG,
@@ -253,7 +246,7 @@ export default class Participant extends Vue {
         (item) => item.parameter.step === GameStep.Play
       );
     }
-    this.selectedLevelId = null;
+    this.selectedLevel = null;
 
     if (this.trackingManager) {
       this.trackingManager.saveIteration({

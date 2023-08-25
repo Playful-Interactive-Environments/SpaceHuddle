@@ -106,13 +106,15 @@
     :prop="`${rulePropPath}.theme`"
   >
     <el-select v-model="modelValue.theme">
-      <el-option value="">-</el-option>
-      <el-option value="preparation">
-        {{ $t('module.information.missionmap.moderatorConfig.preparation') }}
-      </el-option>
-      <el-option value="meeting">
-        {{ $t('module.information.missionmap.moderatorConfig.meeting') }}
-      </el-option>
+      <el-option value="" label="-" />
+      <el-option
+        value="preparation"
+        :label="$t('module.information.missionmap.moderatorConfig.preparation')"
+      />
+      <el-option
+        value="meeting"
+        :label="$t('module.information.missionmap.moderatorConfig.meeting')"
+      />
     </el-select>
   </el-form-item>
 </template>

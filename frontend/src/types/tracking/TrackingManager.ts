@@ -124,8 +124,7 @@ export class TrackingManager {
     maxPoints: number | null = null,
     pointsSpent: number | null = null
   ): GameplayResult | GameplayAndSpentResult {
-    const points =
-      playPoints !== null ? playPoints : this.getStarPoints(stars);
+    const points = playPoints !== null ? playPoints : this.getStarPoints(stars);
     const result = {
       stars: stars,
       points: maxPoints !== null && points > maxPoints ? maxPoints : points,

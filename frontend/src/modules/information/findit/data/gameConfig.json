@@ -48,10 +48,6 @@
         "explanationText": "module.information.findit.participant.placeables.fire"
       },
       "bottleWhite": {
-        "escalationLevels": [
-          { "min": 60, "max": 120 },
-          { "min": 30, "max": 60 }
-        ],
         "severity": 2,
         "maxCount": 5,
         "width": 1,
@@ -59,10 +55,6 @@
         "explanationKey": "bottle"
       },
       "bottleWine": {
-        "escalationLevels": [
-          { "min": 60, "max": 120 },
-          { "min": 30, "max": 60 }
-        ],
         "severity": 1,
         "maxCount": 5,
         "width": 1,
@@ -70,10 +62,6 @@
         "explanationKey": "bottle"
       },
       "bottleBeer": {
-        "escalationLevels": [
-          { "min": 60, "max": 120 },
-          { "min": 30, "max": 60 }
-        ],
         "severity": 1,
         "maxCount": 5,
         "width": 1,

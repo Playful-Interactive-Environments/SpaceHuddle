@@ -5,6 +5,7 @@
     :y="position[1] - offset[1]"
     :rotation="rotationValue"
     :scale="scale"
+    :filters="objectFilters"
   >
     <slot></slot>
     <Graphics
@@ -29,6 +30,7 @@ import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import { delay } from '@/utils/wait';
 import * as turf from '@turf/turf';
+import { GrayscaleFilter } from '@pixi/filter-grayscale';
 
 @Options({
   components: {},
@@ -70,6 +72,7 @@ export default class GameObject extends Vue {
   @Prop({ default: true }) moveWithBackground!: boolean;
   @Prop({ default: null }) triggerDelay!: number | null;
   @Prop({ default: false }) highlighted!: boolean;
+  @Prop({ default: false }) disabled!: boolean;
   body!: typeof Matter.Body;
   position: [number, number] = [0, 0];
   rotationValue = 0;
@@ -81,6 +84,7 @@ export default class GameObject extends Vue {
   displayHeight = this.defaultSize;
   triggerStartTime: number | null = null;
   destroyed = false;
+  objectFilters: any[] = [];
 
   get displayX(): number {
     return this.position[0] - this.offset[0];
@@ -126,6 +130,9 @@ export default class GameObject extends Vue {
 
   clickTime = 0;
   gameObjectClicked(): void {
+    if (this.disabled) {
+      return;
+    }
     if (this.body && !this.isStatic && !this.usePhysic) {
       this.body.isStatic = false;
     }
@@ -153,6 +160,42 @@ export default class GameObject extends Vue {
       if (releaseDelay > 0) await delay(releaseDelay);
       this.gameContainer.activeObject = null;
       this.$emit('update:highlighted', false);
+    }
+  }
+
+  @Watch('disabled', { immediate: true })
+  onDisabledChanged(): void {
+    if (this.disabled) {
+      this.objectFilters = [new GrayscaleFilter()];
+      if (
+        this.clickable &&
+        this.gameContainer &&
+        this.body &&
+        Matter.Composite.get(
+          this.gameContainer.engine.world,
+          this.body.id,
+          this.body.type
+        )
+      ) {
+        Matter.Composite.remove(this.gameContainer.engine.world, this.body);
+      }
+      this.gameObjectReleased();
+    } else {
+      setTimeout(() => {
+        if (
+          this.clickable &&
+          this.gameContainer &&
+          this.body &&
+          !Matter.Composite.get(
+            this.gameContainer.engine.world,
+            this.body.id,
+            this.body.type
+          )
+        ) {
+          Matter.Composite.add(this.gameContainer.engine.world, this.body);
+        }
+        this.objectFilters = [];
+      }, 200);
     }
   }
 

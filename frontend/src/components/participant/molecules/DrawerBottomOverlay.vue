@@ -49,7 +49,7 @@ export default class DrawerBottomOverlay extends Vue {
 .overlay {
   padding: 1rem;
   position: absolute;
-  height: 70vh;
+  height: 70%;
   width: 100%;
   bottom: 0;
   z-index: 100;

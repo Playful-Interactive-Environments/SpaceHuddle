@@ -1,12 +1,35 @@
 <template>
   <div>
+    <el-tabs v-model="activeTab" v-if="selectedLevel">
+      <el-tab-pane
+        :label="$t('module.information.findit.moderatorContent.tabs.play')"
+        name="play"
+      >
+      </el-tab-pane>
+      <el-tab-pane
+        :label="$t('module.information.findit.moderatorContent.tabs.edit')"
+        name="edit"
+        v-if="
+          !selectedLevel.parameter.state ||
+          selectedLevel.parameter.state !== LevelWorkflowType.approved
+        "
+      >
+      </el-tab-pane>
+    </el-tabs>
+    <PlayState
+      v-if="activeTab === 'play' && selectedLevel"
+      :taskId="taskId"
+      :level="selectedLevel"
+      height="30rem"
+    ></PlayState>
     <BuildState
-      v-if="selectedLevel"
+      v-if="activeTab === 'edit' && selectedLevel"
       :level="selectedLevel"
       v-model:level-type="selectedLevelType"
       :task-id="taskId"
       :auth-header-typ="EndpointAuthorisationType.MODERATOR"
       height="30rem"
+      @approved="approved"
     ></BuildState>
     <draggable
       v-model="ideas"
@@ -23,10 +46,11 @@
           :showState="false"
           :portrait="false"
           :is-selected="selectedLevel && selectedLevel.id === element.id"
+          :background-color="getLevelColor(element)"
           @ideaDeleted="refreshIdeas()"
           @customCommand="dropdownCommand($event, element)"
           :style="{ '--level-type-color': getSettingsForLevel(element).color }"
-          @click="selectedLevel = element"
+          @click="selectLevel(element)"
         >
           <template #icon>
             <div class="level-icon">
@@ -40,6 +64,13 @@
           </template>
         </IdeaCard>
       </template>
+      <template v-slot:footer>
+        <AddItem
+          :text="$t('module.information.findit.moderatorContent.add')"
+          :is-column="true"
+          @addNew="showSettings = true"
+        />
+      </template>
     </draggable>
     <el-dialog
       v-model="showStatistic"
@@ -51,6 +82,42 @@
       </template>
       <LevelStatistic :task-id="this.taskId" :idea-id="activeStatisticIdeaId" />
     </el-dialog>
+    <IdeaSettings
+      v-model:show-modal="showSettings"
+      :taskId="taskId"
+      :idea="addIdea"
+      :title="$t('module.information.default.moderatorContent.settingsTitle')"
+      @updateData="addData"
+    >
+      <el-form-item
+        :label="$t('module.information.findit.moderatorContent.levelType')"
+        :prop="`parameter.shareData`"
+      >
+        <el-select v-model="addIdea.parameter.type">
+          <el-option
+            v-for="configType of Object.keys(gameConfig)"
+            :key="configType"
+            :value="configType"
+            :style="{ color: getSettingsForLevelType(configType).color }"
+            :label="
+              $t(
+                `module.information.findit.participant.placeables.${configType}.name`
+              )
+            "
+          >
+            <font-awesome-icon
+              :icon="getSettingsForLevelType(configType).icon"
+            />
+            &nbsp;
+            {{
+              $t(
+                `module.information.findit.participant.placeables.${configType}.name`
+              )
+            }}
+          </el-option>
+        </el-select>
+      </el-form-item>
+    </IdeaSettings>
   </div>
 </template>
 
@@ -70,9 +137,22 @@ import * as cashService from '@/services/cash-service';
 import LevelStatistic from '@/modules/information/findit/organisms/LevelStatistic.vue';
 import gameConfig from '@/modules/information/findit/data/gameConfig.json';
 import BuildState from '@/modules/information/findit/organisms/BuildState.vue';
+import PlayState from '@/modules/information/findit/organisms/PlayState.vue';
+import * as configParameter from '@/modules/information/findit/utils/configParameter';
+import { LevelWorkflowType } from '@/modules/information/findit/types/LevelWorkflowType';
+import * as themeColors from '@/utils/themeColors';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+
+const emptyParameter = {
+  state: LevelWorkflowType.created,
+  type: configParameter.getDefaultLevelType(),
+  items: [],
+};
 
 @Options({
   components: {
+    FontAwesomeIcon,
+    PlayState,
     BuildState,
     LevelStatistic,
     AddItem,
@@ -89,6 +169,20 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   selectedLevel: Idea | null = null;
   selectedLevelType = '';
   EndpointAuthorisationType = EndpointAuthorisationType;
+  activeTab = 'play';
+  gameConfig = gameConfig;
+  showSettings = false;
+  addIdea: any = {
+    keywords: '',
+    description: '',
+    link: null,
+    image: null, // the datebase64 url of created image
+    parameter: { ...emptyParameter },
+  };
+
+  getSettingsForLevel = configParameter.getSettingsForLevel;
+  getSettingsForLevelType = configParameter.getSettingsForLevelType;
+  LevelWorkflowType = LevelWorkflowType;
 
   get showStatistic(): boolean {
     return !!this.activeStatisticIdeaId;
@@ -98,16 +192,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     if (!value) this.activeStatisticIdeaId = null;
   }
 
-  get defaultLevelType(): string {
-    return Object.keys(gameConfig)[0];
-  }
-
-  getLevelTypeForLevel(level: Idea): string {
-    return level.parameter.type ? level.parameter.type : this.defaultLevelType;
-  }
-
-  getSettingsForLevel(level: Idea): any {
-    return gameConfig[this.getLevelTypeForLevel(level)].settings;
+  getLevelColor(level: Idea): string {
+    if (level.parameter.state === LevelWorkflowType.approved) return 'white';
+    return themeColors.getInformingColor('-light');
   }
 
   deregisterAll(): void {
@@ -154,6 +241,32 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
         this.activeStatisticIdeaId = idea.id;
         break;
     }
+  }
+
+  selectLevel(level: Idea): void {
+    this.selectedLevel = level;
+    this.activeTab = 'play';
+  }
+
+  approved(): void {
+    this.activeTab = 'play';
+  }
+
+  @Watch('showSettings', { immediate: true })
+  onShowSettingsChanged(): void {
+    if (this.showSettings) {
+      this.addIdea.order = this.ideas.length;
+      this.addIdea.parameter = { ...emptyParameter };
+    }
+  }
+
+  addData(newIdea: Idea): void {
+    this.addIdea.keywords = '';
+    this.addIdea.description = '';
+    this.addIdea.image = null;
+    this.addIdea.link = null;
+    this.addIdea.parameter = { ...emptyParameter };
+    this.ideas.push(newIdea);
   }
 }
 </script>

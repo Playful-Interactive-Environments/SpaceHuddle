@@ -301,10 +301,9 @@ export default class GameContainer extends Vue {
         bodyA.position.x - bodyB.position.x,
         bodyA.position.y - bodyB.position.y,
       ];
-      const length = Math.sqrt(
+      const normFactor = Math.sqrt(
         Math.pow(directionVector[0], 2) + Math.pow(directionVector[1], 2)
       );
-      const normFactor = length;
       directionVector[0] = directionVector[0] / normFactor;
       directionVector[1] = directionVector[1] / normFactor;
       const bodyAHeight = bodyA.bounds.max.y - bodyA.bounds.min.y,

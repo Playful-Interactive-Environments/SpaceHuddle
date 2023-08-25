@@ -15,7 +15,12 @@
               v-for="configType of Object.keys(gameConfig)"
               :key="configType"
               :command="configType"
+              :style="{ color: getSettingsForLevelType(configType).color }"
             >
+              <font-awesome-icon
+                :icon="getSettingsForLevelType(configType).icon"
+              />
+              &nbsp;
               {{
                 $t(
                   `module.information.findit.participant.placeables.${configType}.name`
@@ -60,7 +65,6 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
-import * as placeable from '@/modules/information/findit/types/Placeable';
 import * as cashService from '@/services/cash-service';
 import * as authService from '@/services/auth-service';
 import * as ideaService from '@/services/idea-service';
@@ -70,6 +74,8 @@ import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterati
 import { GameStep } from '@/modules/information/findit/output/Participant.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
+import * as configParameter from '@/modules/information/findit/utils/configParameter';
+import { LevelWorkflowType } from '@/modules/information/findit/types/LevelWorkflowType';
 
 @Options({
   components: { FontAwesomeIcon },
@@ -84,20 +90,11 @@ export default class SelectState extends Vue {
   result: TaskParticipantIterationStep[] = [];
   mapping: { [key: string]: number } = {};
 
+  getSettingsForLevel = configParameter.getSettingsForLevel;
+  getSettingsForLevelType = configParameter.getSettingsForLevelType;
+
   get maxLevelPoints(): number {
     return this.trackingManager.getStarPoints(3);
-  }
-
-  get defaultLevelType(): string {
-    return Object.keys(this.gameConfig)[0];
-  }
-
-  getLevelTypeForLevel(level: Idea): string {
-    return level.parameter.type ? level.parameter.type : this.defaultLevelType;
-  }
-
-  getSettingsForLevel(level: Idea): any {
-    return this.gameConfig[this.getLevelTypeForLevel(level)].settings;
   }
 
   getPointsForLevel(ideaId: string): number {
@@ -140,7 +137,9 @@ export default class SelectState extends Vue {
   }
 
   updateIdeas(ideas: Idea[]): void {
-    this.ideas = ideas;
+    this.ideas = ideas.filter(
+      (item) => item.parameter.state === LevelWorkflowType.approved
+    );
     this.calculateResult();
   }
 
@@ -180,18 +179,10 @@ export default class SelectState extends Vue {
 
   levelSelected(level: Idea | null, levelType: string | null = null) {
     if (!level) {
-      this.$emit('selectionDone', levelType, [], null);
+      this.$emit('selectionDone', levelType, null);
     } else {
-      const items = level.parameter.items
-        ? level.parameter.items
-        : level.parameter;
-      const levelType = this.getLevelTypeForLevel(level);
-      this.$emit(
-        'selectionDone',
-        levelType,
-        items as placeable.PlaceableBase[],
-        level.id
-      );
+      const levelType = configParameter.getTypeForLevel(level);
+      this.$emit('selectionDone', levelType, level);
     }
   }
 }
