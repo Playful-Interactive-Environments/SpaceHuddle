@@ -51,6 +51,10 @@
           "campfire": {
             "name": "Lagerfeuer",
             "description": "Lagerfeuer können vom Wind neu angefacht werden und so einen Waldbrand auslösen."
+          },
+          "dead-tree": {
+            "name": "Toter Baum",
+            "description": "Tote Bäume können austrocknen und bieten somit ein erhöhtes Risiko Feuer zu fangen."
           }
         },
         "red_herring": {

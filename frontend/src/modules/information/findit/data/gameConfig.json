@@ -34,9 +34,20 @@
         ],
         "severity": 1,
         "maxCount": 1,
-        "width": 7,
+        "width": 5,
         "shape": "circle",
         "explanationKey": "campfire"
+      },
+      "dead-tree": {
+        "escalationLevels": [
+          { "min": 15, "max": 20 },
+          { "min": 15, "max": 25 }
+        ],
+        "severity": 1,
+        "maxCount": 5,
+        "width": 7,
+        "shape": "rect",
+        "explanationKey": "dead tree"
       }
     },
     "red_herring": {

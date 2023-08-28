@@ -1,30 +1,30 @@
 {
 "frames": {
-	"bush": {
-		"frame": {"x":0, "y":0, "w":153, "h":152},
-		"spriteSourceSize": {"x":0,"y":0,"w":153,"h":152},
-		"sourceSize": {"w":153,"h":152}
-	},
 	"stone": {
-		"frame": {"x":138, "y":153, "w":85, "h":87},
-		"spriteSourceSize": {"x":17,"y":19,"w":115,"h":119},
-		"sourceSize": {"w":115,"h":119}
+		"frame": {"x":1070, "y":259, "w":450, "h":425},
+		"spriteSourceSize": {"x":0,"y":0,"w":450,"h":425},
+		"sourceSize": {"w":450,"h":425}
+	},
+	"bush": {
+		"frame": {"x":0, "y":992, "w":1069, "h":969},
+		"spriteSourceSize": {"x":0,"y":0,"w":1069,"h":969},
+		"sourceSize": {"w":1069,"h":969}
 	},
 	"tree": {
-		"frame": {"x":0, "y":153, "w":137, "h":133},
-		"spriteSourceSize": {"x":0,"y":0,"w":137,"h":133},
-		"sourceSize": {"w":137,"h":133}
+		"frame": {"x":0, "y":0, "w":1069, "h":991},
+		"spriteSourceSize": {"x":0,"y":0,"w":1069,"h":991},
+		"sourceSize": {"w":1069,"h":991}
 	},
 	"wood": {
-		"frame": {"x":154, "y":0, "w":34, "h":73},
-		"spriteSourceSize": {"x":0,"y":0,"w":34,"h":73},
-		"sourceSize": {"w":34,"h":73}
+		"frame": {"x":1070, "y":0, "w":605, "h":258},
+		"spriteSourceSize": {"x":0,"y":0,"w":605,"h":258},
+		"sourceSize": {"w":605,"h":258}
 	}
 
 },
 "meta": {
 	"image": "obstacle.png",
-	"size": {"w": 224, "h": 287},
+	"size": {"w": 1676, "h": 1962},
 	"scale": "1"
 }
 }

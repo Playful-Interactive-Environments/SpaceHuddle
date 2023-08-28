@@ -51,6 +51,10 @@
           "campfire": {
             "name": "Campfire",
             "description": "Campfires can be rekindled by the wind, causing a forest fire."
+          },
+          "dead-tree": {
+            "name": "dead Tree",
+            "description": "Dead trees can dry out, which increases the risk of them catching fire."
           }
         },
         "red_herring": {
@@ -73,7 +77,7 @@
         "hazards": {
           "fish": {
             "name": "Fish",
-            "description": "Fishen can be stranded after the flood and need to be rescued."
+            "description": "Fishes can be stranded after the flood and need to be rescued."
           },
           "person": {
             "name": "People",

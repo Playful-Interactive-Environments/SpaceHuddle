@@ -1,20 +1,25 @@
 {
 "frames": {
 	"campfire": {
-		"frame": {"x":0, "y":266, "w":309, "h":268},
-		"spriteSourceSize": {"x":29,"y":49,"w":360,"h":375},
-		"sourceSize": {"w":360,"h":375}
+		"frame": {"x":749, "y":593, "w":596, "h":690},
+		"spriteSourceSize": {"x":0,"y":0,"w":596,"h":690},
+		"sourceSize": {"w":596,"h":690}
 	},
 	"cigarette": {
-		"frame": {"x":0, "y":0, "w":372, "h":265},
-		"spriteSourceSize": {"x":9,"y":7,"w":390,"h":278},
-		"sourceSize": {"w":390,"h":278}
+		"frame": {"x":0, "y":0, "w":789, "h":592},
+		"spriteSourceSize": {"x":0,"y":0,"w":789,"h":592},
+		"sourceSize": {"w":789,"h":592}
+	},
+	"dead-tree": {
+		"frame": {"x":0, "y":593, "w":748, "h":801},
+		"spriteSourceSize": {"x":0,"y":0,"w":748,"h":801},
+		"sourceSize": {"w":748,"h":801}
 	}
 
 },
 "meta": {
 	"image": "hazard.png",
-	"size": {"w": 373, "h": 535},
+	"size": {"w": 1346, "h": 1395},
 	"scale": "1"
 }
 }
