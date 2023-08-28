@@ -1,0 +1,8 @@
+{
+  "icon": "comments",
+  "iconPrefix": "fas",
+  "type": "main",
+  "input": "no",
+  "syncPublicParticipant": false,
+  "fallback": "quiz"
+}

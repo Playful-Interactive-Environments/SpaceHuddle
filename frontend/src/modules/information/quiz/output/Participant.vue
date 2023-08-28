@@ -233,7 +233,7 @@
       <span>{{
         $t('module.information.quiz.participant.thanksIndividual')
       }}</span>
-      <span id="ScoreString" v-if="isQuiz">{{ getScoreString }}</span>
+      <span id="ScoreString" v-if="showSummery">{{ getScoreString }}</span>
     </div>
   </ParticipantModuleDefaultContainer>
 </template>
@@ -275,13 +275,10 @@ import { Hierarchy } from '@/types/api/Hierarchy';
 import ImagePicker from '@/components/moderator/atoms/ImagePicker.vue';
 import * as cashService from '@/services/cash-service';
 import draggable from 'vuedraggable';
-import * as taskParticipantService from '@/services/task-participant-service';
-import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
-import { TaskParticipantIteration } from '@/types/api/TaskParticipantIteration';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
-import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
+import { TrackingManager } from '@/types/tracking/TrackingManager';
 
 @Options({
   components: {
@@ -302,16 +299,18 @@ export default class Participant extends Vue {
   activeQuestion: Hierarchy | null = null;
   module: Module | null = null;
   task: Task | null = null;
-  state: TaskParticipantState | null = null;
   votes: Vote[] = [];
   EndpointAuthorisationType = EndpointAuthorisationType;
   activeQuestionIndex = -1;
   questionCount = 0;
+  quizQuestionCount = 0;
   questionnaireType: QuestionnaireType = QuestionnaireType.QUIZ;
   moderatedQuestionFlow = true;
   score = 0;
   voteResults: boolean[] = [];
   savedQuestions: string[] = [];
+
+  trackingManager!: TrackingManager;
 
   activeAnswer: {
     numValue: number | null;
@@ -339,16 +338,24 @@ export default class Participant extends Vue {
 
   submitScreen = false;
 
-  iteration: TaskParticipantIteration | null = null;
+  get hasAnswer(): boolean {
+    if (
+      this.activeQuestion &&
+      Object.hasOwn(this.activeQuestion.parameter, 'hasAnswer')
+    )
+      return this.activeQuestion.parameter.hasAnswer;
+    return this.questionnaireType !== QuestionnaireType.SURVEY;
+  }
+
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
-    taskParticipantService.registerGetList(
-      this.taskId,
-      this.updateState,
-      EndpointAuthorisationType.PARTICIPANT,
-      2 * 60
-    );
+    if (this.taskId) {
+      this.trackingManager = new TrackingManager(this.taskId, {}, true);
+      this.trackingManager.callbackUpdateState = this.updateState;
+      this.trackingManager.callbackUpdateFinalStepList =
+        this.updateStoredAnswers;
+    }
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
@@ -358,20 +365,6 @@ export default class Participant extends Vue {
     hierarchyService.registerGetQuestions(
       this.taskId,
       this.updateQuestions,
-      EndpointAuthorisationType.PARTICIPANT,
-      60 * 60
-    );
-    taskParticipantService
-      .postParticipantIteration(this.taskId, {
-        state: TaskParticipantIterationStatesType.IN_PROGRESS,
-        parameter: {},
-      })
-      .then((result) => {
-        this.iteration = result;
-      });
-    taskParticipantService.registerGetIterationStepFinalList(
-      this.taskId,
-      this.updateStoredAnswers,
       EndpointAuthorisationType.PARTICIPANT,
       60 * 60
     );
@@ -424,8 +417,8 @@ export default class Participant extends Vue {
     return getQuestionTypeFromHierarchy(this.activeQuestion);
   }
 
-  get isQuiz(): boolean {
-    return this.questionnaireType === QuestionnaireType.QUIZ;
+  get showSummery(): boolean {
+    return this.questionnaireType !== QuestionnaireType.SURVEY;
   }
 
   get loading(): boolean {
@@ -455,7 +448,7 @@ export default class Participant extends Vue {
   }
 
   get getScoreString(): string {
-    return this.score + '/' + this.questionCount;
+    return this.score + '/' + this.quizQuestionCount;
   }
 
   checkScore(): { isCorrect: boolean; answers: any } {
@@ -561,40 +554,39 @@ export default class Participant extends Vue {
 
   trackState(): void {
     const result = this.checkScore();
-    if (this.iteration) {
+    if (this.trackingManager) {
       if (!this.savedQuestions.includes(this.activeQuestionId))
         this.savedQuestions.push(this.activeQuestionId);
       if (
-        !this.activeStep ||
-        this.activeStep.ideaId !== this.activeQuestionId ||
-        this.activeStep.iteration !== this.iteration.iteration
+        !this.trackingManager.iterationStep ||
+        this.trackingManager.iterationStep.ideaId !== this.activeQuestionId ||
+        this.trackingManager.iterationStep.iteration !==
+          this.trackingManager.iteration?.iteration
       ) {
-        taskParticipantService
-          .postParticipantIterationStep(this.taskId, {
-            iteration: this.iteration.iteration,
-            ideaId: this.activeQuestionId,
-            state: this.isQuiz
-              ? result.isCorrect
-                ? TaskParticipantIterationStepStatesType.CORRECT
-                : TaskParticipantIterationStepStatesType.WRONG
-              : TaskParticipantIterationStepStatesType.NEUTRAL,
-            parameter: {
-              answer: result.answers,
-            },
-          })
-          .then((step) => (this.activeStep = step));
+        this.trackingManager.createInstanceStepPoints(
+          this.activeQuestionId,
+          this.hasAnswer
+            ? result.isCorrect
+              ? TaskParticipantIterationStepStatesType.CORRECT
+              : TaskParticipantIterationStepStatesType.WRONG
+            : TaskParticipantIterationStepStatesType.NEUTRAL,
+          {
+            answer: result.answers,
+          },
+          !this.hasAnswer || result.isCorrect ? 10 : 0
+        );
       } else {
-        this.activeStep.state = this.isQuiz
-          ? result.isCorrect
-            ? TaskParticipantIterationStepStatesType.CORRECT
-            : TaskParticipantIterationStepStatesType.WRONG
-          : TaskParticipantIterationStepStatesType.NEUTRAL;
-        this.activeStep.parameter = {
-          answer: result.answers,
-        };
-        taskParticipantService.putParticipantIterationStep(
-          this.taskId,
-          this.activeStep
+        this.trackingManager.saveIterationStep(
+          {
+            answer: result.answers,
+          },
+          this.hasAnswer
+            ? result.isCorrect
+              ? TaskParticipantIterationStepStatesType.CORRECT
+              : TaskParticipantIterationStepStatesType.WRONG
+            : TaskParticipantIterationStepStatesType.NEUTRAL,
+          null,
+          !this.hasAnswer || result.isCorrect ? 10 : 0
         );
       }
     }
@@ -617,28 +609,30 @@ export default class Participant extends Vue {
     this.checkScore();
     if (!this.savedQuestions.includes(this.activeQuestionId))
       this.savedQuestions.push(this.activeQuestionId);
-    if (this.iteration) {
-      if (this.isQuiz)
-        this.iteration.state =
-          this.score > this.questionCount / 2
+    if (this.trackingManager) {
+      this.trackingManager.saveIterationPointsFromSteps();
+      this.trackingManager.saveIteration(
+        null,
+        this.showSummery
+          ? this.score > this.quizQuestionCount / 2
             ? TaskParticipantIterationStatesType.WIN
-            : TaskParticipantIterationStatesType.LOOS;
-      else
-        this.iteration.state = TaskParticipantIterationStatesType.PARTICIPATED;
-      taskParticipantService.putParticipantIteration(
-        this.taskId,
-        this.iteration
+            : TaskParticipantIterationStatesType.LOOS
+          : TaskParticipantIterationStatesType.PARTICIPATED,
+        null,
+        true
       );
     }
     this.activeQuestionIndex++;
     this.submitScreen = true;
-    if (this.state) {
-      this.state.state = TaskParticipantStatesType.FINISHED;
-      this.state.parameter = {
-        score: this.score,
-        answeredQuestionCount: this.questionCount,
-      };
-      taskParticipantService.putParticipantState(this.taskId, this.state);
+    if (this.trackingManager) {
+      this.trackingManager.saveState(
+        {
+          score: this.score,
+          answeredQuizQuestionCount: this.quizQuestionCount,
+          answeredQuestionCount: this.questionCount,
+        },
+        TaskParticipantStatesType.FINISHED
+      );
     }
   }
 
@@ -963,8 +957,27 @@ export default class Participant extends Vue {
     this.skipAnswerQuestions();
   }
 
+  questions: Hierarchy[] = [];
   updateQuestions(questions: Hierarchy[]): void {
+    this.questions = questions;
     this.questionCount = questions.length;
+    this._setQuizQuestionCount();
+  }
+
+  _setQuizQuestionCount(): void {
+    switch (this.questionnaireType) {
+      case QuestionnaireType.QUIZ:
+        this.quizQuestionCount = this.questionCount;
+        break;
+      case QuestionnaireType.QUIZSURVEYMIX:
+        this.quizQuestionCount = this.questions.filter(
+          (item) => item.parameter.hasAnswer
+        ).length;
+        break;
+      case QuestionnaireType.SURVEY:
+        this.quizQuestionCount = 0;
+        break;
+    }
   }
 
   updateTask(task: Task): void {
@@ -976,6 +989,7 @@ export default class Participant extends Vue {
       if (module) {
         this.questionnaireType =
           QuestionnaireType[module.parameter.questionType.toUpperCase()];
+        this._setQuizQuestionCount();
         this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
         if (this.moderatedQuestionFlow) this.initData = false;
         if (!this.moderatedQuestionFlow && this.activeQuestionIndex === -1) {
@@ -985,23 +999,22 @@ export default class Participant extends Vue {
     }
   }
 
-  updateState(stateList: TaskParticipantState[]): void {
-    if (stateList.length > 0) {
-      this.state = stateList[0];
-      if (this.state.state === TaskParticipantStatesType.FINISHED) {
-        this.questionCount = this.state.parameter.answeredQuestionCount;
-        this.score = this.state.parameter.score;
+  updateState(): void {
+    if (this.trackingManager.state) {
+      if (this.trackingManager.isFinished()) {
+        this.questionCount =
+          this.trackingManager.state.parameter.answeredQuestionCount;
+        this.score = this.trackingManager.state.parameter.score;
         this.submitScreen = true;
       }
     }
   }
 
-  activeStep: TaskParticipantIterationStep | null = null;
-  updateStoredAnswers(steps: TaskParticipantIterationStep[]): void {
-    for (let i = 0; i < steps.length; i++) {
-      this.activeStep = steps[i];
+  updateStoredAnswers(): void {
+    for (let i = 0; i < this.trackingManager.finalStepList.length; i++) {
       this.voteResults[i] =
-        steps[i].state === TaskParticipantIterationStepStatesType.CORRECT;
+        this.trackingManager.finalStepList[i].state ===
+        TaskParticipantIterationStepStatesType.CORRECT;
     }
   }
 
@@ -1051,12 +1064,11 @@ export default class Participant extends Vue {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateVotes);
     cashService.deregisterAllGet(this.updateQuestions);
-    cashService.deregisterAllGet(this.updateStoredAnswers);
-    cashService.deregisterAllGet(this.updateState);
   }
 
   unmounted(): void {
     this.deregisterAll();
+    if (this.trackingManager) this.trackingManager.deregisterAll();
   }
 
   @Watch('publicAnswerList', { immediate: false })

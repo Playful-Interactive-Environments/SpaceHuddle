@@ -373,6 +373,7 @@ export default class ShowResult extends Vue {
           ? TaskParticipantIterationStepStatesType.CORRECT
           : TaskParticipantIterationStepStatesType.WRONG,
         this.successRate,
+        null,
         true,
         (item) =>
           vehicleCalculation.isSameVehicle(item.parameter.vehicle, vehicle)

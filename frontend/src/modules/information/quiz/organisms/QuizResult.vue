@@ -38,7 +38,8 @@
         },
         plugins: {
           legend: {
-            display: showLegend && questionnaireType === QuestionnaireType.QUIZ,
+            display:
+              showLegend && questionnaireType !== QuestionnaireType.SURVEY,
             position: 'top',
             align: 'end',
             labels: {
@@ -65,11 +66,14 @@ import Color from 'colorjs.io';
 import { v4 as uuidv4 } from 'uuid';
 import { delay } from '@/utils/wait';
 import * as themeColors from '@/utils/themeColors';
+import { Hierarchy } from '@/types/api/Hierarchy';
+import { Idea } from '@/types/api/Idea';
 
 interface ChartLegend {
   color: string;
   name: string;
-  condition: (vote: VoteResult) => boolean;
+  conditionAnswer: (vote: VoteResult) => boolean;
+  conditionQuestion: (idea: Hierarchy | Idea) => boolean;
 }
 
 @Options({
@@ -113,18 +117,22 @@ export default class QuizResult extends Vue {
   }
 
   get legend(): ChartLegend[] {
-    if (this.questionnaireType === QuestionnaireType.SURVEY) {
+    const legend: ChartLegend[] = [];
+    if (this.questionnaireType !== QuestionnaireType.QUIZ) {
       const labelResult = (this as any).$t(
         'module.information.quiz.publicScreen.chartDataLabelResult'
       );
-      return [
-        {
-          color: themeColors.getInformingColor(),
-          name: labelResult,
-          condition: () => true,
-        },
-      ];
-    } else {
+      legend.push({
+        color: themeColors.getYellowColor(),
+        name: labelResult,
+        conditionAnswer: () => true,
+        conditionQuestion: (idea) =>
+          this.questionnaireType === QuestionnaireType.SURVEY ||
+          !idea.parameter.hasAnswer,
+      });
+    }
+
+    if (this.questionnaireType !== QuestionnaireType.SURVEY) {
       if (this.questionType !== QuestionType.ORDER) {
         const labelCorrect = (this as any).$t(
           'module.information.quiz.publicScreen.chartDataLabelCorrect'
@@ -132,21 +140,25 @@ export default class QuizResult extends Vue {
         const labelIncorrect = (this as any).$t(
           'module.information.quiz.publicScreen.chartDataLabelIncorrect'
         );
-        return [
-          {
-            color: themeColors.getBrainstormingColor(),
-            name: labelCorrect,
-            condition: (vote) => vote.idea.parameter.isCorrect,
-          },
-          {
-            color: themeColors.getEvaluatingColor(),
-            name: labelIncorrect,
-            condition: (vote) => !vote.idea.parameter.isCorrect,
-          },
-        ];
+        legend.push({
+          color: themeColors.getGreenColor(),
+          name: labelCorrect,
+          conditionAnswer: (vote) => vote.idea.parameter.isCorrect,
+          conditionQuestion: (idea) =>
+            this.questionnaireType === QuestionnaireType.QUIZ ||
+            idea.parameter.hasAnswer,
+        });
+        legend.push({
+          color: themeColors.getRedColor(),
+          name: labelIncorrect,
+          conditionAnswer: (vote) => !vote.idea.parameter.isCorrect,
+          conditionQuestion: (idea) =>
+            this.questionnaireType === QuestionnaireType.QUIZ ||
+            idea.parameter.hasAnswer,
+        });
       } else {
-        const color1 = new Color(themeColors.getBrainstormingColor());
-        const color2 = new Color(themeColors.getEvaluatingColor());
+        const color1 = new Color(themeColors.getGreenColor());
+        const color2 = new Color(themeColors.getRedColor());
         const minVote = this.voteResult.sort((a, b) => {
           if (a.idea && b.idea)
             return (a.idea.order as number) - (b.idea.order as number);
@@ -163,7 +175,6 @@ export default class QuizResult extends Vue {
         const max = maxVote
           ? (maxVote.idea.order as number)
           : this.voteResult.length - 1;
-        const legend: ChartLegend[] = [];
         for (let i = min; i <= max; i++) {
           const color = (
             color1.mix(color2, (1 / (max + 1)) * (i + 1), {
@@ -178,12 +189,15 @@ export default class QuizResult extends Vue {
           legend.push({
             color: hexColor,
             name: (i + 1).toString(),
-            condition: (vote) => (vote as VoteResultDetail).rating === i,
+            conditionAnswer: (vote) => (vote as VoteResultDetail).rating === i,
+            conditionQuestion: (idea) =>
+              this.questionnaireType === QuestionnaireType.QUIZ ||
+              idea.parameter.hasAnswer,
           });
         }
-        return legend;
       }
     }
+    return legend;
   }
 
   async mounted(): Promise<void> {
@@ -254,7 +268,8 @@ export default class QuizResult extends Vue {
             (item) => item.idea.id === idea.id
           );
           for (const vote of votes) {
-            if (l.condition(vote)) return vote[this.resultColumn];
+            if (l.conditionQuestion(idea) && l.conditionAnswer(vote))
+              return vote[this.resultColumn];
           }
           return 0;
         }),

@@ -23,7 +23,8 @@
     "correctValue": "correct value",
     "submit": "save",
     "addAnswer": "add answer",
-    "noQuestionSelected": "No question selected."
+    "noQuestionSelected": "No question selected.",
+    "hasAnswer": "has correct answer"
   },
   "publicScreen": {
     "chartDataLabelCorrect": "correct",
@@ -42,7 +43,8 @@
   "enum": {
     "questionType": {
       "quiz": "quiz",
-      "survey": "survey"
+      "survey": "survey",
+      "quizSurveyMix": "quiz survey mix"
     }
   }
 }

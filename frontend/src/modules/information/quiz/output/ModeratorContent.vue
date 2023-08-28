@@ -1,7 +1,11 @@
 <template>
   <div>
     <h1 class="heading heading--medium">
-      {{ $t(`module.information.quiz.enum.questionType.${questionnaireType}`) }}
+      {{
+        $t(
+          `module.information.quiz.enum.questionType.${moduleQuestionnaireType}`
+        )
+      }}
     </h1>
 
     <div id="QuizDiv">
@@ -20,7 +24,7 @@
         :change="false"
         :questionnaireType="
           trackingResult.length > 0
-            ? questionnaireType
+            ? moduleQuestionnaireType
             : QuestionnaireType.SURVEY
         "
         :questionType="formData.questionType"
@@ -42,7 +46,7 @@
       :hasParticipantToggle="moderatedQuestionFlow"
       :hasParticipantOption="hasParticipantOption"
       :canClickHome="true"
-      :canDisableResult="questionnaireType === QuestionnaireType.QUIZ"
+      :canDisableResult="moduleQuestionnaireType !== QuestionnaireType.SURVEY"
       :contentListIcon="(item) => null"
       :getKey="(item) => item.id"
       :getTitle="(item) => item.keywords"
@@ -66,6 +70,13 @@
         submit-label-key="module.information.quiz.moderatorContent.submit"
         v-on:submitDataValid="saveQuestion"
       >
+        <el-form-item
+          v-if="moduleQuestionnaireType === QuestionnaireType.QUIZSURVEYMIX"
+          :label="$t('module.information.quiz.moderatorContent.hasAnswer')"
+          prop="hasAnswer"
+        >
+          <el-switch v-model="hasAnswer" />
+        </el-form-item>
         <el-form-item
           :label="$t('module.information.quiz.moderatorContent.questionType')"
           prop="questionType"
@@ -170,7 +181,7 @@
         >
           <div class="media" v-if="index < formData.answers.length">
             <el-checkbox
-              v-if="questionnaireType === QuestionnaireType.QUIZ"
+              v-if="hasAnswer"
               class="media-left"
               v-model="answer.parameter.isCorrect"
               v-on:change="correctCheckboxChanged(answer)"
@@ -381,9 +392,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   ideas: Idea[] = [];
   minAnswerCount = 2;
   answerCount = this.minAnswerCount;
-  questionnaireType: QuestionnaireType = QuestionnaireType.QUIZ;
+  moduleQuestionnaireType: QuestionnaireType = QuestionnaireType.QUIZ;
   moderatedQuestionFlow = false;
   defaultQuestionTime: number | null = null;
+  hasAnswer = true;
 
   QuestionnaireType = QuestionnaireType;
   QuestionType = QuestionType;
@@ -423,6 +435,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     )
       return this.formData.answers;
     return [];
+  }
+
+  get questionnaireType(): QuestionnaireType {
+    if (this.hasAnswer) return QuestionnaireType.QUIZ;
+    return QuestionnaireType.SURVEY;
   }
 
   questionCash!: cashService.SimplifiedCashEntry<Hierarchy[]>;
@@ -468,6 +485,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       question: Object.assign({}, question.question),
       answers: question.answers.map((answer) => Object.assign({}, answer)),
     };
+    if (Object.hasOwn(question.question.parameter, 'hasAnswer'))
+      this.hasAnswer = question.question.parameter.hasAnswer;
   }
 
   handleOrderChange(): void {
@@ -652,6 +671,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   async saveQuestion(): Promise<void> {
     this.formData.question.parameter.questionType = this.formData.questionType;
+    this.formData.question.parameter.hasAnswer = this.hasAnswer;
     if (this.formData.question.id) {
       await hierarchyService.putHierarchy(this.formData.question);
       if (
@@ -769,10 +789,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     if (module && module.parameter) {
       this.answerCount = module.parameter.answerCount;
       if (module.parameter?.questionType) {
-        this.questionnaireType =
+        this.moduleQuestionnaireType =
           QuestionnaireType[module.parameter.questionType.toUpperCase()];
       } else {
-        this.questionnaireType = QuestionnaireType.QUIZ;
+        this.moduleQuestionnaireType = QuestionnaireType.QUIZ;
       }
       const questionFlowChanged =
         this.moderatedQuestionFlow !== module.parameter.moderatedQuestionFlow;
@@ -783,13 +803,17 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       this.defaultQuestionTime = module.parameter.defaultQuestionTime;
     } else if (init) {
       this.answerCount = 1;
-      this.questionnaireType = QuestionnaireType.QUIZ;
+      this.moduleQuestionnaireType = QuestionnaireType.QUIZ;
       this.moderatedQuestionFlow = false;
       this.defaultQuestionTime = null;
     }
+    this.hasAnswer = this.moduleQuestionnaireType !== QuestionnaireType.SURVEY;
     if (init) {
       cashService.deregisterAllGet(this.updateFinalResult);
-      if (this.questionnaireType === QuestionnaireType.QUIZ) {
+      if (
+        this.moduleQuestionnaireType === QuestionnaireType.QUIZ ||
+        this.moduleQuestionnaireType === QuestionnaireType.QUIZSURVEYMIX
+      ) {
         taskParticipantService.registerGetIterationStepFinalList(
           this.taskId,
           this.updateFinalResult,

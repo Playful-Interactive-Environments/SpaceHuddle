@@ -35,13 +35,25 @@ export class TrackingManager {
   iterationList: TaskParticipantIteration[] = [];
   iterationStepList: TaskParticipantIterationStep[] = [];
   stepList: TaskParticipantIterationStep[] = [];
+  finalStepList: TaskParticipantIterationStep[] = [];
   state: TaskParticipantState | null = null;
   readonly pointsPerStar = 100;
   readonly maxPoints = 1000;
+  callbackUpdateState: (() => void) | null = null;
+  callbackUpdateIterationList: (() => void) | null = null;
+  callbackUpdateStepList: (() => void) | null = null;
+  callbackUpdateFinalStepList: (() => void) | null = null;
 
   iterationsCash!: cashService.SimplifiedCashEntry<TaskParticipantIteration[]>;
   stepsCash!: cashService.SimplifiedCashEntry<TaskParticipantIterationStep[]>;
-  constructor(taskId: string, initInstanceContent: any) {
+  finalStepsCash!: cashService.SimplifiedCashEntry<
+    TaskParticipantIterationStep[]
+  >;
+  constructor(
+    taskId: string,
+    initInstanceContent: any,
+    pullFinalSteps = false
+  ) {
     this.taskId = taskId;
     this.deregisterAll();
     taskParticipantService.registerGetList(
@@ -69,6 +81,15 @@ export class TrackingManager {
           EndpointAuthorisationType.PARTICIPANT,
           2 * 60
         );
+        if (pullFinalSteps) {
+          this.finalStepsCash =
+            taskParticipantService.registerGetIterationStepFinalList(
+              this.taskId,
+              (result: any) => this._updateFinalSteps(result),
+              EndpointAuthorisationType.PARTICIPANT,
+              60 * 60
+            );
+        }
       });
     taskService.registerGetTaskById(
       this.taskId,
@@ -84,29 +105,50 @@ export class TrackingManager {
       this._updateIterations(result)
     );
     cashService.deregisterAllGet((result: any) => this._updateSteps(result));
+    cashService.deregisterAllGet((result: any) =>
+      this._updateFinalSteps(result)
+    );
     cashService.deregisterAllGet((result: any) => this._updateTask(result));
+  }
+
+  isFinished(): boolean {
+    return (
+      !!this.state && this.state.state === TaskParticipantStatesType.FINISHED
+    );
   }
 
   _updateState(stateList: TaskParticipantState[]): void {
     if (stateList.length > 0) {
       this.state = stateList[0];
-      if (this.state.state === TaskParticipantStatesType.FINISHED) {
-        //
-      }
+      if (this.callbackUpdateState) this.callbackUpdateState();
     }
   }
 
   _updateIterations(iterationList: TaskParticipantIteration[]): void {
     this.iterationList = iterationList;
+    if (this.callbackUpdateIterationList) this.callbackUpdateIterationList();
   }
 
   _updateSteps(stepList: TaskParticipantIterationStep[]): void {
+    this.stepList = stepList.sort((a, b) => {
+      if (a.iteration !== b.iteration) return b.iteration - a.iteration;
+      return b.step - a.step;
+    });
     if (this.iteration) {
-      this.stepList = stepList;
-      this.iterationStepList = stepList.filter(
-        (item) => item.iteration === this.iteration?.iteration
-      );
+      this.iterationStepList = stepList
+        .filter((item) => item.iteration === this.iteration?.iteration)
+        .sort((a, b) => b.step - a.step);
+      if (this.iterationStepList.length > 0 && !this.iterationStep) {
+        this.iterationStep =
+          this.iterationStepList[this.iterationStepList.length - 1];
+      }
     }
+    if (this.callbackUpdateStepList) this.callbackUpdateStepList();
+  }
+
+  _updateFinalSteps(stepList: TaskParticipantIterationStep[]): void {
+    this.finalStepList = stepList;
+    if (this.callbackUpdateFinalStepList) this.callbackUpdateFinalStepList();
   }
 
   _updateTask(task: Task): void {
@@ -313,6 +355,11 @@ export class TrackingManager {
     return 0;
   }
 
+  async _refreshSteps(): Promise<void> {
+    await this.stepsCash.refreshData();
+    if (this.finalStepsCash) await this.finalStepsCash.refreshData();
+  }
+
   async createInstanceStep(
     ideaId: string | null,
     state: TaskParticipantIterationStepStatesType,
@@ -341,7 +388,7 @@ export class TrackingManager {
           state: state,
           parameter: initContent,
         });
-      await this.stepsCash.refreshData();
+      await this._refreshSteps();
       if (updateInstanceSum && this.iterationStep.parameter.gameplayResult) {
         await this.saveIterationPointsFromSteps();
         await this.saveStatePointsFromIterations();
@@ -373,7 +420,7 @@ export class TrackingManager {
           state: state,
           parameter: initContent,
         });
-      await this.stepsCash.refreshData();
+      await this._refreshSteps();
       if (updateInstanceSum && this.iterationStep.parameter.gameplayResult) {
         await this.saveIterationPointsFromSteps();
         await this.saveStatePointsFromIterations();
@@ -385,13 +432,19 @@ export class TrackingManager {
     contentChanges: any | null = null,
     changedState: TaskParticipantIterationStepStatesType | null = null,
     stars: number | null = null,
+    points: number | null = null,
     updateInstanceSum = false,
     starLimitRule:
       | ((step: TaskParticipantIterationStep) => boolean)
       | null = null
   ): Promise<void> {
     if (this.iterationStep) {
-      if (stars !== null)
+      if (points !== null)
+        this.iterationStep.parameter.gameplayResult = this.getGameplayResult(
+          stars ? stars : 0,
+          points
+        );
+      else if (stars !== null)
         this.iterationStep.parameter.gameplayResult = this.getGameplayResult(
           stars,
           this._getLimitedStarPoints(
@@ -410,7 +463,7 @@ export class TrackingManager {
         this.taskId,
         this.iterationStep
       );
-      await this.stepsCash.refreshData();
+      await this._refreshSteps();
       if (updateInstanceSum && this.iterationStep.parameter.gameplayResult) {
         await this.saveIterationPointsFromSteps();
         await this.saveStatePointsFromIterations();
@@ -436,7 +489,7 @@ export class TrackingManager {
       taskParticipantService
         .putParticipantIterationStep(this.taskId, this.iterationStep)
         .then(() => {
-          this.stepsCash.refreshData();
+          this._refreshSteps();
         });
     }
   }
@@ -456,7 +509,7 @@ export class TrackingManager {
       taskParticipantService
         .putParticipantIterationStep(this.taskId, this.iterationStep)
         .then(() => {
-          this.stepsCash.refreshData();
+          this._refreshSteps();
         });
     }
   }

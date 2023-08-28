@@ -154,7 +154,7 @@ export default class PublicBase extends Vue {
   questions: Question[] = [];
   publicQuestion: Question | null = null;
   voteResult: VoteResult[] = [];
-  questionnaireType: QuestionnaireType = QuestionnaireType.QUIZ;
+  moduleQuestionnaireType: QuestionnaireType = QuestionnaireType.QUIZ;
   moderatedQuestionFlow = true;
 
   questionState: QuestionState = QuestionState.ACTIVE_CREATE_QUESTION;
@@ -279,6 +279,20 @@ export default class PublicBase extends Vue {
         (question) => question.question.id === this.publicQuestion?.question.id
       );
     return -1;
+  }
+
+  get hasAnswer(): boolean {
+    if (
+      this.activeQuestion &&
+      Object.hasOwn(this.activeQuestion.parameter, 'hasAnswer')
+    )
+      return this.activeQuestion.parameter.hasAnswer;
+    return this.moduleQuestionnaireType !== QuestionnaireType.SURVEY;
+  }
+
+  get questionnaireType(): QuestionnaireType {
+    if (this.hasAnswer) return QuestionnaireType.QUIZ;
+    return QuestionnaireType.SURVEY;
   }
   //#endregion get / set
 
@@ -577,7 +591,7 @@ export default class PublicBase extends Vue {
     this.task = task;
     const module = task.modules.find((module) => moduleNameValid(module.name));
     if (module) {
-      this.questionnaireType =
+      this.moduleQuestionnaireType =
         QuestionnaireType[module.parameter.questionType.toUpperCase()];
       this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
       if (this.moderatedQuestionFlow && this.taskCash) {
@@ -589,7 +603,7 @@ export default class PublicBase extends Vue {
     if (init) {
       this.initQuestionState();
       cashService.deregisterAllGet(this.updateFinalResult);
-      if (this.questionnaireType === QuestionnaireType.QUIZ) {
+      if (this.moduleQuestionnaireType !== QuestionnaireType.SURVEY) {
         taskParticipantService.registerGetIterationStepFinalList(
           this.taskId,
           this.updateFinalResult,

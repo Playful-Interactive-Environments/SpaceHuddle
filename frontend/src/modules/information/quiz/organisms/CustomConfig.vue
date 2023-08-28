@@ -183,7 +183,7 @@ export default class CustomConfig
   async updateParameterForSaving(): Promise<void> {
     if (
       this.modelValue &&
-      this.modelValue.questionType === QuestionnaireType.SURVEY
+      this.modelValue.questionType !== QuestionnaireType.QUIZ
     ) {
       delete this.modelValue.moderatedQuestionFlow;
     }
