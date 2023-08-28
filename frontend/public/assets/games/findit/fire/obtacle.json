@@ -1,0 +1,30 @@
+{
+"frames": {
+	"stone": {
+		"frame": {"x":1070, "y":259, "w":450, "h":425},
+		"spriteSourceSize": {"x":0,"y":0,"w":450,"h":425},
+		"sourceSize": {"w":450,"h":425}
+	},
+	"bush": {
+		"frame": {"x":0, "y":991, "w":1069, "h":969},
+		"spriteSourceSize": {"x":0,"y":0,"w":1069,"h":969},
+		"sourceSize": {"w":1069,"h":969}
+	},
+	"tree": {
+		"frame": {"x":0, "y":0, "w":1069, "h":990},
+		"spriteSourceSize": {"x":0,"y":1,"w":1069,"h":991},
+		"sourceSize": {"w":1069,"h":991}
+	},
+	"wood": {
+		"frame": {"x":1070, "y":0, "w":605, "h":258},
+		"spriteSourceSize": {"x":0,"y":0,"w":605,"h":258},
+		"sourceSize": {"w":605,"h":258}
+	}
+
+},
+"meta": {
+	"image": "obstacle.png",
+	"size": {"w": 1676, "h": 1961},
+	"scale": "1"
+}
+}
