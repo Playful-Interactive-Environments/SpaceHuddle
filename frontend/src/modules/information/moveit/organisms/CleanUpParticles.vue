@@ -123,7 +123,7 @@
               label: getParticleDisplayName(particle),
               collisionFilter: {
                 group: index + 1,
-                category: 0x0010,
+                category: 0b0010,
               },
             }"
             :render-delay="1000"
@@ -157,8 +157,8 @@
               label: particle.label,
               collisionFilter: {
                 group: particle.group,
-                category: 0x0001,
-                mask: 0x0001,
+                category: 0b0001,
+                mask: 0b0001,
               },
             }"
             :collision-handler="particleCollisionHandler"

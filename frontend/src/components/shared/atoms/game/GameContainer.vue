@@ -567,7 +567,7 @@ export default class GameContainer extends Vue {
       for (const obj of clickedGameObjects) {
         obj.gameObjectClicked();
       }
-      this.$emit('gameObjectClick', clickedGameObjects);
+      this.$emit('gameObjectClick', clickedGameObjects, event);
     } else {
       this.$emit('update:selectedObject', null);
     }

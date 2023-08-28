@@ -61,7 +61,6 @@
           </GameObject>
           <GameObject
             v-if="gameWidth > 0"
-            :disabled="showToolbox"
             :moveWithBackground="false"
             v-model:x="searchPosition[0]"
             v-model:y="searchPosition[1]"
@@ -203,6 +202,8 @@ export default class PlayState extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: null }) readonly level!: Idea | null;
   @Prop({ default: '100%' }) readonly height!: string;
+  @Prop({ default: EndpointAuthorisationType.PARTICIPANT })
+  authHeaderTyp!: EndpointAuthorisationType;
   renderer!: PIXI.Renderer;
   gameWidth = 0;
   gameHeight = 0;
@@ -248,10 +249,7 @@ export default class PlayState extends Vue {
   }
 
   mounted(): void {
-    tutorialService.registerGetList(
-      this.updateTutorial,
-      EndpointAuthorisationType.PARTICIPANT
-    );
+    tutorialService.registerGetList(this.updateTutorial, this.authHeaderTyp);
 
     /*this.eventBus.off(EventType.CHANGE_TUTORIAL);
     this.eventBus.on(EventType.CHANGE_TUTORIAL, async (steps) => {
@@ -465,7 +463,7 @@ export default class PlayState extends Vue {
     return config.collectable;
   }
 
-  destroyPlaceable(value: placeable.Placeable): void {
+  destroyPlaceable(value: placeable.Placeable, event: PointerEvent): void {
     const config = gameConfig[this.levelType][value.type].settings;
     if (config.explanationText) this.clickedPlaceable = value;
     if (config.collectable) {
@@ -481,6 +479,7 @@ export default class PlayState extends Vue {
     if (placeableConfig.explanationKey) {
       const tutorialStepName = `${value.type}-${placeableConfig.explanationKey}`;
       if (!this.tutorialSteps.find((item) => item.step === tutorialStepName)) {
+        event.preventDefault();
         this.showToolbox = true;
         const tutorialItem: Tutorial = {
           step: tutorialStepName,
@@ -489,16 +488,16 @@ export default class PlayState extends Vue {
         };
         tutorialService.addTutorialStep(
           tutorialItem,
-          EndpointAuthorisationType.PARTICIPANT,
+          this.authHeaderTyp,
           this.eventBus
         );
       }
     }
   }
 
-  gameObjectClick(objectList: GameObject[]): void {
+  gameObjectClick(objectList: GameObject[], event: PointerEvent): void {
     for (const obj of objectList) {
-      if (obj.source) this.destroyPlaceable(obj.source);
+      if (obj.source) this.destroyPlaceable(obj.source, event);
     }
   }
 

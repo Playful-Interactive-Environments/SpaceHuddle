@@ -163,39 +163,24 @@ export default class GameObject extends Vue {
     }
   }
 
+  collisionCategory = 0b0001;
+  collisionMask = 0xffffffff; //0b11111111111111111111111111111111
+  hasDisabled = false;
   @Watch('disabled', { immediate: true })
   onDisabledChanged(): void {
     if (this.disabled) {
+      this.collisionCategory = this.body.collisionFilter.category;
+      this.collisionMask = this.body.collisionFilter.mask;
+      this.body.collisionFilter.category = 0b0010;
+      this.body.collisionFilter.mask = 0b11111111111111111111111111111110;
       this.objectFilters = [new GrayscaleFilter()];
-      if (
-        this.clickable &&
-        this.gameContainer &&
-        this.body &&
-        Matter.Composite.get(
-          this.gameContainer.engine.world,
-          this.body.id,
-          this.body.type
-        )
-      ) {
-        Matter.Composite.remove(this.gameContainer.engine.world, this.body);
+      this.hasDisabled = true;
+    } else if (this.hasDisabled) {
+      if (this.body) {
+        this.body.collisionFilter.category = this.collisionCategory;
+        this.body.collisionFilter.mask = this.collisionMask;
       }
-      this.gameObjectReleased();
-    } else {
-      setTimeout(() => {
-        if (
-          this.clickable &&
-          this.gameContainer &&
-          this.body &&
-          !Matter.Composite.get(
-            this.gameContainer.engine.world,
-            this.body.id,
-            this.body.type
-          )
-        ) {
-          Matter.Composite.add(this.gameContainer.engine.world, this.body);
-        }
-        this.objectFilters = [];
-      }, 200);
+      this.objectFilters = [];
     }
   }
 

@@ -21,6 +21,7 @@
       :taskId="taskId"
       :level="selectedLevel"
       height="30rem"
+      :auth-header-typ="EndpointAuthorisationType.MODERATOR"
     ></PlayState>
     <BuildState
       v-if="activeTab === 'edit' && selectedLevel"
