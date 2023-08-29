@@ -136,6 +136,22 @@ export default class CustomSprite extends Vue implements CustomObject {
     }
   }
 
+  unmounted(): void {
+    this.gameContainer.deregisterCustomObject(this);
+  }
+
+  setGameContainer(gameContainer: GameContainer): void {
+    this.gameContainer = gameContainer;
+    this.calculateRelativePosition();
+  }
+
+  calculateRelativePosition(): void {
+    this.displayWidth = this.calcDisplayWidth();
+    this.displayHeight = this.calcDisplayHeight();
+    this.displayX = this.calcDisplayX();
+    this.displayY = this.calcDisplayY();
+  }
+
   @Watch('outline', { immediate: true })
   onOutlineChanged(): void {
     const customSprite = this.$refs.customSprite as any;
@@ -144,16 +160,6 @@ export default class CustomSprite extends Vue implements CustomObject {
         customSprite.filters = [new OutlineFilter(2, this.outline)];
       else customSprite.filters = [];
     }
-  }
-
-  @Watch('gameContainer', { immediate: true })
-  onEngineChanged(): void {
-    setTimeout(() => {
-      this.displayWidth = this.calcDisplayWidth();
-      this.displayHeight = this.calcDisplayHeight();
-      this.displayX = this.calcDisplayX();
-      this.displayY = this.calcDisplayY();
-    }, 100);
   }
 
   @Watch('width', { immediate: true })

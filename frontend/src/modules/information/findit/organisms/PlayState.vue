@@ -224,6 +224,16 @@ export default class PlayState extends Vue {
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
 
+  clearPlayState(): void {
+    this.clickedPlaceable = null;
+    this.levelType = '';
+    this.placedObjects = [];
+    this.collectedObjects = [];
+    this.totalCount = 0;
+    this.collectedCount = 0;
+    this.startTime = Date.now();
+  }
+
   get playStateResult(): PlayStateResult {
     return {
       stars: Math.floor((this.collectedCount / this.totalCount) * 3),
@@ -324,9 +334,11 @@ export default class PlayState extends Vue {
   }
 
   previousLevelType = '';
+  isReadyForPlay = false;
   @Watch('level', { immediate: true })
   async onLevelChanged(): Promise<void> {
     if (this.level) {
+      this.isReadyForPlay = false;
       this.placedObjects = [];
       const levelType = this.level.parameter.type
         ? this.level.parameter.type
@@ -368,7 +380,12 @@ export default class PlayState extends Vue {
         );
       this.previousLevelType = levelType;
       this.totalCount = this.collectableObjects.length;
+      this.collectedObjects = [];
+      this.collectedCount = 0;
+      this.clickedPlaceable = null;
+      this.startTime = Date.now();
       this.playStateType = PlayStateType.play;
+      this.isReadyForPlay = true;
     }
   }
 
@@ -436,9 +453,13 @@ export default class PlayState extends Vue {
 
   @Watch('placedObjects.length', { immediate: false })
   onPlaceablesCountChanged(): void {
-    if (this.totalCount > 0 && this.collectableObjects.length === 0) {
+    if (
+      this.isReadyForPlay &&
+      this.totalCount > 0 &&
+      this.collectableObjects.length === 0
+    ) {
       this.$emit('playFinished', this.playStateResult);
-      if (this.placedObjects.length > 0) this.playStateType = PlayStateType.win;
+      this.playStateType = PlayStateType.win;
     }
   }
 

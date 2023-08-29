@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="module-content">
     <el-tabs v-model="activeTab" v-if="selectedLevel">
       <el-tab-pane
         :label="$t('module.information.findit.moderatorContent.tabs.play')"
@@ -16,63 +16,71 @@
       >
       </el-tab-pane>
     </el-tabs>
-    <PlayState
-      v-if="activeTab === 'play' && selectedLevel"
-      :taskId="taskId"
-      :level="selectedLevel"
-      height="30rem"
-      :auth-header-typ="EndpointAuthorisationType.MODERATOR"
-    ></PlayState>
-    <BuildState
-      v-if="activeTab === 'edit' && selectedLevel"
-      :level="selectedLevel"
-      v-model:level-type="selectedLevelType"
-      :task-id="taskId"
-      :auth-header-typ="EndpointAuthorisationType.MODERATOR"
-      height="30rem"
-      @approved="approved"
-    ></BuildState>
-    <draggable
-      v-model="ideas"
-      id="ideas"
-      item-key="id"
-      class="layout__columns"
-      @end="dragDone"
-    >
-      <template v-slot:item="{ element }">
-        <IdeaCard
-          :idea="element"
-          :isDraggable="true"
-          :canChangeState="false"
-          :showState="false"
-          :portrait="false"
-          :is-selected="selectedLevel && selectedLevel.id === element.id"
-          :background-color="getLevelColor(element)"
-          @ideaDeleted="refreshIdeas()"
-          @customCommand="dropdownCommand($event, element)"
-          :style="{ '--level-type-color': getSettingsForLevel(element).color }"
-          @click="selectLevel(element)"
+    <el-container>
+      <el-aside v-if="selectedLevel">
+        <PlayState
+          v-if="activeTab === 'play'"
+          :taskId="taskId"
+          :level="selectedLevel"
+          :auth-header-typ="EndpointAuthorisationType.MODERATOR"
+        ></PlayState>
+        <BuildState
+          v-if="activeTab === 'edit'"
+          :level="selectedLevel"
+          v-model:level-type="selectedLevelType"
+          :task-id="taskId"
+          :auth-header-typ="EndpointAuthorisationType.MODERATOR"
+          @approved="approved"
+        ></BuildState>
+      </el-aside>
+      <el-main>
+        <draggable
+          v-model="ideas"
+          id="ideas"
+          item-key="id"
+          class="layout__columns"
+          @end="dragDone"
         >
-          <template #icon>
-            <div class="level-icon">
-              <font-awesome-icon :icon="getSettingsForLevel(element).icon" />
-            </div>
+          <template v-slot:item="{ element }">
+            <IdeaCard
+              :idea="element"
+              :isDraggable="true"
+              :canChangeState="false"
+              :showState="false"
+              :portrait="false"
+              :is-selected="selectedLevel && selectedLevel.id === element.id"
+              :background-color="getLevelColor(element)"
+              @ideaDeleted="refreshIdeas()"
+              @customCommand="dropdownCommand($event, element)"
+              :style="{
+                '--level-type-color': getSettingsForLevel(element).color,
+              }"
+              @click="selectLevel(element)"
+            >
+              <template #icon>
+                <div class="level-icon">
+                  <font-awesome-icon
+                    :icon="getSettingsForLevel(element).icon"
+                  />
+                </div>
+              </template>
+              <template #dropdown>
+                <el-dropdown-item command="statistic">
+                  <font-awesome-icon icon="chart-column" />
+                </el-dropdown-item>
+              </template>
+            </IdeaCard>
           </template>
-          <template #dropdown>
-            <el-dropdown-item command="statistic">
-              <font-awesome-icon icon="chart-column" />
-            </el-dropdown-item>
+          <template v-slot:footer>
+            <AddItem
+              :text="$t('module.information.findit.moderatorContent.add')"
+              :is-column="true"
+              @addNew="showSettings = true"
+            />
           </template>
-        </IdeaCard>
-      </template>
-      <template v-slot:footer>
-        <AddItem
-          :text="$t('module.information.findit.moderatorContent.add')"
-          :is-column="true"
-          @addNew="showSettings = true"
-        />
-      </template>
-    </draggable>
+        </draggable>
+      </el-main>
+    </el-container>
     <el-dialog
       v-model="showStatistic"
       :key="activeStatisticIdeaId"
@@ -245,6 +253,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   selectLevel(level: Idea): void {
+    this.selectedLevelType = '';
     this.selectedLevel = level;
     this.activeTab = 'play';
   }
@@ -277,5 +286,18 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   font-size: 2rem;
   margin: 0.8rem;
   color: var(--level-type-color);
+}
+
+.el-aside {
+  overflow: hidden;
+  --el-aside-width: 50%;
+  padding-right: 2rem;
+}
+
+.module-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding-bottom: 1rem;
 }
 </style>

@@ -51,21 +51,21 @@
         </el-scrollbar>
         <slot name="header"></slot>
       </el-header>
-      <el-main class="main-layout__content">
+      <el-main class="main-layout__content" :class="contentClass">
         <slot name="content"></slot>
       </el-main>
     </el-container>
-  </el-container>
 
-  <el-drawer
-    v-model="displaySettings"
-    direction="ltr"
-    size="300px"
-    :key="displaySettings"
-    class="sidebar"
-  >
-    <slot name="sidebar"></slot>
-  </el-drawer>
+    <el-drawer
+      v-model="displaySettings"
+      direction="ltr"
+      size="300px"
+      :key="displaySettings"
+      class="sidebar"
+    >
+      <slot name="sidebar"></slot>
+    </el-drawer>
+  </el-container>
 </template>
 
 <script lang="ts">
@@ -85,6 +85,7 @@ import { EventType } from '@/types/enum/EventType';
 export default class ModeratorNavigationLayout extends Vue {
   @Prop({ default: false }) white!: boolean;
   @Prop({ default: '' }) readonly currentRouteTitle!: string;
+  @Prop({ default: null }) readonly contentClass!: string | null;
   displaySettings = false;
 
   mounted(): void {

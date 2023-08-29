@@ -322,11 +322,9 @@ export default class GameObject extends Vue {
     }
   }
 
-  @Watch('gameContainer', { immediate: true })
-  onEngineChanged(): void {
-    setTimeout(() => {
-      this.initPosition();
-    }, 100);
+  setGameContainer(gameContainer: GameContainer): void {
+    this.gameContainer = gameContainer;
+    this.initPosition();
     this.addBodyToEngine();
     this.addBodyToDetector();
   }

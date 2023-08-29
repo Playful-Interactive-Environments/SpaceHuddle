@@ -134,6 +134,7 @@ export enum BackgroundMovement {
     'gameObjectClick',
     'update:selectedObject',
     'update:offset',
+    'backgroundSizeChanged',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -176,6 +177,7 @@ export default class GameContainer extends Vue {
   resizeObserver = new ResizeObserver(this.sizeChanged);
 
   gameObjects: GameObject[] = [];
+  customObjects: CustomObject[] = [];
   activeObject: GameObject | null = null;
   activeComposition: Matter.Composite = Matter.Composite.create();
 
@@ -243,6 +245,19 @@ export default class GameContainer extends Vue {
     if (deltaY > 0) {
       this.backgroundPositionOffsetMin[1] -= deltaY / 2;
       this.backgroundPositionOffsetMax[1] += deltaY / 2;
+    }
+    this.$emit('backgroundSizeChanged');
+    for (const customObject of this.customObjects) {
+      customObject.calculateRelativePosition();
+    }
+    for (const gameObject of this.gameObjects) {
+      if (gameObject.moveWithBackground) {
+        gameObject.initPosition();
+        if (gameObject.objectSpace === ObjectSpace.RelativeToBackground)
+          gameObject.updateOffset(this.gameObjectOffsetRelativeToBackground);
+        else if (gameObject.objectSpace === ObjectSpace.RelativeToScreen)
+          gameObject.updateOffset(this.gameObjectOffsetRelativeToScreen);
+      }
     }
   }
 
@@ -409,7 +424,7 @@ export default class GameContainer extends Vue {
         gameObject.initOffset(this.gameObjectOffsetRelativeToScreen);
     }
     this.gameObjects.push(gameObject);
-    gameObject.gameContainer = this;
+    gameObject.setGameContainer(this);
     if (this.activatedObjectOnRegister) {
       this.$emit('update:selectedObject', gameObject);
       if (this.isMouseDown) {
@@ -419,9 +434,24 @@ export default class GameContainer extends Vue {
     }
   }
 
+  deregisterGameObject(gameObject: GameObject): void {
+    const index = this.gameObjects.findIndex((obj) => obj === gameObject);
+    if (index > -1) {
+      this.gameObjects.splice(index, 1);
+    }
+  }
+
   registerCustomObject(e: any): void {
     const gameObject = e.detail.data as CustomObject;
-    gameObject.gameContainer = this;
+    this.customObjects.push(gameObject);
+    gameObject.setGameContainer(this);
+  }
+
+  deregisterCustomObject(gameObject: CustomObject): void {
+    const index = this.customObjects.findIndex((obj) => obj === gameObject);
+    if (index > -1) {
+      this.customObjects.splice(index, 1);
+    }
   }
 
   addWind(): void {
@@ -440,13 +470,6 @@ export default class GameContainer extends Vue {
           y: gameObject.body.velocity.y + calcForce(),
         });
       }
-    }
-  }
-
-  deregisterGameObject(gameObject: GameObject): void {
-    const index = this.gameObjects.findIndex((obj) => obj === gameObject);
-    if (index > -1) {
-      this.gameObjects.splice(index, 1);
     }
   }
 
@@ -474,6 +497,7 @@ export default class GameContainer extends Vue {
   ): void {
     const gameContainer = (observer as any).gameContainer as GameContainer;
     gameContainer.setupPixiSpace();
+    //gameContainer.resizeObserver.disconnect();
   }
 
   unmounted(): void {
@@ -819,6 +843,7 @@ export default class GameContainer extends Vue {
 
   syncRenderView(): void {
     for (const gameObject of this.gameObjects) {
+      if (gameObject.moveWithBackground && !this.backgroundSprite) continue;
       gameObject.checkTrigger();
       gameObject.syncronize();
     }

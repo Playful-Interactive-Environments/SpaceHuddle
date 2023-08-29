@@ -3,6 +3,7 @@
     v-if="topic"
     :current-route-title="topic.title"
     :key="componentLoadIndex"
+    content-class="customContentLayout"
   >
     <template v-slot:sidebar>
       <Sidebar
@@ -186,6 +187,7 @@
         v-if="activeTask"
         :task-id="activeTaskId"
         ref="moduleContent"
+        class="moduleContent"
       />
     </template>
   </ModeratorNavigationLayout>
@@ -946,5 +948,15 @@ p {
     border-radius: 100px;
     margin-right: 0.2rem;
   }
+}
+
+.main-layout::v-deep(.customContentLayout) {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.moduleContent {
+  flex: 1;
 }
 </style>

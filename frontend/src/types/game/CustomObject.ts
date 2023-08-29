@@ -1,5 +1,6 @@
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 
 export interface CustomObject {
-  gameContainer: GameContainer;
+  setGameContainer(gameContainer: GameContainer): void;
+  calculateRelativePosition(): void;
 }
