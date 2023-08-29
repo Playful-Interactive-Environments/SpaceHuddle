@@ -1,55 +1,55 @@
-{
+ {
 "frames": {
 	"benzene": {
-		"frame": {"x":253, "y":247, "w":108, "h":125},
-		"spriteSourceSize": {"x":10,"y":2,"w":128,"h":128},
-		"sourceSize": {"w":128,"h":128}
-	},
-	"carbonDioxide": {
-		"frame": {"x":127, "y":106, "w":125, "h":63},
-		"spriteSourceSize": {"x":2,"y":3,"w":128,"h":69},
-		"sourceSize": {"w":128,"h":69}
+		"frame": {"x":407, "y":0, "w":170, "h":195},
+		"spriteSourceSize": {"x":0,"y":0,"w":170,"h":195},
+		"sourceSize": {"w":170,"h":195}
 	},
 	"carbon-monoxide": {
-		"frame": {"x":253, "y":124, "w":112, "h":122},
-		"spriteSourceSize": {"x":4,"y":3,"w":119,"h":128},
-		"sourceSize": {"w":119,"h":128}
+		"frame": {"x":0, "y":0, "w":221, "h":90},
+		"spriteSourceSize": {"x":0,"y":0,"w":221,"h":90},
+		"sourceSize": {"w":221,"h":90}
+	},
+	"carbonDioxide": {
+		"frame": {"x":0, "y":278, "w":203, "h":53},
+		"spriteSourceSize": {"x":0,"y":0,"w":203,"h":53},
+		"sourceSize": {"w":203,"h":53}
 	},
 	"dust": {
-		"frame": {"x":0, "y":286, "w":126, "h":121},
-		"spriteSourceSize": {"x":1,"y":4,"w":128,"h":128},
-		"sourceSize": {"w":128,"h":128}
+		"frame": {"x":0, "y":91, "w":211, "h":186},
+		"spriteSourceSize": {"x":0,"y":0,"w":211,"h":186},
+		"sourceSize": {"w":211,"h":186}
 	},
 	"formaldehyde": {
-		"frame": {"x":0, "y":161, "w":126, "h":124},
-		"spriteSourceSize": {"x":1,"y":2,"w":128,"h":128},
-		"sourceSize": {"w":128,"h":128}
+		"frame": {"x":199, "y":332, "w":197, "h":191},
+		"spriteSourceSize": {"x":0,"y":0,"w":197,"h":191},
+		"sourceSize": {"w":197,"h":191}
 	},
 	"methane": {
-		"frame": {"x":253, "y":0, "w":124, "h":123},
-		"spriteSourceSize": {"x":2,"y":3,"w":128,"h":128},
-		"sourceSize": {"w":128,"h":128}
+		"frame": {"x":397, "y":284, "w":190, "h":190},
+		"spriteSourceSize": {"x":0,"y":0,"w":190,"h":190},
+		"sourceSize": {"w":190,"h":190}
 	},
 	"microplastic": {
-		"frame": {"x":127, "y":170, "w":125, "h":124},
-		"spriteSourceSize": {"x":2,"y":2,"w":128,"h":128},
-		"sourceSize": {"w":128,"h":128}
+		"frame": {"x":212, "y":91, "w":194, "h":192},
+		"spriteSourceSize": {"x":0,"y":0,"w":194,"h":192},
+		"sourceSize": {"w":194,"h":192}
 	},
 	"nitrogenOxide": {
-		"frame": {"x":0, "y":106, "w":126, "h":54},
-		"spriteSourceSize": {"x":1,"y":1,"w":128,"h":56},
-		"sourceSize": {"w":128,"h":56}
+		"frame": {"x":0, "y":488, "w":196, "h":82},
+		"spriteSourceSize": {"x":0,"y":0,"w":196,"h":82},
+		"sourceSize": {"w":196,"h":82}
 	},
 	"sulphureDioxide": {
-		"frame": {"x":0, "y":0, "w":127, "h":105},
-		"spriteSourceSize": {"x":1,"y":2,"w":128,"h":109},
-		"sourceSize": {"w":128,"h":109}
+		"frame": {"x":0, "y":332, "w":198, "h":155},
+		"spriteSourceSize": {"x":0,"y":0,"w":198,"h":155},
+		"sourceSize": {"w":198,"h":155}
 	}
 
 },
 "meta": {
-	"image": "molecules_bw.png",
-	"size": {"w": 378, "h": 408},
+	"image": "molecules.png",
+	"size": {"w": 588, "h": 571},
 	"scale": "1"
 }
 }
