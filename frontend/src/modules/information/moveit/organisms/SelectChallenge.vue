@@ -435,8 +435,9 @@ export default class SelectChallenge extends Vue {
   height: 15rem;
   width: 100%;
 
-  background-image: url('~@/modules/information/moveit/assets/energy.jpg');
+  background-image: url('~@/modules/information/moveit/assets/chartsbg.png');
   background-size: cover; //contain;
+  background-position: 50%;
   background-repeat: no-repeat;
   background-color: var(--color-dark-contrast);
   background-blend-mode: overlay;
