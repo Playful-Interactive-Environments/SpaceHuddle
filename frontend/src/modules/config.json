@@ -114,6 +114,12 @@
              "icon": "questions-check",  "iconPrefix": "fac",  "type": "main",  "input": "no",  "syncPublicParticipant": true,  
            "path": "information/quiz"  
        },  
+       "quizSurveyMix": {  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "de,en,",  
+             "icon": "comments",  "iconPrefix": "fas",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "fallback": "quiz",  
+           "path": "information/quizSurveyMix"  
+       },  
        "survey": {  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
