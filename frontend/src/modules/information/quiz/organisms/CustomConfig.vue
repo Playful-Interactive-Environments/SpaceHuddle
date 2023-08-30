@@ -70,6 +70,22 @@
       </span>
     </div>
   </el-form-item>
+  <el-form-item
+    :label="$t('module.information.quiz.moderatorConfig.theme')"
+    :prop="`${rulePropPath}.theme`"
+  >
+    <el-select v-model="modelValue.theme">
+      <el-option value="" label="-" />
+      <el-option
+        value="preparation"
+        :label="$t('module.information.quiz.moderatorConfig.preparation')"
+      />
+      <el-option
+        value="interview"
+        :label="$t('module.information.quiz.moderatorConfig.interview')"
+      />
+    </el-select>
+  </el-form-item>
 </template>
 
 <script lang="ts">
@@ -129,6 +145,9 @@ export default class CustomConfig
     }
     if (this.modelValue && !this.modelValue.defaultQuestionTime) {
       this.modelValue.defaultQuestionTime = this.defaultTime;
+    }
+    if (!('theme' in this.modelValue)) {
+      this.modelValue.theme = '';
     }
   }
 

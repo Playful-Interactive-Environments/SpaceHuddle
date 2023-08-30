@@ -821,4 +821,18 @@ export default class PublicBase extends Vue {
   max-height: 30vh;
   object-fit: contain;
 }
+
+[module-theme='interview'] {
+  .question {
+    border-radius: var(--border-radius) var(--border-radius)
+      var(--border-radius) 0;
+    background-color: color-mix(
+      in srgb,
+      var(--color-informing) 60%,
+      transparent
+    );
+    border: solid 2px var(--color-gray);
+    padding: 0.5rem;
+  }
+}
 </style>

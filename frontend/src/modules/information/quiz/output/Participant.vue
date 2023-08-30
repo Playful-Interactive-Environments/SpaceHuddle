@@ -2,6 +2,7 @@
   <ParticipantModuleDefaultContainer
     :task-id="taskId"
     :module="moduleName"
+    :module-theme="theme"
     :class="{ PMDC: hasImage }"
   >
     <div id="preloader"></div>
@@ -235,7 +236,9 @@
       <span>{{
         $t('module.information.quiz.participant.thanksIndividual')
       }}</span>
-      <span id="ScoreString" v-if="showSummery">{{ getScoreString }}</span>
+      <span id="ScoreString" v-if="showSummery && quizQuestionCount > 0">{{
+        getScoreString
+      }}</span>
     </div>
   </ParticipantModuleDefaultContainer>
 </template>
@@ -309,6 +312,7 @@ export default class Participant extends Vue {
   score = 0;
   voteResults: boolean[] = [];
   savedQuestions: string[] = [];
+  theme = '';
 
   trackingManager!: TrackingManager;
 
@@ -866,6 +870,7 @@ export default class Participant extends Vue {
 
   updateModule(module: Module): void {
     this.module = module;
+    if (module.parameter.theme) this.theme = module.parameter.theme;
     this.questionnaireType =
       QuestionnaireType[module.parameter.questionType.toUpperCase()];
     this._setQuizQuestionCount();
@@ -1413,5 +1418,152 @@ label {
 .ghost {
   background-color: var(--color-dark-contrast);
   color: white;
+}
+
+.module-content::v-deep(.fixed) {
+  background-color: unset;
+}
+
+[module-theme='preparation'] {
+  background-image: url('@/modules/information/quiz/assets/preparation.jpg');
+  background-size: contain;
+
+  .el-space .el-button,
+  .orderDraggable,
+  .el-slider,
+  .el-rate,
+  .el-input-number,
+  .el-textarea::v-deep(.el-textarea__inner) {
+    border-radius: 0;
+    background: linear-gradient(
+        color-mix(in srgb, var(--color-informing) 45%, transparent),
+        color-mix(in srgb, var(--color-informing) 45%, transparent)
+      ),
+      url('@/modules/information/quiz/assets/paper.jpg');
+    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+    color: var(--color-dark-contrast);
+    border: none;
+  }
+
+  .el-slider {
+    padding: 1.5rem 1.5rem 3rem 1.5rem;
+  }
+
+  .el-rate {
+    padding: 1.5rem;
+  }
+
+  .el-input-number::v-deep(.el-input-number__decrease),
+  .el-input-number::v-deep(.el-input-number__increase) {
+    background-color: color-mix(
+      in srgb,
+      var(--el-fill-color-light) 60%,
+      transparent
+    );
+    border-radius: 0;
+  }
+
+  .el-input-number::v-deep(.el-input__wrapper) {
+    background-color: transparent;
+    border-radius: 0;
+  }
+
+  .el-rate::v-deep(.el-rate__item) {
+    color: var(--color-dark-contrast);
+  }
+
+  .el-slider::v-deep(.el-slider__marks-text) {
+    color: var(--color-dark-contrast);
+  }
+
+  #submitScreen {
+    background: linear-gradient(
+        color-mix(in srgb, var(--color-informing) 45%, transparent),
+        color-mix(in srgb, var(--color-informing) 45%, transparent)
+      ),
+      url('@/modules/information/quiz/assets/paper.jpg');
+    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+    padding: 1rem;
+  }
+}
+
+[module-theme='preparation'].module-content::v-deep(.media) {
+  --module-color: var(--color-dark-contrast);
+}
+
+[module-theme='interview'] {
+  background-image: url('@/modules/information/quiz/assets/microphones.png'),
+    url('@/modules/information/quiz/assets/stage.png');
+  background-position: center bottom, left top;
+  background-repeat: no-repeat;
+  background-size: contain, cover;
+
+  .el-space .el-button,
+  .orderDraggable,
+  .el-slider,
+  .el-rate,
+  .el-input-number,
+  .el-textarea::v-deep(.el-textarea__inner) {
+    border-radius: var(--border-radius) var(--border-radius) 0
+      var(--border-radius);
+    background-color: color-mix(
+      in srgb,
+      var(--color-background) 60%,
+      transparent
+    );
+    border: solid 2px var(--color-gray);
+    color: var(--color-dark-contrast);
+  }
+
+  .el-slider {
+    padding: 1.5rem 1.5rem 3rem 1.5rem;
+  }
+
+  .el-rate {
+    padding: 1.5rem;
+  }
+
+  .el-rate::v-deep(.el-rate__item) {
+    color: var(--color-dark-contrast);
+  }
+
+  .el-slider::v-deep(.el-slider__marks-text) {
+    color: var(--color-dark-contrast);
+  }
+
+  .el-input-number::v-deep(.el-input-number__decrease),
+  .el-input-number::v-deep(.el-input-number__increase) {
+    background-color: color-mix(
+      in srgb,
+      var(--el-fill-color-light) 60%,
+      transparent
+    );
+  }
+
+  .el-input-number::v-deep(.el-input-number__decrease) {
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+  }
+
+  .el-input-number::v-deep(.el-input-number__increase) {
+    border-radius: 0 calc(var(--border-radius) - 3px) 0 0;
+  }
+
+  .el-input-number::v-deep(.el-input__wrapper) {
+    background-color: transparent;
+    border-radius: var(--border-radius) var(--border-radius) 0
+      var(--border-radius);
+  }
+
+  #submitScreen {
+    border-radius: var(--border-radius) var(--border-radius)
+      var(--border-radius) 0;
+    background-color: color-mix(
+      in srgb,
+      var(--color-informing) 60%,
+      transparent
+    );
+    border: solid 2px var(--color-gray);
+    padding: 1rem;
+  }
 }
 </style>

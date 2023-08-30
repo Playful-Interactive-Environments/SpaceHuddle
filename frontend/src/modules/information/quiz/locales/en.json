@@ -8,7 +8,10 @@
     "moderatedQuestionFlow": "moderated question flow",
     "questionType": "questionnaire type",
     "time": "time",
-    "answerCountExample": "3"
+    "answerCountExample": "3",
+    "theme": "theme",
+    "preparation": "preparation",
+    "interview": "press conference"
   },
   "moderatorContent": {
     "questionType": "question type",
