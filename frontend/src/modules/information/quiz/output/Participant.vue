@@ -205,7 +205,8 @@
           type="textarea"
           rows="3"
           v-model="activeAnswer.textValue"
-          v-on:change="onAnswerValueChanged"
+          v-on:input="onInputTextChanged(false)"
+          v-on:change="onInputTextChanged(true)"
           :disabled="quizState === QuestionState.RESULT_ANSWER"
         ></el-input>
         <div v-else-if="activeQuestionType === QuestionType.IMAGE">
@@ -220,7 +221,8 @@
           </label>
           <el-input
             v-model="activeAnswer.textValue"
-            v-on:change="onAnswerValueChanged"
+            v-on:input="onInputTextChanged(false)"
+            v-on:change="onInputTextChanged(true)"
             :placeholder="
               $t('module.information.quiz.participant.imageKeywords')
             "
@@ -253,10 +255,7 @@ import PublicBase, {
 import { Task } from '@/types/api/Task';
 import * as taskService from '@/services/task-service';
 import * as timerService from '@/services/timer-service';
-import {
-  moduleNameValid,
-  QuestionnaireType,
-} from '@/modules/information/quiz/types/QuestionnaireType';
+import { QuestionnaireType } from '@/modules/information/quiz/types/QuestionnaireType';
 import {
   QuestionPhase,
   QuestionState,
@@ -279,6 +278,7 @@ import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
+import { delay } from '@/utils/wait';
 
 @Options({
   components: {
@@ -338,12 +338,13 @@ export default class Participant extends Vue {
 
   submitScreen = false;
 
-  get hasAnswer(): boolean {
-    if (
-      this.activeQuestion &&
-      Object.hasOwn(this.activeQuestion.parameter, 'hasAnswer')
-    )
-      return this.activeQuestion.parameter.hasAnswer;
+  hasAnswer(): boolean {
+    return this.hasQuestionAnCorrectAnswer(this.activeQuestion);
+  }
+
+  hasQuestionAnCorrectAnswer(question: Hierarchy | null): boolean {
+    if (question && Object.hasOwn(question.parameter, 'hasAnswer'))
+      return question.parameter.hasAnswer;
     return this.questionnaireType !== QuestionnaireType.SURVEY;
   }
 
@@ -514,24 +515,34 @@ export default class Participant extends Vue {
         this.voteResults[this.activeQuestionIndex] =
           this.activeAnswer.numValue ===
           this.activeQuestion?.parameter.correctValue;
-      } else if (this.activeQuestionType === QuestionType.TEXT)
+      } else if (this.activeQuestionType === QuestionType.TEXT) {
         answers = this.activeAnswer.textValue;
-      else if (this.activeQuestionType === QuestionType.IMAGE)
+        this.voteResults[this.activeQuestionIndex] = false;
+      } else if (this.activeQuestionType === QuestionType.IMAGE) {
         answers = this.activeAnswer.image
           ? this.activeAnswer.image
           : this.activeAnswer.link;
-    }
-    let score = 0;
-    for (let i = 0; i < this.voteResults.length; i++) {
-      if (this.voteResults[i]) {
-        score++;
+        this.voteResults[this.activeQuestionIndex] = false;
       }
     }
-    this.score = score;
+    this.calculateScore();
     return {
       isCorrect: this.voteResults[this.activeQuestionIndex],
       answers: answers,
     };
+  }
+
+  calculateScore(): void {
+    let score = 0;
+    for (let i = 0; i < this.voteResults.length; i++) {
+      if (
+        this.voteResults[i] &&
+        this.hasQuestionAnCorrectAnswer(this.questions[i])
+      ) {
+        score++;
+      }
+    }
+    this.score = score;
   }
 
   get getImageSrc(): string {
@@ -565,7 +576,7 @@ export default class Participant extends Vue {
       ) {
         this.trackingManager.createInstanceStepPoints(
           this.activeQuestionId,
-          this.hasAnswer
+          this.hasAnswer()
             ? result.isCorrect
               ? TaskParticipantIterationStepStatesType.CORRECT
               : TaskParticipantIterationStepStatesType.WRONG
@@ -573,20 +584,28 @@ export default class Participant extends Vue {
           {
             answer: result.answers,
           },
-          !this.hasAnswer || result.isCorrect ? 10 : 0
+          !this.hasAnswer() || result.isCorrect ? 10 : 0,
+          null,
+          true,
+          false,
+          () => true
         );
       } else {
         this.trackingManager.saveIterationStep(
           {
             answer: result.answers,
           },
-          this.hasAnswer
+          this.hasAnswer()
             ? result.isCorrect
               ? TaskParticipantIterationStepStatesType.CORRECT
               : TaskParticipantIterationStepStatesType.WRONG
             : TaskParticipantIterationStepStatesType.NEUTRAL,
           null,
-          !this.hasAnswer || result.isCorrect ? 10 : 0
+          !this.hasAnswer() || result.isCorrect ? 10 : 0,
+          true,
+          null,
+          false,
+          () => true
         );
       }
     }
@@ -605,13 +624,12 @@ export default class Participant extends Vue {
     } else this.goToSubmitScreen();
   }
 
-  goToSubmitScreen(): void {
+  async goToSubmitScreen(): Promise<void> {
     this.checkScore();
     if (!this.savedQuestions.includes(this.activeQuestionId))
       this.savedQuestions.push(this.activeQuestionId);
     if (this.trackingManager) {
-      this.trackingManager.saveIterationPointsFromSteps();
-      this.trackingManager.saveIteration(
+      await this.trackingManager.saveIteration(
         null,
         this.showSummery
           ? this.score > this.quizQuestionCount / 2
@@ -656,6 +674,25 @@ export default class Participant extends Vue {
   isSavingList: string[] = [];
   isSaving(answerId: string): boolean {
     return this.isSavingList.includes(answerId);
+  }
+
+  lastInputCharacterTime = Date.now();
+  onInputTextChanged(immediate = false): void {
+    if (!this.activeQuestionLoaded || !this.activeAnswer.textValue) {
+      return;
+    } else {
+      const answer = this.storedActiveAnswer;
+      if (answer && this.activeAnswer.textValue === answer.keywords) return;
+    }
+    const inputTime = Date.now();
+    this.lastInputCharacterTime = inputTime;
+    if (immediate) this.onAnswerValueChanged();
+    else {
+      setTimeout(() => {
+        if (inputTime === this.lastInputCharacterTime)
+          this.onAnswerValueChanged();
+      }, 2000);
+    }
   }
 
   async onAnswerValueChanged(): Promise<void> {
@@ -829,13 +866,23 @@ export default class Participant extends Vue {
 
   updateModule(module: Module): void {
     this.module = module;
+    this.questionnaireType =
+      QuestionnaireType[module.parameter.questionType.toUpperCase()];
+    this._setQuizQuestionCount();
+    this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
+    if (this.moderatedQuestionFlow) this.initData = false;
+    if (!this.moderatedQuestionFlow && this.activeQuestionIndex === -1) {
+      this.activeQuestionIndex = 0;
+    }
   }
 
+  activeQuestionLoaded = false;
   @Watch('activeQuestion', { immediate: true })
   async onActiveQuestionChanged(
     newValue: Hierarchy | null,
     oldValue: Hierarchy | null
   ): Promise<void> {
+    this.activeQuestionLoaded = false;
     const newQuestionResultStorage =
       getQuestionResultStorageFromHierarchy(newValue);
     const oldQuestionResultStorage =
@@ -877,10 +924,12 @@ export default class Participant extends Vue {
     );
   }
 
-  updateVotes(votes: Vote[]): void {
+  async updateVotes(votes: Vote[]): Promise<void> {
     this.votes = votes;
+    if (this.publicAnswerList.length === 0) await delay(500);
     if (this.hasVotesForActiveQuestion) this.loadSavedOrder();
     this.skipAnswerQuestions();
+    this.activeQuestionLoaded = true;
   }
 
   loadSavedOrder(): void {
@@ -955,11 +1004,13 @@ export default class Participant extends Vue {
       this.activeAnswer.numValue = null;
     }
     this.skipAnswerQuestions();
+    this.activeQuestionLoaded = true;
   }
 
   questions: Hierarchy[] = [];
   updateQuestions(questions: Hierarchy[]): void {
     this.questions = questions;
+    this.loadProgress();
     this.questionCount = questions.length;
     this._setQuizQuestionCount();
   }
@@ -982,21 +1033,6 @@ export default class Participant extends Vue {
 
   updateTask(task: Task): void {
     this.task = task;
-    if (task && task.modules) {
-      const module = this.task.modules.find((module) =>
-        moduleNameValid(module.name)
-      );
-      if (module) {
-        this.questionnaireType =
-          QuestionnaireType[module.parameter.questionType.toUpperCase()];
-        this._setQuizQuestionCount();
-        this.moderatedQuestionFlow = module.parameter.moderatedQuestionFlow;
-        if (this.moderatedQuestionFlow) this.initData = false;
-        if (!this.moderatedQuestionFlow && this.activeQuestionIndex === -1) {
-          this.activeQuestionIndex = 0;
-        }
-      }
-    }
   }
 
   updateState(): void {
@@ -1011,10 +1047,35 @@ export default class Participant extends Vue {
   }
 
   updateStoredAnswers(): void {
-    for (let i = 0; i < this.trackingManager.finalStepList.length; i++) {
-      this.voteResults[i] =
-        this.trackingManager.finalStepList[i].state ===
-        TaskParticipantIterationStepStatesType.CORRECT;
+    this.loadProgress();
+  }
+
+  storedProgressLoaded = false;
+  loadProgress(): void {
+    if (this.storedProgressLoaded || this.voteResults.length > 0) return;
+    const questionCount = this.questions.length;
+    const stepCount = this.trackingManager.finalStepList.length;
+    if (questionCount > 0 && this.trackingManager && stepCount > 0) {
+      let activeIndex =
+        stepCount < questionCount ? stepCount : questionCount - 1;
+      for (let i = 0; i < questionCount; i++) {
+        const trackingData = this.trackingManager.finalStepList.find(
+          (item) => item.ideaId === this.questions[i].id
+        );
+        if (trackingData) {
+          this.voteResults[i] =
+            trackingData.state ===
+            TaskParticipantIterationStepStatesType.CORRECT;
+        } else {
+          this.voteResults[i] = false;
+          if (i < activeIndex) {
+            activeIndex = i;
+          }
+        }
+      }
+      this.activeQuestionIndex = activeIndex;
+      this.calculateScore();
+      this.storedProgressLoaded = true;
     }
   }
 

@@ -369,7 +369,8 @@ export class TrackingManager {
     updateInstanceSum = false,
     starLimitRule:
       | ((step: TaskParticipantIterationStep) => boolean)
-      | null = null
+      | null = null,
+    shareUpdateInstanceSum = true
   ): Promise<void> {
     if (this.iteration) {
       if (stars !== null || pointsSpent !== null) {
@@ -391,7 +392,41 @@ export class TrackingManager {
       await this._refreshSteps();
       if (updateInstanceSum && this.iterationStep.parameter.gameplayResult) {
         await this.saveIterationPointsFromSteps();
-        await this.saveStatePointsFromIterations();
+        if (shareUpdateInstanceSum) await this.saveStatePointsFromIterations();
+      }
+    }
+  }
+
+  async _deletePreviousPointsForIdea(
+    ideaId: string | null,
+    excludeId: string | null = null,
+    rule: ((step: TaskParticipantIterationStep) => boolean) | null = null,
+    updateInstanceSum = false
+  ): Promise<void> {
+    const previousIdeaPoints = this.stepList.filter(
+      (item) =>
+        item.ideaId === ideaId &&
+        item.parameter.gameplayResult.points > 0 &&
+        (excludeId === null || item.id !== excludeId) &&
+        (rule === null || rule(item))
+    );
+    for (let item of previousIdeaPoints) {
+      const previousPoints = item.parameter.gameplayResult.points;
+      item.parameter.gameplayResult.points = 0;
+      item = await taskParticipantService.putParticipantIterationStep(
+        this.taskId,
+        item
+      );
+
+      const instance = this.iterationList.find(
+        (instance) => instance.iteration === item.iteration
+      );
+      if (instance && updateInstanceSum) {
+        instance.parameter.gameplayResult.points -= previousPoints;
+        await taskParticipantService.putParticipantIteration(
+          this.taskId,
+          instance
+        );
       }
     }
   }
@@ -402,9 +437,21 @@ export class TrackingManager {
     initContent: any,
     points: number | null = null,
     pointsSpent: number | null = null,
-    updateInstanceSum = false
+    updateInstanceSum = false,
+    shareUpdateInstanceSum = true,
+    deletePreviousPointRule:
+      | ((step: TaskParticipantIterationStep) => boolean)
+      | null = null
   ): Promise<void> {
     if (this.iteration) {
+      if (deletePreviousPointRule) {
+        await this._deletePreviousPointsForIdea(
+          ideaId,
+          null,
+          deletePreviousPointRule,
+          updateInstanceSum
+        );
+      }
       if (points !== null || pointsSpent !== null)
         initContent.gameplayResult = this.getGameplayResult(
           0,
@@ -423,7 +470,7 @@ export class TrackingManager {
       await this._refreshSteps();
       if (updateInstanceSum && this.iterationStep.parameter.gameplayResult) {
         await this.saveIterationPointsFromSteps();
-        await this.saveStatePointsFromIterations();
+        if (shareUpdateInstanceSum) await this.saveStatePointsFromIterations();
       }
     }
   }
@@ -436,9 +483,21 @@ export class TrackingManager {
     updateInstanceSum = false,
     starLimitRule:
       | ((step: TaskParticipantIterationStep) => boolean)
+      | null = null,
+    shareUpdateInstanceSum = true,
+    deletePreviousPointRule:
+      | ((step: TaskParticipantIterationStep) => boolean)
       | null = null
   ): Promise<void> {
     if (this.iterationStep) {
+      if (deletePreviousPointRule) {
+        await this._deletePreviousPointsForIdea(
+          this.iterationStep.ideaId,
+          this.iterationStep.id,
+          deletePreviousPointRule,
+          updateInstanceSum
+        );
+      }
       if (points !== null)
         this.iterationStep.parameter.gameplayResult = this.getGameplayResult(
           stars ? stars : 0,
@@ -466,7 +525,7 @@ export class TrackingManager {
       await this._refreshSteps();
       if (updateInstanceSum && this.iterationStep.parameter.gameplayResult) {
         await this.saveIterationPointsFromSteps();
-        await this.saveStatePointsFromIterations();
+        if (shareUpdateInstanceSum) await this.saveStatePointsFromIterations();
       }
     }
   }
