@@ -25,7 +25,30 @@
         <slot name="moduleInfoRight" />
       </span>
     </span>
+    <el-collapse
+      class="module-info__description"
+      :class="{ twoLineText: shortenDescription }"
+      v-if="description"
+    >
+      <el-collapse-item>
+        <template v-slot:title>
+          <h3
+            :class="{
+              'heading--regular': isParticipant,
+              twoLineText: shortenDescription,
+            }"
+            class="module-info__title"
+          >
+            {{ title }}
+          </h3>
+        </template>
+        <div class="task-info">
+          {{ description }}
+        </div>
+      </el-collapse-item>
+    </el-collapse>
     <h3
+      v-else
       :class="{
         'heading--regular': isParticipant,
         twoLineText: shortenDescription,
@@ -34,13 +57,6 @@
     >
       {{ title }}
     </h3>
-    <p
-      class="module-info__description"
-      :class="{ twoLineText: shortenDescription }"
-      v-if="description"
-    >
-      {{ description }}
-    </p>
   </div>
 </template>
 
@@ -197,5 +213,26 @@ export default class TaskInfo extends Vue {
 .el-breadcrumb::v-deep(.el-breadcrumb__item) {
   float: unset;
   display: inline;
+}
+
+.el-collapse {
+  border-top: unset;
+  border-bottom: unset;
+  margin-bottom: 0;
+}
+
+.el-collapse::v-deep(.el-collapse-item__wrap) {
+  border-bottom: unset;
+}
+
+.el-collapse::v-deep(.el-collapse-item__header) {
+  border-bottom: unset;
+  justify-content: flex-start;
+  align-items: unset;
+  gap: 0.5rem;
+}
+
+.el-collapse::v-deep(.el-collapse-item__arrow) {
+  margin: 0.5rem;
 }
 </style>

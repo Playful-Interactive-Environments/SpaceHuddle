@@ -867,16 +867,61 @@ export default class Participant extends Vue {
 [module-theme='preparation'] {
   background-image: url('@/modules/information/missionmap/assets/preparation.jpg');
   background-size: contain;
+
+  .el-card {
+    margin-right: 2rem;
+    margin-left: 2rem;
+    border-radius: 0;
+    background: linear-gradient(
+        color-mix(in srgb, var(--background-color) 45%, transparent),
+        color-mix(in srgb, var(--background-color) 45%, transparent)
+      ),
+      url('@/modules/information/quiz/assets/paper.jpg');
+    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+    border: none;
+  }
+
+  .el-card::v-deep(.card__image) {
+    background-color: color-mix(in srgb, var(--card-color) 30%, transparent);
+    border-radius: 0;
+  }
+
+  .el-card::v-deep(.el-card__body) {
+    border-radius: 0;
+  }
 }
 
 [module-theme='preparation'].module-content::v-deep(.media) {
   --module-color: var(--color-dark-contrast);
 }
 
+[module-theme='preparation'].module-content::v-deep(.participant-content) {
+  margin-left: -2rem;
+  margin-right: -2rem;
+}
+
+[module-theme='preparation'].module-content::v-deep(.mapSpace) {
+  filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+}
+
+[module-theme='preparation'].module-content::v-deep(.task-info) {
+  padding: 1rem;
+  border-radius: 0;
+  background: linear-gradient(
+      color-mix(in srgb, var(--color-informing) 45%, transparent),
+      color-mix(in srgb, var(--color-informing) 45%, transparent)
+    ),
+    url('@/modules/information/quiz/assets/paper.jpg');
+  filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+  border: none;
+}
+
 [module-theme='meeting'] {
-  background-image: url('@/modules/information/missionmap/assets/stage.png');
+  background-image: url('@/modules/information/missionmap/assets/lectern.png'),
+    url('@/modules/information/missionmap/assets/stage.png');
+  background-position: center bottom, left top;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: contain, cover;
 
   .el-card {
     border-radius: var(--border-radius) var(--border-radius) 0
@@ -899,26 +944,15 @@ export default class Participant extends Vue {
   }
 }
 
-[module-theme='meeting'].module-content::v-deep(.fixed) {
-  background-image: url('@/modules/information/missionmap/assets/lectern.png');
-  background-repeat: no-repeat;
-  background-size: 100% 100%; // contain;
-  background-position: bottom;
-  //padding-top: 5rem;
-  margin-left: -2rem;
-  padding: 5rem 1rem 1rem 1rem;
-  width: calc(100% + 4rem);
-}
-
-[module-theme='meeting'].module-content::v-deep(.fixed) {
-  z-index: 0;
-}
-
-[module-theme='meeting'].module-content::v-deep(.participant-content) {
-  z-index: 100;
-}
-
 [module-theme='meeting'].module-content::v-deep(.mapSpace) {
   border: var(--color-dark-contrast) solid 0.5rem;
+}
+
+[module-theme='meeting'].module-content::v-deep(.task-info) {
+  border-radius: var(--border-radius) var(--border-radius) var(--border-radius)
+    0;
+  background-color: color-mix(in srgb, var(--color-informing) 60%, transparent);
+  border: solid 2px var(--color-gray);
+  padding: 0.5rem;
 }
 </style>
