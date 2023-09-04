@@ -44,6 +44,11 @@
             @addNew="item.displayCount = 1000"
             class="showMore"
           />
+          <AddItem
+            :text="$t('module.information.findit.moderatorContent.add')"
+            :is-column="true"
+            @addNew="showSettings = true"
+          />
         </template>
       </draggable>
       <div class="layout__columns" v-else>
@@ -61,9 +66,21 @@
           @addNew="item.displayCount = 1000"
           class="showMore"
         />
+        <AddItem
+          :text="$t('module.information.findit.moderatorContent.add')"
+          :is-column="true"
+          @addNew="showSettings = true"
+        />
       </div>
     </el-collapse-item>
   </el-collapse>
+  <IdeaSettings
+    v-model:show-modal="showSettings"
+    :taskId="taskId"
+    :idea="addIdea"
+    :title="$t('module.information.default.moderatorContent.settingsTitle')"
+    @updateData="addData"
+  />
 </template>
 
 <script lang="ts">
@@ -86,6 +103,7 @@ import IdeaFilter, {
   FilterData,
 } from '@/components/moderator/molecules/IdeaFilter.vue';
 import * as cashService from '@/services/cash-service';
+import IdeaSettings from '@/components/moderator/organisms/settings/IdeaSettings.vue';
 
 @Options({
   components: {
@@ -94,6 +112,7 @@ import * as cashService from '@/services/cash-service';
     CollapseTitle,
     draggable,
     IdeaFilter,
+    IdeaSettings,
   },
 })
 
@@ -105,6 +124,13 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   openTabs: string[] = [];
   filter: FilterData = { ...defaultFilterData };
   cashEntry!: cashService.SimplifiedCashEntry<Idea[]>;
+  addIdea: any = {
+    keywords: '',
+    description: '',
+    link: null,
+    image: null, // the datebase64 url of created image
+  };
+  showSettings = false;
 
   get orderIsChangeable(): boolean {
     return this.filter.orderType === IdeaSortOrder.ORDER;
@@ -209,6 +235,22 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     ideas.forEach((idea) => {
       ideaService.putIdea(idea, EndpointAuthorisationType.MODERATOR, false);
     });
+  }
+
+  @Watch('showSettings', { immediate: true })
+  onShowSettingsChanged(): void {
+    if (this.showSettings) {
+      this.addIdea.order = this.ideas.length;
+      this.addIdea.parameter = [];
+    }
+  }
+
+  addData(newIdea: Idea): void {
+    this.addIdea.keywords = '';
+    this.addIdea.description = '';
+    this.addIdea.image = null;
+    this.addIdea.link = null;
+    this.ideas.push(newIdea);
   }
 }
 </script>
