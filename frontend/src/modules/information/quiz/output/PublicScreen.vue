@@ -92,6 +92,12 @@
           <p>{{ answerValue }}</p>
         </div>
       </div>
+      <el-space
+        v-else-if="activeQuestionType === QuestionType.INFO"
+        class="questionInfo"
+      >
+        {{ activeQuestion.description }}
+      </el-space>
     </template>
   </PublicBase>
 </template>

@@ -531,7 +531,8 @@
       "slider": "Slider",
       "number": "Number",
       "text": "Text",
-      "image": "Image"
+      "image": "Image",
+      "info": "Info text"
     },
     "userType": {
       "FACILITATOR": "facilitator",

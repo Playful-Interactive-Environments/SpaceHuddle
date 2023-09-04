@@ -822,6 +822,19 @@ export default class PublicBase extends Vue {
   object-fit: contain;
 }
 
+[module-theme='preparation'] {
+  .question {
+    padding: 0.5rem;
+    background: linear-gradient(
+        color-mix(in srgb, white 45%, transparent),
+        color-mix(in srgb, white 45%, transparent)
+      ),
+      url('@/modules/information/quiz/assets/paper.jpg');
+    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+    color: var(--color-dark-contrast);
+  }
+}
+
 [module-theme='interview'] {
   .question {
     border-radius: var(--border-radius) var(--border-radius)

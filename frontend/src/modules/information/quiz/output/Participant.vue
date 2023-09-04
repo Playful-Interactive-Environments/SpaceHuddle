@@ -230,6 +230,12 @@
             :disabled="quizState === QuestionState.RESULT_ANSWER"
           ></el-input>
         </div>
+        <el-space
+          v-else-if="activeQuestionType === QuestionType.INFO"
+          class="questionInfo"
+        >
+          {{ activeQuestion.description }}
+        </el-space>
       </template>
     </PublicBase>
     <div id="submitScreen" v-if="submitScreen">
@@ -615,7 +621,25 @@ export default class Participant extends Vue {
     }
   }
 
+  logInfo(): void {
+    if (this.activeQuestionType === QuestionType.INFO) {
+      if (
+        !this.trackingManager.stepList.find(
+          (item) => item.ideaId === this.activeQuestionId
+        )
+      ) {
+        this.trackingManager.createInstanceStepPoints(
+          this.activeQuestionId,
+          TaskParticipantIterationStepStatesType.NEUTRAL,
+          {},
+          0
+        );
+      }
+    }
+  }
+
   goToNextQuestion(event: PointerEvent | null, initData = false): void {
+    this.logInfo();
     this.initData = initData;
     this.checkScore();
     if (this.submitScreen) {
@@ -629,6 +653,7 @@ export default class Participant extends Vue {
   }
 
   async goToSubmitScreen(): Promise<void> {
+    this.logInfo();
     this.checkScore();
     if (!this.savedQuestions.includes(this.activeQuestionId))
       this.savedQuestions.push(this.activeQuestionId);
@@ -1060,6 +1085,7 @@ export default class Participant extends Vue {
     if (this.storedProgressLoaded || this.voteResults.length > 0) return;
     const questionCount = this.questions.length;
     const stepCount = this.trackingManager.finalStepList.length;
+    console.log(this.trackingManager.finalStepList);
     if (questionCount > 0 && this.trackingManager && stepCount > 0) {
       let activeIndex =
         stepCount < questionCount ? stepCount : questionCount - 1;
@@ -1091,6 +1117,7 @@ export default class Participant extends Vue {
 
   questionAnswered = false;
   getQuestionAnswered(): boolean {
+    if (this.activeQuestionType === QuestionType.INFO) return true;
     //if (this.activeQuestionType === QuestionType.ORDER) return true;
     if (
       getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
@@ -1119,7 +1146,11 @@ export default class Participant extends Vue {
   skipAnswerQuestions(): void {
     this.questionAnswered = this.getQuestionAnswered();
     if (!this.moderatedQuestionFlow && this.initData) {
-      if (this.questionAnswered) this.goToNextQuestion(null, true);
+      if (
+        this.questionAnswered &&
+        this.activeQuestionType !== QuestionType.INFO
+      )
+        this.goToNextQuestion(null, true);
       else this.initData = false;
     }
   }
@@ -1428,6 +1459,17 @@ label {
   background-image: url('@/modules/information/quiz/assets/preparation.jpg');
   background-size: contain;
 
+  .el-space .questionInfo {
+    padding: 0.5rem;
+    background: linear-gradient(
+        color-mix(in srgb, white 45%, transparent),
+        color-mix(in srgb, white 45%, transparent)
+      ),
+      url('@/modules/information/quiz/assets/paper.jpg');
+    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+    color: var(--color-dark-contrast);
+  }
+
   .el-space .el-button,
   .orderDraggable,
   .el-slider,
@@ -1497,6 +1539,18 @@ label {
   background-position: center bottom, left top;
   background-repeat: no-repeat;
   background-size: contain, cover;
+
+  .el-space .questionInfo {
+    border-radius: var(--border-radius) var(--border-radius)
+      var(--border-radius) 0;
+    background-color: color-mix(
+      in srgb,
+      var(--color-informing) 60%,
+      transparent
+    );
+    border: solid 2px var(--color-gray);
+    padding: 0.5rem;
+  }
 
   .el-space .el-button,
   .orderDraggable,

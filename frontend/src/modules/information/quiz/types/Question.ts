@@ -9,9 +9,11 @@ export enum QuestionType {
   NUMBER = 'number',
   TEXT = 'text',
   IMAGE = 'image',
+  INFO = 'info',
 }
 
 export const SurveyQuestionType: QuestionType[] = [
+  QuestionType.INFO,
   QuestionType.MULTIPLECHOICE,
   QuestionType.SINGLECHOICE,
   QuestionType.RATING,
@@ -21,6 +23,7 @@ export const SurveyQuestionType: QuestionType[] = [
   QuestionType.TEXT,
 ];
 export const QuizQuestionType: QuestionType[] = [
+  QuestionType.INFO,
   QuestionType.MULTIPLECHOICE,
   QuestionType.SINGLECHOICE,
   QuestionType.ORDER,

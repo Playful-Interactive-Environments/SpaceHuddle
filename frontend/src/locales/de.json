@@ -531,7 +531,8 @@
       "slider": "Slider",
       "number": "Zahl",
       "text": "Text",
-      "image": "Bild"
+      "image": "Bild",
+      "info": "Informationstext"
     },
     "userType": {
       "FACILITATOR": "Co-Moderator",
