@@ -20,7 +20,7 @@
         v-on:click="ideaSelected(idea)"
         color="#cc0000"
         :scale="0.5"
-        clone
+        :clone="true"
       >
         <template v-slot:icon>
           <el-tooltip placement="top" effect="light" :hide-after="0">

@@ -92,6 +92,7 @@ import * as votingService from '@/services/voting-service';
 import { VoteParameterResult } from '@/types/api/Vote';
 import MissionProgress from '@/modules/information/missionmap/organisms/MissionProgress.vue';
 import * as progress from '@/modules/information/missionmap/utils/progress';
+import * as viewService from '@/services/view-service';
 
 @Options({
   computed: {
@@ -138,13 +139,14 @@ export default class PublicScreen extends Vue {
   }
 
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
+  inputCashEntry!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
-      EndpointAuthorisationType.MODERATOR,
+      this.authHeaderTyp,
       30
     );
     this.ideaCash = ideaService.registerGetIdeasForTask(
@@ -159,8 +161,16 @@ export default class PublicScreen extends Vue {
       this.taskId,
       'points',
       this.updateVoteResult,
-      EndpointAuthorisationType.PARTICIPANT,
+      this.authHeaderTyp,
       60
+    );
+    this.inputCashEntry = viewService.registerGetInputIdeas(
+      this.taskId,
+      this.filter.orderType,
+      null,
+      this.updateInputIdeas,
+      this.authHeaderTyp,
+      20
     );
   }
 
@@ -175,6 +185,8 @@ export default class PublicScreen extends Vue {
       this.filter.orderType,
       null
     );
+    this.inputCashEntry.parameter.urlParameter =
+      ideaService.getIdeaListParameter(this.filter.orderType, null);
     if (task.modules.length === 1) this.module = task.modules[0];
     else {
       this.module = task.modules.find((t) => t.name === 'missionmap');
@@ -182,7 +194,26 @@ export default class PublicScreen extends Vue {
     if (this.module) this.showProgress = true;
   }
 
+  ownIdeas: Idea[] = [];
+  inputIdeas: Idea[] = [];
   updateIdeas(ideas: Idea[]): void {
+    this.ownIdeas = ideas;
+    this.updateIdeaList();
+  }
+
+  updateInputIdeas(ideas: Idea[]): void {
+    this.inputIdeas = ideas;
+    this.updateIdeaList();
+  }
+
+  updateIdeaList(): void {
+    let ideas = [...this.ownIdeas, ...this.inputIdeas].sort((a, b) => {
+      if (a.orderGroup === b.orderGroup) {
+        return b.orderText.localeCompare(a.orderText);
+      } else {
+        return b.orderGroup.localeCompare(a.orderGroup);
+      }
+    });
     ideas = ideas.filter((idea) => idea.parameter.shareData);
     ideas = this.filter.orderAsc ? ideas : ideas.reverse();
     ideas = ideaService.filterIdeas(

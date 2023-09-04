@@ -14,7 +14,7 @@
       </mgl-map>
     </div>
   </el-form-item>
-  <el-form-item
+  <!--<el-form-item
     v-if="hasInput"
     :label="
       $t(
@@ -27,7 +27,7 @@
       class="level-item"
       v-model="modelValue.insertInitProgressionFromInput"
     />
-  </el-form-item>
+  </el-form-item>-->
   <el-form-item
     v-for="parameter of ManuelInitParameter"
     :key="parameter"
@@ -160,8 +160,8 @@ export default class ModeratorConfig extends Vue {
   hasInput = false;
 
   get ManuelInitParameter(): string[] {
-    if (this.hasInput && this.modelValue.insertInitProgressionFromInput)
-      return [];
+    /*if (this.hasInput && this.modelValue.insertInitProgressionFromInput)
+      return [];*/
     return Object.keys(gameConfig.parameter);
   }
 
@@ -176,9 +176,9 @@ export default class ModeratorConfig extends Vue {
       if (!('theme' in this.modelValue)) {
         this.modelValue.theme = '';
       }
-      if (!('insertInitProgressionFromInput' in this.modelValue)) {
+      /*if (!('insertInitProgressionFromInput' in this.modelValue)) {
         this.modelValue.insertInitProgressionFromInput = true;
-      }
+      }*/
       if (!('effectElectricity' in this.modelValue)) {
         this.modelValue.effectElectricity = false;
       }

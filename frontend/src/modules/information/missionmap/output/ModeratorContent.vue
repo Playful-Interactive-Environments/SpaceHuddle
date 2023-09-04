@@ -8,7 +8,9 @@
   <IdeaMap
     class="mapSpace"
     :ideas="ideas"
-    :canChangePosition="() => true"
+    :canChangePosition="
+      (idea) => this.ownIdeas.find((item) => item.id === idea.id) !== undefined
+    "
     :highlightCondition="(idea) => !idea.parameter.shareData"
     v-model:selected-idea="selectedIdea"
     :parameter="module?.parameter"
@@ -46,6 +48,9 @@
         <template v-slot:item="{ element }">
           <IdeaCard
             :idea="element"
+            :is-editable="
+              this.ownIdeas.find((item) => item.id === element.id) !== undefined
+            "
             :isDraggable="true"
             :handleEditable="false"
             :isSelected="element.id === selectedIdea?.id"
@@ -101,6 +106,9 @@
           v-for="(idea, index) in item.filteredIdeas"
           :key="index"
           :isSelected="idea.id === selectedIdea?.id"
+          :is-editable="
+            this.ownIdeas.find((item) => item.id === idea.id) !== undefined
+          "
           :handleEditable="false"
           :selectionColor="selectionColor"
           :background-color="getIdeaColor(idea)"
@@ -293,6 +301,7 @@ import { ValidationRules } from '@/types/ui/ValidationRule';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 import * as progress from '@/modules/information/missionmap/utils/progress';
 import { MissionInputData } from '@/modules/information/missionmap/types/MissionInputData';
+import * as viewService from '@/services/view-service';
 
 @Options({
   computed: {
@@ -320,13 +329,15 @@ import { MissionInputData } from '@/modules/information/missionmap/types/Mission
 export default class ModeratorContent extends Vue implements IModeratorContent {
   @Prop() readonly taskId!: string;
   module: Module | undefined = undefined;
+  task: Task | null = null;
   ideas: Idea[] = [];
   votes: Vote[] = [];
   decidedIdeas: Idea[] = [];
   orderGroupContent: OrderGroupList = {};
   openTabs: string[] = [];
   filter: FilterData = { ...defaultFilterData };
-  cashEntry!: cashService.SimplifiedCashEntry<Idea[]>;
+  ideaCashEntry!: cashService.SimplifiedCashEntry<Idea[]>;
+  inputCashEntry!: cashService.SimplifiedCashEntry<Idea[]>;
   selectedIdea: Idea | null = null;
   selectionColor = '#0192d0';
   addIdea: any = {
@@ -414,7 +425,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     /*if (this.taskId) {
       this.missionInput = new MissionInputData(this.taskId);
     }*/
-    this.cashEntry = ideaService.registerGetIdeasForTask(
+    this.ideaCashEntry = ideaService.registerGetIdeasForTask(
       this.taskId,
       this.filter.orderType,
       null,
@@ -434,6 +445,14 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       EndpointAuthorisationType.MODERATOR,
       20
     );
+    this.inputCashEntry = viewService.registerGetInputIdeas(
+      this.taskId,
+      this.filter.orderType,
+      null,
+      this.updateInputIdeas,
+      EndpointAuthorisationType.MODERATOR,
+      20
+    );
   }
 
   updateVotes(votes: Vote[]): void {
@@ -442,6 +461,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   updateTask(task: Task): void {
+    this.task = task;
     if (task.modules.length === 1) this.module = task.modules[0];
     else {
       this.module = task.modules.find((t) => t.name === 'missionmap');
@@ -449,7 +469,26 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.resetAddIdea();
   }
 
+  ownIdeas: Idea[] = [];
+  inputIdeas: Idea[] = [];
   updateIdeas(ideas: Idea[]): void {
+    this.ownIdeas = ideas;
+    this.updateIdeaList();
+  }
+
+  updateInputIdeas(ideas: Idea[]): void {
+    this.inputIdeas = ideas;
+    this.updateIdeaList();
+  }
+
+  updateIdeaList(): void {
+    const ideas = [...this.ownIdeas, ...this.inputIdeas].sort((a, b) => {
+      if (a.orderGroup === b.orderGroup) {
+        return b.orderText.localeCompare(a.orderText);
+      } else {
+        return b.orderGroup.localeCompare(a.orderGroup);
+      }
+    });
     for (const idea of ideas) {
       setEmptyParameterIfNotExists(idea, () => this.module);
     }
@@ -514,12 +553,13 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   reloadTabState = true;
   reloadIdeas(reloadTabState = false): void {
-    this.cashEntry.parameter.urlParameter = ideaService.getIdeaListParameter(
-      this.filter.orderType,
-      null
-    );
+    this.inputCashEntry.parameter.urlParameter =
+      ideaService.getIdeaListParameter(this.filter.orderType, null);
+    this.ideaCashEntry.parameter.urlParameter =
+      ideaService.getIdeaListParameter(this.filter.orderType, null);
     this.reloadTabState = reloadTabState;
-    this.cashEntry.refreshData(false);
+    this.inputCashEntry.refreshData(false);
+    this.ideaCashEntry.refreshData(false);
   }
 
   async mounted(): Promise<void> {
@@ -552,7 +592,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   refreshIdeas(): void {
-    this.cashEntry.refreshData();
+    this.inputCashEntry.refreshData();
+    this.ideaCashEntry.refreshData();
   }
 
   saveIdea(idea: Idea): void {

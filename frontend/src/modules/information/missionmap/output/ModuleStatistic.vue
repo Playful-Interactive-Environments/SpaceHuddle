@@ -30,7 +30,8 @@
       },
       plugins: {
         legend: {
-          display: chartData.data.datasets.length > 1,
+          display:
+            chartData.legendAlwaysVisible || chartData.data.datasets.length > 1,
         },
         title: {
           display: true,
@@ -110,6 +111,8 @@ import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
 import { Task } from '@/types/api/Task';
 import { Module } from '@/types/api/Module';
 import * as progress from '@/modules/information/missionmap/utils/progress';
+import * as viewService from '@/services/view-service';
+import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 
 Chart.register(annotationPlugin);
 
@@ -132,6 +135,7 @@ export default class ModuleStatistic extends Vue {
     stacked: boolean;
     annotations: { [key: string]: any };
     stepSize: number;
+    legendAlwaysVisible: boolean;
   }[] = [];
   lineChartDataList: {
     title: string;
@@ -186,6 +190,14 @@ export default class ModuleStatistic extends Vue {
         EndpointAuthorisationType.MODERATOR,
         2 * 60
       );
+      viewService.registerGetInputIdeas(
+        this.taskId,
+        IdeaSortOrder.TIMESTAMP,
+        null,
+        this.updateInputIdeas,
+        EndpointAuthorisationType.MODERATOR,
+        20
+      );
     }
   }
 
@@ -194,7 +206,26 @@ export default class ModuleStatistic extends Vue {
     if (module) this.module = module;
   }
 
+  ownIdeas: Idea[] = [];
+  inputIdeas: Idea[] = [];
   updateIdeas(ideas: Idea[]): void {
+    this.ownIdeas = ideas;
+    this.updateIdeaList();
+  }
+
+  updateInputIdeas(ideas: Idea[]): void {
+    this.inputIdeas = ideas;
+    this.updateIdeaList();
+  }
+
+  updateIdeaList(): void {
+    const ideas = [...this.ownIdeas, ...this.inputIdeas].sort((a, b) => {
+      if (a.orderGroup === b.orderGroup) {
+        return b.orderText.localeCompare(a.orderText);
+      } else {
+        return b.orderGroup.localeCompare(a.orderGroup);
+      }
+    });
     this.ideas = ideas.filter((idea) => idea.parameter.shareData);
     this.calculateDecidedIdeas();
     this.sortIdeasByVote();
@@ -212,8 +243,9 @@ export default class ModuleStatistic extends Vue {
     this.calculateCharts();
   }
 
+  dbVotes: Vote[] = [];
   updateVotes(votes: Vote[]): void {
-    this.votes = votes;
+    this.dbVotes = votes;
     this.calculateDecidedIdeas();
     this.sortIdeasByVote();
     this.calculateCharts();
@@ -221,14 +253,14 @@ export default class ModuleStatistic extends Vue {
 
   calculateDecidedIdeas(): void {
     this.decidedIdeas = progress.calculateDecidedIdeasFromVotesSorted(
-      this.votes,
+      this.dbVotes,
       this.ideas
     );
   }
 
   sortIdeasByVote(): void {
-    if (this.ideas && this.votes) {
-      this.votes = this.votes.filter((vote) =>
+    if (this.ideas && this.dbVotes) {
+      this.votes = this.dbVotes.filter((vote) =>
         this.ideas.find((idea) => idea.id === vote.ideaId)
       );
       this.ideas = this.ideas
@@ -310,6 +342,7 @@ export default class ModuleStatistic extends Vue {
       stacked: false,
       annotations: {},
       stepSize: 1,
+      legendAlwaysVisible: false,
     });
   }
 
@@ -343,6 +376,7 @@ export default class ModuleStatistic extends Vue {
       stacked: true,
       annotations: {},
       stepSize: 1,
+      legendAlwaysVisible: false,
     });
   }
 
@@ -401,6 +435,7 @@ export default class ModuleStatistic extends Vue {
       stacked: true,
       annotations: annotations,
       stepSize: 500,
+      legendAlwaysVisible: false,
     });
   }
 
@@ -438,6 +473,7 @@ export default class ModuleStatistic extends Vue {
       stacked: true,
       annotations: {},
       stepSize: 1,
+      legendAlwaysVisible: true,
     });
   }
 
@@ -473,6 +509,7 @@ export default class ModuleStatistic extends Vue {
       stacked: true,
       annotations: {},
       stepSize: 50,
+      legendAlwaysVisible: false,
     });
   }
 
@@ -506,6 +543,7 @@ export default class ModuleStatistic extends Vue {
       stacked: true,
       annotations: {},
       stepSize: 1,
+      legendAlwaysVisible: false,
     });
   }
 

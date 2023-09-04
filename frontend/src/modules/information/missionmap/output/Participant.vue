@@ -29,7 +29,11 @@
           :ideas="ideas"
           v-model:selected-idea="selectedIdea"
           :parameter="module?.parameter"
-          :canChangePosition="(idea) => idea.isOwn"
+          :canChangePosition="
+            (idea) =>
+              idea.isOwn &&
+              this.ownIdeas.find((item) => item.id === idea.id) !== undefined
+          "
           :highlightCondition="(idea) => idea.isOwn"
           v-on:visibleIdeasChanged="visibleIdeasChanged"
           v-on:selectionColorChanged="selectionColor = $event"
@@ -46,7 +50,10 @@
       :is-selectable="true"
       :isSelected="idea.id === selectedIdea?.id"
       :selectionColor="selectionColor"
-      :is-editable="idea.isOwn"
+      :is-editable="
+        idea.isOwn &&
+        this.ownIdeas.find((item) => item.id === idea.id) !== undefined
+      "
       :show-state="false"
       :canChangeState="false"
       :handleEditable="false"
@@ -253,6 +260,7 @@ import { setEmptyParameterIfNotExists } from '@/modules/information/missionmap/u
 import { ElMessageBox } from 'element-plus';
 import MissionProgress from '@/modules/information/missionmap/organisms/MissionProgress.vue';
 import * as progress from '@/modules/information/missionmap/utils/progress';
+import * as viewService from '@/services/view-service';
 
 interface ProgressValues {
   origin: number;
@@ -453,6 +461,14 @@ export default class Participant extends Vue {
       EndpointAuthorisationType.PARTICIPANT,
       60 * 60
     );
+    viewService.registerGetInputIdeas(
+      this.taskId,
+      IdeaSortOrder.TIMESTAMP,
+      null,
+      this.updateInputIdeas,
+      EndpointAuthorisationType.PARTICIPANT,
+      20
+    );
   }
 
   @Watch('selectedIdea', { immediate: true })
@@ -501,7 +517,26 @@ export default class Participant extends Vue {
     }
   }
 
+  ownIdeas: Idea[] = [];
+  inputIdeas: Idea[] = [];
   updateIdeas(ideas: Idea[]): void {
+    this.ownIdeas = ideas;
+    this.updateIdeaList();
+  }
+
+  updateInputIdeas(ideas: Idea[]): void {
+    this.inputIdeas = ideas;
+    this.updateIdeaList();
+  }
+
+  updateIdeaList(): void {
+    const ideas = [...this.ownIdeas, ...this.inputIdeas].sort((a, b) => {
+      if (a.orderGroup === b.orderGroup) {
+        return b.orderText.localeCompare(a.orderText);
+      } else {
+        return b.orderGroup.localeCompare(a.orderGroup);
+      }
+    });
     this.ideas = ideas.filter((idea) => idea.parameter.shareData || idea.isOwn);
     this.orderedIdeas = [
       ...this.ideas.filter((idea) => idea.parameter.shareData),
