@@ -25,7 +25,9 @@ export function getTypeForLevel(level: Idea): string {
 export function getItemsForLevel(level: Idea): placeable.PlaceableBase[] {
   const items = level.parameter.items
     ? (level.parameter.items as placeable.PlaceableBase[])
-    : (Object.values(level.parameter) as placeable.PlaceableBase[]);
+    : (Object.values(level.parameter) as placeable.PlaceableBase[]).filter(
+        (item) => Object.hasOwn(item, 'position')
+      );
   const settings = getSettingsForLevel(level);
   for (const item of items) {
     if (!item.type) item.type = settings.defaultType;

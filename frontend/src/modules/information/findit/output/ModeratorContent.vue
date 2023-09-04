@@ -1,40 +1,147 @@
 <template>
   <div class="module-content">
-    <el-tabs v-model="activeTab" v-if="selectedLevel">
-      <el-tab-pane
-        :label="$t('module.information.findit.moderatorContent.tabs.play')"
-        name="play"
-      >
-      </el-tab-pane>
-      <el-tab-pane
-        :label="$t('module.information.findit.moderatorContent.tabs.edit')"
-        name="edit"
-        v-if="
-          !selectedLevel.parameter.state ||
-          selectedLevel.parameter.state !== LevelWorkflowType.approved
-        "
-      >
-      </el-tab-pane>
-    </el-tabs>
+    <IdeaFilter :taskId="taskId" v-model="filter" @change="reloadIdeas(true)" />
     <el-container>
       <el-aside v-if="selectedLevel">
-        <PlayState
-          v-if="activeTab === 'play'"
-          :taskId="taskId"
-          :level="selectedLevel"
-          :auth-header-typ="EndpointAuthorisationType.MODERATOR"
-        ></PlayState>
-        <BuildState
-          v-if="activeTab === 'edit'"
-          :level="selectedLevel"
-          v-model:level-type="selectedLevelType"
-          :task-id="taskId"
-          :auth-header-typ="EndpointAuthorisationType.MODERATOR"
-          @approved="approved"
-        ></BuildState>
+        <el-tabs v-model="activeTab" v-if="selectedLevel" type="border-card">
+          <el-tab-pane
+            :label="$t('module.information.findit.moderatorContent.tabs.play')"
+            name="play"
+          >
+          </el-tab-pane>
+          <el-tab-pane
+            :label="$t('module.information.findit.moderatorContent.tabs.edit')"
+            name="edit"
+            v-if="
+              !selectedLevel.parameter.state ||
+              selectedLevel.parameter.state !== LevelWorkflowType.approved
+            "
+          >
+          </el-tab-pane>
+        </el-tabs>
+        <div style="height: 100%">
+          <PlayState
+            v-if="activeTab === 'play'"
+            :taskId="taskId"
+            :level="selectedLevel"
+            :auth-header-typ="EndpointAuthorisationType.MODERATOR"
+          ></PlayState>
+          <BuildState
+            v-if="activeTab === 'edit'"
+            :level="selectedLevel"
+            v-model:level-type="selectedLevelType"
+            :task-id="taskId"
+            :auth-header-typ="EndpointAuthorisationType.MODERATOR"
+            @approved="approved"
+          ></BuildState>
+        </div>
       </el-aside>
       <el-main>
-        <draggable
+        <el-collapse v-model="openTabs">
+          <el-collapse-item
+            v-for="(item, key) in orderGroupContent"
+            :key="key"
+            :name="key"
+          >
+            <template #title>
+              <CollapseTitle :text="key" :avatar="item.avatar">
+                <span
+                  role="button"
+                  class="awesome-icon"
+                  v-if="item.ideas.length > item.displayCount"
+                  v-on:click="item.displayCount = 1000"
+                >
+                  <font-awesome-icon icon="ellipsis-h" />
+                </span>
+              </CollapseTitle>
+            </template>
+            <draggable
+              v-model="item.filteredIdeas"
+              :id="key"
+              item-key="id"
+              class="layout__columns"
+              v-if="orderIsChangeable"
+              @end="dragDone"
+            >
+              <template v-slot:item="{ element }">
+                <IdeaCard
+                  :idea="element"
+                  :isDraggable="true"
+                  :canChangeState="false"
+                  :showState="false"
+                  :portrait="false"
+                  :is-selected="
+                    selectedLevel && selectedLevel.id === element.id
+                  "
+                  :background-color="getLevelColor(element)"
+                  @ideaDeleted="refreshIdeas()"
+                  @customCommand="dropdownCommand($event, element)"
+                  :style="{
+                    '--level-type-color': getSettingsForLevel(element).color,
+                  }"
+                  @click="selectLevel(element)"
+                >
+                  <template #icon>
+                    <div class="level-icon">
+                      <font-awesome-icon
+                        :icon="getSettingsForLevel(element).icon"
+                      />
+                    </div>
+                  </template>
+                  <template #dropdown>
+                    <el-dropdown-item command="statistic">
+                      <font-awesome-icon icon="chart-column" />
+                    </el-dropdown-item>
+                  </template>
+                </IdeaCard>
+              </template>
+              <template v-slot:footer>
+                <AddItem
+                  :text="$t('module.information.findit.moderatorContent.add')"
+                  :is-column="true"
+                  @addNew="showSettings = true"
+                />
+              </template>
+            </draggable>
+            <div class="layout__columns" v-else>
+              <IdeaCard
+                v-for="(idea, index) in item.filteredIdeas"
+                :key="index"
+                :idea="idea"
+                :isDraggable="true"
+                :canChangeState="false"
+                :showState="false"
+                :portrait="false"
+                :is-selected="selectedLevel && selectedLevel.id === idea.id"
+                :background-color="getLevelColor(idea)"
+                @ideaDeleted="refreshIdeas()"
+                @customCommand="dropdownCommand($event, idea)"
+                :style="{
+                  '--level-type-color': getSettingsForLevel(idea).color,
+                }"
+                @click="selectLevel(idea)"
+                v-model:collapseIdeas="filter.collapseIdeas"
+              >
+                <template #icon>
+                  <div class="level-icon">
+                    <font-awesome-icon :icon="getSettingsForLevel(idea).icon" />
+                  </div>
+                </template>
+                <template #dropdown>
+                  <el-dropdown-item command="statistic">
+                    <font-awesome-icon icon="chart-column" />
+                  </el-dropdown-item>
+                </template>
+              </IdeaCard>
+              <AddItem
+                :text="$t('module.information.findit.moderatorContent.add')"
+                :is-column="true"
+                @addNew="showSettings = true"
+              />
+            </div>
+          </el-collapse-item>
+        </el-collapse>
+        <!--<draggable
           v-model="ideas"
           id="ideas"
           item-key="id"
@@ -78,7 +185,7 @@
               @addNew="showSettings = true"
             />
           </template>
-        </draggable>
+        </draggable>-->
       </el-main>
     </el-container>
     <el-dialog
@@ -151,6 +258,17 @@ import * as configParameter from '@/modules/information/findit/utils/configParam
 import { LevelWorkflowType } from '@/modules/information/findit/types/LevelWorkflowType';
 import * as themeColors from '@/utils/themeColors';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import IdeaFilter, {
+  defaultFilterData,
+  FilterData,
+} from '@/components/moderator/molecules/IdeaFilter.vue';
+import { reloadCollapseTabs } from '@/utils/collapse';
+import { setEmptyParameterIfNotExists } from '@/modules/information/missionmap/utils/parameter';
+import { OrderGroup, OrderGroupList } from '@/types/api/OrderGroup';
+import * as taskService from '@/services/task-service';
+import { Task } from '@/types/api/Task';
+import { Module } from '@/types/api/Module';
+import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 
 const emptyParameter = {
   state: LevelWorkflowType.created,
@@ -168,6 +286,8 @@ const emptyParameter = {
     IdeaSettings,
     IdeaCard,
     draggable,
+    IdeaFilter,
+    CollapseTitle,
   },
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -188,6 +308,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     image: null, // the datebase64 url of created image
     parameter: { ...emptyParameter },
   };
+  openTabs: string[] = [];
+  module: Module | undefined = undefined;
+  filter: FilterData = { ...defaultFilterData };
+  orderGroupContent: OrderGroupList = {};
 
   getSettingsForLevel = configParameter.getSettingsForLevel;
   getSettingsForLevelType = configParameter.getSettingsForLevelType;
@@ -199,6 +323,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   set showStatistic(value: boolean) {
     if (!value) this.activeStatisticIdeaId = null;
+  }
+
+  get orderIsChangeable(): boolean {
+    return this.filter.orderType === IdeaSortOrder.ORDER;
   }
 
   getLevelColor(level: Idea): string {
@@ -226,10 +354,84 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       EndpointAuthorisationType.MODERATOR,
       10
     );
+    taskService.registerGetTaskById(
+      this.taskId,
+      this.updateTask,
+      EndpointAuthorisationType.MODERATOR,
+      60 * 60
+    );
+  }
+
+  updateTask(task: Task): void {
+    if (task.modules.length === 1) this.module = task.modules[0];
+    else {
+      this.module = task.modules.find((t) => t.name === 'findit');
+    }
   }
 
   updateIdeas(ideas: Idea[]): void {
-    this.ideas = ideas;
+    for (const idea of ideas) {
+      setEmptyParameterIfNotExists(idea, () => this.module);
+    }
+    const orderType = this.filter.orderType;
+    const dataList = ideaService.getOrderGroups(
+      ideas,
+      this.filter.orderAsc,
+      this.orderGroupContent
+    );
+    let orderGroupName = '';
+    let orderGroupContent: OrderGroupList = {};
+    switch (orderType) {
+      case IdeaSortOrder.TIMESTAMP:
+      case IdeaSortOrder.ALPHABETICAL:
+      case IdeaSortOrder.ORDER:
+        dataList.ideas = ideaService.filterIdeas(
+          dataList.ideas,
+          this.filter.stateFilter,
+          this.filter.textFilter
+        );
+        orderGroupName = (this as any).$t(
+          `module.brainstorming.default.moderatorContent.${orderType}`
+        );
+        orderGroupContent[orderGroupName] = new OrderGroup(dataList.ideas);
+        break;
+      default:
+        for (const key of Object.keys(dataList.oderGroups)) {
+          dataList.oderGroups[key].ideas = ideaService.filterIdeas(
+            dataList.oderGroups[key].ideas,
+            this.filter.stateFilter,
+            this.filter.textFilter
+          );
+        }
+        orderGroupContent = dataList.oderGroups;
+    }
+    Object.keys(orderGroupContent).forEach((key) => {
+      if (key in this.orderGroupContent)
+        orderGroupContent[key].displayCount =
+          this.orderGroupContent[key].displayCount;
+    });
+    const oldTabs = Object.keys(this.orderGroupContent);
+    this.orderGroupContent = orderGroupContent;
+    this.ideas = dataList.ideas;
+    const newTabs = Object.keys(this.orderGroupContent);
+
+    reloadCollapseTabs(
+      this.openTabs,
+      oldTabs,
+      newTabs,
+      this.reloadTabState
+    ).then((tabs) => (this.openTabs = tabs));
+    this.reloadTabState = false;
+  }
+
+  reloadTabState = true;
+  reloadIdeas(reloadTabState = false): void {
+    this.ideaCash.parameter.urlParameter = ideaService.getIdeaListParameter(
+      this.filter.orderType,
+      null
+    );
+    this.reloadTabState = reloadTabState;
+    this.ideaCash.refreshData(false);
   }
 
   refreshIdeas(): void {
@@ -292,6 +494,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   overflow: hidden;
   --el-aside-width: 50%;
   padding-right: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
 }
 
 .module-content {
@@ -299,5 +504,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   flex-direction: column;
   align-items: stretch;
   padding-bottom: 1rem;
+}
+
+.el-tabs::v-deep(.el-tabs__content) {
+  background-color: transparent;
+  padding: 0;
 }
 </style>
