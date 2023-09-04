@@ -203,7 +203,7 @@ export default class IdeaMap extends Vue {
         key = 'streets-v2-dark';
         break;
     }
-    return `https://www.maptiler.com/img/cloud/slider/${key}.png`;
+    return `https://media.maptiler.com/old/img/cloud/slider/${key}.png`;
   }
 
   mounted(): void {
