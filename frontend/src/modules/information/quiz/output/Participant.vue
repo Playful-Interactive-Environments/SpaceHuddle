@@ -1085,7 +1085,6 @@ export default class Participant extends Vue {
     if (this.storedProgressLoaded || this.voteResults.length > 0) return;
     const questionCount = this.questions.length;
     const stepCount = this.trackingManager.finalStepList.length;
-    console.log(this.trackingManager.finalStepList);
     if (questionCount > 0 && this.trackingManager && stepCount > 0) {
       let activeIndex =
         stepCount < questionCount ? stepCount : questionCount - 1;
