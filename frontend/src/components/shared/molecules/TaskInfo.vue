@@ -28,7 +28,7 @@
     <el-collapse
       class="module-info__description"
       :class="{ twoLineText: shortenDescription }"
-      v-if="description"
+      v-if="description && collapseDescription"
     >
       <el-collapse-item>
         <template v-slot:title>
@@ -57,6 +57,13 @@
     >
       {{ title }}
     </h3>
+    <p
+      class="module-info__description"
+      :class="{ twoLineText: shortenDescription }"
+      v-if="description && !collapseDescription"
+    >
+      {{ description }}
+    </p>
   </div>
 </template>
 
@@ -83,6 +90,7 @@ export default class TaskInfo extends Vue {
   @Prop({ default: [] }) modules!: string[];
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
+  @Prop({ default: false }) collapseDescription!: boolean;
 
   taskType: TaskType | null = null;
   title = '';

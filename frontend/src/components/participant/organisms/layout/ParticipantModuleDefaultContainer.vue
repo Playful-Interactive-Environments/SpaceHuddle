@@ -9,6 +9,7 @@
         :shortenDescription="false"
         :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
         class="infoSection"
+        :collapseDescription="true"
       />
     </el-header>
     <el-header
@@ -22,6 +23,7 @@
         :shortenDescription="false"
         :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
         class="infoSectionOverlay"
+        :collapseDescription="true"
       />
       <slot name="headerOverlay"></slot>
     </el-header>
@@ -32,6 +34,7 @@
         :is-participant="true"
         :shortenDescription="false"
         :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+        :collapseDescription="true"
       />
     </el-header>
     <el-main
