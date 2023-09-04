@@ -141,51 +141,6 @@
             </div>
           </el-collapse-item>
         </el-collapse>
-        <!--<draggable
-          v-model="ideas"
-          id="ideas"
-          item-key="id"
-          class="layout__columns"
-          @end="dragDone"
-        >
-          <template v-slot:item="{ element }">
-            <IdeaCard
-              :idea="element"
-              :isDraggable="true"
-              :canChangeState="false"
-              :showState="false"
-              :portrait="false"
-              :is-selected="selectedLevel && selectedLevel.id === element.id"
-              :background-color="getLevelColor(element)"
-              @ideaDeleted="refreshIdeas()"
-              @customCommand="dropdownCommand($event, element)"
-              :style="{
-                '--level-type-color': getSettingsForLevel(element).color,
-              }"
-              @click="selectLevel(element)"
-            >
-              <template #icon>
-                <div class="level-icon">
-                  <font-awesome-icon
-                    :icon="getSettingsForLevel(element).icon"
-                  />
-                </div>
-              </template>
-              <template #dropdown>
-                <el-dropdown-item command="statistic">
-                  <font-awesome-icon icon="chart-column" />
-                </el-dropdown-item>
-              </template>
-            </IdeaCard>
-          </template>
-          <template v-slot:footer>
-            <AddItem
-              :text="$t('module.information.findit.moderatorContent.add')"
-              :is-column="true"
-              @addNew="showSettings = true"
-            />
-          </template>
-        </draggable>-->
       </el-main>
     </el-container>
     <el-dialog
