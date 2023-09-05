@@ -2,6 +2,7 @@
 
 namespace App\Domain\Vote\Data;
 
+use App\Domain\Participant\Data\AvatarData;
 use Selective\ArrayReader\ArrayReader;
 
 /**
@@ -53,6 +54,12 @@ class VoteData
     public ?string $timestamp;
 
     /**
+     * To visually distinguish in the front end, each participant is assigned its own avatar.
+     * @OA\Property(ref="#/components/schemas/AvatarData")
+     */
+    public ?AvatarData $avatar;
+
+    /**
      * Creates a new vote.
      * @param array $data Vote data.
      */
@@ -65,5 +72,6 @@ class VoteData
         $this->detailRating = $reader->findFloat("detail_rating");
         $this->parameter = (object)json_decode($reader->findString("parameter") ?? "{}");
         $this->timestamp = $reader->findString("timestamp");
+        $this->avatar = new AvatarData($data);
     }
 }

@@ -146,7 +146,8 @@ class VoteRepository implements RepositoryInterface
         $authorisation_conditions = $this->getAuthorisationCondition($authorisation);
 
         $query = $this->queryFactory->newSelect($this->getEntityName());
-        $query->select(["*"])
+        $query->select(["vote.*", "participant.symbol", "participant.color"])
+            ->leftJoin("participant", "participant.id = vote.participant_id")
             ->andWhere($conditions)
             ->andWhere($authorisation_conditions)
             ->order($sortConditions);
