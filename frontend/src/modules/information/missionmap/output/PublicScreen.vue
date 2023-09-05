@@ -88,11 +88,10 @@ import { Module } from '@/types/api/Module';
 import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
 import { setHash } from '@/utils/url';
 import * as themeColors from '@/utils/themeColors';
-import * as votingService from '@/services/voting-service';
 import { VoteParameterResult } from '@/types/api/Vote';
 import MissionProgress from '@/modules/information/missionmap/organisms/MissionProgress.vue';
 import * as progress from '@/modules/information/missionmap/utils/progress';
-import * as viewService from '@/services/view-service';
+import { CombinedInputManager } from '@/types/input/CombinedInputManager';
 
 @Options({
   computed: {
@@ -123,6 +122,7 @@ export default class PublicScreen extends Vue {
   decidedIdeas: Idea[] = [];
   selectionColor = '#0192d0';
   showProgress = false;
+  inputManager!: CombinedInputManager;
 
   get progress(): { [key: string]: progress.ProgressValues } {
     return progress.getProgress(this.decidedIdeas, this.module);
@@ -138,40 +138,24 @@ export default class PublicScreen extends Vue {
     return !!this.decidedIdeas.find((idea) => idea.id === ideaId);
   }
 
-  ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
-  inputCashEntry!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
+    this.inputManager = new CombinedInputManager(
+      this.taskId,
+      this.filter.orderType,
+      this.authHeaderTyp,
+      true,
+      'points'
+    );
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
       this.authHeaderTyp,
       30
     );
-    this.ideaCash = ideaService.registerGetIdeasForTask(
-      this.taskId,
-      this.filter.orderType,
-      null,
-      this.updateIdeas,
-      this.authHeaderTyp,
-      20
-    );
-    votingService.registerGetParameterResult(
-      this.taskId,
-      'points',
-      this.updateVoteResult,
-      this.authHeaderTyp,
-      60
-    );
-    this.inputCashEntry = viewService.registerGetInputIdeas(
-      this.taskId,
-      this.filter.orderType,
-      null,
-      this.updateInputIdeas,
-      this.authHeaderTyp,
-      20
-    );
+    this.inputManager.callbackUpdateIdeas = this.updateIdeas;
+    this.inputManager.callbackUpdateVotes = this.updateVotes;
   }
 
   @Watch('selectedIdea', { immediate: true })
@@ -181,12 +165,7 @@ export default class PublicScreen extends Vue {
 
   updateTask(task: Task): void {
     this.filter = getFilterForTask(task);
-    this.ideaCash.parameter.urlParameter = ideaService.getIdeaListParameter(
-      this.filter.orderType,
-      null
-    );
-    this.inputCashEntry.parameter.urlParameter =
-      ideaService.getIdeaListParameter(this.filter.orderType, null);
+    this.inputManager.setOrderType(this.filter.orderType, false);
     if (task.modules.length === 1) this.module = task.modules[0];
     else {
       this.module = task.modules.find((t) => t.name === 'missionmap');
@@ -194,26 +173,8 @@ export default class PublicScreen extends Vue {
     if (this.module) this.showProgress = true;
   }
 
-  ownIdeas: Idea[] = [];
-  inputIdeas: Idea[] = [];
-  updateIdeas(ideas: Idea[]): void {
-    this.ownIdeas = ideas;
-    this.updateIdeaList();
-  }
-
-  updateInputIdeas(ideas: Idea[]): void {
-    this.inputIdeas = ideas;
-    this.updateIdeaList();
-  }
-
-  updateIdeaList(): void {
-    let ideas = [...this.ownIdeas, ...this.inputIdeas].sort((a, b) => {
-      if (a.orderGroup === b.orderGroup) {
-        return b.orderText.localeCompare(a.orderText);
-      } else {
-        return b.orderGroup.localeCompare(a.orderGroup);
-      }
-    });
+  updateIdeas(): void {
+    let ideas = this.inputManager.ideas;
     ideas = ideas.filter((idea) => idea.parameter.shareData);
     ideas = this.filter.orderAsc ? ideas : ideas.reverse();
     ideas = ideaService.filterIdeas(
@@ -223,6 +184,10 @@ export default class PublicScreen extends Vue {
     );
     this.ideas = ideas;
     this.calculateDecidedIdeas();
+  }
+
+  updateVotes(): void {
+    this.updateVoteResult(this.inputManager.votingResult);
   }
 
   updateVoteResult(votes: VoteParameterResult[]): void {
@@ -239,8 +204,7 @@ export default class PublicScreen extends Vue {
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
-    cashService.deregisterAllGet(this.updateIdeas);
-    cashService.deregisterAllGet(this.updateVoteResult);
+    if (this.inputManager) this.inputManager.deregisterAll();
   }
 
   mounted(): void {

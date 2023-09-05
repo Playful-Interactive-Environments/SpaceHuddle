@@ -90,8 +90,6 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
 import { Bar, Line } from 'vue-chartjs';
 import * as taskParticipantService from '@/services/task-participant-service';
-import * as ideaService from '@/services/idea-service';
-import * as votingService from '@/services/voting-service';
 import * as taskService from '@/services/task-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import type { ChartData } from 'chart.js';
@@ -111,8 +109,8 @@ import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
 import { Task } from '@/types/api/Task';
 import { Module } from '@/types/api/Module';
 import * as progress from '@/modules/information/missionmap/utils/progress';
-import * as viewService from '@/services/view-service';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
+import { CombinedInputManager } from '@/types/input/CombinedInputManager';
 
 Chart.register(annotationPlugin);
 
@@ -128,6 +126,7 @@ export default class ModuleStatistic extends Vue {
   ideas: Idea[] = [];
   votes: Vote[] = [];
   decidedIdeas: Idea[] = [];
+  decidedInputIdeas: Idea[] = [];
   barChartDataList: {
     title: string;
     data: ChartData;
@@ -145,6 +144,7 @@ export default class ModuleStatistic extends Vue {
   displayLabels = false;
   replayColors: string[] = [];
   colorList: string[] = getRandomColorList(20);
+  inputManager!: CombinedInputManager;
 
   get contrastColor(): string {
     return themeColors.getContrastColor();
@@ -158,8 +158,9 @@ export default class ModuleStatistic extends Vue {
   }
 
   deregisterAll(): void {
-    cashService.deregisterAllGet(this.updateIdeas);
+    cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateIterationSteps);
+    if (this.inputManager) this.inputManager.deregisterAll();
   }
 
   unmounted(): void {
@@ -169,34 +170,21 @@ export default class ModuleStatistic extends Vue {
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     if (this.taskId) {
-      taskService.registerGetTaskById(this.taskId, this.updateTask);
-      ideaService.registerGetIdeasForTask(
+      this.inputManager = new CombinedInputManager(
         this.taskId,
-        null,
-        null,
-        this.updateIdeas,
+        IdeaSortOrder.TIMESTAMP,
         EndpointAuthorisationType.MODERATOR,
-        2 * 60
+        true,
+        'points'
       );
+      this.inputManager.callbackUpdateIdeas = this.updateIdeas;
+      this.inputManager.callbackUpdateVotes = this.updateVotes;
+      taskService.registerGetTaskById(this.taskId, this.updateTask);
       taskParticipantService.registerGetIterationStepList(
         this.taskId,
         this.updateIterationSteps,
         EndpointAuthorisationType.MODERATOR,
         2 * 60
-      );
-      votingService.registerGetVotes(
-        this.taskId,
-        this.updateVotes,
-        EndpointAuthorisationType.MODERATOR,
-        2 * 60
-      );
-      viewService.registerGetInputIdeas(
-        this.taskId,
-        IdeaSortOrder.TIMESTAMP,
-        null,
-        this.updateInputIdeas,
-        EndpointAuthorisationType.MODERATOR,
-        20
       );
     }
   }
@@ -204,28 +192,11 @@ export default class ModuleStatistic extends Vue {
   updateTask(task: Task): void {
     const module = task.modules.find((module) => module.name === 'missionmap');
     if (module) this.module = module;
+    this.calculateCharts();
   }
 
-  ownIdeas: Idea[] = [];
-  inputIdeas: Idea[] = [];
-  updateIdeas(ideas: Idea[]): void {
-    this.ownIdeas = ideas;
-    this.updateIdeaList();
-  }
-
-  updateInputIdeas(ideas: Idea[]): void {
-    this.inputIdeas = ideas;
-    this.updateIdeaList();
-  }
-
-  updateIdeaList(): void {
-    const ideas = [...this.ownIdeas, ...this.inputIdeas].sort((a, b) => {
-      if (a.orderGroup === b.orderGroup) {
-        return b.orderText.localeCompare(a.orderText);
-      } else {
-        return b.orderGroup.localeCompare(a.orderGroup);
-      }
-    });
+  updateIdeas(): void {
+    const ideas = this.inputManager.ideas;
     this.ideas = ideas.filter((idea) => idea.parameter.shareData);
     this.calculateDecidedIdeas();
     this.sortIdeasByVote();
@@ -243,24 +214,29 @@ export default class ModuleStatistic extends Vue {
     this.calculateCharts();
   }
 
-  dbVotes: Vote[] = [];
-  updateVotes(votes: Vote[]): void {
-    this.dbVotes = votes;
+  updateVotes(): void {
+    this.votes = this.inputManager.votes;
     this.calculateDecidedIdeas();
     this.sortIdeasByVote();
     this.calculateCharts();
   }
 
   calculateDecidedIdeas(): void {
-    this.decidedIdeas = progress.calculateDecidedIdeasFromVotesSorted(
-      this.dbVotes,
-      this.ideas
-    );
+    if (this.inputManager) {
+      this.decidedIdeas = progress.calculateDecidedIdeasFromVotesSorted(
+        this.inputManager.votes,
+        this.ideas
+      );
+      this.decidedInputIdeas = progress.calculateDecidedIdeasFromVotesSorted(
+        this.inputManager.inputVotes,
+        this.ideas
+      );
+    }
   }
 
   sortIdeasByVote(): void {
-    if (this.ideas && this.dbVotes) {
-      this.votes = this.dbVotes.filter((vote) =>
+    if (this.inputManager && this.ideas && this.inputManager.votes) {
+      this.votes = this.inputManager.votes.filter((vote) =>
         this.ideas.find((idea) => idea.id === vote.ideaId)
       );
       this.ideas = this.ideas
@@ -281,8 +257,8 @@ export default class ModuleStatistic extends Vue {
     }
   }
 
-  getAvatarList(filter: ((item) => boolean) | null = null): any[] {
-    const subset = filter ? this.steps.filter(filter) : this.steps;
+  getAvatarList(list: any[], filter: ((item) => boolean) | null = null): any[] {
+    const subset = filter ? list.filter(filter) : list;
     return subset
       .map((item) => item.avatar)
       .filter(
@@ -303,16 +279,27 @@ export default class ModuleStatistic extends Vue {
   calculateCharts(): void {
     this.barChartDataList = [];
     this.lineChartDataList = [];
-    this.calculateRatingChart();
-    this.calculateOrderChart();
-    this.calculatePointSpentChart();
-    this.calculateExplanationChart();
+    if (!this.module) return;
+    if (this.inputManager.hasInput())
+      this.calculateRatingChart(this.inputManager.inputVotes, 'input');
+    this.calculateRatingChart(this.inputManager.currentVotes, 'current');
+    if (this.inputManager.hasInput())
+      this.calculateOrderChart(this.inputManager.inputVotes, 'input');
+    this.calculateOrderChart(this.inputManager.currentVotes, 'current');
+    if (this.inputManager.hasInput())
+      this.calculatePointSpentChart(this.inputManager.inputVotes, 'input');
+    this.calculatePointSpentChart(this.inputManager.votes, 'current');
+    if (this.inputManager.hasInput())
+      this.calculateExplanationChart(this.inputManager.inputVotes, 'input');
+    this.calculateExplanationChart(this.inputManager.currentVotes, 'current');
     this.calculatePointCollectChart();
     this.calculateOwnIdeasChart();
-    this.calculateLineChartByProgression();
+    if (this.inputManager.hasInput())
+      this.calculateLineChartByProgression(this.decidedInputIdeas, 'input');
+    this.calculateLineChartByProgression(this.decidedIdeas, 'current');
   }
 
-  calculateRatingChart(): void {
+  calculateRatingChart(votes: Vote[], type: string): void {
     const parameter: number[] = [0, 1, 2, 3];
     const displayParameter: string[] = [
       '-',
@@ -322,7 +309,7 @@ export default class ModuleStatistic extends Vue {
     ];
     const labels: string[] = this.ideas.map((idea) => idea.keywords);
     const datasets = calculateChartPerParameter(
-      this.votes,
+      votes,
       parameter,
       this.ideas,
       this.colorList,
@@ -332,8 +319,10 @@ export default class ModuleStatistic extends Vue {
       (list) => list.length,
       (parameter) => displayParameter[parameter]
     );
+    const typeName = this.$t(`module.information.missionmap.statistic.${type}`);
+    const title = this.$t('module.information.missionmap.statistic.rating');
     this.barChartDataList.push({
-      title: this.$t('module.information.missionmap.statistic.rating'),
+      title: `${typeName}: ${title}`,
       data: {
         labels: labels,
         datasets: datasets,
@@ -346,17 +335,16 @@ export default class ModuleStatistic extends Vue {
     });
   }
 
-  calculateOrderChart(): void {
+  calculateOrderChart(votes: Vote[], type: string): void {
     const maxOrder =
-      this.votes.length > 0
-        ? this.votes.sort((a, b) => b.detailRating - a.detailRating)[0]
-            .detailRating
+      votes.length > 0
+        ? votes.sort((a, b) => b.detailRating - a.detailRating)[0].detailRating
         : 0;
     const colorList = getRainbowColorList(maxOrder + 1);
     const parameter: number[] = [...Array(maxOrder + 1).keys()];
     const labels: string[] = this.ideas.map((idea) => idea.keywords);
     const datasets = calculateChartPerParameter(
-      this.votes,
+      votes,
       parameter,
       this.ideas,
       colorList,
@@ -366,8 +354,10 @@ export default class ModuleStatistic extends Vue {
       (list) => list.length,
       (parameter) => parameter + 1
     );
+    const typeName = this.$t(`module.information.missionmap.statistic.${type}`);
+    const title = this.$t('module.information.missionmap.statistic.order');
     this.barChartDataList.push({
-      title: this.$t('module.information.missionmap.statistic.order'),
+      title: `${typeName}: ${title}`,
       data: {
         labels: labels,
         datasets: datasets,
@@ -380,8 +370,71 @@ export default class ModuleStatistic extends Vue {
     });
   }
 
-  calculatePointSpentChart(): void {
-    const avatarList = this.getAvatarList();
+  calculatePointSpentChart(votes: Vote[], type: string): void {
+    const avatarList = this.getAvatarList(votes);
+    const labels: string[] = this.ideas.map((idea) => idea.keywords);
+    const mapToValue = (list) => list.map((item) => item.parameter.points);
+    const datasets = calculateChartPerParameter(
+      votes,
+      avatarList,
+      this.ideas,
+      avatarList.map((avatar) => avatar.color),
+      (item, avatar) =>
+        item.avatar.color === avatar.color &&
+        item.avatar.symbol === avatar.symbol,
+      (item, idea) => item.ideaId === idea.id,
+      null,
+      (list) => getCalculationForType(CalculationType.Sum)(mapToValue(list)),
+      (avatar) => AvatarUnicode[avatar.symbol]
+    );
+    const annotations: { [key: string]: any } = {};
+    for (let i = 0; i < this.ideas.length; i++) {
+      const idea = this.ideas[i];
+      const votePoints = this.votes
+        .filter((vote) => vote.ideaId === idea.id)
+        .map((vote) => vote.parameter.points)
+        .reduce((a, b) => a + b, 0);
+      let annotationColor = themeColors.getRedColor();
+      if (votePoints >= idea.parameter.points)
+        annotationColor = themeColors.getGreenColor();
+      if (votePoints >= (idea.parameter.points / 3) * 2)
+        annotationColor = themeColors.getYellowColor();
+      annotations[idea.id] = {
+        type: 'box',
+        xMin: i - 0.4,
+        xMax: i + 0.4,
+        yMin: 0,
+        yMax: idea.parameter.points,
+        backgroundColor: themeColors.convertToRGBA(annotationColor, 0.25),
+        borderColor: themeColors.convertToRGBA(annotationColor),
+        label: {
+          content: idea.parameter.points,
+          display: true,
+          position: { x: '50%', y: '0%' },
+          color: themeColors.convertToRGBA(themeColors.getContrastColor()),
+        },
+      };
+    }
+    const typeName = this.$t(`module.information.missionmap.statistic.${type}`);
+    const title = this.$t(
+      'module.information.missionmap.statistic.pointsSpent'
+    );
+    this.barChartDataList.push({
+      title: `${typeName}: ${title}`,
+      data: {
+        labels: labels,
+        datasets: datasets,
+      },
+      labelColors: themeColors.getContrastColor(),
+      stacked: true,
+      annotations: annotations,
+      stepSize: 500,
+      legendAlwaysVisible: false,
+    });
+  }
+
+  calculatePointSpentChart_(): void {
+    const avatarList = this.getAvatarList(this.steps);
     const labels: string[] = this.ideas.map((idea) => idea.keywords);
     const mapToValue = (list) => list.map((item) => item.parameter.points);
     const datasets = calculateChartPerParameter(
@@ -439,9 +492,9 @@ export default class ModuleStatistic extends Vue {
     });
   }
 
-  calculateExplanationChart(): void {
+  calculateExplanationChart(votes: Vote[], type: string): void {
     const filter = (item) => item.parameter.explanation;
-    const parameter = this.votes
+    const parameter = votes
       .filter(filter)
       .map((item) => item.parameter.explanation)
       .filter(
@@ -455,7 +508,7 @@ export default class ModuleStatistic extends Vue {
       });
     const labels: string[] = this.ideas.map((idea) => idea.keywords);
     const datasets = calculateChartPerParameter(
-      this.votes,
+      votes,
       parameter,
       this.ideas,
       this.colorList,
@@ -463,8 +516,12 @@ export default class ModuleStatistic extends Vue {
       (item, idea) => item.ideaId === idea.id,
       filter
     );
+    const typeName = this.$t(`module.information.missionmap.statistic.${type}`);
+    const title = this.$t(
+      'module.information.missionmap.statistic.explanation'
+    );
     this.barChartDataList.push({
-      title: this.$t('module.information.missionmap.statistic.explanation'),
+      title: `${typeName}: ${title}`,
       data: {
         labels: labels,
         datasets: datasets,
@@ -478,7 +535,7 @@ export default class ModuleStatistic extends Vue {
   }
 
   calculatePointCollectChart(): void {
-    const avatarList = this.getAvatarList();
+    const avatarList = this.getAvatarList(this.steps);
     const labels: string[] = avatarList.map(
       (participant) => AvatarUnicode[participant.symbol]
     );
@@ -515,7 +572,7 @@ export default class ModuleStatistic extends Vue {
 
   calculateOwnIdeasChart(): void {
     const filter = (item) => item.parameter.participantIdea;
-    const avatarList = this.getAvatarList();
+    const avatarList = this.getAvatarList(this.steps);
     const labels: string[] = avatarList.map(
       (participant) => AvatarUnicode[participant.symbol]
     );
@@ -547,7 +604,7 @@ export default class ModuleStatistic extends Vue {
     });
   }
 
-  calculateLineChartByProgression(): void {
+  calculateLineChartByProgression(decidedIdeas: Idea[], type: string): void {
     const mapToValue = (list, parameter) =>
       list.map((item) =>
         item.idea ? item.idea.parameter.influenceAreas[parameter] : 0
@@ -555,8 +612,8 @@ export default class ModuleStatistic extends Vue {
     const ideaProgress: { index: number; idea: Idea | null }[] = [
       { index: -1, idea: null },
     ];
-    for (let i = 0; i < this.decidedIdeas.length; i++) {
-      ideaProgress.push({ index: i, idea: this.decidedIdeas[i] });
+    for (let i = 0; i < decidedIdeas.length; i++) {
+      ideaProgress.push({ index: i, idea: decidedIdeas[i] });
     }
     const labels = ideaProgress.map((item) =>
       item.idea
@@ -578,8 +635,10 @@ export default class ModuleStatistic extends Vue {
         return this.module.parameter[parameter] + sum;
       }
     );
+    const typeName = this.$t(`module.information.missionmap.statistic.${type}`);
+    const title = this.$t('module.information.missionmap.statistic.progress');
     this.lineChartDataList.push({
-      title: this.$t('module.information.missionmap.statistic.progress'),
+      title: `${typeName}: ${title}`,
       data: {
         labels: labels,
         datasets: datasets,

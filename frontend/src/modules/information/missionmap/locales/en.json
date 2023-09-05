@@ -43,6 +43,8 @@
     "noIdeas": "No ideas yet - stay tuned."
   },
   "statistic": {
+    "input": "input values",
+    "current": "current values",
     "rating": "rating per idea",
     "order": "order per idea",
     "pointsSpent": "spent points per idea",

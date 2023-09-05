@@ -8,9 +8,7 @@
   <IdeaMap
     class="mapSpace"
     :ideas="ideas"
-    :canChangePosition="
-      (idea) => this.ownIdeas.find((item) => item.id === idea.id) !== undefined
-    "
+    :canChangePosition="(idea) => this.inputManager.isCurrentIdea(idea.id)"
     :highlightCondition="(idea) => !idea.parameter.shareData"
     v-model:selected-idea="selectedIdea"
     :parameter="module?.parameter"
@@ -48,9 +46,7 @@
         <template v-slot:item="{ element }">
           <IdeaCard
             :idea="element"
-            :is-editable="
-              this.ownIdeas.find((item) => item.id === element.id) !== undefined
-            "
+            :is-editable="this.inputManager.isCurrentIdea(element.id)"
             :isDraggable="true"
             :handleEditable="false"
             :isSelected="element.id === selectedIdea?.id"
@@ -106,9 +102,7 @@
           v-for="(idea, index) in item.filteredIdeas"
           :key="index"
           :isSelected="idea.id === selectedIdea?.id"
-          :is-editable="
-            this.ownIdeas.find((item) => item.id === idea.id) !== undefined
-          "
+          :is-editable="this.inputManager.isCurrentIdea(idea.id)"
           :handleEditable="false"
           :selectionColor="selectionColor"
           :background-color="getIdeaColor(idea)"
@@ -271,7 +265,6 @@ import { Idea } from '@/types/api/Idea';
 import { Task } from '@/types/api/Task';
 import * as ideaService from '@/services/idea-service';
 import * as taskService from '@/services/task-service';
-import * as votingService from '@/services/voting-service';
 import * as cashService from '@/services/cash-service';
 import IdeaCard from '@/components/moderator/organisms/cards/IdeaCard.vue';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
@@ -301,7 +294,7 @@ import { ValidationRules } from '@/types/ui/ValidationRule';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 import * as progress from '@/modules/information/missionmap/utils/progress';
 import { MissionInputData } from '@/modules/information/missionmap/types/MissionInputData';
-import * as viewService from '@/services/view-service';
+import { CombinedInputManager } from '@/types/input/CombinedInputManager';
 
 @Options({
   computed: {
@@ -336,8 +329,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   orderGroupContent: OrderGroupList = {};
   openTabs: string[] = [];
   filter: FilterData = { ...defaultFilterData };
-  ideaCashEntry!: cashService.SimplifiedCashEntry<Idea[]>;
-  inputCashEntry!: cashService.SimplifiedCashEntry<Idea[]>;
   selectedIdea: Idea | null = null;
   selectionColor = '#0192d0';
   addIdea: any = {
@@ -351,6 +342,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   settingsIdea = this.addIdea;
   showSettings = false;
   missionInput!: MissionInputData;
+  inputManager!: CombinedInputManager;
 
   getIdeaColor(idea: Idea): string {
     if (!idea.parameter.shareData)
@@ -425,38 +417,25 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     /*if (this.taskId) {
       this.missionInput = new MissionInputData(this.taskId);
     }*/
-    this.ideaCashEntry = ideaService.registerGetIdeasForTask(
+    this.inputManager = new CombinedInputManager(
       this.taskId,
       this.filter.orderType,
-      null,
-      this.updateIdeas,
       EndpointAuthorisationType.MODERATOR,
-      20
+      true,
+      'points'
     );
+    this.inputManager.callbackUpdateIdeas = this.updateIdeas;
+    this.inputManager.callbackUpdateVotes = this.updateVotes;
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
       EndpointAuthorisationType.MODERATOR,
       60 * 60
     );
-    votingService.registerGetVotes(
-      this.taskId,
-      this.updateVotes,
-      EndpointAuthorisationType.MODERATOR,
-      20
-    );
-    this.inputCashEntry = viewService.registerGetInputIdeas(
-      this.taskId,
-      this.filter.orderType,
-      null,
-      this.updateInputIdeas,
-      EndpointAuthorisationType.MODERATOR,
-      20
-    );
   }
 
-  updateVotes(votes: Vote[]): void {
-    this.votes = votes;
+  updateVotes(): void {
+    this.votes = this.inputManager.votes;
     this.calculateDecidedIdeas();
   }
 
@@ -469,26 +448,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.resetAddIdea();
   }
 
-  ownIdeas: Idea[] = [];
-  inputIdeas: Idea[] = [];
-  updateIdeas(ideas: Idea[]): void {
-    this.ownIdeas = ideas;
-    this.updateIdeaList();
-  }
-
-  updateInputIdeas(ideas: Idea[]): void {
-    this.inputIdeas = ideas;
-    this.updateIdeaList();
-  }
-
-  updateIdeaList(): void {
-    const ideas = [...this.ownIdeas, ...this.inputIdeas].sort((a, b) => {
-      if (a.orderGroup === b.orderGroup) {
-        return b.orderText.localeCompare(a.orderText);
-      } else {
-        return b.orderGroup.localeCompare(a.orderGroup);
-      }
-    });
+  updateIdeas(): void {
+    const ideas = this.inputManager.ideas;
     for (const idea of ideas) {
       setEmptyParameterIfNotExists(idea, () => this.module);
     }
@@ -553,13 +514,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   reloadTabState = true;
   reloadIdeas(reloadTabState = false): void {
-    this.inputCashEntry.parameter.urlParameter =
-      ideaService.getIdeaListParameter(this.filter.orderType, null);
-    this.ideaCashEntry.parameter.urlParameter =
-      ideaService.getIdeaListParameter(this.filter.orderType, null);
+    if (this.inputManager)
+      this.inputManager.setOrderType(this.filter.orderType, true);
     this.reloadTabState = reloadTabState;
-    this.inputCashEntry.refreshData(false);
-    this.ideaCashEntry.refreshData(false);
   }
 
   async mounted(): Promise<void> {
@@ -572,10 +529,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   deregisterAll(): void {
-    cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateTask);
-    cashService.deregisterAllGet(this.updateVotes);
     if (this.missionInput) this.missionInput.deregisterAll();
+    if (this.inputManager) this.inputManager.deregisterAll();
   }
 
   unmounted(): void {
@@ -591,15 +547,14 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     });
   }
 
-  refreshIdeas(): void {
-    this.inputCashEntry.refreshData();
-    this.ideaCashEntry.refreshData();
-  }
-
   saveIdea(idea: Idea): void {
     ideaService.putIdea(idea, EndpointAuthorisationType.MODERATOR).then(() => {
       this.refreshIdeas();
     });
+  }
+
+  refreshIdeas(): void {
+    this.inputManager.refreshIdeas();
   }
 
   @Watch('showSettings', { immediate: true })
@@ -611,7 +566,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   addData(newIdea: Idea): void {
     if (!this.settingsIdea.id) {
-      this.ideas.push(newIdea);
+      this.inputManager.addIdea(newIdea);
+      this.ideas = this.inputManager.ideas;
     }
     this.resetAddIdea();
   }

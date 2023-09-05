@@ -43,6 +43,8 @@
     "noIdeas": "Noch keine Ideen - Bleib dran."
   },
   "statistic": {
+    "input": "Ausgangswerte",
+    "current": "aktuelle Wert",
     "rating": "Bewertung pro Idee",
     "order": "Reihenfolge pro Idee",
     "pointsSpent": "ausgegebene Punkte pro Idee",

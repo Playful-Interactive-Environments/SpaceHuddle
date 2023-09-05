@@ -117,19 +117,19 @@ export class TrackingManager {
     );
   }
 
-  _updateState(stateList: TaskParticipantState[]): void {
+  private _updateState(stateList: TaskParticipantState[]): void {
     if (stateList.length > 0) {
       this.state = stateList[0];
       if (this.callbackUpdateState) this.callbackUpdateState();
     }
   }
 
-  _updateIterations(iterationList: TaskParticipantIteration[]): void {
+  private _updateIterations(iterationList: TaskParticipantIteration[]): void {
     this.iterationList = iterationList;
     if (this.callbackUpdateIterationList) this.callbackUpdateIterationList();
   }
 
-  _updateSteps(stepList: TaskParticipantIterationStep[]): void {
+  private _updateSteps(stepList: TaskParticipantIterationStep[]): void {
     this.stepList = stepList.sort((a, b) => {
       if (a.iteration !== b.iteration) return b.iteration - a.iteration;
       return b.step - a.step;
@@ -146,12 +146,12 @@ export class TrackingManager {
     if (this.callbackUpdateStepList) this.callbackUpdateStepList();
   }
 
-  _updateFinalSteps(stepList: TaskParticipantIterationStep[]): void {
+  private _updateFinalSteps(stepList: TaskParticipantIterationStep[]): void {
     this.finalStepList = stepList;
     if (this.callbackUpdateFinalStepList) this.callbackUpdateFinalStepList();
   }
 
-  _updateTask(task: Task): void {
+  private _updateTask(task: Task): void {
     this.task = task;
   }
 
@@ -327,7 +327,7 @@ export class TrackingManager {
     }
   }
 
-  _getLimitedStarPoints(
+  private _getLimitedStarPoints(
     ideaId: string | null,
     stars: number | null = null,
     starLimitRule:
@@ -355,7 +355,7 @@ export class TrackingManager {
     return 0;
   }
 
-  async _refreshSteps(): Promise<void> {
+  private async _refreshSteps(): Promise<void> {
     await this.stepsCash.refreshData();
     if (this.finalStepsCash) await this.finalStepsCash.refreshData();
   }
@@ -397,7 +397,7 @@ export class TrackingManager {
     }
   }
 
-  async _deletePreviousPointsForIdea(
+  private async _deletePreviousPointsForIdea(
     ideaId: string | null,
     excludeId: string | null = null,
     rule: ((step: TaskParticipantIterationStep) => boolean) | null = null,

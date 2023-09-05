@@ -30,9 +30,7 @@
           v-model:selected-idea="selectedIdea"
           :parameter="module?.parameter"
           :canChangePosition="
-            (idea) =>
-              idea.isOwn &&
-              this.ownIdeas.find((item) => item.id === idea.id) !== undefined
+            (idea) => idea.isOwn && inputManager.isCurrentIdea(idea.id)
           "
           :highlightCondition="(idea) => idea.isOwn"
           v-on:visibleIdeasChanged="visibleIdeasChanged"
@@ -50,10 +48,7 @@
       :is-selectable="true"
       :isSelected="idea.id === selectedIdea?.id"
       :selectionColor="selectionColor"
-      :is-editable="
-        idea.isOwn &&
-        this.ownIdeas.find((item) => item.id === idea.id) !== undefined
-      "
+      :is-editable="idea.isOwn && inputManager.isCurrentIdea(idea.id)"
       :show-state="false"
       :canChangeState="false"
       :handleEditable="false"
@@ -71,18 +66,19 @@
         </div>
         <div class="column" @click="() => (showDetails = true)">
           <font-awesome-icon icon="person-booth" />
-          {{ getVoteForIdea(idea.id)?.parameter.points }}
+          {{ getVoteResultForIdea(idea.id)?.sum }}
         </div>
       </div>
-      <div class="columns is-mobile">
+      <div
+        v-if="getInfluenceAreasForIdea(idea).length > 0"
+        class="columns is-mobile"
+      >
         <div
           class="column"
-          v-for="parameter of Object.keys(gameConfig.parameter)"
+          v-for="parameter of getInfluenceAreasForIdea(idea)"
           :key="parameter"
           :style="{
             color: gameConfig.parameter[parameter].color,
-            display:
-              idea.parameter.influenceAreas[parameter] > 0 ? 'block' : 'none',
           }"
         >
           <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
@@ -200,8 +196,8 @@
             :is-editable="false"
           >
             <el-rate
-              v-if="getVoteForIdea(element.id)"
-              v-model="getVoteForIdea(element.id).rating"
+              v-if="getCurrentVoteForIdea(element.id)"
+              v-model="getCurrentVoteForIdea(element.id).rating"
               disabled
               :max="3"
             ></el-rate>
@@ -260,7 +256,7 @@ import { setEmptyParameterIfNotExists } from '@/modules/information/missionmap/u
 import { ElMessageBox } from 'element-plus';
 import MissionProgress from '@/modules/information/missionmap/organisms/MissionProgress.vue';
 import * as progress from '@/modules/information/missionmap/utils/progress';
-import * as viewService from '@/services/view-service';
+import { CombinedInputManager } from '@/types/input/CombinedInputManager';
 
 interface ProgressValues {
   origin: number;
@@ -317,11 +313,13 @@ export default class Participant extends Vue {
     explanation: '',
     explanationIndex: 3,
     previousSpendPoints: 0,
+    previousInputSpendPoints: 0,
     spentPoints: 0,
   };
   trackingManager!: TrackingManager;
   orderedIdeas: Idea[] = [];
   theme = '';
+  inputManager!: CombinedInputManager;
 
   showIdeaSettings = false;
   addIdea: any = {
@@ -414,6 +412,14 @@ export default class Participant extends Vue {
     return result;
   }
 
+  getInfluenceAreasForIdea(idea: Idea): string[] {
+    const areas: string[] = [];
+    for (const parameter of Object.keys(gameConfig.parameter)) {
+      if (idea.parameter.influenceAreas[parameter] > 0) areas.push(parameter);
+    }
+    return areas;
+  }
+
   isDecided(ideaId: string): boolean {
     return !!this.decidedIdeas.find((idea) => idea.id === ideaId);
   }
@@ -425,49 +431,26 @@ export default class Participant extends Vue {
     return '#ffffff';
   }
 
-  votingCash!: cashService.SimplifiedCashEntry<Vote[]>;
-  votingParameterCash!: cashService.SimplifiedCashEntry<VoteParameterResult[]>;
-  ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     this.deregisterAll();
     if (this.taskId) {
       this.trackingManager = new TrackingManager(this.taskId, {});
+      this.inputManager = new CombinedInputManager(
+        this.taskId,
+        IdeaSortOrder.TIMESTAMP,
+        EndpointAuthorisationType.PARTICIPANT,
+        true,
+        'points'
+      );
+      this.inputManager.callbackUpdateIdeas = this.updateIdeas;
+      this.inputManager.callbackUpdateVotes = this.updateVotes;
     }
     taskService.registerGetTaskById(
       this.taskId,
       this.updateTask,
       EndpointAuthorisationType.PARTICIPANT,
       60 * 60
-    );
-    this.ideaCash = ideaService.registerGetIdeasForTask(
-      this.taskId,
-      IdeaSortOrder.TIMESTAMP,
-      null,
-      this.updateIdeas,
-      EndpointAuthorisationType.PARTICIPANT,
-      30
-    );
-    this.votingCash = votingService.registerGetVotes(
-      this.taskId,
-      this.updateVotes,
-      EndpointAuthorisationType.PARTICIPANT,
-      60 * 60
-    );
-    this.votingParameterCash = votingService.registerGetParameterResult(
-      this.taskId,
-      'points',
-      this.updateVoteResult,
-      EndpointAuthorisationType.PARTICIPANT,
-      60 * 60
-    );
-    viewService.registerGetInputIdeas(
-      this.taskId,
-      IdeaSortOrder.TIMESTAMP,
-      null,
-      this.updateInputIdeas,
-      EndpointAuthorisationType.PARTICIPANT,
-      20
     );
   }
 
@@ -490,8 +473,18 @@ export default class Participant extends Vue {
     this.showSpentPoints = false;
   }
 
-  getVoteForIdea(ideaId: string): Vote | undefined {
-    return this.votes.find((vote) => vote.ideaId === ideaId);
+  getCurrentVoteForIdea(ideaId: string): Vote | undefined {
+    return this.inputManager.currentVotes.find(
+      (vote) => vote.ideaId === ideaId
+    );
+  }
+
+  getInputVoteForIdea(ideaId: string): Vote | undefined {
+    return this.inputManager.inputVotes.find((vote) => vote.ideaId === ideaId);
+  }
+
+  getVoteResultForIdea(ideaId: string): VoteParameterResult | undefined {
+    return this.voteResults.find((vote) => vote.ideaId === ideaId);
   }
 
   updateStates(points: number): void {
@@ -517,26 +510,8 @@ export default class Participant extends Vue {
     }
   }
 
-  ownIdeas: Idea[] = [];
-  inputIdeas: Idea[] = [];
-  updateIdeas(ideas: Idea[]): void {
-    this.ownIdeas = ideas;
-    this.updateIdeaList();
-  }
-
-  updateInputIdeas(ideas: Idea[]): void {
-    this.inputIdeas = ideas;
-    this.updateIdeaList();
-  }
-
-  updateIdeaList(): void {
-    const ideas = [...this.ownIdeas, ...this.inputIdeas].sort((a, b) => {
-      if (a.orderGroup === b.orderGroup) {
-        return b.orderText.localeCompare(a.orderText);
-      } else {
-        return b.orderGroup.localeCompare(a.orderGroup);
-      }
-    });
+  updateIdeas(): void {
+    const ideas = this.inputManager.ideas;
     this.ideas = ideas.filter((idea) => idea.parameter.shareData || idea.isOwn);
     this.orderedIdeas = [
       ...this.ideas.filter((idea) => idea.parameter.shareData),
@@ -545,8 +520,9 @@ export default class Participant extends Vue {
     this.calculateDecidedIdeas();
   }
 
-  updateVotes(votes: Vote[]): void {
-    this.votes = votes;
+  updateVotes(): void {
+    this.votes = this.inputManager.votes;
+    this.updateVoteResult(this.inputManager.votingResult);
     this.sortIdeasByVote();
   }
 
@@ -609,7 +585,7 @@ export default class Participant extends Vue {
           ]
       )
         this.selectedVote.explanationIndex = ownExplanationIndex;
-      const vote = this.getVoteForIdea(this.selectedIdea.id);
+      const vote = this.getCurrentVoteForIdea(this.selectedIdea.id);
       let points = 0;
       if (!vote) {
         if (this.selectedVote.rate) points += 10;
@@ -625,7 +601,8 @@ export default class Participant extends Vue {
             detailRating: this.selectedVote.order,
             parameter: {
               points:
-                this.selectedVote.previousSpendPoints +
+                this.selectedVote.previousSpendPoints -
+                this.selectedVote.previousInputSpendPoints +
                 this.selectedVote.points,
               explanation: this.selectedVote.explanation,
               explanationIndex: this.selectedVote.explanationIndex,
@@ -634,7 +611,7 @@ export default class Participant extends Vue {
           .then(async (vote) => {
             trackVote(vote, points);
             this.votes.push(vote);
-            await this.votingParameterCash.refreshData();
+            await this.inputManager.refreshVotes();
             this.loadSelectedVote();
           });
       } else {
@@ -663,14 +640,15 @@ export default class Participant extends Vue {
         vote.detailRating = this.selectedVote.order;
         vote.parameter = {
           points:
-            this.selectedVote.previousSpendPoints + this.selectedVote.points,
+            this.selectedVote.previousSpendPoints -
+            this.selectedVote.previousInputSpendPoints +
+            this.selectedVote.points,
           explanation: this.selectedVote.explanation,
           explanationIndex: this.selectedVote.explanationIndex,
         };
         votingService.putVote(vote).then(async () => {
           trackVote(vote, points);
-          await this.votingCash.refreshData();
-          await this.votingParameterCash.refreshData();
+          await this.inputManager.refreshVotes();
           this.loadSelectedVote();
         });
       }
@@ -698,8 +676,9 @@ export default class Participant extends Vue {
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateModule);
-    cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateStates);
+
+    if (this.inputManager) this.inputManager.deregisterAll();
   }
 
   unmounted(): void {
@@ -739,23 +718,46 @@ export default class Participant extends Vue {
       explanation: '',
       explanationIndex: 3,
       previousSpendPoints: 0,
+      previousInputSpendPoints: 0,
       spentPoints: 0,
     };
   }
 
   loadSelectedVote(): void {
     if (this.selectedIdea) {
-      const vote = this.getVoteForIdea(this.selectedIdea.id);
-      if (vote) {
-        this.selectedVote = {
-          rate: vote.rating,
-          order: vote.detailRating,
-          points: 0,
-          explanation: vote.parameter.explanation,
-          explanationIndex: vote.parameter.explanationIndex,
-          previousSpendPoints: vote.parameter.points,
-          spentPoints: 0,
-        };
+      const vote = this.getCurrentVoteForIdea(this.selectedIdea.id);
+      const inputVote = this.getInputVoteForIdea(this.selectedIdea.id);
+      const voteResult = this.getVoteResultForIdea(this.selectedIdea.id);
+      if (vote && voteResult) {
+        if (inputVote) {
+          this.selectedVote = {
+            rate: vote.rating ? vote.rating : inputVote.rating,
+            order: vote.detailRating
+              ? vote.detailRating
+              : inputVote.detailRating,
+            points: 0,
+            explanation: vote.parameter.explanation
+              ? vote.parameter.explanation
+              : inputVote.parameter.explanation,
+            explanationIndex: vote.parameter.explanationIndex
+              ? vote.parameter.explanationIndex
+              : inputVote.parameter.explanationIndex,
+            previousSpendPoints: voteResult.sum,
+            previousInputSpendPoints: inputVote.parameter.points,
+            spentPoints: 0,
+          };
+        } else {
+          this.selectedVote = {
+            rate: vote.rating,
+            order: vote.detailRating,
+            points: 0,
+            explanation: vote.parameter.explanation,
+            explanationIndex: vote.parameter.explanationIndex,
+            previousSpendPoints: voteResult.sum,
+            previousInputSpendPoints: 0,
+            spentPoints: 0,
+          };
+        }
       } else this.reset();
     }
   }
@@ -763,7 +765,7 @@ export default class Participant extends Vue {
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types*/
   async dragDone(): Promise<void> {
     for (const [index, idea] of this.orderedIdeas.entries()) {
-      const vote = this.votes.find((vote) => vote.ideaId === idea.id);
+      const vote = this.getCurrentVoteForIdea(idea.id);
       if (!vote) {
         votingService
           .postVote(this.taskId, {
@@ -782,12 +784,11 @@ export default class Participant extends Vue {
       } else {
         vote.detailRating = index;
         votingService.putVote(vote).then(() => {
-          this.votingCash.refreshData();
+          this.inputManager.refreshVotes();
         });
       }
     }
     this.sortVisibleIdeas();
-    //this.ideas = [...this.orderedIdeas];
   }
 
   editNewImage(): void {
@@ -809,7 +810,8 @@ export default class Participant extends Vue {
 
   addData(newIdea: Idea): void {
     if (!this.settingsIdea.id) {
-      this.ideas.push(newIdea);
+      this.inputManager.addIdea(newIdea);
+      this.ideas = this.inputManager.ideas;
       this.trackingManager.createInstanceStepPoints(
         newIdea.id,
         TaskParticipantIterationStepStatesType.NEUTRAL,
@@ -823,16 +825,16 @@ export default class Participant extends Vue {
     }
   }
 
-  refreshIdeas(): void {
-    this.ideaCash.refreshData();
-  }
-
   saveIdea(idea: Idea): void {
     ideaService
       .putIdea(idea, EndpointAuthorisationType.PARTICIPANT)
       .then(() => {
         this.refreshIdeas();
       });
+  }
+
+  refreshIdeas(): void {
+    this.inputManager.refreshIdeas();
   }
 
   finished(): void {

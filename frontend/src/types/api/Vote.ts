@@ -1,5 +1,6 @@
 import { Idea } from '@/types/api/Idea';
 import { Hierarchy } from '@/types/api/Hierarchy';
+import { Avatar } from '@/types/api/Participant';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export interface Vote {
@@ -9,6 +10,7 @@ export interface Vote {
   detailRating: number;
   parameter: any;
   timestamp: string;
+  avatar: Avatar;
 }
 
 export interface VoteResult {
