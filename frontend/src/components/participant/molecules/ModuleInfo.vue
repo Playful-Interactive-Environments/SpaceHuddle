@@ -33,13 +33,15 @@
           :alt="entry.key"
         />
         <div class="info-text">
-          {{ $t(`${translationPath}.${entry.key}`) }}
+          <p
+            v-html="replaceLinebreaks($t(`${translationPath}.${entry.key}`))"
+          ></p>
         </div>
       </el-carousel-item>
     </el-carousel>
     <div class="next">
       <el-button type="primary" @click="next">
-        {{ $t('participant.molecules.moduleInfo.next') }}
+        <p>{{ $t('participant.molecules.moduleInfo.next') }}</p>
       </el-button>
     </div>
   </div>
@@ -78,6 +80,10 @@ export default class ModuleInfo extends Vue {
   gameHeight = 0;
   tutorialSteps: Tutorial[] = [];
   activeTabIndex = 0;
+
+  replaceLinebreaks(text): string {
+    return text.replace(/\n/g, '<br><br>');
+  }
 
   get openModuleInfoEntryDataList(): ModuleInfoEntryData[] {
     return this.mappedModuleInfoEntryDataList.filter(
@@ -246,6 +252,9 @@ img {
 
 .info-text {
   position: absolute;
-  top: calc(50vh + 1rem);
+  top: calc(50vh);
+  height: calc(30vh);
+  overflow: auto;
+  margin: 2vh 1vh 1vh 1vh;
 }
 </style>

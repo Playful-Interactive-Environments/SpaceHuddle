@@ -35,19 +35,11 @@
     "select": "select",
     "play": "play",
     "tutorial": {
-      "traffic": "Traffic accounts for 30% of greenhouse emissions.",
-      "vehicleType": "Try to figure out what impact different vehicle types have.",
-      "emissionStats": "The statistic at the top shows you how much greenhouse gases are in one kWh of fuel",
-      "emissionStatsVariable": "While this is constant for fuels like diesel and gasoline, the values for electricity depend on the electricity mix.",
-      "speed": "In addition to vehicle choice, driving behavior also plays a crucial role. The faster you drive, the more fuel you need.",
-      "threshold": "In the statistics above the map you can see how many emissions are released. All emissions in the red marked area go directly into the environment. For all below you have the change to clean them up.",
-      "personCount": "But the number of passengers also makes a difference. The fuller the more people sharing the emissions.",
-      "addPersons": "Stop at bus stops to let people on.",
-      "cleanUp": "Now try to clean up the emissions you caused by throwing them in the right garbage can.",
-      "maxCount": "But watch out! If there are too many free emissions they will evaporate and get into the environment.",
-      "improveSpeed": "Try to leave yourself more air next time when cleaning up by clever driving behavior.",
-      "improveElectricity": "Or influence the electricity mix by appropriate measures in the measures map",
-      "particleTypes": "In addition to greenhouse gases, microplastics are also released through tire wear and particulate matter."
+      "select": "Traffic accounts for 30% of greenhouse emissions.\nTry to figure out what impact different vehicle types have.\nThe statistic shows you how much greenhouse gases are in one kWh of fuel.\nWhile this is constant for fuels like diesel and gasoline, the values for electricity depend on the electricity mix.",
+      "drive": "In addition to vehicle choice, driving behavior also plays a crucial role. The faster you drive, the more fuel you need.\nIn the statistics above the map you can see how many emissions are released. All emissions in the red marked area go directly into the environment. For all below you have the chance to clean them up.",
+      "bus": "But the number of passengers also makes a difference. The fuller the more people sharing the emissions.\nStop at bus stops to let people on.",
+      "cleanUp": "Now try to clean up the emissions you caused by throwing them in the right garbage can.\nBut watch out! If there are too many free emissions they will evaporate and get into the environment.\nIn addition to greenhouse gases, microplastics are also released through tire wear and particulate matter.",
+      "improve": "Try to leave yourself more air next time when cleaning up by clever driving behavior, or influence the electricity mix by appropriate measures in the measures map."
     }
   },
   "enums": {

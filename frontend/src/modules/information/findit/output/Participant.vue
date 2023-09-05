@@ -171,34 +171,9 @@ export default class Participant extends Vue {
   get tutorialList(): (string | ModuleInfoEntryData)[] {
     switch (this.gameStep) {
       case GameStep.Build:
-        return [
-          {
-            key: 'click',
-            texture: 'click.png',
-          },
-          {
-            key: 'place',
-            texture: 'select.jpg',
-          },
-          {
-            key: 'move',
-            texture: this.spritesheet.animations['drag'], //'drag.json',
-          },
-          {
-            key: 'rotate',
-            texture: this.spritesheet.animations['rotate'],
-          },
-        ];
+        return [{ key: 'creation', texture: 'creation.png' }];
       case GameStep.Play:
-        return [
-          { key: 'info', texture: 'info.jpg' },
-          { key: 'hazards', texture: 'select.jpg' },
-          { key: 'collect', texture: 'collect.jpg' },
-          {
-            key: 'magnifier',
-            texture: 'magnifier.jpg',
-          },
-        ];
+        return [{ key: 'finding', texture: 'finding.jpg' }];
     }
     return [];
   }

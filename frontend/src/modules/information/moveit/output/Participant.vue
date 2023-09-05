@@ -120,20 +120,14 @@ export default class Participant extends Vue {
   get tutorialList(): string[] {
     switch (this.gameStep) {
       case GameStep.Select:
-        return [
-          'traffic',
-          'vehicleType',
-          'emissionStats',
-          'emissionStatsVariable',
-        ];
+        return ['select'];
       case GameStep.Drive:
-        if (this.vehicle.category === 'bus')
-          return ['speed', 'threshold', 'personCount', 'addPersons'];
-        return ['speed', 'threshold'];
+        if (this.vehicle.category === 'bus') return ['drive', 'bus'];
+        return ['drive'];
       case GameStep.CleanUp:
-        return ['cleanUp', 'maxCount', 'particleTypes'];
+        return ['cleanUp'];
       case GameStep.Result:
-        return ['improveSpeed', 'improveElectricity'];
+        return ['improve'];
     }
     return [];
   }
