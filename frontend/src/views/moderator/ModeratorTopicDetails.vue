@@ -28,6 +28,19 @@
               ></font-awesome-icon>
             </span>
           </TutorialStep>
+          <TutorialStep
+            v-if="isModerator"
+            type="sessionDetails"
+            step="participants"
+            :order="10"
+          >
+            <span v-on:click="showParticipants = true">
+              <font-awesome-icon
+                class="awesome-icon"
+                icon="users"
+              ></font-awesome-icon>
+            </span>
+          </TutorialStep>
           <span v-on:click="download">
             <font-awesome-icon
               class="awesome-icon"
@@ -226,6 +239,11 @@
     <TaskStatistic :task-id="dialogTask.id" />
     <ModuleStatisticComponent :task-id="dialogTask.id" />
   </el-dialog>
+  <ParticipantSettings
+    v-if="isModerator"
+    v-model:show-modal="showParticipants"
+    :session-id="sessionId"
+  />
 </template>
 
 <script lang="ts">
@@ -274,9 +292,11 @@ import { SessionRole } from '@/types/api/SessionRole';
 import { reactivateTutorial } from '@/services/tutorial-service';
 import { ElMessageBox } from 'element-plus';
 import TaskStatistic from '@/components/moderator/organisms/statistics/TaskStatistic.vue';
+import ParticipantSettings from '@/components/moderator/organisms/settings/ParticipantSettings.vue';
 
 @Options({
   components: {
+    ParticipantSettings,
     TaskStatistic,
     TutorialStep,
     TimerSettings,
@@ -315,6 +335,7 @@ export default class ModeratorTopicDetails extends Vue {
   componentLoadingState: ComponentLoadingState = ComponentLoadingState.NONE;
   showRoles = false;
   showStatistic = false;
+  showParticipants = false;
   statisticComponentLoadIndex = 0;
 
   TaskType = TaskType;
