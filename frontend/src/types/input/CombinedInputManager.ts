@@ -146,7 +146,10 @@ export class CombinedInputManager {
         if (!sum[vote.ideaId]) {
           sum[vote.ideaId] = { sum: 0, count: 0 };
         }
-        if (Object.hasOwn(vote.parameter, this._sumVoteParameter)) {
+        if (
+          vote.parameter &&
+          Object.hasOwn(vote.parameter, this._sumVoteParameter)
+        ) {
           sum[vote.ideaId].sum += vote.parameter[this._sumVoteParameter];
           sum[vote.ideaId].count += 1;
         }

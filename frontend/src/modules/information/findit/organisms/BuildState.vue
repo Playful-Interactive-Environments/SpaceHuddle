@@ -6,6 +6,7 @@
     v-loading="isSaving"
   >
     <GameContainer
+      ref="gameContainer"
       v-model:width="gameWidth"
       v-model:height="gameHeight"
       :background-texture="gameConfig[levelType].settings.background"
@@ -39,6 +40,7 @@
             }"
             :source="placeable"
             :use-physic="false"
+            @positionChanged="placeablePositionChanged"
           >
             <CustomSprite
               :texture="placeable.texture"
@@ -488,6 +490,10 @@ export default class ForestFireEdit extends Vue {
     return pixiUtil.getSpriteAspect(spriteSheet, objectName);
   }
 
+  isObjectCollectable(objectType: string): boolean {
+    return gameConfig[this.levelType][objectType].settings.collectable;
+  }
+
   async saveLevel(name: string): Promise<void> {
     this.isSaving = true;
     if (!this.level) {
@@ -569,12 +575,20 @@ export default class ForestFireEdit extends Vue {
           return;
         }
         this.placementState[this.activeObjectName].currentCount++;
+        const texture = this.getActiveTexture(
+          this.activeObjectName
+        ) as PIXI.Texture<PIXI.Resource>;
+        position = this.ensurePositionVisibility(
+          texture,
+          configParameter.width,
+          position
+        );
         const placeable: placeable.Placeable = {
           uuid: uuidv4(),
           id: 0,
           type: this.activeObjectType,
           name: this.activeObjectName,
-          texture: this.getActiveTexture(this.activeObjectName),
+          texture: texture,
           width: configParameter.width,
           shape: configParameter.shape,
           position: position,
@@ -586,6 +600,58 @@ export default class ForestFireEdit extends Vue {
         this.placedObjects.push(placeable);
       }
     }, 100);
+  }
+
+  private ensurePositionVisibility(
+    texture: PIXI.Texture<PIXI.Resource>,
+    width: number,
+    position: [number, number]
+  ): [number, number] {
+    if (
+      this.$refs.gameContainer &&
+      this.isObjectCollectable(this.activeObjectType)
+    ) {
+      const container = this.$refs.gameContainer as GameContainer;
+      const aspect = (texture as any).orig.width / (texture as any).orig.height;
+      const aspectContainer = container.getBackgroundAspect();
+      const height = (width / aspect) * aspectContainer;
+      if (position[0] < width / 2) position[0] = width / 2;
+      if (position[1] < height / 2) position[1] = height / 2;
+      if (position[0] > 100 - width / 2) position[0] = 100 - width / 2;
+      if (position[1] > 100 - height / 2) position[1] = 100 - height / 2;
+    }
+    return position;
+  }
+
+  placeablePositionChanged(position: [number, number]): void {
+    if (this.selectedObject) {
+      const selectionId = this.selectedObject.source.id;
+      const selectionObject = this.placedObjects.find(
+        (item) => item.id === selectionId
+      );
+      if (selectionObject) {
+        const texture = this.getTexture(
+          this.selectedObject.source.type,
+          this.selectedObject.source.name
+        ) as PIXI.Texture<PIXI.Resource>;
+        const configParameter =
+          gameConfig[this.levelType][this.selectedObject.source.type][
+            this.selectedObject.source.name
+          ];
+        const previousPosition = [...position];
+        const newPosition = this.ensurePositionVisibility(
+          texture,
+          configParameter.width,
+          position
+        );
+        if (
+          newPosition[0] !== previousPosition[0] ||
+          newPosition[1] !== previousPosition[1]
+        ) {
+          this.selectedObject.updatePosition([...newPosition]);
+        }
+      }
+    }
   }
 
   @Watch('selectedObject', { immediate: true })

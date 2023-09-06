@@ -46,6 +46,7 @@ import { GrayscaleFilter } from '@pixi/filter-grayscale';
     'click',
     'handleTrigger',
     'update:highlighted',
+    'positionChanged',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -260,25 +261,27 @@ export default class GameObject extends Vue {
     }
   }
 
-  initPosition(): void {
+  initPosition(x: number | null = null, y: number | null = null): void {
+    if (x === null) x = this.x;
+    if (y === null) y = this.y;
     if (
       this.objectSpace === ObjectSpace.RelativeToScreen &&
       this.gameContainer
     ) {
       this.position = [
-        (this.x / 100) * this.gameContainer.gameWidth,
-        (this.y / 100) * this.gameContainer.gameHeight,
+        (x / 100) * this.gameContainer.gameWidth,
+        (y / 100) * this.gameContainer.gameHeight,
       ];
     } else if (
       this.objectSpace === ObjectSpace.RelativeToBackground &&
       this.gameContainer
     ) {
       this.position = [
-        (this.x / 100) * this.gameContainer.backgroundTextureSize[0],
-        (this.y / 100) * this.gameContainer.backgroundTextureSize[1],
+        (x / 100) * this.gameContainer.backgroundTextureSize[0],
+        (y / 100) * this.gameContainer.backgroundTextureSize[1],
       ];
     } else {
-      this.position = [this.x, this.y];
+      this.position = [x, y];
     }
   }
 
@@ -303,8 +306,22 @@ export default class GameObject extends Vue {
   @Watch('y', { immediate: true })
   onModelValueChanged(): void {
     const inputPosition = this.convertPositionToInputFormat();
-    if (inputPosition[0] !== this.x || inputPosition[1] !== this.y)
+    if (inputPosition[0] !== this.x || inputPosition[1] !== this.y) {
       this.initPosition();
+    }
+  }
+
+  updatePosition(position: [number, number]): void {
+    const inputPosition = this.convertPositionToInputFormat();
+    if (inputPosition[0] !== position[0] || inputPosition[1] !== position[1]) {
+      this.initPosition(position[0], position[1]);
+      if (this.body) {
+        Matter.Body.setPosition(this.body, {
+          x: this.position[0] - this.offset[0],
+          y: this.position[1] - this.offset[1],
+        });
+      }
+    }
   }
 
   @Watch('rotation', { immediate: true })
@@ -356,6 +373,9 @@ export default class GameObject extends Vue {
       this.rotationValue = this.body.angle;
       this.$emit('update:rotation', turf.radiansToDegrees(this.rotationValue));
       const inputPosition = this.convertPositionToInputFormat();
+      if (this.x !== inputPosition[0] || this.y !== inputPosition[1]) {
+        this.$emit('positionChanged', inputPosition);
+      }
       this.$emit('update:x', inputPosition[0]);
       this.$emit('update:y', inputPosition[1]);
     }

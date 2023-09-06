@@ -261,6 +261,15 @@ export default class GameContainer extends Vue {
     }
   }
 
+  getBackgroundAspect(): number {
+    if (this.backgroundSprite && this.backgroundSprite.orig) {
+      const textureWidth = this.backgroundSprite.orig.width;
+      const textureHeight = this.backgroundSprite.orig.height;
+      return textureWidth / textureHeight;
+    }
+    return this.gameWidth / this.gameHeight;
+  }
+
   get backgroundTexturePosition(): [number, number] {
     return this.backgroundPositionOffset;
   }
@@ -681,7 +690,7 @@ export default class GameContainer extends Vue {
         bounds.bottom.y,
         bounds.bottom.width,
         bounds.bottom.height,
-        { isStatic: true, isHidden: true }
+        { isStatic: true, isHidden: true, collisionFilter: { group: 0b0001 } }
       );
       if (this.useBorders) Matter.Composite.add(this.engine.world, bottom);
       const top = Matter.Bodies.rectangle(
@@ -689,7 +698,7 @@ export default class GameContainer extends Vue {
         bounds.top.y,
         bounds.top.width,
         bounds.top.height,
-        { isStatic: true, isHidden: true }
+        { isStatic: true, isHidden: true, collisionFilter: { group: 0b0001 } }
       );
       if (this.useBorders) Matter.Composite.add(this.engine.world, top);
       const right = Matter.Bodies.rectangle(
@@ -697,7 +706,7 @@ export default class GameContainer extends Vue {
         bounds.right.y,
         bounds.right.width,
         bounds.right.height,
-        { isStatic: true, isHidden: true }
+        { isStatic: true, isHidden: true, collisionFilter: { group: 0b0001 } }
       );
       if (this.useBorders) Matter.Composite.add(this.engine.world, right);
       const left = Matter.Bodies.rectangle(
@@ -705,7 +714,7 @@ export default class GameContainer extends Vue {
         bounds.left.y,
         bounds.left.width,
         bounds.left.height,
-        { isStatic: true, isHidden: true }
+        { isStatic: true, isHidden: true, collisionFilter: { group: 0b0001 } }
       );
       if (this.useBorders) Matter.Composite.add(this.engine.world, left);
       this.borders = {
