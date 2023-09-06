@@ -1,5 +1,5 @@
 <template>
-  <div ref="icon">
+  <div ref="icon" :class="{ disableEvents: !interactive }">
     <slot name="icon"> </slot>
   </div>
 </template>
@@ -50,6 +50,7 @@ export default class CustomMapMarker extends Vue {
   @Prop() readonly pixelPos!: [number, number];
   @Prop({ default: false }) readonly hide!: boolean;
   @Prop({ default: false }) readonly clone!: boolean;
+  @Prop({ default: true }) readonly interactive!: boolean;
   marker: Marker | undefined = undefined;
   map!: ShallowRef<Map | null>;
   observer!: MutationObserver;
@@ -213,4 +214,8 @@ export default class CustomMapMarker extends Vue {
 }
 </style>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.disableEvents {
+  pointer-events: none;
+}
+</style>

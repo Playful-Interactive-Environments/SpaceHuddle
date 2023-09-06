@@ -125,6 +125,7 @@
         rotation-alignment="map"
         :hide="!noStreet"
         :coordinates="checkRoutePoint"
+        :interactive="false"
       >
         <template v-slot:icon>
           <font-awesome-icon :icon="['fac', 'noEntry']" class="noEntry" />
