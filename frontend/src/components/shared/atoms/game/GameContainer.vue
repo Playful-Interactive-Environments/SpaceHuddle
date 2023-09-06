@@ -173,8 +173,8 @@ export default class GameContainer extends Vue {
   runner!: typeof Matter.Runner;
   detector!: typeof Matter.Detector;
   mouseConstraint!: typeof Matter.MouseConstraint;
-  hierarchyObserver = new MutationObserver(this.hierarchyChanged);
-  resizeObserver = new ResizeObserver(this.sizeChanged);
+  hierarchyObserver!: MutationObserver;
+  resizeObserver!: ResizeObserver;
 
   gameObjects: GameObject[] = [];
   customObjects: CustomObject[] = [];
@@ -381,6 +381,10 @@ export default class GameContainer extends Vue {
   }
 
   async mounted(): Promise<void> {
+    //initialise observer in mounted as otherwise this references observer
+    this.hierarchyObserver = new MutationObserver(this.hierarchyChanged);
+    this.resizeObserver = new ResizeObserver(this.sizeChanged);
+
     const gameContainer = this.$refs.gameContainer as HTMLElement;
     gameContainer.addEventListener(
       EventType.REGISTER_GAME_OBJECT,
@@ -392,10 +396,8 @@ export default class GameContainer extends Vue {
     );
 
     this.setupMatter();
-    (this.resizeObserver as any).gameContainer = this;
     this.resizeObserver.observe(this.$el.parentElement);
     if (this.hasMouseInput) {
-      (this.hierarchyObserver as any).gameContainer = this;
       this.hierarchyObserver.observe(this.$refs.gameContainer as HTMLElement, {
         childList: true,
         subtree: false,
@@ -482,31 +484,23 @@ export default class GameContainer extends Vue {
     }
   }
 
-  hierarchyChanged(
-    mutationList: MutationRecord[],
-    observer: MutationObserver
-  ): void {
-    const gameContainer = (observer as any).gameContainer as GameContainer;
+  hierarchyChanged(mutationList: MutationRecord[]): void {
     for (const mutation of mutationList) {
       if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
         const canvas = Array.from(mutation.addedNodes).find(
           (node) => node.nodeName.toLowerCase() === 'canvas'
         ) as HTMLCanvasElement | undefined;
         if (canvas) {
-          gameContainer.setupMouseConstraint(canvas);
+          this.setupMouseConstraint(canvas);
           return;
         }
       }
     }
   }
 
-  sizeChanged(
-    mutationList: ResizeObserverEntry[],
-    observer: ResizeObserver
-  ): void {
-    const gameContainer = (observer as any).gameContainer as GameContainer;
-    gameContainer.setupPixiSpace();
-    //gameContainer.resizeObserver.disconnect();
+  sizeChanged(): void {
+    this.setupPixiSpace();
+    //this.resizeObserver.disconnect();
   }
 
   unmounted(): void {

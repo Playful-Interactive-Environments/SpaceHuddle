@@ -52,10 +52,12 @@ export default class CustomMapMarker extends Vue {
   @Prop({ default: false }) readonly clone!: boolean;
   marker: Marker | undefined = undefined;
   map!: ShallowRef<Map | null>;
-  observer = new MutationObserver(this.domChanged);
+  observer!: MutationObserver;
   elementDisplay = 'block';
 
   mounted(): void {
+    //initialise observer in mounted as otherwise this references observer
+    this.observer = new MutationObserver(this.domChanged);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.map = inject(mapSymbol)!;
     if (this.$slots.icon) {
@@ -85,7 +87,6 @@ export default class CustomMapMarker extends Vue {
         this.elementDisplay = element.style.display;
         opts.element = element.cloneNode(true) as HTMLElement;
         element.style.display = 'none';
-        (this.observer as any).customMapMarker = this;
         this.observer.observe(element, {
           childList: true,
           subtree: true,
@@ -109,10 +110,9 @@ export default class CustomMapMarker extends Vue {
     this.marker = marker;
   }
 
-  domChanged(mutationList: MutationRecord[], observer: MutationObserver): void {
-    const customMapMarker = (observer as any).customMapMarker;
-    if (customMapMarker.marker) {
-      const element = (customMapMarker.$refs.icon as HTMLElement).cloneNode(
+  domChanged(): void {
+    if (this.marker) {
+      const element = (this.$refs.icon as HTMLElement).cloneNode(
         true
       ) as HTMLElement;
       element.style.display = this.elementDisplay;
@@ -120,7 +120,7 @@ export default class CustomMapMarker extends Vue {
       for (const child of element.childNodes) {
         children.push(child);
       }
-      customMapMarker.marker.getElement().replaceChildren(...children);
+      this.marker.getElement().replaceChildren(...children);
     }
   }
 
