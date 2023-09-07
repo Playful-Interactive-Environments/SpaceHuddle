@@ -224,6 +224,8 @@ CREATE TABLE `task` (
                         `parameter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
                         `order` int(11) NOT NULL DEFAULT 0,
                         `state` varchar(255) DEFAULT NULL,
+                        `dependenceStart` int(11) NOT NULL DEFAULT 0,
+                        `dependenceDuration` int(11) NOT NULL DEFAULT 1,
                         `expiration_time` datetime DEFAULT NULL,
                         `active_module_id` char(36) DEFAULT NULL,
                         `modification_date` datetime NOT NULL DEFAULT current_timestamp()

@@ -129,6 +129,12 @@ class TaskData
     public ?int $participantCount;
 
     /**
+     * Number of participants who have worked on this task.
+     * @OA\Property(ref="#/components/schemas/DependencyData")
+     */
+    public DependencyData $dependency;
+
+    /**
      * Creates a new task.
      * @param array $data Task data.
      */
@@ -148,6 +154,7 @@ class TaskData
         $this->state = strtoupper($reader->findString("state"));
         $expirationTime = $reader->findString("expiration_time");
         $this->participantCount = $reader->findInt("participant_count");
+        $this->dependency = new DependencyData($data);
 
         if ($expirationTime) {
             $expirationTime = strtotime($expirationTime);

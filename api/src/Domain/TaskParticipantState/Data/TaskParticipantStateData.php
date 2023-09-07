@@ -19,6 +19,13 @@ class TaskParticipantStateData
     public ?string $id = null;
 
     /**
+     * The task id.
+     * @var string|null
+     * @OA\Property(example="uuid")
+     */
+    public ?string $taskId;
+
+    /**
      * How many times the task was called by the participant.
      * @var int
      * @OA\Property()
@@ -53,6 +60,7 @@ class TaskParticipantStateData
     {
         $reader = new ArrayReader($data);
         $this->id = $reader->findString("id");
+        $this->taskId = $reader->findString("task_id");
         $this->count = $reader->findInt("count");
         $this->state = strtoupper($reader->findString("state"));
         $this->parameter = (object)json_decode($reader->findString("parameter"));
