@@ -47,6 +47,12 @@
               icon="download"
             ></font-awesome-icon>
           </span>
+          <span v-on:click="showDependencies = true">
+            <font-awesome-icon
+              class="awesome-icon"
+              icon="table"
+            ></font-awesome-icon>
+          </span>
           <el-dropdown>
             <span class="el-dropdown-link">
               <font-awesome-icon class="awesome-icon" icon="info-circle" />
@@ -244,6 +250,12 @@
     v-model:show-modal="showParticipants"
     :session-id="sessionId"
   />
+  <TopicDependencySettings
+    v-if="isModerator"
+    v-model:show-modal="showDependencies"
+    :session-id="sessionId"
+    :topic-id="topicId"
+  />
 </template>
 
 <script lang="ts">
@@ -293,6 +305,7 @@ import { reactivateTutorial } from '@/services/tutorial-service';
 import { ElMessageBox } from 'element-plus';
 import TaskStatistic from '@/components/moderator/organisms/statistics/TaskStatistic.vue';
 import ParticipantSettings from '@/components/moderator/organisms/settings/ParticipantSettings.vue';
+import TopicDependencySettings from '@/components/moderator/organisms/settings/TopicDependencySettings.vue';
 
 @Options({
   components: {
@@ -310,6 +323,7 @@ import ParticipantSettings from '@/components/moderator/organisms/settings/Parti
     TaskTimeline,
     SessionCode,
     FacilitatorSettings,
+    TopicDependencySettings,
     ModuleContentComponent: getEmptyComponent(),
     ModuleStatisticComponent: getEmptyComponent(),
   },
@@ -336,6 +350,7 @@ export default class ModeratorTopicDetails extends Vue {
   showRoles = false;
   showStatistic = false;
   showParticipants = false;
+  showDependencies = false;
   statisticComponentLoadIndex = 0;
 
   TaskType = TaskType;

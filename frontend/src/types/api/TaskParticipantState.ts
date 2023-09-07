@@ -6,6 +6,7 @@ import TaskType from '@/types/enum/TaskType';
 
 export interface TaskParticipantState {
   id: string;
+  taskId: string;
   count: number;
   state: TaskParticipantStatesType;
   parameter: any;

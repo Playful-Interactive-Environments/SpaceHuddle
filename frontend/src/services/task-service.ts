@@ -114,12 +114,11 @@ export const postTask = async (
 export const putTask = async (
   data: Partial<TaskForSaveAction>
 ): Promise<Task> => {
-  const result = await apiExecutePut<Task>(
+  return await apiExecutePut<Task>(
     `/${EndpointType.TASK}/`,
     data,
     EndpointAuthorisationType.MODERATOR
   );
-  return result;
 };
 
 export const clone = async (

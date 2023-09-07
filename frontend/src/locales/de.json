@@ -205,6 +205,9 @@
           "allowAnonymous": "Jedem Zugriff auf die Publikumsansicht erlauben",
           "publicScreen": "Anonymer Link zur Publikumsansicht"
         },
+        "topicDependencySettings": {
+          "header": "Aufgabenabhängigkeiten verwalten"
+        },
         "participantSettings": {
           "header": "Teilnehmer verwalten",
           "info": "Fügen Sie neue Teilnehmer hinzu oder löschen Sie nicht verwendete Teilnehmerschlüssel.",

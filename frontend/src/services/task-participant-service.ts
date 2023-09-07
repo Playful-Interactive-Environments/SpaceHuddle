@@ -79,18 +79,28 @@ export const registerGetPoints = (
     [],
     authHeaderType,
     maxDelaySeconds,
-    async (items: TaskParticipantState[]) => {
-      let points = 0;
-      for (const item of items) {
-        if (item.parameter.gameplayResult) {
-          const gameplayResult = item.parameter.gameplayResult;
-          points += gameplayResult.points;
-          if (gameplayResult.pointsSpent) points -= gameplayResult.pointsSpent;
-        }
-      }
-      return points;
-    }
+    async (items: TaskParticipantState[]) => calculatePoints(items),
+    null,
+    'points::'
   );
+};
+
+export const refreshPoints = (sessionId: string): void => {
+  cashService.refreshCash(
+    `points::/${EndpointType.SESSION}/${sessionId}/${EndpointType.PARTICIPANT_STATE}`
+  );
+};
+
+export const calculatePoints = (items: TaskParticipantState[]): number => {
+  let points = 0;
+  for (const item of items) {
+    if (item.parameter.gameplayResult) {
+      const gameplayResult = item.parameter.gameplayResult;
+      points += gameplayResult.points;
+      if (gameplayResult.pointsSpent) points -= gameplayResult.pointsSpent;
+    }
+  }
+  return points;
 };
 
 export const deregisterGetListFromTopic = (

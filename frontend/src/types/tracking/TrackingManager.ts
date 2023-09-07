@@ -9,7 +9,6 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import { Module } from '@/types/api/Module';
-import EndpointType from '@/types/enum/EndpointType';
 import { Task } from '@/types/api/Task';
 
 export interface GameplayResult {
@@ -249,9 +248,7 @@ export class TrackingManager {
         .putParticipantState(this.taskId, this.state)
         .then(() => {
           if (this.task) {
-            cashService.refreshCash(
-              `/${EndpointType.SESSION}/${this.task.sessionId}/${EndpointType.PARTICIPANT_STATE}`
-            );
+            taskParticipantService.refreshPoints(this.task.sessionId);
           }
         });
     }

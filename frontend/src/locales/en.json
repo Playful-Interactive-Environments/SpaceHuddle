@@ -205,6 +205,9 @@
           "allowAnonymous": "allow everyone to view public screen",
           "publicScreen": "Anonymous Public Link"
         },
+        "topicDependencySettings": {
+          "header": "manage task dependencies"
+        },
         "participantSettings": {
           "header": "manage participants",
           "info": "Add new participants or delete unused participant keys.",

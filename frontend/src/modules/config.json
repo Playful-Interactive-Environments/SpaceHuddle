@@ -92,7 +92,7 @@
            "moderatorConfig": "output/ModeratorConfig",  
            "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
-             "icon": "map-location",  "type": "main",  "input": "no",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"information\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  
+             "icon": "map-location",  "type": "main",  "input": "optional",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"information\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  
            "path": "information/missionmap"  
        },  
        "moveit": {  

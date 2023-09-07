@@ -197,7 +197,7 @@ export default class Sidebar extends Vue {
 }
 
 .el-page-header::v-deep(.el-page-header__left) {
-  margin-right: 20px;
+  margin-right: 0; // 20px;
 }
 
 .el-page-header::v-deep(.el-page-header__left)::after {

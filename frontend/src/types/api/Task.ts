@@ -4,6 +4,11 @@ import { Module } from '@/types/api/Module';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
+export interface Dependency {
+  start: number;
+  duration: number;
+}
+
 export interface Task {
   id: string;
   topicId: string;
@@ -22,6 +27,7 @@ export interface Task {
   syncPublicParticipant: boolean;
   modules: Module[];
   participantCount: number;
+  dependency: Dependency;
 }
 
 export interface TaskForSaveAction {
@@ -36,6 +42,7 @@ export interface TaskForSaveAction {
   state: TaskStates;
   remainingTime: number | null;
   modules: string[];
+  dependency: Dependency;
 }
 
 export interface TaskSettingsData {
@@ -56,6 +63,7 @@ export const convertToSaveVersion = (task: Task): TaskForSaveAction => {
     parameter: task.parameter,
     order: task.order,
     state: task.state,
+    dependency: task.dependency,
     remainingTime: task.remainingTime,
   } as TaskForSaveAction;
 };

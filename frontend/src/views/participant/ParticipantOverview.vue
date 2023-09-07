@@ -54,7 +54,15 @@
           :style="{
             '--module-color': getColor(task),
           }"
-          v-on:click="$router.push(`/participant-module-content/${task.id}`)"
+          :class="{
+            disabled: topicDependencyLimit[topic.id] < task.dependency.start,
+          }"
+          v-on:click="
+            () => {
+              if (topicDependencyLimit[topic.id] >= task.dependency.start)
+                $router.push(`/participant-module-content/${task.id}`);
+            }
+          "
         >
           <font-awesome-icon
             :icon="getIcon(task)"
@@ -125,6 +133,8 @@ import * as authService from '@/services/auth-service';
 import LanguageSettings from '@/components/moderator/organisms/settings/LanguageSettings.vue';
 import * as taskParticipantService from '@/services/task-participant-service';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { TaskParticipantState } from '@/types/api/TaskParticipantState';
+import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
 
 @Options({
   components: {
@@ -149,6 +159,8 @@ export default class ParticipantOverview extends Vue {
   avatar!: Avatar;
   showLanguageSettings = false;
   points = 0;
+  states: TaskParticipantState[] = [];
+  topicDependencyLimit: { [key: string]: number } = {};
 
   getColor(task: Task): string | undefined {
     if (task.taskType) {
@@ -220,7 +232,7 @@ export default class ParticipantOverview extends Vue {
   onSessionIdChanged(): void {
     cashService.deregisterAllGet(this.updateStates);
     if (this.sessionId) {
-      taskParticipantService.registerGetPoints(
+      taskParticipantService.registerGetListFromSession(
         this.sessionId,
         this.updateStates,
         EndpointAuthorisationType.PARTICIPANT,
@@ -229,8 +241,42 @@ export default class ParticipantOverview extends Vue {
     }
   }
 
-  updateStates(points: number): void {
-    this.points = points;
+  updateStates(states: TaskParticipantState[]): void {
+    this.points = taskParticipantService.calculatePoints(states);
+    this.states = states;
+    this.calculateDisabledList();
+  }
+
+  calculateDisabledList(): void {
+    for (const topic of this.topics) {
+      this.topicDependencyLimit[topic.id] = Number.MAX_VALUE;
+      if (topic.tasks) {
+        const tasks = topic.tasks.sort((a, b) => {
+          if (a.dependency.start === b.dependency.start)
+            return a.dependency.duration - b.dependency.duration;
+          return a.dependency.start - b.dependency.start;
+        });
+        for (const task of tasks) {
+          const start = task.dependency.start;
+          if (start > this.topicDependencyLimit[topic.id]) break;
+          const duration = task.dependency.duration;
+          const end = start + duration;
+          const state = this.states.find((item) => item.taskId === task.id);
+          if (!state) {
+            this.topicDependencyLimit[topic.id] = start;
+            break;
+          }
+          if (state.state !== TaskParticipantStatesType.FINISHED) {
+            if (duration === 1) {
+              this.topicDependencyLimit[topic.id] = start;
+              break;
+            } else {
+              this.topicDependencyLimit[topic.id] = end - 1;
+            }
+          }
+        }
+      }
+    }
   }
 
   refreshTopics(): void {
@@ -254,6 +300,7 @@ export default class ParticipantOverview extends Vue {
       topic.tasks = tasks;
       topic.tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
     }
+    this.calculateDisabledList();
   }
 
   get filteredTopics(): Topic[] {
@@ -383,5 +430,16 @@ export default class ParticipantOverview extends Vue {
     border-radius: 20rem;
     background-color: white;
   }
+}
+
+.disabled {
+  background-color: var(--color-gray-inactive-light);
+  cursor: not-allowed;
+}
+
+.disabled:last-child {
+  background-color: var(--color-gray-inactive-light);
+  border-radius: 0 0 1rem 1rem;
+  cursor: not-allowed;
 }
 </style>
