@@ -545,9 +545,15 @@ export default class Participant extends Vue {
   calculateScore(): void {
     let score = 0;
     for (let i = 0; i < this.voteResults.length; i++) {
-      if (
+      /*if (
         this.voteResults[i] &&
         this.hasQuestionAnCorrectAnswer(this.questions[i])
+      ) {
+        score++;
+      }*/
+      if (
+        this.voteResults[i] ||
+        !this.hasQuestionAnCorrectAnswer(this.questions[i])
       ) {
         score++;
       }
@@ -1047,12 +1053,15 @@ export default class Participant extends Vue {
 
   _setQuizQuestionCount(): void {
     switch (this.questionnaireType) {
-      case QuestionnaireType.QUIZ:
-        this.quizQuestionCount = this.questionCount;
-        break;
-      case QuestionnaireType.TALK:
+      /*case QuestionnaireType.TALK:
         this.quizQuestionCount = this.questions.filter(
-          (item) => item.parameter.hasAnswer
+          (item) => item.parameter.questionType !== QuestionType.INFO && item.parameter.hasAnswer
+        ).length;
+        break;*/
+      case QuestionnaireType.TALK:
+      case QuestionnaireType.QUIZ:
+        this.quizQuestionCount = this.questions.filter(
+          (item) => item.parameter.questionType !== QuestionType.INFO
         ).length;
         break;
       case QuestionnaireType.SURVEY:
