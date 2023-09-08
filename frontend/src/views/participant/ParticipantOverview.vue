@@ -539,6 +539,7 @@ table {
 .task-card {
   background-color: color-mix(in srgb, var(--module-color) 30%, transparent);
   height: 100%;
+  cursor: pointer;
 
   .media {
     border-top: unset;
@@ -556,6 +557,10 @@ table {
 
 .disabled {
   background-color: var(--color-gray-inactive-light);
+  cursor: not-allowed;
+}
+
+.disabled .link {
   cursor: not-allowed;
 }
 
