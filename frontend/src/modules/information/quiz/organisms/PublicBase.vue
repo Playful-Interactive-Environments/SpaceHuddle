@@ -822,7 +822,7 @@ export default class PublicBase extends Vue {
   object-fit: contain;
 }
 
-[module-theme='preparation'] {
+[module-theme='paper'] {
   .question {
     padding: 0.5rem;
     background: linear-gradient(

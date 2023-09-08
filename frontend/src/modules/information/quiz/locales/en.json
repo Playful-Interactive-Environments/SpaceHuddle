@@ -10,8 +10,9 @@
     "time": "time",
     "answerCountExample": "3",
     "theme": "theme",
-    "preparation": "preparation",
-    "interview": "press conference"
+    "paper": "paper",
+    "interview": "interview",
+    "default": "default"
   },
   "moderatorContent": {
     "questionType": "question type",

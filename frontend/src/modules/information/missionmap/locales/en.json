@@ -29,7 +29,8 @@
     "insertInitProgressionFromInput": "insert starting progression from input",
     "theme": "theme",
     "preparation": "preparation",
-    "meeting": "council meeting"
+    "meeting": "council meeting",
+    "default": "default"
   },
   "moderatorContent": {
     "settingsTitle": "idea settings",

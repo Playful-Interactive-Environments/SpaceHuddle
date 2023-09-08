@@ -106,7 +106,10 @@
     :prop="`${rulePropPath}.theme`"
   >
     <el-select v-model="modelValue.theme">
-      <el-option value="" label="-" />
+      <el-option
+        value=""
+        :label="$t('module.information.missionmap.moderatorConfig.default')"
+      />
       <el-option
         value="preparation"
         :label="$t('module.information.missionmap.moderatorConfig.preparation')"

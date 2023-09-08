@@ -29,7 +29,8 @@
     "insertInitProgressionFromInput": "Startprogression von der Eingabe einfügen",
     "theme": "Thema",
     "preparation": "Vorbereitung",
-    "meeting": "Sitzung"
+    "meeting": "Sitzung",
+    "default": "Standard"
   },
   "moderatorContent": {
     "settingsTitle": "Ideeneinstellungen",

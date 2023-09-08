@@ -10,8 +10,9 @@
     "time": "Zeit",
     "answerCountExample": "3",
     "theme": "Thema",
-    "preparation": "Vorbereitung",
-    "interview": "Pressekonferenz"
+    "paper": "Papier",
+    "interview": "Interview",
+    "default": "Standard"
   },
   "moderatorContent": {
     "questionType": "Fragetyp",

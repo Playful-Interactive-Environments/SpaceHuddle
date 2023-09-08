@@ -1454,8 +1454,8 @@ label {
   background-color: unset;
 }
 
-[module-theme='preparation'] {
-  background-image: url('@/modules/information/quiz/assets/preparation.jpg');
+[module-theme='paper'] {
+  background-image: url('@/modules/information/quiz/assets/wood.jpg');
   background-size: contain;
 
   .el-space .questionInfo {
@@ -1528,7 +1528,7 @@ label {
   }
 }
 
-[module-theme='preparation'].module-content::v-deep(.media) {
+[module-theme='paper'].module-content::v-deep(.media) {
   --module-color: var(--color-dark-contrast);
 }
 

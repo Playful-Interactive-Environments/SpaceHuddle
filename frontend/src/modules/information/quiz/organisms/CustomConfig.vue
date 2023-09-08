@@ -75,10 +75,13 @@
     :prop="`${rulePropPath}.theme`"
   >
     <el-select v-model="modelValue.theme">
-      <el-option value="" label="-" />
       <el-option
-        value="preparation"
-        :label="$t('module.information.quiz.moderatorConfig.preparation')"
+        value=""
+        :label="$t('module.information.quiz.moderatorConfig.default')"
+      />
+      <el-option
+        value="paper"
+        :label="$t('module.information.quiz.moderatorConfig.paper')"
       />
       <el-option
         value="interview"
