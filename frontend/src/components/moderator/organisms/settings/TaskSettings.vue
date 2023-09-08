@@ -1476,6 +1476,7 @@ export default class TaskSettings extends Vue {
           modules: this.moduleSelection.map((item) => item.moduleName),
           state: this.task?.state,
           order: this.task?.order,
+          dependency: this.task?.dependency,
         })
         .then(
           (task) => {
