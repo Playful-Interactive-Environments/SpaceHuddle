@@ -13,6 +13,7 @@ export interface Session {
   role: UserType;
   title: string;
   subject: string | null;
+  theme: string | null;
   topicCount: number;
   taskCount: number;
   allowAnonymous: boolean;

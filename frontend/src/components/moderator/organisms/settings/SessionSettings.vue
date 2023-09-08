@@ -95,6 +95,21 @@
         >
         </el-date-picker>
       </el-form-item>
+      <el-form-item
+        :label="$t('moderator.organism.settings.sessionSettings.theme')"
+        prop="theme"
+      >
+        <el-select v-model="formData.theme">
+          <el-option
+            value=""
+            :label="$t('moderator.organism.settings.sessionSettings.default')"
+          />
+          <el-option
+            value="calendar"
+            :label="$t('moderator.organism.settings.sessionSettings.calendar')"
+          />
+        </el-select>
+      </el-form-item>
       <template #footer>
         <FromSubmitItem
           :form-state-message="formData.stateMessage"
@@ -149,6 +164,7 @@ export default class SessionSettings extends Vue {
     title: '',
     description: '',
     subject: '',
+    theme: '',
     expirationDate: new Date(this.today.setMonth(this.today.getMonth() + 1)),
   };
 
@@ -187,12 +203,15 @@ export default class SessionSettings extends Vue {
     this.formData.description = session.description;
     this.subjectCash.refreshData();
     this.formData.subject = session.subject;
+    this.formData.theme = session.theme ?? '';
     this.formData.expirationDate = new Date(session.expirationDate);
   }
+
   updateSubjects(subjects: string[]): void {
     this.subjectList = subjects;
     this.removeNullEntries(this.subjectList);
   }
+
   removeNullEntries(subjectList: string[]): void {
     const tempList: string[] = [];
     subjectList.forEach((subject) => {
@@ -221,6 +240,7 @@ export default class SessionSettings extends Vue {
     this.formData.title = '';
     this.formData.description = '';
     this.formData.subject = null;
+    this.formData.theme = null;
     this.formData.expirationDate = new Date(
       this.today.setMonth(this.today.getMonth() + 1)
     );
@@ -251,6 +271,7 @@ export default class SessionSettings extends Vue {
           title: this.formData.title,
           description: this.formData.description,
           subject: this.formData.subject,
+          theme: this.formData.theme,
           expirationDate: this.isoExpirationDate,
         })
         .then(
@@ -287,6 +308,7 @@ export default class SessionSettings extends Vue {
           title: this.formData.title,
           description: this.formData.description,
           subject: this.formData.subject,
+          theme: this.formData.theme,
           expirationDate: this.isoExpirationDate,
         })
         .then(

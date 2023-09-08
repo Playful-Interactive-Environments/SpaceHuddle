@@ -271,6 +271,9 @@
           "topicsInfo": "Themen helfen dabei, eine klare Unterteilung zwischen Bereichen zu definieren, die getrennte Brainstorming-Module haben sollten. Tipp: Halte es einfach, ein oder zwei Themen sind normalerweise genug!",
           "firstTopic": "Thema 1",
           "topicExample": "z.B. Neuer App-Name",
+          "theme": "Thema",
+          "default": "Standard",
+          "calendar": "Kalender",
           "submit": "Sitzung speichern"
         },
         "topicSettings": {

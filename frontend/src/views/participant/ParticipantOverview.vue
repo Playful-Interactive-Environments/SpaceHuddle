@@ -47,8 +47,66 @@
             {{ topic.title }}
           </span>
         </template>
+        <el-scrollbar v-if="theme === 'calendar'">
+          <table>
+            <tr
+              v-for="(row, index) in tableTasks[topic.id]"
+              :key="index"
+              class="dependency-row"
+            >
+              <td
+                v-for="task in row"
+                :id="task.id"
+                :key="task.id"
+                :rowspan="task.dependency.duration"
+              >
+                <el-card
+                  class="task-card"
+                  :style="{
+                    '--module-color': getColor(task),
+                  }"
+                  :class="{
+                    disabled:
+                      topicDependencyLimit[topic.id] < task.dependency.start,
+                  }"
+                  v-on:click="
+                    () => {
+                      if (
+                        topicDependencyLimit[topic.id] >= task.dependency.start
+                      )
+                        $router.push(`/participant-module-content/${task.id}`);
+                    }
+                  "
+                >
+                  <div class="media link">
+                    <font-awesome-icon
+                      :icon="getIcon(task)"
+                      class="media-left"
+                      :style="{
+                        color: getColor(task),
+                      }"
+                    />
+                    <TaskInfo
+                      class="media-content"
+                      :taskId="task.id"
+                      :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+                    />
+                    <Timer
+                      v-if="task.remainingTime !== null"
+                      :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+                      class="media-right"
+                      :entity="task"
+                      v-on:timerEnds="refreshTask(task)"
+                    ></Timer>
+                  </div>
+                </el-card>
+              </td>
+            </tr>
+          </table>
+        </el-scrollbar>
         <div
-          class="media link"
+          v-else
+          class="default-theme media link"
           v-for="task in topic.tasks"
           :key="task.id"
           :style="{
@@ -154,6 +212,7 @@ export default class ParticipantOverview extends Vue {
   sessionName = '';
   sessionDescription = '';
   sessionId = '';
+  theme: string | null = '';
   openTabs: string[] = [];
   EndpointAuthorisationType = EndpointAuthorisationType;
   avatar!: Avatar;
@@ -161,6 +220,7 @@ export default class ParticipantOverview extends Vue {
   points = 0;
   states: TaskParticipantState[] = [];
   topicDependencyLimit: { [key: string]: number } = {};
+  tableTasks: { [key: string]: Task[][] } = {};
 
   getColor(task: Task): string | undefined {
     if (task.taskType) {
@@ -204,6 +264,7 @@ export default class ParticipantOverview extends Vue {
     this.sessionName = session.title;
     this.sessionDescription = session.description;
     this.sessionId = session.id;
+    this.theme = session.theme;
   }
 
   updateTopics(topics: Topic[]): void {
@@ -221,7 +282,7 @@ export default class ParticipantOverview extends Vue {
         topic.id,
         this.updateTasks,
         EndpointAuthorisationType.PARTICIPANT,
-        10
+        30
       );
     });
     this.topics = topics;
@@ -279,6 +340,32 @@ export default class ParticipantOverview extends Vue {
     }
   }
 
+  updateTableTasks(): void {
+    for (const topic of this.topics) {
+      this.tableTasks[topic.id] = [];
+      if (topic.tasks) {
+        const tasks = topic.tasks;
+        let maxRows = 0;
+        const tableTasks: Task[][] = [];
+        for (const task of tasks) {
+          (task.dependency as any).durationInvert = -task.dependency.duration;
+          const taskEnd = task.dependency.start + task.dependency.duration;
+          if (maxRows < taskEnd) maxRows = taskEnd;
+        }
+        for (let row = 0; row < maxRows; row++) {
+          tableTasks[row] = tasks
+            .filter((item) => item.dependency.start === row)
+            .sort((a, b) => {
+              if (a.dependency.start === b.dependency.start)
+                return b.dependency.duration - a.dependency.duration;
+              return b.dependency.start - a.dependency.start;
+            });
+        }
+        this.tableTasks[topic.id] = tableTasks;
+      }
+    }
+  }
+
   refreshTopics(): void {
     this.topicCash.refreshData();
   }
@@ -301,6 +388,7 @@ export default class ParticipantOverview extends Vue {
       topic.tasks.sort((a, b) => (a.order > b.order ? 1 : 0));
     }
     this.calculateDisabledList();
+    this.updateTableTasks();
   }
 
   get filteredTopics(): Topic[] {
@@ -432,14 +520,46 @@ export default class ParticipantOverview extends Vue {
   }
 }
 
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.dependency-row {
+  height: 3rem;
+  border-top: dashed var(--color-dark-contrast) 1px;
+
+  td {
+    height: inherit;
+    min-width: 12rem;
+    padding: 0.1rem;
+  }
+}
+
+.task-card {
+  background-color: color-mix(in srgb, var(--module-color) 30%, transparent);
+  height: 100%;
+
+  .media {
+    border-top: unset;
+  }
+
+  .media.link svg {
+    margin-left: 0.5rem;
+    margin-right: 0;
+  }
+}
+
+.task-card.el-card::v-deep(.el-card__body) {
+  padding: 0;
+}
+
 .disabled {
   background-color: var(--color-gray-inactive-light);
   cursor: not-allowed;
 }
 
-.disabled:last-child {
-  background-color: var(--color-gray-inactive-light);
+.default-theme.disabled:last-child {
   border-radius: 0 0 1rem 1rem;
-  cursor: not-allowed;
 }
 </style>

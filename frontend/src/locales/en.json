@@ -271,6 +271,9 @@
           "topicsInfo": "Topics help to make a clear distinction between subjects that should have separate brainstorming modules. Tip: Keep it simple - one or two topics are usually enough!",
           "firstTopic": "Topic 1",
           "topicExample": "e.g. New app Name",
+          "theme": "theme",
+          "default": "default",
+          "calendar": "calendar",
           "submit": "Save session"
         },
         "topicSettings": {
