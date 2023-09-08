@@ -135,7 +135,7 @@ $--font-size: (
 
         &__body {
                 padding: 10px var(--el-dialog-padding-primary);
-                max-height: calc(100vh - var(--el-dialog-margin-top) - 5rem);
+                max-height: calc(100vh - var(--el-dialog-margin-top) - 15rem);
                 overflow: auto;
                 max-width: 95vw;
         }
