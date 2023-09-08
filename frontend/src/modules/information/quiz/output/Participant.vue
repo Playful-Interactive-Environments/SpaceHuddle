@@ -1050,7 +1050,7 @@ export default class Participant extends Vue {
       case QuestionnaireType.QUIZ:
         this.quizQuestionCount = this.questionCount;
         break;
-      case QuestionnaireType.QUIZSURVEYMIX:
+      case QuestionnaireType.TALK:
         this.quizQuestionCount = this.questions.filter(
           (item) => item.parameter.hasAnswer
         ).length;

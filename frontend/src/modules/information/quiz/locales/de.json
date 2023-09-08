@@ -48,7 +48,7 @@
     "questionType": {
       "quiz": "quiz",
       "survey": "survey",
-      "quizSurveyMix": "quiz survey mix"
+      "talk": "talk"
     }
   }
 }

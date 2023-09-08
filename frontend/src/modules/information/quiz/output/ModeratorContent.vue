@@ -71,7 +71,7 @@
         v-on:submitDataValid="saveQuestion"
       >
         <el-form-item
-          v-if="moduleQuestionnaireType === QuestionnaireType.QUIZSURVEYMIX"
+          v-if="moduleQuestionnaireType === QuestionnaireType.TALK"
           :label="$t('module.information.quiz.moderatorContent.hasAnswer')"
           prop="hasAnswer"
         >
@@ -812,7 +812,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       cashService.deregisterAllGet(this.updateFinalResult);
       if (
         this.moduleQuestionnaireType === QuestionnaireType.QUIZ ||
-        this.moduleQuestionnaireType === QuestionnaireType.QUIZSURVEYMIX
+        this.moduleQuestionnaireType === QuestionnaireType.TALK
       ) {
         taskParticipantService.registerGetIterationStepFinalList(
           this.taskId,

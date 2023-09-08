@@ -10,6 +10,8 @@ import { until } from '@/utils/wait';
 
 const defaultModuleName = 'default';
 
+const hiddenModuleList = JSON.parse(process.env.VUE_APP_HIDDEN_MODULES);
+
 const isObject = (item) => {
   return item && typeof item === 'object' && !Array.isArray(item);
 };
@@ -379,7 +381,11 @@ export const getModulesForTaskType = async (
     const taskTypeName = TaskType[taskType.toUpperCase()];
     for (const moduleName in moduleConfig[taskTypeName]) {
       const moduleParameter = moduleConfig[taskTypeName][moduleName];
-      if (!Object.hasOwn(moduleParameter, 'usable') || moduleParameter.usable) {
+      const usable =
+        !Object.hasOwn(moduleParameter, 'usable') || moduleParameter.usable;
+      const searchName = `${taskType.toLowerCase()}:${moduleName}`;
+      const active = !hiddenModuleList.includes(searchName);
+      if (usable && active) {
         modules.push({
           taskType: taskType,
           moduleName: moduleName,

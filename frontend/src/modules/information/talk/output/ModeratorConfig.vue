@@ -6,7 +6,7 @@
     :taskId="taskId"
     :topicId="topicId"
     v-model="modelValue"
-    :limitQuestionType="QuestionType.QUIZSURVEYMIX"
+    :limitQuestionType="QuestionType.TALK"
     @update="$emit('update')"
   />
 </template>
