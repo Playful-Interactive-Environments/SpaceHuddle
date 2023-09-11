@@ -63,6 +63,7 @@ interface ModuleConfigItem {
   type?: string;
   input?: string;
   syncPublicParticipant?: boolean;
+  finishManuel?: boolean;
   path: string;
   parameter?: string;
 }

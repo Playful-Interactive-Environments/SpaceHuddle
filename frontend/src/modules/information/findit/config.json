@@ -3,5 +3,6 @@
   "type": "main",
   "input": "no",
   "syncPublicParticipant": false,
-  "usable": true
+  "usable": true,
+  "finishManuel": true
 }

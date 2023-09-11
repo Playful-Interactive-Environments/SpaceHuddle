@@ -7,5 +7,6 @@
   "inputFilterModules": "[\"missionmap\"]",
   "maxInputs": 1,
   "syncPublicParticipant": false,
-  "usable": true
+  "usable": true,
+  "finishManuel": true
 }

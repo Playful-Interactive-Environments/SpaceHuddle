@@ -3,5 +3,6 @@
   "iconPrefix": "fac",
   "type": "main",
   "input": "no",
-  "syncPublicParticipant": true
+  "syncPublicParticipant": true,
+  "finishManuel": false
 }

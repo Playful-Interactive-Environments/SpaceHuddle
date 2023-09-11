@@ -424,7 +424,11 @@
       "overview": {
         "publicScreen": "Public View",
         "disconnect": "Logout",
-        "avatar": "Your avatar"
+        "avatar": "Your avatar",
+        "finishTask": "check off task",
+        "finishQuestion": "Are you sure you want to finish the task?",
+        "yes": "yes",
+        "no": "no"
       }
     }
   },

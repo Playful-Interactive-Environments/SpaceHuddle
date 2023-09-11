@@ -424,7 +424,11 @@
       "overview": {
         "publicScreen": "Publikumsansicht",
         "disconnect": "Abmelden",
-        "avatar": "Dein Avatar"
+        "avatar": "Dein Avatar",
+        "finishTask": "Aufgabe abhacken",
+        "finishQuestion": "Sind sie sicher, dass sie die Aufgabe abschließen wollen?",
+        "yes": "ja",
+        "no": "nein"
       }
     }
   },

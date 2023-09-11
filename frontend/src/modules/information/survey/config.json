@@ -4,5 +4,6 @@
   "type": "main",
   "input": "no",
   "syncPublicParticipant": false,
-  "fallback": "quiz"
+  "fallback": "quiz",
+  "finishManuel": false
 }

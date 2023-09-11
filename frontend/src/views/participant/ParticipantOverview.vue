@@ -53,12 +53,18 @@
               v-for="(row, index) in tableTasks[topic.id]"
               :key="index"
               class="dependency-row"
+              :style="{
+                display: rowVisible(topic.id, index) ? 'table-row' : 'none',
+              }"
             >
               <td
                 v-for="task in row"
                 :id="task.id"
                 :key="task.id"
                 :rowspan="task.dependency.duration"
+                :style="{
+                  display: taskIsVisible(task) ? 'table-cell' : 'none',
+                }"
               >
                 <el-card
                   class="task-card"
@@ -91,10 +97,23 @@
                       :taskId="task.id"
                       :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
                     />
+                    <el-dropdown
+                      v-if="hasFinishCheckMark(task)"
+                      class="media-right"
+                    >
+                      <font-awesome-icon :icon="['far', 'circle-check']" />
+                      <template #dropdown>
+                        <el-dropdown-menu>
+                          <el-dropdown-item v-on:click="finishTask(task)">
+                            {{ $t('participant.view.overview.finishTask') }}
+                          </el-dropdown-item>
+                        </el-dropdown-menu>
+                      </template>
+                    </el-dropdown>
                     <Timer
                       v-if="task.remainingTime !== null"
                       :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
-                      class="media-right"
+                      class="media-right timer"
                       :entity="task"
                       v-on:timerEnds="refreshTask(task)"
                     ></Timer>
@@ -111,6 +130,7 @@
           :key="task.id"
           :style="{
             '--module-color': getColor(task),
+            display: taskIsVisible(task) ? 'flex' : 'none',
           }"
           :class="{
             disabled: topicDependencyLimit[topic.id] < task.dependency.start,
@@ -134,10 +154,20 @@
             :taskId="task.id"
             :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
           />
+          <el-dropdown v-if="hasFinishCheckMark(task)" class="media-right">
+            <font-awesome-icon :icon="['far', 'circle-check']" />
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item v-on:click="finishTask(task)">
+                  {{ $t('participant.view.overview.finishTask') }}
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
           <Timer
             v-if="task.remainingTime !== null"
             :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
-            class="media-right"
+            class="media-right timer"
             :entity="task"
             v-on:timerEnds="refreshTask(task)"
           ></Timer>
@@ -193,6 +223,8 @@ import * as taskParticipantService from '@/services/task-participant-service';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { TaskParticipantState } from '@/types/api/TaskParticipantState';
 import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
+import { ElMessageBox } from 'element-plus';
+import { getModuleConfig } from '@/modules';
 
 @Options({
   components: {
@@ -221,6 +253,15 @@ export default class ParticipantOverview extends Vue {
   states: TaskParticipantState[] = [];
   topicDependencyLimit: { [key: string]: number } = {};
   tableTasks: { [key: string]: Task[][] } = {};
+  finishManuel: { [key: string]: boolean } = {};
+
+  hasFinishCheckMark(task: Task): boolean {
+    if (this.finishManuel[task.id]) {
+      const state = this.states.find((item) => item.taskId === task.id);
+      if (state) return true;
+    }
+    return false;
+  }
 
   getColor(task: Task): string | undefined {
     if (task.taskType) {
@@ -232,6 +273,21 @@ export default class ParticipantOverview extends Vue {
     if (task.taskType) {
       return getIconOfType(TaskType[task.taskType.toUpperCase()]);
     }
+  }
+
+  taskIsVisible(task: Task): boolean {
+    const state = this.states.find((item) => item.taskId === task.id);
+    return !(state && state.state === TaskParticipantStatesType.FINISHED);
+  }
+
+  rowVisible(topicId: string, index: number): boolean {
+    for (let i = 0; i <= index; i++) {
+      const rowTasks = this.tableTasks[topicId][i].filter((task) =>
+        this.taskIsVisible(task)
+      );
+      if (rowTasks.length > 0) return true;
+    }
+    return false;
   }
 
   topicCash!: cashService.SimplifiedCashEntry<Topic[]>;
@@ -389,10 +445,48 @@ export default class ParticipantOverview extends Vue {
     }
     this.calculateDisabledList();
     this.updateTableTasks();
+    this.updateModuleConfig(tasks);
+  }
+
+  async updateModuleConfig(tasks: Task[]): Promise<void> {
+    for (const task of tasks) {
+      this.finishManuel[task.id] = true;
+      for (const module of task.modules) {
+        const configValue = await getModuleConfig(
+          'finishManuel',
+          task.taskType.toLowerCase(),
+          module.name
+        );
+        if (configValue === false) {
+          this.finishManuel[task.id] = false;
+          break;
+        }
+      }
+    }
   }
 
   get filteredTopics(): Topic[] {
     return this.topics.filter((topic) => topic.tasks && topic.tasks.length > 0);
+  }
+
+  finishTask(task: Task): void {
+    ElMessageBox.confirm(
+      (this as any).$t('participant.view.overview.finishQuestion'),
+      (this as any).$t('participant.view.overview.finishTask'),
+      {
+        confirmButtonText: (this as any).$t('participant.view.overview.yes'),
+        cancelButtonText: (this as any).$t('participant.view.overview.no'),
+        type: 'warning',
+      }
+    ).then(() => {
+      const state = this.states.find((item) => item.taskId === task.id);
+      if (state) {
+        state.state = TaskParticipantStatesType.FINISHED;
+        taskParticipantService.putParticipantState(task.id, state).then(() => {
+          this.calculateDisabledList();
+        });
+      }
+    });
   }
 }
 </script>
@@ -430,6 +524,12 @@ export default class ParticipantOverview extends Vue {
   }
 
   &-right {
+    margin-top: 1rem;
+    margin-right: 0.5rem;
+    margin-left: 0;
+  }
+
+  &-right.timer {
     background-color: var(--module-color);
     margin: 1rem;
   }
@@ -548,6 +648,11 @@ table {
   .media.link svg {
     margin-left: 0.5rem;
     margin-right: 0;
+  }
+
+  .media.link .media-right svg {
+    margin-left: 0;
+    width: unset;
   }
 }
 

@@ -2,5 +2,6 @@
   "icon": "rocket",
   "type": "main",
   "input": "no",
-  "syncPublicParticipant": false
+  "syncPublicParticipant": false,
+  "finishManuel": true
 }

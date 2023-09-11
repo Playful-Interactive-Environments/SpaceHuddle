@@ -6,5 +6,6 @@
   "inputFilterCategories": "[\"information\"]",
   "inputFilterModules": "[\"missionmap\"]",
   "maxInputs": 1,
-  "syncPublicParticipant": false
+  "syncPublicParticipant": false,
+  "finishManuel": true
 }

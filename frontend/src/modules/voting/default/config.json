@@ -2,5 +2,6 @@
   "icon": "star",
   "type": "main",
   "input": "yes",
-  "syncPublicParticipant": false
+  "syncPublicParticipant": false,
+  "finishManuel": false
 }
