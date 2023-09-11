@@ -4,9 +4,9 @@
     ref="ideaCard"
     shadow="never"
     v-on:click="changeSelection"
-    class="card"
     :class="{
       landscape: !portrait,
+      card: !portrait,
       card__selected: isSelected,
       card__new: isNew,
       card__handled: isHandled,
