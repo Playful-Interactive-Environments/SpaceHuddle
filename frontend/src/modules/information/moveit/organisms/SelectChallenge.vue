@@ -291,12 +291,13 @@ export default class SelectChallenge extends Vue {
   }
 
   getStarsForVehicle(vehicle: vehicleCalculation.Vehicle): number {
-    const vehicleSteps = this.trackingManager.stepList.filter((item) =>
-      vehicleCalculation.isSameVehicle(item.parameter.vehicle, vehicle)
-    );
+    const vehicleSteps = this.trackingManager.stepList
+      .filter((item) =>
+        vehicleCalculation.isSameVehicle(item.parameter.vehicle, vehicle)
+      )
+      .sort((a, b) => b.parameter.rate - a.parameter.rate);
     if (vehicleSteps.length > 0) {
-      return vehicleSteps.sort((a, b) => b.parameter.rate - a.parameter.rate)[0]
-        .parameter.rate;
+      return vehicleSteps[0].parameter.rate;
     }
     return 0;
   }

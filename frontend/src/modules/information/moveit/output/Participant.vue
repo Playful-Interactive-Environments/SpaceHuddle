@@ -6,7 +6,7 @@
       image-directory="/assets/games/moveit/tutorial"
       :module-info-entry-data-list="tutorialList"
       @infoRead="gameState = GameState.Game"
-      :info-type="`clean-up-${gameStep}`"
+      :info-type="`move-it-${gameStep}`"
       :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
     />
     <select-challenge

@@ -1116,6 +1116,7 @@ export default class DriveToLocation extends Vue {
     this.addAnimationSteps(newDrivingPoint, subPath);
     this.setMapDrivingPoint(newDrivingPoint);
     if (this.goalReached()) {
+      if (this.trackingManager) this.trackingManager.saveIterationStep();
       this.$emit('goalReached', this.trackingData);
       clearInterval(this.intervalCalculation);
       clearInterval(this.busStopInterval);
@@ -1282,7 +1283,7 @@ export default class DriveToLocation extends Vue {
           turf.length(this.drivenPath);
         this.trackingManager.iterationStep.parameter.drive.drivenPath =
           this.drivenPath;
-        this.trackingManager.saveIterationStep();
+        //this.trackingManager.saveIterationStep();
       }
     }
     this.updateTraceIsRunning = false;

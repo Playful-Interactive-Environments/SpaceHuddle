@@ -173,6 +173,7 @@
               @render="drawCircle"
             >
               <CustomSprite
+                v-if="spritesheet"
                 :texture="spritesheet.textures[particle.name]"
                 :anchor="0.5"
                 :tint="particle.color"
