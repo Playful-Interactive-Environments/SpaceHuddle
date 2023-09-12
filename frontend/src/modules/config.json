@@ -10,7 +10,7 @@
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
-             "icon": "comment-alt",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
+             "icon": "comment-alt",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "finishManuel": true,  
            "path": "brainstorming/chat"  
        },  
        "default": {  
@@ -18,7 +18,7 @@
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "locales": "de,en,",  
-             "icon": "rocket",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
+             "icon": "rocket",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "finishManuel": true,  
            "path": "brainstorming/default"  
        },  
        "gallery": {  
@@ -39,7 +39,7 @@
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
-             "icon": "map-location-dot",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
+             "icon": "map-location-dot",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "finishManuel": true,  
            "path": "brainstorming/map"  
        },  
        "settings": {  
@@ -52,7 +52,7 @@
            "publicScreen": "output/PublicScreen",  
            "moderatorContent": "output/ModeratorContent",  
            "locales": "de,en,",  
-             "icon": "object-group",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  
+             "icon": "object-group",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  "finishManuel": true,  
            "path": "categorisation/default"  
        },  
        "settings": {  
@@ -64,7 +64,7 @@
        "coolit": {  
            "participant": "output/Participant",  
            "locales": "de,en,",  
-             "icon": "smog",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": false,  
+             "icon": "smog",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": false,  "finishManuel": true,  
            "path": "information/coolit"  
        },  
        "default": {  
@@ -72,7 +72,7 @@
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "locales": "de,en,",  
-             "icon": "info",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
+             "icon": "info",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "finishManuel": true,  
            "path": "information/default"  
        },  
        "findit": {  
@@ -82,7 +82,7 @@
            "moderatorConfig": "output/ModeratorConfig",  
            "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
-             "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  
+             "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
            "path": "information/findit"  
        },  
        "missionmap": {  
@@ -92,7 +92,7 @@
            "moderatorConfig": "output/ModeratorConfig",  
            "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
-             "icon": "map-location",  "type": "main",  "input": "optional",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"information\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  
+             "icon": "map-location",  "type": "main",  "input": "optional",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"information\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  "finishManuel": true,  
            "path": "information/missionmap"  
        },  
        "moveit": {  
@@ -102,7 +102,7 @@
            "moderatorConfig": "output/ModeratorConfig",  
            "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
-             "icon": "route",  "type": "main",  "input": "optional",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"information\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  "usable": true,  
+             "icon": "route",  "type": "main",  "input": "optional",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"information\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
            "path": "information/moveit"  
        },  
        "quiz": {  
@@ -111,20 +111,20 @@
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
-             "icon": "questions-check",  "iconPrefix": "fac",  "type": "main",  "input": "no",  "syncPublicParticipant": true,  
+             "icon": "questions-check",  "iconPrefix": "fac",  "type": "main",  "input": "no",  "syncPublicParticipant": true,  "finishManuel": false,  
            "path": "information/quiz"  
-       },  
-       "talk": {
-           "moderatorConfig": "output/ModeratorConfig",  
-           "locales": "de,en,",  
-             "icon": "comments",  "iconPrefix": "fas",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "fallback": "quiz",  
-           "path": "information/talk"
        },  
        "survey": {  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
-             "icon": "questions",  "iconPrefix": "fac",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "fallback": "quiz",  
+             "icon": "questions",  "iconPrefix": "fac",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "fallback": "quiz",  "finishManuel": false,  
            "path": "information/survey"  
+       },  
+       "talk": {  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "de,en,",  
+             "icon": "comments",  "iconPrefix": "fas",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "fallback": "quiz",  "finishManuel": false,  
+           "path": "information/talk"  
        },  
        "settings": {  
            "parameter": "TaskParameter",  
@@ -138,7 +138,7 @@
            "moderatorConfig": "output/ModeratorConfig",  
            "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
-             "icon": "times",  "iconPrefix": "fas",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  
+             "icon": "times",  "iconPrefix": "fas",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "finishManuel": true,  
            "path": "none",  
        "settings": {  
            "parameter": "TaskParameter",  
@@ -150,7 +150,7 @@
            "publicScreen": "output/PublicScreen",  
            "moderatorContent": "output/ModeratorContent",  
            "locales": "de,en,",  
-             "icon": "check",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  
+             "icon": "check",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  "finishManuel": true,  
            "path": "selection/default"  
        },  
        "settings": {  
@@ -165,14 +165,14 @@
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
-             "icon": "star",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  
+             "icon": "star",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  "finishManuel": false,  
            "path": "voting/default"  
        },  
        "slots": {  
            "participant": "output/Participant",  
            "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
-             "icon": "list",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  
+             "icon": "list",  "type": "main",  "input": "yes",  "syncPublicParticipant": false,  "finishManuel": true,  
            "path": "voting/slots"  
        },  
        "settings": {  

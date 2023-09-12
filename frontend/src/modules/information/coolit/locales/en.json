@@ -2,5 +2,16 @@
   "description": {
     "title": "Cool It",
     "description": "A game about the greenhouse effect."
+  },
+  "moderatorConfig": {
+    "mapSection": "map section",
+    "replayable": "replayable",
+    "showTutorialOnlyOnce": "show tutorial only once"
+  },
+  "participant": {
+    "tutorial": {
+      "select": "The respiratory sphere is composed of the gases nitrogen, oxygen, argon and carbon dioxide. Light rays can pass through these gases unhindered. When a light ray hits the earth, it is absorbed by the surface and released as thermal radiation. Heat radiation is absorbed by the greenhouse gases and thus warms the atmosphere. Without these gases it would be very cold on Earth. The average temperature would be -18°C. Although the atmosphere consists of only 0.04% greenhouse gases, this is enough to warm the earth to a temperature that is comfortable for us. However, the more greenhouse gases, the warmer it gets. Gases and rays are colourless and very very small. So that you can see them, we have coloured them and enlarged them. ",
+      "play": "Move the greenhouse gases out of the way to let the excess heat escape from the earth and keep it comfortable."
+    }
   }
 }

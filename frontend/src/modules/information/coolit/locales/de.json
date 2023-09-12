@@ -2,5 +2,16 @@
   "description": {
     "title": "Cool It",
     "description": "Ein Spiel über den Treibhauseffekt."
+  },
+  "moderatorConfig": {
+    "mapSection": "Kartenabschnitt",
+    "replayable": "mehrfach spielbar",
+    "showTutorialOnlyOnce": "Tutorial nur beim ersten mal zeigen"
+  },
+  "participant": {
+    "tutorial": {
+      "select": "Die Atmosphäre setzt sich aus den Gasen Stickstoff, Sauerstoff, Argon und Kohlenstoffdioxid zusammen. Lichtstrahlen können diese Gase ungehindert durchdringen. Trifft ein Lichtstahl auf die Erde wird er von der Oberfläche absorbiert und als Wärmestrahlung freigesetzt. Wärmestrahlung wird von den Treibhausgasen aufgenommen und erwärmt dadurch die Atmosphäre. Ohne diese Gase wäre es auf der Erde sehr kalt. Die Durchschnittstemperatur würde bei -18°C liegen. Obwohl die Atmosphäre aus nur 0,04% Treibhausgasen beseht reicht das aus um die Erde auf eine für uns angenehme Temperatur zu erwärmen. Allerdings je mehr Treibhausgase desto wärmer wird es. Gase und Strahlen sind farblos und sehr sehr klein. Damit du sie sehen kannst haben wir sie eingefärbt und stark vergrößert.",
+      "play": "Schiebe die Treibhausgase aus dem Weg um die überschüssige Wärme von der Erde entweichen zu lassen und es so auf der Erde angenehm zu halten."
+    }
   }
 }
