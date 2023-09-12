@@ -4,6 +4,7 @@
     ref="ideaCard"
     shadow="never"
     v-on:click="changeSelection"
+    class="idea-card"
     :class="{
       landscape: !portrait,
       card: !portrait,
@@ -372,11 +373,13 @@ export default class IdeaCard extends Vue {
   cursor: grab;
 }
 
-.card {
+.idea-card {
   --card-color: var(--el-card-border-color);
   border-color: var(--card-color);
   background-color: var(--background-color);
+}
 
+.card {
   &__new {
     --card-color: var(--el-card-border-color);
     border-color: var(--card-color);

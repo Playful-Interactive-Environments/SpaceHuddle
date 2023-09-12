@@ -1,11 +1,7 @@
 <template>
   <el-container ref="container">
-    <el-header>
-      <MissionProgress
-        v-if="showProgress"
-        :progress="progress"
-        :progress-tabs="['origin', 'progress']"
-      />
+    <el-header height="150px">
+      <MissionProgressChart v-if="showProgress" :task-id="taskId" />
     </el-header>
     <el-container>
       <el-aside width="70vw" class="mapSpace">
@@ -89,7 +85,7 @@ import gameConfig from '@/modules/information/missionmap/data/gameConfig.json';
 import { setHash } from '@/utils/url';
 import * as themeColors from '@/utils/themeColors';
 import { VoteParameterResult } from '@/types/api/Vote';
-import MissionProgress from '@/modules/information/missionmap/organisms/MissionProgress.vue';
+import MissionProgressChart from '@/modules/information/missionmap/organisms/MissionProgressChart.vue';
 import * as progress from '@/modules/information/missionmap/utils/progress';
 import { CombinedInputManager } from '@/types/input/CombinedInputManager';
 
@@ -102,7 +98,7 @@ import { CombinedInputManager } from '@/types/input/CombinedInputManager';
   components: {
     IdeaMap,
     IdeaCard,
-    MissionProgress,
+    MissionProgressChart,
   },
 })
 

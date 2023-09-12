@@ -56,7 +56,9 @@ import CleanUpParticles, {
 } from '@/modules/information/moveit/organisms/CleanUpParticles.vue';
 import SelectChallenge from '@/modules/information/moveit/organisms/SelectChallenge.vue';
 import ShowResult from '@/modules/information/moveit/organisms/ShowResult.vue';
-import ModuleInfo, { ModuleInfoEntryData } from '@/components/participant/molecules/ModuleInfo.vue';
+import ModuleInfo, {
+  ModuleInfoEntryData,
+} from '@/components/participant/molecules/ModuleInfo.vue';
 import * as formulas from '@/modules/information/moveit/utils/formulas';
 import * as configCalculation from '@/modules/information/moveit/utils/configCalculation';
 import { TrackingManager } from '@/types/tracking/TrackingManager';

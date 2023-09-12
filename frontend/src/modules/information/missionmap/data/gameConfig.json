@@ -2,15 +2,18 @@
   "parameter": {
     "eco": {
       "color": "#7bc168",
-      "icon": "leaf"
+      "icon": "leaf",
+      "iconCode": "\uf06c"
     },
     "social": {
       "color": "#63c3cb",
-      "icon": "heart"
+      "icon": "heart",
+      "iconCode": "\uf004"
     },
     "business": {
       "color": "#c55e44",
-      "icon": "sack-dollar"
+      "icon": "sack-dollar",
+      "iconCode": "\uf81d"
     }
   }
 }

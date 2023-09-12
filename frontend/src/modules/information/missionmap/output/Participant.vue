@@ -5,86 +5,108 @@
     :module-theme="theme"
     :use-scroll-content="true"
   >
-    <template #headerOverlay>
-      <div class="header-overlay-right columns is-mobile">
-        <div class="column" @click="showSort = true">
-          <font-awesome-icon icon="sort" />
-        </div>
-        <div class="column" @click="editNewImage">
-          <font-awesome-icon icon="circle-plus" />
-        </div>
-        <div class="column" @click="showProgress = true">
-          <font-awesome-icon icon="bars-progress" />
-        </div>
-        <div class="column" @click="finished">
-          <font-awesome-icon icon="file-circle-check" />
-        </div>
-      </div>
-    </template>
-    <template #footer>
-      <div>
-        <IdeaMap
-          style="height: 30vh"
-          v-if="module"
-          :ideas="ideas"
-          v-model:selected-idea="selectedIdea"
-          :parameter="module?.parameter"
-          :canChangePosition="
-            (idea) => idea.isOwn && inputManager.isCurrentIdea(idea.id)
+    <template v-slot:headerAfterInfo>
+      <el-tabs v-model="activeTab">
+        <el-tab-pane
+          name="measures"
+          :label="$t('module.information.missionmap.participant.tabs.measures')"
+        >
+        </el-tab-pane>
+        <el-tab-pane
+          name="statistic"
+          :label="
+            $t('module.information.missionmap.participant.tabs.statistic')
           "
-          :highlightCondition="(idea) => idea.isOwn"
-          v-on:visibleIdeasChanged="visibleIdeasChanged"
-          v-on:selectionColorChanged="selectionColor = $event"
-          v-on:ideaPositionChanged="saveIdea"
         >
-        </IdeaMap>
-      </div>
+        </el-tab-pane>
+        <el-tab-pane
+          name="map"
+          :label="$t('module.information.missionmap.participant.tabs.map')"
+        >
+        </el-tab-pane>
+      </el-tabs>
     </template>
-    <IdeaCard
-      v-for="idea of visibleIdeas"
-      :key="idea.id"
-      class="ideaCard"
-      :idea="idea"
-      :is-selectable="true"
-      :isSelected="idea.id === selectedIdea?.id"
-      :selectionColor="selectionColor"
-      :is-editable="idea.isOwn && inputManager.isCurrentIdea(idea.id)"
-      :show-state="false"
-      :canChangeState="false"
-      :handleEditable="false"
-      :portrait="false"
-      :background-color="getIdeaColor(idea)"
-      :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
-      v-on:click="ideaClicked(idea)"
-      @ideaDeleted="refreshIdeas"
-      @ideaStartEdit="editIdea(idea)"
+    <IdeaMap
+      v-if="module && activeTab === 'map'"
+      :ideas="ideas"
+      v-model:selected-idea="selectedIdea"
+      :parameter="module?.parameter"
+      :canChangePosition="
+        (idea) => idea.isOwn && inputManager.isCurrentIdea(idea.id)
+      "
+      :highlightCondition="(idea) => idea.isOwn"
+      v-on:visibleIdeasChanged="visibleIdeasChanged"
+      v-on:selectionColorChanged="selectionColor = $event"
+      v-on:ideaPositionChanged="saveIdea"
     >
-      <div class="columns is-mobile" v-if="idea.parameter.shareData">
-        <div class="column">
-          <font-awesome-icon icon="coins" />
-          {{ idea.parameter.points }}
-        </div>
-        <div class="column" @click="() => (showDetails = true)">
-          <font-awesome-icon icon="person-booth" />
-          {{ getVoteResultForIdea(idea.id)?.sum }}
-        </div>
-      </div>
-      <div
-        v-if="getInfluenceAreasForIdea(idea).length > 0"
-        class="columns is-mobile"
-      >
-        <div
-          class="column"
-          v-for="parameter of getInfluenceAreasForIdea(idea)"
-          :key="parameter"
-          :style="{
-            color: gameConfig.parameter[parameter].color,
-          }"
+    </IdeaMap>
+    <div v-else-if="module && activeTab === 'statistic'" class="statistic">
+      <MissionProgressChart
+        :task-id="taskId"
+        :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+      />
+    </div>
+    <draggable
+      v-else-if="module && activeTab === 'measures'"
+      v-model="orderedIdeas"
+      item-key="id"
+      @end="dragDone"
+      class="measureList"
+    >
+      <template v-slot:item="{ element }">
+        <IdeaCard
+          :idea="element"
+          :isDraggable="true"
+          :portrait="false"
+          class="ideaCard"
+          :is-selectable="true"
+          :isSelected="element.id === selectedIdea?.id"
+          :selectionColor="selectionColor"
+          :is-editable="element.isOwn && inputManager.isCurrentIdea(element.id)"
+          :show-state="false"
+          :canChangeState="false"
+          :handleEditable="false"
+          :background-color="getIdeaColor(element)"
+          :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
+          v-on:click="ideaClicked(element)"
+          @ideaDeleted="refreshIdeas"
+          @ideaStartEdit="editIdea(element)"
         >
-          <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
-        </div>
-      </div>
-    </IdeaCard>
+          <div class="columns is-mobile" v-if="element.parameter.shareData">
+            <div class="column">
+              <font-awesome-icon icon="coins" />
+              {{ element.parameter.points }}
+            </div>
+            <div class="column" @click="() => (showDetails = true)">
+              <font-awesome-icon icon="person-booth" />
+              {{ getVoteResultForIdea(element.id)?.sum }}
+            </div>
+          </div>
+          <div
+            v-if="getInfluenceAreasForIdea(element).length > 0"
+            class="columns is-mobile"
+          >
+            <div
+              class="column"
+              v-for="parameter of getInfluenceAreasForIdea(element)"
+              :key="parameter"
+              :style="{
+                color: gameConfig.parameter[parameter].color,
+              }"
+            >
+              <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
+            </div>
+          </div>
+        </IdeaCard>
+      </template>
+      <template v-slot:footer>
+        <AddItem
+          :text="$t('module.information.missionmap.participant.add')"
+          :is-column="true"
+          @addNew="editNewImage"
+        />
+      </template>
+    </draggable>
   </ParticipantModuleDefaultContainer>
   <ValidationForm
     :form-data="selectedVote"
@@ -185,34 +207,6 @@
       :disabled="minSpentPoints === maxSpentPoints"
     />
   </el-dialog>
-  <el-dialog v-model="showSort">
-    <div>
-      <draggable v-model="orderedIdeas" item-key="id" @end="dragDone">
-        <template v-slot:item="{ element }">
-          <IdeaCard
-            :idea="element"
-            :isDraggable="true"
-            :portrait="false"
-            :is-editable="false"
-          >
-            <el-rate
-              v-if="getCurrentVoteForIdea(element.id)"
-              v-model="getCurrentVoteForIdea(element.id).rating"
-              disabled
-              :max="3"
-            ></el-rate>
-          </IdeaCard>
-        </template>
-      </draggable>
-    </div>
-  </el-dialog>
-  <el-dialog v-model="showProgress">
-    <MissionProgress
-      v-if="module"
-      :progress="progress"
-      :progress-tabs="['origin', 'general', 'own', 'ownFuture']"
-    />
-  </el-dialog>
 
   <IdeaSettings
     v-model:show-modal="showIdeaSettings"
@@ -222,6 +216,58 @@
     :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
     @updateData="addData"
   />
+  <el-dialog
+    v-if="activeTab === 'map'"
+    v-model="showSelectedIdea"
+    :with-header="false"
+    :show-close="false"
+    class="idea-card-overlay"
+  >
+    <IdeaCard
+      class="ideaCard"
+      :idea="selectedIdea"
+      :is-selectable="true"
+      :selectionColor="selectionColor"
+      :is-editable="
+        selectedIdea.isOwn && inputManager.isCurrentIdea(selectedIdea.id)
+      "
+      :show-state="false"
+      :canChangeState="false"
+      :handleEditable="false"
+      :portrait="false"
+      :background-color="getIdeaColor(selectedIdea)"
+      :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
+      v-on:click="ideaClicked(selectedIdea)"
+      @ideaDeleted="refreshIdeas"
+      @ideaStartEdit="editIdea(selectedIdea)"
+    >
+      <div class="columns is-mobile" v-if="selectedIdea.parameter.shareData">
+        <div class="column">
+          <font-awesome-icon icon="coins" />
+          {{ selectedIdea.parameter.points }}
+        </div>
+        <div class="column" @click="() => (showDetails = true)">
+          <font-awesome-icon icon="person-booth" />
+          {{ getVoteResultForIdea(selectedIdea.id)?.sum }}
+        </div>
+      </div>
+      <div
+        v-if="getInfluenceAreasForIdea(selectedIdea).length > 0"
+        class="columns is-mobile"
+      >
+        <div
+          class="column"
+          v-for="parameter of getInfluenceAreasForIdea(selectedIdea)"
+          :key="parameter"
+          :style="{
+            color: gameConfig.parameter[parameter].color,
+          }"
+        >
+          <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
+        </div>
+      </div>
+    </IdeaCard>
+  </el-dialog>
 </template>
 
 <script lang="ts">
@@ -250,13 +296,13 @@ import { TrackingManager } from '@/types/tracking/TrackingManager';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import draggable from 'vuedraggable';
-import { setHash } from '@/utils/url';
 import * as themeColors from '@/utils/themeColors';
 import { setEmptyParameterIfNotExists } from '@/modules/information/missionmap/utils/parameter';
 import { ElMessageBox } from 'element-plus';
-import MissionProgress from '@/modules/information/missionmap/organisms/MissionProgress.vue';
+import MissionProgressChart from '@/modules/information/missionmap/organisms/MissionProgressChart.vue';
 import * as progress from '@/modules/information/missionmap/utils/progress';
 import { CombinedInputManager } from '@/types/input/CombinedInputManager';
+import AddItem from '@/components/moderator/atoms/AddItem.vue';
 
 interface ProgressValues {
   origin: number;
@@ -272,7 +318,7 @@ interface ProgressValues {
     },
   },
   components: {
-    MissionProgress,
+    MissionProgressChart,
     FontAwesomeIcon,
     ValidationForm,
     IdeaMap,
@@ -280,6 +326,7 @@ interface ProgressValues {
     IdeaSettings,
     ParticipantModuleDefaultContainer,
     draggable,
+    AddItem,
   },
 })
 
@@ -295,6 +342,7 @@ export default class Participant extends Vue {
   ideas: Idea[] = [];
   EndpointAuthorisationType = EndpointAuthorisationType;
   selectedIdea: Idea | null = null;
+  showSelectedIdea = false;
   selectionColor = '#0192d0';
   visibleIdeas: Idea[] = [];
   votes: Vote[] = [];
@@ -304,7 +352,6 @@ export default class Participant extends Vue {
   points = 0;
   showDetails = false;
   showSpentPoints = false;
-  showSort = false;
   showProgress = false;
   selectedVote = {
     rate: 0,
@@ -320,6 +367,7 @@ export default class Participant extends Vue {
   orderedIdeas: Idea[] = [];
   theme = '';
   inputManager!: CombinedInputManager;
+  activeTab = 'measures';
 
   showIdeaSettings = false;
   addIdea: any = {
@@ -457,8 +505,8 @@ export default class Participant extends Vue {
   @Watch('selectedIdea', { immediate: true })
   onSelectedIdeaChanged(): void {
     if (this.selectedIdea) {
-      setHash(this.selectedIdea.id);
       this.loadSelectedVote();
+      if (this.activeTab === 'map') this.showSelectedIdea = true;
     }
   }
 
@@ -514,7 +562,7 @@ export default class Participant extends Vue {
     const ideas = this.inputManager.ideas;
     this.ideas = ideas.filter((idea) => idea.parameter.shareData || idea.isOwn);
     this.orderedIdeas = [
-      ...this.ideas.filter((idea) => idea.parameter.shareData),
+      ...this.ideas, //.filter((idea) => idea.parameter.shareData),
     ];
     this.sortIdeasByVote();
     this.calculateDecidedIdeas();
@@ -551,7 +599,7 @@ export default class Participant extends Vue {
         .sort((a, b) => a.order - b.order)
         .map((item) => item.idea);
       this.orderedIdeas = [
-        ...this.ideas.filter((idea) => idea.parameter.shareData),
+        ...this.ideas, // .filter((idea) => idea.parameter.shareData),
       ];
     }
   }
@@ -811,7 +859,7 @@ export default class Participant extends Vue {
   addData(newIdea: Idea): void {
     if (!this.settingsIdea.id) {
       this.inputManager.addIdea(newIdea);
-      this.ideas = this.inputManager.ideas;
+      this.updateIdeas();
       this.trackingManager.createInstanceStepPoints(
         newIdea.id,
         TaskParticipantIterationStepStatesType.NEUTRAL,
@@ -866,6 +914,21 @@ export default class Participant extends Vue {
 }
 </script>
 
+<style lang="scss">
+.idea-card-overlay {
+  background-color: unset;
+  box-shadow: unset;
+
+  .el-dialog__header {
+    padding: unset;
+  }
+
+  .el-dialog__body {
+    padding: 0.5rem;
+  }
+}
+</style>
+
 <style lang="scss" scoped>
 .button {
   border: unset;
@@ -891,14 +954,28 @@ export default class Participant extends Vue {
   height: 3rem;
 }
 
-.header-overlay-right {
-  position: absolute;
-  top: 2rem;
-  right: 0;
+.add {
+  --background-color: #ffffff;
+}
+
+.add--column {
+  min-height: unset;
+}
+
+.add::v-deep(.el-card__body) {
+  min-height: unset;
+}
+
+.measureList {
+  padding-bottom: 1rem;
 }
 
 .module-content::v-deep(.fixed) {
   background-color: unset;
+}
+
+.statistic {
+  margin: 0 2rem;
 }
 
 [module-theme='preparation'] {
@@ -926,6 +1003,11 @@ export default class Participant extends Vue {
   .el-card::v-deep(.el-card__body) {
     border-radius: 0;
   }
+
+  .statistic {
+    background-image: url('@/modules/information/quiz/assets/paper.jpg');
+    filter: drop-shadow(0.3rem 0.3rem 0.5rem var(--color-gray-dark));
+  }
 }
 
 [module-theme='preparation'].module-content::v-deep(.media) {
@@ -933,6 +1015,7 @@ export default class Participant extends Vue {
 }
 
 [module-theme='preparation'].module-content::v-deep(.participant-content) {
+  margin-bottom: -1rem;
   margin-left: -2rem;
   margin-right: -2rem;
 }
@@ -978,6 +1061,12 @@ export default class Participant extends Vue {
   .el-card::v-deep(.el-card__body) {
     border-radius: var(--border-radius) var(--border-radius) 0
       var(--border-radius);
+  }
+
+  .statistic {
+    margin: 0;
+    background-color: white;
+    border: var(--color-dark-contrast) solid 0.5rem;
   }
 }
 

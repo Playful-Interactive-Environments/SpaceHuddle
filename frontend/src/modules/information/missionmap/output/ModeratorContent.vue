@@ -1,10 +1,8 @@
 <template>
   <IdeaFilter :taskId="taskId" v-model="filter" @change="reloadIdeas(true)" />
-  <MissionProgress
-    v-if="module"
-    :progress="progress"
-    :progress-tabs="['origin', 'progress']"
-  />
+  <div>
+    <MissionProgressChart v-if="module" :task-id="taskId" />
+  </div>
   <IdeaMap
     class="mapSpace"
     :ideas="ideas"
@@ -289,7 +287,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { Vote } from '@/types/api/Vote';
 import { setEmptyParameterIfNotExists } from '@/modules/information/missionmap/utils/parameter';
 import * as themeColors from '@/utils/themeColors';
-import MissionProgress from '@/modules/information/missionmap/organisms/MissionProgress.vue';
+import MissionProgressChart from '@/modules/information/missionmap/organisms/MissionProgressChart.vue';
 import { ValidationRules } from '@/types/ui/ValidationRule';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 import * as progress from '@/modules/information/missionmap/utils/progress';
@@ -314,7 +312,7 @@ import { CombinedInputManager } from '@/types/input/CombinedInputManager';
     draggable,
     IdeaFilter,
     IdeaSettings,
-    MissionProgress,
+    MissionProgressChart,
   },
 })
 

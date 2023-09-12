@@ -16,7 +16,13 @@
       "text": "Do you want to finish this task to move on to the next one?",
       "yes": "yes",
       "no": "no"
-    }
+    },
+    "tabs": {
+      "measures": "measures",
+      "statistic": "statistic",
+      "map": "map"
+    },
+    "add": "add own measure"
   },
   "moderatorConfig": {
     "mapSection": "map section",

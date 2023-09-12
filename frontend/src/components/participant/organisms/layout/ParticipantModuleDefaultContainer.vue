@@ -12,6 +12,17 @@
         :collapseDescription="true"
       />
     </el-header>
+    <el-header v-else-if="$slots.headerAfterInfo" class="moduleHeader">
+      <TaskInfo
+        :taskId="taskId"
+        :modules="[module]"
+        :is-participant="true"
+        :shortenDescription="false"
+        :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+        :collapseDescription="true"
+      />
+      <slot name="headerAfterInfo"></slot>
+    </el-header>
     <el-header
       v-else-if="$slots.headerOverlay"
       class="slotsHeaderOverlay moduleHeader"

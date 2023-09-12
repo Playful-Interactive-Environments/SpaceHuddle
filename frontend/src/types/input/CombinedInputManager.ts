@@ -24,6 +24,12 @@ export class CombinedInputManager {
   private _inputIdeasCash!: cashService.SimplifiedCashEntry<Idea[]>;
   private _votesCash!: cashService.SimplifiedCashEntry<Vote[]>;
   private _inputVotesCash!: cashService.SimplifiedCashEntry<Vote[]>;
+  private _voteParameterCash!: cashService.SimplifiedCashEntry<
+    VoteParameterResult[]
+  >;
+  private _inputVoteParameterCash!: cashService.SimplifiedCashEntry<
+    VoteParameterResult[]
+  >;
 
   private readonly _authHeaderType: EndpointAuthorisationType;
   private readonly _sumVoteParameter: string | null;
@@ -69,6 +75,15 @@ export class CombinedInputManager {
         authHeaderType,
         20
       );
+      if (authHeaderType === EndpointAuthorisationType.PARTICIPANT) {
+        this._voteParameterCash = votingService.registerGetParameterResult(
+          this.taskId,
+          'points',
+          (result: any) => this._updateParameterResults(result),
+          authHeaderType,
+          20
+        );
+      }
     }
   }
 
@@ -80,7 +95,13 @@ export class CombinedInputManager {
     );
     cashService.deregisterAllGet((result: any) => this._updateVotes(result));
     cashService.deregisterAllGet((result: any) =>
+      this._updateParameterResults(result)
+    );
+    cashService.deregisterAllGet((result: any) =>
       this._updateInputVotes(result)
+    );
+    cashService.deregisterAllGet((result: any) =>
+      this._updateInputParameterResults(result)
     );
   }
 
@@ -97,6 +118,15 @@ export class CombinedInputManager {
         this._authHeaderType,
         60 * 60
       );
+      if (this._authHeaderType === EndpointAuthorisationType.PARTICIPANT) {
+        this._inputVoteParameterCash = votingService.registerGetParameterResult(
+          inputTaskId,
+          'points',
+          (result: any) => this._updateInputParameterResults(result),
+          this._authHeaderType,
+          60 * 60
+        );
+      }
     }
   }
 
@@ -138,9 +168,48 @@ export class CombinedInputManager {
     this._updateVoteList();
   }
 
+  currentVoteResults: VoteParameterResult[] = [];
+  private _updateParameterResults(votes: VoteParameterResult[]): void {
+    this.currentVoteResults = votes;
+    this._updateResultList();
+  }
+
+  inputVoteResults: VoteParameterResult[] = [];
+  private _updateInputParameterResults(votes: VoteParameterResult[]): void {
+    this.inputVoteResults = votes;
+    this._updateResultList();
+  }
+
+  private _updateResultList(): void {
+    const votingResult: VoteParameterResult[] = [];
+    const list = [...this.currentVoteResults, ...this.inputVoteResults];
+    const ideaList = list
+      .map((item) => item.ideaId)
+      .filter(
+        (value, index, self) =>
+          self.findIndex((item) => item === value) === index
+      );
+    for (const ideaId of ideaList) {
+      const votes = list.filter((item) => item.ideaId === ideaId);
+      votingResult.push({
+        ideaId: votes[0].ideaId,
+        sum: votes.reduce((sum, item) => sum + item.sum, 0),
+        count: votes.reduce((sum, item) => sum + item.count, 0),
+        avg:
+          votes.reduce((sum, item) => sum + item.sum, 0) /
+          votes.reduce((sum, item) => sum + item.count, 0),
+      });
+    }
+    this.votingResult = votingResult;
+    if (this.callbackUpdateVotes) this.callbackUpdateVotes();
+  }
+
   private _updateVoteList(): void {
     this.votes = [...this.currentVotes, ...this.inputVotes];
-    if (this._sumVoteParameter) {
+    if (
+      this._sumVoteParameter &&
+      this._authHeaderType !== EndpointAuthorisationType.PARTICIPANT
+    ) {
       const sum: { [key: string]: { sum: number; count: number } } = {};
       for (const vote of this.votes) {
         if (!sum[vote.ideaId]) {
@@ -189,7 +258,9 @@ export class CombinedInputManager {
 
   async refreshVotes(): Promise<void> {
     //await this._inputVotesCash.refreshData();
+    //await this._inputVoteParameterCash.refreshData(false);
     await this._votesCash.refreshData(false);
+    await this._voteParameterCash.refreshData(false);
   }
 
   isCurrentIdea(ideaId: string): boolean {

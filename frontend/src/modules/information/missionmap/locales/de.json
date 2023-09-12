@@ -16,7 +16,13 @@
       "text": "Möchten Sie diese Aufgabe beenden, um zur nächsten überzugehen?",
       "yes": "ja",
       "no": "nein"
-    }
+    },
+    "tabs": {
+      "measures": "Maßnahmen",
+      "statistic": "Statistik",
+      "map": "Karte"
+    },
+    "add": "eigenen Vorschlag hinzufügen"
   },
   "moderatorConfig": {
     "mapSection": "Kartenausschnitt",
