@@ -56,7 +56,7 @@ import CleanUpParticles, {
 } from '@/modules/information/moveit/organisms/CleanUpParticles.vue';
 import SelectChallenge from '@/modules/information/moveit/organisms/SelectChallenge.vue';
 import ShowResult from '@/modules/information/moveit/organisms/ShowResult.vue';
-import ModuleInfo from '@/components/participant/molecules/ModuleInfo.vue';
+import ModuleInfo, { ModuleInfoEntryData } from '@/components/participant/molecules/ModuleInfo.vue';
 import * as formulas from '@/modules/information/moveit/utils/formulas';
 import * as configCalculation from '@/modules/information/moveit/utils/configCalculation';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
@@ -117,17 +117,21 @@ export default class Participant extends Vue {
   trackingManager!: TrackingManager;
   missionProgress!: MissionProgress;
 
-  get tutorialList(): string[] {
+  get tutorialList(): (string | ModuleInfoEntryData)[] {
     switch (this.gameStep) {
       case GameStep.Select:
-        return ['select'];
+        return [{ key: 'select', texture: 'select.jpg' }];
       case GameStep.Drive:
-        if (this.vehicle.category === 'bus') return ['drive', 'bus'];
-        return ['drive'];
+        if (this.vehicle.category === 'bus')
+          return [
+            { key: 'drive', texture: 'drive.gif' },
+            { key: 'bus', texture: 'bus.jpg' },
+          ];
+        return [{ key: 'drive', texture: 'drive.gif' }];
       case GameStep.CleanUp:
-        return ['cleanUp'];
+        return [{ key: 'cleanUp', texture: 'cleanUp.gif' }];
       case GameStep.Result:
-        return ['improve'];
+        return [{ key: 'improve', texture: 'improve.gif' }];
     }
     return [];
   }
