@@ -73,6 +73,10 @@
             "name": "Fisch",
             "description": "Fische können nach der Flut gestrandet sein und müssen gerettet werden."
           },
+          "sandbag": {
+            "name": "Sandsack",
+            "description": "Sandsäcke müssen nach der Flut weggeräumt werden, da sie Straßen und Wege blockieren."
+          },
           "person": {
             "name": "Menschen",
             "description": "Menschen können ertrinken."

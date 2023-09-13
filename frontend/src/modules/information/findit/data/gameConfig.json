@@ -169,7 +169,7 @@
         ],
         "severity": 3,
         "maxCount": 10,
-        "width": 2,
+        "width": 3,
         "shape": "rect",
         "explanationKey": "fish"
       },
@@ -180,7 +180,7 @@
         ],
         "severity": 1,
         "maxCount": 2,
-        "width": 7,
+        "width": 4,
         "shape": "circle",
         "explanationKey": "person"
       },
@@ -191,42 +191,20 @@
         ],
         "severity": 1,
         "maxCount": 2,
-        "width": 7,
+        "width": 3,
         "shape": "circle",
         "explanationKey": "person"
       },
-      "bottleWhite": {
+      "sandbag": {
         "escalationLevels": [
           { "min": 60, "max": 120 },
           { "min": 30, "max": 60 }
         ],
         "severity": 2,
         "maxCount": 5,
-        "width": 1,
+        "width": 2,
         "shape": "rect",
-        "explanationKey": "garbage"
-      },
-      "bottleWine": {
-        "escalationLevels": [
-          { "min": 60, "max": 120 },
-          { "min": 30, "max": 60 }
-        ],
-        "severity": 1,
-        "maxCount": 5,
-        "width": 1,
-        "shape": "rect",
-        "explanationKey": "garbage"
-      },
-      "bottleBeer": {
-        "escalationLevels": [
-          { "min": 60, "max": 120 },
-          { "min": 30, "max": 60 }
-        ],
-        "severity": 1,
-        "maxCount": 5,
-        "width": 1,
-        "shape": "rect",
-        "explanationKey": "garbage"
+        "explanationKey": "sandbag"
       }
     },
     "red_herring": {

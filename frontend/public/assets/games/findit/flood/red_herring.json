@@ -1,50 +1,50 @@
 {
 "frames": {
-	"bottleBeer": {
-		"frame": {"x":533, "y":1328, "w":69, "h":256},
-		"spriteSourceSize": {"x":2,"y":0,"w":74,"h":256},
-		"sourceSize": {"w":74,"h":256}
-	},
-	"bottleWhite": {
-		"frame": {"x":438, "y":1328, "w":94, "h":256},
-		"spriteSourceSize": {"x":3,"y":0,"w":100,"h":256},
-		"sourceSize": {"w":100,"h":256}
+	"bug": {
+		"frame": {"x":673, "y":762, "w":448, "h":564},
+		"spriteSourceSize": {"x":0,"y":0,"w":448,"h":564},
+		"sourceSize": {"w":448,"h":564}
 	},
 	"bottleWine": {
-		"frame": {"x":603, "y":1328, "w":60, "h":256},
-		"spriteSourceSize": {"x":2,"y":0,"w":64,"h":256},
-		"sourceSize": {"w":64,"h":256}
+		"frame": {"x":1319, "y":0, "w":196, "h":726},
+		"spriteSourceSize": {"x":0,"y":0,"w":196,"h":726},
+		"sourceSize": {"w":196,"h":726}
 	},
-	"bug": {
-		"frame": {"x":1097, "y":787, "w":593, "h":750},
-		"spriteSourceSize": {"x":8,"y":13,"w":608,"h":776},
-		"sourceSize": {"w":608,"h":776}
+	"bottleBeer": {
+		"frame": {"x":1122, "y":361, "w":196, "h":558},
+		"spriteSourceSize": {"x":0,"y":0,"w":196,"h":558},
+		"sourceSize": {"w":196,"h":558}
+	},
+	"bottleWhite": {
+		"frame": {"x":1319, "y":727, "w":196, "h":665},
+		"spriteSourceSize": {"x":0,"y":0,"w":196,"h":665},
+		"sourceSize": {"w":196,"h":665}
 	},
 	"dragonfly": {
-		"frame": {"x":0, "y":0, "w":1121, "h":786},
-		"spriteSourceSize": {"x":13,"y":18,"w":1146,"h":820},
-		"sourceSize": {"w":1146,"h":820}
-	},
-	"earthworm": {
-		"frame": {"x":0, "y":787, "w":1096, "h":232},
-		"spriteSourceSize": {"x":7,"y":8,"w":1110,"h":248},
-		"sourceSize": {"w":1110,"h":248}
+		"frame": {"x":0, "y":0, "w":840, "h":583},
+		"spriteSourceSize": {"x":0,"y":0,"w":840,"h":583},
+		"sourceSize": {"w":840,"h":583}
 	},
 	"ladybug": {
-		"frame": {"x":0, "y":1020, "w":437, "h":477},
-		"spriteSourceSize": {"x":38,"y":18,"w":512,"h":512},
-		"sourceSize": {"w":512,"h":512}
+		"frame": {"x":841, "y":0, "w":325, "h":360},
+		"spriteSourceSize": {"x":0,"y":0,"w":325,"h":360},
+		"sourceSize": {"w":325,"h":360}
 	},
 	"turtle": {
-		"frame": {"x":438, "y":1020, "w":311, "h":307},
-		"spriteSourceSize": {"x":8,"y":12,"w":327,"h":329},
-		"sourceSize": {"w":327,"h":329}
+		"frame": {"x":0, "y":762, "w":672, "h":615},
+		"spriteSourceSize": {"x":0,"y":0,"w":672,"h":615},
+		"sourceSize": {"w":672,"h":615}
+	},
+	"earthworm": {
+		"frame": {"x":0, "y":584, "w":824, "h":177},
+		"spriteSourceSize": {"x":0,"y":0,"w":824,"h":177},
+		"sourceSize": {"w":824,"h":177}
 	}
 
 },
 "meta": {
 	"image": "red_herring.png",
-	"size": {"w": 1691, "h": 1585},
+	"size": {"w": 1516, "h": 1393},
 	"scale": "1"
 }
 }

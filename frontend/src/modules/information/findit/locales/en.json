@@ -73,6 +73,10 @@
             "name": "Fish",
             "description": "Fishes can be stranded after the flood and need to be rescued."
           },
+          "sandbag": {
+            "name": "Sandbag",
+            "description": "Sandbags have to be removed after the flood is over, as they are blocking paths and streets."
+          },
           "person": {
             "name": "People",
             "description": "People can drown."
