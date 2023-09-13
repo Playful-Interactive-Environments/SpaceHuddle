@@ -63,9 +63,11 @@
    "information": {  
        "coolit": {  
            "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  
+           "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
-             "icon": "smog",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": false,  "finishManuel": true,  
+             "icon": "smog",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
            "path": "information/coolit"  
        },  
        "default": {  
