@@ -215,7 +215,7 @@ export const getModuleConfig = async (
   await until(() => moduleConfigLoaded);
   if (taskType) {
     const module = moduleConfig[taskType][moduleName];
-    if (module[componentType]) {
+    if (Object.hasOwn(module, componentType)) {
       return module[componentType];
     } else if (moduleName != defaultModuleName && includeFallback) {
       return getModuleConfig(

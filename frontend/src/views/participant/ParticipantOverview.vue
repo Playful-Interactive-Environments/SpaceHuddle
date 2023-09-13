@@ -174,7 +174,7 @@
         </div>
       </el-collapse-item>
     </el-collapse>
-    <router-link
+    <!--<router-link
       :to="`/public-screen/${this.sessionId}/${EndpointAuthorisationType.PARTICIPANT}`"
     >
       <el-button class="fullwidth">
@@ -183,7 +183,7 @@
         </template>
         {{ $t('participant.view.overview.publicScreen') }}
       </el-button>
-    </router-link>
+    </router-link>-->
     <router-link to="/join">
       <el-button class="fullwidth">
         <template #icon>
