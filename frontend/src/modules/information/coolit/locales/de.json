@@ -8,10 +8,46 @@
     "replayable": "mehrfach spielbar",
     "showTutorialOnlyOnce": "Tutorial nur beim ersten mal zeigen"
   },
+  "moderatorContent": {
+    "settingsTitle": "Ideeneinstellungen",
+    "add": "Level hinzufügen",
+    "levelType": "Leveltyp",
+    "share": "teilen"
+  },
   "participant": {
+    "everythingPlaced": "Alles platziert",
+    "maxCountPlaced": "Maximale Anzahl des Objekttyps platziert",
+    "place": "Platzieren",
+    "newLevel": "neues Level erstellen",
+    "settings": {
+      "levelName": "Levelname"
+    },
+    "itemSelection": {
+      "selectItem": "Zu platzierendes Objekt auswählen"
+    },
     "tutorial": {
       "select": "Die Atmosphäre setzt sich aus den Gasen Stickstoff, Sauerstoff, Argon und Kohlenstoffdioxid zusammen. Lichtstrahlen können diese Gase ungehindert durchdringen. Trifft ein Lichtstahl auf die Erde wird er von der Oberfläche absorbiert und als Wärmestrahlung freigesetzt. Wärmestrahlung wird von den Treibhausgasen aufgenommen und erwärmt dadurch die Atmosphäre. Ohne diese Gase wäre es auf der Erde sehr kalt. Die Durchschnittstemperatur würde bei -18°C liegen. Obwohl die Atmosphäre aus nur 0,04% Treibhausgasen beseht reicht das aus um die Erde auf eine für uns angenehme Temperatur zu erwärmen. Allerdings je mehr Treibhausgase desto wärmer wird es. Gase und Strahlen sind farblos und sehr sehr klein. Damit du sie sehen kannst haben wir sie eingefärbt und stark vergrößert.",
       "play": "Schiebe die Treibhausgase aus dem Weg um die überschüssige Wärme von der Erde entweichen zu lassen und es so auf der Erde angenehm zu halten."
+    },
+    "placeables": {
+      "city": {
+        "name": "Stadt"
+      }
+    }
+  },
+  "statistic": {
+    "levels": "Wie oft wurde welcher Level gespielt?",
+    "rating": "Wie oft wurden wie viele Punkte erzielt?",
+    "play": "Wie oft hat welcher Benutzer einen Level gespielt?",
+    "build": "Wie oft hat welcher Benutzer einen Level erstellt?",
+    "time": "Wie viele Sekunden hat es gedauert, das Level zu beenden?",
+    "item": {
+      "play": "Wie oft wurde welches Element gefunden?",
+      "build": "Wie oft wurde welcher Gegenstand versteckt?"
+    },
+    "itemCount": {
+      "play": "Wie viele Gegenstände wurden gefunden?",
+      "build": "Wie viele Gegenstände wurden versteckt?"
     }
   }
 }

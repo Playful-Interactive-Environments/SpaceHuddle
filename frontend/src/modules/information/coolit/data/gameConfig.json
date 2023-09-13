@@ -1,0 +1,97 @@
+{
+  "city": {
+    "settings": {
+      "background": "/assets/games/coolit/city/background.jpg",
+      "defaultType": "building",
+      "defaultName": "cigarette",
+      "icon": "city",
+      "color": "#c55e44",
+      "heatRation": [
+        {
+          "yMin": 0,
+          "yMax": 10,
+          "coefficient": 0.5
+        },
+        {
+          "yMin": 10,
+          "yMax": 30,
+          "coefficient": 3
+        }
+      ],
+      "placingRegion": {
+        "yMin": 30,
+        "yMax": 50
+      }
+    },
+    "building": {
+      "settings": {
+        "icon": "building",
+        "order": 10,
+        "spritesheet": "/assets/games/coolit/city/city.json",
+        "explanationText": "module.information.coolit.participant.placeables.city"
+      },
+      "building01": {
+        "heatRationCoefficient": 3,
+        "maxCount": 10,
+        "width": 15,
+        "shape": "rect"
+      },
+      "building02": {
+        "heatRationCoefficient": 3,
+        "maxCount": 10,
+        "width": 15,
+        "shape": "rect"
+      },
+      "building03": {
+        "heatRationCoefficient": 3,
+        "maxCount": 10,
+        "width": 15,
+        "shape": "rect"
+      },
+      "building04": {
+        "heatRationCoefficient": 3,
+        "maxCount": 10,
+        "width": 15,
+        "shape": "rect"
+      },
+      "building05": {
+        "heatRationCoefficient": 3,
+        "maxCount": 10,
+        "width": 15,
+        "shape": "rect"
+      },
+      "building06": {
+        "heatRationCoefficient": 3,
+        "maxCount": 10,
+        "width": 15,
+        "shape": "rect"
+      },
+      "building07": {
+        "heatRationCoefficient": 3,
+        "maxCount": 10,
+        "width": 15,
+        "shape": "rect"
+      },
+      "building08": {
+        "heatRationCoefficient": 3,
+        "maxCount": 10,
+        "width": 15,
+        "shape": "rect"
+      }
+    },
+    "nature": {
+      "settings": {
+        "icon": "tree",
+        "order": 10,
+        "spritesheet": "/assets/games/coolit/city/city.json",
+        "explanationText": "module.information.coolit.participant.placeables.city"
+      },
+      "trees": {
+        "heatRationCoefficient": 0.5,
+        "maxCount": 10,
+        "width": 15,
+        "shape": "rect"
+      }
+    }
+  }
+}

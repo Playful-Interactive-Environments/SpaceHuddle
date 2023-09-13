@@ -63,6 +63,7 @@
    "information": {  
        "coolit": {  
            "participant": "output/Participant",  
+           "moderatorConfig": "output/ModeratorConfig",  
            "locales": "de,en,",  
              "icon": "smog",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": false,  "finishManuel": true,  
            "path": "information/coolit"  

@@ -225,9 +225,21 @@ export default class IdeaMap extends Vue {
   }
 
   convertCoordinates(position: [number, number]): LngLatLike {
+    if (position) {
+      return {
+        lng: position[0],
+        lat: position[1],
+      };
+    }
+    if (this.parameter.mapCenter) {
+      return {
+        lng: this.parameter.mapCenter[0],
+        lat: this.parameter.mapCenter[1],
+      };
+    }
     return {
-      lng: position[0],
-      lat: position[1],
+      lng: 0,
+      lat: 0,
     };
   }
 
@@ -271,32 +283,29 @@ export default class IdeaMap extends Vue {
   }
 
   calculateMapBounds(): void {
-    if (this.ideas.length > 0) {
-      const points = turf.points(
-        this.ideas.map((idea) => idea.parameter.position)
-      );
+    const ideas = this.ideas.filter((idea) => idea.parameter.position);
+    if (ideas.length > 0) {
+      const points = turf.points(ideas.map((idea) => idea.parameter.position));
       const center: [number, number] = turf.center(points).geometry
         .coordinates as [number, number];
 
-      if (this.ideas.length > 1) {
-        const bounds = turf.envelope(points).geometry.coordinates[0] as [
-          number,
-          number
-        ][];
-        const min = bounds[0];
-        const max = bounds[2];
-        const delta = 0.02;
-        const minLngLat = this.convertCoordinates([
-          min[0] - delta,
-          min[1] - delta,
-        ]);
-        const maxLngLat = this.convertCoordinates([
-          max[0] + delta,
-          max[1] + delta,
-        ]);
-        this.mapBounds = [minLngLat, maxLngLat];
-        this.fitZoomToBounds();
-      } else this.mapBounds = null;
+      const bounds = turf.envelope(points).geometry.coordinates[0] as [
+        number,
+        number
+      ][];
+      const min = bounds[0];
+      const max = bounds[2];
+      const delta = 0.02;
+      const minLngLat = this.convertCoordinates([
+        min[0] - delta,
+        min[1] - delta,
+      ]);
+      const maxLngLat = this.convertCoordinates([
+        max[0] + delta,
+        max[1] + delta,
+      ]);
+      this.mapBounds = [minLngLat, maxLngLat];
+      this.fitZoomToBounds();
       this.mapIdeaCenter = center;
       this.changeSection();
     } else this.mapBounds = null;
