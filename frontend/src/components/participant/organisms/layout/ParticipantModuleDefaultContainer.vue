@@ -145,7 +145,7 @@ export default class ParticipantModuleDefaultContainer extends Vue {
 }
 
 .module-content {
-  background-color: white;
+  background-color: var(--color-background);
   color: var(--color-dark-contrast);
   flex-grow: 1;
   justify-content: space-between;
