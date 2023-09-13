@@ -73,6 +73,8 @@ export default class TaskStatistic extends Vue {
         return themeColors.getBrainstormingColor();
       case TaskType.INFORMATION:
         return themeColors.getInformingColor();
+      case TaskType.PLAYING:
+        return themeColors.getPlayingColor();
       case TaskType.CATEGORISATION:
       case TaskType.SELECTION:
         return themeColors.getStructuringColor();

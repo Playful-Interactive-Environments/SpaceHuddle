@@ -45,7 +45,7 @@
             class="showMore"
           />
           <AddItem
-            :text="$t('module.information.findit.moderatorContent.add')"
+            :text="$t('module.playing.findit.moderatorContent.add')"
             :is-column="true"
             @addNew="showSettings = true"
           />
@@ -67,7 +67,7 @@
           class="showMore"
         />
         <AddItem
-          :text="$t('module.information.findit.moderatorContent.add')"
+          :text="$t('module.playing.findit.moderatorContent.add')"
           :is-column="true"
           @addNew="showSettings = true"
         />

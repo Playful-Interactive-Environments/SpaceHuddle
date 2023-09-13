@@ -555,7 +555,8 @@ export default class ModeratorTopicDetails extends Vue {
   taskTypeAvailable(taskCategory: string): boolean {
     if (
       TaskCategory[taskCategory].taskTypes.includes(TaskType.BRAINSTORMING) ||
-      TaskCategory[taskCategory].taskTypes.includes(TaskType.INFORMATION)
+      TaskCategory[taskCategory].taskTypes.includes(TaskType.INFORMATION) ||
+      TaskCategory[taskCategory].taskTypes.includes(TaskType.PLAYING)
     )
       return true;
     return !!this.tasks.find(

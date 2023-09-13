@@ -1,0 +1,8 @@
+{
+  "icon": "gamepad",
+  "type": "main",
+  "input": "no",
+  "syncPublicParticipant": false,
+  "usable": false,
+  "finishManuel": true
+}

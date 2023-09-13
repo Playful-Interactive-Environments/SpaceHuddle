@@ -487,6 +487,7 @@
   "enum": {
     "taskType": {
       "null": "",
+      "playing": "Spiele",
       "information": "Information",
       "brainstorming": "Brainstorming",
       "selection": "Selektion",
@@ -494,6 +495,7 @@
       "voting": "Bewertung"
     },
     "taskCategory": {
+      "playing": "Spielen",
       "informing": "Informieren",
       "brainstorming": "Brainstormen",
       "structuring": "Strukturieren",

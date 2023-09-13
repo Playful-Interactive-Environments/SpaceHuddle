@@ -5,6 +5,7 @@ header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Credentials: true");
 
 $config = array(
+    'playing' => array(),
     'brainstorming' => array(),
     'categorisation' => array(),
     'information' => array(),
@@ -68,6 +69,7 @@ function createConfig($dir) {
     }
 };
 
+createConfig('playing');
 createConfig('brainstorming');
 createConfig('categorisation');
 createConfig('information');

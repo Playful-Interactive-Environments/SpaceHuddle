@@ -1,0 +1,11 @@
+{
+  "icon": "map-location",
+  "type": "main",
+  "input": "optional",
+  "inputFilterTypes": "[\"task\"]",
+  "inputFilterCategories": "[\"brainstorming\"]",
+  "inputFilterModules": "[\"missionmap\"]",
+  "maxInputs": 1,
+  "syncPublicParticipant": false,
+  "finishManuel": true
+}

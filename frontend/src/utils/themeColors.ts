@@ -25,6 +25,12 @@ export function getInformingColor(variation = ''): string {
   );
 }
 
+export function getPlayingColor(variation = ''): string {
+  return getComputedStyle(document.body).getPropertyValue(
+    `--color-playing${variation}`
+  );
+}
+
 export function getEvaluatingColor(variation = ''): string {
   return getComputedStyle(document.body).getPropertyValue(
     `--color-evaluating${variation}`

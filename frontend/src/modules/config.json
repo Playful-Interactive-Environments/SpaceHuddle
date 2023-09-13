@@ -42,6 +42,16 @@
              "icon": "map-location-dot",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "finishManuel": true,  
            "path": "brainstorming/map"  
        },  
+       "missionmap": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "moduleStatistic": "output/ModuleStatistic",  
+           "locales": "de,en,",  
+             "icon": "map-location",  "type": "main",  "input": "optional",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"brainstorming\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  "finishManuel": true,  
+           "path": "brainstorming/missionmap"  
+       },  
        "settings": {  
            "parameter": "TaskParameter",  
            "path": "brainstorming/settings"  
@@ -61,15 +71,6 @@
        }  
    },  
    "information": {  
-       "coolit": {  
-           "participant": "output/Participant",  
-           "moderatorContent": "output/ModeratorContent",  
-           "moderatorConfig": "output/ModeratorConfig",  
-           "moduleStatistic": "output/ModuleStatistic",  
-           "locales": "de,en,",  
-             "icon": "smog",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
-           "path": "information/coolit"  
-       },  
        "default": {  
            "publicScreen": "output/PublicScreen",  
            "participant": "output/Participant",  
@@ -77,36 +78,6 @@
            "locales": "de,en,",  
              "icon": "info",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "finishManuel": true,  
            "path": "information/default"  
-       },  
-       "findit": {  
-           "publicScreen": "output/PublicScreen",  
-           "participant": "output/Participant",  
-           "moderatorContent": "output/ModeratorContent",  
-           "moderatorConfig": "output/ModeratorConfig",  
-           "moduleStatistic": "output/ModuleStatistic",  
-           "locales": "de,en,",  
-             "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
-           "path": "information/findit"  
-       },  
-       "missionmap": {  
-           "publicScreen": "output/PublicScreen",  
-           "participant": "output/Participant",  
-           "moderatorContent": "output/ModeratorContent",  
-           "moderatorConfig": "output/ModeratorConfig",  
-           "moduleStatistic": "output/ModuleStatistic",  
-           "locales": "de,en,",  
-             "icon": "map-location",  "type": "main",  "input": "optional",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"information\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  "finishManuel": true,  
-           "path": "information/missionmap"  
-       },  
-       "moveit": {  
-           "publicScreen": "output/PublicScreen",  
-           "participant": "output/Participant",  
-           "moderatorContent": "output/ModeratorContent",  
-           "moderatorConfig": "output/ModeratorConfig",  
-           "moduleStatistic": "output/ModuleStatistic",  
-           "locales": "de,en,",  
-             "icon": "route",  "type": "main",  "input": "optional",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"information\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
-           "path": "information/moveit"  
        },  
        "quiz": {  
            "publicScreen": "output/PublicScreen",  
@@ -146,6 +117,49 @@
        "settings": {  
            "parameter": "TaskParameter",  
            "path": "none/settings"  
+       }  
+   },  
+   "playing": {  
+       "coolit": {  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "moduleStatistic": "output/ModuleStatistic",  
+           "locales": "de,en,",  
+             "icon": "smog",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": false,  "finishManuel": true,  
+           "path": "playing/coolit"  
+       },  
+       "default": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "locales": "de,en,",  
+             "icon": "gamepad",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": false,  "finishManuel": true,  
+           "path": "playing/default"  
+       },  
+       "findit": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "moduleStatistic": "output/ModuleStatistic",  
+           "locales": "de,en,",  
+             "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
+           "path": "playing/findit"  
+       },  
+       "moveit": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "moduleStatistic": "output/ModuleStatistic",  
+           "locales": "de,en,",  
+             "icon": "route",  "type": "main",  "input": "optional",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"information\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
+           "path": "playing/moveit"  
+       },  
+       "settings": {  
+           "parameter": "TaskParameter",  
+           "path": "playing/settings"  
        }  
    },  
    "selection": {  

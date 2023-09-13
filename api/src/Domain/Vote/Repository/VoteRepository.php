@@ -48,9 +48,11 @@ class VoteRepository implements RepositoryInterface
     {
         $taskTypeVotes = strtoupper(TaskType::VOTING);
         $taskTypeInformation = strtoupper(TaskType::INFORMATION);
+        $taskTypePlaying = strtoupper(TaskType::PLAYING);
+        $taskTypeBrainstorming = strtoupper(TaskType::BRAINSTORMING);
         $query = $this->queryFactory->newSelect("task");
         $query->select(["id"])
-            ->whereInList("task_type", [$taskTypeVotes, $taskTypeInformation])
+            ->whereInList("task_type", [$taskTypeVotes, $taskTypeInformation, $taskTypePlaying, $taskTypeBrainstorming])
             ->andWhere([
                 "id" => $taskId
             ]);

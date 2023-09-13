@@ -7,12 +7,13 @@ namespace App\Domain\Task\Type;
  * @OA\Schema(
  *   description="possible task types",
  *   type="string",
- *   enum={"INFORMATION", "BRAINSTORMING", "SELECTION", "CATEGORISATION", "VOTING"},
+ *   enum={"PLAYINF", "INFORMATION", "BRAINSTORMING", "SELECTION", "CATEGORISATION", "VOTING"},
  *   example="BRAINSTORMING"
  * )
  */
 class TaskType
 {
+    public const PLAYING = "playing";
     public const INFORMATION = "information";
     public const BRAINSTORMING = "brainstorming";
     public const SELECTION = "selection";

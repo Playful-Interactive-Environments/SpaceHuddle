@@ -881,7 +881,7 @@ SELECT
 FROM
     task
 WHERE
-    task_type IN ('BRAINSTORMING', 'CATEGORISATION', 'INFORMATION')
+    task_type IN ('BRAINSTORMING', 'CATEGORISATION', 'INFORMATION', 'PLAYING')
 UNION ALL
 SELECT
     'VOTE' COLLATE utf8mb4_unicode_ci AS type,
@@ -1253,25 +1253,24 @@ AND
         )) != '';
 
 CREATE OR REPLACE VIEW task_info (task_id, task_type, participant_count) AS
-SELECT
-    vote.task_id,
-    task.task_type,
-    COUNT(DISTINCT vote.participant_id) AS participant_count
-FROM
-    vote
-        INNER JOIN task ON task.id = vote.task_id
-GROUP BY vote.task_id
-UNION
-SELECT
-    idea.task_id,
-    task.task_type,
-    COUNT(DISTINCT idea.participant_id) AS participant_count
-FROM
-    idea
-        INNER JOIN task ON task.id = idea.task_id
-WHERE
-        task.task_type LIKE 'BRAINSTORMING'
-GROUP BY idea.task_id;
+SELECT task_id, task_type, SUM(participant_count) as participant_count
+FROM (
+    SELECT vote.task_id,
+         task.task_type,
+         COUNT(DISTINCT vote.participant_id) AS participant_count
+    FROM vote
+           INNER JOIN task ON task.id = vote.task_id
+    GROUP BY vote.task_id
+    UNION
+    SELECT idea.task_id,
+         task.task_type,
+         COUNT(DISTINCT idea.participant_id) AS participant_count
+    FROM idea
+           INNER JOIN task ON task.id = idea.task_id
+    WHERE task.task_type LIKE 'BRAINSTORMING'
+    GROUP BY idea.task_id
+) AS task_info
+GROUP BY task_id;
 
 COMMIT;
 

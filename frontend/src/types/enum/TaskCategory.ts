@@ -1,6 +1,7 @@
 import TaskType from '@/types/enum/TaskType';
 
 export enum TaskCategoryOption {
+  PLAYING = 'playing',
   INFORMING = 'informing',
   BRAINSTORMING = 'brainstorming',
   STRUCTURING = 'structuring',
@@ -15,6 +16,11 @@ export interface TaskCategoryType {
 }
 
 const TaskCategory: { [name: string]: TaskCategoryType } = {
+  playing: {
+    icon: 'gamepad',
+    color: 'var(--color-playing)',
+    taskTypes: [TaskType.PLAYING],
+  },
   informing: {
     icon: 'info',
     color: 'var(--color-informing)',

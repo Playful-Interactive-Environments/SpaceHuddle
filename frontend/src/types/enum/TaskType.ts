@@ -1,4 +1,5 @@
 enum TaskType {
+  PLAYING = 'playing',
   INFORMATION = 'information',
   BRAINSTORMING = 'brainstorming',
   SELECTION = 'selection',
