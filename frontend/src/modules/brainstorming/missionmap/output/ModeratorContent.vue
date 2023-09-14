@@ -1,7 +1,27 @@
 <template>
   <IdeaFilter :taskId="taskId" v-model="filter" @change="reloadIdeas(true)" />
-  <div>
-    <MissionProgressChart v-if="module" :task-id="taskId" />
+  <div v-if="module">
+    <el-tabs v-model="activeProgressTab">
+      <el-tab-pane
+        :name="MissionProgressParameter.influenceAreas"
+        :label="
+          $t('module.brainstorming.missionmap.participant.tabs.influenceAreas')
+        "
+      >
+      </el-tab-pane>
+      <el-tab-pane
+        v-if="module.parameter.effectElectricity"
+        :name="MissionProgressParameter.electricity"
+        :label="
+          $t('module.brainstorming.missionmap.participant.tabs.electricity')
+        "
+      >
+      </el-tab-pane>
+    </el-tabs>
+    <MissionProgressChart
+      :task-id="taskId"
+      :mission-progress-parameter="activeProgressTab"
+    />
   </div>
   <IdeaMap
     class="mapSpace"
@@ -287,7 +307,9 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { Vote } from '@/types/api/Vote';
 import { setEmptyParameterIfNotExists } from '@/modules/brainstorming/missionmap/utils/parameter';
 import * as themeColors from '@/utils/themeColors';
-import MissionProgressChart from '@/modules/brainstorming/missionmap/organisms/MissionProgressChart.vue';
+import MissionProgressChart, {
+  MissionProgressParameter,
+} from '@/modules/brainstorming/missionmap/organisms/MissionProgressChart.vue';
 import { ValidationRules } from '@/types/ui/ValidationRule';
 import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 import * as progress from '@/modules/brainstorming/missionmap/utils/progress';
@@ -299,8 +321,8 @@ import { CombinedInputManager } from '@/types/input/CombinedInputManager';
     gameConfig() {
       return gameConfig;
     },
-    gameConfigMoveIt() {
-      return gameConfigMoveIt;
+    MissionProgressParameter() {
+      return MissionProgressParameter;
     },
   },
   components: {
@@ -341,6 +363,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   showSettings = false;
   missionInput!: MissionInputData;
   inputManager!: CombinedInputManager;
+  activeProgressTab = MissionProgressParameter.influenceAreas;
 
   getIdeaColor(idea: Idea): string {
     if (!idea.parameter.shareData)

@@ -9,13 +9,25 @@
       <el-tabs v-model="activeTab">
         <el-tab-pane
           name="measures"
-          :label="$t('module.brainstorming.missionmap.participant.tabs.measures')"
+          :label="
+            $t('module.brainstorming.missionmap.participant.tabs.measures')
+          "
         >
         </el-tab-pane>
         <el-tab-pane
-          name="statistic"
+          :name="MissionProgressParameter.influenceAreas"
           :label="
-            $t('module.brainstorming.missionmap.participant.tabs.statistic')
+            $t(
+              'module.brainstorming.missionmap.participant.tabs.influenceAreas'
+            )
+          "
+        >
+        </el-tab-pane>
+        <el-tab-pane
+          v-if="module && module.parameter.effectElectricity"
+          :name="MissionProgressParameter.electricity"
+          :label="
+            $t('module.brainstorming.missionmap.participant.tabs.electricity')
           "
         >
         </el-tab-pane>
@@ -40,10 +52,18 @@
       v-on:ideaPositionChanged="saveIdea"
     >
     </IdeaMap>
-    <div v-else-if="module && activeTab === 'statistic'" class="statistic">
+    <div
+      v-else-if="
+        module &&
+        (activeTab === MissionProgressParameter.influenceAreas ||
+          activeTab === MissionProgressParameter.electricity)
+      "
+      class="statistic"
+    >
       <MissionProgressChart
         :task-id="taskId"
         :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
+        :mission-progress-parameter="activeTab"
       />
     </div>
     <draggable
@@ -212,7 +232,9 @@
     v-model:show-modal="showIdeaSettings"
     :taskId="taskId"
     :idea="settingsIdea"
-    :title="$t('module.brainstorming.missionmap.moderatorContent.settingsTitle')"
+    :title="
+      $t('module.brainstorming.missionmap.moderatorContent.settingsTitle')
+    "
     :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
     @updateData="addData"
   />
@@ -299,7 +321,9 @@ import draggable from 'vuedraggable';
 import * as themeColors from '@/utils/themeColors';
 import { setEmptyParameterIfNotExists } from '@/modules/brainstorming/missionmap/utils/parameter';
 import { ElMessageBox } from 'element-plus';
-import MissionProgressChart from '@/modules/brainstorming/missionmap/organisms/MissionProgressChart.vue';
+import MissionProgressChart, {
+  MissionProgressParameter,
+} from '@/modules/brainstorming/missionmap/organisms/MissionProgressChart.vue';
 import * as progress from '@/modules/brainstorming/missionmap/utils/progress';
 import { CombinedInputManager } from '@/types/input/CombinedInputManager';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
@@ -315,6 +339,9 @@ interface ProgressValues {
   computed: {
     gameConfig() {
       return gameConfig;
+    },
+    MissionProgressParameter() {
+      return MissionProgressParameter;
     },
   },
   components: {

@@ -1,7 +1,30 @@
 <template>
   <el-container ref="container">
-    <el-header height="150px">
-      <MissionProgressChart v-if="showProgress" :task-id="taskId" />
+    <el-header height="150px" class="statistic">
+      <el-tabs v-model="activeProgressTab">
+        <el-tab-pane
+          :name="MissionProgressParameter.influenceAreas"
+          :label="
+            $t(
+              'module.brainstorming.missionmap.participant.tabs.influenceAreas'
+            )
+          "
+        >
+        </el-tab-pane>
+        <el-tab-pane
+          v-if="showProgress && module.parameter.effectElectricity"
+          :name="MissionProgressParameter.electricity"
+          :label="
+            $t('module.brainstorming.missionmap.participant.tabs.electricity')
+          "
+        >
+        </el-tab-pane>
+      </el-tabs>
+      <MissionProgressChart
+        v-if="showProgress"
+        :task-id="taskId"
+        :mission-progress-parameter="activeProgressTab"
+      />
     </el-header>
     <el-container>
       <el-aside width="70vw" class="mapSpace">
@@ -22,7 +45,9 @@
           v-if="ideas.length === 0"
           class="centered public-screen__error"
         >
-          <p>{{ $t('module.brainstorming.missionmap.publicScreen.noIdeas') }}</p>
+          <p>
+            {{ $t('module.brainstorming.missionmap.publicScreen.noIdeas') }}
+          </p>
         </section>
         <div v-else class="public-screen__content">
           <section class="layout__columns">
@@ -85,7 +110,9 @@ import gameConfig from '@/modules/brainstorming/missionmap/data/gameConfig.json'
 import { setHash } from '@/utils/url';
 import * as themeColors from '@/utils/themeColors';
 import { VoteParameterResult } from '@/types/api/Vote';
-import MissionProgressChart from '@/modules/brainstorming/missionmap/organisms/MissionProgressChart.vue';
+import MissionProgressChart, {
+  MissionProgressParameter,
+} from '@/modules/brainstorming/missionmap/organisms/MissionProgressChart.vue';
 import * as progress from '@/modules/brainstorming/missionmap/utils/progress';
 import { CombinedInputManager } from '@/types/input/CombinedInputManager';
 
@@ -93,6 +120,9 @@ import { CombinedInputManager } from '@/types/input/CombinedInputManager';
   computed: {
     gameConfig() {
       return gameConfig;
+    },
+    MissionProgressParameter() {
+      return MissionProgressParameter;
     },
   },
   components: {
@@ -119,6 +149,7 @@ export default class PublicScreen extends Vue {
   selectionColor = '#0192d0';
   showProgress = false;
   inputManager!: CombinedInputManager;
+  activeProgressTab = MissionProgressParameter.influenceAreas;
 
   get progress(): { [key: string]: progress.ProgressValues } {
     return progress.getProgress(this.decidedIdeas, this.module);
@@ -241,5 +272,9 @@ export default class PublicScreen extends Vue {
 .mapSpace {
   height: 100%;
   margin-right: 1rem;
+}
+
+.statistic {
+  margin-bottom: 3rem;
 }
 </style>

@@ -20,6 +20,8 @@
     "tabs": {
       "measures": "Maßnahmen",
       "statistic": "Statistik",
+      "influenceAreas": "Statistik",
+      "electricity": "Elektrizitätsstatistik",
       "map": "Karte"
     },
     "add": "eigenen Vorschlag hinzufügen"

@@ -20,6 +20,8 @@
     "tabs": {
       "measures": "measures",
       "statistic": "statistic",
+      "influenceAreas": "statistic",
+      "electricity": "electricity statistic",
       "map": "map"
     },
     "add": "add own measure"

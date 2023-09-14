@@ -37,35 +37,7 @@
             text: chartData.title,
           },
           annotation: {
-            annotations: {
-              box1: {
-                type: 'box',
-                xMin: 0,
-                xMax: chartData.data.labels.length - 1,
-                yMin: 10,
-                yMax: 3,
-                backgroundColor: positiveColorTransparent,
-                borderColor: 'transparent',
-              },
-              box2: {
-                type: 'box',
-                xMin: 0,
-                xMax: chartData.data.labels.length - 1,
-                yMin: 3,
-                yMax: -2,
-                backgroundColor: naturalColorTransparent,
-                borderColor: 'transparent',
-              },
-              box3: {
-                type: 'box',
-                xMin: 0,
-                xMax: chartData.data.labels.length - 1,
-                yMin: -2,
-                yMax: -10,
-                backgroundColor: negativeColorTransparent,
-                borderColor: 'transparent',
-              },
-            },
+            annotations: chartAnnotations(chartData),
           },
         },
       }"
@@ -77,6 +49,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import gameConfig from '@/modules/brainstorming/missionmap/data/gameConfig.json';
+import gameConfigMoveIt from '@/modules/playing/moveit/data/gameConfig.json';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import * as themeColors from '@/utils/themeColors';
 import { Bar, Line } from 'vue-chartjs';
@@ -97,6 +70,17 @@ import { Task } from '@/types/api/Task';
 import * as cashService from '@/services/cash-service';
 import { Module } from '@/types/api/Module';
 
+export enum MissionProgressParameter {
+  influenceAreas = 'influenceAreas',
+  electricity = 'electricity',
+}
+
+interface LineChartData {
+  title: string;
+  data: ChartData;
+  labelColors: string[] | string;
+}
+
 @Options({
   computed: {
     gameConfig() {
@@ -113,18 +97,54 @@ import { Module } from '@/types/api/Module';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class MissionProgressChart extends Vue {
   @Prop() readonly taskId!: string;
+  @Prop({ default: MissionProgressParameter.influenceAreas })
+  readonly missionProgressParameter!: MissionProgressParameter;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
-  authHeaderTyp!: EndpointAuthorisationType;
-  lineChartDataList: {
-    title: string;
-    data: ChartData;
-    labelColors: string[] | string;
-  }[] = [];
+  readonly authHeaderTyp!: EndpointAuthorisationType;
+  lineChartDataList: LineChartData[] = [];
   module!: Module;
   ideas: Idea[] = [];
   inputManager!: CombinedInputManager;
   decidedIdeas: Idea[] = [];
   displayLabels = false;
+
+  chartAnnotations(chartData: LineChartData): any {
+    if (
+      this.missionProgressParameter === MissionProgressParameter.influenceAreas
+    ) {
+      const xMax = chartData.data.labels ? chartData.data.labels.length : 0;
+      return {
+        box1: {
+          type: 'box',
+          xMin: 0,
+          xMax: xMax,
+          yMin: 10,
+          yMax: 3,
+          backgroundColor: this.positiveColorTransparent,
+          borderColor: 'transparent',
+        },
+        box2: {
+          type: 'box',
+          xMin: 0,
+          xMax: xMax,
+          yMin: 3,
+          yMax: -2,
+          backgroundColor: this.naturalColorTransparent,
+          borderColor: 'transparent',
+        },
+        box3: {
+          type: 'box',
+          xMin: 0,
+          xMax: xMax,
+          yMin: -2,
+          yMax: -10,
+          backgroundColor: this.negativeColorTransparent,
+          borderColor: 'transparent',
+        },
+      };
+    }
+    return {};
+  }
 
   mounted(): void {
     this.displayLabels = true;
@@ -170,6 +190,11 @@ export default class MissionProgressChart extends Vue {
   updateTask(task: Task): void {
     const module = task.modules.find((module) => module.name === 'missionmap');
     if (module) this.module = module;
+    this.calculateCharts();
+  }
+
+  @Watch('missionProgressParameter', { immediate: true })
+  onMissionProgressParameterChanged(): void {
     this.calculateCharts();
   }
 
@@ -219,6 +244,10 @@ export default class MissionProgressChart extends Vue {
     title = 'general',
     mapOnlyOwnInfluence = false
   ): void {
+    const displayParameter =
+      this.missionProgressParameter === MissionProgressParameter.influenceAreas
+        ? gameConfig.parameter
+        : gameConfigMoveIt.electricity;
     let ideaVotes = decidedIdeas.map((idea) => {
       return {
         idea: idea,
@@ -228,7 +257,9 @@ export default class MissionProgressChart extends Vue {
     });
     let mapToValue = (list, parameter) =>
       list.map((item) =>
-        item.idea ? item.idea.parameter.influenceAreas[parameter] : 0
+        item.idea
+          ? item.idea.parameter[this.missionProgressParameter][parameter]
+          : 0
       );
     if (mapOnlyOwnInfluence) {
       ideaVotes = decidedIdeas
@@ -262,7 +293,7 @@ export default class MissionProgressChart extends Vue {
               0
             );
             return (
-              item.idea.parameter.influenceAreas[parameter] *
+              item.idea.parameter[this.missionProgressParameter][parameter] *
               (ownSum / item.vote.sum)
             );
           }
@@ -290,9 +321,9 @@ export default class MissionProgressChart extends Vue {
     );
     const datasets = calculateChartPerParameter(
       ideaProgress,
-      Object.keys(gameConfig.parameter),
+      Object.keys(displayParameter),
       ideaProgress,
-      Object.values(gameConfig.parameter).map((item) => item.color),
+      Object.values(displayParameter).map((item) => item.color),
       () => true,
       (item, progress) => item.index <= progress.index,
       null,
@@ -300,9 +331,14 @@ export default class MissionProgressChart extends Vue {
         const sum = getCalculationForType(CalculationType.Sum)(
           mapToValue(list, parameter)
         );
-        return this.module.parameter[parameter] + sum;
+        if (
+          this.missionProgressParameter ===
+          MissionProgressParameter.influenceAreas
+        )
+          return this.module.parameter[parameter] + sum;
+        else return displayParameter[parameter].value + sum;
       },
-      (parameter) => gameConfig.parameter[parameter].iconCode
+      (parameter) => displayParameter[parameter].iconCode
     );
     for (const dataset of datasets) {
       (dataset as any).pointStyle = 'circle';
