@@ -69,7 +69,9 @@
         <template #headerContent>
           <el-collapse accordion v-model="activeTab">
             <el-collapse-item
-              v-for="taskCategory in Object.keys(TaskCategory)"
+              v-for="taskCategory in Object.keys(
+                TaskCategoriesWithUsableModules
+              )"
               :key="taskCategory"
               :name="taskCategory"
               :style="{
@@ -278,6 +280,7 @@ import TaskType from '@/types/enum/TaskType';
 import TaskCategory, {
   getCategoryOfType,
   TaskCategoryOption,
+  TaskCategoryType,
 } from '@/types/enum/TaskCategory';
 import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 import AddItem from '@/components/moderator/atoms/AddItem.vue';
@@ -361,6 +364,24 @@ export default class ModeratorTopicDetails extends Vue {
   reactivateTutorial(): void {
     reactivateTutorial('topicDetails', this.eventBus);
     reactivateTutorial('taskTimeline', this.eventBus);
+  }
+
+  get TaskCategoriesWithUsableModules(): { [name: string]: TaskCategoryType } {
+    const taskCategories: { [name: string]: TaskCategoryType } = {};
+    for (const category of Object.keys(TaskCategory)) {
+      let moduleCount = 0;
+      for (const taskType of TaskCategory[category].taskTypes) {
+        if (this.moduleIcon[taskType.toUpperCase()]) {
+          moduleCount += Object.keys(
+            this.moduleIcon[taskType.toUpperCase()]
+          ).length;
+        }
+      }
+      if (moduleCount > 0) {
+        taskCategories[category] = TaskCategory[category];
+      }
+    }
+    return taskCategories;
   }
 
   get isModerator(): boolean {
