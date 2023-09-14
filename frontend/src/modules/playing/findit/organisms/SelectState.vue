@@ -15,10 +15,12 @@
               v-for="configType of Object.keys(gameConfig)"
               :key="configType"
               :command="configType"
-              :style="{ color: getSettingsForLevelType(configType).color }"
+              :style="{
+                color: getSettingsForLevelType(gameConfig, configType).color,
+              }"
             >
               <font-awesome-icon
-                :icon="getSettingsForLevelType(configType).icon"
+                :icon="getSettingsForLevelType(gameConfig, configType).icon"
               />
               &nbsp;
               {{
@@ -36,11 +38,13 @@
       :class="{ own: isOwnLevel(idea) }"
       v-for="idea of ideas"
       :key="idea.id"
-      :style="{ '--level-type-color': getSettingsForLevel(idea).color }"
+      :style="{
+        '--level-type-color': getSettingsForLevel(gameConfig, idea).color,
+      }"
       @click="levelSelected(idea)"
     >
       <div class="media-left">
-        <font-awesome-icon :icon="getSettingsForLevel(idea).icon" />
+        <font-awesome-icon :icon="getSettingsForLevel(gameConfig, idea).icon" />
       </div>
       <div class="media-content">{{ idea.keywords }}</div>
       <div class="media-right">
@@ -74,8 +78,8 @@ import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterati
 import { GameStep } from '@/modules/playing/findit/output/Participant.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
-import * as configParameter from '@/modules/playing/findit/utils/configParameter';
-import { LevelWorkflowType } from '@/modules/playing/findit/types/LevelWorkflowType';
+import * as configParameter from '@/utils/game/configParameter';
+import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 
 @Options({
   components: { FontAwesomeIcon },
@@ -181,7 +185,7 @@ export default class SelectState extends Vue {
     if (!level) {
       this.$emit('selectionDone', levelType, null);
     } else {
-      const levelType = configParameter.getTypeForLevel(level);
+      const levelType = configParameter.getTypeForLevel(this.gameConfig, level);
       this.$emit('selectionDone', levelType, level);
     }
   }

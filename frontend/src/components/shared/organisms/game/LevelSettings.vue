@@ -7,7 +7,7 @@
   >
     <el-dialog
       v-model="showSettings"
-      :title="$t('module.playing.findit.participant.settings.levelName')"
+      :title="$t('shared.organism.game.levelSettings.levelName')"
       :before-close="handleClose"
       width="calc(var(--app-width) * 0.8)"
     >
@@ -49,7 +49,7 @@ import FromSubmitItem from '@/components/shared/molecules/FromSubmitItem.vue';
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class LinkSettings extends Vue {
+export default class LevelSettings extends Vue {
   defaultFormRules: ValidationRuleDefinition = defaultFormRules;
 
   @Prop({ default: false }) showModal!: boolean;

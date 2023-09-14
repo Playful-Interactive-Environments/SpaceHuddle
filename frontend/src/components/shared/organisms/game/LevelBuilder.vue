@@ -44,7 +44,7 @@
           >
             <CustomSprite
               :texture="placeable.texture"
-              :anchor="0.5"
+              :anchor="placeable.pivot"
               :width="placeable.width"
               :aspect-ration="getObjectAspect(placeable.type, placeable.name)"
               :object-space="ObjectSpace.RelativeToBackground"
@@ -89,13 +89,13 @@
         <font-awesome-icon icon="square-plus" />
       </div>
       <div
-        v-if="selectedObject && showOptions"
+        v-if="selectedObject && showOptions && canRotate"
         @click="rotateSelectedObject(-10)"
       >
         <font-awesome-icon icon="rotate-left" />
       </div>
       <div
-        v-if="selectedObject && showOptions"
+        v-if="selectedObject && showOptions && canRotate"
         @click="rotateSelectedObject(10)"
       >
         <font-awesome-icon icon="rotate-right" />
@@ -132,9 +132,7 @@
     <DrawerBottomOverlay
       v-if="levelType"
       v-model="showToolbox"
-      :title="
-        $t('module.playing.findit.participant.itemSelection.selectItem')
-      "
+      :title="$t('shared.organism.game.levelBuilder.itemSelection.selectItem')"
     >
       <el-space wrap>
         <el-button
@@ -146,7 +144,7 @@
           :class="{ active: objectType === activeObjectType }"
         >
           <font-awesome-icon
-            :icon="gameConfig[levelType][objectType].settings.icon"
+            :icon="gameConfig[levelType].categories[objectType].settings.icon"
           />
         </el-button>
       </el-space>
@@ -192,12 +190,12 @@ import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer, {
   BackgroundMovement,
 } from '@/components/shared/atoms/game/GameContainer.vue';
-import * as placeable from '@/modules/playing/findit/types/Placeable';
+import * as placeable from '@/types/game/Placeable';
 import { v4 as uuidv4 } from 'uuid';
 import * as pixiUtil from '@/utils/pixi';
 import * as ideaService from '@/services/idea-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import LevelSettings from '@/modules/playing/findit/organisms/LevelSettings.vue';
+import LevelSettings from '@/components/shared/organisms/game/LevelSettings.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ElMessage } from 'element-plus';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
@@ -206,10 +204,9 @@ import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
 import * as themeColors from '@/utils/themeColors';
 import { Idea } from '@/types/api/Idea';
-import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
 import { until } from '@/utils/wait';
-import * as configParameter from '@/modules/playing/findit/utils/configParameter';
-import { LevelWorkflowType } from '@/modules/playing/findit/types/LevelWorkflowType';
+import * as configParameter from '@/utils/game/configParameter';
+import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 
 // The current state of the edit mode
 export interface BuildState {
@@ -246,13 +243,15 @@ export interface BuildStateResult {
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
-export default class ForestFireEdit extends Vue {
+export default class LevelBuilder extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly levelType!: string;
   @Prop({ default: EndpointAuthorisationType.PARTICIPANT })
   authHeaderTyp!: EndpointAuthorisationType;
   @Prop({ default: null }) readonly level!: Idea | null;
   @Prop({ default: '100%' }) readonly height!: string;
+  @Prop({ default: true }) readonly canRotate!: boolean;
+  @Prop() readonly gameConfig!: placeable.PlaceableConfig;
   activeObjectType = '';
   activeObjectName = '';
   showToolbox = false;
@@ -266,7 +265,6 @@ export default class ForestFireEdit extends Vue {
   showLevelSettings = false;
   selectedObject: GameObject | null = null;
   startTime = Date.now();
-  gameConfig = gameConfig;
   isSaving = false;
 
   EndpointAuthorisationType = EndpointAuthorisationType;
@@ -281,7 +279,9 @@ export default class ForestFireEdit extends Vue {
 
   get buildResult(): BuildStateResult {
     const categoryCount: { [key: string]: number } = {};
-    for (const categoryName of Object.keys(gameConfig[this.levelType])) {
+    for (const categoryName of Object.keys(
+      this.gameConfig[this.levelType].categories
+    )) {
       categoryCount[categoryName] = this.placedObjects.filter(
         (item) => item.type === categoryName
       ).length;
@@ -296,10 +296,9 @@ export default class ForestFireEdit extends Vue {
 
   get ObjectsForActiveType(): string[] {
     if (this.activeObjectType) {
-      const list = Object.keys(
-        gameConfig[this.levelType][this.activeObjectType]
+      return Object.keys(
+        this.gameConfig[this.levelType].categories[this.activeObjectType].items
       );
-      return list.filter((name) => name !== 'settings');
     }
     return [];
   }
@@ -339,7 +338,9 @@ export default class ForestFireEdit extends Vue {
 
   getValues(objectName: string): { count: number; max: number } {
     const config =
-      gameConfig[this.levelType][this.activeObjectType][objectName];
+      this.gameConfig[this.levelType].categories[this.activeObjectType].items[
+        objectName
+      ];
     return {
       count: 0,
       max: config.maxCount,
@@ -399,12 +400,13 @@ export default class ForestFireEdit extends Vue {
   }
 
   get gameConfigTypes(): string[] {
-    return configParameter.getGameConfigTypes(this.levelType);
+    return configParameter.getGameConfigTypes(this.gameConfig, this.levelType);
   }
 
   unmounted(): void {
     for (const typeName of this.gameConfigTypes) {
-      const settings = gameConfig[this.levelType][typeName].settings;
+      const settings =
+        this.gameConfig[this.levelType].categories[typeName].settings;
       PIXI.Assets.unload(settings.spritesheet);
     }
   }
@@ -412,10 +414,13 @@ export default class ForestFireEdit extends Vue {
   @Watch('levelType', { immediate: true })
   onLevelTypeChanged(): void {
     if (this.levelType) {
-      this.activeObjectType = gameConfig[this.levelType].settings.defaultType;
-      this.activeObjectName = gameConfig[this.levelType].settings.defaultName;
+      this.activeObjectType =
+        this.gameConfig[this.levelType].settings.defaultType;
+      this.activeObjectName =
+        this.gameConfig[this.levelType].settings.defaultName;
       for (const typeName of this.gameConfigTypes) {
-        const settings = gameConfig[this.levelType][typeName].settings;
+        const settings =
+          this.gameConfig[this.levelType].categories[typeName].settings;
         setTimeout(() => {
           if (settings && settings.spritesheet && !this.stylesheets[typeName]) {
             PIXI.Assets.load(settings.spritesheet).then((sheet) => {
@@ -423,15 +428,17 @@ export default class ForestFireEdit extends Vue {
             });
           }
         }, 100);
-        for (const objectName in gameConfig[this.levelType][typeName]) {
-          if (objectName !== 'settings') {
-            const hazardParameter =
-              gameConfig[this.levelType][typeName][objectName];
-            this.placementState[objectName] = {
-              maxCount: hazardParameter.maxCount,
-              currentCount: 0,
-            };
-          }
+        for (const objectName in this.gameConfig[this.levelType].categories[
+          typeName
+        ].items) {
+          const hazardParameter =
+            this.gameConfig[this.levelType].categories[typeName].items[
+              objectName
+            ];
+          this.placementState[objectName] = {
+            maxCount: hazardParameter.maxCount,
+            currentCount: 0,
+          };
         }
       }
     }
@@ -445,14 +452,15 @@ export default class ForestFireEdit extends Vue {
       this.placedObjects = [];
       const levelType = this.level.parameter.type
         ? this.level.parameter.type
-        : configParameter.getDefaultLevelType();
+        : configParameter.getDefaultLevelType(this.gameConfig);
       if (this.previousLevelType && this.previousLevelType !== levelType) {
-        const gameConfigTypes = Object.keys(gameConfig[levelType]).filter(
-          (config) => config !== 'settings'
+        const gameConfigTypes = Object.keys(
+          this.gameConfig[levelType].categories
         );
         for (const typeName of gameConfigTypes) {
           const previousSettings =
-            gameConfig[this.previousLevelType][typeName].settings;
+            this.gameConfig[this.previousLevelType].categories[typeName]
+              .settings;
           if (
             previousSettings &&
             previousSettings.spritesheet &&
@@ -465,7 +473,10 @@ export default class ForestFireEdit extends Vue {
         }
       }
       this.$emit('update:levelType', levelType);
-      const items = configParameter.getItemsForLevel(this.level);
+      const items = configParameter.getItemsForLevel(
+        this.gameConfig,
+        this.level
+      );
       const spriteSheetTypes = items
         .map((item) => item.type)
         .filter((value, index, array) => array.indexOf(value) === index);
@@ -477,7 +488,7 @@ export default class ForestFireEdit extends Vue {
         .map((item) =>
           placeable.convertToDetailData(
             item,
-            gameConfig[levelType],
+            this.gameConfig[levelType],
             this.getTexture(item.type, item.name)
           )
         );
@@ -490,8 +501,11 @@ export default class ForestFireEdit extends Vue {
     return pixiUtil.getSpriteAspect(spriteSheet, objectName);
   }
 
-  isObjectCollectable(objectType: string): boolean {
-    return gameConfig[this.levelType][objectType].settings.collectable;
+  getPlacingRegion(
+    objectType: string
+  ): [number, number, number, number] | undefined {
+    return this.gameConfig[this.levelType].categories[objectType].settings
+      .placingRegion;
   }
 
   async saveLevel(name: string): Promise<void> {
@@ -557,16 +571,15 @@ export default class ForestFireEdit extends Vue {
     setTimeout(() => {
       if (this.activeObjectType) {
         const configParameter =
-          gameConfig[this.levelType][this.activeObjectType][
-            this.activeObjectName
-          ];
+          this.gameConfig[this.levelType].categories[this.activeObjectType]
+            .items[this.activeObjectName];
         if (
           this.placementState[this.activeObjectName].currentCount ===
           this.placementState[this.activeObjectName].maxCount
         ) {
           ElMessage({
             message: this.$t(
-              'module.playing.findit.participant.maxCountPlaced'
+              'shared.organism.game.levelBuilder.maxCountPlaced'
             ),
             type: 'error',
             center: true,
@@ -579,6 +592,8 @@ export default class ForestFireEdit extends Vue {
           this.activeObjectName
         ) as PIXI.Texture<PIXI.Resource>;
         position = this.ensurePositionVisibility(
+          this.activeObjectType,
+          this.activeObjectName,
           texture,
           configParameter.width,
           position
@@ -591,11 +606,10 @@ export default class ForestFireEdit extends Vue {
           texture: texture,
           width: configParameter.width,
           shape: configParameter.shape,
+          pivot: configParameter.pivot ?? [0.5, 0.5],
           position: position,
           rotation: 0,
           scale: 1,
-          escalationSteps: [],
-          escalationStepIndex: 0,
         };
         this.placedObjects.push(placeable);
       }
@@ -603,22 +617,42 @@ export default class ForestFireEdit extends Vue {
   }
 
   private ensurePositionVisibility(
+    configType: string,
+    configName: string,
     texture: PIXI.Texture<PIXI.Resource>,
     width: number,
     position: [number, number]
   ): [number, number] {
-    if (
-      this.$refs.gameContainer &&
-      this.isObjectCollectable(this.activeObjectType)
-    ) {
+    const placingRegion = this.getPlacingRegion(configType);
+    if (this.$refs.gameContainer && !!placingRegion) {
       const container = this.$refs.gameContainer as GameContainer;
       const aspect = (texture as any).orig.width / (texture as any).orig.height;
       const aspectContainer = container.getBackgroundAspect();
       const height = (width / aspect) * aspectContainer;
-      if (position[0] < width / 2) position[0] = width / 2;
-      if (position[1] < height / 2) position[1] = height / 2;
-      if (position[0] > 100 - width / 2) position[0] = 100 - width / 2;
-      if (position[1] > 100 - height / 2) position[1] = 100 - height / 2;
+
+      const checkCompletelyInside =
+        this.gameConfig[this.levelType].categories[configType].settings
+          .checkCompletelyInside;
+      if (checkCompletelyInside) {
+        const configParameter =
+          this.gameConfig[this.levelType].categories[configType].items[
+            configName
+          ];
+        const pivot = configParameter.pivot ?? [0.5, 0.5];
+        if (position[0] < placingRegion[0] + width * pivot[0])
+          position[0] = placingRegion[0] + width * pivot[0];
+        if (position[1] < placingRegion[1] + height * pivot[1])
+          position[1] = placingRegion[1] + height * pivot[1];
+        if (position[0] > placingRegion[2] - width * (1 - pivot[0]))
+          position[0] = placingRegion[2] - width * (1 - pivot[0]);
+        if (position[1] > placingRegion[3] - height * (1 - pivot[1]))
+          position[1] = placingRegion[3] - height * (1 - pivot[1]);
+      } else {
+        if (position[0] < placingRegion[0]) position[0] = placingRegion[0];
+        if (position[1] < placingRegion[1]) position[1] = placingRegion[1];
+        if (position[0] > placingRegion[2]) position[0] = placingRegion[2];
+        if (position[1] > placingRegion[3]) position[1] = placingRegion[3];
+      }
     }
     return position;
   }
@@ -635,11 +669,13 @@ export default class ForestFireEdit extends Vue {
           this.selectedObject.source.name
         ) as PIXI.Texture<PIXI.Resource>;
         const configParameter =
-          gameConfig[this.levelType][this.selectedObject.source.type][
-            this.selectedObject.source.name
-          ];
+          this.gameConfig[this.levelType].categories[
+            this.selectedObject.source.type
+          ].items[this.selectedObject.source.name];
         const previousPosition = [...position];
         const newPosition = this.ensurePositionVisibility(
+          this.selectedObject.source.type,
+          this.selectedObject.source.name,
           texture,
           configParameter.width,
           position
@@ -699,7 +735,8 @@ export default class ForestFireEdit extends Vue {
 
   get renderList(): placeable.Placeable[] {
     const getSortNumber = (placeable: placeable.Placeable): number => {
-      return gameConfig[this.levelType][placeable.type].settings.order;
+      return this.gameConfig[this.levelType].categories[placeable.type].settings
+        .order;
     };
     return this.placedObjects.sort(
       (a, b) => getSortNumber(a) - getSortNumber(b)

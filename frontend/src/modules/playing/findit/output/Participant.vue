@@ -12,14 +12,15 @@
     <SelectState
       v-if="gameStep === GameStep.Select && gameState === GameState.Game"
       :task-id="taskId"
-      :game-config="totalGameConfig"
+      :gameConfig="gameConfig"
       :tracking-manager="trackingManager"
       @selectionDone="levelSelected"
     />
-    <BuildState
+    <LevelBuilder
       v-if="gameStep === GameStep.Build && gameState === GameState.Game"
       :taskId="taskId"
       :level-type="selectedLevelType"
+      :gameConfig="gameConfig"
       @editFinished="editFinished"
     />
     <PlayState
@@ -38,9 +39,9 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
 import * as cashService from '@/services/cash-service';
-import BuildState, {
+import LevelBuilder, {
   BuildStateResult,
-} from '@/modules/playing/findit/organisms/BuildState.vue';
+} from '@/components/shared/organisms/game/LevelBuilder.vue';
 import PlayState, {
   PlayStateResult,
 } from '@/modules/playing/findit/organisms/PlayState.vue';
@@ -50,8 +51,8 @@ import ModuleInfo, {
 } from '@/components/participant/molecules/ModuleInfo.vue';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
-import totalGameConfig from '@/modules/playing/findit/data/gameConfig.json';
 import { Idea } from '@/types/api/Idea';
+import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
 
 export enum GameStep {
   Select = 'select',
@@ -67,7 +68,7 @@ enum GameState {
 @Options({
   components: {
     ModuleInfo,
-    BuildState,
+    LevelBuilder,
     PlayState,
     SelectState,
   },
@@ -93,9 +94,10 @@ export default class Participant extends Vue {
   GameStep = GameStep;
   gameState = GameState.Info;
   GameState = GameState;
-  totalGameConfig = totalGameConfig;
 
   trackingManager!: TrackingManager;
+
+  gameConfig = gameConfig;
 
   // Vue Callbacks for mounting and unmounting / loading and unloading.
   mounted(): void {

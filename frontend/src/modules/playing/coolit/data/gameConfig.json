@@ -8,89 +8,102 @@
       "color": "#c55e44",
       "heatRation": [
         {
-          "yMin": 0,
-          "yMax": 10,
-          "coefficient": 0.5
+          "yMin": 65,
+          "yMax": 85,
+          "coefficient": 3
         },
         {
-          "yMin": 10,
-          "yMax": 30,
-          "coefficient": 3
+          "yMin": 85,
+          "yMax": 100,
+          "coefficient": 0.5
         }
-      ],
-      "placingRegion": {
-        "yMin": 30,
-        "yMax": 50
-      }
+      ]
     },
-    "building": {
-      "settings": {
-        "icon": "building",
-        "order": 10,
-        "spritesheet": "/assets/games/coolit/city/city.json",
-        "explanationText": "module.playing.coolit.participant.placeables.city"
+    "categories": {
+      "building": {
+        "settings": {
+          "icon": "building",
+          "order": 10,
+          "spritesheet": "/assets/games/coolit/city/city.json",
+          "explanationText": "module.playing.coolit.participant.placeables.city",
+          "placingRegion": [0, 50, 100, 63]
+        },
+        "items": {
+          "building01": {
+            "heatRationCoefficient": 3,
+            "maxCount": 10,
+            "width": 15,
+            "shape": "rect",
+            "pivot": [0.5, 1]
+          },
+          "building02": {
+            "heatRationCoefficient": 3,
+            "maxCount": 10,
+            "width": 15,
+            "shape": "rect",
+            "pivot": [0.5, 1]
+          },
+          "building03": {
+            "heatRationCoefficient": 3,
+            "maxCount": 10,
+            "width": 15,
+            "shape": "rect",
+            "pivot": [0.5, 1]
+          },
+          "building04": {
+            "heatRationCoefficient": 3,
+            "maxCount": 10,
+            "width": 15,
+            "shape": "rect",
+            "pivot": [0.5, 1]
+          },
+          "building05": {
+            "heatRationCoefficient": 3,
+            "maxCount": 10,
+            "width": 15,
+            "shape": "rect",
+            "pivot": [0.5, 1]
+          },
+          "building06": {
+            "heatRationCoefficient": 3,
+            "maxCount": 10,
+            "width": 15,
+            "shape": "rect",
+            "pivot": [0.5, 1]
+          },
+          "building07": {
+            "heatRationCoefficient": 3,
+            "maxCount": 10,
+            "width": 15,
+            "shape": "rect",
+            "pivot": [0.5, 1]
+          },
+          "building08": {
+            "heatRationCoefficient": 3,
+            "maxCount": 10,
+            "width": 15,
+            "shape": "rect",
+            "pivot": [0.5, 1]
+          }
+        }
       },
-      "building01": {
-        "heatRationCoefficient": 3,
-        "maxCount": 10,
-        "width": 15,
-        "shape": "rect"
-      },
-      "building02": {
-        "heatRationCoefficient": 3,
-        "maxCount": 10,
-        "width": 15,
-        "shape": "rect"
-      },
-      "building03": {
-        "heatRationCoefficient": 3,
-        "maxCount": 10,
-        "width": 15,
-        "shape": "rect"
-      },
-      "building04": {
-        "heatRationCoefficient": 3,
-        "maxCount": 10,
-        "width": 15,
-        "shape": "rect"
-      },
-      "building05": {
-        "heatRationCoefficient": 3,
-        "maxCount": 10,
-        "width": 15,
-        "shape": "rect"
-      },
-      "building06": {
-        "heatRationCoefficient": 3,
-        "maxCount": 10,
-        "width": 15,
-        "shape": "rect"
-      },
-      "building07": {
-        "heatRationCoefficient": 3,
-        "maxCount": 10,
-        "width": 15,
-        "shape": "rect"
-      },
-      "building08": {
-        "heatRationCoefficient": 3,
-        "maxCount": 10,
-        "width": 15,
-        "shape": "rect"
-      }
-    },
-    "nature": {
-      "settings": {
-        "icon": "tree",
-        "order": 10,
-        "spritesheet": "/assets/games/coolit/city/city.json",
-        "explanationText": "module.playing.coolit.participant.placeables.city"
-      },
-      "trees": {
-        "heatRationCoefficient": 0.5,
-        "maxCount": 10,
-        "width": 15,
-        "shape": "rect"
+      "nature": {
+        "settings": {
+          "icon": "tree",
+          "order": 10,
+          "spritesheet": "/assets/games/coolit/city/city.json",
+          "explanationText": "module.playing.coolit.participant.placeables.city",
+          "placingRegion": [0, 50, 100, 63]
+        },
+        "items": {
+          "trees": {
+            "heatRationCoefficient": 0.5,
+            "maxCount": 10,
+            "width": 15,
+            "shape": "rect",
+            "pivot": [0.5, 1]
+          }
+        }
       }
     }
   }

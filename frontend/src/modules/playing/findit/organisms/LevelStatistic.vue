@@ -54,7 +54,7 @@ import * as ideaService from '@/services/idea-service';
 import { Idea } from '@/types/api/Idea';
 import { AvatarUnicode } from '@/types/enum/AvatarUnicode';
 import { GameStep } from '@/modules/playing/findit/output/Participant.vue';
-import * as placeable from '@/modules/playing/findit/types/Placeable';
+import * as placeable from '@/types/game/Placeable';
 import * as themeColors from '@/utils/themeColors';
 import { getRandomColorList } from '@/utils/colors';
 import { calculateChartPerIteration } from '@/utils/statistic';
@@ -333,9 +333,7 @@ export default class LevelStatistic extends Vue {
         filter
       );
       this.barChartDataList.push({
-        title: this.$t(
-          `module.playing.findit.statistic.itemCount.${gameStep}`
-        ),
+        title: this.$t(`module.playing.findit.statistic.itemCount.${gameStep}`),
         data: {
           labels: labels,
           datasets: datasets,

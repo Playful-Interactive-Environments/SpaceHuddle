@@ -139,7 +139,7 @@ import GameContainer, {
   BackgroundPosition,
   BackgroundMovement,
 } from '@/components/shared/atoms/game/GameContainer.vue';
-import * as placeable from '@/modules/playing/findit/types/Placeable';
+import * as placeable from '@/types/game/Placeable';
 import * as pixiUtil from '@/utils/pixi';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
@@ -156,8 +156,9 @@ import CustomParticleContainer from '@/components/shared/atoms/game/CustomPartic
 import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
 import { Idea } from '@/types/api/Idea';
-import * as configParameter from '@/modules/playing/findit/utils/configParameter';
+import * as configParameter from '@/utils/game/configParameter';
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
 
 enum PlayStateType {
@@ -172,6 +173,48 @@ export interface PlayStateResult {
   collected: number;
   total: number;
   itemList: placeable.PlaceableBase[];
+}
+
+interface FindItPlaceable extends placeable.Placeable {
+  escalationSteps: number[];
+  escalationStepIndex: number;
+}
+
+function convertToFindItPlaceable(
+  value: placeable.PlaceableBase,
+  categoryConfig: placeable.PlaceableThemeConfig,
+  texture: string | PIXI.Texture
+): FindItPlaceable {
+  const result = placeable.convertToDetailData(value, categoryConfig, texture);
+  const escalationSteps: number[] = [];
+  const configParameter = placeable.getConfigParameter(
+    value,
+    categoryConfig
+  ) as any;
+  if (configParameter) {
+    if (configParameter.escalationLevels) {
+      escalationSteps.push(
+        ...configParameter.escalationLevels.map(
+          (level) => Math.random() * (level.max - level.min) + level.min
+        )
+      );
+    }
+  }
+  return {
+    uuid: result.uuid,
+    id: result.id,
+    type: result.type,
+    name: result.name,
+    texture: result.texture,
+    width: result.width,
+    shape: result.shape,
+    pivot: result.pivot,
+    position: result.position,
+    rotation: result.rotation,
+    scale: result.scale,
+    escalationSteps: escalationSteps,
+    escalationStepIndex: 0,
+  };
 }
 
 @Options({
@@ -196,8 +239,6 @@ export interface PlayStateResult {
   },
   emits: ['playFinished'],
 })
-
-/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class PlayState extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: null }) readonly level!: Idea | null;
@@ -209,11 +250,11 @@ export default class PlayState extends Vue {
   gameHeight = 0;
   showToolbox = false;
   tutorialSteps: Tutorial[] = [];
-  clickedPlaceable: placeable.Placeable | null = null;
+  clickedPlaceable: FindItPlaceable | null = null;
   levelType = '';
   gameConfig = gameConfig;
 
-  placedObjects: placeable.Placeable[] = [];
+  placedObjects: FindItPlaceable[] = [];
   collectedObjects: placeable.PlaceableBase[] = [];
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
   totalCount = 0;
@@ -244,7 +285,7 @@ export default class PlayState extends Vue {
     };
   }
 
-  get escalationLevelObject(): placeable.Placeable[][] {
+  get escalationLevelObject(): FindItPlaceable[][] {
     const itemList = this.noneCollectableObjects;
     const levelEscalationList = itemList
       .map((item) => item.escalationStepIndex)
@@ -276,19 +317,23 @@ export default class PlayState extends Vue {
   }
 
   get gameConfigTypes(): string[] {
-    return configParameter.getGameConfigTypes(this.levelType);
+    return configParameter.getGameConfigTypes(
+      gameConfig as any,
+      this.levelType
+    );
   }
 
   unmounted(): void {
     this.deregisterAll();
     for (const typeName of this.gameConfigTypes) {
-      const settings = gameConfig[this.levelType][typeName].settings;
+      const settings = gameConfig[this.levelType].categories[typeName].settings;
       PIXI.Assets.unload(settings.spritesheet);
     }
   }
 
-  getSearchMask(placeable: placeable.Placeable): any {
-    const config = gameConfig[this.levelType][placeable.type].settings;
+  getSearchMask(placeable: FindItPlaceable): any {
+    const config =
+      gameConfig[this.levelType].categories[placeable.type].settings;
     if (!config.collectable) {
       return this.$refs.searchMask;
     }
@@ -308,7 +353,7 @@ export default class PlayState extends Vue {
   }
 
   updatedSearchMask(): void {
-    if (this.searchGraphics) {
+    if (this.searchGraphics && this.searchGraphics.geometry) {
       this.searchGraphics.clear();
       this.searchGraphics.beginFill('#ffffff');
       this.searchGraphics.drawRect(0, 0, this.gameWidth, this.gameHeight);
@@ -342,14 +387,12 @@ export default class PlayState extends Vue {
       this.placedObjects = [];
       const levelType = this.level.parameter.type
         ? this.level.parameter.type
-        : configParameter.getDefaultLevelType();
+        : configParameter.getDefaultLevelType(gameConfig as any);
       if (this.previousLevelType && this.previousLevelType !== levelType) {
-        const gameConfigTypes = Object.keys(gameConfig[levelType]).filter(
-          (config) => config !== 'settings'
-        );
+        const gameConfigTypes = Object.keys(gameConfig[levelType].categories);
         for (const typeName of gameConfigTypes) {
           const previousSettings =
-            gameConfig[this.previousLevelType][typeName].settings;
+            gameConfig[this.previousLevelType].categories[typeName].settings;
           if (
             previousSettings &&
             previousSettings.spritesheet &&
@@ -362,7 +405,10 @@ export default class PlayState extends Vue {
         }
       }
       this.levelType = levelType;
-      const items = configParameter.getItemsForLevel(this.level);
+      const items = configParameter.getItemsForLevel(
+        gameConfig as any,
+        this.level
+      );
       const spriteSheetTypes = items
         .map((item) => item.type)
         .filter((value, index, array) => array.indexOf(value) === index);
@@ -372,7 +418,7 @@ export default class PlayState extends Vue {
       this.placedObjects = items
         .filter((item) => this.hasTexture(item.type, item.name))
         .map((item) =>
-          placeable.convertToDetailData(
+          convertToFindItPlaceable(
             item,
             gameConfig[levelType],
             this.getTexture(item.type, item.name)
@@ -393,7 +439,8 @@ export default class PlayState extends Vue {
   onLevelTypeChanged(): void {
     if (this.levelType) {
       for (const typeName of this.gameConfigTypes) {
-        const settings = gameConfig[this.levelType][typeName].settings;
+        const settings =
+          gameConfig[this.levelType].categories[typeName].settings;
         setTimeout(() => {
           if (
             settings &&
@@ -439,15 +486,17 @@ export default class PlayState extends Vue {
     return pixiUtil.getSpriteAspect(spriteSheet, objectName);
   }
 
-  get collectableObjects(): placeable.Placeable[] {
+  get collectableObjects(): FindItPlaceable[] {
     return this.placedObjects.filter(
-      (obj) => gameConfig[this.levelType][obj.type].settings.collectable
+      (obj) =>
+        gameConfig[this.levelType].categories[obj.type].settings.collectable
     );
   }
 
-  get noneCollectableObjects(): placeable.Placeable[] {
+  get noneCollectableObjects(): FindItPlaceable[] {
     return this.placedObjects.filter(
-      (obj) => !gameConfig[this.levelType][obj.type].settings.collectable
+      (obj) =>
+        !gameConfig[this.levelType].categories[obj.type].settings.collectable
     );
   }
 
@@ -465,27 +514,29 @@ export default class PlayState extends Vue {
 
   get clickedPlaceableConfigSettings(): any {
     if (this.clickedPlaceable) {
-      return gameConfig[this.levelType][this.clickedPlaceable.type].settings;
+      return gameConfig[this.levelType].categories[this.clickedPlaceable.type]
+        .settings;
     }
     return null;
   }
 
   get clickedPlaceableConfig(): any {
     if (this.clickedPlaceable) {
-      return gameConfig[this.levelType][this.clickedPlaceable.type][
+      return gameConfig[this.levelType].categories[this.clickedPlaceable.type][
         this.clickedPlaceable.name
       ];
     }
     return null;
   }
 
-  getCollectable(placeable: placeable.Placeable): boolean {
-    const config = gameConfig[this.levelType][placeable.type].settings;
+  getCollectable(placeable: FindItPlaceable): boolean {
+    const config =
+      gameConfig[this.levelType].categories[placeable.type].settings;
     return config.collectable;
   }
 
-  destroyPlaceable(value: placeable.Placeable, event: PointerEvent): void {
-    const config = gameConfig[this.levelType][value.type].settings;
+  destroyPlaceable(value: FindItPlaceable, event: PointerEvent): void {
+    const config = gameConfig[this.levelType].categories[value.type].settings;
     if (config.explanationText) this.clickedPlaceable = value;
     if (config.collectable) {
       const id = value.id;
@@ -496,7 +547,8 @@ export default class PlayState extends Vue {
       }
       this.collectedCount++;
     }
-    const placeableConfig = gameConfig[this.levelType][value.type][value.name];
+    const placeableConfig =
+      gameConfig[this.levelType].categories[value.type].items[value.name];
     if (placeableConfig.explanationKey) {
       const tutorialStepName = `${value.type}-${placeableConfig.explanationKey}`;
       if (!this.tutorialSteps.find((item) => item.step === tutorialStepName)) {
@@ -526,7 +578,7 @@ export default class PlayState extends Vue {
     this.renderer = renderer;
   }
 
-  handleEscalation(placeable: placeable.Placeable): void {
+  handleEscalation(placeable: FindItPlaceable): void {
     placeable.escalationStepIndex++;
     if (placeable.escalationStepIndex >= placeable.escalationSteps.length) {
       ElMessage({
@@ -543,9 +595,10 @@ export default class PlayState extends Vue {
   }
 
   getConfigForPlaceable(
-    placeable: placeable.Placeable
+    placeable: FindItPlaceable
   ): PIXIParticles.EmitterConfigV3 | null {
-    const typeConfig = gameConfig[this.levelType][placeable.type].settings;
+    const typeConfig =
+      gameConfig[this.levelType].categories[placeable.type].settings;
     if (!typeConfig.escalationShape) return null;
     let shapeIndex = placeable.escalationStepIndex - 1;
     if (shapeIndex < 0) return null;

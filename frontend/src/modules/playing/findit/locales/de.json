@@ -20,19 +20,11 @@
     "place": "Platzieren",
     "play": "Start",
     "newLevel": "neues Level erstellen",
-    "everythingPlaced": "Alles platziert",
-    "maxCountPlaced": "Maximale Anzahl des Objekttyps platziert",
     "lost": "Du hast leider zu lange ein gefährliches Objekt nicht gefunden, das nun einen Schaden verursacht hat. Du hast verloren, bitte versuche es noch einmal.",
     "win": "Herzlichen Glückwunsch, du hast gewonnen",
     "tutorial": {
       "placing": "Klicke auf einen beliebige Stelle in der Szene um eine Auswahl an Objekten zu bekommen. Wähle eines der Objekte aus um es an dem ausgewählten Ort zu platzieren.\nVerschiebe das Objekt durch drag and drop und Drehe, skaliere und lösche das ausgewählte Objekt durch klick auf die Buttons in der Symbolleiste.",
       "finding": "Diese Szene ist nicht so harmlos wie sie scheint!\nAn manchen Orten verstecken sich gefährliche Objekte, die früher oder später eine Katastrophe verursachen könnten. Sammle diese Objekte mit einem Klick ein und verhindere eine große Katastrophe, bevor es zu spät ist!\nBenutze die Lupe, um hinter Bäume und andere Objekte zu schauen."
-    },
-    "settings": {
-      "levelName": "Levelname"
-    },
-    "itemSelection": {
-      "selectItem": "Zu platzierendes Objekt auswählen"
     },
     "placeables": {
       "fire": {

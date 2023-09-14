@@ -26,14 +26,15 @@
             :level="selectedLevel"
             :auth-header-typ="EndpointAuthorisationType.MODERATOR"
           ></PlayState>
-          <BuildState
+          <LevelBuilder
             v-if="activeTab === 'edit'"
             :level="selectedLevel"
             v-model:level-type="selectedLevelType"
             :task-id="taskId"
             :auth-header-typ="EndpointAuthorisationType.MODERATOR"
+            :gameConfig="gameConfig"
             @approved="approved"
-          ></BuildState>
+          ></LevelBuilder>
         </div>
       </el-aside>
       <el-main>
@@ -77,14 +78,17 @@
                   @ideaDeleted="refreshIdeas()"
                   @customCommand="dropdownCommand($event, element)"
                   :style="{
-                    '--level-type-color': getSettingsForLevel(element).color,
+                    '--level-type-color': getSettingsForLevel(
+                      gameConfig,
+                      element
+                    ).color,
                   }"
                   @click="selectLevel(element)"
                 >
                   <template #icon>
                     <div class="level-icon">
                       <font-awesome-icon
-                        :icon="getSettingsForLevel(element).icon"
+                        :icon="getSettingsForLevel(gameConfig, element).icon"
                       />
                     </div>
                   </template>
@@ -117,14 +121,17 @@
                 @ideaDeleted="refreshIdeas()"
                 @customCommand="dropdownCommand($event, idea)"
                 :style="{
-                  '--level-type-color': getSettingsForLevel(idea).color,
+                  '--level-type-color': getSettingsForLevel(gameConfig, idea)
+                    .color,
                 }"
                 @click="selectLevel(idea)"
                 v-model:collapseIdeas="filter.collapseIdeas"
               >
                 <template #icon>
                   <div class="level-icon">
-                    <font-awesome-icon :icon="getSettingsForLevel(idea).icon" />
+                    <font-awesome-icon
+                      :icon="getSettingsForLevel(gameConfig, idea).icon"
+                    />
                   </div>
                 </template>
                 <template #dropdown>
@@ -169,7 +176,9 @@
             v-for="configType of Object.keys(gameConfig)"
             :key="configType"
             :value="configType"
-            :style="{ color: getSettingsForLevelType(configType).color }"
+            :style="{
+              color: getSettingsForLevelType(gameConfig, configType).color,
+            }"
             :label="
               $t(
                 `module.playing.findit.participant.placeables.${configType}.name`
@@ -177,7 +186,7 @@
             "
           >
             <font-awesome-icon
-              :icon="getSettingsForLevelType(configType).icon"
+              :icon="getSettingsForLevelType(gameConfig, configType).icon"
             />
             &nbsp;
             {{
@@ -207,10 +216,10 @@ import { IModeratorContent } from '@/types/ui/IModeratorContent';
 import * as cashService from '@/services/cash-service';
 import LevelStatistic from '@/modules/playing/findit/organisms/LevelStatistic.vue';
 import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
-import BuildState from '@/modules/playing/findit/organisms/BuildState.vue';
+import LevelBuilder from '@/components/shared/organisms/game/LevelBuilder.vue';
 import PlayState from '@/modules/playing/findit/organisms/PlayState.vue';
-import * as configParameter from '@/modules/playing/findit/utils/configParameter';
-import { LevelWorkflowType } from '@/modules/playing/findit/types/LevelWorkflowType';
+import * as configParameter from '@/utils/game/configParameter';
+import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 import * as themeColors from '@/utils/themeColors';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import IdeaFilter, {
@@ -225,9 +234,10 @@ import { Task } from '@/types/api/Task';
 import { Module } from '@/types/api/Module';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 const emptyParameter = {
   state: LevelWorkflowType.created,
-  type: configParameter.getDefaultLevelType(),
+  type: configParameter.getDefaultLevelType(gameConfig as any),
   items: [],
 };
 
@@ -235,7 +245,7 @@ const emptyParameter = {
   components: {
     FontAwesomeIcon,
     PlayState,
-    BuildState,
+    LevelBuilder,
     LevelStatistic,
     AddItem,
     IdeaSettings,
@@ -245,7 +255,6 @@ const emptyParameter = {
     CollapseTitle,
   },
 })
-/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorContent extends Vue implements IModeratorContent {
   @Prop() readonly taskId!: string;
   ideas: Idea[] = [];

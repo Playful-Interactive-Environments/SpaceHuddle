@@ -454,6 +454,18 @@
       "drawingUploader": {
         "header": "create a sketch",
         "save": "Done"
+      },
+      "game": {
+        "levelSettings": {
+          "levelName": "level name"
+        },
+        "levelBuilder": {
+          "everythingPlaced": "everything placed",
+          "maxCountPlaced": "max objects of type placed",
+          "itemSelection": {
+            "selectItem": "select placing item"
+          }
+        }
       }
     },
     "view": {

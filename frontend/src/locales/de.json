@@ -454,6 +454,18 @@
       "drawingUploader": {
         "header": "Eine Skizze erstellen",
         "save": "Erledigt"
+      },
+      "game": {
+        "levelSettings": {
+          "levelName": "Levelname"
+        },
+        "levelBuilder": {
+          "everythingPlaced": "Alles platziert",
+          "maxCountPlaced": "Maximale Anzahl des Objekttyps platziert",
+          "itemSelection": {
+            "selectItem": "Zu platzierendes Objekt auswählen"
+          }
+        }
       }
     },
     "view": {

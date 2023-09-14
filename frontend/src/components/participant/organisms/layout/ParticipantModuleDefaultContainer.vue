@@ -177,7 +177,7 @@ export default class ParticipantModuleDefaultContainer extends Vue {
 
 .fixed {
   position: sticky;
-  background-color: white;
+  background-color: var(--color-background);
   margin-bottom: -1rem;
   padding: 1rem 0;
 }
