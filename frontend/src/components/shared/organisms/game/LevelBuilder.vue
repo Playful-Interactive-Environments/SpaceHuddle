@@ -26,7 +26,7 @@
             v-model:id="placeable.id"
             :type="placeable.shape"
             :collider-delta="colliderDelta"
-            :show-bounds="true"
+            :show-bounds="false"
             :anchor="placeable.pivot"
             :object-space="ObjectSpace.RelativeToBackground"
             v-model:x="placeable.position[0]"
@@ -556,11 +556,6 @@ export default class LevelBuilder extends Vue {
     return pixiUtil.getSpriteAspect(spriteSheet, objectName);
   }
 
-  getPlacingRegions(objectType: string): [number, number][][] | undefined {
-    return this.gameConfig[this.levelType].categories[objectType].settings
-      .placingRegions;
-  }
-
   async saveLevel(name: string): Promise<void> {
     this.isSaving = true;
     if (!this.level) {
@@ -667,6 +662,7 @@ export default class LevelBuilder extends Vue {
           position: position,
           rotation: 0,
           scale: 1,
+          placingRegions: configParameter.placingRegions,
         };
         this.placedObjects.push(placeable);
       }
@@ -680,7 +676,13 @@ export default class LevelBuilder extends Vue {
     width: number,
     position: [number, number]
   ): [number, number] {
-    const placingRegionList = this.getPlacingRegions(configType);
+    let placingRegionList =
+      this.gameConfig[this.levelType].categories[configType].items[configName]
+        .placingRegions;
+    if (!placingRegionList)
+      placingRegionList =
+        this.gameConfig[this.levelType].categories[configType].settings
+          .placingRegions;
     if (this.$refs.gameContainer && !!placingRegionList) {
       const container = this.$refs.gameContainer as GameContainer;
       const aspect = (texture as any).orig.width / (texture as any).orig.height;
@@ -691,6 +693,7 @@ export default class LevelBuilder extends Vue {
         offsetAmount = 0,
         pivot: [number, number] = [0.5, 0.5]
       ): [number, number] => {
+        if (!placingRegionList) return position;
         let closesPoint = {
           distance: Number.MAX_VALUE,
           point: [...position] as [number, number],

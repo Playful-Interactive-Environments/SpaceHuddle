@@ -214,6 +214,7 @@ function convertToFindItPlaceable(
     scale: result.scale,
     escalationSteps: escalationSteps,
     escalationStepIndex: 0,
+    placingRegions: result.placingRegions,
   };
 }
 

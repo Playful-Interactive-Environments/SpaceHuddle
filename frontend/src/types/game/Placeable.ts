@@ -22,6 +22,7 @@ export interface Placeable extends PlaceableBase {
   texture: string | PIXI.Texture;
   width: number;
   shape: BoundingBoxShape;
+  placingRegions: [number, number][][] | undefined;
 }
 
 export interface PlaceableItemConfig {
@@ -29,6 +30,7 @@ export interface PlaceableItemConfig {
   width: number;
   shape: BoundingBoxShape;
   pivot: [number, number] | undefined;
+  placingRegions: [number, number][][] | undefined;
 }
 
 export interface PlaceableCategoryConfig {
@@ -98,6 +100,7 @@ export function convertToDetailData(
       position: value.position,
       rotation: value.rotation,
       scale: value.scale,
+      placingRegions: undefined,
     };
   }
   return {
@@ -112,5 +115,6 @@ export function convertToDetailData(
     position: value.position,
     rotation: value.rotation,
     scale: value.scale,
+    placingRegions: configParameter.placingRegions,
   };
 }

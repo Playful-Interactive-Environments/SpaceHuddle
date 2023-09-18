@@ -16,7 +16,7 @@
           "spritesheet": "/assets/games/findit/fire/hazard.json",
           "explanationText": "module.information.findit.participant.placeables.fire",
           "escalationShape": ["smoke", "fire"],
-          "placingRegions": [[[0, 0], [0,  100], [100, 100], [100, 0]]],
+          "placingRegions": [[[0, 0], [100, 0], [100, 100], [0, 100]]],
           "checkCompletelyInside": true
         },
         "items": {
@@ -175,7 +175,7 @@
             "splash",
             "smoke"
           ],
-          "placingRegions": [[[0, 0], [0,  100], [100, 100], [100, 0]]],
+          "placingRegions": [[[0, 0], [100, 0], [100, 100], [0, 100]]],
           "checkCompletelyInside": true
         },
         "items": {
@@ -194,7 +194,8 @@
             "maxCount": 10,
             "width": 3,
             "shape": "rect",
-            "explanationKey": "fish"
+            "explanationKey": "fish",
+            "placingRegions": [[[0, 0], [15, 0], [20, 50], [40, 100], [0, 100]]]
           },
           "man": {
             "escalationLevels": [
@@ -211,7 +212,8 @@
             "maxCount": 2,
             "width": 4,
             "shape": "circle",
-            "explanationKey": "person"
+            "explanationKey": "person",
+            "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           },
           "woman": {
             "escalationLevels": [
@@ -228,7 +230,8 @@
             "maxCount": 2,
             "width": 3,
             "shape": "circle",
-            "explanationKey": "person"
+            "explanationKey": "person",
+            "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           },
           "sandbag": {
             "escalationLevels": [
