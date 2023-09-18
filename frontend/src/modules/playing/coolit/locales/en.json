@@ -12,6 +12,8 @@
     "settingsTitle": "idea settings",
     "add": "add level",
     "levelType": "level type",
+    "preConfig": "pre-configuration",
+    "noPreConfig": "none",
     "share": "share"
   },
   "participant": {

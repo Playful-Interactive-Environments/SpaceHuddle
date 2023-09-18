@@ -74,6 +74,7 @@ export default class GameObject extends Vue {
   @Prop({ default: null }) triggerDelay!: number | null;
   @Prop({ default: false }) highlighted!: boolean;
   @Prop({ default: false }) disabled!: boolean;
+  @Prop({ default: 0 }) anchor!: number | [number, number];
   body!: typeof Matter.Body;
   position: [number, number] = [0, 0];
   rotationValue = 0;
@@ -212,6 +213,14 @@ export default class GameObject extends Vue {
     }, this.renderDelay);
   }
 
+  updatePivot(width: number, height: number): void {
+    if (this.anchor) {
+      const deltaX = width * this.anchor[0] - width / 2;
+      const deltaY = height * this.anchor[1] - height / 2;
+      Matter.Body.setCentre(this.body, { x: deltaX, y: deltaY }, true);
+    }
+  }
+
   addRect(x: number, y: number, width: number, height: number): void {
     this.options.isStatic = this.isStatic;
     const colliderWidth = width + this.colliderDelta * 2;
@@ -223,6 +232,7 @@ export default class GameObject extends Vue {
       colliderHeight,
       this.options
     );
+    this.updatePivot(colliderWidth, colliderHeight);
     this.onRotationChanged();
     this.onScaleChanged();
     this.$emit('update:id', this.body.id);
@@ -234,12 +244,10 @@ export default class GameObject extends Vue {
 
   addCircle(x: number, y: number, width: number, height: number): void {
     this.options.isStatic = this.isStatic;
-    this.body = Matter.Bodies.circle(
-      x,
-      y,
-      (width > height ? width / 2 : height / 2) + this.colliderDelta,
-      this.options
-    );
+    const radius =
+      (width > height ? width / 2 : height / 2) + this.colliderDelta;
+    this.body = Matter.Bodies.circle(x, y, radius, this.options);
+    this.updatePivot(radius, radius);
     this.onRotationChanged();
     this.onScaleChanged();
     this.$emit('update:id', this.body.id);
@@ -437,16 +445,24 @@ export default class GameObject extends Vue {
       const width = this.clickWidth;
       const height = this.clickHeight;
 
+      const centerX = width * this.anchor[0] - width / 2;
+      const centerY = height * this.anchor[1] - height / 2;
       if (this.type === 'rect') {
         graphics.clear();
         graphics.lineStyle(2, '#ff0000');
-        graphics.drawRect(-width / 2, -height / 2, width, height);
+
+        graphics.drawRect(
+          -width / 2 - centerX,
+          -height / 2 - centerY,
+          width,
+          height
+        );
       } else {
         graphics.clear();
         graphics.lineStyle(2, '#ff0000');
         graphics.drawCircle(
-          graphics.x,
-          graphics.y,
+          graphics.x - centerX,
+          graphics.y - centerY,
           (width > height ? width : height) / 2
         );
       }

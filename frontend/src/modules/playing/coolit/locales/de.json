@@ -12,6 +12,8 @@
     "settingsTitle": "Ideeneinstellungen",
     "add": "Level hinzufügen",
     "levelType": "Leveltyp",
+    "preConfig": "Vorkonfiguration",
+    "noPreConfig": "ohne",
     "share": "teilen"
   },
   "participant": {

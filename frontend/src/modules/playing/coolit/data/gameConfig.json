@@ -3,7 +3,7 @@
     "settings": {
       "background": "/assets/games/coolit/city/background.jpg",
       "defaultType": "building",
-      "defaultName": "cigarette",
+      "defaultName": "building01",
       "icon": "city",
       "color": "#c55e44",
       "heatRation": [

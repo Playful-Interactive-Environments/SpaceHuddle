@@ -14,7 +14,9 @@
       "edit": "bearbeiten"
     },
     "add": "Level hinzufügen",
-    "levelType": "Leveltyp"
+    "levelType": "Leveltyp",
+    "preConfig": "Vorkonfiguration",
+    "noPreConfig": "ohne"
   },
   "participant": {
     "place": "Platzieren",

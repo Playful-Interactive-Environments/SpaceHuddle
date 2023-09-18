@@ -12,6 +12,7 @@
         :gameConfig="gameConfig"
         :can-rotate="false"
         :can-export="true"
+        :collider-delta="0"
       ></LevelBuilder>
     </div>
     <el-container>
@@ -149,15 +150,15 @@
     <IdeaSettings
       v-model:show-modal="showSettings"
       :taskId="taskId"
-      :idea="settingsIdea"
+      :idea="addIdea"
       @updateData="addData"
       ref="ideaSettings"
     >
       <el-form-item
         :label="$t('module.playing.coolit.moderatorContent.levelType')"
-        :prop="`parameter.shareData`"
+        :prop="`parameter.type`"
       >
-        <el-select v-model="addIdea.parameter.type">
+        <el-select v-model="addIdea.parameter.type" v-on:change="onTypeChanged">
           <el-option
             v-for="configType of Object.keys(gameConfig)"
             :key="configType"
@@ -184,10 +185,28 @@
         </el-select>
       </el-form-item>
       <el-form-item
+        v-if="possiblePreConfigNameList.length > 0"
+        :label="$t('module.playing.coolit.moderatorContent.preConfig')"
+        :prop="`preConfig`"
+      >
+        <el-select v-model="preConfig">
+          <el-option
+            :value="null"
+            :label="$t('module.playing.coolit.moderatorContent.noPreConfig')"
+          />
+          <el-option
+            v-for="name of possiblePreConfigNameList"
+            :key="name"
+            :value="name"
+            :label="name"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item
         :label="$t('module.playing.coolit.moderatorContent.share')"
         :prop="`parameter.shareData`"
       >
-        <el-switch v-model="settingsIdea.parameter.shareData" />
+        <el-switch v-model="addIdea.parameter.shareData" />
       </el-form-item>
     </IdeaSettings>
   </div>
@@ -208,6 +227,7 @@ import { IModeratorContent } from '@/types/ui/IModeratorContent';
 import * as cashService from '@/services/cash-service';
 import LevelStatistic from '@/modules/playing/coolit/organisms/LevelStatistic.vue';
 import gameConfig from '@/modules/playing/coolit/data/gameConfig.json';
+import defaultLevelConfig from '@/modules/playing/coolit/data/defaultLevels.json';
 import LevelBuilder from '@/components/shared/organisms/game/LevelBuilder.vue';
 import * as configParameter from '@/utils/game/configParameter';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
@@ -264,11 +284,11 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     image: null, // the datebase64 url of created image
     parameter: { ...emptyParameter },
   };
-  settingsIdea = this.addIdea;
   openTabs: string[] = [];
   module: Module | undefined = undefined;
   filter: FilterData = { ...defaultFilterData };
   orderGroupContent: OrderGroupList = {};
+  preConfig: string | null = null;
 
   getSettingsForLevel = configParameter.getSettingsForLevel;
   getSettingsForLevelType = configParameter.getSettingsForLevelType;
@@ -283,6 +303,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   get orderIsChangeable(): boolean {
     return this.filter.orderType === IdeaSortOrder.ORDER;
+  }
+
+  get possiblePreConfigNameList(): string[] {
+    return Object.keys(defaultLevelConfig).filter(
+      (name) => defaultLevelConfig[name].type === this.addIdea.parameter.type
+    );
   }
 
   getLevelColor(level: Idea): string {
@@ -426,6 +452,17 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       this.addIdea.order = this.ideas.length;
       this.addIdea.parameter = { ...emptyParameter };
     }
+  }
+
+  onTypeChanged(): void {
+    this.preConfig = null;
+  }
+
+  @Watch('preConfig', { immediate: true })
+  onPreConfigChanged(): void {
+    if (this.preConfig) {
+      this.addIdea.parameter.items = defaultLevelConfig[this.preConfig].items;
+    } else this.addIdea.parameter.items = [];
   }
 
   addData(newIdea: Idea): void {

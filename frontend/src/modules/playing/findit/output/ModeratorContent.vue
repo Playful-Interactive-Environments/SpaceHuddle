@@ -34,6 +34,7 @@
             :auth-header-typ="EndpointAuthorisationType.MODERATOR"
             :gameConfig="gameConfig"
             :can-approve="true"
+            :collider-delta="20"
             @approved="approved"
           ></LevelBuilder>
         </div>
@@ -170,9 +171,9 @@
     >
       <el-form-item
         :label="$t('module.playing.findit.moderatorContent.levelType')"
-        :prop="`parameter.shareData`"
+        :prop="`parameter.type`"
       >
-        <el-select v-model="addIdea.parameter.type">
+        <el-select v-model="addIdea.parameter.type" v-on:change="onTypeChanged">
           <el-option
             v-for="configType of Object.keys(gameConfig)"
             :key="configType"
@@ -198,6 +199,24 @@
           </el-option>
         </el-select>
       </el-form-item>
+      <el-form-item
+        v-if="possiblePreConfigNameList.length > 0"
+        :label="$t('module.playing.findit.moderatorContent.preConfig')"
+        :prop="`preConfig`"
+      >
+        <el-select v-model="preConfig">
+          <el-option
+            :value="null"
+            :label="$t('module.playing.findit.moderatorContent.noPreConfig')"
+          />
+          <el-option
+            v-for="name of possiblePreConfigNameList"
+            :key="name"
+            :value="name"
+            :label="name"
+          />
+        </el-select>
+      </el-form-item>
     </IdeaSettings>
   </div>
 </template>
@@ -217,6 +236,7 @@ import { IModeratorContent } from '@/types/ui/IModeratorContent';
 import * as cashService from '@/services/cash-service';
 import LevelStatistic from '@/modules/playing/findit/organisms/LevelStatistic.vue';
 import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
+import defaultLevelConfig from '@/modules/playing/findit/data/defaultLevels.json';
 import LevelBuilder from '@/components/shared/organisms/game/LevelBuilder.vue';
 import PlayState from '@/modules/playing/findit/organisms/PlayState.vue';
 import * as configParameter from '@/utils/game/configParameter';
@@ -277,6 +297,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   module: Module | undefined = undefined;
   filter: FilterData = { ...defaultFilterData };
   orderGroupContent: OrderGroupList = {};
+  preConfig: string | null = null;
 
   getSettingsForLevel = configParameter.getSettingsForLevel;
   getSettingsForLevelType = configParameter.getSettingsForLevelType;
@@ -292,6 +313,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   get orderIsChangeable(): boolean {
     return this.filter.orderType === IdeaSortOrder.ORDER;
+  }
+
+  get possiblePreConfigNameList(): string[] {
+    return Object.keys(defaultLevelConfig).filter(
+      (name) => defaultLevelConfig[name].type === this.addIdea.parameter.type
+    );
   }
 
   getLevelColor(level: Idea): string {
@@ -435,6 +462,17 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       this.addIdea.order = this.ideas.length;
       this.addIdea.parameter = { ...emptyParameter };
     }
+  }
+
+  onTypeChanged(): void {
+    this.preConfig = null;
+  }
+
+  @Watch('preConfig', { immediate: true })
+  onPreConfigChanged(): void {
+    if (this.preConfig) {
+      this.addIdea.parameter.items = defaultLevelConfig[this.preConfig].items;
+    } else this.addIdea.parameter.items = [];
   }
 
   addData(newIdea: Idea): void {

@@ -25,8 +25,9 @@
             :key="placeable.uuid"
             v-model:id="placeable.id"
             :type="placeable.shape"
-            :collider-delta="20"
+            :collider-delta="colliderDelta"
             :show-bounds="false"
+            :anchor="placeable.pivot"
             :object-space="ObjectSpace.RelativeToBackground"
             v-model:x="placeable.position[0]"
             v-model:y="placeable.position[1]"
@@ -278,6 +279,7 @@ export default class LevelBuilder extends Vue {
   @Prop({ default: false }) readonly canApprove!: boolean;
   @Prop({ default: false }) readonly canExport!: boolean;
   @Prop() readonly gameConfig!: placeable.PlaceableConfig;
+  @Prop({ default: 0 }) readonly colliderDelta!: number;
   activeObjectType = '';
   activeObjectName = '';
   showToolbox = false;

@@ -1,0 +1,10 @@
+{
+  "empty fire": {
+    "type": "fire",
+    "items": []
+  },
+  "empty flood": {
+    "type": "flood",
+    "items": []
+  }
+}

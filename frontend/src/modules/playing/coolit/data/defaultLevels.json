@@ -1,0 +1,107 @@
+{
+  "city centre": {
+    "type": "city",
+    "items": [
+      {
+        "type": "building",
+        "name": "building01",
+        "position": [
+          5.005810445533071,
+          54.56963465394541
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "building02",
+        "position": [
+          14.286499237808274,
+          59.13100300908262
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "building03",
+        "position": [
+          33.26480106515773,
+          57.27347113568827
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "building04",
+        "position": [
+          44.59425107806235,
+          59.48890143435399
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "building05",
+        "position": [
+          60.8519447500997,
+          56.974569751886978
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "building06",
+        "position": [
+          68.89572067025437,
+          61.73085687564369
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "building07",
+        "position": [
+          89.23001834449494,
+          56.296198516300439
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "building08",
+        "position": [
+          24.214093342956269,
+          62.604312353096819
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "building02",
+        "position": [
+          97.06998042757783,
+          59.60204170016114
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "building04",
+        "position": [
+          82.01270751329432,
+          59.85109565816104
+        ],
+        "rotation": 0,
+        "scale": 1
+      }
+    ]
+  }
+}
