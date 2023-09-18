@@ -213,11 +213,15 @@ export default class GameObject extends Vue {
     }, this.renderDelay);
   }
 
+  pivotOffset = [0, 0];
   updatePivot(width: number, height: number): void {
     if (this.anchor) {
       const deltaX = width * this.anchor[0] - width / 2;
       const deltaY = height * this.anchor[1] - height / 2;
-      Matter.Body.setCentre(this.body, { x: deltaX, y: deltaY }, true);
+      setTimeout(() => {
+        this.pivotOffset = [deltaX, deltaY];
+        Matter.Body.setCentre(this.body, { x: deltaX, y: deltaY }, true);
+      }, 100);
     }
   }
 
@@ -232,7 +236,6 @@ export default class GameObject extends Vue {
       colliderHeight,
       this.options
     );
-    this.updatePivot(colliderWidth, colliderHeight);
     this.onRotationChanged();
     this.onScaleChanged();
     this.$emit('update:id', this.body.id);
@@ -240,6 +243,7 @@ export default class GameObject extends Vue {
       this.addBodyToEngine();
       this.addBodyToDetector();
     }
+    this.updatePivot(colliderWidth, colliderHeight);
   }
 
   addCircle(x: number, y: number, width: number, height: number): void {
@@ -247,7 +251,6 @@ export default class GameObject extends Vue {
     const radius =
       (width > height ? width / 2 : height / 2) + this.colliderDelta;
     this.body = Matter.Bodies.circle(x, y, radius, this.options);
-    this.updatePivot(radius, radius);
     this.onRotationChanged();
     this.onScaleChanged();
     this.$emit('update:id', this.body.id);
@@ -255,6 +258,7 @@ export default class GameObject extends Vue {
       this.addBodyToEngine();
       this.addBodyToDetector();
     }
+    this.updatePivot(radius, radius);
   }
 
   addBodyToEngine(): void {
@@ -375,8 +379,8 @@ export default class GameObject extends Vue {
         }
       }
       this.position = [
-        this.body.position.x + this.offset[0],
-        this.body.position.y + this.offset[1],
+        this.body.position.x + this.offset[0] - this.pivotOffset[0],
+        this.body.position.y + this.offset[1] - this.pivotOffset[1],
       ];
       this.rotationValue = this.body.angle;
       this.$emit('update:rotation', turf.radiansToDegrees(this.rotationValue));
