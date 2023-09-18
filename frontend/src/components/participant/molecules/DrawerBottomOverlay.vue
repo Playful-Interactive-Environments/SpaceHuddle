@@ -65,7 +65,7 @@ export default class DrawerBottomOverlay extends Vue {
 }
 
 .scroll {
-  height: calc(70vh - 4rem);
+  height: calc(100%); // calc(70vh - 4rem);
   overflow-y: auto;
 }
 
