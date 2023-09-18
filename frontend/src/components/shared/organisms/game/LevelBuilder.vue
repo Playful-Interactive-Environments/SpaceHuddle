@@ -122,11 +122,34 @@
         v-if="
           level &&
           showOptions &&
-          authHeaderTyp === EndpointAuthorisationType.MODERATOR
+          authHeaderTyp === EndpointAuthorisationType.MODERATOR &&
+          canApprove
         "
         @click="approveLevel"
       >
         <font-awesome-icon icon="thumbs-up" />
+      </div>
+      <div
+        v-if="
+          level &&
+          showOptions &&
+          authHeaderTyp === EndpointAuthorisationType.MODERATOR &&
+          canExport
+        "
+        @click="copyToClipboard"
+      >
+        <font-awesome-icon icon="copy" />
+      </div>
+      <div
+        v-if="
+          level &&
+          showOptions &&
+          authHeaderTyp === EndpointAuthorisationType.MODERATOR &&
+          canExport
+        "
+        @click="pasteFromClipboard"
+      >
+        <font-awesome-icon icon="paste" />
       </div>
     </div>
     <DrawerBottomOverlay
@@ -207,6 +230,7 @@ import { Idea } from '@/types/api/Idea';
 import { until } from '@/utils/wait';
 import * as configParameter from '@/utils/game/configParameter';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
+import { copyToClipboard, pasteFromClipboard } from '@/utils/date';
 
 // The current state of the edit mode
 export interface BuildState {
@@ -251,6 +275,8 @@ export default class LevelBuilder extends Vue {
   @Prop({ default: null }) readonly level!: Idea | null;
   @Prop({ default: '100%' }) readonly height!: string;
   @Prop({ default: true }) readonly canRotate!: boolean;
+  @Prop({ default: false }) readonly canApprove!: boolean;
+  @Prop({ default: false }) readonly canExport!: boolean;
   @Prop() readonly gameConfig!: placeable.PlaceableConfig;
   activeObjectType = '';
   activeObjectName = '';
@@ -741,6 +767,53 @@ export default class LevelBuilder extends Vue {
     return this.placedObjects.sort(
       (a, b) => getSortNumber(a) - getSortNumber(b)
     );
+  }
+
+  copyToClipboard(): void {
+    const data = JSON.stringify({
+      type: this.levelType,
+      items: this.renderList.map((obj) => {
+        return placeable.convertToBase(obj);
+      }),
+    });
+    copyToClipboard(data, this.$t);
+  }
+
+  pasteFromClipboard(): void {
+    pasteFromClipboard('text/plain', this.$t).then((textData) => {
+      if (textData) {
+        try {
+          const data = JSON.parse(textData);
+          if (data.type && data.items && data.type === this.levelType) {
+            this.placedObjects = [];
+            const items = data.items as placeable.PlaceableBase[];
+            this.placedObjects = items
+              .filter((item) => this.hasTexture(item.type, item.name))
+              .map((item) =>
+                placeable.convertToDetailData(
+                  item,
+                  this.gameConfig[this.levelType],
+                  this.getTexture(item.type, item.name)
+                )
+              );
+          } else {
+            ElMessage({
+              message: this.$t('confirm.clipboard.pasteNoData'),
+              type: 'error',
+              center: true,
+              showClose: true,
+            });
+          }
+        } catch (e) {
+          ElMessage({
+            message: this.$t('confirm.clipboard.pasteNoData'),
+            type: 'error',
+            center: true,
+            showClose: true,
+          });
+        }
+      }
+    });
   }
 }
 </script>

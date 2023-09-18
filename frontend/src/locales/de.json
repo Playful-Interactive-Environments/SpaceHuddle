@@ -12,6 +12,14 @@
       "title": "Löschen",
       "ok": "Löschen",
       "cancel": "Abbruch"
+    },
+    "clipboard": {
+      "pasteNoData": "Zwischenablage enthält keine passenden Daten",
+      "clipboardNotAllowed": "Das Lesen der Zwischenablage ist nicht erlaubt.",
+      "clipboardInfo": "Um Daten aus der Zwischenablage einfügen zu können, müssen Sie der Seite den Zugriff auf die Zwischenablage erlauben, andernfalls wird diese Funktion deaktiviert.",
+      "clipboardInfoTitle": "Einfügen von Daten aus der Zwischenablage erlauben",
+      "clipboardInfoOk": "OK",
+      "clipboardInfoCancel": "Verweigern"
     }
   },
   "error": {
@@ -443,12 +451,6 @@
         "header": "Bild hochladen",
         "uploadText": "Datei hier ablegen oder zum Hochladen anklicken",
         "uploadTip": "jpg/png-Dateien",
-        "pasteNoImage": "Zwischenablage enthält keine Bild-Daten",
-        "clipboardNotAllowed": "Das Lesen der Zwischenablage ist nicht erlaubt.",
-        "clipboardInfo": "Um Bilder aus der Zwischenablage einfügen zu können, müssen Sie der Seite den Zugriff auf die Zwischenablage erlauben, andernfalls wird diese Funktion deaktiviert.",
-        "clipboardInfoTitle": "Einfügen von Bildern aus der Zwischenablage erlauben",
-        "clipboardInfoOk": "OK",
-        "clipboardInfoCancel": "Verweigern",
         "save": "Erledigt"
       },
       "drawingUploader": {

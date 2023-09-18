@@ -12,6 +12,14 @@
       "title": "Delete",
       "ok": "Delete",
       "cancel": "Cancel"
+    },
+    "clipboard": {
+      "pasteNoData": "Clipboard does not contain matching data",
+      "clipboardNotAllowed": "Not allowed to read clipboard.",
+      "clipboardInfo": "To be able to paste data from the clipboard, you must allow the page to access the clipboard, otherwise this feature will be disabled.",
+      "clipboardInfoTitle": "Allow paste data from the clipboard",
+      "clipboardInfoOk": "OK",
+      "clipboardInfoCancel": "Deny"
     }
   },
   "error": {
@@ -443,12 +451,6 @@
         "header": "upload and crop image",
         "uploadText": "Drop file here or click to upload",
         "uploadTip": "jpg/png files",
-        "pasteNoImage": "Clipboard contains non-image data.",
-        "clipboardNotAllowed": "Not allowed to read clipboard.",
-        "clipboardInfo": "To be able to paste images from the clipboard, you must allow the page to access the clipboard, otherwise this feature will be disabled.",
-        "clipboardInfoTitle": "Allow paste images from the clipboard",
-        "clipboardInfoOk": "OK",
-        "clipboardInfoCancel": "Deny",
         "save": "Done"
       },
       "drawingUploader": {

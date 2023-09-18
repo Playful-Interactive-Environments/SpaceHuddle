@@ -11,6 +11,7 @@
         @approved="approved"
         :gameConfig="gameConfig"
         :can-rotate="false"
+        :can-export="true"
       ></LevelBuilder>
     </div>
     <el-container>

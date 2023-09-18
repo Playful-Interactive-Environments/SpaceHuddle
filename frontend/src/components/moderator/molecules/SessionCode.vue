@@ -26,8 +26,8 @@
 <script lang="ts">
 import { Prop } from 'vue-property-decorator';
 import { Options, Vue } from 'vue-class-component';
-import { ElMessage } from 'element-plus';
 import TutorialStep from '@/components/shared/atoms/TutorialStep.vue';
+import { copyToClipboard } from '@/utils/date';
 
 @Options({
   components: { TutorialStep },
@@ -43,24 +43,7 @@ export default class SessionCode extends Vue {
   }
 
   copyToClipboard(text: string): void {
-    navigator.clipboard.writeText(text).then(
-      () => {
-        ElMessage({
-          message: (this as any).$t('info.copyToClipboard'),
-          type: 'success',
-          center: true,
-          showClose: true,
-        });
-      },
-      () => {
-        ElMessage({
-          message: (this as any).$t('error.gui.copyToClipboard'),
-          type: 'error',
-          center: true,
-          showClose: true,
-        });
-      }
-    );
+    copyToClipboard(text, this.$t);
   }
 
   share(): void {

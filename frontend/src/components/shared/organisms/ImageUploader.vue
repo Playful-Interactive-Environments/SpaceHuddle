@@ -76,11 +76,12 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage } from 'element-plus';
 import { getBase64ImageType, isValidFileType, UploadData } from '@/utils/file';
 import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import 'vue-advanced-cropper/dist/theme.classic.css';
+import { pasteFromClipboard } from '@/utils/date';
 
 @Options({
   components: { Cropper },
@@ -183,65 +184,16 @@ export default class ImageUploader extends Vue {
   }
 
   async pasteFromClipboard(): Promise<void> {
-    const permission = await (navigator.permissions as any).query({
-      name: 'clipboard-read',
-    });
-    let allowClipboard = permission.state === 'granted';
-    if (permission.state === 'prompt') {
-      await ElMessageBox.confirm(
-        (this as any).$t('shared.organism.imageUploader.clipboardInfo'),
-        (this as any).$t('shared.organism.imageUploader.clipboardInfoTitle'),
-        {
-          confirmButtonText: (this as any).$t(
-            'shared.organism.imageUploader.clipboardInfoOk'
-          ),
-          cancelButtonText: (this as any).$t(
-            'shared.organism.imageUploader.clipboardInfoCancel'
-          ),
-          type: 'warning',
-        }
-      )
-        .then(() => {
-          allowClipboard = true;
-        })
-        .catch(() => {
-          allowClipboard = false;
-        });
-    } else if (permission.state === 'denied') {
-      ElMessage({
-        message: (this as any).$t(
-          'shared.organism.imageUploader.clipboardNotAllowed'
-        ),
-        type: 'error',
-        center: true,
-        showClose: true,
-      });
-      allowClipboard = false;
-    }
-
-    if (allowClipboard) {
-      const clipboardContents = await (navigator.clipboard as any).read();
-      const imageType = 'image/png';
-      for (const item of clipboardContents) {
-        if (!item.types.includes(imageType)) {
-          ElMessage({
-            message: (this as any).$t(
-              'shared.organism.imageUploader.pasteNoImage'
-            ),
-            type: 'error',
-            center: true,
-            showClose: true,
-          });
-        } else {
-          const blob = await item.getType(imageType);
-          this.uploadData = {
-            name: 'clipboard',
-            url: URL.createObjectURL(blob),
-            type: imageType,
-          };
-        }
+    const imageType = 'image/png';
+    pasteFromClipboard(imageType, this.$t).then((blob) => {
+      if (blob) {
+        this.uploadData = {
+          name: 'clipboard',
+          url: URL.createObjectURL(blob),
+          type: imageType,
+        };
       }
-    }
+    });
   }
 }
 </script>

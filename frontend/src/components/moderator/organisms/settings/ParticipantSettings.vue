@@ -193,9 +193,9 @@ import { Session } from '@/types/api/Session';
 import * as cashService from '@/services/cash-service';
 import { ParticipantInfo } from '@/types/api/Participant';
 import QrcodeVue from 'qrcode.vue';
-import { ElMessage } from 'element-plus';
 import Vue3Html2pdf from 'vue3-html2pdf';
 import * as themeColors from '@/utils/themeColors';
+import { copyToClipboard } from '@/utils/date';
 
 @Options({
   components: {
@@ -238,24 +238,7 @@ export default class ParticipantSettings extends Vue {
   }
 
   copyToClipboard(text: string): void {
-    navigator.clipboard.writeText(text).then(
-      () => {
-        ElMessage({
-          message: (this as any).$t('info.copyToClipboard'),
-          type: 'success',
-          center: true,
-          showClose: true,
-        });
-      },
-      () => {
-        ElMessage({
-          message: (this as any).$t('error.gui.copyToClipboard'),
-          type: 'error',
-          center: true,
-          showClose: true,
-        });
-      }
-    );
+    copyToClipboard(text, this.$t);
   }
 
   handleClose(done: { (): void }): void {

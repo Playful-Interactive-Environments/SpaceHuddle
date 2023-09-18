@@ -33,6 +33,7 @@
             :task-id="taskId"
             :auth-header-typ="EndpointAuthorisationType.MODERATOR"
             :gameConfig="gameConfig"
+            :can-approve="true"
             @approved="approved"
           ></LevelBuilder>
         </div>
