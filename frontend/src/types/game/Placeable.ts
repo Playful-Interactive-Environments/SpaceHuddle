@@ -36,7 +36,7 @@ export interface PlaceableCategoryConfig {
     icon: string;
     order: number;
     spritesheet: string;
-    placingRegion: [number, number, number, number] | undefined;
+    placingRegions: [number, number][][] | undefined;
     checkCompletelyInside: boolean | undefined;
   };
   items: {

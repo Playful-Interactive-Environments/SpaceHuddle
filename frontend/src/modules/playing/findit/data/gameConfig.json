@@ -16,7 +16,7 @@
           "spritesheet": "/assets/games/findit/fire/hazard.json",
           "explanationText": "module.information.findit.participant.placeables.fire",
           "escalationShape": ["smoke", "fire"],
-          "placingRegion": [0, 0, 100, 100],
+          "placingRegions": [[[0, 0], [0,  100], [100, 100], [100, 0]]],
           "checkCompletelyInside": true
         },
         "items": {
@@ -51,7 +51,8 @@
             "maxCount": 5,
             "width": 7,
             "shape": "rect",
-            "explanationKey": "dead-tree"
+            "explanationKey": "dead-tree",
+            "pivot": [0.5, 1]
           }
         }
       },
@@ -174,12 +175,7 @@
             "splash",
             "smoke"
           ],
-          "placingRegion": [
-            0,
-            0,
-            100,
-            100
-          ],
+          "placingRegions": [[[0, 0], [0,  100], [100, 100], [100, 0]]],
           "checkCompletelyInside": true
         },
         "items": {

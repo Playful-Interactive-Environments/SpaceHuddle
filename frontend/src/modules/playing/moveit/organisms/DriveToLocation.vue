@@ -612,9 +612,7 @@ export default class DriveToLocation extends Vue {
       const particle = gameConfig.particles[particleName];
       const data = {
         name: particleName,
-        label: this.$t(
-          `module.playing.moveit.enums.particle.${particleName}`
-        ),
+        label: this.$t(`module.playing.moveit.enums.particle.${particleName}`),
         data: [],
         backgroundColor: particle.color,
         borderColor: particle.color,

@@ -889,9 +889,17 @@ export default class GameContainer extends Vue {
       x > this.backgroundPositionOffsetMax[0] ||
       y < this.backgroundPositionOffsetMin[1] ||
       y > this.backgroundPositionOffsetMax[1]
-    )
+    ) {
+      if (x < this.backgroundPositionOffsetMin[0])
+        this.backgroundPositionOffset[0] = this.backgroundPositionOffsetMin[0];
+      if (x > this.backgroundPositionOffsetMax[0])
+        this.backgroundPositionOffset[0] = this.backgroundPositionOffsetMax[0];
+      if (y < this.backgroundPositionOffsetMin[1])
+        this.backgroundPositionOffset[1] = this.backgroundPositionOffsetMin[1];
+      if (y > this.backgroundPositionOffsetMax[1])
+        this.backgroundPositionOffset[1] = this.backgroundPositionOffsetMax[1];
       this.endPan();
-    else {
+    } else {
       this.backgroundPositionOffset = [x, y];
       for (const gameObj of this.gameObjects) {
         if (

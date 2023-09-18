@@ -56,13 +56,17 @@
     <el-switch class="level-item" v-model="modelValue.effectElectricity" />
   </el-form-item>
   <el-form-item
-    :label="$t('module.brainstorming.missionmap.moderatorConfig.maxRatingStars')"
+    :label="
+      $t('module.brainstorming.missionmap.moderatorConfig.maxRatingStars')
+    "
     :prop="`${rulePropPath}.maxRatingStars`"
   >
     <el-input-number v-model="modelValue.maxRatingStars" :min="3" :max="10" />
   </el-form-item>
   <el-form-item
-    :label="$t('module.brainstorming.missionmap.moderatorConfig.minParticipants')"
+    :label="
+      $t('module.brainstorming.missionmap.moderatorConfig.minParticipants')
+    "
     :prop="`${rulePropPath}.minParticipants`"
   >
     <el-input-number v-model="modelValue.minParticipants" :min="1" :max="100" />
@@ -112,7 +116,9 @@
       />
       <el-option
         value="preparation"
-        :label="$t('module.brainstorming.missionmap.moderatorConfig.preparation')"
+        :label="
+          $t('module.brainstorming.missionmap.moderatorConfig.preparation')
+        "
       />
       <el-option
         value="meeting"

@@ -26,7 +26,7 @@
             v-model:id="placeable.id"
             :type="placeable.shape"
             :collider-delta="colliderDelta"
-            :show-bounds="false"
+            :show-bounds="true"
             :anchor="placeable.pivot"
             :object-space="ObjectSpace.RelativeToBackground"
             v-model:x="placeable.position[0]"
@@ -160,7 +160,7 @@
     >
       <el-space wrap>
         <el-button
-          v-for="objectType of gameConfigTypes"
+          v-for="objectType of regionGameConfigTypes"
           :key="objectType"
           type="primary"
           size="large"
@@ -232,6 +232,7 @@ import { until } from '@/utils/wait';
 import * as configParameter from '@/utils/game/configParameter';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 import { copyToClipboard, pasteFromClipboard } from '@/utils/date';
+import * as polygon from '@/utils/polygon';
 
 // The current state of the edit mode
 export interface BuildState {
@@ -431,6 +432,32 @@ export default class LevelBuilder extends Vue {
     return configParameter.getGameConfigTypes(this.gameConfig, this.levelType);
   }
 
+  get regionGameConfigTypes(): string[] {
+    const typeNameList = this.gameConfigTypes;
+    const result: string[] = [];
+    for (const typeName of typeNameList) {
+      const settings =
+        this.gameConfig[this.levelType].categories[typeName].settings;
+      if (settings.placingRegions) {
+        for (const region of settings.placingRegions) {
+          if (
+            polygon.containsPoint(
+              region,
+              this.clickPosition[0],
+              this.clickPosition[1]
+            )
+          ) {
+            result.push(typeName);
+            break;
+          }
+        }
+      } else {
+        result.push(typeName);
+      }
+    }
+    return result;
+  }
+
   unmounted(): void {
     for (const typeName of this.gameConfigTypes) {
       const settings =
@@ -529,11 +556,9 @@ export default class LevelBuilder extends Vue {
     return pixiUtil.getSpriteAspect(spriteSheet, objectName);
   }
 
-  getPlacingRegion(
-    objectType: string
-  ): [number, number, number, number] | undefined {
+  getPlacingRegions(objectType: string): [number, number][][] | undefined {
     return this.gameConfig[this.levelType].categories[objectType].settings
-      .placingRegion;
+      .placingRegions;
   }
 
   async saveLevel(name: string): Promise<void> {
@@ -592,7 +617,11 @@ export default class LevelBuilder extends Vue {
       event.relativeMousePositionToBackground.x,
       event.relativeMousePositionToBackground.y,
     ];
-    this.showToolbox = true;
+    const typeNameList = this.regionGameConfigTypes;
+    if (typeNameList.length > 0) {
+      this.activeObjectType = typeNameList[0];
+      this.showToolbox = true;
+    }
   }
 
   createObject(position: [number, number]): void {
@@ -651,12 +680,50 @@ export default class LevelBuilder extends Vue {
     width: number,
     position: [number, number]
   ): [number, number] {
-    const placingRegion = this.getPlacingRegion(configType);
-    if (this.$refs.gameContainer && !!placingRegion) {
+    const placingRegionList = this.getPlacingRegions(configType);
+    if (this.$refs.gameContainer && !!placingRegionList) {
       const container = this.$refs.gameContainer as GameContainer;
       const aspect = (texture as any).orig.width / (texture as any).orig.height;
       const aspectContainer = container.getBackgroundAspect();
       const height = (width / aspect) * aspectContainer;
+
+      const getClosesPosition = (
+        offsetAmount = 0,
+        pivot: [number, number] = [0.5, 0.5]
+      ): [number, number] => {
+        let closesPoint = {
+          distance: Number.MAX_VALUE,
+          point: [...position] as [number, number],
+        };
+        for (let region of placingRegionList) {
+          if (offsetAmount > 0) {
+            region = polygon.shrinkPolygon(region, -offsetAmount, [
+              width * pivot[0] - width / 2,
+              height * pivot[1] - height / 2,
+            ]);
+          }
+          if (polygon.containsPoint(region, position[0], position[1])) {
+            closesPoint = {
+              distance: 0,
+              point: [...position],
+            };
+            break;
+          } else {
+            const possiblePoint = polygon.closestPoint(
+              region,
+              position[0],
+              position[1]
+            );
+            if (possiblePoint.distance < closesPoint.distance) {
+              closesPoint = {
+                distance: possiblePoint.distance,
+                point: possiblePoint.point,
+              };
+            }
+          }
+        }
+        return closesPoint.point;
+      };
 
       const checkCompletelyInside =
         this.gameConfig[this.levelType].categories[configType].settings
@@ -667,19 +734,21 @@ export default class LevelBuilder extends Vue {
             configName
           ];
         const pivot = configParameter.pivot ?? [0.5, 0.5];
-        if (position[0] < placingRegion[0] + width * pivot[0])
-          position[0] = placingRegion[0] + width * pivot[0];
-        if (position[1] < placingRegion[1] + height * pivot[1])
-          position[1] = placingRegion[1] + height * pivot[1];
-        if (position[0] > placingRegion[2] - width * (1 - pivot[0]))
-          position[0] = placingRegion[2] - width * (1 - pivot[0]);
-        if (position[1] > placingRegion[3] - height * (1 - pivot[1]))
-          position[1] = placingRegion[3] - height * (1 - pivot[1]);
+        position[0] = getClosesPosition(width / 2, pivot)[0];
+        position[1] = getClosesPosition(height / 2, pivot)[1];
+        /*const placingRegion = placingRegionList[0];
+        if (position[0] < placingRegion[0][0] + width * pivot[0])
+          position[0] = placingRegion[0][0] + width * pivot[0];
+        if (position[1] < placingRegion[0][1] + height * pivot[1])
+          position[1] = placingRegion[0][1] + height * pivot[1];
+        if (position[0] > placingRegion[2][0] - width * (1 - pivot[0]))
+          position[0] = placingRegion[2][0] - width * (1 - pivot[0]);
+        if (position[1] > placingRegion[2][1] - height * (1 - pivot[1]))
+          position[1] = placingRegion[2][1] - height * (1 - pivot[1]);*/
       } else {
-        if (position[0] < placingRegion[0]) position[0] = placingRegion[0];
-        if (position[1] < placingRegion[1]) position[1] = placingRegion[1];
-        if (position[0] > placingRegion[2]) position[0] = placingRegion[2];
-        if (position[1] > placingRegion[3]) position[1] = placingRegion[3];
+        const closesPoint = getClosesPosition();
+        position[0] = closesPoint[0];
+        position[1] = closesPoint[1];
       }
     }
     return position;

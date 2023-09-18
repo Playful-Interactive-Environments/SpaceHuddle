@@ -6,9 +6,7 @@
     <el-switch class="level-item" v-model="modelValue.replayable" />
   </el-form-item>
   <el-form-item
-    :label="
-      $t('module.playing.findit.moderatorConfig.showTutorialOnlyOnce')
-    "
+    :label="$t('module.playing.findit.moderatorConfig.showTutorialOnlyOnce')"
     :prop="`${rulePropPath}.showTutorialOnlyOnce`"
   >
     <el-switch class="level-item" v-model="modelValue.showTutorialOnlyOnce" />

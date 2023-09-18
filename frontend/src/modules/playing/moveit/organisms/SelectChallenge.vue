@@ -166,16 +166,12 @@
           </div>
           <div v-if="vehicle.fuel">
             {{
-              $t(
-                'module.playing.moveit.participant.vehicle-parameter.fuel'
-              )
+              $t('module.playing.moveit.participant.vehicle-parameter.fuel')
             }}:
             {{ $t(`module.playing.moveit.enums.fuel.${vehicle.fuel}`) }}
           </div>
           <div v-if="vehicle.mpg">
-            {{
-              $t('module.playing.moveit.participant.vehicle-parameter.mpg')
-            }}:
+            {{ $t('module.playing.moveit.participant.vehicle-parameter.mpg') }}:
             {{ vehicle.mpg }}
             <span v-if="vehicle.fuel === 'electricity'">
               {{ $t('module.playing.moveit.enums.units.kw') }}
@@ -186,18 +182,14 @@
           </div>
           <div v-if="vehicle.power">
             {{
-              $t(
-                'module.playing.moveit.participant.vehicle-parameter.power'
-              )
+              $t('module.playing.moveit.participant.vehicle-parameter.power')
             }}:
             {{ vehicle.power }}
             {{ $t('module.playing.moveit.enums.units.ps') }}
           </div>
           <div v-if="vehicle.speed">
             {{
-              $t(
-                'module.playing.moveit.participant.vehicle-parameter.speed'
-              )
+              $t('module.playing.moveit.participant.vehicle-parameter.speed')
             }}:
             {{ vehicle.speed }}
             {{ $t('module.playing.moveit.enums.units.km/h') }}
@@ -213,9 +205,7 @@
           </div>
           <div v-if="vehicle.persons">
             {{
-              $t(
-                'module.playing.moveit.participant.vehicle-parameter.persons'
-              )
+              $t('module.playing.moveit.participant.vehicle-parameter.persons')
             }}:
             {{ vehicle.persons }}
           </div>
