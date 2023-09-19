@@ -51,8 +51,7 @@
             "maxCount": 5,
             "width": 7,
             "shape": "rect",
-            "explanationKey": "dead-tree",
-            "pivot": [0.5, 1]
+            "explanationKey": "dead-tree"
           }
         }
       },

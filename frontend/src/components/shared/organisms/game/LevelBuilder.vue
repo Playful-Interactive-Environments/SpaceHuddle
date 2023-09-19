@@ -777,7 +777,7 @@ export default class LevelBuilder extends Vue {
           this.selectedObject.source.type,
           this.selectedObject.source.name,
           texture,
-          configParameter.width,
+          configParameter.width * this.selectedObject.source.scale,
           position
         );
         if (
@@ -818,8 +818,10 @@ export default class LevelBuilder extends Vue {
   scaleSelectedObject(value: number): void {
     if (this.selectedObject) {
       const newValue = this.selectedObject.source.scale + value;
-      if (newValue > 0.5 && newValue <= 3)
+      if (newValue > 0.5 && newValue <= 3) {
         this.selectedObject.source.scale = newValue;
+        this.placeablePositionChanged(this.selectedObject.source.position);
+      }
     }
   }
 
