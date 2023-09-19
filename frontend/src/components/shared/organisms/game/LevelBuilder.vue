@@ -173,7 +173,7 @@
         </el-button>
       </el-space>
       <el-space wrap>
-        <div v-for="objectName of ObjectsForActiveType" :key="objectName">
+        <div v-for="objectName of RegionObjectsForActiveType" :key="objectName">
           <SpriteCanvas
             :texture="getActiveTexture(objectName)"
             :aspect-ration="getObjectAspect(activeObjectType, objectName)"
@@ -453,6 +453,34 @@ export default class LevelBuilder extends Vue {
         }
       } else {
         result.push(typeName);
+      }
+    }
+    return result;
+  }
+
+  get RegionObjectsForActiveType(): string[] {
+    const itemNameList = this.ObjectsForActiveType;
+    const result: string[] = [];
+    for (const itemName of itemNameList) {
+      const settings =
+        this.gameConfig[this.levelType].categories[this.activeObjectType].items[
+          itemName
+        ];
+      if (settings.placingRegions) {
+        for (const region of settings.placingRegions) {
+          if (
+            polygon.containsPoint(
+              region,
+              this.clickPosition[0],
+              this.clickPosition[1]
+            )
+          ) {
+            result.push(itemName);
+            break;
+          }
+        }
+      } else {
+        result.push(itemName);
       }
     }
     return result;
