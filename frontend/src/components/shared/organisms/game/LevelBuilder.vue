@@ -221,7 +221,7 @@ import * as ideaService from '@/services/idea-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import LevelSettings from '@/components/shared/organisms/game/LevelSettings.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
@@ -889,17 +889,37 @@ export default class LevelBuilder extends Vue {
         try {
           const data = JSON.parse(textData);
           if (data.type && data.items && data.type === this.levelType) {
-            this.placedObjects = [];
-            const items = data.items as placeable.PlaceableBase[];
-            this.placedObjects = items
-              .filter((item) => this.hasTexture(item.type, item.name))
-              .map((item) =>
-                placeable.convertToDetailData(
-                  item,
-                  this.gameConfig[this.levelType],
-                  this.getTexture(item.type, item.name)
-                )
-              );
+            ElMessageBox.confirm(
+              (this as any).$t('shared.organism.game.levelBuilder.paste.text'),
+              (this as any).$t(
+                'shared.organism.game.levelBuilder.paste.header'
+              ),
+              {
+                confirmButtonText: (this as any).$t(
+                  'shared.organism.game.levelBuilder.paste.yes'
+                ),
+                cancelButtonText: (this as any).$t(
+                  'shared.organism.game.levelBuilder.paste.no'
+                ),
+                type: 'warning',
+              }
+            )
+              .then(() => {
+                this.placedObjects = [];
+                const items = data.items as placeable.PlaceableBase[];
+                this.placedObjects = items
+                  .filter((item) => this.hasTexture(item.type, item.name))
+                  .map((item) =>
+                    placeable.convertToDetailData(
+                      item,
+                      this.gameConfig[this.levelType],
+                      this.getTexture(item.type, item.name)
+                    )
+                  );
+              })
+              .catch(() => {
+                //
+              });
           } else {
             ElMessage({
               message: this.$t('confirm.clipboard.pasteNoData'),

@@ -466,6 +466,12 @@
           "maxCountPlaced": "max objects of type placed",
           "itemSelection": {
             "selectItem": "select placing item"
+          },
+          "paste": {
+            "header": "paste clipboard scene",
+            "text": "Do you really want to replace the current items in the scene with the clipboard?",
+            "yes": "yes",
+            "no": "no"
           }
         }
       }

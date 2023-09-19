@@ -466,6 +466,12 @@
           "maxCountPlaced": "Maximale Anzahl des Objekttyps platziert",
           "itemSelection": {
             "selectItem": "Zu platzierendes Objekt auswählen"
+          },
+          "paste": {
+            "header": "Zwischenablage-Szene einfügen",
+            "text": "Willst du wirklich die aktuellen Elemente in der Szene durch die Zwischenablage ersetzen?",
+            "yes": "ja",
+            "no": "nein"
           }
         }
       }

@@ -34,6 +34,7 @@
             :auth-header-typ="EndpointAuthorisationType.MODERATOR"
             :gameConfig="gameConfig"
             :can-approve="true"
+            :can-export="true"
             :collider-delta="20"
             @approved="approved"
           ></LevelBuilder>
