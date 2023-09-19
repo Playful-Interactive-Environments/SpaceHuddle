@@ -208,6 +208,7 @@ function convertToFindItPlaceable(
     texture: result.texture,
     width: result.width,
     shape: result.shape,
+    polygonShape: result.polygonShape,
     pivot: result.pivot,
     position: result.position,
     rotation: result.rotation,

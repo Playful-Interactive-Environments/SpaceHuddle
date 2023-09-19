@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 export enum BoundingBoxShape {
   rect = 'rect',
   circle = 'circle',
+  polygon = 'polygon',
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -22,6 +23,7 @@ export interface Placeable extends PlaceableBase {
   texture: string | PIXI.Texture;
   width: number;
   shape: BoundingBoxShape;
+  polygonShape: [number, number][] | undefined;
   placingRegions: [number, number][][] | undefined;
 }
 
@@ -29,6 +31,7 @@ export interface PlaceableItemConfig {
   maxCount: number;
   width: number;
   shape: BoundingBoxShape;
+  polygonShape: [number, number][] | undefined;
   pivot: [number, number] | undefined;
   placingRegions: [number, number][][] | undefined;
 }
@@ -96,6 +99,7 @@ export function convertToDetailData(
       texture: texture,
       width: 1,
       shape: BoundingBoxShape.rect,
+      polygonShape: undefined,
       pivot: [0.5, 0.5],
       position: value.position,
       rotation: value.rotation,
@@ -111,6 +115,7 @@ export function convertToDetailData(
     texture: texture,
     width: configParameter.width,
     shape: configParameter.shape,
+    polygonShape: configParameter.polygonShape,
     pivot: configParameter.pivot ?? [0.5, 0.5],
     position: value.position,
     rotation: value.rotation,

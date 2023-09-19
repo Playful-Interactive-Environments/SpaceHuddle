@@ -9,12 +9,12 @@
   >
     <slot></slot>
     <Graphics
-      v-if="body && showBounds"
+      v-if="body && showBounds && loadingFinished"
       @render="drawBorder"
       :x="0"
       :y="0"
-      :width="clickWidth"
-      :height="clickHeight"
+      :width="boundsWidth ?? clickWidth"
+      :height="boundsHeight ?? clickHeight"
     ></Graphics>
   </container>
 </template>
@@ -31,6 +31,8 @@ import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import { delay } from '@/utils/wait';
 import * as turf from '@turf/turf';
 import { GrayscaleFilter } from '@pixi/filter-grayscale';
+import Polygon from 'polygon';
+import Vec2 from 'vec2';
 
 @Options({
   components: {},
@@ -59,7 +61,8 @@ export default class GameObject extends Vue {
   @Prop({ default: 1 }) scale!: number;
   //@Prop({ default: 0.5 }) anchor!: number;
   @Prop({ default: ObjectSpace.Absolute }) objectSpace!: ObjectSpace;
-  @Prop({ default: 'rect' }) readonly type!: 'rect' | 'circle';
+  @Prop({ default: 'rect' }) readonly type!: 'rect' | 'circle' | 'polygon';
+  @Prop({ default: [] }) readonly polygonShape!: [number, number][];
   @Prop({ default: 0 }) readonly colliderDelta!: number;
   @Prop({ default: false }) readonly showBounds!: boolean;
   @Prop({ default: {} }) readonly options!: {
@@ -87,6 +90,7 @@ export default class GameObject extends Vue {
   triggerStartTime: number | null = null;
   destroyed = false;
   objectFilters: any[] = [];
+  loadingFinished = false;
 
   get displayX(): number {
     return this.position[0] - this.offset[0];
@@ -209,11 +213,20 @@ export default class GameObject extends Vue {
             container.height
           );
           break;
+        case 'polygon':
+          this.addPolygon(
+            container.x,
+            container.y,
+            container.width,
+            container.height,
+            this.polygonShape
+          );
+          break;
       }
     }, this.renderDelay);
   }
 
-  updatePivot(): void {
+  updatePivot(delta = 100): void {
     if (this.anchor) {
       const width = this.displayWidth;
       const height = this.displayHeight;
@@ -223,7 +236,8 @@ export default class GameObject extends Vue {
         const position = [this.body.position.x, this.body.position.y];
         Matter.Body.setCentre(this.body, { x: deltaX, y: deltaY }, true);
         Matter.Body.setPosition(this.body, { x: position[0], y: position[1] });
-      }, 100);
+        this.loadingFinished = true;
+      }, delta);
     }
   }
 
@@ -253,6 +267,34 @@ export default class GameObject extends Vue {
     const radius =
       (width > height ? width / 2 : height / 2) + this.colliderDelta;
     this.body = Matter.Bodies.circle(x, y, radius, this.options);
+    this.updatePivot();
+    this.onRotationChanged();
+    this.onScaleChanged();
+    this.$emit('update:id', this.body.id);
+    if (this.clickable) {
+      this.addBodyToEngine();
+      this.addBodyToDetector();
+    }
+  }
+
+  addPolygon(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    shape: [number, number][]
+  ): void {
+    this.options.isStatic = this.isStatic;
+    const path = shape.map((item) => {
+      return { x: (item[0] / 100) * width, y: (item[1] / 100) * height };
+    });
+    const p = new Polygon(shape.map((point) => new Vec2(point[0], point[1])));
+    const centerDelta = new Vec2(50, 50).subtract(p.center());
+    const deltaX = (width * centerDelta.x) / 100;
+    const deltaY = (height * centerDelta.y) / 100;
+    this.body = Matter.Bodies.fromVertices(x, y, [path], this.options);
+    Matter.Body.setCentre(this.body, { x: deltaX, y: deltaY }, true);
+    Matter.Body.setPosition(this.body, { x: x, y: y });
     this.updatePivot();
     this.onRotationChanged();
     this.onScaleChanged();
@@ -346,10 +388,14 @@ export default class GameObject extends Vue {
     }
   }
 
+  appliedScaleFactor = 1;
   @Watch('scale', { immediate: true })
   onScaleChanged(): void {
-    if (this.body) {
-      Matter.Body.scale(this.body, this.scale, this.scale);
+    if (this.body && this.scale !== this.appliedScaleFactor) {
+      const scale = (1 / this.appliedScaleFactor) * this.scale;
+      Matter.Body.scale(this.body, scale, scale);
+      this.appliedScaleFactor = this.scale;
+      //if (this.boundsGraphic) this.drawBorder();
     }
   }
 
@@ -446,7 +492,12 @@ export default class GameObject extends Vue {
     return this.displayHeight;
   }
 
-  drawBorder(graphics: PIXI.Graphics): void {
+  boundsWidth: number | null = null;
+  boundsHeight: number | null = null;
+  boundsGraphic: PIXI.Graphics | null = null;
+  drawBorder(inputGraphics: PIXI.Graphics | null = null): void {
+    const graphics = inputGraphics ?? this.boundsGraphic;
+    if (inputGraphics) this.boundsGraphic = inputGraphics;
     if (graphics && this.body) {
       const width = this.clickWidth;
       const height = this.clickHeight;
@@ -465,7 +516,7 @@ export default class GameObject extends Vue {
           width,
           height
         );
-      } else {
+      } else if (this.type === 'circle') {
         graphics.clear();
         graphics.lineStyle(2, '#ff0000');
         graphics.drawCircle(
@@ -473,7 +524,19 @@ export default class GameObject extends Vue {
           graphics.y - centerY,
           (width > height ? width : height) / 2
         );
+      } else {
+        graphics.clear();
+        graphics.lineStyle(2, '#ff0000');
+        const path = this.body.vertices.map((item) => {
+          return {
+            x: item.x - this.body.position.x,
+            y: item.y - this.body.position.y,
+          };
+        });
+        graphics.drawPolygon(path);
       }
+      this.boundsWidth = graphics.width;
+      this.boundsHeight = graphics.height;
     }
   }
 

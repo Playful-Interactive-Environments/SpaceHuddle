@@ -25,6 +25,7 @@
             :key="placeable.uuid"
             v-model:id="placeable.id"
             :type="placeable.shape"
+            :polygon-shape="placeable.polygonShape"
             :collider-delta="colliderDelta"
             :show-bounds="false"
             :anchor="placeable.pivot"
@@ -751,6 +752,7 @@ export default class LevelBuilder extends Vue {
           texture: texture,
           width: configParameter.width,
           shape: configParameter.shape,
+          polygonShape: configParameter.polygonShape,
           pivot: configParameter.pivot ?? [0.5, 0.5],
           position: position,
           rotation: 0,
