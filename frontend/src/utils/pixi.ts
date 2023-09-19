@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { GradientFactory } from '@pixi-essentials/gradients';
+import { until } from '@/utils/wait';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export function drawCircleWithGradient(
@@ -121,4 +122,35 @@ export function getSpriteNames(spritesheet: PIXI.Spritesheet): string[] {
     return Object.keys(spritesheet.data.frames);
   }
   return [];
+}
+
+enum TextureState {
+  loading = 'loading',
+  loaded = 'loaded',
+  unloading = 'unloading',
+}
+const textureState: { [url: string]: TextureState } = {};
+export async function loadTexture(url: string): Promise<any> {
+  if (textureState[url]) {
+    await until(
+      () =>
+        textureState[url] !== TextureState.loading &&
+        textureState[url] !== TextureState.unloading
+    );
+  }
+  if (PIXI.Cache.has(url)) return PIXI.Cache.get(url);
+  else {
+    textureState[url] = TextureState.loading;
+    const texture = await PIXI.Assets.load(url);
+    textureState[url] = TextureState.loaded;
+    return texture;
+  }
+}
+
+export function unloadTexture(url: string | null): void {
+  if (url && PIXI.Cache.has(url)) {
+    textureState[url] = TextureState.unloading;
+    PIXI.Assets.unload(url);
+    delete textureState[url];
+  }
 }

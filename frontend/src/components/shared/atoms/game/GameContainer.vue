@@ -100,6 +100,7 @@ import { CustomObject } from '@/types/game/CustomObject';
 import * as PIXI from 'pixi.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
+import * as pixiUtil from '@/utils/pixi';
 
 export enum BackgroundPosition {
   Stretch = 'stretch',
@@ -296,7 +297,7 @@ export default class GameContainer extends Vue {
   onBackgroundTextureChanged(): void {
     const loadTexture = (): void => {
       if (this.backgroundTexture) {
-        PIXI.Assets.load(this.backgroundTexture).then((sprite) => {
+        pixiUtil.loadTexture(this.backgroundTexture).then((sprite) => {
           this.backgroundSprite = sprite;
           this.calculateBackgroundSize();
         });
@@ -521,9 +522,7 @@ export default class GameContainer extends Vue {
     clearInterval(this.intervalWind);
     clearInterval(this.intervalSync);
     clearInterval(this.intervalPan);
-    if (this.backgroundTexture && PIXI.Cache.has(this.backgroundTexture)) {
-      PIXI.Assets.unload(this.backgroundTexture);
-    }
+    pixiUtil.unloadTexture(this.backgroundTexture);
     Matter.Events.off(this.engine, 'collisionStart', this.collisionStart);
   }
 

@@ -328,7 +328,7 @@ export default class PlayState extends Vue {
     this.deregisterAll();
     for (const typeName of this.gameConfigTypes) {
       const settings = gameConfig[this.levelType].categories[typeName].settings;
-      PIXI.Assets.unload(settings.spritesheet);
+      pixiUtil.unloadTexture(settings.spritesheet);
     }
   }
 
@@ -400,7 +400,7 @@ export default class PlayState extends Vue {
             this.stylesheets[typeName] &&
             PIXI.Cache.has(previousSettings.spritesheet)
           ) {
-            PIXI.Assets.unload(previousSettings.spritesheet);
+            pixiUtil.unloadTexture(previousSettings.spritesheet);
             delete this.stylesheets[typeName];
           }
         }
@@ -448,7 +448,7 @@ export default class PlayState extends Vue {
             settings.spritesheet &&
             this.previousLevelType !== this.levelType
           ) {
-            PIXI.Assets.load(settings.spritesheet).then((sheet) => {
+            pixiUtil.loadTexture(settings.spritesheet).then((sheet) => {
               this.stylesheets[typeName] = sheet;
             });
           }

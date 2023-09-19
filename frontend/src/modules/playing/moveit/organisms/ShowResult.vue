@@ -338,9 +338,9 @@ export default class ShowResult extends Vue {
         this.particleVisualisation[particleName] = [];
       }
     }
-    PIXI.Assets.load('/assets/games/moveit/molecules.json').then(
-      (sheet) => (this.spritesheet = sheet)
-    );
+    pixiUtil
+      .loadTexture('/assets/games/moveit/molecules.json')
+      .then((sheet) => (this.spritesheet = sheet));
 
     if (
       this.trackingManager &&
@@ -380,7 +380,7 @@ export default class ShowResult extends Vue {
   }
 
   unmounted(): void {
-    PIXI.Assets.unload('/assets/games/moveit/molecules.json');
+    pixiUtil.unloadTexture('/assets/games/moveit/molecules.json');
   }
 
   @Watch('gameWidth', { immediate: true })

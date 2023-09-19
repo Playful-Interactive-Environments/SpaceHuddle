@@ -101,7 +101,7 @@ export default class Participant extends Vue {
 
   // Vue Callbacks for mounting and unmounting / loading and unloading.
   mounted(): void {
-    /*PIXI.Assets.load('/assets/games/findit/tutorial/animations.json').then(
+    /*pixiUtil.loadSpriteSheet('/assets/games/findit/tutorial/animations.json').then(
       (sheet) => {
         this.spritesheet = sheet;
       }
@@ -122,7 +122,7 @@ export default class Participant extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
-    //PIXI.Assets.unload('/assets/games/findit/tutorial/animations.json');
+    //pixiUtil.unloadTexture('/assets/games/findit/tutorial/animations.json');
   }
 
   deregisterAll(): void {

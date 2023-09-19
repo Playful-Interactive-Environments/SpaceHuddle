@@ -13,6 +13,7 @@ import { Prop, Watch } from 'vue-property-decorator';
 import * as PIXI from 'pixi.js';
 import * as PIXIParticles from '@pixi/particle-emitter';
 import { until, delay } from '@/utils/wait';
+import * as pixiUtil from '@/utils/pixi';
 
 @Options({
   components: {},
@@ -40,16 +41,9 @@ export default class CustomParticleContainer extends Vue {
   async onSpriteSheetChanged(spriteSheetUrl: string): Promise<void> {
     this.isSpriteSheetLoaded = false;
     if (spriteSheetUrl) {
-      if (PIXI.Cache.has(spriteSheetUrl))
-        this.spriteSheet = PIXI.Cache.get(spriteSheetUrl);
-      else this.spriteSheet = await PIXI.Assets.load(spriteSheetUrl);
+      this.spriteSheet = await pixiUtil.loadTexture(spriteSheetUrl);
       this.isSpriteSheetLoaded = true;
     }
-  }
-
-  async loadTexture(url: string): Promise<PIXI.Texture<PIXI.Resource>> {
-    if (PIXI.Cache.has(url)) return PIXI.Cache.get(url);
-    else return await PIXI.Assets.load(url);
   }
 
   @Watch('config', { immediate: true })
@@ -69,8 +63,8 @@ export default class CustomParticleContainer extends Vue {
         const url = !isAnimation ? textureList[i] : textureList[i].texture;
         if (typeof url === 'string') {
           if (!this.spriteSheetUrl && !config.spriteSheet) {
-            if (!isAnimation) textureList[i] = await this.loadTexture(url);
-            else textureList[i].texture = await this.loadTexture(url);
+            if (!isAnimation) textureList[i] = await pixiUtil.loadTexture(url);
+            else textureList[i].texture = await pixiUtil.loadTexture(url);
           } else {
             if (this.spriteSheetUrl) await until(this.isSpriteSheetLoaded);
             else if (config.spriteSheet) {

@@ -462,7 +462,7 @@ export default class LevelBuilder extends Vue {
     for (const typeName of this.gameConfigTypes) {
       const settings =
         this.gameConfig[this.levelType].categories[typeName].settings;
-      PIXI.Assets.unload(settings.spritesheet);
+      pixiUtil.unloadTexture(settings.spritesheet);
     }
   }
 
@@ -478,7 +478,7 @@ export default class LevelBuilder extends Vue {
           this.gameConfig[this.levelType].categories[typeName].settings;
         setTimeout(() => {
           if (settings && settings.spritesheet && !this.stylesheets[typeName]) {
-            PIXI.Assets.load(settings.spritesheet).then((sheet) => {
+            pixiUtil.loadTexture(settings.spritesheet).then((sheet) => {
               this.stylesheets[typeName] = sheet;
             });
           }
@@ -522,7 +522,7 @@ export default class LevelBuilder extends Vue {
             this.stylesheets[typeName] &&
             PIXI.Cache.has(previousSettings.spritesheet)
           ) {
-            PIXI.Assets.unload(previousSettings.spritesheet);
+            pixiUtil.unloadTexture(previousSettings.spritesheet);
             delete this.stylesheets[typeName];
           }
         }

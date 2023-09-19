@@ -435,15 +435,15 @@ export default class CleanUpParticles extends Vue {
     setTimeout(() => {
       this.loadActiveParticle();
     }, 1500);
-    PIXI.Assets.load('/assets/games/moveit/molecules.json').then(
-      (sheet) => (this.spritesheet = sheet)
-    );
+    pixiUtil
+      .loadTexture('/assets/games/moveit/molecules.json')
+      .then((sheet) => (this.spritesheet = sheet));
     this.interval = setInterval(this.updatedLoop, this.intervalTime);
   }
 
   unmounted(): void {
     clearInterval(this.interval);
-    PIXI.Assets.unload('/assets/games/moveit/molecules.json');
+    pixiUtil.unloadTexture('/assets/games/moveit/molecules.json');
   }
 
   updatedLoop(): void {
