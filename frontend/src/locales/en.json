@@ -472,6 +472,12 @@
             "text": "Do you really want to replace the current items in the scene with the clipboard?",
             "yes": "yes",
             "no": "no"
+          },
+          "save": {
+            "header": "save changes",
+            "text": "Do you want to save the changes in the level?",
+            "yes": "yes",
+            "no": "no"
           }
         }
       }

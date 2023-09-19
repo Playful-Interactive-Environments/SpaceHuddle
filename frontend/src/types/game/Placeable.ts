@@ -67,7 +67,7 @@ export function convertToBase(placeable: Placeable): PlaceableBase {
   return {
     type: placeable.type,
     name: placeable.name,
-    position: placeable.position,
+    position: [...placeable.position],
     rotation: placeable.rotation,
     scale: placeable.scale,
   };

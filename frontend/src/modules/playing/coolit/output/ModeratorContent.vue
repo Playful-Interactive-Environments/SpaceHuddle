@@ -22,6 +22,7 @@
           :parameter="module?.parameter"
           :canChangePosition="() => true"
           v-model:selected-idea="selectedLevel"
+          v-on:ideaPositionChanged="saveIdea"
         />
       </el-aside>
       <el-main>
@@ -472,6 +473,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.addIdea.link = null;
     this.addIdea.parameter = { ...emptyParameter };
     this.ideas.push(newIdea);
+  }
+
+  saveIdea(idea: Idea): void {
+    ideaService.putIdea(idea, EndpointAuthorisationType.MODERATOR).then(() => {
+      this.refreshIdeas();
+    });
   }
 }
 </script>

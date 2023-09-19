@@ -115,7 +115,7 @@
       </div>
       <div
         v-else-if="level && showOptions && placedObjects.length > 5"
-        @click="saveLevel"
+        @click="saveCurrentLevel"
       >
         <font-awesome-icon icon="save" />
       </div>
@@ -202,7 +202,7 @@
   </div>
   <LevelSettings
     v-model:show-modal="showLevelSettings"
-    @saveLevel="saveLevel"
+    @saveLevel="saveCurrentLevel"
   />
 </template>
 
@@ -295,6 +295,7 @@ export default class LevelBuilder extends Vue {
   selectedObject: GameObject | null = null;
   startTime = Date.now();
   isSaving = false;
+  savedItems: placeable.PlaceableBase[] = [];
 
   EndpointAuthorisationType = EndpointAuthorisationType;
 
@@ -486,7 +487,58 @@ export default class LevelBuilder extends Vue {
     return result;
   }
 
+  cacheSavedItems(): void {
+    this.savedItems = this.renderList.map((obj) => {
+      return placeable.convertToBase(obj);
+    });
+  }
+
+  saveChanges(): void {
+    const sceneItems = this.renderList.map((obj) => {
+      return placeable.convertToBase(obj);
+    });
+    let hasChanges = sceneItems.length !== this.savedItems.length;
+    if (!hasChanges) {
+      for (let i = 0; i < sceneItems.length; i++) {
+        if (
+          sceneItems[i].name !== this.savedItems[i].name ||
+          sceneItems[i].position[0] !== this.savedItems[i].position[0] ||
+          sceneItems[i].position[1] !== this.savedItems[i].position[1] ||
+          sceneItems[i].rotation !== this.savedItems[i].rotation ||
+          sceneItems[i].scale !== this.savedItems[i].scale
+        ) {
+          hasChanges = true;
+          break;
+        }
+      }
+    }
+    if (hasChanges) {
+      const sceneLevel = this.loadedLevel ? { ...this.loadedLevel } : null;
+      const sceneLevelType = this.levelType;
+      ElMessageBox.confirm(
+        (this as any).$t('shared.organism.game.levelBuilder.save.text'),
+        (this as any).$t('shared.organism.game.levelBuilder.save.header'),
+        {
+          confirmButtonText: (this as any).$t(
+            'shared.organism.game.levelBuilder.save.yes'
+          ),
+          cancelButtonText: (this as any).$t(
+            'shared.organism.game.levelBuilder.save.no'
+          ),
+          type: 'warning',
+        }
+      )
+        .then(() => {
+          this.saveLevel(sceneLevel, sceneLevelType, sceneItems);
+        })
+        .catch(() => {
+          //
+        });
+    }
+  }
+
   unmounted(): void {
+    this.saveChanges();
     for (const typeName of this.gameConfigTypes) {
       const settings =
         this.gameConfig[this.levelType].categories[typeName].settings;
@@ -527,23 +579,24 @@ export default class LevelBuilder extends Vue {
     }
   }
 
-  previousLevelType = '';
+  loadedLevelType = '';
+  loadedLevel: Idea | null = null;
   @Watch('level', { immediate: true })
   async onLevelChanged(): Promise<void> {
     this.showToolbox = false;
     if (this.level) {
+      this.saveChanges();
       this.placedObjects = [];
       const levelType = this.level.parameter.type
         ? this.level.parameter.type
         : configParameter.getDefaultLevelType(this.gameConfig);
-      if (this.previousLevelType && this.previousLevelType !== levelType) {
+      if (this.loadedLevelType && this.loadedLevelType !== levelType) {
         const gameConfigTypes = Object.keys(
           this.gameConfig[levelType].categories
         );
         for (const typeName of gameConfigTypes) {
           const previousSettings =
-            this.gameConfig[this.previousLevelType].categories[typeName]
-              .settings;
+            this.gameConfig[this.loadedLevelType].categories[typeName].settings;
           if (
             previousSettings &&
             previousSettings.spritesheet &&
@@ -575,7 +628,9 @@ export default class LevelBuilder extends Vue {
             this.getTexture(item.type, item.name)
           )
         );
-      this.previousLevelType = levelType;
+      this.loadedLevelType = levelType;
+      this.loadedLevel = this.level;
+      this.cacheSavedItems();
     }
   }
 
@@ -584,38 +639,48 @@ export default class LevelBuilder extends Vue {
     return pixiUtil.getSpriteAspect(spriteSheet, objectName);
   }
 
-  async saveLevel(name: string): Promise<void> {
+  async saveCurrentLevel(name: string): Promise<void> {
     this.isSaving = true;
-    if (!this.level) {
-      const idea = await ideaService.postIdea(
+    const idea = await this.saveLevel(
+      this.level,
+      this.levelType,
+      this.renderList.map((obj) => {
+        return placeable.convertToBase(obj);
+      }),
+      name
+    );
+    this.$emit('editFinished', idea.id, this.buildResult);
+    this.cacheSavedItems();
+    this.isSaving = false;
+  }
+
+  async saveLevel(
+    level: Idea | null,
+    levelType: string,
+    items: placeable.PlaceableBase[],
+    name = 'temp'
+  ): Promise<Idea> {
+    if (!level) {
+      return await ideaService.postIdea(
         this.taskId,
         {
           keywords: name,
           parameter: {
             state: LevelWorkflowType.created,
-            type: this.levelType,
-            items: this.renderList.map((obj) => {
-              return placeable.convertToBase(obj);
-            }),
+            type: levelType,
+            items: items,
           },
         },
         this.authHeaderTyp
       );
-      this.$emit('editFinished', idea.id, this.buildResult);
     } else {
-      this.level.parameter = {
-        state: this.level.parameter.state
-          ? this.level.parameter.state
-          : LevelWorkflowType.created,
-        type: this.levelType,
-        items: this.renderList.map((obj) => {
-          return placeable.convertToBase(obj);
-        }),
-      };
-      const idea = await ideaService.putIdea(this.level, this.authHeaderTyp);
-      this.$emit('editFinished', idea.id, this.buildResult);
+      if (!level.parameter) level.parameter = {};
+      if (!level.parameter.state)
+        level.parameter.state = LevelWorkflowType.created;
+      level.parameter.type = levelType;
+      level.parameter.items = items;
+      return await ideaService.putIdea(level, this.authHeaderTyp);
     }
-    this.isSaving = false;
   }
 
   approveLevel(): void {
@@ -868,9 +933,12 @@ export default class LevelBuilder extends Vue {
       return this.gameConfig[this.levelType].categories[placeable.type].settings
         .order;
     };
-    return this.placedObjects.sort(
-      (a, b) => getSortNumber(a) - getSortNumber(b)
-    );
+    if (this.levelType) {
+      return this.placedObjects.sort(
+        (a, b) => getSortNumber(a) - getSortNumber(b)
+      );
+    }
+    return this.placedObjects;
   }
 
   copyToClipboard(): void {

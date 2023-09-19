@@ -472,6 +472,12 @@
             "text": "Willst du wirklich die aktuellen Elemente in der Szene durch die Zwischenablage ersetzen?",
             "yes": "ja",
             "no": "nein"
+          },
+          "save": {
+            "header": "Änderungen speichern",
+            "text": "Möchten Sie die Änderungen in der Szene speichern?",
+            "yes": "ja",
+            "no": "nein"
           }
         }
       }
