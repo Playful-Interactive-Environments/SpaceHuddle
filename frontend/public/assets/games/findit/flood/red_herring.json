@@ -5,21 +5,6 @@
 		"spriteSourceSize": {"x":0,"y":0,"w":448,"h":564},
 		"sourceSize": {"w":448,"h":564}
 	},
-	"bottleWine": {
-		"frame": {"x":1319, "y":0, "w":196, "h":726},
-		"spriteSourceSize": {"x":0,"y":0,"w":196,"h":726},
-		"sourceSize": {"w":196,"h":726}
-	},
-	"bottleBeer": {
-		"frame": {"x":1122, "y":361, "w":196, "h":558},
-		"spriteSourceSize": {"x":0,"y":0,"w":196,"h":558},
-		"sourceSize": {"w":196,"h":558}
-	},
-	"bottleWhite": {
-		"frame": {"x":1319, "y":727, "w":196, "h":665},
-		"spriteSourceSize": {"x":0,"y":0,"w":196,"h":665},
-		"sourceSize": {"w":196,"h":665}
-	},
 	"dragonfly": {
 		"frame": {"x":0, "y":0, "w":840, "h":583},
 		"spriteSourceSize": {"x":0,"y":0,"w":840,"h":583},
@@ -44,7 +29,7 @@
 },
 "meta": {
 	"image": "red_herring.png",
-	"size": {"w": 1516, "h": 1393},
+	"size": {"w": 1167, "h": 1378},
 	"scale": "1"
 }
 }

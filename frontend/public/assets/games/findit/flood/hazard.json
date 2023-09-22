@@ -1,7 +1,22 @@
 {
 "frames": {
+	"bottleWine": {
+		"frame": {"x":998, "y":0, "w":196, "h":726},
+		"spriteSourceSize": {"x":0,"y":0,"w":196,"h":726},
+		"sourceSize": {"w":196,"h":726}
+	},
+	"bottleBeer": {
+		"frame": {"x":1136, "y":727, "w":196, "h":558},
+		"spriteSourceSize": {"x":0,"y":0,"w":196,"h":558},
+		"sourceSize": {"w":196,"h":558}
+	},
+	"bottleWhite": {
+		"frame": {"x":1195, "y":0, "w":196, "h":665},
+		"spriteSourceSize": {"x":0,"y":0,"w":196,"h":665},
+		"sourceSize": {"w":196,"h":665}
+	},
 	"woman": {
-		"frame": {"x":672, "y":357, "w":541, "h":477},
+		"frame": {"x":594, "y":890, "w":541, "h":477},
 		"spriteSourceSize": {"x":0,"y":0,"w":541,"h":477},
 		"sourceSize": {"w":541,"h":477}
 	},
@@ -11,9 +26,14 @@
 		"sourceSize": {"w":671,"h":532}
 	},
 	"sandbag": {
-		"frame": {"x":672, "y":835, "w":325, "h":512},
+		"frame": {"x":672, "y":357, "w":325, "h":512},
 		"spriteSourceSize": {"x":0,"y":0,"w":325,"h":512},
 		"sourceSize": {"w":325,"h":512}
+	},
+	"branches": {
+		"frame": {"x":0, "y":890, "w":593, "h":350},
+		"spriteSourceSize": {"x":0,"y":0,"w":593,"h":350},
+		"sourceSize": {"w":593,"h":350}
 	},
 	"fish": {
 		"frame": {"x":0, "y":0, "w":837, "h":356},
@@ -24,7 +44,7 @@
 },
 "meta": {
 	"image": "hazard.png",
-	"size": {"w": 1214, "h": 1348},
+	"size": {"w": 1392, "h": 1368},
 	"scale": "1"
 }
 }

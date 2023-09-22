@@ -77,7 +77,11 @@
           },
           "garbage": {
             "name": "Müll",
-            "description": "Müll kann von der Flut weggetragen werden und muss später wieder eingesammelt werden."
+            "description": "Müll kann von der Flut weggetragen werden und muss später wieder eingesammelt werden um die Umwelt nicht zu verschmutzen."
+          },
+          "branches": {
+            "name": "Äste",
+            "description": "Äste können während der Flut in die Straßen gespült werden und müssen danach aufgeräumt werden."
           }
         },
         "red_herring": {

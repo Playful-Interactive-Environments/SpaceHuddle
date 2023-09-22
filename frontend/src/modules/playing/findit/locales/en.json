@@ -77,7 +77,11 @@
           },
           "garbage": {
             "name": "Garbage",
-            "description": "Garbage can be carried away by the flood and must be collected again later."
+            "description": "Garbage can be carried away by the flood and must be collected again later in order to not pollute the environment."
+          },
+          "branches": {
+            "name": "Branches",
+            "description": "Branches and Driftwood can be washed into the streets and have to be cleaned up."
           }
         },
         "red_herring": {

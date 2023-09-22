@@ -247,8 +247,81 @@
             "maxCount": 5,
             "width": 2,
             "shape": "rect",
-            "explanationKey": "sandbag"
-          }
+            "explanationKey": "sandbag",
+            "placingRegions": [[[0, 0], [15, 0], [20, 50], [40, 100], [0, 100]]]
+          },
+          "branches": {
+            "escalationLevels": [
+              {
+                "min": 60,
+                "max": 120
+              },
+              {
+                "min": 30,
+                "max": 60
+              }
+            ],
+            "severity": 2,
+            "maxCount": 5,
+            "width": 5,
+            "shape": "rect",
+            "explanationKey": "branches",
+            "placingRegions": [[[0, 0], [15, 0], [20, 50], [40, 100], [0, 100]]]
+          },
+            "bottleWhite": {
+              "escalationLevels": [
+                {
+                  "min": 60,
+                  "max": 120
+                },
+                {
+                  "min": 30,
+                  "max": 60
+                }
+              ],
+              "severity": 2,
+              "maxCount": 5,
+              "width": 0.5,
+              "shape": "rect",
+              "explanationKey": "garbage",
+              "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
+            },
+            "bottleWine": {
+              "escalationLevels": [
+                {
+                  "min": 60,
+                  "max": 120
+                },
+                {
+                  "min": 30,
+                  "max": 60
+                }
+              ],
+              "severity": 1,
+              "maxCount": 5,
+              "width": 0.5,
+              "shape": "rect",
+              "explanationKey": "garbage",
+              "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
+            },
+            "bottleBeer": {
+              "escalationLevels": [
+                {
+                  "min": 60,
+                  "max": 120
+                },
+                {
+                  "min": 30,
+                  "max": 60
+                }
+              ],
+              "severity": 1,
+              "maxCount": 5,
+              "width": 0.5,
+              "shape": "rect",
+              "explanationKey": "garbage",
+              "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
+            }
         }
       },
       "red_herring": {
