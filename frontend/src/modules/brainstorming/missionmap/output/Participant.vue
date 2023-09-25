@@ -1006,8 +1006,9 @@ export default class Participant extends Vue {
 }
 
 [module-theme='preparation'] {
-  background-image: url('@/modules/brainstorming/missionmap/assets/preparation.jpg');
-  background-size: contain;
+  background-image: url('@/modules/brainstorming/missionmap/assets/preparation.png');
+  background-size: cover;
+  background-position: center top;
 
   .el-card {
     margin-right: 2rem;
@@ -1108,4 +1109,5 @@ export default class Participant extends Vue {
   border: solid 2px var(--color-gray);
   padding: 0.5rem;
 }
+
 </style>
