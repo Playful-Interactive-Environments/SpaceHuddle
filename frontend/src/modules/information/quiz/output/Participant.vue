@@ -1464,8 +1464,9 @@ label {
 }
 
 [module-theme='paper'] {
-  background-image: url('@/modules/information/quiz/assets/wood.jpg');
-  background-size: contain;
+  background-image: url('@/modules/information/quiz/assets/clipboard.png');
+  background-size: cover;
+  background-position: center top;
 
   .el-space .questionInfo {
     padding: 0.5rem;
@@ -1542,7 +1543,7 @@ label {
 }
 
 [module-theme='interview'] {
-  background-image: url('@/modules/information/quiz/assets/microphones.png'),
+  background-image: url('@/modules/information/quiz/assets/lectern.png'),
     url('@/modules/information/quiz/assets/stage.png');
   background-position: center bottom, left top;
   background-repeat: no-repeat;
