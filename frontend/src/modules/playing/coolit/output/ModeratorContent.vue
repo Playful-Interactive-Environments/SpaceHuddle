@@ -9,7 +9,7 @@
         :task-id="taskId"
         :auth-header-typ="EndpointAuthorisationType.MODERATOR"
         @approved="approved"
-        :gameConfig="gameConfig"
+        :gameConfig="gameConfig.obstacles"
         :can-rotate="false"
         :can-export="true"
         :collider-delta="0"
@@ -67,7 +67,7 @@
                   @customCommand="dropdownCommand($event, element)"
                   :style="{
                     '--level-type-color': getSettingsForLevel(
-                      gameConfig,
+                      gameConfig.obstacles,
                       element
                     ).color,
                   }"
@@ -76,7 +76,10 @@
                   <template #icon>
                     <div class="level-icon">
                       <font-awesome-icon
-                        :icon="getSettingsForLevel(gameConfig, element).icon"
+                        :icon="
+                          getSettingsForLevel(gameConfig.obstacles, element)
+                            .icon
+                        "
                       />
                     </div>
                   </template>
@@ -109,8 +112,10 @@
                 @ideaDeleted="refreshIdeas()"
                 @customCommand="dropdownCommand($event, idea)"
                 :style="{
-                  '--level-type-color': getSettingsForLevel(gameConfig, idea)
-                    .color,
+                  '--level-type-color': getSettingsForLevel(
+                    gameConfig.obstacles,
+                    idea
+                  ).color,
                 }"
                 @click="selectLevel(idea)"
                 v-model:collapseIdeas="filter.collapseIdeas"
@@ -118,7 +123,9 @@
                 <template #icon>
                   <div class="level-icon">
                     <font-awesome-icon
-                      :icon="getSettingsForLevel(gameConfig, idea).icon"
+                      :icon="
+                        getSettingsForLevel(gameConfig.obstacles, idea).icon
+                      "
                     />
                   </div>
                 </template>
@@ -161,11 +168,12 @@
       >
         <el-select v-model="addIdea.parameter.type" v-on:change="onTypeChanged">
           <el-option
-            v-for="configType of Object.keys(gameConfig)"
+            v-for="configType of Object.keys(gameConfig.obstacles)"
             :key="configType"
             :value="configType"
             :style="{
-              color: getSettingsForLevelType(gameConfig, configType).color,
+              color: getSettingsForLevelType(gameConfig.obstacles, configType)
+                .color,
             }"
             :label="
               $t(
@@ -174,7 +182,9 @@
             "
           >
             <font-awesome-icon
-              :icon="getSettingsForLevelType(gameConfig, configType).icon"
+              :icon="
+                getSettingsForLevelType(gameConfig.obstacles, configType).icon
+              "
             />
             &nbsp;
             {{
@@ -250,7 +260,7 @@ import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const emptyParameter = {
   state: LevelWorkflowType.created,
-  type: configParameter.getDefaultLevelType(gameConfig as any),
+  type: configParameter.getDefaultLevelType(gameConfig.obstacles as any),
   items: [],
 };
 

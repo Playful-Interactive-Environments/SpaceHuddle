@@ -5,12 +5,13 @@
     :height="height"
     :backgroundColor="backgroundColor"
   >
+    <slot></slot>
     <container v-if="texture">
       <sprite
         v-if="!isAnimation && !Array.isArray(texture)"
         :texture="texture"
-        :width="objectWidth"
-        :height="objectHeight"
+        :width="objectWidth * scaleFactor"
+        :height="objectHeight * scaleFactor"
         :tint="tint"
         :anchor="0.5"
         :x="width / 2"
@@ -20,8 +21,8 @@
         v-else-if="isAnimationLoaded"
         :textures="animationSequence"
         :animation-speed="animationSpeed"
-        :width="objectWidth"
-        :height="objectHeight"
+        :width="objectWidth * scaleFactor"
+        :height="objectHeight * scaleFactor"
         :anchor="0.5"
         :tint="tint"
         :x="width / 2"
@@ -42,17 +43,19 @@ import * as pixiUtil from '@/utils/pixi';
 
 @Options({
   components: { Application },
-  emits: [],
+  emits: ['update:renderer'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class SpriteCanvas extends Vue {
   @Prop({ default: 100 }) readonly width!: number;
   @Prop({ default: 100 }) readonly height!: number;
+  @Prop({ default: 1 }) readonly scaleFactor!: number;
   @Prop({ default: 1 }) readonly aspectRation!: number;
   @Prop({ default: '#f4f4f4' }) readonly backgroundColor!: string;
   @Prop({ default: '#ffffff' }) tint!: string;
   @Prop() texture!: string | PIXI.Texture | PIXI.Texture[] | string[];
   @Prop({ default: 0.1 }) animationSpeed!: number;
+  @Prop() renderer!: PIXI.Renderer;
   spritesheet!: PIXI.Spritesheet;
   app: PIXI.Application | null = null;
   loadedTexture = '';
@@ -80,6 +83,7 @@ export default class SpriteCanvas extends Vue {
       const pixi = this.$refs.pixi as typeof Application;
       if (pixi) {
         this.app = pixi.app;
+        if (pixi.app) this.$emit('update:renderer', pixi.app.renderer);
       }
     }, 100);
   }

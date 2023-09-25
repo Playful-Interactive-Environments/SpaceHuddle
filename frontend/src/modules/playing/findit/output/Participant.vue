@@ -114,6 +114,7 @@ export default class Participant extends Vue {
         if (targetWidth && targetHeight) {
           (dom as any).style.width = `${targetWidth}px`;
           (dom as any).style.height = `${targetHeight}px`;
+          document.body.style.overflowY = 'hidden';
         }
         this.sizeCalculated = true;
       }

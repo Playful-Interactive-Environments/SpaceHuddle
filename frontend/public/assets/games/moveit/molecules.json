@@ -5,7 +5,7 @@
 		"spriteSourceSize": {"x":0,"y":0,"w":170,"h":195},
 		"sourceSize": {"w":170,"h":195}
 	},
-	"carbon-monoxide": {
+	"carbonMonoxide": {
 		"frame": {"x":0, "y":0, "w":221, "h":90},
 		"spriteSourceSize": {"x":0,"y":0,"w":221,"h":90},
 		"sourceSize": {"w":221,"h":90}

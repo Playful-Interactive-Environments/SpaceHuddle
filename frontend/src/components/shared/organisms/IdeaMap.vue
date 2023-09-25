@@ -419,6 +419,7 @@ export default class IdeaMap extends Vue {
   width: 100%;
 
   .overlay {
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
     background-color: white;
     border-radius: 0.5rem;
     position: absolute;

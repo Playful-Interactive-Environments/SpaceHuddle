@@ -176,6 +176,7 @@ export default class GameContainer extends Vue {
   mouseConstraint!: typeof Matter.MouseConstraint;
   hierarchyObserver!: MutationObserver;
   resizeObserver!: ResizeObserver;
+  app: PIXI.Application | null = null;
 
   gameObjects: GameObject[] = [];
   customObjects: CustomObject[] = [];
@@ -420,6 +421,7 @@ export default class GameContainer extends Vue {
     setTimeout(async () => {
       const pixi = this.$refs.pixi as typeof Application;
       if (pixi) {
+        this.app = pixi.app;
         pixi.app.transparent = this.transparent;
         this.$emit('initRenderer', pixi.app.renderer);
       }
