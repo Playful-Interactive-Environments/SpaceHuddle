@@ -68,8 +68,12 @@
         }}
       </div>
       <div class="reference">
-        <a :href="getMoleculeConfig(activeMoleculeName).reference">
-          {{ getMoleculeConfig(activeMoleculeName).reference }}
+        <a
+          v-for="reference of getMoleculeConfig(activeMoleculeName).reference"
+          :key="reference"
+          :href="reference"
+        >
+          {{ reference }}
         </a>
       </div>
     </div>
@@ -359,6 +363,10 @@ export default class SelectLevel extends Vue {
     font-size: var(--font-size-xxsmall);
     width: 100%;
     text-align: right;
+
+    a {
+      display: block;
+    }
   }
 }
 

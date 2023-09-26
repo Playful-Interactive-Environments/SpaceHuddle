@@ -120,63 +120,83 @@
   "molecules": {
     "waterVapor": {
       "type": "greenhouseGas",
-      "reference": "https://climatekids.nasa.gov/greenhouse-cards/",
+      "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#63c3cb",
-      "globalWarmingFactor": 1
+      "globalWarmingFactor": 1,
+      "size": 1,
+      "ration": 0.4
     },
     "carbonDioxide": {
       "type": "greenhouseGas",
-      "reference": "https://climatekids.nasa.gov/greenhouse-cards/",
+      "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#c55e44",
-      "globalWarmingFactor": 1
+      "globalWarmingFactor": 1,
+      "size": 1,
+      "ration": 0.04
     },
     "methane": {
       "type": "greenhouseGas",
-      "reference": "https://climatekids.nasa.gov/greenhouse-cards/",
+      "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#e7a320",
-      "globalWarmingFactor": 1
+      "globalWarmingFactor": 1,
+      "size": 1,
+      "ration": 0.01
     },
     "nitrogenOxide": {
       "type": "greenhouseGas",
-      "reference": "https://climatekids.nasa.gov/greenhouse-cards/",
+      "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#ac7dbc",
-      "globalWarmingFactor": 1
+      "globalWarmingFactor": 1,
+      "size": 1,
+      "ration": 0.01
     },
     "ozone": {
       "type": "greenhouseGas",
-      "reference": "https://climatekids.nasa.gov/greenhouse-cards/",
+      "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#9b5144",
-      "globalWarmingFactor": 1
+      "globalWarmingFactor": 1,
+      "size": 1,
+      "ration": 0.01
     },
     "fluorinatedGases": {
       "type": "greenhouseGas",
-      "reference": "https://climatekids.nasa.gov/greenhouse-cards/ , https://www.epa.gov/ghgemissions/overview-greenhouse-gases#f-gases",
+      "reference": ["https://climatekids.nasa.gov/greenhouse-cards/", "https://www.epa.gov/ghgemissions/overview-greenhouse-gases#f-gases"],
       "color": "#9b864c",
-      "globalWarmingFactor": 1
+      "globalWarmingFactor": 1,
+      "size": 1,
+      "ration": 0.01
     },
     "oxygen": {
       "type": "atmosphericGas",
-      "reference": "https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/oxygen.html",
+      "reference": ["https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/oxygen.html"],
       "color": "#d88e81",
-      "globalWarmingFactor": 1
+      "globalWarmingFactor": 1,
+      "size": 1,
+      "ration": 20.6
     },
     "nitrogen": {
       "type": "atmosphericGas",
-      "reference": "https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/nitrogen.html",
+      "reference": ["https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/nitrogen.html"],
       "color": "#d9b9e4",
-      "globalWarmingFactor": 1
+      "globalWarmingFactor": 1,
+      "size": 1,
+      "ration": 78
     },
     "argon": {
       "type": "atmosphericGas",
-      "reference": "https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/argon.html",
+      "reference": ["https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/argon.html"],
       "color": "74909d",
-      "globalWarmingFactor": 1
+      "globalWarmingFactor": 1,
+      "size": 1,
+      "ration": 0.9
     },
     "helium": {
       "type": "atmosphericGas",
-      "reference": "https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/helium.html",
+      "reference": ["https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/helium.html"],
       "color": "#757d76",
-      "globalWarmingFactor": 1
+      "globalWarmingFactor": 1,
+      "size": 1,
+      "ration": 0.02
     }
   }
 }
