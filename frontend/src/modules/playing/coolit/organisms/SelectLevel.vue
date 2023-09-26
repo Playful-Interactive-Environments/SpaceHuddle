@@ -8,7 +8,7 @@
     />
     <div class="overlay-bottom-right">
       <el-button v-on:click="showMoleculesInfo = true">
-        <font-awesome-icon icon="gear" />
+        <font-awesome-icon icon="atom" />
       </el-button>
     </div>
   </div>
@@ -66,6 +66,11 @@
             `module.playing.coolit.participant.moleculeInfo.${activeMoleculeName}.cons`
           )
         }}
+      </div>
+      <div class="reference">
+        <a :href="getMoleculeConfig(activeMoleculeName).reference">
+          {{ getMoleculeConfig(activeMoleculeName).reference }}
+        </a>
       </div>
     </div>
     <template v-slot:footer>
@@ -347,6 +352,13 @@ export default class SelectLevel extends Vue {
     margin-bottom: 1.5rem;
     float: right;
     width: 48%;
+  }
+
+  .reference {
+    clear: both;
+    font-size: var(--font-size-xxsmall);
+    width: 100%;
+    text-align: right;
   }
 }
 

@@ -1109,5 +1109,4 @@ export default class Participant extends Vue {
   border: solid 2px var(--color-gray);
   padding: 0.5rem;
 }
-
 </style>
