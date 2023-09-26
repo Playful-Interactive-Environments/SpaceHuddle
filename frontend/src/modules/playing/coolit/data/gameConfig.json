@@ -121,61 +121,61 @@
     "waterVapor": {
       "type": "greenhouseGas",
       "reference": "https://climatekids.nasa.gov/greenhouse-cards/",
-      "color": "#FFD9ED",
+      "color": "#63c3cb",
       "globalWarmingFactor": 1
     },
     "carbonDioxide": {
       "type": "greenhouseGas",
       "reference": "https://climatekids.nasa.gov/greenhouse-cards/",
-      "color": "#DDDDDD",
+      "color": "#c55e44",
       "globalWarmingFactor": 1
     },
     "methane": {
       "type": "greenhouseGas",
       "reference": "https://climatekids.nasa.gov/greenhouse-cards/",
-      "color": "#A6DDAE",
+      "color": "#e7a320",
       "globalWarmingFactor": 1
     },
     "nitrogenOxide": {
       "type": "greenhouseGas",
       "reference": "https://climatekids.nasa.gov/greenhouse-cards/",
-      "color": "#ffffff",
+      "color": "#ac7dbc",
       "globalWarmingFactor": 1
     },
     "ozone": {
       "type": "greenhouseGas",
       "reference": "https://climatekids.nasa.gov/greenhouse-cards/",
-      "color": "#A2C8DD",
+      "color": "#9b5144",
       "globalWarmingFactor": 1
     },
     "fluorinatedGases": {
       "type": "greenhouseGas",
       "reference": "https://climatekids.nasa.gov/greenhouse-cards/ , https://www.epa.gov/ghgemissions/overview-greenhouse-gases#f-gases",
-      "color": "#ffffff",
+      "color": "#9b864c",
       "globalWarmingFactor": 1
     },
     "oxygen": {
       "type": "atmosphericGas",
       "reference": "https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/oxygen.html",
-      "color": "#ffffff",
+      "color": "#d88e81",
       "globalWarmingFactor": 1
     },
     "nitrogen": {
       "type": "atmosphericGas",
       "reference": "https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/nitrogen.html",
-      "color": "#ffffff",
+      "color": "#d9b9e4",
       "globalWarmingFactor": 1
     },
     "argon": {
       "type": "atmosphericGas",
       "reference": "https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/argon.html",
-      "color": "#ffffff",
+      "color": "74909d",
       "globalWarmingFactor": 1
     },
     "helium": {
       "type": "atmosphericGas",
       "reference": "https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/helium.html",
-      "color": "#ffffff",
+      "color": "#757d76",
       "globalWarmingFactor": 1
     }
   }
