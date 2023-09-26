@@ -150,7 +150,7 @@ import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottom
     IdeaMap,
     DrawerBottomOverlay,
   },
-  emits: [],
+  emits: ['play'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class SelectLevel extends Vue {
@@ -198,6 +198,13 @@ export default class SelectLevel extends Vue {
         EndpointAuthorisationType.PARTICIPANT,
         2 * 60
       );
+    }
+  }
+
+  @Watch('selectedIdea', { immediate: true })
+  onSelectedLevelChanged(): void {
+    if (this.selectedIdea) {
+      this.$emit('play', this.selectedIdea);
     }
   }
 

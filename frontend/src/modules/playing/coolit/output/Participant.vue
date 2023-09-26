@@ -39,7 +39,8 @@ import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as cashService from '@/services/cash-service';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import PlayLevel from '@/modules/playing/coolit/organisms/PlayLevel.vue';
-import { ParticleState } from '@/modules/playing/coolit/organisms/PlayLevel.vue';
+import { PlayStateResult } from '@/modules/playing/coolit/organisms/PlayLevel.vue';
+import { Idea } from '@/types/api/Idea';
 
 export enum GameStep {
   Select = 'select',
@@ -69,13 +70,7 @@ export default class Participant extends Vue {
   trackingManager!: TrackingManager;
   startTime = Date.now();
   stepTime = Date.now();
-  activeLevel = 0;
-  particleState: { [key: string]: ParticleState } = {
-    carbonDioxide: { totalCount: 18, movedCount: 0 },
-    dust: { totalCount: 10, movedCount: 0 },
-    methane: { totalCount: 12, movedCount: 0 },
-    microplastic: { totalCount: 5, movedCount: 0 },
-  };
+  activeLevel: Idea | null = null;
 
   gameStep = GameStep.Select;
   GameStep = GameStep;
@@ -122,9 +117,12 @@ export default class Participant extends Vue {
     if (this.taskId) {
       this.trackingManager = new TrackingManager(this.taskId, {
         gameStep: GameStep.Select,
-        level: 0,
-        particleState: {},
-        rate: 0,
+        level: '',
+        stars: 0,
+        hitCount: 0,
+        temperature: 0,
+        moleculeState: {},
+        obstacleState: {},
       });
     }
   }
@@ -133,7 +131,7 @@ export default class Participant extends Vue {
     this.module = module;
   }
 
-  startLevel(level: number): void {
+  startLevel(level: Idea): void {
     this.gameStep = GameStep.Play;
     this.gameState = GameState.Info;
     this.activeLevel = level;
@@ -143,11 +141,14 @@ export default class Participant extends Vue {
         null,
         TaskParticipantIterationStepStatesType.NEUTRAL,
         {
-          level: level,
+          level: level.id,
           selectTime: Date.now() - this.stepTime,
           playTime: Date.now() - this.startTime,
-          particleState: {},
-          rate: 0,
+          stars: 0,
+          hitCount: 0,
+          temperature: 0,
+          moleculeState: {},
+          obstacleState: {},
         }
       );
       this.trackingManager.saveIteration({
@@ -158,19 +159,15 @@ export default class Participant extends Vue {
     this.stepTime = Date.now();
   }
 
-  levelPlayed(particleState: { [key: string]: ParticleState }): void {
-    this.particleState = particleState;
+  levelPlayed(state: PlayStateResult): void {
     this.gameStep = GameStep.Select;
     this.gameState = GameState.Info;
 
     if (this.trackingManager) {
       this.trackingManager.saveIterationStep({
-        particleState: particleState,
+        state: state,
         cleanupTime: Date.now() - this.stepTime,
         playTime: Date.now() - this.startTime,
-      });
-      this.trackingManager.saveIteration({
-        particleState: particleState,
       });
       this.trackingManager.setFinishedState(this.module);
     }

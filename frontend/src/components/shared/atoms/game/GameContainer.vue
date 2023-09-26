@@ -112,7 +112,7 @@ export enum BackgroundPosition {
 export enum BackgroundMovement {
   None = 'none',
   Pan = 'pan',
-  //Auto = 'auto',
+  Auto = 'auto',
 }
 
 @Options({
@@ -427,6 +427,12 @@ export default class GameContainer extends Vue {
       }
     }, 100);
     Matter.Composite.add(this.engine.world, this.activeComposition);
+
+    setTimeout(() => {
+      if (this.backgroundMovement === BackgroundMovement.Auto) {
+        this.startAutoPan();
+      }
+    }, 1000);
   }
 
   registerGameObject(e: any): void {
@@ -870,6 +876,11 @@ export default class GameContainer extends Vue {
     }
   }
 
+  startAutoPan(): void {
+    this.backgroundPositionOffset = [...this.backgroundPositionOffsetMax];
+    this.beginPan([-0.2, 0]);
+  }
+
   panVector: [number, number] = [0, 0];
   beginPan(vector: [number, number]): void {
     this.panVector = [vector[0] * 5, vector[1] * 5];
@@ -899,7 +910,8 @@ export default class GameContainer extends Vue {
         this.backgroundPositionOffset[1] = this.backgroundPositionOffsetMin[1];
       if (y > this.backgroundPositionOffsetMax[1])
         this.backgroundPositionOffset[1] = this.backgroundPositionOffsetMax[1];
-      this.endPan();
+      if (this.backgroundMovement === BackgroundMovement.Pan) this.endPan();
+      else this.panVector = [this.panVector[0] * -1, this.panVector[1] * -1];
     } else {
       this.backgroundPositionOffset = [x, y];
       for (const gameObj of this.gameObjects) {
