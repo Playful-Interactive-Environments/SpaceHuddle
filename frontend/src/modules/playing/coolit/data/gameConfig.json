@@ -27,7 +27,7 @@
             "order": 10,
             "spritesheet": "/assets/games/coolit/city/city.json",
             "explanationText": "module.playing.coolit.participant.placeables.city",
-            "placingRegions": [[[0, 50], [100, 50], [100, 63], [0, 63]]]
+            "placingRegions": [[[0, 92], [100, 92], [100, 0], [0, 0]]]
           },
           "items": {
             "building01": {
