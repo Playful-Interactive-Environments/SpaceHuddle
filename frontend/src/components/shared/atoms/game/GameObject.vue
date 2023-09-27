@@ -30,7 +30,7 @@ import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import { delay } from '@/utils/wait';
 import * as turf from '@turf/turf';
-import { GrayscaleFilter } from '@pixi/filter-grayscale';
+import { GrayscaleFilter } from 'pixi-filters';
 import Polygon from 'polygon';
 import Vec2 from 'vec2';
 
@@ -49,6 +49,7 @@ import Vec2 from 'vec2';
     'handleTrigger',
     'update:highlighted',
     'positionChanged',
+    'initialised',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -59,7 +60,6 @@ export default class GameObject extends Vue {
   @Prop({ default: 0 }) y!: number;
   @Prop({ default: 0 }) rotation!: number;
   @Prop({ default: 1 }) scale!: number;
-  //@Prop({ default: 0.5 }) anchor!: number;
   @Prop({ default: ObjectSpace.Absolute }) objectSpace!: ObjectSpace;
   @Prop({ default: 'rect' }) readonly type!: 'rect' | 'circle' | 'polygon';
   @Prop({ default: [] }) readonly polygonShape!: [number, number][];
@@ -193,37 +193,55 @@ export default class GameObject extends Vue {
   containerLoad(container: PIXI.Container): void {
     this.container = container;
     setTimeout(() => {
-      this.$emit('sizeChanged', [container.width, container.height]);
-      this.displayWidth = container.width;
-      this.displayHeight = container.height;
-      switch (this.type) {
-        case 'rect':
-          this.addRect(
-            container.x,
-            container.y,
-            container.width,
-            container.height
-          );
-          break;
-        case 'circle':
-          this.addCircle(
-            container.x,
-            container.y,
-            container.width,
-            container.height
-          );
-          break;
-        case 'polygon':
-          this.addPolygon(
-            container.x,
-            container.y,
-            container.width,
-            container.height,
-            this.polygonShape
-          );
-          break;
+      try {
+        this.displayWidth = container.width;
+        this.displayHeight = container.height;
+        this.$emit('sizeChanged', [this.displayWidth, this.displayHeight]);
+        switch (this.type) {
+          case 'rect':
+            this.addRect(
+              container.x,
+              container.y,
+              container.width,
+              container.height
+            );
+            break;
+          case 'circle':
+            this.addCircle(
+              container.x,
+              container.y,
+              container.width,
+              container.height
+            );
+            break;
+          case 'polygon':
+            this.addPolygon(
+              container.x,
+              container.y,
+              container.width,
+              container.height,
+              this.polygonShape
+            );
+            break;
+        }
+        this.$emit('initialised', this);
+      } catch (e) {
+        this.$emit('initError', this);
       }
     }, this.renderDelay);
+  }
+
+  updatedColliderSize(): void {
+    if (this.body) {
+      const scale = this.container.width / this.displayWidth;
+      /*const scaleX = this.container.width / this.displayWidth;
+      const scaleY = this.container.height / this.displayHeight;*/
+      Matter.Body.scale(this.body, scale, scale);
+      this.displayWidth = this.container.width;
+      this.displayHeight = this.container.height;
+      this.$emit('sizeChanged', [this.displayWidth, this.displayHeight]);
+      if (this.boundsGraphic) this.drawBorder();
+    }
   }
 
   updatePivot(delta = 100): void {
@@ -238,6 +256,8 @@ export default class GameObject extends Vue {
         Matter.Body.setPosition(this.body, { x: position[0], y: position[1] });
         this.loadingFinished = true;
       }, delta);
+    } else {
+      this.loadingFinished = true;
     }
   }
 
@@ -339,6 +359,12 @@ export default class GameObject extends Vue {
     } else {
       this.position = [x, y];
     }
+    if (this.body) {
+      Matter.Body.setPosition(this.body, {
+        x: this.position[0] - this.offset[0],
+        y: this.position[1] - this.offset[1],
+      });
+    }
   }
 
   convertPositionToInputFormat(): [number, number] {
@@ -371,12 +397,12 @@ export default class GameObject extends Vue {
     const inputPosition = this.convertPositionToInputFormat();
     if (inputPosition[0] !== position[0] || inputPosition[1] !== position[1]) {
       this.initPosition(position[0], position[1]);
-      if (this.body) {
+      /*if (this.body) {
         Matter.Body.setPosition(this.body, {
           x: this.position[0] - this.offset[0],
           y: this.position[1] - this.offset[1],
         });
-      }
+      }*/
     }
   }
 
@@ -472,12 +498,12 @@ export default class GameObject extends Vue {
     }, 100);
   }
 
-  handleCollision(): void {
+  handleCollision(collisionObject: GameObject | null): void {
     if (this.collisionHandler) {
-      this.collisionHandler.handleCollision(this);
+      this.collisionHandler.handleCollision(this, collisionObject);
     }
 
-    this.$emit('collision', this);
+    this.$emit('collision', this, collisionObject);
   }
 
   get clickWidth(): number {
@@ -499,7 +525,7 @@ export default class GameObject extends Vue {
     const graphics = inputGraphics ?? this.boundsGraphic;
     if (inputGraphics) this.boundsGraphic = inputGraphics;
     if (graphics && this.body) {
-      const width = this.clickWidth;
+      /*const width = this.clickWidth;
       const height = this.clickHeight;
 
       const centerX =
@@ -524,7 +550,7 @@ export default class GameObject extends Vue {
           graphics.y - centerY,
           (width > height ? width : height) / 2
         );
-      } else {
+      } else*/ {
         graphics.clear();
         graphics.lineStyle(2, '#ff0000');
         const path = this.body.vertices.map((item) => {

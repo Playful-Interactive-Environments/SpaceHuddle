@@ -21,7 +21,8 @@ import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import * as PIXI from 'pixi.js';
 import { CustomObject } from '@/types/game/CustomObject';
 import { EventType } from '@/types/enum/EventType';
-import { OutlineFilter } from '@pixi/filter-outline';
+import { OutlineFilter } from 'pixi-filters';
+import { ColorOverlayFilter } from 'pixi-filters';
 
 @Options({
   components: {},
@@ -37,6 +38,7 @@ export default class CustomSprite extends Vue implements CustomObject {
   @Prop({ default: 1 }) aspectRation!: number;
   @Prop({ default: 0 }) anchor!: number | [number, number];
   @Prop({ default: '#ffffff' }) tint!: string;
+  @Prop({ default: [0, 0, 0, 0] }) colorOverlay!: [number, number, number, number];
   @Prop({ default: null }) outline!: number | null;
   @Prop() texture!: string | PIXI.Texture;
   gameContainer!: GameContainer;
@@ -121,6 +123,21 @@ export default class CustomSprite extends Vue implements CustomObject {
     return this.y;
   }
 
+  @Watch('colorOverlay', { immediate: true })
+  onColorOverlayChanged(): void {
+    const customSprite = this.$refs.customSprite as any;
+    if (customSprite) {
+      if (this.colorOverlay) {
+        customSprite.filters = [
+          new ColorOverlayFilter(
+            [this.colorOverlay[0], this.colorOverlay[1], this.colorOverlay[2]],
+            this.colorOverlay[3]
+          ),
+        ];
+      } else customSprite.filters = [];
+    }
+  }
+
   mounted(): void {
     const container = document.getElementById('gameContainer');
     if (container) {
@@ -150,6 +167,7 @@ export default class CustomSprite extends Vue implements CustomObject {
     this.displayHeight = this.calcDisplayHeight();
     this.displayX = this.calcDisplayX();
     this.displayY = this.calcDisplayY();
+    if (this.$parent) (this.$parent as any).updatedColliderSize();
   }
 
   @Watch('outline', { immediate: true })

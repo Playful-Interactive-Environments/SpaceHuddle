@@ -135,6 +135,7 @@ export enum BackgroundMovement {
     'gameObjectClick',
     'update:selectedObject',
     'update:offset',
+    'updateOffset',
     'backgroundSizeChanged',
   ],
 })
@@ -248,6 +249,9 @@ export default class GameContainer extends Vue {
       this.backgroundPositionOffsetMin[1] -= deltaY / 2;
       this.backgroundPositionOffsetMax[1] += deltaY / 2;
     }
+    if (this.backgroundMovement === BackgroundMovement.Auto)
+      this.backgroundPositionOffset = [...this.backgroundPositionOffsetMax];
+    this.notifyCurrentOffset();
     this.$emit('backgroundSizeChanged');
     for (const customObject of this.customObjects) {
       customObject.calculateRelativePosition();
@@ -815,7 +819,10 @@ export default class GameContainer extends Vue {
   }
 
   lookForCollision(): void {
-    const handleCollision = (gameObject: GameObject): void => {
+    const handleCollision = (
+      gameObject: GameObject,
+      collisionObject: GameObject | null
+    ): void => {
       if (
         this.activeComposition.bodies.find(
           (item) => gameObject.body.id === item.id
@@ -825,28 +832,28 @@ export default class GameContainer extends Vue {
           const chainObject = this.getGameObjectForBody(chainBody);
           if (chainObject && chainObject.body.id !== gameObject.body.id) {
             chainObject.$emit('update:highlighted', false);
-            chainObject.handleCollision();
+            chainObject.handleCollision(collisionObject);
           }
         }
         Matter.Composite.clear(this.activeComposition);
       }
       if (gameObject) gameObject.$emit('update:highlighted', false);
-      gameObject.handleCollision();
+      gameObject.handleCollision(collisionObject);
     };
 
     const collisions = Matter.Detector.collisions(this.detector);
     if (collisions.length > 0) {
-      const validCollision = this.collisionsFilter
-        ? collisions.find((collision) => {
+      const validCollisionList = this.collisionsFilter
+        ? collisions.filter((collision) => {
             if (this.collisionsFilter) return this.collisionsFilter(collision);
             return true;
           })
         : collisions;
-      if (validCollision) {
+      for (const validCollision of validCollisionList) {
         const gameObjectA = this.getGameObjectForBody(validCollision.bodyA);
         const gameObjectB = this.getGameObjectForBody(validCollision.bodyB);
-        if (gameObjectA) handleCollision(gameObjectA);
-        if (gameObjectB) handleCollision(gameObjectB);
+        if (gameObjectA) handleCollision(gameObjectA, gameObjectB);
+        if (gameObjectB) handleCollision(gameObjectB, gameObjectA);
       }
     }
   }
@@ -889,8 +896,11 @@ export default class GameContainer extends Vue {
   }
 
   endPan(): void {
-    this.panVector = [0, 0];
-    clearInterval(this.intervalPan);
+    if (this.backgroundMovement === BackgroundMovement.Pan) {
+      console.warn('endPan');
+      this.panVector = [0, 0];
+      clearInterval(this.intervalPan);
+    }
   }
 
   pan(): void {
@@ -926,7 +936,81 @@ export default class GameContainer extends Vue {
         )
           gameObj.updateOffset(this.gameObjectOffsetRelativeToScreen);
       }
-      this.$emit('update:offset', this.gameObjectOffsetRelativeToBackground);
+    }
+
+    this.notifyCurrentOffset();
+    this.$emit('update:offset', this.gameObjectOffsetRelativeToBackground);
+  }
+
+  notifyCurrentOffset(): void {
+    const relativeOffset = this.convertToRelativePosition(
+      this.backgroundPositionOffset,
+      'current'
+    );
+    const relativeOffsetMin = this.convertToRelativePosition(
+      this.backgroundPositionOffset,
+      'min'
+    );
+    const relativeOffsetMax = this.convertToRelativePosition(
+      this.backgroundPositionOffset,
+      'max'
+    );
+    this.$emit(
+      'updateOffset',
+      relativeOffset,
+      relativeOffsetMin,
+      relativeOffsetMax
+    );
+  }
+
+  convertToRelativePosition(
+    position: [number, number],
+    type: 'min' | 'max' | 'current'
+  ): [number, number] {
+    const deltaX = this.backgroundTextureSize[0] - this.gameWidth;
+    const deltaY = this.backgroundTextureSize[1] - this.gameHeight;
+    //const min = [-deltaX / 2, -deltaY / 2];
+    const max = [this.gameWidth + deltaX / 2, this.gameHeight + deltaY];
+    const minPosition = [
+      position[0] - this.gameWidth / 2,
+      position[1] - this.gameHeight / 2,
+    ];
+    const maxPosition = [
+      position[0] + this.gameWidth / 2,
+      position[1] + this.gameHeight / 2,
+    ];
+    switch (type) {
+      case 'current':
+        return [
+          deltaX > 0
+            ? 100 -
+              ((position[0] - this.backgroundPositionOffsetMin[0]) / deltaX) *
+                100
+            : 0,
+          deltaY > 0
+            ? 100 -
+              ((position[1] - this.backgroundPositionOffsetMin[1]) / deltaY) *
+                100
+            : 0,
+        ];
+      case 'min':
+        return [
+          ((maxPosition[0] - max[0]) / this.backgroundTextureSize[0]) *
+            100 *
+            -1,
+          ((maxPosition[1] - max[1]) / this.backgroundTextureSize[1]) *
+            100 *
+            -1,
+        ];
+      case 'max':
+        return [
+          ((minPosition[0] - max[0]) / this.backgroundTextureSize[0]) *
+            100 *
+            -1,
+          ((minPosition[1] - max[1]) / this.backgroundTextureSize[1]) *
+            100 *
+            -1,
+        ];
     }
   }
 

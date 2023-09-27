@@ -6,12 +6,13 @@
     <GameContainer
       v-model:width="gameWidth"
       v-model:height="gameHeight"
-      :detect-collision="false"
+      :detect-collision="true"
       :use-gravity="false"
       :background-texture="gameConfig.obstacles[levelType].settings.background"
       :background-position="BackgroundPosition.Cover"
       :background-movement="BackgroundMovement.Auto"
       @initRenderer="initRenderer"
+      @updateOffset="updateOffset"
     >
       <template v-slot:default>
         <container v-if="gameWidth">
@@ -21,8 +22,7 @@
             v-model:id="obstacle.id"
             :type="obstacle.shape"
             :polygon-shape="obstacle.polygonShape"
-            :collider-delta="20"
-            :show-bounds="false"
+            :show-bounds="true"
             :anchor="obstacle.pivot"
             :object-space="ObjectSpace.RelativeToBackground"
             :x="obstacle.position[0]"
@@ -32,14 +32,15 @@
             :options="{
               name: obstacle.name,
               collisionFilter: {
-                group: -1,
+                group: 0,
+                category: CollisionGroups.OBSTACLE,
               },
             }"
             :is-static="true"
-            :clickable="false"
             :source="obstacle"
           >
             <CustomSprite
+              :colorOverlay="calculateTintColor(obstacle)"
               :texture="obstacle.texture"
               :anchor="obstacle.pivot"
               :width="obstacle.width"
@@ -47,6 +48,62 @@
               :object-space="ObjectSpace.RelativeToBackground"
             >
             </CustomSprite>
+          </GameObject>
+          <GameObject
+            v-for="(ray, index) in lightRayList"
+            :key="index"
+            type="circle"
+            :object-space="ObjectSpace.RelativeToBackground"
+            :x="ray.position[0]"
+            :y="ray.position[1]"
+            :options="{
+              name: 'light',
+              collisionFilter: {
+                group: 0,
+                category: CollisionGroups.LIGHT_RAY,
+                mask: CollisionGroups.OBSTACLE,
+              },
+            }"
+            :is-static="false"
+            :show-bounds="false"
+            :source="ray"
+            @collision="lightCollision"
+            @initialised="rayInitialised"
+            @initError="rayInitError"
+          >
+            <Graphics
+              :radius="10"
+              :color="yellowColor"
+              @render="drawCircle($event)"
+            ></Graphics>
+          </GameObject>
+          <GameObject
+            v-for="(ray, index) in heatRayList"
+            :key="index"
+            type="circle"
+            :object-space="ObjectSpace.RelativeToBackground"
+            :x="ray.position[0]"
+            :y="ray.position[1]"
+            :options="{
+              name: 'light',
+              collisionFilter: {
+                group: 0,
+                category: CollisionGroups.HEAT_RAY,
+                mask: CollisionGroups.MOLECULE,
+              },
+            }"
+            :is-static="false"
+            :show-bounds="false"
+            :source="ray"
+            @collision="heatCollision"
+            @initialised="rayInitialised"
+            @initError="rayInitError"
+          >
+            <Graphics
+              :radius="10"
+              :color="redColor"
+              @render="drawCircle($event)"
+            ></Graphics>
           </GameObject>
         </container>
       </template>
@@ -76,9 +133,20 @@ import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/coolit/data/gameConfig.json';
 import { Idea } from '@/types/api/Idea';
 import * as configParameter from '@/utils/game/configParameter';
+import { v4 as uuidv4 } from 'uuid';
+import Vec2 from 'vec2';
+import * as turf from '@turf/turf';
+import Color from 'colorjs.io';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
+
+interface Ray {
+  uuid: string;
+  position: [number, number];
+  direction: [number, number];
+  initialised: boolean;
+}
 
 export interface MoleculeState {
   startCount: number;
@@ -108,6 +176,40 @@ export interface PlayStateResult {
   temperature: number;
 }
 
+interface CoolItObstacle extends placeable.Placeable {
+  maxHitCount: number;
+  hitCount: number;
+}
+
+function convertToCoolItObstacle(
+  value: placeable.PlaceableBase,
+  categoryConfig: placeable.PlaceableThemeConfig,
+  texture: string | PIXI.Texture
+): CoolItObstacle {
+  const result = placeable.convertToDetailData(value, categoryConfig, texture);
+  const configParameter = placeable.getConfigParameter(
+    value,
+    categoryConfig
+  ) as any;
+  return {
+    uuid: result.uuid,
+    id: result.id,
+    type: result.type,
+    name: result.name,
+    texture: result.texture,
+    width: result.width,
+    shape: result.shape,
+    polygonShape: result.polygonShape,
+    pivot: result.pivot,
+    position: result.position,
+    rotation: result.rotation,
+    scale: result.scale,
+    hitCount: 0,
+    maxHitCount: configParameter.maxHitCount ?? 10,
+    placingRegions: result.placingRegions,
+  };
+}
+
 @Options({
   computed: {
     ObjectSpace() {
@@ -135,23 +237,60 @@ export default class PlayLevel extends Vue {
   renderer!: PIXI.Renderer;
   gameWidth = 0;
   gameHeight = 0;
+  panOffsetMin = [0, 0];
+  panOffsetMax = [100, 100];
   tutorialSteps: Tutorial[] = [];
   levelType = '';
   gameConfig = gameConfig;
+  active = true;
 
-  obstacleList: placeable.Placeable[] = [];
+  obstacleList: CoolItObstacle[] = [];
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
   startTime = Date.now();
 
+  lightRayList: Ray[] = [];
+  heatRayList: Ray[] = [];
+
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
+  interval!: any;
+  readonly intervalTime = 100;
+
+  CollisionGroups = Object.freeze({
+    CONTROLLABLE: 1 << 0,
+    OBSTACLE: 1 << 1,
+    LIGHT_RAY: 1 << 2,
+    HEAT_RAY: 1 << 3,
+    MOLECULE: 1 << 4,
+  });
+
+  /*get playStateResult(): PlayStateResult {
+    return {
+      stars: Math.floor((this.collectedCount / this.totalCount) * 3),
+      time: Date.now() - this.startTime,
+      moleculeState: {},
+      obstacleState: {},
+      hitCount: 0,
+      temperature: 0,
+    };
+  }*/
 
   get backgroundColor(): string {
     return themeColors.getBackgroundColor();
   }
 
+  get yellowColor(): string {
+    return themeColors.getYellowColor();
+  }
+
+  get redColor(): string {
+    return themeColors.getRedColor();
+  }
+
   mounted(): void {
     tutorialService.registerGetList(this.updateTutorial, this.authHeaderTyp);
+    this.interval = setInterval(() => this.updateRays(), this.intervalTime);
+    this.emitLightRays();
   }
 
   updateTutorial(steps: Tutorial[]): void {
@@ -169,7 +308,32 @@ export default class PlayLevel extends Vue {
     );
   }
 
+  calculateTintColor(
+    building: CoolItObstacle
+  ): [number, number, number, number] {
+    /*const toHex = (d: number): string => {
+      if (d < 0) d = 0;
+      if (d > 1) d = 1;
+      return ('0' + Number(d * 255).toString(16)).slice(-2).toUpperCase();
+    };
+    const toColorString = (color: any): string => {
+      return `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;
+    };*/
+    const white = new Color('#ffffff').to('srgb');
+    const red = new Color(themeColors.getRedColor()).to('srgb') as any;
+    let mixingFactor = building.hitCount / building.maxHitCount;
+    if (mixingFactor > 1) mixingFactor = 1;
+    const tint = white.range(red, {
+      space: 'lch',
+      outputSpace: 'srgb',
+    }) as any;
+    const color = tint(mixingFactor);
+    return [color.r, color.g, color.b, 0.4];
+  }
+
   unmounted(): void {
+    this.active = false;
+    clearInterval(this.interval);
     this.deregisterAll();
     for (const typeName of this.gameConfigTypes) {
       const settings =
@@ -221,7 +385,7 @@ export default class PlayLevel extends Vue {
       this.obstacleList = items
         .filter((item) => this.hasTexture(item.type, item.name))
         .map((item) =>
-          placeable.convertToDetailData(
+          convertToCoolItObstacle(
             item,
             gameConfig.obstacles[levelType],
             this.getTexture(item.type, item.name)
@@ -287,6 +451,95 @@ export default class PlayLevel extends Vue {
 
   initRenderer(renderer: PIXI.Renderer): void {
     this.renderer = renderer;
+  }
+
+  drawCircle(circle: PIXI.Graphics): void {
+    if (this.renderer) {
+      pixiUtil.drawCircleWithGradient(circle, this.renderer);
+    }
+  }
+
+  emitLightRays(): void {
+    const delay = 200 + Math.random() * 3000;
+    const angle = 5 + Math.random() * 10;
+    const direction = new Vec2(0, 1).rotate(-turf.degreesToRadians(angle));
+    const displayWidth = this.panOffsetMax[0] - this.panOffsetMin[0];
+    const position =
+      this.panOffsetMin[0] +
+      displayWidth / 5 +
+      Math.random() * (displayWidth / 2);
+    setTimeout(() => {
+      this.lightRayList.push({
+        uuid: uuidv4(),
+        position: [position, 0],
+        direction: [direction.x, direction.y],
+        initialised: false,
+      });
+      if (this.active) this.emitLightRays();
+    }, delay);
+  }
+
+  rayInitialised(item: GameObject): void {
+    item.source.initialised = true;
+  }
+
+  rayInitError(item: GameObject): void {
+    const ray = item.source as Ray;
+    console.log('rayInitError', ray);
+    const index = this.lightRayList.findIndex((item) => item.uuid === ray.uuid);
+    if (index > -1) {
+      this.lightRayList.splice(index, 1);
+    } else {
+      const index = this.heatRayList.findIndex(
+        (item) => item.uuid === ray.uuid
+      );
+      if (index > -1) {
+        this.heatRayList.splice(index, 1);
+      }
+    }
+  }
+
+  updateRays(): void {
+    for (const ray of this.lightRayList) {
+      if (ray.initialised) {
+        ray.position[0] += ray.direction[0];
+        ray.position[1] += ray.direction[1];
+      }
+    }
+    for (const ray of this.heatRayList) {
+      if (ray.initialised) {
+        ray.position[0] += ray.direction[0];
+        ray.position[1] += ray.direction[1];
+      }
+    }
+  }
+
+  lightCollision(light: GameObject, building: GameObject): void {
+    const ray = light.source as Ray;
+    const index = this.lightRayList.findIndex((item) => item.uuid === ray.uuid);
+    if (index > -1) {
+      const hitBuilding = building?.source as CoolItObstacle;
+      if (hitBuilding) {
+        hitBuilding.hitCount++;
+      }
+      this.lightRayList.splice(index, 1);
+      ray.direction[1] *= -1;
+      ray.initialised = false;
+      this.heatRayList.push(ray);
+    }
+  }
+
+  heatCollision(heat: GameObject, molecule: GameObject): void {
+    console.log(heat, molecule);
+  }
+
+  updateOffset(
+    value: [number, number],
+    min: [number, number],
+    max: [number, number]
+  ): void {
+    this.panOffsetMin = min;
+    this.panOffsetMax = max;
   }
 }
 </script>

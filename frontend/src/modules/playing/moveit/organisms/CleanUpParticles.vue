@@ -481,6 +481,7 @@ export default class CleanUpParticles extends Vue {
     this.containerWidth,
     this.containerWidth / this.containerAspectRation,
   ];
+
   containerSizeChanged(size: [number, number]): void {
     this.containerSize = size;
   }
