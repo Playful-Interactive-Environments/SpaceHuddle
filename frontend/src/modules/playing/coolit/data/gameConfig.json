@@ -27,7 +27,7 @@
             "order": 10,
             "spritesheet": "/assets/games/coolit/city/city.json",
             "explanationText": "module.playing.coolit.participant.placeables.city",
-            "placingRegions": [[[0, 75], [100, 75], [100, 92], [0, 92]]]
+            "placingRegions": [[[0, 77], [100, 77], [100, 92], [0, 92]]]
           },
           "items": {
             "building01": {
@@ -35,7 +35,7 @@
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
-              "polygonShape": [[10, 0], [90, 0], [90, 100], [10, 100]],
+              "polygonShape": [[10, 10], [90, 10], [90, 100], [10, 100]],
               "pivot": [0.5, 1]
             },
             "building02": {
@@ -43,7 +43,7 @@
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
-              "polygonShape": [[20, 0], [80, 0], [80, 100], [20, 100]],
+              "polygonShape": [[5, 20], [20, 0], [80, 0], [95, 20], [95, 100], [5, 100]],
               "pivot": [0.5, 1],
               "maxHitCount": 3
             },
@@ -52,15 +52,14 @@
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
-              "polygonShape": [[10, 10], [90, 10], [90, 100], [10, 100]],
+              "polygonShape": [[10, 10], [20, 0], [80, 0], [90, 10], [90, 100], [10, 100]],
               "pivot": [0.5, 1]
             },
             "building04": {
               "heatRationCoefficient": 3,
               "maxCount": 10,
               "width": 5,
-              "shape": "polygon",
-              "polygonShape": [[10, 20], [25, 0], [75, 0], [90, 20], [90, 100], [10, 100]],
+              "shape": "rect",
               "pivot": [0.5, 1]
             },
             "glassBuilding01": {
@@ -68,23 +67,21 @@
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
-              "polygonShape": [[20, 30], [30, 10], [70, 10], [80, 30], [80, 100], [20, 100]],
+              "polygonShape": [[0, 10], [100, 10], [100, 100], [0, 100]],
               "pivot": [0.5, 1]
             },
             "glassBuilding02": {
               "heatRationCoefficient": 3,
               "maxCount": 10,
               "width": 5,
-              "shape": "polygon",
-              "polygonShape": [[20, 30], [30, 10], [70, 10], [80, 30], [80, 100], [20, 100]],
+              "shape": "rect",
               "pivot": [0.5, 1]
             },
             "glassBuilding03": {
               "heatRationCoefficient": 3,
               "maxCount": 10,
               "width": 5,
-              "shape": "polygon",
-              "polygonShape": [[20, 0], [80, 0], [80, 100], [20, 100]],
+              "shape": "rect",
               "pivot": [0.5, 1]
             },
             "industry01": {
@@ -105,7 +102,8 @@
               "heatRationCoefficient": 3,
               "maxCount": 10,
               "width": 5,
-              "shape": "rect",
+              "shape": "polygon",
+              "polygonShape": [[0, 100], [0, 70], [40, 0], [60, 0], [100, 70], [100, 100]],
               "pivot": [0.5, 1]
             },
             "industry04": {
@@ -123,7 +121,7 @@
             "order": 10,
             "spritesheet": "/assets/games/coolit/city/city.json",
             "explanationText": "module.playing.coolit.participant.placeables.city",
-            "placingRegions": [[[0, 75], [100, 75], [100, 92], [0, 92]]]
+            "placingRegions": [[[0, 77], [100, 77], [100, 92], [0, 92]]]
           },
           "items": {
             "trees01": {
@@ -131,7 +129,7 @@
               "maxCount": 10,
               "width": 7,
               "shape": "polygon",
-              "polygonShape": [[20, 50], [80, 50], [100, 100], [0, 100]],
+              "polygonShape": [[20, 100], [0, 20], [20, 0], [80, 0], [100, 20], [80, 100]],
               "pivot": [0.5, 1]
             }
           }
