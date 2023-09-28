@@ -897,7 +897,6 @@ export default class GameContainer extends Vue {
 
   endPan(): void {
     if (this.backgroundMovement === BackgroundMovement.Pan) {
-      console.warn('endPan');
       this.panVector = [0, 0];
       clearInterval(this.intervalPan);
     }

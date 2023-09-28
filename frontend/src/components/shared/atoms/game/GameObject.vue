@@ -8,15 +8,15 @@
     :filters="objectFilters"
   >
     <slot></slot>
-    <Graphics
-      v-if="body && showBounds && loadingFinished"
-      @render="drawBorder"
-      :x="0"
-      :y="0"
-      :width="boundsWidth ?? clickWidth"
-      :height="boundsHeight ?? clickHeight"
-    ></Graphics>
   </container>
+  <Graphics
+    v-if="body && showBounds && loadingFinished"
+    @render="drawBorder"
+    :x="position[0] - offset[0]"
+    :y="position[1] - offset[1]"
+    :width="boundsWidth ?? clickWidth"
+    :height="boundsHeight ?? clickHeight"
+  ></Graphics>
 </template>
 
 <script lang="ts">
@@ -29,10 +29,10 @@ import { CollisionHandler } from '@/types/game/CollisionHandler';
 import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import { delay } from '@/utils/wait';
-import * as turf from '@turf/turf';
 import { GrayscaleFilter } from 'pixi-filters';
 import Polygon from 'polygon';
 import Vec2 from 'vec2';
+import { toRadians, toDegrees } from '@/utils/angle';
 
 @Options({
   components: {},
@@ -131,6 +131,7 @@ export default class GameObject extends Vue {
         x: this.position[0] - this.offset[0],
         y: this.position[1] - this.offset[1],
       });
+      if (this.boundsGraphic) this.drawBorder();
     }
   }
 
@@ -364,6 +365,7 @@ export default class GameObject extends Vue {
         x: this.position[0] - this.offset[0],
         y: this.position[1] - this.offset[1],
       });
+      if (this.boundsGraphic) this.drawBorder();
     }
   }
 
@@ -408,9 +410,12 @@ export default class GameObject extends Vue {
 
   @Watch('rotation', { immediate: true })
   onRotationChanged(): void {
-    this.rotationValue = turf.degreesToRadians(this.rotation);
-    if (this.body) {
-      Matter.Body.setAngle(this.body, this.rotationValue);
+    if (!isNaN(this.rotation)) {
+      this.rotationValue = toRadians(360 - this.rotation);
+      if (this.body) {
+        Matter.Body.setAngle(this.body, this.rotationValue);
+        if (this.boundsGraphic) this.drawBorder();
+      }
     }
   }
 
@@ -421,7 +426,7 @@ export default class GameObject extends Vue {
       const scale = (1 / this.appliedScaleFactor) * this.scale;
       Matter.Body.scale(this.body, scale, scale);
       this.appliedScaleFactor = this.scale;
-      //if (this.boundsGraphic) this.drawBorder();
+      if (this.boundsGraphic) this.drawBorder();
     }
   }
 
@@ -457,7 +462,7 @@ export default class GameObject extends Vue {
         this.body.position.y + this.offset[1],
       ];
       this.rotationValue = this.body.angle;
-      this.$emit('update:rotation', turf.radiansToDegrees(this.rotationValue));
+      this.$emit('update:rotation', 360 - toDegrees(this.rotationValue));
       const inputPosition = this.convertPositionToInputFormat();
       if (this.x !== inputPosition[0] || this.y !== inputPosition[1]) {
         this.$emit('positionChanged', inputPosition);

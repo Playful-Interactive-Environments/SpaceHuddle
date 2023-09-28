@@ -27,7 +27,7 @@
             "order": 10,
             "spritesheet": "/assets/games/coolit/city/city.json",
             "explanationText": "module.playing.coolit.participant.placeables.city",
-            "placingRegions": [[[0, 80], [100, 80], [100, 92], [0, 92]]]
+            "placingRegions": [[[0, 75], [100, 75], [100, 92], [0, 92]]]
           },
           "items": {
             "building01": {
@@ -123,7 +123,7 @@
             "order": 10,
             "spritesheet": "/assets/games/coolit/city/city.json",
             "explanationText": "module.playing.coolit.participant.placeables.city",
-            "placingRegions": [[[0, 50], [100, 50], [100, 63], [0, 63]], [[0, 90], [100, 90], [100, 100], [0, 100]]]
+            "placingRegions": [[[0, 75], [100, 75], [100, 92], [0, 92]]]
           },
           "items": {
             "trees01": {
