@@ -11,6 +11,7 @@
       :background-texture="gameConfig.obstacles[levelType].settings.background"
       :background-position="BackgroundPosition.Cover"
       :background-movement="BackgroundMovement.Auto"
+      :collisionRegions="collisionRegions"
       @initRenderer="initRenderer"
       @updateOffset="updateOffset"
     >
@@ -50,8 +51,8 @@
             </CustomSprite>
           </GameObject>
           <GameObject
-            v-for="(ray, index) in lightRayList"
-            :key="index"
+            v-for="ray in lightRayList"
+            :key="ray.uuid"
             type="circle"
             :object-space="ObjectSpace.RelativeToBackground"
             :x="ray.position[0]"
@@ -61,7 +62,7 @@
               collisionFilter: {
                 group: 0,
                 category: CollisionGroups.LIGHT_RAY,
-                mask: CollisionGroups.OBSTACLE,
+                mask: CollisionGroups.OBSTACLE | CollisionGroups.GROUND,
               },
             }"
             :is-static="false"
@@ -78,14 +79,14 @@
             ></Graphics>
           </GameObject>
           <GameObject
-            v-for="(ray, index) in heatRayList"
-            :key="index"
+            v-for="ray in heatRayList"
+            :key="ray.uuid"
             type="circle"
             :object-space="ObjectSpace.RelativeToBackground"
             :x="ray.position[0]"
             :y="ray.position[1]"
             :options="{
-              name: 'light',
+              name: 'heat',
               collisionFilter: {
                 group: 0,
                 category: CollisionGroups.HEAT_RAY,
@@ -98,6 +99,7 @@
             @collision="heatCollision"
             @initialised="rayInitialised"
             @initError="rayInitError"
+            @outsideDrawingSpace="leaveAtmosphere"
           >
             <Graphics
               :radius="10"
@@ -119,6 +121,7 @@ import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer, {
   BackgroundPosition,
   BackgroundMovement,
+  CollisionRegion,
 } from '@/components/shared/atoms/game/GameContainer.vue';
 import * as placeable from '@/types/game/Placeable';
 import * as pixiUtil from '@/utils/pixi';
@@ -135,8 +138,8 @@ import { Idea } from '@/types/api/Idea';
 import * as configParameter from '@/utils/game/configParameter';
 import { v4 as uuidv4 } from 'uuid';
 import Vec2 from 'vec2';
-import * as turf from '@turf/turf';
 import Color from 'colorjs.io';
+import { toRadians } from '@/utils/angle';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
@@ -146,6 +149,7 @@ interface Ray {
   position: [number, number];
   direction: [number, number];
   initialised: boolean;
+  startTime: number;
 }
 
 export interface MoleculeState {
@@ -262,6 +266,7 @@ export default class PlayLevel extends Vue {
     LIGHT_RAY: 1 << 2,
     HEAT_RAY: 1 << 3,
     MOLECULE: 1 << 4,
+    GROUND: 1 << 5,
   });
 
   /*get playStateResult(): PlayStateResult {
@@ -285,6 +290,25 @@ export default class PlayLevel extends Vue {
 
   get redColor(): string {
     return themeColors.getRedColor();
+  }
+
+  get collisionRegions(): CollisionRegion[] {
+    const regions: CollisionRegion[] = [];
+    for (const ration of gameConfig.obstacles[this.levelType].settings
+      .heatRation) {
+      regions.push({
+        path: ration.region,
+        options: {
+          name: 'ground',
+          collisionFilter: {
+            group: 0,
+            category: this.CollisionGroups.GROUND,
+          },
+        },
+        source: ration,
+      });
+    }
+    return regions;
   }
 
   mounted(): void {
@@ -319,16 +343,17 @@ export default class PlayLevel extends Vue {
     const toColorString = (color: any): string => {
       return `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;
     };*/
-    const white = new Color('#ffffff').to('srgb');
-    const red = new Color(themeColors.getRedColor()).to('srgb') as any;
     let mixingFactor = building.hitCount / building.maxHitCount;
     if (mixingFactor > 1) mixingFactor = 1;
+    const red = new Color(themeColors.getRedColor()).to('srgb') as any;
+    /*const white = new Color('#ffffff').to('srgb');
     const tint = white.range(red, {
       space: 'lch',
       outputSpace: 'srgb',
     }) as any;
     const color = tint(mixingFactor);
-    return [color.r, color.g, color.b, 0.4];
+    return [color.r, color.g, color.b, 0.4];*/
+    return [red.r, red.g, red.b, mixingFactor / 2];
   }
 
   unmounted(): void {
@@ -462,7 +487,7 @@ export default class PlayLevel extends Vue {
   emitLightRays(): void {
     const delay = 200 + Math.random() * 3000;
     const angle = 5 + Math.random() * 10;
-    const direction = new Vec2(0, 1).rotate(-turf.degreesToRadians(angle));
+    const direction = new Vec2(0, 1).rotate(-toRadians(angle));
     const displayWidth = this.panOffsetMax[0] - this.panOffsetMin[0];
     const position =
       this.panOffsetMin[0] +
@@ -474,6 +499,7 @@ export default class PlayLevel extends Vue {
         position: [position, 0],
         direction: [direction.x, direction.y],
         initialised: false,
+        startTime: Date.now(),
       });
       if (this.active) this.emitLightRays();
     }, delay);
@@ -504,12 +530,22 @@ export default class PlayLevel extends Vue {
       if (ray.initialised) {
         ray.position[0] += ray.direction[0];
         ray.position[1] += ray.direction[1];
+      } else if (ray.startTime + 1000 < Date.now()) {
+        const index = this.lightRayList.findIndex(
+          (item) => item.uuid === ray.uuid
+        );
+        if (index > -1) this.lightRayList.splice(index, 1);
       }
     }
     for (const ray of this.heatRayList) {
       if (ray.initialised) {
         ray.position[0] += ray.direction[0];
         ray.position[1] += ray.direction[1];
+      } else if (ray.startTime + 1000 < Date.now()) {
+        const index = this.heatRayList.findIndex(
+          (item) => item.uuid === ray.uuid
+        );
+        if (index > -1) this.heatRayList.splice(index, 1);
       }
     }
   }
@@ -525,12 +561,21 @@ export default class PlayLevel extends Vue {
       this.lightRayList.splice(index, 1);
       ray.direction[1] *= -1;
       ray.initialised = false;
+      ray.startTime = Date.now();
       this.heatRayList.push(ray);
     }
   }
 
   heatCollision(heat: GameObject, molecule: GameObject): void {
     console.log(heat, molecule);
+  }
+
+  leaveAtmosphere(heat: GameObject): void {
+    const ray = heat.source as Ray;
+    const index = this.heatRayList.findIndex((item) => item.uuid === ray.uuid);
+    if (index > -1) {
+      this.heatRayList.splice(index, 1);
+    }
   }
 
   updateOffset(

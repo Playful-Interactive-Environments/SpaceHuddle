@@ -101,6 +101,9 @@ import * as PIXI from 'pixi.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import * as pixiUtil from '@/utils/pixi';
+import * as matterUtil from '@/utils/matter';
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 
 export enum BackgroundPosition {
   Stretch = 'stretch',
@@ -113,6 +116,14 @@ export enum BackgroundMovement {
   None = 'none',
   Pan = 'pan',
   Auto = 'auto',
+}
+
+export interface CollisionRegion {
+  path: [number, number][];
+  source: any;
+  options: {
+    [key: string]: string | number | boolean | object;
+  };
 }
 
 @Options({
@@ -139,7 +150,6 @@ export enum BackgroundMovement {
     'backgroundSizeChanged',
   ],
 })
-/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class GameContainer extends Vue {
   @Prop({ default: true }) readonly hasMouseInput!: boolean;
   @Prop({ default: true }) readonly detectCollision!: boolean;
@@ -165,6 +175,7 @@ export default class GameContainer extends Vue {
     | ((collision: Matter.Collision) => boolean)
     | undefined;
   @Prop({ default: false }) readonly combinedActiveCollisionToChain!: boolean;
+  @Prop({ default: [] }) readonly collisionRegions!: CollisionRegion[];
   ready = false;
   gameWidth = 0;
   gameHeight = 0;
@@ -264,6 +275,19 @@ export default class GameContainer extends Vue {
         else if (gameObject.objectSpace === ObjectSpace.RelativeToScreen)
           gameObject.updateOffset(this.gameObjectOffsetRelativeToScreen);
       }
+    }
+
+    for (const collisionRegion of this.collisionRegions) {
+      const body = matterUtil.createPolygonBody(
+        collisionRegion.options,
+        this.backgroundTextureSize[0] / 2,
+        this.backgroundTextureSize[1] / 2,
+        this.backgroundTextureSize[0],
+        this.backgroundTextureSize[1],
+        collisionRegion.path
+      );
+      Matter.Composite.add(this.engine.world, body);
+      this.detector.bodies.push(body);
     }
   }
 

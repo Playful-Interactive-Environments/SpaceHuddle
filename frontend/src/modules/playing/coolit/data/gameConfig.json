@@ -9,14 +9,12 @@
         "color": "#c55e44",
         "heatRation": [
           {
-            "yMin": 65,
-            "yMax": 85,
-            "coefficient": 3
+            "region": [[0, 90], [100, 90], [100, 92], [0, 92]],
+            "coefficient": 0.5
           },
           {
-            "yMin": 85,
-            "yMax": 100,
-            "coefficient": 0.5
+            "region": [[0, 92], [100, 92], [100, 100], [0, 100]],
+            "coefficient": 3
           }
         ]
       },

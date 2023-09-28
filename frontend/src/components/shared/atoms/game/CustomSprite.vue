@@ -38,7 +38,12 @@ export default class CustomSprite extends Vue implements CustomObject {
   @Prop({ default: 1 }) aspectRation!: number;
   @Prop({ default: 0 }) anchor!: number | [number, number];
   @Prop({ default: '#ffffff' }) tint!: string;
-  @Prop({ default: [0, 0, 0, 0] }) colorOverlay!: [number, number, number, number];
+  @Prop({ default: [0, 0, 0, 0] }) colorOverlay!: [
+    number,
+    number,
+    number,
+    number
+  ];
   @Prop({ default: null }) outline!: number | null;
   @Prop() texture!: string | PIXI.Texture;
   gameContainer!: GameContainer;
