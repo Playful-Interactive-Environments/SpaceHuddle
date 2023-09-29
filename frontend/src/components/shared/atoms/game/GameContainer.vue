@@ -126,6 +126,11 @@ export interface CollisionRegion {
   };
 }
 
+interface CollisionRegionData {
+  region: CollisionRegion;
+  body: Matter.Body | null;
+}
+
 @Options({
   computed: {
     BackgroundMovement() {
@@ -156,6 +161,7 @@ export default class GameContainer extends Vue {
   @Prop({ default: true }) readonly useGravity!: boolean;
   @Prop({ default: false }) readonly useWind!: boolean;
   @Prop({ default: true }) readonly useBorders!: boolean;
+  @Prop({ default: 1 }) readonly borderCategory!: number;
   @Prop({ default: false }) readonly activatedObjectOnRegister!: boolean;
   @Prop({ default: undefined }) readonly width!: number | undefined;
   @Prop({ default: undefined }) readonly height!: number | undefined;
@@ -189,6 +195,7 @@ export default class GameContainer extends Vue {
   hierarchyObserver!: MutationObserver;
   resizeObserver!: ResizeObserver;
   app: PIXI.Application | null = null;
+  regionBodyList: CollisionRegionData[] = [];
 
   gameObjects: GameObject[] = [];
   customObjects: CustomObject[] = [];
@@ -277,17 +284,36 @@ export default class GameContainer extends Vue {
       }
     }
 
-    for (const collisionRegion of this.collisionRegions) {
-      const body = matterUtil.createPolygonBody(
-        collisionRegion.options,
-        this.backgroundTextureSize[0] / 2,
-        this.backgroundTextureSize[1] / 2,
-        this.backgroundTextureSize[0],
-        this.backgroundTextureSize[1],
-        collisionRegion.path
-      );
-      Matter.Composite.add(this.engine.world, body);
-      this.detector.bodies.push(body);
+    for (const region of this.regionBodyList) {
+      const collisionRegion = region.region;
+      if (!region.body) {
+        collisionRegion.options.isStatic = true;
+        collisionRegion.options.isSensor = true;
+        region.body = matterUtil.createPolygonBody(
+          collisionRegion.options,
+          this.backgroundTextureSize[0] / 2,
+          this.backgroundTextureSize[1] / 2,
+          this.backgroundTextureSize[0],
+          this.backgroundTextureSize[1],
+          collisionRegion.path
+        );
+        Matter.Composite.add(this.engine.world, region.body);
+        this.detector.bodies.push(region.body);
+      } else {
+        collisionRegion.options.isStatic = true;
+        const body = matterUtil.createPolygonBody(
+          collisionRegion.options,
+          this.backgroundTextureSize[0] / 2,
+          this.backgroundTextureSize[1] / 2,
+          this.backgroundTextureSize[0],
+          this.backgroundTextureSize[1],
+          collisionRegion.path
+        );
+        //Matter.Body.setPosition(region.body, body.position);
+        //Matter.Body.setVertices(region.body, body.vertices);
+        region.body.position = body.position;
+        region.body.vertices = body.vertices;
+      }
     }
   }
 
@@ -302,6 +328,16 @@ export default class GameContainer extends Vue {
 
   get backgroundTexturePosition(): [number, number] {
     return this.backgroundPositionOffset;
+  }
+
+  @Watch('collisionRegions', { immediate: true })
+  onCollisionRegionChanged(): void {
+    this.regionBodyList = this.collisionRegions.map((item) => {
+      return {
+        region: item,
+        body: null,
+      };
+    });
   }
 
   @Watch('activeObject', { immediate: true })
@@ -612,6 +648,16 @@ export default class GameContainer extends Vue {
     return null;
   }
 
+  getCollisionRegionForBody(body: Matter.Body): CollisionRegion | null {
+    if (body) {
+      const obj = this.regionBodyList.find(
+        (obj) => obj.body && obj.body.id === body.id
+      );
+      if (obj) return obj.region;
+    }
+    return null;
+  }
+
   readonly minClickTimeDelta = 10;
   isMouseDown = false;
   gameContainerClicked(event: any): void {
@@ -719,7 +765,11 @@ export default class GameContainer extends Vue {
         bounds.bottom.y,
         bounds.bottom.width,
         bounds.bottom.height,
-        { isStatic: true, isHidden: true, collisionFilter: { group: 0b0001 } }
+        {
+          isStatic: true,
+          isHidden: true,
+          collisionFilter: { group: 0b0001, category: this.borderCategory },
+        }
       );
       if (this.useBorders) Matter.Composite.add(this.engine.world, bottom);
       const top = Matter.Bodies.rectangle(
@@ -727,7 +777,11 @@ export default class GameContainer extends Vue {
         bounds.top.y,
         bounds.top.width,
         bounds.top.height,
-        { isStatic: true, isHidden: true, collisionFilter: { group: 0b0001 } }
+        {
+          isStatic: true,
+          isHidden: true,
+          collisionFilter: { group: 0b0001, category: this.borderCategory },
+        }
       );
       if (this.useBorders) Matter.Composite.add(this.engine.world, top);
       const right = Matter.Bodies.rectangle(
@@ -735,7 +789,11 @@ export default class GameContainer extends Vue {
         bounds.right.y,
         bounds.right.width,
         bounds.right.height,
-        { isStatic: true, isHidden: true, collisionFilter: { group: 0b0001 } }
+        {
+          isStatic: true,
+          isHidden: true,
+          collisionFilter: { group: 0b0001, category: this.borderCategory },
+        }
       );
       if (this.useBorders) Matter.Composite.add(this.engine.world, right);
       const left = Matter.Bodies.rectangle(
@@ -743,7 +801,11 @@ export default class GameContainer extends Vue {
         bounds.left.y,
         bounds.left.width,
         bounds.left.height,
-        { isStatic: true, isHidden: true, collisionFilter: { group: 0b0001 } }
+        {
+          isStatic: true,
+          isHidden: true,
+          collisionFilter: { group: 0b0001, category: this.borderCategory },
+        }
       );
       if (this.useBorders) Matter.Composite.add(this.engine.world, left);
       this.borders = {
@@ -845,7 +907,7 @@ export default class GameContainer extends Vue {
   lookForCollision(): void {
     const handleCollision = (
       gameObject: GameObject,
-      collisionObject: GameObject | null
+      collisionObject: GameObject | CollisionRegion | null
     ): void => {
       if (
         this.activeComposition.bodies.find(
@@ -876,8 +938,16 @@ export default class GameContainer extends Vue {
       for (const validCollision of validCollisionList) {
         const gameObjectA = this.getGameObjectForBody(validCollision.bodyA);
         const gameObjectB = this.getGameObjectForBody(validCollision.bodyB);
-        if (gameObjectA) handleCollision(gameObjectA, gameObjectB);
-        if (gameObjectB) handleCollision(gameObjectB, gameObjectA);
+        const regionObjectA = this.getCollisionRegionForBody(
+          validCollision.bodyA
+        );
+        const regionObjectB = this.getCollisionRegionForBody(
+          validCollision.bodyB
+        );
+        if (gameObjectA)
+          handleCollision(gameObjectA, gameObjectB ?? regionObjectB);
+        if (gameObjectB)
+          handleCollision(gameObjectB, gameObjectA ?? regionObjectA);
       }
     }
   }

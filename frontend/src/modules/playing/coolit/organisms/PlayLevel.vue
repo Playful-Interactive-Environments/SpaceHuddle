@@ -8,6 +8,7 @@
       v-model:height="gameHeight"
       :detect-collision="true"
       :use-gravity="false"
+      :border-category="CollisionGroups.BORDER"
       :background-texture="gameConfig.obstacles[levelType].settings.background"
       :background-position="BackgroundPosition.Cover"
       :background-movement="BackgroundMovement.Auto"
@@ -31,6 +32,7 @@
             :rotation="obstacle.rotation"
             :scale="obstacle.scale"
             :options="{
+              isSensor: true,
               name: obstacle.name,
               collisionFilter: {
                 group: 0,
@@ -51,61 +53,45 @@
             </CustomSprite>
           </GameObject>
           <GameObject
-            v-for="ray in lightRayList"
+            v-for="ray in rayList"
             :key="ray.uuid"
             type="circle"
             :object-space="ObjectSpace.RelativeToBackground"
-            :x="ray.position[0]"
-            :y="ray.position[1]"
-            :options="{
-              name: 'light',
-              collisionFilter: {
-                group: 0,
-                category: CollisionGroups.LIGHT_RAY,
-                mask: CollisionGroups.OBSTACLE | CollisionGroups.GROUND,
-              },
-            }"
+            v-model:x="ray.position[0]"
+            v-model:y="ray.position[1]"
+            :rotation="ray.angle"
+            :options="getRayTypeOptions(ray.type)"
             :is-static="false"
             :show-bounds="false"
             :source="ray"
-            @collision="lightCollision"
-            @initialised="rayInitialised"
-            @initError="rayInitError"
-          >
-            <Graphics
-              :radius="10"
-              :color="yellowColor"
-              @render="drawCircle($event)"
-            ></Graphics>
-          </GameObject>
-          <GameObject
-            v-for="ray in heatRayList"
-            :key="ray.uuid"
-            type="circle"
-            :object-space="ObjectSpace.RelativeToBackground"
-            :x="ray.position[0]"
-            :y="ray.position[1]"
-            :options="{
-              name: 'heat',
-              collisionFilter: {
-                group: 0,
-                category: CollisionGroups.HEAT_RAY,
-                mask: CollisionGroups.MOLECULE,
-              },
-            }"
-            :is-static="false"
-            :show-bounds="false"
-            :source="ray"
-            @collision="heatCollision"
+            @collision="rayCollision"
             @initialised="rayInitialised"
             @initError="rayInitError"
             @outsideDrawingSpace="leaveAtmosphere"
           >
             <Graphics
+              v-if="ray.type === RayType.light"
+              :radius="10"
+              :color="yellowColor"
+              @render="drawCircle($event)"
+            ></Graphics>
+            <Graphics
+              v-else
               :radius="10"
               :color="redColor"
               @render="drawCircle($event)"
             ></Graphics>
+            <template #background>
+              <simple-rope
+                v-if="lightTexture"
+                :texture="lightTexture"
+                :x="0"
+                :y="0"
+                :scale="0.2"
+                :tint="ray.type === RayType.light ? yellowColor : redColor"
+                :points="ray.points"
+              />
+            </template>
           </GameObject>
         </container>
       </template>
@@ -140,16 +126,25 @@ import { v4 as uuidv4 } from 'uuid';
 import Vec2 from 'vec2';
 import Color from 'colorjs.io';
 import { toRadians } from '@/utils/angle';
+import Matter from 'matter-js';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
 
+enum RayType {
+  light = 'light',
+  heat = 'heat',
+}
+
 interface Ray {
   uuid: string;
+  type: RayType;
   position: [number, number];
   direction: [number, number];
+  angle: number;
   initialised: boolean;
   startTime: number;
+  points: { x: number; y: number }[];
 }
 
 export interface MoleculeState {
@@ -250,23 +245,25 @@ export default class PlayLevel extends Vue {
 
   obstacleList: CoolItObstacle[] = [];
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
+  lightTexture!: PIXI.Texture;
   startTime = Date.now();
 
-  lightRayList: Ray[] = [];
-  heatRayList: Ray[] = [];
+  rayList: Ray[] = [];
 
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
+  RayType = RayType;
   interval!: any;
   readonly intervalTime = 100;
 
   CollisionGroups = Object.freeze({
-    CONTROLLABLE: 1 << 0,
+    MOUSE: 1 << 0,
     OBSTACLE: 1 << 1,
     LIGHT_RAY: 1 << 2,
     HEAT_RAY: 1 << 3,
     MOLECULE: 1 << 4,
     GROUND: 1 << 5,
+    BORDER: 1 << 6,
   });
 
   /*get playStateResult(): PlayStateResult {
@@ -305,16 +302,52 @@ export default class PlayLevel extends Vue {
             category: this.CollisionGroups.GROUND,
           },
         },
-        source: ration,
+        source: {
+          name: 'ground',
+          heatRationCoefficient: ration.coefficient,
+          hitCount: 0,
+        },
       });
     }
     return regions;
   }
 
+  getRayTypeOptions(rayType: RayType): any {
+    switch (rayType) {
+      case RayType.light:
+        return {
+          name: 'light',
+          collisionFilter: {
+            group: 0,
+            category: this.CollisionGroups.LIGHT_RAY,
+            mask:
+              this.CollisionGroups.OBSTACLE |
+              this.CollisionGroups.GROUND |
+              this.CollisionGroups.MOUSE,
+          },
+        };
+      case RayType.heat:
+        return {
+          name: 'heat',
+          collisionFilter: {
+            group: 0,
+            category: this.CollisionGroups.HEAT_RAY,
+            mask: this.CollisionGroups.MOLECULE,
+          },
+        };
+    }
+  }
+
   mounted(): void {
     tutorialService.registerGetList(this.updateTutorial, this.authHeaderTyp);
     this.interval = setInterval(() => this.updateRays(), this.intervalTime);
-    this.emitLightRays();
+    this.emitLightRays(200, 200);
+
+    pixiUtil
+      .loadTexture('/assets/games/coolit/city/light.png')
+      .then((texture) => {
+        this.lightTexture = texture;
+      });
   }
 
   updateTutorial(steps: Tutorial[]): void {
@@ -479,13 +512,15 @@ export default class PlayLevel extends Vue {
   }
 
   drawCircle(circle: PIXI.Graphics): void {
-    if (this.renderer) {
+    until(() => this.renderer).then(() => {
       pixiUtil.drawCircleWithGradient(circle, this.renderer);
-    }
+    });
   }
 
-  emitLightRays(): void {
-    const delay = 200 + Math.random() * 3000;
+  readonly rayPoints = 20;
+  readonly rayLength = 500 / this.rayPoints;
+  emitLightRays(minDelay = 2000, maxDelay = 3000): void {
+    const delay = minDelay + Math.random() * maxDelay;
     const angle = 5 + Math.random() * 10;
     const direction = new Vec2(0, 1).rotate(-toRadians(angle));
     const displayWidth = this.panOffsetMax[0] - this.panOffsetMin[0];
@@ -494,12 +529,22 @@ export default class PlayLevel extends Vue {
       displayWidth / 5 +
       Math.random() * (displayWidth / 2);
     setTimeout(() => {
-      this.lightRayList.push({
+      const ropePoints: { x: number; y: number }[] = [];
+      for (let i = 0; i < this.rayPoints; i++) {
+        ropePoints.push({
+          x: -i * this.rayLength * direction.x,
+          y: -i * this.rayLength * direction.y,
+        });
+      }
+      this.rayList.push({
         uuid: uuidv4(),
+        type: RayType.light,
+        angle: angle,
         position: [position, 0],
         direction: [direction.x, direction.y],
         initialised: false,
         startTime: Date.now(),
+        points: ropePoints,
       });
       if (this.active) this.emitLightRays();
     }, delay);
@@ -507,74 +552,112 @@ export default class PlayLevel extends Vue {
 
   rayInitialised(item: GameObject): void {
     item.source.initialised = true;
+    if (item.body) {
+      const force = Matter.Vector.create(
+        item.source.direction[0],
+        item.source.direction[1]
+      );
+      item.body.frictionAir = 0;
+      Matter.Body.setVelocity(item.body, force);
+      (Matter.Body as any).setSpeed(item.body, 5);
+    }
   }
 
   rayInitError(item: GameObject): void {
     const ray = item.source as Ray;
-    console.log('rayInitError', ray);
-    const index = this.lightRayList.findIndex((item) => item.uuid === ray.uuid);
+    const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
     if (index > -1) {
-      this.lightRayList.splice(index, 1);
-    } else {
-      const index = this.heatRayList.findIndex(
-        (item) => item.uuid === ray.uuid
-      );
-      if (index > -1) {
-        this.heatRayList.splice(index, 1);
-      }
+      this.rayList.splice(index, 1);
     }
   }
 
   updateRays(): void {
-    for (const ray of this.lightRayList) {
+    for (const ray of this.rayList) {
+      if (ray.initialised) {
+        const tick = ray.startTime - Date.now();
+        for (let i = 0; i < ray.points.length; i++) {
+          /*ray.points[i].y =
+            -i * this.rayLength * ray.direction[1] +
+            Math.sin(i * 0.5 + tick) * 30 * ray.direction[0];
+          ray.points[i].x =
+            -i * this.rayLength * ray.direction[0] +
+            Math.cos(i * 0.3 + tick) * 20 * ray.direction[1];*/
+          ray.points[i].y =
+            -i * this.rayLength +
+            Math.sin(i * 0.5 + tick) * 30 * ray.direction[0];
+          ray.points[i].x = Math.cos(i * 0.3 + tick) * 20 * ray.direction[1];
+          if (ray.type === RayType.light) {
+            ray.points[i].y =
+              -i * this.rayLength +
+              Math.sin(i * 5 + tick) * 60 * ray.direction[0];
+            ray.points[i].x = Math.cos(i * 3 + tick) * 40 * ray.direction[1];
+          } else {
+            ray.points[i].y =
+              -i * this.rayLength +
+              Math.sin(i * 0.5 + tick) * 60 * ray.direction[0];
+            ray.points[i].x = Math.cos(i * 0.3 + tick) * 40 * ray.direction[1];
+          }
+        }
+      } else if (!ray.initialised && ray.startTime + 1000 < Date.now()) {
+        const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
+        if (index > -1) this.rayList.splice(index, 1);
+      }
+    }
+
+    /*for (const ray of this.rayList) {
       if (ray.initialised) {
         ray.position[0] += ray.direction[0];
         ray.position[1] += ray.direction[1];
       } else if (ray.startTime + 1000 < Date.now()) {
-        const index = this.lightRayList.findIndex(
+        const index = this.rayList.findIndex(
           (item) => item.uuid === ray.uuid
         );
-        if (index > -1) this.lightRayList.splice(index, 1);
+        if (index > -1) this.rayList.splice(index, 1);
       }
-    }
-    for (const ray of this.heatRayList) {
-      if (ray.initialised) {
-        ray.position[0] += ray.direction[0];
-        ray.position[1] += ray.direction[1];
-      } else if (ray.startTime + 1000 < Date.now()) {
-        const index = this.heatRayList.findIndex(
-          (item) => item.uuid === ray.uuid
+    }*/
+  }
+
+  rayCollision(
+    rayObject: GameObject,
+    obstacleObject: GameObject | CollisionRegion
+  ): void {
+    const ray = rayObject.source as Ray;
+    //console.log('rayCollision', ray.type, obstacleObject?.source);
+    const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
+    if (index > -1) {
+      const hitObstacle = obstacleObject?.source as CoolItObstacle;
+      if (hitObstacle) {
+        hitObstacle.hitCount++;
+      }
+      if (ray.type === RayType.light) {
+        const force = Matter.Vector.create(
+          rayObject.body.velocity.x,
+          rayObject.body.velocity.y * -1
         );
-        if (index > -1) this.heatRayList.splice(index, 1);
+        Matter.Body.setVelocity(rayObject.body, force);
+        const options = this.getRayTypeOptions(ray.type);
+        rayObject.body.name = options.name;
+        rayObject.body.collisionFilter.mask = options.collisionFilter.mask;
+        rayObject.body.collisionFilter.category =
+          options.collisionFilter.category;
+        ray.direction[1] *= -1;
+        ray.type = RayType.heat;
+        ray.angle *= -1;
+        ray.angle += 180;
       }
     }
   }
 
-  lightCollision(light: GameObject, building: GameObject): void {
-    const ray = light.source as Ray;
-    const index = this.lightRayList.findIndex((item) => item.uuid === ray.uuid);
-    if (index > -1) {
-      const hitBuilding = building?.source as CoolItObstacle;
-      if (hitBuilding) {
-        hitBuilding.hitCount++;
+  leaveAtmosphere(
+    rayObject: GameObject,
+    out: { top: boolean; bottom: boolean; right: boolean; left: boolean }
+  ): void {
+    const ray = rayObject.source as Ray;
+    if (ray.type === RayType.heat && out.top) {
+      const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
+      if (index > -1) {
+        this.rayList.splice(index, 1);
       }
-      this.lightRayList.splice(index, 1);
-      ray.direction[1] *= -1;
-      ray.initialised = false;
-      ray.startTime = Date.now();
-      this.heatRayList.push(ray);
-    }
-  }
-
-  heatCollision(heat: GameObject, molecule: GameObject): void {
-    console.log(heat, molecule);
-  }
-
-  leaveAtmosphere(heat: GameObject): void {
-    const ray = heat.source as Ray;
-    const index = this.heatRayList.findIndex((item) => item.uuid === ray.uuid);
-    if (index > -1) {
-      this.heatRayList.splice(index, 1);
     }
   }
 

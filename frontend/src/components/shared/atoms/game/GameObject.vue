@@ -9,11 +9,20 @@
   >
     <slot></slot>
   </container>
+  <container
+    :x="position[0] - offset[0]"
+    :y="position[1] - offset[1]"
+    :rotation="rotationValue"
+    :scale="scale"
+    :filters="objectFilters"
+  >
+    <slot name="background"></slot>
+  </container>
   <Graphics
     v-if="body && showBounds && loadingFinished"
     @render="drawBorder"
-    :x="position[0] - offset[0]"
-    :y="position[1] - offset[1]"
+    :x="body.position.x"
+    :y="body.position.y"
     :width="boundsWidth ?? clickWidth"
     :height="boundsHeight ?? clickHeight"
   ></Graphics>
@@ -26,7 +35,9 @@ import * as Matter from 'matter-js/build/matter';
 import * as PIXI from 'pixi.js';
 import { EventType } from '@/types/enum/EventType';
 import { CollisionHandler } from '@/types/game/CollisionHandler';
-import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
+import GameContainer, {
+  CollisionRegion,
+} from '@/components/shared/atoms/game/GameContainer.vue';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import { delay } from '@/utils/wait';
 import { GrayscaleFilter } from 'pixi-filters';
@@ -468,15 +479,25 @@ export default class GameObject extends Vue {
         this.body.position.y + this.offset[1] !== this.position[1])
     ) {
       if (this.gameContainer) {
-        if (
-          this.body.position.x + this.offset[0] >
-            this.gameContainer.gameWidth ||
-          this.body.position.x + this.offset[0] < 0 ||
-          this.body.position.y + this.offset[1] >
-            this.gameContainer.gameHeight ||
-          this.body.position.y + this.offset[1] < 0
-        ) {
-          this.$emit('outsideDrawingSpace', this);
+        /*const outsideRight =
+          this.body.position.x + this.offset[0] > this.gameContainer.gameWidth;
+        const outsideLeft = this.body.position.x + this.offset[0] < 0;
+        const outsideBottom =
+          this.body.position.y + this.offset[1] > this.gameContainer.gameHeight;
+        const outsideTop = this.body.position.y + this.offset[1] < 0;*/
+        const outsideRight =
+          this.body.position.x > this.gameContainer.gameWidth;
+        const outsideLeft = this.body.position.x < 0;
+        const outsideBottom =
+          this.body.position.y > this.gameContainer.gameHeight;
+        const outsideTop = this.body.position.y < 0;
+        if (outsideRight || outsideLeft || outsideBottom || outsideTop) {
+          this.$emit('outsideDrawingSpace', this, {
+            right: outsideRight,
+            left: outsideLeft,
+            bottom: outsideBottom,
+            top: outsideTop,
+          });
         }
       }
       this.position = [
@@ -492,6 +513,7 @@ export default class GameObject extends Vue {
       this.$emit('update:x', inputPosition[0]);
       this.$emit('update:y', inputPosition[1]);
     }
+    if (this.boundsGraphic) this.drawBorder();
   }
 
   notifyDestroy(): void {
@@ -527,7 +549,7 @@ export default class GameObject extends Vue {
     }, 100);
   }
 
-  handleCollision(collisionObject: GameObject | null): void {
+  handleCollision(collisionObject: GameObject | CollisionRegion | null): void {
     if (this.collisionHandler) {
       this.collisionHandler.handleCollision(this, collisionObject);
     }
