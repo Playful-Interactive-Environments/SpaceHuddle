@@ -71,13 +71,13 @@
           >
             <Graphics
               v-if="ray.type === RayType.light"
-              :radius="10"
+              :radius="5"
               :color="yellowColor"
               @render="drawCircle($event)"
             ></Graphics>
             <Graphics
               v-else
-              :radius="10"
+              :radius="5"
               :color="redColor"
               @render="drawCircle($event)"
             ></Graphics>
@@ -89,7 +89,7 @@
                 :y="0"
                 :scale="0.2"
                 :tint="ray.type === RayType.light ? yellowColor : redColor"
-                :points="ray.points"
+                :points="ray.displayPoints"
               />
             </template>
           </GameObject>
@@ -145,6 +145,8 @@ interface Ray {
   initialised: boolean;
   startTime: number;
   points: { x: number; y: number }[];
+  displayPoints: { x: number; y: number }[];
+  displayPointsCount: number;
 }
 
 export interface MoleculeState {
@@ -517,7 +519,7 @@ export default class PlayLevel extends Vue {
     });
   }
 
-  readonly rayPoints = 20;
+  readonly rayPoints = 80;
   readonly rayLength = 500 / this.rayPoints;
   emitLightRays(minDelay = 2000, maxDelay = 3000): void {
     const delay = minDelay + Math.random() * maxDelay;
@@ -528,14 +530,8 @@ export default class PlayLevel extends Vue {
       this.panOffsetMin[0] +
       displayWidth / 5 +
       Math.random() * (displayWidth / 2);
+    const points = this.calculateInitRayPoints(RayType.light);
     setTimeout(() => {
-      const ropePoints: { x: number; y: number }[] = [];
-      for (let i = 0; i < this.rayPoints; i++) {
-        ropePoints.push({
-          x: -i * this.rayLength * direction.x,
-          y: -i * this.rayLength * direction.y,
-        });
-      }
       this.rayList.push({
         uuid: uuidv4(),
         type: RayType.light,
@@ -544,10 +540,30 @@ export default class PlayLevel extends Vue {
         direction: [direction.x, direction.y],
         initialised: false,
         startTime: Date.now(),
-        points: ropePoints,
+        points: points,
+        displayPoints: points.map(() => {
+          return {
+            x: 0,
+            y: 0,
+          };
+        }),
+        displayPointsCount: 0,
       });
       if (this.active) this.emitLightRays();
     }, delay);
+  }
+
+  calculateInitRayPoints(type: RayType): { x: number; y: number }[] {
+    const rayPoints: { x: number; y: number }[] = [];
+    const iPart = (Math.PI * 2) / this.rayPoints;
+    const waveCount = type === RayType.light ? 3 : 1;
+    for (let i = 0; i < this.rayPoints; i++) {
+      rayPoints.push({
+        x: Math.sin(i * iPart * waveCount) * 40,
+        y: -i * this.rayLength,
+      });
+    }
+    return rayPoints;
   }
 
   rayInitialised(item: GameObject): void {
@@ -574,29 +590,15 @@ export default class PlayLevel extends Vue {
   updateRays(): void {
     for (const ray of this.rayList) {
       if (ray.initialised) {
-        const tick = ray.startTime - Date.now();
+        ray.displayPointsCount += 10;
         for (let i = 0; i < ray.points.length; i++) {
-          /*ray.points[i].y =
-            -i * this.rayLength * ray.direction[1] +
-            Math.sin(i * 0.5 + tick) * 30 * ray.direction[0];
-          ray.points[i].x =
-            -i * this.rayLength * ray.direction[0] +
-            Math.cos(i * 0.3 + tick) * 20 * ray.direction[1];*/
-          ray.points[i].y =
-            -i * this.rayLength +
-            Math.sin(i * 0.5 + tick) * 30 * ray.direction[0];
-          ray.points[i].x = Math.cos(i * 0.3 + tick) * 20 * ray.direction[1];
-          if (ray.type === RayType.light) {
-            ray.points[i].y =
-              -i * this.rayLength +
-              Math.sin(i * 5 + tick) * 60 * ray.direction[0];
-            ray.points[i].x = Math.cos(i * 3 + tick) * 40 * ray.direction[1];
-          } else {
-            ray.points[i].y =
-              -i * this.rayLength +
-              Math.sin(i * 0.5 + tick) * 60 * ray.direction[0];
-            ray.points[i].x = Math.cos(i * 0.3 + tick) * 40 * ray.direction[1];
+          ray.points[i].x *= -1;
+          let displayPoint = ray.points[i];
+          if (i >= ray.displayPointsCount) {
+            displayPoint = ray.points[ray.displayPointsCount - 1];
           }
+          ray.displayPoints[i].x = displayPoint.x;
+          ray.displayPoints[i].y = displayPoint.y;
         }
       } else if (!ray.initialised && ray.startTime + 1000 < Date.now()) {
         const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
@@ -630,6 +632,7 @@ export default class PlayLevel extends Vue {
         hitObstacle.hitCount++;
       }
       if (ray.type === RayType.light) {
+        ray.type = RayType.heat;
         const force = Matter.Vector.create(
           rayObject.body.velocity.x,
           rayObject.body.velocity.y * -1
@@ -640,10 +643,15 @@ export default class PlayLevel extends Vue {
         rayObject.body.collisionFilter.mask = options.collisionFilter.mask;
         rayObject.body.collisionFilter.category =
           options.collisionFilter.category;
+        const points = this.calculateInitRayPoints(ray.type);
+        for (let i = 0; i < ray.points.length; i++) {
+          ray.points[i].x = points[i].x;
+          ray.points[i].y = points[i].y;
+        }
         ray.direction[1] *= -1;
-        ray.type = RayType.heat;
         ray.angle *= -1;
         ray.angle += 180;
+        ray.displayPointsCount = 0;
       }
     }
   }
@@ -654,10 +662,12 @@ export default class PlayLevel extends Vue {
   ): void {
     const ray = rayObject.source as Ray;
     if (ray.type === RayType.heat && out.top) {
-      const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
-      if (index > -1) {
-        this.rayList.splice(index, 1);
-      }
+      setTimeout(() => {
+        const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
+        if (index > -1) {
+          this.rayList.splice(index, 1);
+        }
+      }, 3000);
     }
   }
 
