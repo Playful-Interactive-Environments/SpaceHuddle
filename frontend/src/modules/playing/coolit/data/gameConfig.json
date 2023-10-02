@@ -14,7 +14,7 @@
           },
           {
             "region": [[0, 92], [100, 92], [100, 100], [0, 100]],
-            "coefficient": 3
+            "coefficient": 2.5
           }
         ]
       },
@@ -29,7 +29,7 @@
           },
           "items": {
             "building01": {
-              "heatRationCoefficient": 3,
+              "heatRationCoefficient": 2,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -37,7 +37,7 @@
               "pivot": [0.5, 1]
             },
             "building02": {
-              "heatRationCoefficient": 3,
+              "heatRationCoefficient": 2,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -46,7 +46,7 @@
               "maxHitCount": 3
             },
             "building03": {
-              "heatRationCoefficient": 3,
+              "heatRationCoefficient": 1.5,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -54,14 +54,14 @@
               "pivot": [0.5, 1]
             },
             "building04": {
-              "heatRationCoefficient": 3,
+              "heatRationCoefficient": 2,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
               "pivot": [0.5, 1]
             },
             "glassBuilding01": {
-              "heatRationCoefficient": 3,
+              "heatRationCoefficient": 2.5,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -83,21 +83,21 @@
               "pivot": [0.5, 1]
             },
             "industry01": {
-              "heatRationCoefficient": 3,
+              "heatRationCoefficient": 2,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
               "pivot": [0.5, 1]
             },
             "industry02": {
-              "heatRationCoefficient": 3,
+              "heatRationCoefficient": 2,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
               "pivot": [0.5, 1]
             },
             "industry03": {
-              "heatRationCoefficient": 3,
+              "heatRationCoefficient": 2,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -105,7 +105,7 @@
               "pivot": [0.5, 1]
             },
             "industry04": {
-              "heatRationCoefficient": 3,
+              "heatRationCoefficient": 2,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",

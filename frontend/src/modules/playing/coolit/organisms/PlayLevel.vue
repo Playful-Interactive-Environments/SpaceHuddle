@@ -15,6 +15,7 @@
       :collisionRegions="collisionRegions"
       @initRenderer="initRenderer"
       @updateOffset="updateOffset"
+      :show-bounds="true"
     >
       <template v-slot:default>
         <container v-if="gameWidth">
@@ -49,6 +50,7 @@
               :width="obstacle.width"
               :aspect-ration="getObjectAspect(obstacle.type, obstacle.name)"
               :object-space="ObjectSpace.RelativeToBackground"
+              :filters="obstacle.hitAnimation"
             >
             </CustomSprite>
           </GameObject>
@@ -60,6 +62,7 @@
             v-model:x="ray.position[0]"
             v-model:y="ray.position[1]"
             :rotation="ray.angle"
+            :scale="ray.intensity"
             :options="getRayTypeOptions(ray.type)"
             :is-static="false"
             :show-bounds="false"
@@ -127,6 +130,7 @@ import Vec2 from 'vec2';
 import Color from 'colorjs.io';
 import { toRadians } from '@/utils/angle';
 import Matter from 'matter-js';
+import { ShockwaveFilter, ColorOverlayFilter } from 'pixi-filters';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
@@ -147,6 +151,8 @@ interface Ray {
   points: { x: number; y: number }[];
   displayPoints: { x: number; y: number }[];
   displayPointsCount: number;
+  body: Matter.Body | null;
+  intensity: number;
 }
 
 export interface MoleculeState {
@@ -180,6 +186,8 @@ export interface PlayStateResult {
 interface CoolItObstacle extends placeable.Placeable {
   maxHitCount: number;
   hitCount: number;
+  hitAnimation: ShockwaveFilter[];
+  heatRationCoefficient: number;
 }
 
 function convertToCoolItObstacle(
@@ -208,6 +216,8 @@ function convertToCoolItObstacle(
     hitCount: 0,
     maxHitCount: configParameter.maxHitCount ?? 10,
     placingRegions: result.placingRegions,
+    hitAnimation: [],
+    heatRationCoefficient: configParameter.heatRationCoefficient ?? 1,
   };
 }
 
@@ -292,6 +302,7 @@ export default class PlayLevel extends Vue {
   }
 
   get collisionRegions(): CollisionRegion[] {
+    const red = new Color(themeColors.getRedColor()).to('srgb') as any;
     const regions: CollisionRegion[] = [];
     for (const ration of gameConfig.obstacles[this.levelType].settings
       .heatRation) {
@@ -308,7 +319,9 @@ export default class PlayLevel extends Vue {
           name: 'ground',
           heatRationCoefficient: ration.coefficient,
           hitCount: 0,
+          hitAnimation: [],
         },
+        filter: [new ColorOverlayFilter([red.r, red.g, red.b], 0.5)],
       });
     }
     return regions;
@@ -530,7 +543,7 @@ export default class PlayLevel extends Vue {
       this.panOffsetMin[0] +
       displayWidth / 5 +
       Math.random() * (displayWidth / 2);
-    const points = this.calculateInitRayPoints(RayType.light);
+    const points = this.calculateInitRayPoints(RayType.light, 1);
     setTimeout(() => {
       this.rayList.push({
         uuid: uuidv4(),
@@ -548,19 +561,24 @@ export default class PlayLevel extends Vue {
           };
         }),
         displayPointsCount: 0,
+        body: null,
+        intensity: 1,
       });
       if (this.active) this.emitLightRays();
     }, delay);
   }
 
-  calculateInitRayPoints(type: RayType): { x: number; y: number }[] {
+  calculateInitRayPoints(
+    type: RayType,
+    intensity: number
+  ): { x: number; y: number }[] {
     const rayPoints: { x: number; y: number }[] = [];
     const iPart = (Math.PI * 2) / this.rayPoints;
     const waveCount = type === RayType.light ? 3 : 1;
     for (let i = 0; i < this.rayPoints; i++) {
       rayPoints.push({
-        x: Math.sin(i * iPart * waveCount) * 40,
-        y: -i * this.rayLength,
+        x: (Math.sin(i * iPart * waveCount) * 40) / intensity,
+        y: (-i * this.rayLength) / intensity,
       });
     }
     return rayPoints;
@@ -569,13 +587,23 @@ export default class PlayLevel extends Vue {
   rayInitialised(item: GameObject): void {
     item.source.initialised = true;
     if (item.body) {
-      const force = Matter.Vector.create(
-        item.source.direction[0],
-        item.source.direction[1]
-      );
+      item.source.body = item.body;
       item.body.frictionAir = 0;
-      Matter.Body.setVelocity(item.body, force);
-      (Matter.Body as any).setSpeed(item.body, 5);
+      this.calculateRayVelocity(item.source);
+    }
+  }
+
+  calculateRayVelocity(ray: Ray): void {
+    if (ray.body) {
+      const force = Matter.Vector.create(ray.direction[0], ray.direction[1]);
+      Matter.Body.setVelocity(ray.body, force);
+      this.setConstRaySpeed(ray);
+    }
+  }
+
+  setConstRaySpeed(ray: Ray): void {
+    if (ray.body) {
+      (Matter.Body as any).setSpeed(ray.body, 5);
     }
   }
 
@@ -600,6 +628,7 @@ export default class PlayLevel extends Vue {
           ray.displayPoints[i].x = displayPoint.x;
           ray.displayPoints[i].y = displayPoint.y;
         }
+        //this.setConstRaySpeed(ray);
       } else if (!ray.initialised && ray.startTime + 1000 < Date.now()) {
         const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
         if (index > -1) this.rayList.splice(index, 1);
@@ -617,38 +646,62 @@ export default class PlayLevel extends Vue {
         if (index > -1) this.rayList.splice(index, 1);
       }
     }*/
+
+    for (const obstacle of this.obstacleList) {
+      obstacle.hitAnimation = obstacle.hitAnimation.filter(
+        (item) => item.time < 5
+      );
+      for (const animation of obstacle.hitAnimation) {
+        animation.time += 0.1;
+      }
+    }
   }
 
   rayCollision(
     rayObject: GameObject,
-    obstacleObject: GameObject | CollisionRegion
+    obstacleObject: GameObject | CollisionRegion,
+    hitPoint: [number, number]
   ): void {
     const ray = rayObject.source as Ray;
-    //console.log('rayCollision', ray.type, obstacleObject?.source);
     const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
     if (index > -1) {
       const hitObstacle = obstacleObject?.source as CoolItObstacle;
       if (hitObstacle) {
         hitObstacle.hitCount++;
+        hitObstacle.hitAnimation.push(
+          new ShockwaveFilter(
+            hitPoint,
+            {
+              amplitude: 1,
+              wavelength: 50,
+              speed: 10,
+              brightness: 1.5,
+              radius: 50,
+            },
+            0
+          )
+        );
       }
       if (ray.type === RayType.light) {
         ray.type = RayType.heat;
+        ray.direction[1] *= -1;
+        ray.intensity = hitObstacle.heatRationCoefficient;
         const force = Matter.Vector.create(
           rayObject.body.velocity.x,
           rayObject.body.velocity.y * -1
         );
         Matter.Body.setVelocity(rayObject.body, force);
+        //this.setConstRaySpeed(ray);
         const options = this.getRayTypeOptions(ray.type);
         rayObject.body.name = options.name;
         rayObject.body.collisionFilter.mask = options.collisionFilter.mask;
         rayObject.body.collisionFilter.category =
           options.collisionFilter.category;
-        const points = this.calculateInitRayPoints(ray.type);
+        const points = this.calculateInitRayPoints(ray.type, ray.intensity);
         for (let i = 0; i < ray.points.length; i++) {
           ray.points[i].x = points[i].x;
           ray.points[i].y = points[i].y;
         }
-        ray.direction[1] *= -1;
         ray.angle *= -1;
         ray.angle += 180;
         ray.displayPointsCount = 0;

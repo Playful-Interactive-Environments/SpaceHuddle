@@ -4,6 +4,7 @@ import { CollisionRegion } from '@/components/shared/atoms/game/GameContainer.vu
 export interface CollisionHandler {
   handleCollision(
     gameObject: GameObject,
-    collisionObject: GameObject | CollisionRegion | null
+    collisionObject: GameObject | CollisionRegion | null,
+    hitPoint: [number, number]
   ): void;
 }

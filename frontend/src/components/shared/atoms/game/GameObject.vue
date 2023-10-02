@@ -243,15 +243,31 @@ export default class GameObject extends Vue {
   }
 
   updatedColliderSize(): void {
-    if (this.body) {
-      const scale = this.container.width / this.displayWidth;
-      /*const scaleX = this.container.width / this.displayWidth;
-      const scaleY = this.container.height / this.displayHeight;*/
-      Matter.Body.scale(this.body, scale, scale);
-      this.displayWidth = this.container.width;
-      this.displayHeight = this.container.height;
-      this.$emit('sizeChanged', [this.displayWidth, this.displayHeight]);
-      if (this.boundsGraphic) this.drawBorder();
+    const updateBody = (): void => {
+      try {
+        if (
+          this.body &&
+          this.container &&
+          this.container.width !== this.displayWidth
+        ) {
+          const scale = this.container.width / this.displayWidth;
+          Matter.Body.scale(this.body, scale, scale);
+          this.displayWidth = this.container.width;
+          this.displayHeight = this.container.height;
+          this.$emit('sizeChanged', [this.displayWidth, this.displayHeight]);
+          if (this.boundsGraphic) this.drawBorder();
+        }
+      } catch (e) {
+        //
+      }
+    };
+
+    if (this.body && this.container) {
+      updateBody();
+    } else {
+      setTimeout(() => {
+        updateBody();
+      }, 1000);
     }
   }
 
@@ -316,31 +332,6 @@ export default class GameObject extends Vue {
     shape: [number, number][]
   ): void {
     this.options.isStatic = this.isStatic;
-    /*const calculateCentroid = (shape: [number, number][]): [number, number] => {
-      const path = shape.map((item) => {
-        return { x: item[0], y: item[1] };
-      });
-      const relativeBody = Matter.Bodies.fromVertices(0, 0, [path]);
-      const minX = Math.min(...relativeBody.vertices.map((item) => item.x));
-      const minY = Math.min(...relativeBody.vertices.map((item) => item.y));
-
-      const minShapeX = Math.min(...shape.map((item) => item[0]));
-      const minShapeY = Math.min(...shape.map((item) => item[1]));
-
-      const deltaX = minX + 50 - minShapeX;
-      const deltaY = minY + 50 - minShapeY;
-      return [50 - deltaX, 50 - deltaY];
-    };
-
-    const path = shape.map((item) => {
-      return { x: (item[0] / 100) * width, y: (item[1] / 100) * height };
-    });
-    this.body = Matter.Bodies.fromVertices(x, y, [path], this.options);
-    const centroid = calculateCentroid(shape);
-    const deltaX = (width * (50 - centroid[0])) / 100;
-    const deltaY = (height * (50 - centroid[1])) / 100;
-    Matter.Body.setCentre(this.body, { x: deltaX, y: deltaY }, true);
-    Matter.Body.setPosition(this.body, { x: x, y: y });*/
     this.body = matterUtil.createPolygonBody(
       this.options,
       x,
@@ -432,12 +423,6 @@ export default class GameObject extends Vue {
     const inputPosition = this.convertPositionToInputFormat();
     if (inputPosition[0] !== position[0] || inputPosition[1] !== position[1]) {
       this.initPosition(position[0], position[1]);
-      /*if (this.body) {
-        Matter.Body.setPosition(this.body, {
-          x: this.position[0] - this.offset[0],
-          y: this.position[1] - this.offset[1],
-        });
-      }*/
     }
   }
 
@@ -549,12 +534,15 @@ export default class GameObject extends Vue {
     }, 100);
   }
 
-  handleCollision(collisionObject: GameObject | CollisionRegion | null): void {
+  handleCollision(
+    collisionObject: GameObject | CollisionRegion | null,
+    hitPoint: [number, number]
+  ): void {
     if (this.collisionHandler) {
-      this.collisionHandler.handleCollision(this, collisionObject);
+      this.collisionHandler.handleCollision(this, collisionObject, hitPoint);
     }
 
-    this.$emit('collision', this, collisionObject);
+    this.$emit('collision', this, collisionObject, hitPoint);
   }
 
   get clickWidth(): number {

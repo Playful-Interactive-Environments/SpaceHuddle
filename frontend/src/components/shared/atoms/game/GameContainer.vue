@@ -32,6 +32,23 @@
           :y="backgroundTexturePosition[1]"
         ></sprite>
         <slot :itemProps="{ engine: engine, detector: detector }"></slot>
+        <container
+          v-for="region of regionBodyList"
+          :key="region.body.id"
+          :x="region.body.position.x"
+          :y="region.body.position.y"
+          :filters="region.region.filter"
+        >
+          <Graphics
+            v-if="region.body"
+            @render="drawRegion($event, region)"
+            :x="0"
+            :y="0"
+            :width="region.body.bounds.max.x - region.body.bounds.min.x"
+            :height="region.body.bounds.max.y - region.body.bounds.min.y"
+            :filters="region.region.filter"
+          ></Graphics>
+        </container>
       </container>
     </Application>
     <div
@@ -124,6 +141,7 @@ export interface CollisionRegion {
   options: {
     [key: string]: string | number | boolean | object;
   };
+  filter: any[];
 }
 
 interface CollisionRegionData {
@@ -182,6 +200,7 @@ export default class GameContainer extends Vue {
     | undefined;
   @Prop({ default: false }) readonly combinedActiveCollisionToChain!: boolean;
   @Prop({ default: [] }) readonly collisionRegions!: CollisionRegion[];
+  @Prop({ default: false }) readonly showBounds!: boolean;
   ready = false;
   gameWidth = 0;
   gameHeight = 0;
@@ -907,7 +926,8 @@ export default class GameContainer extends Vue {
   lookForCollision(): void {
     const handleCollision = (
       gameObject: GameObject,
-      collisionObject: GameObject | CollisionRegion | null
+      collisionObject: GameObject | CollisionRegion | null,
+      hitPoint: [number, number]
     ): void => {
       if (
         this.activeComposition.bodies.find(
@@ -918,13 +938,13 @@ export default class GameContainer extends Vue {
           const chainObject = this.getGameObjectForBody(chainBody);
           if (chainObject && chainObject.body.id !== gameObject.body.id) {
             chainObject.$emit('update:highlighted', false);
-            chainObject.handleCollision(collisionObject);
+            chainObject.handleCollision(collisionObject, hitPoint);
           }
         }
         Matter.Composite.clear(this.activeComposition);
       }
       if (gameObject) gameObject.$emit('update:highlighted', false);
-      gameObject.handleCollision(collisionObject);
+      gameObject.handleCollision(collisionObject, hitPoint);
     };
 
     const collisions = Matter.Detector.collisions(this.detector);
@@ -945,9 +965,15 @@ export default class GameContainer extends Vue {
           validCollision.bodyB
         );
         if (gameObjectA)
-          handleCollision(gameObjectA, gameObjectB ?? regionObjectB);
+          handleCollision(gameObjectA, gameObjectB ?? regionObjectB, [
+            validCollision.bodyA.position.x - validCollision.bodyB.bounds.min.x,
+            validCollision.bodyA.position.y - validCollision.bodyB.bounds.min.y,
+          ]);
         if (gameObjectB)
-          handleCollision(gameObjectB, gameObjectA ?? regionObjectA);
+          handleCollision(gameObjectB, gameObjectA ?? regionObjectA, [
+            validCollision.bodyB.position.x - validCollision.bodyA.bounds.min.x,
+            validCollision.bodyB.position.y - validCollision.bodyA.bounds.min.y,
+          ]);
       }
     }
   }
@@ -1028,6 +1054,10 @@ export default class GameContainer extends Vue {
           gameObj.objectSpace === ObjectSpace.RelativeToScreen
         )
           gameObj.updateOffset(this.gameObjectOffsetRelativeToScreen);
+      }
+      for (const region of this.regionBodyList) {
+        region.body.position.x += this.panVector[0];
+        region.body.position.y += this.panVector[1];
       }
     }
 
@@ -1123,6 +1153,22 @@ export default class GameContainer extends Vue {
       this.backgroundPositionOffset[0] - this.gameWidth / 2,
       this.backgroundPositionOffset[1] - this.gameHeight / 2,
     ] as [number, number];*/
+  }
+
+  drawRegion(inputGraphics: PIXI.Graphics, region: CollisionRegionData): void {
+    if (inputGraphics && region.body) {
+      inputGraphics.clear();
+      const path = region.body.vertices.map((item) => {
+        return {
+          x: item.x - region.body.position.x,
+          y: item.y - region.body.position.y,
+        };
+      });
+      if (this.showBounds) {
+        inputGraphics.lineStyle(2, '#ff0000');
+        inputGraphics.drawPolygon(path);
+      }
+    }
   }
 }
 </script>

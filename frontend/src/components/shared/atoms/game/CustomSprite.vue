@@ -8,6 +8,7 @@
     :tint="tint"
     :x="displayX"
     :y="displayY"
+    :filters="objectFilters"
   >
     <slot></slot>
   </sprite>
@@ -21,8 +22,7 @@ import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import * as PIXI from 'pixi.js';
 import { CustomObject } from '@/types/game/CustomObject';
 import { EventType } from '@/types/enum/EventType';
-import { OutlineFilter } from 'pixi-filters';
-import { ColorOverlayFilter } from 'pixi-filters';
+import { OutlineFilter, ColorOverlayFilter } from 'pixi-filters';
 
 @Options({
   components: {},
@@ -46,6 +46,7 @@ export default class CustomSprite extends Vue implements CustomObject {
   ];
   @Prop({ default: null }) outline!: number | null;
   @Prop() texture!: string | PIXI.Texture;
+  @Prop({ default: [] }) filters!: any[];
   gameContainer!: GameContainer;
 
   readonly defaultSize = 50;
@@ -53,6 +54,15 @@ export default class CustomSprite extends Vue implements CustomObject {
   displayHeight = this.defaultSize;
   displayX = 0;
   displayY = 0;
+  outlineFilter: OutlineFilter | null = null;
+  colorOverlayFilter: ColorOverlayFilter | null = null;
+
+  get objectFilters(): any[] {
+    const filters: any[] = [...this.filters];
+    if (this.outlineFilter) filters.push(this.outlineFilter);
+    if (this.colorOverlayFilter) filters.push(this.colorOverlayFilter);
+    return filters;
+  }
 
   calcDisplayWidth(): number {
     let value = this.defaultSize;
@@ -130,17 +140,12 @@ export default class CustomSprite extends Vue implements CustomObject {
 
   @Watch('colorOverlay', { immediate: true })
   onColorOverlayChanged(): void {
-    const customSprite = this.$refs.customSprite as any;
-    if (customSprite) {
-      if (this.colorOverlay) {
-        customSprite.filters = [
-          new ColorOverlayFilter(
-            [this.colorOverlay[0], this.colorOverlay[1], this.colorOverlay[2]],
-            this.colorOverlay[3]
-          ),
-        ];
-      } else customSprite.filters = [];
-    }
+    if (this.colorOverlay) {
+      this.colorOverlayFilter = new ColorOverlayFilter(
+        [this.colorOverlay[0], this.colorOverlay[1], this.colorOverlay[2]],
+        this.colorOverlay[3]
+      );
+    } else this.colorOverlayFilter = null;
   }
 
   mounted(): void {
@@ -177,12 +182,8 @@ export default class CustomSprite extends Vue implements CustomObject {
 
   @Watch('outline', { immediate: true })
   onOutlineChanged(): void {
-    const customSprite = this.$refs.customSprite as any;
-    if (customSprite) {
-      if (this.outline)
-        customSprite.filters = [new OutlineFilter(2, this.outline)];
-      else customSprite.filters = [];
-    }
+    if (this.outline) this.outlineFilter = new OutlineFilter(2, this.outline);
+    else this.outlineFilter = null;
   }
 
   @Watch('width', { immediate: true })
