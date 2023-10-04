@@ -31,12 +31,11 @@
           :x="backgroundTexturePosition[0]"
           :y="backgroundTexturePosition[1]"
         ></sprite>
-        <slot :itemProps="{ engine: engine, detector: detector }"></slot>
         <container
           v-for="region of regionBodyList"
           :key="region.body.id"
-          :x="region.body.position.x"
-          :y="region.body.position.y"
+          :x="region.body.position.x - gameObjectOffsetRelativeToBackground[0]"
+          :y="region.body.position.y - gameObjectOffsetRelativeToBackground[1]"
           :filters="region.region.filter"
         >
           <Graphics
@@ -49,6 +48,7 @@
             :filters="region.region.filter"
           ></Graphics>
         </container>
+        <slot :itemProps="{ engine: engine, detector: detector }"></slot>
       </container>
     </Application>
     <div
@@ -119,6 +119,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import * as pixiUtil from '@/utils/pixi';
 import * as matterUtil from '@/utils/matter';
+import { getPolygonCenter } from '@/utils/polygon';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -147,6 +148,7 @@ export interface CollisionRegion {
 interface CollisionRegionData {
   region: CollisionRegion;
   body: Matter.Body | null;
+  graphic: PIXI.Graphics | null;
 }
 
 @Options({
@@ -305,16 +307,24 @@ export default class GameContainer extends Vue {
 
     for (const region of this.regionBodyList) {
       const collisionRegion = region.region;
+      //const x = this.backgroundTextureSize[0] / 2;
+      //const y = this.backgroundTextureSize[1] / 2;
+      const width = this.backgroundTextureSize[0];
+      const height = this.backgroundTextureSize[1];
+      const center = getPolygonCenter(collisionRegion.path);
+      const x = this.backgroundTextureSize[0] * (center[0] / 100);
+      const y = this.backgroundTextureSize[1] * (center[1] / 100);
       if (!region.body) {
         collisionRegion.options.isStatic = true;
         collisionRegion.options.isSensor = true;
         region.body = matterUtil.createPolygonBody(
           collisionRegion.options,
-          this.backgroundTextureSize[0] / 2,
-          this.backgroundTextureSize[1] / 2,
-          this.backgroundTextureSize[0],
-          this.backgroundTextureSize[1],
-          collisionRegion.path
+          x,
+          y,
+          width,
+          height,
+          collisionRegion.path,
+          false
         );
         Matter.Composite.add(this.engine.world, region.body);
         this.detector.bodies.push(region.body);
@@ -322,16 +332,18 @@ export default class GameContainer extends Vue {
         collisionRegion.options.isStatic = true;
         const body = matterUtil.createPolygonBody(
           collisionRegion.options,
-          this.backgroundTextureSize[0] / 2,
-          this.backgroundTextureSize[1] / 2,
-          this.backgroundTextureSize[0],
-          this.backgroundTextureSize[1],
-          collisionRegion.path
+          x,
+          y,
+          width,
+          height,
+          collisionRegion.path,
+          false
         );
         //Matter.Body.setPosition(region.body, body.position);
         //Matter.Body.setVertices(region.body, body.vertices);
         region.body.position = body.position;
         region.body.vertices = body.vertices;
+        if (this.showBounds && region.graphic) this.redrawRegion(region);
       }
     }
   }
@@ -355,6 +367,7 @@ export default class GameContainer extends Vue {
       return {
         region: item,
         body: null,
+        graphic: null,
       };
     });
   }
@@ -1055,10 +1068,6 @@ export default class GameContainer extends Vue {
         )
           gameObj.updateOffset(this.gameObjectOffsetRelativeToScreen);
       }
-      for (const region of this.regionBodyList) {
-        region.body.position.x += this.panVector[0];
-        region.body.position.y += this.panVector[1];
-      }
     }
 
     this.notifyCurrentOffset();
@@ -1156,18 +1165,45 @@ export default class GameContainer extends Vue {
   }
 
   drawRegion(inputGraphics: PIXI.Graphics, region: CollisionRegionData): void {
-    if (inputGraphics && region.body) {
-      inputGraphics.clear();
+    if (inputGraphics) {
+      region.graphic = inputGraphics;
+      this.redrawRegion(region);
+    }
+  }
+
+  redrawRegion(region: CollisionRegionData): void {
+    if (region.graphic && region.body) {
+      region.graphic.clear();
       const path = region.body.vertices.map((item) => {
         return {
           x: item.x - region.body.position.x,
           y: item.y - region.body.position.y,
         };
       });
-      if (this.showBounds) {
-        inputGraphics.lineStyle(2, '#ff0000');
-        inputGraphics.drawPolygon(path);
+      if (this.backgroundSprite && this.backgroundSprite.orig) {
+        const matrix: PIXI.Matrix = new PIXI.Matrix();
+
+        const textureWidth = this.backgroundSprite.orig.width;
+        const backgroundScale = this.backgroundTextureSize[0] / textureWidth;
+        matrix.scale(backgroundScale, backgroundScale);
+        matrix.translate(
+          -this.backgroundTextureSize[0] / 2,
+          -this.backgroundTextureSize[1] / 2
+        );
+        matrix.translate(
+          this.backgroundTextureSize[0] / 2 - region.body.position.x,
+          this.backgroundTextureSize[1] / 2 - region.body.position.y
+        );
+        region.graphic.beginTextureFill({
+          texture: this.backgroundSprite,
+          matrix: matrix,
+        });
       }
+      if (this.showBounds) {
+        region.graphic.lineStyle(2, '#ff0000');
+      }
+      region.graphic.drawPolygon(path);
+      region.graphic.endFill();
     }
   }
 }

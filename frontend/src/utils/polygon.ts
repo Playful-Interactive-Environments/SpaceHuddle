@@ -39,3 +39,23 @@ export function shrinkPolygon(
   const newP = p.offset(amount).translate(new Vec2(offset[0], offset[1]));
   return newP.toArray().map((item) => [item[0], item[1]]);
 }
+
+export function getPolygonCenter(
+  polygonPoints: [number, number][]
+): [number, number] {
+  const p = new Polygon(
+    polygonPoints.map((point) => new Vec2(point[0], point[1]))
+  );
+  const center = p.center();
+  return [center.x, center.y];
+}
+
+export function getPolygonSize(
+  polygonPoints: [number, number][]
+): [number, number] {
+  const p = new Polygon(
+    polygonPoints.map((point) => new Vec2(point[0], point[1]))
+  );
+  const box = p.aabb();
+  return [box.w, box.h];
+}

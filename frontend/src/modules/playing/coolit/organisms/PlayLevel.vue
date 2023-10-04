@@ -15,7 +15,7 @@
       :collisionRegions="collisionRegions"
       @initRenderer="initRenderer"
       @updateOffset="updateOffset"
-      :show-bounds="true"
+      :show-bounds="false"
     >
       <template v-slot:default>
         <container v-if="gameWidth">
@@ -151,6 +151,7 @@ interface Ray {
   points: { x: number; y: number }[];
   displayPoints: { x: number; y: number }[];
   displayPointsCount: number;
+  animationIndex: number;
   body: Matter.Body | null;
   intensity: number;
 }
@@ -183,12 +184,14 @@ export interface PlayStateResult {
   temperature: number;
 }
 
-interface CoolItObstacle extends placeable.Placeable {
+interface CoolItHitRegion {
   maxHitCount: number;
   hitCount: number;
   hitAnimation: ShockwaveFilter[];
   heatRationCoefficient: number;
 }
+
+interface CoolItObstacle extends placeable.Placeable, CoolItHitRegion {}
 
 function convertToCoolItObstacle(
   value: placeable.PlaceableBase,
@@ -261,6 +264,7 @@ export default class PlayLevel extends Vue {
   startTime = Date.now();
 
   rayList: Ray[] = [];
+  rayPath: { [key: string]: { x: number; y: number }[][] } = {};
 
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
@@ -302,7 +306,6 @@ export default class PlayLevel extends Vue {
   }
 
   get collisionRegions(): CollisionRegion[] {
-    const red = new Color(themeColors.getRedColor()).to('srgb') as any;
     const regions: CollisionRegion[] = [];
     for (const ration of gameConfig.obstacles[this.levelType].settings
       .heatRation) {
@@ -316,12 +319,12 @@ export default class PlayLevel extends Vue {
           },
         },
         source: {
-          name: 'ground',
           heatRationCoefficient: ration.coefficient,
+          maxHitCount: ration.maxHitCount,
           hitCount: 0,
           hitAnimation: [],
-        },
-        filter: [new ColorOverlayFilter([red.r, red.g, red.b], 0.5)],
+        } as CoolItHitRegion,
+        filter: [],
       });
     }
     return regions;
@@ -353,7 +356,32 @@ export default class PlayLevel extends Vue {
     }
   }
 
+  calculateRayPath(type: RayType, shift = 0): { x: number; y: number }[] {
+    const rayPoints: { x: number; y: number }[] = [];
+    const iPart = (Math.PI * 2) / this.rayPoints;
+    const waveCount = type === RayType.light ? 3 : 1;
+    for (let i = 0; i < this.rayPoints; i++) {
+      rayPoints.push({
+        x: Math.sin(i * iPart * waveCount + shift) * 40,
+        y: -i * this.rayLength,
+      });
+    }
+    return rayPoints;
+  }
+
+  readonly animationSteps = 8;
   mounted(): void {
+    const initPath = (type: RayType): void => {
+      this.rayPath[type] = [];
+      for (let i = 0; i < this.animationSteps; i++) {
+        this.rayPath[type].push(
+          this.calculateRayPath(type, (i * (Math.PI * 2)) / this.animationSteps)
+        );
+      }
+    };
+    initPath(RayType.light);
+    initPath(RayType.heat);
+
     tutorialService.registerGetList(this.updateTutorial, this.authHeaderTyp);
     this.interval = setInterval(() => this.updateRays(), this.intervalTime);
     this.emitLightRays(200, 200);
@@ -381,7 +409,7 @@ export default class PlayLevel extends Vue {
   }
 
   calculateTintColor(
-    building: CoolItObstacle
+    building: CoolItHitRegion
   ): [number, number, number, number] {
     /*const toHex = (d: number): string => {
       if (d < 0) d = 0;
@@ -543,7 +571,7 @@ export default class PlayLevel extends Vue {
       this.panOffsetMin[0] +
       displayWidth / 5 +
       Math.random() * (displayWidth / 2);
-    const points = this.calculateInitRayPoints(RayType.light, 1);
+    const points = this.calculateInitRayPoints(RayType.light, 1, 0);
     setTimeout(() => {
       this.rayList.push({
         uuid: uuidv4(),
@@ -561,6 +589,7 @@ export default class PlayLevel extends Vue {
           };
         }),
         displayPointsCount: 0,
+        animationIndex: 0,
         body: null,
         intensity: 1,
       });
@@ -570,18 +599,17 @@ export default class PlayLevel extends Vue {
 
   calculateInitRayPoints(
     type: RayType,
-    intensity: number
+    intensity: number,
+    animationStep: number
   ): { x: number; y: number }[] {
-    const rayPoints: { x: number; y: number }[] = [];
-    const iPart = (Math.PI * 2) / this.rayPoints;
-    const waveCount = type === RayType.light ? 3 : 1;
-    for (let i = 0; i < this.rayPoints; i++) {
-      rayPoints.push({
-        x: (Math.sin(i * iPart * waveCount) * 40) / intensity,
-        y: (-i * this.rayLength) / intensity,
-      });
-    }
-    return rayPoints;
+    return this.rayPath[type][animationStep % this.animationSteps].map(
+      (item) => {
+        return {
+          x: item.x / intensity,
+          y: item.y / intensity,
+        };
+      }
+    );
   }
 
   rayInitialised(item: GameObject): void {
@@ -617,19 +645,24 @@ export default class PlayLevel extends Vue {
 
   updateRays(): void {
     for (const ray of this.rayList) {
-      if (ray.initialised) {
+      if (ray.initialised && ray.body?.speed) {
+        ray.animationIndex++;
         ray.displayPointsCount += 10;
-        for (let i = 0; i < ray.points.length; i++) {
-          ray.points[i].x *= -1;
-          let displayPoint = ray.points[i];
+        const points = this.calculateInitRayPoints(
+          ray.type,
+          ray.intensity,
+          ray.animationIndex
+        );
+        for (let i = 0; i < points.length; i++) {
+          let displayPoint = points[i];
           if (i >= ray.displayPointsCount) {
-            displayPoint = ray.points[ray.displayPointsCount - 1];
+            displayPoint = points[ray.displayPointsCount - 1];
           }
           ray.displayPoints[i].x = displayPoint.x;
           ray.displayPoints[i].y = displayPoint.y;
         }
         //this.setConstRaySpeed(ray);
-      } else if (!ray.initialised && ray.startTime + 1000 < Date.now()) {
+      } else if (ray.startTime + 2000 < Date.now()) {
         const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
         if (index > -1) this.rayList.splice(index, 1);
       }
@@ -655,6 +688,16 @@ export default class PlayLevel extends Vue {
         animation.time += 0.1;
       }
     }
+
+    for (const region of this.collisionRegions) {
+      region.source.hitAnimation = region.source.hitAnimation.filter(
+        (item) => item.time < 5
+      );
+      for (const animation of region.source.hitAnimation) {
+        animation.time += 0.1;
+      }
+      this.updateRegionFilter(region);
+    }
   }
 
   rayCollision(
@@ -664,28 +707,29 @@ export default class PlayLevel extends Vue {
   ): void {
     const ray = rayObject.source as Ray;
     const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
+    const hitObstacle = obstacleObject?.source as CoolItHitRegion;
+    if (hitObstacle) {
+      hitObstacle.hitCount++;
+      hitObstacle.hitAnimation.push(
+        new ShockwaveFilter(
+          hitPoint,
+          {
+            amplitude: 1,
+            wavelength: 50,
+            speed: 10,
+            brightness: 1.5,
+            radius: 50,
+          },
+          0
+        )
+      );
+    }
     if (index > -1) {
-      const hitObstacle = obstacleObject?.source as CoolItObstacle;
-      if (hitObstacle) {
-        hitObstacle.hitCount++;
-        hitObstacle.hitAnimation.push(
-          new ShockwaveFilter(
-            hitPoint,
-            {
-              amplitude: 1,
-              wavelength: 50,
-              speed: 10,
-              brightness: 1.5,
-              radius: 50,
-            },
-            0
-          )
-        );
-      }
       if (ray.type === RayType.light) {
         ray.type = RayType.heat;
         ray.direction[1] *= -1;
-        ray.intensity = hitObstacle.heatRationCoefficient;
+        ray.intensity = hitObstacle?.heatRationCoefficient;
+        ray.animationIndex = 0;
         const force = Matter.Vector.create(
           rayObject.body.velocity.x,
           rayObject.body.velocity.y * -1
@@ -697,7 +741,11 @@ export default class PlayLevel extends Vue {
         rayObject.body.collisionFilter.mask = options.collisionFilter.mask;
         rayObject.body.collisionFilter.category =
           options.collisionFilter.category;
-        const points = this.calculateInitRayPoints(ray.type, ray.intensity);
+        const points = this.calculateInitRayPoints(
+          ray.type,
+          ray.intensity,
+          ray.animationIndex
+        );
         for (let i = 0; i < ray.points.length; i++) {
           ray.points[i].x = points[i].x;
           ray.points[i].y = points[i].y;
@@ -707,6 +755,20 @@ export default class PlayLevel extends Vue {
         ray.displayPointsCount = 0;
       }
     }
+    if (Object.hasOwn(obstacleObject, 'filter') && hitObstacle) {
+      this.updateRegionFilter(obstacleObject as CollisionRegion);
+    }
+  }
+
+  updateRegionFilter(region: CollisionRegion): void {
+    const source = region.source as CoolItHitRegion;
+    const red = new Color(themeColors.getRedColor()).to('srgb') as any;
+    let mixingFactor = source.hitCount / source.maxHitCount;
+    if (mixingFactor > 1) mixingFactor = 1;
+    region.filter = [
+      new ColorOverlayFilter([red.r, red.g, red.b], mixingFactor / 2),
+      ...source.hitAnimation,
+    ];
   }
 
   leaveAtmosphere(

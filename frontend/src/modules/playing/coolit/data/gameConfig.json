@@ -10,11 +10,13 @@
         "heatRation": [
           {
             "region": [[0, 90], [100, 90], [100, 92], [0, 92]],
-            "coefficient": 0.5
+            "coefficient": 0.5,
+            "maxHitCount": 30
           },
           {
             "region": [[0, 92], [100, 92], [100, 100], [0, 100]],
-            "coefficient": 2.5
+            "coefficient": 2.5,
+            "maxHitCount": 10
           }
         ]
       },
