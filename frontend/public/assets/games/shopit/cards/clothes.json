@@ -1,0 +1,55 @@
+{
+"frames": {
+	"shirt-1": {
+		"frame": {"x":0, "y":3420, "w":1270, "h":1710},
+		"spriteSourceSize": {"x":0,"y":0,"w":1270, "h":1710},
+		"sourceSize": {"w":1270, "h":1710}
+	},
+	"shirt-2": {
+		"frame": {"x":1270, "y":3420, "w":1269, "h":1710},
+		"spriteSourceSize": {"x":0,"y":0,"w":1269, "h":1710},
+		"sourceSize": {"w":1269, "h":1710}
+	},
+	"shirt-3": {
+		"frame": {"x":2540, "y":3420, "w":1269, "h":1710},
+		"spriteSourceSize": {"x":0,"y":0,"w":1269, "h":1710},
+		"sourceSize": {"w":1269, "h":1710}
+	},
+	"pants-1": {
+		"frame": {"x":0, "y":1710, "w":1270, "h":1709},
+		"spriteSourceSize": {"x":0,"y":0,"w":1270, "h":1709},
+		"sourceSize": {"w":1270, "h":1709}
+	},
+	"pants-2": {
+		"frame": {"x":1270, "y":1710, "w":1269, "h":1709},
+		"spriteSourceSize": {"x":0,"y":0,"w":1269, "h":1709},
+		"sourceSize": {"w":1269, "h":1709}
+	},
+	"pants-3": {
+		"frame": {"x":2540, "y":1710, "w":1269, "h":1709},
+		"spriteSourceSize": {"x":0,"y":0,"w":1269, "h":1709},
+		"sourceSize": {"w":1269, "h":1709}
+	},
+	"shoes-1": {
+		"frame": {"x":0, "y":0, "w":1270, "h":1709},
+		"spriteSourceSize": {"x":0,"y":0,"w":1270, "h":1709},
+		"sourceSize": {"w":1270, "h":1709}
+	},
+	"shoes-2": {
+		"frame": {"x":1270, "y":0, "w":1269, "h":1709},
+		"spriteSourceSize": {"x":0,"y":0,"w":1269, "h":1709},
+		"sourceSize": {"w":1269, "h":1709}
+	}
+	"shoes-3": {
+		"frame": {"x":2540, "y":0, "w":1269, "h":1709},
+		"spriteSourceSize": {"x":0,"y":0,"w":1269, "h":1709},
+		"sourceSize": {"w":1269, "h":1709}
+	}
+
+},
+"meta": {
+	"image": "clothes.png",
+	"size": {"w": 3808, "h": 5128},
+	"scale": "1"
+}
+}
