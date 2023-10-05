@@ -1,0 +1,18 @@
+{
+  "description": {
+    "title": "Shop It",
+    "description": "Ein Kartenspiel, das sich mit Konsum beschäftigt."
+  },
+  "moderatorConfig": {
+    "replayable": "mehrfach spielbar",
+    "showTutorialOnlyOnce": "Tutorial nur beim ersten mal zeigen"
+  },
+  "participant": {
+    "tutorial": {
+      "select": "Tutorial text 1",
+      "play": "Tutorial text 2"
+    },
+    "lost": "Du hast verloren.",
+    "win": "Du hast gewonnen."
+  }
+}

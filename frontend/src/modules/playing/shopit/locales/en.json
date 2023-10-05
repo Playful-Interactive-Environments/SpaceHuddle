@@ -1,0 +1,18 @@
+{
+  "description": {
+    "title": "Shop It",
+    "description": "A card game about consumption."
+  },
+  "moderatorConfig": {
+    "replayable": "replayable",
+    "showTutorialOnlyOnce": "show tutorial only once"
+  },
+  "participant": {
+    "tutorial": {
+      "select": "Tutorial text 1",
+      "play": "Tutorial text 2"
+    },
+    "lost": "You lost.",
+    "win": "You won."
+  }
+}

@@ -1,0 +1,248 @@
+{
+  "gameValues": {
+    "background": "/assets/games/shopit/background/background.png",
+    "maxCO2": 120
+  },
+  "categories": {
+    "clothing": {
+      "settings": {
+        "icon": "shirt",
+        "spritesheet": "/assets/games/shopit/cards/clothes.json"
+      },
+      "items": {
+        "shirt-1": {
+          "cost": 8,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "1 years",
+          "water": "4 kl",
+          "money": "5€"
+        },
+        "shirt-2": {
+          "cost": 9,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "3 years",
+          "water": "4 kl",
+          "money": "20€"
+        },
+        "shirt-3": {
+          "cost": 10,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "10 years",
+          "water": "4 kl",
+          "money": "40€"
+        },
+        "pants-1": {
+          "cost": 11,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "2 years",
+          "water": "4 kl",
+          "money": "30€"
+        },
+        "pants-2": {
+          "cost": 12,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "6 years",
+          "water": "4 kl",
+          "money": "60€"
+        },
+        "pants-3": {
+          "cost": 13,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "15 years",
+          "water": "4 kl",
+          "money": "100€"
+        },
+        "shoes-1": {
+          "cost": 14,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "2 years",
+          "water": "4 kl",
+          "money": "20€"
+        },
+        "shoes-2": {
+          "cost": 15,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "4 years",
+          "water": "4 kl",
+          "money": "60€"
+        },
+        "shoes-3": {
+          "cost": 16,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "10 years",
+          "water": "4 kl",
+          "money": "120€"
+        }
+      }
+    },
+    "electronics": {
+      "settings": {
+        "icon": "desktop",
+        "spritesheet": "/assets/games/shopit/cards/electronics.json"
+      },
+      "items": {
+        "phone-1": {
+          "cost": 8,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "1.5 years",
+          "water": "4 kl",
+          "money": "150€"
+        },
+        "phone-2": {
+          "cost": 9,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "3 years",
+          "water": "4 kl",
+          "money": "500€"
+        },
+        "phone-3": {
+          "cost": 10,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "6 years",
+          "water": "4 kl",
+          "money": "1200€"
+        },
+        "laptop-1": {
+          "cost": 11,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "2 years",
+          "water": "4 kl",
+          "money": "600€"
+        },
+        "laptop-2": {
+          "cost": 12,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "3 years",
+          "water": "4 kl",
+          "money": "1200€"
+        },
+        "laptop-3": {
+          "cost": 13,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "5 years",
+          "water": "4 kl",
+          "money": "2000€"
+        },
+        "tv-1": {
+          "cost": 14,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "4 years",
+          "water": "4 kl",
+          "money": "300€"
+        },
+        "tv-2": {
+          "cost": 15,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "6 years",
+          "water": "4 kl",
+          "money": "800€"
+        },
+        "tv-3": {
+          "cost": 16,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "15 years",
+          "water": "4 kl",
+          "money": "1400€"
+        }
+      }
+    },
+    "food": {
+      "settings": {
+        "icon": "utensils",
+        "spritesheet": "/assets/games/shopit/cards/food.json"
+      },
+      "items": {
+        "vegetarian-1": {
+          "cost": 8,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "1 years",
+          "water": "4 kl",
+          "money": "5€"
+        },
+        "vegetarian-2": {
+          "cost": 9,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "1 years",
+          "water": "4 kl",
+          "money": "5€"
+        },
+        "vegetarian-3": {
+          "cost": 10,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "1 years",
+          "water": "4 kl",
+          "money": "5€"
+        },
+        "meat-1": {
+          "cost": 11,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "1 years",
+          "water": "4 kl",
+          "money": "5€"
+        },
+        "meat-2": {
+          "cost": 12,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "1 years",
+          "water": "4 kl",
+          "money": "5€"
+        },
+        "meat-3": {
+          "cost": 13,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "1 years",
+          "water": "4 kl",
+          "money": "5€"
+        },
+        "coffee-1": {
+          "cost": 14,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "1 years",
+          "water": "4 kl",
+          "money": "5€"
+        },
+        "coffee-2": {
+          "cost": 15,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "1 years",
+          "water": "4 kl",
+          "money": "5€"
+        },
+        "coffee-3": {
+          "cost": 16,
+          "CO2": "8 kg",
+          "energy": "10 kw",
+          "lifetime": "1 years",
+          "water": "4 kl",
+          "money": "5€"
+        }
+      }
+    }
+  }
+}
