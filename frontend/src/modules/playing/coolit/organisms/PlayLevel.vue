@@ -558,9 +558,15 @@ export default class PlayLevel extends Vue {
   }
 
   drawCircle(circle: PIXI.Graphics): void {
-    until(() => this.renderer).then(() => {
+    const radius = (circle as any).radius;
+    const color = (circle as any).color;
+    circle.clear();
+    circle.beginFill(color, 0.01);
+    circle.drawCircle(0, 0, radius);
+    circle.endFill();
+    /*until(() => this.renderer).then(() => {
       pixiUtil.drawCircleWithGradient(circle, this.renderer);
-    });
+    });*/
   }
 
   readonly rayPoints = 80;
