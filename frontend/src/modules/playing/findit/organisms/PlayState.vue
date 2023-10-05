@@ -14,6 +14,7 @@
       :background-movement="BackgroundMovement.Pan"
       @initRenderer="initRenderer"
       @gameObjectClick="gameObjectClick"
+      :collision-borders="CollisionBorderType.Screen"
     >
       <template v-slot:default>
         <container v-if="gameWidth">
@@ -138,6 +139,7 @@ import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer, {
   BackgroundPosition,
   BackgroundMovement,
+  CollisionBorderType,
 } from '@/components/shared/atoms/game/GameContainer.vue';
 import * as placeable from '@/types/game/Placeable';
 import * as pixiUtil from '@/utils/pixi';
@@ -266,6 +268,7 @@ export default class PlayState extends Vue {
 
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
+  CollisionBorderType = CollisionBorderType;
 
   clearPlayState(): void {
     this.clickedPlaceable = null;
@@ -355,7 +358,7 @@ export default class PlayState extends Vue {
   }
 
   updatedSearchMask(): void {
-    if (this.searchGraphics && this.searchGraphics.geometry) {
+    /*if (this.searchGraphics && this.searchGraphics.geometry) {
       this.searchGraphics.clear();
       this.searchGraphics.beginFill('#ffffff');
       this.searchGraphics.drawRect(0, 0, this.gameWidth, this.gameHeight);
@@ -367,7 +370,7 @@ export default class PlayState extends Vue {
       );
       this.searchGraphics.endHole();
       this.searchGraphics.endFill();
-    }
+    }*/
   }
 
   @Watch('searchPosition', { immediate: true, deep: true })

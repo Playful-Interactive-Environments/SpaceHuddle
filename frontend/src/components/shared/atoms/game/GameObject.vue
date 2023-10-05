@@ -536,13 +536,19 @@ export default class GameObject extends Vue {
 
   handleCollision(
     collisionObject: GameObject | CollisionRegion | null,
-    hitPoint: [number, number]
+    hitPoint: [number, number],
+    hitPointScreen: [number, number]
   ): void {
     if (this.collisionHandler) {
-      this.collisionHandler.handleCollision(this, collisionObject, hitPoint);
+      this.collisionHandler.handleCollision(
+        this,
+        collisionObject,
+        hitPoint,
+        hitPointScreen
+      );
     }
 
-    this.$emit('collision', this, collisionObject, hitPoint);
+    this.$emit('collision', this, collisionObject, hitPoint, hitPointScreen);
   }
 
   get clickWidth(): number {

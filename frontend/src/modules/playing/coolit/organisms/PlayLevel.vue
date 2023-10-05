@@ -16,6 +16,7 @@
       @initRenderer="initRenderer"
       @updateOffset="updateOffset"
       :show-bounds="false"
+      :collision-borders="CollisionBorderType.Background"
     >
       <template v-slot:default>
         <container v-if="gameWidth">
@@ -111,6 +112,7 @@ import GameContainer, {
   BackgroundPosition,
   BackgroundMovement,
   CollisionRegion,
+  CollisionBorderType,
 } from '@/components/shared/atoms/game/GameContainer.vue';
 import * as placeable from '@/types/game/Placeable';
 import * as pixiUtil from '@/utils/pixi';
@@ -281,6 +283,7 @@ export default class PlayLevel extends Vue {
     GROUND: 1 << 5,
     BORDER: 1 << 6,
   });
+  CollisionBorderType = CollisionBorderType;
 
   /*get playStateResult(): PlayStateResult {
     return {
@@ -703,7 +706,8 @@ export default class PlayLevel extends Vue {
   rayCollision(
     rayObject: GameObject,
     obstacleObject: GameObject | CollisionRegion,
-    hitPoint: [number, number]
+    hitPoint: [number, number],
+    hitPointScreen: [number, number]
   ): void {
     const ray = rayObject.source as Ray;
     const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
@@ -712,7 +716,7 @@ export default class PlayLevel extends Vue {
       hitObstacle.hitCount++;
       hitObstacle.hitAnimation.push(
         new ShockwaveFilter(
-          hitPoint,
+          hitPointScreen,
           {
             amplitude: 1,
             wavelength: 50,

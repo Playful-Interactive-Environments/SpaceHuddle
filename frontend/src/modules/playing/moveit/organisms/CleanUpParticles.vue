@@ -105,7 +105,7 @@
       :collisionsFilter="(collision: Matter.Collision) => {
             return collision.bodyA.isStatic !== collision.bodyB.isStatic;
           }"
-      :useBorders="!isFull"
+      :collisionBorders="isFull ? CollisionBorderType.None : CollisionBorderType.Screen"
       :combined-active-collision-to-chain="true"
       @initRenderer="initRenderer"
     >
@@ -198,7 +198,9 @@ import { Line } from 'vue-chartjs';
 import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import * as PIXI from 'pixi.js';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
-import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
+import GameContainer, {
+  CollisionBorderType,
+} from '@/components/shared/atoms/game/GameContainer.vue';
 import { Chart } from 'chart.js';
 import { ParticleCollisionHandler } from '@/modules/playing/moveit/types/ParticleCollisionHandler';
 import annotationPlugin from 'chartjs-plugin-annotation';
@@ -296,6 +298,7 @@ export default class CleanUpParticles extends Vue {
 
   particleQueueEmit: { [key: string]: number } = {};
   particleQueueEmission: { [key: string]: number } = {};
+  CollisionBorderType = CollisionBorderType;
 
   get intervalTime(): number {
     return this.playTime / this.normalizedTrackingData.length;

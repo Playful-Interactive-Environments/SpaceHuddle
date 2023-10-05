@@ -5,6 +5,7 @@ export interface CollisionHandler {
   handleCollision(
     gameObject: GameObject,
     collisionObject: GameObject | CollisionRegion | null,
-    hitPoint: [number, number]
+    hitPoint: [number, number],
+    hitPointScreen: [number, number]
   ): void;
 }

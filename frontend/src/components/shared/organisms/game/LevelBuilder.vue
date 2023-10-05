@@ -13,7 +13,7 @@
       :background-movement="BackgroundMovement.Pan"
       :detect-collision="false"
       :use-gravity="false"
-      :use-borders="false"
+      :collision-borders="CollisionBorderType.None"
       :activatedObjectOnRegister="true"
       @click="placeObject"
       v-model:selectedObject="selectedObject"
@@ -214,6 +214,7 @@ import * as PIXI from 'pixi.js';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer, {
   BackgroundMovement,
+  CollisionBorderType,
 } from '@/components/shared/atoms/game/GameContainer.vue';
 import * as placeable from '@/types/game/Placeable';
 import { v4 as uuidv4 } from 'uuid';
@@ -299,6 +300,7 @@ export default class LevelBuilder extends Vue {
   savedItems: placeable.PlaceableBase[] = [];
 
   EndpointAuthorisationType = EndpointAuthorisationType;
+  CollisionBorderType = CollisionBorderType;
 
   get inactiveColor(): string {
     return themeColors.getInactiveColor();
