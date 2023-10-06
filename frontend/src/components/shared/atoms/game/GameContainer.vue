@@ -10,6 +10,7 @@
     @mouseup="endPan"
     @mouseout="endPan"
     @touchend="endPan"
+    v-loading="loading"
   >
     <Application
       ref="pixi"
@@ -49,7 +50,11 @@
         </container>
         <slot :itemProps="{ engine: engine, detector: detector }"></slot>
         <container
-          v-if="collisionBorders !== CollisionBorderType.None && borders"
+          v-if="
+            collisionBorders !== CollisionBorderType.None &&
+            borders &&
+            showBounds
+          "
         >
           <container
             v-if="borders.bottom"
@@ -181,6 +186,7 @@ import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import * as pixiUtil from '@/utils/pixi';
 import * as matterUtil from '@/utils/matter';
 import { getPolygonCenter } from '@/utils/polygon';
+import { until } from '@/utils/wait';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -305,6 +311,7 @@ export default class GameContainer extends Vue {
   intervalSync = -1;
   readonly intervalTimePan = 50;
   intervalPan = -1;
+  loading = false;
 
   backgroundPositionOffset: [number, number] = [0, 0];
   backgroundPositionOffsetMin: [number, number] = [0, 0];
@@ -426,10 +433,12 @@ export default class GameContainer extends Vue {
   onBackgroundTextureChanged(): void {
     const loadTexture = (): void => {
       if (this.backgroundTexture) {
-        pixiUtil.loadTexture(this.backgroundTexture).then((sprite) => {
-          this.backgroundSprite = sprite;
-          this.calculateBackgroundSize();
-        });
+        pixiUtil
+          .loadTexture(this.backgroundTexture, this.eventBus)
+          .then((sprite) => {
+            this.backgroundSprite = sprite;
+            this.calculateBackgroundSize();
+          });
       }
     };
 
@@ -449,6 +458,13 @@ export default class GameContainer extends Vue {
 
   //#region load / unload
   async mounted(): Promise<void> {
+    this.eventBus.on(EventType.TEXTURES_LOADING_START, async () => {
+      this.loading = true;
+    });
+    this.eventBus.on(EventType.ALL_TEXTURES_LOADED, async () => {
+      this.loading = false;
+    });
+
     //initialise observer in mounted as otherwise this references observer
     this.hierarchyObserver = new MutationObserver(this.hierarchyChanged);
     this.resizeObserver = new ResizeObserver(this.sizeChanged);
@@ -540,6 +556,8 @@ export default class GameContainer extends Vue {
     clearInterval(this.intervalPan);
     pixiUtil.unloadTexture(this.backgroundTexture);
     Matter.Events.off(this.engine, 'collisionStart', this.collisionStart);
+    this.eventBus.off(EventType.TEXTURES_LOADING_START);
+    this.eventBus.off(EventType.ALL_TEXTURES_LOADED);
   }
 
   setupPixiSpace(): void {
@@ -1002,10 +1020,10 @@ export default class GameContainer extends Vue {
     }
   }
 
-  @Watch('useBorders', { immediate: true })
-  onUseBordersChanged(): void {
+  @Watch('collisionBorders', { immediate: true })
+  onCollisionBordersChanged(): void {
     if (this.borders) {
-      if (!this.collisionBorders) {
+      if (this.collisionBorders === CollisionBorderType.None) {
         Matter.Composite.remove(this.engine.world, this.borders.bottom);
         Matter.Composite.remove(this.engine.world, this.borders.top);
         Matter.Composite.remove(this.engine.world, this.borders.right);
@@ -1261,7 +1279,8 @@ export default class GameContainer extends Vue {
   //#endregion loop
 
   //#region pan and scroll
-  startAutoPan(): void {
+  async startAutoPan(): Promise<void> {
+    await until(() => !this.loading);
     this.backgroundPositionOffset = [...this.backgroundPositionOffsetMax];
     this.beginPan([-0.2, 0]);
   }

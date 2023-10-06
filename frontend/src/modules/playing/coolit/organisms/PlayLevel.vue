@@ -397,7 +397,7 @@ export default class PlayLevel extends Vue {
     this.emitLightRays(200, 200);
 
     pixiUtil
-      .loadTexture('/assets/games/coolit/city/light.png')
+      .loadTexture('/assets/games/coolit/city/light.png', this.eventBus)
       .then((texture) => {
         this.lightTexture = texture;
       });
@@ -521,9 +521,11 @@ export default class PlayLevel extends Vue {
             settings.spritesheet &&
             this.previousLevelType !== this.levelType
           ) {
-            pixiUtil.loadTexture(settings.spritesheet).then((sheet) => {
-              this.stylesheets[typeName] = sheet;
-            });
+            pixiUtil
+              .loadTexture(settings.spritesheet, this.eventBus)
+              .then((sheet) => {
+                this.stylesheets[typeName] = sheet;
+              });
           }
         }, 100);
       }

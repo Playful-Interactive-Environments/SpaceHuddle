@@ -1,6 +1,8 @@
 import * as PIXI from 'pixi.js';
 import { GradientFactory } from '@pixi-essentials/gradients';
 import { until } from '@/utils/wait';
+import { Emitter } from 'mitt';
+import { EventType } from '@/types/enum/EventType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export function drawCircleWithGradient(
@@ -130,7 +132,10 @@ enum TextureState {
   unloading = 'unloading',
 }
 const textureState: { [url: string]: TextureState } = {};
-export async function loadTexture(url: string): Promise<any> {
+export async function loadTexture(
+  url: string,
+  eventBus: Emitter<Record<EventType, unknown>>
+): Promise<any> {
   if (textureState[url]) {
     await until(
       () =>
@@ -141,8 +146,12 @@ export async function loadTexture(url: string): Promise<any> {
   if (PIXI.Cache.has(url)) return PIXI.Cache.get(url);
   else {
     textureState[url] = TextureState.loading;
+    eventBus.emit(EventType.TEXTURES_LOADING_START);
     const texture = await PIXI.Assets.load(url);
     textureState[url] = TextureState.loaded;
+    if (isLoadingFinished()) {
+      eventBus.emit(EventType.ALL_TEXTURES_LOADED);
+    }
     return texture;
   }
 }
@@ -153,4 +162,11 @@ export function unloadTexture(url: string | null): void {
     PIXI.Assets.unload(url);
     delete textureState[url];
   }
+}
+
+export function isLoadingFinished(): boolean {
+  for (const texture of Object.values(textureState)) {
+    if (texture === TextureState.loading) return false;
+  }
+  return true;
 }

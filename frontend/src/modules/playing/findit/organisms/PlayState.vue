@@ -452,9 +452,11 @@ export default class PlayState extends Vue {
             settings.spritesheet &&
             this.previousLevelType !== this.levelType
           ) {
-            pixiUtil.loadTexture(settings.spritesheet).then((sheet) => {
-              this.stylesheets[typeName] = sheet;
-            });
+            pixiUtil
+              .loadTexture(settings.spritesheet, this.eventBus)
+              .then((sheet) => {
+                this.stylesheets[typeName] = sheet;
+              });
           }
         }, 100);
       }

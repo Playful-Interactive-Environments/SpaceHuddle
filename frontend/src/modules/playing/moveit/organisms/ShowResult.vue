@@ -339,7 +339,7 @@ export default class ShowResult extends Vue {
       }
     }
     pixiUtil
-      .loadTexture('/assets/games/moveit/molecules.json')
+      .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
       .then((sheet) => (this.spritesheet = sheet));
 
     if (

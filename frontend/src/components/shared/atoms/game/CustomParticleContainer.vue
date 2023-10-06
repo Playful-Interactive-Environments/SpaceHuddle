@@ -41,7 +41,10 @@ export default class CustomParticleContainer extends Vue {
   async onSpriteSheetChanged(spriteSheetUrl: string): Promise<void> {
     this.isSpriteSheetLoaded = false;
     if (spriteSheetUrl) {
-      this.spriteSheet = await pixiUtil.loadTexture(spriteSheetUrl);
+      this.spriteSheet = await pixiUtil.loadTexture(
+        spriteSheetUrl,
+        this.eventBus
+      );
       this.isSpriteSheetLoaded = true;
     }
   }
@@ -63,8 +66,13 @@ export default class CustomParticleContainer extends Vue {
         const url = !isAnimation ? textureList[i] : textureList[i].texture;
         if (typeof url === 'string') {
           if (!this.spriteSheetUrl && !config.spriteSheet) {
-            if (!isAnimation) textureList[i] = await pixiUtil.loadTexture(url);
-            else textureList[i].texture = await pixiUtil.loadTexture(url);
+            if (!isAnimation)
+              textureList[i] = await pixiUtil.loadTexture(url, this.eventBus);
+            else
+              textureList[i].texture = await pixiUtil.loadTexture(
+                url,
+                this.eventBus
+              );
           } else {
             if (this.spriteSheetUrl) await until(this.isSpriteSheetLoaded);
             else if (config.spriteSheet) {

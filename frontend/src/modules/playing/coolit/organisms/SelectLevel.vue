@@ -177,7 +177,7 @@ export default class SelectLevel extends Vue {
 
   mounted(): void {
     pixiUtil
-      .loadTexture('/assets/games/moveit/molecules.json')
+      .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
       .then((sheet) => (this.spritesheet = sheet));
   }
 

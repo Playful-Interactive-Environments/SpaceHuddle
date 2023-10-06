@@ -561,9 +561,11 @@ export default class LevelBuilder extends Vue {
           this.gameConfig[this.levelType].categories[typeName].settings;
         setTimeout(() => {
           if (settings && settings.spritesheet && !this.stylesheets[typeName]) {
-            pixiUtil.loadTexture(settings.spritesheet).then((sheet) => {
-              this.stylesheets[typeName] = sheet;
-            });
+            pixiUtil
+              .loadTexture(settings.spritesheet, this.eventBus)
+              .then((sheet) => {
+                this.stylesheets[typeName] = sheet;
+              });
           }
         }, 100);
         for (const objectName in this.gameConfig[this.levelType].categories[

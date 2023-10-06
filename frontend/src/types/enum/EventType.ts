@@ -6,4 +6,6 @@ export enum EventType {
   CHANGE_SIDEBAR_VISIBILITY = 'changeSidebarVisibility',
   REGISTER_GAME_OBJECT = 'registerGameObject',
   REGISTER_CUSTOM_OBJECT = 'registerCustomObject',
+  TEXTURES_LOADING_START = 'textureLoadingStart',
+  ALL_TEXTURES_LOADED = 'allTexturesLoaded',
 }

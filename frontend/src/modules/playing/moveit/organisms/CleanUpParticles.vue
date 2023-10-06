@@ -103,9 +103,12 @@
       v-model:height="gameHeight"
       background-texture="/assets/games/moveit/road02.png"
       :collisionsFilter="(collision: Matter.Collision) => {
-            return collision.bodyA.isStatic !== collision.bodyB.isStatic;
+            return collision.bodyA.isStatic !== collision.bodyB.isStatic &&
+            collision.bodyA.collisionFilter.group === collision.bodyB.collisionFilter.group;
           }"
-      :collisionBorders="isFull ? CollisionBorderType.None : CollisionBorderType.Screen"
+      :collisionBorders="
+        isFull ? CollisionBorderType.None : CollisionBorderType.Screen
+      "
       :combined-active-collision-to-chain="true"
       @initRenderer="initRenderer"
     >
@@ -122,7 +125,7 @@
               name: particle,
               label: getParticleDisplayName(particle),
               collisionFilter: {
-                group: index + 1,
+                group: index + 2,
                 category: 0b0010,
               },
             }"
@@ -217,6 +220,7 @@ import * as themeColors from '@/utils/themeColors';
 import { CalculationType, mapArrayToConstantSize } from '@/utils/statistic';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
+import { EventType } from '@/types/enum/EventType';
 
 Chart.register(annotationPlugin);
 
@@ -292,6 +296,7 @@ export default class CleanUpParticles extends Vue {
   spritesheet!: PIXI.Spritesheet;
   countdownTime = 5;
   containerAspectRation = 1.3;
+  loading = false;
 
   readonly maxCleanupThreshold = constants.maxCleanupThreshold;
   readonly calcChartHeight = constants.calcChartHeight;
@@ -425,6 +430,13 @@ export default class CleanUpParticles extends Vue {
   }
 
   mounted(): void {
+    this.eventBus.on(EventType.TEXTURES_LOADING_START, async () => {
+      this.loading = true;
+    });
+    this.eventBus.on(EventType.ALL_TEXTURES_LOADED, async () => {
+      this.loading = false;
+    });
+
     this.initTrackingData();
     for (const particleName in gameConfig.particles) {
       this.particleState[particleName] = {
@@ -439,7 +451,7 @@ export default class CleanUpParticles extends Vue {
       this.loadActiveParticle();
     }, 1500);
     pixiUtil
-      .loadTexture('/assets/games/moveit/molecules.json')
+      .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
       .then((sheet) => (this.spritesheet = sheet));
     this.interval = setInterval(this.updatedLoop, this.intervalTime);
   }
@@ -450,6 +462,7 @@ export default class CleanUpParticles extends Vue {
   }
 
   updatedLoop(): void {
+    if (this.loading) return;
     this.activeValue++;
     if (this.activeValue <= this.normalizedTrackingData.length) {
       this.loadActiveParticle();
@@ -502,7 +515,7 @@ export default class CleanUpParticles extends Vue {
           id: 0,
           name: dataset.name,
           label: dataset.label,
-          group: index + 1,
+          group: index + 2,
           color: dataset.backgroundColor,
           position: [
             Math.random() * (this.gameWidth - this.particleRadius * 2) +
