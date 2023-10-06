@@ -74,14 +74,14 @@
             @outsideDrawingSpace="leaveAtmosphere"
           >
             <Graphics
-              v-if="ray.type === RayType.light"
+              v-if="ray.type === RayType.light && !ray.hit"
               :x="ray.displayPoints[0].x * 0.2"
               :radius="5"
               :color="yellowColor"
               @render="drawCircle($event)"
             ></Graphics>
             <Graphics
-              v-else
+              v-else-if="ray.type === RayType.heat && !ray.hit"
               :x="ray.displayPoints[0].x * 0.2"
               :radius="5"
               :color="redColor"
@@ -660,7 +660,12 @@ export default class PlayLevel extends Vue {
     for (const ray of this.rayList) {
       if (ray.initialised && ray.body?.speed) {
         ray.animationIndex++;
-        ray.displayPointsCount += 10;
+        if (ray.hit) {
+          if (ray.displayPointsCount > ray.displayPoints.length)
+            ray.displayPointsCount = ray.displayPoints.length;
+          ray.displayPointsCount -= 10;
+          if (ray.displayPointsCount < 1) ray.displayPointsCount = 1;
+        } else ray.displayPointsCount += 10;
         const points = this.calculateInitRayPoints(
           ray.type,
           ray.intensity,
@@ -727,6 +732,11 @@ export default class PlayLevel extends Vue {
       if (ray.type === RayType.light && !ray.hit) {
         ray.hit = true;
         await delay(100);
+        const rayVelocity = [
+          rayObject.body.velocity.x,
+          rayObject.body.velocity.y,
+        ];
+        rayObject.body.isStatic = true;
         if (hitObstacle) {
           const hitPointScreen = matterUtil.calculateVisibleHitPoint(
             obstacleBody,
@@ -749,6 +759,7 @@ export default class PlayLevel extends Vue {
             )
           );
         }
+        await delay(1000);
         ray.displayPointsCount = 0;
         for (let i = 0; i < ray.displayPoints.length; i++) {
           ray.displayPoints[i].x = 0;
@@ -758,10 +769,8 @@ export default class PlayLevel extends Vue {
         ray.direction[1] *= -1;
         ray.intensity = hitObstacle?.heatRationCoefficient;
         ray.animationIndex = 0;
-        const force = Matter.Vector.create(
-          rayObject.body.velocity.x,
-          rayObject.body.velocity.y * -1
-        );
+        const force = Matter.Vector.create(rayVelocity[0], rayVelocity[1] * -1);
+        rayObject.body.isStatic = false;
         Matter.Body.setVelocity(rayObject.body, force);
         //this.setConstRaySpeed(ray);
         const options = this.getRayTypeOptions(ray.type);
