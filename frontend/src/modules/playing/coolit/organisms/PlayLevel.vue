@@ -369,7 +369,7 @@ export default class PlayLevel extends Vue {
   calculateRayPath(type: RayType, shift = 0): { x: number; y: number }[] {
     const rayPoints: { x: number; y: number }[] = [];
     const iPart = (Math.PI * 2) / this.rayPoints;
-    const waveCount = type === RayType.light ? 3 : 1;
+    const waveCount = type === RayType.light ? 4 : 1.5;
     for (let i = 0; i < this.rayPoints; i++) {
       rayPoints.push({
         x: Math.sin(i * iPart * waveCount + shift) * 40,
@@ -379,7 +379,7 @@ export default class PlayLevel extends Vue {
     return rayPoints;
   }
 
-  readonly animationSteps = 8;
+  readonly animationSteps = 10;
   mounted(): void {
     const initPath = (type: RayType): void => {
       this.rayPath[type] = [];
