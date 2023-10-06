@@ -749,6 +749,11 @@ export default class PlayLevel extends Vue {
             )
           );
         }
+        ray.displayPointsCount = 0;
+        for (let i = 0; i < ray.displayPoints.length; i++) {
+          ray.displayPoints[i].x = 0;
+          ray.displayPoints[i].y = 0;
+        }
         ray.type = RayType.heat;
         ray.direction[1] *= -1;
         ray.intensity = hitObstacle?.heatRationCoefficient;
@@ -775,7 +780,6 @@ export default class PlayLevel extends Vue {
         }
         ray.angle *= -1;
         ray.angle += 180;
-        ray.displayPointsCount = 0;
         ray.hit = false;
       }
     }
