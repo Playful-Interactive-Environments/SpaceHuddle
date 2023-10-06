@@ -75,12 +75,14 @@
           >
             <Graphics
               v-if="ray.type === RayType.light"
+              :x="ray.displayPoints[0].x * 0.2"
               :radius="5"
               :color="yellowColor"
               @render="drawCircle($event)"
             ></Graphics>
             <Graphics
               v-else
+              :x="ray.displayPoints[0].x * 0.2"
               :radius="5"
               :color="redColor"
               @render="drawCircle($event)"
@@ -558,15 +560,9 @@ export default class PlayLevel extends Vue {
   }
 
   drawCircle(circle: PIXI.Graphics): void {
-    const radius = (circle as any).radius;
-    const color = (circle as any).color;
-    circle.clear();
-    circle.beginFill(color, 0.01);
-    circle.drawCircle(0, 0, radius);
-    circle.endFill();
-    /*until(() => this.renderer).then(() => {
+    until(() => this.renderer).then(() => {
       pixiUtil.drawCircleWithGradient(circle, this.renderer);
-    });*/
+    });
   }
 
   readonly rayPoints = 80;
