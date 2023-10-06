@@ -1,5 +1,6 @@
 <template>
   <container
+    :mask="mask"
     @render="containerLoad"
     :x="position[0] - offset[0]"
     :y="position[1] - offset[1]"
@@ -10,6 +11,7 @@
     <slot></slot>
   </container>
   <container
+    :mask="mask"
     :x="position[0] - offset[0]"
     :y="position[1] - offset[1]"
     :rotation="rotationValue"
@@ -19,6 +21,7 @@
     <slot name="background"></slot>
   </container>
   <Graphics
+    :mask="mask"
     v-if="body && showBounds && loadingFinished"
     @render="drawBorder"
     :x="body.position.x"
@@ -88,6 +91,10 @@ export default class GameObject extends Vue {
   @Prop({ default: false }) highlighted!: boolean;
   @Prop({ default: false }) disabled!: boolean;
   @Prop({ default: 0 }) anchor!: number | [number, number];
+  @Prop({ default: null }) mask!:
+    | PIXI.Container<PIXI.DisplayObject>
+    | PIXI.MaskData
+    | null;
   body!: typeof Matter.Body;
   position: [number, number] = [0, 0];
   rotationValue = 0;

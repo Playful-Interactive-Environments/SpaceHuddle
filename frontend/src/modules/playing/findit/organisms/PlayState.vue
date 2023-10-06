@@ -76,7 +76,7 @@
             <Graphics @render="drawSearchObject" />
           </GameObject>
           <Graphics
-            v-if="noneCollectableObjects.length > 0"
+            v-if="gameWidth && noneCollectableObjects.length > 0"
             ref="searchMask"
             @render="drawSearchMask"
           />
@@ -358,7 +358,7 @@ export default class PlayState extends Vue {
   }
 
   updatedSearchMask(): void {
-    /*if (this.searchGraphics && this.searchGraphics.geometry) {
+    if (this.searchGraphics && this.searchGraphics.geometry) {
       this.searchGraphics.clear();
       this.searchGraphics.beginFill('#ffffff');
       this.searchGraphics.drawRect(0, 0, this.gameWidth, this.gameHeight);
@@ -370,7 +370,7 @@ export default class PlayState extends Vue {
       );
       this.searchGraphics.endHole();
       this.searchGraphics.endFill();
-    }*/
+    }
   }
 
   @Watch('searchPosition', { immediate: true, deep: true })
