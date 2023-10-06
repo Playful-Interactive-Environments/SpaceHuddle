@@ -359,12 +359,12 @@ export default class GameObject extends Vue {
 
   addBodyToEngine(): void {
     if (this.gameContainer && this.body) {
-      Matter.Composite.add(this.gameContainer.engine.world, this.body);
+      this.gameContainer.addToEngin(this.body);
     }
   }
 
   addBodyToDetector(): void {
-    if (this.gameContainer && this.body) {
+    if (this.gameContainer && this.gameContainer.detector && this.body) {
       this.gameContainer.detector.bodies.push(this.body);
     }
   }
