@@ -39,3 +39,53 @@ export function createPolygonBody(
   }
   return body;
 }
+
+export function calculateHitPoint(
+  obstacle: Matter.Body,
+  hitObject: Matter.Body
+): [number, number] {
+  return [
+    hitObject.position.x - obstacle.bounds.min.x,
+    hitObject.position.y - obstacle.bounds.min.y,
+  ];
+}
+
+export function getVisibleBodyBounds(
+  body: Matter.Body,
+  gameWidth: number,
+  gameHeight: number
+): Matter.Bounds {
+  const screenMin = [0, 0];
+  const screenMax = [gameWidth, gameHeight];
+  const minX =
+    body.bounds.min.x < screenMin[0] ? screenMin[0] : body.bounds.min.x;
+  const maxX =
+    body.bounds.max.x > screenMax[0] ? screenMax[0] : body.bounds.max.x;
+  const minY =
+    body.bounds.min.y < screenMin[1] ? screenMin[1] : body.bounds.min.y;
+  const maxY =
+    body.bounds.min.y < screenMax[1] ? screenMax[1] : body.bounds.min.y;
+  return {
+    min: {
+      x: minX,
+      y: minY,
+    },
+    max: {
+      x: maxX,
+      y: maxY,
+    },
+  };
+}
+
+export function calculateVisibleHitPoint(
+  obstacle: Matter.Body,
+  hitObject: Matter.Body,
+  gameWidth: number,
+  gameHeight: number
+): [number, number] {
+  const boundsObstacle = getVisibleBodyBounds(obstacle, gameWidth, gameHeight);
+  return [
+    hitObject.position.x - boundsObstacle.min.x,
+    hitObject.position.y - boundsObstacle.min.y,
+  ];
+}

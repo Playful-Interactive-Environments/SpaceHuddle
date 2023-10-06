@@ -373,13 +373,6 @@ export default class GameContainer extends Vue {
     ] as [number, number];*/
   }
 
-  /*get offsetDelta(): [number, number] {
-    return [
-      this.backgroundPositionOffset[0] - this.backgroundPositionOffsetMax[0],
-      this.backgroundPositionOffset[1] - this.backgroundPositionOffsetMax[1],
-    ];
-  }*/
-
   get visibleScreenMin(): [number, number] {
     /*return [
       this.gameObjectOffsetRelativeToBackground[0] - this.gameWidth / 2,
@@ -394,29 +387,6 @@ export default class GameContainer extends Vue {
       this.gameObjectOffsetRelativeToBackground[1] + this.gameHeight / 2,
     ];*/
     return [this.gameWidth, this.gameHeight];
-  }
-
-  getVisibleBodyBounds(body: Matter.Body): Matter.Bounds {
-    const screenMin = this.visibleScreenMin;
-    const screenMax = this.visibleScreenMax;
-    const minX =
-      body.bounds.min.x < screenMin[0] ? screenMin[0] : body.bounds.min.x;
-    const maxX =
-      body.bounds.max.x > screenMax[0] ? screenMax[0] : body.bounds.max.x;
-    const minY =
-      body.bounds.min.y < screenMin[1] ? screenMin[1] : body.bounds.min.y;
-    const maxY =
-      body.bounds.min.y < screenMax[1] ? screenMax[1] : body.bounds.min.y;
-    return {
-      min: {
-        x: minX,
-        y: minY,
-      },
-      max: {
-        x: maxX,
-        y: maxY,
-      },
-    };
   }
   //#endregion get
 
@@ -503,10 +473,10 @@ export default class GameContainer extends Vue {
     }
 
     if (this.detectCollision) {
-      this.intervalCollision = setInterval(
+      /*this.intervalCollision = setInterval(
         this.lookForCollision,
         this.intervalTimeCollision
-      );
+      );*/
     }
 
     if (this.useWind) {
@@ -1075,10 +1045,116 @@ export default class GameContainer extends Vue {
   }
 
   collisionStart(event: Matter.Event): void {
+    const collisions = [...event.pairs] as Matter.Collision[];
+    this.checkChainCollision(collisions);
+    this.notifyCollision(collisions);
+  }
+
+  notifyCollision(collisions: Matter.Collision[]): void {
+    const handleCollision = (
+      gameObject: GameObject,
+      collisionObject: GameObject | CollisionRegion | null,
+      hitPoint: [number, number],
+      hitPointScreen: [number, number],
+      objectBody: Matter.Body,
+      collisionBody: Matter.Body
+    ): void => {
+      if (
+        this.activeComposition.bodies.find(
+          (item) => gameObject.body.id === item.id
+        )
+      ) {
+        for (const chainBody of this.activeComposition.bodies) {
+          const chainObject = this.getGameObjectForBody(chainBody);
+          if (chainObject && chainObject.body.id !== gameObject.body.id) {
+            chainObject.$emit('update:highlighted', false);
+            chainObject.handleCollision(
+              collisionObject,
+              hitPoint,
+              hitPointScreen,
+              objectBody,
+              collisionBody
+            );
+          }
+        }
+        Matter.Composite.clear(this.activeComposition);
+      }
+      if (gameObject) gameObject.$emit('update:highlighted', false);
+      gameObject.handleCollision(
+        collisionObject,
+        hitPoint,
+        hitPointScreen,
+        objectBody,
+        collisionBody
+      );
+    };
+
+    if (collisions.length > 0) {
+      const validCollisionList = this.collisionsFilter
+        ? collisions.filter((collision) => {
+            if (this.collisionsFilter) return this.collisionsFilter(collision);
+            return true;
+          })
+        : collisions;
+      for (const validCollision of validCollisionList) {
+        const gameObjectA = this.getGameObjectForBody(validCollision.bodyA);
+        const gameObjectB = this.getGameObjectForBody(validCollision.bodyB);
+        const regionObjectA = this.getCollisionRegionForBody(
+          validCollision.bodyA
+        );
+        const regionObjectB = this.getCollisionRegionForBody(
+          validCollision.bodyB
+        );
+        if (gameObjectA) {
+          handleCollision(
+            gameObjectA,
+            gameObjectB ?? regionObjectB,
+            matterUtil.calculateHitPoint(
+              validCollision.bodyB,
+              validCollision.bodyA
+            ),
+            matterUtil.calculateVisibleHitPoint(
+              validCollision.bodyB,
+              validCollision.bodyA,
+              this.gameWidth,
+              this.gameHeight
+            ),
+            validCollision.bodyA,
+            validCollision.bodyB
+          );
+        }
+        if (gameObjectB) {
+          handleCollision(
+            gameObjectB,
+            gameObjectA ?? regionObjectA,
+            matterUtil.calculateHitPoint(
+              validCollision.bodyA,
+              validCollision.bodyB
+            ),
+            matterUtil.calculateVisibleHitPoint(
+              validCollision.bodyA,
+              validCollision.bodyB,
+              this.gameWidth,
+              this.gameHeight
+            ),
+            validCollision.bodyB,
+            validCollision.bodyA
+          );
+        }
+      }
+    }
+  }
+
+  lookForCollision(): void {
+    const collisions = Matter.Detector.collisions(this.detector);
+    this.notifyCollision(collisions);
+  }
+
+  checkChainCollision(collisions: Matter.Collision[]): void {
     if (this.activeObject && this.combinedActiveCollisionToChain) {
       const activeId = this.activeObject.id;
       const group = (this.activeObject.options.collisionFilter as any).group;
-      const collisionWithActiveObject = event.pairs.filter(
+      const collisionWithActiveObject = collisions.filter(
         (collision) =>
           (collision.bodyA.id === activeId ||
             collision.bodyB.id === activeId) &&
@@ -1104,90 +1180,6 @@ export default class GameContainer extends Vue {
             if (gameObject) gameObject.$emit('update:highlighted', true);
             this.createChain();
           }
-        }
-      }
-    }
-  }
-
-  lookForCollision(): void {
-    const handleCollision = (
-      gameObject: GameObject,
-      collisionObject: GameObject | CollisionRegion | null,
-      hitPoint: [number, number],
-      hitPointScreen: [number, number]
-    ): void => {
-      if (
-        this.activeComposition.bodies.find(
-          (item) => gameObject.body.id === item.id
-        )
-      ) {
-        for (const chainBody of this.activeComposition.bodies) {
-          const chainObject = this.getGameObjectForBody(chainBody);
-          if (chainObject && chainObject.body.id !== gameObject.body.id) {
-            chainObject.$emit('update:highlighted', false);
-            chainObject.handleCollision(
-              collisionObject,
-              hitPoint,
-              hitPointScreen
-            );
-          }
-        }
-        Matter.Composite.clear(this.activeComposition);
-      }
-      if (gameObject) gameObject.$emit('update:highlighted', false);
-      gameObject.handleCollision(collisionObject, hitPoint, hitPointScreen);
-    };
-
-    const collisions = Matter.Detector.collisions(this.detector);
-    if (collisions.length > 0) {
-      const validCollisionList = this.collisionsFilter
-        ? collisions.filter((collision) => {
-            if (this.collisionsFilter) return this.collisionsFilter(collision);
-            return true;
-          })
-        : collisions;
-      for (const validCollision of validCollisionList) {
-        const gameObjectA = this.getGameObjectForBody(validCollision.bodyA);
-        const gameObjectB = this.getGameObjectForBody(validCollision.bodyB);
-        const regionObjectA = this.getCollisionRegionForBody(
-          validCollision.bodyA
-        );
-        const regionObjectB = this.getCollisionRegionForBody(
-          validCollision.bodyB
-        );
-        const boundsA = this.getVisibleBodyBounds(validCollision.bodyA);
-        const boundsB = this.getVisibleBodyBounds(validCollision.bodyB);
-        if (gameObjectA) {
-          handleCollision(
-            gameObjectA,
-            gameObjectB ?? regionObjectB,
-            [
-              validCollision.bodyA.position.x -
-                validCollision.bodyB.bounds.min.x,
-              validCollision.bodyA.position.y -
-                validCollision.bodyB.bounds.min.y,
-            ],
-            [
-              validCollision.bodyA.position.x - boundsB.min.x,
-              validCollision.bodyA.position.y - boundsB.min.y,
-            ]
-          );
-        }
-        if (gameObjectB) {
-          handleCollision(
-            gameObjectB,
-            gameObjectA ?? regionObjectA,
-            [
-              validCollision.bodyB.position.x -
-                validCollision.bodyA.bounds.min.x,
-              validCollision.bodyB.position.y -
-                validCollision.bodyA.bounds.min.y,
-            ],
-            [
-              validCollision.bodyB.position.x - boundsA.min.x,
-              validCollision.bodyB.position.y - boundsA.min.y,
-            ]
-          );
         }
       }
     }

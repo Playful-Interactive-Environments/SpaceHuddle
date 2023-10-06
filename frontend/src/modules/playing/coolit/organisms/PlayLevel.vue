@@ -120,7 +120,7 @@ import * as placeable from '@/types/game/Placeable';
 import * as pixiUtil from '@/utils/pixi';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
-import { until } from '@/utils/wait';
+import { until, delay } from '@/utils/wait';
 import * as tutorialService from '@/services/tutorial-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Tutorial } from '@/types/api/Tutorial';
@@ -135,6 +135,7 @@ import Color from 'colorjs.io';
 import { toRadians } from '@/utils/angle';
 import Matter from 'matter-js';
 import { ShockwaveFilter, ColorOverlayFilter } from 'pixi-filters';
+import * as matterUtil from '@/utils/matter';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
@@ -147,6 +148,7 @@ enum RayType {
 interface Ray {
   uuid: string;
   type: RayType;
+  hit: boolean;
   position: [number, number];
   direction: [number, number];
   angle: number;
@@ -193,6 +195,7 @@ interface CoolItHitRegion {
   hitCount: number;
   hitAnimation: ShockwaveFilter[];
   heatRationCoefficient: number;
+  reflectionProbability: number;
 }
 
 interface CoolItObstacle extends placeable.Placeable, CoolItHitRegion {}
@@ -225,6 +228,7 @@ function convertToCoolItObstacle(
     placingRegions: result.placingRegions,
     hitAnimation: [],
     heatRationCoefficient: configParameter.heatRationCoefficient ?? 1,
+    reflectionProbability: 1,
   };
 }
 
@@ -328,6 +332,7 @@ export default class PlayLevel extends Vue {
           maxHitCount: ration.maxHitCount,
           hitCount: 0,
           hitAnimation: [],
+          reflectionProbability: ration.reflectionProbability,
         } as CoolItHitRegion,
         filter: [],
       });
@@ -597,6 +602,7 @@ export default class PlayLevel extends Vue {
         animationIndex: 0,
         body: null,
         intensity: 1,
+        hit: false,
       });
       if (this.active) this.emitLightRays();
     }, delay);
@@ -705,33 +711,42 @@ export default class PlayLevel extends Vue {
     }
   }
 
-  rayCollision(
+  async rayCollision(
     rayObject: GameObject,
     obstacleObject: GameObject | CollisionRegion,
-    hitPoint: [number, number],
-    hitPointScreen: [number, number]
-  ): void {
+    rayBody: Matter.Body,
+    obstacleBody: Matter.Body
+  ): Promise<void> {
     const ray = rayObject.source as Ray;
     const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
     const hitObstacle = obstacleObject?.source as CoolItHitRegion;
-    if (hitObstacle) {
-      hitObstacle.hitCount++;
-      hitObstacle.hitAnimation.push(
-        new ShockwaveFilter(
-          hitPointScreen,
-          {
-            amplitude: 1,
-            wavelength: 50,
-            speed: 10,
-            brightness: 1.5,
-            radius: 50,
-          },
-          0
-        )
-      );
-    }
-    if (index > -1) {
-      if (ray.type === RayType.light) {
+    const probability = Math.random();
+    if (index > -1 && hitObstacle.reflectionProbability >= probability) {
+      if (ray.type === RayType.light && !ray.hit) {
+        ray.hit = true;
+        await delay(100);
+        if (hitObstacle) {
+          const hitPointScreen = matterUtil.calculateVisibleHitPoint(
+            obstacleBody,
+            rayBody,
+            this.gameWidth,
+            this.gameHeight
+          );
+          hitObstacle.hitCount++;
+          hitObstacle.hitAnimation.push(
+            new ShockwaveFilter(
+              hitPointScreen,
+              {
+                amplitude: 1,
+                wavelength: 50,
+                speed: 10,
+                brightness: 1.5,
+                radius: 50,
+              },
+              0
+            )
+          );
+        }
         ray.type = RayType.heat;
         ray.direction[1] *= -1;
         ray.intensity = hitObstacle?.heatRationCoefficient;
@@ -759,6 +774,7 @@ export default class PlayLevel extends Vue {
         ray.angle *= -1;
         ray.angle += 180;
         ray.displayPointsCount = 0;
+        ray.hit = false;
       }
     }
     if (Object.hasOwn(obstacleObject, 'filter') && hitObstacle) {

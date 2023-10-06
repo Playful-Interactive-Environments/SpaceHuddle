@@ -11,12 +11,14 @@
           {
             "region": [[0, 90], [100, 90], [100, 92], [0, 92]],
             "coefficient": 0.5,
-            "maxHitCount": 30
+            "maxHitCount": 30,
+            "reflectionProbability": 0.25
           },
           {
             "region": [[0, 92], [100, 92], [100, 100], [0, 100]],
             "coefficient": 2.5,
-            "maxHitCount": 10
+            "maxHitCount": 10,
+            "reflectionProbability": 1
           }
         ]
       },
