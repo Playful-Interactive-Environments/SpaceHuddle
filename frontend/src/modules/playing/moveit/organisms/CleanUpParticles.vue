@@ -129,7 +129,7 @@
                 category: 0b0010,
               },
             }"
-            :render-delay="1000"
+            :render-delay="100"
             @sizeChanged="containerSizeChanged"
           >
             <sprite
@@ -141,13 +141,15 @@
             >
             </sprite>
           </GameObject>
-          <Graphics
-            v-if="renderer"
+          <sprite
+            v-if="linearGradiant"
+            :texture="linearGradiant"
+            :width="gameWidth"
+            :height="gameHeight - particleBorder"
             :x="0"
             :y="particleBorder"
-            :color="statusColor"
-            @render="drawStatusBackground"
-          ></Graphics>
+            :tint="statusColor"
+          ></sprite>
           <GameObject
             v-for="particle in cleanupParticles"
             :key="particle.uuid"
@@ -155,6 +157,7 @@
             type="circle"
             v-model:x="particle.position[0]"
             v-model:y="particle.position[1]"
+            :fix-size="particleRadius * 2"
             :options="{
               name: particle.name,
               label: particle.label,
@@ -170,10 +173,13 @@
             @outsideDrawingSpace="outsideDrawingSpace"
             @collision="updateTracking"
           >
-            <Graphics
-              :radius="particleRadius"
-              :color="particle.color"
-              @render="drawCircle"
+            <sprite
+              v-if="circleGradiant"
+              :texture="circleGradiant"
+              :width="particleRadius * 2"
+              :height="particleRadius * 2"
+              :anchor="0.5"
+              :tint="particle.color"
             >
               <CustomSprite
                 v-if="spritesheet"
@@ -186,7 +192,7 @@
                 "
                 :outline="particle.highlighted ? 'red' : null"
               />
-            </Graphics>
+            </sprite>
           </GameObject>
         </container>
       </template>
@@ -297,6 +303,8 @@ export default class CleanUpParticles extends Vue {
   countdownTime = 5;
   containerAspectRation = 1.3;
   loading = false;
+  circleGradiant: PIXI.Texture | null = null;
+  linearGradiant: PIXI.Texture | null = null;
 
   readonly maxCleanupThreshold = constants.maxCleanupThreshold;
   readonly calcChartHeight = constants.calcChartHeight;
@@ -385,30 +393,6 @@ export default class CleanUpParticles extends Vue {
     return constants.convertFontSizeToScreenSize(fontSize, this.gameWidth);
   }
 
-  drawCircle(circle: PIXI.Graphics): void {
-    pixiUtil.drawCircleWithGradient(circle, this.renderer);
-  }
-
-  drawStatusBackground(background: PIXI.Graphics): void {
-    const width = this.gameWidth;
-    const height = this.gameHeight - this.particleBorder;
-    pixiUtil.drawRectWithGradient(
-      background,
-      this.renderer,
-      width,
-      height,
-      this.statusColor
-    );
-  }
-
-  textAdded(container: PIXI.Container): void {
-    for (const child of container.children) {
-      if (child instanceof PIXI.Text) {
-        child.style.fill = this.evaluatingColor;
-      }
-    }
-  }
-
   async updateChart(): Promise<void> {
     if (this.$refs.chartRef) {
       const chartRef = this.$refs.chartRef as any;
@@ -491,6 +475,15 @@ export default class CleanUpParticles extends Vue {
 
   initRenderer(renderer: PIXI.Renderer): void {
     this.renderer = renderer;
+    this.circleGradiant = pixiUtil.generateCircleGradiantTexture(
+      this.particleRadius,
+      this.renderer
+    );
+    this.linearGradiant = pixiUtil.generateLinearGradiantTexture(
+      this.gameWidth,
+      this.gameHeight - this.particleBorder,
+      this.renderer
+    );
   }
 
   containerSize: [number, number] = [

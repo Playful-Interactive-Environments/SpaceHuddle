@@ -30,10 +30,13 @@
             :x="getX(activeTabName, index - 1)"
             :y="getY(activeTabName, index - 1)"
           >
-            <Graphics
-              :radius="particleRadius"
-              :color="getParticleColor(activeTabName, index - 1)"
-              @render="drawCircle"
+            <sprite
+              v-if="circleGradiant"
+              :texture="circleGradiant"
+              :width="particleRadius * 2"
+              :height="particleRadius * 2"
+              :anchor="0.5"
+              :tint="getParticleColor(activeTabName, index - 1)"
             >
               <sprite
                 :texture="getParticleTexture(activeTabName, index - 1)"
@@ -47,9 +50,8 @@
                 "
               >
               </sprite>
-            </Graphics>
+            </sprite>
           </GameObject>
-          <!--<Graphics v-if="renderer" :x="0" :y="0" @render="drawRect"></Graphics>-->
         </container>
       </template>
     </GameContainer>
@@ -153,6 +155,7 @@ export default class ShowResult extends Vue {
   activeTabName = resultTabName;
   spritesheet!: PIXI.Spritesheet;
   maxParticleCount = 100;
+  circleGradiant: PIXI.Texture | null = null;
 
   get particleStateSum(): ParticleState {
     let totalCount = 0;
@@ -276,23 +279,6 @@ export default class ShowResult extends Vue {
     return null;
   }
 
-  drawCircle(circle: PIXI.Graphics): void {
-    pixiUtil.drawCircleWithGradient(circle, this.renderer);
-  }
-
-  drawRect(background: PIXI.Graphics): void {
-    const width = this.gameWidth;
-    const height = this.gameHeight;
-    pixiUtil.drawRectWithGradient(
-      background,
-      this.renderer,
-      width,
-      height,
-      '#ffffff',
-      pixiUtil.GradientDirection.BottomTop
-    );
-  }
-
   getRandomPosition(): [number, number] {
     const x = Math.round(
       Math.random() * (this.gameWidth - this.particleRadius * 2) +
@@ -327,6 +313,10 @@ export default class ShowResult extends Vue {
 
   initRenderer(renderer: PIXI.Renderer): void {
     this.renderer = renderer;
+    this.circleGradiant = pixiUtil.generateCircleGradiantTexture(
+      this.particleRadius,
+      this.renderer
+    );
     this.rendererReady = true;
   }
 

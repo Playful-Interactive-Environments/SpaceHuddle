@@ -22,7 +22,7 @@
       @pointerdown="gameContainerClicked"
       @pointerup="gameContainerReleased"
     >
-      <container>
+      <container :filters="pixiFilterList">
         <sprite
           v-if="backgroundSprite && backgroundSprite.valid"
           :texture="backgroundSprite"
@@ -216,6 +216,8 @@ export interface CollisionRegion {
     [key: string]: string | number | boolean | object;
   };
   filter: any[];
+  color: string;
+  alpha: number;
 }
 
 interface CollisionRegionData {
@@ -280,6 +282,7 @@ export default class GameContainer extends Vue {
   @Prop({ default: false }) readonly combinedActiveCollisionToChain!: boolean;
   @Prop({ default: [] }) readonly collisionRegions!: CollisionRegion[];
   @Prop({ default: false }) readonly showBounds!: boolean;
+  @Prop({ default: [] }) readonly pixiFilterList!: any[];
   //#endregion props
 
   //#region variables
@@ -305,8 +308,6 @@ export default class GameContainer extends Vue {
 
   readonly intervalTimeWind = 50;
   intervalWind = -1;
-  readonly intervalTimeCollision = 200;
-  intervalCollision = -1;
   readonly intervalTimeSync = 100;
   intervalSync = -1;
   readonly intervalTimePan = 50;
@@ -488,13 +489,6 @@ export default class GameContainer extends Vue {
       });
     }
 
-    /*if (this.detectCollision) {
-      this.intervalCollision = setInterval(
-        this.lookForCollision,
-        this.intervalTimeCollision
-      );
-    }*/
-
     if (this.useWind) {
       this.intervalWind = setInterval(this.addWind, this.intervalTimeWind);
     }
@@ -549,7 +543,6 @@ export default class GameContainer extends Vue {
         this.registerCustomObject
       );
     }
-    clearInterval(this.intervalCollision);
     clearInterval(this.intervalWind);
     clearInterval(this.intervalSync);
     clearInterval(this.intervalPan);
@@ -1202,11 +1195,6 @@ export default class GameContainer extends Vue {
     }
   }
 
-  lookForCollision(): void {
-    const collisions = Matter.Detector.collisions(this.detector);
-    this.notifyCollision(collisions);
-  }
-
   checkChainCollision(collisions: Matter.Collision[]): void {
     if (this.activeObject && this.combinedActiveCollisionToChain) {
       const activeId = this.activeObject.id;
@@ -1512,6 +1500,21 @@ export default class GameContainer extends Vue {
           y: item.y - region.body.position.y,
         };
       });
+      if (this.showBounds) {
+        region.graphic.lineStyle(2, '#ff0000');
+      }
+      region.graphic.beginFill(region.region.color, region.region.alpha);
+      region.graphic.drawPolygon(path);
+      region.graphic.endFill();
+    }
+    /*if (region.graphic && region.body) {
+      region.graphic.clear();
+      const path = region.body.vertices.map((item) => {
+        return {
+          x: item.x - region.body.position.x,
+          y: item.y - region.body.position.y,
+        };
+      });
       if (this.backgroundSprite && this.backgroundSprite.orig) {
         const matrix: PIXI.Matrix = new PIXI.Matrix();
 
@@ -1534,7 +1537,7 @@ export default class GameContainer extends Vue {
       }
       region.graphic.drawPolygon(path);
       region.graphic.endFill();
-    }
+    }*/
   }
 
   drawBorder(inputGraphics: PIXI.Graphics, body: Matter.Body): void {

@@ -1,6 +1,6 @@
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import { CollisionRegion } from '@/components/shared/atoms/game/GameContainer.vue';
-import * as Matter from "matter-js/build/matter";
+import * as Matter from 'matter-js/build/matter';
 
 export interface CollisionHandler {
   handleCollision(

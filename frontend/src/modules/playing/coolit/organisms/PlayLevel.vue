@@ -17,9 +17,10 @@
       @updateOffset="updateOffset"
       :show-bounds="false"
       :collision-borders="CollisionBorderType.Background"
+      :pixi-filter-list="collisionAnimation"
     >
       <template v-slot:default>
-        <container v-if="gameWidth">
+        <container v-if="gameWidth && circleGradiant">
           <GameObject
             v-for="obstacle in obstacleList"
             :key="obstacle.uuid"
@@ -68,25 +69,22 @@
             :is-static="false"
             :show-bounds="false"
             :source="ray"
+            :fix-size="rayParticleSize"
             @collision="rayCollision"
             @initialised="rayInitialised"
             @initError="rayInitError"
             @outsideDrawingSpace="leaveAtmosphere"
           >
-            <Graphics
-              v-if="ray.type === RayType.light && !ray.hit"
-              :x="ray.displayPoints[0].x * 0.2"
-              :radius="5"
-              :color="yellowColor"
-              @render="drawCircle($event)"
-            ></Graphics>
-            <Graphics
-              v-else-if="ray.type === RayType.heat && !ray.hit"
-              :x="ray.displayPoints[0].x * 0.2"
-              :radius="5"
-              :color="redColor"
-              @render="drawCircle($event)"
-            ></Graphics>
+            <container v-if="!ray.hit">
+              <sprite
+                :texture="circleGradiant"
+                :x="ray.displayPoints[0].x * 0.2"
+                :width="rayParticleSize"
+                :height="rayParticleSize"
+                :anchor="0.5"
+                :tint="ray.type === RayType.light ? yellowColor : redColor"
+              ></sprite>
+            </container>
             <template #background>
               <simple-rope
                 v-if="lightTexture"
@@ -134,7 +132,7 @@ import Vec2 from 'vec2';
 import Color from 'colorjs.io';
 import { toRadians } from '@/utils/angle';
 import Matter from 'matter-js';
-import { ShockwaveFilter, ColorOverlayFilter } from 'pixi-filters';
+import { ShockwaveFilter } from 'pixi-filters';
 import * as matterUtil from '@/utils/matter';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -273,6 +271,9 @@ export default class PlayLevel extends Vue {
 
   rayList: Ray[] = [];
   rayPath: { [key: string]: { x: number; y: number }[][] } = {};
+  circleGradiant: PIXI.Texture | null = null;
+  rayParticleSize = 10;
+  collisionAnimation: any[] = [];
 
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
@@ -335,6 +336,8 @@ export default class PlayLevel extends Vue {
           reflectionProbability: ration.reflectionProbability,
         } as CoolItHitRegion,
         filter: [],
+        color: '#ffffff',
+        alpha: 0,
       });
     }
     return regions;
@@ -394,7 +397,7 @@ export default class PlayLevel extends Vue {
 
     tutorialService.registerGetList(this.updateTutorial, this.authHeaderTyp);
     this.interval = setInterval(() => this.updateRays(), this.intervalTime);
-    this.emitLightRays(200, 200);
+    this.emitLightRays(100, 0);
 
     pixiUtil
       .loadTexture('/assets/games/coolit/city/light.png', this.eventBus)
@@ -564,12 +567,10 @@ export default class PlayLevel extends Vue {
 
   initRenderer(renderer: PIXI.Renderer): void {
     this.renderer = renderer;
-  }
-
-  drawCircle(circle: PIXI.Graphics): void {
-    until(() => this.renderer).then(() => {
-      pixiUtil.drawCircleWithGradient(circle, this.renderer);
-    });
+    this.circleGradiant = pixiUtil.generateCircleGradiantTexture(
+      256,
+      this.renderer
+    );
   }
 
   readonly rayPoints = 80;
@@ -716,6 +717,13 @@ export default class PlayLevel extends Vue {
       }
       this.updateRegionFilter(region);
     }
+
+    this.collisionAnimation = this.collisionAnimation.filter(
+      (item) => item.time < 5
+    );
+    for (const filter of this.collisionAnimation) {
+      filter.time += 0.1;
+    }
   }
 
   async rayCollision(
@@ -758,6 +766,21 @@ export default class PlayLevel extends Vue {
               0
             )
           );
+          if (Object.hasOwn(obstacleObject, 'filter') && hitObstacle) {
+            this.collisionAnimation.push(
+              new ShockwaveFilter(
+                [rayBody.position.x, rayBody.position.y],
+                {
+                  amplitude: 1,
+                  wavelength: 50,
+                  speed: 10,
+                  brightness: 1.5,
+                  radius: 50,
+                },
+                0
+              )
+            );
+          }
         }
         await delay(1000);
         ray.displayPointsCount = 0;
@@ -799,13 +822,21 @@ export default class PlayLevel extends Vue {
 
   updateRegionFilter(region: CollisionRegion): void {
     const source = region.source as CoolItHitRegion;
-    const red = new Color(themeColors.getRedColor()).to('srgb') as any;
+    const redHash = themeColors.getRedColor();
+    //const red = new Color(redHash).to('srgb') as any;
     let mixingFactor = source.hitCount / source.maxHitCount;
     if (mixingFactor > 1) mixingFactor = 1;
-    region.filter = [
+    /*region.filter = [
       new ColorOverlayFilter([red.r, red.g, red.b], mixingFactor / 2),
       ...source.hitAnimation,
-    ];
+    ];*/
+    //const alpha = `0${(mixingFactor / 2).toString(16)}`.slice(-2);
+    //region.color = `${redHash}${alpha}`;
+    region.color = redHash;
+    region.alpha = mixingFactor / 2;
+    /*region.filter = [
+      new ColorOverlayFilter([red.r, red.g, red.b], mixingFactor / 2),
+    ];*/
   }
 
   leaveAtmosphere(

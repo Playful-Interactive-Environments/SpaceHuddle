@@ -7,9 +7,12 @@ import { EventType } from '@/types/enum/EventType';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export function drawCircleWithGradient(
   circle: PIXI.Graphics,
-  renderer: PIXI.Renderer
+  renderer: PIXI.Renderer,
+  radius = 10,
+  color = '#ffffff'
 ): void {
-  const radius = (circle as any).radius;
+  if ((circle as any).radius) radius = (circle as any).radius;
+  if ((circle as any).color) color = (circle as any).color;
   const renderTexture = PIXI.RenderTexture.create({
     width: radius * 2,
     height: radius * 2,
@@ -32,7 +35,7 @@ export function drawCircleWithGradient(
   circle.clear();
   circle.beginTextureFill({
     texture: renderTexture,
-    color: (circle as any).color,
+    color: color,
     alpha: 0.9,
     matrix: matrix,
   });
@@ -50,11 +53,15 @@ export enum GradientDirection {
 export function drawRectWithGradient(
   rect: PIXI.Graphics,
   renderer: PIXI.Renderer,
-  width: number,
-  height: number,
-  color: string,
+  width = 10,
+  height = 10,
+  color = '#ffffff',
   direction = GradientDirection.TopBottom
 ): void {
+  if ((rect as any).width) width = (rect as any).width;
+  if ((rect as any).height) height = (rect as any).height;
+  if ((rect as any).color) color = (rect as any).color;
+  if ((rect as any).direction) direction = (rect as any).direction;
   const renderTexture = PIXI.RenderTexture.create({
     width: width,
     height: height,
@@ -96,6 +103,34 @@ export function drawRectWithGradient(
   });
   rect.drawRect(0, 0, width, height);
   rect.endFill();
+}
+
+export function generateCircleGradiantTexture(
+  radius: number,
+  renderer: PIXI.Renderer
+): PIXI.Texture {
+  const circle = new PIXI.Graphics();
+  drawCircleWithGradient(circle, renderer, radius);
+  const bounds = new PIXI.Rectangle(-radius, -radius, radius * 2, radius * 2);
+  return renderer.generateTexture(circle, {
+    region: bounds,
+    scaleMode: PIXI.SCALE_MODES.LINEAR,
+  });
+}
+
+export function generateLinearGradiantTexture(
+  width: number,
+  height: number,
+  renderer: PIXI.Renderer
+): PIXI.Texture {
+  const rect = new PIXI.Graphics();
+  drawRectWithGradient(rect, renderer, width, height);
+
+  const bounds = new PIXI.Rectangle(0, 0, width, height);
+  return renderer.generateTexture(rect, {
+    region: bounds,
+    scaleMode: PIXI.SCALE_MODES.LINEAR,
+  });
 }
 
 export function getSpriteAspect(

@@ -71,6 +71,7 @@ export default class GameObject extends Vue {
   @Prop({ default: 0 }) id!: number;
   @Prop({ default: 0 }) x!: number;
   @Prop({ default: 0 }) y!: number;
+  @Prop({ default: null }) fixSize!: [number, number] | number | null;
   @Prop({ default: 0 }) rotation!: number;
   @Prop({ default: 1 }) scale!: number;
   @Prop({ default: ObjectSpace.Absolute }) objectSpace!: ObjectSpace;
@@ -115,6 +116,18 @@ export default class GameObject extends Vue {
 
   get displayY(): number {
     return this.position[1] - this.offset[1];
+  }
+
+  getContainerWidth(): number {
+    if (this.fixSize === null) return this.container.width;
+    if (Array.isArray(this.fixSize)) return this.fixSize[0];
+    return this.fixSize;
+  }
+
+  getContainerHeight(): number {
+    if (this.fixSize === null) return this.container.height;
+    if (Array.isArray(this.fixSize)) return this.fixSize[1];
+    return this.fixSize;
   }
 
   async mounted(): Promise<void> {
@@ -209,58 +222,64 @@ export default class GameObject extends Vue {
   }
 
   containerLoad(container: PIXI.Container): void {
+    const setupBody = (): void => {
+      this.displayWidth = this.getContainerWidth();
+      this.displayHeight = this.getContainerHeight();
+      this.$emit('sizeChanged', [this.displayWidth, this.displayHeight]);
+      switch (this.type) {
+        case 'rect':
+          this.addRect(
+            this.container.x,
+            this.container.y,
+            this.displayWidth,
+            this.displayHeight
+          );
+          break;
+        case 'circle':
+          this.addCircle(
+            this.container.x,
+            this.container.y,
+            this.displayWidth,
+            this.displayHeight
+          );
+          break;
+        case 'polygon':
+          this.addPolygon(
+            this.container.x,
+            this.container.y,
+            this.displayWidth,
+            this.displayHeight,
+            this.polygonShape
+          );
+          break;
+      }
+      this.$emit('initialised', this);
+    };
+
     this.container = container;
+    const delay = this.fixSize === null ? 0 : this.renderDelay;
     setTimeout(() => {
       try {
-        this.displayWidth = container.width;
-        this.displayHeight = container.height;
-        this.$emit('sizeChanged', [this.displayWidth, this.displayHeight]);
-        switch (this.type) {
-          case 'rect':
-            this.addRect(
-              container.x,
-              container.y,
-              container.width,
-              container.height
-            );
-            break;
-          case 'circle':
-            this.addCircle(
-              container.x,
-              container.y,
-              container.width,
-              container.height
-            );
-            break;
-          case 'polygon':
-            this.addPolygon(
-              container.x,
-              container.y,
-              container.width,
-              container.height,
-              this.polygonShape
-            );
-            break;
-        }
-        this.$emit('initialised', this);
+        setupBody();
       } catch (e) {
         this.$emit('initError', this);
       }
-    }, this.renderDelay);
+    }, delay);
   }
 
   updatedColliderSize(): void {
     const updateBody = (): void => {
       try {
+        const containerWidth = this.getContainerWidth();
         if (
           this.body &&
           this.container &&
-          this.container.width !== this.displayWidth
+          containerWidth !== this.displayWidth
         ) {
-          const scale = this.container.width / this.displayWidth;
+          const scale = containerWidth / this.displayWidth;
           Matter.Body.scale(this.body, scale, scale);
-          this.displayWidth = this.container.width;
-          this.displayHeight = this.container.height;
+          this.displayWidth = containerWidth;
+          this.displayHeight = this.getContainerHeight();
           this.$emit('sizeChanged', [this.displayWidth, this.displayHeight]);
           if (this.boundsGraphic) this.drawBorder();
         }
@@ -571,15 +590,15 @@ export default class GameObject extends Vue {
   }
 
   get clickWidth(): number {
-    if (this.container) return this.container.width + this.colliderDelta * 2;
+    //if (this.container) return this.container.width + this.colliderDelta * 2;
     //if (this.body) return this.body.bounds.max.x - this.body.bounds.min.x;
-    return this.displayWidth;
+    return this.displayWidth + this.colliderDelta * 2;
   }
 
   get clickHeight(): number {
-    if (this.container) return this.container.height + this.colliderDelta * 2;
+    //if (this.container) return this.container.height + this.colliderDelta * 2;
     //if (this.body) return this.body.bounds.max.y - this.body.bounds.min.y;
-    return this.displayHeight;
+    return this.displayHeight + this.colliderDelta * 2;
   }
 
   boundsWidth: number | null = null;
