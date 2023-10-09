@@ -1,46 +1,46 @@
 {
 "frames": {
-	"pants-01": {
+	"vegetarian-01": {
 		"frame": {"x":636, "y":856, "w":635, "h":855},
 		"spriteSourceSize": {"x":0,"y":0,"w":635,"h":855},
 		"sourceSize": {"w":635,"h":855}
 	},
-	"pants-02": {
+	"vegetarian-02": {
 		"frame": {"x":1272, "y":856, "w":635, "h":855},
 		"spriteSourceSize": {"x":0,"y":0,"w":635,"h":855},
 		"sourceSize": {"w":635,"h":855}
 	},
-	"pants-03": {
+	"vegetarian-03": {
 		"frame": {"x":1272, "y":0, "w":635, "h":855},
 		"spriteSourceSize": {"x":0,"y":0,"w":635,"h":855},
 		"sourceSize": {"w":635,"h":855}
 	},
-	"shirt-01": {
+	"meat-01": {
 		"frame": {"x":636, "y":1712, "w":635, "h":855},
 		"spriteSourceSize": {"x":0,"y":0,"w":635,"h":855},
 		"sourceSize": {"w":635,"h":855}
 	},
-	"shirt-02": {
+	"meat-02": {
 		"frame": {"x":1272, "y":1712, "w":635, "h":855},
 		"spriteSourceSize": {"x":0,"y":0,"w":635,"h":855},
 		"sourceSize": {"w":635,"h":855}
 	},
-	"shirt-03": {
+	"meat-03": {
 		"frame": {"x":636, "y":0, "w":635, "h":855},
 		"spriteSourceSize": {"x":0,"y":0,"w":635,"h":855},
 		"sourceSize": {"w":635,"h":855}
 	},
-	"shoe-01": {
+	"coffee-01": {
 		"frame": {"x":0, "y":1712, "w":635, "h":855},
 		"spriteSourceSize": {"x":0,"y":0,"w":635,"h":855},
 		"sourceSize": {"w":635,"h":855}
 	},
-	"shoe-02": {
+	"coffee-02": {
 		"frame": {"x":0, "y":856, "w":635, "h":855},
 		"spriteSourceSize": {"x":0,"y":0,"w":635,"h":855},
 		"sourceSize": {"w":635,"h":855}
 	},
-	"shoe-03": {
+	"coffee-03": {
 		"frame": {"x":0, "y":0, "w":635, "h":855},
 		"spriteSourceSize": {"x":0,"y":0,"w":635,"h":855},
 		"sourceSize": {"w":635,"h":855}
@@ -48,7 +48,7 @@
 
 },
 "meta": {
-	"image": "clothes.png",
+	"image": "food.png",
 	"size": {"w": 1908, "h": 2568},
 	"scale": "1"
 }

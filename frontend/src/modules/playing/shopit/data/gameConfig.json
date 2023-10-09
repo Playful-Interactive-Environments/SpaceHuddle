@@ -1,13 +1,14 @@
 {
   "gameValues": {
     "background": "/assets/games/shopit/background/background.png",
+    "cardBackground": "/assets/games/shopit/cards/cardBackground.png",
+    "spriteFolder": "/assets/games/shopit/cards/items/",
     "maxCO2": 120
   },
   "categories": {
     "clothing": {
       "settings": {
-        "icon": "shirt",
-        "spritesheet": "/assets/games/shopit/cards/clothes.json"
+        "icon": "shirt"
       },
       "items": {
         "shirt-1": {
@@ -16,7 +17,8 @@
           "energy": "10 kw",
           "lifetime": "1 years",
           "water": "4 kl",
-          "money": "5€"
+          "money": "5€",
+          "category": "clothing"
         },
         "shirt-2": {
           "cost": 9,
@@ -24,7 +26,8 @@
           "energy": "10 kw",
           "lifetime": "3 years",
           "water": "4 kl",
-          "money": "20€"
+          "money": "20€",
+          "category": "clothing"
         },
         "shirt-3": {
           "cost": 10,
@@ -32,7 +35,8 @@
           "energy": "10 kw",
           "lifetime": "10 years",
           "water": "4 kl",
-          "money": "40€"
+          "money": "40€",
+          "category": "clothing"
         },
         "pants-1": {
           "cost": 11,
@@ -40,7 +44,8 @@
           "energy": "10 kw",
           "lifetime": "2 years",
           "water": "4 kl",
-          "money": "30€"
+          "money": "30€",
+          "category": "clothing"
         },
         "pants-2": {
           "cost": 12,
@@ -48,7 +53,8 @@
           "energy": "10 kw",
           "lifetime": "6 years",
           "water": "4 kl",
-          "money": "60€"
+          "money": "60€",
+          "category": "clothing"
         },
         "pants-3": {
           "cost": 13,
@@ -56,7 +62,8 @@
           "energy": "10 kw",
           "lifetime": "15 years",
           "water": "4 kl",
-          "money": "100€"
+          "money": "100€",
+          "category": "clothing"
         },
         "shoes-1": {
           "cost": 14,
@@ -64,7 +71,8 @@
           "energy": "10 kw",
           "lifetime": "2 years",
           "water": "4 kl",
-          "money": "20€"
+          "money": "20€",
+          "category": "clothing"
         },
         "shoes-2": {
           "cost": 15,
@@ -72,7 +80,8 @@
           "energy": "10 kw",
           "lifetime": "4 years",
           "water": "4 kl",
-          "money": "60€"
+          "money": "60€",
+          "category": "clothing"
         },
         "shoes-3": {
           "cost": 16,
@@ -80,7 +89,8 @@
           "energy": "10 kw",
           "lifetime": "10 years",
           "water": "4 kl",
-          "money": "120€"
+          "money": "120€",
+          "category": "clothing"
         }
       }
     },
@@ -96,7 +106,8 @@
           "energy": "10 kw",
           "lifetime": "1.5 years",
           "water": "4 kl",
-          "money": "150€"
+          "money": "150€",
+          "category": "electronics"
         },
         "phone-2": {
           "cost": 9,
@@ -104,7 +115,8 @@
           "energy": "10 kw",
           "lifetime": "3 years",
           "water": "4 kl",
-          "money": "500€"
+          "money": "500€",
+          "category": "electronics"
         },
         "phone-3": {
           "cost": 10,
@@ -112,7 +124,8 @@
           "energy": "10 kw",
           "lifetime": "6 years",
           "water": "4 kl",
-          "money": "1200€"
+          "money": "1200€",
+          "category": "electronics"
         },
         "laptop-1": {
           "cost": 11,
@@ -120,7 +133,8 @@
           "energy": "10 kw",
           "lifetime": "2 years",
           "water": "4 kl",
-          "money": "600€"
+          "money": "600€",
+          "category": "electronics"
         },
         "laptop-2": {
           "cost": 12,
@@ -128,7 +142,8 @@
           "energy": "10 kw",
           "lifetime": "3 years",
           "water": "4 kl",
-          "money": "1200€"
+          "money": "1200€",
+          "category": "electronics"
         },
         "laptop-3": {
           "cost": 13,
@@ -136,31 +151,35 @@
           "energy": "10 kw",
           "lifetime": "5 years",
           "water": "4 kl",
-          "money": "2000€"
+          "money": "2000€",
+          "category": "electronics"
         },
-        "tv-1": {
+        "headphones-1": {
           "cost": 14,
           "CO2": "8 kg",
           "energy": "10 kw",
           "lifetime": "4 years",
           "water": "4 kl",
-          "money": "300€"
+          "money": "30€",
+          "category": "electronics"
         },
-        "tv-2": {
+        "headphones-2": {
           "cost": 15,
           "CO2": "8 kg",
           "energy": "10 kw",
           "lifetime": "6 years",
           "water": "4 kl",
-          "money": "800€"
+          "money": "80€",
+          "category": "electronics"
         },
-        "tv-3": {
+        "headphones-3": {
           "cost": 16,
           "CO2": "8 kg",
           "energy": "10 kw",
           "lifetime": "15 years",
           "water": "4 kl",
-          "money": "1400€"
+          "money": "140€",
+          "category": "electronics"
         }
       }
     },
@@ -176,7 +195,8 @@
           "energy": "10 kw",
           "lifetime": "1 years",
           "water": "4 kl",
-          "money": "5€"
+          "money": "5€",
+          "category": "food"
         },
         "vegetarian-2": {
           "cost": 9,
@@ -184,7 +204,8 @@
           "energy": "10 kw",
           "lifetime": "1 years",
           "water": "4 kl",
-          "money": "5€"
+          "money": "5€",
+          "category": "food"
         },
         "vegetarian-3": {
           "cost": 10,
@@ -192,7 +213,8 @@
           "energy": "10 kw",
           "lifetime": "1 years",
           "water": "4 kl",
-          "money": "5€"
+          "money": "5€",
+          "category": "food"
         },
         "meat-1": {
           "cost": 11,
@@ -200,7 +222,8 @@
           "energy": "10 kw",
           "lifetime": "1 years",
           "water": "4 kl",
-          "money": "5€"
+          "money": "5€",
+          "category": "food"
         },
         "meat-2": {
           "cost": 12,
@@ -208,7 +231,8 @@
           "energy": "10 kw",
           "lifetime": "1 years",
           "water": "4 kl",
-          "money": "5€"
+          "money": "5€",
+          "category": "food"
         },
         "meat-3": {
           "cost": 13,
@@ -216,7 +240,8 @@
           "energy": "10 kw",
           "lifetime": "1 years",
           "water": "4 kl",
-          "money": "5€"
+          "money": "5€",
+          "category": "food"
         },
         "coffee-1": {
           "cost": 14,
@@ -224,7 +249,8 @@
           "energy": "10 kw",
           "lifetime": "1 years",
           "water": "4 kl",
-          "money": "5€"
+          "money": "5€",
+          "category": "food"
         },
         "coffee-2": {
           "cost": 15,
@@ -232,7 +258,8 @@
           "energy": "10 kw",
           "lifetime": "1 years",
           "water": "4 kl",
-          "money": "5€"
+          "money": "5€",
+          "category": "food"
         },
         "coffee-3": {
           "cost": 16,
@@ -240,7 +267,8 @@
           "energy": "10 kw",
           "lifetime": "1 years",
           "water": "4 kl",
-          "money": "5€"
+          "money": "5€",
+          "category": "food"
         }
       }
     }

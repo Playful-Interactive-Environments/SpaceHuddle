@@ -1,25 +1,32 @@
 <template>
   <div
     class="gameArea"
-    :style="{ height: height }"
+    :style="{ height: height, backgroundImage: 'url(' + background + ')' }"
     v-if="playStateType === PlayStateType.play"
   >
-    <GameContainer
-      v-model:width="gameWidth"
-      v-model:height="gameHeight"
-      :detect-collision="false"
-      :use-gravity="false"
-      :background-texture="gameConfig.gameValues.background"
-      :background-position="BackgroundPosition.Cover"
-      @initRenderer="initRenderer"
-      @gameObjectClick="gameObjectClick"
-    >
-      <template v-slot:default>
-        <container v-if="gameWidth">
-
-        </container>
-      </template>
-    </GameContainer>
+    <div class="hand">
+      <div
+        v-for="card in cardHand"
+        :key="card[7]"
+        :id="card[7]"
+        class="cardContainer"
+        :style="{ backgroundImage: 'url(' + cardBackground + ')' }"
+        @click="activeCardChanged(card)"
+      >
+        <ul class="cardStats">
+          <li class="cardCost">{{ card[0] }}</li>
+          <li>{{ card[1] }}</li>
+          <li>{{ card[2] }}</li>
+          <li>{{ card[3] }}</li>
+          <li>{{ card[4] }}</li>
+        </ul>
+        <img :src="getCardSprite(card)" alt="{{ card[7] }}" class="cardImage" />
+        <font-awesome-icon
+          :icon="gameConfig.categories[card[6]].settings.icon"
+          class="categoryIcon"
+        />
+      </div>
+    </div>
   </div>
   <div
     class="gameArea result"
@@ -39,25 +46,17 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import * as PIXI from 'pixi.js';
 import { Prop, Watch } from 'vue-property-decorator';
-import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer, {
   BackgroundPosition,
 } from '@/components/shared/atoms/game/GameContainer.vue';
-import * as placeable from '@/types/game/Placeable';
-import * as pixiUtil from '@/utils/pixi';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
-import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import { until } from '@/utils/wait';
-import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
-import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import * as tutorialService from '@/services/tutorial-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
 import { ElMessage } from 'element-plus';
-import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
 import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
 import { Idea } from '@/types/api/Idea';
@@ -77,7 +76,6 @@ export interface PlayStateResult {
   time: number;
   collected: number;
   total: number;
-  itemList: placeable.PlaceableBase[];
 }
 
 @Options({
@@ -89,14 +87,7 @@ export interface PlayStateResult {
       return BackgroundPosition;
     },
   },
-  components: {
-    CustomParticleContainer,
-    GameObject,
-    GameContainer,
-    CustomSprite,
-    DrawerBottomOverlay,
-    SpriteCanvas,
-  },
+  components: {},
   emits: ['playFinished'],
 })
 export default class PlayState extends Vue {
@@ -105,7 +96,6 @@ export default class PlayState extends Vue {
   @Prop({ default: '100%' }) readonly height!: string;
   @Prop({ default: EndpointAuthorisationType.PARTICIPANT })
   authHeaderTyp!: EndpointAuthorisationType;
-  renderer!: PIXI.Renderer;
   gameWidth = 0;
   gameHeight = 0;
   showToolbox = false;
@@ -113,8 +103,6 @@ export default class PlayState extends Vue {
   levelType = '';
   gameConfig = gameConfig;
 
-  collectedObjects: placeable.PlaceableBase[] = [];
-  stylesheets: { [key: string]: PIXI.Spritesheet } = {};
   totalCount = 0;
   collectedCount = 0;
   startTime = Date.now();
@@ -122,22 +110,21 @@ export default class PlayState extends Vue {
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
 
+  background = gameConfig.gameValues.background;
+  cardBackground = gameConfig.gameValues.cardBackground;
+  cardSpriteFolder = gameConfig.gameValues.spriteFolder;
+
+  activeCard: any[] = [];
+
+  cards = this.shuffle(this.parseCards(gameConfig));
+  cardHand: any[] = [];
+
   clearPlayState(): void {
     this.levelType = '';
-    this.collectedObjects = [];
     this.totalCount = 0;
     this.collectedCount = 0;
     this.startTime = Date.now();
-  }
-
-  get playStateResult(): PlayStateResult {
-    return {
-      stars: Math.floor((this.collectedCount / this.totalCount) * 3),
-      time: Date.now() - this.startTime,
-      collected: this.collectedCount,
-      total: this.totalCount,
-      itemList: this.collectedObjects,
-    };
+    this.cards = this.shuffle(this.parseCards(gameConfig));
   }
 
   get backgroundColor(): string {
@@ -146,7 +133,9 @@ export default class PlayState extends Vue {
 
   mounted(): void {
     tutorialService.registerGetList(this.updateTutorial, this.authHeaderTyp);
-
+    this.initialCardPull();
+    console.log(this.cardHand);
+    console.log(this.cards);
     /*this.eventBus.off(EventType.CHANGE_TUTORIAL);
     this.eventBus.on(EventType.CHANGE_TUTORIAL, async (steps) => {
       this.updateTutorial(steps as Tutorial[]);
@@ -165,44 +154,70 @@ export default class PlayState extends Vue {
     this.deregisterAll();
   }
 
-  getSpriteSheetForType(objectType: string): PIXI.Spritesheet {
-    return this.stylesheets[objectType];
+  parseCards(cards) {
+    const cardArray: any[] = [];
+    const data = cards.categories;
+    for (const category in data) {
+      const categoryItems = data[category].items;
+      for (const itemKey in categoryItems) {
+        const item = categoryItems[itemKey];
+        const itemValues = Object.values(item);
+        itemValues.push(itemKey);
+        cardArray.push(itemValues);
+      }
+    }
+    return cardArray;
   }
 
-  getTexture(objectType: string, objectName: string): PIXI.Texture | string {
-    const spriteSheet = this.getSpriteSheetForType(objectType);
-    if (spriteSheet && spriteSheet.textures)
-      return spriteSheet.textures[objectName];
-    return '';
+  getCardSprite(card) {
+    return this.cardSpriteFolder + card[7] + '.png';
   }
 
-  spriteSheetLoaded(objectType: string): boolean {
-    const spriteSheet = this.getSpriteSheetForType(objectType);
-    return !!spriteSheet && !!spriteSheet.textures;
+  shuffle(cards) {
+    let currentIndex = cards.length;
+    let randomIndex;
+
+    while (currentIndex > 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+
+      [cards[currentIndex], cards[randomIndex]] = [
+        cards[randomIndex],
+        cards[currentIndex],
+      ];
+    }
+    return cards;
   }
 
-  hasTexture(objectType: string, objectName: string): boolean {
-    const spriteSheet = this.getSpriteSheetForType(objectType);
-    return (
-      !!spriteSheet &&
-      !!spriteSheet.textures &&
-      objectName in spriteSheet.textures
-    );
-  }
-
-  getObjectAspect(objectType: string, objectName: string): number {
-    const spriteSheet = this.getSpriteSheetForType(objectType);
-    return pixiUtil.getSpriteAspect(spriteSheet, objectName);
-  }
-
-  gameObjectClick(objectList: GameObject[], event: PointerEvent): void {
-    for (const obj of objectList) {
-      console.log("gameObjectClicked");
+  initialCardPull() {
+    for (let i = 0; i < 3; i++) {
+      const card = this.cards.pop();
+      this.cardHand.push(card);
     }
   }
 
-  initRenderer(renderer: PIXI.Renderer): void {
-    this.renderer = renderer;
+  cardPlayed(card) {
+    const index = this.cardHand.indexOf(card);
+    this.cardHand.splice(index, 1);
+    console.log(this.cardHand);
+  }
+
+  drawNewCard() {
+    const card = this.cards.pop();
+    this.cardHand.push(card);
+  }
+
+  activeCardChanged(card) {
+    let element = document.getElementById(this.activeCard[7]);
+    if (element) {
+      element.classList.remove('cardContainerActive');
+    }
+    this.activeCard = card;
+    console.log(card[7]);
+    element = document.getElementById(this.activeCard[7]);
+    if (element) {
+      element.classList.add('cardContainerActive');
+    }
   }
 }
 </script>
@@ -212,6 +227,7 @@ export default class PlayState extends Vue {
   height: calc(100%);
   width: 100%;
   position: relative;
+  background-size: cover;
 }
 
 .custom-renderer-wrapper {
@@ -239,5 +255,64 @@ export default class PlayState extends Vue {
     width: 100%;
     text-align: center;
   }
+}
+
+.hand {
+  position: absolute;
+  height: 30%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  border: 1px solid red;
+  bottom: 0;
+  align-items: center;
+}
+
+.cardContainer {
+  position: relative;
+  aspect-ratio: 1904/2564;
+  background-size: cover;
+  z-index: 1;
+  height: 80%;
+  padding: 2%;
+  margin-left: -10%;
+  left: 5%;
+  filter: drop-shadow(var(--color-dark-contrast) -0.4rem 0.2rem 0.2rem);
+  transition: 0.3s;
+}
+
+.cardContainerActive {
+  z-index: 2;
+  transform: translateY(-1rem);
+  transition: 0.3s;
+}
+
+.cardStats {
+  z-index: 10;
+  color: var(--color-dark-contrast);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family);
+}
+
+.cardCost {
+  font-size: var(--font-size-xlarge);
+  font-weight: var(--font-weight-bold);
+}
+
+.categoryIcon {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  margin: 5%;
+}
+
+.cardImage {
+  z-index: 1;
+  position: absolute;
+  width: 65%;
+  bottom: 0;
+  right: 0;
+  margin: 2.7%;
 }
 </style>
