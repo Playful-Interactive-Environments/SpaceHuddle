@@ -29,7 +29,8 @@
             "order": 10,
             "spritesheet": "/assets/games/coolit/city/city.json",
             "explanationText": "module.playing.coolit.participant.placeables.city",
-            "placingRegions": [[[0, 77], [100, 77], [100, 92], [0, 92]]]
+            "placingRegions": [[[0, 77], [100, 77], [100, 92], [0, 92]]],
+            "type": "obstacle"
           },
           "items": {
             "building01": {
@@ -123,7 +124,8 @@
             "order": 10,
             "spritesheet": "/assets/games/coolit/city/city.json",
             "explanationText": "module.playing.coolit.participant.placeables.city",
-            "placingRegions": [[[0, 77], [100, 77], [100, 92], [0, 92]]]
+            "placingRegions": [[[0, 77], [100, 77], [100, 92], [0, 92]]],
+            "type": "carbonSink"
           },
           "items": {
             "trees01": {
@@ -145,80 +147,100 @@
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#63c3cb",
       "globalWarmingFactor": 1,
-      "size": 1,
-      "ration": 0.4
+      "size": 0.25,
+      "ration": 0.4,
+      "controllable": true,
+      "absorbedByTree": false
     },
     "carbonDioxide": {
       "type": "greenhouseGas",
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#c55e44",
       "globalWarmingFactor": 1,
-      "size": 1,
-      "ration": 0.04
+      "size": 0.33,
+      "ration": 0.04,
+      "controllable": true,
+      "absorbedByTree": true
     },
     "methane": {
       "type": "greenhouseGas",
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#e7a320",
       "globalWarmingFactor": 1,
-      "size": 1,
-      "ration": 0.01
+      "size": 0.25,
+      "ration": 0.01,
+      "controllable": true,
+      "absorbedByTree": false
     },
     "nitrogenOxide": {
       "type": "greenhouseGas",
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#ac7dbc",
       "globalWarmingFactor": 1,
-      "size": 1,
-      "ration": 0.01
+      "size": 0.5,
+      "ration": 0.01,
+      "controllable": true,
+      "absorbedByTree": false
     },
     "ozone": {
       "type": "greenhouseGas",
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#9b5144",
       "globalWarmingFactor": 1,
-      "size": 1,
-      "ration": 0.01
+      "size": 0.33,
+      "ration": 0.01,
+      "controllable": true,
+      "absorbedByTree": false
     },
     "fluorinatedGases": {
       "type": "greenhouseGas",
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/", "https://www.epa.gov/ghgemissions/overview-greenhouse-gases#f-gases"],
       "color": "#9b864c",
       "globalWarmingFactor": 1,
-      "size": 1,
-      "ration": 0.01
+      "size": 0.5,
+      "ration": 0.01,
+      "controllable": true,
+      "absorbedByTree": false
     },
     "oxygen": {
       "type": "atmosphericGas",
       "reference": ["https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/oxygen.html"],
       "color": "#d88e81",
       "globalWarmingFactor": 1,
-      "size": 1,
-      "ration": 20.6
+      "size": 0.2,
+      "ration": 20.6,
+      "controllable": false,
+      "absorbedByTree": false
     },
     "nitrogen": {
       "type": "atmosphericGas",
       "reference": ["https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/nitrogen.html"],
       "color": "#d9b9e4",
       "globalWarmingFactor": 1,
-      "size": 1,
-      "ration": 78
+      "size": 0.2,
+      "ration": 78,
+      "controllable": false,
+      "absorbedByTree": false
     },
     "argon": {
       "type": "atmosphericGas",
       "reference": ["https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/argon.html"],
       "color": "74909d",
       "globalWarmingFactor": 1,
-      "size": 1,
-      "ration": 0.9
+      "size": 0.2,
+      "ration": 0.9,
+      "controllable": false,
+      "absorbedByTree": false
     },
     "helium": {
       "type": "atmosphericGas",
       "reference": ["https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/helium.html"],
       "color": "#757d76",
       "globalWarmingFactor": 1,
-      "size": 1,
-      "ration": 0.02
+      "size": 0.2,
+      "ration": 0.02,
+      "controllable": false,
+      "absorbedByTree": false
     }
   }
 }

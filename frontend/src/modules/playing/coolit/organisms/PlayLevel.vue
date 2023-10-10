@@ -8,6 +8,7 @@
       v-model:height="gameHeight"
       :detect-collision="true"
       :use-gravity="false"
+      :use-wind="true"
       :border-category="CollisionGroups.BORDER"
       :background-texture="gameConfig.obstacles[levelType].settings.background"
       :background-position="BackgroundPosition.Cover"
@@ -16,6 +17,7 @@
       @initRenderer="initRenderer"
       @updateOffset="updateOffset"
       @containerReady="containerReady"
+      @backgroundSizeChanged="containerTextureSizeChanged"
       :show-bounds="false"
       :collision-borders="CollisionBorderType.Background"
       :pixi-filter-list="collisionAnimation"
@@ -28,22 +30,16 @@
             v-model:id="obstacle.id"
             :type="obstacle.shape"
             :polygon-shape="obstacle.polygonShape"
-            :show-bounds="true"
+            :show-bounds="false"
             :anchor="obstacle.pivot"
             :object-space="ObjectSpace.RelativeToBackground"
             :x="obstacle.position[0]"
             :y="obstacle.position[1]"
             :rotation="obstacle.rotation"
             :scale="obstacle.scale"
-            :options="{
-              isSensor: true,
-              name: obstacle.name,
-              collisionFilter: {
-                group: 0,
-                category: CollisionGroups.OBSTACLE,
-              },
-            }"
+            :options="getObstacleTypeOptions(obstacle.type, obstacle.name)"
             :is-static="true"
+            :affectedByForce="false"
             :source="obstacle"
           >
             <CustomSprite
@@ -68,6 +64,7 @@
             :scale="ray.intensity"
             :options="getRayTypeOptions(ray.type)"
             :is-static="false"
+            :affectedByForce="false"
             :show-bounds="false"
             :source="ray"
             :fix-size="rayParticleSize"
@@ -97,6 +94,41 @@
                 :points="ray.displayPoints"
               />
             </template>
+          </GameObject>
+          <GameObject
+            v-for="molecule of moleculeList"
+            :key="molecule.id"
+            type="circle"
+            :object-space="ObjectSpace.RelativeToBackground"
+            v-model:x="molecule.position[0]"
+            v-model:y="molecule.position[1]"
+            :options="getMoleculeTypeOptions(molecule.type)"
+            :is-static="false"
+            :fix-size="molecule.size * moleculeSize * 2"
+            :source="molecule"
+          >
+            <sprite
+              v-if="circleGradiant"
+              :texture="circleGradiant"
+              :width="molecule.size * moleculeSize * 2"
+              :height="molecule.size * moleculeSize * 2"
+              :anchor="0.5"
+              :tint="molecule.color"
+            >
+              <CustomSprite
+                v-if="moleculeStylesheets"
+                :texture="getMoleculeTexture(molecule.type)"
+                :anchor="0.5"
+                :tint="molecule.color"
+                :width="molecule.size * moleculeSize * 15"
+                :height="
+                  getMoleculeAspect(molecule.type) *
+                  molecule.size *
+                  moleculeSize *
+                  15
+                "
+              />
+            </sprite>
           </GameObject>
         </container>
       </template>
@@ -189,12 +221,29 @@ export interface PlayStateResult {
   temperature: number;
 }
 
+enum ObstacleType {
+  obstacle = 'obstacle',
+  carbonSink = 'carbonSink',
+  carbonSource = 'carbonSource',
+}
+
 interface CoolItHitRegion {
   maxHitCount: number;
   hitCount: number;
   hitAnimation: ShockwaveFilter[];
   heatRationCoefficient: number;
   reflectionProbability: number;
+}
+
+interface MoleculeData extends CoolItHitRegion {
+  id: string;
+  type: string;
+  position: [number, number];
+  globalWarmingFactor: number;
+  size: number;
+  controllable: boolean;
+  absorbedByTree: boolean;
+  color: string;
 }
 
 interface CoolItObstacle extends placeable.Placeable, CoolItHitRegion {}
@@ -267,14 +316,17 @@ export default class PlayLevel extends Vue {
 
   obstacleList: CoolItObstacle[] = [];
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
+  moleculeStylesheets!: PIXI.Spritesheet;
   lightTexture!: PIXI.Texture;
   startTime = Date.now();
+  moleculeSize = 50;
 
   rayList: Ray[] = [];
   rayPath: { [key: string]: { x: number; y: number }[][] } = {};
   circleGradiant: PIXI.Texture | null = null;
   rayParticleSize = 10;
   collisionAnimation: any[] = [];
+  moleculeList: MoleculeData[] = [];
 
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
@@ -285,11 +337,13 @@ export default class PlayLevel extends Vue {
   CollisionGroups = Object.freeze({
     MOUSE: 1 << 0,
     OBSTACLE: 1 << 1,
-    LIGHT_RAY: 1 << 2,
-    HEAT_RAY: 1 << 3,
-    MOLECULE: 1 << 4,
-    GROUND: 1 << 5,
-    BORDER: 1 << 6,
+    CARBON_SINK: 1 << 2,
+    CARBON_SOURCE: 1 << 3,
+    LIGHT_RAY: 1 << 4,
+    HEAT_RAY: 1 << 5,
+    MOLECULE: 1 << 6,
+    GROUND: 1 << 7,
+    BORDER: 1 << 8,
   });
   CollisionBorderType = CollisionBorderType;
 
@@ -344,6 +398,24 @@ export default class PlayLevel extends Vue {
     return regions;
   }
 
+  getObstacleTypeOptions(obstacleType: string, obstacleName: string): any {
+    const settings =
+      gameConfig.obstacles[this.levelType].categories[obstacleType].settings;
+    return {
+      isSensor: true,
+      name: obstacleName,
+      collisionFilter: {
+        group: 0,
+        category:
+          settings.type === ObstacleType.obstacle
+            ? this.CollisionGroups.OBSTACLE
+            : settings.type === ObstacleType.carbonSink
+            ? this.CollisionGroups.CARBON_SINK
+            : this.CollisionGroups.CARBON_SOURCE,
+      },
+    };
+  }
+
   getRayTypeOptions(rayType: RayType): any {
     switch (rayType) {
       case RayType.light:
@@ -354,6 +426,8 @@ export default class PlayLevel extends Vue {
             category: this.CollisionGroups.LIGHT_RAY,
             mask:
               this.CollisionGroups.OBSTACLE |
+              this.CollisionGroups.CARBON_SINK |
+              this.CollisionGroups.CARBON_SOURCE |
               this.CollisionGroups.GROUND |
               this.CollisionGroups.MOUSE,
           },
@@ -368,6 +442,33 @@ export default class PlayLevel extends Vue {
           },
         };
     }
+  }
+
+  getMoleculeTypeOptions(moleculeType: string): any {
+    const moleculeConfig = gameConfig.molecules[moleculeType];
+    let mask = this.CollisionGroups.MOLECULE | this.CollisionGroups.BORDER;
+    if (moleculeConfig.controllable)
+      mask = mask | this.CollisionGroups.HEAT_RAY | this.CollisionGroups.MOUSE;
+    if (moleculeConfig.absorbedByTree)
+      mask = mask | this.CollisionGroups.CARBON_SINK;
+    return {
+      name: moleculeType,
+      collisionFilter: {
+        group: 0,
+        category: this.CollisionGroups.MOLECULE,
+        mask: mask,
+      },
+    };
+  }
+
+  getMoleculeTexture(objectName: string): PIXI.Texture | string {
+    if (this.moleculeStylesheets)
+      return this.moleculeStylesheets.textures[objectName];
+    return '';
+  }
+
+  getMoleculeAspect(objectName: string): number {
+    return 1 / pixiUtil.getSpriteAspect(this.moleculeStylesheets, objectName);
   }
 
   calculateRayPath(type: RayType, shift = 0): { x: number; y: number }[] {
@@ -404,10 +505,43 @@ export default class PlayLevel extends Vue {
       .then((texture) => {
         this.lightTexture = texture;
       });
+    pixiUtil
+      .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
+      .then((sheet) => (this.moleculeStylesheets = sheet));
+  }
+
+  containerTextureSize: [number, number] = [100, 100];
+  containerTextureSizeChanged(size: [number, number]): void {
+    this.containerTextureSize = size;
   }
 
   containerReady(): void {
-    if (!this.emitStart) this.emitLightRays(200, 0);
+    if (!this.emitStart) {
+      this.emitLightRays(200, 0);
+
+      for (const moleculeConfigName of Object.keys(gameConfig.molecules)) {
+        const moleculeConfig = gameConfig.molecules[moleculeConfigName];
+        const moduleCountFactor = moleculeConfig.controllable ? 100 : 1;
+        const moleculeCount = moleculeConfig.ration * moduleCountFactor;
+        for (let i = 0; i < moleculeCount; i++) {
+          this.moleculeList.push({
+            id: uuidv4(),
+            type: moleculeConfigName,
+            position: [Math.random() * 100, Math.random() * 50],
+            globalWarmingFactor: moleculeConfig.globalWarmingFactor,
+            size: moleculeConfig.size,
+            controllable: moleculeConfig.controllable,
+            absorbedByTree: moleculeConfig.absorbedByTree,
+            color: moleculeConfig.color,
+            maxHitCount: 1000,
+            hitCount: 0,
+            hitAnimation: [],
+            heatRationCoefficient: moleculeConfig.globalWarmingFactor,
+            reflectionProbability: 1,
+          });
+        }
+      }
+    }
   }
 
   updateTutorial(steps: Tutorial[]): void {
@@ -458,6 +592,7 @@ export default class PlayLevel extends Vue {
         gameConfig.obstacles[this.levelType].categories[typeName].settings;
       pixiUtil.unloadTexture(settings.spritesheet);
     }
+    pixiUtil.unloadTexture('/assets/games/moveit/molecules.json');
   }
 
   previousLevelType = '';
@@ -725,10 +860,10 @@ export default class PlayLevel extends Vue {
     }
 
     this.collisionAnimation = this.collisionAnimation.filter(
-      (item) => item.time < 5
+      (item) => item.radius < 0 || item.time < item.radius / 10
     );
     for (const filter of this.collisionAnimation) {
-      filter.time += 0.1;
+      filter.time += filter.wavelength / 500;
     }
   }
 
@@ -742,7 +877,11 @@ export default class PlayLevel extends Vue {
     const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
     const hitObstacle = obstacleObject?.source as CoolItHitRegion;
     const probability = Math.random();
-    if (index > -1 && hitObstacle.reflectionProbability >= probability) {
+    if (
+      index > -1 &&
+      hitObstacle &&
+      hitObstacle.reflectionProbability >= probability
+    ) {
       if (ray.type === RayType.light && !ray.hit) {
         ray.hit = true;
         await delay(100);
@@ -766,7 +905,7 @@ export default class PlayLevel extends Vue {
                 amplitude: 1,
                 wavelength: 50,
                 speed: 10,
-                brightness: 1.5,
+                brightness: 1.2,
                 radius: 50,
               },
               0
@@ -780,7 +919,7 @@ export default class PlayLevel extends Vue {
                   amplitude: 1,
                   wavelength: 50,
                   speed: 10,
-                  brightness: 1.5,
+                  brightness: 1.2,
                   radius: 50,
                 },
                 0
@@ -802,7 +941,6 @@ export default class PlayLevel extends Vue {
         const force = Matter.Vector.create(rayVelocity[0], rayVelocity[1] * -1);
         rayObject.body.isStatic = false;
         Matter.Body.setVelocity(rayObject.body, force);
-        //this.setConstRaySpeed(ray);
         const options = this.getRayTypeOptions(ray.type);
         rayObject.body.name = options.name;
         rayObject.body.collisionFilter.mask = options.collisionFilter.mask;
@@ -820,6 +958,23 @@ export default class PlayLevel extends Vue {
         ray.angle *= -1;
         ray.angle += 180;
         ray.hit = false;
+      } else if (ray.type === RayType.heat && !ray.hit) {
+        ray.hit = true;
+        hitObstacle.hitCount++;
+        this.collisionAnimation.push(
+          new ShockwaveFilter(
+            [rayBody.position.x, rayBody.position.y],
+            {
+              amplitude: 1,
+              wavelength: 100 * ray.intensity,
+              speed: 10,
+              brightness: 1.2,
+              radius: hitObstacle.heatRationCoefficient * 100 * ray.intensity,
+            },
+            0
+          )
+        );
+        this.rayList.splice(index, 1);
       }
     }
     if (Object.hasOwn(obstacleObject, 'filter') && hitObstacle) {

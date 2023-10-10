@@ -181,6 +181,10 @@ export default class SelectLevel extends Vue {
       .then((sheet) => (this.spritesheet = sheet));
   }
 
+  unmounted(): void {
+    pixiUtil.unloadTexture('/assets/games/moveit/molecules.json');
+  }
+
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
     if (this.taskId) {

@@ -87,6 +87,7 @@ export default class GameObject extends Vue {
   @Prop() readonly collisionHandler!: CollisionHandler;
   @Prop() readonly source!: any;
   @Prop({ default: true }) usePhysic!: boolean;
+  @Prop({ default: true }) affectedByForce!: boolean;
   @Prop({ default: true }) moveWithBackground!: boolean;
   @Prop({ default: null }) triggerDelay!: number | null;
   @Prop({ default: false }) highlighted!: boolean;

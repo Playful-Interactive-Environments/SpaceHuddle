@@ -634,7 +634,7 @@ export default class GameContainer extends Vue {
     if (this.backgroundMovement === BackgroundMovement.Auto)
       this.backgroundPositionOffset = [...this.backgroundPositionOffsetMax];
     this.notifyCurrentOffset();
-    this.$emit('backgroundSizeChanged');
+    this.$emit('backgroundSizeChanged', this.backgroundTextureSize);
     for (const customObject of this.customObjects) {
       customObject.calculateRelativePosition();
     }
@@ -770,7 +770,11 @@ export default class GameContainer extends Vue {
     };
 
     for (const gameObject of this.gameObjects) {
-      if (gameObject.body) {
+      if (
+        gameObject.body &&
+        gameObject.affectedByForce &&
+        !gameObject.isStatic
+      ) {
         Matter.Body.setVelocity(gameObject.body, {
           x: gameObject.body.velocity.x + calcForce(),
           y: gameObject.body.velocity.y + calcForce(),
