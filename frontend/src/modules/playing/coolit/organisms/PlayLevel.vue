@@ -15,6 +15,7 @@
       :collisionRegions="collisionRegions"
       @initRenderer="initRenderer"
       @updateOffset="updateOffset"
+      @containerReady="containerReady"
       :show-bounds="false"
       :collision-borders="CollisionBorderType.Background"
       :pixi-filter-list="collisionAnimation"
@@ -397,13 +398,16 @@ export default class PlayLevel extends Vue {
 
     tutorialService.registerGetList(this.updateTutorial, this.authHeaderTyp);
     this.interval = setInterval(() => this.updateRays(), this.intervalTime);
-    this.emitLightRays(100, 0);
 
     pixiUtil
       .loadTexture('/assets/games/coolit/city/light.png', this.eventBus)
       .then((texture) => {
         this.lightTexture = texture;
       });
+  }
+
+  containerReady(): void {
+    if (!this.emitStart) this.emitLightRays(200, 0);
   }
 
   updateTutorial(steps: Tutorial[]): void {
@@ -575,17 +579,19 @@ export default class PlayLevel extends Vue {
 
   readonly rayPoints = 80;
   readonly rayLength = 500 / this.rayPoints;
-  emitLightRays(minDelay = 2000, maxDelay = 3000): void {
+  emitStart = false;
+  emitLightRays(minDelay = 5000, maxDelay = 1000): void {
+    this.emitStart = true;
     const delay = minDelay + Math.random() * maxDelay;
-    const angle = 5 + Math.random() * 10;
-    const direction = new Vec2(0, 1).rotate(-toRadians(angle));
-    const displayWidth = this.panOffsetMax[0] - this.panOffsetMin[0];
-    const position =
-      this.panOffsetMin[0] +
-      displayWidth / 5 +
-      Math.random() * (displayWidth / 2);
-    const points = this.calculateInitRayPoints(RayType.light, 1, 0);
     setTimeout(() => {
+      const angle = 5 + Math.random() * 10;
+      const direction = new Vec2(0, 1).rotate(-toRadians(angle));
+      const displayWidth = this.panOffsetMax[0] - this.panOffsetMin[0];
+      const position =
+        this.panOffsetMin[0] +
+        displayWidth / 5 +
+        Math.random() * (displayWidth / 2);
+      const points = this.calculateInitRayPoints(RayType.light, 1, 0);
       this.rayList.push({
         uuid: uuidv4(),
         type: RayType.light,
@@ -645,7 +651,7 @@ export default class PlayLevel extends Vue {
 
   setConstRaySpeed(ray: Ray): void {
     if (ray.body) {
-      (Matter.Body as any).setSpeed(ray.body, 5);
+      (Matter.Body as any).setSpeed(ray.body, 3);
     }
   }
 
@@ -783,6 +789,7 @@ export default class PlayLevel extends Vue {
           }
         }
         await delay(1000);
+        if (!rayObject.body) return;
         ray.displayPointsCount = 0;
         for (let i = 0; i < ray.displayPoints.length; i++) {
           ray.displayPoints[i].x = 0;

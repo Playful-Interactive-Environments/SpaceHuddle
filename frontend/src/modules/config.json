@@ -126,7 +126,7 @@
            "moderatorConfig": "output/ModeratorConfig",  
            "moduleStatistic": "output/ModuleStatistic",  
            "locales": "de,en,",  
-             "icon": "smog",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": false,  "finishManuel": true,  
+             "icon": "smog",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
            "path": "playing/coolit"  
        },  
        "default": {  
@@ -156,16 +156,16 @@
            "locales": "de,en,",  
              "icon": "route",  "type": "main",  "input": "optional",  "inputFilterTypes": "[\"task\"]",  "inputFilterCategories": "[\"information\"]",  "inputFilterModules": "[\"missionmap\"]",  "maxInputs": 1,  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
            "path": "playing/moveit"  
-       },
-       "shopit": {
-         "publicScreen": "output/PublicScreen",
-         "participant": "output/Participant",
-         "moderatorContent": "output/ModeratorContent",
-         "moderatorConfig": "output/ModeratorConfig",
-         "locales": "de,en,",
-         "icon": "fire",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,
-         "path": "playing/shopit"
-       },
+       },  
+       "shopit": {  
+           "publicScreen": "output/PublicScreen",  
+           "participant": "output/Participant",  
+           "moderatorContent": "output/ModeratorContent",  
+           "moderatorConfig": "output/ModeratorConfig",  
+           "locales": "de,en,",  
+             "icon": "basket-shopping",  "type": "main",  "input": "no",  "syncPublicParticipant": false,  "usable": true,  "finishManuel": true,  
+           "path": "playing/shopit"  
+       },  
        "settings": {  
            "parameter": "TaskParameter",  
            "path": "playing/settings"  

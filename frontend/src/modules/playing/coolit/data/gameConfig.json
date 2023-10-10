@@ -9,7 +9,7 @@
         "color": "#c55e44",
         "heatRation": [
           {
-            "region": [[0, 90], [100, 90], [100, 92], [0, 92]],
+            "region": [[0, 77], [100, 77], [100, 92], [0, 92]],
             "coefficient": 0.5,
             "maxHitCount": 30,
             "reflectionProbability": 0.25

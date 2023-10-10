@@ -55,57 +55,62 @@
         </container>
       </template>
     </GameContainer>
-    <el-carousel
-      :height="`${gameHeight}px`"
-      :interval="30000"
-      trigger="click"
-      @change="carouselChanged"
-    >
-      <el-carousel-item class="infoGraphic successState">
-        <h1>
-          <el-rate
-            v-model="successRate"
-            size="large"
-            :max="3"
-            :disabled="true"
-          />
-        </h1>
-        <div>
-          {{
-            $t(`module.playing.moveit.participant.result.${successStatusText}`)
-          }}
-        </div>
-        <div class="result">
-          {{ particleStateSum.collectedCount }}
-          /
-          {{ particleStateSum.totalCount }}
-        </div>
-      </el-carousel-item>
-      <el-carousel-item
-        class="infoGraphic"
-        v-for="particleSource of Object.keys(gameConfig.particles)"
-        :key="particleSource"
+    <div class="infoOverlay">
+      <el-carousel
+        class="resultInfo"
+        :height="`${gameHeight}px`"
+        :interval="30000"
+        trigger="click"
+        @change="carouselChanged"
       >
-        <h1>
-          {{ $t(`module.playing.moveit.enums.particle.${particleSource}`) }}
-        </h1>
-        <div>
-          {{
-            $t(
-              `module.playing.moveit.participant.result.${particleSource}Explanation`
-            )
-          }}
-        </div>
-        <div class="result">
-          {{
-            particleState[particleSource].totalCount -
-            particleState[particleSource].collectedCount
-          }}
-          /
-          {{ particleState[particleSource].totalCount }}
-        </div>
-      </el-carousel-item>
-    </el-carousel>
+        <el-carousel-item class="infoGraphic successState">
+          <h1>
+            <el-rate
+              v-model="successRate"
+              size="large"
+              :max="3"
+              :disabled="true"
+            />
+          </h1>
+          <div>
+            {{
+              $t(
+                `module.playing.moveit.participant.result.${successStatusText}`
+              )
+            }}
+          </div>
+          <div class="result">
+            {{ particleStateSum.collectedCount }}
+            /
+            {{ particleStateSum.totalCount }}
+          </div>
+        </el-carousel-item>
+        <el-carousel-item
+          class="infoGraphic"
+          v-for="particleSource of Object.keys(gameConfig.particles)"
+          :key="particleSource"
+        >
+          <h1>
+            {{ $t(`module.playing.moveit.enums.particle.${particleSource}`) }}
+          </h1>
+          <div>
+            {{
+              $t(
+                `module.playing.moveit.participant.result.${particleSource}Explanation`
+              )
+            }}
+          </div>
+          <div class="result">
+            {{
+              particleState[particleSource].totalCount -
+              particleState[particleSource].collectedCount
+            }}
+            /
+            {{ particleState[particleSource].totalCount }}
+          </div>
+        </el-carousel-item>
+      </el-carousel>
+    </div>
   </div>
 </template>
 
@@ -443,6 +448,14 @@ h1 {
   position: absolute;
   top: 0;
   right: 0;
+}
+
+.infoOverlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
 }
 
 .gameArea {

@@ -250,6 +250,7 @@ interface CollisionRegionData {
     'update:offset',
     'updateOffset',
     'backgroundSizeChanged',
+    'containerReady',
   ],
 })
 export default class GameContainer extends Vue {
@@ -308,8 +309,6 @@ export default class GameContainer extends Vue {
 
   readonly intervalTimeWind = 50;
   intervalWind = -1;
-  readonly intervalTimeSync = 100;
-  intervalSync = -1;
   readonly intervalTimePan = 50;
   intervalPan = -1;
   loading = false;
@@ -464,6 +463,7 @@ export default class GameContainer extends Vue {
     });
     this.eventBus.on(EventType.ALL_TEXTURES_LOADED, async () => {
       this.loading = false;
+      if (this.ready) this.$emit('containerReady');
     });
 
     //initialise observer in mounted as otherwise this references observer
@@ -492,7 +492,6 @@ export default class GameContainer extends Vue {
     if (this.useWind) {
       this.intervalWind = setInterval(this.addWind, this.intervalTimeWind);
     }
-    this.intervalSync = setInterval(this.syncRenderView, this.intervalTimeSync);
 
     setTimeout(async () => {
       const pixi = this.$refs.pixi as typeof Application;
@@ -544,10 +543,10 @@ export default class GameContainer extends Vue {
       );
     }
     clearInterval(this.intervalWind);
-    clearInterval(this.intervalSync);
     clearInterval(this.intervalPan);
     pixiUtil.unloadTexture(this.backgroundTexture);
     Matter.Events.off(this.engine, 'collisionStart', this.collisionStart);
+    Matter.Events.off(this.engine, 'afterUpdate', this.afterPhysicUpdate);
     this.eventBus.off(EventType.TEXTURES_LOADING_START);
     this.eventBus.off(EventType.ALL_TEXTURES_LOADED);
   }
@@ -575,6 +574,7 @@ export default class GameContainer extends Vue {
           this.setupBound();
         this.calculateBackgroundSize();
         this.ready = true;
+        if (!this.loading) this.$emit('containerReady');
       }
     }
   }
@@ -1039,6 +1039,7 @@ export default class GameContainer extends Vue {
     this.engine = Matter.Engine.create();
     if (this.detectCollision)
       Matter.Events.on(this.engine, 'collisionStart', this.collisionStart);
+    Matter.Events.on(this.engine, 'afterUpdate', this.afterPhysicUpdate);
     this.$emit('initEngine', this.engine);
     if (this.useGravity) {
       this.engine.gravity = {
@@ -1296,6 +1297,10 @@ export default class GameContainer extends Vue {
   //#endregion matterjs
 
   //#region loop
+  afterPhysicUpdate(): void {
+    this.syncRenderView();
+  }
+
   syncRenderView(): void {
     for (const gameObject of this.gameObjects) {
       if (gameObject.moveWithBackground && !this.backgroundSprite) continue;
