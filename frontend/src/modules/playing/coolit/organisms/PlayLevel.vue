@@ -41,6 +41,7 @@
             :is-static="true"
             :affectedByForce="false"
             :source="obstacle"
+            @collision="obstacleCollision"
           >
             <CustomSprite
               :colorOverlay="calculateTintColor(obstacle)"
@@ -1048,6 +1049,38 @@ export default class PlayLevel extends Vue {
     }
     if (Object.hasOwn(obstacleObject, 'filter') && hitObstacle) {
       this.updateRegionFilter(obstacleObject as CollisionRegion);
+    }
+  }
+
+  obstacleCollision(
+    obstacleObject: GameObject,
+    moleculeObject: GameObject | CollisionRegion
+  ): void {
+    if (!moleculeObject) return;
+    const obstacleType =
+      gameConfig.obstacles[this.levelType].categories[
+        obstacleObject.source.type
+      ].settings.type;
+    if (
+      obstacleType === ObstacleType.carbonSink &&
+      moleculeObject.source.absorbedByTree
+    ) {
+      const index = this.moleculeList.findIndex(
+        (item) => item.id === moleculeObject.source.id
+      );
+      if (index > -1) {
+        moleculeObject.source.type = 'oxygen';
+        const oxygenConfig = gameConfig.molecules.oxygen;
+        moleculeObject.source.globalWarmingFactor =
+          oxygenConfig.globalWarmingFactor;
+        moleculeObject.source.size = oxygenConfig.size;
+        moleculeObject.source.controllable = oxygenConfig.controllable;
+        moleculeObject.source.absorbedByTree = oxygenConfig.absorbedByTree;
+        moleculeObject.source.color = oxygenConfig.color;
+        moleculeObject.source.heatRationCoefficient =
+          oxygenConfig.globalWarmingFactor;
+        //this.moleculeList.splice(index, 1);
+      }
     }
   }
 
