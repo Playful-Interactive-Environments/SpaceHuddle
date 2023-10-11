@@ -133,6 +133,36 @@ export function generateLinearGradiantTexture(
   });
 }
 
+export function generateStackedTexture(
+  textures: PIXI.Texture[],
+  renderer: PIXI.Renderer
+): PIXI.Texture {
+  const graphic = new PIXI.Graphics();
+  const width = textures[0].width,
+    height = textures[0].height;
+  for (const texture of textures) {
+    const matrix: PIXI.Matrix = new PIXI.Matrix();
+    matrix.translate(-texture.width / 2, -texture.height / 2);
+    graphic.beginTextureFill({
+      texture: texture,
+      alpha: 1,
+      matrix: matrix,
+    });
+    graphic.drawRect(
+      -texture.width / 2,
+      -texture.height / 2,
+      texture.width,
+      texture.height
+    );
+    graphic.endFill();
+  }
+  const bounds = new PIXI.Rectangle(-width / 2, -height / 2, width, height);
+  return renderer.generateTexture(graphic, {
+    region: bounds,
+    scaleMode: PIXI.SCALE_MODES.LINEAR,
+  });
+}
+
 export function getSpriteAspect(
   spritesheet: PIXI.Spritesheet,
   spriteName: string
@@ -181,11 +211,11 @@ export async function loadTexture(
   if (PIXI.Cache.has(url)) return PIXI.Cache.get(url);
   else {
     textureState[url] = TextureState.loading;
-    eventBus.emit(EventType.TEXTURES_LOADING_START);
+    if (eventBus) eventBus.emit(EventType.TEXTURES_LOADING_START);
     const texture = await PIXI.Assets.load(url);
     textureState[url] = TextureState.loaded;
     if (isLoadingFinished()) {
-      eventBus.emit(EventType.ALL_TEXTURES_LOADED);
+      if (eventBus) eventBus.emit(EventType.ALL_TEXTURES_LOADED);
     }
     return texture;
   }

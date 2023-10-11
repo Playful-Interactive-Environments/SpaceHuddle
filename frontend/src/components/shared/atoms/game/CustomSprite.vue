@@ -9,6 +9,7 @@
     :x="displayX"
     :y="displayY"
     :filters="objectFilters"
+    :alpha="alpha"
   >
     <slot></slot>
   </sprite>
@@ -38,6 +39,7 @@ export default class CustomSprite extends Vue implements CustomObject {
   @Prop({ default: 1 }) aspectRation!: number;
   @Prop({ default: 0 }) anchor!: number | [number, number];
   @Prop({ default: '#ffffff' }) tint!: string;
+  @Prop({ default: 1 }) alpha!: number;
   @Prop({ default: [0, 0, 0, 0] }) colorOverlay!: [
     number,
     number,

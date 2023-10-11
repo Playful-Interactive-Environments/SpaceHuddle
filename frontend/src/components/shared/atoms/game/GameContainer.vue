@@ -163,12 +163,6 @@
         @touchstart="beginPan([0, -1])"
       />
     </div>
-    <div v-if="ready">
-      <div v-for="region of regionBodyList" :key="region.body.id">
-        {{ region.body.position.x }} /
-        {{ region.position[0] + backgroundPositionOffset[0] }}
-      </div>
-    </div>
   </div>
 </template>
 

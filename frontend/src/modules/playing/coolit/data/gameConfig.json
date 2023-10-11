@@ -145,7 +145,7 @@
     "waterVapor": {
       "type": "greenhouseGas",
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
-      "color": "#63c3cb",
+      "color": "#188c96",
       "globalWarmingFactor": 1,
       "size": 0.25,
       "ration": 0.4,

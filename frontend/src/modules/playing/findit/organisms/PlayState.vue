@@ -58,6 +58,7 @@
             <custom-particle-container
               v-if="placeable.escalationStepIndex > 0"
               :config="getConfigForPlaceable(placeable)"
+              :parentEventBus="eventBus"
             />
           </GameObject>
           <GameObject

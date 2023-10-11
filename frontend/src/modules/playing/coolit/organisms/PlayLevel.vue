@@ -95,6 +95,17 @@
               />
             </template>
           </GameObject>
+          <custom-particle-container
+            v-for="moleculeName of Object.keys(backgroundParticle)"
+            :key="moleculeName"
+            :deep-clone-config="false"
+            :default-texture="moleculeTextures[moleculeName]"
+            :parentEventBus="eventBus"
+            :config="backgroundParticle[moleculeName]"
+            :x="(-panOffset[0] * (containerTextureSize[0] - gameWidth)) / 100"
+            :y="(-panOffset[1] * (containerTextureSize[1] - gameHeight)) / 100"
+            :auto-update="false"
+          />
           <GameObject
             v-for="molecule of moleculeList"
             :key="molecule.id"
@@ -107,28 +118,15 @@
             :fix-size="molecule.size * moleculeSize * 2"
             :source="molecule"
           >
-            <sprite
-              v-if="circleGradiant"
-              :texture="circleGradiant"
-              :width="molecule.size * moleculeSize * 2"
-              :height="molecule.size * moleculeSize * 2"
+            <CustomSprite
+              v-if="getMoleculeTexture(molecule.type)"
+              :texture="getMoleculeTexture(molecule.type)"
               :anchor="0.5"
               :tint="molecule.color"
-            >
-              <CustomSprite
-                v-if="moleculeStylesheets"
-                :texture="getMoleculeTexture(molecule.type)"
-                :anchor="0.5"
-                :tint="molecule.color"
-                :width="molecule.size * moleculeSize * 15"
-                :height="
-                  getMoleculeAspect(molecule.type) *
-                  molecule.size *
-                  moleculeSize *
-                  15
-                "
-              />
-            </sprite>
+              :width="molecule.size * moleculeSize * 2"
+              :height="molecule.size * moleculeSize * 2"
+              :alpha="molecule.controllable ? 1 : 0.4"
+            />
           </GameObject>
         </container>
       </template>
@@ -158,6 +156,8 @@ import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
 import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/coolit/data/gameConfig.json';
+import backgroundParticle from '@/modules/playing/coolit/data/backgroundParticle.json';
+import * as PIXIParticles from '@pixi/particle-emitter';
 import { Idea } from '@/types/api/Idea';
 import * as configParameter from '@/utils/game/configParameter';
 import { v4 as uuidv4 } from 'uuid';
@@ -167,6 +167,7 @@ import { toRadians } from '@/utils/angle';
 import Matter from 'matter-js';
 import { ShockwaveFilter } from 'pixi-filters';
 import * as matterUtil from '@/utils/matter';
+import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
@@ -296,6 +297,7 @@ function convertToCoolItObstacle(
     GameObject,
     GameContainer,
     CustomSprite,
+    CustomParticleContainer,
   },
   emits: ['finished'],
 })
@@ -309,6 +311,7 @@ export default class PlayLevel extends Vue {
   gameHeight = 0;
   panOffsetMin = [0, 0];
   panOffsetMax = [100, 100];
+  panOffset = [0, 0];
   tutorialSteps: Tutorial[] = [];
   levelType = '';
   gameConfig = gameConfig;
@@ -324,9 +327,11 @@ export default class PlayLevel extends Vue {
   rayList: Ray[] = [];
   rayPath: { [key: string]: { x: number; y: number }[][] } = {};
   circleGradiant: PIXI.Texture | null = null;
+  moleculeTextures: { [key: string]: PIXI.Texture } = {};
   rayParticleSize = 10;
   collisionAnimation: any[] = [];
   moleculeList: MoleculeData[] = [];
+  backgroundParticle: { [key: string]: PIXIParticles.EmitterConfigV3 } = {};
 
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
@@ -462,6 +467,8 @@ export default class PlayLevel extends Vue {
   }
 
   getMoleculeTexture(objectName: string): PIXI.Texture | string {
+    if (this.moleculeTextures[objectName])
+      return this.moleculeTextures[objectName];
     if (this.moleculeStylesheets)
       return this.moleculeStylesheets.textures[objectName];
     return '';
@@ -507,7 +514,10 @@ export default class PlayLevel extends Vue {
       });
     pixiUtil
       .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
-      .then((sheet) => (this.moleculeStylesheets = sheet));
+      .then((sheet) => {
+        this.moleculeStylesheets = sheet;
+        this.generateMoleculeTextures();
+      });
   }
 
   containerTextureSize: [number, number] = [100, 100];
@@ -521,24 +531,26 @@ export default class PlayLevel extends Vue {
 
       for (const moleculeConfigName of Object.keys(gameConfig.molecules)) {
         const moleculeConfig = gameConfig.molecules[moleculeConfigName];
-        const moduleCountFactor = moleculeConfig.controllable ? 100 : 1;
-        const moleculeCount = moleculeConfig.ration * moduleCountFactor;
-        for (let i = 0; i < moleculeCount; i++) {
-          this.moleculeList.push({
-            id: uuidv4(),
-            type: moleculeConfigName,
-            position: [Math.random() * 100, Math.random() * 50],
-            globalWarmingFactor: moleculeConfig.globalWarmingFactor,
-            size: moleculeConfig.size,
-            controllable: moleculeConfig.controllable,
-            absorbedByTree: moleculeConfig.absorbedByTree,
-            color: moleculeConfig.color,
-            maxHitCount: 1000,
-            hitCount: 0,
-            hitAnimation: [],
-            heatRationCoefficient: moleculeConfig.globalWarmingFactor,
-            reflectionProbability: 1,
-          });
+        if (moleculeConfig.controllable) {
+          const moduleCountFactor = moleculeConfig.controllable ? 100 : 1;
+          const moleculeCount = moleculeConfig.ration * moduleCountFactor;
+          for (let i = 0; i < moleculeCount; i++) {
+            this.moleculeList.push({
+              id: uuidv4(),
+              type: moleculeConfigName,
+              position: [Math.random() * 100, Math.random() * 50],
+              globalWarmingFactor: moleculeConfig.globalWarmingFactor,
+              size: moleculeConfig.size,
+              controllable: moleculeConfig.controllable,
+              absorbedByTree: moleculeConfig.absorbedByTree,
+              color: moleculeConfig.color,
+              maxHitCount: 1000,
+              hitCount: 0,
+              hitAnimation: [],
+              heatRationCoefficient: moleculeConfig.globalWarmingFactor,
+              reflectionProbability: 1,
+            });
+          }
         }
       }
     }
@@ -710,6 +722,63 @@ export default class PlayLevel extends Vue {
       256,
       this.renderer
     );
+    this.generateMoleculeTextures();
+  }
+
+  async generateMoleculeTextures(): Promise<void> {
+    if (
+      !this.renderer ||
+      !this.circleGradiant ||
+      !this.moleculeStylesheets ||
+      Object.keys(this.moleculeTextures).length > 0
+    )
+      return;
+    for (const moleculeName of Object.keys(gameConfig.molecules)) {
+      if (this.moleculeStylesheets.textures[moleculeName]) {
+        this.moleculeTextures[moleculeName] = pixiUtil.generateStackedTexture(
+          [
+            this.circleGradiant,
+            this.moleculeStylesheets.textures[moleculeName],
+          ],
+          this.renderer
+        );
+        if (!gameConfig.molecules[moleculeName].controllable) {
+          const moleculeConfig = gameConfig.molecules[moleculeName];
+          const particleSettings = JSON.parse(
+            JSON.stringify(backgroundParticle)
+          );
+          particleSettings.maxParticles =
+            gameConfig.molecules[moleculeName].ration * 100;
+          particleSettings.particlesPerWave = particleSettings.maxParticles;
+          particleSettings.behaviors.push({
+            type: 'colorStatic',
+            config: {
+              color: moleculeConfig.color.slice(-6),
+            },
+          });
+          particleSettings.behaviors.push({
+            type: 'scaleStatic',
+            config: {
+              min: moleculeConfig.size * 0.15,
+              max: moleculeConfig.size * 0.15,
+            },
+          });
+          particleSettings.behaviors.push({
+            type: 'spawnShape',
+            config: {
+              type: 'rect',
+              data: {
+                x: 0,
+                y: 0,
+                w: this.containerTextureSize[0],
+                h: (this.containerTextureSize[1] / 3) * 2,
+              },
+            },
+          });
+          this.backgroundParticle[moleculeName] = particleSettings;
+        }
+      }
+    }
   }
 
   readonly rayPoints = 80;
@@ -1023,6 +1092,7 @@ export default class PlayLevel extends Vue {
   ): void {
     this.panOffsetMin = min;
     this.panOffsetMax = max;
+    this.panOffset = value;
   }
 }
 </script>

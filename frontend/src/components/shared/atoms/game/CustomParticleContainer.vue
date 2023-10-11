@@ -14,6 +14,8 @@ import * as PIXI from 'pixi.js';
 import * as PIXIParticles from '@pixi/particle-emitter';
 import { until, delay } from '@/utils/wait';
 import * as pixiUtil from '@/utils/pixi';
+import { Emitter } from 'mitt';
+import { EventType } from '@/types/enum/EventType';
 
 @Options({
   components: {},
@@ -24,8 +26,12 @@ export default class CustomParticleContainer extends Vue {
   @Prop({ default: 0 }) x!: number;
   @Prop({ default: 0 }) y!: number;
   @Prop({ default: false }) disabled!: boolean;
+  @Prop({ default: true }) deepCloneConfig!: boolean;
+  @Prop({ default: true }) autoUpdate!: boolean;
   @Prop({ default: null }) spriteSheetUrl!: string | null;
+  @Prop({ default: null }) defaultTexture!: PIXI.Texture | null;
   @Prop({ default: null }) config!: PIXIParticles.EmitterConfigV3 | null;
+  @Prop() parentEventBus!: Emitter<Record<EventType, unknown>> | unknown;
   emitter!: PIXIParticles.Emitter;
   container!: PIXI.ParticleContainer;
   particleContainerActive = true;
@@ -37,13 +43,17 @@ export default class CustomParticleContainer extends Vue {
     this.destroyEmitter(this.emitter, true, true);
   }
 
+  get containerEventBus(): Emitter<Record<EventType, unknown>> {
+    return this.eventBus ?? this.parentEventBus;
+  }
+
   @Watch('spriteSheetUrl', { immediate: true })
   async onSpriteSheetChanged(spriteSheetUrl: string): Promise<void> {
     this.isSpriteSheetLoaded = false;
     if (spriteSheetUrl) {
       this.spriteSheet = await pixiUtil.loadTexture(
         spriteSheetUrl,
-        this.eventBus
+        this.containerEventBus
       );
       this.isSpriteSheetLoaded = true;
     }
@@ -53,29 +63,41 @@ export default class CustomParticleContainer extends Vue {
   async onConfigChanged(): Promise<void> {
     this.destroyEmitter(this.emitter, false);
     if (!this.config) return;
-    const config = JSON.parse(JSON.stringify(this.config));
+    const config = this.deepCloneConfig
+      ? structuredClone(this.config) // JSON.parse(JSON.stringify(this.config))
+      : { ...this.config };
     const textureConfig = config.behaviors.find(
-      (item) => item.type === 'textureRandom' || item.type === 'animatedSingle'
+      (item) =>
+        item.type === 'textureRandom' ||
+        item.type === 'textureSingle' ||
+        item.type === 'animatedSingle'
     );
     if (textureConfig) {
       const isAnimation = textureConfig.type === 'animatedSingle';
-      const textureList = !isAnimation
-        ? textureConfig.config.textures
-        : textureConfig.config.anim.textures;
+      const isSingleTexture = textureConfig.type === 'textureSingle';
+      const textureList = isAnimation
+        ? textureConfig.config.anim.textures
+        : isSingleTexture
+        ? [textureConfig.config.texture]
+        : textureConfig.config.textures;
       for (let i = 0; i < textureList.length; i++) {
         const url = !isAnimation ? textureList[i] : textureList[i].texture;
         if (typeof url === 'string') {
           if (!this.spriteSheetUrl && !config.spriteSheet) {
             if (!isAnimation)
-              textureList[i] = await pixiUtil.loadTexture(url, this.eventBus);
+              textureList[i] = await pixiUtil.loadTexture(
+                url,
+                this.containerEventBus
+              );
             else
               textureList[i].texture = await pixiUtil.loadTexture(
                 url,
-                this.eventBus
+                this.containerEventBus
               );
           } else {
-            if (this.spriteSheetUrl) await until(this.isSpriteSheetLoaded);
-            else if (config.spriteSheet) {
+            if (this.spriteSheetUrl)
+              await until(() => this.isSpriteSheetLoaded);
+            else if (config.spriteSheet && !this.spriteSheet) {
               await this.onSpriteSheetChanged(config.spriteSheet);
               this.isSpriteSheetLoaded = true;
             }
@@ -84,9 +106,19 @@ export default class CustomParticleContainer extends Vue {
           }
         }
       }
+      if (isSingleTexture) textureConfig.config.texture = textureList[0];
+    } else if (this.defaultTexture) {
+      await delay(100);
+      config.behaviors.push({
+        type: 'textureSingle',
+        config: {
+          texture: { ...this.defaultTexture },
+        },
+      });
     }
     this.emitter = new PIXIParticles.Emitter(this.container, config);
-    this.emitter.autoUpdate = true;
+    this.emitter.autoUpdate = this.autoUpdate;
+    if (!this.autoUpdate) this.emitter.emitNow();
   }
 
   renderContainer(container: PIXI.ParticleContainer): void {
