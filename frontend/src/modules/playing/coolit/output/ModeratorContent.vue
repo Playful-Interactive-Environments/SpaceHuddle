@@ -13,6 +13,8 @@
         :can-rotate="false"
         :can-export="true"
         :collider-delta="0"
+        :can-change-saturation="true"
+        :can-change-layer="true"
       ></LevelBuilder>
     </div>
     <el-container>

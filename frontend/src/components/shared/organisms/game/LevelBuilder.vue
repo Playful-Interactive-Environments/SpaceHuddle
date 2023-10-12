@@ -55,6 +55,7 @@
                   ? 0xff0000
                   : null
               "
+              :saturation="placeable.saturation"
             >
             </CustomSprite>
           </GameObject>
@@ -101,6 +102,20 @@
         @click="rotateSelectedObject(10)"
       >
         <font-awesome-icon icon="rotate-right" />
+      </div>
+      <div
+        v-if="selectedObject && showOptions && canChangeSaturation"
+        @click="changeSaturation(0.1)"
+      >
+        <font-awesome-icon icon="circle-half-stroke" />
+        <font-awesome-icon icon="plus" class="iconInfo" />
+      </div>
+      <div
+        v-if="selectedObject && showOptions && canChangeSaturation"
+        @click="changeSaturation(-0.1)"
+      >
+        <font-awesome-icon icon="circle-half-stroke" />
+        <font-awesome-icon icon="minus" class="iconInfo" />
       </div>
       <!--<div v-if="selectedObject && showOptions" @click="showToolbox = true">
         <font-awesome-icon icon="screwdriver-wrench" />
@@ -153,6 +168,29 @@
       >
         <font-awesome-icon icon="paste" />
       </div>
+    </div>
+    <div
+      v-if="canChangeLayer"
+      class="overlay-layers"
+      :style="{
+        'max-width': 'calc(100% / 2)',
+        'max-height': 'calc(100% - 2rem)',
+      }"
+    >
+      <div class="minimize" @click="showLayers = !showLayers">...</div>
+      <el-scrollbar v-if="showLayers" height="150px">
+        <draggable v-model="placedObjects" item-key="uuid">
+          <template v-slot:item="{ element }">
+            <div
+              :style="{
+                color: element.id === selectedObject?.id ? 'red' : 'white',
+              }"
+            >
+              {{ element.name }}
+            </div>
+          </template>
+        </draggable>
+      </el-scrollbar>
     </div>
     <DrawerBottomOverlay
       v-if="levelType"
@@ -235,6 +273,7 @@ import * as configParameter from '@/utils/game/configParameter';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 import { copyToClipboard, pasteFromClipboard } from '@/utils/date';
 import * as polygon from '@/utils/polygon';
+import draggable from 'vuedraggable';
 
 // The current state of the edit mode
 export interface BuildState {
@@ -266,6 +305,7 @@ export interface BuildStateResult {
     GameObject,
     GameContainer,
     DrawerBottomOverlay,
+    draggable,
   },
   emits: ['editFinished', 'update:levelType', 'approved'],
 })
@@ -279,6 +319,8 @@ export default class LevelBuilder extends Vue {
   @Prop({ default: null }) readonly level!: Idea | null;
   @Prop({ default: '100%' }) readonly height!: string;
   @Prop({ default: true }) readonly canRotate!: boolean;
+  @Prop({ default: false }) readonly canChangeSaturation!: boolean;
+  @Prop({ default: false }) readonly canChangeLayer!: boolean;
   @Prop({ default: false }) readonly canApprove!: boolean;
   @Prop({ default: false }) readonly canExport!: boolean;
   @Prop() readonly gameConfig!: placeable.PlaceableConfig;
@@ -289,6 +331,7 @@ export default class LevelBuilder extends Vue {
   gameWidth = 0;
   gameHeight = 0;
   showOptions = false;
+  showLayers = false;
 
   placedObjects: placeable.Placeable[] = [];
   placementState: { [key: string]: BuildState } = {};
@@ -712,7 +755,7 @@ export default class LevelBuilder extends Vue {
     ];
     const typeNameList = this.regionGameConfigTypes;
     if (typeNameList.length > 0) {
-      this.activeObjectType = typeNameList[0];
+      //this.activeObjectType = typeNameList[0];
       this.showToolbox = true;
     }
   }
@@ -762,6 +805,7 @@ export default class LevelBuilder extends Vue {
           rotation: 0,
           scale: 1,
           placingRegions: configParameter.placingRegions,
+          saturation: 1,
         };
         this.placedObjects.push(placeable);
       }
@@ -924,6 +968,15 @@ export default class LevelBuilder extends Vue {
     }
   }
 
+  changeSaturation(value: number): void {
+    if (this.selectedObject) {
+      const newValue = this.selectedObject.source.saturation + value;
+      if (newValue > 0.3 && newValue <= 1) {
+        this.selectedObject.source.saturation = newValue;
+      }
+    }
+  }
+
   objectTypeClicked(objectType: string): void {
     this.activeObjectType = objectType;
   }
@@ -1067,6 +1120,18 @@ export default class LevelBuilder extends Vue {
   }
 }
 
+.overlay-layers {
+  z-index: 100;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: var(--font-size-default);
+  color: white;
+  background-color: var(--color-primary);
+  border-radius: 5px;
+  padding: 0.5rem;
+}
+
 .placeable {
   border-radius: var(--border-radius);
 }
@@ -1086,5 +1151,14 @@ export default class LevelBuilder extends Vue {
 
 .active {
   background-color: var(--color-informing);
+}
+
+.iconInfo {
+  position: absolute;
+  font-size: var(--font-size-xxsmall);
+}
+
+.minimize {
+  float: right;
 }
 </style>

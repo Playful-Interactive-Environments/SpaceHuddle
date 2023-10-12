@@ -14,6 +14,7 @@ export interface PlaceableBase {
   position: [number, number];
   rotation: number;
   scale: number;
+  saturation: number;
 }
 
 export interface Placeable extends PlaceableBase {
@@ -73,6 +74,7 @@ export function convertToBase(placeable: Placeable): PlaceableBase {
     position: [...placeable.position],
     rotation: placeable.rotation,
     scale: placeable.scale,
+    saturation: placeable.saturation,
   };
 }
 
@@ -105,6 +107,7 @@ export function convertToDetailData(
       rotation: value.rotation,
       scale: value.scale,
       placingRegions: undefined,
+      saturation: 1,
     };
   }
   return {
@@ -121,5 +124,6 @@ export function convertToDetailData(
     rotation: value.rotation,
     scale: value.scale,
     placingRegions: configParameter.placingRegions,
+    saturation: value.saturation ?? 1,
   };
 }

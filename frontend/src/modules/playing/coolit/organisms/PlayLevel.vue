@@ -51,6 +51,7 @@
               :aspect-ration="getObjectAspect(obstacle.type, obstacle.name)"
               :object-space="ObjectSpace.RelativeToBackground"
               :filters="obstacle.hitAnimation"
+              :saturation="obstacle.saturation"
             >
             </CustomSprite>
           </GameObject>
@@ -279,6 +280,7 @@ function convertToCoolItObstacle(
     hitAnimation: [],
     heatRationCoefficient: configParameter.heatRationCoefficient ?? 1,
     reflectionProbability: 1,
+    saturation: result.saturation,
   };
 }
 

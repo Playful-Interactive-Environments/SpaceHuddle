@@ -23,7 +23,12 @@ import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import * as PIXI from 'pixi.js';
 import { CustomObject } from '@/types/game/CustomObject';
 import { EventType } from '@/types/enum/EventType';
-import { OutlineFilter, ColorOverlayFilter } from 'pixi-filters';
+import {
+  OutlineFilter,
+  ColorOverlayFilter,
+  AdjustmentFilter,
+  HslAdjustmentFilter,
+} from 'pixi-filters';
 
 @Options({
   components: {},
@@ -47,6 +52,7 @@ export default class CustomSprite extends Vue implements CustomObject {
     number
   ];
   @Prop({ default: null }) outline!: number | null;
+  @Prop({ default: 1 }) saturation!: number;
   @Prop() texture!: string | PIXI.Texture;
   @Prop({ default: [] }) filters!: any[];
   gameContainer!: GameContainer;
@@ -58,9 +64,11 @@ export default class CustomSprite extends Vue implements CustomObject {
   displayY = 0;
   outlineFilter: OutlineFilter | null = null;
   colorOverlayFilter: ColorOverlayFilter | null = null;
+  saturationFilter: PIXI.Filter[] = [];
 
   get objectFilters(): any[] {
     const filters: any[] = [...this.filters];
+    if (this.saturationFilter) filters.push(...this.saturationFilter);
     if (this.outlineFilter) filters.push(this.outlineFilter);
     if (this.colorOverlayFilter) filters.push(this.colorOverlayFilter);
     return filters;
@@ -148,6 +156,27 @@ export default class CustomSprite extends Vue implements CustomObject {
         this.colorOverlay[3]
       );
     } else this.colorOverlayFilter = null;
+  }
+
+  @Watch('saturation', { immediate: true })
+  onSaturationChanged(): void {
+    if (this.saturation !== 1) {
+      this.saturationFilter = [
+        new AdjustmentFilter({
+          saturation: this.saturation,
+          contrast: this.saturation,
+          brightness: 2 - this.saturation,
+        }),
+        new HslAdjustmentFilter({
+          saturation: this.saturation - 1,
+          colorize: true,
+          hue: 180,
+          alpha: 1 - this.saturation,
+        }),
+        //new ColorOverlayFilter(0x9fe4eb, 1 - this.saturation),
+        //new PIXI.BlurFilter(1 - this.saturation),
+      ];
+    } else this.saturationFilter = [];
   }
 
   mounted(): void {

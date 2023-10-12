@@ -53,6 +53,7 @@
               :width="placeable.width"
               :aspect-ration="getObjectAspect(placeable.type, placeable.name)"
               :object-space="ObjectSpace.RelativeToBackground"
+              :saturation="placeable.saturation"
             >
             </CustomSprite>
             <custom-particle-container
@@ -219,6 +220,7 @@ function convertToFindItPlaceable(
     escalationSteps: escalationSteps,
     escalationStepIndex: 0,
     placingRegions: result.placingRegions,
+    saturation: result.saturation ?? 1,
   };
 }
 
