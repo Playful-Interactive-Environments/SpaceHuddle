@@ -16,7 +16,7 @@
         {
             "type": "alphaStatic",
             "config": {
-                "alpha": 0.2
+                "alpha": 0.1
             }
         },
         {

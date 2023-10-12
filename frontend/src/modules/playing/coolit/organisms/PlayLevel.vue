@@ -765,6 +765,11 @@ export default class PlayLevel extends Vue {
               max: moleculeConfig.size * 0.15,
             },
           });
+          if (
+            this.containerTextureSize[0] === 100 ||
+            this.containerTextureSize[0] === this.gameWidth
+          )
+            await delay(100);
           particleSettings.behaviors.push({
             type: 'spawnShape',
             config: {

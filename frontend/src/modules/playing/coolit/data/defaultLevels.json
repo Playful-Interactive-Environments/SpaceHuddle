@@ -6,8 +6,8 @@
         "type": "building",
         "name": "building01",
         "position": [
-          5.005810445533071,
-          54.56963465394541
+          3.4077493684434589,
+          87.80627120621554
         ],
         "rotation": 0,
         "scale": 1
@@ -16,8 +16,148 @@
         "type": "building",
         "name": "building02",
         "position": [
-          14.286499237808274,
-          59.13100300908262
+          11.816653239016937,
+          80.81227630123907
+        ],
+        "rotation": 0,
+        "scale": 0.8
+      },
+      {
+        "type": "building",
+        "name": "building03",
+        "position": [
+          15.170247745058335,
+          82.05361883777639
+        ],
+        "rotation": 0,
+        "scale": 0.8
+      },
+      {
+        "type": "building",
+        "name": "building04",
+        "position": [
+          21.918097078666205,
+          89.99652683074214
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "building02",
+        "position": [
+          94.59906237795403,
+          81.26128703871356
+        ],
+        "rotation": 0,
+        "scale": 0.8
+      },
+      {
+        "type": "building",
+        "name": "building04",
+        "position": [
+          7.812132783900363,
+          90.3601498073848
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "glassBuilding01",
+        "position": [
+          36.04578241239247,
+          87.71618651151606
+        ],
+        "rotation": 0,
+        "scale": 0.8
+      },
+      {
+        "type": "building",
+        "name": "glassBuilding02",
+        "position": [
+          39.38881890568458,
+          90.25821139070122
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "glassBuilding03",
+        "position": [
+          50.43641383280658,
+          90.68379582536338
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "building01",
+        "position": [
+          26.236116671546058,
+          90.89475183465862
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "industry02",
+        "position": [
+          66.06104651162791,
+          88.98717414501101
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "industry02",
+        "position": [
+          71.5071945651584,
+          88.96358079241309
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "industry03",
+        "position": [
+          61.772335606843999,
+          90.22272426093213
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "industry01",
+        "position": [
+          77.90642271974306,
+          80.08707729462086
+        ],
+        "rotation": 0,
+        "scale": 0.8
+      },
+      {
+        "type": "building",
+        "name": "industry01",
+        "position": [
+          84.81104651162791,
+          88.56347660685694
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "industry04",
+        "position": [
+          80.74093810258238,
+          90.25638935745035
         ],
         "rotation": 0,
         "scale": 1
@@ -26,58 +166,18 @@
         "type": "building",
         "name": "building03",
         "position": [
-          33.26480106515773,
-          57.27347113568827
+          98.47383720930233,
+          88.98717414501101
         ],
         "rotation": 0,
         "scale": 1
       },
       {
         "type": "building",
-        "name": "building04",
+        "name": "glassBuilding01",
         "position": [
-          44.59425107806235,
-          59.48890143435399
-        ],
-        "rotation": 0,
-        "scale": 1
-      },
-      {
-        "type": "building",
-        "name": "building05",
-        "position": [
-          60.8519447500997,
-          56.974569751886978
-        ],
-        "rotation": 0,
-        "scale": 1
-      },
-      {
-        "type": "building",
-        "name": "building06",
-        "position": [
-          68.89572067025437,
-          61.73085687564369
-        ],
-        "rotation": 0,
-        "scale": 1
-      },
-      {
-        "type": "building",
-        "name": "building07",
-        "position": [
-          89.23001834449494,
-          56.296198516300439
-        ],
-        "rotation": 0,
-        "scale": 1
-      },
-      {
-        "type": "building",
-        "name": "building08",
-        "position": [
-          24.214093342956269,
-          62.604312353096819
+          33.21233158232928,
+          90.47344867253412
         ],
         "rotation": 0,
         "scale": 1
@@ -86,8 +186,153 @@
         "type": "building",
         "name": "building02",
         "position": [
-          97.06998042757783,
-          59.60204170016114
+          92.0064531777302,
+          90.68093446609781
+        ],
+        "rotation": 0,
+        "scale": 1
+      }
+    ]
+  },
+  "wood": {
+    "type": "city",
+    "items": [
+      {
+        "type": "nature",
+        "name": "trees01",
+        "position": [
+          37.86390864278551,
+          87.71751041934098
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "nature",
+        "name": "trees01",
+        "position": [
+          18.24127906976744,
+          88.77532537593398
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "nature",
+        "name": "trees01",
+        "position": [
+          8.13953488372093,
+          88.77532537593398
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "nature",
+        "name": "trees01",
+        "position": [
+          59.81038027157247,
+          81.3597628498952
+        ],
+        "rotation": 0,
+        "scale": 0.8
+      },
+      {
+        "type": "nature",
+        "name": "trees01",
+        "position": [
+          57.48521898582835,
+          90.47158352136259
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "nature",
+        "name": "trees01",
+        "position": [
+          76.89095211711929,
+          79.24180242492622
+        ],
+        "rotation": 0,
+        "scale": 0.6000000000000001
+      },
+      {
+        "type": "building",
+        "name": "building02",
+        "position": [
+          33.79397598979487,
+          90.04767948607608
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "building02",
+        "position": [
+          23.25581395348837,
+          89.83668770918327
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "building03",
+        "position": [
+          64.82521475859432,
+          90.46828284053993
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "building",
+        "name": "building02",
+        "position": [
+          89.8248526402378,
+          82.41992511036512
+        ],
+        "rotation": 0,
+        "scale": 0.8
+      },
+      {
+        "type": "building",
+        "name": "building02",
+        "position": [
+          94.113382537726,
+          82.63564278663518
+        ],
+        "rotation": 0,
+        "scale": 0.8
+      },
+      {
+        "type": "nature",
+        "name": "trees01",
+        "position": [
+          92.73193760137709,
+          91.31638878441042
+        ],
+        "rotation": 0,
+        "scale": 1
+      },
+      {
+        "type": "nature",
+        "name": "trees01",
+        "position": [
+          73.25591884171399,
+          79.24423646747101
+        ],
+        "rotation": 0,
+        "scale": 0.6000000000000001
+      },
+      {
+        "type": "building",
+        "name": "building03",
+        "position": [
+          80.74175936465355,
+          90.25664372748837
         ],
         "rotation": 0,
         "scale": 1
@@ -96,8 +341,28 @@
         "type": "building",
         "name": "building04",
         "position": [
-          82.01270751329432,
-          59.85109565816104
+          49.92955700639271,
+          81.14576118606508
+        ],
+        "rotation": 0,
+        "scale": 0.6000000000000001
+      },
+      {
+        "type": "building",
+        "name": "building04",
+        "position": [
+          46.51234078946805,
+          81.14835649298175
+        ],
+        "rotation": 0,
+        "scale": 0.6000000000000001
+      },
+      {
+        "type": "nature",
+        "name": "trees01",
+        "position": [
+          43.38613238296694,
+          90.04799021761379
         ],
         "rotation": 0,
         "scale": 1
