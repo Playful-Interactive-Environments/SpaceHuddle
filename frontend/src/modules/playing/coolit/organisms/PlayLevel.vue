@@ -741,7 +741,8 @@ export default class PlayLevel extends Vue {
             this.circleGradiant,
             this.moleculeStylesheets.textures[moleculeName],
           ],
-          this.renderer
+          this.renderer,
+          60
         );
         if (!gameConfig.molecules[moleculeName].controllable) {
           const moleculeConfig = gameConfig.molecules[moleculeName];

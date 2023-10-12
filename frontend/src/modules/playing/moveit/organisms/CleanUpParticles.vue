@@ -173,26 +173,15 @@
             @outsideDrawingSpace="outsideDrawingSpace"
             @collision="updateTracking"
           >
-            <sprite
-              v-if="circleGradiant"
-              :texture="circleGradiant"
-              :width="particleRadius * 2"
-              :height="particleRadius * 2"
+            <CustomSprite
+              v-if="getParticleTexture(particle.name)"
+              :texture="getParticleTexture(particle.name)"
               :anchor="0.5"
               :tint="particle.color"
-            >
-              <CustomSprite
-                v-if="spritesheet"
-                :texture="spritesheet.textures[particle.name]"
-                :anchor="0.5"
-                :tint="particle.color"
-                :width="particleRadius * 1.5"
-                :height="
-                  (particleRadius * 1.5) / getParticleAspect(particle.name)
-                "
-                :outline="particle.highlighted ? 'red' : null"
-              />
-            </sprite>
+              :width="particleRadius * 2"
+              :height="particleRadius * 2"
+              :outline="particle.highlighted ? 'red' : null"
+            />
           </GameObject>
         </container>
       </template>
@@ -300,6 +289,7 @@ export default class CleanUpParticles extends Vue {
   renderer!: PIXI.Renderer;
   maxParticleCount = 50;
   spritesheet!: PIXI.Spritesheet;
+  particleTextures: { [key: string]: PIXI.Texture } = {};
   countdownTime = 5;
   containerAspectRation = 1.3;
   loading = false;
@@ -389,8 +379,34 @@ export default class CleanUpParticles extends Vue {
     return pixiUtil.getSpriteAspect(this.spritesheet, particleName);
   }
 
+  getParticleTexture(particleName: string): PIXI.Texture | string {
+    if (this.particleTextures[particleName])
+      return this.particleTextures[particleName];
+    if (this.spritesheet) return this.spritesheet.textures[particleName];
+    return '';
+  }
+
   convertFontSizeToScreenSize(fontSize: number): string {
     return constants.convertFontSizeToScreenSize(fontSize, this.gameWidth);
+  }
+
+  async generateParticleTextures(): Promise<void> {
+    if (
+      !this.renderer ||
+      !this.circleGradiant ||
+      !this.spritesheet ||
+      Object.keys(this.particleTextures).length > 0
+    )
+      return;
+    for (const particleName of Object.keys(gameConfig.particles)) {
+      if (this.spritesheet.textures[particleName]) {
+        this.particleTextures[particleName] = pixiUtil.generateStackedTexture(
+          [this.circleGradiant, this.spritesheet.textures[particleName]],
+          this.renderer,
+          60
+        );
+      }
+    }
   }
 
   async updateChart(): Promise<void> {
@@ -436,7 +452,10 @@ export default class CleanUpParticles extends Vue {
     }, 1500);
     pixiUtil
       .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
-      .then((sheet) => (this.spritesheet = sheet));
+      .then((sheet) => {
+        this.spritesheet = sheet;
+        this.generateParticleTextures();
+      });
     this.interval = setInterval(this.updatedLoop, this.intervalTime);
   }
 
@@ -484,6 +503,7 @@ export default class CleanUpParticles extends Vue {
       this.gameHeight - this.particleBorder,
       this.renderer
     );
+    this.generateParticleTextures();
   }
 
   containerSize: [number, number] = [

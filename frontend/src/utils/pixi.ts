@@ -135,24 +135,31 @@ export function generateLinearGradiantTexture(
 
 export function generateStackedTexture(
   textures: PIXI.Texture[],
-  renderer: PIXI.Renderer
+  renderer: PIXI.Renderer,
+  percentagePerSubLevel = 100
 ): PIXI.Texture {
   const graphic = new PIXI.Graphics();
   const width = textures[0].width,
     height = textures[0].height;
-  for (const texture of textures) {
+  for (let i = 0; i < textures.length; i++) {
+    const texture = textures[i];
     const matrix: PIXI.Matrix = new PIXI.Matrix();
-    matrix.translate(-texture.width / 2, -texture.height / 2);
+    const textureScale = width / texture.width;
+    const layerScale = textureScale * Math.pow(percentagePerSubLevel / 100, i);
+    const layerWidth = texture.width * layerScale;
+    const layerHeight = texture.height * layerScale;
+    matrix.scale(layerScale, layerScale);
+    matrix.translate(-layerWidth / 2, -layerHeight / 2);
     graphic.beginTextureFill({
       texture: texture,
       alpha: 1,
       matrix: matrix,
     });
     graphic.drawRect(
-      -texture.width / 2,
-      -texture.height / 2,
-      texture.width,
-      texture.height
+      -layerWidth / 2,
+      -layerHeight / 2,
+      layerWidth,
+      layerHeight
     );
     graphic.endFill();
   }

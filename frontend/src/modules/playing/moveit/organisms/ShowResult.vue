@@ -29,28 +29,16 @@
             type="circle"
             :x="getX(activeTabName, index - 1)"
             :y="getY(activeTabName, index - 1)"
+            :fix-size="particleRadius * 2"
           >
             <sprite
-              v-if="circleGradiant"
-              :texture="circleGradiant"
+              v-if="getParticleTexture(activeTabName, index - 1)"
+              :texture="getParticleTexture(activeTabName, index - 1)"
               :width="particleRadius * 2"
               :height="particleRadius * 2"
               :anchor="0.5"
               :tint="getParticleColor(activeTabName, index - 1)"
-            >
-              <sprite
-                :texture="getParticleTexture(activeTabName, index - 1)"
-                :anchor="0.5"
-                :tint="getParticleColor(activeTabName, index - 1)"
-                :width="particleRadius * 1.5"
-                :height="
-                  getParticleAspect(activeTabName, index - 1) *
-                  particleRadius *
-                  1.5
-                "
-              >
-              </sprite>
-            </sprite>
+            />
           </GameObject>
         </container>
       </template>
@@ -161,6 +149,7 @@ export default class ShowResult extends Vue {
   spritesheet!: PIXI.Spritesheet;
   maxParticleCount = 100;
   circleGradiant: PIXI.Texture | null = null;
+  particleTextures: { [key: string]: PIXI.Texture } = {};
 
   get particleStateSum(): ParticleState {
     let totalCount = 0;
@@ -279,6 +268,8 @@ export default class ShowResult extends Vue {
       this.spritesheet
     ) {
       const particleName = this.particleVisualisation[tabName][index].type;
+      if (this.particleTextures[particleName])
+        return this.particleTextures[particleName];
       return this.spritesheet.textures[particleName];
     }
     return null;
@@ -316,6 +307,25 @@ export default class ShowResult extends Vue {
     return 0;
   }
 
+  async generateParticleTextures(): Promise<void> {
+    if (
+      !this.renderer ||
+      !this.circleGradiant ||
+      !this.spritesheet ||
+      Object.keys(this.particleTextures).length > 0
+    )
+      return;
+    for (const particleName of Object.keys(gameConfig.particles)) {
+      if (this.spritesheet.textures[particleName]) {
+        this.particleTextures[particleName] = pixiUtil.generateStackedTexture(
+          [this.circleGradiant, this.spritesheet.textures[particleName]],
+          this.renderer,
+          60
+        );
+      }
+    }
+  }
+
   initRenderer(renderer: PIXI.Renderer): void {
     this.renderer = renderer;
     this.circleGradiant = pixiUtil.generateCircleGradiantTexture(
@@ -323,6 +333,7 @@ export default class ShowResult extends Vue {
       this.renderer
     );
     this.rendererReady = true;
+    this.generateParticleTextures();
   }
 
   async mounted(): Promise<void> {
@@ -335,7 +346,10 @@ export default class ShowResult extends Vue {
     }
     pixiUtil
       .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
-      .then((sheet) => (this.spritesheet = sheet));
+      .then((sheet) => {
+        this.spritesheet = sheet;
+        this.generateParticleTextures();
+      });
 
     if (
       this.trackingManager &&
