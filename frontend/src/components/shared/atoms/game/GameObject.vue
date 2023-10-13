@@ -93,6 +93,7 @@ export default class GameObject extends Vue {
   @Prop({ default: false }) highlighted!: boolean;
   @Prop({ default: false }) disabled!: boolean;
   @Prop({ default: 0 }) anchor!: number | [number, number];
+  @Prop({ default: 0 }) zIndex!: number;
   @Prop({ default: null }) mask!:
     | PIXI.Container<PIXI.DisplayObject>
     | PIXI.MaskData
@@ -326,6 +327,7 @@ export default class GameObject extends Vue {
       colliderHeight,
       this.options
     );
+    (this.body as any).zIndex = this.zIndex;
     this.updatePivot();
     this.onRotationChanged();
     this.onScaleChanged();
@@ -341,6 +343,7 @@ export default class GameObject extends Vue {
     const radius =
       (width > height ? width / 2 : height / 2) + this.colliderDelta;
     this.body = Matter.Bodies.circle(x, y, radius, this.options);
+    (this.body as any).zIndex = this.zIndex;
     this.updatePivot();
     this.onRotationChanged();
     this.onScaleChanged();
@@ -367,6 +370,7 @@ export default class GameObject extends Vue {
       height,
       shape
     );
+    (this.body as any).zIndex = this.zIndex;
     this.updatePivot();
     this.onRotationChanged();
     this.onScaleChanged();
