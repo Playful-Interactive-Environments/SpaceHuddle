@@ -10,15 +10,23 @@
         "heatRation": [
           {
             "region": [[0, 77], [100, 77], [100, 92], [0, 92]],
-            "coefficient": 0.5,
             "maxHitCount": 30,
-            "reflectionProbability": 0.25
+            "reflectionProbability": 0.25,
+            "heatRationCoefficient": 0.5,
+            "heatAbsorptionCoefficientLight": 0.5,
+            "heatAbsorptionCoefficientHeat": 0.5,
+            "heatRadiationCoefficient": 0.5,
+            "initialTemperature": 15
           },
           {
             "region": [[0, 92], [100, 92], [100, 100], [0, 100]],
-            "coefficient": 2.5,
             "maxHitCount": 10,
-            "reflectionProbability": 1
+            "reflectionProbability": 1,
+            "heatRationCoefficient": 2.5,
+            "heatAbsorptionCoefficientLight": 2.5,
+            "heatAbsorptionCoefficientHeat": 2.5,
+            "heatRadiationCoefficient": 2.5,
+            "initialTemperature": 15
           }
         ]
       },
@@ -35,6 +43,10 @@
           "items": {
             "building01": {
               "heatRationCoefficient": 2,
+              "heatAbsorptionCoefficientLight": 2,
+              "heatAbsorptionCoefficientHeat": 2,
+              "heatRadiationCoefficient": 2,
+              "initialTemperature": 15,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -43,6 +55,10 @@
             },
             "building02": {
               "heatRationCoefficient": 2,
+              "heatAbsorptionCoefficientLight": 2,
+              "heatAbsorptionCoefficientHeat": 2,
+              "heatRadiationCoefficient": 2,
+              "initialTemperature": 15,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -52,6 +68,10 @@
             },
             "building03": {
               "heatRationCoefficient": 1.5,
+              "heatAbsorptionCoefficientLight": 1.5,
+              "heatAbsorptionCoefficientHeat": 1.5,
+              "heatRadiationCoefficient": 1.5,
+              "initialTemperature": 15,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -60,6 +80,10 @@
             },
             "building04": {
               "heatRationCoefficient": 2,
+              "heatAbsorptionCoefficientLight": 2,
+              "heatAbsorptionCoefficientHeat": 2,
+              "heatRadiationCoefficient": 2,
+              "initialTemperature": 15,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
@@ -67,6 +91,10 @@
             },
             "glassBuilding01": {
               "heatRationCoefficient": 2.5,
+              "heatAbsorptionCoefficientLight": 2.5,
+              "heatAbsorptionCoefficientHeat": 2.5,
+              "heatRadiationCoefficient": 2.5,
+              "initialTemperature": 15,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -75,6 +103,10 @@
             },
             "glassBuilding02": {
               "heatRationCoefficient": 3,
+              "heatAbsorptionCoefficientLight": 3,
+              "heatAbsorptionCoefficientHeat": 3,
+              "heatRadiationCoefficient": 3,
+              "initialTemperature": 15,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
@@ -82,6 +114,10 @@
             },
             "glassBuilding03": {
               "heatRationCoefficient": 3,
+              "heatAbsorptionCoefficientLight": 3,
+              "heatAbsorptionCoefficientHeat": 3,
+              "heatRadiationCoefficient": 3,
+              "initialTemperature": 15,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
@@ -89,6 +125,10 @@
             },
             "industry01": {
               "heatRationCoefficient": 2,
+              "heatAbsorptionCoefficientLight": 2,
+              "heatAbsorptionCoefficientHeat": 2,
+              "heatRadiationCoefficient": 2,
+              "initialTemperature": 15,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
@@ -96,6 +136,10 @@
             },
             "industry02": {
               "heatRationCoefficient": 2,
+              "heatAbsorptionCoefficientLight": 2,
+              "heatAbsorptionCoefficientHeat": 2,
+              "heatRadiationCoefficient": 2,
+              "initialTemperature": 15,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
@@ -103,6 +147,10 @@
             },
             "industry03": {
               "heatRationCoefficient": 2,
+              "heatAbsorptionCoefficientLight": 2,
+              "heatAbsorptionCoefficientHeat": 2,
+              "heatRadiationCoefficient": 2,
+              "initialTemperature": 15,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -111,6 +159,10 @@
             },
             "industry04": {
               "heatRationCoefficient": 2,
+              "heatAbsorptionCoefficientLight": 2,
+              "heatAbsorptionCoefficientHeat": 2,
+              "heatRadiationCoefficient": 2,
+              "initialTemperature": 15,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
@@ -130,6 +182,10 @@
           "items": {
             "trees01": {
               "heatRationCoefficient": 0.5,
+              "heatAbsorptionCoefficientLight": 0.5,
+              "heatAbsorptionCoefficientHeat": 0.5,
+              "heatRadiationCoefficient": 0.5,
+              "initialTemperature": 15,
               "maxCount": 10,
               "width": 7,
               "shape": "polygon",

@@ -52,6 +52,7 @@ export default class CustomSprite extends Vue implements CustomObject {
     number
   ];
   @Prop({ default: null }) outline!: number | null;
+  @Prop({ default: 2 }) outlineWidth!: number;
   @Prop({ default: 1 }) saturation!: number;
   @Prop() texture!: string | PIXI.Texture;
   @Prop({ default: [] }) filters!: any[];
@@ -213,7 +214,8 @@ export default class CustomSprite extends Vue implements CustomObject {
 
   @Watch('outline', { immediate: true })
   onOutlineChanged(): void {
-    if (this.outline) this.outlineFilter = new OutlineFilter(2, this.outline);
+    if (this.outline)
+      this.outlineFilter = new OutlineFilter(this.outlineWidth, this.outline);
     else this.outlineFilter = null;
   }
 

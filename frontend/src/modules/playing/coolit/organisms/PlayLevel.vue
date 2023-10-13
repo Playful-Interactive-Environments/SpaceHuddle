@@ -52,6 +52,10 @@
               :object-space="ObjectSpace.RelativeToBackground"
               :filters="obstacle.hitAnimation"
               :saturation="obstacle.saturation"
+              :outline="getTemperatureColor(obstacle.temperature).code"
+              :outline-width="
+                getTemperatureColor(obstacle.temperature).thickness
+              "
             >
             </CustomSprite>
           </GameObject>
@@ -119,6 +123,7 @@
             :is-static="false"
             :fix-size="molecule.size * moleculeSize * 2"
             :source="molecule"
+            :z-index="1"
           >
             <CustomSprite
               v-if="getMoleculeTexture(molecule.type)"
@@ -236,6 +241,10 @@ interface CoolItHitRegion {
   hitAnimation: ShockwaveFilter[];
   heatRationCoefficient: number;
   reflectionProbability: number;
+  heatAbsorptionCoefficientLight: number;
+  heatAbsorptionCoefficientHeat: number;
+  heatRadiationCoefficient: number;
+  temperature: number;
 }
 
 interface MoleculeData extends CoolItHitRegion {
@@ -279,9 +288,23 @@ function convertToCoolItObstacle(
     placingRegions: result.placingRegions,
     hitAnimation: [],
     heatRationCoefficient: configParameter.heatRationCoefficient ?? 1,
+    heatAbsorptionCoefficientLight:
+      configParameter.heatAbsorptionCoefficientLight ?? 1,
+    heatAbsorptionCoefficientHeat:
+      configParameter.heatAbsorptionCoefficientHeat ?? 1,
+    heatRadiationCoefficient: configParameter.heatRadiationCoefficient ?? 1,
     reflectionProbability: 1,
     saturation: result.saturation,
+    temperature: configParameter.initialTemperature,
   };
+}
+
+interface ColorValues {
+  code: number;
+  hex: string;
+  coords: [number, number, number];
+  alpha: number;
+  thickness: number;
 }
 
 @Options({
@@ -326,6 +349,14 @@ export default class PlayLevel extends Vue {
   lightTexture!: PIXI.Texture;
   startTime = Date.now();
   moleculeSize = 50;
+
+  readonly absorptionConst = 0.25;
+  readonly radiationConst = 0.01;
+  readonly minTemperature = -20;
+  readonly maxTemperature = 50;
+  readonly lowerTemperatureLimit = 0;
+  readonly upperTemperatureLimit = 30;
+  temperatureColorSteps: { [key: number]: ColorValues } = {};
 
   rayList: Ray[] = [];
   rayPath: { [key: string]: { x: number; y: number }[][] } = {};
@@ -392,11 +423,15 @@ export default class PlayLevel extends Vue {
           },
         },
         source: {
-          heatRationCoefficient: ration.coefficient,
+          heatRationCoefficient: ration.heatRationCoefficient,
           maxHitCount: ration.maxHitCount,
           hitCount: 0,
           hitAnimation: [],
           reflectionProbability: ration.reflectionProbability,
+          heatAbsorptionCoefficientLight: ration.heatAbsorptionCoefficientLight,
+          heatAbsorptionCoefficientHeat: ration.heatAbsorptionCoefficientHeat,
+          heatRadiationCoefficient: ration.heatRadiationCoefficient,
+          temperature: ration.initialTemperature,
         } as CoolItHitRegion,
         filter: [],
         color: '#ffffff',
@@ -508,7 +543,7 @@ export default class PlayLevel extends Vue {
     initPath(RayType.heat);
 
     tutorialService.registerGetList(this.updateTutorial, this.authHeaderTyp);
-    this.interval = setInterval(() => this.updateRays(), this.intervalTime);
+    this.interval = setInterval(() => this.updateLoop(), this.intervalTime);
 
     pixiUtil
       .loadTexture('/assets/games/coolit/city/light.png', this.eventBus)
@@ -521,6 +556,10 @@ export default class PlayLevel extends Vue {
         this.moleculeStylesheets = sheet;
         this.generateMoleculeTextures();
       });
+
+    for (let i = this.minTemperature; i <= this.maxTemperature; i++) {
+      this.temperatureColorSteps[i] = this.calculateTemperatureColor(i);
+    }
   }
 
   containerTextureSize: [number, number] = [100, 100];
@@ -551,7 +590,12 @@ export default class PlayLevel extends Vue {
               hitCount: 0,
               hitAnimation: [],
               heatRationCoefficient: moleculeConfig.globalWarmingFactor,
+              heatAbsorptionCoefficientLight:
+                moleculeConfig.globalWarmingFactor,
+              heatAbsorptionCoefficientHeat: moleculeConfig.globalWarmingFactor,
+              heatRadiationCoefficient: moleculeConfig.globalWarmingFactor,
               reflectionProbability: 1,
+              temperature: 0,
             });
           }
         }
@@ -575,27 +619,54 @@ export default class PlayLevel extends Vue {
   }
 
   calculateTintColor(
-    building: CoolItHitRegion
+    obstacle: CoolItHitRegion
   ): [number, number, number, number] {
-    /*const toHex = (d: number): string => {
-      if (d < 0) d = 0;
-      if (d > 1) d = 1;
-      return ('0' + Number(d * 255).toString(16)).slice(-2).toUpperCase();
-    };
-    const toColorString = (color: any): string => {
-      return `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;
-    };*/
-    let mixingFactor = building.hitCount / building.maxHitCount;
+    /*let mixingFactor = obstacle.hitCount / obstacle.maxHitCount;
     if (mixingFactor > 1) mixingFactor = 1;
     const red = new Color(themeColors.getRedColor()).to('srgb') as any;
-    /*const white = new Color('#ffffff').to('srgb');
-    const tint = white.range(red, {
+    return [red.r, red.g, red.b, mixingFactor / 2];*/
+    const color = this.getTemperatureColor(obstacle.temperature);
+    return [color.coords[0], color.coords[1], color.coords[2], color.alpha];
+  }
+
+  get temperatureGradient(): any {
+    const minTempColor = new Color('#0000FF').to('srgb');
+    const maxTempColor = new Color('#FF00FF').to('srgb');
+    return minTempColor.range(maxTempColor, {
       space: 'lch',
+      hue: 'decreasing',
       outputSpace: 'srgb',
-    }) as any;
-    const color = tint(mixingFactor);
-    return [color.r, color.g, color.b, 0.4];*/
-    return [red.r, red.g, red.b, mixingFactor / 2];
+    });
+  }
+
+  calculateTemperatureColor(temperature: number): ColorValues {
+    let range =
+      (temperature - this.minTemperature) /
+      (this.maxTemperature - this.minTemperature);
+    if (range < 0) range = 0;
+    if (range > 1) range = 1;
+    const temperatureColor = this.temperatureGradient(range);
+    const hex = temperatureColor.toString({ format: 'hex', collapse: false });
+    let dangerFactor = 0;
+    if (temperature < this.lowerTemperatureLimit)
+      dangerFactor =
+        (this.lowerTemperatureLimit - temperature) /
+        (this.lowerTemperatureLimit - this.minTemperature);
+    if (temperature > this.upperTemperatureLimit)
+      dangerFactor =
+        (temperature - this.upperTemperatureLimit) /
+        (this.maxTemperature - this.upperTemperatureLimit);
+    return {
+      hex: hex,
+      code: parseInt(hex.slice(1), 16),
+      coords: [temperatureColor.r, temperatureColor.g, temperatureColor.b],
+      alpha: dangerFactor / 2 + 0.1,
+      thickness: dangerFactor * 5 + 1,
+    };
+  }
+
+  getTemperatureColor(temperature: number): ColorValues {
+    return this.temperatureColorSteps[Math.round(temperature)];
   }
 
   unmounted(): void {
@@ -876,7 +947,11 @@ export default class PlayLevel extends Vue {
     }
   }
 
-  updateRays(): void {
+  updateTimeStamp = Date.now();
+  updateLoop(): void {
+    const updateTimeStamp = Date.now();
+    const updateDelta = updateTimeStamp - this.updateTimeStamp;
+    this.updateTimeStamp = updateTimeStamp;
     for (const ray of this.rayList) {
       if (ray.initialised && ray.body?.speed) {
         ray.animationIndex++;
@@ -899,7 +974,6 @@ export default class PlayLevel extends Vue {
           ray.displayPoints[i].x = displayPoint.x;
           ray.displayPoints[i].y = displayPoint.y;
         }
-        //this.setConstRaySpeed(ray);
       } else if (ray.startTime + 2000 < Date.now()) {
         const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
         if (index > -1) this.rayList.splice(index, 1);
@@ -943,6 +1017,27 @@ export default class PlayLevel extends Vue {
     for (const filter of this.collisionAnimation) {
       filter.time += filter.wavelength / 500;
     }
+
+    const timeFactor = updateDelta / 5000;
+    for (const obstacle of this.obstacleList) {
+      let temperature = obstacle.temperature - this.minTemperature;
+      if (temperature < 0) temperature = 0;
+      obstacle.temperature -=
+        obstacle.heatRadiationCoefficient *
+        this.radiationConst *
+        temperature *
+        timeFactor;
+    }
+
+    for (const region of this.collisionRegions) {
+      let temperature = region.source.temperature - this.minTemperature;
+      if (temperature < 0) temperature = 0;
+      region.source.temperature -=
+        region.source.heatRadiationCoefficient *
+        this.radiationConst *
+        temperature *
+        timeFactor;
+    }
   }
 
   async rayCollision(
@@ -961,6 +1056,7 @@ export default class PlayLevel extends Vue {
       hitObstacle.reflectionProbability >= probability
     ) {
       if (ray.type === RayType.light && !ray.hit) {
+        const heatRationCoefficientObstacle = hitObstacle.heatRationCoefficient;
         ray.hit = true;
         await delay(100);
         const rayVelocity = [
@@ -976,6 +1072,8 @@ export default class PlayLevel extends Vue {
             this.gameHeight
           );
           hitObstacle.hitCount++;
+          hitObstacle.temperature +=
+            hitObstacle.heatAbsorptionCoefficientLight * this.absorptionConst;
           hitObstacle.hitAnimation.push(
             new ShockwaveFilter(
               hitPointScreen,
@@ -1014,7 +1112,7 @@ export default class PlayLevel extends Vue {
         }
         ray.type = RayType.heat;
         ray.direction[1] *= -1;
-        ray.intensity = hitObstacle?.heatRationCoefficient;
+        ray.intensity = heatRationCoefficientObstacle;
         ray.animationIndex = 0;
         const force = Matter.Vector.create(rayVelocity[0], rayVelocity[1] * -1);
         rayObject.body.isStatic = false;
@@ -1039,6 +1137,7 @@ export default class PlayLevel extends Vue {
       } else if (ray.type === RayType.heat && !ray.hit) {
         ray.hit = true;
         hitObstacle.hitCount++;
+        const heatRadiation = hitObstacle.heatRationCoefficient * ray.intensity;
         this.collisionAnimation.push(
           new ShockwaveFilter(
             [rayBody.position.x, rayBody.position.y],
@@ -1047,12 +1146,24 @@ export default class PlayLevel extends Vue {
               wavelength: 100 * ray.intensity,
               speed: 10,
               brightness: 1.2,
-              radius: hitObstacle.heatRationCoefficient * 100 * ray.intensity,
+              radius: heatRadiation * 100,
             },
             0
           )
         );
         this.rayList.splice(index, 1);
+        for (const obstacle of this.obstacleList) {
+          obstacle.temperature +=
+            obstacle.heatAbsorptionCoefficientHeat *
+            this.absorptionConst *
+            heatRadiation;
+        }
+        for (const region of this.collisionRegions) {
+          region.source.temperature +=
+            region.source.heatAbsorptionCoefficientHeat *
+            this.absorptionConst *
+            heatRadiation;
+        }
       }
     }
     if (Object.hasOwn(obstacleObject, 'filter') && hitObstacle) {
@@ -1094,21 +1205,12 @@ export default class PlayLevel extends Vue {
 
   updateRegionFilter(region: CollisionRegion): void {
     const source = region.source as CoolItHitRegion;
-    const redHash = themeColors.getRedColor();
-    //const red = new Color(redHash).to('srgb') as any;
+    /*const redHash = themeColors.getRedColor();
     let mixingFactor = source.hitCount / source.maxHitCount;
-    if (mixingFactor > 1) mixingFactor = 1;
-    /*region.filter = [
-      new ColorOverlayFilter([red.r, red.g, red.b], mixingFactor / 2),
-      ...source.hitAnimation,
-    ];*/
-    //const alpha = `0${(mixingFactor / 2).toString(16)}`.slice(-2);
-    //region.color = `${redHash}${alpha}`;
-    region.color = redHash;
-    region.alpha = mixingFactor / 2;
-    /*region.filter = [
-      new ColorOverlayFilter([red.r, red.g, red.b], mixingFactor / 2),
-    ];*/
+    if (mixingFactor > 1) mixingFactor = 1;*/
+    const color = this.getTemperatureColor(source.temperature);
+    region.color = color.hex;
+    region.alpha = color.alpha; //mixingFactor / 2;
   }
 
   leaveAtmosphere(
