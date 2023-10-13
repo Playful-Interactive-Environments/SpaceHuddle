@@ -541,6 +541,7 @@ export default class GameContainer extends Vue {
     pixiUtil.unloadTexture(this.backgroundTexture);
     Matter.Events.off(this.engine, 'collisionStart', this.collisionStart);
     Matter.Events.off(this.engine, 'afterUpdate', this.afterPhysicUpdate);
+    Matter.Events.off(this.engine.world, 'afterAdd', this.bodyAdded);
     this.eventBus.off(EventType.TEXTURES_LOADING_START);
     this.eventBus.off(EventType.ALL_TEXTURES_LOADED);
   }
@@ -1038,6 +1039,7 @@ export default class GameContainer extends Vue {
     if (this.detectCollision)
       Matter.Events.on(this.engine, 'collisionStart', this.collisionStart);
     Matter.Events.on(this.engine, 'afterUpdate', this.afterPhysicUpdate);
+    Matter.Events.on(this.engine.world, 'afterAdd', this.bodyAdded);
     this.$emit('initEngine', this.engine);
     if (this.useGravity) {
       this.engine.gravity = {
@@ -1074,6 +1076,10 @@ export default class GameContainer extends Vue {
         )[]
   ): void {
     if (this.engine) Matter.Composite.add(this.engine.world, physicObject);
+  }
+
+  bodyAdded(): void {
+    this.engine.world.bodies.sort((a, b) => a.zIndex - b.zIndex);
   }
 
   removeFromEngin(
