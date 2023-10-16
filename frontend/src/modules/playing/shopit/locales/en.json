@@ -13,6 +13,10 @@
       "play": "Tutorial text 2"
     },
     "lost": "You lost.",
-    "win": "You won."
+    "lostCategories": "Your opponent has collected all categories before you could.",
+    "lostPoints": "Your emissions have exceeded the maximum.",
+    "win": "You won.",
+    "winCategories": "You managed to collect all categories before your opponent! Good Job!",
+    "winPoints": "Your opponent exceeded their maximum emissions."
   }
 }

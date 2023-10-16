@@ -1,32 +1,86 @@
 <template>
   <div
     class="gameArea"
-    :style="{ height: height, backgroundImage: 'url(' + background + ')' }"
+    :style="{ height: height }"
     v-if="playStateType === PlayStateType.play"
   >
-    <div class="hand">
+    <div
+      class="opponentHand"
+      :style="{ backgroundImage: 'url(' + gameConfig.gameValues.opponentHand + ')' }"
+    ></div>
+    <div class="categories" id="opponent"></div>
+    <div id="activeCards"></div>
+    <div class="categories" id="own">
+      <div
+        v-for="cat in categoryPoints"
+        :key="cat[0]"
+        :id="cat[0]"
+        class="categoryContainer"
+      >
+        <span
+          class="circle categoryItem"
+          :class="{ fullCircle: cat[1] >= 2 }"
+        ></span>
+        <span
+          class="circle categoryItem"
+          :class="{ fullCircle: cat[1] >= 1 }"
+        ></span>
+        <font-awesome-icon
+          :icon="gameConfig.categories[cat[0]].settings.icon"
+          class="categoryIcon categoryItem"
+        />
+      </div>
+    </div>
+    <div class="CO2BarContainer">
+      <div class="CO2BarBackground">
+        <p>CO²: {{ pointsSpent }}/{{ maxCost }}</p>
+        <div
+          class="CO2Bar"
+          :style="{ width: (pointsSpent / maxCost) * 100 + '%' }"
+          :class="{ hidden: pointsSpent / maxCost <= 0 }"
+        ></div>
+      </div>
+    </div>
+    <TransitionGroup name="hand" class="hand" tag="div">
       <div
         v-for="card in cardHand"
         :key="card[7]"
         :id="card[7]"
         class="cardContainer"
-        :style="{ backgroundImage: 'url(' + cardBackground + ')' }"
+        :style="{ backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')' }"
         @click="activeCardChanged(card)"
       >
         <ul class="cardStats">
-          <li class="cardCost">{{ card[0] }}</li>
-          <li>{{ card[1] }}</li>
-          <li>{{ card[2] }}</li>
-          <li>{{ card[3] }}</li>
-          <li>{{ card[4] }}</li>
+          <li class="cardCost">
+            {{ card[0] }}
+            <hr />
+          </li>
+          <li>
+            {{ card[1].split(' ')[0] }}<span>{{ card[1].split(' ')[1] }}</span>
+          </li>
+          <li>
+            {{ card[2].split(' ')[0] }}<span>{{ card[2].split(' ')[1] }}</span>
+          </li>
+          <li>
+            {{ card[3].split(' ')[0] }}<span>{{ card[3].split(' ')[1] }}</span>
+          </li>
+          <li>
+            {{ card[4].split(' ')[0] }}<span>{{ card[4].split(' ')[1] }}</span>
+          </li>
+          <li>
+            {{ card[5].split(' ')[0] }}<span>{{ card[5].split(' ')[1] }}</span>
+          </li>
         </ul>
         <img :src="getCardSprite(card)" alt="{{ card[7] }}" class="cardImage" />
         <font-awesome-icon
           :icon="gameConfig.categories[card[6]].settings.icon"
-          class="categoryIcon"
+          class="categoryCardIcon"
         />
       </div>
-    </div>
+      <button id="cardSelectButton" @click="cardPlayed(activeCard)">
+        Play card!
+      </button>
+    </TransitionGroup>
   </div>
   <div
     class="gameArea result"
@@ -34,6 +88,12 @@
     v-if="playStateType === PlayStateType.win"
   >
     <span>{{ $t('module.playing.shopit.participant.win') }}</span>
+    <span v-if="reason === 'category'">{{
+      $t('module.playing.shopit.participant.winCategories')
+    }}</span>
+    <span v-if="reason === 'points'">{{
+      $t('module.playing.shopit.participant.winPoints')
+    }}</span>
   </div>
   <div
     class="gameArea result"
@@ -41,6 +101,12 @@
     v-if="playStateType === PlayStateType.lost"
   >
     <span>{{ $t('module.playing.shopit.participant.lost') }}</span>
+    <span v-if="reason === 'category'">{{
+      $t('module.playing.shopit.participant.lostCategories')
+    }}</span>
+    <span v-if="reason === 'points'">{{
+      $t('module.playing.shopit.participant.lostPoints')
+    }}</span>
   </div>
 </template>
 
@@ -110,14 +176,18 @@ export default class PlayState extends Vue {
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
 
-  background = gameConfig.gameValues.background;
-  cardBackground = gameConfig.gameValues.cardBackground;
   cardSpriteFolder = gameConfig.gameValues.spriteFolder;
 
   activeCard: any[] = [];
-
   cards = this.shuffle(this.parseCards(gameConfig));
   cardHand: any[] = [];
+  testCard = this.cards[9];
+
+  categoryPoints: any[] = [];
+
+  maxCost = 130;
+  pointsSpent = 0;
+  reason = '';
 
   clearPlayState(): void {
     this.levelType = '';
@@ -127,15 +197,26 @@ export default class PlayState extends Vue {
     this.cards = this.shuffle(this.parseCards(gameConfig));
   }
 
+  playstateChange(outcome, reason) {
+    switch (outcome) {
+      case 'lost':
+        this.playStateType = PlayStateType.lost;
+        break;
+      case 'win':
+        this.playStateType = PlayStateType.win;
+        break;
+    }
+    this.reason = reason;
+  }
+
   get backgroundColor(): string {
     return themeColors.getBackgroundColor();
   }
 
   mounted(): void {
     tutorialService.registerGetList(this.updateTutorial, this.authHeaderTyp);
+    this.categorySetup();
     this.initialCardPull();
-    console.log(this.cardHand);
-    console.log(this.cards);
     /*this.eventBus.off(EventType.CHANGE_TUTORIAL);
     this.eventBus.on(EventType.CHANGE_TUTORIAL, async (steps) => {
       this.updateTutorial(steps as Tutorial[]);
@@ -152,6 +233,13 @@ export default class PlayState extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
+  }
+
+  categorySetup() {
+    const data = this.gameConfig.categories;
+    for (const category in data) {
+      this.categoryPoints.push([category, 0]);
+    }
   }
 
   parseCards(cards) {
@@ -194,17 +282,51 @@ export default class PlayState extends Vue {
       const card = this.cards.pop();
       this.cardHand.push(card);
     }
+    console.log(
+      'Test Card: ' +
+        this.testCard[7] +
+        ', Cost: ' +
+        this.testCard[0] +
+        ', Category: ' +
+        this.testCard[6]
+    );
   }
 
   cardPlayed(card) {
-    const index = this.cardHand.indexOf(card);
-    this.cardHand.splice(index, 1);
-    console.log(this.cardHand);
+    const container = document.getElementById('activeCards');
+    const element = document.getElementById(card[7]);
+    const button = document.getElementById('cardSelectButton');
+    if (element && container) {
+      element.classList.remove('cardContainer');
+      element.classList.add('cardPlayed');
+      if (button) {
+        button.setAttribute('disabled', '');
+      }
+      element.classList.remove('cardContainerActive');
+      container.append(element.cloneNode(true));
+      const index = this.cardHand.indexOf(card);
+      this.cardHand.splice(index, 1);
+    }
+    setTimeout(() => {
+      this.compareCards(this.testCard, card);
+    }, 2000);
   }
 
   drawNewCard() {
-    const card = this.cards.pop();
-    this.cardHand.push(card);
+    if (this.cards.length > 0) {
+      const card = this.cards.pop();
+      this.cardHand.unshift(card);
+    }
+
+    this.testCard = this.cards[Math.floor(Math.random() * this.cards.length)];
+    console.log(
+      'Test Card: ' +
+        this.testCard[7] +
+        ', Cost: ' +
+        this.testCard[0] +
+        ', Category: ' +
+        this.testCard[6]
+    );
   }
 
   activeCardChanged(card) {
@@ -213,21 +335,84 @@ export default class PlayState extends Vue {
       element.classList.remove('cardContainerActive');
     }
     this.activeCard = card;
-    console.log(card[7]);
     element = document.getElementById(this.activeCard[7]);
     if (element) {
-      element.classList.add('cardContainerActive');
+      if (!element.classList.contains('cardPlayed')) {
+        element.classList.add('cardContainerActive');
+      }
+    }
+  }
+
+  compareCards(card, card2) {
+    //card = Card that was there first. Wins in case of category mismatch
+    //Compares the cost + category of the cards and decides the winner
+    let winningCard;
+    if (card && card2) {
+      if (card[6] == card2[6]) {
+        if (card[0] > card2[0]) {
+          this.pointsSpent += card[0] + card2[0];
+          winningCard = card;
+        } else {
+          this.pointsSpent += card[0] + card2[0];
+          winningCard = card2;
+        }
+      } else {
+        winningCard = card;
+        this.pointsSpent += winningCard[0];
+      }
+    }
+    if (this.pointsSpent >= this.maxCost) {
+      this.playstateChange('lost', 'points');
+    }
+    console.log('Winner: ' + winningCard[7]);
+    //Check if winning card is the own or the opponents
+    //Adds points to winners category
+    for (let i = 0; i < this.categoryPoints.length; i++) {
+      if (this.categoryPoints[i][0] == winningCard[6]) {
+        this.categoryPoints[i][1] += 1;
+      }
+    }
+    console.log(this.categoryPoints.every((row) => row[1] >= 2));
+    if (this.categoryPoints.every((row) => row[1] >= 2)) {
+      console.log(this.categoryPoints);
+      this.playstateChange('win', 'category');
+    }
+    //removes cards from play
+    /*const index = this.cardHand.indexOf(card2);
+    this.cardHand.splice(index, 1);*/
+
+    const cardsToDelete = document.getElementsByClassName('cardPlayed');
+    while (cardsToDelete[0]) {
+      if (cardsToDelete[0].parentNode) {
+        cardsToDelete[0].parentNode.removeChild(cardsToDelete[0]);
+      }
+    }
+    //draw new cards
+    setTimeout(() => {
+      this.drawNewCard();
+    }, 500);
+    //reactivate Button
+    const button = document.getElementById('cardSelectButton');
+    if (button) {
+      button.removeAttribute('disabled');
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
+.hidden {
+  opacity: 0 !important;
+  transition: opacity 0.3s ease;
+}
+
 .gameArea {
+  background-color: var(--color-background);
   height: calc(100%);
   width: 100%;
   position: relative;
   background-size: cover;
+  overflow: hidden;
 }
 
 .custom-renderer-wrapper {
@@ -257,15 +442,144 @@ export default class PlayState extends Vue {
   }
 }
 
+.opponentHand {
+  height: 13%;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: auto 60%;
+}
+
+.categories#opponent {
+  height: 8%;
+  width: 100%;
+  background-color: var(--color-brown);
+  outline: 8px solid var(--color-brown-light);
+}
+
+.categories#own {
+  height: 8%;
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--color-brown);
+  outline: 0.5rem solid var(--color-brown-light);
+}
+
+.categoryContainer {
+  position: relative;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  width: 15%;
+}
+
+.categoryItem {
+  margin: 0.1rem;
+}
+
+.categoryIcon {
+  color: var(--color-background);
+}
+
+.circle {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 100%;
+  border: 3px solid var(--color-background);
+  display: inline-block;
+}
+
+.fullCircle {
+  background-color: var(--color-background);
+}
+
+#activeCards {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 35%;
+  width: 100%;
+  background-color: var(--color-brown-xlight);
+  z-index: 10;
+}
+
+.cardPlayed {
+  position: relative;
+  aspect-ratio: 1904/2564;
+  background-size: cover;
+  padding: 2%;
+  height: 70%;
+  z-index: 1;
+  transition: 0.3s;
+}
+
+.CO2BarContainer {
+  position: relative;
+  width: 100%;
+  height: 6%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 0.5rem;
+}
+
+.CO2BarBackground {
+  width: 80%;
+  height: 60%;
+  background-color: var(--color-brown);
+  border-radius: var(--border-radius);
+  border: 2px solid var(--color-brown-light);
+  p {
+    position: absolute;
+    font-size: var(--font-size);
+    font-weight: var(--font-weight-semibold);
+    font-family: var(--font-family);
+    color: var(--color-background);
+    margin-left: 0.4rem;
+  }
+}
+
+.CO2Bar {
+  height: 100%;
+  max-width: 100%;
+  background-color: var(--color-evaluating);
+  border-radius: var(--border-radius);
+  border: 2px solid var(--color-evaluating-light);
+  opacity: 100%;
+  transition: 0.3s ease;
+}
+
 .hand {
   position: absolute;
   height: 30%;
   width: 100%;
   display: flex;
   justify-content: center;
-  border: 1px solid red;
   bottom: 0;
-  align-items: center;
+}
+
+.hand-move, /* apply transition to moving elements */
+.hand-enter-active,
+.hand-leave-active {
+  transition: all 0.3s ease;
+}
+
+.hand-enter-from,
+.hand-leave-to {
+  opacity: 0;
+  transform: translateY(-8rem);
+}
+
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.hand-leave-active {
+  position: absolute;
 }
 
 .cardContainer {
@@ -287,12 +601,28 @@ export default class PlayState extends Vue {
   transition: 0.3s;
 }
 
+hr {
+  background-color: var(--color-brown);
+  margin: -2pt 0 4pt 0;
+  width: 60%;
+}
+
 .cardStats {
   z-index: 10;
-  color: var(--color-dark-contrast);
+  color: var(--color-brown);
   font-size: var(--font-size-small);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   font-family: var(--font-family);
+
+  li {
+    margin-top: -2pt;
+
+    span {
+      margin-left: 1pt;
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-xxsmall);
+    }
+  }
 }
 
 .cardCost {
@@ -300,7 +630,8 @@ export default class PlayState extends Vue {
   font-weight: var(--font-weight-bold);
 }
 
-.categoryIcon {
+.categoryCardIcon {
+  color: var(--color-brown-light);
   position: absolute;
   bottom: 0;
   left: 0;
@@ -308,11 +639,22 @@ export default class PlayState extends Vue {
 }
 
 .cardImage {
-  z-index: 1;
+  z-index: 0;
   position: absolute;
-  width: 65%;
+  width: 70%;
   bottom: 0;
   right: 0;
   margin: 2.7%;
+}
+
+#cardSelectButton {
+  border-radius: var(--border-radius-small);
+  border: 2px solid var(--color-dark-contrast);
+  background-color: var(--color-background);
+  font-weight: var(--font-weight-semibold);
+  position: absolute;
+  bottom: 0.7rem;
+  width: 6rem;
+  height: 1.5rem;
 }
 </style>
