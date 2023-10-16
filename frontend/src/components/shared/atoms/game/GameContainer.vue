@@ -278,6 +278,7 @@ export default class GameContainer extends Vue {
   @Prop({ default: [] }) readonly collisionRegions!: CollisionRegion[];
   @Prop({ default: false }) readonly showBounds!: boolean;
   @Prop({ default: [] }) readonly pixiFilterList!: any[];
+  @Prop({ default: 0.2 }) readonly autoPanSpeed!: number;
   //#endregion props
 
   //#region variables
@@ -447,6 +448,11 @@ export default class GameContainer extends Vue {
         loadTexture();
       }
     }
+  }
+
+  @Watch('autoPanSpeed', { immediate: true })
+  onAutoPanSpeedChanged(): void {
+    if (this.autoPlayIsRunning) this.startAutoPan();
   }
   //#endregion watch
 
@@ -1315,10 +1321,12 @@ export default class GameContainer extends Vue {
   //#endregion loop
 
   //#region pan and scroll
+  autoPlayIsRunning = false;
   async startAutoPan(): Promise<void> {
     await until(() => !this.loading);
     this.backgroundPositionOffset = [...this.backgroundPositionOffsetMax];
-    this.beginPan([-0.2, 0]);
+    this.beginPan([-this.autoPanSpeed, 0]);
+    this.autoPlayIsRunning = true;
   }
 
   panVector: [number, number] = [0, 0];

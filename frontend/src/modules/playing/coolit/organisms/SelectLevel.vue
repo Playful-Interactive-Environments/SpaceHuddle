@@ -11,6 +11,17 @@
         <font-awesome-icon icon="atom" />
       </el-button>
     </div>
+    <div class="overlay-top-left">
+      <el-slider
+        v-model="temperatureRise"
+        vertical
+        height="180px"
+        :min="-2"
+        :max="5"
+        :step="0.5"
+        :marks="marks"
+      />
+    </div>
   </div>
   <DrawerBottomOverlay v-model="showMoleculesInfo">
     <template v-slot:header>
@@ -166,6 +177,8 @@ export default class SelectLevel extends Vue {
   activeMoleculeName = '';
   gameConfig = gameConfig;
   rendererList: { [key: string]: PIXI.Renderer } = {};
+  temperatureRise = 0;
+  marks = {};
 
   get inactiveColor(): string {
     return themeColors.getInactiveColor();
@@ -179,6 +192,10 @@ export default class SelectLevel extends Vue {
     pixiUtil
       .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
       .then((sheet) => (this.spritesheet = sheet));
+
+    for (let i = 5; i >= -2; i--) {
+      this.marks[i] = `${i}°C`;
+    }
   }
 
   unmounted(): void {
@@ -208,7 +225,7 @@ export default class SelectLevel extends Vue {
   @Watch('selectedIdea', { immediate: true })
   onSelectedLevelChanged(): void {
     if (this.selectedIdea) {
-      this.$emit('play', this.selectedIdea);
+      this.$emit('play', this.selectedIdea, this.temperatureRise);
     }
   }
 
@@ -327,6 +344,18 @@ export default class SelectLevel extends Vue {
     height: unset;
     min-height: unset;
   }
+}
+
+.overlay-top-left {
+  background-image: url('@/modules/playing/coolit/assets/thermometer.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: absolute;
+  z-index: 100;
+  top: 0.5rem;
+  left: 0.5rem;
+  padding: 2.8rem 0.1rem 0.3rem 0.1rem;
 }
 
 .clickable {

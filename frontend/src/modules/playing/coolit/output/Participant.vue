@@ -20,6 +20,7 @@
       v-if="gameStep === GameStep.Play && gameState === GameState.Game"
       :level="activeLevel"
       :tracking-manager="trackingManager"
+      :temperature-rise="temperatureRise"
       @finished="levelPlayed"
     />
   </div>
@@ -71,6 +72,7 @@ export default class Participant extends Vue {
   startTime = Date.now();
   stepTime = Date.now();
   activeLevel: Idea | null = null;
+  temperatureRise = 0;
 
   gameStep = GameStep.Select;
   GameStep = GameStep;
@@ -131,7 +133,8 @@ export default class Participant extends Vue {
     this.module = module;
   }
 
-  startLevel(level: Idea): void {
+  startLevel(level: Idea, temperatureRise: number): void {
+    this.temperatureRise = temperatureRise;
     this.gameStep = GameStep.Play;
     this.gameState = GameState.Info;
     this.activeLevel = level;

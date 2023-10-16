@@ -21,123 +21,218 @@
       :show-bounds="false"
       :collision-borders="CollisionBorderType.Background"
       :pixi-filter-list="collisionAnimation"
+      :auto-pan-speed="autoPanSpeed"
     >
       <template v-slot:default>
-        <container v-if="gameWidth && circleGradiant">
-          <GameObject
-            v-for="obstacle in obstacleList"
-            :key="obstacle.uuid"
-            v-model:id="obstacle.id"
-            :type="obstacle.shape"
-            :polygon-shape="obstacle.polygonShape"
-            :show-bounds="false"
-            :anchor="obstacle.pivot"
-            :object-space="ObjectSpace.RelativeToBackground"
-            :x="obstacle.position[0]"
-            :y="obstacle.position[1]"
-            :rotation="obstacle.rotation"
-            :scale="obstacle.scale"
-            :options="getObstacleTypeOptions(obstacle.type, obstacle.name)"
-            :is-static="true"
-            :affectedByForce="false"
-            :source="obstacle"
-            @collision="obstacleCollision"
-          >
-            <CustomSprite
-              :colorOverlay="calculateTintColor(obstacle)"
-              :texture="obstacle.texture"
+        <container v-if="gameWidth && circleGradientTexture">
+          <container>
+            <sprite
+              :texture="temperatureGradientTexture"
+              :height="10"
+              :width="gameWidth"
+            ></sprite>
+            <sprite
+              :texture="temperatureMarkerTexture"
+              :x="getTemperatureRange(lowerTemperatureLimit) * gameWidth"
+              :width="4"
+              :height="15"
+              :anchor="[0.5, 0]"
+              tint="#ff0000"
+            ></sprite>
+            <sprite
+              :texture="temperatureMarkerTexture"
+              :x="getTemperatureRange(upperTemperatureLimit) * gameWidth"
+              :width="4"
+              :height="15"
+              :anchor="[0.5, 0]"
+              tint="#ff0000"
+            ></sprite>
+            <sprite
+              v-for="obstacle in obstacleList"
+              :key="obstacle.uuid"
+              :texture="temperatureMarkerTexture"
+              :x="getTemperatureRange(obstacle.temperature) * gameWidth"
+              :width="2"
+              :height="12"
+              :anchor="[0.5, 0]"
+              tint="#ffffff"
+            ></sprite>
+            <sprite
+              :texture="temperatureMarkerTexture"
+              :x="getTemperatureRange(averageTemperature) * gameWidth"
+              :width="4"
+              :height="20"
+              :anchor="[0.5, 0]"
+              tint="#ff0000"
+            ></sprite>
+          </container>
+          <container v-if="!gameOver">
+            <GameObject
+              v-for="obstacle in obstacleList"
+              :key="obstacle.uuid"
+              v-model:id="obstacle.id"
+              :type="obstacle.shape"
+              :polygon-shape="obstacle.polygonShape"
+              :show-bounds="false"
               :anchor="obstacle.pivot"
-              :width="obstacle.width"
-              :aspect-ration="getObjectAspect(obstacle.type, obstacle.name)"
               :object-space="ObjectSpace.RelativeToBackground"
-              :filters="obstacle.hitAnimation"
-              :saturation="obstacle.saturation"
-              :outline="getTemperatureColor(obstacle.temperature).code"
-              :outline-width="
-                getTemperatureColor(obstacle.temperature).thickness
-              "
+              :x="obstacle.position[0]"
+              :y="obstacle.position[1]"
+              :rotation="obstacle.rotation"
+              :scale="obstacle.scale"
+              :options="getObstacleTypeOptions(obstacle.type, obstacle.name)"
+              :is-static="true"
+              :affectedByForce="false"
+              :source="obstacle"
+              @collision="obstacleCollision"
             >
-            </CustomSprite>
-          </GameObject>
-          <GameObject
-            v-for="ray in rayList"
-            :key="ray.uuid"
-            type="circle"
-            :object-space="ObjectSpace.RelativeToBackground"
-            v-model:x="ray.position[0]"
-            v-model:y="ray.position[1]"
-            :rotation="ray.angle"
-            :scale="ray.intensity"
-            :options="getRayTypeOptions(ray.type)"
-            :is-static="false"
-            :affectedByForce="false"
-            :show-bounds="false"
-            :source="ray"
-            :fix-size="rayParticleSize"
-            @collision="rayCollision"
-            @initialised="rayInitialised"
-            @initError="rayInitError"
-            @outsideDrawingSpace="leaveAtmosphere"
-          >
-            <container v-if="!ray.hit">
-              <sprite
-                :texture="circleGradiant"
-                :x="ray.displayPoints[0].x * 0.2"
-                :width="rayParticleSize"
-                :height="rayParticleSize"
-                :anchor="0.5"
-                :tint="ray.type === RayType.light ? yellowColor : redColor"
-              ></sprite>
-            </container>
-            <template #background>
-              <simple-rope
-                v-if="lightTexture"
-                :texture="lightTexture"
-                :x="0"
-                :y="0"
-                :scale="0.2"
-                :tint="ray.type === RayType.light ? yellowColor : redColor"
-                :points="ray.displayPoints"
-              />
-            </template>
-          </GameObject>
-          <custom-particle-container
-            v-for="moleculeName of Object.keys(backgroundParticle)"
-            :key="moleculeName"
-            :deep-clone-config="false"
-            :default-texture="moleculeTextures[moleculeName]"
-            :parentEventBus="eventBus"
-            :config="backgroundParticle[moleculeName]"
-            :x="(-panOffset[0] * (containerTextureSize[0] - gameWidth)) / 100"
-            :y="(-panOffset[1] * (containerTextureSize[1] - gameHeight)) / 100"
-            :auto-update="false"
-          />
-          <GameObject
-            v-for="molecule of moleculeList"
-            :key="molecule.id"
-            type="circle"
-            :object-space="ObjectSpace.RelativeToBackground"
-            v-model:x="molecule.position[0]"
-            v-model:y="molecule.position[1]"
-            :options="getMoleculeTypeOptions(molecule.type)"
-            :is-static="false"
-            :fix-size="molecule.size * moleculeSize * 2"
-            :source="molecule"
-            :z-index="1"
-          >
-            <CustomSprite
-              v-if="getMoleculeTexture(molecule.type)"
-              :texture="getMoleculeTexture(molecule.type)"
-              :anchor="0.5"
-              :tint="molecule.color"
-              :width="molecule.size * moleculeSize * 2"
-              :height="molecule.size * moleculeSize * 2"
-              :alpha="molecule.controllable ? 1 : 0.4"
+              <CustomSprite
+                :colorOverlay="calculateTintColor(obstacle)"
+                :texture="obstacle.texture"
+                :anchor="obstacle.pivot"
+                :width="obstacle.width"
+                :aspect-ration="getObjectAspect(obstacle.type, obstacle.name)"
+                :object-space="ObjectSpace.RelativeToBackground"
+                :filters="obstacle.hitAnimation"
+                :saturation="obstacle.saturation"
+                :outline="getTemperatureColor(obstacle.temperature).code"
+                :outline-width="
+                  getTemperatureColor(obstacle.temperature).thickness
+                "
+              >
+              </CustomSprite>
+            </GameObject>
+            <GameObject
+              v-for="ray in rayList"
+              :key="ray.uuid"
+              type="circle"
+              :object-space="ObjectSpace.RelativeToBackground"
+              v-model:x="ray.position[0]"
+              v-model:y="ray.position[1]"
+              :rotation="ray.angle"
+              :scale="ray.intensity"
+              :options="getRayTypeOptions(ray.type)"
+              :is-static="false"
+              :affectedByForce="false"
+              :show-bounds="false"
+              :source="ray"
+              :fix-size="rayParticleSize"
+              @collision="rayCollision"
+              @initialised="rayInitialised"
+              @initError="rayInitError"
+              @outsideDrawingSpace="leaveAtmosphere"
+            >
+              <container v-if="!ray.hit">
+                <sprite
+                  :texture="circleGradientTexture"
+                  :x="ray.displayPoints[0].x * 0.2"
+                  :width="rayParticleSize"
+                  :height="rayParticleSize"
+                  :anchor="0.5"
+                  :tint="ray.type === RayType.light ? yellowColor : redColor"
+                ></sprite>
+              </container>
+              <template #background>
+                <simple-rope
+                  v-if="lightTexture"
+                  :texture="lightTexture"
+                  :x="0"
+                  :y="0"
+                  :scale="0.2"
+                  :tint="ray.type === RayType.light ? yellowColor : redColor"
+                  :points="ray.displayPoints"
+                />
+              </template>
+            </GameObject>
+            <custom-particle-container
+              v-for="moleculeName of Object.keys(backgroundParticle)"
+              :key="moleculeName"
+              :deep-clone-config="false"
+              :default-texture="moleculeTextures[moleculeName]"
+              :parentEventBus="eventBus"
+              :config="backgroundParticle[moleculeName]"
+              :x="(-panOffset[0] * (containerTextureSize[0] - gameWidth)) / 100"
+              :y="
+                (-panOffset[1] * (containerTextureSize[1] - gameHeight)) / 100
+              "
+              :auto-update="false"
             />
-          </GameObject>
+            <GameObject
+              v-for="molecule of moleculeList"
+              :key="molecule.id"
+              type="circle"
+              :object-space="ObjectSpace.RelativeToBackground"
+              v-model:x="molecule.position[0]"
+              v-model:y="molecule.position[1]"
+              :options="getMoleculeTypeOptions(molecule.type)"
+              :is-static="false"
+              :fix-size="molecule.size * moleculeSize * 2"
+              :source="molecule"
+              :z-index="1"
+              @click="moleculeClicked"
+            >
+              <CustomSprite
+                v-if="getMoleculeTexture(molecule.type)"
+                :texture="getMoleculeTexture(molecule.type)"
+                :anchor="0.5"
+                :tint="molecule.color"
+                :width="molecule.size * moleculeSize * 2"
+                :height="molecule.size * moleculeSize * 2"
+                :alpha="molecule.controllable ? 1 : 0.4"
+              />
+            </GameObject>
+          </container>
+          <container v-else>
+            <sprite
+              :texture="riverTexture"
+              :width="containerTextureSize[0]"
+              :height="containerTextureSize[1]"
+              :x="(-panOffset[0] * (containerTextureSize[0] - gameWidth)) / 100"
+              :y="
+                (-panOffset[1] * (containerTextureSize[1] - gameHeight)) / 100
+              "
+              tint="#ff4400"
+            >
+            </sprite>
+            <GameObject
+              v-for="obstacle in obstacleList"
+              :key="obstacle.uuid"
+              v-model:id="obstacle.id"
+              :type="obstacle.shape"
+              :polygon-shape="obstacle.polygonShape"
+              :show-bounds="false"
+              :anchor="obstacle.pivot"
+              :object-space="ObjectSpace.RelativeToBackground"
+              :x="obstacle.position[0]"
+              :y="obstacle.position[1]"
+              :rotation="obstacle.rotation"
+              :scale="obstacle.scale"
+              :options="getObstacleTypeOptions(obstacle.type, obstacle.name)"
+              :is-static="true"
+              :affectedByForce="false"
+              :source="obstacle"
+            >
+              <CustomSprite
+                :colorOverlay="calculateTintColor(obstacle, 1)"
+                :texture="obstacle.texture"
+                :anchor="obstacle.pivot"
+                :width="obstacle.width"
+                :aspect-ration="getObjectAspect(obstacle.type, obstacle.name)"
+                :object-space="ObjectSpace.RelativeToBackground"
+              >
+              </CustomSprite>
+            </GameObject>
+          </container>
         </container>
       </template>
     </GameContainer>
+    <div class="statusOverlay">
+      {{ playTimeString }}
+      <el-rate v-model="stars" size="large" :max="3" :disabled="true" />
+    </div>
+    <div class="statusGameOver" v-if="gameOver">
+      {{ $t('module.playing.coolit.participant.gameOver') }}
+    </div>
   </div>
 </template>
 
@@ -211,7 +306,12 @@ export interface MoleculeState {
 
 export interface ObstacleState {
   totalCount: number;
-  hitCount: number;
+  avgHitCount: number;
+  avgTemperature: number;
+  items: {
+    hitCount: number;
+    temperature: number;
+  }[];
 }
 
 enum PlayStateType {
@@ -221,11 +321,16 @@ enum PlayStateType {
 }
 
 export interface PlayStateResult {
+  temperatureRise: number;
   stars: number;
   time: number;
   moleculeState: { [key: string]: MoleculeState };
   obstacleState: { [key: string]: ObstacleState };
-  hitCount: number;
+  regionState: { [key: string]: ObstacleState };
+  obstacleHitCount: number;
+  regionHitCount: number;
+  moleculeHitCount: number;
+  rayCount: number;
   temperature: number;
 }
 
@@ -236,6 +341,7 @@ enum ObstacleType {
 }
 
 interface CoolItHitRegion {
+  name: string;
   maxHitCount: number;
   hitCount: number;
   hitAnimation: ShockwaveFilter[];
@@ -330,6 +436,8 @@ interface ColorValues {
 export default class PlayLevel extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: null }) readonly level!: Idea | null;
+  @Prop({ default: 120000 }) readonly winTime!: number;
+  @Prop({ default: 0 }) readonly temperatureRise!: number;
   @Prop({ default: EndpointAuthorisationType.PARTICIPANT })
   authHeaderTyp!: EndpointAuthorisationType;
   renderer!: PIXI.Renderer;
@@ -348,24 +456,33 @@ export default class PlayLevel extends Vue {
   moleculeStylesheets!: PIXI.Spritesheet;
   lightTexture!: PIXI.Texture;
   startTime = Date.now();
+  playTime = 0;
   moleculeSize = 50;
+  autoPanSpeed = 0.2;
 
-  readonly absorptionConst = 0.25;
-  readonly radiationConst = 0.01;
+  readonly absorptionConst = 1.25;
+  readonly radiationConst = 0.05;
   readonly minTemperature = -20;
   readonly maxTemperature = 50;
   readonly lowerTemperatureLimit = 0;
   readonly upperTemperatureLimit = 30;
+  readonly moduleCountFactor = 100;
   temperatureColorSteps: { [key: number]: ColorValues } = {};
 
   rayList: Ray[] = [];
   rayPath: { [key: string]: { x: number; y: number }[][] } = {};
-  circleGradiant: PIXI.Texture | null = null;
+  circleGradientTexture: PIXI.Texture | null = null;
+  temperatureGradientTexture: PIXI.Texture | null = null;
+  temperatureMarkerTexture: PIXI.Texture | null = null;
+  riverTexture: PIXI.Texture | null = null;
+  groundTexture: PIXI.Texture | null = null;
+  streetTexture: PIXI.Texture | null = null;
   moleculeTextures: { [key: string]: PIXI.Texture } = {};
   rayParticleSize = 10;
   collisionAnimation: any[] = [];
   moleculeList: MoleculeData[] = [];
   backgroundParticle: { [key: string]: PIXIParticles.EmitterConfigV3 } = {};
+  moleculeState: { [key: string]: MoleculeState } = {};
 
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
@@ -386,16 +503,73 @@ export default class PlayLevel extends Vue {
   });
   CollisionBorderType = CollisionBorderType;
 
-  /*get playStateResult(): PlayStateResult {
-    return {
-      stars: Math.floor((this.collectedCount / this.totalCount) * 3),
-      time: Date.now() - this.startTime,
-      moleculeState: {},
+  get playStateResult(): PlayStateResult {
+    const result: PlayStateResult = {
+      temperatureRise: this.temperatureRise,
+      stars: this.stars,
+      time: this.playTime,
+      moleculeState: { ...this.moleculeState },
       obstacleState: {},
-      hitCount: 0,
-      temperature: 0,
+      regionState: {},
+      obstacleHitCount: 0,
+      regionHitCount: 0,
+      moleculeHitCount: Object.values(this.moleculeState).reduce(
+        (sum, item) => sum + item.hitCount,
+        0
+      ),
+      rayCount: this.emittedRayCount,
+      temperature: this.averageTemperature,
     };
-  }*/
+    for (const obstacle of Object.keys(
+      gameConfig.obstacles[this.levelType].categories
+    )) {
+      const list = this.obstacleList.filter((item) => item.name === obstacle);
+      result.obstacleState[obstacle] = {
+        totalCount: list.length,
+        avgHitCount:
+          list.reduce((sum, item) => sum + item.hitCount, 0) / list.length,
+        avgTemperature:
+          list.reduce((sum, item) => sum + item.temperature, 0) / list.length,
+        items: list.map((item) => {
+          return {
+            hitCount: item.hitCount,
+            temperature: item.temperature,
+          };
+        }),
+      };
+      result.obstacleHitCount += list.reduce(
+        (sum, item) => sum + item.hitCount,
+        0
+      );
+    }
+    for (const region of gameConfig.obstacles[this.levelType].settings
+      .heatRation) {
+      const regionName = region.name;
+      const list = this.collisionRegions.filter(
+        (item) => item.source.name === regionName
+      );
+      result.regionState[regionName] = {
+        totalCount: list.length,
+        avgHitCount:
+          list.reduce((sum, item) => sum + item.source.hitCount, 0) /
+          list.length,
+        avgTemperature:
+          list.reduce((sum, item) => sum + item.source.temperature, 0) /
+          list.length,
+        items: list.map((item) => {
+          return {
+            hitCount: item.source.hitCount,
+            temperature: item.source.temperature,
+          };
+        }),
+      };
+      result.regionHitCount += list.reduce(
+        (sum, item) => sum + item.source.hitCount,
+        0
+      );
+    }
+    return result;
+  }
 
   get backgroundColor(): string {
     return themeColors.getBackgroundColor();
@@ -423,6 +597,7 @@ export default class PlayLevel extends Vue {
           },
         },
         source: {
+          name: ration.name,
           heatRationCoefficient: ration.heatRationCoefficient,
           maxHitCount: ration.maxHitCount,
           hitCount: 0,
@@ -439,6 +614,33 @@ export default class PlayLevel extends Vue {
       });
     }
     return regions;
+  }
+
+  get averageTemperature(): number {
+    const sumObstacles = this.obstacleList.reduce(
+      (sum, item) => sum + item.temperature,
+      0
+    );
+    const countObstacles = this.obstacleList.length;
+    const sumRegions = this.collisionRegions.reduce(
+      (sum, item) => sum + item.source.temperature,
+      0
+    );
+    const countRegions = this.collisionRegions.length;
+    return (sumObstacles + sumRegions) / (countObstacles + countRegions);
+  }
+
+  get playTimeString(): string {
+    const playTime = this.playTime;
+    const seconds = Math.floor(playTime / 1000);
+    const secondsString = `0${seconds % 60}`;
+    return `${Math.floor(seconds / 60)}:${secondsString.slice(-2)}`;
+  }
+
+  get stars(): number {
+    const stars = Math.floor((this.playTime / this.winTime) * 3);
+    if (stars < 3) return stars;
+    return 3;
   }
 
   getObstacleTypeOptions(obstacleType: string, obstacleName: string): any {
@@ -556,6 +758,21 @@ export default class PlayLevel extends Vue {
         this.moleculeStylesheets = sheet;
         this.generateMoleculeTextures();
       });
+    pixiUtil
+      .loadTexture('/assets/games/coolit/city/river.png', this.eventBus)
+      .then((sheet) => {
+        this.riverTexture = sheet;
+      });
+    pixiUtil
+      .loadTexture('/assets/games/coolit/city/ground.png', this.eventBus)
+      .then((sheet) => {
+        this.groundTexture = sheet;
+      });
+    pixiUtil
+      .loadTexture('/assets/games/coolit/city/street.png', this.eventBus)
+      .then((sheet) => {
+        this.streetTexture = sheet;
+      });
 
     for (let i = this.minTemperature; i <= this.maxTemperature; i++) {
       this.temperatureColorSteps[i] = this.calculateTemperatureColor(i);
@@ -569,15 +786,19 @@ export default class PlayLevel extends Vue {
 
   containerReady(): void {
     if (!this.emitStart) {
+      this.startTime = Date.now();
       this.emitLightRays(200, 0);
 
       for (const moleculeConfigName of Object.keys(gameConfig.molecules)) {
         const moleculeConfig = gameConfig.molecules[moleculeConfigName];
         if (moleculeConfig.controllable) {
-          const moduleCountFactor = moleculeConfig.controllable ? 100 : 1;
-          const moleculeCount = moleculeConfig.ration * moduleCountFactor;
+          const moleculeCount =
+            (moleculeConfig.ration +
+              moleculeConfig.rationDeltaPerDegree * this.temperatureRise) *
+            this.moduleCountFactor;
           for (let i = 0; i < moleculeCount; i++) {
             this.moleculeList.push({
+              name: moleculeConfigName,
               id: uuidv4(),
               type: moleculeConfigName,
               position: [Math.random() * 100, Math.random() * 50],
@@ -599,6 +820,17 @@ export default class PlayLevel extends Vue {
             });
           }
         }
+
+        const list = this.moleculeList.filter(
+          (item) => item.type === moleculeConfigName
+        );
+        this.moleculeState[moleculeConfigName] = {
+          startCount: list.length,
+          movedCount: 0,
+          hitCount: 0,
+          emitCount: 0,
+          decreaseCount: 0,
+        };
       }
     }
   }
@@ -619,14 +851,20 @@ export default class PlayLevel extends Vue {
   }
 
   calculateTintColor(
-    obstacle: CoolItHitRegion
+    obstacle: CoolItHitRegion,
+    alpha = -1
   ): [number, number, number, number] {
     /*let mixingFactor = obstacle.hitCount / obstacle.maxHitCount;
     if (mixingFactor > 1) mixingFactor = 1;
     const red = new Color(themeColors.getRedColor()).to('srgb') as any;
     return [red.r, red.g, red.b, mixingFactor / 2];*/
     const color = this.getTemperatureColor(obstacle.temperature);
-    return [color.coords[0], color.coords[1], color.coords[2], color.alpha];
+    return [
+      color.coords[0],
+      color.coords[1],
+      color.coords[2],
+      alpha > 0 ? alpha : color.alpha,
+    ];
   }
 
   get temperatureGradient(): any {
@@ -639,10 +877,15 @@ export default class PlayLevel extends Vue {
     });
   }
 
-  calculateTemperatureColor(temperature: number): ColorValues {
-    let range =
+  getTemperatureRange(temperature: number): number {
+    return (
       (temperature - this.minTemperature) /
-      (this.maxTemperature - this.minTemperature);
+      (this.maxTemperature - this.minTemperature)
+    );
+  }
+
+  calculateTemperatureColor(temperature: number): ColorValues {
+    let range = this.getTemperatureRange(temperature);
     if (range < 0) range = 0;
     if (range > 1) range = 1;
     const temperatureColor = this.temperatureGradient(range);
@@ -792,9 +1035,32 @@ export default class PlayLevel extends Vue {
 
   initRenderer(renderer: PIXI.Renderer): void {
     this.renderer = renderer;
-    this.circleGradiant = pixiUtil.generateCircleGradiantTexture(
+    this.circleGradientTexture = pixiUtil.generateCircleGradientTexture(
       256,
       this.renderer
+    );
+    const colorStops: string[] = [];
+    for (let i = 0; i < 20; i++) {
+      colorStops.push(
+        this.temperatureGradient(i / 20).toString({
+          format: 'hex',
+          collapse: false,
+        })
+      );
+    }
+    this.temperatureGradientTexture = pixiUtil.generateLinearGradientTexture(
+      1024,
+      10,
+      this.renderer,
+      colorStops,
+      '#ffffff',
+      pixiUtil.GradientDirection.LeftRight
+    );
+    this.temperatureMarkerTexture = pixiUtil.generateLinearGradientTexture(
+      10,
+      128,
+      this.renderer,
+      ['#ffffff', '#ffffff']
     );
     this.generateMoleculeTextures();
   }
@@ -802,7 +1068,7 @@ export default class PlayLevel extends Vue {
   async generateMoleculeTextures(): Promise<void> {
     if (
       !this.renderer ||
-      !this.circleGradiant ||
+      !this.circleGradientTexture ||
       !this.moleculeStylesheets ||
       Object.keys(this.moleculeTextures).length > 0
     )
@@ -811,7 +1077,7 @@ export default class PlayLevel extends Vue {
       if (this.moleculeStylesheets.textures[moleculeName]) {
         this.moleculeTextures[moleculeName] = pixiUtil.generateStackedTexture(
           [
-            this.circleGradiant,
+            this.circleGradientTexture,
             this.moleculeStylesheets.textures[moleculeName],
           ],
           this.renderer,
@@ -823,7 +1089,10 @@ export default class PlayLevel extends Vue {
             JSON.stringify(backgroundParticle)
           );
           particleSettings.maxParticles =
-            gameConfig.molecules[moleculeName].ration * 100;
+            (gameConfig.molecules[moleculeName].ration +
+              gameConfig.molecules[moleculeName].rationDeltaPerDegree *
+                this.temperatureRise) *
+            this.moduleCountFactor;
           particleSettings.particlesPerWave = particleSettings.maxParticles;
           particleSettings.behaviors.push({
             type: 'colorStatic',
@@ -864,7 +1133,8 @@ export default class PlayLevel extends Vue {
   readonly rayPoints = 80;
   readonly rayLength = 500 / this.rayPoints;
   emitStart = false;
-  emitLightRays(minDelay = 5000, maxDelay = 1000): void {
+  emittedRayCount = 0;
+  emitLightRays(minDelay = 3000, maxDelay = 1000): void {
     this.emitStart = true;
     const delay = minDelay + Math.random() * maxDelay;
     setTimeout(() => {
@@ -876,6 +1146,7 @@ export default class PlayLevel extends Vue {
         displayWidth / 5 +
         Math.random() * (displayWidth / 2);
       const points = this.calculateInitRayPoints(RayType.light, 1, 0);
+      this.emittedRayCount++;
       this.rayList.push({
         uuid: uuidv4(),
         type: RayType.light,
@@ -948,8 +1219,49 @@ export default class PlayLevel extends Vue {
   }
 
   updateTimeStamp = Date.now();
+  gameOver = false;
   updateLoop(): void {
     const updateTimeStamp = Date.now();
+    this.playTime = updateTimeStamp - this.startTime;
+    const averageTemperature = this.averageTemperature;
+    let gameOver =
+      averageTemperature < this.lowerTemperatureLimit ||
+      averageTemperature > this.upperTemperatureLimit;
+    if (!gameOver) {
+      let obstacleGameOverCount = 0;
+      for (const obstacle of this.obstacleList) {
+        if (
+          obstacle.temperature < this.lowerTemperatureLimit ||
+          obstacle.temperature > this.upperTemperatureLimit
+        )
+          obstacleGameOverCount++;
+      }
+      let regionGameOverCount = 0;
+      for (const region of this.collisionRegions) {
+        if (
+          region.source.temperature < this.lowerTemperatureLimit ||
+          region.source.temperature > this.upperTemperatureLimit
+        )
+          regionGameOverCount++;
+      }
+      if (obstacleGameOverCount + regionGameOverCount > 3) gameOver = true;
+    }
+    if (gameOver) {
+      this.gameOver = true;
+      this.collisionAnimation.splice(0);
+      clearInterval(this.interval);
+
+      for (const obstacle of this.obstacleList) {
+        obstacle.hitAnimation.splice(0);
+      }
+      for (const region of this.collisionRegions) {
+        region.source.hitAnimation.splice(0);
+        region.filter.splice(0);
+        region.alpha = 1;
+      }
+      this.autoPanSpeed = 1;
+      return;
+    }
     const updateDelta = updateTimeStamp - this.updateTimeStamp;
     this.updateTimeStamp = updateTimeStamp;
     for (const ray of this.rayList) {
@@ -1018,28 +1330,31 @@ export default class PlayLevel extends Vue {
       filter.time += filter.wavelength / 500;
     }
 
-    const timeFactor = updateDelta / 5000;
-    for (const obstacle of this.obstacleList) {
-      let temperature = obstacle.temperature - this.minTemperature;
-      if (temperature < 0) temperature = 0;
-      obstacle.temperature -=
-        obstacle.heatRadiationCoefficient *
-        this.radiationConst *
-        temperature *
-        timeFactor;
-    }
+    if (this.emittedRayCount > 0 && this.lightCollisionCount > 0) {
+      const timeFactor = updateDelta / 5000;
+      for (const obstacle of this.obstacleList) {
+        let temperature = obstacle.temperature - this.minTemperature;
+        if (temperature < 0) temperature = 0;
+        obstacle.temperature -=
+          obstacle.heatRadiationCoefficient *
+          this.radiationConst *
+          temperature *
+          timeFactor;
+      }
 
-    for (const region of this.collisionRegions) {
-      let temperature = region.source.temperature - this.minTemperature;
-      if (temperature < 0) temperature = 0;
-      region.source.temperature -=
-        region.source.heatRadiationCoefficient *
-        this.radiationConst *
-        temperature *
-        timeFactor;
+      for (const region of this.collisionRegions) {
+        let temperature = region.source.temperature - this.minTemperature;
+        if (temperature < 0) temperature = 0;
+        region.source.temperature -=
+          region.source.heatRadiationCoefficient *
+          this.radiationConst *
+          temperature *
+          timeFactor;
+      }
     }
   }
 
+  lightCollisionCount = 0;
   async rayCollision(
     rayObject: GameObject,
     obstacleObject: GameObject | CollisionRegion,
@@ -1056,6 +1371,7 @@ export default class PlayLevel extends Vue {
       hitObstacle.reflectionProbability >= probability
     ) {
       if (ray.type === RayType.light && !ray.hit) {
+        this.lightCollisionCount++;
         const heatRationCoefficientObstacle = hitObstacle.heatRationCoefficient;
         ray.hit = true;
         await delay(100);
@@ -1137,6 +1453,7 @@ export default class PlayLevel extends Vue {
       } else if (ray.type === RayType.heat && !ray.hit) {
         ray.hit = true;
         hitObstacle.hitCount++;
+        this.moleculeState[hitObstacle.name].hitCount++;
         const heatRadiation = hitObstacle.heatRationCoefficient * ray.intensity;
         this.collisionAnimation.push(
           new ShockwaveFilter(
@@ -1188,7 +1505,9 @@ export default class PlayLevel extends Vue {
         (item) => item.id === moleculeObject.source.id
       );
       if (index > -1) {
+        this.moleculeState[moleculeObject.source.name].decreaseCount++;
         moleculeObject.source.type = 'oxygen';
+        moleculeObject.source.name = 'oxygen';
         const oxygenConfig = gameConfig.molecules.oxygen;
         moleculeObject.source.globalWarmingFactor =
           oxygenConfig.globalWarmingFactor;
@@ -1210,7 +1529,7 @@ export default class PlayLevel extends Vue {
     if (mixingFactor > 1) mixingFactor = 1;*/
     const color = this.getTemperatureColor(source.temperature);
     region.color = color.hex;
-    region.alpha = color.alpha; //mixingFactor / 2;
+    region.alpha = this.gameOver ? 1 : color.alpha; //mixingFactor / 2;
   }
 
   leaveAtmosphere(
@@ -1236,6 +1555,13 @@ export default class PlayLevel extends Vue {
     this.panOffsetMin = min;
     this.panOffsetMax = max;
     this.panOffset = value;
+    if (this.gameOver && max[0] === 100 && max[1] === 100) {
+      console.log('bounce');
+    }
+  }
+
+  moleculeClicked(item: any): void {
+    this.moleculeState[item.source.name].movedCount++;
   }
 }
 </script>
@@ -1245,5 +1571,29 @@ export default class PlayLevel extends Vue {
   height: calc(100%);
   width: 100%;
   position: relative;
+}
+
+.statusOverlay {
+  pointer-events: none;
+  position: absolute;
+  z-index: 100;
+  top: 1rem;
+  right: 1rem;
+  text-align: right;
+  font-size: var(--font-size-large);
+  color: var(--color-dark-contrast);
+}
+
+.statusGameOver {
+  pointer-events: none;
+  position: absolute;
+  z-index: 100;
+  top: 40vh;
+  bottom: 1rem;
+  right: 1rem;
+  left: 1rem;
+  text-align: center;
+  font-size: var(--font-size-xxxlarge);
+  color: var(--color-dark-contrast);
 }
 </style>

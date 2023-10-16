@@ -95,7 +95,8 @@
     "moleculeType": {
       "greenhouseGas": "Greenhouse Gas",
       "atmosphericGas": "Atmospheric Gas"
-    }
+    },
+    "gameOver": "game over"
   },
   "statistic": {
     "level": "How many times was which level played?",

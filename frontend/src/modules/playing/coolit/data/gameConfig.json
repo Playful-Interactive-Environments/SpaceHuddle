@@ -16,7 +16,8 @@
             "heatAbsorptionCoefficientLight": 0.5,
             "heatAbsorptionCoefficientHeat": 0.5,
             "heatRadiationCoefficient": 0.5,
-            "initialTemperature": 15
+            "initialTemperature": 14,
+            "name": "ground"
           },
           {
             "region": [[0, 92], [100, 92], [100, 100], [0, 100]],
@@ -26,7 +27,8 @@
             "heatAbsorptionCoefficientLight": 2.5,
             "heatAbsorptionCoefficientHeat": 2.5,
             "heatRadiationCoefficient": 2.5,
-            "initialTemperature": 15
+            "initialTemperature": 14,
+            "name": "street"
           }
         ]
       },
@@ -46,7 +48,7 @@
               "heatAbsorptionCoefficientLight": 2,
               "heatAbsorptionCoefficientHeat": 2,
               "heatRadiationCoefficient": 2,
-              "initialTemperature": 15,
+              "initialTemperature": 14,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -58,7 +60,7 @@
               "heatAbsorptionCoefficientLight": 2,
               "heatAbsorptionCoefficientHeat": 2,
               "heatRadiationCoefficient": 2,
-              "initialTemperature": 15,
+              "initialTemperature": 14,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -71,7 +73,7 @@
               "heatAbsorptionCoefficientLight": 1.5,
               "heatAbsorptionCoefficientHeat": 1.5,
               "heatRadiationCoefficient": 1.5,
-              "initialTemperature": 15,
+              "initialTemperature": 14,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -83,7 +85,7 @@
               "heatAbsorptionCoefficientLight": 2,
               "heatAbsorptionCoefficientHeat": 2,
               "heatRadiationCoefficient": 2,
-              "initialTemperature": 15,
+              "initialTemperature": 14,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
@@ -94,7 +96,7 @@
               "heatAbsorptionCoefficientLight": 2.5,
               "heatAbsorptionCoefficientHeat": 2.5,
               "heatRadiationCoefficient": 2.5,
-              "initialTemperature": 15,
+              "initialTemperature": 14,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -106,7 +108,7 @@
               "heatAbsorptionCoefficientLight": 3,
               "heatAbsorptionCoefficientHeat": 3,
               "heatRadiationCoefficient": 3,
-              "initialTemperature": 15,
+              "initialTemperature": 14,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
@@ -117,7 +119,7 @@
               "heatAbsorptionCoefficientLight": 3,
               "heatAbsorptionCoefficientHeat": 3,
               "heatRadiationCoefficient": 3,
-              "initialTemperature": 15,
+              "initialTemperature": 14,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
@@ -128,7 +130,7 @@
               "heatAbsorptionCoefficientLight": 2,
               "heatAbsorptionCoefficientHeat": 2,
               "heatRadiationCoefficient": 2,
-              "initialTemperature": 15,
+              "initialTemperature": 14,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
@@ -139,7 +141,7 @@
               "heatAbsorptionCoefficientLight": 2,
               "heatAbsorptionCoefficientHeat": 2,
               "heatRadiationCoefficient": 2,
-              "initialTemperature": 15,
+              "initialTemperature": 14,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
@@ -150,7 +152,7 @@
               "heatAbsorptionCoefficientLight": 2,
               "heatAbsorptionCoefficientHeat": 2,
               "heatRadiationCoefficient": 2,
-              "initialTemperature": 15,
+              "initialTemperature": 14,
               "maxCount": 10,
               "width": 5,
               "shape": "polygon",
@@ -162,7 +164,7 @@
               "heatAbsorptionCoefficientLight": 2,
               "heatAbsorptionCoefficientHeat": 2,
               "heatRadiationCoefficient": 2,
-              "initialTemperature": 15,
+              "initialTemperature": 14,
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
@@ -185,7 +187,7 @@
               "heatAbsorptionCoefficientLight": 0.5,
               "heatAbsorptionCoefficientHeat": 0.5,
               "heatRadiationCoefficient": 0.5,
-              "initialTemperature": 15,
+              "initialTemperature": 14,
               "maxCount": 10,
               "width": 7,
               "shape": "polygon",
@@ -206,7 +208,8 @@
       "size": 0.25,
       "ration": 0.4,
       "controllable": true,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "rationDeltaPerDegree": 0.2
     },
     "carbonDioxide": {
       "type": "greenhouseGas",
@@ -216,7 +219,8 @@
       "size": 0.33,
       "ration": 0.04,
       "controllable": true,
-      "absorbedByTree": true
+      "absorbedByTree": true,
+      "rationDeltaPerDegree": 0.02
     },
     "methane": {
       "type": "greenhouseGas",
@@ -226,7 +230,8 @@
       "size": 0.25,
       "ration": 0.01,
       "controllable": true,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "rationDeltaPerDegree": 0.01
     },
     "nitrogenOxide": {
       "type": "greenhouseGas",
@@ -236,7 +241,8 @@
       "size": 0.5,
       "ration": 0.01,
       "controllable": true,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "rationDeltaPerDegree": 0.01
     },
     "ozone": {
       "type": "greenhouseGas",
@@ -246,7 +252,8 @@
       "size": 0.33,
       "ration": 0.01,
       "controllable": true,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "rationDeltaPerDegree": 0.01
     },
     "fluorinatedGases": {
       "type": "greenhouseGas",
@@ -256,7 +263,8 @@
       "size": 0.5,
       "ration": 0.01,
       "controllable": true,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "rationDeltaPerDegree": 0.01
     },
     "oxygen": {
       "type": "atmosphericGas",
@@ -266,7 +274,8 @@
       "size": 0.2,
       "ration": 20.6,
       "controllable": false,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "rationDeltaPerDegree": -0.2
     },
     "nitrogen": {
       "type": "atmosphericGas",
@@ -276,7 +285,8 @@
       "size": 0.2,
       "ration": 78,
       "controllable": false,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "rationDeltaPerDegree": -0.02
     },
     "argon": {
       "type": "atmosphericGas",
@@ -286,7 +296,8 @@
       "size": 0.2,
       "ration": 0.9,
       "controllable": false,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "rationDeltaPerDegree": -0.02
     },
     "helium": {
       "type": "atmosphericGas",
@@ -296,7 +307,8 @@
       "size": 0.2,
       "ration": 0.02,
       "controllable": false,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "rationDeltaPerDegree": -0.02
     }
   }
 }

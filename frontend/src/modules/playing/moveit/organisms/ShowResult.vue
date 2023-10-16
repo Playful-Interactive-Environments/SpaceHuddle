@@ -148,7 +148,7 @@ export default class ShowResult extends Vue {
   activeTabName = resultTabName;
   spritesheet!: PIXI.Spritesheet;
   maxParticleCount = 100;
-  circleGradiant: PIXI.Texture | null = null;
+  circleGradientTexture: PIXI.Texture | null = null;
   particleTextures: { [key: string]: PIXI.Texture } = {};
 
   get particleStateSum(): ParticleState {
@@ -310,7 +310,7 @@ export default class ShowResult extends Vue {
   async generateParticleTextures(): Promise<void> {
     if (
       !this.renderer ||
-      !this.circleGradiant ||
+      !this.circleGradientTexture ||
       !this.spritesheet ||
       Object.keys(this.particleTextures).length > 0
     )
@@ -318,7 +318,7 @@ export default class ShowResult extends Vue {
     for (const particleName of Object.keys(gameConfig.particles)) {
       if (this.spritesheet.textures[particleName]) {
         this.particleTextures[particleName] = pixiUtil.generateStackedTexture(
-          [this.circleGradiant, this.spritesheet.textures[particleName]],
+          [this.circleGradientTexture, this.spritesheet.textures[particleName]],
           this.renderer,
           60
         );
@@ -328,7 +328,7 @@ export default class ShowResult extends Vue {
 
   initRenderer(renderer: PIXI.Renderer): void {
     this.renderer = renderer;
-    this.circleGradiant = pixiUtil.generateCircleGradiantTexture(
+    this.circleGradientTexture = pixiUtil.generateCircleGradientTexture(
       this.particleRadius,
       this.renderer
     );

@@ -55,12 +55,13 @@ export function drawRectWithGradient(
   renderer: PIXI.Renderer,
   width = 10,
   height = 10,
-  color = '#ffffff',
+  colorStops = ['#ffffff00', '#ffffffff'],
+  tintColor = '#ffffff',
   direction = GradientDirection.TopBottom
 ): void {
   if ((rect as any).width) width = (rect as any).width;
   if ((rect as any).height) height = (rect as any).height;
-  if ((rect as any).color) color = (rect as any).color;
+  if ((rect as any).color) tintColor = (rect as any).color;
   if ((rect as any).direction) direction = (rect as any).direction;
   const renderTexture = PIXI.RenderTexture.create({
     width: width,
@@ -85,27 +86,30 @@ export function drawRectWithGradient(
       break;
   }
   if (!(renderer.renderTexture as any).renderer) return;
+  const colorStopsList = colorStops.map((color, index) => {
+    return {
+      color: color,
+      offset: index / colorStops.length,
+    };
+  });
   GradientFactory.createLinearGradient(renderer, renderTexture, {
     x0: x0,
     y0: y0,
     x1: x1,
     y1: y1,
-    colorStops: [
-      { color: '#ffffff00', offset: 0 },
-      { color: '#ffffffff', offset: 1 },
-    ],
+    colorStops: colorStopsList,
   });
   rect.clear();
   rect.beginTextureFill({
     texture: renderTexture,
-    color: color,
+    color: tintColor,
     alpha: 0.9,
   });
   rect.drawRect(0, 0, width, height);
   rect.endFill();
 }
 
-export function generateCircleGradiantTexture(
+export function generateCircleGradientTexture(
   radius: number,
   renderer: PIXI.Renderer
 ): PIXI.Texture {
@@ -118,13 +122,24 @@ export function generateCircleGradiantTexture(
   });
 }
 
-export function generateLinearGradiantTexture(
+export function generateLinearGradientTexture(
   width: number,
   height: number,
-  renderer: PIXI.Renderer
+  renderer: PIXI.Renderer,
+  colorStops = ['#ffffff00', '#ffffffff'],
+  tintColor = '#ffffff',
+  direction = GradientDirection.TopBottom
 ): PIXI.Texture {
   const rect = new PIXI.Graphics();
-  drawRectWithGradient(rect, renderer, width, height);
+  drawRectWithGradient(
+    rect,
+    renderer,
+    width,
+    height,
+    colorStops,
+    tintColor,
+    direction
+  );
 
   const bounds = new PIXI.Rectangle(0, 0, width, height);
   return renderer.generateTexture(rect, {

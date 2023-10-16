@@ -142,8 +142,8 @@
             </sprite>
           </GameObject>
           <sprite
-            v-if="linearGradiant"
-            :texture="linearGradiant"
+            v-if="linearGradientTexture"
+            :texture="linearGradientTexture"
             :width="gameWidth"
             :height="gameHeight - particleBorder"
             :x="0"
@@ -293,8 +293,8 @@ export default class CleanUpParticles extends Vue {
   countdownTime = 5;
   containerAspectRation = 1.3;
   loading = false;
-  circleGradiant: PIXI.Texture | null = null;
-  linearGradiant: PIXI.Texture | null = null;
+  circleGradientTexture: PIXI.Texture | null = null;
+  linearGradientTexture: PIXI.Texture | null = null;
 
   readonly maxCleanupThreshold = constants.maxCleanupThreshold;
   readonly calcChartHeight = constants.calcChartHeight;
@@ -393,7 +393,7 @@ export default class CleanUpParticles extends Vue {
   async generateParticleTextures(): Promise<void> {
     if (
       !this.renderer ||
-      !this.circleGradiant ||
+      !this.circleGradientTexture ||
       !this.spritesheet ||
       Object.keys(this.particleTextures).length > 0
     )
@@ -401,7 +401,7 @@ export default class CleanUpParticles extends Vue {
     for (const particleName of Object.keys(gameConfig.particles)) {
       if (this.spritesheet.textures[particleName]) {
         this.particleTextures[particleName] = pixiUtil.generateStackedTexture(
-          [this.circleGradiant, this.spritesheet.textures[particleName]],
+          [this.circleGradientTexture, this.spritesheet.textures[particleName]],
           this.renderer,
           60
         );
@@ -494,11 +494,11 @@ export default class CleanUpParticles extends Vue {
 
   initRenderer(renderer: PIXI.Renderer): void {
     this.renderer = renderer;
-    this.circleGradiant = pixiUtil.generateCircleGradiantTexture(
+    this.circleGradientTexture = pixiUtil.generateCircleGradientTexture(
       this.particleRadius,
       this.renderer
     );
-    this.linearGradiant = pixiUtil.generateLinearGradiantTexture(
+    this.linearGradientTexture = pixiUtil.generateLinearGradientTexture(
       this.gameWidth,
       this.gameHeight - this.particleBorder,
       this.renderer
