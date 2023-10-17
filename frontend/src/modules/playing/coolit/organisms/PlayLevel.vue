@@ -226,6 +226,12 @@
                 :object-space="ObjectSpace.RelativeToBackground"
               >
               </CustomSprite>
+              <text
+                :anchor="[0.5, 1]"
+                :style="{ fontFamily: 'Arial', fontSize: 34, fill: '#ffffff' }"
+              >
+                {{ Math.round(obstacle.temperature) }}°C
+              </text>
             </GameObject>
           </container>
         </container>
@@ -626,6 +632,7 @@ export default class PlayLevel extends Vue {
         filter: [],
         color: '#ffffff',
         alpha: 0,
+        text: '',
       });
     }
     return regions;
@@ -1290,6 +1297,7 @@ export default class PlayLevel extends Vue {
         region.source.hitAnimation.splice(0);
         region.filter.splice(0);
         region.alpha = 1;
+        region.text = `${Math.round(region.source.temperature)}°C`
       }
       this.autoPanSpeed = 1;
       this.saveHighScore();
@@ -1408,6 +1416,7 @@ export default class PlayLevel extends Vue {
         const heatRationCoefficientObstacle = hitObstacle.heatRationCoefficient;
         ray.hit = true;
         await delay(100);
+        if (!rayObject.body) return;
         const rayVelocity = [
           rayObject.body.velocity.x,
           rayObject.body.velocity.y,

@@ -47,6 +47,13 @@
             :height="region.size[1]"
             :filters="region.region.filter"
           ></Graphics>
+          <text
+            v-if="region.region.text"
+            :anchor="[0.5, 0]"
+            :style="{ fontFamily: 'Arial', fontSize: 34, fill: '#ffffff' }"
+          >
+            {{ region.region.text }}
+          </text>
         </container>
         <slot :itemProps="{ engine: engine, detector: detector }"></slot>
         <container
@@ -212,6 +219,7 @@ export interface CollisionRegion {
   filter: any[];
   color: string;
   alpha: number;
+  text: string;
 }
 
 interface CollisionRegionData {

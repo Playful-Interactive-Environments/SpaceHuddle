@@ -234,12 +234,16 @@ export async function loadTexture(
   else {
     textureState[url] = TextureState.loading;
     if (eventBus) eventBus.emit(EventType.TEXTURES_LOADING_START);
-    const texture = await PIXI.Assets.load(url);
-    textureState[url] = TextureState.loaded;
-    if (isLoadingFinished()) {
-      if (eventBus) eventBus.emit(EventType.ALL_TEXTURES_LOADED);
+    try {
+      const texture = await PIXI.Assets.load(url);
+      textureState[url] = TextureState.loaded;
+      if (isLoadingFinished()) {
+        if (eventBus) eventBus.emit(EventType.ALL_TEXTURES_LOADED);
+      }
+      return texture;
+    } catch (e) {
+      return null;
     }
-    return texture;
   }
 }
 
