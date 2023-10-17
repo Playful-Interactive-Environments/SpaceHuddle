@@ -21,6 +21,7 @@
           :id="element.id"
           :key="element.id"
           :rowspan="element.dependency.duration"
+          :style="{ '--rowspan': element.dependency.duration }"
         >
           <el-card
             class="task-card"
@@ -157,11 +158,11 @@ table {
 }
 
 .dependency-row {
-  height: 3rem;
+  height: 5rem;
   border-bottom: dashed var(--color-dark-contrast) 1px;
 
   td {
-    height: inherit;
+    height: calc(5rem * var(--rowspan));
   }
 }
 

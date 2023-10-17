@@ -64,6 +64,7 @@
                 :rowspan="task.dependency.duration"
                 :style="{
                   display: taskIsVisible(task) ? 'table-cell' : 'none',
+                  '--rowspan': task.dependency.duration,
                 }"
               >
                 <el-card
@@ -626,11 +627,11 @@ table {
 }
 
 .dependency-row {
-  height: 3rem;
+  height: 5rem;
   border-top: dashed var(--color-dark-contrast) 1px;
 
   td {
-    height: inherit;
+    height: calc(5rem * var(--rowspan));
     min-width: 12rem;
     padding: 0.1rem;
   }
