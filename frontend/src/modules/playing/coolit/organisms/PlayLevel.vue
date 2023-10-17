@@ -342,8 +342,10 @@ enum PlayStateType {
 
 export interface PlayStateResult {
   temperatureRise: number;
+  winTime: number;
   stars: number;
   time: number;
+  normalisedTime: number;
   moleculeState: { [key: string]: MoleculeState };
   obstacleState: { [key: string]: ObstacleState };
   regionState: { [key: string]: ObstacleState };
@@ -456,7 +458,7 @@ interface ColorValues {
 export default class PlayLevel extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: null }) readonly level!: Idea | null;
-  @Prop({ default: 120000 }) readonly winTime!: number;
+  @Prop({ default: 180000 }) readonly winTime!: number;
   @Prop({ default: 0 }) readonly temperatureRise!: number;
   @Prop({ default: EndpointAuthorisationType.PARTICIPANT })
   authHeaderTyp!: EndpointAuthorisationType;
@@ -527,8 +529,10 @@ export default class PlayLevel extends Vue {
   get playStateResult(): PlayStateResult {
     const result: PlayStateResult = {
       temperatureRise: this.temperatureRise,
+      winTime: this.temperatureWinTime,
       stars: this.stars,
       time: this.playTime,
+      normalisedTime: this.normalisedTime,
       moleculeState: { ...this.moleculeState },
       obstacleState: {},
       regionState: {},
@@ -653,9 +657,17 @@ export default class PlayLevel extends Vue {
   }
 
   get stars(): number {
-    const stars = Math.floor((this.playTime / this.winTime) * 3);
+    const stars = Math.floor((this.playTime / this.temperatureWinTime) * 3);
     if (stars < 3) return stars;
     return 3;
+  }
+
+  get temperatureWinTime(): number {
+    return this.winTime - Math.abs(this.temperatureRise * 30000);
+  }
+
+  get normalisedTime(): number {
+    return (this.playTime / this.temperatureWinTime) * 120000;
   }
 
   getTimeString(timestamp: number): string {
@@ -1297,7 +1309,7 @@ export default class PlayLevel extends Vue {
         region.source.hitAnimation.splice(0);
         region.filter.splice(0);
         region.alpha = 1;
-        region.text = `${Math.round(region.source.temperature)}°C`
+        region.text = `${Math.round(region.source.temperature)}°C`;
       }
       this.autoPanSpeed = 1;
       this.saveHighScore();
@@ -1612,9 +1624,16 @@ export default class PlayLevel extends Vue {
       if (lastHighScore.time < this.playTime)
         lastHighScore.time = this.playTime;
       if (lastHighScore.stars < this.stars) lastHighScore.stars = this.stars;
+      if (
+        !this.highScore.parameter.normalisedTime ||
+        this.highScore.parameter.normalisedTime < this.normalisedTime
+      )
+        this.highScore.parameter.normalisedTime = this.normalisedTime;
       votingService.putVote(this.highScore);
     } else {
-      const parameter: any = {};
+      const parameter: any = {
+        normalisedTime: this.normalisedTime,
+      };
       for (
         let i = CoolItConst.MAX_TEMPERATURE_RISE;
         i >= CoolItConst.MIN_TEMPERATURE_RISE;

@@ -14,17 +14,8 @@
         <font-awesome-icon icon="trophy" />
       </el-button>
     </div>
-    <div class="overlay-top-left">
-      <el-slider
-        v-model="temperatureRise"
-        vertical
-        height="180px"
-        :min="MIN_TEMPERATURE_RISE"
-        :max="MAX_TEMPERATURE_RISE"
-        :step="0.5"
-        :marks="marks"
-      />
-    </div>
+    <!--<div class="overlay-top-left thermometer">
+    </div>-->
   </div>
   <DrawerBottomOverlay v-model="showMoleculesInfo">
     <template v-slot:header>
@@ -162,6 +153,31 @@
       </el-collapse-item>
     </el-collapse>
   </DrawerBottomOverlay>
+  <el-dialog v-model="showPlayDialog" @close="cancelGame">
+    <template #header>
+      {{ $t('module.playing.coolit.participant.playDialog.header') }}
+    </template>
+    <h1 v-if="selectedIdea">
+      {{ selectedIdea.keywords }}
+    </h1>
+    <div class="thermometer">
+      <el-slider
+        v-model="temperatureRise"
+        vertical
+        height="180px"
+        :min="MIN_TEMPERATURE_RISE"
+        :max="MAX_TEMPERATURE_RISE"
+        :step="0.5"
+        :marks="marks"
+      />
+    </div>
+    <el-button @click="cancelGame">
+      {{ $t('module.playing.coolit.participant.playDialog.cancel') }}
+    </el-button>
+    <el-button @click="startGame">
+      {{ $t('module.playing.coolit.participant.playDialog.play') }}
+    </el-button>
+  </el-dialog>
 </template>
 
 <script lang="ts">
@@ -210,6 +226,7 @@ export default class SelectLevel extends Vue {
   selectedIdea: Idea | null = null;
   showMoleculesInfo = false;
   showHighScore = false;
+  showPlayDialog = false;
   spritesheet!: PIXI.Spritesheet;
   activeMoleculeName = '';
   gameConfig = gameConfig;
@@ -251,6 +268,13 @@ export default class SelectLevel extends Vue {
     ) {
       this.marks[i] = `${i}°C`;
     }
+    votingService.registerGetParameterResult(
+      this.taskId,
+      'normalisedTime',
+      this.updateHighScore,
+      EndpointAuthorisationType.PARTICIPANT,
+      5 * 60
+    );
   }
 
   unmounted(): void {
@@ -289,23 +313,35 @@ export default class SelectLevel extends Vue {
     }
   }
 
-  @Watch('temperatureRise', { immediate: true })
+  /*@Watch('temperatureRise', { immediate: true })
   onTemperatureRiseChanged(): void {
     cashService.deregisterAllGet(this.updateHighScore);
     votingService.registerGetParameterResult(
       this.taskId,
-      `${this.temperatureRise}.time`,
+      //`${this.temperatureRise}.time`,
+      'normalisedTime',
       this.updateHighScore,
       EndpointAuthorisationType.PARTICIPANT,
       5 * 60
     );
-  }
+  }*/
 
   @Watch('selectedIdea', { immediate: true })
   onSelectedLevelChanged(): void {
     if (this.selectedIdea) {
+      this.showPlayDialog = true;
+    }
+  }
+
+  startGame(): void {
+    if (this.selectedIdea) {
       this.$emit('play', this.selectedIdea, this.temperatureRise);
     }
+  }
+
+  cancelGame(): void {
+    this.showPlayDialog = false;
+    this.selectedIdea = null;
   }
 
   updateIdeas(ideas: Idea[]): void {
@@ -434,15 +470,19 @@ export default class SelectLevel extends Vue {
 }
 
 .overlay-top-left {
-  background-image: url('@/modules/playing/coolit/assets/thermometer.png');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
   position: absolute;
   z-index: 100;
   top: 0.5rem;
   left: 0.5rem;
+}
+
+.thermometer {
+  background-image: url('@/modules/playing/coolit/assets/thermometer.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
   padding: 2.8rem 0.1rem 0.3rem 0.1rem;
+  width: 2.5rem;
 }
 
 .clickable {

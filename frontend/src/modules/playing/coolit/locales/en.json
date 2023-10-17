@@ -99,6 +99,11 @@
     "gameOver": "game over",
     "highScore": {
       "header": "highscore"
+    },
+    "playDialog": {
+      "header": "play level",
+      "play": "play",
+      "cancel": "cancel"
     }
   },
   "statistic": {
