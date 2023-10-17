@@ -169,6 +169,11 @@
               :fix-size="molecule.size * moleculeSize * 2"
               :source="molecule"
               :z-index="1"
+              :circle-fast-objects="true"
+              :conditional-velocity="{
+                velocity: {x: 0, y: -3},
+                condition: (object: GameObject) => object.position[1] > gameHeight / 3 * 2
+              }"
               @click="moleculeClicked"
             >
               <CustomSprite
@@ -869,12 +874,15 @@ export default class PlayLevel extends Vue {
     const red = new Color(themeColors.getRedColor()).to('srgb') as any;
     return [red.r, red.g, red.b, mixingFactor / 2];*/
     const color = this.getTemperatureColor(obstacle.temperature);
-    return [
-      color.coords[0],
-      color.coords[1],
-      color.coords[2],
-      alpha > 0 ? alpha : color.alpha,
-    ];
+    if (color) {
+      return [
+        color.coords[0],
+        color.coords[1],
+        color.coords[2],
+        alpha > 0 ? alpha : color.alpha,
+      ];
+    }
+    return [255, 255, 255, 0];
   }
 
   get temperatureGradient(): any {

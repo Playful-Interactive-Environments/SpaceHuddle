@@ -47,6 +47,11 @@ import { GrayscaleFilter } from 'pixi-filters';
 import { toRadians, toDegrees } from '@/utils/angle';
 import * as matterUtil from '@/utils/matter';
 
+export interface ConditionalVelocity {
+  velocity: { x: number; y: number };
+  condition: (object: GameObject) => boolean;
+}
+
 @Options({
   components: {},
   emits: [
@@ -92,8 +97,10 @@ export default class GameObject extends Vue {
   @Prop({ default: null }) triggerDelay!: number | null;
   @Prop({ default: false }) highlighted!: boolean;
   @Prop({ default: false }) disabled!: boolean;
+  @Prop({ default: false }) circleFastObjects!: boolean;
   @Prop({ default: 0 }) anchor!: number | [number, number];
   @Prop({ default: 0 }) zIndex!: number;
+  @Prop({ default: null }) conditionalVelocity!: ConditionalVelocity | null;
   @Prop({ default: null }) mask!:
     | PIXI.Container<PIXI.DisplayObject>
     | PIXI.MaskData
@@ -514,6 +521,40 @@ export default class GameObject extends Vue {
             bottom: outsideBottom,
             top: outsideTop,
           });
+        }
+      }
+      if (
+        this.circleFastObjects &&
+        this.gameContainer.mouseConstraint.body?.id !== this.body.id
+      ) {
+        const velocityAmount =
+          Math.pow(this.body.velocity.x, 2) + Math.pow(this.body.velocity.y, 2);
+        if (velocityAmount > 10) {
+          const delta = 10;
+          const pos: [number, number] = [
+            this.body.position.x,
+            this.body.position.y,
+          ];
+          if (pos[0] < -delta) pos[0] = this.gameContainer.gameWidth;
+          else if (pos[0] > this.gameContainer.gameWidth + delta) pos[0] = 0;
+          if (pos[1] < -delta) pos[1] = this.gameContainer.gameHeight;
+          else if (pos[1] > this.gameContainer.gameHeight + delta) pos[1] = 0;
+          Matter.Body.setPosition(this.body, { x: pos[0], y: pos[1] });
+        }
+      }
+      if (
+        this.conditionalVelocity &&
+        this.gameContainer.mouseConstraint.body?.id !== this.body.id
+      ) {
+        const velocityAmount =
+          Math.pow(this.body.velocity.x, 2) + Math.pow(this.body.velocity.y, 2);
+        if (velocityAmount < 5) {
+          if (this.conditionalVelocity.condition(this)) {
+            Matter.Body.setVelocity(
+              this.body,
+              this.conditionalVelocity.velocity
+            );
+          }
         }
       }
       this.position = [
