@@ -198,6 +198,7 @@ export class CombinedInputManager {
         avg:
           votes.reduce((sum, item) => sum + item.sum, 0) /
           votes.reduce((sum, item) => sum + item.count, 0),
+        details: undefined,
       });
     }
     this.votingResult = votingResult;
@@ -230,6 +231,7 @@ export class CombinedInputManager {
           sum: sum[ideaId].sum,
           count: sum[ideaId].count,
           avg: sum[ideaId].count > 0 ? sum[ideaId].sum / sum[ideaId].count : 0,
+          details: undefined,
         });
       }
       this.votingResult = votingResult;

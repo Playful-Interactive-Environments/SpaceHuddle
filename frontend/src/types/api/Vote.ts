@@ -30,4 +30,5 @@ export interface VoteParameterResult {
   sum: number;
   avg: number;
   count: number;
+  details: { value: number; avatar: Avatar }[] | undefined;
 }

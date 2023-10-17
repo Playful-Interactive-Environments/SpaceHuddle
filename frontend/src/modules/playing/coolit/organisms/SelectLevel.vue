@@ -10,14 +10,17 @@
       <el-button v-on:click="showMoleculesInfo = true">
         <font-awesome-icon icon="atom" />
       </el-button>
+      <el-button v-on:click="showHighScore = true">
+        <font-awesome-icon icon="trophy" />
+      </el-button>
     </div>
     <div class="overlay-top-left">
       <el-slider
         v-model="temperatureRise"
         vertical
         height="180px"
-        :min="-2"
-        :max="5"
+        :min="MIN_TEMPERATURE_RISE"
+        :max="MAX_TEMPERATURE_RISE"
         :step="0.5"
         :marks="marks"
       />
@@ -131,6 +134,34 @@
       </el-scrollbar>
     </template>
   </DrawerBottomOverlay>
+  <DrawerBottomOverlay v-model="showHighScore">
+    <template v-slot:header>
+      {{ $t('module.playing.coolit.participant.highScore.header') }}
+      {{ temperatureRise >= 0 ? '+' : '' }}{{ temperatureRise }}°C
+    </template>
+    <el-collapse v-model="openHighScoreLevels">
+      <el-collapse-item
+        v-for="level of highScoreList"
+        :key="level.ideaId"
+        :title="getLevelTitle(level.ideaId)"
+        :name="level.ideaId"
+      >
+        <table class="highScore">
+          <tr v-for="entry of level.details" :key="entry.avatar.symbol">
+            <td>
+              <font-awesome-icon
+                :icon="entry.avatar.symbol"
+                :style="{ color: entry.avatar.color }"
+              ></font-awesome-icon>
+            </td>
+            <td>
+              {{ getTimeString(entry.value) }}
+            </td>
+          </tr>
+        </table>
+      </el-collapse-item>
+    </el-collapse>
+  </DrawerBottomOverlay>
 </template>
 
 <script lang="ts">
@@ -141,6 +172,7 @@ import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as ideaService from '@/services/idea-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as taskParticipantService from '@/services/task-participant-service';
+import * as votingService from '@/services/voting-service';
 import { Idea } from '@/types/api/Idea';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
 import { GameStep } from '@/modules/playing/coolit/output/Participant.vue';
@@ -153,6 +185,9 @@ import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/coolit/data/gameConfig.json';
 import { until } from '@/utils/wait';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
+import * as CoolItConst from '@/modules/playing/coolit/utils/consts';
+import * as cashService from '@/services/cash-service';
+import { VoteParameterResult } from '@/types/api/Vote';
 
 @Options({
   components: {
@@ -168,17 +203,24 @@ export default class SelectLevel extends Vue {
   @Prop() readonly trackingManager!: TrackingManager;
   @Prop() readonly taskId!: string;
   @Prop() readonly module!: Module;
+  @Prop({ default: true }) readonly openHighScore!: boolean;
   ideas: Idea[] = [];
   result: TaskParticipantIterationStep[] = [];
   mapping: { [key: string]: number } = {};
   selectedIdea: Idea | null = null;
   showMoleculesInfo = false;
+  showHighScore = false;
   spritesheet!: PIXI.Spritesheet;
   activeMoleculeName = '';
   gameConfig = gameConfig;
   rendererList: { [key: string]: PIXI.Renderer } = {};
   temperatureRise = 0;
   marks = {};
+  highScoreList: VoteParameterResult[] = [];
+  openHighScoreLevels: string[] = [];
+
+  MIN_TEMPERATURE_RISE = CoolItConst.MIN_TEMPERATURE_RISE;
+  MAX_TEMPERATURE_RISE = CoolItConst.MAX_TEMPERATURE_RISE;
 
   get inactiveColor(): string {
     return themeColors.getInactiveColor();
@@ -188,18 +230,43 @@ export default class SelectLevel extends Vue {
     return themeColors.getBackgroundColor();
   }
 
-  mounted(): void {
-    pixiUtil
-      .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
-      .then((sheet) => (this.spritesheet = sheet));
+  getTimeString(timestamp: number): string {
+    const seconds = Math.floor(timestamp / 1000);
+    const secondsString = `0${seconds % 60}`;
+    return `${Math.floor(seconds / 60)}:${secondsString.slice(-2)}`;
+  }
 
-    for (let i = 5; i >= -2; i--) {
+  mounted(): void {
+    this.showHighScore = this.openHighScore;
+    setTimeout(() => {
+      pixiUtil
+        .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
+        .then((sheet) => (this.spritesheet = sheet));
+    }, 100);
+
+    for (
+      let i = CoolItConst.MAX_TEMPERATURE_RISE;
+      i >= CoolItConst.MIN_TEMPERATURE_RISE;
+      i--
+    ) {
       this.marks[i] = `${i}°C`;
     }
   }
 
   unmounted(): void {
     pixiUtil.unloadTexture('/assets/games/moveit/molecules.json');
+    cashService.deregisterAllGet(this.updateHighScore);
+  }
+
+  updateHighScore(list: VoteParameterResult[]): void {
+    if (this.highScoreList.length === 0)
+      this.openHighScoreLevels = list.map((item) => item.ideaId);
+    for (const level of list) {
+      if (level.details) {
+        level.details = level.details.sort((a, b) => b.value - a.value);
+      }
+    }
+    this.highScoreList = list;
   }
 
   @Watch('taskId', { immediate: true })
@@ -220,6 +287,18 @@ export default class SelectLevel extends Vue {
         2 * 60
       );
     }
+  }
+
+  @Watch('temperatureRise', { immediate: true })
+  onTemperatureRiseChanged(): void {
+    cashService.deregisterAllGet(this.updateHighScore);
+    votingService.registerGetParameterResult(
+      this.taskId,
+      `${this.temperatureRise}.time`,
+      this.updateHighScore,
+      EndpointAuthorisationType.PARTICIPANT,
+      5 * 60
+    );
   }
 
   @Watch('selectedIdea', { immediate: true })
@@ -319,6 +398,14 @@ export default class SelectLevel extends Vue {
       }
     });
   }
+
+  getLevelTitle(levelId: string): string {
+    if (this.ideas) {
+      const level = this.ideas.find((item) => item.id === levelId);
+      if (level) return level.keywords;
+    }
+    return '';
+  }
 }
 </script>
 
@@ -417,5 +504,14 @@ export default class SelectLevel extends Vue {
 
 .molecule {
   font-size: var(--font-size-xxsmall);
+}
+
+.highScore {
+  color: var(--color-playing);
+  width: 100%;
+
+  td {
+    width: 50%;
+  }
 }
 </style>

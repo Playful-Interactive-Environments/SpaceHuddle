@@ -14,10 +14,12 @@
       :tracking-manager="trackingManager"
       :task-id="taskId"
       :module="module"
+      :open-high-score="levelDone"
       @play="startLevel"
     />
     <play-level
       v-if="gameStep === GameStep.Play && gameState === GameState.Game"
+      :task-id="taskId"
       :level="activeLevel"
       :tracking-manager="trackingManager"
       :temperature-rise="temperatureRise"
@@ -73,6 +75,7 @@ export default class Participant extends Vue {
   stepTime = Date.now();
   activeLevel: Idea | null = null;
   temperatureRise = 0;
+  levelDone = false;
 
   gameStep = GameStep.Select;
   GameStep = GameStep;
@@ -145,6 +148,7 @@ export default class Participant extends Vue {
         TaskParticipantIterationStepStatesType.NEUTRAL,
         {
           level: level.id,
+          temperatureRise: this.temperatureRise,
           selectTime: Date.now() - this.stepTime,
           playTime: Date.now() - this.startTime,
           stars: 0,
@@ -164,13 +168,19 @@ export default class Participant extends Vue {
 
   levelPlayed(state: PlayStateResult): void {
     this.gameStep = GameStep.Select;
-    this.gameState = GameState.Info;
+    //this.gameState = GameState.Info;
+    this.levelDone = true;
 
     if (this.trackingManager) {
       this.trackingManager.saveIterationStep({
         state: state,
-        cleanupTime: Date.now() - this.stepTime,
+        coolItTime: Date.now() - this.stepTime,
         playTime: Date.now() - this.startTime,
+        stars: state.stars,
+        hitCount: state.moleculeHitCount,
+        temperature: state.temperature,
+        moleculeState: state.moleculeState,
+        obstacleState: state.obstacleState,
       });
       this.trackingManager.setFinishedState(this.module);
     }

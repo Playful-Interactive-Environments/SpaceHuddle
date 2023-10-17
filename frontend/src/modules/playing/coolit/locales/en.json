@@ -96,7 +96,10 @@
       "greenhouseGas": "Greenhouse Gas",
       "atmosphericGas": "Atmospheric Gas"
     },
-    "gameOver": "game over"
+    "gameOver": "game over",
+    "highScore": {
+      "header": "highscore"
+    }
   },
   "statistic": {
     "level": "How many times was which level played?",

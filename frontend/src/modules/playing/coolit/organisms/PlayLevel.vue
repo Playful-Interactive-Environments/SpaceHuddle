@@ -227,11 +227,17 @@
       </template>
     </GameContainer>
     <div class="statusOverlay">
-      {{ playTimeString }}
+      {{ getTimeString(playTime) }}
       <el-rate v-model="stars" size="large" :max="3" :disabled="true" />
     </div>
     <div class="statusGameOver" v-if="gameOver">
-      {{ $t('module.playing.coolit.participant.gameOver') }}
+      <div>{{ $t('module.playing.coolit.participant.gameOver') }}</div>
+      <div>
+        <el-rate v-model="stars" size="large" :max="3" :disabled="true" />
+      </div>
+      <div>{{ level.keywords }}</div>
+      <div>{{ getTimeString(playTime) }}</div>
+      <div v-if="lastTimeDelta > 0">+{{ getTimeString(lastTimeDelta) }}</div>
     </div>
   </div>
 </template>
@@ -242,17 +248,18 @@ import * as PIXI from 'pixi.js';
 import { Prop, Watch } from 'vue-property-decorator';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer, {
-  BackgroundPosition,
   BackgroundMovement,
-  CollisionRegion,
+  BackgroundPosition,
   CollisionBorderType,
+  CollisionRegion,
 } from '@/components/shared/atoms/game/GameContainer.vue';
 import * as placeable from '@/types/game/Placeable';
 import * as pixiUtil from '@/utils/pixi';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
-import { until, delay } from '@/utils/wait';
+import { delay, until } from '@/utils/wait';
 import * as tutorialService from '@/services/tutorial-service';
+import * as votingService from '@/services/voting-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
@@ -270,6 +277,8 @@ import Matter from 'matter-js';
 import { ShockwaveFilter } from 'pixi-filters';
 import * as matterUtil from '@/utils/matter';
 import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
+import { Vote } from '@/types/api/Vote';
+import * as CoolItConst from '@/modules/playing/coolit/utils/consts';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
@@ -483,6 +492,7 @@ export default class PlayLevel extends Vue {
   moleculeList: MoleculeData[] = [];
   backgroundParticle: { [key: string]: PIXIParticles.EmitterConfigV3 } = {};
   moleculeState: { [key: string]: MoleculeState } = {};
+  highScore: Vote | null = null;
 
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
@@ -630,17 +640,16 @@ export default class PlayLevel extends Vue {
     return (sumObstacles + sumRegions) / (countObstacles + countRegions);
   }
 
-  get playTimeString(): string {
-    const playTime = this.playTime;
-    const seconds = Math.floor(playTime / 1000);
-    const secondsString = `0${seconds % 60}`;
-    return `${Math.floor(seconds / 60)}:${secondsString.slice(-2)}`;
-  }
-
   get stars(): number {
     const stars = Math.floor((this.playTime / this.winTime) * 3);
     if (stars < 3) return stars;
     return 3;
+  }
+
+  getTimeString(timestamp: number): string {
+    const seconds = Math.floor(timestamp / 1000);
+    const secondsString = `0${seconds % 60}`;
+    return `${Math.floor(seconds / 60)}:${secondsString.slice(-2)}`;
   }
 
   getObstacleTypeOptions(obstacleType: string, obstacleName: string): any {
@@ -841,6 +850,7 @@ export default class PlayLevel extends Vue {
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTutorial);
+    cashService.deregisterAllGet(this.updateHighScore);
   }
 
   get gameConfigTypes(): string[] {
@@ -929,6 +939,12 @@ export default class PlayLevel extends Vue {
   @Watch('level', { immediate: true })
   async onLevelChanged(): Promise<void> {
     if (this.level) {
+      votingService.registerGetVotes(
+        this.taskId,
+        this.updateHighScore,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
       this.isReadyForPlay = false;
       this.obstacleList = [];
       const levelType = this.level.parameter.type
@@ -977,6 +993,14 @@ export default class PlayLevel extends Vue {
       this.startTime = Date.now();
       this.playStateType = PlayStateType.play;
       this.isReadyForPlay = true;
+    }
+  }
+
+  updateHighScore(votes: Vote[]): void {
+    if (this.level) {
+      const levelId = this.level.id;
+      const vote = votes.find((item) => item.ideaId === levelId);
+      if (vote) this.highScore = vote;
     }
   }
 
@@ -1260,6 +1284,7 @@ export default class PlayLevel extends Vue {
         region.alpha = 1;
       }
       this.autoPanSpeed = 1;
+      this.saveHighScore();
       return;
     }
     const updateDelta = updateTimeStamp - this.updateTimeStamp;
@@ -1556,8 +1581,57 @@ export default class PlayLevel extends Vue {
     this.panOffsetMax = max;
     this.panOffset = value;
     if (this.gameOver && max[0] === 100 && max[1] === 100) {
-      console.log('bounce');
+      this.finished();
     }
+  }
+
+  lastTimeDelta = 0;
+  saveHighScore(): void {
+    if (this.highScore) {
+      const lastHighScore = this.highScore.parameter[this.temperatureRise];
+      this.lastTimeDelta = this.playTime - lastHighScore.time;
+      lastHighScore.lastTimeDelta = this.lastTimeDelta;
+      lastHighScore.lastStarDelta = this.stars - lastHighScore.stars;
+      if (lastHighScore.time < this.playTime)
+        lastHighScore.time = this.playTime;
+      if (lastHighScore.stars < this.stars) lastHighScore.stars = this.stars;
+      votingService.putVote(this.highScore);
+    } else {
+      const parameter: any = {};
+      for (
+        let i = CoolItConst.MAX_TEMPERATURE_RISE;
+        i >= CoolItConst.MIN_TEMPERATURE_RISE;
+        i--
+      ) {
+        if (i === this.temperatureRise) {
+          parameter[i] = {
+            time: this.playTime,
+            stars: this.stars,
+            lastTimeDelta: this.playTime,
+            lastStarDelta: this.stars,
+          };
+        } else {
+          parameter[i] = {
+            time: 0,
+            stars: 0,
+            lastTimeDelta: 0,
+            lastStarDelta: 0,
+          };
+        }
+      }
+      votingService
+        .postVote(this.taskId, {
+          ideaId: this.level?.id,
+          rating: this.stars,
+          detailRating: this.playTime,
+          parameter: parameter,
+        })
+        .then((vote) => (this.highScore = vote));
+    }
+  }
+
+  finished(): void {
+    this.$emit('finished', this.playStateResult);
   }
 
   moleculeClicked(item: any): void {
@@ -1588,7 +1662,7 @@ export default class PlayLevel extends Vue {
   pointer-events: none;
   position: absolute;
   z-index: 100;
-  top: 40vh;
+  top: 30vh;
   bottom: 1rem;
   right: 1rem;
   left: 1rem;
