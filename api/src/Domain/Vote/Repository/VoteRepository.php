@@ -165,11 +165,27 @@ class VoteRepository implements RepositoryInterface
      */
     public function getParameterResult(string $taskId, string $parameterName): array
     {
-        $query = $this->queryFactory->newSelect($this->getEntityName());
-        $query->select(["idea_id", "parameter"])
+        $isPlayingTask = $this->queryFactory->newSelect('task')
+            ->select(["id"])
             ->andWhere([
-                "task_id" => $taskId
-            ]);
+                "id" => $taskId,
+                "task_type" => strtoupper(TaskType::PLAYING)
+            ])->execute()->count() > 0;
+
+
+        $query = $this->queryFactory->newSelect($this->getEntityName());
+        if (!$isPlayingTask) {
+            $query->select(["idea_id", "parameter"])
+                ->andWhere([
+                    "task_id" => $taskId
+                ]);
+        } else {
+            $query->select(["vote.idea_id", "vote.parameter", "participant.color", "participant.symbol"])
+                ->innerJoin("participant", "participant.id = vote.participant_id")
+                ->andWhere([
+                    "task_id" => $taskId
+                ]);
+        }
 
         $rows = $query->execute()->fetchAll("assoc");
         $sum = [];
@@ -177,14 +193,37 @@ class VoteRepository implements RepositoryInterface
             foreach ($rows as $resultItem) {
                 $reader = new ArrayReader($resultItem);
                 $idea_id = $reader->findString("idea_id");
-                if (!array_key_exists($idea_id, $sum)) $sum[$idea_id] = [
-                    "sum" => 0,
-                    "count" => 0
-                ];
+                if (!array_key_exists($idea_id, $sum)) {
+                    $sum[$idea_id] = [
+                        "sum" => 0,
+                        "count" => 0
+                    ];
+                    if ($isPlayingTask) {
+                        $sum[$idea_id]["details"] = [];
+                    }
+                }
                 $parameter = (object)json_decode($reader->findString("parameter") ?? "{}");
-                if (property_exists($parameter, $parameterName) && $parameter->$parameterName > 0) {
-                    $sum[$idea_id]["sum"] += $parameter->$parameterName;
+                $parameterNameParts = explode('.', $parameterName);
+                $parameterNameValue = $parameter;
+                foreach ($parameterNameParts as $parameterNamePart) {
+                    if (property_exists($parameterNameValue, $parameterNamePart)) {
+                        $parameterNameValue = $parameterNameValue->$parameterNamePart;
+                    } else break;
+                }
+                if (is_numeric($parameterNameValue) && $parameterNameValue > 0) {
+                    $sum[$idea_id]["sum"] += $parameterNameValue;
                     $sum[$idea_id]["count"] += 1;
+                    if ($isPlayingTask) {
+                        $color = $reader->findString("color");
+                        $symbol = $reader->findString("symbol");
+                        array_push($sum[$idea_id]["details"], [
+                            "value" => $parameterNameValue,
+                            "avatar" => [
+                                "color" => $color,
+                                "symbol" => $symbol
+                            ]
+                        ]);
+                    }
                 }
             }
         }
