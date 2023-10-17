@@ -213,17 +213,17 @@ class VoteRepository implements RepositoryInterface
                 if (is_numeric($parameterNameValue) && $parameterNameValue > 0) {
                     $sum[$idea_id]["sum"] += $parameterNameValue;
                     $sum[$idea_id]["count"] += 1;
-                    if ($isPlayingTask) {
-                        $color = $reader->findString("color");
-                        $symbol = $reader->findString("symbol");
-                        array_push($sum[$idea_id]["details"], [
-                            "value" => $parameterNameValue,
-                            "avatar" => [
-                                "color" => $color,
-                                "symbol" => $symbol
-                            ]
-                        ]);
-                    }
+                }
+                if ($isPlayingTask) {
+                    $color = $reader->findString("color");
+                    $symbol = $reader->findString("symbol");
+                    array_push($sum[$idea_id]["details"], [
+                        "value" => $parameterNameValue,
+                        "avatar" => [
+                            "color" => $color,
+                            "symbol" => $symbol
+                        ]
+                    ]);
                 }
             }
         }
