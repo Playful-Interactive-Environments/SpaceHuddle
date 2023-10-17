@@ -1629,10 +1629,16 @@ export default class PlayLevel extends Vue {
         this.highScore.parameter.normalisedTime < this.normalisedTime
       )
         this.highScore.parameter.normalisedTime = this.normalisedTime;
+      if (
+        !this.highScore.parameter.rate ||
+        this.highScore.parameter.rate < this.stars
+      )
+        this.highScore.parameter.rate = this.stars;
       votingService.putVote(this.highScore);
     } else {
       const parameter: any = {
         normalisedTime: this.normalisedTime,
+        rate: this.stars,
       };
       for (
         let i = CoolItConst.MAX_TEMPERATURE_RISE;

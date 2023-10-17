@@ -146,7 +146,15 @@
               ></font-awesome-icon>
             </td>
             <td>
-              {{ getTimeString(entry.value) }}
+              {{ getTimeString(entry.value.normalisedTime) }}
+            </td>
+            <td>
+              <el-rate
+                v-model="entry.value.rate"
+                size="large"
+                :max="3"
+                :disabled="true"
+              />
             </td>
           </tr>
         </table>
@@ -270,7 +278,7 @@ export default class SelectLevel extends Vue {
     }
     votingService.registerGetParameterResult(
       this.taskId,
-      'normalisedTime',
+      '-',
       this.updateHighScore,
       EndpointAuthorisationType.PARTICIPANT,
       5 * 60
@@ -287,7 +295,9 @@ export default class SelectLevel extends Vue {
       this.openHighScoreLevels = list.map((item) => item.ideaId);
     for (const level of list) {
       if (level.details) {
-        level.details = level.details.sort((a, b) => b.value - a.value);
+        level.details = level.details.sort(
+          (a, b) => b.value.normalisedTime - a.value.normalisedTime
+        );
       }
     }
     this.highScoreList = list;
@@ -551,7 +561,7 @@ export default class SelectLevel extends Vue {
   width: 100%;
 
   td {
-    width: 50%;
+    width: 33%;
   }
 }
 </style>
