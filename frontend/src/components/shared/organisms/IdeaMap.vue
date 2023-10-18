@@ -12,7 +12,7 @@
       @map:dragend="changeSection"
     >
       <CustomMapMarker
-        :coordinates="convertCoordinates(idea.parameter.position)"
+        :coordinates="convertCoordinates(idea.parameter.position, idea)"
         :draggable="canChangePosition(idea)"
         v-for="idea of ideas"
         :key="idea.id"
@@ -225,11 +225,29 @@ export default class IdeaMap extends Vue {
     }
   }
 
-  convertCoordinates(position: [number, number]): LngLatLike {
+  convertCoordinates(
+    position: [number, number],
+    idea: Idea | null = null
+  ): LngLatLike {
     if (position) {
       return {
         lng: position[0],
         lat: position[1],
+      };
+    }
+    if (this.map && idea) {
+      const bounds = this.map.getBounds();
+      const pos = turf.randomPosition([
+        bounds._sw.lng,
+        bounds._sw.lat,
+        bounds._ne.lng,
+        bounds._ne.lat,
+      ]);
+      idea.parameter.position = pos;
+      this.$emit('ideaPositionChanged', idea);
+      return {
+        lng: pos[0],
+        lat: pos[1],
       };
     }
     if (this.parameter.mapCenter) {
