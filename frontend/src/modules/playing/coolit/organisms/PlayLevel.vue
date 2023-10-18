@@ -234,6 +234,7 @@
               :source="molecule"
               :z-index="1"
               :circle-fast-objects="true"
+              :remove-from-engin-if-not-visible="true"
               :conditional-velocity="{
                 velocity: {x: 0, y: -3},
                 condition: (object: GameObject) => object.position[1] > gameHeight / 3 * 2

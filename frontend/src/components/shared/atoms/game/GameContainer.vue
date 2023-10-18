@@ -782,7 +782,8 @@ export default class GameContainer extends Vue {
       if (
         gameObject.body &&
         gameObject.affectedByForce &&
-        !gameObject.isStatic
+        !gameObject.isStatic &&
+        gameObject.isVisible()
       ) {
         Matter.Body.setVelocity(gameObject.body, {
           x: gameObject.body.velocity.x + calcForce(gameObject.body),
@@ -1089,7 +1090,9 @@ export default class GameContainer extends Vue {
           | Matter.MouseConstraint
         )[]
   ): void {
-    if (this.engine) Matter.Composite.add(this.engine.world, physicObject);
+    if (this.engine) {
+      Matter.Composite.add(this.engine.world, physicObject);
+    }
   }
 
   bodyAdded(): void {
@@ -1110,6 +1113,20 @@ export default class GameContainer extends Vue {
         )[]
   ): void {
     if (this.engine) Matter.Composite.remove(this.engine.world, physicObject);
+  }
+
+  addGameObjectToEngin(gameObject: GameObject): void {
+    if (gameObject.body && this.engine && !gameObject.isPartOfEngin) {
+      gameObject.isPartOfEngin = true;
+      this.addToEngin(gameObject.body);
+    }
+  }
+
+  removeGameObjectFromEngin(gameObject: GameObject): void {
+    if (gameObject.body && this.engine && gameObject.isPartOfEngin) {
+      gameObject.isPartOfEngin = false;
+      this.removeFromEngin(gameObject.body);
+    }
   }
 
   collisionStart(event: Matter.Event): void {

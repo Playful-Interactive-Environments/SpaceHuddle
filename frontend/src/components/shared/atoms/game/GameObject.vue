@@ -98,6 +98,7 @@ export default class GameObject extends Vue {
   @Prop({ default: false }) highlighted!: boolean;
   @Prop({ default: false }) disabled!: boolean;
   @Prop({ default: false }) circleFastObjects!: boolean;
+  @Prop({ default: false }) removeFromEnginIfNotVisible!: boolean;
   @Prop({ default: 0 }) anchor!: number | [number, number];
   @Prop({ default: 0 }) zIndex!: number;
   @Prop({ default: null }) conditionalVelocity!: ConditionalVelocity | null;
@@ -118,6 +119,7 @@ export default class GameObject extends Vue {
   destroyed = false;
   objectFilters: any[] = [];
   loadingFinished = false;
+  isPartOfEngin = false;
 
   get displayX(): number {
     return this.position[0] - this.offset[0];
@@ -340,7 +342,7 @@ export default class GameObject extends Vue {
     this.onScaleChanged();
     this.$emit('update:id', this.body.id);
     if (this.clickable) {
-      this.addBodyToEngine();
+      this.manageEngin();
       this.addBodyToDetector();
     }
   }
@@ -356,7 +358,7 @@ export default class GameObject extends Vue {
     this.onScaleChanged();
     this.$emit('update:id', this.body.id);
     if (this.clickable) {
-      this.addBodyToEngine();
+      this.manageEngin();
       this.addBodyToDetector();
     }
   }
@@ -383,14 +385,29 @@ export default class GameObject extends Vue {
     this.onScaleChanged();
     this.$emit('update:id', this.body.id);
     if (this.clickable) {
-      this.addBodyToEngine();
+      this.manageEngin();
       this.addBodyToDetector();
     }
   }
 
   addBodyToEngine(): void {
-    if (this.gameContainer && this.body) {
-      this.gameContainer.addToEngin(this.body);
+    if (this.gameContainer) {
+      this.gameContainer.addGameObjectToEngin(this);
+    }
+  }
+
+  manageEngin(): void {
+    if (!this.clickable) return;
+    if (this.removeFromEnginIfNotVisible) {
+      if (this.isVisible() && !this.isPartOfEngin) {
+        this.addBodyToEngine();
+      } else if (!this.isVisible() && this.isPartOfEngin) {
+        if (this.gameContainer) {
+          this.gameContainer.removeGameObjectFromEngin(this);
+        }
+      }
+    } else if (!this.isPartOfEngin) {
+      this.addBodyToEngine();
     }
   }
 
@@ -489,7 +506,7 @@ export default class GameObject extends Vue {
   setGameContainer(gameContainer: GameContainer): void {
     this.gameContainer = gameContainer;
     this.initPosition();
-    this.addBodyToEngine();
+    this.manageEngin();
     this.addBodyToDetector();
   }
 
@@ -571,6 +588,7 @@ export default class GameObject extends Vue {
       this.$emit('update:y', inputPosition[1]);
     }
     if (this.boundsGraphic) this.drawBorder();
+    if (this.removeFromEnginIfNotVisible) this.manageEngin();
   }
 
   notifyDestroy(): void {
@@ -645,6 +663,18 @@ export default class GameObject extends Vue {
     //if (this.container) return this.container.height + this.colliderDelta * 2;
     //if (this.body) return this.body.bounds.max.y - this.body.bounds.min.y;
     return this.displayHeight + this.colliderDelta * 2;
+  }
+
+  isVisible(): boolean {
+    if (!this.body) return false;
+    const x = this.body.position.x; // this.position[0];
+    const y = this.body.position.y; // this.position[1];
+    return (
+      x >= 0 &&
+      x <= this.gameContainer.gameWidth &&
+      y >= 1 &&
+      y <= this.gameContainer.gameHeight
+    );
   }
 
   boundsWidth: number | null = null;
