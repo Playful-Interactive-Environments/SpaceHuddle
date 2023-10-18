@@ -14,35 +14,40 @@
       <div class="CO2BarBackground">
         <p>CO²: {{ pointsSpentOpponent }}/{{ maxCost }}</p>
         <div
-            class="CO2Bar"
-            :style="{ width: (pointsSpentOpponent / maxCost) * 100 + '%' }"
-            :class="{ hidden: pointsSpentOpponent / maxCost <= 0 }"
+          class="CO2Bar"
+          :style="{ width: (pointsSpentOpponent / maxCost) * 100 + '%' }"
+          :class="{ hidden: pointsSpentOpponent / maxCost <= 0 }"
         ></div>
       </div>
     </div>
     <div class="categories" id="opponent">
       <div
-          v-for="cat in categoryPointsOpponent"
-          :key="cat[0]"
-          :id="cat[0]"
-          class="categoryContainer"
+        v-for="cat in categoryPointsOpponent"
+        :key="cat[0]"
+        :id="cat[0]"
+        class="categoryContainer"
       >
         <font-awesome-icon
-            :icon="gameConfig.categories[cat[0]].settings.icon"
-            class="categoryIcon categoryItem"
-            style="rotation: 180deg"
+          :icon="gameConfig.categories[cat[0]].settings.icon"
+          class="categoryIcon categoryItem"
+          style="rotation: 180deg"
         />
         <span
-            class="circle categoryItem"
-            :class="{ fullCircle: cat[1] >= 2 }"
+          class="circle categoryItem"
+          :class="{ fullCircle: cat[1] >= 2 }"
         ></span>
         <span
-            class="circle categoryItem"
-            :class="{ fullCircle: cat[1] >= 1 }"
+          class="circle categoryItem"
+          :class="{ fullCircle: cat[1] >= 1 }"
         ></span>
       </div>
     </div>
-    <TransitionGroup name="activeCards" class="activeCards" tag="div" id="activeCards">
+    <TransitionGroup
+      name="activeCards"
+      class="activeCards"
+      tag="div"
+      id="activeCards"
+    >
       <div
         v-for="card in cardsPlayed"
         :key="card[7]"
@@ -253,7 +258,7 @@ export default class PlayState extends Vue {
 
   activeCard: any[] = [];
   cardsPlayed: any[] = [];
-  ownCardPlayed = "";
+  ownCardPlayed = '';
 
   cards = this.shuffle(this.parseCards(gameConfig));
   cardHand: any[] = [];
@@ -277,7 +282,7 @@ export default class PlayState extends Vue {
     this.cards = this.shuffle(this.parseCards(gameConfig));
   }
 
-  playstateChange(outcome, reason) {
+  playStateChange(outcome, reason) {
     switch (outcome) {
       case 'lost':
         this.playStateType = PlayStateType.lost;
@@ -365,35 +370,78 @@ export default class PlayState extends Vue {
       this.cardHand.push(card);
     }
 
-    this.cardsPlayed.push(this.testCard);
+    if (!this.playFirst) {
+      this.cardsPlayed.push(this.testCard);
+    }
   }
 
+  categoryIconChanged: any[] = [];
   cardPlayed(card) {
-    const container = document.getElementById('activeCards');
-    const element = document.getElementById(card[7]);
-    const button = document.getElementById('cardSelectButton');
-    if (element && container) {
-      //element.classList.remove('cardContainer');
-      //element.classList.add('cardPlayed');
-      if (button) {
-        button.setAttribute('disabled', '');
-      }
-      //element.classList.remove('cardContainerActive');
-      //container.append(element.cloneNode(true));
-      const index = this.cardHand.indexOf(card);
-      this.cardHand.splice(index, 1);
-      this.cardsPlayed.push(card);
-      this.ownCardPlayed = card[7];
-    }
-    setTimeout(() => {
-      if (this.playFirst) {
-        this.compareCards(card, this.testCard, this.playFirst);
-        this.playFirst = !this.playFirst;
+    //clear active card to avoid replaying already played card
+    this.activeCard = [];
+    let continuePlay = true;
+    if (!this.playFirst) {
+      //Checking category for category zugzwang (if you have the category an opponent played, you HAVE to play that card)
+      //Only relevant if not playing first
+      const card2 = this.cardsPlayed[0];
+      const boolArray: boolean[] = this.checkAllCardCategories(card2);
+      continuePlay = this.checkCategories(card, card2);
+      if (boolArray.every((en) => !en)) {
+        continuePlay = true;
       } else {
-        this.compareCards(this.testCard, card, this.playFirst);
-        this.playFirst = !this.playFirst;
+        //Highlighting card categories that do not fit (in case one has a playable card)
+        if (!continuePlay) {
+          const element = document.getElementsByClassName('cardContainer');
+          for (let i = 0; i < this.cardHand.length; i++) {
+            if (!boolArray[i] && element[i]) {
+              const cat = element[i].querySelectorAll('.categoryCardIcon');
+              if (cat[0]) {
+                this.categoryIconChanged.push(cat[0]);
+                cat[0].classList.add('categoryCardIconHighlighted');
+              }
+            }
+          }
+        }
       }
-    }, 2000);
+    }
+    if (continuePlay && card[0] > 0) {
+      const container = document.getElementById('activeCards');
+      const element = document.getElementById(card[7]);
+      const button = document.getElementById('cardSelectButton');
+      if (element && container) {
+        //deactivate the button to prevent more cards being played
+        if (button) {
+          button.setAttribute('disabled', '');
+        }
+        const index = this.cardHand.indexOf(card);
+        //remove from hand and add to play
+        this.cardHand.splice(index, 1);
+        this.cardsPlayed.push(card);
+        this.ownCardPlayed = card[7];
+      }
+
+      //remove wrong category icon highlight
+      for (let i = 0; i < this.categoryIconChanged.length; i++) {
+        this.categoryIconChanged[i].classList.remove('categoryCardIconHighlighted');
+      }
+
+      //Show opponent card
+      if (this.playFirst) {
+        setTimeout(() => {
+          this.cardsPlayed.push(this.testCard);
+        }, 1000);
+      }
+
+      setTimeout(() => {
+        if (this.playFirst) {
+          this.compareCards(card, this.testCard, this.playFirst);
+          this.playFirst = !this.playFirst;
+        } else {
+          this.compareCards(this.testCard, card, this.playFirst);
+          this.playFirst = !this.playFirst;
+        }
+      }, 2500);
+    }
   }
 
   drawNewCard() {
@@ -403,9 +451,24 @@ export default class PlayState extends Vue {
     }
 
     this.testCard = this.cards[Math.floor(Math.random() * this.cards.length)];
+    if (!this.playFirst) {
+      this.cardsPlayed.push(this.testCard);
+    }
+  }
 
-    this.cardsPlayed.push(this.testCard);
-    console.log(this.playFirst);
+  checkCategories(card, card2) {
+    return card[6] == card2[6];
+  }
+  checkAllCardCategories(card2) {
+    const boolArray: boolean[] = [];
+    for (let i = 0; i < this.cardHand.length; i++) {
+      if (this.cardHand[i][6] == card2[6]) {
+        boolArray.push(true);
+      } else {
+        boolArray.push(false);
+      }
+    }
+    return boolArray;
   }
 
   activeCardChanged(card) {
@@ -428,13 +491,14 @@ export default class PlayState extends Vue {
     let winningCard;
     if (card && card2) {
       if (card[6] == card2[6]) {
+        //If the categories fit
         if (card[0] > card2[0]) {
           if (playedFirst) {
             this.pointsSpent += card[0] + card2[0];
             winningCard = card;
           } else {
             this.pointsSpentOpponent += card[0] + card2[0];
-            winningCard = card2;
+            winningCard = card;
           }
         } else {
           if (playedFirst) {
@@ -442,33 +506,31 @@ export default class PlayState extends Vue {
             winningCard = card2;
           } else {
             this.pointsSpent += card[0] + card2[0];
-            winningCard = card;
+            winningCard = card2;
           }
         }
       } else {
-        //gotta find out which card is played first
+        //If the categories do not fit
         winningCard = card;
-        if(playedFirst) {
+        if (playedFirst) {
           this.pointsSpent += winningCard[0];
         } else {
           this.pointsSpentOpponent += winningCard[0];
         }
-
       }
     }
     //if too many points spent either win or lose
     if (this.pointsSpent >= this.maxCost) {
-      this.playstateChange('lost', 'points');
+      this.playStateChange('lost', 'points');
     }
     if (this.pointsSpentOpponent >= this.maxCost) {
-      this.playstateChange('win', 'points');
+      this.playStateChange('win', 'points');
     }
-    console.log('Winner: ' + winningCard[7]);
     //Check if winning card is the own or the opponents
     //Adds points to winners category
     for (let i = 0; i < this.categoryPoints.length; i++) {
       if (this.categoryPoints[i][0] == winningCard[6]) {
-        if(this.ownCardPlayed === winningCard[7]) {
+        if (this.ownCardPlayed === winningCard[7]) {
           this.categoryPoints[i][1] += 1;
         } else {
           this.categoryPointsOpponent[i][1] += 1;
@@ -477,21 +539,22 @@ export default class PlayState extends Vue {
     }
     //Check the points, if all filled give win or lose condition
     if (this.categoryPoints.every((row) => row[1] >= 2)) {
-      this.playstateChange('win', 'category');
+      this.playStateChange('win', 'category');
     }
     if (this.categoryPointsOpponent.every((row) => row[1] >= 2)) {
-      this.playstateChange('lost', 'category');
+      this.playStateChange('lost', 'category');
     }
-    //removes cards from play
-    /*const index = this.cardHand.indexOf(card2);
-    this.cardHand.splice(index, 1);*/
-
+    //Remove cards from play
     const cardsToDelete = document.getElementsByClassName('cardPlayed');
     while (cardsToDelete[0]) {
       if (cardsToDelete[0].parentNode) {
         cardsToDelete[0].parentNode.removeChild(cardsToDelete[0]);
       }
     }
+    let index = this.cardsPlayed.indexOf(card);
+    this.cardsPlayed.splice(index, 1);
+    index = this.cardsPlayed.indexOf(card2);
+    this.cardsPlayed.splice(index, 1);
     //draw new cards
     setTimeout(() => {
       this.drawNewCard();
@@ -740,6 +803,11 @@ export default class PlayState extends Vue {
   transition: 0.3s;
 }
 
+.cardDisabled {
+  filter: sepia(100%) brightness(50%)
+    drop-shadow(var(--color-dark-contrast) -0.4rem 0.2rem 0.2rem) !important;
+}
+
 .cardContainerActive {
   z-index: 2;
   transform: translateY(-1rem);
@@ -781,6 +849,15 @@ hr {
   bottom: 0;
   left: 0;
   margin: 5%;
+  transition: 0.3s;
+}
+
+.categoryCardIconHighlighted {
+  color: var(--color-evaluating);
+  transform: scale(200%);
+  transition: 0.3s;
+  bottom: 0.5rem;
+  left: 0.5rem;
 }
 
 .cardImage {
