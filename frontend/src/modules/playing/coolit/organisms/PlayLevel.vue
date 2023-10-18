@@ -27,6 +27,22 @@
         <container v-if="gameWidth && circleGradientTexture">
           <container>
             <sprite
+              :texture="temperatureMarkerTexture"
+              :height="15"
+              :width="getTemperatureRange(lowerTemperatureLimit) * gameWidth"
+              tint="#ff0000"
+            ></sprite>
+            <sprite
+              :texture="temperatureMarkerTexture"
+              :x="gameWidth"
+              :anchor="[1, 0]"
+              :height="15"
+              :width="
+                (1 - getTemperatureRange(upperTemperatureLimit)) * gameWidth
+              "
+              tint="#ff0000"
+            ></sprite>
+            <sprite
               :texture="temperatureGradientTexture"
               :height="10"
               :width="gameWidth"
@@ -39,6 +55,26 @@
               :anchor="[0.5, 0]"
               tint="#ff0000"
             ></sprite>
+            <text
+              :anchor="[0.5, 0]"
+              :x="getTemperatureRange(lowerTemperatureLimit) * gameWidth"
+              :y="15"
+              :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
+            >
+              {{ lowerTemperatureLimit }}°C
+            </text>
+            <text
+              :anchor="[0, 0]"
+              :x="5"
+              :y="15"
+              :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
+            >
+              {{
+                $t(
+                  'module.playing.coolit.participant.temperatureScale.lowerLimit'
+                )
+              }}
+            </text>
             <sprite
               :texture="temperatureMarkerTexture"
               :x="getTemperatureRange(upperTemperatureLimit) * gameWidth"
@@ -47,6 +83,26 @@
               :anchor="[0.5, 0]"
               tint="#ff0000"
             ></sprite>
+            <text
+              :anchor="[0.5, 0]"
+              :x="getTemperatureRange(upperTemperatureLimit) * gameWidth"
+              :y="15"
+              :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
+            >
+              {{ upperTemperatureLimit }}°C
+            </text>
+            <text
+              :anchor="[1, 0]"
+              :x="gameWidth - 5"
+              :y="15"
+              :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
+            >
+              {{
+                $t(
+                  'module.playing.coolit.participant.temperatureScale.upperLimit'
+                )
+              }}
+            </text>
             <sprite
               v-for="obstacle in obstacleList"
               :key="obstacle.uuid"
@@ -55,7 +111,7 @@
               :width="2"
               :height="12"
               :anchor="[0.5, 0]"
-              tint="#ffffff"
+              :tint="contrastColor"
             ></sprite>
             <sprite
               :texture="temperatureMarkerTexture"
@@ -65,6 +121,14 @@
               :anchor="[0.5, 0]"
               tint="#ff0000"
             ></sprite>
+            <text
+              :anchor="[0.5, 0]"
+              :x="getTemperatureRange(averageTemperature) * gameWidth"
+              :y="20"
+              :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
+            >
+              {{ Math.round(averageTemperature) }}°C
+            </text>
           </container>
           <container v-if="!gameOver">
             <GameObject
@@ -484,10 +548,10 @@ export default class PlayLevel extends Vue {
 
   readonly absorptionConst = 1.25;
   readonly radiationConst = 0.05;
-  readonly minTemperature = -20;
-  readonly maxTemperature = 50;
-  readonly lowerTemperatureLimit = 0;
-  readonly upperTemperatureLimit = 30;
+  readonly minTemperature = -40;
+  readonly maxTemperature = 60;
+  readonly lowerTemperatureLimit = -20;
+  readonly upperTemperatureLimit = 40;
   readonly moduleCountFactor = 100;
   temperatureColorSteps: { [key: number]: ColorValues } = {};
 
@@ -600,6 +664,10 @@ export default class PlayLevel extends Vue {
     return themeColors.getBackgroundColor();
   }
 
+  get contrastColor(): string {
+    return themeColors.getContrastColor();
+  }
+
   get yellowColor(): string {
     return themeColors.getYellowColor();
   }
@@ -663,7 +731,8 @@ export default class PlayLevel extends Vue {
   }
 
   get temperatureWinTime(): number {
-    return this.winTime - Math.abs(this.temperatureRise * 30000);
+    //return this.winTime - Math.abs(this.temperatureRise * 30000);
+    return this.winTime - this.temperatureRise * 30000;
   }
 
   get normalisedTime(): number {
@@ -1697,7 +1766,7 @@ export default class PlayLevel extends Vue {
   pointer-events: none;
   position: absolute;
   z-index: 100;
-  top: 1rem;
+  top: 2rem;
   right: 1rem;
   text-align: right;
   font-size: var(--font-size-large);

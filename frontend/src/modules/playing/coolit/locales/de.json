@@ -104,6 +104,10 @@
       "header": "Level spielen",
       "play": "starten",
       "cancel": "abbrechen"
+    },
+    "temperatureScale": {
+      "lowerLimit": "einfrieren",
+      "upperLimit": "überhitzen"
     }
   },
   "statistic": {

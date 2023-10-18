@@ -104,6 +104,10 @@
       "header": "play level",
       "play": "play",
       "cancel": "cancel"
+    },
+    "temperatureScale": {
+      "lowerLimit": "freez",
+      "upperLimit": "overheat"
     }
   },
   "statistic": {
