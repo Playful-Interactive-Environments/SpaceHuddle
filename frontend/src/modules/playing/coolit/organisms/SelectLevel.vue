@@ -179,6 +179,9 @@
     <h1 v-if="selectedIdea">
       {{ selectedIdea.keywords }}
     </h1>
+    <div v-if="selectedIdea">
+      {{ selectedIdea.description }}
+    </div>
     <div class="thermometer">
       <el-slider
         v-model="temperatureRise"
@@ -190,12 +193,14 @@
         :marks="marks"
       />
     </div>
-    <el-button @click="cancelGame">
-      {{ $t('module.playing.coolit.participant.playDialog.cancel') }}
-    </el-button>
-    <el-button @click="startGame">
-      {{ $t('module.playing.coolit.participant.playDialog.play') }}
-    </el-button>
+    <template #footer>
+      <el-button @click="cancelGame" class="dialog-button">
+        {{ $t('module.playing.coolit.participant.playDialog.cancel') }}
+      </el-button>
+      <el-button @click="startGame" class="dialog-button">
+        {{ $t('module.playing.coolit.participant.playDialog.play') }}
+      </el-button>
+    </template>
   </el-dialog>
 </template>
 
@@ -596,5 +601,15 @@ export default class SelectLevel extends Vue {
     --el-rate-disabled-void-color: var(--color-gray-dark);
     --el-rate-fill-color: var(--color-yellow);
   }
+}
+
+h1 {
+  font-size: var(--font-size-large);
+  color: var(--color-playing);
+  margin-bottom: 0.5rem;
+}
+
+.dialog-button {
+  margin-left: 0.5rem;
 }
 </style>
