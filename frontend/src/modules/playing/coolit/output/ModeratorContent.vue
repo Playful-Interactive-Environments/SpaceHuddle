@@ -13,8 +13,12 @@
         :can-rotate="false"
         :can-export="true"
         :collider-delta="0"
-        :can-change-saturation="true"
-        :can-change-layer="true"
+        :can-change-saturation="false"
+        :can-change-layer="false"
+        :can-scale="false"
+        :custom-sort-order="(placeable) => placeable.position[1]"
+        :custom-saturation="customSaturation"
+        :custom-scale-factor="customScale"
       ></LevelBuilder>
     </div>
     <el-container>
@@ -264,6 +268,7 @@ import { Task } from '@/types/api/Task';
 import { Module } from '@/types/api/Module';
 import CollapseTitle from '@/components/moderator/atoms/CollapseTitle.vue';
 import IdeaMap from '@/components/shared/organisms/IdeaMap.vue';
+import * as placeable from '@/types/game/Placeable';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const emptyParameter = {
@@ -339,6 +344,25 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateIdeas);
+  }
+
+  customSaturation(placeable: placeable.Placeable): number {
+    const placingRegions =
+      gameConfig.obstacles[this.selectedLevelType].categories[placeable.type]
+        .settings.placingRegions;
+    const min = placingRegions[0][0][1] - 10;
+    const max = placingRegions[0][2][1];
+    return (placeable.position[1] - min) / (max - min);
+  }
+
+  customScale(placeable: placeable.Placeable): number {
+    //(placeable) => placeable.position[1] / 100
+    const placingRegions =
+      gameConfig.obstacles[this.selectedLevelType].categories[placeable.type]
+        .settings.placingRegions;
+    const min = placingRegions[0][0][1] - 10;
+    const max = placingRegions[0][2][1];
+    return (placeable.position[1] - min) / (max - min) + 0.5;
   }
 
   unmounted(): void {

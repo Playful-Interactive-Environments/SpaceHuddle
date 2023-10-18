@@ -80,13 +80,13 @@
     <div class="overlay-selected-item">
       <div @click="showOptions = !showOptions">...</div>
       <div
-        v-if="selectedObject && showOptions"
+        v-if="selectedObject && showOptions && canScale"
         @click="scaleSelectedObject(-0.2)"
       >
         <font-awesome-icon icon="square-minus" />
       </div>
       <div
-        v-if="selectedObject && showOptions"
+        v-if="selectedObject && showOptions && canScale"
         @click="scaleSelectedObject(0.2)"
       >
         <font-awesome-icon icon="square-plus" />
@@ -319,12 +319,22 @@ export default class LevelBuilder extends Vue {
   @Prop({ default: null }) readonly level!: Idea | null;
   @Prop({ default: '100%' }) readonly height!: string;
   @Prop({ default: true }) readonly canRotate!: boolean;
+  @Prop({ default: true }) readonly canScale!: boolean;
   @Prop({ default: false }) readonly canChangeSaturation!: boolean;
   @Prop({ default: false }) readonly canChangeLayer!: boolean;
   @Prop({ default: false }) readonly canApprove!: boolean;
   @Prop({ default: false }) readonly canExport!: boolean;
   @Prop() readonly gameConfig!: placeable.PlaceableConfig;
   @Prop({ default: 0 }) readonly colliderDelta!: number;
+  @Prop({ default: null }) readonly customSortOrder!:
+    | ((placeable: placeable.Placeable) => number)
+    | null;
+  @Prop({ default: null }) readonly customScaleFactor!:
+    | ((placeable: placeable.Placeable) => number)
+    | null;
+  @Prop({ default: null }) readonly customSaturation!:
+    | ((placeable: placeable.Placeable) => number)
+    | null;
   activeObjectType = '';
   activeObjectName = '';
   showToolbox = false;
@@ -989,9 +999,20 @@ export default class LevelBuilder extends Vue {
 
   get renderList(): placeable.Placeable[] {
     const getSortNumber = (placeable: placeable.Placeable): number => {
+      if (this.customSortOrder) return this.customSortOrder(placeable);
       return this.gameConfig[this.levelType].categories[placeable.type].settings
         .order;
     };
+    if (this.customScaleFactor || this.customSaturation) {
+      for (const placeable of this.placedObjects) {
+        if (this.customScaleFactor) {
+          placeable.scale = this.customScaleFactor(placeable);
+        }
+        if (this.customSaturation) {
+          placeable.saturation = this.customSaturation(placeable);
+        }
+      }
+    }
     if (this.levelType) {
       return this.placedObjects.sort(
         (a, b) => getSortNumber(a) - getSortNumber(b)
