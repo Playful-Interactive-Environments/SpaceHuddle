@@ -770,8 +770,8 @@ export default class GameContainer extends Vue {
 
   //#region force
   addWind(): void {
-    const calcForce = (): number => {
-      const forceMagnitude = 0.05; // (0.05 * body.mass) * timeScale;
+    const calcForce = (body: Matter.Body): number => {
+      const forceMagnitude = 0.05 + body.frictionAir; // (0.05 * body.mass) * timeScale;
       return (
         (forceMagnitude + Matter.Common.random() * forceMagnitude) *
         Matter.Common.choose([1, -1])
@@ -785,8 +785,8 @@ export default class GameContainer extends Vue {
         !gameObject.isStatic
       ) {
         Matter.Body.setVelocity(gameObject.body, {
-          x: gameObject.body.velocity.x + calcForce(),
-          y: gameObject.body.velocity.y + calcForce(),
+          x: gameObject.body.velocity.x + calcForce(gameObject.body),
+          y: gameObject.body.velocity.y + calcForce(gameObject.body),
         });
       }
     }

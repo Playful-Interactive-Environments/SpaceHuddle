@@ -172,16 +172,25 @@ export default class Participant extends Vue {
     this.levelDone = true;
 
     if (this.trackingManager) {
-      this.trackingManager.saveIterationStep({
-        state: state,
-        coolItTime: Date.now() - this.stepTime,
-        playTime: Date.now() - this.startTime,
-        stars: state.stars,
-        hitCount: state.moleculeHitCount,
-        temperature: state.temperature,
-        moleculeState: state.moleculeState,
-        obstacleState: state.obstacleState,
-      });
+      this.trackingManager.saveIterationStep(
+        {
+          state: state,
+          coolItTime: Date.now() - this.stepTime,
+          playTime: Date.now() - this.startTime,
+          stars: state.stars,
+          hitCount: state.moleculeHitCount,
+          temperature: state.temperature,
+          moleculeState: state.moleculeState,
+          obstacleState: state.obstacleState,
+        },
+        state.stars === 3
+          ? TaskParticipantIterationStepStatesType.CORRECT
+          : TaskParticipantIterationStepStatesType.WRONG,
+        state.stars,
+        null,
+        true,
+        (item) => item.parameter.level === this.activeLevel?.id
+      );
       this.trackingManager.setFinishedState(this.module);
     }
     this.stepTime = Date.now();

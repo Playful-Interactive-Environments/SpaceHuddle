@@ -275,7 +275,7 @@ export default class SelectLevel extends Vue {
   getRateForLevel(levelId: string): number {
     const levelSteps = this.trackingManager.stepList
       .filter((item) => item.parameter.level === levelId)
-      .sort((a, b) => b.parameter.rate - a.parameter.rate);
+      .sort((a, b) => b.parameter.stars - a.parameter.stars);
     if (levelSteps.length > 0) {
       return levelSteps[0].parameter.stars;
     }

@@ -144,7 +144,7 @@
                 />
               </template>
             </GameObject>
-            <custom-particle-container
+            <!--<custom-particle-container
               v-for="moleculeName of Object.keys(backgroundParticle)"
               :key="moleculeName"
               :deep-clone-config="false"
@@ -156,7 +156,7 @@
                 (-panOffset[1] * (containerTextureSize[1] - gameHeight)) / 100
               "
               :auto-update="false"
-            />
+            />-->
             <GameObject
               v-for="molecule of moleculeList"
               :key="molecule.id"
@@ -699,6 +699,7 @@ export default class PlayLevel extends Vue {
       case RayType.light:
         return {
           name: 'light',
+          frictionAir: 0,
           collisionFilter: {
             group: 0,
             category: this.CollisionGroups.LIGHT_RAY,
@@ -713,6 +714,7 @@ export default class PlayLevel extends Vue {
       case RayType.heat:
         return {
           name: 'heat',
+          frictionAir: 0,
           collisionFilter: {
             group: 0,
             category: this.CollisionGroups.HEAT_RAY,
@@ -731,6 +733,7 @@ export default class PlayLevel extends Vue {
       mask = mask | this.CollisionGroups.CARBON_SINK;
     return {
       name: moleculeType,
+      frictionAir: 0.1,
       collisionFilter: {
         group: 0,
         category: this.CollisionGroups.MOLECULE,
@@ -1242,7 +1245,6 @@ export default class PlayLevel extends Vue {
     item.source.initialised = true;
     if (item.body) {
       item.source.body = item.body;
-      item.body.frictionAir = 0;
       this.calculateRayVelocity(item.source);
     }
   }
