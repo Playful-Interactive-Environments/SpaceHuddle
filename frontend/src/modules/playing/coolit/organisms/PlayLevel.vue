@@ -1275,7 +1275,8 @@ export default class PlayLevel extends Vue {
   gameOver = false;
   updateLoop(): void {
     const updateTimeStamp = Date.now();
-    this.playTime = updateTimeStamp - this.startTime;
+    if (this.lightCollisionCount > 0)
+      this.playTime = updateTimeStamp - this.startTime;
     const averageTemperature = this.averageTemperature;
     let gameOver =
       averageTemperature < this.lowerTemperatureLimit ||
@@ -1427,6 +1428,7 @@ export default class PlayLevel extends Vue {
     ) {
       if (ray.type === RayType.light && !ray.hit) {
         this.lightCollisionCount++;
+        if (this.lightCollisionCount === 1) this.startTime = Date.now();
         const heatRationCoefficientObstacle = hitObstacle.heatRationCoefficient;
         ray.hit = true;
         await delay(100);
