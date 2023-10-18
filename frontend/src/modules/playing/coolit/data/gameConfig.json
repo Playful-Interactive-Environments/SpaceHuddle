@@ -209,7 +209,7 @@
       "ration": 0.4,
       "controllable": true,
       "absorbedByTree": false,
-      "rationDeltaPerDegree": 0.2
+      "rationDeltaPerDegree": 0.05
     },
     "carbonDioxide": {
       "type": "greenhouseGas",
@@ -275,7 +275,7 @@
       "ration": 20.6,
       "controllable": false,
       "absorbedByTree": false,
-      "rationDeltaPerDegree": -0.2
+      "rationDeltaPerDegree": -0.05
     },
     "nitrogen": {
       "type": "atmosphericGas",
