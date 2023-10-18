@@ -6,10 +6,81 @@
   >
     <div
       class="opponentHand"
-      :style="{ backgroundImage: 'url(' + gameConfig.gameValues.opponentHand + ')' }"
+      :style="{
+        backgroundImage: 'url(' + gameConfig.gameValues.opponentHand + ')',
+      }"
     ></div>
-    <div class="categories" id="opponent"></div>
-    <div id="activeCards"></div>
+    <div class="CO2BarContainer" id="barOpponent">
+      <div class="CO2BarBackground">
+        <p>CO²: {{ pointsSpentOpponent }}/{{ maxCost }}</p>
+        <div
+            class="CO2Bar"
+            :style="{ width: (pointsSpentOpponent / maxCost) * 100 + '%' }"
+            :class="{ hidden: pointsSpentOpponent / maxCost <= 0 }"
+        ></div>
+      </div>
+    </div>
+    <div class="categories" id="opponent">
+      <div
+          v-for="cat in categoryPointsOpponent"
+          :key="cat[0]"
+          :id="cat[0]"
+          class="categoryContainer"
+      >
+        <font-awesome-icon
+            :icon="gameConfig.categories[cat[0]].settings.icon"
+            class="categoryIcon categoryItem"
+            style="rotation: 180deg"
+        />
+        <span
+            class="circle categoryItem"
+            :class="{ fullCircle: cat[1] >= 2 }"
+        ></span>
+        <span
+            class="circle categoryItem"
+            :class="{ fullCircle: cat[1] >= 1 }"
+        ></span>
+      </div>
+    </div>
+    <TransitionGroup name="activeCards" class="activeCards" tag="div" id="activeCards">
+      <div
+        v-for="card in cardsPlayed"
+        :key="card[7]"
+        :id="card[7]"
+        class="cardPlayed"
+        :style="{
+          backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
+        }"
+        @click="activeCardChanged(card)"
+      >
+        <ul class="cardStats">
+          <li class="cardCost">
+            {{ card[0] }}
+            <hr />
+          </li>
+          <li>
+            {{ card[1].split(' ')[0] }}<span>{{ card[1].split(' ')[1] }}</span>
+          </li>
+          <li>
+            {{ card[2].split(' ')[0] }}<span>{{ card[2].split(' ')[1] }}</span>
+          </li>
+          <li>
+            {{ card[3].split(' ')[0] }}<span>{{ card[3].split(' ')[1] }}</span>
+          </li>
+          <li>
+            {{ card[4].split(' ')[0] }}<span>{{ card[4].split(' ')[1] }}</span>
+          </li>
+          <li>
+            {{ card[5].split(' ')[0] }}<span>{{ card[5].split(' ')[1] }}</span>
+          </li>
+        </ul>
+        <img :src="getCardSprite(card)" alt="{{ card[7] }}" class="cardImage" />
+        <font-awesome-icon
+          :icon="gameConfig.categories[card[6]].settings.icon"
+          class="categoryCardIcon"
+        />
+      </div>
+    </TransitionGroup>
     <div class="categories" id="own">
       <div
         v-for="cat in categoryPoints"
@@ -31,7 +102,7 @@
         />
       </div>
     </div>
-    <div class="CO2BarContainer">
+    <div class="CO2BarContainer" id="barOwn">
       <div class="CO2BarBackground">
         <p>CO²: {{ pointsSpent }}/{{ maxCost }}</p>
         <div
@@ -47,7 +118,9 @@
         :key="card[7]"
         :id="card[7]"
         class="cardContainer"
-        :style="{ backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')' }"
+        :style="{
+          backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
+        }"
         @click="activeCardChanged(card)"
       >
         <ul class="cardStats">
@@ -179,15 +252,22 @@ export default class PlayState extends Vue {
   cardSpriteFolder = gameConfig.gameValues.spriteFolder;
 
   activeCard: any[] = [];
+  cardsPlayed: any[] = [];
+  ownCardPlayed = "";
+
   cards = this.shuffle(this.parseCards(gameConfig));
   cardHand: any[] = [];
   testCard = this.cards[9];
 
+  categoryPointsOpponent: any[] = [];
   categoryPoints: any[] = [];
 
   maxCost = 130;
   pointsSpent = 0;
+  pointsSpentOpponent = 0;
   reason = '';
+
+  playFirst = false;
 
   clearPlayState(): void {
     this.levelType = '';
@@ -217,6 +297,7 @@ export default class PlayState extends Vue {
     tutorialService.registerGetList(this.updateTutorial, this.authHeaderTyp);
     this.categorySetup();
     this.initialCardPull();
+
     /*this.eventBus.off(EventType.CHANGE_TUTORIAL);
     this.eventBus.on(EventType.CHANGE_TUTORIAL, async (steps) => {
       this.updateTutorial(steps as Tutorial[]);
@@ -239,6 +320,7 @@ export default class PlayState extends Vue {
     const data = this.gameConfig.categories;
     for (const category in data) {
       this.categoryPoints.push([category, 0]);
+      this.categoryPointsOpponent.push([category, 0]);
     }
   }
 
@@ -282,14 +364,8 @@ export default class PlayState extends Vue {
       const card = this.cards.pop();
       this.cardHand.push(card);
     }
-    console.log(
-      'Test Card: ' +
-        this.testCard[7] +
-        ', Cost: ' +
-        this.testCard[0] +
-        ', Category: ' +
-        this.testCard[6]
-    );
+
+    this.cardsPlayed.push(this.testCard);
   }
 
   cardPlayed(card) {
@@ -297,18 +373,26 @@ export default class PlayState extends Vue {
     const element = document.getElementById(card[7]);
     const button = document.getElementById('cardSelectButton');
     if (element && container) {
-      element.classList.remove('cardContainer');
-      element.classList.add('cardPlayed');
+      //element.classList.remove('cardContainer');
+      //element.classList.add('cardPlayed');
       if (button) {
         button.setAttribute('disabled', '');
       }
-      element.classList.remove('cardContainerActive');
-      container.append(element.cloneNode(true));
+      //element.classList.remove('cardContainerActive');
+      //container.append(element.cloneNode(true));
       const index = this.cardHand.indexOf(card);
       this.cardHand.splice(index, 1);
+      this.cardsPlayed.push(card);
+      this.ownCardPlayed = card[7];
     }
     setTimeout(() => {
-      this.compareCards(this.testCard, card);
+      if (this.playFirst) {
+        this.compareCards(card, this.testCard, this.playFirst);
+        this.playFirst = !this.playFirst;
+      } else {
+        this.compareCards(this.testCard, card, this.playFirst);
+        this.playFirst = !this.playFirst;
+      }
     }, 2000);
   }
 
@@ -319,14 +403,9 @@ export default class PlayState extends Vue {
     }
 
     this.testCard = this.cards[Math.floor(Math.random() * this.cards.length)];
-    console.log(
-      'Test Card: ' +
-        this.testCard[7] +
-        ', Cost: ' +
-        this.testCard[0] +
-        ', Category: ' +
-        this.testCard[6]
-    );
+
+    this.cardsPlayed.push(this.testCard);
+    console.log(this.playFirst);
   }
 
   activeCardChanged(card) {
@@ -343,39 +422,65 @@ export default class PlayState extends Vue {
     }
   }
 
-  compareCards(card, card2) {
+  compareCards(card, card2, playedFirst) {
     //card = Card that was there first. Wins in case of category mismatch
     //Compares the cost + category of the cards and decides the winner
     let winningCard;
     if (card && card2) {
       if (card[6] == card2[6]) {
         if (card[0] > card2[0]) {
-          this.pointsSpent += card[0] + card2[0];
-          winningCard = card;
+          if (playedFirst) {
+            this.pointsSpent += card[0] + card2[0];
+            winningCard = card;
+          } else {
+            this.pointsSpentOpponent += card[0] + card2[0];
+            winningCard = card2;
+          }
         } else {
-          this.pointsSpent += card[0] + card2[0];
-          winningCard = card2;
+          if (playedFirst) {
+            this.pointsSpentOpponent += card[0] + card2[0];
+            winningCard = card2;
+          } else {
+            this.pointsSpent += card[0] + card2[0];
+            winningCard = card;
+          }
         }
       } else {
+        //gotta find out which card is played first
         winningCard = card;
-        this.pointsSpent += winningCard[0];
+        if(playedFirst) {
+          this.pointsSpent += winningCard[0];
+        } else {
+          this.pointsSpentOpponent += winningCard[0];
+        }
+
       }
     }
+    //if too many points spent either win or lose
     if (this.pointsSpent >= this.maxCost) {
       this.playstateChange('lost', 'points');
+    }
+    if (this.pointsSpentOpponent >= this.maxCost) {
+      this.playstateChange('win', 'points');
     }
     console.log('Winner: ' + winningCard[7]);
     //Check if winning card is the own or the opponents
     //Adds points to winners category
     for (let i = 0; i < this.categoryPoints.length; i++) {
       if (this.categoryPoints[i][0] == winningCard[6]) {
-        this.categoryPoints[i][1] += 1;
+        if(this.ownCardPlayed === winningCard[7]) {
+          this.categoryPoints[i][1] += 1;
+        } else {
+          this.categoryPointsOpponent[i][1] += 1;
+        }
       }
     }
-    console.log(this.categoryPoints.every((row) => row[1] >= 2));
+    //Check the points, if all filled give win or lose condition
     if (this.categoryPoints.every((row) => row[1] >= 2)) {
-      console.log(this.categoryPoints);
       this.playstateChange('win', 'category');
+    }
+    if (this.categoryPointsOpponent.every((row) => row[1] >= 2)) {
+      this.playstateChange('lost', 'category');
     }
     //removes cards from play
     /*const index = this.cardHand.indexOf(card2);
@@ -397,6 +502,37 @@ export default class PlayState extends Vue {
       button.removeAttribute('disabled');
     }
   }
+
+  /*createHTMLCard(card) {
+    const cardContainer = document.createElement('div');
+    cardContainer.className = 'cardContainer';
+    cardContainer.id = card[7];
+
+    const ul = document.createElement('ul');
+    ul.classList.add('cardStats');
+
+    for (let i = 0; i <= 5; i++) {
+      const li = document.createElement('li');
+      if (i === 0) {
+        li.classList.add('cardCost');
+      }
+
+      li.append(card[i] + ''.split(' ')[0]);
+      const span = document.createElement('span');
+      span.append(card[i] + ''.split(' ')[1]);
+      li.append(span);
+      ul.append(li);
+    }
+    cardContainer.append(ul);
+
+    const img = document.createElement('img');
+    img.alt = card[7];
+    img.src = this.getCardSprite(card);
+    img.classList.add('cardImage');
+
+    cardContainer.append(img);
+    return cardContainer;
+  }*/
 }
 </script>
 
@@ -443,21 +579,14 @@ export default class PlayState extends Vue {
 }
 
 .opponentHand {
-  height: 13%;
+  height: 7%;
   width: 100%;
   background-repeat: no-repeat;
   background-position: top center;
-  background-size: auto 60%;
+  background-size: auto 100%;
 }
 
-.categories#opponent {
-  height: 8%;
-  width: 100%;
-  background-color: var(--color-brown);
-  outline: 8px solid var(--color-brown-light);
-}
-
-.categories#own {
+.categories {
   height: 8%;
   width: 100%;
   position: relative;
@@ -517,6 +646,7 @@ export default class PlayState extends Vue {
   height: 70%;
   z-index: 1;
   transition: 0.3s;
+  margin: 1rem;
 }
 
 .CO2BarContainer {
@@ -526,7 +656,14 @@ export default class PlayState extends Vue {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+#barOwn {
   padding-top: 0.5rem;
+}
+
+#barOpponent {
+  padding-bottom: 0.5rem;
 }
 
 .CO2BarBackground {
@@ -547,12 +684,19 @@ export default class PlayState extends Vue {
 
 .CO2Bar {
   height: 100%;
-  max-width: 100%;
   background-color: var(--color-evaluating);
   border-radius: var(--border-radius);
   border: 2px solid var(--color-evaluating-light);
   opacity: 100%;
   transition: 0.3s ease;
+}
+
+#barOwn {
+  max-width: 100%;
+}
+
+#barOpponent {
+  max-width: 100%;
 }
 
 .hand {
@@ -565,6 +709,7 @@ export default class PlayState extends Vue {
 }
 
 .hand-move, /* apply transition to moving elements */
+.activeCards-move
 .hand-enter-active,
 .hand-leave-active {
   transition: all 0.3s ease;
