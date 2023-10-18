@@ -191,9 +191,6 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import GameContainer, {
-  BackgroundPosition,
-} from '@/components/shared/atoms/game/GameContainer.vue';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import { until } from '@/utils/wait';
 import * as tutorialService from '@/services/tutorial-service';
@@ -227,9 +224,6 @@ export interface PlayStateResult {
     ObjectSpace() {
       return ObjectSpace;
     },
-    BackgroundPosition() {
-      return BackgroundPosition;
-    },
   },
   components: {},
   emits: ['playFinished'],
@@ -247,8 +241,6 @@ export default class PlayState extends Vue {
   levelType = '';
   gameConfig = gameConfig;
 
-  totalCount = 0;
-  collectedCount = 0;
   startTime = Date.now();
 
   playStateType = PlayStateType.play;
@@ -275,11 +267,23 @@ export default class PlayState extends Vue {
   playFirst = false;
 
   clearPlayState(): void {
-    this.levelType = '';
-    this.totalCount = 0;
-    this.collectedCount = 0;
-    this.startTime = Date.now();
+    this.activeCard = [];
+    this.cardsPlayed = [];
+    this.ownCardPlayed = '';
+
     this.cards = this.shuffle(this.parseCards(gameConfig));
+    this.cardHand = [];
+    this.testCard = this.cards[9];
+
+    this.categoryPointsOpponent = [];
+    this.categoryPoints = [];
+
+    this.maxCost = 130;
+    this.pointsSpent = 0;
+    this.pointsSpentOpponent = 0;
+    this.reason = '';
+
+    this.playFirst = false;
   }
 
   playStateChange(outcome, reason) {
@@ -329,6 +333,7 @@ export default class PlayState extends Vue {
     }
   }
 
+  //parse the json gameconfig and convert it to card items
   parseCards(cards) {
     const cardArray: any[] = [];
     const data = cards.categories;
@@ -370,6 +375,7 @@ export default class PlayState extends Vue {
       this.cardHand.push(card);
     }
 
+    //Testcard for testing purposes
     if (!this.playFirst) {
       this.cardsPlayed.push(this.testCard);
     }
@@ -379,6 +385,10 @@ export default class PlayState extends Vue {
   cardPlayed(card) {
     //clear active card to avoid replaying already played card
     this.activeCard = [];
+    const activeCards = document.getElementsByClassName('cardContainerActive');
+    if (activeCards[0]) {
+      activeCards[0].classList.remove('cardContainerActive');
+    }
     let continuePlay = true;
     if (!this.playFirst) {
       //Checking category for category zugzwang (if you have the category an opponent played, you HAVE to play that card)
@@ -404,6 +414,7 @@ export default class PlayState extends Vue {
         }
       }
     }
+    //If everything goes right: continue the play
     if (continuePlay && card[0] > 0) {
       const container = document.getElementById('activeCards');
       const element = document.getElementById(card[7]);
@@ -422,16 +433,19 @@ export default class PlayState extends Vue {
 
       //remove wrong category icon highlight
       for (let i = 0; i < this.categoryIconChanged.length; i++) {
-        this.categoryIconChanged[i].classList.remove('categoryCardIconHighlighted');
+        this.categoryIconChanged[i].classList.remove(
+          'categoryCardIconHighlighted'
+        );
       }
 
-      //Show opponent card
+      //Show opponent card (if not visible already)
       if (this.playFirst) {
         setTimeout(() => {
           this.cardsPlayed.push(this.testCard);
         }, 1000);
       }
 
+      //Compare the cards and choose a winner
       setTimeout(() => {
         if (this.playFirst) {
           this.compareCards(card, this.testCard, this.playFirst);
@@ -450,6 +464,7 @@ export default class PlayState extends Vue {
       this.cardHand.unshift(card);
     }
 
+    //Testcard for testing purposes
     this.testCard = this.cards[Math.floor(Math.random() * this.cards.length)];
     if (!this.playFirst) {
       this.cardsPlayed.push(this.testCard);
@@ -459,6 +474,7 @@ export default class PlayState extends Vue {
   checkCategories(card, card2) {
     return card[6] == card2[6];
   }
+
   checkAllCardCategories(card2) {
     const boolArray: boolean[] = [];
     for (let i = 0; i < this.cardHand.length; i++) {
@@ -558,12 +574,12 @@ export default class PlayState extends Vue {
     //draw new cards
     setTimeout(() => {
       this.drawNewCard();
+      const button = document.getElementById('cardSelectButton');
+      if (button) {
+        button.removeAttribute('disabled');
+      }
     }, 500);
     //reactivate Button
-    const button = document.getElementById('cardSelectButton');
-    if (button) {
-      button.removeAttribute('disabled');
-    }
   }
 
   /*createHTMLCard(card) {
@@ -772,7 +788,7 @@ export default class PlayState extends Vue {
 }
 
 .hand-move, /* apply transition to moving elements */
-.activeCards-move
+.activeCards-move,
 .hand-enter-active,
 .hand-leave-active {
   transition: all 0.3s ease;
@@ -801,11 +817,6 @@ export default class PlayState extends Vue {
   left: 5%;
   filter: drop-shadow(var(--color-dark-contrast) -0.4rem 0.2rem 0.2rem);
   transition: 0.3s;
-}
-
-.cardDisabled {
-  filter: sepia(100%) brightness(50%)
-    drop-shadow(var(--color-dark-contrast) -0.4rem 0.2rem 0.2rem) !important;
 }
 
 .cardContainerActive {
@@ -855,9 +866,17 @@ hr {
 .categoryCardIconHighlighted {
   color: var(--color-evaluating);
   transform: scale(200%);
-  transition: 0.3s;
   bottom: 0.5rem;
   left: 0.5rem;
+  animation: shake 0.3s;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0) scale(100%)}
+  25% { transform: translateX(5px) scale(125%)}
+  50% { transform: translateX(-5px) scale(150%)}
+  75% { transform: translateX(5px) scale(175%)}
+  100% { transform: translateX(0) scale(200%) }
 }
 
 .cardImage {
