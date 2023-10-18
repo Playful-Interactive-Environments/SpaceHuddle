@@ -376,7 +376,7 @@ export default class SelectLevel extends Vue {
   }
 
   updateIdeas(ideas: Idea[]): void {
-    this.ideas = ideas;
+    this.ideas = ideas.filter((idea) => idea.parameter.shareData);
     this.calculateResult();
   }
 

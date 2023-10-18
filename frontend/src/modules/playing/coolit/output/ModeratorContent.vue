@@ -59,6 +59,7 @@
                   :idea="element"
                   :isDraggable="true"
                   :canChangeState="false"
+                  :handleEditable="false"
                   :showState="false"
                   :portrait="false"
                   :is-selected="
@@ -66,6 +67,7 @@
                   "
                   :background-color="getLevelColor(element)"
                   @ideaDeleted="refreshIdeas()"
+                  @ideaStartEdit="editIdea(element)"
                   @customCommand="dropdownCommand($event, element)"
                   :style="{
                     '--level-type-color': getSettingsForLevel(
@@ -96,7 +98,7 @@
                 <AddItem
                   :text="$t('module.playing.coolit.moderatorContent.add')"
                   :is-column="true"
-                  @addNew="showSettings = true"
+                  @addNew="editNewImage"
                 />
               </template>
             </draggable>
@@ -140,7 +142,7 @@
               <AddItem
                 :text="$t('module.playing.findit.moderatorContent.add')"
                 :is-column="true"
-                @addNew="showSettings = true"
+                @addNew="editNewImage"
               />
             </div>
           </el-collapse-item>
@@ -160,15 +162,19 @@
     <IdeaSettings
       v-model:show-modal="showSettings"
       :taskId="taskId"
-      :idea="addIdea"
+      :idea="settingsIdea"
       @updateData="addData"
       ref="ideaSettings"
     >
       <el-form-item
+        v-if="!settingsIdea.id"
         :label="$t('module.playing.coolit.moderatorContent.levelType')"
         :prop="`parameter.type`"
       >
-        <el-select v-model="addIdea.parameter.type" v-on:change="onTypeChanged">
+        <el-select
+          v-model="settingsIdea.parameter.type"
+          v-on:change="onTypeChanged"
+        >
           <el-option
             v-for="configType of Object.keys(gameConfig.obstacles)"
             :key="configType"
@@ -198,7 +204,7 @@
         </el-select>
       </el-form-item>
       <el-form-item
-        v-if="possiblePreConfigNameList.length > 0"
+        v-if="!settingsIdea.id && possiblePreConfigNameList.length > 0"
         :label="$t('module.playing.coolit.moderatorContent.preConfig')"
         :prop="`preConfig`"
       >
@@ -219,7 +225,7 @@
         :label="$t('module.playing.coolit.moderatorContent.share')"
         :prop="`parameter.shareData`"
       >
-        <el-switch v-model="addIdea.parameter.shareData" />
+        <el-switch v-model="settingsIdea.parameter.shareData" />
       </el-form-item>
     </IdeaSettings>
   </div>
@@ -264,6 +270,7 @@ const emptyParameter = {
   state: LevelWorkflowType.created,
   type: configParameter.getDefaultLevelType(gameConfig.obstacles as any),
   items: [],
+  shareData: false,
 };
 
 @Options({
@@ -302,6 +309,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   filter: FilterData = { ...defaultFilterData };
   orderGroupContent: OrderGroupList = {};
   preConfig: string | null = null;
+  settingsIdea = this.addIdea;
 
   getSettingsForLevel = configParameter.getSettingsForLevel;
   getSettingsForLevelType = configParameter.getSettingsForLevelType;
@@ -479,18 +487,35 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   addData(newIdea: Idea): void {
+    if (!this.settingsIdea.id) {
+      this.ideas.push(newIdea);
+    }
+    this.resetAddIdea();
+  }
+
+  resetAddIdea(): void {
+    this.settingsIdea = this.addIdea;
     this.addIdea.keywords = '';
     this.addIdea.description = '';
     this.addIdea.image = null;
     this.addIdea.link = null;
     this.addIdea.parameter = { ...emptyParameter };
-    this.ideas.push(newIdea);
   }
 
   saveIdea(idea: Idea): void {
     ideaService.putIdea(idea, EndpointAuthorisationType.MODERATOR).then(() => {
       this.refreshIdeas();
     });
+  }
+
+  editNewImage(): void {
+    this.resetAddIdea();
+    this.showSettings = true;
+  }
+
+  editIdea(idea: Idea): void {
+    this.settingsIdea = idea;
+    this.showSettings = true;
   }
 }
 </script>
