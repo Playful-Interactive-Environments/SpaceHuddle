@@ -545,8 +545,9 @@ export default class PlayLevel extends Vue {
   playTime = 0;
   moleculeSize = 50;
   autoPanSpeed = 0.2;
+  emitRatePerStar = 500;
 
-  readonly absorptionConst = 1.25;
+  readonly absorptionConst = 1.1; //1.25;
   readonly radiationConst = 0.05;
   readonly minTemperature = -40;
   readonly maxTemperature = 60;
@@ -737,6 +738,12 @@ export default class PlayLevel extends Vue {
 
   get normalisedTime(): number {
     return (this.playTime / this.temperatureWinTime) * 120000;
+  }
+
+  get absorptionFactor(): number {
+    const size = this.gameWidth * this.gameHeight;
+    const factor = size / 1000000;
+    return this.absorptionConst + factor;
   }
 
   getTimeString(timestamp: number): string {
@@ -1018,6 +1025,11 @@ export default class PlayLevel extends Vue {
   }
 
   getTemperatureColor(temperature: number): ColorValues {
+    const index = Math.round(temperature);
+    if (index > this.maxTemperature)
+      return this.temperatureColorSteps[this.maxTemperature];
+    if (index < this.minTemperature)
+      return this.temperatureColorSteps[this.minTemperature];
     return this.temperatureColorSteps[Math.round(temperature)];
   }
 
@@ -1291,7 +1303,12 @@ export default class PlayLevel extends Vue {
         intensity: 1,
         hit: false,
       });
-      if (this.active) this.emitLightRays();
+      if (this.active) {
+        const stars = Math.floor((this.playTime / this.temperatureWinTime) * 3);
+        let minDelay = 3000 - this.emitRatePerStar * stars;
+        if (minDelay < 500) minDelay = 500;
+        this.emitLightRays(minDelay, 1000);
+      }
     }, delay);
   }
 
@@ -1516,7 +1533,7 @@ export default class PlayLevel extends Vue {
           );
           hitObstacle.hitCount++;
           hitObstacle.temperature +=
-            hitObstacle.heatAbsorptionCoefficientLight * this.absorptionConst;
+            hitObstacle.heatAbsorptionCoefficientLight * this.absorptionFactor;
           hitObstacle.hitAnimation.push(
             new ShockwaveFilter(
               hitPointScreen,
@@ -1599,13 +1616,13 @@ export default class PlayLevel extends Vue {
         for (const obstacle of this.obstacleList) {
           obstacle.temperature +=
             obstacle.heatAbsorptionCoefficientHeat *
-            this.absorptionConst *
+            this.absorptionFactor *
             heatRadiation;
         }
         for (const region of this.collisionRegions) {
           region.source.temperature +=
             region.source.heatAbsorptionCoefficientHeat *
-            this.absorptionConst *
+            this.absorptionFactor *
             heatRadiation;
         }
       }

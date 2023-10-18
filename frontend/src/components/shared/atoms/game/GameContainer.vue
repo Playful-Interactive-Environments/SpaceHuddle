@@ -1339,7 +1339,7 @@ export default class GameContainer extends Vue {
 
   panVector: [number, number] = [0, 0];
   beginPan(vector: [number, number]): void {
-    this.panVector = [vector[0] * 5, vector[1] * 5];
+    this.panVector = [vector[0] * 0.01, vector[1] * 0.01];
     clearInterval(this.intervalPan);
     this.intervalPan = setInterval(this.pan, this.intervalTimePan);
   }
@@ -1352,8 +1352,10 @@ export default class GameContainer extends Vue {
   }
 
   pan(): void {
-    const x = this.backgroundPositionOffset[0] + this.panVector[0];
-    const y = this.backgroundPositionOffset[1] + this.panVector[1];
+    const x =
+      this.backgroundPositionOffset[0] + this.panVector[0] * this.gameWidth;
+    const y =
+      this.backgroundPositionOffset[1] + this.panVector[1] * this.gameHeight;
     const previousPosition = [...this.backgroundPositionOffset];
     if (
       x < this.backgroundPositionOffsetMin[0] ||
