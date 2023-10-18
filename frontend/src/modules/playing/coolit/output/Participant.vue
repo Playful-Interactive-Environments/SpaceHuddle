@@ -144,7 +144,7 @@ export default class Participant extends Vue {
 
     if (this.trackingManager) {
       this.trackingManager.createInstanceStep(
-        null,
+        level.id,
         TaskParticipantIterationStepStatesType.NEUTRAL,
         {
           level: level.id,

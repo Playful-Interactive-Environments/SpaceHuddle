@@ -23,6 +23,7 @@
         :clone="true"
       >
         <template v-slot:icon>
+          <slot name="marker" :idea="idea"></slot>
           <el-tooltip placement="top" effect="light" :hide-after="0">
             <template #content>
               <IdeaCard

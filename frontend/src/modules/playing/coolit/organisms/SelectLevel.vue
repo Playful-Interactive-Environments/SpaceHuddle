@@ -5,7 +5,18 @@
       :parameter="module?.parameter"
       :canChangePosition="() => false"
       v-model:selected-idea="selectedIdea"
-    />
+    >
+      <template v-slot:marker="{ idea }">
+        <div class="mapRate">
+          <el-rate
+            :model-value="getRateForLevel(idea.id)"
+            size="large"
+            :max="3"
+            :disabled="true"
+          />
+        </div>
+      </template>
+    </IdeaMap>
     <div class="overlay-bottom-right">
       <el-button v-on:click="showMoleculesInfo = true">
         <font-awesome-icon icon="atom" />
@@ -259,6 +270,16 @@ export default class SelectLevel extends Vue {
     const seconds = Math.floor(timestamp / 1000);
     const secondsString = `0${seconds % 60}`;
     return `${Math.floor(seconds / 60)}:${secondsString.slice(-2)}`;
+  }
+
+  getRateForLevel(levelId: string): number {
+    const levelSteps = this.trackingManager.stepList
+      .filter((item) => item.parameter.level === levelId)
+      .sort((a, b) => b.parameter.rate - a.parameter.rate);
+    if (levelSteps.length > 0) {
+      return levelSteps[0].parameter.stars;
+    }
+    return 0;
   }
 
   mounted(): void {
@@ -562,6 +583,18 @@ export default class SelectLevel extends Vue {
 
   td {
     width: 33%;
+  }
+}
+
+.mapRate {
+  position: absolute;
+  left: -1.2rem;
+  top: -2.3rem;
+  width: 3rem;
+
+  .el-rate {
+    --el-rate-disabled-void-color: var(--color-gray-dark);
+    --el-rate-fill-color: var(--color-yellow);
   }
 }
 </style>
