@@ -52,6 +52,14 @@ export interface ConditionalVelocity {
   condition: (object: GameObject) => boolean;
 }
 
+export enum FastObjectBehaviour {
+  none = 'none',
+  circle = 'circle',
+  bounce = 'bounce',
+}
+
+export const bounceCategory = 1 << 31;
+
 @Options({
   components: {},
   emits: [
@@ -97,7 +105,8 @@ export default class GameObject extends Vue {
   @Prop({ default: null }) triggerDelay!: number | null;
   @Prop({ default: false }) highlighted!: boolean;
   @Prop({ default: false }) disabled!: boolean;
-  @Prop({ default: false }) circleFastObjects!: boolean;
+  @Prop({ default: FastObjectBehaviour.none })
+  fastObjectBehaviour!: FastObjectBehaviour;
   @Prop({ default: false }) removeFromEnginIfNotVisible!: boolean;
   @Prop({ default: 0 }) anchor!: number | [number, number];
   @Prop({ default: 0 }) zIndex!: number;
@@ -399,9 +408,9 @@ export default class GameObject extends Vue {
   manageEngin(): void {
     if (!this.clickable) return;
     if (this.removeFromEnginIfNotVisible) {
-      if (this.isVisible() && !this.isPartOfEngin) {
+      if (this.isVisible(20) && !this.isPartOfEngin) {
         this.addBodyToEngine();
-      } else if (!this.isVisible() && this.isPartOfEngin) {
+      } else if (!this.isVisible(20) && this.isPartOfEngin) {
         if (this.gameContainer) {
           this.gameContainer.removeGameObjectFromEngin(this);
         }
@@ -510,7 +519,26 @@ export default class GameObject extends Vue {
     this.addBodyToDetector();
   }
 
-  syncronize(): void {
+  beforePhysicUpdate(): void {
+    if (!this.destroyed && !this.isStatic && this.body) {
+      if (
+        this.fastObjectBehaviour !== FastObjectBehaviour.none &&
+        this.gameContainer.mouseConstraint.body?.id !== this.body.id
+      ) {
+        if (this.fastObjectBehaviour === FastObjectBehaviour.bounce) {
+          const velocityAmount =
+            Math.pow(this.body.velocity.x, 2) +
+            Math.pow(this.body.velocity.y, 2);
+          const combinedMask = this.body.collisionFilter.mask | bounceCategory;
+          if (velocityAmount > 10)
+            this.body.collisionFilter.mask = combinedMask;
+          else this.body.collisionFilter.mask = combinedMask ^ bounceCategory;
+        }
+      }
+    }
+  }
+
+  afterPhysicUpdate(): void {
     if (
       !this.destroyed &&
       !this.isStatic &&
@@ -541,22 +569,37 @@ export default class GameObject extends Vue {
         }
       }
       if (
-        this.circleFastObjects &&
+        this.fastObjectBehaviour !== FastObjectBehaviour.none &&
         this.gameContainer.mouseConstraint.body?.id !== this.body.id
       ) {
         const velocityAmount =
           Math.pow(this.body.velocity.x, 2) + Math.pow(this.body.velocity.y, 2);
         if (velocityAmount > 10) {
-          const delta = 10;
-          const pos: [number, number] = [
-            this.body.position.x,
-            this.body.position.y,
-          ];
-          if (pos[0] < -delta) pos[0] = this.gameContainer.gameWidth;
-          else if (pos[0] > this.gameContainer.gameWidth + delta) pos[0] = 0;
-          if (pos[1] < -delta) pos[1] = this.gameContainer.gameHeight;
-          else if (pos[1] > this.gameContainer.gameHeight + delta) pos[1] = 0;
-          Matter.Body.setPosition(this.body, { x: pos[0], y: pos[1] });
+          if (this.fastObjectBehaviour === FastObjectBehaviour.circle) {
+            const delta = 10;
+            const pos: [number, number] = [
+              this.body.position.x,
+              this.body.position.y,
+            ];
+            if (pos[0] < -delta) pos[0] = this.gameContainer.gameWidth;
+            else if (pos[0] > this.gameContainer.gameWidth + delta) pos[0] = 0;
+            if (pos[1] < -delta) pos[1] = this.gameContainer.gameHeight;
+            else if (pos[1] > this.gameContainer.gameHeight + delta) pos[1] = 0;
+            Matter.Body.setPosition(this.body, { x: pos[0], y: pos[1] });
+          } else if (this.fastObjectBehaviour === FastObjectBehaviour.bounce) {
+            const delta = this.displayWidth / 2;
+            const pos: [number, number] = [
+              this.body.position.x,
+              this.body.position.y,
+            ];
+            if (pos[0] < delta) pos[0] = delta;
+            else if (pos[0] > this.gameContainer.gameWidth - delta)
+              pos[0] = this.gameContainer.gameWidth - delta;
+            if (pos[1] < delta) pos[1] = delta;
+            else if (pos[1] > this.gameContainer.gameHeight - delta)
+              pos[1] = this.gameContainer.gameHeight - delta;
+            Matter.Body.setPosition(this.body, { x: pos[0], y: pos[1] });
+          }
         }
       }
       if (
@@ -665,15 +708,15 @@ export default class GameObject extends Vue {
     return this.displayHeight + this.colliderDelta * 2;
   }
 
-  isVisible(): boolean {
+  isVisible(delta = 0): boolean {
     if (!this.body) return false;
     const x = this.body.position.x; // this.position[0];
     const y = this.body.position.y; // this.position[1];
     return (
-      x >= 0 &&
-      x <= this.gameContainer.gameWidth &&
-      y >= 1 &&
-      y <= this.gameContainer.gameHeight
+      x >= -delta &&
+      x <= this.gameContainer.gameWidth + delta &&
+      y >= -delta &&
+      y <= this.gameContainer.gameHeight + delta
     );
   }
 

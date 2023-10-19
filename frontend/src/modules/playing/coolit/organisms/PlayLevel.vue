@@ -235,10 +235,10 @@
               v-model:y="molecule.position[1]"
               :options="getMoleculeTypeOptions(molecule.type)"
               :is-static="false"
-              :fix-size="molecule.size * moleculeSize * 2"
+              :fix-size="molecule.size * moleculeSize"
               :source="molecule"
               :z-index="1"
-              :circle-fast-objects="true"
+              :fast-object-behaviour="FastObjectBehaviour.bounce"
               :remove-from-engin-if-not-visible="true"
               :conditional-velocity="{
                 velocity: {x: 0, y: -3},
@@ -251,8 +251,8 @@
                 :texture="getMoleculeTexture(molecule.type)"
                 :anchor="0.5"
                 :tint="molecule.color"
-                :width="molecule.size * moleculeSize * 2"
-                :height="molecule.size * moleculeSize * 2"
+                :width="molecule.size * moleculeSize"
+                :height="molecule.size * moleculeSize"
                 :alpha="molecule.controllable ? 1 : 0.4"
               />
             </GameObject>
@@ -337,7 +337,9 @@
 import { Options, Vue } from 'vue-class-component';
 import * as PIXI from 'pixi.js';
 import { Prop, Watch } from 'vue-property-decorator';
-import GameObject from '@/components/shared/atoms/game/GameObject.vue';
+import GameObject, {
+  FastObjectBehaviour,
+} from '@/components/shared/atoms/game/GameObject.vue';
 import GameContainer, {
   BackgroundMovement,
   BackgroundPosition,
@@ -563,7 +565,7 @@ export default class PlayLevel extends Vue {
   lightTexture!: PIXI.Texture;
   startTime = Date.now();
   playTime = 0;
-  moleculeSize = 50;
+  moleculeSize = 200;
   autoPanSpeed = 0.2;
   emitRatePerStar = 500;
   randomMessageNo = 1;
@@ -595,6 +597,7 @@ export default class PlayLevel extends Vue {
 
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
+  FastObjectBehaviour = FastObjectBehaviour;
   RayType = RayType;
   interval!: any;
   readonly intervalTime = 100;
@@ -799,6 +802,7 @@ export default class PlayLevel extends Vue {
         return {
           name: 'light',
           frictionAir: 0,
+          mass: 0,
           collisionFilter: {
             group: 0,
             category: this.CollisionGroups.LIGHT_RAY,
@@ -814,6 +818,7 @@ export default class PlayLevel extends Vue {
         return {
           name: 'heat',
           frictionAir: 0,
+          mass: 0,
           collisionFilter: {
             group: 0,
             category: this.CollisionGroups.HEAT_RAY,
@@ -832,7 +837,8 @@ export default class PlayLevel extends Vue {
       mask = mask | this.CollisionGroups.CARBON_SINK;
     return {
       name: moleculeType,
-      frictionAir: 0.1,
+      frictionAir: 0.01,
+      restitution: 1,
       collisionFilter: {
         group: 0,
         category: this.CollisionGroups.MOLECULE,
@@ -1448,7 +1454,7 @@ export default class PlayLevel extends Vue {
       for (const region of this.collisionRegions) {
         region.source.hitAnimation.splice(0);
         region.filter.splice(0);
-        region.alpha = 1;
+        region.alpha = 0.7;
         region.text = `${Math.round(region.source.temperature)}°C`;
       }
       this.autoPanSpeed = 0.6;

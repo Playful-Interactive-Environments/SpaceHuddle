@@ -180,7 +180,10 @@ import { Prop, Watch } from 'vue-property-decorator';
 import * as Matter from 'matter-js/build/matter';
 import { Application } from 'vue3-pixi';
 import { EventType } from '@/types/enum/EventType';
-import GameObject from '@/components/shared/atoms/game/GameObject.vue';
+import GameObject, {
+  FastObjectBehaviour,
+  bounceCategory,
+} from '@/components/shared/atoms/game/GameObject.vue';
 import { CustomObject } from '@/types/game/CustomObject';
 import * as PIXI from 'pixi.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -229,6 +232,19 @@ interface CollisionRegionData {
   size: [number, number];
   body: Matter.Body | null;
   graphic: PIXI.Graphics | null;
+}
+
+interface CollisionBounds {
+  top: Matter.Body;
+  bottom: Matter.Body;
+  left: Matter.Body;
+  right: Matter.Body;
+  topPosition: [number, number];
+  bottomPosition: [number, number];
+  leftPosition: [number, number];
+  rightPosition: [number, number];
+  width: number;
+  height: number;
 }
 
 @Options({
@@ -560,6 +576,7 @@ export default class GameContainer extends Vue {
     pixiUtil.unloadTexture(this.backgroundTexture);
     Matter.Events.off(this.engine, 'collisionStart', this.collisionStart);
     Matter.Events.off(this.engine, 'afterUpdate', this.afterPhysicUpdate);
+    Matter.Events.off(this.engine, 'beforeUpdate', this.beforePhysicUpdate);
     Matter.Events.off(this.engine.world, 'afterAdd', this.bodyAdded);
     this.eventBus.off(EventType.TEXTURES_LOADING_START);
     this.eventBus.off(EventType.ALL_TEXTURES_LOADED);
@@ -750,6 +767,12 @@ export default class GameContainer extends Vue {
         this.activeObject.$emit('update:highlighted', true);
       } else gameObject.gameObjectReleased();
     }
+    if (
+      gameObject.fastObjectBehaviour === FastObjectBehaviour.bounce &&
+      !this.bordersScreen
+    ) {
+      this.setupCollisionBound(CollisionBorderType.Screen, bounceCategory);
+    }
   }
 
   deregisterGameObject(gameObject: GameObject): void {
@@ -863,31 +886,33 @@ export default class GameContainer extends Vue {
   //#endregion events
 
   //#region bounds
-  borders:
-    | undefined
-    | {
-        top: Matter.Body;
-        bottom: Matter.Body;
-        left: Matter.Body;
-        right: Matter.Body;
-        topPosition: [number, number];
-        bottomPosition: [number, number];
-        leftPosition: [number, number];
-        rightPosition: [number, number];
-        width: number;
-        height: number;
-      } = undefined;
+  bordersScreen: undefined | CollisionBounds = undefined;
+  bordersBackground: undefined | CollisionBounds = undefined;
+  getBordersForType(type: CollisionBorderType): CollisionBounds | undefined {
+    if (type === CollisionBorderType.Background) return this.bordersBackground;
+    return this.bordersScreen;
+  }
+
+  setBordersForType(type: CollisionBorderType, borders: CollisionBounds): void {
+    if (type === CollisionBorderType.Background)
+      this.bordersBackground = borders;
+    else this.bordersScreen = borders;
+  }
+
   readonly boundsThickness = 100;
   readonly borderDelta = 0;
-  setupBound(): void {
+  setupCollisionBound(
+    collisionBorderType: CollisionBorderType,
+    borderCategory: number
+  ): CollisionBounds | undefined {
     const gameWidth = this.gameWidth ? this.gameWidth : 100;
     const gameHeight = this.gameHeight ? this.gameHeight : 100;
     const boundsWidth =
-      this.collisionBorders !== CollisionBorderType.Background
+      collisionBorderType !== CollisionBorderType.Background
         ? gameWidth
         : this.backgroundTextureSize[0];
     const boundsHeight =
-      this.collisionBorders !== CollisionBorderType.Background
+      collisionBorderType !== CollisionBorderType.Background
         ? gameHeight
         : this.backgroundTextureSize[1];
     const screenCenterX = gameWidth / 2;
@@ -928,7 +953,8 @@ export default class GameContainer extends Vue {
         height: boundsHeight,
       },
     };
-    if (this.engine && !this.borders) {
+    const containerBorders = this.getBordersForType(collisionBorderType);
+    if (this.engine && !containerBorders) {
       const bottom = Matter.Bodies.rectangle(
         bounds.bottom.x + screenCenterX,
         bounds.bottom.y + screenCenterY,
@@ -937,10 +963,10 @@ export default class GameContainer extends Vue {
         {
           isStatic: true,
           isHidden: true,
-          collisionFilter: { group: 0b0001, category: this.borderCategory },
+          collisionFilter: { group: 0b0001, category: borderCategory },
         }
       );
-      if (this.collisionBorders !== CollisionBorderType.None)
+      if (collisionBorderType !== CollisionBorderType.None)
         this.addToEngin(bottom);
       const top = Matter.Bodies.rectangle(
         bounds.top.x + screenCenterX,
@@ -950,10 +976,10 @@ export default class GameContainer extends Vue {
         {
           isStatic: true,
           isHidden: true,
-          collisionFilter: { group: 0b0001, category: this.borderCategory },
+          collisionFilter: { group: 0b0001, category: borderCategory },
         }
       );
-      if (this.collisionBorders !== CollisionBorderType.None)
+      if (collisionBorderType !== CollisionBorderType.None)
         this.addToEngin(top);
       const right = Matter.Bodies.rectangle(
         bounds.right.x + screenCenterX,
@@ -963,10 +989,10 @@ export default class GameContainer extends Vue {
         {
           isStatic: true,
           isHidden: true,
-          collisionFilter: { group: 0b0001, category: this.borderCategory },
+          collisionFilter: { group: 0b0001, category: borderCategory },
         }
       );
-      if (this.collisionBorders !== CollisionBorderType.None)
+      if (collisionBorderType !== CollisionBorderType.None)
         this.addToEngin(right);
       const left = Matter.Bodies.rectangle(
         bounds.left.x + screenCenterX,
@@ -976,12 +1002,12 @@ export default class GameContainer extends Vue {
         {
           isStatic: true,
           isHidden: true,
-          collisionFilter: { group: 0b0001, category: this.borderCategory },
+          collisionFilter: { group: 0b0001, category: borderCategory },
         }
       );
-      if (this.collisionBorders !== CollisionBorderType.None)
+      if (collisionBorderType !== CollisionBorderType.None)
         this.addToEngin(left);
-      this.borders = {
+      const borders: CollisionBounds = {
         top: top,
         bottom: bottom,
         left: left,
@@ -993,46 +1019,62 @@ export default class GameContainer extends Vue {
         width: boundsWidth,
         height: boundsHeight,
       };
-    } else if (this.borders) {
+      this.setBordersForType(collisionBorderType, borders);
+      return borders;
+    } else if (containerBorders) {
       Matter.Body.scale(
-        this.borders.bottom,
-        boundsWidth / this.borders.width,
+        containerBorders.bottom,
+        boundsWidth / containerBorders.width,
         1
       );
-      Matter.Body.setPosition(this.borders.bottom, {
+      Matter.Body.setPosition(containerBorders.bottom, {
         x: bounds.bottom.x + screenCenterX,
         y: bounds.bottom.y + screenCenterY,
       });
-      Matter.Body.scale(this.borders.top, boundsWidth / this.borders.width, 1);
-      Matter.Body.setPosition(this.borders.top, {
+      Matter.Body.scale(
+        containerBorders.top,
+        boundsWidth / containerBorders.width,
+        1
+      );
+      Matter.Body.setPosition(containerBorders.top, {
         x: bounds.top.x + screenCenterX,
         y: bounds.top.y + screenCenterY,
       });
       Matter.Body.scale(
-        this.borders.right,
+        containerBorders.right,
         1,
-        boundsHeight / this.borders.height
+        boundsHeight / containerBorders.height
       );
-      Matter.Body.setPosition(this.borders.right, {
+      Matter.Body.setPosition(containerBorders.right, {
         x: bounds.right.x + screenCenterX,
         y: bounds.right.y + screenCenterY,
       });
       Matter.Body.scale(
-        this.borders.left,
+        containerBorders.left,
         1,
-        boundsHeight / this.borders.height
+        boundsHeight / containerBorders.height
       );
-      Matter.Body.setPosition(this.borders.left, {
+      Matter.Body.setPosition(containerBorders.left, {
         x: bounds.left.x + screenCenterX,
         y: bounds.left.y + screenCenterY,
       });
-      this.borders.width = boundsWidth;
-      this.borders.height = boundsHeight;
-      this.borders.topPosition = [bounds.top.x, bounds.top.y];
-      this.borders.bottomPosition = [bounds.bottom.x, bounds.bottom.y];
-      this.borders.leftPosition = [bounds.left.x, bounds.left.y];
-      this.borders.rightPosition = [bounds.right.x, bounds.right.y];
+      containerBorders.width = boundsWidth;
+      containerBorders.height = boundsHeight;
+      containerBorders.topPosition = [bounds.top.x, bounds.top.y];
+      containerBorders.bottomPosition = [bounds.bottom.x, bounds.bottom.y];
+      containerBorders.leftPosition = [bounds.left.x, bounds.left.y];
+      containerBorders.rightPosition = [bounds.right.x, bounds.right.y];
+      return containerBorders;
     }
+    return undefined;
+  }
+
+  borders: undefined | CollisionBounds = undefined;
+  setupBound(): void {
+    this.borders = this.setupCollisionBound(
+      this.collisionBorders,
+      this.borderCategory
+    );
   }
 
   @Watch('collisionBorders', { immediate: true })
@@ -1059,6 +1101,7 @@ export default class GameContainer extends Vue {
     if (this.detectCollision)
       Matter.Events.on(this.engine, 'collisionStart', this.collisionStart);
     Matter.Events.on(this.engine, 'afterUpdate', this.afterPhysicUpdate);
+    Matter.Events.on(this.engine, 'beforeUpdate', this.beforePhysicUpdate);
     Matter.Events.on(this.engine.world, 'afterAdd', this.bodyAdded);
     this.$emit('initEngine', this.engine);
     if (this.useGravity) {
@@ -1338,14 +1381,17 @@ export default class GameContainer extends Vue {
 
   //#region loop
   afterPhysicUpdate(): void {
-    this.syncRenderView();
-  }
-
-  syncRenderView(): void {
     for (const gameObject of this.gameObjects) {
       if (gameObject.moveWithBackground && !this.backgroundSprite) continue;
       gameObject.checkTrigger();
-      gameObject.syncronize();
+      gameObject.afterPhysicUpdate();
+    }
+  }
+
+  beforePhysicUpdate(): void {
+    for (const gameObject of this.gameObjects) {
+      if (gameObject.moveWithBackground && !this.backgroundSprite) continue;
+      gameObject.beforePhysicUpdate();
     }
   }
   //#endregion loop
@@ -1437,25 +1483,38 @@ export default class GameContainer extends Vue {
         }
       }
 
-      if (
-        this.collisionBorders === CollisionBorderType.Background &&
-        this.borders
-      ) {
-        Matter.Body.setPosition(this.borders.bottom, {
-          x: this.borders.bottomPosition[0] + this.backgroundPositionOffset[0],
-          y: this.borders.bottomPosition[1] + this.backgroundPositionOffset[1],
+      if (this.bordersBackground) {
+        Matter.Body.setPosition(this.bordersBackground.bottom, {
+          x:
+            this.bordersBackground.bottomPosition[0] +
+            this.backgroundPositionOffset[0],
+          y:
+            this.bordersBackground.bottomPosition[1] +
+            this.backgroundPositionOffset[1],
         });
-        Matter.Body.setPosition(this.borders.top, {
-          x: this.borders.topPosition[0] + this.backgroundPositionOffset[0],
-          y: this.borders.topPosition[1] + this.backgroundPositionOffset[1],
+        Matter.Body.setPosition(this.bordersBackground.top, {
+          x:
+            this.bordersBackground.topPosition[0] +
+            this.backgroundPositionOffset[0],
+          y:
+            this.bordersBackground.topPosition[1] +
+            this.backgroundPositionOffset[1],
         });
-        Matter.Body.setPosition(this.borders.left, {
-          x: this.borders.leftPosition[0] + this.backgroundPositionOffset[0],
-          y: this.borders.leftPosition[1] + this.backgroundPositionOffset[1],
+        Matter.Body.setPosition(this.bordersBackground.left, {
+          x:
+            this.bordersBackground.leftPosition[0] +
+            this.backgroundPositionOffset[0],
+          y:
+            this.bordersBackground.leftPosition[1] +
+            this.backgroundPositionOffset[1],
         });
-        Matter.Body.setPosition(this.borders.right, {
-          x: this.borders.rightPosition[0] + this.backgroundPositionOffset[0],
-          y: this.borders.rightPosition[1] + this.backgroundPositionOffset[1],
+        Matter.Body.setPosition(this.bordersBackground.right, {
+          x:
+            this.bordersBackground.rightPosition[0] +
+            this.backgroundPositionOffset[0],
+          y:
+            this.bordersBackground.rightPosition[1] +
+            this.backgroundPositionOffset[1],
         });
       }
     }
