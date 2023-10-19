@@ -565,12 +565,11 @@ export default class PlayLevel extends Vue {
   lightTexture!: PIXI.Texture;
   startTime = Date.now();
   playTime = 0;
-  moleculeSize = 200;
   autoPanSpeed = 0.2;
   emitRatePerStar = 500;
   randomMessageNo = 1;
 
-  readonly absorptionConst = 1.1; //1.25;
+  //readonly absorptionConst = 1.1; //1.25;
   readonly radiationConst = 0.05;
   readonly minTemperature = -40;
   readonly maxTemperature = 60;
@@ -767,9 +766,11 @@ export default class PlayLevel extends Vue {
   }
 
   get absorptionFactor(): number {
-    const size = this.gameWidth * this.gameHeight;
-    const factor = size / 1000000;
-    return this.absorptionConst + factor;
+    //const size = this.gameWidth * this.gameHeight;
+    //const factor = size / 1000000;
+    //return this.absorptionConst + factor;
+
+    return 1.25;
   }
 
   getTimeString(timestamp: number): string {
@@ -951,6 +952,10 @@ export default class PlayLevel extends Vue {
 
   get textScaleFactor(): number {
     return this.gameWidth / 700;
+  }
+
+  get moleculeSize(): number {
+    return this.textScaleFactor * 300;
   }
   //#endregion get / set
 
@@ -1617,7 +1622,11 @@ export default class PlayLevel extends Vue {
               0
             )
           );
-          if (Object.hasOwn(obstacleObject, 'filter') && hitObstacle) {
+          if (
+            obstacleObject &&
+            Object.hasOwn(obstacleObject, 'filter') &&
+            hitObstacle
+          ) {
             this.collisionAnimation.push(
               new ShockwaveFilter(
                 [rayBody.position.x, rayBody.position.y],
