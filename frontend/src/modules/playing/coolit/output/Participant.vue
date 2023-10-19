@@ -24,6 +24,7 @@
       :tracking-manager="trackingManager"
       :temperature-rise="temperatureRise"
       @finished="levelPlayed"
+      @replayFinished="replayedFinished"
     />
   </div>
 </template>
@@ -167,8 +168,6 @@ export default class Participant extends Vue {
   }
 
   levelPlayed(state: PlayStateResult): void {
-    this.gameStep = GameStep.Select;
-    //this.gameState = GameState.Info;
     this.levelDone = true;
 
     if (this.trackingManager) {
@@ -192,6 +191,19 @@ export default class Participant extends Vue {
         (item) => item.parameter.level === this.activeLevel?.id
       );
       this.trackingManager.setFinishedState(this.module);
+    }
+    this.stepTime = Date.now();
+  }
+
+  replayedFinished(): void {
+    this.gameStep = GameStep.Select;
+    //this.gameState = GameState.Info;
+
+    if (this.trackingManager) {
+      this.trackingManager.saveIterationStep({
+        replayTime: Date.now() - this.stepTime,
+        playTime: Date.now() - this.startTime,
+      });
     }
     this.stepTime = Date.now();
   }

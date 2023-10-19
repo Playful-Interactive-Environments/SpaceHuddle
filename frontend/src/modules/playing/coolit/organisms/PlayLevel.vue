@@ -535,7 +535,7 @@ interface ColorValues {
     CustomSprite,
     CustomParticleContainer,
   },
-  emits: ['finished'],
+  emits: ['finished', 'replayFinished'],
 })
 export default class PlayLevel extends Vue {
   //#region parameters
@@ -1757,7 +1757,7 @@ export default class PlayLevel extends Vue {
     this.panOffsetMax = max;
     this.panOffset = value;
     if (this.gameOver && max[0] === 100 && max[1] === 100) {
-      this.finished();
+      this.$emit('replayFinished');
     }
   }
   //#endregion scroll
@@ -1819,9 +1819,6 @@ export default class PlayLevel extends Vue {
         })
         .then((vote) => (this.highScore = vote));
     }
-  }
-
-  finished(): void {
     this.$emit('finished', this.playStateResult);
   }
   //#endregion finished
