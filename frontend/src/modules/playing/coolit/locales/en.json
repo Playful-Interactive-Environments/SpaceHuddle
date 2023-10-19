@@ -96,7 +96,6 @@
       "greenhouseGas": "Greenhouse Gas",
       "atmosphericGas": "Atmospheric Gas"
     },
-    "gameOver": "game over",
     "highScore": {
       "header": "highscore"
     },
@@ -108,6 +107,40 @@
     "temperatureScale": {
       "lowerLimit": "freez",
       "upperLimit": "overheat"
+    },
+    "playResult": {
+      "0": {
+        "title": "Oh No.",
+        "message": {
+          "1": "Heavy storms expected towards the end of this summer.",
+          "2": "Austria now officially has less glaciers than the year before.",
+          "3": "A vast wildfire spreads across a significant part of Styria."
+        }
+      },
+      "1": {
+        "title": "Nice!",
+        "message": {
+          "1": "A slight decrease in average temperature has been noticed this year. A cool breeze makes for a wonderful summer day.",
+          "2": "Statistics show a decrease in floods during spring compared to last year.",
+          "3": "Farmers report less pests on their crops. A better and greener harvest is expected."
+        }
+      },
+      "2": {
+        "title": "Great Job!",
+        "message": {
+          "1": "More snow is expected to fall this winter. Wonderful news for ski enthusiasts!",
+          "2": "The current list of endangered species has shrunk due to the stabilization of the global climate.",
+          "3": "Some diseases have been reported to appear less often. A connection to the positive change in climate is not out of question!"
+        }
+      },
+      "3": {
+        "title": "Incredible!",
+        "message": {
+          "1": "Heat accumulation in big cities has been decreased significantly. The floor is NOT lava anymore!",
+          "2": "Regular rainfall and less droughts helped immensely in re-vitalizing the ecosystem. Austria looks a lot greener again!",
+          "3": "The glacial border has sunk again after years of rising. Natural water reserves seem to stabilize again."
+        }
+      }
     }
   },
   "statistic": {

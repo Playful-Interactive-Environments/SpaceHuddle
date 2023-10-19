@@ -96,7 +96,6 @@
       "greenhouseGas": "Treibhausgas",
       "atmosphericGas": "Atmosphärisches Gas"
     },
-    "gameOver": "game over",
     "highScore": {
       "header": "Highscore"
     },
@@ -108,6 +107,40 @@
     "temperatureScale": {
       "lowerLimit": "einfrieren",
       "upperLimit": "überhitzen"
+    },
+    "playResult": {
+      "0": {
+        "title": "Ohje.",
+        "message": {
+          "1": "Schwere Stürme und Überflutungen werden gegen Ende dieses Sommers erwartet.",
+          "2": "Österreich verzeichnet ab heute offiziell weniger Gletscher als im Vorjahr.",
+          "3": "Ein riesiger Brand breitet sich in den Wäldern der Steiermark aus."
+        }
+      },
+      "1": {
+        "title": "Super!",
+        "message": {
+          "1": "Dieses Jahr verzeichnete eine leichte Abnahme der durchschnittlichen Temperatur. Angenehme Winde an heißen Tagen sorgen für Wohlbefinden.",
+          "2": "Laut Statistik passierten im Vergleich zu letztem Jahr deutlich weniger Überflutungen.",
+          "3": "Landwirte berichten von deutlich weniger Ungeziefern auf ihren Feldern. Eine bessere und gesündere Ernte wird erwartet."
+        }
+      },
+      "2": {
+        "title": "Großartig!",
+        "message": {
+          "1": "Diesen Winter wird deutlich mehr Schneefall erwartet. Wunderbare Nachrichten für alle Ski-Enthusiasten!",
+          "2": "Die aktuelle Liste der bedrohten Tierarten ist aufgrund eines stabileren Klimas kleiner geworden.",
+          "3": "Manche Krankheiten scheinen weniger oft aufzutreten. Eine Verbindung zu dem positiven Wandel des Klimas wird nicht ausgeschlossen."
+        }
+      },
+      "3": {
+        "title": "Unglaublich!",
+        "message": {
+          "1": "Hitzestaus in großen Städten werden aktiv bekämpft und beseitigt. Der Boden ist KEINE Lava mehr!",
+          "2": "Regelmäßiger Regen und weniger Trockenperioden haben das Ökosystem belebt. Österreich sieht bereits viel grüner aus!",
+          "3": "Nach jahrelangem Anstieg ist die Gletschergrenze dieses Jahr erstmals wieder gesunken. Natürliche Wasserreserven scheinen sich wieder zu stabilisieren."
+        }
+      }
     }
   },
   "statistic": {

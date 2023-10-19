@@ -288,7 +288,7 @@
               :source="obstacle"
             >
               <CustomSprite
-                :colorOverlay="calculateTintColor(obstacle, 1)"
+                :colorOverlay="calculateTintColor(obstacle, 0.7)"
                 :texture="obstacle.texture"
                 :anchor="obstacle.pivot"
                 :width="obstacle.width"
@@ -313,13 +313,22 @@
       <el-rate v-model="stars" size="large" :max="3" :disabled="true" />
     </div>
     <div class="statusGameOver" v-if="gameOver">
-      <div>{{ $t('module.playing.coolit.participant.gameOver') }}</div>
+      <h1>
+        {{ $t(`module.playing.coolit.participant.playResult.${stars}.title`) }}
+      </h1>
+      <div>{{ getTimeString(playTime) }}</div>
+      <div>{{ Math.round(averageTemperature * 10) / 10 }}°C</div>
+      <div v-if="lastTimeDelta > 0">+{{ getTimeString(lastTimeDelta) }}</div>
       <div>
         <el-rate v-model="stars" size="large" :max="3" :disabled="true" />
       </div>
-      <div>{{ level.keywords }}</div>
-      <div>{{ getTimeString(playTime) }}</div>
-      <div v-if="lastTimeDelta > 0">+{{ getTimeString(lastTimeDelta) }}</div>
+      <div>
+        {{
+          $t(
+            `module.playing.coolit.participant.playResult.${stars}.message.${randomMessageNo}`
+          )
+        }}
+      </div>
     </div>
   </div>
 </template>
@@ -557,6 +566,7 @@ export default class PlayLevel extends Vue {
   moleculeSize = 50;
   autoPanSpeed = 0.2;
   emitRatePerStar = 500;
+  randomMessageNo = 1;
 
   readonly absorptionConst = 1.1; //1.25;
   readonly radiationConst = 0.05;
@@ -1428,6 +1438,7 @@ export default class PlayLevel extends Vue {
     }
     if (gameOver) {
       this.gameOver = true;
+      this.randomMessageNo = Math.round(Math.random() * 2) + 1;
       this.collisionAnimation.splice(0);
       clearInterval(this.interval);
 
@@ -1440,7 +1451,7 @@ export default class PlayLevel extends Vue {
         region.alpha = 1;
         region.text = `${Math.round(region.source.temperature)}°C`;
       }
-      this.autoPanSpeed = 1;
+      this.autoPanSpeed = 0.6;
       this.saveHighScore();
       return;
     }
@@ -1833,12 +1844,31 @@ export default class PlayLevel extends Vue {
   pointer-events: none;
   position: absolute;
   z-index: 100;
-  top: 30vh;
+  top: 15vh;
   bottom: 1rem;
   right: 1rem;
   left: 1rem;
   text-align: center;
-  font-size: var(--font-size-xxxlarge);
+  font-size: var(--font-size-xxlarge);
   color: var(--color-dark-contrast);
+
+  .el-rate {
+    height: 4rem;
+  }
+
+  .el-rate::v-deep(.el-icon) {
+    height: 3em;
+    width: 3em;
+
+    svg {
+      height: 3em;
+      width: 3em;
+    }
+  }
+
+  h1 {
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-xxxlarge);
+  }
 }
 </style>
