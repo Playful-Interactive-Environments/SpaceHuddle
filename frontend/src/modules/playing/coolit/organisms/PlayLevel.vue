@@ -521,12 +521,16 @@ interface ColorValues {
   emits: ['finished'],
 })
 export default class PlayLevel extends Vue {
+  //#region parameters
   @Prop() readonly taskId!: string;
   @Prop({ default: null }) readonly level!: Idea | null;
   @Prop({ default: 180000 }) readonly winTime!: number;
   @Prop({ default: 0 }) readonly temperatureRise!: number;
   @Prop({ default: EndpointAuthorisationType.PARTICIPANT })
   authHeaderTyp!: EndpointAuthorisationType;
+  //#endregion parameters
+
+  //#region variables
   renderer!: PIXI.Renderer;
   gameWidth = 0;
   gameHeight = 0;
@@ -591,7 +595,9 @@ export default class PlayLevel extends Vue {
     BORDER: 1 << 8,
   });
   CollisionBorderType = CollisionBorderType;
+  //#endregion variables
 
+  //#region get / set
   get playStateResult(): PlayStateResult {
     const result: PlayStateResult = {
       temperatureRise: this.temperatureRise,
@@ -844,6 +850,85 @@ export default class PlayLevel extends Vue {
     return rayPoints;
   }
 
+  get gameConfigTypes(): string[] {
+    return configParameter.getGameConfigTypes(
+      gameConfig.obstacles as any,
+      this.levelType
+    );
+  }
+
+  calculateTintColor(
+    obstacle: CoolItHitRegion,
+    alpha = -1
+  ): [number, number, number, number] {
+    /*let mixingFactor = obstacle.hitCount / obstacle.maxHitCount;
+    if (mixingFactor > 1) mixingFactor = 1;
+    const red = new Color(themeColors.getRedColor()).to('srgb') as any;
+    return [red.r, red.g, red.b, mixingFactor / 2];*/
+    const color = this.getTemperatureColor(obstacle.temperature);
+    if (color) {
+      return [
+        color.coords[0],
+        color.coords[1],
+        color.coords[2],
+        alpha > 0 ? alpha : color.alpha,
+      ];
+    }
+    return [255, 255, 255, 0];
+  }
+
+  get temperatureGradient(): any {
+    const minTempColor = new Color('#0000FF').to('srgb');
+    const maxTempColor = new Color('#FF00FF').to('srgb');
+    return minTempColor.range(maxTempColor, {
+      space: 'lch',
+      hue: 'decreasing',
+      outputSpace: 'srgb',
+    });
+  }
+
+  getTemperatureRange(temperature: number): number {
+    return (
+      (temperature - this.minTemperature) /
+      (this.maxTemperature - this.minTemperature)
+    );
+  }
+
+  calculateTemperatureColor(temperature: number): ColorValues {
+    let range = this.getTemperatureRange(temperature);
+    if (range < 0) range = 0;
+    if (range > 1) range = 1;
+    const temperatureColor = this.temperatureGradient(range);
+    const hex = temperatureColor.toString({ format: 'hex', collapse: false });
+    let dangerFactor = 0;
+    if (temperature < this.lowerTemperatureLimit)
+      dangerFactor =
+        (this.lowerTemperatureLimit - temperature) /
+        (this.lowerTemperatureLimit - this.minTemperature);
+    if (temperature > this.upperTemperatureLimit)
+      dangerFactor =
+        (temperature - this.upperTemperatureLimit) /
+        (this.maxTemperature - this.upperTemperatureLimit);
+    return {
+      hex: hex,
+      code: parseInt(hex.slice(1), 16),
+      coords: [temperatureColor.r, temperatureColor.g, temperatureColor.b],
+      alpha: dangerFactor / 2 + 0.1,
+      thickness: dangerFactor * 5 + 1,
+    };
+  }
+
+  getTemperatureColor(temperature: number): ColorValues {
+    const index = Math.round(temperature);
+    if (index > this.maxTemperature)
+      return this.temperatureColorSteps[this.maxTemperature];
+    if (index < this.minTemperature)
+      return this.temperatureColorSteps[this.minTemperature];
+    return this.temperatureColorSteps[Math.round(temperature)];
+  }
+  //#endregion get / set
+
+  //#region load / unload
   readonly animationSteps = 10;
   mounted(): void {
     const initPath = (type: RayType): void => {
@@ -957,83 +1042,6 @@ export default class PlayLevel extends Vue {
     cashService.deregisterAllGet(this.updateHighScore);
   }
 
-  get gameConfigTypes(): string[] {
-    return configParameter.getGameConfigTypes(
-      gameConfig.obstacles as any,
-      this.levelType
-    );
-  }
-
-  calculateTintColor(
-    obstacle: CoolItHitRegion,
-    alpha = -1
-  ): [number, number, number, number] {
-    /*let mixingFactor = obstacle.hitCount / obstacle.maxHitCount;
-    if (mixingFactor > 1) mixingFactor = 1;
-    const red = new Color(themeColors.getRedColor()).to('srgb') as any;
-    return [red.r, red.g, red.b, mixingFactor / 2];*/
-    const color = this.getTemperatureColor(obstacle.temperature);
-    if (color) {
-      return [
-        color.coords[0],
-        color.coords[1],
-        color.coords[2],
-        alpha > 0 ? alpha : color.alpha,
-      ];
-    }
-    return [255, 255, 255, 0];
-  }
-
-  get temperatureGradient(): any {
-    const minTempColor = new Color('#0000FF').to('srgb');
-    const maxTempColor = new Color('#FF00FF').to('srgb');
-    return minTempColor.range(maxTempColor, {
-      space: 'lch',
-      hue: 'decreasing',
-      outputSpace: 'srgb',
-    });
-  }
-
-  getTemperatureRange(temperature: number): number {
-    return (
-      (temperature - this.minTemperature) /
-      (this.maxTemperature - this.minTemperature)
-    );
-  }
-
-  calculateTemperatureColor(temperature: number): ColorValues {
-    let range = this.getTemperatureRange(temperature);
-    if (range < 0) range = 0;
-    if (range > 1) range = 1;
-    const temperatureColor = this.temperatureGradient(range);
-    const hex = temperatureColor.toString({ format: 'hex', collapse: false });
-    let dangerFactor = 0;
-    if (temperature < this.lowerTemperatureLimit)
-      dangerFactor =
-        (this.lowerTemperatureLimit - temperature) /
-        (this.lowerTemperatureLimit - this.minTemperature);
-    if (temperature > this.upperTemperatureLimit)
-      dangerFactor =
-        (temperature - this.upperTemperatureLimit) /
-        (this.maxTemperature - this.upperTemperatureLimit);
-    return {
-      hex: hex,
-      code: parseInt(hex.slice(1), 16),
-      coords: [temperatureColor.r, temperatureColor.g, temperatureColor.b],
-      alpha: dangerFactor / 2 + 0.1,
-      thickness: dangerFactor * 5 + 1,
-    };
-  }
-
-  getTemperatureColor(temperature: number): ColorValues {
-    const index = Math.round(temperature);
-    if (index > this.maxTemperature)
-      return this.temperatureColorSteps[this.maxTemperature];
-    if (index < this.minTemperature)
-      return this.temperatureColorSteps[this.minTemperature];
-    return this.temperatureColorSteps[Math.round(temperature)];
-  }
-
   unmounted(): void {
     this.active = false;
     clearInterval(this.interval);
@@ -1138,7 +1146,9 @@ export default class PlayLevel extends Vue {
       }
     }
   }
+  //#endregion load / unload
 
+  //#region texture / pixi
   getSpriteSheetForType(objectType: string): PIXI.Spritesheet {
     return this.stylesheets[objectType];
   }
@@ -1265,7 +1275,9 @@ export default class PlayLevel extends Vue {
       }
     }
   }
+  //#endregion texture / pixi
 
+  //#region rays
   readonly rayPoints = 80;
   readonly rayLength = 500 / this.rayPoints;
   emitStart = false;
@@ -1358,6 +1370,23 @@ export default class PlayLevel extends Vue {
     }
   }
 
+  leaveAtmosphere(
+    rayObject: GameObject,
+    out: { top: boolean; bottom: boolean; right: boolean; left: boolean }
+  ): void {
+    const ray = rayObject.source as Ray;
+    if (ray.type === RayType.heat && out.top) {
+      setTimeout(() => {
+        const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
+        if (index > -1) {
+          this.rayList.splice(index, 1);
+        }
+      }, 3000);
+    }
+  }
+  //#endregion rays
+
+  //#region loop
   updateTimeStamp = Date.now();
   gameOver = false;
   updateLoop(): void {
@@ -1497,6 +1526,18 @@ export default class PlayLevel extends Vue {
     }
   }
 
+  updateRegionFilter(region: CollisionRegion): void {
+    const source = region.source as CoolItHitRegion;
+    /*const redHash = themeColors.getRedColor();
+    let mixingFactor = source.hitCount / source.maxHitCount;
+    if (mixingFactor > 1) mixingFactor = 1;*/
+    const color = this.getTemperatureColor(source.temperature);
+    region.color = color.hex;
+    region.alpha = this.gameOver ? 1 : color.alpha; //mixingFactor / 2;
+  }
+  //#endregion loop
+
+  //#region collision and interaction
   lightCollisionCount = 0;
   async rayCollision(
     rayObject: GameObject,
@@ -1674,31 +1715,12 @@ export default class PlayLevel extends Vue {
     }
   }
 
-  updateRegionFilter(region: CollisionRegion): void {
-    const source = region.source as CoolItHitRegion;
-    /*const redHash = themeColors.getRedColor();
-    let mixingFactor = source.hitCount / source.maxHitCount;
-    if (mixingFactor > 1) mixingFactor = 1;*/
-    const color = this.getTemperatureColor(source.temperature);
-    region.color = color.hex;
-    region.alpha = this.gameOver ? 1 : color.alpha; //mixingFactor / 2;
+  moleculeClicked(item: any): void {
+    this.moleculeState[item.source.name].movedCount++;
   }
+  //#endregion collision and interaction
 
-  leaveAtmosphere(
-    rayObject: GameObject,
-    out: { top: boolean; bottom: boolean; right: boolean; left: boolean }
-  ): void {
-    const ray = rayObject.source as Ray;
-    if (ray.type === RayType.heat && out.top) {
-      setTimeout(() => {
-        const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
-        if (index > -1) {
-          this.rayList.splice(index, 1);
-        }
-      }, 3000);
-    }
-  }
-
+  //#region scroll
   updateOffset(
     value: [number, number],
     min: [number, number],
@@ -1711,7 +1733,9 @@ export default class PlayLevel extends Vue {
       this.finished();
     }
   }
+  //#endregion scroll
 
+  //#region finished
   lastTimeDelta = 0;
   saveHighScore(): void {
     if (this.highScore) {
@@ -1773,10 +1797,7 @@ export default class PlayLevel extends Vue {
   finished(): void {
     this.$emit('finished', this.playStateResult);
   }
-
-  moleculeClicked(item: any): void {
-    this.moleculeState[item.source.name].movedCount++;
-  }
+  //#endregion finished
 }
 </script>
 
