@@ -153,6 +153,7 @@
               :is-static="true"
               :affectedByForce="false"
               :source="obstacle"
+              :remove-from-engin-if-not-visible="true"
               @collision="obstacleCollision"
             >
               <CustomSprite
@@ -1707,7 +1708,11 @@ export default class PlayLevel extends Vue {
         }
       }
     }
-    if (Object.hasOwn(obstacleObject, 'filter') && hitObstacle) {
+    if (
+      obstacleObject &&
+      Object.hasOwn(obstacleObject, 'filter') &&
+      hitObstacle
+    ) {
       this.updateRegionFilter(obstacleObject as CollisionRegion);
     }
   }

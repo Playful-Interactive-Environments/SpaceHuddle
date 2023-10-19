@@ -408,7 +408,7 @@ export default class GameObject extends Vue {
   manageEngin(): void {
     if (!this.clickable) return;
     if (this.removeFromEnginIfNotVisible) {
-      const isVisible = this.isVisible(this.displayWidth * 5);
+      const isVisible = this.isVisible(this.displayWidth * 3);
       if (isVisible && !this.isPartOfEngin) {
         this.addBodyToEngine();
       } else if (!isVisible && this.isPartOfEngin) {
@@ -520,19 +520,25 @@ export default class GameObject extends Vue {
     this.addBodyToDetector();
   }
 
+  getVelocityAmount(): number {
+    return (
+      Math.pow(this.body.velocity.x, 2) + Math.pow(this.body.velocity.y, 2)
+    );
+  }
+
   wasVisible = false;
+  wasAtBorder = false;
   beforePhysicUpdate(): void {
     if (!this.destroyed && !this.isStatic && this.body) {
       let isVisible = this.isVisible(-this.displayWidth / 2);
+      const isAtBorder = this.isVisible(this.displayWidth / 2) && !isVisible;
       if (
         this.fastObjectBehaviour === FastObjectBehaviour.bounce &&
         this.gameContainer.mouseConstraint.body?.id !== this.body.id
       ) {
         const combinedMask = this.body.collisionFilter.mask | bounceCategory;
-        if (this.wasVisible) {
-          const velocityAmount =
-            Math.pow(this.body.velocity.x, 2) +
-            Math.pow(this.body.velocity.y, 2);
+        if (this.wasVisible || isVisible) {
+          const velocityAmount = this.getVelocityAmount();
           if (velocityAmount > 10) {
             if (!isVisible && this.body.collisionFilter.mask !== combinedMask) {
               const delta = this.displayWidth / 2;
@@ -549,11 +555,20 @@ export default class GameObject extends Vue {
               Matter.Body.setPosition(this.body, { x: pos[0], y: pos[1] });
               isVisible = true;
             }
-            if (this.wasVisible) this.body.collisionFilter.mask = combinedMask;
+            if (this.wasVisible || isVisible)
+              this.body.collisionFilter.mask = combinedMask;
           } else this.body.collisionFilter.mask = combinedMask ^ bounceCategory;
-        } else this.body.collisionFilter.mask = combinedMask ^ bounceCategory;
+        } else {
+          this.body.collisionFilter.mask = combinedMask ^ bounceCategory;
+          if (this.wasAtBorder) {
+            const velocityAmount = this.getVelocityAmount();
+            if (velocityAmount > 10)
+              Matter.Body.setVelocity(this.body, { x: 0, y: 0 });
+          }
+        }
       }
       this.wasVisible = isVisible;
+      this.wasAtBorder = isAtBorder;
     }
   }
 
@@ -591,8 +606,7 @@ export default class GameObject extends Vue {
         this.fastObjectBehaviour === FastObjectBehaviour.circle &&
         this.gameContainer.mouseConstraint.body?.id !== this.body.id
       ) {
-        const velocityAmount =
-          Math.pow(this.body.velocity.x, 2) + Math.pow(this.body.velocity.y, 2);
+        const velocityAmount = this.getVelocityAmount();
         if (velocityAmount > 10) {
           const delta = 10;
           const pos: [number, number] = [
@@ -610,8 +624,7 @@ export default class GameObject extends Vue {
         this.conditionalVelocity &&
         this.gameContainer.mouseConstraint.body?.id !== this.body.id
       ) {
-        const velocityAmount =
-          Math.pow(this.body.velocity.x, 2) + Math.pow(this.body.velocity.y, 2);
+        const velocityAmount = this.getVelocityAmount();
         if (velocityAmount < 5) {
           if (this.conditionalVelocity.condition(this)) {
             Matter.Body.setVelocity(
