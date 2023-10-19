@@ -501,7 +501,7 @@ export default class PlayState extends Vue {
     }
   }
 
-  compareCards(card, card2, playedFirst) {
+  async compareCards(card, card2, playedFirst) {
     //card = Card that was there first. Wins in case of category mismatch
     //Compares the cost + category of the cards and decides the winner
     let winningCard;
@@ -561,16 +561,16 @@ export default class PlayState extends Vue {
       this.playStateChange('lost', 'category');
     }
     //Remove cards from play
-    const cardsToDelete = document.getElementsByClassName('cardPlayed');
+    /*const cardsToDelete = document.getElementsByClassName('cardPlayed');
     while (cardsToDelete[0]) {
       if (cardsToDelete[0].parentNode) {
         cardsToDelete[0].parentNode.removeChild(cardsToDelete[0]);
       }
-    }
-    let index = this.cardsPlayed.indexOf(card);
-    this.cardsPlayed.splice(index, 1);
-    index = this.cardsPlayed.indexOf(card2);
-    this.cardsPlayed.splice(index, 1);
+    }*/
+    await until(() => this.cardWin(winningCard));
+    setTimeout(() => {
+      this.cardsPlayed = [];
+    }, 750);
     //draw new cards
     setTimeout(() => {
       this.drawNewCard();
@@ -578,8 +578,21 @@ export default class PlayState extends Vue {
       if (button) {
         button.removeAttribute('disabled');
       }
-    }, 500);
+    }, 1500);
     //reactivate Button
+  }
+
+  cardWin(winningCard) {
+    for (let i = 0; i < this.cardsPlayed.length; i++) {
+      if (this.cardsPlayed[i][7] != winningCard[7]) {
+        this.cardsPlayed.splice(i, 1);
+      }
+    }
+    const element = document.getElementById(winningCard[7]);
+    if (element) {
+      element.classList.add('cardWin');
+    }
+    return true;
   }
 
   /*createHTMLCard(card) {
@@ -728,6 +741,12 @@ export default class PlayState extends Vue {
   margin: 1rem;
 }
 
+.cardWin {
+  z-index: 100;
+  transform: scale(130%);
+  transition: 0.5s;
+}
+
 .CO2BarContainer {
   position: relative;
   width: 100%;
@@ -799,9 +818,14 @@ export default class PlayState extends Vue {
   opacity: 0;
   transform: translateY(-8rem);
 }
+.activeCards-enter-from,
+.activeCards-leave-to {
+  opacity: 0;
+}
 
 /* ensure leaving items are taken out of layout flow so that moving
    animations can be calculated correctly. */
+.activeCards-leave-active,
 .hand-leave-active {
   position: absolute;
 }
@@ -872,11 +896,11 @@ hr {
 }
 
 @keyframes shake {
-  0% { transform: translateX(0) scale(100%)}
-  25% { transform: translateX(5px) scale(125%)}
-  50% { transform: translateX(-5px) scale(150%)}
-  75% { transform: translateX(5px) scale(175%)}
-  100% { transform: translateX(0) scale(200%) }
+  0% {transform: translateX(0) scale(100%)}
+  25% {transform: translateX(5px) scale(125%)}
+  50% {transform: translateX(-5px) scale(150%)}
+  75% {transform: translateX(5px) scale(175%)}
+  100% {transform: translateX(0) scale(200%)}
 }
 
 .cardImage {
