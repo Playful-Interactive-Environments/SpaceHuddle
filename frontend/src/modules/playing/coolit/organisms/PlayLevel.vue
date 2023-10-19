@@ -432,7 +432,7 @@ interface CoolItHitRegion {
   maxHitCount: number;
   hitCount: number;
   hitAnimation: ShockwaveFilter[];
-  heatRationCoefficient: number;
+  //heatRationCoefficient: number;
   reflectionProbability: number;
   heatAbsorptionCoefficientLight: number;
   heatAbsorptionCoefficientHeat: number;
@@ -480,7 +480,7 @@ function convertToCoolItObstacle(
     maxHitCount: configParameter.maxHitCount ?? 10,
     placingRegions: result.placingRegions,
     hitAnimation: [],
-    heatRationCoefficient: configParameter.heatRationCoefficient ?? 1,
+    //heatRationCoefficient: configParameter.heatRationCoefficient ?? 1,
     heatAbsorptionCoefficientLight:
       configParameter.heatAbsorptionCoefficientLight ?? 1,
     heatAbsorptionCoefficientHeat:
@@ -923,7 +923,7 @@ export default class PlayLevel extends Vue {
               maxHitCount: 1000,
               hitCount: 0,
               hitAnimation: [],
-              heatRationCoefficient: moleculeConfig.globalWarmingFactor,
+              //heatRationCoefficient: moleculeConfig.globalWarmingFactor,
               heatAbsorptionCoefficientLight:
                 moleculeConfig.globalWarmingFactor,
               heatAbsorptionCoefficientHeat: moleculeConfig.globalWarmingFactor,
@@ -1516,7 +1516,8 @@ export default class PlayLevel extends Vue {
       if (ray.type === RayType.light && !ray.hit) {
         this.lightCollisionCount++;
         if (this.lightCollisionCount === 1) this.startTime = Date.now();
-        const heatRationCoefficientObstacle = hitObstacle.heatRationCoefficient;
+        const heatAbsorptionCoefficientObstacle =
+          hitObstacle.heatAbsorptionCoefficientLight;
         ray.hit = true;
         await delay(100);
         if (!rayObject.body) return;
@@ -1573,7 +1574,7 @@ export default class PlayLevel extends Vue {
         }
         ray.type = RayType.heat;
         ray.direction[1] *= -1;
-        ray.intensity = heatRationCoefficientObstacle;
+        ray.intensity = heatAbsorptionCoefficientObstacle;
         ray.animationIndex = 0;
         const force = Matter.Vector.create(rayVelocity[0], rayVelocity[1] * -1);
         rayObject.body.isStatic = false;
@@ -1599,7 +1600,8 @@ export default class PlayLevel extends Vue {
         ray.hit = true;
         hitObstacle.hitCount++;
         this.moleculeState[hitObstacle.name].hitCount++;
-        const heatRadiation = hitObstacle.heatRationCoefficient * ray.intensity;
+        const heatRadiation =
+          hitObstacle.heatAbsorptionCoefficientHeat * ray.intensity;
         this.collisionAnimation.push(
           new ShockwaveFilter(
             [rayBody.position.x, rayBody.position.y],
@@ -1660,8 +1662,13 @@ export default class PlayLevel extends Vue {
         moleculeObject.source.controllable = oxygenConfig.controllable;
         moleculeObject.source.absorbedByTree = oxygenConfig.absorbedByTree;
         moleculeObject.source.color = oxygenConfig.color;
-        moleculeObject.source.heatRationCoefficient =
+        moleculeObject.source.heatAbsorptionCoefficientHeat =
           oxygenConfig.globalWarmingFactor;
+        moleculeObject.source.heatAbsorptionCoefficientLight =
+          oxygenConfig.globalWarmingFactor;
+        moleculeObject.source.heatRadiationCoefficient =
+          oxygenConfig.globalWarmingFactor;
+        //moleculeObject.source.heatRationCoefficient = oxygenConfig.globalWarmingFactor;
         //this.moleculeList.splice(index, 1);
       }
     }
