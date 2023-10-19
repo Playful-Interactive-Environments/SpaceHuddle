@@ -51,6 +51,7 @@
             v-if="region.region.text"
             :anchor="[0.5, 0]"
             :style="{ fontFamily: 'Arial', fontSize: 34, fill: '#ffffff' }"
+            :scale="textScaleFactor"
           >
             {{ region.region.text }}
           </text>
@@ -397,6 +398,10 @@ export default class GameContainer extends Vue {
       this.gameObjectOffsetRelativeToBackground[1] + this.gameHeight / 2,
     ];*/
     return [this.gameWidth, this.gameHeight];
+  }
+
+  get textScaleFactor(): number {
+    return this.gameWidth / 700;
   }
   //#endregion get
 

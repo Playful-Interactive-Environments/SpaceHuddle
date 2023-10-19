@@ -59,7 +59,8 @@
               :anchor="[0.5, 0]"
               :x="getTemperatureRange(lowerTemperatureLimit) * gameWidth"
               :y="15"
-              :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
+              :style="{ fontFamily: 'Arial', fontSize: 24, fill: '#ff0000' }"
+              :scale="textScaleFactor"
             >
               {{ lowerTemperatureLimit }}°C
             </text>
@@ -68,6 +69,7 @@
               :x="5"
               :y="15"
               :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
+              :scale="textScaleFactor"
             >
               {{
                 $t(
@@ -87,7 +89,8 @@
               :anchor="[0.5, 0]"
               :x="getTemperatureRange(upperTemperatureLimit) * gameWidth"
               :y="15"
-              :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
+              :style="{ fontFamily: 'Arial', fontSize: 24, fill: '#ff0000' }"
+              :scale="textScaleFactor"
             >
               {{ upperTemperatureLimit }}°C
             </text>
@@ -96,6 +99,7 @@
               :x="gameWidth - 5"
               :y="15"
               :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
+              :scale="textScaleFactor"
             >
               {{
                 $t(
@@ -125,7 +129,8 @@
               :anchor="[0.5, 0]"
               :x="getTemperatureRange(averageTemperature) * gameWidth"
               :y="20"
-              :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
+              :style="{ fontFamily: 'Arial', fontSize: 36, fill: '#ff0000' }"
+              :scale="textScaleFactor"
             >
               {{ Math.round(averageTemperature) }}°C
             </text>
@@ -294,6 +299,7 @@
               <text
                 :anchor="[0.5, 1]"
                 :style="{ fontFamily: 'Arial', fontSize: 34, fill: '#ffffff' }"
+                :scale="textScaleFactor"
               >
                 {{ Math.round(obstacle.temperature) }}°C
               </text>
@@ -925,6 +931,10 @@ export default class PlayLevel extends Vue {
     if (index < this.minTemperature)
       return this.temperatureColorSteps[this.minTemperature];
     return this.temperatureColorSteps[Math.round(temperature)];
+  }
+
+  get textScaleFactor(): number {
+    return this.gameWidth / 700;
   }
   //#endregion get / set
 
