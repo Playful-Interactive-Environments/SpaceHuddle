@@ -88,7 +88,7 @@ export default class Participant extends Vue {
       case GameStep.Select:
         return [{ key: 'select', texture: 'respiratory-sphere.jpg' }];
       case GameStep.Play:
-        return [{ key: 'play', texture: 'respiratory-sphere.jpg' }];
+        return [{ key: 'play', texture: 'greenhouse-effect.png' }];
     }
     return [];
   }
