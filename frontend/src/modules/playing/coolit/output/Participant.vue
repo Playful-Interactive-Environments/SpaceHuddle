@@ -15,6 +15,7 @@
       :task-id="taskId"
       :module="module"
       :open-high-score="levelDone"
+      :win-time="180000"
       @play="startLevel"
     />
     <play-level
@@ -23,6 +24,7 @@
       :level="activeLevel"
       :tracking-manager="trackingManager"
       :temperature-rise="temperatureRise"
+      :win-time="180000"
       @finished="levelPlayed"
       @replayFinished="replayedFinished"
     />

@@ -141,6 +141,24 @@
           "3": "Nach jahrelangem Anstieg ist die Gletschergrenze dieses Jahr erstmals wieder gesunken. Natürliche Wasserreserven scheinen sich wieder zu stabilisieren."
         }
       }
+    },
+    "difficultyLevel": {
+      "veryEasy": {
+        "title": "sehr einfach",
+        "description": "Zur Zeit der Eiszeit betrug die globale Lufttemperatur -6°C. Versuch unter den Bedingungen einer leichten Eiszeit von nur -1°C die Temperatur in der Stadt im Gleichgewicht zu halten und die Erde vor dem Einfrieren zu bewahren, indem du Treibhausgase mit den Wärmestrahlen kollidieren lässt."
+      },
+      "easy": {
+        "title": "einfach",
+        "description": "Zu Beginn der Industrialisierung gab es keine Klimaerwärmung (globale Lufttemperatur = 0°C). Versuch unter diesen Bedingungen, die Temperatur in der Stadt im Gleichgewicht zu halten. Im Idealfall musst du nicht viel tun, weil die Atmosphäre im Gleichgewicht ist. Aber der Zufall führte auch zu Temperaturschwankungen in dieser Zeit, also greife vorsichtig ein, um diese Zufälligkeiten auszugleichen."
+      },
+      "today": {
+        "title": "heute",
+        "description": "Seit dem Beginn der Industrialisierung vor etwa 200 Jahren ist die globale Lufttemperatur aufgrund der Zunahme der Treibhausgase um mehr als 1 °C gestiegen. Versuch, die Erde kühl zu halten und zu verhindern, dass die roten Wärmestrahlen zu sehr mit den Treibhausgasen kollidieren. Aber bitte verhindere den Treibhauseffekt nicht vollständig, denn wir wollen ja auch nicht erfrieren."
+      },
+      "hard": {
+        "title": "schwer",
+        "description": "Nach dem Pariser Klimaabkommen soll der globale Anstieg der Lufttemperatur auf 2 °C begrenzt werden. Versuche unter diesen Bedingungen, die Erde kühl zu halten und zu verhindern, dass die roten Wärmestrahlen zu sehr mit den Treibhausgasen kollidieren. Aber bitte verhindere den Treibhauseffekt nicht gänzlich, denn wir wollen auch nicht erfrieren."
+      }
     }
   },
   "statistic": {

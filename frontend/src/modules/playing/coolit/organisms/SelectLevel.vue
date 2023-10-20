@@ -139,7 +139,6 @@
   <DrawerBottomOverlay v-model="showHighScore">
     <template v-slot:header>
       {{ $t('module.playing.coolit.participant.highScore.header') }}
-      {{ temperatureRise >= 0 ? '+' : '' }}{{ temperatureRise }}°C
     </template>
     <el-collapse v-model="openHighScoreLevels">
       <el-collapse-item
@@ -172,17 +171,99 @@
       </el-collapse-item>
     </el-collapse>
   </DrawerBottomOverlay>
-  <el-dialog v-model="showPlayDialog" @close="cancelGame">
+  <el-dialog
+    v-model="showPlayDialog"
+    @close="cancelGame"
+    custom-class="levelInfo"
+  >
     <template #header>
-      {{ $t('module.playing.coolit.participant.playDialog.header') }}
+      <h1 v-if="selectedIdea">
+        {{ selectedIdea.keywords }}
+      </h1>
     </template>
-    <h1 v-if="selectedIdea">
-      {{ selectedIdea.keywords }}
-    </h1>
     <div v-if="selectedIdea">
       {{ selectedIdea.description }}
     </div>
-    <div class="thermometer">
+    <div>
+      <el-radio-group v-model="difficultyLevel">
+        <el-radio-button
+          v-for="level in DifficultyLevel"
+          :key="level"
+          :label="level"
+        >
+          {{
+            $t(
+              `module.playing.coolit.participant.difficultyLevel.${level}.title`
+            )
+          }}
+        </el-radio-button>
+      </el-radio-group>
+    </div>
+    <div class="columns is-mobile">
+      <div class="column">
+        <SpriteCanvas
+          v-if="spriteSheetDifficulty"
+          :texture="spriteSheetDifficulty.textures['atmosphere.png']"
+          :width="200"
+          :height="200"
+          :background-color="backgroundColor"
+          @initRenderer="initRenderer"
+        >
+          <template v-slot:overlay>
+            <custom-particle-container
+              v-if="circleGradientTexture"
+              :config="difficultySettings.particleConfig"
+              :x="100"
+              :y="100"
+              :auto-update="false"
+              :deep-clone-config="false"
+              :default-texture="circleGradientTexture"
+              :parentEventBus="eventBus"
+            />
+            <sprite
+              v-if="circleGradientTexture"
+              :texture="circleGradientTexture"
+              :x="0"
+              :y="0"
+              :width="200"
+              :height="200"
+              :tint="difficultySettings.color"
+              :alpha="0.5"
+            />
+            <sprite
+              :texture="difficultySettings.texture"
+              :x="10"
+              :y="10"
+              :width="180"
+              :height="180"
+            />
+          </template>
+        </SpriteCanvas>
+      </div>
+      <div class="column">
+        <div>
+          <font-awesome-icon icon="temperature-arrow-up" />
+          {{ difficultySettings.temperatureRise > 0 ? '+' : ''
+          }}{{ difficultySettings.temperatureRise }}°C
+        </div>
+        <div>
+          <font-awesome-icon icon="temperature-half" />
+          {{ localTemperature }}°C
+        </div>
+        <div>
+          <font-awesome-icon icon="clock" />
+          {{ getTimeString(temperatureWinTime) }}
+        </div>
+      </div>
+    </div>
+    <div>
+      {{
+        $t(
+          `module.playing.coolit.participant.difficultyLevel.${difficultyLevel}.description`
+        )
+      }}
+    </div>
+    <!--<div class="thermometer">
       <el-slider
         v-model="temperatureRise"
         vertical
@@ -192,7 +273,7 @@
         :step="0.5"
         :marks="marks"
       />
-    </div>
+    </div>-->
     <template #footer>
       <el-button @click="cancelGame" class="dialog-button">
         {{ $t('module.playing.coolit.participant.playDialog.cancel') }}
@@ -228,6 +309,23 @@ import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottom
 import * as CoolItConst from '@/modules/playing/coolit/utils/consts';
 import * as cashService from '@/services/cash-service';
 import { VoteParameterResult } from '@/types/api/Vote';
+import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
+import globalWarmingParticle from '@/modules/playing/coolit/data/globalWarming.json';
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
+enum DifficultyLevel {
+  veryEasy = 'veryEasy',
+  easy = 'easy',
+  today = 'today',
+  hard = 'hard',
+}
+
+interface DifficultySettings {
+  temperatureRise: number;
+  texture: PIXI.Texture;
+  color: string;
+  particleConfig: any;
+}
 
 @Options({
   components: {
@@ -235,14 +333,15 @@ import { VoteParameterResult } from '@/types/api/Vote';
     FontAwesomeIcon,
     IdeaMap,
     DrawerBottomOverlay,
+    CustomParticleContainer,
   },
   emits: ['play'],
 })
-/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class SelectLevel extends Vue {
   @Prop() readonly trackingManager!: TrackingManager;
   @Prop() readonly taskId!: string;
   @Prop() readonly module!: Module;
+  @Prop({ default: 180000 }) readonly winTime!: number;
   @Prop({ default: true }) readonly openHighScore!: boolean;
   ideas: Idea[] = [];
   result: TaskParticipantIterationStep[] = [];
@@ -252,16 +351,65 @@ export default class SelectLevel extends Vue {
   showHighScore = false;
   showPlayDialog = false;
   spritesheet!: PIXI.Spritesheet;
+  spriteSheetDifficulty!: PIXI.Spritesheet;
   activeMoleculeName = '';
   gameConfig = gameConfig;
   rendererList: { [key: string]: PIXI.Renderer } = {};
+  circleGradientTexture: PIXI.Texture | null = null;
   temperatureRise = 0;
   marks = {};
   highScoreList: VoteParameterResult[] = [];
   openHighScoreLevels: string[] = [];
+  difficultyLevel = DifficultyLevel.today;
 
   MIN_TEMPERATURE_RISE = CoolItConst.MIN_TEMPERATURE_RISE;
   MAX_TEMPERATURE_RISE = CoolItConst.MAX_TEMPERATURE_RISE;
+  DifficultyLevel = DifficultyLevel;
+
+  get difficultySettings(): DifficultySettings {
+    const config = structuredClone(globalWarmingParticle);
+    switch (this.difficultyLevel) {
+      case DifficultyLevel.veryEasy:
+        config.maxParticles = 100;
+        return {
+          temperatureRise: -1,
+          texture: this.spriteSheetDifficulty.textures['planet01.png'],
+          color: '#0000ff',
+          particleConfig: config,
+        };
+      case DifficultyLevel.easy:
+        config.maxParticles = 300;
+        return {
+          temperatureRise: 0,
+          texture: this.spriteSheetDifficulty.textures['planet02.png'],
+          color: '#00ffff',
+          particleConfig: config,
+        };
+      case DifficultyLevel.today:
+        config.maxParticles = 600;
+        return {
+          temperatureRise: 1,
+          texture: this.spriteSheetDifficulty.textures['planet02.png'],
+          color: '#ff8800',
+          particleConfig: config,
+        };
+      case DifficultyLevel.hard:
+        config.maxParticles = 1000;
+        return {
+          temperatureRise: 2,
+          texture: this.spriteSheetDifficulty.textures['planet04.png'],
+          color: '#ff0000',
+          particleConfig: config,
+        };
+    }
+    config.maxParticles = 600;
+    return {
+      temperatureRise: 1,
+      texture: this.spriteSheetDifficulty.textures['planet02.png'],
+      color: '#ff8800',
+      particleConfig: config,
+    };
+  }
 
   get inactiveColor(): string {
     return themeColors.getInactiveColor();
@@ -275,6 +423,21 @@ export default class SelectLevel extends Vue {
     const seconds = Math.floor(timestamp / 1000);
     const secondsString = `0${seconds % 60}`;
     return `${Math.floor(seconds / 60)}:${secondsString.slice(-2)}`;
+  }
+
+  get temperatureWinTime(): number {
+    return CoolItConst.temperatureWinTime(
+      this.winTime,
+      this.difficultySettings.temperatureRise
+    );
+  }
+
+  get localTemperature(): number {
+    if (this.selectedIdea) {
+      return gameConfig.obstacles[this.selectedIdea.parameter.type].settings
+        .heatRation[0].initialTemperature;
+    }
+    return 15;
   }
 
   getRateForLevel(levelId: string): number {
@@ -293,6 +456,11 @@ export default class SelectLevel extends Vue {
       pixiUtil
         .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
         .then((sheet) => (this.spritesheet = sheet));
+    }, 100);
+    setTimeout(() => {
+      pixiUtil
+        .loadTexture('/assets/games/coolit/city/difficulty.json', this.eventBus)
+        .then((sheet) => (this.spriteSheetDifficulty = sheet));
     }, 100);
 
     for (
@@ -371,7 +539,11 @@ export default class SelectLevel extends Vue {
 
   startGame(): void {
     if (this.selectedIdea) {
-      this.$emit('play', this.selectedIdea, this.temperatureRise);
+      this.$emit(
+        'play',
+        this.selectedIdea,
+        this.difficultySettings.temperatureRise
+      );
     }
   }
 
@@ -477,6 +649,13 @@ export default class SelectLevel extends Vue {
       if (level) return level.keywords;
     }
     return '';
+  }
+
+  initRenderer(renderer: PIXI.Renderer): void {
+    this.circleGradientTexture = pixiUtil.generateCircleGradientTexture(
+      256,
+      renderer
+    );
   }
 }
 </script>
@@ -605,11 +784,18 @@ export default class SelectLevel extends Vue {
 
 h1 {
   font-size: var(--font-size-large);
+  font-weight: var(--font-weight-bold);
   color: var(--color-playing);
-  margin-bottom: 0.5rem;
+  //margin-bottom: 0.5rem;
 }
 
 .dialog-button {
   margin-left: 0.5rem;
+}
+</style>
+
+<style lang="scss">
+.levelInfo .el-dialog__body div {
+  margin-bottom: 0.5rem;
 }
 </style>

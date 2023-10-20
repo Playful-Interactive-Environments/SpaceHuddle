@@ -141,6 +141,24 @@
           "3": "The glacial border has sunk again after years of rising. Natural water reserves seem to stabilize again."
         }
       }
+    },
+    "difficultyLevel": {
+      "veryEasy": {
+        "title": "very easy",
+        "description": "At the time of the ice age, the global air temperature was -6°C. Under the conditions of a slight ice age of only -1°C, try to keep the temperature in the city in balance and prevent the earth from freezing by colliding greenhouse gases with the heat rays. "
+      },
+      "easy": {
+        "title": "easy",
+        "description": "At the beginning of the industrialisation there was no climate acquisition (global air temperature = 0°C). Under these conditions, try to keep the temperature in the city in balance. Ideally, you don't have to do much because the atmosphere is in balance. But the coincidence also resulted in temperature fluctuations at that time, so intervene carefully to balance these coincidences."
+      },
+      "today": {
+        "title": "today",
+        "description": "Since the beginning of industrialisation about 200 years ago, the global air temperature has risen by more than 1°C due to the increase in greenhouse gases. Try to keep the earth cool and prevent the red heat rays from colliding excessively with the greenhouse gases. But please don't prevent the greenhouse effect completely, because we don't want to freeze to death either."
+      },
+      "hard": {
+        "title": "hard",
+        "description": "According to the Paris Climate Agreement, the global increase in air temperature should be limited to 2°C. Under these conditions, try to keep the earth cool and prevent the red heat rays from colliding excessively with the greenhouse gases. But please don't prevent the greenhouse effect altogether, because we don't want to freeze to death either."
+      }
     }
   },
   "statistic": {

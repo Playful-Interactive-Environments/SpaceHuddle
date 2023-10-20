@@ -206,7 +206,8 @@
       "color": "#188c96",
       "globalWarmingFactor": 1,
       "size": 0.25,
-      "ration": 0.4,
+      "ration": 0.15,
+      "realRation": 0.4,
       "controllable": true,
       "absorbedByTree": false,
       "rationDeltaPerDegree": 0.05
@@ -272,7 +273,8 @@
       "color": "#d88e81",
       "globalWarmingFactor": 0,
       "size": 0.2,
-      "ration": 20.6,
+      "ration": 20.85,
+      "realRation": 20.6,
       "controllable": false,
       "absorbedByTree": false,
       "rationDeltaPerDegree": -0.05

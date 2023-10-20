@@ -806,8 +806,7 @@ export default class PlayLevel extends Vue {
   }
 
   get temperatureWinTime(): number {
-    //return this.winTime - Math.abs(this.temperatureRise * 30000);
-    return this.winTime - this.temperatureRise * 30000;
+    return CoolItConst.temperatureWinTime(this.winTime, this.temperatureRise);
   }
 
   get normalisedTime(): number {
@@ -819,7 +818,7 @@ export default class PlayLevel extends Vue {
     //const factor = size / 1000000;
     //return this.absorptionConst + factor;
 
-    return 1.75; // 1.25;
+    return 2; // 1.25;
   }
 
   get radiationFactor(): number {
@@ -1009,7 +1008,7 @@ export default class PlayLevel extends Vue {
   }
 
   get moleculeSize(): number {
-    return this.textScaleFactor * 300;
+    return this.textScaleFactor * 200;
   }
 
   get temperatureScale(): number[] {

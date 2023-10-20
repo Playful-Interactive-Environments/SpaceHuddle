@@ -1,0 +1,65 @@
+{
+    "lifetime": {
+        "min": 86400,
+        "max": 86400
+    },
+    "frequency": 0.00005,
+    "emitterLifetime": 0,
+    "maxParticles": 1000,
+    "addAtBack": false,
+    "particlesPerWave": 1000,
+    "pos": {
+        "x": 0,
+        "y": 0
+    },
+    "behaviors": [
+        {
+            "type": "alphaStatic",
+            "config": {
+                "alpha": 0.5
+            }
+        },
+        {
+            "type": "colorStatic",
+            "config": {
+                "color": "#555555"
+            }
+        },
+        {
+            "type": "scaleStatic",
+            "config": {
+                "min": 0.005,
+                "max": 0.005
+            }
+        },
+        {
+            "type": "rotation",
+            "config": {
+                "minStart": 0,
+                "maxStart": 360,
+                "minSpeed": 15,
+                "maxSpeed": 45,
+                "accel": 20
+            }
+        },
+        {
+            "type": "blendMode",
+            "config": {
+                "blendMode": "screen"
+            }
+        },
+        {
+            "type": "spawnShape",
+            "config": {
+                "type": "torus",
+                "data": {
+                    "x": 0,
+                    "y": 0,
+                    "radius": 100,
+                    "innerRadius": 80,
+                    "affectRotation": true
+                }
+            }
+        }
+    ]
+}

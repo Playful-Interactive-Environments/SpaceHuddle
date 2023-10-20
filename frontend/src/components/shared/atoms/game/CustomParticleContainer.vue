@@ -61,7 +61,7 @@ export default class CustomParticleContainer extends Vue {
 
   @Watch('config', { immediate: true })
   async onConfigChanged(): Promise<void> {
-    this.destroyEmitter(this.emitter, false);
+    this.destroyEmitter(this.emitter, !this.autoUpdate);
     if (!this.config) return;
     const config = this.deepCloneConfig
       ? structuredClone(this.config) // JSON.parse(JSON.stringify(this.config))
@@ -116,9 +116,13 @@ export default class CustomParticleContainer extends Vue {
         },
       });
     }
+    await until(() => !!this.container);
     this.emitter = new PIXIParticles.Emitter(this.container, config);
     this.emitter.autoUpdate = this.autoUpdate;
-    if (!this.autoUpdate) this.emitter.emitNow();
+    if (!this.autoUpdate) {
+      await delay(100);
+      this.emitter.emitNow();
+    }
   }
 
   renderContainer(container: PIXI.ParticleContainer): void {

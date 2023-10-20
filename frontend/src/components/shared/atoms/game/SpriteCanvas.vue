@@ -31,6 +31,7 @@
         @frame-change="animationFrameChanged"
       />
     </container>
+    <slot name="overlay"></slot>
   </Application>
 </template>
 
@@ -43,7 +44,7 @@ import * as pixiUtil from '@/utils/pixi';
 
 @Options({
   components: { Application },
-  emits: ['update:renderer'],
+  emits: ['update:renderer', 'initRenderer'],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class SpriteCanvas extends Vue {
@@ -83,7 +84,10 @@ export default class SpriteCanvas extends Vue {
       const pixi = this.$refs.pixi as typeof Application;
       if (pixi) {
         this.app = pixi.app;
-        if (pixi.app) this.$emit('update:renderer', pixi.app.renderer);
+        if (pixi.app) {
+          this.$emit('update:renderer', pixi.app.renderer);
+          this.$emit('initRenderer', pixi.app.renderer);
+        }
       }
     }, 100);
   }
