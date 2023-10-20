@@ -157,7 +157,7 @@
               ></font-awesome-icon>
             </td>
             <td>
-              {{ getTimeString(entry.value.normalisedTime) }}
+              {{ Math.round((entry.value.normalisedTime / 60000) * 100) }}
             </td>
             <td>
               <el-rate

@@ -25,117 +25,117 @@
     >
       <template v-slot:default>
         <container v-if="gameWidth && circleGradientTexture">
-          <container>
-            <sprite
-              :texture="temperatureMarkerTexture"
-              :height="15"
-              :width="getTemperatureRange(lowerTemperatureLimit) * gameWidth"
-              tint="#ff0000"
-            ></sprite>
-            <sprite
-              :texture="temperatureMarkerTexture"
-              :x="gameWidth"
-              :anchor="[1, 0]"
-              :height="15"
-              :width="
-                (1 - getTemperatureRange(upperTemperatureLimit)) * gameWidth
-              "
-              tint="#ff0000"
-            ></sprite>
-            <sprite
-              :texture="temperatureGradientTexture"
-              :height="10"
-              :width="gameWidth"
-            ></sprite>
-            <sprite
-              :texture="temperatureMarkerTexture"
-              :x="getTemperatureRange(lowerTemperatureLimit) * gameWidth"
-              :width="4"
-              :height="15"
-              :anchor="[0.5, 0]"
-              tint="#ff0000"
-            ></sprite>
-            <text
-              :anchor="[0.5, 0]"
-              :x="getTemperatureRange(lowerTemperatureLimit) * gameWidth"
-              :y="15"
-              :style="{ fontFamily: 'Arial', fontSize: 24, fill: '#ff0000' }"
-              :scale="textScaleFactor"
-            >
-              {{ lowerTemperatureLimit }}°C
-            </text>
-            <text
-              :anchor="[0, 0]"
-              :x="5"
-              :y="15"
-              :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
-              :scale="textScaleFactor"
-            >
-              {{
-                $t(
-                  'module.playing.coolit.participant.temperatureScale.lowerLimit'
-                )
-              }}
-            </text>
-            <sprite
-              :texture="temperatureMarkerTexture"
-              :x="getTemperatureRange(upperTemperatureLimit) * gameWidth"
-              :width="4"
-              :height="15"
-              :anchor="[0.5, 0]"
-              tint="#ff0000"
-            ></sprite>
-            <text
-              :anchor="[0.5, 0]"
-              :x="getTemperatureRange(upperTemperatureLimit) * gameWidth"
-              :y="15"
-              :style="{ fontFamily: 'Arial', fontSize: 24, fill: '#ff0000' }"
-              :scale="textScaleFactor"
-            >
-              {{ upperTemperatureLimit }}°C
-            </text>
-            <text
-              :anchor="[1, 0]"
-              :x="gameWidth - 5"
-              :y="15"
-              :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
-              :scale="textScaleFactor"
-            >
-              {{
-                $t(
-                  'module.playing.coolit.participant.temperatureScale.upperLimit'
-                )
-              }}
-            </text>
-            <sprite
-              v-for="obstacle in obstacleList"
-              :key="obstacle.uuid"
-              :texture="temperatureMarkerTexture"
-              :x="getTemperatureRange(obstacle.temperature) * gameWidth"
-              :width="2"
-              :height="12"
-              :anchor="[0.5, 0]"
-              :tint="contrastColor"
-            ></sprite>
-            <sprite
-              :texture="temperatureMarkerTexture"
-              :x="getTemperatureRange(averageTemperature) * gameWidth"
-              :width="4"
-              :height="20"
-              :anchor="[0.5, 0]"
-              tint="#ff0000"
-            ></sprite>
-            <text
-              :anchor="[0.5, 0]"
-              :x="getTemperatureRange(averageTemperature) * gameWidth"
-              :y="20"
-              :style="{ fontFamily: 'Arial', fontSize: 36, fill: '#ff0000' }"
-              :scale="textScaleFactor"
-            >
-              {{ Math.round(averageTemperature) }}°C
-            </text>
-          </container>
           <container v-if="!gameOver">
+            <container>
+              <sprite
+                :texture="temperatureMarkerTexture"
+                :height="15"
+                :width="getTemperatureRange(lowerTemperatureLimit) * gameWidth"
+                tint="#ff0000"
+              ></sprite>
+              <sprite
+                :texture="temperatureMarkerTexture"
+                :x="gameWidth"
+                :anchor="[1, 0]"
+                :height="15"
+                :width="
+                  (1 - getTemperatureRange(upperTemperatureLimit)) * gameWidth
+                "
+                tint="#ff0000"
+              ></sprite>
+              <sprite
+                :texture="temperatureGradientTexture"
+                :height="10"
+                :width="gameWidth"
+              ></sprite>
+              <sprite
+                :texture="temperatureMarkerTexture"
+                :x="getTemperatureRange(lowerTemperatureLimit) * gameWidth"
+                :width="4"
+                :height="15"
+                :anchor="[0.5, 0]"
+                tint="#ff0000"
+              ></sprite>
+              <text
+                :anchor="[0.5, 0]"
+                :x="getTemperatureRange(lowerTemperatureLimit) * gameWidth"
+                :y="15"
+                :style="{ fontFamily: 'Arial', fontSize: 24, fill: '#ff0000' }"
+                :scale="textScaleFactor"
+              >
+                {{ lowerTemperatureLimit }}°C
+              </text>
+              <text
+                :anchor="[0, 0]"
+                :x="5"
+                :y="15"
+                :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
+                :scale="textScaleFactor"
+              >
+                {{
+                  $t(
+                    'module.playing.coolit.participant.temperatureScale.lowerLimit'
+                  )
+                }}
+              </text>
+              <sprite
+                :texture="temperatureMarkerTexture"
+                :x="getTemperatureRange(upperTemperatureLimit) * gameWidth"
+                :width="4"
+                :height="15"
+                :anchor="[0.5, 0]"
+                tint="#ff0000"
+              ></sprite>
+              <text
+                :anchor="[0.5, 0]"
+                :x="getTemperatureRange(upperTemperatureLimit) * gameWidth"
+                :y="15"
+                :style="{ fontFamily: 'Arial', fontSize: 24, fill: '#ff0000' }"
+                :scale="textScaleFactor"
+              >
+                {{ upperTemperatureLimit }}°C
+              </text>
+              <text
+                :anchor="[1, 0]"
+                :x="gameWidth - 5"
+                :y="15"
+                :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
+                :scale="textScaleFactor"
+              >
+                {{
+                  $t(
+                    'module.playing.coolit.participant.temperatureScale.upperLimit'
+                  )
+                }}
+              </text>
+              <sprite
+                v-for="obstacle in obstacleList"
+                :key="obstacle.uuid"
+                :texture="temperatureMarkerTexture"
+                :x="getTemperatureRange(obstacle.temperature) * gameWidth"
+                :width="2"
+                :height="12"
+                :anchor="[0.5, 0]"
+                :tint="contrastColor"
+              ></sprite>
+              <sprite
+                :texture="temperatureMarkerTexture"
+                :x="getTemperatureRange(averageTemperature) * gameWidth"
+                :width="4"
+                :height="20"
+                :anchor="[0.5, 0]"
+                tint="#ff0000"
+              ></sprite>
+              <text
+                :anchor="[0.5, 0]"
+                :x="getTemperatureRange(averageTemperature) * gameWidth"
+                :y="20"
+                :style="{ fontFamily: 'Arial', fontSize: 36, fill: '#ff0000' }"
+                :scale="textScaleFactor"
+              >
+                {{ Math.round(averageTemperature) }}°C
+              </text>
+            </container>
             <GameObject
               v-for="obstacle in obstacleList"
               :key="obstacle.uuid"
@@ -259,6 +259,34 @@
             </GameObject>
           </container>
           <container v-else>
+            <container>
+              <sprite
+                :texture="temperatureGradientTexture"
+                :height="10"
+                :width="gameWidth"
+              ></sprite>
+              <sprite
+                v-for="x in temperatureScale"
+                :key="x"
+                :texture="temperatureMarkerTexture"
+                :x="getTemperatureRange(x) * gameWidth"
+                :width="2"
+                :height="15"
+                :anchor="[0.5, 0]"
+                tint="#ff0000"
+              ></sprite>
+              <text
+                v-for="x in temperatureScale"
+                :key="x"
+                :anchor="[0.5, 0]"
+                :x="getTemperatureRange(x) * gameWidth"
+                :y="15"
+                :style="{ fontFamily: 'Arial', fontSize: 24, fill: '#ff0000' }"
+                :scale="textScaleFactor"
+              >
+                {{ x }}°C
+              </text>
+            </container>
             <sprite
               :texture="riverTexture"
               :width="containerTextureSize[0]"
@@ -309,7 +337,7 @@
         </container>
       </template>
     </GameContainer>
-    <div class="statusOverlay">
+    <div class="statusOverlay" v-if="!gameOver">
       {{ getTimeString(playTime) }}
       <el-rate v-model="stars" size="large" :max="3" :disabled="true" />
     </div>
@@ -317,11 +345,29 @@
       <h1>
         {{ $t(`module.playing.coolit.participant.playResult.${stars}.title`) }}
       </h1>
-      <div>{{ getTimeString(playTime) }}</div>
-      <div>{{ Math.round(averageTemperature * 10) / 10 }}°C</div>
-      <div v-if="lastTimeDelta > 0">+{{ getTimeString(lastTimeDelta) }}</div>
-      <div>
-        <el-rate v-model="stars" size="large" :max="3" :disabled="true" />
+      <div class="columns is-mobile">
+        <div class="column">
+          <div>
+            <font-awesome-icon icon="clock" /> {{ getTimeString(playTime) }}
+            <span v-if="lastTimeDelta > 0"
+              >(+{{ getTimeString(lastTimeDelta) }})</span
+            >
+          </div>
+          <div>
+            <font-awesome-icon icon="star" />
+            <el-rate v-model="stars" size="large" :max="3" :disabled="true" />
+          </div>
+        </div>
+        <div class="column">
+          <div>
+            <font-awesome-icon icon="temperature-half" />
+            {{ Math.round(averageTemperature * 10) / 10 }}°C
+          </div>
+          <div>
+            <font-awesome-icon icon="trophy" />
+            {{ Math.round((normalisedTime / 60000) * 100) }}
+          </div>
+        </div>
       </div>
       <div>
         {{
@@ -373,6 +419,7 @@ import * as matterUtil from '@/utils/matter';
 import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
 import { Vote } from '@/types/api/Vote';
 import * as CoolItConst from '@/modules/playing/coolit/utils/consts';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
@@ -531,6 +578,7 @@ interface ColorValues {
     },
   },
   components: {
+    FontAwesomeIcon,
     GameObject,
     GameContainer,
     CustomSprite,
@@ -571,7 +619,7 @@ export default class PlayLevel extends Vue {
   randomMessageNo = 1;
 
   //readonly absorptionConst = 1.1; //1.25;
-  readonly radiationConst = 0.05;
+  //readonly radiationConst = 0.05;
   readonly minTemperature = -40;
   readonly maxTemperature = 60;
   readonly lowerTemperatureLimit = -20;
@@ -771,7 +819,12 @@ export default class PlayLevel extends Vue {
     //const factor = size / 1000000;
     //return this.absorptionConst + factor;
 
-    return 1.25;
+    return 1.75; // 1.25;
+  }
+
+  get radiationFactor(): number {
+    //return this.radiationConst;
+    return 0.05;
   }
 
   getTimeString(timestamp: number): string {
@@ -957,6 +1010,13 @@ export default class PlayLevel extends Vue {
 
   get moleculeSize(): number {
     return this.textScaleFactor * 300;
+  }
+
+  get temperatureScale(): number[] {
+    return Array.from(
+      { length: (this.maxTemperature - this.minTemperature) / 10 - 1 },
+      (x, i) => i * 10 + this.minTemperature + 10
+    );
   }
   //#endregion get / set
 
@@ -1542,7 +1602,7 @@ export default class PlayLevel extends Vue {
         if (temperature < 0) temperature = 0;
         obstacle.temperature -=
           obstacle.heatRadiationCoefficient *
-          this.radiationConst *
+          this.radiationFactor *
           temperature *
           timeFactor;
       }
@@ -1552,7 +1612,7 @@ export default class PlayLevel extends Vue {
         if (temperature < 0) temperature = 0;
         region.source.temperature -=
           region.source.heatRadiationCoefficient *
-          this.radiationConst *
+          this.radiationFactor *
           temperature *
           timeFactor;
       }
@@ -1861,31 +1921,43 @@ export default class PlayLevel extends Vue {
   pointer-events: none;
   position: absolute;
   z-index: 100;
-  top: 15vh;
-  bottom: 1rem;
+  top: 3rem;
   right: 1rem;
   left: 1rem;
   text-align: center;
-  font-size: var(--font-size-xxlarge);
+  font-size: var(--font-size-large);
   color: var(--color-dark-contrast);
+  background-color: #ffffff77;
+  border-radius: 2rem 2rem 2rem 0;
 
   .el-rate {
-    height: 4rem;
+    height: 1.5rem;
+  }
+
+  .el-rate::v-deep(.el-rate__item) {
+    //height: 3rem;
+    line-height: 1.5rem;
+    vertical-align: bottom;
   }
 
   .el-rate::v-deep(.el-icon) {
-    height: 3em;
-    width: 3em;
+    height: 1.5em;
+    width: 1.5em;
 
     svg {
-      height: 3em;
-      width: 3em;
+      height: 1.5em;
+      width: 1.5em;
     }
+  }
+
+  .column > div {
+    height: 3rem;
+    line-height: 3rem;
   }
 
   h1 {
     font-weight: var(--font-weight-bold);
-    font-size: var(--font-size-xxxlarge);
+    font-size: var(--font-size-xlarge);
   }
 }
 </style>
