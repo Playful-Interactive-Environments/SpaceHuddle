@@ -16,7 +16,8 @@
     "add": "Level hinzufügen",
     "levelType": "Leveltyp",
     "preConfig": "Vorkonfiguration",
-    "noPreConfig": "ohne"
+    "noPreConfig": "ohne",
+    "share": "teilen"
   },
   "participant": {
     "place": "Platzieren",
@@ -102,7 +103,7 @@
     }
   },
   "statistic": {
-    "levels": "Wie oft wurde welcher Level gespielt?",
+    "level": "Wie oft wurde welcher Level gespielt?",
     "rating": "Wie oft wurden wie viele Punkte erzielt?",
     "play": "Wie oft hat welcher Benutzer einen Level gespielt?",
     "build": "Wie oft hat welcher Benutzer einen Level erstellt?",

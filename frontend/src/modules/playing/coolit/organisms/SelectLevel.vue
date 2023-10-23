@@ -311,6 +311,7 @@ import * as cashService from '@/services/cash-service';
 import { VoteParameterResult } from '@/types/api/Vote';
 import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
 import globalWarmingParticle from '@/modules/playing/coolit/data/globalWarming.json';
+import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 enum DifficultyLevel {
@@ -553,7 +554,9 @@ export default class SelectLevel extends Vue {
   }
 
   updateIdeas(ideas: Idea[]): void {
-    this.ideas = ideas.filter((idea) => idea.parameter.shareData);
+    this.ideas = ideas.filter(
+      (idea) => idea.parameter.state === LevelWorkflowType.approved
+    );
     this.calculateResult();
   }
 

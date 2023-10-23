@@ -72,6 +72,7 @@
                   :idea="element"
                   :isDraggable="true"
                   :canChangeState="false"
+                  :handleEditable="false"
                   :showState="false"
                   :portrait="false"
                   :is-selected="
@@ -79,6 +80,7 @@
                   "
                   :background-color="getLevelColor(element)"
                   @ideaDeleted="refreshIdeas()"
+                  @ideaStartEdit="editIdea(element)"
                   @customCommand="dropdownCommand($event, element)"
                   :style="{
                     '--level-type-color': getSettingsForLevel(
@@ -106,7 +108,7 @@
                 <AddItem
                   :text="$t('module.playing.findit.moderatorContent.add')"
                   :is-column="true"
-                  @addNew="showSettings = true"
+                  @addNew="editNewImage"
                 />
               </template>
             </draggable>
@@ -117,11 +119,13 @@
                 :idea="idea"
                 :isDraggable="true"
                 :canChangeState="false"
+                :handleEditable="false"
                 :showState="false"
                 :portrait="false"
                 :is-selected="selectedLevel && selectedLevel.id === idea.id"
                 :background-color="getLevelColor(idea)"
                 @ideaDeleted="refreshIdeas()"
+                @ideaStartEdit="editIdea(idea)"
                 @customCommand="dropdownCommand($event, idea)"
                 :style="{
                   '--level-type-color': getSettingsForLevel(gameConfig, idea)
@@ -146,7 +150,7 @@
               <AddItem
                 :text="$t('module.playing.findit.moderatorContent.add')"
                 :is-column="true"
-                @addNew="showSettings = true"
+                @addNew="editNewImage"
               />
             </div>
           </el-collapse-item>
@@ -166,15 +170,19 @@
     <IdeaSettings
       v-model:show-modal="showSettings"
       :taskId="taskId"
-      :idea="addIdea"
+      :idea="settingsIdea"
       :title="$t('module.information.default.moderatorContent.settingsTitle')"
       @updateData="addData"
     >
       <el-form-item
+        v-if="!settingsIdea.id"
         :label="$t('module.playing.findit.moderatorContent.levelType')"
         :prop="`parameter.type`"
       >
-        <el-select v-model="addIdea.parameter.type" v-on:change="onTypeChanged">
+        <el-select
+          v-model="settingsIdea.parameter.type"
+          v-on:change="onTypeChanged"
+        >
           <el-option
             v-for="configType of Object.keys(gameConfig)"
             :key="configType"
@@ -201,7 +209,7 @@
         </el-select>
       </el-form-item>
       <el-form-item
-        v-if="possiblePreConfigNameList.length > 0"
+        v-if="!settingsIdea.id && possiblePreConfigNameList.length > 0"
         :label="$t('module.playing.findit.moderatorContent.preConfig')"
         :prop="`preConfig`"
       >
@@ -217,6 +225,12 @@
             :label="name"
           />
         </el-select>
+      </el-form-item>
+      <el-form-item
+        :label="$t('module.playing.findit.moderatorContent.share')"
+        :prop="`parameter.shareData`"
+      >
+        <el-switch v-model="shareData" />
       </el-form-item>
     </IdeaSettings>
   </div>
@@ -294,6 +308,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     image: null, // the datebase64 url of created image
     parameter: { ...emptyParameter },
   };
+  settingsIdea = this.addIdea;
   openTabs: string[] = [];
   module: Module | undefined = undefined;
   filter: FilterData = { ...defaultFilterData };
@@ -320,6 +335,15 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     return Object.keys(defaultLevelConfig).filter(
       (name) => defaultLevelConfig[name].type === this.addIdea.parameter.type
     );
+  }
+
+  get shareData(): boolean {
+    return this.settingsIdea.parameter.state === LevelWorkflowType.approved;
+  }
+
+  set shareData(value: boolean) {
+    if (value) this.settingsIdea.parameter.state = LevelWorkflowType.approved;
+    else this.settingsIdea.parameter.state = LevelWorkflowType.created;
   }
 
   getLevelColor(level: Idea): string {
@@ -477,12 +501,29 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   addData(newIdea: Idea): void {
+    if (!this.settingsIdea.id) {
+      this.ideas.push(newIdea);
+    }
+    this.resetAddIdea();
+  }
+
+  resetAddIdea(): void {
+    this.settingsIdea = this.addIdea;
     this.addIdea.keywords = '';
     this.addIdea.description = '';
     this.addIdea.image = null;
     this.addIdea.link = null;
     this.addIdea.parameter = { ...emptyParameter };
-    this.ideas.push(newIdea);
+  }
+
+  editNewImage(): void {
+    this.resetAddIdea();
+    this.showSettings = true;
+  }
+
+  editIdea(idea: Idea): void {
+    this.settingsIdea = idea;
+    this.showSettings = true;
   }
 }
 </script>

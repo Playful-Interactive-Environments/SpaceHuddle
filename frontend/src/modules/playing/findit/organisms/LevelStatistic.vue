@@ -57,7 +57,11 @@ import { GameStep } from '@/modules/playing/findit/output/Participant.vue';
 import * as placeable from '@/types/game/Placeable';
 import * as themeColors from '@/utils/themeColors';
 import { getRandomColorList } from '@/utils/colors';
-import { calculateChartPerIteration } from '@/utils/statistic';
+import {
+  calculateChartPerIteration,
+  calculateChartPerParameter,
+} from '@/utils/statistic';
+import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 
 @Options({
   components: { Bar },
@@ -133,6 +137,7 @@ export default class LevelStatistic extends Vue {
 
   calculateCharts(): void {
     this.barChartDataList = [];
+    if (!this.ideaId) this.calculateLevelChartIteration();
     if (!this.ideaId) this.calculateLevelChart();
     this.calculateStarsChart();
     this.calculateAvatarChart(GameStep.Play);
@@ -145,6 +150,31 @@ export default class LevelStatistic extends Vue {
   }
 
   calculateLevelChart(): void {
+    if (!this.ideaId && this.ideas && this.steps) {
+      const filter = (item) => item.parameter.step === GameStep.Play;
+      const labels: string[] = this.ideas.map((idea) => idea.keywords);
+      const datasets = calculateChartPerParameter(
+        this.steps,
+        Object.values(LevelWorkflowType),
+        this.ideas,
+        this.replayColors,
+        (item, parameter) =>
+          (item.parameter.state ?? LevelWorkflowType.approved) === parameter,
+        (item, idea) => item.ideaId === idea.id,
+        filter
+      );
+      this.barChartDataList.push({
+        title: this.$t('module.playing.findit.statistic.level'),
+        data: {
+          labels: labels,
+          datasets: datasets,
+        },
+        labelColors: themeColors.getContrastColor(),
+      });
+    }
+  }
+
+  calculateLevelChartIteration(): void {
     if (!this.ideaId && this.ideas && this.steps) {
       const filter = (item) => item.parameter.step === GameStep.Play;
       const labels: string[] = this.ideas.map((idea) => idea.keywords);

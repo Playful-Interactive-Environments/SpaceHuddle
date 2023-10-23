@@ -8,7 +8,6 @@
         v-model:level-type="selectedLevelType"
         :task-id="taskId"
         :auth-header-typ="EndpointAuthorisationType.MODERATOR"
-        @approved="approved"
         :gameConfig="gameConfig.obstacles"
         :can-rotate="false"
         :can-export="true"
@@ -16,6 +15,7 @@
         :can-change-saturation="false"
         :can-change-layer="false"
         :can-scale="false"
+        :can-approve="true"
         :custom-sort-order="(placeable) => placeable.position[1]"
         :custom-saturation="customSaturation"
         :custom-scale-factor="customScale"
@@ -113,11 +113,13 @@
                 :idea="idea"
                 :isDraggable="true"
                 :canChangeState="false"
+                :handleEditable="false"
                 :showState="false"
                 :portrait="false"
                 :is-selected="selectedLevel && selectedLevel.id === idea.id"
                 :background-color="getLevelColor(idea)"
                 @ideaDeleted="refreshIdeas()"
+                @ideaStartEdit="editIdea(idea)"
                 @customCommand="dropdownCommand($event, idea)"
                 :style="{
                   '--level-type-color': getSettingsForLevel(
@@ -229,7 +231,7 @@
         :label="$t('module.playing.coolit.moderatorContent.share')"
         :prop="`parameter.shareData`"
       >
-        <el-switch v-model="settingsIdea.parameter.shareData" />
+        <el-switch v-model="shareData" />
       </el-form-item>
     </IdeaSettings>
   </div>
@@ -251,7 +253,9 @@ import * as cashService from '@/services/cash-service';
 import LevelStatistic from '@/modules/playing/coolit/organisms/LevelStatistic.vue';
 import gameConfig from '@/modules/playing/coolit/data/gameConfig.json';
 import defaultLevelConfig from '@/modules/playing/coolit/data/defaultLevels.json';
-import LevelBuilder from '@/components/shared/organisms/game/LevelBuilder.vue';
+import LevelBuilder, {
+  getLevelType,
+} from '@/components/shared/organisms/game/LevelBuilder.vue';
 import * as configParameter from '@/utils/game/configParameter';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 import * as themeColors from '@/utils/themeColors';
@@ -275,7 +279,6 @@ const emptyParameter = {
   state: LevelWorkflowType.created,
   type: configParameter.getDefaultLevelType(gameConfig.obstacles as any),
   items: [],
-  shareData: false,
 };
 
 @Options({
@@ -299,7 +302,6 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   selectedLevel: Idea | null = null;
   selectedLevelType = '';
   EndpointAuthorisationType = EndpointAuthorisationType;
-  activeTab = 'play';
   gameConfig = gameConfig;
   showSettings = false;
   addIdea: any = {
@@ -335,6 +337,15 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     return Object.keys(defaultLevelConfig).filter(
       (name) => defaultLevelConfig[name].type === this.addIdea.parameter.type
     );
+  }
+
+  get shareData(): boolean {
+    return this.settingsIdea.parameter.state === LevelWorkflowType.approved;
+  }
+
+  set shareData(value: boolean) {
+    if (value) this.settingsIdea.parameter.state = LevelWorkflowType.approved;
+    else this.settingsIdea.parameter.state = LevelWorkflowType.created;
   }
 
   getLevelColor(level: Idea): string {
@@ -482,13 +493,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   selectLevel(level: Idea): void {
-    this.selectedLevelType = '';
+    this.selectedLevelType = getLevelType(level, gameConfig.obstacles as any);
     this.selectedLevel = level;
-    this.activeTab = 'play';
-  }
-
-  approved(): void {
-    this.activeTab = 'play';
   }
 
   @Watch('showSettings', { immediate: true })

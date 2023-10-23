@@ -288,6 +288,15 @@ export interface BuildStateResult {
   itemList: placeable.PlaceableBase[];
 }
 
+export function getLevelType(
+  level: Idea,
+  gameConfig: placeable.PlaceableConfig
+): string {
+  return level.parameter.type
+    ? level.parameter.type
+    : configParameter.getDefaultLevelType(gameConfig);
+}
+
 @Options({
   computed: {
     ObjectSpace() {
@@ -645,9 +654,7 @@ export default class LevelBuilder extends Vue {
     if (this.level) {
       this.saveChanges();
       this.placedObjects = [];
-      const levelType = this.level.parameter.type
-        ? this.level.parameter.type
-        : configParameter.getDefaultLevelType(this.gameConfig);
+      const levelType = getLevelType(this.level, this.gameConfig);
       if (this.loadedLevelType && this.loadedLevelType !== levelType) {
         const gameConfigTypes = Object.keys(
           this.gameConfig[levelType].categories

@@ -35,7 +35,7 @@
     </div>
     <div
       class="link media"
-      :class="{ own: isOwnLevel(idea) }"
+      :class="{ own: isOwnLevel(idea), notApproved: !isApproved(idea) }"
       v-for="idea of ideas"
       :key="idea.id"
       :style="{
@@ -142,9 +142,14 @@ export default class SelectState extends Vue {
 
   updateIdeas(ideas: Idea[]): void {
     this.ideas = ideas.filter(
-      (item) => item.parameter.state === LevelWorkflowType.approved
+      (item) =>
+        item.parameter.state === LevelWorkflowType.approved || item.isOwn
     );
     this.calculateResult();
+  }
+
+  isApproved(level: Idea): boolean {
+    return level.parameter.state === LevelWorkflowType.approved;
   }
 
   updateIterationSteps(steps: TaskParticipantIterationStep[]): void {
@@ -213,6 +218,10 @@ export default class SelectState extends Vue {
 
 .own {
   background-color: var(--color-informing);
+}
+
+.notApproved {
+  background-color: var(--color-gray);
 }
 
 .el-rate {

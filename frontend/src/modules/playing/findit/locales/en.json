@@ -16,7 +16,8 @@
     "add": "add level",
     "levelType": "level type",
     "preConfig": "pre-configuration",
-    "noPreConfig": "none"
+    "noPreConfig": "none",
+    "share": "share"
   },
   "participant": {
     "lost": "You have unfortunately not found a dangerous object for too long, which has now caused a damage. You have lost, please try again.",

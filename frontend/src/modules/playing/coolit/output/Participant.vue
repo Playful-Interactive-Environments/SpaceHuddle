@@ -151,6 +151,8 @@ export default class Participant extends Vue {
         TaskParticipantIterationStepStatesType.NEUTRAL,
         {
           level: level.id,
+          state: level.parameter.state,
+          isOwn: level.isOwn,
           temperatureRise: this.temperatureRise,
           selectTime: Date.now() - this.stepTime,
           playTime: Date.now() - this.startTime,
