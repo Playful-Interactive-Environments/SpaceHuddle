@@ -212,6 +212,24 @@ export const getIdeaListParameter = (
   return queryParameter;
 };
 
+export const registerGetIdea = (
+  id: string,
+  callback: (result: any) => void,
+  authHeaderType = EndpointAuthorisationType.MODERATOR,
+  maxDelaySeconds = 60 * 5
+): cashService.SimplifiedCashEntry<Idea> => {
+  return cashService.registerSimplifiedGet<Idea>(
+    `/${EndpointType.IDEA}/${id}/`,
+    callback,
+    [],
+    authHeaderType,
+    maxDelaySeconds,
+    async (idea: Idea) => {
+      return (await getIdeaImages([idea], authHeaderType))[0];
+    }
+  );
+};
+
 export const registerGetIdeasForTask = (
   taskId: string,
   orderType: string | null = null,
