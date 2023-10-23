@@ -482,6 +482,9 @@ export interface PlayStateResult {
   obstacleHitCount: number;
   regionHitCount: number;
   moleculeHitCount: number;
+  moleculeMovedCount: number;
+  moleculeDecreaseCount: number;
+  moleculeEmitCount: number;
   rayCount: number;
   temperature: number;
 }
@@ -681,30 +684,48 @@ export default class PlayLevel extends Vue {
         (sum, item) => sum + item.hitCount,
         0
       ),
+      moleculeMovedCount: Object.values(this.moleculeState).reduce(
+        (sum, item) => sum + item.movedCount,
+        0
+      ),
+      moleculeDecreaseCount: Object.values(this.moleculeState).reduce(
+        (sum, item) => sum + item.decreaseCount,
+        0
+      ),
+      moleculeEmitCount: Object.values(this.moleculeState).reduce(
+        (sum, item) => sum + item.emitCount,
+        0
+      ),
       rayCount: this.emittedRayCount,
       temperature: this.averageTemperature,
     };
-    for (const obstacle of Object.keys(
+    for (const obstacleType of Object.keys(
       gameConfig.obstacles[this.levelType].categories
     )) {
-      const list = this.obstacleList.filter((item) => item.name === obstacle);
-      result.obstacleState[obstacle] = {
-        totalCount: list.length,
-        avgHitCount:
-          list.reduce((sum, item) => sum + item.hitCount, 0) / list.length,
-        avgTemperature:
-          list.reduce((sum, item) => sum + item.temperature, 0) / list.length,
-        items: list.map((item) => {
-          return {
-            hitCount: item.hitCount,
-            temperature: item.temperature,
-          };
-        }),
-      };
-      result.obstacleHitCount += list.reduce(
-        (sum, item) => sum + item.hitCount,
-        0
-      );
+      for (const obstacleName of Object.keys(
+        gameConfig.obstacles[this.levelType].categories[obstacleType].items
+      )) {
+        const list = this.obstacleList.filter(
+          (item) => item.type === obstacleType && item.name === obstacleName
+        );
+        result.obstacleState[obstacleName] = {
+          totalCount: list.length,
+          avgHitCount:
+            list.reduce((sum, item) => sum + item.hitCount, 0) / list.length,
+          avgTemperature:
+            list.reduce((sum, item) => sum + item.temperature, 0) / list.length,
+          items: list.map((item) => {
+            return {
+              hitCount: item.hitCount,
+              temperature: item.temperature,
+            };
+          }),
+        };
+        result.obstacleHitCount += list.reduce(
+          (sum, item) => sum + item.hitCount,
+          0
+        );
+      }
     }
     for (const region of gameConfig.obstacles[this.levelType].settings
       .heatRation) {

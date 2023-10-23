@@ -49,15 +49,17 @@ import * as cashService from '@/services/cash-service';
 import { Bar } from 'vue-chartjs';
 import * as taskParticipantService from '@/services/task-participant-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
-import type { ChartData } from 'chart.js';
+import type { ChartData, ChartDataset } from 'chart.js';
 import * as ideaService from '@/services/idea-service';
 import { Idea } from '@/types/api/Idea';
 import { AvatarUnicode } from '@/types/enum/AvatarUnicode';
-import { GameStep } from '@/modules/playing/coolit/output/Participant.vue';
-import * as placeable from '@/types/game/Placeable';
 import * as themeColors from '@/utils/themeColors';
 import { getRandomColorList } from '@/utils/colors';
-import { calculateChartPerIteration } from '@/utils/statistic';
+import {
+  calculateChartPerIteration,
+  calculateChartPerParameter,
+} from '@/utils/statistic';
+import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 
 @Options({
   components: { Bar },
@@ -133,28 +135,193 @@ export default class LevelStatistic extends Vue {
 
   calculateCharts(): void {
     this.barChartDataList = [];
-    if (!this.ideaId) this.calculateLevelChart();
+    if (!this.ideaId) {
+      this.calculateLevelChartPerState();
+      this.calculateLevelChartIteration();
+    }
     this.calculateStarsChart();
-    this.calculateAvatarChart(GameStep.Play);
-    if (!this.ideaId) this.calculateAvatarChart(GameStep.Select);
-    if (this.ideaId) this.calculateTimeChart();
-    this.calculateItemChart(GameStep.Play);
-    this.calculateItemChart(GameStep.Select);
-    this.calculateItemCountChart(GameStep.Play);
-    if (!this.ideaId) this.calculateItemCountChart(GameStep.Select);
+    this.calculateAvatarChart();
+    this.calculateStateParameterChartPerLevel(
+      'normalisedTime',
+      (value) => Math.round(value / 1000),
+      'time'
+    );
+    this.calculateStateParameterChartPerLevel(
+      'normalisedTime',
+      (value) => Math.round((value / 60000) * 100),
+      'winPoints'
+    );
+    this.calculateStateParameterChartPerLevel('temperatureRise');
+    this.calculateStateParameterChartPerTemperatureRise('moleculeHitCount');
+    this.calculateStateParameterChartPerTemperatureRise(
+      'moleculeState',
+      (value) =>
+        Object.values(value).reduce(
+          (sum, item: any) => sum + item.movedCount,
+          0
+        ),
+      'moleculeMovedCount'
+    );
+    this.calculateStateParameterChartPerTemperatureRise(
+      'moleculeState',
+      (value) =>
+        Object.values(value).reduce(
+          (sum, item: any) => sum + item.decreaseCount,
+          0
+        ),
+      'moleculeDecreaseCount'
+    );
+    this.calculateStateParameterChartPerLevel('obstacleHitCount');
+    this.calculateStateParameterChartPerLevel('regionHitCount');
+    this.calculateStateParameterChartPerLevel('rayCount');
+    this.calculateStateParameterChartPerLevel('temperature', (value) =>
+      Math.round(value)
+    );
   }
 
-  calculateLevelChart(): void {
+  calculateLevelChartPerState(): void {
     if (!this.ideaId && this.ideas && this.steps) {
-      const filter = (item) => item.parameter.step === GameStep.Play;
+      const labels: string[] = this.ideas.map((idea) => idea.keywords);
+      const datasets = calculateChartPerParameter(
+        this.steps,
+        Object.values(LevelWorkflowType),
+        this.ideas,
+        this.replayColors,
+        (item, parameter) =>
+          (item.parameter.state ?? LevelWorkflowType.approved) === parameter,
+        (item, idea) => item.ideaId === idea.id
+      );
+      this.barChartDataList.push({
+        title: this.$t('module.playing.coolit.statistic.level'),
+        data: {
+          labels: labels,
+          datasets: datasets,
+        },
+        labelColors: themeColors.getContrastColor(),
+      });
+    }
+  }
+
+  calculateStateParameterChartPerLevel(
+    parameter: string,
+    convert: ((value: any) => any) | null = null,
+    title: string | null = null
+  ): void {
+    if (this.ideas && this.steps) {
+      const filter = (item) =>
+        (!this.ideaId || item.ideaId === this.ideaId) && item.parameter.state;
+      const labels: number[] = this.steps
+        .filter(
+          (item) =>
+            filter(item) && item.parameter.state[parameter] !== undefined
+        )
+        .map((idea) =>
+          convert
+            ? convert(idea.parameter.state[parameter])
+            : idea.parameter.state[parameter]
+        )
+        .filter((value, index, array) => array.indexOf(value) === index)
+        .sort((a, b) => a - b);
+      let datasets: ChartDataset[] = [];
+      if (this.ideaId) {
+        datasets = calculateChartPerIteration(
+          this.steps,
+          labels,
+          this.replayColors,
+          (item) => item.parameter.replayCount,
+          (item, value) =>
+            (convert
+              ? convert(item.parameter.state[parameter])
+              : item.parameter.state[parameter]) === value,
+          filter
+        );
+      } else {
+        datasets = calculateChartPerParameter(
+          this.steps,
+          this.ideas,
+          labels,
+          this.replayColors,
+          (item, value) => item.ideaId === value.id,
+          (item, value) =>
+            (convert
+              ? convert(item.parameter.state[parameter])
+              : item.parameter.state[parameter]) === value,
+          filter,
+          (list) => list.length,
+          (value) => value.keywords
+        );
+      }
+      this.barChartDataList.push({
+        title: this.$t(`module.playing.coolit.statistic.${title ?? parameter}`),
+        data: {
+          labels: labels,
+          datasets: datasets,
+        },
+        labelColors: themeColors.getContrastColor(),
+      });
+    }
+  }
+
+  calculateStateParameterChartPerTemperatureRise(
+    parameter: string,
+    convert: ((value: any) => any) | null = null,
+    title: string | null = null
+  ): void {
+    if (this.ideas && this.steps) {
+      const filter = (item) =>
+        (!this.ideaId || item.ideaId === this.ideaId) && item.parameter.state;
+      const labels: number[] = this.steps
+        .filter(
+          (item) =>
+            filter(item) && item.parameter.state[parameter] !== undefined
+        )
+        .map((idea) =>
+          convert
+            ? convert(idea.parameter.state[parameter])
+            : idea.parameter.state[parameter]
+        )
+        .filter((value, index, array) => array.indexOf(value) === index)
+        .sort((a, b) => a - b);
+      const legend = this.steps
+        .filter(
+          (item) =>
+            filter(item) && item.parameter.state[parameter] !== undefined
+        )
+        .map((idea) => idea.parameter.state.temperatureRise)
+        .filter((value, index, array) => array.indexOf(value) === index)
+        .sort((a, b) => a - b);
+      const datasets = calculateChartPerParameter(
+        this.steps,
+        legend,
+        labels,
+        this.replayColors,
+        (item, value) => item.parameter.state.temperatureRise === value,
+        (item, value) =>
+          (convert
+            ? convert(item.parameter.state[parameter])
+            : item.parameter.state[parameter]) === value,
+        filter
+      );
+      this.barChartDataList.push({
+        title: this.$t(`module.playing.coolit.statistic.${title ?? parameter}`),
+        data: {
+          labels: labels,
+          datasets: datasets,
+        },
+        labelColors: themeColors.getContrastColor(),
+      });
+    }
+  }
+
+  calculateLevelChartIteration(): void {
+    if (!this.ideaId && this.ideas && this.steps) {
       const labels: string[] = this.ideas.map((idea) => idea.keywords);
       const datasets = calculateChartPerIteration(
         this.steps,
         this.ideas,
         this.replayColors,
         (item) => item.parameter.replayCount,
-        (item, idea) => item.ideaId === idea.id,
-        filter
+        (item, idea) => item.ideaId === idea.id
       );
       this.barChartDataList.push({
         title: this.$t('module.playing.coolit.statistic.level'),
@@ -169,9 +336,7 @@ export default class LevelStatistic extends Vue {
 
   calculateStarsChart(): void {
     if (this.steps) {
-      const filter = (item) =>
-        item.parameter.step === GameStep.Play &&
-        (!this.ideaId || item.ideaId === this.ideaId);
+      const filter = (item) => !this.ideaId || item.ideaId === this.ideaId;
       const labels: string[] = [
         '-',
         '\uf005',
@@ -197,11 +362,9 @@ export default class LevelStatistic extends Vue {
     }
   }
 
-  calculateAvatarChart(gameStep: GameStep): void {
+  calculateAvatarChart(): void {
     if (this.steps) {
-      const filter = (item) =>
-        item.parameter.step === gameStep &&
-        (!this.ideaId || item.ideaId === this.ideaId);
+      const filter = (item) => !this.ideaId || item.ideaId === this.ideaId;
       const participants = this.steps
         .filter((item) => filter(item))
         .map((item) => item.avatar)
@@ -229,116 +392,12 @@ export default class LevelStatistic extends Vue {
         filter
       );
       this.barChartDataList.push({
-        title: this.$t(`module.playing.coolit.statistic.${gameStep}`),
+        title: this.$t(`module.playing.coolit.statistic.avatar`),
         data: {
           labels: labels,
           datasets: datasets,
         },
         labelColors: labelColors,
-      });
-    }
-  }
-
-  calculateTimeChart(): void {
-    if (this.steps) {
-      const filter = (item) =>
-        item.parameter.step === GameStep.Play &&
-        (!this.ideaId || item.ideaId === this.ideaId);
-      const labels = this.steps
-        .filter((item) => filter(item))
-        .map((item) => Math.round(item.parameter.time / 1000))
-        .filter((value, index, array) => array.indexOf(value) === index)
-        .sort((a, b) => a - b);
-      const datasets = calculateChartPerIteration(
-        this.steps,
-        labels,
-        this.replayColors,
-        (item) => item.parameter.replayCount,
-        (item, time) => Math.round(item.parameter.time / 1000) === time,
-        filter
-      );
-      this.barChartDataList.push({
-        title: this.$t('module.playing.coolit.statistic.time'),
-        data: {
-          labels: labels,
-          datasets: datasets,
-        },
-        labelColors: themeColors.getContrastColor(),
-      });
-    }
-  }
-
-  calculateItemChart(gameStep: GameStep): void {
-    if (this.steps) {
-      const itemList: { item: placeable.PlaceableBase; index: number }[] = [];
-      for (const step of this.steps.filter(
-        (item) =>
-          (!this.ideaId || item.ideaId === this.ideaId) &&
-          item.parameter.step === gameStep &&
-          item.parameter.itemList
-      )) {
-        itemList.push(
-          ...step.parameter.itemList.map((item, index) => {
-            return {
-              item: item,
-              index: index,
-            };
-          })
-        );
-      }
-      const labels = itemList
-        .map((item) => item.item.name)
-        .filter((value, index, array) => array.indexOf(value) === index)
-        .sort();
-      const colorCount = Math.max(...itemList.map((item) => item.index + 1));
-      const colors =
-        this.colorList.length > colorCount
-          ? this.colorList
-          : getRandomColorList(colorCount);
-      const datasets = calculateChartPerIteration(
-        itemList,
-        labels,
-        colors,
-        (item) => item.index,
-        (item, label) => item.item.name === label
-      );
-      this.barChartDataList.push({
-        title: this.$t(`module.playing.coolit.statistic.item.${gameStep}`),
-        data: {
-          labels: labels,
-          datasets: datasets,
-        },
-        labelColors: themeColors.getContrastColor(),
-      });
-    }
-  }
-
-  calculateItemCountChart(gameStep: GameStep): void {
-    if (this.steps) {
-      const filter = (item) =>
-        item.parameter.step === gameStep &&
-        item.parameter.itemList &&
-        (!this.ideaId || item.ideaId === this.ideaId);
-      const labels = this.steps
-        .filter((item) => filter(item))
-        .map((item) => item.parameter.itemList.length)
-        .filter((value, index, array) => array.indexOf(value) === index)
-        .sort((a, b) => a - b);
-      const datasets = calculateChartPerIteration(
-        this.steps,
-        labels,
-        this.replayColors,
-        (item) => item.parameter.replayCount,
-        (item, count) => item.parameter.itemList.length === count,
-        filter
-      );
-      this.barChartDataList.push({
-        title: this.$t(`module.playing.coolit.statistic.itemCount.${gameStep}`),
-        data: {
-          labels: labels,
-          datasets: datasets,
-        },
-        labelColors: themeColors.getContrastColor(),
       });
     }
   }

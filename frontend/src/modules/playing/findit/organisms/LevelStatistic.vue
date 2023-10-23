@@ -137,8 +137,10 @@ export default class LevelStatistic extends Vue {
 
   calculateCharts(): void {
     this.barChartDataList = [];
-    if (!this.ideaId) this.calculateLevelChartIteration();
-    if (!this.ideaId) this.calculateLevelChart();
+    if (!this.ideaId) {
+      this.calculateLevelChartIteration();
+      this.calculateLevelChart();
+    }
     this.calculateStarsChart();
     this.calculateAvatarChart(GameStep.Play);
     if (!this.ideaId) this.calculateAvatarChart(GameStep.Build);

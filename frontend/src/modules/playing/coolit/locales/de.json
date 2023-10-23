@@ -163,17 +163,18 @@
   },
   "statistic": {
     "level": "Wie oft wurde welcher Level gespielt?",
+    "temperatureRise": "Wie oft wurde welche Schwierigkeitsstufe gespielt?",
+    "winPoints": "Wie oft wurde wieviele Punkte erzielt?",
+    "temperature": "Was war die Endtemperatur?",
+    "moleculeDecreaseCount": "Wie viele Molecule wurden neutralisiert?",
+    "moleculeMovedCount": "Wie viele Molecule wurden bewegt?",
+    "moleculeHitCount": "Wie viele Molecule wurden getroffen?",
+    "obstacleHitCount": "Wie viele Objekte wurden getroffen?",
+    "regionHitCount": "Wie viele Regionen wurden getroffen?",
+    "rayCount": "Wie viele Strahlen wurden erzeugt?",
     "rating": "Wie oft wurden wie viele Punkte erzielt?",
-    "play": "Wie oft hat welcher Benutzer einen Level gespielt?",
+    "avatar": "Wie oft hat welcher Benutzer einen Level gespielt?",
     "build": "Wie oft hat welcher Benutzer einen Level erstellt?",
-    "time": "Wie viele Sekunden hat es gedauert, das Level zu beenden?",
-    "item": {
-      "play": "Wie oft wurde welches Element gefunden?",
-      "build": "Wie oft wurde welcher Gegenstand versteckt?"
-    },
-    "itemCount": {
-      "play": "Wie viele Gegenstände wurden gefunden?",
-      "build": "Wie viele Gegenstände wurden versteckt?"
-    }
+    "time": "Wie viele Sekunden hat es gedauert, das Level zu beenden?"
   }
 }
