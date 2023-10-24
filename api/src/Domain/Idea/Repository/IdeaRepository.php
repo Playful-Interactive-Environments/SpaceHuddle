@@ -65,10 +65,19 @@ class IdeaRepository implements RepositoryInterface
         ?string $id,
         string | null $detailEntity = null
     ): ?string {
+        $isPlayingTask = $this->queryFactory->newSelect("idea")
+            ->select("*")
+            ->innerJoin("task", "task.id = idea.task_id")
+            ->where(["idea.id" => $id, "task.task_type" => strtoupper(TaskType::PLAYING)])
+            ->execute()
+            ->rowCount();
+
         $authorisation = $this->getAuthorisation();
         $conditions = ["id" => $id];
         if ($authorisation->isParticipant()) {
-            $conditions["participant_id"] = $authorisation->id;
+            if ($isPlayingTask == 0)
+                $conditions["participant_id"] = $authorisation->id;
+            else array_push($conditions,"participant_id IS NOT NULL");;
         }
         return $this->getAuthorisationRoleFromCondition($id, $conditions);
     }
@@ -82,6 +91,22 @@ class IdeaRepository implements RepositoryInterface
     public function getAuthorisationReadRole(?string $id): ?string
     {
         return $this->getAuthorisationRoleFromCondition($id, ["id" => $id], null, true, true);
+    }
+
+    /**
+     * Checks whether the user is authorised to delete the entry with the specified primary key.
+     * @param string|null $id Primary key to be checked.
+     * @return string|null Role with which the user is authorised to access the entry.
+     * @throws GenericException
+     */
+    public function getAuthorisationDeleteRole(?string $id): ?string
+    {
+        $authorisation = $this->getAuthorisation();
+        $conditions = ["id" => $id];
+        if ($authorisation->isParticipant()) {
+            $conditions["participant_id"] = $authorisation->id;
+        }
+        return $this->getAuthorisationRoleFromCondition($id, $conditions);
     }
 
     /**

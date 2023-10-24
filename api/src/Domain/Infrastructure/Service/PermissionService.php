@@ -75,7 +75,7 @@ class PermissionService
         }
 
         //Determines the session role
-        return $this->getRole($authorisation, $data, $dataEntity, $routeMethod == "GET", $detailEntity);
+        return $this->getRole($authorisation, $data, $dataEntity, $routeMethod, $detailEntity);
     }
 
     /**
@@ -83,7 +83,7 @@ class PermissionService
      * @param AuthorisationData $authorisation Authorisation data
      * @param array<string, string> $parameterValue Request parameters.
      * @param array<string, string> $parameterEntity Associated entities.
-     * @param bool $readOnly If true, get authorisation read role. If false, get authorisation role.
+     * @param string $routeMethod Route pattern.
      * @param string|null $detailEntity Detail entity which should be modified.
      * @return string Session role
      */
@@ -91,7 +91,7 @@ class PermissionService
         AuthorisationData $authorisation,
         array $parameterValue,
         array $parameterEntity,
-        bool $readPermission = false,
+        string $routeMethod,
         string | null $detailEntity = null
     ): string {
         $id = null;
@@ -114,8 +114,14 @@ class PermissionService
         }
 
 
-        if ($readPermission) {
+        if ($routeMethod == "GET") {
             return $this->repository->getAuthorisationReadRole($entity, $id) ??
+                SessionRoleType::UNKNOWN;
+        }
+
+
+        if ($routeMethod == "DELETE") {
+            return $this->repository->getAuthorisationDeleteRole($entity, $id) ??
                 SessionRoleType::UNKNOWN;
         }
 

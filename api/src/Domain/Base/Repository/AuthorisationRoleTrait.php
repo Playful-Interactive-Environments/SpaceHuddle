@@ -97,6 +97,17 @@ trait AuthorisationRoleTrait
     }
 
     /**
+     * Checks whether the user is authorised to delete the entry with the specified primary key.
+     * @param string|null $id Primary key to be checked.
+     * @return string|null Role with which the user is authorised to access the entry.
+     * @throws GenericException
+     */
+    public function getAuthorisationDeleteRole(?string $id): ?string
+    {
+        return $this->getAuthorisationRole($id, null, true);
+    }
+
+    /**
      * Checks whether the user is authorised to read the entry with the specified primary key.
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.

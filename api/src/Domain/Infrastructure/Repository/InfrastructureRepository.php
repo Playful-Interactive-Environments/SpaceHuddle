@@ -77,6 +77,20 @@ class InfrastructureRepository
     }
 
     /**
+     * Checks whether the user is authorised to delete the entry with the specified primary key.
+     * @param string $entityName Name of the database table.
+     * @param string|null $id Primary key to be checked.
+     * @param string|null $detailEntity Detail entity which should be modified
+     * @return string|null Role with which the user is authorised to access the entry.
+     * @throws GenericException
+     */
+    public function getAuthorisationDeleteRole(string $entityName, ?string $id, string | null $detailEntity = null): ?string
+    {
+        $repository = $this->copy($this->repositoryMapping[$entityName]);
+        return $repository->getAuthorisationDeleteRole($id, $detailEntity);
+    }
+
+    /**
      * Checks whether the user is authorised to read the entry with the specified primary key.
      * @param string $entityName Name of the database table.
      * @param string|null $id Primary key to be checked.

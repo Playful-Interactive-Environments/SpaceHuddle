@@ -121,6 +121,14 @@ interface RepositoryInterface
     public function getAuthorisationRole(?string $id, string | null $detailEntity = null): ?string;
 
     /**
+     * Checks whether the user is authorised to delete the entry with the specified primary key.
+     * @param string|null $id Primary key to be checked.
+     * @return string|null Role with which the user is authorised to access the entry.
+     * @throws GenericException
+     */
+    public function getAuthorisationDeleteRole(?string $id): ?string;
+
+    /**
      * Checks whether the user is authorised to read the entry with the specified primary key.
      * @param string|null $id Primary key to be checked.
      * @return string|null Role with which the user is authorised to access the entry.
