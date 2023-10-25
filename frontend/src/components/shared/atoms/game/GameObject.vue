@@ -42,7 +42,7 @@ import GameContainer, {
   CollisionRegion,
 } from '@/components/shared/atoms/game/GameContainer.vue';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
-import { delay } from '@/utils/wait';
+import { delay, until } from '@/utils/wait';
 import { GrayscaleFilter } from 'pixi-filters';
 import { toRadians, toDegrees } from '@/utils/angle';
 import * as matterUtil from '@/utils/matter';
@@ -68,6 +68,7 @@ export const bounceCategory = 1 << 31;
     'update:id',
     'update:rotation',
     'destroyObject',
+    'notifyCollision',
     'outsideDrawingSpace',
     'sizeChanged',
     'collision',
@@ -80,6 +81,7 @@ export const bounceCategory = 1 << 31;
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class GameObject extends Vue {
+  //#region props
   @Prop({ default: 100 }) renderDelay!: number;
   @Prop({ default: 0 }) id!: number;
   @Prop({ default: 0 }) x!: number;
@@ -108,6 +110,7 @@ export default class GameObject extends Vue {
   @Prop({ default: FastObjectBehaviour.none })
   fastObjectBehaviour!: FastObjectBehaviour;
   @Prop({ default: false }) removeFromEnginIfNotVisible!: boolean;
+  @Prop({ default: false }) sleepIfNotVisible!: boolean;
   @Prop({ default: 0 }) anchor!: number | [number, number];
   @Prop({ default: 0 }) zIndex!: number;
   @Prop({ default: null }) conditionalVelocity!: ConditionalVelocity | null;
@@ -115,6 +118,10 @@ export default class GameObject extends Vue {
     | PIXI.Container<PIXI.DisplayObject>
     | PIXI.MaskData
     | null;
+  @Prop({ default: 'gameObject' }) poolingKey!: string;
+  //#endregion props
+
+  //#region variables
   body!: typeof Matter.Body;
   position: [number, number] = [0, 0];
   rotationValue = 0;
@@ -129,7 +136,9 @@ export default class GameObject extends Vue {
   objectFilters: any[] = [];
   loadingFinished = false;
   isPartOfEngin = false;
+  //#endregion variables
 
+  //#region get / set
   get displayX(): number {
     return this.position[0] - this.offset[0];
   }
@@ -150,6 +159,38 @@ export default class GameObject extends Vue {
     return this.fixSize;
   }
 
+  get clickWidth(): number {
+    //if (this.container) return this.container.width + this.colliderDelta * 2;
+    //if (this.body) return this.body.bounds.max.x - this.body.bounds.min.x;
+    return this.displayWidth + this.colliderDelta * 2;
+  }
+
+  get clickHeight(): number {
+    //if (this.container) return this.container.height + this.colliderDelta * 2;
+    //if (this.body) return this.body.bounds.max.y - this.body.bounds.min.y;
+    return this.displayHeight + this.colliderDelta * 2;
+  }
+
+  isVisible(delta = 0): boolean {
+    if (!this.body) return false;
+    const x = this.body.position.x; // this.position[0];
+    const y = this.body.position.y; // this.position[1];
+    return (
+      x >= -delta &&
+      x <= this.gameContainer.gameWidth + delta &&
+      y >= -delta &&
+      y <= this.gameContainer.gameHeight + delta
+    );
+  }
+
+  getVelocityAmount(): number {
+    return (
+      Math.pow(this.body.velocity.x, 2) + Math.pow(this.body.velocity.y, 2)
+    );
+  }
+  //#endregion get / set
+
+  //#region load / unload
   async mounted(): Promise<void> {
     const container = document.getElementById('gameContainer');
     if (container) {
@@ -185,6 +226,32 @@ export default class GameObject extends Vue {
     }
   }
 
+  setGameContainer(gameContainer: GameContainer): void {
+    this.gameContainer = gameContainer;
+    this.initPosition();
+    this.manageEngin();
+    this.addBodyToDetector();
+  }
+
+  kill(): void {
+    this.destroyed = true;
+    if (this.gameContainer) {
+      this.gameContainer.deregisterGameObject(this);
+      this.body = null;
+    }
+    setTimeout(() => {
+      if (this.container) {
+        const parent = this.container.parent;
+        if (parent) {
+          parent.removeChild(this.container);
+        }
+        this.container.destroy({ children: true });
+      }
+    }, 100);
+  }
+  //#endregion load / unload
+
+  //#region interaction
   clickTime = 0;
   gameObjectClicked(): void {
     if (this.disabled) {
@@ -219,7 +286,9 @@ export default class GameObject extends Vue {
       this.$emit('update:highlighted', false);
     }
   }
+  //#endregion interaction
 
+  //#region watch
   collisionCategory = 0b0001;
   collisionMask = 0xffffffff; //0b11111111111111111111111111111111
   hasDisabled = false;
@@ -240,11 +309,11 @@ export default class GameObject extends Vue {
       this.objectFilters = [];
     }
   }
+  //#endregion watch
 
-  containerLoad(container: PIXI.Container): void {
+  //#region init body
+  async containerLoad(container: PIXI.Container): Promise<void> {
     const setupBody = (): void => {
-      this.displayWidth = this.getContainerWidth();
-      this.displayHeight = this.getContainerHeight();
       this.$emit('sizeChanged', [this.displayWidth, this.displayHeight]);
       switch (this.type) {
         case 'rect':
@@ -277,14 +346,36 @@ export default class GameObject extends Vue {
     };
 
     this.container = container;
-    const delay = this.fixSize === null ? 0 : this.renderDelay;
-    setTimeout(() => {
-      try {
-        setupBody();
-      } catch (e) {
-        this.$emit('initError', this);
+    const delayTime = this.fixSize === null ? 0 : this.renderDelay;
+    await delay(delayTime);
+    await until(() => !!this.gameContainer);
+    try {
+      this.displayWidth = this.getContainerWidth();
+      this.displayHeight = this.getContainerHeight();
+      if (this.gameContainer && this.gameContainer.useObjectPooling) {
+        await delay(100);
       }
-    }, delay);
+      if (!this.body) {
+        setupBody();
+      }
+    } catch (e) {
+      this.$emit('initError', this);
+    }
+  }
+
+  assignPoolBody(body: Matter.Body): void {
+    Matter.Body.setPosition(body, {
+      x: this.container.x,
+      y: this.container.y,
+    });
+    this.body = body;
+    this.$emit('update:id', this.body.id);
+    if (this.clickable) {
+      this.manageEngin();
+      this.addBodyToDetector();
+    }
+    this.$emit('initialised', this);
+    this.loadingFinished = true;
   }
 
   updatedColliderSize(): void {
@@ -317,21 +408,9 @@ export default class GameObject extends Vue {
     }
   }
 
-  updatePivot(delta = 100): void {
-    if (this.anchor) {
-      const width = this.displayWidth;
-      const height = this.displayHeight;
-      const deltaX = width * this.anchor[0] - width / 2;
-      const deltaY = height * this.anchor[1] - height / 2;
-      setTimeout(() => {
-        const position = [this.body.position.x, this.body.position.y];
-        Matter.Body.setCentre(this.body, { x: deltaX, y: deltaY }, true);
-        Matter.Body.setPosition(this.body, { x: position[0], y: position[1] });
-        this.loadingFinished = true;
-      }, delta);
-    } else {
-      this.loadingFinished = true;
-    }
+  async updatePivot(delta = 100, alwaysUpdate = false): Promise<void> {
+    await matterUtil.updatePivot(this.body, this.anchor, delta, alwaysUpdate);
+    this.loadingFinished = true;
   }
 
   addRect(x: number, y: number, width: number, height: number): void {
@@ -398,7 +477,9 @@ export default class GameObject extends Vue {
       this.addBodyToDetector();
     }
   }
+  //#endregion init body
 
+  //#region engine
   addBodyToEngine(): void {
     if (this.gameContainer) {
       this.gameContainer.addGameObjectToEngin(this);
@@ -406,7 +487,7 @@ export default class GameObject extends Vue {
   }
 
   manageEngin(): void {
-    if (!this.clickable) return;
+    if (!this.clickable || !this.body) return;
     if (this.removeFromEnginIfNotVisible) {
       const isVisible = this.isVisible(this.displayWidth * 3);
       if (isVisible && !this.isPartOfEngin) {
@@ -419,14 +500,48 @@ export default class GameObject extends Vue {
     } else if (!this.isPartOfEngin) {
       this.addBodyToEngine();
     }
+    if (this.sleepIfNotVisible) {
+      const isVisible = this.isVisible(this.displayWidth * 3);
+      Matter.Sleeping.set(this.body, !isVisible);
+    }
   }
 
   addBodyToDetector(): void {
     if (this.gameContainer && this.gameContainer.detector && this.body) {
-      this.gameContainer.detector.bodies.push(this.body);
+      this.gameContainer.addGameObjectToDetector(this);
     }
   }
+  //#endregion engine
 
+  //#region pooling
+  isSleeping = false;
+  sleepTime = Date.now();
+  readyForReuse(): boolean {
+    return this.isSleeping && Date.now() - this.sleepTime > 1000;
+  }
+
+  moveToPool(): void {
+    this.body.isStatic = true;
+    matterUtil.resetBody(this.body, this.gameContainer.mouseConstraint);
+    //Matter.Sleeping.set(this.body, true);
+    Matter.Body.setPosition(this.body, { x: -10000, y: -10000 });
+    this.position = [
+      this.body.position.x + this.offset[0],
+      this.body.position.y + this.offset[1],
+    ];
+    this.sleepTime = Date.now();
+    this.isSleeping = true;
+  }
+
+  activateFromPool(position: [number, number]): void {
+    this.isSleeping = false;
+    Matter.Body.setPosition(this.body, { x: position[0], y: position[1] });
+    //Matter.Sleeping.set(this.body, false);
+    this.body.isStatic = false;
+  }
+  //#endregion pooling
+
+  //#region position / rotation / scale
   initPosition(x: number | null = null, y: number | null = null): void {
     if (x === null) x = this.x;
     if (y === null) y = this.y;
@@ -512,24 +627,18 @@ export default class GameObject extends Vue {
       if (this.boundsGraphic) this.drawBorder();
     }
   }
+  //#endregion position / rotation / scale
 
-  setGameContainer(gameContainer: GameContainer): void {
-    this.gameContainer = gameContainer;
-    this.initPosition();
-    this.manageEngin();
-    this.addBodyToDetector();
-  }
-
-  getVelocityAmount(): number {
-    return (
-      Math.pow(this.body.velocity.x, 2) + Math.pow(this.body.velocity.y, 2)
-    );
-  }
-
+  //#region matter update
   wasVisible = false;
   wasAtBorder = false;
   beforePhysicUpdate(): void {
-    if (!this.destroyed && !this.isStatic && this.body) {
+    if (
+      !this.destroyed &&
+      this.body &&
+      !this.body.isStatic &&
+      !this.body.isSleeping
+    ) {
       let isVisible = this.isVisible(-this.displayWidth / 2);
       const isAtBorder = this.isVisible(this.displayWidth / 2) && !isVisible;
       if (
@@ -575,8 +684,9 @@ export default class GameObject extends Vue {
   afterPhysicUpdate(): void {
     if (
       !this.destroyed &&
-      !this.isStatic &&
       this.body &&
+      !this.body.isStatic &&
+      !this.body.isSleeping &&
       (this.body.position.x + this.offset[0] !== this.position[0] ||
         this.body.position.y + this.offset[1] !== this.position[1])
     ) {
@@ -648,40 +758,20 @@ export default class GameObject extends Vue {
       this.$emit('update:y', inputPosition[1]);
     }
     if (this.boundsGraphic) this.drawBorder();
-    if (this.removeFromEnginIfNotVisible) this.manageEngin();
+    if (this.removeFromEnginIfNotVisible || this.sleepIfNotVisible)
+      this.manageEngin();
   }
+  //#endregion matter update
 
+  //#region collision
   notifyDestroy(): void {
     this.destroyed = true;
     this.$emit('destroyObject', this);
     //this.kill();
   }
 
-  kill(): void {
-    this.destroyed = true;
-    if (this.gameContainer) {
-      this.gameContainer.deregisterGameObject(this);
-      const body = this.body;
-      this.body = null;
-      try {
-        Matter.Composite.remove(this.gameContainer.engine.world, body);
-      } catch (e) {
-        //
-      }
-      const index = this.gameContainer.detector.bodies.findIndex(
-        (b) => b === body
-      );
-      if (index > -1) this.gameContainer.detector.bodies.splice(index, 1);
-    }
-    setTimeout(() => {
-      if (this.container) {
-        const parent = this.container.parent;
-        if (parent) {
-          parent.removeChild(this.container);
-        }
-        this.container.destroy({ children: true });
-      }
-    }, 100);
+  notifyCollision(): void {
+    this.$emit('notifyCollision', this);
   }
 
   handleCollision(
@@ -690,9 +780,10 @@ export default class GameObject extends Vue {
     hitPointScreen: [number, number],
     objectBody: Matter.Body,
     collisionBody: Matter.Body
-  ): void {
+  ): boolean {
+    let deleteFlag = false;
     if (this.collisionHandler) {
-      this.collisionHandler.handleCollision(
+      deleteFlag = this.collisionHandler.handleCollision(
         this,
         collisionObject,
         hitPoint,
@@ -711,32 +802,11 @@ export default class GameObject extends Vue {
       hitPoint,
       hitPointScreen
     );
+    return deleteFlag;
   }
+  //#endregion collision
 
-  get clickWidth(): number {
-    //if (this.container) return this.container.width + this.colliderDelta * 2;
-    //if (this.body) return this.body.bounds.max.x - this.body.bounds.min.x;
-    return this.displayWidth + this.colliderDelta * 2;
-  }
-
-  get clickHeight(): number {
-    //if (this.container) return this.container.height + this.colliderDelta * 2;
-    //if (this.body) return this.body.bounds.max.y - this.body.bounds.min.y;
-    return this.displayHeight + this.colliderDelta * 2;
-  }
-
-  isVisible(delta = 0): boolean {
-    if (!this.body) return false;
-    const x = this.body.position.x; // this.position[0];
-    const y = this.body.position.y; // this.position[1];
-    return (
-      x >= -delta &&
-      x <= this.gameContainer.gameWidth + delta &&
-      y >= -delta &&
-      y <= this.gameContainer.gameHeight + delta
-    );
-  }
-
+  //#region draw bounding box
   boundsWidth: number | null = null;
   boundsHeight: number | null = null;
   boundsGraphic: PIXI.Graphics | null = null;
@@ -744,47 +814,22 @@ export default class GameObject extends Vue {
     const graphics = inputGraphics ?? this.boundsGraphic;
     if (inputGraphics) this.boundsGraphic = inputGraphics;
     if (graphics && this.body) {
-      /*const width = this.clickWidth;
-      const height = this.clickHeight;
-
-      const centerX =
-        this.displayWidth * this.anchor[0] - this.displayWidth / 2;
-      const centerY =
-        this.displayHeight * this.anchor[1] - this.displayHeight / 2;
-      if (this.type === 'rect') {
-        graphics.clear();
-        graphics.lineStyle(2, '#ff0000');
-
-        graphics.drawRect(
-          -width / 2 - centerX,
-          -height / 2 - centerY,
-          width,
-          height
-        );
-      } else if (this.type === 'circle') {
-        graphics.clear();
-        graphics.lineStyle(2, '#ff0000');
-        graphics.drawCircle(
-          graphics.x - centerX,
-          graphics.y - centerY,
-          (width > height ? width : height) / 2
-        );
-      } else*/ {
-        graphics.clear();
-        graphics.lineStyle(2, '#ff0000');
-        const path = this.body.vertices.map((item) => {
-          return {
-            x: item.x - this.body.position.x,
-            y: item.y - this.body.position.y,
-          };
-        });
-        graphics.drawPolygon(path);
-      }
+      graphics.clear();
+      graphics.lineStyle(2, '#ff0000');
+      const path = this.body.vertices.map((item) => {
+        return {
+          x: item.x - this.body.position.x,
+          y: item.y - this.body.position.y,
+        };
+      });
+      graphics.drawPolygon(path);
       this.boundsWidth = graphics.width;
       this.boundsHeight = graphics.height;
     }
   }
+  //#endregion draw bounding box
 
+  //#region trigger
   @Watch('triggerDelay', { immediate: true })
   startTriggerListener(): void {
     if (this.triggerDelay) this.triggerStartTime = Date.now();
@@ -803,6 +848,7 @@ export default class GameObject extends Vue {
     }
     return false;
   }
+  //#endregion trigger
 }
 </script>
 

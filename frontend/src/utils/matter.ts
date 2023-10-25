@@ -1,4 +1,5 @@
 import * as Matter from 'matter-js/build/matter';
+import { delay } from '@/utils/wait';
 
 export function createPolygonBody(
   options: {
@@ -88,4 +89,47 @@ export function calculateVisibleHitPoint(
     hitObject.position.x - boundsObstacle.min.x,
     hitObject.position.y - boundsObstacle.min.y,
   ];
+}
+
+export function resetBody(
+  body: Matter.Body,
+  mouseConstraint: Matter.MouseConstraint | null = null
+): void {
+  if (mouseConstraint && mouseConstraint.body?.id === body.id) {
+    mouseConstraint.body = null;
+    Matter.Mouse.clearSourceEvents(mouseConstraint.mouse);
+  }
+  Matter.Body.setVelocity(body, { x: 0, y: 0 });
+  Matter.Body.setAngularVelocity(body, 0);
+  Matter.Body.setAngularSpeed(body, 0);
+  Matter.Body.setSpeed(body, 0);
+  body.force.x = 0;
+  body.force.y = 0;
+}
+
+export async function updatePivot(
+  body: Matter.Body,
+  anchor: number | [number, number] = 0,
+  delta = 100,
+  alwaysUpdate = false
+): Promise<void> {
+  if (anchor || alwaysUpdate) {
+    await delay(delta);
+    if (!body) return;
+    const xValues = body.vertices.map((item) => item.x).sort((a, b) => a - b);
+    const minX = xValues[0];
+    const maxX = xValues[xValues.length - 1];
+    const yValues = body.vertices.map((item) => item.y).sort((a, b) => a - b);
+    const minY = yValues[0];
+    const maxY = yValues[xValues.length - 1];
+    const width = maxX - minX;
+    const height = maxY - minY;
+    const anchorX = Array.isArray(anchor) ? anchor[0] : anchor;
+    const anchorY = Array.isArray(anchor) ? anchor[1] : anchor;
+    const deltaX = width * anchorX;
+    const deltaY = height * anchorY;
+    const position = [body.position.x, body.position.y];
+    Matter.Body.setCentre(body, { x: deltaX + minX, y: deltaY + minY }, false);
+    Matter.Body.setPosition(body, { x: position[0], y: position[1] });
+  }
 }

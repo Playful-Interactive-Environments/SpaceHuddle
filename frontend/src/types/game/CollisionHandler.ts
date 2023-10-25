@@ -10,5 +10,5 @@ export interface CollisionHandler {
     hitPointScreen: [number, number],
     objectBody: Matter.Body,
     collisionBody: Matter.Body
-  ): void;
+  ): boolean;
 }

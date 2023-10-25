@@ -110,6 +110,9 @@
         isFull ? CollisionBorderType.None : CollisionBorderType.Screen
       "
       :combined-active-collision-to-chain="true"
+      :use-object-pooling="false"
+      :enable-sleeping="false"
+      :show-all-engin-colliders="false"
       @initRenderer="initRenderer"
     >
       <template v-slot:default>
@@ -161,14 +164,20 @@
             :options="{
               name: particle.name,
               label: particle.label,
+              sleepThreshold: 60,
               collisionFilter: {
                 group: particle.group,
                 category: 0b0001,
                 mask: 0b0001,
               },
             }"
+            :source="particle"
+            :anchor="0.5"
             :collision-handler="particleCollisionHandler"
+            :sleep-if-not-visible="true"
+            :pooling-key="particle.name"
             v-model:highlighted="particle.highlighted"
+            @notifyCollision="particleCollected"
             @destroyObject="destroyParticle"
             @outsideDrawingSpace="outsideDrawingSpace"
             @collision="updateTracking"
@@ -229,6 +238,7 @@ interface DrawingParticle {
   color: string;
   position: [number, number];
   highlighted: boolean;
+  gameObject: GameObject | null;
 }
 
 interface DatasetData {
@@ -340,7 +350,7 @@ export default class CleanUpParticles extends Vue {
     const color2 = new Color(themeColors.getEvaluatingColor());
     const color = color1.mix(
       color2,
-      (1 / (this.maxParticleCount + 1)) * (this.cleanupParticles.length + 1),
+      (1 / (this.maxParticleCount + 1)) * (this.activeParticleCount + 1),
       {
         space: 'lch',
         outputSpace: 'srgb',
@@ -349,8 +359,14 @@ export default class CleanUpParticles extends Vue {
     return color.toString();
   }
 
+  get activeParticleCount(): number {
+    return this.cleanupParticles.filter(
+      (item) => !item.gameObject || !item.gameObject.isSleeping
+    ).length;
+  }
+
   get isFull(): boolean {
-    return this.maxParticleCount <= this.cleanupParticles.length;
+    return this.maxParticleCount <= this.activeParticleCount;
   }
 
   get vehicleParameter(): any {
@@ -474,7 +490,7 @@ export default class CleanUpParticles extends Vue {
       this.activeValue >
         this.normalizedTrackingData.length + this.countdownTime ||
       (this.activeValue > this.normalizedTrackingData.length &&
-        this.cleanupParticles.length === 0)
+        this.activeParticleCount === 0)
     ) {
       this.$emit('finished', this.particleState);
       clearInterval(this.interval);
@@ -485,7 +501,7 @@ export default class CleanUpParticles extends Vue {
   onCleanupParticleCountChanged(): void {
     if (
       this.activeValue > this.normalizedTrackingData.length &&
-      this.cleanupParticles.length === 0
+      this.activeParticleCount === 0
     ) {
       this.$emit('finished', this.particleState);
       clearInterval(this.interval);
@@ -523,21 +539,36 @@ export default class CleanUpParticles extends Vue {
       index: number
     ): Promise<void> => {
       for (let i = 0; i < emitCount; i++) {
-        const particle: DrawingParticle = {
-          uuid: uuidv4(),
-          id: 0,
-          name: dataset.name,
-          label: dataset.label,
-          group: index + 2,
-          color: dataset.backgroundColor,
-          position: [
+        const poolParticle = this.cleanupParticles.find(
+          (item) =>
+            item.gameObject &&
+            item.gameObject.readyForReuse() &&
+            item.name === dataset.name
+        );
+        if (!poolParticle) {
+          const particle: DrawingParticle = {
+            uuid: uuidv4(),
+            id: 0,
+            name: dataset.name,
+            label: dataset.label,
+            group: index + 2,
+            color: dataset.backgroundColor,
+            position: [
+              Math.random() * (this.gameWidth - this.particleRadius * 2) +
+                this.particleRadius,
+              this.particleBorder + this.particleRadius,
+            ],
+            highlighted: false,
+            gameObject: null,
+          };
+          this.cleanupParticles.push(particle);
+        } else {
+          poolParticle.gameObject?.activateFromPool([
             Math.random() * (this.gameWidth - this.particleRadius * 2) +
               this.particleRadius,
             this.particleBorder + this.particleRadius,
-          ],
-          highlighted: false,
-        };
-        this.cleanupParticles.push(particle);
+          ]);
+        }
         await delay(Math.floor(this.intervalTime / emitCount) - 1);
       }
     };
@@ -614,10 +645,22 @@ export default class CleanUpParticles extends Vue {
     this.particleState[particle.options.name as string].collectedCount++;
   }
 
+  particleCollected(particle: GameObject): void {
+    if (particle.source) {
+      particle.source.gameObject = particle;
+      particle.moveToPool();
+    }
+    this.particleState[particle.options.name as string].collectedCount++;
+  }
+
   outsideDrawingSpace(particle: GameObject): void {
-    const id = particle.id;
+    if (particle.source) {
+      particle.source.gameObject = particle;
+      particle.moveToPool();
+    }
+    /*const id = particle.id;
     const index = this.cleanupParticles.findIndex((p) => p.id === id);
-    if (index > -1) this.cleanupParticles.splice(index, 1);
+    if (index > -1) this.cleanupParticles.splice(index, 1);*/
     this.particleState[particle.options.name as string].outsideCount++;
   }
 
