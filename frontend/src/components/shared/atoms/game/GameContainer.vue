@@ -256,14 +256,6 @@ interface CollisionBounds {
   height: number;
 }
 
-interface PoolingData {
-  body: Matter.Body;
-  type: 'rect' | 'circle' | 'polygon';
-  width: number;
-  height: number;
-  shape: [number, number][];
-}
-
 @Options({
   computed: {
     BackgroundMovement() {
@@ -348,8 +340,6 @@ export default class GameContainer extends Vue {
   activeObject: GameObject | null = null;
   activeComposition: Matter.Composite = Matter.Composite.create();
 
-  readonly intervalTimeWind = 50;
-  intervalWind = -1;
   readonly intervalTimePan = 50;
   intervalPan = -1;
   loading = false;
@@ -544,10 +534,6 @@ export default class GameContainer extends Vue {
       });
     }
 
-    if (this.useWind) {
-      this.intervalWind = setInterval(this.addWind, this.intervalTimeWind);
-    }
-
     setTimeout(async () => {
       const pixi = this.$refs.pixi as typeof Application;
       if (pixi) {
@@ -597,7 +583,6 @@ export default class GameContainer extends Vue {
         this.registerCustomObject
       );
     }
-    clearInterval(this.intervalWind);
     clearInterval(this.intervalPan);
     pixiUtil.unloadTexture(this.backgroundTexture);
     Matter.Events.off(this.engine, 'collisionStart', this.collisionStart);
@@ -1465,21 +1450,40 @@ export default class GameContainer extends Vue {
       if (gameObject.moveWithBackground && !this.backgroundSprite) continue;
       gameObject.checkTrigger();
       gameObject.afterPhysicUpdate();
-      this.loopCount++;
       if (this.showAllEnginColliders && this.loopCount % 50 === 0)
         this.drawAllCollider();
     }
   }
 
   beforePhysicUpdate(): void {
+    this.loopCount++;
     for (const gameObject of this.gameObjects) {
       if (gameObject.moveWithBackground && !this.backgroundSprite) continue;
       gameObject.beforePhysicUpdate();
     }
+    if (this.useWind && this.loopCount % 5 === 0) this.addWind();
+    if (
+      this.panSpeed > 0 &&
+      this.loopCount % this.getPanInterval(this.panSpeed) === 0
+    )
+      this.pan();
   }
   //#endregion loop
 
   //#region pan and scroll
+  get panDefaultInterval(): number {
+    let interval = Math.round(1400 / this.gameWidth);
+    if (interval < 1) interval = 1;
+    return interval;
+  }
+
+  getPanInterval(panSpeed: number): number {
+    let interval = this.panDefaultInterval;
+    if (panSpeed > 0) interval = Math.round(interval / panSpeed);
+    if (interval < 1) interval = 1;
+    return interval;
+  }
+
   autoPlayIsRunning = false;
   async startAutoPan(): Promise<void> {
     await until(() => !this.loading);
@@ -1489,23 +1493,42 @@ export default class GameContainer extends Vue {
   }
 
   panVector: [number, number] = [0, 0];
+  panSpeed = 0;
   beginPan(vector: [number, number]): void {
-    this.panVector = [
+    /*this.panVector = [
       Math.round(vector[0] * 0.01 * this.gameWidth),
       Math.round(vector[1] * 0.01 * this.gameHeight),
-    ];
+    ];*/
+    const distanceX = Math.round(vector[0] * 5);
+    const distanceY = Math.round(vector[1] * 5);
+    const panSpeed =
+      Math.abs(distanceX) > Math.abs(distanceY)
+        ? Math.abs(distanceX)
+        : Math.abs(distanceY);
+    if (panSpeed > 0) {
+      const panIntervalFactor =
+        this.panDefaultInterval / this.getPanInterval(panSpeed);
+      this.panVector = [
+        Math.round(distanceX / panIntervalFactor),
+        Math.round(distanceY / panIntervalFactor),
+      ];
+    } else {
+      this.panVector = [0, 0];
+    }
     if (vector[0] > 0 && this.panVector[0] === 0) this.panVector[0] = 1;
     if (vector[0] < 0 && this.panVector[0] === 0) this.panVector[0] = -1;
     if (vector[1] > 0 && this.panVector[1] === 0) this.panVector[1] = 1;
     if (vector[1] < 0 && this.panVector[1] === 0) this.panVector[1] = -1;
-    clearInterval(this.intervalPan);
-    this.intervalPan = setInterval(this.pan, this.intervalTimePan);
+    //clearInterval(this.intervalPan);
+    //this.intervalPan = setInterval(this.pan, this.intervalTimePan / this.panInterval);0
+    this.panSpeed = panSpeed;
   }
 
   endPan(): void {
     if (this.backgroundMovement === BackgroundMovement.Pan) {
+      this.panSpeed = 0;
       this.panVector = [0, 0];
-      clearInterval(this.intervalPan);
+      //clearInterval(this.intervalPan);
     }
   }
 

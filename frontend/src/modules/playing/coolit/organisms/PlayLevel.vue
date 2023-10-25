@@ -153,7 +153,7 @@
               :is-static="true"
               :affectedByForce="false"
               :source="obstacle"
-              :remove-from-engin-if-not-visible="true"
+              :sleep-if-not-visible="true"
               @collision="obstacleCollision"
             >
               <CustomSprite
@@ -240,7 +240,7 @@
               :source="molecule"
               :z-index="1"
               :fast-object-behaviour="FastObjectBehaviour.bounce"
-              :remove-from-engin-if-not-visible="true"
+              :sleep-if-not-visible="true"
               :conditional-velocity="{
                 velocity: {x: 0, y: -3},
                 condition: (object: GameObject) => object.position[1] > gameHeight / 3 * 2
@@ -1543,7 +1543,7 @@ export default class PlayLevel extends Vue {
         region.alpha = 0.7;
         region.text = `${Math.round(region.source.temperature)}°C`;
       }
-      this.autoPanSpeed = 0.6;
+      this.autoPanSpeed = 0.8;
       this.saveHighScore();
       return;
     }
