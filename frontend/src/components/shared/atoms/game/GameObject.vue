@@ -424,6 +424,7 @@ export default class GameObject extends Vue {
       colliderHeight,
       this.options
     );
+    this.appliedScaleFactor = this.scale;
     (this.body as any).zIndex = this.zIndex;
     this.updatePivot();
     this.onRotationChanged();
@@ -440,6 +441,7 @@ export default class GameObject extends Vue {
     const radius =
       (width > height ? width / 2 : height / 2) + this.colliderDelta;
     this.body = Matter.Bodies.circle(x, y, radius, this.options);
+    this.appliedScaleFactor = this.scale;
     (this.body as any).zIndex = this.zIndex;
     this.updatePivot();
     this.onRotationChanged();
@@ -467,6 +469,7 @@ export default class GameObject extends Vue {
       height,
       shape
     );
+    this.appliedScaleFactor = this.scale;
     (this.body as any).zIndex = this.zIndex;
     this.updatePivot();
     this.onRotationChanged();
