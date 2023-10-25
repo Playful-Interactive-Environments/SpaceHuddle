@@ -17,11 +17,13 @@
       @initRenderer="initRenderer"
       @updateOffset="updateOffset"
       @containerReady="containerReady"
+      @sizeReady="containerSizeReady"
       @backgroundSizeChanged="containerTextureSizeChanged"
       :show-bounds="false"
       :collision-borders="CollisionBorderType.Background"
       :pixi-filter-list="collisionAnimation"
       :auto-pan-speed="autoPanSpeed"
+      :waitForDataLoad="waitForDataLoad"
     >
       <template v-slot:default>
         <container v-if="gameWidth && circleGradientTexture">
@@ -376,6 +378,14 @@
           )
         }}
       </div>
+      <div>
+        <el-button @click="$emit('replayFinished')">
+          {{ $t('module.playing.coolit.participant.confirm') }}
+        </el-button>
+      </div>
+    </div>
+    <div class="statusOverlayCountDown" v-if="countDownEndTime > -1">
+      {{ Math.ceil((countDownEndTime - Date.now()) / 1000) }}
     </div>
   </div>
 </template>
@@ -444,6 +454,7 @@ interface Ray {
   animationIndex: number;
   body: Matter.Body | null;
   intensity: number;
+  gameObject: GameObject | null;
 }
 
 export interface MoleculeState {
@@ -617,12 +628,10 @@ export default class PlayLevel extends Vue {
   lightTexture!: PIXI.Texture;
   startTime = Date.now();
   playTime = 0;
-  autoPanSpeed = 0.2;
+  autoPanSpeed = 0.4;
   emitRatePerStar = 500;
   randomMessageNo = 1;
 
-  //readonly absorptionConst = 1.1; //1.25;
-  //readonly radiationConst = 0.05;
   readonly minTemperature = -40;
   readonly maxTemperature = 60;
   readonly lowerTemperatureLimit = -20;
@@ -652,6 +661,7 @@ export default class PlayLevel extends Vue {
   RayType = RayType;
   interval!: any;
   readonly intervalTime = 100;
+  waitForDataLoad = true;
 
   CollisionGroups = Object.freeze({
     MOUSE: 1 << 0,
@@ -958,10 +968,6 @@ export default class PlayLevel extends Vue {
     obstacle: CoolItHitRegion,
     alpha = -1
   ): [number, number, number, number] {
-    /*let mixingFactor = obstacle.hitCount / obstacle.maxHitCount;
-    if (mixingFactor > 1) mixingFactor = 1;
-    const red = new Color(themeColors.getRedColor()).to('srgb') as any;
-    return [red.r, red.g, red.b, mixingFactor / 2];*/
     const color = this.getTemperatureColor(obstacle.temperature);
     if (color) {
       return [
@@ -1087,6 +1093,80 @@ export default class PlayLevel extends Vue {
     for (let i = this.minTemperature; i <= this.maxTemperature; i++) {
       this.temperatureColorSteps[i] = this.calculateTemperatureColor(i);
     }
+    this.initRays();
+  }
+
+  initRays(): void {
+    const points = this.calculateInitRayPoints(RayType.light, 1, 0);
+    for (let i = 0; i < 30; i++) {
+      this.rayList.push({
+        uuid: uuidv4(),
+        type: RayType.light,
+        angle: 0,
+        position: [-1000, -1000],
+        direction: [0, 0],
+        initialised: false,
+        startTime: Date.now(),
+        points: structuredClone(points),
+        displayPoints: points.map(() => {
+          return {
+            x: 0,
+            y: 0,
+          };
+        }),
+        displayPointsCount: 0,
+        animationIndex: 0,
+        body: null,
+        gameObject: null,
+        intensity: 1,
+        hit: false,
+      });
+    }
+  }
+
+  initMolecules(): void {
+    for (const moleculeConfigName of Object.keys(gameConfig.molecules)) {
+      const moleculeConfig = gameConfig.molecules[moleculeConfigName];
+      if (moleculeConfig.controllable) {
+        const moleculeCount =
+          (moleculeConfig.ration +
+            moleculeConfig.rationDeltaPerDegree * this.temperatureRise) *
+          this.moduleCountFactor;
+        for (let i = 0; i < moleculeCount; i++) {
+          this.moleculeList.push({
+            name: moleculeConfigName,
+            id: uuidv4(),
+            type: moleculeConfigName,
+            position: [Math.random() * 100, Math.random() * 50],
+            globalWarmingFactor: moleculeConfig.globalWarmingFactor,
+            size: moleculeConfig.size,
+            controllable: moleculeConfig.controllable,
+            absorbedByTree: moleculeConfig.absorbedByTree,
+            color: moleculeConfig.color,
+            maxHitCount: 1000,
+            hitCount: 0,
+            hitAnimation: [],
+            //heatRationCoefficient: moleculeConfig.globalWarmingFactor,
+            heatAbsorptionCoefficientLight: moleculeConfig.globalWarmingFactor,
+            heatAbsorptionCoefficientHeat: moleculeConfig.globalWarmingFactor,
+            heatRadiationCoefficient: moleculeConfig.globalWarmingFactor,
+            reflectionProbability: 1,
+            temperature: 0,
+          });
+        }
+      }
+
+      const list = this.moleculeList.filter(
+        (item) => item.type === moleculeConfigName
+      );
+      this.moleculeState[moleculeConfigName] = {
+        startCount: list.length,
+        movedCount: 0,
+        hitCount: 0,
+        emitCount: 0,
+        decreaseCount: 0,
+      };
+    }
   }
 
   containerTextureSize: [number, number] = [100, 100];
@@ -1097,52 +1177,12 @@ export default class PlayLevel extends Vue {
   containerReady(): void {
     if (!this.emitStart) {
       this.startTime = Date.now();
-      this.emitLightRays(200, 0);
-
-      for (const moleculeConfigName of Object.keys(gameConfig.molecules)) {
-        const moleculeConfig = gameConfig.molecules[moleculeConfigName];
-        if (moleculeConfig.controllable) {
-          const moleculeCount =
-            (moleculeConfig.ration +
-              moleculeConfig.rationDeltaPerDegree * this.temperatureRise) *
-            this.moduleCountFactor;
-          for (let i = 0; i < moleculeCount; i++) {
-            this.moleculeList.push({
-              name: moleculeConfigName,
-              id: uuidv4(),
-              type: moleculeConfigName,
-              position: [Math.random() * 100, Math.random() * 50],
-              globalWarmingFactor: moleculeConfig.globalWarmingFactor,
-              size: moleculeConfig.size,
-              controllable: moleculeConfig.controllable,
-              absorbedByTree: moleculeConfig.absorbedByTree,
-              color: moleculeConfig.color,
-              maxHitCount: 1000,
-              hitCount: 0,
-              hitAnimation: [],
-              //heatRationCoefficient: moleculeConfig.globalWarmingFactor,
-              heatAbsorptionCoefficientLight:
-                moleculeConfig.globalWarmingFactor,
-              heatAbsorptionCoefficientHeat: moleculeConfig.globalWarmingFactor,
-              heatRadiationCoefficient: moleculeConfig.globalWarmingFactor,
-              reflectionProbability: 1,
-              temperature: 0,
-            });
-          }
-        }
-
-        const list = this.moleculeList.filter(
-          (item) => item.type === moleculeConfigName
-        );
-        this.moleculeState[moleculeConfigName] = {
-          startCount: list.length,
-          movedCount: 0,
-          hitCount: 0,
-          emitCount: 0,
-          decreaseCount: 0,
-        };
-      }
+      this.emitLightRays(0, 0);
     }
+  }
+
+  containerSizeReady(): void {
+    this.initMolecules();
   }
 
   updateTutorial(steps: Tutorial[]): void {
@@ -1405,29 +1445,43 @@ export default class PlayLevel extends Vue {
         this.panOffsetMin[0] +
         displayWidth / 5 +
         Math.random() * (displayWidth / 2);
-      const points = this.calculateInitRayPoints(RayType.light, 1, 0);
       this.emittedRayCount++;
-      this.rayList.push({
-        uuid: uuidv4(),
-        type: RayType.light,
-        angle: angle,
-        position: [position, 0],
-        direction: [direction.x, direction.y],
-        initialised: false,
-        startTime: Date.now(),
-        points: points,
-        displayPoints: points.map(() => {
-          return {
-            x: 0,
-            y: 0,
-          };
-        }),
-        displayPointsCount: 0,
-        animationIndex: 0,
-        body: null,
-        intensity: 1,
-        hit: false,
-      });
+      const poolRay = this.rayList.find(
+        (item) =>
+          item.gameObject && item.gameObject.readyForReuse() && item.initialised
+      );
+      if (poolRay) {
+        if (poolRay.type !== RayType.light) {
+          poolRay.type = RayType.light;
+          poolRay.intensity = 1;
+          poolRay.displayPointsCount = 0;
+          poolRay.animationIndex = 0;
+          const points = this.calculateInitRayPoints(RayType.light, 1, 0);
+          for (let i = 0; i < poolRay.points.length; i++) {
+            poolRay.points[i].x = points[i].x;
+            poolRay.points[i].y = points[i].y;
+          }
+          for (let i = 0; i < poolRay.displayPoints.length; i++) {
+            poolRay.displayPoints[i].x = 0;
+            poolRay.displayPoints[i].y = 0;
+          }
+          poolRay.hit = false;
+          if (poolRay.body) {
+            const options = this.getRayTypeOptions(poolRay.type);
+            (poolRay.body as any).name = options.name;
+            poolRay.body.collisionFilter.mask = options.collisionFilter.mask;
+            poolRay.body.collisionFilter.category =
+              options.collisionFilter.category;
+          }
+        }
+        poolRay.angle = angle;
+        poolRay.position = [position, 0];
+        poolRay.direction = [direction.x, direction.y];
+        poolRay.startTime = Date.now();
+        if (poolRay.gameObject)
+          poolRay.gameObject.activateFromPool([position, 0]);
+        this.calculateRayVelocity(poolRay);
+      }
       if (this.active) {
         const stars = Math.floor((this.playTime / this.temperatureWinTime) * 3);
         let minDelay = 3000 - this.emitRatePerStar * stars;
@@ -1452,11 +1506,22 @@ export default class PlayLevel extends Vue {
     );
   }
 
+  countDownEndTime = -1;
   rayInitialised(item: GameObject): void {
     item.source.initialised = true;
     if (item.body) {
+      item.moveToPool(0);
+      item.source.gameObject = item;
       item.source.body = item.body;
-      this.calculateRayVelocity(item.source);
+    }
+    const waitForDataLoad = !!this.rayList.find((item) => !item.initialised);
+    if (!waitForDataLoad) {
+      const countDownTime = 3000;
+      this.countDownEndTime = Date.now() + countDownTime;
+      setTimeout(() => {
+        this.countDownEndTime = -1;
+        this.waitForDataLoad = false;
+      }, countDownTime);
     }
   }
 
@@ -1489,10 +1554,7 @@ export default class PlayLevel extends Vue {
     const ray = rayObject.source as Ray;
     if (ray.type === RayType.heat && out.top) {
       setTimeout(() => {
-        const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
-        if (index > -1) {
-          this.rayList.splice(index, 1);
-        }
+        rayObject.moveToPool();
       }, 3000);
     }
   }
@@ -1503,53 +1565,20 @@ export default class PlayLevel extends Vue {
   gameOver = false;
   updateLoop(): void {
     const updateTimeStamp = Date.now();
-    if (this.lightCollisionCount > 0)
-      this.playTime = updateTimeStamp - this.startTime;
-    const averageTemperature = this.averageTemperature;
-    let gameOver =
-      averageTemperature < this.lowerTemperatureLimit ||
-      averageTemperature > this.upperTemperatureLimit;
-    if (!gameOver) {
-      let obstacleGameOverCount = 0;
-      for (const obstacle of this.obstacleList) {
-        if (
-          obstacle.temperature < this.lowerTemperatureLimit ||
-          obstacle.temperature > this.upperTemperatureLimit
-        )
-          obstacleGameOverCount++;
-      }
-      let regionGameOverCount = 0;
-      for (const region of this.collisionRegions) {
-        if (
-          region.source.temperature < this.lowerTemperatureLimit ||
-          region.source.temperature > this.upperTemperatureLimit
-        )
-          regionGameOverCount++;
-      }
-      if (obstacleGameOverCount + regionGameOverCount > 3) gameOver = true;
-    }
-    if (gameOver) {
-      this.gameOver = true;
-      this.randomMessageNo = Math.round(Math.random() * 2) + 1;
-      this.collisionAnimation.splice(0);
-      clearInterval(this.interval);
-
-      for (const obstacle of this.obstacleList) {
-        obstacle.hitAnimation.splice(0);
-      }
-      for (const region of this.collisionRegions) {
-        region.source.hitAnimation.splice(0);
-        region.filter.splice(0);
-        region.alpha = 0.7;
-        region.text = `${Math.round(region.source.temperature)}°C`;
-      }
-      this.autoPanSpeed = 0.8;
-      this.saveHighScore();
+    const playTime = updateTimeStamp - this.startTime;
+    let updateDelta = updateTimeStamp - this.updateTimeStamp;
+    if (playTime < updateDelta) updateDelta = playTime;
+    if (updateDelta > this.intervalTime * 3)
+      updateDelta = this.intervalTime * 3;
+    this.updateTimeStamp = updateTimeStamp;
+    if (this.lightCollisionCount > 0) this.playTime += updateDelta;
+    if (this.checkGameOver()) {
       return;
     }
-    const updateDelta = updateTimeStamp - this.updateTimeStamp;
-    this.updateTimeStamp = updateTimeStamp;
-    for (const ray of this.rayList) {
+    const activeRays = this.rayList.filter(
+      (item) => item.gameObject && !item.gameObject.isSleeping
+    );
+    for (const ray of activeRays) {
       if (ray.initialised && ray.body?.speed) {
         ray.animationIndex++;
         if (ray.hit) {
@@ -1571,23 +1600,8 @@ export default class PlayLevel extends Vue {
           ray.displayPoints[i].x = displayPoint.x;
           ray.displayPoints[i].y = displayPoint.y;
         }
-      } else if (ray.startTime + 2000 < Date.now()) {
-        const index = this.rayList.findIndex((item) => item.uuid === ray.uuid);
-        if (index > -1) this.rayList.splice(index, 1);
       }
     }
-
-    /*for (const ray of this.rayList) {
-      if (ray.initialised) {
-        ray.position[0] += ray.direction[0];
-        ray.position[1] += ray.direction[1];
-      } else if (ray.startTime + 1000 < Date.now()) {
-        const index = this.rayList.findIndex(
-          (item) => item.uuid === ray.uuid
-        );
-        if (index > -1) this.rayList.splice(index, 1);
-      }
-    }*/
 
     for (const obstacle of this.obstacleList) {
       obstacle.hitAnimation = obstacle.hitAnimation.filter(
@@ -1641,12 +1655,9 @@ export default class PlayLevel extends Vue {
 
   updateRegionFilter(region: CollisionRegion): void {
     const source = region.source as CoolItHitRegion;
-    /*const redHash = themeColors.getRedColor();
-    let mixingFactor = source.hitCount / source.maxHitCount;
-    if (mixingFactor > 1) mixingFactor = 1;*/
     const color = this.getTemperatureColor(source.temperature);
     region.color = color.hex;
-    region.alpha = this.gameOver ? 1 : color.alpha; //mixingFactor / 2;
+    region.alpha = this.gameOver ? 1 : color.alpha;
   }
   //#endregion loop
 
@@ -1773,7 +1784,7 @@ export default class PlayLevel extends Vue {
             0
           )
         );
-        this.rayList.splice(index, 1);
+        rayObject.moveToPool();
         for (const obstacle of this.obstacleList) {
           obstacle.temperature +=
             obstacle.heatAbsorptionCoefficientHeat *
@@ -1857,6 +1868,60 @@ export default class PlayLevel extends Vue {
   //#endregion scroll
 
   //#region finished
+  checkGameOver(): boolean {
+    const averageTemperature = this.averageTemperature;
+    let gameOver =
+      averageTemperature < this.lowerTemperatureLimit ||
+      averageTemperature > this.upperTemperatureLimit;
+    if (!gameOver) {
+      let obstacleGameOverCount = 0;
+      for (const obstacle of this.obstacleList) {
+        if (
+          obstacle.temperature < this.lowerTemperatureLimit ||
+          obstacle.temperature > this.upperTemperatureLimit
+        )
+          obstacleGameOverCount++;
+      }
+      let regionGameOverCount = 0;
+      for (const region of this.collisionRegions) {
+        if (
+          region.source.temperature < this.lowerTemperatureLimit ||
+          region.source.temperature > this.upperTemperatureLimit
+        )
+          regionGameOverCount++;
+      }
+      if (obstacleGameOverCount + regionGameOverCount > 3) gameOver = true;
+    }
+    if (gameOver) {
+      this.gameOver = true;
+      this.randomMessageNo = Math.round(Math.random() * 2) + 1;
+      this.collisionAnimation.splice(0);
+      clearInterval(this.interval);
+
+      for (const obstacle of this.obstacleList) {
+        obstacle.hitAnimation.splice(0);
+        if (obstacle.temperature > this.maxTemperature)
+          obstacle.temperature = this.maxTemperature;
+        if (obstacle.temperature < this.minTemperature)
+          obstacle.temperature = this.minTemperature;
+      }
+      for (const region of this.collisionRegions) {
+        region.source.hitAnimation.splice(0);
+        region.filter.splice(0);
+        region.alpha = 0.7;
+        if (region.source.temperature > this.maxTemperature)
+          region.source.temperature = this.maxTemperature;
+        if (region.source.temperature < this.minTemperature)
+          region.source.temperature = this.minTemperature;
+        region.text = `${Math.round(region.source.temperature)}°C`;
+      }
+      this.autoPanSpeed = 1.2;
+      this.saveHighScore();
+      return true;
+    }
+    return false;
+  }
+
   lastTimeDelta = 0;
   saveHighScore(): void {
     if (this.highScore) {
@@ -1937,6 +2002,19 @@ export default class PlayLevel extends Vue {
   color: var(--color-dark-contrast);
 }
 
+.statusOverlayCountDown {
+  pointer-events: none;
+  position: absolute;
+  z-index: 5000;
+  top: 5rem;
+  right: 1rem;
+  left: 1rem;
+  text-align: center;
+  font-size: var(--font-size-xxxxlarge);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-dark-contrast);
+}
+
 .statusGameOver {
   pointer-events: none;
   position: absolute;
@@ -1949,6 +2027,10 @@ export default class PlayLevel extends Vue {
   color: var(--color-dark-contrast);
   background-color: #ffffff77;
   border-radius: 2rem 2rem 2rem 0;
+
+  .el-button {
+    pointer-events: auto;
+  }
 
   .el-rate {
     height: 1.5rem;

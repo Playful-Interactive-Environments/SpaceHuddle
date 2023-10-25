@@ -10,7 +10,7 @@
     @mouseup="endPan"
     @mouseout="endPan"
     @touchend="endPan"
-    v-loading="loading"
+    v-loading="!isContainerReady"
   >
     <Application
       ref="pixi"
@@ -279,6 +279,7 @@ interface CollisionBounds {
     'updateOffset',
     'backgroundSizeChanged',
     'containerReady',
+    'sizeReady',
   ],
 })
 export default class GameContainer extends Vue {
@@ -315,8 +316,9 @@ export default class GameContainer extends Vue {
   @Prop({ default: false }) readonly showBounds!: boolean;
   @Prop({ default: false }) readonly showAllEnginColliders!: boolean;
   @Prop({ default: [] }) readonly pixiFilterList!: any[];
-  @Prop({ default: 0.2 }) readonly autoPanSpeed!: number;
+  @Prop({ default: 0.4 }) readonly autoPanSpeed!: number;
   @Prop({ default: false }) readonly enableSleeping!: boolean;
+  @Prop({ default: false }) readonly waitForDataLoad!: boolean;
   //#endregion props
 
   //#region variables
@@ -432,6 +434,10 @@ export default class GameContainer extends Vue {
   get textScaleFactor(): number {
     return this.gameWidth / 700;
   }
+
+  get isContainerReady(): boolean {
+    return this.ready && !this.loading && !this.waitForDataLoad;
+  }
   //#endregion get
 
   //#region watch
@@ -499,6 +505,11 @@ export default class GameContainer extends Vue {
   onAutoPanSpeedChanged(): void {
     if (this.autoPlayIsRunning) this.startAutoPan();
   }
+
+  @Watch('waitForDataLoad', { immediate: true })
+  onWaitForDataLoadChanged(): void {
+    if (this.isContainerReady) this.$emit('containerReady');
+  }
   //#endregion watch
 
   //#region load / unload
@@ -508,7 +519,7 @@ export default class GameContainer extends Vue {
     });
     this.eventBus.on(EventType.ALL_TEXTURES_LOADED, async () => {
       this.loading = false;
-      if (this.ready) this.$emit('containerReady');
+      if (this.isContainerReady) this.$emit('containerReady');
     });
 
     //initialise observer in mounted as otherwise this references observer
@@ -616,7 +627,8 @@ export default class GameContainer extends Vue {
           this.setupBound();
         this.calculateBackgroundSize();
         this.ready = true;
-        if (!this.loading) this.$emit('containerReady');
+        this.$emit('sizeReady');
+        if (this.isContainerReady) this.$emit('containerReady');
       }
     }
   }
@@ -1445,28 +1457,49 @@ export default class GameContainer extends Vue {
 
   //#region loop
   loopCount = 0;
+  loopTime = 0;
+  updateTime = Date.now();
   afterPhysicUpdate(): void {
     for (const gameObject of this.gameObjects) {
       if (gameObject.moveWithBackground && !this.backgroundSprite) continue;
       gameObject.checkTrigger();
       gameObject.afterPhysicUpdate();
-      if (this.showAllEnginColliders && this.loopCount % 50 === 0)
+      if (
+        this.showAllEnginColliders &&
+        this.nextDrawUpdateTime < this.loopTime
+      ) {
+        this.nextDrawUpdateTime += this.oneTickDelta * 50;
         this.drawAllCollider();
+      }
     }
   }
 
+  nextWindUpdateTime = 0;
+  nextPanUpdateTime = 0;
+  nextDrawUpdateTime = 0;
+  readonly oneTickDelta = 50;
   beforePhysicUpdate(): void {
+    const updateTime = Date.now();
+    const deltaTime = updateTime - this.updateTime;
+    this.updateTime = updateTime;
+    this.loopTime += deltaTime;
     this.loopCount++;
+    const velocityIterations = Math.round(deltaTime / 10);
+    this.engine.velocityIterations =
+      velocityIterations > 0 ? velocityIterations : 1;
     for (const gameObject of this.gameObjects) {
       if (gameObject.moveWithBackground && !this.backgroundSprite) continue;
       gameObject.beforePhysicUpdate();
     }
-    if (this.useWind && this.loopCount % 5 === 0) this.addWind();
-    if (
-      this.panSpeed > 0 &&
-      this.loopCount % this.getPanInterval(this.panSpeed) === 0
-    )
+    if (this.useWind && this.nextWindUpdateTime < this.loopTime) {
+      this.nextWindUpdateTime += this.oneTickDelta * 5;
+      this.addWind();
+    }
+    if (this.panSpeed > 0 && this.nextPanUpdateTime < this.loopTime) {
+      this.nextPanUpdateTime +=
+        this.oneTickDelta * this.getPanInterval(this.panSpeed);
       this.pan();
+    }
   }
   //#endregion loop
 
@@ -1486,7 +1519,7 @@ export default class GameContainer extends Vue {
 
   autoPlayIsRunning = false;
   async startAutoPan(): Promise<void> {
-    await until(() => !this.loading);
+    await until(() => this.isContainerReady);
     this.backgroundPositionOffset = [...this.backgroundPositionOffsetMax];
     this.beginPan([-this.autoPanSpeed, 0]);
     this.autoPlayIsRunning = true;

@@ -567,7 +567,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 }
 
 .level-layout {
-  height: 20rem;
+  height: 25rem;
   margin-bottom: 0.5rem;
 }
 

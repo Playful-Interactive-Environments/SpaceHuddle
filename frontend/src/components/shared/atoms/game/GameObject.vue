@@ -517,10 +517,11 @@ export default class GameObject extends Vue {
   isSleeping = false;
   sleepTime = Date.now();
   readyForReuse(): boolean {
-    return this.isSleeping && Date.now() - this.sleepTime > 1000;
+    return this.isSleeping && Date.now() > this.sleepTime && !!this.body;
   }
 
-  moveToPool(): void {
+  moveToPool(minSleepTime = 1000): void {
+    if (!this.body) return;
     this.body.isStatic = true;
     matterUtil.resetBody(this.body, this.gameContainer.mouseConstraint);
     //Matter.Sleeping.set(this.body, true);
@@ -529,11 +530,12 @@ export default class GameObject extends Vue {
       this.body.position.x + this.offset[0],
       this.body.position.y + this.offset[1],
     ];
-    this.sleepTime = Date.now();
+    this.sleepTime = Date.now() + minSleepTime;
     this.isSleeping = true;
   }
 
   activateFromPool(position: [number, number]): void {
+    if (!this.body) return;
     this.isSleeping = false;
     Matter.Body.setPosition(this.body, { x: position[0], y: position[1] });
     //Matter.Sleeping.set(this.body, false);
