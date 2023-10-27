@@ -103,6 +103,9 @@ export function resetBody(
   Matter.Body.setAngularVelocity(body, 0);
   Matter.Body.setAngularSpeed(body, 0);
   Matter.Body.setSpeed(body, 0);
+  body.constraintImpulse.x = 0;
+  body.constraintImpulse.y = 0;
+  body.constraintImpulse.angle = 0;
   body.force.x = 0;
   body.force.y = 0;
 }

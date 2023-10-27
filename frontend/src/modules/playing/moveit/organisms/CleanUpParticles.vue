@@ -81,7 +81,10 @@
   <div class="gameArea">
     <table
       class="container-info"
-      :style="{ '--container-font-size': convertFontSizeToScreenSize(24) }"
+      :style="{
+        '--container-font-size': convertFontSizeToScreenSize(24),
+        '--container-height': `${containerHeight}px`,
+      }"
     >
       <tr>
         <td
@@ -106,9 +109,7 @@
             return collision.bodyA.isStatic !== collision.bodyB.isStatic &&
             collision.bodyA.collisionFilter.group === collision.bodyB.collisionFilter.group;
           }"
-      :collisionBorders="
-        isFull ? CollisionBorderType.None : CollisionBorderType.Screen
-      "
+      :border-category="isFull ? boarderDisabledCategory : 1"
       :combined-active-collision-to-chain="true"
       :use-object-pooling="false"
       :enable-sleeping="false"
@@ -120,7 +121,7 @@
           <GameObject
             v-for="(particle, index) in Object.keys(gameConfig.particles)"
             :key="particle"
-            :x="index * containerSpace + padding + containerSpace / 2"
+            :x="index * containerSpace + containerSpace / 2"
             :y="containerHeight / 2"
             type="rect"
             :isStatic="true"
@@ -167,8 +168,8 @@
               sleepThreshold: 60,
               collisionFilter: {
                 group: particle.group,
-                category: 0b0001,
-                mask: 0b0001,
+                category: particleCategory,
+                mask: particleCategory,
               },
             }"
             :source="particle"
@@ -181,6 +182,7 @@
             @destroyObject="destroyParticle"
             @outsideDrawingSpace="outsideDrawingSpace"
             @collision="updateTracking"
+            @isPartOfChainChanged="isPartOfChainChanged"
           >
             <CustomSprite
               v-if="getParticleTexture(particle.name)"
@@ -191,6 +193,14 @@
               :height="particleRadius * 2"
               :outline="particle.highlighted ? 'red' : null"
             />
+            <!--<text
+              :anchor="[0.5, 0.5]"
+              :x="0"
+              :y="0"
+              :style="{ fontFamily: 'Arial', fontSize: 24, fill: '#ff0000' }"
+            >
+              {{ particle.id }}
+            </text>-->
           </GameObject>
         </container>
       </template>
@@ -205,9 +215,7 @@ import { Line } from 'vue-chartjs';
 import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import * as PIXI from 'pixi.js';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
-import GameContainer, {
-  CollisionBorderType,
-} from '@/components/shared/atoms/game/GameContainer.vue';
+import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import { Chart } from 'chart.js';
 import { ParticleCollisionHandler } from '@/modules/playing/moveit/types/ParticleCollisionHandler';
 import annotationPlugin from 'chartjs-plugin-annotation';
@@ -308,10 +316,11 @@ export default class CleanUpParticles extends Vue {
 
   readonly maxCleanupThreshold = constants.maxCleanupThreshold;
   readonly calcChartHeight = constants.calcChartHeight;
+  readonly particleCategory = 0b0001;
+  readonly boarderDisabledCategory = 1 << 30;
 
   particleQueueEmit: { [key: string]: number } = {};
   particleQueueEmission: { [key: string]: number } = {};
-  CollisionBorderType = CollisionBorderType;
 
   get intervalTime(): number {
     return this.playTime / this.normalizedTrackingData.length;
@@ -378,7 +387,7 @@ export default class CleanUpParticles extends Vue {
   }
 
   get particleRadius(): number {
-    const minSize = 10;
+    const minSize = 20;
     const maxSize = 40;
     const circleArea = this.particleArea / (this.maxParticleCount * 2);
     const size = Math.sqrt(circleArea / Math.PI);
@@ -646,6 +655,7 @@ export default class CleanUpParticles extends Vue {
   }
 
   particleCollected(particle: GameObject): void {
+    if (particle.isSleeping) return;
     if (particle.source) {
       particle.source.gameObject = particle;
       particle.moveToPool();
@@ -662,6 +672,15 @@ export default class CleanUpParticles extends Vue {
     const index = this.cleanupParticles.findIndex((p) => p.id === id);
     if (index > -1) this.cleanupParticles.splice(index, 1);*/
     this.particleState[particle.options.name as string].outsideCount++;
+  }
+
+  isPartOfChainChanged(particle: GameObject, isPartOfChain: boolean): void {
+    if (particle.body) {
+      if (isPartOfChain)
+        particle.body.collisionFilter.mask =
+          this.particleCategory | this.boarderDisabledCategory;
+      else particle.body.collisionFilter.mask = this.particleCategory;
+    }
   }
 
   maxChartValue = 0;
@@ -809,7 +828,7 @@ export default class CleanUpParticles extends Vue {
     color: white;
 
     td {
-      padding-top: calc(var(--container-font-size) * 2);
+      padding-top: calc(var(--container-height) / 30 * 11);
     }
   }
 }
