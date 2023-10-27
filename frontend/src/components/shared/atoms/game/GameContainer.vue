@@ -1484,7 +1484,8 @@ export default class GameContainer extends Vue {
     this.updateTime = updateTime;
     this.loopTime += deltaTime;
     this.loopCount++;
-    const velocityIterations = Math.round(deltaTime / 10);
+    let velocityIterations = 4;
+    if (deltaTime > 50) velocityIterations -= Math.round((deltaTime - 50) / 10);
     this.engine.velocityIterations =
       velocityIterations > 0 ? velocityIterations : 1;
     for (const gameObject of this.gameObjects) {
