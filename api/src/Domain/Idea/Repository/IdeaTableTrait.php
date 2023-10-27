@@ -324,7 +324,7 @@ trait IdeaTableTrait
      */
     protected function formatDatabaseInput(object $data): array
     {
-        return [
+        $input = [
             "id" => $data->id ?? null,
             "description" => $data->description ?? null,
             "keywords" => $data->keywords ?? null,
@@ -336,6 +336,10 @@ trait IdeaTableTrait
             "parameter" => isset($data->parameter) ? json_encode($data->parameter) : null,
             "order" => $data->order ?? 0
         ];
+        if (!$input["participant_id"]) {
+            unset($input["participant_id"]);
+        }
+        return $input;
     }
 
     /**
