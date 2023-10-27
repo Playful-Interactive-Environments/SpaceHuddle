@@ -430,6 +430,7 @@ import CustomParticleContainer from '@/components/shared/atoms/game/CustomPartic
 import { Vote } from '@/types/api/Vote';
 import * as CoolItConst from '@/modules/playing/coolit/utils/consts';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { EventType } from '@/types/enum/EventType';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
@@ -1048,7 +1049,15 @@ export default class PlayLevel extends Vue {
 
   //#region load / unload
   readonly animationSteps = 10;
+  loading = false;
   mounted(): void {
+    this.eventBus.on(EventType.TEXTURES_LOADING_START, async () => {
+      this.loading = true;
+    });
+    this.eventBus.on(EventType.ALL_TEXTURES_LOADED, async () => {
+      this.loading = false;
+    });
+
     const initPath = (type: RayType): void => {
       this.rayPath[type] = [];
       for (let i = 0; i < this.animationSteps; i++) {
@@ -1204,6 +1213,8 @@ export default class PlayLevel extends Vue {
       pixiUtil.unloadTexture(settings.spritesheet);
     }
     pixiUtil.unloadTexture('/assets/games/moveit/molecules.json');
+    this.eventBus.off(EventType.TEXTURES_LOADING_START);
+    this.eventBus.off(EventType.ALL_TEXTURES_LOADED);
   }
 
   previousLevelType = '';
@@ -1507,7 +1518,7 @@ export default class PlayLevel extends Vue {
   }
 
   countDownEndTime = -1;
-  rayInitialised(item: GameObject): void {
+  async rayInitialised(item: GameObject): Promise<void> {
     item.source.initialised = true;
     if (item.body) {
       item.moveToPool(0);
@@ -1516,12 +1527,12 @@ export default class PlayLevel extends Vue {
     }
     const waitForDataLoad = !!this.rayList.find((item) => !item.initialised);
     if (!waitForDataLoad) {
+      await until(() => !this.loading);
       const countDownTime = 3000;
       this.countDownEndTime = Date.now() + countDownTime;
-      setTimeout(() => {
-        this.countDownEndTime = -1;
-        this.waitForDataLoad = false;
-      }, countDownTime);
+      await delay(countDownTime);
+      this.countDownEndTime = -1;
+      this.waitForDataLoad = false;
     }
   }
 
