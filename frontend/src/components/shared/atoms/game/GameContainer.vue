@@ -462,6 +462,7 @@ export default class GameContainer extends Vue {
           const gameObject = this.getGameObjectForBody(body);
           if (gameObject) {
             gameObject.$emit('update:highlighted', false);
+            gameObject.$emit('isPartOfChainChanged', gameObject, false);
             this.addToEngin(body);
             gameObject.updatePivot(100, true);
           }
@@ -471,6 +472,14 @@ export default class GameContainer extends Vue {
         this.removeFromEngin(this.activeObject.body);
         Matter.Composite.add(this.activeComposition, this.activeObject.body);
         this.activeObject.$emit('update:highlighted', true);
+        this.activeObject.$emit(
+          'isPartOfChainChanged',
+          this.activeObject,
+          true
+        );
+        if (this.mouseConstraint.body === null) {
+          this.mouseConstraint.body = this.activeObject.body;
+        }
       }
     }
   }
@@ -509,6 +518,16 @@ export default class GameContainer extends Vue {
   @Watch('waitForDataLoad', { immediate: true })
   onWaitForDataLoadChanged(): void {
     if (this.isContainerReady) this.$emit('containerReady');
+  }
+
+  @Watch('borderCategory', { immediate: true })
+  onBorderCategoryChanged(): void {
+    if (this.borders) {
+      this.borders.bottom.collisionFilter.category = this.borderCategory;
+      this.borders.top.collisionFilter.category = this.borderCategory;
+      this.borders.right.collisionFilter.category = this.borderCategory;
+      this.borders.left.collisionFilter.category = this.borderCategory;
+    }
   }
   //#endregion watch
 
@@ -1184,7 +1203,10 @@ export default class GameContainer extends Vue {
           | Matter.MouseConstraint
         )[]
   ): void {
-    if (this.engine) {
+    if (
+      this.engine &&
+      !this.engine.world.bodies.find((item) => item.id === physicObject.id)
+    ) {
       Matter.Composite.add(this.engine.world, physicObject);
     }
   }
@@ -1270,6 +1292,7 @@ export default class GameContainer extends Vue {
           if (isGameObject) gameObjectIsPartOfChain = true;
           if (chainObject && !isGameObject) {
             chainObject.$emit('update:highlighted', false);
+            chainObject.$emit('isPartOfChainChanged', chainObject, false);
             const deleteFlag = chainObject.handleCollision(
               collisionObject,
               hitPoint,
@@ -1296,6 +1319,7 @@ export default class GameContainer extends Vue {
       if (!deleteFlag && gameObjectIsPartOfChain) {
         this.addToEngin(gameObject.body);
         gameObject.updatePivot(100, true);
+        gameObject.$emit('isPartOfChainChanged', gameObject, false);
       }
     };
 
@@ -1382,7 +1406,10 @@ export default class GameContainer extends Vue {
             this.removeFromEngin(collidingObj);
             Matter.Composite.add(this.activeComposition, collidingObj);
             const gameObject = this.getGameObjectForBody(collidingObj);
-            if (gameObject) gameObject.$emit('update:highlighted', true);
+            if (gameObject) {
+              gameObject.$emit('update:highlighted', true);
+              gameObject.$emit('isPartOfChainChanged', gameObject, true);
+            }
             this.createChain();
           }
         }

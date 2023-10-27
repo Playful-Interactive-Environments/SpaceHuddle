@@ -77,6 +77,7 @@ export const bounceCategory = 1 << 31;
     'update:highlighted',
     'positionChanged',
     'initialised',
+    'isPartOfChainChanged',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -505,7 +506,8 @@ export default class GameObject extends Vue {
     }
     if (this.sleepIfNotVisible) {
       const isVisible = this.isVisible(this.displayWidth * 3);
-      Matter.Sleeping.set(this.body, !isVisible);
+      this.body.isStatic = !isVisible;
+      //Matter.Sleeping.set(this.body, !isVisible);
     }
   }
 
@@ -523,8 +525,10 @@ export default class GameObject extends Vue {
     return this.isSleeping && Date.now() > this.sleepTime && !!this.body;
   }
 
-  moveToPool(minSleepTime = 1000): void {
+  moveToPool(minSleepTime = 500): void {
     if (!this.body) return;
+    this.sleepTime = Date.now() + minSleepTime;
+    this.isSleeping = true;
     this.body.isStatic = true;
     matterUtil.resetBody(this.body, this.gameContainer.mouseConstraint);
     //Matter.Sleeping.set(this.body, true);
@@ -533,8 +537,6 @@ export default class GameObject extends Vue {
       this.body.position.x + this.offset[0],
       this.body.position.y + this.offset[1],
     ];
-    this.sleepTime = Date.now() + minSleepTime;
-    this.isSleeping = true;
   }
 
   activateFromPool(position: [number, number]): void {
