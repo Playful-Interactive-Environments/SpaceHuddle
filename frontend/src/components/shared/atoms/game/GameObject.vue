@@ -172,16 +172,22 @@ export default class GameObject extends Vue {
     return this.displayHeight + this.colliderDelta * 2;
   }
 
+  isPositionVisible(x: number, y: number, delta = 0): boolean {
+    const deltaX = this.displayWidth / 2;
+    const deltaY = this.displayHeight / 2;
+    return (
+      x >= -delta - deltaX &&
+      x <= this.gameContainer.gameWidth + delta + deltaX &&
+      y >= -delta - deltaY &&
+      y <= this.gameContainer.gameHeight + delta + deltaY
+    );
+  }
+
   isVisible(delta = 0): boolean {
     if (!this.body) return false;
     const x = this.body.position.x; // this.position[0];
     const y = this.body.position.y; // this.position[1];
-    return (
-      x >= -delta &&
-      x <= this.gameContainer.gameWidth + delta &&
-      y >= -delta &&
-      y <= this.gameContainer.gameHeight + delta
-    );
+    return this.isPositionVisible(x, y, delta);
   }
 
   getVelocityAmount(): number {
@@ -216,13 +222,39 @@ export default class GameObject extends Vue {
     this.offset = offset;
   }
 
-  updateOffset(offset: [number, number]): void {
+  updateOffset(
+    offset: [number, number],
+    offsetCircle: [number, number] | null = null
+  ): void {
+    const testOffset = (offsetX: number, offsetY: number): boolean => {
+      const newPosition = {
+        x: this.position[0] - offsetX,
+        y: this.position[1] - offsetY,
+      };
+      if (this.isPositionVisible(newPosition.x, newPosition.y, 0)) {
+        this.offset = [offsetX, offsetY];
+        Matter.Body.setPosition(this.body, newPosition);
+        return true;
+      }
+      return false;
+    };
+
     this.offset = offset;
     if (this.body) {
-      Matter.Body.setPosition(this.body, {
-        x: this.position[0] - this.offset[0],
-        y: this.position[1] - this.offset[1],
-      });
+      if (Array.isArray(offsetCircle)) {
+        if (!testOffset(offset[0], offset[1])) {
+          if (!testOffset(offsetCircle[0], offset[1])) {
+            if (!testOffset(offset[0], offsetCircle[1])) {
+              testOffset(offsetCircle[0], offsetCircle[1]);
+            }
+          }
+        }
+      } else {
+        Matter.Body.setPosition(this.body, {
+          x: this.position[0] - this.offset[0],
+          y: this.position[1] - this.offset[1],
+        });
+      }
       if (this.boundsGraphic) this.drawBorder();
     }
   }

@@ -32,6 +32,35 @@
           :x="backgroundTexturePosition[0]"
           :y="backgroundTexturePosition[1]"
         ></sprite>
+        <container v-if="endlessPanning">
+          <sprite
+            v-if="backgroundSprite && backgroundSprite.valid"
+            :texture="backgroundSprite"
+            :anchor="0.5"
+            :width="backgroundTextureSize[0]"
+            :height="backgroundTextureSize[1]"
+            :x="backgroundPositionOffsetCircle[0]"
+            :y="backgroundTexturePosition[1]"
+          ></sprite>
+          <sprite
+            v-if="backgroundSprite && backgroundSprite.valid"
+            :texture="backgroundSprite"
+            :anchor="0.5"
+            :width="backgroundTextureSize[0]"
+            :height="backgroundTextureSize[1]"
+            :x="backgroundTexturePosition[0]"
+            :y="backgroundPositionOffsetCircle[1]"
+          ></sprite>
+          <sprite
+            v-if="backgroundSprite && backgroundSprite.valid"
+            :texture="backgroundSprite"
+            :anchor="0.5"
+            :width="backgroundTextureSize[0]"
+            :height="backgroundTextureSize[1]"
+            :x="backgroundPositionOffsetCircle[0]"
+            :y="backgroundPositionOffsetCircle[1]"
+          ></sprite>
+        </container>
         <container
           v-for="region of regionBodyList"
           :key="region.body.id"
@@ -132,7 +161,8 @@
       class="navigation-overlay overlay-right"
       v-if="
         backgroundMovement === BackgroundMovement.Pan &&
-        backgroundPositionOffsetMin[0] < backgroundPositionOffset[0]
+        (backgroundPositionOffsetMin[0] < backgroundPositionOffset[0] ||
+          endlessPanning)
       "
     >
       <font-awesome-icon
@@ -145,7 +175,8 @@
       class="navigation-overlay overlay-left"
       v-if="
         backgroundMovement === BackgroundMovement.Pan &&
-        backgroundPositionOffsetMax[0] > backgroundPositionOffset[0]
+        (backgroundPositionOffsetMax[0] > backgroundPositionOffset[0] ||
+          endlessPanning)
       "
     >
       <font-awesome-icon
@@ -158,7 +189,8 @@
       class="navigation-overlay overlay-up"
       v-if="
         backgroundMovement === BackgroundMovement.Pan &&
-        backgroundPositionOffsetMax[1] > backgroundPositionOffset[1]
+        (backgroundPositionOffsetMax[1] > backgroundPositionOffset[1] ||
+          endlessPanning)
       "
     >
       <font-awesome-icon
@@ -171,7 +203,8 @@
       class="navigation-overlay overlay-down"
       v-if="
         backgroundMovement === BackgroundMovement.Pan &&
-        backgroundPositionOffsetMin[1] < backgroundPositionOffset[1]
+        (backgroundPositionOffsetMin[1] < backgroundPositionOffset[1] ||
+          endlessPanning)
       "
     >
       <font-awesome-icon
@@ -238,6 +271,7 @@ export interface CollisionRegion {
 interface CollisionRegionData {
   region: CollisionRegion;
   position: [number, number];
+  relativePosition: [number, number];
   size: [number, number];
   body: Matter.Body | null;
   graphic: PIXI.Graphics | null;
@@ -303,6 +337,7 @@ export default class GameContainer extends Vue {
   readonly backgroundPosition!: BackgroundPosition;
   @Prop({ default: BackgroundMovement.None })
   readonly backgroundMovement!: BackgroundMovement;
+  @Prop({ default: false }) readonly endlessPanning!: boolean;
   @Prop({ default: false }) readonly transparent!: boolean;
   @Prop({ default: null }) readonly selectedObject!: GameObject | null;
   @Prop({
@@ -397,6 +432,13 @@ export default class GameContainer extends Vue {
     return body.bounds.max.y - body.bounds.min.y;
   }
 
+  get backgroundPositionOffsetCircle(): [number, number] {
+    return [
+      this.backgroundPositionOffset[0] - this.backgroundTextureSize[0],
+      this.backgroundPositionOffset[1] - this.backgroundTextureSize[1],
+    ];
+  }
+
   get gameObjectOffsetRelativeToBackground(): [number, number] {
     return [
       this.backgroundTextureSize[0] / 2 - this.backgroundPositionOffset[0],
@@ -413,6 +455,22 @@ export default class GameContainer extends Vue {
       this.backgroundPositionOffset[0] - this.gameWidth / 2,
       this.backgroundPositionOffset[1] - this.gameHeight / 2,
     ] as [number, number];*/
+  }
+
+  get gameObjectOffsetRelativeToBackgroundCircle(): [number, number] {
+    return [
+      this.backgroundTextureSize[0] / 2 -
+        this.backgroundPositionOffsetCircle[0],
+      this.backgroundTextureSize[1] / 2 -
+        this.backgroundPositionOffsetCircle[1],
+    ] as [number, number];
+  }
+
+  get gameObjectOffsetRelativeToScreenCircle(): [number, number] {
+    return [
+      this.gameWidth / 2 - this.backgroundPositionOffsetCircle[0],
+      this.gameHeight / 2 - this.backgroundPositionOffsetCircle[1],
+    ] as [number, number];
   }
 
   get visibleScreenMin(): [number, number] {
@@ -442,16 +500,55 @@ export default class GameContainer extends Vue {
 
   //#region watch
   @Watch('collisionRegions', { immediate: true })
-  onCollisionRegionChanged(): void {
-    this.regionBodyList = this.collisionRegions.map((item) => {
-      return {
-        region: item,
-        position: [0, 0],
-        size: [100, 100],
-        body: null,
-        graphic: null,
-      };
-    });
+  async onCollisionRegionChanged(): Promise<void> {
+    const regionBodyList: CollisionRegionData[] = this.collisionRegions.map(
+      (item) => {
+        return {
+          region: item,
+          position: [0, 0],
+          relativePosition: [0, 0],
+          size: [100, 100],
+          body: null,
+          graphic: null,
+        };
+      }
+    );
+    if (!this.endlessPanning) this.regionBodyList = regionBodyList;
+    else {
+      this.regionBodyList = [
+        ...regionBodyList,
+        ...this.collisionRegions.map((item) => {
+          return {
+            region: item,
+            position: [0, 0],
+            relativePosition: [-100, 0],
+            size: [100, 100],
+            body: null,
+            graphic: null,
+          } as CollisionRegionData;
+        }),
+        ...this.collisionRegions.map((item) => {
+          return {
+            region: item,
+            position: [0, 0],
+            relativePosition: [0, -100],
+            size: [100, 100],
+            body: null,
+            graphic: null,
+          } as CollisionRegionData;
+        }),
+        ...this.collisionRegions.map((item) => {
+          return {
+            region: item,
+            position: [0, 0],
+            relativePosition: [-100, -100],
+            size: [100, 100],
+            body: null,
+            graphic: null,
+          } as CollisionRegionData;
+        }),
+      ];
+    }
   }
 
   @Watch('activeObject', { immediate: true })
@@ -734,8 +831,12 @@ export default class GameContainer extends Vue {
       const width = this.backgroundTextureSize[0];
       const height = this.backgroundTextureSize[1];
       const center = getPolygonCenter(collisionRegion.path);
-      const x = this.backgroundTextureSize[0] * (center[0] / 100);
-      const y = this.backgroundTextureSize[1] * (center[1] / 100);
+      const x =
+        this.backgroundTextureSize[0] * (center[0] / 100) +
+        (region.relativePosition[0] / 100) * width;
+      const y =
+        this.backgroundTextureSize[1] * (center[1] / 100) +
+        (region.relativePosition[1] / 100) * height;
       if (!region.body) {
         collisionRegion.options.isStatic = true;
         collisionRegion.options.isSensor = true;
@@ -751,6 +852,14 @@ export default class GameContainer extends Vue {
         this.addToEngin(region.body);
         if (this.detector && this.useDetector)
           this.detector.bodies.push(region.body);
+        region.position = [
+          region.body.position.x - this.backgroundPositionOffsetMax[0],
+          region.body.position.y - this.backgroundPositionOffsetMax[1],
+        ];
+        region.size = [
+          this.getBodyWidth(region.body),
+          this.getBodyHeight(region.body),
+        ];
       } else {
         collisionRegion.options.isStatic = true;
         const body = matterUtil.createPolygonBody(
@@ -1597,24 +1706,54 @@ export default class GameContainer extends Vue {
     const x = this.backgroundPositionOffset[0] + this.panVector[0];
     const y = this.backgroundPositionOffset[1] + this.panVector[1];
     const previousPosition = [...this.backgroundPositionOffset];
-    if (
-      x < this.backgroundPositionOffsetMin[0] ||
-      x > this.backgroundPositionOffsetMax[0] ||
-      y < this.backgroundPositionOffsetMin[1] ||
-      y > this.backgroundPositionOffsetMax[1]
-    ) {
-      if (x < this.backgroundPositionOffsetMin[0])
-        this.backgroundPositionOffset[0] = this.backgroundPositionOffsetMin[0];
-      if (x > this.backgroundPositionOffsetMax[0])
-        this.backgroundPositionOffset[0] = this.backgroundPositionOffsetMax[0];
-      if (y < this.backgroundPositionOffsetMin[1])
-        this.backgroundPositionOffset[1] = this.backgroundPositionOffsetMin[1];
-      if (y > this.backgroundPositionOffsetMax[1])
-        this.backgroundPositionOffset[1] = this.backgroundPositionOffsetMax[1];
-      if (this.backgroundMovement === BackgroundMovement.Pan) this.endPan();
-      else this.panVector = [this.panVector[0] * -1, this.panVector[1] * -1];
+    if (this.endlessPanning) {
+      const maxX = this.backgroundPositionOffsetMax[0] + this.gameWidth;
+      const maxY = this.backgroundPositionOffsetMax[1] + this.gameHeight;
+      if (
+        x < this.backgroundPositionOffsetMin[0] ||
+        x > maxX ||
+        y < this.backgroundPositionOffsetMin[1] ||
+        y > maxY
+      ) {
+        if (x < this.backgroundPositionOffsetMin[0])
+          this.backgroundPositionOffset[0] =
+            maxX - (this.backgroundPositionOffsetMin[0] - x);
+        if (x > maxX)
+          this.backgroundPositionOffset[0] =
+            this.backgroundPositionOffsetMin[0] + (x - maxX);
+        if (y < this.backgroundPositionOffsetMin[1])
+          this.backgroundPositionOffset[1] =
+            maxY - (this.backgroundPositionOffsetMin[1] - y);
+        if (y > maxY)
+          this.backgroundPositionOffset[1] =
+            this.backgroundPositionOffsetMin[1] + (y - maxY);
+      } else {
+        this.backgroundPositionOffset = [x, y];
+      }
     } else {
-      this.backgroundPositionOffset = [x, y];
+      if (
+        x < this.backgroundPositionOffsetMin[0] ||
+        x > this.backgroundPositionOffsetMax[0] ||
+        y < this.backgroundPositionOffsetMin[1] ||
+        y > this.backgroundPositionOffsetMax[1]
+      ) {
+        if (x < this.backgroundPositionOffsetMin[0])
+          this.backgroundPositionOffset[0] =
+            this.backgroundPositionOffsetMin[0];
+        if (x > this.backgroundPositionOffsetMax[0])
+          this.backgroundPositionOffset[0] =
+            this.backgroundPositionOffsetMax[0];
+        if (y < this.backgroundPositionOffsetMin[1])
+          this.backgroundPositionOffset[1] =
+            this.backgroundPositionOffsetMin[1];
+        if (y > this.backgroundPositionOffsetMax[1])
+          this.backgroundPositionOffset[1] =
+            this.backgroundPositionOffsetMax[1];
+        if (this.backgroundMovement === BackgroundMovement.Pan) this.endPan();
+        else this.panVector = [this.panVector[0] * -1, this.panVector[1] * -1];
+      } else {
+        this.backgroundPositionOffset = [x, y];
+      }
     }
 
     if (
@@ -1626,12 +1765,22 @@ export default class GameContainer extends Vue {
           gameObj.moveWithBackground &&
           gameObj.objectSpace === ObjectSpace.RelativeToBackground
         )
-          gameObj.updateOffset(this.gameObjectOffsetRelativeToBackground);
+          gameObj.updateOffset(
+            this.gameObjectOffsetRelativeToBackground,
+            this.endlessPanning
+              ? this.gameObjectOffsetRelativeToBackgroundCircle
+              : null
+          );
         else if (
           gameObj.moveWithBackground &&
           gameObj.objectSpace === ObjectSpace.RelativeToScreen
         )
-          gameObj.updateOffset(this.gameObjectOffsetRelativeToScreen);
+          gameObj.updateOffset(
+            this.gameObjectOffsetRelativeToScreen,
+            this.endlessPanning
+              ? this.gameObjectOffsetRelativeToScreenCircle
+              : null
+          );
       }
 
       const deltaX = this.backgroundPositionOffset[0] - previousPosition[0];

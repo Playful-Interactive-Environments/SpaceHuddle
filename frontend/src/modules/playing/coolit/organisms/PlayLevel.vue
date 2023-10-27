@@ -24,6 +24,7 @@
       :pixi-filter-list="collisionAnimation"
       :auto-pan-speed="autoPanSpeed"
       :waitForDataLoad="waitForDataLoad"
+      :endless-panning="!gameOver"
     >
       <template v-slot:default>
         <container v-if="gameWidth && circleGradientTexture">
