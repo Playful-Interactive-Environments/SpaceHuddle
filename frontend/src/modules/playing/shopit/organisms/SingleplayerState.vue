@@ -158,7 +158,6 @@
         Play card!
       </button>
     </TransitionGroup>
-    <p>{{ game.keywords }}</p>
   </div>
   <div
     class="gameArea result"
@@ -190,17 +189,20 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Prop, Watch } from 'vue-property-decorator';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import { until } from '@/utils/wait';
 import * as tutorialService from '@/services/tutorial-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
+import { ElMessage } from 'element-plus';
 import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
 import { Idea } from '@/types/api/Idea';
+import * as authService from '@/services/auth-service';
 import * as ideaService from '@/services/idea-service';
+import * as configParameter from '@/utils/game/configParameter';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'shop-it-object';
@@ -229,12 +231,9 @@ export interface PlayStateResult {
 })
 export default class PlayState extends Vue {
   @Prop() readonly taskId!: string;
-  @Prop({ default: null }) readonly game!: Idea;
   @Prop({ default: '100%' }) readonly height!: string;
-  @Prop({ default: 0 }) readonly player!: number;
   @Prop({ default: EndpointAuthorisationType.PARTICIPANT })
   authHeaderTyp!: EndpointAuthorisationType;
-
   gameWidth = 0;
   gameHeight = 0;
   showToolbox = false;
@@ -249,15 +248,13 @@ export default class PlayState extends Vue {
 
   cardSpriteFolder = gameConfig.gameValues.spriteFolder;
 
-  setupDone = false;
-
   activeCard: any[] = [];
   cardsPlayed: any[] = [];
   ownCardPlayed = '';
 
-  cards: any[] = [];
+  cards = this.shuffle(this.parseCards(gameConfig));
   cardHand: any[] = [];
-  opponentCard = this.cards[9];
+  testCard = this.cards[9];
 
   categoryPointsOpponent: any[] = [];
   categoryPoints: any[] = [];
@@ -267,13 +264,8 @@ export default class PlayState extends Vue {
   pointsSpentOpponent = 0;
   reason = '';
 
-  playersTurn = 0;
+  playFirst = false;
   imageArray: any[] = [];
-
-  getCardsFromGame() {
-    //console.log(this.game.parameter.cards);
-    return this.game.parameter.cards;
-  }
 
   preloadAllSprites(cards) {
     for (let i = 0; i < cards.length; i++) {
@@ -292,8 +284,9 @@ export default class PlayState extends Vue {
     this.cardsPlayed = [];
     this.ownCardPlayed = '';
 
-    this.cards = [];
+    this.cards = this.shuffle(this.parseCards(gameConfig));
     this.cardHand = [];
+    this.testCard = this.cards[9];
 
     this.categoryPointsOpponent = [];
     this.categoryPoints = [];
@@ -302,6 +295,8 @@ export default class PlayState extends Vue {
     this.pointsSpent = 0;
     this.pointsSpentOpponent = 0;
     this.reason = '';
+
+    this.playFirst = false;
   }
 
   playStateChange(outcome, reason) {
@@ -320,53 +315,16 @@ export default class PlayState extends Vue {
     return themeColors.getBackgroundColor();
   }
 
-  setup(): void {
-    this.cards = this.game.parameter.cards;
-    this.categorySetup();
-    //console.log(this.game.parameter.playerNum);
-    this.initialCardPull();
-    this.updateGame();
-    this.preloadAllSprites(this.cards);
-  }
-
   mounted(): void {
     tutorialService.registerGetList(this.updateTutorial, this.authHeaderTyp);
-    if (!this.setupDone) {
-      this.setup();
-    }
+    this.categorySetup();
+    this.initialCardPull();
+    this.preloadAllSprites(this.cards);
+
     /*this.eventBus.off(EventType.CHANGE_TUTORIAL);
     this.eventBus.on(EventType.CHANGE_TUTORIAL, async (steps) => {
       this.updateTutorial(steps as Tutorial[]);
     });*/
-  }
-
-  async updateGame() {
-    ideaService.registerGetIdeasForTask(
-      this.taskId,
-      null,
-      null,
-      this.updatingGame,
-      EndpointAuthorisationType.PARTICIPANT,
-      2
-    );
-  }
-
-  updatingGame(game: Idea[]): void {
-    const tempGame = game.filter(
-      (game) => game.keywords == this.game.keywords
-    )[0];
-    this.cards = tempGame.parameter.cards;
-    switch (this.player) {
-      case 1:
-        this.cardHand = tempGame.parameter.player1Hand;
-        break;
-      case 2:
-        this.cardHand = tempGame.parameter.player2Hand;
-        break;
-    }
-    this.cardsPlayed = tempGame.parameter.cardsPlayed;
-    this.playersTurn = tempGame.parameter.playersTurn;
-    console.log('Player turn: ' + this.playersTurn);
   }
 
   updateTutorial(steps: Tutorial[]): void {
@@ -375,7 +333,6 @@ export default class PlayState extends Vue {
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateTutorial);
-    cashService.deregisterAllGet(this.updatingGame);
   }
 
   unmounted(): void {
@@ -432,34 +389,14 @@ export default class PlayState extends Vue {
       this.cardHand.push(card);
     }
 
-    if (this.game) {
-      switch (this.player) {
-        case 1:
-          console.log('Player ' + this.player);
-          this.game.parameter.player1Hand = this.cardHand;
-          break;
-        case 2:
-          console.log('Player ' + this.player);
-          this.game.parameter.player2Hand = this.cardHand;
-          break;
-      }
-      this.game.parameter.cards = this.cards;
-    }
-
-    ideaService.putIdea(
-      this.game,
-      EndpointAuthorisationType.PARTICIPANT,
-      false
-    );
-
     //Testcard for testing purposes
-    /*if (!this.playFirst) {
+    if (!this.playFirst) {
       this.cardsPlayed.push(this.testCard);
-    }*/
+    }
   }
 
   categoryIconChanged: any[] = [];
-  async cardPlayed(card) {
+  cardPlayed(card) {
     //clear active card to avoid replaying already played card
     this.activeCard = [];
     const activeCards = document.getElementsByClassName('cardContainerActive');
@@ -467,14 +404,9 @@ export default class PlayState extends Vue {
       activeCards[0].classList.remove('cardContainerActive');
     }
     let continuePlay = true;
-    if (this.playersTurn != this.player) {
+    if (!this.playFirst) {
       //Checking category for category zugzwang (if you have the category an opponent played, you HAVE to play that card)
       //Only relevant if not playing first
-      console.log('Waiting for opponent');
-      await until(() => this.cardsPlayed[0]);
-      console.log('Opponent played: ' + this.cardsPlayed[0][7]);
-      this.opponentCard = this.cardsPlayed[0];
-
       const card2 = this.cardsPlayed[0];
       const boolArray: boolean[] = this.checkAllCardCategories(card2);
       continuePlay = this.checkCategories(card, card2);
@@ -510,11 +442,6 @@ export default class PlayState extends Vue {
       this.cardsPlayed.push(card);
       this.ownCardPlayed = card[7];
 
-      this.game.parameter.cardsPlayed = this.cardsPlayed;
-      await until(() =>
-        ideaService.putIdea(this.game, EndpointAuthorisationType.PARTICIPANT)
-      );
-
       //remove wrong category icon highlight
       for (let i = 0; i < this.categoryIconChanged.length; i++) {
         this.categoryIconChanged[i].classList.remove(
@@ -523,19 +450,20 @@ export default class PlayState extends Vue {
       }
 
       //Show opponent card (if not visible already)
-      if (this.playersTurn == this.player) {
-        await until(() => this.cardsPlayed.length == 2);
-        this.opponentCard = this.cardsPlayed[1];
+      if (this.playFirst) {
+        setTimeout(() => {
+          this.cardsPlayed.push(this.testCard);
+        }, 1000);
       }
 
       //Compare the cards and choose a winner
       setTimeout(() => {
-        if (this.playersTurn == this.player) {
-          this.compareCards(card, this.opponentCard, this.playersTurn);
-          this.playersTurn = this.playersTurn == 1 ? 2 : 1;
+        if (this.playFirst) {
+          this.compareCards(card, this.testCard, this.playFirst);
+          this.playFirst = !this.playFirst;
         } else {
-          this.compareCards(this.opponentCard, card, this.playersTurn);
-          this.playersTurn = this.playersTurn == 1 ? 2 : 1;
+          this.compareCards(this.testCard, card, this.playFirst);
+          this.playFirst = !this.playFirst;
         }
       }, 2500);
     }
@@ -548,10 +476,9 @@ export default class PlayState extends Vue {
     }
 
     //Testcard for testing purposes
-    this.opponentCard =
-      this.cards[Math.floor(Math.random() * this.cards.length)];
-    if (this.playersTurn != this.player) {
-      this.cardsPlayed.push(this.opponentCard);
+    this.testCard = this.cards[Math.floor(Math.random() * this.cards.length)];
+    if (!this.playFirst) {
+      this.cardsPlayed.push(this.testCard);
     }
   }
 
@@ -593,7 +520,7 @@ export default class PlayState extends Vue {
       if (card[6] == card2[6]) {
         //If the categories fit
         if (card[0] > card2[0]) {
-          if (playedFirst == this.player) {
+          if (playedFirst) {
             this.pointsSpent += card[0] + card2[0];
             winningCard = card;
           } else {
@@ -601,7 +528,7 @@ export default class PlayState extends Vue {
             winningCard = card;
           }
         } else {
-          if (playedFirst == this.player) {
+          if (playedFirst) {
             this.pointsSpentOpponent += card[0] + card2[0];
             winningCard = card2;
           } else {
@@ -612,7 +539,7 @@ export default class PlayState extends Vue {
       } else {
         //If the categories do not fit
         winningCard = card;
-        if (playedFirst == this.player) {
+        if (playedFirst) {
           this.pointsSpent += winningCard[0];
         } else {
           this.pointsSpentOpponent += winningCard[0];
