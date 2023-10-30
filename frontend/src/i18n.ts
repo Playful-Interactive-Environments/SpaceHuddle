@@ -13,11 +13,13 @@ const addModuleLocales = async (locale = 'en', dict: any): Promise<any> => {
     if (!('module' in dict)) dict.module = {};
     dict.module.general = generalLocales;
   }
-  await import(
-    `@/locales/themes/${process.env.VUE_APP_THEME}/${locale}.json`
-  ).then((value) => {
-    dict = _.merge(dict, value);
-  });
+  if (process.env.VUE_APP_THEME !== 'default') {
+    await import(
+      `@/locales/themes/${process.env.VUE_APP_THEME}/${locale}.json`
+    ).then((value) => {
+      dict = _.merge(dict, value);
+    });
+  }
   return dict;
 };
 

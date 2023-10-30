@@ -106,8 +106,8 @@
       "cancel": "abbrechen"
     },
     "temperatureScale": {
-      "lowerLimit": "einfrieren",
-      "upperLimit": "überhitzen"
+      "lowerLimit": "aktisch",
+      "upperLimit": "tropisch"
     },
     "playResult": {
       "0": {

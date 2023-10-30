@@ -106,8 +106,8 @@
       "cancel": "cancel"
     },
     "temperatureScale": {
-      "lowerLimit": "freez",
-      "upperLimit": "overheat"
+      "lowerLimit": "actic",
+      "upperLimit": "tropical"
     },
     "playResult": {
       "0": {

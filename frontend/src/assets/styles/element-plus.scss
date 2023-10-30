@@ -1,5 +1,4 @@
 /* theme color */
-@use '../themes/variables' as *;
 @forward "~element-plus/theme-chalk/src/common/var.scss" with (
   $colors: (
         "primary": (
@@ -22,6 +21,29 @@
         ),
   )
 );
+/*@use '../themes/variables' as *;
+@forward "~element-plus/theme-chalk/src/common/var.scss" with (
+  $colors: (
+        "primary": (
+                "base": $color-dark-contrast,
+        ),
+        "success": (
+                "base": $color-brainstorming,
+        ),
+        "warning": (
+                "base": $color-informing,
+        ),
+        "danger": (
+                "base": $color-highlight,
+        ),
+        "error": (
+                "base": $color-evaluating,
+        ),
+        "info": (
+                "base": $color-structuring,
+        ),
+  )
+);*/
 
 $dialog-padding: 30px;
 
@@ -794,6 +816,10 @@ $--font-size: (
 
 .el-dropdown-menu__item:hover {
         font-weight: bold;
+}
+
+.el-page-header {
+        pointer-events: auto;
 }
 
 .el-page-header__content {

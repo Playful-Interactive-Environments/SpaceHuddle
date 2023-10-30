@@ -601,6 +601,7 @@ export default class ParticipantOverview extends Vue {
 }
 
 .avatar {
+  pointer-events: auto;
   display: block;
   border-radius: 20rem;
   border: 3px white solid;

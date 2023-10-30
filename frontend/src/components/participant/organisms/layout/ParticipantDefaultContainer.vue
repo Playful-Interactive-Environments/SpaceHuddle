@@ -59,6 +59,7 @@ export default class ParticipantDefaultContainer extends Vue {
 }
 
 .participant-header {
+  pointer-events: none;
   z-index: 100;
   position: sticky;
   top: 0;
@@ -67,9 +68,10 @@ export default class ParticipantDefaultContainer extends Vue {
   &__background {
     background: var(--color-dark-contrast);
     background-image: var(--participant-background-image);
-    background-size: 50%;
-    background-position: top;
-    background-repeat: no-repeat;
+    //background-size: 50%;
+    //background-size: cover;
+    //background-position: top;
+    //background-repeat: no-repeat;
     mask-image: radial-gradient(
         circle farthest-corner at 100% 100%,
         transparent 69%,

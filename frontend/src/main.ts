@@ -1,4 +1,3 @@
-import '@/assets/styles/global.scss';
 import { createApp } from 'vue';
 import VueCookies from 'vue3-cookies';
 import setViewportVariables from '@/vunit';
@@ -9,6 +8,7 @@ import VueObserveVisibility from 'vue3-observe-visibility2';
 import * as i18n from '@/i18n';
 import * as authService from '@/services/auth-service';
 
+import '@/assets/styles/global.scss';
 import ElementPlus from 'element-plus';
 import '@/assets/styles/element-plus.scss';
 import {
