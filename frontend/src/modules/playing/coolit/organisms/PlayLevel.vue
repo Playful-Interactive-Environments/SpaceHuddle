@@ -1037,7 +1037,7 @@ export default class PlayLevel extends Vue {
   }
 
   get moleculeSize(): number {
-    return this.textScaleFactor * 200;
+    return this.textScaleFactor * 250;
   }
 
   get temperatureScale(): number[] {

@@ -538,7 +538,7 @@ export default class GameObject extends Vue {
     }
     if (this.sleepIfNotVisible) {
       const isVisible = this.isVisible(this.displayWidth * 3);
-      this.body.isStatic = !isVisible;
+      this.body.isStatic = !isVisible || this.isStatic;
       //Matter.Sleeping.set(this.body, !isVisible);
     }
   }
@@ -576,7 +576,7 @@ export default class GameObject extends Vue {
     this.isSleeping = false;
     Matter.Body.setPosition(this.body, { x: position[0], y: position[1] });
     //Matter.Sleeping.set(this.body, false);
-    this.body.isStatic = false;
+    this.body.isStatic = this.isStatic;
   }
   //#endregion pooling
 
