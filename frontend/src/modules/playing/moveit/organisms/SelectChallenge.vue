@@ -1,96 +1,40 @@
 <template>
-  <div class="chartArea">
-    <el-carousel
-      height="12rem"
-      :interval="30000"
-      trigger="click"
-      indicator-position="outside"
-    >
-      <el-carousel-item>
-        <Doughnut
-          ref="chartElectricityMixRef"
-          :data="chartDataElectricityMix"
-          :options="{
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'right',
-                labels: {
-                  color: '#ffffff',
-                },
-              },
-            },
-          }"
+  <nav class="level is-mobile">
+    <div class="level-left">
+      <el-button
+        v-for="vehicle of Object.keys(gameConfig.vehicles)"
+        :key="vehicle"
+        type="primary"
+        size="large"
+        @click="vehicleTypeClicked(vehicle)"
+        class="level-item"
+        :class="{ active: vehicle === activeVehicleType }"
+      >
+        <font-awesome-icon
+          v-if="!gameConfig.vehicles[vehicle].iconPrefix"
+          :icon="gameConfig.vehicles[vehicle].icon"
         />
-      </el-carousel-item>
-      <el-carousel-item>
-        <Bar
-          ref="chartElectricityRef"
-          :data="chartDataElectricity"
-          :options="{
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'right',
-                labels: {
-                  color: '#ffffff',
-                },
-              },
-            },
-            scales: {
-              x: {
-                ticks: {
-                  color: '#ffffff',
-                },
-                stacked: true,
-              },
-              y: {
-                ticks: {
-                  color: '#ffffff',
-                },
-                stacked: true,
-              },
-            },
-          }"
+        <font-awesome-icon
+          v-else
+          :icon="[
+            gameConfig.vehicles[vehicle].iconPrefix,
+            gameConfig.vehicles[vehicle].icon,
+          ]"
         />
-      </el-carousel-item>
-      <el-carousel-item>
-        <Bar
-          ref="chartFuelRef"
-          :data="chartDataFuel"
-          :options="{
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'right',
-                labels: {
-                  color: '#ffffff',
-                },
-              },
-            },
-            scales: {
-              x: {
-                ticks: {
-                  color: '#ffffff',
-                },
-                stacked: true,
-              },
-              y: {
-                ticks: {
-                  color: '#ffffff',
-                },
-                stacked: true,
-              },
-            },
-          }"
-        />
-      </el-carousel-item>
-    </el-carousel>
-  </div>
-  <el-space wrap>
+      </el-button>
+    </div>
+    <div class="level-right">
+      <el-button
+        type="primary"
+        size="large"
+        @click="showInfo = true"
+        class="level-item"
+      >
+        <font-awesome-icon icon="circle-info" />
+      </el-button>
+    </div>
+  </nav>
+  <!--<el-space wrap>
     <el-button
       v-for="vehicle of Object.keys(gameConfig.vehicles)"
       :key="vehicle"
@@ -111,9 +55,9 @@
         ]"
       />
     </el-button>
-  </el-space>
-  <div>
-    <el-carousel :autoplay="false" arrow="always" height="30rem">
+  </el-space>-->
+  <div ref="gameContainer" class="gameContainer">
+    <el-carousel :autoplay="false" arrow="always" :height="`${targetHeight}px`">
       <el-carousel-item
         v-for="vehicle of gameConfig.vehicles[activeVehicleType].types"
         :key="vehicle.name"
@@ -140,30 +84,32 @@
               </div>
             </div>
           </template>
-          <div class="spritesheet-container">
-            <img
-              class="vehicle-spritesheet"
-              :src="`/assets/games/moveit/vehicle/spritesheets/${vehicle.image}`"
-              :alt="vehicle.name"
-            />
+          <div class="vehicle-image">
+            <div class="spritesheet-container">
+              <img
+                class="vehicle-spritesheet"
+                :src="`/assets/games/moveit/vehicle/spritesheets/${vehicle.image}`"
+                :alt="vehicle.name"
+              />
+            </div>
+            <div>
+              <el-rate
+                :max="3"
+                :model-value="
+                  getStarsForVehicle({
+                    category: activeVehicleType,
+                    type: vehicle.name,
+                  })
+                "
+                disabled
+              />
+            </div>
           </div>
           <!--          <img
             class="vehicle-image"
             :src="`/assets/games/moveit/vehicle/${vehicle.image}`"
             :alt="vehicle.name"
           />-->
-          <div>
-            <el-rate
-              :max="3"
-              :model-value="
-                getStarsForVehicle({
-                  category: activeVehicleType,
-                  type: vehicle.name,
-                })
-              "
-              disabled
-            />
-          </div>
           <div v-if="vehicle.fuel">
             {{
               $t('module.playing.moveit.participant.vehicle-parameter.fuel')
@@ -221,6 +167,111 @@
       </el-carousel-item>
     </el-carousel>
   </div>
+  <DrawerBottomOverlay
+    v-model="showInfo"
+    :title="$t(`module.playing.moveit.participant.info.${activeTabName}.title`)"
+  >
+    <div class="chartArea">
+      <el-carousel
+        height="12rem"
+        :interval="30000"
+        trigger="click"
+        arrow="always"
+        indicator-position="outside"
+        @change="carouselChanged"
+      >
+        <el-carousel-item>
+          <Doughnut
+            ref="chartElectricityMixRef"
+            :data="chartDataElectricityMix"
+            :options="{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'right',
+                  labels: {
+                    color: '#000000',
+                  },
+                },
+              },
+            }"
+          />
+        </el-carousel-item>
+        <el-carousel-item>
+          <Bar
+            ref="chartElectricityRef"
+            :data="chartDataElectricity"
+            :options="{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'right',
+                  labels: {
+                    color: '#000000',
+                  },
+                },
+              },
+              scales: {
+                x: {
+                  ticks: {
+                    color: '#000000',
+                  },
+                  stacked: true,
+                },
+                y: {
+                  ticks: {
+                    color: '#000000',
+                  },
+                  stacked: true,
+                },
+              },
+            }"
+          />
+        </el-carousel-item>
+        <el-carousel-item>
+          <Bar
+            ref="chartFuelRef"
+            :data="chartDataFuel"
+            :options="{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'right',
+                  labels: {
+                    color: '#000000',
+                  },
+                },
+              },
+              scales: {
+                x: {
+                  ticks: {
+                    color: '#000000',
+                  },
+                  stacked: true,
+                },
+                y: {
+                  ticks: {
+                    color: '#000000',
+                  },
+                  stacked: true,
+                },
+              },
+            }"
+          />
+        </el-carousel-item>
+      </el-carousel>
+      <div>
+        {{
+          $t(
+            `module.playing.moveit.participant.info.${activeTabName}.description`
+          )
+        }}
+      </div>
+    </div>
+  </DrawerBottomOverlay>
 </template>
 
 <script lang="ts">
@@ -232,6 +283,7 @@ import * as configCalculation from '@/modules/playing/moveit/utils/configCalcula
 import { Prop } from 'vue-property-decorator';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
+import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
 
 export interface ChartData {
   labels: string[];
@@ -247,6 +299,7 @@ export interface ChartData {
     FontAwesomeIcon,
     Doughnut,
     Bar,
+    DrawerBottomOverlay,
   },
   emits: ['play'],
 })
@@ -271,6 +324,7 @@ export default class SelectChallenge extends Vue {
     category: 'car',
     type: 'sport',
   };
+  showInfo = false;
 
   get selectedVehicleParameter(): any {
     return configCalculation.getVehicleParameter(this.selectedVehicle);
@@ -296,6 +350,23 @@ export default class SelectChallenge extends Vue {
     return this.trackingManager.getStarPoints(this.getStarsForVehicle(vehicle));
   }
 
+  activeTabName = 'electricity';
+  carouselChanged(index: number): void {
+    switch (index) {
+      case 0:
+        this.activeTabName = 'electricity';
+        break;
+      case 1:
+        this.activeTabName = 'emissionsPerElectricitySource';
+        break;
+      case 2:
+        this.activeTabName = 'emissionsPerFuel';
+        break;
+    }
+  }
+
+  targetWidth = 100;
+  targetHeight = 100;
   mounted(): void {
     this.chartDataElectricityMix.datasets.push({
       label: this.$t('module.playing.moveit.participant.electricity'),
@@ -374,6 +445,14 @@ export default class SelectChallenge extends Vue {
       this.chartDataFuel.datasets.push(ds);
     }
     this.chartDataFuel.datasets[0].data.push(0);
+
+    setTimeout(() => {
+      const dom = this.$refs.gameContainer as HTMLElement;
+      if (dom && dom.parentElement) {
+        this.targetWidth = dom.parentElement.offsetWidth;
+        this.targetHeight = dom.parentElement.offsetHeight;
+      }
+    }, 100);
     setTimeout(() => {
       this.updateChart();
     }, 1000);
@@ -422,16 +501,16 @@ export default class SelectChallenge extends Vue {
 
 <style scoped lang="scss">
 .chartArea {
-  padding: 1rem;
+  padding: 1rem 0;
   height: 15rem;
   width: 100%;
 
-  background-image: url('~@/modules/playing/moveit/assets/chartsbg.png');
-  background-size: cover; //contain;
-  background-position: 50%;
-  background-repeat: no-repeat;
-  background-color: var(--color-dark-contrast);
-  background-blend-mode: overlay;
+  //background-image: url('~@/modules/playing/moveit/assets/chartsbg.png');
+  //background-size: cover; //contain;
+  //background-position: 50%;
+  //background-repeat: no-repeat;
+  //background-color: var(--color-dark-contrast);
+  //background-blend-mode: overlay;
 }
 
 .el-space {
@@ -443,15 +522,37 @@ export default class SelectChallenge extends Vue {
 }
 
 .vehicle-card {
-  width: calc(100%);
+  margin: 0 auto;
+  width: calc(100% - 2rem);
+  max-width: 30rem;
   text-align: center;
+  border: solid var(--color-dark-contrast) 5px;
+  border-radius: var(--border-radius);
+  aspect-ratio: 0.7;
 
   .card-header {
     font-weight: var(--font-weight-bold);
     font-size: var(--font-size-large);
+    padding: 0.5rem;
+    background-color: var(--color-dark-contrast);
+    color: #ffffff;
+    border-radius: 0;
     //text-align: center;
     //display: block;
+
+    .media-content {
+      text-align: left;
+    }
   }
+
+  .el-button {
+    margin-top: 1rem;
+  }
+}
+
+.el-card::v-deep(.el-card__body) {
+  padding: 0;
+  background-color: var(--color-gray);
 }
 
 .media-right {
@@ -464,11 +565,21 @@ export default class SelectChallenge extends Vue {
 
 /*spritesheet functionality:*/
 
+.vehicle-image {
+  height: calc(100% - 17rem);
+  min-height: 7rem;
+  background-color: #ffffff;
+  display: grid;
+  grid-template-rows: auto 3rem;
+  align-items: baseline;
+  margin-bottom: 2rem;
+}
+
 .spritesheet-container {
-  height: 6rem;
+  height: 7rem;
   aspect-ratio: 3.07 / 1;
   overflow: hidden;
-  margin: auto auto 1rem;
+  margin: auto;
   max-width: 100%;
 }
 
@@ -487,10 +598,10 @@ export default class SelectChallenge extends Vue {
     object-position: right top;
   }
   50% {
-    object-position: left -6rem;
+    object-position: left -7rem;
   }
   75% {
-    object-position: right -6rem;
+    object-position: right -7rem;
   }
 }
 
@@ -504,5 +615,17 @@ export default class SelectChallenge extends Vue {
   left: 0;
   text-align: center;
   width: 100vw;
+}
+
+.level {
+  padding: 1rem;
+}
+
+.level:not(:last-child) {
+  margin-bottom: 0;
+}
+
+.gameContainer {
+  height: 100%;
 }
 </style>

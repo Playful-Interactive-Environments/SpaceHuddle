@@ -49,6 +49,7 @@
         :height="`${gameHeight}px`"
         :interval="30000"
         trigger="click"
+        arrow="always"
         @change="carouselChanged"
       >
         <el-carousel-item class="infoGraphic successState">

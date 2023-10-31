@@ -33,12 +33,26 @@
       "improvable": "You can do better. Try to leave yourself even more air next time when cleaning up by clever driving behavior, then you will surely manage more next time."
     },
     "select": "select",
+    "info": {
+      "electricity": {
+        "title": "electricity mix",
+        "description": "The current standard electricity mix is composed as shown in the graph. This composition influences the climate friendliness of electric cars. You can influence this mix through your choice of measures in the local council."
+      },
+      "emissionsPerFuel": {
+        "title": "emissions per fuel",
+        "description": "On this graph you can see how many greenhouse gases are in which fuel. Electricity depends on the electricity mix and can be influenced by the local council."
+      },
+      "emissionsPerElectricitySource": {
+        "title": "emissions per electricity source",
+        "description": "The graph shows how many greenhouse gases are produced by which electricity source."
+      }
+    },
     "play": "play",
     "tutorial": {
       "select": "Traffic accounts for 30% of greenhouse emissions.\nTry to figure out what impact different types of vehicles have.\nThe statistic shows you how many greenhouse gases are produced produced per kWh of fuel.\nWhile this is constant for fuels like diesel and gasoline, the values for electricity depend on the electricity mix.",
       "drive": "In addition to vehicle choice, driving behavior also plays a crucial role. The faster you drive, the more fuel you need.\nIn the statistics above the map you can see how many emissions are released. All emissions in the red marked area go directly into the environment. For all below you have the chance to clean them up.",
       "bus": "But the number of passengers also makes a difference. More people travelling in the same vehicle means more people are sharing the same emissions.\nStop at bus stops to let people get in.",
-      "cleanUp": "Now try to clean up the emissions you caused by throwing them into the correct garbage can.\nBut watch out! If there are too many emissions they will evaporate and get into the environment.\nIn addition to greenhouse gases, microplastics are also released through tire wear and particulate matter.",
+      "cleanUp": "Now try to clean up the emissions you caused by throwing them into the correct garbage can.\nBy nudging the same particles, you can collect and dispose of several at once.\nBut watch out! If there are too many emissions they will evaporate and get into the environment.\nIn addition to greenhouse gases, microplastics are also released through tire wear and particulate matter.",
       "improve": "Try to leave yourself more air next time when cleaning up by clever driving behavior, or influence the electricity mix by appropriate measures in the measures map."
     }
   },

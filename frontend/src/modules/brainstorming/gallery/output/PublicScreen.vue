@@ -3,6 +3,7 @@
     v-if="ideas.length > 0"
     height="calc(var(--app-height) * 0.6)"
     type="card"
+    arrow="always"
     :initial-index="0"
     :interval="7000"
     v-on:change="galleryIndexChanged"
