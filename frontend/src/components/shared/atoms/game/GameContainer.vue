@@ -1305,7 +1305,10 @@ export default class GameContainer extends Vue {
         scale: 0,
       };
     }
-    this.runner = Matter.Runner.create();
+    this.runner = Matter.Runner.create({
+      deltaMax: 1000 / 15,
+      deltaMin: 1000 / 90,
+    });
     if (this.useDetector) {
       this.detector = Matter.Detector.create({ bodies: [] });
       this.$emit('initDetector', this.detector);
@@ -1636,22 +1639,29 @@ export default class GameContainer extends Vue {
     this.updateTime = updateTime;
     this.loopTime += deltaTime;
     this.loopCount++;
-    let velocityIterations = 4;
-    if (deltaTime > 50) velocityIterations -= Math.round((deltaTime - 50) / 10);
-    this.engine.velocityIterations =
-      velocityIterations > 0 ? velocityIterations : 1;
+    //let velocityIterations = 4;
+    //if (deltaTime > 50) velocityIterations -= Math.round((deltaTime - 50) / 10);
+    //this.engine.velocityIterations =
+    //  velocityIterations > 0 ? velocityIterations : 1;
     for (const gameObject of this.gameObjects) {
+      /*if (gameObject.body && !gameObject.isStatic && this.isContainerReady) {
+        gameObject.body.timeScale = deltaTime / 48;
+      }*/
       if (gameObject.moveWithBackground && !this.backgroundSprite) continue;
       gameObject.beforePhysicUpdate();
     }
+
     if (this.useWind && this.nextWindUpdateTime < this.loopTime) {
       this.nextWindUpdateTime += this.oneTickDelta * 5;
       this.addWind();
     }
     if (this.panSpeed > 0 && this.nextPanUpdateTime < this.loopTime) {
-      this.nextPanUpdateTime +=
+      const panTimeDelta =
         this.oneTickDelta * this.getPanInterval(this.panSpeed);
-      this.pan();
+      while (this.nextPanUpdateTime < this.loopTime) {
+        this.nextPanUpdateTime += panTimeDelta;
+        this.pan();
+      }
     }
   }
   //#endregion loop
@@ -1708,6 +1718,7 @@ export default class GameContainer extends Vue {
     if (vector[1] < 0 && this.panVector[1] === 0) this.panVector[1] = -1;
     //clearInterval(this.intervalPan);
     //this.intervalPan = setInterval(this.pan, this.intervalTimePan / this.panInterval);0
+    this.nextPanUpdateTime = this.loopTime;
     this.panSpeed = panSpeed;
   }
 
