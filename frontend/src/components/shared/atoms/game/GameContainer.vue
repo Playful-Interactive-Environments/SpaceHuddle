@@ -515,39 +515,45 @@ export default class GameContainer extends Vue {
     );
     if (!this.endlessPanning) this.regionBodyList = regionBodyList;
     else {
-      this.regionBodyList = [
-        ...regionBodyList,
-        ...this.collisionRegions.map((item) => {
-          return {
-            region: item,
-            position: [0, 0],
-            relativePosition: [-100, 0],
-            size: [100, 100],
-            body: null,
-            graphic: null,
-          } as CollisionRegionData;
-        }),
-        ...this.collisionRegions.map((item) => {
-          return {
-            region: item,
-            position: [0, 0],
-            relativePosition: [0, -100],
-            size: [100, 100],
-            body: null,
-            graphic: null,
-          } as CollisionRegionData;
-        }),
-        ...this.collisionRegions.map((item) => {
-          return {
-            region: item,
-            position: [0, 0],
-            relativePosition: [-100, -100],
-            size: [100, 100],
-            body: null,
-            graphic: null,
-          } as CollisionRegionData;
-        }),
-      ];
+      this.regionBodyList = regionBodyList;
+      if (this.backgroundMovement !== BackgroundMovement.None) {
+        this.regionBodyList.push(
+          ...this.collisionRegions.map((item) => {
+            return {
+              region: item,
+              position: [0, 0],
+              relativePosition: [-100, 0],
+              size: [100, 100],
+              body: null,
+              graphic: null,
+            } as CollisionRegionData;
+          })
+        );
+      }
+      if (this.backgroundMovement === BackgroundMovement.Pan) {
+        this.regionBodyList.push(
+          ...this.collisionRegions.map((item) => {
+            return {
+              region: item,
+              position: [0, 0],
+              relativePosition: [0, -100],
+              size: [100, 100],
+              body: null,
+              graphic: null,
+            } as CollisionRegionData;
+          }),
+          ...this.collisionRegions.map((item) => {
+            return {
+              region: item,
+              position: [0, 0],
+              relativePosition: [-100, -100],
+              size: [100, 100],
+              body: null,
+              graphic: null,
+            } as CollisionRegionData;
+          })
+        );
+      }
     }
   }
 
