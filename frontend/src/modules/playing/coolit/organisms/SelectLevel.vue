@@ -483,6 +483,8 @@ export default class SelectLevel extends Vue {
   unmounted(): void {
     pixiUtil.unloadTexture('/assets/games/moveit/molecules.json');
     cashService.deregisterAllGet(this.updateHighScore);
+    cashService.deregisterAllGet(this.updateIdeas);
+    cashService.deregisterAllGet(this.updateIterationSteps);
   }
 
   updateHighScore(list: VoteParameterResult[]): void {
