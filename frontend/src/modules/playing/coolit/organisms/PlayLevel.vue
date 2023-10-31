@@ -23,6 +23,7 @@
       :collision-borders="CollisionBorderType.Background"
       :pixi-filter-list="collisionAnimation"
       :auto-pan-speed="autoPanSpeed"
+      :reset-position-on-speed-changed="gameOver"
       :waitForDataLoad="waitForDataLoad"
       :endless-panning="!gameOver"
     >
@@ -833,8 +834,12 @@ export default class PlayLevel extends Vue {
     return (sumObstacles + sumRegions) / (countObstacles + countRegions);
   }
 
+  get speedLevel(): number {
+    return Math.floor((this.playTime / this.temperatureWinTime) * 3);
+  }
+
   get stars(): number {
-    const stars = Math.floor((this.playTime / this.temperatureWinTime) * 3);
+    const stars = this.speedLevel;
     if (stars < 3) return stars;
     return 3;
   }
@@ -1051,6 +1056,13 @@ export default class PlayLevel extends Vue {
     );
   }
   //#endregion get / set
+
+  //#region watch
+  @Watch('speedLevel', { immediate: true })
+  onSpeedLevelChanged(): void {
+    this.autoPanSpeed = 0.4 + this.speedLevel * 0.2;
+  }
+  //#endregion watch
 
   //#region load / unload
   readonly animationSteps = 10;
@@ -1499,8 +1511,7 @@ export default class PlayLevel extends Vue {
         this.calculateRayVelocity(poolRay);
       }
       if (this.active) {
-        const stars = Math.floor((this.playTime / this.temperatureWinTime) * 3);
-        let minDelay = 3000 - this.emitRatePerStar * stars;
+        let minDelay = 3000 - this.emitRatePerStar * this.speedLevel;
         if (minDelay < 500) minDelay = 500;
         this.emitLightRays(minDelay, 1000);
       }

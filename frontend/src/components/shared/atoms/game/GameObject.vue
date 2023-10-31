@@ -245,7 +245,12 @@ export default class GameObject extends Vue {
         if (!testOffset(offset[0], offset[1])) {
           if (!testOffset(offsetCircle[0], offset[1])) {
             if (!testOffset(offset[0], offsetCircle[1])) {
-              testOffset(offsetCircle[0], offsetCircle[1]);
+              if (!testOffset(offsetCircle[0], offsetCircle[1])) {
+                Matter.Body.setPosition(this.body, {
+                  x: this.position[0] - this.offset[0],
+                  y: this.position[1] - this.offset[1],
+                });
+              }
             }
           }
         }

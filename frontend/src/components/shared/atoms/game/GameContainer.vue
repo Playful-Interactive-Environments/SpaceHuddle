@@ -352,6 +352,7 @@ export default class GameContainer extends Vue {
   @Prop({ default: false }) readonly showAllEnginColliders!: boolean;
   @Prop({ default: [] }) readonly pixiFilterList!: any[];
   @Prop({ default: 0.4 }) readonly autoPanSpeed!: number;
+  @Prop({ default: false }) readonly resetPositionOnSpeedChanged!: boolean;
   @Prop({ default: false }) readonly enableSleeping!: boolean;
   @Prop({ default: false }) readonly waitForDataLoad!: boolean;
   //#endregion props
@@ -615,7 +616,8 @@ export default class GameContainer extends Vue {
 
   @Watch('autoPanSpeed', { immediate: true })
   onAutoPanSpeedChanged(): void {
-    if (this.autoPlayIsRunning) this.startAutoPan();
+    if (this.autoPlayIsRunning)
+      this.startAutoPan(this.resetPositionOnSpeedChanged);
   }
 
   @Watch('waitForDataLoad', { immediate: true })
@@ -678,7 +680,7 @@ export default class GameContainer extends Vue {
 
     setTimeout(() => {
       if (this.backgroundMovement === BackgroundMovement.Auto) {
-        this.startAutoPan();
+        this.startAutoPan(true);
       }
     }, 1000);
   }
@@ -1084,14 +1086,22 @@ export default class GameContainer extends Vue {
   ): CollisionBounds | undefined {
     const gameWidth = this.gameWidth ? this.gameWidth : 100;
     const gameHeight = this.gameHeight ? this.gameHeight : 100;
+    const backgroundTextureSize =
+      this.endlessPanning && this.backgroundMovement !== BackgroundMovement.None
+        ? [
+            this.backgroundTextureSize[0] * 3,
+            this.backgroundTextureSize[1] *
+              (this.backgroundMovement === BackgroundMovement.Pan ? 3 : 1),
+          ]
+        : this.backgroundTextureSize;
     const boundsWidth =
       collisionBorderType !== CollisionBorderType.Background
         ? gameWidth
-        : this.backgroundTextureSize[0];
+        : backgroundTextureSize[0];
     const boundsHeight =
       collisionBorderType !== CollisionBorderType.Background
         ? gameHeight
-        : this.backgroundTextureSize[1];
+        : backgroundTextureSize[1];
     const screenCenterX = gameWidth / 2;
     const screenCenterY = gameHeight / 2;
     const xLeft =
@@ -1661,9 +1671,10 @@ export default class GameContainer extends Vue {
   }
 
   autoPlayIsRunning = false;
-  async startAutoPan(): Promise<void> {
+  async startAutoPan(resetPosition = false): Promise<void> {
     await until(() => this.isContainerReady);
-    this.backgroundPositionOffset = [...this.backgroundPositionOffsetMax];
+    if (resetPosition)
+      this.backgroundPositionOffset = [...this.backgroundPositionOffsetMax];
     this.beginPan([-this.autoPanSpeed, 0]);
     this.autoPlayIsRunning = true;
   }
