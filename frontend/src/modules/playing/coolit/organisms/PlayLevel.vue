@@ -672,9 +672,10 @@ export default class PlayLevel extends Vue {
     CARBON_SOURCE: 1 << 3,
     LIGHT_RAY: 1 << 4,
     HEAT_RAY: 1 << 5,
-    MOLECULE: 1 << 6,
-    GROUND: 1 << 7,
-    BORDER: 1 << 8,
+    GREENHOUSE_MOLECULE: 1 << 6,
+    ATMOSPHERIC_MOLECULE: 1 << 7,
+    GROUND: 1 << 8,
+    BORDER: 1 << 9,
   });
   CollisionBorderType = CollisionBorderType;
   //#endregion variables
@@ -909,7 +910,7 @@ export default class PlayLevel extends Vue {
           collisionFilter: {
             group: 0,
             category: this.CollisionGroups.HEAT_RAY,
-            mask: this.CollisionGroups.MOLECULE,
+            mask: this.CollisionGroups.GREENHOUSE_MOLECULE,
           },
         };
     }
@@ -917,7 +918,10 @@ export default class PlayLevel extends Vue {
 
   getMoleculeTypeOptions(moleculeType: string): any {
     const moleculeConfig = gameConfig.molecules[moleculeType];
-    let mask = this.CollisionGroups.MOLECULE | this.CollisionGroups.BORDER;
+    let mask =
+      this.CollisionGroups.GREENHOUSE_MOLECULE |
+      this.CollisionGroups.ATMOSPHERIC_MOLECULE |
+      this.CollisionGroups.BORDER;
     if (moleculeConfig.controllable)
       mask = mask | this.CollisionGroups.HEAT_RAY | this.CollisionGroups.MOUSE;
     if (moleculeConfig.absorbedByTree)
@@ -928,7 +932,7 @@ export default class PlayLevel extends Vue {
       restitution: 1,
       collisionFilter: {
         group: 0,
-        category: this.CollisionGroups.MOLECULE,
+        category: this.CollisionGroups.GREENHOUSE_MOLECULE,
         mask: mask,
       },
     };
@@ -1037,7 +1041,7 @@ export default class PlayLevel extends Vue {
   }
 
   get moleculeSize(): number {
-    return this.textScaleFactor * 250;
+    return this.textScaleFactor * 220;
   }
 
   get temperatureScale(): number[] {
@@ -1822,7 +1826,7 @@ export default class PlayLevel extends Vue {
 
   obstacleCollision(
     obstacleObject: GameObject,
-    moleculeObject: GameObject | CollisionRegion
+    moleculeObject: GameObject
   ): void {
     if (!moleculeObject) return;
     const obstacleType =
@@ -1853,6 +1857,8 @@ export default class PlayLevel extends Vue {
           oxygenConfig.globalWarmingFactor;
         moleculeObject.source.heatRadiationCoefficient =
           oxygenConfig.globalWarmingFactor;
+        moleculeObject.body.collisionFilter.category =
+          this.CollisionGroups.ATMOSPHERIC_MOLECULE;
         //moleculeObject.source.heatRationCoefficient = oxygenConfig.globalWarmingFactor;
         //this.moleculeList.splice(index, 1);
       }
