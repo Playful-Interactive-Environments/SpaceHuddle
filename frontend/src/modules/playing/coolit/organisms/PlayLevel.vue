@@ -862,7 +862,7 @@ export default class PlayLevel extends Vue {
 
   get radiationFactor(): number {
     //return this.radiationConst;
-    return 0.05;
+    return this.autoPanSpeed / 10;
   }
 
   getTimeString(timestamp: number): string {
@@ -1158,8 +1158,9 @@ export default class PlayLevel extends Vue {
           (moleculeConfig.ration +
             moleculeConfig.rationDeltaPerDegree * this.temperatureRise) *
           this.moduleCountFactor;
+        const moleculeList: MoleculeData[] = [];
         for (let i = 0; i < moleculeCount; i++) {
-          this.moleculeList.push({
+          moleculeList.push({
             name: moleculeConfigName,
             id: uuidv4(),
             type: moleculeConfigName,
@@ -1180,6 +1181,11 @@ export default class PlayLevel extends Vue {
             temperature: 0,
           });
         }
+        const distance = 100 / moleculeCount;
+        for (let i = 0; i < moleculeCount; i++) {
+          moleculeList[i].position[0] = Math.random() * distance + i * distance;
+        }
+        this.moleculeList.push(...moleculeList);
       }
 
       const list = this.moleculeList.filter(
@@ -1562,7 +1568,7 @@ export default class PlayLevel extends Vue {
 
   setConstRaySpeed(ray: Ray): void {
     if (ray.body) {
-      (Matter.Body as any).setSpeed(ray.body, 3);
+      (Matter.Body as any).setSpeed(ray.body, this.autoPanSpeed * 10);
     }
   }
 
