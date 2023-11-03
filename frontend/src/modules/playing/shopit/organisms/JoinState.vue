@@ -127,6 +127,8 @@ export default class SelectState extends Vue {
   flex-direction: column;
   height: 50%;
   width: 100%;
-  border: 1px solid red;
+  border: 5px solid var(--color-brown);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-xlarge);
 }
 </style>

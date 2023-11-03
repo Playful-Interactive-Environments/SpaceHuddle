@@ -43,7 +43,7 @@ import SingleplayerState from '@/modules/playing/shopit/organisms/SingleplayerSt
 import {Idea} from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
-import { until } from '@/utils/wait';
+import {until} from '@/utils/wait';
 
 export enum GameStep {
   Join = 'join',
@@ -147,20 +147,17 @@ export default class Participant extends Vue {
         this.startSingleplayer();
         break;
       case 'multiplayer':
-        console.log('multiplayer');
         this.player = 1;
         this.InstantiateGame(id);
         this.startGame();
         break;
       case 'joinMultiplayer':
-        console.log('joinMultiplayer');
         this.player = 2;
         this.joinID = id;
         this.joinGame(id);
         this.startGame();
         break;
     }
-    //console.log(option + ' ' + id);
   }
 
   async InstantiateGame(id) {
@@ -200,8 +197,6 @@ export default class Participant extends Vue {
   updateGame(game: Idea[]): void {
     for (let i = 0; i < game.length; i++) {
       if (parseInt(game[i].keywords) == this.joinID) {
-        console.log('found');
-        console.log(game[i]);
         this.gameIdeaInstance = game[i];
         this.startGame();
       }
@@ -251,7 +246,7 @@ export default class Participant extends Vue {
       );
       await until(() =>
         setTimeout(() => {
-          console.log('checking');
+          const i = 1;
         }, 5000)
       );
       switch (this.gameIdeaInstance.parameter.active) {
