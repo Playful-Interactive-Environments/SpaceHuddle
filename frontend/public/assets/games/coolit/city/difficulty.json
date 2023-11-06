@@ -1,7 +1,7 @@
 {
 "frames": {
 	"atmosphere.png": {
-		"frame": {"x":0, "y":513, "w":512, "h":512},
+		"frame": {"x":0, "y":1026, "w":512, "h":512},
 		"spriteSourceSize": {"x":0,"y":0,"w":512,"h":512},
 		"sourceSize": {"w":512,"h":512}
 	},
@@ -15,6 +15,11 @@
 		"spriteSourceSize": {"x":0,"y":0,"w":512,"h":512},
 		"sourceSize": {"w":512,"h":512}
 	},
+	"planet03.png": {
+		"frame": {"x":0, "y":513, "w":512, "h":512},
+		"spriteSourceSize": {"x":0,"y":0,"w":512,"h":512},
+		"sourceSize": {"w":512,"h":512}
+	},
 	"planet04.png": {
 		"frame": {"x":0, "y":0, "w":512, "h":512},
 		"spriteSourceSize": {"x":0,"y":0,"w":512,"h":512},
@@ -24,7 +29,7 @@
 },
 "meta": {
 	"image": "difficulty.png",
-	"size": {"w": 1026, "h": 1026},
+	"size": {"w": 1026, "h": 1539},
 	"scale": "1"
 }
 }
