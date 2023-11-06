@@ -549,37 +549,32 @@ export default class PlayState extends Vue {
       //Compare the cards and choose a winner
       if (this.playersTurn === this.player) {
         this.compareCards(card, this.opponentCard, this.playersTurn);
-        console.log('done 1');
       } else {
         this.compareCards(this.opponentCard, card, this.playersTurn);
-        console.log('done 2');
       }
 
       setTimeout(async () => {
-        console.log("Card length: " + this.cards.length);
         this.cardsPlayed = [];
         if (this.cards.length > 1) {
           this.drawNewCard();
           await until(
             () =>
               this.game.parameter.player1Hand.length > this.maxCards - 1 &&
-              this.game.parameter.player2Hand.length > this.maxCards - 1 &&
-              this.debug("waiting for cards")
+              this.game.parameter.player2Hand.length > this.maxCards - 1
           );
         } else {
           this.maxCards -= 1;
         }
-        console.log("Hand Counts: " + this.game.parameter.player1Hand.length + ", " + this.game.parameter.player1Hand.length + ", Card length: " + this.cards.length);
         if (
           this.game.parameter.player1Hand.length === 0 &&
           this.game.parameter.player2Hand.length === 0 &&
           this.cards.length <= 1
         ) {
-          console.log("Reshuffle");
           this.reShuffle();
         }
 
         this.playersTurn = this.playersTurn === 1 ? 2 : 1;
+
         if (button) {
           button.removeAttribute('disabled');
         }

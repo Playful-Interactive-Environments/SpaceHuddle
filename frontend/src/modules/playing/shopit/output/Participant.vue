@@ -175,6 +175,7 @@ export default class Participant extends Vue {
           player2Hand: [],
           cardsPlayed: [],
           playersTurn: Math.random() >= 0.5 ? 2 : 1,
+          readyCounter: 0,
         },
       },
       EndpointAuthorisationType.PARTICIPANT
