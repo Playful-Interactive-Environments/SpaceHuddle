@@ -256,7 +256,7 @@
         </div>
       </div>
     </div>
-    <div>
+    <div class="info">
       {{
         $t(
           `module.playing.coolit.participant.difficultyLevel.${difficultyLevel}.description`
@@ -796,6 +796,13 @@ h1 {
 
 .dialog-button {
   margin-left: 0.5rem;
+}
+
+.info {
+  padding-top: 1rem;
+  text-align: left;
+  font-size: var(--font-size-small);
+  max-width: 30rem;
 }
 </style>
 

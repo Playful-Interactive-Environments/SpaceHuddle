@@ -101,7 +101,7 @@
       <CustomMapMarker :coordinates="mapVehiclePoint" anchor="center">
         <template v-slot:icon>
           <Joystick
-            v-if="combinedJoystick"
+            v-if="navigation === NavigationType.path"
             :size="150"
             :stick-size="15"
             @move="move($event)"
@@ -169,7 +169,7 @@
     <div class="overlay-bottom-right">
       <div>
         <Joystick
-          v-if="!combinedJoystick"
+          v-if="navigation === NavigationType.joystick"
           :size="150"
           :stick-size="50"
           @move="move($event)"
@@ -180,7 +180,7 @@
         />
       </div>
     </div>
-    <div class="overlay-bottom-left">
+    <!--<div class="overlay-bottom-left">
       <el-switch
         v-model="combinedJoystick"
         class="ml-2"
@@ -192,7 +192,7 @@
         :active-text="$t('module.playing.moveit.participant.combined')"
         :inactive-text="$t('module.playing.moveit.participant.separate')"
       />
-    </div>
+    </div>-->
   </div>
 </template>
 
@@ -205,14 +205,19 @@ import { Line } from 'vue-chartjs';
 import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import { OsrmCustom as OSRM, OSRMWayPoint } from '@/utils/osrm';
 import {
+  MglEvent,
   MglGeoJsonSource,
   MglLineLayer,
+  MglMap,
   MglMarker,
   MglNavigationControl,
-  MglMap,
-  MglEvent,
 } from 'vue-maplibre-gl';
-import { LineLayerSpecification, Map } from 'maplibre-gl';
+import {
+  LineLayerSpecification,
+  LngLatBoundsLike,
+  LngLatLike,
+  Map,
+} from 'maplibre-gl';
 import { FeatureCollection } from 'geojson';
 import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
 import * as formulas from '@/modules/playing/moveit/utils/formulas';
@@ -227,6 +232,7 @@ import * as mapStyle from '@/utils/mapStyle';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as themeColors from '@/utils/themeColors';
 import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
+import { NavigationType } from '@/modules/playing/moveit/organisms/SelectChallenge.vue';
 
 mapStyle.setMapStyleStreets();
 
@@ -286,6 +292,8 @@ export default class DriveToLocation extends Vue {
   @Prop({ default: { category: 'car', type: 'sport' } })
   readonly vehicle!: vehicleCalculation.Vehicle;
   @Prop({ default: {} }) readonly parameter!: any;
+  @Prop({ default: NavigationType.path })
+  readonly navigation!: NavigationType;
   osrmProfile = 'car';
   mapZoomDefault = 15;
   mapCenter: [number, number] = [0, 0];
@@ -341,7 +349,7 @@ export default class DriveToLocation extends Vue {
   direction = 0;
   speed = 0;
   maxSpeed = 0;
-  combinedJoystick = true;
+  //combinedJoystick = true;
 
   isMoving = false;
   moveSpeed = 0;
@@ -360,6 +368,7 @@ export default class DriveToLocation extends Vue {
   intervalAnimation = -1;
   readonly busStopIntervalTime = 10000;
   busStopInterval = -1;
+  NavigationType = NavigationType;
 
   convertSpeedToColorPercentage(speed: number): number {
     return (speed / this.vehicleParameter.speed) * 100;
@@ -518,6 +527,45 @@ export default class DriveToLocation extends Vue {
       for (const layer of notNeededLayers) {
         map.removeLayer(layer.id);
       }
+    }
+    const drivingBound = this.map.getBounds();
+
+    this.showEntireRoute();
+    setTimeout(() => {
+      this.map.fitBounds(drivingBound, {
+        duration: 1000,
+        animate: true,
+        essential: true,
+      });
+    }, 3000);
+  }
+
+  showEntireRoute(): void {
+    const convertCoordinates = (position: [number, number]): LngLatLike => {
+      return {
+        lng: position[0],
+        lat: position[1],
+      };
+    };
+
+    const points = turf.points([this.mapStart, this.mapEnd]);
+
+    const bounds = turf.envelope(points).geometry.coordinates[0] as [
+      number,
+      number
+    ][];
+    const min = bounds[0];
+    const max = bounds[2];
+    const delta = 0.002;
+    const minLngLat = convertCoordinates([min[0] - delta, min[1] - delta]);
+    const maxLngLat = convertCoordinates([max[0] + delta, max[1] + delta]);
+    const mapBounds: LngLatBoundsLike = [minLngLat, maxLngLat];
+    if (this.map && mapBounds) {
+      this.map.fitBounds(mapBounds, {
+        duration: 0,
+        animate: false,
+        essential: true,
+      });
     }
   }
 
@@ -1206,7 +1254,7 @@ export default class DriveToLocation extends Vue {
             clearInterval(this.intervalCalculation);
             clearInterval(this.busStopInterval);
           }*/
-          const recalculateRoute = true;
+          const recalculateRoute = this.navigation === NavigationType.joystick;
           /*const corner = turfUtils.isCornerPointOnSegment(
             this.routePath,
             this.mapDrivingPoint,

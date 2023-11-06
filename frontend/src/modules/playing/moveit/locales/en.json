@@ -48,6 +48,21 @@
       }
     },
     "play": "play",
+    "playDialog": {
+      "header": "play level",
+      "play": "play",
+      "cancel": "cancel"
+    },
+    "navigationType": {
+      "path": {
+        "title": "path",
+        "description": "Follow the fixed path by directly controlling the direction of travel with the joystick on the vehicle."
+      },
+      "joystick": {
+        "title": "joystick",
+        "description": "Follow the path or determine your own path by controlling the vehicle with the joystick in the bottom right corner. "
+      }
+    },
     "tutorial": {
       "select": "Traffic accounts for 30% of greenhouse emissions.\nTry to figure out what impact different types of vehicles have.\nThe statistic shows you how many greenhouse gases are produced produced per kWh of fuel.\nWhile this is constant for fuels like diesel and gasoline, the values for electricity depend on the electricity mix.",
       "drive": "In addition to vehicle choice, driving behavior also plays a crucial role. The faster you drive, the more fuel you need.\nIn the statistics above the map you can see how many emissions are released. All emissions in the red marked area go directly into the environment. For all below you have the chance to clean them up.",
@@ -112,6 +127,7 @@
     "rating": "How many times how many points were scored?",
     "vehicleCategory": "Which vehicle category were used how often in which run?",
     "vehicleType": "Which vehicle types were used how often in which run?",
+    "navigationType": "Which navigation types were used how often in which run?",
     "stops": "How many times did the driver stop while driving?",
     "pathCalculationCount": "How many times did the driver recalculate the route?",
     "persons": "How many people were on the bus?",

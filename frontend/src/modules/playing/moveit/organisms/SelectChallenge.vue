@@ -272,6 +272,47 @@
       </div>
     </div>
   </DrawerBottomOverlay>
+  <el-dialog v-model="showPlayDialog">
+    <template #header>
+      <h1 v-if="selectedVehicle">
+        {{
+          $t(
+            `module.playing.moveit.enums.vehicles.${selectedVehicle.category}.${selectedVehicle.type}`
+          )
+        }}
+      </h1>
+    </template>
+    <div>
+      <el-radio-group v-model="navigationType">
+        <el-radio-button
+          v-for="level in NavigationType"
+          :key="level"
+          :label="level"
+        >
+          {{
+            $t(
+              `module.playing.moveit.participant.navigationType.${level}.title`
+            )
+          }}
+        </el-radio-button>
+      </el-radio-group>
+    </div>
+    <div class="info">
+      {{
+        $t(
+          `module.playing.moveit.participant.navigationType.${navigationType}.description`
+        )
+      }}
+    </div>
+    <template #footer>
+      <el-button @click="cancelGame" class="dialog-button">
+        {{ $t('module.playing.moveit.participant.playDialog.cancel') }}
+      </el-button>
+      <el-button @click="startGame" class="dialog-button">
+        {{ $t('module.playing.moveit.participant.playDialog.play') }}
+      </el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script lang="ts">
@@ -284,6 +325,11 @@ import { Prop } from 'vue-property-decorator';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
+
+export enum NavigationType {
+  path = 'path',
+  joystick = 'joystick',
+}
 
 export interface ChartData {
   labels: string[];
@@ -325,6 +371,9 @@ export default class SelectChallenge extends Vue {
     type: 'sport',
   };
   showInfo = false;
+  showPlayDialog = false;
+  navigationType = NavigationType.joystick;
+  NavigationType = NavigationType;
 
   get selectedVehicleParameter(): any {
     return configCalculation.getVehicleParameter(this.selectedVehicle);
@@ -494,7 +543,15 @@ export default class SelectChallenge extends Vue {
   ): void {
     this.selectedVehicle.category = category;
     this.selectedVehicle.type = type;
-    this.$emit('play', this.selectedVehicle);
+    this.showPlayDialog = true;
+  }
+
+  startGame(): void {
+    this.$emit('play', this.selectedVehicle, this.navigationType);
+  }
+
+  cancelGame(): void {
+    this.showPlayDialog = false;
   }
 }
 </script>
@@ -627,5 +684,22 @@ export default class SelectChallenge extends Vue {
 
 .gameContainer {
   height: 100%;
+}
+
+.dialog-button {
+  margin-left: 0.5rem;
+}
+
+.info {
+  padding-top: 1rem;
+  text-align: left;
+  font-size: var(--font-size-small);
+  max-width: 30rem;
+}
+</style>
+
+<style lang="scss">
+.levelInfo .el-dialog__body div {
+  margin-bottom: 0.5rem;
 }
 </style>

@@ -48,6 +48,21 @@
       }
     },
     "play": "Start",
+    "playDialog": {
+      "header": "Level spielen",
+      "play": "starten",
+      "cancel": "abbrechen"
+    },
+    "navigationType": {
+      "path": {
+        "title": "Pfad",
+        "description": "Folgen Sie dem festgelegten Pfad, indem du die Fahrtrichtung direkt mit dem Joystick des Fahrzeugs steuerst."
+      },
+      "joystick": {
+        "title": "Joystick",
+        "description": "Folge dem Weg oder bestimme deinen eigenen Weg, indem du das Fahrzeug mit dem Joystick in der unteren rechten Ecke steuerst. "
+      }
+    },
     "tutorial": {
       "select": "Der Verkehr ist für 30% der Treibhausgasemissionen verantwortlich.\nVersuche herauszufinden, welche Auswirkungen verschiedene Fahrzeugtypen haben.\nDie Statistik oben zeigt, wie viele Treibhausgase in einer kWh Kraftstoff stecken.\nWährend dies für Kraftstoffe wie Diesel und Benzin konstant ist, hängen die Werte für Strom vom Strommix ab.",
       "drive": "Neben der Wahl des Fahrzeugs spielt auch das Fahrverhalten eine entscheidende Rolle. Je schneller du fährst, desto mehr Kraftstoff benötigst du.\nIn der Statistik oberhalb der Karte kannst du sehen, wie viele Emissionen freigesetzt werden. Alle Emissionen im rot markierten Bereich gehen direkt in die Umwelt. Für alle darunter hast du die Chance, sie im nächsten Schritt zu bereinigen.",
@@ -112,6 +127,7 @@
     "rating": "Wie oft wurden wie viele Punkte erzielt?",
     "vehicleCategory": "Welche Fahrzeugtypen wurden wie oft in welchem Durchlauf eingesetzt?",
     "vehicleType": "Welche Fahrzeugkategorien wurden wie oft in welchem Durchlauf eingesetzt?",
+    "navigationType": "Welche Navigationsmodus wurden wie oft in welchem Durchlauf eingesetzt?",
     "stops": "Wie oft hat der Fahrer während der Fahrt angehalten?",
     "pathCalculationCount": "Wie oft hat der Fahrer die Route neu berechnen lassen?",
     "persons": "Wie viele Personen befanden sich im Bus?",

@@ -23,6 +23,7 @@
       "
       :parameter="module.parameter"
       :vehicle="vehicle"
+      :navigation="navigationType"
       :tracking-manager="trackingManager"
       v-on:goalReached="goalReached"
     />
@@ -54,7 +55,9 @@ import * as cashService from '@/services/cash-service';
 import CleanUpParticles, {
   ParticleState,
 } from '@/modules/playing/moveit/organisms/CleanUpParticles.vue';
-import SelectChallenge from '@/modules/playing/moveit/organisms/SelectChallenge.vue';
+import SelectChallenge, {
+  NavigationType,
+} from '@/modules/playing/moveit/organisms/SelectChallenge.vue';
 import ShowResult from '@/modules/playing/moveit/organisms/ShowResult.vue';
 import ModuleInfo, {
   ModuleInfoEntryData,
@@ -109,6 +112,7 @@ export default class Participant extends Vue {
   startTime = Date.now();
   stepTime = Date.now();
   inputTaskId = '';
+  navigationType: NavigationType = NavigationType.path;
 
   trackingData: TrackingData[] = [];
   gameStep = GameStep.Select;
@@ -269,10 +273,14 @@ export default class Participant extends Vue {
     }
   }
 
-  startGame(vehicle: vehicleCalculation.Vehicle): void {
+  startGame(
+    vehicle: vehicleCalculation.Vehicle,
+    navigationType: NavigationType
+  ): void {
     this.vehicle = vehicle;
     this.gameStep = GameStep.Drive;
     this.gameState = GameState.Info;
+    this.navigationType = navigationType;
 
     if (this.trackingManager) {
       this.trackingManager.createInstanceStep(
@@ -280,6 +288,7 @@ export default class Participant extends Vue {
         TaskParticipantIterationStepStatesType.NEUTRAL,
         {
           vehicle: vehicle,
+          navigation: navigationType,
           selectTime: Date.now() - this.stepTime,
           playTime: Date.now() - this.startTime,
           trackingData: [],

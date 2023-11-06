@@ -99,6 +99,7 @@ import {
 } from '@/utils/statistic';
 import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
+import { NavigationType } from '@/modules/playing/moveit/organisms/SelectChallenge.vue';
 
 @Options({
   components: { Bar, Line },
@@ -179,6 +180,7 @@ export default class ModuleStatistic extends Vue {
     this.calculateStarsChart();
     this.calculateVehicleCategoryChart();
     this.calculateVehicleTypeChart();
+    this.calculateNavigationTypeChart();
     this.calculateDrivingParameterChart('stops');
     this.calculateDrivingParameterChart('pathCalculationCount');
     this.calculatePersonsChart();
@@ -276,6 +278,28 @@ export default class ModuleStatistic extends Vue {
         title: this.$t('module.playing.moveit.statistic.vehicleType'),
         data: {
           labels: labels,
+          datasets: datasets,
+        },
+        labelColors: themeColors.getContrastColor(),
+        stacked: true,
+      });
+    }
+  }
+
+  calculateNavigationTypeChart(): void {
+    if (this.steps) {
+      const navigationList = Object.keys(NavigationType);
+      const datasets = calculateChartPerIteration(
+        this.steps,
+        navigationList,
+        this.replayColors,
+        (item) => item.iteration - 1,
+        (item, navigation) => navigation === item.parameter.navigation
+      );
+      this.barChartDataList.push({
+        title: this.$t('module.playing.moveit.statistic.navigationType'),
+        data: {
+          labels: navigationList,
           datasets: datasets,
         },
         labelColors: themeColors.getContrastColor(),
