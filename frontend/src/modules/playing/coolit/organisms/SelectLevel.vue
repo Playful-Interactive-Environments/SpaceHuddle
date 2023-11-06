@@ -232,10 +232,10 @@
             />
             <sprite
               :texture="difficultySettings.texture"
-              :x="10"
-              :y="10"
-              :width="180"
-              :height="180"
+              :x="5"
+              :y="5"
+              :width="190"
+              :height="190"
             />
           </template>
         </SpriteCanvas>
@@ -390,7 +390,7 @@ export default class SelectLevel extends Vue {
         config.maxParticles = 600;
         return {
           temperatureRise: 1,
-          texture: this.spriteSheetDifficulty.textures['planet02.png'],
+          texture: this.spriteSheetDifficulty.textures['planet03.png'],
           color: '#ff8800',
           particleConfig: config,
         };
