@@ -9,10 +9,14 @@
       :style="{
         backgroundImage: 'url(' + gameConfig.gameValues.opponentHand + ')',
       }"
-    ></div>
+    >
+      <p class="gameKey">
+        {{ game.keywords }}
+      </p>
+    </div>
     <div class="CO2BarContainer" id="barOpponent">
       <div class="CO2BarBackground">
-        <p>CO²: {{ pointsSpentOpponent }}/{{ maxCost }}</p>
+        <p class="CO2BarText">CO²: {{ pointsSpentOpponent }}/{{ maxCost }}</p>
         <div
           class="CO2Bar"
           :style="{ width: (pointsSpentOpponent / maxCost) * 100 + '%' }"
@@ -110,7 +114,7 @@
     </div>
     <div class="CO2BarContainer" id="barOwn">
       <div class="CO2BarBackground">
-        <p>CO²: {{ pointsSpent }}/{{ maxCost }}</p>
+        <p class="CO2BarText">CO²: {{ pointsSpent }}/{{ maxCost }}</p>
         <div
           class="CO2Bar"
           :style="{ width: (pointsSpent / maxCost) * 100 + '%' }"
@@ -129,6 +133,9 @@
         }"
         @click="activeCardChanged(card)"
       >
+        <button v-if="card === activeCard" id="cardSelectButton" @click="cardPlayed(activeCard)">
+          Play card!
+        </button>
         <ul class="cardStats">
           <li class="cardCost">
             {{ card[0] }}
@@ -156,13 +163,7 @@
           class="categoryCardIcon"
         />
       </div>
-      <button id="cardSelectButton" @click="cardPlayed(activeCard)">
-        Play card!
-      </button>
     </TransitionGroup>
-    <p>
-      {{ game.keywords }}<span v-if="player === playersTurn">Your Turn</span>
-    </p>
   </div>
   <div
     class="gameArea result"
@@ -381,9 +382,10 @@ export default class PlayState extends Vue {
         break;
     }
     this.game.parameter = game.parameter;
-    this.cards = game.parameter.cards.map((x) => x);
-    this.cardsPlayed = game.parameter.cardsPlayed.map((x) => x);
-    console.log(this.cards.length + ' ');
+    if (this.cards.length >= game.parameter.cards.length) {
+      this.cards = game.parameter.cards.map((x) => x);
+      this.cardsPlayed = game.parameter.cardsPlayed.map((x) => x);
+    }
     if (this.game.parameter.playerNum === 2 && !this.initialButtonState) {
       const button = document.getElementById('cardSelectButton');
       if (button) {
@@ -557,14 +559,16 @@ export default class PlayState extends Vue {
         this.cardsPlayed = [];
         if (this.cards.length > 1) {
           this.drawNewCard();
+          this.cardsPlayed = [];
           await until(
             () =>
               this.game.parameter.player1Hand.length > this.maxCards - 1 &&
-              this.game.parameter.player2Hand.length > this.maxCards - 1
+              this.game.parameter.player2Hand.length > this.maxCards - 1 && this.removeCards()
           );
         } else {
           this.maxCards -= 1;
         }
+        this.cardsPlayed = [];
         if (
           this.game.parameter.player1Hand.length === 0 &&
           this.game.parameter.player2Hand.length === 0 &&
@@ -581,8 +585,9 @@ export default class PlayState extends Vue {
       }, 1000);
     }
   }
-  debug(text) {
-    console.log(text);
+
+  removeCards() {
+    this.cardsPlayed = [];
     return true;
   }
 
@@ -710,10 +715,10 @@ export default class PlayState extends Vue {
       }
     }
     //if too many points spent either win or lose
-    if (this.pointsSpent >= this.maxCost) {
+    if (this.pointsSpent >= this.maxCost && this.playStateType === PlayStateType.play) {
       this.playStateChange('lost', 'points');
     }
-    if (this.pointsSpentOpponent >= this.maxCost) {
+    if (this.pointsSpentOpponent >= this.maxCost && this.playStateType === PlayStateType.play) {
       this.playStateChange('win', 'points');
     }
 
@@ -730,10 +735,10 @@ export default class PlayState extends Vue {
     }
 
     //Check the points, if all categories filled give win or lose condition
-    if (this.categoryPoints.every((row) => row[1] >= 2)) {
+    if (this.categoryPoints.every((row) => row[1] >= 2) && this.playStateType === PlayStateType.play) {
       this.playStateChange('win', 'category');
     }
-    if (this.categoryPointsOpponent.every((row) => row[1] >= 2)) {
+    if (this.categoryPointsOpponent.every((row) => row[1] >= 2) && this.playStateType === PlayStateType.play) {
       this.playStateChange('lost', 'category');
     }
 
@@ -920,6 +925,10 @@ export default class PlayState extends Vue {
   z-index: 2;
 }
 
+.CO2BarText {
+  position: relative;
+}
+
 #barOwn {
   max-width: 100%;
 }
@@ -932,9 +941,10 @@ export default class PlayState extends Vue {
   position: relative;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   height: 30%;
   width: 100%;
+  z-index: 50;
 }
 
 .hand-move,
@@ -1059,13 +1069,22 @@ hr {
   background-color: var(--color-background);
   font-weight: var(--font-weight-semibold);
   position: absolute;
-  bottom: 0.7rem;
+  top: -0.5rem;
+  right: -0.2rem;
   width: 6rem;
   height: 1.5rem;
+  z-index: 100;
+  filter: drop-shadow(var(--color-dark-contrast) -0.1rem 0.2rem 0.2rem);
 }
 
 .waiting {
   color: var(--color-background);
+}
 
+p.gameKey {
+  font-size: var(--font-size-xsmall);
+  margin-left: 0.6rem;
+  margin-top: 0.4rem;
+  position: absolute;
 }
 </style>
