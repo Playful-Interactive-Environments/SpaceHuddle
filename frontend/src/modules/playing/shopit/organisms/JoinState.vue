@@ -1,22 +1,41 @@
 <template>
   <div id="selectContainer">
-    <div class="selectOption" @click="optionSelected('singleplayer', null)">
-      <p>Singleplayer</p>
-    </div>
-    <div class="selectOption">
-      <div
-        id="ownID"
-        class="selectOption"
-        @click="optionSelected('multiplayer', this.ownPlayID)"
-      >
-        <p>Multiplayer ID: {{ this.ownPlayID }}</p>
+    <div id="cardContainer">
+      <div class="selectOption" id="singleplayer">
+        <h2 class="heading heading--medium">Singleplayer</h2>
+        <p>Play against an artificial opponent and get familiar with the cards!</p>
+        <div class="options">
+          <label class="el-form-item__label">Play alone</label>
+          <el-button
+            class="el-button--submit"
+            @click="optionSelected('singleplayer', null)"
+          >
+            Play!
+          </el-button>
+        </div>
       </div>
-      <div id="joinID" class="selectOption">
-        <p>Join</p>
-        <input v-model="inputID" placeholder="ID" />
-        <button @click="optionSelected('joinMultiplayer', inputID)">
-          Join
-        </button>
+      <div class="selectOption" id="multiplayer">
+        <h2 class="heading heading--medium">Multiplayer</h2>
+        <p>Play against a friend and see who is better at keeping their emissions balanced! Host or join a game.</p>
+        <div class="options">
+          <label class="el-form-item__label">Host Game</label>
+          <el-button
+            class="el-button--submit"
+            @click="optionSelected('multiplayer', this.ownPlayID)"
+          >
+            Host Game: {{ this.ownPlayID }}
+          </el-button>
+        </div>
+        <div class="options">
+          <label class="el-form-item__label">Join Game</label>
+          <el-input v-model="inputID" placeholder="ID" />
+          <el-button
+            class="el-button--submit"
+            @click="optionSelected('joinMultiplayer', inputID)"
+          >
+            Join
+          </el-button>
+        </div>
       </div>
     </div>
   </div>
@@ -51,7 +70,7 @@ export default class SelectState extends Vue {
   result: TaskParticipantIterationStep[] = [];
   mapping: { [key: string]: number } = {};
 
-  inputID = 0;
+  inputID = '';
   ownPlayID = this.createPlayID();
 
   unmounted(): void {
@@ -115,20 +134,62 @@ export default class SelectState extends Vue {
 </style>
 
 <style lang="scss" scoped>
-#selectContainer {
-  height: 100%;
+
+#cardContainer {
+  padding: 3rem;
+  position: absolute;
+  bottom: 0;
+  min-height: 70%;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  border-radius: var(--el-border-radius-base) var(--el-border-radius-base) 0 0;
+  background-color: white;
 }
 
 .selectOption {
+  width: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   flex-direction: column;
-  height: 50%;
-  width: 100%;
-  border: 5px solid var(--color-brown);
+  height: auto;
   border-radius: var(--border-radius);
-  font-size: var(--font-size-xlarge);
+  position: relative;
+
+  p {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.selectOption#singleplayer {
+  margin-bottom: 2rem;
+}
+
+.options {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.el-input {
+  width: 100%;
+  height: 2rem;
+}
+
+.el-button {
+  width: 100%;
+  height: 2rem;
+}
+
+label {
+  height: auto;
+  margin-bottom: 0.3rem;
+  margin-top: 1rem;
 }
 </style>

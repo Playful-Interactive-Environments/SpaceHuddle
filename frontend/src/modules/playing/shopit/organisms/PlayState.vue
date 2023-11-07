@@ -170,26 +170,38 @@
     :style="{ height: height }"
     v-if="playStateType === PlayStateType.win"
   >
-    <span>{{ $t('module.playing.shopit.participant.win') }}</span>
-    <span v-if="reason === 'category'">{{
+    <h2 class="heading heading--medium">{{ $t('module.playing.shopit.participant.win') }}</h2>
+    <p v-if="reason === 'category'">{{
       $t('module.playing.shopit.participant.winCategories')
-    }}</span>
-    <span v-if="reason === 'points'">{{
+    }}</p>
+    <p v-if="reason === 'points'">{{
       $t('module.playing.shopit.participant.winPoints')
-    }}</span>
+    }}</p>
+    <el-button
+        class="el-button--submit"
+        @click="finished"
+    >
+      Return to menu.
+    </el-button>
   </div>
   <div
     class="gameArea result"
     :style="{ height: height }"
     v-if="playStateType === PlayStateType.lost"
   >
-    <span>{{ $t('module.playing.shopit.participant.lost') }}</span>
-    <span v-if="reason === 'category'">{{
+    <h2 class="heading heading--medium">{{ $t('module.playing.shopit.participant.lost') }}</h2>
+    <p v-if="reason === 'category'">{{
       $t('module.playing.shopit.participant.lostCategories')
-    }}</span>
-    <span v-if="reason === 'points'">{{
+    }}</p>
+    <p v-if="reason === 'points'">{{
       $t('module.playing.shopit.participant.lostPoints')
-    }}</span>
+    }}</p>
+    <el-button
+        class="el-button--submit"
+        @click="finished"
+    >
+      Return to menu.
+    </el-button>
   </div>
 </template>
 
@@ -757,6 +769,10 @@ export default class PlayState extends Vue {
     }
     return true;
   }
+
+  finished() {
+    this.$emit('playFinished');
+  }
 }
 </script>
 
@@ -1086,5 +1102,14 @@ p.gameKey {
   margin-left: 0.6rem;
   margin-top: 0.4rem;
   position: absolute;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-default);
+  text-align: center;
 }
 </style>

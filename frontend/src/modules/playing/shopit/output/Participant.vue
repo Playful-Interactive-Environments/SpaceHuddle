@@ -88,7 +88,10 @@ export default class Participant extends Vue {
   get tutorialList(): (string | ModuleInfoEntryData)[] {
     switch (this.gameStep) {
       case GameStep.Join:
-        return [{ key: 'select', texture: 'tut.png' }];
+        return [
+          { key: 'rules1', texture: 'tut.png' },
+          { key: 'rules2', texture: 'tut.png' },
+        ];
       case GameStep.Play:
         return [{ key: 'play', texture: 'clothes.png' }];
     }
@@ -175,7 +178,6 @@ export default class Participant extends Vue {
           player2Hand: [],
           cardsPlayed: [],
           playersTurn: Math.random() >= 0.5 ? 2 : 1,
-          readyCounter: 0,
         },
       },
       EndpointAuthorisationType.PARTICIPANT
@@ -202,6 +204,7 @@ export default class Participant extends Vue {
         this.startGame();
       }
     }
+
     if (this.gameIdeaInstance && this.gameIdeaInstance.parameter.playerNum == 2) {
       this.gameIdeaInstance.parameter.active = true;
       ideaService.putIdea(this.gameIdeaInstance, EndpointAuthorisationType.PARTICIPANT);
