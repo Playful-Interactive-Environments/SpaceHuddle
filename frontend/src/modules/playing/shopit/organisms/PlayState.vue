@@ -51,8 +51,18 @@
       tag="div"
       id="activeCards"
     >
-      <p v-if="cardsPlayed.length === 0 && player === playersTurn" class="waiting">waiting for your turn...</p>
-      <p v-if="cardsPlayed.length === 0 && player !== playersTurn" class="waiting">waiting for opponent...</p>
+      <p
+        v-if="cardsPlayed.length === 0 && player === playersTurn"
+        class="waiting"
+      >
+        {{ $t('module.playing.shopit.participant.waiting.yourTurn') }}
+      </p>
+      <p
+        v-if="cardsPlayed.length === 0 && player !== playersTurn"
+        class="waiting"
+      >
+        {{ $t('module.playing.shopit.participant.waiting.opponent') }}
+      </p>
       <div
         v-for="card in cardsPlayed"
         :key="card[7]"
@@ -69,19 +79,34 @@
             <hr />
           </li>
           <li>
-            {{ card[1].split(' ')[0] }}<span>{{ card[1].split(' ')[1] }}</span>
+            {{ card[1].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.kg')
+            }}</span>
           </li>
           <li>
-            {{ card[2].split(' ')[0] }}<span>{{ card[2].split(' ')[1] }}</span>
+            {{ card[2].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.kw')
+            }}</span>
           </li>
           <li>
-            {{ card[3].split(' ')[0] }}<span>{{ card[3].split(' ')[1] }}</span>
+            {{ card[3].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.years')
+            }}</span>
           </li>
           <li>
-            {{ card[4].split(' ')[0] }}<span>{{ card[4].split(' ')[1] }}</span>
+            {{ card[4].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.kl')
+            }}</span>
           </li>
           <li>
-            {{ card[5].split(' ')[0] }}<span>{{ card[5].split(' ')[1] }}</span>
+            {{ card[5].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.price')
+            }}</span>
           </li>
         </ul>
         <img :src="getCardSprite(card)" alt="{{ card[7] }}" class="cardImage" />
@@ -133,8 +158,12 @@
         }"
         @click="activeCardChanged(card)"
       >
-        <button v-if="card === activeCard" id="cardSelectButton" @click="cardPlayed(activeCard)">
-          Play card!
+        <button
+          v-if="card === activeCard"
+          id="cardSelectButton"
+          @click="cardPlayed(activeCard)"
+        >
+          {{ $t('module.playing.shopit.participant.cardPlayButton') }}
         </button>
         <ul class="cardStats">
           <li class="cardCost">
@@ -142,19 +171,34 @@
             <hr />
           </li>
           <li>
-            {{ card[1].split(' ')[0] }}<span>{{ card[1].split(' ')[1] }}</span>
+            {{ card[1].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.kg')
+            }}</span>
           </li>
           <li>
-            {{ card[2].split(' ')[0] }}<span>{{ card[2].split(' ')[1] }}</span>
+            {{ card[2].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.kw')
+            }}</span>
           </li>
           <li>
-            {{ card[3].split(' ')[0] }}<span>{{ card[3].split(' ')[1] }}</span>
+            {{ card[3].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.years')
+            }}</span>
           </li>
           <li>
-            {{ card[4].split(' ')[0] }}<span>{{ card[4].split(' ')[1] }}</span>
+            {{ card[4].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.kl')
+            }}</span>
           </li>
           <li>
-            {{ card[5].split(' ')[0] }}<span>{{ card[5].split(' ')[1] }}</span>
+            {{ card[5].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.price')
+            }}</span>
           </li>
         </ul>
         <img :src="getCardSprite(card)" alt="{{ card[7] }}" class="cardImage" />
@@ -170,18 +214,17 @@
     :style="{ height: height }"
     v-if="playStateType === PlayStateType.win"
   >
-    <h2 class="heading heading--medium">{{ $t('module.playing.shopit.participant.win') }}</h2>
-    <p v-if="reason === 'category'">{{
-      $t('module.playing.shopit.participant.winCategories')
-    }}</p>
-    <p v-if="reason === 'points'">{{
-      $t('module.playing.shopit.participant.winPoints')
-    }}</p>
-    <el-button
-        class="el-button--submit"
-        @click="finished"
-    >
-      Return to menu.
+    <h2 class="heading heading--medium">
+      {{ $t('module.playing.shopit.participant.win') }}
+    </h2>
+    <p v-if="reason === 'category'">
+      {{ $t('module.playing.shopit.participant.winCategories') }}
+    </p>
+    <p v-if="reason === 'points'">
+      {{ $t('module.playing.shopit.participant.winPoints') }}
+    </p>
+    <el-button class="el-button--submit" @click="finished">
+      {{ $t('module.playing.shopit.participant.returnToMenu') }}
     </el-button>
   </div>
   <div
@@ -189,34 +232,33 @@
     :style="{ height: height }"
     v-if="playStateType === PlayStateType.lost"
   >
-    <h2 class="heading heading--medium">{{ $t('module.playing.shopit.participant.lost') }}</h2>
-    <p v-if="reason === 'category'">{{
-      $t('module.playing.shopit.participant.lostCategories')
-    }}</p>
-    <p v-if="reason === 'points'">{{
-      $t('module.playing.shopit.participant.lostPoints')
-    }}</p>
-    <el-button
-        class="el-button--submit"
-        @click="finished"
-    >
-      Return to menu.
+    <h2 class="heading heading--medium">
+      {{ $t('module.playing.shopit.participant.lost') }}
+    </h2>
+    <p v-if="reason === 'category'">
+      {{ $t('module.playing.shopit.participant.lostCategories') }}
+    </p>
+    <p v-if="reason === 'points'">
+      {{ $t('module.playing.shopit.participant.lostPoints') }}
+    </p>
+    <el-button class="el-button--submit" @click="finished">
+      {{ $t('module.playing.shopit.participant.returnToMenu') }}
     </el-button>
   </div>
 </template>
 
 <script lang="ts">
-import {Options, Vue} from 'vue-class-component';
-import {Prop} from 'vue-property-decorator';
-import {ObjectSpace} from '@/types/enum/ObjectSpace';
-import {until} from '@/utils/wait';
+import { Options, Vue } from 'vue-class-component';
+import { Prop } from 'vue-property-decorator';
+import { ObjectSpace } from '@/types/enum/ObjectSpace';
+import { until } from '@/utils/wait';
 import * as tutorialService from '@/services/tutorial-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import {Tutorial} from '@/types/api/Tutorial';
+import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
 import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
-import {Idea} from '@/types/api/Idea';
+import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -575,7 +617,8 @@ export default class PlayState extends Vue {
           await until(
             () =>
               this.game.parameter.player1Hand.length > this.maxCards - 1 &&
-              this.game.parameter.player2Hand.length > this.maxCards - 1 && this.removeCards()
+              this.game.parameter.player2Hand.length > this.maxCards - 1 &&
+              this.removeCards()
           );
         } else {
           this.maxCards -= 1;
@@ -727,10 +770,16 @@ export default class PlayState extends Vue {
       }
     }
     //if too many points spent either win or lose
-    if (this.pointsSpent >= this.maxCost && this.playStateType === PlayStateType.play) {
+    if (
+      this.pointsSpent >= this.maxCost &&
+      this.playStateType === PlayStateType.play
+    ) {
       this.playStateChange('lost', 'points');
     }
-    if (this.pointsSpentOpponent >= this.maxCost && this.playStateType === PlayStateType.play) {
+    if (
+      this.pointsSpentOpponent >= this.maxCost &&
+      this.playStateType === PlayStateType.play
+    ) {
       this.playStateChange('win', 'points');
     }
 
@@ -747,10 +796,16 @@ export default class PlayState extends Vue {
     }
 
     //Check the points, if all categories filled give win or lose condition
-    if (this.categoryPoints.every((row) => row[1] >= 2) && this.playStateType === PlayStateType.play) {
+    if (
+      this.categoryPoints.every((row) => row[1] >= 2) &&
+      this.playStateType === PlayStateType.play
+    ) {
       this.playStateChange('win', 'category');
     }
-    if (this.categoryPointsOpponent.every((row) => row[1] >= 2) && this.playStateType === PlayStateType.play) {
+    if (
+      this.categoryPointsOpponent.every((row) => row[1] >= 2) &&
+      this.playStateType === PlayStateType.play
+    ) {
       this.playStateChange('lost', 'category');
     }
 

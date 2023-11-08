@@ -2,38 +2,38 @@
   <div id="selectContainer">
     <div id="cardContainer">
       <div class="selectOption" id="singleplayer">
-        <h2 class="heading heading--medium">Singleplayer</h2>
-        <p>Play against an artificial opponent and get familiar with the cards!</p>
+        <h2 class="heading heading--medium">{{ $t('module.playing.shopit.participant.joinState.singleplayer') }}</h2>
+        <p>{{ $t('module.playing.shopit.participant.joinState.singleplayerDesc') }}</p>
         <div class="options">
-          <label class="el-form-item__label">Play alone</label>
+          <label class="el-form-item__label">{{ $t('module.playing.shopit.participant.joinState.singleplayerLabel') }}</label>
           <el-button
             class="el-button--submit"
             @click="optionSelected('singleplayer', null)"
           >
-            Play!
+            {{ $t('module.playing.shopit.participant.joinState.singleplayerButton') }}
           </el-button>
         </div>
       </div>
       <div class="selectOption" id="multiplayer">
-        <h2 class="heading heading--medium">Multiplayer</h2>
-        <p>Play against a friend and see who is better at keeping their emissions balanced! Host or join a game.</p>
+        <h2 class="heading heading--medium">{{ $t('module.playing.shopit.participant.joinState.multiplayer') }}</h2>
+        <p>{{ $t('module.playing.shopit.participant.joinState.multiplayerDesc') }}</p>
         <div class="options">
-          <label class="el-form-item__label">Host Game</label>
+          <label class="el-form-item__label">{{ $t('module.playing.shopit.participant.joinState.multiplayerLabelHost') }}</label>
           <el-button
             class="el-button--submit"
             @click="optionSelected('multiplayer', this.ownPlayID)"
           >
-            Host Game: {{ this.ownPlayID }}
+            {{ $t('module.playing.shopit.participant.joinState.multiplayerButtonHost') }} {{ this.ownPlayID }}
           </el-button>
         </div>
         <div class="options">
-          <label class="el-form-item__label">Join Game</label>
+          <label class="el-form-item__label">{{ $t('module.playing.shopit.participant.joinState.multiplayerLabelJoin') }}</label>
           <el-input v-model="inputID" placeholder="ID" />
           <el-button
             class="el-button--submit"
             @click="optionSelected('joinMultiplayer', inputID)"
           >
-            Join
+            {{ $t('module.playing.shopit.participant.joinState.multiplayerButtonJoin') }}
           </el-button>
         </div>
       </div>

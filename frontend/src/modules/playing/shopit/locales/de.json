@@ -9,10 +9,40 @@
   },
   "participant": {
     "tutorial": {
-      "select": "Tutorial text 1",
+      "rules1": "Jeder Spieler hat 3 Karten und muss 3 Kategorien füllen. Um einen Punkt in einer Kategorie zu erlangen, muss der Spieler eine Runde in dieser Kategorie gewinnen. Der Spieler der als erstes alle Kategorien gefüllt hat, gewinnt!",
+      "rules2": "Aber Achtung! Die Punkte die du ausgeben darfst sind begrenzt. \\n Wenn beide Spieler eine Karte der selben Kategorie spielen, werden die Punkte beider Karten dem Limit zugeschrieben. Wenn dein Gegner aber keine Karte dieser Kategorie hat, hast du Glück, denn dann wird dir nur der Wert deiner eigenen Karte zugeschrieben.",
       "play": "Tutorial text 2"
     },
+    "joinState": {
+      "singleplayer": "Einzelspieler",
+      "singleplayerDesc": "Spiele gegen einen künstlichen Gegner und mache dich mit den Karten vertraut!",
+      "singleplayerLabel": "Spiele alleine",
+      "singleplayerButton": "Los geht's!",
+      "multiplayer": "Multiplayer",
+      "multiplayerDesc": "Spiele gegen einen Freund und finde heraus, wer seine Emissionen besser im Gleichgewicht halten kann! Lege ein Spiel an, oder nimm an einem Teil.",
+      "multiplayerLabelHost": "Spiel anlegen",
+      "multiplayerButtonHost": "Spiel anlegen:",
+      "multiplayerLabelJoin": "Spiel beitreten",
+      "multiplayerButtonJoin": "beitreten"
+    },
+    "cards": {
+      "kg": "kg",
+      "kw": "kw",
+      "years": "Jahre",
+      "kl": "kl",
+      "price": "€"
+    },
+    "waiting": {
+      "yourTurn": "Warte auf deinen Zug...",
+      "opponent": "Warte auf den Gegner..."
+    },
+    "cardPlayButton": "Spiele Karte!",
+    "returnToMenu": "Zurück zum Menü.",
     "lost": "Du hast verloren.",
-    "win": "Du hast gewonnen."
+    "lostCategories": "Dein Gegner hat alle Kategorien vor dir gesammelt.",
+    "lostPoints": "Deine Emissionen überstiegen das Maximum.",
+    "win": "Du hast gewonnen!",
+    "winCategories": "Du hast alle Kategorien vor deinem Gegner gesammelt! Gut gemacht!",
+    "winPoints": "Dein Gegner hat seine maximalen Emissionen überschreitet."
   }
 }
