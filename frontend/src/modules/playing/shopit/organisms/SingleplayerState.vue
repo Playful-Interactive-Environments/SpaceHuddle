@@ -47,6 +47,18 @@
       tag="div"
       id="activeCards"
     >
+      <p
+          v-if="cardsPlayed.length === 0 && playFirst"
+          class="waiting"
+      >
+        {{ $t('module.playing.shopit.participant.waiting.yourTurn') }}
+      </p>
+      <p
+          v-if="cardsPlayed.length === 0 && !playFirst"
+          class="waiting"
+      >
+        {{ $t('module.playing.shopit.participant.waiting.opponent') }}
+      </p>
       <div
         v-for="card in cardsPlayed"
         :key="card[7]"
@@ -63,19 +75,34 @@
             <hr />
           </li>
           <li>
-            {{ card[1].split(' ')[0] }}<span>{{ card[1].split(' ')[1] }}</span>
+            {{ card[1].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.kg')
+            }}</span>
           </li>
           <li>
-            {{ card[2].split(' ')[0] }}<span>{{ card[2].split(' ')[1] }}</span>
+            {{ card[2].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.kw')
+            }}</span>
           </li>
           <li>
-            {{ card[3].split(' ')[0] }}<span>{{ card[3].split(' ')[1] }}</span>
+            {{ card[3].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.years')
+            }}</span>
           </li>
           <li>
-            {{ card[4].split(' ')[0] }}<span>{{ card[4].split(' ')[1] }}</span>
+            {{ card[4].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.kl')
+            }}</span>
           </li>
           <li>
-            {{ card[5].split(' ')[0] }}<span>{{ card[5].split(' ')[1] }}</span>
+            {{ card[5].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.price')
+            }}</span>
           </li>
         </ul>
         <img :src="getCardSprite(card)" alt="{{ card[7] }}" class="cardImage" />
@@ -127,25 +154,47 @@
         }"
         @click="activeCardChanged(card)"
       >
+        <button
+            v-if="card === activeCard"
+            id="cardSelectButton"
+            @click="cardPlayed(activeCard)"
+        >
+          {{ $t('module.playing.shopit.participant.cardPlayButton') }}
+        </button>
         <ul class="cardStats">
           <li class="cardCost">
             {{ card[0] }}
             <hr />
           </li>
           <li>
-            {{ card[1].split(' ')[0] }}<span>{{ card[1].split(' ')[1] }}</span>
+            {{ card[1].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.kg')
+            }}</span>
           </li>
           <li>
-            {{ card[2].split(' ')[0] }}<span>{{ card[2].split(' ')[1] }}</span>
+            {{ card[2].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.kw')
+            }}</span>
           </li>
           <li>
-            {{ card[3].split(' ')[0] }}<span>{{ card[3].split(' ')[1] }}</span>
+            {{ card[3].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.years')
+            }}</span>
           </li>
           <li>
-            {{ card[4].split(' ')[0] }}<span>{{ card[4].split(' ')[1] }}</span>
+            {{ card[4].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.kl')
+            }}</span>
           </li>
           <li>
-            {{ card[5].split(' ')[0] }}<span>{{ card[5].split(' ')[1] }}</span>
+            {{ card[5].split(' ')[0]
+            }}<span>{{
+              $t('module.playing.shopit.participant.cards.price')
+            }}</span>
           </li>
         </ul>
         <img :src="getCardSprite(card)" alt="{{ card[7] }}" class="cardImage" />
@@ -154,9 +203,6 @@
           class="categoryCardIcon"
         />
       </div>
-      <button id="cardSelectButton" @click="cardPlayed(activeCard)">
-        Play card!
-      </button>
     </TransitionGroup>
   </div>
   <div
@@ -164,26 +210,36 @@
     :style="{ height: height }"
     v-if="playStateType === PlayStateType.win"
   >
-    <span>{{ $t('module.playing.shopit.participant.win') }}</span>
-    <span v-if="reason === 'category'">{{
-      $t('module.playing.shopit.participant.winCategories')
-    }}</span>
-    <span v-if="reason === 'points'">{{
-      $t('module.playing.shopit.participant.winPoints')
-    }}</span>
+    <h2 class="heading heading--medium">
+      {{ $t('module.playing.shopit.participant.win') }}
+    </h2>
+    <p v-if="reason === 'category'">
+      {{ $t('module.playing.shopit.participant.winCategories') }}
+    </p>
+    <p v-if="reason === 'points'">
+      {{ $t('module.playing.shopit.participant.winPoints') }}
+    </p>
+    <el-button class="el-button--submit" @click="finished">
+      {{ $t('module.playing.shopit.participant.returnToMenu') }}
+    </el-button>
   </div>
   <div
-    class="gameArea result"
-    :style="{ height: height }"
-    v-if="playStateType === PlayStateType.lost"
+      class="gameArea result"
+      :style="{ height: height }"
+      v-if="playStateType === PlayStateType.lost"
   >
-    <span>{{ $t('module.playing.shopit.participant.lost') }}</span>
-    <span v-if="reason === 'category'">{{
-      $t('module.playing.shopit.participant.lostCategories')
-    }}</span>
-    <span v-if="reason === 'points'">{{
-      $t('module.playing.shopit.participant.lostPoints')
-    }}</span>
+    <h2 class="heading heading--medium">
+      {{ $t('module.playing.shopit.participant.lost') }}
+    </h2>
+    <p v-if="reason === 'category'">
+      {{ $t('module.playing.shopit.participant.lostCategories') }}
+    </p>
+    <p v-if="reason === 'points'">
+      {{ $t('module.playing.shopit.participant.lostPoints') }}
+    </p>
+    <el-button class="el-button--submit" @click="finished">
+      {{ $t('module.playing.shopit.participant.returnToMenu') }}
+    </el-button>
   </div>
 </template>
 
@@ -592,16 +648,15 @@ export default class PlayState extends Vue {
   }
 
   cardWin(winningCard) {
-    for (let i = 0; i < this.cardsPlayed.length; i++) {
-      if (this.cardsPlayed[i][7] != winningCard[7]) {
-        this.cardsPlayed.splice(i, 1);
-      }
-    }
     const element = document.getElementById(winningCard[7]);
     if (element) {
       element.classList.add('cardWin');
     }
     return true;
+  }
+
+  finished() {
+    this.$emit('playFinished');
   }
 }
 </script>
@@ -721,7 +776,7 @@ export default class PlayState extends Vue {
 
 .cardWin {
   z-index: 100;
-  transform: scale(130%);
+  transform: scale(120%);
   transition: 0.5s;
 }
 
@@ -771,6 +826,10 @@ export default class PlayState extends Vue {
   z-index: 2;
 }
 
+.CO2BarText {
+  position: relative;
+}
+
 #barOwn {
   max-width: 100%;
 }
@@ -783,9 +842,10 @@ export default class PlayState extends Vue {
   position: relative;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   height: 30%;
   width: 100%;
+  z-index: 50;
 }
 
 .hand-move,
@@ -910,8 +970,31 @@ hr {
   background-color: var(--color-background);
   font-weight: var(--font-weight-semibold);
   position: absolute;
-  bottom: 0.7rem;
+  top: -0.5rem;
+  right: -0.2rem;
   width: 6rem;
   height: 1.5rem;
+  z-index: 100;
+  filter: drop-shadow(var(--color-dark-contrast) -0.1rem 0.2rem 0.2rem);
+}
+
+.waiting {
+  color: var(--color-background);
+}
+
+p.gameKey {
+  font-size: var(--font-size-xsmall);
+  margin-left: 0.6rem;
+  margin-top: 0.4rem;
+  position: absolute;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-default);
+  text-align: center;
 }
 </style>

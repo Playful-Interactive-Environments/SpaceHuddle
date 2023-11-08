@@ -1,5 +1,11 @@
 <template>
   <div id="selectContainer">
+    <div
+        class="opponentHand"
+        :style="{
+        backgroundImage: 'url(' + gameConfig.gameValues.opponentHand + ')',
+      }"
+    ></div>
     <div id="cardContainer">
       <div class="selectOption" id="singleplayer">
         <h2 class="heading heading--medium">{{ $t('module.playing.shopit.participant.joinState.singleplayer') }}</h2>
@@ -56,6 +62,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as configParameter from '@/utils/game/configParameter';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
+import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
 
 @Options({
   components: { FontAwesomeIcon },
@@ -64,12 +71,12 @@ import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class SelectState extends Vue {
   @Prop() readonly taskId!: string;
-  @Prop({ default: {} }) readonly gameConfig!: any;
   @Prop() readonly trackingManager!: TrackingManager;
   ideas: Idea[] = [];
   result: TaskParticipantIterationStep[] = [];
   mapping: { [key: string]: number } = {};
 
+  gameConfig = gameConfig;
   inputID = '';
   ownPlayID = this.createPlayID();
 
@@ -103,15 +110,6 @@ export default class SelectState extends Vue {
     this.ideas = ideas.filter(
       (item) => item.parameter.state === LevelWorkflowType.approved
     );
-  }
-
-  levelSelected(level: Idea | null, levelType: string | null = null) {
-    if (!level) {
-      this.$emit('selectionDone', levelType, null);
-    } else {
-      const levelType = configParameter.getTypeForLevel(this.gameConfig, level);
-      this.$emit('selectionDone', levelType, level);
-    }
   }
 
   optionSelected(option, id) {
@@ -148,6 +146,16 @@ export default class SelectState extends Vue {
 
   border-radius: var(--el-border-radius-base) var(--el-border-radius-base) 0 0;
   background-color: white;
+}
+
+.opponentHand {
+  height: 7%;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: auto 100%;
+  position: absolute;
+  top: 0;
 }
 
 .selectOption {
