@@ -54,13 +54,23 @@
       "cancel": "cancel"
     },
     "navigationType": {
-      "path": {
-        "title": "path",
-        "description": "Follow the fixed path by directly controlling the direction of travel with the joystick on the vehicle."
+      "drag": {
+        "title": "direct",
+        "description": "Control the direction of travel with the joystick direct on the vehicle."
       },
       "joystick": {
         "title": "joystick",
-        "description": "Follow the path or determine your own path by controlling the vehicle with the joystick in the bottom right corner. "
+        "description": "Control the vehicle with the joystick in the bottom right corner. "
+      }
+    },
+    "movingType": {
+      "path": {
+        "title": "path",
+        "description": "Follow the fixed path."
+      },
+      "free": {
+        "title": "free style",
+        "description": "Determine your own path. "
       }
     },
     "tutorial": {
@@ -128,6 +138,7 @@
     "vehicleCategory": "Which vehicle category were used how often in which run?",
     "vehicleType": "Which vehicle types were used how often in which run?",
     "navigationType": "Which navigation types were used how often in which run?",
+    "movingType": "Which moving types were used how often in which run?",
     "stops": "How many times did the driver stop while driving?",
     "pathCalculationCount": "How many times did the driver recalculate the route?",
     "persons": "How many people were on the bus?",

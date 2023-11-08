@@ -54,13 +54,23 @@
       "cancel": "abbrechen"
     },
     "navigationType": {
-      "path": {
-        "title": "Pfad",
-        "description": "Folgen Sie dem festgelegten Pfad, indem du die Fahrtrichtung direkt mit dem Joystick des Fahrzeugs steuerst."
+      "drag": {
+        "title": "direkt",
+        "description": "Steuer die Fahrtrichtung mit dem Joystick direkt am Fahrzeug."
       },
       "joystick": {
         "title": "Joystick",
-        "description": "Folge dem Weg oder bestimme deinen eigenen Weg, indem du das Fahrzeug mit dem Joystick in der unteren rechten Ecke steuerst. "
+        "description": "Steuer das Fahrzeug mit dem Joystick in der unteren rechten Ecke."
+      }
+    },
+    "movingType": {
+      "path": {
+        "title": "Pfad",
+        "description": "Folge dem festgelegten Pfad."
+      },
+      "free": {
+        "title": "Freistil",
+        "description": "Bestimme deinen eigenen Pfad. "
       }
     },
     "tutorial": {
@@ -128,6 +138,7 @@
     "vehicleCategory": "Welche Fahrzeugtypen wurden wie oft in welchem Durchlauf eingesetzt?",
     "vehicleType": "Welche Fahrzeugkategorien wurden wie oft in welchem Durchlauf eingesetzt?",
     "navigationType": "Welche Navigationsmodus wurden wie oft in welchem Durchlauf eingesetzt?",
+    "movingType": "Welche Bewegungsmodus wurden wie oft in welchem Durchlauf eingesetzt?",
     "stops": "Wie oft hat der Fahrer während der Fahrt angehalten?",
     "pathCalculationCount": "Wie oft hat der Fahrer die Route neu berechnen lassen?",
     "persons": "Wie viele Personen befanden sich im Bus?",

@@ -304,6 +304,26 @@
         )
       }}
     </div>
+    <div>
+      <el-radio-group v-model="movingType">
+        <el-radio-button
+          v-for="level in MovingType"
+          :key="level"
+          :label="level"
+        >
+          {{
+            $t(`module.playing.moveit.participant.movingType.${level}.title`)
+          }}
+        </el-radio-button>
+      </el-radio-group>
+    </div>
+    <div class="info">
+      {{
+        $t(
+          `module.playing.moveit.participant.movingType.${movingType}.description`
+        )
+      }}
+    </div>
     <template #footer>
       <el-button @click="cancelGame" class="dialog-button">
         {{ $t('module.playing.moveit.participant.playDialog.cancel') }}
@@ -327,8 +347,13 @@ import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
 
 export enum NavigationType {
-  path = 'path',
+  drag = 'drag',
   joystick = 'joystick',
+}
+
+export enum MovingType {
+  path = 'path',
+  free = 'free',
 }
 
 export interface ChartData {
@@ -374,6 +399,8 @@ export default class SelectChallenge extends Vue {
   showPlayDialog = false;
   navigationType = NavigationType.joystick;
   NavigationType = NavigationType;
+  movingType = MovingType.free;
+  MovingType = MovingType;
 
   get selectedVehicleParameter(): any {
     return configCalculation.getVehicleParameter(this.selectedVehicle);
@@ -547,7 +574,12 @@ export default class SelectChallenge extends Vue {
   }
 
   startGame(): void {
-    this.$emit('play', this.selectedVehicle, this.navigationType);
+    this.$emit(
+      'play',
+      this.selectedVehicle,
+      this.navigationType,
+      this.movingType
+    );
   }
 
   cancelGame(): void {
@@ -692,6 +724,7 @@ export default class SelectChallenge extends Vue {
 
 .info {
   padding-top: 1rem;
+  padding-bottom: 2rem;
   text-align: left;
   font-size: var(--font-size-small);
   max-width: 30rem;

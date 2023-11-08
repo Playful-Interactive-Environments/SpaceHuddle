@@ -23,6 +23,7 @@
     "@types/randomcolor": "^0.5.7",
     "axios": "^1.2.1",
     "bulma": "^0.9.4",
+    "canvas": "^2.11.2",
     "chart.js": "^4.3.0",
     "chartjs-plugin-annotation": "^3.0.1",
     "colorjs.io": "^0.4.3",

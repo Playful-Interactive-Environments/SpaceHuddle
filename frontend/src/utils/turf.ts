@@ -1,5 +1,6 @@
 import { FeatureCollection } from 'geojson';
 import * as turf from '@turf/turf';
+import { LngLatBounds } from 'maplibre-gl';
 
 export enum DrivingDirection {
   forward,
@@ -203,7 +204,8 @@ export function isPointCloseToRoute(
   point: [number, number],
   searchDelta = 0.003
 ): boolean {
-  return getDistanceToRoute(routePath, point) < searchDelta;
+  const delta = getDistanceToRoute(routePath, point);
+  return delta < searchDelta;
 }
 
 export function isCornerPointOnSegment(
@@ -329,7 +331,8 @@ export function getMinMaxAngleForPathSegment(
   actualPointDist: number,
   speedDrivingDistance: number,
   buffer = 0,
-  reversePath = false
+  reversePath = false,
+  allowedCornerDistance = 0.001
 ): {
   min: number;
   max: number;
@@ -385,7 +388,7 @@ export function getMinMaxAngleForPathSegment(
     const cornerDistance = reversePath
       ? turf.distance(corner.location, endPoint)
       : turf.distance(corner.location, actualPoint);
-    if (cornerDistance > 0.001) {
+    if (cornerDistance > allowedCornerDistance) {
       if (reversePath)
         subRoute = getSubRoute(subRoute, corner.location, endPoint) as any;
       else
@@ -454,7 +457,8 @@ export function getMinMaxAngleForPathDistanceSegment(
   actualPoint: [number, number],
   airlinePoint: [number, number],
   distance: number,
-  buffer = 0
+  buffer = 0,
+  allowedCornerDistance = 0.001
 ): {
   min: number;
   max: number;
@@ -535,7 +539,9 @@ export function getMinMaxAngleForPathDistanceSegment(
         endPoint,
         startDistance,
         distance,
-        buffer
+        buffer,
+        false,
+        allowedCornerDistance
       );
     } else {
       result = getMinMaxAngleForPathSegment(
@@ -545,7 +551,8 @@ export function getMinMaxAngleForPathDistanceSegment(
         startDistance,
         distance,
         buffer,
-        true
+        true,
+        allowedCornerDistance
       );
     }
   }
@@ -593,7 +600,21 @@ export function distanceToGoal(
 
 export function goalReached(
   routePath: FeatureCollection,
-  activePoint: [number, number]
+  activePoint: [number, number],
+  maxGoalDistance = 0.001
 ): boolean {
-  return distanceToGoal(routePath, activePoint) < 0.001;
+  return distanceToGoal(routePath, activePoint) < maxGoalDistance;
+}
+
+export function lngLatToPixel(
+  lngLat: [number, number],
+  bounds: LngLatBounds,
+  width: number,
+  height: number
+): [number, number] {
+  const boundsWidth = bounds.getEast() - bounds.getWest();
+  const boundsHeight = bounds.getNorth() - bounds.getSouth();
+  const x = ((lngLat[0] - bounds.getWest()) / boundsWidth) * width;
+  const y = ((lngLat[1] - bounds.getSouth()) / boundsHeight) * height;
+  return [x, height - y];
 }
