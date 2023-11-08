@@ -89,8 +89,8 @@ export default class Participant extends Vue {
     switch (this.gameStep) {
       case GameStep.Join:
         return [
-          { key: 'rules1', texture: 'tut.png' },
-          { key: 'rules2', texture: 'tut.png' },
+          { key: 'rules1', texture: 'tut1.gif' },
+          { key: 'rules2', texture: 'tut2.png' },
         ];
       case GameStep.Play:
         return [{ key: 'play', texture: 'clothes.png' }];
