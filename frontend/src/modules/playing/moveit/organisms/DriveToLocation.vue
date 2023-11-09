@@ -159,6 +159,37 @@
         :inactive-text="$t('module.playing.moveit.participant.separate')"
       />
     </div>-->
+    <div class="overlay-bottom-left">
+      <el-button
+        class="overlay-top-right"
+        link
+        v-if="showMiniMap"
+        @click="showMiniMap = false"
+      >
+        <font-awesome-icon icon="xmark" />
+      </el-button>
+      <el-button v-if="!showMiniMap" @click="showMiniMap = true">
+        <font-awesome-icon icon="map" />
+      </el-button>
+      <mgl-map
+        :style="{ display: showMiniMap ? 'block' : 'none' }"
+        width="15rem"
+        height="10rem"
+        @map:load="miniMapLoaded"
+        class="miniMap"
+      >
+        <CustomMapMarker anchor="bottom" :coordinates="mapDrivingPoint">
+          <template v-slot:icon>
+            <font-awesome-icon icon="location-dot" class="pin" />
+          </template>
+        </CustomMapMarker>
+        <CustomMapMarker anchor="bottom-left" :coordinates="mapEnd">
+          <template v-slot:icon>
+            <font-awesome-icon icon="flag-checkered" class="pin" />
+          </template>
+        </CustomMapMarker>
+      </mgl-map>
+    </div>
   </div>
   <!--<img v-if="streetMask" :src="streetMask" class="streetMask" />-->
 </template>
@@ -193,7 +224,6 @@ import * as turf from '@turf/turf';
 import * as turfUtils from '@/utils/turf';
 import { Application } from 'vue3-pixi';
 import RoundSlider from 'vue-three-round-slider/src';
-import * as constants from '@/modules/playing/moveit/utils/consts';
 import Color from 'colorjs.io';
 import * as mapStyle from '@/utils/mapStyle';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
@@ -271,6 +301,7 @@ export default class DriveToLocation extends Vue {
   //#endregion prop
 
   //#region variables
+  showMiniMap = true;
   mapZoomDefault = 15;
   mapCenter: [number, number] = [0, 0];
   mapStart: [number, number] = [0, 0];
@@ -584,6 +615,13 @@ export default class DriveToLocation extends Vue {
     }, 3000);
   }
 
+  miniMap!: Map;
+  miniMapLoaded(e: MglEvent): void {
+    this.miniMap = e.map;
+    //console.log(this.miniMap);
+    this.updateMiniMap();
+  }
+
   showEntireRoute(): void {
     const convertCoordinates = (position: [number, number]): LngLatLike => {
       return {
@@ -610,6 +648,45 @@ export default class DriveToLocation extends Vue {
         animate: false,
         essential: true,
       });
+    }
+  }
+
+  updateMiniMap(): void {
+    if (this.miniMap && this.mapDrivingPoint) {
+      const convertCoordinates = (position: [number, number]): LngLatLike => {
+        return {
+          lng: position[0],
+          lat: position[1],
+        };
+      };
+
+      const points = turf.points([this.mapDrivingPoint, this.mapEnd]);
+
+      const bounds = turf.envelope(points).geometry.coordinates[0] as [
+        number,
+        number
+      ][];
+      const min = bounds[0];
+      const max = bounds[2];
+      const width = max[0] - min[0];
+      const height = max[1] - min[1];
+      const delta = Math.max(width, height) * 0.4;
+      const minLngLat = convertCoordinates([
+        min[0] - delta / 2,
+        min[1] - 0.001,
+      ]);
+      const maxLngLat = convertCoordinates([
+        max[0] + delta / 2,
+        max[1] + delta,
+      ]);
+      const mapBounds: LngLatBoundsLike = [minLngLat, maxLngLat];
+      if (mapBounds) {
+        this.miniMap.fitBounds(mapBounds, {
+          duration: 0,
+          animate: false,
+          essential: true,
+        });
+      }
     }
   }
 
@@ -889,6 +966,11 @@ export default class DriveToLocation extends Vue {
   @Watch('moveSpeed', { immediate: true })
   onMoveSpeedChanged(): void {
     if (this.speed !== this.moveSpeed) this.speed = this.moveSpeed;
+  }
+
+  @Watch('mapDrivingPoint', { immediate: true })
+  onMapDrivingPointChanged(): void {
+    this.updateMiniMap();
   }
   //#endregion watcher
 
@@ -1335,6 +1417,7 @@ export default class DriveToLocation extends Vue {
   font-size: var(--font-size-xxxlarge);
   color: var(--pin-color);
 }
+
 .overlay-bottom {
   position: absolute;
   z-index: 100;
@@ -1357,7 +1440,16 @@ export default class DriveToLocation extends Vue {
   z-index: 100;
   bottom: 0.5rem;
   left: 0.5rem;
-  padding: 2rem;
+  padding: 0 0 2rem 2rem;
+
+  .overlay-top-right {
+    position: absolute;
+    z-index: 150;
+    top: -0.5rem;
+    right: 0.4rem;
+    font-size: var(--font-size-large);
+    color: var(--pin-color);
+  }
 }
 
 .chartArea {
@@ -1496,5 +1588,17 @@ export default class DriveToLocation extends Vue {
   width: 30rem;
   height: 30rem;
   background-color: #ffffff55;
+}
+
+.miniMap {
+  border: 3px solid var(--color-dark-contrast);
+}
+</style>
+
+<style lang="scss">
+.miniMap {
+  .maplibregl-ctrl-bottom-right {
+    display: none;
+  }
 }
 </style>
