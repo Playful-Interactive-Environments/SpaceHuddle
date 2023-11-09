@@ -7,6 +7,24 @@ export enum DrivingDirection {
   backward,
 }
 
+export function getRouteObject(
+  pathCoordinates: [number, number][]
+): FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: pathCoordinates,
+        },
+      },
+    ],
+  };
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export function getRoute(
   routePath: FeatureCollection | turf.Feature<turf.LineString>
