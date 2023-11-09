@@ -238,7 +238,7 @@ import {
   MovingType,
   NavigationType,
 } from '@/modules/playing/moveit/organisms/SelectChallenge.vue';
-import { createCanvas } from 'canvas';
+import * as mapUtils from '@/modules/playing/moveit/utils/map';
 
 mapStyle.setMapStyleStreets();
 
@@ -579,33 +579,8 @@ export default class DriveToLocation extends Vue {
   onLoad(e: MglEvent): void {
     const map = e.map;
     this.map = map;
-    const notNeededLayers = map.getStyle().layers.filter((layer) => {
-      const layerCategory = layer['source-layer'];
-      const layerType = layer['type'];
-      if (layerCategory) {
-        return layerType === 'symbol' && layerCategory !== 'place';
-      }
-      return false;
-    });
-    this.streetLayers = map
-      .getStyle()
-      .layers.filter((layer) => {
-        return (
-          (layer.id.includes('highway') ||
-            //layer.id.includes('primary') ||
-            layer.id.includes('bridge') ||
-            layer.id.includes('tunnel')) &&
-          !layer.id.includes('casing') &&
-          !layer.id.includes('path') &&
-          !layer.id.includes('area') &&
-          !layer.id.includes('waterway') &&
-          !layer.id.includes('railway') &&
-          layer.type === 'line' &&
-          !notNeededLayers.includes(layer)
-        );
-      })
-      .map((layer) => layer.id)
-      .filter((value, index, array) => array.indexOf(value) === index);
+    const notNeededLayers = mapUtils.getNotNeededLayers(map);
+    this.streetLayers = mapUtils.getStreetLayers(map);
     if (this.vehicle.category === 'bus') {
       const layer = notNeededLayers.find(
         (layer) =>
@@ -713,62 +688,7 @@ export default class DriveToLocation extends Vue {
 
   /*streetMask = '';
   createVisibleStreetMask(): void {
-    const mapCanvas = this.map.getCanvas();
-    const bounds = this.map.getBounds();
-    const delta = 0;
-    const streets = this.map
-      .queryRenderedFeatures(
-        [
-          [-delta, -delta],
-          [mapCanvas.width + delta * 2, mapCanvas.height + delta * 2],
-        ],
-        { layers: this.streetLayers }
-      )
-      .filter((f) => f.properties.class !== 'service')
-      //.filter((f) => f.properties.surface !== 'unpaved')
-      .filter(
-        (f) =>
-          f.properties.subclass !== 'pedestrian' &&
-          f.properties.subclass !== 'footway' &&
-          f.properties.subclass !== 'cycleway'
-      );
-
-    const canvas = createCanvas(mapCanvas.width, mapCanvas.height);
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 10;
-    for (const street of streets) {
-      const coordinates: [number, number][] = (street.geometry as any)
-        .coordinates;
-      if (coordinates.length >= 2) {
-        ctx.beginPath();
-        const lngLatStart: [number, number] = coordinates[0];
-        if (Array.isArray(lngLatStart)) {
-          const start = turfUtils.lngLatToPixel(
-            lngLatStart,
-            bounds,
-            mapCanvas.width,
-            mapCanvas.height
-          );
-          ctx.moveTo(start[0], start[1]);
-          for (let i = 1; i < coordinates.length; i++) {
-            const lngLatEnd: [number, number] = coordinates[i];
-            if (Array.isArray(lngLatStart) && Array.isArray(lngLatEnd)) {
-              const end = turfUtils.lngLatToPixel(
-                lngLatEnd,
-                bounds,
-                mapCanvas.width,
-                mapCanvas.height
-              );
-              ctx.lineTo(end[0], end[1]);
-            }
-          }
-          ctx.stroke();
-        }
-      }
-    }
-    this.streetMask = canvas.toDataURL();
+    this.streetMask = mapUtils.calculateStreetMask(this.map, this.streetLayers);
   }*/
 
   initTrackingData(): void {
@@ -1261,228 +1181,6 @@ export default class DriveToLocation extends Vue {
   }
 
   getPossibleStreets(): [number, number][][] {
-    const connectIfOverlaps = (
-      street01: [number, number][],
-      street02: [number, number][]
-    ): [number, number][] => {
-      if (
-        street01[street01.length - 1][0] === street02[0][0] &&
-        street01[street01.length - 1][1] === street02[0][1] &&
-        street01[street01.length - 2][0] !== street02[1][0] &&
-        street01[street01.length - 2][1] !== street02[1][1]
-      ) {
-        return [...street01.slice(0, -1), ...street02];
-      }
-      /*for (let i = street01.length - 1; i > 0; i--) {
-        const checkCount = street01.length - i;
-        if (street02.length < checkCount) return [];
-        let match = true;
-        for (let j = i, k = 0; j < street01.length; j++, k++) {
-          if (
-            street02.length <= k ||
-            street01[j][0] !== street02[k][0] ||
-            street01[j][1] !== street02[k][1]
-          ) {
-            match = false;
-            break;
-          }
-        }
-        if (match) {
-          const j = street01.length - 1 - i;
-          if (
-            i === street01.length - 1 &&
-            street01[i - 1][0] === street02[1][0] &&
-            street01[i - 1][1] === street02[1][1]
-          )
-            return [];
-          if (
-            street02.length > j + 1 &&
-            street01[i - 1][0] === street02[j + 1][0] &&
-            street01[i - 1][1] === street02[j + 1][1]
-          )
-            return [];
-          return [...street01.slice(0, i), ...street02];
-        }
-      }*/
-      return [];
-    };
-
-    const checkTotalOverlay = (
-      street01: [number, number][],
-      street02: [number, number][]
-    ): boolean => {
-      for (let i = street01.length - street02.length; i >= 0; i--) {
-        let match = true;
-        for (let j = i, k = 0; k < street02.length; j++, k++) {
-          if (
-            street01[j][0] !== street02[k][0] ||
-            street01[j][1] !== street02[k][1]
-          ) {
-            match = false;
-            break;
-          }
-        }
-        if (match) return true;
-      }
-      return false;
-    };
-
-    const removeTotalOverlay = (
-      roads: [number, number][][]
-    ): [number, number][][] => {
-      const streets: [number, number][][] = [];
-      for (let i = 0; i < roads.length; i++) {
-        const street01 = roads[i];
-        let overlay = false;
-        for (let j = 0; j < roads.length; j++) {
-          if (i === j) continue;
-          const street02 = roads[j];
-          overlay = checkTotalOverlay(street02, street01);
-          if (overlay) {
-            if (street01.length !== street02.length || i > j) break;
-            else overlay = false;
-          }
-          overlay = checkTotalOverlay(street02, [...street01].reverse());
-          if (overlay) {
-            if (street01.length !== street02.length || i > j) break;
-            else overlay = false;
-          }
-        }
-        if (!overlay) streets.push(street01);
-      }
-      return streets;
-    };
-
-    const connectStreets = (
-      roads: [number, number][][],
-      baseRoads: [number, number][][] | null = null,
-      loopCount = 0
-    ): [number, number][][] => {
-      roads = removeTotalOverlay(roads);
-      const roadList = roads.map((road) => {
-        return {
-          coordinates: road,
-          findConnection: false,
-        };
-      });
-      const streets: [number, number][][] = [];
-      let findConnection = false;
-      for (let i = 0; i < roadList.length; i++) {
-        const street01 = roadList[i].coordinates;
-        if (!baseRoads) {
-          for (let j = i + 1; j < roadList.length; j++) {
-            const street02 = roadList[j].coordinates;
-            const tryConnection = (
-              road01: [number, number][],
-              road02: [number, number][]
-            ): boolean => {
-              const street = connectIfOverlaps(road01, road02);
-              if (street.length > 0) {
-                findConnection = true;
-                roadList[i].findConnection = true;
-                roadList[j].findConnection = true;
-                streets.push(street);
-                return true;
-              }
-              return false;
-            };
-            if (!tryConnection(street01, street02))
-              if (!tryConnection([...street01].reverse(), street02))
-                if (!tryConnection(street01, [...street02].reverse()))
-                  tryConnection(
-                    [...street01].reverse(),
-                    [...street02].reverse()
-                  );
-          }
-        } else {
-          for (let j = 0; j < baseRoads.length; j++) {
-            const street02 = baseRoads[j];
-            if (checkTotalOverlay(street01, street02)) continue;
-            if (checkTotalOverlay(street01, [...street02].reverse())) continue;
-            const tryConnection = (
-              road01: [number, number][],
-              road02: [number, number][]
-            ): boolean => {
-              const street = connectIfOverlaps(road01, road02);
-              if (street.length > 0) {
-                findConnection = true;
-                roadList[i].findConnection = true;
-                streets.push(street);
-                return true;
-              }
-              return false;
-            };
-            if (!tryConnection(street01, street02))
-              if (!tryConnection([...street01].reverse(), street02))
-                if (!tryConnection(street01, [...street02].reverse()))
-                  tryConnection(
-                    [...street01].reverse(),
-                    [...street02].reverse()
-                  );
-          }
-        }
-        if (!roadList[i].findConnection) {
-          streets.push(street01);
-        }
-      }
-      if (findConnection && loopCount < 6) {
-        return connectStreets(streets, baseRoads ?? roads, loopCount + 1);
-      }
-      return streets;
-    };
-
-    /*return connectStreets([
-      [[14.285917282104492, 48.30691550235801],
-        [14.286566376686096, 48.30715813191841],
-        [14.286877512931824, 48.30728658239519]],
-
-
-      [[14.285863637924194, 48.306983296027795],
-        [14.285670518875122, 48.30725090173962]],
-
-
-      [[14.285917282104492, 48.30691550235801],
-        [14.285863637924194, 48.306983296027795]],
-
-
-      [[14.285697340965271, 48.30692977471702],
-        [14.285756349563599, 48.30685127669307]],
-
-
-      [[14.285504221916199, 48.30719738070954],
-        [14.285697340965271, 48.30692977471702]],
-
-
-      [[14.285756349563599, 48.30685127669307],
-        [14.285917282104492, 48.30691550235801]],
-
-
-      [[14.286502003669739, 48.30613051646574],
-        [14.28646981716156, 48.306205447458495],
-        [14.286324977874756, 48.30640883102723],
-        [14.286180138587952, 48.30658010077221],
-        [14.286110401153564, 48.30665146299637],
-        [14.285917282104492, 48.30691550235801]],
-
-
-      [[14.285756349563599, 48.30685127669307],
-        [14.285799264907837, 48.30679418714524]],
-
-
-      [[14.285799264907837, 48.30679418714524],
-        [14.285944104194641, 48.30660150944993],
-        [14.28596556186676, 48.30656226020062]],
-
-
-      [[14.28596556186676, 48.30656226020062],
-        [14.286169409751892, 48.30619831117821],
-        [14.286190867424011, 48.30610910759043]],
-
-
-      [[14.285756349563599, 48.30685127669307],
-        [14.285686612129211, 48.30682630002377]]
-    ]);*/
-
     if (this.map) {
       const mapCanvas = this.map.getCanvas();
       const bounds = this.map.getBounds();
@@ -1532,26 +1230,13 @@ export default class DriveToLocation extends Vue {
           mapCanvas.height
         );
         const pixelDelta = 2;
-        const roadList = this.map
-          .queryRenderedFeatures(
-            [
-              [pixelPos01[0] - pixelDelta, pixelPos01[1] - pixelDelta],
-              [pixelPos02[0] + pixelDelta, pixelPos02[1] + pixelDelta],
-            ],
-            { layers: this.streetLayers }
-          )
-          //.filter((f) => f.properties.class !== 'service')
-          .filter((f) => f.properties.surface !== 'unpaved')
-          .filter(
-            (f) =>
-              f.properties.subclass !== 'pedestrian' &&
-              f.properties.subclass !== 'footway' &&
-              f.properties.subclass !== 'cycleway'
-          )
-          .map(
-            (road) => (road.geometry as any).coordinates as [number, number][]
-          );
-        return connectStreets(roadList);
+        return mapUtils.getStreetsInRegion(
+          this.map,
+          this.streetLayers,
+          pixelPos01,
+          pixelPos02,
+          pixelDelta
+        );
       }
     }
     return [];
