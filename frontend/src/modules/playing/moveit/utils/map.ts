@@ -364,18 +364,18 @@ export function getStreetFeaturesInRegion(
 
 export function calculateStreetMask(map: Map, streetLayers: string[]): string {
   if (map) {
-    const mapCanvas = map.getCanvas();
+    const mapSize = getMapSize(map);
     const bounds = map.getBounds();
     const delta = 0;
     const streets = getStreetFeaturesInRegion(
       map,
       streetLayers,
       [0, 0],
-      [mapCanvas.width, mapCanvas.height],
+      mapSize,
       delta
     );
 
-    const canvas = createCanvas(mapCanvas.width, mapCanvas.height);
+    const canvas = createCanvas(mapSize[0], mapSize[1]);
     const ctx = canvas.getContext('2d');
     if (!ctx) return '';
     ctx.strokeStyle = 'black';
@@ -390,8 +390,8 @@ export function calculateStreetMask(map: Map, streetLayers: string[]): string {
           const start = turfUtils.lngLatToPixel(
             lngLatStart,
             bounds,
-            mapCanvas.width,
-            mapCanvas.height
+            mapSize[0],
+            mapSize[1]
           );
           ctx.moveTo(start[0], start[1]);
           for (let i = 1; i < coordinates.length; i++) {
@@ -400,8 +400,8 @@ export function calculateStreetMask(map: Map, streetLayers: string[]): string {
               const end = turfUtils.lngLatToPixel(
                 lngLatEnd,
                 bounds,
-                mapCanvas.width,
-                mapCanvas.height
+                mapSize[0],
+                mapSize[1]
               );
               ctx.lineTo(end[0], end[1]);
             }
@@ -437,4 +437,9 @@ export function getStreetsInRegion(
     );
   }
   return [];
+}
+
+export function getMapSize(map: Map): [number, number] {
+  const mapCanvas = map.getCanvas();
+  return [mapCanvas.offsetWidth, mapCanvas.offsetHeight];
 }

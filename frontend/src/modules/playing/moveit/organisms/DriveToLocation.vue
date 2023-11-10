@@ -301,7 +301,7 @@ export default class DriveToLocation extends Vue {
   //#endregion prop
 
   //#region variables
-  showMiniMap = true;
+  showMiniMap = false;
   mapZoomDefault = 15;
   mapCenter: [number, number] = [0, 0];
   mapStart: [number, number] = [0, 0];
@@ -618,7 +618,6 @@ export default class DriveToLocation extends Vue {
   miniMap!: Map;
   miniMapLoaded(e: MglEvent): void {
     this.miniMap = e.map;
-    //console.log(this.miniMap);
     this.updateMiniMap();
   }
 
@@ -692,14 +691,10 @@ export default class DriveToLocation extends Vue {
 
   updateVisibleBusStops(): void {
     const busLayerName = 'bus';
-    const canvas = this.map.getCanvas();
-    const features = this.map.queryRenderedFeatures(
-      [
-        [0, 0],
-        [canvas.width, canvas.height],
-      ],
-      { layers: [busLayerName] }
-    );
+    const mapSize = mapUtils.getMapSize(this.map);
+    const features = this.map.queryRenderedFeatures([[0, 0], mapSize], {
+      layers: [busLayerName],
+    });
     this.busStopList = features
       .filter((f) => f.properties.class === 'bus')
       .map((f) => {
@@ -859,6 +854,15 @@ export default class DriveToLocation extends Vue {
   //#endregion navigation
 
   //#region watcher
+  @Watch('showMiniMap', { immediate: true })
+  onShowMiniMapChanged(): void {
+    if (this.showMiniMap) {
+      setTimeout(() => {
+        this.updateMiniMap();
+      }, 500);
+    }
+  }
+
   @Watch('parameter', { immediate: true, deep: true })
   onParameterChanged(): void {
     if (
@@ -1112,7 +1116,7 @@ export default class DriveToLocation extends Vue {
 
   getPossibleStreets(): [number, number][][] {
     if (this.map) {
-      const mapCanvas = this.map.getCanvas();
+      const mapSize = mapUtils.getMapSize(this.map);
       const bounds = this.map.getBounds();
       const speedDrivingDistance = this.getDrivingDistance();
       if (speedDrivingDistance > 0) {
@@ -1126,38 +1130,33 @@ export default class DriveToLocation extends Vue {
           speedDrivingDistance,
           this.moveAngle + minToleratedAngleDeviation
         );
-        const searchRegion = turf.envelope(
+        const envelope = turf.envelope(
           turf.featureCollection([
             searchPoint01,
             searchPoint02,
             turf.point(this.mapDrivingPoint),
           ])
-        ).bbox as number[];
+        );
+        const searchRegion = envelope.bbox as number[];
+        const min: [number, number] = [
+          searchRegion[0] < searchRegion[2] ? searchRegion[0] : searchRegion[2],
+          searchRegion[1] > searchRegion[3] ? searchRegion[1] : searchRegion[3],
+        ];
+        const max: [number, number] = [
+          searchRegion[0] > searchRegion[2] ? searchRegion[0] : searchRegion[2],
+          searchRegion[1] < searchRegion[3] ? searchRegion[1] : searchRegion[3],
+        ];
         const pixelPos01 = turfUtils.lngLatToPixel(
-          [
-            searchRegion[0] < searchRegion[2]
-              ? searchRegion[0]
-              : searchRegion[2],
-            searchRegion[1] > searchRegion[3]
-              ? searchRegion[1]
-              : searchRegion[3],
-          ],
+          min,
           bounds,
-          mapCanvas.width,
-          mapCanvas.height
+          mapSize[0],
+          mapSize[1]
         );
         const pixelPos02 = turfUtils.lngLatToPixel(
-          [
-            searchRegion[0] > searchRegion[2]
-              ? searchRegion[0]
-              : searchRegion[2],
-            searchRegion[1] < searchRegion[3]
-              ? searchRegion[1]
-              : searchRegion[3],
-          ],
+          max,
           bounds,
-          mapCanvas.width,
-          mapCanvas.height
+          mapSize[0],
+          mapSize[1]
         );
         const pixelDelta = 0; // 2;
         return mapUtils.getStreetsInRegion(
@@ -1424,7 +1423,7 @@ export default class DriveToLocation extends Vue {
   bottom: 0.5rem;
   right: 0.5rem;
   left: 0.5rem;
-  padding: 2rem;
+  //padding: 1rem;
 }
 
 .overlay-bottom-right {
@@ -1432,7 +1431,7 @@ export default class DriveToLocation extends Vue {
   z-index: 100;
   bottom: 0.5rem;
   right: 0.5rem;
-  padding: 2rem;
+  //padding: 1rem;
 }
 
 .overlay-bottom-left {
@@ -1440,7 +1439,7 @@ export default class DriveToLocation extends Vue {
   z-index: 100;
   bottom: 0.5rem;
   left: 0.5rem;
-  padding: 0 0 2rem 2rem;
+  //padding: 0 0 1rem 1rem;
 
   .overlay-top-right {
     position: absolute;
