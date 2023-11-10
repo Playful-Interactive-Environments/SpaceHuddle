@@ -831,6 +831,36 @@ export default class DriveToLocation extends Vue {
       }
     }
 
+    const speedDrivingDistance = 0.05;
+    const maxCornerDistance = 0.0001;
+    const newDrivingPoint = this.getNewDrivingPoint(speedDrivingDistance);
+    if (this.movingType === MovingType.free) {
+      const possibleSegments = this.getPossibleSegments(
+        newDrivingPoint,
+        speedDrivingDistance,
+        maxCornerDistance,
+        true
+      ).filter((street) => street.corner);
+      if (possibleSegments.length > 0) {
+        const bestSegment = possibleSegments.sort(
+          (a, b) => (a.distanceToCorner ?? 1000) - (b.distanceToCorner ?? 1000)
+        )[0];
+        if (bestSegment.corner) {
+          this.updateDrivingPoint(bestSegment.corner, [], 0.015);
+        }
+      }
+    } else {
+      const insideSegment = this.isDrivingAngleInsideNextSegment(
+        this.routePath,
+        speedDrivingDistance,
+        newDrivingPoint,
+        maxCornerDistance
+      );
+      if (insideSegment.corner) {
+        this.updateDrivingPoint(insideSegment.corner, [], 0.005);
+      }
+    }
+
     this.initTrackingData();
     if (this.trackingManager && this.trackingManager.iterationStep) {
       this.trackingManager.iterationStep.parameter.drive.persons =
@@ -1114,29 +1144,48 @@ export default class DriveToLocation extends Vue {
     this.drivenPath = turfUtils.getRouteObject(coordinates);
   }
 
-  getPossibleStreets(): [number, number][][] {
+  getPossibleStreets(
+    speedDrivingDistance: number,
+    lookBackward = false
+  ): [number, number][][] {
     if (this.map) {
       const mapSize = mapUtils.getMapSize(this.map);
       const bounds = this.map.getBounds();
-      const speedDrivingDistance = this.getDrivingDistance();
       if (speedDrivingDistance > 0) {
-        const searchPoint01 = turf.destination(
-          this.mapDrivingPoint,
-          speedDrivingDistance,
-          this.moveAngle - minToleratedAngleDeviation
+        const features: turf.helpers.Feature[] = [
+          turf.point(this.mapDrivingPoint),
+        ];
+        features.push(
+          turf.destination(
+            this.mapDrivingPoint,
+            speedDrivingDistance,
+            this.moveAngle - minToleratedAngleDeviation
+          )
         );
-        const searchPoint02 = turf.destination(
-          this.mapDrivingPoint,
-          speedDrivingDistance,
-          this.moveAngle + minToleratedAngleDeviation
+        features.push(
+          turf.destination(
+            this.mapDrivingPoint,
+            speedDrivingDistance,
+            this.moveAngle + minToleratedAngleDeviation
+          )
         );
-        const envelope = turf.envelope(
-          turf.featureCollection([
-            searchPoint01,
-            searchPoint02,
-            turf.point(this.mapDrivingPoint),
-          ])
-        );
+        if (lookBackward) {
+          features.push(
+            turf.destination(
+              this.mapDrivingPoint,
+              speedDrivingDistance,
+              this.moveAngle - minToleratedAngleDeviation - 180
+            )
+          );
+          features.push(
+            turf.destination(
+              this.mapDrivingPoint,
+              speedDrivingDistance,
+              this.moveAngle + minToleratedAngleDeviation - 180
+            )
+          );
+        }
+        const envelope = turf.envelope(turf.featureCollection(features));
         const searchRegion = envelope.bbox as number[];
         const min: [number, number] = [
           searchRegion[0] < searchRegion[2] ? searchRegion[0] : searchRegion[2],
@@ -1171,6 +1220,70 @@ export default class DriveToLocation extends Vue {
     return [];
   }
 
+  getPossibleSegments(
+    newDrivingPoint: [number, number],
+    speedDrivingDistance: number,
+    maxCornerDistance: number,
+    lookBackward = false
+  ): {
+    value: boolean;
+    endPoint: [number, number];
+    corner: [number, number] | null;
+    subPath: [number, number][];
+    distanceToSearchPoint: number;
+    distanceToCorner: number | null;
+  }[] {
+    const possibleStreets = this.getPossibleStreets(
+      speedDrivingDistance,
+      lookBackward
+    );
+    if (possibleStreets.length > 0) {
+      const streets = possibleStreets.filter((street) =>
+        turfUtils.isPointCloseToRoute(
+          turfUtils.getRouteObject(street),
+          this.mapDrivingPoint,
+          maxCornerDistance
+        )
+      );
+      const possibleSegments: {
+        value: boolean;
+        endPoint: [number, number];
+        corner: [number, number] | null;
+        subPath: [number, number][];
+        distanceToSearchPoint: number;
+        distanceToCorner: number | null;
+      }[] = [];
+      for (const street of streets) {
+        const insideSegment = this.isDrivingAngleInsideNextSegment(
+          turfUtils.getRouteObject(street),
+          speedDrivingDistance,
+          newDrivingPoint,
+          maxCornerDistance
+        ) as any;
+        if (insideSegment.value && insideSegment.subPath.length > 1) {
+          const pathLength = turf.length(
+            turf.lineString(insideSegment.subPath)
+          );
+          if (pathLength > 0) {
+            insideSegment.distanceToSearchPoint = turf.distance(
+              insideSegment.endPoint,
+              newDrivingPoint
+            );
+            if (insideSegment.corner) {
+              insideSegment.distanceToCorner = turf.distance(
+                insideSegment.corner,
+                this.mapDrivingPoint
+              );
+            } else insideSegment.distanceToCorner = null;
+            possibleSegments.push(insideSegment);
+          }
+        }
+      }
+      return possibleSegments;
+    }
+    return [];
+  }
+
   noStreet = false;
   updateTraceIsRunning = false;
   //pauseCount = 0;
@@ -1197,59 +1310,25 @@ export default class DriveToLocation extends Vue {
         this.movingType === MovingType.free ? 0.03 : 0.002;
       //this.movingType === MovingType.free ? speedDrivingDistance / 3 : 0.001;
       if (this.movingType === MovingType.free) {
-        const possibleStreets = this.getPossibleStreets();
-        if (possibleStreets.length > 0) {
-          const streets = possibleStreets.filter((street) =>
-            turfUtils.isPointCloseToRoute(
-              turfUtils.getRouteObject(street),
-              this.mapDrivingPoint,
-              maxCornerDistance
-            )
-          );
-          const possibleSegments: {
-            value: boolean;
-            endPoint: [number, number];
-            corner: [number, number] | null;
-            subPath: [number, number][];
-            distanceToSearchPoint: number;
-          }[] = [];
-          for (const street of streets) {
-            const insideSegment = this.isDrivingAngleInsideNextSegment(
-              turfUtils.getRouteObject(street),
-              speedDrivingDistance,
-              newDrivingPoint,
-              maxCornerDistance
-            ) as any;
-            if (insideSegment.value && insideSegment.subPath.length > 1) {
-              const pathLength = turf.length(
-                turf.lineString(insideSegment.subPath)
-              );
-              if (pathLength > 0) {
-                insideSegment.distanceToSearchPoint = turf.distance(
-                  insideSegment.endPoint,
-                  newDrivingPoint
-                );
-                possibleSegments.push(insideSegment);
-              }
-            }
-          }
-          if (possibleSegments.length > 0) {
-            const bestSegment = possibleSegments.sort(
-              (a, b) => a.distanceToSearchPoint - b.distanceToSearchPoint
-            )[0];
-            /*const worstSegment = possibleSegments.sort(
-              (a, b) => b.distanceToSearchPoint - a.distanceToSearchPoint
-            )[0];*/
-            subPath = bestSegment.subPath;
-            newDrivingPoint = bestSegment.endPoint;
-            /*if (bestSegment.corner) {
-              newDrivingPoint = bestSegment.corner;
-            } else if (worstSegment.corner) {
-              newDrivingPoint = worstSegment.corner;
-            }*/
-          } else {
-            isOnRoute = false;
-          }
+        const possibleSegments = this.getPossibleSegments(
+          newDrivingPoint,
+          speedDrivingDistance,
+          maxCornerDistance
+        );
+        if (possibleSegments.length > 0) {
+          const bestSegment = possibleSegments.sort(
+            (a, b) => a.distanceToSearchPoint - b.distanceToSearchPoint
+          )[0];
+          /*const worstSegment = possibleSegments.sort(
+            (a, b) => b.distanceToSearchPoint - a.distanceToSearchPoint
+          )[0];*/
+          subPath = bestSegment.subPath;
+          newDrivingPoint = bestSegment.endPoint;
+          /*if (bestSegment.corner) {
+            newDrivingPoint = bestSegment.corner;
+          } else if (worstSegment.corner) {
+            newDrivingPoint = worstSegment.corner;
+          }*/
         } else {
           isOnRoute = false;
         }
