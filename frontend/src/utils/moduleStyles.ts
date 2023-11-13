@@ -11,8 +11,4 @@ export const setModuleStyles = (
   if (!color) color = defaultColor;
   if (!ref) ref = document.getElementsByTagName('body')[0];
   ref.style.setProperty('--module-color', color);
-  ref.style.setProperty(
-    '--module-planet',
-    `/assets/illustrations/planets/${type}.png`
-  );
 };

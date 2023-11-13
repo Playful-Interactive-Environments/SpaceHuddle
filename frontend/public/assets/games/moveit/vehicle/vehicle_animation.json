@@ -1,0 +1,130 @@
+{
+"frames": {
+	"bus_01.png": {
+		"frame": {"x":1025, "y":668, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"bus_02_000.png": {
+		"frame": {"x":2050, "y":1002, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"bus_03_000.png": {
+		"frame": {"x":2050, "y":668, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"bus_04_000.png": {
+		"frame": {"x":2050, "y":334, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"compact-car_01.png": {
+		"frame": {"x":2050, "y":0, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"compact-car_02.png": {
+		"frame": {"x":1025, "y":2672, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"compact-car_03.png": {
+		"frame": {"x":1025, "y":2338, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"compact-car_04.png": {
+		"frame": {"x":1025, "y":2004, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"e-car_01.png": {
+		"frame": {"x":1025, "y":1670, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"e-car_02.png": {
+		"frame": {"x":1025, "y":1336, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"e-car_03.png": {
+		"frame": {"x":1025, "y":1670, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"e-car_04.png": {
+		"frame": {"x":1025, "y":1002, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"motorcycle_01.png": {
+		"frame": {"x":2050, "y":1336, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"motorcycle_02.png": {
+		"frame": {"x":1025, "y":334, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"motorcycle_03.png": {
+		"frame": {"x":1025, "y":0, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"motorcycle_04.png": {
+		"frame": {"x":0, "y":2672, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"sport-car_01.png": {
+		"frame": {"x":0, "y":2338, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"sport-car_02.png": {
+		"frame": {"x":0, "y":2004, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"sport-car_03.png": {
+		"frame": {"x":0, "y":1670, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"sport-car_04.png": {
+		"frame": {"x":0, "y":1336, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"suv_01.png": {
+		"frame": {"x":0, "y":1002, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"suv_02.png": {
+		"frame": {"x":0, "y":668, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"suv_03.png": {
+		"frame": {"x":0, "y":334, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	},
+	"suv_04.png": {
+		"frame": {"x":0, "y":0, "w":1024, "h":333},
+		"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":333},
+		"sourceSize": {"w":1024,"h":333}
+	}
+
+},
+"meta": {
+	"image": "vehicle_animation.png",
+	"size": {"w": 3075, "h": 3006},
+	"scale": "1"
+}
+}

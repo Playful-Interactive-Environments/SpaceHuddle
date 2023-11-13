@@ -57,7 +57,12 @@
     </el-button>
   </el-space>-->
   <div ref="gameContainer" class="gameContainer">
-    <el-carousel :autoplay="false" arrow="always" :height="`${targetHeight}px`">
+    <el-carousel
+      v-if="ready"
+      :autoplay="false"
+      arrow="always"
+      :height="`${targetHeight}px`"
+    >
       <el-carousel-item
         v-for="vehicle of gameConfig.vehicles[activeVehicleType].types"
         :key="vehicle.name"
@@ -85,12 +90,19 @@
             </div>
           </template>
           <div class="vehicle-image">
-            <div class="spritesheet-container">
-              <img
+            <div ref="vehicleSpace" class="spritesheet-container">
+              <SpriteCanvas
+                :texture="getAnimationForVehicle(vehicle)"
+                :width="vehicleWidth"
+                :height="vehicleHeight"
+                background-color="#ffffff"
+              >
+              </SpriteCanvas>
+              <!--<img
                 class="vehicle-spritesheet"
                 :src="`/assets/games/moveit/vehicle/spritesheets/${vehicle.image}`"
                 :alt="vehicle.name"
-              />
+              />-->
             </div>
             <div>
               <el-rate
@@ -289,6 +301,9 @@
           :key="level"
           :label="level"
         >
+          <span class="icon">
+            <font-awesome-icon :icon="['fac', getNavigationIcon(level)]" />
+          </span>
           {{
             $t(
               `module.playing.moveit.participant.navigationType.${level}.title`
@@ -311,6 +326,9 @@
           :key="level"
           :label="level"
         >
+          <span class="icon">
+            <font-awesome-icon :icon="['fac', getMovingIcon(level)]" />
+          </span>
           {{
             $t(`module.playing.moveit.participant.movingType.${level}.title`)
           }}
@@ -345,6 +363,9 @@ import { Prop } from 'vue-property-decorator';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
+import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
+import * as pixiUtil from '@/utils/pixi';
+import * as PIXI from 'pixi.js';
 
 export enum NavigationType {
   drag = 'drag',
@@ -367,6 +388,7 @@ export interface ChartData {
 
 @Options({
   components: {
+    SpriteCanvas,
     FontAwesomeIcon,
     Doughnut,
     Bar,
@@ -410,6 +432,26 @@ export default class SelectChallenge extends Vue {
     return this.trackingManager.getStarPoints(3);
   }
 
+  getMovingIcon(movingType: MovingType): string {
+    switch (movingType) {
+      case MovingType.free:
+        return 'freestyle';
+      case MovingType.path:
+        return 'path';
+    }
+    return 'path';
+  }
+
+  getNavigationIcon(navigationType: NavigationType): string {
+    switch (navigationType) {
+      case NavigationType.drag:
+        return 'direct';
+      case NavigationType.joystick:
+        return 'joystick';
+    }
+    return 'joystick';
+  }
+
   getStarsForVehicle(vehicle: vehicleCalculation.Vehicle): number {
     const vehicleSteps = this.trackingManager.stepList
       .filter((item) =>
@@ -441,9 +483,44 @@ export default class SelectChallenge extends Vue {
     }
   }
 
+  vehicleWidth = 100;
+  vehicleHeight = 100;
+  getAnimationForVehicle(vehicle: any): PIXI.Texture[] {
+    const result: PIXI.Texture[] = [];
+    if (this.vehicleSpritesheet) {
+      const keys = Object.keys(this.vehicleSpritesheet.textures)
+        .filter((key) => key.includes(vehicle.image.slice(0, -4)))
+        .sort((a, b) => a.localeCompare(b));
+      for (const key of keys) {
+        result.push(this.vehicleSpritesheet.textures[key]);
+      }
+    }
+    return result;
+  }
+
   targetWidth = 100;
   targetHeight = 100;
+  vehicleSpritesheet!: PIXI.Spritesheet;
+  ready = false;
   mounted(): void {
+    pixiUtil
+      .loadTexture(
+        '/assets/games/moveit/vehicle/vehicle_animation.json',
+        this.eventBus
+      )
+      .then((sheet) => {
+        this.vehicleSpritesheet = sheet;
+        this.ready = true;
+
+        setTimeout(() => {
+          const dom = this.$refs.vehicleSpace as HTMLElement[];
+          if (dom) {
+            this.vehicleWidth = dom[0].offsetWidth - 20;
+            this.vehicleHeight = dom[0].offsetHeight;
+          }
+        }, 100);
+      });
+
     this.chartDataElectricityMix.datasets.push({
       label: this.$t('module.playing.moveit.participant.electricity'),
       backgroundColor: [],
@@ -532,6 +609,12 @@ export default class SelectChallenge extends Vue {
     setTimeout(() => {
       this.updateChart();
     }, 1000);
+  }
+
+  unmounted(): void {
+    pixiUtil.unloadTexture(
+      '/assets/games/moveit/vehicle/vehicle_animation.json'
+    );
   }
 
   async updateChart(): Promise<void> {
@@ -734,5 +817,14 @@ export default class SelectChallenge extends Vue {
 <style lang="scss">
 .levelInfo .el-dialog__body div {
   margin-bottom: 0.5rem;
+}
+
+.icon {
+  font-size: var(--font-size-xxxlarge);
+  margin-right: 0.5rem;
+}
+
+.el-radio-button > .el-radio-button__inner {
+  padding-top: 1rem;
 }
 </style>

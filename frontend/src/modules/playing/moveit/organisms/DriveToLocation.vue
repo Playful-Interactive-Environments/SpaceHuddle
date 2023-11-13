@@ -66,7 +66,7 @@
       <CustomMapMarker :coordinates="mapVehiclePoint" anchor="center">
         <template v-slot:icon>
           <Joystick
-            v-if="navigation === NavigationType.drag"
+            v-if="navigation === NavigationType.drag && zoomReady"
             :size="150"
             :stick-size="15"
             @move="move($event)"
@@ -82,6 +82,19 @@
       <CustomMapMarker anchor="bottom-left" :coordinates="mapEnd">
         <template v-slot:icon>
           <font-awesome-icon icon="flag-checkered" class="pin" />
+        </template>
+      </CustomMapMarker>
+      <CustomMapMarker
+        anchor="center"
+        :coordinates="mapEndInfo"
+        :rotation="infoRotation"
+      >
+        <template v-slot:icon>
+          <font-awesome-icon
+            icon="arrow-right"
+            class="pin"
+            :style="{ display: showDirectionInfo ? 'block' : 'none' }"
+          />
         </template>
       </CustomMapMarker>
       <CustomMapMarker
@@ -134,7 +147,7 @@
     <div class="overlay-bottom-right">
       <div>
         <Joystick
-          v-if="navigation === NavigationType.joystick"
+          v-if="navigation === NavigationType.joystick && zoomReady"
           :size="150"
           :stick-size="50"
           @move="move($event)"
@@ -555,6 +568,7 @@ export default class DriveToLocation extends Vue {
   //#endregion get / set
 
   //#region load / unload
+  zoomReady = false;
   streetLayers: string[] = [];
   onLoad(e: MglEvent): void {
     const map = e.map;
@@ -609,6 +623,7 @@ export default class DriveToLocation extends Vue {
         animate: true,
         essential: true,
       });
+      setTimeout(() => (this.zoomReady = true), 1000);
       /*setTimeout(() => {
         this.createVisibleStreetMask();
       }, 2000);*/
@@ -1002,13 +1017,72 @@ export default class DriveToLocation extends Vue {
     if (this.speed !== this.moveSpeed) this.speed = this.moveSpeed;
   }
 
+  showDirectionInfo = false;
+  mapEndInfo: [number, number] = [0, 0];
+  infoRotation = 0;
   @Watch('mapDrivingPoint', { immediate: true })
   onMapDrivingPointChanged(): void {
-    this.updateMiniMap();
+    if (this.showMiniMap) this.updateMiniMap();
+    setTimeout(() => this.calculateRouteInfoPoint(), 100);
   }
   //#endregion watcher
 
   //#region route
+  calculateRouteInfoPoint(): void {
+    if (this.movingType === MovingType.free && this.map) {
+      const bounds = this.map.getBounds();
+      const lineBorder = turf.lineString([
+        [bounds.getWest(), bounds.getNorth()],
+        [bounds.getEast(), bounds.getNorth()],
+        [bounds.getEast(), bounds.getSouth()],
+        [bounds.getWest(), bounds.getSouth()],
+        [bounds.getWest(), bounds.getNorth()],
+      ]);
+      const lineGoal = turf.lineString([this.mapDrivingPoint, this.mapEnd]);
+      const intersectionPoint = turf.lineIntersect(lineBorder, lineGoal);
+      this.showDirectionInfo = intersectionPoint.features.length > 0;
+      if (this.showDirectionInfo) {
+        const coordinates = intersectionPoint.features[0].geometry.coordinates;
+        this.infoRotation =
+          turf.bearing(this.mapDrivingPoint, this.mapEnd) - 90;
+        const boundsWidth = bounds.getEast() - bounds.getWest();
+        const boundsHeight = bounds.getNorth() - bounds.getSouth();
+        const mapSize = mapUtils.getMapSize(this.map);
+        const deltaHorizontal = (boundsWidth / mapSize[0]) * 40;
+        const deltaVertical = (boundsHeight / mapSize[1]) * 30;
+        const lineNorth = turf.lineString([
+          [bounds.getWest(), bounds.getNorth() - deltaVertical],
+          [bounds.getEast(), bounds.getNorth() - deltaVertical],
+        ]);
+        const lineEast = turf.lineString([
+          [bounds.getEast() - deltaHorizontal, bounds.getNorth()],
+          [bounds.getEast() - deltaHorizontal, bounds.getSouth()],
+        ]);
+        const lineSouth = turf.lineString([
+          [bounds.getEast(), bounds.getSouth() + deltaVertical],
+          [bounds.getWest(), bounds.getSouth() + deltaVertical],
+        ]);
+        const lineWest = turf.lineString([
+          [bounds.getWest() + deltaHorizontal, bounds.getSouth()],
+          [bounds.getWest() + deltaHorizontal, bounds.getNorth()],
+        ]);
+        if (turf.lineIntersect(lineNorth, lineGoal).features.length > 0) {
+          coordinates[1] -= deltaVertical;
+        } else if (
+          turf.lineIntersect(lineSouth, lineGoal).features.length > 0
+        ) {
+          coordinates[1] += deltaVertical;
+        }
+        if (turf.lineIntersect(lineEast, lineGoal).features.length > 0) {
+          coordinates[0] -= deltaHorizontal;
+        } else if (turf.lineIntersect(lineWest, lineGoal).features.length > 0) {
+          coordinates[0] += deltaHorizontal;
+        }
+        this.mapEndInfo = coordinates as [number, number];
+      }
+    }
+  }
+
   async isOnPossibleRoute(point: [number, number]): Promise<{
     distance: number;
     location: [number, number];

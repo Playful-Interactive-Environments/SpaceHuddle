@@ -290,14 +290,6 @@ export default class Participant extends Vue {
 
   doTakeoff = false;
 
-  planets = [
-    require('@/assets/illustrations/planets/brainstorming01.png'),
-    require('@/assets/illustrations/planets/brainstorming02.png'),
-    require('@/assets/illustrations/planets/brainstorming03.png'),
-    require('@/assets/illustrations/planets/brainstorming04.png'),
-  ];
-  scalePlanet = false;
-
   ideaCash!: cashService.SimplifiedCashEntry<Idea[]>;
   @Watch('taskId', { immediate: true })
   onTaskIdChanged(): void {
@@ -404,7 +396,6 @@ export default class Participant extends Vue {
       .then(
         (queryResult) => {
           this.reset();
-          setTimeout(this.setNewPlanet, 500);
           ElMessage({
             message: this.$t('info.postIdea', [queryResult.keywords]),
             type: 'success',
@@ -421,20 +412,6 @@ export default class Participant extends Vue {
 
   get showSecondInput(): boolean {
     return this.formData.description.length > MAX_KEYWORDS_LENGTH;
-  }
-
-  get activePlanetIndex(): number {
-    if (this.ideas.length < this.planets.length) return this.ideas.length;
-    return this.planets.length - 1;
-  }
-
-  setNewPlanet(): void {
-    if (this.ideas.length >= this.planets.length) {
-      this.scalePlanet = true;
-      setTimeout(() => {
-        this.scalePlanet = false;
-      }, 1000);
-    }
   }
 
   imageLinkChanged(): void {

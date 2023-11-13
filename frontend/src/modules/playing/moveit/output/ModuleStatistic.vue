@@ -103,6 +103,7 @@ import {
   NavigationType,
   MovingType,
 } from '@/modules/playing/moveit/organisms/SelectChallenge.vue';
+import { AvatarUnicode } from '@/types/enum/AvatarUnicode';
 
 @Options({
   components: { Bar, Line },
@@ -290,15 +291,41 @@ export default class ModuleStatistic extends Vue {
     }
   }
 
+  getAvatarList(list: any[], filter: ((item) => boolean) | null = null): any[] {
+    const subset = filter ? list.filter(filter) : list;
+    return subset
+      .map((item) => item.avatar)
+      .filter(
+        (value, index, array) =>
+          array.findIndex(
+            (item) => item.color === value.color && item.symbol === value.symbol
+          ) === index
+      )
+      .sort((a, b) => {
+        const x = `${a.symbol}#${a.color}`;
+        const y = `${b.symbol}#${b.color}`;
+        if (x < y) return -1;
+        if (x > y) return 1;
+        return 0;
+      });
+  }
+
   calculateNavigationTypeChart(): void {
     if (this.steps) {
       const navigationList = Object.keys(NavigationType);
-      const datasets = calculateChartPerIteration(
+      const avatarList = this.getAvatarList(this.steps);
+      const datasets = calculateChartPerParameter(
         this.steps,
+        avatarList,
         navigationList,
-        this.replayColors,
-        (item) => item.iteration - 1,
-        (item, navigation) => navigation === item.parameter.navigation
+        avatarList.map((avatar) => avatar.color),
+        (item, avatar) =>
+          item.avatar.color === avatar.color &&
+          item.avatar.symbol === avatar.symbol,
+        (item, navigation) => navigation === item.parameter.navigation,
+        null,
+        (list) => list.length,
+        (avatar) => AvatarUnicode[avatar.symbol]
       );
       this.barChartDataList.push({
         title: this.$t('module.playing.moveit.statistic.navigationType'),
@@ -315,12 +342,19 @@ export default class ModuleStatistic extends Vue {
   calculateMovingTypeChart(): void {
     if (this.steps) {
       const movingTypeList = Object.keys(MovingType);
-      const datasets = calculateChartPerIteration(
+      const avatarList = this.getAvatarList(this.steps);
+      const datasets = calculateChartPerParameter(
         this.steps,
+        avatarList,
         movingTypeList,
-        this.replayColors,
-        (item) => item.iteration - 1,
-        (item, movingType) => movingType === item.parameter.movingType
+        avatarList.map((avatar) => avatar.color),
+        (item, avatar) =>
+          item.avatar.color === avatar.color &&
+          item.avatar.symbol === avatar.symbol,
+        (item, movingType) => movingType === item.parameter.movingType,
+        null,
+        (list) => list.length,
+        (avatar) => AvatarUnicode[avatar.symbol]
       );
       this.barChartDataList.push({
         title: this.$t('module.playing.moveit.statistic.movingType'),

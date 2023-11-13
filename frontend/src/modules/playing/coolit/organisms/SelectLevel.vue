@@ -25,8 +25,6 @@
         <font-awesome-icon icon="trophy" />
       </el-button>
     </div>
-    <!--<div class="overlay-top-left thermometer">
-    </div>-->
   </div>
   <DrawerBottomOverlay v-model="showMoleculesInfo">
     <template v-slot:header>
@@ -263,17 +261,6 @@
         )
       }}
     </div>
-    <!--<div class="thermometer">
-      <el-slider
-        v-model="temperatureRise"
-        vertical
-        height="180px"
-        :min="MIN_TEMPERATURE_RISE"
-        :max="MAX_TEMPERATURE_RISE"
-        :step="0.5"
-        :marks="marks"
-      />
-    </div>-->
     <template #footer>
       <el-button @click="cancelGame" class="dialog-button">
         {{ $t('module.playing.coolit.participant.playDialog.cancel') }}
@@ -694,15 +681,6 @@ export default class SelectLevel extends Vue {
   z-index: 100;
   top: 0.5rem;
   left: 0.5rem;
-}
-
-.thermometer {
-  background-image: url('@/modules/playing/coolit/assets/thermometer.png');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  padding: 2.8rem 0.1rem 0.3rem 0.1rem;
-  width: 2.5rem;
 }
 
 .clickable {
