@@ -331,6 +331,8 @@ export default class PlayState extends Vue {
   playersTurn = 0;
   imageArray: any[] = [];
 
+  updateCardsPlayed = true;
+
   initialButtonState = false;
 
   getCardsFromGame() {
@@ -438,7 +440,11 @@ export default class PlayState extends Vue {
     this.game.parameter = game.parameter;
     if (this.cards.length >= game.parameter.cards.length) {
       this.cards = game.parameter.cards.map((x) => x);
-      this.cardsPlayed = game.parameter.cardsPlayed.map((x) => x);
+      console.log(this.cardsPlayed);
+      console.log(game.parameter.cardsPlayed);
+      if (this.updateCardsPlayed) {
+        this.cardsPlayed = game.parameter.cardsPlayed.map((x) => x);
+      }
     }
     if (this.game.parameter.playerNum === 2 && !this.initialButtonState) {
       const button = document.getElementById('cardSelectButton');
@@ -611,25 +617,34 @@ export default class PlayState extends Vue {
 
       setTimeout(async () => {
         this.cardsPlayed = [];
+        console.log("deleted cards 1");
         if (this.cards.length > 1) {
           this.drawNewCard();
           this.cardsPlayed = [];
+          if (this.playersTurn !== this.player) {
+            this.updateCardsPlayed = false;
+          }
+          console.log("deleted cards 2 - 2");
           await until(
             () =>
               this.game.parameter.player1Hand.length > this.maxCards - 1 &&
-              this.game.parameter.player2Hand.length > this.maxCards - 1 &&
-              this.removeCards()
+              this.game.parameter.player2Hand.length > this.maxCards - 1
           );
         } else {
           this.maxCards -= 1;
         }
         this.cardsPlayed = [];
+        console.log("deleted cards 4");
         if (
           this.game.parameter.player1Hand.length === 0 &&
           this.game.parameter.player2Hand.length === 0 &&
           this.cards.length <= 1
         ) {
           this.reShuffle();
+        }
+
+        if (this.playersTurn !== this.player) {
+          this.updateCardsPlayed = true;
         }
 
         this.playersTurn = this.playersTurn === 1 ? 2 : 1;
@@ -639,11 +654,6 @@ export default class PlayState extends Vue {
         }
       }, 1000);
     }
-  }
-
-  removeCards() {
-    this.cardsPlayed = [];
-    return true;
   }
 
   /*async drawNewCard() {
