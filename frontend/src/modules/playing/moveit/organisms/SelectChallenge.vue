@@ -421,7 +421,7 @@ export default class SelectChallenge extends Vue {
   showPlayDialog = false;
   navigationType = NavigationType.joystick;
   NavigationType = NavigationType;
-  movingType = MovingType.free;
+  movingType = MovingType.path;
   MovingType = MovingType;
 
   get selectedVehicleParameter(): any {
@@ -748,11 +748,13 @@ export default class SelectChallenge extends Vue {
 }
 
 .spritesheet-container {
-  height: 7rem;
-  aspect-ratio: 3.07 / 1;
+  width: 100%;
+  height: 100%;
+  //height: 7rem;
+  //aspect-ratio: 3.07 / 1;
   overflow: hidden;
   margin: auto;
-  max-width: 100%;
+  //max-width: 100%;
 }
 
 .vehicle-spritesheet {

@@ -59,7 +59,7 @@
         "description": "Control the direction of travel with the joystick direct on the vehicle."
       },
       "joystick": {
-        "title": "joystick",
+        "title": "separate",
         "description": "Control the vehicle with the joystick in the bottom right corner. "
       }
     },

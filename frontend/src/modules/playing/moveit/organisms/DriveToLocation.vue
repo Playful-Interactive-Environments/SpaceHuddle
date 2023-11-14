@@ -35,6 +35,19 @@
           :paint="drivenPaint"
         />
       </mgl-geo-json-source>
+      <!--<mgl-geo-json-source
+        v-for="(street, index) of possibleStreets"
+        :key="index"
+        :source-id="`street${index}`"
+        :data="turfUtils.getRouteObject(street)"
+        :lineMetrics="true"
+      >
+        <mgl-line-layer
+          :layer-id="`street${index}`"
+          :layout="routeLayout"
+          :paint="routePaint"
+        />
+      </mgl-geo-json-source>-->
       <CustomMapMarker
         :coordinates="mapVehiclePoint"
         :rotation="mapDrivingRotation"
@@ -84,6 +97,32 @@
           <font-awesome-icon icon="flag-checkered" class="pin" />
         </template>
       </CustomMapMarker>
+      <!--<CustomMapMarker anchor="bottom" v-for="(corner, index) of searchPoints" :key="index" :coordinates="corner.point">
+        <template v-slot:icon>
+          <font-awesome-icon
+            icon="location-pin"
+            class="pin"
+            :style="{
+              color: corner.color,
+              display: corner.active ? 'block' : 'none',
+            }"
+          />
+        </template>
+      </CustomMapMarker>
+      <CustomMapMarker
+        anchor="bottom"
+        v-for="(corner, index) of corners"
+        :key="index"
+        :coordinates="corner.point"
+      >
+        <template v-slot:icon>
+          <font-awesome-icon
+            icon="location-dot"
+            class="pin"
+            :style="{ color: 'red', display: corner.active ? 'block' : 'none' }"
+          />
+        </template>
+      </CustomMapMarker>-->
       <CustomMapMarker
         anchor="center"
         :coordinates="mapEndInfo"
@@ -390,6 +429,12 @@ export default class DriveToLocation extends Vue {
     labels: [],
     datasets: [],
   };
+
+  turfUtils = turfUtils;
+  streetPaint: LineLayerSpecification['paint'] = {
+    'line-color': '#FFFF00',
+    'line-width': 8,
+  };
   //#endregion variables
 
   //#region get / set
@@ -500,13 +545,15 @@ export default class DriveToLocation extends Vue {
     routePath: FeatureCollection,
     distance: number,
     airlinePoint: [number, number],
-    allowedCornerDistance = 0.001
+    allowedCornerDistance = 0.001,
+    moveAngle: number | null = null
   ): {
     value: boolean;
     endPoint: [number, number];
     corner: [number, number] | null;
     subPath: [number, number][];
   } {
+    if (!moveAngle) moveAngle = this.moveAngle;
     const minMax = turfUtils.getMinMaxAngleForPathDistanceSegment(
       routePath,
       this.mapDrivingPoint,
@@ -521,28 +568,22 @@ export default class DriveToLocation extends Vue {
       ...minMax.checkPoints,
       [...this.mapDrivingPoint],
     ];
-    console.log(minMax, this.moveAngle);*/
-    if (this.moveAngle >= minMax.min && this.moveAngle <= minMax.max)
+    console.log(minMax, moveAngle);*/
+    if (moveAngle >= minMax.min && moveAngle <= minMax.max)
       return {
         value: true,
         endPoint: minMax.endPoint,
         corner: minMax.corner,
         subPath: minMax.subPath,
       };
-    if (
-      this.moveAngle - 360 >= minMax.min &&
-      this.moveAngle - 360 <= minMax.max
-    )
+    if (moveAngle - 360 >= minMax.min && moveAngle - 360 <= minMax.max)
       return {
         value: true,
         endPoint: minMax.endPoint,
         corner: minMax.corner,
         subPath: minMax.subPath,
       };
-    if (
-      this.moveAngle + 360 >= minMax.min &&
-      this.moveAngle + 360 <= minMax.max
-    )
+    if (moveAngle + 360 >= minMax.min && moveAngle + 360 <= minMax.max)
       return {
         value: true,
         endPoint: minMax.endPoint,
@@ -745,6 +786,7 @@ export default class DriveToLocation extends Vue {
       this.controlHeight = (this.$refs.controlArea as HTMLElement).offsetHeight;
     this.ready = true;
     this.maxSpeed = this.vehicleParameter.speed;
+    if (this.maxSpeed > 100) this.maxSpeed = 100;
 
     if (this.animationIntermediateSteps > 1) {
       this.intervalAnimation = setInterval(
@@ -823,6 +865,9 @@ export default class DriveToLocation extends Vue {
     }
   }
 
+  corners: { point: [number, number]; active: boolean }[] = [];
+  searchPoints: { point: [number, number]; active: boolean; color: string }[] =
+    [];
   stop(): void {
     this.enableMapPan();
     clearInterval(this.intervalCalculation);
@@ -846,25 +891,63 @@ export default class DriveToLocation extends Vue {
       }
     }
 
-    const speedDrivingDistance = 0.05;
-    const maxCornerDistance = 0.0001;
-    const newDrivingPoint = this.getNewDrivingPoint(speedDrivingDistance);
+    const speedDrivingDistance = 0.04;
+    //const maxStreetDistance = 0.0001;
+    const maxCornerDistance = 0;
     if (this.movingType === MovingType.free) {
-      const possibleSegments = this.getPossibleSegments(
-        newDrivingPoint,
+      /*this.possibleStreets.length = 0;
+      this.possibleStreets.push(...this.getPossibleStreets(speedDrivingDistance, true));*/
+      const possibleCorners = this.getPossibleCorners(
+        speedDrivingDistance,
+        true
+      );
+      if (possibleCorners.length > 0) {
+        /*for (const point of this.corners) {
+          point.active = false;
+        }
+        this.corners.push(
+          ...possibleCorners.map((corner) => {
+            return {
+              point: corner,
+              active: true,
+            };
+          })
+        );*/
+        let minCorner = possibleCorners[0];
+        let minDistance = turf.distance(minCorner, this.mapDrivingPoint);
+        for (let i = 1; i < possibleCorners.length; i++) {
+          const distance = turf.distance(
+            possibleCorners[i],
+            this.mapDrivingPoint
+          );
+          if (distance < minDistance) {
+            minDistance = distance;
+            minCorner = possibleCorners[i];
+          }
+        }
+        if (minDistance < 0.015) {
+          this.updateDrivingPoint(minCorner, [], 0.015);
+        }
+      }
+      /*const possibleSegments = this.getPossibleCorners(
         speedDrivingDistance,
         maxCornerDistance,
+        maxStreetDistance,
         true
       ).filter((street) => street.corner);
       if (possibleSegments.length > 0) {
+        this.corners.push(
+          ...possibleSegments.map((item) => item.corner as [number, number])
+        );
         const bestSegment = possibleSegments.sort(
           (a, b) => (a.distanceToCorner ?? 1000) - (b.distanceToCorner ?? 1000)
         )[0];
         if (bestSegment.corner) {
           this.updateDrivingPoint(bestSegment.corner, [], 0.015);
         }
-      }
+      }*/
     } else {
+      const newDrivingPoint = this.getNewDrivingPoint(speedDrivingDistance);
       const insideSegment = this.isDrivingAngleInsideNextSegment(
         this.routePath,
         speedDrivingDistance,
@@ -1218,10 +1301,10 @@ export default class DriveToLocation extends Vue {
     this.drivenPath = turfUtils.getRouteObject(coordinates);
   }
 
-  getPossibleStreets(
+  getSearchArea(
     speedDrivingDistance: number,
     lookBackward = false
-  ): [number, number][][] {
+  ): [[number, number], [number, number]] | null {
     if (this.map) {
       const mapSize = mapUtils.getMapSize(this.map);
       const bounds = this.map.getBounds();
@@ -1281,23 +1364,54 @@ export default class DriveToLocation extends Vue {
           mapSize[0],
           mapSize[1]
         );
-        const pixelDelta = 0; // 2;
-        return mapUtils.getStreetsInRegion(
-          this.map,
-          this.streetLayers,
-          pixelPos01,
-          pixelPos02,
-          pixelDelta
-        );
+        return [pixelPos01, pixelPos02];
       }
+    }
+    return null;
+  }
+
+  getPossibleStreets(
+    speedDrivingDistance: number,
+    lookBackward = false
+  ): [number, number][][] {
+    const searchArea = this.getSearchArea(speedDrivingDistance, lookBackward);
+    if (searchArea) {
+      const pixelDelta = 0; // 2;
+      return mapUtils.getStreetsInRegion(
+        this.map,
+        this.streetLayers,
+        searchArea[0],
+        searchArea[1],
+        pixelDelta
+      );
     }
     return [];
   }
 
+  getPossibleCorners(
+    speedDrivingDistance: number,
+    lookBackward = false
+  ): [number, number][] {
+    const searchArea = this.getSearchArea(speedDrivingDistance, lookBackward);
+    if (searchArea) {
+      const pixelDelta = 0; // 2;
+      return mapUtils.getCornersInRegion(
+        this.map,
+        this.streetLayers,
+        searchArea[0],
+        searchArea[1],
+        pixelDelta
+      );
+    }
+    return [];
+  }
+
+  possibleStreets: [number, number][][] = [];
   getPossibleSegments(
-    newDrivingPoint: [number, number],
+    //newDrivingPoint: [number, number],
     speedDrivingDistance: number,
     maxCornerDistance: number,
+    maxStreetDistance: number,
     lookBackward = false
   ): {
     value: boolean;
@@ -1311,14 +1425,42 @@ export default class DriveToLocation extends Vue {
       speedDrivingDistance,
       lookBackward
     );
+    /*this.possibleStreets.length = 0;
+    this.possibleStreets.push(...possibleStreets);*/
+    //console.log(possibleStreets);
     if (possibleStreets.length > 0) {
       const streets = possibleStreets.filter((street) =>
         turfUtils.isPointCloseToRoute(
           turfUtils.getRouteObject(street),
           this.mapDrivingPoint,
-          maxCornerDistance
+          maxStreetDistance
         )
       );
+      /*if (lookBackward) {
+        for (const point of this.searchPoints) {
+          point.active = false;
+        }
+        const points = streets.map((item) => {
+          return {
+            point: item[item.length - 1],
+            active: true,
+            color: 'green'
+          }
+        });
+        points.push(...streets.map((item) => {
+          return {
+            point: item[0],
+            active: true,
+            color: 'blue'
+          }
+        }));
+        points.push({
+          point: this.mapDrivingPoint,
+          active: true,
+          color: 'yellow'
+        });
+        this.searchPoints.push(...points);
+      }*/
       const possibleSegments: {
         value: boolean;
         endPoint: [number, number];
@@ -1327,13 +1469,27 @@ export default class DriveToLocation extends Vue {
         distanceToSearchPoint: number;
         distanceToCorner: number | null;
       }[] = [];
+      if (streets.length === 0) return [];
+      const newDrivingPoint01 = this.getNewDrivingPoint(speedDrivingDistance);
+      const newDrivingPoint02 = this.getNewDrivingPoint(-speedDrivingDistance);
       for (const street of streets) {
-        const insideSegment = this.isDrivingAngleInsideNextSegment(
+        let newDrivingPoint = newDrivingPoint01;
+        let insideSegment = this.isDrivingAngleInsideNextSegment(
           turfUtils.getRouteObject(street),
           speedDrivingDistance,
           newDrivingPoint,
           maxCornerDistance
         ) as any;
+        if (!insideSegment.value && lookBackward) {
+          newDrivingPoint = newDrivingPoint02;
+          insideSegment = this.isDrivingAngleInsideNextSegment(
+            turfUtils.getRouteObject(street),
+            speedDrivingDistance,
+            newDrivingPoint,
+            maxCornerDistance,
+            this.moveAngle + 180
+          ) as any;
+        }
         if (insideSegment.value && insideSegment.subPath.length > 1) {
           const pathLength = turf.length(
             turf.lineString(insideSegment.subPath)
@@ -1385,8 +1541,8 @@ export default class DriveToLocation extends Vue {
       //this.movingType === MovingType.free ? speedDrivingDistance / 3 : 0.001;
       if (this.movingType === MovingType.free) {
         const possibleSegments = this.getPossibleSegments(
-          newDrivingPoint,
           speedDrivingDistance,
+          maxCornerDistance,
           maxCornerDistance
         );
         if (possibleSegments.length > 0) {

@@ -1,20 +1,48 @@
 import { Map, LayerSpecification, MapGeoJSONFeature } from 'maplibre-gl';
 import { createCanvas } from 'canvas';
 import * as turfUtils from '@/utils/turf';
+import * as turf from '@turf/turf';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
+const minFittingDistanceDefault = 0.000005;
+const minFittingDistanceSeparation = 0.0001;
+
+export function samePoint(
+  point1: [number, number],
+  point2: [number, number]
+): boolean {
+  return point1[0] === point2[0] && point1[1] === point2[1];
+}
+
+export function addPointToListIfNotExists(
+  list: [number, number][],
+  coordinates: [number, number]
+): [number, number][] {
+  if (!list.find((corner) => samePoint(corner, coordinates)))
+    list.push(coordinates);
+  return list;
+}
+
 export function connectIfFits(
   street01: [number, number][],
-  street02: [number, number][]
+  street02: [number, number][],
+  minFittingDistance = minFittingDistanceDefault
 ): [number, number][] {
+  const possibleReverseStep = samePoint(
+    street01[street01.length - 2],
+    street02[1]
+  );
   if (
-    street01[street01.length - 1][0] === street02[0][0] &&
-    street01[street01.length - 1][1] === street02[0][1] &&
-    street01[street01.length - 2][0] !== street02[1][0] &&
-    street01[street01.length - 2][1] !== street02[1][1]
+    samePoint(street01[street01.length - 1], street02[0]) &&
+    !possibleReverseStep
   ) {
     return [...street01.slice(0, -1), ...street02];
+  } else if (!possibleReverseStep) {
+    const distance = turf.distance(street01[street01.length - 1], street02[0]);
+    if (distance < minFittingDistance) {
+      return [...street01.slice(0, -1), ...street02];
+    }
   }
   return [];
 }
@@ -39,16 +67,11 @@ export function connectIfOverlaps(
     }
     if (match) {
       const j = street01.length - 1 - i;
-      if (
-        i === street01.length - 1 &&
-        street01[i - 1][0] === street02[1][0] &&
-        street01[i - 1][1] === street02[1][1]
-      )
+      if (i === street01.length - 1 && samePoint(street01[i - 1], street02[1]))
         return [];
       if (
         street02.length > j + 1 &&
-        street01[i - 1][0] === street02[j + 1][0] &&
-        street01[i - 1][1] === street02[j + 1][1]
+        samePoint(street01[i - 1], street02[j + 1])
       )
         return [];
       return [...street01.slice(0, i), ...street02];
@@ -168,6 +191,7 @@ export function reversRoad(road: Road): Road {
 
 export function connectStreets(
   roads: Road[],
+  minFittingDistance = minFittingDistanceDefault,
   baseRoads: Road[] | null = null,
   loopCount = 0
 ): Road[] {
@@ -186,7 +210,11 @@ export function connectStreets(
       for (let j = i + 1; j < roadList.length; j++) {
         const road02 = roadList[j].road;
         const tryConnection = (road01: Road, road02: Road): boolean => {
-          const street = connectIfFits(road01.coordinates, road02.coordinates);
+          const street = connectIfFits(
+            road01.coordinates,
+            road02.coordinates,
+            minFittingDistance
+          );
           if (street.length > 0) {
             findConnection = true;
             roadList[i].findConnection = true;
@@ -234,9 +262,38 @@ export function connectStreets(
     }
   }
   if (findConnection && loopCount < 6) {
-    return connectStreets(streets, baseRoads ?? roads, loopCount + 1);
+    return connectStreets(
+      streets,
+      minFittingDistance,
+      baseRoads ?? roads,
+      loopCount + 1
+    );
   }
   return streets;
+}
+
+function getCorners(streets: [number, number][][]): [number, number][] {
+  const connectionPoints: { point: [number, number]; count: number }[] = [];
+  const addToList = (point: [number, number]): void => {
+    const existingPoint = connectionPoints.find((corner) =>
+      samePoint(corner.point, point)
+    );
+    if (!existingPoint) {
+      connectionPoints.push({
+        point: point,
+        count: 1,
+      });
+    } else {
+      existingPoint.count++;
+    }
+  };
+  for (let i = 0; i < streets.length; i++) {
+    addToList(streets[i][0]);
+    addToList(streets[i][streets[i].length - 1]);
+  }
+  return connectionPoints
+    .filter((item) => item.count > 2)
+    .map((item) => item.point);
 }
 
 export const testRoads: [number, number][][] = [
@@ -415,28 +472,183 @@ export function calculateStreetMask(map: Map, streetLayers: string[]): string {
   return '';
 }
 
+function separateIntersectingStreets(
+  streets: [number, number][][]
+): [number, number][][] {
+  const minStreetLength = 0.01;
+  const splitStreet = streets.map(() => false);
+  const result: [number, number][][] = [];
+  for (let i = 0; i < streets.length; i++) {
+    const street1 = streets[i];
+    const line1 = turf.lineString(street1);
+    if (turf.length(line1) < minStreetLength) {
+      result.push(street1);
+      continue;
+    }
+    for (let j = i + 1; j < streets.length; j++) {
+      const street2 = streets[j];
+      const line2 = turf.lineString(street2);
+      if (turf.length(line2) < minStreetLength) continue;
+      const intersectionPoint = turf.lineIntersect(line1, line2);
+      if (intersectionPoint.features.length > 0) {
+        const coordinates = intersectionPoint.features[0].geometry.coordinates;
+        if (
+          turf.distance(coordinates, street1[0]) >
+            minFittingDistanceSeparation &&
+          turf.distance(coordinates, street1[street1.length - 1]) >
+            minFittingDistanceSeparation
+        ) {
+          splitStreet[i] = true;
+          const part1 = turf.lineSlice(street1[0], coordinates, line1);
+          const part2 = turf.lineSlice(
+            coordinates,
+            street1[street1.length - 1],
+            line1
+          );
+          result.push(part1.geometry.coordinates as [number, number][]);
+          result.push(part2.geometry.coordinates as [number, number][]);
+        }
+        if (
+          turf.distance(coordinates, street2[0]) >
+            minFittingDistanceSeparation &&
+          turf.distance(coordinates, street2[street2.length - 1]) >
+            minFittingDistanceSeparation
+        ) {
+          splitStreet[j] = true;
+          const part1 = turf.lineSlice(street2[0], coordinates, line2);
+          const part2 = turf.lineSlice(
+            coordinates,
+            street2[street2.length - 1],
+            line2
+          );
+          result.push(part1.geometry.coordinates as [number, number][]);
+          result.push(part2.geometry.coordinates as [number, number][]);
+        }
+      }
+    }
+    if (!splitStreet[i]) result.push(street1);
+  }
+  return result;
+}
+
 export function getStreetsInRegion(
   map: Map,
   streetLayers: string[],
   pixelPos01: [number, number] = [0, 0],
   pixelPos02: [number, number] = [100, 100],
-  pixelDelta = 0
+  pixelDelta = 0,
+  calculateSeparation = false
 ): [number, number][][] {
   /*return connectStreets(testRoads);*/
 
   if (map) {
-    const roadList = getStreetFeaturesInRegion(
+    let roadList = getStreetFeaturesInRegion(
       map,
       streetLayers,
       pixelPos01,
       pixelPos02,
       pixelDelta
     ).map((road) => (road.geometry as any).coordinates as [number, number][]);
-    return connectStreets(convertToRoadList(roadList)).map(
-      (road) => road.coordinates
-    );
+    if (calculateSeparation && roadList.length < 10)
+      roadList = separateIntersectingStreets(roadList);
+    return connectStreets(
+      convertToRoadList(roadList),
+      minFittingDistanceSeparation
+    ).map((road) => road.coordinates);
   }
   return [];
+}
+
+export function getCornersInRegion(
+  map: Map,
+  streetLayers: string[],
+  pixelPos01: [number, number] = [0, 0],
+  pixelPos02: [number, number] = [100, 100],
+  pixelDelta = 0
+): [number, number][] {
+  if (!map) return [];
+  let streets = getStreetFeaturesInRegion(
+    map,
+    streetLayers,
+    pixelPos01,
+    pixelPos02,
+    pixelDelta
+  ).map((road) => (road.geometry as any).coordinates as [number, number][]);
+  const corners: [number, number][] = getCorners(streets);
+
+  const addCorner = (coordinates: [number, number]): void => {
+    if (!corners.find((corner) => samePoint(corner, coordinates)))
+      corners.push(coordinates);
+  };
+  streets = connectStreets(
+    convertToRoadList(streets),
+    minFittingDistanceSeparation
+  ).map((road) => road.coordinates);
+  if (streets.length < 30) {
+    for (let i = 0; i < streets.length; i++) {
+      const street1 = streets[i];
+      const line1 = turf.lineString(street1);
+      for (let j = i + 1; j < streets.length; j++) {
+        const street2 = streets[j];
+        const line2 = turf.lineString(street2);
+        const overlapping = turf.lineOverlap(line1, line2);
+        if (overlapping.features.length > 0) {
+          /*const part = overlapping.features[0].geometry.coordinates as [
+            number,
+            number
+          ][];
+          if (
+            !samePoint(part[0], street1[0]) &&
+            !samePoint(part[0], street1[street1.length - 1]) &&
+            !samePoint(part[0], street2[0]) &&
+            !samePoint(part[0], street2[street2.length - 1])
+          )
+            addCorner(part[0]);
+          if (
+            !samePoint(part[part.length - 1], street1[0]) &&
+            !samePoint(part[part.length - 1], street1[street1.length - 1]) &&
+            !samePoint(part[part.length - 1], street2[0]) &&
+            !samePoint(part[part.length - 1], street2[street2.length - 1])
+          )
+            addCorner(part[part.length - 1]);*/
+          continue;
+        }
+        const intersectionPoint = turf.lineIntersect(line1, line2);
+        if (intersectionPoint.features.length > 0) {
+          const coordinates = intersectionPoint.features[0].geometry
+            .coordinates as [number, number];
+          addCorner(coordinates);
+        } else if (
+          !samePoint(street1[0], street2[0]) &&
+          !samePoint(street1[0], street2[street2.length - 1]) &&
+          !samePoint(street1[street1.length - 1], street2[0]) &&
+          !samePoint(street1[street1.length - 1], street2[street2.length - 1])
+        ) {
+          const minFittingDistance = 0.003;
+          if (
+            turf.pointToLineDistance(street1[0], line2) < minFittingDistance
+          ) {
+            addCorner(street1[0]);
+          } else if (
+            turf.pointToLineDistance(street1[street1.length - 1], line2) <
+            minFittingDistance
+          ) {
+            addCorner(street1[street1.length - 1]);
+          } else if (
+            turf.pointToLineDistance(street2[0], line1) < minFittingDistance
+          ) {
+            addCorner(street2[0]);
+          } else if (
+            turf.pointToLineDistance(street2[street2.length - 1], line1) <
+            minFittingDistance
+          ) {
+            addCorner(street2[street2.length - 1]);
+          }
+        }
+      }
+    }
+  }
+  return corners;
 }
 
 export function getMapSize(map: Map): [number, number] {

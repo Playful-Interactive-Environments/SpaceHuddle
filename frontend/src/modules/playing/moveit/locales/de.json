@@ -59,7 +59,7 @@
         "description": "Steuer die Fahrtrichtung mit dem Joystick direkt am Fahrzeug."
       },
       "joystick": {
-        "title": "Joystick",
+        "title": "separat",
         "description": "Steuer das Fahrzeug mit dem Joystick in der unteren rechten Ecke."
       }
     },
