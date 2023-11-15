@@ -98,11 +98,6 @@
                 background-color="#ffffff"
               >
               </SpriteCanvas>
-              <!--<img
-                class="vehicle-spritesheet"
-                :src="`/assets/games/moveit/vehicle/spritesheets/${vehicle.image}`"
-                :alt="vehicle.name"
-              />-->
             </div>
             <div>
               <el-rate
