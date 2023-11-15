@@ -12,7 +12,7 @@ export function samePoint(
   point1: [number, number],
   point2: [number, number]
 ): boolean {
-  return point1[0] === point2[0] && point1[1] === point2[1];
+  return point1 && point2 && point1[0] === point2[0] && point1[1] === point2[1];
 }
 
 export function addPointToListIfNotExists(
@@ -29,19 +29,24 @@ export function connectIfFits(
   street02: [number, number][],
   minFittingDistance = minFittingDistanceDefault
 ): [number, number][] {
-  const possibleReverseStep = samePoint(
-    street01[street01.length - 2],
-    street02[1]
-  );
-  if (
-    samePoint(street01[street01.length - 1], street02[0]) &&
-    !possibleReverseStep
-  ) {
-    return [...street01.slice(0, -1), ...street02];
-  } else if (!possibleReverseStep) {
-    const distance = turf.distance(street01[street01.length - 1], street02[0]);
-    if (distance < minFittingDistance) {
+  if (street01.length > 1 && street02.length > 1) {
+    const possibleReverseStep = samePoint(
+      street01[street01.length - 2],
+      street02[1]
+    );
+    if (
+      samePoint(street01[street01.length - 1], street02[0]) &&
+      !possibleReverseStep
+    ) {
       return [...street01.slice(0, -1), ...street02];
+    } else if (!possibleReverseStep && minFittingDistance > 0) {
+      const distance = turf.distance(
+        street01[street01.length - 1],
+        street02[0]
+      );
+      if (distance < minFittingDistance) {
+        return [...street01.slice(0, -1), ...street02];
+      }
     }
   }
   return [];
@@ -239,7 +244,11 @@ export function connectStreets(
         //if (checkTotalOverlayingRoads(road01, road02)) continue;
         //if (checkTotalOverlayingRoads(road01, reversRoad(road02))) continue;
         const tryConnection = (road01: Road, road02: Road): boolean => {
-          const street = connectIfFits(road01.coordinates, road02.coordinates);
+          const street = connectIfFits(
+            road01.coordinates,
+            road02.coordinates,
+            minFittingDistance
+          );
           if (street.length > 0) {
             findConnection = true;
             roadList[i].findConnection = true;
@@ -351,7 +360,7 @@ export const testRoads: [number, number][][] = [
 ];
 
 export function connectionTestResult(): Road[] {
-  return connectStreets(convertToRoadList(testRoads));
+  return connectStreets(convertToRoadList(testRoads), 0);
 }
 
 export function getNotNeededLayers(map: Map): LayerSpecification[] {
@@ -397,6 +406,8 @@ export function getStreetFeaturesInRegion(
   pixelDelta = 0
 ): MapGeoJSONFeature[] {
   if (map) {
+    const options: any = {};
+    if (streetLayers.length > 0) options['layers'] = streetLayers;
     return (
       map
         .queryRenderedFeatures(
@@ -404,10 +415,11 @@ export function getStreetFeaturesInRegion(
             [pixelPos01[0] - pixelDelta, pixelPos01[1] - pixelDelta],
             [pixelPos02[0] + pixelDelta, pixelPos02[1] + pixelDelta],
           ],
-          { layers: streetLayers }
+          options
         )
+        .filter((f) => f.layer.type === 'line')
         //.filter((f) => f.properties.class !== 'service')
-        .filter((f) => f.properties.surface !== 'unpaved')
+        //.filter((f) => f.properties.surface !== 'unpaved')
         .filter(
           (f) =>
             f.properties.subclass !== 'pedestrian' &&
@@ -415,6 +427,22 @@ export function getStreetFeaturesInRegion(
             f.properties.subclass !== 'cycleway'
         )
     );
+  }
+  return [];
+}
+
+export function getStreetCoordinates(
+  street: MapGeoJSONFeature
+): [number, number][] {
+  if (street.geometry.type === 'LineString')
+    return (street.geometry as any).coordinates;
+  else if (street.geometry.type === 'MultiLineString') {
+    const coordinatesBase = (street.geometry as any).coordinates;
+    const coordinates: [number, number][] = [...coordinatesBase[0]];
+    /*for (let i = 1; i < coordinatesBase.length; i++) {
+      coordinates.push(...coordinatesBase[i]);
+    }*/
+    return coordinates;
   }
   return [];
 }
@@ -431,6 +459,7 @@ export function calculateStreetMask(map: Map, streetLayers: string[]): string {
       mapSize,
       delta
     );
+    //console.log(streets);
 
     const canvas = createCanvas(mapSize[0], mapSize[1]);
     const ctx = canvas.getContext('2d');
@@ -438,8 +467,7 @@ export function calculateStreetMask(map: Map, streetLayers: string[]): string {
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 10;
     for (const street of streets) {
-      const coordinates: [number, number][] = (street.geometry as any)
-        .coordinates;
+      const coordinates: [number, number][] = getStreetCoordinates(street);
       if (coordinates.length >= 2) {
         ctx.beginPath();
         const lngLatStart: [number, number] = coordinates[0];
@@ -539,8 +567,6 @@ export function getStreetsInRegion(
   pixelDelta = 0,
   calculateSeparation = false
 ): [number, number][][] {
-  /*return connectStreets(testRoads);*/
-
   if (map) {
     let roadList = getStreetFeaturesInRegion(
       map,
@@ -548,12 +574,12 @@ export function getStreetsInRegion(
       pixelPos01,
       pixelPos02,
       pixelDelta
-    ).map((road) => (road.geometry as any).coordinates as [number, number][]);
+    ).map((road) => getStreetCoordinates(road));
     if (calculateSeparation && roadList.length < 10)
       roadList = separateIntersectingStreets(roadList);
     return connectStreets(
       convertToRoadList(roadList),
-      minFittingDistanceSeparation
+      calculateSeparation ? minFittingDistanceSeparation : 0
     ).map((road) => road.coordinates);
   }
   return [];
@@ -573,17 +599,16 @@ export function getCornersInRegion(
     pixelPos01,
     pixelPos02,
     pixelDelta
-  ).map((road) => (road.geometry as any).coordinates as [number, number][]);
+  ).map((road) => getStreetCoordinates(road));
   const corners: [number, number][] = getCorners(streets);
 
   const addCorner = (coordinates: [number, number]): void => {
     if (!corners.find((corner) => samePoint(corner, coordinates)))
       corners.push(coordinates);
   };
-  streets = connectStreets(
-    convertToRoadList(streets),
-    minFittingDistanceSeparation
-  ).map((road) => road.coordinates);
+  streets = connectStreets(convertToRoadList(streets), 0).map(
+    (road) => road.coordinates
+  );
   if (streets.length < 30) {
     for (let i = 0; i < streets.length; i++) {
       const street1 = streets[i];

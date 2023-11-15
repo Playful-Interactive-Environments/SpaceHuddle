@@ -763,10 +763,10 @@ export default class DriveToLocation extends Vue {
       });
   }
 
-  /*streetMask = '';
+  streetMask = '';
   createVisibleStreetMask(): void {
     this.streetMask = mapUtils.calculateStreetMask(this.map, this.streetLayers);
-  }*/
+  }
 
   initTrackingData(): void {
     if (
