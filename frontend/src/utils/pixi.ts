@@ -230,8 +230,9 @@ export async function loadTexture(
         textureState[url] !== TextureState.unloading
     );
   }
-  if (PIXI.Cache.has(url)) return PIXI.Cache.get(url);
-  else {
+  if (PIXI.Cache.has(url)) {
+    return PIXI.Cache.get(url);
+  } else {
     textureState[url] = TextureState.loading;
     if (eventBus) eventBus.emit(EventType.TEXTURES_LOADING_START);
     try {
@@ -242,6 +243,7 @@ export async function loadTexture(
       }
       return texture;
     } catch (e) {
+      delete textureState[url];
       return null;
     }
   }
