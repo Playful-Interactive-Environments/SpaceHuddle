@@ -187,7 +187,6 @@ export default class ModuleStatistic extends Vue {
     this.calculateNavigationTypeChart();
     this.calculateMovingTypeChart();
     this.calculateDrivingParameterChart('stops');
-    this.calculateDrivingParameterChart('pathCalculationCount');
     this.calculatePersonsChart();
     this.calculateSpeedChart('max');
     this.calculateSpeedChart('average');
@@ -588,17 +587,18 @@ export default class ModuleStatistic extends Vue {
       const mappingLength = 100;
       const mapToValue = (list, label) =>
         list
-          .filter((item) => item.parameter.trackingData)
+          .filter((item) => item.parameter.drive.trackingData)
           .map((item) => {
             return mapArrayToConstantSize(
-              item.parameter.trackingData,
+              item.parameter.drive.trackingData,
               (item) => item[parameterName],
               label,
               mappingLength
             );
           });
       const filter = (item) =>
-        item.parameter.trackingData && item.parameter.trackingData.length > 0;
+        item.parameter.drive.trackingData &&
+        item.parameter.drive.trackingData.length > 0;
       const vehicleList = this.getVehicleList(filter);
       const labels: number[] = [...Array(mappingLength).keys()];
       const datasets = calculateChartPerParameter(
@@ -632,18 +632,18 @@ export default class ModuleStatistic extends Vue {
       const mappingLength = 100;
       const mapToValue = (list, label) =>
         list
-          .filter((item) => item.parameter.trackingData)
+          .filter((item) => item.parameter.drive.trackingData)
           .map((item) => {
             return mapArrayToConstantSize(
-              item.parameter.trackingData,
+              item.parameter.drive.trackingData,
               (item) => item[parameterName],
               label,
               mappingLength
             );
           });
       const filter = (item) =>
-        item.parameter.trackingData &&
-        item.parameter.trackingData.length > 0 &&
+        item.parameter.drive.trackingData &&
+        item.parameter.drive.trackingData.length > 0 &&
         item.parameter.vehicle.category === 'bus';
       const compareList = [
         CalculationType.Average,

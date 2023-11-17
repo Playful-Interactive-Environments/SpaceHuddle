@@ -139,14 +139,14 @@ export default class Participant extends Vue {
     this.module = module;
   }
 
-  startLevel(level: Idea, temperatureRise: number): void {
+  async startLevel(level: Idea, temperatureRise: number): Promise<void> {
     this.temperatureRise = temperatureRise;
     this.gameStep = GameStep.Play;
     this.gameState = GameState.Info;
     this.activeLevel = level;
 
     if (this.trackingManager) {
-      this.trackingManager.createInstanceStep(
+      await this.trackingManager.createInstanceStep(
         level.id,
         TaskParticipantIterationStepStatesType.NEUTRAL,
         {
@@ -163,7 +163,7 @@ export default class Participant extends Vue {
           obstacleState: {},
         }
       );
-      this.trackingManager.saveIteration({
+      await this.trackingManager.saveIteration({
         gameStep: GameStep.Play,
         level: level,
       });
@@ -171,11 +171,11 @@ export default class Participant extends Vue {
     this.stepTime = Date.now();
   }
 
-  levelPlayed(state: PlayStateResult): void {
+  async levelPlayed(state: PlayStateResult): Promise<void> {
     this.levelDone = true;
 
     if (this.trackingManager) {
-      this.trackingManager.saveIterationStep(
+      await this.trackingManager.saveIterationStep(
         {
           state: state,
           coolItTime: Date.now() - this.stepTime,
@@ -194,7 +194,16 @@ export default class Participant extends Vue {
         true,
         (item) => item.parameter.level === this.activeLevel?.id
       );
-      this.trackingManager.setFinishedState(this.module);
+
+      if (
+        this.trackingManager.state &&
+        (!this.trackingManager.state.parameter.rate ||
+          this.trackingManager.state.parameter.rate < state.stars)
+      ) {
+        this.trackingManager.setFinishedState(this.module, {
+          rate: state.stars,
+        });
+      } else this.trackingManager.setFinishedState(this.module);
     }
     this.stepTime = Date.now();
   }

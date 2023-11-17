@@ -112,10 +112,8 @@ import GameContainer from '@/components/shared/atoms/game/GameContainer.vue';
 import GameObject from '@/components/shared/atoms/game/GameObject.vue';
 import * as PIXI from 'pixi.js';
 import * as pixiUtil from '@/utils/pixi';
-import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
-import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
-import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
+import * as particleStateUtil from '@/modules/playing/moveit/utils/particleState';
 
 const resultTabName = 'result';
 
@@ -153,49 +151,15 @@ export default class ShowResult extends Vue {
   particleTextures: { [key: string]: PIXI.Texture } = {};
 
   get particleStateSum(): ParticleState {
-    let totalCount = 0;
-    let collectedCount = 0;
-    for (const particleName of Object.keys(this.particleState)) {
-      totalCount += this.particleState[particleName].totalCount;
-      collectedCount += this.particleState[particleName].collectedCount;
-    }
-    return {
-      collectedCount: collectedCount,
-      totalCount: totalCount,
-    };
-  }
-
-  get successStatus(): number {
-    const sum = this.particleStateSum;
-    return (sum.collectedCount / sum.totalCount) * 100;
+    return particleStateUtil.particleStateSum(this.particleState);
   }
 
   get successStatusText(): string {
-    const successStatus = this.successStatus;
-    if (successStatus > 90) {
-      return 'veryGood';
-    }
-    if (successStatus > 70) {
-      return 'good';
-    }
-    if (successStatus > 50) {
-      return 'notBad';
-    }
-    return 'improvable';
+    return particleStateUtil.successStatusText(this.particleState);
   }
 
   get successRate(): number {
-    const successStatus = this.successStatus;
-    if (successStatus > 90) {
-      return 3;
-    }
-    if (successStatus > 70) {
-      return 2;
-    }
-    if (successStatus > 50) {
-      return 1;
-    }
-    return 0;
+    return particleStateUtil.successRate(this.particleState);
   }
 
   get particleArea(): number {
@@ -351,42 +315,6 @@ export default class ShowResult extends Vue {
         this.spritesheet = sheet;
         this.generateParticleTextures();
       });
-
-    if (
-      this.trackingManager &&
-      this.trackingManager.state &&
-      this.trackingManager.state.parameter.rate < this.successRate
-    ) {
-      this.trackingManager.saveState({ rate: this.successRate });
-    }
-
-    if (this.trackingManager && this.trackingManager.iteration) {
-      await this.trackingManager.saveIteration(
-        {
-          rate: this.successRate,
-        },
-        this.successRate >= 2
-          ? TaskParticipantIterationStatesType.WIN
-          : TaskParticipantIterationStatesType.LOOS
-      );
-    }
-
-    if (this.trackingManager && this.trackingManager.iterationStep) {
-      const vehicle = this.trackingManager.iterationStep.parameter.vehicle;
-      await this.trackingManager.saveIterationStep(
-        {
-          rate: this.successRate,
-        },
-        this.successRate === 3
-          ? TaskParticipantIterationStepStatesType.CORRECT
-          : TaskParticipantIterationStepStatesType.WRONG,
-        this.successRate,
-        null,
-        true,
-        (item) =>
-          vehicleCalculation.isSameVehicle(item.parameter.vehicle, vehicle)
-      );
-    }
   }
 
   unmounted(): void {

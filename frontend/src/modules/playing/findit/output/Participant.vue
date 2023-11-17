@@ -181,13 +181,16 @@ export default class Participant extends Vue {
   }
 
   // Callbacks when stages are finished.
-  editFinished(newLevelId: string | null, result: BuildStateResult): void {
+  async editFinished(
+    newLevelId: string | null,
+    result: BuildStateResult
+  ): Promise<void> {
     this.gameStep = GameStep.Select;
     this.gameState = GameState.Info;
 
     if (this.trackingManager && newLevelId) {
       (result as any).step = GameStep.Build;
-      this.trackingManager.createInstanceStep(
+      await this.trackingManager.createInstanceStep(
         newLevelId,
         TaskParticipantIterationStepStatesType.NEUTRAL,
         result,
@@ -198,14 +201,14 @@ export default class Participant extends Vue {
     }
 
     if (this.trackingManager) {
-      this.trackingManager.saveIteration({
+      await this.trackingManager.saveIteration({
         gameStep: this.gameStep,
         levelId: null,
       });
     }
   }
 
-  playFinished(result: PlayStateResult): void {
+  async playFinished(result: PlayStateResult): Promise<void> {
     this.gameStep = GameStep.Select;
     this.gameState = GameState.Info;
 
@@ -213,7 +216,7 @@ export default class Participant extends Vue {
       (result as any).step = GameStep.Play;
       (result as any).state = this.selectedLevel?.parameter.state;
       (result as any).isOwn = this.selectedLevel?.isOwn;
-      this.trackingManager.createInstanceStep(
+      await this.trackingManager.createInstanceStep(
         this.selectedLevel.id,
         result.collected === result.total
           ? TaskParticipantIterationStepStatesType.CORRECT
@@ -228,19 +231,19 @@ export default class Participant extends Vue {
     this.selectedLevel = null;
 
     if (this.trackingManager) {
-      this.trackingManager.saveIteration({
+      await this.trackingManager.saveIteration({
         gameStep: this.gameStep,
         levelId: null,
       });
-      this.trackingManager.setFinishedState(this.module);
-    }
-
-    if (
-      this.trackingManager &&
-      this.trackingManager.state &&
-      this.trackingManager.state.parameter.rate < result.stars
-    ) {
-      this.trackingManager.saveState({ rate: result.stars });
+      if (
+        this.trackingManager.state &&
+        (!this.trackingManager.state.parameter.rate ||
+          this.trackingManager.state.parameter.rate < result.stars)
+      ) {
+        this.trackingManager.setFinishedState(this.module, {
+          rate: result.stars,
+        });
+      } else this.trackingManager.setFinishedState(this.module);
     }
   }
 }

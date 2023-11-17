@@ -140,7 +140,6 @@
     "navigationType": "Welche Navigationsmodus wurden wie oft pro User eingesetzt?",
     "movingType": "Welche Bewegungsmodus wurden wie oft pro User eingesetzt?",
     "stops": "Wie oft hat der Fahrer während der Fahrt angehalten?",
-    "pathCalculationCount": "Wie oft hat der Fahrer die Route neu berechnen lassen?",
     "persons": "Wie viele Personen befanden sich im Bus?",
     "speed": {
       "max": "Was war die Höchstgeschwindigkeit?",

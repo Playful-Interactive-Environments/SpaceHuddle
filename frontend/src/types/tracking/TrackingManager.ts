@@ -206,20 +206,27 @@ export class TrackingManager {
     );
   }
 
-  setFinishedState(module: Module | null): void {
+  setFinishedState(
+    module: Module | null,
+    contentChanges: any | null = null
+  ): void {
     if (
       this.state &&
       module &&
       'replayabel' in module.parameter &&
       !module.parameter.replayabel
     ) {
-      this.setManualFinishedState();
+      this.setManualFinishedState(contentChanges);
+    } else if (contentChanges) {
+      this.saveState(contentChanges);
     }
   }
 
-  setManualFinishedState(): void {
+  setManualFinishedState(contentChanges: any | null = null): void {
     if (this.state) {
-      this.saveState({}, TaskParticipantStatesType.FINISHED);
+      this.saveState(contentChanges, TaskParticipantStatesType.FINISHED);
+    } else if (contentChanges) {
+      this.saveState(contentChanges);
     }
   }
 

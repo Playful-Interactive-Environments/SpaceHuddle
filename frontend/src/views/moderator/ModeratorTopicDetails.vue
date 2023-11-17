@@ -765,7 +765,6 @@ export default class ModeratorTopicDetails extends Vue {
         }
         break;
       case 'statistic':
-        this.showStatistic = true;
         getAsyncModule(
           ModuleComponentType.MODULE_STATISTIC,
           TaskType[task.taskType],
@@ -773,6 +772,7 @@ export default class ModeratorTopicDetails extends Vue {
         ).then((component) => {
           if (this.$options.components) {
             this.$options.components['ModuleStatisticComponent'] = component;
+            this.showStatistic = true;
             this.statisticComponentLoadIndex++;
           }
         });

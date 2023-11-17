@@ -181,7 +181,6 @@
             @notifyCollision="particleCollected"
             @destroyObject="destroyParticle"
             @outsideDrawingSpace="outsideDrawingSpace"
-            @collision="updateTracking"
             @isPartOfChainChanged="isPartOfChainChanged"
           >
             <CustomSprite
@@ -444,16 +443,6 @@ export default class CleanUpParticles extends Vue {
     }
   }
 
-  initTrackingData(): void {
-    if (
-      this.trackingManager &&
-      this.trackingManager.iterationStep &&
-      !this.trackingManager.iterationStep.parameter.cleanUp
-    ) {
-      this.trackingManager.saveIterationStep({ cleanUp: {} });
-    }
-  }
-
   mounted(): void {
     this.eventBus.on(EventType.TEXTURES_LOADING_START, async () => {
       this.loading = true;
@@ -462,7 +451,6 @@ export default class CleanUpParticles extends Vue {
       this.loading = false;
     });
 
-    this.initTrackingData();
     for (const particleName in gameConfig.particles) {
       this.particleState[particleName] = {
         totalCount: 0,
@@ -628,22 +616,6 @@ export default class CleanUpParticles extends Vue {
 
         emitParticles(emitCount, dataset, parseInt(index));
       }
-    }
-    this.updateTracking();
-  }
-
-  updateTracking(): void {
-    this.initTrackingData();
-    if (this.trackingManager && this.trackingManager.iterationStep) {
-      this.trackingManager.iterationStep.parameter.cleanUp.particleState =
-        this.particleState;
-      this.trackingManager.iterationStep.parameter.cleanUp.totalTime =
-        this.chartData.datasets[0].data.length;
-      this.trackingManager.iterationStep.parameter.cleanUp.remaindingTime =
-        this.chartData.datasets[0].data.length - this.activeValue;
-      this.trackingManager.iterationStep.parameter.cleanUp.workingTime =
-        this.activeValue;
-      this.trackingManager.saveIterationStep();
     }
   }
 

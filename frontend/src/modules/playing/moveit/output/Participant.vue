@@ -71,8 +71,11 @@ import { MissionProgress } from '@/modules/brainstorming/missionmap/types/Missio
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
-import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
+import { FeatureCollection } from 'geojson';
+import * as turf from '@turf/turf';
+import * as particleStateUtil from '@/modules/playing/moveit/utils/particleState';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 
 enum GameStep {
   Select = 'select',
@@ -214,7 +217,15 @@ export default class Participant extends Vue {
       this.trackingManager = new TrackingManager(this.taskId, {
         gameStep: GameStep.Select,
         vehicle: this.vehicle,
-        trackingData: [],
+        drive: {
+          stops: 0,
+          persons: 1,
+          routePath: null,
+          routePathLength: 0,
+          drivenPath: null,
+          drivenPathLength: 0,
+          trackingData: [],
+        },
         particleState: {},
         rate: 0,
       });
@@ -261,26 +272,11 @@ export default class Participant extends Vue {
     this.module = module;
   }
 
-  newRun(): void {
-    if (this.trackingManager) {
-      this.trackingManager.saveIteration(
-        {
-          gameStep: GameStep.Select,
-          vehicle: this.vehicle,
-          trackingData: [],
-          particleState: {},
-          rate: 0,
-        },
-        TaskParticipantIterationStatesType.IN_PROGRESS
-      );
-    }
-  }
-
-  startGame(
+  async startGame(
     vehicle: vehicleCalculation.Vehicle,
     navigationType: NavigationType,
     movingType: MovingType
-  ): void {
+  ): Promise<void> {
     this.vehicle = vehicle;
     this.gameStep = GameStep.Drive;
     this.gameState = GameState.Info;
@@ -288,7 +284,7 @@ export default class Participant extends Vue {
     this.movingType = movingType;
 
     if (this.trackingManager) {
-      this.trackingManager.createInstanceStep(
+      await this.trackingManager.createInstanceStep(
         null,
         TaskParticipantIterationStepStatesType.NEUTRAL,
         {
@@ -297,12 +293,20 @@ export default class Participant extends Vue {
           movingType: movingType,
           selectTime: Date.now() - this.stepTime,
           playTime: Date.now() - this.startTime,
-          trackingData: [],
+          drive: {
+            stops: 0,
+            persons: 1,
+            routePath: null,
+            routePathLength: 0,
+            drivenPath: null,
+            drivenPathLength: 0,
+            trackingData: [],
+          },
           particleState: {},
           rate: 0,
         }
       );
-      this.trackingManager.saveIteration({
+      await this.trackingManager.saveIteration({
         gameStep: GameStep.Drive,
         vehicle: vehicle,
       });
@@ -310,18 +314,32 @@ export default class Participant extends Vue {
     this.stepTime = Date.now();
   }
 
-  goalReached(trackingData): void {
+  async goalReached(
+    trackingData: TrackingData[],
+    routePath: FeatureCollection,
+    drivenPath: FeatureCollection,
+    personCount: number,
+    stops: number
+  ): Promise<void> {
     this.trackingData = trackingData;
     this.gameStep = GameStep.CleanUp;
     this.gameState = GameState.Info;
 
     if (this.trackingManager) {
-      this.trackingManager.saveIterationStep({
-        trackingData: trackingData,
+      await this.trackingManager.saveIterationStep({
+        drive: {
+          stops: stops,
+          persons: personCount,
+          routePath: routePath,
+          routePathLength: turf.length(routePath),
+          drivenPath: drivenPath,
+          drivenPathLength: turf.length(drivenPath),
+          trackingData: trackingData,
+        },
         driveTime: Date.now() - this.stepTime,
         playTime: Date.now() - this.startTime,
       });
-      this.trackingManager.saveIteration({
+      await this.trackingManager.saveIteration({
         gameStep: GameStep.CleanUp,
         trackingData: trackingData,
       });
@@ -329,22 +347,51 @@ export default class Participant extends Vue {
     this.stepTime = Date.now();
   }
 
-  cleanupFinished(particleState: { [key: string]: ParticleState }): void {
+  async cleanupFinished(particleState: {
+    [key: string]: ParticleState;
+  }): Promise<void> {
     this.particleState = particleState;
     this.gameStep = GameStep.Result;
     this.gameState = GameState.Info;
 
     if (this.trackingManager) {
-      this.trackingManager.saveIterationStep({
-        particleState: particleState,
-        cleanupTime: Date.now() - this.stepTime,
-        playTime: Date.now() - this.startTime,
-      });
-      this.trackingManager.saveIteration({
-        gameStep: GameStep.Result,
-        particleState: particleState,
-      });
-      this.trackingManager.setFinishedState(this.module);
+      const successRate = particleStateUtil.successRate(particleState);
+      await this.trackingManager.saveIterationStep(
+        {
+          rate: successRate,
+          particleState: particleState,
+          cleanupTime: Date.now() - this.stepTime,
+          playTime: Date.now() - this.startTime,
+        },
+        successRate === 3
+          ? TaskParticipantIterationStepStatesType.CORRECT
+          : TaskParticipantIterationStepStatesType.WRONG,
+        successRate,
+        null,
+        true,
+        (item) =>
+          vehicleCalculation.isSameVehicle(item.parameter.vehicle, this.vehicle)
+      );
+      await this.trackingManager.saveIteration(
+        {
+          rate: successRate,
+          gameStep: GameStep.Result,
+          particleState: particleState,
+        },
+        successRate >= 2
+          ? TaskParticipantIterationStatesType.WIN
+          : TaskParticipantIterationStatesType.LOOS
+      );
+
+      if (
+        this.trackingManager.state &&
+        (!this.trackingManager.state.parameter.rate ||
+          this.trackingManager.state.parameter.rate < successRate)
+      ) {
+        this.trackingManager.setFinishedState(this.module, {
+          rate: successRate,
+        });
+      } else this.trackingManager.setFinishedState(this.module);
     }
     this.stepTime = Date.now();
   }
