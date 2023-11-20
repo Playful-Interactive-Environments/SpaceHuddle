@@ -18,12 +18,17 @@
       </template>
     </IdeaMap>
     <div class="overlay-bottom-right">
-      <el-button v-on:click="showMoleculesInfo = true">
-        <font-awesome-icon icon="atom" />
-      </el-button>
-      <el-button v-on:click="showHighScore = true">
-        <font-awesome-icon icon="trophy" />
-      </el-button>
+      <el-button-group>
+        <el-button v-on:click="showMoleculesInfo = true">
+          <font-awesome-icon icon="atom" />
+        </el-button>
+        <el-button v-on:click="showBuildingInfo = true">
+          <font-awesome-icon icon="building" />
+        </el-button>
+        <el-button v-on:click="showHighScore = true">
+          <font-awesome-icon icon="trophy" />
+        </el-button>
+      </el-button-group>
     </div>
   </div>
   <DrawerBottomOverlay v-model="showMoleculesInfo">
@@ -127,6 +132,67 @@
             {{
               $t(
                 `module.playing.coolit.participant.moleculeInfo.${moleculeName}.title`
+              )
+            }}
+          </div>
+        </el-space>
+      </el-scrollbar>
+    </template>
+  </DrawerBottomOverlay>
+  <DrawerBottomOverlay v-model="showBuildingInfo">
+    <template v-slot:header>
+      <div class="moleculeInfo" v-if="activeBuildingName">
+        <div class="title">
+          {{
+            $t(
+              `module.playing.coolit.participant.buildingInfo.${activeBuildingName}.title`
+            )
+          }}
+        </div>
+      </div>
+      <div class="moleculeInfo" v-else>
+        {{ $t('module.playing.coolit.participant.buildingInfo.none') }}
+      </div>
+    </template>
+    <div class="moleculeInfo" v-if="activeBuildingName">
+      <div class="description">
+        {{
+          $t(
+            `module.playing.coolit.participant.buildingInfo.${activeBuildingName}.description`
+          )
+        }}
+      </div>
+    </div>
+    <template v-slot:footer>
+      <el-scrollbar class="moleculeSelection">
+        <el-space wrap>
+          <div
+            class="clickable molecule"
+            v-for="buildingName of [
+              ...Object.keys(
+                gameConfig.obstacles.city.categories.building.items
+              ),
+              ...Object.keys(gameConfig.obstacles.city.categories.nature.items),
+            ]"
+            :key="buildingName"
+            @click="buildingNameClicked(buildingName)"
+          >
+            <SpriteCanvas
+              :key="buildingName"
+              :texture="getBuildingTexture(buildingName)"
+              :aspect-ration="getBuildingAspect(buildingName)"
+              :scale-factor="0.8"
+              :width="80"
+              :height="80"
+              :class="{ selected: activeBuildingName === buildingName }"
+              :background-color="backgroundColor"
+              v-model:renderer="rendererList[buildingName]"
+            >
+            </SpriteCanvas>
+            <br />
+            {{
+              $t(
+                `module.playing.coolit.participant.buildingInfo.${buildingName}.title`
               )
             }}
           </div>
@@ -336,11 +402,16 @@ export default class SelectLevel extends Vue {
   mapping: { [key: string]: number } = {};
   selectedIdea: Idea | null = null;
   showMoleculesInfo = false;
+  showBuildingInfo = false;
   showHighScore = false;
   showPlayDialog = false;
   spritesheet!: PIXI.Spritesheet;
+  spritesheetBuilding!: PIXI.Spritesheet;
   spriteSheetDifficulty!: PIXI.Spritesheet;
-  activeMoleculeName = '';
+  activeMoleculeName = Object.keys(gameConfig.molecules)[0];
+  activeBuildingName = Object.keys(
+    gameConfig.obstacles.city.categories.building.items
+  )[0];
   gameConfig = gameConfig;
   rendererList: { [key: string]: PIXI.Renderer } = {};
   circleGradientTexture: PIXI.Texture | null = null;
@@ -444,6 +515,11 @@ export default class SelectLevel extends Vue {
       pixiUtil
         .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
         .then((sheet) => (this.spritesheet = sheet));
+    }, 100);
+    setTimeout(() => {
+      pixiUtil
+        .loadTexture('/assets/games/coolit/city/city.json', this.eventBus)
+        .then((sheet) => (this.spritesheetBuilding = sheet));
     }, 100);
     setTimeout(() => {
       pixiUtil
@@ -623,6 +699,20 @@ export default class SelectLevel extends Vue {
     };
   }
 
+  buildingNameClicked(objectName: string): void {
+    this.activeBuildingName = objectName;
+  }
+
+  getBuildingTexture(objectName: string): PIXI.Texture | string {
+    if (this.spritesheetBuilding)
+      return this.spritesheetBuilding.textures[objectName];
+    return '';
+  }
+
+  getBuildingAspect(objectName: string): number {
+    return pixiUtil.getSpriteAspect(this.spritesheetBuilding, objectName);
+  }
+
   drawCircle(circle: PIXI.Graphics, objectName: string): void {
     until(() => this.rendererList[objectName]).then(() => {
       const renderer = this.rendererList[objectName];
@@ -669,7 +759,7 @@ export default class SelectLevel extends Vue {
   .el-button {
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
     padding: 0.5rem;
-    border-radius: 0.5rem;
+    --el-border-radius-base: 0.5rem;
     margin: 0;
     height: unset;
     min-height: unset;

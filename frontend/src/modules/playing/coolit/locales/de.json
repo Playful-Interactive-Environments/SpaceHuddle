@@ -93,6 +93,58 @@
         "cons": "Leider hat Helium großen Bedarf, aber geringes Vorkommen. Auf der Erde kann es hauptsächlich von natürlich vorkommenden Quellen bezogen werden."
       }
     },
+    "buildingInfo": {
+      "none": "Wähle ein Gebäude aus um dessen Informationen zu sehen.",
+      "notDiscovered": "Dieses Gebäude wurde noch nicht entdeckt.",
+      "building01": {
+        "title": "Wohnhaus",
+        "description": "Helle Farben und eine gute Wärmedämmung sorgen dafür, dass das Gebäude im Sommer kühl und im Winter warm bleibt."
+      },
+      "building02": {
+        "title": "Einfamilienhaus",
+        "description": "Helle Farben und eine gute Wärmedämmung sorgen dafür, dass das Gebäude im Sommer kühl und im Winter warm bleibt."
+      },
+      "building03": {
+        "title": "Mehrfamilienhaus",
+        "description": "Helle Farben und eine gute Wärmedämmung sorgen dafür, dass das Gebäude im Sommer kühl und im Winter warm bleibt."
+      },
+      "building04": {
+        "title": "Wohnhaus",
+        "description": "Dunkle Farben und eine viel Glas sorgen dafür, dass das Gebäude im Sommer sehr warm wird."
+      },
+      "glassBuilding01": {
+        "title": "Bürogebäude",
+        "description": "Glas erhitzt sich stark durch die Sonnen und kann schlecht wärme speichern."
+      },
+      "glassBuilding02": {
+        "title": "Bürogebäude",
+        "description": "Glas erhitzt sich stark durch die Sonnen und kann schlecht wärme speichern."
+      },
+      "glassBuilding03": {
+        "title": "Bürogebäude",
+        "description": "Glas erhitzt sich stark durch die Sonnen und kann schlecht wärme speichern."
+      },
+      "industry01": {
+        "title": "Lagerturm",
+        "description": "Dunkle Farben und Metall werden stark von der Sonne erhitzt."
+      },
+      "industry02": {
+        "title": "Fabrik",
+        "description": "Dunkle Farben und Metall werden stark von der Sonne erhitzt."
+      },
+      "industry03": {
+        "title": "Fabrik",
+        "description": "Dunkle Farben und Metall werden stark von der Sonne erhitzt."
+      },
+      "industry04": {
+        "title": "Fabrik",
+        "description": "Helle Farben und eine gute Wärmedämmung sorgen dafür, dass das Gebäude im Sommer kühl und im Winter warm bleibt."
+      },
+      "trees01": {
+        "title": "Bäume",
+        "description": "Bäume nehmen CO2 auf und sorgen für Beschattung."
+      }
+    },
     "moleculeType": {
       "greenhouseGas": "Treibhausgas",
       "atmosphericGas": "Atmosphärisches Gas"

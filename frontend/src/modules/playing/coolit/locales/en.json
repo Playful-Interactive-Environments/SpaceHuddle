@@ -93,6 +93,58 @@
         "cons": "Unfortunately, Helium is in high demand and short supply. On Earth it is mostly sourced from natural gas wells."
       }
     },
+    "buildingInfo": {
+      "none": "Select an available building to show its information.",
+      "notDiscovered": "This building has not been discovered yet.",
+      "building01": {
+        "title": "Residential building",
+        "description": "Light colours and good thermal insulation ensure that the building stays cool in summer and warm in winter."
+      },
+      "building02": {
+        "title": "Detached house",
+        "description": "Light colours and good thermal insulation ensure that the building stays cool in summer and warm in winter."
+      },
+      "building03": {
+        "title": "Apartment block",
+        "description": "Light colours and good thermal insulation ensure that the building stays cool in summer and warm in winter."
+      },
+      "building04": {
+        "title": "Residential building",
+        "description": "Dark colours and lots of glass ensure that the building is very warm in summer."
+      },
+      "glassBuilding01": {
+        "title": "Office building",
+        "description": "Glass heats up strongly from the sun and is poor at storing heat."
+      },
+      "glassBuilding02": {
+        "title": "Office building",
+        "description": "Glass heats up strongly due to the sun and is poor at storing heat."
+      },
+      "glassBuilding03": {
+        "title": "Office building",
+        "description": "Glass heats up strongly from the sun and is poor at storing heat."
+      },
+      "industry01": {
+        "title": "Warehouse tower",
+        "description": "Dark colours and metal are strongly heated by the sun."
+      },
+      "industry02": {
+        "title": "Factory",
+        "description": "Dark colours and metal are strongly heated by the sun."
+      },
+      "industry03": {
+        "title": "Factory",
+        "description": "Dark colours and metal are strongly heated by the sun."
+      },
+      "industry04": {
+        "title": "Factory",
+        "description": "Light colours and good thermal insulation ensure that the building stays cool in summer and warm in winter."
+      },
+      "trees01": {
+        "title": "Trees",
+        "description": "Trees absorb CO2 and provide shade."
+      }
+    },
     "moleculeType": {
       "greenhouseGas": "Greenhouse Gas",
       "atmosphericGas": "Atmospheric Gas"
