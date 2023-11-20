@@ -88,9 +88,9 @@ export default class Participant extends Vue {
   get tutorialList(): (string | ModuleInfoEntryData)[] {
     switch (this.gameStep) {
       case GameStep.Select:
-        return [{ key: 'select', texture: 'respiratory-sphere.jpg' }];
+        return [{ key: 'select', texture: 'gases.gif' }];
       case GameStep.Play:
-        return [{ key: 'play', texture: 'greenhouse-effect.png' }];
+        return [{ key: 'play', texture: 'playing.gif' }];
     }
     return [];
   }
