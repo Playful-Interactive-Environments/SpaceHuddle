@@ -261,6 +261,19 @@
                 :alpha="molecule.controllable ? 1 : 0.4"
               />
             </GameObject>
+
+            <animated-sprite
+              v-if="vehicleStylesheets"
+              :textures="vehicleStylesheets.animations[randomVehicleName]"
+              :animation-speed="0.2"
+              :width="vehicleWidth"
+              :height="vehicleWidth / getVehicleAspect(randomVehicleName)"
+              :x="vehiclePosition"
+              :y="(gameHeight / 50) * 49"
+              :anchor="[0.5, 1]"
+              playing
+              @frame-change="animationFrameChanged"
+            />
           </container>
           <container v-else>
             <container>
@@ -628,6 +641,7 @@ export default class PlayLevel extends Vue {
   obstacleList: CoolItObstacle[] = [];
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
   moleculeStylesheets!: PIXI.Spritesheet;
+  vehicleStylesheets!: PIXI.Spritesheet;
   lightTexture!: PIXI.Texture;
   startTime = Date.now();
   playTime = 0;
@@ -665,6 +679,10 @@ export default class PlayLevel extends Vue {
   interval!: any;
   readonly intervalTime = 100;
   waitForDataLoad = true;
+  randomVehicleName = '';
+  vehiclePosition = 0;
+  vehicleHasEmitted = false;
+  vehicleIsActive = false;
 
   CollisionGroups = Object.freeze({
     MOUSE: 1 << 0,
@@ -955,6 +973,13 @@ export default class PlayLevel extends Vue {
     return 1 / pixiUtil.getSpriteAspect(this.moleculeStylesheets, objectName);
   }
 
+  getVehicleAspect(objectName: string): number {
+    return pixiUtil.getSpriteAspect(
+      this.vehicleStylesheets,
+      `${objectName}_01.png`
+    );
+  }
+
   calculateRayPath(type: RayType, shift = 0): { x: number; y: number }[] {
     const rayPoints: { x: number; y: number }[] = [];
     const iPart = (Math.PI * 2) / this.rayPoints;
@@ -1055,6 +1080,10 @@ export default class PlayLevel extends Vue {
       (x, i) => i * 10 + this.minTemperature + 10
     );
   }
+
+  get vehicleWidth(): number {
+    return this.gameWidth / 2;
+  }
   //#endregion get / set
 
   //#region watch
@@ -1101,6 +1130,15 @@ export default class PlayLevel extends Vue {
         this.generateMoleculeTextures();
       });
     pixiUtil
+      .loadTexture(
+        '/assets/games/moveit/vehicle/vehicle_animation.json',
+        this.eventBus
+      )
+      .then((sheet) => {
+        this.vehicleStylesheets = sheet;
+        this.setRandomAnimation();
+      });
+    pixiUtil
       .loadTexture('/assets/games/coolit/city/river.png', this.eventBus)
       .then((sheet) => {
         this.riverTexture = sheet;
@@ -1120,6 +1158,56 @@ export default class PlayLevel extends Vue {
       this.temperatureColorSteps[i] = this.calculateTemperatureColor(i);
     }
     this.initRays();
+  }
+
+  setRandomAnimation(): void {
+    if (this.vehicleStylesheets) {
+      const list = Object.keys(this.vehicleStylesheets.animations);
+      this.randomVehicleName = list[Math.floor(Math.random() * list.length)];
+      this.vehiclePosition = -this.vehicleWidth / 2;
+      this.vehicleHasEmitted = false;
+      this.vehicleIsActive = false;
+    }
+  }
+
+  animationFrameChanged(): void {
+    if (!this.vehicleIsActive) return;
+    this.vehiclePosition += this.vehicleWidth / 50;
+    if (this.vehiclePosition > this.gameWidth + this.vehicleWidth / 2) {
+      this.setRandomAnimation();
+      setTimeout(() => {
+        this.vehicleIsActive = true;
+      }, Math.random() * 2000);
+    } else if (
+      this.vehiclePosition > this.gameWidth / 2 &&
+      !this.vehicleHasEmitted
+    ) {
+      this.vehicleHasEmitted = true;
+      const moleculeName = 'carbonDioxide';
+      this.moleculeList.push({
+        name: moleculeName,
+        id: uuidv4(),
+        type: moleculeName,
+        position: [(this.panOffsetMin[0] + this.panOffsetMax[0]) / 2, 92],
+        globalWarmingFactor:
+          gameConfig.molecules[moleculeName].globalWarmingFactor,
+        size: gameConfig.molecules[moleculeName].size,
+        controllable: gameConfig.molecules[moleculeName].controllable,
+        absorbedByTree: gameConfig.molecules[moleculeName].absorbedByTree,
+        color: gameConfig.molecules[moleculeName].color,
+        maxHitCount: 1000,
+        hitCount: 0,
+        hitAnimation: [],
+        heatAbsorptionCoefficientLight:
+          gameConfig.molecules[moleculeName].globalWarmingFactor,
+        heatAbsorptionCoefficientHeat:
+          gameConfig.molecules[moleculeName].globalWarmingFactor,
+        heatRadiationCoefficient:
+          gameConfig.molecules[moleculeName].globalWarmingFactor,
+        reflectionProbability: 1,
+        temperature: 0,
+      });
+    }
   }
 
   initRays(): void {
@@ -1211,6 +1299,10 @@ export default class PlayLevel extends Vue {
       this.startTime = Date.now();
       this.emitLightRays(0, 0);
     }
+
+    setTimeout(() => {
+      this.vehicleIsActive = true;
+    }, Math.random() * 1000);
   }
 
   containerSizeReady(): void {

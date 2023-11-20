@@ -481,7 +481,12 @@ export default class SelectChallenge extends Vue {
   vehicleWidth = 100;
   vehicleHeight = 100;
   getAnimationForVehicle(vehicle: any): PIXI.Texture[] {
-    const result: PIXI.Texture[] = [];
+    if (this.vehicleSpritesheet) {
+      const animationName = vehicle.image.slice(0, -4);
+      return this.vehicleSpritesheet.animations[animationName];
+    }
+    return [];
+    /*const result: PIXI.Texture[] = [];
     if (this.vehicleSpritesheet) {
       const keys = Object.keys(this.vehicleSpritesheet.textures)
         .filter((key) => key.includes(vehicle.image.slice(0, -4)))
@@ -490,7 +495,7 @@ export default class SelectChallenge extends Vue {
         result.push(this.vehicleSpritesheet.textures[key]);
       }
     }
-    return result;
+    return result;*/
   }
 
   targetWidth = 100;
