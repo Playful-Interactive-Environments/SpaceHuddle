@@ -268,8 +268,8 @@
               :animation-speed="0.2"
               :width="vehicleWidth"
               :height="vehicleWidth / getVehicleAspect(randomVehicleName)"
-              :x="vehiclePosition"
-              :y="(gameHeight / 50) * 49"
+              :x="vehicleXPosition"
+              :y="vehicleYPosition"
               :anchor="[0.5, 1]"
               playing
               @frame-change="animationFrameChanged"
@@ -680,7 +680,7 @@ export default class PlayLevel extends Vue {
   readonly intervalTime = 100;
   waitForDataLoad = true;
   randomVehicleName = '';
-  vehiclePosition = 0;
+  vehicleXPosition = 0;
   vehicleHasEmitted = false;
   vehicleIsActive = false;
 
@@ -1082,7 +1082,11 @@ export default class PlayLevel extends Vue {
   }
 
   get vehicleWidth(): number {
-    return this.gameWidth / 2;
+    return this.gameWidth / 3;
+  }
+
+  get vehicleYPosition(): number {
+    return (this.gameHeight / 50) * 49;
   }
   //#endregion get / set
 
@@ -1162,9 +1166,9 @@ export default class PlayLevel extends Vue {
 
   setRandomAnimation(): void {
     if (this.vehicleStylesheets) {
-      const list = Object.keys(this.vehicleStylesheets.animations);
+      const list = ['bus', 'compact-car', 'e-car', 'sport-car', 'suv']; //Object.keys(this.vehicleStylesheets.animations);
       this.randomVehicleName = list[Math.floor(Math.random() * list.length)];
-      this.vehiclePosition = -this.vehicleWidth / 2;
+      this.vehicleXPosition = -this.vehicleWidth / 2;
       this.vehicleHasEmitted = false;
       this.vehicleIsActive = false;
     }
@@ -1172,14 +1176,14 @@ export default class PlayLevel extends Vue {
 
   animationFrameChanged(): void {
     if (!this.vehicleIsActive) return;
-    this.vehiclePosition += this.vehicleWidth / 50;
-    if (this.vehiclePosition > this.gameWidth + this.vehicleWidth / 2) {
+    this.vehicleXPosition += this.vehicleWidth / 50;
+    if (this.vehicleXPosition > this.gameWidth + this.vehicleWidth / 2) {
       this.setRandomAnimation();
       setTimeout(() => {
         this.vehicleIsActive = true;
-      }, Math.random() * 2000);
+      }, Math.random() * 10000);
     } else if (
-      this.vehiclePosition > this.gameWidth / 2 &&
+      this.vehicleXPosition > this.gameWidth / 2 &&
       !this.vehicleHasEmitted
     ) {
       this.vehicleHasEmitted = true;
