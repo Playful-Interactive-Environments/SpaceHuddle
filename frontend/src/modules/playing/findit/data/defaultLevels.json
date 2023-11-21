@@ -1,10 +1,584 @@
 {
-  "empty fire": {
+  "fire world": {
     "type": "fire",
-    "items": []
+    "items": [
+      {
+        "type": "red_herring",
+        "name": "bottleWine",
+        "position": [
+          68.57205013278809,
+          55.68856761619384
+        ],
+        "rotation": 230,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "red_herring",
+        "name": "bottleBeer",
+        "position": [
+          58.28524115207628,
+          28.402051723535295
+        ],
+        "rotation": 50,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "red_herring",
+        "name": "ladybug",
+        "position": [
+          72.61956395585739,
+          39.68891889560885
+        ],
+        "rotation": 50,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "red_herring",
+        "name": "bug",
+        "position": [
+          88.42857142857142,
+          2.9732142857142858
+        ],
+        "rotation": 290,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "red_herring",
+        "name": "dragonfly",
+        "position": [
+          94,
+          84.40178571428572
+        ],
+        "rotation": 310,
+        "scale": 1.2,
+        "saturation": 1
+      },
+      {
+        "type": "red_herring",
+        "name": "dragonfly",
+        "position": [
+          86.76190476190476,
+          40.54464285714286
+        ],
+        "rotation": 290,
+        "scale": 1.7999999999999999,
+        "saturation": 1
+      },
+      {
+        "type": "red_herring",
+        "name": "dragonfly",
+        "position": [
+          85.61904761904762,
+          68.11607142857142
+        ],
+        "rotation": 280,
+        "scale": 1.5999999999999999,
+        "saturation": 1
+      },
+      {
+        "type": "red_herring",
+        "name": "turtle",
+        "position": [
+          97.09472221710186,
+          52.26541710296285
+        ],
+        "rotation": 80,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "red_herring",
+        "name": "bottleWhite",
+        "position": [
+          94.47667476708284,
+          47.83037581614579
+        ],
+        "rotation": 290,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "red_herring",
+        "name": "bottleWhite",
+        "position": [
+          44.52349978665631,
+          50.11721675075014
+        ],
+        "rotation": 320,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "red_herring",
+        "name": "bottleWine",
+        "position": [
+          39.990546113145857,
+          42.83144368450263
+        ],
+        "rotation": 160,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "red_herring",
+        "name": "dragonfly",
+        "position": [
+          41.80942445723638,
+          73.44849903230977
+        ],
+        "rotation": 320,
+        "scale": 1.9999999999999998,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "campfire",
+        "position": [
+          8.244114838554568,
+          60.68748854
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "cigarette",
+        "position": [
+          21.952380952380954,
+          97.54464285714286
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "cigarette",
+        "position": [
+          3.809807933028095,
+          96.11489048625518
+        ],
+        "rotation": 330,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "dead-tree",
+        "position": [
+          37.573740625188289,
+          85.259064430162
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "cigarette",
+        "position": [
+          76.66668988147103,
+          96.97401212525823
+        ],
+        "rotation": 10,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "dead-tree",
+        "position": [
+          74.24146204574204,
+          15.005004269470309
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "cigarette",
+        "position": [
+          91.71468555317017,
+          85.9739921212011
+        ],
+        "rotation": 270,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "cigarette",
+        "position": [
+          75.7139236592773,
+          1.6978065356928758
+        ],
+        "rotation": 180,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "dead-tree",
+        "position": [
+          91.42904670556685,
+          24.68743023
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "obstacles",
+        "name": "tree",
+        "position": [
+          11.28523807928637,
+          61.116071428744458
+        ],
+        "rotation": 0,
+        "scale": 0.6000000000000001,
+        "saturation": 1
+      },
+      {
+        "type": "obstacles",
+        "name": "bush",
+        "position": [
+          37.99976476501088,
+          88.2576757078917
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "obstacles",
+        "name": "bush",
+        "position": [
+          74.16003793132085,
+          14.810695689664796
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "obstacles",
+        "name": "bush",
+        "position": [
+          40.66435592832404,
+          52.256699507711058
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      }
+    ]
   },
-  "empty flood": {
+  "flood world": {
     "type": "flood",
-    "items": []
+    "items": [
+      {
+        "type": "red_herring",
+        "name": "turtle",
+        "position": [
+          18.30112366248105,
+          61.402107874090187
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "fish",
+        "position": [
+          20.142746837854767,
+          86.68843790376907
+        ],
+        "rotation": 310,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "fish",
+        "position": [
+          6.523482785166884,
+          6.109523782817285
+        ],
+        "rotation": 100,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "fish",
+        "position": [
+          23.205536725282607,
+          92.03994204495439
+        ],
+        "rotation": 20,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "branches",
+        "position": [
+          28.809395500037995,
+          90.11460606908858
+        ],
+        "rotation": 300,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "branches",
+        "position": [
+          6.951450654303683,
+          29.10681087676351
+        ],
+        "rotation": 80,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "sandbag",
+        "position": [
+          12.619047707867779,
+          5.16109308
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "sandbag",
+        "position": [
+          13.506871005024385,
+          12.07911613
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "sandbag",
+        "position": [
+          14.19047619047619,
+          17.50362397
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "man",
+        "position": [
+          48.172337438396237,
+          18.054294508664584
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "woman",
+        "position": [
+          55.333333333333339,
+          40.25892857142857
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "bottleWhite",
+        "position": [
+          54.693862876464098,
+          78.11483585582005
+        ],
+        "rotation": 300,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "woman",
+        "position": [
+          80.0990414044748,
+          54.92105391864375
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "man",
+        "position": [
+          94.52380952380952,
+          21.973214285714286
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "bottleWhite",
+        "position": [
+          85.09523809523809,
+          20.116071428571428
+        ],
+        "rotation": 290,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "bottleWine",
+        "position": [
+          86.85714285714286,
+          77.6875
+        ],
+        "rotation": 160,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "bottleBeer",
+        "position": [
+          98.46084445580735,
+          75.35574765
+        ],
+        "rotation": 30,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "hazards",
+        "name": "bottleWhite",
+        "position": [
+          72.71642069400494,
+          91.40593869398681
+        ],
+        "rotation": 300,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "obstacles",
+        "name": "bush",
+        "position": [
+          19.333417756482313,
+          89.1429302564508
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "obstacles",
+        "name": "bush",
+        "position": [
+          1.2386330201227425,
+          64.68750176023774
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "obstacles",
+        "name": "tree",
+        "position": [
+          50.428090521622319,
+          22.686311323372605
+        ],
+        "rotation": 0,
+        "scale": 0.6000000000000001,
+        "saturation": 1
+      },
+      {
+        "type": "obstacles",
+        "name": "bush",
+        "position": [
+          53.761470534046718,
+          74.40116780531128
+        ],
+        "rotation": 0,
+        "scale": 0.6000000000000001,
+        "saturation": 1
+      },
+      {
+        "type": "obstacles",
+        "name": "bush",
+        "position": [
+          87.38095238095238,
+          71.25892857142857
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "obstacles",
+        "name": "bush",
+        "position": [
+          96.7068107223231,
+          68.70762814274079
+        ],
+        "rotation": 0,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "obstacles",
+        "name": "wood",
+        "position": [
+          79.99986108749668,
+          59.690366974047098
+        ],
+        "rotation": 340,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "obstacles",
+        "name": "wood",
+        "position": [
+          94.96219396475519,
+          26.899552288434028
+        ],
+        "rotation": 210,
+        "scale": 1,
+        "saturation": 1
+      },
+      {
+        "type": "obstacles",
+        "name": "wood",
+        "position": [
+          72.71428386316437,
+          93.97055548771337
+        ],
+        "rotation": 20,
+        "scale": 1,
+        "saturation": 1
+      }
+    ]
   }
 }
