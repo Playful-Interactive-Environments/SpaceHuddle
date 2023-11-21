@@ -125,6 +125,13 @@ export default class CustomParticleContainer extends Vue {
     }
   }
 
+  @Watch('config.frequency', { immediate: true })
+  onFrequencyChanged(): void {
+    if (this.config && this.emitter) {
+      this.emitter.frequency = this.config.frequency;
+    }
+  }
+
   renderContainer(container: PIXI.ParticleContainer): void {
     this.container = container;
   }

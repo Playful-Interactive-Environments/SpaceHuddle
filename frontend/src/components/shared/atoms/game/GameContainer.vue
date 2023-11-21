@@ -31,8 +31,9 @@
           :height="backgroundTextureSize[1]"
           :x="backgroundTexturePosition[0]"
           :y="backgroundTexturePosition[1]"
+          :filters="pixiFilterListBackground"
         ></sprite>
-        <container v-if="endlessPanning">
+        <container v-if="endlessPanning" :filters="pixiFilterListBackground">
           <sprite
             v-if="backgroundSprite && backgroundSprite.valid"
             :texture="backgroundSprite"
@@ -351,6 +352,7 @@ export default class GameContainer extends Vue {
   @Prop({ default: false }) readonly showBounds!: boolean;
   @Prop({ default: false }) readonly showAllEnginColliders!: boolean;
   @Prop({ default: [] }) readonly pixiFilterList!: any[];
+  @Prop({ default: [] }) readonly pixiFilterListBackground!: any[];
   @Prop({ default: 0.4 }) readonly autoPanSpeed!: number;
   @Prop({ default: false }) readonly resetPositionOnSpeedChanged!: boolean;
   @Prop({ default: false }) readonly enableSleeping!: boolean;

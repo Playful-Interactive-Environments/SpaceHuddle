@@ -22,6 +22,7 @@
       :show-bounds="false"
       :collision-borders="CollisionBorderType.Background"
       :pixi-filter-list="collisionAnimation"
+      :pixi-filter-list-background="[colorFilter]"
       :auto-pan-speed="autoPanSpeed"
       :reset-position-on-speed-changed="gameOver"
       :waitForDataLoad="waitForDataLoad"
@@ -30,6 +31,13 @@
       <template v-slot:default>
         <container v-if="gameWidth && circleGradientTexture">
           <container v-if="!gameOver">
+            <custom-particle-container
+              v-if="snow.frequency"
+              :config="snow"
+              :parentEventBus="eventBus"
+              :default-texture="snowTexture"
+              :deep-clone-config="false"
+            />
             <container>
               <sprite
                 :texture="temperatureMarkerTexture"
@@ -439,13 +447,14 @@ import Vec2 from 'vec2';
 import Color from 'colorjs.io';
 import { toRadians } from '@/utils/angle';
 import Matter from 'matter-js';
-import { ShockwaveFilter } from 'pixi-filters';
+import { ShockwaveFilter, MultiColorReplaceFilter } from 'pixi-filters';
 import * as matterUtil from '@/utils/matter';
 import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
 import { Vote } from '@/types/api/Vote';
 import * as CoolItConst from '@/modules/playing/coolit/utils/consts';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { EventType } from '@/types/enum/EventType';
+import weatherConfig from '@/modules/playing/coolit/data/weather.json';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
@@ -667,10 +676,19 @@ export default class PlayLevel extends Vue {
   moleculeTextures: { [key: string]: PIXI.Texture } = {};
   rayParticleSize = 10;
   collisionAnimation: any[] = [];
+  colorFilter: MultiColorReplaceFilter = new MultiColorReplaceFilter(
+    [
+      [0x7cc269, 0x7cc269],
+      [0xafd5a4, 0xafd5a4],
+      [0x417b40, 0x417b40],
+    ],
+    0.2
+  );
   moleculeList: MoleculeData[] = [];
   backgroundParticle: { [key: string]: PIXIParticles.EmitterConfigV3 } = {};
   moleculeState: { [key: string]: MoleculeState } = {};
   highScore: Vote | null = null;
+  snowTexture!: PIXI.Texture;
 
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
@@ -697,6 +715,7 @@ export default class PlayLevel extends Vue {
     BORDER: 1 << 9,
   });
   CollisionBorderType = CollisionBorderType;
+  snow = weatherConfig.snow;
   //#endregion variables
 
   //#region get / set
@@ -1095,6 +1114,19 @@ export default class PlayLevel extends Vue {
   onSpeedLevelChanged(): void {
     this.autoPanSpeed = 0.4 + this.speedLevel * 0.2;
   }
+
+  @Watch('gameWidth', { immediate: true })
+  onGameWidthChanged(): void {
+    if (this.gameWidth) {
+      const spawnShape = this.snow.behaviors.find(
+        (behavior) => behavior.type === 'spawnShape'
+      );
+      if (spawnShape && spawnShape.config.data) {
+        spawnShape.config.data.w =
+          this.gameWidth - spawnShape.config.data.x * 2;
+      }
+    }
+  }
   //#endregion watch
 
   //#region load / unload
@@ -1157,6 +1189,11 @@ export default class PlayLevel extends Vue {
       .then((sheet) => {
         this.streetTexture = sheet;
       });
+    pixiUtil
+      .loadTexture('/assets/games/coolit/city/snow.png', this.eventBus)
+      .then((sheet) => {
+        this.snowTexture = sheet;
+      });
 
     for (let i = this.minTemperature; i <= this.maxTemperature; i++) {
       this.temperatureColorSteps[i] = this.calculateTemperatureColor(i);
@@ -1166,7 +1203,7 @@ export default class PlayLevel extends Vue {
 
   setRandomAnimation(): void {
     if (this.vehicleStylesheets) {
-      const list = ['bus', 'compact-car', 'e-car', 'sport-car', 'suv']; //Object.keys(this.vehicleStylesheets.animations);
+      const list = ['compact-car', 'e-car', 'sport-car', 'suv']; //Object.keys(this.vehicleStylesheets.animations);
       this.randomVehicleName = list[Math.floor(Math.random() * list.length)];
       this.vehicleXPosition = -this.vehicleWidth / 2;
       this.vehicleHasEmitted = false;
@@ -1780,6 +1817,62 @@ export default class PlayLevel extends Vue {
           timeFactor;
       }
     }
+
+    this.calculateWeather();
+  }
+
+  weatherTemperature = 0;
+  calculateWeather(): void {
+    if (this.weatherTemperature === Math.round(this.averageTemperature)) return;
+    const replacements = [...this.colorFilter.replacements];
+    replacements[0][1] = this.calculateTemperatureReplaceColor(
+      replacements[0][0] as number
+    );
+    replacements[1][1] = this.calculateTemperatureReplaceColor(
+      replacements[1][0] as number
+    );
+    replacements[2][1] = this.calculateTemperatureReplaceColor(
+      replacements[2][0] as number
+    );
+    this.colorFilter.replacements = replacements;
+    if (this.averageTemperature < 0) {
+      const frequency = Math.pow(2, Math.round(this.averageTemperature));
+      const minFrequency = 0.004;
+      if (frequency > minFrequency) this.snow.frequency = frequency;
+      else this.snow.frequency = minFrequency;
+    } else {
+      this.snow.frequency = 0;
+    }
+    this.weatherTemperature = Math.round(this.averageTemperature);
+  }
+
+  calculateTemperatureReplaceColor(sourceColor: number): number {
+    const startColor = new Color(`#${sourceColor.toString(16)}`);
+    const temperatureRange =
+      (this.upperTemperatureLimit - this.lowerTemperatureLimit) / 2;
+    const neutralTemperature = temperatureRange + this.lowerTemperatureLimit;
+    const lostColor = new Color(`#${sourceColor.toString(16)}`);
+    if (this.averageTemperature < neutralTemperature) {
+      lostColor.lch.l += 20;
+      lostColor.lch.c -= 40;
+      lostColor.lch.h += 100;
+    } else {
+      lostColor.lch.h -= 100;
+    }
+    const temperatureDifference =
+      this.averageTemperature < neutralTemperature
+        ? neutralTemperature - this.averageTemperature
+        : this.averageTemperature - neutralTemperature;
+    const colorWeight = temperatureDifference / temperatureRange;
+    const targetColor = startColor.range(lostColor, {
+      space: 'lch',
+      outputSpace: 'srgb',
+    })(colorWeight) as any;
+    const colorString = targetColor.toString({
+      format: 'hex',
+      collapse: false,
+    });
+    return parseInt(colorString.substring(1), 16);
   }
 
   updateRegionFilter(region: CollisionRegion): void {
