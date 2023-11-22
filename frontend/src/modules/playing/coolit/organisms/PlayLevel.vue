@@ -682,7 +682,7 @@ export default class PlayLevel extends Vue {
       [0xafd5a4, 0xafd5a4],
       [0x417b40, 0x417b40],
     ],
-    0.2
+    0.1
   );
   moleculeList: MoleculeData[] = [];
   backgroundParticle: { [key: string]: PIXIParticles.EmitterConfigV3 } = {};

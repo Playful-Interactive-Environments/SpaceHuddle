@@ -235,11 +235,7 @@
       </el-collapse-item>
     </el-collapse>
   </DrawerBottomOverlay>
-  <el-dialog
-    v-model="showPlayDialog"
-    @close="cancelGame"
-    custom-class="levelInfo"
-  >
+  <el-dialog v-model="showPlayDialog" @close="cancelGame" class="levelInfo">
     <template #header>
       <h1 v-if="selectedIdea">
         {{ selectedIdea.keywords }}
