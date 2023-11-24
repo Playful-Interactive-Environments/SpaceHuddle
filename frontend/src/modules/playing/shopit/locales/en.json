@@ -43,6 +43,7 @@
     "lostPoints": "Your emissions have exceeded the maximum.",
     "win": "You won!",
     "winCategories": "You managed to collect all categories before your opponent! Good Job!",
-    "winPoints": "Your opponent exceeded their maximum emissions."
+    "winPoints": "Your opponent exceeded their maximum emissions.",
+    "endCards": "These are the most expensive cards considering each resource that you played:"
   }
 }

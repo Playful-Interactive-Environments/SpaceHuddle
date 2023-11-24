@@ -43,6 +43,14 @@
     "lostPoints": "Deine Emissionen überstiegen das Maximum.",
     "win": "Du hast gewonnen!",
     "winCategories": "Du hast alle Kategorien vor deinem Gegner gesammelt! Gut gemacht!",
-    "winPoints": "Dein Gegner hat seine maximalen Emissionen überschreitet."
+    "winPoints": "Dein Gegner hat seine maximalen Emissionen überschreitet.",
+    "endCards": "Dies sind die teuersten Karten jeder Ressource, die du gespielt hast:",
+    "endCardTexts": {
+      "CO²": "",
+      "electricity": "",
+      "lifetime": "",
+      "water": "",
+      "money": ""
+    }
   }
 }
