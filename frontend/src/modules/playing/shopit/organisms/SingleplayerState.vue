@@ -47,16 +47,10 @@
       tag="div"
       id="activeCards"
     >
-      <p
-          v-if="cardsPlayed.length === 0 && playFirst"
-          class="waiting"
-      >
+      <p v-if="cardsPlayed.length === 0 && playFirst" class="waiting">
         {{ $t('module.playing.shopit.participant.waiting.yourTurn') }}
       </p>
-      <p
-          v-if="cardsPlayed.length === 0 && !playFirst"
-          class="waiting"
-      >
+      <p v-if="cardsPlayed.length === 0 && !playFirst" class="waiting">
         {{ $t('module.playing.shopit.participant.waiting.opponent') }}
       </p>
       <div
@@ -75,31 +69,31 @@
             <hr />
           </li>
           <li>
-            {{ card[1].split(' ')[0]
+            {{ card[1]
             }}<span>{{
               $t('module.playing.shopit.participant.cards.kg')
             }}</span>
           </li>
           <li>
-            {{ card[2].split(' ')[0]
+            {{ card[2]
             }}<span>{{
               $t('module.playing.shopit.participant.cards.kw')
             }}</span>
           </li>
           <li>
-            {{ card[3].split(' ')[0]
+            {{ card[3]
             }}<span>{{
               $t('module.playing.shopit.participant.cards.years')
             }}</span>
           </li>
           <li>
-            {{ card[4].split(' ')[0]
+            {{ card[4]
             }}<span>{{
               $t('module.playing.shopit.participant.cards.kl')
             }}</span>
           </li>
           <li>
-            {{ card[5].split(' ')[0]
+            {{ card[5]
             }}<span>{{
               $t('module.playing.shopit.participant.cards.price')
             }}</span>
@@ -155,9 +149,9 @@
         @click="activeCardChanged(card)"
       >
         <button
-            v-if="card === activeCard"
-            id="cardSelectButton"
-            @click="cardPlayed(activeCard)"
+          v-if="card === activeCard && !buttonDisabled"
+          id="cardSelectButton"
+          @click="cardPlayed(activeCard)"
         >
           {{ $t('module.playing.shopit.participant.cardPlayButton') }}
         </button>
@@ -167,31 +161,31 @@
             <hr />
           </li>
           <li>
-            {{ card[1].split(' ')[0]
+            {{ card[1]
             }}<span>{{
               $t('module.playing.shopit.participant.cards.kg')
             }}</span>
           </li>
           <li>
-            {{ card[2].split(' ')[0]
+            {{ card[2]
             }}<span>{{
               $t('module.playing.shopit.participant.cards.kw')
             }}</span>
           </li>
           <li>
-            {{ card[3].split(' ')[0]
+            {{ card[3]
             }}<span>{{
               $t('module.playing.shopit.participant.cards.years')
             }}</span>
           </li>
           <li>
-            {{ card[4].split(' ')[0]
+            {{ card[4]
             }}<span>{{
               $t('module.playing.shopit.participant.cards.kl')
             }}</span>
           </li>
           <li>
-            {{ card[5].split(' ')[0]
+            {{ card[5]
             }}<span>{{
               $t('module.playing.shopit.participant.cards.price')
             }}</span>
@@ -224,9 +218,9 @@
     </el-button>
   </div>
   <div
-      class="gameArea result"
-      :style="{ height: height }"
-      v-if="playStateType === PlayStateType.lost"
+    class="gameArea result"
+    :style="{ height: height }"
+    v-if="playStateType === PlayStateType.lost"
   >
     <h2 class="heading heading--medium">
       {{ $t('module.playing.shopit.participant.lost') }}
@@ -319,6 +313,8 @@ export default class PlayState extends Vue {
   pointsSpent = 0;
   pointsSpentOpponent = 0;
   reason = '';
+
+  buttonDisabled = false;
 
   playFirst = false;
   imageArray: any[] = [];
@@ -486,11 +482,7 @@ export default class PlayState extends Vue {
     }
     //If everything goes right: continue the play
     if (continuePlay && card[0] > 0) {
-      const button = document.getElementById('cardSelectButton');
-      //deactivate the button to prevent more cards being played
-      if (button) {
-        button.setAttribute('disabled', '');
-      }
+      this.buttonDisabled = true;
 
       //remove from hand and add to play
       const index = this.cardHand.indexOf(card);
@@ -639,10 +631,7 @@ export default class PlayState extends Vue {
     //draw new cards
     setTimeout(() => {
       this.drawNewCard();
-      const button = document.getElementById('cardSelectButton');
-      if (button) {
-        button.removeAttribute('disabled');
-      }
+      this.buttonDisabled = false;
     }, 1500);
     //reactivate Button
   }
