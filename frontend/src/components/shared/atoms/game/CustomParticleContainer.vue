@@ -117,7 +117,7 @@ export default class CustomParticleContainer extends Vue {
       });
     }
     await until(() => !!this.container);
-    this.emitter = new PIXIParticles.Emitter(this.container, config);
+    this.emitter = new PIXIParticles.Emitter(this.container as any, config);
     this.emitter.autoUpdate = this.autoUpdate;
     if (!this.autoUpdate) {
       await delay(100);

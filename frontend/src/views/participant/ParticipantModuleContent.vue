@@ -57,7 +57,6 @@
       :module-id="moduleId"
       v-model:useFullSize="useFullSize"
       v-model:backgroundClass="backgroundClass"
-      v-model:drawNavigation="drawNavigation"
     />
   </ParticipantDefaultContainer>
 </template>

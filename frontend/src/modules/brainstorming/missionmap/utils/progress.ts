@@ -77,7 +77,7 @@ export interface ProgressValues {
 
 export function getProgress(
   decidedIdeas: Idea[],
-  module: Module | undefined
+  module: Module | null
 ): { [key: string]: ProgressValues } {
   const result: { [key: string]: ProgressValues } = {};
   if (module) {
@@ -98,7 +98,7 @@ export function getProgress(
 
 export function getElectricityProgress(
   decidedIdeas: Idea[],
-  module: Module | undefined
+  module: Module | null
 ): { [key: string]: ProgressValues } {
   const result: { [key: string]: ProgressValues } = {};
   for (const electricityName in gameConfigMoveIt.electricity) {

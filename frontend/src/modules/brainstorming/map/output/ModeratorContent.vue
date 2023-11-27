@@ -1,6 +1,7 @@
 <template>
   <IdeaFilter :taskId="taskId" v-model="filter" @change="reloadIdeas(true)" />
   <IdeaMap
+    v-if="module"
     class="mapSpace"
     :ideas="ideas"
     :canChangePosition="() => true"
@@ -122,7 +123,7 @@ import { Module } from '@/types/api/Module';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorContent extends Vue implements IModeratorContent {
   @Prop() readonly taskId!: string;
-  module: Module | undefined = undefined;
+  module: Module | null = null;
   ideas: Idea[] = [];
   orderGroupContent: OrderGroupList = {};
   openTabs: string[] = [];
@@ -157,7 +158,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   updateTask(task: Task): void {
     if (task.modules.length === 1) this.module = task.modules[0];
     else {
-      this.module = task.modules.find((t) => t.name === 'map');
+      const module = task.modules.find((t) => t.name === 'map');
+      this.module = module ?? null;
     }
   }
 

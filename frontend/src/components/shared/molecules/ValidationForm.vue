@@ -52,7 +52,7 @@ export default class ValidationForm extends Vue implements ValidationMethods {
   }
 
   formItemValidated(prop: string): void {
-    if (!this.submitCheckActive && prop != 'stateMessage') {
+    if (!this.submitCheckActive && prop !== 'stateMessage') {
       this.formData.stateMessage = '';
       if (this.dataForm()) this.dataForm().validateField('stateMessage');
     }

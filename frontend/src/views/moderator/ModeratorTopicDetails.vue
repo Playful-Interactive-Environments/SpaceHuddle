@@ -208,7 +208,6 @@
         v-if="activeTask"
         :task-id="activeTaskId"
         ref="moduleContent"
-        class="moduleContent"
       />
     </template>
   </ModeratorNavigationLayout>
@@ -1012,9 +1011,5 @@ p {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-}
-
-.moduleContent {
-  flex: 1;
 }
 </style>

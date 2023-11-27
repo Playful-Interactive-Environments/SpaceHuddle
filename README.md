@@ -212,6 +212,7 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
 
       @Options({
         components: {},
+        emits: ['update'],
       })
 
       /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -223,6 +224,7 @@ SpaceHuddle is built on the following technologies. Visit the websites to learn 
         @Prop() readonly taskId!: string;
         @Prop() readonly topicId!: string;
         @Prop({ default: {} }) modelValue!: any;
+        @Prop({ default: {} }) formData!: any;
         module: Module | null = null;
 
         @Watch('modelValue', { immediate: true })

@@ -249,11 +249,17 @@ export async function loadTexture(
   }
 }
 
-export function unloadTexture(url: string | null): void {
-  if (url && PIXI.Cache.has(url)) {
+export async function unloadTexture(url: string | null): Promise<void> {
+  if (
+    url &&
+    PIXI.Cache.has(url) &&
+    textureState[url] &&
+    textureState[url] !== TextureState.unloading
+  ) {
     textureState[url] = TextureState.unloading;
-    PIXI.Assets.unload(url);
-    delete textureState[url];
+    PIXI.Assets.unload(url).then(() => {
+      delete textureState[url];
+    });
   }
 }
 

@@ -33,6 +33,7 @@ export default class ModeratorConfig
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
+  @Prop({ default: {} }) formData!: any;
 
   QuestionType = QuestionnaireType;
 

@@ -385,13 +385,17 @@ export default class Participant extends Vue {
     ideaService
       .postIdea(this.taskId, {
         description:
-          this.formData.keywords.length > 0 ? this.formData.description : '',
+          this.formData.keywords.length > 0
+            ? this.formData.description.trim()
+            : '',
         keywords:
           this.formData.keywords.length > 0
-            ? this.formData.keywords
-            : this.formData.description,
+            ? this.formData.keywords.trim()
+            : this.formData.description.trim(),
         image: this.formData.imgDataUrl,
-        link: this.formData.imageWebLink,
+        link: this.formData.imageWebLink
+          ? this.formData.imageWebLink.trim()
+          : null,
       })
       .then(
         (queryResult) => {

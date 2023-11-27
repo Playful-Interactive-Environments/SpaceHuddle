@@ -74,6 +74,86 @@ app.config.globalProperties.eventBus = eventBus;
 app.use(ElementPlus);
 app.use(VueObserveVisibility);
 app.use(i18n.customI18n(authService.getLocale()));
+
+//import { isCustomElement } from 'vue3-pixi';
+//app.config.compilerOptions.isCustomElement = (tag) => isCustomElement(tag);
+/*app.config.warnHandler = (msg, instance, trace) => {
+  console.log(msg, instance, trace);
+  ![
+    'A BaseTexture managed by Assets was destroyed instead of unloaded! Use Assets.unload() instead of destroying the BaseTexture.',
+    'App already provides property with key "Symbol(pixi_application)". It will be overwritten with the new value.',
+    'settings.FILTER_RESOLUTION is deprecated, use Filter.defaultResolution Deprecated since v7.1.0',
+    'utils.rgb2hex is deprecated, use Color#toNumber instead Deprecated since v7.2.0',
+  ].some((warning) => msg.includes(warning)) &&
+  console.warn('[no warn]: '.concat(msg).concat(trace));
+};*/
+const warn = console.warn;
+const groupCollapsed = console.groupCollapsed;
+console.groupCollapsed = (...data: any[]): void => {
+  const stringData = data.filter((item) => typeof item === 'string');
+  const isPixiDeprecation = !!stringData.find((item) =>
+    item.includes('PixiJS Deprecation Warning:')
+  );
+  if (isPixiDeprecation) {
+    const isPackageWarning = !!stringData.find(
+      (item) =>
+        item.includes(
+          'settings.FILTER_RESOLUTION is deprecated, use Filter.defaultResolution'
+        ) ||
+        item.includes(
+          'utils.rgb2hex is deprecated, use Color#toNumber instead'
+        ) ||
+        item.includes(
+          'utils.hex2rgb is deprecated, use Color#toRgbArray instead'
+        )
+    );
+    if (!isPackageWarning) {
+      groupCollapsed(...data);
+    }
+  } else groupCollapsed(...data);
+};
+console.warn = (...data: any[]): void => {
+  const stringData = data.filter((item) => typeof item === 'string' && !!item);
+  const objectData = data.filter((item) => typeof item === 'object' && !!item);
+  const isPixiPackageWarning = !!stringData.find(
+    (item) =>
+      item.includes('@pixi/filter-advanced-bloom/') ||
+      item.includes('@pixi/filter-multi-color-replace/') ||
+      item.includes('@pixi/filter-color-overlay/') ||
+      item.includes('@pixi/filter-outline/') ||
+      item.includes(
+        'App already provides property with key "Symbol(pixi_application)". It will be overwritten with the new value.'
+      ) ||
+      item.includes(
+        'A BaseTexture managed by Assets was destroyed instead of unloaded! Use Assets.unload() instead of destroying the BaseTexture.'
+      )
+  );
+  const isValidationWarning = !!objectData.find((item) => {
+    const array = Object.values(item);
+    if (
+      Array.isArray(array) &&
+      array.length > 0 &&
+      Array.isArray(array[0]) &&
+      array[0].length > 0
+    ) {
+      const value = array[0][0];
+      return Object.hasOwn(value, 'message') && Object.hasOwn(value, 'field');
+    }
+    return false;
+  });
+  if (isValidationWarning) {
+    for (const item of objectData) {
+      const array = Object.values(item) as any[];
+      for (const subArray of array) {
+        for (const item2 of subArray) {
+          warn(`validation warning: ${item2.field} - ${item2.message}`);
+        }
+      }
+    }
+  } else if (!isPixiPackageWarning && !isValidationWarning) {
+    warn(...data);
+  }
+};
 app.mount('#app');
 
 setViewportVariables();

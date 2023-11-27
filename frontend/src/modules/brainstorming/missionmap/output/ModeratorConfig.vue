@@ -151,6 +151,7 @@ mapStyle.setMapStyleStreets();
     MglMap,
     FontAwesomeIcon,
   },
+  emits: ['update'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/

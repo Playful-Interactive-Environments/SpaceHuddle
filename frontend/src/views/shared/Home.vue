@@ -21,7 +21,7 @@
         </router-link>
       </section>
       <section class="home__img">
-        <img alt="Illustration" />
+        <img alt="Illustration" src="" />
       </section>
     </div>
     <footer>

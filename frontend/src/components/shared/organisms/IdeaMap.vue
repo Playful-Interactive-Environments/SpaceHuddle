@@ -2,7 +2,6 @@
   <div ref="mapSpace" class="mapSpace">
     <mgl-map
       v-if="showMap"
-      ref="map"
       :center="mapCenter"
       :zoom="mapZoom"
       language="en"
@@ -153,7 +152,7 @@ export default class IdeaMap extends Vue {
   mapZoom = 14;
   mapBounds: LngLatBoundsLike | null = null;
   sizeCalculated = false;
-  map!: Map;
+  map: Map | null = null;
 
   MapStyleType = mapStyle.MapStyleType;
   mapStyle: mapStyle.MapStyleType = mapStyle.MapStyleType.Streets;

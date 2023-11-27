@@ -4,6 +4,8 @@
 @import '~@/assets/styles/third-party-components.scss';
 @import '~@/assets/styles/layout.scss';
 
+iframe#webpack-dev-server-client-overlay{display:none!important}
+
 html {
   box-sizing: border-box;
 }

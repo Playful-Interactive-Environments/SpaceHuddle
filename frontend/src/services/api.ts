@@ -1,4 +1,8 @@
-import Axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import Axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  InternalAxiosRequestConfig,
+} from 'axios';
 import {
   getAccessTokenModerator,
   getAccessTokenParticipant,
@@ -10,9 +14,9 @@ import app from '@/main';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
 const interceptorAuthHeader = (
-  axiosConfig: AxiosRequestConfig,
+  axiosConfig: InternalAxiosRequestConfig,
   authHeaderType = EndpointAuthorisationType.MODERATOR
-): AxiosRequestConfig => {
+): InternalAxiosRequestConfig => {
   if (authHeaderType != EndpointAuthorisationType.UNAUTHORISED) {
     let jwt: string | null = null;
     switch (authHeaderType) {
@@ -48,9 +52,9 @@ export const endpoint = (
 
   // request interceptors are used to automatically attach the authorization header for endpoints
   // that require authorization
-  axiosInstance.interceptors.request.use((axiosConfig) =>
-    interceptorAuthHeader(axiosConfig, authHeaderType)
-  );
+  axiosInstance.interceptors.request.use((axiosConfig) => {
+    return interceptorAuthHeader(axiosConfig, authHeaderType);
+  });
 
   // response interceptors are used to catch errors globally to show a generic error message
   axiosInstance.interceptors.response.use(

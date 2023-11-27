@@ -248,7 +248,7 @@ export default class ParticipantOverview extends Vue {
   theme: string | null = '';
   openTabs: string[] = [];
   EndpointAuthorisationType = EndpointAuthorisationType;
-  avatar!: Avatar;
+  avatar: Avatar | null = null;
   showLanguageSettings = false;
   points = 0;
   states: TaskParticipantState[] = [];

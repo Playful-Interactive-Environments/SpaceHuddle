@@ -137,7 +137,7 @@ export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
-  module: Module | undefined = undefined;
+  module: Module | null = null;
   ideas: Idea[] = [];
   readonly newTimeSpan = 10000;
   filter: FilterData = { ...defaultFilterData };
@@ -195,7 +195,8 @@ export default class PublicScreen extends Vue {
     this.inputManager.setOrderType(this.filter.orderType, false);
     if (task.modules.length === 1) this.module = task.modules[0];
     else {
-      this.module = task.modules.find((t) => t.name === 'missionmap');
+      const module = task.modules.find((t) => t.name === 'missionmap');
+      this.module = module ?? null;
     }
     if (this.module) this.showProgress = true;
   }

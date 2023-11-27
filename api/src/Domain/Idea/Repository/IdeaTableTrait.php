@@ -312,6 +312,7 @@ trait IdeaTableTrait
             $query = $this->queryFactory->newSelect("idea");
             $query->select(["id"])
                 ->andWhere($condition);
+
             return ($query->execute()->rowCount() == 0);
         }
         return false;

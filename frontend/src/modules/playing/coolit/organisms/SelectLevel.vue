@@ -520,7 +520,9 @@ export default class SelectLevel extends Vue {
     setTimeout(() => {
       pixiUtil
         .loadTexture('/assets/games/coolit/city/difficulty.json', this.eventBus)
-        .then((sheet) => (this.spriteSheetDifficulty = sheet));
+        .then((sheet) => {
+          this.spriteSheetDifficulty = sheet;
+        });
     }, 100);
 
     for (
@@ -541,6 +543,8 @@ export default class SelectLevel extends Vue {
 
   unmounted(): void {
     pixiUtil.unloadTexture('/assets/games/moveit/molecules.json');
+    pixiUtil.unloadTexture('/assets/games/coolit/city/city.json');
+    pixiUtil.unloadTexture('/assets/games/coolit/city/difficulty.json');
     cashService.deregisterAllGet(this.updateHighScore);
     cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateIterationSteps);

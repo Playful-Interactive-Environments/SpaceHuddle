@@ -197,7 +197,9 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
       oldTabs,
       newTabs,
       this.reloadTabState
-    ).then((tabs) => (this.openTabs = tabs));
+    ).then((tabs) => {
+      this.openTabs = tabs;
+    });
     this.reloadTabState = false;
   }
 

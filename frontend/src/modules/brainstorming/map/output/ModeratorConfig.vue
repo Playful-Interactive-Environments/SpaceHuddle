@@ -31,6 +31,7 @@ mapStyle.setMapStyleStreets();
     MglNavigationControl,
     MglMap,
   },
+  emits: ['update'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -42,6 +43,7 @@ export default class ModeratorConfig extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
+  @Prop({ default: {} }) formData!: any;
 
   mapCenter = [...defaultCenter] as [number, number];
   mapZoom = 5;

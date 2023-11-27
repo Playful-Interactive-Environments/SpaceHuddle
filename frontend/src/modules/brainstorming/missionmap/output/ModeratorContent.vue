@@ -24,6 +24,7 @@
     />
   </div>
   <IdeaMap
+    v-if="module"
     class="mapSpace"
     :ideas="ideas"
     :canChangePosition="(idea) => this.inputManager.isCurrentIdea(idea.id)"
@@ -341,7 +342,7 @@ import { CombinedInputManager } from '@/types/input/CombinedInputManager';
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModeratorContent extends Vue implements IModeratorContent {
   @Prop() readonly taskId!: string;
-  module: Module | undefined = undefined;
+  module: Module | null = null;
   task: Task | null = null;
   ideas: Idea[] = [];
   votes: Vote[] = [];
@@ -464,7 +465,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     this.task = task;
     if (task.modules.length === 1) this.module = task.modules[0];
     else {
-      this.module = task.modules.find((t) => t.name === 'missionmap');
+      const module = task.modules.find((t) => t.name === 'missionmap');
+      this.module = module ?? null;
     }
     this.resetAddIdea();
   }

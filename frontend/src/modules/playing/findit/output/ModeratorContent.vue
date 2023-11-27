@@ -215,7 +215,7 @@
       >
         <el-select v-model="preConfig">
           <el-option
-            :value="null"
+            value=""
             :label="$t('module.playing.findit.moderatorContent.noPreConfig')"
           />
           <el-option
@@ -313,7 +313,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   module: Module | undefined = undefined;
   filter: FilterData = { ...defaultFilterData };
   orderGroupContent: OrderGroupList = {};
-  preConfig: string | null = null;
+  preConfig = '';
 
   getSettingsForLevel = configParameter.getSettingsForLevel;
   getSettingsForLevelType = configParameter.getSettingsForLevelType;
@@ -490,7 +490,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   onTypeChanged(): void {
-    this.preConfig = null;
+    this.preConfig = '';
   }
 
   @Watch('preConfig', { immediate: true })
@@ -546,6 +546,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
 .module-content {
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: stretch;
   padding-bottom: 1rem;

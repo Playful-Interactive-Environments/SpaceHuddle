@@ -16,7 +16,7 @@ export class MissionInputData {
   taskId: string;
   inputTaskId: string | null = null;
   task!: Task;
-  module: Module | undefined = undefined;
+  module: Module | null = null;
   inputModule: Module | undefined = undefined;
   inputIdeas: Idea[] = [];
   ownIdeas: Idea[] = [];
@@ -97,7 +97,8 @@ export class MissionInputData {
     this.task = task;
     if (task.modules.length === 1) this.module = task.modules[0];
     else {
-      this.module = task.modules.find((t) => t.name === 'missionmap');
+      const module = task.modules.find((t) => t.name === 'missionmap');
+      this.module = module ?? null;
     }
     //todo use inputModule
     //todo input can pass over several modules

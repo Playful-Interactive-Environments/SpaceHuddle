@@ -69,6 +69,22 @@
             {{ MAX_INPUT_LENGTH - formData.newIdeaInput.length }}
           </span>
         </el-form-item>
+        <el-form-item
+          prop="stateMessage"
+          :rules="[defaultFormRules.ruleStateMessage]"
+          id="textErrorMessage"
+          class="hide"
+        >
+          <span class="media">
+            <span class="media-content">
+              <el-input
+                v-model="formData.stateMessage"
+                class="hide"
+                input-style="display: none"
+              />
+            </span>
+          </span>
+        </el-form-item>
       </ValidationForm>
     </template>
     <!--<div class="media" v-if="task">
@@ -173,6 +189,7 @@ import ValidationForm, {
 import ImageUploader from '@/components/shared/organisms/ImageUploader.vue';
 import DrawingUpload from '@/components/shared/organisms/DrawingUpload.vue';
 import * as cashService from '@/services/cash-service';
+import { getSingleTranslatedErrorMessage } from '@/services/exception-service';
 
 @Options({
   components: {
@@ -245,21 +262,27 @@ export default class Participant extends Vue {
       this.formData.newIdeaInput.startsWith('http') ||
       this.formData.newIdeaInput.startsWith('www')
     ) {
-      if (!this.newIdea.image) this.newIdea.link = this.formData.newIdeaInput;
+      if (!this.newIdea.image)
+        this.newIdea.link = this.formData.newIdeaInput.trim();
     } else if (this.formData.newIdeaInput.length > MAX_KEYWORDS_LENGTH)
-      this.newIdea.description = this.formData.newIdeaInput;
-    else this.newIdea.keywords = this.formData.newIdeaInput;
+      this.newIdea.description = this.formData.newIdeaInput.trim();
+    else this.newIdea.keywords = this.formData.newIdeaInput.trim();
     this.formData.newIdeaInput = '';
     this.scrollToBottom(0);
     if (this.newIdea.keywords) {
-      ideaService.postIdea(this.taskId, this.newIdea).then((queryResult) => {
-        if (queryResult) {
-          this.newIdea = {};
-          this.ideas.push(queryResult);
-          const scrollIsBottom = this.scrollIsBottom();
-          if (scrollIsBottom) this.scrollToBottom();
+      ideaService.postIdea(this.taskId, this.newIdea).then(
+        (queryResult) => {
+          if (queryResult) {
+            this.newIdea = {};
+            this.ideas.push(queryResult);
+            const scrollIsBottom = this.scrollIsBottom();
+            if (scrollIsBottom) this.scrollToBottom();
+          }
+        },
+        (error) => {
+          this.formData.stateMessage = getSingleTranslatedErrorMessage(error);
         }
-      });
+      );
     }
   }
 
@@ -449,5 +472,10 @@ export default class Participant extends Vue {
 
 .el-form-item--default {
   margin-bottom: 0;
+}
+
+.el-form-item.hide {
+  margin-bottom: 0;
+  display: none;
 }
 </style>

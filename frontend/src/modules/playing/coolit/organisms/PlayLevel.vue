@@ -402,7 +402,7 @@
         }}
       </div>
       <div>
-        <el-button @click="$emit('replayFinished')">
+        <el-button type="primary" @click="$emit('replayFinished')">
           {{ $t('module.playing.coolit.participant.confirm') }}
         </el-button>
       </div>
@@ -649,8 +649,8 @@ export default class PlayLevel extends Vue {
 
   obstacleList: CoolItObstacle[] = [];
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
-  moleculeStylesheets!: PIXI.Spritesheet;
-  vehicleStylesheets!: PIXI.Spritesheet;
+  moleculeStylesheets: PIXI.Spritesheet | null = null;
+  vehicleStylesheets: PIXI.Spritesheet | null = null;
   lightTexture!: PIXI.Texture;
   startTime = Date.now();
   playTime = 0;
@@ -881,6 +881,10 @@ export default class PlayLevel extends Vue {
     return 3;
   }
 
+  set stars(value: number) {
+    // do nothing
+  }
+
   get temperatureWinTime(): number {
     return CoolItConst.temperatureWinTime(this.winTime, this.temperatureRise);
   }
@@ -989,14 +993,18 @@ export default class PlayLevel extends Vue {
   }
 
   getMoleculeAspect(objectName: string): number {
-    return 1 / pixiUtil.getSpriteAspect(this.moleculeStylesheets, objectName);
+    if (this.moleculeStylesheets)
+      return 1 / pixiUtil.getSpriteAspect(this.moleculeStylesheets, objectName);
+    return 1;
   }
 
   getVehicleAspect(objectName: string): number {
-    return pixiUtil.getSpriteAspect(
-      this.vehicleStylesheets,
-      `${objectName}_01.png`
-    );
+    if (this.vehicleStylesheets)
+      return pixiUtil.getSpriteAspect(
+        this.vehicleStylesheets,
+        `${objectName}_01.png`
+      );
+    return 1;
   }
 
   calculateRayPath(type: RayType, shift = 0): { x: number; y: number }[] {
@@ -2254,6 +2262,7 @@ export default class PlayLevel extends Vue {
 
   .el-button {
     pointer-events: auto;
+    margin-top: 2rem;
   }
 
   .el-rate {

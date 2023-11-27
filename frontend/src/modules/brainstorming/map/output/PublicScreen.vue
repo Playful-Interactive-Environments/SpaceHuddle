@@ -2,7 +2,7 @@
   <el-container ref="container">
     <el-aside width="70vw" class="mapSpace">
       <IdeaMap
-        v-if="sizeLoaded"
+        v-if="sizeLoaded && module"
         :ideas="ideas"
         :parameter="module?.parameter"
         :canChangePosition="() => false"
@@ -67,7 +67,7 @@ export default class PublicScreen extends Vue {
   @Prop() readonly taskId!: string;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   authHeaderTyp!: EndpointAuthorisationType;
-  module: Module | undefined = undefined;
+  module: Module | null = null;
   ideas: Idea[] = [];
   ideaTransform: { [id: string]: boolean } = {};
   readonly newTimeSpan = 10000;
@@ -110,7 +110,8 @@ export default class PublicScreen extends Vue {
     );
     if (task.modules.length === 1) this.module = task.modules[0];
     else {
-      this.module = task.modules.find((t) => t.name === 'map');
+      const module = task.modules.find((t) => t.name === 'map');
+      this.module = module ?? null;
     }
   }
 

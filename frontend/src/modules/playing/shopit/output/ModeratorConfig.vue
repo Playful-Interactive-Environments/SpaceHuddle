@@ -23,6 +23,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
   components: {
     FontAwesomeIcon,
   },
+  emits: ['update'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -34,6 +35,7 @@ export default class ModeratorConfig extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
+  @Prop({ default: {} }) formData!: any;
 
   @Watch('modelValue', { immediate: true })
   async onModelValueChanged(): Promise<void> {

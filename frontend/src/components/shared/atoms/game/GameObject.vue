@@ -78,6 +78,7 @@ export const bounceCategory = 1 << 31;
     'positionChanged',
     'initialised',
     'isPartOfChainChanged',
+    'initError',
   ],
 })
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -123,7 +124,7 @@ export default class GameObject extends Vue {
   //#endregion props
 
   //#region variables
-  body!: typeof Matter.Body;
+  body: typeof Matter.Body | null = null;
   position: [number, number] = [0, 0];
   rotationValue = 0;
   container!: PIXI.Container;
@@ -281,7 +282,7 @@ export default class GameObject extends Vue {
       if (this.container) {
         const parent = this.container.parent;
         if (parent) {
-          parent.removeChild(this.container);
+          parent.removeChild(this.container as any);
         }
         this.container.destroy({ children: true });
       }

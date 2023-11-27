@@ -73,7 +73,7 @@
       <div @click="showToolbox = true">
         <font-awesome-icon icon="screwdriver-wrench" />
       </div>
-      <div v-if="placedObjects.length > 5" @click="showLevelSettings = true">
+      <div v-if="isReadyForSave" @click="showLevelSettings = true">
         <font-awesome-icon icon="save" />
       </div>
     </div>-->
@@ -124,13 +124,13 @@
         <font-awesome-icon icon="trash" />
       </div>
       <div
-        v-if="!level && showOptions && placedObjects.length > 5"
+        v-if="!level && showOptions && isReadyForSave"
         @click="showLevelSettings = true"
       >
         <font-awesome-icon icon="save" />
       </div>
       <div
-        v-else-if="level && showOptions && placedObjects.length > 5"
+        v-else-if="level && showOptions && isReadyForSave"
         @click="saveCurrentLevel"
       >
         <font-awesome-icon icon="save" />
@@ -364,6 +364,10 @@ export default class LevelBuilder extends Vue {
   EndpointAuthorisationType = EndpointAuthorisationType;
   CollisionBorderType = CollisionBorderType;
 
+  get isReadyForSave(): boolean {
+    return this.placedObjects.length > 5;
+  }
+
   get inactiveColor(): string {
     return themeColors.getInactiveColor();
   }
@@ -577,7 +581,7 @@ export default class LevelBuilder extends Vue {
         }
       }
     }
-    if (hasChanges) {
+    if (hasChanges && this.isReadyForSave) {
       const sceneLevel = this.loadedLevel ? { ...this.loadedLevel } : null;
       const sceneLevelType = this.levelType;
       ElMessageBox.confirm(

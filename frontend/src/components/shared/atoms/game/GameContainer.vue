@@ -168,8 +168,8 @@
     >
       <font-awesome-icon
         icon="circle-chevron-right"
-        @mousedown="beginPan([-1, 0])"
-        @touchstart="beginPan([-1, 0])"
+        @mousedown="beginPan([-manualPanSpeed, 0])"
+        @touchstart="beginPan([-manualPanSpeed, 0])"
       />
     </div>
     <div
@@ -182,8 +182,8 @@
     >
       <font-awesome-icon
         icon="circle-chevron-left"
-        @mousedown="beginPan([1, 0])"
-        @touchstart="beginPan([1, 0])"
+        @mousedown="beginPan([manualPanSpeed, 0])"
+        @touchstart="beginPan([manualPanSpeed, 0])"
       />
     </div>
     <div
@@ -196,8 +196,8 @@
     >
       <font-awesome-icon
         icon="circle-chevron-up"
-        @mousedown="beginPan([0, 1])"
-        @touchstart="beginPan([0, 1])"
+        @mousedown="beginPan([0, manualPanSpeed])"
+        @touchstart="beginPan([0, manualPanSpeed])"
       />
     </div>
     <div
@@ -210,8 +210,8 @@
     >
       <font-awesome-icon
         icon="circle-chevron-down"
-        @mousedown="beginPan([0, -1])"
-        @touchstart="beginPan([0, -1])"
+        @mousedown="beginPan([0, -manualPanSpeed])"
+        @touchstart="beginPan([0, -manualPanSpeed])"
       />
     </div>
   </div>
@@ -354,6 +354,7 @@ export default class GameContainer extends Vue {
   @Prop({ default: [] }) readonly pixiFilterList!: any[];
   @Prop({ default: [] }) readonly pixiFilterListBackground!: any[];
   @Prop({ default: 0.4 }) readonly autoPanSpeed!: number;
+  @Prop({ default: 2 }) readonly manualPanSpeed!: number;
   @Prop({ default: false }) readonly resetPositionOnSpeedChanged!: boolean;
   @Prop({ default: false }) readonly enableSleeping!: boolean;
   @Prop({ default: false }) readonly waitForDataLoad!: boolean;
@@ -368,7 +369,7 @@ export default class GameContainer extends Vue {
   canvasPosition: [number, number] = [0, 0];
   engine!: typeof Matter.Engine;
   runner!: typeof Matter.Runner;
-  detector!: typeof Matter.Detector;
+  detector: typeof Matter.Detector | null = null;
   mouseConstraint!: typeof Matter.MouseConstraint;
   hierarchyObserver!: MutationObserver;
   resizeObserver!: ResizeObserver;
@@ -1724,8 +1725,22 @@ export default class GameContainer extends Vue {
     this.panSpeed = panSpeed;
   }
 
-  endPan(): void {
-    if (this.backgroundMovement === BackgroundMovement.Pan) {
+  endPan(e: MouseEvent | null = null): void {
+    let endPan = !e || e.type !== 'mouseout';
+    if (
+      e &&
+      e.type === 'mouseout' &&
+      e.target === (this.$refs.pixi as any).canvas
+    ) {
+      const bounds = (this.$refs.pixi as any).canvas.getBoundingClientRect();
+      const insideBounds =
+        e.clientX > bounds.left &&
+        e.clientX < bounds.right &&
+        e.clientY > bounds.top &&
+        e.clientY < bounds.bottom;
+      endPan = !insideBounds;
+    }
+    if (endPan && this.backgroundMovement === BackgroundMovement.Pan) {
       this.panSpeed = 0;
       this.panVector = [0, 0];
       //clearInterval(this.intervalPan);

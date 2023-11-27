@@ -13,6 +13,7 @@ import * as cashService from '@/services/cash-service';
 
 @Options({
   components: {},
+  emits: ['update'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -24,6 +25,7 @@ export default class ModeratorConfig extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
+  @Prop({ default: {} }) formData!: any;
   module: Module | null = null;
 
   @Watch('moduleId', { immediate: true })

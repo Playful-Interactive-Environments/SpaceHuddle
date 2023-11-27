@@ -16,6 +16,7 @@ import CustomConfig from '@/modules/playing/findit/organisms/CustomConfig.vue';
 
 @Options({
   components: { CustomConfig },
+  emits: ['update'],
 })
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
@@ -25,6 +26,7 @@ export default class ModeratorConfig extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly topicId!: string;
   @Prop({ default: {} }) modelValue!: any;
+  @Prop({ default: {} }) formData!: any;
 }
 </script>
 

@@ -13,7 +13,7 @@
           </template>
         </el-input>
       </div>
-      <div class="level-item">
+      <div class="level-item" v-if="useStateFilter">
         <el-select
           v-model="modelValue.stateFilter"
           class="select--fullwidth"
@@ -159,6 +159,7 @@ export default class IdeaFilter extends Vue {
   })
   modelValue!: FilterData;
   @Prop() readonly taskId!: string;
+  @Prop({ default: true }) readonly useStateFilter!: boolean;
   task!: Task;
   syncUserId = '';
   ownUserId = '';

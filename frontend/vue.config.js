@@ -20,4 +20,27 @@ module.exports = {
       },
     },
   },
+  chainWebpack: (config) => {
+    config.module
+      .rule('vue')
+      .use('vue-loader')
+      .tap((options) => ({
+        ...options,
+        compilerOptions: {
+          isCustomElement: (tag) => {
+            return [
+              'container',
+              'sprite',
+              'graphics',
+              'animated-sprite',
+              'animatedsprite',
+              'particle-container',
+              'particlecontainer',
+              'simple-rope',
+              'simplerope',
+            ].includes(tag.toLowerCase());
+          },
+        },
+      }));
+  },
 };

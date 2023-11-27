@@ -145,7 +145,7 @@ export default class ShowResult extends Vue {
   particleReady = false;
   rendererReady = false;
   activeTabName = resultTabName;
-  spritesheet!: PIXI.Spritesheet;
+  spritesheet: PIXI.Spritesheet | null = null;
   maxParticleCount = 100;
   circleGradientTexture: PIXI.Texture | null = null;
   particleTextures: { [key: string]: PIXI.Texture } = {};
@@ -160,6 +160,10 @@ export default class ShowResult extends Vue {
 
   get successRate(): number {
     return particleStateUtil.successRate(this.particleState);
+  }
+
+  set successRate(value: number) {
+    // do nothing
   }
 
   get particleArea(): number {

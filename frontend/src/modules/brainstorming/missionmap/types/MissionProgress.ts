@@ -14,7 +14,7 @@ import * as progress from '@/modules/brainstorming/missionmap/utils/progress';
 export class MissionProgress {
   taskId: string;
   task!: Task;
-  module: Module | undefined = undefined;
+  module: Module | null = null;
   ideas: Idea[] = [];
   decidedIdeas: Idea[] = [];
   voteResult: VoteParameterResult[] = [];
@@ -66,7 +66,8 @@ export class MissionProgress {
     this.task = task;
     if (task.modules.length === 1) this.module = task.modules[0];
     else {
-      this.module = task.modules.find((t) => t.name === 'missionmap');
+      const module = task.modules.find((t) => t.name === 'missionmap');
+      this.module = module ?? null;
     }
   }
 

@@ -1,6 +1,11 @@
 <template>
   <div class="module-content">
-    <IdeaFilter :taskId="taskId" v-model="filter" @change="reloadIdeas(true)" />
+    <IdeaFilter
+      :taskId="taskId"
+      :use-state-filter="false"
+      v-model="filter"
+      @change="reloadIdeas(true)"
+    />
 
     <div class="level-layout" v-if="selectedLevel">
       <LevelBuilder
@@ -24,6 +29,7 @@
     <el-container>
       <el-aside>
         <IdeaMap
+          v-if="module"
           :ideas="ideas"
           :parameter="module?.parameter"
           :canChangePosition="() => true"
@@ -216,7 +222,7 @@
       >
         <el-select v-model="preConfig">
           <el-option
-            :value="null"
+            value=""
             :label="$t('module.playing.coolit.moderatorContent.noPreConfig')"
           />
           <el-option
@@ -312,10 +318,10 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
     parameter: { ...emptyParameter },
   };
   openTabs: string[] = [];
-  module: Module | undefined = undefined;
+  module: Module | null = null;
   filter: FilterData = { ...defaultFilterData };
   orderGroupContent: OrderGroupList = {};
-  preConfig: string | null = null;
+  preConfig = '';
   settingsIdea = this.addIdea;
 
   getSettingsForLevel = configParameter.getSettingsForLevel;
@@ -403,7 +409,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   updateTask(task: Task): void {
     if (task.modules.length === 1) this.module = task.modules[0];
     else {
-      this.module = task.modules.find((t) => t.name === 'coolit');
+      const module = task.modules.find((t) => t.name === 'coolit');
+      this.module = module ?? null;
     }
   }
 
@@ -506,7 +513,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   }
 
   onTypeChanged(): void {
-    this.preConfig = null;
+    this.preConfig = '';
   }
 
   @Watch('preConfig', { immediate: true })
@@ -573,6 +580,7 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
 .module-content {
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: stretch;
   padding-bottom: 1rem;

@@ -86,7 +86,7 @@
         </template>
         {{ $t('moderator.organism.settings.participantSettings.add') }}
       </el-button>
-      <vue3-html2pdf
+      <!--<vue3-html2pdf
         :show-layout="false"
         :float-layout="true"
         :enable-download="false"
@@ -142,7 +142,7 @@
             </div>
           </div>
         </template>
-      </vue3-html2pdf>
+      </vue3-html2pdf>-->
       <el-button type="primary" class="fullwidth" v-on:click="generateReport">
         {{ $t('moderator.organism.settings.participantSettings.export') }}
       </el-button>
@@ -193,14 +193,12 @@ import { Session } from '@/types/api/Session';
 import * as cashService from '@/services/cash-service';
 import { ParticipantInfo } from '@/types/api/Participant';
 import QrcodeVue from 'qrcode.vue';
-import Vue3Html2pdf from 'vue3-html2pdf';
 import * as themeColors from '@/utils/themeColors';
 import { copyToClipboard } from '@/utils/date';
 
 @Options({
   components: {
     QrcodeVue,
-    Vue3Html2pdf,
   },
   emits: ['update:showModal'],
 })
@@ -360,7 +358,7 @@ ${this.$t('moderator.organism.settings.participantSettings.link')}: ${link}`;
   }
 
   generateReport(): void {
-    (this.$refs as any).html2Pdf.generatePdf();
+    //(this.$refs as any).html2Pdf.generatePdf();
   }
 }
 </script>

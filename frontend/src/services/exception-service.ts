@@ -242,7 +242,7 @@ export const apiErrorHandling = async (
 };
 
 const reportErrors = (errors: string[]): void => {
-  console.log('reportErrors', errors);
+  //console.log('reportErrors', errors);
   const t = app.config.globalProperties.$t;
   errors.forEach((error) => {
     ElMessage({
