@@ -30,6 +30,10 @@
       }
     },
     "moleculeInfo": {
+      "globalWarmingFactor": "Globale Erwärmungspotenzial",
+      "lifespan": "Lebendauer",
+      "years": "Jahre",
+      "gwpInfo": "im Vergleich zu Kohlendioxid",
       "none": "Wähle ein Molekül aus um dessen Informationen zu sehen.",
       "notDiscovered": "Dieses Molekül wurde noch nicht entdeckt.",
       "waterVapor": {

@@ -4,6 +4,7 @@
     v-if="playStateType === PlayStateType.play && levelType"
   >
     <GameContainer
+      ref="gameContainer"
       v-model:width="gameWidth"
       v-model:height="gameHeight"
       :detect-collision="true"
@@ -542,6 +543,7 @@ interface CoolItHitRegion {
   heatAbsorptionCoefficientHeat: number;
   heatRadiationCoefficient: number;
   temperature: number;
+  emits: string[];
 }
 
 interface MoleculeData extends CoolItHitRegion {
@@ -593,6 +595,7 @@ function convertToCoolItObstacle(
     reflectionProbability: 1,
     saturation: result.saturation,
     temperature: configParameter.initialTemperature,
+    emits: configParameter.emits,
   };
 }
 
@@ -847,6 +850,7 @@ export default class PlayLevel extends Vue {
           heatAbsorptionCoefficientHeat: ration.heatAbsorptionCoefficientHeat,
           heatRadiationCoefficient: ration.heatRadiationCoefficient,
           temperature: ration.initialTemperature,
+          emits: ration.emits,
         } as CoolItHitRegion,
         filter: [],
         color: '#ffffff',
@@ -903,7 +907,7 @@ export default class PlayLevel extends Vue {
 
   get radiationFactor(): number {
     //return this.radiationConst;
-    return this.autoPanSpeed / 10;
+    return this.autoPanSpeed / 30;
   }
 
   getTimeString(timestamp: number): string {
@@ -1232,31 +1236,38 @@ export default class PlayLevel extends Vue {
       !this.vehicleHasEmitted
     ) {
       this.vehicleHasEmitted = true;
-      const moleculeName = 'carbonDioxide';
-      this.moleculeList.push({
-        name: moleculeName,
-        id: uuidv4(),
-        type: moleculeName,
-        position: [(this.panOffsetMin[0] + this.panOffsetMax[0]) / 2, 92],
-        globalWarmingFactor:
-          gameConfig.molecules[moleculeName].globalWarmingFactor,
-        size: gameConfig.molecules[moleculeName].size,
-        controllable: gameConfig.molecules[moleculeName].controllable,
-        absorbedByTree: gameConfig.molecules[moleculeName].absorbedByTree,
-        color: gameConfig.molecules[moleculeName].color,
-        maxHitCount: 1000,
-        hitCount: 0,
-        hitAnimation: [],
-        heatAbsorptionCoefficientLight:
-          gameConfig.molecules[moleculeName].globalWarmingFactor,
-        heatAbsorptionCoefficientHeat:
-          gameConfig.molecules[moleculeName].globalWarmingFactor,
-        heatRadiationCoefficient:
-          gameConfig.molecules[moleculeName].globalWarmingFactor,
-        reflectionProbability: 1,
-        temperature: 0,
-      });
+      this.emitMolecule(
+        [(this.panOffsetMin[0] + this.panOffsetMax[0]) / 2, 92],
+        'carbonDioxide'
+      );
     }
+  }
+
+  private emitMolecule(position: [number, number], moleculeName: string): void {
+    this.moleculeList.push({
+      name: moleculeName,
+      id: uuidv4(),
+      type: moleculeName,
+      position: position,
+      globalWarmingFactor:
+        gameConfig.molecules[moleculeName].globalWarmingFactor,
+      size: gameConfig.molecules[moleculeName].size,
+      controllable: gameConfig.molecules[moleculeName].controllable,
+      absorbedByTree: gameConfig.molecules[moleculeName].absorbedByTree,
+      color: gameConfig.molecules[moleculeName].color,
+      maxHitCount: 1000,
+      hitCount: 0,
+      hitAnimation: [],
+      heatAbsorptionCoefficientLight:
+        gameConfig.molecules[moleculeName].globalWarmingFactor,
+      heatAbsorptionCoefficientHeat:
+        gameConfig.molecules[moleculeName].globalWarmingFactor,
+      heatRadiationCoefficient:
+        gameConfig.molecules[moleculeName].globalWarmingFactor,
+      reflectionProbability: 1,
+      temperature: 0,
+      emits: [],
+    });
   }
 
   initRays(): void {
@@ -1316,6 +1327,7 @@ export default class PlayLevel extends Vue {
             heatRadiationCoefficient: moleculeConfig.globalWarmingFactor,
             reflectionProbability: 1,
             temperature: 0,
+            emits: [],
           });
         }
         const distance = 100 / moleculeCount;
@@ -1737,6 +1749,7 @@ export default class PlayLevel extends Vue {
   //#region loop
   updateTimeStamp = Date.now();
   gameOver = false;
+  emitObstacleList: string[] = [];
   updateLoop(): void {
     const updateTimeStamp = Date.now();
     const playTime = updateTimeStamp - this.startTime;
@@ -1777,12 +1790,54 @@ export default class PlayLevel extends Vue {
       }
     }
 
+    const displayWidth = this.panOffsetMax[0] - this.panOffsetMin[0];
+    const containerAspect = (
+      this.$refs.gameContainer as any
+    ).getBackgroundAspect();
+    const possibleEmitList = this.obstacleList
+      .filter(
+        (obstacle) =>
+          obstacle.emits.length > 0 &&
+          obstacle.position[0] > this.panOffsetMin[0] &&
+          obstacle.position[0] < this.panOffsetMax[0]
+      )
+      .map((item) => item.uuid);
+    this.emitObstacleList = this.emitObstacleList.filter((item) =>
+      possibleEmitList.includes(item)
+    );
     for (const obstacle of this.obstacleList) {
       obstacle.hitAnimation = obstacle.hitAnimation.filter(
         (item) => item.time < 5
       );
       for (const animation of obstacle.hitAnimation) {
         animation.time += 0.1;
+      }
+      if (
+        obstacle.emits.length > 0 &&
+        obstacle.position[0] > this.panOffsetMin[0] &&
+        obstacle.position[0] < this.panOffsetMax[0]
+      ) {
+        const position = this.panOffsetMin[0] + displayWidth / 2;
+        if (
+          position > obstacle.position[0] &&
+          !this.emitObstacleList.includes(obstacle.uuid)
+        ) {
+          this.emitObstacleList.push(obstacle.uuid);
+          for (const emit of obstacle.emits) {
+            const aspect = this.getObjectAspect(obstacle.type, obstacle.name);
+            this.emitMolecule(
+              [
+                obstacle.position[0],
+                obstacle.position[1] -
+                  obstacle.scale *
+                    obstacle.width *
+                    (1 / aspect) *
+                    containerAspect,
+              ],
+              emit
+            );
+          }
+        }
       }
     }
 
@@ -1827,6 +1882,15 @@ export default class PlayLevel extends Vue {
     }
 
     this.calculateWeather();
+
+    this.moleculeList = this.moleculeList.filter(
+      (item) =>
+        item.globalWarmingFactor > 0 ||
+        (item.position[0] > this.panOffsetMin[0] - 10 &&
+          item.position[0] < this.panOffsetMax[0] + 10) ||
+        (item.position[0] - 100 > this.panOffsetMin[0] - 10 &&
+          item.position[0] - 100 < this.panOffsetMax[0] + 10)
+    );
   }
 
   weatherTemperature = 0;
@@ -2006,7 +2070,7 @@ export default class PlayLevel extends Vue {
             [rayBody.position.x, rayBody.position.y],
             {
               amplitude: 1,
-              wavelength: 100 * ray.intensity,
+              wavelength: heatRadiation * 100, //100 * ray.intensity,
               speed: 10,
               brightness: 1.2,
               radius: heatRadiation * 100,

@@ -17,7 +17,8 @@
             "heatAbsorptionCoefficientHeat": 0.5,
             "heatRadiationCoefficient": 0.5,
             "initialTemperature": 14,
-            "name": "ground"
+            "name": "ground",
+            "emits": []
           },
           {
             "region": [[0, 92], [100, 92], [100, 100], [0, 100]],
@@ -28,7 +29,8 @@
             "heatAbsorptionCoefficientHeat": 2.5,
             "heatRadiationCoefficient": 2.5,
             "initialTemperature": 14,
-            "name": "street"
+            "name": "street",
+            "emits": []
           }
         ]
       },
@@ -53,7 +55,8 @@
               "width": 5,
               "shape": "polygon",
               "polygonShape": [[10, 10], [90, 10], [90, 100], [10, 100]],
-              "pivot": [0.5, 1]
+              "pivot": [0.5, 1],
+              "emits": []
             },
             "building02": {
               "heatRationCoefficient": 2,
@@ -66,7 +69,8 @@
               "shape": "polygon",
               "polygonShape": [[5, 20], [20, 0], [80, 0], [95, 20], [95, 100], [5, 100]],
               "pivot": [0.5, 1],
-              "maxHitCount": 3
+              "maxHitCount": 3,
+              "emits": []
             },
             "building03": {
               "heatRationCoefficient": 1.5,
@@ -78,7 +82,8 @@
               "width": 5,
               "shape": "polygon",
               "polygonShape": [[10, 10], [20, 0], [80, 0], [90, 10], [90, 100], [10, 100]],
-              "pivot": [0.5, 1]
+              "pivot": [0.5, 1],
+              "emits": []
             },
             "building04": {
               "heatRationCoefficient": 2,
@@ -89,7 +94,8 @@
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
-              "pivot": [0.5, 1]
+              "pivot": [0.5, 1],
+              "emits": []
             },
             "glassBuilding01": {
               "heatRationCoefficient": 2.5,
@@ -101,7 +107,8 @@
               "width": 5,
               "shape": "polygon",
               "polygonShape": [[0, 10], [100, 10], [100, 100], [0, 100]],
-              "pivot": [0.5, 1]
+              "pivot": [0.5, 1],
+              "emits": []
             },
             "glassBuilding02": {
               "heatRationCoefficient": 3,
@@ -112,7 +119,8 @@
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
-              "pivot": [0.5, 1]
+              "pivot": [0.5, 1],
+              "emits": []
             },
             "glassBuilding03": {
               "heatRationCoefficient": 3,
@@ -123,7 +131,8 @@
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
-              "pivot": [0.5, 1]
+              "pivot": [0.5, 1],
+              "emits": []
             },
             "industry01": {
               "heatRationCoefficient": 2,
@@ -134,7 +143,8 @@
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
-              "pivot": [0.5, 1]
+              "pivot": [0.5, 1],
+              "emits": []
             },
             "industry02": {
               "heatRationCoefficient": 2,
@@ -145,7 +155,8 @@
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
-              "pivot": [0.5, 1]
+              "pivot": [0.5, 1],
+              "emits": ["carbonDioxide"]
             },
             "industry03": {
               "heatRationCoefficient": 2,
@@ -157,7 +168,8 @@
               "width": 5,
               "shape": "polygon",
               "polygonShape": [[0, 100], [0, 70], [40, 0], [60, 0], [100, 70], [100, 100]],
-              "pivot": [0.5, 1]
+              "pivot": [0.5, 1],
+              "emits": ["carbonDioxide"]
             },
             "industry04": {
               "heatRationCoefficient": 2,
@@ -168,7 +180,8 @@
               "maxCount": 10,
               "width": 5,
               "shape": "rect",
-              "pivot": [0.5, 1]
+              "pivot": [0.5, 1],
+              "emits": []
             }
           }
         },
@@ -192,7 +205,8 @@
               "width": 7,
               "shape": "polygon",
               "polygonShape": [[20, 100], [0, 20], [20, 0], [80, 0], [100, 20], [80, 100]],
-              "pivot": [0.5, 1]
+              "pivot": [0.5, 1],
+              "emits": ["oxygen"]
             }
           }
         }
@@ -204,7 +218,9 @@
       "type": "greenhouseGas",
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#188c96",
-      "globalWarmingFactor": 1,
+      "globalWarmingFactorReal": 2.5,
+      "globalWarmingFactor": 0.5,
+      "lifespan": 0.03,
       "size": 0.25,
       "ration": 0.15,
       "realRation": 0.4,
@@ -216,9 +232,12 @@
       "type": "greenhouseGas",
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#c55e44",
-      "globalWarmingFactor": 1,
+      "globalWarmingFactorReal": 1,
+      "globalWarmingFactor": 0.25,
+      "lifespan": "30 - 1000",
       "size": 0.33,
       "ration": 0.04,
+      "realRation": 0.1,
       "controllable": true,
       "absorbedByTree": true,
       "rationDeltaPerDegree": 0.02
@@ -227,7 +246,9 @@
       "type": "greenhouseGas",
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#e7a320",
-      "globalWarmingFactor": 1,
+      "globalWarmingFactorReal": 25,
+      "globalWarmingFactor": 1.5,
+      "lifespan": 9.1,
       "size": 0.25,
       "ration": 0.01,
       "controllable": true,
@@ -238,7 +259,9 @@
       "type": "greenhouseGas",
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#ac7dbc",
-      "globalWarmingFactor": 1,
+      "globalWarmingFactorReal": 298,
+      "globalWarmingFactor": 5,
+      "lifespan": 131,
       "size": 0.5,
       "ration": 0.01,
       "controllable": true,
@@ -249,7 +272,8 @@
       "type": "greenhouseGas",
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#9b5144",
-      "globalWarmingFactor": 1,
+      "globalWarmingFactorReal": 2000,
+      "globalWarmingFactor": 8,
       "size": 0.33,
       "ration": 0.01,
       "controllable": true,
@@ -260,7 +284,9 @@
       "type": "greenhouseGas",
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/", "https://www.epa.gov/ghgemissions/overview-greenhouse-gases#f-gases"],
       "color": "#9b864c",
-      "globalWarmingFactor": 1,
+      "globalWarmingFactorReal": 14800,
+      "globalWarmingFactor": 16,
+      "lifespan": 100,
       "size": 0.5,
       "ration": 0.01,
       "controllable": true,
@@ -271,6 +297,7 @@
       "type": "atmosphericGas",
       "reference": ["https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/oxygen.html"],
       "color": "#d88e81",
+      "globalWarmingFactorReal": 0,
       "globalWarmingFactor": 0,
       "size": 0.2,
       "ration": 20.85,
@@ -283,6 +310,7 @@
       "type": "atmosphericGas",
       "reference": ["https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/nitrogen.html"],
       "color": "#d9b9e4",
+      "globalWarmingFactorReal": 0,
       "globalWarmingFactor": 0,
       "size": 0.2,
       "ration": 78,
@@ -294,6 +322,7 @@
       "type": "atmosphericGas",
       "reference": ["https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/argon.html"],
       "color": "74909d",
+      "globalWarmingFactorReal": 0,
       "globalWarmingFactor": 0,
       "size": 0.2,
       "ration": 0.9,
@@ -305,6 +334,7 @@
       "type": "atmosphericGas",
       "reference": ["https://www.linde-gas.com/en/products_and_supply/gases_atmospheric/helium.html"],
       "color": "#757d76",
+      "globalWarmingFactorReal": 0,
       "globalWarmingFactor": 0,
       "size": 0.2,
       "ration": 0.02,

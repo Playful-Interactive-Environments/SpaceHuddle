@@ -95,6 +95,36 @@
           {{ reference }}
         </a>
       </div>
+      <div class="values">
+        <table>
+          <tr>
+            <th>
+              {{
+                $t(
+                  'module.playing.coolit.participant.moleculeInfo.globalWarmingFactor'
+                )
+              }}
+            </th>
+            <td>
+              {{
+                getMoleculeConfig(activeMoleculeName).globalWarmingFactorReal
+              }}
+              {{ $t('module.playing.coolit.participant.moleculeInfo.gwpInfo') }}
+            </td>
+          </tr>
+          <tr v-if="getMoleculeConfig(activeMoleculeName).lifespan">
+            <th>
+              {{
+                $t('module.playing.coolit.participant.moleculeInfo.lifespan')
+              }}
+            </th>
+            <td>
+              {{ getMoleculeConfig(activeMoleculeName).lifespan }}
+              {{ $t('module.playing.coolit.participant.moleculeInfo.years') }}
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
     <template v-slot:footer>
       <el-scrollbar class="moleculeSelection">
@@ -687,6 +717,8 @@ export default class SelectLevel extends Vue {
     reference: string;
     color: string;
     globalWarmingFactor: number;
+    globalWarmingFactorReal: number;
+    lifespan: number | string;
   } {
     if (objectName) {
       return gameConfig.molecules[objectName];
@@ -696,6 +728,8 @@ export default class SelectLevel extends Vue {
       reference: '',
       color: '#ffffff',
       globalWarmingFactor: 1,
+      globalWarmingFactorReal: 1,
+      lifespan: 1,
     };
   }
 
@@ -822,6 +856,14 @@ export default class SelectLevel extends Vue {
     a {
       display: block;
     }
+  }
+
+  .values table {
+    margin-top: 2rem;
+  }
+
+  .values table th {
+    padding-right: 1rem;
   }
 }
 

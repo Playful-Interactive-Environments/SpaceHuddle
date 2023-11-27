@@ -30,6 +30,10 @@
       }
     },
     "moleculeInfo": {
+      "globalWarmingFactor": "Global Warming Potential",
+      "lifespan": "Lifespan",
+      "years": "years",
+      "gwpInfo": "compared to carbon dioxide",
       "none": "Select an available molecule to show its information.",
       "notDiscovered": "This molecule has not been discovered yet.",
       "waterVapor": {
