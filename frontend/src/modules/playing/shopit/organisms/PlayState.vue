@@ -318,7 +318,7 @@ export default class PlayState extends Vue {
   categoryPoints: any[] = [];
 
   maxCards = 3;
-  maxCost = 8;
+  maxCost = 125;
   pointsSpent = 0;
   pointsSpentOpponent = 0;
   reason = '';
