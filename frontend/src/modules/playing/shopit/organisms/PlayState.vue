@@ -237,17 +237,17 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
-import { ObjectSpace } from '@/types/enum/ObjectSpace';
-import { until } from '@/utils/wait';
+import {Options, Vue} from 'vue-class-component';
+import {Prop} from 'vue-property-decorator';
+import {ObjectSpace} from '@/types/enum/ObjectSpace';
+import {until} from '@/utils/wait';
 import * as tutorialService from '@/services/tutorial-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { Tutorial } from '@/types/api/Tutorial';
+import {Tutorial} from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
 import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
-import { Idea } from '@/types/api/Idea';
+import {Idea} from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import Card from '@/modules/playing/shopit/organisms/Card.vue';
 
@@ -276,7 +276,7 @@ export interface PlayStateResult {
   components: {
     Card,
   },
-  emits: ['playFinished'],
+  emits: ['playFinished', 'PlayerLeft'],
 })
 export default class PlayState extends Vue {
   @Prop() readonly taskId!: string;
@@ -493,6 +493,15 @@ export default class PlayState extends Vue {
         this.initialButtonState = true;
         console.log('player joined');
       }
+      if (this.player === 2 && this.game.parameter.playerNum <= 1 && this.initialButtonState) {
+        this.deregisterAll();
+        this.clearPlayState();
+        this.game.parameter.playerNum -= 1;
+        ideaService.putIdea(this.game, EndpointAuthorisationType.PARTICIPANT);
+        this.$emit('playerLeft');
+      } else if (this.player === 1 && this.game.parameter.playerNum <= 1 && this.initialButtonState) {
+        this.$emit('playerLeft');
+      }
     }
   }
 
@@ -505,11 +514,17 @@ export default class PlayState extends Vue {
     cashService.deregisterAllGet(this.updatingGame);
   }
 
-  unmounted(): void {
-    this.deregisterAll();
-    this.clearPlayState();
+  async unmounted() {
     this.game.parameter.playerNum -= 1;
-    ideaService.putIdea(this.game, EndpointAuthorisationType.PARTICIPANT);
+    await ideaService.putIdea(this.game, EndpointAuthorisationType.PARTICIPANT);
+    if (this.player === 1) {
+      await until(() => this.game.parameter.playerNum <= 0);
+      console.log('deleted');
+      await ideaService.deleteIdea(this.game.id, EndpointAuthorisationType.PARTICIPANT, false);
+      this.deregisterAll();
+      this.clearPlayState();
+      this.$emit('playFinished');
+    }
   }
 
   categorySetup() {

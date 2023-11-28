@@ -36,6 +36,10 @@
       "yourTurn": "waiting for your turn...",
       "opponent": "waiting for opponent..."
     },
+    "playerLeft": {
+      "left": "Player left.",
+      "leftText": "Unfortunately your opponent decided to give up on the game."
+    },
     "cardPlayButton": "Play Card!",
     "returnToMenu": "Return to menu.",
     "lost": "You lost.",

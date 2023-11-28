@@ -25,7 +25,19 @@
       :game="gameIdeaInstance"
       :player="player"
       @playFinished="playFinished"
+      @playerLeft="playerLeft"
     />
+    <div class="playerLeftScreen" v-if="gameState === GameState.Left">
+      <h2 class="heading heading--medium">
+        {{ $t('module.playing.shopit.participant.playerLeft.left') }}
+      </h2>
+      <p>
+        {{ $t('module.playing.shopit.participant.playerLeft.leftText') }}
+      </p>
+      <el-button class="el-button--submit returnButton" @click="clearAndReset">
+        {{ $t('module.playing.shopit.participant.returnToMenu') }}
+      </el-button>
+    </div>
   </div>
 </template>
 
@@ -54,6 +66,7 @@ export enum GameStep {
 enum GameState {
   Info = 'info',
   Game = 'game',
+  Left = 'left',
 }
 
 @Options({
@@ -84,6 +97,19 @@ export default class Participant extends Vue {
   gameIdeaInstance: Idea | null = null;
   joinID = 0;
   player = 0;
+
+  clearAndReset() {
+    this.gameStep = GameStep.Join;
+    this.GameStep = GameStep;
+    this.gameState = GameState.Game;
+    this.GameState = GameState;
+
+    this.cards = this.shuffle(this.parseCards(gameConfig));
+
+    this.joinID = 0;
+    this.player = 0;
+    this.gameIdeaInstance = null;
+  }
 
   get tutorialList(): (string | ModuleInfoEntryData)[] {
     switch (this.gameStep) {
@@ -258,6 +284,7 @@ export default class Participant extends Vue {
         case false:
           this.gameIdeaInstance.parameter.playerNum += 1;
           this.gameStep = GameStep.Play;
+          cashService.deregisterAllGet(this.updateGame);
           break;
         case true:
           break;
@@ -270,8 +297,12 @@ export default class Participant extends Vue {
   }
 
   playFinished(result: PlayStateResult): void {
+    this.clearAndReset();
+  }
+
+  playerLeft(): void {
     this.gameStep = GameStep.Join;
-    this.gameState = GameState.Info;
+    this.gameState = GameState.Left;
   }
 }
 </script>
@@ -279,5 +310,22 @@ export default class Participant extends Vue {
 <style lang="scss" scoped>
 .gameSpace {
   position: relative;
+}
+
+.playerLeftScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-default);
+  text-align: center;
+  height: 100%;
+  width: 100%;
+  padding: 1rem;
+}
+
+.returnButton {
+  position: absolute;
+  bottom: 2rem;
 }
 </style>

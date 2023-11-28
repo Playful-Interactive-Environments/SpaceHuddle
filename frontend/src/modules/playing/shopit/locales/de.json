@@ -36,6 +36,10 @@
       "yourTurn": "Warte auf deinen Zug...",
       "opponent": "Warte auf den Gegner..."
     },
+    "playerLeft": {
+      "left": "Spieler verlassen.",
+      "leftText": "Leider hat dein Gegner das Spiel aufgegeben."
+    },
     "cardPlayButton": "Spiele Karte!",
     "returnToMenu": "Zurück zum Menü.",
     "lost": "Du hast verloren.",
