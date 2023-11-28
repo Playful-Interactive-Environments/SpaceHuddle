@@ -216,6 +216,10 @@
         "title": "schwer",
         "description": "Nach dem Pariser Klimaabkommen soll der globale Anstieg der Lufttemperatur auf 2 °C begrenzt werden. Versuche unter diesen Bedingungen, die Erde kühl zu halten und zu verhindern, dass die roten Wärmestrahlen zu sehr mit den Treibhausgasen kollidieren. Aber bitte verhindere den Treibhauseffekt nicht gänzlich, denn wir wollen auch nicht erfrieren."
       }
+    },
+    "weatherInfo": {
+      "snow": "Schneewarnung",
+      "hail": "Hagelwarnung"
     }
   },
   "statistic": {

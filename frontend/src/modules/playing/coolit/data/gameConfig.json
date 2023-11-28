@@ -218,7 +218,8 @@
               "shape": "rect",
               "pivot": [0.5, 1],
               "emits": ["methane"],
-              "reflectionProbability": 0
+              "reflectionProbability": 0,
+              "calculateTemperature": false
             },
             "fertilizer": {
               "heatRationCoefficient": 0,
@@ -231,7 +232,8 @@
               "shape": "rect",
               "pivot": [0.5, 1],
               "emits": ["nitrogenOxide"],
-              "reflectionProbability": 0
+              "reflectionProbability": 0,
+              "calculateTemperature": false
             }
           }
         }
@@ -244,7 +246,7 @@
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#188c96",
       "globalWarmingFactorReal": 2.5,
-      "globalWarmingFactor": 0.7,
+      "globalWarmingFactor": 1.1,
       "lifespan": 0.03,
       "size": 0.25,
       "ration": 0.15,
@@ -260,7 +262,7 @@
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#c55e44",
       "globalWarmingFactorReal": 1,
-      "globalWarmingFactor": 0.4,
+      "globalWarmingFactor": 0.8,
       "lifespan": "30 - 1000",
       "size": 0.33,
       "ration": 0.04,
@@ -291,7 +293,7 @@
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#ac7dbc",
       "globalWarmingFactorReal": 298,
-      "globalWarmingFactor": 3,
+      "globalWarmingFactor": 2,
       "lifespan": 131,
       "size": 0.5,
       "ration": 0.01,
@@ -306,7 +308,7 @@
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/"],
       "color": "#9b5144",
       "globalWarmingFactorReal": 2000,
-      "globalWarmingFactor": 5,
+      "globalWarmingFactor": 3,
       "size": 0.33,
       "ration": 0.01,
       "rationDeltaPerDegree": 0.01,
@@ -320,7 +322,7 @@
       "reference": ["https://climatekids.nasa.gov/greenhouse-cards/", "https://www.epa.gov/ghgemissions/overview-greenhouse-gases#f-gases"],
       "color": "#9b864c",
       "globalWarmingFactorReal": 14800,
-      "globalWarmingFactor": 10,
+      "globalWarmingFactor": 4,
       "lifespan": 100,
       "size": 0.5,
       "ration": 0.01,

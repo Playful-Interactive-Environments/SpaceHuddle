@@ -216,6 +216,10 @@
         "title": "hard",
         "description": "According to the Paris Climate Agreement, the global increase in air temperature should be limited to 2°C. Under these conditions, try to keep the earth cool and prevent the red heat rays from colliding excessively with the greenhouse gases. But please don't prevent the greenhouse effect altogether, because we don't want to freeze to death either."
       }
+    },
+    "weatherInfo": {
+      "snow": "snow warning",
+      "hail": "hail warning"
     }
   },
   "statistic": {
