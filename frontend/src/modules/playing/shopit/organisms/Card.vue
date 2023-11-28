@@ -25,30 +25,19 @@
       }}<span>{{ $t('module.playing.shopit.participant.cards.price') }}</span>
     </li>
   </ul>
+<!--  <p class="cardCondition">condition</p>-->
   <img :src="getCardSprite(cardName)" alt="{{ category }}" class="cardImage" />
   <font-awesome-icon
     :icon="gameConfig.categories[category].settings.icon"
     class="categoryCardIcon"
   />
+<!--  <img :src="gameConfig.gameValues.sparkle" alt="sparkle" class="sparkle" />-->
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import { ObjectSpace } from '@/types/enum/ObjectSpace';
-import { until } from '@/utils/wait';
-import * as tutorialService from '@/services/tutorial-service';
-import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import { Tutorial } from '@/types/api/Tutorial';
-import * as cashService from '@/services/cash-service';
-import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
-import { Idea } from '@/types/api/Idea';
-import * as ideaService from '@/services/idea-service';
-import ModuleInfo from "@/components/participant/molecules/ModuleInfo.vue";
-import PlayState from "@/modules/playing/shopit/organisms/PlayState.vue";
-import SingleplayerState from "@/modules/playing/shopit/organisms/SingleplayerState.vue";
-import JoinState from "@/modules/playing/shopit/organisms/JoinState.vue";
 
 
 export default class Card extends Vue {
@@ -101,6 +90,26 @@ hr {
   font-weight: var(--font-weight-bold);
 }
 
+.cardCondition {
+  color: var(--color-brown);
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 5%;
+  text-align: right;
+  font-size: var(--font-size-xsmall);
+  font-weight: var(--font-weight-bold);
+}
+
+.categoryCardIcon {
+  color: var(--color-brown-light);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  margin: 5%;
+  transition: 0.3s;
+}
+
 .categoryCardIcon {
   color: var(--color-brown-light);
   position: absolute;
@@ -143,5 +152,16 @@ hr {
   bottom: 0;
   right: 0;
   margin: 2.7%;
+}
+
+.sparkle {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  pointer-events: none;
 }
 </style>

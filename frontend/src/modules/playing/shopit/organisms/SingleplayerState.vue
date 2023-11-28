@@ -63,46 +63,15 @@
         }"
         @click="activeCardChanged(card)"
       >
-        <ul class="cardStats">
-          <li class="cardCost">
-            {{ card[0] }}
-            <hr />
-          </li>
-          <li>
-            {{ card[1]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kg')
-            }}</span>
-          </li>
-          <li>
-            {{ card[2]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kw')
-            }}</span>
-          </li>
-          <li>
-            {{ card[3]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.years')
-            }}</span>
-          </li>
-          <li>
-            {{ card[4]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kl')
-            }}</span>
-          </li>
-          <li>
-            {{ card[5]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.price')
-            }}</span>
-          </li>
-        </ul>
-        <img :src="getCardSprite(card)" alt="{{ card[7] }}" class="cardImage" />
-        <font-awesome-icon
-          :icon="gameConfig.categories[card[6]].settings.icon"
-          class="categoryCardIcon"
+        <Card
+          :cost="card[0]"
+          :CO2="card[1]"
+          :energy="card[2]"
+          :lifetime="card[3]"
+          :water="card[4]"
+          :money="card[5]"
+          :category="card[6]"
+          :cardName="card[7]"
         />
       </div>
     </TransitionGroup>
@@ -155,46 +124,15 @@
         >
           {{ $t('module.playing.shopit.participant.cardPlayButton') }}
         </button>
-        <ul class="cardStats">
-          <li class="cardCost">
-            {{ card[0] }}
-            <hr />
-          </li>
-          <li>
-            {{ card[1]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kg')
-            }}</span>
-          </li>
-          <li>
-            {{ card[2]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kw')
-            }}</span>
-          </li>
-          <li>
-            {{ card[3]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.years')
-            }}</span>
-          </li>
-          <li>
-            {{ card[4]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kl')
-            }}</span>
-          </li>
-          <li>
-            {{ card[5]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.price')
-            }}</span>
-          </li>
-        </ul>
-        <img :src="getCardSprite(card)" alt="{{ card[7] }}" class="cardImage" />
-        <font-awesome-icon
-          :icon="gameConfig.categories[card[6]].settings.icon"
-          class="categoryCardIcon"
+        <Card
+          :cost="card[0]"
+          :CO2="card[1]"
+          :energy="card[2]"
+          :lifetime="card[3]"
+          :water="card[4]"
+          :money="card[5]"
+          :category="card[6]"
+          :cardName="card[7]"
         />
       </div>
     </TransitionGroup>
@@ -213,7 +151,33 @@
     <p v-if="reason === 'points'">
       {{ $t('module.playing.shopit.participant.winPoints') }}
     </p>
-    <el-button class="el-button--submit" @click="finished">
+    <p class="marginTop">
+      {{ $t('module.playing.shopit.participant.endCards') }}
+    </p>
+    <div class="endCards">
+      <div
+        v-for="card in endCardsOverview"
+        :key="card[7]"
+        :id="card[7]"
+        class="endCard"
+        :style="{
+          backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
+        }"
+      >
+        <Card
+          :cost="card[0]"
+          :CO2="card[1]"
+          :energy="card[2]"
+          :lifetime="card[3]"
+          :water="card[4]"
+          :money="card[5]"
+          :category="card[6]"
+          :cardName="card[7]"
+        />
+        <p class="CardDescription">{{ card[8] }}</p>
+      </div>
+    </div>
+    <el-button class="el-button--submit returnButton" @click="finished">
       {{ $t('module.playing.shopit.participant.returnToMenu') }}
     </el-button>
   </div>
@@ -231,7 +195,33 @@
     <p v-if="reason === 'points'">
       {{ $t('module.playing.shopit.participant.lostPoints') }}
     </p>
-    <el-button class="el-button--submit" @click="finished">
+    <p class="marginTop">
+      {{ $t('module.playing.shopit.participant.endCards') }}
+    </p>
+    <div class="endCards">
+      <div
+        v-for="card in endCardsOverview"
+        :key="card[7]"
+        :id="card[7]"
+        class="endCard"
+        :style="{
+          backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
+        }"
+      >
+        <Card
+          :cost="card[0]"
+          :CO2="card[1]"
+          :energy="card[2]"
+          :lifetime="card[3]"
+          :water="card[4]"
+          :money="card[5]"
+          :category="card[6]"
+          :cardName="card[7]"
+        />
+        <p class="CardDescription">{{ card[8] }}</p>
+      </div>
+    </div>
+    <el-button class="el-button--submit returnButton" @click="finished">
       {{ $t('module.playing.shopit.participant.returnToMenu') }}
     </el-button>
   </div>
@@ -246,13 +236,9 @@ import * as tutorialService from '@/services/tutorial-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
-import { ElMessage } from 'element-plus';
 import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
-import { Idea } from '@/types/api/Idea';
-import * as authService from '@/services/auth-service';
-import * as ideaService from '@/services/idea-service';
-import * as configParameter from '@/utils/game/configParameter';
+import Card from '@/modules/playing/shopit/organisms/Card.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'shop-it-object';
@@ -276,7 +262,9 @@ export interface PlayStateResult {
       return ObjectSpace;
     },
   },
-  components: {},
+  components: {
+    Card,
+  },
   emits: ['playFinished'],
 })
 export default class PlayState extends Vue {
@@ -301,6 +289,9 @@ export default class PlayState extends Vue {
   activeCard: any[] = [];
   cardsPlayed: any[] = [];
   ownCardPlayed = '';
+  ownCardsPlayed: any[] = [];
+
+  endCardsOverview: any[] = [];
 
   cards = this.shuffle(this.parseCards(gameConfig));
   cardHand: any[] = [];
@@ -354,13 +345,62 @@ export default class PlayState extends Vue {
   playStateChange(outcome, reason) {
     switch (outcome) {
       case 'lost':
+        this.endCardsOverview = this.calculateMostExpensiveCards();
         this.playStateType = PlayStateType.lost;
         break;
       case 'win':
+        this.endCardsOverview = this.calculateMostExpensiveCards();
         this.playStateType = PlayStateType.win;
         break;
     }
     this.reason = reason;
+  }
+
+  calculateMostExpensiveCards() {
+    const cards: any = [];
+    let co2Card: any = [];
+    let electricityCard: any = [];
+    let lifetimeCard: any = [];
+    let waterCard: any = [];
+    let moneyCard: any = [];
+    let co2 = 0;
+    let electricity = 0;
+    let lifetime = 1000;
+    let water = 0;
+    let money = 0;
+    for (let i = 0; i < this.ownCardsPlayed.length; i++) {
+      if (this.ownCardsPlayed[i][1] > co2) {
+        co2 = this.ownCardsPlayed[i][1];
+        co2Card = this.ownCardsPlayed[i].map((x) => x);
+        co2Card.push('CO²');
+      }
+      if (this.ownCardsPlayed[i][2] > electricity) {
+        electricity = this.ownCardsPlayed[i][2];
+        electricityCard = this.ownCardsPlayed[i].map((x) => x);
+        electricityCard.push('electricity');
+      }
+      if (this.ownCardsPlayed[i][3] < lifetime) {
+        lifetime = this.ownCardsPlayed[i][3];
+        lifetimeCard = this.ownCardsPlayed[i].map((x) => x);
+        lifetimeCard.push('lifetime');
+      }
+      if (this.ownCardsPlayed[i][4] > water) {
+        water = this.ownCardsPlayed[i][4];
+        waterCard = this.ownCardsPlayed[i].map((x) => x);
+        waterCard.push('water');
+      }
+      if (this.ownCardsPlayed[i][5] > money) {
+        money = this.ownCardsPlayed[i][5];
+        moneyCard = this.ownCardsPlayed[i].map((x) => x);
+        moneyCard.push('money');
+      }
+    }
+    cards.push(co2Card);
+    cards.push(electricityCard);
+    cards.push(lifetimeCard);
+    cards.push(waterCard);
+    cards.push(moneyCard);
+    return cards;
   }
 
   get backgroundColor(): string {
@@ -488,7 +528,9 @@ export default class PlayState extends Vue {
       const index = this.cardHand.indexOf(card);
       this.cardHand.splice(index, 1);
       this.cardsPlayed.push(card);
-      this.ownCardPlayed = card[7];
+      const copyCard = card.map((x) => x);
+      this.ownCardPlayed = copyCard[7];
+      this.ownCardsPlayed.push(copyCard);
 
       //remove wrong category icon highlight
       for (let i = 0; i < this.categoryIconChanged.length; i++) {
@@ -985,5 +1027,47 @@ p.gameKey {
   justify-content: center;
   font-size: var(--font-size-default);
   text-align: center;
+}
+
+.endCards {
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  height: 32%;
+  width: 100%;
+  z-index: 10;
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+.endCard {
+  text-align: left;
+  position: relative;
+  aspect-ratio: 1904/2564;
+  background-size: cover;
+  padding: 2%;
+  height: 78%;
+  z-index: 1;
+  transition: 0.3s;
+  margin: 1rem;
+}
+
+.CardDescription {
+  position: absolute;
+  bottom: -12%;
+  right: 0;
+  left: 0;
+  text-align: center;
+}
+
+.marginTop {
+  margin-top: 2rem;
+  padding: 0 1rem;
+}
+
+.returnButton {
+  position: absolute;
+  bottom: 2rem;
 }
 </style>

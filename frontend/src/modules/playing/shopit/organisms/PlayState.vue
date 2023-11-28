@@ -383,12 +383,12 @@ export default class PlayState extends Vue {
   playStateChange(outcome, reason) {
     switch (outcome) {
       case 'lost':
-        this.playStateType = PlayStateType.lost;
         this.endCardsOverview = this.calculateMostExpensiveCards();
+        this.playStateType = PlayStateType.lost;
         break;
       case 'win':
-        this.playStateType = PlayStateType.win;
         this.endCardsOverview = this.calculateMostExpensiveCards();
+        this.playStateType = PlayStateType.win;
         break;
     }
     this.reason = reason;

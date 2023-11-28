@@ -2,6 +2,7 @@
   "gameValues": {
     "background": "/assets/games/shopit/background/background.png",
     "cardBackground": "/assets/games/shopit/cards/cardBackground.png",
+    "sparkle": "/assets/games/shopit/cards/sparkle.png",
     "opponentHand": "/assets/games/shopit/cards/opponentHand.png",
     "spriteFolder": "/assets/games/shopit/cards/items/",
     "maxCO2": 120
