@@ -160,9 +160,6 @@
     <p v-if="reason === 'points'">
       {{ $t('module.playing.shopit.participant.winPoints') }}
     </p>
-    <el-button class="el-button--submit" @click="finished">
-      {{ $t('module.playing.shopit.participant.returnToMenu') }}
-    </el-button>
     <p class="marginTop">
       {{ $t('module.playing.shopit.participant.endCards') }}
     </p>
@@ -189,6 +186,9 @@
         <p class="CardDescription">{{ card[8] }}</p>
       </div>
     </div>
+    <el-button class="el-button--submit returnButton" @click="finished">
+      {{ $t('module.playing.shopit.participant.returnToMenu') }}
+    </el-button>
   </div>
   <div
     class="gameArea result"
@@ -204,9 +204,9 @@
     <p v-if="reason === 'points'">
       {{ $t('module.playing.shopit.participant.lostPoints') }}
     </p>
-    <el-button class="el-button--submit" @click="finished">
-      {{ $t('module.playing.shopit.participant.returnToMenu') }}
-    </el-button>
+    <p class="marginTop">
+      {{ $t('module.playing.shopit.participant.endCards') }}
+    </p>
     <div class="endCards">
       <div
         v-for="card in endCardsOverview"
@@ -230,6 +230,9 @@
         <p class="CardDescription">{{ card[8] }}</p>
       </div>
     </div>
+    <el-button class="el-button--submit returnButton" @click="finished">
+      {{ $t('module.playing.shopit.participant.returnToMenu') }}
+    </el-button>
   </div>
 </template>
 
@@ -315,7 +318,7 @@ export default class PlayState extends Vue {
   categoryPoints: any[] = [];
 
   maxCards = 3;
-  maxCost = 125;
+  maxCost = 8;
   pointsSpent = 0;
   pointsSpentOpponent = 0;
   reason = '';
@@ -1142,7 +1145,8 @@ p.gameKey {
   height: 32%;
   width: 100%;
   z-index: 10;
-  overflow: scroll;
+  overflow-x: scroll;
+  overflow-y: hidden;
 }
 
 .endCard {
@@ -1158,13 +1162,20 @@ p.gameKey {
 }
 
 .CardDescription {
-  position: relative;
-  bottom: -5rem;
+  position: absolute;
+  bottom: -12%;
+  right: 0;
+  left: 0;
   text-align: center;
 }
 
 .marginTop {
   margin-top: 2rem;
   padding: 0 1rem;
+}
+
+.returnButton {
+  position: absolute;
+  bottom: 2rem;
 }
 </style>
