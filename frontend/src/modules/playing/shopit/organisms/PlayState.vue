@@ -436,7 +436,7 @@ export default class PlayState extends Vue {
   categoryPoints: any[] = [];
 
   maxCards = 3;
-  maxCost = 280;
+  maxCost = 125;
   pointsSpent = 0;
   pointsSpentOpponent = 0;
   reason = '';
@@ -487,7 +487,7 @@ export default class PlayState extends Vue {
     this.categoryPoints = [];
 
     this.maxCards = 3;
-    this.maxCost = 280;
+    this.maxCost = 125;
     this.pointsSpent = 0;
     this.pointsSpentOpponent = 0;
     this.reason = '';
@@ -566,7 +566,6 @@ export default class PlayState extends Vue {
   async setup() {
     this.buttonDisabled = true;
     this.cards = this.game.parameter.cards;
-    this.cards.splice(11, this.cards.length-12);
     this.playersTurn = this.game.parameter.playersTurn;
     this.categorySetup();
     this.initialCardPull();
