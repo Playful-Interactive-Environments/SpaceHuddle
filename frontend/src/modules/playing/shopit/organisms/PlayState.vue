@@ -72,46 +72,15 @@
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
       >
-        <ul class="cardStats">
-          <li class="cardCost">
-            {{ card[0] }}
-            <hr />
-          </li>
-          <li>
-            {{ card[1]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kg')
-            }}</span>
-          </li>
-          <li>
-            {{ card[2]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kw')
-            }}</span>
-          </li>
-          <li>
-            {{ card[3]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.years')
-            }}</span>
-          </li>
-          <li>
-            {{ card[4]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kl')
-            }}</span>
-          </li>
-          <li>
-            {{ card[5]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.price')
-            }}</span>
-          </li>
-        </ul>
-        <img :src="getCardSprite(card)" alt="{{ card[7] }}" class="cardImage" />
-        <font-awesome-icon
-          :icon="gameConfig.categories[card[6]].settings.icon"
-          class="categoryCardIcon"
+        <Card
+          :cost="card[0]"
+          :CO2="card[1]"
+          :energy="card[2]"
+          :lifetime="card[3]"
+          :water="card[4]"
+          :money="card[5]"
+          :category="card[6]"
+          :cardName="card[7]"
         />
       </div>
     </TransitionGroup>
@@ -164,46 +133,15 @@
         >
           {{ $t('module.playing.shopit.participant.cardPlayButton') }}
         </button>
-        <ul class="cardStats">
-          <li class="cardCost">
-            {{ card[0] }}
-            <hr />
-          </li>
-          <li>
-            {{ card[1]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kg')
-            }}</span>
-          </li>
-          <li>
-            {{ card[2]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kw')
-            }}</span>
-          </li>
-          <li>
-            {{ card[3]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.years')
-            }}</span>
-          </li>
-          <li>
-            {{ card[4]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kl')
-            }}</span>
-          </li>
-          <li>
-            {{ card[5]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.price')
-            }}</span>
-          </li>
-        </ul>
-        <img :src="getCardSprite(card)" alt="{{ card[7] }}" class="cardImage" />
-        <font-awesome-icon
-          :icon="gameConfig.categories[card[6]].settings.icon"
-          class="categoryCardIcon"
+        <Card
+          :cost="card[0]"
+          :CO2="card[1]"
+          :energy="card[2]"
+          :lifetime="card[3]"
+          :water="card[4]"
+          :money="card[5]"
+          :category="card[6]"
+          :cardName="card[7]"
         />
       </div>
     </TransitionGroup>
@@ -238,46 +176,15 @@
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
       >
-        <ul class="cardStats">
-          <li class="cardCost">
-            {{ card[0] }}
-            <hr />
-          </li>
-          <li>
-            {{ card[1]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kg')
-            }}</span>
-          </li>
-          <li>
-            {{ card[2]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kw')
-            }}</span>
-          </li>
-          <li>
-            {{ card[3]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.years')
-            }}</span>
-          </li>
-          <li>
-            {{ card[4]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kl')
-            }}</span>
-          </li>
-          <li>
-            {{ card[5]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.price')
-            }}</span>
-          </li>
-        </ul>
-        <img :src="getCardSprite(card)" alt="{{ card[7] }}" class="cardImage" />
-        <font-awesome-icon
-          :icon="gameConfig.categories[card[6]].settings.icon"
-          class="categoryCardIcon"
+        <Card
+          :cost="card[0]"
+          :CO2="card[1]"
+          :energy="card[2]"
+          :lifetime="card[3]"
+          :water="card[4]"
+          :money="card[5]"
+          :category="card[6]"
+          :cardName="card[7]"
         />
         <p class="CardDescription">{{ card[8] }}</p>
       </div>
@@ -310,46 +217,15 @@
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
       >
-        <ul class="cardStats">
-          <li class="cardCost">
-            {{ card[0] }}
-            <hr />
-          </li>
-          <li>
-            {{ card[1]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kg')
-            }}</span>
-          </li>
-          <li>
-            {{ card[2]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kw')
-            }}</span>
-          </li>
-          <li>
-            {{ card[3]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.years')
-            }}</span>
-          </li>
-          <li>
-            {{ card[4]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.kl')
-            }}</span>
-          </li>
-          <li>
-            {{ card[5]
-            }}<span>{{
-              $t('module.playing.shopit.participant.cards.price')
-            }}</span>
-          </li>
-        </ul>
-        <img :src="getCardSprite(card)" alt="{{ card[7] }}" class="cardImage" />
-        <font-awesome-icon
-          :icon="gameConfig.categories[card[6]].settings.icon"
-          class="categoryCardIcon"
+        <Card
+          :cost="card[0]"
+          :CO2="card[1]"
+          :energy="card[2]"
+          :lifetime="card[3]"
+          :water="card[4]"
+          :money="card[5]"
+          :category="card[6]"
+          :cardName="card[7]"
         />
         <p class="CardDescription">{{ card[8] }}</p>
       </div>
@@ -370,6 +246,7 @@ import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
 import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
+import Card from '@/modules/playing/shopit/organisms/Card.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'shop-it-object';
@@ -393,7 +270,9 @@ export interface PlayStateResult {
       return ObjectSpace;
     },
   },
-  components: {},
+  components: {
+    Card,
+  },
   emits: ['playFinished'],
 })
 export default class PlayState extends Vue {
@@ -675,25 +554,18 @@ export default class PlayState extends Vue {
   }
 
   async reShuffle() {
-    console.log('1');
     if (this.player === 1) {
-      console.log('2');
       this.cards = this.shuffle(this.parseCards(gameConfig));
       this.maxCards = 3;
       this.game.parameter.cards = this.cards.map((x) => x);
       this.updateCards();
-      console.log('3');
       await until(() => this.game.parameter.player2Hand.length > 2);
       this.initialCardPull();
-      console.log('4');
     } else {
-      console.log('5');
       this.maxCards = 3;
       await until(() => this.game.parameter.cards.length >= 2);
-      console.log('6');
       this.cards = this.game.parameter.cards.map((x) => x);
       this.initialCardPull();
-      console.log('7');
     }
   }
 
@@ -781,11 +653,12 @@ export default class PlayState extends Vue {
 
       //Compare the cards and choose a winner
       if (this.playersTurn === this.player) {
-        this.compareCards(card, this.opponentCard, this.playersTurn);
+        this.compareCards(card, this.opponentCard);
       } else {
-        this.compareCards(this.opponentCard, card, this.playersTurn);
+        this.compareCards(this.opponentCard, card);
       }
 
+      //draw new cards and continue the play
       setTimeout(async () => {
         this.cardsPlayed = [];
         this.game.parameter.cardsPlayed = [];
@@ -794,7 +667,6 @@ export default class PlayState extends Vue {
             this.shuffle(this.parseCards(gameConfig))
           );
         }
-        console.log(this.cards);
         this.drawNewCard();
         await until(
           () =>
@@ -871,7 +743,7 @@ export default class PlayState extends Vue {
     }
   }
 
-  compareCards(card, card2, playedFirst) {
+  compareCards(card, card2) {
     //card = Card that was there first. Wins in case of category mismatch
     //Compares the cost + category of the cards and decides the winner
     let winningCard;
@@ -944,11 +816,8 @@ export default class PlayState extends Vue {
     ) {
       this.playStateChange('lost', 'category');
     }
-
     this.cardWin(winningCard);
 
-    //draw new cards
-    //this.drawNewCard();
     //reactivate Button
     return winningCard;
   }
@@ -1193,45 +1062,6 @@ export default class PlayState extends Vue {
 .cardContainerActive {
   z-index: 2;
   transform: translateY(-1rem);
-  transition: 0.3s;
-}
-
-hr {
-  background-color: var(--color-brown);
-  margin: -2pt 0 4pt 0;
-  width: 60%;
-}
-
-.cardStats {
-  position: relative;
-  z-index: 10;
-  color: var(--color-brown);
-  font-size: var(--font-size-small);
-  font-weight: var(--font-weight-bold);
-  font-family: var(--font-family);
-
-  li {
-    margin-top: -2pt;
-
-    span {
-      margin-left: 1pt;
-      font-weight: var(--font-weight-semibold);
-      font-size: var(--font-size-xxsmall);
-    }
-  }
-}
-
-.cardCost {
-  font-size: var(--font-size-xlarge);
-  font-weight: var(--font-weight-bold);
-}
-
-.categoryCardIcon {
-  color: var(--color-brown-light);
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  margin: 5%;
   transition: 0.3s;
 }
 
