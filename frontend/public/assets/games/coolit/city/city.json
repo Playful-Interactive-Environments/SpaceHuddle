@@ -1,42 +1,67 @@
 {
 "frames": {
 	"building01": {
-		"frame": {"x":0, "y":367, "w":477, "h":499},
+		"frame": {"x":0, "y":545, "w":477, "h":499},
 		"spriteSourceSize": {"x":0,"y":0,"w":477,"h":499},
 		"sourceSize": {"w":477,"h":499}
 	},
 	"building02": {
-		"frame": {"x":0, "y":1478, "w":372, "h":327},
+		"frame": {"x":458, "y":1380, "w":372, "h":327},
 		"spriteSourceSize": {"x":0,"y":0,"w":372,"h":327},
 		"sourceSize": {"w":372,"h":327}
 	},
 	"building03": {
-		"frame": {"x":952, "y":0, "w":348, "h":452},
+		"frame": {"x":527, "y":0, "w":348, "h":452},
 		"spriteSourceSize": {"x":0,"y":0,"w":348,"h":452},
 		"sourceSize": {"w":348,"h":452}
 	},
 	"building04": {
-		"frame": {"x":1301, "y":414, "w":333, "h":476},
+		"frame": {"x":1321, "y":634, "w":333, "h":476},
 		"spriteSourceSize": {"x":0,"y":0,"w":333,"h":476},
 		"sourceSize": {"w":333,"h":476}
 	},
+	"cow": {
+		"frame": {"x":1169, "y":1450, "w":329, "h":237},
+		"spriteSourceSize": {"x":16,"y":12,"w":357,"h":255},
+		"sourceSize": {"w":357,"h":255}
+	},
+	"fertilizer": {
+		"frame": {"x":0, "y":367, "w":501, "h":177},
+		"spriteSourceSize": {"x":10,"y":11,"w":512,"h":202},
+		"sourceSize": {"w":512,"h":202}
+	},
+	"glassBuilding01": {
+		"frame": {"x":1499, "y":1111, "w":283, "h":566},
+		"spriteSourceSize": {"x":0,"y":0,"w":283,"h":566},
+		"sourceSize": {"w":283,"h":566}
+	},
+	"glassBuilding02": {
+		"frame": {"x":831, "y":1450, "w":337, "h":413},
+		"spriteSourceSize": {"x":0,"y":0,"w":337,"h":413},
+		"sourceSize": {"w":337,"h":413}
+	},
+	"glassBuilding03": {
+		"frame": {"x":929, "y":634, "w":391, "h":815},
+		"spriteSourceSize": {"x":0,"y":0,"w":391,"h":815},
+		"sourceSize": {"w":391,"h":815}
+	},
 	"industry01": {
-		"frame": {"x":527, "y":0, "w":424, "h":633},
+		"frame": {"x":929, "y":0, "w":424, "h":633},
 		"spriteSourceSize": {"x":0,"y":0,"w":424,"h":633},
 		"sourceSize": {"w":424,"h":633}
 	},
 	"industry02": {
-		"frame": {"x":458, "y":867, "w":450, "h":834},
+		"frame": {"x":478, "y":545, "w":450, "h":834},
 		"spriteSourceSize": {"x":0,"y":0,"w":450,"h":834},
 		"sourceSize": {"w":450,"h":834}
 	},
 	"industry03": {
-		"frame": {"x":0, "y":867, "w":457, "h":610},
+		"frame": {"x":0, "y":1045, "w":457, "h":610},
 		"spriteSourceSize": {"x":0,"y":0,"w":457,"h":610},
 		"sourceSize": {"w":457,"h":610}
 	},
 	"industry04": {
-		"frame": {"x":909, "y":1450, "w":311, "h":339},
+		"frame": {"x":1354, "y":0, "w":311, "h":339},
 		"spriteSourceSize": {"x":0,"y":0,"w":311,"h":339},
 		"sourceSize": {"w":311,"h":339}
 	},
@@ -44,27 +69,12 @@
 		"frame": {"x":0, "y":0, "w":526, "h":366},
 		"spriteSourceSize": {"x":0,"y":0,"w":526,"h":366},
 		"sourceSize": {"w":526,"h":366}
-	},
-	"glassBuilding01": {
-		"frame": {"x":1301, "y":891, "w":283, "h":566},
-		"spriteSourceSize": {"x":0,"y":0,"w":283,"h":566},
-		"sourceSize": {"w":283,"h":566}
-	},
-	"glassBuilding02": {
-		"frame": {"x":1301, "y":0, "w":337, "h":413},
-		"spriteSourceSize": {"x":0,"y":0,"w":337,"h":413},
-		"sourceSize": {"w":337,"h":413}
-	},
-	"glassBuilding03": {
-		"frame": {"x":909, "y":634, "w":391, "h":815},
-		"spriteSourceSize": {"x":0,"y":0,"w":391,"h":815},
-		"sourceSize": {"w":391,"h":815}
 	}
 
 },
 "meta": {
 	"image": "city.png",
-	"size": {"w": 1639, "h": 1806},
+	"size": {"w": 1783, "h": 1864},
 	"scale": "1"
 }
 }

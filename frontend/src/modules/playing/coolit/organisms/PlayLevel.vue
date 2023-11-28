@@ -256,7 +256,13 @@
               :sleep-if-not-visible="true"
               :conditional-velocity="{
                 velocity: {x: 0, y: -3},
-                condition: (object: GameObject) => object.position[1] > gameHeight / 3 * 2
+                condition: (object: GameObject) => {
+                  if (molecule.rise) {
+                    molecule.rise = false;
+                    return true;
+                  }
+                  return object.position[1] > gameHeight / 3 * 2;
+                }
               }"
               @click="moleculeClicked"
             >
@@ -555,6 +561,7 @@ interface MoleculeData extends CoolItHitRegion {
   controllable: boolean;
   absorbedByTree: boolean;
   color: string;
+  rise: boolean;
 }
 
 interface CoolItObstacle extends placeable.Placeable, CoolItHitRegion {}
@@ -592,7 +599,7 @@ function convertToCoolItObstacle(
     heatAbsorptionCoefficientHeat:
       configParameter.heatAbsorptionCoefficientHeat ?? 1,
     heatRadiationCoefficient: configParameter.heatRadiationCoefficient ?? 1,
-    reflectionProbability: 1,
+    reflectionProbability: configParameter.reflectionProbability ?? 1,
     saturation: result.saturation,
     temperature: configParameter.initialTemperature,
     emits: configParameter.emits,
@@ -654,7 +661,7 @@ export default class PlayLevel extends Vue {
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
   moleculeStylesheets: PIXI.Spritesheet | null = null;
   vehicleStylesheets: PIXI.Spritesheet | null = null;
-  lightTexture!: PIXI.Texture;
+  lightTexture: PIXI.Texture | null = null;
   startTime = Date.now();
   playTime = 0;
   autoPanSpeed = 0.4;
@@ -917,19 +924,19 @@ export default class PlayLevel extends Vue {
   }
 
   getObstacleTypeOptions(obstacleType: string, obstacleName: string): any {
-    const settings =
-      gameConfig.obstacles[this.levelType].categories[obstacleType].settings;
+    const config =
+      gameConfig.obstacles[this.levelType].categories[obstacleType].items[
+        obstacleName
+      ];
     return {
       isSensor: true,
       name: obstacleName,
       collisionFilter: {
         group: 0,
         category:
-          settings.type === ObstacleType.obstacle
-            ? this.CollisionGroups.OBSTACLE
-            : settings.type === ObstacleType.carbonSink
+          config.type === ObstacleType.carbonSink
             ? this.CollisionGroups.CARBON_SINK
-            : this.CollisionGroups.CARBON_SOURCE,
+            : this.CollisionGroups.OBSTACLE,
       },
     };
   }
@@ -1232,14 +1239,35 @@ export default class PlayLevel extends Vue {
         this.vehicleIsActive = true;
       }, Math.random() * 10000);
     } else if (
-      this.vehicleXPosition > this.gameWidth / 2 &&
+      this.vehicleXPosition > this.gameWidth * 0.4 &&
       !this.vehicleHasEmitted
     ) {
       this.vehicleHasEmitted = true;
+      const relativePosition = this.vehicleXPosition / this.gameWidth;
       this.emitMolecule(
-        [(this.panOffsetMin[0] + this.panOffsetMax[0]) / 2, 92],
+        [(this.panOffsetMin[0] + this.panOffsetMax[0]) * relativePosition, 92],
         'carbonDioxide'
       );
+      setTimeout(() => {
+        const relativePosition = this.vehicleXPosition / this.gameWidth;
+        this.emitMolecule(
+          [
+            (this.panOffsetMin[0] + this.panOffsetMax[0]) * relativePosition,
+            92,
+          ],
+          'carbonDioxide'
+        );
+      }, 1000);
+      setTimeout(() => {
+        const relativePosition = this.vehicleXPosition / this.gameWidth;
+        this.emitMolecule(
+          [
+            (this.panOffsetMin[0] + this.panOffsetMax[0]) * relativePosition,
+            92,
+          ],
+          'methane'
+        );
+      }, 2000);
     }
   }
 
@@ -1267,6 +1295,7 @@ export default class PlayLevel extends Vue {
       reflectionProbability: 1,
       temperature: 0,
       emits: [],
+      rise: true,
     });
   }
 
@@ -1303,9 +1332,8 @@ export default class PlayLevel extends Vue {
       const moleculeConfig = gameConfig.molecules[moleculeConfigName];
       if (moleculeConfig.controllable) {
         const moleculeCount =
-          (moleculeConfig.ration +
-            moleculeConfig.rationDeltaPerDegree * this.temperatureRise) *
-          this.moduleCountFactor;
+          moleculeConfig.particleCount +
+          moleculeConfig.particleDeltaPerDegree * this.temperatureRise;
         const moleculeList: MoleculeData[] = [];
         for (let i = 0; i < moleculeCount; i++) {
           moleculeList.push({
@@ -1328,6 +1356,7 @@ export default class PlayLevel extends Vue {
             reflectionProbability: 1,
             temperature: 0,
             emits: [],
+            rise: false,
           });
         }
         const distance = 100 / moleculeCount;
@@ -1574,10 +1603,9 @@ export default class PlayLevel extends Vue {
             JSON.stringify(backgroundParticle)
           );
           particleSettings.maxParticles =
-            (gameConfig.molecules[moleculeName].ration +
-              gameConfig.molecules[moleculeName].rationDeltaPerDegree *
-                this.temperatureRise) *
-            this.moduleCountFactor;
+            gameConfig.molecules[moleculeName].particleCount +
+            gameConfig.molecules[moleculeName].particleDeltaPerDegree *
+              this.temperatureRise;
           particleSettings.particlesPerWave = particleSettings.maxParticles;
           particleSettings.behaviors.push({
             type: 'colorStatic',
@@ -1815,27 +1843,33 @@ export default class PlayLevel extends Vue {
       if (
         obstacle.emits.length > 0 &&
         obstacle.position[0] > this.panOffsetMin[0] &&
-        obstacle.position[0] < this.panOffsetMax[0]
+        obstacle.position[0] < this.panOffsetMax[0] &&
+        this.isReadyForPlay &&
+        this.lightCollisionCount > 0
       ) {
-        const position = this.panOffsetMin[0] + displayWidth / 2;
+        const position = this.panOffsetMin[0] + displayWidth * 0.6;
         if (
           position > obstacle.position[0] &&
           !this.emitObstacleList.includes(obstacle.uuid)
         ) {
           this.emitObstacleList.push(obstacle.uuid);
+          let i = 0;
           for (const emit of obstacle.emits) {
             const aspect = this.getObjectAspect(obstacle.type, obstacle.name);
-            this.emitMolecule(
-              [
-                obstacle.position[0],
-                obstacle.position[1] -
-                  obstacle.scale *
-                    obstacle.width *
-                    (1 / aspect) *
-                    containerAspect,
-              ],
-              emit
-            );
+            setTimeout(() => {
+              this.emitMolecule(
+                [
+                  obstacle.position[0],
+                  obstacle.position[1] -
+                    obstacle.scale *
+                      obstacle.width *
+                      (1 / aspect) *
+                      containerAspect,
+                ],
+                emit
+              );
+            }, 1000 * i);
+            i++;
           }
         }
       }
@@ -2110,7 +2144,7 @@ export default class PlayLevel extends Vue {
     const obstacleType =
       gameConfig.obstacles[this.levelType].categories[
         obstacleObject.source.type
-      ].settings.type;
+      ].items[obstacleObject.source.name].type;
     if (
       obstacleType === ObstacleType.carbonSink &&
       moleculeObject.source.absorbedByTree
