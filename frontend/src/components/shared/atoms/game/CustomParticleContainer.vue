@@ -29,7 +29,10 @@ export default class CustomParticleContainer extends Vue {
   @Prop({ default: true }) deepCloneConfig!: boolean;
   @Prop({ default: true }) autoUpdate!: boolean;
   @Prop({ default: null }) spriteSheetUrl!: string | null;
-  @Prop({ default: null }) defaultTexture!: PIXI.Texture | null;
+  @Prop({ default: null }) defaultTexture!:
+    | PIXI.Texture
+    | PIXI.Texture[]
+    | null;
   @Prop({ default: null }) config!: PIXIParticles.EmitterConfigV3 | null;
   @Prop() parentEventBus!: Emitter<Record<EventType, unknown>> | unknown;
   emitter!: PIXIParticles.Emitter;
@@ -109,12 +112,21 @@ export default class CustomParticleContainer extends Vue {
       if (isSingleTexture) textureConfig.config.texture = textureList[0];
     } else if (this.defaultTexture) {
       await delay(100);
-      config.behaviors.push({
-        type: 'textureSingle',
-        config: {
-          texture: { ...this.defaultTexture },
-        },
-      });
+      if (Array.isArray(this.defaultTexture)) {
+        config.behaviors.push({
+          type: 'textureRandom',
+          config: {
+            textures: [...this.defaultTexture],
+          },
+        });
+      } else {
+        config.behaviors.push({
+          type: 'textureSingle',
+          config: {
+            texture: { ...this.defaultTexture },
+          },
+        });
+      }
     }
     await until(() => !!this.container);
     this.emitter = new PIXIParticles.Emitter(this.container as any, config);

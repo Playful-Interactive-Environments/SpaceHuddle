@@ -32,13 +32,6 @@
       <template v-slot:default>
         <container v-if="gameWidth && circleGradientTexture">
           <container v-if="!gameOver">
-            <custom-particle-container
-              v-if="snow.frequency"
-              :config="snow"
-              :parentEventBus="eventBus"
-              :default-texture="snowTexture"
-              :deep-clone-config="false"
-            />
             <container>
               <sprite
                 :texture="temperatureMarkerTexture"
@@ -185,6 +178,41 @@
               >
               </CustomSprite>
             </GameObject>
+            <animated-sprite
+              v-if="vehicleStylesheets"
+              :textures="vehicleStylesheets.animations[randomVehicleName]"
+              :animation-speed="0.2"
+              :width="vehicleWidth"
+              :height="vehicleWidth / getVehicleAspect(randomVehicleName)"
+              :x="vehicleXPosition"
+              :y="vehicleYPosition"
+              :anchor="[0.5, 1]"
+              playing
+              @frame-change="animationFrameChanged"
+            />
+            <custom-particle-container
+              v-if="snow.frequency && weatherStylesheets"
+              :config="snow"
+              :parentEventBus="eventBus"
+              :default-texture="[
+                weatherStylesheets.textures['snow_01.png'],
+                weatherStylesheets.textures['snow_02.png'],
+                weatherStylesheets.textures['snow_03.png'],
+                weatherStylesheets.textures['snow_04.png'],
+                weatherStylesheets.textures['snow_05.png'],
+                weatherStylesheets.textures['snow_06.png'],
+                weatherStylesheets.textures['snow_07.png'],
+                weatherStylesheets.textures['snow_08.png'],
+              ]"
+              :deep-clone-config="false"
+            />
+            <custom-particle-container
+              v-if="hail.frequency && weatherStylesheets"
+              :config="hail"
+              :parentEventBus="eventBus"
+              :default-texture="weatherStylesheets.textures['hail.png']"
+              :deep-clone-config="false"
+            />
             <GameObject
               v-for="ray in rayList"
               :key="ray.uuid"
@@ -217,8 +245,8 @@
               </container>
               <template #background>
                 <simple-rope
-                  v-if="lightTexture"
-                  :texture="lightTexture"
+                  v-if="weatherStylesheets"
+                  :texture="weatherStylesheets.textures['light.png']"
                   :x="0"
                   :y="0"
                   :scale="0.2"
@@ -276,19 +304,6 @@
                 :alpha="molecule.controllable ? 1 : 0.4"
               />
             </GameObject>
-
-            <animated-sprite
-              v-if="vehicleStylesheets"
-              :textures="vehicleStylesheets.animations[randomVehicleName]"
-              :animation-speed="0.2"
-              :width="vehicleWidth"
-              :height="vehicleWidth / getVehicleAspect(randomVehicleName)"
-              :x="vehicleXPosition"
-              :y="vehicleYPosition"
-              :anchor="[0.5, 1]"
-              playing
-              @frame-change="animationFrameChanged"
-            />
           </container>
           <container v-else>
             <container>
@@ -372,6 +387,12 @@
     <div class="statusOverlay" v-if="!gameOver">
       {{ getTimeString(playTime) }}
       <el-rate v-model="stars" size="large" :max="3" :disabled="true" />
+    </div>
+    <div class="statusWeatherWarning" v-if="!gameOver && snow.frequency > 0">
+      {{ $t('module.playing.coolit.participant.weatherInfo.snow') }}
+    </div>
+    <div class="statusWeatherWarning" v-if="!gameOver && hail.frequency > 0">
+      {{ $t('module.playing.coolit.participant.weatherInfo.hail') }}
     </div>
     <div class="statusGameOver" v-if="gameOver">
       <h1>
@@ -550,6 +571,7 @@ interface CoolItHitRegion {
   heatRadiationCoefficient: number;
   temperature: number;
   emits: string[];
+  calculateTemperature: boolean;
 }
 
 interface MoleculeData extends CoolItHitRegion {
@@ -576,6 +598,12 @@ function convertToCoolItObstacle(
     value,
     categoryConfig
   ) as any;
+  const calculateTemperature = Object.hasOwn(
+    configParameter,
+    'calculateTemperature'
+  )
+    ? (configParameter.calculateTemperature as boolean)
+    : true;
   return {
     uuid: result.uuid,
     id: result.id,
@@ -600,6 +628,7 @@ function convertToCoolItObstacle(
       configParameter.heatAbsorptionCoefficientHeat ?? 1,
     heatRadiationCoefficient: configParameter.heatRadiationCoefficient ?? 1,
     reflectionProbability: configParameter.reflectionProbability ?? 1,
+    calculateTemperature: calculateTemperature,
     saturation: result.saturation,
     temperature: configParameter.initialTemperature,
     emits: configParameter.emits,
@@ -661,7 +690,7 @@ export default class PlayLevel extends Vue {
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
   moleculeStylesheets: PIXI.Spritesheet | null = null;
   vehicleStylesheets: PIXI.Spritesheet | null = null;
-  lightTexture: PIXI.Texture | null = null;
+  weatherStylesheets: PIXI.Spritesheet | null = null;
   startTime = Date.now();
   playTime = 0;
   autoPanSpeed = 0.4;
@@ -698,7 +727,6 @@ export default class PlayLevel extends Vue {
   backgroundParticle: { [key: string]: PIXIParticles.EmitterConfigV3 } = {};
   moleculeState: { [key: string]: MoleculeState } = {};
   highScore: Vote | null = null;
-  snowTexture!: PIXI.Texture;
 
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
@@ -726,6 +754,7 @@ export default class PlayLevel extends Vue {
   });
   CollisionBorderType = CollisionBorderType;
   snow = weatherConfig.snow;
+  hail = weatherConfig.rain;
   //#endregion variables
 
   //#region get / set
@@ -858,6 +887,7 @@ export default class PlayLevel extends Vue {
           heatRadiationCoefficient: ration.heatRadiationCoefficient,
           temperature: ration.initialTemperature,
           emits: ration.emits,
+          calculateTemperature: true,
         } as CoolItHitRegion,
         filter: [],
         color: '#ffffff',
@@ -869,11 +899,14 @@ export default class PlayLevel extends Vue {
   }
 
   get averageTemperature(): number {
-    const sumObstacles = this.obstacleList.reduce(
+    const obstacleList = this.obstacleList.filter(
+      (item) => item.calculateTemperature
+    );
+    const sumObstacles = obstacleList.reduce(
       (sum, item) => sum + item.temperature,
       0
     );
-    const countObstacles = this.obstacleList.length;
+    const countObstacles = obstacleList.length;
     const sumRegions = this.collisionRegions.reduce(
       (sum, item) => sum + item.source.temperature,
       0
@@ -914,7 +947,7 @@ export default class PlayLevel extends Vue {
 
   get radiationFactor(): number {
     //return this.radiationConst;
-    return this.autoPanSpeed / 30;
+    return this.autoPanSpeed / 10; // ((this.temperatureRise + 2) * 10);
   }
 
   getTimeString(timestamp: number): string {
@@ -1137,12 +1170,19 @@ export default class PlayLevel extends Vue {
   @Watch('gameWidth', { immediate: true })
   onGameWidthChanged(): void {
     if (this.gameWidth) {
-      const spawnShape = this.snow.behaviors.find(
+      const spawnShapeSnow = this.snow.behaviors.find(
         (behavior) => behavior.type === 'spawnShape'
       );
-      if (spawnShape && spawnShape.config.data) {
-        spawnShape.config.data.w =
-          this.gameWidth - spawnShape.config.data.x * 2;
+      if (spawnShapeSnow && spawnShapeSnow.config.data) {
+        spawnShapeSnow.config.data.w =
+          this.gameWidth - spawnShapeSnow.config.data.x * 2;
+      }
+      const spawnShapeHail = this.hail.behaviors.find(
+        (behavior) => behavior.type === 'spawnShape'
+      );
+      if (spawnShapeHail && spawnShapeHail.config.data) {
+        spawnShapeHail.config.data.w =
+          this.gameWidth - spawnShapeHail.config.data.x * 2;
       }
     }
   }
@@ -1174,9 +1214,9 @@ export default class PlayLevel extends Vue {
     this.interval = setInterval(() => this.updateLoop(), this.intervalTime);
 
     pixiUtil
-      .loadTexture('/assets/games/coolit/city/light.png', this.eventBus)
-      .then((texture) => {
-        this.lightTexture = texture;
+      .loadTexture('/assets/games/coolit/city/weather.json', this.eventBus)
+      .then((sheet) => {
+        this.weatherStylesheets = sheet;
       });
     pixiUtil
       .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
@@ -1207,11 +1247,6 @@ export default class PlayLevel extends Vue {
       .loadTexture('/assets/games/coolit/city/street.png', this.eventBus)
       .then((sheet) => {
         this.streetTexture = sheet;
-      });
-    pixiUtil
-      .loadTexture('/assets/games/coolit/city/snow.png', this.eventBus)
-      .then((sheet) => {
-        this.snowTexture = sheet;
       });
 
     for (let i = this.minTemperature; i <= this.maxTemperature; i++) {
@@ -1296,6 +1331,7 @@ export default class PlayLevel extends Vue {
       temperature: 0,
       emits: [],
       rise: true,
+      calculateTemperature: true,
     });
   }
 
@@ -1357,6 +1393,7 @@ export default class PlayLevel extends Vue {
             temperature: 0,
             emits: [],
             rise: false,
+            calculateTemperature: true,
           });
         }
         const distance = 100 / moleculeCount;
@@ -1941,13 +1978,34 @@ export default class PlayLevel extends Vue {
       replacements[2][0] as number
     );
     this.colorFilter.replacements = replacements;
-    if (this.averageTemperature < 0) {
-      const frequency = Math.pow(2, Math.round(this.averageTemperature));
+    const averageTemperature = this.averageTemperature;
+    if (averageTemperature < 0) {
+      const frequency = Math.pow(2, Math.round(averageTemperature));
       const minFrequency = 0.004;
       if (frequency > minFrequency) this.snow.frequency = frequency;
       else this.snow.frequency = minFrequency;
     } else {
       this.snow.frequency = 0;
+    }
+    const hailStartTemperature = 26;
+    if (averageTemperature > hailStartTemperature) {
+      const intensity = averageTemperature - hailStartTemperature;
+      const frequency = Math.pow(2, -Math.round(intensity)) * 2;
+      const minFrequency = 0.004;
+      if (frequency > minFrequency) this.hail.frequency = frequency;
+      else this.hail.frequency = minFrequency;
+      const scaleStatic = this.hail.behaviors.find(
+        (behavior) => behavior.type === 'scaleStatic'
+      );
+      if (scaleStatic && scaleStatic.config) {
+        let scale = intensity / 30;
+        if (scale < 0.05) scale = 0.1;
+        else if (scale > 0.25) scale = 0.2;
+        scaleStatic.config.min = scale;
+        scaleStatic.config.max = scale;
+      }
+    } else {
+      this.hail.frequency = 0;
     }
     this.weatherTemperature = Math.round(this.averageTemperature);
   }
@@ -2343,6 +2401,20 @@ export default class PlayLevel extends Vue {
   font-size: var(--font-size-xxxxlarge);
   font-weight: var(--font-weight-bold);
   color: var(--color-dark-contrast);
+}
+
+.statusWeatherWarning {
+  pointer-events: none;
+  position: absolute;
+  z-index: 100;
+  bottom: 3rem;
+  right: 1rem;
+  left: 1rem;
+  text-align: center;
+  font-size: var(--font-size-xxlarge);
+  color: var(--color-red);
+  background-color: #ffffff77;
+  border-radius: 2rem 2rem 2rem 0;
 }
 
 .statusGameOver {

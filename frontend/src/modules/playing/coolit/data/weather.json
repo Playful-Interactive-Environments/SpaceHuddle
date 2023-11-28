@@ -61,11 +61,11 @@
             "list": [
               {
                 "time": 0,
-                "value": 0.15
+                "value": 0.05
               },
               {
                 "time": 1,
-                "value": 0.2
+                "value": 0.1
               }
             ]
           },
@@ -80,6 +80,61 @@
           "maxSpeed": 50,
           "minStart": 80,
           "maxStart": 100
+        }
+      },
+      {
+        "type": "spawnShape",
+        "config": {
+          "type": "rect",
+          "data": {
+            "x": -5,
+            "y": -5,
+            "w": 900,
+            "h": 5
+          }
+        }
+      }
+    ]
+  },
+  "rain": {
+    "lifetime": {
+      "min": 2,
+      "max": 2
+    },
+    "frequency": 0,
+    "emitterLifetime": 0,
+    "maxParticles": 10000,
+    "addAtBack": false,
+    "pos": {
+      "x": 0,
+      "y": 0
+    },
+    "behaviors": [
+      {
+        "type": "alphaStatic",
+        "config": {
+          "alpha": 1
+        }
+      },
+      {
+        "type": "moveSpeedStatic",
+        "config": {
+          "min": 500,
+          "max": 500
+        }
+      },
+      {
+        "type": "scaleStatic",
+        "config": {
+          "min": 0.1,
+          "max": 0.1
+        }
+      },
+      {
+        "type": "rotationStatic",
+        "config": {
+          "min": 90,
+          "max": 90
         }
       },
       {
