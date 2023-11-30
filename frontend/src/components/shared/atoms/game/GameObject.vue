@@ -1,16 +1,43 @@
 <template>
   <container
+    v-if="isVisibleInContainer && isActive"
     :mask="mask"
+    :x="position[0] - offset[0]"
+    :y="position[1] - offset[1]"
+    :rotation="rotationValue"
+    :scale="scale"
+    :filters="objectFilters"
     @render="containerLoad"
+  >
+    <slot></slot>
+  </container>
+  <container
+    v-if="isVisibleInContainer && isActive && $slots.background"
+    :mask="mask"
     :x="position[0] - offset[0]"
     :y="position[1] - offset[1]"
     :rotation="rotationValue"
     :scale="scale"
     :filters="objectFilters"
   >
-    <slot></slot>
+    <slot name="background"></slot>
+  </container>
+  <!--<container
+    v-if="isVisibleInContainer && isActive"
+    :mask="mask"
+    :x="position[0] - offset[0]"
+    :y="position[1] - offset[1]"
+    :rotation="rotationValue"
+    :scale="scale"
+    :filters="objectFilters"
+  >
+    <container @render="containerLoad">
+      <slot></slot>
+    </container>
+    <slot name="background"></slot>
   </container>
   <container
+    v-if="isVisibleInContainer && isActive && $slots.background"
     :mask="mask"
     :x="position[0] - offset[0]"
     :y="position[1] - offset[1]"
@@ -22,13 +49,15 @@
   </container>
   <Graphics
     :mask="mask"
-    v-if="body && showBounds && loadingFinished"
+    v-if="
+      isVisibleInContainer && isActive && body && showBounds && loadingFinished
+    "
     @render="drawBorder"
     :x="body.position.x"
     :y="body.position.y"
     :width="boundsWidth ?? clickWidth"
     :height="boundsHeight ?? clickHeight"
-  ></Graphics>
+  ></Graphics>-->
 </template>
 
 <script lang="ts">
@@ -39,12 +68,13 @@ import * as PIXI from 'pixi.js';
 import { EventType } from '@/types/enum/EventType';
 import { CollisionHandler } from '@/types/game/CollisionHandler';
 import GameContainer, {
+  BackgroundMovement,
   CollisionRegion,
 } from '@/components/shared/atoms/game/GameContainer.vue';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import { delay, until } from '@/utils/wait';
 import { GrayscaleFilter } from 'pixi-filters';
-import { toRadians, toDegrees } from '@/utils/angle';
+import { toDegrees, toRadians } from '@/utils/angle';
 import * as matterUtil from '@/utils/matter';
 
 export interface ConditionalVelocity {
@@ -100,6 +130,7 @@ export default class GameObject extends Vue {
     [key: string]: string | number | boolean | object;
   };
   @Prop({ default: false }) readonly isStatic!: boolean;
+  @Prop({ default: true }) readonly isActive!: boolean;
   @Prop({ default: true }) readonly clickable!: boolean;
   @Prop() readonly collisionHandler!: CollisionHandler;
   @Prop() readonly source!: any;
@@ -127,7 +158,8 @@ export default class GameObject extends Vue {
   body: typeof Matter.Body | null = null;
   position: [number, number] = [0, 0];
   rotationValue = 0;
-  container!: PIXI.Container;
+  containerSize!: PIXI.Container;
+  containerPosition!: PIXI.Container;
   gameContainer!: GameContainer;
   offset: [number, number] = [0, 0];
   readonly defaultSize = 50;
@@ -150,25 +182,25 @@ export default class GameObject extends Vue {
   }
 
   getContainerWidth(): number {
-    if (this.fixSize === null) return this.container.width;
+    if (this.fixSize === null) return this.containerSize.width;
     if (Array.isArray(this.fixSize)) return this.fixSize[0];
     return this.fixSize;
   }
 
   getContainerHeight(): number {
-    if (this.fixSize === null) return this.container.height;
+    if (this.fixSize === null) return this.containerSize.height;
     if (Array.isArray(this.fixSize)) return this.fixSize[1];
     return this.fixSize;
   }
 
   get clickWidth(): number {
-    //if (this.container) return this.container.width + this.colliderDelta * 2;
+    //if (this.containerSize) return this.containerSize.width + this.colliderDelta * 2;
     //if (this.body) return this.body.bounds.max.x - this.body.bounds.min.x;
     return this.displayWidth + this.colliderDelta * 2;
   }
 
   get clickHeight(): number {
-    //if (this.container) return this.container.height + this.colliderDelta * 2;
+    //if (this.containerSize) return this.containerSize.height + this.colliderDelta * 2;
     //if (this.body) return this.body.bounds.max.y - this.body.bounds.min.y;
     return this.displayHeight + this.colliderDelta * 2;
   }
@@ -186,9 +218,38 @@ export default class GameObject extends Vue {
 
   isVisible(delta = 0): boolean {
     if (!this.body) return false;
-    const x = this.body.position.x; // this.position[0];
-    const y = this.body.position.y; // this.position[1];
-    return this.isPositionVisible(x, y, delta);
+    const x = this.body.position.x;
+    const y = this.body.position.y;
+    let isVisible = this.isPositionVisible(x, y, delta);
+    if (this.gameContainer.endlessPanning && !isVisible) {
+      isVisible =
+        isVisible ||
+        this.isPositionVisible(
+          x - this.gameContainer.backgroundTextureSize[0],
+          y,
+          delta
+        );
+      if (
+        !isVisible &&
+        this.gameContainer.backgroundMovement === BackgroundMovement.Pan
+      ) {
+        isVisible =
+          isVisible ||
+          this.isPositionVisible(
+            x,
+            y - this.gameContainer.backgroundTextureSize[1],
+            delta
+          );
+        isVisible =
+          isVisible ||
+          this.isPositionVisible(
+            x - this.gameContainer.backgroundTextureSize[0],
+            y - this.gameContainer.backgroundTextureSize[1],
+            delta
+          );
+      }
+    }
+    return isVisible;
   }
 
   getVelocityAmount(): number {
@@ -279,12 +340,12 @@ export default class GameObject extends Vue {
       this.body = null;
     }
     setTimeout(() => {
-      if (this.container) {
-        const parent = this.container.parent;
+      if (this.containerPosition) {
+        const parent = this.containerPosition.parent;
         if (parent) {
-          parent.removeChild(this.container as any);
+          parent.removeChild(this.containerPosition as any);
         }
-        this.container.destroy({ children: true });
+        this.containerPosition.destroy({ children: true });
       }
     }, 100);
   }
@@ -348,6 +409,12 @@ export default class GameObject extends Vue {
       this.objectFilters = [];
     }
   }
+
+  @Watch('isActive', { immediate: true })
+  onIsActiveChanged(): void {
+    this.manageEngin();
+    //this.isVisibleInContainer = this.isVisible();
+  }
   //#endregion watch
 
   //#region init body
@@ -357,24 +424,24 @@ export default class GameObject extends Vue {
       switch (this.type) {
         case 'rect':
           this.addRect(
-            this.container.x,
-            this.container.y,
+            this.containerPosition.x,
+            this.containerPosition.y,
             this.displayWidth,
             this.displayHeight
           );
           break;
         case 'circle':
           this.addCircle(
-            this.container.x,
-            this.container.y,
+            this.containerPosition.x,
+            this.containerPosition.y,
             this.displayWidth,
             this.displayHeight
           );
           break;
         case 'polygon':
           this.addPolygon(
-            this.container.x,
-            this.container.y,
+            this.containerPosition.x,
+            this.containerPosition.y,
             this.displayWidth,
             this.displayHeight,
             this.polygonShape
@@ -384,7 +451,8 @@ export default class GameObject extends Vue {
       this.$emit('initialised', this);
     };
 
-    this.container = container;
+    this.containerSize = container;
+    this.containerPosition = container;
     const delayTime = this.fixSize === null ? 0 : this.renderDelay;
     await delay(delayTime);
     await until(() => !!this.gameContainer);
@@ -404,8 +472,8 @@ export default class GameObject extends Vue {
 
   assignPoolBody(body: Matter.Body): void {
     Matter.Body.setPosition(body, {
-      x: this.container.x,
-      y: this.container.y,
+      x: this.containerPosition.x,
+      y: this.containerPosition.y,
     });
     this.body = body;
     this.$emit('update:id', this.body.id);
@@ -423,7 +491,7 @@ export default class GameObject extends Vue {
         const containerWidth = this.getContainerWidth();
         if (
           this.body &&
-          this.container &&
+          this.containerPosition &&
           containerWidth !== this.displayWidth
         ) {
           const scale = containerWidth / this.displayWidth;
@@ -438,7 +506,7 @@ export default class GameObject extends Vue {
       }
     };
 
-    if (this.body && this.container) {
+    if (this.body && this.containerPosition) {
       updateBody();
     } else {
       setTimeout(() => {
@@ -530,8 +598,8 @@ export default class GameObject extends Vue {
 
   manageEngin(): void {
     if (!this.clickable || !this.body) return;
-    if (this.removeFromEnginIfNotVisible) {
-      const isVisible = this.isVisible(this.displayWidth * 3);
+    if (this.removeFromEnginIfNotVisible || !this.isActive) {
+      const isVisible = this.isActive && this.isVisible(this.displayWidth * 3);
       if (isVisible && !this.isPartOfEngin) {
         this.addBodyToEngine();
       } else if (!isVisible && this.isPartOfEngin) {
@@ -726,6 +794,7 @@ export default class GameObject extends Vue {
     }
   }
 
+  isVisibleInContainer = true;
   afterPhysicUpdate(): void {
     if (
       !this.destroyed &&
@@ -735,6 +804,7 @@ export default class GameObject extends Vue {
       (this.body.position.x + this.offset[0] !== this.position[0] ||
         this.body.position.y + this.offset[1] !== this.position[1])
     ) {
+      this.isVisibleInContainer = this.isVisible();
       if (this.gameContainer) {
         /*const outsideRight =
           this.body.position.x + this.offset[0] > this.gameContainer.gameWidth;

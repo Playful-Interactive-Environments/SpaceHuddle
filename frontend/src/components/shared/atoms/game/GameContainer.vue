@@ -24,44 +24,18 @@
     >
       <container :filters="pixiFilterList">
         <sprite
-          v-if="backgroundSprite && backgroundSprite.valid"
-          :texture="backgroundSprite"
+          v-if="
+            backgroundTexturePositionSprite &&
+            backgroundTexturePositionSprite.valid
+          "
+          :texture="backgroundTexturePositionSprite"
           :anchor="0.5"
-          :width="backgroundTextureSize[0]"
-          :height="backgroundTextureSize[1]"
+          :width="backgroundTexturePositionSize[0]"
+          :height="backgroundTexturePositionSize[1]"
           :x="backgroundTexturePosition[0]"
           :y="backgroundTexturePosition[1]"
           :filters="pixiFilterListBackground"
         ></sprite>
-        <container v-if="endlessPanning" :filters="pixiFilterListBackground">
-          <sprite
-            v-if="backgroundSprite && backgroundSprite.valid"
-            :texture="backgroundSprite"
-            :anchor="0.5"
-            :width="backgroundTextureSize[0]"
-            :height="backgroundTextureSize[1]"
-            :x="backgroundPositionOffsetCircle[0]"
-            :y="backgroundTexturePosition[1]"
-          ></sprite>
-          <sprite
-            v-if="backgroundSprite && backgroundSprite.valid"
-            :texture="backgroundSprite"
-            :anchor="0.5"
-            :width="backgroundTextureSize[0]"
-            :height="backgroundTextureSize[1]"
-            :x="backgroundTexturePosition[0]"
-            :y="backgroundPositionOffsetCircle[1]"
-          ></sprite>
-          <sprite
-            v-if="backgroundSprite && backgroundSprite.valid"
-            :texture="backgroundSprite"
-            :anchor="0.5"
-            :width="backgroundTextureSize[0]"
-            :height="backgroundTextureSize[1]"
-            :x="backgroundPositionOffsetCircle[0]"
-            :y="backgroundPositionOffsetCircle[1]"
-          ></sprite>
-        </container>
         <container
           v-for="region of regionBodyList"
           :key="region.body.id"
@@ -365,6 +339,7 @@ export default class GameContainer extends Vue {
   gameWidth = 0;
   gameHeight = 0;
   backgroundSprite: PIXI.Texture | null = null;
+  backgroundSpriteEndlessPanning: PIXI.Texture | null = null;
 
   canvasPosition: [number, number] = [0, 0];
   engine!: typeof Matter.Engine;
@@ -405,7 +380,33 @@ export default class GameContainer extends Vue {
   }
 
   get backgroundTexturePosition(): [number, number] {
-    return this.backgroundPositionOffset;
+    if (!this.endlessPanning) return this.backgroundPositionOffset;
+    if (this.backgroundMovement === BackgroundMovement.Pan) {
+      return [
+        this.backgroundPositionOffset[0] - this.backgroundTextureSize[0] / 2,
+        this.backgroundPositionOffset[1] - this.backgroundTextureSize[1] / 2,
+      ];
+    }
+    return [
+      this.backgroundPositionOffset[0] - this.backgroundTextureSize[0] / 2,
+      this.backgroundPositionOffset[1],
+    ];
+  }
+
+  get backgroundTexturePositionSize(): [number, number] {
+    if (!this.endlessPanning) return this.backgroundTextureSize;
+    if (this.backgroundMovement === BackgroundMovement.Pan) {
+      return [
+        this.backgroundTextureSize[0] * 2,
+        this.backgroundTextureSize[1] * 2,
+      ];
+    }
+    return [this.backgroundTextureSize[0] * 2, this.backgroundTextureSize[1]];
+  }
+
+  get backgroundTexturePositionSprite(): PIXI.Texture | null {
+    if (!this.endlessPanning) return this.backgroundSprite;
+    return this.backgroundSpriteEndlessPanning;
   }
 
   getGameObjectForBody(body: Matter.Body): GameObject | null {
@@ -597,9 +598,11 @@ export default class GameContainer extends Vue {
       if (this.backgroundTexture) {
         pixiUtil
           .loadTexture(this.backgroundTexture, this.eventBus)
-          .then((sprite) => {
+          .then(async (sprite) => {
             this.backgroundSprite = sprite;
             this.calculateBackgroundSize();
+            this.backgroundSpriteEndlessPanning =
+              await this.createBackgroundTexture(sprite);
           });
       }
     };
@@ -607,9 +610,12 @@ export default class GameContainer extends Vue {
     if (this.backgroundTexture) {
       if (PIXI.Cache.has(this.backgroundTexture)) {
         this.backgroundSprite = PIXI.Assets.get(this.backgroundTexture);
-        setTimeout(() => {
-          if (this.backgroundSprite?.valid) this.calculateBackgroundSize();
-          else loadTexture();
+        setTimeout(async () => {
+          if (this.backgroundSprite?.valid) {
+            this.calculateBackgroundSize();
+            this.backgroundSpriteEndlessPanning =
+              await this.createBackgroundTexture(this.backgroundSprite);
+          } else loadTexture();
         }, 100);
       } else {
         loadTexture();
@@ -2066,6 +2072,43 @@ export default class GameContainer extends Vue {
       drawBodies(this.engine.world.bodies, graphics);
       drawBodies(this.activeComposition.bodies, graphics);
     }
+  }
+
+  async createBackgroundTexture(texture: PIXI.Texture): Promise<PIXI.Texture> {
+    if (this.endlessPanning) {
+      await until(() => !!this.app);
+      if (this.app) {
+        const backgroundPositions: [number, number][] = [
+          [0, 0],
+          [texture.width, 0],
+        ];
+        if (this.backgroundMovement === BackgroundMovement.Pan) {
+          backgroundPositions.push(
+            [0, texture.height],
+            [texture.width, texture.height]
+          );
+        }
+        const background = new PIXI.Graphics();
+        for (const position of backgroundPositions) {
+          const matrix: PIXI.Matrix = new PIXI.Matrix();
+          matrix.translate(+position[0], +position[1]);
+          background.beginTextureFill({
+            texture: texture,
+            alpha: 1,
+            matrix: matrix,
+          });
+          background.drawRect(
+            position[0],
+            position[1],
+            texture.width,
+            texture.height
+          );
+          background.endFill();
+        }
+        texture = this.app.renderer.generateTexture(background);
+      }
+    }
+    return texture;
   }
   //#endregion draw
 }

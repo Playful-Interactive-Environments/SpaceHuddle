@@ -162,7 +162,7 @@
       "cancel": "abbrechen"
     },
     "temperatureScale": {
-      "lowerLimit": "aktisch",
+      "lowerLimit": "arktisch",
       "upperLimit": "tropisch"
     },
     "playResult": {

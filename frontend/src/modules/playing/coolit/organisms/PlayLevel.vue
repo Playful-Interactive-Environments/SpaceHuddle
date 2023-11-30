@@ -34,88 +34,14 @@
           <container v-if="!gameOver">
             <container>
               <sprite
-                :texture="temperatureMarkerTexture"
-                :height="15"
-                :width="getTemperatureRange(lowerTemperatureLimit) * gameWidth"
-                tint="#ff0000"
-              ></sprite>
-              <sprite
-                :texture="temperatureMarkerTexture"
-                :x="gameWidth"
-                :anchor="[1, 0]"
-                :height="15"
-                :width="
-                  (1 - getTemperatureRange(upperTemperatureLimit)) * gameWidth
-                "
-                tint="#ff0000"
-              ></sprite>
-              <sprite
-                :texture="temperatureGradientTexture"
-                :height="10"
+                v-if="temperatureScaleTexture"
+                :texture="temperatureScaleTexture"
                 :width="gameWidth"
-              ></sprite>
+              />
               <sprite
-                :texture="temperatureMarkerTexture"
-                :x="getTemperatureRange(lowerTemperatureLimit) * gameWidth"
-                :width="4"
-                :height="15"
-                :anchor="[0.5, 0]"
-                tint="#ff0000"
-              ></sprite>
-              <text
-                :anchor="[0.5, 0]"
-                :x="getTemperatureRange(lowerTemperatureLimit) * gameWidth"
-                :y="15"
-                :style="{ fontFamily: 'Arial', fontSize: 24, fill: '#ff0000' }"
-                :scale="textScaleFactor"
-              >
-                {{ lowerTemperatureLimit }}°C
-              </text>
-              <text
-                :anchor="[0, 0]"
-                :x="5"
-                :y="15"
-                :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
-                :scale="textScaleFactor"
-              >
-                {{
-                  $t(
-                    'module.playing.coolit.participant.temperatureScale.lowerLimit'
-                  )
-                }}
-              </text>
-              <sprite
-                :texture="temperatureMarkerTexture"
-                :x="getTemperatureRange(upperTemperatureLimit) * gameWidth"
-                :width="4"
-                :height="15"
-                :anchor="[0.5, 0]"
-                tint="#ff0000"
-              ></sprite>
-              <text
-                :anchor="[0.5, 0]"
-                :x="getTemperatureRange(upperTemperatureLimit) * gameWidth"
-                :y="15"
-                :style="{ fontFamily: 'Arial', fontSize: 24, fill: '#ff0000' }"
-                :scale="textScaleFactor"
-              >
-                {{ upperTemperatureLimit }}°C
-              </text>
-              <text
-                :anchor="[1, 0]"
-                :x="gameWidth - 5"
-                :y="15"
-                :style="{ fontFamily: 'Arial', fontSize: 18, fill: '#ff0000' }"
-                :scale="textScaleFactor"
-              >
-                {{
-                  $t(
-                    'module.playing.coolit.participant.temperatureScale.upperLimit'
-                  )
-                }}
-              </text>
-              <sprite
-                v-for="obstacle in obstacleList"
+                v-for="obstacle in obstacleList.filter(
+                  (item) => item.calculateTemperature > 0
+                )"
                 :key="obstacle.uuid"
                 :texture="temperatureMarkerTexture"
                 :x="getTemperatureRange(obstacle.temperature) * gameWidth"
@@ -155,11 +81,12 @@
               :y="obstacle.position[1]"
               :rotation="obstacle.rotation"
               :scale="obstacle.scale"
-              :options="getObstacleTypeOptions(obstacle.type, obstacle.name)"
+              :options="obstacle.options"
               :is-static="true"
               :affectedByForce="false"
               :source="obstacle"
               :sleep-if-not-visible="true"
+              :clickable="obstacle.reflectionProbability > 0"
               @collision="obstacleCollision"
             >
               <CustomSprite
@@ -271,11 +198,12 @@
             <GameObject
               v-for="molecule of moleculeList"
               :key="molecule.id"
+              :is-active="molecule.isActive"
               type="circle"
               :object-space="ObjectSpace.RelativeToBackground"
               v-model:x="molecule.position[0]"
               v-model:y="molecule.position[1]"
-              :options="getMoleculeTypeOptions(molecule.type)"
+              :options="molecule.options"
               :is-static="false"
               :fix-size="molecule.size * moleculeSize"
               :source="molecule"
@@ -305,35 +233,12 @@
               />
             </GameObject>
           </container>
-          <container v-else>
-            <container>
-              <sprite
-                :texture="temperatureGradientTexture"
-                :height="10"
-                :width="gameWidth"
-              ></sprite>
-              <sprite
-                v-for="x in temperatureScale"
-                :key="x"
-                :texture="temperatureMarkerTexture"
-                :x="getTemperatureRange(x) * gameWidth"
-                :width="2"
-                :height="15"
-                :anchor="[0.5, 0]"
-                tint="#ff0000"
-              ></sprite>
-              <text
-                v-for="x in temperatureScale"
-                :key="x"
-                :anchor="[0.5, 0]"
-                :x="getTemperatureRange(x) * gameWidth"
-                :y="15"
-                :style="{ fontFamily: 'Arial', fontSize: 24, fill: '#ff0000' }"
-                :scale="textScaleFactor"
-              >
-                {{ x }}°C
-              </text>
-            </container>
+          <container v-else-if="$refs.gameContainer">
+            <sprite
+              v-if="temperatureScaleResultTexture"
+              :texture="temperatureScaleResultTexture"
+              :width="gameWidth"
+            />
             <sprite
               :texture="riverTexture"
               :width="containerTextureSize[0]"
@@ -345,23 +250,19 @@
               tint="#ff4400"
             >
             </sprite>
-            <GameObject
+            <container
               v-for="obstacle in obstacleList"
               :key="obstacle.uuid"
-              v-model:id="obstacle.id"
-              :type="obstacle.shape"
-              :polygon-shape="obstacle.polygonShape"
-              :show-bounds="false"
-              :anchor="obstacle.pivot"
-              :object-space="ObjectSpace.RelativeToBackground"
-              :x="obstacle.position[0]"
-              :y="obstacle.position[1]"
-              :rotation="obstacle.rotation"
+              :x="
+                ((obstacle.position[0] - panOffsetMin[0]) / 100) *
+                $refs.gameContainer.backgroundTextureSize[0]
+              "
+              :y="
+                (obstacle.position[1] / 100) *
+                $refs.gameContainer.backgroundTextureSize[1]
+              "
+              :pivot="obstacle.pivot"
               :scale="obstacle.scale"
-              :options="getObstacleTypeOptions(obstacle.type, obstacle.name)"
-              :is-static="true"
-              :affectedByForce="false"
-              :source="obstacle"
             >
               <CustomSprite
                 :colorOverlay="calculateTintColor(obstacle, 0.7)"
@@ -379,7 +280,43 @@
               >
                 {{ Math.round(obstacle.temperature) }}°C
               </text>
-            </GameObject>
+            </container>
+            <!--<GameObject
+              v-for="obstacle in obstacleList"
+              :key="obstacle.uuid"
+              v-model:id="obstacle.id"
+              :type="obstacle.shape"
+              :polygon-shape="obstacle.polygonShape"
+              :show-bounds="false"
+              :anchor="obstacle.pivot"
+              :object-space="ObjectSpace.RelativeToBackground"
+              :x="obstacle.position[0]"
+              :y="obstacle.position[1]"
+              :rotation="obstacle.rotation"
+              :scale="obstacle.scale"
+              :options="obstacle.options"
+              :is-static="true"
+              :affectedByForce="false"
+              :source="obstacle"
+              :clickable="false"
+            >
+              <CustomSprite
+                :colorOverlay="calculateTintColor(obstacle, 0.7)"
+                :texture="obstacle.texture"
+                :anchor="obstacle.pivot"
+                :width="obstacle.width"
+                :aspect-ration="getObjectAspect(obstacle.type, obstacle.name)"
+                :object-space="ObjectSpace.RelativeToBackground"
+              >
+              </CustomSprite>
+              <text
+                :anchor="[0.5, 1]"
+                :style="{ fontFamily: 'Arial', fontSize: 34, fill: '#ffffff' }"
+                :scale="textScaleFactor"
+              >
+                {{ Math.round(obstacle.temperature) }}°C
+              </text>
+            </GameObject>-->
           </container>
         </container>
       </template>
@@ -483,6 +420,7 @@ import * as CoolItConst from '@/modules/playing/coolit/utils/consts';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { EventType } from '@/types/enum/EventType';
 import weatherConfig from '@/modules/playing/coolit/data/weather.json';
+import * as preRenderer from '@/modules/playing/coolit/utils/preRender';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
@@ -490,6 +428,11 @@ const tutorialType = 'find-it-object';
 enum RayType {
   light = 'light',
   heat = 'heat',
+}
+
+enum GasType {
+  atmosphericGas = 'atmosphericGas',
+  greenhouseGas = 'greenhouseGas',
 }
 
 interface Ray {
@@ -572,6 +515,7 @@ interface CoolItHitRegion {
   temperature: number;
   emits: string[];
   calculateTemperature: boolean;
+  options: any;
 }
 
 interface MoleculeData extends CoolItHitRegion {
@@ -584,56 +528,10 @@ interface MoleculeData extends CoolItHitRegion {
   absorbedByTree: boolean;
   color: string;
   rise: boolean;
+  isActive: boolean;
 }
 
 interface CoolItObstacle extends placeable.Placeable, CoolItHitRegion {}
-
-function convertToCoolItObstacle(
-  value: placeable.PlaceableBase,
-  categoryConfig: placeable.PlaceableThemeConfig,
-  texture: string | PIXI.Texture
-): CoolItObstacle {
-  const result = placeable.convertToDetailData(value, categoryConfig, texture);
-  const configParameter = placeable.getConfigParameter(
-    value,
-    categoryConfig
-  ) as any;
-  const calculateTemperature = Object.hasOwn(
-    configParameter,
-    'calculateTemperature'
-  )
-    ? (configParameter.calculateTemperature as boolean)
-    : true;
-  return {
-    uuid: result.uuid,
-    id: result.id,
-    type: result.type,
-    name: result.name,
-    texture: result.texture,
-    width: result.width,
-    shape: result.shape,
-    polygonShape: result.polygonShape,
-    pivot: result.pivot,
-    position: result.position,
-    rotation: result.rotation,
-    scale: result.scale,
-    hitCount: 0,
-    maxHitCount: configParameter.maxHitCount ?? 10,
-    placingRegions: result.placingRegions,
-    hitAnimation: [],
-    //heatRationCoefficient: configParameter.heatRationCoefficient ?? 1,
-    heatAbsorptionCoefficientLight:
-      configParameter.heatAbsorptionCoefficientLight ?? 1,
-    heatAbsorptionCoefficientHeat:
-      configParameter.heatAbsorptionCoefficientHeat ?? 1,
-    heatRadiationCoefficient: configParameter.heatRadiationCoefficient ?? 1,
-    reflectionProbability: configParameter.reflectionProbability ?? 1,
-    calculateTemperature: calculateTemperature,
-    saturation: result.saturation,
-    temperature: configParameter.initialTemperature,
-    emits: configParameter.emits,
-  };
-}
 
 interface ColorValues {
   code: number;
@@ -694,20 +592,14 @@ export default class PlayLevel extends Vue {
   startTime = Date.now();
   playTime = 0;
   autoPanSpeed = 0.4;
-  emitRatePerStar = 500;
+  emitRatePerStar = 1000;
   randomMessageNo = 1;
 
-  readonly minTemperature = -40;
-  readonly maxTemperature = 60;
-  readonly lowerTemperatureLimit = -20;
-  readonly upperTemperatureLimit = 40;
-  readonly moduleCountFactor = 100;
   temperatureColorSteps: { [key: number]: ColorValues } = {};
 
   rayList: Ray[] = [];
   rayPath: { [key: string]: { x: number; y: number }[][] } = {};
   circleGradientTexture: PIXI.Texture | null = null;
-  temperatureGradientTexture: PIXI.Texture | null = null;
   temperatureMarkerTexture: PIXI.Texture | null = null;
   riverTexture: PIXI.Texture | null = null;
   groundTexture: PIXI.Texture | null = null;
@@ -736,7 +628,7 @@ export default class PlayLevel extends Vue {
   readonly intervalTime = 100;
   waitForDataLoad = true;
   randomVehicleName = '';
-  vehicleXPosition = 0;
+  vehicleXPosition = -100;
   vehicleHasEmitted = false;
   vehicleIsActive = false;
 
@@ -755,6 +647,9 @@ export default class PlayLevel extends Vue {
   CollisionBorderType = CollisionBorderType;
   snow = weatherConfig.snow;
   hail = weatherConfig.rain;
+
+  temperatureScaleTexture: PIXI.Texture | null = null;
+  temperatureScaleResultTexture: PIXI.Texture | null = null;
   //#endregion variables
 
   //#region get / set
@@ -888,6 +783,7 @@ export default class PlayLevel extends Vue {
           temperature: ration.initialTemperature,
           emits: ration.emits,
           calculateTemperature: true,
+          options: {},
         } as CoolItHitRegion,
         filter: [],
         color: '#ffffff',
@@ -1007,6 +903,27 @@ export default class PlayLevel extends Vue {
   }
 
   getMoleculeTypeOptions(moleculeType: string): any {
+    return {
+      name: moleculeType,
+      frictionAir: 0.01,
+      restitution: 1,
+      collisionFilter: {
+        group: 0,
+        category: this.getMoleculeCategory(moleculeType),
+        mask: this.getMoleculeMask(moleculeType),
+      },
+    };
+  }
+
+  getMoleculeCategory(moleculeType: string): number {
+    const moleculeConfig = gameConfig.molecules[moleculeType];
+    if (moleculeConfig.type === GasType.atmosphericGas) {
+      return this.CollisionGroups.ATMOSPHERIC_MOLECULE;
+    }
+    return this.CollisionGroups.GREENHOUSE_MOLECULE;
+  }
+
+  getMoleculeMask(moleculeType: string): number {
     const moleculeConfig = gameConfig.molecules[moleculeType];
     let mask =
       this.CollisionGroups.GREENHOUSE_MOLECULE |
@@ -1016,16 +933,7 @@ export default class PlayLevel extends Vue {
       mask = mask | this.CollisionGroups.HEAT_RAY | this.CollisionGroups.MOUSE;
     if (moleculeConfig.absorbedByTree)
       mask = mask | this.CollisionGroups.CARBON_SINK;
-    return {
-      name: moleculeType,
-      frictionAir: 0.01,
-      restitution: 1,
-      collisionFilter: {
-        group: 0,
-        category: this.CollisionGroups.GREENHOUSE_MOLECULE,
-        mask: mask,
-      },
-    };
+    return mask;
   }
 
   getMoleculeTexture(objectName: string): PIXI.Texture | string {
@@ -1087,38 +995,25 @@ export default class PlayLevel extends Vue {
     return [255, 255, 255, 0];
   }
 
-  get temperatureGradient(): any {
-    const minTempColor = new Color('#0000FF').to('srgb');
-    const maxTempColor = new Color('#FF00FF').to('srgb');
-    return minTempColor.range(maxTempColor, {
-      space: 'lch',
-      hue: 'decreasing',
-      outputSpace: 'srgb',
-    });
-  }
-
   getTemperatureRange(temperature: number): number {
-    return (
-      (temperature - this.minTemperature) /
-      (this.maxTemperature - this.minTemperature)
-    );
+    return preRenderer.getTemperatureRange(temperature);
   }
 
   calculateTemperatureColor(temperature: number): ColorValues {
     let range = this.getTemperatureRange(temperature);
     if (range < 0) range = 0;
     if (range > 1) range = 1;
-    const temperatureColor = this.temperatureGradient(range);
+    const temperatureColor = preRenderer.getColorForTemperature(range);
     const hex = temperatureColor.toString({ format: 'hex', collapse: false });
     let dangerFactor = 0;
-    if (temperature < this.lowerTemperatureLimit)
+    if (temperature < preRenderer.lowerTemperatureLimit)
       dangerFactor =
-        (this.lowerTemperatureLimit - temperature) /
-        (this.lowerTemperatureLimit - this.minTemperature);
-    if (temperature > this.upperTemperatureLimit)
+        (preRenderer.lowerTemperatureLimit - temperature) /
+        (preRenderer.lowerTemperatureLimit - preRenderer.minTemperature);
+    if (temperature > preRenderer.upperTemperatureLimit)
       dangerFactor =
-        (temperature - this.upperTemperatureLimit) /
-        (this.maxTemperature - this.upperTemperatureLimit);
+        (temperature - preRenderer.upperTemperatureLimit) /
+        (preRenderer.maxTemperature - preRenderer.upperTemperatureLimit);
     return {
       hex: hex,
       code: parseInt(hex.slice(1), 16),
@@ -1130,10 +1025,10 @@ export default class PlayLevel extends Vue {
 
   getTemperatureColor(temperature: number): ColorValues {
     const index = Math.round(temperature);
-    if (index > this.maxTemperature)
-      return this.temperatureColorSteps[this.maxTemperature];
-    if (index < this.minTemperature)
-      return this.temperatureColorSteps[this.minTemperature];
+    if (index > preRenderer.maxTemperature)
+      return this.temperatureColorSteps[preRenderer.maxTemperature];
+    if (index < preRenderer.minTemperature)
+      return this.temperatureColorSteps[preRenderer.minTemperature];
     return this.temperatureColorSteps[Math.round(temperature)];
   }
 
@@ -1145,19 +1040,12 @@ export default class PlayLevel extends Vue {
     return this.textScaleFactor * 220;
   }
 
-  get temperatureScale(): number[] {
-    return Array.from(
-      { length: (this.maxTemperature - this.minTemperature) / 10 - 1 },
-      (x, i) => i * 10 + this.minTemperature + 10
-    );
-  }
-
   get vehicleWidth(): number {
-    return this.gameWidth / 3;
+    return this.gameWidth / 3.5;
   }
 
   get vehicleYPosition(): number {
-    return (this.gameHeight / 50) * 49;
+    return this.gameHeight * 0.975;
   }
   //#endregion get / set
 
@@ -1249,7 +1137,11 @@ export default class PlayLevel extends Vue {
         this.streetTexture = sheet;
       });
 
-    for (let i = this.minTemperature; i <= this.maxTemperature; i++) {
+    for (
+      let i = preRenderer.minTemperature;
+      i <= preRenderer.maxTemperature;
+      i++
+    ) {
       this.temperatureColorSteps[i] = this.calculateTemperatureColor(i);
     }
     this.initRays();
@@ -1274,65 +1166,128 @@ export default class PlayLevel extends Vue {
         this.vehicleIsActive = true;
       }, Math.random() * 10000);
     } else if (
-      this.vehicleXPosition > this.gameWidth * 0.4 &&
+      this.vehicleXPosition > this.gameWidth * 0.5 &&
       !this.vehicleHasEmitted
     ) {
       this.vehicleHasEmitted = true;
       const relativePosition = this.vehicleXPosition / this.gameWidth;
+      const displayWidth = this.panOffsetMax[0] - this.panOffsetMin[0];
+      const position = this.panOffsetMin[0] + displayWidth * relativePosition;
       this.emitMolecule(
-        [(this.panOffsetMin[0] + this.panOffsetMax[0]) * relativePosition, 92],
-        'carbonDioxide'
+        [position, 94],
+        ['carbonDioxide', 'carbonDioxide', 'methane', 'carbonDioxide']
       );
-      setTimeout(() => {
-        const relativePosition = this.vehicleXPosition / this.gameWidth;
-        this.emitMolecule(
-          [
-            (this.panOffsetMin[0] + this.panOffsetMax[0]) * relativePosition,
-            92,
-          ],
-          'carbonDioxide'
-        );
-      }, 1000);
-      setTimeout(() => {
-        const relativePosition = this.vehicleXPosition / this.gameWidth;
-        this.emitMolecule(
-          [
-            (this.panOffsetMin[0] + this.panOffsetMax[0]) * relativePosition,
-            92,
-          ],
-          'methane'
-        );
-      }, 2000);
     }
   }
 
-  private emitMolecule(position: [number, number], moleculeName: string): void {
-    this.moleculeList.push({
-      name: moleculeName,
-      id: uuidv4(),
-      type: moleculeName,
-      position: position,
-      globalWarmingFactor:
-        gameConfig.molecules[moleculeName].globalWarmingFactor,
-      size: gameConfig.molecules[moleculeName].size,
-      controllable: gameConfig.molecules[moleculeName].controllable,
-      absorbedByTree: gameConfig.molecules[moleculeName].absorbedByTree,
-      color: gameConfig.molecules[moleculeName].color,
-      maxHitCount: 1000,
+  private emitMolecule(
+    position: [number, number],
+    moleculeName: string[] | string
+  ): void {
+    if (Array.isArray(moleculeName)) {
+      const index = Math.floor(Math.random() * moleculeName.length);
+      moleculeName = moleculeName[index];
+    }
+    const reactiveMolecule = this.moleculeList.find((item) => !item.isActive);
+    if (reactiveMolecule) {
+      this.updatedMolecule(reactiveMolecule, moleculeName);
+      reactiveMolecule.position = position;
+      reactiveMolecule.rise = true;
+      reactiveMolecule.isActive = true;
+      const container = this.$refs.gameContainer as GameContainer;
+      if (container) {
+        const gameObject = container.gameObjects.find(
+          (item) => item.source.id === reactiveMolecule.id
+        );
+        if (gameObject) {
+          gameObject.body.collisionFilter.category =
+            this.getMoleculeCategory(moleculeName);
+          gameObject.body.collisionFilter.mask =
+            this.getMoleculeMask(moleculeName);
+        }
+      }
+    } else {
+      this.moleculeList.push({
+        name: moleculeName,
+        id: uuidv4(),
+        type: moleculeName,
+        position: position,
+        globalWarmingFactor:
+          gameConfig.molecules[moleculeName].globalWarmingFactor,
+        size: gameConfig.molecules[moleculeName].size,
+        controllable: gameConfig.molecules[moleculeName].controllable,
+        absorbedByTree: gameConfig.molecules[moleculeName].absorbedByTree,
+        color: gameConfig.molecules[moleculeName].color,
+        maxHitCount: 1000,
+        hitCount: 0,
+        hitAnimation: [],
+        heatAbsorptionCoefficientLight:
+          gameConfig.molecules[moleculeName].globalWarmingFactor,
+        heatAbsorptionCoefficientHeat:
+          gameConfig.molecules[moleculeName].globalWarmingFactor,
+        heatRadiationCoefficient:
+          gameConfig.molecules[moleculeName].globalWarmingFactor,
+        reflectionProbability: 1,
+        temperature: 0,
+        emits: [],
+        rise: true,
+        calculateTemperature: true,
+        isActive: true,
+        options: this.getMoleculeTypeOptions(moleculeName),
+      });
+    }
+  }
+
+  convertToCoolItObstacle(
+    value: placeable.PlaceableBase,
+    categoryConfig: placeable.PlaceableThemeConfig,
+    texture: string | PIXI.Texture
+  ): CoolItObstacle {
+    const result = placeable.convertToDetailData(
+      value,
+      categoryConfig,
+      texture
+    );
+    const configParameter = placeable.getConfigParameter(
+      value,
+      categoryConfig
+    ) as any;
+    const calculateTemperature = Object.hasOwn(
+      configParameter,
+      'calculateTemperature'
+    )
+      ? (configParameter.calculateTemperature as boolean)
+      : true;
+    return {
+      uuid: result.uuid,
+      id: result.id,
+      type: result.type,
+      name: result.name,
+      texture: result.texture,
+      width: result.width,
+      shape: result.shape,
+      polygonShape: result.polygonShape,
+      pivot: result.pivot,
+      position: result.position,
+      rotation: result.rotation,
+      scale: result.scale,
       hitCount: 0,
+      maxHitCount: configParameter.maxHitCount ?? 10,
+      placingRegions: result.placingRegions,
       hitAnimation: [],
+      //heatRationCoefficient: configParameter.heatRationCoefficient ?? 1,
       heatAbsorptionCoefficientLight:
-        gameConfig.molecules[moleculeName].globalWarmingFactor,
+        configParameter.heatAbsorptionCoefficientLight ?? 1,
       heatAbsorptionCoefficientHeat:
-        gameConfig.molecules[moleculeName].globalWarmingFactor,
-      heatRadiationCoefficient:
-        gameConfig.molecules[moleculeName].globalWarmingFactor,
-      reflectionProbability: 1,
-      temperature: 0,
-      emits: [],
-      rise: true,
-      calculateTemperature: true,
-    });
+        configParameter.heatAbsorptionCoefficientHeat ?? 1,
+      heatRadiationCoefficient: configParameter.heatRadiationCoefficient ?? 1,
+      reflectionProbability: configParameter.reflectionProbability ?? 1,
+      calculateTemperature: calculateTemperature,
+      saturation: result.saturation,
+      temperature: configParameter.initialTemperature,
+      emits: configParameter.emits,
+      options: this.getObstacleTypeOptions(result.type, result.name),
+    };
   }
 
   initRays(): void {
@@ -1394,6 +1349,8 @@ export default class PlayLevel extends Vue {
             emits: [],
             rise: false,
             calculateTemperature: true,
+            isActive: true,
+            options: this.getMoleculeTypeOptions(moleculeConfigName),
           });
         }
         const distance = 100 / moleculeCount;
@@ -1427,7 +1384,8 @@ export default class PlayLevel extends Vue {
       this.emitLightRays(0, 0);
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
+      await until(() => !!this.vehicleStylesheets);
       this.vehicleIsActive = true;
     }, Math.random() * 1000);
   }
@@ -1508,7 +1466,7 @@ export default class PlayLevel extends Vue {
       this.obstacleList = items
         .filter((item) => this.hasTexture(item.type, item.name))
         .map((item) =>
-          convertToCoolItObstacle(
+          this.convertToCoolItObstacle(
             item,
             gameConfig.obstacles[levelType],
             this.getTexture(item.type, item.name)
@@ -1590,23 +1548,6 @@ export default class PlayLevel extends Vue {
       256,
       this.renderer
     );
-    const colorStops: string[] = [];
-    for (let i = 0; i < 20; i++) {
-      colorStops.push(
-        this.temperatureGradient(i / 20).toString({
-          format: 'hex',
-          collapse: false,
-        })
-      );
-    }
-    this.temperatureGradientTexture = pixiUtil.generateLinearGradientTexture(
-      1024,
-      10,
-      this.renderer,
-      colorStops,
-      '#ffffff',
-      pixiUtil.GradientDirection.LeftRight
-    );
     this.temperatureMarkerTexture = pixiUtil.generateLinearGradientTexture(
       10,
       128,
@@ -1614,6 +1555,18 @@ export default class PlayLevel extends Vue {
       ['#ffffff', '#ffffff']
     );
     this.generateMoleculeTextures();
+    this.temperatureScaleTexture = preRenderer.generateTemperatureScale(
+      renderer,
+      this.gameWidth,
+      this.textScaleFactor,
+      this.$t
+    );
+    this.temperatureScaleResultTexture =
+      preRenderer.generateTemperatureScaleResult(
+        renderer,
+        this.gameWidth,
+        this.textScaleFactor
+      );
   }
 
   async generateMoleculeTextures(): Promise<void> {
@@ -1838,7 +1791,7 @@ export default class PlayLevel extends Vue {
             ray.displayPointsCount = ray.displayPoints.length;
           ray.displayPointsCount -= 10;
           if (ray.displayPointsCount < 1) ray.displayPointsCount = 1;
-        } else ray.displayPointsCount += 10;
+        } else ray.displayPointsCount += 20;
         const points = this.calculateInitRayPoints(
           ray.type,
           ray.intensity,
@@ -1857,7 +1810,7 @@ export default class PlayLevel extends Vue {
 
     const displayWidth = this.panOffsetMax[0] - this.panOffsetMin[0];
     const containerAspect = (
-      this.$refs.gameContainer as any
+      this.$refs.gameContainer as GameContainer
     ).getBackgroundAspect();
     const possibleEmitList = this.obstacleList
       .filter(
@@ -1884,30 +1837,24 @@ export default class PlayLevel extends Vue {
         this.isReadyForPlay &&
         this.lightCollisionCount > 0
       ) {
-        const position = this.panOffsetMin[0] + displayWidth * 0.6;
+        const position = this.panOffsetMin[0] + displayWidth * 0.5;
         if (
           position > obstacle.position[0] &&
           !this.emitObstacleList.includes(obstacle.uuid)
         ) {
           this.emitObstacleList.push(obstacle.uuid);
-          let i = 0;
-          for (const emit of obstacle.emits) {
-            const aspect = this.getObjectAspect(obstacle.type, obstacle.name);
-            setTimeout(() => {
-              this.emitMolecule(
-                [
-                  obstacle.position[0],
-                  obstacle.position[1] -
-                    obstacle.scale *
-                      obstacle.width *
-                      (1 / aspect) *
-                      containerAspect,
-                ],
-                emit
-              );
-            }, 1000 * i);
-            i++;
-          }
+          const aspect = this.getObjectAspect(obstacle.type, obstacle.name);
+          this.emitMolecule(
+            [
+              obstacle.position[0],
+              obstacle.position[1] -
+                obstacle.scale *
+                  obstacle.width *
+                  (1 / aspect) *
+                  containerAspect,
+            ],
+            obstacle.emits
+          );
         }
       }
     }
@@ -1932,7 +1879,7 @@ export default class PlayLevel extends Vue {
     if (this.emittedRayCount > 0 && this.lightCollisionCount > 0) {
       const timeFactor = updateDelta / 5000;
       for (const obstacle of this.obstacleList) {
-        let temperature = obstacle.temperature - this.minTemperature;
+        let temperature = obstacle.temperature - preRenderer.minTemperature;
         if (temperature < 0) temperature = 0;
         obstacle.temperature -=
           obstacle.heatRadiationCoefficient *
@@ -1942,7 +1889,8 @@ export default class PlayLevel extends Vue {
       }
 
       for (const region of this.collisionRegions) {
-        let temperature = region.source.temperature - this.minTemperature;
+        let temperature =
+          region.source.temperature - preRenderer.minTemperature;
         if (temperature < 0) temperature = 0;
         region.source.temperature -=
           region.source.heatRadiationCoefficient *
@@ -1954,14 +1902,15 @@ export default class PlayLevel extends Vue {
 
     this.calculateWeather();
 
-    this.moleculeList = this.moleculeList.filter(
+    const inactiveMolecules = this.moleculeList.filter(
       (item) =>
-        item.globalWarmingFactor > 0 ||
-        (item.position[0] > this.panOffsetMin[0] - 10 &&
-          item.position[0] < this.panOffsetMax[0] + 10) ||
-        (item.position[0] - 100 > this.panOffsetMin[0] - 10 &&
-          item.position[0] - 100 < this.panOffsetMax[0] + 10)
+        item.isActive &&
+        item.globalWarmingFactor === 0 &&
+        !this.isGameObjectVisible(item)
     );
+    for (const item of inactiveMolecules) {
+      item.isActive = false;
+    }
   }
 
   weatherTemperature = 0;
@@ -2013,8 +1962,10 @@ export default class PlayLevel extends Vue {
   calculateTemperatureReplaceColor(sourceColor: number): number {
     const startColor = new Color(`#${sourceColor.toString(16)}`);
     const temperatureRange =
-      (this.upperTemperatureLimit - this.lowerTemperatureLimit) / 2;
-    const neutralTemperature = temperatureRange + this.lowerTemperatureLimit;
+      (preRenderer.upperTemperatureLimit - preRenderer.lowerTemperatureLimit) /
+      2;
+    const neutralTemperature =
+      temperatureRange + preRenderer.lowerTemperatureLimit;
     const lostColor = new Color(`#${sourceColor.toString(16)}`);
     if (this.averageTemperature < neutralTemperature) {
       lostColor.lch.l += 20;
@@ -2094,7 +2045,7 @@ export default class PlayLevel extends Vue {
                 amplitude: 1,
                 wavelength: 50,
                 speed: 10,
-                brightness: 1.2,
+                brightness: 1.5,
                 radius: 50,
               },
               0
@@ -2212,27 +2163,32 @@ export default class PlayLevel extends Vue {
       );
       if (index > -1) {
         this.moleculeState[moleculeObject.source.name].decreaseCount++;
-        moleculeObject.source.type = 'oxygen';
-        moleculeObject.source.name = 'oxygen';
-        const oxygenConfig = gameConfig.molecules.oxygen;
-        moleculeObject.source.globalWarmingFactor =
-          oxygenConfig.globalWarmingFactor;
-        moleculeObject.source.size = oxygenConfig.size;
-        moleculeObject.source.controllable = oxygenConfig.controllable;
-        moleculeObject.source.absorbedByTree = oxygenConfig.absorbedByTree;
-        moleculeObject.source.color = oxygenConfig.color;
-        moleculeObject.source.heatAbsorptionCoefficientHeat =
-          oxygenConfig.globalWarmingFactor;
-        moleculeObject.source.heatAbsorptionCoefficientLight =
-          oxygenConfig.globalWarmingFactor;
-        moleculeObject.source.heatRadiationCoefficient =
-          oxygenConfig.globalWarmingFactor;
+        const moleculeName = 'oxygen';
+        this.updatedMolecule(moleculeObject.source, moleculeName);
         moleculeObject.body.collisionFilter.category =
-          this.CollisionGroups.ATMOSPHERIC_MOLECULE;
+          this.getMoleculeCategory(moleculeName);
+        moleculeObject.body.collisionFilter.mask =
+          this.getMoleculeMask(moleculeName);
         //moleculeObject.source.heatRationCoefficient = oxygenConfig.globalWarmingFactor;
         //this.moleculeList.splice(index, 1);
       }
     }
+  }
+
+  updatedMolecule(molecule: MoleculeData, newMoleculeName: string): void {
+    molecule.type = newMoleculeName;
+    molecule.name = newMoleculeName;
+    const moleculeConfig = gameConfig.molecules[newMoleculeName];
+    molecule.globalWarmingFactor = moleculeConfig.globalWarmingFactor;
+    molecule.size = moleculeConfig.size;
+    molecule.controllable = moleculeConfig.controllable;
+    molecule.absorbedByTree = moleculeConfig.absorbedByTree;
+    molecule.color = moleculeConfig.color;
+    molecule.heatAbsorptionCoefficientHeat = moleculeConfig.globalWarmingFactor;
+    molecule.heatAbsorptionCoefficientLight =
+      moleculeConfig.globalWarmingFactor;
+    molecule.heatRadiationCoefficient = moleculeConfig.globalWarmingFactor;
+    molecule.options = this.getMoleculeTypeOptions(newMoleculeName);
   }
 
   moleculeClicked(item: any): void {
@@ -2249,9 +2205,21 @@ export default class PlayLevel extends Vue {
     this.panOffsetMin = min;
     this.panOffsetMax = max;
     this.panOffset = value;
-    if (this.gameOver && max[0] === 100 && max[1] === 100) {
+    if (this.gameOver && max[0] >= 99.9 && max[1] >= 99.9) {
       this.$emit('replayFinished');
     }
+  }
+
+  isGameObjectVisible(
+    item: { position: [number, number] },
+    delta = 10
+  ): boolean {
+    return (
+      (item.position[0] > this.panOffsetMin[0] - delta &&
+        item.position[0] < this.panOffsetMax[0] + delta) ||
+      (item.position[0] - 100 > this.panOffsetMin[0] - delta &&
+        item.position[0] - 100 < this.panOffsetMax[0] + delta)
+    );
   }
   //#endregion scroll
 
@@ -2259,48 +2227,48 @@ export default class PlayLevel extends Vue {
   checkGameOver(): boolean {
     const averageTemperature = this.averageTemperature;
     let gameOver =
-      averageTemperature < this.lowerTemperatureLimit ||
-      averageTemperature > this.upperTemperatureLimit;
+      averageTemperature < preRenderer.lowerTemperatureLimit ||
+      averageTemperature > preRenderer.upperTemperatureLimit;
     if (!gameOver) {
       let obstacleGameOverCount = 0;
       for (const obstacle of this.obstacleList) {
         if (
-          obstacle.temperature < this.lowerTemperatureLimit ||
-          obstacle.temperature > this.upperTemperatureLimit
+          obstacle.temperature < preRenderer.lowerTemperatureLimit ||
+          obstacle.temperature > preRenderer.upperTemperatureLimit
         )
           obstacleGameOverCount++;
       }
       let regionGameOverCount = 0;
       for (const region of this.collisionRegions) {
         if (
-          region.source.temperature < this.lowerTemperatureLimit ||
-          region.source.temperature > this.upperTemperatureLimit
+          region.source.temperature < preRenderer.lowerTemperatureLimit ||
+          region.source.temperature > preRenderer.upperTemperatureLimit
         )
           regionGameOverCount++;
       }
       if (obstacleGameOverCount + regionGameOverCount > 3) gameOver = true;
     }
     if (gameOver) {
+      clearInterval(this.interval);
       this.gameOver = true;
       this.randomMessageNo = Math.round(Math.random() * 2) + 1;
       this.collisionAnimation.splice(0);
-      clearInterval(this.interval);
 
       for (const obstacle of this.obstacleList) {
         obstacle.hitAnimation.splice(0);
-        if (obstacle.temperature > this.maxTemperature)
-          obstacle.temperature = this.maxTemperature;
-        if (obstacle.temperature < this.minTemperature)
-          obstacle.temperature = this.minTemperature;
+        if (obstacle.temperature > preRenderer.maxTemperature)
+          obstacle.temperature = preRenderer.maxTemperature;
+        if (obstacle.temperature < preRenderer.minTemperature)
+          obstacle.temperature = preRenderer.minTemperature;
       }
       for (const region of this.collisionRegions) {
         region.source.hitAnimation.splice(0);
         region.filter.splice(0);
         region.alpha = 0.7;
-        if (region.source.temperature > this.maxTemperature)
-          region.source.temperature = this.maxTemperature;
-        if (region.source.temperature < this.minTemperature)
-          region.source.temperature = this.minTemperature;
+        if (region.source.temperature > preRenderer.maxTemperature)
+          region.source.temperature = preRenderer.maxTemperature;
+        if (region.source.temperature < preRenderer.minTemperature)
+          region.source.temperature = preRenderer.minTemperature;
         region.text = `${Math.round(region.source.temperature)}°C`;
       }
       this.autoPanSpeed = 1.2;

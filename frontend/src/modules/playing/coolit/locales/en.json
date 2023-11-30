@@ -162,7 +162,7 @@
       "cancel": "cancel"
     },
     "temperatureScale": {
-      "lowerLimit": "actic",
+      "lowerLimit": "arctic",
       "upperLimit": "tropical"
     },
     "playResult": {

@@ -36,6 +36,7 @@ export default class CustomParticleContainer extends Vue {
   @Prop({ default: null }) config!: PIXIParticles.EmitterConfigV3 | null;
   @Prop() parentEventBus!: Emitter<Record<EventType, unknown>> | unknown;
   emitter!: PIXIParticles.Emitter;
+  emitterTimeStamp = 0;
   container!: PIXI.ParticleContainer;
   particleContainerActive = true;
   spriteSheet!: PIXI.Spritesheet;
@@ -129,11 +130,14 @@ export default class CustomParticleContainer extends Vue {
       }
     }
     await until(() => !!this.container);
-    this.emitter = new PIXIParticles.Emitter(this.container as any, config);
-    this.emitter.autoUpdate = this.autoUpdate;
-    if (!this.autoUpdate) {
-      await delay(100);
-      this.emitter.emitNow();
+    if (this.particleContainerActive) {
+      this.emitter = new PIXIParticles.Emitter(this.container as any, config);
+      this.emitterTimeStamp = Date.now();
+      this.emitter.autoUpdate = this.autoUpdate;
+      if (!this.autoUpdate) {
+        await delay(100);
+        if (!this.emitter.destroyed) this.emitter.emitNow();
+      }
     }
   }
 

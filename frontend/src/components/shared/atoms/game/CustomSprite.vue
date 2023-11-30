@@ -209,7 +209,8 @@ export default class CustomSprite extends Vue implements CustomObject {
     this.displayHeight = this.calcDisplayHeight();
     this.displayX = this.calcDisplayX();
     this.displayY = this.calcDisplayY();
-    if (this.$parent) (this.$parent as any).updatedColliderSize();
+    if (this.$parent && Object.hasOwn(this.$parent, 'updatedColliderSize'))
+      (this.$parent as any).updatedColliderSize();
   }
 
   @Watch('outline', { immediate: true })

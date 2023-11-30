@@ -155,7 +155,7 @@
               "width": 5,
               "shape": "rect",
               "pivot": [0.5, 1],
-              "emits": ["carbonDioxide", "carbonDioxide", "methane", "nitrogenOxide"]
+              "emits": ["carbonDioxide", "carbonDioxide", "methane", "nitrogenOxide", "carbonDioxide"]
             },
             "industry03": {
               "heatRationCoefficient": 2,
@@ -168,7 +168,7 @@
               "shape": "polygon",
               "polygonShape": [[0, 100], [0, 70], [40, 0], [60, 0], [100, 70], [100, 100]],
               "pivot": [0.5, 1],
-              "emits": ["carbonDioxide", "carbonDioxide", "methane", "nitrogenOxide"]
+              "emits": ["carbonDioxide", "carbonDioxide", "methane", "nitrogenOxide", "carbonDioxide"]
             },
             "industry04": {
               "heatRationCoefficient": 2,
@@ -204,7 +204,7 @@
               "shape": "polygon",
               "polygonShape": [[20, 100], [0, 20], [20, 0], [80, 0], [100, 20], [80, 100]],
               "pivot": [0.5, 1],
-              "emits": ["oxygen"],
+              "emits": [],
               "type": "carbonSink"
             },
             "cow": {
