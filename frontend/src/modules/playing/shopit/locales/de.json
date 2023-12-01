@@ -51,11 +51,11 @@
     "winPoints": "Dein Gegner hat seine maximalen Emissionen überschreitet.",
     "endCards": "Dies sind die teuersten Karten jeder Ressource, die du gespielt hast:",
     "endCardTexts": {
-      "CO²": "",
-      "electricity": "",
-      "lifetime": "",
-      "water": "",
-      "money": ""
+      "CO²": "CO2 Information",
+      "electricity": "electricity Information",
+      "lifetime": "lifetime Information",
+      "water": "water Information",
+      "money": "money Information"
     }
   }
 }

@@ -142,7 +142,7 @@
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
-        @click="activeCardChanged(card)"
+        @click="activeCardChanged(card, card[7])"
       >
         <button
           v-if="card === activeCard && !buttonDisabled"
@@ -184,12 +184,13 @@
     <div class="endCards">
       <div
         v-for="card in endCardsOverview"
-        :key="card[7]"
-        :id="card[7]"
+        :key="card[8]"
+        :id="card[8]"
         class="endCard"
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
+        @click="activeCardChanged(card, card[8], true)"
       >
         <Card
           :cost="card[0]"
@@ -203,6 +204,11 @@
         />
         <p class="CardDescription">{{ card[8] }}</p>
       </div>
+    </div>
+    <div class="infoText">
+      <p class="marginTop" v-show="this.activeCardId !== ''">
+        {{ $t(('module.playing.shopit.participant.endCardTexts.' + this.activeCardId)) }}
+      </p>
     </div>
     <el-button class="el-button--submit returnButton" @click="finished">
       {{ $t('module.playing.shopit.participant.returnToMenu') }}
@@ -228,12 +234,13 @@
     <div class="endCards">
       <div
         v-for="card in endCardsOverview"
-        :key="card[7]"
-        :id="card[7]"
+        :key="card[8]"
+        :id="card[8]"
         class="endCard"
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
+        @click="activeCardChanged(card, card[8], true)"
       >
         <Card
           :cost="card[0]"
@@ -247,6 +254,11 @@
         />
         <p class="CardDescription">{{ card[8] }}</p>
       </div>
+    </div>
+    <div class="infoText">
+      <p class="marginTop" v-show="this.activeCardId !== ''">
+        {{ $t(('module.playing.shopit.participant.endCardTexts.' + this.activeCardId)) }}
+      </p>
     </div>
     <el-button class="el-button--submit returnButton" @click="finished">
       {{ $t('module.playing.shopit.participant.returnToMenu') }}
@@ -321,6 +333,7 @@ export default class PlayState extends Vue {
   setupDone = false;
 
   activeCard: any[] = [];
+  activeCardId = '';
   cardsPlayed: any[] = [];
   ownCardPlayed = '';
   ownCardsPlayed: any[] = [];
@@ -402,10 +415,12 @@ export default class PlayState extends Vue {
     switch (outcome) {
       case 'lost':
         this.endCardsOverview = this.calculateMostExpensiveCards();
+        this.activeCardChanged(this.endCardsOverview[0], this.endCardsOverview[0][8]);
         this.playStateType = PlayStateType.lost;
         break;
       case 'win':
         this.endCardsOverview = this.calculateMostExpensiveCards();
+        this.activeCardChanged(this.endCardsOverview[0], this.endCardsOverview[0][8]);
         this.playStateType = PlayStateType.win;
         break;
     }
@@ -632,6 +647,7 @@ export default class PlayState extends Vue {
   async cardPlayed(card) {
     //clear active card to avoid replaying already played card
     this.activeCard = [];
+    this.activeCardId = '';
     const activeCards = document.getElementsByClassName('cardContainerActive');
     if (activeCards[0]) {
       activeCards[0].classList.remove('cardContainerActive');
@@ -773,17 +789,21 @@ export default class PlayState extends Vue {
     return boolArray;
   }
 
-  activeCardChanged(card) {
+  activeCardChanged(card, id, scroll = false) {
     if (!this.buttonDisabled) {
-      let element = document.getElementById(this.activeCard[7]);
+      let element = document.getElementById(this.activeCardId);
       if (element) {
         element.classList.remove('cardContainerActive');
       }
       this.activeCard = card;
-      element = document.getElementById(this.activeCard[7]);
+      this.activeCardId = id;
+      element = document.getElementById(id);
       if (element) {
         if (!element.classList.contains('cardPlayed')) {
           element.classList.add('cardContainerActive');
+        }
+        if (scroll) {
+          element.scrollIntoView({behavior: "smooth", block: "center", inline: "center"});
         }
       }
     }
@@ -1220,6 +1240,12 @@ p.gameKey {
   z-index: 10;
   overflow-x: scroll;
   overflow-y: hidden;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.endCards::-webkit-scrollbar {
+  display: none;
 }
 
 .endCard {
@@ -1250,5 +1276,9 @@ p.gameKey {
 .returnButton {
   position: absolute;
   bottom: 2rem;
+}
+
+.infoText {
+  height: 2rem;
 }
 </style>

@@ -49,6 +49,13 @@
     "win": "You won!",
     "winCategories": "You managed to collect all categories before your opponent! Good Job!",
     "winPoints": "Your opponent exceeded their maximum emissions.",
-    "endCards": "These are the most expensive cards considering each resource that you played:"
+    "endCards": "These are the most expensive cards considering each resource that you played:",
+    "endCardTexts": {
+      "CO²": "CO2 Information",
+      "electricity": "electricity Information",
+      "lifetime": "lifetime Information",
+      "water": "water Information",
+      "money": "money Information"
+    }
   }
 }
