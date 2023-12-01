@@ -22,11 +22,27 @@
       @pointerdown="gameContainerClicked"
       @pointerup="gameContainerReleased"
     >
+      <container
+        v-if="$slots.preRender && backgroundSprite"
+        @render="preRenderData"
+      >
+        <sprite
+          v-if="backgroundSprite && backgroundSprite.valid"
+          :texture="backgroundSprite"
+          :anchor="0.5"
+          :width="backgroundTextureSize[0]"
+          :height="backgroundTextureSize[1]"
+          :x="backgroundPositionOffset[0]"
+          :y="backgroundPositionOffset[1]"
+        ></sprite>
+        <slot name="preRender"></slot>
+      </container>
       <container :filters="pixiFilterList">
         <sprite
           v-if="
             backgroundTexturePositionSprite &&
-            backgroundTexturePositionSprite.valid
+            backgroundTexturePositionSprite.valid &&
+            (!$slots.preRender || preRendered)
           "
           :texture="backgroundTexturePositionSprite"
           :anchor="0.5"
@@ -208,7 +224,7 @@ import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import * as pixiUtil from '@/utils/pixi';
 import * as matterUtil from '@/utils/matter';
 import { getPolygonCenter } from '@/utils/polygon';
-import { until } from '@/utils/wait';
+import { delay, until } from '@/utils/wait';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -336,6 +352,7 @@ export default class GameContainer extends Vue {
 
   //#region variables
   ready = false;
+  preRendered = false;
   gameWidth = 0;
   gameHeight = 0;
   backgroundSprite: PIXI.Texture | null = null;
@@ -405,6 +422,9 @@ export default class GameContainer extends Vue {
   }
 
   get backgroundTexturePositionSprite(): PIXI.Texture | null {
+    if (this.endlessPanning && this.preRenderTextureEndless)
+      return this.preRenderTextureEndless;
+    if (this.preRenderTexture) return this.preRenderTexture;
     if (!this.endlessPanning) return this.backgroundSprite;
     return this.backgroundSpriteEndlessPanning;
   }
@@ -1070,6 +1090,117 @@ export default class GameContainer extends Vue {
     if (this.activeObject) {
       this.activeObject.gameObjectReleased();
     }
+  }
+
+  preRenderTexture: PIXI.Texture | null = null;
+  preRenderTextureEndless: PIXI.Texture | null = null;
+  async preRenderData(container: PIXI.Container): Promise<void> {
+    const renderTexture = (renderer: PIXI.IRenderer): PIXI.Texture => {
+      const bounds = new PIXI.Rectangle(
+        0,
+        0,
+        Math.round(this.backgroundTextureSize[0]),
+        Math.round(this.backgroundTextureSize[1])
+      );
+      return renderer.generateTexture(container, {
+        region: bounds,
+      });
+    };
+
+    await until(() => !!this.app);
+    await delay(1500);
+    //const startPos = [...this.backgroundPositionOffset] as [number, number];
+    if (this.app) {
+      const localBounds = container.getLocalBounds();
+      console.log(container.children);
+      const mainTile = renderTexture(this.app.renderer);
+      const graphics = new PIXI.Graphics();
+      graphics.beginTextureFill({
+        texture: mainTile,
+        alpha: 1,
+      });
+      graphics.drawRect(0, 0, mainTile.width, mainTile.height);
+      graphics.endFill();
+
+      /*this.backgroundPositionOffset = [
+        this.backgroundPositionOffsetMax[0] + this.gameWidth / 2,
+        this.backgroundPositionOffset[1],
+      ];
+      await delay(1000);
+      const borderTile = renderTexture(this.app.renderer);
+      const matrix: PIXI.Matrix = new PIXI.Matrix();
+      matrix.translate(
+        -this.gameWidth / 2,
+        0
+      );
+      graphics.beginTextureFill({
+        texture: borderTile,
+        alpha: 1,
+        matrix: matrix,
+      });
+      graphics.drawRect(0, 0, this.gameWidth / 2, borderTile.height);
+      graphics.endFill();*/
+      if (localBounds.x < 0) {
+        const previousTile = this.app.renderer.generateTexture(container, {
+          region: new PIXI.Rectangle(
+            localBounds.x,
+            0,
+            -localBounds.x,
+            Math.round(this.backgroundTextureSize[1])
+          ),
+        });
+
+        const matrix: PIXI.Matrix = new PIXI.Matrix();
+        matrix.translate(
+          Math.round(this.backgroundTextureSize[0]) + localBounds.x,
+          0
+        );
+        graphics.beginTextureFill({
+          texture: previousTile,
+          alpha: 1,
+          matrix: matrix,
+        });
+        graphics.drawRect(
+          Math.round(this.backgroundTextureSize[0]) + localBounds.x,
+          0,
+          previousTile.width,
+          previousTile.height
+        );
+        graphics.endFill();
+      }
+      if (
+        localBounds.width + localBounds.x >
+        Math.round(this.backgroundTextureSize[0])
+      ) {
+        const nextTile = this.app.renderer.generateTexture(container, {
+          region: new PIXI.Rectangle(
+            Math.round(this.backgroundTextureSize[0]),
+            0,
+            localBounds.width -
+              (Math.round(this.backgroundTextureSize[0]) - localBounds.x),
+            Math.round(this.backgroundTextureSize[1])
+          ),
+        });
+
+        const matrix: PIXI.Matrix = new PIXI.Matrix();
+        matrix.translate(0, 0);
+        graphics.beginTextureFill({
+          texture: nextTile,
+          alpha: 1,
+          matrix: matrix,
+        });
+        graphics.drawRect(0, 0, nextTile.width, nextTile.height);
+        graphics.endFill();
+      }
+      this.preRenderTexture = this.app.renderer.generateTexture(graphics);
+      this.preRenderTextureEndless = await this.createBackgroundTexture(
+        this.preRenderTexture
+      );
+    }
+    await delay(1000);
+    //this.backgroundPositionOffset = startPos;
+    this.preRendered = true;
+    container.removeFromParent();
   }
   //#endregion events
 
@@ -1850,6 +1981,13 @@ export default class GameContainer extends Vue {
         }
       }
 
+      for (const filter of this.pixiFilterList) {
+        if (filter.center) {
+          filter.center[0] += deltaX;
+          filter.center[1] += deltaY;
+        }
+      }
+
       if (this.bordersBackground) {
         Matter.Body.setPosition(this.bordersBackground.bottom, {
           x:
@@ -2091,7 +2229,7 @@ export default class GameContainer extends Vue {
         const background = new PIXI.Graphics();
         for (const position of backgroundPositions) {
           const matrix: PIXI.Matrix = new PIXI.Matrix();
-          matrix.translate(+position[0], +position[1]);
+          matrix.translate(position[0], position[1]);
           background.beginTextureFill({
             texture: texture,
             alpha: 1,

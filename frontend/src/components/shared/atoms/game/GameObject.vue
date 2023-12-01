@@ -10,19 +10,10 @@
     @render="containerLoad"
   >
     <slot></slot>
-  </container>
-  <container
-    v-if="isVisibleInContainer && isActive && $slots.background"
-    :mask="mask"
-    :x="position[0] - offset[0]"
-    :y="position[1] - offset[1]"
-    :rotation="rotationValue"
-    :scale="scale"
-    :filters="objectFilters"
-  >
     <slot name="background"></slot>
   </container>
-  <!--<container
+  <!--
+  <container
     v-if="isVisibleInContainer && isActive"
     :mask="mask"
     :x="position[0] - offset[0]"
@@ -30,11 +21,9 @@
     :rotation="rotationValue"
     :scale="scale"
     :filters="objectFilters"
+    @render="containerLoad"
   >
-    <container @render="containerLoad">
-      <slot></slot>
-    </container>
-    <slot name="background"></slot>
+    <slot></slot>
   </container>
   <container
     v-if="isVisibleInContainer && isActive && $slots.background"
@@ -875,6 +864,17 @@ export default class GameObject extends Vue {
     if (this.boundsGraphic) this.drawBorder();
     if (this.removeFromEnginIfNotVisible || this.sleepIfNotVisible)
       this.manageEngin();
+
+    if (this.gameContainer.endlessPanning) {
+      const maxX = this.gameContainer.backgroundTextureSize[0];
+      const maxY = this.gameContainer.backgroundTextureSize[1];
+      if (this.position[0] < 0) this.position[0] = maxX + this.position[0];
+      if (this.position[0] > maxX) this.position[0] = this.position[0] - maxX;
+      if (this.gameContainer.backgroundMovement === BackgroundMovement.Pan) {
+        if (this.position[1] < 0) this.position[1] = maxY + this.position[1];
+        if (this.position[1] > maxY) this.position[1] = this.position[1] - maxY;
+      }
+    }
   }
   //#endregion matter update
 
@@ -928,7 +928,7 @@ export default class GameObject extends Vue {
   drawBorder(inputGraphics: PIXI.Graphics | null = null): void {
     const graphics = inputGraphics ?? this.boundsGraphic;
     if (inputGraphics) this.boundsGraphic = inputGraphics;
-    if (graphics && this.body) {
+    if (graphics && graphics.geometry && this.body) {
       graphics.clear();
       graphics.lineStyle(2, '#ff0000');
       const path = this.body.vertices.map((item) => {

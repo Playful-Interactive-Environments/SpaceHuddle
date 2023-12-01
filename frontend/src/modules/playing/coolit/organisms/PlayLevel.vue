@@ -22,13 +22,48 @@
       @backgroundSizeChanged="containerTextureSizeChanged"
       :show-bounds="false"
       :collision-borders="CollisionBorderType.Background"
-      :pixi-filter-list="collisionAnimation"
+      :pixi-filter-list="[...collisionAnimation, ...hitAnimation]"
       :pixi-filter-list-background="[colorFilter]"
       :auto-pan-speed="autoPanSpeed"
       :reset-position-on-speed-changed="gameOver"
       :waitForDataLoad="waitForDataLoad"
       :endless-panning="!gameOver"
     >
+      <template v-slot:preRender>
+        <container v-if="gameWidth">
+          <GameObject
+            v-for="obstacle in obstacleList"
+            :key="obstacle.uuid"
+            v-model:id="obstacle.id"
+            :type="obstacle.shape"
+            :polygon-shape="obstacle.polygonShape"
+            :show-bounds="false"
+            :anchor="obstacle.pivot"
+            :object-space="ObjectSpace.RelativeToBackground"
+            :x="obstacle.position[0]"
+            :y="obstacle.position[1]"
+            :rotation="obstacle.rotation"
+            :scale="obstacle.scale"
+            :options="obstacle.options"
+            :is-static="true"
+            :affectedByForce="false"
+            :source="obstacle"
+            :sleep-if-not-visible="true"
+            :clickable="obstacle.reflectionProbability > 0"
+            @collision="obstacleCollision"
+          >
+            <CustomSprite
+              :texture="obstacle.texture"
+              :anchor="obstacle.pivot"
+              :width="obstacle.width"
+              :aspect-ration="getObjectAspect(obstacle.type, obstacle.name)"
+              :object-space="ObjectSpace.RelativeToBackground"
+              :saturation="obstacle.saturation"
+            >
+            </CustomSprite>
+          </GameObject>
+        </container>
+      </template>
       <template v-slot:default>
         <container v-if="gameWidth && circleGradientTexture">
           <container v-if="!gameOver">
@@ -68,7 +103,7 @@
                 {{ Math.round(averageTemperature) }}°C
               </text>
             </container>
-            <GameObject
+            <!--<GameObject
               v-for="obstacle in obstacleList"
               :key="obstacle.uuid"
               v-model:id="obstacle.id"
@@ -104,7 +139,7 @@
                 "
               >
               </CustomSprite>
-            </GameObject>
+            </GameObject>-->
             <animated-sprite
               v-if="vehicleStylesheets"
               :textures="vehicleStylesheets.animations[randomVehicleName]"
@@ -169,6 +204,17 @@
                   :anchor="0.5"
                   :tint="ray.type === RayType.light ? yellowColor : redColor"
                 ></sprite>
+              </container>
+              <container v-else>
+                <animated-sprite
+                  :textures="sunStylesheets.animations['sun']"
+                  :animation-speed="0.1"
+                  :width="rayParticleSize"
+                  :height="rayParticleSize"
+                  :anchor="0.5"
+                  :scale="0.05"
+                  playing
+                />
               </container>
               <template #background>
                 <simple-rope
@@ -589,6 +635,7 @@ export default class PlayLevel extends Vue {
   moleculeStylesheets: PIXI.Spritesheet | null = null;
   vehicleStylesheets: PIXI.Spritesheet | null = null;
   weatherStylesheets: PIXI.Spritesheet | null = null;
+  sunStylesheets: PIXI.Spritesheet | null = null;
   startTime = Date.now();
   playTime = 0;
   autoPanSpeed = 0.4;
@@ -602,11 +649,10 @@ export default class PlayLevel extends Vue {
   circleGradientTexture: PIXI.Texture | null = null;
   temperatureMarkerTexture: PIXI.Texture | null = null;
   riverTexture: PIXI.Texture | null = null;
-  groundTexture: PIXI.Texture | null = null;
-  streetTexture: PIXI.Texture | null = null;
   moleculeTextures: { [key: string]: PIXI.Texture } = {};
   rayParticleSize = 10;
   collisionAnimation: any[] = [];
+  hitAnimation: any[] = [];
   colorFilter: MultiColorReplaceFilter = new MultiColorReplaceFilter(
     [
       [0x7cc269, 0x7cc269],
@@ -1127,14 +1173,9 @@ export default class PlayLevel extends Vue {
         this.riverTexture = sheet;
       });
     pixiUtil
-      .loadTexture('/assets/games/coolit/city/ground.png', this.eventBus)
+      .loadTexture('/assets/games/coolit/city/sun.json', this.eventBus)
       .then((sheet) => {
-        this.groundTexture = sheet;
-      });
-    pixiUtil
-      .loadTexture('/assets/games/coolit/city/street.png', this.eventBus)
-      .then((sheet) => {
-        this.streetTexture = sheet;
+        this.sunStylesheets = sheet;
       });
 
     for (
@@ -1791,7 +1832,9 @@ export default class PlayLevel extends Vue {
             ray.displayPointsCount = ray.displayPoints.length;
           ray.displayPointsCount -= 10;
           if (ray.displayPointsCount < 1) ray.displayPointsCount = 1;
-        } else ray.displayPointsCount += 20;
+        } else {
+          ray.displayPointsCount += 20;
+        }
         const points = this.calculateInitRayPoints(
           ray.type,
           ray.intensity,
@@ -1874,6 +1917,11 @@ export default class PlayLevel extends Vue {
     );
     for (const filter of this.collisionAnimation) {
       filter.time += filter.wavelength / 500;
+    }
+
+    this.hitAnimation = this.hitAnimation.filter((item) => item.time < 5);
+    for (const filter of this.hitAnimation) {
+      filter.time += 0.1;
     }
 
     if (this.emittedRayCount > 0 && this.lightCollisionCount > 0) {
@@ -2051,6 +2099,7 @@ export default class PlayLevel extends Vue {
               0
             )
           );
+
           if (
             obstacleObject &&
             Object.hasOwn(obstacleObject, 'filter') &&
@@ -2069,9 +2118,23 @@ export default class PlayLevel extends Vue {
                 0
               )
             );
+          } else {
+            this.hitAnimation.push(
+              new ShockwaveFilter(
+                [rayBody.position.x, rayBody.position.y],
+                {
+                  amplitude: 1,
+                  wavelength: 50,
+                  speed: 10,
+                  brightness: 1.5,
+                  radius: 50,
+                },
+                0
+              )
+            );
           }
         }
-        await delay(1000);
+        await delay(2000);
         if (!rayObject.body) return;
         ray.displayPointsCount = 0;
         for (let i = 0; i < ray.displayPoints.length; i++) {

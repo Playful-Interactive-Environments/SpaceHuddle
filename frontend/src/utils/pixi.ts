@@ -244,6 +244,9 @@ export async function loadTexture(
       return texture;
     } catch (e) {
       delete textureState[url];
+      if (isLoadingFinished()) {
+        if (eventBus) eventBus.emit(EventType.ALL_TEXTURES_LOADED);
+      }
       return null;
     }
   }
