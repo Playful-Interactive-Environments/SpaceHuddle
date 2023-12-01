@@ -19,9 +19,9 @@
       "singleplayerLabel": "Play alone",
       "singleplayerButton": "Play!",
       "multiplayer": "Multiplayer",
-      "multiplayerDesc": "Play against a friend and see who is better at keeping their emissions balanced! Host or join a game.",
+      "multiplayerDesc": "Play against a friend and see who can balance their emissions better! Host or join a game.",
       "multiplayerLabelHost": "Host Game",
-      "multiplayerButtonHost": "Host Game",
+      "multiplayerButtonHost": "Host Game!",
       "multiplayerLabelJoin": "Join Game",
       "multiplayerButtonJoin": "Join!"
     },

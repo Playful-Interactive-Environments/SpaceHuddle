@@ -61,7 +61,6 @@
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
-        @click="activeCardChanged(card)"
       >
         <Card
           :cost="card[0]"
@@ -115,7 +114,7 @@
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
-        @click="activeCardChanged(card)"
+        @click="activeCardChanged(card, card[7])"
       >
         <button
           v-if="card === activeCard && !buttonDisabled"
@@ -157,12 +156,13 @@
     <div class="endCards">
       <div
         v-for="card in endCardsOverview"
-        :key="card[7]"
-        :id="card[7]"
+        :key="card[8]"
+        :id="card[8]"
         class="endCard"
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
+        @click="activeCardChanged(card, card[8], true)"
       >
         <Card
           :cost="card[0]"
@@ -176,6 +176,16 @@
         />
         <p class="CardDescription">{{ card[8] }}</p>
       </div>
+    </div>
+    <div class="infoText">
+      <p class="marginTop" v-show="this.activeCardId !== ''">
+        {{
+          $t(
+            'module.playing.shopit.participant.endCardTexts.' +
+              this.activeCardId
+          )
+        }}
+      </p>
     </div>
     <el-button class="el-button--submit returnButton" @click="finished">
       {{ $t('module.playing.shopit.participant.returnToMenu') }}
@@ -201,12 +211,13 @@
     <div class="endCards">
       <div
         v-for="card in endCardsOverview"
-        :key="card[7]"
-        :id="card[7]"
+        :key="card[8]"
+        :id="card[8]"
         class="endCard"
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
+        @click="activeCardChanged(card, card[8], true)"
       >
         <Card
           :cost="card[0]"
@@ -220,6 +231,16 @@
         />
         <p class="CardDescription">{{ card[8] }}</p>
       </div>
+    </div>
+    <div class="infoText">
+      <p class="marginTop" v-show="this.activeCardId !== ''">
+        {{
+          $t(
+            'module.playing.shopit.participant.endCardTexts.' +
+              this.activeCardId
+          )
+        }}
+      </p>
     </div>
     <el-button class="el-button--submit returnButton" @click="finished">
       {{ $t('module.playing.shopit.participant.returnToMenu') }}
@@ -287,6 +308,7 @@ export default class PlayState extends Vue {
   cardSpriteFolder = gameConfig.gameValues.spriteFolder;
 
   activeCard: any[] = [];
+  activeCardId = '';
   cardsPlayed: any[] = [];
   ownCardPlayed = '';
   ownCardsPlayed: any[] = [];
@@ -491,6 +513,7 @@ export default class PlayState extends Vue {
   cardPlayed(card) {
     //clear active card to avoid replaying already played card
     this.activeCard = [];
+    this.activeCardId = '';
     const activeCards = document.getElementsByClassName('cardContainerActive');
     if (activeCards[0]) {
       activeCards[0].classList.remove('cardContainerActive');
@@ -588,16 +611,24 @@ export default class PlayState extends Vue {
     return boolArray;
   }
 
-  activeCardChanged(card) {
-    let element = document.getElementById(this.activeCard[7]);
+  activeCardChanged(card, id, scroll = false) {
+    let element = document.getElementById(this.activeCardId);
     if (element) {
       element.classList.remove('cardContainerActive');
     }
     this.activeCard = card;
-    element = document.getElementById(this.activeCard[7]);
+    this.activeCardId = id;
+    element = document.getElementById(id);
     if (element) {
       if (!element.classList.contains('cardPlayed')) {
         element.classList.add('cardContainerActive');
+      }
+      if (scroll) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'center',
+        });
       }
     }
   }

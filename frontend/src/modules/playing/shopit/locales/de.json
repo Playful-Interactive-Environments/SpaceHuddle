@@ -21,9 +21,9 @@
       "multiplayer": "Multiplayer",
       "multiplayerDesc": "Spiele gegen einen Freund und finde heraus, wer seine Emissionen besser im Gleichgewicht halten kann! Lege ein Spiel an, oder nimm an einem Teil.",
       "multiplayerLabelHost": "Spiel anlegen",
-      "multiplayerButtonHost": "Spiel anlegen",
+      "multiplayerButtonHost": "Spiel anlegen!",
       "multiplayerLabelJoin": "Spiel beitreten",
-      "multiplayerButtonJoin": "beitreten"
+      "multiplayerButtonJoin": "beitreten!"
     },
     "cards": {
       "kg": "kg",
