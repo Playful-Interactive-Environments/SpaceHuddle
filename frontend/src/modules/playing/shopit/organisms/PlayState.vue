@@ -51,18 +51,36 @@
       tag="div"
       id="activeCards"
     >
-      <p
-        v-if="cardsPlayed.length === 0 && player === playersTurn"
-        class="waiting"
-      >
-        {{ $t('module.playing.shopit.participant.waiting.yourTurn') }}
-      </p>
-      <p
-        v-if="cardsPlayed.length === 0 && player !== playersTurn"
-        class="waiting"
-      >
-        {{ $t('module.playing.shopit.participant.waiting.opponent') }}
-      </p>
+      <div class="waitingTexts">
+        <p
+          v-if="
+            cardsPlayed.length === 0 &&
+            player === playersTurn &&
+            game.parameter.playerNum > 1
+          "
+          class="waiting"
+        >
+          {{ $t('module.playing.shopit.participant.waiting.yourTurn') }}
+        </p>
+        <p
+          v-if="
+            (cardsPlayed.length === 0 && player !== playersTurn) ||
+            (!initialButtonState && game.parameter.playerNum <= 1)
+          "
+          class="waiting"
+        >
+          {{ $t('module.playing.shopit.participant.waiting.opponent') }}
+        </p>
+        <p
+          v-if="!initialButtonState && game.parameter.playerNum <= 1"
+          class="waiting"
+        >
+          {{
+            $t('module.playing.shopit.participant.waiting.joinID') +
+            game.keywords
+          }}
+        </p>
+      </div>
       <div
         v-for="card in cardsPlayed"
         :key="card[7]"
@@ -237,17 +255,17 @@
 </template>
 
 <script lang="ts">
-import {Options, Vue} from 'vue-class-component';
-import {Prop} from 'vue-property-decorator';
-import {ObjectSpace} from '@/types/enum/ObjectSpace';
-import {until} from '@/utils/wait';
+import { Options, Vue } from 'vue-class-component';
+import { Prop } from 'vue-property-decorator';
+import { ObjectSpace } from '@/types/enum/ObjectSpace';
+import { until } from '@/utils/wait';
 import * as tutorialService from '@/services/tutorial-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import {Tutorial} from '@/types/api/Tutorial';
+import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
 import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
-import {Idea} from '@/types/api/Idea';
+import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import Card from '@/modules/playing/shopit/organisms/Card.vue';
 
@@ -491,15 +509,22 @@ export default class PlayState extends Vue {
       if (this.game.parameter.playerNum === 2 && !this.initialButtonState) {
         this.buttonDisabled = false;
         this.initialButtonState = true;
-        console.log('player joined');
       }
-      if (this.player === 2 && this.game.parameter.playerNum <= 1 && this.initialButtonState) {
+      if (
+        this.player === 2 &&
+        this.game.parameter.playerNum <= 1 &&
+        this.initialButtonState
+      ) {
         this.deregisterAll();
         this.clearPlayState();
         this.game.parameter.playerNum -= 1;
         ideaService.putIdea(this.game, EndpointAuthorisationType.PARTICIPANT);
         this.$emit('playerLeft');
-      } else if (this.player === 1 && this.game.parameter.playerNum <= 1 && this.initialButtonState) {
+      } else if (
+        this.player === 1 &&
+        this.game.parameter.playerNum <= 1 &&
+        this.initialButtonState
+      ) {
         this.$emit('playerLeft');
       }
     }
@@ -519,8 +544,11 @@ export default class PlayState extends Vue {
     await ideaService.putIdea(this.game, EndpointAuthorisationType.PARTICIPANT);
     if (this.player === 1) {
       await until(() => this.game.parameter.playerNum <= 0);
-      console.log('deleted');
-      await ideaService.deleteIdea(this.game.id, EndpointAuthorisationType.PARTICIPANT, false);
+      await ideaService.deleteIdea(
+        this.game.id,
+        EndpointAuthorisationType.PARTICIPANT,
+        false
+      );
       this.deregisterAll();
       this.clearPlayState();
       this.$emit('playFinished');
@@ -796,7 +824,7 @@ export default class PlayState extends Vue {
       }
     }
     //if too many points spent either win or lose
-    if (
+    /*if (
       this.pointsSpent >= this.maxCost &&
       this.playStateType === PlayStateType.play
     ) {
@@ -807,7 +835,7 @@ export default class PlayState extends Vue {
       this.playStateType === PlayStateType.play
     ) {
       this.playStateChange('win', 'points');
-    }
+    }*/
 
     //Check if winning card is the own or the opponents
     //Adds points to winners category
@@ -821,8 +849,10 @@ export default class PlayState extends Vue {
       }
     }
 
+    this.checkWinConditions();
+
     //Check the points, if all categories filled give win or lose condition
-    if (
+    /*if (
       this.categoryPoints.every((row) => row[1] >= 2) &&
       this.playStateType === PlayStateType.play
     ) {
@@ -833,11 +863,35 @@ export default class PlayState extends Vue {
       this.playStateType === PlayStateType.play
     ) {
       this.playStateChange('lost', 'category');
-    }
+    }*/
     this.cardWin(winningCard);
 
     //reactivate Button
     return winningCard;
+  }
+
+  checkWinConditions() {
+    if (
+      this.pointsSpent >= this.maxCost &&
+      this.playStateType === PlayStateType.play
+    ) {
+      this.playStateChange('lost', 'points');
+    } else if (
+      this.pointsSpentOpponent >= this.maxCost &&
+      this.playStateType === PlayStateType.play
+    ) {
+      this.playStateChange('win', 'points');
+    } else if (
+      this.categoryPoints.every((row) => row[1] >= 2) &&
+      this.playStateType === PlayStateType.play
+    ) {
+      this.playStateChange('win', 'category');
+    } else if (
+      this.categoryPointsOpponent.every((row) => row[1] >= 2) &&
+      this.playStateType === PlayStateType.play
+    ) {
+      this.playStateChange('lost', 'category');
+    }
   }
 
   cardWin(winningCard) {
@@ -1134,6 +1188,10 @@ export default class PlayState extends Vue {
 
 .waiting {
   color: var(--color-background);
+}
+
+.waitingTexts {
+  text-align: center;
 }
 
 p.gameKey {

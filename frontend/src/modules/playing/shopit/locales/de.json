@@ -21,7 +21,7 @@
       "multiplayer": "Multiplayer",
       "multiplayerDesc": "Spiele gegen einen Freund und finde heraus, wer seine Emissionen besser im Gleichgewicht halten kann! Lege ein Spiel an, oder nimm an einem Teil.",
       "multiplayerLabelHost": "Spiel anlegen",
-      "multiplayerButtonHost": "Spiel anlegen:",
+      "multiplayerButtonHost": "Spiel anlegen",
       "multiplayerLabelJoin": "Spiel beitreten",
       "multiplayerButtonJoin": "beitreten"
     },
@@ -34,7 +34,8 @@
     },
     "waiting": {
       "yourTurn": "Warte auf deinen Zug...",
-      "opponent": "Warte auf den Gegner..."
+      "opponent": "Warte auf den Gegner...",
+      "joinID":  "Beitritts ID: "
     },
     "playerLeft": {
       "left": "Spieler verlassen.",

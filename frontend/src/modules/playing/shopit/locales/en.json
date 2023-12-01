@@ -21,7 +21,7 @@
       "multiplayer": "Multiplayer",
       "multiplayerDesc": "Play against a friend and see who is better at keeping their emissions balanced! Host or join a game.",
       "multiplayerLabelHost": "Host Game",
-      "multiplayerButtonHost": "Host Game:",
+      "multiplayerButtonHost": "Host Game",
       "multiplayerLabelJoin": "Join Game",
       "multiplayerButtonJoin": "Join!"
     },
@@ -34,7 +34,8 @@
     },
     "waiting": {
       "yourTurn": "waiting for your turn...",
-      "opponent": "waiting for opponent..."
+      "opponent": "waiting for opponent...",
+      "joinID": "Join ID: "
     },
     "playerLeft": {
       "left": "Player left.",

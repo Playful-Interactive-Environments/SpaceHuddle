@@ -42,20 +42,24 @@
 </template>
 
 <script lang="ts">
-import {Options, Vue} from 'vue-class-component';
-import {Prop, Watch} from 'vue-property-decorator';
+import { Options, Vue } from 'vue-class-component';
+import { Prop, Watch } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as cashService from '@/services/cash-service';
-import ModuleInfo, {ModuleInfoEntryData,} from '@/components/participant/molecules/ModuleInfo.vue';
+import ModuleInfo, {
+  ModuleInfoEntryData,
+} from '@/components/participant/molecules/ModuleInfo.vue';
 import * as moduleService from '@/services/module-service';
-import {Module} from '@/types/api/Module';
-import PlayState, {PlayStateResult,} from '@/modules/playing/shopit/organisms/PlayState.vue';
+import { Module } from '@/types/api/Module';
+import PlayState, {
+  PlayStateResult,
+} from '@/modules/playing/shopit/organisms/PlayState.vue';
 import JoinState from '@/modules/playing/shopit/organisms/JoinState.vue';
 import SingleplayerState from '@/modules/playing/shopit/organisms/SingleplayerState.vue';
-import {Idea} from '@/types/api/Idea';
+import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
-import {until} from '@/utils/wait';
+import { until } from '@/utils/wait';
 
 export enum GameStep {
   Join = 'join',
@@ -96,7 +100,9 @@ export default class Participant extends Vue {
 
   gameIdeaInstance: Idea | null = null;
   joinID = 0;
+  hostID = 0;
   player = 0;
+  checkedAvailability = false;
 
   clearAndReset() {
     this.gameStep = GameStep.Join;
@@ -108,6 +114,8 @@ export default class Participant extends Vue {
 
     this.joinID = 0;
     this.player = 0;
+    this.hostID = 0;
+    this.checkedAvailability = false;
     this.gameIdeaInstance = null;
   }
 
@@ -164,6 +172,7 @@ export default class Participant extends Vue {
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
     cashService.deregisterAllGet(this.updateGame);
+    cashService.deregisterAllGet(this.checkAvailability);
   }
 
   unmounted(): void {
@@ -177,6 +186,7 @@ export default class Participant extends Vue {
         break;
       case 'multiplayer':
         this.player = 1;
+        this.hostID = id;
         this.InstantiateGame(id);
         this.startGame();
         break;
@@ -190,15 +200,18 @@ export default class Participant extends Vue {
   }
 
   async InstantiateGame(id) {
-    console.log('Instantiating game: ' + id);
+    console.log('Instantiating game: ' + this.hostID);
+    await this.checkAvailability();
+    await until(() => this.checkedAvailability);
+    cashService.deregisterAllGet(this.checkAvailability);
     this.gameIdeaInstance = await ideaService.postIdea(
       this.taskId,
       {
-        keywords: id,
+        keywords: '' + this.hostID,
         parameter: {
           active: false,
           playerNum: 0,
-          id: id,
+          id: this.hostID,
           cards: this.shuffle(this.parseCards(gameConfig)),
           player1Hand: [],
           player2Hand: [],
@@ -210,6 +223,30 @@ export default class Participant extends Vue {
       EndpointAuthorisationType.PARTICIPANT
     );
     await this.startGame();
+  }
+
+  async checkAvailability() {
+    ideaService.registerGetIdeasForTask(
+      this.taskId,
+      null,
+      null,
+      this.checkGames,
+      EndpointAuthorisationType.PARTICIPANT,
+      1
+    );
+  }
+
+  checkGames(game: Idea[]): void {
+    for (let i = 0; i < game.length; i++) {
+      if (parseInt(game[i].keywords) == this.hostID) {
+        i = 0;
+        this.hostID += 1;
+        if (this.hostID > 9999) {
+          this.hostID = 1000;
+        }
+      }
+    }
+    this.checkedAvailability = true;
   }
 
   async joinGame(id) {
@@ -232,9 +269,15 @@ export default class Participant extends Vue {
       }
     }
 
-    if (this.gameIdeaInstance && this.gameIdeaInstance.parameter.playerNum == 2) {
+    if (
+      this.gameIdeaInstance &&
+      this.gameIdeaInstance.parameter.playerNum == 2
+    ) {
       this.gameIdeaInstance.parameter.active = true;
-      ideaService.putIdea(this.gameIdeaInstance, EndpointAuthorisationType.PARTICIPANT);
+      ideaService.putIdea(
+        this.gameIdeaInstance,
+        EndpointAuthorisationType.PARTICIPANT
+      );
     }
   }
 

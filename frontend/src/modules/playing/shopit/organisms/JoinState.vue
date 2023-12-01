@@ -29,7 +29,7 @@
             class="el-button--submit"
             @click="optionSelected('multiplayer', this.ownPlayID)"
           >
-            {{ $t('module.playing.shopit.participant.joinState.multiplayerButtonHost') }} {{ this.ownPlayID }}
+            {{ $t('module.playing.shopit.participant.joinState.multiplayerButtonHost') }}
           </el-button>
         </div>
         <div class="options">
