@@ -121,6 +121,7 @@
    },  
    "playing": {  
        "coolit": {  
+           "publicScreen": "output/PublicScreen",  
            "participant": "output/Participant",  
            "moderatorContent": "output/ModeratorContent",  
            "moderatorConfig": "output/ModeratorConfig",  

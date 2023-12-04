@@ -1094,7 +1094,11 @@ export default class GameContainer extends Vue {
 
   preRenderTexture: PIXI.Texture | null = null;
   preRenderTextureEndless: PIXI.Texture | null = null;
+  preRenderStarted = false;
   async preRenderData(container: PIXI.Container): Promise<void> {
+    const startTime = Date.now();
+    if (this.preRenderStarted) return;
+    this.preRenderStarted = true;
     const renderTexture = (renderer: PIXI.IRenderer): PIXI.Texture => {
       const bounds = new PIXI.Rectangle(
         0,
@@ -1107,12 +1111,41 @@ export default class GameContainer extends Vue {
       });
     };
 
+    const containerChildren = (
+      container: PIXI.Container
+    ): PIXI.DisplayObject[] => {
+      return container.children.filter(
+        (item) => item.constructor.name !== 'Empty'
+      );
+    };
+
+    const containerContainer = (
+      container: PIXI.Container
+    ): PIXI.Container[] => {
+      return container.children.filter(
+        (item) => item.constructor.name === '_Container2'
+      ) as PIXI.Container[];
+    };
+
     await until(() => !!this.app);
-    await delay(1500);
     //const startPos = [...this.backgroundPositionOffset] as [number, number];
     if (this.app) {
+      await until(
+        () =>
+          containerChildren(container).length > 0 &&
+          Date.now() - startTime < 30000
+      );
+      if (containerChildren(container).length === 0) return;
+      const subContainerList = containerContainer(container);
+      for (const subContainer of subContainerList) {
+        await until(
+          () =>
+            containerChildren(subContainer).length > 0 &&
+            Date.now() - startTime < 30000
+        );
+        if (containerChildren(subContainer).length === 0) return;
+      }
       const localBounds = container.getLocalBounds();
-      console.log(container.children);
       const mainTile = renderTexture(this.app.renderer);
       const graphics = new PIXI.Graphics();
       graphics.beginTextureFill({

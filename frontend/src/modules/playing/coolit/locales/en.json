@@ -35,7 +35,6 @@
       "years": "years",
       "gwpInfo": "compared to carbon dioxide",
       "none": "Select an available molecule to show its information.",
-      "notDiscovered": "This molecule has not been discovered yet.",
       "waterVapor": {
         "title": "Water Vapor",
         "description": "Water in its gaseous state.",
@@ -99,7 +98,6 @@
     },
     "buildingInfo": {
       "none": "Select an available building to show its information.",
-      "notDiscovered": "This building has not been discovered yet.",
       "building01": {
         "title": "Residential building",
         "description": "Light colours and good thermal insulation ensure that the building stays cool in summer and warm in winter."

@@ -35,7 +35,6 @@
       "years": "Jahre",
       "gwpInfo": "im Vergleich zu Kohlendioxid",
       "none": "Wähle ein Molekül aus um dessen Informationen zu sehen.",
-      "notDiscovered": "Dieses Molekül wurde noch nicht entdeckt.",
       "waterVapor": {
         "title": "Wasserdampf",
         "description": "Wasser in seinem Gaszustand.",
@@ -99,7 +98,6 @@
     },
     "buildingInfo": {
       "none": "Wähle ein Gebäude aus um dessen Informationen zu sehen.",
-      "notDiscovered": "Dieses Gebäude wurde noch nicht entdeckt.",
       "building01": {
         "title": "Wohnhaus",
         "description": "Helle Farben und eine gute Wärmedämmung sorgen dafür, dass das Gebäude im Sommer kühl und im Winter warm bleibt."

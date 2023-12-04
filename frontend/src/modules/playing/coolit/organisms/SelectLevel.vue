@@ -33,10 +33,7 @@
   </div>
   <DrawerBottomOverlay v-model="showMoleculesInfo">
     <template v-slot:header>
-      <div
-        class="moleculeInfo"
-        v-if="activeMoleculeName && moleculeIsDiscovered(activeMoleculeName)"
-      >
+      <div class="moleculeInfo" v-if="activeMoleculeName">
         <div class="title">
           {{
             $t(
@@ -54,17 +51,11 @@
           }}
         </div>
       </div>
-      <div class="moleculeInfo" v-else-if="activeMoleculeName">
-        {{ $t('module.playing.coolit.participant.moleculeInfo.notDiscovered') }}
-      </div>
       <div class="moleculeInfo" v-else>
         {{ $t('module.playing.coolit.participant.moleculeInfo.none') }}
       </div>
     </template>
-    <div
-      class="moleculeInfo"
-      v-if="activeMoleculeName && moleculeIsDiscovered(activeMoleculeName)"
-    >
+    <div class="moleculeInfo" v-if="activeMoleculeName">
       <div class="description">
         {{
           $t(
@@ -143,14 +134,7 @@
               :width="80"
               :height="80"
               :class="{ selected: activeMoleculeName === moleculeName }"
-              :tint="
-                moleculeIsDiscovered(moleculeName) ? '#ffffff' : inactiveColor
-              "
-              :background-color="
-                moleculeIsDiscovered(moleculeName)
-                  ? backgroundColor
-                  : inactiveColor
-              "
+              :background-color="backgroundColor"
               v-model:renderer="rendererList[moleculeName]"
             >
               <Graphics
@@ -706,10 +690,6 @@ export default class SelectLevel extends Vue {
 
   moleculeNameClicked(objectName: string): void {
     this.activeMoleculeName = objectName;
-  }
-
-  moleculeIsDiscovered(objectName: string): boolean {
-    return true;
   }
 
   getMoleculeConfig(objectName: string): {
