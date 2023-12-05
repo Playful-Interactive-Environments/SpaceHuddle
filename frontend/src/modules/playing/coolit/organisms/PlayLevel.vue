@@ -11,7 +11,7 @@
       :use-gravity="false"
       :use-wind="true"
       :border-category="CollisionGroups.BORDER"
-      :background-texture="gameConfig.obstacles[levelType].settings.background"
+      :background-texture="levelTypeSettings.background"
       :background-position="BackgroundPosition.Cover"
       :background-movement="BackgroundMovement.Auto"
       :collisionRegions="collisionRegions"
@@ -28,9 +28,10 @@
       :reset-position-on-speed-changed="gameOver"
       :waitForDataLoad="waitForDataLoad"
       :endless-panning="!gameOver"
+      :use-pre-calculation="!gameOver"
     >
       <template v-slot:preRender>
-        <container v-if="gameWidth">
+        <container v-if="gameWidth && stylesheets">
           <GameObject
             v-for="obstacle in obstacleList"
             :key="obstacle.uuid"
@@ -208,12 +209,13 @@
               <container v-else>
                 <animated-sprite
                   :textures="sunStylesheets.animations['sun']"
-                  :animation-speed="0.1"
+                  :animation-speed="0.2"
                   :width="rayParticleSize"
                   :height="rayParticleSize"
                   :anchor="0.5"
                   :scale="0.05"
                   playing
+                  :loop="false"
                 />
               </container>
               <template #background>
@@ -256,6 +258,7 @@
               :z-index="1"
               :fast-object-behaviour="FastObjectBehaviour.bounce"
               :sleep-if-not-visible="true"
+              v-model:rotation="molecule.rotation"
               :conditional-velocity="{
                 velocity: {x: 0, y: -3},
                 condition: (object: GameObject) => {
@@ -267,6 +270,7 @@
                 }
               }"
               @click="moleculeClicked"
+              @release="moduleReleased"
             >
               <CustomSprite
                 v-if="getMoleculeTexture(molecule.type)"
@@ -277,6 +281,26 @@
                 :height="molecule.size * moleculeSize"
                 :alpha="molecule.controllable ? 1 : 0.4"
               />
+              <template #background>
+                <text
+                  v-if="molecule.isClicked"
+                  :anchor="[0.5, 3]"
+                  :style="{
+                    fontFamily: 'Arial',
+                    fontSize: 18,
+                    fill: contrastColor,
+                  }"
+                  :scale="textScaleFactor"
+                  :rotation="(molecule.rotation / 180) * Math.PI"
+                >
+                  {{
+                    $t(
+                      `module.playing.coolit.participant.moleculeInfo.${molecule.name}.title`
+                    )
+                  }}: GWP:
+                  {{ getMoleculeConfig(molecule.name).globalWarmingFactorReal }}
+                </text>
+              </template>
             </GameObject>
           </container>
           <container v-else-if="$refs.gameContainer">
@@ -309,6 +333,7 @@
               "
               :pivot="obstacle.pivot"
               :scale="obstacle.scale"
+              @click="obstacleClicked(obstacle)"
             >
               <CustomSprite
                 :colorOverlay="calculateTintColor(obstacle, 0.7)"
@@ -371,10 +396,22 @@
       {{ getTimeString(playTime) }}
       <el-rate v-model="stars" size="large" :max="3" :disabled="true" />
     </div>
-    <div class="statusWeatherWarning" v-if="!gameOver && snow.frequency > 0">
+    <div class="statusWeatherWarning" v-if="!gameOver && hypothermia">
+      {{ $t('module.playing.coolit.participant.weatherInfo.hypothermia') }}
+    </div>
+    <div
+      class="statusWeatherWarning"
+      v-else-if="!gameOver && snow.frequency > 0"
+    >
       {{ $t('module.playing.coolit.participant.weatherInfo.snow') }}
     </div>
-    <div class="statusWeatherWarning" v-if="!gameOver && hail.frequency > 0">
+    <div class="statusWeatherWarning" v-if="!gameOver && overheating">
+      {{ $t('module.playing.coolit.participant.weatherInfo.overheating') }}
+    </div>
+    <div
+      class="statusWeatherWarning"
+      v-else-if="!gameOver && hail.frequency > 0"
+    >
       {{ $t('module.playing.coolit.participant.weatherInfo.hail') }}
     </div>
     <div class="statusGameOver" v-if="gameOver">
@@ -421,6 +458,28 @@
     <div class="statusOverlayCountDown" v-if="countDownEndTime > -1">
       {{ Math.ceil((countDownEndTime - Date.now()) / 1000) }}
     </div>
+    <DrawerBottomOverlay
+      v-if="selectedObstacle"
+      v-model="showObstacleSelection"
+      :title="$t('shared.organism.game.levelBuilder.itemSelection.selectItem')"
+    >
+      <el-space wrap>
+        <div
+          v-for="objectName of Object.keys(
+            getLevelTypeCategoryItems(selectedObstacle.type)
+          )"
+          :key="objectName"
+        >
+          <SpriteCanvas
+            :texture="getTexture(selectedObstacle.type, objectName)"
+            :aspect-ration="getObjectAspect(selectedObstacle.type, objectName)"
+            class="placeable"
+            :background-color="backgroundColor"
+            @pointerdown="changeSelectedObstacle(objectName)"
+          />
+        </div>
+      </el-space>
+    </DrawerBottomOverlay>
   </div>
 </template>
 
@@ -467,6 +526,8 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { EventType } from '@/types/enum/EventType';
 import weatherConfig from '@/modules/playing/coolit/data/weather.json';
 import * as preRenderer from '@/modules/playing/coolit/utils/preRender';
+import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
+import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
@@ -548,6 +609,35 @@ enum ObstacleType {
   carbonSource = 'carbonSource',
 }
 
+interface ObstacleCategoryConfig {
+  settings: ObstacleCategorySettings;
+  items: { [key: string]: ObstacleConfig };
+}
+
+interface ObstacleCategorySettings {
+  icon: string;
+  order: number;
+  spritesheet: string;
+  explanationText: string;
+  placingRegions: [number, number][][];
+}
+
+interface ObstacleConfig {
+  heatRationCoefficient: number;
+  heatAbsorptionCoefficientLight: number;
+  heatAbsorptionCoefficientHeat: number;
+  heatRadiationCoefficient: number;
+  initialTemperature: number;
+  maxCount: number;
+  width: number;
+  shape: 'rect' | 'circle' | 'polygon';
+  pivot: [number, number];
+  emits: string[];
+  reflectionProbability: number;
+  calculateTemperature: boolean;
+  type: string | undefined;
+}
+
 interface CoolItHitRegion {
   name: string;
   maxHitCount: number;
@@ -562,6 +652,13 @@ interface CoolItHitRegion {
   emits: string[];
   calculateTemperature: boolean;
   options: any;
+  hits: Hit[];
+}
+
+interface Hit {
+  type: RayType;
+  time: number;
+  intensity: number;
 }
 
 interface MoleculeData extends CoolItHitRegion {
@@ -575,6 +672,8 @@ interface MoleculeData extends CoolItHitRegion {
   color: string;
   rise: boolean;
   isActive: boolean;
+  isClicked: boolean;
+  rotation: number;
 }
 
 interface CoolItObstacle extends placeable.Placeable, CoolItHitRegion {}
@@ -605,6 +704,8 @@ interface ColorValues {
     GameContainer,
     CustomSprite,
     CustomParticleContainer,
+    DrawerBottomOverlay,
+    SpriteCanvas,
   },
   emits: ['finished', 'replayFinished'],
 })
@@ -641,6 +742,8 @@ export default class PlayLevel extends Vue {
   autoPanSpeed = 0.4;
   emitRatePerStar = 1000;
   randomMessageNo = 1;
+  showObstacleSelection = false;
+  selectedObstacle: CoolItObstacle | null = null;
 
   temperatureColorSteps: { [key: number]: ColorValues } = {};
 
@@ -699,6 +802,24 @@ export default class PlayLevel extends Vue {
   //#endregion variables
 
   //#region get / set
+  get levelTypeSettings(): any {
+    return gameConfig.obstacles[this.levelType].settings;
+  }
+
+  get levelTypeCategories(): { [key: string]: ObstacleCategoryConfig } {
+    return gameConfig.obstacles[this.levelType].categories;
+  }
+
+  getLevelTypeCategorySettings(category: string): ObstacleCategorySettings {
+    return this.levelTypeCategories[category].settings;
+  }
+
+  getLevelTypeCategoryItems(category: string): {
+    [key: string]: ObstacleConfig;
+  } {
+    return this.levelTypeCategories[category].items;
+  }
+
   get playStateResult(): PlayStateResult {
     const result: PlayStateResult = {
       temperatureRise: this.temperatureRise,
@@ -730,11 +851,9 @@ export default class PlayLevel extends Vue {
       rayCount: this.emittedRayCount,
       temperature: this.averageTemperature,
     };
-    for (const obstacleType of Object.keys(
-      gameConfig.obstacles[this.levelType].categories
-    )) {
+    for (const obstacleType of Object.keys(this.levelTypeCategories)) {
       for (const obstacleName of Object.keys(
-        gameConfig.obstacles[this.levelType].categories[obstacleType].items
+        this.getLevelTypeCategoryItems(obstacleType)
       )) {
         const list = this.obstacleList.filter(
           (item) => item.type === obstacleType && item.name === obstacleName
@@ -758,8 +877,7 @@ export default class PlayLevel extends Vue {
         );
       }
     }
-    for (const region of gameConfig.obstacles[this.levelType].settings
-      .heatRation) {
+    for (const region of this.levelTypeSettings.heatRation) {
       const regionName = region.name;
       const list = this.collisionRegions.filter(
         (item) => item.source.name === regionName
@@ -805,8 +923,7 @@ export default class PlayLevel extends Vue {
 
   get collisionRegions(): CollisionRegion[] {
     const regions: CollisionRegion[] = [];
-    for (const ration of gameConfig.obstacles[this.levelType].settings
-      .heatRation) {
+    for (const ration of this.levelTypeSettings.heatRation) {
       regions.push({
         path: ration.region,
         options: {
@@ -830,6 +947,7 @@ export default class PlayLevel extends Vue {
           emits: ration.emits,
           calculateTemperature: true,
           options: {},
+          hits: [],
         } as CoolItHitRegion,
         filter: [],
         color: '#ffffff',
@@ -899,10 +1017,7 @@ export default class PlayLevel extends Vue {
   }
 
   getObstacleTypeOptions(obstacleType: string, obstacleName: string): any {
-    const config =
-      gameConfig.obstacles[this.levelType].categories[obstacleType].items[
-        obstacleName
-      ];
+    const config = this.getLevelTypeCategoryItems(obstacleType)[obstacleName];
     return {
       isSensor: true,
       name: obstacleName,
@@ -1093,6 +1208,27 @@ export default class PlayLevel extends Vue {
   get vehicleYPosition(): number {
     return this.gameHeight * 0.975;
   }
+
+  getMoleculeConfig(objectName: string): {
+    type: string;
+    reference: string;
+    color: string;
+    globalWarmingFactor: number;
+    globalWarmingFactorReal: number;
+    lifespan: number | string;
+  } {
+    if (objectName) {
+      return gameConfig.molecules[objectName];
+    }
+    return {
+      type: 'greenhouseGas',
+      reference: '',
+      color: '#ffffff',
+      globalWarmingFactor: 1,
+      globalWarmingFactorReal: 1,
+      lifespan: 1,
+    };
+  }
   //#endregion get / set
 
   //#region watch
@@ -1274,7 +1410,10 @@ export default class PlayLevel extends Vue {
         rise: true,
         calculateTemperature: true,
         isActive: true,
+        isClicked: false,
+        rotation: 0,
         options: this.getMoleculeTypeOptions(moleculeName),
+        hits: [],
       });
     }
   }
@@ -1328,6 +1467,7 @@ export default class PlayLevel extends Vue {
       temperature: configParameter.initialTemperature,
       emits: configParameter.emits,
       options: this.getObstacleTypeOptions(result.type, result.name),
+      hits: [],
     };
   }
 
@@ -1391,7 +1531,10 @@ export default class PlayLevel extends Vue {
             rise: false,
             calculateTemperature: true,
             isActive: true,
+            isClicked: false,
+            rotation: 0,
             options: this.getMoleculeTypeOptions(moleculeConfigName),
+            hits: [],
           });
         }
         const distance = 100 / moleculeCount;
@@ -1449,8 +1592,7 @@ export default class PlayLevel extends Vue {
     clearInterval(this.interval);
     this.deregisterAll();
     for (const typeName of this.gameConfigTypes) {
-      const settings =
-        gameConfig.obstacles[this.levelType].categories[typeName].settings;
+      const settings = this.getLevelTypeCategorySettings(typeName);
       pixiUtil.unloadTexture(settings.spritesheet);
     }
     pixiUtil.unloadTexture('/assets/games/moveit/molecules.json');
@@ -1532,8 +1674,7 @@ export default class PlayLevel extends Vue {
   onLevelTypeChanged(): void {
     if (this.levelType) {
       for (const typeName of this.gameConfigTypes) {
-        const settings =
-          gameConfig.obstacles[this.levelType].categories[typeName].settings;
+        const settings = this.getLevelTypeCategorySettings(typeName);
         setTimeout(() => {
           if (
             settings &&
@@ -1808,6 +1949,8 @@ export default class PlayLevel extends Vue {
   //#region loop
   updateTimeStamp = Date.now();
   gameOver = false;
+  hypothermia = false;
+  overheating = false;
   emitObstacleList: string[] = [];
   updateLoop(): void {
     const updateTimeStamp = Date.now();
@@ -1817,10 +1960,11 @@ export default class PlayLevel extends Vue {
     if (updateDelta > this.intervalTime * 3)
       updateDelta = this.intervalTime * 3;
     this.updateTimeStamp = updateTimeStamp;
-    if (this.lightCollisionCount > 0) this.playTime += updateDelta;
-    if (this.checkGameOver()) {
+    this.checkGameOver();
+    if (this.gameOver) {
       return;
     }
+    if (this.lightCollisionCount > 0) this.playTime += updateDelta;
     const activeRays = this.rayList.filter(
       (item) => item.gameObject && !item.gameObject.isSleeping
     );
@@ -1925,17 +2069,15 @@ export default class PlayLevel extends Vue {
     }
 
     if (this.emittedRayCount > 0 && this.lightCollisionCount > 0) {
-      const timeFactor = updateDelta / 5000;
       for (const obstacle of this.obstacleList) {
-        let temperature = obstacle.temperature - preRenderer.minTemperature;
-        if (temperature < 0) temperature = 0;
-        obstacle.temperature -=
-          obstacle.heatRadiationCoefficient *
-          this.radiationFactor *
-          temperature *
-          timeFactor;
+        obstacle.temperature = this.calculateObstacleTemperature(
+          obstacle.type,
+          obstacle.name,
+          obstacle.hits
+        );
       }
 
+      const timeFactor = updateDelta / 5000;
       for (const region of this.collisionRegions) {
         let temperature =
           region.source.temperature - preRenderer.minTemperature;
@@ -1959,6 +2101,67 @@ export default class PlayLevel extends Vue {
     for (const item of inactiveMolecules) {
       item.isActive = false;
     }
+  }
+
+  calculateObstacleTemperature(
+    obstacleCategory: string,
+    obstacleType: string,
+    hits: Hit[],
+    showLog = false
+  ): number {
+    const config =
+      this.getLevelTypeCategoryItems(obstacleCategory)[obstacleType];
+    let temperature = config.initialTemperature;
+    let time = this.startTime;
+    const reduceTemperature = (hitTime: number): void => {
+      const updateDelta = hitTime - time;
+      const timeFactor = updateDelta / 5000;
+      let temperatureHelper = temperature - preRenderer.minTemperature;
+      if (temperatureHelper < 0) temperatureHelper = 0;
+      const test = temperature;
+      temperature -=
+        config.heatRadiationCoefficient *
+        this.radiationFactor *
+        temperatureHelper *
+        timeFactor;
+      if (showLog) {
+        console.log(
+          'reduceTemperature',
+          updateDelta,
+          timeFactor,
+          test,
+          temperature
+        );
+      }
+    };
+
+    for (const hit of hits) {
+      reduceTemperature(hit.time);
+      const test = temperature;
+      if (hit.type === RayType.light) {
+        const heatAbsorptionCoefficientLight =
+          config.heatAbsorptionCoefficientLight ?? 1;
+        temperature += heatAbsorptionCoefficientLight * this.absorptionFactor;
+      } else {
+        const heatAbsorptionCoefficientHeat =
+          config.heatAbsorptionCoefficientHeat ?? 1;
+        const heatRadiation = heatAbsorptionCoefficientHeat * hit.intensity;
+        temperature +=
+          heatAbsorptionCoefficientHeat * this.absorptionFactor * heatRadiation;
+      }
+      if (showLog) {
+        console.log(
+          'addTemperature',
+          hit.type,
+          hit.intensity,
+          test,
+          temperature
+        );
+      }
+      time = hit.time;
+    }
+    reduceTemperature(this.startTime + this.playTime);
+    return temperature;
   }
 
   weatherTemperature = 0;
@@ -2086,6 +2289,11 @@ export default class PlayLevel extends Vue {
           hitObstacle.hitCount++;
           hitObstacle.temperature +=
             hitObstacle.heatAbsorptionCoefficientLight * this.absorptionFactor;
+          hitObstacle.hits.push({
+            type: RayType.light,
+            time: Date.now(),
+            intensity: 1,
+          });
           hitObstacle.hitAnimation.push(
             new ShockwaveFilter(
               hitPointScreen,
@@ -2190,12 +2398,22 @@ export default class PlayLevel extends Vue {
             obstacle.heatAbsorptionCoefficientHeat *
             this.absorptionFactor *
             heatRadiation;
+          obstacle.hits.push({
+            type: RayType.heat,
+            time: Date.now(),
+            intensity: ray.intensity,
+          });
         }
         for (const region of this.collisionRegions) {
           region.source.temperature +=
             region.source.heatAbsorptionCoefficientHeat *
             this.absorptionFactor *
             heatRadiation;
+          region.source.hits.push({
+            type: RayType.heat,
+            time: Date.now(),
+            intensity: ray.intensity,
+          });
         }
       }
     }
@@ -2213,10 +2431,9 @@ export default class PlayLevel extends Vue {
     moleculeObject: GameObject
   ): void {
     if (!moleculeObject) return;
-    const obstacleType =
-      gameConfig.obstacles[this.levelType].categories[
-        obstacleObject.source.type
-      ].items[obstacleObject.source.name].type;
+    const obstacleType = this.getLevelTypeCategoryItems(
+      obstacleObject.source.type
+    )[obstacleObject.source.name].type;
     if (
       obstacleType === ObstacleType.carbonSink &&
       moleculeObject.source.absorbedByTree
@@ -2256,6 +2473,11 @@ export default class PlayLevel extends Vue {
 
   moleculeClicked(item: any): void {
     this.moleculeState[item.source.name].movedCount++;
+    item.source.isClicked = true;
+  }
+
+  moduleReleased(item: any): void {
+    item.source.isClicked = false;
   }
   //#endregion collision and interaction
 
@@ -2288,54 +2510,74 @@ export default class PlayLevel extends Vue {
 
   //#region finished
   checkGameOver(): boolean {
-    const averageTemperature = this.averageTemperature;
-    let gameOver =
-      averageTemperature < preRenderer.lowerTemperatureLimit ||
-      averageTemperature > preRenderer.upperTemperatureLimit;
-    if (!gameOver) {
-      let obstacleGameOverCount = 0;
-      for (const obstacle of this.obstacleList) {
-        if (
-          obstacle.temperature < preRenderer.lowerTemperatureLimit ||
-          obstacle.temperature > preRenderer.upperTemperatureLimit
-        )
-          obstacleGameOverCount++;
+    if (this.countDownEndTime > -1) return true;
+    let hypothermia = false;
+    let overheating = false;
+    const calculateGameOver = (): boolean => {
+      const averageTemperature = this.averageTemperature;
+      hypothermia = averageTemperature < preRenderer.lowerTemperatureLimit;
+      overheating = averageTemperature > preRenderer.upperTemperatureLimit;
+      let gameOver = hypothermia || overheating;
+      if (!gameOver) {
+        let obstacleHypothermiaCount = 0;
+        let obstacleOverheatingCount = 0;
+        for (const obstacle of this.obstacleList) {
+          if (obstacle.temperature < preRenderer.lowerTemperatureLimit)
+            obstacleHypothermiaCount++;
+          if (obstacle.temperature > preRenderer.upperTemperatureLimit)
+            obstacleOverheatingCount++;
+        }
+        for (const region of this.collisionRegions) {
+          if (region.source.temperature < preRenderer.lowerTemperatureLimit)
+            obstacleHypothermiaCount++;
+          if (region.source.temperature > preRenderer.upperTemperatureLimit)
+            obstacleOverheatingCount++;
+        }
+        const maxObstacleCount =
+          (this.obstacleList.length + this.collisionRegions.length) / 5;
+        if (obstacleHypothermiaCount > maxObstacleCount) hypothermia = true;
+        if (obstacleOverheatingCount > maxObstacleCount) overheating = true;
+        gameOver = hypothermia || overheating;
       }
-      let regionGameOverCount = 0;
-      for (const region of this.collisionRegions) {
-        if (
-          region.source.temperature < preRenderer.lowerTemperatureLimit ||
-          region.source.temperature > preRenderer.upperTemperatureLimit
-        )
-          regionGameOverCount++;
-      }
-      if (obstacleGameOverCount + regionGameOverCount > 3) gameOver = true;
-    }
-    if (gameOver) {
-      clearInterval(this.interval);
-      this.gameOver = true;
-      this.randomMessageNo = Math.round(Math.random() * 2) + 1;
-      this.collisionAnimation.splice(0);
+      return gameOver;
+    };
 
-      for (const obstacle of this.obstacleList) {
-        obstacle.hitAnimation.splice(0);
-        if (obstacle.temperature > preRenderer.maxTemperature)
-          obstacle.temperature = preRenderer.maxTemperature;
-        if (obstacle.temperature < preRenderer.minTemperature)
-          obstacle.temperature = preRenderer.minTemperature;
-      }
-      for (const region of this.collisionRegions) {
-        region.source.hitAnimation.splice(0);
-        region.filter.splice(0);
-        region.alpha = 0.7;
-        if (region.source.temperature > preRenderer.maxTemperature)
-          region.source.temperature = preRenderer.maxTemperature;
-        if (region.source.temperature < preRenderer.minTemperature)
-          region.source.temperature = preRenderer.minTemperature;
-        region.text = `${Math.round(region.source.temperature)}°C`;
-      }
-      this.autoPanSpeed = 1.2;
-      this.saveHighScore();
+    const gameOver = calculateGameOver();
+    this.hypothermia = hypothermia;
+    this.overheating = overheating;
+    if (gameOver) {
+      const countDownTime = 3000;
+      this.countDownEndTime = Date.now() + countDownTime;
+      setTimeout(() => {
+        this.countDownEndTime = -1;
+        const gameOver = calculateGameOver();
+        if (gameOver) {
+          clearInterval(this.interval);
+          this.gameOver = true;
+          this.randomMessageNo = Math.round(Math.random() * 2) + 1;
+          this.collisionAnimation.splice(0);
+
+          for (const obstacle of this.obstacleList) {
+            obstacle.hitAnimation.splice(0);
+            if (obstacle.temperature > preRenderer.maxTemperature)
+              obstacle.temperature = preRenderer.maxTemperature;
+            if (obstacle.temperature < preRenderer.minTemperature)
+              obstacle.temperature = preRenderer.minTemperature;
+          }
+          for (const region of this.collisionRegions) {
+            region.source.hitAnimation.splice(0);
+            region.filter.splice(0);
+            region.alpha = 0.7;
+            if (region.source.temperature > preRenderer.maxTemperature)
+              region.source.temperature = preRenderer.maxTemperature;
+            if (region.source.temperature < preRenderer.minTemperature)
+              region.source.temperature = preRenderer.minTemperature;
+            region.text = `${Math.round(region.source.temperature)}°C`;
+          }
+          this.autoPanSpeed = 1.2;
+          this.saveHighScore();
+        }
+      }, countDownTime);
       return true;
     }
     return false;
@@ -2400,6 +2642,32 @@ export default class PlayLevel extends Vue {
     this.$emit('finished', this.playStateResult);
   }
   //#endregion finished
+
+  //#region replay
+  changeSelectedObstacle(name: string): void {
+    if (this.selectedObstacle) {
+      const temperature = this.calculateObstacleTemperature(
+        this.selectedObstacle.type,
+        name,
+        this.selectedObstacle.hits,
+        true
+      );
+      console.log(this.playTime, this.startTime, this.selectedObstacle.name, name, this.selectedObstacle.temperature, temperature, this.selectedObstacle.hits);
+      this.selectedObstacle.temperature = temperature;
+      this.selectedObstacle.name = name;
+      this.selectedObstacle.texture = this.getTexture(
+        this.selectedObstacle.type,
+        name
+      );
+    }
+    this.showObstacleSelection = false;
+  }
+
+  obstacleClicked(obstacle: CoolItObstacle): void {
+    this.selectedObstacle = obstacle;
+    this.showObstacleSelection = true;
+  }
+  //#endregion replay
 }
 </script>
 

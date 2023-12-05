@@ -92,6 +92,7 @@ export const bounceCategory = 1 << 31;
     'sizeChanged',
     'collision',
     'click',
+    'release',
     'handleTrigger',
     'update:highlighted',
     'positionChanged',
@@ -366,6 +367,7 @@ export default class GameObject extends Vue {
         if (this.body) this.body.isStatic = true;
       }, 100);
     }
+    this.$emit('release', this);
     if (this.gameContainer && this.gameContainer.activeObject === this) {
       const clickTimeDelta = Date.now() - this.clickTime;
       const releaseDelay =

@@ -348,6 +348,7 @@ export default class GameContainer extends Vue {
   @Prop({ default: false }) readonly resetPositionOnSpeedChanged!: boolean;
   @Prop({ default: false }) readonly enableSleeping!: boolean;
   @Prop({ default: false }) readonly waitForDataLoad!: boolean;
+  @Prop({ default: true }) readonly usePreCalculation!: boolean;
   //#endregion props
 
   //#region variables
@@ -422,9 +423,11 @@ export default class GameContainer extends Vue {
   }
 
   get backgroundTexturePositionSprite(): PIXI.Texture | null {
-    if (this.endlessPanning && this.preRenderTextureEndless)
-      return this.preRenderTextureEndless;
-    if (this.preRenderTexture) return this.preRenderTexture;
+    if (this.usePreCalculation) {
+      if (this.endlessPanning && this.preRenderTextureEndless)
+        return this.preRenderTextureEndless;
+      if (this.preRenderTexture) return this.preRenderTexture;
+    }
     if (!this.endlessPanning) return this.backgroundSprite;
     return this.backgroundSpriteEndlessPanning;
   }
@@ -1132,7 +1135,7 @@ export default class GameContainer extends Vue {
     if (this.app) {
       await until(
         () =>
-          containerChildren(container).length > 0 &&
+          containerChildren(container).length > 1 &&
           Date.now() - startTime < 30000
       );
       if (containerChildren(container).length === 0) return;
@@ -1145,6 +1148,7 @@ export default class GameContainer extends Vue {
         );
         if (containerChildren(subContainer).length === 0) return;
       }
+      await delay(1000);
       const localBounds = container.getLocalBounds();
       const mainTile = renderTexture(this.app.renderer);
       const graphics = new PIXI.Graphics();
