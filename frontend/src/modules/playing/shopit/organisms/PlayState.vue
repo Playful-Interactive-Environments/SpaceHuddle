@@ -972,10 +972,15 @@ export default class PlayState extends Vue {
       money += this.ownCardsPlayed[i][5];
     }
 
+    if (!this.win) {
+      this.reason = 'lost';
+    }
+
     this.$emit(
       'playFinished',
       [],
       this.win,
+      this.reason,
       cardsPlayed,
       pointsSpent,
       co2,

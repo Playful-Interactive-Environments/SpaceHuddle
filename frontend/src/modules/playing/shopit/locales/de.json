@@ -14,7 +14,8 @@
     "electricity": "Wie viel Energie wurde benötigt? (kw)",
     "lifetime": "Was war die aufgerechnete Lebenszeit der gekauften Objekte? (years)",
     "water": "Wie viel Wasser wurde verbraucht? (kl)",
-    "money": "Wie viel Geld wurde ausgegeben? (€)"
+    "money": "Wie viel Geld wurde ausgegeben? (€)",
+    "winReason": "Wegen welchem Grund haben die Nutzer gewonnen?"
   },
   "participant": {
     "tutorial": {

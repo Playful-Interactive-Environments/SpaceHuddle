@@ -14,7 +14,8 @@
     "electricity": "How much energy was needed? (kw)",
     "lifetime": "What was the accumulated liftime of purchased objects? (years)",
     "water": "How much water was used? (kl)",
-    "money": "How much money was spent? (€)"
+    "money": "How much money was spent? (€)",
+    "winReason": "By what condition did the users win?"
   },
   "participant": {
     "tutorial": {

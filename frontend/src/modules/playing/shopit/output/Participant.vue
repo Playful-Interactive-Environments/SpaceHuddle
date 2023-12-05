@@ -202,6 +202,7 @@ export default class Participant extends Vue {
           lifetime: 0,
           water: 0,
           money: 0,
+          winReason: '',
         },
         rate: 0,
       });
@@ -383,6 +384,7 @@ export default class Participant extends Vue {
               lifetime: 0,
               water: 0,
               money: 0,
+              winReason: '',
             },
             rate: 0,
           }
@@ -409,6 +411,7 @@ export default class Participant extends Vue {
             lifetime: 0,
             water: 0,
             money: 0,
+            winReason: '',
           },
           rate: 0,
         }
@@ -422,6 +425,7 @@ export default class Participant extends Vue {
   async playFinished(
     trackingData: TrackingData[],
     win: boolean,
+    winReason: string,
     cardsPlayed: number,
     pointsSpent: number,
     co2: number,
@@ -442,6 +446,7 @@ export default class Participant extends Vue {
             lifetime: lifetime,
             water: water,
             money: money,
+            winReason: winReason,
           },
           rate: this.calcRate(win, pointsSpent),
         },
@@ -459,8 +464,12 @@ export default class Participant extends Vue {
   calcRate(win, pointsSpent): number {
     if (win) {
       return pointsSpent <= 90 ? 3 : pointsSpent <= 110 ? 2 : 1;
-    } else {
+    } else if (!win && pointsSpent > 0) {
       return 0;
+    } else if (!win && pointsSpent === 0) {
+      return -1;
+    } else {
+      return -1;
     }
   }
 

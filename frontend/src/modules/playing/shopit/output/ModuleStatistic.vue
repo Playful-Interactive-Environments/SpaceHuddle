@@ -108,6 +108,7 @@ export default class ModuleStatistic extends Vue {
     this.calculateLifetimeChart();
     this.calculateWaterChart();
     this.calculateMoneyChart();
+    this.calculateWinReasonChart();
   }
 
   calculateStarsChart(): void {
@@ -119,7 +120,6 @@ export default class ModuleStatistic extends Vue {
         '\uf005\uf005\uf005',
       ];
       const avatarList = this.getAvatarList(this.steps);
-      const pointsSpent = this.getPointsSpent();
       const datasets = calculateChartPerParameter(
         this.steps,
         avatarList,
@@ -325,52 +325,129 @@ export default class ModuleStatistic extends Vue {
     }
   }
 
+  calculateWinReasonChart(): void {
+    if (this.steps) {
+      const avatarList = this.getAvatarList(this.steps);
+      const labels: string[] = this.getWinReason();
+      const winReason = this.getWinReason();
+      console.log(winReason);
+      const datasets = calculateChartPerParameter(
+          this.steps,
+          avatarList,
+          winReason,
+          avatarList.map((avatar) => avatar.color),
+          (item, avatar) =>
+              item.avatar.color === avatar.color &&
+              item.avatar.symbol === avatar.symbol,
+          (item, winReason) => item.parameter.game.winReason === winReason,
+          null,
+          (list) => list.length,
+          (avatar) => AvatarUnicode[avatar.symbol]
+      );
+      this.barChartDataList.push({
+        title: this.$t('module.playing.shopit.statistic.winReason'),
+        data: {
+          labels: labels,
+          datasets: datasets,
+        },
+        labelColors: themeColors.getContrastColor(),
+        stacked: true,
+      });
+    }
+  }
+
   getPointsSpent() {
-    return this.steps
+    const returnArray = this.steps
       .map((item) => item.parameter.game.pointsSpent)
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
+    const index = returnArray.indexOf(0);
+    if (index > -1) {
+      returnArray.splice(index, 1);
+    }
+    return returnArray;
   }
 
   getRatings() {
-    return this.steps
+    const returnArray = this.steps
       .map((item) => item.parameter.rate)
       .filter((value, index, array) => array.indexOf(value) === index);
+    const index = returnArray.indexOf(-1);
+    if (index > -1) {
+      returnArray.splice(index, 1);
+    }
+    return returnArray;
   }
 
   getCO2() {
-    return this.steps
+    const returnArray = this.steps
       .map((item) => item.parameter.game.co2)
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
+    const index = returnArray.indexOf(0);
+    if (index > -1) {
+      returnArray.splice(index, 1);
+    }
+    return returnArray;
   }
 
   getElectricity() {
-    return this.steps
+    const returnArray = this.steps
       .map((item) => item.parameter.game.electricity)
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
+    const index = returnArray.indexOf(0);
+    if (index > -1) {
+      returnArray.splice(index, 1);
+    }
+    return returnArray;
   }
 
   getLifetime() {
-    return this.steps
+    const returnArray = this.steps
       .map((item) => item.parameter.game.lifetime)
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
+    const index = returnArray.indexOf(0);
+    if (index > -1) {
+      returnArray.splice(index, 1);
+    }
+    return returnArray;
   }
 
   getWater() {
-    return this.steps
+    const returnArray = this.steps
       .map((item) => item.parameter.game.water)
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
+    const index = returnArray.indexOf(0);
+    if (index > -1) {
+      returnArray.splice(index, 1);
+    }
+    return returnArray;
   }
 
   getMoney() {
-    return this.steps
+    const returnArray = this.steps
       .map((item) => item.parameter.game.money)
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
+    const index = returnArray.indexOf(0);
+    if (index > -1) {
+      returnArray.splice(index, 1);
+    }
+    return returnArray;
+  }
+
+  getWinReason() {
+    const returnArray = this.steps
+        .map((item) => item.parameter.game.winReason)
+        .filter((value, index, array) => array.indexOf(value) === index);
+    const index = returnArray.indexOf('');
+    if (index > -1) {
+      returnArray.splice(index, 1);
+    }
+    return returnArray;
   }
 
   getAvatarList(list: any[], filter: ((item) => boolean) | null = null): any[] {
