@@ -7,6 +7,15 @@
     "replayable": "mehrfach spielbar",
     "showTutorialOnlyOnce": "Tutorial nur beim ersten mal zeigen"
   },
+  "statistic": {
+    "rating": "Wie viele Sterne haben die Nutzer mit ihren Punkten erreicht?",
+    "pointsSpent": "Wie viele Punkte wurden ausgegeben?",
+    "co2": "Wie viel CO² wurde ausgestoßen? (kg)",
+    "electricity": "Wie viel Energie wurde benötigt? (kw)",
+    "lifetime": "Was war die aufgerechnete Lebenszeit der gekauften Objekte? (years)",
+    "water": "Wie viel Wasser wurde verbraucht? (kl)",
+    "money": "Wie viel Geld wurde ausgegeben? (€)"
+  },
   "participant": {
     "tutorial": {
       "rules1": "Jeder Spieler hat 3 Karten und muss 3 Kategorien füllen. Um einen Punkt in einer Kategorie zu erlangen, muss der Spieler eine Runde in dieser Kategorie gewinnen. Der Spieler der als erstes alle Kategorien gefüllt hat, gewinnt!",

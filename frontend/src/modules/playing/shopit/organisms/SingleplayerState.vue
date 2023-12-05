@@ -332,6 +332,9 @@ export default class PlayState extends Vue {
   playFirst = false;
   imageArray: any[] = [];
 
+  win = false;
+  gameEnded = false;
+
   preloadAllSprites(cards) {
     for (let i = 0; i < cards.length; i++) {
       this.preloadImage(this.cardSpriteFolder + cards[i][7] + '.png');
@@ -362,15 +365,22 @@ export default class PlayState extends Vue {
     this.reason = '';
 
     this.playFirst = false;
+
+    this.win = false;
+    this.gameEnded = false;
   }
 
   playStateChange(outcome, reason) {
     switch (outcome) {
       case 'lost':
+        this.win = false;
+        this.gameEnded = true;
         this.endCardsOverview = this.calculateMostExpensiveCards();
         this.playStateType = PlayStateType.lost;
         break;
       case 'win':
+        this.win = true;
+        this.gameEnded = true;
         this.endCardsOverview = this.calculateMostExpensiveCards();
         this.playStateType = PlayStateType.win;
         break;
@@ -718,7 +728,34 @@ export default class PlayState extends Vue {
   }
 
   finished() {
-    this.$emit('playFinished');
+    const cardsPlayed = this.ownCardsPlayed.length;
+    const pointsSpent = this.pointsSpent;
+    let co2 = 0;
+    let electricity = 0;
+    let lifetime = 0;
+    let water = 0;
+    let money = 0;
+    for (let i = 0; i < this.ownCardsPlayed.length; i++) {
+      co2 += this.ownCardsPlayed[i][1];
+      electricity += this.ownCardsPlayed[i][2];
+      lifetime += this.ownCardsPlayed[i][3];
+      water += this.ownCardsPlayed[i][4];
+      money += this.ownCardsPlayed[i][5];
+    }
+
+    this.$emit(
+      'playFinished',
+      [],
+      this.win,
+      cardsPlayed,
+      pointsSpent,
+      co2,
+      electricity,
+      lifetime,
+      water,
+      money
+    );
+    this.clearPlayState();
   }
 }
 </script>

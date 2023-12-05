@@ -60,6 +60,11 @@ import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
 import { until } from '@/utils/wait';
+import { TrackingData } from '@/modules/playing/moveit/organisms/DriveToLocation.vue';
+import { TrackingManager } from '@/types/tracking/TrackingManager';
+import * as taskService from '@/services/task-service';
+import { Task } from '@/types/api/Task';
+import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 
 export enum GameStep {
   Join = 'join',
@@ -103,6 +108,10 @@ export default class Participant extends Vue {
   hostID = 0;
   player = 0;
   checkedAvailability = false;
+
+  trackingData: TrackingData[] = [];
+  trackingManager!: TrackingManager;
+  inputTaskId = '';
 
   clearAndReset() {
     this.gameStep = GameStep.Join;
@@ -173,10 +182,41 @@ export default class Participant extends Vue {
     cashService.deregisterAllGet(this.updateModule);
     cashService.deregisterAllGet(this.updateGame);
     cashService.deregisterAllGet(this.checkAvailability);
+    if (this.trackingManager) this.trackingManager.deregisterAll();
   }
 
   unmounted(): void {
     this.deregisterAll();
+  }
+
+  @Watch('taskId', { immediate: true })
+  onTaskIdChanged(): void {
+    if (this.taskId) {
+      this.trackingManager = new TrackingManager(this.taskId, {
+        gameStep: GameStep.Join,
+        game: {
+          cardsPlayed: 0,
+          pointsSpent: 0,
+          co2: 0,
+          electricity: 0,
+          lifetime: 0,
+          water: 0,
+          money: 0,
+        },
+        rate: 0,
+      });
+      taskService.registerGetTaskById(
+        this.taskId,
+        this.updateTask,
+        EndpointAuthorisationType.PARTICIPANT,
+        60 * 60
+      );
+    }
+  }
+
+  updateTask(task: Task): void {
+    if (task.parameter.input.length > 0)
+      this.inputTaskId = task.parameter.input[0].view.id;
   }
 
   selectionDone(option, id): void {
@@ -200,7 +240,6 @@ export default class Participant extends Vue {
   }
 
   async InstantiateGame(id) {
-    console.log('Instantiating game: ' + this.hostID);
     await this.checkAvailability();
     await until(() => this.checkedAvailability);
     cashService.deregisterAllGet(this.checkAvailability);
@@ -250,7 +289,6 @@ export default class Participant extends Vue {
   }
 
   async joinGame(id) {
-    console.log('Joining game: ' + id);
     ideaService.registerGetIdeasForTask(
       this.taskId,
       null,
@@ -332,15 +370,98 @@ export default class Participant extends Vue {
         case true:
           break;
       }
+      if (this.trackingManager) {
+        await this.trackingManager.createInstanceStep(
+          null,
+          TaskParticipantIterationStepStatesType.NEUTRAL,
+          {
+            game: {
+              cardsPlayed: 0,
+              pointsSpent: 0,
+              co2: 0,
+              electricity: 0,
+              lifetime: 0,
+              water: 0,
+              money: 0,
+            },
+            rate: 0,
+          }
+        );
+        await this.trackingManager.saveIteration({
+          gameStep: GameStep.Play,
+        });
+      }
     }
   }
 
-  startSingleplayer(): void {
+  async startSingleplayer() {
     this.gameStep = GameStep.Singleplayer;
+    if (this.trackingManager) {
+      await this.trackingManager.createInstanceStep(
+        null,
+        TaskParticipantIterationStepStatesType.NEUTRAL,
+        {
+          game: {
+            cardsPlayed: 0,
+            pointsSpent: 0,
+            co2: 0,
+            electricity: 0,
+            lifetime: 0,
+            water: 0,
+            money: 0,
+          },
+          rate: 0,
+        }
+      );
+      await this.trackingManager.saveIteration({
+        gameStep: GameStep.Singleplayer,
+      });
+    }
   }
 
-  playFinished(result: PlayStateResult): void {
+  async playFinished(
+    trackingData: TrackingData[],
+    win: boolean,
+    cardsPlayed: number,
+    pointsSpent: number,
+    co2: number,
+    electricity: number,
+    lifetime: number,
+    water: number,
+    money: number
+  ): Promise<void> {
+    this.trackingData = trackingData;
+    if (this.trackingManager) {
+      await this.trackingManager.saveIterationStep(
+        {
+          game: {
+            cardsPlayed: cardsPlayed,
+            pointsSpent: pointsSpent,
+            co2: co2,
+            electricity: electricity,
+            lifetime: lifetime,
+            water: water,
+            money: money,
+          },
+          rate: this.calcRate(win, pointsSpent),
+        },
+        null,
+        this.calcRate(win, pointsSpent)
+      );
+      await this.trackingManager.saveIteration({
+        gameStep: GameStep.Join,
+        trackingData: trackingData,
+      });
+    }
     this.clearAndReset();
+  }
+
+  calcRate(win, pointsSpent): number {
+    if (win) {
+      return pointsSpent <= 90 ? 3 : pointsSpent <= 110 ? 2 : 1;
+    } else {
+      return 0;
+    }
   }
 
   playerLeft(): void {

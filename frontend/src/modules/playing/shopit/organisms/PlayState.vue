@@ -207,7 +207,12 @@
     </div>
     <div class="infoText">
       <p class="marginTop" v-show="this.activeCardId !== ''">
-        {{ $t(('module.playing.shopit.participant.endCardTexts.' + this.activeCardId)) }}
+        {{
+          $t(
+            'module.playing.shopit.participant.endCardTexts.' +
+              this.activeCardId
+          )
+        }}
       </p>
     </div>
     <el-button class="el-button--submit returnButton" @click="finished">
@@ -257,7 +262,12 @@
     </div>
     <div class="infoText">
       <p class="marginTop" v-show="this.activeCardId !== ''">
-        {{ $t(('module.playing.shopit.participant.endCardTexts.' + this.activeCardId)) }}
+        {{
+          $t(
+            'module.playing.shopit.participant.endCardTexts.' +
+              this.activeCardId
+          )
+        }}
       </p>
     </div>
     <el-button class="el-button--submit returnButton" @click="finished">
@@ -363,6 +373,9 @@ export default class PlayState extends Vue {
 
   initialButtonState = false;
 
+  win = false;
+  gameEnded = false;
+
   getCardsFromGame() {
     return this.game.parameter.cards;
   }
@@ -409,18 +422,31 @@ export default class PlayState extends Vue {
     this.imageArray = [];
 
     this.initialButtonState = false;
+
+    this.win = false;
+    this.gameEnded = false;
   }
 
   playStateChange(outcome, reason) {
     switch (outcome) {
       case 'lost':
+        this.win = false;
+        this.gameEnded = true;
         this.endCardsOverview = this.calculateMostExpensiveCards();
-        this.activeCardChanged(this.endCardsOverview[0], this.endCardsOverview[0][8]);
+        this.activeCardChanged(
+          this.endCardsOverview[0],
+          this.endCardsOverview[0][8]
+        );
         this.playStateType = PlayStateType.lost;
         break;
       case 'win':
+        this.win = true;
+        this.gameEnded = true;
         this.endCardsOverview = this.calculateMostExpensiveCards();
-        this.activeCardChanged(this.endCardsOverview[0], this.endCardsOverview[0][8]);
+        this.activeCardChanged(
+          this.endCardsOverview[0],
+          this.endCardsOverview[0][8]
+        );
         this.playStateType = PlayStateType.win;
         break;
     }
@@ -528,7 +554,8 @@ export default class PlayState extends Vue {
       if (
         this.player === 2 &&
         this.game.parameter.playerNum <= 1 &&
-        this.initialButtonState
+        this.initialButtonState &&
+        !this.gameEnded
       ) {
         this.deregisterAll();
         this.clearPlayState();
@@ -538,7 +565,8 @@ export default class PlayState extends Vue {
       } else if (
         this.player === 1 &&
         this.game.parameter.playerNum <= 1 &&
-        this.initialButtonState
+        this.initialButtonState &&
+        !this.gameEnded
       ) {
         this.$emit('playerLeft');
       }
@@ -565,8 +593,10 @@ export default class PlayState extends Vue {
         false
       );
       this.deregisterAll();
-      this.clearPlayState();
-      this.$emit('playFinished');
+      this.finished();
+    } else {
+      this.deregisterAll();
+      this.finished();
     }
   }
 
@@ -803,7 +833,11 @@ export default class PlayState extends Vue {
           element.classList.add('cardContainerActive');
         }
         if (scroll) {
-          element.scrollIntoView({behavior: "smooth", block: "center", inline: "center"});
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center',
+          });
         }
       }
     }
@@ -923,7 +957,34 @@ export default class PlayState extends Vue {
   }
 
   finished() {
-    this.$emit('playFinished');
+    const cardsPlayed = this.ownCardsPlayed.length;
+    const pointsSpent = this.pointsSpent;
+    let co2 = 0;
+    let electricity = 0;
+    let lifetime = 0;
+    let water = 0;
+    let money = 0;
+    for (let i = 0; i < this.ownCardsPlayed.length; i++) {
+      co2 += this.ownCardsPlayed[i][1];
+      electricity += this.ownCardsPlayed[i][2];
+      lifetime += this.ownCardsPlayed[i][3];
+      water += this.ownCardsPlayed[i][4];
+      money += this.ownCardsPlayed[i][5];
+    }
+
+    this.$emit(
+      'playFinished',
+      [],
+      this.win,
+      cardsPlayed,
+      pointsSpent,
+      co2,
+      electricity,
+      lifetime,
+      water,
+      money
+    );
+    this.clearPlayState();
   }
 }
 </script>
@@ -1240,8 +1301,8 @@ p.gameKey {
   z-index: 10;
   overflow-x: scroll;
   overflow-y: hidden;
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 .endCards::-webkit-scrollbar {
