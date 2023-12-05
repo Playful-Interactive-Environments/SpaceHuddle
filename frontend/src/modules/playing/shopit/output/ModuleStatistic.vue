@@ -151,17 +151,17 @@ export default class ModuleStatistic extends Vue {
       const labels: number[] = this.getPointsSpent();
       const pointsSpent = this.getPointsSpent();
       const datasets = calculateChartPerParameter(
-          this.steps,
-          avatarList,
-          pointsSpent,
-          avatarList.map((avatar) => avatar.color),
-          (item, avatar) =>
-              item.avatar.color === avatar.color &&
-              item.avatar.symbol === avatar.symbol,
-          (item, pointsSpent) => item.parameter.game.pointsSpent === pointsSpent,
-          null,
-          (list) => list.length,
-          (avatar) => AvatarUnicode[avatar.symbol]
+        this.steps,
+        avatarList,
+        pointsSpent,
+        avatarList.map((avatar) => avatar.color),
+        (item, avatar) =>
+          item.avatar.color === avatar.color &&
+          item.avatar.symbol === avatar.symbol,
+        (item, pointsSpent) => item.parameter.game.pointsSpent === pointsSpent,
+        null,
+        (list) => list.length,
+        (avatar) => AvatarUnicode[avatar.symbol]
       );
       this.barChartDataList.push({
         title: this.$t('module.playing.shopit.statistic.pointsSpent'),
@@ -330,19 +330,18 @@ export default class ModuleStatistic extends Vue {
       const avatarList = this.getAvatarList(this.steps);
       const labels: string[] = this.getWinReason();
       const winReason = this.getWinReason();
-      console.log(winReason);
       const datasets = calculateChartPerParameter(
-          this.steps,
-          avatarList,
-          winReason,
-          avatarList.map((avatar) => avatar.color),
-          (item, avatar) =>
-              item.avatar.color === avatar.color &&
-              item.avatar.symbol === avatar.symbol,
-          (item, winReason) => item.parameter.game.winReason === winReason,
-          null,
-          (list) => list.length,
-          (avatar) => AvatarUnicode[avatar.symbol]
+        this.steps,
+        avatarList,
+        winReason,
+        avatarList.map((avatar) => avatar.color),
+        (item, avatar) =>
+          item.avatar.color === avatar.color &&
+          item.avatar.symbol === avatar.symbol,
+        (item, winReason) => item.parameter.game.winReason === winReason,
+        null,
+        (list) => list.length,
+        (avatar) => AvatarUnicode[avatar.symbol]
       );
       this.barChartDataList.push({
         title: this.$t('module.playing.shopit.statistic.winReason'),
@@ -441,8 +440,8 @@ export default class ModuleStatistic extends Vue {
 
   getWinReason() {
     const returnArray = this.steps
-        .map((item) => item.parameter.game.winReason)
-        .filter((value, index, array) => array.indexOf(value) === index);
+      .map((item) => item.parameter.game.winReason)
+      .filter((value, index, array) => array.indexOf(value) === index);
     const index = returnArray.indexOf('');
     if (index > -1) {
       returnArray.splice(index, 1);

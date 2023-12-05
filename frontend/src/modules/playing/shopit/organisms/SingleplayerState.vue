@@ -376,12 +376,20 @@ export default class PlayState extends Vue {
         this.win = false;
         this.gameEnded = true;
         this.endCardsOverview = this.calculateMostExpensiveCards();
+        this.activeCardChanged(
+            this.endCardsOverview[0],
+            this.endCardsOverview[0][8]
+        );
         this.playStateType = PlayStateType.lost;
         break;
       case 'win':
         this.win = true;
         this.gameEnded = true;
         this.endCardsOverview = this.calculateMostExpensiveCards();
+        this.activeCardChanged(
+            this.endCardsOverview[0],
+            this.endCardsOverview[0][8]
+        );
         this.playStateType = PlayStateType.win;
         break;
     }
@@ -747,6 +755,7 @@ export default class PlayState extends Vue {
       'playFinished',
       [],
       this.win,
+      this.reason,
       cardsPlayed,
       pointsSpent,
       co2,
