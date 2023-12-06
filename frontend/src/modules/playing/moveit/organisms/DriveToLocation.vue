@@ -354,7 +354,7 @@ export default class DriveToLocation extends Vue {
 
   //#region variables
   showMiniMap = false;
-  mapZoomDefault = 15;
+  mapZoomDefault = 18;
   mapCenter: [number, number] = [0, 0];
   mapStart: [number, number] = [0, 0];
   mapEnd: [number, number] = [0, 0];
@@ -371,8 +371,8 @@ export default class DriveToLocation extends Vue {
   };
   routePaint: any = {
     'line-color': '#0000FF',
-    'line-width': 2,
-    'line-gradient': [
+    'line-width': 4,
+    /*'line-gradient': [
       'interpolate',
       ['linear'],
       ['line-progress'],
@@ -388,7 +388,7 @@ export default class DriveToLocation extends Vue {
       'yellow',
       1,
       'red',
-    ],
+    ],*/
   };
   drivenPaint: LineLayerSpecification['paint'] = {
     'line-color': '#FF0000',
