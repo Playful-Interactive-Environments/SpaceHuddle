@@ -459,7 +459,11 @@
         </el-button>
       </div>
     </div>
-    <div class="statusOverlayCountDown" v-if="countDownEndTime > -1">
+    <div
+      class="statusOverlayCountDown"
+      v-if="countDownEndTime > -1"
+      :style="{ color: hypothermia || overheating ? redColor : contrastColor }"
+    >
       {{ Math.ceil((countDownEndTime - Date.now()) / 1000) }}
     </div>
     <DrawerBottomOverlay
@@ -661,7 +665,7 @@ interface CoolItHitRegion {
 interface Hit {
   type: RayType;
   timeStamp: number;
-  intensity: number;
+  quantifier: number;
   radiationFactor: number;
 }
 
@@ -1016,7 +1020,7 @@ export default class PlayLevel extends Vue {
 
   get radiationFactor(): number {
     //return this.radiationConst;
-    return this.speedLevelAutoPanSpeed / 20;
+    return this.speedLevelAutoPanSpeed / 10;
   }
 
   getTimeString(timestamp: number): string {
@@ -2124,6 +2128,19 @@ export default class PlayLevel extends Vue {
     }
   }
 
+  calculateObstacleTemperatureRiseLight(
+    heatAbsorptionCoefficientLight: number
+  ): number {
+    return heatAbsorptionCoefficientLight * this.absorptionFactor;
+  }
+
+  calculateObstacleTemperatureRiseHeat(
+    heatAbsorptionCoefficientHeat: number,
+    quantifier: number
+  ): number {
+    return heatAbsorptionCoefficientHeat * this.absorptionFactor * quantifier;
+  }
+
   calculateObstacleTemperature(
     obstacleCategory: string | null,
     obstacleType: string,
@@ -2159,13 +2176,16 @@ export default class PlayLevel extends Vue {
       if (hit.type === RayType.light) {
         const heatAbsorptionCoefficientLight =
           config.heatAbsorptionCoefficientLight ?? 1;
-        temperature += heatAbsorptionCoefficientLight * this.absorptionFactor;
+        temperature += this.calculateObstacleTemperatureRiseLight(
+          heatAbsorptionCoefficientLight
+        );
       } else {
         const heatAbsorptionCoefficientHeat =
           config.heatAbsorptionCoefficientHeat ?? 1;
-        const heatRadiation = heatAbsorptionCoefficientHeat * hit.intensity;
-        temperature +=
-          heatAbsorptionCoefficientHeat * this.absorptionFactor * heatRadiation;
+        temperature += this.calculateObstacleTemperatureRiseHeat(
+          heatAbsorptionCoefficientHeat,
+          hit.quantifier
+        );
       }
       time = hit.timeStamp;
     }
@@ -2299,12 +2319,13 @@ export default class PlayLevel extends Vue {
             this.gameHeight
           );
           hitObstacle.hitCount++;
-          hitObstacle.temperature +=
-            hitObstacle.heatAbsorptionCoefficientLight * this.absorptionFactor;
+          hitObstacle.temperature += this.calculateObstacleTemperatureRiseLight(
+            hitObstacle.heatAbsorptionCoefficientLight
+          );
           hitObstacle.hits.push({
             type: RayType.light,
             timeStamp: Date.now(),
-            intensity: 1,
+            quantifier: 1,
             radiationFactor: this.radiationFactor,
           });
           hitObstacle.hitAnimation.push(
@@ -2407,26 +2428,27 @@ export default class PlayLevel extends Vue {
         );
         rayObject.moveToPool();
         for (const obstacle of this.obstacleList) {
-          obstacle.temperature +=
-            obstacle.heatAbsorptionCoefficientHeat *
-            this.absorptionFactor *
-            heatRadiation;
+          obstacle.temperature += this.calculateObstacleTemperatureRiseHeat(
+            obstacle.heatAbsorptionCoefficientHeat,
+            heatRadiation
+          );
           obstacle.hits.push({
             type: RayType.heat,
             timeStamp: Date.now(),
-            intensity: ray.intensity,
+            quantifier: heatRadiation,
             radiationFactor: this.radiationFactor,
           });
         }
         for (const region of this.collisionRegions) {
           region.source.temperature +=
-            region.source.heatAbsorptionCoefficientHeat *
-            this.absorptionFactor *
-            heatRadiation;
+            this.calculateObstacleTemperatureRiseHeat(
+              region.source.heatAbsorptionCoefficientHeat,
+              heatRadiation
+            );
           region.source.hits.push({
             type: RayType.heat,
             timeStamp: Date.now(),
-            intensity: ray.intensity,
+            quantifier: heatRadiation,
             radiationFactor: this.radiationFactor,
           });
         }
@@ -2548,8 +2570,9 @@ export default class PlayLevel extends Vue {
           if (region.source.temperature > preRenderer.upperTemperatureLimit)
             obstacleOverheatingCount++;
         }
-        const maxObstacleCount =
+        let maxObstacleCount =
           (this.obstacleList.length + this.collisionRegions.length) / 5;
+        if (maxObstacleCount < 3) maxObstacleCount = 3;
         if (obstacleHypothermiaCount > maxObstacleCount) hypothermia = true;
         if (obstacleOverheatingCount > maxObstacleCount) overheating = true;
         gameOver = hypothermia || overheating;
@@ -2561,7 +2584,7 @@ export default class PlayLevel extends Vue {
     this.hypothermia = hypothermia;
     this.overheating = overheating;
     if (gameOver) {
-      const countDownTime = 3000;
+      const countDownTime = 5000;
       this.countDownEndTime = Date.now() + countDownTime;
       setTimeout(() => {
         this.countDownEndTime = -1;
