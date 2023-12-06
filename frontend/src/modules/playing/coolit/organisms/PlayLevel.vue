@@ -13,7 +13,11 @@
       :border-category="CollisionGroups.BORDER"
       :background-texture="levelTypeSettings.background"
       :background-position="BackgroundPosition.Cover"
-      :background-movement="BackgroundMovement.Auto"
+      :background-movement="
+        showObstacleSelection
+          ? BackgroundMovement.Pause
+          : BackgroundMovement.Auto
+      "
       :collisionRegions="collisionRegions"
       @initRenderer="initRenderer"
       @updateOffset="updateOffset"
@@ -470,12 +474,11 @@
           )"
           :key="objectName"
         >
-          <SpriteCanvas
-            :texture="getTexture(selectedObstacle.type, objectName)"
-            :aspect-ration="getObjectAspect(selectedObstacle.type, objectName)"
-            class="placeable"
-            :background-color="backgroundColor"
-            @pointerdown="changeSelectedObstacle(objectName)"
+          <img
+            :src="categoryImages[selectedObstacle.type][objectName]"
+            :alt="objectName"
+            class="obstacle-image"
+            @click="changeSelectedObstacle(objectName)"
           />
         </div>
       </el-space>
@@ -657,8 +660,9 @@ interface CoolItHitRegion {
 
 interface Hit {
   type: RayType;
-  time: number;
+  timeStamp: number;
   intensity: number;
+  radiationFactor: number;
 }
 
 interface MoleculeData extends CoolItHitRegion {
@@ -733,6 +737,7 @@ export default class PlayLevel extends Vue {
 
   obstacleList: CoolItObstacle[] = [];
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
+  categoryImages: { [key: string]: { [key: string]: string } } = {};
   moleculeStylesheets: PIXI.Spritesheet | null = null;
   vehicleStylesheets: PIXI.Spritesheet | null = null;
   weatherStylesheets: PIXI.Spritesheet | null = null;
@@ -1005,9 +1010,13 @@ export default class PlayLevel extends Vue {
     return 2; // 1.25;
   }
 
+  get speedLevelAutoPanSpeed(): number {
+    return 0.4 + this.speedLevel * 0.2;
+  }
+
   get radiationFactor(): number {
     //return this.radiationConst;
-    return this.autoPanSpeed / 10; // ((this.temperatureRise + 2) * 10);
+    return this.speedLevelAutoPanSpeed / 20;
   }
 
   getTimeString(timestamp: number): string {
@@ -1234,7 +1243,7 @@ export default class PlayLevel extends Vue {
   //#region watch
   @Watch('speedLevel', { immediate: true })
   onSpeedLevelChanged(): void {
-    this.autoPanSpeed = 0.4 + this.speedLevel * 0.2;
+    this.autoPanSpeed = this.speedLevelAutoPanSpeed;
   }
 
   @Watch('gameWidth', { immediate: true })
@@ -1683,8 +1692,20 @@ export default class PlayLevel extends Vue {
           ) {
             pixiUtil
               .loadTexture(settings.spritesheet, this.eventBus)
-              .then((sheet) => {
+              .then(async (sheet) => {
                 this.stylesheets[typeName] = sheet;
+                this.categoryImages[typeName] = {};
+                await until(() => this.renderer);
+                for (const textureKey of Object.keys(sheet.textures)) {
+                  const texture = sheet.textures[textureKey];
+                  const graphics = new PIXI.Graphics()
+                    .beginTextureFill({
+                      texture: texture,
+                    })
+                    .drawRect(0, 0, texture.width, texture.height);
+                  this.categoryImages[typeName][textureKey] =
+                    await this.renderer.plugins.extract.base64(graphics);
+                }
               });
           }
         }, 100);
@@ -2077,16 +2098,16 @@ export default class PlayLevel extends Vue {
         );
       }
 
-      const timeFactor = updateDelta / 5000;
+      //const timeFactor = updateDelta / 5000;
       for (const region of this.collisionRegions) {
         let temperature =
           region.source.temperature - preRenderer.minTemperature;
         if (temperature < 0) temperature = 0;
-        region.source.temperature -=
-          region.source.heatRadiationCoefficient *
-          this.radiationFactor *
-          temperature *
-          timeFactor;
+        region.source.temperature = this.calculateObstacleTemperature(
+          null,
+          region.source.name,
+          region.source.hits
+        );
       }
     }
 
@@ -2104,40 +2125,37 @@ export default class PlayLevel extends Vue {
   }
 
   calculateObstacleTemperature(
-    obstacleCategory: string,
+    obstacleCategory: string | null,
     obstacleType: string,
     hits: Hit[],
-    showLog = false
+    radiationFactor: number | null = null
   ): number {
-    const config =
-      this.getLevelTypeCategoryItems(obstacleCategory)[obstacleType];
+    const config = obstacleCategory
+      ? this.getLevelTypeCategoryItems(obstacleCategory)[obstacleType]
+      : this.levelTypeSettings.heatRation.find(
+          (item) => item.name === obstacleType
+        );
+    if (!config) return 0;
     let temperature = config.initialTemperature;
     let time = this.startTime;
-    const reduceTemperature = (hitTime: number): void => {
+    const reduceTemperature = (
+      hitTime: number,
+      radiationFactor: number
+    ): void => {
       const updateDelta = hitTime - time;
       const timeFactor = updateDelta / 5000;
       let temperatureHelper = temperature - preRenderer.minTemperature;
       if (temperatureHelper < 0) temperatureHelper = 0;
-      const test = temperature;
-      temperature -=
+      const temperatureDelta =
         config.heatRadiationCoefficient *
-        this.radiationFactor *
+        radiationFactor *
         temperatureHelper *
         timeFactor;
-      if (showLog) {
-        console.log(
-          'reduceTemperature',
-          updateDelta,
-          timeFactor,
-          test,
-          temperature
-        );
-      }
+      temperature -= temperatureDelta;
     };
 
     for (const hit of hits) {
-      reduceTemperature(hit.time);
-      const test = temperature;
+      reduceTemperature(hit.timeStamp, hit.radiationFactor);
       if (hit.type === RayType.light) {
         const heatAbsorptionCoefficientLight =
           config.heatAbsorptionCoefficientLight ?? 1;
@@ -2149,18 +2167,12 @@ export default class PlayLevel extends Vue {
         temperature +=
           heatAbsorptionCoefficientHeat * this.absorptionFactor * heatRadiation;
       }
-      if (showLog) {
-        console.log(
-          'addTemperature',
-          hit.type,
-          hit.intensity,
-          test,
-          temperature
-        );
-      }
-      time = hit.time;
+      time = hit.timeStamp;
     }
-    reduceTemperature(this.startTime + this.playTime);
+    reduceTemperature(
+      this.startTime + this.playTime,
+      radiationFactor ?? this.radiationFactor
+    );
     return temperature;
   }
 
@@ -2291,8 +2303,9 @@ export default class PlayLevel extends Vue {
             hitObstacle.heatAbsorptionCoefficientLight * this.absorptionFactor;
           hitObstacle.hits.push({
             type: RayType.light,
-            time: Date.now(),
+            timeStamp: Date.now(),
             intensity: 1,
+            radiationFactor: this.radiationFactor,
           });
           hitObstacle.hitAnimation.push(
             new ShockwaveFilter(
@@ -2400,8 +2413,9 @@ export default class PlayLevel extends Vue {
             heatRadiation;
           obstacle.hits.push({
             type: RayType.heat,
-            time: Date.now(),
+            timeStamp: Date.now(),
             intensity: ray.intensity,
+            radiationFactor: this.radiationFactor,
           });
         }
         for (const region of this.collisionRegions) {
@@ -2411,8 +2425,9 @@ export default class PlayLevel extends Vue {
             heatRadiation;
           region.source.hits.push({
             type: RayType.heat,
-            time: Date.now(),
+            timeStamp: Date.now(),
             intensity: ray.intensity,
+            radiationFactor: this.radiationFactor,
           });
         }
       }
@@ -2646,14 +2661,11 @@ export default class PlayLevel extends Vue {
   //#region replay
   changeSelectedObstacle(name: string): void {
     if (this.selectedObstacle) {
-      const temperature = this.calculateObstacleTemperature(
+      this.selectedObstacle.temperature = this.calculateObstacleTemperature(
         this.selectedObstacle.type,
         name,
-        this.selectedObstacle.hits,
-        true
+        this.selectedObstacle.hits
       );
-      console.log(this.playTime, this.startTime, this.selectedObstacle.name, name, this.selectedObstacle.temperature, temperature, this.selectedObstacle.hits);
-      this.selectedObstacle.temperature = temperature;
       this.selectedObstacle.name = name;
       this.selectedObstacle.texture = this.getTexture(
         this.selectedObstacle.type,
@@ -2763,5 +2775,10 @@ export default class PlayLevel extends Vue {
     font-weight: var(--font-weight-bold);
     font-size: var(--font-size-xlarge);
   }
+}
+
+.obstacle-image {
+  height: 5rem;
+  margin: 0.5rem;
 }
 </style>

@@ -222,7 +222,8 @@ export default class ModuleStatistic extends Vue {
         this.colorList,
         (item, parameter) =>
           vehicleCalculation.isSameVehicle(item.parameter.vehicle, parameter),
-        (item, stars) => item.parameter.rate === stars && item.parameter.rate != -1,
+        (item, stars) =>
+          item.parameter.rate === stars && item.parameter.rate != -1,
         null,
         (list) => list.length,
         (vehicle) => vehicleCalculation.vehicleToString(vehicle)

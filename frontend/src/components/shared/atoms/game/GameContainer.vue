@@ -239,6 +239,7 @@ export enum BackgroundMovement {
   None = 'none',
   Pan = 'pan',
   Auto = 'auto',
+  Pause = 'pause',
 }
 
 export enum CollisionBorderType {
@@ -1456,6 +1457,25 @@ export default class GameContainer extends Vue {
         this.addToEngin(this.borders.left);
       }
     }
+  }
+
+  previousBackgroundMovement = BackgroundMovement.None;
+  @Watch('backgroundMovement', { immediate: true })
+  onBackgroundMovementChanged(): void {
+    const restartFromPause =
+      this.previousBackgroundMovement === BackgroundMovement.Pause;
+    if (this.isContainerReady) {
+      switch (this.backgroundMovement) {
+        case BackgroundMovement.Pause:
+          this.panSpeed = 0;
+          this.panVector = [0, 0];
+          break;
+        case BackgroundMovement.Auto:
+          this.startAutoPan(!restartFromPause);
+          break;
+      }
+    }
+    this.previousBackgroundMovement = this.backgroundMovement;
   }
   //#endregion bounds
 
