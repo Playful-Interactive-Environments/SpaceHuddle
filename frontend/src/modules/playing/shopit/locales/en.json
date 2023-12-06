@@ -40,7 +40,13 @@
       "kw": "kw",
       "years": "years",
       "kl": "kl",
-      "price": "€"
+      "price": "€",
+      "conditions": {
+        "brandNew": "brand new",
+        "2ndHand": "2nd hand",
+        "exotic": "exotic",
+        "regional": "regional"
+      }
     },
     "waiting": {
       "yourTurn": "waiting for your turn...",
@@ -60,12 +66,13 @@
     "winCategories": "You managed to collect all categories before your opponent! Good Job!",
     "winPoints": "Your opponent exceeded their maximum emissions.",
     "endCards": "These are the most expensive cards considering each resource that you played:",
+
     "endCardTexts": {
-      "CO²": "CO2 Information",
-      "electricity": "electricity Information",
-      "lifetime": "lifetime Information",
-      "water": "water Information",
-      "money": "money Information"
+      "CO²": "It may surprise you to learn that the fashion industry produces about 10 percent of annual global carbon emissions. A t-shirt is 7 kg of CO2 equivalent on average.",
+      "electricity": "Manufacturing a t-shirt involves different processes such as knitting & weaving, wet treatment or confectioning. These processes require about 10 Kwh of energy.",
+      "lifetime": "A shirts durability can be attributed often times by both the quality of the dress shirt and the amount of times it's been laundered. Some shirts last 6 months, others 2-5 years or longer.",
+      "water": "With the production of cotton, it takes about 2,700 liters of water to make just one t-shirt , which is enough water for one person to drink for 900 days.",
+      "money": "On average, a basic plain t-shirt can range from 5€ to 30€, while designer or branded t-shirts can cost anywhere from 30€ to 100€ or more."
     }
   }
 }

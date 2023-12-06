@@ -25,20 +25,34 @@
       }}<span>{{ $t('module.playing.shopit.participant.cards.price') }}</span>
     </li>
   </ul>
-<!--  <p class="cardCondition">condition</p>-->
+  <p class="cardCondition">
+    {{
+      condition === 2
+        ? category === 'food'
+          ? $t('module.playing.shopit.participant.cards.conditions.regional')
+          : $t('module.playing.shopit.participant.cards.conditions.2ndHand')
+        : category === 'food'
+        ? $t('module.playing.shopit.participant.cards.conditions.exotic')
+        : $t('module.playing.shopit.participant.cards.conditions.brandNew')
+    }}
+  </p>
   <img :src="getCardSprite(cardName)" alt="{{ category }}" class="cardImage" />
   <font-awesome-icon
     :icon="gameConfig.categories[category].settings.icon"
     class="categoryCardIcon"
   />
-<!--  <img :src="gameConfig.gameValues.sparkle" alt="sparkle" class="sparkle" />-->
+  <img
+    :src="gameConfig.gameValues.sparkle"
+    alt="sparkle"
+    class="sparkle"
+    v-if="condition === 1"
+  />
 </template>
 
 <script lang="ts">
 import { Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
-
 
 export default class Card extends Vue {
   @Prop({ default: 0 }) readonly cost!: number;
@@ -48,6 +62,7 @@ export default class Card extends Vue {
   @Prop({ default: 0 }) readonly water!: number;
   @Prop({ default: 0 }) readonly money!: number;
   @Prop({ default: '' }) readonly category!: string;
+  @Prop({ default: 2 }) readonly condition!: number;
   @Prop({ default: '' }) readonly cardName!: string;
 
   gameConfig = gameConfig;
