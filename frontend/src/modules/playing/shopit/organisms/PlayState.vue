@@ -648,6 +648,14 @@ export default class PlayState extends Vue {
     if (this.player === 1) {
       this.cards = this.shuffle(this.parseCards(gameConfig));
       this.maxCards = 3;
+
+      const elementsToRemove = this.game.parameter.player1Hand.concat(this.game.parameter.player2Hand);
+      this.cards = this.cards.filter(
+        (item) => !elementsToRemove.includes(item)
+      );
+      console.log(elementsToRemove);
+      console.log(this.cards);
+
       this.game.parameter.cards = this.cards.map((x) => x);
       this.updateCards();
       await until(() => this.game.parameter.player2Hand.length > 2);

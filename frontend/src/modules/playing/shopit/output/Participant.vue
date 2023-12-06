@@ -204,7 +204,7 @@ export default class Participant extends Vue {
           money: 0,
           winReason: '',
         },
-        rate: 0,
+        rate: null,
       });
       taskService.registerGetTaskById(
         this.taskId,
@@ -386,7 +386,7 @@ export default class Participant extends Vue {
               money: 0,
               winReason: '',
             },
-            rate: 0,
+            rate: null,
           }
         );
         await this.trackingManager.saveIteration({
@@ -413,7 +413,7 @@ export default class Participant extends Vue {
             money: 0,
             winReason: '',
           },
-          rate: 0,
+          rate: null,
         }
       );
       await this.trackingManager.saveIteration({
@@ -461,19 +461,42 @@ export default class Participant extends Vue {
     this.clearAndReset();
   }
 
-  calcRate(win, pointsSpent): number {
+  calcRate(win, pointsSpent): number | null {
     if (win) {
       return pointsSpent <= 90 ? 3 : pointsSpent <= 110 ? 2 : 1;
     } else if (!win && pointsSpent > 0) {
       return 0;
     } else if (!win && pointsSpent === 0) {
-      return -1;
+      return null;
     } else {
-      return -1;
+      return null;
     }
   }
 
-  playerLeft(): void {
+  async playerLeft(): Promise<void> {
+    if (this.trackingManager) {
+      await this.trackingManager.saveIterationStep(
+        {
+          game: {
+            cardsPlayed: null,
+            pointsSpent: null,
+            co2: null,
+            electricity: null,
+            lifetime: null,
+            water: null,
+            money: null,
+            winReason: null,
+          },
+          rate: null,
+        },
+        null,
+        this.calcRate(null, null)
+      );
+      await this.trackingManager.saveIteration({
+        gameStep: GameStep.Join,
+        trackingData: null,
+      });
+    }
     this.gameStep = GameStep.Join;
     this.gameState = GameState.Left;
   }

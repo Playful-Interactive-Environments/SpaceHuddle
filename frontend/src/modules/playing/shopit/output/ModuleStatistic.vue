@@ -100,6 +100,7 @@ export default class ModuleStatistic extends Vue {
     }
   }
   calculateCharts(): void {
+    this.filterSteps();
     this.barChartDataList = [];
     this.calculateStarsChart();
     this.calculatePointsSpentChart();
@@ -109,6 +110,10 @@ export default class ModuleStatistic extends Vue {
     this.calculateWaterChart();
     this.calculateMoneyChart();
     this.calculateWinReasonChart();
+  }
+
+  filterSteps(): void {
+    this.steps = this.steps.filter((item) => item.parameter.rate != null);
   }
 
   calculateStarsChart(): void {
@@ -356,97 +361,58 @@ export default class ModuleStatistic extends Vue {
   }
 
   getPointsSpent() {
-    const returnArray = this.steps
+    return this.steps
       .map((item) => item.parameter.game.pointsSpent)
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
-    const index = returnArray.indexOf(0);
-    if (index > -1) {
-      returnArray.splice(index, 1);
-    }
-    return returnArray;
   }
 
   getRatings() {
-    const returnArray = this.steps
+    return this.steps
       .map((item) => item.parameter.rate)
       .filter((value, index, array) => array.indexOf(value) === index);
-    const index = returnArray.indexOf(-1);
-    if (index > -1) {
-      returnArray.splice(index, 1);
-    }
-    return returnArray;
   }
 
   getCO2() {
-    const returnArray = this.steps
+    return this.steps
       .map((item) => item.parameter.game.co2)
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
-    const index = returnArray.indexOf(0);
-    if (index > -1) {
-      returnArray.splice(index, 1);
-    }
-    return returnArray;
   }
 
   getElectricity() {
-    const returnArray = this.steps
+    return this.steps
       .map((item) => item.parameter.game.electricity)
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
-    const index = returnArray.indexOf(0);
-    if (index > -1) {
-      returnArray.splice(index, 1);
-    }
-    return returnArray;
   }
 
   getLifetime() {
-    const returnArray = this.steps
+    return this.steps
       .map((item) => item.parameter.game.lifetime)
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
-    const index = returnArray.indexOf(0);
-    if (index > -1) {
-      returnArray.splice(index, 1);
-    }
-    return returnArray;
   }
 
   getWater() {
-    const returnArray = this.steps
+    return this.steps
       .map((item) => item.parameter.game.water)
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
-    const index = returnArray.indexOf(0);
-    if (index > -1) {
-      returnArray.splice(index, 1);
-    }
-    return returnArray;
   }
 
   getMoney() {
-    const returnArray = this.steps
+    return this.steps
       .map((item) => item.parameter.game.money)
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
-    const index = returnArray.indexOf(0);
-    if (index > -1) {
-      returnArray.splice(index, 1);
-    }
-    return returnArray;
+
   }
 
   getWinReason() {
-    const returnArray = this.steps
+    return this.steps
       .map((item) => item.parameter.game.winReason)
       .filter((value, index, array) => array.indexOf(value) === index);
-    const index = returnArray.indexOf('');
-    if (index > -1) {
-      returnArray.splice(index, 1);
-    }
-    return returnArray;
   }
 
   getAvatarList(list: any[], filter: ((item) => boolean) | null = null): any[] {
