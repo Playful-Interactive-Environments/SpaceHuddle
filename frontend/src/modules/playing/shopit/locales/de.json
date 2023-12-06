@@ -40,7 +40,13 @@
       "kw": "kw",
       "years": "Jahre",
       "kl": "kl",
-      "price": "€"
+      "price": "€",
+      "conditions": {
+        "brandNew": "brandneu",
+        "2ndHand": "gebraucht",
+        "exotic": "exotisch",
+        "regional": "regional"
+      }
     },
     "waiting": {
       "yourTurn": "Warte auf deinen Zug...",

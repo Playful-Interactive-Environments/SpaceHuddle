@@ -55,8 +55,8 @@
       </p>
       <div
         v-for="card in cardsPlayed"
-        :key="card[7]"
-        :id="card[7]"
+        :key="card[8]"
+        :id="card[8]"
         class="cardPlayed"
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
@@ -70,7 +70,8 @@
           :water="card[4]"
           :money="card[5]"
           :category="card[6]"
-          :cardName="card[7]"
+          :condition="card[7]"
+          :cardName="card[8]"
         />
       </div>
     </TransitionGroup>
@@ -108,13 +109,13 @@
     <TransitionGroup name="hand" class="hand" tag="div">
       <div
         v-for="card in cardHand"
-        :key="card[7]"
-        :id="card[7]"
+        :key="card[8]"
+        :id="card[8]"
         class="cardContainer"
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
-        @click="activeCardChanged(card, card[7])"
+        @click="activeCardChanged(card, card[8])"
       >
         <button
           v-if="card === activeCard && !buttonDisabled"
@@ -131,7 +132,8 @@
           :water="card[4]"
           :money="card[5]"
           :category="card[6]"
-          :cardName="card[7]"
+          :condition="card[7]"
+          :cardName="card[8]"
         />
       </div>
     </TransitionGroup>
@@ -156,13 +158,13 @@
     <div class="endCards">
       <div
         v-for="card in endCardsOverview"
-        :key="card[8]"
-        :id="card[8]"
+        :key="card[9]"
+        :id="card[9]"
         class="endCard"
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
-        @click="activeCardChanged(card, card[8], true)"
+        @click="activeCardChanged(card, card[9], true)"
       >
         <Card
           :cost="card[0]"
@@ -172,9 +174,10 @@
           :water="card[4]"
           :money="card[5]"
           :category="card[6]"
-          :cardName="card[7]"
+          :condition="card[7]"
+          :cardName="card[8]"
         />
-        <p class="CardDescription">{{ card[8] }}</p>
+        <p class="CardDescription">{{ card[9] }}</p>
       </div>
     </div>
     <div class="infoText">
@@ -211,13 +214,13 @@
     <div class="endCards">
       <div
         v-for="card in endCardsOverview"
-        :key="card[8]"
-        :id="card[8]"
+        :key="card[9]"
+        :id="card[9]"
         class="endCard"
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
-        @click="activeCardChanged(card, card[8], true)"
+        @click="activeCardChanged(card, card[9], true)"
       >
         <Card
           :cost="card[0]"
@@ -227,9 +230,10 @@
           :water="card[4]"
           :money="card[5]"
           :category="card[6]"
-          :cardName="card[7]"
+          :condition="card[7]"
+          :cardName="card[8]"
         />
-        <p class="CardDescription">{{ card[8] }}</p>
+        <p class="CardDescription">{{ card[9] }}</p>
       </div>
     </div>
     <div class="infoText">
@@ -337,7 +341,7 @@ export default class PlayState extends Vue {
 
   preloadAllSprites(cards) {
     for (let i = 0; i < cards.length; i++) {
-      this.preloadImage(this.cardSpriteFolder + cards[i][7] + '.png');
+      this.preloadImage(this.cardSpriteFolder + cards[i][8] + '.png');
     }
   }
 
@@ -378,7 +382,7 @@ export default class PlayState extends Vue {
         this.endCardsOverview = this.calculateMostExpensiveCards();
         this.activeCardChanged(
             this.endCardsOverview[0],
-            this.endCardsOverview[0][8]
+            this.endCardsOverview[0][9]
         );
         this.playStateType = PlayStateType.lost;
         break;
@@ -388,7 +392,7 @@ export default class PlayState extends Vue {
         this.endCardsOverview = this.calculateMostExpensiveCards();
         this.activeCardChanged(
             this.endCardsOverview[0],
-            this.endCardsOverview[0][8]
+            this.endCardsOverview[0][9]
         );
         this.playStateType = PlayStateType.win;
         break;
@@ -496,7 +500,7 @@ export default class PlayState extends Vue {
   }
 
   getCardSprite(card) {
-    return this.cardSpriteFolder + card[7] + '.png';
+    return this.cardSpriteFolder + card[8] + '.png';
   }
 
   shuffle(cards) {
@@ -570,7 +574,7 @@ export default class PlayState extends Vue {
       this.cardHand.splice(index, 1);
       this.cardsPlayed.push(card);
       const copyCard = card.map((x) => x);
-      this.ownCardPlayed = copyCard[7];
+      this.ownCardPlayed = copyCard[8];
       this.ownCardsPlayed.push(copyCard);
 
       //remove wrong category icon highlight
@@ -697,7 +701,7 @@ export default class PlayState extends Vue {
     //Adds points to winners category
     for (let i = 0; i < this.categoryPoints.length; i++) {
       if (this.categoryPoints[i][0] == winningCard[6]) {
-        if (this.ownCardPlayed === winningCard[7]) {
+        if (this.ownCardPlayed === winningCard[8]) {
           this.categoryPoints[i][1] += 1;
         } else {
           this.categoryPointsOpponent[i][1] += 1;
@@ -728,7 +732,7 @@ export default class PlayState extends Vue {
   }
 
   cardWin(winningCard) {
-    const element = document.getElementById(winningCard[7]);
+    const element = document.getElementById(winningCard[8]);
     if (element) {
       element.classList.add('cardWin');
     }
