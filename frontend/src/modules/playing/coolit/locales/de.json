@@ -21,7 +21,7 @@
     "newLevel": "neues Level erstellen",
     "confirm": "Weiter",
     "tutorial": {
-      "select": "Die Atmosphäre setzt sich aus den Gasen Stickstoff, Sauerstoff, Argon und Kohlenstoffdioxid zusammen. Lichtstrahlen können diese Gase ungehindert durchdringen. Trifft ein Lichtstahl auf die Erde wird er von der Oberfläche absorbiert und als Wärmestrahlung freigesetzt. Wärmestrahlung wird von den Treibhausgasen aufgenommen und erwärmt dadurch die Atmosphäre. Ohne diese Gase wäre es auf der Erde sehr kalt. Die Durchschnittstemperatur würde bei -18°C liegen. Obwohl die Atmosphäre aus nur 0,04% Treibhausgasen beseht reicht das aus um die Erde auf eine für uns angenehme Temperatur zu erwärmen. Allerdings je mehr Treibhausgase desto wärmer wird es. Gase und Strahlen sind farblos und sehr sehr klein. Damit du sie sehen kannst haben wir sie eingefärbt und stark vergrößert.",
+      "select": "Die Atmosphäre setzt sich aus mehreren Gasen zusammen, u.a. Stickstoff, Sauerstoff, Argon und Kohlenstoffdioxid. Lichtstrahlen können diese Gase ungehindert durchdringen. Trifft ein Lichtstahl auf die Erde wird er von der Oberfläche absorbiert und als Wärmestrahlung freigesetzt. Wärmestrahlung wird von den Treibhausgasen aufgenommen und erwärmt dadurch die Atmosphäre. Ohne diese Gase wäre es auf der Erde sehr kalt. Die Durchschnittstemperatur würde bei -18°C liegen! Obwohl die Atmosphäre aus nur 0,04% Treibhausgasen besteht reicht das aus um die Erde auf eine für uns angenehme Temperatur zu erwärmen. Allerdings je mehr Treibhausgase desto wärmer wird es. Gase und Strahlen sind farblos und sehr sehr klein. Damit du sie sehen kannst haben wir sie eingefärbt und stark vergrößert.",
       "play": "Schiebe die Treibhausgase aus dem Weg um die überschüssige Wärme von der Erde entweichen zu lassen und es so auf der Erde angenehm zu halten. Aber Achtung, du solltest auch nicht zu viel Wärmestrahlung vermeiden, denn ohne den Treibhauseffekt geht es nicht. Wir wollen ja schließlich nicht erfrieren. Der Balken oben zeigt dir die aktuelle Temperaturentwicklung an. Versuche, im mittleren Bereich zu bleiben. Wenn deine Durchschnittstemperatur oder 3 Gebäude den markierten Grenzwert über- oder unterschreiten, ist das Spiel vorbei."
     },
     "placeables": {
@@ -31,7 +31,7 @@
     },
     "moleculeInfo": {
       "globalWarmingFactor": "Globale Erwärmungspotenzial",
-      "lifespan": "Lebendauer",
+      "lifespan": "Lebensdauer",
       "years": "Jahre",
       "gwpInfo": "im Vergleich zu Kohlendioxid",
       "none": "Wähle ein Molekül aus um dessen Informationen zu sehen.",
@@ -165,31 +165,31 @@
     },
     "playResult": {
       "0": {
-        "title": "Ohje.",
+        "title": "Leider perfekte Bedingungen für Starkwetter!",
         "message": {
-          "1": "Schwere Stürme und Überflutungen werden gegen Ende dieses Sommers erwartet.",
+          "1": "Schwere Stürme treten vermehrt auf und beschädigen Gebäude, Autos und Felder.",
           "2": "Österreich verzeichnet ab heute offiziell weniger Gletscher als im Vorjahr.",
-          "3": "Ein riesiger Brand breitet sich in den Wäldern der Steiermark aus."
+          "3": "Durch die extreme Trockenheit gibt es viel mehr Waldbrände rund um Linz."
         }
       },
       "1": {
-        "title": "Super!",
+        "title": "Etwas Abkühlung, aber trotzdem noch zu warm!",
         "message": {
-          "1": "Dieses Jahr verzeichnete eine leichte Abnahme der durchschnittlichen Temperatur. Angenehme Winde an heißen Tagen sorgen für Wohlbefinden.",
-          "2": "Laut Statistik passierten im Vergleich zu letztem Jahr deutlich weniger Überflutungen.",
-          "3": "Landwirte berichten von deutlich weniger Ungeziefern auf ihren Feldern. Eine bessere und gesündere Ernte wird erwartet."
+          "1": "Dieses Jahr keine signifikante Erhöhung der durchschnittlichen Temperatur. Angenehme Winde an heißen Tagen sorgen für Wohlbefinden.",
+          "2": "Es sind heuer wenig Hagelschäden verzeichnet worden.",
+          "3": "Die Bäume im Park schauen heuer etwas grüner aus und haben mehr Blätter."
         }
       },
       "2": {
-        "title": "Großartig!",
+        "title": "Am Weg zum stabileren Klima!",
         "message": {
-          "1": "Diesen Winter wird deutlich mehr Schneefall erwartet. Wunderbare Nachrichten für alle Ski-Enthusiasten!",
-          "2": "Die aktuelle Liste der bedrohten Tierarten ist aufgrund eines stabileren Klimas kleiner geworden.",
-          "3": "Manche Krankheiten scheinen weniger oft aufzutreten. Eine Verbindung zu dem positiven Wandel des Klimas wird nicht ausgeschlossen."
+          "1": "Diesen Winter wird deutlich mehr Schneefall erwartet, was auch mehr Wasser für die Zeit nach dem Winter bedeutet.",
+          "2": "Die Luft ist auch im Sommer erträglicher und ",
+          "3": "Eis essen macht mehr Spass, wenn das Eis nicht gleich wegschmilzt!"
         }
       },
       "3": {
-        "title": "Unglaublich!",
+        "title": "Wir schaffen doch eine Klimawende!",
         "message": {
           "1": "Hitzestaus in großen Städten werden aktiv bekämpft und beseitigt. Der Boden ist KEINE Lava mehr!",
           "2": "Regelmäßiger Regen und weniger Trockenperioden haben das Ökosystem belebt. Österreich sieht bereits viel grüner aus!",
@@ -200,7 +200,7 @@
     "difficultyLevel": {
       "veryEasy": {
         "title": "sehr einfach",
-        "description": "Zur Zeit der Eiszeit betrug die globale Lufttemperatur -6°C. Versuch unter den Bedingungen einer leichten Eiszeit von nur -1°C die Temperatur in der Stadt im Gleichgewicht zu halten und die Erde vor dem Einfrieren zu bewahren, indem du Treibhausgase mit den Wärmestrahlen kollidieren lässt."
+        "description": "Zur Zeit der Eiszeit betrug die globale Lufttemperatur -6°C. Versuch unter diesen Bedingungen einer leichten Eiszeit von nur -1°C die Temperatur in der Stadt im Gleichgewicht zu halten und die Erde vor dem Einfrieren zu bewahren, indem du Treibhausgase mit den Wärmestrahlen kollidieren lässt."
       },
       "easy": {
         "title": "einfach",
