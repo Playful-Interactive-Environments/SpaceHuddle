@@ -15,7 +15,8 @@
     "lifetime": "Was war die aufgerechnete Lebenszeit der gekauften Objekte? (years)",
     "water": "Wie viel Wasser wurde verbraucht? (kl)",
     "money": "Wie viel Geld wurde ausgegeben? (€)",
-    "winReason": "Wegen welchem Grund haben die Nutzer gewonnen?"
+    "winReason": "Wegen welchem Grund haben die Nutzer gewonnen?",
+    "cardsPlayed": "Wie viele Karten wurden in einer Runde gespielt?"
   },
   "participant": {
     "tutorial": {

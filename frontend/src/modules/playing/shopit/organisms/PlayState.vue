@@ -437,24 +437,22 @@ export default class PlayState extends Vue {
         this.win = false;
         this.gameEnded = true;
         this.endCardsOverview = this.calculateMostExpensiveCards();
-        this.activeCardChanged(
-          this.endCardsOverview[0],
-          this.endCardsOverview[0][9]
-        );
+        this.buttonDisabled = false;
         this.playStateType = PlayStateType.lost;
         break;
       case 'win':
         this.win = true;
         this.gameEnded = true;
         this.endCardsOverview = this.calculateMostExpensiveCards();
-        this.activeCardChanged(
-          this.endCardsOverview[0],
-          this.endCardsOverview[0][9]
-        );
+        this.buttonDisabled = false;
         this.playStateType = PlayStateType.win;
         break;
     }
     this.reason = reason;
+    this.activeCardChanged(
+        this.endCardsOverview[0],
+        this.endCardsOverview[0][9]
+    );
   }
 
   calculateMostExpensiveCards() {
@@ -756,6 +754,7 @@ export default class PlayState extends Vue {
 
       //draw new cards and continue the play
       setTimeout(async () => {
+        this.checkWinConditions();
         this.cardsPlayed = [];
         this.game.parameter.cardsPlayed = [];
         if (this.cards.length <= 1) {
@@ -907,8 +906,6 @@ export default class PlayState extends Vue {
       }
     }
 
-    this.checkWinConditions();
-
     //Check the points, if all categories filled give win or lose condition
     /*if (
       this.categoryPoints.every((row) => row[1] >= 2) &&
@@ -961,7 +958,7 @@ export default class PlayState extends Vue {
   }
 
   finished() {
-    const cardsPlayed = this.ownCardsPlayed.length;
+    const cardsPlayed = this.ownCardsPlayed.map((x) => x);
     const pointsSpent = this.pointsSpent;
     let co2 = 0;
     let electricity = 0;

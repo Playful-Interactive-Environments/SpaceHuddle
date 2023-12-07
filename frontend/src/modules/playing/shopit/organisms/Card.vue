@@ -26,15 +26,7 @@
     </li>
   </ul>
   <p class="cardCondition">
-    {{
-      condition === 2
-        ? category === 'food'
-          ? $t('module.playing.shopit.participant.cards.conditions.regional')
-          : $t('module.playing.shopit.participant.cards.conditions.2ndHand')
-        : category === 'food'
-        ? $t('module.playing.shopit.participant.cards.conditions.exotic')
-        : $t('module.playing.shopit.participant.cards.conditions.brandNew')
-    }}
+    {{ $t(getCondition(condition, category)) }}
   </p>
   <img :src="getCardSprite(cardName)" alt="{{ category }}" class="cardImage" />
   <font-awesome-icon
@@ -70,6 +62,16 @@ export default class Card extends Vue {
 
   getCardSprite(cardName) {
     return this.cardSpriteFolder + cardName + '.png';
+  }
+
+  getCondition(condition: number, category: string) {
+    return condition === 2
+      ? category === 'food'
+        ? 'module.playing.shopit.participant.cards.conditions.regional'
+        : 'module.playing.shopit.participant.cards.conditions.2ndHand'
+      : category === 'food'
+      ? 'module.playing.shopit.participant.cards.conditions.exotic'
+      : 'module.playing.shopit.participant.cards.conditions.brandNew';
   }
 }
 </script>

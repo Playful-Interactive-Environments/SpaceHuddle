@@ -195,7 +195,7 @@ export default class Participant extends Vue {
       this.trackingManager = new TrackingManager(this.taskId, {
         gameStep: GameStep.Join,
         game: {
-          cardsPlayed: 0,
+          cardsPlayed: [],
           pointsSpent: 0,
           co2: 0,
           electricity: 0,
@@ -377,7 +377,7 @@ export default class Participant extends Vue {
           TaskParticipantIterationStepStatesType.NEUTRAL,
           {
             game: {
-              cardsPlayed: 0,
+              cardsPlayed: [],
               pointsSpent: 0,
               co2: 0,
               electricity: 0,
@@ -404,7 +404,7 @@ export default class Participant extends Vue {
         TaskParticipantIterationStepStatesType.NEUTRAL,
         {
           game: {
-            cardsPlayed: 0,
+            cardsPlayed: [],
             pointsSpent: 0,
             co2: 0,
             electricity: 0,
@@ -426,7 +426,7 @@ export default class Participant extends Vue {
     trackingData: TrackingData[],
     win: boolean,
     winReason: string,
-    cardsPlayed: number,
+    cardsPlayed: [],
     pointsSpent: number,
     co2: number,
     electricity: number,

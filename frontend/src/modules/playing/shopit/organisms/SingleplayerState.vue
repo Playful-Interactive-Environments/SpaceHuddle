@@ -740,7 +740,7 @@ export default class PlayState extends Vue {
   }
 
   finished() {
-    const cardsPlayed = this.ownCardsPlayed.length;
+    const cardsPlayed = this.ownCardsPlayed;
     const pointsSpent = this.pointsSpent;
     let co2 = 0;
     let electricity = 0;

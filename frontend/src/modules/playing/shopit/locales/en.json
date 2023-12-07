@@ -12,10 +12,11 @@
     "pointsSpent": "How many points were spent?",
     "co2": "How much CO² was emitted? (kg)",
     "electricity": "How much energy was needed? (kw)",
-    "lifetime": "What was the accumulated liftime of purchased objects? (years)",
+    "lifetime": "What was the accumulated lifetime of purchased objects? (years)",
     "water": "How much water was used? (kl)",
     "money": "How much money was spent? (€)",
-    "winReason": "By what condition did the users win?"
+    "winReason": "By what condition did the users win?",
+    "cardsPlayed": "How many cards were played in a round?"
   },
   "participant": {
     "tutorial": {
