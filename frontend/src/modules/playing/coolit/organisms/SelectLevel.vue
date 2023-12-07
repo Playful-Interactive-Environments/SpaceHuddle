@@ -19,10 +19,16 @@
     </IdeaMap>
     <div class="overlay-bottom-right">
       <el-button-group>
-        <el-button v-on:click="showMoleculesInfo = true">
+        <el-button
+          v-if="Object.keys(moleculeImages).length > 0"
+          v-on:click="showMoleculesInfo = true"
+        >
           <font-awesome-icon icon="atom" />
         </el-button>
-        <el-button v-on:click="showBuildingInfo = true">
+        <el-button
+          v-if="Object.keys(obstacleImages).length > 0"
+          v-on:click="showBuildingInfo = true"
+        >
           <font-awesome-icon icon="building" />
         </el-button>
         <el-button v-on:click="showHighScore = true">
@@ -126,7 +132,7 @@
             :key="moleculeName"
             @click="moleculeNameClicked(moleculeName)"
           >
-            <SpriteCanvas
+            <!--<SpriteCanvas
               :key="moleculeName"
               :texture="getMoleculeTexture(moleculeName)"
               :aspect-ration="getMoleculeAspect(moleculeName)"
@@ -141,8 +147,17 @@
                 :color="getMoleculeConfig(moleculeName).color"
                 @render="drawCircle($event, moleculeName)"
               ></Graphics>
-            </SpriteCanvas>
-            <br />
+            </SpriteCanvas>-->
+            <div :class="{ selected: activeMoleculeName === moleculeName }">
+              <div
+                class="molecule-image"
+                :style="{
+                  '--molecule-color': getMoleculeConfig(moleculeName).color,
+                }"
+              >
+                <img :src="moleculeImages[moleculeName]" :alt="moleculeName" />
+              </div>
+            </div>
             {{
               $t(
                 `module.playing.coolit.participant.moleculeInfo.${moleculeName}.title`
@@ -191,7 +206,7 @@
             :key="buildingName"
             @click="buildingNameClicked(buildingName)"
           >
-            <SpriteCanvas
+            <!--<SpriteCanvas
               :key="buildingName"
               :texture="getBuildingTexture(buildingName)"
               :aspect-ration="getBuildingAspect(buildingName)"
@@ -202,8 +217,13 @@
               :background-color="backgroundColor"
               v-model:renderer="rendererList[buildingName]"
             >
-            </SpriteCanvas>
-            <br />
+            </SpriteCanvas>-->
+            <div
+              class="obstacle-image"
+              :class="{ selected: activeBuildingName === buildingName }"
+            >
+              <img :src="obstacleImages[buildingName]" :alt="buildingName" />
+            </div>
             {{
               $t(
                 `module.playing.coolit.participant.buildingInfo.${buildingName}.title`
@@ -519,17 +539,25 @@ export default class SelectLevel extends Vue {
     return 0;
   }
 
+  moleculeImages: { [key: string]: string } = {};
+  obstacleImages: { [key: string]: string } = {};
   mounted(): void {
     this.showHighScore = this.openHighScore;
     setTimeout(() => {
       pixiUtil
         .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
-        .then((sheet) => (this.spritesheet = sheet));
+        .then((sheet) => {
+          this.spritesheet = sheet;
+          pixiUtil.convertSpritesheetToBase64(sheet, this.moleculeImages);
+        });
     }, 100);
     setTimeout(() => {
       pixiUtil
         .loadTexture('/assets/games/coolit/city/city.json', this.eventBus)
-        .then((sheet) => (this.spritesheetBuilding = sheet));
+        .then((sheet) => {
+          this.spritesheetBuilding = sheet;
+          pixiUtil.convertSpritesheetToBase64(sheet, this.obstacleImages);
+        });
     }, 100);
     setTimeout(() => {
       pixiUtil
@@ -893,6 +921,37 @@ h1 {
   text-align: left;
   font-size: var(--font-size-small);
   max-width: 30rem;
+}
+
+.obstacle-image {
+  height: 5rem;
+  width: 5rem;
+  margin: 0.2rem;
+  padding: 0.5rem;
+  display: flex;
+
+  img {
+    margin: auto;
+    max-height: 4rem;
+  }
+}
+
+.molecule-image {
+  background-image: radial-gradient(
+    circle,
+    var(--molecule-color) 30%,
+    #ffffff00 75%
+  );
+  border-radius: 50%;
+  height: 5rem;
+  width: 5rem;
+  margin: 0.2rem;
+  padding: 1rem;
+  display: flex;
+
+  img {
+    margin: auto;
+  }
 }
 </style>
 

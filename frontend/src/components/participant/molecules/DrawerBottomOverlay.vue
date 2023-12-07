@@ -104,6 +104,7 @@ export default class DrawerBottomOverlay extends Vue {
   bottom: 0;
   z-index: 100;
   border-radius: var(--corner-radius) var(--corner-radius) 0 0;
+  box-shadow: 0 -2px 2px var(--color-gray-dark);
 
   .close {
     position: absolute;

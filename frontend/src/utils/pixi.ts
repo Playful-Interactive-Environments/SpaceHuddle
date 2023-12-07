@@ -272,3 +272,28 @@ export function isLoadingFinished(): boolean {
   }
   return true;
 }
+
+export async function convertTextureToBase64(
+  texture: PIXI.Texture,
+  renderer: PIXI.Renderer
+): Promise<string> {
+  const graphics = new PIXI.Graphics()
+    .beginTextureFill({
+      texture: texture,
+    })
+    .drawRect(0, 0, texture.width, texture.height);
+  return await renderer.extract.base64(graphics as PIXI.DisplayObject);
+}
+
+export async function convertSpritesheetToBase64(
+  sheet: PIXI.Spritesheet,
+  result: { [key: string]: string } = {},
+  renderer: PIXI.Renderer | null = null
+): Promise<{ [key: string]: string }> {
+  if (!renderer) renderer = new PIXI.Renderer();
+  for (const textureKey of Object.keys(sheet.textures)) {
+    const texture = sheet.textures[textureKey];
+    result[textureKey] = await convertTextureToBase64(texture, renderer);
+  }
+  return result;
+}

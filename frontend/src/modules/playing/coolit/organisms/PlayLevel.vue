@@ -302,7 +302,7 @@
                     $t(
                       `module.playing.coolit.participant.moleculeInfo.${molecule.name}.title`
                     )
-                  }}: GWP:
+                  }}
                   {{ getMoleculeConfig(molecule.name).globalWarmingFactorReal }}
                 </text>
               </template>
@@ -478,15 +478,40 @@
             getLevelTypeCategoryItems(selectedObstacle.type)
           )"
           :key="objectName"
+          class="clickable"
+          @click="activeObstacleName = objectName"
         >
-          <img
-            :src="categoryImages[selectedObstacle.type][objectName]"
-            :alt="objectName"
+          <div
             class="obstacle-image"
-            @click="changeSelectedObstacle(objectName)"
-          />
+            :class="{ selected: activeObstacleName === objectName }"
+          >
+            <img
+              :src="categoryImages[selectedObstacle.type][objectName]"
+              :alt="objectName"
+            />
+          </div>
+          {{
+            $t(
+              `module.playing.coolit.participant.buildingInfo.${objectName}.title`
+            )
+          }}
         </div>
       </el-space>
+      <div class="obstacleInfo" v-if="activeObstacleName">
+        <div class="description">
+          {{
+            $t(
+              `module.playing.coolit.participant.buildingInfo.${activeObstacleName}.description`
+            )
+          }}
+        </div>
+        <el-button
+          type="primary"
+          @click="changeSelectedObstacle(activeObstacleName)"
+        >
+          {{ $t('module.playing.coolit.participant.selectObstacle') }}
+        </el-button>
+      </div>
     </DrawerBottomOverlay>
   </div>
 </template>
@@ -809,6 +834,7 @@ export default class PlayLevel extends Vue {
   interactionTime = 0;
   isInteracting = false;
   windForce = 1;
+  activeObstacleName = '';
 
   temperatureScaleTexture: PIXI.Texture | null = null;
   temperatureScaleResultTexture: PIXI.Texture | null = null;
@@ -1397,21 +1423,22 @@ export default class PlayLevel extends Vue {
     const reactiveMolecule = this.moleculeList.find((item) => !item.isActive);
     if (reactiveMolecule) {
       this.updatedMolecule(reactiveMolecule, moleculeName);
-      reactiveMolecule.position = position;
-      reactiveMolecule.rise = true;
-      reactiveMolecule.isActive = true;
       const container = this.$refs.gameContainer as GameContainer;
       if (container) {
         const gameObject = container.gameObjects.find(
           (item) => item.source.id === reactiveMolecule.id
         );
         if (gameObject) {
+          matterUtil.resetBody(gameObject.body);
           gameObject.body.collisionFilter.category =
             this.getMoleculeCategory(moleculeName);
           gameObject.body.collisionFilter.mask =
             this.getMoleculeMask(moleculeName);
         }
       }
+      reactiveMolecule.position = position;
+      reactiveMolecule.rise = true;
+      reactiveMolecule.isActive = true;
     } else {
       this.moleculeList.push({
         name: moleculeName,
@@ -1716,16 +1743,11 @@ export default class PlayLevel extends Vue {
                 this.stylesheets[typeName] = sheet;
                 this.categoryImages[typeName] = {};
                 await until(() => this.renderer);
-                for (const textureKey of Object.keys(sheet.textures)) {
-                  const texture = sheet.textures[textureKey];
-                  const graphics = new PIXI.Graphics()
-                    .beginTextureFill({
-                      texture: texture,
-                    })
-                    .drawRect(0, 0, texture.width, texture.height);
-                  this.categoryImages[typeName][textureKey] =
-                    await this.renderer.plugins.extract.base64(graphics);
-                }
+                pixiUtil.convertSpritesheetToBase64(
+                  sheet,
+                  this.categoryImages[typeName],
+                  this.renderer
+                );
               });
           }
         }, 100);
@@ -1900,6 +1922,7 @@ export default class PlayLevel extends Vue {
             poolRay.body.collisionFilter.mask = options.collisionFilter.mask;
             poolRay.body.collisionFilter.category =
               options.collisionFilter.category;
+            Matter.Body.setInertia(poolRay.body, Infinity);
           }
         }
         poolRay.angle = angle;
@@ -2232,8 +2255,10 @@ export default class PlayLevel extends Vue {
     if (averageTemperature < 0) {
       const frequency = Math.pow(2, Math.round(averageTemperature));
       const minFrequency = 0.004;
-      if (frequency > minFrequency) this.snow.frequency = frequency;
-      else this.snow.frequency = minFrequency;
+      const maxFrequency = 0.5;
+      if (frequency < minFrequency) this.snow.frequency = minFrequency;
+      else if (frequency > maxFrequency) this.snow.frequency = maxFrequency;
+      else this.snow.frequency = frequency;
     } else {
       this.snow.frequency = 0;
     }
@@ -2241,9 +2266,11 @@ export default class PlayLevel extends Vue {
     if (averageTemperature > hailStartTemperature) {
       const intensity = averageTemperature - hailStartTemperature;
       const frequency = Math.pow(2, -Math.round(intensity)) * 2;
-      const minFrequency = 0.004;
-      if (frequency > minFrequency) this.hail.frequency = frequency;
-      else this.hail.frequency = minFrequency;
+      const minFrequency = 0.01;
+      const maxFrequency = 0.5;
+      if (frequency < minFrequency) this.hail.frequency = minFrequency;
+      else if (frequency > maxFrequency) this.hail.frequency = maxFrequency;
+      else this.hail.frequency = frequency;
       const scaleStatic = this.hail.behaviors.find(
         (behavior) => behavior.type === 'scaleStatic'
       );
@@ -2750,7 +2777,7 @@ export default class PlayLevel extends Vue {
   pointer-events: none;
   position: absolute;
   z-index: 5000;
-  top: 5rem;
+  top: 8rem;
   right: 1rem;
   left: 1rem;
   text-align: center;
@@ -2763,14 +2790,14 @@ export default class PlayLevel extends Vue {
   pointer-events: none;
   position: absolute;
   z-index: 100;
-  bottom: 3rem;
+  top: 5rem;
   right: 1rem;
   left: 1rem;
   text-align: center;
   font-size: var(--font-size-xxlarge);
   color: var(--color-red);
-  background-color: #ffffff77;
-  border-radius: 2rem 2rem 2rem 0;
+  //background-color: #ffffff77;
+  //border-radius: 2rem 2rem 2rem 0;
 }
 
 .statusGameOver {
@@ -2824,6 +2851,32 @@ export default class PlayLevel extends Vue {
 
 .obstacle-image {
   height: 5rem;
-  margin: 0.5rem;
+  width: 5rem;
+  margin: 0.2rem;
+  padding: 0.5rem;
+  display: flex;
+
+  img {
+    margin: auto;
+    max-height: 4rem;
+  }
+}
+
+.selected {
+  border: red 2px solid;
+  border-radius: var(--border-radius);
+}
+
+.obstacleInfo {
+  margin-top: 2rem;
+  .description {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.clickable {
+  cursor: pointer;
+  font-size: var(--font-size-xxsmall);
+  text-align: center;
 }
 </style>

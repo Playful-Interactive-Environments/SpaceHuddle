@@ -87,7 +87,7 @@ app.use(i18n.customI18n(authService.getLocale()));
   ].some((warning) => msg.includes(warning)) &&
   console.warn('[no warn]: '.concat(msg).concat(trace));
 };*/
-const warn = console.warn;
+/*const warn = console.warn;
 const groupCollapsed = console.groupCollapsed;
 console.groupCollapsed = (...data: any[]): void => {
   const stringData = data.filter((item) => typeof item === 'string');
@@ -153,7 +153,7 @@ console.warn = (...data: any[]): void => {
   } else if (!isPixiPackageWarning && !isValidationWarning) {
     warn(...data);
   }
-};
+};*/
 app.mount('#app');
 
 setViewportVariables();
