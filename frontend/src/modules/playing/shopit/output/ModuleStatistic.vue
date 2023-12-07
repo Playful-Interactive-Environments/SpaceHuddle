@@ -110,6 +110,7 @@ export default class ModuleStatistic extends Vue {
     this.calculateWaterChart();
     this.calculateMoneyChart();
     this.calculateWinReasonChart();
+    this.calculateCardsPlayedLengthChart();
   }
 
   filterSteps(): void {
@@ -343,13 +344,44 @@ export default class ModuleStatistic extends Vue {
         (item, avatar) =>
           item.avatar.color === avatar.color &&
           item.avatar.symbol === avatar.symbol,
-        (item, winReason) => item.parameter.game.winReason === winReason,
+        (item, winReason) => {return item.parameter.game.winReason === winReason},
         null,
         (list) => list.length,
         (avatar) => AvatarUnicode[avatar.symbol]
       );
       this.barChartDataList.push({
         title: this.$t('module.playing.shopit.statistic.winReason'),
+        data: {
+          labels: labels,
+          datasets: datasets,
+        },
+        labelColors: themeColors.getContrastColor(),
+        stacked: true,
+      });
+    }
+  }
+
+  calculateCardsPlayedLengthChart(): void {
+    if (this.steps) {
+      const avatarList = this.getAvatarList(this.steps);
+      const labels: number[] = this.getCardsPlayedLength();
+      const cardsPlayed = this.getCardsPlayedLength();
+      const datasets = calculateChartPerParameter(
+        this.steps,
+        avatarList,
+        cardsPlayed,
+        avatarList.map((avatar) => avatar.color),
+        (item, avatar) =>
+          item.avatar.color === avatar.color &&
+          item.avatar.symbol === avatar.symbol,
+        (item, cardsPlayed) =>
+          item.parameter.game.cardsPlayed.length === cardsPlayed,
+        null,
+        (list) => list.length,
+        (avatar) => AvatarUnicode[avatar.symbol]
+      );
+      this.barChartDataList.push({
+        title: this.$t('module.playing.shopit.statistic.cardsPlayed'),
         data: {
           labels: labels,
           datasets: datasets,
@@ -406,13 +438,20 @@ export default class ModuleStatistic extends Vue {
       .map((item) => item.parameter.game.money)
       .filter((value, index, array) => array.indexOf(value) === index)
       .sort((a, b) => a - b);
-
   }
 
   getWinReason() {
     return this.steps
       .map((item) => item.parameter.game.winReason)
-      .filter((value, index, array) => array.indexOf(value) === index);
+      .filter((value, index, array) => array.indexOf(value) === index)
+      .filter((item) => item != 'lost');
+  }
+
+  getCardsPlayedLength() {
+    return this.steps
+      .map((item) => item.parameter.game.cardsPlayed.length)
+      .filter((value, index, array) => array.indexOf(value) === index)
+      .sort((a, b) => a - b);
   }
 
   getAvatarList(list: any[], filter: ((item) => boolean) | null = null): any[] {
