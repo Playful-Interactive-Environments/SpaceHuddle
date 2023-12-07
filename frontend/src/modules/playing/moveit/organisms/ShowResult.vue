@@ -5,7 +5,7 @@
       :detect-collision="false"
       :has-mouse-input="false"
       :use-gravity="false"
-      :use-wind="true"
+      :wind-force="1"
       :background-texture="`/assets/games/moveit/${getParticleBackground(
         activeTabName
       )}`"

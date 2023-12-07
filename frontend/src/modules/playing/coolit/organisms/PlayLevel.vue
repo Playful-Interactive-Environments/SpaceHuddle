@@ -9,7 +9,7 @@
       v-model:height="gameHeight"
       :detect-collision="true"
       :use-gravity="false"
-      :use-wind="true"
+      :wind-force="windForce"
       :border-category="CollisionGroups.BORDER"
       :background-texture="levelTypeSettings.background"
       :background-position="BackgroundPosition.Cover"
@@ -213,7 +213,7 @@
               <container v-else>
                 <animated-sprite
                   :textures="sunStylesheets.animations['sun']"
-                  :animation-speed="0.2"
+                  :animation-speed="0.3"
                   :width="rayParticleSize"
                   :height="rayParticleSize"
                   :anchor="0.5"
@@ -270,6 +270,7 @@
                     molecule.rise = false;
                     return true;
                   }
+                  //console.log(object.position[1], gameHeight / 3 * 2);
                   return object.position[1] > gameHeight / 3 * 2;
                 }
               }"
@@ -805,12 +806,27 @@ export default class PlayLevel extends Vue {
   CollisionBorderType = CollisionBorderType;
   snow = weatherConfig.snow;
   hail = weatherConfig.rain;
+  interactionTime = 0;
+  isInteracting = false;
+  windForce = 1;
 
   temperatureScaleTexture: PIXI.Texture | null = null;
   temperatureScaleResultTexture: PIXI.Texture | null = null;
   //#endregion variables
 
   //#region get / set
+  getWindForce(): number {
+    if (this.isInteracting || !this.isReadyForPlay || this.waitForDataLoad) {
+      return 1;
+    } else {
+      const delta = Date.now() - this.interactionTime;
+      const force = Math.ceil(delta / 3000);
+      const maxForce = 20;
+      if (force > maxForce) return maxForce;
+      return force;
+    }
+  }
+
   get levelTypeSettings(): any {
     return gameConfig.obstacles[this.levelType].settings;
   }
@@ -1932,6 +1948,7 @@ export default class PlayLevel extends Vue {
       this.countDownEndTime = Date.now() + countDownTime;
       await delay(countDownTime);
       this.countDownEndTime = -1;
+      this.interactionTime = Date.now();
       this.waitForDataLoad = false;
     }
   }
@@ -1978,6 +1995,7 @@ export default class PlayLevel extends Vue {
   overheating = false;
   emitObstacleList: string[] = [];
   updateLoop(): void {
+    this.windForce = this.getWindForce();
     const updateTimeStamp = Date.now();
     const playTime = updateTimeStamp - this.startTime;
     let updateDelta = updateTimeStamp - this.updateTimeStamp;
@@ -2376,7 +2394,7 @@ export default class PlayLevel extends Vue {
             );
           }
         }
-        await delay(2000);
+        await delay(1000);
         if (!rayObject.body) return;
         ray.displayPointsCount = 0;
         for (let i = 0; i < ray.displayPoints.length; i++) {
@@ -2509,12 +2527,16 @@ export default class PlayLevel extends Vue {
   }
 
   moleculeClicked(item: any): void {
+    this.interactionTime = Date.now();
+    this.isInteracting = true;
     this.moleculeState[item.source.name].movedCount++;
     item.source.isClicked = true;
   }
 
   moduleReleased(item: any): void {
     item.source.isClicked = false;
+    this.interactionTime = Date.now();
+    this.isInteracting = false;
   }
   //#endregion collision and interaction
 

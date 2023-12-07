@@ -791,50 +791,65 @@ export default class GameObject extends Vue {
       !this.destroyed &&
       this.body &&
       !this.body.isStatic &&
-      !this.body.isSleeping &&
-      (this.body.position.x + this.offset[0] !== this.position[0] ||
-        this.body.position.y + this.offset[1] !== this.position[1])
+      !this.body.isSleeping
     ) {
-      this.isVisibleInContainer = this.isVisible();
-      if (this.gameContainer) {
-        /*const outsideRight =
-          this.body.position.x + this.offset[0] > this.gameContainer.gameWidth;
-        const outsideLeft = this.body.position.x + this.offset[0] < 0;
-        const outsideBottom =
-          this.body.position.y + this.offset[1] > this.gameContainer.gameHeight;
-        const outsideTop = this.body.position.y + this.offset[1] < 0;*/
-        const outsideRight =
-          this.body.position.x > this.gameContainer.gameWidth;
-        const outsideLeft = this.body.position.x < 0;
-        const outsideBottom =
-          this.body.position.y > this.gameContainer.gameHeight;
-        const outsideTop = this.body.position.y < 0;
-        if (outsideRight || outsideLeft || outsideBottom || outsideTop) {
-          this.$emit('outsideDrawingSpace', this, {
-            right: outsideRight,
-            left: outsideLeft,
-            bottom: outsideBottom,
-            top: outsideTop,
-          });
+      const hasPositionUpdate =
+        this.body.position.x + this.offset[0] !== this.position[0] ||
+        this.body.position.y + this.offset[1] !== this.position[1];
+      if (hasPositionUpdate) {
+        this.isVisibleInContainer = this.isVisible();
+        if (this.gameContainer) {
+          /*const outsideRight =
+            this.body.position.x + this.offset[0] > this.gameContainer.gameWidth;
+          const outsideLeft = this.body.position.x + this.offset[0] < 0;
+          const outsideBottom =
+            this.body.position.y + this.offset[1] > this.gameContainer.gameHeight;
+          const outsideTop = this.body.position.y + this.offset[1] < 0;*/
+          const outsideRight =
+            this.body.position.x > this.gameContainer.gameWidth;
+          const outsideLeft = this.body.position.x < 0;
+          const outsideBottom =
+            this.body.position.y > this.gameContainer.gameHeight;
+          const outsideTop = this.body.position.y < 0;
+          if (outsideRight || outsideLeft || outsideBottom || outsideTop) {
+            this.$emit('outsideDrawingSpace', this, {
+              right: outsideRight,
+              left: outsideLeft,
+              bottom: outsideBottom,
+              top: outsideTop,
+            });
+          }
         }
-      }
-      if (
-        this.fastObjectBehaviour === FastObjectBehaviour.circle &&
-        this.gameContainer.mouseConstraint.body?.id !== this.body.id
-      ) {
-        const velocityAmount = this.getVelocityAmount();
-        if (velocityAmount > 10) {
-          const delta = 10;
-          const pos: [number, number] = [
-            this.body.position.x,
-            this.body.position.y,
-          ];
-          if (pos[0] < -delta) pos[0] = this.gameContainer.gameWidth;
-          else if (pos[0] > this.gameContainer.gameWidth + delta) pos[0] = 0;
-          if (pos[1] < -delta) pos[1] = this.gameContainer.gameHeight;
-          else if (pos[1] > this.gameContainer.gameHeight + delta) pos[1] = 0;
-          Matter.Body.setPosition(this.body, { x: pos[0], y: pos[1] });
+        if (
+          this.fastObjectBehaviour === FastObjectBehaviour.circle &&
+          this.gameContainer.mouseConstraint.body?.id !== this.body.id
+        ) {
+          const velocityAmount = this.getVelocityAmount();
+          if (velocityAmount > 10) {
+            const delta = 10;
+            const pos: [number, number] = [
+              this.body.position.x,
+              this.body.position.y,
+            ];
+            if (pos[0] < -delta) pos[0] = this.gameContainer.gameWidth;
+            else if (pos[0] > this.gameContainer.gameWidth + delta) pos[0] = 0;
+            if (pos[1] < -delta) pos[1] = this.gameContainer.gameHeight;
+            else if (pos[1] > this.gameContainer.gameHeight + delta) pos[1] = 0;
+            Matter.Body.setPosition(this.body, { x: pos[0], y: pos[1] });
+          }
         }
+        this.position = [
+          this.body.position.x + this.offset[0],
+          this.body.position.y + this.offset[1],
+        ];
+        this.rotationValue = this.body.angle;
+        this.$emit('update:rotation', 360 - toDegrees(this.rotationValue));
+        const inputPosition = this.convertPositionToInputFormat();
+        if (this.x !== inputPosition[0] || this.y !== inputPosition[1]) {
+          this.$emit('positionChanged', inputPosition);
+        }
+        this.$emit('update:x', inputPosition[0]);
+        this.$emit('update:y', inputPosition[1]);
       }
       if (
         this.conditionalVelocity &&
@@ -850,18 +865,6 @@ export default class GameObject extends Vue {
           }
         }
       }
-      this.position = [
-        this.body.position.x + this.offset[0],
-        this.body.position.y + this.offset[1],
-      ];
-      this.rotationValue = this.body.angle;
-      this.$emit('update:rotation', 360 - toDegrees(this.rotationValue));
-      const inputPosition = this.convertPositionToInputFormat();
-      if (this.x !== inputPosition[0] || this.y !== inputPosition[1]) {
-        this.$emit('positionChanged', inputPosition);
-      }
-      this.$emit('update:x', inputPosition[0]);
-      this.$emit('update:y', inputPosition[1]);
     }
     if (this.boundsGraphic) this.drawBorder();
     if (this.removeFromEnginIfNotVisible || this.sleepIfNotVisible)

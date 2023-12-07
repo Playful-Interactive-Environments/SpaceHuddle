@@ -313,7 +313,7 @@ export default class GameContainer extends Vue {
   @Prop({ default: true }) readonly hasMouseInput!: boolean;
   @Prop({ default: true }) readonly detectCollision!: boolean;
   @Prop({ default: true }) readonly useGravity!: boolean;
-  @Prop({ default: false }) readonly useWind!: boolean;
+  @Prop({ default: 0 }) readonly windForce!: number;
   @Prop({ default: false }) readonly useDetector!: boolean;
   @Prop({ default: false }) readonly useObjectPooling!: boolean;
   @Prop({ default: CollisionBorderType.Screen })
@@ -1011,7 +1011,8 @@ export default class GameContainer extends Vue {
   //#region force
   addWind(): void {
     const calcForce = (body: Matter.Body): number => {
-      const forceMagnitude = 0.05 + body.frictionAir; // (0.05 * body.mass) * timeScale;
+      const windForce = this.windForce > 0 ? this.windForce : 1;
+      const forceMagnitude = (0.05 + body.frictionAir) * windForce; // (0.05 * body.mass) * timeScale;
       return (
         (forceMagnitude + Matter.Common.random() * forceMagnitude) *
         Matter.Common.choose([1, -1])
@@ -1848,7 +1849,7 @@ export default class GameContainer extends Vue {
       gameObject.beforePhysicUpdate();
     }
 
-    if (this.useWind && this.nextWindUpdateTime < this.loopTime) {
+    if (this.windForce > 0 && this.nextWindUpdateTime < this.loopTime) {
       this.nextWindUpdateTime += this.oneTickDelta * 5;
       this.addWind();
     }
