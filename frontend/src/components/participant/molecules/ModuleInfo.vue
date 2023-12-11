@@ -16,7 +16,7 @@
       ref="carousel"
       v-if="gameHeight"
       :autoplay="false"
-      arrow="always"
+      arrow="never"
       :height="`${gameHeight}px`"
       trigger="click"
       :loop="false"
@@ -42,6 +42,11 @@
     <div class="next">
       <el-button type="primary" @click="next">
         <p>{{ $t('participant.molecules.moduleInfo.next') }}</p>
+      </el-button>
+    </div>
+    <div class="prev">
+      <el-button type="primary" @click="prev" v-if="activeTabIndex - 1 >= 0">
+        <p>{{ $t('participant.molecules.moduleInfo.prev') }}</p>
       </el-button>
     </div>
   </div>
@@ -197,6 +202,12 @@ export default class ModuleInfo extends Vue {
     }
   }
 
+  prev(): void {
+    if (this.activeTabIndex - 1 >= 0) {
+      (this.$refs.carousel as any).prev();
+    }
+  }
+
   storeInfoStepRead(): void {
     const stepName = this.mappedModuleInfoEntryDataList[this.activeTabIndex];
     if (!this.getIncludeStep(stepName.key)) {
@@ -228,10 +239,6 @@ export default class ModuleInfo extends Vue {
   right: 0;
 }
 
-.el-carousel__item div {
-  padding: 2rem;
-}
-
 img {
   max-height: 50%;
   height: 50%;
@@ -240,9 +247,19 @@ img {
 }
 
 .next {
-  padding: 2rem;
-  position: fixed;
-  bottom: 0;
+  padding: 0 2rem;
+  position: absolute;
+  right: 0;
+  height: calc(6vh);
+  top: calc(50vh);
+}
+
+.prev {
+  padding: 0 2rem;
+  position: absolute;
+  left: 0;
+  height: calc(6vh);
+  top: calc(50vh);
 }
 
 .info-image {
@@ -251,8 +268,9 @@ img {
 }
 
 .info-text {
+  padding: 2rem;
   position: absolute;
-  top: calc(50vh);
+  top: calc(52vh);
   height: calc(30vh);
   overflow: auto;
   margin: 2vh 1vh 1vh 1vh;

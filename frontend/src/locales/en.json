@@ -413,7 +413,8 @@
   "participant": {
     "molecules": {
       "moduleInfo": {
-        "next": "next"
+        "next": "next",
+        "prev": "back"
       }
     },
     "organism": {
