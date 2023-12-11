@@ -9,11 +9,7 @@
       :style="{
         backgroundImage: 'url(' + gameConfig.gameValues.opponentHand + ')',
       }"
-    >
-      <p class="gameKey">
-        {{ game.keywords }}
-      </p>
-    </div>
+    ></div>
     <div class="CO2BarContainer" id="barOpponent">
       <div class="CO2BarBackground">
         <p class="CO2BarText">CO²: {{ pointsSpentOpponent }}/{{ maxCost }}</p>
@@ -73,7 +69,7 @@
         </p>
         <p
           v-if="!initialButtonState && game.parameter.playerNum <= 1"
-          class="waiting"
+          class="waiting joinID"
         >
           {{
             $t('module.playing.shopit.participant.waiting.joinID') +
@@ -1310,6 +1306,9 @@ p.gameKey {
   overflow-y: hidden;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+  background-color: var(--color-brown-xlight);
+  outline: 0.5rem solid var(--color-brown);
+  margin: 1rem 0;
 }
 
 .endCards::-webkit-scrollbar {
@@ -1334,6 +1333,8 @@ p.gameKey {
   right: 0;
   left: 0;
   text-align: center;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-brown);
 }
 
 .marginTop {
@@ -1348,5 +1349,10 @@ p.gameKey {
 
 .infoText {
   height: 2rem;
+}
+
+.joinID {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-large);
 }
 </style>

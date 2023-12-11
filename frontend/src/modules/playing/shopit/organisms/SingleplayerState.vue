@@ -1105,9 +1105,10 @@ p.gameKey {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   font-size: var(--font-size-default);
   text-align: center;
+  padding-top: 2rem;
 }
 
 .endCards {
@@ -1120,6 +1121,11 @@ p.gameKey {
   z-index: 10;
   overflow-x: scroll;
   overflow-y: hidden;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  background-color: var(--color-brown-xlight);
+  outline: 0.5rem solid var(--color-brown);
+  margin: 1rem 0;
 }
 
 .endCard {
@@ -1140,6 +1146,8 @@ p.gameKey {
   right: 0;
   left: 0;
   text-align: center;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-brown);
 }
 
 .marginTop {
