@@ -20,8 +20,10 @@
     "share": "share"
   },
   "participant": {
-    "lost": "You have unfortunately not found a dangerous object for too long, which has now caused a damage. You have lost, please try again.",
-    "win": "congratulations you have won",
+    "lostText": "You have unfortunately not found a dangerous object for too long, which has now caused a damage. You have lost, please try again.",
+    "win": "You won!",
+    "winText": "You managed to save the environment from the hazardous objects!",
+    "lost": "You lost.",
     "newLevel": "create new level",
     "place": "Place",
     "play": "Start",
@@ -96,7 +98,13 @@
           }
         }
       }
-    }
+    },
+    "endCardTexts": {
+      "dead-tree": "Dead tree Info Text.",
+      "cigarette": "Cigarette Info Text.",
+      "campfire": "Campfire Info Text"
+    },
+    "returnToMenu": "Return to Menu."
   },
   "statistic": {
     "level": "How many times was which level played?",

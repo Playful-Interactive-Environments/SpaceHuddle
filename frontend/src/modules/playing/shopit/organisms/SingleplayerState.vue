@@ -808,7 +808,6 @@ export default class PlayState extends Vue {
   font-size: var(--font-size-xxlarge);
   display: flex;
   align-items: center;
-
   span {
     width: 100%;
     text-align: center;

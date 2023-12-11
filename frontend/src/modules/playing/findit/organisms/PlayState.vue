@@ -121,14 +121,92 @@
     :style="{ height: height }"
     v-if="playStateType === PlayStateType.win"
   >
-    <span>{{ $t('module.playing.findit.participant.win') }}</span>
+    <h2 class="heading heading--medium">
+      {{ $t('module.playing.findit.participant.win') }}
+    </h2>
+    <p>
+      {{ $t('module.playing.findit.participant.winText') }}
+    </p>
+    <div class="endObjects">
+      <div
+        v-for="object in endObjects"
+        :key="object.name"
+        :id="object.name"
+        class="endObject"
+        @click="activeObjectChanged(object, object.name, true)"
+      >
+        <SpriteCanvas
+          :texture="getTexture(object.type, object.name)"
+          :aspect-ration="getObjectAspect(object.type, object.name)"
+          :width="(gameWidth - 50) / 2"
+          :height="((gameHeight / 10) * 4) / 2"
+          :background-color="backgroundColor"
+          class="endObjectSprites"
+        />
+      </div>
+    </div>
+    <div class="infoText">
+      <p class="marginTop" v-show="this.activeObjectId !== ''">
+        {{
+          $t(
+            'module.playing.findit.participant.endCardTexts.' +
+              this.activeObjectId
+          )
+        }}
+      </p>
+    </div>
+    <el-button
+      class="el-button--submit returnButton"
+      @click="this.$emit('playFinished', this.playStateResult)"
+    >
+      {{ $t('module.playing.findit.participant.returnToMenu') }}
+    </el-button>
   </div>
   <div
     class="gameArea result"
     :style="{ height: height }"
     v-if="playStateType === PlayStateType.lost"
   >
-    <span>{{ $t('module.playing.findit.participant.lost') }}</span>
+    <h2 class="heading heading--medium">
+      {{ $t('module.playing.findit.participant.lost') }}
+    </h2>
+    <p>
+      {{ $t('module.playing.findit.participant.lostText') }}
+    </p>
+    <div class="endObjects">
+      <div
+        v-for="object in endObjects"
+        :key="object.name"
+        :id="object.name"
+        class="endObject"
+        @click="activeObjectChanged(object, object.name, true)"
+      >
+        <SpriteCanvas
+          :texture="getTexture(object.type, object.name)"
+          :aspect-ration="getObjectAspect(object.type, object.name)"
+          :width="(gameWidth - 50) / 2"
+          :height="((gameHeight / 10) * 4) / 2"
+          :background-color="backgroundColor"
+          class="endObjectSprites"
+        />
+      </div>
+    </div>
+    <div class="infoText">
+      <p class="marginTop" v-show="this.activeObjectId !== ''">
+        {{
+          $t(
+            'module.playing.findit.participant.endCardTexts.' +
+              this.activeObjectId
+          )
+        }}
+      </p>
+    </div>
+    <el-button
+      class="el-button--submit returnButton"
+      @click="this.$emit('playFinished', this.playStateResult)"
+    >
+      {{ $t('module.playing.findit.participant.returnToMenu') }}
+    </el-button>
   </div>
 </template>
 
@@ -273,11 +351,15 @@ export default class PlayState extends Vue {
   PlayStateType = PlayStateType;
   CollisionBorderType = CollisionBorderType;
 
+  endObjects: placeable.PlaceableBase[] = [];
+  activeObjectId = '';
+
   clearPlayState(): void {
     this.clickedPlaceable = null;
     this.levelType = '';
     this.placedObjects = [];
     this.collectedObjects = [];
+    this.endObjects = [];
     this.totalCount = 0;
     this.collectedCount = 0;
     this.startTime = Date.now();
@@ -517,9 +599,22 @@ export default class PlayState extends Vue {
       this.totalCount > 0 &&
       this.collectableObjects.length === 0
     ) {
-      this.$emit('playFinished', this.playStateResult);
+      //TODO WIN
+      //this.$emit('playFinished', this.playStateResult);
+      this.endObjects = this.getEndObjects();
       this.playStateType = PlayStateType.win;
     }
+  }
+
+  getEndObjects(): placeable.PlaceableBase[] {
+    const uniqueNamesSet = new Set();
+    return this.collectedObjects.filter((obj) => {
+      if (!uniqueNamesSet.has(obj.name)) {
+        uniqueNamesSet.add(obj.name);
+        return true;
+      }
+      return false;
+    });
   }
 
   get clickedPlaceableConfigSettings(): any {
@@ -597,7 +692,8 @@ export default class PlayState extends Vue {
         center: true,
         showClose: true,
         onClose: () => {
-          this.$emit('playFinished', this.playStateResult);
+          //this.$emit('playFinished', this.playStateResult);
+          this.endObjects = this.getEndObjects();
           this.playStateType = PlayStateType.lost;
         },
       });
@@ -615,6 +711,25 @@ export default class PlayState extends Vue {
     if (shapeIndex >= typeConfig.escalationShape.length)
       shapeIndex = typeConfig.escalationShape.length - 1;
     return escalationConfig[typeConfig.escalationShape[shapeIndex]];
+  }
+
+  activeObjectChanged(object, id, scroll = false) {
+    let element = document.getElementById(this.activeObjectId);
+    if (element) {
+      element.classList.remove('objectContainerActive');
+    }
+    this.activeObjectId = id;
+    element = document.getElementById(id);
+    if (element) {
+      element.classList.add('objectContainerActive');
+      if (scroll) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'center',
+        });
+      }
+    }
   }
 }
 </script>
@@ -651,5 +766,60 @@ export default class PlayState extends Vue {
     width: 100%;
     text-align: center;
   }
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: var(--font-size-default);
+  text-align: center;
+  padding-top: 2rem;
+}
+
+.endObjects {
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  height: 32%;
+  width: 100%;
+  z-index: 10;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  margin: 1rem 0;
+}
+
+.endObject {
+  position: relative;
+  margin: 1rem;
+  transition: 0.3s;
+}
+
+.objectContainerActive {
+  z-index: 2;
+  transform: translateY(-1rem);
+  transition: 0.3s;
+}
+
+.endObjectSprites {
+  pointer-events: none;
+}
+
+.marginTop {
+  margin-top: 2rem;
+  padding: 0 1rem;
+}
+
+.returnButton {
+  position: absolute;
+  bottom: 2rem;
+}
+
+.infoText {
+  height: 2rem;
 }
 </style>
