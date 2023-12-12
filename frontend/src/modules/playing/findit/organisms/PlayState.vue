@@ -145,12 +145,15 @@
         />
       </div>
     </div>
+    <h2 class="heading heading--medium" v-if="this.activeObject !== null">
+      {{ $t('module.playing.findit.participant.placeables.'+ levelType + '.' + this.activeObject.type + '.' + getExplanationKey(this.activeObject) + '.name') }}
+    </h2>
     <div class="infoText">
       <p class="marginTop" v-show="this.activeObjectId !== ''">
         {{
           $t(
             'module.playing.findit.participant.endCardTexts.' +
-              this.activeObjectId
+              getExplanationKey(this.activeObject)
           )
         }}
       </p>
@@ -353,6 +356,7 @@ export default class PlayState extends Vue {
 
   endObjects: placeable.PlaceableBase[] = [];
   activeObjectId = '';
+  activeObject: placeable.PlaceableBase | null = null;
 
   clearPlayState(): void {
     this.clickedPlaceable = null;
@@ -599,7 +603,6 @@ export default class PlayState extends Vue {
       this.totalCount > 0 &&
       this.collectableObjects.length === 0
     ) {
-      //TODO WIN
       //this.$emit('playFinished', this.playStateResult);
       this.endObjects = this.getEndObjects();
       this.playStateType = PlayStateType.win;
@@ -719,6 +722,7 @@ export default class PlayState extends Vue {
       element.classList.remove('objectContainerActive');
     }
     this.activeObjectId = id;
+    this.activeObject = object;
     element = document.getElementById(id);
     if (element) {
       element.classList.add('objectContainerActive');
@@ -729,6 +733,16 @@ export default class PlayState extends Vue {
           inline: 'center',
         });
       }
+    }
+  }
+
+  getExplanationKey(object: placeable.PlaceableBase): string {
+    if (object.name === 'man' || object.name === 'woman') {
+      return 'person';
+    } else if (object.name.substring(0, 6) === 'bottle') {
+      return 'bottle';
+    } else {
+      return object.name;
     }
   }
 }
@@ -790,13 +804,19 @@ export default class PlayState extends Vue {
   overflow-y: hidden;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
-  margin: 1rem 0;
+  margin: 2rem 0;
+  background-color: var(--color-brown-xlight);
+  outline: 0.5rem solid var(--color-brown);
 }
 
 .endObject {
   position: relative;
   margin: 1rem;
   transition: 0.3s;
+  padding: 0.5rem;
+  border: 0.3rem solid var(--color-brown);
+  background-color: var(--color-background);
+  border-radius: var(--border-radius-small);
 }
 
 .objectContainerActive {
@@ -810,7 +830,7 @@ export default class PlayState extends Vue {
 }
 
 .marginTop {
-  margin-top: 2rem;
+  margin-top: 1rem;
   padding: 0 1rem;
 }
 
@@ -821,5 +841,6 @@ export default class PlayState extends Vue {
 
 .infoText {
   height: 2rem;
+  transition: 0.3s;
 }
 </style>
