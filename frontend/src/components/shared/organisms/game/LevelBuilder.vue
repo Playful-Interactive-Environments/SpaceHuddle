@@ -212,27 +212,34 @@
         </el-button>
       </el-space>
       <el-space wrap>
-        <div v-for="objectName of RegionObjectsForActiveType" :key="objectName">
-          <SpriteCanvas
-            :texture="getActiveTexture(objectName)"
-            :aspect-ration="getObjectAspect(activeObjectType, objectName)"
-            class="placeable"
-            :class="{ selected: activeObjectName === objectName }"
-            :tint="
-              placementState[objectName].currentCount <
-              placementState[objectName].maxCount
-                ? '#ffffff'
-                : inactiveColor
-            "
-            :background-color="
-              placementState[objectName].currentCount <
-              placementState[objectName].maxCount
-                ? backgroundColor
-                : inactiveColor
-            "
-            @pointerdown="objectNameClicked(objectName)"
-          />
-          <br />
+        <div
+          class="clickable placeable-info"
+          v-for="objectName of RegionObjectsForActiveType"
+          :key="objectName"
+          @mousedown="objectNameClicked(objectName)"
+        >
+          <div :class="{ selected: activeObjectName === objectName }">
+            <div
+              class="placeable"
+              :style="{
+                '--alpha':
+                  placementState[objectName].currentCount <
+                  placementState[objectName].maxCount
+                    ? 1
+                    : 0.5,
+                '--placeable-color':
+                  placementState[objectName].currentCount <
+                  placementState[objectName].maxCount
+                    ? '#ffffff00'
+                    : inactiveColor,
+              }"
+            >
+              <img
+                :src="levelTypeImages[activeObjectType][objectName]"
+                :alt="objectName"
+              />
+            </div>
+          </div>
           {{ placementState[objectName].currentCount }} /
           {{ placementState[objectName].maxCount }}
         </div>
@@ -264,7 +271,6 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
-import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
 import * as themeColors from '@/utils/themeColors';
 import { Idea } from '@/types/api/Idea';
@@ -307,7 +313,6 @@ export function getLevelType(
     },
   },
   components: {
-    SpriteCanvas,
     CustomSprite,
     FontAwesomeIcon,
     LevelSettings,
@@ -355,6 +360,7 @@ export default class LevelBuilder extends Vue {
   placedObjects: placeable.Placeable[] = [];
   placementState: { [key: string]: BuildState } = {};
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
+  levelTypeImages: { [key: string]: { [key: string]: string } } = {};
   showLevelSettings = false;
   selectedObject: GameObject | null = null;
   startTime = Date.now();
@@ -631,6 +637,11 @@ export default class LevelBuilder extends Vue {
               .loadTexture(settings.spritesheet, this.eventBus)
               .then((sheet) => {
                 this.stylesheets[typeName] = sheet;
+                this.levelTypeImages[typeName] = {};
+                pixiUtil.convertSpritesheetToBase64(
+                  sheet,
+                  this.levelTypeImages[typeName]
+                );
               });
           }
         }, 100);
@@ -1166,6 +1177,29 @@ export default class LevelBuilder extends Vue {
 
 .placeable {
   border-radius: var(--border-radius);
+}
+
+.placeable {
+  height: 5rem;
+  width: 5rem;
+  margin: 0.2rem;
+  padding: 0.5rem;
+  display: flex;
+  background-color: var(--placeable-color);
+
+  img {
+    margin: auto;
+    max-height: 4rem;
+    opacity: var(--alpha);
+  }
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.placeable-info {
+  text-align: center;
 }
 
 .selected {

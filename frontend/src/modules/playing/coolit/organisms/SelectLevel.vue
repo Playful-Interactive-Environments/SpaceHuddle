@@ -132,22 +132,6 @@
             :key="moleculeName"
             @click="moleculeNameClicked(moleculeName)"
           >
-            <!--<SpriteCanvas
-              :key="moleculeName"
-              :texture="getMoleculeTexture(moleculeName)"
-              :aspect-ration="getMoleculeAspect(moleculeName)"
-              :scale-factor="0.5"
-              :width="80"
-              :height="80"
-              :class="{ selected: activeMoleculeName === moleculeName }"
-              :background-color="backgroundColor"
-              v-model:renderer="rendererList[moleculeName]"
-            >
-              <Graphics
-                :color="getMoleculeConfig(moleculeName).color"
-                @render="drawCircle($event, moleculeName)"
-              ></Graphics>
-            </SpriteCanvas>-->
             <div :class="{ selected: activeMoleculeName === moleculeName }">
               <div
                 class="molecule-image"
@@ -206,18 +190,6 @@
             :key="buildingName"
             @click="buildingNameClicked(buildingName)"
           >
-            <!--<SpriteCanvas
-              :key="buildingName"
-              :texture="getBuildingTexture(buildingName)"
-              :aspect-ration="getBuildingAspect(buildingName)"
-              :scale-factor="0.8"
-              :width="80"
-              :height="80"
-              :class="{ selected: activeBuildingName === buildingName }"
-              :background-color="backgroundColor"
-              v-model:renderer="rendererList[buildingName]"
-            >
-            </SpriteCanvas>-->
             <div
               class="obstacle-image"
               :class="{ selected: activeBuildingName === buildingName }"
