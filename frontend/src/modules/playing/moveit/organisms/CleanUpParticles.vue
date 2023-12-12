@@ -83,7 +83,7 @@
       class="container-info"
       :style="{
         '--container-font-size': convertFontSizeToScreenSize(24),
-        '--container-height': `${containerHeight}px`,
+        '--container-height': `${containerHeight + padding * 2}px`,
       }"
     >
       <tr>
@@ -122,7 +122,7 @@
             v-for="(particle, index) in Object.keys(gameConfig.particles)"
             :key="particle"
             :x="index * containerSpace + containerSpace / 2"
-            :y="containerHeight / 2"
+            :y="containerHeight / 2 + padding"
             type="rect"
             :isStatic="true"
             :options="{
@@ -140,7 +140,7 @@
               :anchor="0.5"
               :width="containerWidth"
               :height="containerHeight"
-              texture="/assets/games/moveit/dumpster.svg"
+              :texture="dumpsterTexture"
               :tint="gameConfig.particles[particle].color"
             >
             </sprite>
@@ -308,10 +308,11 @@ export default class CleanUpParticles extends Vue {
   spritesheet!: PIXI.Spritesheet;
   particleTextures: { [key: string]: PIXI.Texture } = {};
   countdownTime = 5;
-  containerAspectRation = 1.3;
+  containerAspectRation = 1.5;
   loading = false;
   circleGradientTexture: PIXI.Texture | null = null;
   linearGradientTexture: PIXI.Texture | null = null;
+  dumpsterTexture: PIXI.Texture | null = null;
 
   readonly maxCleanupThreshold = constants.maxCleanupThreshold;
   readonly calcChartHeight = constants.calcChartHeight;
@@ -468,6 +469,11 @@ export default class CleanUpParticles extends Vue {
       .then((sheet) => {
         this.spritesheet = sheet;
         this.generateParticleTextures();
+      });
+    pixiUtil
+      .loadTexture('/assets/games/moveit/dumpster.png', this.eventBus)
+      .then((texture) => {
+        this.dumpsterTexture = texture;
       });
     this.interval = setInterval(this.updatedLoop, this.intervalTime);
   }
