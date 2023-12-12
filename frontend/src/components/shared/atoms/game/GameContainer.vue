@@ -69,9 +69,10 @@
           ></Graphics>
           <text
             v-if="region.region.text"
-            :anchor="[0.5, 0]"
+            :anchor="[region.anchor, 0]"
             :style="{ fontFamily: 'Arial', fontSize: 34, fill: '#ffffff' }"
             :scale="textScaleFactor"
+            :x="calculateRegionTextPosition(region)"
           >
             {{ region.region.text }}
           </text>
@@ -267,6 +268,7 @@ interface CollisionRegionData {
   size: [number, number];
   body: Matter.Body | null;
   graphic: PIXI.Graphics | null;
+  anchor: number;
 }
 
 interface CollisionBounds {
@@ -525,6 +527,37 @@ export default class GameContainer extends Vue {
   get isContainerReady(): boolean {
     return this.ready && !this.loading && !this.waitForDataLoad;
   }
+
+  calculateRegionTextPosition(region: CollisionRegionData): number {
+    const fullyVisible =
+      region.body.position.x - region.size[0] / 2 <= 0 &&
+      region.body.position.x + region.size[0] / 2 >= this.gameWidth;
+    if (fullyVisible) {
+      region.anchor = 0.5;
+      return -region.body.position.x + this.gameWidth / 2;
+    }
+    const partlyVisible =
+      region.body.position.x - region.size[0] / 2 < this.gameWidth &&
+      region.body.position.x + region.size[0] / 2 > 0;
+    if (partlyVisible) {
+      if (
+        region.body.position.x > this.gameWidth &&
+        region.body.position.x - region.size[0] / 2 < this.gameWidth
+      ) {
+        region.anchor = 1;
+        return -region.body.position.x + this.gameWidth;
+      }
+      if (
+        region.body.position.x < 0 &&
+        region.body.position.x + region.size[0] / 2 > 0
+      ) {
+        region.anchor = 0;
+        return -region.body.position.x;
+      }
+      region.anchor = region.body.position.x / this.gameWidth;
+    }
+    return 0;
+  }
   //#endregion get
 
   //#region watch
@@ -539,6 +572,7 @@ export default class GameContainer extends Vue {
           size: [100, 100],
           body: null,
           graphic: null,
+          anchor: 0.5,
         };
       }
     );
@@ -555,6 +589,7 @@ export default class GameContainer extends Vue {
               size: [100, 100],
               body: null,
               graphic: null,
+              anchor: 0.5,
             } as CollisionRegionData;
           })
         );
@@ -569,6 +604,7 @@ export default class GameContainer extends Vue {
               size: [100, 100],
               body: null,
               graphic: null,
+              anchor: 0.5,
             } as CollisionRegionData;
           }),
           ...this.collisionRegions.map((item) => {
@@ -579,6 +615,7 @@ export default class GameContainer extends Vue {
               size: [100, 100],
               body: null,
               graphic: null,
+              anchor: 0.5,
             } as CollisionRegionData;
           })
         );

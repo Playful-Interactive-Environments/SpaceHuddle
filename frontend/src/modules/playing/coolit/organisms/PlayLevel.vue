@@ -347,6 +347,7 @@
                 :width="obstacle.width"
                 :aspect-ration="getObjectAspect(obstacle.type, obstacle.name)"
                 :object-space="ObjectSpace.RelativeToBackground"
+                :filters="!selectedObstacle ? [flashFilter] : []"
               >
               </CustomSprite>
               <text
@@ -550,7 +551,11 @@ import Vec2 from 'vec2';
 import Color from 'colorjs.io';
 import { toRadians } from '@/utils/angle';
 import Matter from 'matter-js';
-import { ShockwaveFilter, MultiColorReplaceFilter } from 'pixi-filters';
+import {
+  ShockwaveFilter,
+  MultiColorReplaceFilter,
+  GlowFilter,
+} from 'pixi-filters';
 import * as matterUtil from '@/utils/matter';
 import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
 import { Vote } from '@/types/api/Vote';
@@ -835,6 +840,11 @@ export default class PlayLevel extends Vue {
   isInteracting = false;
   windForce = 1;
   activeObstacleName = '';
+  flashFilter: GlowFilter = new GlowFilter({
+    outerStrength: 0,
+    color: 0xffffff,
+    alpha: 0.7,
+  });
 
   temperatureScaleTexture: PIXI.Texture | null = null;
   temperatureScaleResultTexture: PIXI.Texture | null = null;
@@ -1396,7 +1406,7 @@ export default class PlayLevel extends Vue {
       this.setRandomAnimation();
       setTimeout(() => {
         this.vehicleIsActive = true;
-      }, Math.random() * 10000);
+      }, 1000 + Math.random() * 10000);
     } else if (
       this.vehicleXPosition > this.gameWidth * 0.5 &&
       !this.vehicleHasEmitted
@@ -2169,6 +2179,14 @@ export default class PlayLevel extends Vue {
     }
   }
 
+  flashDirection = 1;
+  updateLoopReplay(): void {
+    if (this.flashFilter.outerStrength >= 10) this.flashDirection = -1;
+    if (this.flashFilter.outerStrength <= 0) this.flashDirection = 1;
+
+    this.flashFilter.outerStrength += 2 * this.flashDirection;
+  }
+
   calculateObstacleTemperatureRiseLight(
     heatAbsorptionCoefficientLight: number
   ): number {
@@ -2266,8 +2284,15 @@ export default class PlayLevel extends Vue {
     if (averageTemperature > hailStartTemperature) {
       const intensity = averageTemperature - hailStartTemperature;
       const frequency = Math.pow(2, -Math.round(intensity)) * 2;
-      const minFrequency = 0.01;
+      const minTotalFrequencyValue = 0.015;
+      const minRelativeFrequencyValue = this.hail.frequency * 0.8;
       const maxFrequency = 0.5;
+      const minFrequency =
+        minRelativeFrequencyValue === 0
+          ? minTotalFrequencyValue * 10
+          : minRelativeFrequencyValue < minTotalFrequencyValue
+          ? minTotalFrequencyValue
+          : minRelativeFrequencyValue;
       if (frequency < minFrequency) this.hail.frequency = minFrequency;
       else if (frequency > maxFrequency) this.hail.frequency = maxFrequency;
       else this.hail.frequency = frequency;
@@ -2640,6 +2665,10 @@ export default class PlayLevel extends Vue {
         const gameOver = calculateGameOver();
         if (gameOver) {
           clearInterval(this.interval);
+          this.interval = setInterval(
+            () => this.updateLoopReplay(),
+            this.intervalTime
+          );
           this.gameOver = true;
           this.randomMessageNo = Math.round(Math.random() * 2) + 1;
           this.collisionAnimation.splice(0);
@@ -2750,6 +2779,7 @@ export default class PlayLevel extends Vue {
   obstacleClicked(obstacle: CoolItObstacle): void {
     this.selectedObstacle = obstacle;
     this.showObstacleSelection = true;
+    clearInterval(this.interval);
   }
   //#endregion replay
 }

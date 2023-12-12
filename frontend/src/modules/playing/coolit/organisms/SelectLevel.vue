@@ -234,7 +234,7 @@
       </el-scrollbar>
     </template>
   </DrawerBottomOverlay>
-  <DrawerBottomOverlay v-model="showHighScore">
+  <DrawerBottomOverlay v-model="showHighScore" class="highscore">
     <template v-slot:header>
       {{ $t('module.playing.coolit.participant.highScore.header') }}
     </template>
@@ -245,7 +245,7 @@
         :title="getLevelTitle(level.ideaId)"
         :name="level.ideaId"
       >
-        <table class="highScore">
+        <table class="highscore-table">
           <tr v-for="entry of level.details" :key="entry.avatar.symbol">
             <td>
               <font-awesome-icon
@@ -268,6 +268,11 @@
         </table>
       </el-collapse-item>
     </el-collapse>
+    <template v-slot:footer>
+      <el-button type="primary" @click="showHighScore = false">
+        {{ $t('module.playing.coolit.participant.confirm') }}
+      </el-button>
+    </template>
   </DrawerBottomOverlay>
   <el-dialog v-model="showPlayDialog" @close="cancelGame" class="levelInfo">
     <template #header>
@@ -884,7 +889,7 @@ export default class SelectLevel extends Vue {
   font-size: var(--font-size-xxsmall);
 }
 
-.highScore {
+.highscore-table {
   color: var(--color-playing);
   width: 100%;
 
@@ -952,6 +957,14 @@ h1 {
   img {
     margin: auto;
   }
+}
+
+.highscore::v-deep(.footer) {
+  text-align: center;
+}
+
+.highscore {
+  --footer-height: 4rem;
 }
 </style>
 

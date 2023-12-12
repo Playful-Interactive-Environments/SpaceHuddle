@@ -94,6 +94,7 @@ export default class DrawerBottomOverlay extends Vue {
   top: 0;
   width: 100%;
   height: 100%;
+  --footer-height: 7rem;
 }
 
 .overlay {
@@ -121,11 +122,11 @@ export default class DrawerBottomOverlay extends Vue {
 }
 
 .contentWithFooter {
-  height: calc(100% - 7rem - var(--header-height));
+  height: calc(100% - var(--footer-height) - var(--header-height));
 }
 
 .footer {
-  height: 7rem;
+  height: var(--footer-height);
   background-color: unset;
   padding: unset;
 }
