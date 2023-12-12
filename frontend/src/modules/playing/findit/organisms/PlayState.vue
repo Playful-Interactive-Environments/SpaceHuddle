@@ -149,7 +149,7 @@
       {{ $t('module.playing.findit.participant.placeables.'+ levelType + '.' + this.activeObject.type + '.' + getExplanationKey(this.activeObject) + '.name') }}
     </h2>
     <div class="infoText">
-      <p class="marginTop" v-show="this.activeObjectId !== ''">
+      <p class="marginTop" v-if="this.activeObject !== null">
         {{
           $t(
             'module.playing.findit.participant.endCardTexts.' +
