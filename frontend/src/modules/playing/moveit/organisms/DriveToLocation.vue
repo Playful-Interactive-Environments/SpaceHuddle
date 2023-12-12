@@ -15,7 +15,12 @@
     />
   </div>
   <div class="mapArea">
-    <mgl-map :center="mapVehiclePoint" :zoom="mapZoom" @map:load="onLoad">
+    <mgl-map
+      :center="mapVehiclePoint"
+      :zoom="mapZoom"
+      :double-click-zoom="false"
+      @map:load="onLoad"
+    >
       <mgl-geo-json-source
         v-if="routeCalculated"
         source-id="routePath"
@@ -229,6 +234,7 @@
         height="10rem"
         @map:load="miniMapLoaded"
         class="miniMap"
+        :double-click-zoom="false"
       >
         <CustomMapMarker anchor="bottom" :coordinates="mapDrivingPoint">
           <template v-slot:icon>

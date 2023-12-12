@@ -5,6 +5,7 @@
       :center="mapCenter"
       :zoom="mapZoom"
       language="en"
+      :double-click-zoom="false"
       @map:load="onLoad"
       @map:zoomend="changeSection"
       @map:rotateend="changeSection"

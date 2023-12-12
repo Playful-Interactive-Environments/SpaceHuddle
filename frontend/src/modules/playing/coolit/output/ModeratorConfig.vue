@@ -19,6 +19,7 @@
       <mgl-map
         :center="mapCenter"
         :zoom="mapZoom"
+        :double-click-zoom="false"
         @map:zoomend="changeSection"
         @map:dragend="changeSection"
       >
