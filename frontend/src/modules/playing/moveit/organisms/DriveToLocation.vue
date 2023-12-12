@@ -197,8 +197,11 @@
           @move="move($event)"
           @start="start"
           @stop="stop"
-          stickColor="white"
-          :base-color="getSpeedColor(moveSpeed, 0.3)"
+          stickColor="radial-gradient(circle at 60% 55%, #ffffff, #aaaaaa)"
+          :base-color="`radial-gradient(circle, #757d76ff 20%, #26352799 59%, ${getSpeedColor(
+            moveSpeed,
+            0.3
+          )} 60%)`"
         />
         <!--<el-button @click="createVisibleStreetMask">test</el-button>-->
       </div>
@@ -1581,8 +1584,8 @@ export default class DriveToLocation extends Vue {
 .overlay-top-left {
   position: absolute;
   z-index: 100;
-  top: 0.5rem;
-  left: 0.5rem;
+  top: 1rem;
+  left: 1rem;
 
   .el-progress {
     position: absolute;
@@ -1597,8 +1600,8 @@ export default class DriveToLocation extends Vue {
 .overlay-top-right {
   position: absolute;
   z-index: 100;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: 1rem;
+  right: 1rem;
   font-size: var(--font-size-xxxlarge);
   color: var(--pin-color);
 }
@@ -1607,24 +1610,24 @@ export default class DriveToLocation extends Vue {
   position: absolute;
   z-index: 100;
   bottom: 0.5rem;
-  right: 0.5rem;
-  left: 0.5rem;
+  right: 1rem;
+  left: 1rem;
   //padding: 1rem;
 }
 
 .overlay-bottom-right {
   position: absolute;
   z-index: 100;
-  bottom: 0.5rem;
-  right: 0.5rem;
+  bottom: 1rem;
+  right: 1rem;
   //padding: 1rem;
 }
 
 .overlay-bottom-left {
   position: absolute;
   z-index: 100;
-  bottom: 0.5rem;
-  left: 0.5rem;
+  bottom: 1rem;
+  left: 1rem;
   //padding: 0 0 1rem 1rem;
 
   .overlay-top-right {
@@ -1682,7 +1685,7 @@ export default class DriveToLocation extends Vue {
 }
 
 .divingVehicle {
-  border: var(--color-evaluating) solid 2px;
+  //border: var(--color-evaluating) solid 2px;
 }
 
 .rs-control {
@@ -1761,7 +1764,8 @@ export default class DriveToLocation extends Vue {
   border: 1px solid var(--color-primary);
 
   .joystick::v-deep(.joystick__stick) {
-    background: white;
+    background-image: radial-gradient(#ffffff, #dddddd);
+    //background: white;
     border: 1px solid var(--color-primary);
   }
 }
