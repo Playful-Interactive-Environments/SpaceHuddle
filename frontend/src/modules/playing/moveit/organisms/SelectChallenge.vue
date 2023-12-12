@@ -1,6 +1,6 @@
 <template>
   <nav class="level is-mobile">
-    <div class="level-left">
+    <div class="level-left category-selection">
       <el-button
         v-for="vehicle of Object.keys(gameConfig.vehicles)"
         :key="vehicle"
@@ -8,7 +8,7 @@
         size="large"
         @click="vehicleTypeClicked(vehicle)"
         class="level-item"
-        :class="{ active: vehicle === activeVehicleType }"
+        :class="{ active: vehicle === activeVehicle?.category }"
       >
         <font-awesome-icon
           v-if="!gameConfig.vehicles[vehicle].iconPrefix"
@@ -59,13 +59,15 @@
   <div ref="gameContainer" class="gameContainer">
     <el-carousel
       v-if="ready"
+      ref="carousel"
       :autoplay="false"
       arrow="always"
       :height="`${targetHeight}px`"
+      @change="activeVehicleChanged"
     >
       <el-carousel-item
-        v-for="vehicle of gameConfig.vehicles[activeVehicleType].types"
-        :key="vehicle.name"
+        v-for="vehicle of vehicleList"
+        :key="vehicle.vehicle.name"
       >
         <el-card class="vehicle-card">
           <template #header>
@@ -73,7 +75,7 @@
               <div class="media-content">
                 {{
                   $t(
-                    `module.playing.moveit.enums.vehicles.${activeVehicleType}.${vehicle.name}`
+                    `module.playing.moveit.enums.vehicles.${vehicle.category}.${vehicle.vehicle.name}`
                   )
                 }}
               </div>
@@ -81,8 +83,8 @@
                 <font-awesome-icon icon="coins" />
                 {{
                   getPointsForVehicle({
-                    category: activeVehicleType,
-                    type: vehicle.name,
+                    category: vehicle.category,
+                    type: vehicle.vehicle.name,
                   })
                 }}
                 / {{ maxVehiclePoints }}
@@ -92,7 +94,7 @@
           <div class="vehicle-image">
             <div ref="vehicleSpace" class="spritesheet-container">
               <SpriteCanvas
-                :texture="getAnimationForVehicle(vehicle)"
+                :texture="getAnimationForVehicle(vehicle.vehicle)"
                 :width="vehicleWidth"
                 :height="vehicleHeight"
                 background-color="#ffffff"
@@ -104,8 +106,8 @@
                 :max="3"
                 :model-value="
                   getStarsForVehicle({
-                    category: activeVehicleType,
-                    type: vehicle.name,
+                    category: vehicle.category,
+                    type: vehicle.vehicle.name,
                   })
                 "
                 disabled
@@ -114,58 +116,58 @@
           </div>
           <!--          <img
             class="vehicle-image"
-            :src="`/assets/games/moveit/vehicle/${vehicle.image}`"
-            :alt="vehicle.name"
+            :src="`/assets/games/moveit/vehicle/${vehicle.vehicle.image}`"
+            :alt="vehicle.vehicle.name"
           />-->
-          <div v-if="vehicle.fuel">
+          <div v-if="vehicle.vehicle.fuel">
             {{
               $t('module.playing.moveit.participant.vehicle-parameter.fuel')
             }}:
-            {{ $t(`module.playing.moveit.enums.fuel.${vehicle.fuel}`) }}
+            {{ $t(`module.playing.moveit.enums.fuel.${vehicle.vehicle.fuel}`) }}
           </div>
-          <div v-if="vehicle.mpg">
+          <div v-if="vehicle.vehicle.mpg">
             {{ $t('module.playing.moveit.participant.vehicle-parameter.mpg') }}:
-            {{ vehicle.mpg }}
-            <span v-if="vehicle.fuel === 'electricity'">
+            {{ vehicle.vehicle.mpg }}
+            <span v-if="vehicle.vehicle.fuel === 'electricity'">
               {{ $t('module.playing.moveit.enums.units.kw') }}
             </span>
             <span v-else>
               {{ $t('module.playing.moveit.enums.units.liters') }}
             </span>
           </div>
-          <div v-if="vehicle.power">
+          <div v-if="vehicle.vehicle.power">
             {{
               $t('module.playing.moveit.participant.vehicle-parameter.power')
             }}:
-            {{ vehicle.power }}
+            {{ vehicle.vehicle.power }}
             {{ $t('module.playing.moveit.enums.units.ps') }}
           </div>
-          <div v-if="vehicle.speed">
+          <div v-if="vehicle.vehicle.speed">
             {{
               $t('module.playing.moveit.participant.vehicle-parameter.speed')
             }}:
-            {{ vehicle.speed }}
+            {{ vehicle.vehicle.speed }}
             {{ $t('module.playing.moveit.enums.units.km/h') }}
           </div>
-          <div v-if="vehicle.acceleration">
+          <div v-if="vehicle.vehicle.acceleration">
             {{
               $t(
                 'module.playing.moveit.participant.vehicle-parameter.acceleration'
               )
             }}:
-            {{ vehicle.acceleration }}
+            {{ vehicle.vehicle.acceleration }}
             {{ $t('module.playing.moveit.enums.units.seconds') }}
           </div>
-          <div v-if="vehicle.persons">
+          <div v-if="vehicle.vehicle.persons">
             {{
               $t('module.playing.moveit.participant.vehicle-parameter.persons')
             }}:
-            {{ vehicle.persons }}
+            {{ vehicle.vehicle.persons }}
           </div>
           <div>
             <el-button
               type="primary"
-              @click="selectVehicle(activeVehicleType, vehicle.name)"
+              @click="selectVehicle(vehicle.category, vehicle.vehicle.name)"
             >
               {{ $t('module.playing.moveit.participant.select') }}
             </el-button>
@@ -407,6 +409,7 @@ export default class SelectChallenge extends Vue {
     datasets: [],
   };
   activeVehicleType: 'motorcycle' | 'bus' | 'car' | 'scooter' | 'bike' = 'car';
+  activeVehicleIndex = 0;
   gameConfig = gameConfig;
   selectedVehicle: vehicleCalculation.Vehicle = {
     category: 'car',
@@ -418,6 +421,12 @@ export default class SelectChallenge extends Vue {
   NavigationType = NavigationType;
   movingType = MovingType.path;
   MovingType = MovingType;
+
+  get activeVehicle(): { vehicle: any; category: string } | null {
+    if (this.vehicleList.length > this.activeVehicleIndex)
+      return this.vehicleList[this.activeVehicleIndex];
+    return null;
+  }
 
   get selectedVehicleParameter(): any {
     return configCalculation.getVehicleParameter(this.selectedVehicle);
@@ -496,6 +505,21 @@ export default class SelectChallenge extends Vue {
       }
     }
     return result;*/
+  }
+
+  get vehicleList(): { vehicle: any; category: string }[] {
+    const list: { vehicle: any; category: string }[] = [];
+    for (const category of Object.keys(gameConfig.vehicles)) {
+      list.push(
+        ...gameConfig.vehicles[category].types.map((vehicle) => {
+          return {
+            vehicle: vehicle,
+            category: category,
+          };
+        })
+      );
+    }
+    return list;
   }
 
   targetWidth = 100;
@@ -617,6 +641,10 @@ export default class SelectChallenge extends Vue {
     );
   }
 
+  activeVehicleChanged(index: number): void {
+    this.activeVehicleIndex = index;
+  }
+
   async updateChart(): Promise<void> {
     if (this.$refs.chartElectricityMixRef) {
       const chartRef = this.$refs.chartElectricityMixRef as any;
@@ -644,6 +672,12 @@ export default class SelectChallenge extends Vue {
   vehicleTypeClicked(
     vehicle: 'motorcycle' | 'bus' | 'car' | 'scooter' | 'bike'
   ): void {
+    const index = this.vehicleList.findIndex(
+      (value) => value.category === vehicle
+    );
+    if (index > -1 && this.$refs.carousel) {
+      (this.$refs.carousel as any).setActiveItem(index);
+    }
     this.activeVehicleType = vehicle;
   }
 
@@ -685,8 +719,8 @@ export default class SelectChallenge extends Vue {
   //background-blend-mode: overlay;
 }
 
-.el-space {
-  padding: 1rem;
+.category-selection {
+  //padding: 1rem;
 
   .el-button.active {
     --el-button-bg-color: var(--color-structuring);
