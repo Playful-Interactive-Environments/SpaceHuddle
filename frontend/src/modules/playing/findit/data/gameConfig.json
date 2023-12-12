@@ -22,8 +22,8 @@
         "items": {
           "cigarette": {
             "escalationLevels": [
-              { "min": 25, "max": 30 },
-              { "min": 15, "max": 30 }
+              { "min": 90, "max": 120 },
+              { "min": 45, "max": 60 }
             ],
             "severity": 3,
             "maxCount": 10,
@@ -33,8 +33,8 @@
           },
           "campfire": {
             "escalationLevels": [
-              { "min": 15, "max": 20 },
-              { "min": 15, "max": 25 }
+              { "min": 45, "max": 60 },
+              { "min": 30, "max": 45 }
             ],
             "severity": 1,
             "maxCount": 1,
@@ -44,8 +44,8 @@
           },
           "dead-tree": {
             "escalationLevels": [
-              { "min": 15, "max": 20 },
-              { "min": 15, "max": 25 }
+              { "min": 90, "max": 120 },
+              { "min": 45, "max": 60 }
             ],
             "severity": 1,
             "maxCount": 5,
@@ -181,12 +181,12 @@
           "fish": {
             "escalationLevels": [
               {
-                "min": 25,
-                "max": 30
+                "min": 90,
+                "max": 120
               },
               {
-                "min": 15,
-                "max": 30
+                "min": 45,
+                "max": 60
               }
             ],
             "severity": 3,
@@ -199,12 +199,12 @@
           "man": {
             "escalationLevels": [
               {
-                "min": 15,
-                "max": 20
+                "min": 45,
+                "max": 60
               },
               {
-                "min": 15,
-                "max": 25
+                "min": 30,
+                "max": 45
               }
             ],
             "severity": 1,
@@ -217,12 +217,12 @@
           "woman": {
             "escalationLevels": [
               {
-                "min": 15,
-                "max": 20
+                "min": 45,
+                "max": 60
               },
               {
-                "min": 15,
-                "max": 25
+                "min": 30,
+                "max": 45
               }
             ],
             "severity": 1,
@@ -235,11 +235,11 @@
           "sandbag": {
             "escalationLevels": [
               {
-                "min": 60,
-                "max": 120
+                "min": 120,
+                "max": 150
               },
               {
-                "min": 30,
+                "min": 45,
                 "max": 60
               }
             ],
@@ -253,11 +253,11 @@
           "branches": {
             "escalationLevels": [
               {
-                "min": 60,
-                "max": 120
+                "min": 120,
+                "max": 150
               },
               {
-                "min": 30,
+                "min": 45,
                 "max": 60
               }
             ],
@@ -271,11 +271,11 @@
           "bottleWhite": {
             "escalationLevels": [
               {
-                "min": 60,
-                "max": 120
+                "min": 120,
+                "max": 150
               },
               {
-                "min": 30,
+                "min": 45,
                 "max": 60
               }
             ],
@@ -289,11 +289,11 @@
           "bottleWine": {
             "escalationLevels": [
               {
-                "min": 60,
-                "max": 120
+                "min": 120,
+                "max": 150
               },
               {
-                "min": 30,
+                "min": 45,
                 "max": 60
               }
             ],
@@ -307,11 +307,11 @@
           "bottleBeer": {
             "escalationLevels": [
               {
-                "min": 60,
-                "max": 120
+                "min": 120,
+                "max": 150
               },
               {
-                "min": 30,
+                "min": 45,
                 "max": 60
               }
             ],
