@@ -29,6 +29,12 @@
       :level="selectedLevel"
       @playFinished="playFinished"
     />
+    <CollectedState
+      v-if="gameStep === GameStep.Collect && gameState === GameState.Game"
+      :level="selectedLevel"
+      :play-state-result="playStateResult"
+      @replayFinished="replayFinished"
+    />
   </div>
 </template>
 
@@ -53,11 +59,13 @@ import { TrackingManager } from '@/types/tracking/TrackingManager';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import { Idea } from '@/types/api/Idea';
 import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
+import CollectedState from '@/modules/playing/findit/organisms/CollectedState.vue';
 
 export enum GameStep {
   Select = 'select',
   Build = 'build',
   Play = 'play',
+  Collect = 'collect',
 }
 
 enum GameState {
@@ -67,6 +75,7 @@ enum GameState {
 
 @Options({
   components: {
+    CollectedState,
     ModuleInfo,
     LevelBuilder,
     PlayState,
@@ -85,6 +94,7 @@ export default class Participant extends Vue {
   selectedLevel: Idea | null = null;
   selectedLevelType: string | null = null;
   //spritesheet!: PIXI.Spritesheet;
+  playStateResult: PlayStateResult | null = null;
 
   // Flag which indicates if the window size has finished calculating.
   sizeCalculated = false;
@@ -209,8 +219,9 @@ export default class Participant extends Vue {
   }
 
   async playFinished(result: PlayStateResult): Promise<void> {
-    this.gameStep = GameStep.Select;
-    this.gameState = GameState.Info;
+    this.playStateResult = result;
+    this.gameStep = GameStep.Collect;
+    //this.gameState = GameState.Info;
 
     if (this.trackingManager && this.selectedLevel) {
       (result as any).step = GameStep.Play;
@@ -245,6 +256,11 @@ export default class Participant extends Vue {
         });
       } else this.trackingManager.setFinishedState(this.module);
     }
+  }
+
+  replayFinished(): void {
+    this.gameStep = GameStep.Select;
+    this.gameState = GameState.Info;
   }
 }
 </script>

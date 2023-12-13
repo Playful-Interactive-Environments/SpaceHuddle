@@ -11,7 +11,7 @@
       :use-gravity="false"
       :background-texture="gameConfig[levelType].settings.background"
       :background-position="BackgroundPosition.Cover"
-      :background-movement="BackgroundMovement.Pan"
+      :background-movement="BackgroundMovement.Map"
       @initRenderer="initRenderer"
       @gameObjectClick="gameObjectClick"
       :collision-borders="CollisionBorderType.Screen"
@@ -115,101 +115,6 @@
         }}
       </div>
     </DrawerBottomOverlay>
-  </div>
-  <div
-    class="gameArea result"
-    :style="{ height: height }"
-    v-if="playStateType === PlayStateType.win"
-  >
-    <h2 class="heading heading--medium">
-      {{ $t('module.playing.findit.participant.win') }}
-    </h2>
-    <p>
-      {{ $t('module.playing.findit.participant.winText') }}
-    </p>
-    <div class="endObjects">
-      <div
-        v-for="object in endObjects"
-        :key="object.name"
-        :id="object.name"
-        class="endObject"
-        @click="activeObjectChanged(object, object.name, true)"
-      >
-        <SpriteCanvas
-          :texture="getTexture(object.type, object.name)"
-          :aspect-ration="getObjectAspect(object.type, object.name)"
-          :width="(gameWidth - 50) / 2"
-          :height="((gameHeight / 10) * 4) / 2"
-          :background-color="backgroundColor"
-          class="endObjectSprites"
-        />
-      </div>
-    </div>
-    <h2 class="heading heading--medium" v-if="this.activeObject !== null">
-      {{ $t('module.playing.findit.participant.placeables.'+ levelType + '.' + this.activeObject.type + '.' + getExplanationKey(this.activeObject) + '.name') }}
-    </h2>
-    <div class="infoText">
-      <p class="marginTop" v-if="this.activeObject !== null">
-        {{
-          $t(
-            'module.playing.findit.participant.endCardTexts.' +
-              getExplanationKey(this.activeObject)
-          )
-        }}
-      </p>
-    </div>
-    <el-button
-      class="el-button--submit returnButton"
-      @click="this.$emit('playFinished', this.playStateResult)"
-    >
-      {{ $t('module.playing.findit.participant.returnToMenu') }}
-    </el-button>
-  </div>
-  <div
-    class="gameArea result"
-    :style="{ height: height }"
-    v-if="playStateType === PlayStateType.lost"
-  >
-    <h2 class="heading heading--medium">
-      {{ $t('module.playing.findit.participant.lost') }}
-    </h2>
-    <p>
-      {{ $t('module.playing.findit.participant.lostText') }}
-    </p>
-    <div class="endObjects">
-      <div
-        v-for="object in endObjects"
-        :key="object.name"
-        :id="object.name"
-        class="endObject"
-        @click="activeObjectChanged(object, object.name, true)"
-      >
-        <SpriteCanvas
-          :texture="getTexture(object.type, object.name)"
-          :aspect-ration="getObjectAspect(object.type, object.name)"
-          :width="(gameWidth - 50) / 2"
-          :height="((gameHeight / 10) * 4) / 2"
-          :background-color="backgroundColor"
-          class="endObjectSprites"
-        />
-      </div>
-    </div>
-    <div class="infoText">
-      <p class="marginTop" v-show="this.activeObjectId !== ''">
-        {{
-          $t(
-            'module.playing.findit.participant.endCardTexts.' +
-              this.activeObjectId
-          )
-        }}
-      </p>
-    </div>
-    <el-button
-      class="el-button--submit returnButton"
-      @click="this.$emit('playFinished', this.playStateResult)"
-    >
-      {{ $t('module.playing.findit.participant.returnToMenu') }}
-    </el-button>
   </div>
 </template>
 
@@ -354,16 +259,11 @@ export default class PlayState extends Vue {
   PlayStateType = PlayStateType;
   CollisionBorderType = CollisionBorderType;
 
-  endObjects: placeable.PlaceableBase[] = [];
-  activeObjectId = '';
-  activeObject: placeable.PlaceableBase | null = null;
-
   clearPlayState(): void {
     this.clickedPlaceable = null;
     this.levelType = '';
     this.placedObjects = [];
     this.collectedObjects = [];
-    this.endObjects = [];
     this.totalCount = 0;
     this.collectedCount = 0;
     this.startTime = Date.now();
@@ -467,7 +367,7 @@ export default class PlayState extends Vue {
     this.updatedSearchMask();
   }
 
-  @Watch('gameWidth', { immediate: true })
+  @Watch('gameHeight', { immediate: true })
   onGameWidthSet(): void {
     this.searchPosition = [this.gameWidth / 2, this.gameHeight / 2];
   }
@@ -603,21 +503,9 @@ export default class PlayState extends Vue {
       this.totalCount > 0 &&
       this.collectableObjects.length === 0
     ) {
-      //this.$emit('playFinished', this.playStateResult);
-      this.endObjects = this.getEndObjects();
+      this.$emit('playFinished', this.playStateResult);
       this.playStateType = PlayStateType.win;
     }
-  }
-
-  getEndObjects(): placeable.PlaceableBase[] {
-    const uniqueNamesSet = new Set();
-    return this.collectedObjects.filter((obj) => {
-      if (!uniqueNamesSet.has(obj.name)) {
-        uniqueNamesSet.add(obj.name);
-        return true;
-      }
-      return false;
-    });
   }
 
   get clickedPlaceableConfigSettings(): any {
@@ -695,8 +583,7 @@ export default class PlayState extends Vue {
         center: true,
         showClose: true,
         onClose: () => {
-          //this.$emit('playFinished', this.playStateResult);
-          this.endObjects = this.getEndObjects();
+          this.$emit('playFinished', this.playStateResult);
           this.playStateType = PlayStateType.lost;
         },
       });
@@ -714,36 +601,6 @@ export default class PlayState extends Vue {
     if (shapeIndex >= typeConfig.escalationShape.length)
       shapeIndex = typeConfig.escalationShape.length - 1;
     return escalationConfig[typeConfig.escalationShape[shapeIndex]];
-  }
-
-  activeObjectChanged(object, id, scroll = false) {
-    let element = document.getElementById(this.activeObjectId);
-    if (element) {
-      element.classList.remove('objectContainerActive');
-    }
-    this.activeObjectId = id;
-    this.activeObject = object;
-    element = document.getElementById(id);
-    if (element) {
-      element.classList.add('objectContainerActive');
-      if (scroll) {
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'center',
-        });
-      }
-    }
-  }
-
-  getExplanationKey(object: placeable.PlaceableBase): string {
-    if (object.name === 'man' || object.name === 'woman') {
-      return 'person';
-    } else if (object.name.substring(0, 6) === 'bottle') {
-      return 'bottle';
-    } else {
-      return object.name;
-    }
   }
 }
 </script>
@@ -769,78 +626,5 @@ export default class PlayState extends Vue {
   text-align: center;
   font-size: var(--font-size-xxlarge);
   color: white;
-}
-
-.result {
-  font-size: var(--font-size-xxlarge);
-  display: flex;
-  align-items: center;
-
-  span {
-    width: 100%;
-    text-align: center;
-  }
-}
-
-.result {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  font-size: var(--font-size-default);
-  text-align: center;
-  padding-top: 2rem;
-}
-
-.endObjects {
-  position: relative;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  height: 32%;
-  width: 100%;
-  z-index: 10;
-  overflow-x: scroll;
-  overflow-y: hidden;
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-  margin: 2rem 0;
-  background-color: var(--color-brown-xlight);
-  outline: 0.5rem solid var(--color-brown);
-}
-
-.endObject {
-  position: relative;
-  margin: 1rem;
-  transition: 0.3s;
-  padding: 0.5rem;
-  border: 0.3rem solid var(--color-brown);
-  background-color: var(--color-background);
-  border-radius: var(--border-radius-small);
-}
-
-.objectContainerActive {
-  z-index: 2;
-  transform: translateY(-1rem);
-  transition: 0.3s;
-}
-
-.endObjectSprites {
-  pointer-events: none;
-}
-
-.marginTop {
-  margin-top: 1rem;
-  padding: 0 1rem;
-}
-
-.returnButton {
-  position: absolute;
-  bottom: 2rem;
-}
-
-.infoText {
-  height: 2rem;
-  transition: 0.3s;
 }
 </style>
