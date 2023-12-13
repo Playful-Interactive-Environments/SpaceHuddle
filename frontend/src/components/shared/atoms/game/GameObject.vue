@@ -202,7 +202,7 @@ export default class GameObject extends Vue {
       x >= -delta - deltaX &&
       x <= this.gameContainer.gameWidth + delta + deltaX &&
       y >= -delta - deltaY &&
-      y <= this.gameContainer.gameHeight + delta + deltaY
+      y <= this.gameContainer.gameDisplayHeight + delta + deltaY
     );
   }
 
@@ -655,7 +655,7 @@ export default class GameObject extends Vue {
     ) {
       this.position = [
         (x / 100) * this.gameContainer.gameWidth,
-        (y / 100) * this.gameContainer.gameHeight,
+        (y / 100) * this.gameContainer.gameDisplayHeight,
       ];
     } else if (
       this.objectSpace === ObjectSpace.RelativeToBackground &&
@@ -681,7 +681,7 @@ export default class GameObject extends Vue {
     if (this.objectSpace === ObjectSpace.RelativeToScreen && this.gameContainer)
       return [
         (this.position[0] / this.gameContainer.gameWidth) * 100,
-        (this.position[1] / this.gameContainer.gameHeight) * 100,
+        (this.position[1] / this.gameContainer.gameDisplayHeight) * 100,
       ];
     if (
       this.objectSpace === ObjectSpace.RelativeToBackground &&
@@ -763,8 +763,8 @@ export default class GameObject extends Vue {
               else if (pos[0] > this.gameContainer.gameWidth - delta)
                 pos[0] = this.gameContainer.gameWidth - delta;
               if (pos[1] < delta) pos[1] = delta;
-              else if (pos[1] > this.gameContainer.gameHeight - delta)
-                pos[1] = this.gameContainer.gameHeight - delta;
+              else if (pos[1] > this.gameContainer.gameDisplayHeight - delta)
+                pos[1] = this.gameContainer.gameDisplayHeight - delta;
               Matter.Body.setPosition(this.body, { x: pos[0], y: pos[1] });
               isVisible = true;
             }
@@ -803,13 +803,13 @@ export default class GameObject extends Vue {
             this.body.position.x + this.offset[0] > this.gameContainer.gameWidth;
           const outsideLeft = this.body.position.x + this.offset[0] < 0;
           const outsideBottom =
-            this.body.position.y + this.offset[1] > this.gameContainer.gameHeight;
+            this.body.position.y + this.offset[1] > this.gameContainer.gameDisplayHeight;
           const outsideTop = this.body.position.y + this.offset[1] < 0;*/
           const outsideRight =
             this.body.position.x > this.gameContainer.gameWidth;
           const outsideLeft = this.body.position.x < 0;
           const outsideBottom =
-            this.body.position.y > this.gameContainer.gameHeight;
+            this.body.position.y > this.gameContainer.gameDisplayHeight;
           const outsideTop = this.body.position.y < 0;
           if (outsideRight || outsideLeft || outsideBottom || outsideTop) {
             this.$emit('outsideDrawingSpace', this, {
@@ -833,8 +833,9 @@ export default class GameObject extends Vue {
             ];
             if (pos[0] < -delta) pos[0] = this.gameContainer.gameWidth;
             else if (pos[0] > this.gameContainer.gameWidth + delta) pos[0] = 0;
-            if (pos[1] < -delta) pos[1] = this.gameContainer.gameHeight;
-            else if (pos[1] > this.gameContainer.gameHeight + delta) pos[1] = 0;
+            if (pos[1] < -delta) pos[1] = this.gameContainer.gameDisplayHeight;
+            else if (pos[1] > this.gameContainer.gameDisplayHeight + delta)
+              pos[1] = 0;
             Matter.Body.setPosition(this.body, { x: pos[0], y: pos[1] });
           }
         }

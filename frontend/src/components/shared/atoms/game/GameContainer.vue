@@ -13,9 +13,33 @@
     v-loading="!isContainerReady"
   >
     <Application
-      ref="pixi"
       :width="gameWidth"
-      :height="gameHeight"
+      :height="mapHeight"
+      :backgroundColor="backgroundColor"
+      v-if="ready && backgroundMovement === BackgroundMovement.Map"
+    >
+      <sprite
+        v-if="backgroundSprite && backgroundSprite.valid"
+        :texture="backgroundSprite"
+        :anchor="0"
+        :alpha="0.5"
+        :width="gameWidth"
+        :height="mapHeight"
+        :x="0"
+        :y="0"
+      ></sprite>
+      <Graphics
+        v-if="backgroundPositionOffset && backgroundPositionOffset.length === 2"
+        :x="gameObjectOffsetRelativeToBackground[0] * mapScale"
+        @render="drawDisplayRegion"
+        @pointermove="moveDisplayArea"
+      />
+    </Application>
+    <Application
+      ref="pixi"
+      id="pixiContainer"
+      :width="gameWidth"
+      :height="gameDisplayHeight"
       v-if="ready"
       :backgroundColor="backgroundColor"
       :transparent="transparent"
@@ -145,7 +169,7 @@
           :x="0"
           :y="0"
           :width="gameWidth"
-          :height="gameHeight"
+          :height="gameDisplayHeight"
         ></Graphics>
       </container>
     </Application>
@@ -240,6 +264,7 @@ export enum BackgroundMovement {
   None = 'none',
   Pan = 'pan',
   Auto = 'auto',
+  Map = 'map',
   Pause = 'pause',
 }
 
@@ -391,13 +416,41 @@ export default class GameContainer extends Vue {
   //#endregion variables
 
   //#region get
-  getBackgroundAspect(): number {
+  get isBackgroundLoaded(): boolean {
+    return !!this.backgroundSprite && !!this.backgroundSprite.orig;
+  }
+
+  get backgroundTextureAspect(): number {
     if (this.backgroundSprite && this.backgroundSprite.orig) {
       const textureWidth = this.backgroundSprite.orig.width;
       const textureHeight = this.backgroundSprite.orig.height;
       return textureWidth / textureHeight;
     }
-    return this.gameWidth / this.gameHeight;
+    return -1;
+  }
+
+  get mapHeight(): number {
+    if (this.backgroundMovement === BackgroundMovement.Map) {
+      if (this.backgroundTextureAspect > 0) {
+        return this.gameWidth / this.backgroundTextureAspect;
+      }
+    }
+    return 0;
+  }
+
+  get gameDisplayHeight(): number {
+    return this.gameHeight - this.mapHeight;
+  }
+
+  get mapScale(): number {
+    return this.mapHeight / this.gameDisplayHeight;
+  }
+
+  getBackgroundAspect(): number {
+    if (this.backgroundTextureAspect > 0) {
+      return this.backgroundTextureAspect;
+    }
+    return this.gameWidth / this.gameDisplayHeight;
   }
 
   get backgroundTexturePosition(): [number, number] {
@@ -480,11 +533,11 @@ export default class GameContainer extends Vue {
   get gameObjectOffsetRelativeToScreen(): [number, number] {
     return [
       this.gameWidth / 2 - this.backgroundPositionOffset[0],
-      this.gameHeight / 2 - this.backgroundPositionOffset[1],
+      this.gameDisplayHeight / 2 - this.backgroundPositionOffset[1],
     ] as [number, number];
     /*return [
       this.backgroundPositionOffset[0] - this.gameWidth / 2,
-      this.backgroundPositionOffset[1] - this.gameHeight / 2,
+      this.backgroundPositionOffset[1] - this.gameDisplayHeight / 2,
     ] as [number, number];*/
   }
 
@@ -500,14 +553,14 @@ export default class GameContainer extends Vue {
   get gameObjectOffsetRelativeToScreenCircle(): [number, number] {
     return [
       this.gameWidth / 2 - this.backgroundPositionOffsetCircle[0],
-      this.gameHeight / 2 - this.backgroundPositionOffsetCircle[1],
+      this.gameDisplayHeight / 2 - this.backgroundPositionOffsetCircle[1],
     ] as [number, number];
   }
 
   get visibleScreenMin(): [number, number] {
     /*return [
       this.gameObjectOffsetRelativeToBackground[0] - this.gameWidth / 2,
-      this.gameObjectOffsetRelativeToBackground[1] - this.gameHeight / 2,
+      this.gameObjectOffsetRelativeToBackground[1] - this.gameDisplayHeight / 2,
     ];*/
     return [0, 0];
   }
@@ -515,9 +568,9 @@ export default class GameContainer extends Vue {
   get visibleScreenMax(): [number, number] {
     /*return [
       this.gameObjectOffsetRelativeToBackground[0] + this.gameWidth / 2,
-      this.gameObjectOffsetRelativeToBackground[1] + this.gameHeight / 2,
+      this.gameObjectOffsetRelativeToBackground[1] + this.gameDisplayHeight / 2,
     ];*/
-    return [this.gameWidth, this.gameHeight];
+    return [this.gameWidth, this.gameDisplayHeight];
   }
 
   get textScaleFactor(): number {
@@ -756,16 +809,20 @@ export default class GameContainer extends Vue {
   }
 
   hierarchyChanged(mutationList: MutationRecord[]): void {
+    const addedNodes: Node[] = [];
     for (const mutation of mutationList) {
       if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-        const canvas = Array.from(mutation.addedNodes).find(
-          (node) => node.nodeName.toLowerCase() === 'canvas'
-        ) as HTMLCanvasElement | undefined;
-        if (canvas) {
-          this.setupMouseConstraint(canvas);
-          return;
-        }
+        addedNodes.push(...Array.from(mutation.addedNodes));
       }
+    }
+    const canvasList = addedNodes.filter(
+      (node) => node.nodeName.toLowerCase() === 'canvas'
+    ) as HTMLCanvasElement[];
+    if (canvasList.length) {
+      until(() => this.isBackgroundLoaded).then(() => {
+        this.setupMouseConstraint(canvasList[canvasList.length - 1]);
+      });
+      return;
     }
   }
 
@@ -815,6 +872,10 @@ export default class GameContainer extends Vue {
         this.gameHeight = dom.offsetHeight;
         this.$emit('update:width', this.gameWidth);
         this.$emit('update:height', this.gameHeight);
+        until(() => this.isBackgroundLoaded).then(() => {
+          this.$emit('update:height', this.gameDisplayHeight);
+        });
+        this.$emit('update:height', this.gameDisplayHeight);
         const bounds = dom.getBoundingClientRect();
         this.canvasPosition = [bounds.left, bounds.top];
         if (this.collisionBorders !== CollisionBorderType.Background)
@@ -832,13 +893,13 @@ export default class GameContainer extends Vue {
       const textureWidth = this.backgroundSprite.orig.width;
       const textureHeight = this.backgroundSprite.orig.height;
       const scaleFactorWidth = textureWidth / this.gameWidth;
-      const scaleFactorHeight = textureHeight / this.gameHeight;
+      const scaleFactorHeight = textureHeight / this.gameDisplayHeight;
       switch (this.backgroundPosition) {
         case BackgroundPosition.None:
           this.backgroundTextureSize = [textureWidth, textureHeight];
           break;
         case BackgroundPosition.Stretch:
-          this.backgroundTextureSize = [this.gameWidth, this.gameHeight];
+          this.backgroundTextureSize = [this.gameWidth, this.gameDisplayHeight];
           break;
         case BackgroundPosition.Contain:
           if (scaleFactorWidth > scaleFactorHeight)
@@ -849,14 +910,14 @@ export default class GameContainer extends Vue {
           else
             this.backgroundTextureSize = [
               textureWidth / scaleFactorHeight,
-              this.gameHeight,
+              this.gameDisplayHeight,
             ];
           break;
         case BackgroundPosition.Cover:
           if (scaleFactorWidth > scaleFactorHeight) {
             this.backgroundTextureSize = [
               textureWidth / scaleFactorHeight,
-              this.gameHeight,
+              this.gameDisplayHeight,
             ];
           } else
             this.backgroundTextureSize = [
@@ -865,12 +926,16 @@ export default class GameContainer extends Vue {
             ];
           break;
       }
-    } else this.backgroundTextureSize = [this.gameWidth, this.gameHeight];
-    this.backgroundPositionOffset = [this.gameWidth / 2, this.gameHeight / 2];
+    } else
+      this.backgroundTextureSize = [this.gameWidth, this.gameDisplayHeight];
+    this.backgroundPositionOffset = [
+      this.gameWidth / 2,
+      this.gameDisplayHeight / 2,
+    ];
     this.backgroundPositionOffsetMin = [...this.backgroundPositionOffset];
     this.backgroundPositionOffsetMax = [...this.backgroundPositionOffset];
     const deltaX = this.backgroundTextureSize[0] - this.gameWidth;
-    const deltaY = this.backgroundTextureSize[1] - this.gameHeight;
+    const deltaY = this.backgroundTextureSize[1] - this.gameDisplayHeight;
     if (deltaX > 0) {
       this.backgroundPositionOffsetMin[0] -= deltaX / 2;
       this.backgroundPositionOffsetMax[0] += deltaX / 2;
@@ -1076,12 +1141,12 @@ export default class GameContainer extends Vue {
   readonly minClickTimeDelta = 10;
   isMouseDown = false;
   gameContainerClicked(event: any): void {
-    const point = { x: event.layerX, y: event.layerY }; //this.mouseConstraint.mouse.position;
+    const mousePosition = { x: event.offsetX, y: event.offsetY }; //this.mouseConstraint.mouse.position;
     const clickedBodies = Matter.Query.point(
       this.gameObjects
         .filter((gameObj) => gameObj.body)
         .map((gameObj) => gameObj.body),
-      point
+      mousePosition
     );
     if (clickedBodies.length > 0) {
       const clickedGameObjects = clickedBodies.map((body) => {
@@ -1097,7 +1162,7 @@ export default class GameContainer extends Vue {
     this.isMouseDown = true;
     setTimeout(() => {
       if (!this.activeObject) {
-        const mousePosition = this.mouseConstraint.mouse.position;
+        //const mousePosition = this.mouseConstraint.mouse.position;
         const relativeMousePositionToScreen = {
           x:
             ((mousePosition.x + this.gameObjectOffsetRelativeToScreen[0]) /
@@ -1105,7 +1170,7 @@ export default class GameContainer extends Vue {
             100,
           y:
             ((mousePosition.y + this.gameObjectOffsetRelativeToScreen[1]) /
-              this.gameHeight) *
+              this.gameDisplayHeight) *
             100,
         };
         const relativeMousePositionToBackground = {
@@ -1301,7 +1366,7 @@ export default class GameContainer extends Vue {
     borderCategory: number
   ): CollisionBounds | undefined {
     const gameWidth = this.gameWidth ? this.gameWidth : 100;
-    const gameHeight = this.gameHeight ? this.gameHeight : 100;
+    const gameHeight = this.gameDisplayHeight ? this.gameDisplayHeight : 100;
     const backgroundTextureSize =
       this.endlessPanning && this.backgroundMovement !== BackgroundMovement.None
         ? [
@@ -1714,7 +1779,7 @@ export default class GameContainer extends Vue {
               validCollision.bodyB,
               validCollision.bodyA,
               this.gameWidth,
-              this.gameHeight
+              this.gameDisplayHeight
             ),
             validCollision.bodyA,
             validCollision.bodyB
@@ -1732,7 +1797,7 @@ export default class GameContainer extends Vue {
               validCollision.bodyA,
               validCollision.bodyB,
               this.gameWidth,
-              this.gameHeight
+              this.gameDisplayHeight
             ),
             validCollision.bodyB,
             validCollision.bodyA
@@ -1929,7 +1994,7 @@ export default class GameContainer extends Vue {
   beginPan(vector: [number, number]): void {
     /*this.panVector = [
       Math.round(vector[0] * 0.01 * this.gameWidth),
-      Math.round(vector[1] * 0.01 * this.gameHeight),
+      Math.round(vector[1] * 0.01 * this.gameDisplayHeight),
     ];*/
     const distanceX = Math.round(vector[0] * 5);
     const distanceY = Math.round(vector[1] * 5);
@@ -1982,10 +2047,13 @@ export default class GameContainer extends Vue {
   pan(): void {
     const x = this.backgroundPositionOffset[0] + this.panVector[0];
     const y = this.backgroundPositionOffset[1] + this.panVector[1];
-    const previousPosition = [...this.backgroundPositionOffset];
+    const previousPosition = [...this.backgroundPositionOffset] as [
+      number,
+      number
+    ];
     if (this.endlessPanning) {
       const maxX = this.backgroundPositionOffsetMax[0] + this.gameWidth;
-      const maxY = this.backgroundPositionOffsetMax[1] + this.gameHeight;
+      const maxY = this.backgroundPositionOffsetMax[1] + this.gameDisplayHeight;
       if (
         x < this.backgroundPositionOffsetMin[0] ||
         x > maxX ||
@@ -2037,90 +2105,115 @@ export default class GameContainer extends Vue {
       previousPosition[0] !== this.backgroundPositionOffset[0] ||
       previousPosition[1] !== this.backgroundPositionOffset[1]
     ) {
-      for (const gameObj of this.gameObjects) {
-        if (
-          gameObj.moveWithBackground &&
-          gameObj.objectSpace === ObjectSpace.RelativeToBackground
-        )
-          gameObj.updateOffset(
-            this.gameObjectOffsetRelativeToBackground,
-            this.endlessPanning
-              ? this.gameObjectOffsetRelativeToBackgroundCircle
-              : null
-          );
-        else if (
-          gameObj.moveWithBackground &&
-          gameObj.objectSpace === ObjectSpace.RelativeToScreen
-        )
-          gameObj.updateOffset(
-            this.gameObjectOffsetRelativeToScreen,
-            this.endlessPanning
-              ? this.gameObjectOffsetRelativeToScreenCircle
-              : null
-          );
-      }
+      this.updateObjectPosition(previousPosition);
+    }
 
-      const deltaX = this.backgroundPositionOffset[0] - previousPosition[0];
-      const deltaY = this.backgroundPositionOffset[1] - previousPosition[1];
-      for (const region of this.regionBodyList) {
-        Matter.Body.setPosition(region.body, {
-          x: region.position[0] + this.backgroundPositionOffset[0],
-          y: region.position[1] + this.backgroundPositionOffset[1],
-        });
+    this.notifyCurrentOffset();
+    this.$emit('update:offset', this.gameObjectOffsetRelativeToBackground);
+  }
 
-        for (const filter of region.region.filter) {
-          if (filter.center) {
-            filter.center[0] += deltaX;
-            filter.center[1] += deltaY;
-          }
-        }
-      }
+  updateObjectPosition(previousPosition: [number, number]): void {
+    for (const gameObj of this.gameObjects) {
+      if (
+        gameObj.moveWithBackground &&
+        gameObj.objectSpace === ObjectSpace.RelativeToBackground
+      )
+        gameObj.updateOffset(
+          this.gameObjectOffsetRelativeToBackground,
+          this.endlessPanning
+            ? this.gameObjectOffsetRelativeToBackgroundCircle
+            : null
+        );
+      else if (
+        gameObj.moveWithBackground &&
+        gameObj.objectSpace === ObjectSpace.RelativeToScreen
+      )
+        gameObj.updateOffset(
+          this.gameObjectOffsetRelativeToScreen,
+          this.endlessPanning
+            ? this.gameObjectOffsetRelativeToScreenCircle
+            : null
+        );
+    }
 
-      for (const filter of this.pixiFilterList) {
+    const deltaX = this.backgroundPositionOffset[0] - previousPosition[0];
+    const deltaY = this.backgroundPositionOffset[1] - previousPosition[1];
+    for (const region of this.regionBodyList) {
+      Matter.Body.setPosition(region.body, {
+        x: region.position[0] + this.backgroundPositionOffset[0],
+        y: region.position[1] + this.backgroundPositionOffset[1],
+      });
+
+      for (const filter of region.region.filter) {
         if (filter.center) {
           filter.center[0] += deltaX;
           filter.center[1] += deltaY;
         }
       }
+    }
 
-      if (this.bordersBackground) {
-        Matter.Body.setPosition(this.bordersBackground.bottom, {
-          x:
-            this.bordersBackground.bottomPosition[0] +
-            this.backgroundPositionOffset[0],
-          y:
-            this.bordersBackground.bottomPosition[1] +
-            this.backgroundPositionOffset[1],
-        });
-        Matter.Body.setPosition(this.bordersBackground.top, {
-          x:
-            this.bordersBackground.topPosition[0] +
-            this.backgroundPositionOffset[0],
-          y:
-            this.bordersBackground.topPosition[1] +
-            this.backgroundPositionOffset[1],
-        });
-        Matter.Body.setPosition(this.bordersBackground.left, {
-          x:
-            this.bordersBackground.leftPosition[0] +
-            this.backgroundPositionOffset[0],
-          y:
-            this.bordersBackground.leftPosition[1] +
-            this.backgroundPositionOffset[1],
-        });
-        Matter.Body.setPosition(this.bordersBackground.right, {
-          x:
-            this.bordersBackground.rightPosition[0] +
-            this.backgroundPositionOffset[0],
-          y:
-            this.bordersBackground.rightPosition[1] +
-            this.backgroundPositionOffset[1],
-        });
+    for (const filter of this.pixiFilterList) {
+      if (filter.center) {
+        filter.center[0] += deltaX;
+        filter.center[1] += deltaY;
       }
     }
 
-    this.notifyCurrentOffset();
-    this.$emit('update:offset', this.gameObjectOffsetRelativeToBackground);
+    if (this.bordersBackground) {
+      Matter.Body.setPosition(this.bordersBackground.bottom, {
+        x:
+          this.bordersBackground.bottomPosition[0] +
+          this.backgroundPositionOffset[0],
+        y:
+          this.bordersBackground.bottomPosition[1] +
+          this.backgroundPositionOffset[1],
+      });
+      Matter.Body.setPosition(this.bordersBackground.top, {
+        x:
+          this.bordersBackground.topPosition[0] +
+          this.backgroundPositionOffset[0],
+        y:
+          this.bordersBackground.topPosition[1] +
+          this.backgroundPositionOffset[1],
+      });
+      Matter.Body.setPosition(this.bordersBackground.left, {
+        x:
+          this.bordersBackground.leftPosition[0] +
+          this.backgroundPositionOffset[0],
+        y:
+          this.bordersBackground.leftPosition[1] +
+          this.backgroundPositionOffset[1],
+      });
+      Matter.Body.setPosition(this.bordersBackground.right, {
+        x:
+          this.bordersBackground.rightPosition[0] +
+          this.backgroundPositionOffset[0],
+        y:
+          this.bordersBackground.rightPosition[1] +
+          this.backgroundPositionOffset[1],
+      });
+    }
+  }
+
+  moveDisplayArea(event: PIXI.FederatedPointerEvent): void {
+    if (event.buttons === 1) {
+      const delta = event.movement.x / this.mapScale;
+      let backgroundPositionOffset = this.backgroundPositionOffset[0] - delta;
+      if (backgroundPositionOffset < this.backgroundPositionOffsetMin[0])
+        backgroundPositionOffset = this.backgroundPositionOffsetMin[0];
+      if (backgroundPositionOffset > this.backgroundPositionOffsetMax[0])
+        backgroundPositionOffset = this.backgroundPositionOffsetMax[0];
+      if (backgroundPositionOffset !== this.backgroundPositionOffset[0]) {
+        const previousPosition = [...this.backgroundPositionOffset] as [
+          number,
+          number
+        ];
+        this.backgroundPositionOffset[0] = backgroundPositionOffset;
+        this.updateObjectPosition(previousPosition);
+        this.notifyCurrentOffset();
+        this.$emit('update:offset', this.gameObjectOffsetRelativeToBackground);
+      }
+    }
   }
 
   notifyCurrentOffset(): void {
@@ -2149,16 +2242,16 @@ export default class GameContainer extends Vue {
     type: 'min' | 'max' | 'current'
   ): [number, number] {
     const deltaX = this.backgroundTextureSize[0] - this.gameWidth;
-    const deltaY = this.backgroundTextureSize[1] - this.gameHeight;
+    const deltaY = this.backgroundTextureSize[1] - this.gameDisplayHeight;
     //const min = [-deltaX / 2, -deltaY / 2];
-    const max = [this.gameWidth + deltaX / 2, this.gameHeight + deltaY];
+    const max = [this.gameWidth + deltaX / 2, this.gameDisplayHeight + deltaY];
     const minPosition = [
       position[0] - this.gameWidth / 2,
-      position[1] - this.gameHeight / 2,
+      position[1] - this.gameDisplayHeight / 2,
     ];
     const maxPosition = [
       position[0] + this.gameWidth / 2,
-      position[1] + this.gameHeight / 2,
+      position[1] + this.gameDisplayHeight / 2,
     ];
     switch (type) {
       case 'current':
@@ -2287,8 +2380,8 @@ export default class GameContainer extends Vue {
               y:
                 item.y < 0
                   ? 0
-                  : item.y > this.gameHeight
-                  ? this.gameHeight
+                  : item.y > this.gameDisplayHeight
+                  ? this.gameDisplayHeight
                   : item.y,
             };
           });
@@ -2342,6 +2435,28 @@ export default class GameContainer extends Vue {
       }
     }
     return texture;
+  }
+
+  drawDisplayRegion(graphics: PIXI.Graphics): void {
+    graphics.clear();
+    if (this.backgroundSprite) {
+      const textureScale = this.gameWidth / this.backgroundSprite.orig.width;
+      const matrix: PIXI.Matrix = new PIXI.Matrix();
+      matrix.scale(textureScale, textureScale);
+      matrix.translate(
+        -this.gameObjectOffsetRelativeToBackground[0] * this.mapScale,
+        0
+      );
+      graphics.beginTextureFill({
+        texture: this.backgroundSprite,
+        alpha: 1,
+        matrix: matrix,
+      });
+    }
+    //graphics.beginFill('#ffffff', 0.5);
+    graphics.lineStyle(10, '#ff0000');
+    graphics.drawRect(0, 0, this.gameWidth * this.mapScale, this.mapHeight);
+    graphics.endFill();
   }
   //#endregion draw
 }
