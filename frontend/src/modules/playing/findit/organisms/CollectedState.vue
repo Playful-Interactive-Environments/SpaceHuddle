@@ -175,7 +175,6 @@ export default class CollectedState extends Vue {
         const targetHeight = dom.offsetHeight;
         if (targetWidth && targetHeight) {
           this.gameAreaSize = [targetWidth, targetHeight];
-          console.log(this.gameAreaSize);
         }
       }
     }, 500);

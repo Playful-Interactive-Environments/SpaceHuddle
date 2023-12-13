@@ -14,7 +14,7 @@
           "order": 10,
           "collectable": true,
           "spritesheet": "/assets/games/findit/fire/hazard.json",
-          "explanationText": "module.information.findit.participant.placeables.fire",
+          "explanationText": "module.playing.findit.participant.placeables.fire",
           "escalationShape": ["smoke", "fire"],
           "placingRegions": [[[0, 0], [100, 0], [100, 100], [0, 100]]],
           "checkCompletelyInside": true
@@ -61,7 +61,7 @@
           "order": 1,
           "collectable": false,
           "spritesheet": "/assets/games/findit/fire/red_herring.json",
-          "explanationText": "module.information.findit.participant.placeables.fire"
+          "explanationText": "module.playing.findit.participant.placeables.fire"
         },
         "items": {
           "bottleWhite": {
@@ -169,7 +169,7 @@
           "order": 10,
           "collectable": true,
           "spritesheet": "/assets/games/findit/flood/hazard.json",
-          "explanationText": "module.information.findit.participant.placeables.flood",
+          "explanationText": "module.playing.findit.participant.placeables.flood",
           "escalationShape": [
             "splash",
             "smoke"
@@ -330,7 +330,7 @@
           "order": 1,
           "collectable": false,
           "spritesheet": "/assets/games/findit/flood/red_herring.json",
-          "explanationText": "module.information.findit.participant.placeables.flood"
+          "explanationText": "module.playing.findit.participant.placeables.flood"
         },
         "items": {
           "turtle": {

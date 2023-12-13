@@ -128,6 +128,7 @@ export default class GameObject extends Vue {
   @Prop({ default: true }) affectedByForce!: boolean;
   @Prop({ default: true }) moveWithBackground!: boolean;
   @Prop({ default: null }) triggerDelay!: number | null;
+  @Prop({ default: false }) triggerDelayPause!: boolean;
   @Prop({ default: false }) highlighted!: boolean;
   @Prop({ default: false }) disabled!: boolean;
   @Prop({ default: FastObjectBehaviour.none })
@@ -957,8 +958,24 @@ export default class GameObject extends Vue {
     else this.triggerStartTime = null;
   }
 
+  triggerPauseStartTime: null | number = null;
+  @Watch('triggerDelayPause', { immediate: true })
+  pauseTriggerDelay(): void {
+    if (this.triggerDelayPause) {
+      this.triggerPauseStartTime = Date.now();
+    } else {
+      if (this.triggerStartTime && this.triggerPauseStartTime) {
+        const delta = Date.now() - this.triggerPauseStartTime;
+        this.triggerStartTime += delta;
+      }
+      this.triggerPauseStartTime = null;
+    }
+  }
+
   checkTrigger(): boolean {
     if (
+      !this.triggerDelayPause &&
+      !this.triggerPauseStartTime &&
       this.triggerDelay &&
       this.triggerStartTime &&
       this.triggerStartTime + this.triggerDelay * 1000 < Date.now()

@@ -45,6 +45,7 @@
                 ? placeable.escalationSteps[placeable.escalationStepIndex]
                 : null
             "
+            :trigger-delay-pause="showToolbox"
             @handleTrigger="handleEscalation(placeable)"
           >
             <CustomSprite
@@ -98,15 +99,29 @@
         )
       "
     >
-      <SpriteCanvas
-        :texture="getTexture(clickedPlaceable.type, clickedPlaceable.name)"
-        :aspect-ration="
-          getObjectAspect(clickedPlaceable.type, clickedPlaceable.name)
-        "
-        :width="gameWidth - 50"
-        :height="(gameHeight / 10) * 4"
-        :background-color="backgroundColor"
-      />
+      <div
+        v-if="clickedPlaceableConfigSettings.collectable"
+        class="collected-right"
+      >
+        {{ $t('module.playing.findit.participant.collectable') }}
+      </div>
+      <div v-else class="collected-wrong">
+        {{ $t('module.playing.findit.participant.not-collectable') }}
+      </div>
+      <div class="clickedPlaceable">
+        <img
+          v-if="
+            levelTypeImages[clickedPlaceable.type] &&
+            levelTypeImages[clickedPlaceable.type][clickedPlaceable.name]
+          "
+          :src="levelTypeImages[clickedPlaceable.type][clickedPlaceable.name]"
+          :alt="clickedPlaceable.name"
+          :style="{
+            'max-width': `${gameWidth - 50}px`,
+            'max-height': `${(gameHeight / 10) * 4}px`,
+          }"
+        />
+      </div>
       <div>
         {{
           $t(
@@ -135,7 +150,6 @@ import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import { until } from '@/utils/wait';
 import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottomOverlay.vue';
-import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import * as tutorialService from '@/services/tutorial-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import { Tutorial } from '@/types/api/Tutorial';
@@ -228,7 +242,6 @@ function convertToFindItPlaceable(
     GameContainer,
     CustomSprite,
     DrawerBottomOverlay,
-    SpriteCanvas,
   },
   emits: ['playFinished'],
 })
@@ -250,6 +263,7 @@ export default class PlayState extends Vue {
   placedObjects: FindItPlaceable[] = [];
   collectedObjects: placeable.PlaceableBase[] = [];
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
+  levelTypeImages: { [key: string]: { [key: string]: string } } = {};
   totalCount = 0;
   collectedCount = 0;
   searchPosition: [number, number] = [0, 0];
@@ -445,6 +459,11 @@ export default class PlayState extends Vue {
               .loadTexture(settings.spritesheet, this.eventBus)
               .then((sheet) => {
                 this.stylesheets[typeName] = sheet;
+                this.levelTypeImages[typeName] = {};
+                pixiUtil.convertSpritesheetToBase64(
+                  sheet,
+                  this.levelTypeImages[typeName]
+                );
               });
           }
         }, 100);
@@ -518,9 +537,8 @@ export default class PlayState extends Vue {
 
   get clickedPlaceableConfig(): any {
     if (this.clickedPlaceable) {
-      return gameConfig[this.levelType].categories[this.clickedPlaceable.type][
-        this.clickedPlaceable.name
-      ];
+      return gameConfig[this.levelType].categories[this.clickedPlaceable.type]
+        .items[this.clickedPlaceable.name];
     }
     return null;
   }
@@ -547,9 +565,9 @@ export default class PlayState extends Vue {
       gameConfig[this.levelType].categories[value.type].items[value.name];
     if (placeableConfig.explanationKey) {
       const tutorialStepName = `${value.type}-${placeableConfig.explanationKey}`;
+      event.preventDefault();
+      this.showToolbox = true;
       if (!this.tutorialSteps.find((item) => item.step === tutorialStepName)) {
-        event.preventDefault();
-        this.showToolbox = true;
         const tutorialItem: Tutorial = {
           step: tutorialStepName,
           type: tutorialType,
@@ -560,6 +578,10 @@ export default class PlayState extends Vue {
           this.authHeaderTyp,
           this.eventBus
         );
+      } else {
+        setTimeout(() => {
+          this.showToolbox = false;
+        }, 5000);
       }
     }
   }
@@ -626,5 +648,28 @@ export default class PlayState extends Vue {
   text-align: center;
   font-size: var(--font-size-xxlarge);
   color: white;
+}
+
+.clickedPlaceable {
+  align-items: center;
+  width: 100%;
+  display: flex;
+  padding: 2rem;
+
+  img {
+    margin: auto;
+  }
+}
+
+.collected-right {
+  font-size: var(--font-size-xxlarge);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-green);
+}
+
+.collected-wrong {
+  font-size: var(--font-size-xxlarge);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-red);
 }
 </style>
