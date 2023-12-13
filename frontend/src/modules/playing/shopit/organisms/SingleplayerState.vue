@@ -55,23 +55,23 @@
       </p>
       <div
         v-for="card in cardsPlayed"
-        :key="card[8]"
-        :id="card[8]"
+        :key="card.name"
+        :id="card.name"
         class="cardPlayed"
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
       >
         <Card
-          :cost="card[0]"
-          :CO2="card[1]"
-          :energy="card[2]"
-          :lifetime="card[3]"
-          :water="card[4]"
-          :money="card[5]"
-          :category="card[6]"
-          :condition="card[7]"
-          :cardName="card[8]"
+          :cost="card.cost"
+          :CO2="card.CO2"
+          :energy="card.energy"
+          :lifetime="card.lifetime"
+          :water="card.water"
+          :money="card.money"
+          :category="card.category"
+          :condition="card.condition"
+          :cardName="card.name"
         />
       </div>
     </TransitionGroup>
@@ -109,13 +109,13 @@
     <TransitionGroup name="hand" class="hand" tag="div">
       <div
         v-for="card in cardHand"
-        :key="card[8]"
-        :id="card[8]"
+        :key="card.name"
+        :id="card.name"
         class="cardContainer"
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
-        @click="activeCardChanged(card, card[8])"
+        @click="activeCardChanged(card, card.name)"
       >
         <button
           v-if="card === activeCard && !buttonDisabled"
@@ -125,15 +125,15 @@
           {{ $t('module.playing.shopit.participant.cardPlayButton') }}
         </button>
         <Card
-          :cost="card[0]"
-          :CO2="card[1]"
-          :energy="card[2]"
-          :lifetime="card[3]"
-          :water="card[4]"
-          :money="card[5]"
-          :category="card[6]"
-          :condition="card[7]"
-          :cardName="card[8]"
+          :cost="card.cost"
+          :CO2="card.CO2"
+          :energy="card.energy"
+          :lifetime="card.lifetime"
+          :water="card.water"
+          :money="card.money"
+          :category="card.category"
+          :condition="card.condition"
+          :cardName="card.name"
         />
       </div>
     </TransitionGroup>
@@ -158,26 +158,26 @@
     <div class="endCards">
       <div
         v-for="card in endCardsOverview"
-        :key="card[9]"
-        :id="card[9]"
+        :key="card.infoKey"
+        :id="card.infoKey"
         class="endCard"
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
-        @click="activeCardChanged(card, card[9], true)"
+        @click="activeCardChanged(card, card.infoKey, true)"
       >
         <Card
-          :cost="card[0]"
-          :CO2="card[1]"
-          :energy="card[2]"
-          :lifetime="card[3]"
-          :water="card[4]"
-          :money="card[5]"
-          :category="card[6]"
-          :condition="card[7]"
-          :cardName="card[8]"
+          :cost="card.cost"
+          :CO2="card.CO2"
+          :energy="card.energy"
+          :lifetime="card.lifetime"
+          :water="card.water"
+          :money="card.money"
+          :category="card.category"
+          :condition="card.condition"
+          :cardName="card.name"
         />
-        <p class="CardDescription">{{ card[9] }}</p>
+        <p class="CardDescription">{{ card.infoKey }}</p>
       </div>
     </div>
     <div class="infoText">
@@ -214,26 +214,26 @@
     <div class="endCards">
       <div
         v-for="card in endCardsOverview"
-        :key="card[9]"
-        :id="card[9]"
+        :key="card.infoKey"
+        :id="card.infoKey"
         class="endCard"
         :style="{
           backgroundImage: 'url(' + gameConfig.gameValues.cardBackground + ')',
         }"
-        @click="activeCardChanged(card, card[9], true)"
+        @click="activeCardChanged(card, card.infoKey, true)"
       >
         <Card
-          :cost="card[0]"
-          :CO2="card[1]"
-          :energy="card[2]"
-          :lifetime="card[3]"
-          :water="card[4]"
-          :money="card[5]"
-          :category="card[6]"
-          :condition="card[7]"
-          :cardName="card[8]"
+          :cost="card.cost"
+          :CO2="card.CO2"
+          :energy="card.energy"
+          :lifetime="card.lifetime"
+          :water="card.water"
+          :money="card.money"
+          :category="card.category"
+          :condition="card.condition"
+          :cardName="card.name"
         />
-        <p class="CardDescription">{{ card[9] }}</p>
+        <p class="CardDescription">{{ card.infoKey }}</p>
       </div>
     </div>
     <div class="infoText">
@@ -254,7 +254,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop, Watch } from 'vue-property-decorator';
+import { Prop } from 'vue-property-decorator';
 import { ObjectSpace } from '@/types/enum/ObjectSpace';
 import { until } from '@/utils/wait';
 import * as tutorialService from '@/services/tutorial-service';
@@ -272,13 +272,6 @@ enum PlayStateType {
   play,
   win,
   lost,
-}
-
-export interface PlayStateResult {
-  stars: number;
-  time: number;
-  collected: number;
-  total: number;
 }
 
 @Options({
@@ -341,7 +334,7 @@ export default class PlayState extends Vue {
 
   preloadAllSprites(cards) {
     for (let i = 0; i < cards.length; i++) {
-      this.preloadImage(this.cardSpriteFolder + cards[i][8] + '.png');
+      this.preloadImage(this.cardSpriteFolder + cards[i].name + '.png');
     }
   }
 
@@ -381,8 +374,8 @@ export default class PlayState extends Vue {
         this.gameEnded = true;
         this.endCardsOverview = this.calculateMostExpensiveCards();
         this.activeCardChanged(
-            this.endCardsOverview[0],
-            this.endCardsOverview[0][9]
+          this.endCardsOverview[0],
+          this.endCardsOverview[0].infoKey
         );
         this.playStateType = PlayStateType.lost;
         break;
@@ -391,8 +384,8 @@ export default class PlayState extends Vue {
         this.gameEnded = true;
         this.endCardsOverview = this.calculateMostExpensiveCards();
         this.activeCardChanged(
-            this.endCardsOverview[0],
-            this.endCardsOverview[0][9]
+          this.endCardsOverview[0],
+          this.endCardsOverview[0].infoKey
         );
         this.playStateType = PlayStateType.win;
         break;
@@ -413,30 +406,30 @@ export default class PlayState extends Vue {
     let water = 0;
     let money = 0;
     for (let i = 0; i < this.ownCardsPlayed.length; i++) {
-      if (this.ownCardsPlayed[i][1] > co2) {
-        co2 = this.ownCardsPlayed[i][1];
-        co2Card = this.ownCardsPlayed[i].map((x) => x);
-        co2Card.push('CO²');
+      if (this.ownCardsPlayed[i].CO2 > co2) {
+        co2 = this.ownCardsPlayed[i].CO2;
+        co2Card = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
+        co2Card.infoKey = 'CO²';
       }
-      if (this.ownCardsPlayed[i][2] > electricity) {
-        electricity = this.ownCardsPlayed[i][2];
-        electricityCard = this.ownCardsPlayed[i].map((x) => x);
-        electricityCard.push('electricity');
+      if (this.ownCardsPlayed[i].energy > electricity) {
+        electricity = this.ownCardsPlayed[i].energy;
+        electricityCard = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
+        electricityCard.infoKey = 'electricity';
       }
-      if (this.ownCardsPlayed[i][3] < lifetime) {
-        lifetime = this.ownCardsPlayed[i][3];
-        lifetimeCard = this.ownCardsPlayed[i].map((x) => x);
-        lifetimeCard.push('lifetime');
+      if (this.ownCardsPlayed[i].lifetime < lifetime) {
+        lifetime = this.ownCardsPlayed[i].lifetime;
+        lifetimeCard = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
+        lifetimeCard.infoKey = 'lifetime';
       }
-      if (this.ownCardsPlayed[i][4] > water) {
-        water = this.ownCardsPlayed[i][4];
-        waterCard = this.ownCardsPlayed[i].map((x) => x);
-        waterCard.push('water');
+      if (this.ownCardsPlayed[i].water > water) {
+        water = this.ownCardsPlayed[i].water;
+        waterCard = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
+        waterCard.infoKey = 'water';
       }
-      if (this.ownCardsPlayed[i][5] > money) {
-        money = this.ownCardsPlayed[i][5];
-        moneyCard = this.ownCardsPlayed[i].map((x) => x);
-        moneyCard.push('money');
+      if (this.ownCardsPlayed[i].money > money) {
+        money = this.ownCardsPlayed[i].money;
+        moneyCard = JSON.parse(JSON.stringify(this.ownCardsPlayed[i]));
+        moneyCard.infoKey = 'money';
       }
     }
     cards.push(co2Card);
@@ -492,15 +485,26 @@ export default class PlayState extends Vue {
       for (const itemKey in categoryItems) {
         const item = categoryItems[itemKey];
         const itemValues = Object.values(item);
-        itemValues.push(itemKey);
-        cardArray.push(itemValues);
+        const card = {
+          cost: itemValues[0],
+          CO2: itemValues[1],
+          energy: itemValues[2],
+          lifetime: itemValues[3],
+          water: itemValues[4],
+          money: itemValues[5],
+          category: itemValues[6],
+          condition: itemValues[7],
+          name: itemKey,
+          infoKey: '',
+        };
+        cardArray.push(card);
       }
     }
     return cardArray;
   }
 
   getCardSprite(card) {
-    return this.cardSpriteFolder + card[8] + '.png';
+    return this.cardSpriteFolder + card.name + '.png';
   }
 
   shuffle(cards) {
@@ -566,15 +570,15 @@ export default class PlayState extends Vue {
       }
     }
     //If everything goes right: continue the play
-    if (continuePlay && card[0] > 0) {
+    if (continuePlay && card.cost > 0) {
       this.buttonDisabled = true;
 
       //remove from hand and add to play
       const index = this.cardHand.indexOf(card);
       this.cardHand.splice(index, 1);
       this.cardsPlayed.push(card);
-      const copyCard = card.map((x) => x);
-      this.ownCardPlayed = copyCard[8];
+      const copyCard = JSON.parse(JSON.stringify(card));
+      this.ownCardPlayed = copyCard.name;
       this.ownCardsPlayed.push(copyCard);
 
       //remove wrong category icon highlight
@@ -618,13 +622,13 @@ export default class PlayState extends Vue {
   }
 
   checkCategories(card, card2) {
-    return card[6] == card2[6];
+    return card.category == card2.category;
   }
 
   checkAllCardCategories(card2) {
     const boolArray: boolean[] = [];
     for (let i = 0; i < this.cardHand.length; i++) {
-      if (this.cardHand[i][6] == card2[6]) {
+      if (this.cardHand[i].category == card2.category) {
         boolArray.push(true);
       } else {
         boolArray.push(false);
@@ -660,22 +664,22 @@ export default class PlayState extends Vue {
     //Compares the cost + category of the cards and decides the winner
     let winningCard;
     if (card && card2) {
-      if (card[6] == card2[6]) {
+      if (card.category == card2.category) {
         //If the categories fit
-        if (card[0] > card2[0]) {
+        if (card.cost > card2.cost) {
           if (playedFirst) {
-            this.pointsSpent += card[0] + card2[0];
+            this.pointsSpent += card.cost + card2.cost;
             winningCard = card;
           } else {
-            this.pointsSpentOpponent += card[0] + card2[0];
+            this.pointsSpentOpponent += card.cost + card2.cost;
             winningCard = card;
           }
         } else {
           if (playedFirst) {
-            this.pointsSpentOpponent += card[0] + card2[0];
+            this.pointsSpentOpponent += card.cost + card2.cost;
             winningCard = card2;
           } else {
-            this.pointsSpent += card[0] + card2[0];
+            this.pointsSpent += card.cost + card2.cost;
             winningCard = card2;
           }
         }
@@ -683,9 +687,9 @@ export default class PlayState extends Vue {
         //If the categories do not fit
         winningCard = card;
         if (playedFirst) {
-          this.pointsSpent += winningCard[0];
+          this.pointsSpent += winningCard.cost;
         } else {
-          this.pointsSpentOpponent += winningCard[0];
+          this.pointsSpentOpponent += winningCard.cost;
         }
       }
     }
@@ -700,8 +704,8 @@ export default class PlayState extends Vue {
     //Check if winning card is the own or the opponents
     //Adds points to winners category
     for (let i = 0; i < this.categoryPoints.length; i++) {
-      if (this.categoryPoints[i][0] == winningCard[6]) {
-        if (this.ownCardPlayed === winningCard[8]) {
+      if (this.categoryPoints[i][0] == winningCard.category) {
+        if (this.ownCardPlayed === winningCard.name) {
           this.categoryPoints[i][1] += 1;
         } else {
           this.categoryPointsOpponent[i][1] += 1;
@@ -732,7 +736,7 @@ export default class PlayState extends Vue {
   }
 
   cardWin(winningCard) {
-    const element = document.getElementById(winningCard[8]);
+    const element = document.getElementById(winningCard.name);
     if (element) {
       element.classList.add('cardWin');
     }
@@ -748,11 +752,11 @@ export default class PlayState extends Vue {
     let water = 0;
     let money = 0;
     for (let i = 0; i < this.ownCardsPlayed.length; i++) {
-      co2 += this.ownCardsPlayed[i][1];
-      electricity += this.ownCardsPlayed[i][2];
-      lifetime += this.ownCardsPlayed[i][3];
-      water += this.ownCardsPlayed[i][4];
-      money += this.ownCardsPlayed[i][5];
+      co2 += this.ownCardsPlayed[i].CO2;
+      electricity += this.ownCardsPlayed[i].energy;
+      lifetime += this.ownCardsPlayed[i].lifetime;
+      water += this.ownCardsPlayed[i].water;
+      money += this.ownCardsPlayed[i].money;
     }
 
     this.$emit(

@@ -1,45 +1,79 @@
 <template>
   <div id="selectContainer">
     <div
-        class="opponentHand"
-        :style="{
+      class="opponentHand"
+      :style="{
         backgroundImage: 'url(' + gameConfig.gameValues.opponentHand + ')',
       }"
     ></div>
     <div id="cardContainer">
       <div class="selectOption" id="singleplayer">
-        <h2 class="heading heading--medium">{{ $t('module.playing.shopit.participant.joinState.singleplayer') }}</h2>
-        <p>{{ $t('module.playing.shopit.participant.joinState.singleplayerDesc') }}</p>
+        <h2 class="heading heading--medium">
+          {{ $t('module.playing.shopit.participant.joinState.singleplayer') }}
+        </h2>
+        <p>
+          {{
+            $t('module.playing.shopit.participant.joinState.singleplayerDesc')
+          }}
+        </p>
         <div class="options">
-          <label class="el-form-item__label">{{ $t('module.playing.shopit.participant.joinState.singleplayerLabel') }}</label>
+          <label class="el-form-item__label">{{
+            $t('module.playing.shopit.participant.joinState.singleplayerLabel')
+          }}</label>
           <el-button
             class="el-button--submit"
             @click="optionSelected('singleplayer', null)"
           >
-            {{ $t('module.playing.shopit.participant.joinState.singleplayerButton') }}
+            {{
+              $t(
+                'module.playing.shopit.participant.joinState.singleplayerButton'
+              )
+            }}
           </el-button>
         </div>
       </div>
       <div class="selectOption" id="multiplayer">
-        <h2 class="heading heading--medium">{{ $t('module.playing.shopit.participant.joinState.multiplayer') }}</h2>
-        <p>{{ $t('module.playing.shopit.participant.joinState.multiplayerDesc') }}</p>
+        <h2 class="heading heading--medium">
+          {{ $t('module.playing.shopit.participant.joinState.multiplayer') }}
+        </h2>
+        <p>
+          {{
+            $t('module.playing.shopit.participant.joinState.multiplayerDesc')
+          }}
+        </p>
         <div class="options">
-          <label class="el-form-item__label">{{ $t('module.playing.shopit.participant.joinState.multiplayerLabelHost') }}</label>
+          <label class="el-form-item__label">{{
+            $t(
+              'module.playing.shopit.participant.joinState.multiplayerLabelHost'
+            )
+          }}</label>
           <el-button
             class="el-button--submit"
             @click="optionSelected('multiplayer', this.ownPlayID)"
           >
-            {{ $t('module.playing.shopit.participant.joinState.multiplayerButtonHost') }}
+            {{
+              $t(
+                'module.playing.shopit.participant.joinState.multiplayerButtonHost'
+              )
+            }}
           </el-button>
         </div>
         <div class="options">
-          <label class="el-form-item__label">{{ $t('module.playing.shopit.participant.joinState.multiplayerLabelJoin') }}</label>
+          <label class="el-form-item__label">{{
+            $t(
+              'module.playing.shopit.participant.joinState.multiplayerLabelJoin'
+            )
+          }}</label>
           <el-input v-model="inputID" placeholder="ID" />
           <el-button
             class="el-button--submit"
             @click="optionSelected('joinMultiplayer', inputID)"
           >
-            {{ $t('module.playing.shopit.participant.joinState.multiplayerButtonJoin') }}
+            {{
+              $t(
+                'module.playing.shopit.participant.joinState.multiplayerButtonJoin'
+              )
+            }}
           </el-button>
         </div>
       </div>
@@ -52,15 +86,11 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
 import { Idea } from '@/types/api/Idea';
 import * as cashService from '@/services/cash-service';
-import * as authService from '@/services/auth-service';
 import * as ideaService from '@/services/idea-service';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
-import * as taskParticipantService from '@/services/task-participant-service';
 import { TaskParticipantIterationStep } from '@/types/api/TaskParticipantIterationStep';
-import { GameStep } from '@/modules/playing/findit/output/Participant.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
-import * as configParameter from '@/utils/game/configParameter';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
 
@@ -132,7 +162,6 @@ export default class SelectState extends Vue {
 </style>
 
 <style lang="scss" scoped>
-
 #cardContainer {
   padding: 3rem;
   position: absolute;

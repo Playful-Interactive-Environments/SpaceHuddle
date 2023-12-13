@@ -328,8 +328,19 @@ export default class Participant extends Vue {
       for (const itemKey in categoryItems) {
         const item = categoryItems[itemKey];
         const itemValues = Object.values(item);
-        itemValues.push(itemKey);
-        cardArray.push(itemValues);
+        const card = {
+          cost: itemValues[0],
+          CO2: itemValues[1],
+          energy: itemValues[2],
+          lifetime: itemValues[3],
+          water: itemValues[4],
+          money: itemValues[5],
+          category: itemValues[6],
+          condition: itemValues[7],
+          name: itemKey,
+          infoKey: '',
+        };
+        cardArray.push(card);
       }
     }
     return cardArray;
