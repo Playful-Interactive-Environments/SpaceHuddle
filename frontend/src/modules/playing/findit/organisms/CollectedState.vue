@@ -120,7 +120,11 @@ export default class CollectedState extends Vue {
 
   getEndObjects(): placeable.PlaceableBase[] {
     const uniqueNamesSet = new Set();
-    return this.playStateResult.itemList.filter((obj) => {
+    const list = [
+      ...this.playStateResult.itemList,
+      ...this.playStateResult.redHerringList,
+    ];
+    return list.filter((obj) => {
       if (!uniqueNamesSet.has(obj.name)) {
         uniqueNamesSet.add(obj.name);
         return true;
@@ -178,6 +182,13 @@ export default class CollectedState extends Vue {
         }
       }
     }, 500);
+  }
+
+  unmounted(): void {
+    for (const typeName of this.gameConfigTypes) {
+      const settings = gameConfig[this.levelType].categories[typeName].settings;
+      pixiUtil.unloadTexture(settings.spritesheet);
+    }
   }
   //#endregion load / unload
 
@@ -280,6 +291,7 @@ export default class CollectedState extends Vue {
   width: var(--end-object-width);
   vertical-align: center;
   display: flex;
+  flex: 0 0 auto;
 }
 
 .objectContainerActive {

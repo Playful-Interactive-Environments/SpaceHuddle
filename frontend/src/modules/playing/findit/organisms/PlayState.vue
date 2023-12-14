@@ -117,7 +117,7 @@
           :src="levelTypeImages[clickedPlaceable.type][clickedPlaceable.name]"
           :alt="clickedPlaceable.name"
           :style="{
-            'max-width': `${gameWidth - 50}px`,
+            'max-width': `calc(${gameWidth}px - 6rem)`,
             'max-height': `${(gameHeight / 10) * 4}px`,
           }"
         />
@@ -177,6 +177,7 @@ export interface PlayStateResult {
   collected: number;
   total: number;
   itemList: placeable.PlaceableBase[];
+  redHerringList: placeable.PlaceableBase[];
 }
 
 interface FindItPlaceable extends placeable.Placeable {
@@ -262,6 +263,7 @@ export default class PlayState extends Vue {
 
   placedObjects: FindItPlaceable[] = [];
   collectedObjects: placeable.PlaceableBase[] = [];
+  collectedRedHerrings: placeable.PlaceableBase[] = [];
   stylesheets: { [key: string]: PIXI.Spritesheet } = {};
   levelTypeImages: { [key: string]: { [key: string]: string } } = {};
   totalCount = 0;
@@ -278,6 +280,7 @@ export default class PlayState extends Vue {
     this.levelType = '';
     this.placedObjects = [];
     this.collectedObjects = [];
+    this.collectedRedHerrings = [];
     this.totalCount = 0;
     this.collectedCount = 0;
     this.startTime = Date.now();
@@ -290,6 +293,7 @@ export default class PlayState extends Vue {
       collected: this.collectedCount,
       total: this.totalCount,
       itemList: this.collectedObjects,
+      redHerringList: this.collectedRedHerrings,
     };
   }
 
@@ -435,6 +439,7 @@ export default class PlayState extends Vue {
       this.previousLevelType = levelType;
       this.totalCount = this.collectableObjects.length;
       this.collectedObjects = [];
+      this.collectedRedHerrings = [];
       this.collectedCount = 0;
       this.clickedPlaceable = null;
       this.startTime = Date.now();
@@ -552,6 +557,8 @@ export default class PlayState extends Vue {
   destroyPlaceable(value: FindItPlaceable, event: PointerEvent): void {
     const config = gameConfig[this.levelType].categories[value.type].settings;
     if (config.explanationText) this.clickedPlaceable = value;
+    const placeableConfig =
+      gameConfig[this.levelType].categories[value.type].items[value.name];
     if (config.collectable) {
       const id = value.id;
       const index = this.placedObjects.findIndex((p) => p.id === id);
@@ -560,9 +567,14 @@ export default class PlayState extends Vue {
         this.placedObjects.splice(index, 1);
       }
       this.collectedCount++;
+    } else if (placeableConfig.explanationKey) {
+      const id = value.id;
+      const index = this.placedObjects.findIndex((p) => p.id === id);
+      if (index > -1) {
+        this.collectedRedHerrings.push(placeable.convertToBase(value));
+        this.placedObjects.splice(index, 1);
+      }
     }
-    const placeableConfig =
-      gameConfig[this.levelType].categories[value.type].items[value.name];
     if (placeableConfig.explanationKey) {
       const tutorialStepName = `${value.type}-${placeableConfig.explanationKey}`;
       event.preventDefault();
