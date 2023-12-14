@@ -88,8 +88,6 @@
             :size="150"
             :stick-size="15"
             @move="move($event)"
-            @start="start"
-            @stop="stop"
             @mousedown="disableMapPan"
             v-on:touchstart="disableMapPan"
             stickColor="white"
@@ -97,7 +95,7 @@
           />
         </template>
       </CustomMapMarker>
-      <CustomMapMarker anchor="bottom-left" :coordinates="mapEnd">
+      <CustomMapMarker anchor="top-left" :coordinates="mapEnd">
         <template v-slot:icon>
           <font-awesome-icon icon="flag-checkered" class="pin" />
         </template>
@@ -154,7 +152,7 @@
         </template>
       </CustomMapMarker>
     </mgl-map>
-    <div class="overlay-top-left">
+<!--    <div class="overlay-top-left">
       <round-slider
         v-model="maxSpeed"
         :max="vehicleParameter.speed"
@@ -183,20 +181,21 @@
           </div>
         </template>
       </el-progress>
-    </div>
-    <div v-if="vehicle.category === 'bus'" class="overlay-top-right">
-      <font-awesome-icon icon="users" />
-      {{ personCount }} / {{ vehicleParameter.persons }}
+    </div>-->
+    <div class="overlay-top-right">
+      <div v-if="vehicle.category === 'bus'" >
+        <font-awesome-icon icon="users" />
+        {{ personCount }} / {{ vehicleParameter.persons }}
+      </div>
+      <p class="overlay-top-mid" :style="{ backgroundColor: getSpeedColor(moveSpeed, 0.6) }">{{ Math.round(moveSpeed) }} km/h</p>
     </div>
     <div class="overlay-bottom-right">
       <div>
         <Joystick
           v-if="navigation === NavigationType.joystick && zoomReady"
-          :size="150"
-          :stick-size="50"
+          :size="120"
+          :stick-size="40"
           @move="move($event)"
-          @start="start"
-          @stop="stop"
           stickColor="radial-gradient(circle at 60% 55%, #ffffff, #aaaaaa)"
           :base-color="`radial-gradient(circle, #757d76ff 20%, #26352799 59%, ${getSpeedColor(
             moveSpeed,
@@ -219,7 +218,7 @@
         :inactive-text="$t('module.playing.moveit.participant.separate')"
       />
     </div>-->
-    <div class="overlay-bottom-left">
+    <div class="overlay-top-left">
       <el-button
         class="overlay-top-right"
         link
@@ -250,6 +249,22 @@
           </template>
         </CustomMapMarker>
       </mgl-map>
+    </div>
+    <div class="overlay-bottom-left">
+      <el-button
+        class="gas"
+        @click="increaseSpeed"
+        :style="{ backgroundColor: getSpeedColor(moveSpeed, 0.6) }"
+      >
+        G
+      </el-button>
+      <el-button
+        class="brake"
+        @click="decreaseSpeed"
+        :style="{ backgroundColor: getSpeedColor(100 - moveSpeed, 0.6) }"
+      >
+        B
+      </el-button>
     </div>
   </div>
   <!--<img v-if="streetMask" :src="streetMask" class="streetMask" />-->
@@ -826,6 +841,7 @@ export default class DriveToLocation extends Vue {
     clearInterval(this.intervalCalculation);
     clearInterval(this.intervalAnimation);
     clearInterval(this.busStopInterval);
+    clearInterval(this.decreaseSpeedInterval);
     window.removeEventListener('mouseup', this.enableMapPan);
     window.removeEventListener('touchend', this.enableMapPan);
   }
@@ -932,11 +948,42 @@ export default class DriveToLocation extends Vue {
     const calcAngle = (point: [number, number]): number => {
       return Math.atan2(point[0], point[1]) * (180 / Math.PI);
     };
-
-    this.moveSpeed = (event.distance / 100.0) * this.maxSpeed;
     this.moveAngle = calcAngle([event.x, event.y]);
     this.moveDirection = [event.x, event.y];
     this.noStreet = false;
+  }
+
+  decreaseTimeSeconds = 3;
+  stepsPerSecond = 5;
+  totalSteps = this.decreaseTimeSeconds * this.stepsPerSecond;
+  stepSize = this.speed / this.totalSteps;
+  decreaseSpeedInterval = setInterval(() => {
+    this.speed -= this.stepSize;
+    if (this.speed <= 0) {
+      this.speed = 0;
+    }
+    this.moveSpeed = this.speed;
+  }, 1000 / this.stepsPerSecond);
+
+  increaseSpeed(): void {
+    if (this.speed < this.maxSpeed) {
+      if (this.speed + 5 < this.maxSpeed) {
+        this.speed += 5;
+      } else {
+        this.speed += this.maxSpeed - this.speed;
+      }
+    }
+    this.stepSize = this.speed / this.totalSteps;
+  }
+  decreaseSpeed(): void {
+    if (this.speed > 0) {
+      if (this.speed - 7 > 0) {
+        this.speed -= 7;
+      } else {
+        this.speed = 0;
+      }
+    }
+    this.stepSize = this.speed / this.totalSteps;
   }
   //#endregion navigation
 
@@ -1604,6 +1651,7 @@ export default class DriveToLocation extends Vue {
   right: 1rem;
   font-size: var(--font-size-xxxlarge);
   color: var(--pin-color);
+  text-align: right;
 }
 
 .overlay-bottom {
@@ -1613,6 +1661,18 @@ export default class DriveToLocation extends Vue {
   right: 1rem;
   left: 1rem;
   //padding: 1rem;
+}
+
+.overlay-top-mid {
+  text-align: center;
+  position: relative;
+  font-size: var(--font-size-large);
+  font-weight: var(--font-weight-semibold);
+  right: 0;
+  display: inline;
+  padding: 0.4rem 0.5rem;
+  border-radius: var(--border-radius-small);
+  border: 4px solid var(--color-dark-contrast);
 }
 
 .overlay-bottom-right {
@@ -1781,6 +1841,18 @@ export default class DriveToLocation extends Vue {
 
 .miniMap {
   border: 3px solid var(--color-dark-contrast);
+}
+
+.gas {
+  border: 4px solid var(--color-dark-contrast);
+  width: 4rem;
+  height: 7rem;
+}
+.brake {
+  border: 4px solid var(--color-dark-contrast);
+  width: 3rem;
+  height: 4rem;
+  margin-left: 0.3rem;
 }
 </style>
 
