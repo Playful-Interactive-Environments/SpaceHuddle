@@ -105,19 +105,6 @@
         }
       }
     },
-    "endCardTexts": {
-      "dead-tree": "Dead trees can dry out, which increases the risk of them catching fire.",
-      "cigarette": "Cigarettes which haven't been extinguished properly are one of the most severe fire hazards out there. They get thrown out of cars or get left behind by hikers on their way to the top.",
-      "campfire": "Campfires can be rekindled by the wind, causing a forest fire.",
-      "turtle": "Turtles do not occur naturally in our area. Exposed in the forest, they are defenseless.",
-      "bug": "Beetles are part of the natural ecosystem, form the basis of the food chain for other animals and loosen the soil. Their survival is therefore important for the survival of the forest and other animals.",
-      "bottle": "It is a myth that left-behind glass bottles of all kinds act like a lens under the right circumstances and focus the light. No one can start a fire at the focal point! However, garbage does not belong in the forest, as animals can get hurt.",
-      "fish": "Fishes can be stranded after the flood and need to be rescued.",
-      "sandbag": "Sandbags have to be removed after the flood is over, as they are blocking paths and streets.",
-      "person": "People can drown.",
-      "garbage": "Garbage can be carried away by the flood and must be collected again later in order to not pollute the environment.",
-      "branches": "Branches and Driftwood can be washed into the streets and have to be cleaned up."
-    },
     "returnToMenu": "Return to Menu."
   },
   "statistic": {

@@ -105,19 +105,6 @@
         }
       }
     },
-    "endCardTexts": {
-      "dead-tree": "Tote Bäume können austrocknen und bieten somit ein erhöhtes Risiko Feuer zu fangen.",
-      "cigarette": "Nicht ordentlich ausgedämpfte Zigaretten sind einer der größten Waldbrandverursacher. Häufig werden sie aus fahrenden Autos geworfen oder auf Wanderwegen zurückgelassen.",
-      "campfire": "Lagerfeuer können vom Wind neu angefacht werden und so einen Waldbrand auslösen.",
-      "turtle": "Schildkröten kommen in unserer Gegend nicht natürlich vor. Im Wald ausgesetzt, sind sie schutzlos.",
-      "bug": "Käfer sind Teil des natürlichen Ökosystems, bilden die Grundlage der Nahrungskette für andere Tiere und lockern den Boden. Ihr Überleben ist daher wichtig für das Überleben des Waldes und anderer Tiere.",
-      "bottle": "Es ist ein Mythos, dass zurückgelassene Glasflaschen aller Art unter den richtigen Umständen wie eine Linse wirken und das Licht fokussieren. Am Brennpunkt kann kein ein Feuer entstehen! Allerdings gehört Müll nicht in den Wald, da sich Tier verletzen können",
-      "fish": "Fische können nach der Flut gestrandet sein und müssen gerettet werden.",
-      "sandbag": "Sandsäcke müssen nach der Flut weggeräumt werden, da sie Straßen und Wege blockieren.",
-      "person": "Menschen können ertrinken.",
-      "garbage": "Müll kann von der Flut weggetragen werden und muss später wieder eingesammelt werden um die Umwelt nicht zu verschmutzen.",
-      "branches": "Äste können während der Flut in die Straßen gespült werden und müssen danach aufgeräumt werden."
-    },
     "returnToMenu": "Zurück zum Menü."
   },
   "statistic": {

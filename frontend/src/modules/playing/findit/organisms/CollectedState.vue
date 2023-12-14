@@ -46,13 +46,9 @@
     <h2 class="heading heading--medium" v-if="this.activeObject !== null">
       {{
         $t(
-          'module.playing.findit.participant.placeables.' +
-            levelType +
-            '.' +
-            this.activeObject.type +
-            '.' +
-            getExplanationKey(this.activeObject) +
-            '.name'
+          `module.playing.findit.participant.placeables.${levelType}.${
+            this.activeObject.type
+          }.${getExplanationKey(this.activeObject)}.name`
         )
       }}
     </h2>
@@ -60,9 +56,9 @@
       <p class="marginTop" v-if="this.activeObject !== null">
         {{
           $t(
-            `module.playing.findit.participant.endCardTexts.${getExplanationKey(
-              this.activeObject
-            )}`
+            `module.playing.findit.participant.placeables.${levelType}.${
+              this.activeObject.type
+            }.${getExplanationKey(this.activeObject)}.description`
           )
         }}
       </p>
@@ -214,13 +210,9 @@ export default class CollectedState extends Vue {
   }
 
   getExplanationKey(object: placeable.PlaceableBase): string {
-    if (object.name === 'man' || object.name === 'woman') {
-      return 'person';
-    } else if (object.name.substring(0, 6) === 'bottle') {
-      return 'bottle';
-    } else {
-      return object.name;
-    }
+    const placeableConfig =
+      gameConfig[this.levelType].categories[object.type].items[object.name];
+    return placeableConfig.explanationKey;
   }
   //#endregion interaction
 }
