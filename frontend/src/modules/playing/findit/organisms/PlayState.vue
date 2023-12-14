@@ -270,6 +270,7 @@ export default class PlayState extends Vue {
   collectedCount = 0;
   searchPosition: [number, number] = [0, 0];
   startTime = Date.now();
+  textureToken = pixiUtil.createLoadingToken();
 
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
@@ -337,10 +338,7 @@ export default class PlayState extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
-    for (const typeName of this.gameConfigTypes) {
-      const settings = gameConfig[this.levelType].categories[typeName].settings;
-      pixiUtil.unloadTexture(settings.spritesheet);
-    }
+    pixiUtil.cleanupToken(this.textureToken);
   }
 
   getSearchMask(placeable: FindItPlaceable): any {
@@ -400,22 +398,6 @@ export default class PlayState extends Vue {
       const levelType = this.level.parameter.type
         ? this.level.parameter.type
         : configParameter.getDefaultLevelType(gameConfig as any);
-      if (this.previousLevelType && this.previousLevelType !== levelType) {
-        const gameConfigTypes = Object.keys(gameConfig[levelType].categories);
-        for (const typeName of gameConfigTypes) {
-          const previousSettings =
-            gameConfig[this.previousLevelType].categories[typeName].settings;
-          if (
-            previousSettings &&
-            previousSettings.spritesheet &&
-            this.stylesheets[typeName] &&
-            PIXI.Cache.has(previousSettings.spritesheet)
-          ) {
-            pixiUtil.unloadTexture(previousSettings.spritesheet);
-            delete this.stylesheets[typeName];
-          }
-        }
-      }
       this.levelType = levelType;
       const items = configParameter.getItemsForLevel(
         gameConfig as any,
@@ -461,7 +443,11 @@ export default class PlayState extends Vue {
             this.previousLevelType !== this.levelType
           ) {
             pixiUtil
-              .loadTexture(settings.spritesheet, this.eventBus)
+              .loadTexture(
+                settings.spritesheet,
+                this.eventBus,
+                this.textureToken
+              )
               .then((sheet) => {
                 this.stylesheets[typeName] = sheet;
                 this.levelTypeImages[typeName] = {};

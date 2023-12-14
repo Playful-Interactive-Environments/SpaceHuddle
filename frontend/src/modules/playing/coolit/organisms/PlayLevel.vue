@@ -108,45 +108,9 @@
                 {{ Math.round(averageTemperature) }}°C
               </text>
             </container>
-            <!--<GameObject
-              v-for="obstacle in obstacleList"
-              :key="obstacle.uuid"
-              v-model:id="obstacle.id"
-              :type="obstacle.shape"
-              :polygon-shape="obstacle.polygonShape"
-              :show-bounds="false"
-              :anchor="obstacle.pivot"
-              :object-space="ObjectSpace.RelativeToBackground"
-              :x="obstacle.position[0]"
-              :y="obstacle.position[1]"
-              :rotation="obstacle.rotation"
-              :scale="obstacle.scale"
-              :options="obstacle.options"
-              :is-static="true"
-              :affectedByForce="false"
-              :source="obstacle"
-              :sleep-if-not-visible="true"
-              :clickable="obstacle.reflectionProbability > 0"
-              @collision="obstacleCollision"
-            >
-              <CustomSprite
-                :colorOverlay="calculateTintColor(obstacle)"
-                :texture="obstacle.texture"
-                :anchor="obstacle.pivot"
-                :width="obstacle.width"
-                :aspect-ration="getObjectAspect(obstacle.type, obstacle.name)"
-                :object-space="ObjectSpace.RelativeToBackground"
-                :filters="obstacle.hitAnimation"
-                :saturation="obstacle.saturation"
-                :outline="getTemperatureColor(obstacle.temperature).code"
-                :outline-width="
-                  getTemperatureColor(obstacle.temperature).thickness
-                "
-              >
-              </CustomSprite>
-            </GameObject>-->
             <animated-sprite
-              v-if="vehicleStylesheets"
+              ref="vehicle"
+              v-if="vehicleStylesheets && randomVehicleName"
               :textures="vehicleStylesheets.animations[randomVehicleName]"
               :animation-speed="0.2"
               :width="vehicleWidth"
@@ -155,6 +119,7 @@
               :y="vehicleYPosition"
               :anchor="[0.5, 1]"
               playing
+              :loop="vehicleIsActive && !gameOver"
               @frame-change="animationFrameChanged"
             />
             <custom-particle-container
@@ -234,19 +199,6 @@
                 />
               </template>
             </GameObject>
-            <!--<custom-particle-container
-              v-for="moleculeName of Object.keys(backgroundParticle)"
-              :key="moleculeName"
-              :deep-clone-config="false"
-              :default-texture="moleculeTextures[moleculeName]"
-              :parentEventBus="eventBus"
-              :config="backgroundParticle[moleculeName]"
-              :x="(-panOffset[0] * (containerTextureSize[0] - gameWidth)) / 100"
-              :y="
-                (-panOffset[1] * (containerTextureSize[1] - gameHeight)) / 100
-              "
-              :auto-update="false"
-            />-->
             <GameObject
               v-for="molecule of moleculeList"
               :key="molecule.id"
@@ -270,7 +222,6 @@
                     molecule.rise = false;
                     return true;
                   }
-                  //console.log(object.position[1], gameHeight / 3 * 2);
                   return object.position[1] > gameHeight / 3 * 2;
                 }
               }"
@@ -358,42 +309,6 @@
                 {{ Math.round(obstacle.temperature) }}°C
               </text>
             </container>
-            <!--<GameObject
-              v-for="obstacle in obstacleList"
-              :key="obstacle.uuid"
-              v-model:id="obstacle.id"
-              :type="obstacle.shape"
-              :polygon-shape="obstacle.polygonShape"
-              :show-bounds="false"
-              :anchor="obstacle.pivot"
-              :object-space="ObjectSpace.RelativeToBackground"
-              :x="obstacle.position[0]"
-              :y="obstacle.position[1]"
-              :rotation="obstacle.rotation"
-              :scale="obstacle.scale"
-              :options="obstacle.options"
-              :is-static="true"
-              :affectedByForce="false"
-              :source="obstacle"
-              :clickable="false"
-            >
-              <CustomSprite
-                :colorOverlay="calculateTintColor(obstacle, 0.7)"
-                :texture="obstacle.texture"
-                :anchor="obstacle.pivot"
-                :width="obstacle.width"
-                :aspect-ration="getObjectAspect(obstacle.type, obstacle.name)"
-                :object-space="ObjectSpace.RelativeToBackground"
-              >
-              </CustomSprite>
-              <text
-                :anchor="[0.5, 1]"
-                :style="{ fontFamily: 'Arial', fontSize: 34, fill: '#ffffff' }"
-                :scale="textScaleFactor"
-              >
-                {{ Math.round(obstacle.temperature) }}°C
-              </text>
-            </GameObject>-->
           </container>
         </container>
       </template>
@@ -784,6 +699,7 @@ export default class PlayLevel extends Vue {
   randomMessageNo = 1;
   showObstacleSelection = false;
   selectedObstacle: CoolItObstacle | null = null;
+  textureToken = pixiUtil.createLoadingToken();
 
   temperatureColorSteps: { [key: number]: ColorValues } = {};
 
@@ -1349,12 +1265,20 @@ export default class PlayLevel extends Vue {
     this.interval = setInterval(() => this.updateLoop(), this.intervalTime);
 
     pixiUtil
-      .loadTexture('/assets/games/coolit/city/weather.json', this.eventBus)
+      .loadTexture(
+        '/assets/games/coolit/city/weather.json',
+        this.eventBus,
+        this.textureToken
+      )
       .then((sheet) => {
         this.weatherStylesheets = sheet;
       });
     pixiUtil
-      .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
+      .loadTexture(
+        '/assets/games/moveit/molecules.json',
+        this.eventBus,
+        this.textureToken
+      )
       .then((sheet) => {
         this.moleculeStylesheets = sheet;
         this.generateMoleculeTextures();
@@ -1362,19 +1286,28 @@ export default class PlayLevel extends Vue {
     pixiUtil
       .loadTexture(
         '/assets/games/moveit/vehicle/vehicle_animation.json',
-        this.eventBus
+        this.eventBus,
+        this.textureToken
       )
       .then((sheet) => {
         this.vehicleStylesheets = sheet;
         this.setRandomAnimation();
       });
     pixiUtil
-      .loadTexture('/assets/games/coolit/city/river.png', this.eventBus)
+      .loadTexture(
+        '/assets/games/coolit/city/river.png',
+        this.eventBus,
+        this.textureToken
+      )
       .then((sheet) => {
         this.riverTexture = sheet;
       });
     pixiUtil
-      .loadTexture('/assets/games/coolit/city/sun.json', this.eventBus)
+      .loadTexture(
+        '/assets/games/coolit/city/sun.json',
+        this.eventBus,
+        this.textureToken
+      )
       .then((sheet) => {
         this.sunStylesheets = sheet;
       });
@@ -1400,12 +1333,20 @@ export default class PlayLevel extends Vue {
   }
 
   animationFrameChanged(): void {
-    if (!this.vehicleIsActive) return;
+    if (!this.vehicleIsActive) {
+      if (this.vehicleSprite) this.vehicleSprite.stop();
+      return;
+    }
+    if (this.gameOver) {
+      if (this.vehicleSprite) this.vehicleSprite.stop();
+      return;
+    }
     this.vehicleXPosition += this.vehicleWidth / 50;
     if (this.vehicleXPosition > this.gameWidth + this.vehicleWidth / 2) {
       this.setRandomAnimation();
       setTimeout(() => {
         this.vehicleIsActive = true;
+        if (this.vehicleSprite) this.vehicleSprite.play();
       }, 1000 + Math.random() * 10000);
     } else if (
       this.vehicleXPosition > this.gameWidth * 0.5 &&
@@ -1628,6 +1569,7 @@ export default class PlayLevel extends Vue {
     this.containerTextureSize = size;
   }
 
+  vehicleSprite: PIXI.AnimatedSprite | null = null;
   containerReady(): void {
     if (!this.emitStart) {
       this.startTime = Date.now();
@@ -1637,6 +1579,8 @@ export default class PlayLevel extends Vue {
     setTimeout(async () => {
       await until(() => !!this.vehicleStylesheets);
       this.vehicleIsActive = true;
+      this.vehicleSprite = this.$refs.vehicle as PIXI.AnimatedSprite;
+      this.vehicleSprite.play();
     }, Math.random() * 1000);
   }
 
@@ -1657,11 +1601,9 @@ export default class PlayLevel extends Vue {
     this.active = false;
     clearInterval(this.interval);
     this.deregisterAll();
-    for (const typeName of this.gameConfigTypes) {
-      const settings = this.getLevelTypeCategorySettings(typeName);
-      pixiUtil.unloadTexture(settings.spritesheet);
-    }
-    pixiUtil.unloadTexture('/assets/games/moveit/molecules.json');
+    this.vehicleIsActive = false;
+    pixiUtil.cleanupToken(this.textureToken);
+    this.vehicleStylesheets = null;
     this.eventBus.off(EventType.TEXTURES_LOADING_START);
     this.eventBus.off(EventType.ALL_TEXTURES_LOADED);
   }
@@ -1682,25 +1624,6 @@ export default class PlayLevel extends Vue {
       const levelType = this.level.parameter.type
         ? this.level.parameter.type
         : configParameter.getDefaultLevelType(gameConfig.obstacles as any);
-      if (this.previousLevelType && this.previousLevelType !== levelType) {
-        const gameConfigTypes = Object.keys(
-          gameConfig.obstacles[levelType].categories
-        );
-        for (const typeName of gameConfigTypes) {
-          const previousSettings =
-            gameConfig.obstacles[this.previousLevelType].categories[typeName]
-              .settings;
-          if (
-            previousSettings &&
-            previousSettings.spritesheet &&
-            this.stylesheets[typeName] &&
-            PIXI.Cache.has(previousSettings.spritesheet)
-          ) {
-            pixiUtil.unloadTexture(previousSettings.spritesheet);
-            delete this.stylesheets[typeName];
-          }
-        }
-      }
       this.levelType = levelType;
       const items = configParameter.getItemsForLevel(
         gameConfig.obstacles as any,
@@ -1748,7 +1671,11 @@ export default class PlayLevel extends Vue {
             this.previousLevelType !== this.levelType
           ) {
             pixiUtil
-              .loadTexture(settings.spritesheet, this.eventBus)
+              .loadTexture(
+                settings.spritesheet,
+                this.eventBus,
+                this.textureToken
+              )
               .then(async (sheet) => {
                 this.stylesheets[typeName] = sheet;
                 this.categoryImages[typeName] = {};

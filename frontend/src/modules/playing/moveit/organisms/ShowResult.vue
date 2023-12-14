@@ -149,6 +149,7 @@ export default class ShowResult extends Vue {
   maxParticleCount = 100;
   circleGradientTexture: PIXI.Texture | null = null;
   particleTextures: { [key: string]: PIXI.Texture } = {};
+  textureToken = pixiUtil.createLoadingToken();
 
   get particleStateSum(): ParticleState {
     return particleStateUtil.particleStateSum(this.particleState);
@@ -314,7 +315,11 @@ export default class ShowResult extends Vue {
       }
     }
     pixiUtil
-      .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
+      .loadTexture(
+        '/assets/games/moveit/molecules.json',
+        this.eventBus,
+        this.textureToken
+      )
       .then((sheet) => {
         this.spritesheet = sheet;
         this.generateParticleTextures();
@@ -322,7 +327,7 @@ export default class ShowResult extends Vue {
   }
 
   unmounted(): void {
-    pixiUtil.unloadTexture('/assets/games/moveit/molecules.json');
+    pixiUtil.cleanupToken(this.textureToken);
   }
 
   @Watch('gameWidth', { immediate: true })

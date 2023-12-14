@@ -427,6 +427,7 @@ export default class SelectLevel extends Vue {
   highScoreList: VoteParameterResult[] = [];
   openHighScoreLevels: string[] = [];
   difficultyLevel = DifficultyLevel.today;
+  textureToken = pixiUtil.createLoadingToken();
 
   MIN_TEMPERATURE_RISE = CoolItConst.MIN_TEMPERATURE_RISE;
   MAX_TEMPERATURE_RISE = CoolItConst.MAX_TEMPERATURE_RISE;
@@ -522,7 +523,11 @@ export default class SelectLevel extends Vue {
     this.showHighScore = this.openHighScore;
     setTimeout(() => {
       pixiUtil
-        .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
+        .loadTexture(
+          '/assets/games/moveit/molecules.json',
+          this.eventBus,
+          this.textureToken
+        )
         .then((sheet) => {
           this.spritesheet = sheet;
           pixiUtil.convertSpritesheetToBase64(sheet, this.moleculeImages);
@@ -530,7 +535,11 @@ export default class SelectLevel extends Vue {
     }, 100);
     setTimeout(() => {
       pixiUtil
-        .loadTexture('/assets/games/coolit/city/city.json', this.eventBus)
+        .loadTexture(
+          '/assets/games/coolit/city/city.json',
+          this.eventBus,
+          this.textureToken
+        )
         .then((sheet) => {
           this.spritesheetBuilding = sheet;
           pixiUtil.convertSpritesheetToBase64(sheet, this.obstacleImages);
@@ -538,7 +547,11 @@ export default class SelectLevel extends Vue {
     }, 100);
     setTimeout(() => {
       pixiUtil
-        .loadTexture('/assets/games/coolit/city/difficulty.json', this.eventBus)
+        .loadTexture(
+          '/assets/games/coolit/city/difficulty.json',
+          this.eventBus,
+          this.textureToken
+        )
         .then((sheet) => {
           this.spriteSheetDifficulty = sheet;
         });
@@ -561,9 +574,7 @@ export default class SelectLevel extends Vue {
   }
 
   unmounted(): void {
-    pixiUtil.unloadTexture('/assets/games/moveit/molecules.json');
-    pixiUtil.unloadTexture('/assets/games/coolit/city/city.json');
-    pixiUtil.unloadTexture('/assets/games/coolit/city/difficulty.json');
+    pixiUtil.cleanupToken(this.textureToken);
     cashService.deregisterAllGet(this.updateHighScore);
     cashService.deregisterAllGet(this.updateIdeas);
     cashService.deregisterAllGet(this.updateIterationSteps);

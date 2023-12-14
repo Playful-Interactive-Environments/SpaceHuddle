@@ -386,6 +386,7 @@ export default class GameContainer extends Vue {
   gameHeight = 0;
   backgroundSprite: PIXI.Texture | null = null;
   backgroundSpriteEndlessPanning: PIXI.Texture | null = null;
+  textureToken = pixiUtil.createLoadingToken();
 
   canvasPosition: [number, number] = [0, 0];
   engine!: typeof Matter.Engine;
@@ -699,7 +700,7 @@ export default class GameContainer extends Vue {
           this.activeObject,
           true
         );
-        if (this.mouseConstraint.body === null) {
+        if (this.mouseConstraint && this.mouseConstraint.body === null) {
           this.mouseConstraint.body = this.activeObject.body;
         }
       }
@@ -711,7 +712,7 @@ export default class GameContainer extends Vue {
     const loadTexture = (): void => {
       if (this.backgroundTexture) {
         pixiUtil
-          .loadTexture(this.backgroundTexture, this.eventBus)
+          .loadTexture(this.backgroundTexture, this.eventBus, this.textureToken)
           .then(async (sprite) => {
             this.backgroundSprite = sprite;
             this.calculateBackgroundSize();
@@ -722,18 +723,7 @@ export default class GameContainer extends Vue {
     };
 
     if (this.backgroundTexture) {
-      if (PIXI.Cache.has(this.backgroundTexture)) {
-        this.backgroundSprite = PIXI.Assets.get(this.backgroundTexture);
-        setTimeout(async () => {
-          if (this.backgroundSprite?.valid) {
-            this.calculateBackgroundSize();
-            this.backgroundSpriteEndlessPanning =
-              await this.createBackgroundTexture(this.backgroundSprite);
-          } else loadTexture();
-        }, 100);
-      } else {
-        loadTexture();
-      }
+      loadTexture();
     }
   }
 
@@ -846,7 +836,7 @@ export default class GameContainer extends Vue {
       );
     }
     clearInterval(this.intervalPan);
-    pixiUtil.unloadTexture(this.backgroundTexture);
+    pixiUtil.cleanupToken(this.textureToken);
     Matter.Events.off(this.engine, 'collisionStart', this.collisionStart);
     Matter.Events.off(this.engine, 'afterUpdate', this.afterPhysicUpdate);
     Matter.Events.off(this.engine, 'beforeUpdate', this.beforePhysicUpdate);
@@ -1141,7 +1131,7 @@ export default class GameContainer extends Vue {
   readonly minClickTimeDelta = 10;
   isMouseDown = false;
   gameContainerClicked(event: any): void {
-    const mousePosition = { x: event.offsetX, y: event.offsetY }; //this.mouseConstraint.mouse.position;
+    const mousePosition = { x: event.offsetX, y: event.offsetY };
     const clickedBodies = Matter.Query.point(
       this.gameObjects
         .filter((gameObj) => gameObj.body)
@@ -1162,7 +1152,6 @@ export default class GameContainer extends Vue {
     this.isMouseDown = true;
     setTimeout(() => {
       if (!this.activeObject) {
-        //const mousePosition = this.mouseConstraint.mouse.position;
         const relativeMousePositionToScreen = {
           x:
             ((mousePosition.x + this.gameObjectOffsetRelativeToScreen[0]) /
@@ -2453,7 +2442,6 @@ export default class GameContainer extends Vue {
         matrix: matrix,
       });
     }
-    //graphics.beginFill('#ffffff', 0.5);
     graphics.lineStyle(10, '#ff0000');
     graphics.drawRect(0, 0, this.gameWidth * this.mapScale, this.mapHeight);
     graphics.endFill();

@@ -748,7 +748,7 @@ export default class GameObject extends Vue {
       const isAtBorder = this.isVisible(this.displayWidth / 2) && !isVisible;
       if (
         this.fastObjectBehaviour === FastObjectBehaviour.bounce &&
-        this.gameContainer.mouseConstraint.body?.id !== this.body.id
+        this.gameContainer.mouseConstraint?.body?.id !== this.body.id
       ) {
         const combinedMask = this.body.collisionFilter.mask | bounceCategory;
         if (this.wasVisible || isVisible) {
@@ -823,7 +823,7 @@ export default class GameObject extends Vue {
         }
         if (
           this.fastObjectBehaviour === FastObjectBehaviour.circle &&
-          this.gameContainer.mouseConstraint.body?.id !== this.body.id
+          this.gameContainer.mouseConstraint?.body?.id !== this.body.id
         ) {
           const velocityAmount = this.getVelocityAmount();
           if (velocityAmount > 10) {
@@ -855,7 +855,7 @@ export default class GameObject extends Vue {
       }
       if (
         this.conditionalVelocity &&
-        this.gameContainer.mouseConstraint.body?.id !== this.body.id
+        this.gameContainer.mouseConstraint?.body?.id !== this.body.id
       ) {
         const velocityAmount = this.getVelocityAmount();
         if (velocityAmount < 5) {

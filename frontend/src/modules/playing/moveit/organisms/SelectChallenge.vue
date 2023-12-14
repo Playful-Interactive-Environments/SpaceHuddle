@@ -291,7 +291,7 @@
         }}
       </h1>
     </template>
-    <div>
+    <!--<div>
       <el-radio-group v-model="navigationType">
         <el-radio-button
           v-for="level in NavigationType"
@@ -308,7 +308,7 @@
           }}
         </el-radio-button>
       </el-radio-group>
-    </div>
+    </div>-->
     <div class="info">
       {{
         $t(
@@ -421,6 +421,7 @@ export default class SelectChallenge extends Vue {
   NavigationType = NavigationType;
   movingType = MovingType.path;
   MovingType = MovingType;
+  textureToken = pixiUtil.createLoadingToken();
 
   get activeVehicle(): { vehicle: any; category: string } | null {
     if (this.vehicleList.length > this.activeVehicleIndex)
@@ -530,7 +531,8 @@ export default class SelectChallenge extends Vue {
     pixiUtil
       .loadTexture(
         '/assets/games/moveit/vehicle/vehicle_animation.json',
-        this.eventBus
+        this.eventBus,
+        this.textureToken
       )
       .then((sheet) => {
         this.vehicleSpritesheet = sheet;
@@ -636,9 +638,7 @@ export default class SelectChallenge extends Vue {
   }
 
   unmounted(): void {
-    pixiUtil.unloadTexture(
-      '/assets/games/moveit/vehicle/vehicle_animation.json'
-    );
+    pixiUtil.cleanupToken(this.textureToken);
   }
 
   activeVehicleChanged(index: number): void {

@@ -97,6 +97,7 @@ export default class CollectedState extends Vue {
 
   levelType = '';
   levelTypeImages: { [key: string]: { [key: string]: string } } = {};
+  textureToken = pixiUtil.createLoadingToken();
 
   endObjects: placeable.PlaceableBase[] = [];
   activeObjectId = '';
@@ -149,7 +150,11 @@ export default class CollectedState extends Vue {
         setTimeout(() => {
           if (settings && settings.spritesheet) {
             pixiUtil
-              .loadTexture(settings.spritesheet, this.eventBus)
+              .loadTexture(
+                settings.spritesheet,
+                this.eventBus,
+                this.textureToken
+              )
               .then((sheet) => {
                 this.levelTypeImages[typeName] = {};
                 pixiUtil.convertSpritesheetToBase64(
@@ -181,10 +186,7 @@ export default class CollectedState extends Vue {
   }
 
   unmounted(): void {
-    for (const typeName of this.gameConfigTypes) {
-      const settings = gameConfig[this.levelType].categories[typeName].settings;
-      pixiUtil.unloadTexture(settings.spritesheet);
-    }
+    pixiUtil.cleanupToken(this.textureToken);
   }
   //#endregion load / unload
 

@@ -15,6 +15,7 @@
       :use-gravity="false"
       :collision-borders="CollisionBorderType.None"
       :activatedObjectOnRegister="true"
+      :waitForDataLoad="waitForDataLoad"
       @click="placeObject"
       v-model:selectedObject="selectedObject"
     >
@@ -366,6 +367,8 @@ export default class LevelBuilder extends Vue {
   startTime = Date.now();
   isSaving = false;
   savedItems: placeable.PlaceableBase[] = [];
+  waitForDataLoad = true;
+  textureToken = pixiUtil.createLoadingToken();
 
   EndpointAuthorisationType = EndpointAuthorisationType;
   CollisionBorderType = CollisionBorderType;
@@ -614,11 +617,7 @@ export default class LevelBuilder extends Vue {
 
   unmounted(): void {
     this.saveChanges();
-    for (const typeName of this.gameConfigTypes) {
-      const settings =
-        this.gameConfig[this.levelType].categories[typeName].settings;
-      pixiUtil.unloadTexture(settings.spritesheet);
-    }
+    pixiUtil.cleanupToken(this.textureToken);
   }
 
   @Watch('levelType', { immediate: true })
@@ -628,20 +627,28 @@ export default class LevelBuilder extends Vue {
         this.gameConfig[this.levelType].settings.defaultType;
       this.activeObjectName =
         this.gameConfig[this.levelType].settings.defaultName;
+      const sheetImageLoaded: { [key: string]: boolean } = {};
       for (const typeName of this.gameConfigTypes) {
+        sheetImageLoaded[typeName] = false;
         const settings =
           this.gameConfig[this.levelType].categories[typeName].settings;
         setTimeout(() => {
           if (settings && settings.spritesheet && !this.stylesheets[typeName]) {
             pixiUtil
-              .loadTexture(settings.spritesheet, this.eventBus)
+              .loadTexture(
+                settings.spritesheet,
+                this.eventBus,
+                this.textureToken
+              )
               .then((sheet) => {
                 this.stylesheets[typeName] = sheet;
                 this.levelTypeImages[typeName] = {};
-                pixiUtil.convertSpritesheetToBase64(
-                  sheet,
-                  this.levelTypeImages[typeName]
-                );
+                pixiUtil
+                  .convertSpritesheetToBase64(
+                    sheet,
+                    this.levelTypeImages[typeName]
+                  )
+                  .then(() => (sheetImageLoaded[typeName] = true));
               });
           }
         }, 100);
@@ -658,6 +665,9 @@ export default class LevelBuilder extends Vue {
           };
         }
       }
+      until(() => !Object.values(sheetImageLoaded).includes(false)).then(() => {
+        this.waitForDataLoad = false;
+      });
     }
   }
 
@@ -670,24 +680,6 @@ export default class LevelBuilder extends Vue {
       this.saveChanges();
       this.placedObjects = [];
       const levelType = getLevelType(this.level, this.gameConfig);
-      if (this.loadedLevelType && this.loadedLevelType !== levelType) {
-        const gameConfigTypes = Object.keys(
-          this.gameConfig[levelType].categories
-        );
-        for (const typeName of gameConfigTypes) {
-          const previousSettings =
-            this.gameConfig[this.loadedLevelType].categories[typeName].settings;
-          if (
-            previousSettings &&
-            previousSettings.spritesheet &&
-            this.stylesheets[typeName] &&
-            PIXI.Cache.has(previousSettings.spritesheet)
-          ) {
-            pixiUtil.unloadTexture(previousSettings.spritesheet);
-            delete this.stylesheets[typeName];
-          }
-        }
-      }
       this.$emit('update:levelType', levelType);
       const items = configParameter.getItemsForLevel(
         this.gameConfig,

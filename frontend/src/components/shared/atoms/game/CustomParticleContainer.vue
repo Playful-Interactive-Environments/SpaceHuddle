@@ -41,10 +41,12 @@ export default class CustomParticleContainer extends Vue {
   particleContainerActive = true;
   spriteSheet!: PIXI.Spritesheet;
   isSpriteSheetLoaded = false;
+  textureToken = pixiUtil.createLoadingToken();
 
   unmounted(): void {
     this.particleContainerActive = false;
     this.destroyEmitter(this.emitter, true, true);
+    pixiUtil.cleanupToken(this.textureToken);
   }
 
   get containerEventBus(): Emitter<Record<EventType, unknown>> {
@@ -57,7 +59,8 @@ export default class CustomParticleContainer extends Vue {
     if (spriteSheetUrl) {
       this.spriteSheet = await pixiUtil.loadTexture(
         spriteSheetUrl,
-        this.containerEventBus
+        this.containerEventBus,
+        this.textureToken
       );
       this.isSpriteSheetLoaded = true;
     }
@@ -88,16 +91,13 @@ export default class CustomParticleContainer extends Vue {
         const url = !isAnimation ? textureList[i] : textureList[i].texture;
         if (typeof url === 'string') {
           if (!this.spriteSheetUrl && !config.spriteSheet) {
-            if (!isAnimation)
-              textureList[i] = await pixiUtil.loadTexture(
-                url,
-                this.containerEventBus
-              );
-            else
-              textureList[i].texture = await pixiUtil.loadTexture(
-                url,
-                this.containerEventBus
-              );
+            const texture = await pixiUtil.loadTexture(
+              url,
+              this.containerEventBus,
+              this.textureToken
+            );
+            if (!isAnimation) textureList[i] = texture;
+            else textureList[i].texture = texture;
           } else {
             if (this.spriteSheetUrl)
               await until(() => this.isSpriteSheetLoaded);

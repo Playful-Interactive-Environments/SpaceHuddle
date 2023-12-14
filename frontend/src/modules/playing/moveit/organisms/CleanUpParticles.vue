@@ -313,6 +313,7 @@ export default class CleanUpParticles extends Vue {
   circleGradientTexture: PIXI.Texture | null = null;
   linearGradientTexture: PIXI.Texture | null = null;
   dumpsterTexture: PIXI.Texture | null = null;
+  textureToken = pixiUtil.createLoadingToken();
 
   readonly maxCleanupThreshold = constants.maxCleanupThreshold;
   readonly calcChartHeight = constants.calcChartHeight;
@@ -465,13 +466,21 @@ export default class CleanUpParticles extends Vue {
       this.loadActiveParticle();
     }, 1500);
     pixiUtil
-      .loadTexture('/assets/games/moveit/molecules.json', this.eventBus)
+      .loadTexture(
+        '/assets/games/moveit/molecules.json',
+        this.eventBus,
+        this.textureToken
+      )
       .then((sheet) => {
         this.spritesheet = sheet;
         this.generateParticleTextures();
       });
     pixiUtil
-      .loadTexture('/assets/games/moveit/dumpster.png', this.eventBus)
+      .loadTexture(
+        '/assets/games/moveit/dumpster.png',
+        this.eventBus,
+        this.textureToken
+      )
       .then((texture) => {
         this.dumpsterTexture = texture;
       });
@@ -480,7 +489,7 @@ export default class CleanUpParticles extends Vue {
 
   unmounted(): void {
     clearInterval(this.interval);
-    pixiUtil.unloadTexture('/assets/games/moveit/molecules.json');
+    pixiUtil.cleanupToken(this.textureToken);
   }
 
   updatedLoop(): void {

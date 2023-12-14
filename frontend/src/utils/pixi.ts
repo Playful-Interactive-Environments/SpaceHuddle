@@ -1,8 +1,9 @@
 import * as PIXI from 'pixi.js';
 import { GradientFactory } from '@pixi-essentials/gradients';
-import { until } from '@/utils/wait';
+import { delay, until } from '@/utils/wait';
 import { Emitter } from 'mitt';
 import { EventType } from '@/types/enum/EventType';
+import { v4 as uuidv4 } from 'uuid';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export function drawCircleWithGradient(
@@ -213,62 +214,101 @@ export function getSpriteNames(spritesheet: PIXI.Spritesheet): string[] {
   return [];
 }
 
+const tokenUrls: { [key: string]: string[] } = {};
+export function createLoadingToken(): string {
+  const token = uuidv4();
+  tokenUrls[token] = [];
+  return token;
+}
+
+export function cleanupToken(token: string): void {
+  for (const url of tokenUrls[token]) {
+    unloadTexture(url, token);
+  }
+  delete tokenUrls[token];
+}
+
 enum TextureState {
   loading = 'loading',
   loaded = 'loaded',
   unloading = 'unloading',
 }
-const textureState: { [url: string]: TextureState } = {};
+const textureState: { [url: string]: { state: TextureState; count: number } } =
+  {};
 export async function loadTexture(
   url: string,
-  eventBus: Emitter<Record<EventType, unknown>>
+  eventBus: Emitter<Record<EventType, unknown>>,
+  token: string | null = null
 ): Promise<any> {
+  if (token && !tokenUrls[token].includes(url)) tokenUrls[token].push(url);
   if (textureState[url]) {
+    textureState[url].count++;
     await until(
       () =>
-        textureState[url] !== TextureState.loading &&
-        textureState[url] !== TextureState.unloading
+        textureState[url].state !== TextureState.loading &&
+        textureState[url].state !== TextureState.unloading
     );
-  }
-  if (PIXI.Cache.has(url)) {
-    return PIXI.Cache.get(url);
   } else {
-    textureState[url] = TextureState.loading;
-    if (eventBus) eventBus.emit(EventType.TEXTURES_LOADING_START);
-    try {
-      const texture = await PIXI.Assets.load(url);
-      textureState[url] = TextureState.loaded;
-      if (isLoadingFinished()) {
-        if (eventBus) eventBus.emit(EventType.ALL_TEXTURES_LOADED);
-      }
-      return texture;
-    } catch (e) {
-      delete textureState[url];
-      if (isLoadingFinished()) {
-        if (eventBus) eventBus.emit(EventType.ALL_TEXTURES_LOADED);
-      }
-      return null;
+    textureState[url] = {
+      count: 1,
+      state: TextureState.loading,
+    };
+  }
+  console.log('loadTexture', url, textureState[url].count);
+  if (PIXI.Cache.has(url)) {
+    const texture = PIXI.Cache.get(url); // PIXI.Assets.get(url);
+    await delay(100);
+    if (!Object.hasOwn(texture, 'valid') || texture.valid) return texture;
+  }
+
+  textureState[url].state = TextureState.loading;
+  if (eventBus) eventBus.emit(EventType.TEXTURES_LOADING_START);
+  try {
+    const texture = await PIXI.Assets.load(url);
+    textureState[url].state = TextureState.loaded;
+    if (isLoadingFinished()) {
+      if (eventBus) eventBus.emit(EventType.ALL_TEXTURES_LOADED);
     }
+    return texture;
+  } catch (e) {
+    delete textureState[url];
+    if (isLoadingFinished()) {
+      if (eventBus) eventBus.emit(EventType.ALL_TEXTURES_LOADED);
+    }
+    return null;
   }
 }
 
-export async function unloadTexture(url: string | null): Promise<void> {
+export async function unloadTexture(
+  url: string | null,
+  token: string | null = null
+): Promise<void> {
   if (
     url &&
     PIXI.Cache.has(url) &&
     textureState[url] &&
-    textureState[url] !== TextureState.unloading
+    textureState[url].state !== TextureState.unloading
   ) {
-    textureState[url] = TextureState.unloading;
-    PIXI.Assets.unload(url).then(() => {
-      delete textureState[url];
-    });
+    textureState[url].count--;
+    if (token) {
+      await delay(10000);
+      const otherTokens = Object.keys(tokenUrls).filter(
+        (item) => item !== token
+      );
+      for (const otherToken of otherTokens) {
+        if (tokenUrls[otherToken].includes(url)) return;
+      }
+    }
+    textureState[url].state = TextureState.unloading;
+    console.log('unloadTexture', url, textureState[url].count);
+    await PIXI.Assets.unload(url);
+    delete textureState[url];
   }
 }
 
 export function isLoadingFinished(): boolean {
   for (const texture of Object.values(textureState)) {
-    if (texture === TextureState.loading) return false;
+    if (texture.state === TextureState.loading) return false;
   }
   return true;
 }
@@ -285,15 +325,18 @@ export async function convertTextureToBase64(
   return await renderer.extract.base64(graphics as PIXI.DisplayObject);
 }
 
+const fallbackRenderer = new PIXI.Renderer();
 export async function convertSpritesheetToBase64(
   sheet: PIXI.Spritesheet,
   result: { [key: string]: string } = {},
   renderer: PIXI.Renderer | null = null
 ): Promise<{ [key: string]: string }> {
-  if (!renderer) renderer = new PIXI.Renderer();
+  if (!renderer) renderer = fallbackRenderer;
   for (const textureKey of Object.keys(sheet.textures)) {
-    const texture = sheet.textures[textureKey];
-    result[textureKey] = await convertTextureToBase64(texture, renderer);
+    if (sheet.textures) {
+      const texture = sheet.textures[textureKey];
+      result[textureKey] = await convertTextureToBase64(texture, renderer);
+    }
   }
   return result;
 }

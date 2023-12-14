@@ -111,11 +111,6 @@ export default class Participant extends Vue {
 
   // Vue Callbacks for mounting and unmounting / loading and unloading.
   mounted(): void {
-    /*pixiUtil.loadSpriteSheet('/assets/games/findit/tutorial/animations.json').then(
-      (sheet) => {
-        this.spritesheet = sheet;
-      }
-    );*/
     setTimeout(() => {
       const dom = this.$refs.gameContainer as HTMLElement;
       if (dom) {
@@ -133,7 +128,6 @@ export default class Participant extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
-    //pixiUtil.unloadTexture('/assets/games/findit/tutorial/animations.json');
   }
 
   deregisterAll(): void {
