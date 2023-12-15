@@ -31,10 +31,16 @@
       }
     },
     "moleculeInfo": {
+      "pro": "Vorteil",
+      "contra": "Nachteil",
+      "rationAtmosphere": "Anteil an der Erdatmosphäre",
+      "rationGreenhouse": "Anteil an Treibhausgasen",
+      "impactGreenhouse": "Beitrag zum Treibhauseffekts",
+      "riseFactor": "Anstieg seit Beginn der Industrialisierung",
       "globalWarmingFactor": "Globale Erwärmungspotenzial",
       "lifespan": "Lebensdauer",
       "years": "Jahre",
-      "gwpInfo": "im Vergleich zu Kohlendioxid",
+      "gwpInfo": "im Vergleich zu Kohlenstoffdioxid",
       "none": "Wähle ein Molekül aus um dessen Informationen zu sehen.",
       "waterVapor": {
         "title": "Wasserdampf",

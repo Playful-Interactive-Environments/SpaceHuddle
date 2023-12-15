@@ -46,6 +46,7 @@
               `module.playing.coolit.participant.moleculeInfo.${activeMoleculeName}.title`
             )
           }}
+          ({{ getMoleculeConfig(activeMoleculeName).formula }})
         </div>
         <div class="subtitle">
           {{
@@ -70,6 +71,7 @@
         }}
       </div>
       <div class="pros">
+        <h3>{{ $t('module.playing.coolit.participant.moleculeInfo.pro') }}</h3>
         {{
           $t(
             `module.playing.coolit.participant.moleculeInfo.${activeMoleculeName}.pros`
@@ -77,6 +79,9 @@
         }}
       </div>
       <div class="cons">
+        <h3>
+          {{ $t('module.playing.coolit.participant.moleculeInfo.contra') }}
+        </h3>
         {{
           $t(
             `module.playing.coolit.participant.moleculeInfo.${activeMoleculeName}.cons`
@@ -119,6 +124,50 @@
               {{ getMoleculeConfig(activeMoleculeName).lifespan }}
               {{ $t('module.playing.coolit.participant.moleculeInfo.years') }}
             </td>
+          </tr>
+          <tr v-if="getMoleculeConfig(activeMoleculeName).rationAtmosphere">
+            <th>
+              {{
+                $t(
+                  'module.playing.coolit.participant.moleculeInfo.rationAtmosphere'
+                )
+              }}
+            </th>
+            <td>
+              {{ getMoleculeConfig(activeMoleculeName).rationAtmosphere }}%
+            </td>
+          </tr>
+          <tr v-if="getMoleculeConfig(activeMoleculeName).rationGreenhouse">
+            <th>
+              {{
+                $t(
+                  'module.playing.coolit.participant.moleculeInfo.rationGreenhouse'
+                )
+              }}
+            </th>
+            <td>
+              {{ getMoleculeConfig(activeMoleculeName).rationGreenhouse }}%
+            </td>
+          </tr>
+          <tr v-if="getMoleculeConfig(activeMoleculeName).impactGreenhouse">
+            <th>
+              {{
+                $t(
+                  'module.playing.coolit.participant.moleculeInfo.impactGreenhouse'
+                )
+              }}
+            </th>
+            <td>
+              {{ getMoleculeConfig(activeMoleculeName).impactGreenhouse }}%
+            </td>
+          </tr>
+          <tr v-if="getMoleculeConfig(activeMoleculeName).riseFactor">
+            <th>
+              {{
+                $t('module.playing.coolit.participant.moleculeInfo.riseFactor')
+              }}
+            </th>
+            <td>{{ getMoleculeConfig(activeMoleculeName).riseFactor }}%</td>
           </tr>
         </table>
       </div>
@@ -709,23 +758,33 @@ export default class SelectLevel extends Vue {
   }
 
   getMoleculeConfig(objectName: string): {
+    formula: string;
     type: string;
     reference: string;
     color: string;
     globalWarmingFactor: number;
     globalWarmingFactorReal: number;
     lifespan: number | string;
+    rationAtmosphere: number;
+    rationGreenhouse: number;
+    riseFactor: number;
+    impactGreenhouse: number;
   } {
     if (objectName) {
       return gameConfig.molecules[objectName];
     }
     return {
+      formula: '',
       type: 'greenhouseGas',
       reference: '',
       color: '#ffffff',
       globalWarmingFactor: 1,
       globalWarmingFactorReal: 1,
       lifespan: 1,
+      rationAtmosphere: 0,
+      rationGreenhouse: 0,
+      riseFactor: 0,
+      impactGreenhouse: 0,
     };
   }
 
@@ -830,17 +889,25 @@ export default class SelectLevel extends Vue {
   }
 
   .pros {
-    color: var(--color-green);
+    //color: var(--color-green);
     margin-bottom: 1.5rem;
     float: left;
     width: 48%;
+
+    h3 {
+      font-weight: var(--font-weight-bold);
+    }
   }
 
   .cons {
-    color: var(--color-red);
+    //color: var(--color-red);
     margin-bottom: 1.5rem;
     float: right;
     width: 48%;
+
+    h3 {
+      font-weight: var(--font-weight-bold);
+    }
   }
 
   .reference {

@@ -310,7 +310,7 @@
               "
               :pivot="obstacle.pivot"
               :scale="obstacle.scale"
-              @click="obstacleClicked(obstacle)"
+              @pointerdown="obstacleClicked(obstacle)"
             >
               <CustomSprite
                 :colorOverlay="calculateTintColor(obstacle, 0.7)"

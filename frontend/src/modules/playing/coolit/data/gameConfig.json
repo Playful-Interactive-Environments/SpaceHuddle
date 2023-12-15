@@ -251,11 +251,16 @@
       "size": 0.25,
       "ration": 0.15,
       "realRation": 0.4,
+      "rationAtmosphere": 0.4,
+      "rationGreenhouse": 90,
+      "impactGreenhouse": 0,
+      "riseFactor": 0,
       "rationDeltaPerDegree": 0.05,
       "particleCount": 15,
       "particleDeltaPerDegree": 5,
       "controllable": true,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "formula": "H20"
     },
     "carbonDioxide": {
       "type": "greenhouseGas",
@@ -266,12 +271,17 @@
       "lifespan": "30 - 1000",
       "size": 0.33,
       "ration": 0.04,
-      "realRation": 0.1,
+      "realRation": 0.04,
+      "rationAtmosphere": 0.04,
+      "rationGreenhouse": 9,
+      "impactGreenhouse": 66.4,
+      "riseFactor": 33,
       "rationDeltaPerDegree": 0.02,
       "particleCount": 8,
       "particleDeltaPerDegree": 5,
       "controllable": true,
-      "absorbedByTree": true
+      "absorbedByTree": true,
+      "formula": "CO2"
     },
     "methane": {
       "type": "greenhouseGas",
@@ -282,11 +292,17 @@
       "lifespan": 9.1,
       "size": 0.25,
       "ration": 0.01,
+      "realRation": 0.01,
+      "rationAtmosphere": 0,
+      "rationGreenhouse": 0.04,
+      "impactGreenhouse": 16.3,
+      "riseFactor": 0,
       "rationDeltaPerDegree": 0.01,
       "particleCount": 1,
       "particleDeltaPerDegree": 2,
       "controllable": true,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "formula": "CH4"
     },
     "nitrogenOxide": {
       "type": "greenhouseGas",
@@ -297,11 +313,17 @@
       "lifespan": 131,
       "size": 0.5,
       "ration": 0.01,
+      "realRation": 0.01,
+      "rationAtmosphere": 0,
+      "rationGreenhouse": 0.007,
+      "impactGreenhouse": 6.5,
+      "riseFactor": 0,
       "rationDeltaPerDegree": 0.01,
       "particleCount": 1,
       "particleDeltaPerDegree": 1,
       "controllable": true,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "formula": "N2O"
     },
     "ozone": {
       "type": "greenhouseGas",
@@ -311,11 +333,17 @@
       "globalWarmingFactor": 3,
       "size": 0.33,
       "ration": 0.01,
+      "realRation": 0.01,
+      "rationAtmosphere": 0,
+      "rationGreenhouse": 0.008,
+      "impactGreenhouse": 0,
+      "riseFactor": 0,
       "rationDeltaPerDegree": 0.01,
       "particleCount": 1,
       "particleDeltaPerDegree": 1,
       "controllable": true,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "formula": "O3"
     },
     "fluorinatedGases": {
       "type": "greenhouseGas",
@@ -326,11 +354,17 @@
       "lifespan": 100,
       "size": 0.5,
       "ration": 0.01,
+      "realRation": 0.01,
+      "rationAtmosphere": 0,
+      "rationGreenhouse": 0,
+      "impactGreenhouse": 10.8,
+      "riseFactor": 0,
       "rationDeltaPerDegree": 0.01,
       "particleCount": 1,
       "particleDeltaPerDegree": 1,
       "controllable": true,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "formula": "FKW / HFKW / SF6 / NF3"
     },
     "oxygen": {
       "type": "atmosphericGas",
@@ -340,12 +374,17 @@
       "globalWarmingFactor": 0,
       "size": 0.2,
       "ration": 20.85,
-      "realRation": 20.6,
+      "realRation": 20.942,
+      "rationAtmosphere": 20.942,
+      "rationGreenhouse": 0,
+      "impactGreenhouse": 0,
+      "riseFactor": 0,
       "rationDeltaPerDegree": -0.05,
       "particleCount": 2000,
       "particleDeltaPerDegree": -12,
       "controllable": false,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "formula": "O2"
     },
     "nitrogen": {
       "type": "atmosphericGas",
@@ -355,11 +394,17 @@
       "globalWarmingFactor": 0,
       "size": 0.2,
       "ration": 78,
+      "realRation": 78.084,
+      "rationAtmosphere": 78.084,
+      "rationGreenhouse": 0,
+      "impactGreenhouse": 0,
+      "riseFactor": 0,
       "rationDeltaPerDegree": -0.02,
       "particleCount": 7800,
       "particleDeltaPerDegree": 0,
       "controllable": false,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "formula": "N2"
     },
     "argon": {
       "type": "atmosphericGas",
@@ -369,11 +414,17 @@
       "globalWarmingFactor": 0,
       "size": 0.2,
       "ration": 0.9,
+      "realRation": 0.934,
+      "rationAtmosphere": 0.934,
+      "rationGreenhouse": 0,
+      "impactGreenhouse": 0,
+      "riseFactor": 0,
       "rationDeltaPerDegree": -0.02,
       "particleCount": 90,
       "particleDeltaPerDegree": 0,
       "controllable": false,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "formula": "Ar"
     },
     "helium": {
       "type": "atmosphericGas",
@@ -383,11 +434,17 @@
       "globalWarmingFactor": 0,
       "size": 0.2,
       "ration": 0.02,
+      "realRation": 0.004,
+      "rationAtmosphere": 0,
+      "rationGreenhouse": 0,
+      "impactGreenhouse": 0,
+      "riseFactor": 0,
       "rationDeltaPerDegree": -0.02,
       "particleCount": 2,
       "particleDeltaPerDegree": 0,
       "controllable": false,
-      "absorbedByTree": false
+      "absorbedByTree": false,
+      "formula": "He"
     }
   }
 }

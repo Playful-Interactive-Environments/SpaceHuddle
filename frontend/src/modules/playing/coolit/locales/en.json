@@ -31,6 +31,11 @@
       }
     },
     "moleculeInfo": {
+      "pro": "pro",
+      "contra": "contra",
+      "rationAtmosphere": "contribution to the earth's atmosphere",
+      "rationGreenhouse": "Proportion of the greenhouse effect",
+      "riseFactor": "increase since the beginning of industrialization",
       "globalWarmingFactor": "Global Warming Potential",
       "lifespan": "Lifespan",
       "years": "years",
