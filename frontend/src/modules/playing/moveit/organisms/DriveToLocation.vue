@@ -152,7 +152,7 @@
         </template>
       </CustomMapMarker>
     </mgl-map>
-<!--    <div class="overlay-top-left">
+    <!--<div class="overlay-top-left">
       <round-slider
         v-model="maxSpeed"
         :max="vehicleParameter.speed"
@@ -183,11 +183,16 @@
       </el-progress>
     </div>-->
     <div class="overlay-top-right">
-      <div v-if="vehicle.category === 'bus'" >
+      <div v-if="vehicle.category === 'bus'">
         <font-awesome-icon icon="users" />
         {{ personCount }} / {{ vehicleParameter.persons }}
       </div>
-      <p class="overlay-top-mid" :style="{ backgroundColor: getSpeedColor(moveSpeed, 0.6) }">{{ Math.round(moveSpeed) }} km/h</p>
+      <p
+        class="overlay-top-mid"
+        :style="{ backgroundColor: getSpeedColor(moveSpeed, 0.6) }"
+      >
+        {{ Math.round(moveSpeed) }} km/h
+      </p>
     </div>
     <div class="overlay-bottom-right">
       <div>
@@ -252,15 +257,23 @@
     </div>
     <div class="overlay-bottom-left">
       <el-button
+        v-if="zoomReady"
         class="gas"
-        @click="increaseSpeed"
+        @pointerdown="startIncreaseSpeed"
+        @pointerup="stopIncreaseSpeed"
+        @pointerout="stopIncreaseSpeed"
+        @contextmenu="(e) => e.preventDefault()"
         :style="{ backgroundColor: getSpeedColor(moveSpeed, 0.6) }"
       >
         G
       </el-button>
       <el-button
+        v-if="zoomReady"
         class="brake"
-        @click="decreaseSpeed"
+        @pointerdown="startDecreaseSpeed"
+        @pointerup="stopDecreaseSpeed"
+        @pointerout="stopDecreaseSpeed"
+        @contextmenu="(e) => e.preventDefault()"
         :style="{ backgroundColor: getSpeedColor(100 - moveSpeed, 0.6) }"
       >
         B
@@ -446,6 +459,10 @@ export default class DriveToLocation extends Vue {
   intervalAnimation = -1;
   readonly busStopIntervalTime = 10000;
   busStopInterval = -1;
+  stepsPerSecond = 5;
+  intervalGas = -1;
+  intervalBreak = -1;
+  decreaseSpeedInterval = -1;
   NavigationType = NavigationType;
 
   chartData: ChartData = {
@@ -797,7 +814,7 @@ export default class DriveToLocation extends Vue {
       this.controlHeight = (this.$refs.controlArea as HTMLElement).offsetHeight;
     this.ready = true;
     this.maxSpeed = this.vehicleParameter.speed;
-    if (this.maxSpeed > 100) this.maxSpeed = 100;
+    //if (this.maxSpeed > 100) this.maxSpeed = 100;
 
     if (this.animationIntermediateSteps > 1) {
       this.intervalAnimation = setInterval(
@@ -842,6 +859,8 @@ export default class DriveToLocation extends Vue {
     clearInterval(this.intervalAnimation);
     clearInterval(this.busStopInterval);
     clearInterval(this.decreaseSpeedInterval);
+    clearInterval(this.intervalGas);
+    clearInterval(this.intervalBreak);
     window.removeEventListener('mouseup', this.enableMapPan);
     window.removeEventListener('touchend', this.enableMapPan);
   }
@@ -953,17 +972,27 @@ export default class DriveToLocation extends Vue {
     this.noStreet = false;
   }
 
-  decreaseTimeSeconds = 3;
-  stepsPerSecond = 5;
-  totalSteps = this.decreaseTimeSeconds * this.stepsPerSecond;
-  stepSize = this.speed / this.totalSteps;
-  decreaseSpeedInterval = setInterval(() => {
-    this.speed -= this.stepSize;
-    if (this.speed <= 0) {
-      this.speed = 0;
+  startIncreaseSpeed(event: Event | null = null): void {
+    if (event) event.preventDefault();
+    clearInterval(this.decreaseSpeedInterval);
+    this.decreaseSpeedInterval = -1;
+    this.increaseSpeed();
+    this.intervalGas = setInterval(
+      this.increaseSpeed,
+      1000 / this.stepsPerSecond
+    );
+  }
+
+  stopIncreaseSpeed(event: Event | null = null): void {
+    if (event) event.preventDefault();
+    clearInterval(this.intervalGas);
+    if (this.decreaseSpeedInterval === -1) {
+      this.decreaseSpeedInterval = setInterval(
+        () => this.decreaseSpeed(5),
+        1000 / this.stepsPerSecond
+      );
     }
-    this.moveSpeed = this.speed;
-  }, 1000 / this.stepsPerSecond);
+  }
 
   increaseSpeed(): void {
     if (this.speed < this.maxSpeed) {
@@ -973,17 +1002,44 @@ export default class DriveToLocation extends Vue {
         this.speed += this.maxSpeed - this.speed;
       }
     }
-    this.stepSize = this.speed / this.totalSteps;
   }
-  decreaseSpeed(): void {
+
+  startDecreaseSpeed(event: Event | null = null): void {
+    if (event) event.preventDefault();
+    clearInterval(this.decreaseSpeedInterval);
+    this.decreaseSpeedInterval = -1;
+    const speed = this.speed;
+    this.decreaseSpeed(1, speed);
+    this.intervalBreak = setInterval(
+      () => this.decreaseSpeed(1, speed),
+      1000 / this.stepsPerSecond
+    );
+  }
+
+  stopDecreaseSpeed(event: Event | null = null): void {
+    if (event) event.preventDefault();
+    clearInterval(this.intervalBreak);
+    if (this.decreaseSpeedInterval === -1) {
+      this.decreaseSpeedInterval = setInterval(
+        () => this.decreaseSpeed(5),
+        1000 / this.stepsPerSecond
+      );
+    }
+  }
+
+  decreaseSpeed(
+    decreaseTimeSeconds: number,
+    speed: number | null = null
+  ): void {
     if (this.speed > 0) {
-      if (this.speed - 7 > 0) {
-        this.speed -= 7;
+      const totalSteps = decreaseTimeSeconds * this.stepsPerSecond;
+      const stepSize = (speed ?? this.speed) / totalSteps;
+      if (this.speed - stepSize > 0) {
+        this.speed -= stepSize;
       } else {
         this.speed = 0;
       }
     }
-    this.stepSize = this.speed / this.totalSteps;
   }
   //#endregion navigation
 
