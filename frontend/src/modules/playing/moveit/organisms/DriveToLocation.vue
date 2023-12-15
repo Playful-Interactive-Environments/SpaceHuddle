@@ -1033,7 +1033,9 @@ export default class DriveToLocation extends Vue {
   ): void {
     if (this.speed > 0) {
       const totalSteps = decreaseTimeSeconds * this.stepsPerSecond;
-      const stepSize = (speed ?? this.speed) / totalSteps;
+      let stepSize = (speed ?? this.speed) / totalSteps;
+      const minStepSize = 2;
+      if (stepSize < minStepSize) stepSize = minStepSize;
       if (this.speed - stepSize > 0) {
         this.speed -= stepSize;
       } else {
