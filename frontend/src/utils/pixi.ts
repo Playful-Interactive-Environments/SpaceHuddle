@@ -254,11 +254,22 @@ export async function loadTexture(
       state: TextureState.loading,
     };
   }
-  console.log('loadTexture', url, textureState[url].count);
   if (PIXI.Cache.has(url)) {
-    const texture = PIXI.Cache.get(url); // PIXI.Assets.get(url);
+    const texture = url.endsWith('.json')
+      ? PIXI.Cache.get(url)
+      : PIXI.Assets.get(url);
     await delay(100);
-    if (!Object.hasOwn(texture, 'valid') || texture.valid) return texture;
+    const isValid = !Object.hasOwn(texture, 'valid') || texture.valid;
+    const hasBaseTexture =
+      !Object.hasOwn(texture, 'baseTexture') || !!texture.baseTexture?.resource;
+    if (isValid && hasBaseTexture) return texture;
+    else {
+      await unloadTexture(url);
+      textureState[url] = {
+        count: 1,
+        state: TextureState.loading,
+      };
+    }
   }
 
   textureState[url].state = TextureState.loading;
@@ -291,7 +302,7 @@ export async function unloadTexture(
   ) {
     textureState[url].count--;
     if (token) {
-      await delay(10000);
+      await delay(1000);
       const otherTokens = Object.keys(tokenUrls).filter(
         (item) => item !== token
       );
@@ -299,10 +310,11 @@ export async function unloadTexture(
         if (tokenUrls[otherToken].includes(url)) return;
       }
     }
-    textureState[url].state = TextureState.unloading;
-    console.log('unloadTexture', url, textureState[url].count);
-    await PIXI.Assets.unload(url);
-    delete textureState[url];
+    if (textureState[url]) {
+      textureState[url].state = TextureState.unloading;
+      await PIXI.Assets.unload(url);
+      delete textureState[url];
+    }
   }
 }
 
@@ -315,13 +327,15 @@ export function isLoadingFinished(): boolean {
 
 export async function convertTextureToBase64(
   texture: PIXI.Texture,
-  renderer: PIXI.Renderer
+  renderer: PIXI.Renderer | null = null
 ): Promise<string> {
   const graphics = new PIXI.Graphics()
     .beginTextureFill({
       texture: texture,
     })
     .drawRect(0, 0, texture.width, texture.height);
+  if (!renderer || !renderer.extract || !(renderer.extract as any).renderer)
+    renderer = fallbackRenderer;
   return await renderer.extract.base64(graphics as PIXI.DisplayObject);
 }
 
