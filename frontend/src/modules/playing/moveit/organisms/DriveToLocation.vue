@@ -183,16 +183,16 @@
       </el-progress>
     </div>-->
     <div class="overlay-top-right">
-      <div v-if="vehicle.category === 'bus'">
-        <font-awesome-icon icon="users" />
-        {{ personCount }} / {{ vehicleParameter.persons }}
-      </div>
       <p
-        class="overlay-top-mid"
-        :style="{ backgroundColor: getSpeedColor(moveSpeed, 0.6) }"
+          class="overlay-info"
+          :style="{ backgroundColor: getSpeedColor(moveSpeed, 0.6) }"
       >
         {{ Math.round(moveSpeed) }} km/h
       </p>
+      <div v-if="vehicle.category === 'bus'" class="overlay-info">
+        <font-awesome-icon icon="users" />
+        {{ personCount }} / {{ vehicleParameter.persons }}
+      </div>
     </div>
     <div class="overlay-bottom-right">
       <div>
@@ -1719,16 +1719,18 @@ export default class DriveToLocation extends Vue {
   //padding: 1rem;
 }
 
-.overlay-top-mid {
+.overlay-info {
   text-align: center;
   position: relative;
   font-size: var(--font-size-large);
   font-weight: var(--font-weight-semibold);
   right: 0;
-  display: inline;
+  display: block;
   padding: 0.4rem 0.5rem;
   border-radius: var(--border-radius-small);
   border: 4px solid var(--color-dark-contrast);
+  margin-top: 0.3rem;
+  background-color: var(--color-background);
 }
 
 .overlay-bottom-right {
@@ -1744,6 +1746,10 @@ export default class DriveToLocation extends Vue {
   z-index: 100;
   bottom: 1rem;
   left: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  align-content: flex-end;
+  flex-direction: row;
   //padding: 0 0 1rem 1rem;
 
   .overlay-top-right {
@@ -1909,6 +1915,8 @@ export default class DriveToLocation extends Vue {
   width: 3rem;
   height: 4rem;
   margin-left: 0.3rem;
+  align-self: flex-end;
+  justify-self: flex-end;
 }
 </style>
 
