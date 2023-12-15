@@ -1,4 +1,4 @@
-export const maxCleanupThreshold = 5;
+export const maxCleanupThreshold = 3;
 export const playableReducingFactor = 1;
 export const cleanupTime = 60;
 

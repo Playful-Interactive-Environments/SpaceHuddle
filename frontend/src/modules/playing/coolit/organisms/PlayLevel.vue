@@ -4,6 +4,7 @@
     v-if="playStateType === PlayStateType.play && levelType"
   >
     <GameContainer
+      v-if="!gameOver"
       ref="gameContainer"
       v-model:width="gameWidth"
       v-model:height="gameHeight"
@@ -13,11 +14,7 @@
       :border-category="CollisionGroups.BORDER"
       :background-texture="levelTypeSettings.background"
       :background-position="BackgroundPosition.Cover"
-      :background-movement="
-        showObstacleSelection
-          ? BackgroundMovement.Pause
-          : BackgroundMovement.Auto
-      "
+      :background-movement="BackgroundMovement.Auto"
       :collisionRegions="collisionRegions"
       @initRenderer="initRenderer"
       @updateOffset="updateOffset"
@@ -259,7 +256,31 @@
               </template>
             </GameObject>
           </container>
-          <container v-else-if="$refs.gameContainer">
+        </container>
+      </template>
+    </GameContainer>
+    <GameContainer
+      v-else
+      ref="gameContainerReplay"
+      v-model:width="gameWidth"
+      v-model:height="gameHeight"
+      :detect-collision="true"
+      :use-gravity="false"
+      :background-texture="levelTypeSettings.background"
+      :background-position="BackgroundPosition.Cover"
+      :background-movement="
+        showObstacleSelection
+          ? BackgroundMovement.Pause
+          : BackgroundMovement.Auto
+      "
+      :collisionRegions="collisionRegions"
+      :pixi-filter-list-background="[colorFilter]"
+      :auto-pan-speed="autoPanSpeed"
+      @updateOffset="updateOffset"
+    >
+      <template v-slot:default>
+        <container v-if="gameWidth && circleGradientTexture">
+          <container v-if="$refs.gameContainerReplay">
             <sprite
               v-if="temperatureScaleResultTexture"
               :texture="temperatureScaleResultTexture"
@@ -281,11 +302,11 @@
               :key="obstacle.uuid"
               :x="
                 ((obstacle.position[0] - panOffsetMin[0]) / 100) *
-                $refs.gameContainer.backgroundTextureSize[0]
+                $refs.gameContainerReplay.backgroundTextureSize[0]
               "
               :y="
                 (obstacle.position[1] / 100) *
-                $refs.gameContainer.backgroundTextureSize[1]
+                $refs.gameContainerReplay.backgroundTextureSize[1]
               "
               :pivot="obstacle.pivot"
               :scale="obstacle.scale"
@@ -1951,6 +1972,7 @@ export default class PlayLevel extends Vue {
   //#region loop
   updateTimeStamp = Date.now();
   gameOver = false;
+  gameOverTimeStamp = -1;
   hypothermia = false;
   overheating = false;
   emitObstacleList: string[] = [];
@@ -2528,7 +2550,12 @@ export default class PlayLevel extends Vue {
     this.panOffsetMin = min;
     this.panOffsetMax = max;
     this.panOffset = value;
-    if (this.gameOver && max[0] >= 99.9 && max[1] >= 99.9) {
+    if (
+      this.gameOver &&
+      max[0] >= 99.9 &&
+      max[1] >= 99.9 &&
+      Date.now() - this.gameOverTimeStamp > 1000
+    ) {
       this.$emit('replayFinished');
     }
   }
@@ -2596,6 +2623,7 @@ export default class PlayLevel extends Vue {
             () => this.updateLoopReplay(),
             this.intervalTime
           );
+          this.gameOverTimeStamp = Date.now();
           this.gameOver = true;
           this.randomMessageNo = Math.round(Math.random() * 2) + 1;
           this.collisionAnimation.splice(0);

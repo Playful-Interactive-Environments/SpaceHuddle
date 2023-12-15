@@ -44,6 +44,7 @@ export default class CustomParticleContainer extends Vue {
   textureToken = pixiUtil.createLoadingToken();
 
   unmounted(): void {
+    this.container.destroy();
     this.particleContainerActive = false;
     this.destroyEmitter(this.emitter, true, true);
     pixiUtil.cleanupToken(this.textureToken);
