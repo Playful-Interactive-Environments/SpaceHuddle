@@ -64,6 +64,7 @@
         :task-id="taskId"
         :auth-header-typ="EndpointAuthorisationType.PARTICIPANT"
         :mission-progress-parameter="activeTab"
+        :y-label="$t(`module.brainstorming.missionmap.participant.chart.y-${activeTab}`)"
       />
     </div>
     <draggable

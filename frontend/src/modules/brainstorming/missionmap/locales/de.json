@@ -24,7 +24,12 @@
       "electricity": "Elektrizitätsstatistik",
       "map": "Karte"
     },
-    "add": "eigenen Vorschlag hinzufügen"
+    "add": "eigenen Vorschlag hinzufügen",
+    "chart": {
+      "x": "Maßnahmen",
+      "y-influenceAreas": "Entwicklung der Gesellschaft",
+      "y-electricity": "Stromanteil in %"
+    }
   },
   "moderatorConfig": {
     "mapSection": "Kartenausschnitt",

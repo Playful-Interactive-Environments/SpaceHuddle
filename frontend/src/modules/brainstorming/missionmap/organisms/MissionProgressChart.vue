@@ -16,10 +16,18 @@
             grid: {
               display: false,
             },
+            title: {
+              text: $t('module.brainstorming.missionmap.participant.chart.x'),
+              display: true,
+            },
           },
           y: {
             ticks: {
               stepSize: 1,
+            },
+            title: {
+              text: yLabel,
+              display: true,
             },
           },
         },
@@ -101,6 +109,7 @@ export default class MissionProgressChart extends Vue {
   readonly missionProgressParameter!: MissionProgressParameter;
   @Prop({ default: EndpointAuthorisationType.MODERATOR })
   readonly authHeaderTyp!: EndpointAuthorisationType;
+  @Prop({ default: '' }) readonly yLabel!: string;
   lineChartDataList: LineChartData[] = [];
   module!: Module;
   ideas: Idea[] = [];
@@ -280,8 +289,8 @@ export default class MissionProgressChart extends Vue {
             (b.ownVotes[0] as Vote).timestamp
           )
         );
-      mapToValue = (list, parameter) =>
-        list.map((item) => {
+      mapToValue = (list, parameter) => {
+        return list.map((item) => {
           if (
             item.idea &&
             item.vote &&
@@ -292,13 +301,24 @@ export default class MissionProgressChart extends Vue {
               (sum, item) => sum + item.parameter.points,
               0
             );
-            return (
-              item.idea.parameter[this.missionProgressParameter][parameter] *
-              (ownSum / item.vote.sum)
-            );
+            if (
+              item.idea.parameter[this.missionProgressParameter] &&
+              Object.hasOwn(
+                item.idea.parameter[this.missionProgressParameter],
+                parameter
+              )
+            ) {
+              return (
+                item.idea.parameter[this.missionProgressParameter][parameter] *
+                (ownSum / item.vote.sum)
+              );
+            } else {
+              return ownSum / item.vote.sum;
+            }
           }
           return 0;
         });
+      };
     }
     const ideaProgress: {
       index: number;

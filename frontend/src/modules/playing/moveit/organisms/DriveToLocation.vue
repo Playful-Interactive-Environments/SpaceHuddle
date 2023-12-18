@@ -7,8 +7,22 @@
         responsive: true,
         maintainAspectRatio: false,
         scales: {
+          x: {
+            title: {
+              text: $t(
+                'module.playing.moveit.participant.info.driving.scale.x'
+              ),
+              display: true,
+            },
+          },
           y: {
             stacked: true,
+            title: {
+              text: $t(
+                'module.playing.moveit.participant.info.driving.scale.y'
+              ),
+              display: true,
+            },
           },
         },
       }"

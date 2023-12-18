@@ -13,7 +13,7 @@
     "maxSpeed": "max",
     "combined": "combined",
     "separate": "separate",
-    "electricity": "electricity ratio",
+    "electricity": "electricity ratio in %",
     "vehicle-parameter": {
       "fuel": "fuel",
       "mpg": "miles per gallon",
@@ -30,21 +30,37 @@
       "veryGood": "Congratulations, you're already a real pro at cleaning up your emissions.",
       "good": "That was already really good. Next time, try to leave yourself even more room for maneuver by clever driving behavior, then you'll manage the last percent as well.",
       "notBad": "That wasn't bad at all, but there's still more to do. Try to leave more space for cleaning up next time by clever driving behavior, then you will surely manage more next time.",
-      "improvable": "You can do better. Try to leave yourself even more air next time when cleaning up by clever driving behavior, then you will surely manage more next time."
+      "improvable": "You can do better. Try to leave yourself even more air next time when cleaning up by clever driving behavior, then you will surely manage more next time.",
+      "notCollected": "not collected"
     },
     "select": "select",
     "info": {
       "electricity": {
         "title": "electricity mix",
-        "description": "The current standard electricity mix is composed as shown in the graph. This composition influences the climate friendliness of electric cars. You can influence this mix through your choice of measures in the local council."
+        "description": "The current standard electricity mix is composed as shown in the graph. This composition influences the climate friendliness of electric cars. You can influence this mix through your choice of measures in the local council.",
+        "scale": "electricity ratio in %"
       },
       "emissionsPerFuel": {
         "title": "emissions per fuel",
-        "description": "On this graph you can see how many greenhouse gases are in which fuel. Electricity depends on the electricity mix and can be influenced by the local council."
+        "description": "On this graph you can see how many greenhouse gases are in which fuel. Electricity depends on the electricity mix and can be influenced by the local council.",
+        "scale": {
+          "x": "fuel",
+          "y": "gCO2eq/kWh"
+        }
       },
       "emissionsPerElectricitySource": {
         "title": "emissions per electricity source",
-        "description": "The graph shows how many greenhouse gases are produced by which electricity source."
+        "description": "The graph shows how many greenhouse gases are produced by which electricity source.",
+        "scale": {
+          "x": "electricity source",
+          "y": "gCO2eq/kWh"
+        }
+      },
+      "driving": {
+        "scale": {
+          "x": "time",
+          "y": "g/kWh and person"
+        }
       }
     },
     "play": "play",
@@ -86,7 +102,8 @@
       "carbonDioxide": "co2",
       "dust": "dust",
       "methane": "ch4",
-      "microplastic": "microplastic"
+      "microplastic": "microplastic",
+      "carbonDioxideEquivalent": "CO2 equivalent"
     },
     "electricity": {
       "water": "hydroelectric power",

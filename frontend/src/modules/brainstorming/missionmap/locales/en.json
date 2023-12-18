@@ -24,7 +24,12 @@
       "electricity": "electricity statistic",
       "map": "map"
     },
-    "add": "add own measure"
+    "add": "add own measure",
+    "chart": {
+      "x": "measures",
+      "y-influenceAreas": "development of society",
+      "y-electricity": "electricity ratio in %"
+    }
   },
   "moderatorConfig": {
     "mapSection": "map section",

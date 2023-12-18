@@ -13,7 +13,7 @@
     "maxSpeed": "max",
     "combined": "kombiniert",
     "separate": "separat",
-    "electricity": "Stromanteil",
+    "electricity": "Stromanteil in %",
     "vehicle-parameter": {
       "fuel": "Treibstoff",
       "mpg": "Verbrauch",
@@ -30,21 +30,37 @@
       "veryGood": "Gratulation du bist ja schon einrichtiger Profi beim aufräumen deiner Emissionen.",
       "good": "Das war schon richtig gut. Versuch durch geschicktes Fahrverhalten dir nächstesmal noch mehr Luft beim aufräumen zu lassen, dann schaffst du auch noch die letzten Prozent",
       "notBad": "Das war gar nicht schlecht, aber da geht noch mehr. Versuch durch geschicktes Fahrverhalten dir nächstesmal noch mehr Luft beim aufräumen zu lassen, dann schaffst du nächstesmal sicher mehr",
-      "improvable": "Das geht besser. Versuch durch geschicktes Fahrverhalten dir nächstesmal noch mehr Luft beim aufräumen zu lassen, dann schaffst du nächstesmal sicher mehr"
+      "improvable": "Das geht besser. Versuch durch geschicktes Fahrverhalten dir nächstesmal noch mehr Luft beim aufräumen zu lassen, dann schaffst du nächstesmal sicher mehr",
+      "notCollected": "nicht gefangen"
     },
     "select": "auswählen",
     "info": {
       "electricity": {
         "title": "Strommix",
-        "description": "Der aktuelle Standard-Strommix setzt sich wie in der Grafik dargestellt zusammen. Diese Zusammensetzung beeinflusst die Klimafreundlichkeit von Elektroautos. Du kannst diesen Mix durch deine Wahl von Maßnahmen im Gemeinderat beeinflussen."
+        "description": "Der aktuelle Standard-Strommix setzt sich wie in der Grafik dargestellt zusammen. Diese Zusammensetzung beeinflusst die Klimafreundlichkeit von Elektroautos. Du kannst diesen Mix durch deine Wahl von Maßnahmen im Gemeinderat beeinflussen.",
+        "scale": "Stromanteil in %"
       },
       "emissionsPerFuel": {
         "title": "Emissionen pro Kraftstoff",
-        "description": "In diesem Diagramm kannst du sehen, wie viele Treibhausgase in welchem Kraftstoff stecken. Elektrizität hängt vom Strommix ab und kann im Gemeinderat beeinflusst werden."
+        "description": "In diesem Diagramm kannst du sehen, wie viele Treibhausgase in welchem Kraftstoff stecken. Elektrizität hängt vom Strommix ab und kann im Gemeinderat beeinflusst werden.",
+        "scale": {
+          "x": "Kraftstoff",
+          "y": "gCO2eq/kWh"
+        }
       },
       "emissionsPerElectricitySource": {
         "title": "Emissionen pro Stromquelle",
-        "description": "Die Grafik zeigt, wie viele Treibhausgase von welcher Stromquelle erzeugt werden."
+        "description": "Die Grafik zeigt, wie viele Treibhausgase von welcher Stromquelle erzeugt werden.",
+        "scale": {
+          "x": "Stromquelle",
+          "y": "gCO2eq/kWh"
+        }
+      },
+      "driving": {
+        "scale": {
+          "x": "Zeit",
+          "y": "g/kWh und Person"
+        }
       }
     },
     "play": "Start",
@@ -86,7 +102,8 @@
       "carbonDioxide": "CO2",
       "dust": "Feinstaub",
       "methane": "CH4",
-      "microplastic": "Microplastik"
+      "microplastic": "Microplastik",
+      "carbonDioxideEquivalent": "CO2-Äquivalent"
     },
     "electricity": {
       "water": "Wasserkraft",

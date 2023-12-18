@@ -203,6 +203,12 @@
                     color: '#000000',
                   },
                 },
+                title: {
+                  display: true,
+                  text: $t(
+                    'module.playing.moveit.participant.info.electricity.scale'
+                  ),
+                },
               },
             }"
           />
@@ -216,6 +222,7 @@
               maintainAspectRatio: false,
               plugins: {
                 legend: {
+                  display: false,
                   position: 'right',
                   labels: {
                     color: '#000000',
@@ -228,12 +235,24 @@
                     color: '#000000',
                   },
                   stacked: true,
+                  title: {
+                    text: $t(
+                      'module.playing.moveit.participant.info.emissionsPerElectricitySource.scale.x'
+                    ),
+                    display: true,
+                  },
                 },
                 y: {
                   ticks: {
                     color: '#000000',
                   },
                   stacked: true,
+                  title: {
+                    text: $t(
+                      'module.playing.moveit.participant.info.emissionsPerElectricitySource.scale.y'
+                    ),
+                    display: true,
+                  },
                 },
               },
             }"
@@ -260,12 +279,24 @@
                     color: '#000000',
                   },
                   stacked: true,
+                  title: {
+                    text: $t(
+                      'module.playing.moveit.participant.info.emissionsPerFuel.scale.x'
+                    ),
+                    display: true,
+                  },
                 },
                 y: {
                   ticks: {
                     color: '#000000',
                   },
                   stacked: true,
+                  title: {
+                    text: $t(
+                      'module.playing.moveit.participant.info.emissionsPerFuel.scale.y'
+                    ),
+                    display: true,
+                  },
                 },
               },
             }"
@@ -585,18 +616,23 @@ export default class SelectChallenge extends Vue {
     this.chartDataFuel.labels.push(
       this.$t('module.playing.moveit.enums.fuel.electricity')
     );
-    for (const particleSource of Object.keys(gameConfig.particles)) {
+    for (const particleSource of ['carbonDioxideEquivalent']) {
+      //Object.keys(gameConfig.particles)) {
       const dsElectricity = {
         label: this.$t(
           `module.playing.moveit.enums.particle.${particleSource}`
         ),
-        backgroundColor: gameConfig.particles[particleSource].color,
+        backgroundColor: [] as string[], //gameConfig.particles.carbonDioxide.color,
+        //backgroundColor: gameConfig.particles[particleSource].color,
         data: [] as number[],
       };
 
       for (const energySource of Object.keys(gameConfig.electricity)) {
         dsElectricity.data.push(
           gameConfig.electricity[energySource].perUnit[particleSource]
+        );
+        dsElectricity.backgroundColor.push(
+          gameConfig.electricity[energySource].color
         );
       }
       this.chartDataElectricity.datasets.push(dsElectricity);
