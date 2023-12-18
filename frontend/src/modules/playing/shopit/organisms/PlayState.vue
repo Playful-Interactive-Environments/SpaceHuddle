@@ -49,17 +49,23 @@
     >
       <div class="waitingTexts">
         <p
-          v-if="
+          v-show="
             cardsPlayed.length === 0 &&
             player === playersTurn &&
             game.parameter.playerNum > 1
           "
           class="waiting"
+          :class="{
+            yourTurn:
+              cardsPlayed.length === 0 &&
+              player === playersTurn &&
+              game.parameter.playerNum > 1,
+          }"
         >
           {{ $t('module.playing.shopit.participant.waiting.yourTurn') }}
         </p>
         <p
-          v-if="
+            v-show="
             (cardsPlayed.length === 0 && player !== playersTurn) ||
             (!initialButtonState && game.parameter.playerNum <= 1)
           "
@@ -68,8 +74,8 @@
           {{ $t('module.playing.shopit.participant.waiting.opponent') }}
         </p>
         <p
-          v-if="!initialButtonState && game.parameter.playerNum <= 1"
-          class="waiting joinID"
+            v-show="!initialButtonState && game.parameter.playerNum <= 1"
+          class="waiting"
         >
           {{
             $t('module.playing.shopit.participant.waiting.joinID') +
@@ -1282,6 +1288,49 @@ export default class PlayState extends Vue {
 
 .waiting {
   color: var(--color-background);
+}
+
+.yourTurn {
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--border-radius);
+  opacity: 100%;
+  transition: 0.3s;
+  animation: appear 1s, yourTurnAnimation 3s infinite ease-in-out;
+}
+
+@keyframes yourTurnAnimation {
+  0% {
+    transform: scale(100%);
+    background-color: transparent;
+  }
+  10% {
+    transform: scale(100%);
+    background-color: transparent;
+  }
+  50% {
+    transform: scale(115%);
+    background-color: var(--color-brainstorming);
+  }
+  60% {
+    transform: scale(115%);
+    background-color: var(--color-brainstorming);
+  }
+  1000% {
+    transform: scale(100%);
+    background-color: transparent;
+  }
+}
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 100%;
+  }
 }
 
 .waitingTexts {
