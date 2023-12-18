@@ -70,23 +70,27 @@
           )
         }}
       </div>
-      <div class="pros">
-        <h3>{{ $t('module.playing.coolit.participant.moleculeInfo.pro') }}</h3>
-        {{
-          $t(
-            `module.playing.coolit.participant.moleculeInfo.${activeMoleculeName}.pros`
-          )
-        }}
-      </div>
-      <div class="cons">
-        <h3>
-          {{ $t('module.playing.coolit.participant.moleculeInfo.contra') }}
-        </h3>
-        {{
-          $t(
-            `module.playing.coolit.participant.moleculeInfo.${activeMoleculeName}.cons`
-          )
-        }}
+      <div class="columns">
+        <div class="column is-half pros">
+          <h3>
+            {{ $t('module.playing.coolit.participant.moleculeInfo.pro') }}
+          </h3>
+          {{
+            $t(
+              `module.playing.coolit.participant.moleculeInfo.${activeMoleculeName}.pros`
+            )
+          }}
+        </div>
+        <div class="column is-half cons">
+          <h3>
+            {{ $t('module.playing.coolit.participant.moleculeInfo.contra') }}
+          </h3>
+          {{
+            $t(
+              `module.playing.coolit.participant.moleculeInfo.${activeMoleculeName}.cons`
+            )
+          }}
+        </div>
       </div>
       <div class="reference">
         <a
@@ -890,9 +894,9 @@ export default class SelectLevel extends Vue {
 
   .pros {
     //color: var(--color-green);
-    margin-bottom: 1.5rem;
-    float: left;
-    width: 48%;
+    //margin-bottom: 1.5rem;
+    //float: left;
+    //width: 48%;
 
     h3 {
       font-weight: var(--font-weight-bold);
@@ -901,9 +905,9 @@ export default class SelectLevel extends Vue {
 
   .cons {
     //color: var(--color-red);
-    margin-bottom: 1.5rem;
-    float: right;
-    width: 48%;
+    //margin-bottom: 1.5rem;
+    //float: right;
+    //width: 48%;
 
     h3 {
       font-weight: var(--font-weight-bold);
@@ -911,7 +915,7 @@ export default class SelectLevel extends Vue {
   }
 
   .reference {
-    clear: both;
+    //clear: both;
     font-size: var(--font-size-xxsmall);
     width: 100%;
     text-align: right;
@@ -923,11 +927,22 @@ export default class SelectLevel extends Vue {
 
   .values table {
     margin-top: 2rem;
-  }
 
-  .values table th {
-    padding-right: 1rem;
+    th {
+      padding-right: 1rem;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 0.5rem;
+      padding-top: 0.5rem;
+    }
   }
+}
+
+.columns:not(:last-child) {
+  margin-bottom: 0;
 }
 
 .moleculeSelection {
