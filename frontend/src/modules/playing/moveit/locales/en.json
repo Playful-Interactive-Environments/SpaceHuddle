@@ -65,7 +65,7 @@
     },
     "movingType": {
       "path": {
-        "title": "predetermined route",
+        "title": "navigated",
         "description": "Follow the fixed path."
       },
       "free": {
