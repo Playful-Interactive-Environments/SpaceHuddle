@@ -33,6 +33,7 @@
       :center="mapVehiclePoint"
       :zoom="mapZoom"
       :double-click-zoom="false"
+      :keyboard="false"
       @map:load="onLoad"
     >
       <mgl-geo-json-source
@@ -198,8 +199,8 @@
     </div>-->
     <div class="overlay-top-right">
       <p
-          class="overlay-info"
-          :style="{ backgroundColor: getSpeedColor(moveSpeed, 0.6) }"
+        class="overlay-info"
+        :style="{ backgroundColor: getSpeedColor(moveSpeed, 0.6) }"
       >
         {{ Math.round(moveSpeed) }} km/h
       </p>
@@ -208,7 +209,7 @@
         {{ personCount }} / {{ vehicleParameter.persons }}
       </div>
     </div>
-    <div class="overlay-bottom-right">
+    <div class="overlay-bottom-left">
       <div>
         <Joystick
           v-if="navigation === NavigationType.joystick && zoomReady"
@@ -223,6 +224,30 @@
         />
         <!--<el-button @click="createVisibleStreetMask">test</el-button>-->
       </div>
+    </div>
+    <div class="overlay-bottom-right">
+      <el-button
+          v-if="zoomReady"
+          class="brake"
+          @pointerdown="startDecreaseSpeed"
+          @pointerup="stopDecreaseSpeed"
+          @pointerout="stopDecreaseSpeed"
+          @contextmenu="(e) => e.preventDefault()"
+          :style="{ backgroundColor: getSpeedColor(100 - moveSpeed, 0.6) }"
+      >
+        B
+      </el-button>
+      <el-button
+          v-if="zoomReady"
+          class="gas"
+          @pointerdown="startIncreaseSpeed"
+          @pointerup="stopIncreaseSpeed"
+          @pointerout="stopIncreaseSpeed"
+          @contextmenu="(e) => e.preventDefault()"
+          :style="{ backgroundColor: getSpeedColor(moveSpeed, 0.6) }"
+      >
+        G
+      </el-button>
     </div>
     <!--<div class="overlay-bottom-left">
       <el-switch
@@ -268,30 +293,6 @@
           </template>
         </CustomMapMarker>
       </mgl-map>
-    </div>
-    <div class="overlay-bottom-left">
-      <el-button
-        v-if="zoomReady"
-        class="gas"
-        @pointerdown="startIncreaseSpeed"
-        @pointerup="stopIncreaseSpeed"
-        @pointerout="stopIncreaseSpeed"
-        @contextmenu="(e) => e.preventDefault()"
-        :style="{ backgroundColor: getSpeedColor(moveSpeed, 0.6) }"
-      >
-        G
-      </el-button>
-      <el-button
-        v-if="zoomReady"
-        class="brake"
-        @pointerdown="startDecreaseSpeed"
-        @pointerup="stopDecreaseSpeed"
-        @pointerout="stopDecreaseSpeed"
-        @contextmenu="(e) => e.preventDefault()"
-        :style="{ backgroundColor: getSpeedColor(100 - moveSpeed, 0.6) }"
-      >
-        B
-      </el-button>
     </div>
   </div>
   <!--<img v-if="streetMask" :src="streetMask" class="streetMask" />-->
@@ -866,6 +867,38 @@ export default class DriveToLocation extends Vue {
 
     window.addEventListener('mouseup', this.enableMapPan);
     window.addEventListener('touchend', this.enableMapPan);
+    window.addEventListener('keydown', this.handleKeyDown);
+    window.addEventListener('keyup', this.handleKeyUp);
+  }
+
+  KeyPressedAccelerate = false;
+  KeyPressedDecelerate = false;
+  handleKeyDown(event: KeyboardEvent): void {
+    if (
+      (event.key === 'g' || event.key === 'ArrowUp') &&
+      !this.KeyPressedAccelerate
+    ) {
+      this.KeyPressedAccelerate = true;
+      this.startIncreaseSpeed();
+    }
+    if (
+      (event.key === 'b' || event.key === 'ArrowDown') &&
+      !this.KeyPressedDecelerate
+    ) {
+      this.KeyPressedDecelerate = true;
+      this.startDecreaseSpeed();
+    }
+  }
+
+  handleKeyUp(event: KeyboardEvent): void {
+    if (event.key === 'g' || event.key === 'ArrowUp') {
+      this.KeyPressedAccelerate = false;
+      this.stopIncreaseSpeed();
+    }
+    if (event.key === 'b' || event.key === 'ArrowDown') {
+      this.KeyPressedDecelerate = false;
+      this.stopDecreaseSpeed();
+    }
   }
 
   unmounted(): void {
@@ -877,6 +910,8 @@ export default class DriveToLocation extends Vue {
     clearInterval(this.intervalBreak);
     window.removeEventListener('mouseup', this.enableMapPan);
     window.removeEventListener('touchend', this.enableMapPan);
+    window.removeEventListener('keydown', this.handleKeyDown);
+    window.removeEventListener('keyup', this.handleKeyUp);
   }
   //#endregion load / unload
 
@@ -1749,19 +1784,19 @@ export default class DriveToLocation extends Vue {
   background-color: var(--color-background);
 }
 
-.overlay-bottom-right {
-  position: absolute;
-  z-index: 100;
-  bottom: 1rem;
-  right: 1rem;
-  //padding: 1rem;
-}
-
 .overlay-bottom-left {
   position: absolute;
   z-index: 100;
   bottom: 1rem;
   left: 1rem;
+  //padding: 1rem;
+}
+
+.overlay-bottom-right {
+  position: absolute;
+  z-index: 100;
+  bottom: 1rem;
+  right: 1rem;
   display: flex;
   justify-content: flex-end;
   align-content: flex-end;
@@ -1930,7 +1965,7 @@ export default class DriveToLocation extends Vue {
   border: 4px solid var(--color-dark-contrast);
   width: 3rem;
   height: 4rem;
-  margin-left: 0.3rem;
+  margin-right: 0.3rem;
   align-self: flex-end;
   justify-self: flex-end;
 }
