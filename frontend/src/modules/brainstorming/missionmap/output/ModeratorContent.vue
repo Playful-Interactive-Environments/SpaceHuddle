@@ -181,6 +181,56 @@
         :min="500"
         :max="10000"
         :step="500"
+        :show-stops="true"
+        :marks="calculateMarks(1000, 10000, 1000)"
+      />
+    </el-form-item>
+    <el-form-item
+      :label="
+        $t('module.brainstorming.missionmap.moderatorConfig.minParticipants')
+      "
+      :prop="`parameter.minParticipants`"
+    >
+      <el-slider
+        v-model="settingsIdea.parameter.minParticipants"
+        :min="2"
+        :max="30"
+        :step="1"
+        :show-stops="true"
+        :marks="calculateMarks(5, 30, 5)"
+      />
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.brainstorming.missionmap.moderatorConfig.minPoints')"
+      :prop="`parameter.minPoints`"
+    >
+      <el-slider
+        v-model="settingsIdea.parameter.minPoints"
+        :min="100"
+        :max="settingsIdea.parameter.maxPoints"
+        :step="100"
+        :show-stops="true"
+        :marks="calculateMarks(100, settingsIdea.parameter.maxPoints, 100, 10)"
+      />
+    </el-form-item>
+    <el-form-item
+      :label="$t('module.brainstorming.missionmap.moderatorConfig.maxPoints')"
+      :prop="`parameter.maxPoints`"
+    >
+      <el-slider
+        v-model="settingsIdea.parameter.maxPoints"
+        :min="settingsIdea.parameter.minPoints"
+        :max="settingsIdea.parameter.points"
+        :step="100"
+        :show-stops="true"
+        :marks="
+          calculateMarks(
+            settingsIdea.parameter.minPoints,
+            settingsIdea.parameter.points,
+            100,
+            10
+          )
+        "
       />
     </el-form-item>
     <el-form-item
@@ -199,6 +249,8 @@
         v-model="settingsIdea.parameter.influenceAreas[parameter]"
         :min="-5"
         :max="5"
+        :show-stops="true"
+        :marks="calculateMarks(-5, 5, 1)"
       />
     </el-form-item>
     <el-form-item
@@ -220,38 +272,6 @@
         v-model="settingsIdea.parameter.electricity[parameter]"
         :min="-100"
         :max="100"
-      />
-    </el-form-item>
-    <el-form-item
-      :label="
-        $t('module.brainstorming.missionmap.moderatorConfig.minParticipants')
-      "
-      :prop="`parameter.minParticipants`"
-    >
-      <el-input-number
-        v-model="settingsIdea.parameter.minParticipants"
-        :min="1"
-        :max="100"
-      />
-    </el-form-item>
-    <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorConfig.minPoints')"
-      :prop="`parameter.minPoints`"
-    >
-      <el-input-number
-        v-model="settingsIdea.parameter.minPoints"
-        :min="100"
-        :max="settingsIdea.parameter.maxPoints"
-      />
-    </el-form-item>
-    <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorConfig.maxPoints')"
-      :prop="`parameter.maxPoints`"
-    >
-      <el-input-number
-        v-model="settingsIdea.parameter.maxPoints"
-        :min="settingsIdea.parameter.minPoints"
-        :max="settingsIdea.parameter.points"
       />
     </el-form-item>
     <el-form-item
@@ -316,6 +336,7 @@ import ValidationForm from '@/components/shared/molecules/ValidationForm.vue';
 import * as progress from '@/modules/brainstorming/missionmap/utils/progress';
 import { MissionInputData } from '@/modules/brainstorming/missionmap/types/MissionInputData';
 import { CombinedInputManager } from '@/types/input/CombinedInputManager';
+import { calculateMarks } from '@/utils/element-plus';
 
 @Options({
   computed: {
@@ -365,6 +386,8 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   missionInput!: MissionInputData;
   inputManager!: CombinedInputManager;
   activeProgressTab = MissionProgressParameter.influenceAreas;
+
+  calculateMarks = calculateMarks;
 
   getIdeaColor(idea: Idea): string {
     if (!idea.parameter.shareData)
