@@ -105,7 +105,11 @@
         }
       }
     },
-    "returnToMenu": "Return to Menu."
+    "returnToMenu": "Return to Menu.",
+    "categorisationButtons": {
+      "flammable": "fire hazard",
+      "non-flammable": "no hazard"
+    }
   },
   "statistic": {
     "level": "How many times was which level played?",

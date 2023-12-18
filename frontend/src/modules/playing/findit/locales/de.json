@@ -105,7 +105,11 @@
         }
       }
     },
-    "returnToMenu": "Zurück zum Menü."
+    "returnToMenu": "Zurück zum Menü.",
+    "categorisationButtons": {
+      "flammable": "Brandgefahr",
+      "non-flammable": "keine Gefahr"
+    }
   },
   "statistic": {
     "level": "Wie oft wurde welcher Level gespielt?",

@@ -41,6 +41,15 @@
           :alt="object.name"
           class="endObjectSprites"
         />
+        <font-awesome-icon
+          :icon="gameConfig[levelType].categories[object.type].settings.icon"
+          class="categoryIcon"
+          :class="{
+            hazardIcon: checkType(true, object.name),
+            noHazardIcon: checkType(false, object.name),
+          }"
+          v-if="this.correctClassified.includes(object.name)"
+        />
       </div>
     </div>
     <h2 class="heading heading--medium" v-if="this.activeObject !== null">
@@ -52,8 +61,34 @@
         )
       }}
     </h2>
+    <div class="classificationButtons">
+      <el-button
+        class="classificationButton hazard"
+        @click="checkType(true, this.activeObjectId)"
+        >{{
+          $t(
+            `module.playing.findit.participant.categorisationButtons.flammable`
+          )
+        }}</el-button
+      >
+      <el-button
+        class="classificationButton noHazard"
+        @click="checkType(false, this.activeObjectId)"
+        >{{
+          $t(
+            `module.playing.findit.participant.categorisationButtons.non-flammable`
+          )
+        }}</el-button
+      >
+    </div>
     <div class="infoText">
-      <p class="marginTop" v-if="this.activeObject !== null">
+      <p
+        class="marginTop"
+        v-if="
+          this.activeObject !== null &&
+          this.correctClassified.includes(this.activeObjectId)
+        "
+      >
         {{
           $t(
             `module.playing.findit.participant.placeables.${levelType}.${
@@ -66,6 +101,11 @@
     <el-button
       class="el-button--submit returnButton"
       @click="this.$emit('replayFinished')"
+      v-if="
+        endObjects
+          .map((x) => x.name)
+          .every((x) => correctClassified.includes(x))
+      "
     >
       {{ $t('module.playing.findit.participant.returnToMenu') }}
     </el-button>
@@ -103,6 +143,9 @@ export default class CollectedState extends Vue {
   activeObjectId = '';
   activeObject: placeable.PlaceableBase | null = null;
 
+  correctClassified: string[] = [];
+  gameConfig = gameConfig;
+
   //#region get / set
   get hasWon(): boolean {
     return this.playStateResult.collected === this.playStateResult.total;
@@ -113,6 +156,31 @@ export default class CollectedState extends Vue {
       gameConfig as any,
       this.levelType
     );
+  }
+
+  checkType(hazard: boolean, id: string) {
+    if (this.activeObject) {
+      if (this.activeObject.type === 'hazards') {
+        if (hazard) {
+          this.correctClassified.push(id);
+        }
+        return hazard;
+      } else {
+        if (!hazard) {
+          this.correctClassified.push(id);
+        }
+        return !hazard;
+      }
+    }
+  }
+
+  checkAllAnswered() {
+    for (let i = 0; i < this.endObjects.length; i++) {
+      if (!this.correctClassified.includes(this.endObjects[i].name)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   getEndObjects(): placeable.PlaceableBase[] {
@@ -316,5 +384,48 @@ export default class CollectedState extends Vue {
 .infoText {
   height: 2rem;
   transition: 0.3s;
+}
+
+.classificationButtons {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: row;
+}
+
+.classificationButton {
+  width: 40%;
+  height: 3rem;
+  border: none;
+  color: var(--color-dark-contrast);
+  margin: 0.3rem;
+  border-radius: var(--border-radius-small);
+  font-size: var(--font-size-default);
+  font-weight: var(--font-weight-semibold);
+}
+
+.hazard {
+  background-color: var(--color-evaluating);
+}
+
+.noHazard {
+  background-color: var(--color-brainstorming);
+}
+
+.hazardIcon {
+  color: var(--color-evaluating);
+}
+
+.noHazardIcon {
+  color: var(--color-brainstorming);
+}
+
+.categoryIcon {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  width: 2rem;
+  height: 2rem;
 }
 </style>
