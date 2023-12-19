@@ -265,4 +265,8 @@ export default class SelectState extends Vue {
 .media-right {
   font-size: var(--font-size-small);
 }
+
+:focus-visible {
+  outline: unset;
+}
 </style>

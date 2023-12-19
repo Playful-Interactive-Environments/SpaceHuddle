@@ -439,6 +439,15 @@ export default class GameContainer extends Vue {
     return 0;
   }
 
+  get isGameDisplayHeightReady(): boolean {
+    if (this.backgroundMovement === BackgroundMovement.Map) {
+      if (this.backgroundTextureAspect <= 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   get gameDisplayHeight(): number {
     return this.gameHeight - this.mapHeight;
   }
@@ -845,7 +854,7 @@ export default class GameContainer extends Vue {
     this.eventBus.off(EventType.ALL_TEXTURES_LOADED);
   }
 
-  setupPixiSpace(): void {
+  async setupPixiSpace(): Promise<void> {
     const dom = this.$refs.gameContainer as HTMLElement;
     if (dom) {
       const targetWidth = dom.parentElement?.offsetWidth;
@@ -869,7 +878,7 @@ export default class GameContainer extends Vue {
         const bounds = dom.getBoundingClientRect();
         this.canvasPosition = [bounds.left, bounds.top];
         if (this.collisionBorders !== CollisionBorderType.Background)
-          this.setupBound();
+          await this.setupBound();
         this.calculateBackgroundSize();
         this.ready = true;
         this.$emit('sizeReady');
@@ -1350,11 +1359,12 @@ export default class GameContainer extends Vue {
 
   readonly boundsThickness = 100;
   readonly borderDelta = 0;
-  setupCollisionBound(
+  async setupCollisionBound(
     collisionBorderType: CollisionBorderType,
     borderCategory: number
-  ): CollisionBounds | undefined {
+  ): Promise<CollisionBounds | undefined> {
     const gameWidth = this.gameWidth ? this.gameWidth : 100;
+    await until(() => this.isGameDisplayHeightReady);
     const gameHeight = this.gameDisplayHeight ? this.gameDisplayHeight : 100;
     const backgroundTextureSize =
       this.endlessPanning && this.backgroundMovement !== BackgroundMovement.None
@@ -1527,8 +1537,8 @@ export default class GameContainer extends Vue {
   }
 
   borders: undefined | CollisionBounds = undefined;
-  setupBound(): void {
-    this.borders = this.setupCollisionBound(
+  async setupBound(): Promise<void> {
+    this.borders = await this.setupCollisionBound(
       this.collisionBorders,
       this.borderCategory
     );
@@ -2016,6 +2026,7 @@ export default class GameContainer extends Vue {
     if (
       e &&
       e.type === 'mouseout' &&
+      this.$refs.pixi &&
       e.target === (this.$refs.pixi as any).canvas
     ) {
       const bounds = (this.$refs.pixi as any).canvas.getBoundingClientRect();
