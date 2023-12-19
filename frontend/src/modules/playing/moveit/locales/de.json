@@ -31,7 +31,8 @@
       "good": "Das war schon richtig gut. Versuch durch geschicktes Fahrverhalten dir nächstesmal noch mehr Luft beim aufräumen zu lassen, dann schaffst du auch noch die letzten Prozent",
       "notBad": "Das war gar nicht schlecht, aber da geht noch mehr. Versuch durch geschicktes Fahrverhalten dir nächstesmal noch mehr Luft beim aufräumen zu lassen, dann schaffst du nächstesmal sicher mehr",
       "improvable": "Das geht besser. Versuch durch geschicktes Fahrverhalten dir nächstesmal noch mehr Luft beim aufräumen zu lassen, dann schaffst du nächstesmal sicher mehr",
-      "notCollected": "nicht gefangen"
+      "collected": "eingesammelt",
+      "notCollected": "nicht eingesammelt"
     },
     "select": "auswählen",
     "info": {

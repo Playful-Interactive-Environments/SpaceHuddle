@@ -31,6 +31,7 @@
       "good": "That was already really good. Next time, try to leave yourself even more room for maneuver by clever driving behavior, then you'll manage the last percent as well.",
       "notBad": "That wasn't bad at all, but there's still more to do. Try to leave more space for cleaning up next time by clever driving behavior, then you will surely manage more next time.",
       "improvable": "You can do better. Try to leave yourself even more air next time when cleaning up by clever driving behavior, then you will surely manage more next time.",
+      "collected": "collected",
       "notCollected": "not collected"
     },
     "select": "select",

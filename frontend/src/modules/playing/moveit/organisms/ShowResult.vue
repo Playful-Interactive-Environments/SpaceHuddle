@@ -72,6 +72,7 @@
             {{ particleStateSum.collectedCount }}
             /
             {{ particleStateSum.totalCount }}
+            {{ $t(`module.playing.moveit.participant.result.collected`) }}
           </div>
         </el-carousel-item>
         <el-carousel-item
