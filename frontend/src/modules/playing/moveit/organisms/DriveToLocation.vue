@@ -227,24 +227,24 @@
     </div>
     <div class="overlay-bottom-right">
       <el-button
-          v-if="zoomReady"
-          class="brake"
-          @pointerdown="startDecreaseSpeed"
-          @pointerup="stopDecreaseSpeed"
-          @pointerout="stopDecreaseSpeed"
-          @contextmenu="(e) => e.preventDefault()"
-          :style="{ backgroundColor: getSpeedColor(100 - moveSpeed, 0.6) }"
+        v-if="zoomReady"
+        class="brake"
+        @pointerdown="startDecreaseSpeed"
+        @pointerup="stopDecreaseSpeed"
+        @pointerout="stopDecreaseSpeed"
+        @contextmenu="(e) => e.preventDefault()"
+        :style="{ backgroundColor: getSpeedColor(100 - moveSpeed, 0.6) }"
       >
         B
       </el-button>
       <el-button
-          v-if="zoomReady"
-          class="gas"
-          @pointerdown="startIncreaseSpeed"
-          @pointerup="stopIncreaseSpeed"
-          @pointerout="stopIncreaseSpeed"
-          @contextmenu="(e) => e.preventDefault()"
-          :style="{ backgroundColor: getSpeedColor(moveSpeed, 0.6) }"
+        v-if="zoomReady"
+        class="gas"
+        @pointerdown="startIncreaseSpeed"
+        @pointerup="stopIncreaseSpeed"
+        @pointerout="stopIncreaseSpeed"
+        @contextmenu="(e) => e.preventDefault()"
+        :style="{ backgroundColor: getSpeedColor(moveSpeed, 0.6) }"
       >
         G
       </el-button>
@@ -723,7 +723,7 @@ export default class DriveToLocation extends Vue {
       /*setTimeout(() => {
         this.createVisibleStreetMask();
       }, 2000);*/
-    }, 3000);
+    }, 1000);
   }
 
   miniMap!: Map;
@@ -876,14 +876,16 @@ export default class DriveToLocation extends Vue {
   handleKeyDown(event: KeyboardEvent): void {
     if (
       (event.key === 'g' || event.key === 'ArrowUp') &&
-      !this.KeyPressedAccelerate
+      !this.KeyPressedAccelerate &&
+      this.zoomReady
     ) {
       this.KeyPressedAccelerate = true;
       this.startIncreaseSpeed();
     }
     if (
       (event.key === 'b' || event.key === 'ArrowDown') &&
-      !this.KeyPressedDecelerate
+      !this.KeyPressedDecelerate &&
+      this.zoomReady
     ) {
       this.KeyPressedDecelerate = true;
       this.startDecreaseSpeed();
@@ -1044,7 +1046,7 @@ export default class DriveToLocation extends Vue {
   }
 
   increaseSpeed(): void {
-    if (this.speed < this.maxSpeed) {
+    if (this.speed < this.maxSpeed && !this.noStreet) {
       if (this.speed + 5 < this.maxSpeed) {
         this.speed += 5;
       } else {
@@ -1315,6 +1317,7 @@ export default class DriveToLocation extends Vue {
       return turfUtils.getNearestPointOnRoute(this.routePath, newDrivingPoint);
     } else {
       this.noStreet = true;
+      this.speed = 0;
       return null;
     }
   }
@@ -1611,6 +1614,7 @@ export default class DriveToLocation extends Vue {
 
   noStreet = false;
   updateTraceIsRunning = false;
+  accelerateEnabled = true;
   async updateTrace(): Promise<void> {
     if (this.updateTraceIsRunning) return;
     if (this.openAnimationSteps > this.animationIntermediateSteps / 2) return;
@@ -1662,6 +1666,7 @@ export default class DriveToLocation extends Vue {
         this.updateDrivingPoint(newDrivingPoint, subPath, maxGoalDistance);
       } else {
         this.noStreet = true;
+        this.speed = 0;
         const checkMarkDistance = 0.01;
         this.checkRoutePoint = this.getNewDrivingPoint(checkMarkDistance);
       }
