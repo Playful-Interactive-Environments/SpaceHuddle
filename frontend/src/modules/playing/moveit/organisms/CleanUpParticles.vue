@@ -274,6 +274,11 @@ interface DatasetData {
 export interface ParticleState {
   totalCount: number;
   collectedCount: number;
+  timelineInput: number[];
+  timelineOutside: number[];
+  timelineCollected: number[];
+  timelineSpeed: number[];
+  timelinePersons: number[];
 }
 
 interface ParticleStateExtended extends ParticleState {
@@ -459,6 +464,25 @@ export default class CleanUpParticles extends Vue {
     }
   }
 
+  initParticleState(): void {
+    for (const particleName in gameConfig.particles) {
+      if (!this.particleState[particleName]) {
+        this.particleState[particleName] = {
+          totalCount: 0,
+          collectedCount: 0,
+          outsideCount: 0,
+          outsideCountAdd: 0,
+          insideCountAdd: 0,
+          timelineInput: [],
+          timelineOutside: [],
+          timelineCollected: [],
+          timelineSpeed: [],
+          timelinePersons: [],
+        };
+      }
+    }
+  }
+
   mounted(): void {
     this.eventBus.on(EventType.TEXTURES_LOADING_START, async () => {
       this.loading = true;
@@ -467,15 +491,7 @@ export default class CleanUpParticles extends Vue {
       this.loading = false;
     });
 
-    for (const particleName in gameConfig.particles) {
-      this.particleState[particleName] = {
-        totalCount: 0,
-        collectedCount: 0,
-        outsideCount: 0,
-        outsideCountAdd: 0,
-        insideCountAdd: 0,
-      };
-    }
+    this.initParticleState();
     setTimeout(() => {
       this.loadActiveParticle();
     }, 1500);
@@ -512,12 +528,36 @@ export default class CleanUpParticles extends Vue {
     if (this.activeValue <= this.normalizedTrackingData.length) {
       this.loadActiveParticle();
     }
+    for (const particleName of Object.keys(this.particleState)) {
+      const outsideSum = this.particleState[
+        particleName
+      ].timelineOutside.reduce((partialSum, a) => partialSum + a, 0);
+      this.particleState[particleName].timelineOutside.push(
+        this.particleState[particleName].outsideCount - outsideSum
+      );
+      const collectedSum = this.particleState[
+        particleName
+      ].timelineCollected.reduce((partialSum, a) => partialSum + a, 0);
+      this.particleState[particleName].timelineCollected.push(
+        this.particleState[particleName].collectedCount - collectedSum
+      );
+    }
     if (
       this.activeValue >
         this.normalizedTrackingData.length + this.countdownTime ||
       (this.activeValue > this.normalizedTrackingData.length &&
         this.activeParticleCount === 0)
     ) {
+      for (const particleName of Object.keys(this.particleState)) {
+        const outsideSum = this.particleState[
+          particleName
+        ].timelineOutside.reduce((partialSum, a) => partialSum + a, 0);
+        this.particleState[particleName].timelineOutside.push(
+          this.particleState[particleName].totalCount -
+            this.particleState[particleName].collectedCount -
+            outsideSum
+        );
+      }
       this.$emit('finished', this.particleState);
       clearInterval(this.interval);
     }
@@ -732,6 +772,7 @@ export default class CleanUpParticles extends Vue {
         Math.round(data.speed).toString()
       );
       let totalValue = 0;
+      this.initParticleState();
       for (const particleName in gameConfig.particles) {
         const particle = gameConfig.particles[particleName];
         /*const speedFunction = new Function(
@@ -739,10 +780,12 @@ export default class CleanUpParticles extends Vue {
           `return ${particle.speedFunction[this.vehicle.category][this.vehicle.type]}`
         );*/
         let maxParticleValue = 0;
-        const data = {
-          name: particleName,
-          label: this.getParticleDisplayName(particleName),
-          data: this.normalizedTrackingData.map((data) => {
+        this.particleState[particleName].timelinePersons =
+          this.normalizedTrackingData.map((data) => Math.round(data.persons));
+        this.particleState[particleName].timelineSpeed =
+          this.normalizedTrackingData.map((data) => Math.round(data.speed));
+        this.particleState[particleName].timelineInput =
+          this.normalizedTrackingData.map((data) => {
             const particleValue = configCalculation.statisticsValue(
               particleName,
               data,
@@ -751,7 +794,11 @@ export default class CleanUpParticles extends Vue {
             if (maxParticleValue < particleValue)
               maxParticleValue = particleValue;
             return particleValue;
-          }),
+          });
+        const data = {
+          name: particleName,
+          label: this.getParticleDisplayName(particleName),
+          data: this.particleState[particleName].timelineInput,
           backgroundColor: particle.color,
           borderColor: particle.color,
           fill: {

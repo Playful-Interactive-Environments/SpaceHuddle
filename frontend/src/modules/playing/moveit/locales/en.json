@@ -59,6 +59,29 @@
       },
       "driving": {
         "scale": {
+          "x": "speed per time",
+          "y": "g/kWh and person"
+        }
+      },
+      "speed": {
+        "title": "speed per time",
+        "scale": {
+          "x": "time",
+          "y": "km/h"
+        }
+      },
+      "persons": {
+        "title": "person count per time",
+        "scale": {
+          "x": "time",
+          "y": "persons"
+        }
+      },
+      "emissions": {
+        "input": "emissions per time",
+        "collected": "collected emissions per time",
+        "outside": "emissions released per time",
+        "scale": {
           "x": "time",
           "y": "g/kWh and person"
         }

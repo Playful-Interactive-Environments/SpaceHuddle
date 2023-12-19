@@ -12,6 +12,11 @@ export function particleStateSum(particleState: {
   return {
     collectedCount: collectedCount,
     totalCount: totalCount,
+    timelineOutside: [],
+    timelineSpeed: [],
+    timelinePersons: [],
+    timelineCollected: [],
+    timelineInput: [],
   };
 }
 

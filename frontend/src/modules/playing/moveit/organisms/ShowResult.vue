@@ -100,6 +100,185 @@
             {{ $t(`module.playing.moveit.participant.result.notCollected`) }}
           </div>
         </el-carousel-item>
+        <el-carousel-item class="infoGraphic">
+          <h2>
+            {{ $t('module.playing.moveit.participant.info.emissions.input') }}
+          </h2>
+          <div style="height: 20%">
+            <Line
+              ref="chartRef"
+              :data="chartDataInput"
+              :options="{
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.emissions.scale.x'
+                      ),
+                      display: true,
+                    },
+                  },
+                  y: {
+                    stacked: true,
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.emissions.scale.y'
+                      ),
+                      display: true,
+                    },
+                  },
+                },
+                plugins: {
+                  annotation: {
+                    annotations: {
+                      box1: {
+                        type: 'box',
+                        xMin: 0,
+                        xMax: chartDataInput.labels.length,
+                        yMin: maxCleanupThreshold,
+                        yMax: calcChartHeight(maxChartValue),
+                        backgroundColor: highlightColorTransparent,
+                        borderColor: highlightColor,
+                      },
+                    },
+                  },
+                },
+              }"
+            />
+          </div>
+          <h2>
+            {{
+              $t('module.playing.moveit.participant.info.emissions.collected')
+            }}
+          </h2>
+          <div style="height: 20%">
+            <Line
+              ref="chartRef"
+              :data="chartDataCollected"
+              :options="{
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.emissions.scale.x'
+                      ),
+                      display: true,
+                    },
+                  },
+                  y: {
+                    stacked: true,
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.emissions.scale.y'
+                      ),
+                      display: true,
+                    },
+                  },
+                },
+              }"
+            />
+          </div>
+          <h2>
+            {{ $t('module.playing.moveit.participant.info.emissions.outside') }}
+          </h2>
+          <div style="height: 20%">
+            <Line
+              ref="chartRef"
+              :data="chartDataOutside"
+              :options="{
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.emissions.scale.x'
+                      ),
+                      display: true,
+                    },
+                  },
+                  y: {
+                    stacked: true,
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.emissions.scale.y'
+                      ),
+                      display: true,
+                    },
+                  },
+                },
+              }"
+            />
+          </div>
+          <h2>
+            {{ $t('module.playing.moveit.participant.info.speed.title') }}
+          </h2>
+          <div style="height: 20%">
+            <Line
+              ref="chartRef"
+              :data="chartDataSpeed"
+              :options="{
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.speed.scale.x'
+                      ),
+                      display: true,
+                    },
+                  },
+                  y: {
+                    stacked: true,
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.speed.scale.y'
+                      ),
+                      display: true,
+                    },
+                  },
+                },
+              }"
+            />
+          </div>
+          <h2 v-if="vehicle.category === 'bus'">
+            {{ $t('module.playing.moveit.participant.info.persons.title') }}
+          </h2>
+          <div style="height: 20%" v-if="vehicle.category === 'bus'">
+            <Line
+              ref="chartRef"
+              :data="chartDataPersons"
+              :options="{
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.persons.scale.x'
+                      ),
+                      display: true,
+                    },
+                  },
+                  y: {
+                    stacked: true,
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.persons.scale.y'
+                      ),
+                      display: true,
+                    },
+                  },
+                },
+              }"
+            />
+          </div>
+        </el-carousel-item>
       </el-carousel>
     </div>
   </div>
@@ -116,22 +295,70 @@ import * as PIXI from 'pixi.js';
 import * as pixiUtil from '@/utils/pixi';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as particleStateUtil from '@/modules/playing/moveit/utils/particleState';
+import { Line } from 'vue-chartjs';
+import * as constants from '@/modules/playing/moveit/utils/consts';
+import * as themeColors from '@/utils/themeColors';
+import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
+
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 
 const resultTabName = 'result';
 
+interface DatasetData {
+  name: string;
+  label: string;
+  backgroundColor: string;
+  borderColor: string;
+  data: number[];
+  fill: any;
+}
+
 @Options({
-  components: { GameObject, GameContainer },
+  components: { GameObject, GameContainer, Line },
   emits: [],
 })
-/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ShowResult extends Vue {
   @Prop() readonly trackingManager!: TrackingManager;
+  @Prop({ default: { category: 'car', type: 'sport' } })
+  readonly vehicle!: vehicleCalculation.Vehicle;
   @Prop({
     default: {
-      carbonDioxide: { collectedCount: 0, totalCount: 0 },
-      dust: { collectedCount: 0, totalCount: 0 },
-      methane: { collectedCount: 0, totalCount: 0 },
-      microplastic: { collectedCount: 0, totalCount: 0 },
+      carbonDioxide: {
+        collectedCount: 0,
+        totalCount: 0,
+        timelineOutside: [],
+        timelineSpeed: [],
+        timelinePersons: [],
+        timelineCollected: [],
+        timelineInput: [],
+      },
+      dust: {
+        collectedCount: 0,
+        totalCount: 0,
+        timelineOutside: [],
+        timelineSpeed: [],
+        timelinePersons: [],
+        timelineCollected: [],
+        timelineInput: [],
+      },
+      methane: {
+        collectedCount: 0,
+        totalCount: 0,
+        timelineOutside: [],
+        timelineSpeed: [],
+        timelinePersons: [],
+        timelineCollected: [],
+        timelineInput: [],
+      },
+      microplastic: {
+        collectedCount: 0,
+        totalCount: 0,
+        timelineOutside: [],
+        timelineSpeed: [],
+        timelinePersons: [],
+        timelineCollected: [],
+        timelineInput: [],
+      },
     },
   })
   readonly particleState!: {
@@ -152,6 +379,43 @@ export default class ShowResult extends Vue {
   circleGradientTexture: PIXI.Texture | null = null;
   particleTextures: { [key: string]: PIXI.Texture } = {};
   textureToken = pixiUtil.createLoadingToken();
+  chartDataInput: {
+    labels: string[];
+    datasets: DatasetData[];
+  } = {
+    labels: [],
+    datasets: [],
+  };
+  chartDataCollected: {
+    labels: string[];
+    datasets: DatasetData[];
+  } = {
+    labels: [],
+    datasets: [],
+  };
+  chartDataOutside: {
+    labels: string[];
+    datasets: DatasetData[];
+  } = {
+    labels: [],
+    datasets: [],
+  };
+  chartDataSpeed: {
+    labels: string[];
+    datasets: any[];
+  } = {
+    labels: [],
+    datasets: [],
+  };
+  chartDataPersons: {
+    labels: string[];
+    datasets: any[];
+  } = {
+    labels: [],
+    datasets: [],
+  };
+  readonly maxCleanupThreshold = constants.maxCleanupThreshold;
+  readonly calcChartHeight = constants.calcChartHeight;
 
   get particleStateSum(): ParticleState {
     return particleStateUtil.particleStateSum(this.particleState);
@@ -167,6 +431,14 @@ export default class ShowResult extends Vue {
 
   set successRate(value: number) {
     // do nothing
+  }
+
+  get highlightColorTransparent(): string {
+    return themeColors.convertToRGBA(themeColors.getHighlightColor(), 0.25);
+  }
+
+  get highlightColor(): string {
+    return themeColors.convertToRGBA(themeColors.getHighlightColor());
   }
 
   get particleArea(): number {
@@ -367,6 +639,77 @@ export default class ShowResult extends Vue {
       this.particleReady = true;
     }
   }
+
+  getParticleDisplayName(particleName: string): string {
+    return this.$t(`module.playing.moveit.enums.particle.${particleName}`);
+  }
+
+  maxChartValue = 0;
+  @Watch('particleState', { immediate: true })
+  onParticleStateChanged(): void {
+    let totalValue = 0;
+    for (const particleName of Object.keys(this.particleState)) {
+      if (this.chartDataInput.labels.length === 0) {
+        this.chartDataInput.labels =
+          this.chartDataOutside.labels =
+          this.chartDataCollected.labels =
+          this.chartDataSpeed.labels =
+          this.chartDataPersons.labels =
+            this.particleState[particleName].timelineOutside.map(
+              (item, index) => index.toString()
+            );
+
+        this.chartDataSpeed.datasets.push({
+          name: 'speed',
+          label: 'speed',
+          data: this.particleState[particleName].timelineSpeed,
+        });
+
+        this.chartDataPersons.datasets.push({
+          name: 'persons',
+          label: 'persons',
+          data: this.particleState[particleName].timelinePersons,
+        });
+      }
+      const particle = gameConfig.particles[particleName];
+      this.chartDataInput.datasets.push({
+        name: particleName,
+        label: this.getParticleDisplayName(particleName),
+        data: this.particleState[particleName].timelineInput,
+        backgroundColor: particle.color,
+        borderColor: particle.color,
+        fill: {
+          target: 'stack',
+          above: `${particle.color}77`,
+        },
+      });
+      this.chartDataOutside.datasets.push({
+        name: particleName,
+        label: this.getParticleDisplayName(particleName),
+        data: this.particleState[particleName].timelineOutside,
+        backgroundColor: particle.color,
+        borderColor: particle.color,
+        fill: {
+          target: 'stack',
+          above: `${particle.color}77`,
+        },
+      });
+      this.chartDataCollected.datasets.push({
+        name: particleName,
+        label: this.getParticleDisplayName(particleName),
+        data: this.particleState[particleName].timelineCollected,
+        backgroundColor: particle.color,
+        borderColor: particle.color,
+        fill: {
+          target: 'stack',
+          above: `${particle.color}77`,
+        },
+      });
+      totalValue += Math.max(...this.particleState[particleName].timelineInput);
+    }
+    totalValue += 1;
+    if (this.maxChartValue < totalValue) this.maxChartValue = totalValue;
+  }
 }
 </script>
 
@@ -384,6 +727,7 @@ h1 {
   background-repeat: no-repeat;
   background-position: center;
   background-image: linear-gradient(#ffffffee, #ffffff00);
+  overflow-y: auto;
 }
 
 .successState {
@@ -425,5 +769,9 @@ h1 {
     height: 5em;
     width: 5em;
   }
+}
+
+h2 {
+  font-weight: var(--font-weight-bold);
 }
 </style>

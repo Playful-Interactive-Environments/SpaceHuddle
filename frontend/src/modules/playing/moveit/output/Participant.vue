@@ -39,6 +39,7 @@
       v-if="gameStep === GameStep.Result && gameState === GameState.Game"
       :particle-state="particleState"
       :tracking-manager="trackingManager"
+      :vehicle="vehicle"
     />
   </div>
 </template>
@@ -109,10 +110,42 @@ export default class Participant extends Vue {
   module: Module | null = null;
   vehicle: vehicleCalculation.Vehicle = { category: 'car', type: 'sport' };
   particleState: { [key: string]: ParticleState } = {
-    carbonDioxide: { totalCount: 18, collectedCount: 15 },
-    dust: { totalCount: 10, collectedCount: 9 },
-    methane: { totalCount: 12, collectedCount: 9 },
-    microplastic: { totalCount: 5, collectedCount: 1 },
+    carbonDioxide: {
+      totalCount: 18,
+      collectedCount: 15,
+      timelineOutside: [],
+      timelineSpeed: [],
+      timelinePersons: [],
+      timelineCollected: [],
+      timelineInput: [],
+    },
+    dust: {
+      totalCount: 10,
+      collectedCount: 9,
+      timelineOutside: [],
+      timelineSpeed: [],
+      timelinePersons: [],
+      timelineCollected: [],
+      timelineInput: [],
+    },
+    methane: {
+      totalCount: 12,
+      collectedCount: 9,
+      timelineOutside: [],
+      timelineSpeed: [],
+      timelinePersons: [],
+      timelineCollected: [],
+      timelineInput: [],
+    },
+    microplastic: {
+      totalCount: 5,
+      collectedCount: 1,
+      timelineOutside: [],
+      timelineSpeed: [],
+      timelinePersons: [],
+      timelineCollected: [],
+      timelineInput: [],
+    },
   };
   startTime = Date.now();
   stepTime = Date.now();
