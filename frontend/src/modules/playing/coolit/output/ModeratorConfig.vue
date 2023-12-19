@@ -15,7 +15,7 @@
     :label="$t('module.playing.coolit.moderatorConfig.mapSection')"
     :prop="`${rulePropPath}.mapSection`"
   >
-    <div style="height: 200px">
+    <div style="height: var(--map-settings-height)">
       <mgl-map
         :center="mapCenter"
         :zoom="mapZoom"

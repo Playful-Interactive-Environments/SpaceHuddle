@@ -37,6 +37,7 @@
     "minParticipants": "mindestens erforderliche Teilnehmer",
     "minPoints": "erforderliche Mindestpunktzahl pro Teilnehmer",
     "maxPoints": "maximal zu vergebende Punkte pro Teilnehmer",
+    "mapLocation": "Standort",
     "explanation": "für den Teilnehmer auswählbare Erklärungen",
     "maxRatingStars": "maximale Bewertungssterne",
     "insertInitProgressionFromInput": "Startprogression von der Eingabe einfügen",

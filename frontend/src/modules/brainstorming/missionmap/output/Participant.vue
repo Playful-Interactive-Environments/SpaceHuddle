@@ -240,6 +240,7 @@
     "
     :authHeaderTyp="EndpointAuthorisationType.PARTICIPANT"
     @updateData="addData"
+    ref="ideaSettings"
   >
     <el-form-item
       :label="$t('module.brainstorming.missionmap.moderatorContent.points')"
@@ -352,6 +353,31 @@
         :max="100"
       />
     </el-form-item>
+    <el-form-item
+      :label="$t('module.brainstorming.missionmap.moderatorConfig.mapLocation')"
+      :prop="`parameter.mapLocation`"
+    >
+      <div style="height: var(--map-settings-height)">
+        <mgl-map
+          :center="mapCenter"
+          :zoom="mapZoom"
+          :double-click-zoom="false"
+          @map:load="onLoad"
+        >
+          <CustomMapMarker
+            :coordinates="convertCoordinates(settingsIdea.parameter.position)"
+            :draggable="true"
+            v-on:dragend="positionChanged"
+          >
+            <template v-slot:icon>
+              <font-awesome-icon icon="location-crosshairs" class="pin" />
+            </template>
+          </CustomMapMarker>
+
+          <mgl-navigation-control position="bottom-left" />
+        </mgl-map>
+      </div>
+    </el-form-item>
   </IdeaSettings>
   <el-dialog
     v-if="activeTab === 'map'"
@@ -445,6 +471,12 @@ import AddItem from '@/components/moderator/atoms/AddItem.vue';
 import gameConfigMoveIt from '@/modules/playing/moveit/data/gameConfig.json';
 import { ValidationRules } from '@/types/ui/ValidationRule';
 import { calculateMarks } from '@/utils/element-plus';
+import { defaultCenter } from '@/utils/map';
+import { LngLatLike, Map } from 'maplibre-gl';
+import * as turf from '@turf/turf';
+import { MglEvent, MglMap, MglNavigationControl } from 'vue-maplibre-gl';
+import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
+import { until } from '@/utils/wait';
 
 interface ProgressValues {
   origin: number;
@@ -463,6 +495,9 @@ interface ProgressValues {
     },
   },
   components: {
+    MglNavigationControl,
+    MglMap,
+    CustomMapMarker,
     MissionProgressChart,
     FontAwesomeIcon,
     ValidationForm,
@@ -523,6 +558,9 @@ export default class Participant extends Vue {
     parameter: {},
   };
   settingsIdea = this.addIdea;
+
+  mapCenter = [...defaultCenter] as [number, number];
+  mapZoom = 5;
 
   calculateMarks = calculateMarks;
 
@@ -921,6 +959,68 @@ export default class Participant extends Vue {
   updateModule(module: Module): void {
     this.module = module;
     if (module.parameter.theme) this.theme = module.parameter.theme;
+
+    if (module.parameter.mapCenter) {
+      this.mapCenter = module.parameter.mapCenter;
+    }
+    if (module.parameter.mapZoom) {
+      this.mapZoom = module.parameter.mapZoom;
+    }
+  }
+
+  convertCoordinates(position: [number, number]): LngLatLike {
+    if (position) {
+      return {
+        lng: position[0],
+        lat: position[1],
+      };
+    }
+    if (this.map) {
+      const bounds = this.map.getBounds();
+      const pos = turf.randomPosition([
+        bounds._sw.lng,
+        bounds._sw.lat,
+        bounds._ne.lng,
+        bounds._ne.lat,
+      ]);
+      this.settingsIdea.parameter.position = pos;
+      return {
+        lng: pos[0],
+        lat: pos[1],
+      };
+    } else {
+      until(() => this.map).then(() => {
+        if (this.map) {
+          const bounds = this.map.getBounds();
+          this.settingsIdea.parameter.position = turf.randomPosition([
+            bounds._sw.lng,
+            bounds._sw.lat,
+            bounds._ne.lng,
+            bounds._ne.lat,
+          ]);
+        }
+      });
+    }
+    if (this.mapCenter) {
+      return {
+        lng: this.mapCenter[0],
+        lat: this.mapCenter[1],
+      };
+    }
+    return {
+      lng: 0,
+      lat: 0,
+    };
+  }
+
+  map: Map | null = null;
+  onLoad(e: MglEvent): void {
+    this.map = e.map;
+  }
+
+  positionChanged(marker: any): void {
+    const lngLat = marker.target._lngLat;
+    this.settingsIdea.parameter.position = [lngLat.lng, lngLat.lat];
   }
 
   deregisterAll(): void {
@@ -1287,5 +1387,11 @@ export default class Participant extends Vue {
 
 .el-form-item::v-deep(.el-form-item__label) {
   color: var(--parameter-color);
+}
+
+.pin {
+  --pin-color: var(--color-primary);
+  font-size: var(--font-size-xxxlarge);
+  color: var(--pin-color);
 }
 </style>

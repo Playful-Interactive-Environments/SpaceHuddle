@@ -37,6 +37,7 @@
     "minParticipants": "minimum required participants",
     "minPoints": "minimum required points per participant",
     "maxPoints": "maximum points to be spent per participant",
+    "mapLocation": "location",
     "explanation": "explanations selectable for the participant",
     "maxRatingStars": "max rating stars",
     "insertInitProgressionFromInput": "insert starting progression from input",
