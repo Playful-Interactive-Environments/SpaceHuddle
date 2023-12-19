@@ -37,7 +37,6 @@
     "minParticipants": "minimum required participants",
     "minPoints": "minimum required points per participant",
     "maxPoints": "maximum points to be spent per participant",
-    "mapLocation": "location",
     "explanation": "explanations selectable for the participant",
     "maxRatingStars": "max rating stars",
     "insertInitProgressionFromInput": "insert starting progression from input",
@@ -51,7 +50,10 @@
     "displayAll": "display all",
     "add": "add content",
     "points": "required sum of points",
+    "mapLocation": "location",
     "share": "share",
+    "evaluation": "evaluation",
+    "reasonsForRejection": "Give reasons for your rejection",
     "electricityValidationErrors": "electricity sum must be 0 please adjust the values so that the sum is again 0 instead of "
   },
   "publicScreen": {

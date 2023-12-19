@@ -37,7 +37,6 @@
     "minParticipants": "mindestens erforderliche Teilnehmer",
     "minPoints": "erforderliche Mindestpunktzahl pro Teilnehmer",
     "maxPoints": "maximal zu vergebende Punkte pro Teilnehmer",
-    "mapLocation": "Standort",
     "explanation": "für den Teilnehmer auswählbare Erklärungen",
     "maxRatingStars": "maximale Bewertungssterne",
     "insertInitProgressionFromInput": "Startprogression von der Eingabe einfügen",
@@ -51,7 +50,10 @@
     "displayAll": "Alle Anzeigen",
     "add": "Info hinzufügen",
     "points": "Benötigte Summe an Punkten",
+    "mapLocation": "Standort",
     "share": "teilen",
+    "evaluation": "Bewertung",
+    "reasonsForRejection": "Begründe deine Ablehnung",
     "electricityValidationErrors": "Stromsumme muss 0 sein, bitte die Werte so anpassen, dass die Summe wieder 0 ist anstelle von "
   },
   "publicScreen": {

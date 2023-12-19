@@ -85,7 +85,11 @@
           :is-selectable="true"
           :isSelected="element.id === selectedIdea?.id"
           :selectionColor="selectionColor"
-          :is-editable="element.isOwn && inputManager.isCurrentIdea(element.id)"
+          :is-editable="
+            element.isOwn &&
+            !element.parameter.shareData &&
+            inputManager.isCurrentIdea(element.id)
+          "
           :show-state="false"
           :canChangeState="false"
           :handleEditable="false"
@@ -119,6 +123,21 @@
             >
               <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
             </div>
+          </div>
+          <div
+            v-if="element.state.toLowerCase() === IdeaStates.THUMBS_DOWN"
+            class="rejection"
+          >
+            {{ element.parameter.reasonsForRejection }}
+          </div>
+          <div
+            v-if="
+              element.state.toLowerCase() === IdeaStates.THUMBS_UP &&
+              element.isOwn
+            "
+            class="accept"
+          >
+            <font-awesome-icon icon="thumbs-up" />
           </div>
         </IdeaCard>
       </template>
@@ -243,7 +262,9 @@
     ref="ideaSettings"
   >
     <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorContent.points')"
+      :label="`${$t(
+        'module.brainstorming.missionmap.moderatorContent.points'
+      )}: ${settingsIdea.parameter.points}`"
       :prop="`parameter.points`"
     >
       <el-slider
@@ -256,9 +277,9 @@
       />
     </el-form-item>
     <el-form-item
-      :label="
-        $t('module.brainstorming.missionmap.moderatorConfig.minParticipants')
-      "
+      :label="`${$t(
+        'module.brainstorming.missionmap.moderatorConfig.minParticipants'
+      )}: ${settingsIdea.parameter.minParticipants}`"
       :prop="`parameter.minParticipants`"
     >
       <el-slider
@@ -271,7 +292,9 @@
       />
     </el-form-item>
     <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorConfig.minPoints')"
+      :label="`${$t(
+        'module.brainstorming.missionmap.moderatorConfig.minPoints'
+      )}: ${settingsIdea.parameter.minPoints}`"
       :prop="`parameter.minPoints`"
     >
       <!--<el-slider
@@ -293,7 +316,9 @@
       />
     </el-form-item>
     <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorConfig.maxPoints')"
+      :label="`${$t(
+        'module.brainstorming.missionmap.moderatorConfig.maxPoints'
+      )}: ${settingsIdea.parameter.maxPoints}`"
       :prop="`parameter.maxPoints`"
     >
       <el-slider
@@ -321,7 +346,10 @@
     >
       <template #label>
         {{ $t(`module.brainstorming.missionmap.gameConfig.${parameter}`) }}
-        <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />
+        <font-awesome-icon :icon="gameConfig.parameter[parameter].icon" />:
+        <span v-if="settingsIdea.parameter.influenceAreas">
+          {{ settingsIdea.parameter.influenceAreas[parameter] }}
+        </span>
       </template>
       <el-slider
         v-if="settingsIdea.parameter.influenceAreas"
@@ -354,7 +382,9 @@
       />
     </el-form-item>
     <el-form-item
-      :label="$t('module.brainstorming.missionmap.moderatorConfig.mapLocation')"
+      :label="
+        $t('module.brainstorming.missionmap.moderatorContent.mapLocation')
+      "
       :prop="`parameter.mapLocation`"
     >
       <div style="height: var(--map-settings-height)">
@@ -477,6 +507,7 @@ import * as turf from '@turf/turf';
 import { MglEvent, MglMap, MglNavigationControl } from 'vue-maplibre-gl';
 import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
 import { until } from '@/utils/wait';
+import IdeaStates from '@/types/enum/IdeaStates';
 
 interface ProgressValues {
   origin: number;
@@ -487,6 +518,9 @@ interface ProgressValues {
 
 @Options({
   computed: {
+    IdeaStates() {
+      return IdeaStates;
+    },
     gameConfig() {
       return gameConfig;
     },
@@ -1176,6 +1210,7 @@ export default class Participant extends Vue {
   }
 
   saveIdea(idea: Idea): void {
+    idea.state = IdeaStates.NEW;
     ideaService
       .putIdea(idea, EndpointAuthorisationType.PARTICIPANT)
       .then(() => {
@@ -1393,5 +1428,14 @@ export default class Participant extends Vue {
   --pin-color: var(--color-primary);
   font-size: var(--font-size-xxxlarge);
   color: var(--pin-color);
+}
+
+.rejection {
+  color: var(--color-red);
+  font-weight: var(--font-weight-bold);
+}
+
+.accept {
+  color: var(--color-green);
 }
 </style>

@@ -288,11 +288,58 @@
         </template>
       </el-input>
     </el-form-item>
-    <el-form-item
+    <!--<el-form-item
       :label="$t('module.brainstorming.missionmap.moderatorContent.share')"
       :prop="`parameter.shareData`"
     >
       <el-switch v-model="settingsIdea.parameter.shareData" />
+    </el-form-item>-->
+    <el-form-item
+      :label="$t('module.brainstorming.missionmap.moderatorContent.evaluation')"
+      :prop="`parameter.shareData`"
+    >
+      <span
+        class="link"
+        :class="{
+          'is-active':
+            settingsIdea.state.toLowerCase() === IdeaStates.THUMBS_UP,
+        }"
+        @click="
+          () => {
+            settingsIdea.parameter.shareData = true;
+            settingsIdea.state = IdeaStates.THUMBS_UP;
+          }
+        "
+      >
+        <font-awesome-icon icon="thumbs-up" />
+      </span>
+      <span
+        class="link"
+        :class="{
+          'is-active':
+            settingsIdea.state.toLowerCase() === IdeaStates.THUMBS_DOWN,
+        }"
+        @click="
+          () => {
+            settingsIdea.parameter.shareData = false;
+            settingsIdea.state = IdeaStates.THUMBS_DOWN;
+          }
+        "
+      >
+        <font-awesome-icon icon="thumbs-down" />
+      </span>
+      <div v-if="settingsIdea.state.toLowerCase() === IdeaStates.THUMBS_DOWN">
+        <el-input
+          v-model="settingsIdea.parameter.reasonsForRejection"
+          :rows="3"
+          type="textarea"
+          :placeholder="
+            $t(
+              'module.brainstorming.missionmap.moderatorContent.reasonsForRejection'
+            )
+          "
+        />
+      </div>
     </el-form-item>
   </IdeaSettings>
 </template>
@@ -337,9 +384,13 @@ import * as progress from '@/modules/brainstorming/missionmap/utils/progress';
 import { MissionInputData } from '@/modules/brainstorming/missionmap/types/MissionInputData';
 import { CombinedInputManager } from '@/types/input/CombinedInputManager';
 import { calculateMarks } from '@/utils/element-plus';
+import IdeaStates from '@/types/enum/IdeaStates';
 
 @Options({
   computed: {
+    IdeaStates() {
+      return IdeaStates;
+    },
     gameConfig() {
       return gameConfig;
     },
@@ -658,5 +709,15 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
 
 .el-form-item::v-deep(.el-form-item__label) {
   color: var(--parameter-color);
+}
+
+.link {
+  font-size: var(--font-size-xxlarge);
+  color: var(--color-dark-contrast-light);
+  padding-right: 0.5rem;
+}
+
+.is-active {
+  color: var(--color-dark-contrast-dark);
 }
 </style>
