@@ -54,13 +54,7 @@
             player === playersTurn &&
             game.parameter.playerNum > 1
           "
-          class="waiting"
-          :class="{
-            yourTurn:
-              cardsPlayed.length === 0 &&
-              player === playersTurn &&
-              game.parameter.playerNum > 1,
-          }"
+          class="waiting yourTurn"
         >
           {{ $t('module.playing.shopit.participant.waiting.yourTurn') }}
         </p>

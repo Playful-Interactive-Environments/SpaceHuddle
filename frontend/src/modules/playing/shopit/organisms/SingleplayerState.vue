@@ -47,12 +47,17 @@
       tag="div"
       id="activeCards"
     >
-      <p v-if="cardsPlayed.length === 0 && playFirst" class="waiting">
-        {{ $t('module.playing.shopit.participant.waiting.yourTurn') }}
-      </p>
-      <p v-if="cardsPlayed.length === 0 && !playFirst" class="waiting">
-        {{ $t('module.playing.shopit.participant.waiting.opponent') }}
-      </p>
+      <div class="waitingTexts">
+        <p
+          v-show="cardsPlayed.length === 0 && playFirst"
+          class="waiting yourTurn"
+        >
+          {{ $t('module.playing.shopit.participant.waiting.yourTurn') }}
+        </p>
+        <p v-show="cardsPlayed.length === 0 && !playFirst" class="waiting">
+          {{ $t('module.playing.shopit.participant.waiting.opponent') }}
+        </p>
+      </div>
       <div
         v-for="card in cardsPlayed"
         :key="card.name"
@@ -1095,6 +1100,53 @@ hr {
 
 .waiting {
   color: var(--color-background);
+}
+
+.waitingTexts {
+  text-align: center;
+}
+
+.yourTurn {
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--border-radius);
+  opacity: 100%;
+  transition: 0.3s;
+  animation: appear 1s, yourTurnAnimation 3s infinite ease-in-out;
+}
+
+@keyframes yourTurnAnimation {
+  0% {
+    transform: scale(100%);
+    background-color: transparent;
+  }
+  10% {
+    transform: scale(100%);
+    background-color: transparent;
+  }
+  50% {
+    transform: scale(115%);
+    background-color: var(--color-brainstorming);
+  }
+  60% {
+    transform: scale(115%);
+    background-color: var(--color-brainstorming);
+  }
+  1000% {
+    transform: scale(100%);
+    background-color: transparent;
+  }
+}
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 100%;
+  }
 }
 
 p.gameKey {
