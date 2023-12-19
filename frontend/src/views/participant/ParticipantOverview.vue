@@ -292,7 +292,10 @@ export default class ParticipantOverview extends Vue {
   }
 
   topicCash!: cashService.SimplifiedCashEntry<Topic[]>;
+  oldBodyHeight = 'unset';
   mounted(): void {
+    this.oldBodyHeight = document.body.style.height;
+    document.body.style.height = 'unset';
     this.avatar = authService.getAvatar();
     sessionService.registerGetParticipantSession(
       this.updateSession,
@@ -314,6 +317,7 @@ export default class ParticipantOverview extends Vue {
   }
 
   unmounted(): void {
+    document.body.style.height = this.oldBodyHeight;
     this.deregisterAll();
   }
 
