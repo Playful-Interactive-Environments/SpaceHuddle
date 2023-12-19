@@ -404,4 +404,8 @@ export default class ParticipantModuleContent extends Vue {
 .el-tabs::v-deep(.el-tabs__nav-wrap)::after {
   background-color: var(--color-gray-inactive);
 }
+
+.el-tabs {
+  pointer-events: auto;
+}
 </style>
