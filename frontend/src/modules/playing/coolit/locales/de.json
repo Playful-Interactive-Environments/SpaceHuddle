@@ -42,6 +42,15 @@
       "years": "Jahre",
       "gwpInfo": "im Vergleich zu Kohlenstoffdioxid",
       "none": "Wähle ein Molekül aus um dessen Informationen zu sehen.",
+      "overview": {
+        "title": "Übersicht",
+        "description": "Die Atmosphäre setzt sich aus mehreren Gasen zusammen, u.a. Stickstoff, Sauerstoff, Argon und Kohlenstoffdioxid. Lichtstrahlen können diese Gase ungehindert durchdringen. Trifft ein Lichtstahl auf die Erde wird er von der Oberfläche absorbiert und als Wärmestrahlung freigesetzt. Wärmestrahlung wird von den Treibhausgasen aufgenommen und erwärmt dadurch die Atmosphäre. Ohne diese Gase wäre es auf der Erde sehr kalt. Die Durchschnittstemperatur würde bei -18°C liegen! Obwohl die Atmosphäre aus nur 0,04% Treibhausgasen besteht reicht das aus um die Erde auf eine für uns angenehme Temperatur zu erwärmen. Allerdings je mehr Treibhausgase desto wärmer wird es. Gase und Strahlen sind farblos und sehr sehr klein. Damit du sie sehen kannst haben wir sie eingefärbt und stark vergrößert.",
+        "chart-atmosphere": "Zusammensetzung der Atmosphäre",
+        "chart-greenhouse": "Zusammensetzung der Treibhausgase",
+        "chart-greenhouse2": "Zusammensetzung der Treibhausgase ohne Wasserdampf",
+        "chart-greenhouse3": "Zusammensetzung der Treibhausgase ohne Wasserdampf und Kohlenstoffdioxid",
+        "chart-impact-greenhouse": "Einfluss der Treibhausgase"
+      },
       "waterVapor": {
         "title": "Wasserdampf",
         "description": "Wasser in seinem Gaszustand.",

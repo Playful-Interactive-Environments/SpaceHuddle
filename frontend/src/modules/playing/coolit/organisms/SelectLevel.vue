@@ -59,7 +59,9 @@
         </div>
       </div>
       <div class="moleculeInfo" v-else>
-        {{ $t('module.playing.coolit.participant.moleculeInfo.none') }}
+        {{
+          $t('module.playing.coolit.participant.moleculeInfo.overview.title')
+        }}
       </div>
     </template>
     <div class="moleculeInfo" v-if="activeMoleculeName">
@@ -176,9 +178,100 @@
         </table>
       </div>
     </div>
+    <div class="moleculeInfo" v-else>
+      <div class="description">
+        {{
+          $t(
+            `module.playing.coolit.participant.moleculeInfo.overview.description`
+          )
+        }}
+      </div>
+      <div class="chart">
+        <Doughnut
+          :data="chartDataAtmosphere"
+          :options="{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right',
+                labels: {
+                  color: '#000000',
+                },
+              },
+              title: {
+                display: true,
+                text: $t(
+                  'module.playing.coolit.participant.moleculeInfo.overview.chart-atmosphere'
+                ),
+              },
+            },
+          }"
+        />
+      </div>
+      <div class="chart">
+        <Doughnut
+          :data="chartDataGreenhouse"
+          :options="{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right',
+                labels: {
+                  color: '#000000',
+                },
+              },
+              title: {
+                display: true,
+                text: $t(
+                  'module.playing.coolit.participant.moleculeInfo.overview.chart-greenhouse'
+                ),
+              },
+            },
+          }"
+        />
+      </div>
+      <div class="chart">
+        <Doughnut
+          :data="chartDataImpactGreenhouse"
+          :options="{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right',
+                labels: {
+                  color: '#000000',
+                },
+              },
+              title: {
+                display: true,
+                text: $t(
+                  'module.playing.coolit.participant.moleculeInfo.overview.chart-impact-greenhouse'
+                ),
+              },
+            },
+          }"
+        />
+      </div>
+    </div>
     <template v-slot:footer>
       <el-scrollbar class="moleculeSelection">
         <el-space wrap>
+          <div class="clickable molecule" @click="moleculeOverviewClicked()">
+            <div
+              class="molecule-overview"
+              :class="{ selected: !activeMoleculeName }"
+            >
+              <font-awesome-icon icon="chart-pie" />
+            </div>
+            {{
+              $t(
+                `module.playing.coolit.participant.moleculeInfo.overview.title`
+              )
+            }}
+          </div>
           <div
             class="clickable molecule"
             v-for="moleculeName of Object.keys(gameConfig.molecules)"
@@ -425,6 +518,7 @@ import { VoteParameterResult } from '@/types/api/Vote';
 import CustomParticleContainer from '@/components/shared/atoms/game/CustomParticleContainer.vue';
 import globalWarmingParticle from '@/modules/playing/coolit/data/globalWarming.json';
 import { LevelWorkflowType } from '@/types/game/LevelWorkflowType';
+import { Doughnut } from 'vue-chartjs';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 enum DifficultyLevel {
@@ -441,6 +535,15 @@ interface DifficultySettings {
   particleConfig: any;
 }
 
+export interface ChartData {
+  labels: string[];
+  datasets: {
+    label: string;
+    backgroundColor: string | string[];
+    data: number[];
+  }[];
+}
+
 @Options({
   components: {
     SpriteCanvas,
@@ -448,6 +551,7 @@ interface DifficultySettings {
     IdeaMap,
     DrawerBottomOverlay,
     CustomParticleContainer,
+    Doughnut,
   },
   emits: ['play'],
 })
@@ -468,7 +572,7 @@ export default class SelectLevel extends Vue {
   spritesheet!: PIXI.Spritesheet;
   spritesheetBuilding!: PIXI.Spritesheet;
   spriteSheetDifficulty!: PIXI.Spritesheet;
-  activeMoleculeName = Object.keys(gameConfig.molecules)[0];
+  activeMoleculeName = ''; // Object.keys(gameConfig.molecules)[0];
   activeBuildingName = Object.keys(
     gameConfig.obstacles.city.categories.building.items
   )[0];
@@ -481,6 +585,19 @@ export default class SelectLevel extends Vue {
   openHighScoreLevels: string[] = [];
   difficultyLevel = DifficultyLevel.today;
   textureToken = pixiUtil.createLoadingToken();
+
+  chartDataAtmosphere: ChartData = {
+    labels: [],
+    datasets: [],
+  };
+  chartDataGreenhouse: ChartData = {
+    labels: [],
+    datasets: [],
+  };
+  chartDataImpactGreenhouse: ChartData = {
+    labels: [],
+    datasets: [],
+  };
 
   MIN_TEMPERATURE_RISE = CoolItConst.MIN_TEMPERATURE_RISE;
   MAX_TEMPERATURE_RISE = CoolItConst.MAX_TEMPERATURE_RISE;
@@ -624,6 +741,98 @@ export default class SelectLevel extends Vue {
       EndpointAuthorisationType.PARTICIPANT,
       5 * 60
     );
+
+    this.chartDataAtmosphere.datasets.push({
+      label: this.$t(
+        'module.playing.coolit.participant.moleculeInfo.overview.chart-atmosphere'
+      ),
+      backgroundColor: [],
+      data: [],
+    });
+    this.chartDataGreenhouse.datasets.push(
+      {
+        label: this.$t(
+          'module.playing.coolit.participant.moleculeInfo.overview.chart-greenhouse'
+        ),
+        backgroundColor: [],
+        data: [],
+      },
+      {
+        label: this.$t(
+          'module.playing.coolit.participant.moleculeInfo.overview.chart-greenhouse2'
+        ),
+        backgroundColor: [],
+        data: [],
+      },
+      {
+        label: this.$t(
+          'module.playing.coolit.participant.moleculeInfo.overview.chart-greenhouse3'
+        ),
+        backgroundColor: [],
+        data: [],
+      }
+    );
+    this.chartDataImpactGreenhouse.datasets.push({
+      label: this.$t(
+        'module.playing.coolit.participant.moleculeInfo.overview.chart-impact-greenhouse'
+      ),
+      backgroundColor: [],
+      data: [],
+    });
+    for (const moleculeName of Object.keys(gameConfig.molecules)) {
+      const moleculeInfo = gameConfig.molecules[moleculeName];
+      if (moleculeInfo.rationAtmosphere > 0.1) {
+        this.chartDataAtmosphere.labels.push(
+          this.$t(
+            `module.playing.coolit.participant.moleculeInfo.${moleculeName}.title`
+          )
+        );
+        this.chartDataAtmosphere.datasets[0].data.push(
+          moleculeInfo.rationAtmosphere
+        );
+        (this.chartDataAtmosphere.datasets[0].backgroundColor as string[]).push(
+          moleculeInfo.color
+        );
+      }
+      if (moleculeInfo.rationGreenhouse) {
+        this.chartDataGreenhouse.labels.push(
+          this.$t(
+            `module.playing.coolit.participant.moleculeInfo.${moleculeName}.title`
+          )
+        );
+        this.chartDataGreenhouse.datasets[0].data.push(
+          moleculeInfo.rationGreenhouse
+        );
+        (this.chartDataGreenhouse.datasets[0].backgroundColor as string[]).push(
+          moleculeInfo.color
+        );
+        this.chartDataGreenhouse.datasets[1].data.push(
+          moleculeInfo.rationGreenhouse < 50 ? moleculeInfo.rationGreenhouse : 0
+        );
+        (this.chartDataGreenhouse.datasets[1].backgroundColor as string[]).push(
+          moleculeInfo.color
+        );
+        this.chartDataGreenhouse.datasets[2].data.push(
+          moleculeInfo.rationGreenhouse < 5 ? moleculeInfo.rationGreenhouse : 0
+        );
+        (this.chartDataGreenhouse.datasets[2].backgroundColor as string[]).push(
+          moleculeInfo.color
+        );
+      }
+      if (moleculeInfo.impactGreenhouse) {
+        this.chartDataImpactGreenhouse.labels.push(
+          this.$t(
+            `module.playing.coolit.participant.moleculeInfo.${moleculeName}.title`
+          )
+        );
+        this.chartDataImpactGreenhouse.datasets[0].data.push(
+          moleculeInfo.impactGreenhouse
+        );
+        (
+          this.chartDataImpactGreenhouse.datasets[0].backgroundColor as string[]
+        ).push(moleculeInfo.color);
+      }
+    }
   }
 
   unmounted(): void {
@@ -759,6 +968,10 @@ export default class SelectLevel extends Vue {
 
   moleculeNameClicked(objectName: string): void {
     this.activeMoleculeName = objectName;
+  }
+
+  moleculeOverviewClicked(): void {
+    this.activeMoleculeName = '';
   }
 
   getMoleculeConfig(objectName: string): {
@@ -1030,6 +1243,23 @@ h1 {
 
 .highscore {
   --footer-height: 4rem;
+}
+
+.molecule-overview {
+  font-size: 3.5rem;
+  height: 5rem;
+  width: 5rem;
+  margin: 0.2rem;
+  display: flex;
+
+  svg {
+    margin: auto;
+  }
+}
+
+.chart {
+  height: 30%;
+  min-height: 5rem;
 }
 </style>
 
