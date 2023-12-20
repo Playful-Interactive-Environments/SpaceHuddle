@@ -779,20 +779,25 @@ export default class SelectLevel extends Vue {
       backgroundColor: [],
       data: [],
     });
+    let sumGreenhouse = 0;
     for (const moleculeName of Object.keys(gameConfig.molecules)) {
       const moleculeInfo = gameConfig.molecules[moleculeName];
-      if (moleculeInfo.rationAtmosphere > 0.1) {
-        this.chartDataAtmosphere.labels.push(
-          this.$t(
-            `module.playing.coolit.participant.moleculeInfo.${moleculeName}.title`
-          )
-        );
-        this.chartDataAtmosphere.datasets[0].data.push(
-          moleculeInfo.rationAtmosphere
-        );
-        (this.chartDataAtmosphere.datasets[0].backgroundColor as string[]).push(
-          moleculeInfo.color
-        );
+      if (moleculeInfo.rationAtmosphere) {
+        if (moleculeInfo.type === 'atmosphericGas') {
+          this.chartDataAtmosphere.labels.push(
+            this.$t(
+              `module.playing.coolit.participant.moleculeInfo.${moleculeName}.title`
+            )
+          );
+          this.chartDataAtmosphere.datasets[0].data.push(
+            moleculeInfo.rationAtmosphere
+          );
+          (
+            this.chartDataAtmosphere.datasets[0].backgroundColor as string[]
+          ).push(moleculeInfo.color);
+        } else {
+          sumGreenhouse += moleculeInfo.rationAtmosphere;
+        }
       }
       if (moleculeInfo.rationGreenhouse) {
         this.chartDataGreenhouse.labels.push(
@@ -833,6 +838,13 @@ export default class SelectLevel extends Vue {
         ).push(moleculeInfo.color);
       }
     }
+    this.chartDataAtmosphere.labels.push(
+      this.$t(`module.playing.coolit.participant.moleculeType.greenhouseGas`)
+    );
+    this.chartDataAtmosphere.datasets[0].data.push(sumGreenhouse);
+    (this.chartDataAtmosphere.datasets[0].backgroundColor as string[]).push(
+      themeColors.getGreenColor()
+    );
   }
 
   unmounted(): void {
