@@ -104,9 +104,8 @@
           <h2>
             {{ $t('module.playing.moveit.participant.info.emissions.input') }}
           </h2>
-          <div style="height: 20%">
+          <div class="chartArea">
             <Line
-              ref="chartRef"
               :data="chartDataInput"
               :options="{
                 responsive: true,
@@ -153,9 +152,8 @@
               $t('module.playing.moveit.participant.info.emissions.collected')
             }}
           </h2>
-          <div style="height: 20%">
+          <div class="chartArea">
             <Line
-              ref="chartRef"
               :data="chartDataCollected"
               :options="{
                 responsive: true,
@@ -185,9 +183,8 @@
           <h2>
             {{ $t('module.playing.moveit.participant.info.emissions.outside') }}
           </h2>
-          <div style="height: 20%">
+          <div class="chartArea">
             <Line
-              ref="chartRef"
               :data="chartDataOutside"
               :options="{
                 responsive: true,
@@ -217,9 +214,8 @@
           <h2>
             {{ $t('module.playing.moveit.participant.info.speed.title') }}
           </h2>
-          <div style="height: 20%">
+          <div class="chartArea">
             <Line
-              ref="chartRef"
               :data="chartDataSpeed"
               :options="{
                 responsive: true,
@@ -249,9 +245,8 @@
           <h2 v-if="vehicle.category === 'bus'">
             {{ $t('module.playing.moveit.participant.info.persons.title') }}
           </h2>
-          <div style="height: 20%" v-if="vehicle.category === 'bus'">
+          <div class="chartArea" v-if="vehicle.category === 'bus'">
             <Line
-              ref="chartRef"
               :data="chartDataPersons"
               :options="{
                 responsive: true,
@@ -773,5 +768,10 @@ h1 {
 
 h2 {
   font-weight: var(--font-weight-bold);
+}
+
+.chartArea {
+  height: 20%;
+  min-height: 10rem;
 }
 </style>

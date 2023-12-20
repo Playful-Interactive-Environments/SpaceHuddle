@@ -323,7 +323,7 @@ export default class CleanUpParticles extends Vue {
   particleCollisionHandler = new ParticleCollisionHandler();
   particleState: { [key: string]: ParticleStateExtended } = {};
   renderer!: PIXI.Renderer;
-  maxParticleCount = 50;
+  maxParticleCount = 40;
   spritesheet!: PIXI.Spritesheet;
   particleTextures: { [key: string]: PIXI.Texture } = {};
   countdownTime = 5;
@@ -344,6 +344,12 @@ export default class CleanUpParticles extends Vue {
 
   get intervalTime(): number {
     return this.playTime / this.normalizedTrackingData.length;
+  }
+
+  get dynamicIntervalTime(): number {
+    if (this.cleanupParticles.length === 0) return 100;
+    if (this.cleanupParticles.length < 2) return 500;
+    return this.intervalTime;
   }
 
   get evaluatingColor(): string {
@@ -388,10 +394,14 @@ export default class CleanUpParticles extends Vue {
     return color.toString();
   }
 
-  get activeParticleCount(): number {
+  get activeParticle(): DrawingParticle[] {
     return this.cleanupParticles.filter(
       (item) => !item.gameObject || !item.gameObject.isSleeping
-    ).length;
+    );
+  }
+
+  get activeParticleCount(): number {
+    return this.activeParticle.length;
   }
 
   get isFull(): boolean {
@@ -407,8 +417,8 @@ export default class CleanUpParticles extends Vue {
   }
 
   get particleRadius(): number {
-    const minSize = 20;
-    const maxSize = 40;
+    const minSize = 25;
+    const maxSize = 50;
     const circleArea = this.particleArea / (this.maxParticleCount * 2);
     const size = Math.sqrt(circleArea / Math.PI);
     if (size > maxSize) return maxSize;
@@ -514,12 +524,28 @@ export default class CleanUpParticles extends Vue {
       .then((texture) => {
         this.dumpsterTexture = texture;
       });
-    this.interval = setInterval(this.updatedLoop, this.intervalTime);
+    //this.interval = setInterval(this.updatedLoop, this.intervalTime);
+    this.setDynamicInterval();
   }
 
   unmounted(): void {
-    clearInterval(this.interval);
+    this.cleanupDynamicInterval();
     pixiUtil.cleanupToken(this.textureToken);
+  }
+
+  intervalIsRunning = false;
+  async setDynamicInterval(): Promise<void> {
+    //this.interval = setInterval(this.updatedLoop, this.intervalTime);
+    this.intervalIsRunning = true;
+    while (this.intervalIsRunning) {
+      await delay(this.dynamicIntervalTime);
+      this.updatedLoop();
+    }
+  }
+
+  cleanupDynamicInterval(): void {
+    this.intervalIsRunning = false;
+    clearInterval(this.interval);
   }
 
   updatedLoop(): void {
@@ -549,17 +575,13 @@ export default class CleanUpParticles extends Vue {
         this.activeParticleCount === 0)
     ) {
       for (const particleName of Object.keys(this.particleState)) {
-        const outsideSum = this.particleState[
-          particleName
-        ].timelineOutside.reduce((partialSum, a) => partialSum + a, 0);
-        this.particleState[particleName].timelineOutside.push(
-          this.particleState[particleName].totalCount -
-            this.particleState[particleName].collectedCount -
-            outsideSum
-        );
+        const rest = this.activeParticle.filter(
+          (item) => item.name === particleName
+        ).length;
+        this.particleState[particleName].timelineOutside.push(rest);
       }
       this.$emit('finished', this.particleState);
-      clearInterval(this.interval);
+      this.cleanupDynamicInterval();
     }
   }
 
@@ -570,7 +592,7 @@ export default class CleanUpParticles extends Vue {
       this.activeParticleCount === 0
     ) {
       this.$emit('finished', this.particleState);
-      clearInterval(this.interval);
+      this.cleanupDynamicInterval();
     }
   }
 
@@ -635,7 +657,7 @@ export default class CleanUpParticles extends Vue {
             this.particleBorder + this.particleRadius,
           ]);
         }
-        await delay(Math.floor(this.intervalTime / emitCount) - 1);
+        await delay(Math.floor(this.dynamicIntervalTime / emitCount) - 1);
       }
     };
 
@@ -667,10 +689,9 @@ export default class CleanUpParticles extends Vue {
         const emitCount = Math.floor(this.particleQueueEmit[particleName]);
         this.particleQueueEmit[particleName] -= emitCount;
         if (emitCount < emissionCount) {
-          this.particleState[particleName].outsideCountAdd =
-            emissionCount - emitCount;
-          this.particleState[particleName].outsideCount +=
-            emissionCount - emitCount;
+          const outside = emissionCount - emitCount;
+          this.particleState[particleName].outsideCountAdd = outside;
+          this.particleState[particleName].outsideCount += outside;
 
           setTimeout(() => {
             this.particleState[particleName].outsideCountAdd = 0;
