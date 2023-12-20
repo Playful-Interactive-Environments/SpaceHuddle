@@ -52,6 +52,9 @@
         />
       </div>
     </div>
+    <div class="score heading--medium">
+      <p><span>{{ this.correctClassified.length }} / {{ this.endObjects.length }}</span></p>
+    </div>
     <h2 class="heading heading--medium" v-if="this.activeObject !== null">
       {{
         $t(
@@ -63,22 +66,12 @@
     </h2>
     <div class="classificationButtons">
       <el-button
-        class="classificationButton hazard"
-        @click="checkType(true, this.activeObjectId)"
-        >{{
-          $t(
-            `module.playing.findit.participant.categorisationButtons.flammable`
-          )
-        }}</el-button
-      >
-      <el-button
-        class="classificationButton noHazard"
-        @click="checkType(false, this.activeObjectId)"
-        >{{
-          $t(
-            `module.playing.findit.participant.categorisationButtons.non-flammable`
-          )
-        }}</el-button
+        v-for="key in this.collectKeys"
+        :key="key"
+        :id="key"
+        class="classificationButton"
+        @click="checkType(key, this.activeObjectId)"
+        >{{ key }}</el-button
       >
     </div>
     <div class="infoText">
@@ -146,6 +139,8 @@ export default class CollectedState extends Vue {
   correctClassified: string[] = [];
   gameConfig = gameConfig;
 
+  collectKeys: string[] = [];
+
   //#region get / set
   get hasWon(): boolean {
     return this.playStateResult.collected === this.playStateResult.total;
@@ -158,19 +153,31 @@ export default class CollectedState extends Vue {
     );
   }
 
-  checkType(hazard: boolean, id: string) {
-    if (this.activeObject) {
-      if (this.activeObject.type === 'hazards') {
-        if (hazard) {
-          this.correctClassified.push(id);
-        }
-        return hazard;
-      } else {
-        if (!hazard) {
-          this.correctClassified.push(id);
-        }
-        return !hazard;
+  getCollectKeys(): string[] {
+    const keys: string[] = [];
+    for (let i = 0; i < this.endObjects.length; i++) {
+      const key =
+        gameConfig[this.levelType].categories[this.endObjects[i].type].items[
+          this.endObjects[i].name
+        ].collectKey;
+      if (!keys.includes(key)) {
+        keys.push(key);
       }
+    }
+    return keys;
+  }
+
+  checkType(key: string, id: string) {
+    if (this.activeObject) {
+      if (
+        gameConfig[this.levelType].categories[this.activeObject.type].items[
+          this.activeObject.name
+        ].collectKey === key
+      ) {
+        this.correctClassified.push(id);
+        return true;
+      }
+      return false;
     }
   }
 
@@ -240,7 +247,14 @@ export default class CollectedState extends Vue {
   //#region load / unload
   gameAreaSize: [number, number] = [0, 0];
   mounted(): void {
-    this.endObjects = this.getEndObjects();
+    this.endObjects = this.shuffle(this.getEndObjects());
+    this.collectKeys = this.getCollectKeys();
+    this.activeObject = this.endObjects[0];
+    this.activeObjectId = this.endObjects[0].name;
+    const element = document.getElementById(this.activeObjectId);
+    if (element) {
+      element.classList.add('objectContainerActive');
+    }
     setTimeout(() => {
       const dom = this.$refs.gameArea as HTMLElement;
       if (dom) {
@@ -285,6 +299,21 @@ export default class CollectedState extends Vue {
     return placeableConfig.explanationKey;
   }
   //#endregion interaction
+  shuffle(array) {
+    let currentIndex = array.length;
+    let randomIndex;
+
+    while (currentIndex > 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex],
+        array[currentIndex],
+      ];
+    }
+    return array;
+  }
 }
 </script>
 
@@ -392,25 +421,19 @@ export default class CollectedState extends Vue {
   justify-content: center;
   align-content: center;
   flex-direction: row;
+  padding: 0 0.3rem;
 }
 
 .classificationButton {
   width: 40%;
   height: 3rem;
-  border: none;
+  border: 3px solid var(--color-dark-contrast);
   color: var(--color-dark-contrast);
   margin: 0.3rem;
   border-radius: var(--border-radius-small);
   font-size: var(--font-size-default);
   font-weight: var(--font-weight-semibold);
-}
-
-.hazard {
-  background-color: var(--color-evaluating);
-}
-
-.noHazard {
-  background-color: var(--color-brainstorming);
+  background-color: var(--color-background);
 }
 
 .hazardIcon {
