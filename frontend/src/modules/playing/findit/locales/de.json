@@ -33,6 +33,8 @@
     },
     "collectable": "sehr gut, dieses Objekt wurde gesucht",
     "not-collectable": "dieses Objekt gehört nicht hierher, wird aber in diesem Fall nicht gesucht",
+    "correct": "richtig",
+    "incorrect": "falsch",
     "placeables": {
       "fire": {
         "name": "Feuer",

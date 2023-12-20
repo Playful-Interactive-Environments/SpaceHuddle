@@ -29,7 +29,8 @@
             "maxCount": 10,
             "width": 1,
             "shape": "rect",
-            "explanationKey": "cigarette"
+            "explanationKey": "cigarette",
+            "collectKey": "fire"
           },
           "campfire": {
             "escalationLevels": [
@@ -40,7 +41,8 @@
             "maxCount": 1,
             "width": 5,
             "shape": "circle",
-            "explanationKey": "campfire"
+            "explanationKey": "campfire",
+            "collectKey": "fire"
           },
           "dead-tree": {
             "escalationLevels": [
@@ -51,7 +53,8 @@
             "maxCount": 5,
             "width": 7,
             "shape": "rect",
-            "explanationKey": "dead-tree"
+            "explanationKey": "dead-tree",
+            "collectKey": "fire"
           }
         }
       },
@@ -69,56 +72,64 @@
             "maxCount": 5,
             "width": 1,
             "shape": "rect",
-            "explanationKey": "bottle"
+            "explanationKey": "bottle",
+            "collectKey": "garbage"
           },
           "bottleWine": {
             "severity": 1,
             "maxCount": 5,
             "width": 1,
             "shape": "rect",
-            "explanationKey": "bottle"
+            "explanationKey": "bottle",
+            "collectKey": "garbage"
           },
           "bottleBeer": {
             "severity": 1,
             "maxCount": 5,
             "width": 1,
             "shape": "rect",
-            "explanationKey": "bottle"
+            "explanationKey": "bottle",
+            "collectKey": "garbage"
           },
           "turtle": {
             "severity": 1,
             "maxCount": 5,
             "width": 3,
             "shape": "rect",
-            "explanationKey": "turtle"
+            "explanationKey": "turtle",
+            "collectKey": "animal"
           },
           "ladybug": {
             "severity": 1,
             "maxCount": 5,
             "width": 0.5,
             "shape": "rect",
-            "explanationKey": "bug"
+            "explanationKey": "bug",
+            "collectKey": "animal"
           },
           "bug": {
             "severity": 1,
             "maxCount": 5,
             "width": 0.5,
             "shape": "rect",
-            "explanationKey": "bug"
+            "explanationKey": "bug",
+            "collectKey": "animal"
           },
           "dragonfly": {
             "severity": 1,
             "maxCount": 5,
             "width": 0.5,
             "shape": "rect",
-            "explanationKey": "bug"
+            "explanationKey": "bug",
+            "collectKey": "animal"
           },
           "earthworm": {
             "severity": 1,
             "maxCount": 5,
             "width": 1,
             "shape": "rect",
-            "explanationKey": "bug"
+            "explanationKey": "bug",
+            "collectKey": "animal"
           }
         }
       },
@@ -194,6 +205,7 @@
             "width": 3,
             "shape": "rect",
             "explanationKey": "fish",
+            "collectKey": "rescue",
             "placingRegions": [[[0, 0], [15, 0], [20, 50], [40, 100], [0, 100]]]
           },
           "man": {
@@ -212,6 +224,7 @@
             "width": 4,
             "shape": "circle",
             "explanationKey": "person",
+            "collectKey": "rescue",
             "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           },
           "woman": {
@@ -230,6 +243,7 @@
             "width": 3,
             "shape": "circle",
             "explanationKey": "person",
+            "collectKey": "rescue",
             "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           },
           "sandbag": {
@@ -248,6 +262,7 @@
             "width": 2,
             "shape": "rect",
             "explanationKey": "sandbag",
+            "collectKey": "collect",
             "placingRegions": [[[0, 0], [15, 0], [20, 50], [40, 100], [0, 100]]]
           },
           "branches": {
@@ -266,6 +281,7 @@
             "width": 5,
             "shape": "rect",
             "explanationKey": "branches",
+            "collectKey": "collect",
             "placingRegions": [[[0, 0], [15, 0], [20, 50], [40, 100], [0, 100]]]
           },
           "bottleWhite": {
@@ -284,6 +300,7 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "garbage",
+            "collectKey": "garbage",
             "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           },
           "bottleWine": {
@@ -302,6 +319,7 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "garbage",
+            "collectKey": "garbage",
             "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           },
           "bottleBeer": {
@@ -320,6 +338,7 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "garbage",
+            "collectKey": "garbage",
             "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           }
         }
@@ -338,35 +357,40 @@
             "maxCount": 5,
             "width": 3,
             "shape": "rect",
-            "explanationKey": "turtle"
+            "explanationKey": "turtle",
+            "collectKey": "animal"
           },
           "ladybug": {
             "severity": 1,
             "maxCount": 5,
             "width": 0.5,
             "shape": "rect",
-            "explanationKey": "bug"
+            "explanationKey": "bug",
+            "collectKey": "animal"
           },
           "bug": {
             "severity": 1,
             "maxCount": 5,
             "width": 0.5,
             "shape": "rect",
-            "explanationKey": "bug"
+            "explanationKey": "bug",
+            "collectKey": "animal"
           },
           "dragonfly": {
             "severity": 1,
             "maxCount": 5,
             "width": 0.5,
             "shape": "rect",
-            "explanationKey": "bug"
+            "explanationKey": "bug",
+            "collectKey": "animal"
           },
           "earthworm": {
             "severity": 1,
             "maxCount": 5,
             "width": 1,
             "shape": "rect",
-            "explanationKey": "bug"
+            "explanationKey": "bug",
+            "collectKey": "animal"
           }
         }
       },
