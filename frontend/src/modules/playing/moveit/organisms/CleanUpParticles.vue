@@ -347,8 +347,8 @@ export default class CleanUpParticles extends Vue {
   }
 
   get dynamicIntervalTime(): number {
-    if (this.cleanupParticles.length === 0) return 100;
-    if (this.cleanupParticles.length < 2) return 500;
+    if (this.activeParticleCount === 0) return 100;
+    if (this.activeParticleCount < 2) return 500;
     return this.intervalTime;
   }
 
