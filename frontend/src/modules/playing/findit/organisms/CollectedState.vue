@@ -24,7 +24,7 @@
         {{ $t('module.playing.findit.participant.lostText') }}
       </p>
     </div>
-    <div class="endObjects">
+    <div class="endObjects" v-if="this.endObjects.length !== 0">
       <div
         v-for="object in endObjects"
         :key="object.name"
@@ -53,7 +53,12 @@
       </div>
     </div>
     <div class="score heading--medium">
-      <p><span>{{ this.correctClassified.length }} / {{ this.endObjects.length }}</span></p>
+      <p>
+        <span
+          >{{ this.correctClassified.length }} /
+          {{ this.endObjects.length }}</span
+        >
+      </p>
     </div>
     <h2 class="heading heading--medium" v-if="this.activeObject !== null">
       {{
@@ -64,7 +69,7 @@
         )
       }}
     </h2>
-    <div class="classificationButtons">
+    <div class="classificationButtons" v-if="this.endObjects.length !== 0">
       <el-button
         v-for="key in this.collectKeys"
         :key="key"
@@ -74,7 +79,7 @@
         >{{ key }}</el-button
       >
     </div>
-    <div class="infoText">
+    <div class="infoText" v-if="this.endObjects.length !== 0">
       <p
         class="marginTop"
         v-if="
@@ -97,7 +102,8 @@
       v-if="
         endObjects
           .map((x) => x.name)
-          .every((x) => correctClassified.includes(x))
+          .every((x) => correctClassified.includes(x)) &&
+        this.endObjects.length !== 0
       "
     >
       {{ $t('module.playing.findit.participant.returnToMenu') }}
@@ -248,12 +254,14 @@ export default class CollectedState extends Vue {
   gameAreaSize: [number, number] = [0, 0];
   mounted(): void {
     this.endObjects = this.shuffle(this.getEndObjects());
-    this.collectKeys = this.getCollectKeys();
-    this.activeObject = this.endObjects[0];
-    this.activeObjectId = this.endObjects[0].name;
-    const element = document.getElementById(this.activeObjectId);
-    if (element) {
-      element.classList.add('objectContainerActive');
+    if (this.endObjects.length > 0) {
+      this.collectKeys = this.getCollectKeys();
+      this.activeObject = this.endObjects[0];
+      this.activeObjectId = this.endObjects[0].name;
+      const element = document.getElementById(this.activeObjectId);
+      if (element) {
+        element.classList.add('objectContainerActive');
+      }
     }
     setTimeout(() => {
       const dom = this.$refs.gameArea as HTMLElement;
