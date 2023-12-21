@@ -323,7 +323,7 @@ export default class CleanUpParticles extends Vue {
   particleCollisionHandler = new ParticleCollisionHandler();
   particleState: { [key: string]: ParticleStateExtended } = {};
   renderer!: PIXI.Renderer;
-  maxParticleCount = 40;
+  maxParticleCount = 35;
   spritesheet!: PIXI.Spritesheet;
   particleTextures: { [key: string]: PIXI.Texture } = {};
   countdownTime = 5;

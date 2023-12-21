@@ -52,54 +52,6 @@
         arrow="always"
         @change="carouselChanged"
       >
-        <el-carousel-item class="infoGraphic successState">
-          <h1>
-            <el-rate
-              v-model="successRate"
-              size="large"
-              :max="3"
-              :disabled="true"
-            />
-          </h1>
-          <div>
-            {{
-              $t(
-                `module.playing.moveit.participant.result.${successStatusText}`
-              )
-            }}
-          </div>
-          <div class="result">
-            {{ particleStateSum.collectedCount }}
-            /
-            {{ particleStateSum.totalCount }}
-            {{ $t(`module.playing.moveit.participant.result.collected`) }}
-          </div>
-        </el-carousel-item>
-        <el-carousel-item
-          class="infoGraphic"
-          v-for="particleSource of Object.keys(gameConfig.particles)"
-          :key="particleSource"
-        >
-          <h1>
-            {{ $t(`module.playing.moveit.enums.particle.${particleSource}`) }}
-          </h1>
-          <div>
-            {{
-              $t(
-                `module.playing.moveit.participant.result.${particleSource}Explanation`
-              )
-            }}
-          </div>
-          <div class="result">
-            {{
-              particleState[particleSource].totalCount -
-              particleState[particleSource].collectedCount
-            }}
-            /
-            {{ particleState[particleSource].totalCount }}
-            {{ $t(`module.playing.moveit.participant.result.notCollected`) }}
-          </div>
-        </el-carousel-item>
         <el-carousel-item class="infoGraphic">
           <h2>
             {{ $t('module.playing.moveit.participant.info.emissions.input') }}
@@ -274,6 +226,54 @@
             />
           </div>
         </el-carousel-item>
+        <el-carousel-item class="infoGraphic successState">
+          <h1>
+            <el-rate
+              v-model="successRate"
+              size="large"
+              :max="3"
+              :disabled="true"
+            />
+          </h1>
+          <div>
+            {{
+              $t(
+                `module.playing.moveit.participant.result.${successStatusText}`
+              )
+            }}
+          </div>
+          <div class="result">
+            {{ particleStateSum.collectedCount }}
+            /
+            {{ particleStateSum.totalCount }}
+            {{ $t(`module.playing.moveit.participant.result.collected`) }}
+          </div>
+        </el-carousel-item>
+        <el-carousel-item
+          class="infoGraphic"
+          v-for="particleSource of Object.keys(gameConfig.particles)"
+          :key="particleSource"
+        >
+          <h1>
+            {{ $t(`module.playing.moveit.enums.particle.${particleSource}`) }}
+          </h1>
+          <div>
+            {{
+              $t(
+                `module.playing.moveit.participant.result.${particleSource}Explanation`
+              )
+            }}
+          </div>
+          <div class="result">
+            {{
+              particleState[particleSource].totalCount -
+              particleState[particleSource].collectedCount
+            }}
+            /
+            {{ particleState[particleSource].totalCount }}
+            {{ $t(`module.playing.moveit.participant.result.notCollected`) }}
+          </div>
+        </el-carousel-item>
       </el-carousel>
     </div>
   </div>
@@ -368,7 +368,7 @@ export default class ShowResult extends Vue {
   renderer!: PIXI.Renderer;
   particleReady = false;
   rendererReady = false;
-  activeTabName = resultTabName;
+  activeTabName = '';
   spritesheet: PIXI.Spritesheet | null = null;
   maxParticleCount = 100;
   circleGradientTexture: PIXI.Texture | null = null;
@@ -451,10 +451,12 @@ export default class ShowResult extends Vue {
   }
 
   carouselChanged(index: number): void {
-    if (index > 0) {
-      this.activeTabName = Object.keys(this.particleState)[index - 1];
-    } else {
+    if (index > 1) {
+      this.activeTabName = Object.keys(this.particleState)[index - 2];
+    } else if (index === 1) {
       this.activeTabName = resultTabName;
+    } else {
+      this.activeTabName = '';
     }
   }
 
