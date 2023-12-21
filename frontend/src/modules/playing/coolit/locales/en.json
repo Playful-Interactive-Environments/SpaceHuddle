@@ -50,6 +50,7 @@
         "chart-greenhouse3": "composition of greenhouse gases in % without water vapor and carbon dioxide",
         "chart-impact-greenhouse": "impact of greenhouse gases in %"
       },
+      "others": "others",
       "waterVapor": {
         "title": "Water Vapor",
         "description": "Water in its gaseous state.",

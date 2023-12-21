@@ -51,6 +51,7 @@
         "chart-greenhouse3": "Zusammensetzung der Treibhausgase in % ohne Wasserdampf und Kohlenstoffdioxid",
         "chart-impact-greenhouse": "Einfluss der Treibhausgase in %"
       },
+      "others": "Andere",
       "waterVapor": {
         "title": "Wasserdampf",
         "description": "Wasser in seinem Gaszustand.",

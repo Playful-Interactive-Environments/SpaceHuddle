@@ -780,6 +780,7 @@ export default class SelectLevel extends Vue {
       data: [],
     });
     let sumGreenhouse = 0;
+    let sumRationGreenhouse = 0;
     for (const moleculeName of Object.keys(gameConfig.molecules)) {
       const moleculeInfo = gameConfig.molecules[moleculeName];
       if (moleculeInfo.rationAtmosphere) {
@@ -800,23 +801,28 @@ export default class SelectLevel extends Vue {
         }
       }
       if (moleculeInfo.rationGreenhouse) {
+        sumRationGreenhouse += moleculeInfo.rationGreenhouse;
         this.chartDataGreenhouse.labels.push(
           this.$t(
             `module.playing.coolit.participant.moleculeInfo.${moleculeName}.title`
           )
         );
         this.chartDataGreenhouse.datasets[0].data.push(
-          moleculeInfo.rationGreenhouse
+          moleculeInfo.rationGreenhouse > 1 ? moleculeInfo.rationGreenhouse : 0
         );
         (this.chartDataGreenhouse.datasets[0].backgroundColor as string[]).push(
           moleculeInfo.color
         );
-        this.chartDataGreenhouse.datasets[1].data.push(
-          moleculeInfo.rationGreenhouse < 50 ? moleculeInfo.rationGreenhouse : 0
-        );
-        (this.chartDataGreenhouse.datasets[1].backgroundColor as string[]).push(
-          moleculeInfo.color
-        );
+        if (moleculeInfo.rationGreenhouse > 1) {
+          this.chartDataGreenhouse.datasets[1].data.push(
+            moleculeInfo.rationGreenhouse < 50
+              ? moleculeInfo.rationGreenhouse
+              : 0
+          );
+          (
+            this.chartDataGreenhouse.datasets[1].backgroundColor as string[]
+          ).push(moleculeInfo.color);
+        }
         this.chartDataGreenhouse.datasets[2].data.push(
           moleculeInfo.rationGreenhouse < 5 ? moleculeInfo.rationGreenhouse : 0
         );
@@ -838,6 +844,40 @@ export default class SelectLevel extends Vue {
         ).push(moleculeInfo.color);
       }
     }
+    this.chartDataGreenhouse.labels.push(
+      this.$t(`module.playing.coolit.participant.moleculeInfo.others`)
+    );
+    const others =
+      100 -
+      this.chartDataGreenhouse.datasets[0].data.reduce(
+        (sum, item) => sum + item,
+        0
+      );
+    this.chartDataGreenhouse.datasets[0].data.push(others);
+    (this.chartDataGreenhouse.datasets[0].backgroundColor as string[]).push(
+      themeColors.getContrastColor()
+    );
+    this.chartDataGreenhouse.datasets[1].data.push(others);
+    (this.chartDataGreenhouse.datasets[1].backgroundColor as string[]).push(
+      themeColors.getContrastColor()
+    );
+    this.chartDataGreenhouse.datasets[2].data.push(100 - sumRationGreenhouse);
+    (this.chartDataGreenhouse.datasets[2].backgroundColor as string[]).push(
+      themeColors.getContrastColor()
+    );
+    this.chartDataImpactGreenhouse.labels.push(
+      this.$t(`module.playing.coolit.participant.moleculeInfo.others`)
+    );
+    this.chartDataImpactGreenhouse.datasets[0].data.push(
+      100 -
+        this.chartDataImpactGreenhouse.datasets[0].data.reduce(
+          (sum, item) => sum + item,
+          0
+        )
+    );
+    (
+      this.chartDataImpactGreenhouse.datasets[0].backgroundColor as string[]
+    ).push(themeColors.getContrastColor());
     this.chartDataAtmosphere.labels.push(
       this.$t(`module.playing.coolit.participant.moleculeType.greenhouseGas`)
     );
