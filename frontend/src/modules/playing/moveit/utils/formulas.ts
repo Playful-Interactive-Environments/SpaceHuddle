@@ -21,15 +21,46 @@ export const getTireWareMass = (
   return volume * rubberDense;
 };
 
+const rollingResistance = (vehicle: config.VehicleParameter): number => {
+  return vehicle.rollingResistanceCoefficient * (vehicle.weight * g);
+};
+
+const airResistance = (
+  vehicle: config.VehicleParameter,
+  speed: number
+): number => {
+  return (
+    (1 / 2) *
+    vehicle.flowResistance *
+    airtight *
+    (vehicle.profileArea / 1000) *
+    Math.pow(speed, 2)
+  );
+};
+
 export const tireWareRate = (
   speed: number,
   distance: number,
   vehicle: config.VehicleParameter
 ): number => {
-  const rollingResistance =
-    vehicle.rollingResistanceCoefficient * (vehicle.weight * g);
+  const rollingResistanceValue = rollingResistance(vehicle);
+  /*const airResistanceValue = airResistance(vehicle, speed);
+  const curveRadius = 25000;
+  const centrifugalResistanceValue =
+    (vehicle.weight * Math.pow(speed / 3.6, 2)) / curveRadius;
+  const lateralResistanceValue =
+    centrifugalResistanceValue + rollingResistanceValue;
+  const exponent = 2;
+  const calibrationFactor = 0.05;
+  const lateralLongitudinalFactor = 7;
+  const power =
+    calibrationFactor *
+    (Math.pow(rollingResistanceValue + airResistanceValue, exponent) +
+      lateralLongitudinalFactor * Math.pow(lateralResistanceValue, exponent));
+  const treadwareKilometer = 11500;
+  const abrasionDepth = (power * (1 / vehicle.treadwear)) / treadwareKilometer;*/
   //const rollingFrictionWork = rollingResistance * distance;
-  const rollingFrictionPower = rollingResistance * speed;
+  const rollingFrictionPower = rollingResistanceValue * speed;
   //const impulse = rollingResistance * time;
   const treadwareKilometer = 11500;
   const abrasionDepth =
@@ -47,15 +78,9 @@ export const consumption = (
   const vehicleEfficiency = vehicle.efficiency
     ? vehicle.efficiency
     : fuel.efficiency;
-  const airResistance =
-    (1 / 2) *
-    vehicle.flowResistance *
-    airtight *
-    (vehicle.profileArea / 1000) *
-    Math.pow(speed, 2);
-  const rollingResistance =
-    vehicle.rollingResistanceCoefficient * (vehicle.weight * g);
-  const power = ((airResistance + rollingResistance) * speed) / 1000;
+  const airResistanceValue = airResistance(vehicle, speed);
+  const rollingResistanceValue = rollingResistance(vehicle);
+  const power = ((airResistanceValue + rollingResistanceValue) * speed) / 1000;
   const fuelVolume = (power / fuel.kwh) * (1 / vehicleEfficiency);
   return (fuelVolume / 100) * distance;
 };
