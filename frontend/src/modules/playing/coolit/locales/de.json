@@ -22,8 +22,10 @@
     "confirm": "Weiter",
     "selectObstacle": "dieses Element verwenden",
     "tutorial": {
-      "select": "Die Atmosphäre setzt sich aus mehreren Gasen zusammen, u.a. Stickstoff, Sauerstoff, Argon und Kohlenstoffdioxid. Lichtstrahlen können diese Gase ungehindert durchdringen. Trifft ein Lichtstahl auf die Erde wird er von der Oberfläche absorbiert und als Wärmestrahlung freigesetzt. Wärmestrahlung wird von den Treibhausgasen aufgenommen und erwärmt dadurch die Atmosphäre. Ohne diese Gase wäre es auf der Erde sehr kalt. Die Durchschnittstemperatur würde bei -18°C liegen! Obwohl die Atmosphäre aus nur 0,04% Treibhausgasen besteht reicht das aus um die Erde auf eine für uns angenehme Temperatur zu erwärmen. Allerdings je mehr Treibhausgase desto wärmer wird es. Gase und Strahlen sind farblos und sehr sehr klein. Damit du sie sehen kannst haben wir sie eingefärbt und stark vergrößert.",
-      "play": "Schiebe die Treibhausgase aus dem Weg um die überschüssige Wärme von der Erde entweichen zu lassen und es so auf der Erde angenehm zu halten. Aber Achtung, du solltest auch nicht zu viel Wärmestrahlung vermeiden, denn ohne den Treibhauseffekt geht es nicht. Wir wollen ja schließlich nicht erfrieren. Der Balken oben zeigt dir die aktuelle Temperaturentwicklung an. Versuche, im mittleren Bereich zu bleiben. Wenn deine Durchschnittstemperatur oder 3 Gebäude den markierten Grenzwert über- oder unterschreiten, ist das Spiel vorbei."
+      "atmosphere": "Die Atmosphäre setzt sich aus unterschiedlichsten Gasen wie Sauerstoff, Stickstoff, Wasserdampf und vielen Anderen zusammen. Ohne sie wäre das Überleben auf der Erde nicht möglich. Erkundige dich vor dem spielen, welchen Einfluss die verschiedenen Gase haben. Das wird dir später helfen.",
+      "light": "Licht kommt in allen Formen von der Sonne zu uns. Das sichtbare Licht kommt durch die Atmosphäre und trifft auf die Erde. Beobachte was mit dem sichtbaren (hier gelbes) Licht passiert, wenn es auf ein Objekt trifft.",
+      "heat": "Deine Mission: der überschüssigen Wärmestrahlung Platz machen, dass sie wieder von der Erde entweichen kann.  Schiebe dazu die Treibhausgase aus dem Weg. Woran liegt das eigentlich, dass die Erde wärmer wird?",
+      "play": "Der Balken oben zeigt dir die aktuelle Temperaturentwicklung an. Versuche, im mittleren Bereich zu bleiben. Wenn deine Durchschnittstemperatur oder 3 Gebäude den markierten Grenzwert über- oder unterschreiten, ist das Spiel vorbei."
     },
     "placeables": {
       "city": {
@@ -35,7 +37,7 @@
       "contra": "Nachteil",
       "rationAtmosphere": "Anteil an der Erdatmosphäre",
       "rationGreenhouse": "Anteil an Treibhausgasen",
-      "impactGreenhouse": "Beitrag zum Treibhauseffekts",
+      "impactGreenhouse": "Beitrag zum Treibhauseffekt",
       "riseFactor": "Anstieg seit Beginn der Industrialisierung",
       "globalWarmingFactor": "Globale Erwärmungspotenzial",
       "lifespan": "Lebensdauer",
@@ -60,9 +62,9 @@
       },
       "carbonDioxide": {
         "title": "Kohlenstoffdioxid",
-        "description": "Das wichtigste Molekül im Kohlenstoff-Zyklus!",
-        "pros": "Bestehend aus Kohlenstoff und Sauerstoff existiert Kohlenstoffdioxid in unserer natürlichen Atmosphäre und ist daher immer vorhanden. Es wird von Lebewesen aller Art sowie Vulkanen produziert.",
-        "cons": "Kohlenstoffdioxid wird ebenfalls durch die Verwendung von fossilen Brennstoffen wie Kohle oder Öl erzeugt. Es ist das Gas, welches am Meisten zu dem vom Menschen verursachten Treibhauseffekt beisteuert."
+        "description": "CO2 ist das bekannteste Treibhausgas. Es kommt in einer erhöhten Konzentration in unserer Atmosphäre vor, welche durch den menschlichen Einfluss weiter zunimmt. Natürliche Qullen sind Lebewesen aller Art und Vulkane.",
+        "pros": "Kohlenstoffdioxid bewirkt, dass wir auf der Erde leben können und reagiert schwächer mit Wärmestrahlung als andere Teilchen.",
+        "cons": "Die stark steigende Konzentration erwärmt das Erdklima allerdings immer weiter. In den letzten 100 Jahren wurde die Konzentration nahezu verdoppelt. Kohlenstoffdioxid ist außedem für den Menschen giftig."
       },
       "methane": {
         "title": "Methan",
@@ -133,27 +135,27 @@
       },
       "glassBuilding01": {
         "title": "Bürogebäude",
-        "description": "Glas erhitzt sich stark durch die Sonnen und kann schlecht wärme speichern."
+        "description": "Glas erwärmt sich rasch und speichert diese Wärme schlecht. Das Glas gibt die Wärme vor allem an seine Umgebung wieder ab. Zudem reflektiert Glas das sichtbare Sonnenlicht stark, was die direkte Umgebung ebenfalls erwärmt."
       },
       "glassBuilding02": {
         "title": "Bürogebäude",
-        "description": "Glas erhitzt sich stark durch die Sonnen und kann schlecht wärme speichern."
+        "description": "Glas erwärmt sich rasch und speichert diese Wärme schlecht. Das Glas gibt die Wärme vor allem an seine Umgebung wieder ab. Zudem reflektiert Glas das sichtbare Sonnenlicht stark, was die direkte Umgebung ebenfalls erwärmt."
       },
       "glassBuilding03": {
         "title": "Bürogebäude",
-        "description": "Glas erhitzt sich stark durch die Sonnen und kann schlecht wärme speichern."
+        "description": "Glas erwärmt sich rasch und speichert diese Wärme schlecht. Das Glas gibt die Wärme vor allem an seine Umgebung wieder ab. Zudem reflektiert Glas das sichtbare Sonnenlicht stark, was die direkte Umgebung ebenfalls erwärmt."
       },
       "industry01": {
         "title": "Lagerturm",
-        "description": "Dunkle Farben und Metall werden stark von der Sonne erhitzt."
+        "description": "Dunkle Farben nehmen viel Wärme in Form von Strahlung auf. Metalle erwärme sich sehr schnell durch das Sonnenlicht. Beide erwärmen sich stark und schnell und geben diese Wärme schnell auch wieder an die Umgebung ab."
       },
       "industry02": {
         "title": "Fabrik",
-        "description": "Dunkle Farben und Metall werden stark von der Sonne erhitzt."
+        "description": "Dunkle Farben nehmen viel Wärme in Form von Strahlung auf. Metalle erwärme sich sehr schnell durch das Sonnenlicht. Beide erwärmen sich stark und schnell und geben diese Wärme schnell auch wieder an die Umgebung ab."
       },
       "industry03": {
         "title": "Fabrik",
-        "description": "Dunkle Farben und Metall werden stark von der Sonne erhitzt."
+        "description": "Dunkle Farben nehmen viel Wärme in Form von Strahlung auf. Metalle erwärme sich sehr schnell durch das Sonnenlicht. Beide erwärmen sich stark und schnell und geben diese Wärme schnell auch wieder an die Umgebung ab."
       },
       "industry04": {
         "title": "Fabrik",
@@ -161,7 +163,7 @@
       },
       "trees01": {
         "title": "Bäume",
-        "description": "Bäume nehmen CO2 auf und sorgen für Beschattung."
+        "description": "Mithilfe der Photosynthese können Bäume CO2 in O2 umwandeln und verdunsten dabei Wasser zu Wasserdampf. Die Blätter sorgen somit nicht nur für einen Schatten, sondern durch das Abgeben von Wasserdampf auch für ein angenehmes Klima. Das Holz und der Wasserdampf erwärmen sich nur langsam und speichern diese Wärme gut."
       },
       "cow": {
         "title": "Kühe",

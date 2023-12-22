@@ -22,9 +22,10 @@
     "place": "Place",
     "selectObstacle": "use this obstacle",
     "tutorial": {
-      "select": "The respiratory sphere is composed of the gases nitrogen, oxygen, argon and carbon dioxide. Light rays can pass through these gases unhindered. When a light ray hits the earth, it is absorbed by the surface and released as thermal radiation. Heat radiation is absorbed by the greenhouse gases and thus warms the atmosphere. Without these gases it would be very cold on Earth. The average temperature would be -18°C. Although the atmosphere consists of only 0.04% greenhouse gases, this is enough to warm the earth to a temperature that is comfortable for us. However, the more greenhouse gases, the warmer it gets. Gases and rays are colourless and very very small. So that you can see them, we have coloured them and enlarged them. ",
-      "play": "Move the greenhouse gases out of the way to let the excess heat escape from the earth and keep it comfortable. But be careful not to avoid too much heat radiation, because you can't do it without the greenhouse effect. After all, we don't want to freeze to death. The bar at the top shows you the current temperature development. Try to stay in the middle range. If your average temperature or 3 buildings move above or below the marked limit, the game is over."
-    },
+      "atmosphere": "The atmosphere is made up of a wide variety of gases such as oxygen, nitrogen, water vapor and many others. Without them, survival on earth would not be possible. Before playing, find out what influence the different gases have. This will help you later.",
+      "light": "Light comes to us in all forms from the sun. Visible light comes through the atmosphere and hits the earth. Observe what happens to the visible (here yellow) light when it hits an object.",
+      "heat": "Your mission: to make room for the excess heat radiation so that it can escape from the earth again.  To do this, push the greenhouse gases out of the way. Why is the earth getting warmer?",
+      "play": "The bar at the top shows you the current temperature development. Try to stay in the middle range. If your average temperature or 3 buildings exceed or fall below the marked limit, the game is over."    },
     "placeables": {
       "city": {
         "name": "city"
@@ -59,9 +60,9 @@
       },
       "carbonDioxide": {
         "title": "Carbon Dioxide",
-        "description": "The main player in Earth's carbon cycle!",
-        "pros": "Made up of carbon and oxygen, Carbon Dioxide is all around us naturally. It comes from decaying and living organisms as well as volcanoes.",
-        "cons": "Carbon Dioxide is released when burning fossil fuels such as coal and oil. It is the most important contributor to human-caused global warming."
+        "description": "CO2 is the best-known greenhouse gas. It occurs in increased concentrations in our atmosphere, which continue to increase due to human influence. Natural sources are living organisms of all kinds and volcanoes.",
+        "pros": "Carbon dioxide makes it possible for us to live on earth and reacts less strongly with heat radiation than other particles.",
+        "cons": "However, the rapidly increasing concentration continues to warm the Earth's climate. In the last 100 years, the concentration has almost doubled. Carbon dioxide is also toxic to humans."
       },
       "methane": {
         "title": "Methane",
@@ -132,27 +133,27 @@
       },
       "glassBuilding01": {
         "title": "Office building",
-        "description": "Glass heats up strongly from the sun and is poor at storing heat."
+        "description": "Glass heats up quickly and stores this heat poorly. The glass primarily releases the heat back into its surroundings. In addition, glass strongly reflects visible sunlight, which also heats up the immediate surroundings."
       },
       "glassBuilding02": {
         "title": "Office building",
-        "description": "Glass heats up strongly due to the sun and is poor at storing heat."
+        "description": "Glass heats up quickly and stores this heat poorly. The glass primarily releases the heat back into its surroundings. In addition, glass strongly reflects visible sunlight, which also heats up the immediate surroundings."
       },
       "glassBuilding03": {
         "title": "Office building",
-        "description": "Glass heats up strongly from the sun and is poor at storing heat."
+        "description": "Glass heats up quickly and stores this heat poorly. The glass primarily releases the heat back into its surroundings. In addition, glass strongly reflects visible sunlight, which also heats up the immediate surroundings."
       },
       "industry01": {
         "title": "Warehouse tower",
-        "description": "Dark colours and metal are strongly heated by the sun."
+        "description": "Dark colors absorb a lot of heat in the form of radiation. Metals heat up very quickly due to sunlight. Both heat up strongly and quickly and quickly release this heat back into the environment."
       },
       "industry02": {
         "title": "Factory",
-        "description": "Dark colours and metal are strongly heated by the sun."
+        "description": "Dark colors absorb a lot of heat in the form of radiation. Metals heat up very quickly due to sunlight. Both heat up strongly and quickly and quickly release this heat back into the environment."
       },
       "industry03": {
         "title": "Factory",
-        "description": "Dark colours and metal are strongly heated by the sun."
+        "description": "Dark colors absorb a lot of heat in the form of radiation. Metals heat up very quickly due to sunlight. Both heat up strongly and quickly and quickly release this heat back into the environment."
       },
       "industry04": {
         "title": "Factory",
