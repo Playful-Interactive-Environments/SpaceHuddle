@@ -295,6 +295,7 @@ import {
   NavigationType,
 } from '@/modules/playing/moveit/organisms/SelectChallenge.vue';
 import * as mapUtils from '@/modules/playing/moveit/utils/map';
+import { TrackingData } from '@/modules/playing/moveit/utils/trackingData';
 
 mapStyle.setMapStyleStreets();
 
@@ -304,14 +305,6 @@ interface BusStop {
   name: string;
   id: number;
   persons: number;
-}
-
-export interface TrackingData {
-  speed: number;
-  consumption: number;
-  persons: number;
-  distance: number;
-  tireWareRate: number;
 }
 
 export interface ChartData {
