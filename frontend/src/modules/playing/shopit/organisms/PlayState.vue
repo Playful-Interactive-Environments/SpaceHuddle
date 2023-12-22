@@ -986,7 +986,6 @@ export default class PlayState extends Vue {
 
     this.$emit(
       'playFinished',
-      [],
       this.win,
       this.reason,
       cardsPlayed,

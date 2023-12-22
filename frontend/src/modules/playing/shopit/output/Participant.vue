@@ -51,16 +51,13 @@ import ModuleInfo, {
 } from '@/components/participant/molecules/ModuleInfo.vue';
 import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
-import PlayState, {
-  PlayStateResult,
-} from '@/modules/playing/shopit/organisms/PlayState.vue';
+import PlayState from '@/modules/playing/shopit/organisms/PlayState.vue';
 import JoinState from '@/modules/playing/shopit/organisms/JoinState.vue';
 import SingleplayerState from '@/modules/playing/shopit/organisms/SingleplayerState.vue';
 import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
 import { until } from '@/utils/wait';
-import { TrackingData } from '@/modules/playing/moveit/organisms/DriveToLocation.vue';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
@@ -109,7 +106,6 @@ export default class Participant extends Vue {
   player = 0;
   checkedAvailability = false;
 
-  trackingData: TrackingData[] = [];
   trackingManager!: TrackingManager;
   inputTaskId = '';
 
@@ -434,7 +430,6 @@ export default class Participant extends Vue {
   }
 
   async playFinished(
-    trackingData: TrackingData[],
     win: boolean,
     winReason: string,
     cardsPlayed: [],
@@ -445,7 +440,6 @@ export default class Participant extends Vue {
     water: number,
     money: number
   ): Promise<void> {
-    this.trackingData = trackingData;
     if (this.trackingManager) {
       await this.trackingManager.saveIterationStep(
         {
@@ -466,7 +460,6 @@ export default class Participant extends Vue {
       );
       await this.trackingManager.saveIteration({
         gameStep: GameStep.Join,
-        trackingData: trackingData,
       });
     }
     this.clearAndReset();
@@ -505,7 +498,6 @@ export default class Participant extends Vue {
       );
       await this.trackingManager.saveIteration({
         gameStep: GameStep.Join,
-        trackingData: null,
       });
     }
     this.gameStep = GameStep.Join;

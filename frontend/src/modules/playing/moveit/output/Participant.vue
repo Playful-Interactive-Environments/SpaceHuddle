@@ -48,9 +48,8 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop, Watch } from 'vue-property-decorator';
-import DriveToLocation, {
-  TrackingData,
-} from '@/modules/playing/moveit/organisms/DriveToLocation.vue';
+import DriveToLocation from '@/modules/playing/moveit/organisms/DriveToLocation.vue';
+import { TrackingData } from '@/modules/playing/moveit/utils/trackingData';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import * as moduleService from '@/services/module-service';
 import { Module } from '@/types/api/Module';
