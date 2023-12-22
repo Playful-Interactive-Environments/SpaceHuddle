@@ -193,10 +193,13 @@ export default class Participant extends Vue {
     const vehicleParameter = configCalculation.getVehicleParameter(
       this.vehicle
     );
+    let distanceTraveled = 0;
     for (const test of testData) {
+      distanceTraveled += test.distance;
       this.trackingData.push({
         speed: test.speed,
         distance: test.distance,
+        distanceTraveled: distanceTraveled,
         persons: test.persons,
         consumption: formulas.consumption(
           test.speed,

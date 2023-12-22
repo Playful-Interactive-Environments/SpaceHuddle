@@ -1171,6 +1171,7 @@ export default class DriveToLocation extends Vue {
   }
 
   maxChartValue = 0;
+  distanceTraveled = 0;
   addDrivingDataToChart(newDrivingPoint: [number, number]): void {
     const distance = turf.distance(
       turf.point(this.mapDrivingPoint),
@@ -1179,6 +1180,7 @@ export default class DriveToLocation extends Vue {
     if (distance === 0) {
       return;
     }
+    this.distanceTraveled += distance;
     const vehicleParameter = this.vehicleParameter;
     const trackingData: TrackingData = {
       speed: this.moveSpeed,
@@ -1189,6 +1191,7 @@ export default class DriveToLocation extends Vue {
         vehicleParameter
       ),
       distance: distance,
+      distanceTraveled: this.distanceTraveled,
       tireWareRate: formulas.tireWareRate(
         this.moveSpeed,
         distance,
