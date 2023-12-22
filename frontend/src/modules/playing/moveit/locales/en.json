@@ -18,7 +18,7 @@
       "fuel": "fuel",
       "mpg": "miles per gallon",
       "power": "power",
-      "speed": "speed",
+      "speed": "max speed",
       "acceleration": "acceleration",
       "persons": "persons"
     },
@@ -59,21 +59,21 @@
       },
       "driving": {
         "scale": {
-          "x": "speed per time",
-          "y": "g/kWh and person"
+          "x": "Distance traveled in km",
+          "y": "emissions per person in g/kWh"
         }
       },
       "speed": {
         "title": "speed per time",
         "scale": {
-          "x": "time",
+          "x": "Distance traveled in km",
           "y": "km/h"
         }
       },
       "persons": {
         "title": "person count per time",
         "scale": {
-          "x": "time",
+          "x": "Distance traveled in km",
           "y": "persons"
         }
       },
@@ -82,8 +82,8 @@
         "collected": "collected emissions per time",
         "outside": "emissions released per time",
         "scale": {
-          "x": "time",
-          "y": "g/kWh and person"
+          "x": "Distance traveled in km",
+          "y": "emissions per person in g/kWh"
         }
       }
     },
@@ -169,9 +169,9 @@
     "units": {
       "ps": "ps",
       "km/h": "km/h",
-      "liters": "liters",
-      "seconds": "sec.",
-      "kw": "kw"
+      "liters": "liters per 100 km",
+      "seconds": "m/s per second",
+      "kw": "kWh per 100 km"
     }
   },
   "statistic": {

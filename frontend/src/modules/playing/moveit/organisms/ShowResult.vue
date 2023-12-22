@@ -294,6 +294,10 @@ import { Line } from 'vue-chartjs';
 import * as constants from '@/modules/playing/moveit/utils/consts';
 import * as themeColors from '@/utils/themeColors';
 import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
+import {
+  TrackingData,
+  normalizedTrackingData,
+} from '@/modules/playing/moveit/utils/trackingData';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -316,14 +320,14 @@ export default class ShowResult extends Vue {
   @Prop() readonly trackingManager!: TrackingManager;
   @Prop({ default: { category: 'car', type: 'sport' } })
   readonly vehicle!: vehicleCalculation.Vehicle;
+  @Prop({ default: [] })
+  readonly trackingData!: TrackingData[];
   @Prop({
     default: {
       carbonDioxide: {
         collectedCount: 0,
         totalCount: 0,
         timelineOutside: [],
-        timelineSpeed: [],
-        timelinePersons: [],
         timelineCollected: [],
         timelineInput: [],
       },
@@ -331,8 +335,6 @@ export default class ShowResult extends Vue {
         collectedCount: 0,
         totalCount: 0,
         timelineOutside: [],
-        timelineSpeed: [],
-        timelinePersons: [],
         timelineCollected: [],
         timelineInput: [],
       },
@@ -340,8 +342,6 @@ export default class ShowResult extends Vue {
         collectedCount: 0,
         totalCount: 0,
         timelineOutside: [],
-        timelineSpeed: [],
-        timelinePersons: [],
         timelineCollected: [],
         timelineInput: [],
       },
@@ -349,8 +349,6 @@ export default class ShowResult extends Vue {
         collectedCount: 0,
         totalCount: 0,
         timelineOutside: [],
-        timelineSpeed: [],
-        timelinePersons: [],
         timelineCollected: [],
         timelineInput: [],
       },
@@ -645,29 +643,34 @@ export default class ShowResult extends Vue {
   @Watch('particleState', { immediate: true })
   onParticleStateChanged(): void {
     let totalValue = 0;
+    const normalizedData = normalizedTrackingData(this.trackingData);
+    const labels = normalizedData.map((data) =>
+      (Math.round(data.distanceTraveled * 100) / 100).toString()
+    );
+    const outsideLength = Object.values(this.particleState)[0].timelineOutside
+      .length;
+    for (let i = labels.length; i < outsideLength; i++) {
+      labels.push(labels[labels.length - 1]);
+    }
+    this.chartDataInput.labels =
+      this.chartDataOutside.labels =
+      this.chartDataCollected.labels =
+      this.chartDataSpeed.labels =
+      this.chartDataPersons.labels =
+        labels;
+
+    this.chartDataSpeed.datasets.push({
+      name: 'speed',
+      label: 'speed',
+      data: normalizedData.map((data) => Math.round(data.speed)),
+    });
+
+    this.chartDataPersons.datasets.push({
+      name: 'persons',
+      label: 'persons',
+      data: normalizedData.map((data) => Math.round(data.persons)),
+    });
     for (const particleName of Object.keys(this.particleState)) {
-      if (this.chartDataInput.labels.length === 0) {
-        this.chartDataInput.labels =
-          this.chartDataOutside.labels =
-          this.chartDataCollected.labels =
-          this.chartDataSpeed.labels =
-          this.chartDataPersons.labels =
-            this.particleState[particleName].timelineOutside.map(
-              (item, index) => index.toString()
-            );
-
-        this.chartDataSpeed.datasets.push({
-          name: 'speed',
-          label: 'speed',
-          data: this.particleState[particleName].timelineSpeed,
-        });
-
-        this.chartDataPersons.datasets.push({
-          name: 'persons',
-          label: 'persons',
-          data: this.particleState[particleName].timelinePersons,
-        });
-      }
       const particle = gameConfig.particles[particleName];
       this.chartDataInput.datasets.push({
         name: particleName,

@@ -38,6 +38,7 @@
     <show-result
       v-if="gameStep === GameStep.Result && gameState === GameState.Game"
       :particle-state="particleState"
+      :trackingData="trackingData"
       :tracking-manager="trackingManager"
       :vehicle="vehicle"
     />
@@ -114,8 +115,6 @@ export default class Participant extends Vue {
       totalCount: 18,
       collectedCount: 15,
       timelineOutside: [],
-      timelineSpeed: [],
-      timelinePersons: [],
       timelineCollected: [],
       timelineInput: [],
     },
@@ -123,8 +122,6 @@ export default class Participant extends Vue {
       totalCount: 10,
       collectedCount: 9,
       timelineOutside: [],
-      timelineSpeed: [],
-      timelinePersons: [],
       timelineCollected: [],
       timelineInput: [],
     },
@@ -132,8 +129,6 @@ export default class Participant extends Vue {
       totalCount: 12,
       collectedCount: 9,
       timelineOutside: [],
-      timelineSpeed: [],
-      timelinePersons: [],
       timelineCollected: [],
       timelineInput: [],
     },
@@ -141,8 +136,6 @@ export default class Participant extends Vue {
       totalCount: 5,
       collectedCount: 1,
       timelineOutside: [],
-      timelineSpeed: [],
-      timelinePersons: [],
       timelineCollected: [],
       timelineInput: [],
     },

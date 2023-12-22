@@ -1,10 +1,8 @@
 import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
-import {
-  TrackingData,
-  ChartData,
-} from '@/modules/playing/moveit/organisms/DriveToLocation.vue';
+import { ChartData } from '@/modules/playing/moveit/organisms/DriveToLocation.vue';
 import * as constants from '@/modules/playing/moveit/utils/consts';
 import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
+import { TrackingData } from '@/modules/playing/moveit/utils/trackingData';
 
 export enum FuelType {
   electricity = 'electricity',
@@ -126,6 +124,8 @@ export const addValueToStatistics = (
       totalValue += particleValue;
     }
   }
-  chartData.labels.push(Math.round(trackingData.speed).toString());
+  chartData.labels.push(
+    (Math.round(trackingData.distanceTraveled * 100) / 100).toString()
+  );
   return totalValue;
 };

@@ -236,13 +236,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { center } from '@turf/turf';
 import { delay } from '@/utils/wait';
 import Color from 'colorjs.io';
-import { TrackingData } from '@/modules/playing/moveit/organisms/DriveToLocation.vue';
+import {
+  TrackingData,
+  normalizedTrackingData,
+} from '@/modules/playing/moveit/utils/trackingData';
 import * as configCalculation from '@/modules/playing/moveit/utils/configCalculation';
 import * as pixiUtil from '@/utils/pixi';
 import * as constants from '@/modules/playing/moveit/utils/consts';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as themeColors from '@/utils/themeColors';
-import { CalculationType, mapArrayToConstantSize } from '@/utils/statistic';
 import CustomSprite from '@/components/shared/atoms/game/CustomSprite.vue';
 import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
 import { EventType } from '@/types/enum/EventType';
@@ -277,8 +279,6 @@ export interface ParticleState {
   timelineInput: number[];
   timelineOutside: number[];
   timelineCollected: number[];
-  timelineSpeed: number[];
-  timelinePersons: number[];
 }
 
 interface ParticleStateExtended extends ParticleState {
@@ -486,8 +486,6 @@ export default class CleanUpParticles extends Vue {
           timelineInput: [],
           timelineOutside: [],
           timelineCollected: [],
-          timelineSpeed: [],
-          timelinePersons: [],
         };
       }
     }
@@ -749,48 +747,9 @@ export default class CleanUpParticles extends Vue {
   @Watch('trackingData', { immediate: true })
   onTrackingDataChanged(): void {
     if (this.trackingData) {
-      const normalizedTrackingData: TrackingData[] = [];
-      const mappingLength = constants.cleanupTime;
-      for (let i = 0; i < mappingLength; i++) {
-        normalizedTrackingData[i] = {
-          speed: mapArrayToConstantSize(
-            this.trackingData,
-            (item) => item.speed,
-            i,
-            mappingLength
-          ),
-          persons: mapArrayToConstantSize(
-            this.trackingData,
-            (item) => item.persons,
-            i,
-            mappingLength
-          ),
-          distance: mapArrayToConstantSize(
-            this.trackingData,
-            (item) => item.distance,
-            i,
-            mappingLength,
-            CalculationType.Sum
-          ),
-          tireWareRate: mapArrayToConstantSize(
-            this.trackingData,
-            (item) => item.tireWareRate,
-            i,
-            mappingLength,
-            CalculationType.Sum
-          ),
-          consumption: mapArrayToConstantSize(
-            this.trackingData,
-            (item) => item.consumption,
-            i,
-            mappingLength,
-            CalculationType.Sum
-          ),
-        };
-      }
-      this.normalizedTrackingData = normalizedTrackingData;
+      this.normalizedTrackingData = normalizedTrackingData(this.trackingData);
       this.chartData.labels = this.normalizedTrackingData.map((data) =>
-        Math.round(data.speed).toString()
+        (Math.round(data.distanceTraveled * 100) / 100).toString()
       );
       let totalValue = 0;
       this.initParticleState();
@@ -801,10 +760,6 @@ export default class CleanUpParticles extends Vue {
           `return ${particle.speedFunction[this.vehicle.category][this.vehicle.type]}`
         );*/
         let maxParticleValue = 0;
-        this.particleState[particleName].timelinePersons =
-          this.normalizedTrackingData.map((data) => Math.round(data.persons));
-        this.particleState[particleName].timelineSpeed =
-          this.normalizedTrackingData.map((data) => Math.round(data.speed));
         this.particleState[particleName].timelineInput =
           this.normalizedTrackingData.map((data) => {
             const particleValue = configCalculation.statisticsValue(

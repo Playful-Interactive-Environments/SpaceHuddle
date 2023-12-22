@@ -37,7 +37,7 @@
       @map:load="onLoad"
     >
       <mgl-geo-json-source
-        v-if="routeCalculated"
+        v-if="routeCalculated && movingType === MovingType.path"
         source-id="routePath"
         :data="routePath"
         :lineMetrics="true"
@@ -338,6 +338,7 @@ import {
   NavigationType,
 } from '@/modules/playing/moveit/organisms/SelectChallenge.vue';
 import * as mapUtils from '@/modules/playing/moveit/utils/map';
+import { TrackingData } from '@/modules/playing/moveit/utils/trackingData';
 
 mapStyle.setMapStyleStreets();
 
@@ -347,14 +348,6 @@ interface BusStop {
   name: string;
   id: number;
   persons: number;
-}
-
-export interface TrackingData {
-  speed: number;
-  consumption: number;
-  persons: number;
-  distance: number;
-  tireWareRate: number;
 }
 
 export interface ChartData {
@@ -479,6 +472,7 @@ export default class DriveToLocation extends Vue {
   intervalBreak = -1;
   decreaseSpeedInterval = -1;
   NavigationType = NavigationType;
+  MovingType = MovingType;
 
   chartData: ChartData = {
     labels: [],
@@ -1335,6 +1329,7 @@ export default class DriveToLocation extends Vue {
   }
 
   maxChartValue = 0;
+  distanceTraveled = 0;
   addDrivingDataToChart(newDrivingPoint: [number, number]): void {
     const distance = turf.distance(
       turf.point(this.mapDrivingPoint),
@@ -1343,6 +1338,7 @@ export default class DriveToLocation extends Vue {
     if (distance === 0) {
       return;
     }
+    this.distanceTraveled += distance;
     const vehicleParameter = this.vehicleParameter;
     const trackingData: TrackingData = {
       speed: this.moveSpeed,
@@ -1353,6 +1349,7 @@ export default class DriveToLocation extends Vue {
         vehicleParameter
       ),
       distance: distance,
+      distanceTraveled: this.distanceTraveled,
       tireWareRate: formulas.tireWareRate(
         this.moveSpeed,
         distance,
