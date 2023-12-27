@@ -52,7 +52,7 @@
         />
       </div>
     </div>
-    <div class="score heading--medium">
+    <div class="score heading--medium" v-if="this.activeObject !== null">
       <p>
         <span
           >{{ this.correctClassified.length }} /
@@ -102,8 +102,8 @@
       v-if="
         endObjects
           .map((x) => x.name)
-          .every((x) => correctClassified.includes(x)) &&
-        this.endObjects.length !== 0
+          .every((x) => correctClassified.includes(x)) ||
+        this.endObjects.length === 0
       "
     >
       {{ $t('module.playing.findit.participant.returnToMenu') }}

@@ -1311,7 +1311,11 @@ export default class DriveToLocation extends Vue {
       return turfUtils.getNearestPointOnRoute(this.routePath, newDrivingPoint);
     } else {
       this.noStreet = true;
-      this.speed = 0;
+      setTimeout(() => {
+        if (this.noStreet) {
+          this.speed = 0;
+        }
+      }, 2000);
       return null;
     }
   }
@@ -1663,7 +1667,11 @@ export default class DriveToLocation extends Vue {
         this.updateDrivingPoint(newDrivingPoint, subPath, maxGoalDistance);
       } else {
         this.noStreet = true;
-        this.speed = 0;
+        setTimeout(() => {
+          if (this.noStreet) {
+            this.speed = 0;
+          }
+        }, 2000);
         const checkMarkDistance = 0.01;
         this.checkRoutePoint = this.getNewDrivingPoint(checkMarkDistance);
       }
