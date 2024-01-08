@@ -51,7 +51,7 @@
     "add": "Info hinzufügen",
     "points": "Benötigte Summe an Punkten",
     "mapLocation": "Standort",
-    "share": "teilen",
+    "share": "für alle sichtbar machen",
     "evaluation": "Bewertung",
     "reasonsForRejection": "Begründe deine Ablehnung",
     "electricityValidationErrors": "Stromsumme muss 0 sein, bitte die Werte so anpassen, dass die Summe wieder 0 ist anstelle von "

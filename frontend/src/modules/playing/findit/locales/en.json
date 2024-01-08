@@ -17,7 +17,7 @@
     "levelType": "level type",
     "preConfig": "pre-configuration",
     "noPreConfig": "none",
-    "share": "share"
+    "share": "make it visible to all"
   },
   "participant": {
     "lostText": "You have unfortunately not found a dangerous object for too long, which has now caused a damage. You have lost, please try again.",

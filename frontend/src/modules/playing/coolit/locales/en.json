@@ -14,7 +14,7 @@
     "levelType": "level type",
     "preConfig": "pre-configuration",
     "noPreConfig": "none",
-    "share": "share"
+    "share": "make it visible to all"
   },
   "participant": {
     "newLevel": "create new level",
