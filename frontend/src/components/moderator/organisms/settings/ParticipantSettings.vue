@@ -86,17 +86,11 @@
         </template>
         {{ $t('moderator.organism.settings.participantSettings.add') }}
       </el-button>
-      <!--<vue3-html2pdf
-        :show-layout="false"
-        :float-layout="true"
+      <PDFConverter
         :enable-download="false"
         :preview-modal="true"
         :paginate-elements-by-height="600"
-        :pdf-quality="2"
-        :manual-pagination="false"
         filename="participants"
-        pdf-format="a4"
-        pdf-orientation="portrait"
         ref="html2Pdf"
       >
         <template v-slot:pdf-content>
@@ -142,7 +136,7 @@
             </div>
           </div>
         </template>
-      </vue3-html2pdf>-->
+      </PDFConverter>
       <el-button type="primary" class="fullwidth" v-on:click="generateReport">
         {{ $t('moderator.organism.settings.participantSettings.export') }}
       </el-button>
@@ -195,10 +189,12 @@ import { ParticipantInfo } from '@/types/api/Participant';
 import QrcodeVue from 'qrcode.vue';
 import * as themeColors from '@/utils/themeColors';
 import { copyToClipboard } from '@/utils/date';
+import PDFConverter from '@/components/shared/atoms/PDFConverter.vue';
 
 @Options({
   components: {
     QrcodeVue,
+    PDFConverter,
   },
   emits: ['update:showModal'],
 })
@@ -358,7 +354,7 @@ ${this.$t('moderator.organism.settings.participantSettings.link')}: ${link}`;
   }
 
   generateReport(): void {
-    //(this.$refs as any).html2Pdf.generatePdf();
+    (this.$refs as any).html2Pdf.generatePdf();
   }
 }
 </script>
