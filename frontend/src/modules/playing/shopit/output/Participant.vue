@@ -57,11 +57,12 @@ import SingleplayerState from '@/modules/playing/shopit/organisms/SingleplayerSt
 import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
-import { until } from '@/utils/wait';
+import { until, delay } from '@/utils/wait';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
+import { registerDomElement, unregisterDomElement } from '@/vunit';
 
 export enum GameStep {
   Join = 'join',
@@ -83,6 +84,7 @@ enum GameState {
     JoinState,
   },
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class Participant extends Vue {
   @Prop() readonly taskId!: string;
   @Prop() readonly moduleId!: string;
@@ -137,20 +139,16 @@ export default class Participant extends Vue {
     return [];
   }
 
+  domKey = '';
   mounted(): void {
-    setTimeout(() => {
-      const dom = this.$refs.gameContainer as HTMLElement;
-      if (dom) {
-        const targetWidth = dom.parentElement?.offsetWidth;
-        const targetHeight = dom.parentElement?.offsetHeight;
-        if (targetWidth && targetHeight) {
-          (dom as any).style.width = `${targetWidth}px`;
-          (dom as any).style.height = `${targetHeight}px`;
-          document.body.style.overflowY = 'hidden';
-        }
+    this.domKey = registerDomElement(
+      this.$refs.gameContainer as HTMLElement,
+      () => {
+        document.body.style.overflowY = 'hidden';
         this.sizeCalculated = true;
-      }
-    }, 500);
+      },
+      500
+    );
   }
 
   get moduleName(): string {
@@ -183,6 +181,7 @@ export default class Participant extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
+    unregisterDomElement(this.domKey);
   }
 
   @Watch('taskId', { immediate: true })
@@ -236,6 +235,7 @@ export default class Participant extends Vue {
     }
   }
 
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
   async InstantiateGame(id) {
     await this.checkAvailability();
     await until(() => this.checkedAvailability);
@@ -285,6 +285,7 @@ export default class Participant extends Vue {
     this.checkedAvailability = true;
   }
 
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
   async joinGame(id) {
     ideaService.registerGetIdeasForTask(
       this.taskId,
@@ -364,11 +365,7 @@ export default class Participant extends Vue {
         this.gameIdeaInstance,
         EndpointAuthorisationType.PARTICIPANT
       );
-      await until(() =>
-        setTimeout(() => {
-          const i = 1;
-        }, 5000)
-      );
+      await delay(5000);
       switch (this.gameIdeaInstance.parameter.active) {
         case false:
           this.gameIdeaInstance.parameter.playerNum += 1;

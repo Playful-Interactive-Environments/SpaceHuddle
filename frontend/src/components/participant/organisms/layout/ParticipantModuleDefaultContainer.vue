@@ -76,6 +76,7 @@ import { Options, Vue } from 'vue-class-component';
 import TaskInfo from '@/components/shared/molecules/TaskInfo.vue';
 import { Prop } from 'vue-property-decorator';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import { registerDomElement, unregisterDomElement } from '@/vunit';
 
 @Options({
   components: {
@@ -92,19 +93,26 @@ export default class ParticipantModuleDefaultContainer extends Vue {
   scrollHeight = 100;
   scrollSizeCalculated = false;
 
+  domKey = '';
   mounted(): void {
     if (this.useScrollContent) {
-      setTimeout(() => {
-        const dom = this.$refs.scrollContent as HTMLElement;
-        if (dom) {
-          const mainElement = dom.parentElement;
-          if (mainElement) {
-            this.scrollHeight = mainElement.offsetHeight + this.scrollOverlay;
-            this.scrollSizeCalculated = true;
-          }
+      this.domKey = registerDomElement(
+        this.$refs.scrollContent as HTMLElement,
+        (targetWidth, targetHeight) => {
+          this.scrollHeight = targetHeight + this.scrollOverlay;
+          this.scrollSizeCalculated = true;
+        },
+        2000,
+        false,
+        () => {
+          this.scrollHeight = 100;
         }
-      }, 2000);
+      );
     }
+  }
+
+  unmounted(): void {
+    unregisterDomElement(this.domKey);
   }
 }
 </script>

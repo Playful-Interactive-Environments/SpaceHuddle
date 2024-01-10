@@ -394,6 +394,8 @@ import DrawerBottomOverlay from '@/components/participant/molecules/DrawerBottom
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import * as pixiUtil from '@/utils/pixi';
 import * as PIXI from 'pixi.js';
+import { registerDomElement, unregisterDomElement } from '@/vunit';
+import { delay } from '@/utils/wait';
 
 export enum NavigationType {
   drag = 'drag',
@@ -558,6 +560,7 @@ export default class SelectChallenge extends Vue {
   targetHeight = 100;
   vehicleSpritesheet!: PIXI.Spritesheet;
   ready = false;
+  domKeys: string[] = [];
   mounted(): void {
     pixiUtil
       .loadTexture(
@@ -565,17 +568,29 @@ export default class SelectChallenge extends Vue {
         this.eventBus,
         this.textureToken
       )
-      .then((sheet) => {
+      .then(async (sheet) => {
         this.vehicleSpritesheet = sheet;
         this.ready = true;
 
-        setTimeout(() => {
-          const dom = this.$refs.vehicleSpace as HTMLElement[];
-          if (dom) {
-            this.vehicleWidth = dom[0].offsetWidth - 20;
-            this.vehicleHeight = dom[0].offsetHeight;
-          }
-        }, 100);
+        await delay(100);
+        const dom = this.$refs.vehicleSpace as HTMLElement[];
+        if (dom) {
+          this.domKeys.push(
+            registerDomElement(
+              dom[0],
+              () => {
+                this.vehicleWidth = dom[0].offsetWidth - 20;
+                this.vehicleHeight = dom[0].offsetHeight;
+              },
+              100,
+              false,
+              () => {
+                this.vehicleWidth = 100;
+                this.vehicleHeight = 100;
+              }
+            )
+          );
+        }
       });
 
     this.chartDataElectricityMix.datasets.push({
@@ -661,13 +676,21 @@ export default class SelectChallenge extends Vue {
     }
     this.chartDataFuel.datasets[0].data.push(0);
 
-    setTimeout(() => {
-      const dom = this.$refs.gameContainer as HTMLElement;
-      if (dom && dom.parentElement) {
-        this.targetWidth = dom.parentElement.offsetWidth;
-        this.targetHeight = dom.parentElement.offsetHeight;
-      }
-    }, 100);
+    this.domKeys.push(
+      registerDomElement(
+        this.$refs.gameContainer as HTMLElement,
+        (targetWidth, targetHeight) => {
+          this.targetWidth = targetWidth;
+          this.targetHeight = targetHeight;
+        },
+        100,
+        false,
+        () => {
+          this.targetWidth = 100;
+          this.targetHeight = 100;
+        }
+      )
+    );
     setTimeout(() => {
       this.updateChart();
     }, 1000);
@@ -675,6 +698,9 @@ export default class SelectChallenge extends Vue {
 
   unmounted(): void {
     pixiUtil.cleanupToken(this.textureToken);
+    for (const key of this.domKeys) {
+      unregisterDomElement(key);
+    }
   }
 
   activeVehicleChanged(index: number): void {

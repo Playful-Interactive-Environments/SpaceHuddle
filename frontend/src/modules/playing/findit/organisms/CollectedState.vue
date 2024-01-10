@@ -120,6 +120,7 @@ import * as pixiUtil from '@/utils/pixi';
 import { Idea } from '@/types/api/Idea';
 import * as configParameter from '@/utils/game/configParameter';
 import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
+import { registerDomElement, unregisterDomElement } from '@/vunit';
 
 @Options({
   components: {},
@@ -252,6 +253,7 @@ export default class CollectedState extends Vue {
 
   //#region load / unload
   gameAreaSize: [number, number] = [0, 0];
+  domKey = '';
   mounted(): void {
     this.endObjects = this.shuffle(this.getEndObjects());
     if (this.endObjects.length > 0) {
@@ -263,20 +265,22 @@ export default class CollectedState extends Vue {
         element.classList.add('objectContainerActive');
       }
     }
-    setTimeout(() => {
-      const dom = this.$refs.gameArea as HTMLElement;
-      if (dom) {
-        const targetWidth = dom.offsetWidth;
-        const targetHeight = dom.offsetHeight;
-        if (targetWidth && targetHeight) {
-          this.gameAreaSize = [targetWidth, targetHeight];
-        }
+    this.domKey = registerDomElement(
+      this.$refs.gameArea as HTMLElement,
+      (targetWidth, targetHeight) => {
+        this.gameAreaSize = [targetWidth, targetHeight];
+      },
+      500,
+      false,
+      () => {
+        this.gameAreaSize = [0, 0];
       }
-    }, 500);
+    );
   }
 
   unmounted(): void {
     pixiUtil.cleanupToken(this.textureToken);
+    unregisterDomElement(this.domKey);
   }
   //#endregion load / unload
 

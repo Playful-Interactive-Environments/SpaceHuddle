@@ -77,6 +77,7 @@ import { FeatureCollection } from 'geojson';
 import * as turf from '@turf/turf';
 import * as particleStateUtil from '@/modules/playing/moveit/utils/particleState';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
+import { registerDomElement, unregisterDomElement } from '@/vunit';
 
 enum GameStep {
   Select = 'select',
@@ -173,6 +174,7 @@ export default class Participant extends Vue {
     return [];
   }
 
+  domKey = '';
   mounted(): void {
     const testData = [
       { speed: 50, persons: 1, distance: 0.02 },
@@ -214,18 +216,13 @@ export default class Participant extends Vue {
       });
     }
 
-    setTimeout(() => {
-      const dom = this.$refs.gameContainer as HTMLElement;
-      if (dom) {
-        const targetWidth = dom.parentElement?.offsetWidth;
-        const targetHeight = dom.parentElement?.offsetHeight;
-        if (targetWidth && targetHeight) {
-          (dom as any).style.width = `${targetWidth}px`;
-          (dom as any).style.height = `${targetHeight}px`;
-        }
+    this.domKey = registerDomElement(
+      this.$refs.gameContainer as HTMLElement,
+      () => {
         this.sizeCalculated = true;
-      }
-    }, 500);
+      },
+      500
+    );
   }
 
   deregisterAll(): void {
@@ -237,6 +234,7 @@ export default class Participant extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
+    unregisterDomElement(this.domKey);
   }
 
   @Watch('taskId', { immediate: true })

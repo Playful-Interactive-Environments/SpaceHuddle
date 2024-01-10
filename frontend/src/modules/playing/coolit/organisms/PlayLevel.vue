@@ -119,8 +119,12 @@
               :loop="vehicleIsActive && !gameOver"
               @frame-change="animationFrameChanged"
             />
-            <custom-particle-container
-              v-if="snow.frequency && weatherStylesheets"
+            <!--<custom-particle-container
+              v-if="
+                (snow.frequency ||
+                  snow.startTime + minExtremeWeatherTime > Date.now()) &&
+                weatherStylesheets
+              "
               :config="snow"
               :parentEventBus="eventBus"
               :default-texture="[
@@ -136,12 +140,16 @@
               :deep-clone-config="false"
             />
             <custom-particle-container
-              v-if="hail.frequency && weatherStylesheets"
+              v-if="
+                (hail.frequency ||
+                  hail.startTime + minExtremeWeatherTime > Date.now()) &&
+                weatherStylesheets
+              "
               :config="hail"
               :parentEventBus="eventBus"
               :default-texture="weatherStylesheets.textures['hail.png']"
               :deep-clone-config="false"
-            />
+            />-->
             <GameObject
               v-for="ray in rayList"
               :key="ray.uuid"
@@ -757,6 +765,7 @@ export default class PlayLevel extends Vue {
   vehicleXPosition = -100;
   vehicleHasEmitted = false;
   vehicleIsActive = false;
+  readonly minExtremeWeatherTime = 1000;
 
   CollisionGroups = Object.freeze({
     MOUSE: 1 << 0,
@@ -1528,6 +1537,7 @@ export default class PlayLevel extends Vue {
   }
 
   initMolecules(): void {
+    if (this.moleculeList.length > 0) return;
     for (const moleculeConfigName of Object.keys(gameConfig.molecules)) {
       const moleculeConfig = gameConfig.molecules[moleculeConfigName];
       if (moleculeConfig.controllable) {
@@ -1591,18 +1601,22 @@ export default class PlayLevel extends Vue {
   }
 
   vehicleSprite: PIXI.AnimatedSprite | null = null;
+  vehicleInitStart = false;
   containerReady(): void {
     if (!this.emitStart) {
       this.startTime = Date.now();
       this.emitLightRays(0, 0);
     }
 
-    setTimeout(async () => {
-      await until(() => !!this.vehicleStylesheets);
-      this.vehicleIsActive = true;
-      this.vehicleSprite = this.$refs.vehicle as PIXI.AnimatedSprite;
-      this.vehicleSprite.play();
-    }, Math.random() * 1000);
+    if (!this.vehicleInitStart) {
+      this.vehicleInitStart = true;
+      setTimeout(async () => {
+        await until(() => !!this.vehicleStylesheets);
+        this.vehicleIsActive = true;
+        this.vehicleSprite = this.$refs.vehicle as PIXI.AnimatedSprite;
+        this.vehicleSprite.play();
+      }, Math.random() * 1000);
+    }
   }
 
   containerSizeReady(): void {
@@ -2223,6 +2237,7 @@ export default class PlayLevel extends Vue {
       const frequency = Math.pow(2, Math.round(averageTemperature));
       const minFrequency = 0.004;
       const maxFrequency = 0.5;
+      if (this.snow.frequency === 0) this.snow.startTime = Date.now();
       if (frequency < minFrequency) this.snow.frequency = minFrequency;
       else if (frequency > maxFrequency) this.snow.frequency = maxFrequency;
       else this.snow.frequency = frequency;
@@ -2242,6 +2257,7 @@ export default class PlayLevel extends Vue {
           : minRelativeFrequencyValue < minTotalFrequencyValue
           ? minTotalFrequencyValue
           : minRelativeFrequencyValue;
+      if (this.hail.frequency === 0) this.hail.startTime = Date.now();
       if (frequency < minFrequency) this.hail.frequency = minFrequency;
       else if (frequency > maxFrequency) this.hail.frequency = maxFrequency;
       else this.hail.frequency = frequency;

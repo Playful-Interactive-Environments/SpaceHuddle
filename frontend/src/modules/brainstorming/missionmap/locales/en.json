@@ -21,7 +21,7 @@
       "measures": "measures",
       "statistic": "statistic",
       "influenceAreas": "statistic",
-      "electricity": "electricity statistic",
+      "electricity": "electricity",
       "map": "map"
     },
     "add": "add own measure",

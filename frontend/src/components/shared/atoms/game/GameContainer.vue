@@ -250,6 +250,7 @@ import * as pixiUtil from '@/utils/pixi';
 import * as matterUtil from '@/utils/matter';
 import { getPolygonCenter } from '@/utils/polygon';
 import { delay, until } from '@/utils/wait';
+import { registerDomElement, unregisterDomElement } from '@/vunit';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -394,7 +395,7 @@ export default class GameContainer extends Vue {
   detector: typeof Matter.Detector | null = null;
   mouseConstraint!: typeof Matter.MouseConstraint;
   hierarchyObserver!: MutationObserver;
-  resizeObserver!: ResizeObserver;
+  //resizeObserver!: ResizeObserver;
   app: PIXI.Application | null = null;
   regionBodyList: CollisionRegionData[] = [];
 
@@ -759,6 +760,7 @@ export default class GameContainer extends Vue {
   //#endregion watch
 
   //#region load / unload
+  domKey = '';
   async mounted(): Promise<void> {
     this.eventBus.on(EventType.TEXTURES_LOADING_START, async () => {
       this.loading = true;
@@ -770,7 +772,7 @@ export default class GameContainer extends Vue {
 
     //initialise observer in mounted as otherwise this references observer
     this.hierarchyObserver = new MutationObserver(this.hierarchyChanged);
-    this.resizeObserver = new ResizeObserver(this.sizeChanged);
+    //this.resizeObserver = new ResizeObserver(this.sizeChanged);
 
     const gameContainer = this.$refs.gameContainer as HTMLElement;
     gameContainer.addEventListener(
@@ -783,7 +785,7 @@ export default class GameContainer extends Vue {
     );
 
     this.setupMatter();
-    this.resizeObserver.observe(this.$el.parentElement);
+    //this.resizeObserver.observe(this.$el.parentElement);
     if (this.hasMouseInput) {
       this.hierarchyObserver.observe(this.$refs.gameContainer as HTMLElement, {
         childList: true,
@@ -791,20 +793,27 @@ export default class GameContainer extends Vue {
       });
     }
 
-    setTimeout(async () => {
+    until(() => this.$refs.pixi).then(async () => {
+      await delay(100);
       const pixi = this.$refs.pixi as typeof Application;
       if (pixi) {
         this.app = pixi.app;
         pixi.app.transparent = this.transparent;
         this.$emit('initRenderer', pixi.app.renderer);
       }
-    }, 100);
+    });
 
     setTimeout(() => {
       if (this.backgroundMovement === BackgroundMovement.Auto) {
         this.startAutoPan(true);
       }
     }, 1000);
+
+    this.domKey = registerDomElement(
+      this.$refs.gameContainer as HTMLElement,
+      this.setupPixiSpace,
+      0
+    );
   }
 
   hierarchyChanged(mutationList: MutationRecord[]): void {
@@ -825,14 +834,16 @@ export default class GameContainer extends Vue {
     }
   }
 
-  sizeChanged(): void {
-    this.setupPixiSpace();
-    //this.resizeObserver.disconnect();
-  }
+  /*sizeChanged(entryList: ResizeObserverEntry[]): void {
+    for (const entry of entryList) {
+      //this.setupPixiSpace(entry.contentRect.width, entry.contentRect.height);
+      //this.resizeObserver.disconnect();
+    }
+  }*/
 
   unmounted(): void {
     this.hierarchyObserver.disconnect();
-    this.resizeObserver.disconnect();
+    //this.resizeObserver.disconnect();
     const gameContainer = this.$refs.gameContainer as HTMLElement;
     if (gameContainer) {
       gameContainer.removeEventListener(
@@ -852,38 +863,29 @@ export default class GameContainer extends Vue {
     Matter.Events.off(this.engine.world, 'afterAdd', this.bodyAdded);
     this.eventBus.off(EventType.TEXTURES_LOADING_START);
     this.eventBus.off(EventType.ALL_TEXTURES_LOADED);
+
+    unregisterDomElement(this.domKey);
   }
 
-  async setupPixiSpace(): Promise<void> {
+  async setupPixiSpace(width: number, height: number): Promise<void> {
     const dom = this.$refs.gameContainer as HTMLElement;
-    if (dom) {
-      const targetWidth = dom.parentElement?.offsetWidth;
-      const targetHeight = dom.parentElement?.offsetHeight;
-      if (
-        (targetWidth && targetHeight && targetWidth !== this.gameWidth) ||
-        targetHeight !== this.gameHeight
-      ) {
-        if (targetWidth && targetHeight) {
-          (dom as any).style.width = `${targetWidth}px`;
-          (dom as any).style.height = `${targetHeight}px`;
-        }
-        this.gameWidth = dom.offsetWidth;
-        this.gameHeight = dom.offsetHeight;
-        this.$emit('update:width', this.gameWidth);
-        this.$emit('update:height', this.gameHeight);
-        until(() => this.isBackgroundLoaded).then(() => {
-          this.$emit('update:height', this.gameDisplayHeight);
-        });
+    if (dom && (width !== this.gameWidth || height !== this.gameHeight)) {
+      this.gameWidth = width;
+      this.gameHeight = height;
+      this.$emit('update:width', this.gameWidth);
+      this.$emit('update:height', this.gameHeight);
+      until(() => this.isBackgroundLoaded).then(() => {
         this.$emit('update:height', this.gameDisplayHeight);
-        const bounds = dom.getBoundingClientRect();
-        this.canvasPosition = [bounds.left, bounds.top];
-        if (this.collisionBorders !== CollisionBorderType.Background)
-          await this.setupBound();
-        this.calculateBackgroundSize();
-        this.ready = true;
-        this.$emit('sizeReady');
-        if (this.isContainerReady) this.$emit('containerReady');
-      }
+      });
+      this.$emit('update:height', this.gameDisplayHeight);
+      const bounds = dom.getBoundingClientRect();
+      this.canvasPosition = [bounds.left, bounds.top];
+      if (this.collisionBorders !== CollisionBorderType.Background)
+        await this.setupBound();
+      this.calculateBackgroundSize();
+      this.ready = true;
+      this.$emit('sizeReady');
+      if (this.isContainerReady) this.$emit('containerReady');
     }
   }
 

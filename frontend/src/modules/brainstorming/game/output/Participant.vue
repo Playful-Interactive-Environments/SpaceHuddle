@@ -79,6 +79,7 @@ import { Task } from '@/types/api/Task';
 import IdeaSortOrder from '@/types/enum/IdeaSortOrder';
 import * as ideaService from '@/services/idea-service';
 import * as cashService from '@/services/cash-service';
+import { registerDomElement, unregisterDomElement } from '@/vunit';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const o9n = require('o9n');
@@ -217,14 +218,14 @@ export default class Participant extends Vue {
 
   get vueCanvasWidth(): number {
     if (this.$refs.canvas) {
-      return (this.$refs.canvas as any).width;
+      return (this.$refs.canvas as HTMLCanvasElement).width;
     }
     return 0;
   }
 
   get vueCanvasHeight(): number {
     if (this.$refs.canvas) {
-      return (this.$refs.canvas as any).height;
+      return (this.$refs.canvas as HTMLCanvasElement).height;
     }
     return 0;
   }
@@ -276,6 +277,7 @@ export default class Participant extends Vue {
     }
   }
 
+  domKey = '';
   async mounted(): Promise<void> {
     await this.requestFullscreen();
     this.$emit('update:useFullSize', true);
@@ -284,24 +286,34 @@ export default class Participant extends Vue {
       .lock('portrait-primary')
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       .catch(function () {});
-    setTimeout(() => {
-      if (this.$refs.canvas) {
-        (this.$refs.canvas as any).width = (
-          this.$refs.canvas as any
-        ).parentElement.offsetWidth;
-        (this.$refs.canvas as any).height = (
-          this.$refs.canvas as any
-        ).parentElement.offsetHeight;
-        this.vueCanvas = (this.$refs.canvas as any).getContext('2d');
-      }
-      window.addEventListener('deviceorientation', this.onOrientationChange);
+    const canvas = this.$refs.canvas as HTMLCanvasElement;
+    this.domKey = registerDomElement(
+      canvas,
+      (targetWidth, targetHeight) => {
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        if (!this.vueCanvas) {
+          const context = canvas.getContext('2d');
+          if (context) this.vueCanvas = context;
+          window.addEventListener(
+            'deviceorientation',
+            this.onOrientationChange
+          );
 
-      this.setupPhysics();
-      this.drawingInterval = setInterval(() => {
-        this.update_drawing();
-      }, this.drawingIntervalTime);
-      this.setupShaking();
-    }, 100);
+          this.setupPhysics();
+          this.drawingInterval = setInterval(() => {
+            this.update_drawing();
+          }, this.drawingIntervalTime);
+          this.setupShaking();
+        }
+      },
+      100,
+      false,
+      () => {
+        canvas.width = 100;
+        canvas.height = 100;
+      }
+    );
 
     window.addEventListener('mousedown', this.mousedown);
     window.addEventListener('mouseup', this.mouseup);
@@ -497,6 +509,7 @@ export default class Participant extends Vue {
     window.removeEventListener('shake', this.isShaking, false);
     this.shakeEvent.stop();
     this.deregisterAll();
+    unregisterDomElement(this.domKey);
   }
 
   allIdeas: Idea[] = [];

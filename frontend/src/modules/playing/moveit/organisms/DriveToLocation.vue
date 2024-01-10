@@ -447,8 +447,6 @@ export default class DriveToLocation extends Vue {
   animationPoints: [number, number][][] = [];
   map!: Map;
   ready = false;
-  gameWidth = 0;
-  controlHeight = 0;
 
   speed = 0;
   maxSpeed = 0;
@@ -818,9 +816,6 @@ export default class DriveToLocation extends Vue {
   }
 
   async mounted(): Promise<void> {
-    this.gameWidth = this.$el.parentElement.offsetWidth;
-    if (this.$refs.controlArea)
-      this.controlHeight = (this.$refs.controlArea as HTMLElement).offsetHeight;
     this.ready = true;
     this.maxSpeed = this.vehicleParameter.speed;
     //if (this.maxSpeed > 100) this.maxSpeed = 100;

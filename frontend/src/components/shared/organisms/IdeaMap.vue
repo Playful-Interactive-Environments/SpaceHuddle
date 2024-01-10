@@ -106,6 +106,7 @@ import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
 import * as turf from '@turf/turf';
 import * as mapStyle from '@/utils/mapStyle';
 import * as themeColors from '@/utils/themeColors';
+import { registerDomElement, unregisterDomElement } from '@/vunit';
 
 /*export enum MapStyles {
   STREETS = 'streets-v2',
@@ -207,22 +208,22 @@ export default class IdeaMap extends Vue {
     return `https://media.maptiler.com/old/img/cloud/slider/${key}.png`;
   }
 
+  domKey = '';
   mounted(): void {
     mapStyle.setMapStyle(this.mapStyle);
     if (this.calculateSize) {
-      setTimeout(() => {
-        const dom = this.$refs.mapSpace as HTMLElement;
-        if (dom) {
-          const targetWidth = dom.parentElement?.offsetWidth;
-          const targetHeight = dom.parentElement?.offsetHeight;
-          if (targetWidth && targetHeight) {
-            (dom as any).style.width = `${targetWidth}px`;
-            (dom as any).style.height = `${targetHeight}px`;
-          }
+      this.domKey = registerDomElement(
+        this.$refs.mapSpace as HTMLElement,
+        () => {
           this.sizeCalculated = true;
-        }
-      }, 500);
+        },
+        500
+      );
     }
+  }
+
+  unmounted(): void {
+    unregisterDomElement(this.domKey);
   }
 
   convertCoordinates(

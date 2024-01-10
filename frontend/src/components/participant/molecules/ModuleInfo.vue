@@ -62,6 +62,7 @@ import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
 import SpriteCanvas from '@/components/shared/atoms/game/SpriteCanvas.vue';
 import * as PIXI from 'pixi.js';
 import * as themeColors from '@/utils/themeColors';
+import { registerDomElement, unregisterDomElement } from '@/vunit';
 
 export interface ModuleInfoEntryData {
   key: string;
@@ -127,12 +128,24 @@ export default class ModuleInfo extends Vue {
     return themeColors.getBackgroundColor();
   }
 
+  domKey = '';
   mounted(): void {
-    this.gameWidth = this.$el.parentElement.offsetWidth;
-    this.gameHeight = this.$el.parentElement.offsetHeight;
     tutorialService.registerGetList(
       this.updateTutorial,
       EndpointAuthorisationType.PARTICIPANT
+    );
+    this.domKey = registerDomElement(
+      this.$el,
+      (targetWidth, targetHeight) => {
+        this.gameWidth = targetWidth;
+        this.gameHeight = targetHeight;
+      },
+      0,
+      false,
+      () => {
+        this.gameWidth = 0;
+        this.gameHeight = 0;
+      }
     );
   }
 
@@ -149,6 +162,7 @@ export default class ModuleInfo extends Vue {
 
   unmounted(): void {
     this.deregisterAll();
+    unregisterDomElement(this.domKey);
   }
 
   initTutorialDone = false;

@@ -115,6 +115,7 @@ import MissionProgressChart, {
 } from '@/modules/brainstorming/missionmap/organisms/MissionProgressChart.vue';
 import * as progress from '@/modules/brainstorming/missionmap/utils/progress';
 import { CombinedInputManager } from '@/types/input/CombinedInputManager';
+import { registerDomElement, unregisterDomElement } from '@/vunit';
 
 @Options({
   computed: {
@@ -235,23 +236,21 @@ export default class PublicScreen extends Vue {
     if (this.inputManager) this.inputManager.deregisterAll();
   }
 
+  domKey = '';
   mounted(): void {
-    setTimeout(() => {
-      const dom = (this.$refs.container as any)?.$el as HTMLElement;
-      if (dom) {
-        const targetWidth = dom.parentElement?.offsetWidth;
-        const targetHeight = dom.parentElement?.offsetHeight;
-        if (targetWidth && targetHeight) {
-          (dom as any).style.width = `${targetWidth}px`;
-          (dom as any).style.height = `${targetHeight - 100}px`;
-        }
+    const dom = (this.$refs.container as any)?.$el as HTMLElement;
+    this.domKey = registerDomElement(
+      dom,
+      () => {
         this.sizeLoaded = true;
-      }
-    }, 2000);
+      },
+      2000
+    );
   }
 
   unmounted(): void {
     this.deregisterAll();
+    unregisterDomElement(this.domKey);
   }
 
   visibleIdeasChanged(ideas: Idea[]): void {

@@ -1,5 +1,6 @@
 {
   "snow": {
+    "startTime": 0,
     "lifetime": {
       "min": 4,
       "max": 4
@@ -97,6 +98,7 @@
     ]
   },
   "rain": {
+    "startTime": 0,
     "lifetime": {
       "min": 2,
       "max": 2
