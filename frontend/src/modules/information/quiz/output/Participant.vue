@@ -1459,10 +1459,6 @@ label {
   color: white;
 }
 
-.module-content::v-deep(.fixed) {
-  background-color: unset;
-}
-
 [module-theme='paper'] {
   background-image: url('@/modules/information/quiz/assets/clipboard.png');
   background-size: cover;
@@ -1540,6 +1536,12 @@ label {
 
 [module-theme='paper'].module-content::v-deep(.media) {
   --module-color: var(--color-dark-contrast);
+}
+
+[module-theme='paper'].module-content::v-deep(.fixed) {
+  margin: 0 -2rem -1rem -2rem;
+  padding: 1rem 2rem;
+  width: calc(100% + 4rem);
 }
 
 [module-theme='interview'] {
@@ -1628,5 +1630,11 @@ label {
     border: solid 2px var(--color-gray);
     padding: 1rem;
   }
+}
+
+[module-theme='interview'].module-content::v-deep(.fixed) {
+  margin: 0 -2rem -1rem -2rem;
+  padding: 1rem 2rem;
+  width: calc(100% + 4rem);
 }
 </style>
