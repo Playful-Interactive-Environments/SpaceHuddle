@@ -172,12 +172,13 @@
             >
               <container v-if="!ray.hit">
                 <sprite
-                  :texture="circleGradientTexture"
+                  :texture="weatherStylesheets.textures['arrow.png']"
                   :x="ray.displayPoints[0].x * 0.2"
-                  :width="rayParticleSize"
-                  :height="rayParticleSize"
+                  :width="rayParticleSize * 2"
+                  :height="rayParticleSize * 2"
                   :anchor="0.5"
                   :tint="ray.type === RayType.light ? yellowColor : redColor"
+                  :rotation="getRotation(ray.displayPoints)"
                 ></sprite>
               </container>
               <container v-else>
@@ -1131,6 +1132,18 @@ export default class PlayLevel extends Vue {
     return 1;
   }
 
+  getRotation(rayPoints: { x: number; y: number }[]): number {
+    const p1 = rayPoints[0];
+    const p2 = rayPoints[1];
+    if (p1.x !== p2.x || p1.y !== p2.y) {
+      const x = p2.x - p1.x;
+      const y = p2.y - p1.y;
+      const angle = Math.atan2(y, x) + Math.PI / 2; //radians
+      return angle / 2;
+    }
+    return 0;
+  }
+
   calculateRayPath(type: RayType, shift = 0): { x: number; y: number }[] {
     const rayPoints: { x: number; y: number }[] = [];
     const iPart = (Math.PI * 2) / this.rayPoints;
@@ -1508,6 +1521,7 @@ export default class PlayLevel extends Vue {
     };
   }
 
+  lightIntensity = 2;
   initRays(): void {
     const points = this.calculateInitRayPoints(RayType.light, 1, 0);
     for (let i = 0; i < 30; i++) {
@@ -1530,7 +1544,7 @@ export default class PlayLevel extends Vue {
         animationIndex: 0,
         body: null,
         gameObject: null,
-        intensity: 1,
+        intensity: this.lightIntensity,
         hit: false,
       });
     }
@@ -1875,7 +1889,7 @@ export default class PlayLevel extends Vue {
       if (poolRay) {
         if (poolRay.type !== RayType.light) {
           poolRay.type = RayType.light;
-          poolRay.intensity = 1;
+          poolRay.intensity = this.lightIntensity;
           poolRay.displayPointsCount = 0;
           poolRay.animationIndex = 0;
           const points = this.calculateInitRayPoints(RayType.light, 1, 0);

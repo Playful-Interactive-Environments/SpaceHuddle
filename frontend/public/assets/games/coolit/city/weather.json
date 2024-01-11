@@ -1,12 +1,17 @@
 {
 "frames": {
+	"arrow.png": {
+		"frame": {"x":503, "y":0, "w":256, "h":256},
+		"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+		"sourceSize": {"w":256,"h":256}
+	},
 	"flash.png": {
 		"frame": {"x":0, "y":0, "w":502, "h":850},
 		"spriteSourceSize": {"x":9,"y":9,"w":556,"h":869},
 		"sourceSize": {"w":556,"h":869}
 	},
 	"hail.png": {
-		"frame": {"x":257, "y":851, "w":156, "h":145},
+		"frame": {"x":0, "y":882, "w":156, "h":145},
 		"spriteSourceSize": {"x":7,"y":5,"w":170,"h":155},
 		"sourceSize": {"w":170,"h":155}
 	},
@@ -16,52 +21,57 @@
 		"sourceSize": {"w":256,"h":30}
 	},
 	"rain.png": {
-		"frame": {"x":871, "y":829, "w":112, "h":182},
+		"frame": {"x":827, "y":833, "w":112, "h":182},
 		"spriteSourceSize": {"x":7,"y":12,"w":128,"h":203},
 		"sourceSize": {"w":128,"h":203}
 	},
+	"snow.png": {
+		"frame": {"x":157, "y":882, "w":84, "h":92},
+		"spriteSourceSize": {"x":9,"y":4,"w":100,"h":100},
+		"sourceSize": {"w":100,"h":100}
+	},
 	"snow_01.png": {
-		"frame": {"x":703, "y":445, "w":169, "h":191},
+		"frame": {"x":657, "y":702, "w":169, "h":191},
 		"spriteSourceSize": {"x":0,"y":0,"w":169,"h":191},
 		"sourceSize": {"w":169,"h":191}
 	},
 	"snow_02.png": {
-		"frame": {"x":503, "y":0, "w":218, "h":221},
+		"frame": {"x":503, "y":257, "w":218, "h":221},
 		"spriteSourceSize": {"x":0,"y":0,"w":218,"h":221},
 		"sourceSize": {"w":218,"h":221}
 	},
 	"snow_03.png": {
-		"frame": {"x":703, "y":829, "w":167, "h":191},
+		"frame": {"x":827, "y":641, "w":167, "h":191},
 		"spriteSourceSize": {"x":0,"y":0,"w":167,"h":191},
 		"sourceSize": {"w":167,"h":191}
 	},
 	"snow_04.png": {
-		"frame": {"x":503, "y":445, "w":199, "h":201},
+		"frame": {"x":257, "y":851, "w":199, "h":201},
 		"spriteSourceSize": {"x":0,"y":0,"w":199,"h":201},
 		"sourceSize": {"w":199,"h":201}
 	},
 	"snow_05.png": {
-		"frame": {"x":703, "y":637, "w":168, "h":191},
+		"frame": {"x":722, "y":257, "w":168, "h":191},
 		"spriteSourceSize": {"x":0,"y":0,"w":168,"h":191},
 		"sourceSize": {"w":168,"h":191}
 	},
 	"snow_06.png": {
-		"frame": {"x":503, "y":647, "w":199, "h":201},
+		"frame": {"x":457, "y":851, "w":199, "h":201},
 		"spriteSourceSize": {"x":0,"y":0,"w":199,"h":201},
 		"sourceSize": {"w":199,"h":201}
 	},
 	"snow_07.png": {
-		"frame": {"x":722, "y":192, "w":167, "h":191},
+		"frame": {"x":760, "y":0, "w":167, "h":191},
 		"spriteSourceSize": {"x":0,"y":0,"w":167,"h":191},
 		"sourceSize": {"w":167,"h":191}
 	},
 	"snow_08.png": {
-		"frame": {"x":503, "y":222, "w":218, "h":222},
+		"frame": {"x":503, "y":479, "w":218, "h":222},
 		"spriteSourceSize": {"x":0,"y":0,"w":218,"h":222},
 		"sourceSize": {"w":218,"h":222}
 	},
 	"snow_09.png": {
-		"frame": {"x":722, "y":0, "w":167, "h":191},
+		"frame": {"x":722, "y":449, "w":167, "h":191},
 		"spriteSourceSize": {"x":0,"y":0,"w":167,"h":191},
 		"sourceSize": {"w":167,"h":191}
 	}
@@ -69,7 +79,7 @@
 },
 "meta": {
 	"image": "weather.png",
-	"size": {"w": 984, "h": 1021},
+	"size": {"w": 995, "h": 1053},
 	"scale": "1"
 }
 }
