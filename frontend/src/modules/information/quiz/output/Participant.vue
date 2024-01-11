@@ -198,7 +198,8 @@
           :min="activeQuestion.parameter.minValue"
           :value-on-clear="null"
           v-model="activeAnswer.numValue"
-          v-on:change="onAnswerValueChanged"
+          v-on:change="onInputNumberChanged(true)"
+          v-on:input="onInputNumberChanged(false)"
           :disabled="quizState === QuestionState.RESULT_ANSWER"
         ></el-input-number>
         <el-input
@@ -287,7 +288,7 @@ import TaskParticipantStatesType from '@/types/enum/TaskParticipantStatesType';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
-import { delay } from '@/utils/wait';
+import { delay, until } from '@/utils/wait';
 
 @Options({
   components: {
@@ -579,7 +580,7 @@ export default class Participant extends Vue {
     return this.activeQuestionIndex + 1 < this.questionCount;
   }
 
-  trackState(): void {
+  async trackState(): Promise<void> {
     const result = this.checkScore();
     if (this.trackingManager) {
       if (!this.savedQuestions.includes(this.activeQuestionId))
@@ -590,7 +591,7 @@ export default class Participant extends Vue {
         this.trackingManager.iterationStep.iteration !==
           this.trackingManager.iteration?.iteration
       ) {
-        this.trackingManager.createInstanceStepPoints(
+        await this.trackingManager.createInstanceStepPoints(
           this.activeQuestionId,
           this.hasAnswer()
             ? result.isCorrect
@@ -607,7 +608,7 @@ export default class Participant extends Vue {
           () => true
         );
       } else {
-        this.trackingManager.saveIterationStep(
+        await this.trackingManager.saveIterationStep(
           {
             answer: result.answers,
           },
@@ -663,6 +664,8 @@ export default class Participant extends Vue {
     this.checkScore();
     if (!this.savedQuestions.includes(this.activeQuestionId))
       this.savedQuestions.push(this.activeQuestionId);
+    this.submitScreen = true;
+    await until(() => this.dataSaved);
     if (this.trackingManager) {
       await this.trackingManager.saveIteration(
         null,
@@ -676,7 +679,6 @@ export default class Participant extends Vue {
       );
     }
     this.activeQuestionIndex++;
-    this.submitScreen = true;
     if (this.trackingManager) {
       this.trackingManager.saveState(
         {
@@ -712,7 +714,9 @@ export default class Participant extends Vue {
   }
 
   lastInputCharacterTime = Date.now();
+  dataSaved = true;
   onInputTextChanged(immediate = false): void {
+    this.dataSaved = false;
     if (!this.activeQuestionLoaded || !this.activeAnswer.textValue) {
       return;
     } else {
@@ -730,7 +734,29 @@ export default class Participant extends Vue {
     }
   }
 
+  async onInputNumberChanged(immediate = false): Promise<void> {
+    this.dataSaved = false;
+    if (!immediate) await delay(100);
+    if (!this.activeQuestionLoaded || this.activeAnswer.numValue === null) {
+      return;
+    } else {
+      const answer = this.storedActiveAnswer;
+      if (answer && this.activeAnswer.numValue.toString() === answer.keywords)
+        return;
+    }
+    const inputTime = Date.now();
+    this.lastInputCharacterTime = inputTime;
+    if (immediate) this.onAnswerValueChanged();
+    else {
+      setTimeout(() => {
+        if (inputTime === this.lastInputCharacterTime)
+          this.onAnswerValueChanged();
+      }, 1000);
+    }
+  }
+
   async onAnswerValueChanged(): Promise<void> {
+    this.dataSaved = false;
     if (
       getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
       QuestionResultStorage.CHILD_HIERARCHY
@@ -791,11 +817,13 @@ export default class Participant extends Vue {
         );
       }
       this.questionAnswered = this.getQuestionAnswered();
-      this.trackState();
+      await this.trackState();
     }
+    this.dataSaved = true;
   }
 
   async changeVote(answerId: string): Promise<void> {
+    this.dataSaved = false;
     if (!this.isSaving(answerId)) {
       this.isSavingList.push(answerId);
       const vote = this.votes.find((vote) => vote.ideaId === answerId);
@@ -840,10 +868,12 @@ export default class Participant extends Vue {
       }
     }
     this.questionAnswered = this.getQuestionAnswered();
-    this.trackState();
+    await this.trackState();
+    this.dataSaved = true;
   }
 
   async changeOrderVotes(): Promise<void> {
+    this.dataSaved = false;
     const callList: Promise<Vote>[] = [];
     if (this.votes.length <= 0) {
       for (let index = 0; index < this.orderAnswers.length; index++) {
@@ -879,7 +909,8 @@ export default class Participant extends Vue {
     }
     await Promise.all(callList);
     this.questionAnswered = this.getQuestionAnswered();
-    this.trackState();
+    await this.trackState();
+    this.dataSaved = true;
   }
 
   get moduleName(): string {
