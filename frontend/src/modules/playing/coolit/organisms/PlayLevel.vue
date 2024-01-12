@@ -174,11 +174,12 @@
                 <sprite
                   :texture="weatherStylesheets.textures['arrow.png']"
                   :x="ray.displayPoints[0].x * 0.2"
-                  :width="rayParticleSize * 2"
-                  :height="rayParticleSize * 2"
+                  :width="rayParticleSize"
+                  :height="rayParticleSize"
                   :anchor="0.5"
                   :tint="ray.type === RayType.light ? yellowColor : redColor"
                   :rotation="getRotation(ray.displayPoints)"
+                  :alpha="ray.type === RayType.heatReadonly ? 0.5 : 1"
                 ></sprite>
               </container>
               <container v-else>
@@ -202,6 +203,7 @@
                   :scale="0.2"
                   :tint="ray.type === RayType.light ? yellowColor : redColor"
                   :points="ray.displayPoints"
+                  :alpha="ray.type === RayType.heatReadonly ? 0.5 : 1"
                 />
               </template>
             </GameObject>
@@ -518,6 +520,7 @@ const tutorialType = 'find-it-object';
 enum RayType {
   light = 'light',
   heat = 'heat',
+  heatReadonly = 'heatReadonly',
 }
 
 enum GasType {
@@ -779,6 +782,7 @@ export default class PlayLevel extends Vue {
     ATMOSPHERIC_MOLECULE: 1 << 7,
     GROUND: 1 << 8,
     BORDER: 1 << 9,
+    HEAT_READONLY_RAY: 1 << 10,
   });
   CollisionBorderType = CollisionBorderType;
   snow = weatherConfig.snow;
@@ -1072,6 +1076,17 @@ export default class PlayLevel extends Vue {
             mask: this.CollisionGroups.GREENHOUSE_MOLECULE,
           },
         };
+      case RayType.heatReadonly:
+        return {
+          name: 'heat readonly',
+          frictionAir: 0,
+          mass: 0,
+          collisionFilter: {
+            group: 0,
+            category: this.CollisionGroups.HEAT_READONLY_RAY,
+            mask: 0,
+          },
+        };
     }
   }
 
@@ -1303,6 +1318,7 @@ export default class PlayLevel extends Vue {
     };
     initPath(RayType.light);
     initPath(RayType.heat);
+    initPath(RayType.heatReadonly);
 
     tutorialService.registerGetList(this.updateTutorial, this.authHeaderTyp);
     this.interval = setInterval(() => this.updateLoop(), this.intervalTime);
@@ -1882,49 +1898,66 @@ export default class PlayLevel extends Vue {
         displayWidth / 5 +
         Math.random() * (displayWidth / 2);
       this.emittedRayCount++;
-      const poolRay = this.rayList.find(
-        (item) =>
-          item.gameObject && item.gameObject.readyForReuse() && item.initialised
+      this.activateRay(
+        [position, 0],
+        [position, 0],
+        [direction.x, direction.y],
+        angle
       );
-      if (poolRay) {
-        if (poolRay.type !== RayType.light) {
-          poolRay.type = RayType.light;
-          poolRay.intensity = this.lightIntensity;
-          poolRay.displayPointsCount = 0;
-          poolRay.animationIndex = 0;
-          const points = this.calculateInitRayPoints(RayType.light, 1, 0);
-          for (let i = 0; i < poolRay.points.length; i++) {
-            poolRay.points[i].x = points[i].x;
-            poolRay.points[i].y = points[i].y;
-          }
-          for (let i = 0; i < poolRay.displayPoints.length; i++) {
-            poolRay.displayPoints[i].x = 0;
-            poolRay.displayPoints[i].y = 0;
-          }
-          poolRay.hit = false;
-          if (poolRay.body) {
-            const options = this.getRayTypeOptions(poolRay.type);
-            (poolRay.body as any).name = options.name;
-            poolRay.body.collisionFilter.mask = options.collisionFilter.mask;
-            poolRay.body.collisionFilter.category =
-              options.collisionFilter.category;
-            Matter.Body.setInertia(poolRay.body, Infinity);
-          }
-        }
-        poolRay.angle = angle;
-        poolRay.position = [position, 0];
-        poolRay.direction = [direction.x, direction.y];
-        poolRay.startTime = Date.now();
-        if (poolRay.gameObject)
-          poolRay.gameObject.activateFromPool([position, 0]);
-        this.calculateRayVelocity(poolRay);
-      }
       if (this.active) {
         let minDelay = 3000 - this.emitRatePerStar * this.speedLevel;
         if (minDelay < 500) minDelay = 500;
         this.emitLightRays(minDelay, 1000);
       }
     }, delay);
+  }
+
+  activateRay(
+    rayRelativePosition: [number, number],
+    rayBodyPosition: [number, number],
+    movingDirection: [number, number],
+    rayAngle: number,
+    rayType: RayType = RayType.light,
+    rayIntensity = this.lightIntensity,
+    checkInit = true
+  ): void {
+    const poolRay = this.rayList.find(
+      (item) =>
+        item.gameObject && item.gameObject.readyForReuse() && item.initialised
+    );
+    if (poolRay) {
+      if (!checkInit || poolRay.type !== rayType) {
+        poolRay.type = rayType;
+        poolRay.intensity = rayIntensity;
+        poolRay.displayPointsCount = 0;
+        poolRay.animationIndex = 0;
+        const points = this.calculateInitRayPoints(rayType, 1, 0);
+        for (let i = 0; i < poolRay.points.length; i++) {
+          poolRay.points[i].x = points[i].x;
+          poolRay.points[i].y = points[i].y;
+        }
+        for (let i = 0; i < poolRay.displayPoints.length; i++) {
+          poolRay.displayPoints[i].x = 0;
+          poolRay.displayPoints[i].y = 0;
+        }
+        poolRay.hit = false;
+        if (poolRay.body) {
+          const options = this.getRayTypeOptions(poolRay.type);
+          (poolRay.body as any).name = options.name;
+          poolRay.body.collisionFilter.mask = options.collisionFilter.mask;
+          poolRay.body.collisionFilter.category =
+            options.collisionFilter.category;
+          Matter.Body.setInertia(poolRay.body, Infinity);
+        }
+      }
+      poolRay.angle = rayAngle;
+      poolRay.position = rayRelativePosition;
+      poolRay.direction = movingDirection;
+      poolRay.startTime = Date.now();
+      if (poolRay.gameObject)
+        poolRay.gameObject.activateFromPool(rayBodyPosition);
+      this.calculateRayVelocity(poolRay);
+    }
   }
 
   calculateInitRayPoints(
@@ -1993,6 +2026,9 @@ export default class PlayLevel extends Vue {
       setTimeout(() => {
         rayObject.moveToPool();
       }, 3000);
+    }
+    if (ray.type === RayType.heatReadonly && (out.top || out.bottom)) {
+      rayObject.moveToPool();
     }
   }
   //#endregion rays
@@ -2458,6 +2494,12 @@ export default class PlayLevel extends Vue {
         ray.hit = false;
       } else if (ray.type === RayType.heat && !ray.hit) {
         ray.hit = true;
+        const rayIntensity = ray.intensity;
+        const hitPosition = [...ray.position] as [number, number];
+        const hitPositionBody = [
+          rayObject.body.position.x,
+          rayObject.body.position.y,
+        ] as [number, number];
         hitObstacle.hitCount++;
         this.moleculeState[hitObstacle.name].hitCount++;
         const heatRadiation =
@@ -2501,6 +2543,27 @@ export default class PlayLevel extends Vue {
             radiationFactor: this.radiationFactor,
           });
         }
+
+        //visualize heat
+        this.activateRay(
+          [...hitPosition],
+          [...hitPositionBody],
+          [0, 1],
+          0,
+          RayType.heatReadonly,
+          (rayIntensity / (hitObstacle.heatAbsorptionCoefficientHeat + 1)) *
+            hitObstacle.heatAbsorptionCoefficientHeat,
+          false
+        );
+        this.activateRay(
+          [...hitPosition],
+          [...hitPositionBody],
+          [0, -1],
+          180,
+          RayType.heatReadonly,
+          rayIntensity / (hitObstacle.heatAbsorptionCoefficientHeat + 1),
+          false
+        );
       }
     }
     if (
