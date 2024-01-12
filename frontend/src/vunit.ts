@@ -52,10 +52,16 @@ async function appViewport(): Promise<void> {
 
   setTimeout(() => {
     if (viewport) {
-      viewport.setAttribute(
-        'content',
-        `height=${height},width=${width},initial-scale=1.0`
-      );
+      let viewportContent = `height=${height},width=${width}`;
+      const props = viewport.getAttribute('content')?.split(',');
+      if (props) {
+        for (const prop of props) {
+          if (!prop.startsWith('width=') && !prop.startsWith('height=')) {
+            viewportContent += `,${prop}`;
+          }
+        }
+      }
+      viewport.setAttribute('content', viewportContent);
     }
     calculateFillSize();
   }, 300);

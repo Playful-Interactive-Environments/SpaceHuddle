@@ -61,6 +61,7 @@
       v-if="ready"
       ref="carousel"
       :autoplay="false"
+      indicator-position="none"
       arrow="always"
       :height="`${targetHeight}px`"
       @change="activeVehicleChanged"

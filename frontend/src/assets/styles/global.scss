@@ -8,6 +8,7 @@ iframe#webpack-dev-server-client-overlay{display:none!important}
 
 html {
   box-sizing: border-box;
+  touch-action: manipulation;
 }
 
 *,
