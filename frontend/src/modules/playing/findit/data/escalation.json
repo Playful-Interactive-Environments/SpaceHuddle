@@ -469,7 +469,7 @@
                 "config": {
                     "accel": 20,
                     "minSpeed": 20,
-                    "maxSpeed": 150,
+                    "maxSpeed": 80,
                     "minStart": 0,
                     "maxStart": 360
                 }
