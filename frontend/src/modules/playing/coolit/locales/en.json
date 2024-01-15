@@ -242,7 +242,7 @@
     },
     "weatherInfo": {
       "snow": "snow warning",
-      "hail": "hail warning",
+      "hail": "severe weather warning",
       "hypothermia": "ATTENTION: hypothermia!",
       "overheating": "ATTENTION: overheating!"
     }

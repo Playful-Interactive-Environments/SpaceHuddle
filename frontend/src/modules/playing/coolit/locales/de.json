@@ -244,7 +244,7 @@
     },
     "weatherInfo": {
       "snow": "Schneewarnung",
-      "hail": "Hagelwarnung",
+      "hail": "Starkwetterwarnung",
       "hypothermia": "ACHTUNG: Unterkühlung!",
       "overheating": "ACHTUNG: Überhitzung!"
     }
