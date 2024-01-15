@@ -535,6 +535,7 @@ export default class PlayState extends Vue {
     }
 
     //Testcard for testing purposes
+    this.testCard = this.cards.pop();
     if (!this.playFirst) {
       this.cardsPlayed.push(this.testCard);
     }
@@ -620,7 +621,7 @@ export default class PlayState extends Vue {
     }
 
     //Testcard for testing purposes
-    this.testCard = this.cards[Math.floor(Math.random() * this.cards.length)];
+    this.testCard = this.cards.pop();
     if (!this.playFirst) {
       this.cardsPlayed.push(this.testCard);
     }
@@ -731,6 +732,10 @@ export default class PlayState extends Vue {
     setTimeout(() => {
       this.cardsPlayed = [];
     }, 750);
+
+    if (this.cards.length <= 1) {
+      this.cards = this.cards.concat(this.shuffle(this.parseCards(gameConfig)));
+    }
 
     //draw new cards
     setTimeout(() => {

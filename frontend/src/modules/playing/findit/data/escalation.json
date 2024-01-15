@@ -379,10 +379,10 @@
     "splash": {
         "spriteSheet": "/assets/games/findit/flood/escalation/splash.json",
         "lifetime": {
-            "min": 15,
-            "max": 25
+            "min": 0.25,
+            "max": 0.40
         },
-        "frequency": 0.008,
+        "frequency": 0.001,
         "emitterLifetime": 0,
         "maxParticles": 2000,
         "addAtBack": false,
@@ -390,7 +390,6 @@
             "x": 0,
             "y": 0
         },
-        "spawnChance": 0.3,
         "behaviors": [
             {
                 "type": "alpha",
@@ -398,51 +397,27 @@
                     "alpha": {
                         "list": [
                             {
-                                "value": 0,
-                                "time": 0
+                                "time": 0,
+                                "value": 1
                             },
                             {
-                                "value": 0.05,
-                                "time": 0.03
-                            },
-                            {
-                                "value": 0.1,
-                                "time": 0.3
-                            },
-                            {
-                                "value": 0.05,
-                                "time": 0.5
-                            },
-                            {
-                                "value": 0,
-                                "time": 1
+                                "time": 1,
+                                "value": 0.31
                             }
-                        ],
-                        "isStepped": false
+                        ]
                     }
                 }
             },
             {
-                "type": "moveSpeed",
+                "type": "moveAcceleration",
                 "config": {
-                    "speed": {
-                        "list": [
-                            {
-                                "value": 10,
-                                "time": 0
-                            },
-                            {
-                                "value": 20,
-                                "time": 0.7
-                            },
-                            {
-                                "value": 30,
-                                "time": 1
-                            }
-                        ],
-                        "isStepped": true
+                    "accel": {
+                        "x": 0,
+                        "y": 2000
                     },
-                    "minMult": 1
+                    "minStart": 400,
+                    "maxStart": 600,
+                    "rotate": true
                 }
             },
             {
@@ -451,27 +426,40 @@
                     "scale": {
                         "list": [
                             {
-                                "value": 0.03,
-                                "time": 0
+                                "time": 0,
+                                "value": 0.03
                             },
                             {
-                                "value": 1.35,
-                                "time": 1
+                                "time": 1,
+                                "value": 0.08
                             }
-                        ],
-                        "isStepped": false
+                        ]
                     },
                     "minMult": 1
                 }
             },
             {
-                "type": "rotation",
+                "type": "color",
                 "config": {
-                    "accel": 20,
-                    "minSpeed": 20,
-                    "maxSpeed": 80,
-                    "minStart": 0,
-                    "maxStart": 360
+                    "color": {
+                        "list": [
+                            {
+                                "time": 0,
+                                "value": "ffffff"
+                            },
+                            {
+                                "time": 1,
+                                "value": "9ff3ff"
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "type": "rotationStatic",
+                "config": {
+                    "min": 240,
+                    "max": 300
                 }
             },
             {
@@ -523,16 +511,10 @@
                     "data": {
                         "x": 0,
                         "y": 0,
-                        "radius": 10,
-                        "innerRadius": 0,
+                        "radius": 50,
+                        "innerRadius": 20,
                         "affectRotation": false
                     }
-                }
-            },
-            {
-                "type": "blendMode",
-                "config": {
-                    "blendMode": "screen"
                 }
             }
         ]
