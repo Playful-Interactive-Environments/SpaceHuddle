@@ -192,8 +192,8 @@
           "fish": {
             "escalationLevels": [
               {
-                "min": 90,
-                "max": 120
+                "min": 70,
+                "max": 90
               },
               {
                 "min": 45,
@@ -211,7 +211,7 @@
           "man": {
             "escalationLevels": [
               {
-                "min": 45,
+                "min": 25,
                 "max": 60
               },
               {
@@ -230,7 +230,7 @@
           "woman": {
             "escalationLevels": [
               {
-                "min": 45,
+                "min": 25,
                 "max": 60
               },
               {
@@ -249,7 +249,7 @@
           "sandbag": {
             "escalationLevels": [
               {
-                "min": 120,
+                "min": 100,
                 "max": 150
               },
               {
@@ -268,7 +268,7 @@
           "branches": {
             "escalationLevels": [
               {
-                "min": 120,
+                "min": 100,
                 "max": 150
               },
               {
@@ -287,8 +287,8 @@
           "bottleWhite": {
             "escalationLevels": [
               {
-                "min": 120,
-                "max": 150
+                "min": 85,
+                "max": 130
               },
               {
                 "min": 45,
@@ -300,45 +300,45 @@
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "garbage",
-            "collectKey": "garbage",
+            "collectKey": "litter",
             "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           },
           "bottleWine": {
             "escalationLevels": [
               {
-                "min": 120,
-                "max": 150
+                "min": 85,
+                "max": 130
               },
               {
                 "min": 45,
                 "max": 60
               }
             ],
-            "severity": 1,
+            "severity": 2,
             "maxCount": 5,
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "garbage",
-            "collectKey": "garbage",
+            "collectKey": "litter",
             "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           },
           "bottleBeer": {
             "escalationLevels": [
               {
-                "min": 120,
-                "max": 150
+                "min": 85,
+                "max": 130
               },
               {
                 "min": 45,
                 "max": 60
               }
             ],
-            "severity": 1,
+            "severity": 2,
             "maxCount": 5,
             "width": 0.5,
             "shape": "rect",
             "explanationKey": "garbage",
-            "collectKey": "garbage",
+            "collectKey": "litter",
             "placingRegions": [[[15, 0], [100, 0], [100, 100], [40, 100], [20, 50]]]
           }
         }

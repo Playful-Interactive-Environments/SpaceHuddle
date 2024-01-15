@@ -59,7 +59,7 @@
           {{ $t('module.playing.shopit.participant.waiting.yourTurn') }}
         </p>
         <p
-            v-show="
+          v-show="
             (cardsPlayed.length === 0 && player !== playersTurn) ||
             (!initialButtonState && game.parameter.playerNum <= 1)
           "
