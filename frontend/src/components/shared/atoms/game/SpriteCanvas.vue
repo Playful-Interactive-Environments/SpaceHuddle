@@ -4,6 +4,7 @@
     :width="width"
     :height="height"
     :backgroundColor="backgroundColor"
+    :style="{ 'touch-action': 'auto' }"
   >
     <slot></slot>
     <container v-if="texture">

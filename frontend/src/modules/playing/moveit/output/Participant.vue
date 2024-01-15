@@ -427,5 +427,6 @@ export default class Participant extends Vue {
 <style lang="scss" scoped>
 .mapSpace {
   position: relative;
+  overflow: scroll;
 }
 </style>

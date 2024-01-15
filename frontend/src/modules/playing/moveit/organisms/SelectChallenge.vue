@@ -682,7 +682,9 @@ export default class SelectChallenge extends Vue {
         this.$refs.gameContainer as HTMLElement,
         (targetWidth, targetHeight) => {
           this.targetWidth = targetWidth;
-          this.targetHeight = targetHeight;
+          if (targetHeight > targetWidth / 0.7)
+            this.targetHeight = targetHeight;
+          else this.targetHeight = targetWidth / 0.7;
         },
         100,
         false,
@@ -797,7 +799,7 @@ export default class SelectChallenge extends Vue {
   text-align: center;
   border: solid var(--color-dark-contrast) 5px;
   border-radius: var(--border-radius);
-  aspect-ratio: 0.7;
+  //aspect-ratio: 0.7;
 
   .card-header {
     font-weight: var(--font-weight-bold);
@@ -897,7 +899,7 @@ export default class SelectChallenge extends Vue {
 }
 
 .gameContainer {
-  height: 100%;
+  //height: 100%;
 }
 
 .dialog-button {
