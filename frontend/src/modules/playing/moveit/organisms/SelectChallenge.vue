@@ -397,6 +397,7 @@ import * as pixiUtil from '@/utils/pixi';
 import * as PIXI from 'pixi.js';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
 import { delay } from '@/utils/wait';
+import { remToPx } from '@/modules/playing/moveit/utils/consts';
 
 export enum NavigationType {
   drag = 'drag',
@@ -682,9 +683,12 @@ export default class SelectChallenge extends Vue {
         this.$refs.gameContainer as HTMLElement,
         (targetWidth, targetHeight) => {
           this.targetWidth = targetWidth;
-          if (targetHeight > targetWidth / 0.7)
-            this.targetHeight = targetHeight;
-          else this.targetHeight = targetWidth / 0.7;
+          let cardWidth = targetWidth - remToPx(2);
+          if (cardWidth > remToPx(30)) cardWidth = remToPx(30);
+          if (cardWidth < 300) cardWidth = 300;
+          console.log(cardWidth, targetHeight, cardWidth / 0.7, targetWidth);
+          if (targetHeight > cardWidth / 0.7) this.targetHeight = targetHeight;
+          else this.targetHeight = cardWidth / 0.7;
         },
         100,
         false,
@@ -800,6 +804,8 @@ export default class SelectChallenge extends Vue {
   border: solid var(--color-dark-contrast) 5px;
   border-radius: var(--border-radius);
   //aspect-ratio: 0.7;
+  height: calc(100% - 0.5rem);
+  max-height: calc(30rem / 0.7);
 
   .card-header {
     font-weight: var(--font-weight-bold);

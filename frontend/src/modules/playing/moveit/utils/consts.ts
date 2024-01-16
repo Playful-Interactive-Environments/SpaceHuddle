@@ -23,3 +23,10 @@ export const convertFontSizeToScreenSize = (
   }
   return `${fontSize}px`;
 };
+
+export const remToPx = (value: number): number => {
+  const rootFontSize = parseFloat(
+    getComputedStyle(document.documentElement).fontSize
+  );
+  return value * rootFontSize;
+};
