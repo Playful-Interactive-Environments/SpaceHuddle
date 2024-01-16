@@ -686,7 +686,6 @@ export default class SelectChallenge extends Vue {
           let cardWidth = targetWidth - remToPx(2);
           if (cardWidth > remToPx(30)) cardWidth = remToPx(30);
           if (cardWidth < 300) cardWidth = 300;
-          console.log(cardWidth, targetHeight, cardWidth / 0.7, targetWidth);
           if (targetHeight > cardWidth / 0.7) this.targetHeight = targetHeight;
           else this.targetHeight = cardWidth / 0.7;
         },
