@@ -119,12 +119,8 @@
               :loop="vehicleIsActive && !gameOver"
               @frame-change="animationFrameChanged"
             />
-            <!--<custom-particle-container
-              v-if="
-                (snow.frequency ||
-                  snow.startTime + minExtremeWeatherTime > Date.now()) &&
-                weatherStylesheets
-              "
+            <custom-particle-container
+              v-if="weatherStylesheets"
               :config="snow"
               :parentEventBus="eventBus"
               :default-texture="[
@@ -137,19 +133,23 @@
                 weatherStylesheets.textures['snow_07.png'],
                 weatherStylesheets.textures['snow_08.png'],
               ]"
-              :deep-clone-config="false"
+              :deep-clone-config="true"
+              :disabled="
+                !snow.frequency &&
+                snow.startTime + minExtremeWeatherTime < Date.now()
+              "
             />
             <custom-particle-container
-              v-if="
-                (hail.frequency ||
-                  hail.startTime + minExtremeWeatherTime > Date.now()) &&
-                weatherStylesheets
-              "
+              v-if="weatherStylesheets"
               :config="hail"
               :parentEventBus="eventBus"
               :default-texture="weatherStylesheets.textures['hail.png']"
-              :deep-clone-config="false"
-            />-->
+              :deep-clone-config="true"
+              :disabled="
+                !hail.frequency &&
+                hail.startTime + minExtremeWeatherTime < Date.now()
+              "
+            />
             <GameObject
               v-for="ray in rayList"
               :key="ray.uuid"
@@ -172,6 +172,7 @@
             >
               <container v-if="!ray.hit">
                 <sprite
+                  v-if="weatherStylesheets"
                   :texture="weatherStylesheets.textures['arrow.png']"
                   :x="ray.displayPoints[0].x * 0.2"
                   :width="rayParticleSize"
@@ -184,6 +185,7 @@
               </container>
               <container v-else>
                 <animated-sprite
+                  v-if="sunStylesheets"
                   :textures="sunStylesheets.animations['sun']"
                   :animation-speed="0.3"
                   :width="rayParticleSize"
@@ -489,8 +491,8 @@ import { Tutorial } from '@/types/api/Tutorial';
 import * as cashService from '@/services/cash-service';
 import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/coolit/data/gameConfig.json';
-import backgroundParticle from '@/modules/playing/coolit/data/backgroundParticle.json';
-import * as PIXIParticles from '@pixi/particle-emitter';
+//import backgroundParticle from '@/modules/playing/coolit/data/backgroundParticle.json';
+//import * as PIXIParticles from '@pixi/particle-emitter';
 import { Idea } from '@/types/api/Idea';
 import * as configParameter from '@/utils/game/configParameter';
 import { v4 as uuidv4 } from 'uuid';
@@ -754,7 +756,7 @@ export default class PlayLevel extends Vue {
     0.1
   );
   moleculeList: MoleculeData[] = [];
-  backgroundParticle: { [key: string]: PIXIParticles.EmitterConfigV3 } = {};
+  //backgroundParticle: { [key: string]: PIXIParticles.EmitterConfigV3 } = {};
   moleculeState: { [key: string]: MoleculeState } = {};
   highScore: Vote | null = null;
 
@@ -1438,7 +1440,7 @@ export default class PlayLevel extends Vue {
         const gameObject = container.gameObjects.find(
           (item) => item.source.id === reactiveMolecule.id
         );
-        if (gameObject) {
+        if (gameObject && gameObject.body) {
           matterUtil.resetBody(gameObject.body);
           gameObject.body.collisionFilter.category =
             this.getMoleculeCategory(moleculeName);
@@ -1570,47 +1572,45 @@ export default class PlayLevel extends Vue {
     if (this.moleculeList.length > 0) return;
     for (const moleculeConfigName of Object.keys(gameConfig.molecules)) {
       const moleculeConfig = gameConfig.molecules[moleculeConfigName];
-      if (moleculeConfig.controllable) {
-        const moleculeCount =
-          moleculeConfig.particleCount +
-          moleculeConfig.particleDeltaPerDegree * this.temperatureRise;
-        const moleculeList: MoleculeData[] = [];
-        for (let i = 0; i < moleculeCount; i++) {
-          moleculeList.push({
-            name: moleculeConfigName,
-            id: uuidv4(),
-            type: moleculeConfigName,
-            position: [Math.random() * 100, Math.random() * 50],
-            globalWarmingFactor: moleculeConfig.globalWarmingFactor,
-            size: moleculeConfig.size,
-            controllable: moleculeConfig.controllable,
-            absorbedByTree: moleculeConfig.absorbedByTree,
-            color: moleculeConfig.color,
-            maxHitCount: 1000,
-            hitCount: 0,
-            hitAnimation: [],
-            //heatRationCoefficient: moleculeConfig.globalWarmingFactor,
-            heatAbsorptionCoefficientLight: moleculeConfig.globalWarmingFactor,
-            heatAbsorptionCoefficientHeat: moleculeConfig.globalWarmingFactor,
-            heatRadiationCoefficient: moleculeConfig.globalWarmingFactor,
-            reflectionProbability: 1,
-            temperature: 0,
-            emits: [],
-            rise: false,
-            calculateTemperature: true,
-            isActive: true,
-            isClicked: false,
-            rotation: 0,
-            options: this.getMoleculeTypeOptions(moleculeConfigName),
-            hits: [],
-          });
-        }
-        const distance = 100 / moleculeCount;
-        for (let i = 0; i < moleculeCount; i++) {
-          moleculeList[i].position[0] = Math.random() * distance + i * distance;
-        }
-        this.moleculeList.push(...moleculeList);
+      const moleculeCount =
+        moleculeConfig.particleCount +
+        moleculeConfig.particleDeltaPerDegree * this.temperatureRise;
+      const moleculeList: MoleculeData[] = [];
+      for (let i = 0; i < moleculeCount; i++) {
+        moleculeList.push({
+          name: moleculeConfigName,
+          id: uuidv4(),
+          type: moleculeConfigName,
+          position: [Math.random() * 100, Math.random() * 50],
+          globalWarmingFactor: moleculeConfig.globalWarmingFactor,
+          size: moleculeConfig.size,
+          controllable: moleculeConfig.controllable,
+          absorbedByTree: moleculeConfig.absorbedByTree,
+          color: moleculeConfig.color,
+          maxHitCount: 1000,
+          hitCount: 0,
+          hitAnimation: [],
+          //heatRationCoefficient: moleculeConfig.globalWarmingFactor,
+          heatAbsorptionCoefficientLight: moleculeConfig.globalWarmingFactor,
+          heatAbsorptionCoefficientHeat: moleculeConfig.globalWarmingFactor,
+          heatRadiationCoefficient: moleculeConfig.globalWarmingFactor,
+          reflectionProbability: 1,
+          temperature: 0,
+          emits: [],
+          rise: false,
+          calculateTemperature: true,
+          isActive: true,
+          isClicked: false,
+          rotation: 0,
+          options: this.getMoleculeTypeOptions(moleculeConfigName),
+          hits: [],
+        });
       }
+      const distance = 100 / moleculeCount;
+      for (let i = 0; i < moleculeCount; i++) {
+        moleculeList[i].position[0] = Math.random() * distance + i * distance;
+      }
+      this.moleculeList.push(...moleculeList);
 
       const list = this.moleculeList.filter(
         (item) => item.type === moleculeConfigName
@@ -1834,7 +1834,7 @@ export default class PlayLevel extends Vue {
           this.renderer,
           60
         );
-        if (!gameConfig.molecules[moleculeName].controllable) {
+        /*if (!gameConfig.molecules[moleculeName].controllable) {
           const moleculeConfig = gameConfig.molecules[moleculeName];
           const particleSettings = JSON.parse(
             JSON.stringify(backgroundParticle)
@@ -1875,7 +1875,7 @@ export default class PlayLevel extends Vue {
             },
           });
           this.backgroundParticle[moleculeName] = particleSettings;
-        }
+        }*/
       }
     }
   }

@@ -1,6 +1,6 @@
 <template>
   <particle-container
-    v-if="config && particleContainerActive && !disabled"
+    v-if="config && particleContainerActive"
     :x="x"
     :y="y"
     @render="renderContainer($event)"
@@ -44,7 +44,7 @@ export default class CustomParticleContainer extends Vue {
   textureToken = pixiUtil.createLoadingToken();
 
   unmounted(): void {
-    this.container.destroy();
+    if (this.container) this.container.destroy();
     this.particleContainerActive = false;
     this.destroyEmitter(this.emitter, true, true);
     pixiUtil.cleanupToken(this.textureToken);
@@ -52,6 +52,63 @@ export default class CustomParticleContainer extends Vue {
 
   get containerEventBus(): Emitter<Record<EventType, unknown>> {
     return this.eventBus ?? this.parentEventBus;
+  }
+
+  isValid(): boolean {
+    if (this.emitter) {
+      const singleTextureConfig = this.emitter.getBehavior(
+        'textureSingle'
+      ) as any;
+      if (singleTextureConfig) {
+        return (
+          !!singleTextureConfig.texture &&
+          !!singleTextureConfig.texture.baseTexture &&
+          singleTextureConfig.texture.baseTexture.valid
+        );
+      }
+      const randomTextureConfig = this.emitter.getBehavior(
+        'textureRandom'
+      ) as any;
+      if (randomTextureConfig) {
+        return (
+          randomTextureConfig.textures.length > 0 &&
+          randomTextureConfig.textures[0].baseTexture &&
+          randomTextureConfig.textures[0].baseTexture.valid
+        );
+      }
+      const singleAnimationConfig = this.emitter.getBehavior(
+        'animatedSingle'
+      ) as any;
+      if (singleAnimationConfig) {
+        return (
+          singleAnimationConfig.anim.textures.length > 0 &&
+          singleAnimationConfig.anim.textures[0].baseTexture &&
+          singleAnimationConfig.anim.textures[0].baseTexture.valid
+        );
+      }
+    }
+    return false;
+  }
+
+  @Watch('disabled', { immediate: true })
+  async onDisabledChanged(): Promise<void> {
+    if (this.emitter && !this.emitter.destroyed) {
+      if (!this.disabled) {
+        this.emitterTimeStamp = Date.now();
+        if (this.isValid()) {
+          this.emitter.autoUpdate = this.autoUpdate;
+          if (!this.autoUpdate) {
+            await delay(100);
+            if (!this.emitter.destroyed) this.emitter.emitNow();
+          }
+        } else {
+          await delay(1000);
+        }
+      } else {
+        this.emitter.autoUpdate = false;
+        this.emitter.cleanup();
+      }
+    }
   }
 
   @Watch('spriteSheetUrl', { immediate: true })
@@ -74,6 +131,9 @@ export default class CustomParticleContainer extends Vue {
     const config = this.deepCloneConfig
       ? structuredClone(this.config) // JSON.parse(JSON.stringify(this.config))
       : { ...this.config };
+    if (!structuredClone) {
+      config.behaviors = [...config.behaviors];
+    }
     const textureConfig = config.behaviors.find(
       (item) =>
         item.type === 'textureRandom' ||
@@ -133,11 +193,13 @@ export default class CustomParticleContainer extends Vue {
     await until(() => !!this.container);
     if (this.particleContainerActive) {
       this.emitter = new PIXIParticles.Emitter(this.container as any, config);
-      this.emitterTimeStamp = Date.now();
-      this.emitter.autoUpdate = this.autoUpdate;
-      if (!this.autoUpdate) {
-        await delay(100);
-        if (!this.emitter.destroyed) this.emitter.emitNow();
+      if (!this.disabled) {
+        this.emitterTimeStamp = Date.now();
+        this.emitter.autoUpdate = this.autoUpdate;
+        if (!this.autoUpdate) {
+          await delay(100);
+          if (!this.emitter.destroyed) this.emitter.emitNow();
+        }
       }
     }
   }
