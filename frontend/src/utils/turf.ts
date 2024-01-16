@@ -114,6 +114,32 @@ export function getSubRoute(
   );
 }
 
+const removeSameNeighbors = (list: [number, number][]) => {
+  for (let i = list.length - 1; i > 1; i--) {
+    const distance = turf.distance(list[i], list[i - 1]);
+    if (distance < 0.00001) {
+      list.splice(i, 1);
+    }
+  }
+  return list;
+};
+
+export function getSubRouteCoordinates(
+  routePath: FeatureCollection | turf.Feature<turf.LineString>,
+  point1: [number, number],
+  point2: [number, number]
+): [number, number][] {
+  const convertCoordinates = (
+    subCoordinates: [number, number][]
+  ): [number, number][] => {
+    removeSameNeighbors(subCoordinates);
+    return subCoordinates;
+  };
+  const subRoute = getSubRoute(routePath, point1, point2);
+  const subCoordinates = subRoute.geometry.coordinates as [number, number][];
+  return convertCoordinates(subCoordinates);
+}
+
 export function getSubRouteFromDist(
   routePath: FeatureCollection | turf.Feature<turf.LineString>,
   startDist: number,
@@ -372,15 +398,6 @@ export function getMinMaxAngleForPathSegment(
     endPoint: returnEndPoint,
     corner: null as [number, number] | null,
     subPath: [returnStartPoint, returnEndPoint],
-  };
-  const removeSameNeighbors = (list: [number, number][]) => {
-    for (let i = list.length - 1; i > 1; i--) {
-      const distance = turf.distance(list[i], list[i - 1]);
-      if (distance < 0.00001) {
-        list.splice(i, 1);
-      }
-    }
-    return list;
   };
   const pathSegment = reversePath
     ? getSubRouteFromDist(

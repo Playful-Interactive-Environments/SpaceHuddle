@@ -94,13 +94,17 @@
       "cancel": "cancel"
     },
     "navigationType": {
-      "drag": {
-        "title": "direct",
-        "description": "Control the direction of travel with the joystick direct on the vehicle."
+      "speed": {
+        "title": "speed",
+        "description": "Control the vehicle speed with the accelerator and brake."
+      },
+      "combined": {
+        "title": "speed and direction",
+        "description": "Control the vehicle speed with the accelerator and brake and the direction of travel using the joystick."
       },
       "joystick": {
-        "title": "separate",
-        "description": "Control the vehicle with the joystick in the bottom right corner. "
+        "title": "joystick",
+        "description": "Control the vehicle speed and direction of travel using the joystick."
       }
     },
     "movingType": {

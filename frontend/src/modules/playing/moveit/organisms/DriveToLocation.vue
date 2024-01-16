@@ -96,20 +96,6 @@
           </div>
         </template>
       </CustomMapMarker>
-      <CustomMapMarker :coordinates="mapVehiclePoint" anchor="center">
-        <template v-slot:icon>
-          <Joystick
-            v-if="navigation === NavigationType.drag && zoomReady"
-            :size="150"
-            :stick-size="15"
-            @move="move($event)"
-            @mousedown="disableMapPan"
-            v-on:touchstart="disableMapPan"
-            stickColor="white"
-            :base-color="getSpeedColor(moveSpeed, 0.3)"
-          />
-        </template>
-      </CustomMapMarker>
       <CustomMapMarker anchor="top-left" :coordinates="mapEnd">
         <template v-slot:icon>
           <font-awesome-icon icon="flag-checkered" class="pin" />
@@ -209,13 +195,15 @@
         {{ personCount }} / {{ vehicleParameter.persons }}
       </div>
     </div>
-    <div class="overlay-bottom-left">
+    <div class="overlay-bottom-right">
       <div>
         <Joystick
-          v-if="navigation === NavigationType.joystick && zoomReady"
+          v-if="zoomReady && navigation !== NavigationType.speed"
           :size="120"
           :stick-size="40"
           @move="move($event)"
+          @start="start"
+          @stop="stop"
           stickColor="radial-gradient(circle at 60% 55%, #ffffff, #aaaaaa)"
           :base-color="`radial-gradient(circle, #757d76ff 20%, #26352799 59%, ${getSpeedColor(
             moveSpeed,
@@ -225,9 +213,15 @@
         <!--<el-button @click="createVisibleStreetMask">test</el-button>-->
       </div>
     </div>
-    <div class="overlay-bottom-right">
+    <div
+      :class="
+        navigation === NavigationType.speed
+          ? 'overlay-bottom-right'
+          : 'overlay-bottom-left'
+      "
+    >
       <el-button
-        v-if="zoomReady"
+        v-if="zoomReady && navigation !== NavigationType.joystick"
         class="brake"
         @pointerdown="startDecreaseSpeed"
         @pointerup="stopDecreaseSpeed"
@@ -238,7 +232,7 @@
         B
       </el-button>
       <el-button
-        v-if="zoomReady"
+        v-if="zoomReady && navigation !== NavigationType.joystick"
         class="gas"
         @pointerdown="startIncreaseSpeed"
         @pointerup="stopIncreaseSpeed"
@@ -248,6 +242,19 @@
       >
         G
       </el-button>
+      <el-slider
+        v-if="zoomReady && navigation === NavigationType.joystick"
+        v-model="maxSpeed"
+        :max="vehicleParameter.speed"
+        :format-tooltip="
+          (value) =>
+            `${$t('module.playing.moveit.participant.maxSpeed')}: ${value} ${$t(
+              'module.playing.moveit.enums.units.km/h'
+            )}`
+        "
+        vertical
+        height="6rem"
+      />
     </div>
     <!--<div class="overlay-bottom-left">
       <el-switch
@@ -818,7 +825,8 @@ export default class DriveToLocation extends Vue {
   async mounted(): Promise<void> {
     this.ready = true;
     this.maxSpeed = this.vehicleParameter.speed;
-    //if (this.maxSpeed > 100) this.maxSpeed = 100;
+    if (this.navigation === NavigationType.joystick && this.maxSpeed > 100)
+      this.maxSpeed = 100;
 
     if (this.animationIntermediateSteps > 1) {
       this.intervalAnimation = setInterval(
@@ -863,32 +871,36 @@ export default class DriveToLocation extends Vue {
   KeyPressedAccelerate = false;
   KeyPressedDecelerate = false;
   handleKeyDown(event: KeyboardEvent): void {
-    if (
-      (event.key === 'g' || event.key === 'ArrowUp') &&
-      !this.KeyPressedAccelerate &&
-      this.zoomReady
-    ) {
-      this.KeyPressedAccelerate = true;
-      this.startIncreaseSpeed();
-    }
-    if (
-      (event.key === 'b' || event.key === 'ArrowDown') &&
-      !this.KeyPressedDecelerate &&
-      this.zoomReady
-    ) {
-      this.KeyPressedDecelerate = true;
-      this.startDecreaseSpeed();
+    if (this.navigation !== NavigationType.joystick) {
+      if (
+        (event.key === 'g' || event.key === 'ArrowUp') &&
+        !this.KeyPressedAccelerate &&
+        this.zoomReady
+      ) {
+        this.KeyPressedAccelerate = true;
+        this.startIncreaseSpeed();
+      }
+      if (
+        (event.key === 'b' || event.key === 'ArrowDown') &&
+        !this.KeyPressedDecelerate &&
+        this.zoomReady
+      ) {
+        this.KeyPressedDecelerate = true;
+        this.startDecreaseSpeed();
+      }
     }
   }
 
   handleKeyUp(event: KeyboardEvent): void {
-    if (event.key === 'g' || event.key === 'ArrowUp') {
-      this.KeyPressedAccelerate = false;
-      this.stopIncreaseSpeed();
-    }
-    if (event.key === 'b' || event.key === 'ArrowDown') {
-      this.KeyPressedDecelerate = false;
-      this.stopDecreaseSpeed();
+    if (this.navigation !== NavigationType.joystick) {
+      if (event.key === 'g' || event.key === 'ArrowUp') {
+        this.KeyPressedAccelerate = false;
+        this.stopIncreaseSpeed();
+      }
+      if (event.key === 'b' || event.key === 'ArrowDown') {
+        this.KeyPressedDecelerate = false;
+        this.stopDecreaseSpeed();
+      }
     }
   }
 
@@ -908,15 +920,17 @@ export default class DriveToLocation extends Vue {
 
   //#region navigation
   start(event: any): void {
-    this.disableMapPan();
-    this.boardingPersons = 0;
-    this.move(event);
-    this.isMoving = true;
-    this.intervalCalculation = setInterval(
-      this.updateTrace,
-      this.intervalCalculationTime
-    );
-    this.noStreet = false;
+    if (this.navigation === NavigationType.joystick) {
+      this.disableMapPan();
+      this.boardingPersons = 0;
+      this.move(event);
+      this.isMoving = true;
+      this.intervalCalculation = setInterval(
+        this.updateTrace,
+        this.intervalCalculationTime
+      );
+      this.noStreet = false;
+    }
   }
 
   disableMapPan(): void {
@@ -939,65 +953,67 @@ export default class DriveToLocation extends Vue {
   searchPoints: { point: [number, number]; active: boolean; color: string }[] =
     [];
   stop(): void {
-    this.enableMapPan();
-    clearInterval(this.intervalCalculation);
-    if (!this.isMoving) return;
-    this.isMoving = false;
-    this.moveSpeed = 0;
-    this.stops++;
+    if (this.navigation === NavigationType.joystick) {
+      this.enableMapPan();
+      clearInterval(this.intervalCalculation);
+      if (!this.isMoving) return;
+      this.isMoving = false;
+      this.moveSpeed = 0;
+      this.stops++;
 
-    if (this.vehicle.category === 'bus') {
-      for (const busStop of this.busStopList) {
-        const distance = turf.distance(
-          turf.point(this.mapDrivingPoint),
-          turf.point(busStop.coordinates)
-        );
-        if (distance < 0.05) {
-          let addCount = busStop.persons;
-          if (addCount > this.vehicleParameter.persons - this.personCount)
-            addCount = this.vehicleParameter.persons - this.personCount;
-          this.boardingPersons = addCount;
-          this.personCount += addCount;
-          busStop.persons -= addCount;
-        }
-      }
-    }
-
-    const speedDrivingDistance = 0.04;
-    //const maxStreetDistance = 0.0001;
-    const maxCornerDistance = 0;
-    if (this.movingType === MovingType.free) {
-      const possibleCorners = this.getPossibleCorners(
-        speedDrivingDistance,
-        true
-      );
-      if (possibleCorners.length > 0) {
-        let minCorner = possibleCorners[0];
-        let minDistance = turf.distance(minCorner, this.mapDrivingPoint);
-        for (let i = 1; i < possibleCorners.length; i++) {
+      if (this.vehicle.category === 'bus') {
+        for (const busStop of this.busStopList) {
           const distance = turf.distance(
-            possibleCorners[i],
-            this.mapDrivingPoint
+            turf.point(this.mapDrivingPoint),
+            turf.point(busStop.coordinates)
           );
-          if (distance < minDistance) {
-            minDistance = distance;
-            minCorner = possibleCorners[i];
+          if (distance < 0.05) {
+            let addCount = busStop.persons;
+            if (addCount > this.vehicleParameter.persons - this.personCount)
+              addCount = this.vehicleParameter.persons - this.personCount;
+            this.boardingPersons = addCount;
+            this.personCount += addCount;
+            busStop.persons -= addCount;
           }
         }
-        if (minDistance < 0.015) {
-          this.updateDrivingPoint(minCorner, [], 0.015);
-        }
       }
-    } else {
-      const newDrivingPoint = this.getNewDrivingPoint(speedDrivingDistance);
-      const insideSegment = this.isDrivingAngleInsideNextSegment(
-        this.routePath,
-        speedDrivingDistance,
-        newDrivingPoint,
-        maxCornerDistance
-      );
-      if (insideSegment.corner) {
-        this.updateDrivingPoint(insideSegment.corner, [], 0.005);
+
+      const speedDrivingDistance = 0.04;
+      //const maxStreetDistance = 0.0001;
+      const maxCornerDistance = 0;
+      if (this.movingType === MovingType.free) {
+        const possibleCorners = this.getPossibleCorners(
+          speedDrivingDistance,
+          true
+        );
+        if (possibleCorners.length > 0) {
+          let minCorner = possibleCorners[0];
+          let minDistance = turf.distance(minCorner, this.mapDrivingPoint);
+          for (let i = 1; i < possibleCorners.length; i++) {
+            const distance = turf.distance(
+              possibleCorners[i],
+              this.mapDrivingPoint
+            );
+            if (distance < minDistance) {
+              minDistance = distance;
+              minCorner = possibleCorners[i];
+            }
+          }
+          if (minDistance < 0.015) {
+            this.updateDrivingPoint(minCorner, [], 0.015);
+          }
+        }
+      } else {
+        const newDrivingPoint = this.getNewDrivingPoint(speedDrivingDistance);
+        const insideSegment = this.isDrivingAngleInsideNextSegment(
+          this.routePath,
+          speedDrivingDistance,
+          newDrivingPoint,
+          maxCornerDistance
+        );
+        if (insideSegment.corner) {
+          this.updateDrivingPoint(insideSegment.corner, [], 0.005);
+        }
       }
     }
   }
@@ -1007,6 +1023,9 @@ export default class DriveToLocation extends Vue {
     const calcAngle = (point: [number, number]): number => {
       return Math.atan2(point[0], point[1]) * (180 / Math.PI);
     };
+    if (this.navigation === NavigationType.joystick) {
+      this.moveSpeed = (event.distance / 100.0) * this.maxSpeed;
+    }
     this.moveAngle = calcAngle([event.x, event.y]);
     this.moveDirection = [event.x, event.y];
     this.noStreet = false;
@@ -1618,7 +1637,11 @@ export default class DriveToLocation extends Vue {
 
     const speedDrivingDistance = this.getDrivingDistance();
 
-    if (this.isMoving && this.moveSpeed) {
+    if (
+      this.isMoving &&
+      this.moveSpeed &&
+      this.navigation !== NavigationType.speed
+    ) {
       let newDrivingPoint = this.getNewDrivingPoint(speedDrivingDistance);
       let isOnRoute = !this.noStreet;
       let subPath: [number, number][] = [];
@@ -1670,6 +1693,28 @@ export default class DriveToLocation extends Vue {
         const checkMarkDistance = 0.01;
         this.checkRoutePoint = this.getNewDrivingPoint(checkMarkDistance);
       }
+    } else if (
+      this.isMoving &&
+      this.moveSpeed &&
+      this.navigation === NavigationType.speed
+    ) {
+      const newDrivingPoint = turfUtils.moveAlongPath(
+        this.routePath,
+        this.mapDrivingPoint,
+        speedDrivingDistance
+      ).location;
+      this.moveAngle = turfUtils.getRotation(
+        this.mapDrivingPoint,
+        newDrivingPoint
+      );
+      const maxGoalDistance = 0.005;
+      const subPath = turfUtils.getSubRouteCoordinates(
+        this.routePath,
+        this.mapDrivingPoint,
+        newDrivingPoint
+      );
+      this.addDrivingDataToChart(newDrivingPoint);
+      this.updateDrivingPoint(newDrivingPoint, subPath, maxGoalDistance);
     }
     this.updateTraceIsRunning = false;
   }

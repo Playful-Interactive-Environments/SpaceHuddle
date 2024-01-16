@@ -94,13 +94,17 @@
       "cancel": "abbrechen"
     },
     "navigationType": {
-      "drag": {
-        "title": "direkt",
-        "description": "Steuer die Fahrtrichtung mit dem Joystick direkt am Fahrzeug."
+      "speed": {
+        "title": "speed",
+        "description": "Steuern Sie die Fahrzeuggeschwindigkeit mit dem Gaspedal und der Bremse."
+      },
+      "combined": {
+        "title": "Geschwindigkeit und Richtung",
+        "description": "Steuern Sie die Fahrzeuggeschwindigkeit mit dem Gaspedal und der Bremse und die Fahrtrichtung mit dem Joystick."
       },
       "joystick": {
-        "title": "separat",
-        "description": "Steuer das Fahrzeug mit dem Joystick in der unteren rechten Ecke."
+        "title": "joystick",
+        "description": "Steuern Sie die Geschwindigkeit und die Fahrtrichtung des Fahrzeugs mit dem Joystick."
       }
     },
     "movingType": {

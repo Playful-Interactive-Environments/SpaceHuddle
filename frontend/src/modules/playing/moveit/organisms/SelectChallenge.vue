@@ -323,31 +323,6 @@
         }}
       </h1>
     </template>
-    <!--<div>
-      <el-radio-group v-model="navigationType">
-        <el-radio-button
-          v-for="level in NavigationType"
-          :key="level"
-          :label="level"
-        >
-          <span class="icon">
-            <font-awesome-icon :icon="['fac', getNavigationIcon(level)]" />
-          </span>
-          {{
-            $t(
-              `module.playing.moveit.participant.navigationType.${level}.title`
-            )
-          }}
-        </el-radio-button>
-      </el-radio-group>
-    </div>-->
-    <div class="info">
-      {{
-        $t(
-          `module.playing.moveit.participant.navigationType.${navigationType}.description`
-        )
-      }}
-    </div>
     <div>
       <el-radio-group v-model="movingType">
         <el-radio-button
@@ -358,9 +333,9 @@
           <span class="icon">
             <font-awesome-icon :icon="['fac', getMovingIcon(level)]" />
           </span>
-          {{
+          <!--{{
             $t(`module.playing.moveit.participant.movingType.${level}.title`)
-          }}
+          }}-->
         </el-radio-button>
       </el-radio-group>
     </div>
@@ -368,6 +343,32 @@
       {{
         $t(
           `module.playing.moveit.participant.movingType.${movingType}.description`
+        )
+      }}
+    </div>
+    <div>
+      <el-radio-group v-model="navigationType">
+        <el-radio-button
+          v-for="level in NavigationType"
+          :key="level"
+          :label="level"
+          :disabled="hasNavigationType(level)"
+        >
+          <span class="icon">
+            <font-awesome-icon :icon="['fac', getNavigationIcon(level)]" />
+          </span>
+          <!--{{
+            $t(
+              `module.playing.moveit.participant.navigationType.${level}.title`
+            )
+          }}-->
+        </el-radio-button>
+      </el-radio-group>
+    </div>
+    <div class="info">
+      {{
+        $t(
+          `module.playing.moveit.participant.navigationType.${navigationType}.description`
         )
       }}
     </div>
@@ -400,7 +401,8 @@ import { delay } from '@/utils/wait';
 import { remToPx } from '@/modules/playing/moveit/utils/consts';
 
 export enum NavigationType {
-  drag = 'drag',
+  speed = 'speed',
+  combined = 'combined',
   joystick = 'joystick',
 }
 
@@ -452,7 +454,7 @@ export default class SelectChallenge extends Vue {
   };
   showInfo = false;
   showPlayDialog = false;
-  navigationType = NavigationType.joystick;
+  navigationType = NavigationType.speed;
   NavigationType = NavigationType;
   movingType = MovingType.path;
   MovingType = MovingType;
@@ -484,12 +486,30 @@ export default class SelectChallenge extends Vue {
 
   getNavigationIcon(navigationType: NavigationType): string {
     switch (navigationType) {
-      case NavigationType.drag:
-        return 'direct';
+      case NavigationType.speed:
+        return 'speed';
+      case NavigationType.combined:
+        return 'combined';
       case NavigationType.joystick:
         return 'joystick';
     }
     return 'joystick';
+  }
+
+  hasNavigationType(navigationType: NavigationType): boolean {
+    switch (navigationType) {
+      case NavigationType.speed:
+        if (
+          this.navigationType === navigationType &&
+          this.movingType === MovingType.free
+        )
+          this.navigationType = NavigationType.combined;
+        return this.movingType === MovingType.free;
+      case NavigationType.combined:
+      case NavigationType.joystick:
+        return false;
+    }
+    return false;
   }
 
   getStarsForVehicle(vehicle: vehicleCalculation.Vehicle): number {
