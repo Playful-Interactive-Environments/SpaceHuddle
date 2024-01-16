@@ -54,6 +54,68 @@
       >
         <el-carousel-item class="infoGraphic">
           <h2>
+            {{ $t('module.playing.moveit.participant.info.speed.title') }}
+          </h2>
+          <div class="chartArea">
+            <Line
+              :data="chartDataSpeed"
+              :options="{
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.speed.scale.x'
+                      ),
+                      display: true,
+                    },
+                  },
+                  y: {
+                    stacked: true,
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.speed.scale.y'
+                      ),
+                      display: true,
+                    },
+                  },
+                },
+              }"
+            />
+          </div>
+          <h2 v-if="vehicle.category === 'bus'">
+            {{ $t('module.playing.moveit.participant.info.persons.title') }}
+          </h2>
+          <div class="chartArea" v-if="vehicle.category === 'bus'">
+            <Line
+              :data="chartDataPersons"
+              :options="{
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.persons.scale.x'
+                      ),
+                      display: true,
+                    },
+                  },
+                  y: {
+                    stacked: true,
+                    title: {
+                      text: $t(
+                        'module.playing.moveit.participant.info.persons.scale.y'
+                      ),
+                      display: true,
+                    },
+                  },
+                },
+              }"
+            />
+          </div>
+          <h2>
             {{ $t('module.playing.moveit.participant.info.emissions.input') }}
           </h2>
           <div class="chartArea">
@@ -155,68 +217,6 @@
                     title: {
                       text: $t(
                         'module.playing.moveit.participant.info.emissions.scale.y'
-                      ),
-                      display: true,
-                    },
-                  },
-                },
-              }"
-            />
-          </div>
-          <h2>
-            {{ $t('module.playing.moveit.participant.info.speed.title') }}
-          </h2>
-          <div class="chartArea">
-            <Line
-              :data="chartDataSpeed"
-              :options="{
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  x: {
-                    title: {
-                      text: $t(
-                        'module.playing.moveit.participant.info.speed.scale.x'
-                      ),
-                      display: true,
-                    },
-                  },
-                  y: {
-                    stacked: true,
-                    title: {
-                      text: $t(
-                        'module.playing.moveit.participant.info.speed.scale.y'
-                      ),
-                      display: true,
-                    },
-                  },
-                },
-              }"
-            />
-          </div>
-          <h2 v-if="vehicle.category === 'bus'">
-            {{ $t('module.playing.moveit.participant.info.persons.title') }}
-          </h2>
-          <div class="chartArea" v-if="vehicle.category === 'bus'">
-            <Line
-              :data="chartDataPersons"
-              :options="{
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  x: {
-                    title: {
-                      text: $t(
-                        'module.playing.moveit.participant.info.persons.scale.x'
-                      ),
-                      display: true,
-                    },
-                  },
-                  y: {
-                    stacked: true,
-                    title: {
-                      text: $t(
-                        'module.playing.moveit.participant.info.persons.scale.y'
                       ),
                       display: true,
                     },
