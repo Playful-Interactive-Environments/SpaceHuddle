@@ -158,20 +158,45 @@ export default class Participant extends Vue {
   get tutorialList(): (string | ModuleInfoEntryData)[] {
     switch (this.gameStep) {
       case GameStep.Select:
-        return [{ key: 'select', texture: 'select.jpg' }];
+        return [
+          { key: 'select', texture: 'select.jpg' },
+          { key: 'statistics', texture: 'stats.gif' },
+        ];
       case GameStep.Drive:
-        if (this.vehicle.category === 'bus')
+        if (this.vehicle.category === 'bus') {
           return [
             { key: 'drive', texture: 'drive.gif' },
+            { key: 'statsGame', texture: 'statsGame.png' },
+            this.NavTutorial,
             { key: 'bus', texture: 'bus.jpg' },
           ];
-        return [{ key: 'drive', texture: 'drive.gif' }];
+        }
+        return [
+          { key: 'drive', texture: 'drive.gif' },
+          { key: 'statsGame', texture: 'statsGame.png' },
+          this.NavTutorial,
+        ];
       case GameStep.CleanUp:
-        return [{ key: 'cleanUp', texture: 'cleanUp.gif' }, {key: 'nudging', texture:'nudging.gif'}];
+        return [
+          { key: 'cleanUp', texture: 'cleanUp.gif' },
+          { key: 'nudging', texture: 'nudging.gif' },
+        ];
       case GameStep.Result:
         return [{ key: 'improve', texture: 'improve.gif' }];
     }
     return [];
+  }
+
+  get NavTutorial(): any {
+    switch (this.navigationType) {
+      case NavigationType.speed:
+        return { key: 'speed', texture: 'Controls2.png' };
+      case NavigationType.joystick:
+        return { key: 'joystick', texture: 'Controls3.png' };
+      case NavigationType.combined:
+        return { key: 'combined', texture: 'Controls1.png' };
+    }
+    return { key: 'speed', texture: 'Controls2.png' };
   }
 
   domKey = '';

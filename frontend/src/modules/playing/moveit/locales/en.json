@@ -129,8 +129,13 @@
       }
     },
     "tutorial": {
-      "select": "Traffic accounts for 30% of greenhouse emissions. Try to figure out what impact different types of vehicles have. \nThe statistic shows you how many greenhouse gases are produced produced per kWh of fuel.\nWhile this is constant for fuels like diesel and gasoline, the values for electricity depend on the electricity mix.",
-      "drive": "In addition to vehicle choice, driving behavior also plays a crucial role. The faster you drive, the more fuel you need.\nYou can speed up and slow down with the pedals on the bottom right. Use the Joystick on the left to steer.\nIn the statistics above the map you can see how many emissions are released. All emissions in the red marked area go directly into the environment. For all below you have the chance to clean them up.",
+      "select": "Traffic accounts for 30% of greenhouse emissions. Try to figure out what impact different types of vehicles have.",
+      "statistics": "The statistic shows you how many greenhouse gases are produced per kWh of fuel.\nWhile this is constant for fuels like diesel and gasoline, the values for electricity depend on the electricity mix.",
+      "drive": "In addition to vehicle choice, driving behavior also plays a crucial role. The faster you drive, the more fuel you need.",
+      "statsGame": "In the statistics above the map you can see how many emissions are released. All emissions in the red marked area go directly into the environment. For all below you have the chance to clean them up.",
+      "speed": "You can speed up and slow down with the pedals on the bottom right. The car will steer for you.",
+      "joystick": "You can speed up, slow down and steer with the joystick on the bottom right. With the slider on the left you can set the maximum speed.",
+      "combined": "You can speed up and slow down with the pedals on the bottom left. Use the Joystick on the left to steer.",
       "bus": "But the number of passengers also makes a difference. More people travelling in the same vehicle means more people are sharing the same emissions.\nStop at bus stops to let people get in.",
       "cleanUp": "Now try to clean up the emissions you caused by throwing them into the correct garbage can.\nBut watch out! If there are too many emissions they will evaporate and get into the environment.\nIn addition to greenhouse gases, microplastics are also released through tire wear and particulate matter.",
       "nudging": "You can nudge particles of the same type together to create a chain. This allows you to get rid of multiple particles at once!",
