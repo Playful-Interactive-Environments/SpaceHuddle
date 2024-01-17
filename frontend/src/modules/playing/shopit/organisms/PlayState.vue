@@ -1220,7 +1220,8 @@ export default class PlayState extends Vue {
   padding: 2%;
   margin-left: -10%;
   left: 5%;
-  filter: drop-shadow(var(--color-dark-contrast) -0.4rem 0.2rem 0.2rem);
+  /*filter: drop-shadow(var(--color-dark-contrast) -0.4rem 0.2rem 0.2rem);*/
+  box-shadow: var(--color-dark-contrast) -0.4rem 0.2rem 0.2rem;
   transition: 0.3s;
 }
 

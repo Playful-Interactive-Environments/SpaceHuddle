@@ -143,6 +143,10 @@
         "title": "Office building",
         "description": "Glass heats up quickly and stores this heat poorly. The glass primarily releases the heat back into its surroundings. In addition, glass strongly reflects visible sunlight, which also heats up the immediate surroundings."
       },
+      "parkingLot01": {
+        "title": "Parking lot",
+        "description": "Asphalt heats up faster than vegetated ground and emits that heat back into its surroundings. Because of that, in summer it is way hotter on asphalted areas than on vegetated areas."
+      },
       "industry01": {
         "title": "Warehouse tower",
         "description": "Dark colors absorb a lot of heat in the form of radiation. Metals heat up very quickly due to sunlight. Both heat up strongly and quickly and quickly release this heat back into the environment."

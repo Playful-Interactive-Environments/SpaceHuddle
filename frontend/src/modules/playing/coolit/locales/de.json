@@ -145,6 +145,10 @@
         "title": "Bürogebäude",
         "description": "Glas erwärmt sich rasch und speichert diese Wärme schlecht. Das Glas gibt die Wärme vor allem an seine Umgebung wieder ab. Zudem reflektiert Glas das sichtbare Sonnenlicht stark, was die direkte Umgebung ebenfalls erwärmt."
       },
+      "parkingLot01": {
+        "title": "Parkplatz",
+        "description": "Asphalt erhitzt sich schneller als begrünter Boden, und gibt diese Hitze dann auch wieder an die Umgebung ab. Dadurch ist es im Sommer auf Betonflächen auch merkbar heißer als auf begrüntem Boden."
+      },
       "industry01": {
         "title": "Lagerturm",
         "description": "Dunkle Farben nehmen viel Wärme in Form von Strahlung auf. Metalle erwärme sich sehr schnell durch das Sonnenlicht. Beide erwärmen sich stark und schnell und geben diese Wärme schnell auch wieder an die Umgebung ab."
