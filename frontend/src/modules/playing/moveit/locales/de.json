@@ -119,9 +119,10 @@
     },
     "tutorial": {
       "select": "Der Verkehr ist für 30% der Treibhausgasemissionen verantwortlich.\nVersuche herauszufinden, welche Auswirkungen verschiedene Fahrzeugtypen haben.\nDie Statistik oben zeigt, wie viele Treibhausgase in einer kWh Kraftstoff stecken.\nWährend dies für Kraftstoffe wie Diesel und Benzin konstant ist, hängen die Werte für Strom vom Strommix ab.",
-      "drive": "Neben der Wahl des Fahrzeugs spielt auch das Fahrverhalten eine entscheidende Rolle. Je schneller du fährst, desto mehr Kraftstoff benötigst du.\nIn der Statistik oberhalb der Karte kannst du sehen, wie viele Emissionen freigesetzt werden. Alle Emissionen im rot markierten Bereich gehen direkt in die Umwelt. Für alle darunter hast du die Chance, sie im nächsten Schritt zu bereinigen.",
+      "drive": "Neben der Wahl des Fahrzeugs spielt auch das Fahrverhalten eine entscheidende Rolle. Je schneller du fährst, desto mehr Kraftstoff benötigst du.\n Mit den Pedalen rechts unten kannst du beschleunigen und Bremsen, lenken ist mit dem Joystick links unten möglich.\nIn der Statistik oberhalb der Karte kannst du sehen, wie viele Emissionen freigesetzt werden. Alle Emissionen im rot markierten Bereich gehen direkt in die Umwelt. Für alle darunter hast du die Chance, sie im nächsten Schritt zu bereinigen.",
       "bus": "Aber auch die Anzahl der Passagiere macht einen Unterschied. Je voller das Fahrzeug, desto mehr Personen teilen sich die Emissionen.\nBleib an Bushaltestellen stehen, um Leute einsteigen zu lassen.",
-      "cleanUp": "Versuche nun, die von dir verursachten Emissionen zu beseitigen, indem du sie in die richtige Tonne wirfst.\nWenn du dieselben Partikel anstupst, kannst du mehrere auf einmal einsammeln und entsorgen.\nAber pass auf! Wenn es zu viele freie Emissionen gibt, verflüchtigen sie sich und gelangen in die Umwelt.",
+      "cleanUp": "Versuche nun, die von dir verursachten Emissionen zu beseitigen, indem du sie in die richtige Tonne wirfst.\nAber pass auf! Wenn es zu viele freie Emissionen gibt, verflüchtigen sie sich und gelangen in die Umwelt.",
+      "nudging": "Du kannst mehrere Partikel der selben Art anstupsen um sie zu verketten. So kannst du sie schneller wieder beseitigen!",
       "improve": "Versuche, dir beim nächsten Mal beim Aufräumen durch geschicktes Fahrverhalten mehr Luft zu lassen, oder beeinflusse den Strommix durch entsprechende Maßnahmen in der Maßnahmenkarte.\nNeben Treibhausgasen wird auch Mikroplastik durch Reifenabrieb und Feinstaub freigesetzt."
     }
   },

@@ -167,7 +167,7 @@ export default class Participant extends Vue {
           ];
         return [{ key: 'drive', texture: 'drive.gif' }];
       case GameStep.CleanUp:
-        return [{ key: 'cleanUp', texture: 'cleanUp.gif' }];
+        return [{ key: 'cleanUp', texture: 'cleanUp.gif' }, {key: 'nudging', texture:'nudging.gif'}];
       case GameStep.Result:
         return [{ key: 'improve', texture: 'improve.gif' }];
     }
