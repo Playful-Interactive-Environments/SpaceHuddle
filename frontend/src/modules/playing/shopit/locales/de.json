@@ -21,7 +21,8 @@
   "participant": {
     "tutorial": {
       "rules1": "Jeder Spieler hat 3 Karten und muss 3 Kategorien füllen. Um einen Punkt in einer Kategorie zu erlangen, muss der Spieler eine Runde in dieser Kategorie gewinnen. Der Spieler der als erstes alle Kategorien gefüllt hat, gewinnt!",
-      "rules2": "Aber Achtung! Die Punkte die du ausgeben darfst sind begrenzt. \\n Wenn beide Spieler eine Karte der selben Kategorie spielen, werden die Punkte beider Karten dem Limit zugeschrieben. Wenn dein Gegner aber keine Karte dieser Kategorie hat, hast du Glück, denn dann wird dir nur der Wert deiner eigenen Karte zugeschrieben.",
+      "rules2": "Aber Achtung! Die Punkte die du ausgeben darfst sind begrenzt. Wie viele Punkte schon ausgegeben wurden siehst du am roten Balken.",
+      "pointCalc": "Wenn beide Spieler eine Karte der selben Kategorie spielen, werden die Punkte beider Karten dem Limit zugeschrieben. Wenn dein Gegner aber keine Karte dieser Kategorie hat, hast du Glück, denn dann wird dir nur der Wert deiner eigenen Karte zugeschrieben.",
       "play": "Tutorial text 2"
     },
     "joinState": {

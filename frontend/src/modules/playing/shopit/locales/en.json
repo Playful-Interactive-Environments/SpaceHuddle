@@ -21,7 +21,8 @@
   "participant": {
     "tutorial": {
       "rules1": "Each player has 3 cards and must fulfill 3 categories. To earn a point in a category the player needs to win a round in that category. The player who finishes all categories first wins!",
-      "rules2": "But watch out! There's a limit on how many points you are allowed to spend. \n If both players play a card of the same category, both cards points will contribute to the limit. If your opponent doesn't have a fitting card for this category, you are lucky and get away with just the points of your card.",
+      "rules2": "But watch out! There's a limit on how many points you are allowed to spend. You can track your spent points with the red bar.",
+      "pointCalc": "If both players play a card of the same category, both cards points will contribute to the limit. If your opponent doesn't have a fitting card for this category, you are lucky and get away with just the points of your card.",
       "play": "Tutorial text 2"
     },
     "joinState": {
