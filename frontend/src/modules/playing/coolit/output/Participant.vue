@@ -93,7 +93,7 @@ export default class Participant extends Vue {
         return [
           { key: 'light', texture: 'playing.gif' },
           { key: 'heat', texture: 'playing.gif' },
-          { key: 'play', texture: 'playing.gif' },
+          { key: 'play', texture: 'temperatureBar.png' },
         ];
     }
     return [];
