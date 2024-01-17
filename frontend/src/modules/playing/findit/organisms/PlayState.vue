@@ -15,6 +15,8 @@
       @initRenderer="initRenderer"
       @gameObjectClick="gameObjectClick"
       :collision-borders="CollisionBorderType.Screen"
+      :border-delta="-searchSize"
+      :pixi-filter-list="[zoomFilter]"
     >
       <template v-slot:default>
         <container v-if="gameWidth">
@@ -161,6 +163,7 @@ import * as themeColors from '@/utils/themeColors';
 import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
 import { Idea } from '@/types/api/Idea';
 import * as configParameter from '@/utils/game/configParameter';
+import { BulgePinchFilter } from 'pixi-filters';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
@@ -271,6 +274,11 @@ export default class PlayState extends Vue {
   searchPosition: [number, number] = [0, 0];
   startTime = Date.now();
   textureToken = pixiUtil.createLoadingToken();
+  zoomFilter: BulgePinchFilter = new BulgePinchFilter({
+    radius: this.searchSize,
+    strength: 0.5,
+    center: [0.5, 0.5],
+  });
 
   playStateType = PlayStateType.play;
   PlayStateType = PlayStateType;
@@ -310,6 +318,10 @@ export default class PlayState extends Vue {
 
   get backgroundColor(): string {
     return themeColors.getBackgroundColor();
+  }
+
+  get searchSize(): number {
+    return this.gameWidth / 10;
   }
 
   mounted(): void {
@@ -353,7 +365,7 @@ export default class PlayState extends Vue {
   drawSearchObject(graphics: PIXI.Graphics): void {
     graphics.clear();
     graphics.lineStyle(10, '#ff0000');
-    graphics.drawCircle(0, 0, this.gameWidth / 10);
+    graphics.drawCircle(0, 0, this.searchSize);
   }
 
   searchGraphics!: PIXI.Graphics;
@@ -366,16 +378,26 @@ export default class PlayState extends Vue {
     if (this.searchGraphics && this.searchGraphics.geometry) {
       this.searchGraphics.clear();
       this.searchGraphics.beginFill('#ffffff');
-      this.searchGraphics.drawRect(0, 0, this.gameWidth, this.gameHeight);
+      const searchDelta = this.searchSize * 2;
+      this.searchGraphics.drawRect(
+        -searchDelta,
+        -searchDelta,
+        this.gameWidth + searchDelta,
+        this.gameHeight + searchDelta
+      );
       this.searchGraphics.beginHole();
       this.searchGraphics.drawCircle(
         this.searchPosition[0],
         this.searchPosition[1],
-        this.gameWidth / 10
+        this.searchSize
       );
       this.searchGraphics.endHole();
       this.searchGraphics.endFill();
     }
+    this.zoomFilter.center = [
+      this.searchPosition[0] / this.gameWidth,
+      this.searchPosition[1] / this.gameHeight,
+    ];
   }
 
   @Watch('searchPosition', { immediate: true, deep: true })
@@ -385,6 +407,7 @@ export default class PlayState extends Vue {
 
   @Watch('gameHeight', { immediate: true })
   onGameWidthSet(): void {
+    this.zoomFilter.radius = this.searchSize;
     this.searchPosition = [this.gameWidth / 2, this.gameHeight / 2];
   }
 

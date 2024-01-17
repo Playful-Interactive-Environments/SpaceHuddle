@@ -346,6 +346,7 @@ export default class GameContainer extends Vue {
   @Prop({ default: false }) readonly useObjectPooling!: boolean;
   @Prop({ default: CollisionBorderType.Screen })
   readonly collisionBorders!: CollisionBorderType;
+  @Prop({ default: 0 }) readonly borderDelta!: number;
   @Prop({ default: 1 }) readonly borderCategory!: number;
   @Prop({ default: false }) readonly activatedObjectOnRegister!: boolean;
   @Prop({ default: undefined }) readonly width!: number | undefined;
@@ -1360,7 +1361,6 @@ export default class GameContainer extends Vue {
   }
 
   readonly boundsThickness = 100;
-  readonly borderDelta = 0;
   async setupCollisionBound(
     collisionBorderType: CollisionBorderType,
     borderCategory: number
