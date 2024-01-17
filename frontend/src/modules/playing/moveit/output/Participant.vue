@@ -190,10 +190,12 @@ export default class Participant extends Vue {
   get NavTutorial(): any {
     switch (this.navigationType) {
       case NavigationType.speed:
+      case NavigationType.acceleration:
         return { key: 'speed', texture: 'Controls2.png' };
       case NavigationType.joystick:
         return { key: 'joystick', texture: 'Controls3.png' };
-      case NavigationType.combined:
+      case NavigationType.speedDirection:
+      case NavigationType.accelerationDirection:
         return { key: 'combined', texture: 'Controls1.png' };
     }
     return { key: 'speed', texture: 'Controls2.png' };
