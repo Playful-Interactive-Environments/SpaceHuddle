@@ -387,6 +387,7 @@ import Color from 'colorjs.io';
 import * as mapStyle from '@/utils/mapStyle';
 import { TrackingManager } from '@/types/tracking/TrackingManager';
 import * as themeColors from '@/utils/themeColors';
+import { getGreenColor, getRedColor } from '@/utils/themeColors';
 import * as vehicleCalculation from '@/modules/playing/moveit/types/Vehicle';
 import {
   MovingType,
@@ -394,7 +395,6 @@ import {
 } from '@/modules/playing/moveit/organisms/SelectChallenge.vue';
 import * as mapUtils from '@/modules/playing/moveit/utils/map';
 import { TrackingData } from '@/modules/playing/moveit/utils/trackingData';
-import { getGreenColor, getRedColor } from '@/utils/themeColors';
 
 mapStyle.setMapStyleStreets();
 
@@ -1028,6 +1028,27 @@ export default class DriveToLocation extends Vue {
     }
   }
 
+  snapToCorner(speedDrivingDistance: number): void {
+    const possibleCorners = this.getPossibleCorners(speedDrivingDistance, true);
+    if (possibleCorners.length > 0) {
+      let minCorner = possibleCorners[0];
+      let minDistance = turf.distance(minCorner, this.mapDrivingPoint);
+      for (let i = 1; i < possibleCorners.length; i++) {
+        const distance = turf.distance(
+          possibleCorners[i],
+          this.mapDrivingPoint
+        );
+        if (distance < minDistance) {
+          minDistance = distance;
+          minCorner = possibleCorners[i];
+        }
+      }
+      if (minDistance < 0.015) {
+        this.updateDrivingPoint(minCorner, [], 0.015);
+      }
+    }
+  }
+
   corners: { point: [number, number]; active: boolean }[] = [];
   searchPoints: { point: [number, number]; active: boolean; color: string }[] =
     [];
@@ -1061,27 +1082,7 @@ export default class DriveToLocation extends Vue {
       //const maxStreetDistance = 0.0001;
       const maxCornerDistance = 0;
       if (this.movingType === MovingType.free) {
-        const possibleCorners = this.getPossibleCorners(
-          speedDrivingDistance,
-          true
-        );
-        if (possibleCorners.length > 0) {
-          let minCorner = possibleCorners[0];
-          let minDistance = turf.distance(minCorner, this.mapDrivingPoint);
-          for (let i = 1; i < possibleCorners.length; i++) {
-            const distance = turf.distance(
-              possibleCorners[i],
-              this.mapDrivingPoint
-            );
-            if (distance < minDistance) {
-              minDistance = distance;
-              minCorner = possibleCorners[i];
-            }
-          }
-          if (minDistance < 0.015) {
-            this.updateDrivingPoint(minCorner, [], 0.015);
-          }
-        }
+        this.snapToCorner(speedDrivingDistance);
       } else {
         const newDrivingPoint = this.getNewDrivingPoint(speedDrivingDistance);
         const insideSegment = this.isDrivingAngleInsideNextSegment(
@@ -1270,7 +1271,11 @@ export default class DriveToLocation extends Vue {
         this.updateTrace,
         this.intervalCalculationTime
       );
-    } else if (this.moveSpeed > 0 && this.speed === 0) {
+    } else if (
+      this.moveSpeed > 0 &&
+      this.speed === 0 &&
+      this.navigation !== NavigationType.joystick
+    ) {
       this.stop();
     }
     this.moveSpeed = this.speed;
@@ -1712,6 +1717,7 @@ export default class DriveToLocation extends Vue {
   noStreet = false;
   updateTraceIsRunning = false;
   accelerateEnabled = true;
+  findNewPoint = true;
   async updateTrace(): Promise<void> {
     if (this.updateTraceIsRunning) return;
     if (this.openAnimationSteps > this.animationIntermediateSteps / 2) return;
@@ -1744,8 +1750,13 @@ export default class DriveToLocation extends Vue {
           )[0];
           subPath = bestSegment.subPath;
           newDrivingPoint = bestSegment.endPoint;
+          this.findNewPoint = true;
         } else {
+          if (this.findNewPoint) {
+            this.snapToCorner(0.01);
+          }
           isOnRoute = false;
+          this.findNewPoint = false;
         }
       } else {
         if (isOnRoute) {
@@ -1758,8 +1769,10 @@ export default class DriveToLocation extends Vue {
           subPath = insideSegment.subPath;
           if (insideSegment.value) {
             newDrivingPoint = insideSegment.endPoint;
+            this.findNewPoint = true;
           } else {
             isOnRoute = false;
+            this.findNewPoint = false;
           }
         }
       }
