@@ -48,13 +48,13 @@
           :paint="routePaint"
         />
       </mgl-geo-json-source>
-      <mgl-geo-json-source source-id="drivenPath" :data="drivenPath">
+      <!--<mgl-geo-json-source source-id="drivenPath" :data="drivenPath">
         <mgl-line-layer
           layer-id="drivenPath"
           :layout="routeLayout"
           :paint="drivenPaint"
         />
-      </mgl-geo-json-source>
+      </mgl-geo-json-source>-->
       <!--<mgl-geo-json-source
         v-for="(street, index) of possibleStreets"
         :key="index"
@@ -1499,6 +1499,9 @@ export default class DriveToLocation extends Vue {
       .coordinates;
     coordinates.push(...path);
     this.drivenPath = turfUtils.getRouteObject(coordinates);
+    /*(this.drivenPath.features[0].geometry as any).coordinates.push(...path);
+    const source = this.map.getSource('drivenPath') as any;
+    if (source) source.setData(this.drivenPath);*/
   }
 
   getSearchArea(
@@ -1874,8 +1877,8 @@ export default class DriveToLocation extends Vue {
   }
 
   addAnimationSegment(segmentPath: [number, number][]): void {
-    this.mapVehiclePoint = segmentPath[segmentPath.length - 1];
     this.updateDrivingPath(segmentPath);
+    this.mapVehiclePoint = segmentPath[segmentPath.length - 1];
   }
   //#endregion animation
 }
