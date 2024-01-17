@@ -11,6 +11,9 @@
   "participant": {
     "speed": "Geschwindigkeit",
     "maxSpeed": "max",
+    "hold": "-",
+    "gas": "G",
+    "break": "B",
     "combined": "kombiniert",
     "separate": "separat",
     "electricity": "Stromanteil in %",
@@ -98,9 +101,17 @@
         "title": "speed",
         "description": "Steuern Sie die Fahrzeuggeschwindigkeit mit dem Gaspedal und der Bremse."
       },
-      "combined": {
-        "title": "Geschwindigkeit und Richtung",
+      "acceleration": {
+        "title": "Beschleunigung",
+        "description": "Steuern Sie die Fahrzeuggeschwindigkeit mit dem Gaspedalschieber."
+      },
+      "speedDirection": {
+        "title": "Geschwindigkeit und Fahrtrichtung",
         "description": "Steuern Sie die Fahrzeuggeschwindigkeit mit dem Gaspedal und der Bremse und die Fahrtrichtung mit dem Joystick."
+      },
+      "accelerationDirection": {
+        "title": "Beschleunigung und Fahrtrichtung",
+        "description": "Steuern Sie die Fahrzeuggeschwindigkeit mit dem Gaspedalschieber und die Fahrtrichtung mit dem Joystick."
       },
       "joystick": {
         "title": "joystick",

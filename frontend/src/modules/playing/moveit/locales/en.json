@@ -11,6 +11,9 @@
   "participant": {
     "speed": "speed",
     "maxSpeed": "max",
+    "hold": "-",
+    "gas": "G",
+    "break": "B",
     "combined": "combined",
     "separate": "separate",
     "electricity": "electricity ratio in %",
@@ -98,9 +101,17 @@
         "title": "speed",
         "description": "Control the vehicle speed with the accelerator and brake."
       },
-      "combined": {
+      "acceleration": {
+        "title": "acceleration",
+        "description": "Control the vehicle speed with the accelerator slider."
+      },
+      "speedDirection": {
         "title": "speed and direction",
         "description": "Control the vehicle speed with the accelerator and brake and the direction of travel using the joystick."
+      },
+      "accelerationDirection": {
+        "title": "acceleration and direction",
+        "description": "Control the vehicle speed with the accelerator slider and the direction of travel using the joystick."
       },
       "joystick": {
         "title": "joystick",

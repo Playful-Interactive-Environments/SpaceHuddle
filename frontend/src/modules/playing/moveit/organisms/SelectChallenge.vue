@@ -355,7 +355,11 @@
           :disabled="hasNavigationType(level)"
         >
           <span class="icon">
-            <font-awesome-icon :icon="['fac', getNavigationIcon(level)]" />
+            <font-awesome-icon
+              v-for="icon in getNavigationIcon(level)"
+              :key="icon"
+              :icon="['fac', icon]"
+            />
           </span>
           <!--{{
             $t(
@@ -402,7 +406,9 @@ import { remToPx } from '@/modules/playing/moveit/utils/consts';
 
 export enum NavigationType {
   speed = 'speed',
-  combined = 'combined',
+  acceleration = 'acceleration',
+  speedDirection = 'speedDirection',
+  accelerationDirection = 'accelerationDirection',
   joystick = 'joystick',
 }
 
@@ -484,28 +490,34 @@ export default class SelectChallenge extends Vue {
     return 'path';
   }
 
-  getNavigationIcon(navigationType: NavigationType): string {
+  getNavigationIcon(navigationType: NavigationType): string[] {
     switch (navigationType) {
       case NavigationType.speed:
-        return 'speed';
-      case NavigationType.combined:
-        return 'combined';
+        return ['speed'];
+      case NavigationType.acceleration:
+        return ['acceleration'];
+      case NavigationType.speedDirection:
+        return ['speed', 'joystick'];
+      case NavigationType.accelerationDirection:
+        return ['acceleration', 'joystick'];
       case NavigationType.joystick:
-        return 'joystick';
+        return ['joystick'];
     }
-    return 'joystick';
+    return ['joystick'];
   }
 
   hasNavigationType(navigationType: NavigationType): boolean {
     switch (navigationType) {
       case NavigationType.speed:
+      case NavigationType.acceleration:
         if (
           this.navigationType === navigationType &&
           this.movingType === MovingType.free
         )
-          this.navigationType = NavigationType.combined;
+          this.navigationType = NavigationType.speedDirection;
         return this.movingType === MovingType.free;
-      case NavigationType.combined:
+      case NavigationType.speedDirection:
+      case NavigationType.accelerationDirection:
       case NavigationType.joystick:
         return false;
     }
@@ -948,6 +960,8 @@ export default class SelectChallenge extends Vue {
 .icon {
   font-size: var(--font-size-xxxlarge);
   margin-right: 0.5rem;
+  width: unset;
+  min-width: 1.5rem;
 }
 
 .el-radio-button > .el-radio-button__inner {

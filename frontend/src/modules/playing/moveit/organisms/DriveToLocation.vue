@@ -198,7 +198,11 @@
     <div class="overlay-bottom-right">
       <div>
         <Joystick
-          v-if="zoomReady && navigation !== NavigationType.speed"
+          v-if="
+            zoomReady &&
+            navigation !== NavigationType.speed &&
+            navigation !== NavigationType.acceleration
+          "
           :size="120"
           :stick-size="40"
           @move="move($event)"
@@ -215,13 +219,18 @@
     </div>
     <div
       :class="
-        navigation === NavigationType.speed
+        navigation === NavigationType.speed ||
+        navigation === NavigationType.acceleration
           ? 'overlay-bottom-right'
           : 'overlay-bottom-left'
       "
     >
       <el-button
-        v-if="zoomReady && navigation !== NavigationType.joystick"
+        v-if="
+          zoomReady &&
+          (navigation === NavigationType.speed ||
+            navigation === NavigationType.speedDirection)
+        "
         class="brake"
         @pointerdown="startDecreaseSpeed"
         @pointerup="stopDecreaseSpeed"
@@ -232,7 +241,11 @@
         B
       </el-button>
       <el-button
-        v-if="zoomReady && navigation !== NavigationType.joystick"
+        v-if="
+          zoomReady &&
+          (navigation === NavigationType.speed ||
+            navigation === NavigationType.speedDirection)
+        "
         class="gas"
         @pointerdown="startIncreaseSpeed"
         @pointerup="stopIncreaseSpeed"
@@ -242,6 +255,41 @@
       >
         G
       </el-button>
+      <el-slider
+        v-if="
+          zoomReady &&
+          (navigation === NavigationType.acceleration ||
+            navigation === NavigationType.accelerationDirection)
+        "
+        v-model="accelerationFactor"
+        :max="maxAccelerationFactor"
+        :min="minAccelerationFactor"
+        :show-tooltip="false"
+        :marks="{
+          '-10': {
+            style: {
+              color: getRedColor(),
+            },
+            label: $t('module.playing.moveit.participant.break'),
+          },
+          0: $t('module.playing.moveit.participant.hold'),
+          10: {
+            style: {
+              color: getGreenColor(),
+            },
+            label: $t('module.playing.moveit.participant.gas'),
+          },
+        }"
+        vertical
+        height="6rem"
+        @pointerdown="startIncreaseSpeed"
+        @pointerup="stopIncreaseSpeed"
+        @pointerout="stopIncreaseSpeed"
+        class="accelerationFactor"
+        :style="{
+          '--acceleration-color': getAccelerationColor(),
+        }"
+      />
       <el-slider
         v-if="zoomReady && navigation === NavigationType.joystick"
         v-model="maxSpeed"
@@ -346,6 +394,7 @@ import {
 } from '@/modules/playing/moveit/organisms/SelectChallenge.vue';
 import * as mapUtils from '@/modules/playing/moveit/utils/map';
 import { TrackingData } from '@/modules/playing/moveit/utils/trackingData';
+import { getGreenColor, getRedColor } from '@/utils/themeColors';
 
 mapStyle.setMapStyleStreets();
 
@@ -377,6 +426,7 @@ interface ColorProp {
 const minToleratedAngleDeviation = 22.5;
 
 @Options({
+  methods: { getRedColor, getGreenColor },
   components: {
     FontAwesomeIcon,
     MglGeoJsonSource,
@@ -463,6 +513,9 @@ export default class DriveToLocation extends Vue {
   moveDirection: [number, number] = [0, 0];
   moveAngle = 0;
   checkRoutePoint: [number, number] = [0, 0];
+  accelerationFactor = 5;
+  minAccelerationFactor = -10;
+  maxAccelerationFactor = 10;
 
   boardingPersons = 0;
 
@@ -525,12 +578,14 @@ export default class DriveToLocation extends Vue {
     ];
   }
 
-  getSpeedColor(speed: number, transparent = 1): string {
+  calculateColor(
+    colorPropList: ColorProp[],
+    percentage: number,
+    transparent = 1
+  ): string {
     const convertColor = (colorProp: ColorProp): Color => {
       return new Color(colorProp.color);
     };
-    const percentage = this.convertSpeedToColorPercentage(speed);
-    const colorPropList = this.colors;
     const colorMixList: [ColorProp, ColorProp] = [
       colorPropList[0],
       colorPropList[colorPropList.length - 1],
@@ -562,6 +617,30 @@ export default class DriveToLocation extends Vue {
     }
     resultColor.alpha = transparent;
     return resultColor.toString();
+  }
+
+  getAccelerationColor(): string {
+    const percentage =
+      ((this.accelerationFactor - this.minAccelerationFactor) /
+        (this.maxAccelerationFactor - this.minAccelerationFactor)) *
+      100;
+    const colorPropList = [
+      {
+        color: themeColors.getRedColor(),
+        percentage: 40,
+      },
+      {
+        color: themeColors.getGreenColor(),
+        percentage: 60,
+      },
+    ];
+    return this.calculateColor(colorPropList, percentage);
+  }
+
+  getSpeedColor(speed: number, transparent = 1): string {
+    const percentage = this.convertSpeedToColorPercentage(speed);
+    const colorPropList = this.colors;
+    return this.calculateColor(colorPropList, percentage, transparent);
   }
 
   get vehicleParameter(): any {
@@ -1054,13 +1133,16 @@ export default class DriveToLocation extends Vue {
   }
 
   increaseSpeed(): void {
+    let speed = this.speed;
     if (this.speed < this.maxSpeed && !this.noStreet) {
-      if (this.speed + 5 < this.maxSpeed) {
-        this.speed += 5;
+      if (this.speed + this.accelerationFactor < this.maxSpeed) {
+        speed += this.accelerationFactor;
       } else {
-        this.speed += this.maxSpeed - this.speed;
+        speed += this.maxSpeed - this.speed;
       }
     }
+    if (speed < 0) speed = 0;
+    this.speed = speed;
   }
 
   startDecreaseSpeed(event: Event | null = null): void {
@@ -1640,7 +1722,8 @@ export default class DriveToLocation extends Vue {
     if (
       this.isMoving &&
       this.moveSpeed &&
-      this.navigation !== NavigationType.speed
+      this.navigation !== NavigationType.speed &&
+      this.navigation !== NavigationType.acceleration
     ) {
       let newDrivingPoint = this.getNewDrivingPoint(speedDrivingDistance);
       let isOnRoute = !this.noStreet;
@@ -1696,7 +1779,8 @@ export default class DriveToLocation extends Vue {
     } else if (
       this.isMoving &&
       this.moveSpeed &&
-      this.navigation === NavigationType.speed
+      (this.navigation === NavigationType.speed ||
+        this.navigation === NavigationType.acceleration)
     ) {
       const newDrivingPoint = turfUtils.moveAlongPath(
         this.routePath,
@@ -2018,6 +2102,18 @@ export default class DriveToLocation extends Vue {
   margin-right: 0.3rem;
   align-self: flex-end;
   justify-self: flex-end;
+}
+
+.accelerationFactor {
+  font-weight: var(--font-weight-bold);
+}
+
+.accelerationFactor::v-deep(.el-slider__button) {
+  border-radius: 20% 20% 50% 50%;
+  border: 4px solid var(--color-dark-contrast);
+  background-color: var(--acceleration-color);
+  width: 1.5rem;
+  height: 2rem;
 }
 </style>
 
