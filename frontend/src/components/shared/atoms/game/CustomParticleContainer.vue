@@ -128,10 +128,10 @@ export default class CustomParticleContainer extends Vue {
   async onConfigChanged(): Promise<void> {
     this.destroyEmitter(this.emitter, !this.autoUpdate);
     if (!this.config) return;
-    const config = this.deepCloneConfig
+    let config = this.deepCloneConfig
       ? structuredClone(this.config) // JSON.parse(JSON.stringify(this.config))
       : { ...this.config };
-    if (!structuredClone) {
+    if (!this.deepCloneConfig) {
       config.behaviors = [...config.behaviors];
     }
     const textureConfig = config.behaviors.find(
@@ -172,22 +172,27 @@ export default class CustomParticleContainer extends Vue {
         }
       }
       if (isSingleTexture) textureConfig.config.texture = textureList[0];
-    } else if (this.defaultTexture) {
-      await delay(100);
-      if (Array.isArray(this.defaultTexture)) {
-        config.behaviors.push({
-          type: 'textureRandom',
-          config: {
-            textures: [...this.defaultTexture],
-          },
-        });
-      } else {
-        config.behaviors.push({
-          type: 'textureSingle',
-          config: {
-            texture: { ...this.defaultTexture },
-          },
-        });
+    } else {
+      if (!this.deepCloneConfig) {
+        config = structuredClone(this.config);
+      }
+      if (this.defaultTexture) {
+        await delay(100);
+        if (Array.isArray(this.defaultTexture)) {
+          config.behaviors.push({
+            type: 'textureRandom',
+            config: {
+              textures: [...this.defaultTexture],
+            },
+          });
+        } else {
+          config.behaviors.push({
+            type: 'textureSingle',
+            config: {
+              texture: { ...this.defaultTexture },
+            },
+          });
+        }
       }
     }
     await until(() => !!this.container);
