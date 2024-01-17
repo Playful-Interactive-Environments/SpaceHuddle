@@ -234,6 +234,10 @@ class ParticipantRepository implements RepositoryInterface
         $this->queryFactory->newDelete("task_participant_state")
             ->andWhere(["participant_id" => $id])
             ->execute();
+
+        $this->queryFactory->newDelete("tutorial_participant")
+            ->andWhere(["participant_id" => $id])
+            ->execute();
     }
 
     /**
