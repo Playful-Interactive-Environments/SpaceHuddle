@@ -208,7 +208,7 @@ export default class ModuleInfo extends Vue {
   }
 
   next(): void {
-    if (this.activeTabIndex + 1 >= this.moduleInfoEntryDataList.length) {
+    if (this.activeTabIndex + 1 >= this.openModuleInfoEntryDataList.length) {
       this.storeInfoStepRead();
       this.$emit('infoRead');
     } else {
