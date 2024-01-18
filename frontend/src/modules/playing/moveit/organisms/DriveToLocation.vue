@@ -453,7 +453,7 @@ export default class DriveToLocation extends Vue {
   mapVehiclePoint: [number, number] = [0, 0];
   mapZoom = this.mapZoomDefault;
   readonly maxDrivingDistance = 2;
-  routeCalculated = false;
+  routeCalculated = true;
   routePath: FeatureCollection = turfUtils.getRouteObject([]);
   drivenPath: FeatureCollection = turfUtils.getRouteObject([]);
   routeLayout: LineLayerSpecification['layout'] = {
@@ -800,7 +800,9 @@ export default class DriveToLocation extends Vue {
         animate: true,
         essential: true,
       });
-      setTimeout(() => (this.zoomReady = true), 1000);
+      setTimeout(() => {
+        this.zoomReady = true;
+      }, 1000);
       /*setTimeout(() => {
         this.createVisibleStreetMask();
       }, 2000);*/
