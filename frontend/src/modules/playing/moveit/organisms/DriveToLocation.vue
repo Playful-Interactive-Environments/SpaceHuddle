@@ -905,7 +905,6 @@ export default class DriveToLocation extends Vue {
   }
 
   async mounted(): Promise<void> {
-    window.addEventListener('pointerup', this.stopTouchAction);
     this.ready = true;
     this.maxSpeed = this.vehicleParameter.speed;
     if (this.navigation === NavigationType.joystick && this.maxSpeed > 100)
@@ -949,6 +948,9 @@ export default class DriveToLocation extends Vue {
     window.addEventListener('touchend', this.enableMapPan);
     window.addEventListener('keydown', this.handleKeyDown);
     window.addEventListener('keyup', this.handleKeyUp);
+    window.addEventListener('touchend', this.stopTouchAction);
+    window.addEventListener('mouseup', this.stopTouchAction);
+    window.addEventListener('pointerup', this.stopTouchAction);
   }
 
   KeyPressedAccelerate = false;
@@ -998,6 +1000,8 @@ export default class DriveToLocation extends Vue {
     window.removeEventListener('touchend', this.enableMapPan);
     window.removeEventListener('keydown', this.handleKeyDown);
     window.removeEventListener('keyup', this.handleKeyUp);
+    window.removeEventListener('mouseup', this.stopTouchAction);
+    window.removeEventListener('touchend', this.stopTouchAction);
     window.removeEventListener('pointerup', this.stopTouchAction);
   }
   //#endregion load / unload
