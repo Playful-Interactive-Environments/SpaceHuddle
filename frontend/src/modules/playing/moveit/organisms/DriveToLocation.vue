@@ -234,7 +234,6 @@
         class="brake"
         @pointerdown="startDecreaseSpeed"
         @pointerup="stopDecreaseSpeed"
-        @pointerout="stopDecreaseSpeed"
         @contextmenu="(e) => e.preventDefault()"
         :style="{ backgroundColor: getSpeedColor(100 - moveSpeed, 0.6) }"
       >
@@ -249,7 +248,6 @@
         class="gas"
         @pointerdown="startIncreaseSpeed"
         @pointerup="stopIncreaseSpeed"
-        @pointerout="stopIncreaseSpeed"
         @contextmenu="(e) => e.preventDefault()"
         :style="{ backgroundColor: getSpeedColor(moveSpeed, 0.6) }"
       >
@@ -284,7 +282,6 @@
         height="6rem"
         @pointerdown="startIncreaseSpeed"
         @pointerup="stopIncreaseSpeed"
-        @pointerout="stopIncreaseSpeed"
         class="accelerationFactor"
         :style="{
           '--acceleration-color': getAccelerationColor(),
@@ -902,6 +899,7 @@ export default class DriveToLocation extends Vue {
   }
 
   async mounted(): Promise<void> {
+    window.addEventListener('pointerup', this.stopTouchAction);
     this.ready = true;
     this.maxSpeed = this.vehicleParameter.speed;
     if (this.navigation === NavigationType.joystick && this.maxSpeed > 100)
@@ -994,6 +992,7 @@ export default class DriveToLocation extends Vue {
     window.removeEventListener('touchend', this.enableMapPan);
     window.removeEventListener('keydown', this.handleKeyDown);
     window.removeEventListener('keyup', this.handleKeyUp);
+    window.removeEventListener('pointerup', this.stopTouchAction);
   }
   //#endregion load / unload
 
@@ -1111,8 +1110,11 @@ export default class DriveToLocation extends Vue {
     this.noStreet = false;
   }
 
+  isIncreaseSpeedStarted = false;
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
   startIncreaseSpeed(event: Event | null = null): void {
-    if (event) event.preventDefault();
+    this.isIncreaseSpeedStarted = true;
+    //if (event) event.preventDefault();
     clearInterval(this.decreaseSpeedInterval);
     this.decreaseSpeedInterval = -1;
     this.increaseSpeed();
@@ -1122,14 +1124,23 @@ export default class DriveToLocation extends Vue {
     );
   }
 
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
   stopIncreaseSpeed(event: Event | null = null): void {
-    if (event) event.preventDefault();
+    //if (event) event.preventDefault();
     clearInterval(this.intervalGas);
     if (this.decreaseSpeedInterval === -1) {
       this.decreaseSpeedInterval = setInterval(
         () => this.decreaseSpeed(5),
         1000 / this.stepsPerSecond
       );
+    }
+    this.isIncreaseSpeedStarted = false;
+  }
+
+  stopTouchAction(event: Event | null = null): void {
+    if (this.navigation !== NavigationType.joystick) {
+      if (this.isIncreaseSpeedStarted) this.stopIncreaseSpeed(event);
+      if (this.isDecreaseSpeedStarted) this.stopDecreaseSpeed(event);
     }
   }
 
@@ -1146,8 +1157,11 @@ export default class DriveToLocation extends Vue {
     this.speed = speed;
   }
 
+  isDecreaseSpeedStarted = false;
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
   startDecreaseSpeed(event: Event | null = null): void {
-    if (event) event.preventDefault();
+    this.isDecreaseSpeedStarted = true;
+    //if (event) event.preventDefault();
     clearInterval(this.decreaseSpeedInterval);
     this.decreaseSpeedInterval = -1;
     const speed = this.speed;
@@ -1158,8 +1172,9 @@ export default class DriveToLocation extends Vue {
     );
   }
 
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
   stopDecreaseSpeed(event: Event | null = null): void {
-    if (event) event.preventDefault();
+    //if (event) event.preventDefault();
     clearInterval(this.intervalBreak);
     if (this.decreaseSpeedInterval === -1) {
       this.decreaseSpeedInterval = setInterval(
@@ -1167,6 +1182,7 @@ export default class DriveToLocation extends Vue {
         1000 / this.stepsPerSecond
       );
     }
+    this.isDecreaseSpeedStarted = false;
   }
 
   decreaseSpeed(
