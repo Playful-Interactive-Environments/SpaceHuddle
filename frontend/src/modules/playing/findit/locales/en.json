@@ -28,8 +28,8 @@
     "place": "Place",
     "play": "Start",
     "tutorial": {
-      "placing": "Click on any spot in the scene to get a list of placeable objects and choose one of those objects to place it.\nMove the object by drag and drop and rotate, scale and delete the selected object by using the toolbar button.",
-      "finding": "This scene is not as harmless as it might seem!\nScattered throughout these scene are dangerous hazards. Collect them by clicking on them and prevent a massive disaster before it is too late!\nUse the magnifying glass to look behind trees and other view obstructing objects."
+      "placing": "Building:\nClick on any spot in the scene to get a list of placeable objects and choose one of those objects to place it.\nMove the object by drag and drop and rotate, scale or delete the selected object by using the toolbar button.",
+      "finding": "Searching: \nScattered throughout this scene are dangerous hazards. Collect them by clicking on them and prevent a massive disaster before it is too late!\nUse the magnifying glass to look behind trees and other view obstructing objects."
     },
     "collectable": "very good, this object was searched for",
     "not-collectable": "this object does not belong here, but is not wanted in this case",

@@ -42,6 +42,13 @@
       :tracking-manager="trackingManager"
       :vehicle="vehicle"
     />
+    <el-button
+        type="secondary"
+        v-if="gameStep === GameStep.Select && gameState === GameState.Game"
+        class="tutorialButton"
+        @click="gameState = GameState.Info"
+    ><font-awesome-icon :icon="['fas', 'lightbulb']"
+    /></el-button>
   </div>
 </template>
 
@@ -455,5 +462,13 @@ export default class Participant extends Vue {
 .mapSpace {
   position: relative;
   overflow: auto;
+}
+.tutorialButton {
+  position: absolute;
+  margin: 0;
+  bottom: 0.2rem;
+  left: 0.2rem;
+  text-align: center;
+  background-color: var(--color-background);
 }
 </style>

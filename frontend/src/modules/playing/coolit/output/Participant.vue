@@ -28,6 +28,13 @@
       @finished="levelPlayed"
       @replayFinished="replayedFinished"
     />
+    <el-button
+        type="secondary"
+        v-if="gameStep === GameStep.Select && gameState === GameState.Game"
+        class="tutorialButton"
+        @click="gameState = GameState.Info"
+    ><font-awesome-icon :icon="['fas', 'lightbulb']"
+    /></el-button>
   </div>
 </template>
 
@@ -231,5 +238,14 @@ export default class Participant extends Vue {
 .mapSpace {
   position: relative;
   width: 100%;
+}
+.tutorialButton {
+  position: absolute;
+  margin: 0;
+  top: 0.4rem;
+  left: 0.4rem;
+  text-align: center;
+  background-color: white;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 </style>

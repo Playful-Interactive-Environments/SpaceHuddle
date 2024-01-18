@@ -35,6 +35,13 @@
       :play-state-result="playStateResult"
       @replayFinished="replayFinished"
     />
+    <el-button
+        type="secondary"
+        v-if="gameStep === GameStep.Select && gameState === GameState.Game"
+        class="tutorialButton"
+        @click="gameState = GameState.Info"
+    ><font-awesome-icon :icon="['fas', 'lightbulb']"
+    /></el-button>
   </div>
 </template>
 
@@ -103,7 +110,7 @@ export default class Participant extends Vue {
   // The general state of the game (tutorial, playing, ...) and smaller steps (edit-mode, play-mode, ...) within those states.
   gameStep = GameStep.Select;
   GameStep = GameStep;
-  gameState = GameState.Info;
+  gameState = GameState.Game;
   GameState = GameState;
 
   trackingManager!: TrackingManager;
@@ -178,6 +185,11 @@ export default class Participant extends Vue {
         return [{ key: 'placing', texture: 'placing.gif' }];
       case GameStep.Play:
         return [{ key: 'finding', texture: 'finding.gif' }];
+      case GameStep.Select:
+        return [
+          { key: 'placing', texture: 'placing.gif' },
+          { key: 'finding', texture: 'finding.gif' },
+        ];
     }
     return [];
   }
@@ -260,5 +272,13 @@ export default class Participant extends Vue {
 <style lang="scss" scoped>
 .gameSpace {
   position: relative;
+}
+.tutorialButton {
+  position: absolute;
+  margin: 0;
+  bottom: 0.2rem;
+  left: 0.2rem;
+  text-align: center;
+  background-color: transparent;
 }
 </style>

@@ -38,6 +38,13 @@
         {{ $t('module.playing.shopit.participant.returnToMenu') }}
       </el-button>
     </div>
+    <el-button
+      type="secondary"
+      v-if="gameStep === GameStep.Join && gameState === GameState.Game"
+      class="tutorialButton"
+      @click="gameState = GameState.Info"
+      ><font-awesome-icon :icon="['fas', 'lightbulb']"
+    /></el-button>
   </div>
 </template>
 
@@ -524,5 +531,14 @@ export default class Participant extends Vue {
 .returnButton {
   position: absolute;
   bottom: 2rem;
+}
+
+.tutorialButton {
+  position: absolute;
+  margin: 0;
+  bottom: 0.2rem;
+  left: 0.2rem;
+  text-align: center;
+  background-color: transparent;
 }
 </style>
