@@ -1118,6 +1118,7 @@ export default class DriveToLocation extends Vue {
     clearInterval(this.decreaseSpeedInterval);
     this.decreaseSpeedInterval = -1;
     this.increaseSpeed();
+    clearInterval(this.intervalGas);
     this.intervalGas = setInterval(
       this.increaseSpeed,
       1000 / this.stepsPerSecond
@@ -1166,6 +1167,7 @@ export default class DriveToLocation extends Vue {
     this.decreaseSpeedInterval = -1;
     const speed = this.speed;
     this.decreaseSpeed(1, speed);
+    clearInterval(this.intervalBreak);
     this.intervalBreak = setInterval(
       () => this.decreaseSpeed(1, speed),
       1000 / this.stepsPerSecond
