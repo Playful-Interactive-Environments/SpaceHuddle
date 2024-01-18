@@ -133,18 +133,6 @@
               "pivot": [0.5, 1],
               "emits": []
             },
-            "parkingLot01": {
-              "heatRationCoefficient": 3,
-              "heatAbsorptionCoefficientLight": 3,
-              "heatAbsorptionCoefficientHeat": 3,
-              "heatRadiationCoefficient": 3,
-              "initialTemperature": 14,
-              "maxCount": 10,
-              "width": 10,
-              "shape": "rect",
-              "pivot": [0.5, 1],
-              "emits": []
-            },
             "industry01": {
               "heatRationCoefficient": 2,
               "heatAbsorptionCoefficientLight": 2,
@@ -218,6 +206,18 @@
               "pivot": [0.5, 1],
               "emits": [],
               "type": "carbonSink"
+            },
+            "parkingLot01": {
+              "heatRationCoefficient": 3,
+              "heatAbsorptionCoefficientLight": 3,
+              "heatAbsorptionCoefficientHeat": 3,
+              "heatRadiationCoefficient": 3,
+              "initialTemperature": 14,
+              "maxCount": 10,
+              "width": 10,
+              "shape": "rect",
+              "pivot": [0.5, 1],
+              "emits": []
             },
             "cow": {
               "heatRationCoefficient": 0,
