@@ -240,11 +240,7 @@
         B
       </el-button>
       <el-button
-        v-if="
-          zoomReady &&
-          (navigation === NavigationType.speed ||
-            navigation === NavigationType.speedDirection)
-        "
+        v-if="zoomReady && hasAccelerationButtons"
         class="gas"
         @pointerdown="startIncreaseSpeed"
         @pointerup="stopIncreaseSpeed"
@@ -254,11 +250,7 @@
         G
       </el-button>
       <el-slider
-        v-if="
-          zoomReady &&
-          (navigation === NavigationType.acceleration ||
-            navigation === NavigationType.accelerationDirection)
-        "
+        v-if="zoomReady && hasAccelerationSlider"
         v-model="accelerationFactor"
         :max="maxAccelerationFactor"
         :min="minAccelerationFactor"
@@ -573,6 +565,20 @@ export default class DriveToLocation extends Vue {
         percentage: this.convertSpeedToColorPercentage(100),
       },
     ];
+  }
+
+  get hasAccelerationSlider(): boolean {
+    return (
+      this.navigation === NavigationType.acceleration ||
+      this.navigation === NavigationType.accelerationDirection
+    );
+  }
+
+  get hasAccelerationButtons(): boolean {
+    return (
+      this.navigation === NavigationType.speed ||
+      this.navigation === NavigationType.speedDirection
+    );
   }
 
   calculateColor(
@@ -1114,7 +1120,7 @@ export default class DriveToLocation extends Vue {
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   startIncreaseSpeed(event: Event | null = null): void {
     this.isIncreaseSpeedStarted = true;
-    //if (event) event.preventDefault();
+    if (event && this.hasAccelerationButtons) event.preventDefault();
     clearInterval(this.decreaseSpeedInterval);
     this.decreaseSpeedInterval = -1;
     this.increaseSpeed();
@@ -1127,7 +1133,7 @@ export default class DriveToLocation extends Vue {
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   stopIncreaseSpeed(event: Event | null = null): void {
-    //if (event) event.preventDefault();
+    if (event && this.hasAccelerationButtons) event.preventDefault();
     clearInterval(this.intervalGas);
     if (this.decreaseSpeedInterval === -1) {
       this.decreaseSpeedInterval = setInterval(
@@ -1162,7 +1168,7 @@ export default class DriveToLocation extends Vue {
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   startDecreaseSpeed(event: Event | null = null): void {
     this.isDecreaseSpeedStarted = true;
-    //if (event) event.preventDefault();
+    if (event && this.hasAccelerationButtons) event.preventDefault();
     clearInterval(this.decreaseSpeedInterval);
     this.decreaseSpeedInterval = -1;
     const speed = this.speed;
@@ -1176,7 +1182,7 @@ export default class DriveToLocation extends Vue {
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   stopDecreaseSpeed(event: Event | null = null): void {
-    //if (event) event.preventDefault();
+    if (event && this.hasAccelerationButtons) event.preventDefault();
     clearInterval(this.intervalBreak);
     if (this.decreaseSpeedInterval === -1) {
       this.decreaseSpeedInterval = setInterval(
