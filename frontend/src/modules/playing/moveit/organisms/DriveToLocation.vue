@@ -207,7 +207,7 @@
           :stick-size="40"
           @move="move($event)"
           @start="start"
-          @stop="stop"
+          @stop="stopJoystick"
           stickColor="radial-gradient(circle at 60% 55%, #ffffff, #aaaaaa)"
           :base-color="`radial-gradient(circle, #757d76ff 20%, #26352799 59%, ${getSpeedColor(
             moveSpeed,
@@ -1063,48 +1063,50 @@ export default class DriveToLocation extends Vue {
   corners: { point: [number, number]; active: boolean }[] = [];
   searchPoints: { point: [number, number]; active: boolean; color: string }[] =
     [];
-  stop(): void {
-    if (this.navigation === NavigationType.joystick) {
-      this.enableMapPan();
-      clearInterval(this.intervalCalculation);
-      if (!this.isMoving) return;
-      this.isMoving = false;
-      this.moveSpeed = 0;
-      this.stops++;
+  stopJoystick(): void {
+    if (this.navigation === NavigationType.joystick) this.stop();
+  }
 
-      if (this.vehicle.category === 'bus') {
-        for (const busStop of this.busStopList) {
-          const distance = turf.distance(
-            turf.point(this.mapDrivingPoint),
-            turf.point(busStop.coordinates)
-          );
-          if (distance < 0.05) {
-            let addCount = busStop.persons;
-            if (addCount > this.vehicleParameter.persons - this.personCount)
-              addCount = this.vehicleParameter.persons - this.personCount;
-            this.boardingPersons = addCount;
-            this.personCount += addCount;
-            busStop.persons -= addCount;
-          }
+  stop(): void {
+    this.enableMapPan();
+    clearInterval(this.intervalCalculation);
+    if (!this.isMoving) return;
+    this.isMoving = false;
+    this.moveSpeed = 0;
+    this.stops++;
+
+    if (this.vehicle.category === 'bus') {
+      for (const busStop of this.busStopList) {
+        const distance = turf.distance(
+          turf.point(this.mapDrivingPoint),
+          turf.point(busStop.coordinates)
+        );
+        if (distance < 0.05) {
+          let addCount = busStop.persons;
+          if (addCount > this.vehicleParameter.persons - this.personCount)
+            addCount = this.vehicleParameter.persons - this.personCount;
+          this.boardingPersons = addCount;
+          this.personCount += addCount;
+          busStop.persons -= addCount;
         }
       }
+    }
 
-      const speedDrivingDistance = 0.04;
-      //const maxStreetDistance = 0.0001;
-      const maxCornerDistance = 0;
-      if (this.movingType === MovingType.free) {
-        this.snapToCorner(speedDrivingDistance);
-      } else {
-        const newDrivingPoint = this.getNewDrivingPoint(speedDrivingDistance);
-        const insideSegment = this.isDrivingAngleInsideNextSegment(
-          this.routePath,
-          speedDrivingDistance,
-          newDrivingPoint,
-          maxCornerDistance
-        );
-        if (insideSegment.corner) {
-          this.updateDrivingPoint(insideSegment.corner, [], 0.005);
-        }
+    const speedDrivingDistance = 0.04;
+    //const maxStreetDistance = 0.0001;
+    const maxCornerDistance = 0;
+    if (this.movingType === MovingType.free) {
+      this.snapToCorner(speedDrivingDistance);
+    } else {
+      const newDrivingPoint = this.getNewDrivingPoint(speedDrivingDistance);
+      const insideSegment = this.isDrivingAngleInsideNextSegment(
+        this.routePath,
+        speedDrivingDistance,
+        newDrivingPoint,
+        maxCornerDistance
+      );
+      if (insideSegment.corner) {
+        this.updateDrivingPoint(insideSegment.corner, [], 0.005);
       }
     }
   }
@@ -1142,6 +1144,7 @@ export default class DriveToLocation extends Vue {
     if (event && this.hasAccelerationButtons) event.preventDefault();
     clearInterval(this.intervalGas);
     if (this.decreaseSpeedInterval === -1) {
+      clearInterval(this.decreaseSpeedInterval);
       this.decreaseSpeedInterval = setInterval(
         () => this.decreaseSpeed(5),
         1000 / this.stepsPerSecond
@@ -1191,6 +1194,7 @@ export default class DriveToLocation extends Vue {
     if (event && this.hasAccelerationButtons) event.preventDefault();
     clearInterval(this.intervalBreak);
     if (this.decreaseSpeedInterval === -1) {
+      clearInterval(this.decreaseSpeedInterval);
       this.decreaseSpeedInterval = setInterval(
         () => this.decreaseSpeed(5),
         1000 / this.stepsPerSecond
