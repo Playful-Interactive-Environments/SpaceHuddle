@@ -28,8 +28,8 @@
             :collider-delta="20"
             :show-bounds="false"
             :object-space="ObjectSpace.RelativeToBackground"
-            :x="placeable.position[0]"
-            :y="placeable.position[1]"
+            :x="getDisplayPosition(placeable)[0]"
+            :y="getDisplayPosition(placeable)[1]"
             :rotation="placeable.rotation"
             :scale="placeable.scale"
             :options="{
@@ -164,6 +164,7 @@ import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
 import { Idea } from '@/types/api/Idea';
 import * as configParameter from '@/utils/game/configParameter';
 import { BulgePinchFilter } from 'pixi-filters';
+import { Placeable } from '@/types/game/Placeable';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
@@ -275,7 +276,7 @@ export default class PlayState extends Vue {
   startTime = Date.now();
   textureToken = pixiUtil.createLoadingToken();
   zoomFilter: BulgePinchFilter = new BulgePinchFilter({
-    radius: this.searchSize,
+    radius: this.zoomSize,
     strength: 0.5,
     center: [0.5, 0.5],
   });
@@ -321,7 +322,15 @@ export default class PlayState extends Vue {
   }
 
   get searchSize(): number {
-    return this.gameWidth / 10;
+    return this.gameWidth / 6;
+  }
+
+  get zoomSize(): number {
+    return (this.searchSize / 5) * 4;
+  }
+
+  getDisplayPosition(placeable: Placeable): [number, number] {
+    return placeable.position;
   }
 
   mounted(): void {
@@ -382,8 +391,8 @@ export default class PlayState extends Vue {
       this.searchGraphics.drawRect(
         -searchDelta,
         -searchDelta,
-        this.gameWidth + searchDelta,
-        this.gameHeight + searchDelta
+        this.gameWidth + searchDelta * 2,
+        this.gameHeight + searchDelta * 2
       );
       this.searchGraphics.beginHole();
       this.searchGraphics.drawCircle(
@@ -407,7 +416,7 @@ export default class PlayState extends Vue {
 
   @Watch('gameHeight', { immediate: true })
   onGameWidthSet(): void {
-    this.zoomFilter.radius = this.searchSize;
+    this.zoomFilter.radius = this.zoomSize;
     this.searchPosition = [this.gameWidth / 2, this.gameHeight / 2];
   }
 
