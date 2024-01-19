@@ -206,8 +206,10 @@
           :size="120"
           :stick-size="40"
           @move="move($event)"
-          @start="start"
+          @start="startJoystick"
           @stop="stopJoystick"
+          @mousedown="disableMapPan"
+          v-on:touchstart="disableMapPan"
           stickColor="radial-gradient(circle at 60% 55%, #ffffff, #aaaaaa)"
           :base-color="`radial-gradient(circle, #757d76ff 20%, #26352799 59%, ${getSpeedColor(
             moveSpeed,
@@ -271,7 +273,7 @@
           },
         }"
         vertical
-        height="6rem"
+        height="10rem"
         @pointerdown="startIncreaseSpeed"
         @pointerup="stopIncreaseSpeed"
         class="accelerationFactor"
@@ -663,9 +665,10 @@ export default class DriveToLocation extends Vue {
     return turfUtils.getRoute(this.drivenPath);
   }
 
-  getDrivingDistance(): number {
+  getDrivingDistance(moveSpeed: number | null = null): number {
+    if (moveSpeed === null) moveSpeed = this.moveSpeed;
     const drivingTime = (this.intervalCalculationTime / (1000 * 3600)) * 10;
-    return this.moveSpeed * drivingTime;
+    return moveSpeed * drivingTime;
   }
 
   getNewDrivingPoint(distance: number): [number, number] {
@@ -778,9 +781,9 @@ export default class DriveToLocation extends Vue {
         busLayer['source-layer'] = 'poi';
         map.addLayer(busLayer);
       }
-      setTimeout(() => {
+      /*setTimeout(() => {
         this.updateVisibleBusStops();
-      }, 1000);
+      }, 1000);*/
 
       for (const layer of notNeededLayers) {
         map.removeLayer(layer.id);
@@ -892,11 +895,13 @@ export default class DriveToLocation extends Vue {
     this.busStopList = features
       .filter((f) => f.properties.class === 'bus')
       .map((f) => {
+        let persons = Math.ceil(Math.random() * 10);
+        if (persons < 1) persons = 1;
         return {
           coordinates: (f.geometry as any).coordinates,
           name: f.properties.name,
           id: f.id,
-          persons: Math.ceil(Math.random() * 10),
+          persons: persons,
         } as BusStop;
       });
   }
@@ -922,10 +927,10 @@ export default class DriveToLocation extends Vue {
       this.personCount = Math.ceil(
         Math.random() * (this.vehicleParameter.persons / 3) + 1
       );
-      this.busStopInterval = setInterval(
+      /*this.busStopInterval = setInterval(
         this.updateVisibleBusStops,
         this.busStopIntervalTime
-      );
+      );*/
     }
     for (const particleName in gameConfig.particles) {
       const particle = gameConfig.particles[particleName];
@@ -1009,18 +1014,21 @@ export default class DriveToLocation extends Vue {
   //#endregion load / unload
 
   //#region navigation
-  start(event: any): void {
-    if (this.navigation === NavigationType.joystick) {
-      this.disableMapPan();
-      this.boardingPersons = 0;
-      this.move(event);
-      this.isMoving = true;
-      this.intervalCalculation = setInterval(
-        this.updateTrace,
-        this.intervalCalculationTime
-      );
-      this.noStreet = false;
-    }
+  startJoystick(event: any): void {
+    if (this.navigation === NavigationType.joystick) this.start(event);
+  }
+
+  start(event: any | null = null): void {
+    this.disableMapPan();
+    this.boardingPersons = 0;
+    if (event) this.move(event);
+    this.isMoving = true;
+    clearInterval(this.intervalCalculation);
+    this.intervalCalculation = setInterval(
+      this.updateTrace,
+      this.intervalCalculationTime
+    );
+    this.noStreet = false;
   }
 
   disableMapPan(): void {
@@ -1067,6 +1075,7 @@ export default class DriveToLocation extends Vue {
     if (this.navigation === NavigationType.joystick) this.stop();
   }
 
+  addedBusList: number[] = [];
   stop(): void {
     this.enableMapPan();
     clearInterval(this.intervalCalculation);
@@ -1076,7 +1085,9 @@ export default class DriveToLocation extends Vue {
     this.stops++;
 
     if (this.vehicle.category === 'bus') {
+      this.updateVisibleBusStops();
       for (const busStop of this.busStopList) {
+        if (this.addedBusList.find((item) => item === busStop.id)) continue;
         const distance = turf.distance(
           turf.point(this.mapDrivingPoint),
           turf.point(busStop.coordinates)
@@ -1088,6 +1099,8 @@ export default class DriveToLocation extends Vue {
           this.boardingPersons = addCount;
           this.personCount += addCount;
           busStop.persons -= addCount;
+          this.addedBusList.push(busStop.id);
+          break;
         }
       }
     }
@@ -1098,15 +1111,27 @@ export default class DriveToLocation extends Vue {
     if (this.movingType === MovingType.free) {
       this.snapToCorner(speedDrivingDistance);
     } else {
-      const newDrivingPoint = this.getNewDrivingPoint(speedDrivingDistance);
-      const insideSegment = this.isDrivingAngleInsideNextSegment(
+      const corner = turfUtils.isCornerPoint(
         this.routePath,
-        speedDrivingDistance,
-        newDrivingPoint,
-        maxCornerDistance
+        this.mapDrivingPoint
       );
-      if (insideSegment.corner) {
-        this.updateDrivingPoint(insideSegment.corner, [], 0.005);
+      if (corner.value) {
+        if (
+          corner.location[0] !== this.mapDrivingPoint[0] ||
+          corner.location[1] !== this.mapDrivingPoint[1]
+        )
+          this.updateDrivingPoint(corner.location, [], 0.005);
+      } else {
+        const newDrivingPoint = this.getNewDrivingPoint(speedDrivingDistance);
+        const insideSegment = this.isDrivingAngleInsideNextSegment(
+          this.routePath,
+          speedDrivingDistance,
+          newDrivingPoint,
+          maxCornerDistance
+        );
+        if (insideSegment.corner) {
+          this.updateDrivingPoint(insideSegment.corner, [], 0.005);
+        }
       }
     }
   }
@@ -1160,17 +1185,30 @@ export default class DriveToLocation extends Vue {
     }
   }
 
+  increaseValue = 0;
   increaseSpeed(): void {
-    let speed = this.speed;
-    if (this.speed < this.maxSpeed && !this.noStreet) {
-      if (this.speed + this.accelerationFactor < this.maxSpeed) {
-        speed += this.accelerationFactor;
-      } else {
-        speed += this.maxSpeed - this.speed;
+    if (this.accelerationFactor > 0 && this.speed < this.maxSpeed) {
+      let speed = this.speed;
+      if (this.speed < this.maxSpeed && !this.noStreet) {
+        if (this.speed + this.accelerationFactor < this.maxSpeed) {
+          speed += this.accelerationFactor;
+        } else {
+          speed += this.maxSpeed - this.speed;
+        }
       }
+      if (speed < 0) speed = 0;
+      if (speed !== this.speed) {
+        if (this.speed !== 0 || this.checkPossibility(speed)) {
+          this.speed = speed;
+          this.increaseValue = this.speed;
+        }
+      }
+    } else if (this.accelerationFactor < 0 && this.speed > 0) {
+      this.decreaseSpeed(
+        this.accelerationFactor - this.minAccelerationFactor + 0.3,
+        this.increaseValue
+      );
     }
-    if (speed < 0) speed = 0;
-    this.speed = speed;
   }
 
   isDecreaseSpeedStarted = false;
@@ -1300,16 +1338,8 @@ export default class DriveToLocation extends Vue {
   @Watch('speed', { immediate: true })
   onSpeedChanged(): void {
     if (this.moveSpeed === 0 && this.speed > 0) {
-      this.isMoving = true;
-      this.intervalCalculation = setInterval(
-        this.updateTrace,
-        this.intervalCalculationTime
-      );
-    } else if (
-      this.moveSpeed > 0 &&
-      this.speed === 0 &&
-      this.navigation !== NavigationType.joystick
-    ) {
+      this.start();
+    } else if (this.moveSpeed > 0 && this.speed === 0) {
       this.stop();
     }
     this.moveSpeed = this.speed;
@@ -1749,6 +1779,29 @@ export default class DriveToLocation extends Vue {
       return possibleSegments;
     }
     return [];
+  }
+
+  checkPossibility(speed: number): boolean {
+    const speedDrivingDistance = this.getDrivingDistance(speed);
+    const maxCornerDistance =
+      this.movingType === MovingType.free ? 0.03 : 0.002;
+    if (this.movingType === MovingType.free) {
+      const possibleSegments = this.getPossibleSegments(
+        speedDrivingDistance,
+        maxCornerDistance,
+        maxCornerDistance
+      );
+      return possibleSegments.length > 0;
+    } else {
+      const newDrivingPoint = this.getNewDrivingPoint(speedDrivingDistance);
+      const insideSegment = this.isDrivingAngleInsideNextSegment(
+        this.routePath,
+        speedDrivingDistance,
+        newDrivingPoint,
+        maxCornerDistance
+      );
+      return insideSegment.value;
+    }
   }
 
   noStreet = false;

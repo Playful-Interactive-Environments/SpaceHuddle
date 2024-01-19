@@ -326,6 +326,39 @@ export function isCornerBetweenPoints(
   return { location: targetPoint, value: false };
 }
 
+export function isCornerPoint(
+  routePath: FeatureCollection,
+  actualPoint: [number, number]
+): { location: [number, number]; value: boolean } {
+  if (isPointCloseToRoute(routePath, actualPoint)) {
+    const convertCoordinates = (
+      subCoordinates: [number, number][]
+    ): [number, number][] => {
+      removeSameNeighbors(subCoordinates);
+      return subCoordinates;
+    };
+
+    const distanceToStart = turf.length(
+      getRouteBeforePoint(routePath, actualPoint)
+    );
+    const searchDistance = 0.001;
+    const subRoute = getSubRouteFromDist(
+      routePath,
+      distanceToStart - searchDistance,
+      distanceToStart + searchDistance
+    );
+    if (subRoute) {
+      const subCoordinates = subRoute.geometry.coordinates as [
+        number,
+        number
+      ][];
+      const convertedCoordinates = convertCoordinates(subCoordinates);
+      return isCornerAlongSegment(convertedCoordinates);
+    }
+  }
+  return { location: actualPoint, value: false };
+}
+
 export function moveAlongPath(
   routePath: FeatureCollection,
   actualPoint: [number, number],
