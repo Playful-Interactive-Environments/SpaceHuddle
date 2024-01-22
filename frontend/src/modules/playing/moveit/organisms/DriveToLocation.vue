@@ -6,6 +6,9 @@
       :options="{
         responsive: true,
         maintainAspectRatio: false,
+        animation: {
+          duration: 0,
+        },
         scales: {
           x: {
             title: {
@@ -514,8 +517,8 @@ export default class DriveToLocation extends Vue {
   intervalCalculation = -1;
   readonly intervalAnimationTime = 50;
   intervalAnimation = -1;
-  readonly busStopIntervalTime = 10000;
-  busStopInterval = -1;
+  readonly intervalChartTime = 1000;
+  intervalChart = -1;
   stepsPerSecond = 5;
   intervalGas = -1;
   intervalBreak = -1;
@@ -580,6 +583,13 @@ export default class DriveToLocation extends Vue {
     return (
       this.navigation === NavigationType.speed ||
       this.navigation === NavigationType.speedDirection
+    );
+  }
+
+  get controlDirection(): boolean {
+    return (
+      this.navigation !== NavigationType.speed &&
+      this.navigation !== NavigationType.acceleration
     );
   }
 
@@ -781,9 +791,6 @@ export default class DriveToLocation extends Vue {
         busLayer['source-layer'] = 'poi';
         map.addLayer(busLayer);
       }
-      /*setTimeout(() => {
-        this.updateVisibleBusStops();
-      }, 1000);*/
 
       for (const layer of notNeededLayers) {
         map.removeLayer(layer.id);
@@ -927,10 +934,6 @@ export default class DriveToLocation extends Vue {
       this.personCount = Math.ceil(
         Math.random() * (this.vehicleParameter.persons / 3) + 1
       );
-      /*this.busStopInterval = setInterval(
-        this.updateVisibleBusStops,
-        this.busStopIntervalTime
-      );*/
     }
     for (const particleName in gameConfig.particles) {
       const particle = gameConfig.particles[particleName];
@@ -947,9 +950,7 @@ export default class DriveToLocation extends Vue {
       };
       this.chartData.datasets.push(data);
     }
-    setTimeout(() => {
-      this.updateChart();
-    }, 1000);
+    this.intervalChart = setInterval(this.updateChart, this.intervalChartTime);
 
     window.addEventListener('mouseup', this.enableMapPan);
     window.addEventListener('touchend', this.enableMapPan);
@@ -999,7 +1000,7 @@ export default class DriveToLocation extends Vue {
   unmounted(): void {
     clearInterval(this.intervalCalculation);
     clearInterval(this.intervalAnimation);
-    clearInterval(this.busStopInterval);
+    clearInterval(this.intervalChart);
     clearInterval(this.decreaseSpeedInterval);
     clearInterval(this.intervalGas);
     clearInterval(this.intervalBreak);
@@ -1110,7 +1111,7 @@ export default class DriveToLocation extends Vue {
     const maxCornerDistance = 0;
     if (this.movingType === MovingType.free) {
       this.snapToCorner(speedDrivingDistance);
-    } else {
+    } else if (this.controlDirection) {
       const corner = turfUtils.isCornerPoint(
         this.routePath,
         this.mapDrivingPoint
@@ -1498,10 +1499,15 @@ export default class DriveToLocation extends Vue {
   //#endregion route
 
   //#region chart
+  lastChartLength = 0;
   async updateChart(): Promise<void> {
     if (this.$refs.chartRef) {
       const chartRef = this.$refs.chartRef as any;
-      if (chartRef.chart) {
+      if (
+        chartRef.chart &&
+        this.lastChartLength !== this.chartData.labels.length
+      ) {
+        this.lastChartLength = this.chartData.labels.length;
         chartRef.chart.data = this.chartData;
         chartRef.chart.update();
       }
@@ -1543,7 +1549,6 @@ export default class DriveToLocation extends Vue {
       this.chartData
     );
     if (this.maxChartValue < totalValue) this.maxChartValue = totalValue;
-    this.updateChart();
   }
   //#endregion chart
 
@@ -1565,7 +1570,11 @@ export default class DriveToLocation extends Vue {
         this.stops
       );
       clearInterval(this.intervalCalculation);
-      clearInterval(this.busStopInterval);
+      clearInterval(this.intervalAnimation);
+      clearInterval(this.intervalChart);
+      clearInterval(this.decreaseSpeedInterval);
+      clearInterval(this.intervalGas);
+      clearInterval(this.intervalBreak);
     }
   }
 
@@ -1826,12 +1835,7 @@ export default class DriveToLocation extends Vue {
 
     const speedDrivingDistance = this.getDrivingDistance();
 
-    if (
-      this.isMoving &&
-      this.moveSpeed &&
-      this.navigation !== NavigationType.speed &&
-      this.navigation !== NavigationType.acceleration
-    ) {
+    if (this.isMoving && this.moveSpeed && this.controlDirection) {
       let newDrivingPoint = this.getNewDrivingPoint(speedDrivingDistance);
       let isOnRoute = !this.noStreet;
       let subPath: [number, number][] = [];
@@ -1890,12 +1894,7 @@ export default class DriveToLocation extends Vue {
         const checkMarkDistance = 0.01;
         this.checkRoutePoint = this.getNewDrivingPoint(checkMarkDistance);
       }
-    } else if (
-      this.isMoving &&
-      this.moveSpeed &&
-      (this.navigation === NavigationType.speed ||
-        this.navigation === NavigationType.acceleration)
-    ) {
+    } else if (this.isMoving && this.moveSpeed && !this.controlDirection) {
       const newDrivingPoint = turfUtils.moveAlongPath(
         this.routePath,
         this.mapDrivingPoint,
