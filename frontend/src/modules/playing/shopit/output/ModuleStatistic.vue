@@ -58,6 +58,7 @@ import * as cashService from '@/services/cash-service';
 @Options({
   components: { Bar, Line },
 })
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export default class ModuleStatistic extends Vue {
   @Prop() readonly taskId!: string;
   steps: TaskParticipantIterationStep[] = [];
@@ -93,8 +94,7 @@ export default class ModuleStatistic extends Vue {
     this.steps = steps;
     if (steps.length > 0) {
       //todo iteration + step
-      const maxReplays = steps.sort((a, b) => b.iteration - a.iteration)[0]
-        .iteration;
+      //const maxReplays = steps.sort((a, b) => b.iteration - a.iteration)[0].iteration;
       //this.replayColors.push(...getRandomColorList(maxReplays));
       this.calculateCharts();
     }
@@ -344,7 +344,9 @@ export default class ModuleStatistic extends Vue {
         (item, avatar) =>
           item.avatar.color === avatar.color &&
           item.avatar.symbol === avatar.symbol,
-        (item, winReason) => {return item.parameter.game.winReason === winReason},
+        (item, winReason) => {
+          return item.parameter.game.winReason === winReason;
+        },
         null,
         (list) => list.length,
         (avatar) => AvatarUnicode[avatar.symbol]

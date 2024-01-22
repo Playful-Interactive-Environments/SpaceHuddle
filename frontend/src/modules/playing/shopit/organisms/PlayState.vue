@@ -68,7 +68,7 @@
           {{ $t('module.playing.shopit.participant.waiting.opponent') }}
         </p>
         <p
-            v-show="!initialButtonState && game.parameter.playerNum <= 1"
+          v-show="!initialButtonState && game.parameter.playerNum <= 1"
           class="waiting"
         >
           {{
