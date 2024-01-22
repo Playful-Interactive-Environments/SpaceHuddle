@@ -1150,8 +1150,10 @@ export default class DriveToLocation extends Vue {
   }
 
   isIncreaseSpeedStarted = false;
+  clickPointerId = -1;
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
-  startIncreaseSpeed(event: Event | null = null): void {
+  startIncreaseSpeed(event: PointerEvent | null = null): void {
+    this.clickPointerId = event ? event.pointerId : -1;
     this.isIncreaseSpeedStarted = true;
     if (event && this.hasAccelerationButtons) event.preventDefault();
     clearInterval(this.decreaseSpeedInterval);
@@ -1165,23 +1167,28 @@ export default class DriveToLocation extends Vue {
   }
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
-  stopIncreaseSpeed(event: Event | null = null): void {
-    if (event && this.hasAccelerationButtons) event.preventDefault();
-    clearInterval(this.intervalGas);
-    if (this.decreaseSpeedInterval === -1) {
-      clearInterval(this.decreaseSpeedInterval);
-      this.decreaseSpeedInterval = setInterval(
-        () => this.decreaseSpeed(5),
-        1000 / this.stepsPerSecond
-      );
+  stopIncreaseSpeed(event: PointerEvent | null = null): void {
+    const pointerId = event ? event.pointerId : -1;
+    if (pointerId === this.clickPointerId) {
+      if (event && this.hasAccelerationButtons) event.preventDefault();
+      clearInterval(this.intervalGas);
+      if (this.decreaseSpeedInterval === -1) {
+        clearInterval(this.decreaseSpeedInterval);
+        this.decreaseSpeedInterval = setInterval(
+          () => this.decreaseSpeed(5),
+          1000 / this.stepsPerSecond
+        );
+      }
+      this.isIncreaseSpeedStarted = false;
     }
-    this.isIncreaseSpeedStarted = false;
   }
 
-  stopTouchAction(event: Event | null = null): void {
+  stopTouchAction(
+    event: PointerEvent | TouchEvent | MouseEvent | null = null
+  ): void {
     if (this.navigation !== NavigationType.joystick) {
-      if (this.isIncreaseSpeedStarted) this.stopIncreaseSpeed(event);
-      if (this.isDecreaseSpeedStarted) this.stopDecreaseSpeed(event);
+      if (this.isIncreaseSpeedStarted) this.stopIncreaseSpeed(event as any);
+      if (this.isDecreaseSpeedStarted) this.stopDecreaseSpeed(event as any);
     }
   }
 
@@ -1213,7 +1220,8 @@ export default class DriveToLocation extends Vue {
 
   isDecreaseSpeedStarted = false;
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
-  startDecreaseSpeed(event: Event | null = null): void {
+  startDecreaseSpeed(event: PointerEvent | null = null): void {
+    this.clickPointerId = event ? event.pointerId : -1;
     this.isDecreaseSpeedStarted = true;
     if (event && this.hasAccelerationButtons) event.preventDefault();
     clearInterval(this.decreaseSpeedInterval);
@@ -1228,17 +1236,20 @@ export default class DriveToLocation extends Vue {
   }
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
-  stopDecreaseSpeed(event: Event | null = null): void {
-    if (event && this.hasAccelerationButtons) event.preventDefault();
-    clearInterval(this.intervalBreak);
-    if (this.decreaseSpeedInterval === -1) {
-      clearInterval(this.decreaseSpeedInterval);
-      this.decreaseSpeedInterval = setInterval(
-        () => this.decreaseSpeed(5),
-        1000 / this.stepsPerSecond
-      );
+  stopDecreaseSpeed(event: PointerEvent | null = null): void {
+    const pointerId = event ? event.pointerId : -1;
+    if (pointerId === this.clickPointerId) {
+      if (event && this.hasAccelerationButtons) event.preventDefault();
+      clearInterval(this.intervalBreak);
+      if (this.decreaseSpeedInterval === -1) {
+        clearInterval(this.decreaseSpeedInterval);
+        this.decreaseSpeedInterval = setInterval(
+          () => this.decreaseSpeed(5),
+          1000 / this.stepsPerSecond
+        );
+      }
+      this.isDecreaseSpeedStarted = false;
     }
-    this.isDecreaseSpeedStarted = false;
   }
 
   decreaseSpeed(
