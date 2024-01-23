@@ -300,13 +300,6 @@ enum PlayStateType {
   lost,
 }
 
-export interface PlayStateResult {
-  stars: number;
-  time: number;
-  collected: number;
-  total: number;
-}
-
 @Options({
   computed: {
     ObjectSpace() {

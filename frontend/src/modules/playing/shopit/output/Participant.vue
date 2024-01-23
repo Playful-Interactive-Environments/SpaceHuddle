@@ -161,7 +161,7 @@ export default class Participant extends Vue {
           { key: 'rules1', texture: 'tut1.gif' },
           { key: 'rules2', texture: 'tut2.png' },
           { key: 'pointCalc', texture: 'PointCalc.png' },
-          { key: 'tutGame', texture: 'tutGame.gif'}
+          { key: 'tutGame', texture: 'tutGame.gif' },
         ];
       case GameStep.Play:
         return [{ key: 'play', texture: 'clothes.png' }];
@@ -253,20 +253,20 @@ export default class Participant extends Vue {
       case 'multiplayer':
         this.player = 1;
         this.hostID = id;
-        this.InstantiateGame(id);
+        this.InstantiateGame();
         this.startGame();
         break;
       case 'joinMultiplayer':
         this.player = 2;
         this.joinID = id;
-        this.joinGame(id);
+        this.joinGame();
         this.startGame();
         break;
     }
   }
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async InstantiateGame(id) {
+  async InstantiateGame() {
     await this.checkAvailability();
     await until(() => this.checkedAvailability);
     cashService.deregisterAllGet(this.checkAvailability);
@@ -316,7 +316,7 @@ export default class Participant extends Vue {
   }
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async joinGame(id) {
+  async joinGame() {
     ideaService.registerGetIdeasForTask(
       this.taskId,
       null,
