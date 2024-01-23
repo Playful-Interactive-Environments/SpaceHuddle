@@ -260,10 +260,11 @@ export default class CollectedState extends Vue {
       this.collectKeys = this.getCollectKeys();
       this.activeObject = this.endObjects[0];
       this.activeObjectId = this.endObjects[0].name;
-      const element = document.getElementById(this.activeObjectId);
+      /*const element = document.getElementById(this.activeObjectId);
       if (element) {
         element.classList.add('objectContainerActive');
-      }
+      }*/
+      this.activeObjectChanged(this.activeObject, this.activeObjectId);
     }
     this.domKey = registerDomElement(
       this.$refs.gameArea as HTMLElement,

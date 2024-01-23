@@ -5,9 +5,25 @@
       translation-path="module.playing.shopit.participant.tutorial"
       image-directory="/assets/games/shopit/tutorial"
       :module-info-entry-data-list="tutorialList"
-      @infoRead="gameState = GameState.Game"
+      @infoRead="
+        gameState = GameState.Game;
+        gameStep = GameStep.Tut;
+      "
       :info-type="`shop-it-${gameStep}`"
       :showTutorialOnlyOnce="module.parameter.showTutorialOnlyOnce"
+    />
+    <TutorialGame
+      v-if="gameStep === GameStep.Tut && gameState === GameState.Game"
+      :cost="tutorialCard.cost"
+      :CO2="tutorialCard.CO2"
+      :energy="tutorialCard.energy"
+      :lifetime="tutorialCard.lifetime"
+      :water="tutorialCard.water"
+      :money="tutorialCard.money"
+      :category="tutorialCard.category"
+      :condition="tutorialCard.condition"
+      :cardName="tutorialCard.name"
+      @playFinished="gameStep = GameStep.Join"
     />
     <JoinState
       v-if="gameStep === GameStep.Join && gameState === GameState.Game"
@@ -61,6 +77,7 @@ import { Module } from '@/types/api/Module';
 import PlayState from '@/modules/playing/shopit/organisms/PlayState.vue';
 import JoinState from '@/modules/playing/shopit/organisms/JoinState.vue';
 import SingleplayerState from '@/modules/playing/shopit/organisms/SingleplayerState.vue';
+import TutorialGame from '@/modules/playing/shopit/organisms/TutorialGame.vue';
 import { Idea } from '@/types/api/Idea';
 import * as ideaService from '@/services/idea-service';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
@@ -74,6 +91,7 @@ import { registerDomElement, unregisterDomElement } from '@/vunit';
 export enum GameStep {
   Join = 'join',
   Play = 'play',
+  Tut = 'tut',
   Singleplayer = 'singleplayer',
 }
 
@@ -85,6 +103,7 @@ enum GameState {
 
 @Options({
   components: {
+    TutorialGame,
     ModuleInfo,
     PlayState,
     SingleplayerState,
@@ -108,6 +127,8 @@ export default class Participant extends Vue {
   GameState = GameState;
 
   cards = this.shuffle(this.parseCards(gameConfig));
+  tutorialCard =
+    this.cards[Math.floor(Math.random() * (this.cards.length - 1))];
 
   gameIdeaInstance: Idea | null = null;
   joinID = 0;

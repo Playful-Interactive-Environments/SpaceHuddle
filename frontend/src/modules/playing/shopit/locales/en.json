@@ -23,7 +23,7 @@
       "rules1": "Each player has 3 cards and must fulfill 3 categories. To earn a point in a category the player needs to win a round in that category. The player who finishes all categories first wins!",
       "rules2": "But watch out! There's a limit on how many points you are allowed to spend. You can track your spent points with the red bar.",
       "pointCalc": "If both players play a card of the same category, both cards points will contribute to the limit. If your opponent doesn't have a fitting card for this category, you are lucky and get away with just the points of your card.",
-      "play": "Tutorial text 2"
+      "tutGame": "But first, let's get familiar with the cards and their properties. Click on the grey boxes and assign the correct property to it.\nIf you made a mistake, you can simply press on it again and the selection will be removed."
     },
     "joinState": {
       "singleplayer": "Singleplayer",
@@ -75,6 +75,13 @@
       "lifetime": "A shirts durability can be attributed often times by both the quality of the dress shirt and the amount of times it's been laundered. Some shirts last 6 months, others 2-5 years or longer.",
       "water": "With the production of cotton, it takes about 2,700 liters of water to make just one t-shirt , which is enough water for one person to drink for 900 days.",
       "money": "On average, a basic plain t-shirt can range from 5€ to 30€, while designer or branded t-shirts can cost anywhere from 30€ to 100€ or more."
+    },
+    "cardProperties": {
+      "CO²": "CO²",
+      "electricity": "Energy",
+      "lifetime": "Lifetime",
+      "water": "Water",
+      "money": "Money"
     }
   }
 }
