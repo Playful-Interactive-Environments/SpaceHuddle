@@ -71,6 +71,7 @@
     </div>
     <div class="TutGameButtons">
       <el-button type="primary" :disabled="this.properties.filter((property) => property.correct).length < 5" @click="$emit('playFinished')">Continue</el-button>
+      <el-button type="tertiary" id="skip" @click="$emit('playFinished')">skip</el-button>
     </div>
   </div>
 </template>
@@ -421,5 +422,9 @@ hr {
   display: flex;
   justify-content: center;
   align-items: center;
+  #skip {
+    position: absolute;
+    right: 2rem;
+  }
 }
 </style>

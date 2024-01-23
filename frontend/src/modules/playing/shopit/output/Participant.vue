@@ -161,6 +161,7 @@ export default class Participant extends Vue {
           { key: 'rules1', texture: 'tut1.gif' },
           { key: 'rules2', texture: 'tut2.png' },
           { key: 'pointCalc', texture: 'PointCalc.png' },
+          { key: 'tutGame', texture: 'tutGame.gif'}
         ];
       case GameStep.Play:
         return [{ key: 'play', texture: 'clothes.png' }];
