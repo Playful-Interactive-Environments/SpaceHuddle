@@ -5,6 +5,7 @@
     v-if="playStateType === PlayStateType.play"
   >
     <GameContainer
+      ref="gameContainer"
       v-model:width="gameWidth"
       v-model:height="gameHeight"
       :detect-collision="false"
@@ -14,6 +15,7 @@
       :background-movement="BackgroundMovement.Map"
       @initRenderer="initRenderer"
       @gameObjectClick="gameObjectClick"
+      @updateOffset="offsetChanged"
       :collision-borders="CollisionBorderType.Screen"
       :border-delta="-searchSize"
       :pixi-filter-list="[zoomFilter]"
@@ -164,7 +166,6 @@ import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
 import { Idea } from '@/types/api/Idea';
 import * as configParameter from '@/utils/game/configParameter';
 import { BulgePinchFilter } from 'pixi-filters';
-import { Placeable } from '@/types/game/Placeable';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 const tutorialType = 'find-it-object';
@@ -326,10 +327,91 @@ export default class PlayState extends Vue {
   }
 
   get zoomSize(): number {
-    return (this.searchSize / 5) * 4;
+    return this.searchSize; // (this.searchSize / 5) * 4;
   }
 
-  getDisplayPosition(placeable: Placeable): [number, number] {
+  getDisplayPosition(placeable: FindItPlaceable): [number, number] {
+    const gameContainer = this.$refs.gameContainer as GameContainer;
+    const config =
+      gameConfig[this.levelType].categories[placeable.type].settings;
+    if (gameContainer && config.explanationText) {
+      const boarder = [
+        this.absoluteSearchPosition[0] > 0 &&
+        this.absoluteSearchPosition[0] < this.searchSize
+          ? -1
+          : this.absoluteSearchPosition[0] <
+              gameContainer.backgroundTextureSize[0] &&
+            this.absoluteSearchPosition[0] >
+              gameContainer.backgroundTextureSize[0] - this.searchSize
+          ? 1
+          : 0,
+        this.absoluteSearchPosition[1] > 0 &&
+        this.absoluteSearchPosition[1] < this.searchSize
+          ? -1
+          : this.absoluteSearchPosition[1] <
+              gameContainer.backgroundTextureSize[1] &&
+            this.absoluteSearchPosition[1] >
+              gameContainer.backgroundTextureSize[1] - this.searchSize
+          ? 1
+          : 0,
+      ];
+      const isAtBoarder = [boarder[0] !== 0, boarder[1] !== 0];
+      if (isAtBoarder[0] || isAtBoarder[1]) {
+        const absolutePosition = [
+          (placeable.position[0] / 100) *
+            gameContainer.backgroundTextureSize[0],
+          (placeable.position[1] / 100) *
+            gameContainer.backgroundTextureSize[1],
+        ];
+        const delta = [
+          absolutePosition[0] - this.absoluteSearchPosition[0],
+          absolutePosition[1] - this.absoluteSearchPosition[1],
+        ];
+        if (
+          Math.abs(delta[0]) < this.searchSize &&
+          Math.abs(delta[1]) < this.searchSize &&
+          (absolutePosition[0] < this.searchSize ||
+            absolutePosition[0] >
+              gameContainer.backgroundTextureSize[0] - this.searchSize ||
+            absolutePosition[1] < this.searchSize ||
+            absolutePosition[1] >
+              gameContainer.backgroundTextureSize[1] - this.searchSize)
+        ) {
+          const deltaRelative = [
+            isAtBoarder[0]
+              ? placeable.position[0] - this.relativeSearchPosition[0]
+              : 0,
+            isAtBoarder[1]
+              ? placeable.position[1] - this.relativeSearchPosition[1]
+              : 0,
+          ];
+          const transformConsumption = (
+            value: number,
+            delta: number,
+            sign: number
+          ): number => {
+            if (value !== 0 && Math.sign(delta) === sign) {
+              return Math.sin(value * (Math.PI / 2)) * 4;
+            }
+            return 0;
+          };
+          return [
+            placeable.position[0] -
+              transformConsumption(
+                isAtBoarder[0] ? delta[0] / this.searchSize : 0,
+                deltaRelative[0],
+                boarder[0]
+              ),
+            placeable.position[1] -
+              transformConsumption(
+                isAtBoarder[1] ? delta[1] / this.searchSize : 0,
+                deltaRelative[1],
+                boarder[1]
+              ),
+          ];
+        }
+      }
+    }
     return placeable.position;
   }
 
@@ -365,7 +447,7 @@ export default class PlayState extends Vue {
   getSearchMask(placeable: FindItPlaceable): any {
     const config =
       gameConfig[this.levelType].categories[placeable.type].settings;
-    if (!config.collectable) {
+    if (!config.explanationText) {
       return this.$refs.searchMask;
     }
     return null;
@@ -409,9 +491,38 @@ export default class PlayState extends Vue {
     ];
   }
 
+  absoluteSearchPosition: [number, number] = [0, 0];
+  relativeSearchPosition: [number, number] = [50, 50];
+  calculateRelativeSearchPosition(): void {
+    const gameContainer = this.$refs.gameContainer as GameContainer;
+    if (gameContainer) {
+      this.absoluteSearchPosition = [
+        this.searchPosition[0] +
+          gameContainer.gameObjectOffsetRelativeToScreenMax[0] +
+          gameContainer.gameObjectOffsetRelativeToScreen[0],
+        this.searchPosition[1] +
+          gameContainer.gameObjectOffsetRelativeToScreenMax[1] +
+          gameContainer.gameObjectOffsetRelativeToScreen[1],
+      ];
+      this.relativeSearchPosition = [
+        (this.absoluteSearchPosition[0] /
+          gameContainer.backgroundTextureSize[0]) *
+          100,
+        (this.absoluteSearchPosition[1] /
+          gameContainer.backgroundTextureSize[1]) *
+          100,
+      ];
+    }
+  }
+
+  offsetChanged(): void {
+    this.calculateRelativeSearchPosition();
+  }
+
   @Watch('searchPosition', { immediate: true, deep: true })
   onSearchPositionChanged(): void {
     this.updatedSearchMask();
+    this.calculateRelativeSearchPosition();
   }
 
   @Watch('gameHeight', { immediate: true })

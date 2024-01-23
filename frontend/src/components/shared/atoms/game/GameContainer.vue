@@ -553,6 +553,20 @@ export default class GameContainer extends Vue {
     ] as [number, number];*/
   }
 
+  get gameObjectOffsetRelativeToScreenMin(): [number, number] {
+    return [
+      -(this.gameWidth / 2 - this.backgroundPositionOffsetMin[0]),
+      -(this.gameDisplayHeight / 2 - this.backgroundPositionOffsetMin[1]),
+    ] as [number, number];
+  }
+
+  get gameObjectOffsetRelativeToScreenMax(): [number, number] {
+    return [
+      -(this.gameWidth / 2 - this.backgroundPositionOffsetMax[0]),
+      -(this.gameDisplayHeight / 2 - this.backgroundPositionOffsetMax[1]),
+    ] as [number, number];
+  }
+
   get gameObjectOffsetRelativeToBackgroundCircle(): [number, number] {
     return [
       this.backgroundTextureSize[0] / 2 -
