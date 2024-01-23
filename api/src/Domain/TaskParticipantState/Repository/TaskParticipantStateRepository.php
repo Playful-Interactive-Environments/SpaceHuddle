@@ -2,6 +2,7 @@
 
 namespace App\Domain\TaskParticipantState\Repository;
 
+use Cake\Database\Query;
 use App\Domain\Base\Repository\GenericException;
 use App\Domain\Base\Repository\RepositoryInterface;
 use App\Domain\Base\Repository\RepositoryTrait;
@@ -11,6 +12,7 @@ use App\Domain\TaskParticipantState\Type\TaskParticipantStateType;
 use App\Factory\QueryFactory;
 use Selective\ArrayReader\ArrayReader;
 use function App\Domain\SessionRole\Repository\sizeof;
+use App\Domain\TaskParticipantIteration\Type\TaskParticipantIterationStateType;
 
 /**
  * Repository.
@@ -35,6 +37,45 @@ class TaskParticipantStateRepository implements RepositoryInterface
         );
     }
 
+    private function getSubQueryIterationCount(): Query
+    {
+        return $this->queryFactory->newSelect("task_participant_iteration")
+            ->select(function ($q) {
+                return ['count' => $q->func()->count('task_participant_iteration.id')];
+            })
+            ->where([
+                function ($exp, $q) {
+                    return $exp->equalFields("task_participant_iteration.task_id", "task_participant_state.task_id");
+                },
+                function ($exp, $q) {
+                    return $exp->equalFields(
+                        "task_participant_iteration.participant_id",
+                        "task_participant_state.participant_id"
+                    );
+                },
+            ]);
+    }
+
+    private function getSubQueryIterationDoneCount(): Query
+    {
+        return $this->queryFactory->newSelect("task_participant_iteration")
+            ->select(function ($q) {
+                return ['count' => $q->func()->count('task_participant_iteration.id')];
+            })
+            ->where([
+                "task_participant_iteration.state !=" => TaskParticipantIterationStateType::IN_PROGRESS,
+                function ($exp, $q) {
+                    return $exp->equalFields("task_participant_iteration.task_id", "task_participant_state.task_id");
+                },
+                function ($exp, $q) {
+                    return $exp->equalFields(
+                        "task_participant_iteration.participant_id",
+                        "task_participant_state.participant_id"
+                    );
+                },
+            ]);
+    }
+
     /**
      * Get entity.
      * @param array $conditions The WHERE conditions to add with AND.
@@ -45,7 +86,13 @@ class TaskParticipantStateRepository implements RepositoryInterface
     public function get(array $conditions = [], array $sortConditions = []): null|TaskParticipantStateData|array
     {
         $query = $this->queryFactory->newSelect($this->getEntityName());
-        $query->select(["task_participant_state.*", "participant.symbol", "participant.color"])
+        $query->select([
+            "task_participant_state.*",
+            "participant.symbol",
+            "participant.color",
+            "iteration_count" => $this->getSubQueryIterationCount(),
+            "iteration_done_count" => $this->getSubQueryIterationDoneCount()
+        ])
             ->innerJoin("participant", "task_participant_state.participant_id = participant.id")
             ->andWhere($conditions)
             ->order($sortConditions);
@@ -103,7 +150,9 @@ class TaskParticipantStateRepository implements RepositoryInterface
             "task.name",
             "task.keywords",
             "task.task_type",
-            "SUM(task_participant_state.count) as count"
+            "SUM(task_participant_state.count) as count",
+            "iteration_count" => $this->getSubQueryIterationCount(),
+            "iteration_done_count" => $this->getSubQueryIterationDoneCount()
         ])
             ->innerJoin("task", "task_participant_state.task_id = task.id")
             ->andWhere($conditions)
@@ -142,7 +191,13 @@ class TaskParticipantStateRepository implements RepositoryInterface
             $conditions["participant_id"] = $authorisation->id;
         }
         $query = $this->queryFactory->newSelect($this->getEntityName());
-        $query->select(["task_participant_state.*", "participant.symbol", "participant.color"])
+        $query->select([
+            "task_participant_state.*",
+            "participant.symbol",
+            "participant.color",
+            "iteration_count" => $this->getSubQueryIterationCount(),
+            "iteration_done_count" => $this->getSubQueryIterationDoneCount()
+        ])
             ->innerJoin("participant", "task_participant_state.participant_id = participant.id")
             ->innerJoin("task", "task_participant_state.task_id = task.id")
             ->innerJoin("topic", "task.topic_id = topic.id")

@@ -53,6 +53,20 @@ class TaskParticipantStateData
     public ?AvatarData $avatar;
 
     /**
+     * How many times the task was called by the participant.
+     * @var int
+     * @OA\Property()
+     */
+    public int $iteration_count;
+
+    /**
+     * How many times the task was called by the participant.
+     * @var int
+     * @OA\Property()
+     */
+    public int $iteration_done_count;
+
+    /**
      * Creates a new user role for a session.
      * @param array $data Selection data.
      */
@@ -65,5 +79,7 @@ class TaskParticipantStateData
         $this->state = strtoupper($reader->findString("state"));
         $this->parameter = (object)json_decode($reader->findString("parameter"));
         $this->avatar = new AvatarData($data);
+        $this->iteration_count = $reader->findInt("iteration_count");
+        $this->iteration_done_count = $reader->findInt("iteration_done_count");
     }
 }
