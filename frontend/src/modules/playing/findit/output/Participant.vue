@@ -68,6 +68,7 @@ import { Idea } from '@/types/api/Idea';
 import gameConfig from '@/modules/playing/findit/data/gameConfig.json';
 import CollectedState from '@/modules/playing/findit/organisms/CollectedState.vue';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 
 export enum GameStep {
   Select = 'select',
@@ -246,10 +247,15 @@ export default class Participant extends Vue {
     this.selectedLevel = null;
 
     if (this.trackingManager) {
-      await this.trackingManager.saveIteration({
-        gameStep: this.gameStep,
-        levelId: null,
-      });
+      await this.trackingManager.saveIteration(
+        {
+          gameStep: this.gameStep,
+          levelId: null,
+        },
+        result.stars >= 2
+          ? TaskParticipantIterationStatesType.WIN
+          : TaskParticipantIterationStatesType.LOOS
+      );
       if (
         this.trackingManager.state &&
         (!this.trackingManager.state.parameter.rate ||

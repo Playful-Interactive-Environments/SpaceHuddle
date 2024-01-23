@@ -54,6 +54,7 @@ import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipant
 import PlayLevel from '@/modules/playing/coolit/organisms/PlayLevel.vue';
 import { PlayStateResult } from '@/modules/playing/coolit/organisms/PlayLevel.vue';
 import { Idea } from '@/types/api/Idea';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 
 export enum GameStep {
   Select = 'select',
@@ -204,6 +205,12 @@ export default class Participant extends Vue {
         null,
         true,
         (item) => item.parameter.level === this.activeLevel?.id
+      );
+      await this.trackingManager.saveIteration(
+        {},
+        state.stars >= 2
+          ? TaskParticipantIterationStatesType.WIN
+          : TaskParticipantIterationStatesType.LOOS
       );
 
       if (

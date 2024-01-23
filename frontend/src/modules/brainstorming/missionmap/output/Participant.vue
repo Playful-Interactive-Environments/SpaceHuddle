@@ -508,6 +508,7 @@ import { MglEvent, MglMap, MglNavigationControl } from 'vue-maplibre-gl';
 import CustomMapMarker from '@/components/shared/atoms/CustomMapMarker.vue';
 import { until } from '@/utils/wait';
 import IdeaStates from '@/types/enum/IdeaStates';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 
 interface ProgressValues {
   origin: number;
@@ -879,8 +880,8 @@ export default class Participant extends Vue {
   }
 
   async saveVoting(): Promise<void> {
-    const trackVote = (vote: Vote, points: number): void => {
-      this.trackingManager.createInstanceStepPoints(
+    const trackVote = async (vote: Vote, points: number): Promise<void> => {
+      await this.trackingManager.createInstanceStepPoints(
         vote.ideaId,
         TaskParticipantIterationStepStatesType.NEUTRAL,
         {
@@ -894,6 +895,16 @@ export default class Participant extends Vue {
         this.selectedVote.points,
         true
       );
+      if (
+        this.trackingManager.iteration &&
+        this.trackingManager.iteration.state ===
+          TaskParticipantIterationStatesType.IN_PROGRESS
+      ) {
+        await this.trackingManager.saveIteration(
+          {},
+          TaskParticipantIterationStatesType.PARTICIPATED
+        );
+      }
     };
 
     if (this.selectedIdea) {

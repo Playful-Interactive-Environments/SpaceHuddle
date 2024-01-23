@@ -11,6 +11,8 @@ export interface TaskParticipantState {
   state: TaskParticipantStatesType;
   parameter: any;
   avatar: Avatar;
+  iteration_count: number;
+  iteration_done_count: number;
 }
 
 export interface TaskParticipantStateSum {

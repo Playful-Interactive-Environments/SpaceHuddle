@@ -256,9 +256,17 @@ export default class ParticipantOverview extends Vue {
   tableTasks: { [key: string]: Task[][] } = {};
   finishManuel: { [key: string]: boolean } = {};
 
+  getStateForTask(taskId: string): TaskParticipantState | undefined {
+    return this.states.find(
+      (item) =>
+        item.taskId === taskId &&
+        (item.iteration_count === 0 || item.iteration_done_count > 0)
+    );
+  }
+
   hasFinishCheckMark(task: Task): boolean {
     if (this.finishManuel[task.id]) {
-      const state = this.states.find((item) => item.taskId === task.id);
+      const state = this.getStateForTask(task.id);
       if (state) return true;
     }
     return false;
@@ -277,7 +285,7 @@ export default class ParticipantOverview extends Vue {
   }
 
   taskIsVisible(task: Task): boolean {
-    const state = this.states.find((item) => item.taskId === task.id);
+    const state = this.getStateForTask(task.id);
     return !(state && state.state === TaskParticipantStatesType.FINISHED);
   }
 
@@ -383,7 +391,7 @@ export default class ParticipantOverview extends Vue {
           if (start > this.topicDependencyLimit[topic.id]) break;
           const duration = task.dependency.duration;
           const end = start + duration;
-          const state = this.states.find((item) => item.taskId === task.id);
+          const state = this.getStateForTask(task.id);
           if (!state) {
             this.topicDependencyLimit[topic.id] = start;
             break;
@@ -484,7 +492,7 @@ export default class ParticipantOverview extends Vue {
         type: 'warning',
       }
     ).then(() => {
-      const state = this.states.find((item) => item.taskId === task.id);
+      const state = this.getStateForTask(task.id);
       if (state) {
         state.state = TaskParticipantStatesType.FINISHED;
         taskParticipantService.putParticipantState(task.id, state).then(() => {

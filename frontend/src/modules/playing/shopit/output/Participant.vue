@@ -87,6 +87,7 @@ import * as taskService from '@/services/task-service';
 import { Task } from '@/types/api/Task';
 import TaskParticipantIterationStepStatesType from '@/types/enum/TaskParticipantIterationStepStatesType';
 import { registerDomElement, unregisterDomElement } from '@/vunit';
+import TaskParticipantIterationStatesType from '@/types/enum/TaskParticipantIterationStatesType';
 
 export enum GameStep {
   Join = 'join',
@@ -468,6 +469,7 @@ export default class Participant extends Vue {
     money: number
   ): Promise<void> {
     if (this.trackingManager) {
+      const rate = this.calcRate(win, pointsSpent);
       await this.trackingManager.saveIterationStep(
         {
           game: {
@@ -480,14 +482,19 @@ export default class Participant extends Vue {
             money: money,
             winReason: winReason,
           },
-          rate: this.calcRate(win, pointsSpent),
+          rate: rate,
         },
         null,
         this.calcRate(win, pointsSpent)
       );
-      await this.trackingManager.saveIteration({
-        gameStep: GameStep.Join,
-      });
+      await this.trackingManager.saveIteration(
+        {
+          gameStep: GameStep.Join,
+        },
+        rate && rate >= 2
+          ? TaskParticipantIterationStatesType.WIN
+          : TaskParticipantIterationStatesType.LOOS
+      );
     }
     this.clearAndReset();
   }
