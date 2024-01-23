@@ -22,7 +22,7 @@
               <font-awesome-icon
                 v-if="property.filled && property.iconChosen !== ''"
                 :icon="['fas', property.iconChosen]"
-                :class="{boxIncorrect: showChecks && !property.correct}"
+                :class="{ boxIncorrect: showChecks && !property.correct }"
               />
             </span>
             {{ property.num
@@ -70,8 +70,17 @@
       </div>
     </div>
     <div class="TutGameButtons">
-      <el-button type="primary" :disabled="this.properties.filter((property) => property.correct).length < 5" @click="$emit('playFinished')">Continue</el-button>
-      <el-button type="tertiary" id="skip" @click="$emit('playFinished')">skip</el-button>
+      <el-button
+        type="primary"
+        :disabled="
+          this.properties.filter((property) => property.correct).length < 5
+        "
+        @click="$emit('playFinished')"
+        >Continue</el-button
+      >
+      <el-button type="tertiary" id="skip" @click="$emit('playFinished')"
+        >skip</el-button
+      >
     </div>
   </div>
 </template>
@@ -80,7 +89,16 @@
 import { Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import gameConfig from '@/modules/playing/shopit/data/gameConfig.json';
-import Card from '@/modules/playing/shopit/organisms/Card.vue';
+
+interface Property {
+  name: string;
+  icon: string;
+  unit: string;
+  num: number;
+  iconChosen: string;
+  filled: boolean;
+  correct: boolean;
+}
 
 export default class TutorialGame extends Vue {
   @Prop({ default: 0 }) readonly cost!: number;
@@ -98,7 +116,7 @@ export default class TutorialGame extends Vue {
   activeBox: HTMLElement | null = null;
   showChecks = false;
 
-  properties: any = [];
+  properties: Property[] = [];
 
   mounted() {
     this.properties = [
@@ -170,7 +188,9 @@ export default class TutorialGame extends Vue {
     }
     const element = document.getElementById(id);
     if (element) {
-      const property = this.properties.filter((property) => property.name === element.id)[0];
+      const property = this.properties.filter(
+        (property) => property.name === element.id
+      )[0];
       if (!property.filled) {
         element.classList.add('activeBoxSpan');
         this.activeBox = element;
@@ -185,11 +205,7 @@ export default class TutorialGame extends Vue {
       for (let i = 0; i < this.properties.length; i++) {
         if (this.properties[i].name === this.activeBox.id) {
           this.properties[i].filled = true;
-          if (this.activeBox.id === name) {
-            this.properties[i].correct = true;
-          } else {
-            this.properties[i].correct = false;
-          }
+          this.properties[i].correct = this.activeBox.id === name;
           switch (name) {
             case 'CO²':
               this.properties[i].iconChosen = 'smog';
@@ -209,11 +225,9 @@ export default class TutorialGame extends Vue {
           }
         }
       }
-      if (this.properties.filter((property) => property.filled).length >= 5) {
-        this.showChecks = true;
-      } else {
-        this.showChecks = false;
-      }
+      this.showChecks =
+        this.properties.filter((property) => property.filled).length >= 5;
+      this.activeBox = null;
     }
   }
 }
@@ -308,7 +322,6 @@ hr {
       height: var(--font-size-xlarge);
       width: var(--font-size-xlarge);
       background-color: var(--color-background-darker);
-      display: inline-block;
       border-radius: 2pt;
       border: 2.5pt dashed var(--color-dark-contrast-light);
       display: flex;
