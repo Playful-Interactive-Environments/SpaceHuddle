@@ -1,7 +1,42 @@
 <template>
   <div>
-    <div class="link new">
-      <el-dropdown
+    <div class="link new" @click="selection = !selection">
+      <span class="link-text">
+        {{ $t('module.playing.findit.participant.newLevel') }}
+      </span>
+      <div class="newLevelSelectionContainer" v-if="selection">
+        <el-button
+          class="backButtonSelection"
+          type="primary"
+
+          >{{ $t('participant.molecules.moduleInfo.prev') }}</el-button
+        >
+        <div
+          v-for="configType of Object.keys(gameConfig)"
+          :key="configType"
+          :style="{
+            height: 100 / Object.keys(gameConfig).length + '%',
+            color: getSettingsForLevelType(gameConfig, configType).color,
+            backgroundImage:
+              'url(' +
+              getSettingsForLevelType(gameConfig, configType).background +
+              ')',
+          }"
+          class="newLevelSelection"
+          @click="levelSelected(null, configType)"
+        >
+          <div class="selectionWhite" :style="{height: 100 / Object.keys(gameConfig).length + '%'}"></div>
+          <font-awesome-icon
+            :icon="getSettingsForLevelType(gameConfig, configType).icon"
+          />
+          <p>{{
+            $t(
+                `module.playing.findit.participant.placeables.${configType}.name`
+            )
+          }}</p>
+        </div>
+      </div>
+      <!--      <el-dropdown
         v-on:command="levelSelected(null, $event)"
         size="large"
         popper-class="select-new-level-type"
@@ -31,34 +66,38 @@
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
-      </el-dropdown>
+      </el-dropdown>-->
     </div>
-    <div
-      class="link media"
-      :class="{ own: isOwnLevel(idea), notApproved: !isApproved(idea) }"
-      v-for="idea of ideas"
-      :key="idea.id"
-      :style="{
-        '--level-type-color': getSettingsForLevel(gameConfig, idea).color,
-      }"
-      @click="levelSelected(idea)"
-    >
-      <div class="media-left">
-        <font-awesome-icon :icon="getSettingsForLevel(gameConfig, idea).icon" />
-      </div>
-      <div class="media-content">{{ idea.keywords }}</div>
-      <div class="media-right">
-        <div>
-          <el-rate
-            v-model="mapping[idea.id]"
-            size="large"
-            :max="3"
-            :disabled="true"
+    <div v-if="!selection">
+      <div
+        class="link media"
+        :class="{ own: isOwnLevel(idea), notApproved: !isApproved(idea) }"
+        v-for="idea of ideas"
+        :key="idea.id"
+        :style="{
+          '--level-type-color': getSettingsForLevel(gameConfig, idea).color,
+        }"
+        @click="levelSelected(idea)"
+      >
+        <div class="media-left">
+          <font-awesome-icon
+            :icon="getSettingsForLevel(gameConfig, idea).icon"
           />
         </div>
-        <div>
-          <font-awesome-icon icon="coins" />
-          {{ getPointsForLevel(idea.id) }} / {{ maxLevelPoints }}
+        <div class="media-content">{{ idea.keywords }}</div>
+        <div class="media-right">
+          <div>
+            <el-rate
+              v-model="mapping[idea.id]"
+              size="large"
+              :max="3"
+              :disabled="true"
+            />
+          </div>
+          <div>
+            <font-awesome-icon icon="coins" />
+            {{ getPointsForLevel(idea.id) }} / {{ maxLevelPoints }}
+          </div>
         </div>
       </div>
     </div>
@@ -93,6 +132,7 @@ export default class SelectState extends Vue {
   ideas: Idea[] = [];
   result: TaskParticipantIterationStep[] = [];
   mapping: { [key: string]: number } = {};
+  selection = false;
 
   getSettingsForLevel = configParameter.getSettingsForLevel;
   getSettingsForLevelType = configParameter.getSettingsForLevelType;
@@ -252,6 +292,9 @@ export default class SelectState extends Vue {
   border-radius: calc(var(--border-radius) - 0.2rem) 0 0
     calc(var(--border-radius) - 0.2rem);
   width: 3.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .el-rate--large {
@@ -268,5 +311,49 @@ export default class SelectState extends Vue {
 
 :focus-visible {
   outline: unset;
+}
+
+.newLevelSelection {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-size: cover;
+  flex-direction: column;
+  outline: 0.5rem solid var(--color-background);
+  svg {
+    width: 30%;
+    height: 30%;
+    z-index: 110;
+  }
+  p {
+    z-index: 110;
+    font-size: var(--font-size-xlarge);
+    font-weight: var(--font-weight-bold);
+    margin-top: 6pt;
+  }
+  .selectionWhite {
+    width: 100%;
+    background-color: #ffffff;
+    position: absolute;
+    opacity: 60%;
+    transition: opacity 1s ease-in-out;
+    z-index: 100;
+  }
+}
+
+.newLevelSelectionContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100%);
+  height: 100%;
+  z-index: 100;
+  .backButtonSelection {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 150;
+  }
 }
 </style>
