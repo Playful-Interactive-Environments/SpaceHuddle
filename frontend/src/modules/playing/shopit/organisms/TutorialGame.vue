@@ -53,7 +53,7 @@
     </div>
     <div class="propertyBox">
       <div
-        v-for="property in properties"
+        v-for="property in buttonOrder"
         class="property"
         :key="property.name"
         @click="propertyClicked(property.name)"
@@ -117,6 +117,7 @@ export default class TutorialGame extends Vue {
   showChecks = false;
 
   properties: Property[] = [];
+  buttonOrder: Property[] = [];
 
   mounted() {
     this.properties = [
@@ -166,6 +167,7 @@ export default class TutorialGame extends Vue {
         correct: false,
       },
     ];
+    this.buttonOrder = this.shuffle(this.properties.map((x) => x));
   }
 
   getCardSprite(cardName) {
@@ -229,6 +231,22 @@ export default class TutorialGame extends Vue {
         this.properties.filter((property) => property.filled).length >= 5;
       this.activeBox = null;
     }
+  }
+
+  shuffle(cards) {
+    let currentIndex = cards.length;
+    let randomIndex;
+
+    while (currentIndex > 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+
+      [cards[currentIndex], cards[randomIndex]] = [
+        cards[randomIndex],
+        cards[currentIndex],
+      ];
+    }
+    return cards;
   }
 }
 </script>
