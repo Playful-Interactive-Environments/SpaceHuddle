@@ -166,7 +166,7 @@ export default class Participant extends Vue {
     switch (this.gameStep) {
       case GameStep.Select:
         return [
-          { key: 'select', texture: 'select.jpg' },
+          { key: 'select', texture: 'select.png' },
           { key: 'statistics', texture: 'stats.gif' },
         ];
       case GameStep.Drive:
@@ -175,7 +175,7 @@ export default class Participant extends Vue {
             { key: 'drive', texture: 'drive.gif' },
             { key: 'statsGame', texture: 'statsGame.png' },
             this.NavTutorial,
-            { key: 'bus', texture: 'bus.jpg' },
+            { key: 'bus', texture: 'bus.png' },
           ];
         }
         return [

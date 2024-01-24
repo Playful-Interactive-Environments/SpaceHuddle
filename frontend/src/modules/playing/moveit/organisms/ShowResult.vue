@@ -462,13 +462,13 @@ export default class ShowResult extends Vue {
     switch (name) {
       case 'carbonDioxide':
       case 'methane':
-        return 'sky.jpg';
+        return 'sky.png';
       case 'dust':
         return 'body.png';
       case 'microplastic':
-        return 'water.jpg';
+        return 'water.png';
     }
-    return 'sky.jpg';
+    return 'sky.png';
   }
 
   getParticleAspect(tabName: string, index: number): number {

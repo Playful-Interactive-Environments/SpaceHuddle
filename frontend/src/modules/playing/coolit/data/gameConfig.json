@@ -2,7 +2,7 @@
   "obstacles": {
     "city": {
       "settings": {
-        "background": "/assets/games/coolit/city/background.jpg",
+        "background": "/assets/games/coolit/city/background.png",
         "defaultType": "building",
         "defaultName": "building01",
         "icon": "city",

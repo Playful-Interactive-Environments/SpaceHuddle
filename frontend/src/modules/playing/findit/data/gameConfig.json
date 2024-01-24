@@ -1,7 +1,7 @@
 {
   "fire": {
     "settings": {
-      "background": "/assets/games/findit/fire/background/forest.jpg",
+      "background": "/assets/games/findit/fire/background/forest.png",
       "defaultType": "hazards",
       "defaultName": "cigarette",
       "icon": "fire",
@@ -167,7 +167,7 @@
   },
   "flood": {
     "settings": {
-      "background": "/assets/games/findit/flood/background/flood.jpg",
+      "background": "/assets/games/findit/flood/background/flood.png",
       "defaultType": "hazards",
       "defaultName": "cigarette",
       "icon": "water",
