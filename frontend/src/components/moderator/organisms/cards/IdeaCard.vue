@@ -66,7 +66,10 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item>
-                  <el-switch v-model="sharedStatus" @click="levelSharedChanged"/>
+                  <el-switch
+                    v-model="sharedStatus"
+                    @click="levelSharedChanged"
+                  />
                 </el-dropdown-item>
                 <el-dropdown-item command="edit">
                   <font-awesome-icon icon="pen" />
@@ -193,7 +196,7 @@ export default class IdeaCard extends Vue {
   levelSharedChanged() {
     this.$emit('sharedStatusChanged', this.sharedStatus);
   }
-  
+
   imageLoaded(event: Event): void {
     const id = (event as any).param1;
     if (id === this.idea.id) {
@@ -203,7 +206,8 @@ export default class IdeaCard extends Vue {
 
   mounted(): void {
     window.addEventListener('imageLoaded', this.imageLoaded, false);
-    this.sharedStatus = this.idea.parameter.state === LevelWorkflowType.approved;
+    this.sharedStatus =
+      this.idea.parameter.state === LevelWorkflowType.approved;
   }
 
   unmounted(): void {
@@ -345,7 +349,6 @@ export default class IdeaCard extends Vue {
 
   menuItemSelected(command: string): void {
     switch (command) {
-      //TODO
       case 'edit':
         if (this.handleEditable) this.showSettings = true;
         else this.$emit('ideaStartEdit', this.idea.id);
