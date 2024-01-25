@@ -110,14 +110,12 @@ export default class SpriteCanvas extends Vue {
       ) {
         this.isAnimation = true;
         this.loadedTexture = this.texture;
-        pixiUtil
-          .loadTexture(this.texture, this.eventBus, this.textureToken)
-          .then((sheet) => {
-            this.spritesheet = sheet;
-            this.animationSequence = Object.values(sheet.textures);
-            this.isAnimationLoaded = true;
-            this.startAnimation();
-          });
+        pixiUtil.loadTexture(this.texture, this.textureToken).then((sheet) => {
+          this.spritesheet = sheet;
+          this.animationSequence = Object.values(sheet.textures);
+          this.isAnimationLoaded = true;
+          this.startAnimation();
+        });
       } else {
         this.isAnimationLoaded = false;
         this.animationSequence = [];

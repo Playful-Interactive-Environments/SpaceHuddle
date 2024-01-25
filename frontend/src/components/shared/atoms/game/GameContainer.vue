@@ -737,7 +737,7 @@ export default class GameContainer extends Vue {
     const loadTexture = (): void => {
       if (this.backgroundTexture) {
         pixiUtil
-          .loadTexture(this.backgroundTexture, this.eventBus, this.textureToken)
+          .loadTexture(this.backgroundTexture, this.textureToken)
           .then(async (sprite) => {
             this.backgroundSprite = sprite;
             this.calculateBackgroundSize();
@@ -775,15 +775,22 @@ export default class GameContainer extends Vue {
   //#endregion watch
 
   //#region load / unload
+  private async allTexturesLoaded(): Promise<void> {
+    this.loading = false;
+    if (this.isContainerReady) this.$emit('containerReady');
+  }
+
+  private async texturesLoadingStart(): Promise<void> {
+    this.loading = true;
+  }
+
   domKey = '';
   async mounted(): Promise<void> {
-    this.eventBus.on(EventType.TEXTURES_LOADING_START, async () => {
-      this.loading = true;
-    });
-    this.eventBus.on(EventType.ALL_TEXTURES_LOADED, async () => {
-      this.loading = false;
-      if (this.isContainerReady) this.$emit('containerReady');
-    });
+    this.eventBus.on(
+      EventType.TEXTURES_LOADING_START,
+      this.texturesLoadingStart
+    );
+    this.eventBus.on(EventType.ALL_TEXTURES_LOADED, this.allTexturesLoaded);
 
     //initialise observer in mounted as otherwise this references observer
     this.hierarchyObserver = new MutationObserver(this.hierarchyChanged);
@@ -876,8 +883,11 @@ export default class GameContainer extends Vue {
     Matter.Events.off(this.engine, 'afterUpdate', this.afterPhysicUpdate);
     Matter.Events.off(this.engine, 'beforeUpdate', this.beforePhysicUpdate);
     Matter.Events.off(this.engine.world, 'afterAdd', this.bodyAdded);
-    this.eventBus.off(EventType.TEXTURES_LOADING_START);
-    this.eventBus.off(EventType.ALL_TEXTURES_LOADED);
+    this.eventBus.off(
+      EventType.TEXTURES_LOADING_START,
+      this.texturesLoadingStart
+    );
+    this.eventBus.off(EventType.ALL_TEXTURES_LOADED, this.allTexturesLoaded);
 
     unregisterDomElement(this.domKey);
   }
@@ -1249,7 +1259,7 @@ export default class GameContainer extends Vue {
       ) as PIXI.Container[];
     };
 
-    await until(() => !!this.app);
+    await until(() => !!this.app && !!this.backgroundSprite);
     //const startPos = [...this.backgroundPositionOffset] as [number, number];
     if (this.app) {
       await until(

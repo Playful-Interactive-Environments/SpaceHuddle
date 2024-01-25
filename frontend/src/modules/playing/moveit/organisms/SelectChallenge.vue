@@ -599,7 +599,6 @@ export default class SelectChallenge extends Vue {
     pixiUtil
       .loadTexture(
         '/assets/games/moveit/vehicle/vehicle_animation.json',
-        this.eventBus,
         this.textureToken
       )
       .then(async (sheet) => {

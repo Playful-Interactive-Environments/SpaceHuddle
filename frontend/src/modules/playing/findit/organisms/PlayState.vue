@@ -588,7 +588,6 @@ export default class PlayState extends Vue {
             pixiUtil
               .loadTexture(
                 settings.spritesheet,
-                this.eventBus,
                 this.textureToken
               )
               .then((sheet) => {

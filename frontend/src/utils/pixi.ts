@@ -4,6 +4,7 @@ import { delay, until } from '@/utils/wait';
 import { Emitter } from 'mitt';
 import { EventType } from '@/types/enum/EventType';
 import { v4 as uuidv4 } from 'uuid';
+import app from '@/main';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 export function drawCircleWithGradient(
@@ -237,9 +238,9 @@ const textureState: { [url: string]: { state: TextureState; count: number } } =
   {};
 export async function loadTexture(
   url: string,
-  eventBus: Emitter<Record<EventType, unknown>>,
   token: string | null = null
 ): Promise<any> {
+  const eventBus = app.config.globalProperties.eventBus;
   if (token && !tokenUrls[token].includes(url)) tokenUrls[token].push(url);
   if (textureState[url]) {
     textureState[url].count++;

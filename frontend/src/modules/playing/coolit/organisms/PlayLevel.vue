@@ -4,7 +4,7 @@
     v-if="playStateType === PlayStateType.play && levelType"
   >
     <GameContainer
-      v-if="!gameOver"
+      v-if="!gameOver && spriteSheetsLoaded"
       ref="gameContainer"
       v-model:width="gameWidth"
       v-model:height="gameHeight"
@@ -32,7 +32,7 @@
       :use-pre-calculation="!gameOver"
     >
       <template v-slot:preRender>
-        <container v-if="gameWidth && stylesheets">
+        <container v-if="gameWidth && obstacleList.length > 0">
           <GameObject
             v-for="obstacle in obstacleList"
             :key="obstacle.uuid"
@@ -1181,6 +1181,22 @@ export default class PlayLevel extends Vue {
     );
   }
 
+  get spriteSheetsLoaded(): boolean {
+    let loaded = true;
+    if (this.levelType) {
+      for (const typeName of this.gameConfigTypes) {
+        const settings = this.getLevelTypeCategorySettings(typeName);
+        if (settings) {
+          if (settings.spritesheet && !this.stylesheets[typeName]) {
+            loaded = false;
+            break;
+          }
+        }
+      }
+    } else loaded = false;
+    return loaded;
+  }
+
   calculateTintColor(
     obstacle: CoolItHitRegion,
     alpha = -1
@@ -1300,15 +1316,22 @@ export default class PlayLevel extends Vue {
   //#endregion watch
 
   //#region load / unload
+  private async allTexturesLoaded(): Promise<void> {
+    this.loading = false;
+  }
+
+  private async texturesLoadingStart(): Promise<void> {
+    this.loading = true;
+  }
+
   readonly animationSteps = 10;
   loading = false;
   mounted(): void {
-    this.eventBus.on(EventType.TEXTURES_LOADING_START, async () => {
-      this.loading = true;
-    });
-    this.eventBus.on(EventType.ALL_TEXTURES_LOADED, async () => {
-      this.loading = false;
-    });
+    this.eventBus.on(
+      EventType.TEXTURES_LOADING_START,
+      this.texturesLoadingStart
+    );
+    this.eventBus.on(EventType.ALL_TEXTURES_LOADED, this.allTexturesLoaded);
 
     const initPath = (type: RayType): void => {
       this.rayPath[type] = [];
@@ -1328,7 +1351,6 @@ export default class PlayLevel extends Vue {
     pixiUtil
       .loadTexture(
         '/assets/games/coolit/city/weather.json',
-        this.eventBus,
         this.textureToken
       )
       .then((sheet) => {
@@ -1337,7 +1359,6 @@ export default class PlayLevel extends Vue {
     pixiUtil
       .loadTexture(
         '/assets/games/moveit/molecules.json',
-        this.eventBus,
         this.textureToken
       )
       .then((sheet) => {
@@ -1347,7 +1368,6 @@ export default class PlayLevel extends Vue {
     pixiUtil
       .loadTexture(
         '/assets/games/moveit/vehicle/vehicle_animation.json',
-        this.eventBus,
         this.textureToken
       )
       .then((sheet) => {
@@ -1357,7 +1377,6 @@ export default class PlayLevel extends Vue {
     pixiUtil
       .loadTexture(
         '/assets/games/coolit/city/river.png',
-        this.eventBus,
         this.textureToken
       )
       .then((sheet) => {
@@ -1366,7 +1385,6 @@ export default class PlayLevel extends Vue {
     pixiUtil
       .loadTexture(
         '/assets/games/coolit/city/sun.json',
-        this.eventBus,
         this.textureToken
       )
       .then((sheet) => {
@@ -1669,8 +1687,11 @@ export default class PlayLevel extends Vue {
     this.vehicleIsActive = false;
     pixiUtil.cleanupToken(this.textureToken);
     this.vehicleStylesheets = null;
-    this.eventBus.off(EventType.TEXTURES_LOADING_START);
-    this.eventBus.off(EventType.ALL_TEXTURES_LOADED);
+    this.eventBus.off(
+      EventType.TEXTURES_LOADING_START,
+      this.texturesLoadingStart
+    );
+    this.eventBus.off(EventType.ALL_TEXTURES_LOADED, this.allTexturesLoaded);
   }
 
   previousLevelType = '';
@@ -1738,7 +1759,6 @@ export default class PlayLevel extends Vue {
             pixiUtil
               .loadTexture(
                 settings.spritesheet,
-                this.eventBus,
                 this.textureToken
               )
               .then(async (sheet) => {
@@ -2041,6 +2061,7 @@ export default class PlayLevel extends Vue {
   overheating = false;
   emitObstacleList: string[] = [];
   updateLoop(): void {
+    if (!this.$refs.gameContainer) return;
     this.windForce = this.getWindForce();
     const updateTimeStamp = Date.now();
     const playTime = updateTimeStamp - this.startTime;

@@ -448,6 +448,7 @@
               :alpha="0.5"
             />
             <sprite
+              v-if="difficultySettings.texture"
               :texture="difficultySettings.texture"
               :x="5"
               :y="5"
@@ -530,7 +531,7 @@ enum DifficultyLevel {
 
 interface DifficultySettings {
   temperatureRise: number;
-  texture: PIXI.Texture;
+  texture: PIXI.Texture | null;
   color: string;
   particleConfig: any;
 }
@@ -610,7 +611,9 @@ export default class SelectLevel extends Vue {
         config.maxParticles = 100;
         return {
           temperatureRise: -1,
-          texture: this.spriteSheetDifficulty.textures['planet01.png'],
+          texture: this.spriteSheetDifficulty
+            ? this.spriteSheetDifficulty.textures['planet01.png']
+            : null,
           color: '#0000ff',
           particleConfig: config,
         };
@@ -618,7 +621,9 @@ export default class SelectLevel extends Vue {
         config.maxParticles = 300;
         return {
           temperatureRise: 0,
-          texture: this.spriteSheetDifficulty.textures['planet02.png'],
+          texture: this.spriteSheetDifficulty
+            ? this.spriteSheetDifficulty.textures['planet02.png']
+            : null,
           color: '#00ffff',
           particleConfig: config,
         };
@@ -626,7 +631,9 @@ export default class SelectLevel extends Vue {
         config.maxParticles = 600;
         return {
           temperatureRise: 1,
-          texture: this.spriteSheetDifficulty.textures['planet03.png'],
+          texture: this.spriteSheetDifficulty
+            ? this.spriteSheetDifficulty.textures['planet03.png']
+            : null,
           color: '#ff8800',
           particleConfig: config,
         };
@@ -634,7 +641,9 @@ export default class SelectLevel extends Vue {
         config.maxParticles = 1000;
         return {
           temperatureRise: 2,
-          texture: this.spriteSheetDifficulty.textures['planet04.png'],
+          texture: this.spriteSheetDifficulty
+            ? this.spriteSheetDifficulty.textures['planet04.png']
+            : null,
           color: '#ff0000',
           particleConfig: config,
         };
@@ -642,7 +651,9 @@ export default class SelectLevel extends Vue {
     config.maxParticles = 600;
     return {
       temperatureRise: 1,
-      texture: this.spriteSheetDifficulty.textures['planet02.png'],
+      texture: this.spriteSheetDifficulty
+        ? this.spriteSheetDifficulty.textures['planet02.png']
+        : null,
       color: '#ff8800',
       particleConfig: config,
     };
@@ -695,7 +706,6 @@ export default class SelectLevel extends Vue {
       pixiUtil
         .loadTexture(
           '/assets/games/moveit/molecules.json',
-          this.eventBus,
           this.textureToken
         )
         .then((sheet) => {
@@ -707,7 +717,6 @@ export default class SelectLevel extends Vue {
       pixiUtil
         .loadTexture(
           '/assets/games/coolit/city/city.json',
-          this.eventBus,
           this.textureToken
         )
         .then((sheet) => {
@@ -719,7 +728,6 @@ export default class SelectLevel extends Vue {
       pixiUtil
         .loadTexture(
           '/assets/games/coolit/city/difficulty.json',
-          this.eventBus,
           this.textureToken
         )
         .then((sheet) => {

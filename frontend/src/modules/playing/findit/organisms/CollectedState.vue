@@ -234,7 +234,6 @@ export default class CollectedState extends Vue {
             pixiUtil
               .loadTexture(
                 settings.spritesheet,
-                this.eventBus,
                 this.textureToken
               )
               .then((sheet) => {

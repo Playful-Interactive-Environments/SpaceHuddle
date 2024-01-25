@@ -637,7 +637,6 @@ export default class LevelBuilder extends Vue {
             pixiUtil
               .loadTexture(
                 settings.spritesheet,
-                this.eventBus,
                 this.textureToken
               )
               .then((sheet) => {

@@ -50,10 +50,6 @@ export default class CustomParticleContainer extends Vue {
     pixiUtil.cleanupToken(this.textureToken);
   }
 
-  get containerEventBus(): Emitter<Record<EventType, unknown>> {
-    return this.eventBus ?? this.parentEventBus;
-  }
-
   isValid(): boolean {
     if (this.emitter) {
       const singleTextureConfig = this.emitter.getBehavior(
@@ -117,7 +113,6 @@ export default class CustomParticleContainer extends Vue {
     if (spriteSheetUrl) {
       this.spriteSheet = await pixiUtil.loadTexture(
         spriteSheetUrl,
-        this.containerEventBus,
         this.textureToken
       );
       this.isSpriteSheetLoaded = true;
@@ -152,11 +147,7 @@ export default class CustomParticleContainer extends Vue {
         const url = !isAnimation ? textureList[i] : textureList[i].texture;
         if (typeof url === 'string') {
           if (!this.spriteSheetUrl && !config.spriteSheet) {
-            const texture = await pixiUtil.loadTexture(
-              url,
-              this.containerEventBus,
-              this.textureToken
-            );
+            const texture = await pixiUtil.loadTexture(url, this.textureToken);
             if (!isAnimation) textureList[i] = texture;
             else textureList[i].texture = texture;
           } else {
