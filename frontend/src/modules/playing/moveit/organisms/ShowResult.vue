@@ -586,7 +586,6 @@ export default class ShowResult extends Vue {
     pixiUtil
       .loadTexture(
         '/assets/games/moveit/molecules.json',
-        this.eventBus,
         this.textureToken
       )
       .then((sheet) => {

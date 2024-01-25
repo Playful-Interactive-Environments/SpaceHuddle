@@ -491,13 +491,20 @@ export default class CleanUpParticles extends Vue {
     }
   }
 
+  private async allTexturesLoaded(): Promise<void> {
+    this.loading = false;
+  }
+
+  private async texturesLoadingStart(): Promise<void> {
+    this.loading = true;
+  }
+
   mounted(): void {
-    this.eventBus.on(EventType.TEXTURES_LOADING_START, async () => {
-      this.loading = true;
-    });
-    this.eventBus.on(EventType.ALL_TEXTURES_LOADED, async () => {
-      this.loading = false;
-    });
+    this.eventBus.on(
+      EventType.TEXTURES_LOADING_START,
+      this.texturesLoadingStart
+    );
+    this.eventBus.on(EventType.ALL_TEXTURES_LOADED, this.allTexturesLoaded);
 
     this.initParticleState();
     setTimeout(() => {
@@ -506,7 +513,6 @@ export default class CleanUpParticles extends Vue {
     pixiUtil
       .loadTexture(
         '/assets/games/moveit/molecules.json',
-        this.eventBus,
         this.textureToken
       )
       .then((sheet) => {
@@ -516,7 +522,6 @@ export default class CleanUpParticles extends Vue {
     pixiUtil
       .loadTexture(
         '/assets/games/moveit/dumpster.png',
-        this.eventBus,
         this.textureToken
       )
       .then((texture) => {
@@ -529,6 +534,11 @@ export default class CleanUpParticles extends Vue {
   unmounted(): void {
     this.cleanupDynamicInterval();
     pixiUtil.cleanupToken(this.textureToken);
+    this.eventBus.off(
+      EventType.TEXTURES_LOADING_START,
+      this.texturesLoadingStart
+    );
+    this.eventBus.off(EventType.ALL_TEXTURES_LOADED, this.allTexturesLoaded);
   }
 
   intervalIsRunning = false;

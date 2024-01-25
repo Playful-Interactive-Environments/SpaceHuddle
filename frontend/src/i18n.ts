@@ -23,8 +23,8 @@ const addModuleLocales = async (locale = 'en', dict: any): Promise<any> => {
   return dict;
 };
 
-addModuleLocales('de', de);
-addModuleLocales('en', en);
+await addModuleLocales('de', de);
+await addModuleLocales('en', en);
 
 const messages = { de, en };
 
