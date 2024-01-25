@@ -79,6 +79,7 @@
                   @ideaDeleted="refreshIdeas()"
                   @ideaStartEdit="editIdea(element)"
                   @customCommand="dropdownCommand($event, element)"
+                  @sharedStatusChanged="sharedStatusChanged(element, $event)"
                   :style="{
                     '--level-type-color': getSettingsForLevel(
                       gameConfig.obstacles,
@@ -127,6 +128,7 @@
                 @ideaDeleted="refreshIdeas()"
                 @ideaStartEdit="editIdea(idea)"
                 @customCommand="dropdownCommand($event, idea)"
+                @sharedStatusChanged="sharedStatusChanged(idea, $event)"
                 :style="{
                   '--level-type-color': getSettingsForLevel(
                     gameConfig.obstacles,
@@ -232,12 +234,6 @@
             :label="name"
           />
         </el-select>
-      </el-form-item>
-      <el-form-item
-        :label="$t('module.playing.coolit.moderatorContent.share')"
-        :prop="`parameter.shareData`"
-      >
-        <el-switch v-model="shareData" />
       </el-form-item>
     </IdeaSettings>
   </div>
@@ -352,6 +348,12 @@ export default class ModeratorContent extends Vue implements IModeratorContent {
   set shareData(value: boolean) {
     if (value) this.settingsIdea.parameter.state = LevelWorkflowType.approved;
     else this.settingsIdea.parameter.state = LevelWorkflowType.created;
+  }
+
+  sharedStatusChanged(level: Idea, value: boolean) {
+    if (value) level.parameter.state = LevelWorkflowType.approved;
+    else level.parameter.state = LevelWorkflowType.created;
+    this.saveIdea(level);
   }
 
   getLevelColor(level: Idea): string {
