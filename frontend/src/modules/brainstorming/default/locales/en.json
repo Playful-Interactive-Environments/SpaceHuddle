@@ -21,6 +21,7 @@
     "order": "drag to change the order",
     "timestamp": "Chronological order of ideas",
     "alphabetical": "alphabetical order of ideas",
-    "displayAll": "display all"
+    "displayAll": "display all",
+    "add": "add content"
   }
 }

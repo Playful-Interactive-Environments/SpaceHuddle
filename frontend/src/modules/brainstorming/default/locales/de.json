@@ -21,6 +21,7 @@
     "order": "Verändere die Ordnung durch drag and drop",
     "timestamp": "Chronologische Ordnung der Ideen",
     "alphabetical": "Alphabetische Ordnung der Ideen",
-    "displayAll": "Alle Anzeigen"
+    "displayAll": "Alle Anzeigen",
+    "add": "Eintrag hinzufügen"
   }
 }
