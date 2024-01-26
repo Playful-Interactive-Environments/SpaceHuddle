@@ -715,7 +715,9 @@ export default class Participant extends Vue {
 
   lastInputCharacterTime = Date.now();
   dataSaved = true;
+  dataSaveStart = -1;
   onInputTextChanged(immediate = false): void {
+    this.dataSaveStart = Date.now();
     this.dataSaved = false;
     if (!this.activeQuestionLoaded || !this.activeAnswer.textValue) {
       return;
@@ -735,6 +737,7 @@ export default class Participant extends Vue {
   }
 
   async onInputNumberChanged(immediate = false): Promise<void> {
+    this.dataSaveStart = Date.now();
     this.dataSaved = false;
     if (!immediate) await delay(100);
     if (!this.activeQuestionLoaded || this.activeAnswer.numValue === null) {
@@ -756,6 +759,8 @@ export default class Participant extends Vue {
   }
 
   async onAnswerValueChanged(): Promise<void> {
+    const dataSaveStart = Date.now();
+    this.dataSaveStart = dataSaveStart;
     this.dataSaved = false;
     if (
       getQuestionResultStorageFromQuestionType(this.activeQuestionType) ===
@@ -819,10 +824,12 @@ export default class Participant extends Vue {
       this.questionAnswered = this.getQuestionAnswered();
       await this.trackState();
     }
-    this.dataSaved = true;
+    if (this.dataSaveStart === dataSaveStart) this.dataSaved = true;
   }
 
   async changeVote(answerId: string): Promise<void> {
+    const dataSaveStart = Date.now();
+    this.dataSaveStart = dataSaveStart;
     this.dataSaved = false;
     if (!this.isSaving(answerId)) {
       this.isSavingList.push(answerId);
@@ -869,10 +876,12 @@ export default class Participant extends Vue {
     }
     this.questionAnswered = this.getQuestionAnswered();
     await this.trackState();
-    this.dataSaved = true;
+    if (this.dataSaveStart === dataSaveStart) this.dataSaved = true;
   }
 
   async changeOrderVotes(): Promise<void> {
+    const dataSaveStart = Date.now();
+    this.dataSaveStart = dataSaveStart;
     this.dataSaved = false;
     const callList: Promise<Vote>[] = [];
     if (this.votes.length <= 0) {
@@ -910,7 +919,7 @@ export default class Participant extends Vue {
     await Promise.all(callList);
     this.questionAnswered = this.getQuestionAnswered();
     await this.trackState();
-    this.dataSaved = true;
+    if (this.dataSaveStart === dataSaveStart) this.dataSaved = true;
   }
 
   get moduleName(): string {
