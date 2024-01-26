@@ -9,7 +9,7 @@
       <el-page-header
         :content="taskType"
         :title="$t('general.back')"
-        @back="$router.go(-1)"
+        @back="back"
       />
       <el-tabs
         :stretch="false"
@@ -115,6 +115,7 @@ export default class ParticipantModuleContent extends Vue {
   backgroundClass = '';
   drawNavigation = true;
   points = 0;
+  backClicked = false;
 
   EndpointAuthorisationType = EndpointAuthorisationType;
 
@@ -134,6 +135,11 @@ export default class ParticipantModuleContent extends Vue {
       EndpointAuthorisationType.PARTICIPANT,
       2 * 60
     );
+  }
+
+  back(): void {
+    if (!this.backClicked) this.$router.go(-1);
+    this.backClicked = true;
   }
 
   goBack(): void {

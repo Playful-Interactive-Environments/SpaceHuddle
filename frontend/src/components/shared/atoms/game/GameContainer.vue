@@ -2457,7 +2457,8 @@ export default class GameContainer extends Vue {
           );
           background.endFill();
         }
-        texture = this.app.renderer.generateTexture(background);
+        if (this.app.renderer)
+          texture = this.app.renderer.generateTexture(background);
       }
     }
     return texture;
