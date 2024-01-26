@@ -205,8 +205,9 @@ export default class Participant extends Vue {
 
   deregisterAll(): void {
     cashService.deregisterAllGet(this.updateModule);
+    cashService.deregisterAllGet(this.updateTask);
     cashService.deregisterAllGet(this.updateGame);
-    cashService.deregisterAllGet(this.checkAvailability);
+    cashService.deregisterAllGet(this.checkGames);
     if (this.trackingManager) this.trackingManager.deregisterAll();
   }
 
@@ -270,7 +271,7 @@ export default class Participant extends Vue {
   async InstantiateGame() {
     await this.checkAvailability();
     await until(() => this.checkedAvailability);
-    cashService.deregisterAllGet(this.checkAvailability);
+    cashService.deregisterAllGet(this.checkGames);
     this.gameIdeaInstance = await ideaService.postIdea(
       this.taskId,
       {

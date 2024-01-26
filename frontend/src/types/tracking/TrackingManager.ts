@@ -57,7 +57,7 @@ export class TrackingManager {
     this.deregisterAll();
     taskParticipantService.registerGetList(
       this.taskId,
-      (result: any) => this._updateState(result),
+      this.callUpdateState,
       EndpointAuthorisationType.PARTICIPANT,
       2 * 60
     );
@@ -70,13 +70,13 @@ export class TrackingManager {
         this.iteration = result;
         this.iterationsCash = taskParticipantService.registerGetIterationList(
           this.taskId,
-          (result: any) => this._updateIterations(result),
+          this.callUpdateIterations,
           EndpointAuthorisationType.PARTICIPANT,
           2 * 60
         );
         this.stepsCash = taskParticipantService.registerGetIterationStepList(
           this.taskId,
-          (result: any) => this._updateSteps(result),
+          this.callUpdateSteps,
           EndpointAuthorisationType.PARTICIPANT,
           2 * 60
         );
@@ -84,7 +84,7 @@ export class TrackingManager {
           this.finalStepsCash =
             taskParticipantService.registerGetIterationStepFinalList(
               this.taskId,
-              (result: any) => this._updateFinalSteps(result),
+              this.callUpdateFinalSteps,
               EndpointAuthorisationType.PARTICIPANT,
               60 * 60
             );
@@ -92,22 +92,26 @@ export class TrackingManager {
       });
     taskService.registerGetTaskById(
       this.taskId,
-      (result: any) => this._updateTask(result),
+      this.callUpdateTask,
       EndpointAuthorisationType.PARTICIPANT,
       60 * 60
     );
   }
 
+  private readonly callUpdateState = (result: any) => this._updateState(result);
+  private readonly callUpdateIterations = (result: any) =>
+    this._updateIterations(result);
+  private readonly callUpdateSteps = (result: any) => this._updateSteps(result);
+  private readonly callUpdateFinalSteps = (result: any) =>
+    this._updateFinalSteps(result);
+  private readonly callUpdateTask = (result: any) => this._updateTask(result);
+
   deregisterAll(): void {
-    cashService.deregisterAllGet((result: any) => this._updateState(result));
-    cashService.deregisterAllGet((result: any) =>
-      this._updateIterations(result)
-    );
-    cashService.deregisterAllGet((result: any) => this._updateSteps(result));
-    cashService.deregisterAllGet((result: any) =>
-      this._updateFinalSteps(result)
-    );
-    cashService.deregisterAllGet((result: any) => this._updateTask(result));
+    cashService.deregisterAllGet(this.callUpdateState);
+    cashService.deregisterAllGet(this.callUpdateIterations);
+    cashService.deregisterAllGet(this.callUpdateSteps);
+    cashService.deregisterAllGet(this.callUpdateFinalSteps);
+    cashService.deregisterAllGet(this.callUpdateTask);
   }
 
   isFinished(): boolean {

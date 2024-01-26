@@ -6,6 +6,7 @@ import {
 import ApiResponse from '@/types/api/ApiResponse';
 import EndpointType from '@/types/enum/EndpointType';
 import EndpointAuthorisationType from '@/types/enum/EndpointAuthorisationType';
+import * as cashService from '@/services/cash-service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any*/
 
@@ -53,6 +54,7 @@ export const loginUser = async (
   email: string,
   password: string
 ): Promise<ApiResponse> => {
+  cashService.resetCash();
   return apiExecutePost<ApiResponse>(
     `/${EndpointType.USER}/${EndpointType.LOGIN}/`,
     {

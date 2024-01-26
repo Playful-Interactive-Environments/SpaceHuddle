@@ -331,7 +331,11 @@ export class CashEntry<TIn = any, TOut = any> {
 
 export class SimplifiedCashEntry<T = any> extends CashEntry<T, T> {}
 
-const dataCash: { [key: string]: CashEntry<any, any> } = {};
+let dataCash: { [key: string]: CashEntry<any, any> } = {};
+
+export function resetCash(): void {
+  dataCash = {};
+}
 
 export function registerSimplifiedGet<T = any>(
   url: string,

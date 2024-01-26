@@ -13,6 +13,7 @@ import * as cashService from '@/services/cash-service';
 export const connect = async (
   sessionKey: string
 ): Promise<Participant | Partial<Participant>> => {
+  cashService.resetCash();
   return await apiExecutePost<Participant>(
     `/${EndpointType.PARTICIPANT_CONNECT}/`,
     {
@@ -35,6 +36,7 @@ export const addParticipant = async (
 };
 
 export const reconnect = async (browserKey: string): Promise<Participant> => {
+  cashService.resetCash();
   return await apiExecuteGetHandled<Participant>(
     `/${EndpointType.PARTICIPANT_RECONNECT}/${browserKey}/`,
     null,
