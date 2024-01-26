@@ -1547,14 +1547,13 @@ export default class DriveToLocation extends Vue {
   async updateChart(): Promise<void> {
     if (this.$refs.chartRef) {
       const chartRef = this.$refs.chartRef as any;
-      if (
-        chartRef.chart &&
-        this.lastChartLength !== this.chartData.labels.length
-      ) {
-        this.lastChartLength = this.chartData.labels.length;
+      if (chartRef.chart && this.lastChartLength !== this.trackingData.length) {
+        this.lastChartLength = this.trackingData.length;
+        let period = this.distanceTraveled / this.maxDrivingDistance;
+        if (period < 0.2) period = 0.2;
         this.normalizedTrackingData = normalizedTrackingData(
           this.trackingData,
-          this.distanceTraveled / this.maxDrivingDistance
+          period
         );
         trackingDataToChartData(
           this.normalizedTrackingData,
