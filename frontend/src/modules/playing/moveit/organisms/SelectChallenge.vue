@@ -809,13 +809,6 @@ export default class SelectChallenge extends Vue {
   padding: 1rem 0;
   height: 15rem;
   width: 100%;
-
-  //background-image: url('~@/modules/playing/moveit/assets/chartsbg.png');
-  //background-size: cover; //contain;
-  //background-position: 50%;
-  //background-repeat: no-repeat;
-  //background-color: var(--color-dark-contrast);
-  //background-blend-mode: overlay;
 }
 
 .category-selection {

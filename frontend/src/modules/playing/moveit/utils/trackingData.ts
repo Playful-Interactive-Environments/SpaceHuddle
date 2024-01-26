@@ -1,6 +1,10 @@
 import * as constants from '@/modules/playing/moveit/utils/consts';
 import { CalculationType, mapArrayToConstantSize } from '@/utils/statistic';
+import { ChartData } from '@/modules/playing/moveit/organisms/DriveToLocation.vue';
+import * as configCalculation from '@/modules/playing/moveit/utils/configCalculation';
+import * as gameConfig from '@/modules/playing/moveit/data/gameConfig.json';
 
+/* eslint-disable @typescript-eslint/no-explicit-any*/
 export interface TrackingData {
   speed: number;
   consumption: number;
@@ -10,11 +14,34 @@ export interface TrackingData {
   tireWareRate: number;
 }
 
+export function trackingDataToChartData(
+  trackingData: TrackingData[],
+  chartData: ChartData,
+  vehicleParameter: any
+): void {
+  chartData.labels = trackingData.map((data) =>
+    (Math.round(data.distanceTraveled * 100) / 100).toString()
+  );
+  for (const particleName in gameConfig.particles) {
+    const dataset = chartData.datasets.find((ds) => ds.name === particleName);
+    if (dataset) {
+      dataset.data = trackingData.map((data) => {
+        return configCalculation.statisticsValue(
+          particleName,
+          data,
+          vehicleParameter
+        );
+      });
+    }
+  }
+}
+
 export function normalizedTrackingData(
-  trackingData: TrackingData[]
+  trackingData: TrackingData[],
+  period = 1
 ): TrackingData[] {
   const normalizedTrackingData: TrackingData[] = [];
-  const mappingLength = constants.cleanupTime;
+  const mappingLength = Math.round(constants.cleanupTime * period);
   for (let i = 0; i < mappingLength; i++) {
     normalizedTrackingData[i] = {
       speed: mapArrayToConstantSize(

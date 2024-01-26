@@ -511,19 +511,13 @@ export default class CleanUpParticles extends Vue {
       this.loadActiveParticle();
     }, 1500);
     pixiUtil
-      .loadTexture(
-        '/assets/games/moveit/molecules.json',
-        this.textureToken
-      )
+      .loadTexture('/assets/games/moveit/molecules.json', this.textureToken)
       .then((sheet) => {
         this.spritesheet = sheet;
         this.generateParticleTextures();
       });
     pixiUtil
-      .loadTexture(
-        '/assets/games/moveit/dumpster.png',
-        this.textureToken
-      )
+      .loadTexture('/assets/games/moveit/dumpster.png', this.textureToken)
       .then((texture) => {
         this.dumpsterTexture = texture;
       });
@@ -829,7 +823,8 @@ export default class CleanUpParticles extends Vue {
 
 .releaseArea {
   height: 4rem;
-  background-image: url('../assets/sky.jpg');
+  background-image: url('../assets/sky.png');
+  background-size: cover;
 
   .container-info {
     position: relative;

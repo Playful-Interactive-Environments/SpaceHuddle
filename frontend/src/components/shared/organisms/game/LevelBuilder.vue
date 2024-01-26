@@ -635,10 +635,7 @@ export default class LevelBuilder extends Vue {
         setTimeout(() => {
           if (settings && settings.spritesheet && !this.stylesheets[typeName]) {
             pixiUtil
-              .loadTexture(
-                settings.spritesheet,
-                this.textureToken
-              )
+              .loadTexture(settings.spritesheet, this.textureToken)
               .then((sheet) => {
                 this.stylesheets[typeName] = sheet;
                 this.levelTypeImages[typeName] = {};

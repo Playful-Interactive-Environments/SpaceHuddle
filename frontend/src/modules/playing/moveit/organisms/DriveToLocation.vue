@@ -388,7 +388,11 @@ import {
   NavigationType,
 } from '@/modules/playing/moveit/organisms/SelectChallenge.vue';
 import * as mapUtils from '@/modules/playing/moveit/utils/map';
-import { TrackingData } from '@/modules/playing/moveit/utils/trackingData';
+import {
+  TrackingData,
+  normalizedTrackingData,
+  trackingDataToChartData,
+} from '@/modules/playing/moveit/utils/trackingData';
 
 mapStyle.setMapStyleStreets();
 
@@ -494,6 +498,7 @@ export default class DriveToLocation extends Vue {
   personCount = 1;
   stops = 0;
   trackingData: TrackingData[] = [];
+  normalizedTrackingData: TrackingData[] = [];
   animationIndex = 0;
   animationPoints: [number, number][][] = [];
   map!: Map;
@@ -959,6 +964,8 @@ export default class DriveToLocation extends Vue {
     window.addEventListener('touchend', this.stopTouchAction);
     window.addEventListener('mouseup', this.stopTouchAction);
     window.addEventListener('pointerup', this.stopTouchAction);
+    window.addEventListener('pointerdown', this.syncTouchPoint);
+    window.addEventListener('touchstart', this.syncTouchPoint);
   }
 
   KeyPressedAccelerate = false;
@@ -1152,6 +1159,7 @@ export default class DriveToLocation extends Vue {
 
   isIncreaseSpeedStarted = false;
   clickPointerId = -1;
+  clickTouchId = -1;
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   startIncreaseSpeed(event: PointerEvent | null = null): void {
     this.clickPointerId = event ? event.pointerId : -1;
@@ -1169,7 +1177,7 @@ export default class DriveToLocation extends Vue {
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   stopIncreaseSpeed(event: PointerEvent | null = null): void {
-    const pointerId = event ? event.pointerId : -1;
+    const pointerId = this.getPointerIdForEvent(event);
     if (pointerId === this.clickPointerId) {
       if (event && this.hasAccelerationButtons) event.preventDefault();
       clearInterval(this.intervalGas);
@@ -1184,6 +1192,40 @@ export default class DriveToLocation extends Vue {
     }
   }
 
+  pointerDict: { [key: number]: number } = {};
+  lastTouchId = -1;
+  syncTouchPoint(event: TouchEvent | PointerEvent): void {
+    if (event instanceof TouchEvent) {
+      for (const key of Object.keys(this.pointerDict)) {
+        if (this.pointerDict[key] === -1) {
+          this.pointerDict[key] = event.changedTouches[0].identifier;
+          return;
+        }
+      }
+      this.lastTouchId = event.changedTouches[0].identifier;
+    } else {
+      this.pointerDict[event.pointerId] = this.lastTouchId;
+      this.lastTouchId = -1;
+    }
+  }
+
+  getPointerIdForEvent(
+    event: PointerEvent | TouchEvent | MouseEvent | null
+  ): number {
+    if (event instanceof PointerEvent) {
+      return event.pointerId;
+    } else if (event instanceof TouchEvent) {
+      for (const key of Object.keys(this.pointerDict).reverse()) {
+        if (this.pointerDict[key] === event.changedTouches[0].identifier) {
+          return parseInt(key);
+        }
+      }
+    } else if (event instanceof MouseEvent) {
+      return parseInt(Object.keys(this.pointerDict).reverse()[0]);
+    }
+    return -1;
+  }
+
   stopTouchAction(
     event: PointerEvent | TouchEvent | MouseEvent | null = null
   ): void {
@@ -1191,6 +1233,8 @@ export default class DriveToLocation extends Vue {
       if (this.isIncreaseSpeedStarted) this.stopIncreaseSpeed(event as any);
       if (this.isDecreaseSpeedStarted) this.stopDecreaseSpeed(event as any);
     }
+    const pointerId = this.getPointerIdForEvent(event);
+    if (pointerId) delete this.pointerDict[pointerId];
   }
 
   increaseValue = 0;
@@ -1238,7 +1282,7 @@ export default class DriveToLocation extends Vue {
 
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   stopDecreaseSpeed(event: PointerEvent | null = null): void {
-    const pointerId = event ? event.pointerId : -1;
+    const pointerId = this.getPointerIdForEvent(event);
     if (pointerId === this.clickPointerId) {
       if (event && this.hasAccelerationButtons) event.preventDefault();
       clearInterval(this.intervalBreak);
@@ -1508,6 +1552,15 @@ export default class DriveToLocation extends Vue {
         this.lastChartLength !== this.chartData.labels.length
       ) {
         this.lastChartLength = this.chartData.labels.length;
+        this.normalizedTrackingData = normalizedTrackingData(
+          this.trackingData,
+          this.distanceTraveled / this.maxDrivingDistance
+        );
+        trackingDataToChartData(
+          this.normalizedTrackingData,
+          this.chartData,
+          this.vehicleParameter
+        );
         chartRef.chart.data = this.chartData;
         chartRef.chart.update();
       }
@@ -1543,10 +1596,9 @@ export default class DriveToLocation extends Vue {
       ),
     };
     this.trackingData.push(trackingData);
-    const totalValue = configCalculation.addValueToStatistics(
+    const totalValue = configCalculation.getTotalValue(
       trackingData,
-      this.vehicleParameter,
-      this.chartData
+      this.vehicleParameter
     );
     if (this.maxChartValue < totalValue) this.maxChartValue = totalValue;
   }

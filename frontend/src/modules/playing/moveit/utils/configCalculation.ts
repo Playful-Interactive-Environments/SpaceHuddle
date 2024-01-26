@@ -129,3 +129,19 @@ export const addValueToStatistics = (
   );
   return totalValue;
 };
+
+export const getTotalValue = (
+  trackingData: TrackingData,
+  vehicleParameter: any
+): number => {
+  let totalValue = 0;
+  for (const particleName in gameConfig.particles) {
+    const particleValue = statisticsValue(
+      particleName,
+      trackingData,
+      vehicleParameter
+    );
+    totalValue += particleValue;
+  }
+  return totalValue;
+};
